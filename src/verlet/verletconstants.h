@@ -1,0 +1,6 @@
+#ifndef VERLETCONSTANTS_H
+#define VERLETCONSTANTS_H
+
+#define GRAVITY 0.5f
+
+#endif // VERLETCONSTANTS_H

@@ -1,0 +1,11 @@
+{
+    "GameConfiguration" :
+    {
+        "fullscreen": false,
+        "video_mode_width": 960,
+        "video_mode_height": 540,
+        "view_width": 480,
+        "view_height": 270
+    }
+}
+

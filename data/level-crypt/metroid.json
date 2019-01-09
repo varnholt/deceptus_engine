@@ -1,0 +1,120 @@
+{
+  "filename": "data/level-crypt/metroid.tmx",
+  "startposition": [
+    47,
+    41
+  ],
+  "startposition_2": [
+    47,
+    320
+  ],
+  "startposition_3": [
+    114,
+    347
+  ],
+  "enemies": [
+    {
+      "script": "blob.lua",
+      "startposition": [
+        60,
+        321
+      ],
+      "patrolpath": [
+        60,
+        321,
+        65,
+        321
+      ],
+      "properties": [
+        {
+          "name": "dummy",
+          "value": "dummy"
+        }
+      ]
+    },
+    {
+      "script": "blob.lua",
+      "startposition": [
+        80,
+        321
+      ],
+      "patrolpath": [
+        80,
+        321,
+        85,
+        321
+      ],
+      "properties": [
+        {
+          "name": "dummy",
+          "value": "dummy"
+        }
+      ]
+    },
+    {
+      "script": "blob.lua",
+      "startposition": [
+        113,
+        320
+      ],
+      "patrolpath": [
+        113,
+        320,
+        116,
+        320
+      ],
+      "properties": [
+        {
+          "name": "dummy",
+          "value": "dummy"
+        }
+      ]
+    },
+    {
+      "script": "blob.lua",
+      "startposition": [
+        204,
+        320
+      ],
+      "patrolpath": [
+        204,
+        320,
+        207,
+        320
+      ],
+      "properties": [
+        {
+          "name": "dummy",
+          "value": "dummy"
+        }
+      ]
+    }
+    ,
+    {
+      "script": "cannon.lua",
+      "startposition": [
+        64,
+        311
+      ],
+      "properties": [
+        {
+            "name": "alignment",
+            "value": "down"
+        }
+      ]
+    },
+    {
+      "script": "landmine.lua",
+      "startposition": [
+        29,
+        41
+      ],
+      "properties": [
+        {
+            "name": "alignment",
+            "value": "down"
+        }
+      ]
+    }
+  ]
+}
