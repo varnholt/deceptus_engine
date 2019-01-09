@@ -1,0 +1,21 @@
+{
+    "PhysicsConfiguration": {
+        "gravity": 8.5,
+        "player_acceleration_air": 0.0500000007450581,
+        "player_acceleration_ground": 0.100000001490116,
+        "player_deceleration_air": 0.649999976158142,
+        "player_deceleration_ground": 0.600000023841858,
+        "player_friction": 0.0,
+        "player_jump_falloff": 6.5,
+        "player_jump_speed_factor": 0.100000001490116,
+        "player_jump_steps": 9,
+        "player_jump_after_contact_lost_in_ms": 100,
+        "player_jump_buffer_in_ms": 100,
+        "player_jumps_trength": 3.29999995231628,
+        "player_speed_max_run": 3.5,
+        "player_speed_max_walk": 2.5,
+        "player_speed_max_water": 1.5,
+        "timestep": 0.0285714287310839
+    }
+}
+
