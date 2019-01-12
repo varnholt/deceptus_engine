@@ -11,6 +11,8 @@ using json = nlohmann::json;
 
 PhysicsConfiguration PhysicsConfiguration::sInstance;
 
+bool PhysicsConfiguration::sInitialized = false;
+
 
 std::string PhysicsConfiguration::serialize()
 {

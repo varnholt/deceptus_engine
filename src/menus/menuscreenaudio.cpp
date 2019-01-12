@@ -1,6 +1,9 @@
 #include "menuscreenaudio.h"
 
 #include "menu.h"
+#include "game/gameconfiguration.h"
+
+#define STEP_SIZE 10
 
 
 MenuScreenAudio::MenuScreenAudio()
@@ -44,7 +47,60 @@ void MenuScreenAudio::select()
 
 void MenuScreenAudio::back()
 {
-   Menu::getInstance().show(Menu::MenuType::Options);
+    Menu::getInstance().show(Menu::MenuType::Options);
+}
+
+
+void MenuScreenAudio::set(int32_t x)
+{
+    switch (mSelection)
+    {
+        case Selection::Master:
+            GameConfiguration::getInstance().mAudioVolumeMaster += x;
+            break;
+        case Selection::Music:
+            GameConfiguration::getInstance().mAudioVolumeMusic += x;
+            break;
+        case Selection::SFX:
+            GameConfiguration::getInstance().mAudioVolumeSfx += x;
+            break;
+        case Selection::Count:
+            break;
+    }
+
+    if (GameConfiguration::getInstance().mAudioVolumeMaster > 100)
+    {
+        GameConfiguration::getInstance().mAudioVolumeMaster = 100;
+    }
+
+    if (GameConfiguration::getInstance().mAudioVolumeMaster < 0)
+    {
+        GameConfiguration::getInstance().mAudioVolumeMaster = 0;
+    }
+
+    if (GameConfiguration::getInstance().mAudioVolumeMusic > 100)
+    {
+        GameConfiguration::getInstance().mAudioVolumeMusic = 100;
+    }
+
+    if (GameConfiguration::getInstance().mAudioVolumeMusic < 0)
+    {
+        GameConfiguration::getInstance().mAudioVolumeMusic = 0;
+    }
+
+    if (GameConfiguration::getInstance().mAudioVolumeSfx > 100)
+    {
+        GameConfiguration::getInstance().mAudioVolumeSfx = 100;
+    }
+
+    if (GameConfiguration::getInstance().mAudioVolumeSfx < 0)
+    {
+        GameConfiguration::getInstance().mAudioVolumeSfx = 0;
+    }
+
+    GameConfiguration::getInstance().serializeToFile();
+
+    updateLayers();
 }
 
 
@@ -63,6 +119,16 @@ void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Return)
    {
       select();
+   }
+
+   else if (key == sf::Keyboard::Left)
+   {
+       set(-STEP_SIZE);
+   }
+
+   else if (key == sf::Keyboard::Right)
+   {
+       set(STEP_SIZE);
    }
 
    else if (key == sf::Keyboard::Escape)
@@ -122,6 +188,13 @@ void MenuScreenAudio::updateLayers()
    mLayers["master_arrows"]->mVisible = master;
    mLayers["master_h"]->mVisible = true;
    mLayers["master_value"]->mVisible = true;
+
+   const auto masterVolume = GameConfiguration::getInstance().mAudioVolumeMaster;
+   const auto sfxVolume = GameConfiguration::getInstance().mAudioVolumeSfx;
+   const auto musicVolume = GameConfiguration::getInstance().mAudioVolumeMusic;
+   mLayers["master_h"]->mSprite->setOrigin(50 - masterVolume, 0);
+   mLayers["sfxVolume_h"]->mSprite->setOrigin(50 - sfxVolume, 0);
+   mLayers["mscVolume_h"]->mSprite->setOrigin(50 - musicVolume, 0);
 }
 
 

@@ -2,6 +2,9 @@
 
 #include "menuscreen.h"
 
+#include <cstdint>
+
+
 class MenuScreenAudio : public MenuScreen
 {
 public:
@@ -23,6 +26,8 @@ public:
    void down();
    void select();
    void back();
+
+   void set(int32_t x);
 
    Selection mSelection = Selection::Master;
 };

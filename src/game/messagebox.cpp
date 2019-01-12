@@ -17,7 +17,7 @@ bool MessageBox::sInitialized = false;
 std::vector<std::shared_ptr<Layer>> MessageBox::sLayerStack;
 std::map<std::string, std::shared_ptr<Layer>> MessageBox::sLayers;
 sf::Font MessageBox::sFont;
-
+sf::Text MessageBox::sText;
 
 bool MessageBox::empty()
 {
@@ -164,22 +164,21 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       }
    }
 
-   sf::Text text;
-   text.setScale(0.25f, 0.25f);
-   text.setFont(sFont);
-   text.setCharacterSize(48);
-   text.setString(box.mMessage);
-   text.setFillColor(sf::Color{232, 219, 243});
+   sText.setScale(0.25f, 0.25f);
+   sText.setFont(sFont);
+   sText.setCharacterSize(48);
+   sText.setString(box.mMessage);
+   sText.setFillColor(sf::Color{232, 219, 243});
 
    // box top/left: 137 x 94
    // box dimensions: 202 x 71
    // box left: 143
-   const auto rect = text.getGlobalBounds();
+   const auto rect = sText.getGlobalBounds();
    const auto left = 143;
    const auto x = left + (202 - rect.width) * 0.5f;
 
-   text.setPosition(floor(x), 112);
-   window.draw(text, states);
+   sText.setPosition(floor(x), 112);
+   window.draw(sText, states);
 }
 
 

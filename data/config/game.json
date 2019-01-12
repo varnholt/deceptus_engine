@@ -1,11 +1,13 @@
 {
-    "GameConfiguration" :
-    {
-        "fullscreen": false,
-        "video_mode_width": 960,
+    "GameConfiguration": {
+        "audio_volume_master": 80,
+        "audio_volume_music": 60,
+        "audio_volume_sfx": 30,
+        "fullscreen": true,
         "video_mode_height": 540,
-        "view_width": 480,
-        "view_height": 270
+        "video_mode_width": 960,
+        "view_height": 270,
+        "view_width": 480
     }
 }
 

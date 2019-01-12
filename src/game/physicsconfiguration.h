@@ -24,17 +24,29 @@ struct PhysicsConfiguration
    float mPlayerJumpFalloff = 6.5f;
    float mPlayerJumpSpeedFactor = 0.1f;
 
-   std::string serialize();
-   void deserialize(const std::string& data);
-
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
+
+   static bool sInitialized;
 
    static PhysicsConfiguration sInstance;
 
    static PhysicsConfiguration& getInstance()
    {
+      if (!sInitialized)
+      {
+         sInitialized = true;
+         sInstance.deserializeFromFile();
+      }
+
       return sInstance;
    }
+
+
+private:
+
+   std::string serialize();
+   void deserialize(const std::string& data);
+
 };
 
