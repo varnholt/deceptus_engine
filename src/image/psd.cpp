@@ -451,17 +451,17 @@ void PSD::Layer::loadChannelImageData(std::istream& stream)
 
          case 2: // zip without prediction
             std::cerr << "unsupported compression" << std::endl;
-            exit(-1);
+            // exit(-1);
             break;
 
          case 3: // zip with prediction
             std::cerr << "unsupported compression" << std::endl;
-            exit(-1);
+            // exit(-1);
             break;
 
          default:
             std::cerr << "unsupported compression" << std::endl;
-            exit(-1);
+            // exit(-1);
             break;
       }
    }
@@ -987,7 +987,7 @@ void PSD::Path::load(std::istream& stream, int32_t width, int32_t height)
       }
 
       // default: skip rest of 26-byte block
-      stream.ignore( (recordStart + 26) - stream.tellg() );
+      stream.ignore( (static_cast<int64_t>(recordStart) + 26) - static_cast<int64_t>(stream.tellg()) );
 
       mPathRecordCount--;
    }
