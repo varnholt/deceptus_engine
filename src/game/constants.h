@@ -14,6 +14,8 @@
 // spot.
 
 
+#define GAME_NAME "<working_title>"
+
 #define PPM 48.0f
 #define MPP (1.0f/PPM)
 

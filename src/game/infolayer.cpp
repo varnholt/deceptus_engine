@@ -48,9 +48,7 @@ void InfoLayer::draw(sf::RenderTarget& window)
       window.draw(mHeartSprite);
    }
 
-   char buf[3];
-   itoa(health, buf, 10);
-   std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(buf);
+   std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(std::to_string(health));
    mFont.draw(window, coords, 5, 5);
 }
 

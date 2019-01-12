@@ -34,6 +34,10 @@
 #undef MessageBox
 #endif
 
+#ifdef __linux__
+#define setUniform setParameter
+#endif
+
 
 //----------------------------------------------------------------------------------------------------------------------
 Game::Game()
@@ -62,7 +66,7 @@ void Game::createWindow()
          static_cast<uint32_t>(gameConfig.mVideoModeWidth),
          static_cast<uint32_t>(gameConfig.mVideoModeHeight)
       ),
-      "a.d.a.m",
+      GAME_NAME,
       gameConfig.mFullscreen ? sf::Style::Fullscreen : sf::Style::Default,
       settings
     );
@@ -395,7 +399,7 @@ void Game::updateGameControllerForInventory()
 void Game::updateWindowTitle()
 {
    std::ostringstream sStream;
-   sStream << "a.d.a.m - " << mFps << "fps";
+   sStream << GAME_NAME << " - " << mFps << "fps";
    mWindow->setTitle(sStream.str());
    mFps = 0;
 }
