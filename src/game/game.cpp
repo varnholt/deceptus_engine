@@ -147,9 +147,6 @@ void Game::initialize()
 {
   initializeController();
 
-  GameConfiguration::getInstance().deserializeFromFile();
-  PhysicsConfiguration::getInstance().deserializeFromFile();
-
   createWindow();
 
   auto levels = Levels::getInstance();

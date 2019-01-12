@@ -7,6 +7,9 @@
 
 #include "json/json.hpp"
 
+bool GameConfiguration::sInitialized = false;
+
+
 using json = nlohmann::json;
 
 GameConfiguration GameConfiguration::sInstance;
@@ -24,6 +27,10 @@ std::string GameConfiguration::serialize()
             {"view_width",        mViewWidth},
             {"view_height",       mViewHeight},
             {"fullscreen",        mFullscreen},
+
+            {"audio_volume_master", mAudioVolumeMaster},
+            {"audio_volume_sfx",    mAudioVolumeSfx},
+            {"audio_volume_music",  mAudioVolumeMusic},
          }
       }
    };
@@ -37,14 +44,25 @@ std::string GameConfiguration::serialize()
 void GameConfiguration::deserialize(const std::string& data)
 {
    json config = json::parse(data);
-   mVideoModeWidth  = config["GameConfiguration"]["video_mode_width"].get<int>();
-   mVideoModeHeight = config["GameConfiguration"]["video_mode_height"].get<int>();
-   mViewWidth       = config["GameConfiguration"]["view_width"].get<int>();
-   mViewHeight      = config["GameConfiguration"]["view_height"].get<int>();
-   mFullscreen      = config["GameConfiguration"]["fullscreen"].get<bool>();
 
-   mViewScaleWidth = static_cast<float>(mViewWidth) / static_cast<float>(mVideoModeWidth);
-   mViewScaleHeight = static_cast<float>(mViewHeight) / static_cast<float>(mVideoModeHeight);
+   try {
+       mVideoModeWidth  = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
+       mVideoModeHeight = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
+       mViewWidth       = config["GameConfiguration"]["view_width"].get<int32_t>();
+       mViewHeight      = config["GameConfiguration"]["view_height"].get<int32_t>();
+       mFullscreen      = config["GameConfiguration"]["fullscreen"].get<bool>();
+
+       mViewScaleWidth = static_cast<float>(mViewWidth) / static_cast<float>(mVideoModeWidth);
+       mViewScaleHeight = static_cast<float>(mViewHeight) / static_cast<float>(mVideoModeHeight);
+
+       mAudioVolumeMaster = config["GameConfiguration"]["audio_volume_master"].get<int32_t>();
+       mAudioVolumeSfx    = config["GameConfiguration"]["audio_volume_sfx"].get<int32_t>();
+       mAudioVolumeMusic  = config["GameConfiguration"]["audio_volume_music"].get<int32_t>();
+   }
+   catch (const std::exception& e)
+   {
+       std::cout << e.what() << std::endl;
+   }
 }
 
 

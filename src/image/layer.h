@@ -14,7 +14,7 @@ struct Layer : public sf::Drawable
 
    bool mVisible = true;
 
-   sf::Vector2f mOffset;
+   //sf::Vector2f mOffset;
    std::shared_ptr<sf::Texture> mTexture;
    std::shared_ptr<sf::Sprite> mSprite;
 };

@@ -62,6 +62,7 @@ class MessageBox
       static std::vector<std::shared_ptr<Layer>> sLayerStack; // SLAYER!
       static std::map<std::string, std::shared_ptr<Layer>> sLayers;
       static sf::Font sFont;
+      static sf::Text sText;
 
       static bool sInitialized;
 };
