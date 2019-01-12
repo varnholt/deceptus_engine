@@ -124,8 +124,8 @@ void BitmapFont::draw(
       );
 
       mSprite.setPosition(
-         static_cast<float_t>(x + xOffset),
-         static_cast<float_t>(y)
+         static_cast<float>(x + xOffset),
+         static_cast<float>(y)
       );
 
       window.draw(mSprite);

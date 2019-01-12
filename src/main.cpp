@@ -3,6 +3,8 @@
 #include <chrono>
 #include <sstream>
 
+#include "game/constants.h"
+
 // to read
 // http://www.gamasutra.com/blogs/YoannPignole/20140103/207987/Platformer_controls_how_to_avoid_limpness_and_rigidity_feelings.php
 // https://stackoverflow.com/questions/8205088/preventing-box2d-player-from-pressing-against-walls-in-midair
@@ -20,7 +22,8 @@ void debugAuthors()
    auto year = (*gmtime(&now)).tm_year + 1900;
 
    std::stringstream text;
-   text << "a.d.a.m (c) ";
+   text << GAME_NAME;
+   text << " (c) ";
    text << year;
    text << " dstar/mueslee";
    printf("%s\n", text.str().c_str());

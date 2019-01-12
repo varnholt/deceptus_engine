@@ -987,7 +987,7 @@ void PSD::Path::load(std::istream& stream, int32_t width, int32_t height)
       }
 
       // default: skip rest of 26-byte block
-      stream.ignore( (recordStart + std::fpos_t{26}) - stream.tellg() );
+      stream.ignore( (recordStart + 26) - stream.tellg() );
 
       mPathRecordCount--;
    }

@@ -27,9 +27,10 @@ win32 {
 linux {
     QMAKE_CXXFLAGS += -std=c++17
     QMAKE_CXXFLAGS += -lc++fs
-}
 
-QMAKE_LFLAGS_RELEASE += /DEBUG
+    # apt install:
+    # libsfml-dev libsdl2-dev liblua5.3-dev
+}
 
 # get rid of all qt
 QT     -= gui core
@@ -39,30 +40,56 @@ LIBS   -= -lQtGui -lQtCore
 INCLUDEPATH += sfml/include
 DEPENDPATH += sfml/include
 
-# sdl
-LIBS += -LSDL\lib\x64
-LIBS += -lSDL2
+win32 {
+    LIBS += -Llib64
 
-# sfml
-LIBS += -Lsfml\lib
-CONFIG(release, debug|release) {
-  LIBS += -lsfml-audio
-  LIBS += -lsfml-graphics
-  LIBS += -lsfml-network
-  LIBS += -lsfml-window
-  LIBS += -lsfml-system
-} else {
-  LIBS += -lsfml-audio-d
-  LIBS += -lsfml-graphics-d
-  LIBS += -lsfml-network-d
-  LIBS += -lsfml-window-d
-  LIBS += -lsfml-system-d
+    # sdl
+    LIBS += -LSDL\lib\x64
+    LIBS += -lSDL2
+
+    # sfml
+    LIBS += -Lsfml\lib
+    CONFIG(release, debug|release) {
+      LIBS += -lsfml-audio
+      LIBS += -lsfml-graphics
+      LIBS += -lsfml-network
+      LIBS += -lsfml-window
+      LIBS += -lsfml-system
+    } else {
+      LIBS += -lsfml-audio-d
+      LIBS += -lsfml-graphics-d
+      LIBS += -lsfml-network-d
+      LIBS += -lsfml-window-d
+      LIBS += -lsfml-system-d
+    }
+
+    LIBS += -lglu32
+    LIBS += -lopengl32
+    LIBS += -llua53
 }
 
-LIBS += -lglu32
-LIBS += -lopengl32
-LIBS += -Llib64
-LIBS += -llua53
+
+linux {
+    LIBS += -lstdc++fs
+
+    LIBS += -llua5.3
+    LIBS += -lSDL2
+    LIBS += -lGL
+
+   # CONFIG(release, debug|release) {
+      LIBS += -lsfml-audio
+      LIBS += -lsfml-graphics
+      LIBS += -lsfml-network
+      LIBS += -lsfml-window
+      LIBS += -lsfml-system
+   # } else {
+   #   LIBS += -lsfml-audio-d
+   #   LIBS += -lsfml-graphics-d
+   #   LIBS += -lsfml-network-d
+   #   LIBS += -lsfml-window-d
+   #   LIBS += -lsfml-system-d
+   # }
+}
 
 
 INCLUDEPATH += .
@@ -155,7 +182,6 @@ SOURCES += \
     src/tinyxml2/tinyxml2.cpp \
     src/game/sfmlmath.cpp \
     src/tmxparser/tmxtools.cpp \
-    src/game/websocketserver.cpp \
     src/game/gamenode.cpp \
     src/game/luanode.cpp \
     src/game/fixturenode.cpp \
@@ -308,7 +334,6 @@ HEADERS += \
     src/game/sfmlmath.h \
     src/tmxparser/tmxtools.h \
     src/json/json.hpp \
-    src/game/websocketserver.h \
     src/game/luaconstants.h \
     src/game/gamenode.h \
     src/game/luanode.h \
