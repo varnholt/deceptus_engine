@@ -9,6 +9,8 @@ CONFIG += console
 CONFIG += c++17
 CONFIG -= debug_and_release
 
+OBJECTS_DIR = .obj
+
 # get rid of all qt
 CONFIG -= QT
 CONFIG -= app_bundle
