@@ -1,24 +1,23 @@
 TEMPLATE = app
-
-DEFINES += _USE_MATH_DEFINES
-
+TARGET = jumpnrun
 CONFIG_APP_NAME = jumpnrun
 
-DEFINES += USE_GL
 DEFINES += _USE_MATH_DEFINES
+DEFINES += USE_GL
 
-MOC_DIR = .moc
-OBJECTS_DIR = .obj
-
-TARGET = jumpnrun
 CONFIG += console
-CONFIG -= QT
-CONFIG -= app_bundle
-
+CONFIG += c++17
 CONFIG -= debug_and_release
 
-CONFIG += c++17
+# get rid of all qt
+CONFIG -= QT
+CONFIG -= app_bundle
+QT -= gui
+QT -= core
+LIBS -= -lQtGui
+LIBS -= -lQtCore
 
+# code requires c++17
 win32 {
    QMAKE_CXXFLAGS += -std:c++latest
    QMAKE_CXXFLAGS_RELEASE += /Zi
@@ -27,25 +26,16 @@ win32 {
 linux {
     QMAKE_CXXFLAGS += -std=c++17
     QMAKE_CXXFLAGS += -lc++fs
-
-    # apt install:
-    # libsfml-dev libsdl2-dev liblua5.3-dev
 }
 
-# get rid of all qt
-QT     -= gui core
-LIBS   -= -lQtGui -lQtCore
-
-#sfml
-INCLUDEPATH += sfml/include
-DEPENDPATH += sfml/include
 
 win32 {
     LIBS += -Llib64
-
-    # sdl
     LIBS += -LSDL\lib\x64
     LIBS += -lSDL2
+    LIBS += -lglu32
+    LIBS += -lopengl32
+    LIBS += -llua53
 
     # sfml
     LIBS += -Lsfml\lib
@@ -62,34 +52,27 @@ win32 {
       LIBS += -lsfml-window-d
       LIBS += -lsfml-system-d
     }
-
-    LIBS += -lglu32
-    LIBS += -lopengl32
-    LIBS += -llua53
 }
 
 
 linux {
-    LIBS += -lstdc++fs
-
-    LIBS += -llua5.3
-    LIBS += -lSDL2
-    LIBS += -lGL
-
-   # CONFIG(release, debug|release) {
-      LIBS += -lsfml-audio
-      LIBS += -lsfml-graphics
-      LIBS += -lsfml-network
-      LIBS += -lsfml-window
-      LIBS += -lsfml-system
-   # } else {
-   #   LIBS += -lsfml-audio-d
-   #   LIBS += -lsfml-graphics-d
-   #   LIBS += -lsfml-network-d
-   #   LIBS += -lsfml-window-d
-   #   LIBS += -lsfml-system-d
-   # }
+   # apt install:
+   # libsfml-dev libsdl2-dev liblua5.3-dev
+   LIBS += -lstdc++fs
+   LIBS += -llua5.3
+   LIBS += -lSDL2
+   LIBS += -lGL
+   LIBS += -lsfml-audio
+   LIBS += -lsfml-graphics
+   LIBS += -lsfml-network
+   LIBS += -lsfml-window
+   LIBS += -lsfml-system
 }
+
+
+#sfml
+INCLUDEPATH += sfml/include
+DEPENDPATH += sfml/include
 
 
 INCLUDEPATH += .
