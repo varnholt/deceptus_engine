@@ -2,10 +2,18 @@
 
 #include "menu.h"
 
+#include "game/gameconfiguration.h"
+
+
+static const auto STEP_SIZE = 10;
+
+
 
 MenuScreenVideo::MenuScreenVideo()
 {
    setFilename("data/menus/video.psd");
+
+   mVideoModes = { {1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080} };
 }
 
 
@@ -37,15 +45,68 @@ void MenuScreenVideo::down()
 }
 
 
-void MenuScreenVideo::select()
+void MenuScreenVideo::select(int32_t step)
 {
+    switch (mSelection)
+    {
+        case Selection::DisplayMode:
+        {
+            mFullscreenCallback();
+            updateLayers();
+            break;
+        }
 
+        case Selection::Resolution:
+        {
+            auto next = [this, step]() -> std::array<int32_t, 2> {
+                auto it = std::find_if(std::begin(mVideoModes), std::end(mVideoModes), [](const std::array<int32_t, 2> arr){
+                    return
+                           arr[0] == GameConfiguration::getInstance().mVideoModeWidth
+                        && arr[1] == GameConfiguration::getInstance().mVideoModeHeight;
+                });
+
+                auto index = it - mVideoModes.begin();
+                if (step < 0)
+                    index--;
+                else
+                    index++;
+
+                if (index < 0)
+                {
+                    index = mVideoModes.size() - 1;
+                }
+                else if (index > static_cast<int32_t>(mVideoModes.size() - 1))
+                {
+                    index = 0;
+                }
+                return mVideoModes[index];
+            }();
+
+            mResolutionCallback(next[0], next[1]);
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 
 void MenuScreenVideo::back()
 {
-   Menu::getInstance().show(Menu::MenuType::Options);
+    Menu::getInstance().show(Menu::MenuType::Options);
+}
+
+
+void MenuScreenVideo::setFullscreenCallback(MenuScreenVideo::FullscreenCallback callback)
+{
+    mFullscreenCallback = callback;
+}
+
+
+void MenuScreenVideo::setResolutionCallback(MenuScreenVideo::ResolutionCallback callback)
+{
+    mResolutionCallback = callback;
 }
 
 
@@ -61,9 +122,14 @@ void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
       down();
    }
 
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Left)
    {
-      select();
+       select(-STEP_SIZE);
+   }
+
+   else if (key == sf::Keyboard::Right)
+   {
+       select(STEP_SIZE);
    }
 
    else if (key == sf::Keyboard::Escape)
@@ -91,6 +157,13 @@ void MenuScreenVideo::updateLayers()
    auto resolutionSelection = 0;
    auto displayModeSelection = 0;
    auto vsyncSelection = 0;
+
+   auto fullscreen = GameConfiguration::getInstance().mFullscreen;
+   if (fullscreen)
+   {
+       displayModeSelection = 2;
+   }
+
 
    mLayers["defaults_xbox_0"]->mVisible = false;
    mLayers["defaults_xbox_1"]->mVisible = false;

@@ -28,6 +28,7 @@ public:
    void back();
 
    void set(int32_t x);
+   void setDefaults();
 
    Selection mSelection = Selection::Master;
 };

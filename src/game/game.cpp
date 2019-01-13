@@ -21,6 +21,7 @@
 #include "joystick/gamecontroller.h"
 
 #include "menus/menuscreenmain.h"
+#include "menus/menuscreenvideo.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
@@ -39,12 +40,6 @@
 #ifdef __linux__
 #define setUniform setParameter
 #endif
-
-
-//----------------------------------------------------------------------------------------------------------------------
-Game::Game()
-{
-}
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -149,8 +144,6 @@ void Game::initialize()
 {
   initializeController();
 
-  createWindow();
-
   auto levels = Levels::getInstance();
   levels.deserializeFromFile();
   auto levelOne = levels.mLevels.at(0);
@@ -172,11 +165,18 @@ void Game::initialize()
 
   // initially the game should be in main menu and paused
   std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance().getMenuScreen(Menu::MenuType::Main))->setExitCallback(
-     [this]() {
-        std::cout << "application shutdown" << std::endl;
-        mWindow->close();
-     }
+     [this](){mWindow->close();}
   );
+
+  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
+     [this](){toggleFullScreen();}
+  );
+
+  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
+     [this](int32_t w, int32_t h){changeResolution(w, h);}
+  );
+
+  createWindow();
 
   showMainMenu();
 
@@ -515,6 +515,27 @@ void Game::openInventory()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::toggleFullScreen()
+{
+    GameConfiguration::getInstance().mFullscreen = !GameConfiguration::getInstance().mFullscreen;
+    createWindow();
+    mLevel->createViews();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Game::changeResolution(int32_t w, int32_t h)
+{
+    GameConfiguration::getInstance().mVideoModeWidth = w;
+    GameConfiguration::getInstance().mVideoModeHeight = h;
+    GameConfiguration::getInstance().serializeToFile();
+
+    createWindow();
+    mLevel->createViews();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
    switch (event.key.code)
@@ -540,9 +561,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F:
       {
-         GameConfiguration::getInstance().mFullscreen = !GameConfiguration::getInstance().mFullscreen;
-         createWindow();
-         mLevel->createViews();
+         toggleFullScreen();
          break;
       }
       case sf::Keyboard::I:

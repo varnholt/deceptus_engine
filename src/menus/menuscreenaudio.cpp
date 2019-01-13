@@ -104,6 +104,17 @@ void MenuScreenAudio::set(int32_t x)
 }
 
 
+void MenuScreenAudio::setDefaults()
+{
+    GameConfiguration defaults;
+    GameConfiguration::getInstance().mAudioVolumeMaster = defaults.mAudioVolumeMaster;
+    GameConfiguration::getInstance().mAudioVolumeMusic = defaults.mAudioVolumeMusic;
+    GameConfiguration::getInstance().mAudioVolumeSfx = defaults.mAudioVolumeSfx;
+
+    updateLayers();
+}
+
+
 void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (key == sf::Keyboard::Up)
@@ -134,6 +145,11 @@ void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Escape)
    {
       back();
+   }
+
+   else if (key == sf::Keyboard::D)
+   {
+       setDefaults();
    }
 }
 

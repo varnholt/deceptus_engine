@@ -49,7 +49,7 @@ private:
 
 public:
 
-   Game();
+   Game() = default;
 
    void initialize();
    int loop();
@@ -81,6 +81,8 @@ private:
    void showMainMenu();
    void processKeyPressedEvents(const sf::Event& event);
    void processKeyReleasedEvents(const sf::Event& event);
+   void toggleFullScreen();
+   void changeResolution(int32_t w, int32_t h);
 };
 
 #endif // GAME_H
