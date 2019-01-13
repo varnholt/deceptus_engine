@@ -2,6 +2,9 @@
 
 #include "menuscreen.h"
 
+#include <functional>
+
+
 class MenuScreenVideo : public MenuScreen
 {
 public:
@@ -15,6 +18,9 @@ public:
       Count       = 5
    };
 
+   using FullscreenCallback = std::function<void(void)>;
+   using ResolutionCallback = std::function<void(int32_t, int32_t)>;
+
    MenuScreenVideo();
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
@@ -23,9 +29,23 @@ public:
 
    void up();
    void down();
-   void select();
+   void select(int32_t step);
    void back();
 
+   void setFullscreenCallback(FullscreenCallback callback);
+   void setResolutionCallback(ResolutionCallback callback);
+
    Selection mSelection = Selection::Monitor;
+
+
+private:
+
+    FullscreenCallback mFullscreenCallback;
+    ResolutionCallback mResolutionCallback;
+    std::vector<std::array<int32_t, 2>> mVideoModes;
+
 };
+
+
+
 
