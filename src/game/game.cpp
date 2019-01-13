@@ -78,6 +78,11 @@ void Game::createWindow()
      mLevelRenderTexture.reset();
    }
 
+   // this ought to be the right texture size to keep the aspect ratio
+   // however, that totally fucks up all the things. needs to be fixed.
+   [[maybe_unused]] int32_t textureWidth = (gameConfig.mVideoModeWidth / gameConfig.mViewWidth) * gameConfig.mViewWidth;
+   [[maybe_unused]] int32_t textureHeight = (gameConfig.mVideoModeHeight / gameConfig.mViewHeight) * gameConfig.mViewHeight;
+
    mLevelRenderTexture = std::make_shared<sf::RenderTexture>();
    mLevelRenderTexture->create(
       static_cast<uint32_t>(gameConfig.mVideoModeWidth),

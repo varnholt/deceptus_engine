@@ -816,7 +816,7 @@ void Level::draw(sf::RenderTarget& target)
    // drawRaycastLight(window);
    //
    // draw map
-   // drawMap(window);
+   // drawMap(target);
 }
 
 
