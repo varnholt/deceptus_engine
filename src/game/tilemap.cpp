@@ -35,7 +35,7 @@ bool TileMap::load(
 {
    if (tileSet == nullptr)
    {
-      std::cout << "TileMap::load: tileSet is a nullptr" << std::endl;
+      // std::cout << "TileMap::load: tileSet is a nullptr" << std::endl;
       return false;
    }
 

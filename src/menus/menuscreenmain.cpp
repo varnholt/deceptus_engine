@@ -94,10 +94,16 @@ void MenuScreenMain::select()
       case Selection::Quit:
          MessageBox::question(
             "Are you sure you want to quit?",
-            [](MessageBox::Button button) {if (button == MessageBox::Button::Yes) exit(0);}
+            [this](MessageBox::Button button) {if (button == MessageBox::Button::Yes) mExitCallback();}
          );
          break;
    }
+}
+
+
+void MenuScreenMain::setExitCallback(MenuScreenMain::ExitCallback callback)
+{
+    mExitCallback = callback;
 }
 
 

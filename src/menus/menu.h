@@ -31,6 +31,7 @@ public:
    void keyboardKeyReleased(sf::Keyboard::Key key);
 
    MenuType getCurrentType() const;
+   const std::shared_ptr<MenuScreen>& getMenuScreen(MenuType) const;
 
    static Menu& getInstance();
 
