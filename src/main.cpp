@@ -6,15 +6,13 @@
 #include "game/constants.h"
 
 // to read
+//
 // http://www.gamasutra.com/blogs/YoannPignole/20140103/207987/Platformer_controls_how_to_avoid_limpness_and_rigidity_feelings.php
 // https://stackoverflow.com/questions/8205088/preventing-box2d-player-from-pressing-against-walls-in-midair
-
-
-// TODO:
-
 // http://www.emanueleferonato.com/2013/09/10/creation-of-a-box2d-hook-like-the-one-seen-on-ios-mikey-hooks-game/
 // http://www.iforce2d.net/b2dtut/joints-overview
 // https://www.youtube.com/watch?v=C-ScURIRTGA
+
 
 void debugAuthors()
 {

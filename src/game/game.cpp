@@ -20,6 +20,8 @@
 #include "weapon.h"
 #include "joystick/gamecontroller.h"
 
+#include "menus/menuscreenmain.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
@@ -169,6 +171,13 @@ void Game::initialize()
   Audio::getInstance();
 
   // initially the game should be in main menu and paused
+  std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance().getMenuScreen(Menu::MenuType::Main))->setExitCallback(
+     [this]() {
+        std::cout << "application shutdown" << std::endl;
+        mWindow->close();
+     }
+  );
+
   showMainMenu();
 
   // TODO: MOVE ALL BULLET STUFF TO SEPERATE WEAPON CLASS

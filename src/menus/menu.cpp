@@ -134,6 +134,33 @@ void Menu::keyboardKeyReleased(sf::Keyboard::Key key)
 
 Menu::MenuType Menu::getCurrentType() const
 {
-   return mCurrentType;
+    return mCurrentType;
+}
+
+
+const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) const
+{
+    switch (type)
+    {
+       case MenuType::Main:
+          return mMenuMain;
+       case MenuType::Options:
+          return mMenuOptions;
+       case MenuType::Controls:
+          return mMenuControls;
+       case MenuType::Video:
+          return mMenuVideo;
+       case MenuType::Audio:
+          return mMenuAudio;
+       case MenuType::Game:
+          return mMenuGame;
+       case MenuType::Achievements:
+          return mMenuAchievements;
+       case MenuType::Credits:
+          return mMenuCredits;
+        case MenuType::None:
+          break;
+    }
+    return nullptr;
 }
 

@@ -1063,7 +1063,7 @@ void Level::parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
 
    if (tileSet == nullptr)
    {
-      std::cout << "tileset is a nullptr" << std::endl;
+      // std::cout << "tileset is a nullptr" << std::endl;
       return;
    }
 

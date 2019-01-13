@@ -2,6 +2,9 @@
 
 #include "menuscreen.h"
 
+#include <functional>
+
+
 class MenuScreenMain : public MenuScreen
 {
 
@@ -12,6 +15,8 @@ public:
       Options,
       Quit
    };
+
+   using ExitCallback = std::function<void(void)>;
 
    MenuScreenMain();
 
@@ -27,6 +32,13 @@ public:
    void up();
    void down();
    void select();
+
+   void setExitCallback(ExitCallback callback);
+
+
+private:
+
+   ExitCallback mExitCallback;
 
 };
 

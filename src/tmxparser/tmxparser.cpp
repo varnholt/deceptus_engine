@@ -150,7 +150,7 @@ TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
 
    if (!tileset)
    {
-     std::cout<< "TmxParser::getTileSet: loading fuckup for: " << layer->mName << std::endl;
+     // std::cout<< "TmxParser::getTileSet: loading fuckup for: " << layer->mName << std::endl;
    }
 
    return tileset;
