@@ -8,12 +8,6 @@
 class SfmlAnimation
 {
 
-private:
-
-   std::vector<sf::IntRect> mFrames;
-   const sf::Texture* mTexture = nullptr;
-
-
 public:
 
    SfmlAnimation();
@@ -23,5 +17,12 @@ public:
    const sf::Texture* getSpriteSheet() const;
    size_t getSize() const;
    const sf::IntRect& getFrame(size_t n) const;
+
+
+private:
+
+   std::vector<sf::IntRect> mFrames;
+   const sf::Texture* mTexture = nullptr;
+
 
 };
