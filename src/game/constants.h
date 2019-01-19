@@ -43,14 +43,14 @@ enum Alignment {
 enum class AnimationType
 {
    Invalid = 0,
-   IdleLeftAligned,
-   IdleRightAligned,
-   RunLeftAligned,
-   RunRightAligned,
-   CrouchLeftAligned,
-   CrouchRightAligned,
-   JumpDustLeftAligned,
-   JumpDustRightAligned,
+   PlayerIdleLeftAligned,
+   PlayerIdleRightAligned,
+   PlayerRunLeftAligned,
+   PlayerRunRightAligned,
+   PlayerCrouchLeftAligned,
+   PlayerCrouchRightAligned,
+   PlayerJumpDustLeftAligned,
+   PlayerJumpDustRightAligned,
    Size
 };
 
