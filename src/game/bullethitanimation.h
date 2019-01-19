@@ -5,13 +5,16 @@
 #include <list>
 
 
-class BulletHitAnimation : public SfmlAnimatedSprite
+class BulletHitAnimation : public SpriteAnimation
 {
    protected:
 
       static bool sInitialized;
+
       static sf::Texture sTexture;
-      static SfmlAnimation sAnimation;
+      static std::vector<sf::IntRect> sFrames;
+
+
       static std::list<BulletHitAnimation*> sAnimations;
       static std::list<BulletHitAnimation*> sElapsedAnimations;
 

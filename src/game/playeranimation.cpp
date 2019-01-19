@@ -1,22 +1,16 @@
 #include "playeranimation.h"
 
+#include <fstream>
+#include <iostream>
+#include <ostream>
+#include <sstream>
 
-//----------------------------------------------------------------------------------------------------------------------
-bool PlayerAnimation::sInitialized = false;
-std::list<PlayerAnimation*> PlayerAnimation::sAnimations;
-std::list<PlayerAnimation*> PlayerAnimation::sElapsedAnimations;
-std::array<std::shared_ptr<PlayerAnimation::PlayerAnimationSetup>, static_cast<size_t>(PlayerAnimation::PlayerAnimationType::Size)> PlayerAnimation::sSetups;
+#include "json/json.hpp"
+
+using json = nlohmann::json;
 
 
-//----------------------------------------------------------------------------------------------------------------------
-PlayerAnimation::PlayerAnimation(PlayerAnimationType type, sf::Time frameTime)
- : SfmlAnimatedSprite(frameTime),
-   mType(type)
-{
-   auto setup = sSetups[static_cast<size_t>(mType)];
-   setOrigin(setup->mOriginX, setup->mOriginY);
-   setAnimation(setup->mAnimation);
-}
+PlayerAnimation PlayerAnimation::sPlayerAnimation;
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -32,11 +26,17 @@ void PlayerAnimation::initialize()
    dustLeft->mOriginX = 9.0f;
    dustLeft->mOriginY = 12.0f;
    dustLeft->mTexture.loadFromFile("data/sprites/player.png");
-   dustLeft->mAnimation.setSpriteSheet(dustLeft->mTexture);
 
    for (int i = 0; i < dustLeft->mSprites; i++)
    {
-      dustLeft->mAnimation.addFrame(sf::IntRect(i * (dustLeft->mWidth + 1), 8 * 24, dustLeft->mWidth, dustLeft->mHeight));
+      dustLeft->mFrames.push_back(
+         sf::IntRect(
+            i * (dustLeft->mWidth + 1),
+            8 * 24,
+            dustLeft->mWidth,
+            dustLeft->mHeight
+         )
+      );
    }
 
    // jump dust right aligned
@@ -49,34 +49,45 @@ void PlayerAnimation::initialize()
    dustRight->mOriginX = 12.0f;
    dustRight->mOriginY = 12.0f;
    dustRight->mTexture.loadFromFile("data/sprites/player.png");
-   dustRight->mAnimation.setSpriteSheet(dustRight->mTexture);
 
    for (int i = 0; i < dustRight->mSprites; i++)
    {
-      dustRight->mAnimation.addFrame(sf::IntRect(i * (dustRight->mWidth + 1), 8 * 24, dustRight->mWidth, dustRight->mHeight));
+      dustRight->mFrames.push_back(
+         sf::IntRect(
+            i * (dustRight->mWidth + 1),
+            8 * 24,
+            dustRight->mWidth,
+            dustRight->mHeight
+         )
+      );
    }
 
-   sSetups[static_cast<size_t>(PlayerAnimationType::JumpLeftAligned)] = dustLeft;
-   sSetups[static_cast<size_t>(PlayerAnimationType::JumpRightAligned)] = dustRight;
+   mSetups[AnimationType::JumpDustLeftAligned] = dustLeft;
+   mSetups[AnimationType::JumpDustRightAligned] = dustRight;
 
    sInitialized = true;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerAnimation::add(PlayerAnimationType type, float x, float y)
+void PlayerAnimation::add(AnimationType type, float x, float y)
 {
    if (!sInitialized)
    {
       initialize();
    }
 
-   auto setup = sSetups[static_cast<size_t>(type)];
-   auto anim = new PlayerAnimation(type, sf::seconds(setup->mFrameTime));
+   auto setup = mSetups[type];
+   auto anim = new SpriteAnimation();
+
+   anim->setOrigin(setup->mOriginX, setup->mOriginY);
+   anim->mType = type;
    anim->setPosition(x, y);
+   anim->mFrames = setup->mFrames;
+   anim->mTexture = setup->mTexture;
    anim->play();
 
-   sAnimations.push_back(anim);
+   mAnimations.push_back(anim);
 }
 
 
@@ -88,31 +99,56 @@ void PlayerAnimation::updateAnimations(float dt)
      return;
    }
 
-   std::list<PlayerAnimation*>::iterator it;
-   for (it = sAnimations.begin(); it != sAnimations.end();)
-   {
-      PlayerAnimation* sprite = (*it);
-      auto setup = sSetups[static_cast<size_t>(sprite->mType)];
+   mAnimations.erase(
+      std::remove_if(
+         mAnimations.begin(), mAnimations.end(), [this](SpriteAnimation* animation)
+         {
+            if (animation->mType == AnimationType::Invalid)
+            {
+               return false;
+            }
+            auto setup = mSetups[animation->mType];
+            return (animation->mElapsed > setup->mAnimationDuration);
+         }
+      ),
+      mAnimations.end()
+   );
 
-      if (sprite->getElapsed() > setup->mAnimationDuration)
-      {
-         delete *it;
-         sAnimations.erase(it++);
-      }
-      else
-      {
-         it++;
-         sprite->update(dt);
-         sprite->incrementElapsed(static_cast<int>(dt * 1000.0f));
-      }
+   for (auto animation : mAnimations)
+   {
+      animation->update(dt);
+      animation->incrementElapsed(static_cast<int>(dt * 1000.0f));
    }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::list<PlayerAnimation*> *PlayerAnimation::getAnimations()
+const std::vector<SpriteAnimation*>& PlayerAnimation::getAnimations()
 {
-   return &sAnimations;
+   return mAnimations;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+PlayerAnimation&PlayerAnimation::getInstance()
+{
+   return sPlayerAnimation;
+}
+
+
+
+void PlayerAnimation::deserialize(const std::string& data)
+{
+   json config = json::parse(data);
+
+   try
+   {
+     // mLevels = config.get<std::vector<LevelItem>>();
+   }
+   catch (const std::exception& e)
+   {
+     std::cout << e.what() << std::endl;
+   }
 }
 
 

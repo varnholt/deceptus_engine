@@ -21,63 +21,49 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFMLANIMATEDSPRITE_INCLUDE
-#define SFMLANIMATEDSPRITE_INCLUDE
+#pragma once
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include "game/constants.h"
 #include "sfmlanimation.h"
 
-class SfmlAnimatedSprite : public sf::Sprite
+
+class SpriteAnimation : public sf::Sprite
 {
-
-private:
-
-   const SfmlAnimation* mAnimation = nullptr;
-   sf::Time mFrameTime;
-   sf::Time mCurrentTime;
-   size_t mCurrentFrame = 0;
-   size_t mPreviousFrame = -1;
-   bool mPaused = false;
-   bool mLooped = false;
-   const sf::Texture* mTexture = nullptr;
-   sf::Vertex mVertices[4];
-   int mElapsed = 0;
-
 
 public:
 
-   explicit SfmlAnimatedSprite(sf::Time mFrameTime = sf::seconds(0.2f), bool mPaused = false, bool mLooped = true);
-
-   void update(float dt);
-   void setAnimation(const SfmlAnimation& mAnimation);
-   void setFrameTime(sf::Time time);
-   void play();
-   void play(const SfmlAnimation& mAnimation);
-   void pause();
-   void stop();
-   void setLooped(bool mLooped);
-   void setColor(const sf::Color& color);
-   const SfmlAnimation* getAnimation() const;
-   size_t getCurrentFrame();
-   size_t getPreviousFrame();
-   sf::FloatRect getLocalBounds() const;
-   sf::FloatRect getGlobalBounds() const;
-   bool isLooped() const;
-   bool isPlaying() const;
-   sf::Time getFrameTime() const;
-   void setFrame(size_t newFrame, bool resetTime = true);
-   void incrementElapsed(int ms);
-   int getElapsed();
-
-
-private:
+   explicit SpriteAnimation(sf::Time mFrameTime = sf::seconds(0.2f), bool mPaused = false, bool mLooped = true);
 
    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+   void update(float dt);
 
+   void play();
+   void play(const Animation& mAnimation);
+   void pause();
+   void stop();
+
+   sf::FloatRect getLocalBounds() const;
+   sf::FloatRect getGlobalBounds() const;
+
+   void setFrame(int32_t newFrame, bool resetTime = true);
+
+   void incrementElapsed(int ms);
+
+   AnimationType mType = AnimationType::Invalid;
+   std::vector<sf::IntRect> mFrames;
+   sf::Texture mTexture;
+   sf::Time mFrameTime;
+   sf::Time mCurrentTime;
+   int32_t mCurrentFrame = 0;
+   int32_t mPreviousFrame = -1;
+   bool mPaused = false;
+   bool mLooped = false;
+   sf::Vertex mVertices[4];
+   int mElapsed = 0;
 };
 
-#endif // ANIMATEDSPRITE_INCLUDE

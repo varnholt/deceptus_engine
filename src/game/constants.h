@@ -40,6 +40,20 @@ enum Alignment {
   PointsLeft    = 0x08
 };
 
+enum class AnimationType
+{
+   Invalid = 0,
+   IdleLeftAligned,
+   IdleRightAligned,
+   RunLeftAligned,
+   RunRightAligned,
+   CrouchLeftAligned,
+   CrouchRightAligned,
+   JumpDustLeftAligned,
+   JumpDustRightAligned,
+   Size
+};
+
 enum Display {
   DisplayInvalid   = 0x00,
   DisplayGame      = 0x01,

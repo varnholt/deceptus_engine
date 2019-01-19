@@ -27,7 +27,7 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-SfmlAnimatedSprite::SfmlAnimatedSprite(sf::Time frameTime, bool paused, bool looped)
+SpriteAnimation::SpriteAnimation(sf::Time frameTime, bool paused, bool looped)
 {
    mFrameTime = frameTime;
    mPaused = paused;
@@ -36,52 +36,21 @@ SfmlAnimatedSprite::SfmlAnimatedSprite(sf::Time frameTime, bool paused, bool loo
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::setAnimation(const SfmlAnimation &animation)
-{
-   this->mAnimation = &animation;
-   mTexture = this->mAnimation->getSpriteSheet();
-
-   mPreviousFrame = -1;
-   mCurrentFrame = 0;
-   setFrame(mCurrentFrame);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::setFrameTime(sf::Time time)
-{
-   mFrameTime = time;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::play()
+void SpriteAnimation::play()
 {
    mPaused = false;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::play(const SfmlAnimation &animation)
-{
-   if (getAnimation() != &animation)
-   {
-      setAnimation(animation);
-   }
-
-   play();
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::pause()
+void SpriteAnimation::pause()
 {
    mPaused = true;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::stop()
+void SpriteAnimation::stop()
 {
    mPaused = true;
 
@@ -92,99 +61,41 @@ void SfmlAnimatedSprite::stop()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::setLooped(bool looped)
+sf::FloatRect SpriteAnimation::getLocalBounds() const
 {
-    this->mLooped = looped;
+   sf::IntRect rect = mFrames[mCurrentFrame];
+   return sf::FloatRect(
+      0.f,
+      0.f,
+      static_cast<float>(std::abs(rect.width)),
+      static_cast<float>(std::abs(rect.height))
+   );
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::setColor(const sf::Color& color)
-{
-   mVertices[0].color = color;
-   mVertices[1].color = color;
-   mVertices[2].color = color;
-   mVertices[3].color = color;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-const SfmlAnimation* SfmlAnimatedSprite::getAnimation() const
-{
-   return mAnimation;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-size_t SfmlAnimatedSprite::getCurrentFrame()
-{
-   return mCurrentFrame;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-size_t SfmlAnimatedSprite::getPreviousFrame()
-{
-   return mPreviousFrame;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-sf::FloatRect SfmlAnimatedSprite::getLocalBounds() const
-{
-   sf::IntRect rect = mAnimation->getFrame(mCurrentFrame);
-
-   float width  = static_cast<float>(std::abs(rect.width));
-   float height = static_cast<float>(std::abs(rect.height));
-
-   return sf::FloatRect(0.f, 0.f, width, height);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-sf::FloatRect SfmlAnimatedSprite::getGlobalBounds() const
+sf::FloatRect SpriteAnimation::getGlobalBounds() const
 {
    return getTransform().transformRect(getLocalBounds());
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool SfmlAnimatedSprite::isLooped() const
+void SpriteAnimation::setFrame(int32_t, bool resetTime)
 {
-   return mLooped;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-bool SfmlAnimatedSprite::isPlaying() const
-{
-   return !mPaused;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-sf::Time SfmlAnimatedSprite::getFrameTime() const
-{
-   return mFrameTime;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::setFrame(size_t, bool resetTime)
-{
-   if (mAnimation && mAnimation->getSize() > 0)
+   if (mFrames.size() > 0)
    {
-      sf::IntRect rect = mAnimation->getFrame(mCurrentFrame);
+      sf::IntRect rect = mFrames[mCurrentFrame];
+
+      const auto l =     static_cast<float>(rect.left) + 0.0001f;
+      const auto r = l + static_cast<float>(rect.width);
+      const auto t =     static_cast<float>(rect.top);
+      const auto b = t + static_cast<float>(rect.height);
 
       mVertices[0].position = sf::Vector2f(0.f, 0.f);
       mVertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect.height));
       mVertices[2].position = sf::Vector2f(static_cast<float>(rect.width), static_cast<float>(rect.height));
       mVertices[3].position = sf::Vector2f(static_cast<float>(rect.width), 0.f);
-
-      float l =     static_cast<float>(rect.left) + 0.0001f;
-      float r = l + static_cast<float>(rect.width);
-      float t =     static_cast<float>(rect.top);
-      float b = t + static_cast<float>(rect.height);
 
       mVertices[0].texCoords = sf::Vector2f(l, t);
       mVertices[1].texCoords = sf::Vector2f(l, b);
@@ -200,9 +111,9 @@ void SfmlAnimatedSprite::setFrame(size_t, bool resetTime)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::update(float dt)
+void SpriteAnimation::update(float dt)
 {
-   if (!mPaused && mAnimation)
+   if (!mPaused)
    {
       mPreviousFrame = mCurrentFrame;
 
@@ -214,7 +125,7 @@ void SfmlAnimatedSprite::update(float dt)
          // reset time, but keep the remainder
          mCurrentTime = sf::microseconds(mCurrentTime.asMicroseconds() % mFrameTime.asMicroseconds());
 
-         if (mCurrentFrame + 1 < mAnimation->getSize())
+         if (mCurrentFrame + 1 < static_cast<int32_t>(mFrames.size()))
          {
             mCurrentFrame++;
          }
@@ -235,27 +146,16 @@ void SfmlAnimatedSprite::update(float dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void SpriteAnimation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-   if (mAnimation && mTexture)
-   {
-      states.transform *= getTransform();
-      states.texture = mTexture;
-      target.draw(mVertices, 4, sf::Quads, states);
-   }
+   states.transform *= getTransform();
+   states.texture = &mTexture;
+   target.draw(mVertices, 4, sf::Quads, states);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void SfmlAnimatedSprite::incrementElapsed(int ms)
+void SpriteAnimation::incrementElapsed(int ms)
 {
    mElapsed += ms;
 }
-
-
-//----------------------------------------------------------------------------------------------------------------------
-int SfmlAnimatedSprite::getElapsed()
-{
-   return mElapsed;
-}
-

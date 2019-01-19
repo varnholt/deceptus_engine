@@ -4,25 +4,9 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-
-class SfmlAnimation
+struct Animation
 {
-
-public:
-
-   SfmlAnimation();
-
-   void addFrame(sf::IntRect rect);
-   void setSpriteSheet(const sf::Texture& texture);
-   const sf::Texture* getSpriteSheet() const;
-   size_t getSize() const;
-   const sf::IntRect& getFrame(size_t n) const;
-
-
-private:
-
+   Animation() = default;
    std::vector<sf::IntRect> mFrames;
-   const sf::Texture* mTexture = nullptr;
-
-
+   sf::Texture mTexture;
 };
