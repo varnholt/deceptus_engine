@@ -194,7 +194,7 @@ void Player::draw(sf::RenderTarget& target)
 
    target.draw(mSprite);
 
-   const auto& animations = PlayerAnimation::getInstance().getAnimations();
+   const auto& animations = AnimationPool::getInstance().getAnimations();
    for (auto it = animations.begin(); it != animations.end(); ++it)
    {
       target.draw(*(*it));
@@ -1200,7 +1200,7 @@ void Player::update(float dt)
    updatePixelPosition();
    updateFootsteps();
    updatePortal();
-   PlayerAnimation::getInstance().updateAnimations(dt);
+   AnimationPool::getInstance().updateAnimations(dt);
 }
 
 
@@ -1739,7 +1739,7 @@ void Player::jump()
          }
          else
          {
-            PlayerAnimation::getInstance().add(
+            AnimationPool::getInstance().add(
                mPointsToLeft
                 ? AnimationType::JumpDustLeftAligned
                 : AnimationType::JumpDustRightAligned,
