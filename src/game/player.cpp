@@ -11,7 +11,7 @@
 #include "fixturenode.h"
 #include "joystick/gamecontroller.h"
 #include "level.h"
-#include "playeranimation.h"
+#include "animationpool.h"
 #include "physicsconfiguration.h"
 #include "weapon.h"
 
@@ -1741,8 +1741,8 @@ void Player::jump()
          {
             AnimationPool::getInstance().add(
                mPointsToLeft
-                ? AnimationType::JumpDustLeftAligned
-                : AnimationType::JumpDustRightAligned,
+                ? AnimationType::PlayerJumpDustLeftAligned
+                : AnimationType::PlayerJumpDustRightAligned,
                mPixelPosition.x,
                mPixelPosition.y
             );

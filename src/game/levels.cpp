@@ -29,13 +29,13 @@ void Levels::deserializeFromFile(const std::string &filename)
 {
   std::ifstream ifs (filename, std::ifstream::in);
 
-  char c = ifs.get();
+  auto c = ifs.get();
   std::string data;
 
   while (ifs.good())
   {
     // std::cout << c;
-    data.push_back(c);
+    data.push_back(static_cast<char>(c));
     c = ifs.get();
   }
 
