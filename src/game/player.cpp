@@ -194,8 +194,8 @@ void Player::draw(sf::RenderTarget& target)
 
    target.draw(mSprite);
 
-   auto animations = PlayerAnimation::getAnimations();
-   for (auto it = animations->begin(); it != animations->end(); ++it)
+   const auto& animations = PlayerAnimation::getInstance().getAnimations();
+   for (auto it = animations.begin(); it != animations.end(); ++it)
    {
       target.draw(*(*it));
    }
@@ -259,7 +259,7 @@ void Player::createHead()
    FixtureNode* objectDataHead = new FixtureNode(this);
    objectDataHead->setType(ObjectTypePlayer);
    objectDataHead->setFlag("head", true);
-   mHeadFixture->SetUserData((void*)objectDataHead);
+   mHeadFixture->SetUserData(static_cast<void*>(objectDataHead));
 }
 
 
@@ -279,9 +279,9 @@ void Player::createFeet()
    //  count * (dist + radius)
 
    int feetCount = 4;
-   float feetRadius = 0.16f / (float)feetCount;
+   float feetRadius = 0.16f / static_cast<float>(feetCount);
    float feetDist = 0.0f;
-   float feetOffset = (float)feetCount * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
+   float feetOffset = static_cast<float>(feetCount) * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
 
    for (int i = 0; i < feetCount; i++)
    {
@@ -299,7 +299,7 @@ void Player::createFeet()
 
       FixtureNode* objectDataFeet = new FixtureNode(this);
       objectDataFeet->setType(ObjectTypePlayer);
-      feet->SetUserData((void*)objectDataFeet);
+      feet->SetUserData(static_cast<void*>(objectDataFeet));
    }
 
    // attach foot sensor shape
@@ -319,7 +319,7 @@ void Player::createFeet()
 
    FixtureNode* objectData = new FixtureNode(this);
    objectData->setType(ObjectTypePlayerFootSensor);
-   footSensorFixture->SetUserData((void*)objectData);
+   footSensorFixture->SetUserData(static_cast<void*>(objectData));
 }
 
 
@@ -1200,7 +1200,7 @@ void Player::update(float dt)
    updatePixelPosition();
    updateFootsteps();
    updatePortal();
-   PlayerAnimation::updateAnimations(dt);
+   PlayerAnimation::getInstance().updateAnimations(dt);
 }
 
 
@@ -1739,10 +1739,10 @@ void Player::jump()
          }
          else
          {
-            PlayerAnimation::add(
+            PlayerAnimation::getInstance().add(
                mPointsToLeft
-                ? PlayerAnimation::PlayerAnimationType::JumpLeftAligned
-                : PlayerAnimation::PlayerAnimationType::JumpRightAligned,
+                ? AnimationType::JumpDustLeftAligned
+                : AnimationType::JumpDustRightAligned,
                mPixelPosition.x,
                mPixelPosition.y
             );

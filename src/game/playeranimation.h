@@ -1,25 +1,19 @@
 #pragma once
 
+#include "game/constants.h"
 #include "game/sfmlanimatedsprite.h"
 
 #include <array>
 #include <list>
 #include <memory>
 
+#include "json/json.hpp"
+using json = nlohmann::json;
 
-class PlayerAnimation : public SfmlAnimatedSprite
+
+class PlayerAnimation
 {
    public:
-
-      enum class PlayerAnimationType
-      {
-         Invalid = 0,
-         JumpLeftAligned,
-         JumpRightAligned,
-         Size
-      };
-
-   private:
 
       struct PlayerAnimationSetup
       {
@@ -31,26 +25,31 @@ class PlayerAnimation : public SfmlAnimatedSprite
          float mFrameTime = 0.0f;
          int mAnimationDuration = 0;
          sf::Texture mTexture;
-         SfmlAnimation mAnimation;
+         std::vector<sf::IntRect> mFrames;
       };
 
-      static bool sInitialized;
-      static std::array<std::shared_ptr<PlayerAnimationSetup>, static_cast<size_t>(PlayerAnimationType::Size)> sSetups;
-      static std::list<PlayerAnimation*> sAnimations;
-      static std::list<PlayerAnimation*> sElapsedAnimations;
+      void initialize();
+      void add(AnimationType type, float x, float y);
+      void updateAnimations(float dt);
+      const std::vector<SpriteAnimation*>& getAnimations();
 
-
-   public:
-
-      static void initialize();
-      static void add(PlayerAnimationType type, float x, float y);
-      static void updateAnimations(float dt);
-      static std::list<PlayerAnimation*>* getAnimations();
-
+      static PlayerAnimation& getInstance();
 
    private:
 
-      PlayerAnimation(PlayerAnimationType type, sf::Time mFrameTime = sf::seconds(0.2f));
-      PlayerAnimationType mType;
+      PlayerAnimation() = default;
+
+      bool sInitialized = false;
+      std::map<AnimationType, std::shared_ptr<PlayerAnimationSetup>> mSetups;
+      std::vector<SpriteAnimation*> mAnimations;
+
+      void deserialize(const std::string& data);
+      void deserializeFromFile(const std::string& filename = "data/config/levels.json");
+
+
+      static PlayerAnimation sPlayerAnimation;
+
 };
+
+void from_json(const json& j, PlayerAnimation& item);
 

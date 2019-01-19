@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 bool BulletHitAnimation::sInitialized = false;
 sf::Texture BulletHitAnimation::sTexture;
-SfmlAnimation BulletHitAnimation::sAnimation;
+std::vector<sf::IntRect> BulletHitAnimation::sFrames;
 std::list<BulletHitAnimation*> BulletHitAnimation::sAnimations;
 std::list<BulletHitAnimation*> BulletHitAnimation::sElapsedAnimations;
 
@@ -17,7 +17,7 @@ const auto animationDuration = 400;
 
 //----------------------------------------------------------------------------------------------------------------------
 BulletHitAnimation::BulletHitAnimation(sf::Time frameTime)
- : SfmlAnimatedSprite(frameTime)
+ : SpriteAnimation(frameTime)
 {
    if (!sInitialized)
    {
@@ -25,7 +25,6 @@ BulletHitAnimation::BulletHitAnimation(sf::Time frameTime)
    }
 
    setOrigin(width / 2, height / 2);
-   setAnimation(sAnimation);
 }
 
 
@@ -34,11 +33,9 @@ void BulletHitAnimation::initialize()
 {
    if (sTexture.loadFromFile("data/weapons/detonation_big.png"))
    {
-      sAnimation.setSpriteSheet(sTexture);
-
       for (int i = 0; i < sprites; i++)
       {
-         sAnimation.addFrame(sf::IntRect(i * (width + 1), 0, width, height));
+         sFrames.push_back(sf::IntRect(i * (width + 1), 0, width, height));
       }
 
       sInitialized = true;
@@ -54,6 +51,10 @@ void BulletHitAnimation::initialize()
 void BulletHitAnimation::add(float x, float y)
 {
    auto anim = new BulletHitAnimation(sf::seconds(frameTime));
+
+   anim->mFrames = sFrames;
+   anim->mTexture = sTexture;
+
    anim->setPosition(x, y);
    anim->play();
 
@@ -69,7 +70,7 @@ void BulletHitAnimation::updateAnimations(float dt)
    {
       BulletHitAnimation* sprite = (*it);
 
-      if (sprite->getElapsed() > animationDuration)
+      if (sprite->mElapsed > animationDuration)
       {
          delete *it;
          sAnimations.erase(it++);

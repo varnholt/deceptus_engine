@@ -21,7 +21,7 @@ LIBS -= -lQtCore
 
 # code requires c++17
 win32 {
-   QMAKE_CXXFLAGS += -std:c++latest
+   # QMAKE_CXXFLAGS += -std:c++latest
    QMAKE_CXXFLAGS_RELEASE += /Zi
 }
 
