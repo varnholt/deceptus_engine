@@ -12,13 +12,14 @@ const auto width = 32;
 const auto height = 32;
 const auto sprites = 6;
 const auto frameTime = 0.075f;
-const auto animationDuration = 400;
+const sf::Time animationDuration = sf::milliseconds(400);
 
 
 //----------------------------------------------------------------------------------------------------------------------
-BulletHitAnimation::BulletHitAnimation(sf::Time frameTime)
- : SpriteAnimation(frameTime)
+BulletHitAnimation::BulletHitAnimation()
 {
+   mFrameTime = sf::seconds(frameTime);
+
    if (!sInitialized)
    {
       initialize();
@@ -50,7 +51,7 @@ void BulletHitAnimation::initialize()
 //----------------------------------------------------------------------------------------------------------------------
 void BulletHitAnimation::add(float x, float y)
 {
-   auto anim = new BulletHitAnimation(sf::seconds(frameTime));
+   auto anim = new BulletHitAnimation();
 
    anim->mFrames = sFrames;
    anim->mTexture = sTexture;
@@ -78,8 +79,7 @@ void BulletHitAnimation::updateAnimations(float dt)
       else
       {
          it++;
-         sprite->update(dt);
-         sprite->incrementElapsed(static_cast<int>(dt * 1000.0f));
+         sprite->update(sf::seconds(dt));
       }
    }
 }

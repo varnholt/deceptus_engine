@@ -1,4 +1,4 @@
-#include "playeranimation.h"
+#include "animationpool.h"
 
 #include <fstream>
 #include <iostream>
@@ -10,19 +10,19 @@
 using json = nlohmann::json;
 
 
-PlayerAnimation PlayerAnimation::sPlayerAnimation;
+AnimationPool AnimationPool::sPlayerAnimation;
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerAnimation::initialize()
+void AnimationPool::initialize()
 {
    // jump dust left aligned
-   auto dustLeft = std::make_shared<PlayerAnimationSetup>();
+   auto dustLeft = std::make_shared<AnimationSettings>();
    dustLeft->mWidth = 24;
    dustLeft->mHeight = 24;
    dustLeft->mSprites = 6;
-   dustLeft->mFrameTime = 0.075f;
-   dustLeft->mAnimationDuration = 400;
+   dustLeft->mFrameTime = sf::seconds(0.075f);
+   dustLeft->mAnimationDuration = sf::milliseconds(400);
    dustLeft->mOriginX = 9.0f;
    dustLeft->mOriginY = 12.0f;
    dustLeft->mTexture.loadFromFile("data/sprites/player.png");
@@ -40,12 +40,12 @@ void PlayerAnimation::initialize()
    }
 
    // jump dust right aligned
-   auto dustRight = std::make_shared<PlayerAnimationSetup>();
+   auto dustRight = std::make_shared<AnimationSettings>();
    dustRight->mWidth = 24;
    dustRight->mHeight = 24;
    dustRight->mSprites = 6;
-   dustRight->mFrameTime = 0.075f;
-   dustRight->mAnimationDuration = 400;
+   dustRight->mFrameTime = sf::seconds(0.075f);
+   dustRight->mAnimationDuration = sf::milliseconds(400);
    dustRight->mOriginX = 12.0f;
    dustRight->mOriginY = 12.0f;
    dustRight->mTexture.loadFromFile("data/sprites/player.png");
@@ -70,7 +70,7 @@ void PlayerAnimation::initialize()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerAnimation::add(AnimationType type, float x, float y)
+void AnimationPool::add(AnimationType type, float x, float y)
 {
    if (!sInitialized)
    {
@@ -78,13 +78,14 @@ void PlayerAnimation::add(AnimationType type, float x, float y)
    }
 
    auto setup = mSetups[type];
-   auto anim = new SpriteAnimation();
+   auto anim = new Animation();
 
    anim->setOrigin(setup->mOriginX, setup->mOriginY);
    anim->mType = type;
    anim->setPosition(x, y);
    anim->mFrames = setup->mFrames;
    anim->mTexture = setup->mTexture;
+   anim->mFrameTime = setup->mFrameTime;
    anim->play();
 
    mAnimations.push_back(anim);
@@ -92,7 +93,7 @@ void PlayerAnimation::add(AnimationType type, float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerAnimation::updateAnimations(float dt)
+void AnimationPool::updateAnimations(float dt)
 {
    if (!sInitialized)
    {
@@ -101,7 +102,7 @@ void PlayerAnimation::updateAnimations(float dt)
 
    mAnimations.erase(
       std::remove_if(
-         mAnimations.begin(), mAnimations.end(), [this](SpriteAnimation* animation)
+         mAnimations.begin(), mAnimations.end(), [this](Animation* animation)
          {
             if (animation->mType == AnimationType::Invalid)
             {
@@ -116,28 +117,27 @@ void PlayerAnimation::updateAnimations(float dt)
 
    for (auto animation : mAnimations)
    {
-      animation->update(dt);
-      animation->incrementElapsed(static_cast<int>(dt * 1000.0f));
+      animation->update(sf::seconds(dt));
    }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-const std::vector<SpriteAnimation*>& PlayerAnimation::getAnimations()
+const std::vector<Animation*>& AnimationPool::getAnimations()
 {
    return mAnimations;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-PlayerAnimation&PlayerAnimation::getInstance()
+AnimationPool&AnimationPool::getInstance()
 {
    return sPlayerAnimation;
 }
 
 
 
-void PlayerAnimation::deserialize(const std::string& data)
+void AnimationPool::deserialize(const std::string& data)
 {
    json config = json::parse(data);
 

@@ -83,52 +83,6 @@ INCLUDEPATH += src
 
 SOURCES += \
    src/main.cpp \
-    src/Box2D/Collision/Shapes/b2ChainShape.cpp \
-    src/Box2D/Collision/Shapes/b2CircleShape.cpp \
-    src/Box2D/Collision/Shapes/b2EdgeShape.cpp \
-    src/Box2D/Collision/Shapes/b2PolygonShape.cpp \
-    src/Box2D/Common/b2BlockAllocator.cpp \
-    src/Box2D/Common/b2Draw.cpp \
-    src/Box2D/Common/b2Math.cpp \
-    src/Box2D/Common/b2Settings.cpp \
-    src/Box2D/Common/b2StackAllocator.cpp \
-    src/Box2D/Common/b2Timer.cpp \
-    src/Box2D/Collision/b2BroadPhase.cpp \
-    src/Box2D/Collision/b2CollideCircle.cpp \
-    src/Box2D/Collision/b2CollideEdge.cpp \
-    src/Box2D/Collision/b2CollidePolygon.cpp \
-    src/Box2D/Collision/b2Collision.cpp \
-    src/Box2D/Collision/b2Distance.cpp \
-    src/Box2D/Collision/b2DynamicTree.cpp \
-    src/Box2D/Collision/b2TimeOfImpact.cpp \
-    src/Box2D/Dynamics/b2Body.cpp \
-    src/Box2D/Dynamics/b2ContactManager.cpp \
-    src/Box2D/Dynamics/b2Fixture.cpp \
-    src/Box2D/Dynamics/b2Island.cpp \
-    src/Box2D/Dynamics/b2World.cpp \
-    src/Box2D/Dynamics/b2WorldCallbacks.cpp \
-    src/Box2D/Rope/b2Rope.cpp \
-    src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2FrictionJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2GearJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2Joint.cpp \
-    src/Box2D/Dynamics/Joints/b2MotorJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2MouseJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2PrismaticJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2PulleyJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2RevoluteJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2RopeJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2WeldJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2WheelJoint.cpp \
-    src/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2CircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2Contact.cpp \
-    src/Box2D/Dynamics/Contacts/b2ContactSolver.cpp \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2PolygonContact.cpp \
     src/game/debugdraw.cpp \
     src/game/globalclock.cpp \
     src/game/game.cpp \
@@ -181,8 +135,7 @@ SOURCES += \
     src/game/physicsconfiguration.cpp \
     src/game/timer.cpp \
     src/game/bullethitanimation.cpp \
-    src/game/sfmlanimatedsprite.cpp \
-    src/game/sfmlanimation.cpp \
+    src/game/animation.cpp \
     src/game/infolayer.cpp \
     src/game/bitmapfont.cpp \
     src/game/leveldescription.cpp \
@@ -202,7 +155,7 @@ SOURCES += \
     src/game/inventoryitem.cpp \
     src/game/displaymode.cpp \
     src/game/gamestate.cpp \
-    src/game/playeranimation.cpp \
+    src/game/animationpool.cpp \
     src/game/bumper.cpp \
     src/game/jumpplatform.cpp \
     src/game/bouncer.cpp \
@@ -226,56 +179,13 @@ SOURCES += \
     src/image/image.cpp \
     src/image/psd.cpp \
     src/image/tga.cpp \
-    src/game/messagebox.cpp
+    src/game/messagebox.cpp \
+    src/game/animationsettings.cpp
+
+
+# add box2d
 
 HEADERS += \
-    src/Box2D/Collision/Shapes/b2ChainShape.h \
-    src/Box2D/Collision/Shapes/b2CircleShape.h \
-    src/Box2D/Collision/Shapes/b2EdgeShape.h \
-    src/Box2D/Collision/Shapes/b2PolygonShape.h \
-    src/Box2D/Collision/Shapes/b2Shape.h \
-    src/Box2D/Box2D.h \
-    src/Box2D/Common/b2BlockAllocator.h \
-    src/Box2D/Common/b2Draw.h \
-    src/Box2D/Common/b2GrowableStack.h \
-    src/Box2D/Common/b2Math.h \
-    src/Box2D/Common/b2Settings.h \
-    src/Box2D/Common/b2StackAllocator.h \
-    src/Box2D/Common/b2Timer.h \
-    src/Box2D/Collision/b2BroadPhase.h \
-    src/Box2D/Collision/b2Collision.h \
-    src/Box2D/Collision/b2Distance.h \
-    src/Box2D/Collision/b2DynamicTree.h \
-    src/Box2D/Collision/b2TimeOfImpact.h \
-    src/Box2D/Dynamics/b2Body.h \
-    src/Box2D/Dynamics/b2ContactManager.h \
-    src/Box2D/Dynamics/b2Fixture.h \
-    src/Box2D/Dynamics/b2Island.h \
-    src/Box2D/Dynamics/b2TimeStep.h \
-    src/Box2D/Dynamics/b2World.h \
-    src/Box2D/Dynamics/b2WorldCallbacks.h \
-    src/Box2D/Rope/b2Rope.h \
-    src/Box2D/Dynamics/Joints/b2DistanceJoint.h \
-    src/Box2D/Dynamics/Joints/b2FrictionJoint.h \
-    src/Box2D/Dynamics/Joints/b2GearJoint.h \
-    src/Box2D/Dynamics/Joints/b2Joint.h \
-    src/Box2D/Dynamics/Joints/b2MotorJoint.h \
-    src/Box2D/Dynamics/Joints/b2MouseJoint.h \
-    src/Box2D/Dynamics/Joints/b2PrismaticJoint.h \
-    src/Box2D/Dynamics/Joints/b2PulleyJoint.h \
-    src/Box2D/Dynamics/Joints/b2RevoluteJoint.h \
-    src/Box2D/Dynamics/Joints/b2RopeJoint.h \
-    src/Box2D/Dynamics/Joints/b2WeldJoint.h \
-    src/Box2D/Dynamics/Joints/b2WheelJoint.h \
-    src/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.h \
-    src/Box2D/Dynamics/Contacts/b2CircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2Contact.h \
-    src/Box2D/Dynamics/Contacts/b2ContactSolver.h \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.h \
-    src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2PolygonContact.h \
     src/game/constants.h \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
@@ -338,8 +248,7 @@ HEADERS += \
     src/game/physicsconfiguration.h \
     src/game/timer.h \
     src/game/bullethitanimation.h \
-    src/game/sfmlanimatedsprite.h \
-    src/game/sfmlanimation.h \
+    src/game/animation.h \
     src/game/infolayer.h \
     src/game/bitmapfont.h \
     src/game/leveldescription.h \
@@ -359,7 +268,7 @@ HEADERS += \
     src/game/inventoryitem.h \
     src/game/displaymode.h \
     src/game/gamestate.h \
-    src/game/playeranimation.h \
+    src/game/animationpool.h \
     src/game/bumper.h \
     src/game/jumpplatform.h \
     src/game/bouncer.h \
@@ -383,7 +292,106 @@ HEADERS += \
     src/image/image.h \
     src/image/psd.h \
     src/image/tga.h \
-    src/game/messagebox.h
+    src/game/messagebox.h \
+    src/game/animationsettings.h
+
+
+SOURCES += \
+    src/Box2D/Collision/Shapes/b2ChainShape.cpp \
+    src/Box2D/Collision/Shapes/b2CircleShape.cpp \
+    src/Box2D/Collision/Shapes/b2EdgeShape.cpp \
+    src/Box2D/Collision/Shapes/b2PolygonShape.cpp \
+    src/Box2D/Common/b2BlockAllocator.cpp \
+    src/Box2D/Common/b2Draw.cpp \
+    src/Box2D/Common/b2Math.cpp \
+    src/Box2D/Common/b2Settings.cpp \
+    src/Box2D/Common/b2StackAllocator.cpp \
+    src/Box2D/Common/b2Timer.cpp \
+    src/Box2D/Collision/b2BroadPhase.cpp \
+    src/Box2D/Collision/b2CollideCircle.cpp \
+    src/Box2D/Collision/b2CollideEdge.cpp \
+    src/Box2D/Collision/b2CollidePolygon.cpp \
+    src/Box2D/Collision/b2Collision.cpp \
+    src/Box2D/Collision/b2Distance.cpp \
+    src/Box2D/Collision/b2DynamicTree.cpp \
+    src/Box2D/Collision/b2TimeOfImpact.cpp \
+    src/Box2D/Dynamics/b2Body.cpp \
+    src/Box2D/Dynamics/b2ContactManager.cpp \
+    src/Box2D/Dynamics/b2Fixture.cpp \
+    src/Box2D/Dynamics/b2Island.cpp \
+    src/Box2D/Dynamics/b2World.cpp \
+    src/Box2D/Dynamics/b2WorldCallbacks.cpp \
+    src/Box2D/Rope/b2Rope.cpp \
+    src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2FrictionJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2GearJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2Joint.cpp \
+    src/Box2D/Dynamics/Joints/b2MotorJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2MouseJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2PrismaticJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2PulleyJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2RevoluteJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2RopeJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2WeldJoint.cpp \
+    src/Box2D/Dynamics/Joints/b2WheelJoint.cpp \
+    src/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.cpp \
+    src/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.cpp \
+    src/Box2D/Dynamics/Contacts/b2CircleContact.cpp \
+    src/Box2D/Dynamics/Contacts/b2Contact.cpp \
+    src/Box2D/Dynamics/Contacts/b2ContactSolver.cpp \
+    src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
+    src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp \
+    src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.cpp \
+    src/Box2D/Dynamics/Contacts/b2PolygonContact.cpp
+
+HEADERS += \
+    src/Box2D/Collision/Shapes/b2ChainShape.h \
+    src/Box2D/Collision/Shapes/b2CircleShape.h \
+    src/Box2D/Collision/Shapes/b2EdgeShape.h \
+    src/Box2D/Collision/Shapes/b2PolygonShape.h \
+    src/Box2D/Collision/Shapes/b2Shape.h \
+    src/Box2D/Box2D.h \
+    src/Box2D/Common/b2BlockAllocator.h \
+    src/Box2D/Common/b2Draw.h \
+    src/Box2D/Common/b2GrowableStack.h \
+    src/Box2D/Common/b2Math.h \
+    src/Box2D/Common/b2Settings.h \
+    src/Box2D/Common/b2StackAllocator.h \
+    src/Box2D/Common/b2Timer.h \
+    src/Box2D/Collision/b2BroadPhase.h \
+    src/Box2D/Collision/b2Collision.h \
+    src/Box2D/Collision/b2Distance.h \
+    src/Box2D/Collision/b2DynamicTree.h \
+    src/Box2D/Collision/b2TimeOfImpact.h \
+    src/Box2D/Dynamics/b2Body.h \
+    src/Box2D/Dynamics/b2ContactManager.h \
+    src/Box2D/Dynamics/b2Fixture.h \
+    src/Box2D/Dynamics/b2Island.h \
+    src/Box2D/Dynamics/b2TimeStep.h \
+    src/Box2D/Dynamics/b2World.h \
+    src/Box2D/Dynamics/b2WorldCallbacks.h \
+    src/Box2D/Rope/b2Rope.h \
+    src/Box2D/Dynamics/Joints/b2DistanceJoint.h \
+    src/Box2D/Dynamics/Joints/b2FrictionJoint.h \
+    src/Box2D/Dynamics/Joints/b2GearJoint.h \
+    src/Box2D/Dynamics/Joints/b2Joint.h \
+    src/Box2D/Dynamics/Joints/b2MotorJoint.h \
+    src/Box2D/Dynamics/Joints/b2MouseJoint.h \
+    src/Box2D/Dynamics/Joints/b2PrismaticJoint.h \
+    src/Box2D/Dynamics/Joints/b2PulleyJoint.h \
+    src/Box2D/Dynamics/Joints/b2RevoluteJoint.h \
+    src/Box2D/Dynamics/Joints/b2RopeJoint.h \
+    src/Box2D/Dynamics/Joints/b2WeldJoint.h \
+    src/Box2D/Dynamics/Joints/b2WheelJoint.h \
+    src/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.h \
+    src/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.h \
+    src/Box2D/Dynamics/Contacts/b2CircleContact.h \
+    src/Box2D/Dynamics/Contacts/b2Contact.h \
+    src/Box2D/Dynamics/Contacts/b2ContactSolver.h \
+    src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h \
+    src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.h \
+    src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.h \
+    src/Box2D/Dynamics/Contacts/b2PolygonContact.h
 
 OTHER_FILES += \
     data/shaders/parallax_frag.glsl \

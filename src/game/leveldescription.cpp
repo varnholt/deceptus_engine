@@ -5,6 +5,8 @@
 #include <ostream>
 #include <sstream>
 
+using json = nlohmann::json;
+
 
 void to_json(json &j, const ScriptProperty &p)
 {

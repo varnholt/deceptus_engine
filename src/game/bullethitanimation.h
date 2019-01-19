@@ -1,11 +1,11 @@
 #pragma once
 
-#include "game/sfmlanimatedsprite.h"
+#include "game/animation.h"
 
 #include <list>
 
 
-class BulletHitAnimation : public SpriteAnimation
+class BulletHitAnimation : public Animation
 {
    protected:
 
@@ -21,7 +21,7 @@ class BulletHitAnimation : public SpriteAnimation
 
    public:
 
-      BulletHitAnimation(sf::Time mFrameTime = sf::seconds(0.2f));
+      BulletHitAnimation();
 
       static void initialize();
       static void add(float x, float y);

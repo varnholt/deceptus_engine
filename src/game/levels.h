@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "json/json.hpp"
-using json = nlohmann::json;
 
 
 struct LevelItem
@@ -13,7 +12,7 @@ struct LevelItem
 };
 
 
-void from_json(const json& j, LevelItem& item);
+void from_json(const nlohmann::json& j, LevelItem& item);
 
 
 struct Levels
