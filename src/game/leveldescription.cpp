@@ -68,12 +68,12 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string &path
 {
    std::ifstream ifs (path, std::ifstream::in);
 
-   char c = ifs.get();
+   auto c = ifs.get();
    std::string data;
 
    while (ifs.good())
    {
-     data.push_back(c);
+     data.push_back(static_cast<char>(c));
      c = ifs.get();
    }
 

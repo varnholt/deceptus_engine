@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include "animationpool.h"
 #include "audio.h"
 #include "bullethitanimation.h"
 #include "debugdraw.h"
@@ -161,6 +162,8 @@ void Game::initialize()
   new DebugDraw(mWindow);
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
+
+  AnimationPool::getInstance().initialize();
 
   mLevel->initialize();
   mPlayer->setWorld(mLevel->getWorld());

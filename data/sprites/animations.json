@@ -1,0 +1,18 @@
+{
+  "player_jump_dust_left_aligned": {
+    "frame_size": [24, 24],
+    "frame_offset": [0, 192],
+    "sprite_count": 6,
+    "frame_duration": 75,
+    "origin": [9.0, 12.0],
+    "texture": "data/sprites/player.png"
+  },
+  "player_jump_dust_right_aligned": {
+    "frame_size": [24, 24],
+    "frame_offset": [0, 192],
+    "sprite_count": 6,
+    "frame_duration": 75,
+    "origin": [12.0, 12.0],
+    "texture": "data/sprites/player.png"
+  }
+}

@@ -1741,8 +1741,8 @@ void Player::jump()
          {
             AnimationPool::getInstance().add(
                mPointsToLeft
-                ? AnimationType::PlayerJumpDustLeftAligned
-                : AnimationType::PlayerJumpDustRightAligned,
+                ? "player_jump_dust_left_aligned"
+                : "player_jump_dust_right_aligned",
                mPixelPosition.x,
                mPixelPosition.y
             );

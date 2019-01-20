@@ -22,7 +22,11 @@ LIBS -= -lQtCore
 # code requires c++17
 win32 {
    # QMAKE_CXXFLAGS += -std:c++latest
-   QMAKE_CXXFLAGS_RELEASE += /Zi
+
+   # link debug symbols
+   QMAKE_CFLAGS_RELEASE += -Zi
+   QMAKE_CXXFLAGS_RELEASE += -Zi
+   QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF
 }
 
 linux {
@@ -413,6 +417,7 @@ DISTFILES += \
     data/scripts/enemies/constants.lua \
     data/scripts/enemies/helpers.lua \
     data/scripts/enemies/vectorial2.lua \
-    data/config/levels.json
+    data/config/levels.json \
+    data/sprites/animations.json
 
 
