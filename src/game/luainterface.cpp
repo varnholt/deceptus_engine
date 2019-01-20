@@ -42,11 +42,6 @@ void LuaInterface::update(float dt)
 {
    for (auto& object : mObjectList)
    {
-      // object->updateAtmosphere();
-      // object->updateFire();
-      // object->updateJump(dt);
-      // object->updatePlatformMovement(dt);
-      // object->updateDeath();
       object->luaMovedTo();
       object->luaPlayerMovedTo();
       object->luaAct(dt);

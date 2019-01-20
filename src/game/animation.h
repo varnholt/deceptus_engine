@@ -26,7 +26,7 @@ public:
 
    void setFrame(int32_t newFrame, bool resetTime = true);
 
-   AnimationType mType = AnimationType::Invalid;
+   std::string mName;
 
    std::vector<sf::IntRect> mFrames;
    sf::Texture mTexture;
@@ -38,7 +38,7 @@ public:
    int32_t mCurrentFrame = 0;
    int32_t mPreviousFrame = -1;
    bool mPaused = false;
-   bool mLooped = true;
+   bool mLooped = false;
    sf::Vertex mVertices[4];
 };
 

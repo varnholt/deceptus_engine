@@ -16,76 +16,28 @@ AnimationPool AnimationPool::sPlayerAnimation;
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::initialize()
 {
-   // jump dust left aligned
-   AnimationSettings dustLeft;
-   dustLeft.mWidth = 24;
-   dustLeft.mHeight = 24;
-   dustLeft.mSprites = 6;
-   dustLeft.mFrameTime = sf::seconds(0.075f);
-   dustLeft.mAnimationDuration = sf::milliseconds(400);
-   dustLeft.mOriginX = 9.0f;
-   dustLeft.mOriginY = 12.0f;
-   dustLeft.mTexture.loadFromFile("data/sprites/player.png");
-
-   for (int i = 0; i < dustLeft.mSprites; i++)
-   {
-      dustLeft.mFrames.push_back(
-         sf::IntRect(
-            i * (dustLeft.mWidth + 1),
-            8 * 24,
-            dustLeft.mWidth,
-            dustLeft.mHeight
-         )
-      );
-   }
-
-   // jump dust right aligned
-   AnimationSettings dustRight;
-   dustRight.mWidth = 24;
-   dustRight.mHeight = 24;
-   dustRight.mSprites = 6;
-   dustRight.mFrameTime = sf::seconds(0.075f);
-   dustRight.mAnimationDuration = sf::milliseconds(400);
-   dustRight.mOriginX = 12.0f;
-   dustRight.mOriginY = 12.0f;
-   dustRight.mTexture.loadFromFile("data/sprites/player.png");
-
-   for (int i = 0; i < dustRight.mSprites; i++)
-   {
-      dustRight.mFrames.push_back(
-         sf::IntRect(
-            i * (dustRight.mWidth + 1),
-            8 * 24,
-            dustRight.mWidth,
-            dustRight.mHeight
-         )
-      );
-   }
-
-   mSettings[AnimationType::PlayerJumpDustLeftAligned] = dustLeft;
-   mSettings[AnimationType::PlayerJumpDustRightAligned] = dustRight;
-
-   sInitialized = true;
+   deserializeFromFile();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void AnimationPool::add(AnimationType type, float x, float y)
+void AnimationPool::add(const std::string animationName, float x, float y)
 {
-   if (!sInitialized)
+   if (mSettings.empty())
    {
-      initialize();
+      std::cerr << "initialize animation pool first!" << std::endl;
+      return;
    }
 
-   const auto& setup = mSettings[type];
+   const auto& setup = mSettings[animationName];
    auto anim = std::make_shared<Animation>();
 
-   anim->setOrigin(setup.mOriginX, setup.mOriginY);
-   anim->mType = type;
+   anim->setOrigin(setup.mOrigin[0], setup.mOrigin[1]);
+   anim->mName = animationName;
    anim->setPosition(x, y);
    anim->mFrames = setup.mFrames;
    anim->mTexture = setup.mTexture;
-   anim->mFrameTime = setup.mFrameTime;
+   anim->mFrameTime = setup.mFrameDuration;
    anim->play();
 
    mAnimations.push_back(anim);
@@ -95,30 +47,25 @@ void AnimationPool::add(AnimationType type, float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::updateAnimations(float dt)
 {
-   if (!sInitialized)
+   if (mSettings.empty())
    {
      return;
    }
-
-   mAnimations.erase(
-      std::remove_if(
-         mAnimations.begin(), mAnimations.end(), [this](const std::shared_ptr<Animation>& animation)
-         {
-            if (animation->mType == AnimationType::Invalid)
-            {
-               return false;
-            }
-            const auto& settings = mSettings[animation->mType];
-            return (animation->mElapsed > settings.mAnimationDuration);
-         }
-      ),
-      mAnimations.end()
-   );
 
    for (auto animation : mAnimations)
    {
       animation->update(sf::seconds(dt));
    }
+
+   mAnimations.erase(
+      std::remove_if(
+         mAnimations.begin(), mAnimations.end(), [](const std::shared_ptr<Animation>& animation)
+         {
+            return (animation->mPaused);
+         }
+      ),
+      mAnimations.end()
+   );
 }
 
 
@@ -143,11 +90,11 @@ void AnimationPool::deserialize(const std::string& data)
 
    try
    {
-      auto settings = config.get<std::vector<AnimationSettings>>();
-
-      for (const auto& settings : settings)
+      for (auto& item : config.get<json::object_t>())
       {
-
+         auto name = item.first;
+         AnimationSettings settings = item.second.get<AnimationSettings>();
+         mSettings[name] = settings;
       }
    }
    catch (const std::exception& e)

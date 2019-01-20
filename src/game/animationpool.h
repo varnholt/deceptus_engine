@@ -13,7 +13,7 @@ class AnimationPool
    public:
 
       void initialize();
-      void add(AnimationType type, float x, float y);
+      void add(const std::string animationName, float x, float y);
       void updateAnimations(float dt);
       const std::vector<std::shared_ptr<Animation>>& getAnimations();
 
@@ -23,12 +23,11 @@ class AnimationPool
 
       AnimationPool() = default;
 
-      bool sInitialized = false;
-      std::map<AnimationType, AnimationSettings> mSettings;
+      std::map<std::string, AnimationSettings> mSettings;
       std::vector<std::shared_ptr<Animation>> mAnimations;
 
       void deserialize(const std::string& data);
-      void deserializeFromFile(const std::string& filename = "data/config/animations.json");
+      void deserializeFromFile(const std::string& filename = "data/sprites/animations.json");
 
       static AnimationPool sPlayerAnimation;
 

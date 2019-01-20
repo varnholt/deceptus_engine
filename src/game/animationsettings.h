@@ -10,14 +10,11 @@
 
 struct AnimationSettings
 {
-   int32_t mWidth = 0;
-   int32_t mHeight = 0;
-   int32_t mSprites = 0;
-   float mOriginX = 0.0f;
-   float mOriginY = 0.0f;
-   sf::Time mFrameTime;
-   sf::Time mAnimationDuration;
-   sf::Texture mTexture;
+   std::array<int32_t, 2> mFrameSize;
+   std::array<int32_t, 2> mFrameOffset;
+   std::array<float, 2> mOrigin;
+   sf::Time mFrameDuration;
+   sf::Texture mTexture; // to do: have these just once (so duplicated textures are not stored)
    std::vector<sf::IntRect> mFrames;
 };
 
