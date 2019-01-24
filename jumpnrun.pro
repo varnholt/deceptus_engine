@@ -21,7 +21,8 @@ LIBS -= -lQtCore
 
 # code requires c++17
 win32 {
-   # QMAKE_CXXFLAGS += -std:c++latest
+   # visual studio wants 'latest' for C++17 support
+   QMAKE_CXXFLAGS += -std:c++latest
 
    # link debug symbols
    QMAKE_CFLAGS_RELEASE += -Zi
