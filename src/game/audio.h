@@ -1,5 +1,4 @@
-#ifndef AUDIO_H
-#define AUDIO_H
+#pragma once
 
 #include <SFML/Audio.hpp>
 #include <map>
@@ -27,7 +26,11 @@ public:
 
    void initialize();
 
+   void initializeMusicVolume();
+
    void playSample(Sample, float volume = 30.0f);
+
+   sf::Music& getMusic() const;
 
 
 protected:
@@ -36,8 +39,8 @@ protected:
 
    std::map<Sample, sf::SoundBuffer> mSounds;
    sf::Sound mThreads[10];
+   mutable sf::Music mMusic;
 
    static Audio* sInstance;
 };
 
-#endif // AUDIO_H

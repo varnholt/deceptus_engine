@@ -1,5 +1,7 @@
 #include "audio.h"
 
+#include "gameconfiguration.h"
+
 
 Audio* Audio::sInstance = nullptr;
 
@@ -54,6 +56,15 @@ void Audio::initialize()
 
 
 //-----------------------------------------------------------------------------
+void Audio::initializeMusicVolume()
+{
+   const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
+   const auto music = (GameConfiguration::getInstance().mAudioVolumeMusic * 0.01f);
+   Audio::getInstance()->getMusic().setVolume(master * music);
+}
+
+
+//-----------------------------------------------------------------------------
 void Audio::playSample(Audio::Sample sample, float volume)
 {
    sf::Sound* sound = nullptr;
@@ -76,8 +87,19 @@ void Audio::playSample(Audio::Sample sample, float volume)
    if (it != mSounds.end())
    {
       sound->setBuffer(it->second);
-      sound->setVolume(volume);
+
+      const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
+      const auto sfx = (GameConfiguration::getInstance().mAudioVolumeSfx * 0.01f);
+
+      sound->setVolume(master * sfx * volume);
       sound->play();
    }
+}
+
+
+//-----------------------------------------------------------------------------
+sf::Music& Audio::getMusic() const
+{
+   return mMusic;
 }
 
