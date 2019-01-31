@@ -173,6 +173,31 @@ void Player::draw(sf::RenderTarget& target)
       }
    }
 
+   /*
+
+      player_spriteset.png
+
+      72 x 48
+
+      0: idle right
+      1: idle left
+      2: run right
+      3: run left
+      4: placeholder
+      5: placeholder
+      6: dash right
+      7: dash left
+      8: crouch right
+      9: crouch left
+
+      origin is at 36 x 48 per frame
+
+      empty area at top: 16px
+
+      => actual height: 32
+
+   */
+
    updateAnimationOffset();
 
    mSprite.setTextureRect(
