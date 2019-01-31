@@ -1,6 +1,7 @@
 #include "menuscreenaudio.h"
 
 #include "menu.h"
+#include "game/audio.h"
 #include "game/gameconfiguration.h"
 
 #define STEP_SIZE 10
@@ -99,6 +100,7 @@ void MenuScreenAudio::set(int32_t x)
     }
 
     GameConfiguration::getInstance().serializeToFile();
+    Audio::getInstance()->initializeMusicVolume();
 
     updateLayers();
 }
