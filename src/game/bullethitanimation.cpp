@@ -3,7 +3,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 bool BulletHitAnimation::sInitialized = false;
-sf::Texture BulletHitAnimation::sTexture;
+std::shared_ptr<sf::Texture> BulletHitAnimation::sTexture;
 std::vector<sf::IntRect> BulletHitAnimation::sFrames;
 std::list<BulletHitAnimation*> BulletHitAnimation::sAnimations;
 std::list<BulletHitAnimation*> BulletHitAnimation::sElapsedAnimations;
@@ -32,7 +32,8 @@ BulletHitAnimation::BulletHitAnimation()
 //----------------------------------------------------------------------------------------------------------------------
 void BulletHitAnimation::initialize()
 {
-   if (sTexture.loadFromFile("data/weapons/detonation_big.png"))
+   sTexture = std::make_shared<sf::Texture>();
+   if (sTexture->loadFromFile("data/weapons/detonation_big.png"))
    {
       for (int i = 0; i < sprites; i++)
       {

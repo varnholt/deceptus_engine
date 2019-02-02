@@ -23,7 +23,8 @@ class AnimationPool
 
       AnimationPool() = default;
 
-      std::map<std::string, AnimationSettings> mSettings;
+      std::map<std::string, std::shared_ptr<AnimationSettings>> mSettings;
+      std::map<std::string, std::shared_ptr<sf::Texture>> mTextures;
       std::vector<std::shared_ptr<Animation>> mAnimations;
 
       void deserialize(const std::string& data);

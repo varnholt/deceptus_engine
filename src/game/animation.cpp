@@ -118,7 +118,7 @@ void Animation::update(const sf::Time& dt)
 void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    states.transform *= getTransform();
-   states.texture = &mTexture;
+   states.texture = mTexture.get();
    target.draw(mVertices, 4, sf::Quads, states);
 }
 
