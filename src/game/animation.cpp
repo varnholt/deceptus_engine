@@ -18,13 +18,19 @@ void Animation::pause()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Animation::stop()
+void Animation::seekToStart()
 {
-   mPaused = true;
-
    mPreviousFrame = -1;
    mCurrentFrame = 0;
    setFrame(mCurrentFrame);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Animation::stop()
+{
+   mPaused = true;
+   seekToStart();
 }
 
 

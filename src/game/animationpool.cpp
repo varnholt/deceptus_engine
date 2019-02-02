@@ -21,28 +21,44 @@ void AnimationPool::initialize()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void AnimationPool::add(const std::string animationName, float x, float y)
+std::shared_ptr<Animation> AnimationPool::add(
+   const std::string& animationName,
+   float x,
+   float y,
+   bool autoPlay,
+   bool autoDelete
+)
 {
    if (mSettings.empty())
    {
       std::cerr << "initialize animation pool first!" << std::endl;
-      return;
+      return nullptr;
    }
 
    const auto& settings = mSettings[animationName];
-   auto anim = std::make_shared<Animation>();
+   auto animation = std::make_shared<Animation>();
 
-   anim->setOrigin(settings->mOrigin[0], settings->mOrigin[1]);
-   anim->setPosition(x, y);
+   animation->setOrigin(settings->mOrigin[0], settings->mOrigin[1]);
+   animation->setPosition(x, y);
 
-   anim->mName = animationName;
-   anim->mFrames = settings->mFrames;
-   anim->mTexture = settings->mTexture;
-   anim->mFrameTime = settings->mFrameDuration;
+   animation->mName = animationName;
+   animation->mFrames = settings->mFrames;
+   animation->mTexture = settings->mTexture;
+   animation->mFrameTime = settings->mFrameDuration;
+   animation->mAutoDelete = autoDelete;
 
-   anim->play();
+   if (autoPlay)
+   {
+      animation->play();
+   }
+   else
+   {
+      animation->pause();
+   }
 
-   mAnimations.push_back(anim);
+   mAnimations.push_back(animation);
+
+   return animation;
 }
 
 
@@ -51,7 +67,7 @@ void AnimationPool::updateAnimations(float dt)
 {
    if (mSettings.empty())
    {
-     return;
+      return;
    }
 
    for (auto animation : mAnimations)
@@ -63,7 +79,7 @@ void AnimationPool::updateAnimations(float dt)
       std::remove_if(
          mAnimations.begin(), mAnimations.end(), [](const std::shared_ptr<Animation>& animation)
          {
-            return (animation->mPaused);
+            return (animation->mPaused && animation->mAutoDelete);
          }
       ),
       mAnimations.end()

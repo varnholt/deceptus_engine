@@ -13,7 +13,15 @@ class AnimationPool
    public:
 
       void initialize();
-      void add(const std::string animationName, float x, float y);
+
+      std::shared_ptr<Animation> add(
+         const std::string& animationName,
+         float x = 0.0f,
+         float y = 0.0f,
+         bool autoPlay = true,
+         bool autoDelete = true
+      );
+
       void updateAnimations(float dt);
       const std::vector<std::shared_ptr<Animation>>& getAnimations();
 
