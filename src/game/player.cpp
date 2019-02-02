@@ -92,6 +92,17 @@ void Player::initialize()
 
   createPlayerBody();
 
+  mJumpDustLeftAligned  = AnimationPool::getInstance().add("player_jump_dust_left_aligned");
+  mJumpDustRightAligned = AnimationPool::getInstance().add("player_jump_dust_right_aligned");
+  mIdleRightAligned     = AnimationPool::getInstance().add("player_idle_right_aligned");
+  mIdleLeftAligned      = AnimationPool::getInstance().add("player_idle_left_aligned");
+  mRunRightAligned      = AnimationPool::getInstance().add("player_run_right_aligned");
+  mRunLeftAligned       = AnimationPool::getInstance().add("player_run_left_aligned");
+  mDashRightAligned     = AnimationPool::getInstance().add("player_dash_right_aligned");
+  mDashLeftAligned      = AnimationPool::getInstance().add("player_dash_left_aligned");
+  mCrouchRightAligned   = AnimationPool::getInstance().add("player_crouch_right_aligned");
+  mCrouchLeftAligned    = AnimationPool::getInstance().add("player_crouch_left_aligned");
+
   if (mTexture.loadFromFile("data/sprites/player.png"))
   {
      // mSprite.scale(4.0f, 4.0f);
@@ -151,9 +162,6 @@ void Player::setBodyViaPixelPosition(float x, float y)
    }
 }
 
-//
-// https://github.com/SFML/SFML/wiki/Source:-AnimatedSprite
-// animated sprites
 
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& target)
@@ -172,31 +180,6 @@ void Player::draw(sf::RenderTarget& target)
          return;
       }
    }
-
-   /*
-
-      player_spriteset.png
-
-      72 x 48
-
-      0: idle right
-      1: idle left
-      2: run right
-      3: run left
-      4: placeholder
-      5: placeholder
-      6: dash right
-      7: dash left
-      8: crouch right
-      9: crouch left
-
-      origin is at 36 x 48 per frame
-
-      empty area at top: 16px
-
-      => actual height: 32
-
-   */
 
    updateAnimationOffset();
 
@@ -683,32 +666,54 @@ float Player::getAcceleration() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAnimationOffset()
 {
-   auto y = 0;
+   std::shared_ptr<Animation> nextCycle = nullptr;
+
+   auto y = 0u;
    [[maybe_unused]] auto velocity = mBody->GetLinearVelocity().x;
    auto inAir = isInAir();
    auto inWater = isInWater();
 
+   // run
    if (isMovingRight() && !inAir && !inWater)
    {
       y = 0;
+      nextCycle = mRunRightAligned;
    }
    else if (isMovingLeft() && !inAir && !inWater)
    {
       y = PLAYER_TILES_HEIGHT;
+      nextCycle = mRunLeftAligned;
    }
+
+   // jump
    else if (!mPointsToLeft)
    {
       y = 2 * PLAYER_TILES_HEIGHT;
+      nextCycle = mIdleLeftAligned;
    }
    else
    {
       y = 3 * PLAYER_TILES_HEIGHT;
+      nextCycle = mIdleRightAligned;
    }
 
    // reset x if animation cycle changed
    if (y != mSpritePrev.y)
    {
       mSpriteAnim.x = 0;
+   }
+
+   if (nextCycle != mPreviousCycle)
+   {
+      if (nextCycle != nullptr)
+      {
+         nextCycle->seekToStart();
+      }
+
+      if (mPreviousCycle != nullptr)
+      {
+         mPreviousCycle->seekToStart();
+      }
    }
 
    // update animation cycle
@@ -726,6 +731,8 @@ void Player::updateAnimationOffset()
 
    mSpriteAnim.y = y;
    mSpritePrev = mSpriteAnim;
+
+   mPreviousCycle = nextCycle;
 }
 
 

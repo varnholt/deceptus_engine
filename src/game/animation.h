@@ -31,14 +31,18 @@ public:
    std::vector<sf::IntRect> mFrames;
    std::shared_ptr<sf::Texture> mTexture;
 
+   sf::Vertex mVertices[4];
+
    sf::Time mFrameTime = sf::seconds(0.2f);
    sf::Time mCurrentTime;
    sf::Time mElapsed;
 
    int32_t mCurrentFrame = 0;
    int32_t mPreviousFrame = -1;
+
    bool mPaused = false;
    bool mLooped = false;
-   sf::Vertex mVertices[4];
+   bool mAutoDelete = false;
+   void seekToStart();
 };
 

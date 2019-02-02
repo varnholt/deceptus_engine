@@ -1,5 +1,4 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include "constants.h"
 #include "extramanager.h"
@@ -14,6 +13,7 @@
 #include <memory>
 #include <set>
 
+class Animation;
 class GameContactListener;
 class Weapon;
 
@@ -51,64 +51,6 @@ class Player : public GameNode
      Left,
      Right
    };
-
-
-public:
-
-   std::shared_ptr<ExtraTable> mExtraTable;
-
-
-protected:
-
-   b2World* mWorld = nullptr;
-   b2Body* mBody = nullptr;
-   b2Fixture* mHeadFixture = nullptr;
-   b2Joint* mClimbJoint = nullptr;
-
-   Weapon* mWeapon = nullptr;
-   std::shared_ptr<ExtraManager> mExtraManager;
-
-   sf::Vector2f mPixelPosition;
-
-   GameControllerInfo mJoystickInfo;
-   int mKeysPressed = 0;
-   bool mControllerRunPressed = false;
-
-   sf::Texture mTexture;
-   sf::Sprite mSprite;
-   sf::Vector2u mSpritePrev;
-   sf::Vector2u mSpriteAnim;
-   sf::Clock mClock;
-   sf::Time mGroundContactLostTime;
-   sf::Time mLastJumpPressTime;
-
-   int mAnimSpeed = 50;
-
-   sf::Clock mJumpClock;
-   int mJumpSteps = 0;
-
-   bool mPointsToLeft = false;
-   bool mVisible = true;
-
-   float mPlatformVelocity = 0.0f;
-   bool mInWater = false;
-   float mTime = 0.0f;
-   float mNextFootStepTime = 0.0f;
-   int mZ = 0;
-   int mId = 0;
-   bool mHadGroundContact = true;
-   bool mGroundContactJustLost = false;
-   float mBeltVelocity = 0.0f;
-   bool mIsOnBelt = false;
-
-   int mDashSteps = 20;
-   Dash mDashDir = Dash::None;
-
-   sf::Clock mPortalClock;
-   sf::Clock mDamageClock;
-
-   static int sNextId;
-   static std::vector<Player*> sPlayerList;
 
 
 public:
@@ -249,6 +191,75 @@ private:
    float getSlowDown() const;
    float getAcceleration() const;
    void updateAnimationOffset();
+
+
+public:
+
+   std::shared_ptr<ExtraTable> mExtraTable;
+
+
+private:
+
+   b2World* mWorld = nullptr;
+   b2Body* mBody = nullptr;
+   b2Fixture* mHeadFixture = nullptr;
+   b2Joint* mClimbJoint = nullptr;
+
+   Weapon* mWeapon = nullptr;
+   std::shared_ptr<ExtraManager> mExtraManager;
+
+   sf::Vector2f mPixelPosition;
+
+   GameControllerInfo mJoystickInfo;
+   int mKeysPressed = 0;
+   bool mControllerRunPressed = false;
+
+   sf::Texture mTexture;
+   sf::Sprite mSprite;
+   sf::Vector2u mSpritePrev;
+   sf::Vector2u mSpriteAnim;
+   sf::Clock mClock;
+   sf::Time mGroundContactLostTime;
+   sf::Time mLastJumpPressTime;
+
+   int mAnimSpeed = 50;
+
+   sf::Clock mJumpClock;
+   int mJumpSteps = 0;
+
+   bool mPointsToLeft = false;
+   bool mVisible = true;
+
+   float mPlatformVelocity = 0.0f;
+   bool mInWater = false;
+   float mTime = 0.0f;
+   float mNextFootStepTime = 0.0f;
+   int mZ = 0;
+   int mId = 0;
+   bool mHadGroundContact = true;
+   bool mGroundContactJustLost = false;
+   float mBeltVelocity = 0.0f;
+   bool mIsOnBelt = false;
+
+   int mDashSteps = 20;
+   Dash mDashDir = Dash::None;
+
+   sf::Clock mPortalClock;
+   sf::Clock mDamageClock;
+
+   std::shared_ptr<Animation> mJumpDustLeftAligned;
+   std::shared_ptr<Animation> mJumpDustRightAligned;
+   std::shared_ptr<Animation> mIdleRightAligned;
+   std::shared_ptr<Animation> mIdleLeftAligned;
+   std::shared_ptr<Animation> mRunRightAligned;
+   std::shared_ptr<Animation> mRunLeftAligned;
+   std::shared_ptr<Animation> mDashRightAligned;
+   std::shared_ptr<Animation> mDashLeftAligned;
+   std::shared_ptr<Animation> mCrouchRightAligned;
+   std::shared_ptr<Animation> mCrouchLeftAligned;
+   std::shared_ptr<Animation> mPreviousCycle;
+
+   static int sNextId;
+   static std::vector<Player*> sPlayerList;
 };
 
-#endif // PLAYER_H

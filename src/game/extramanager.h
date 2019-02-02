@@ -15,21 +15,17 @@ struct TmxTileSet;
 
 class ExtraManager
 {
-
-public:
-
-   std::vector<std::shared_ptr<InventoryItem>> mInventory;
-   std::vector<std::shared_ptr<ExtraItem>> mExtras;
-
-   std::shared_ptr<TileMap> mTilemap;
-
-
 public:
 
    void load(TmxLayer *layer, TmxTileSet *tileSet);
    void collide(const sf::Rect<int> &playerRect);
 
    ExtraManager();
+
+   std::vector<std::shared_ptr<InventoryItem>> mInventory;
+   std::vector<std::shared_ptr<ExtraItem>> mExtras;
+
+   std::shared_ptr<TileMap> mTilemap;
 };
 
 #endif // EXTRAMANAGER_H
