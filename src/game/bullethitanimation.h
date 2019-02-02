@@ -11,7 +11,7 @@ class BulletHitAnimation : public Animation
 
       static bool sInitialized;
 
-      static sf::Texture sTexture;
+      static std::shared_ptr<sf::Texture> sTexture;
       static std::vector<sf::IntRect> sFrames;
 
 

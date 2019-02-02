@@ -14,7 +14,8 @@ struct AnimationSettings
    std::array<int32_t, 2> mFrameOffset;
    std::array<float, 2> mOrigin;
    sf::Time mFrameDuration;
-   sf::Texture mTexture; // to do: have these just once (so duplicated textures are not stored)
+   std::string mTexturePath;
+   std::shared_ptr<sf::Texture> mTexture;
    std::vector<sf::IntRect> mFrames;
 };
 

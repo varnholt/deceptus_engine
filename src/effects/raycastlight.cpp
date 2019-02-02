@@ -4,6 +4,8 @@
 #include "game/level.h"
 #include "game/player.h"
 
+#include <iostream>
+
 #include <SFML/OpenGL.hpp>
 
 #include <math.h>
@@ -174,9 +176,18 @@ void RaycastLight::drawQuads(sf::RenderTarget &target, std::shared_ptr<RaycastLi
    auto lightPos = light->mPosMeters;
    const sf::Color black = {0, 0, 0, 255};
 
+   // do not draw lights that are too far away
+   auto playerBody = Player::getPlayer(0)->getBody();
+   auto distanceToPlayer = (playerBody->GetWorldCenter() - light->mPosMeters).LengthSquared();
+
+   if (distanceToPlayer > 40.0f)
+   {
+      return;
+   }
+
    for (b2Body* b = Level::getCurrentLevel()->getWorld()->GetBodyList(); b; b = b->GetNext())
    {
-      if (b == Player::getPlayer(0)->getBody())
+      if (b == playerBody)
          continue;
 
       for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())

@@ -29,15 +29,17 @@ void AnimationPool::add(const std::string animationName, float x, float y)
       return;
    }
 
-   const auto& setup = mSettings[animationName];
+   const auto& settings = mSettings[animationName];
    auto anim = std::make_shared<Animation>();
 
-   anim->setOrigin(setup.mOrigin[0], setup.mOrigin[1]);
-   anim->mName = animationName;
+   anim->setOrigin(settings->mOrigin[0], settings->mOrigin[1]);
    anim->setPosition(x, y);
-   anim->mFrames = setup.mFrames;
-   anim->mTexture = setup.mTexture;
-   anim->mFrameTime = setup.mFrameDuration;
+
+   anim->mName = animationName;
+   anim->mFrames = settings->mFrames;
+   anim->mTexture = settings->mTexture;
+   anim->mFrameTime = settings->mFrameDuration;
+
    anim->play();
 
    mAnimations.push_back(anim);
@@ -93,8 +95,28 @@ void AnimationPool::deserialize(const std::string& data)
       for (auto& item : config.get<json::object_t>())
       {
          auto name = item.first;
-         AnimationSettings settings = item.second.get<AnimationSettings>();
+         auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
          mSettings[name] = settings;
+
+         // use a single pool for textures only
+         auto textureIt = mTextures.find(settings->mTexturePath);
+         if (textureIt != mTextures.end())
+         {
+            settings->mTexture = textureIt->second;
+         }
+         else
+         {
+            auto texture = std::make_shared<sf::Texture>();
+            if (texture->loadFromFile(settings->mTexturePath))
+            {
+               mTextures[settings->mTexturePath] = texture;
+               settings->mTexture = texture;
+            }
+            else
+            {
+               std::cerr << "AnimationPool::deserialize: texture '" << settings->mTexturePath << "' not found." << std::endl;
+            }
+         }
       }
    }
    catch (const std::exception& e)

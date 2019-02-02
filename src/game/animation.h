@@ -29,7 +29,7 @@ public:
    std::string mName;
 
    std::vector<sf::IntRect> mFrames;
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
 
    sf::Time mFrameTime = sf::seconds(0.2f);
    sf::Time mCurrentTime;
