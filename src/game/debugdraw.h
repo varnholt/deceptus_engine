@@ -15,7 +15,7 @@ class DebugDraw : public b2Draw
 {
    public:
 
-      DebugDraw(const std::shared_ptr<sf::RenderTarget>& window);
+      DebugDraw() = default;
 
       static sf::Color GLColorToSFML(const b2Color &color, sf::Uint8 alpha = 255);
       static sf::Vector2f B2VecToSFVec(const b2Vec2 &vector);
@@ -29,10 +29,12 @@ class DebugDraw : public b2Draw
 
       static DebugDraw* getInstance();
 
-private:
+      std::shared_ptr<sf::RenderTarget> getWindow() const;
+      void setWindow(const std::shared_ptr<sf::RenderTarget>& window);
+
+
+   private:
 
       std::shared_ptr<sf::RenderTarget> mWindow;
-
-      static DebugDraw* sInstance;
 };
 #endif //SFMLDEBUGDRAW_H

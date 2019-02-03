@@ -19,11 +19,12 @@ class AnimationPool
          float x = 0.0f,
          float y = 0.0f,
          bool autoPlay = true,
-         bool autoDelete = true
+         bool managedByPool = true
       );
 
+      void drawAnimations(sf::RenderTarget& target, const std::vector<std::string>& animations);
       void updateAnimations(float dt);
-      const std::vector<std::shared_ptr<Animation>>& getAnimations();
+      const std::map<std::string, std::shared_ptr<Animation> >& getAnimations();
 
       static AnimationPool& getInstance();
 
@@ -33,7 +34,7 @@ class AnimationPool
 
       std::map<std::string, std::shared_ptr<AnimationSettings>> mSettings;
       std::map<std::string, std::shared_ptr<sf::Texture>> mTextures;
-      std::vector<std::shared_ptr<Animation>> mAnimations;
+      std::map<std::string, std::shared_ptr<Animation>> mAnimations;
 
       void deserialize(const std::string& data);
       void deserializeFromFile(const std::string& filename = "data/sprites/animations.json");

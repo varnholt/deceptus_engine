@@ -40,7 +40,7 @@
       "texture": "data/sprites/player_spriteset.png"
    },
    "player_run_left_aligned": {
-      "frame_size": [72, 96],
+      "frame_size": [72, 48],
       "frame_offset": [0, 144],
       "sprite_count": 11,
       "frame_duration": 75,
@@ -50,15 +50,15 @@
    "player_dash_right_aligned": {
       "frame_size": [72, 48],
       "frame_offset": [0, 288],
-      "sprite_count": 11,
+      "sprite_count": 7,
       "frame_duration": 75,
       "origin": [36.0, 48.0],
       "texture": "data/sprites/player_spriteset.png"
    },
    "player_dash_left_aligned": {
-      "frame_size": [72, 96],
+      "frame_size": [72, 48],
       "frame_offset": [0, 336],
-      "sprite_count": 11,
+      "sprite_count": 7,
       "frame_duration": 75,
       "origin": [36.0, 48.0],
       "texture": "data/sprites/player_spriteset.png"
@@ -66,15 +66,15 @@
    "player_crouch_right_aligned": {
       "frame_size": [72, 48],
       "frame_offset": [0, 384],
-      "sprite_count": 11,
+      "sprite_count": 5,
       "frame_duration": 75,
       "origin": [36.0, 48.0],
       "texture": "data/sprites/player_spriteset.png"
    },
    "player_crouch_left_aligned": {
-      "frame_size": [72, 96],
+      "frame_size": [72, 48],
       "frame_offset": [0, 432],
-      "sprite_count": 11,
+      "sprite_count": 5,
       "frame_duration": 75,
       "origin": [36.0, 48.0],
       "texture": "data/sprites/player_spriteset.png"

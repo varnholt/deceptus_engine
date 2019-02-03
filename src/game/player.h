@@ -70,12 +70,11 @@ public:
    Player(GameNode* parent = nullptr);
    virtual ~Player();
 
-
    void initialize();
    void initializeController();
    void draw(sf::RenderTarget& target);
 
-   void update(float dt);
+   void update(const sf::Time& dt);
    void keyboardKeyPressed(sf::Keyboard::Key key);
    void keyboardKeyReleased(sf::Keyboard::Key key);
 
@@ -163,6 +162,7 @@ private:
 
    void updateDash(Dash dir = Dash::None);
 
+   void updateAnimation(const sf::Time& dt);
    void updateExtraManager();
    void updateAtmosphere();
    void updateVelocity();
@@ -177,7 +177,7 @@ private:
 
    void createHead();
    void createFeet();
-   void setHeadEnabled(bool enabled);
+   void setCrouching(bool enabled);
    void createBody();
 
    bool isClimbableEdge(b2ChainShape* shape, int currIndex);
@@ -190,7 +190,6 @@ private:
    float getDesiredVelocity() const;
    float getSlowDown() const;
    float getAcceleration() const;
-   void updateAnimationOffset();
 
 
 public:
@@ -200,55 +199,55 @@ public:
 
 private:
 
+   Weapon* mWeapon = nullptr;
+   std::shared_ptr<ExtraManager> mExtraManager;
+
    b2World* mWorld = nullptr;
    b2Body* mBody = nullptr;
    b2Fixture* mHeadFixture = nullptr;
    b2Joint* mClimbJoint = nullptr;
 
-   Weapon* mWeapon = nullptr;
-   std::shared_ptr<ExtraManager> mExtraManager;
-
-   sf::Vector2f mPixelPosition;
-
    GameControllerInfo mJoystickInfo;
    int mKeysPressed = 0;
    bool mControllerRunPressed = false;
 
+   sf::Vector2f mPixelPosition;
    sf::Texture mTexture;
    sf::Sprite mSprite;
    sf::Vector2u mSpritePrev;
    sf::Vector2u mSpriteAnim;
-   sf::Clock mClock;
    sf::Time mGroundContactLostTime;
    sf::Time mLastJumpPressTime;
 
-   int mAnimSpeed = 50;
-
+   sf::Time mTime;
+   sf::Clock mClock;
    sf::Clock mJumpClock;
+   sf::Clock mPortalClock;
+   sf::Clock mDamageClock;
+
+   int mAnimSpeed = 50;
    int mJumpSteps = 0;
 
    bool mPointsToLeft = false;
    bool mVisible = true;
+   bool mCrouching = false;
+   bool mInWater = false;
 
    float mPlatformVelocity = 0.0f;
-   bool mInWater = false;
-   float mTime = 0.0f;
    float mNextFootStepTime = 0.0f;
+
    int mZ = 0;
    int mId = 0;
+
    bool mHadGroundContact = true;
    bool mGroundContactJustLost = false;
+
    float mBeltVelocity = 0.0f;
    bool mIsOnBelt = false;
 
    int mDashSteps = 20;
    Dash mDashDir = Dash::None;
 
-   sf::Clock mPortalClock;
-   sf::Clock mDamageClock;
-
-   std::shared_ptr<Animation> mJumpDustLeftAligned;
-   std::shared_ptr<Animation> mJumpDustRightAligned;
    std::shared_ptr<Animation> mIdleRightAligned;
    std::shared_ptr<Animation> mIdleLeftAligned;
    std::shared_ptr<Animation> mRunRightAligned;
@@ -257,7 +256,8 @@ private:
    std::shared_ptr<Animation> mDashLeftAligned;
    std::shared_ptr<Animation> mCrouchRightAligned;
    std::shared_ptr<Animation> mCrouchLeftAligned;
-   std::shared_ptr<Animation> mPreviousCycle;
+   std::vector<std::shared_ptr<Animation>> mAnimations;
+   std::shared_ptr<Animation> mCurrentCycle;
 
    static int sNextId;
    static std::vector<Player*> sPlayerList;
