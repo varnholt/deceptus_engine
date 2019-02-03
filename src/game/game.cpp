@@ -103,6 +103,8 @@ void Game::createWindow()
 
    // must be reloaded when the physics texture is reset
    initializeAtmosphereShader();
+
+   mDebugDraw->setWindow(mWindow);
 }
 
 
@@ -159,7 +161,9 @@ void Game::initialize()
 
   mPlayer = std::make_shared<Player>();
 
-  new DebugDraw(mWindow);
+  mDebugDraw = std::make_unique<DebugDraw>();
+  mDebugDraw->setWindow(mWindow);
+
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
 
@@ -455,22 +459,23 @@ void Game::updateGameState()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::update()
 {
-   float dt = mDeltaClock.getElapsedTime().asSeconds();
+   const auto dt = mDeltaClock.getElapsedTime();
    mDeltaClock.restart();
 
    if (GameState::getInstance().getMode() == ExecutionMode::Paused)
    {
       updateGameController();
       updateGameControllerForInventory();
-      mInventoryLayer->update(dt);
+      mInventoryLayer->update(dt.asSeconds());
    }
    else if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {
       Timer::update();
-      updateBulletHitAnimations(dt);
+      AnimationPool::getInstance().updateAnimations(dt.asSeconds());
+      updateBulletHitAnimations(dt.asSeconds());
       updateGameController();
       updateGameControllerForGame();
-      mLevel->update(dt);
+      mLevel->update(dt.asSeconds());
       mPlayer->update(dt);
       updateGameState();
    }
@@ -743,7 +748,7 @@ void Game::debugBodies()
       auto distanceJoint = dynamic_cast<b2DistanceJoint*>(joint);
       if (distanceJoint != nullptr)
       {
-         DebugDraw::getInstance()->DrawSegment(
+         mDebugDraw->DrawSegment(
             distanceJoint->GetAnchorA(),
             distanceJoint->GetAnchorB(),
             b2Color(1, 1, 0, 1)
@@ -785,7 +790,7 @@ void Game::debugBodies()
                      vertices[i].y += body->GetPosition().y;
                   }
 
-                  DebugDraw::getInstance()->DrawPolygon(
+                  mDebugDraw->DrawPolygon(
                      vertices,
                      vertexCount,
                      b2Color(1,0,0,1)
@@ -804,7 +809,7 @@ void Game::debugBodies()
                      offset = circleShape->m_p;
                   }
 
-                  DebugDraw::getInstance()->DrawCircle(
+                  mDebugDraw->DrawCircle(
                      body->GetPosition() + offset,
                      shape->m_radius,
                      b2Color(0.4f, 0.4f, 0.4f, 1.0f)
@@ -826,7 +831,7 @@ void Game::debugBodies()
                      vertices[i].y += body->GetPosition().y;
                   }
 
-                  DebugDraw::getInstance()->DrawPolygon(
+                  mDebugDraw->DrawPolygon(
                      vertices,
                      vertexCount,
                      b2Color(1,0,0,1)
@@ -854,7 +859,7 @@ void Game::debugBodies()
             && vtxCountIt != mLevel->getPointSizeMap()->end()
          )
          {
-            DebugDraw::getInstance()->DrawPolygon(
+            mDebugDraw->DrawPolygon(
                vtxIt->second,
                vtxCountIt->second,
                b2Color(1,0,0)

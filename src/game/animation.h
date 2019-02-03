@@ -14,7 +14,7 @@ public:
 
    Animation() = default;
 
-   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+   virtual void draw(sf::RenderTarget& target, sf::RenderStates states = {}) const;
    void update(const sf::Time& dt);
 
    void play();
@@ -42,7 +42,6 @@ public:
 
    bool mPaused = false;
    bool mLooped = false;
-   bool mAutoDelete = false;
    void seekToStart();
 };
 

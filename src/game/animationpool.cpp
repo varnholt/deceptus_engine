@@ -22,11 +22,11 @@ void AnimationPool::initialize()
 
 //----------------------------------------------------------------------------------------------------------------------
 std::shared_ptr<Animation> AnimationPool::add(
-   const std::string& animationName,
+   const std::string& name,
    float x,
    float y,
    bool autoPlay,
-   bool autoDelete
+   bool managedByPool
 )
 {
    if (mSettings.empty())
@@ -35,17 +35,16 @@ std::shared_ptr<Animation> AnimationPool::add(
       return nullptr;
    }
 
-   const auto& settings = mSettings[animationName];
+   const auto& settings = mSettings[name];
    auto animation = std::make_shared<Animation>();
 
    animation->setOrigin(settings->mOrigin[0], settings->mOrigin[1]);
    animation->setPosition(x, y);
 
-   animation->mName = animationName;
+   animation->mName = name;
    animation->mFrames = settings->mFrames;
    animation->mTexture = settings->mTexture;
    animation->mFrameTime = settings->mFrameDuration;
-   animation->mAutoDelete = autoDelete;
 
    if (autoPlay)
    {
@@ -56,9 +55,30 @@ std::shared_ptr<Animation> AnimationPool::add(
       animation->pause();
    }
 
-   mAnimations.push_back(animation);
+   if (managedByPool)
+   {
+      mAnimations[name] = animation;
+   }
 
    return animation;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void AnimationPool::drawAnimations(
+   sf::RenderTarget& target,
+   const std::vector<std::string>& animations
+)
+{
+   for (const auto& key : animations)
+   {
+      const auto& animation = mAnimations.find(key);
+
+      if (animation != mAnimations.end())
+      {
+         animation->second->draw(target);
+      }
+   }
 }
 
 
@@ -72,23 +92,21 @@ void AnimationPool::updateAnimations(float dt)
 
    for (auto animation : mAnimations)
    {
-      animation->update(sf::seconds(dt));
+      animation.second->update(sf::seconds(dt));
    }
 
-   mAnimations.erase(
-      std::remove_if(
-         mAnimations.begin(), mAnimations.end(), [](const std::shared_ptr<Animation>& animation)
-         {
-            return (animation->mPaused && animation->mAutoDelete);
-         }
-      ),
-      mAnimations.end()
-   );
+   for (auto it = mAnimations.begin(); it != mAnimations.end();)
+   {
+       if (it->second->mPaused == true && !it->second->mLooped)
+          it = mAnimations.erase(it);
+       else
+          ++it;
+   }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-const std::vector<std::shared_ptr<Animation>>& AnimationPool::getAnimations()
+const std::map<std::string, std::shared_ptr<Animation>>& AnimationPool::getAnimations()
 {
    return mAnimations;
 }

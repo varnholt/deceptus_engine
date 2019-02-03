@@ -92,16 +92,28 @@ void Player::initialize()
 
   createPlayerBody();
 
-  mJumpDustLeftAligned  = AnimationPool::getInstance().add("player_jump_dust_left_aligned");
-  mJumpDustRightAligned = AnimationPool::getInstance().add("player_jump_dust_right_aligned");
-  mIdleRightAligned     = AnimationPool::getInstance().add("player_idle_right_aligned");
-  mIdleLeftAligned      = AnimationPool::getInstance().add("player_idle_left_aligned");
-  mRunRightAligned      = AnimationPool::getInstance().add("player_run_right_aligned");
-  mRunLeftAligned       = AnimationPool::getInstance().add("player_run_left_aligned");
-  mDashRightAligned     = AnimationPool::getInstance().add("player_dash_right_aligned");
-  mDashLeftAligned      = AnimationPool::getInstance().add("player_dash_left_aligned");
-  mCrouchRightAligned   = AnimationPool::getInstance().add("player_crouch_right_aligned");
-  mCrouchLeftAligned    = AnimationPool::getInstance().add("player_crouch_left_aligned");
+  mIdleRightAligned     = AnimationPool::getInstance().add("player_idle_right_aligned",      0.0f, 0.0f, true, false);
+  mIdleLeftAligned      = AnimationPool::getInstance().add("player_idle_left_aligned",       0.0f, 0.0f, true, false);
+  mRunRightAligned      = AnimationPool::getInstance().add("player_run_right_aligned",       0.0f, 0.0f, true, false);
+  mRunLeftAligned       = AnimationPool::getInstance().add("player_run_left_aligned",        0.0f, 0.0f, true, false);
+  mDashRightAligned     = AnimationPool::getInstance().add("player_dash_right_aligned",      0.0f, 0.0f, true, false);
+  mDashLeftAligned      = AnimationPool::getInstance().add("player_dash_left_aligned",       0.0f, 0.0f, true, false);
+  mCrouchRightAligned   = AnimationPool::getInstance().add("player_crouch_right_aligned",    0.0f, 0.0f, true, false);
+  mCrouchLeftAligned    = AnimationPool::getInstance().add("player_crouch_left_aligned",     0.0f, 0.0f, true, false);
+
+  mAnimations.push_back(mIdleRightAligned);
+  mAnimations.push_back(mIdleLeftAligned);
+  mAnimations.push_back(mRunRightAligned);
+  mAnimations.push_back(mRunLeftAligned);
+  mAnimations.push_back(mDashRightAligned);
+  mAnimations.push_back(mDashLeftAligned);
+  mAnimations.push_back(mCrouchRightAligned);
+  mAnimations.push_back(mCrouchLeftAligned);
+
+  for (auto& i : mAnimations)
+  {
+     i->mLooped = true;
+  }
 
   if (mTexture.loadFromFile("data/sprites/player.png"))
   {
@@ -181,32 +193,16 @@ void Player::draw(sf::RenderTarget& target)
       }
    }
 
-   updateAnimationOffset();
-
-   mSprite.setTextureRect(
-      sf::IntRect(
-         mSpriteAnim.x * PLAYER_TILES_WIDTH,
-         mSpriteAnim.y,
-         PLAYER_TILES_WIDTH,
-         PLAYER_TILES_HEIGHT
-      )
-   );
-
-   mSprite.setPosition(
-        mPixelPosition
-      - sf::Vector2f(
-         PLAYER_TILES_WIDTH / 2,
-         PLAYER_ACTUAL_HEIGHT + 8 // WHERE DOES THIS OFFSET COME FROM??
-      )
-   );
-
-   target.draw(mSprite);
-
-   const auto& animations = AnimationPool::getInstance().getAnimations();
-   for (auto it = animations.begin(); it != animations.end(); ++it)
+   if (mCurrentCycle)
    {
-      target.draw(*(*it));
+      mCurrentCycle->setPosition(mPixelPosition + sf::Vector2f(0, 8)); // that y offset is to compensate the wonky box2d origin
+      mCurrentCycle->draw(target);
    }
+
+   AnimationPool::getInstance().drawAnimations(
+      target,
+      {"player_jump_dust_left_aligned", "player_jump_dust_right_aligned"}
+   );
 }
 
 
@@ -240,10 +236,11 @@ sf::Rect<int> Player::getPlayerRect() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setHeadEnabled(bool enabled)
+void Player::setCrouching(bool enabled)
 {
+   mCrouching = enabled;
    b2Filter filter;
-   filter.maskBits = enabled ? 0xFFFF : 2;
+   filter.maskBits = enabled ? 2 : 0xFFFF;
    mHeadFixture->SetFilterData(filter);
 }
 
@@ -664,11 +661,10 @@ float Player::getAcceleration() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateAnimationOffset()
+void Player::updateAnimation(const sf::Time& dt)
 {
    std::shared_ptr<Animation> nextCycle = nullptr;
 
-   auto y = 0u;
    [[maybe_unused]] auto velocity = mBody->GetLinearVelocity().x;
    auto inAir = isInAir();
    auto inWater = isInWater();
@@ -676,63 +672,31 @@ void Player::updateAnimationOffset()
    // run
    if (isMovingRight() && !inAir && !inWater)
    {
-      y = 0;
       nextCycle = mRunRightAligned;
    }
    else if (isMovingLeft() && !inAir && !inWater)
    {
-      y = PLAYER_TILES_HEIGHT;
       nextCycle = mRunLeftAligned;
    }
 
-   // jump
-   else if (!mPointsToLeft)
+   // idle
+   else if (mPointsToLeft)
    {
-      y = 2 * PLAYER_TILES_HEIGHT;
       nextCycle = mIdleLeftAligned;
    }
    else
    {
-      y = 3 * PLAYER_TILES_HEIGHT;
       nextCycle = mIdleRightAligned;
    }
 
    // reset x if animation cycle changed
-   if (y != mSpritePrev.y)
+   if (nextCycle != mCurrentCycle)
    {
-      mSpriteAnim.x = 0;
+      nextCycle->seekToStart();
    }
 
-   if (nextCycle != mPreviousCycle)
-   {
-      if (nextCycle != nullptr)
-      {
-         nextCycle->seekToStart();
-      }
-
-      if (mPreviousCycle != nullptr)
-      {
-         mPreviousCycle->seekToStart();
-      }
-   }
-
-   // update animation cycle
-   if (mClock.getElapsedTime().asMilliseconds() >= mAnimSpeed)
-   {
-      mSpriteAnim.x++;
-
-      if ((mSpriteAnim.x * PLAYER_TILES_WIDTH) >= PLAYER_TILES_WIDTH * PLAYER_ANIMATION_CYCLES)
-      {
-         mSpriteAnim.x = 0;
-      }
-
-      mClock.restart();
-   }
-
-   mSpriteAnim.y = y;
-   mSpritePrev = mSpriteAnim;
-
-   mPreviousCycle = nextCycle;
+   mCurrentCycle = nextCycle;
+   mCurrentCycle->update(dt);
 }
 
 
@@ -1173,17 +1137,17 @@ void Player::updateFootsteps()
 {
    if (GameContactListener::getInstance()->getNumFootContacts() > 0 && !isInWater())
    {
-      float vel = fabs(mBody->GetLinearVelocity().x);
+      auto vel = fabs(mBody->GetLinearVelocity().x);
       if (vel > 0.1f)
       {
          if (vel < 3.0f)
-            vel = 3;
+            vel = 3.0f;
 
-         if (mTime > mNextFootStepTime)
+         if (mTime.asSeconds() > mNextFootStepTime)
          {
             // play footstep
             Audio::getInstance()->playSample(Audio::SampleFootstep, 1);
-            mNextFootStepTime = mTime + 1.0f / vel;
+            mNextFootStepTime = mTime.asSeconds() + 1.0f / vel;
          }
       }
    }
@@ -1212,12 +1176,13 @@ void Player::setZ(int z)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::update(float dt)
+void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
-   setHeadEnabled(!(mKeysPressed & KeyPressedDown)); // CLEAN UP!
+   setCrouching(mKeysPressed & KeyPressedDown); // CLEAN UP!
 
+   updateAnimation(dt);
    updateExtraManager();
    updateAtmosphere();
    updateFire();
@@ -1228,11 +1193,10 @@ void Player::update(float dt)
    updateJumpBuffer();
    updateDash();
    updateClimb();
-   updatePlatformMovement(dt);
+   updatePlatformMovement(dt.asSeconds());
    updatePixelPosition();
    updateFootsteps();
    updatePortal();
-   AnimationPool::getInstance().updateAnimations(dt);
 }
 
 

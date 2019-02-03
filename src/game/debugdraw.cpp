@@ -1,18 +1,6 @@
 #include "debugdraw.h"
 
 
-DebugDraw* DebugDraw::sInstance = nullptr;
-
-
-DebugDraw::DebugDraw(
-  const std::shared_ptr<sf::RenderTarget> &window
-)
-  : mWindow(window)
-{
-  sInstance = this;
-}
-
-
 sf::Color DebugDraw::GLColorToSFML(const b2Color& color, sf::Uint8 alpha)
 {
   return sf::Color(
@@ -156,9 +144,14 @@ void DebugDraw::DrawTransform(const b2Transform& xf)
    mWindow->draw(greenLine, 2, sf::Lines);
 }
 
-
-DebugDraw *DebugDraw::getInstance()
+std::shared_ptr<sf::RenderTarget> DebugDraw::getWindow() const
 {
-  return sInstance;
+   return mWindow;
 }
+
+void DebugDraw::setWindow(const std::shared_ptr<sf::RenderTarget>& window)
+{
+   mWindow = window;
+}
+
 
