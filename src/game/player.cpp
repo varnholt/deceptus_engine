@@ -666,27 +666,71 @@ void Player::updateAnimation(const sf::Time& dt)
    std::shared_ptr<Animation> nextCycle = nullptr;
 
    [[maybe_unused]] auto velocity = mBody->GetLinearVelocity().x;
-   auto inAir = isInAir();
-   auto inWater = isInWater();
+   const auto inAir = isInAir();
+   const auto inWater = isInWater();
+   auto requiresUpdate = true;
 
-   // run
-   if (isMovingRight() && !inAir && !inWater)
+   // dash
+   if (mDashSteps > 0)
    {
-      nextCycle = mRunRightAligned;
+      if (mDashDir == Dash::Left)
+      {
+         nextCycle = mDashLeftAligned;
+      }
+      else
+      {
+         nextCycle = mDashRightAligned;
+      }
+   }
+
+   // run / crouch
+   else if (isMovingRight() && !inAir && !inWater)
+   {
+      if (mCrouching)
+      {
+         nextCycle = mCrouchRightAligned;
+      }
+      else
+      {
+         nextCycle = mRunRightAligned;
+      }
    }
    else if (isMovingLeft() && !inAir && !inWater)
    {
-      nextCycle = mRunLeftAligned;
+      if (mCrouching)
+      {
+         nextCycle = mCrouchLeftAligned;
+      }
+      else
+      {
+         nextCycle = mRunLeftAligned;
+      }
    }
 
-   // idle
+   // idle or idle crouch
    else if (mPointsToLeft)
    {
-      nextCycle = mIdleLeftAligned;
+      if (mCrouching)
+      {
+         nextCycle = mCrouchLeftAligned;
+         requiresUpdate = false;
+      }
+      else
+      {
+         nextCycle = mIdleLeftAligned;
+      }
    }
    else
    {
-      nextCycle = mIdleRightAligned;
+      if (mCrouching)
+      {
+         nextCycle = mCrouchRightAligned;
+         requiresUpdate = false;
+      }
+      else
+      {
+         nextCycle = mIdleRightAligned;
+      }
    }
 
    // reset x if animation cycle changed
@@ -696,7 +740,11 @@ void Player::updateAnimation(const sf::Time& dt)
    }
 
    mCurrentCycle = nextCycle;
-   mCurrentCycle->update(dt);
+
+   if (requiresUpdate)
+   {
+      mCurrentCycle->update(dt);
+   }
 }
 
 

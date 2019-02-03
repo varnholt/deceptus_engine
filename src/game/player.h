@@ -245,7 +245,7 @@ private:
    float mBeltVelocity = 0.0f;
    bool mIsOnBelt = false;
 
-   int mDashSteps = 20;
+   int mDashSteps = 0;
    Dash mDashDir = Dash::None;
 
    std::shared_ptr<Animation> mIdleRightAligned;
