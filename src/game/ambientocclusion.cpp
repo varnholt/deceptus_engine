@@ -59,8 +59,8 @@ void AmbientOcclusion::load(
 
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-  for (auto& sprite : mSprites)
-  {
-    window.draw(sprite, {sf::BlendAlpha});
-  }
+   for (auto& sprite : mSprites)
+   {
+      window.draw(sprite, {sf::BlendAlpha});
+   }
 }
