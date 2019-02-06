@@ -4,6 +4,7 @@
 
 #include "game/constants.h"
 
+#include <memory>
 #include <vector>
 
 
