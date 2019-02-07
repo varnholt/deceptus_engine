@@ -617,6 +617,7 @@ void Level::createViews()
 {
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
+   // the view dimensions never change
    mViewWidth = static_cast<float>(gameConfig.mViewWidth);
    mViewHeight = static_cast<float>(gameConfig.mViewHeight);
 
@@ -685,16 +686,16 @@ void Level::updateViews()
 
 
 //-----------------------------------------------------------------------------
-void Level::drawMap(sf::RenderTarget& window)
+void Level::drawMap(sf::RenderTarget& target)
 {
-  window.setView(*mMapView);
+  target.setView(*mMapView);
   for (auto z = 0; z < 50; z++)
   {
      for (auto& tileMap : mTileMaps)
      {
         if (tileMap->getZ() == z)
         {
-           window.draw(*tileMap);
+           target.draw(*tileMap);
         }
      }
   }
@@ -702,36 +703,38 @@ void Level::drawMap(sf::RenderTarget& window)
 
 
 //-----------------------------------------------------------------------------
-void Level::drawRaycastLight(sf::RenderTarget& window)
+void Level::drawRaycastLight(sf::RenderTarget& target)
 {
-  window.setView(*mLevelView);
-  mRaycastLight->draw(window, {});
+  target.setView(*mLevelView);
+  mRaycastLight->draw(target, {});
 }
 
 
 //-----------------------------------------------------------------------------
-void Level::drawParallaxMaps(sf::RenderTarget& window)
+void Level::drawParallaxMaps(sf::RenderTarget& target)
 {
-  for (auto i = 0; i < mParallaxMaps.size(); i++)
+  for (auto i = 0u; i < mParallaxMaps.size(); i++)
   {
-     window.setView(*mParallaxView[i]);
-     window.draw(*mParallaxMaps[i]);
+     target.setView(*mParallaxView[i]);
+     target.draw(*mParallaxMaps[i]);
   }
 }
 
 
 //-----------------------------------------------------------------------------
-void Level::drawLayers(sf::RenderTarget &window, int from, int to)
+void Level::drawLayers(sf::RenderTarget& target, int from, int to)
 {
+   target.setView(*mLevelView);
+
    for (auto z = from; z <= to; z++)
    {
-      mStaticLight->drawToZ(window, {}, z);
+      mStaticLight->drawToZ(target, {}, z);
 
       for (auto& tileMap : mTileMaps)
       {
          if (tileMap->getZ() == z)
          {
-            window.draw(*tileMap);
+            target.draw(*tileMap);
          }
       }
 
@@ -739,7 +742,7 @@ void Level::drawLayers(sf::RenderTarget &window, int from, int to)
       {
          if (platform->getZ() == z)
          {
-            platform->draw(window);
+            platform->draw(target);
          }
       }
 
@@ -747,7 +750,7 @@ void Level::drawLayers(sf::RenderTarget &window, int from, int to)
       {
          if (door->getZ() == z)
          {
-            door->draw(window);
+            door->draw(target);
          }
       }
 
@@ -755,7 +758,7 @@ void Level::drawLayers(sf::RenderTarget &window, int from, int to)
       {
          if (portal->getZ() == z)
          {
-            portal->draw(window);
+            portal->draw(target);
          }
       }
 
@@ -763,27 +766,27 @@ void Level::drawLayers(sf::RenderTarget &window, int from, int to)
       {
          if (bouncer->getZ() == z)
          {
-            bouncer->draw(window);
+            bouncer->draw(target);
          }
       }
 
       if (z == 11)
       {
-         mAo.draw(window);
+         mAo.draw(target);
 
          for (auto& enemy : mEnemies)
          {
-            enemy->draw(window);
+            enemy->draw(target);
          }
 
-         Player::getPlayer(0)->draw(window);
+         Player::getPlayer(0)->draw(target);
       }
 
       for_each(std::begin(mImageLayers), std::end(mImageLayers), [&](auto& layer)
       {
          if (layer->mZ == z)
          {
-            window.draw(layer->mSprite, {layer->mBlendMode});
+            target.draw(layer->mSprite, {layer->mBlendMode});
          }
       });
    }
@@ -808,8 +811,9 @@ void Level::drawPhysicsLayer(sf::RenderTarget& target)
 void Level::draw(sf::RenderTarget& target)
 {
    updateViews();
+
    drawParallaxMaps(target);
-   target.setView(*mLevelView);
+
    drawLayers(target, 0, 14);
 
    // raycast

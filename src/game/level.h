@@ -66,7 +66,7 @@ protected:
    std::shared_ptr<sf::View> mParallaxView[3];
    std::shared_ptr<sf::View> mMapView;
 
-   float mParallaxFactor[3] = {0.9f, 0.9f, 0.9f};
+   float mParallaxFactor[3] = {0.9f, 0.85f, 0.8f};
    float mViewWidth = 0.0f;
    float mViewHeight = 0.0f;
    int32_t mLook = LookInactive;
@@ -121,11 +121,12 @@ public:
 
    void spawnEnemies();
 
-   void draw(sf::RenderTarget& window);
-   void drawRaycastLight(sf::RenderTarget& window);
-   void drawParallaxMaps(sf::RenderTarget& window);
-   void drawLayers(sf::RenderTarget& window, int from = 0, int to = 50);
+   void draw(sf::RenderTarget& target);
+   void drawRaycastLight(sf::RenderTarget& target);
+   void drawParallaxMaps(sf::RenderTarget& target);
+   void drawLayers(sf::RenderTarget& target, int from = 0, int to = 50);
    void drawPhysicsLayer(sf::RenderTarget& target);
+   void drawMap(sf::RenderTarget& target);
 
    sf::Vector2f getSize();
 
@@ -194,7 +195,6 @@ private:
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
 
    void loadLevel(const std::filesystem::path& levelPath);
-   void drawMap(sf::RenderTarget& window);
    bool isControllerUsed() const;
 
    std::shared_ptr<RaycastLight::LightInstance> deserializeRaycastLight(TmxObject* tmxObject);
