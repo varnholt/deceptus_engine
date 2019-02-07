@@ -26,7 +26,7 @@ private:
    std::shared_ptr<Player> mPlayer;
    std::shared_ptr<sf::RenderWindow> mWindow;
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mPhysicsRenderTexture;
+   std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
    std::shared_ptr<Level> mLevel;
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;

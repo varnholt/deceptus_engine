@@ -74,9 +74,10 @@ void Game::createWindow()
    mWindow->setKeyRepeatEnabled(false);
    mWindow->setMouseCursorVisible(false);
 
+   // reset render textures if needed
    if (mLevelRenderTexture != nullptr)
    {
-     mLevelRenderTexture.reset();
+      mLevelRenderTexture.reset();
    }
 
    // this ought to be the right texture size to keep the aspect ratio
@@ -90,13 +91,13 @@ void Game::createWindow()
       static_cast<uint32_t>(gameConfig.mVideoModeHeight)
    );
 
-   if (mPhysicsRenderTexture != nullptr)
+   if (mAtmosphereRenderTexture != nullptr)
    {
-     mPhysicsRenderTexture.reset();
+     mAtmosphereRenderTexture.reset();
    }
 
-   mPhysicsRenderTexture = std::make_shared<sf::RenderTexture>();
-   mPhysicsRenderTexture->create(
+   mAtmosphereRenderTexture = std::make_shared<sf::RenderTexture>();
+   mAtmosphereRenderTexture->create(
       static_cast<uint32_t>(gameConfig.mVideoModeWidth),
       static_cast<uint32_t>(gameConfig.mVideoModeHeight)
    );
@@ -244,13 +245,13 @@ void Game::takeScreenshot(sf::RenderTexture& texture)
 void Game::drawAtmosphere()
 {
   // render physics to texture
-  mPhysicsRenderTexture->clear();
-  mLevel->drawPhysicsLayer(*mPhysicsRenderTexture.get());
-  mPhysicsRenderTexture->display();
+  mAtmosphereRenderTexture->clear();
+  mLevel->drawPhysicsLayer(*mAtmosphereRenderTexture.get());
+  mAtmosphereRenderTexture->display();
 
   if (mScreenshot)
   {
-    takeScreenshot(*mPhysicsRenderTexture.get());
+    takeScreenshot(*mAtmosphereRenderTexture.get());
   }
 }
 
@@ -263,11 +264,7 @@ void Game::drawLevel()
 
   mLevel->updateViews();
   mLevel->drawParallaxMaps(*mLevelRenderTexture.get());
-  mLevelRenderTexture->setView(*mLevel->getLevelView().get());
   mLevel->drawLayers(*mLevelRenderTexture.get(), 0, 15);
-
-  // that's been the simple all-in-one approach
-  // mLevel->draw(*mLevelRenderTexture.get());
 
   mLevelRenderTexture->display();
 
@@ -278,18 +275,10 @@ void Game::drawLevel()
     GameConfiguration::getInstance().mViewScaleHeight
   );
 
-  // if (true)
-  // {
   drawAtmosphere();
   updateAtmosphereShader();
   mWindow->draw(sprite, &mAtmosphereShader);
-  mWindow->setView(*mLevel->getLevelView().get());
   mLevel->drawLayers(*mWindow.get(), 16, 50);
-  // }
-  // else
-  // {
-  //   mWindow->draw(sprite);
-  // }
 
   if (mScreenshot)
   {
@@ -321,7 +310,7 @@ void Game::initializeAtmosphereShader()
 
   mAtmosphereShader.setUniform("currentTexture", sf::Shader::CurrentTexture);
   mAtmosphereShader.setUniform("distortionMapTexture", mAtmosphereDistortionMap);
-  mAtmosphereShader.setUniform("physicsTexture", mPhysicsRenderTexture->getTexture());
+  mAtmosphereShader.setUniform("physicsTexture", mAtmosphereRenderTexture->getTexture());
 }
 
 
