@@ -38,6 +38,8 @@ std::string PhysicsConfiguration::serialize()
             {"player_jump_buffer_in_ms",             mPlayerJumpBufferMs},
             {"player_jump_falloff",                  mPlayerJumpFalloff},
             {"player_jump_speed_factor",             mPlayerJumpSpeedFactor},
+            {"player_dash_steps",                    mPlayerDashSteps},
+            {"player_dash_factor",                   mPlayerDashFactor},
          }
       }
    };
@@ -63,11 +65,13 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    mPlayerAccelerationAir        = config["PhysicsConfiguration"]["player_acceleration_air"].get<float>();
    mPlayerDecelerationGround     = config["PhysicsConfiguration"]["player_deceleration_ground"].get<float>();
    mPlayerDecelerationAir        = config["PhysicsConfiguration"]["player_deceleration_air"].get<float>();
-   mPlayerJumpSteps              = config["PhysicsConfiguration"]["player_jump_steps"].get<int>();
-   mPlayerJumpAfterContactLostMs = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int>();
-   mPlayerJumpBufferMs           = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int>();
+   mPlayerJumpSteps              = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
+   mPlayerJumpAfterContactLostMs = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
+   mPlayerJumpBufferMs           = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
    mPlayerJumpFalloff            = config["PhysicsConfiguration"]["player_jump_falloff"].get<float>();
    mPlayerJumpSpeedFactor        = config["PhysicsConfiguration"]["player_jump_speed_factor"].get<float>();
+   mPlayerDashSteps              = config["PhysicsConfiguration"]["player_dash_steps"].get<int32_t>();
+   mPlayerDashFactor             = config["PhysicsConfiguration"]["player_dash_factor"].get<float>();
 }
 
 

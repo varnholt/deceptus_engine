@@ -1629,7 +1629,7 @@ void Player::updateDash(Dash dir)
   }
   else
   {
-    mDashSteps = 20;
+    mDashSteps = PhysicsConfiguration::getInstance().mPlayerDashSteps;
     mDashDir = dir;
   }
 
@@ -1640,7 +1640,7 @@ void Player::updateDash(Dash dir)
 
   auto left = (dir == Dash::Left);
   mPointsToLeft = (left);
-  auto dashVector = mDashSteps * mBody->GetMass() * 3.0f;
+  auto dashVector = mDashSteps * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerDashFactor;
   auto impulse = (left) ? -dashVector : dashVector;
 
   mBody->ApplyForceToCenter(
