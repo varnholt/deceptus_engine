@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 struct PhysicsConfiguration
@@ -18,11 +19,13 @@ struct PhysicsConfiguration
    float mPlayerAccelerationAir = 0.05f;
    float mPlayerDecelerationGround = 0.6f;
    float mPlayerDecelerationAir = 0.65f;
-   int mPlayerJumpSteps = 9;
-   int mPlayerJumpAfterContactLostMs = 100;
-   int mPlayerJumpBufferMs = 100;
+   int32_t mPlayerJumpSteps = 9;
+   int32_t mPlayerJumpAfterContactLostMs = 100;
+   int32_t mPlayerJumpBufferMs = 100;
    float mPlayerJumpFalloff = 6.5f;
    float mPlayerJumpSpeedFactor = 0.1f;
+   int32_t mPlayerDashSteps = 20;
+   float mPlayerDashFactor = 3.0f;
 
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");

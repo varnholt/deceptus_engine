@@ -194,13 +194,14 @@ private:
    void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
 
-   void loadLevel(const std::filesystem::path& levelPath);
+   void loadLevel();
    bool isControllerUsed() const;
 
    std::shared_ptr<RaycastLight::LightInstance> deserializeRaycastLight(TmxObject* tmxObject);
    std::shared_ptr<StaticLight::LightInstance> deserializeStaticLight(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
    std::shared_ptr<ImageLayer> deserializeImageLayer(TmxElement* tmxElement, const std::filesystem::path &levelPath);
    void deserializeParallaxMap(TmxLayer *layer);
+   void loadTmx();
 };
 
 #endif // LEVEL_H

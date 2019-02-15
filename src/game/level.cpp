@@ -292,181 +292,221 @@ std::shared_ptr<ImageLayer> Level::deserializeImageLayer(TmxElement* element, co
 //-----------------------------------------------------------------------------
 void Level::deserializeParallaxMap(TmxLayer* layer)
 {
-  if (layer->mProperties)
-  {
-     auto parallax = 1.0f;
-     auto& map = layer->mProperties->mMap;
-     auto itParallaxValue = map.find("parallax");
-     if (itParallaxValue != map.end())
-     {
-       parallax = itParallaxValue->second->mValueFloat;
-     }
+   if (layer->mProperties)
+   {
+      auto parallax = 1.0f;
+      auto& map = layer->mProperties->mMap;
+      auto itParallaxValue = map.find("parallax");
+      if (itParallaxValue != map.end())
+      {
+        parallax = itParallaxValue->second->mValueFloat;
+      }
 
-     auto itParallaxView = map.find("parallax_view");
-     if (itParallaxView != map.end())
-     {
-        int view = itParallaxView->second->mValueInt;
-        mParallaxFactor[view] = parallax;
-     }
-  }
+      auto itParallaxView = map.find("parallax_view");
+      if (itParallaxView != map.end())
+      {
+         int view = itParallaxView->second->mValueInt;
+         mParallaxFactor[view] = parallax;
+      }
+   }
 }
 
 
 //-----------------------------------------------------------------------------
-void Level::loadLevel(const std::filesystem::path& path)
+void Level::loadTmx()
 {
-  mTmxParser = std::make_unique<TmxParser>();
-  mTmxParser->parse(mDescription->mFilename);
+   auto path = std::filesystem::path(mDescription->mFilename).parent_path();
 
-  auto elements = mTmxParser->getElements();
+   sf::Clock elapsed;
 
-  for (auto element : elements)
-  {
-     if (element->mType == TmxElement::TypeLayer)
-     {
-        auto layer = dynamic_cast<TmxLayer*>(element);
-        auto tileset = mTmxParser->getTileSet(layer);
+   // parse tmx
+   std::cout << "[x] parsing tmx... ";
 
-        if (layer->mName == "doors")
-        {
-           mDoors = Door::load(layer, tileset, path, mWorld);
-        }
-        else if (layer->mName == "portals")
-        {
-           mPortals = Portal::load(layer, tileset, path, mWorld);
-        }
-        else if (layer->mName == "platforms")
-        {
-           mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
-        }
-        else
-        {
-           std::shared_ptr<TileMap> tileMap = std::make_shared<TileMap>();
-           tileMap->load(layer, tileset, path);
+   mTmxParser = std::make_unique<TmxParser>();
+   mTmxParser->parse(mDescription->mFilename);
 
-           auto pushTileMap = true;
+   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   elapsed.restart();
 
-           if (layer->mName == "physics")
-           {
-              parsePhysicsLayer(layer, tileset);
-              mPhysics.mTileMap = tileMap;
-           }
-           else if (layer->mName == "extras")
-           {
-              Player::getPlayer(0)->getExtraManager()->mTilemap = tileMap;
-              Player::getPlayer(0)->getExtraManager()->load(layer, tileset);
-           }
-           else if (layer->mName.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
-           {
-              deserializeParallaxMap(layer);
-              mParallaxMaps.push_back(tileMap);
-              pushTileMap = false;
-           }
+   std::cout << "[x] loading tmx... ";
 
-           parseDynamicPhyicsLayer(layer, tileset);
+   auto elements = mTmxParser->getElements();
 
-           if (pushTileMap)
-           {
-              mTileMaps.push_back(tileMap);
-           }
-        }
-     }
+   for (auto element : elements)
+   {
+      if (element->mType == TmxElement::TypeLayer)
+      {
+         auto layer = dynamic_cast<TmxLayer*>(element);
+         auto tileset = mTmxParser->getTileSet(layer);
 
-     else if (element->mType == TmxElement::TypeObjectGroup)
-     {
-        TmxObjectGroup* objectGroup = dynamic_cast<TmxObjectGroup*>(element);
-        for (auto object : objectGroup->mObjects)
-        {
-           TmxObject* tmxObject = object.second;
+         if (layer->mName == "doors")
+         {
+            mDoors = Door::load(layer, tileset, path, mWorld);
+         }
+         else if (layer->mName == "portals")
+         {
+            mPortals = Portal::load(layer, tileset, path, mWorld);
+         }
+         else if (layer->mName == "platforms")
+         {
+            mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
+         }
+         else
+         {
+            std::shared_ptr<TileMap> tileMap = std::make_shared<TileMap>();
+            tileMap->load(layer, tileset, path);
 
-           if (objectGroup->mName == "portals")
-           {
-             if (tmxObject->mPolyLine)
-             {
-               Portal::link(mPortals, tmxObject);
-             }
-           }
-           if (objectGroup->mName == "bouncers")
-           {
-             Bouncer* bouncer = new Bouncer(
-               0,
-               mWorld,
-               tmxObject->mX,
-               tmxObject->mY,
-               tmxObject->mWidth,
-               tmxObject->mHeight
-             );
-             bouncer->setZ(objectGroup->mZ);
-             mBouncers.push_back(bouncer);
-             addDebugRect(bouncer->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
-           }
-           if (objectGroup->mName == "conveyorbelts")
-           {
-             ConveyorBelt* belt = new ConveyorBelt(
-               0,
-               mWorld,
-               tmxObject->mX,
-               tmxObject->mY,
-               tmxObject->mWidth,
-               tmxObject->mHeight
-             );
-             auto velocity = 0.0f;
-             if (tmxObject->mProperties)
-             {
-               auto it = tmxObject->mProperties->mMap.find("velocity");
-               if (it != tmxObject->mProperties->mMap.end())
-               {
-                  velocity = it->second->mValueFloat;
-               }
-             }
-             belt->setVelocity(velocity);
-             belt->setZ(objectGroup->mZ);
-             mConveyorBelts.push_back(belt);
-             addDebugRect(belt->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
-           }
-           else if (objectGroup->mName == "platform_paths")
-           {
-             if (tmxObject->mPolyLine)
-             {
-               MovingPlatform::link(mPlatforms, tmxObject);
-             }
-           }
+            auto pushTileMap = true;
 
-           else if (objectGroup->mName == "lights")
-           {
-             auto light = deserializeRaycastLight(tmxObject);
-             mRaycastLight->mLights.push_back(light);
-           }
+            if (layer->mName == "physics")
+            {
+               parsePhysicsLayer(layer, tileset);
+               mPhysics.mTileMap = tileMap;
+            }
+            else if (layer->mName == "extras")
+            {
+               Player::getPlayer(0)->getExtraManager()->mTilemap = tileMap;
+               Player::getPlayer(0)->getExtraManager()->load(layer, tileset);
+            }
+            else if (layer->mName.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
+            {
+               deserializeParallaxMap(layer);
+               mParallaxMaps.push_back(tileMap);
+               pushTileMap = false;
+            }
 
-           else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
-           {
-             auto light = deserializeStaticLight(tmxObject, objectGroup);
-             mStaticLight->mLights.push_back(light);
-           }
-        }
-     }
-     else if (element->mType == TmxElement::TypeImageLayer)
-     {
-       auto image = deserializeImageLayer(element, path);
-       mImageLayers.push_back(image);
-     }
-  }
+            parseDynamicPhyicsLayer(layer, tileset);
 
-  if (!mStaticLight->mLights.empty())
-  {
-     mStaticLight->load();
-  }
+            if (pushTileMap)
+            {
+               mTileMaps.push_back(tileMap);
+            }
+         }
+      }
 
-  if (!mRaycastLight->mLights.empty())
-  {
-     mRaycastLight->load();
-  }
+      else if (element->mType == TmxElement::TypeObjectGroup)
+      {
+         TmxObjectGroup* objectGroup = dynamic_cast<TmxObjectGroup*>(element);
+         for (auto object : objectGroup->mObjects)
+         {
+            TmxObject* tmxObject = object.second;
 
-  if (!mPhysics.mTileMap)
-  {
-     printf("no physics layer (called 'physics') found!\n");
-     exit(1);
-  }
+            if (objectGroup->mName == "portals")
+            {
+              if (tmxObject->mPolyLine)
+              {
+                Portal::link(mPortals, tmxObject);
+              }
+            }
+            if (objectGroup->mName == "bouncers")
+            {
+              Bouncer* bouncer = new Bouncer(
+                nullptr,
+                mWorld,
+                tmxObject->mX,
+                tmxObject->mY,
+                tmxObject->mWidth,
+                tmxObject->mHeight
+              );
+              bouncer->setZ(objectGroup->mZ);
+              mBouncers.push_back(bouncer);
+              addDebugRect(bouncer->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+            }
+            if (objectGroup->mName == "conveyorbelts")
+            {
+              ConveyorBelt* belt = new ConveyorBelt(
+                nullptr,
+                mWorld,
+                tmxObject->mX,
+                tmxObject->mY,
+                tmxObject->mWidth,
+                tmxObject->mHeight
+              );
+              auto velocity = 0.0f;
+              if (tmxObject->mProperties)
+              {
+                auto it = tmxObject->mProperties->mMap.find("velocity");
+                if (it != tmxObject->mProperties->mMap.end())
+                {
+                   velocity = it->second->mValueFloat;
+                }
+              }
+              belt->setVelocity(velocity);
+              belt->setZ(objectGroup->mZ);
+              mConveyorBelts.push_back(belt);
+              addDebugRect(belt->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+            }
+            else if (objectGroup->mName == "platform_paths")
+            {
+              if (tmxObject->mPolyLine)
+              {
+                MovingPlatform::link(mPlatforms, tmxObject);
+              }
+            }
+
+            else if (objectGroup->mName == "lights")
+            {
+              auto light = deserializeRaycastLight(tmxObject);
+              mRaycastLight->mLights.push_back(light);
+            }
+
+            else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
+            {
+              auto light = deserializeStaticLight(tmxObject, objectGroup);
+              mStaticLight->mLights.push_back(light);
+            }
+         }
+      }
+      else if (element->mType == TmxElement::TypeImageLayer)
+      {
+        auto image = deserializeImageLayer(element, path);
+        mImageLayers.push_back(image);
+      }
+   }
+
+   if (!mPhysics.mTileMap)
+   {
+      printf("no physics layer (called 'physics') found!\n");
+      exit(1);
+   }
+
+   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::loadLevel()
+{
+   auto path = std::filesystem::path(mDescription->mFilename).parent_path();
+
+   // load tmx
+   loadTmx();
+
+   sf::Clock elapsed;
+
+   // load static lights
+   std::cout << "[x] loading static lights...";
+   if (!mStaticLight->mLights.empty())
+   {
+      mStaticLight->load();
+   }
+   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   elapsed.restart();
+
+   // load raycast lights
+   std::cout << "[x] loading raycast lights...";
+   if (!mRaycastLight->mLights.empty())
+   {
+      mRaycastLight->load();
+   }
+   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   elapsed.restart();
+
+   // loading ao
+   std::cout << "[x] loading ao... ";
+   mAo.load(path, std::filesystem::path(mDescription->mFilename).stem().string());
+
+   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
 }
 
 
@@ -477,11 +517,7 @@ void Level::initialize()
 
    mDescription = LevelDescription::load(mDescriptionFilename);
 
-   auto levelPath = std::filesystem::path(mDescription->mFilename).parent_path();
-
-   loadLevel(levelPath);
-   mAo.load(levelPath, std::filesystem::path(mDescription->mFilename).stem().string());
-
+   loadLevel();
 
    mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * TILE_WIDTH  + PLAYER_ACTUAL_WIDTH / 2);
    mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * TILE_HEIGHT + DIFF_PLAYER_TILE_TO_PHYSICS);
