@@ -80,6 +80,7 @@ private:
    bool mDrawPhysics = false;
    int32_t mScreenshotCounter = 0;
    float mViewToTextureScale = 1.0f;
+   sf::Vector2u mRenderTextureOffset;
 
    bool mAtmosphereEnabled = false;
    sf::Shader mAtmosphereShader;
