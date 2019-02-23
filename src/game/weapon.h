@@ -45,6 +45,7 @@ public:
 
    // later on each weapon shall have its own animation
    static void updateBulletHitAnimations(float dt);
+   static void drawBulletHits(sf::RenderTarget& target);
 
    int damage() const;
    void loadTextures();

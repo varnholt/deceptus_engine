@@ -25,18 +25,21 @@ public:
    void initialize();
    int loop();
    void processEvents();
-   void keyboardFuckup();
    void draw();
+
 
 private:
 
-   void createWindow();
-   void drawBulletHits();
+   void initializeWindow();
+   void initializeAtmosphereShader();
+   void initializeController();
+
    void drawLevel();
    void drawAtmosphere();
-   void initializeAtmosphereShader();
+
    void reset();
    void takeScreenshot(sf::RenderTexture &texture);
+
    void update();
    void updateGameState();
    void updateGameController();
@@ -44,12 +47,14 @@ private:
    void updateGameControllerForInventory();
    void updateAtmosphereShader();
    void updateWindowTitle();
-   void initializeController();
+
    void checkCloseInventory();
    void openInventory();
    void showMainMenu();
+
    void processKeyPressedEvents(const sf::Event& event);
    void processKeyReleasedEvents(const sf::Event& event);
+
    void toggleFullScreen();
    void changeResolution(int32_t w, int32_t h);
 
