@@ -65,6 +65,7 @@ private:
 
    std::shared_ptr<Player> mPlayer;
    std::shared_ptr<sf::RenderWindow> mWindow;
+   std::shared_ptr<sf::RenderTexture> mWindowRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
    std::shared_ptr<Level> mLevel;
@@ -78,6 +79,7 @@ private:
    bool mScreenshot = false;
    bool mDrawPhysics = false;
    int32_t mScreenshotCounter = 0;
+   float mViewToTextureScale = 1.0f;
 
    bool mAtmosphereEnabled = false;
    sf::Shader mAtmosphereShader;

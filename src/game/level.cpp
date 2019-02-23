@@ -24,7 +24,6 @@
 #include "joystick/gamecontroller.h"
 
 // sfml
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -830,7 +829,7 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
 
 
 //-----------------------------------------------------------------------------
-void Level::drawPhysicsLayer(sf::RenderTarget& target)
+void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 {
   updateViews();
 

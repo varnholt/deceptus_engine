@@ -29,12 +29,12 @@ class DebugDraw : public b2Draw
 
       static DebugDraw* getInstance();
 
-      std::shared_ptr<sf::RenderTarget> getWindow() const;
-      void setWindow(const std::shared_ptr<sf::RenderTarget>& window);
+      std::shared_ptr<sf::RenderTarget> getRenderTarget() const;
+      void setRenderTarget(const std::shared_ptr<sf::RenderTarget>& window);
 
 
    private:
 
-      std::shared_ptr<sf::RenderTarget> mWindow;
+      std::shared_ptr<sf::RenderTarget> mTarget;
 };
 #endif //SFMLDEBUGDRAW_H
