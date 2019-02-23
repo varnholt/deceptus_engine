@@ -3,6 +3,7 @@
 
 // game
 #include "bullet.h"
+#include "bullethitanimation.h"
 #include "constants.h"
 
 
@@ -14,6 +15,8 @@ Weapon::Weapon()
 {
    mShape = std::make_unique<b2CircleShape>();
    mShape->m_radius = 0.05f;
+
+   loadTextures();
 }
 
 
@@ -21,6 +24,7 @@ Weapon::Weapon(std::unique_ptr<b2Shape> shape, int fireInterval)
  : mShape(std::move(shape)),
    mFireInterval(fireInterval)
 {
+   loadTextures();
 }
 
 
@@ -54,7 +58,7 @@ void Weapon::fire(
 
       auto bullet = new Bullet();
       bullet->setBody(body);
-      fixture->SetUserData((void*)bullet);
+      fixture->SetUserData(static_cast<void*>(bullet));
 
       // store bullet
       sBullets.insert(bullet);
@@ -73,6 +77,20 @@ int Weapon::getFireInterval() const
 void Weapon::setFireInterval(int fireInterval)
 {
    mFireInterval = fireInterval;
+}
+
+
+void Weapon::drawBullets(sf::RenderTarget& target)
+{
+   for (auto bullet: sBullets)
+   {
+      mBulletSprite.setPosition(
+         bullet->getBody()->GetPosition().x * PPM,
+         bullet->getBody()->GetPosition().y * PPM
+      );
+
+      target.draw(mBulletSprite);
+   }
 }
 
 
@@ -97,6 +115,55 @@ void Weapon::cleanupBullets()
 }
 
 
+int Weapon::damage() const
+{
+   int val = 0;
+
+   switch (mType)
+   {
+      case WeaponType::Slingshot:
+      case WeaponType::Pistol:
+      case WeaponType::Bazooka:
+      case WeaponType::Laser:
+      case WeaponType::Aliengun:
+         val = 20;
+         break;
+   }
+
+   return val;
+}
 
 
+void Weapon::loadTextures()
+{
+   mBulletTexture.loadFromFile("data/weapons/bullet.png");
+   mBulletSprite.setTexture(mBulletTexture);
+   mBulletSprite.setOrigin(
+      static_cast<float_t>(mBulletTexture.getSize().x / 2),
+      static_cast<float_t>(mBulletTexture.getSize().y / 2)
+   );
+}
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Weapon::updateBulletHitAnimations(float dt)
+{
+   cleanupBullets();
+
+   auto bulletDetonations = Weapon::sDetonationPositions;
+
+   std::list<b2Vec2>::iterator it;
+   for (it = bulletDetonations.begin(); it != bulletDetonations.end(); ++it)
+   {
+      b2Vec2 vec = *it;
+      float gx = vec.x * PPM;
+      float gy = vec.y * PPM;
+
+      BulletHitAnimation::add(gx, gy);
+   }
+
+   BulletHitAnimation::updateAnimations(dt);
+}
 

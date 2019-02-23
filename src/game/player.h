@@ -16,6 +16,7 @@
 class Animation;
 class GameContactListener;
 class Weapon;
+class WeaponSystem;
 
 const sf::Vector2f vector2fZero;
 
@@ -199,7 +200,7 @@ public:
 
 private:
 
-   Weapon* mWeapon = nullptr;
+   std::shared_ptr<WeaponSystem> mWeaponSystem;
    std::shared_ptr<ExtraManager> mExtraManager;
 
    b2World* mWorld = nullptr;

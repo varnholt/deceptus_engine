@@ -250,14 +250,6 @@ void Game::initialize()
 
   showMainMenu();
 
-  // TODO: MOVE ALL BULLET STUFF TO SEPERATE WEAPON CLASS
-  mBulletTexture.loadFromFile("data/weapons/bullet.png");
-  mBulletSprite.setTexture(mBulletTexture);
-  mBulletSprite.setOrigin(
-    static_cast<float_t>(mBulletTexture.getSize().x / 2),
-    static_cast<float_t>(mBulletTexture.getSize().y / 2)
-  );
-
   Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetetive);
 }
 
@@ -269,22 +261,6 @@ void Game::drawBulletHits()
    for (auto it = bulletHits->begin(); it != bulletHits->end(); ++it)
    {
       mWindow->draw(*(*it));
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Game::drawBullets()
-{
-   auto bullets = Weapon::sBullets;
-   for (auto bullet: bullets)
-   {
-      mBulletSprite.setPosition(
-         bullet->getBody()->GetPosition().x * PPM,
-         bullet->getBody()->GetPosition().y * PPM
-      );
-
-      mWindow->draw(mBulletSprite);
    }
 }
 
@@ -393,7 +369,6 @@ void Game::draw()
 
    // mLevel->draw(*mWindow.get());
 
-   drawBullets();
    drawBulletHits();
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
@@ -470,27 +445,6 @@ void Game::updateWindowTitle()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::updateBulletHitAnimations(float dt)
-{
-   Weapon::cleanupBullets();
-
-   auto bulletDetonations = Weapon::sDetonationPositions;
-
-   std::list<b2Vec2>::iterator it;
-   for (it = bulletDetonations.begin(); it != bulletDetonations.end(); ++it)
-   {
-      b2Vec2 vec = *it;
-      float gx = vec.x * PPM;
-      float gy = vec.y * PPM;
-
-      BulletHitAnimation::add(gx, gy);
-   }
-
-   BulletHitAnimation::updateAnimations(dt);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameState()
 {
    if (mPlayer->isDead())
@@ -518,7 +472,7 @@ void Game::update()
    {
       Timer::update();
       AnimationPool::getInstance().updateAnimations(dt.asSeconds());
-      updateBulletHitAnimations(dt.asSeconds());
+      Weapon::updateBulletHitAnimations(dt.asSeconds());
       updateGameController();
       updateGameControllerForGame();
       mLevel->update(dt.asSeconds());
