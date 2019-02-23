@@ -4,14 +4,17 @@
 #include <memory>
 #include <vector>
 
-#include "weaponitem.h"
+#include <SFML/Graphics.hpp>
+
+class Weapon;
 
 struct WeaponSystem
 {
-   std::shared_ptr<WeaponItem> mSelected;
-   std::vector<std::shared_ptr<WeaponItem>> mWeapons;
+   WeaponSystem() = default;
+   void initialize();
 
-   WeaponSystem();
+   std::shared_ptr<Weapon> mSelected;
+   std::vector<std::shared_ptr<Weapon>> mWeapons;
 };
 
 #endif // WEAPONSYSTEM_H

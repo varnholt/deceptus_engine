@@ -146,7 +146,6 @@ SOURCES += \
     src/game/leveldescription.cpp \
     src/game/squaremarcher.cpp \
     src/game/weaponsystem.cpp \
-    src/game/weaponitem.cpp \
     src/effects/raycastlight.cpp \
     src/game/pathinterpolation.cpp \
     src/game/extraskill.cpp \
@@ -259,7 +258,6 @@ HEADERS += \
     src/game/leveldescription.h \
     src/game/squaremarcher.h \
     src/game/weaponsystem.h \
-    src/game/weaponitem.h \
     src/effects/raycastlight.h \
     src/game/pathinterpolation.h \
     src/game/extraskill.h \

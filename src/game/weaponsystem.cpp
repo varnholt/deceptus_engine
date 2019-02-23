@@ -1,6 +1,11 @@
 #include "weaponsystem.h"
 
-WeaponSystem::WeaponSystem()
-{
+#include "weapon.h"
 
+
+//----------------------------------------------------------------------------------------------------------------------
+void WeaponSystem::initialize()
+{
+   // set up default weapon
+   mSelected = std::make_shared<Weapon>();
 }

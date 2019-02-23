@@ -14,6 +14,7 @@
 #include "animationpool.h"
 #include "physicsconfiguration.h"
 #include "weapon.h"
+#include "weaponsystem.h"
 
 #include <iostream>
 
@@ -64,8 +65,8 @@ Player::Player(GameNode* parent)
 {
    sPlayerList.push_back(this);
 
+   mWeaponSystem = std::make_shared<WeaponSystem>();
    mExtraManager = std::make_shared<ExtraManager>();
-   mWeapon = new Weapon();
    mExtraTable = std::make_shared<ExtraTable>();
 }
 
@@ -89,6 +90,8 @@ void Player::initialize()
 
   mPortalClock.restart();
   mDamageClock.restart();
+
+  mWeaponSystem->initialize();
 
   createPlayerBody();
 
@@ -178,6 +181,8 @@ void Player::setBodyViaPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& target)
 {
+   mWeaponSystem->mSelected->drawBullets(target);
+
    if (!mVisible)
    {
       return;
@@ -1831,7 +1836,7 @@ void Player::fire()
    pos.x = xOffset + mPixelPosition.x * MPP;
    pos.y = yOffset + mPixelPosition.y * MPP;
 
-   mWeapon->fire(
+   mWeaponSystem->mSelected->fire(
       mWorld,
       pos,
       dir
