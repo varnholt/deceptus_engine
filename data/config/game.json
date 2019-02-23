@@ -4,8 +4,8 @@
         "audio_volume_music": 70,
         "audio_volume_sfx": 70,
         "fullscreen": false,
-        "video_mode_height": 540,
-        "video_mode_width": 960,
+        "video_mode_height": 900,
+        "video_mode_width": 1600,
         "view_height": 270,
         "view_width": 480
     }

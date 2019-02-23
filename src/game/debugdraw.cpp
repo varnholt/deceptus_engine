@@ -46,7 +46,7 @@ void DebugDraw::DrawPolygon(
    polygon.setFillColor(sf::Color::Transparent);
    polygon.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
-   mWindow->draw(polygon);
+   mTarget->draw(polygon);
 }
 
 
@@ -66,7 +66,7 @@ void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, cons
    polygon.setFillColor(DebugDraw::GLColorToSFML(color, 60));
    polygon.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
-   mWindow->draw(polygon);
+   mTarget->draw(polygon);
 }
 
 
@@ -79,7 +79,7 @@ void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& 
    circle.setOutlineThickness(-0.3f);
    circle.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
-   mWindow->draw(circle);
+   mTarget->draw(circle);
 }
 
 
@@ -99,8 +99,8 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
       sf::Vertex(DebugDraw::B2VecToSFVec(endPoint), DebugDraw::GLColorToSFML(color)),
    };
 
-   mWindow->draw(circle);
-   mWindow->draw(line, 2, sf::Lines);
+   mTarget->draw(circle);
+   mTarget->draw(line, 2, sf::Lines);
 }
 
 
@@ -113,7 +113,7 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
       sf::Vertex(DebugDraw::B2VecToSFVec(p2), DebugDraw::GLColorToSFML(color))
    };
 
-   mWindow->draw(line, 2, sf::Lines);
+   mTarget->draw(line, 2, sf::Lines);
 }
 
 
@@ -140,18 +140,18 @@ void DebugDraw::DrawTransform(const b2Transform& xf)
       sf::Vertex(DebugDraw::B2VecToSFVec(yAxis), sf::Color::Green)
    };
 
-   mWindow->draw(redLine, 2, sf::Lines);
-   mWindow->draw(greenLine, 2, sf::Lines);
+   mTarget->draw(redLine, 2, sf::Lines);
+   mTarget->draw(greenLine, 2, sf::Lines);
 }
 
-std::shared_ptr<sf::RenderTarget> DebugDraw::getWindow() const
+std::shared_ptr<sf::RenderTarget> DebugDraw::getRenderTarget() const
 {
-   return mWindow;
+   return mTarget;
 }
 
-void DebugDraw::setWindow(const std::shared_ptr<sf::RenderTarget>& window)
+void DebugDraw::setRenderTarget(const std::shared_ptr<sf::RenderTarget>& window)
 {
-   mWindow = window;
+   mTarget = window;
 }
 
 

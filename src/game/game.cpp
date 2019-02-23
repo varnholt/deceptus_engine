@@ -113,6 +113,7 @@ void Game::initializeWindow()
       mWindow.reset();
    }
 
+   // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    mWindow = std::make_shared<sf::RenderWindow>(
       sf::VideoMode(
          static_cast<uint32_t>(gameConfig.mVideoModeWidth),
@@ -129,40 +130,53 @@ void Game::initializeWindow()
    mWindow->setMouseCursorVisible(false);
 
    // reset render textures if needed
+   if (mWindowRenderTexture != nullptr)
+   {
+      mWindowRenderTexture.reset();
+   }
+
    if (mLevelRenderTexture != nullptr)
    {
       mLevelRenderTexture.reset();
    }
-
-   // this ought to be the right texture size to keep the aspect ratio
-   // however, that totally fucks up all the things. needs to be fixed.
-   const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
-   const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
-   const auto sizeRatio = std::min(ratioWidth, ratioHeight);
-   [[maybe_unused]] int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
-   [[maybe_unused]] int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
-
-   mLevelRenderTexture = std::make_shared<sf::RenderTexture>();
-   mLevelRenderTexture->create(
-      static_cast<uint32_t>(gameConfig.mVideoModeWidth),
-      static_cast<uint32_t>(gameConfig.mVideoModeHeight)
-   );
 
    if (mAtmosphereRenderTexture != nullptr)
    {
      mAtmosphereRenderTexture.reset();
    }
 
+   // this the render texture size derived from the window dimensions. as opposed to the window
+   // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
+   const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
+   const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+   const auto sizeRatio = std::min(ratioWidth, ratioHeight);
+   mViewToTextureScale = 1.0f / sizeRatio;
+
+   int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
+   int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
+
+   mWindowRenderTexture = std::make_shared<sf::RenderTexture>();
+   mWindowRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+
+   mLevelRenderTexture = std::make_shared<sf::RenderTexture>();
+   mLevelRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+
    mAtmosphereRenderTexture = std::make_shared<sf::RenderTexture>();
    mAtmosphereRenderTexture->create(
-      static_cast<uint32_t>(gameConfig.mVideoModeWidth),
-      static_cast<uint32_t>(gameConfig.mVideoModeHeight)
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
    );
 
    // must be reloaded when the physics texture is reset
    initializeAtmosphereShader();
 
-   mDebugDraw->setWindow(mWindow);
+   mDebugDraw->setRenderTarget(mWindowRenderTexture);
 }
 
 
@@ -220,7 +234,7 @@ void Game::initialize()
   mPlayer = std::make_shared<Player>();
 
   mDebugDraw = std::make_unique<DebugDraw>();
-  mDebugDraw->setWindow(mWindow);
+  mDebugDraw->setRenderTarget(mWindowRenderTexture);
 
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
@@ -258,58 +272,57 @@ void Game::initialize()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::takeScreenshot(sf::RenderTexture& texture)
 {
-  std::ostringstream ss;
-  ss << "screenshot_" << std::setw(2) << std::setfill('0') << mScreenshotCounter++ << ".png";
-  texture.getTexture().copyToImage().saveToFile(ss.str());
+   std::ostringstream ss;
+   ss << "screenshot_" << std::setw(2) << std::setfill('0') << mScreenshotCounter++ << ".png";
+   texture.getTexture().copyToImage().saveToFile(ss.str());
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::drawAtmosphere()
 {
-  // render physics to texture
-  mAtmosphereRenderTexture->clear();
-  mLevel->drawPhysicsLayer(*mAtmosphereRenderTexture.get());
-  mAtmosphereRenderTexture->display();
+   // render physics to texture
+   mAtmosphereRenderTexture->clear();
+   mLevel->drawAtmosphereLayer(*mAtmosphereRenderTexture.get());
+   mAtmosphereRenderTexture->display();
 
-  if (mScreenshot)
-  {
-    takeScreenshot(*mAtmosphereRenderTexture.get());
-  }
+   if (mScreenshot)
+   {
+      takeScreenshot(*mAtmosphereRenderTexture.get());
+   }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::drawLevel()
 {
-  // render level to texture
-  mLevelRenderTexture->clear();
+   // render background layers to texture so the atmosphere shader can be applied on it
+   mLevelRenderTexture->clear();
 
-  mLevel->updateViews();
-  mLevel->drawParallaxMaps(*mLevelRenderTexture.get());
-  mLevel->drawLayers(*mLevelRenderTexture.get(), 0, 15);
+   mLevel->updateViews();
+   mLevel->drawParallaxMaps(*mLevelRenderTexture.get());
+   mLevel->drawLayers(*mLevelRenderTexture.get(), 0, 15);
+   mLevelRenderTexture->display();
 
-  mLevelRenderTexture->display();
+   sf::Sprite sprite(mLevelRenderTexture->getTexture());
+   sprite.scale(
+      mViewToTextureScale,
+      mViewToTextureScale
+   );
 
-  // scale texture to window
-  sf::Sprite sprite(mLevelRenderTexture->getTexture());
-  sprite.scale(
-    GameConfiguration::getInstance().mViewScaleWidth,
-    GameConfiguration::getInstance().mViewScaleHeight
-  );
+   drawAtmosphere();
+   updateAtmosphereShader();
+   mWindowRenderTexture->draw(sprite, &mAtmosphereShader);
 
-  drawAtmosphere();
-  updateAtmosphereShader();
-  mWindow->draw(sprite, &mAtmosphereShader);
-  mLevel->drawLayers(*mWindow.get(), 16, 50);
+   mLevel->drawLayers(*mWindowRenderTexture.get(), 16, 50);
 
-  if (mScreenshot)
-  {
-    takeScreenshot(*mLevelRenderTexture.get());
-    mScreenshot = false;
-  }
+   if (mScreenshot)
+   {
+       takeScreenshot(*mLevelRenderTexture.get());
+       mScreenshot = false;
+   }
 
-  mLevel->drawRaycastLight(*mWindow.get());
+   mLevel->drawRaycastLight(*mWindowRenderTexture.get());
 }
 
 
@@ -352,12 +365,13 @@ void Game::draw()
 {
    mFps++;
 
+   mWindowRenderTexture->clear();
    mWindow->clear(sf::Color::Black);
    mWindow->pushGLStates();
 
    drawLevel();
 
-   Weapon::drawBulletHits(*mWindow.get());
+   Weapon::drawBulletHits(*mWindowRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
@@ -365,23 +379,26 @@ void Game::draw()
       mLevel->drawStaticChains(mWindow);
    }
 
-   mInfoLayer->draw(*mWindow.get());
+   mInfoLayer->draw(*mWindowRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
-     mInfoLayer->drawDebugInfo(*mWindow.get());
+     mInfoLayer->drawDebugInfo(*mWindowRenderTexture.get());
    }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
    {
-     mInventoryLayer->draw(*mWindow.get());
+     mInventoryLayer->draw(*mWindowRenderTexture.get());
    }
 
-   Menu::getInstance().draw(*mWindow.get());
-   MessageBox::draw(*mWindow.get());
+   Menu::getInstance().draw(*mWindowRenderTexture.get());
+   MessageBox::draw(*mWindowRenderTexture.get());
+
+   mWindowRenderTexture->display();
+   auto sprite = sf::Sprite(mWindowRenderTexture->getTexture());
+   mWindow->draw(sprite);
 
    mWindow->popGLStates();
-
    mWindow->display();
 }
 

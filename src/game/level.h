@@ -125,7 +125,7 @@ public:
    void drawRaycastLight(sf::RenderTarget& target);
    void drawParallaxMaps(sf::RenderTarget& target);
    void drawLayers(sf::RenderTarget& target, int from = 0, int to = 50);
-   void drawPhysicsLayer(sf::RenderTarget& target);
+   void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
 
    sf::Vector2f getSize();
