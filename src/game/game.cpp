@@ -250,7 +250,7 @@ void Game::initialize()
 
   showMainMenu();
 
-  Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetetive);
+  Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetitive);
 }
 
 

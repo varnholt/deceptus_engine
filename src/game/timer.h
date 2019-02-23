@@ -15,7 +15,7 @@ public:
    enum class Type
    {
       Singleshot,
-      Repetetive
+      Repetitive
    };
 
    std::chrono::milliseconds mInterval;
