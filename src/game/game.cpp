@@ -155,6 +155,9 @@ void Game::initializeWindow()
    int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
    int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
 
+   mRenderTextureOffset.x = static_cast<uint32_t>((gameConfig.mVideoModeWidth - textureWidth) / 2);
+   mRenderTextureOffset.y = static_cast<uint32_t>((gameConfig.mVideoModeHeight - textureHeight) / 2);
+
    mWindowRenderTexture = std::make_shared<sf::RenderTexture>();
    mWindowRenderTexture->create(
       static_cast<uint32_t>(textureWidth),
@@ -396,6 +399,7 @@ void Game::draw()
 
    mWindowRenderTexture->display();
    auto sprite = sf::Sprite(mWindowRenderTexture->getTexture());
+   sprite.setPosition(mRenderTextureOffset.x, mRenderTextureOffset.y);
    mWindow->draw(sprite);
 
    mWindow->popGLStates();
