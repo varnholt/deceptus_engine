@@ -145,9 +145,6 @@ void Weapon::loadTextures()
 }
 
 
-
-
-//----------------------------------------------------------------------------------------------------------------------
 void Weapon::updateBulletHitAnimations(float dt)
 {
    cleanupBullets();
@@ -165,5 +162,15 @@ void Weapon::updateBulletHitAnimations(float dt)
    }
 
    BulletHitAnimation::updateAnimations(dt);
+}
+
+
+void Weapon::drawBulletHits(sf::RenderTarget& target)
+{
+   auto bulletHits = BulletHitAnimation::getAnimations();
+   for (auto it = bulletHits->begin(); it != bulletHits->end(); ++it)
+   {
+      target.draw(*(*it));
+   }
 }
 

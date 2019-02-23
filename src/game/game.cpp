@@ -98,7 +98,7 @@
 // render texture height:   270 * 2 = 540px
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::createWindow()
+void Game::initializeWindow()
 {
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
@@ -246,23 +246,13 @@ void Game::initialize()
      [this](int32_t w, int32_t h){changeResolution(w, h);}
   );
 
-  createWindow();
+  initializeWindow();
 
   showMainMenu();
 
   Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetetive);
 }
 
-
-//----------------------------------------------------------------------------------------------------------------------
-void Game::drawBulletHits()
-{
-   auto bulletHits = BulletHitAnimation::getAnimations();
-   for (auto it = bulletHits->begin(); it != bulletHits->end(); ++it)
-   {
-      mWindow->draw(*(*it));
-   }
-}
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -367,9 +357,7 @@ void Game::draw()
 
    drawLevel();
 
-   // mLevel->draw(*mWindow.get());
-
-   drawBulletHits();
+   Weapon::drawBulletHits(*mWindow.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
@@ -531,7 +519,7 @@ void Game::openInventory()
 void Game::toggleFullScreen()
 {
     GameConfiguration::getInstance().mFullscreen = !GameConfiguration::getInstance().mFullscreen;
-    createWindow();
+    initializeWindow();
     mLevel->createViews();
 }
 
@@ -543,7 +531,7 @@ void Game::changeResolution(int32_t w, int32_t h)
     GameConfiguration::getInstance().mVideoModeHeight = h;
     GameConfiguration::getInstance().serializeToFile();
 
-    createWindow();
+    initializeWindow();
     mLevel->createViews();
 }
 
