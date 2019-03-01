@@ -26,11 +26,11 @@ MovingPlatform::MovingPlatform(GameNode *parent)
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::draw(sf::RenderTarget& window)
+void MovingPlatform::draw(sf::RenderTarget& target)
 {
    for (const auto& sprite : mSprites)
    {
-      window.draw(sprite);
+      target.draw(sprite);
    }
 }
 
