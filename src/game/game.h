@@ -35,10 +35,9 @@ private:
    void initializeController();
 
    void drawLevel();
-   void drawAtmosphere();
 
    void reset();
-   void takeScreenshot(sf::RenderTexture &texture);
+   void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
 
    void update();
    void updateGameState();
@@ -67,6 +66,7 @@ private:
    std::shared_ptr<sf::RenderWindow> mWindow;
    std::shared_ptr<sf::RenderTexture> mWindowRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
+   std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
    std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
    std::shared_ptr<Level> mLevel;
    std::unique_ptr<InfoLayer> mInfoLayer;
@@ -78,7 +78,7 @@ private:
    int32_t mFps;
    bool mScreenshot = false;
    bool mDrawPhysics = false;
-   int32_t mScreenshotCounter = 0;
+   std::map<std::string, int32_t> mScreenshotCounters;
    float mViewToTextureScale = 1.0f;
    sf::Vector2u mRenderTextureOffset;
 

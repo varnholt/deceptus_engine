@@ -135,9 +135,14 @@ void Game::initializeWindow()
       mWindowRenderTexture.reset();
    }
 
-   if (mLevelRenderTexture != nullptr)
+   if (mWindowRenderTexture != nullptr)
    {
-      mLevelRenderTexture.reset();
+      mWindowRenderTexture.reset();
+   }
+
+   if (mLevelBackgroundRenderTexture != nullptr)
+   {
+      mLevelBackgroundRenderTexture.reset();
    }
 
    if (mAtmosphereRenderTexture != nullptr)
@@ -160,6 +165,12 @@ void Game::initializeWindow()
 
    mWindowRenderTexture = std::make_shared<sf::RenderTexture>();
    mWindowRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+
+   mLevelBackgroundRenderTexture = std::make_shared<sf::RenderTexture>();
+   mLevelBackgroundRenderTexture->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight)
    );
@@ -273,59 +284,67 @@ void Game::initialize()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::takeScreenshot(sf::RenderTexture& texture)
+void Game::takeScreenshot(const std::string& basename, sf::RenderTexture& texture)
 {
    std::ostringstream ss;
-   ss << "screenshot_" << std::setw(2) << std::setfill('0') << mScreenshotCounter++ << ".png";
+   ss << basename << "_" << std::setw(2) << std::setfill('0') << mScreenshotCounters[basename] << ".png";
+   mScreenshotCounters[basename]++;
    texture.getTexture().copyToImage().saveToFile(ss.str());
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Game::drawAtmosphere()
-{
-   // render physics to texture
-   mAtmosphereRenderTexture->clear();
-   mLevel->drawAtmosphereLayer(*mAtmosphereRenderTexture.get());
-   mAtmosphereRenderTexture->display();
-
-   if (mScreenshot)
-   {
-      takeScreenshot(*mAtmosphereRenderTexture.get());
-   }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::drawLevel()
 {
-   // render background layers to texture so the atmosphere shader can be applied on it
-   mLevelRenderTexture->clear();
-
-   mLevel->updateViews();
-   mLevel->drawParallaxMaps(*mLevelRenderTexture.get());
-   mLevel->drawLayers(*mLevelRenderTexture.get(), 0, 15);
-   mLevelRenderTexture->display();
-
-   sf::Sprite sprite(mLevelRenderTexture->getTexture());
-   sprite.scale(
-      mViewToTextureScale,
-      mViewToTextureScale
-   );
-
-   drawAtmosphere();
-   updateAtmosphereShader();
-   mWindowRenderTexture->draw(sprite, &mAtmosphereShader);
-
-   mLevel->drawLayers(*mWindowRenderTexture.get(), 16, 50);
+   // render atmosphere to atmosphere texture, that texture is used in the shader only
+   mAtmosphereRenderTexture->clear();
+   mLevel->drawAtmosphereLayer(*mAtmosphereRenderTexture.get());
+   mAtmosphereRenderTexture->display();
 
    if (mScreenshot)
    {
-       takeScreenshot(*mLevelRenderTexture.get());
-       mScreenshot = false;
+      takeScreenshot("screenshot_atmosphere", *mAtmosphereRenderTexture.get());
    }
 
-   mLevel->drawRaycastLight(*mWindowRenderTexture.get());
+   // render layers affected by the atmosphere
+   mLevelBackgroundRenderTexture->clear();
+
+   mLevel->updateViews();
+   mLevel->drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
+   mLevel->drawLayers(*mLevelBackgroundRenderTexture.get(), 0, 15);
+   mLevelBackgroundRenderTexture->display();
+
+   if (mScreenshot)
+   {
+       takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
+   }
+
+   sf::Sprite sprite(mLevelBackgroundRenderTexture->getTexture());
+
+   // draw the atmospheric parts into the level texture
+   updateAtmosphereShader();
+   mLevelRenderTexture->draw(sprite, &mAtmosphereShader);
+
+   // draw the level layers into the level texture
+   mLevel->drawLayers(*mLevelRenderTexture.get(), 16);
+
+   // draw all the other things
+   mLevel->drawRaycastLight(*mLevelRenderTexture.get());
+   Weapon::drawBulletHits(*mLevelRenderTexture.get());
+
+   sf::View view(sf::FloatRect(0.0f, 0.0f, mLevelRenderTexture->getSize().x, mLevelRenderTexture->getSize().y));
+   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+
+   mLevelRenderTexture->setView(view);
+
+   mLevelRenderTexture->display();
+
+   if (mScreenshot)
+   {
+       takeScreenshot("screenshot_level", *mLevelRenderTexture.get());
+   }
+
+   mScreenshot = false;
 }
 
 
@@ -363,6 +382,16 @@ void Game::updateAtmosphereShader()
 }
 
 
+// frambuffers
+// - the window render texture
+//    - the level render texture
+//       - the level background render texture
+//    - info layer
+//    - menus
+//    - inventory
+//    - message boxes
+
+
 //----------------------------------------------------------------------------------------------------------------------
 void Game::draw()
 {
@@ -372,9 +401,12 @@ void Game::draw()
    mWindow->clear(sf::Color::Black);
    mWindow->pushGLStates();
 
+   mWindowRenderTexture->clear();
    drawLevel();
 
-   Weapon::drawBulletHits(*mWindowRenderTexture.get());
+   auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
+   levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
+   mWindowRenderTexture->draw(levelTextureSprite);
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
@@ -398,9 +430,9 @@ void Game::draw()
    MessageBox::draw(*mWindowRenderTexture.get());
 
    mWindowRenderTexture->display();
-   auto sprite = sf::Sprite(mWindowRenderTexture->getTexture());
-   sprite.setPosition(mRenderTextureOffset.x, mRenderTextureOffset.y);
-   mWindow->draw(sprite);
+   auto windowTextureSprite = sf::Sprite(mWindowRenderTexture->getTexture());
+   windowTextureSprite.setPosition(mRenderTextureOffset.x, mRenderTextureOffset.y);
+   mWindow->draw(windowTextureSprite);
 
    mWindow->popGLStates();
    mWindow->display();
