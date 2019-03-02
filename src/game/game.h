@@ -37,7 +37,6 @@ private:
    void drawLevel();
 
    void reset();
-   void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
 
    void update();
    void updateGameState();
@@ -65,9 +64,6 @@ private:
    std::shared_ptr<Player> mPlayer;
    std::shared_ptr<sf::RenderWindow> mWindow;
    std::shared_ptr<sf::RenderTexture> mWindowRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
    std::shared_ptr<Level> mLevel;
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
@@ -78,13 +74,7 @@ private:
    int32_t mFps;
    bool mScreenshot = false;
    bool mDrawPhysics = false;
-   std::map<std::string, int32_t> mScreenshotCounters;
-   float mViewToTextureScale = 1.0f;
    sf::Vector2u mRenderTextureOffset;
-
-   bool mAtmosphereEnabled = false;
-   sf::Shader mAtmosphereShader;
-   sf::Texture mAtmosphereDistortionMap;
 };
 
 #endif // GAME_H

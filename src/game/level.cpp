@@ -48,6 +48,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <thread>
 
@@ -79,8 +80,57 @@ void Level::setDescriptionFilename(const std::string &descriptionFilename)
 
 const Level::Physics& Level::getPhysics() const
 {
-  return mPhysics;
+   return mPhysics;
 }
+
+void Level::initializeTextures()
+{
+   GameConfiguration& gameConfig = GameConfiguration::getInstance();
+
+   // since stencil buffers are used, it is required to enable them explicitly
+   sf::ContextSettings contextSettings;
+   contextSettings.stencilBits = 8;
+
+   if (mLevelBackgroundRenderTexture != nullptr)
+   {
+      mLevelBackgroundRenderTexture.reset();
+   }
+
+   if (mAtmosphereRenderTexture != nullptr)
+   {
+     mAtmosphereRenderTexture.reset();
+   }
+
+   // this the render texture size derived from the window dimensions. as opposed to the window
+   // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
+   const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
+   const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+   const auto sizeRatio = std::min(ratioWidth, ratioHeight);
+   mViewToTextureScale = 1.0f / sizeRatio;
+
+   int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
+   int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
+
+   mLevelBackgroundRenderTexture = std::make_shared<sf::RenderTexture>();
+   mLevelBackgroundRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+
+   mLevelRenderTexture = std::make_shared<sf::RenderTexture>();
+   mLevelRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight),
+      contextSettings // the lights require stencils
+   );
+
+   mAtmosphereRenderTexture = std::make_shared<sf::RenderTexture>();
+   mAtmosphereRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+}
+
 
 Level::Level()
   : GameNode(nullptr),
@@ -842,20 +892,109 @@ void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 }
 
 
-//-----------------------------------------------------------------------------
-void Level::draw(sf::RenderTarget& target)
+//----------------------------------------------------------------------------------------------------------------------
+void Level::initializeAtmosphereShader()
 {
+  if (!mAtmosphereShader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
+  {
+    std::cout << "error loading water shader" << std::endl;
+    return;
+  }
+
+  if (!mAtmosphereDistortionMap.loadFromFile("data/effects/distortion_map.png"))
+  {
+    std::cout << "error loading distortion map" << std::endl;
+    return;
+  }
+
+  mAtmosphereDistortionMap.setRepeated(true);
+  mAtmosphereDistortionMap.setSmooth(true);
+
+  mAtmosphereShader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+  mAtmosphereShader.setUniform("distortionMapTexture", mAtmosphereDistortionMap);
+  mAtmosphereShader.setUniform("physicsTexture", mAtmosphereRenderTexture->getTexture());
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Level::updateAtmosphereShader()
+{
+  float distortionFactor = 0.02f;
+
+  mAtmosphereShader.setUniform("time", GlobalClock::getInstance()->getElapsedTimeInS() * 0.2f);
+  mAtmosphereShader.setUniform("distortionFactor", distortionFactor);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& texture)
+{
+   std::ostringstream ss;
+   ss << basename << "_" << std::setw(2) << std::setfill('0') << mScreenshotCounters[basename] << ".png";
+   mScreenshotCounters[basename]++;
+   texture.getTexture().copyToImage().saveToFile(ss.str());
+}
+
+
+
+//-----------------------------------------------------------------------------
+void Level::draw(
+   const std::shared_ptr<sf::RenderTexture>& window,
+   bool screenshot
+)
+{
+   // render atmosphere to atmosphere texture, that texture is used in the shader only
+   mAtmosphereRenderTexture->clear();
+   drawAtmosphereLayer(*mAtmosphereRenderTexture.get());
+   mAtmosphereRenderTexture->display();
+
+   if (screenshot)
+   {
+      takeScreenshot("screenshot_atmosphere", *mAtmosphereRenderTexture.get());
+   }
+
+   // render layers affected by the atmosphere
+   mLevelBackgroundRenderTexture->clear();
+
    updateViews();
+   drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
+   drawLayers(*mLevelBackgroundRenderTexture.get(), 0, 15);
+   mLevelBackgroundRenderTexture->display();
 
-   drawParallaxMaps(target);
+   if (screenshot)
+   {
+       takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
+   }
 
-   drawLayers(target, 0, 14);
+   sf::Sprite sprite(mLevelBackgroundRenderTexture->getTexture());
 
-   // raycast
-   // drawRaycastLight(window);
-   //
-   // draw map
-   // drawMap(target);
+   // draw the atmospheric parts into the level texture
+   updateAtmosphereShader();
+   mLevelRenderTexture->draw(sprite, &mAtmosphereShader);
+
+   // draw the level layers into the level texture
+   drawLayers(*mLevelRenderTexture.get(), 16);
+
+   // draw all the other things
+   drawRaycastLight(*mLevelRenderTexture.get());
+   Weapon::drawBulletHits(*mLevelRenderTexture.get());
+
+   // display the whole texture
+   sf::View view(sf::FloatRect(0.0f, 0.0f, mLevelRenderTexture->getSize().x, mLevelRenderTexture->getSize().y));
+   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   mLevelRenderTexture->setView(view);
+   mLevelRenderTexture->display();
+
+   if (screenshot)
+   {
+       takeScreenshot("screenshot_level", *mLevelRenderTexture.get());
+   }
+
+   screenshot = false;
+
+   auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
+   levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
+   window->draw(levelTextureSprite);
 }
 
 
@@ -910,6 +1049,15 @@ void Level::update(float dt)
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Level::updateBoom(const sf::Time& dt)
+{
+   // bounceX= mCameraShakeIntensity * 0.5f * sin(time * 71.0f) * mBounce;
+   // bounceY= mCameraShakeIntensity * 0.5f * sin(time * 113.0f) * mBounce;
+}
+
 
 
 //-----------------------------------------------------------------------------
