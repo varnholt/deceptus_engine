@@ -103,9 +103,8 @@ void Game::initializeWindow()
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
-   // https://en.sfml-dev.org/forums/index.php?topic=14130.0
-   sf::ContextSettings settings;
-   settings.stencilBits = 8;
+   sf::ContextSettings contextSettings;
+   contextSettings.stencilBits = 8;
 
    if (mWindow != nullptr)
    {
@@ -121,7 +120,7 @@ void Game::initializeWindow()
       ),
       GAME_NAME,
       gameConfig.mFullscreen ? sf::Style::Fullscreen : sf::Style::Default,
-      settings
+      contextSettings
     );
 
    mWindow->setVerticalSyncEnabled(true);
@@ -178,7 +177,8 @@ void Game::initializeWindow()
    mLevelRenderTexture = std::make_shared<sf::RenderTexture>();
    mLevelRenderTexture->create(
       static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
+      static_cast<uint32_t>(textureHeight),
+      contextSettings // the lights require stencils
    );
 
    mAtmosphereRenderTexture = std::make_shared<sf::RenderTexture>();
@@ -332,11 +332,10 @@ void Game::drawLevel()
    mLevel->drawRaycastLight(*mLevelRenderTexture.get());
    Weapon::drawBulletHits(*mLevelRenderTexture.get());
 
+   // display the whole texture
    sf::View view(sf::FloatRect(0.0f, 0.0f, mLevelRenderTexture->getSize().x, mLevelRenderTexture->getSize().y));
    view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-
    mLevelRenderTexture->setView(view);
-
    mLevelRenderTexture->display();
 
    if (mScreenshot)
