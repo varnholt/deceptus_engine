@@ -44,12 +44,10 @@ private:
 
    bool onLoad() override;
    void onUpdate(float time, float x, float y) override;
-   void onDraw1(sf::RenderTarget& target, sf::RenderStates states) const;
    void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
    void debug() const;
 
    void drawLines(sf::RenderTarget& target, std::shared_ptr<LightInstance> light) const;
-   void drawTriangles(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
    void drawQuads(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
 };
 
