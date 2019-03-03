@@ -48,6 +48,7 @@ struct LuaNode : public GameNode
    void luaSendPatrolPath();
    void luaSendPath(const std::vector<sf::Vector2f> &vec);
    void damage(int playerId, int damage, float forceX, float forceY);
+   void boom(float x, float y, float intensity);
 
    // property accessors
    bool getPropertyBool(const std::string& key);

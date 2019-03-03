@@ -81,7 +81,7 @@ public:
 
    sf::Vector2f getSize();
 
-   void update(float dt);
+   void update(const sf::Time& dt);
 
    b2World *getWorld() const;
    void setWorld(b2World *world);
@@ -93,6 +93,7 @@ public:
 
    Portal* getNearbyPortal() const;
    void toggleDoor();
+   void boom(float x, float y, float intensity);
 
    void reset();
 
@@ -178,6 +179,10 @@ protected:
    float mParallaxFactor[3] = {0.9f, 0.85f, 0.8f};
    float mViewWidth = 0.0f;
    float mViewHeight = 0.0f;
+   float mBoomIntensity = 0.0f;
+   float mBoomOffsetX = 0.0f;
+   float mBoomOffsetY = 0.0f;
+   float mCameraBoomIntensity = 1.0f;
    int32_t mLook = LookInactive;
 
    std::shared_ptr<LevelDescription> mDescription;
