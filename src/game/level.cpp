@@ -993,6 +993,7 @@ void Level::draw(
    screenshot = false;
 
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
+   levelTextureSprite.setPosition(mBoomOffsetX, mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
    window->draw(levelTextureSprite);
 }
@@ -1007,7 +1008,7 @@ sf::Vector2f Level::getSize()
 
 
 //-----------------------------------------------------------------------------
-void Level::update(float dt)
+void Level::update(const sf::Time& dt)
 {
    // clear conveyor belt state
    ConveyorBelt::update();
@@ -1017,33 +1018,34 @@ void Level::update(float dt)
    mWorld->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
 
    updateLookVector();
+   updateBoom(dt);
 
    for (auto& tileMap : mTileMaps)
    {
-      tileMap->update(dt);
+      tileMap->update(dt.asSeconds());
    }
 
    for (auto& platform : mPlatforms)
    {
-      platform->update(dt);
+      platform->update(dt.asSeconds());
    }
 
    for (auto& door : mDoors)
    {
-      door->update(dt);
+      door->update(dt.asSeconds());
    }
 
    for (auto& bouncer : mBouncers)
    {
-      bouncer->update(dt);
+      bouncer->update(dt.asSeconds());
    }
 
    for (auto& portal : mPortals)
    {
-      portal->update(dt);
+      portal->update(dt.asSeconds());
    }
 
-   LuaInterface::instance()->update(dt);
+   LuaInterface::instance()->update(dt.asSeconds());
 
    //mRaycastLight->mLights[0]-> = Player::getPlayer(0)->getBodyPosition();
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
@@ -1054,8 +1056,20 @@ void Level::update(float dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Level::updateBoom(const sf::Time& dt)
 {
-   // bounceX= mCameraShakeIntensity * 0.5f * sin(time * 71.0f) * mBounce;
-   // bounceY= mCameraShakeIntensity * 0.5f * sin(time * 113.0f) * mBounce;
+   if (mBoomIntensity > 0.0f)
+   {
+      mBoomOffsetX = mViewWidth  * 0.2f * mCameraBoomIntensity * 0.5f * sin(dt.asSeconds() * 71.0f)  * mBoomIntensity;
+      mBoomOffsetY = mViewHeight * 0.2f * mCameraBoomIntensity * 0.5f * sin(dt.asSeconds() * 113.0f) * mBoomIntensity;
+
+      // one detionation should take a third of a second
+      mBoomIntensity -= 3.0f * dt.asSeconds();
+   }
+   else
+   {
+      mBoomIntensity = 0.0f;
+      mBoomOffsetX = 0.0f;
+      mBoomOffsetY = 0.0f;
+   }
 }
 
 
@@ -1624,6 +1638,16 @@ void Level::toggleDoor()
    for (auto& door : mDoors)
    {
       door->toggle();
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::boom(float /*x*/, float /*y*/, float intensity)
+{
+   if (intensity > mBoomIntensity)
+   {
+      mBoomIntensity = intensity;
    }
 }
 

@@ -377,7 +377,7 @@ void Game::update()
       Weapon::updateBulletHitAnimations(dt.asSeconds());
       updateGameController();
       updateGameControllerForGame();
-      mLevel->update(dt.asSeconds());
+      mLevel->update(dt);
       mPlayer->update(dt);
       updateGameState();
    }

@@ -102,11 +102,30 @@ extern "C" int damage(lua_State* state)
    {
       auto playerId = static_cast<int32_t>(lua_tointeger(state, 1));
       auto damage = static_cast<int32_t>(lua_tonumber(state, 2));
-      auto dx = static_cast<float_t>(lua_tonumber(state, 3));
-      auto dy = static_cast<float_t>(lua_tonumber(state, 4));
+      auto dx = static_cast<float>(lua_tonumber(state, 3));
+      auto dy = static_cast<float>(lua_tonumber(state, 4));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
       node->damage(playerId, damage, dx, dy);
+   }
+
+   return 0;
+}
+
+
+extern "C" int boom(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 3)
+   {
+      auto x = static_cast<float>(lua_tonumber(state, 1));
+      auto y = static_cast<float>(lua_tonumber(state, 2));
+      auto intensity = static_cast<float>(lua_tonumber(state, 3));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+      node->boom(x, y, intensity);
    }
 
    return 0;
@@ -119,9 +138,9 @@ extern "C" int addShapeCircle(lua_State* state)
 
    if (argc == 3)
    {
-      auto r = static_cast<float_t>(lua_tonumber(state, 1));
-      auto x = static_cast<float_t>(lua_tonumber(state, 2));
-      auto y = static_cast<float_t>(lua_tonumber(state, 3));
+      auto r = static_cast<float>(lua_tonumber(state, 1));
+      auto x = static_cast<float>(lua_tonumber(state, 2));
+      auto y = static_cast<float>(lua_tonumber(state, 3));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
       node->addShapeCircle(r, x, y);
@@ -161,8 +180,8 @@ extern "C" int addShapePoly(lua_State* state)
       auto polyIndex = 0;
       for (auto i = 0; i < argc; i += 2)
       {
-         auto x = static_cast<float_t>(lua_tonumber(state, i));
-         auto y = static_cast<float_t>(lua_tonumber(state, i + 1));
+         auto x = static_cast<float>(lua_tonumber(state, i));
+         auto y = static_cast<float>(lua_tonumber(state, i + 1));
          poly[polyIndex].Set(x, y);
          polyIndex++;
       }
@@ -201,8 +220,8 @@ extern "C" int addWeapon(lua_State* state)
       auto polyIndex = 0;
       for (auto i = 0; i < argc; i += 2)
       {
-         auto x = static_cast<float_t>(lua_tonumber(state, i));
-         auto y = static_cast<float_t>(lua_tonumber(state, i + 1));
+         auto x = static_cast<float>(lua_tonumber(state, i));
+         auto y = static_cast<float>(lua_tonumber(state, i + 1));
          poly[polyIndex].Set(x, y);
          polyIndex++;
       }
@@ -253,7 +272,7 @@ extern "C" int playSample(lua_State* state)
    if (argc == 2)
    {
       auto sampleId = static_cast<Audio::Sample>(lua_tointeger(state, 1));
-      auto volume = static_cast<float_t>(lua_tonumber(state, 2));
+      auto volume = static_cast<float>(lua_tonumber(state, 2));
 
       Audio::getInstance()->playSample(sampleId, volume);
    }
@@ -366,6 +385,7 @@ void LuaNode::setupLua()
    lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
    lua_register(mState, "addShapeCircle", ::addShapeCircle);
    lua_register(mState, "addShapeRect", ::addShapeRect);
+   lua_register(mState, "boom", ::boom);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(mState);
@@ -492,7 +512,13 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 
 void LuaNode::damage(int playerId, int damage, float forceX, float forceY)
 {
-  Player::getPlayer(playerId)->damage(damage, sf::Vector2f(forceX, forceY));
+   Player::getPlayer(playerId)->damage(damage, sf::Vector2f(forceX, forceY));
+}
+
+
+void LuaNode::boom(float x, float y, float intensity)
+{
+   Level::getCurrentLevel()->boom(x, y, intensity);
 }
 
 
@@ -702,12 +728,12 @@ void LuaNode::updateVelocity()
 
    if (mKeysPressed & KeyPressedLeft)
    {
-      desiredVel = static_cast<float_t>(b2Max(velocity.x - acceleration, -velocityMax));
+      desiredVel = static_cast<float>(b2Max(velocity.x - acceleration, -velocityMax));
    }
 
    if (mKeysPressed & KeyPressedRight)
    {
-      desiredVel = static_cast<float_t>(b2Min( velocity.x + acceleration, velocityMax));
+      desiredVel = static_cast<float>(b2Min( velocity.x + acceleration, velocityMax));
    }
 
    // calc impulse, disregard time factor
