@@ -97,6 +97,8 @@ public:
    bool isMovingRight() const;
    bool isMovingLeft() const;
    bool isMoving() const;
+   bool isPointingRight() const;
+   bool isPointingLeft() const;
 
    void setStartPixelPosition(float x, float y);
 

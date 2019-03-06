@@ -571,7 +571,21 @@ bool Player::isMovingRight() const
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isMoving() const
 {
-  return isMovingLeft() || isMovingRight();
+   return isMovingLeft() || isMovingRight();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool Player::isPointingRight() const
+{
+   return !mPointsToLeft;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool Player::isPointingLeft() const
+{
+   return mPointsToLeft;
 }
 
 
@@ -766,24 +780,24 @@ void Player::updateAnimation(const sf::Time& dt)
    if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
    {
       std::cout << "jump ignition" << std::endl;
-      nextCycle = isMovingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
+      nextCycle = isPointingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
    }
    else if (isInAir())
    {
       if (mBody->GetLinearVelocity().y < -1.0f)
       {
          std::cout << "jump up" << std::endl;
-         nextCycle = isMovingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
+         nextCycle = isPointingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
       }
       else if (mBody->GetLinearVelocity().y > 1.0f)
       {
          std::cout << "jump down" << std::endl;
-         nextCycle = isMovingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
+         nextCycle = isPointingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
       }
       else
       {
          std::cout << "jump midair" << std::endl;
-         nextCycle = isMovingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+         nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
       }
    }
 //   else if (mCurrentCycle == jumpDownCycle)
