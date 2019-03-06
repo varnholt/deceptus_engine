@@ -257,6 +257,20 @@ private:
    std::shared_ptr<Animation> mDashLeftAligned;
    std::shared_ptr<Animation> mCrouchRightAligned;
    std::shared_ptr<Animation> mCrouchLeftAligned;
+
+
+   std::shared_ptr<Animation> mJumpInitRightAligned;
+   std::shared_ptr<Animation> mJumpUpRightAligned;
+   std::shared_ptr<Animation> mJumpMidairRightAligned;
+   std::shared_ptr<Animation> mJumpDownRightAligned;
+   std::shared_ptr<Animation> mJumpLandingRightAligned;
+
+   std::shared_ptr<Animation> mJumpInitLeftAligned;
+   std::shared_ptr<Animation> mJumpUpLeftAligned;
+   std::shared_ptr<Animation> mJumpMidairLeftAligned;
+   std::shared_ptr<Animation> mJumpDownLeftAligned;
+   std::shared_ptr<Animation> mJumpLandingLeftAligned;
+
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
 

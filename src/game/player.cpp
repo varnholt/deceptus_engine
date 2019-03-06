@@ -80,55 +80,79 @@ Player::~Player()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::initialize()
 {
-  setBodyViaPixelPosition(
-     Level::getCurrentLevel()->getStartPosition().x,
-     Level::getCurrentLevel()->getStartPosition().y
-  );
+   setBodyViaPixelPosition(
+      Level::getCurrentLevel()->getStartPosition().x,
+      Level::getCurrentLevel()->getStartPosition().y
+   );
 
-  mSpriteAnim.x = PLAYER_TILES_WIDTH;
-  mSpriteAnim.y = 0;
+   mSpriteAnim.x = PLAYER_TILES_WIDTH;
+   mSpriteAnim.y = 0;
 
-  mPortalClock.restart();
-  mDamageClock.restart();
+   mPortalClock.restart();
+   mDamageClock.restart();
 
-  mWeaponSystem->initialize();
+   mWeaponSystem->initialize();
 
-  createPlayerBody();
+   createPlayerBody();
 
-  mIdleRightAligned     = AnimationPool::getInstance().add("player_idle_right_aligned",      0.0f, 0.0f, true, false);
-  mIdleLeftAligned      = AnimationPool::getInstance().add("player_idle_left_aligned",       0.0f, 0.0f, true, false);
-  mRunRightAligned      = AnimationPool::getInstance().add("player_run_right_aligned",       0.0f, 0.0f, true, false);
-  mRunLeftAligned       = AnimationPool::getInstance().add("player_run_left_aligned",        0.0f, 0.0f, true, false);
-  mDashRightAligned     = AnimationPool::getInstance().add("player_dash_right_aligned",      0.0f, 0.0f, true, false);
-  mDashLeftAligned      = AnimationPool::getInstance().add("player_dash_left_aligned",       0.0f, 0.0f, true, false);
-  mCrouchRightAligned   = AnimationPool::getInstance().add("player_crouch_right_aligned",    0.0f, 0.0f, true, false);
-  mCrouchLeftAligned    = AnimationPool::getInstance().add("player_crouch_left_aligned",     0.0f, 0.0f, true, false);
+   mIdleRightAligned        = AnimationPool::getInstance().add("player_idle_right_aligned",         0.0f, 0.0f, true, false);
+   mIdleLeftAligned         = AnimationPool::getInstance().add("player_idle_left_aligned",          0.0f, 0.0f, true, false);
+   mRunRightAligned         = AnimationPool::getInstance().add("player_run_right_aligned",          0.0f, 0.0f, true, false);
+   mRunLeftAligned          = AnimationPool::getInstance().add("player_run_left_aligned",           0.0f, 0.0f, true, false);
+   mDashRightAligned        = AnimationPool::getInstance().add("player_dash_right_aligned",         0.0f, 0.0f, true, false);
+   mDashLeftAligned         = AnimationPool::getInstance().add("player_dash_left_aligned",          0.0f, 0.0f, true, false);
+   mCrouchRightAligned      = AnimationPool::getInstance().add("player_crouch_right_aligned",       0.0f, 0.0f, true, false);
+   mCrouchLeftAligned       = AnimationPool::getInstance().add("player_crouch_left_aligned",        0.0f, 0.0f, true, false);
 
-  mAnimations.push_back(mIdleRightAligned);
-  mAnimations.push_back(mIdleLeftAligned);
-  mAnimations.push_back(mRunRightAligned);
-  mAnimations.push_back(mRunLeftAligned);
-  mAnimations.push_back(mDashRightAligned);
-  mAnimations.push_back(mDashLeftAligned);
-  mAnimations.push_back(mCrouchRightAligned);
-  mAnimations.push_back(mCrouchLeftAligned);
+   mJumpInitRightAligned    = AnimationPool::getInstance().add("player_jump_init_right_aligned",    0.0f, 0.0f, true, false);
+   mJumpUpRightAligned      = AnimationPool::getInstance().add("player_jump_up_right_aligned",      0.0f, 0.0f, true, false);
+   mJumpMidairRightAligned  = AnimationPool::getInstance().add("player_jump_midair_right_aligned",  0.0f, 0.0f, true, false);
+   mJumpDownRightAligned    = AnimationPool::getInstance().add("player_jump_down_right_aligned",    0.0f, 0.0f, true, false);
+   mJumpLandingRightAligned = AnimationPool::getInstance().add("player_jump_landing_right_aligned", 0.0f, 0.0f, true, false);
 
-  for (auto& i : mAnimations)
-  {
-     i->mLooped = true;
-  }
+   mJumpInitLeftAligned     = AnimationPool::getInstance().add("player_jump_init_left_aligned",     0.0f, 0.0f, true, false);
+   mJumpUpLeftAligned       = AnimationPool::getInstance().add("player_jump_up_left_aligned",       0.0f, 0.0f, true, false);
+   mJumpMidairLeftAligned   = AnimationPool::getInstance().add("player_jump_midair_left_aligned",   0.0f, 0.0f, true, false);
+   mJumpDownLeftAligned     = AnimationPool::getInstance().add("player_jump_down_left_aligned",     0.0f, 0.0f, true, false);
+   mJumpLandingLeftAligned  = AnimationPool::getInstance().add("player_jump_landing_left_aligned",  0.0f, 0.0f, true, false);
 
-  if (mTexture.loadFromFile("data/sprites/player.png"))
-  {
-     // mSprite.scale(4.0f, 4.0f);
-     mSprite.setTexture(mTexture);
-  }
-  else
-  {
-     printf("failed loading player spriteset");
-  }
+   mAnimations.push_back(mIdleRightAligned);
+   mAnimations.push_back(mIdleLeftAligned);
+   mAnimations.push_back(mRunRightAligned);
+   mAnimations.push_back(mRunLeftAligned);
+   mAnimations.push_back(mDashRightAligned);
+   mAnimations.push_back(mDashLeftAligned);
+   mAnimations.push_back(mCrouchRightAligned);
+   mAnimations.push_back(mCrouchLeftAligned);
 
-  initializeController();
+   mAnimations.push_back(mJumpInitRightAligned);
+   mAnimations.push_back(mJumpUpRightAligned);
+   mAnimations.push_back(mJumpDownRightAligned);
+   mAnimations.push_back(mJumpLandingRightAligned);
+   mAnimations.push_back(mJumpMidairRightAligned);
+
+   mAnimations.push_back(mJumpInitLeftAligned);
+   mAnimations.push_back(mJumpUpLeftAligned);
+   mAnimations.push_back(mJumpDownLeftAligned);
+   mAnimations.push_back(mJumpLandingLeftAligned);
+   mAnimations.push_back(mJumpMidairLeftAligned);
+
+   for (auto& i : mAnimations)
+   {
+      i->mLooped = true;
+   }
+
+   if (mTexture.loadFromFile("data/sprites/player.png"))
+   {
+      // mSprite.scale(4.0f, 4.0f);
+      mSprite.setTexture(mTexture);
+   }
+   else
+   {
+      printf("failed loading player spriteset");
+   }
+
+   initializeController();
 }
 
 
@@ -737,6 +761,36 @@ void Player::updateAnimation(const sf::Time& dt)
          nextCycle = mIdleRightAligned;
       }
    }
+
+   // jump init
+   if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+   {
+      std::cout << "jump ignition" << std::endl;
+      nextCycle = isMovingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
+   }
+   else if (isInAir())
+   {
+      if (mBody->GetLinearVelocity().y < -1.0f)
+      {
+         std::cout << "jump up" << std::endl;
+         nextCycle = isMovingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
+      }
+      else if (mBody->GetLinearVelocity().y > 1.0f)
+      {
+         std::cout << "jump down" << std::endl;
+         nextCycle = isMovingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
+      }
+      else
+      {
+         std::cout << "jump midair" << std::endl;
+         nextCycle = isMovingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+      }
+   }
+//   else if (mCurrentCycle == jumpDownCycle)
+//   {
+//      // player landed
+//   }
+
 
    // reset x if animation cycle changed
    if (nextCycle != mCurrentCycle)
