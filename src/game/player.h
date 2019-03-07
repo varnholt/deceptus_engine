@@ -16,7 +16,7 @@
 class Animation;
 class GameContactListener;
 class Weapon;
-class WeaponSystem;
+struct WeaponSystem;
 
 const sf::Vector2f vector2fZero;
 
@@ -230,6 +230,7 @@ private:
 
    int mAnimSpeed = 50;
    int mJumpSteps = 0;
+   int mJumpAnimationReference = 0;
 
    bool mPointsToLeft = false;
    bool mVisible = true;

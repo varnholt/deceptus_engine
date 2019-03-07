@@ -708,7 +708,7 @@ void Player::updateAnimation(const sf::Time& dt)
 {
    std::shared_ptr<Animation> nextCycle = nullptr;
 
-   [[maybe_unused]] auto velocity = mBody->GetLinearVelocity().x;
+   auto velocity = mBody->GetLinearVelocity();
    const auto inAir = isInAir();
    const auto inWater = isInWater();
    auto requiresUpdate = true;
@@ -779,32 +779,38 @@ void Player::updateAnimation(const sf::Time& dt)
    // jump init
    if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
    {
+      mJumpAnimationReference = 0;
       std::cout << "jump ignition" << std::endl;
       nextCycle = isPointingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
    }
-   else if (isInAir())
+   else if (inAir && !inWater)
    {
-      if (mBody->GetLinearVelocity().y < -1.0f)
+      if (velocity.y < -1.0f)
       {
          std::cout << "jump up" << std::endl;
          nextCycle = isPointingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
+         mJumpAnimationReference = 1;
       }
-      else if (mBody->GetLinearVelocity().y > 1.0f)
+      else if (velocity.y > 1.0f)
       {
          std::cout << "jump down" << std::endl;
          nextCycle = isPointingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
+         mJumpAnimationReference = 2;
       }
       else
       {
-         std::cout << "jump midair" << std::endl;
-         nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+          // means: we haven't been moving down yet
+         if (mJumpAnimationReference == 1)
+         {
+             std::cout << "jump midair" << std::endl;
+             nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+         }
       }
    }
-//   else if (mCurrentCycle == jumpDownCycle)
-//   {
-//      // player landed
-//   }
-
+   else if (mJumpAnimationReference == 2)
+   {
+      std::cout << "jump landing" << std::endl;
+   }
 
    // reset x if animation cycle changed
    if (nextCycle != mCurrentCycle)
