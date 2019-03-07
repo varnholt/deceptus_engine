@@ -802,13 +802,14 @@ void Player::updateAnimation(const sf::Time& dt)
           // means: we haven't been moving down yet
          if (mJumpAnimationReference == 1)
          {
-             std::cout << "jump midair" << std::endl;
-             nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+            std::cout << "jump midair" << std::endl;
+            nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
          }
       }
    }
    else if (mJumpAnimationReference == 2)
    {
+      mJumpAnimationReference = 3;
       std::cout << "jump landing" << std::endl;
    }
 
