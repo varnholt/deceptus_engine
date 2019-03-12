@@ -17,6 +17,7 @@ MenuScreenVideo::MenuScreenVideo()
 }
 
 
+
 void MenuScreenVideo::up()
 {
    auto next = static_cast<int32_t>(mSelection);
@@ -89,6 +90,8 @@ void MenuScreenVideo::select(int32_t step)
         default:
             break;
     }
+
+    updateLayers();
 }
 
 
@@ -154,7 +157,7 @@ void MenuScreenVideo::updateLayers()
    auto brightness = mSelection == Selection::Brightness;
 
    auto monitorSelection = 0;
-   auto resolutionSelection = 0;
+   auto resolutionSelection = 0u;
    auto displayModeSelection = 0;
    auto vsyncSelection = 0;
 
@@ -162,6 +165,21 @@ void MenuScreenVideo::updateLayers()
    if (fullscreen)
    {
        displayModeSelection = 2;
+   }
+
+   auto resolution_width = GameConfiguration::getInstance().mVideoModeWidth;
+   auto resolution_height = GameConfiguration::getInstance().mVideoModeHeight;
+
+   for (auto index = 0u; index < mVideoModes.size(); index++)
+   {
+      if (
+            mVideoModes[index][0] == resolution_width
+         && mVideoModes[index][1] == resolution_height
+      )
+      {
+         resolutionSelection = index;
+         break;
+      }
    }
 
 
