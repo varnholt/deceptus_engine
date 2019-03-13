@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D currentTexture;
 uniform sampler2D distortionMapTexture;
 uniform sampler2D physicsTexture;
