@@ -20,11 +20,13 @@ void from_json(const nlohmann::json& j, AnimationSettings& settings)
         settings.mFrameDurations.push_back(sf::milliseconds(frameDurations.at(0)));
       }
    }
-
-   // otherwise have one frame duration for each frame
-   for (const auto duration : frameDurations)
+   else
    {
-     settings.mFrameDurations.push_back(sf::milliseconds(duration));
+      // otherwise have one frame duration for each frame
+      for (const auto duration : frameDurations)
+      {
+        settings.mFrameDurations.push_back(sf::milliseconds(duration));
+      }
    }
 
    for (auto i = 0; i < spriteCount; i++)
