@@ -34,7 +34,7 @@ public:
 
    sf::Vertex mVertices[4];
 
-   sf::Time mFrameTime = sf::seconds(0.2f);
+   std::vector<sf::Time> mFrameTimes;
    sf::Time mCurrentTime;
    sf::Time mElapsed;
 

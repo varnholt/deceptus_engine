@@ -18,11 +18,14 @@ const sf::Time animationDuration = sf::milliseconds(400);
 //----------------------------------------------------------------------------------------------------------------------
 BulletHitAnimation::BulletHitAnimation()
 {
-   mFrameTime = sf::seconds(frameTime);
-
    if (!sInitialized)
    {
       initialize();
+   }
+
+   for (auto i = 0u; i < sFrames.size(); i++)
+   {
+      mFrameTimes.push_back(sf::seconds(frameTime));
    }
 
    setOrigin(width / 2, height / 2);
