@@ -1,3 +1,5 @@
+#version 120
+
 varying vec4 lightpos;
 varying vec4 pos;
 
