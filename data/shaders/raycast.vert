@@ -1,3 +1,5 @@
+#version 120
+
 uniform vec2 light1;
 varying vec4 lightpos;
 varying vec4 pos;

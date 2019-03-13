@@ -1,3 +1,5 @@
+#version 120
+
 uniform float wave_phase;
 uniform vec2 wave_amplitude;
 
