@@ -44,7 +44,7 @@ std::shared_ptr<Animation> AnimationPool::add(
    animation->mName = name;
    animation->mFrames = settings->mFrames;
    animation->mTexture = settings->mTexture;
-   animation->mFrameTime = settings->mFrameDuration;
+   animation->mFrameTimes = settings->mFrameDurations;
 
    if (autoPlay)
    {
