@@ -120,6 +120,8 @@ public:
    void initializeTextures();
    void initializeAtmosphereShader();
    void updateAtmosphereShader();
+   void initializeGammaShader();
+   void updateGammaShader();
 
 
 protected:
@@ -218,6 +220,7 @@ protected:
    bool mAtmosphereEnabled = false;
    sf::Shader mAtmosphereShader;
    sf::Texture mAtmosphereDistortionMap;
+   sf::Shader mGammaShader;
 
    // box2d
 

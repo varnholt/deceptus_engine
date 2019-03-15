@@ -417,6 +417,13 @@ DISTFILES += \
     data/scripts/enemies/helpers.lua \
     data/scripts/enemies/vectorial2.lua \
     data/config/levels.json \
-    data/sprites/animations.json
+    data/sprites/animations.json \
+    data/shaders/blur.frag \
+    data/shaders/brightness.frag \
+    data/shaders/pixelate.frag \
+    data/shaders/raycast.frag \
+    data/shaders/water.frag \
+    data/shaders/raycast.vert \
+    data/shaders/wave.vert
 
 
