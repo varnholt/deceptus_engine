@@ -7,7 +7,9 @@
         "video_mode_height": 900,
         "video_mode_width": 1600,
         "view_height": 270,
-        "view_width": 480
+        "view_width": 480,
+        "brightness": 0.5,
+        "vsync": true
     }
 }
 

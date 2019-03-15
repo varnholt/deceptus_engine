@@ -28,6 +28,8 @@ std::string GameConfiguration::serialize()
             {"view_width",        mViewWidth},
             {"view_height",       mViewHeight},
             {"fullscreen",        mFullscreen},
+            {"brightness",        mBrightness},
+            {"vsync",             mVSync},
 
             {"audio_volume_master", mAudioVolumeMaster},
             {"audio_volume_sfx",    mAudioVolumeSfx},
@@ -52,6 +54,8 @@ void GameConfiguration::deserialize(const std::string& data)
        mViewWidth       = config["GameConfiguration"]["view_width"].get<int32_t>();
        mViewHeight      = config["GameConfiguration"]["view_height"].get<int32_t>();
        mFullscreen      = config["GameConfiguration"]["fullscreen"].get<bool>();
+       mBrightness      = config["GameConfiguration"]["brightness"].get<float>();
+       mVSync           = config["GameConfiguration"]["vsync"].get<bool>();
 
        mViewScaleWidth = static_cast<float>(mViewWidth) / static_cast<float>(mVideoModeWidth);
        mViewScaleHeight = static_cast<float>(mViewHeight) / static_cast<float>(mVideoModeHeight);

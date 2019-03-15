@@ -87,10 +87,36 @@ void MenuScreenVideo::select(int32_t step)
             break;
         }
 
+        case Selection::Brightness:
+        {
+           float brightness = GameConfiguration::getInstance().mBrightness;
+           brightness += (0.01f * step);
+
+           if (brightness < 0.0f)
+           {
+              brightness = 0.0f;
+           }
+           else if (brightness > 1.0f)
+           {
+              brightness = 1.0f;
+           }
+
+           GameConfiguration::getInstance().mBrightness = brightness;
+           break;
+        }
+
+        case Selection::VSync:
+        {
+           GameConfiguration::getInstance().mVSync = !GameConfiguration::getInstance().mVSync;
+           mVsyncCallback();
+           break;
+        }
+
         default:
             break;
     }
 
+    GameConfiguration::getInstance().serializeToFile();
     updateLayers();
 }
 
@@ -109,7 +135,13 @@ void MenuScreenVideo::setFullscreenCallback(MenuScreenVideo::FullscreenCallback 
 
 void MenuScreenVideo::setResolutionCallback(MenuScreenVideo::ResolutionCallback callback)
 {
-    mResolutionCallback = callback;
+   mResolutionCallback = callback;
+}
+
+
+void MenuScreenVideo::setVSyncCallback(VSyncCallback callback)
+{
+   mVsyncCallback = callback;
 }
 
 
@@ -159,7 +191,6 @@ void MenuScreenVideo::updateLayers()
    auto monitorSelection = 0;
    auto resolutionSelection = 0u;
    auto displayModeSelection = 0;
-   auto vsyncSelection = 0;
 
    auto fullscreen = GameConfiguration::getInstance().mFullscreen;
    if (fullscreen)
@@ -182,6 +213,8 @@ void MenuScreenVideo::updateLayers()
       }
    }
 
+   const auto brightnessValue = GameConfiguration::getInstance().mBrightness;
+   const auto vsyncSelection = (GameConfiguration::getInstance().mVSync) ? 0 : 1;
 
    mLayers["defaults_xbox_0"]->mVisible = false;
    mLayers["defaults_xbox_1"]->mVisible = false;
@@ -224,6 +257,7 @@ void MenuScreenVideo::updateLayers()
    mLayers["brightness_arrows"]->mVisible = brightness;
    mLayers["brightness_h"]->mVisible = true;
    mLayers["brightness_value"]->mVisible = true;
+   mLayers["brightness_h"]->mSprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
 
    mLayers["displayMode_text_0"]->mVisible = !displayMode;
    mLayers["displayMode_text_1"]->mVisible = displayMode;
