@@ -31,7 +31,6 @@ public:
 private:
 
    void initializeWindow();
-   void initializeAtmosphereShader();
    void initializeController();
 
    void drawLevel();

@@ -98,7 +98,7 @@ void Level::initializeTextures()
 
    if (mAtmosphereRenderTexture != nullptr)
    {
-     mAtmosphereRenderTexture.reset();
+      mAtmosphereRenderTexture.reset();
    }
 
    // this the render texture size derived from the window dimensions. as opposed to the window
@@ -129,6 +129,9 @@ void Level::initializeTextures()
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight)
    );
+
+   initializeAtmosphereShader();
+   initializeGammaShader();
 }
 
 
@@ -917,6 +920,27 @@ void Level::initializeAtmosphereShader()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Level::initializeGammaShader()
+{
+   if (!mGammaShader.loadFromFile("data/shaders/brightness.frag", sf::Shader::Fragment))
+   {
+      std::cout << "error loading gamma shader" << std::endl;
+      return;
+   }
+
+   mGammaShader.setUniform("texture", mLevelRenderTexture->getTexture());
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Level::updateGammaShader()
+{
+    float gamma = 0.3f;
+    mGammaShader.setUniform("gamma", gamma);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Level::updateAtmosphereShader()
 {
   float distortionFactor = 0.02f;
@@ -995,7 +1019,9 @@ void Level::draw(
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
    levelTextureSprite.setPosition(mBoomOffsetX, mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
-   window->draw(levelTextureSprite);
+
+   updateGammaShader();
+   window->draw(levelTextureSprite, &mGammaShader);
 }
 
 
