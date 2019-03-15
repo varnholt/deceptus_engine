@@ -935,8 +935,9 @@ void Level::initializeGammaShader()
 //----------------------------------------------------------------------------------------------------------------------
 void Level::updateGammaShader()
 {
-    float gamma = 0.3f;
-    mGammaShader.setUniform("gamma", gamma);
+   float brightnessLevel = 0.5f;
+   float gamma = 2.2f - (GameConfiguration::getInstance().mBrightness - 0.5f);
+   mGammaShader.setUniform("gamma", gamma);
 }
 
 

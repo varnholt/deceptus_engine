@@ -20,6 +20,7 @@ public:
    };
 
    using FullscreenCallback = std::function<void(void)>;
+   using VSyncCallback = std::function<void(void)>;
    using ResolutionCallback = std::function<void(int32_t, int32_t)>;
 
    MenuScreenVideo();
@@ -35,6 +36,7 @@ public:
 
    void setFullscreenCallback(FullscreenCallback callback);
    void setResolutionCallback(ResolutionCallback callback);
+   void setVSyncCallback(VSyncCallback callback);
 
    Selection mSelection = Selection::Monitor;
 
@@ -43,6 +45,7 @@ private:
 
     FullscreenCallback mFullscreenCallback;
     ResolutionCallback mResolutionCallback;
+    VSyncCallback mVsyncCallback;
     std::vector<std::array<int32_t, 2>> mVideoModes;
 
 };

@@ -15,6 +15,8 @@ struct GameConfiguration
   bool mFullscreen = false;
   float mViewScaleWidth = 1.0f;
   float mViewScaleHeight = 1.0f;
+  float mBrightness = 0.5f;
+  bool mVSync = false;
 
   int32_t mAudioVolumeMaster = 50;
   int32_t mAudioVolumeSfx = 50;

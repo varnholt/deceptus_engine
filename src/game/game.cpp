@@ -123,7 +123,7 @@ void Game::initializeWindow()
       contextSettings
     );
 
-   mWindow->setVerticalSyncEnabled(true);
+   mWindow->setVerticalSyncEnabled(gameConfig.mVSync);
    mWindow->setFramerateLimit(60);
    mWindow->setKeyRepeatEnabled(false);
    mWindow->setMouseCursorVisible(false);
@@ -236,6 +236,13 @@ void Game::initialize()
 
   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
      [this](int32_t w, int32_t h){changeResolution(w, h);}
+  );
+
+  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
+     [this](){
+     initializeWindow();
+     mLevel->createViews();
+    }
   );
 
   initializeWindow();
