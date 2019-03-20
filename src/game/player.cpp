@@ -214,7 +214,7 @@ void Player::draw(sf::RenderTarget& target)
 
    auto time = GlobalClock::getInstance()->getElapsedTimeInMs();
    auto damageTime = mDamageClock.getElapsedTime().asMilliseconds();
-   if (time > 3000 && damageTime < 3000)
+   if (mDamageInitialized && time > 3000 && damageTime < 3000)
    {
       if ((damageTime / 100) % 2 == 0)
       {
@@ -1077,11 +1077,12 @@ void Player::damage(int damage, const sf::Vector2f& force)
 
    if (mDamageClock.getElapsedTime().asMilliseconds() > 3000)
    {
+      mDamageInitialized = true;
+
       Audio::getInstance()->playSample(Audio::SampleHurt);
 
-      // I'm not converting this to PPM to make the effect of the applied force more visible
+      // not converting this to PPM to make the effect of the applied force more visible
       auto body = getBody();
-      // body->ApplyForceToCenter(b2Vec2(force.x, force.y), true);
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
       printf("player damage: %d\n", damage);
@@ -1308,7 +1309,7 @@ void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
-   setCrouching(mKeysPressed & KeyPressedDown); // CLEAN UP!
+   setCrouching(mKeysPressed & KeyPressedDown && !isInAir()); // CLEAN UP!
 
    updateAnimation(dt);
    updateExtraManager();

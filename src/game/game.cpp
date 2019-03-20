@@ -275,6 +275,7 @@ void Game::draw()
    mWindowRenderTexture->clear();
 
    mLevel->draw(mWindowRenderTexture, mScreenshot);
+   mScreenshot = false;
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
