@@ -227,6 +227,7 @@ private:
    sf::Clock mJumpClock;
    sf::Clock mPortalClock;
    sf::Clock mDamageClock;
+   bool mDamageInitialized = false;
 
    int mAnimSpeed = 50;
    int mJumpSteps = 0;
