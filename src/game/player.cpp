@@ -777,40 +777,43 @@ void Player::updateAnimation(const sf::Time& dt)
    }
 
    // jump init
-   if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+   if (mDashSteps == 0)
    {
-      mJumpAnimationReference = 0;
-      std::cout << "jump ignition" << std::endl;
-      nextCycle = isPointingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
-   }
-   else if (inAir && !inWater)
-   {
-      if (velocity.y < -1.0f)
+      if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
       {
-         std::cout << "jump up" << std::endl;
-         nextCycle = isPointingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
-         mJumpAnimationReference = 1;
+         mJumpAnimationReference = 0;
+         std::cout << "jump ignition" << std::endl;
+         nextCycle = isPointingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
       }
-      else if (velocity.y > 1.0f)
+      else if (inAir && !inWater)
       {
-         std::cout << "jump down" << std::endl;
-         nextCycle = isPointingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
-         mJumpAnimationReference = 2;
-      }
-      else
-      {
-          // means: we haven't been moving down yet
-         if (mJumpAnimationReference == 1)
+         if (velocity.y < -1.0f)
          {
-            std::cout << "jump midair" << std::endl;
-            nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+            std::cout << "jump up" << std::endl;
+            nextCycle = isPointingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
+            mJumpAnimationReference = 1;
+         }
+         else if (velocity.y > 1.0f)
+         {
+            std::cout << "jump down" << std::endl;
+            nextCycle = isPointingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
+            mJumpAnimationReference = 2;
+         }
+         else
+         {
+             // means: we haven't been moving down yet
+            if (mJumpAnimationReference == 1)
+            {
+               std::cout << "jump midair" << std::endl;
+               nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+            }
          }
       }
-   }
-   else if (mJumpAnimationReference == 2)
-   {
-      mJumpAnimationReference = 3;
-      std::cout << "jump landing" << std::endl;
+      else if (mJumpAnimationReference == 2)
+      {
+         mJumpAnimationReference = 3;
+         std::cout << "jump landing" << std::endl;
+      }
    }
 
    // reset x if animation cycle changed
