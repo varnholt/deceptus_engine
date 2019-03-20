@@ -1704,32 +1704,41 @@ void Player::jumpForce()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
-  if (dir == Dash::None)
-  {
-    dir = mDashDir;
-  }
-  else
-  {
-    mDashSteps = PhysicsConfiguration::getInstance().mPlayerDashSteps;
-    mDashDir = dir;
-  }
+   // dir is the initial dir passed in on button press
+   // Dash::None is passed in on regular updates after the initial press
 
-  if (mDashSteps == 0 || mDashDir == Dash::None)
-  {
-    return;
-  }
+   if (dir == Dash::None)
+   {
+      dir = mDashDir;
+   }
+   else
+   {
+      // prevent dash spam
+      if (mDashSteps > 0)
+      {
+         return;
+      }
 
-  auto left = (dir == Dash::Left);
-  mPointsToLeft = (left);
-  auto dashVector = mDashSteps * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerDashFactor;
-  auto impulse = (left) ? -dashVector : dashVector;
+      mDashSteps = PhysicsConfiguration::getInstance().mPlayerDashSteps;
+      mDashDir = dir;
+   }
 
-  mBody->ApplyForceToCenter(
-     b2Vec2(impulse, 0.0f),
-     false
-  );
+   if (mDashSteps == 0 || mDashDir == Dash::None)
+   {
+      return;
+   }
 
-  mDashSteps--;
+   auto left = (dir == Dash::Left);
+   mPointsToLeft = (left);
+   auto dashVector = mDashSteps * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerDashFactor;
+   auto impulse = (left) ? -dashVector : dashVector;
+
+   mBody->ApplyForceToCenter(
+      b2Vec2(impulse, 0.0f),
+      false
+   );
+
+   mDashSteps--;
 }
 
 
