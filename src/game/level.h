@@ -106,6 +106,7 @@ public:
 
    void updateLookVector();
    void updateLookState(Look look, bool enable);
+   bool isLookActive() const;
 
    std::shared_ptr<sf::View> getLevelView();
 
@@ -124,7 +125,7 @@ public:
    void updateGammaShader();
 
 
-protected:
+   protected:
 
    void updateBoom(const sf::Time& dt);
 
