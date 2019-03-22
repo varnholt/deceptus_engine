@@ -1724,6 +1724,9 @@ void Player::updateDash(Dash dir)
 
       mDashSteps = PhysicsConfiguration::getInstance().mPlayerDashSteps;
       mDashDir = dir;
+
+      // disable gravity for player while dash is active
+      mBody->SetGravityScale(0.0f);
    }
 
    if (mDashSteps == 0 || mDashDir == Dash::None)
@@ -1742,6 +1745,12 @@ void Player::updateDash(Dash dir)
    );
 
    mDashSteps--;
+
+   // re-enabled gravity for player
+   if (mDashSteps == 0)
+   {
+      mBody->SetGravityScale(1.0f);
+   }
 }
 
 
