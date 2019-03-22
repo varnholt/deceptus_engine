@@ -280,5 +280,6 @@ private:
 
    static int sNextId;
    static std::vector<Player*> sPlayerList;
+   void updateCrouch();
 };
 
