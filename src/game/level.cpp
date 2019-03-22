@@ -528,6 +528,13 @@ void Level::loadTmx()
 
 
 //-----------------------------------------------------------------------------
+bool Level::isLookActive() const
+{
+   return (mLook & LookActive);
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::loadLevel()
 {
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();

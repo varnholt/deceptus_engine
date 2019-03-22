@@ -711,6 +711,7 @@ void Player::updateAnimation(const sf::Time& dt)
    auto velocity = mBody->GetLinearVelocity();
    const auto inAir = isInAir();
    const auto inWater = isInWater();
+   const auto lookActive = (Level::getCurrentLevel()->isLookActive());
    auto requiresUpdate = true;
 
    // dash
@@ -727,7 +728,7 @@ void Player::updateAnimation(const sf::Time& dt)
    }
 
    // run / crouch
-   else if (isMovingRight() && !inAir && !inWater)
+   else if (isMovingRight() && !inAir && !inWater && !lookActive)
    {
       if (mCrouching)
       {
@@ -738,7 +739,7 @@ void Player::updateAnimation(const sf::Time& dt)
          nextCycle = mRunRightAligned;
       }
    }
-   else if (isMovingLeft() && !inAir && !inWater)
+   else if (isMovingLeft() && !inAir && !inWater && !lookActive)
    {
       if (mCrouching)
       {
