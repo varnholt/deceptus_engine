@@ -1309,12 +1309,46 @@ void Player::setZ(int z)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateCrouch()
+{
+   auto downPressed = false;
+
+   if (isControllerUsed())
+   {
+      auto axisValues = mJoystickInfo.getAxisValues();
+      int axisLeftY = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTY);
+      auto yl = axisValues[axisLeftY] / 32768.0f;
+      auto hatValue = mJoystickInfo.getHatValues().at(0);
+      auto dpadDownPressed = hatValue & SDL_HAT_DOWN;
+
+      if (dpadDownPressed)
+      {
+         yl = 1.0f;
+      }
+
+      if (fabs(yl) >  0.3f)
+      {
+         if (yl > 0.0f)
+         {
+            downPressed = true;
+         }
+      }
+   }
+   else
+   {
+      downPressed = mKeysPressed & KeyPressedDown;
+   }
+
+   setCrouching(downPressed && !isInAir());
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
-   setCrouching(mKeysPressed & KeyPressedDown && !isInAir()); // CLEAN UP!
-
+   updateCrouch();
    updateAnimation(dt);
    updateExtraManager();
    updateAtmosphere();
