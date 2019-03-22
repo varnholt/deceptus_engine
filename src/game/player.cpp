@@ -175,7 +175,7 @@ void Player::initializeController()
       );
 
       gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_LEFTSHOULDER, [this](){updateDash(Dash::Left);});
-      gji->getController()->addButtonReleasedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [this](){updateDash(Dash::Right);});
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [this](){updateDash(Dash::Right);});
    }
 }
 
