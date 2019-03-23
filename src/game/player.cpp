@@ -919,6 +919,7 @@ void Player::applyBeltVelocity(float& desiredVel)
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
 {
    auto desiredVel = getDesiredVelocity();

@@ -182,13 +182,11 @@ void MenuScreenVideo::loadingFinished()
 
 void MenuScreenVideo::updateLayers()
 {
-   auto monitor = mSelection == Selection::Monitor;
    auto resolution = mSelection == Selection::Resolution;
    auto displayMode = mSelection == Selection::DisplayMode;
    auto vsync = mSelection == Selection::VSync;
    auto brightness = mSelection == Selection::Brightness;
 
-   auto monitorSelection = 0;
    auto resolutionSelection = 0u;
    auto displayModeSelection = 0;
 
@@ -225,16 +223,6 @@ void MenuScreenVideo::updateLayers()
    mLayers["defaults_pc_1"]->mVisible = false;
    mLayers["back_pc_0"]->mVisible = true;
    mLayers["back_pc_1"]->mVisible = false;
-
-   mLayers["monitor_text_0"]->mVisible = !monitor;
-   mLayers["monitor_text_1"]->mVisible = monitor;
-   mLayers["monitor_help"]->mVisible = monitor;
-   mLayers["monitor_highlight"]->mVisible = monitor;
-   mLayers["monitor_arrows"]->mVisible = monitor;
-   mLayers["monitor_value_1"]->mVisible = monitorSelection == 0;
-   mLayers["monitor_value_2"]->mVisible = monitorSelection == 1;
-   mLayers["monitor_value_3"]->mVisible = monitorSelection == 2;
-   mLayers["monitor_value_4"]->mVisible = monitorSelection == 3;
 
    mLayers["resolution_text_0"]->mVisible = !resolution;
    mLayers["resolution_text_1"]->mVisible = resolution;
