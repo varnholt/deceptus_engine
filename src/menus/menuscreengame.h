@@ -7,10 +7,9 @@ class MenuScreenGame : public MenuScreen
 public:
 
    enum class Selection {
-      Language = 0,
-      TextSpeed = 1,
-      AutomaticPause = 2,
-      Count = 3,
+      TextSpeed = 0,
+      AutomaticPause = 1,
+      Count = 2,
    };
 
    MenuScreenGame();
@@ -25,6 +24,6 @@ public:
    void select();
    void back();
 
-   Selection mSelection = Selection::Language;
+   Selection mSelection = Selection::TextSpeed;
 };
 

@@ -83,11 +83,9 @@ void MenuScreenGame::updateLayers()
 {
    auto autoPause = mSelection == Selection::AutomaticPause;
    auto textSpeed = mSelection == Selection::TextSpeed;
-   auto language = mSelection == Selection::Language;
 
    auto autoPauseSelection = 0;
    auto textSpeedSelection = 0;
-   auto languageSelection = 0;
 
    mLayers["defaults_xbox_0"]->mVisible = false;
    mLayers["defaults_xbox_1"]->mVisible = false;
@@ -120,13 +118,6 @@ void MenuScreenGame::updateLayers()
    mLayers["textSpeed_4"]->mVisible = textSpeedSelection == 3;
    mLayers["textSpeed_5"]->mVisible = textSpeedSelection == 4;
    mLayers["textSpeed_h"]->mVisible = true;
-
-   mLayers["language_text_0"]->mVisible = !language;
-   mLayers["language_text_1"]->mVisible = language;
-   mLayers["language_highlight"]->mVisible = language;
-   mLayers["language_help"]->mVisible = language;
-   mLayers["language_arrows"]->mVisible = language;
-   mLayers["language_value_en"]->mVisible = languageSelection == 0;
 }
 
 
