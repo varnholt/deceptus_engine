@@ -183,6 +183,10 @@ void Game::initializeController()
             checkCloseInventory();
          }
       );
+
+      GameController::ThresholdCallback test;
+      test.mCallback = [](){std::cout << "woo!" << std::endl;};
+      gji->getController()->addAxisThresholdExceedCallback(test);
    }
 }
 

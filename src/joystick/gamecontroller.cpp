@@ -180,53 +180,56 @@ void GameController::update()
       info.addAxisValue(value);
    }
 
-   for (auto& thresholdInfo : mThresholdCallbacks)
+   if (!mInfo.getAxisValues().empty())
    {
-      const auto axis = thresholdInfo.first;
-      const auto axisIndex = getAxisIndex(axis);
-
-      const auto valuePrevious = mInfo.getAxisValues().at(static_cast<size_t>(axisIndex));
-      const auto valueCurrent = info.getAxisValues().at(static_cast<size_t>(axisIndex));
-
-      const auto valueCurrentNormalized = valueCurrent / 32767.0f;
-      const auto valuePreviousNormalized = thresholdInfo.second.mValue;
-
-      const auto threshold = thresholdInfo.second.mThreshold;
-
-      // do not bother if value hasn't changed at all
-      if (valueCurrent != valuePrevious)
+      for (auto& thresholdInfo : mThresholdCallbacks)
       {
-         // threshold value must be initialized
-         if (valuePreviousNormalized > 0.0f)
+         const auto axis = thresholdInfo.first;
+         const auto axisIndex = getAxisIndex(axis);
+
+         const auto valuePrevious = mInfo.getAxisValues().at(static_cast<size_t>(axisIndex));
+         const auto valueCurrent = info.getAxisValues().at(static_cast<size_t>(axisIndex));
+
+         const auto valueCurrentNormalized = valueCurrent / 32767.0f;
+         const auto valuePreviousNormalized = thresholdInfo.second.mValue;
+
+         const auto threshold = thresholdInfo.second.mThreshold;
+
+         // do not bother if value hasn't changed at all
+         if (valueCurrent != valuePrevious)
          {
-            // check if upper boundary was exceeded
-            if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Upper)
+            // threshold value must be initialized
+            if (valuePreviousNormalized > 0.0f)
             {
-               // the previous value was outside the threshold, but the new one is -> fire callback
-               if (
-                     valuePreviousNormalized < threshold
-                  && valueCurrentNormalized > threshold
-               )
+               // check if upper boundary was exceeded
+               if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Upper)
                {
-                  thresholdInfo.second.mCallback();
+                  // the previous value was outside the threshold, but the new one is -> fire callback
+                  if (
+                        valuePreviousNormalized < threshold
+                     && valueCurrentNormalized > threshold
+                  )
+                  {
+                     thresholdInfo.second.mCallback();
+                  }
                }
-            }
-            else if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Lower)
-            {
-               // the previous value was outside the threshold, but the new one is -> fire callback
-               if (
-                     valuePreviousNormalized > threshold
-                  && valueCurrentNormalized < threshold
-               )
+               else if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Lower)
                {
-                  thresholdInfo.second.mCallback();
+                  // the previous value was outside the threshold, but the new one is -> fire callback
+                  if (
+                        valuePreviousNormalized > threshold
+                     && valueCurrentNormalized < threshold
+                  )
+                  {
+                     thresholdInfo.second.mCallback();
+                  }
                }
             }
          }
-      }
 
-      // store current value
-      thresholdInfo.second.mValue = valueCurrentNormalized;
+         // store current value
+         thresholdInfo.second.mValue = valueCurrentNormalized;
+      }
    }
 
    // read button values
