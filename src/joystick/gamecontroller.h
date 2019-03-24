@@ -21,6 +21,22 @@ class GameController
 {
    public:
 
+      struct ThresholdCallback
+      {
+         enum class Boundary
+         {
+            Upper,
+            Lower
+         };
+
+         SDL_GameControllerAxis mAxis = SDL_CONTROLLER_AXIS_INVALID;
+         Boundary mBoundary = Boundary::Upper;
+         float mThreshold = 0.3f;
+         float mValue = -1.0f;
+         std::function<void()> mCallback;
+      };
+
+
       //! constructor
       GameController();
 
@@ -68,10 +84,10 @@ class GameController
       SDL_GameControllerButton getButtonType(int buttonId) const;
 
       //! get button id by button type
-      int getButtonId(SDL_GameControllerButton) const;
+      int32_t getButtonId(SDL_GameControllerButton) const;
 
       //! getter for axis id by axis type
-      int getAxisId(SDL_GameControllerAxis) const;
+      int32_t getAxisIndex(SDL_GameControllerAxis) const;
 
       //! getter for joystick info object
       const GameControllerInfo& getInfo() const;
@@ -85,6 +101,8 @@ class GameController
          SDL_GameControllerButton,
          std::function<void()>
       );
+
+      void addAxisThresholdExceedCallback(const ThresholdCallback& threshold);
 
 
    protected:
@@ -115,6 +133,7 @@ class GameController
       //! running haptic effect
       SDL_Haptic* mHaptic = nullptr;
 
+      std::map<SDL_GameControllerAxis, ThresholdCallback> mThresholdCallbacks;
       std::map<SDL_GameControllerButton, std::vector<std::function<void()>>> mButtonPressedCallbacks;
       std::map<SDL_GameControllerButton, std::vector<std::function<void()>>> mButtonReleasedCallbacks;
 };

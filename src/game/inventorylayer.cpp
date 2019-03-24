@@ -159,8 +159,8 @@ void InventoryLayer::updateControllerActions()
   }
 
   auto axisValues = mJoystickInfo.getAxisValues();
-  auto axisLeftX = gji->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTX);
-  auto xl = axisValues[axisLeftX] / 32768.0f;
+  auto axisLeftX = gji->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+  auto xl = axisValues[axisLeftX] / 32767.0f;
   auto hatValue = mJoystickInfo.getHatValues().at(0);
   auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
   auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
