@@ -44,15 +44,6 @@ Menu::Menu()
    {
       screen->load();
    }
-
-   if (GameControllerIntegration::getCount() > 0)
-   {
-      auto gji = GameControllerIntegration::getInstance(0);
-
-      GameController::ThresholdCallback test;
-      test.mCallback = [](){std::cout << "woo!" << std::endl;};
-      gji->getController()->addAxisThresholdExceedCallback(test);
-   }
 }
 
 
