@@ -102,7 +102,7 @@ public:
 
    const sf::Vector2f &getStartPosition() const;
 
-   void drawStaticChains(std::shared_ptr<sf::RenderWindow>& window);
+   void drawStaticChains(sf::RenderTarget& target);
 
    void updateLookVector();
    void updateLookState(Look look, bool enable);

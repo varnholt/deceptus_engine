@@ -22,6 +22,7 @@ sf::Vector2f DebugDraw::B2VecToSFVec(const b2Vec2 &vector)
 
 
 void DebugDraw::DrawPolygon(
+   sf::RenderTarget& target,
    const b2Vec2* vertices,
    int32 vertexCount,
    const b2Color& color
@@ -46,11 +47,16 @@ void DebugDraw::DrawPolygon(
    polygon.setFillColor(sf::Color::Transparent);
    polygon.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
-   mTarget->draw(polygon);
+   target.draw(polygon);
 }
 
 
-void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+void DebugDraw::DrawSolidPolygon(
+   sf::RenderTarget& target,
+   const b2Vec2* vertices,
+   int32 vertexCount,
+   const b2Color& color
+)
 {
    sf::ConvexShape polygon(vertexCount);
    for(int i = 0; i < vertexCount; i++)
@@ -66,11 +72,16 @@ void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, cons
    polygon.setFillColor(DebugDraw::GLColorToSFML(color, 60));
    polygon.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
-   mTarget->draw(polygon);
+   target.draw(polygon);
 }
 
 
-void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color)
+void DebugDraw::DrawCircle(
+   sf::RenderTarget& target,
+   const b2Vec2& center,
+   float32 radius,
+   const b2Color& color
+)
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
@@ -79,11 +90,11 @@ void DebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& 
    circle.setOutlineThickness(-0.3f);
    circle.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
-   mTarget->draw(circle);
+   target.draw(circle);
 }
 
 
-void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+void DebugDraw::DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
@@ -99,13 +110,13 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
       sf::Vertex(DebugDraw::B2VecToSFVec(endPoint), DebugDraw::GLColorToSFML(color)),
    };
 
-   mTarget->draw(circle);
-   mTarget->draw(line, 2, sf::Lines);
+   target.draw(circle);
+   target.draw(line, 2, sf::Lines);
 }
 
 
 
-void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+void DebugDraw::DrawSegment(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
    sf::Vertex line[] =
    {
@@ -113,12 +124,12 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
       sf::Vertex(DebugDraw::B2VecToSFVec(p2), DebugDraw::GLColorToSFML(color))
    };
 
-   mTarget->draw(line, 2, sf::Lines);
+   target.draw(line, 2, sf::Lines);
 }
 
 
 
-void DebugDraw::DrawTransform(const b2Transform& xf)
+void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
 {
    float lineLength = 0.4f;
 
@@ -140,18 +151,142 @@ void DebugDraw::DrawTransform(const b2Transform& xf)
       sf::Vertex(DebugDraw::B2VecToSFVec(yAxis), sf::Color::Green)
    };
 
-   mTarget->draw(redLine, 2, sf::Lines);
-   mTarget->draw(greenLine, 2, sf::Lines);
+   target.draw(redLine, 2, sf::Lines);
+   target.draw(greenLine, 2, sf::Lines);
 }
 
-std::shared_ptr<sf::RenderTarget> DebugDraw::getRenderTarget() const
+
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 {
-   return mTarget;
-}
+   for (auto joint = level->getWorld()->GetJointList(); joint != nullptr; joint = joint->GetNext())
+   {
+      auto distanceJoint = dynamic_cast<b2DistanceJoint*>(joint);
+      if (distanceJoint != nullptr)
+      {
+         DrawSegment(
+            target,
+            distanceJoint->GetAnchorA(),
+            distanceJoint->GetAnchorB(),
+            b2Color(1, 1, 0, 1)
+         );
+      }
+   }
 
-void DebugDraw::setRenderTarget(const std::shared_ptr<sf::RenderTarget>& window)
-{
-   mTarget = window;
-}
+   for (
+      auto body = level->getWorld()->GetBodyList();
+      body != nullptr;
+      body = body->GetNext()
+   )
+   {
+      if (
+            body->GetType() == b2_dynamicBody
+         || body->GetType() == b2_kinematicBody
+      )
+      {
+         auto f = body->GetFixtureList();
+         while (f)
+         {
+            auto next = f->GetNext();
+            auto shape = f->GetShape();
 
+            switch (shape->GetType())
+            {
+               case b2Shape::e_polygon:
+               {
+                  auto poly = dynamic_cast<b2PolygonShape*>(shape);
+
+                  auto vertexCount = poly->GetVertexCount();
+                  auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
+
+                  for(auto i = 0; i < vertexCount; i++ )
+                  {
+                     auto vec2 = poly->GetVertex(i);
+                     vertices[i] = vec2;
+                     vertices[i].x += body->GetPosition().x;
+                     vertices[i].y += body->GetPosition().y;
+                  }
+
+                  DrawPolygon(
+                     target,
+                     vertices,
+                     vertexCount,
+                     b2Color(1,0,0,1)
+                  );
+
+                  delete[] vertices;
+                  break;
+               }
+               case b2Shape::e_circle:
+               {
+                  b2Vec2 offset;
+                  b2CircleShape* circleShape = nullptr;
+                  circleShape = dynamic_cast<b2CircleShape*>(f->GetShape());
+                  if (circleShape != nullptr)
+                  {
+                     offset = circleShape->m_p;
+                  }
+
+                  DrawCircle(
+                     target,
+                     body->GetPosition() + offset,
+                     shape->m_radius,
+                     b2Color(0.4f, 0.4f, 0.4f, 1.0f)
+                  );
+                  break;
+               }
+               case b2Shape::e_chain:
+               {
+                  auto chain = dynamic_cast<b2ChainShape*>(shape);
+
+                  auto vertexCount = chain->m_count;
+                  auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
+
+                  for(auto i = 0; i < vertexCount; i++ )
+                  {
+                     auto vec2 = chain->m_vertices[i];
+                     vertices[i] = vec2;
+                     vertices[i].x += body->GetPosition().x;
+                     vertices[i].y += body->GetPosition().y;
+                  }
+
+                  DrawPolygon(
+                     target,
+                     vertices,
+                     vertexCount,
+                     b2Color(1,0,0,1)
+                  );
+
+                  delete[] vertices;
+                  break;
+               }
+               default:
+               {
+                  break;
+               }
+            }
+
+            f = next;
+         }
+      }
+      else
+      {
+         auto vtxIt = level->getPointMap()->find(body);
+         auto vtxCountIt = level->getPointSizeMap()->find(body);
+
+         if (
+               vtxIt != level->getPointMap()->end()
+            && vtxCountIt != level->getPointSizeMap()->end()
+         )
+         {
+            DrawPolygon(
+               target,
+               vtxIt->second,
+               vtxCountIt->second,
+               b2Color(1,0,0)
+            );
+         }
+      }
+   }
+}
 

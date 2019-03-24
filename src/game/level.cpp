@@ -4,6 +4,8 @@
 #include "bouncer.h"
 #include "constants.h"
 #include "conveyorbelt.h"
+#include "debugdraw.h"
+#include "displaymode.h"
 #include "door.h"
 #include "extraitem.h"
 #include "extramanager.h"
@@ -618,11 +620,11 @@ void Level::spawnEnemies()
 
 
 //-----------------------------------------------------------------------------
-void Level::drawStaticChains(std::shared_ptr<sf::RenderWindow>& window)
+void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto path : mPhysics.mOutlines)
    {
-      window->draw(&path.at(0), path.size(), sf::LineStrip);
+      target.draw(&path.at(0), path.size(), sf::LineStrip);
    }
 }
 
@@ -1011,6 +1013,12 @@ void Level::draw(
    // draw all the other things
    drawRaycastLight(*mLevelRenderTexture.get());
    Weapon::drawBulletHits(*mLevelRenderTexture.get());
+
+   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
+   {
+      drawStaticChains(*mLevelRenderTexture.get());
+      DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
+   }
 
    // display the whole texture
    sf::View view(sf::FloatRect(0.0f, 0.0f, mLevelRenderTexture->getSize().x, mLevelRenderTexture->getSize().y));

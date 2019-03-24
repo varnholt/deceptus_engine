@@ -153,8 +153,6 @@ void Game::initializeWindow()
    );
 
    mLevel->initializeTextures();
-
-   mDebugDraw->setRenderTarget(mWindowRenderTexture);
 }
 
 
@@ -211,10 +209,8 @@ void Game::initialize()
 
   mPlayer = std::make_shared<Player>();
 
-  mDebugDraw = std::make_unique<DebugDraw>();
-  mDebugDraw->setRenderTarget(mWindowRenderTexture);
-
   mInfoLayer = std::make_unique<InfoLayer>();
+
   mInventoryLayer = std::make_unique<InventoryLayer>();
 
   AnimationPool::getInstance().initialize();
@@ -276,12 +272,6 @@ void Game::draw()
 
    mLevel->draw(mWindowRenderTexture, mScreenshot);
    mScreenshot = false;
-
-   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
-   {
-      debugBodies();
-      mLevel->drawStaticChains(mWindow);
-   }
 
    mInfoLayer->draw(*mWindowRenderTexture.get());
 
@@ -644,131 +634,3 @@ void Game::processEvents()
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-void Game::debugBodies()
-{
-   for (auto joint = mLevel->getWorld()->GetJointList(); joint != nullptr; joint = joint->GetNext())
-   {
-      auto distanceJoint = dynamic_cast<b2DistanceJoint*>(joint);
-      if (distanceJoint != nullptr)
-      {
-         mDebugDraw->DrawSegment(
-            distanceJoint->GetAnchorA(),
-            distanceJoint->GetAnchorB(),
-            b2Color(1, 1, 0, 1)
-         );
-      }
-   }
-
-   for (
-      auto body = mLevel->getWorld()->GetBodyList();
-      body != nullptr;
-      body = body->GetNext()
-   )
-   {
-      if (
-            body->GetType() == b2_dynamicBody
-         || body->GetType() == b2_kinematicBody
-      )
-      {
-         auto f = body->GetFixtureList();
-         while (f)
-         {
-            auto next = f->GetNext();
-            auto shape = f->GetShape();
-
-            switch (shape->GetType())
-            {
-               case b2Shape::e_polygon:
-               {
-                  auto poly = dynamic_cast<b2PolygonShape*>(shape);
-
-                  auto vertexCount = poly->GetVertexCount();
-                  auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
-
-                  for(auto i = 0; i < vertexCount; i++ )
-                  {
-                     auto vec2 = poly->GetVertex(i);
-                     vertices[i] = vec2;
-                     vertices[i].x += body->GetPosition().x;
-                     vertices[i].y += body->GetPosition().y;
-                  }
-
-                  mDebugDraw->DrawPolygon(
-                     vertices,
-                     vertexCount,
-                     b2Color(1,0,0,1)
-                  );
-
-                  delete[] vertices;
-                  break;
-               }
-               case b2Shape::e_circle:
-               {
-                  b2Vec2 offset;
-                  b2CircleShape* circleShape = nullptr;
-                  circleShape = dynamic_cast<b2CircleShape*>(f->GetShape());
-                  if (circleShape != nullptr)
-                  {
-                     offset = circleShape->m_p;
-                  }
-
-                  mDebugDraw->DrawCircle(
-                     body->GetPosition() + offset,
-                     shape->m_radius,
-                     b2Color(0.4f, 0.4f, 0.4f, 1.0f)
-                  );
-                  break;
-               }
-               case b2Shape::e_chain:
-               {
-                  auto chain = dynamic_cast<b2ChainShape*>(shape);
-
-                  auto vertexCount = chain->m_count;
-                  auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
-
-                  for(auto i = 0; i < vertexCount; i++ )
-                  {
-                     auto vec2 = chain->m_vertices[i];
-                     vertices[i] = vec2;
-                     vertices[i].x += body->GetPosition().x;
-                     vertices[i].y += body->GetPosition().y;
-                  }
-
-                  mDebugDraw->DrawPolygon(
-                     vertices,
-                     vertexCount,
-                     b2Color(1,0,0,1)
-                  );
-
-                  delete[] vertices;
-                  break;
-               }
-               default:
-               {
-                  break;
-               }
-            }
-
-            f = next;
-         }
-      }
-      else
-      {
-         auto vtxIt = mLevel->getPointMap()->find(body);
-         auto vtxCountIt = mLevel->getPointSizeMap()->find(body);
-
-         if (
-               vtxIt != mLevel->getPointMap()->end()
-            && vtxCountIt != mLevel->getPointSizeMap()->end()
-         )
-         {
-            mDebugDraw->DrawPolygon(
-               vtxIt->second,
-               vtxCountIt->second,
-               b2Color(1,0,0)
-            );
-         }
-      }
-   }
-}

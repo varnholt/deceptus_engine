@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include "constants.h"
-#include "debugdraw.h"
 #include "infolayer.h"
 #include "inventorylayer.h"
 #include "menus/menu.h"
@@ -55,8 +54,6 @@ private:
    void toggleFullScreen();
    void changeResolution(int32_t w, int32_t h);
 
-   void debugBodies();
-
 
 private:
 
@@ -66,7 +63,6 @@ private:
    std::shared_ptr<Level> mLevel;
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
-   std::unique_ptr<DebugDraw> mDebugDraw;
 
    sf::Clock mDeltaClock;
 
