@@ -11,6 +11,11 @@
 #include "menuscreenachievements.h"
 #include "menuscreencredits.h"
 
+#include "game/gamecontrollerintegration.h"
+#include "joystick/gamecontroller.h"
+
+#include <iostream>
+
 
 Menu Menu::sInstance;
 
@@ -38,6 +43,15 @@ Menu::Menu()
    for (auto& screen : mMenus)
    {
       screen->load();
+   }
+
+   if (GameControllerIntegration::getCount() > 0)
+   {
+      auto gji = GameControllerIntegration::getInstance(0);
+
+      GameController::ThresholdCallback test;
+      test.mCallback = [](){std::cout << "woo!" << std::endl;};
+      gji->getController()->addAxisThresholdExceedCallback(test);
    }
 }
 

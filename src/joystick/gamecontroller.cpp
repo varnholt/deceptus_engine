@@ -174,8 +174,60 @@ void GameController::update()
    SDL_JoystickUpdate();
 
    // read axis values
-   for (auto i = 0; i < SDL_JoystickNumAxes(mActiveJoystick); i++)
-      info.addAxisValue(SDL_JoystickGetAxis(mActiveJoystick, i));
+   for (auto axis = 0; axis < SDL_JoystickNumAxes(mActiveJoystick); axis++)
+   {
+      auto value = SDL_JoystickGetAxis(mActiveJoystick, axis);
+      info.addAxisValue(value);
+   }
+
+   for (auto& thresholdInfo : mThresholdCallbacks)
+   {
+      const auto axis = thresholdInfo.first;
+      const auto axisIndex = getAxisIndex(axis);
+
+      const auto valuePrevious = mInfo.getAxisValues().at(static_cast<size_t>(axisIndex));
+      const auto valueCurrent = info.getAxisValues().at(static_cast<size_t>(axisIndex));
+
+      const auto valueCurrentNormalized = valueCurrent / 32767.0f;
+      const auto valuePreviousNormalized = thresholdInfo.second.mValue;
+
+      const auto threshold = thresholdInfo.second.mThreshold;
+
+      // do not bother if value hasn't changed at all
+      if (valueCurrent != valuePrevious)
+      {
+         // threshold value must be initialized
+         if (valuePreviousNormalized > 0.0f)
+         {
+            // check if upper boundary was exceeded
+            if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Upper)
+            {
+               // the previous value was outside the threshold, but the new one is -> fire callback
+               if (
+                     valuePreviousNormalized < threshold
+                  && valueCurrentNormalized > threshold
+               )
+               {
+                  thresholdInfo.second.mCallback();
+               }
+            }
+            else if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Lower)
+            {
+               // the previous value was outside the threshold, but the new one is -> fire callback
+               if (
+                     valuePreviousNormalized > threshold
+                  && valueCurrentNormalized < threshold
+               )
+               {
+                  thresholdInfo.second.mCallback();
+               }
+            }
+         }
+      }
+
+      // store current value
+      thresholdInfo.second.mValue = valueCurrentNormalized;
+   }
 
    // read button values
    for (auto i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
@@ -238,7 +290,7 @@ void GameController::update()
        && mInfo.getButtonValues().size() == info.getButtonValues().size()
    )
    {
-      for (auto button = 0; button < SDL_CONTROLLER_BUTTON_MAX; button++)
+      for (auto button = 0u; button < SDL_CONTROLLER_BUTTON_MAX; button++)
       {
          auto pre = mInfo.getButtonValues().at(button);
          auto cur = info.getButtonValues().at(button);
@@ -312,7 +364,7 @@ void GameController::cleanupRumble()
    if (mHaptic)
       SDL_HapticClose(mHaptic);
 
-   mHaptic = 0;
+   mHaptic = nullptr;
 }
 
 
@@ -345,7 +397,7 @@ SDL_GameControllerButton GameController::getButtonType(int buttonId) const
 
 
 //-----------------------------------------------------------------------------
-int GameController::getButtonId(SDL_GameControllerButton button) const
+int32_t GameController::getButtonId(SDL_GameControllerButton button) const
 {
    SDL_GameControllerButtonBind bind = SDL_GameControllerGetBindForButton(
       mController,
@@ -357,7 +409,7 @@ int GameController::getButtonId(SDL_GameControllerButton button) const
 
 
 //-----------------------------------------------------------------------------
-int GameController::getAxisId(SDL_GameControllerAxis axis) const
+int32_t GameController::getAxisIndex(SDL_GameControllerAxis axis) const
 {
    SDL_GameControllerButtonBind bind = SDL_GameControllerGetBindForAxis(
       mController,
@@ -369,7 +421,7 @@ int GameController::getAxisId(SDL_GameControllerAxis axis) const
 
 
 //-----------------------------------------------------------------------------
-const GameControllerInfo &GameController::getInfo() const
+const GameControllerInfo& GameController::getInfo() const
 {
    return mInfo;
 }
@@ -386,6 +438,13 @@ void GameController::addButtonPressedCallback(SDL_GameControllerButton button, s
 void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, std::function<void ()> callback)
 {
    mButtonReleasedCallbacks[button].push_back(callback);
+}
+
+
+//-----------------------------------------------------------------------------
+void GameController::addAxisThresholdExceedCallback(const ThresholdCallback& threshold)
+{
+   mThresholdCallbacks[threshold.mAxis] = threshold;
 }
 
 

@@ -125,7 +125,7 @@ public:
    void updateGammaShader();
 
 
-   protected:
+protected:
 
    void updateBoom(const sf::Time& dt);
 
@@ -136,11 +136,6 @@ public:
    );
 
    void addDebugRect(b2Body* body, float x, float y, float w, float h);
-
-   bool isTileCombinable(int tileNumber) const;
-   bool isTileOneSided(int tileNumber) const;
-   bool isTileDeadly(int tileNumber) const;
-   bool isTileSolid(int tileNumber) const;
 
    b2Vec2 * createShape(
       int tile,

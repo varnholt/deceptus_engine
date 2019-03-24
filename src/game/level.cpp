@@ -638,10 +638,10 @@ void Level::updateLookVector()
   if (isControllerUsed())
   {
     auto axisValues = mJoystickInfo.getAxisValues();
-    auto xAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_RIGHTX);
-    auto yAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_RIGHTY);
-    auto x = axisValues[xAxis] / 32768.0f;
-    auto y = axisValues[yAxis] / 32768.0f;
+    auto xAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
+    auto yAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
+    auto x = axisValues[xAxis] / 32767.0f;
+    auto y = axisValues[yAxis] / 32767.0f;
 
     if (fabs(x)> 0.1f || fabs(y)> 0.1f)
     {
@@ -1506,118 +1506,6 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 
   mPointMap[body] = points;
   mPointCountMap[body] = 4;
-}
-
-
-//-----------------------------------------------------------------------------
-bool Level::isTileCombinable(int tileNumber) const
-{
-   bool combinable = false;
-   PhysicsTile tile = (PhysicsTile)tileNumber;
-
-   switch (tile)
-   {
-      case PhysicsTileSolidFull:
-      case PhysicsTileSolidTop:
-      case PhysicsTileSolidBottom:
-      case PhysicsTileOneSidedFull:
-      case PhysicsTileOneSidedTop:
-      case PhysicsTileOneSidedBottom:
-      case PhysicsTileDeadlyFull:
-      case PhysicsTileDeadlyTop:
-      case PhysicsTileDeadlyBottom:
-         combinable = true;
-         break;
-
-      default:
-         break;
-   }
-
-   return combinable;
-}
-
-
-//-----------------------------------------------------------------------------
-bool Level::isTileOneSided(int tileNumber) const
-{
-   bool oneSided = false;
-   PhysicsTile tile = (PhysicsTile)tileNumber;
-
-   switch (tile)
-   {
-      case PhysicsTileOneSidedFull:
-      case PhysicsTileOneSidedTop:
-      case PhysicsTileOneSidedBottom:
-      case PhysicsTileOneSidedLeft:
-      case PhysicsTileOneSidedRight:
-      case PhysicsTileOneSidedCornerTopRight:
-      case PhysicsTileOneSidedCornerBottomRight:
-      case PhysicsTileOneSidedCornerBottomLeft:
-      case PhysicsTileOneSidedCornerTopLeft:
-         oneSided = true;
-         break;
-
-      default:
-         break;
-   }
-
-   return oneSided;
-}
-
-
-//-----------------------------------------------------------------------------
-bool Level::isTileDeadly(int tileNumber) const
-{
-   bool deadly = false;
-   PhysicsTile tile = (PhysicsTile)tileNumber;
-
-   switch (tile)
-   {
-      case PhysicsTileDeadlyFull:
-      case PhysicsTileDeadlyTop:
-      case PhysicsTileDeadlyBottom:
-      case PhysicsTileDeadlyLeft:
-      case PhysicsTileDeadlyRight:
-      case PhysicsTileDeadlyCornerTopRight:
-      case PhysicsTileDeadlyCornerBottomRight:
-      case PhysicsTileDeadlyCornerBottomLeft:
-      case PhysicsTileDeadlyCornerTopLeft:
-         deadly = true;
-         break;
-
-      default:
-         break;
-   }
-
-   return deadly;
-}
-
-
-//-----------------------------------------------------------------------------
-bool Level::isTileSolid(int tileNumber) const
-{
-   bool solid = true;
-   PhysicsTile tile = (PhysicsTile)tileNumber;
-
-   switch (tile)
-   {
-      case PhysicsTileWaterFull:
-      case PhysicsTileWaterTop:
-      case PhysicsTileWaterBottom:
-      case PhysicsTileWaterLeft:
-      case PhysicsTileWaterRight:
-      case PhysicsTileWaterCornerTopRight:
-      case PhysicsTileWaterCornerBottomRight:
-      case PhysicsTileWaterCornerBottomLeft:
-      case PhysicsTileWaterCornerTopLeft:
-         solid = false;
-         break;
-
-      default:
-         break;
-   }
-
-   return solid;
 }
 
 

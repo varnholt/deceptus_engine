@@ -448,13 +448,14 @@ float Player::getVelocityFromController(float velocityMax, const b2Vec2& velocit
     return 0.0f;
   }
 
-  int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTX);
+  auto axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
 
   // normalize to -1..1
-  auto xl = axisValues[axisLeftX] / 32768.0f;
+  auto xl = axisValues[axisLeftX] / 32767.0f;
   auto hatValue = mJoystickInfo.getHatValues().at(0);
   auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
   auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
+
   if (dpadLeftPressed)
   {
      xl = -1.0f;
@@ -467,6 +468,7 @@ float Player::getVelocityFromController(float velocityMax, const b2Vec2& velocit
   if (fabs(xl)> 0.3f)
   {
      xl *= acceleration;
+
      if (xl < 0.0f)
      {
         desiredVel = b2Max( velocity.x + xl, -velocityMax);
@@ -492,8 +494,8 @@ bool Player::isMovingLeft() const
   if (isControllerUsed())
   {
      auto axisValues = mJoystickInfo.getAxisValues();
-     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[axisLeftX] / 32768.0f;
+     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+     auto xl = axisValues[axisLeftX] / 32767.0f;
      auto hatValue = mJoystickInfo.getHatValues().at(0);
      auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
      auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
@@ -533,8 +535,8 @@ bool Player::isMovingRight() const
   if (isControllerUsed())
   {
      auto axisValues = mJoystickInfo.getAxisValues();
-     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[axisLeftX] / 32768.0f;
+     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+     auto xl = axisValues[axisLeftX] / 32767.0f;
      auto hatValue = mJoystickInfo.getHatValues().at(0);
      auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
      auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
@@ -595,8 +597,8 @@ void Player::updatePlayerOrientation()
    if (isControllerUsed())
    {
       auto axisValues = mJoystickInfo.getAxisValues();
-      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTX);
-      auto xl = axisValues[axisLeftX] / 32768.0f;
+      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+      auto xl = axisValues[axisLeftX] / 32767.0f;
       auto hatValue = mJoystickInfo.getHatValues().at(0);
       auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
       auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
@@ -998,7 +1000,7 @@ void Player::updatePortal()
             dpadUpPressed = mJoystickInfo.getHatValues().at(0) & SDL_HAT_UP;
          }
 
-         auto y1 = axisValues[1] / 32768.0f;
+         auto y1 = axisValues[1] / 32767.0f;
          joystickPointsUp = (y1 < -0.4f) || dpadUpPressed;
       }
 
@@ -1317,8 +1319,8 @@ void Player::updateCrouch()
    if (isControllerUsed())
    {
       auto axisValues = mJoystickInfo.getAxisValues();
-      int axisLeftY = GameControllerIntegration::getInstance(0)->getController()->getAxisId(SDL_CONTROLLER_AXIS_LEFTY);
-      auto yl = axisValues[axisLeftY] / 32768.0f;
+      int axisLeftY = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+      auto yl = axisValues[axisLeftY] / 32767.0f;
       auto hatValue = mJoystickInfo.getHatValues().at(0);
       auto dpadDownPressed = hatValue & SDL_HAT_DOWN;
 
