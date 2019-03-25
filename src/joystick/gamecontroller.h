@@ -32,7 +32,8 @@ class GameController
          SDL_GameControllerAxis mAxis = SDL_CONTROLLER_AXIS_INVALID;
          Boundary mBoundary = Boundary::Upper;
          float mThreshold = 0.3f;
-         float mValue = -1.0f;
+         float mValue = 0.0f;
+         bool mInitialized = false;
          std::function<void()> mCallback;
       };
 
@@ -133,7 +134,7 @@ class GameController
       //! running haptic effect
       SDL_Haptic* mHaptic = nullptr;
 
-      std::map<SDL_GameControllerAxis, ThresholdCallback> mThresholdCallbacks;
+      std::map<SDL_GameControllerAxis, std::vector<ThresholdCallback>> mThresholdCallbacks;
       std::map<SDL_GameControllerButton, std::vector<std::function<void()>>> mButtonPressedCallbacks;
       std::map<SDL_GameControllerButton, std::vector<std::function<void()>>> mButtonReleasedCallbacks;
 };

@@ -66,7 +66,7 @@ void GameControllerIntegration::initialize(int id)
 
 
 //-----------------------------------------------------------------------------
-GameController *GameControllerIntegration::getController()
+GameController* GameControllerIntegration::getController()
 {
    return mController;
 }

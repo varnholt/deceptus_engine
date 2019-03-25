@@ -85,11 +85,11 @@ void MenuScreenMain::select()
    switch (mSelection)
    {
       case Selection::Start:
-         Menu::getInstance().hide();
+         Menu::getInstance()->hide();
          GameState::getInstance().enqueueResume();
          break;
       case Selection::Options:
-         Menu::getInstance().show(Menu::MenuType::Options);
+         Menu::getInstance()->show(Menu::MenuType::Options);
          break;
       case Selection::Quit:
          MessageBox::question(

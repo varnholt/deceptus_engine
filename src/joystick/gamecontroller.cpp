@@ -2,6 +2,8 @@
 #include "gamecontroller.h"
 #include "game/timer.h"
 
+#include <iostream>
+
 
 //-----------------------------------------------------------------------------
 /*!
@@ -182,53 +184,60 @@ void GameController::update()
 
    if (!mInfo.getAxisValues().empty())
    {
-      for (auto& thresholdInfo : mThresholdCallbacks)
+      for (auto& thresholds : mThresholdCallbacks)
       {
-         const auto axis = thresholdInfo.first;
-         const auto axisIndex = getAxisIndex(axis);
+         const auto axis = thresholds.first;
 
-         const auto valuePrevious = mInfo.getAxisValues().at(static_cast<size_t>(axisIndex));
-         const auto valueCurrent = info.getAxisValues().at(static_cast<size_t>(axisIndex));
-
-         const auto valueCurrentNormalized = valueCurrent / 32767.0f;
-         const auto valuePreviousNormalized = thresholdInfo.second.mValue;
-
-         const auto threshold = thresholdInfo.second.mThreshold;
-
-         // do not bother if value hasn't changed at all
-         if (valueCurrent != valuePrevious)
+         for (auto& tc : thresholds.second)
          {
-            // threshold value must be initialized
-            if (valuePreviousNormalized > 0.0f)
+            const auto axisIndex = getAxisIndex(axis);
+
+            const auto valuePrevious = mInfo.getAxisValues().at(static_cast<size_t>(axisIndex));
+            const auto valueCurrent = info.getAxisValues().at(static_cast<size_t>(axisIndex));
+
+            const auto valueCurrentNormalized = valueCurrent / 32767.0f;
+            const auto valuePreviousNormalized = tc.mValue;
+
+            const auto threshold = tc.mThreshold;
+
+            // std::cout << valueCurrentNormalized << std::endl;
+
+            // do not bother if value hasn't changed at all
+            if (valueCurrent != valuePrevious)
             {
-               // check if upper boundary was exceeded
-               if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Upper)
+               // threshold value must be initialized
+               if (tc.mInitialized)
                {
-                  // the previous value was outside the threshold, but the new one is -> fire callback
-                  if (
-                        valuePreviousNormalized < threshold
-                     && valueCurrentNormalized > threshold
-                  )
+                  // check if upper boundary was exceeded
+                  if (tc.mBoundary == ThresholdCallback::Boundary::Upper)
                   {
-                     thresholdInfo.second.mCallback();
+                     // the previous value was outside the threshold, but the new one is -> fire callback
+                     if (
+                           valuePreviousNormalized < threshold
+                        && valueCurrentNormalized > threshold
+                     )
+                     {
+                        tc.mCallback();
+                     }
                   }
-               }
-               else if (thresholdInfo.second.mBoundary == ThresholdCallback::Boundary::Lower)
-               {
-                  // the previous value was outside the threshold, but the new one is -> fire callback
-                  if (
-                        valuePreviousNormalized > threshold
-                     && valueCurrentNormalized < threshold
-                  )
+                  else if (tc.mBoundary == ThresholdCallback::Boundary::Lower)
                   {
-                     thresholdInfo.second.mCallback();
+                     // the previous value was outside the threshold, but the new one is -> fire callback
+                     if (
+                           valuePreviousNormalized > threshold
+                        && valueCurrentNormalized < threshold
+                     )
+                     {
+                        tc.mCallback();
+                     }
                   }
                }
             }
-         }
 
-         // store current value
-         thresholdInfo.second.mValue = valueCurrentNormalized;
+            // store current value
+            tc.mInitialized = true;
+            tc.mValue = valueCurrentNormalized;
+         }
       }
    }
 
@@ -447,7 +456,7 @@ void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, 
 //-----------------------------------------------------------------------------
 void GameController::addAxisThresholdExceedCallback(const ThresholdCallback& threshold)
 {
-   mThresholdCallbacks[threshold.mAxis] = threshold;
+   mThresholdCallbacks[threshold.mAxis].push_back(threshold);
 }
 
 

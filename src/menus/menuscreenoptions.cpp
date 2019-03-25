@@ -33,9 +33,10 @@ void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
+
 void MenuScreenOptions::back()
 {
-   Menu::getInstance().show(Menu::MenuType::Main);
+   Menu::getInstance()->show(Menu::MenuType::Main);
 }
 
 
@@ -78,22 +79,22 @@ void MenuScreenOptions::select()
    switch (mSelection)
    {
       case Selection::Controls:
-         Menu::getInstance().show(Menu::MenuType::Controls);
+         Menu::getInstance()->show(Menu::MenuType::Controls);
          break;
       case Selection::Video:
-         Menu::getInstance().show(Menu::MenuType::Video);
+         Menu::getInstance()->show(Menu::MenuType::Video);
          break;
       case Selection::Audio:
-         Menu::getInstance().show(Menu::MenuType::Audio);
+         Menu::getInstance()->show(Menu::MenuType::Audio);
          break;
       case Selection::Game:
-         Menu::getInstance().show(Menu::MenuType::Game);
+         Menu::getInstance()->show(Menu::MenuType::Game);
          break;
       case Selection::Achievements:
-         Menu::getInstance().show(Menu::MenuType::Achievements);
+         Menu::getInstance()->show(Menu::MenuType::Achievements);
          break;
       case Selection::Credits:
-         Menu::getInstance().show(Menu::MenuType::Credits);
+         Menu::getInstance()->show(Menu::MenuType::Credits);
          break;
       case Selection::Count:
          break;
@@ -103,14 +104,14 @@ void MenuScreenOptions::select()
 
 void MenuScreenOptions::updateLayers()
 {
-   mLayers["back_xbox_0"]->mVisible = false;
+   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
    mLayers["back_xbox_1"]->mVisible = false;
-   mLayers["accept_xbox_0"]->mVisible = false;
+   mLayers["accept_xbox_0"]->mVisible = isControllerUsed();
    mLayers["accept_xbox_1"]->mVisible = false;
 
-   mLayers["back_pc_0"]->mVisible = true;
+   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
    mLayers["back_pc_1"]->mVisible = false;
-   mLayers["accept_pc_0"]->mVisible = true;
+   mLayers["accept_pc_0"]->mVisible = !isControllerUsed();
    mLayers["accept_pc_1"]->mVisible = false;
 
    mLayers["credits_0"]->mVisible = (mSelection != Selection::Credits);
