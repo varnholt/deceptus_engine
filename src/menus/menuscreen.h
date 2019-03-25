@@ -24,6 +24,9 @@ public:
    virtual void keyboardKeyReleased(sf::Keyboard::Key key);
 
 
+   bool isControllerUsed() const;
+
+
 protected:
 
    std::string mFilename;

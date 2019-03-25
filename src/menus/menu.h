@@ -21,6 +21,9 @@ public:
       Credits
    };
 
+
+   Menu();
+
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void update(float dt);
 
@@ -33,12 +36,12 @@ public:
    MenuType getCurrentType() const;
    const std::shared_ptr<MenuScreen>& getMenuScreen(MenuType) const;
 
-   static Menu& getInstance();
+   void initialize();
+
+   static std::shared_ptr<Menu>& getInstance();
 
 
 private:
-
-   Menu();
 
    MenuType mCurrentType = MenuType::None;
 
@@ -55,6 +58,6 @@ private:
 
    std::vector<std::shared_ptr<MenuScreen>> mMenus;
 
-   static Menu sInstance;
+   static std::shared_ptr<Menu> sInstance;
 };
 

@@ -17,9 +17,10 @@ void MenuScreenCredits::loadingFinished()
 
 void MenuScreenCredits::updateLayers()
 {
-   mLayers["back_xbox_0"]->mVisible = false;
+   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
    mLayers["back_xbox_1"]->mVisible = false;
-   mLayers["back_pc_0"]->mVisible = true;
+
+   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
    mLayers["back_pc_1"]->mVisible = false;
 }
 
@@ -44,7 +45,7 @@ void MenuScreenCredits::select()
 
 void MenuScreenCredits::back()
 {
-   Menu::getInstance().show(Menu::MenuType::Options);
+   Menu::getInstance()->show(Menu::MenuType::Options);
 }
 
 

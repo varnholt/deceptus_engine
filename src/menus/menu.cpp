@@ -17,7 +17,7 @@
 #include <iostream>
 
 
-Menu Menu::sInstance;
+std::shared_ptr<Menu> Menu::sInstance;
 
 
 Menu::Menu()
@@ -47,8 +47,14 @@ Menu::Menu()
 }
 
 
-Menu& Menu::getInstance()
+std::shared_ptr<Menu>& Menu::getInstance()
 {
+   if (!sInstance)
+   {
+      sInstance = std::make_shared<Menu>();
+      sInstance->initialize();
+   }
+
    return sInstance;
 }
 
@@ -176,5 +182,79 @@ const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) cons
           break;
     }
     return nullptr;
+}
+
+void Menu::initialize()
+{
+   auto gci = GameControllerIntegration::getInstance(0);
+
+   if (gci)
+   {
+      GameController::ThresholdCallback up;
+      up.mAxis = SDL_CONTROLLER_AXIS_LEFTY;
+      up.mBoundary = GameController::ThresholdCallback::Boundary::Lower;
+      up.mThreshold = -0.3f;
+      up.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Up);};
+      gci->getController()->addAxisThresholdExceedCallback(up);
+
+      GameController::ThresholdCallback down;
+      down.mAxis = SDL_CONTROLLER_AXIS_LEFTY;
+      down.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Down);};
+      down.mBoundary = GameController::ThresholdCallback::Boundary::Upper;
+      down.mThreshold = 0.3f;
+      gci->getController()->addAxisThresholdExceedCallback(down);
+
+      GameController::ThresholdCallback left;
+      left.mAxis = SDL_CONTROLLER_AXIS_LEFTX;
+      left.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Left);};
+      left.mBoundary = GameController::ThresholdCallback::Boundary::Lower;
+      left.mThreshold = -0.3f;
+      gci->getController()->addAxisThresholdExceedCallback(left);
+
+      GameController::ThresholdCallback right;
+      right.mAxis = SDL_CONTROLLER_AXIS_LEFTX;
+      right.mBoundary = GameController::ThresholdCallback::Boundary::Upper;
+      right.mThreshold = 0.3f;
+      right.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Right);};
+      gci->getController()->addAxisThresholdExceedCallback(right);
+
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_DPAD_UP,
+         [this](){keyboardKeyPressed(sf::Keyboard::Up);}
+      );
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+         [this](){keyboardKeyPressed(sf::Keyboard::Down);}
+      );
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+         [this](){keyboardKeyPressed(sf::Keyboard::Left);}
+      );
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+         [this](){keyboardKeyPressed(sf::Keyboard::Right);}
+      );
+
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_A,
+         [this](){keyboardKeyPressed(sf::Keyboard::Return);}
+      );
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_B,
+         [this](){keyboardKeyPressed(sf::Keyboard::Escape);}
+      );
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_X,
+         [this](){keyboardKeyPressed(sf::Keyboard::D);}
+      );
+
+   }
 }
 

@@ -147,7 +147,7 @@ public:
    int getId() const;
 
    const GameControllerInfo& getJoystickInfo() const;
-   void setJoystickInfo(const GameControllerInfo &joystickInfo);
+   void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
    void damage(int damage, const sf::Vector2f& force = vector2fZero);
 

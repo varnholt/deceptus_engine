@@ -1,6 +1,7 @@
 #include "menuscreen.h"
 
 #include "image/psd.h"
+#include "game/gamecontrollerintegration.h"
 
 #include <iostream>
 
@@ -106,3 +107,15 @@ void MenuScreen::keyboardKeyReleased(sf::Keyboard::Key /*key*/)
 {
 
 }
+
+bool MenuScreen::isControllerUsed() const
+{
+   auto gji = GameControllerIntegration::getInstance(0);
+   if (gji == nullptr)
+   {
+      return false;
+   }
+
+   return true;
+}
+

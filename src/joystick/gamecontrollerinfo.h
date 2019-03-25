@@ -11,7 +11,7 @@ class GameControllerInfo
    public:
 
       //! constructor a
-      GameControllerInfo();
+      GameControllerInfo() = default;
 
       //! constructor b
       GameControllerInfo(

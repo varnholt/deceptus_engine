@@ -183,10 +183,6 @@ void Game::initializeController()
             checkCloseInventory();
          }
       );
-
-      GameController::ThresholdCallback test;
-      test.mCallback = [](){std::cout << "woo!" << std::endl;};
-      gji->getController()->addAxisThresholdExceedCallback(test);
    }
 }
 
@@ -194,7 +190,7 @@ void Game::initializeController()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::showMainMenu()
 {
-   Menu::getInstance().show(Menu::MenuType::Main);
+   Menu::getInstance()->show(Menu::MenuType::Main);
    GameState::getInstance().enqueuePause();
 }
 
@@ -226,19 +222,19 @@ void Game::initialize()
   Audio::getInstance();
 
   // initially the game should be in main menu and paused
-  std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance().getMenuScreen(Menu::MenuType::Main))->setExitCallback(
+  std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
      [this](){mWindow->close();}
   );
 
-  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
+  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
      [this](){toggleFullScreen();}
   );
 
-  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
+  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
      [this](int32_t w, int32_t h){changeResolution(w, h);}
   );
 
-  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance().getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
+  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
      [this](){
      initializeWindow();
      mLevel->createViews();
@@ -289,7 +285,7 @@ void Game::draw()
      mInventoryLayer->draw(*mWindowRenderTexture.get());
    }
 
-   Menu::getInstance().draw(*mWindowRenderTexture.get());
+   Menu::getInstance()->draw(*mWindowRenderTexture.get());
    MessageBox::draw(*mWindowRenderTexture.get());
 
    mWindowRenderTexture->display();
@@ -518,7 +514,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Escape:
       {
-         if (Menu::getInstance().getCurrentType() == Menu::MenuType::None)
+         if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
          {
             showMainMenu();
          }
@@ -624,14 +620,14 @@ void Game::processEvents()
          }
 
          mPlayer->keyboardKeyPressed(event.key.code);
-         Menu::getInstance().keyboardKeyPressed(event.key.code);
+         Menu::getInstance()->keyboardKeyPressed(event.key.code);
          processKeyPressedEvents(event);
       }
 
       if (event.type == sf::Event::KeyReleased)
       {
          mPlayer->keyboardKeyReleased(event.key.code);
-         Menu::getInstance().keyboardKeyReleased(event.key.code);
+         Menu::getInstance()->keyboardKeyReleased(event.key.code);
          processKeyReleasedEvents(event);
       }
    }
