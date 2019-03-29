@@ -23,6 +23,7 @@ struct PhysicsConfiguration
    int32_t mPlayerJumpSteps = 9;
    int32_t mPlayerJumpAfterContactLostMs = 100;
    int32_t mPlayerJumpBufferMs = 100;
+   int32_t mPlayerJumpMinimalDurationMs = 80;
    float mPlayerJumpFalloff = 6.5f;
    float mPlayerJumpSpeedFactor = 0.1f;
    int32_t mPlayerDashSteps = 20;

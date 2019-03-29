@@ -685,8 +685,6 @@ float Player::getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity,
       desiredVel = velocity.x * slowdown;
    }
 
-   std::cout << desiredVel << std::endl;
-
    return desiredVel;
 }
 
@@ -1148,7 +1146,7 @@ void Player::updateJump()
    {
       mBody->ApplyForce(b2Vec2(0, -1.0f), mBody->GetWorldCenter(), true);
    }
-   else if (mJumpSteps > 0 && jumpPressed)
+   else if ( (mJumpSteps > 0 && jumpPressed) || mJumpClock.getElapsedTime().asMilliseconds() < 80)
    {
       // jump higher if a faster
       auto maxWalk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
@@ -1158,6 +1156,7 @@ void Player::updateJump()
       if (vel > 0.0f)
       {
          auto maxRun = PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
+
          factor =
               1.0f
             + PhysicsConfiguration::getInstance().mPlayerJumpSpeedFactor
@@ -1177,13 +1176,14 @@ void Player::updateJump()
       */
 
      // to change velocity by 5 in one time step
-     auto force = factor * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / (1/60.0f) /*dt*/; //f = mv/t
+     auto force = factor * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / (1.0f / 60.0f) /*dt*/; //f = mv/t
 
-     //spread this over 6 time steps
+     // spread this over 6 time steps
      force /= PhysicsConfiguration::getInstance().mPlayerJumpFalloff;
 
      // printf("force: %f\n", force);
-     mBody->ApplyForceToCenter(b2Vec2(0,-force), true );
+     mBody->ApplyForceToCenter(b2Vec2(0.0f, -force), true );
+
      mJumpSteps--;
    }
    else
@@ -1469,10 +1469,10 @@ bool Player::isClimbableEdge(b2ChainShape* shape, int i)
    shape->m_count++;
 
    auto climbable =
-         (p.y > c.y && n.x != c.x && pp.y > p.y)
-      || (n.y > c.y && p.x != c.x && nn.y > n.y)
-      || (p.y > c.y && n.x != c.x && pp.x == n.x)
-      || (n.y > c.y && p.x != c.x && p.x == nn.x);
+         (p.y > c.y && (fabs(n.x - c.x) > 0.001f) && pp.y > p.y)
+      || (n.y > c.y && (fabs(p.x - c.x) > 0.001f) && nn.y > n.y)
+      || (p.y > c.y && (fabs(n.x - c.x) > 0.001f) && (fabs(pp.x - n.x) < 0.0001f))
+      || (n.y > c.y && (fabs(p.x - c.x) > 0.001f) && (fabs(p.x - nn.x) < 0.0001f));
 
 //   if (!climbable)
 //   {
@@ -1738,6 +1738,8 @@ void Player::updateClimb()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::jumpImpulse()
 {
+   mJumpClock.restart();
+
    float impulse = mBody->GetMass() * 6.0f;
 
    mBody->ApplyLinearImpulse(
@@ -1751,7 +1753,8 @@ void Player::jumpImpulse()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::jumpForce()
 {
-  mJumpSteps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
+   mJumpClock.restart();
+   mJumpSteps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
 }
 
 
@@ -1932,9 +1935,6 @@ void Player::jump()
       {
          removeClimbJoint();
 
-         mJumpClock.restart();
-
-         // jumpImpulse();
          jumpForce();
 
          if (isInWater())
