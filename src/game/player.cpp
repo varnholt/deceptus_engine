@@ -1146,7 +1146,10 @@ void Player::updateJump()
    {
       mBody->ApplyForce(b2Vec2(0, -1.0f), mBody->GetWorldCenter(), true);
    }
-   else if ( (mJumpSteps > 0 && jumpPressed) || mJumpClock.getElapsedTime().asMilliseconds() < 80)
+   else if (
+         (mJumpSteps > 0 && jumpPressed)
+      || mJumpClock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance().mPlayerJumpMinimalDurationMs
+   )
    {
       // jump higher if a faster
       auto maxWalk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
