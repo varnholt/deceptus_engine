@@ -414,7 +414,14 @@ float Player::getMaxVelocity() const
      }
      else
      {
-        velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
+        if (isInAir())
+        {
+           velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxAir;
+        }
+        else
+        {
+           velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
+        }
      }
   }
   return velocityMax;
@@ -678,7 +685,9 @@ float Player::getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity,
       desiredVel = velocity.x * slowdown;
    }
 
-  return desiredVel;
+   std::cout << desiredVel << std::endl;
+
+   return desiredVel;
 }
 
 
