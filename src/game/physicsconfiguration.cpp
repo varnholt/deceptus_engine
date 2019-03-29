@@ -38,6 +38,7 @@ std::string PhysicsConfiguration::serialize()
             {"player_jump_steps",                    mPlayerJumpSteps},
             {"player_jump_after_contact_lost_in_ms", mPlayerJumpAfterContactLostMs},
             {"player_jump_buffer_in_ms",             mPlayerJumpBufferMs},
+            {"player_jump_minimal_duration_in_ms",   mPlayerJumpMinimalDurationMs},
             {"player_jump_falloff",                  mPlayerJumpFalloff},
             {"player_jump_speed_factor",             mPlayerJumpSpeedFactor},
             {"player_dash_steps",                    mPlayerDashSteps},
@@ -71,6 +72,7 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    mPlayerJumpSteps              = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
    mPlayerJumpAfterContactLostMs = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
    mPlayerJumpBufferMs           = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
+   mPlayerJumpMinimalDurationMs  = config["PhysicsConfiguration"]["player_jump_minimal_duration_in_ms"].get<int32_t>();
    mPlayerJumpFalloff            = config["PhysicsConfiguration"]["player_jump_falloff"].get<float>();
    mPlayerJumpSpeedFactor        = config["PhysicsConfiguration"]["player_jump_speed_factor"].get<float>();
    mPlayerDashSteps              = config["PhysicsConfiguration"]["player_dash_steps"].get<int32_t>();
