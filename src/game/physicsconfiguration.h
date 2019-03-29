@@ -13,6 +13,7 @@ struct PhysicsConfiguration
    float mPlayerSpeedMaxWalk = 2.5f;
    float mPlayerSpeedMaxRun = 3.5f;
    float mPlayerSpeedMaxWater = 1.5f;
+   float mPlayerSpeedMaxAir = 4.0f;
    float mPlayerFriction = 0.0f;
    float mPlayerJumpStrength = 3.3f;
    float mPlayerAccelerationGround = 0.1f;
