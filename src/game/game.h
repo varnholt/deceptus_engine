@@ -47,6 +47,7 @@ private:
    void checkCloseInventory();
    void openInventory();
    void showMainMenu();
+   void showPauseMenu();
 
    void processKeyPressedEvents(const sf::Event& event);
    void processKeyReleasedEvents(const sf::Event& event);

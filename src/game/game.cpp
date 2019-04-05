@@ -196,6 +196,14 @@ void Game::showMainMenu()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::showPauseMenu()
+{
+   Menu::getInstance()->show(Menu::MenuType::Pause);
+   GameState::getInstance().enqueuePause();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
   initializeController();
@@ -285,7 +293,7 @@ void Game::draw()
      mInventoryLayer->draw(*mWindowRenderTexture.get());
    }
 
-   Menu::getInstance()->draw(*mWindowRenderTexture.get());
+   Menu::getInstance()->draw(*mWindowRenderTexture.get(), {sf::BlendAlpha});
    MessageBox::draw(*mWindowRenderTexture.get());
 
    mWindowRenderTexture->display();
@@ -489,6 +497,15 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::P:
       {
+         if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
+         {
+            showPauseMenu();
+         }
+         else
+         {
+            Menu::getInstance()->hide();
+         }
+
          GameState::getInstance().enqueueTogglePauseResume();
          break;
       }

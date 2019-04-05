@@ -184,7 +184,8 @@ SOURCES += \
     src/image/psd.cpp \
     src/image/tga.cpp \
     src/game/messagebox.cpp \
-    src/game/animationsettings.cpp
+    src/game/animationsettings.cpp \
+    src/menus/menuscreenpause.cpp
 
 
 # add box2d
@@ -296,7 +297,8 @@ HEADERS += \
     src/image/psd.h \
     src/image/tga.h \
     src/game/messagebox.h \
-    src/game/animationsettings.h
+    src/game/animationsettings.h \
+    src/menus/menuscreenpause.h
 
 
 SOURCES += \

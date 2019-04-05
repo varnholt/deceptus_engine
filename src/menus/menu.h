@@ -18,7 +18,8 @@ public:
       Audio,
       Game,
       Achievements,
-      Credits
+      Credits,
+      Pause
    };
 
 
@@ -55,6 +56,8 @@ private:
    std::shared_ptr<MenuScreen> mMenuGame;
    std::shared_ptr<MenuScreen> mMenuAchievements;
    std::shared_ptr<MenuScreen> mMenuCredits;
+   std::shared_ptr<MenuScreen> mMenuPause;
+   std::shared_ptr<MenuScreen> mMenuInvalid;
 
    std::vector<std::shared_ptr<MenuScreen>> mMenus;
 
