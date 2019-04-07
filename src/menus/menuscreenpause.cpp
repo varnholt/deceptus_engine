@@ -33,6 +33,11 @@ void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
    {
       select();
    }
+
+   if (key == sf::Keyboard::Escape)
+   {
+      // resume();
+   }
 }
 
 
@@ -80,13 +85,19 @@ void MenuScreenPause::down()
 }
 
 
+void MenuScreenPause::resume()
+{
+   Menu::getInstance()->hide();
+   GameState::getInstance().enqueueResume();
+}
+
+
 void MenuScreenPause::select()
 {
    switch (mSelection)
    {
       case Selection::Resume:
-         Menu::getInstance()->hide();
-         GameState::getInstance().enqueueResume();
+         resume();
          break;
       case Selection::Options:
          Menu::getInstance()->show(Menu::MenuType::Options);
