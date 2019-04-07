@@ -36,7 +36,8 @@ void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenOptions::back()
 {
-   Menu::getInstance()->show(Menu::MenuType::Main);
+
+   Menu::getInstance()->show(Menu::getInstance()->getPreviousType());
 }
 
 

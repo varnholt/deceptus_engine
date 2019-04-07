@@ -35,6 +35,7 @@ public:
    void keyboardKeyReleased(sf::Keyboard::Key key);
 
    MenuType getCurrentType() const;
+   MenuType getPreviousType() const;
    const std::shared_ptr<MenuScreen>& getMenuScreen(MenuType) const;
 
    void initialize();
@@ -45,6 +46,7 @@ public:
 private:
 
    MenuType mCurrentType = MenuType::None;
+   MenuType mPreviousType = MenuType::None;
 
    std::shared_ptr<MenuScreen> mCurrentMenu;
 
