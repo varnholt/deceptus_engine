@@ -22,6 +22,7 @@
 #include "joystick/gamecontroller.h"
 
 #include "menus/menuscreenmain.h"
+#include "menus/menuscreenpause.h"
 #include "menus/menuscreenvideo.h"
 
 #include <SFML/Graphics.hpp>
@@ -231,6 +232,10 @@ void Game::initialize()
 
   // initially the game should be in main menu and paused
   std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
+     [this](){mWindow->close();}
+  );
+
+  std::dynamic_pointer_cast<MenuScreenPause>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Pause))->setExitCallback(
      [this](){mWindow->close();}
   );
 

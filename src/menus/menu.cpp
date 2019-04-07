@@ -129,6 +129,7 @@ void Menu::show(Menu::MenuType menu)
          break;
    }
 
+   mPreviousType = mCurrentType;
    mCurrentType = menu;
 }
 
@@ -160,7 +161,13 @@ void Menu::keyboardKeyReleased(sf::Keyboard::Key key)
 
 Menu::MenuType Menu::getCurrentType() const
 {
-    return mCurrentType;
+   return mCurrentType;
+}
+
+
+Menu::MenuType Menu::getPreviousType() const
+{
+   return  mPreviousType;
 }
 
 
