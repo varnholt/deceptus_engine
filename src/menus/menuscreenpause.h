@@ -38,5 +38,6 @@ class MenuScreenPause : public MenuScreen
 
       ExitCallback mExitCallback;
 
+      void resume();
 };
 

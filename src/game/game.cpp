@@ -540,7 +540,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          {
             showMainMenu();
          }
-         // mWindow->close();
          break;
       }
       case sf::Keyboard::LShift:
