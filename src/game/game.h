@@ -33,6 +33,7 @@ private:
    void initializeController();
 
    void drawLevel();
+   void loadLevel();
 
    void reset();
 
