@@ -17,6 +17,7 @@ AnimationPool AnimationPool::sPlayerAnimation;
 void AnimationPool::initialize()
 {
    deserializeFromFile();
+   mInitialized = true;
 }
 
 
@@ -29,10 +30,9 @@ std::shared_ptr<Animation> AnimationPool::add(
    bool managedByPool
 )
 {
-   if (mSettings.empty())
+   if (!mInitialized)
    {
-      std::cerr << "initialize animation pool first!" << std::endl;
-      return nullptr;
+      initialize();
    }
 
    const auto& settings = mSettings[name];

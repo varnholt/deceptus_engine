@@ -72,6 +72,7 @@ public:
    virtual ~Player();
 
    void initialize();
+   void initializeLevel();
    void initializeController();
    void draw(sf::RenderTarget& target);
 

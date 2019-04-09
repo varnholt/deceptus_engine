@@ -205,28 +205,37 @@ void Game::showPauseMenu()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::loadLevel()
+{
+   // pick a level
+   auto levels = Levels::getInstance();
+   levels.deserializeFromFile();
+   auto levelOne = levels.mLevels.at(0);
+
+   // load it
+   mLevel = std::make_shared<Level>();
+   mLevel->setDescriptionFilename(levelOne.mLevelName);
+   mLevel->initialize();
+
+   // put the player in there
+   mPlayer->setWorld(mLevel->getWorld());
+   mPlayer->initializeLevel();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
   initializeController();
 
-  auto levels = Levels::getInstance();
-  levels.deserializeFromFile();
-  auto levelOne = levels.mLevels.at(0);
-
-  mLevel = std::make_shared<Level>();
-  mLevel->setDescriptionFilename(levelOne.mLevelName);
-
   mPlayer = std::make_shared<Player>();
+  mPlayer->initialize();
+
+  loadLevel();
 
   mInfoLayer = std::make_unique<InfoLayer>();
 
   mInventoryLayer = std::make_unique<InventoryLayer>();
-
-  AnimationPool::getInstance().initialize();
-
-  mLevel->initialize();
-  mPlayer->setWorld(mLevel->getWorld());
-  mPlayer->initialize();
 
   Audio::getInstance();
 

@@ -80,11 +80,6 @@ Player::~Player()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::initialize()
 {
-   setBodyViaPixelPosition(
-      Level::getCurrentLevel()->getStartPosition().x,
-      Level::getCurrentLevel()->getStartPosition().y
-   );
-
    mSpriteAnim.x = PLAYER_TILES_WIDTH;
    mSpriteAnim.y = 0;
 
@@ -92,8 +87,6 @@ void Player::initialize()
    mDamageClock.restart();
 
    mWeaponSystem->initialize();
-
-   createPlayerBody();
 
    mIdleRightAligned        = AnimationPool::getInstance().add("player_idle_right_aligned",         0.0f, 0.0f, true, false);
    mIdleLeftAligned         = AnimationPool::getInstance().add("player_idle_left_aligned",          0.0f, 0.0f, true, false);
@@ -153,6 +146,18 @@ void Player::initialize()
    }
 
    initializeController();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::initializeLevel()
+{
+   createPlayerBody();
+
+   setBodyViaPixelPosition(
+      Level::getCurrentLevel()->getStartPosition().x,
+      Level::getCurrentLevel()->getStartPosition().y
+   );
 }
 
 
