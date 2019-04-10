@@ -2,14 +2,15 @@
 
 #include "game/gameconfiguration.h"
 
-#include "menuscreenmain.h"
-#include "menuscreenoptions.h"
+#include "menuscreenachievements.h"
 #include "menuscreenaudio.h"
 #include "menuscreencontrols.h"
-#include "menuscreenvideo.h"
-#include "menuscreengame.h"
-#include "menuscreenachievements.h"
 #include "menuscreencredits.h"
+#include "menuscreengame.h"
+#include "menuscreenmain.h"
+#include "menuscreenoptions.h"
+#include "menuscreenpause.h"
+#include "menuscreenvideo.h"
 
 #include "game/gamecontrollerintegration.h"
 #include "joystick/gamecontroller.h"
@@ -30,6 +31,7 @@ Menu::Menu()
    mMenuGame = std::make_shared<MenuScreenGame>();
    mMenuAchievements = std::make_shared<MenuScreenAchievements>();
    mMenuCredits = std::make_shared<MenuScreenCredits>();
+   mMenuPause = std::make_shared<MenuScreenPause>();
 
    mMenus.push_back(mMenuMain);
    mMenus.push_back(mMenuOptions);
@@ -39,6 +41,7 @@ Menu::Menu()
    mMenus.push_back(mMenuGame);
    mMenus.push_back(mMenuAchievements);
    mMenus.push_back(mMenuCredits);
+   mMenus.push_back(mMenuPause);
 
    for (auto& screen : mMenus)
    {
@@ -121,8 +124,12 @@ void Menu::show(Menu::MenuType menu)
       case MenuType::Credits:
          mCurrentMenu = mMenuCredits;
          break;
+      case MenuType::Pause:
+         mCurrentMenu = mMenuPause;
+         break;
    }
 
+   mPreviousType = mCurrentType;
    mCurrentType = menu;
 }
 
@@ -154,7 +161,13 @@ void Menu::keyboardKeyReleased(sf::Keyboard::Key key)
 
 Menu::MenuType Menu::getCurrentType() const
 {
-    return mCurrentType;
+   return mCurrentType;
+}
+
+
+Menu::MenuType Menu::getPreviousType() const
+{
+   return  mPreviousType;
 }
 
 
@@ -178,10 +191,12 @@ const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) cons
           return mMenuAchievements;
        case MenuType::Credits:
           return mMenuCredits;
+       case MenuType::Pause:
+          return mMenuPause;
         case MenuType::None:
           break;
     }
-    return nullptr;
+    return mMenuInvalid;
 }
 
 void Menu::initialize()

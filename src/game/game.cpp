@@ -22,6 +22,7 @@
 #include "joystick/gamecontroller.h"
 
 #include "menus/menuscreenmain.h"
+#include "menus/menuscreenpause.h"
 #include "menus/menuscreenvideo.h"
 
 #include <SFML/Graphics.hpp>
@@ -196,33 +197,54 @@ void Game::showMainMenu()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::showPauseMenu()
+{
+   Menu::getInstance()->show(Menu::MenuType::Pause);
+   GameState::getInstance().enqueuePause();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Game::loadLevel()
+{
+   // pick a level
+   auto levels = Levels::getInstance();
+   levels.deserializeFromFile();
+   auto levelOne = levels.mLevels.at(0);
+
+   // load it
+   mLevel = std::make_shared<Level>();
+   mLevel->setDescriptionFilename(levelOne.mLevelName);
+   mLevel->initialize();
+
+   // put the player in there
+   mPlayer->setWorld(mLevel->getWorld());
+   mPlayer->initializeLevel();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
   initializeController();
 
-  auto levels = Levels::getInstance();
-  levels.deserializeFromFile();
-  auto levelOne = levels.mLevels.at(0);
-
-  mLevel = std::make_shared<Level>();
-  mLevel->setDescriptionFilename(levelOne.mLevelName);
-
   mPlayer = std::make_shared<Player>();
+  mPlayer->initialize();
+
+  loadLevel();
 
   mInfoLayer = std::make_unique<InfoLayer>();
 
   mInventoryLayer = std::make_unique<InventoryLayer>();
 
-  AnimationPool::getInstance().initialize();
-
-  mLevel->initialize();
-  mPlayer->setWorld(mLevel->getWorld());
-  mPlayer->initialize();
-
   Audio::getInstance();
 
   // initially the game should be in main menu and paused
   std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
+     [this](){mWindow->close();}
+  );
+
+  std::dynamic_pointer_cast<MenuScreenPause>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Pause))->setExitCallback(
      [this](){mWindow->close();}
   );
 
@@ -285,7 +307,7 @@ void Game::draw()
      mInventoryLayer->draw(*mWindowRenderTexture.get());
    }
 
-   Menu::getInstance()->draw(*mWindowRenderTexture.get());
+   Menu::getInstance()->draw(*mWindowRenderTexture.get(), {sf::BlendAlpha});
    MessageBox::draw(*mWindowRenderTexture.get());
 
    mWindowRenderTexture->display();
@@ -489,6 +511,15 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::P:
       {
+         if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
+         {
+            showPauseMenu();
+         }
+         else
+         {
+            Menu::getInstance()->hide();
+         }
+
          GameState::getInstance().enqueueTogglePauseResume();
          break;
       }
@@ -518,7 +549,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          {
             showMainMenu();
          }
-         // mWindow->close();
          break;
       }
       case sf::Keyboard::LShift:
