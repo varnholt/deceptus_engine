@@ -537,7 +537,7 @@ bool Level::isLookActive() const
 
 
 //-----------------------------------------------------------------------------
-void Level::loadLevel()
+void Level::load()
 {
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
 
@@ -579,7 +579,7 @@ void Level::initialize()
 
    mDescription = LevelDescription::load(mDescriptionFilename);
 
-   loadLevel();
+   load();
 
    mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * TILE_WIDTH  + PLAYER_ACTUAL_WIDTH / 2);
    mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * TILE_HEIGHT + DIFF_PLAYER_TILE_TO_PHYSICS);

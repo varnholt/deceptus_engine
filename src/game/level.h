@@ -150,7 +150,7 @@ protected:
    void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
 
-   void loadLevel();
+   void load();
    bool isControllerUsed() const;
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);

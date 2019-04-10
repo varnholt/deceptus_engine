@@ -10,6 +10,7 @@ class MenuScreen
 {
 public:
    MenuScreen() = default;
+   virtual ~MenuScreen() = default;
 
    virtual void update(float dt);
    void draw(sf::RenderTarget& window, sf::RenderStates states);

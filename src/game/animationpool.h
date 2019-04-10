@@ -31,6 +31,7 @@ class AnimationPool
    private:
 
       AnimationPool() = default;
+      bool mInitialized = false;
 
       std::map<std::string, std::shared_ptr<AnimationSettings>> mSettings;
       std::map<std::string, std::shared_ptr<sf::Texture>> mTextures;

@@ -18,7 +18,8 @@ public:
       Audio,
       Game,
       Achievements,
-      Credits
+      Credits,
+      Pause
    };
 
 
@@ -34,6 +35,7 @@ public:
    void keyboardKeyReleased(sf::Keyboard::Key key);
 
    MenuType getCurrentType() const;
+   MenuType getPreviousType() const;
    const std::shared_ptr<MenuScreen>& getMenuScreen(MenuType) const;
 
    void initialize();
@@ -44,6 +46,7 @@ public:
 private:
 
    MenuType mCurrentType = MenuType::None;
+   MenuType mPreviousType = MenuType::None;
 
    std::shared_ptr<MenuScreen> mCurrentMenu;
 
@@ -55,6 +58,8 @@ private:
    std::shared_ptr<MenuScreen> mMenuGame;
    std::shared_ptr<MenuScreen> mMenuAchievements;
    std::shared_ptr<MenuScreen> mMenuCredits;
+   std::shared_ptr<MenuScreen> mMenuPause;
+   std::shared_ptr<MenuScreen> mMenuInvalid;
 
    std::vector<std::shared_ptr<MenuScreen>> mMenus;
 

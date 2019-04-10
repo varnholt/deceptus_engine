@@ -13,6 +13,7 @@ struct PhysicsConfiguration
    float mPlayerSpeedMaxWalk = 2.5f;
    float mPlayerSpeedMaxRun = 3.5f;
    float mPlayerSpeedMaxWater = 1.5f;
+   float mPlayerSpeedMaxAir = 4.0f;
    float mPlayerFriction = 0.0f;
    float mPlayerJumpStrength = 3.3f;
    float mPlayerAccelerationGround = 0.1f;
@@ -22,6 +23,7 @@ struct PhysicsConfiguration
    int32_t mPlayerJumpSteps = 9;
    int32_t mPlayerJumpAfterContactLostMs = 100;
    int32_t mPlayerJumpBufferMs = 100;
+   int32_t mPlayerJumpMinimalDurationMs = 80;
    float mPlayerJumpFalloff = 6.5f;
    float mPlayerJumpSpeedFactor = 0.1f;
    int32_t mPlayerDashSteps = 20;

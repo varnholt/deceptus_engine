@@ -72,6 +72,7 @@ public:
    virtual ~Player();
 
    void initialize();
+   void initializeLevel();
    void initializeController();
    void draw(sf::RenderTarget& target);
 
@@ -163,7 +164,6 @@ private:
    void jumpImpulse();
    void jumpForce();
 
-   void updateDash(Dash dir = Dash::None);
 
    void updateAnimation(const sf::Time& dt);
    void updateExtraManager();
@@ -177,6 +177,8 @@ private:
    void updatePortal();
    void updateLostGroundContact();
    void updatePlayerOrientation();
+   void updateDash(Dash dir = Dash::None);
+   bool isDashActive() const;
 
    void createHead();
    void createFeet();
@@ -191,7 +193,7 @@ private:
    float getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const;
    float getDesiredVelocity(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const;
    float getDesiredVelocity() const;
-   float getSlowDown() const;
+   float getDeceleration() const;
    float getAcceleration() const;
 
 

@@ -26,7 +26,6 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
    updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
-   -- print("cannon.lua initialized")
 end
 
 
