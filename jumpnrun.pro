@@ -69,6 +69,8 @@ linux {
    LIBS += -llua5.3
    LIBS += -lSDL2
    LIBS += -lGL
+
+   LIBS += -Lsfml/lib
    LIBS += -lsfml-audio
    LIBS += -lsfml-graphics
    LIBS += -lsfml-network
