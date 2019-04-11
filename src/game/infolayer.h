@@ -2,25 +2,34 @@
 #define INFOLAYER_H
 
 #include "bitmapfont.h"
-#include <memory>
+
+#include "image/layer.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+
+#include <memory>
 
 
 class InfoLayer
 {
 public:
 
+   InfoLayer();
+
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   void drawDebugInfo(sf::RenderTarget& window);
+
+   void setLoading(bool loading);
+
+private:
+
    BitmapFont mFont;
    sf::Texture mHeartTexture;
    sf::Sprite mHeartSprite;
 
-
-   InfoLayer();
-
-   void draw(sf::RenderTarget& window);
-
-   void drawDebugInfo(sf::RenderTarget& window);
+   std::vector<std::shared_ptr<Layer>> mLayerStack;
+   std::map<std::string, std::shared_ptr<Layer>> mLayers;
 };
 
 #endif // INFOLAYER_H
