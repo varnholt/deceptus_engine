@@ -216,6 +216,7 @@ void Game::loadLevel()
    mLevel = std::make_shared<Level>();
    mLevel->setDescriptionFilename(levelOne.mLevelName);
    mLevel->initialize();
+   mLevel->initializeTextures();
 
    // put the player in there
    mPlayer->setWorld(mLevel->getWorld());
@@ -507,6 +508,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::J:
       {
          mPlayer->updateClimb();
+         break;
+      }
+      case sf::Keyboard::L:
+      {
+         auto pos = mPlayer->getPixelPosition();
+         loadLevel();
+         mPlayer->setBodyViaPixelPosition(pos.x, pos.y);
          break;
       }
       case sf::Keyboard::P:
