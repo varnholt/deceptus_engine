@@ -131,6 +131,12 @@ void Menu::show(Menu::MenuType menu)
 
    mPreviousType = mCurrentType;
    mCurrentType = menu;
+
+   mHistory.push_back(menu);
+   while (mHistory.size() > 10)
+   {
+      mHistory.pop_front();
+   }
 }
 
 
@@ -168,6 +174,12 @@ Menu::MenuType Menu::getCurrentType() const
 Menu::MenuType Menu::getPreviousType() const
 {
    return  mPreviousType;
+}
+
+
+const std::deque<Menu::MenuType>& Menu::getHistory() const
+{
+   return mHistory;
 }
 
 

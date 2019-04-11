@@ -36,8 +36,25 @@ void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenOptions::back()
 {
+   const auto& history = Menu::getInstance()->getHistory();
 
-   Menu::getInstance()->show(Menu::getInstance()->getPreviousType());
+   // choose whatever has been used the last time to open up the options menu
+   auto menu = Menu::MenuType::None;
+   for (auto it = history.cbegin(); it != history.cend(); ++it)
+   {
+      if ((*it) == Menu::MenuType::Game)
+      {
+         menu = Menu::MenuType::Game;
+         break;
+      }
+      else if ((*it) == Menu::MenuType::Pause)
+      {
+         menu = Menu::MenuType::Pause;
+         break;
+      }
+   }
+
+   Menu::getInstance()->show(menu);
 }
 
 

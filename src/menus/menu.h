@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <memory>
 #include <vector>
 
@@ -36,6 +37,9 @@ public:
 
    MenuType getCurrentType() const;
    MenuType getPreviousType() const;
+
+   const std::deque<MenuType>& getHistory() const;
+
    const std::shared_ptr<MenuScreen>& getMenuScreen(MenuType) const;
 
    void initialize();
@@ -47,6 +51,8 @@ private:
 
    MenuType mCurrentType = MenuType::None;
    MenuType mPreviousType = MenuType::None;
+
+   std::deque<MenuType> mHistory;
 
    std::shared_ptr<MenuScreen> mCurrentMenu;
 

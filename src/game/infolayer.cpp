@@ -4,6 +4,9 @@
 #include "gameconfiguration.h"
 #include "player.h"
 
+#include "image/psd.h"
+
+#include <iostream>
 #include <sstream>
 
 
@@ -24,10 +27,46 @@ InfoLayer::InfoLayer()
       "data/game/font.png",
       "data/game/font.map"
    );
+
+   // load ingame psd
+   PSD psd;
+   psd.setColorFormat(PSD::ColorFormat::ABGR);
+   psd.load("data/game/ingame_ui.psd");
+
+   // std::cout << mFilename << std::endl;
+
+   for (const auto& layer : psd.getLayers())
+   {
+      // skip groups
+      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
+      {
+         continue;
+      }
+
+      // std::cout << layer.getName() << std::endl;
+
+      auto tmp = std::make_shared<Layer>();
+      tmp->mVisible = layer.isVisible();
+
+      auto texture = std::make_shared<sf::Texture>();
+      auto sprite = std::make_shared<sf::Sprite>();
+
+      texture->create(layer.getWidth(), layer.getHeight());
+      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+
+      sprite->setTexture(*texture, true);
+      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+
+      tmp->mTexture = texture;
+      tmp->mSprite = sprite;
+
+      mLayerStack.push_back(tmp);
+      mLayers[layer.getName()] = tmp;
+   }
 }
 
 
-void InfoLayer::draw(sf::RenderTarget& window)
+void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    auto w = GameConfiguration::getInstance().mViewWidth;
    auto h = GameConfiguration::getInstance().mViewHeight;
@@ -35,21 +74,50 @@ void InfoLayer::draw(sf::RenderTarget& window)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   int health = Player::getPlayer(0)->mExtraTable->mHealth->mHealth;
-   int hearts = health / 20;
+   auto health = (Player::getPlayer(0)->mExtraTable->mHealth->mHealth) * 0.01f;
 
-   for (auto i = 0; i < hearts; i++)
+   //
+   // for (auto i = 0; i < hearts; i++)
+   // {
+   //    mHeartSprite.setPosition(
+   //       static_cast<float>(5 * mFont.mCharWidth + i * 16),
+   //       static_cast<float>(2)
+   //    );
+   //
+   //    window.draw(mHeartSprite);
+   // }
+   //
+   // std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(std::to_string(health));
+   // mFont.draw(window, coords, 5, 5);
+
+   // for (auto& layer : mLayerStack)
+   // {
+   //    if (layer->mVisible)
+   //    {
+   //       layer->draw(window, states);
+   //    }
+   // }
+
+   auto energy = mLayers["health_energy"];
+
+   energy->mSprite->setTextureRect(
+      sf::IntRect{
+         0,
+         0,
+         static_cast<int32_t>(energy->mSprite->getTexture()->getSize().x * health),
+         static_cast<int32_t>(energy->mSprite->getTexture()->getSize().y)
+      }
+   );
+
+   mLayers["health"]->draw(window, states);
+   mLayers["health_energy"]->draw(window, states);
+   mLayers["health_weapon"]->draw(window, states);
+
+   auto autosave = mLayers["autosave"];
+   if (autosave->mVisible)
    {
-      mHeartSprite.setPosition(
-         static_cast<float>(5 * mFont.mCharWidth + i * 16),
-         static_cast<float>(2)
-      );
-
-      window.draw(mHeartSprite);
+      autosave->draw(window, states);
    }
-
-   std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(std::to_string(health));
-   mFont.draw(window, coords, 5, 5);
 }
 
 
@@ -67,6 +135,12 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
    std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(stream.str());
    mFont.draw(window, coords, 5, 50);
+}
+
+
+void InfoLayer::setLoading(bool loading)
+{
+   mLayers["autosave"]->mVisible = loading;
 }
 
 
