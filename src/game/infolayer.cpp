@@ -75,7 +75,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto health = (Player::getPlayer(0)->mExtraTable->mHealth->mHealth) * 0.01f;
+
 
    //
    // for (auto i = 0; i < hearts; i++)
@@ -99,20 +99,32 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    //    }
    // }
 
-   auto energy = mLayers["health_energy"];
+   auto health_energy = mLayers["health_energy"];
+   auto health_weapon = mLayers["health_weapon"];
+   auto health = mLayers["health"];
 
-   energy->mSprite->setTextureRect(
-      sf::IntRect{
-         0,
-         0,
-         static_cast<int32_t>(energy->mSprite->getTexture()->getSize().x * health),
-         static_cast<int32_t>(energy->mSprite->getTexture()->getSize().y)
-      }
-   );
+   if (health_energy->mVisible)
+   {
+       auto h = (Player::getPlayer(0)->mExtraTable->mHealth->mHealth) * 0.01f;
+       health_energy->mSprite->setTextureRect(
+          sf::IntRect{
+             0,
+             0,
+             static_cast<int32_t>(health_energy->mSprite->getTexture()->getSize().x * h),
+             static_cast<int32_t>(health_energy->mSprite->getTexture()->getSize().y)
+          }
+       );
+   }
 
-   mLayers["health"]->draw(window, states);
-   mLayers["health_energy"]->draw(window, states);
-   mLayers["health_weapon"]->draw(window, states);
+   if (health_weapon->mVisible)
+   {
+       health_weapon->draw(window, states);
+   }
+
+   if (health->mVisible)
+   {
+       health->draw(window, states);
+   }
 
    auto autosave = mLayers["autosave"];
    if (autosave->mVisible)
@@ -144,6 +156,11 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 void InfoLayer::setLoading(bool loading)
 {
    mLayers["autosave"]->mVisible = loading;
+
+   mLayers["health"]->mVisible = !loading;
+   mLayers["health_energy"]->mVisible = !loading;
+   mLayers["health_weapon"]->mVisible = !loading;
+
 }
 
 
