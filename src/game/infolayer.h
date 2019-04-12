@@ -25,8 +25,9 @@ public:
 private:
 
    BitmapFont mFont;
-   sf::Texture mHeartTexture;
-   sf::Sprite mHeartSprite;
+
+   bool mLoading = false;
+   sf::Time mShowTime;
 
    std::vector<std::shared_ptr<Layer>> mLayerStack;
    std::map<std::string, std::shared_ptr<Layer>> mLayers;
