@@ -1,6 +1,7 @@
 #include "infolayer.h"
 
 #include "extratable.h"
+#include "globalclock.h"
 #include "gameconfiguration.h"
 #include "player.h"
 
@@ -116,6 +117,8 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto autosave = mLayers["autosave"];
    if (autosave->mVisible)
    {
+      auto alpha = 0.5f * (1.0f + sin(GlobalClock::getInstance()->getElapsedTime().asSeconds() * 2.0f));
+      autosave->mSprite->setColor(sf::Color(255, 255, 255, alpha * 255));
       autosave->draw(window, states);
    }
 }

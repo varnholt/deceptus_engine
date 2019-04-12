@@ -10,6 +10,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include <thread>
+#include <future>
+
 class Level;
 class Player;
 class RaycastLight;
@@ -67,6 +70,8 @@ private:
    std::unique_ptr<InventoryLayer> mInventoryLayer;
 
    sf::Clock mDeltaClock;
+   bool mLevelLoadingFinished = false;
+   std::future<void> mLevelLoadingThread;
 
    int32_t mFps;
    bool mScreenshot = false;
