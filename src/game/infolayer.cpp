@@ -13,17 +13,6 @@
 
 InfoLayer::InfoLayer()
 {
-   mHeartTexture.loadFromFile("data/game/info.png");
-   mHeartSprite.setTexture(mHeartTexture);
-   mHeartSprite.setTextureRect(
-      sf::IntRect(
-         0,
-         0,
-         16,
-         16
-      )
-   );
-
    mFont.load(
       "data/game/font.png",
       "data/game/font.map"
@@ -69,39 +58,17 @@ InfoLayer::InfoLayer()
 
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
+   const auto now = GlobalClock::getInstance()->getElapsedTime();
+
    auto w = GameConfiguration::getInstance().mViewWidth;
    auto h = GameConfiguration::getInstance().mViewHeight;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-
-
-   //
-   // for (auto i = 0; i < hearts; i++)
-   // {
-   //    mHeartSprite.setPosition(
-   //       static_cast<float>(5 * mFont.mCharWidth + i * 16),
-   //       static_cast<float>(2)
-   //    );
-   //
-   //    window.draw(mHeartSprite);
-   // }
-   //
-   // std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(std::to_string(health));
-   // mFont.draw(window, coords, 5, 5);
-
-   // for (auto& layer : mLayerStack)
-   // {
-   //    if (layer->mVisible)
-   //    {
-   //       layer->draw(window, states);
-   //    }
-   // }
-
+   auto health = mLayers["health"];
    auto health_energy = mLayers["health_energy"];
    auto health_weapon = mLayers["health_weapon"];
-   auto health = mLayers["health"];
 
    if (health_energy->mVisible)
    {
@@ -114,22 +81,24 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
              static_cast<int32_t>(health_energy->mSprite->getTexture()->getSize().y)
           }
        );
-   }
 
-   if (health_weapon->mVisible)
-   {
+       auto t = (now - mShowTime).asSeconds();
+       const auto duration = 1.0f;
+       t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * M_PI))) * 200;
+
+       health_energy->mSprite->setOrigin(t, 0.0f);
+       health_weapon->mSprite->setOrigin(t, 0.0f);
+       health->mSprite->setOrigin(t, 0.0f);
+
+       health_energy->draw(window, states);
        health_weapon->draw(window, states);
-   }
-
-   if (health->mVisible)
-   {
        health->draw(window, states);
    }
 
    auto autosave = mLayers["autosave"];
    if (autosave->mVisible)
    {
-      auto alpha = 0.5f * (1.0f + sin(GlobalClock::getInstance()->getElapsedTime().asSeconds() * 2.0f));
+      auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
       autosave->mSprite->setColor(sf::Color(255, 255, 255, alpha * 255));
       autosave->draw(window, states);
    }
@@ -161,6 +130,12 @@ void InfoLayer::setLoading(bool loading)
    mLayers["health_energy"]->mVisible = !loading;
    mLayers["health_weapon"]->mVisible = !loading;
 
+   if (!loading && loading != mLoading)
+   {
+       mShowTime = GlobalClock::getInstance()->getElapsedTime();
+   }
+
+   mLoading = loading;
 }
 
 
