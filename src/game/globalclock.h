@@ -18,7 +18,7 @@ public:
    sf::Time getElapsedTime();
 
 
-protected:
+private:
 
    sf::Clock mClock;
 

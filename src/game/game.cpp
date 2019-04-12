@@ -204,23 +204,34 @@ void Game::showPauseMenu()
 }
 
 
+
+
+
 //----------------------------------------------------------------------------------------------------------------------
 void Game::loadLevel()
 {
-   // pick a level
-   auto levels = Levels::getInstance();
-   levels.deserializeFromFile();
-   auto levelOne = levels.mLevels.at(0);
+    mLevelLoadingThread = std::async(
+        std::launch::async, [this](){
+            mLevelLoadingFinished = false;
 
-   // load it
-   mLevel = std::make_shared<Level>();
-   mLevel->setDescriptionFilename(levelOne.mLevelName);
-   mLevel->initialize();
-   mLevel->initializeTextures();
+            // pick a level
+            auto levels = Levels::getInstance();
+            levels.deserializeFromFile();
+            auto levelOne = levels.mLevels.at(0);
 
-   // put the player in there
-   mPlayer->setWorld(mLevel->getWorld());
-   mPlayer->initializeLevel();
+            // load it
+            mLevel = std::make_shared<Level>();
+            mLevel->setDescriptionFilename(levelOne.mLevelName);
+            mLevel->initialize();
+            mLevel->initializeTextures();
+
+            // put the player in there
+            mPlayer->setWorld(mLevel->getWorld());
+            mPlayer->initializeLevel();
+
+            mLevelLoadingFinished = true;
+        }
+    );
 }
 
 
@@ -293,9 +304,14 @@ void Game::draw()
 
    mWindowRenderTexture->clear();
 
-   mLevel->draw(mWindowRenderTexture, mScreenshot);
+   if (mLevelLoadingFinished)
+   {
+       mLevel->draw(mWindowRenderTexture, mScreenshot);
+   }
+
    mScreenshot = false;
 
+   mInfoLayer->setLoading(!mLevelLoadingFinished);
    mInfoLayer->draw(*mWindowRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
@@ -394,13 +410,17 @@ void Game::update()
    else if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {
       Timer::update();
-      AnimationPool::getInstance().updateAnimations(dt.asSeconds());
-      Weapon::updateBulletHitAnimations(dt.asSeconds());
-      updateGameController();
-      updateGameControllerForGame();
-      mLevel->update(dt);
-      mPlayer->update(dt);
-      updateGameState();
+
+      if (mLevelLoadingFinished)
+      {
+          AnimationPool::getInstance().updateAnimations(dt.asSeconds());
+          Weapon::updateBulletHitAnimations(dt.asSeconds());
+          updateGameController();
+          updateGameControllerForGame();
+          mLevel->update(dt);
+          mPlayer->update(dt);
+          updateGameState();
+      }
    }
 
    GameState::getInstance().sync();
