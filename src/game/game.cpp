@@ -230,6 +230,13 @@ void Game::loadLevel()
             mPlayer->initializeLevel();
 
             mLevelLoadingFinished = true;
+
+            // jump back to stored position
+            if (mStoredPositionValid)
+            {
+               mPlayer->setBodyViaPixelPosition(mStoredPosition.x, mStoredPosition.y);
+               mStoredPositionValid = false;
+            }
         }
     );
 }
@@ -532,9 +539,9 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::L:
       {
-         auto pos = mPlayer->getPixelPosition();
+         mStoredPositionValid = true;
+         mStoredPosition = mPlayer->getPixelPosition();
          loadLevel();
-         mPlayer->setBodyViaPixelPosition(pos.x, pos.y);
          break;
       }
       case sf::Keyboard::P:

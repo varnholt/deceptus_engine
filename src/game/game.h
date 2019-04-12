@@ -72,6 +72,8 @@ private:
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;
    std::future<void> mLevelLoadingThread;
+   bool mStoredPositionValid = false;
+   sf::Vector2f mStoredPosition;
 
    int32_t mFps;
    bool mScreenshot = false;
