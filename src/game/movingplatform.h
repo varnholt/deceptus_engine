@@ -39,14 +39,14 @@ public:
       TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path &basePath,
-      b2World *world
+      const std::shared_ptr<b2World>& world
    );
 
    static void link(const std::vector<MovingPlatform*> platforms, TmxObject* tmxObject);
 
    void draw(sf::RenderTarget& target);
    void update(float dt);
-   void setupBody(b2World *world);
+   void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
    void setOffset(float x, float y);
    int getZ() const;

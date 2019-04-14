@@ -75,7 +75,7 @@ void MovingPlatform::updateTransform()
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::setupBody(b2World* world)
+void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygonShape;
    auto sizeX = TILE_WIDTH / PPM;
@@ -113,7 +113,7 @@ std::vector<MovingPlatform*> MovingPlatform::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
-   b2World* world
+   const std::shared_ptr<b2World>& world
 )
 {
    std::vector<MovingPlatform*> movingPlatforms;

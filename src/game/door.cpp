@@ -137,7 +137,7 @@ void Door::reset()
 
 
 //-----------------------------------------------------------------------------
-void Door::setupBody(b2World *world)
+void Door::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygonShape;
    auto sizeX = (TILE_WIDTH / PPM) * 0.26f;
@@ -253,7 +253,7 @@ std::vector<Door *> Door::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
-   b2World* world
+   const std::shared_ptr<b2World>& world
 )
 {
    std::vector<Door*> doors;

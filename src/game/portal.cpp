@@ -236,7 +236,7 @@ std::vector<Portal *> Portal::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
-   b2World* /*world*/
+   const std::shared_ptr<b2World>&
 )
 {
    std::vector<Portal*> portals;

@@ -30,7 +30,7 @@ public:
 
    void draw(sf::RenderTarget& window);
    void update(float dt);
-   void setupBody(b2World *world);
+   void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
 
    void toggle();
@@ -39,7 +39,7 @@ public:
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
-      b2World* mWorld
+      const std::shared_ptr<b2World>&
    );
 
 

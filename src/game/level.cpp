@@ -145,7 +145,7 @@ Level::Level()
    // init world for this level
    b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance().mGravity);
 
-   mWorld = new b2World(gravity);
+   mWorld = std::make_shared<b2World>(gravity);
    mWorld->SetContactListener(GameContactListener::getInstance());
 
    sCurrentLevel = this;
@@ -172,8 +172,6 @@ Level::Level()
 //-----------------------------------------------------------------------------
 Level::~Level()
 {
-   delete mWorld;
-   mWorld = nullptr;
 }
 
 
@@ -1034,7 +1032,10 @@ void Level::draw(
    screenshot = false;
 
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
-   levelTextureSprite.setPosition(mBoomOffsetX, mBoomOffsetY);
+
+   // disabling boom effect for now.
+   // levelTextureSprite.setPosition(mBoomOffsetX, mBoomOffsetY);
+
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
    updateGammaShader();
@@ -1118,14 +1119,14 @@ void Level::updateBoom(const sf::Time& dt)
 
 
 //-----------------------------------------------------------------------------
-b2World *Level::getWorld() const
+const std::shared_ptr<b2World>& Level::getWorld() const
 {
    return mWorld;
 }
 
 
 //-----------------------------------------------------------------------------
-void Level::setWorld(b2World *world)
+void Level::setWorld(const std::shared_ptr<b2World>& world)
 {
     mWorld = world;
 }
@@ -1224,15 +1225,15 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
    auto offsetX = layer->mOffsetX;
    auto offsetY = layer->mOffsetY;
 
-   mPhysics.mMap = new int[width * height];
+   mPhysics.mMap = new int32_t[width * height];
    mPhysics.mMapWidth = width;
    mPhysics.mMapHeight = height;
    mPhysics.mMapOffsetX = offsetX;
    mPhysics.mMapOffsetY = offsetY;
 
-   for (auto y = 0; y < height; y++)
+   for (auto y = 0u; y < height; y++)
    {
-      for (auto x = 0; x < width; x++)
+      for (auto x = 0u; x < width; x++)
       {
          // get the current tile number
          auto tileNumber = tiles[y * width + x];
@@ -1316,9 +1317,9 @@ void Level::parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
    std::vector<b2Vec2> vertices;
    std::vector<std::vector<int32_t>> faces;
 
-   for (auto y = 0; y < height; y++)
+   for (auto y = 0u; y < height; y++)
    {
-      for (auto x = 0; x < width; x++)
+      for (auto x = 0u; x < width; x++)
       {
          const auto tileNumber = tiles[y * width + x];
          auto tileRelative = -1;
@@ -1509,7 +1510,13 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 }
 
 
-//-----------------------------------------------------------------------------
+Level::Physics::~Physics()
+{
+   delete[] mMap;
+   mMap = nullptr;
+}
+
+
 PhysicsTile Level::Physics::getTileForPosition(const b2Vec2 &playerPos) const
 {
    if (mMap == nullptr)

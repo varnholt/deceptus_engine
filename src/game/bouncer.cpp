@@ -38,12 +38,12 @@ void Bouncer::setZ(int z)
 }
 
 Bouncer::Bouncer(
-  GameNode* parent,
-  b2World *world,
-  float x,
-  float y,
-  float width,
-  float height
+   GameNode* parent,
+   const std::shared_ptr<b2World>& world,
+   float x,
+   float y,
+   float width,
+   float height
 )
  : FixtureNode(parent)
 {

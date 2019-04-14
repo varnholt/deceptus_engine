@@ -120,8 +120,7 @@ public:
 
 
    b2Body* getBody() const;
-   b2World* getWorld() const;
-   void setWorld(b2World *world);
+   void setWorld(const std::shared_ptr<b2World>& world);
    void updatePixelPosition();
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
@@ -207,7 +206,7 @@ private:
    std::shared_ptr<WeaponSystem> mWeaponSystem;
    std::shared_ptr<ExtraManager> mExtraManager;
 
-   b2World* mWorld = nullptr;
+   std::shared_ptr<b2World> mWorld;
    b2Body* mBody = nullptr;
    b2Fixture* mHeadFixture = nullptr;
    b2Joint* mClimbJoint = nullptr;

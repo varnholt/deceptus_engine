@@ -49,16 +49,19 @@ public:
 
    struct Physics
    {
-     int* mMap = nullptr;
-     int32_t mMapOffsetX = 0;
-     int32_t mMapOffsetY = 0;
-     int32_t mMapWidth = 0;
-     int32_t mMapHeight = 0;
-     std::vector<std::vector<sf::Vertex>> mOutlines;
-     std::vector<std::vector<b2Vec2>> mChains;
-     std::shared_ptr<TileMap> mTileMap;
+      Physics() = default;
+      ~Physics();
 
-     PhysicsTile getTileForPosition(const b2Vec2& playerPos) const;
+      int* mMap = nullptr;
+      int32_t mMapOffsetX = 0;
+      int32_t mMapOffsetY = 0;
+      uint32_t mMapWidth = 0;
+      uint32_t mMapHeight = 0;
+      std::vector<std::vector<sf::Vertex>> mOutlines;
+      std::vector<std::vector<b2Vec2>> mChains;
+      std::shared_ptr<TileMap> mTileMap;
+
+      PhysicsTile getTileForPosition(const b2Vec2& playerPos) const;
    };
 
 
@@ -83,8 +86,8 @@ public:
 
    void update(const sf::Time& dt);
 
-   b2World *getWorld() const;
-   void setWorld(b2World *world);
+   const std::shared_ptr<b2World>& getWorld() const;
+   void setWorld(const std::shared_ptr<b2World>& world);
 
    std::map<b2Body *, b2Vec2 *> *getPointMap() ;
    std::map<b2Body *, int>* getPointSizeMap();
@@ -221,7 +224,7 @@ protected:
    // box2d
 
    // box2d world
-   b2World* mWorld;
+   std::shared_ptr<b2World> mWorld;
 
    static Level* sCurrentLevel;
 

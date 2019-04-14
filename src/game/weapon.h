@@ -33,7 +33,7 @@ public:
    Weapon(std::unique_ptr<b2Shape>, int fireInterval);
 
    void fire(
-      b2World* world,
+      const std::shared_ptr<b2World>& world,
       const b2Vec2 &pos,
       const b2Vec2 &dir
    );

@@ -28,7 +28,7 @@ private:
 public:
   ConveyorBelt(
     GameNode* parent,
-    b2World* world,
+    const std::shared_ptr<b2World>& world,
     float x,
     float y,
     float width,

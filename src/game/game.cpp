@@ -219,6 +219,8 @@ void Game::loadLevel()
             levels.deserializeFromFile();
             auto levelOne = levels.mLevels.at(0);
 
+            auto previousLevel = mLevel;
+
             // load it
             mLevel = std::make_shared<Level>();
             mLevel->setDescriptionFilename(levelOne.mLevelName);
@@ -228,6 +230,8 @@ void Game::loadLevel()
             // put the player in there
             mPlayer->setWorld(mLevel->getWorld());
             mPlayer->initializeLevel();
+
+            previousLevel.reset();
 
             mLevelLoadingFinished = true;
 
