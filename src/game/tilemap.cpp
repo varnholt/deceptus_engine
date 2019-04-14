@@ -59,9 +59,9 @@ bool TileMap::load(
    std::map<int, TmxTile*> tileMap = tileSet->mTileMap;
 
    // populate the vertex array, with one quad per tile
-   for (auto posX = 0; posX < layer->mWidth; ++posX)
+   for (auto posX = 0u; posX < layer->mWidth; ++posX)
    {
-      for (auto posY = 0; posY < layer->mHeight; ++posY)
+      for (auto posY = 0u; posY < layer->mHeight; ++posY)
       {
          // get the current tile number
          auto tileNumber = layer->mData[posX + posY * layer->mWidth];
@@ -118,8 +118,8 @@ bool TileMap::load(
                   // );
 
                   auto offsetFrame = new AnimatedTileFrame();
-                  offsetFrame->mX = (frame->mTileId /*- tileSet->mFirstGid*/) % (mTexture.getSize().x / mTileSize.x);
-                  offsetFrame->mY = (frame->mTileId /*- tileSet->mFirstGid*/) / (mTexture.getSize().x / mTileSize.x);
+                  offsetFrame->mX = frame->mTileId % (mTexture.getSize().x / mTileSize.x);
+                  offsetFrame->mY = frame->mTileId / (mTexture.getSize().x / mTileSize.x);
                   offsetFrame->mDuration = frame->mDuration;
                   animatedTile->mFrames.push_back(offsetFrame);
                   duration += frame->mDuration;

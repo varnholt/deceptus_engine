@@ -428,6 +428,7 @@ DISTFILES += \
     data/shaders/raycast.frag \
     data/shaders/water.frag \
     data/shaders/raycast.vert \
-    data/shaders/wave.vert
+    data/shaders/wave.vert \
+    data/level-crypt/metroid.tmx
 
 

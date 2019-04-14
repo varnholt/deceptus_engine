@@ -406,7 +406,7 @@ void Level::loadTmx()
          {
             mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
          }
-         else
+         else // tile map
          {
             std::shared_ptr<TileMap> tileMap = std::make_shared<TileMap>();
             tileMap->load(layer, tileset, path);
