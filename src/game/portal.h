@@ -24,13 +24,12 @@ public:
 
    void draw(sf::RenderTarget& window);
    void update(float dt);
-   void setupBody(b2World *world);
 
    static std::vector<Portal*> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
-      b2World* mWorld
+      const std::shared_ptr<b2World>& world
    );
 
    static void link(std::vector<Portal*>& portals, TmxObject*);

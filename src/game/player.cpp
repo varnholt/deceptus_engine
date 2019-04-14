@@ -389,14 +389,7 @@ void Player::createPlayerBody()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-b2World *Player::getWorld() const
-{
-   return mWorld;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::setWorld(b2World *world)
+void Player::setWorld(const std::shared_ptr<b2World>& world)
 {
    mWorld = world;
 }
