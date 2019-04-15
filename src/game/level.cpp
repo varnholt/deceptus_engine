@@ -427,6 +427,10 @@ void Level::loadTmx()
                mParallaxMaps.push_back(tileMap);
                pushTileMap = false;
             }
+            else if (layer->mName == "level")
+            {
+               parsePhysicsTiles(layer, tileset, path);
+            }
 
             parseDynamicPhyicsLayer(layer, tileset);
 
@@ -1293,6 +1297,27 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
 
       mPhysics.mChains.push_back(chain);
       mPhysics.mOutlines.push_back(visiblePath);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::parsePhysicsTiles(
+   TmxLayer* /*layer*/,
+   TmxTileSet* /*tileSet*/,
+   const std::filesystem::path& basePath
+)
+{
+   // std::cout << "parsing physics tiles vs. level layer (" << basePath.string() << ")" << std::endl;
+
+   std::ifstream phsyicsFile("physics_tiles.csv");
+
+   std::string line;
+   while (std::getline(phsyicsFile, line))
+   {
+      std::istringstream iss(line);
+      // int a, b;
+      // if (!(iss >> a >> b)) { break; } // error
    }
 }
 

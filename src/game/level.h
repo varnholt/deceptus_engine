@@ -152,6 +152,7 @@ protected:
 
    void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
+   void parsePhysicsTiles(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
 
    void load();
    bool isControllerUsed() const;
@@ -227,7 +228,6 @@ protected:
    std::shared_ptr<b2World> mWorld;
 
    static Level* sCurrentLevel;
-
 };
 
 #endif // LEVEL_H
