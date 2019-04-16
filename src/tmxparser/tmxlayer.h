@@ -21,7 +21,7 @@ struct TmxLayer : TmxElement
    int32_t mOffsetX = 0;
    int32_t mOffsetY = 0;
 
-   int32_t* mData = 0;
+   int32_t* mData = nullptr;
 
   std::vector<TmxChunk*> chunks;
 };

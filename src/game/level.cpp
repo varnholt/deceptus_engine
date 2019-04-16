@@ -1303,22 +1303,88 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
 
 //-----------------------------------------------------------------------------
 void Level::parsePhysicsTiles(
-   TmxLayer* /*layer*/,
+   TmxLayer* layer,
    TmxTileSet* /*tileSet*/,
    const std::filesystem::path& basePath
 )
 {
    // std::cout << "parsing physics tiles vs. level layer (" << basePath.string() << ")" << std::endl;
 
-   std::ifstream phsyicsFile("physics_tiles.csv");
+   std::ifstream phsyicsFile(basePath / std::filesystem::path("physics_tiles.csv").string());
 
+   std::map<int32_t, std::array<int32_t, 9>> map;
    std::string line;
+
    while (std::getline(phsyicsFile, line))
    {
-      std::istringstream iss(line);
-      // int a, b;
-      // if (!(iss >> a >> b)) { break; } // error
+      std::istringstream stream(line);
+      std::string item;
+      std::vector<int32_t> items;
+
+      while (getline(stream, item, ','))
+      {
+         try
+         {
+            items.push_back(std::stoi(item));
+         }
+         catch (const std::invalid_argument& /*e*/)
+         {
+            // std::cerr << e.what() << std::endl;
+         }
+         catch (const std::out_of_range& /*e*/)
+         {
+            // std::cerr << e.what() << std::endl;
+         }
+      }
+
+      if (items.size() < 10)
+      {
+         continue;
+      }
+
+      std::array<int32_t, 9> data;
+
+      if (items.size() == 11) // a range: 0,12,1,1,1,1,1,1,1,1,1
+      {
+         std::copy_n(items.begin() + 2, 9, data.begin());
+         for (auto key = items[0]; key < items[1]; key++)
+         {
+            map[key] = data;
+         }
+      }
+      else if (items.size() == 10) // a single entry: 64,3,3,3,3,0,0,3,0,0
+      {
+         std::copy_n(items.begin() + 1, 9, data.begin());
+         map[items[0]] = data;
+      }
    }
+
+   const auto gridWidth = layer->mWidth * 3;
+   const auto gridHeight = layer->mHeight * 3;
+   const auto gridSize = gridWidth * gridHeight;
+
+   // create a larger grid and copy tile contents in there
+   std::vector<int32_t> grid(gridSize);
+
+   for (auto y = 0u; y < layer->mHeight; y++)
+   {
+      for (auto x = 0u; x < layer->mWidth; x++)
+      {
+         const auto key = layer->mData[y * layer->mWidth + x];
+         const auto it = map.find(key);
+
+         if (it != map.end())
+         {
+            const auto& arr = (*it).second;
+
+            std::copy_n(arr.begin() + 0, 3, grid.begin() + 3 * (((y + 0) * layer->mWidth) + x));
+            std::copy_n(arr.begin() + 3, 3, grid.begin() + 3 * (((y + 1) * layer->mWidth) + x));
+            std::copy_n(arr.begin() + 6, 3, grid.begin() + 3 * (((y + 2) * layer->mWidth) + x));
+         }
+      }
+   }
+
+   // todo: shove this into the squaremarcher!
 }
 
 
