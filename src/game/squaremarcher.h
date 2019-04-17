@@ -58,6 +58,7 @@ private:
    bool isVisited(uint32_t x, uint32_t y);
    void serialize(const std::string& filename);
    void deserialize(const std::string& filename);
+   void debugPaths();
 
 
 private:
@@ -73,7 +74,6 @@ private:
    uint32_t mY = 0;
    Direction mDirCurrent = Direction::None;
    Direction mDirPrevious = Direction::None;
-
 };
 
 #endif // SQUAREMARCHER_H

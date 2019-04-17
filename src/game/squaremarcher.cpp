@@ -118,7 +118,45 @@ void SquareMarcher::scan()
    else
    {
       deserialize(filename);
+      debugPaths();
    }
+}
+
+
+void SquareMarcher::debugPaths()
+{
+   uint32_t factor = 5;
+   sf::RenderTexture renderTexture;
+   if (!renderTexture.create(mWidth * factor, mHeight * factor))
+   {
+       std::cout << "failed to create render texture" << std::endl;
+       return;
+   }
+
+   renderTexture.clear();
+
+   for (const auto& path : mPaths)
+   {
+      std::vector<sf::Vertex> vertices;
+      for (const auto& pos : path.mPolygon)
+      {
+         vertices.push_back(
+            sf::Vector2f{
+               static_cast<float>(pos.x * factor),
+               static_cast<float>(pos.y * factor)
+            }
+         );
+      }
+      vertices.push_back(vertices.at(0));
+
+      renderTexture.draw(&vertices[0], vertices.size(), sf::LineStrip);
+   }
+
+   renderTexture.display();
+
+   // get the target texture (where the stuff has been drawn)
+   const sf::Texture& texture = renderTexture.getTexture();
+   texture.copyToImage().saveToFile("paths.png");
 }
 
 
