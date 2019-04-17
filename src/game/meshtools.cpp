@@ -37,14 +37,14 @@ void Mesh::writeObj(
    std::ofstream out(filename);
 
    out.setf(std::ios::fixed);
-   for (const auto v : vertices)
+   for (const auto& v : vertices)
    {
       out << std::setprecision(3) << "v " << v.x << " " << v.y << " " << 0.0f << std::endl;
    }
 
    out << std::endl;
 
-   for (const auto face : faces)
+   for (const auto& face : faces)
    {
       out << "f ";
       for (const auto p : face)

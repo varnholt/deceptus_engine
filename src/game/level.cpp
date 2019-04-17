@@ -523,8 +523,7 @@ void Level::loadTmx()
 
    if (!mPhysics.mTileMap)
    {
-      printf("no physics layer (called 'physics') found!\n");
-      exit(1);
+      std::cerr << "fatal: no physics layer (called 'physics') found!" << std::endl;
    }
 
    std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;

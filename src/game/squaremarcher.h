@@ -10,6 +10,16 @@ class SquareMarcher
 
 public:
 
+   SquareMarcher(
+      uint32_t w,
+      uint32_t h,
+      const std::vector<int32_t>& tiles,
+      const std::vector<int32_t>& collidingTiles
+   );
+
+   void printMap();
+
+
    enum class Direction {
       None,
       Up,
@@ -40,38 +50,30 @@ public:
 
 private:
 
-   std::map<int, Direction> mMap;
-   int32_t mWidth = 0;
-   int32_t mHeight = 0;
-   std::vector<int32_t> mTiles;
-   std::vector<int32_t> mCollidingTiles;
-   std::vector<int32_t> mVisited;
-
-   int32_t mX = 0;
-   int32_t mY = 0;
-   Direction mDirCurrent = Direction::None;
-   Direction mDirPrevious = Direction::None;
-
-public:
-
-  SquareMarcher(
-    int32_t w,
-    int32_t h,
-    const std::vector<int32_t>& tiles,
-    const std::vector<int32_t>& collidingTiles
-  );
-
-  void printMap();
+   void scan();
+   Path march(uint32_t startX, uint32_t startY);
+   void updateDirection();
+   void updatePosition();
+   bool isColliding(uint32_t x, uint32_t y);
+   bool isVisited(uint32_t x, uint32_t y);
+   void serialize(const std::string& filename);
+   void deserialize(const std::string& filename);
 
 
 private:
 
-   void scan();
-   Path march(int32_t startX, int32_t startY);
-   void updateDirection();
-   void updatePosition();
-   bool isColliding(int32_t x, int32_t y);
-   bool isVisited(int32_t x, int32_t y);
+   std::map<int, Direction> mMap;
+   uint32_t mWidth = 0u;
+   uint32_t mHeight = 0u;
+   std::vector<int32_t> mTiles;
+   std::vector<int32_t> mCollidingTiles;
+   std::vector<int32_t> mVisited;
+
+   uint32_t mX = 0;
+   uint32_t mY = 0;
+   Direction mDirCurrent = Direction::None;
+   Direction mDirPrevious = Direction::None;
+
 };
 
 #endif // SQUAREMARCHER_H
