@@ -1,11 +1,16 @@
 #include "squaremarcher.h"
 
 #include <algorithm>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <ostream>
+#include <sstream>
 
 
 SquareMarcher::SquareMarcher(
-    int32_t w,
-    int32_t h,
+    uint32_t w,
+    uint32_t h,
     const std::vector<int32_t>& tiles,
     const std::vector<int32_t>& collidingTiles
 )
@@ -20,9 +25,9 @@ SquareMarcher::SquareMarcher(
 
 void SquareMarcher::printMap()
 {
-   for (auto y = 0; y < mHeight; y++)
+   for (auto y = 0u; y < mHeight; y++)
    {
-      for (auto x = 0; x < mWidth; x++)
+      for (auto x = 0u; x < mWidth; x++)
       {
          printf("%d", isColliding(x, y));
       }
@@ -31,23 +36,88 @@ void SquareMarcher::printMap()
 }
 
 
+void SquareMarcher::serialize(const std::string& filename)
+{
+   std::ofstream fileOut(filename);
+   for (const auto& path : mPaths)
+   {
+      for (const auto& pos : path.mPolygon)
+      {
+         fileOut << std::fixed << std::setprecision(8) << pos.x;
+         fileOut << ",";
+         fileOut << std::fixed << std::setprecision(3) << pos.y;
+         fileOut << ";";
+      }
+
+      fileOut << std::endl;
+   }
+   fileOut.close();
+}
+
+void SquareMarcher::deserialize(const std::string& filename)
+{
+   std::string line;
+
+   std::ifstream fileIn(filename);
+   while (std::getline(fileIn, line))
+   {
+      std::istringstream lineStream(line);
+      std::string item;
+
+      std::string eatComma;
+      Path path;
+
+      while (getline(lineStream, item, ';'))
+      {
+         std::istringstream posStream(item);
+         auto x = 0;
+         auto y = 0;
+
+         posStream >> x;
+         std::getline(posStream, eatComma, ',');
+         posStream >> y;
+
+         path.mPolygon.push_back(sf::Vector2i{x, y});
+      }
+
+      mPaths.push_back(path);
+   }
+}
+
+
 void SquareMarcher::scan()
 {
-   // scan tiles until collision hit that wasn't visited
-   for (auto y = 0; y < mHeight; y++)
+   std::string filename = "physics.paths";
+   std::ifstream fileIn(filename);
+   if (fileIn.fail())
    {
-      for (auto x = 0; x < mWidth; x++)
+      // scan tiles until collision hit that wasn't visited
+      for (auto y = 0u; y < mHeight; y++)
       {
-         if (!isVisited(x, y) && isColliding(x, y))
-         {
-            auto p = march(x, y);
+         // if ((y % 10) == 0)
+         // {
+         //    std::cout << (y/static_cast<float>(mHeight)) * 100.0f << std::endl;
+         // }
 
-            if (!p.mPolygon.empty())
+         for (auto x = 0u; x < mWidth; x++)
+         {
+            if (!isVisited(x, y) && isColliding(x, y))
             {
-               mPaths.push_back(p);
+               auto p = march(x, y);
+
+               if (!p.mPolygon.empty())
+               {
+                  mPaths.push_back(p);
+               }
             }
          }
       }
+
+      serialize(filename);
+   }
+   else
+   {
+      deserialize(filename);
    }
 }
 
@@ -171,14 +241,14 @@ void SquareMarcher::updateDirection()
 }
 
 
-bool SquareMarcher::isColliding(int32_t x, int32_t y)
+bool SquareMarcher::isColliding(uint32_t x, uint32_t y)
 {
-   if (x < 0 || x >= mWidth)
+   if (x >= mWidth)
    {
       return false;
    }
 
-   if (y < 0 || y >= mHeight)
+   if (y >= mHeight)
    {
       return false;
    }
@@ -188,14 +258,14 @@ bool SquareMarcher::isColliding(int32_t x, int32_t y)
 }
 
 
-bool SquareMarcher::isVisited(int32_t x, int32_t y)
+bool SquareMarcher::isVisited(uint32_t x, uint32_t y)
 {
-   if (x < 0 || x >= mWidth)
+   if (x >= mWidth)
    {
       return false;
    }
 
-   if (y < 0 || y >= mHeight)
+   if (y >= mHeight)
    {
       return false;
    }
@@ -226,13 +296,12 @@ void SquareMarcher::updatePosition()
          break;
 
       case Direction::None:
-      default:
          break;
    }
 }
 
 
-SquareMarcher::Path SquareMarcher::march(int32_t startX, int32_t startY)
+SquareMarcher::Path SquareMarcher::march(uint32_t startX, uint32_t startY)
 {
    mDirPrevious = Direction::None;
 
