@@ -429,7 +429,7 @@ void Level::loadTmx()
             }
             else if (layer->mName == "level")
             {
-               parsePhysicsTiles(layer, tileset, path);
+               // parsePhysicsTiles(layer, tileset, path);
             }
 
             parseDynamicPhyicsLayer(layer, tileset);
@@ -1209,6 +1209,57 @@ b2Vec2 * Level::createShape(
 
 
 //-----------------------------------------------------------------------------
+void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths)
+{
+    for (auto& path : paths)
+    {
+       // path.printPoly();
+       std::vector<sf::Vertex> visiblePath;
+       for (auto& pos : path.mPolygon)
+       {
+          sf::Vertex visibleVertex;
+          visibleVertex.color = sf::Color(255, 255, 255);
+          visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
+          visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
+
+          visiblePath.push_back(visibleVertex);
+       }
+       visiblePath.push_back(visiblePath.at(0));
+
+       std::vector<b2Vec2> chain;
+       for (auto& pos : path.mPolygon)
+       {
+          b2Vec2 chainPos;
+
+          chainPos.Set(
+             (pos.x + offsetX)* TILE_WIDTH / PPM,
+             (pos.y + offsetY)* TILE_HEIGHT / PPM
+          );
+
+          chain.push_back(chainPos);
+       }
+       chain.push_back(chain.at(0));
+
+       // create 1 body per chain
+       b2BodyDef bodyDef;
+       bodyDef.position.Set(0, 0);
+       bodyDef.type = b2_staticBody;
+       b2Body* body = mWorld->CreateBody(&bodyDef);
+       b2ChainShape chainShape;
+       chainShape.CreateChain(&chain.at(0), static_cast<int32_t>(chain.size()));
+       b2FixtureDef fixtureDef;
+       fixtureDef.density = 0.0f;
+       fixtureDef.friction = 0.2f;
+       fixtureDef.shape = &chainShape;
+       body->CreateFixture(&fixtureDef);
+
+       mPhysics.mChains.push_back(chain);
+       mPhysics.mOutlines.push_back(visiblePath);
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
 {
    if (layer == nullptr)
@@ -1229,7 +1280,7 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
    auto offsetX = layer->mOffsetX;
    auto offsetY = layer->mOffsetY;
 
-   mPhysics.mMap = new int32_t[width * height];
+   mPhysics.mMap.resize(width * height);
    mPhysics.mMapWidth = width;
    mPhysics.mMapHeight = height;
    mPhysics.mMapOffsetX = offsetX;
@@ -1253,51 +1304,7 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
    }
 
    SquareMarcher m(width, height, mPhysics.mMap, std::vector<int32_t>{PhysicsTileSolidFull} );
-   for (auto& path : m.mPaths)
-   {
-      // path.printPoly();
-      std::vector<sf::Vertex> visiblePath;
-      for (auto& pos : path.mPolygon)
-      {
-         sf::Vertex visibleVertex;
-         visibleVertex.color = sf::Color(255, 255, 255);
-         visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
-         visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
-
-         visiblePath.push_back(visibleVertex);
-      }
-      visiblePath.push_back(visiblePath.at(0));
-
-      std::vector<b2Vec2> chain;
-      for (auto& pos : path.mPolygon)
-      {
-         b2Vec2 chainPos;
-
-         chainPos.Set(
-            (pos.x + offsetX)* TILE_WIDTH / PPM,
-            (pos.y + offsetY)* TILE_HEIGHT / PPM
-         );
-
-         chain.push_back(chainPos);
-      }
-      chain.push_back(chain.at(0));
-
-      // create 1 body per chain
-      b2BodyDef bodyDef;
-      bodyDef.position.Set(0, 0);
-      bodyDef.type = b2_staticBody;
-      b2Body* body = mWorld->CreateBody(&bodyDef);
-      b2ChainShape chainShape;
-      chainShape.CreateChain(&chain.at(0), static_cast<int32_t>(chain.size()));
-      b2FixtureDef fixtureDef;
-      fixtureDef.density = 0.0f;
-      fixtureDef.friction = 0.2f;
-      fixtureDef.shape = &chainShape;
-      body->CreateFixture(&fixtureDef);
-
-      mPhysics.mChains.push_back(chain);
-      mPhysics.mOutlines.push_back(visiblePath);
-   }
+   addPathsToWorld(offsetX, offsetY, m.mPaths);
 }
 
 
@@ -1364,7 +1371,11 @@ void Level::parsePhysicsTiles(
    const auto gridSize = gridWidth * gridHeight;
 
    // create a larger grid and copy tile contents in there
-   std::vector<int32_t> grid(gridSize);
+   mPhysics.mMap.resize(gridSize);
+   mPhysics.mMapWidth = gridWidth;
+   mPhysics.mMapHeight = gridHeight;
+   mPhysics.mMapOffsetX = layer->mOffsetX;
+   mPhysics.mMapOffsetY = layer->mOffsetY;
 
    for (auto y = 0u; y < layer->mHeight; y++)
    {
@@ -1377,14 +1388,15 @@ void Level::parsePhysicsTiles(
          {
             const auto& arr = (*it).second;
 
-            std::copy_n(arr.begin() + 0, 3, grid.begin() + 3 * (((y + 0) * layer->mWidth) + x));
-            std::copy_n(arr.begin() + 3, 3, grid.begin() + 3 * (((y + 1) * layer->mWidth) + x));
-            std::copy_n(arr.begin() + 6, 3, grid.begin() + 3 * (((y + 2) * layer->mWidth) + x));
+            std::copy_n(arr.begin() + 0, 3, mPhysics.mMap.begin() + 3 * (((y + 0) * layer->mWidth) + x));
+            std::copy_n(arr.begin() + 3, 3, mPhysics.mMap.begin() + 3 * (((y + 1) * layer->mWidth) + x));
+            std::copy_n(arr.begin() + 6, 3, mPhysics.mMap.begin() + 3 * (((y + 2) * layer->mWidth) + x));
          }
       }
    }
 
-   // todo: shove this into the squaremarcher!
+   SquareMarcher m(gridWidth, gridHeight, mPhysics.mMap, std::vector<int32_t>{PhysicsTileSolidFull} );
+   addPathsToWorld(layer->mOffsetX, layer->mOffsetY, m.mPaths);
 }
 
 
@@ -1601,20 +1613,8 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 }
 
 
-Level::Physics::~Physics()
-{
-   delete[] mMap;
-   mMap = nullptr;
-}
-
-
 PhysicsTile Level::Physics::getTileForPosition(const b2Vec2 &playerPos) const
 {
-   if (mMap == nullptr)
-   {
-      return PhysicsTileInvalid;
-   }
-
    auto x = playerPos.x - mMapOffsetX;
    auto y = playerPos.y - mMapOffsetY;
 

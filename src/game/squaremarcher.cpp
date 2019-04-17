@@ -4,10 +4,10 @@
 
 
 SquareMarcher::SquareMarcher(
-  int32_t w,
-  int32_t h,
-  int32_t* tiles,
-  const std::vector<int32_t>& collidingTiles
+    int32_t w,
+    int32_t h,
+    const std::vector<int32_t>& tiles,
+    const std::vector<int32_t>& collidingTiles
 )
  : mWidth(w),
    mHeight(h),

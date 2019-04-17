@@ -50,9 +50,8 @@ public:
    struct Physics
    {
       Physics() = default;
-      ~Physics();
 
-      int* mMap = nullptr;
+      std::vector<int32_t> mMap;
       int32_t mMapOffsetX = 0;
       int32_t mMapOffsetY = 0;
       uint32_t mMapWidth = 0;
@@ -153,6 +152,7 @@ protected:
    void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parsePhysicsTiles(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
+   void addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths);
 
    void load();
    bool isControllerUsed() const;

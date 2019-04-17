@@ -43,7 +43,7 @@ private:
    std::map<int, Direction> mMap;
    int32_t mWidth = 0;
    int32_t mHeight = 0;
-   int32_t* mTiles = nullptr;
+   std::vector<int32_t> mTiles;
    std::vector<int32_t> mCollidingTiles;
    std::vector<int32_t> mVisited;
 
@@ -57,7 +57,7 @@ public:
   SquareMarcher(
     int32_t w,
     int32_t h,
-    int32_t* tiles,
+    const std::vector<int32_t>& tiles,
     const std::vector<int32_t>& collidingTiles
   );
 
