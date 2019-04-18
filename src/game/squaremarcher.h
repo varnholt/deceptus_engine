@@ -18,6 +18,7 @@ public:
    );
 
    void printMap();
+   void dumpMap();
 
 
    enum class Direction {
