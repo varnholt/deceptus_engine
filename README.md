@@ -9,7 +9,7 @@
 ## build instructions
 
 Requires a recent compiler, i.e.
-- gcc >= 5
+- gcc >= 8
 - clang >= 7 
 - vs2017
 
