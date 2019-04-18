@@ -411,10 +411,11 @@ void Level::loadTmx()
 
             auto pushTileMap = true;
 
+            // todo: refactor all this to be called 'atmosphere'
             if (layer->mName == "physics")
             {
-               parsePhysicsLayer(layer, tileset);
                mPhysics.mTileMap = tileMap;
+               parsePhysicsLayer(layer, tileset);
             }
             else if (layer->mName == "extras")
             {
@@ -1310,7 +1311,7 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
 //-----------------------------------------------------------------------------
 void Level::parsePhysicsTiles(
    TmxLayer* layer,
-   TmxTileSet* /*tileSet*/,
+   TmxTileSet* tileSet,
    const std::filesystem::path& basePath
 )
 {
@@ -1370,31 +1371,35 @@ void Level::parsePhysicsTiles(
    const auto gridSize = gridWidth * gridHeight;
 
    // create a larger grid and copy tile contents in there
-   mPhysics.mMap.resize(gridSize);
-   mPhysics.mMapWidth = gridWidth;
-   mPhysics.mMapHeight = gridHeight;
-   mPhysics.mMapOffsetX = layer->mOffsetX;
-   mPhysics.mMapOffsetY = layer->mOffsetY;
+   std::vector<int32_t> physicsMap(gridSize);
 
    for (auto y = 0u; y < layer->mHeight; y++)
    {
       for (auto x = 0u; x < layer->mWidth; x++)
       {
          const auto key = layer->mData[y * layer->mWidth + x];
-         const auto it = map.find(key);
 
-         if (it != map.end())
+         if (key != 0)
          {
-            const auto& arr = (*it).second;
+            const auto it = map.find(key - tileSet->mFirstGid);
 
-            std::copy_n(arr.begin() + 0, 3, mPhysics.mMap.begin() + 3 * (((y + 0) * layer->mWidth) + x));
-            std::copy_n(arr.begin() + 3, 3, mPhysics.mMap.begin() + 3 * (((y + 1) * layer->mWidth) + x));
-            std::copy_n(arr.begin() + 6, 3, mPhysics.mMap.begin() + 3 * (((y + 2) * layer->mWidth) + x));
+            // std::cout << key << ",";
+
+            if (it != map.end())
+            {
+               const auto& arr = (*it).second;
+
+               std::copy_n(arr.begin() + 0, 3, physicsMap.begin() + (((y + 0) * layer->mWidth * 3) + x * 3));
+               std::copy_n(arr.begin() + 3, 3, physicsMap.begin() + (((y + 1) * layer->mWidth * 3) + x * 3));
+               std::copy_n(arr.begin() + 6, 3, physicsMap.begin() + (((y + 2) * layer->mWidth * 3) + x * 3));
+            }
          }
       }
+
+      // std::cout << std::endl;
    }
 
-   SquareMarcher m(gridWidth, gridHeight, mPhysics.mMap, std::vector<int32_t>{PhysicsTileSolidFull} );
+   SquareMarcher m(gridWidth, gridHeight, physicsMap, std::vector<int32_t>{1} );
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, m.mPaths);
 }
 

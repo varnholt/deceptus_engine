@@ -19,6 +19,7 @@ SquareMarcher::SquareMarcher(
    mTiles(tiles),
    mCollidingTiles(collidingTiles)
 {
+   dumpMap();
    scan();
 }
 
@@ -33,6 +34,21 @@ void SquareMarcher::printMap()
       }
       printf("\n");
    }
+}
+
+
+void SquareMarcher::dumpMap()
+{
+   std::ofstream fileOut("map.dump");
+   for (auto y = 0u; y < mHeight; y++)
+   {
+      for (auto x = 0u; x < mWidth; x++)
+      {
+         fileOut << isColliding(x, y);
+      }
+      fileOut << std::endl;
+   }
+   fileOut.close();
 }
 
 
