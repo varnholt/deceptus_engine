@@ -27,6 +27,6 @@ struct ExtraItem : public GameNode
    sf::Vector2f mPosition;
    Type mType;
 
-   ExtraItem(GameNode* parent = 0);
+   ExtraItem(GameNode* parent = nullptr);
 };
 
