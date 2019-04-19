@@ -44,7 +44,7 @@ void SquareMarcher::dumpMap()
    {
       for (auto x = 0u; x < mWidth; x++)
       {
-         fileOut << isColliding(x, y);
+         fileOut << mTiles[y * mWidth + x];
       }
       fileOut << std::endl;
    }
@@ -110,10 +110,10 @@ void SquareMarcher::scan()
       // scan tiles until collision hit that wasn't visited
       for (auto y = 0u; y < mHeight; y++)
       {
-         // if ((y % 10) == 0)
-         // {
-         //    std::cout << (y/static_cast<float>(mHeight)) * 100.0f << std::endl;
-         // }
+         if ((y % 10) == 0)
+         {
+            std::cout << (y/static_cast<float>(mHeight)) * 100.0f << std::endl;
+         }
 
          for (auto x = 0u; x < mWidth; x++)
          {

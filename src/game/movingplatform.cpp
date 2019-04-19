@@ -124,9 +124,9 @@ std::vector<MovingPlatform*> MovingPlatform::load(
    auto firstId  = tileSet->mFirstGid;
 
    // populate the vertex array, with one quad per tile
-   for (auto y = 0; y < height; y++)
+   for (auto y = 0u; y < height; y++)
    {
-      for (auto x = 0; x < width; x++)
+      for (auto x = 0u; x < width; x++)
       {
          // get the current tile number
          auto tileNumber = tiles[x + y * width];

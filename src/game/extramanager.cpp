@@ -34,9 +34,9 @@ void ExtraManager::load(
    auto tileIdAnimated = 0;
    auto tileIdStatic = 0;
 
-   for (auto i = 0; i < width; ++i)
+   for (auto i = 0u; i < width; ++i)
    {
-      for (auto j = 0; j < height; ++j)
+      for (auto j = 0u; j < height; ++j)
       {
          int tileNumber = tiles[i + j * width];
          if (tileNumber != 0)

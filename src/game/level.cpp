@@ -1364,15 +1364,22 @@ void Level::parsePhysicsTiles(
          std::copy_n(items.begin() + 1, 9, data.begin());
          map[items[0]] = data;
       }
+
+      for (auto x : data)
+      {
+         std::cout << x << ",";
+      }
+      std::cout << std::endl;
    }
 
-   const auto gridWidth = layer->mWidth * 3;
+   const auto gridWidth  = layer->mWidth  * 3;
    const auto gridHeight = layer->mHeight * 3;
-   const auto gridSize = gridWidth * gridHeight;
+   const auto gridSize   = gridWidth * gridHeight;
 
    // create a larger grid and copy tile contents in there
    std::vector<int32_t> physicsMap(gridSize);
 
+   auto yi = 0;
    for (auto y = 0u; y < layer->mHeight; y++)
    {
       for (auto x = 0u; x < layer->mWidth; x++)
@@ -1389,12 +1396,22 @@ void Level::parsePhysicsTiles(
             {
                const auto& arr = (*it).second;
 
-               std::copy_n(arr.begin() + 0, 3, physicsMap.begin() + (((y + 0) * layer->mWidth * 3) + x * 3));
-               std::copy_n(arr.begin() + 3, 3, physicsMap.begin() + (((y + 1) * layer->mWidth * 3) + x * 3));
-               std::copy_n(arr.begin() + 6, 3, physicsMap.begin() + (((y + 2) * layer->mWidth * 3) + x * 3));
+               const auto row1 = ((y + yi + 0) * gridWidth) + (x * 3);
+               const auto row2 = ((y + yi + 1) * gridWidth) + (x * 3);
+               const auto row3 = ((y + yi + 2) * gridWidth) + (x * 3);
+
+               for (auto xi = 0u; xi < 3; xi++) physicsMap[row1 + xi] = arr[xi + 0];
+               for (auto xi = 0u; xi < 3; xi++) physicsMap[row2 + xi] = arr[xi + 3];
+               for (auto xi = 0u; xi < 3; xi++) physicsMap[row3 + xi] = arr[xi + 6];
+
+//               std::copy_n(arr.begin() + 0, 3, physicsMap.begin() + (((y + 0) * layer->mWidth * 3) + x * 3));
+//               std::copy_n(arr.begin() + 3, 3, physicsMap.begin() + (((y + 1) * layer->mWidth * 3) + x * 3));
+//               std::copy_n(arr.begin() + 6, 3, physicsMap.begin() + (((y + 2) * layer->mWidth * 3) + x * 3));
             }
          }
       }
+
+      yi += 2;
 
       // std::cout << std::endl;
    }
