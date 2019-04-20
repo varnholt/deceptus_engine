@@ -407,6 +407,7 @@ OTHER_FILES += \
     data/shaders/bumpmap_vert.glsl
 
 DISTFILES += \
+    data/level-crypt/metroid.json \
     data/level.tmx \
     data/scripts/enemies/dumb.lua \
     data/config/game.json \

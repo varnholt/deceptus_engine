@@ -9,18 +9,22 @@
 
 
 SquareMarcher::SquareMarcher(
-    uint32_t w,
-    uint32_t h,
-    const std::vector<int32_t>& tiles,
-    const std::vector<int32_t>& collidingTiles
+   uint32_t w,
+   uint32_t h,
+   const std::vector<int32_t>& tiles,
+   const std::vector<int32_t>& collidingTiles,
+   float scaleFactor
 )
  : mWidth(w),
    mHeight(h),
    mTiles(tiles),
-   mCollidingTiles(collidingTiles)
+   mCollidingTiles(collidingTiles),
+   mScale(scaleFactor)
 {
-   dumpMap();
+   // dumpMap();
    scan();
+   optimize();
+   scale();
 }
 
 
@@ -173,6 +177,84 @@ void SquareMarcher::debugPaths()
    // get the target texture (where the stuff has been drawn)
    const sf::Texture& texture = renderTexture.getTexture();
    texture.copyToImage().saveToFile("paths.png");
+}
+
+
+
+
+void SquareMarcher::optimize()
+{
+   //                     kick       kick
+   //           ->         ->         ->         ->
+   //      +----------+----------+----------+----------+
+   //      |          |          |          |          |
+   //      |          |          |          |          |
+   //   /\ |          |          |          |          | \/
+   //      |          |          |          |          |
+   //      |          |          |          |          |
+   //      +----------+----------+----------+----------+
+   //           <-         <-         <-         <-
+   //                     kick       kick
+
+   // path is not suited to be optimized
+   if (mPaths.empty() || mPaths.at(0).mDirs.empty())
+   {
+      return;
+   }
+
+   std::vector<Path> optimizedPaths;
+
+   for (auto& path : mPaths)
+   {
+      Path optimized;
+
+      if (path.mPolygon.size() < 5)
+      {
+         optimized = path;
+      }
+      else
+      {
+         for (auto i = 0u; i < path.mPolygon.size(); i++)
+         {
+            if (i == 0 || i == path.mPolygon.size() - 1)
+            {
+               optimized.mPolygon.push_back(path.mPolygon.at(i));
+            }
+            else
+            {
+               auto prevDir = path.mDirs[i - 1];
+               auto currDir = path.mDirs[i    ];
+               auto nextDir = path.mDirs[i + 1];
+
+               if (!(prevDir == currDir && prevDir == nextDir))
+               {
+                  optimized.mPolygon.push_back(path.mPolygon.at(i));
+               }
+            }
+         }
+      }
+
+      optimizedPaths.push_back(path);
+   }
+
+   mPaths = optimizedPaths;
+}
+
+
+void SquareMarcher::scale()
+{
+   for (auto& path : mPaths)
+   {
+      for (const auto& pos : path.mPolygon)
+      {
+         path.mScaled.push_back(
+            sf::Vector2f{
+               pos.x * mScale,
+               pos.y * mScale
+            }
+         );
+      }
+   }
 }
 
 
@@ -374,11 +456,7 @@ SquareMarcher::Path SquareMarcher::march(uint32_t startX, uint32_t startY)
       if (mDirCurrent != Direction::None)
       {
          path.mDirs.push_back(mDirCurrent);
-
-         //if (mDirCurrent != mDirPrevious)
-         {
-            path.mPolygon.push_back(sf::Vector2i(mX, mY));
-         }
+         path.mPolygon.push_back(sf::Vector2i(mX, mY));
       }
 
       if (mX == startX && mY == startY)

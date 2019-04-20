@@ -430,7 +430,7 @@ void Level::loadTmx()
             }
             else if (layer->mName == "level")
             {
-               // parsePhysicsTiles(layer, tileset, path);
+               parsePhysicsTiles(layer, tileset, path);
             }
 
             parseDynamicPhyicsLayer(layer, tileset);
@@ -1213,21 +1213,26 @@ void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<
 {
     for (auto& path : paths)
     {
-       // path.printPoly();
-       std::vector<sf::Vertex> visiblePath;
-       for (auto& pos : path.mPolygon)
+       // just for debugging purposes, this section can be removed later
        {
-          sf::Vertex visibleVertex;
-          visibleVertex.color = sf::Color(255, 255, 255);
-          visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
-          visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
+          // path.printPoly();
+          std::vector<sf::Vertex> visiblePath;
+          for (auto& pos : path.mScaled)
+          {
+             sf::Vertex visibleVertex;
+             visibleVertex.color = sf::Color(255, 255, 255);
+             visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
+             visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
 
-          visiblePath.push_back(visibleVertex);
+             visiblePath.push_back(visibleVertex);
+          }
+          visiblePath.push_back(visiblePath.at(0));
+          mPhysics.mOutlines.push_back(visiblePath);
        }
-       visiblePath.push_back(visiblePath.at(0));
 
+       // create the physical chain
        std::vector<b2Vec2> chain;
-       for (auto& pos : path.mPolygon)
+       for (auto& pos : path.mScaled)
        {
           b2Vec2 chainPos;
 
@@ -1254,7 +1259,6 @@ void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<
        body->CreateFixture(&fixtureDef);
 
        mPhysics.mChains.push_back(chain);
-       mPhysics.mOutlines.push_back(visiblePath);
     }
 }
 
@@ -1303,8 +1307,8 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
       }
    }
 
-   SquareMarcher m(width, height, mPhysics.mMap, std::vector<int32_t>{PhysicsTileSolidFull} );
-   addPathsToWorld(offsetX, offsetY, m.mPaths);
+   // SquareMarcher m(width, height, mPhysics.mMap, std::vector<int32_t>{PhysicsTileSolidFull} );
+   // addPathsToWorld(offsetX, offsetY, m.mPaths);
 }
 
 
@@ -1365,11 +1369,11 @@ void Level::parsePhysicsTiles(
          map[items[0]] = data;
       }
 
-      for (auto x : data)
-      {
-         std::cout << x << ",";
-      }
-      std::cout << std::endl;
+      // for (auto x : data)
+      // {
+      //    std::cout << x << ",";
+      // }
+      // std::cout << std::endl;
    }
 
    const auto gridWidth  = layer->mWidth  * 3;
@@ -1416,7 +1420,7 @@ void Level::parsePhysicsTiles(
       // std::cout << std::endl;
    }
 
-   SquareMarcher m(gridWidth, gridHeight, physicsMap, std::vector<int32_t>{1} );
+   SquareMarcher m(gridWidth, gridHeight, physicsMap, std::vector<int32_t>{1}, 0.33333333333333333f);
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, m.mPaths);
 }
 
