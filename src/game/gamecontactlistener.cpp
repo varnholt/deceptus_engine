@@ -118,12 +118,12 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
    if (fixtureUserDataA)
    {
-      fixtureNodeA = (FixtureNode*)fixtureUserDataA;
+      fixtureNodeA = static_cast<FixtureNode*>(fixtureUserDataA);
    }
 
    if (fixtureUserDataB)
    {
-      fixtureNodeB = (FixtureNode*)fixtureUserDataB;
+      fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
    }
 
    if (fixtureUserDataA)
@@ -164,15 +164,20 @@ void GameContactListener::BeginContact(b2Contact* contact)
                Player::getPlayer(0)->damage(damage);
                break;
             }
+            break;
          }
-         default:
+         case ObjectTypeDoor:
+            break;
+         case ObjectTypeConveyorBelt:
+            break;
+         case ObjectTypeJumpPlatform:
             break;
       }
    }
 
    if (fixtureUserDataB)
    {
-      FixtureNode* fixtureNodeB = (FixtureNode*)fixtureUserDataB;
+      FixtureNode* fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
 
       switch (fixtureNodeB->getType())
       {
@@ -210,15 +215,18 @@ void GameContactListener::BeginContact(b2Contact* contact)
                Player::getPlayer(0)->damage(damage);
                break;
             }
-         }
-         default:
-         {
             break;
          }
+         case ObjectTypeDoor:
+            break;
+         case ObjectTypeConveyorBelt:
+            break;
+         case ObjectTypeJumpPlatform:
+            break;
       }
    }
 
-   if (playerFixture != nullptr && ((FixtureNode*)playerFixture->GetUserData())->hasFlag("head") )
+   if (playerFixture != nullptr && ( static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head") )
    {
       contact->SetEnabled(false);
    }
@@ -235,7 +243,7 @@ void GameContactListener::EndContact(b2Contact* contact)
 
    if (fixtureUserDataA)
    {
-      auto fixtureNode = (FixtureNode*)fixtureUserDataA;
+      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
 
       switch (fixtureNode->getType())
       {
@@ -261,7 +269,7 @@ void GameContactListener::EndContact(b2Contact* contact)
 
    if (fixtureUserDataB)
    {
-      auto fixtureNode = (FixtureNode*)fixtureUserDataB;
+      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
 
       switch (fixtureNode->getType())
       {
@@ -301,6 +309,17 @@ void GameContactListener::PostSolve(b2Contact *contact, const b2ContactImpulse *
 }
 
 
+void GameContactListener::processImpulse(float impulse)
+{
+   auto damage = (static_cast<int>(impulse) - 1) * 20;
+
+   if (impulse > 1.3f)
+   {
+      // printf("impulse a: %f\n", impulse);
+      Player::getPlayer(0)->damage(damage);
+   }
+}
+
 void GameContactListener::processPlayerDamage(const b2ContactImpulse *contactImpulse, b2Contact *contact)
 {
   // check if the player hits something at a heigh speed or
@@ -308,33 +327,24 @@ void GameContactListener::processPlayerDamage(const b2ContactImpulse *contactImp
   auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
   auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
   auto impulse = contactImpulse->normalImpulses[0];
-  auto damage = (static_cast<int>(impulse) - 1) * 20;
 
   if (fixtureUserDataA)
   {
-     auto fixtureNode = (FixtureNode*)fixtureUserDataA;
+     auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
 
      if (fixtureNode->getType() == ObjectTypePlayer)
      {
-        if (impulse > 1.3f)
-        {
-           printf("impulse a: %f\n", impulse);
-           Player::getPlayer(0)->damage(damage);
-        }
+        processImpulse(impulse);
      }
   }
 
   if (fixtureUserDataB)
   {
-     auto fixtureNode = (FixtureNode*)fixtureUserDataB;
+     auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
 
      if (fixtureNode->getType() == ObjectTypePlayer)
      {
-        if (impulse > 1.3f)
-        {
-           printf("impulse b: %f\n", impulse);
-           Player::getPlayer(0)->damage(damage);
-        }
+        processImpulse(impulse);
      }
   }
 }

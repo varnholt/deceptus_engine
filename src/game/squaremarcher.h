@@ -1,6 +1,7 @@
 #ifndef SQUAREMARCHER_H
 #define SQUAREMARCHER_H
 
+#include <filesystem>
 #include <map>
 #include <vector>
 #include <SFML/Graphics.hpp>
@@ -15,6 +16,7 @@ public:
       uint32_t h,
       const std::vector<int32_t>& tiles,
       const std::vector<int32_t>& collidingTiles,
+      const std::filesystem::path& cachePath,
       float scale = 1.0
    );
 
@@ -59,8 +61,8 @@ private:
    void updatePosition();
    bool isColliding(uint32_t x, uint32_t y);
    bool isVisited(uint32_t x, uint32_t y);
-   void serialize(const std::string& filename);
-   void deserialize(const std::string& filename);
+   void serialize();
+   void deserialize();
    void debugPaths();
    void optimize();
    void scale();
@@ -74,6 +76,7 @@ private:
    std::vector<int32_t> mTiles;
    std::vector<int32_t> mCollidingTiles;
    std::vector<uint32_t> mVisited;
+   std::filesystem::path mCachePath;
 
    uint32_t mX = 0;
    uint32_t mY = 0;
