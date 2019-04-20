@@ -596,7 +596,7 @@ void Level::spawnEnemies()
    for (auto& desc : mDescription->mEnemies)
    {
       std::vector<sf::Vector2f> patrolPath;
-      for (auto i = 0; i < desc.mPatrolPath.size(); i+= 2)
+      for (auto i = 0u; i < desc.mPatrolPath.size(); i+= 2)
       {
          patrolPath.push_back(
             sf::Vector2f(
@@ -947,7 +947,6 @@ void Level::initializeGammaShader()
 //----------------------------------------------------------------------------------------------------------------------
 void Level::updateGammaShader()
 {
-   float brightnessLevel = 0.5f;
    float gamma = 2.2f - (GameConfiguration::getInstance().mBrightness - 0.5f);
    mGammaShader.setUniform("gamma", gamma);
 }
@@ -1137,78 +1136,6 @@ void Level::setWorld(const std::shared_ptr<b2World>& world)
 
 
 //-----------------------------------------------------------------------------
-b2Vec2 * Level::createShape(
-   int tileNumber,
-   unsigned int i,
-   unsigned int j,
-   int tileWidth,
-   int tileHeight,
-   int horizontalSpan,
-   int& polyCount
-)
-{
-   // 1633 => default
-   // 1650 => half scale upper
-   PhysicsTile tile = (PhysicsTile)tileNumber;
-
-   float offsetX = 0.0f;
-   float offsetY = 0.0f;
-   float scaleX = 1.0f;
-   float scaleY = 1.0f;
-
-   switch (tile)
-   {
-      case PhysicsTileSolidTop:
-      case PhysicsTileOneSidedTop:
-      case PhysicsTileDeadlyTop:
-         offsetY = 0.0f;
-         scaleY  = 0.5f;
-         break;
-      case PhysicsTileOneSidedBottom:
-      case PhysicsTileSolidBottom:
-      case PhysicsTileDeadlyBottom:
-         offsetY = 0.5f;
-         scaleY  = 0.5f;
-         break;
-
-      case PhysicsTileSolidLeft:
-      case PhysicsTileDeadlyLeft:
-         offsetX = 0.0f;
-         scaleX  = 0.5f;
-         break;
-
-      case PhysicsTileSolidRight:
-      case PhysicsTileDeadlyRight:
-         offsetX = 0.5f;
-         scaleX  = 0.5f;
-         break;
-
-      default:
-         break;
-   }
-
-   // http://forum.cocos2d-objc.org/t/box2d-side-by-side-ground-tiles-flat-ground-yet-blocking-at-small-speed/3058
-
-   polyCount = 4;
-
-   b2Vec2* quad = new b2Vec2[polyCount];
-   quad[0].x = (i + offsetX                          ) * tileWidth  / PPM;
-   quad[0].y = (j + offsetY                          ) * tileHeight / PPM;
-
-   quad[1].x = (i + offsetX + scaleX + horizontalSpan) * tileWidth  / PPM;
-   quad[1].y = (j + offsetY                          ) * tileHeight / PPM;
-
-   quad[2].x = (i + offsetX + scaleX + horizontalSpan) * tileWidth  / PPM;
-   quad[2].y = (j + offsetY + scaleY                 ) * tileHeight / PPM;
-
-   quad[3].x = (i + offsetX                          ) * tileWidth  / PPM;
-   quad[3].y = (j + offsetY + scaleY                 ) * tileHeight / PPM;
-
-   return quad;
-}
-
-
-//-----------------------------------------------------------------------------
 void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths)
 {
     for (auto& path : paths)
@@ -1296,7 +1223,7 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
       {
          // get the current tile number
          auto tileNumber = tiles[y * width + x];
-         auto tileRelative = (int32_t)PhysicsTileInvalid;
+         auto tileRelative = static_cast<int32_t>(PhysicsTileInvalid);
          if (tileNumber != 0)
          {
             tileRelative = tileNumber - tileSet->mFirstGid;
@@ -1383,7 +1310,7 @@ void Level::parsePhysicsTiles(
    // create a larger grid and copy tile contents in there
    std::vector<int32_t> physicsMap(gridSize);
 
-   auto yi = 0;
+   auto yi = 0u;
    for (auto y = 0u; y < layer->mHeight; y++)
    {
       for (auto x = 0u; x < layer->mWidth; x++)
@@ -1407,10 +1334,6 @@ void Level::parsePhysicsTiles(
                for (auto xi = 0u; xi < 3; xi++) physicsMap[row1 + xi] = arr[xi + 0];
                for (auto xi = 0u; xi < 3; xi++) physicsMap[row2 + xi] = arr[xi + 3];
                for (auto xi = 0u; xi < 3; xi++) physicsMap[row3 + xi] = arr[xi + 6];
-
-//               std::copy_n(arr.begin() + 0, 3, physicsMap.begin() + (((y + 0) * layer->mWidth * 3) + x * 3));
-//               std::copy_n(arr.begin() + 3, 3, physicsMap.begin() + (((y + 1) * layer->mWidth * 3) + x * 3));
-//               std::copy_n(arr.begin() + 6, 3, physicsMap.begin() + (((y + 2) * layer->mWidth * 3) + x * 3));
             }
          }
       }
@@ -1420,7 +1343,15 @@ void Level::parsePhysicsTiles(
       // std::cout << std::endl;
    }
 
-   SquareMarcher m(gridWidth, gridHeight, physicsMap, std::vector<int32_t>{1}, 0.33333333333333333f);
+   SquareMarcher m(
+      gridWidth,
+      gridHeight,
+      physicsMap,
+      std::vector<int32_t>{1},
+      basePath / std::filesystem::path("physics_path_solid.csv"),
+      0.33333333333333333f
+   );
+
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, m.mPaths);
 }
 
@@ -1554,24 +1485,24 @@ void Level::parsePolyline(
    const std::vector<sf::Vector2f>& poly
 )
 {
-   int positionCount = static_cast<int>(poly.size());
+   auto positionCount = poly.size();
    b2Vec2* points = new b2Vec2[positionCount];
 
    std::vector<p2t::Point*> polyLine;
 
-   for (int positionIndex = 0; positionIndex < positionCount; positionIndex++)
+   for (auto positionIndex = 0u; positionIndex < positionCount; positionIndex++)
    {
       sf::Vector2f pos = poly.at(positionIndex) + sf::Vector2f(offsetX, offsetY);
 
       points[positionIndex].x = pos.x / PPM;
       points[positionIndex].y = pos.y / PPM;
 
-      printf(
-         "pos: %d, x: %f, y: %f\n",
-         positionIndex,
-         pos.x / PPM,
-         pos.y / PPM
-      );
+      // printf(
+      //    "pos: %d, x: %f, y: %f\n",
+      //    positionIndex,
+      //    pos.x / PPM,
+      //    pos.y / PPM
+      // );
 
       fflush(stdout);
 
@@ -1592,7 +1523,7 @@ void Level::parsePolyline(
    mPointMap[body]=points;
    mPointCountMap[body]=positionCount;
 
-   for (int i = 0; i < triangles.size(); i++)
+   for (auto i = 0u; i < triangles.size(); i++)
    {
       p2t::Point* a = triangles[i]->GetPoint(0);
       p2t::Point* b = triangles[i]->GetPoint(1);
@@ -1660,10 +1591,10 @@ PhysicsTile Level::Physics::getTileForPosition(const b2Vec2 &playerPos) const
   //     << x << " x " << y
   //     << std::endl;
 
-   auto tx = (int)(x * PPM / TILE_WIDTH);
-   auto ty = (int)(y * PPM / TILE_HEIGHT);
+   auto tx = static_cast<uint32_t>(x * PPM / TILE_WIDTH);
+   auto ty = static_cast<uint32_t>(y * PPM / TILE_HEIGHT);
 
-   PhysicsTile tile = (PhysicsTile)mMap[ty * mMapWidth + tx];
+   PhysicsTile tile = static_cast<PhysicsTile>(mMap[ty * mMapWidth + tx]);
    return tile;
 }
 
@@ -1717,7 +1648,7 @@ void Level::reset()
 
 
 //-----------------------------------------------------------------------------
-std::map<b2Body *, int> *Level::getPointSizeMap()
+std::map<b2Body*, size_t>* Level::getPointSizeMap()
 {
    return &mPointCountMap;
 }

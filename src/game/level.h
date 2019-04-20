@@ -89,7 +89,7 @@ public:
    void setWorld(const std::shared_ptr<b2World>& world);
 
    std::map<b2Body *, b2Vec2 *> *getPointMap() ;
-   std::map<b2Body *, int>* getPointSizeMap();
+   std::map<b2Body*, size_t>* getPointSizeMap();
 
    static Level *getCurrentLevel();
 
@@ -139,16 +139,6 @@ protected:
 
    void addDebugRect(b2Body* body, float x, float y, float w, float h);
 
-   b2Vec2 * createShape(
-      int tile,
-      unsigned int i,
-      unsigned int j,
-      int tileWidth,
-      int tileHeight,
-      int horizontalSpan,
-      int& polyCount
-   );
-
    void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parsePhysicsTiles(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
@@ -190,7 +180,7 @@ protected:
    std::shared_ptr<LevelDescription> mDescription;
 
    std::map<b2Body*, b2Vec2*> mPointMap;
-   std::map<b2Body*, int> mPointCountMap;
+   std::map<b2Body*, size_t> mPointCountMap;
 
    std::vector<std::shared_ptr<TileMap>> mTileMaps;
    std::vector<std::shared_ptr<TileMap>> mParallaxMaps;

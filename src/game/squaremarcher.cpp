@@ -1,6 +1,7 @@
 #include "squaremarcher.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -13,12 +14,14 @@ SquareMarcher::SquareMarcher(
    uint32_t h,
    const std::vector<int32_t>& tiles,
    const std::vector<int32_t>& collidingTiles,
+   const std::filesystem::path& cachePath,
    float scaleFactor
 )
  : mWidth(w),
    mHeight(h),
    mTiles(tiles),
    mCollidingTiles(collidingTiles),
+   mCachePath(cachePath),
    mScale(scaleFactor)
 {
    // dumpMap();
@@ -56,9 +59,9 @@ void SquareMarcher::dumpMap()
 }
 
 
-void SquareMarcher::serialize(const std::string& filename)
+void SquareMarcher::serialize()
 {
-   std::ofstream fileOut(filename);
+   std::ofstream fileOut(mCachePath);
    for (const auto& path : mPaths)
    {
       for (const auto& pos : path.mPolygon)
@@ -74,11 +77,12 @@ void SquareMarcher::serialize(const std::string& filename)
    fileOut.close();
 }
 
-void SquareMarcher::deserialize(const std::string& filename)
+
+void SquareMarcher::deserialize()
 {
    std::string line;
 
-   std::ifstream fileIn(filename);
+   std::ifstream fileIn(mCachePath);
    while (std::getline(fileIn, line))
    {
       std::istringstream lineStream(line);
@@ -107,14 +111,15 @@ void SquareMarcher::deserialize(const std::string& filename)
 
 void SquareMarcher::scan()
 {
-   std::string filename = "physics.paths";
-   std::ifstream fileIn(filename);
+   std::ifstream fileIn(mCachePath);
    if (fileIn.fail())
    {
+      std::cout << std::endl << "rebuilding cache for '" << mCachePath.string() << "'" << std::endl;
+
       // scan tiles until collision hit that wasn't visited
       for (auto y = 0u; y < mHeight; y++)
       {
-         if ((y % 10) == 0)
+         if ((y % 100) == 0)
          {
             std::cout << (y/static_cast<float>(mHeight)) * 100.0f << std::endl;
          }
@@ -133,12 +138,12 @@ void SquareMarcher::scan()
          }
       }
 
-      serialize(filename);
+      serialize();
    }
    else
    {
-      deserialize(filename);
-      debugPaths();
+      deserialize();
+      // debugPaths();
    }
 }
 
@@ -178,8 +183,6 @@ void SquareMarcher::debugPaths()
    const sf::Texture& texture = renderTexture.getTexture();
    texture.copyToImage().saveToFile("paths.png");
 }
-
-
 
 
 void SquareMarcher::optimize()
