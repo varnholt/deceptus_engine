@@ -197,6 +197,12 @@ enum PhysicsTile // 16 cols per row
    PhysicsTileInvalid = 1024
 };
 
+enum ObjectBehavior
+{
+   ObjectBehaviorSolid = 1,
+   ObjectBehaviorDeadly
+};
+
 enum ObjectType
 {
    ObjectTypePlayer,
