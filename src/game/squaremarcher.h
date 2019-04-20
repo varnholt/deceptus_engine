@@ -14,7 +14,8 @@ public:
       uint32_t w,
       uint32_t h,
       const std::vector<int32_t>& tiles,
-      const std::vector<int32_t>& collidingTiles
+      const std::vector<int32_t>& collidingTiles,
+      float scale = 1.0
    );
 
    void printMap();
@@ -40,6 +41,7 @@ public:
    struct Path
    {
       std::vector<sf::Vector2i> mPolygon;
+      std::vector<sf::Vector2f> mScaled;
       std::vector<Direction> mDirs;
 
       void printPoly();
@@ -60,6 +62,8 @@ private:
    void serialize(const std::string& filename);
    void deserialize(const std::string& filename);
    void debugPaths();
+   void optimize();
+   void scale();
 
 
 private:
@@ -69,12 +73,13 @@ private:
    uint32_t mHeight = 0u;
    std::vector<int32_t> mTiles;
    std::vector<int32_t> mCollidingTiles;
-   std::vector<int32_t> mVisited;
+   std::vector<uint32_t> mVisited;
 
    uint32_t mX = 0;
    uint32_t mY = 0;
    Direction mDirCurrent = Direction::None;
    Direction mDirPrevious = Direction::None;
+   float mScale = 1.0f;
 };
 
 #endif // SQUAREMARCHER_H
