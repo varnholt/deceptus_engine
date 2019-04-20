@@ -1136,57 +1136,82 @@ void Level::setWorld(const std::shared_ptr<b2World>& world)
 
 
 //-----------------------------------------------------------------------------
-void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths)
+void Level::addPathsToWorld(
+   int32_t offsetX,
+   int32_t offsetY,
+   const std::vector<SquareMarcher::Path>& paths,
+   ObjectBehavior behavior
+)
 {
-    for (auto& path : paths)
-    {
-       // just for debugging purposes, this section can be removed later
-       {
-          // path.printPoly();
-          std::vector<sf::Vertex> visiblePath;
-          for (auto& pos : path.mScaled)
-          {
-             sf::Vertex visibleVertex;
-             visibleVertex.color = sf::Color(255, 255, 255);
-             visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
-             visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
+   sf::Color color;
+   switch (behavior)
+   {
+      case ObjectBehaviorSolid:
+         color = sf::Color(255, 255, 255);
+         break;
+      case ObjectBehaviorDeadly:
+         color = sf::Color(255, 0, 0);
+         break;
+   }
 
-             visiblePath.push_back(visibleVertex);
-          }
-          visiblePath.push_back(visiblePath.at(0));
-          mPhysics.mOutlines.push_back(visiblePath);
-       }
+   for (auto& path : paths)
+   {
+      // just for debugging purposes, this section can be removed later
+      {
+         // path.printPoly();
+         std::vector<sf::Vertex> visiblePath;
+         for (auto& pos : path.mScaled)
+         {
+            sf::Vertex visibleVertex;
+            visibleVertex.color = color;
+            visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
+            visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
 
-       // create the physical chain
-       std::vector<b2Vec2> chain;
-       for (auto& pos : path.mScaled)
-       {
-          b2Vec2 chainPos;
+            visiblePath.push_back(visibleVertex);
+         }
 
-          chainPos.Set(
-             (pos.x + offsetX)* TILE_WIDTH / PPM,
-             (pos.y + offsetY)* TILE_HEIGHT / PPM
-          );
+         visiblePath.push_back(visiblePath.at(0));
+         mPhysics.mOutlines.push_back(visiblePath);
+      }
 
-          chain.push_back(chainPos);
-       }
-       chain.push_back(chain.at(0));
+      // create the physical chain
+      std::vector<b2Vec2> chain;
+      for (auto& pos : path.mScaled)
+      {
+         b2Vec2 chainPos;
 
-       // create 1 body per chain
-       b2BodyDef bodyDef;
-       bodyDef.position.Set(0, 0);
-       bodyDef.type = b2_staticBody;
-       b2Body* body = mWorld->CreateBody(&bodyDef);
-       b2ChainShape chainShape;
-       chainShape.CreateChain(&chain.at(0), static_cast<int32_t>(chain.size()));
-       b2FixtureDef fixtureDef;
-       fixtureDef.density = 0.0f;
-       fixtureDef.friction = 0.2f;
-       fixtureDef.shape = &chainShape;
-       body->CreateFixture(&fixtureDef);
+         chainPos.Set(
+            (pos.x + offsetX)* TILE_WIDTH / PPM,
+            (pos.y + offsetY)* TILE_HEIGHT / PPM
+         );
 
-       mPhysics.mChains.push_back(chain);
-    }
+         chain.push_back(chainPos);
+      }
+      chain.push_back(chain.at(0));
+
+      // create 1 body per chain
+      b2BodyDef bodyDef;
+      bodyDef.position.Set(0, 0);
+      bodyDef.type = b2_staticBody;
+      b2Body* body = mWorld->CreateBody(&bodyDef);
+      b2ChainShape chainShape;
+      chainShape.CreateChain(&chain.at(0), static_cast<int32_t>(chain.size()));
+      b2FixtureDef fixtureDef;
+      fixtureDef.density = 0.0f;
+      fixtureDef.friction = 0.2f;
+      fixtureDef.shape = &chainShape;
+      auto fixture = body->CreateFixture(&fixtureDef);
+
+      // deadly objects are deadly :)
+      if (behavior == ObjectBehaviorDeadly)
+      {
+         auto objectData = new FixtureNode(this);
+         objectData->setType(ObjectTypeDeadly);
+         fixture->SetUserData(static_cast<void*>(objectData));
+      }
+
+      mPhysics.mChains.push_back(chain);
+   }
 }
 
 
@@ -1343,16 +1368,30 @@ void Level::parsePhysicsTiles(
       // std::cout << std::endl;
    }
 
-   SquareMarcher m(
+   static const float scale = 0.33333333333333333f;
+
+   SquareMarcher solid(
       gridWidth,
       gridHeight,
       physicsMap,
       std::vector<int32_t>{1},
       basePath / std::filesystem::path("physics_path_solid.csv"),
-      0.33333333333333333f
+      scale
    );
 
-   addPathsToWorld(layer->mOffsetX, layer->mOffsetY, m.mPaths);
+   addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
+
+   SquareMarcher deadly(
+      gridWidth,
+      gridHeight,
+      physicsMap,
+      std::vector<int32_t>{3},
+      basePath / std::filesystem::path("physics_path_deadly.csv"),
+      scale
+   );
+
+   addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectBehaviorDeadly);
+
 }
 
 

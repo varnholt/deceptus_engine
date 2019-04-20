@@ -141,8 +141,19 @@ protected:
 
    void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
-   void parsePhysicsTiles(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
-   void addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths);
+
+   void parsePhysicsTiles(
+      TmxLayer* layer,
+      TmxTileSet* tileSet,
+      const std::filesystem::path& basePath
+   );
+
+   void addPathsToWorld(
+      int32_t offsetX,
+      int32_t offsetY,
+      const std::vector<SquareMarcher::Path>& paths,
+      ObjectBehavior behavior
+   );
 
    void load();
    bool isControllerUsed() const;
