@@ -1310,7 +1310,7 @@ void Level::parsePhysicsTiles(
       if (items.size() == 11) // a range: 0,12,1,1,1,1,1,1,1,1,1
       {
          std::copy_n(items.begin() + 2, 9, data.begin());
-         for (auto key = items[0]; key < items[1]; key++)
+         for (auto key = items[0]; key <= items[1]; key++)
          {
             map[key] = data;
          }
