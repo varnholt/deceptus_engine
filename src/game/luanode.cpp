@@ -342,6 +342,14 @@ extern "C" int requestMap(lua_State* state)
 }
 
 
+extern "C" int die(lua_State* state)
+{
+   std::shared_ptr<LuaNode> node = OBJINSTANCE;
+   node->luaDie();
+   return 0;
+}
+
+
 void LuaNode::setupTexture()
 {
    std::string spriteName = std::get<std::string>(mProperties["sprite"]);
@@ -386,6 +394,7 @@ void LuaNode::setupLua()
    lua_register(mState, "addShapeCircle", ::addShapeCircle);
    lua_register(mState, "addShapeRect", ::addShapeRect);
    lua_register(mState, "boom", ::boom);
+   lua_register(mState, "die", ::die);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(mState);
@@ -544,9 +553,11 @@ void LuaNode::luaSendPatrolPath()
 }
 
 
-
-void LuaNode::luaDied()
+void LuaNode::luaDie()
 {
+   Level::getCurrentLevel()->getWorld()->DestroyBody(
+      mBody.get()
+   );
 }
 
 
