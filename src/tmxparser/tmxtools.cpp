@@ -62,9 +62,9 @@ std::string TmxTools::trim_copy(std::string s)
    return s;
 }
 
-std::array<int, 4> TmxTools::color(const std::string &c)
+std::array<uint8_t, 4> TmxTools::color(const std::string &c)
 {
-   int r,g,b,a;
+   uint8_t r,g,b,a;
    std::istringstream(c.substr(1,2)) >> std::hex >> a;
    std::istringstream(c.substr(3,2)) >> std::hex >> r;
    std::istringstream(c.substr(5,2)) >> std::hex >> g;
