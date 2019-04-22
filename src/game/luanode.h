@@ -48,7 +48,7 @@ struct LuaNode : public GameNode
    void luaAct(float dt);
    void luaMovedTo();
    void luaPlayerMovedTo();
-   void luaDied();
+   void luaDie();
    void luaRetrieveProperties();
    void luaTimeout(int timerId);
    void luaSendPatrolPath();
