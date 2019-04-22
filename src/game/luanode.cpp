@@ -609,9 +609,13 @@ void LuaNode::createBody()
       fd.friction = 0.0f;
       fd.restitution = 0.0f;
       fd.shape = shape.get();
-      // fd.filter.categoryBits = //
-      fd.filter.maskBits = 0; // http://www.iforce2d.net/b2dtut/collision-filtering
-      fd.filter.groupIndex = -1;
+
+      // apply default filter
+      // // http://www.iforce2d.net/b2dtut/collision-filtering
+      fd.filter.groupIndex = mFilterDefaults.mGroupIndex;
+      fd.filter.maskBits = mFilterDefaults.mMaskBits;
+      fd.filter.categoryBits = mFilterDefaults.mCategoryBits;
+
       b2Fixture* ft = mBody->CreateFixture(&fd);
       FixtureNode* fn = new FixtureNode(this);
       fn->setType(ObjectTypeEnemy);

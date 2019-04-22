@@ -22,6 +22,12 @@ struct LuaNode : public GameNode
 {
    LuaNode(const std::string &filename);
 
+   struct FilterDefaults{
+      uint16_t mCategoryBits = 0x0001;
+      uint16_t mMaskBits = 0xFFFF;
+      int16_t mGroupIndex = -1; // 0 is default
+   };
+
    void initialize();
 
    void setupLua();
@@ -65,6 +71,7 @@ struct LuaNode : public GameNode
    int mKeysPressed = 0;
    std::string mScriptName;
    lua_State* mState = nullptr;
+   FilterDefaults mFilterDefaults;
 
    sf::Vector2f mStartPosition;
    sf::Texture mTexture;

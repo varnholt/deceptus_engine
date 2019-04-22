@@ -735,7 +735,7 @@ void Level::createViews()
    }
 
    mMapView = std::make_shared<sf::View>();
-   mMapView->setViewport(sf::FloatRect(0.80f, 0.1f, 0.16f, 0.1f));
+   mMapView->setViewport(sf::FloatRect(0.65f, 0.05f, 0.32f, 0.18f));
 }
 
 
@@ -778,8 +778,8 @@ void Level::updateViews()
      sf::FloatRect(
         levelViewX,
         levelViewY,
-        mViewWidth * 3.0f,
-        mViewHeight * 3.0f
+        mViewWidth * 4.0f,
+        mViewHeight * 4.0f
       )
    );
 }
@@ -1043,6 +1043,8 @@ void Level::draw(
 
    updateGammaShader();
    window->draw(levelTextureSprite, &mGammaShader);
+
+   // drawMap(*window.get());
 }
 
 
