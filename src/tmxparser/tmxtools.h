@@ -30,6 +30,6 @@ public:
    static std::string trim_copy(std::string s);
 
    // get color from string
-   static std::array<int, 4> color(const std::string& c);
+   static std::array<uint8_t, 4> color(const std::string& c);
 };
 

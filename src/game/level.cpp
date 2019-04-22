@@ -186,7 +186,7 @@ std::shared_ptr<RaycastLight::LightInstance> Level::deserializeRaycastLight(TmxO
     tmxObject->mY * MPP + (tmxObject->mHeight * 0.5f) * MPP
   );
 
-  std::array<int, 4> rgba = {255, 255, 255, 255};
+  std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
   std::string texture = "data/light/smooth.png";
   if (tmxObject->mProperties != nullptr)
   {
@@ -239,7 +239,7 @@ std::shared_ptr<StaticLight::LightInstance> Level::deserializeStaticLight(TmxObj
   // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
 
   auto light = std::make_shared<StaticLight::LightInstance>();
-  std::array<int, 4> rgba = {255, 255, 255, 255};
+  std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
   std::string texture = "data/light/smooth.png";
   auto flickerIntensity = 0.0f;
   auto flickerAlphaAmount = 1.0f;
@@ -571,6 +571,8 @@ void Level::load()
    mAo.load(path, std::filesystem::path(mDescription->mFilename).stem().string());
 
    std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+
+   std::cout << "level loading complete" << std::endl;
 }
 
 
