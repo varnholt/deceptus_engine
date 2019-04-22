@@ -29,9 +29,11 @@ function initialize()
    patrolIndex = 1
    patrolEpsilon = 1.0
    wait = false
+
    addShapeCircle(0.12, 0.0, 0.12)   -- radius, x, y
    addShapeRect(0.2, 0.07, 0.0, 0.1) -- width, height, x, y
    updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
+
    -- print("blob.lua initialized")
 end
 
@@ -131,7 +133,7 @@ function patrol()
       -- print("arrived.")
       wait = true
       mKeyPressed = 0
-      timer(5000, mPatrolTimer)
+      timer(500, mPatrolTimer)
       patrolIndex = patrolIndex + 1
       if (patrolIndex > count) then
          patrolIndex = 0
