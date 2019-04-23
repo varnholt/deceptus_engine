@@ -16,10 +16,10 @@ properties = {
 
 ------------------------------------------------------------------------------------------------------------------------
 mFireTimer = 1
-active = false
+mFireInterval = 3000
+mFireReady = true
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
-
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -33,8 +33,15 @@ end
 function timeout(id)
    -- print(string.format("timeout: %d", id))
    if (id == mFireTimer) then
-      active = false
+      fire()
    end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function fire()
+   print("boom.")
+   mFireReady = true
 end
 
 
@@ -60,6 +67,10 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
+   if (mFireReady == true) then
+      mFireReady = false
+      timer(mFireInterval, mFireTimer)
+   end
 end
 
 
