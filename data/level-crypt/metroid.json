@@ -35,8 +35,8 @@
     {
       "script": "cannon.lua",
       "startposition": [
-        64,
-        311
+        70,
+        41
       ],
       "properties": [
         {

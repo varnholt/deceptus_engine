@@ -68,6 +68,7 @@ void Timer::add(
    timer->mCallback = callback;
    timer->mData = data;
 
+   // don't start another timer from the timed function in your lua code :)
    std::lock_guard<std::mutex> guard(mMutex);
    mTimers.push_back(std::move(timer));
 }
