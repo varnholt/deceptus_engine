@@ -1992,7 +1992,7 @@ void Player::fire()
    pos.x = xOffset + mPixelPosition.x * MPP;
    pos.y = yOffset + mPixelPosition.y * MPP;
 
-   mWeaponSystem->mSelected->fire(
+   mWeaponSystem->mSelected->fireInIntervals(
       mWorld,
       pos,
       dir
