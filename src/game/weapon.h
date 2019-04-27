@@ -32,10 +32,16 @@ public:
    Weapon();
    Weapon(std::unique_ptr<b2Shape>, int fireInterval);
 
-   void fire(
+   void fireInIntervals(
       const std::shared_ptr<b2World>& world,
       const b2Vec2 &pos,
       const b2Vec2 &dir
+   );
+
+   void fireNow(
+      const std::shared_ptr<b2World>& world,
+      const b2Vec2& pos,
+      const b2Vec2& dir
    );
 
    int getFireInterval() const;
@@ -50,8 +56,7 @@ public:
    int damage() const;
    void loadTextures();
 
-
-protected:
+   protected:
 
    static void cleanupBullets();
 

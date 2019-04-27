@@ -10,6 +10,17 @@
 std::set<Bullet*> Weapon::sBullets;
 std::list<b2Vec2> Weapon::sDetonationPositions;
 
+/*
+
+  todo:
+
+  1) lua node registers bullet definition with a key (shape, sprite, origin, hitanimation, damage)
+  2) add sprite and hitanimation to sprite pool, animation pool
+  3) add sprite* to bullet
+  4) call fireNow with bullet definition
+
+*/
+
 
 Weapon::Weapon()
 {
@@ -28,7 +39,42 @@ Weapon::Weapon(std::unique_ptr<b2Shape> shape, int fireInterval)
 }
 
 
-void Weapon::fire(
+void Weapon::fireNow(
+   const std::shared_ptr<b2World>& world,
+   const b2Vec2& pos,
+   const b2Vec2& dir
+)
+{
+   b2BodyDef bodyDef;
+   bodyDef.type = b2_dynamicBody;
+   bodyDef.position.Set(pos.x, pos.y);
+
+   auto body = world->CreateBody(&bodyDef);
+   body->SetBullet(true);
+   body->SetGravityScale(0.0f);
+
+   b2FixtureDef fixtureDef;
+   fixtureDef.shape = mShape.get();
+   fixtureDef.density = 1.0f;
+
+   auto fixture = body->CreateFixture(&fixtureDef);
+
+   body->ApplyLinearImpulse(
+      dir,
+      pos,
+      true
+   );
+
+   auto bullet = new Bullet();
+   bullet->setBody(body);
+   fixture->SetUserData(static_cast<void*>(bullet));
+
+   // store bullet
+   sBullets.insert(bullet);
+}
+
+
+void Weapon::fireInIntervals(
    const std::shared_ptr<b2World>& world,
    const b2Vec2& pos,
    const b2Vec2& dir
@@ -36,32 +82,7 @@ void Weapon::fire(
 {
    if (mFireClock.getElapsedTime().asMilliseconds() > mFireInterval)
    {
-      b2BodyDef bodyDef;
-      bodyDef.type = b2_dynamicBody;
-      bodyDef.position.Set(pos.x, pos.y);
-
-      auto body = world->CreateBody(&bodyDef);
-      body->SetBullet(true);
-      body->SetGravityScale(0.0f);
-
-      b2FixtureDef fixtureDef;
-      fixtureDef.shape = mShape.get();
-      fixtureDef.density = 1.0f;
-
-      auto fixture = body->CreateFixture(&fixtureDef);
-
-      body->ApplyLinearImpulse(
-         dir,
-         pos,
-         true
-      );
-
-      auto bullet = new Bullet();
-      bullet->setBody(body);
-      fixture->SetUserData(static_cast<void*>(bullet));
-
-      // store bullet
-      sBullets.insert(bullet);
+      fireNow(world, pos, dir);
 
       mFireClock.restart();
    }
