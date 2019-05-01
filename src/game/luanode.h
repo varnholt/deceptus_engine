@@ -36,11 +36,12 @@ struct LuaNode : public GameNode
    void synchronizeProperties();
    void updateVelocity();
    void updatePosition();
-   void updateSpriteRect(int x, int y, int w, int h);
+   void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
    void addShapeCircle(float radius, float x, float y);
    void addShapeRect(float width, float height, float x, float y);
    void addShapePoly(const b2Vec2* points, int32_t size);
-   void addWeapon(std::unique_ptr<b2Shape> shape, int fireInterval);
+   void addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval);
+   void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
 
    void draw(sf::RenderTarget& window);
 
@@ -50,10 +51,10 @@ struct LuaNode : public GameNode
    void luaPlayerMovedTo();
    void luaDie();
    void luaRetrieveProperties();
-   void luaTimeout(int timerId);
+   void luaTimeout(int32_t timerId);
    void luaSendPatrolPath();
    void luaSendPath(const std::vector<sf::Vector2f> &vec);
-   void damage(int playerId, int damage, float forceX, float forceY);
+   void damage(int32_t playerId, int32_t damage, float forceX, float forceY);
    void boom(float x, float y, float intensity);
 
    // property accessors
@@ -67,8 +68,8 @@ struct LuaNode : public GameNode
    void stopScript();
 
    // members
-   int mId = -1;
-   int mKeysPressed = 0;
+   int32_t mId = -1;
+   int32_t mKeysPressed = 0;
    std::string mScriptName;
    lua_State* mState = nullptr;
    FilterDefaults mFilterDefaults;
@@ -77,8 +78,8 @@ struct LuaNode : public GameNode
    sf::Texture mTexture;
    sf::Sprite mSprite;
    sf::Vector2u mSpriteOffset;
-   int mSpriteWidth = 0;
-   int mSpriteHeight = 0;
+   int32_t mSpriteWidth = 0;
+   int32_t mSpriteHeight = 0;
    sf::Vector2f mPosition;
    std::vector<sf::Vector2f> mPatrolPath;
 
@@ -90,6 +91,6 @@ struct LuaNode : public GameNode
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> mProperties;
 
    // static
-   static std::atomic<int> sNextId;
+   static std::atomic<int32_t> sNextId;
 };
 

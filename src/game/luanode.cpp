@@ -19,12 +19,12 @@
 #include "timer.h"
 
 // static
-std::atomic<int> LuaNode::sNextId = 0;
+std::atomic<int32_t> LuaNode::sNextId = 0;
 
 #define OBJINSTANCE LuaInterface::instance()->getObject(state)
 
 
-extern "C" int updateProperties(lua_State* state)
+extern "C" int32_t updateProperties(lua_State* state)
 {
    lua_pushnil(state);
 
@@ -72,7 +72,7 @@ extern "C" int updateProperties(lua_State* state)
 }
 
 
-extern "C" int updateSpriteRect(lua_State* state)
+extern "C" int32_t updateSpriteRect(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -93,7 +93,7 @@ extern "C" int updateSpriteRect(lua_State* state)
 
 
 
-extern "C" int damage(lua_State* state)
+extern "C" int32_t damage(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -113,7 +113,7 @@ extern "C" int damage(lua_State* state)
 }
 
 
-extern "C" int boom(lua_State* state)
+extern "C" int32_t boom(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -132,7 +132,7 @@ extern "C" int boom(lua_State* state)
 }
 
 
-extern "C" int addShapeCircle(lua_State* state)
+extern "C" int32_t addShapeCircle(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -150,7 +150,7 @@ extern "C" int addShapeCircle(lua_State* state)
 }
 
 
-extern "C" int addShapeRect(lua_State* state)
+extern "C" int32_t addShapeRect(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -169,7 +169,7 @@ extern "C" int addShapeRect(lua_State* state)
 }
 
 
-extern "C" int addShapePoly(lua_State* state)
+extern "C" int32_t addShapePoly(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -194,9 +194,9 @@ extern "C" int addShapePoly(lua_State* state)
 }
 
 
-extern "C" int addWeapon(lua_State* state)
+extern "C" int32_t addWeapon(lua_State* state)
 {
-   auto argc = lua_gettop(state);
+   auto argc = static_cast<size_t>(lua_gettop(state));
    auto fireInterval = 0;
    std::unique_ptr<b2Shape> shape;
 
@@ -236,8 +236,22 @@ extern "C" int addWeapon(lua_State* state)
 }
 
 
+extern "C" int32_t fireWeapon(lua_State* state)
+{
+   auto index = static_cast<size_t>(lua_tointeger(state, 0));
+   auto posX = static_cast<float>(lua_tonumber(state, 1));
+   auto posY = static_cast<float>(lua_tonumber(state, 2));
+   auto dirX = static_cast<float>(lua_tonumber(state, 3));
+   auto dirY = static_cast<float>(lua_tonumber(state, 4));
 
-extern "C" int timer(lua_State* state)
+   std::shared_ptr<LuaNode> node = OBJINSTANCE;
+   node->fireWeapon(index, {posX, posY}, {dirX, dirY});
+
+   return 0;
+}
+
+
+extern "C" int32_t timer(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -264,10 +278,10 @@ extern "C" int timer(lua_State* state)
 }
 
 
-extern "C" int playSample(lua_State* state)
+extern "C" int32_t playSample(lua_State* state)
 {
    // number of function arguments are on top of the stack.
-   int argc = lua_gettop(state);
+   int32_t argc = lua_gettop(state);
 
    if (argc == 2)
    {
@@ -281,10 +295,10 @@ extern "C" int playSample(lua_State* state)
 }
 
 
-extern "C" int debug(lua_State* state)
+extern "C" int32_t debug(lua_State* state)
 {
    // number of function arguments are on top of the stack.
-   int argc = lua_gettop(state);
+   int32_t argc = lua_gettop(state);
 
    if (argc == 1)
    {
@@ -299,7 +313,7 @@ extern "C" int debug(lua_State* state)
 void error(lua_State* state, const char* /*scope*/ = 0)
 {
   // the error message is on top of the stack.
-  // fetch it, print it and then pop it off the stack.
+  // fetch it, print32_t it and then pop it off the stack.
    std::stringstream os;
    os << lua_tostring(state, -1);
 
@@ -311,7 +325,7 @@ void error(lua_State* state, const char* /*scope*/ = 0)
 }
 
 
-extern "C" int updateKeysPressed(lua_State* state)
+extern "C" int32_t updateKeysPressed(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -330,7 +344,7 @@ extern "C" int updateKeysPressed(lua_State* state)
 }
 
 
-extern "C" int requestMap(lua_State* state)
+extern "C" int32_t requestMap(lua_State* state)
 {
    auto obj = LuaInterface::instance()->getObject(state);
    if (obj != nullptr)
@@ -342,7 +356,7 @@ extern "C" int requestMap(lua_State* state)
 }
 
 
-extern "C" int die(lua_State* state)
+extern "C" int32_t die(lua_State* state)
 {
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
    node->luaDie();
@@ -393,6 +407,8 @@ void LuaNode::setupLua()
    lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
    lua_register(mState, "addShapeCircle", ::addShapeCircle);
    lua_register(mState, "addShapeRect", ::addShapeRect);
+   lua_register(mState, "addWeapon", ::addWeapon);
+   lua_register(mState, "fireWeapon", ::fireWeapon);
    lua_register(mState, "boom", ::boom);
    lua_register(mState, "die", ::die);
 
@@ -428,7 +444,7 @@ void LuaNode::synchronizeProperties()
 {
    // evaluate property map
    //
-   //   int i = std::get<int>(variant);
+   //   int32_t i = std::get<int>(variant);
    //   w = std::get<int>(variant);
    //   w = std::get<0>(variant);
 
@@ -490,7 +506,7 @@ void LuaNode::luaRetrieveProperties()
 }
 
 
-void LuaNode::luaTimeout(int timerId)
+void LuaNode::luaTimeout(int32_t timerId)
 {
    lua_getglobal(mState, FUNCTION_TIMEOUT);
    lua_pushinteger(mState, timerId);
@@ -508,7 +524,7 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 {
    lua_newtable(mState);
 
-   int i = 0;
+   int32_t i = 0;
    for (const auto& v : vec)
    {
       lua_pushnumber(mState, v.x); // push x
@@ -519,7 +535,7 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 }
 
 
-void LuaNode::damage(int playerId, int damage, float forceX, float forceY)
+void LuaNode::damage(int32_t playerId, int32_t damage, float forceX, float forceY)
 {
    Player::getPlayer(playerId)->damage(damage, sf::Vector2f(forceX, forceY));
 }
@@ -675,10 +691,16 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 }
 
 
-void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int fireInterval)
+void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval)
 {
    auto weapon = std::make_unique<Weapon>(std::move(shape), fireInterval);
    mWeapons.push_back(std::move(weapon));
+}
+
+
+void LuaNode::fireWeapon(size_t index, b2Vec2 from, b2Vec2 to)
+{
+   mWeapons[index]->fireNow(Level::getCurrentLevel()->getWorld(), from, to);
 }
 
 
@@ -773,7 +795,7 @@ void LuaNode::updatePosition()
 }
 
 
-void LuaNode::updateSpriteRect(int x, int y, int w, int h)
+void LuaNode::updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
    mSpriteOffset.x = x;
    mSpriteOffset.y = y;
