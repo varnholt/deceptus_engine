@@ -9,6 +9,7 @@
 
 std::set<Bullet*> Weapon::sBullets;
 std::list<b2Vec2> Weapon::sDetonationPositions;
+sf::Rect<int32_t> Weapon::mEmptyRect;
 
 
 Weapon::Weapon()
@@ -147,12 +148,43 @@ int Weapon::damage() const
 
 void Weapon::loadTextures()
 {
-   mBulletTexture.loadFromFile("data/weapons/bullet.png");
+   mBulletTexture.loadFromFile(mTexturePath.string());
+
    mBulletSprite.setTexture(mBulletTexture);
-   mBulletSprite.setOrigin(
-      static_cast<float_t>(mBulletTexture.getSize().x / 2),
-      static_cast<float_t>(mBulletTexture.getSize().y / 2)
-   );
+
+   if (mTextureRect.width > 0)
+   {
+      mBulletSprite.setOrigin(
+         static_cast<float_t>(mTextureRect.width / 2),
+         static_cast<float_t>(mTextureRect.height / 2)
+      );
+
+      mBulletSprite.setTextureRect(mTextureRect);
+   }
+   else
+   {
+      mBulletSprite.setOrigin(
+         static_cast<float_t>(mBulletTexture.getSize().x / 2),
+         static_cast<float_t>(mBulletTexture.getSize().y / 2)
+      );
+   }
+}
+
+
+void Weapon::setTexture(
+   const std::filesystem::path& path,
+   const sf::Rect<int32_t>& textureRect
+)
+{
+   bool reload = ((path != mTexturePath) || (textureRect != mTextureRect));
+
+   if (reload)
+   {
+      mTextureRect = textureRect;
+      mTexturePath = path;
+
+      loadTextures();
+   }
 }
 
 
