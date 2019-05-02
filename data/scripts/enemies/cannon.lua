@@ -28,6 +28,7 @@ function initialize()
    updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
 
    addWeapon(1000, 0.1)
+   updateBulletTexture(0, "data/sprites/enemy_blob.png", 5, 53, 16, 16)
 end
 
 

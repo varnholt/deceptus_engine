@@ -8,6 +8,7 @@
 #include <Box2D/Box2D.h>
 
 // std
+#include <filesystem>
 #include <list>
 #include <memory>
 #include <set>
@@ -55,8 +56,10 @@ public:
 
    int damage() const;
    void loadTextures();
+   void setTexture(const std::filesystem::path& path, const sf::Rect<int32_t>& textureRect = mEmptyRect);
 
-   protected:
+
+protected:
 
    static void cleanupBullets();
 
@@ -69,6 +72,11 @@ public:
    sf::Sprite mBulletSprite;
 
    std::unique_ptr<b2Shape> mShape;
+
    sf::Clock mFireClock;
    int mFireInterval = 100;
+   std::filesystem::path mTexturePath = "data/weapons/bullet.png";
+   sf::Rect<int32_t> mTextureRect;
+
+   static sf::Rect<int32_t> mEmptyRect;
 };

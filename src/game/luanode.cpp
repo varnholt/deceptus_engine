@@ -258,6 +258,47 @@ extern "C" int32_t fireWeapon(lua_State* state)
 }
 
 
+extern "C" int32_t updateBulletTexture(lua_State* state)
+{
+   auto argc = lua_gettop(state);
+   auto valid = (argc >= 2);
+
+   auto index = 0u;
+   std::string path;
+
+   if (valid)
+   {
+      index = static_cast<uint32_t>(lua_tointeger(state, 1));
+      path = lua_tostring(state, 2);
+   }
+
+   sf::Rect<int32_t> rect;
+   if (argc == 6)
+   {
+      auto x1 = static_cast<int32_t>(lua_tointeger(state, 3));
+      auto y1 = static_cast<int32_t>(lua_tointeger(state, 4));
+
+      auto width = static_cast<int32_t>(lua_tointeger(state, 5));
+      auto height = static_cast<int32_t>(lua_tointeger(state, 6));
+
+      rect.left = x1;
+      rect.top = y1;
+      rect.width = width;
+      rect.height = height;
+   }
+
+
+   if (valid)
+   {
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+      node->mWeapons[index]->setTexture(path, rect);
+   }
+
+   return 0;
+}
+
+
+
 extern "C" int32_t timer(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -415,6 +456,7 @@ void LuaNode::setupLua()
    lua_register(mState, "addShapeCircle", ::addShapeCircle);
    lua_register(mState, "addShapeRect", ::addShapeRect);
    lua_register(mState, "addWeapon", ::addWeapon);
+   lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
    lua_register(mState, "fireWeapon", ::fireWeapon);
    lua_register(mState, "boom", ::boom);
    lua_register(mState, "die", ::die);
