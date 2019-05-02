@@ -26,6 +26,8 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
    updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
+
+   addWeapon(1000, 0.1)
 end
 
 
@@ -40,7 +42,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   print("boom.")
+   fireWeapon(0, mPosition:getX() - 20, mPosition:getY(), -0.1, 0.0);
    mFireReady = true
 end
 

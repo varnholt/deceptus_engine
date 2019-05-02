@@ -131,25 +131,42 @@ void GameContactListener::BeginContact(b2Contact* contact)
       switch (fixtureNodeA->getType())
       {
          case ObjectTypePlayerFootSensor:
+         {
             mNumFootContacts++;
             break;
+         }
          case ObjectTypeBullet:
+         {
+            if (getPlayerId(fixtureNodeB) != -1)
+            {
+               auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
+               Player::getPlayer(0)->damage(damage);
+            }
             dynamic_cast<Bullet*>(fixtureNodeA)->setScheduledForRemoval(true);
             break;
+         }
          case ObjectTypeOneSidedWall:
+         {
             platformFixture = contact->GetFixtureA();
             playerFixture = contact->GetFixtureB();
             break;
+         }
          case ObjectTypePlayer:
+         {
             mNumPlayerContacts++;
             break;
+         }
          case ObjectTypeDeadly:
+         {
             if (getPlayerId(fixtureNodeB) != -1)
                mNumDeadlyContacts++;
             break;
+         }
          case ObjectTypeMovingPlatform:
+         {
             mNumMovingPlatformContacts++;
             break;
+         }
          case ObjectTypeBouncer:
          {
             dynamic_cast<Bouncer*>(fixtureNodeA)->activate();
@@ -182,25 +199,42 @@ void GameContactListener::BeginContact(b2Contact* contact)
       switch (fixtureNodeB->getType())
       {
          case ObjectTypePlayerFootSensor:
+         {
             mNumFootContacts++;
             break;
+         }
          case ObjectTypeBullet:
+         {
+            if (getPlayerId(fixtureNodeA) != -1)
+            {
+               auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
+               Player::getPlayer(0)->damage(damage);
+            }
             dynamic_cast<Bullet*>(fixtureNodeB)->setScheduledForRemoval(true);
             break;
+         }
          case ObjectTypeOneSidedWall:
+         {
             platformFixture = contact->GetFixtureB();
             playerFixture = contact->GetFixtureA();
             break;
+         }
          case ObjectTypePlayer:
+         {
             mNumPlayerContacts++;
             break;
+         }
          case ObjectTypeDeadly:
+         {
             if (getPlayerId(fixtureNodeA) != -1)
                mNumDeadlyContacts++;
             break;
+         }
          case ObjectTypeMovingPlatform:
+         {
             mNumMovingPlatformContacts++;
             break;
+         }
          case ObjectTypeBouncer:
          {
             dynamic_cast<Bouncer*>(fixtureNodeB)->activate();

@@ -203,8 +203,8 @@ extern "C" int32_t addWeapon(lua_State* state)
    // add weapon with bullet radius only
    if (argc == 2)
    {
-      fireInterval = static_cast<int>(lua_tointeger(state, 0));
-      auto radius = static_cast<float>(lua_tonumber(state, 1));
+      fireInterval = static_cast<int>(lua_tointeger(state, 1));
+      auto radius = static_cast<float>(lua_tonumber(state, 2));
       shape = std::make_unique<b2CircleShape>();
       dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
    }
@@ -212,13 +212,13 @@ extern "C" int32_t addWeapon(lua_State* state)
    // add weapon with polygon bullet shape
    if (argc >= 3 && ((argc + 1) % 2 == 0))
    {
-      fireInterval = static_cast<int>(lua_tointeger(state, 0));
+      fireInterval = static_cast<int>(lua_tointeger(state, 1));
       shape = std::make_unique<b2PolygonShape>();
 
       auto size = argc / 2;
       b2Vec2* poly = new b2Vec2[size];
       auto polyIndex = 0;
-      for (auto i = 0; i < argc; i += 2)
+      for (auto i = 2; i < argc; i += 2)
       {
          auto x = static_cast<float>(lua_tonumber(state, i));
          auto y = static_cast<float>(lua_tonumber(state, i + 1));
@@ -238,14 +238,21 @@ extern "C" int32_t addWeapon(lua_State* state)
 
 extern "C" int32_t fireWeapon(lua_State* state)
 {
-   auto index = static_cast<size_t>(lua_tointeger(state, 0));
-   auto posX = static_cast<float>(lua_tonumber(state, 1));
-   auto posY = static_cast<float>(lua_tonumber(state, 2));
-   auto dirX = static_cast<float>(lua_tonumber(state, 3));
-   auto dirY = static_cast<float>(lua_tonumber(state, 4));
+   auto argc = lua_gettop(state);
 
-   std::shared_ptr<LuaNode> node = OBJINSTANCE;
-   node->fireWeapon(index, {posX, posY}, {dirX, dirY});
+   if (argc == 5)
+   {
+      auto index = static_cast<size_t>(lua_tointeger(state, 1));
+
+      auto posX = static_cast<float>(lua_tonumber(state, 2)) * MPP;
+      auto posY = static_cast<float>(lua_tonumber(state, 3)) * MPP;
+
+      auto dirX = static_cast<float>(lua_tonumber(state, 4));
+      auto dirY = static_cast<float>(lua_tonumber(state, 5));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+      node->fireWeapon(index, {posX, posY}, {dirX, dirY});
+   }
 
    return 0;
 }
@@ -428,6 +435,7 @@ void LuaNode::setupLua()
       }
       else
       {
+         luaMovedTo();
          luaInitialize();
          luaRetrieveProperties();
          luaSendPatrolPath();
@@ -475,7 +483,7 @@ void LuaNode::luaMovedTo()
 
 void LuaNode::luaPlayerMovedTo()
 {
-   sf::Vector2f pos =  Player::getPlayer(0)->getPixelPosition();
+   const auto pos =  Player::getPlayer(0)->getPixelPosition();
 
    lua_getglobal(mState, FUNCTION_PLAYER_MOVED_TO);
 
