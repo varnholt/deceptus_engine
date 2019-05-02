@@ -2031,7 +2031,7 @@ bool Player::isDead() const
 {
    auto touchesSomethingDeadly = GameContactListener::getInstance()->getDeadlyContacts();
    auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
-   auto outOfHealth = mExtraTable->mHealth->mHealth < 0;
+   auto outOfHealth = mExtraTable->mHealth->mHealth <= 0;
    return touchesSomethingDeadly || tooFast || outOfHealth;
 }
 

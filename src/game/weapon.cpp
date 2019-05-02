@@ -10,17 +10,6 @@
 std::set<Bullet*> Weapon::sBullets;
 std::list<b2Vec2> Weapon::sDetonationPositions;
 
-/*
-
-  todo:
-
-  1) lua node registers bullet definition with a key (shape, sprite, origin, hitanimation, damage)
-  2) add sprite and hitanimation to sprite pool, animation pool
-  3) add sprite* to bullet
-  4) call fireNow with bullet definition
-
-*/
-
 
 Weapon::Weapon()
 {
@@ -66,6 +55,7 @@ void Weapon::fireNow(
    );
 
    auto bullet = new Bullet();
+   bullet->setProperty("damage", 100);
    bullet->setBody(body);
    fixture->SetUserData(static_cast<void*>(bullet));
 
