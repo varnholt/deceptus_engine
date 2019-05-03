@@ -6,6 +6,8 @@
 #include "bullethitanimation.h"
 #include "constants.h"
 
+#include <iostream>
+
 
 std::set<Bullet*> Weapon::sBullets;
 std::list<b2Vec2> Weapon::sDetonationPositions;
@@ -148,9 +150,18 @@ int Weapon::damage() const
 
 void Weapon::loadTextures()
 {
-   mBulletTexture.loadFromFile(mTexturePath.string());
+   //   std::cout << mTexturePath.string() << std::endl;
+   //   std::cout
+   //      << "x1: " << mTextureRect.left << " "
+   //      << "y1: " << mTextureRect.top << " "
+   //      << "width: " << mTextureRect.width << " "
+   //      << "height: " << mTextureRect.height
+   //      << std::endl;
 
-   mBulletSprite.setTexture(mBulletTexture);
+   if (!mBulletTexture.loadFromFile(mTexturePath.string()))
+   {
+      std::cout << "Weapon::loadTextures(): couldn't load texture " << mTexturePath.string() << std::endl;
+   }
 
    if (mTextureRect.width > 0)
    {
@@ -160,6 +171,7 @@ void Weapon::loadTextures()
       );
 
       mBulletSprite.setTextureRect(mTextureRect);
+      mBulletSprite.setTexture(mBulletTexture);
    }
    else
    {
@@ -167,6 +179,8 @@ void Weapon::loadTextures()
          static_cast<float_t>(mBulletTexture.getSize().x / 2),
          static_cast<float_t>(mBulletTexture.getSize().y / 2)
       );
+
+      mBulletSprite.setTexture(mBulletTexture, true);
    }
 }
 

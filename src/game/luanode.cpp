@@ -415,7 +415,7 @@ extern "C" int32_t die(lua_State* state)
 void LuaNode::setupTexture()
 {
    std::string spriteName = std::get<std::string>(mProperties["sprite"]);
-   if (mTexture.loadFromFile("data/" + spriteName))
+   if (mTexture.loadFromFile(spriteName))
    {
       // mSprite.scale(4.0f, 4.0f);
       mSprite.setTexture(mTexture);
@@ -851,6 +851,15 @@ void LuaNode::updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h)
    mSpriteOffset.y = y;
    mSpriteWidth = w;
    mSpriteHeight = h;
+
+   mSprite.setTextureRect(
+      sf::IntRect(
+         mSpriteOffset.x,
+         mSpriteOffset.y,
+         mSpriteWidth,
+         mSpriteHeight
+      )
+   );
 }
 
 
@@ -874,15 +883,6 @@ void LuaNode::draw(sf::RenderTarget &window)
       mClock.restart();
    }
    */
-
-   mSprite.setTextureRect(
-      sf::IntRect(
-         mSpriteOffset.x,
-         mSpriteOffset.y,
-         mSpriteWidth,
-         mSpriteHeight
-      )
-   );
 
    mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));
    window.draw(mSprite);

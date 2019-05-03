@@ -16,7 +16,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    staticBody = true,
-   sprite = "sprites/landmine.png",
+   sprite = "data/sprites/landmine.png",
    pointsUp = Alignment["AlignmentUp"],
    damage = 0
 }

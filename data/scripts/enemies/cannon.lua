@@ -8,7 +8,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    staticBody = true,
-   sprite = "sprites/cannon.png",
+   sprite = "data/sprites/cannon.png",
    pointsUp = Alignment["AlignmentUp"],
    damage = 0
 }
