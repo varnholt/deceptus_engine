@@ -1,9 +1,19 @@
 #ifndef BULLET_H
 #define BULLET_H
 
+// sfml
+#include <SFML/Graphics.hpp>
+
+// box2d
+#include <Box2D/Box2D.h>
+
 // base
 #include "gamenode.h"
 #include "fixturenode.h"
+
+#include <functional>
+#include <list>
+#include <set>
 
 class b2Body;
 
@@ -17,15 +27,7 @@ public:
       BulletTypePistol
    };
 
-
-protected:
-
-   BulletType mBulletType;
-   bool mScheduledForRemoval;
-   b2Body* mBody;
-
-
-public:
+   using DestroyedCallback = std::function<void(void)>;
 
    Bullet();
    ~Bullet();
@@ -38,7 +40,26 @@ public:
 
    b2Body *getBody() const;
    void setBody(b2Body *body);
+
+   static void cleanup();
+   static void updateHitAnimations(float dt);
+
+   void setDestroyedCallback(const DestroyedCallback& destroyedCallback);
+
+
+protected:
+
+   BulletType mBulletType;
+   bool mScheduledForRemoval;
+   b2Body* mBody;
+   DestroyedCallback mDestroyedCallback;
+
+   static std::set<Bullet*> sBullets;
+   static std::list<b2Vec2> sDetonationPositions;
+
 };
+
+
 
 
 #endif // BULLET_H
