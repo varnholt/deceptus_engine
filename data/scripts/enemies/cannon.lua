@@ -21,15 +21,17 @@ mFireInterval = 3000
 mFireReady = true
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
+mSpriteIndex = 0
+mElapsed = 0.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
-   updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
+   updateSpriteRect(0, 0, 24, 24) -- x, y, width, height
 
    addWeapon(1000, 0.1) -- interval, radius
-   updateBulletTexture(0, "data/sprites/enemy_blob.png", 5, 53, 16, 16) -- index, path, x, y, width, height
+   updateBulletTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
 end
 
 
@@ -44,7 +46,10 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   fireWeapon(0, mPosition:getX() - 20, mPosition:getY(), -0.1, 0.0);
+   mElapsed = 0.0
+   mSpriteIndex = 1
+   fireWeapon(0, mPosition:getX() - 16, mPosition:getY() - 3, -0.1, 0.0);
+   updateSpriteRect(24, 0, 24, 24)
    mFireReady = true
 end
 
@@ -74,6 +79,22 @@ function update(dt)
    if (mFireReady == true) then
       mFireReady = false
       timer(mFireInterval, mFireTimer)
+   end
+
+   -- update sprite index
+   mElapsed = mElapsed + dt
+   index = mSpriteIndex
+
+   if (mSpriteIndex > 0) then
+      mSpriteIndex = 1 + math.floor(mElapsed * 10.0)
+   end
+
+   if (mSpriteIndex > 7) then
+      mSpriteIndex = 0
+   end
+
+   if (index ~= mSpriteIndex) then
+      updateSpriteRect(mSpriteIndex * 24, 0, 24, 24)
    end
 end
 
