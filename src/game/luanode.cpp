@@ -863,7 +863,7 @@ void LuaNode::updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h)
 }
 
 
-void LuaNode::draw(sf::RenderTarget &window)
+void LuaNode::draw(sf::RenderTarget& target)
 {
    /*
    if (!mVisible)
@@ -885,7 +885,12 @@ void LuaNode::draw(sf::RenderTarget &window)
    */
 
    mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));
-   window.draw(mSprite);
+   target.draw(mSprite);
+
+   for (auto& w : mWeapons)
+   {
+      w->drawBullets(target);
+   }
 }
 
 

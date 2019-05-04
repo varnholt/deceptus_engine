@@ -9,9 +9,7 @@
 
 // std
 #include <filesystem>
-#include <list>
 #include <memory>
-#include <set>
 
 // game
 #include "game/bullet.h"
@@ -50,8 +48,6 @@ public:
 
    void drawBullets(sf::RenderTarget& target);
 
-   // later on each weapon shall have its own animation
-   static void updateBulletHitAnimations(float dt);
    static void drawBulletHits(sf::RenderTarget& target);
 
    int damage() const;
@@ -61,10 +57,9 @@ public:
 
 protected:
 
-   static void cleanupBullets();
+   void cleanupBullets();
 
-   static std::set<Bullet*> sBullets;
-   static std::list<b2Vec2> sDetonationPositions;
+   std::set<Bullet*> mBullets;
 
    WeaponType mType;
 

@@ -425,7 +425,7 @@ void Game::update()
       if (mLevelLoadingFinished)
       {
           AnimationPool::getInstance().updateAnimations(dt.asSeconds());
-          Weapon::updateBulletHitAnimations(dt.asSeconds());
+          Bullet::updateHitAnimations(dt.asSeconds());
           updateGameController();
           updateGameControllerForGame();
           mLevel->update(dt);

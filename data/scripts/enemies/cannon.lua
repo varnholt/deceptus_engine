@@ -1,3 +1,4 @@
+
 require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
 
@@ -27,8 +28,8 @@ function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
    updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
 
-   addWeapon(1000, 0.1)
-   updateBulletTexture(0, "data/sprites/enemy_blob.png", 5, 53, 16, 16)
+   addWeapon(1000, 0.1) -- interval, radius
+   updateBulletTexture(0, "data/sprites/enemy_blob.png", 5, 53, 16, 16) -- index, path, x, y, width, height
 end
 
 

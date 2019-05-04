@@ -9,8 +9,6 @@
 #include <iostream>
 
 
-std::set<Bullet*> Weapon::sBullets;
-std::list<b2Vec2> Weapon::sDetonationPositions;
 sf::Rect<int32_t> Weapon::mEmptyRect;
 
 
@@ -58,12 +56,13 @@ void Weapon::fireNow(
    );
 
    auto bullet = new Bullet();
+   bullet->setDestroyedCallback([this, bullet](){mBullets.erase(bullet);});
    bullet->setProperty("damage", 100);
    bullet->setBody(body);
    fixture->SetUserData(static_cast<void*>(bullet));
 
    // store bullet
-   sBullets.insert(bullet);
+   mBullets.insert(bullet);
 }
 
 
@@ -96,7 +95,7 @@ void Weapon::setFireInterval(int fireInterval)
 
 void Weapon::drawBullets(sf::RenderTarget& target)
 {
-   for (auto bullet: sBullets)
+   for (auto bullet: mBullets)
    {
       mBulletSprite.setPosition(
          bullet->getBody()->GetPosition().x * PPM,
@@ -104,27 +103,6 @@ void Weapon::drawBullets(sf::RenderTarget& target)
       );
 
       target.draw(mBulletSprite);
-   }
-}
-
-
-void Weapon::cleanupBullets()
-{
-   // todo: port to remove_if
-   sDetonationPositions.clear();
-   for (auto it = sBullets.begin(); it != sBullets.end(); )
-   {
-      auto bullet = *it;
-      if (bullet->isScheduledForRemoval())
-      {
-         sDetonationPositions.push_back(b2Vec2(bullet->getBody()->GetPosition()));
-         delete *it;
-         sBullets.erase(it++);
-      }
-      else
-      {
-         ++it;
-      }
    }
 }
 
@@ -199,26 +177,6 @@ void Weapon::setTexture(
 
       loadTextures();
    }
-}
-
-
-void Weapon::updateBulletHitAnimations(float dt)
-{
-   cleanupBullets();
-
-   auto bulletDetonations = Weapon::sDetonationPositions;
-
-   std::list<b2Vec2>::iterator it;
-   for (it = bulletDetonations.begin(); it != bulletDetonations.end(); ++it)
-   {
-      b2Vec2 vec = *it;
-      float gx = vec.x * PPM;
-      float gy = vec.y * PPM;
-
-      BulletHitAnimation::add(gx, gy);
-   }
-
-   BulletHitAnimation::updateAnimations(dt);
 }
 
 
