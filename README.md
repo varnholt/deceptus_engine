@@ -11,7 +11,7 @@
 Requires a recent compiler, i.e.
 - gcc >= 8
 - clang >= 7 
-- vs2017
+- vs2017, vs2019
 
 ### Linux
 ```
