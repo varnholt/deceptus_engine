@@ -30,6 +30,7 @@ function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
    updateSpriteRect(0, 0, 24, 24) -- x, y, width, height
 
+   addSample("boom.wav")
    addWeapon(1000, 0.1) -- interval, radius
    updateBulletTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
 end

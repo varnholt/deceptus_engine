@@ -5,6 +5,11 @@
 
 Audio* Audio::sInstance = nullptr;
 
+namespace
+{
+static const std::string SFX_ROOT = "data/sounds/";
+}
+
 //-----------------------------------------------------------------------------
 /*!
  * \brief Audio::Audio
@@ -34,24 +39,34 @@ Audio *Audio::getInstance()
 
 
 //-----------------------------------------------------------------------------
-void Audio::initialize()
+void Audio::addSample(const std::string& sample)
 {
    auto loader = [](const std::string& fileName) -> sf::SoundBuffer {
       sf::SoundBuffer buf;
-      buf.loadFromFile(fileName);
+      buf.loadFromFile(SFX_ROOT + fileName);
       return buf;
    };
 
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleCoin, loader("data/sounds/coin.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleDeath, loader("data/sounds/death.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleFootstep, loader("data/sounds/footstep.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleHealthUp, loader("data/sounds/healthup.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleHurt, loader("data/sounds/hurt.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleJump, loader("data/sounds/jump.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SamplePowerUp, loader("data/sounds/powerup.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleSplash, loader("data/sounds/splash.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleImpact, loader("data/sounds/impact.wav")));
-   mSounds.insert(std::pair<Sample, sf::SoundBuffer>(SampleBoom, loader("data/sounds/boom.wav")));
+   if (mSounds.find(sample) == mSounds.end())
+   {
+      mSounds[sample] = loader(sample);
+   }
+}
+
+
+
+//-----------------------------------------------------------------------------
+void Audio::initialize()
+{
+   addSample("coin.wav");
+   addSample("death.wav");
+   addSample("footstep.wav");
+   addSample("healthup.wav");
+   addSample("hurt.wav");
+   addSample("jump.wav");
+   addSample("powerup.wav");
+   addSample("splash.wav");
+   addSample("impact.wav");
 }
 
 
@@ -65,7 +80,7 @@ void Audio::initializeMusicVolume()
 
 
 //-----------------------------------------------------------------------------
-void Audio::playSample(Audio::Sample sample, float volume)
+void Audio::playSample(const std::string& sample, float volume)
 {
    sf::Sound* sound = nullptr;
    for (int i = 0; i < 10; i++)

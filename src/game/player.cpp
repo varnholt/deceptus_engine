@@ -1095,7 +1095,7 @@ void Player::damage(int damage, const sf::Vector2f& force)
    {
       mDamageInitialized = true;
 
-      Audio::getInstance()->playSample(Audio::SampleHurt);
+      Audio::getInstance()->playSample("hurt.wav");
 
       // not converting this to PPM to make the effect of the applied force more visible
       auto body = getBody();
@@ -1296,7 +1296,7 @@ void Player::updateFootsteps()
          if (mTime.asSeconds() > mNextFootStepTime)
          {
             // play footstep
-            Audio::getInstance()->playSample(Audio::SampleFootstep, 1);
+            Audio::getInstance()->playSample("footstep.wav", 1);
             mNextFootStepTime = mTime.asSeconds() + 1.0f / vel;
          }
       }
@@ -1719,7 +1719,7 @@ void Player::updateClimb()
                   // jointDefinition.frequencyHz = 5.0f;
                   // jointDefinition.length = 0.01f;
 
-                  Audio::getInstance()->playSample(Audio::SampleImpact);
+                  Audio::getInstance()->playSample("impact.wav");
                   mClimbJoint = mWorld->CreateJoint(&jointDefinition);
                }
 
@@ -1838,7 +1838,7 @@ void Player::updateAtmosphere()
 
    if (!wasInwater && isInWater())
    {
-      Audio::getInstance()->playSample(Audio::SampleSplash);
+      Audio::getInstance()->playSample("splash.wav");
       // https://freesound.org/people/Rocktopus/packs/14347/
    }
 
@@ -1952,7 +1952,7 @@ void Player::jump()
                mPixelPosition.y
             );
 
-            Audio::getInstance()->playSample(Audio::SampleJump);
+            Audio::getInstance()->playSample("jump.wav");
          }
       }
       else
@@ -2003,7 +2003,7 @@ void Player::fire()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::die()
 {
-   Audio::getInstance()->playSample(Audio::SampleDeath);
+   Audio::getInstance()->playSample("death.wav");
 }
 
 

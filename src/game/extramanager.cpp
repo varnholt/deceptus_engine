@@ -117,18 +117,18 @@ void ExtraManager::collide(const sf::Rect<int>& playerRect)
       switch ((*it)->mType)
       {
          case ExtraItem::Type::Coin:
-            Audio::getInstance()->playSample(Audio::SampleCoin);
+            Audio::getInstance()->playSample("coin.wav");
             break;
          case ExtraItem::Type::Cherry:
-            Audio::getInstance()->playSample(Audio::SampleHealthUp);
+            Audio::getInstance()->playSample("healthup.wav");
             Player::getPlayer(0)->mExtraTable->mHealth->addHalth(20);
             break;
          case ExtraItem::Type::Banana:
-            Audio::getInstance()->playSample(Audio::SampleHealthUp);
+            Audio::getInstance()->playSample("healthup.wav");
             Player::getPlayer(0)->mExtraTable->mHealth->addHalth(10);
             break;
          case ExtraItem::Type::Apple:
-            Audio::getInstance()->playSample(Audio::SamplePowerUp);
+            Audio::getInstance()->playSample("powerup");
             break;
          default:
             break;
