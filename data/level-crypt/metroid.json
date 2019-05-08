@@ -57,6 +57,17 @@
             "value": "down"
         }
       ]
+    },
+    {
+      "script": "dumb.lua",
+      "startposition": [60, 26],
+      "properties": [
+         {"name": "dummy", "value": "dummy"}
+      ],
+      "patrolpath": [
+        74, 26,
+        60, 26
+      ]
     }
   ]
 }
