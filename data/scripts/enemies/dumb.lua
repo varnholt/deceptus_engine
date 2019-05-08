@@ -14,6 +14,7 @@ mPatrolTimer = 1
 mKeyPressed = 0
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
+mPointsToLeft = false
 
 
 -- x: 720..792 (30..33 x 24)
@@ -29,6 +30,10 @@ function initialize()
    addShapeCircle(0.12, 0.0, 0.12)
    addShapeRect(0.2, 0.07, 0.0, 0.1)
    updateSpriteRect(0, 0, 64, 64)
+
+   addWeapon(100, 0.05) -- interval, radius
+   updateBulletTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
+
    print("dumb.lua initialized")
 end
 
@@ -62,6 +67,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
+   mPointsToLeft = true
    updateSpriteRect(0, 64, 64, 64)
    keyReleased(Key["KeyRight"])
    keyPressed(Key["KeyLeft"])
@@ -70,6 +76,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
+   mPointsToLeft = false
    updateSpriteRect(0, 0, 64, 64)
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
@@ -137,8 +144,35 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function updateShootCondition()
+
+   if (math.abs(mPosition:getY() - mPlayerPosition:getY()) < 10) then
+      if (math.abs(mPosition:getX() - mPlayerPosition:getX()) < 300) then
+
+         playerIsLeft = (mPosition:getX() > mPlayerPosition:getX())
+
+         openFire = false
+         fireDir = 1.0
+         if (playerIsLeft and mPointsToLeft) then
+            openFire = true
+            fireDir = -1.0
+         elseif (not playerIsLeft and not mPointsToLeft) then
+            openFire = true
+         end
+
+         if (openFire) then
+            fireWeapon(0, mPosition:getX() + (fireDir * 32), mPosition:getY(), fireDir * 0.05, 0.0);
+         end
+      end
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function update(dt)
    patrol()
+   updateShootCondition()
    updateKeysPressed(mKeyPressed)
 end
 
