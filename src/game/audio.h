@@ -8,27 +8,14 @@ class Audio
 
 public:
 
-   enum Sample
-   {
-      SampleCoin,
-      SampleDeath,
-      SampleFootstep,
-      SampleJump,
-      SampleHealthUp,
-      SampleHurt,
-      SampleImpact,
-      SamplePowerUp,
-      SampleSplash,
-      SampleBoom
-   };
-
    static Audio* getInstance();
 
    void initialize();
 
    void initializeMusicVolume();
 
-   void playSample(Sample, float volume = 30.0f);
+   void addSample(const std::string& sample);
+   void playSample(const std::string& name, float volume = 30.0f);
 
    sf::Music& getMusic() const;
 
@@ -37,7 +24,7 @@ protected:
 
    Audio();
 
-   std::map<Sample, sf::SoundBuffer> mSounds;
+   std::map<std::string, sf::SoundBuffer> mSounds;
    sf::Sound mThreads[10];
    mutable sf::Music mMusic;
 

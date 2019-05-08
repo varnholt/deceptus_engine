@@ -14,15 +14,3 @@ Alignment = {
    AlignmentRight = 0x08
 }
 
-Sample = {
-   SampleCoin     =  0,
-   SampleDeath    =  1,
-   SampleFootstep =  2,
-   SampleJump     =  3,
-   SampleHealthUp =  4,
-   SampleHurt     =  5,
-   SampleImpact   =  6,
-   SamplePowerUp  =  7,
-   SampleSplash   =  8,
-   SampleBoom     =  9
-}

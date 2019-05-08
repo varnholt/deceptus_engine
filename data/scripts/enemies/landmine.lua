@@ -93,7 +93,7 @@ end
 function timeout(id)
    if (id == mDetonationTimer) then
       mExploded = true
-      playSample(Sample["SampleBoom"], 1.0)
+      playSample("boom.wav", 1.0)
       boom(mPosition:getX(), mPosition:getY(), 1.0)
 
       distanceToPlayer = mPlayerPosition - mPosition;

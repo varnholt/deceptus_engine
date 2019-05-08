@@ -509,7 +509,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    {
       case sf::Keyboard::Num0:
       {
-         Audio::getInstance()->playSample(Audio::SamplePowerUp);
+         Audio::getInstance()->playSample("powerup.wav");
 
          if (mPlayer->mExtraTable->mSkills->mSkills & ExtraSkill::SkillClimb)
          {

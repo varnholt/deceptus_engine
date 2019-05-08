@@ -326,6 +326,21 @@ extern "C" int32_t timer(lua_State* state)
 }
 
 
+extern "C" int32_t addSample(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   int32_t argc = lua_gettop(state);
+
+   if (argc == 1)
+   {
+      auto sample = lua_tostring(state, 1);
+      Audio::getInstance()->addSample(sample);
+   }
+
+   return 0;
+}
+
+
 extern "C" int32_t playSample(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -333,10 +348,10 @@ extern "C" int32_t playSample(lua_State* state)
 
    if (argc == 2)
    {
-      auto sampleId = static_cast<Audio::Sample>(lua_tointeger(state, 1));
+      auto sample = lua_tostring(state, 1);
       auto volume = static_cast<float>(lua_tonumber(state, 2));
 
-      Audio::getInstance()->playSample(sampleId, volume);
+      Audio::getInstance()->playSample(sample, volume);
    }
 
    return 0;
@@ -358,7 +373,7 @@ extern "C" int32_t debug(lua_State* state)
 }
 
 
-void error(lua_State* state, const char* /*scope*/ = 0)
+void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
   // the error message is on top of the stack.
   // fetch it, print32_t it and then pop it off the stack.
@@ -449,6 +464,7 @@ void LuaNode::setupLua()
    lua_register(mState, "damage", ::damage);
    lua_register(mState, "debug", ::debug);
    lua_register(mState, "playSample", ::playSample);
+   lua_register(mState, "addSample", ::addSample);
    lua_register(mState, "updateProperties", ::updateProperties);
    lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
    lua_register(mState, "timer", ::timer);
