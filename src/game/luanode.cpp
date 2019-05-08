@@ -750,7 +750,7 @@ void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval)
 
 void LuaNode::fireWeapon(size_t index, b2Vec2 from, b2Vec2 to)
 {
-   mWeapons[index]->fireNow(Level::getCurrentLevel()->getWorld(), from, to);
+   mWeapons[index]->fireInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
 }
 
 
