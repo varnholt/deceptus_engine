@@ -92,6 +92,23 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
 }
 
 
+extern "C" int32_t setGravityScale(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 1)
+   {
+
+      auto scale = static_cast<float>(lua_tonumber(state, 1));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+      node->setGravityScale(scale);
+   }
+
+   return 0;
+}
+
 
 extern "C" int32_t damage(lua_State* state)
 {
@@ -461,21 +478,22 @@ void LuaNode::setupLua()
    mState = luaL_newstate();
 
    // register callbacks
-   lua_register(mState, "damage", ::damage);
-   lua_register(mState, "debug", ::debug);
-   lua_register(mState, "playSample", ::playSample);
    lua_register(mState, "addSample", ::addSample);
-   lua_register(mState, "updateProperties", ::updateProperties);
-   lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
-   lua_register(mState, "timer", ::timer);
-   lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
    lua_register(mState, "addShapeCircle", ::addShapeCircle);
    lua_register(mState, "addShapeRect", ::addShapeRect);
    lua_register(mState, "addWeapon", ::addWeapon);
-   lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
-   lua_register(mState, "fireWeapon", ::fireWeapon);
    lua_register(mState, "boom", ::boom);
+   lua_register(mState, "damage", ::damage);
+   lua_register(mState, "debug", ::debug);
    lua_register(mState, "die", ::die);
+   lua_register(mState, "fireWeapon", ::fireWeapon);
+   lua_register(mState, "playSample", ::playSample);
+   lua_register(mState, "setGravityScale", ::setGravityScale);
+   lua_register(mState, "timer", ::timer);
+   lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
+   lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
+   lua_register(mState, "updateProperties", ::updateProperties);
+   lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(mState);
@@ -610,6 +628,12 @@ void LuaNode::damage(int32_t playerId, int32_t damage, float forceX, float force
 void LuaNode::boom(float x, float y, float intensity)
 {
    Level::getCurrentLevel()->boom(x, y, intensity);
+}
+
+
+void LuaNode::setGravityScale(float scale)
+{
+   mBody->SetGravityScale(scale);
 }
 
 
