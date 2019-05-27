@@ -1,16 +1,8 @@
 {
   "filename": "data/level-crypt/metroid.tmx",
   "startposition": [
-    47,
-    41
-  ],
-  "startposition_2": [
-    47,
-    320
-  ],
-  "startposition_3": [
-    114,
-    347
+    100,
+    26
   ],
   "enemies": [
     {
