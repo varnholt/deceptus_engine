@@ -1019,11 +1019,11 @@ void Player::updatePortal()
       )
       {
          auto portal = Level::getCurrentLevel()->getNearbyPortal();
-         if (portal != nullptr && portal->getDst() != nullptr)
+         if (portal != nullptr && portal->getDestination() != nullptr)
          {
             mPortalClock.restart();
 
-            auto dstPos =  portal->getDst()->getPortalPosition();
+            auto dstPos =  portal->getDestination()->getPortalPosition();
             setBodyViaPixelPosition(
                dstPos.x + PLAYER_ACTUAL_WIDTH / 2,
                dstPos.y + DIFF_PLAYER_TILE_TO_PHYSICS
