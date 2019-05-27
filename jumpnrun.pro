@@ -1,6 +1,6 @@
 TEMPLATE = app
-TARGET = jumpnrun
-CONFIG_APP_NAME = jumpnrun
+TARGET = deceptus
+CONFIG_APP_NAME = deceptus
 
 DEFINES += _USE_MATH_DEFINES
 DEFINES += USE_GL

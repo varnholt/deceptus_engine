@@ -14,18 +14,7 @@
 #include "tmxparser/tmxproperties.h"
 #include "tmxparser/tmxtileset.h"
 
-
-//-----------------------------------------------------------------------------
-/*!
- * \brief Portal::Portal
- */
-Portal::Portal()
- : mHeight(0),
-   mZ(0),
-   mDst(nullptr)
-{
-}
-
+#include <iostream>
 
 
 //-----------------------------------------------------------------------------
@@ -58,9 +47,9 @@ sf::Vector2f Portal::getPortalPosition()
  * \brief Portal::getDst
  * \return
  */
-Portal *Portal::getDst() const
+Portal *Portal::getDestination() const
 {
-   return mDst;
+   return mDestination;
 }
 
 
@@ -69,9 +58,9 @@ Portal *Portal::getDst() const
  * \brief Portal::setDst
  * \param dst
  */
-void Portal::setDst(Portal *dst)
+void Portal::setDestination(Portal *dst)
 {
-   mDst = dst;
+   mDestination = dst;
 }
 
 
@@ -125,21 +114,21 @@ void Portal::update(float /*dt*/)
  * \param srcdst
  */
 void Portal::link(
-   std::vector<Portal *> &portals,
+   std::vector<Portal*>& portals,
    TmxObject* tmxObject
 )
 {
-   std::vector<sf::Vector2f> srcdst = tmxObject->mPolyLine->mPolyLine;
+   auto srcdst = tmxObject->mPolyLine->mPolyLine;
 
    sf::Vector2f srcf = srcdst.at(0);
    sf::Vector2f dstf = srcdst.at(1);
-   sf::Vector2i src(static_cast<int>(srcf.x), static_cast<int>(srcf.y));
-   sf::Vector2i dst(static_cast<int>(dstf.x), static_cast<int>(dstf.y));
+   sf::Vector2i src(static_cast<int32_t>(floor(srcf.x)), static_cast<int32_t>(floor(srcf.y)));
+   sf::Vector2i dst(static_cast<int32_t>(floor(dstf.x)), static_cast<int32_t>(floor(dstf.y)));
 
-   int srcX = (int)(src.x + tmxObject->mX) / TILE_WIDTH;
-   int srcY = (int)(src.y + tmxObject->mY) / TILE_HEIGHT;
-   int dstX = (int)(dst.x + tmxObject->mX) / TILE_WIDTH;
-   int dstY = (int)(dst.y + tmxObject->mY) / TILE_HEIGHT;
+   const auto srcX = static_cast<int32_t>(src.x + tmxObject->mX) / TILE_WIDTH;
+   const auto srcY = static_cast<int32_t>(src.y + tmxObject->mY) / TILE_HEIGHT;
+   const auto dstX = static_cast<int32_t>(dst.x + tmxObject->mX) / TILE_WIDTH;
+   const auto dstY = static_cast<int32_t>(dst.y + tmxObject->mY) / TILE_HEIGHT;
 
    Portal* srcPortal = nullptr;
    Portal* dstPortal = nullptr;
@@ -147,25 +136,34 @@ void Portal::link(
    for (auto portal : portals)
    {
       sf::Vector2f portalPos = portal->getPortalPosition();
-      int px = (int)(portalPos.x / TILE_WIDTH);
-      int py = (int)(portalPos.y / TILE_HEIGHT);
 
-      if (px == srcX && py == srcY)
+      const auto px = static_cast<int32_t>(portalPos.x / TILE_WIDTH);
+      const auto py = static_cast<int32_t>(portalPos.y / TILE_HEIGHT);
+
+      // todo: go to py..(py + mHeight)
+      if (px == srcX && (py == srcY || py + 1 == srcY))
       {
          srcPortal = portal;
       }
 
-      if (px == dstX && py == dstY)
+      if (px == dstX && (py == dstY || py + 1 == dstY))
       {
          dstPortal = portal;
       }
 
       if (srcPortal != nullptr && dstPortal != nullptr)
       {
-         srcPortal->mDst = dstPortal;
+         srcPortal->mDestination = dstPortal;
          break;
       }
    }
+
+   // set the destination's destination to where we came from.
+   // not sure if this is desired behavior. but for development purposes
+   // it'll help :)
+   dstPortal->mDestination = srcPortal;
+
+   // std::cout << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")" << std::endl;
 }
 
 
@@ -174,7 +172,7 @@ void Portal::link(
  * \brief Portal::addSprite
  * \param sprite
  */
-void Portal::addSprite(const sf::Sprite & sprite)
+void Portal::addSprite(const sf::Sprite& sprite)
 {
    mSprites.push_back(sprite);
 }
@@ -239,18 +237,20 @@ std::vector<Portal *> Portal::load(
    const std::shared_ptr<b2World>&
 )
 {
+   // std::cout << "load portal layer" << std::endl;
+
    std::vector<Portal*> portals;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
-   const int *tiles      = layer->mData;
-   unsigned int width    = layer->mWidth;
-   unsigned int height   = layer->mHeight;
-   unsigned int firstId  = tileSet->mFirstGid;
+   const auto tiles    = layer->mData;
+   const auto width    = layer->mWidth;
+   const auto height   = layer->mHeight;
+   const auto firstId  = tileSet->mFirstGid;
 
    // populate the vertex array, with one quad per tile
-   for (unsigned int i = 0; i < width; ++i)
+   for (auto i = 0u; i < width; ++i)
    {
-      for (unsigned int j = 0; j < height; ++j)
+      for (auto j = 0u; j < height; ++j)
       {
          // get the current tile number
          int tileNumber = tiles[i + j * width];
@@ -261,7 +261,9 @@ std::vector<Portal *> Portal::load(
             Portal* portal = nullptr;
             for (Portal* tmp : portals)
             {
-               if (tmp->mTilePosition.x == i && tmp->mTilePosition.y + 1 == j )
+               if (
+                     static_cast<uint32_t>(tmp->mTilePosition.x) == i
+                  && static_cast<uint32_t>(tmp->mTilePosition.y) + 1 == j )
                {
                   portal = tmp;
                   break;

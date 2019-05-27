@@ -20,7 +20,7 @@ class Portal
 {
 public:
 
-   Portal();
+   Portal() = default;
 
    void draw(sf::RenderTarget& window);
    void update(float dt);
@@ -42,8 +42,8 @@ public:
    int getZ() const;
    void setZ(int z);
 
-   Portal *getDst() const;
-   void setDst(Portal *dst);
+   Portal* getDestination() const;
+   void setDestination(Portal* dst);
 
    sf::Vector2f getPortalPosition();
 
@@ -57,10 +57,10 @@ protected:
 
    sf::Vector2f mTilePosition;
 
-   int mHeight;
-   bool mPlayerAtPortal;
-   int mZ;
-   Portal* mDst;
+   int mHeight = 0;
+   bool mPlayerAtPortal = false;
+   int mZ = 0;
+   Portal* mDestination = nullptr;
 };
 
 #endif // PORTAL_H
