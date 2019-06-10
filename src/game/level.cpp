@@ -14,6 +14,7 @@
 #include "globalclock.h"
 #include "leveldescription.h"
 #include "luainterface.h"
+#include "maptools.h"
 #include "meshtools.h"
 #include "movingplatform.h"
 #include "fixturenode.h"
@@ -81,9 +82,9 @@ void Level::setDescriptionFilename(const std::string &descriptionFilename)
    mDescriptionFilename = descriptionFilename;
 }
 
-const Level::Physics& Level::getPhysics() const
+const Level::Atmosphere& Level::getPhysics() const
 {
-   return mPhysics;
+   return mAtmosphere;
 }
 
 void Level::initializeTextures()
@@ -414,8 +415,8 @@ void Level::loadTmx()
             // todo: refactor all this to be called 'atmosphere'
             if (layer->mName == "physics")
             {
-               mPhysics.mTileMap = tileMap;
-               parsePhysicsLayer(layer, tileset);
+               mAtmosphere.mTileMap = tileMap;
+               parseAtmosphereLayer(layer, tileset);
             }
             else if (layer->mName == "extras")
             {
@@ -522,7 +523,7 @@ void Level::loadTmx()
       }
    }
 
-   if (!mPhysics.mTileMap)
+   if (!mAtmosphere.mTileMap)
    {
       std::cerr << "fatal: no physics layer (called 'physics') found!" << std::endl;
    }
@@ -626,7 +627,7 @@ void Level::spawnEnemies()
 //-----------------------------------------------------------------------------
 void Level::drawStaticChains(sf::RenderTarget& target)
 {
-   for (auto path : mPhysics.mOutlines)
+   for (auto path : mAtmosphere.mOutlines)
    {
       target.draw(&path.at(0), path.size(), sf::LineStrip);
    }
@@ -900,12 +901,12 @@ void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 {
   updateViews();
 
-  mPhysics.mTileMap->setVisible(true);
+  mAtmosphere.mTileMap->setVisible(true);
 
   target.setView(*mLevelView);
-  target.draw(*mPhysics.mTileMap);
+  target.draw(*mAtmosphere.mTileMap);
 
-  mPhysics.mTileMap->setVisible(false);
+  mAtmosphere.mTileMap->setVisible(false);
 }
 
 
@@ -951,6 +952,17 @@ void Level::updateGammaShader()
 {
    float gamma = 2.2f - (GameConfiguration::getInstance().mBrightness - 0.5f);
    mGammaShader.setUniform("gamma", gamma);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const
+{
+   auto blocks = [this](uint32_t x, uint32_t y) -> bool {
+      return mPhysics.mPhysicsMap[(mPhysics.mGridWidth * y) + x] == 1;
+   };
+
+   return MapTools::lineCollide(a.x, a.y, b.x, b.y, blocks);
 }
 
 
@@ -1175,7 +1187,7 @@ void Level::addPathsToWorld(
          }
 
          visiblePath.push_back(visiblePath.at(0));
-         mPhysics.mOutlines.push_back(visiblePath);
+         mAtmosphere.mOutlines.push_back(visiblePath);
       }
 
       // create the physical chain
@@ -1214,13 +1226,13 @@ void Level::addPathsToWorld(
          fixture->SetUserData(static_cast<void*>(objectData));
       }
 
-      mPhysics.mChains.push_back(chain);
+      mAtmosphere.mChains.push_back(chain);
    }
 }
 
 
 //-----------------------------------------------------------------------------
-void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
+void Level::parseAtmosphereLayer(TmxLayer* layer, TmxTileSet* tileSet)
 {
    if (layer == nullptr)
    {
@@ -1240,11 +1252,11 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
    auto offsetX = layer->mOffsetX;
    auto offsetY = layer->mOffsetY;
 
-   mPhysics.mMap.resize(width * height);
-   mPhysics.mMapWidth = width;
-   mPhysics.mMapHeight = height;
-   mPhysics.mMapOffsetX = offsetX;
-   mPhysics.mMapOffsetY = offsetY;
+   mAtmosphere.mMap.resize(width * height);
+   mAtmosphere.mMapWidth = width;
+   mAtmosphere.mMapHeight = height;
+   mAtmosphere.mMapOffsetX = offsetX;
+   mAtmosphere.mMapOffsetY = offsetY;
 
    for (auto y = 0u; y < height; y++)
    {
@@ -1252,19 +1264,16 @@ void Level::parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
       {
          // get the current tile number
          auto tileNumber = tiles[y * width + x];
-         auto tileRelative = static_cast<int32_t>(PhysicsTileInvalid);
+         auto tileRelative = static_cast<int32_t>(AtmosphereTileInvalid);
          if (tileNumber != 0)
          {
             tileRelative = tileNumber - tileSet->mFirstGid;
-            mPhysics.mMap[y * width + x] = tileRelative;
+            mAtmosphere.mMap[y * width + x] = tileRelative;
          }
 
-          mPhysics.mMap[y * width + x] = tileRelative;
+          mAtmosphere.mMap[y * width + x] = tileRelative;
       }
    }
-
-   // SquareMarcher m(width, height, mPhysics.mMap, std::vector<int32_t>{PhysicsTileSolidFull} );
-   // addPathsToWorld(offsetX, offsetY, m.mPaths);
 }
 
 
@@ -1332,12 +1341,12 @@ void Level::parsePhysicsTiles(
       // std::cout << std::endl;
    }
 
-   const auto gridWidth  = layer->mWidth  * 3;
-   const auto gridHeight = layer->mHeight * 3;
-   const auto gridSize   = gridWidth * gridHeight;
+   mPhysics.mGridWidth  = layer->mWidth  * 3;
+   mPhysics.mGridHeight = layer->mHeight * 3;
+   mPhysics.mGridSize   = mPhysics.mGridWidth * mPhysics.mGridHeight;
 
    // create a larger grid and copy tile contents in there
-   std::vector<int32_t> physicsMap(gridSize);
+   mPhysics.mPhysicsMap.resize(mPhysics.mGridSize);
 
    auto yi = 0u;
    for (auto y = 0u; y < layer->mHeight; y++)
@@ -1356,13 +1365,13 @@ void Level::parsePhysicsTiles(
             {
                const auto& arr = (*it).second;
 
-               const auto row1 = ((y + yi + 0) * gridWidth) + (x * 3);
-               const auto row2 = ((y + yi + 1) * gridWidth) + (x * 3);
-               const auto row3 = ((y + yi + 2) * gridWidth) + (x * 3);
+               const auto row1 = ((y + yi + 0) * mPhysics.mGridWidth) + (x * 3);
+               const auto row2 = ((y + yi + 1) * mPhysics.mGridWidth) + (x * 3);
+               const auto row3 = ((y + yi + 2) * mPhysics.mGridWidth) + (x * 3);
 
-               for (auto xi = 0u; xi < 3; xi++) physicsMap[row1 + xi] = arr[xi + 0];
-               for (auto xi = 0u; xi < 3; xi++) physicsMap[row2 + xi] = arr[xi + 3];
-               for (auto xi = 0u; xi < 3; xi++) physicsMap[row3 + xi] = arr[xi + 6];
+               for (auto xi = 0u; xi < 3; xi++) mPhysics.mPhysicsMap[row1 + xi] = arr[xi + 0];
+               for (auto xi = 0u; xi < 3; xi++) mPhysics.mPhysicsMap[row2 + xi] = arr[xi + 3];
+               for (auto xi = 0u; xi < 3; xi++) mPhysics.mPhysicsMap[row3 + xi] = arr[xi + 6];
             }
          }
       }
@@ -1375,9 +1384,9 @@ void Level::parsePhysicsTiles(
    static const float scale = 0.33333333333333333f;
 
    SquareMarcher solid(
-      gridWidth,
-      gridHeight,
-      physicsMap,
+      mPhysics.mGridWidth,
+      mPhysics.mGridHeight,
+      mPhysics.mPhysicsMap,
       std::vector<int32_t>{1},
       basePath / std::filesystem::path("physics_path_solid.csv"),
       scale
@@ -1386,16 +1395,15 @@ void Level::parsePhysicsTiles(
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
 
    SquareMarcher deadly(
-      gridWidth,
-      gridHeight,
-      physicsMap,
+      mPhysics.mGridWidth,
+      mPhysics.mGridHeight,
+      mPhysics.mPhysicsMap,
       std::vector<int32_t>{3},
       basePath / std::filesystem::path("physics_path_deadly.csv"),
       scale
    );
 
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectBehaviorDeadly);
-
 }
 
 
@@ -1612,19 +1620,19 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 }
 
 
-PhysicsTile Level::Physics::getTileForPosition(const b2Vec2 &playerPos) const
+AtmosphereTile Level::Atmosphere::getTileForPosition(const b2Vec2& pos) const
 {
-   auto x = playerPos.x - mMapOffsetX;
-   auto y = playerPos.y - mMapOffsetY;
+   auto x = pos.x - mMapOffsetX;
+   auto y = pos.y - mMapOffsetY;
 
    if (x < 0 || x >= mMapWidth)
    {
-      return PhysicsTileInvalid;
+      return AtmosphereTileInvalid;
    }
 
    if (y < 0 || y >= mMapHeight)
    {
-      return PhysicsTileInvalid;
+      return AtmosphereTileInvalid;
    }
 
   //   std::cout
@@ -1637,7 +1645,7 @@ PhysicsTile Level::Physics::getTileForPosition(const b2Vec2 &playerPos) const
    auto tx = static_cast<uint32_t>(x * PPM / TILE_WIDTH);
    auto ty = static_cast<uint32_t>(y * PPM / TILE_HEIGHT);
 
-   PhysicsTile tile = static_cast<PhysicsTile>(mMap[ty * mMapWidth + tx]);
+   AtmosphereTile tile = static_cast<AtmosphereTile>(mMap[ty * mMapWidth + tx]);
    return tile;
 }
 

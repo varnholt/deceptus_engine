@@ -4,6 +4,8 @@
 #include <sstream>
 
 #include "game/constants.h"
+#include "game/test.h"
+
 
 // to read
 //
@@ -36,6 +38,7 @@ void debugAuthors()
 int main(int /*argc*/, char** /*argv*/)
 {
    debugAuthors();
+   Test test;
    Game* game = new Game();
    game->initialize();
    return game->loop();

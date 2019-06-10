@@ -22,6 +22,8 @@
 #define TILE_WIDTH 24
 #define TILE_HEIGHT 24
 
+#define PHYSICS_TILE_WIDTH 8 // each tile is 8x8 px
+
 #define DIFF_PLAYER_TILE_TO_PHYSICS 15 // 20
 
 #define PLAYER_ANIMATION_CYCLES 8
@@ -152,7 +154,7 @@ enum KeyPressed {
    KeyPressedLook  = 0x80
 };
 
-enum PhysicsTile // 16 cols per row
+enum AtmosphereTile // 16 cols per row
 {
    // PhysicsTileSolidFull = 0,
    // PhysicsTileSolidTop,
@@ -184,17 +186,17 @@ enum PhysicsTile // 16 cols per row
    // PhysicsTileDeadlyCornerBottomLeft,
    // PhysicsTileDeadlyCornerTopLeft,
 
-   PhysicsTileWaterFull = 48,
-   PhysicsTileWaterTop,
-   PhysicsTileWaterBottom,
-   PhysicsTileWaterLeft,
-   PhysicsTileWaterRight,
-   PhysicsTileWaterCornerTopRight,     // not used
-   PhysicsTileWaterCornerBottomRight,  // not used
-   PhysicsTileWaterCornerBottomLeft,   // not used
-   PhysicsTileWaterCornerTopLeft,      // not used
+   AtmosphereTileWaterFull = 48,
+   AtmosphereTileWaterTop,
+   AtmosphereTileWaterBottom,
+   AtmosphereTileWaterLeft,
+   AtmosphereTileWaterRight,
+   AtmosphereTileWaterCornerTopRight,     // not used
+   AtmosphereTileWaterCornerBottomRight,  // not used
+   AtmosphereTileWaterCornerBottomLeft,   // not used
+   AtmosphereTileWaterCornerTopLeft,      // not used
 
-   PhysicsTileInvalid = 1024
+   AtmosphereTileInvalid = 1024
 };
 
 enum ObjectBehavior
