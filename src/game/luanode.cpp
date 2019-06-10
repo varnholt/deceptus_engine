@@ -110,6 +110,33 @@ extern "C" int32_t setGravityScale(lua_State* state)
 }
 
 
+extern "C" int32_t isPhsyicsPathClear(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 4)
+   {
+      // the lua scripts think in pixels; the physics grid has a resolution of 8x8 for each tile.
+      // so that needs to be scaled first.
+      auto x0 = static_cast<int32_t>(lua_tonumber(state, 1) / PHYSICS_TILE_WIDTH);
+      auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PHYSICS_TILE_WIDTH);
+      auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PHYSICS_TILE_WIDTH);
+      auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PHYSICS_TILE_WIDTH);
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      // check map for collision
+      auto collides = Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
+
+      lua_pushboolean(state, !collides);
+   }
+
+   // 1 return value
+   return 1;
+}
+
+
 extern "C" int32_t damage(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -488,6 +515,7 @@ void LuaNode::setupLua()
    lua_register(mState, "die", ::die);
    lua_register(mState, "fireWeapon", ::fireWeapon);
    lua_register(mState, "playSample", ::playSample);
+   lua_register(mState, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(mState, "setGravityScale", ::setGravityScale);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateBulletTexture", ::updateBulletTexture);

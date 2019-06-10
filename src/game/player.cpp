@@ -1829,9 +1829,9 @@ void Player::updateAtmosphere()
    bool wasInwater = isInWater();
 
    b2Vec2 pos = mBody->GetPosition();
-   PhysicsTile tile = Level::getCurrentLevel()->getPhysics().getTileForPosition(pos);
+   AtmosphereTile tile = Level::getCurrentLevel()->getPhysics().getTileForPosition(pos);
 
-   bool inWater = tile >= PhysicsTileWaterFull && tile <= PhysicsTileWaterCornerTopLeft;
+   bool inWater = tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft;
    setInWater(inWater);
 
    mBody->SetGravityScale(inWater ? 0.5f : 1.0f);

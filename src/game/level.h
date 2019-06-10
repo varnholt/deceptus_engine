@@ -47,20 +47,32 @@ class Level : GameNode
 
 public:
 
-   struct Physics
+   struct Atmosphere
    {
-      Physics() = default;
+      Atmosphere() = default;
 
       std::vector<int32_t> mMap;
+
       int32_t mMapOffsetX = 0;
       int32_t mMapOffsetY = 0;
       uint32_t mMapWidth = 0;
       uint32_t mMapHeight = 0;
+
       std::vector<std::vector<sf::Vertex>> mOutlines;
       std::vector<std::vector<b2Vec2>> mChains;
       std::shared_ptr<TileMap> mTileMap;
 
-      PhysicsTile getTileForPosition(const b2Vec2& playerPos) const;
+      AtmosphereTile getTileForPosition(const b2Vec2& playerPos) const;
+   };
+
+
+   struct Physics
+   {
+      uint32_t mGridWidth = 0;
+      uint32_t mGridHeight = 0;
+      uint32_t mGridSize = 0;
+
+      std::vector<int32_t> mPhysicsMap;
    };
 
 
@@ -118,13 +130,15 @@ public:
    std::string getDescriptionFilename() const;
    void setDescriptionFilename(const std::string &descriptionFilename);
 
-   const Physics& getPhysics() const;
+   const Atmosphere& getPhysics() const;
 
    void initializeTextures();
    void initializeAtmosphereShader();
    void updateAtmosphereShader();
    void initializeGammaShader();
    void updateGammaShader();
+
+   bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
 
 
 protected:
@@ -139,7 +153,7 @@ protected:
 
    void addDebugRect(b2Body* body, float x, float y, float w, float h);
 
-   void parsePhysicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
+   void parseAtmosphereLayer(TmxLayer* layer, TmxTileSet* tileSet);
    void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
 
    void parsePhysicsTiles(
@@ -203,6 +217,7 @@ protected:
    std::vector<ConveyorBelt*> mConveyorBelts;
    std::vector<std::shared_ptr<LuaNode>> mEnemies;
 
+   Atmosphere mAtmosphere;
    Physics mPhysics;
 
    sf::Vector2f mStartPosition;

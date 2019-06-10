@@ -15,6 +15,7 @@ mKeyPressed = 0
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mPointsToLeft = false
+mFireDistance = 300
 
 
 -- x: 720..792 (30..33 x 24)
@@ -147,7 +148,7 @@ end
 function updateShootCondition()
 
    if (math.abs(mPosition:getY() - mPlayerPosition:getY()) < 10) then
-      if (math.abs(mPosition:getX() - mPlayerPosition:getX()) < 300) then
+      if (math.abs(mPosition:getX() - mPlayerPosition:getX()) < mFireDistance) then
 
          playerIsLeft = (mPosition:getX() > mPlayerPosition:getX())
 
@@ -160,8 +161,11 @@ function updateShootCondition()
             openFire = true
          end
 
-         if (openFire) then
-            fireWeapon(0, mPosition:getX() + (fireDir * 32), mPosition:getY(), fireDir * 0.05, 0.0);
+         if (isPhsyicsPathClear(mPosition:getX(), mPosition:getY(), mPosition:getX() + fireDir * mFireDistance, mPosition:getY()))
+         then
+            if (openFire) then
+               fireWeapon(0, mPosition:getX() + (fireDir * 32), mPosition:getY(), fireDir * 0.05, 0.0);
+            end
          end
       end
    end

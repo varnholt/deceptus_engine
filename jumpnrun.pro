@@ -89,6 +89,8 @@ INCLUDEPATH += src
 
 
 SOURCES += \
+   src/game/maptools.cpp \
+   src/game/test.cpp \
    src/game/texturepool.cpp \
    src/main.cpp \
     src/game/debugdraw.cpp \
@@ -198,8 +200,10 @@ HEADERS += \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
     src/game/game.h \
+    src/game/maptools.h \
     src/game/player.h \
     src/game/level.h \
+    src/game/test.h \
     src/game/texturepool.h \
     src/tmxparser/tmxanimation.h \
     src/tmxparser/tmxelement.h \
