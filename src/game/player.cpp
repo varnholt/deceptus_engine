@@ -2029,10 +2029,18 @@ void Player::reset()
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isDead() const
 {
-   auto touchesSomethingDeadly = GameContactListener::getInstance()->getDeadlyContacts();
-   auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
-   auto outOfHealth = mExtraTable->mHealth->mHealth <= 0;
-   return touchesSomethingDeadly || tooFast || outOfHealth;
+   const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
+   const auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
+   const auto outOfHealth = mExtraTable->mHealth->mHealth <= 0;
+
+   const auto dead = touchesSomethingDeadly || tooFast || outOfHealth;
+
+//   if (dead)
+//   {
+//      std::cout << "DEAD!" << std::endl;
+//   }
+
+   return dead;
 }
 
 
