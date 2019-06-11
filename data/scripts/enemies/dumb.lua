@@ -32,7 +32,7 @@ function initialize()
    addShapeRect(0.2, 0.07, 0.0, 0.1)
    updateSpriteRect(0, 0, 64, 64)
 
-   addWeapon(100, 0.05) -- interval, radius
+   addWeapon(300, 0.1) -- interval, radius
    updateBulletTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
 
    print("dumb.lua initialized")
@@ -161,10 +161,23 @@ function updateShootCondition()
             openFire = true
          end
 
-         if (isPhsyicsPathClear(mPosition:getX(), mPosition:getY(), mPosition:getX() + fireDir * mFireDistance, mPosition:getY()))
+         if (
+            isPhsyicsPathClear(
+               mPosition:getX(),
+               mPosition:getY(),
+               mPlayerPosition:getX(),
+               mPlayerPosition:getY()
+            )
+         )
          then
             if (openFire) then
-               fireWeapon(0, mPosition:getX() + (fireDir * 32), mPosition:getY(), fireDir * 0.05, 0.0);
+               fireWeapon(
+                  0,
+                  mPosition:getX() + (fireDir * 32),
+                  mPosition:getY(),
+                  fireDir * 0.1,
+                  0.0
+               );
             end
          end
       end
