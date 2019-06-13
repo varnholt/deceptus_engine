@@ -7,6 +7,7 @@
 #include "door.h"
 #include "gamenode.h"
 #include "imagelayer.h"
+#include "laser.h"
 #include "luanode.h"
 #include "portal.h"
 #include "squaremarcher.h"
@@ -210,11 +211,13 @@ protected:
    std::vector<std::shared_ptr<TileMap>> mTileMaps;
    std::vector<std::shared_ptr<TileMap>> mParallaxMaps;
 
-   std::vector<MovingPlatform*> mPlatforms;
-   std::vector<Door*> mDoors;
-   std::vector<Portal*> mPortals;
    std::vector<Bouncer*> mBouncers;
    std::vector<ConveyorBelt*> mConveyorBelts;
+   std::vector<Door*> mDoors;
+   std::vector<Laser*> mLasers;
+   std::vector<MovingPlatform*> mPlatforms;
+   std::vector<Portal*> mPortals;
+
    std::vector<std::shared_ptr<LuaNode>> mEnemies;
 
    Atmosphere mAtmosphere;

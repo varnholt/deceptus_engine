@@ -405,6 +405,10 @@ void Level::loadTmx()
          {
             mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
          }
+         else if (layer->mName == "lasers")
+         {
+            mLasers = Laser::load(layer, tileset, path, mWorld);
+         }
          else // tile map
          {
             std::shared_ptr<TileMap> tileMap = std::make_shared<TileMap>();
@@ -412,8 +416,7 @@ void Level::loadTmx()
 
             auto pushTileMap = true;
 
-            // todo: refactor all this to be called 'atmosphere'
-            if (layer->mName == "physics")
+            if (layer->mName == "atmosphere")
             {
                mAtmosphere.mTileMap = tileMap;
                parseAtmosphereLayer(layer, tileset);
@@ -862,6 +865,14 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
          if (portal->getZ() == z)
          {
             portal->draw(target);
+         }
+      }
+
+      for (auto& laser : mLasers)
+      {
+         if (laser->getZ() == z)
+         {
+            laser->draw(target);
          }
       }
 
