@@ -89,6 +89,7 @@ INCLUDEPATH += src
 
 
 SOURCES += \
+   src/game/laser.cpp \
    src/game/maptools.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
@@ -200,6 +201,7 @@ HEADERS += \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
     src/game/game.h \
+    src/game/laser.h \
     src/game/maptools.h \
     src/game/player.h \
     src/game/level.h \
