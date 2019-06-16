@@ -20,23 +20,22 @@
 //-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& window)
 {
-   for (const auto& sprite : mSprites)
-   {
-      window.draw(sprite);
-   }
+   mSprite.setTextureRect(
+      sf::IntRect(
+         mTu * TILE_WIDTH,
+         mTv * TILE_HEIGHT,
+         TILE_WIDTH,
+         TILE_HEIGHT
+      )
+   );
+
+   window.draw(mSprite);
 }
 
 
 //-----------------------------------------------------------------------------
 void Laser::update(float /*dt*/)
 {
-}
-
-
-//-----------------------------------------------------------------------------
-void Laser::addSprite(const sf::Sprite& sprite)
-{
-   mSprites.push_back(sprite);
 }
 
 
@@ -82,8 +81,10 @@ std::vector<Laser *> Laser::load(
          {
             auto laser = new Laser();
             lasers.push_back(laser);
+
             laser->mTilePosition.x = static_cast<float>(i);
             laser->mTilePosition.y = static_cast<float>(j);
+
             laser->mTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
 
             if (layer->mProperties != nullptr)
@@ -91,20 +92,11 @@ std::vector<Laser *> Laser::load(
                laser->setZ(layer->mProperties->mMap["z"]->mValueInt);
             }
 
-            const auto tu = (tileNumber - firstId) % (laser->mTexture.getSize().x / tilesize.x);
-            const auto tv = (tileNumber - firstId) / (laser->mTexture.getSize().x / tilesize.x);
+            laser->mTu = (tileNumber - firstId) % (laser->mTexture.getSize().x / tilesize.x);
+            laser->mTv = (tileNumber - firstId) / (laser->mTexture.getSize().x / tilesize.x);
 
             sf::Sprite sprite;
             sprite.setTexture(laser->mTexture);
-            sprite.setTextureRect(
-               sf::IntRect(
-                  tu * TILE_WIDTH,
-                  tv * TILE_HEIGHT,
-                  TILE_WIDTH,
-                  TILE_HEIGHT
-               )
-            );
-
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * TILE_WIDTH),
@@ -112,7 +104,7 @@ std::vector<Laser *> Laser::load(
                )
             );
 
-            laser->addSprite(sprite);
+            laser->mSprite = sprite;
          }
       }
    }
