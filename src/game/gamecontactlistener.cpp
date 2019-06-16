@@ -389,6 +389,7 @@ void GameContactListener::reset()
    mNumFootContacts = 0;
    mNumPlayerContacts = 0;
    mNumDeadlyContacts = 0;
+   mNumMovingPlatformContacts = 0;
 }
 
 

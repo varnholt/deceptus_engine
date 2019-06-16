@@ -78,6 +78,10 @@ function updateSprite(dt)
       mSpriteCol = col
       mSpriteRow = row
    end
+
+   if (mDone) then
+      die()
+   end
 end
 
 
@@ -102,8 +106,6 @@ function timeout(id)
         damageVal = mDamage * (mDamageDistance - distanceToPlayerLength) / mDamageDistance;
         damage(0, damageVal, mExplosionStrength * distanceToPlayer:getX(), -mExplosionStrength * distanceToPlayer:getY())
       end
-
-      die()
    end
 end
 

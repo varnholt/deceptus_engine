@@ -76,6 +76,7 @@ private:
    sf::Vector2f mStoredPosition;
 
    int32_t mFps;
+   uint32_t mLevelIndex = 0;
    bool mScreenshot = false;
    bool mDrawPhysics = false;
    sf::Vector2u mRenderTextureOffset;

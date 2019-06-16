@@ -21,6 +21,7 @@ struct lua_State;
 struct LuaNode : public GameNode
 {
    LuaNode(const std::string &filename);
+   ~LuaNode();
 
    struct FilterDefaults{
       uint16_t mCategoryBits = 0x0001;
@@ -46,7 +47,7 @@ struct LuaNode : public GameNode
    void draw(sf::RenderTarget& window);
 
    void luaInitialize();
-   void luaAct(float dt);
+   void luaUpdate(float dt);
    void luaMovedTo();
    void luaPlayerMovedTo();
    void luaDie();
@@ -84,9 +85,9 @@ struct LuaNode : public GameNode
    sf::Vector2f mPosition;
    std::vector<sf::Vector2f> mPatrolPath;
 
-   std::shared_ptr<b2Body> mBody;
-   std::shared_ptr<b2BodyDef> mBodyDef;
-   std::vector<std::shared_ptr<b2Shape>> mShapes;
+   b2Body* mBody = nullptr;
+   b2BodyDef* mBodyDef = nullptr;
+   std::vector<b2Shape*> mShapes;
    std::vector<std::unique_ptr<Weapon>> mWeapons;
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> mProperties;
