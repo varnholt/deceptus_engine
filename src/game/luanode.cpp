@@ -5,6 +5,7 @@
 #include "lua/lua.hpp"
 
 // stl
+#include <iostream>
 #include <sstream>
 #include <thread>
 
@@ -85,6 +86,12 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
       auto h = static_cast<int32_t>(lua_tointeger(state, 4));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->updateSpriteRect(x, y, w, h);
    }
 
@@ -103,6 +110,12 @@ extern "C" int32_t setGravityScale(lua_State* state)
       auto scale = static_cast<float>(lua_tonumber(state, 1));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->setGravityScale(scale);
    }
 
@@ -123,8 +136,6 @@ extern "C" int32_t isPhsyicsPathClear(lua_State* state)
       auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PHYSICS_TILE_WIDTH);
       auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PHYSICS_TILE_WIDTH);
       auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PHYSICS_TILE_WIDTH);
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
       // check map for collision
       auto collides = Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
@@ -150,6 +161,12 @@ extern "C" int32_t damage(lua_State* state)
       auto dy = static_cast<float>(lua_tonumber(state, 4));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->damage(playerId, damage, dx, dy);
    }
 
@@ -169,6 +186,12 @@ extern "C" int32_t boom(lua_State* state)
       auto intensity = static_cast<float>(lua_tonumber(state, 3));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->boom(x, y, intensity);
    }
 
@@ -187,6 +210,12 @@ extern "C" int32_t addShapeCircle(lua_State* state)
       auto y = static_cast<float>(lua_tonumber(state, 3));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->addShapeCircle(r, x, y);
    }
 
@@ -206,6 +235,12 @@ extern "C" int32_t addShapeRect(lua_State* state)
       auto y = static_cast<float>(lua_tonumber(state, 4));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->addShapeRect(width, height, x, y);
    }
 
@@ -231,6 +266,12 @@ extern "C" int32_t addShapePoly(lua_State* state)
       }
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->addShapePoly(poly, size);
    }
 
@@ -274,6 +315,12 @@ extern "C" int32_t addWeapon(lua_State* state)
    }
 
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+   if (!node)
+   {
+      return 0;
+   }
+
    node->addWeapon(std::move(shape), fireInterval);
 
    return 0;
@@ -295,6 +342,12 @@ extern "C" int32_t fireWeapon(lua_State* state)
       auto dirY = static_cast<float>(lua_tonumber(state, 5));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->fireWeapon(index, {posX, posY}, {dirX, dirY});
    }
 
@@ -335,6 +388,12 @@ extern "C" int32_t updateBulletTexture(lua_State* state)
    if (valid)
    {
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
       node->mWeapons[index]->setTexture(path, rect);
    }
 
@@ -353,6 +412,11 @@ extern "C" int32_t timer(lua_State* state)
       auto delay = static_cast<int32_t>(lua_tointeger(state, 1));
       auto timerId = static_cast<int32_t>(lua_tointeger(state, 2));
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
 
       Timer::add(
          std::chrono::milliseconds(delay),
@@ -466,6 +530,12 @@ extern "C" int32_t requestMap(lua_State* state)
 extern "C" int32_t die(lua_State* state)
 {
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+   if (!node)
+   {
+      return 0;
+   }
+
    node->luaDie();
    return 0;
 }
@@ -489,6 +559,11 @@ void LuaNode::setupTexture()
 LuaNode::LuaNode(const std::string &filename)
  : GameNode(nullptr),
    mScriptName(filename)
+{
+}
+
+
+LuaNode::~LuaNode()
 {
 }
 
@@ -689,9 +764,8 @@ void LuaNode::luaSendPatrolPath()
 
 void LuaNode::luaDie()
 {
-   Level::getCurrentLevel()->getWorld()->DestroyBody(
-      mBody.get()
-   );
+   Level::getCurrentLevel()->getWorld()->DestroyBody(mBody);
+   mBody = nullptr;
 }
 
 
@@ -730,21 +804,14 @@ void LuaNode::createBody()
    auto staticBody = getPropertyBool("staticBody");
    auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
 
-   mBodyDef = std::make_shared<b2BodyDef>();
+   mBodyDef = new b2BodyDef();
    mBodyDef->type = staticBody ? b2_staticBody : b2_dynamicBody;
    mBodyDef->position.Set(
       mStartPosition.x * MPP,
       mStartPosition.y * MPP
    );
 
-   mBody = std::shared_ptr<b2Body>(
-      Level::getCurrentLevel()->getWorld()->CreateBody(
-         mBodyDef.get()),
-         [](b2Body* body) {
-            Level::getCurrentLevel()->getWorld()->DestroyBody(body);
-         }
-      );
-
+   mBody = Level::getCurrentLevel()->getWorld()->CreateBody(mBodyDef);
    mBody->SetFixedRotation(true);
 
    for (auto shape : mShapes)
@@ -753,7 +820,7 @@ void LuaNode::createBody()
       fd.density = 1.f;
       fd.friction = 0.0f;
       fd.restitution = 0.0f;
-      fd.shape = shape.get();
+      fd.shape = shape;
 
       // apply default filter
       // // http://www.iforce2d.net/b2dtut/collision-filtering
@@ -786,7 +853,7 @@ void LuaNode::createBody()
 
 void LuaNode::addShapeCircle(float radius, float x, float y)
 {
-   std::shared_ptr<b2CircleShape> shape = std::make_shared<b2CircleShape>();
+   b2CircleShape* shape = new b2CircleShape();
    shape->m_p.Set(x, y);
    shape->m_radius = radius;
    mShapes.push_back(shape);
@@ -795,7 +862,7 @@ void LuaNode::addShapeCircle(float radius, float x, float y)
 
 void LuaNode::addShapeRect(float width, float height, float x, float y)
 {
-   std::shared_ptr<b2PolygonShape> shape = std::make_shared<b2PolygonShape>();
+   b2PolygonShape* shape = new b2PolygonShape();
    shape->SetAsBox(width, height, b2Vec2(x, y), 0.0f);
    mShapes.push_back(shape);
 }
@@ -803,7 +870,7 @@ void LuaNode::addShapeRect(float width, float height, float x, float y)
 
 void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 {
-   std::shared_ptr<b2PolygonShape> shape = std::make_shared<b2PolygonShape>();
+   b2PolygonShape* shape = new b2PolygonShape();
    shape->Set(points, size);
    mShapes.push_back(shape);
 }
@@ -834,7 +901,7 @@ void LuaNode::luaInitialize()
 }
 
 
-void LuaNode::luaAct(float dt)
+void LuaNode::luaUpdate(float dt)
 {
    lua_getglobal(mState, FUNCTION_UPDATE);
    lua_pushnumber(mState, dt);
@@ -862,6 +929,11 @@ void LuaNode::stopScript()
 
 void LuaNode::updateVelocity()
 {
+   if (!mBody)
+   {
+      return;
+   }
+
    auto velocityMax = 0.0;
    auto acceleration = 0.0;
 
@@ -876,7 +948,6 @@ void LuaNode::updateVelocity()
    {
       acceleration = *std::get_if<double>(&(accIt->second));
    }
-
 
    auto desiredVel = 0.0f;
    auto velocity = mBody->GetLinearVelocity();
@@ -905,6 +976,11 @@ void LuaNode::updateVelocity()
 
 void LuaNode::updatePosition()
 {
+   if (!mBody)
+   {
+      return;
+   }
+
    auto x = mBody->GetPosition().x * PPM;
    auto y = mBody->GetPosition().y * PPM;
 

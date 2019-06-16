@@ -1,5 +1,8 @@
 #include "gamenode.h"
 
+#include <iostream>
+
+
 GameNode::GameNode(GameNode *parent)
  : mParent(parent)
 {

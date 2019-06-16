@@ -18,6 +18,7 @@ public:
    static LuaInterface* instance();
 
    std::shared_ptr<LuaNode> addObject(const std::string &filename);
+   void removeObject(const std::shared_ptr<LuaNode>& node);
 
    void initialize();
 
@@ -27,6 +28,8 @@ public:
 
    void updateKeysPressed(std::shared_ptr<LuaNode> obj, int keys);
 
+   void reset();
+
    std::shared_ptr<LuaNode> getObject(lua_State*);
 
 
@@ -35,7 +38,6 @@ private:
    explicit LuaInterface();
 
    static LuaInterface* sInstance;
-
    std::vector<std::shared_ptr<LuaNode>> mObjectList;
 };
 

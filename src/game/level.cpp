@@ -139,6 +139,7 @@ void Level::initializeTextures()
 }
 
 
+//-----------------------------------------------------------------------------
 Level::Level()
   : GameNode(nullptr),
     mWorld(nullptr)
@@ -146,33 +147,24 @@ Level::Level()
    // init world for this level
    b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance().mGravity);
 
+   LuaInterface::instance()->reset();
+
    mWorld = std::make_shared<b2World>(gravity);
+
+   GameContactListener::getInstance()->reset();
    mWorld->SetContactListener(GameContactListener::getInstance());
 
    sCurrentLevel = this;
 
    mRaycastLight = std::make_shared<RaycastLight>();
    mStaticLight = std::make_shared<StaticLight>();
-
-   // threaded approach for box2d updates
-//   std::thread box2d(
-//      [=]()
-//      {
-//         using namespace std::chrono_literals;
-//         while (true)
-//         {
-//            mWorld->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
-//            std::this_thread::sleep_for(16ms);
-//         }
-//      }
-//   );
-//   box2d.detach();
 }
 
 
 //-----------------------------------------------------------------------------
 Level::~Level()
 {
+   std::cout << "deleting current level" << std::endl;
 }
 
 

@@ -31,22 +31,33 @@ LuaInterface::LuaInterface()
 std::shared_ptr<LuaNode> LuaInterface::addObject(const std::string &filename)
 {
    std::shared_ptr<LuaNode> object = std::make_shared<LuaNode>(filename);
-
    mObjectList.push_back(object);
-
    return object;
+}
+
+
+void LuaInterface::removeObject(const std::shared_ptr<LuaNode>& node)
+{
+   mObjectList.erase(std::remove(mObjectList.begin(), mObjectList.end(), node), mObjectList.end());
 }
 
 
 void LuaInterface::update(float dt)
 {
-   for (auto& object : mObjectList)
+   for (auto it = mObjectList.begin(); it != mObjectList.end();)
    {
+      auto object = *it;
+
       object->luaMovedTo();
       object->luaPlayerMovedTo();
-      object->luaAct(dt);
+      object->luaUpdate(dt);
       object->updateVelocity();
       object->updatePosition();
+
+      if (!object->mBody)
+         it = mObjectList.erase(it);
+      else
+         ++it;
    }
 }
 
@@ -81,6 +92,12 @@ void LuaInterface::updateKeysPressed(std::shared_ptr<LuaNode> obj, int keys)
 {
    // printf("keyPressed: obj: %d, keys: %d\n", obj->mId, keys);
    obj->mKeysPressed = keys;
+}
+
+
+void LuaInterface::reset()
+{
+   mObjectList.clear();
 }
 
 

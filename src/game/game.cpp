@@ -217,9 +217,9 @@ void Game::loadLevel()
             // pick a level
             auto levels = Levels::getInstance();
             levels.deserializeFromFile();
-            auto levelOne = levels.mLevels.at(0);
+            auto levelOne = levels.mLevels.at(mLevelIndex);
 
-            auto previousLevel = mLevel;
+            mLevel.reset();
 
             // load it
             mLevel = std::make_shared<Level>();
@@ -230,8 +230,6 @@ void Game::loadLevel()
             // put the player in there
             mPlayer->setWorld(mLevel->getWorld());
             mPlayer->initializeLevel();
-
-            previousLevel.reset();
 
             mLevelLoadingFinished = true;
 
