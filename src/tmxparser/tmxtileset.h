@@ -3,6 +3,7 @@
 // base
 #include "tmxelement.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <map>
 
@@ -18,12 +19,12 @@ struct TmxTileSet : TmxElement
    void parseTileSet(tinyxml2::XMLElement* element);
 
    std::string mSource;
-   int mFirstGid = 0;
-   int mTileWidth = 0;
-   int mTileHeight = 0;
-   int mTileCount = 0;
-   int mColumns = 0;
-   int mRows = 0;
+   int32_t mFirstGid = 0;
+   int32_t mTileWidth = 0;
+   int32_t mTileHeight = 0;
+   int32_t mTileCount = 0;
+   int32_t mColumns = 0;
+   int32_t mRows = 0;
 
    TmxImage* mImage = nullptr;
    std::map<int, TmxTile*> mTileMap;

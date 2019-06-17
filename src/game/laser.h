@@ -19,7 +19,7 @@ public:
 
    struct Signal
    {
-      int32_t mDurationMs = 0;
+      uint32_t mDurationMs = 0u;
       bool mOn = false;
    };
 
@@ -43,15 +43,20 @@ protected:
 
    std::vector<Signal> mSignalPlot;
 
-   sf::Vector2u mTileSize;
-   sf::Texture mTexture;
    int32_t mTu = 0;
    int32_t mTv = 0;
 
+   std::shared_ptr<sf::Texture> mTexture;
    sf::Sprite mSprite;
 
    sf::Vector2f mTilePosition;
 
-   int mZ = 0;
+   int32_t mZ = 0;
+
+   bool mOn = false;
+   int32_t mTileIndex = 0;
+   float mTileAnimation = 0.0f;
+   uint32_t mSignalIndex = 0;
+   uint32_t mTime = 0u;
 };
 

@@ -1111,6 +1111,11 @@ void Level::update(const sf::Time& dt)
       portal->update(dt.asSeconds());
    }
 
+   for (auto& laser : mLasers)
+   {
+      laser->update(dt.asSeconds());
+   }
+
    LuaInterface::instance()->update(dt.asSeconds());
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);

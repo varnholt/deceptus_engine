@@ -5,6 +5,7 @@
 #include "player.h"
 #include "fixturenode.h"
 #include "sfmlmath.h"
+#include "texturepool.h"
 
 #include "tmxparser/tmximage.h"
 #include "tmxparser/tmxlayer.h"
@@ -22,7 +23,7 @@ void Laser::draw(sf::RenderTarget& window)
 {
    mSprite.setTextureRect(
       sf::IntRect(
-         mTu * TILE_WIDTH,
+         mTu * TILE_WIDTH + mTileIndex * TILE_WIDTH,
          mTv * TILE_HEIGHT,
          TILE_WIDTH,
          TILE_HEIGHT
@@ -34,8 +35,44 @@ void Laser::draw(sf::RenderTarget& window)
 
 
 //-----------------------------------------------------------------------------
-void Laser::update(float /*dt*/)
+void Laser::update(float dt)
 {
+   mTime += static_cast<uint32_t>(dt * 1000.0f);
+
+   const auto& sig = mSignalPlot.at(mSignalIndex);
+
+   // elapsed time exceeded signal duration
+   if (mTime > sig.mDurationMs)
+   {
+      mOn = !mOn;
+      mTime = 0;
+
+      // reset signal index after 1 loop
+      mSignalIndex++;
+      if (mSignalIndex >= mSignalPlot.size())
+      {
+         mSignalIndex = 0;
+      }
+   }
+
+   if ( (mOn && mTileIndex > 0) || (!mOn && mTileIndex < 6) )
+   {
+      // off sprite is rightmost, on sprite is leftmost
+      auto dir = mOn ? -1 : 1;
+
+      mTileAnimation += (dt * 10.0f * dir);
+      mTileIndex = static_cast<int32_t>(mTileAnimation);
+
+      // clamp tile index
+      if (mTileIndex < 0)
+      {
+         mTileIndex = 0;
+      }
+      if (mTileIndex > 6)
+      {
+         mTileIndex = 6;
+      }
+   }
 }
 
 
@@ -84,19 +121,17 @@ std::vector<Laser *> Laser::load(
 
             laser->mTilePosition.x = static_cast<float>(i);
             laser->mTilePosition.y = static_cast<float>(j);
-
-            laser->mTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
+            laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->mImage->mSource);
+            laser->mTu = (tileNumber - firstId) % (laser->mTexture->getSize().x / tilesize.x);
+            laser->mTv = (tileNumber - firstId) / (laser->mTexture->getSize().x / tilesize.x);
 
             if (layer->mProperties != nullptr)
             {
                laser->setZ(layer->mProperties->mMap["z"]->mValueInt);
             }
 
-            laser->mTu = (tileNumber - firstId) % (laser->mTexture.getSize().x / tilesize.x);
-            laser->mTv = (tileNumber - firstId) / (laser->mTexture.getSize().x / tilesize.x);
-
             sf::Sprite sprite;
-            sprite.setTexture(laser->mTexture);
+            sprite.setTexture(*laser->mTexture);
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * TILE_WIDTH),
@@ -105,6 +140,7 @@ std::vector<Laser *> Laser::load(
             );
 
             laser->mSprite = sprite;
+            laser->mSignalPlot = { {3000, true}, {3000, false} };
          }
       }
    }
