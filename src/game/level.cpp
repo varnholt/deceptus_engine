@@ -1113,7 +1113,6 @@ void Level::update(const sf::Time& dt)
 
    LuaInterface::instance()->update(dt.asSeconds());
 
-   //mRaycastLight->mLights[0]-> = Player::getPlayer(0)->getBodyPosition();
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
 }
