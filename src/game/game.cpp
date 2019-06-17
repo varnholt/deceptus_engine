@@ -541,9 +541,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::L:
       {
-         mStoredPositionValid = true;
-         mStoredPosition = mPlayer->getPixelPosition();
-         loadLevel();
+         if (mLevelLoadingFinished)
+         {
+            mStoredPositionValid = true;
+            mStoredPosition = mPlayer->getPixelPosition();
+            loadLevel();
+         }
          break;
       }
       case sf::Keyboard::P:
