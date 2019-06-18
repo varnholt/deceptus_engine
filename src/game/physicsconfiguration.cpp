@@ -30,7 +30,7 @@ std::string PhysicsConfiguration::serialize()
             {"player_speed_max_run",                 mPlayerSpeedMaxRun},
             {"player_speed_max_water",               mPlayerSpeedMaxWater},
             {"player_friction",                      mPlayerFriction},
-            {"player_jumps_trength",                 mPlayerJumpStrength},
+            {"player_jump_strength",                 mPlayerJumpStrength},
             {"player_acceleration_ground",           mPlayerAccelerationGround},
             {"player_deceleration_ground",           mPlayerDecelerationGround},
             {"player_acceleration_air",              mPlayerAccelerationAir},
@@ -64,7 +64,7 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    mPlayerSpeedMaxWater          = config["PhysicsConfiguration"]["player_speed_max_water"].get<float>();
    mPlayerSpeedMaxAir            = config["PhysicsConfiguration"]["player_speed_max_air"].get<float>();
    mPlayerFriction               = config["PhysicsConfiguration"]["player_friction"].get<float>();
-   mPlayerJumpStrength           = config["PhysicsConfiguration"]["player_jumps_trength"].get<float>();
+   mPlayerJumpStrength           = config["PhysicsConfiguration"]["player_jump_strength"].get<float>();
    mPlayerAccelerationGround     = config["PhysicsConfiguration"]["player_acceleration_ground"].get<float>();
    mPlayerAccelerationAir        = config["PhysicsConfiguration"]["player_acceleration_air"].get<float>();
    mPlayerDecelerationGround     = config["PhysicsConfiguration"]["player_deceleration_ground"].get<float>();
