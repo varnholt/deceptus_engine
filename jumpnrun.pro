@@ -89,6 +89,7 @@ INCLUDEPATH += src
 
 
 SOURCES += \
+   src/game/camerasystem.cpp \
    src/game/laser.cpp \
    src/game/maptools.cpp \
    src/game/test.cpp \
@@ -197,6 +198,7 @@ SOURCES += \
 # add box2d
 
 HEADERS += \
+    src/game/camerasystem.h \
     src/game/constants.h \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
