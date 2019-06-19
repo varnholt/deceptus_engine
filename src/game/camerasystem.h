@@ -8,18 +8,25 @@ class CameraSystem
 
       CameraSystem() = default;
 
-      void update();
+      void update(float viewWidth, float viewHeight);
+
+      float getX() const;
+      float getY() const;
+
 
 
    private:
 
-      int32_t mX = 0;
-      int32_t mY = 0;
+      float mX = 0.0f;
+      float mY = 0.0f;
 
-      int32_t mFocusZoneX0 = 0;
-      int32_t mFocusZoneX1 = 0;
+      float mFocusZoneX0 = 0.0f;
+      float mFocusZoneX1 = 0.0f;
 
-      int32_t mPanicLineY0 = 0;
-      int32_t mPanicLineY1 = 0;
+      float mPanicLineY0 = 0.0f;
+      float mPanicLineY1 = 0.0f;
+
+      float mViewWidth = 0.0f;
+      float mViewHeight = 0.0f;
 };
 
