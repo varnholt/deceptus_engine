@@ -1893,6 +1893,12 @@ void Player::setFriction(float friction)
 //----------------------------------------------------------------------------------------------------------------------
 Player *Player::getPlayer(int id)
 {
+   // will we ever have multiplayer? hmmm :)
+   if (sPlayerList.size() == 1)
+   {
+      return sPlayerList[0];
+   }
+
    Player* p = nullptr;
    std::vector<Player*>::iterator it =
       std::find_if(
