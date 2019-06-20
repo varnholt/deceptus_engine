@@ -290,3 +290,41 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    }
 }
 
+
+void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
+{
+   auto& cameraSystem = CameraSystem::getCameraSystem();
+
+   sf::Vertex f0[2] =
+   {
+      sf::Vertex{sf::Vector2f{cameraSystem.getFocusZoneX0(), 0.0f}, sf::Color{255, 0, 0, 100}},
+      sf::Vertex{sf::Vector2f{cameraSystem.getFocusZoneX0(), static_cast<float>(target.getSize().y)}, sf::Color{255, 0, 0, 100}}
+   };
+
+   target.draw(f0, 2, sf::Lines);
+
+   sf::Vertex f1[2] =
+   {
+      sf::Vertex{sf::Vector2f{cameraSystem.getFocusZoneX1(), 0.0f}, sf::Color{255, 0, 0, 100}},
+      sf::Vertex{sf::Vector2f{cameraSystem.getFocusZoneX1(), static_cast<float>(target.getSize().y)}, sf::Color{255, 0, 0, 100}}
+   };
+
+   target.draw(f1, 2, sf::Lines);
+
+   sf::Vertex p0[2] =
+   {
+      sf::Vertex{sf::Vector2f{0.0f, cameraSystem.getPanicLineY0()}, sf::Color{0, 50, 255, 100}},
+      sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), cameraSystem.getPanicLineY0()}, sf::Color{0, 50, 255, 100}}
+   };
+
+   target.draw(p0, 2, sf::Lines);
+
+   sf::Vertex p1[2] =
+   {
+      sf::Vertex{sf::Vector2f{0.0f, cameraSystem.getPanicLineY1()}, sf::Color{0, 50, 255, 100}},
+      sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), cameraSystem.getPanicLineY1()}, sf::Color{0, 50, 255, 100}}
+   };
+
+   target.draw(p1, 2, sf::Lines);
+}
+

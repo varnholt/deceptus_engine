@@ -6,16 +6,24 @@ class CameraSystem
 {
    public:
 
-      CameraSystem() = default;
-
       void update(float viewWidth, float viewHeight);
 
       float getX() const;
       float getY() const;
 
+      float getFocusZoneX0() const;
+      float getFocusZoneX1() const;
+
+      float getPanicLineY0() const;
+      float getPanicLineY1() const;
+
+
+      static CameraSystem& getCameraSystem();
 
 
    private:
+
+      CameraSystem() = default;
 
       float mX = 0.0f;
       float mY = 0.0f;
@@ -28,5 +36,7 @@ class CameraSystem
 
       float mViewWidth = 0.0f;
       float mViewHeight = 0.0f;
+
+      static CameraSystem sInstance;
 };
 
