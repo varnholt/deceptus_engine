@@ -158,8 +158,6 @@ Level::Level()
 
    mRaycastLight = std::make_shared<RaycastLight>();
    mStaticLight = std::make_shared<StaticLight>();
-
-   mCameraSystem = std::make_unique<CameraSystem>();
 }
 
 
@@ -745,10 +743,11 @@ void Level::createViews()
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
-   mCameraSystem->update(mViewWidth, mViewHeight);
+   auto& cameraSystem = CameraSystem::getCameraSystem();
+   cameraSystem.update(mViewWidth, mViewHeight);
 
-   auto levelViewX = mCameraSystem->getX() + mLookVector.x;
-   auto levelViewY = mCameraSystem->getY() + mLookVector.y;
+   auto levelViewX = cameraSystem.getX() + mLookVector.x;
+   auto levelViewY = cameraSystem.getY() + mLookVector.y;
 
    /*
    if (levelViewX < 0)
@@ -783,8 +782,8 @@ void Level::updateViews()
      sf::FloatRect(
         levelViewX,
         levelViewY,
-        mViewWidth * 4.0f,
-        mViewHeight * 4.0f
+        mViewWidth * 5.0f,
+        mViewHeight * 5.0f
       )
    );
 }
@@ -1023,7 +1022,7 @@ void Level::draw(
 
    if (screenshot)
    {
-       takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
+      takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
    }
 
    sf::Sprite sprite(mLevelBackgroundRenderTexture->getTexture());
@@ -1068,7 +1067,10 @@ void Level::draw(
    updateGammaShader();
    window->draw(levelTextureSprite, &mGammaShader);
 
-   // drawMap(*window.get());
+   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
+   {
+      drawMap(*window.get());
+   }
 }
 
 

@@ -45,44 +45,102 @@
 */
 
 
+CameraSystem CameraSystem::sInstance;
+
+
 void CameraSystem::update(float viewWidth, float viewHeight)
 {
    mViewWidth = viewWidth;
    mViewHeight = viewHeight;
 
-   const auto playerX = Player::getPlayer(0)->getPixelPosition().x;
-   const auto playerY = Player::getPlayer(0)->getPixelPosition().y;
+   auto player = Player::getPlayer(0);
+
+   const auto playerX = player->getPixelPosition().x;
+   const auto playerY = player->getPixelPosition().y;
 
    const auto dx = (playerX - mX) / 32.0f;
    const auto dy = (playerY - mY) / 16.0f;
 
-   const auto fRange = mViewWidth / 6.0f;
-   const auto fCenter = (mViewWidth / 2.0f);
-   [[maybe_unused]] const auto f0 = fCenter - fRange;
-   [[maybe_unused]] const auto f1 = fCenter + fRange;
+   const auto fCenter = mViewWidth / 2.0f;
+   const auto fRange  = mViewWidth / 6.0f;
+
+   mFocusZoneX0 = fCenter - fRange;
+   mFocusZoneX1 = fCenter + fRange;
+
+   // shift focus zone by player orientation
+   //
+   // if (player->isPointingLeft())
+   // {
+   //    mFocusZoneX0 += fRange * 0.75f;
+   //    mFocusZoneX1 += fRange * 0.75f;
+   // }
+   // else
+   // {
+   //    mFocusZoneX0 -= fRange * 0.75f;
+   //    mFocusZoneX1 -= fRange * 0.75f;
+   // }
+
+   const auto pRange  = mViewHeight / 2.5f;
+   const auto pCenter = mViewHeight / 2.0f;
+
+   mPanicLineY0 = pCenter - pRange;
+   mPanicLineY1 = pCenter + pRange;
 
    // test if out of bounds
-   // const auto tx = mX + dx - fCenter;
-   // if (tx < f0 || tx > f1)
-   // {
-   // }
-   //
-   // std::cout << "f0: " << f0 << " f1: " << f1 << " tx: " << tx << std::endl;
+   const auto test = (mX + dx) - ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
 
-   mX += dx;
+   const auto f0 = mX - mFocusZoneX1;
+   const auto f1 = mX - mFocusZoneX0;
+
+   // if (test < f0 || test > f1)
+   {
+      mX += dx;
+   }
+
+   // std::cout << "test: " << test << " f0: " << f0 << " f1: " << f1 << std::endl;
+
    mY += dy;
 }
 
 
 float CameraSystem::getX() const
 {
-   return mX - (mViewWidth / 2.0f);
+   // camera should be in the center of the focus zone
+   return mX - ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
 }
 
 
 float CameraSystem::getY() const
 {
    return mY - (mViewHeight / 1.5f);
+}
+
+
+float CameraSystem::getFocusZoneX0() const
+{
+   return mFocusZoneX0;
+}
+
+
+float CameraSystem::getFocusZoneX1() const
+{
+   return mFocusZoneX1;
+}
+
+
+CameraSystem& CameraSystem::getCameraSystem()
+{
+   return sInstance;
+}
+
+float CameraSystem::getPanicLineY0() const
+{
+   return mPanicLineY0;
+}
+
+float CameraSystem::getPanicLineY1() const
+{
+   return mPanicLineY1;
 }
 
 

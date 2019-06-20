@@ -326,6 +326,7 @@ void Game::draw()
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
      mInfoLayer->drawDebugInfo(*mWindowRenderTexture.get());
+     DebugDraw::debugCameraSystem(*mWindowRenderTexture.get());
    }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))

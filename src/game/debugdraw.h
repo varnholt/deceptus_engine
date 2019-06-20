@@ -27,5 +27,6 @@ class DebugDraw
       static void DrawTransform(sf::RenderTarget& target, const b2Transform& xf);
 
       static void debugBodies(sf::RenderTarget& target, Level* level);
+      static void debugCameraSystem(sf::RenderTarget& target);
 };
 #endif //SFMLDEBUGDRAW_H

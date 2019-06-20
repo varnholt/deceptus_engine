@@ -193,7 +193,6 @@ protected:
    std::shared_ptr<sf::View> mLevelView;
    std::shared_ptr<sf::View> mParallaxView[3];
    std::shared_ptr<sf::View> mMapView;
-   std::unique_ptr<CameraSystem> mCameraSystem;
 
    std::map<std::string, int32_t> mScreenshotCounters;
    float mParallaxFactor[3] = {0.9f, 0.85f, 0.8f};
