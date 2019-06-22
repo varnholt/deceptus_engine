@@ -87,12 +87,12 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    mPanicLineY1 = pCenter + pRange;
 
    // test if out of bounds
-   const auto test = (mX + dx) - ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
+   const auto test = playerX - ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
 
    const auto f0 = mX - mFocusZoneX1;
    const auto f1 = mX - mFocusZoneX0;
 
-   // if (test < f0 || test > f1)
+   if (test < f0 || test > f1)
    {
       mX += dx;
    }
