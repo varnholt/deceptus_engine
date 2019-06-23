@@ -67,18 +67,18 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    mFocusZoneX0 = fCenter - fRange;
    mFocusZoneX1 = fCenter + fRange;
 
-   // shift focus zone by player orientation
-   //
-   // if (player->isPointingLeft())
-   // {
-   //    mFocusZoneX0 += fRange * 0.75f;
-   //    mFocusZoneX1 += fRange * 0.75f;
-   // }
-   // else
-   // {
-   //    mFocusZoneX0 -= fRange * 0.75f;
-   //    mFocusZoneX1 -= fRange * 0.75f;
-   // }
+   // shift focus zone based on player orientation
+   const auto targetOffset = player->isPointingLeft() ? (fRange * 0.75f) : (-fRange * 0.75f);
+   const auto fcd = (targetOffset - mFocusOffset) / 32.0f;
+   if (fabs(mFocusOffset) < fabs(fRange * 0.75f))
+   {
+      mFocusOffset += fcd;
+   }
+   mFocusZoneX0 += mFocusOffset;
+   mFocusZoneX1 += mFocusOffset;
+   // std::cout << fcd << std::endl;
+
+   mFocusZoneCenter = ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
 
    const auto pRange  = mViewHeight / 2.5f;
    const auto pCenter = mViewHeight / 2.0f;
@@ -87,17 +87,31 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    mPanicLineY1 = pCenter + pRange;
 
    // test if out of bounds
-   const auto test = playerX - ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
+   const auto test = playerX - mFocusZoneCenter;
 
    const auto f0 = mX - mFocusZoneX1;
    const auto f1 = mX - mFocusZoneX0;
 
    if (test < f0 || test > f1)
    {
+      mFocusTriggered = true;
+   }
+
+   // test if back within close bounds
+   else if (
+         (test > mX - mFocusZoneCenter - 10)
+      && (test < mX - mFocusZoneCenter + 10)
+   )
+   {
+      mFocusTriggered = false;
+   }
+
+   if (mFocusTriggered)
+   {
       mX += dx;
    }
 
-   // std::cout << "test: " << test << " f0: " << f0 << " f1: " << f1 << std::endl;
+   // std::cout << "test: " << test << " f0: " << f0 << " f1: " << f1 << " mx: " << mX << std::endl;
 
    mY += dy;
 }
@@ -106,7 +120,7 @@ void CameraSystem::update(float viewWidth, float viewHeight)
 float CameraSystem::getX() const
 {
    // camera should be in the center of the focus zone
-   return mX - ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
+   return mX - mFocusZoneCenter;
 }
 
 

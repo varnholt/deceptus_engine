@@ -30,12 +30,16 @@ class CameraSystem
 
       float mFocusZoneX0 = 0.0f;
       float mFocusZoneX1 = 0.0f;
+      float mFocusZoneCenter = 0.0f;
+      float mFocusOffset = 0.0f;
 
       float mPanicLineY0 = 0.0f;
       float mPanicLineY1 = 0.0f;
 
       float mViewWidth = 0.0f;
       float mViewHeight = 0.0f;
+
+      bool mFocusTriggered = false;
 
       static CameraSystem sInstance;
 };
