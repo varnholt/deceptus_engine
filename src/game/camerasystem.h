@@ -6,6 +6,19 @@ class CameraSystem
 {
    public:
 
+      struct CameraSystemConfiguration
+      {
+          // x
+          float mDampingFactorX = 32.0f;
+          float mFocusZoneDivider = 6.0f;
+          float mTargetShiftFactor = 0.75f;
+
+          // y
+          float mDampingFactorY = 16.0f;
+          float mPanicLineDivider = 2.5f;
+          float mViewRatioY = 1.5f;
+      };
+
       void update(float viewWidth, float viewHeight);
 
       float getX() const;
@@ -25,6 +38,9 @@ class CameraSystem
 
       CameraSystem() = default;
 
+      void updateX();
+      void updateY();
+
       float mX = 0.0f;
       float mY = 0.0f;
 
@@ -42,8 +58,8 @@ class CameraSystem
       bool mFocusXTriggered = false;
       bool mFocusYTriggered = false;
 
+      CameraSystemConfiguration mConfig;
+
       static CameraSystem sInstance;
-      void updateX();
-      void updateY();
 };
 
