@@ -39,8 +39,11 @@ class CameraSystem
       float mViewWidth = 0.0f;
       float mViewHeight = 0.0f;
 
-      bool mFocusTriggered = false;
+      bool mFocusXTriggered = false;
+      bool mFocusYTriggered = false;
 
       static CameraSystem sInstance;
+      void updateX();
+      void updateY();
 };
 

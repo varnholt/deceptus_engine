@@ -53,67 +53,93 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    mViewWidth = viewWidth;
    mViewHeight = viewHeight;
 
-   auto player = Player::getPlayer(0);
+   updateX();
+   updateY();
+}
 
-   const auto playerX = player->getPixelPosition().x;
-   const auto playerY = player->getPixelPosition().y;
 
-   const auto dx = (playerX - mX) / 32.0f;
-   const auto dy = (playerY - mY) / 16.0f;
+void CameraSystem::updateX()
+{
+    auto player = Player::getPlayer(0);
 
-   const auto fCenter = mViewWidth / 2.0f;
-   const auto fRange  = mViewWidth / 6.0f;
+    const auto playerX = player->getPixelPosition().x;
+    const auto dx = (playerX - mX) / 32.0f;
+    const auto fCenter = mViewWidth / 2.0f;
+    const auto fRange  = mViewWidth / 6.0f;
 
-   mFocusZoneX0 = fCenter - fRange;
-   mFocusZoneX1 = fCenter + fRange;
+    mFocusZoneX0 = fCenter - fRange;
+    mFocusZoneX1 = fCenter + fRange;
 
-   // shift focus zone based on player orientation
-   const auto targetOffset = player->isPointingLeft() ? (fRange * 0.75f) : (-fRange * 0.75f);
-   const auto fcd = (targetOffset - mFocusOffset) / 32.0f;
-   if (fabs(mFocusOffset) < fabs(fRange * 0.75f))
-   {
-      mFocusOffset += fcd;
-   }
-   mFocusZoneX0 += mFocusOffset;
-   mFocusZoneX1 += mFocusOffset;
-   // std::cout << fcd << std::endl;
+    // shift focus zone based on player orientation
+    const auto targetOffset = player->isPointingLeft() ? (fRange * 0.75f) : (-fRange * 0.75f);
+    const auto fcd = (targetOffset - mFocusOffset) / 32.0f;
+    if (fabs(mFocusOffset) < fabs(fRange * 0.75f))
+    {
+       mFocusOffset += fcd;
+    }
 
-   mFocusZoneCenter = ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
+    mFocusZoneX0 += mFocusOffset;
+    mFocusZoneX1 += mFocusOffset;
+    mFocusZoneCenter = ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
 
-   const auto pRange  = mViewHeight / 2.5f;
-   const auto pCenter = mViewHeight / 2.0f;
+    // test if out of focus zone boundaries
+    const auto test = playerX - mFocusZoneCenter;
 
-   mPanicLineY0 = pCenter - pRange;
-   mPanicLineY1 = pCenter + pRange;
+    const auto f0 = mX - mFocusZoneX1;
+    const auto f1 = mX - mFocusZoneX0;
 
-   // test if out of bounds
-   const auto test = playerX - mFocusZoneCenter;
+    if (test < f0 || test > f1)
+    {
+       mFocusXTriggered = true;
+    }
 
-   const auto f0 = mX - mFocusZoneX1;
-   const auto f1 = mX - mFocusZoneX0;
+    // test if back within close boundaries
+    else if (
+          (test > mX - mFocusZoneCenter - 10)
+       && (test < mX - mFocusZoneCenter + 10)
+    )
+    {
+       mFocusXTriggered = false;
+    }
 
-   if (test < f0 || test > f1)
-   {
-      mFocusTriggered = true;
-   }
+    if (mFocusXTriggered)
+    {
+       mX += dx;
+    }
+}
 
-   // test if back within close bounds
-   else if (
-         (test > mX - mFocusZoneCenter - 10)
-      && (test < mX - mFocusZoneCenter + 10)
-   )
-   {
-      mFocusTriggered = false;
-   }
 
-   if (mFocusTriggered)
-   {
-      mX += dx;
-   }
+void CameraSystem::updateY()
+{
+    const auto pRange  = mViewHeight / 2.5f;
+    const auto pCenter = mViewHeight / 2.0f;
 
-   // std::cout << "test: " << test << " f0: " << f0 << " f1: " << f1 << " mx: " << mX << std::endl;
+    mPanicLineY0 = pCenter - pRange;
+    mPanicLineY1 = pCenter + pRange;
 
-   mY += dy;
+    // test if out of panic line boundaries
+    auto player = Player::getPlayer(0);
+    const auto playerY = player->getPixelPosition().y;
+    const auto test = playerY - (mViewHeight / 1.5f);
+
+    const auto p0 = mY - mPanicLineY1;
+    const auto p1 = mY - mPanicLineY0;
+
+    auto outOfPanicLine = false;
+    // outOfPanicLine = (test < p0 || test > p1);
+    //
+    // if (outOfPanicLine)
+    // {
+    //     std::cout << "test: " << test << " p0: " << p0 << " p1: " << p1 << " mPanicLineY0: " << mPanicLineY0 << " mPanicLineY1: " << mPanicLineY1 << " outOfPanicLine: " << outOfPanicLine << std::endl;
+    // }
+
+    if (player->isInAir() && !outOfPanicLine)
+    {
+        return;
+    }
+
+    const auto dy = (playerY - mY) / 16.0f;
+    mY += dy;
 }
 
 
