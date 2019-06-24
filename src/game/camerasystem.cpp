@@ -130,7 +130,7 @@ void CameraSystem::updateY()
    const auto p0 = mY - mPanicLineY1;
    const auto p1 = mY - mPanicLineY0;
 
-   if (test < p0 || test > p1)
+   if ((test < p0 || test > p1) /*|| !player->isInAir()*/)
    {
       mFocusYTriggered = true;
    }
