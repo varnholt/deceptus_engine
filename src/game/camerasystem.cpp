@@ -60,94 +60,97 @@ void CameraSystem::update(float viewWidth, float viewHeight)
 
 void CameraSystem::updateX()
 {
-    auto player = Player::getPlayer(0);
+   auto player = Player::getPlayer(0);
+   auto& config = CameraSystemConfiguration::getInstance();
 
-    const auto playerX = player->getPixelPosition().x;
-    const auto dx = (playerX - mX) / mConfig.mDampingFactorX;
-    const auto fCenter = mViewWidth / 2.0f;
-    const auto fRange  = mViewWidth / mConfig.mFocusZoneDivider;
+   const auto playerX = player->getPixelPosition().x;
+   const auto dx = (playerX - mX) / config.getDampingFactorX();
+   const auto fCenter = mViewWidth / 2.0f;
+   const auto fRange  = mViewWidth / config.getFocusZoneDivider();
 
-    mFocusZoneX0 = fCenter - fRange;
-    mFocusZoneX1 = fCenter + fRange;
+   mFocusZoneX0 = fCenter - fRange;
+   mFocusZoneX1 = fCenter + fRange;
 
-    // shift focus zone based on player orientation
-    const auto targetOffset = player->isPointingLeft() ? (fRange * mConfig.mTargetShiftFactor) : (-fRange * mConfig.mTargetShiftFactor);
-    const auto fcd = (targetOffset - mFocusOffset) / mConfig.mDampingFactorX;
-    if (fabs(mFocusOffset) < fabs(fRange * mConfig.mTargetShiftFactor))
-    {
-       mFocusOffset += fcd;
-    }
+   // shift focus zone based on player orientation
+   const auto targetOffset = player->isPointingLeft() ? (fRange * config.getTargetShiftFactor()) : (-fRange * config.getTargetShiftFactor());
+   const auto fcd = (targetOffset - mFocusOffset) / config.getDampingFactorX();
+   if (fabs(mFocusOffset) < fabs(fRange * config.getTargetShiftFactor()))
+   {
+      mFocusOffset += fcd;
+   }
 
-    mFocusZoneX0 += mFocusOffset;
-    mFocusZoneX1 += mFocusOffset;
-    mFocusZoneCenter = ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
+   mFocusZoneX0 += mFocusOffset;
+   mFocusZoneX1 += mFocusOffset;
+   mFocusZoneCenter = ((mFocusZoneX0 + mFocusZoneX1) / 2.0f);
 
-    // test if out of focus zone boundaries
-    const auto test = playerX - mFocusZoneCenter;
+   // test if out of focus zone boundaries
+   const auto test = playerX - mFocusZoneCenter;
 
-    const auto f0 = mX - mFocusZoneX1;
-    const auto f1 = mX - mFocusZoneX0;
+   const auto f0 = mX - mFocusZoneX1;
+   const auto f1 = mX - mFocusZoneX0;
 
-    if (test < f0 || test > f1)
-    {
-       mFocusXTriggered = true;
-    }
+   if (test < f0 || test > f1)
+   {
+      mFocusXTriggered = true;
+   }
 
-    // test if back within close boundaries
-    else if (
-          (test > mX - mFocusZoneCenter - 10)
-       && (test < mX - mFocusZoneCenter + 10)
-    )
-    {
-       mFocusXTriggered = false;
-    }
+   // test if back within close boundaries
+   else if (
+         (test > mX - mFocusZoneCenter - config.getBackInBoundsToleranceX())
+      && (test < mX - mFocusZoneCenter + config.getBackInBoundsToleranceX())
+   )
+   {
+      mFocusXTriggered = false;
+   }
 
-    if (mFocusXTriggered)
-    {
-       mX += dx;
-    }
+   if (mFocusXTriggered)
+   {
+      mX += dx;
+   }
 }
 
 
 void CameraSystem::updateY()
 {
-    const auto pRange  = mViewHeight / mConfig.mPanicLineDivider;
-    const auto pCenter = mViewHeight / 2.0f;
+   auto& config = CameraSystemConfiguration::getInstance();
 
-    mPanicLineY0 = pCenter - pRange;
-    mPanicLineY1 = pCenter + pRange;
+   const auto pRange  = mViewHeight / config.getPanicLineDivider();
+   const auto pCenter = mViewHeight / 2.0f;
 
-    const auto viewCenter = (mViewHeight / 2.0f);
+   mPanicLineY0 = pCenter - pRange;
+   mPanicLineY1 = pCenter + pRange;
 
-    // test if out of panic line boundaries
-    auto player = Player::getPlayer(0);
-    const auto playerY = player->getPixelPosition().y;
-    const auto test = playerY - viewCenter;
+   const auto viewCenter = (mViewHeight / 2.0f);
 
-    const auto p0 = mY - mPanicLineY1;
-    const auto p1 = mY - mPanicLineY0;
+   // test if out of panic line boundaries
+   auto player = Player::getPlayer(0);
+   const auto playerY = player->getPixelPosition().y;
+   const auto test = playerY - viewCenter;
 
-    if (test < p0 || test > p1)
-    {
-        mFocusYTriggered = true;
-    }
+   const auto p0 = mY - mPanicLineY1;
+   const auto p1 = mY - mPanicLineY0;
 
-    // test if back within close boundaries
-    else if (
-          (test > mY - viewCenter - 10)
-       && (test < mY - viewCenter + 10)
-    )
-    {
-       mFocusYTriggered = false;
-    }
+   if (test < p0 || test > p1)
+   {
+      mFocusYTriggered = true;
+   }
 
-    if (player->isInAir() && !mFocusYTriggered)
-    {
-        return;
-    }
+   // test if back within close boundaries
+   else if (
+         (test > mY - viewCenter - config.getBackInBoundsToleranceY())
+      && (test < mY - viewCenter + config.getBackInBoundsToleranceY())
+   )
+   {
+      mFocusYTriggered = false;
+   }
 
-    const auto dy = (playerY - mY) / mConfig.mDampingFactorY;
-    mY += dy;
+   if (player->isInAir() && !mFocusYTriggered)
+   {
+      return;
+   }
+
+   const auto dy = (playerY - mY) / config.getDampingFactorY();
+   mY += dy;
 }
 
 
@@ -160,7 +163,7 @@ float CameraSystem::getX() const
 
 float CameraSystem::getY() const
 {
-   return mY - (mViewHeight / mConfig.mViewRatioY);
+   return mY - (mViewHeight / CameraSystemConfiguration::getInstance().getViewRatioY());
 }
 
 

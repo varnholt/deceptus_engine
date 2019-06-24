@@ -1,0 +1,13 @@
+{
+    "CameraSystemConfiguration": {
+        "back_in_bounds_tolerance_x": 10,
+        "back_in_bounds_tolerance_y": 10,
+        "damping_factor_x": 32.0,
+        "damping_factor_y": 16.0,
+        "focus_zone_divider": 6.0,
+        "panic_line_divider": 2.5,
+        "target_shift_factor": 0.75,
+        "view_ratio_y": 1.5
+    }
+}
+
