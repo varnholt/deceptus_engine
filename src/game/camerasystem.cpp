@@ -63,17 +63,17 @@ void CameraSystem::updateX()
     auto player = Player::getPlayer(0);
 
     const auto playerX = player->getPixelPosition().x;
-    const auto dx = (playerX - mX) / 32.0f;
+    const auto dx = (playerX - mX) / mConfig.mDampingFactorX;
     const auto fCenter = mViewWidth / 2.0f;
-    const auto fRange  = mViewWidth / 6.0f;
+    const auto fRange  = mViewWidth / mConfig.mFocusZoneDivider;
 
     mFocusZoneX0 = fCenter - fRange;
     mFocusZoneX1 = fCenter + fRange;
 
     // shift focus zone based on player orientation
-    const auto targetOffset = player->isPointingLeft() ? (fRange * 0.75f) : (-fRange * 0.75f);
-    const auto fcd = (targetOffset - mFocusOffset) / 32.0f;
-    if (fabs(mFocusOffset) < fabs(fRange * 0.75f))
+    const auto targetOffset = player->isPointingLeft() ? (fRange * mConfig.mTargetShiftFactor) : (-fRange * mConfig.mTargetShiftFactor);
+    const auto fcd = (targetOffset - mFocusOffset) / mConfig.mDampingFactorX;
+    if (fabs(mFocusOffset) < fabs(fRange * mConfig.mTargetShiftFactor))
     {
        mFocusOffset += fcd;
     }
@@ -111,7 +111,7 @@ void CameraSystem::updateX()
 
 void CameraSystem::updateY()
 {
-    const auto pRange  = mViewHeight / 2.5f;
+    const auto pRange  = mViewHeight / mConfig.mPanicLineDivider;
     const auto pCenter = mViewHeight / 2.0f;
 
     mPanicLineY0 = pCenter - pRange;
@@ -146,7 +146,7 @@ void CameraSystem::updateY()
         return;
     }
 
-    const auto dy = (playerY - mY) / 16.0f;
+    const auto dy = (playerY - mY) / mConfig.mDampingFactorY;
     mY += dy;
 }
 
@@ -160,7 +160,7 @@ float CameraSystem::getX() const
 
 float CameraSystem::getY() const
 {
-   return mY - (mViewHeight / 1.5f);
+   return mY - (mViewHeight / mConfig.mViewRatioY);
 }
 
 
@@ -181,10 +181,12 @@ CameraSystem& CameraSystem::getCameraSystem()
    return sInstance;
 }
 
+
 float CameraSystem::getPanicLineY0() const
 {
    return mPanicLineY0;
 }
+
 
 float CameraSystem::getPanicLineY1() const
 {
