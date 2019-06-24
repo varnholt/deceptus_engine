@@ -117,23 +117,31 @@ void CameraSystem::updateY()
     mPanicLineY0 = pCenter - pRange;
     mPanicLineY1 = pCenter + pRange;
 
+    const auto viewCenter = (mViewHeight / 2.0f);
+
     // test if out of panic line boundaries
     auto player = Player::getPlayer(0);
     const auto playerY = player->getPixelPosition().y;
-    const auto test = playerY - (mViewHeight / 1.5f);
+    const auto test = playerY - viewCenter;
 
     const auto p0 = mY - mPanicLineY1;
     const auto p1 = mY - mPanicLineY0;
 
-    auto outOfPanicLine = false;
-    // outOfPanicLine = (test < p0 || test > p1);
-    //
-    // if (outOfPanicLine)
-    // {
-    //     std::cout << "test: " << test << " p0: " << p0 << " p1: " << p1 << " mPanicLineY0: " << mPanicLineY0 << " mPanicLineY1: " << mPanicLineY1 << " outOfPanicLine: " << outOfPanicLine << std::endl;
-    // }
+    if (test < p0 || test > p1)
+    {
+        mFocusYTriggered = true;
+    }
 
-    if (player->isInAir() && !outOfPanicLine)
+    // test if back within close boundaries
+    else if (
+          (test > mY - viewCenter - 10)
+       && (test < mY - viewCenter + 10)
+    )
+    {
+       mFocusYTriggered = false;
+    }
+
+    if (player->isInAir() && !mFocusYTriggered)
     {
         return;
     }
