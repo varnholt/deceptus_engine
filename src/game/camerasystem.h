@@ -1,23 +1,12 @@
 #pragma once
 
+#include "camerasystemconfiguration.h"
+
 #include <SFML/Graphics.hpp>
 
 class CameraSystem
 {
    public:
-
-      struct CameraSystemConfiguration
-      {
-          // x
-          float mDampingFactorX = 32.0f;
-          float mFocusZoneDivider = 6.0f;
-          float mTargetShiftFactor = 0.75f;
-
-          // y
-          float mDampingFactorY = 16.0f;
-          float mPanicLineDivider = 2.5f;
-          float mViewRatioY = 1.5f;
-      };
 
       void update(float viewWidth, float viewHeight);
 
@@ -57,8 +46,6 @@ class CameraSystem
 
       bool mFocusXTriggered = false;
       bool mFocusYTriggered = false;
-
-      CameraSystemConfiguration mConfig;
 
       static CameraSystem sInstance;
 };
