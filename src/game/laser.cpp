@@ -171,13 +171,6 @@ void Laser::merge()
       const auto w = static_cast<int32_t>(object->mWidth  / TILE_WIDTH );
       const auto h = static_cast<int32_t>(object->mHeight / TILE_HEIGHT);
 
-      // std::cout
-      //    << " x: " << x
-      //    << " y: " << y
-      //    << " w: " << w
-      //    << " h: " << h
-      //    << std::endl;
-
       for (auto yi = y; yi < y + h; yi++)
       {
          for (auto xi = x; xi < x + w; xi++)
