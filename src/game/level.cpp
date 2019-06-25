@@ -441,82 +441,98 @@ void Level::loadTmx()
       else if (element->mType == TmxElement::TypeObjectGroup)
       {
          TmxObjectGroup* objectGroup = dynamic_cast<TmxObjectGroup*>(element);
+
          for (auto object : objectGroup->mObjects)
          {
             TmxObject* tmxObject = object.second;
 
-            if (objectGroup->mName == "portals")
+            if (objectGroup->mName == "lasers")
             {
-              if (tmxObject->mPolyLine)
-              {
-                Portal::link(mPortals, tmxObject);
-              }
+               Laser::addObject(tmxObject);
             }
-            if (objectGroup->mName == "bouncers")
+
+            else if (objectGroup->mName == "portals")
             {
-              Bouncer* bouncer = new Bouncer(
-                nullptr,
-                mWorld,
-                tmxObject->mX,
-                tmxObject->mY,
-                tmxObject->mWidth,
-                tmxObject->mHeight
-              );
-              bouncer->setZ(objectGroup->mZ);
-              mBouncers.push_back(bouncer);
-              addDebugRect(bouncer->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+               if (tmxObject->mPolyLine)
+               {
+                  Portal::link(mPortals, tmxObject);
+               }
             }
-            if (objectGroup->mName == "conveyorbelts")
+
+            else if (objectGroup->mName == "bouncers")
             {
-              ConveyorBelt* belt = new ConveyorBelt(
-                nullptr,
-                mWorld,
-                tmxObject->mX,
-                tmxObject->mY,
-                tmxObject->mWidth,
-                tmxObject->mHeight
-              );
-              auto velocity = 0.0f;
-              if (tmxObject->mProperties)
-              {
-                auto it = tmxObject->mProperties->mMap.find("velocity");
-                if (it != tmxObject->mProperties->mMap.end())
-                {
-                   velocity = it->second->mValueFloat;
-                }
-              }
-              belt->setVelocity(velocity);
-              belt->setZ(objectGroup->mZ);
-              mConveyorBelts.push_back(belt);
-              addDebugRect(belt->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+               Bouncer* bouncer = new Bouncer(
+                  nullptr,
+                  mWorld,
+                  tmxObject->mX,
+                  tmxObject->mY,
+                  tmxObject->mWidth,
+                  tmxObject->mHeight
+               );
+
+               bouncer->setZ(objectGroup->mZ);
+               mBouncers.push_back(bouncer);
+               addDebugRect(bouncer->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
             }
+
+            else if (objectGroup->mName == "conveyorbelts")
+            {
+               ConveyorBelt* belt = new ConveyorBelt(
+                  nullptr,
+                  mWorld,
+                  tmxObject->mX,
+                  tmxObject->mY,
+                  tmxObject->mWidth,
+                  tmxObject->mHeight
+               );
+
+               auto velocity = 0.0f;
+
+               if (tmxObject->mProperties)
+               {
+                  auto it = tmxObject->mProperties->mMap.find("velocity");
+                  if (it != tmxObject->mProperties->mMap.end())
+                  {
+                     velocity = it->second->mValueFloat;
+                  }
+               }
+
+               belt->setVelocity(velocity);
+               belt->setZ(objectGroup->mZ);
+               mConveyorBelts.push_back(belt);
+               addDebugRect(belt->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+            }
+
             else if (objectGroup->mName == "platform_paths")
             {
-              if (tmxObject->mPolyLine)
-              {
-                MovingPlatform::link(mPlatforms, tmxObject);
-              }
+               if (tmxObject->mPolyLine)
+               {
+                  MovingPlatform::link(mPlatforms, tmxObject);
+               }
             }
 
             else if (objectGroup->mName == "lights")
             {
-              auto light = deserializeRaycastLight(tmxObject);
-              mRaycastLight->mLights.push_back(light);
+               auto light = deserializeRaycastLight(tmxObject);
+               mRaycastLight->mLights.push_back(light);
             }
 
             else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
-              auto light = deserializeStaticLight(tmxObject, objectGroup);
-              mStaticLight->mLights.push_back(light);
+               auto light = deserializeStaticLight(tmxObject, objectGroup);
+               mStaticLight->mLights.push_back(light);
             }
          }
       }
+
       else if (element->mType == TmxElement::TypeImageLayer)
       {
-        auto image = deserializeImageLayer(element, path);
-        mImageLayers.push_back(image);
+         auto image = deserializeImageLayer(element, path);
+         mImageLayers.push_back(image);
       }
    }
+
+   Laser::merge();
 
    if (!mAtmosphere.mTileMap)
    {

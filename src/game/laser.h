@@ -35,11 +35,17 @@ public:
       const std::shared_ptr<b2World>& world
    );
 
+   static void addObject(TmxObject* object);
+   static void merge();
+
    int getZ() const;
    void setZ(int z);
 
 
 protected:
+
+   static std::vector<TmxObject*> mObjects;
+   static std::vector<Laser*> mLasers;
 
    std::vector<Signal> mSignalPlot;
 
