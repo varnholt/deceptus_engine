@@ -19,6 +19,11 @@
 
 
 //-----------------------------------------------------------------------------
+std::vector<TmxObject*> Laser::mObjects;
+std::vector<Laser*> Laser::mLasers;
+
+
+//-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& window)
 {
    mSprite.setTextureRect(
@@ -91,7 +96,7 @@ void Laser::setZ(int z)
 
 
 //-----------------------------------------------------------------------------
-std::vector<Laser *> Laser::load(
+std::vector<Laser*> Laser::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
@@ -141,11 +146,55 @@ std::vector<Laser *> Laser::load(
 
             laser->mSprite = sprite;
             laser->mSignalPlot = { {3000, true}, {3000, false} };
+
+            mLasers.push_back(laser);
          }
       }
    }
 
    return lasers;
+}
+
+
+void Laser::addObject(TmxObject* object)
+{
+   mObjects.push_back(object);
+}
+
+
+void Laser::merge()
+{
+   for (auto& object : mObjects)
+   {
+      const auto x = static_cast<int32_t>(object->mX      / TILE_WIDTH );
+      const auto y = static_cast<int32_t>(object->mY      / TILE_HEIGHT);
+      const auto w = static_cast<int32_t>(object->mWidth  / TILE_WIDTH );
+      const auto h = static_cast<int32_t>(object->mHeight / TILE_HEIGHT);
+
+      // std::cout
+      //    << " x: " << x
+      //    << " y: " << y
+      //    << " w: " << w
+      //    << " h: " << h
+      //    << std::endl;
+
+      for (auto yi = y; yi < y + h; yi++)
+      {
+         for (auto xi = x; xi < x + w; xi++)
+         {
+            for (auto laser : mLasers)
+            {
+               if (
+                     static_cast<int32_t>(laser->mTilePosition.x) == xi
+                  && static_cast<int32_t>(laser->mTilePosition.y) == yi
+               )
+               {
+                  // std::cout << "match" << std::endl;
+               }
+            }
+         }
+      }
+   }
 }
 
 
