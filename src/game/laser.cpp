@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 std::vector<TmxObject*> Laser::mObjects;
 std::vector<Laser*> Laser::mLasers;
+std::vector<std::array<int32_t, 9>> Laser::mTiles;
 
 
 //-----------------------------------------------------------------------------
@@ -103,6 +104,8 @@ std::vector<Laser*> Laser::load(
    const std::shared_ptr<b2World>&
 )
 {
+   addTiles();
+
    std::vector<Laser*> lasers;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
@@ -126,7 +129,9 @@ std::vector<Laser*> Laser::load(
 
             laser->mTilePosition.x = static_cast<float>(i);
             laser->mTilePosition.y = static_cast<float>(j);
+
             laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->mImage->mSource);
+
             laser->mTu = (tileNumber - firstId) % (laser->mTexture->getSize().x / tilesize.x);
             laser->mTv = (tileNumber - firstId) / (laser->mTexture->getSize().x / tilesize.x);
 
@@ -160,6 +165,59 @@ void Laser::addObject(TmxObject* object)
 }
 
 
+void Laser::addTiles()
+{
+   mTiles.push_back({0,0,0,1,1,1,0,0,0});
+   mTiles.push_back({0,1,0,0,1,0,0,1,0});
+   mTiles.push_back({0,1,0,0,1,0,0,1,0});
+   mTiles.push_back({0,1,0,0,1,0,0,1,0});
+   mTiles.push_back({0,0,0,1,1,1,0,0,0});
+   mTiles.push_back({0,0,0,1,1,1,0,0,0});
+   mTiles.push_back({0,1,0,1,1,1,0,1,0});
+   mTiles.push_back({0,0,0,1,1,1,0,1,0});
+   mTiles.push_back({0,1,0,1,1,0,0,1,0});
+   mTiles.push_back({0,1,0,1,1,1,0,0,0});
+   mTiles.push_back({0,1,0,0,1,1,0,1,0});
+   mTiles.push_back({0,0,0,0,1,1,0,1,0});
+   mTiles.push_back({0,0,0,1,1,0,0,1,0});
+   mTiles.push_back({0,1,0,0,1,1,0,0,0});
+   mTiles.push_back({0,1,0,1,1,0,0,0,0});
+   mTiles.push_back({0,1,0,0,1,0,0,0,0});
+   mTiles.push_back({0,0,0,0,1,0,0,1,0});
+   mTiles.push_back({0,0,0,0,1,1,0,0,0});
+   mTiles.push_back({0,0,0,1,1,0,0,0,0});
+}
+
+
+void Laser::collide(const sf::Rect<int32_t>& playerRect)
+{
+   const auto it =
+      std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](Laser* laser){
+            sf::Rect<int32_t> itemRect;
+
+            itemRect.left = static_cast<int32_t>(laser->mTilePosition.x * TILE_WIDTH);
+            itemRect.top = static_cast<int32_t>(laser->mTilePosition.y * TILE_HEIGHT);
+
+            itemRect.width = TILE_WIDTH;
+            itemRect.height = TILE_HEIGHT;
+
+            const auto intersects = playerRect.intersects(itemRect);
+
+            return laser->mTileIndex == 0 && intersects;
+         }
+      );
+
+   if (it != mLasers.end())
+   {
+      // todo: use tiles map for more accurate analysis
+      // -> just let the rect intersect with each of the sub rectangles
+
+      // player is dead
+      Player::getPlayer(0)->damage(100);
+   }
+}
+
+
 void Laser::merge()
 {
    for (auto object : mObjects)
@@ -185,13 +243,13 @@ void Laser::merge()
                       auto it = object->mProperties->mMap.find("on_time");
                       if (it != object->mProperties->mMap.end())
                       {
-                          laser->mSignalPlot.push_back(Signal{it->second->mValueInt, true});
+                          laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt), true});
                       }
 
                       it = object->mProperties->mMap.find("off_time");
                       if (it != object->mProperties->mMap.end())
                       {
-                          laser->mSignalPlot.push_back(Signal{it->second->mValueInt, false});
+                          laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt), false});
                       }
                    }
                }

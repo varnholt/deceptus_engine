@@ -1060,6 +1060,7 @@ void Level::draw(
    {
       drawStaticChains(*mLevelRenderTexture.get());
       DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
+      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getPlayer(0)->getPlayerRect());
    }
 
    // display the whole texture

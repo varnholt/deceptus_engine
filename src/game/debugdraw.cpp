@@ -157,6 +157,28 @@ void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape)
+{
+   shape.setOutlineThickness(-0.3f);
+   shape.setFillColor(sf::Color::Transparent);
+   shape.setOutlineColor(sf::Color::Red);
+   target.draw(shape);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawRect(sf::RenderTarget& target, const sf::Rect<int32_t>& rect)
+{
+   sf::RectangleShape rs;
+   auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
+   auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+   rs.setSize(size);
+   rs.setPosition(pos);
+   drawShape(target, rs);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 {
    for (auto joint = level->getWorld()->GetJointList(); joint != nullptr; joint = joint->GetNext())

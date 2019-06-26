@@ -7,7 +7,10 @@
 #include "Box2D/Box2D.h"
 
 // std
+#include <array>
 #include <filesystem>
+#include <vector>
+
 
 struct TmxLayer;
 struct TmxObject;
@@ -36,7 +39,9 @@ public:
    );
 
    static void addObject(TmxObject* object);
+   static void addTiles();
    static void merge();
+   static void collide(const sf::Rect<int32_t>& playerRect);
 
    int getZ() const;
    void setZ(int z);
@@ -46,6 +51,7 @@ protected:
 
    static std::vector<TmxObject*> mObjects;
    static std::vector<Laser*> mLasers;
+   static std::vector<std::array<int32_t, 9>> mTiles;
 
    std::vector<Signal> mSignalPlot;
 
