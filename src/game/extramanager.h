@@ -18,7 +18,7 @@ class ExtraManager
 public:
 
    void load(TmxLayer *layer, TmxTileSet *tileSet);
-   void collide(const sf::Rect<int> &playerRect);
+   void collide(const sf::Rect<int32_t>& playerRect);
 
    ExtraManager();
 

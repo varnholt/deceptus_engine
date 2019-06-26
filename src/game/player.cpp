@@ -256,14 +256,16 @@ void Player::setPixelPosition(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-sf::Rect<int> Player::getPlayerRect() const
+sf::Rect<int32_t> Player::getPlayerRect() const
 {
-   sf::Rect<int> rect;
+   sf::Rect<int32_t> rect;
 
-   rect.left = static_cast<int>(mPixelPosition.x);
-   rect.top = static_cast<int>(mPixelPosition.y);
-   rect.width = PLAYER_TILES_WIDTH;
-   rect.height = PLAYER_TILES_HEIGHT;
+   const auto dh = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+
+   rect.left = static_cast<int>(mPixelPosition.x) - PLAYER_ACTUAL_WIDTH / 2;
+   rect.top = static_cast<int>(mPixelPosition.y) - dh - dh/2;
+   rect.width = PLAYER_ACTUAL_WIDTH;
+   rect.height = PLAYER_ACTUAL_HEIGHT;
 
    return rect;
 }
@@ -1367,7 +1369,7 @@ void Player::update(const sf::Time& dt)
 
    updateCrouch();
    updateAnimation(dt);
-   updateExtraManager();
+   updatePixelCollisions();
    updateAtmosphere();
    updateFire();
    updateVelocity();
@@ -1817,9 +1819,11 @@ bool Player::isDashActive() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateExtraManager()
+void Player::updatePixelCollisions()
 {
-  mExtraManager->collide(getPlayerRect());
+   const auto rect = getPlayerRect();
+   mExtraManager->collide(rect);
+   Laser::collide(rect);
 }
 
 

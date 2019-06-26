@@ -28,5 +28,7 @@ class DebugDraw
 
       static void debugBodies(sf::RenderTarget& target, Level* level);
       static void debugCameraSystem(sf::RenderTarget& target);
+      static void drawShape(sf::RenderTarget& target, sf::Shape& shape);
+      static void drawRect(sf::RenderTarget& target, const sf::Rect<int32_t>& rect);
 };
 #endif //SFMLDEBUGDRAW_H

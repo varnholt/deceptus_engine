@@ -89,14 +89,14 @@ void ExtraManager::load(
 
 
 //-----------------------------------------------------------------------------
-void ExtraManager::collide(const sf::Rect<int>& playerRect)
+void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 {
    auto it =
       std::find_if(std::begin(mExtras), std::end(mExtras), [playerRect](std::shared_ptr<ExtraItem> item)
       {
-         sf::Rect<int> itemRect;
-         itemRect.left = static_cast<int>(item->mPosition.x);
-         itemRect.top = static_cast<int>(item->mPosition.y + TILE_HEIGHT);
+         sf::Rect<int32_t> itemRect;
+         itemRect.left = static_cast<int32_t>(item->mPosition.x);
+         itemRect.top = static_cast<int32_t>(item->mPosition.y + TILE_HEIGHT);
          itemRect.width = TILE_WIDTH;
          itemRect.height = TILE_HEIGHT;
 

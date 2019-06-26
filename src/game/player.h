@@ -116,7 +116,7 @@ public:
    void setOnBelt(bool onBelt);
    void applyBeltVelocity(float &desiredVel);
 
-   sf::Rect<int> getPlayerRect() const;
+   sf::Rect<int32_t> getPlayerRect() const;
 
 
    b2Body* getBody() const;
@@ -165,7 +165,7 @@ private:
 
 
    void updateAnimation(const sf::Time& dt);
-   void updateExtraManager();
+   void updatePixelCollisions();
    void updateAtmosphere();
    void updateVelocity();
    void updateJumpBuffer();
