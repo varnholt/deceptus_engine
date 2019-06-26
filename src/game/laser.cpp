@@ -145,8 +145,6 @@ std::vector<Laser*> Laser::load(
             );
 
             laser->mSprite = sprite;
-            laser->mSignalPlot = { {3000, true}, {3000, false} };
-
             mLasers.push_back(laser);
          }
       }
@@ -164,7 +162,7 @@ void Laser::addObject(TmxObject* object)
 
 void Laser::merge()
 {
-   for (auto& object : mObjects)
+   for (auto object : mObjects)
    {
       const auto x = static_cast<int32_t>(object->mX      / TILE_WIDTH );
       const auto y = static_cast<int32_t>(object->mY      / TILE_HEIGHT);
@@ -182,7 +180,20 @@ void Laser::merge()
                   && static_cast<int32_t>(laser->mTilePosition.y) == yi
                )
                {
-                  // std::cout << "match" << std::endl;
+                   if (object->mProperties != nullptr)
+                   {
+                      auto it = object->mProperties->mMap.find("on_time");
+                      if (it != object->mProperties->mMap.end())
+                      {
+                          laser->mSignalPlot.push_back(Signal{it->second->mValueInt, true});
+                      }
+
+                      it = object->mProperties->mMap.find("off_time");
+                      if (it != object->mProperties->mMap.end())
+                      {
+                          laser->mSignalPlot.push_back(Signal{it->second->mValueInt, false});
+                      }
+                   }
                }
             }
          }

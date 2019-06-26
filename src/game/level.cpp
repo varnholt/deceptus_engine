@@ -181,6 +181,7 @@ std::shared_ptr<RaycastLight::LightInstance> Level::deserializeRaycastLight(TmxO
 
   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
   std::string texture = "data/light/smooth.png";
+
   if (tmxObject->mProperties != nullptr)
   {
      auto it = tmxObject->mProperties->mMap.find("color");
@@ -195,6 +196,7 @@ std::shared_ptr<RaycastLight::LightInstance> Level::deserializeRaycastLight(TmxO
         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
      }
   }
+
   light->mColor.r = rgba[0];
   light->mColor.g = rgba[1];
   light->mColor.b = rgba[2];
