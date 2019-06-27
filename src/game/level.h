@@ -93,6 +93,7 @@ public:
    void drawParallaxMaps(sf::RenderTarget& target);
    void drawLayers(sf::RenderTarget& target, int from = 0, int to = 50);
    void drawAtmosphereLayer(sf::RenderTarget& target);
+   void drawBlurLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
 
    sf::Vector2f getSize();
@@ -139,6 +140,8 @@ public:
    void updateAtmosphereShader();
    void initializeGammaShader();
    void updateGammaShader();
+   void initializeBlurShader();
+   void updateBlurShader();
 
    bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
 
@@ -188,6 +191,7 @@ protected:
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
    std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
+   std::shared_ptr<sf::RenderTexture> mBlurRenderTexture;
 
    float mViewToTextureScale = 1.0f;
    std::shared_ptr<sf::View> mLevelView;
@@ -241,6 +245,7 @@ protected:
    sf::Shader mAtmosphereShader;
    sf::Texture mAtmosphereDistortionMap;
    sf::Shader mGammaShader;
+   sf::Shader mBlurShader;
 
    // box2d
 
