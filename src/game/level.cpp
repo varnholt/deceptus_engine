@@ -105,6 +105,11 @@ void Level::initializeTextures()
       mAtmosphereRenderTexture.reset();
    }
 
+   if (mBlurRenderTexture != nullptr)
+   {
+      mBlurRenderTexture.reset();
+   }
+
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
    const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
@@ -134,8 +139,15 @@ void Level::initializeTextures()
       static_cast<uint32_t>(textureHeight)
    );
 
+   mBlurRenderTexture = std::make_shared<sf::RenderTexture>();
+   mBlurRenderTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+
    initializeAtmosphereShader();
    initializeGammaShader();
+   initializeBlurShader();
 }
 
 
@@ -937,6 +949,21 @@ void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 }
 
 
+//-----------------------------------------------------------------------------
+void Level::drawBlurLayer(sf::RenderTarget& target)
+{
+  updateViews();
+
+  target.setView(*mLevelView);
+
+  // draw lasers
+  for (auto l : mLasers)
+  {
+     l->draw(target);
+  }
+}
+
+
 //----------------------------------------------------------------------------------------------------------------------
 void Level::initializeAtmosphereShader()
 {
@@ -975,6 +1002,19 @@ void Level::initializeGammaShader()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Level::initializeBlurShader()
+{
+   if (!mBlurShader.loadFromFile("data/shaders/blur.frag", sf::Shader::Fragment))
+   {
+      std::cout << "error loading blur shader" << std::endl;
+      return;
+   }
+
+   mBlurShader.setUniform("texture", mBlurRenderTexture->getTexture());
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Level::updateGammaShader()
 {
    float gamma = 2.2f - (GameConfiguration::getInstance().mBrightness - 0.5f);
@@ -1000,6 +1040,13 @@ void Level::updateAtmosphereShader()
 
   mAtmosphereShader.setUniform("time", GlobalClock::getInstance()->getElapsedTimeInS() * 0.2f);
   mAtmosphereShader.setUniform("distortionFactor", distortionFactor);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Level::updateBlurShader()
+{
+   mBlurShader.setUniform("blur_radius", 0.015f);
 }
 
 
@@ -1030,6 +1077,16 @@ void Level::draw(
       takeScreenshot("screenshot_atmosphere", *mAtmosphereRenderTexture.get());
    }
 
+   // render glowing elements
+   mBlurRenderTexture->clear({0, 0, 0, 0});
+   drawBlurLayer(*mBlurRenderTexture.get());
+   mBlurRenderTexture->display();
+
+   if (screenshot)
+   {
+      takeScreenshot("screenshot_blur", *mBlurRenderTexture.get());
+   }
+
    // render layers affected by the atmosphere
    mLevelBackgroundRenderTexture->clear();
 
@@ -1043,11 +1100,18 @@ void Level::draw(
       takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
    }
 
-   sf::Sprite sprite(mLevelBackgroundRenderTexture->getTexture());
-
    // draw the atmospheric parts into the level texture
+   sf::Sprite backgroundSprite(mLevelBackgroundRenderTexture->getTexture());
    updateAtmosphereShader();
-   mLevelRenderTexture->draw(sprite, &mAtmosphereShader);
+   mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader);
+
+   // draw the glowing parts into the level texture
+   sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
+   updateBlurShader();
+   sf::RenderStates states;
+   states.blendMode = sf::BlendAdd;
+   states.shader = &mBlurShader;
+   mLevelRenderTexture->draw(blurSprite, states);
 
    // draw the level layers into the level texture
    drawLayers(*mLevelRenderTexture.get(), 16);
