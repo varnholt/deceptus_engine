@@ -1046,7 +1046,7 @@ void Level::updateAtmosphereShader()
 //----------------------------------------------------------------------------------------------------------------------
 void Level::updateBlurShader()
 {
-   mBlurShader.setUniform("blur_radius", 0.015f);
+   // mBlurShader.setUniform("blur_radius", 0.015f);
 }
 
 
@@ -1112,6 +1112,21 @@ void Level::draw(
    states.blendMode = sf::BlendAdd;
    states.shader = &mBlurShader;
    mLevelRenderTexture->draw(blurSprite, states);
+
+   // sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
+   // blurSprite.scale({0.25f, 0.25f});
+   // updateBlurShader();
+   // sf::RenderStates statesShader;
+   // statesShader.shader = &mBlurShader;
+   // sf::RenderStates statesAdd;
+   // statesAdd.blendMode = sf::BlendAdd;
+   // sf::RenderTexture blurDest;
+   // blurDest.setSmooth(true);
+   // blurDest.create(blurSprite.getTexture()->getSize().x, blurSprite.getTexture()->getSize().y);
+   // blurDest.draw(blurSprite, statesShader);
+   // sf::Sprite blurScaleSprite(blurDest.getTexture());
+   // blurScaleSprite.scale(4.0f, 4.0f);
+   // mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
 
    // draw the level layers into the level texture
    drawLayers(*mLevelRenderTexture.get(), 16);
