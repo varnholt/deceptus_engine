@@ -29,7 +29,7 @@
 #define PLAYER_ANIMATION_CYCLES 8
 #define PLAYER_TILES_WIDTH  24
 #define PLAYER_TILES_HEIGHT 48
-#define PLAYER_ACTUAL_WIDTH  24 // the actual width can be smaller than the tile width
+#define PLAYER_ACTUAL_WIDTH  20 // the actual width can be smaller than the tile width
 #define PLAYER_ACTUAL_HEIGHT 32 // the actual height can be smaller than the tile height
 
 #define PLAYER_1_COLLISION_ID 3
