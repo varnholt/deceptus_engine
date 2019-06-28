@@ -201,17 +201,53 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
             itemRect.width = TILE_WIDTH;
             itemRect.height = TILE_HEIGHT;
 
-            const auto intersects = playerRect.intersects(itemRect);
+            const auto roughIntersection = playerRect.intersects(itemRect);
 
-            return laser->mTileIndex == 0 && intersects;
+            if (laser->mTileIndex == 0 && roughIntersection)
+            {
+               const auto tileId = static_cast<uint32_t>(laser->mTv);
+               const auto tile = mTiles[tileId];
+
+               auto x = 0u;
+               auto y = 0u;
+               for (auto i = 0u; i < 9; i++)
+               {
+                  if (tile[i] == 1)
+                  {
+                     sf::Rect<int32_t> rect;
+
+                     rect.left = static_cast<int32_t>(laser->mTilePosition.x * TILE_WIDTH) + (x * PHYSICS_TILE_WIDTH);
+                     rect.top = static_cast<int32_t>(laser->mTilePosition.y * TILE_HEIGHT) + (y * PHYSICS_TILE_WIDTH);
+
+                     rect.width = PHYSICS_TILE_WIDTH;
+                     rect.height = PHYSICS_TILE_WIDTH;
+
+                     const auto fineIntersection = playerRect.intersects(rect);
+
+                     if (fineIntersection)
+                     {
+                        return true;
+                     }
+                  }
+
+                  x++;
+
+                  if (i > 0 && ( (i + 1) % 3 == 0))
+                  {
+                     x = 0;
+                     y++;
+                  }
+               }
+
+               return false;
+            }
+
+            return false;
          }
       );
 
    if (it != mLasers.end())
    {
-      // todo: use tiles map for more accurate analysis
-      // -> just let the rect intersect with each of the sub rectangles
-
       // player is dead
       Player::getPlayer(0)->damage(100);
    }
