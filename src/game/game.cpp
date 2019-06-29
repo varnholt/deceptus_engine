@@ -504,6 +504,37 @@ void Game::changeResolution(int32_t w, int32_t h)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
+   if (mConsole)
+   {
+      if (event.key.code == sf::Keyboard::Return)
+      {
+         std::cout << "process command: " << mConsoleCommand << std::endl;
+
+         mConsole = false;
+
+         // parse command
+         std::istringstream iss(mConsoleCommand);
+         std::vector<std::string> results((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
+         mConsoleCommand.clear();
+
+         if (results.empty())
+         {
+            return;
+         }
+
+         if (results.at(0) == "/tp" && results.size() == 3)
+         {
+            auto x = std::atoi(results.at(1).c_str());
+            auto y = std::atoi(results.at(2).c_str());
+            std::cout << "teleport to " << x << ", " <<  y << std::endl;
+
+            Player::getPlayer(0)->setBodyViaPixelPosition(x * TILE_WIDTH, y * TILE_HEIGHT);
+         }
+      }
+
+      return;
+   }
+
    switch (event.key.code)
    {
       case sf::Keyboard::Num0:
@@ -624,6 +655,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          mLevel->updateLookState(Look::LookDown, true);
          break;
       }
+      case sf::Keyboard::Slash:
+      {
+         mConsole = true;
+         break;
+      }
       default:
       {
          break;
@@ -695,11 +731,19 @@ void Game::processEvents()
          processKeyPressedEvents(event);
       }
 
-      if (event.type == sf::Event::KeyReleased)
+      else if (event.type == sf::Event::KeyReleased)
       {
          mPlayer->keyboardKeyReleased(event.key.code);
          Menu::getInstance()->keyboardKeyReleased(event.key.code);
          processKeyReleasedEvents(event);
+      }
+
+      else if (event.type == sf::Event::TextEntered)
+      {
+         if (mConsole)
+         {
+            mConsoleCommand += static_cast<char>(event.text.unicode);
+         }
       }
    }
 }

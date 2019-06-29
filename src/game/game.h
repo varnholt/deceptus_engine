@@ -80,6 +80,9 @@ private:
    bool mScreenshot = false;
    bool mDrawPhysics = false;
    sf::Vector2u mRenderTextureOffset;
+
+   bool mConsole = false;
+   std::string mConsoleCommand;
 };
 
 #endif // GAME_H
