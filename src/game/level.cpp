@@ -110,6 +110,11 @@ void Level::initializeTextures()
       mBlurRenderTexture.reset();
    }
 
+   if (mBlurRenderTextureScaled != nullptr)
+   {
+      mBlurRenderTextureScaled.reset();
+   }
+
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
    const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
@@ -144,6 +149,10 @@ void Level::initializeTextures()
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight)
    );
+
+   mBlurRenderTextureScaled = std::make_shared<sf::RenderTexture>();
+   mBlurRenderTextureScaled->create(960, 540);
+   mBlurRenderTextureScaled->setSmooth(true);
 
    initializeAtmosphereShader();
    initializeGammaShader();
@@ -221,8 +230,8 @@ std::shared_ptr<RaycastLight::LightInstance> Level::deserializeRaycastLight(TmxO
     sf::IntRect(
       0,
       0,
-      light->mTexture.getSize().x,
-      light->mTexture.getSize().y
+      static_cast<int32_t>(light->mTexture.getSize().x),
+      static_cast<int32_t>(light->mTexture.getSize().y)
     )
   );
 
@@ -312,7 +321,7 @@ std::shared_ptr<ImageLayer> Level::deserializeImageLayer(TmxElement* element, co
   image->mZ = imageLayer->mZ;
   image->mTexture.loadFromFile((levelPath / imageLayer->mImage->mSource).string());
   image->mSprite.setPosition(imageLayer->mOffsetX, imageLayer->mOffsetY);
-  image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<int32_t>(imageLayer->mOpacity * 255.0f)));
+  image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(imageLayer->mOpacity * 255.0f)));
   image->mSprite.setTexture(image->mTexture);
 
   sf::BlendMode blendMode = sf::BlendAdd;
@@ -1046,7 +1055,12 @@ void Level::updateAtmosphereShader()
 //----------------------------------------------------------------------------------------------------------------------
 void Level::updateBlurShader()
 {
-   // mBlurShader.setUniform("blur_radius", 0.015f);
+   // that implicitly scales the effect up by 2
+   mBlurShader.setUniform("texture_width", 960/2);
+   mBlurShader.setUniform("texture_height", 540/2);
+
+   mBlurShader.setUniform("blur_radius", 20.0f);
+   mBlurShader.setUniform("add_factor", 1.0f);
 }
 
 
@@ -1106,27 +1120,40 @@ void Level::draw(
    mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader);
 
    // draw the glowing parts into the level texture
-   sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
-   updateBlurShader();
-   sf::RenderStates states;
-   states.blendMode = sf::BlendAdd;
-   states.shader = &mBlurShader;
-   mLevelRenderTexture->draw(blurSprite, states);
+   //
+   // simple but slow approach:
+   //
+   //   sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
+   //   updateBlurShader();
+   //   sf::RenderStates states;
+   //   states.blendMode = sf::BlendAdd;
+   //   states.shader = &mBlurShader;
+   //   mLevelRenderTexture->draw(blurSprite, states);
 
-   // sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
-   // blurSprite.scale({0.25f, 0.25f});
-   // updateBlurShader();
-   // sf::RenderStates statesShader;
-   // statesShader.shader = &mBlurShader;
-   // sf::RenderStates statesAdd;
-   // statesAdd.blendMode = sf::BlendAdd;
-   // sf::RenderTexture blurDest;
-   // blurDest.setSmooth(true);
-   // blurDest.create(blurSprite.getTexture()->getSize().x, blurSprite.getTexture()->getSize().y);
-   // blurDest.draw(blurSprite, statesShader);
-   // sf::Sprite blurScaleSprite(blurDest.getTexture());
-   // blurScaleSprite.scale(4.0f, 4.0f);
-   // mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
+   sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
+   const auto downScaleX = mBlurRenderTextureScaled->getSize().x / static_cast<float>(mBlurRenderTexture->getSize().x);
+   const auto downScaleY = mBlurRenderTextureScaled->getSize().y / static_cast<float>(mBlurRenderTexture->getSize().y);
+   blurSprite.scale({downScaleX, downScaleY});
+
+   sf::RenderStates statesShader;
+   updateBlurShader();
+   statesShader.shader = &mBlurShader;
+   mBlurRenderTextureScaled->draw(blurSprite, statesShader);
+
+   sf::Sprite blurScaleSprite(mBlurRenderTextureScaled->getTexture());
+   blurScaleSprite.scale(1.0f / downScaleX, 1.0f / downScaleY);
+   blurScaleSprite.setTextureRect(
+      sf::IntRect(
+         0,
+         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y),
+         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().x),
+         static_cast<int32_t>(-blurScaleSprite.getTexture()->getSize().y)
+      )
+   );
+
+   sf::RenderStates statesAdd;
+   statesAdd.blendMode = sf::BlendAdd;
+   mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
 
    // draw the level layers into the level texture
    drawLayers(*mLevelRenderTexture.get(), 16);

@@ -1,7 +1,11 @@
 #version 120
 uniform sampler2D texture;
 
-// reference: https://www.shadertoy.com/view/Mtl3Rj
+uniform int texture_width;
+uniform int texture_height;
+uniform float blur_radius;
+uniform float add_factor;
+
 
 float scurve(float x)
 {
@@ -65,7 +69,7 @@ vec4 blurH(sampler2D source, vec2 size, vec2 uv, float radius)
 void main()
 {
    vec2 uv = gl_TexCoord[0].xy;
-   vec4 h = blurH(texture, vec2(800, 450), uv, 20.0);
-   vec4 v = blurV(texture, vec2(800, 450), uv, 20.0);
-   gl_FragColor = (h + v) /*/ 2.0*/;
+   vec4 h = blurH(texture, vec2(texture_width, texture_height), uv, blur_radius);
+   vec4 v = blurV(texture, vec2(texture_width, texture_height), uv, blur_radius);
+   gl_FragColor = (h + v) * add_factor;
 }
