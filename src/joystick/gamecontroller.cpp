@@ -14,7 +14,7 @@ GameController::GameController()
    SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 
    // SDL_GameControllerAddMapping();
-   auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
+   [[maybe_unused]] auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
 
    // if (res == -1)
    // {
