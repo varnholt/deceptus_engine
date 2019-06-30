@@ -2,12 +2,13 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 #include <locale>
 #include <sstream>
 
+
 TmxTools::TmxTools()
 {
-
 }
 
 
@@ -62,12 +63,17 @@ std::string TmxTools::trim_copy(std::string s)
    return s;
 }
 
-std::array<uint8_t, 4> TmxTools::color(const std::string &c)
+std::array<uint8_t, 4> TmxTools::color(const std::string& c)
 {
-   uint8_t r,g,b,a;
-   std::istringstream(c.substr(1,2)) >> std::hex >> a;
-   std::istringstream(c.substr(3,2)) >> std::hex >> r;
-   std::istringstream(c.substr(5,2)) >> std::hex >> g;
-   std::istringstream(c.substr(7,2)) >> std::hex >> b;
+   uint8_t r, g, b, a;
+   uint64_t value = stoul(c.substr(1, 9), nullptr, 16);
+
+   a = (value >> 24) & 0xff;
+   r = (value >> 16) & 0xff;
+   g = (value >> 8) & 0xff;
+   b = (value >> 0) & 0xff;
+
    return {r,g,b,a};
 }
+
+
