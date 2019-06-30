@@ -24,7 +24,11 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element)
    {
       mValueFloat = element->FloatAttribute("value");
    }
-   else if (mType == "string" || mType == "color")
+   else if (mType == "string" )
+   {
+      mValueStr = element->Attribute("value");
+   }
+   else if (mType == "color")
    {
       mValueStr = element->Attribute("value");
    }
