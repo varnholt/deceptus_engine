@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "console.h"
 #include "constants.h"
 #include "infolayer.h"
 #include "inventorylayer.h"
@@ -68,6 +69,7 @@ private:
    std::shared_ptr<Level> mLevel;
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
+   std::unique_ptr<Console> mConsole;
 
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;
@@ -81,8 +83,9 @@ private:
    bool mDrawPhysics = false;
    sf::Vector2u mRenderTextureOffset;
 
-   bool mConsole = false;
-   std::string mConsoleCommand;
+   bool mRecording = false;
+   int32_t mRecordingCounter = 0;
+   std::vector<sf::Image> mRecordingImages;
 };
 
 #endif // GAME_H
