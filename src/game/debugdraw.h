@@ -1,5 +1,4 @@
-#ifndef SFMLDEBUGDRAW_H
-#define SFMLDEBUGDRAW_H
+#pragma once
 
 #include <Box2D/Box2D.h>
 #include <SFML/Window.hpp>
@@ -31,4 +30,3 @@ class DebugDraw
       static void drawShape(sf::RenderTarget& target, sf::Shape& shape);
       static void drawRect(sf::RenderTarget& target, const sf::Rect<int32_t>& rect);
 };
-#endif //SFMLDEBUGDRAW_H

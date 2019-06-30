@@ -98,7 +98,6 @@ void Door::update(float dt)
       }
       case State::Open:
       case State::Closed:
-      default:
          break;
    }
 
@@ -198,7 +197,6 @@ void Door::toggle()
          break;
       case State::Opening:
       case State::Closing:
-      default:
          break;
    }
 }

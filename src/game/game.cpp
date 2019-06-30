@@ -204,9 +204,6 @@ void Game::showPauseMenu()
 }
 
 
-
-
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::loadLevel()
 {
@@ -248,6 +245,8 @@ void Game::loadLevel()
 void Game::initialize()
 {
   initializeController();
+
+  mConsole = std::make_unique<Console>();
 
   mPlayer = std::make_shared<Player>();
   mPlayer->initialize();
@@ -344,6 +343,20 @@ void Game::draw()
 
    mWindow->popGLStates();
    mWindow->display();
+
+   if (mRecording)
+   {
+      const auto image = windowTextureSprite.getTexture()->copyToImage();
+
+      std::thread record([this, image](){
+            std::ostringstream num;
+            num << std::setfill('0') << std::setw(5) << mRecordingCounter++;
+            image.saveToFile(num.str() + ".bmp");
+         }
+      );
+
+      record.detach();
+   }
 }
 
 
@@ -504,32 +517,11 @@ void Game::changeResolution(int32_t w, int32_t h)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
-   if (mConsole)
+   if (mConsole->isActive())
    {
       if (event.key.code == sf::Keyboard::Return)
       {
-         std::cout << "process command: " << mConsoleCommand << std::endl;
-
-         mConsole = false;
-
-         // parse command
-         std::istringstream iss(mConsoleCommand);
-         std::vector<std::string> results((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-         mConsoleCommand.clear();
-
-         if (results.empty())
-         {
-            return;
-         }
-
-         if (results.at(0) == "/tp" && results.size() == 3)
-         {
-            auto x = std::atoi(results.at(1).c_str());
-            auto y = std::atoi(results.at(2).c_str());
-            std::cout << "teleport to " << x << ", " <<  y << std::endl;
-
-            Player::getPlayer(0)->setBodyViaPixelPosition(x * TILE_WIDTH, y * TILE_HEIGHT);
-         }
+         mConsole->execute();
       }
 
       return;
@@ -579,6 +571,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
             mStoredPosition = mPlayer->getPixelPosition();
             loadLevel();
          }
+         break;
+      }
+      case sf::Keyboard::M:
+      {
+         mRecording = !mRecording;
          break;
       }
       case sf::Keyboard::P:
@@ -657,7 +654,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Slash:
       {
-         mConsole = true;
+         mConsole->setActive(true);
          break;
       }
       default:
@@ -740,9 +737,9 @@ void Game::processEvents()
 
       else if (event.type == sf::Event::TextEntered)
       {
-         if (mConsole)
+         if (mConsole->isActive())
          {
-            mConsoleCommand += static_cast<char>(event.text.unicode);
+            mConsole->append(static_cast<char>(event.text.unicode));
          }
       }
    }

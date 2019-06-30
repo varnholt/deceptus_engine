@@ -91,6 +91,7 @@ INCLUDEPATH += src
 SOURCES += \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
+   src/game/console.cpp \
    src/game/laser.cpp \
    src/game/maptools.cpp \
    src/game/test.cpp \
@@ -201,6 +202,7 @@ SOURCES += \
 HEADERS += \
     src/game/camerasystem.h \
     src/game/camerasystemconfiguration.h \
+    src/game/console.h \
     src/game/constants.h \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
