@@ -23,7 +23,7 @@ qmake && make
 qmake && nmake 
 ```
 
-### Contribute
+## Contribute
 If you're a musician, graphic artist, level designer or programmer - [join us on Discord!](https://discord.gg/U6z4Nm)
 
 
