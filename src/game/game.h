@@ -69,7 +69,6 @@ private:
    std::shared_ptr<Level> mLevel;
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
-   std::unique_ptr<Console> mConsole;
 
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;

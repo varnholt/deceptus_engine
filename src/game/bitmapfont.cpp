@@ -26,7 +26,7 @@ void BitmapFont::load(
    auto i = 0;
    std::string line;
    std::string font;
-   std::vector<int> vals;
+   std::vector<int32_t> vals;
    while (std::getline(file, line))
    {
       if (i == 0)
@@ -107,8 +107,8 @@ std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::strin
 void BitmapFont::draw(
    sf::RenderTarget& window,
    const std::vector<std::shared_ptr<sf::IntRect> > &coords,
-   int x,
-   int y
+   int32_t x,
+   int32_t y
 )
 {
    auto xOffset = 0;

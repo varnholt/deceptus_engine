@@ -1,6 +1,7 @@
 #ifndef BITMAPFONT_H
 #define BITMAPFONT_H
 
+#include <cstdint>
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -14,8 +15,8 @@ public:
    sf::Texture mTexture;
    sf::Sprite mSprite;
    std::map<char, std::shared_ptr<sf::IntRect>> mMap;
-   int mCharWidth = 0;
-   int mCharHeight = 0;
+   int32_t mCharWidth = 0;
+   int32_t mCharHeight = 0;
 
 
 public:
@@ -27,8 +28,8 @@ public:
    void draw(
       sf::RenderTarget& window,
       const std::vector<std::shared_ptr<sf::IntRect>>& coords,
-      int x = 0,
-      int y = 0
+      int32_t x = 0,
+      int32_t y = 0
    );
 };
 
