@@ -1,5 +1,6 @@
 #include "infolayer.h"
 
+#include "console.h"
 #include "extratable.h"
 #include "globalclock.h"
 #include "gameconfiguration.h"
@@ -117,8 +118,8 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto pos = Player::getPlayer(0)->getPixelPosition();
    stream << "player pos: " << static_cast<int>(pos.x / TILE_WIDTH) << ", " << static_cast<int>(pos.y / TILE_HEIGHT);
 
-   std::vector<std::shared_ptr<sf::IntRect>> coords = mFont.getCoords(stream.str());
-   mFont.draw(window, coords, 5, 50);
+   mFont.draw(window, mFont.getCoords(stream.str()), 5, 50);
+   mFont.draw(window, mFont.getCoords(Console::getInstance().getCommand()), 5, 100);
 }
 
 

@@ -246,8 +246,6 @@ void Game::initialize()
 {
   initializeController();
 
-  mConsole = std::make_unique<Console>();
-
   mPlayer = std::make_shared<Player>();
   mPlayer->initialize();
 
@@ -517,11 +515,15 @@ void Game::changeResolution(int32_t w, int32_t h)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
-   if (mConsole->isActive())
+   if (Console::getInstance().isActive())
    {
       if (event.key.code == sf::Keyboard::Return)
       {
-         mConsole->execute();
+         Console::getInstance().execute();
+      }
+      else if (event.key.code == sf::Keyboard::Backspace)
+      {
+          Console::getInstance().chop();
       }
 
       return;
@@ -654,7 +656,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Slash:
       {
-         mConsole->setActive(true);
+         Console::getInstance().setActive(true);
          break;
       }
       default:
@@ -737,9 +739,9 @@ void Game::processEvents()
 
       else if (event.type == sf::Event::TextEntered)
       {
-         if (mConsole->isActive())
+         if (Console::getInstance().isActive())
          {
-            mConsole->append(static_cast<char>(event.text.unicode));
+            Console::getInstance().append(static_cast<char>(event.text.unicode));
          }
       }
    }

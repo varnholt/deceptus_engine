@@ -6,6 +6,9 @@
 #include <sstream>
 
 
+Console Console::mConsole;
+
+
 bool Console::isActive() const
 {
    return mActive;
@@ -21,6 +24,12 @@ void Console::setActive(bool active)
 void Console::append(char c)
 {
    mCommand.push_back(c);
+}
+
+
+void Console::chop()
+{
+   mCommand.pop_back();
 }
 
 
@@ -48,4 +57,16 @@ void Console::execute()
 
       Player::getPlayer(0)->setBodyViaPixelPosition(x * TILE_WIDTH, y * TILE_HEIGHT);
    }
+}
+
+
+Console& Console::getInstance()
+{
+   return mConsole;
+}
+
+
+std::string Console::getCommand() const
+{
+   return mCommand;
 }

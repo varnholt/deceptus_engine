@@ -3,18 +3,25 @@
 class Console
 {
    public:
-      Console() = default;
 
       bool isActive() const;
       void setActive(bool active);
 
       void append(char c);
+      void chop();
       void execute();
 
+      std::string getCommand() const;
 
-   private:
+      static Console& getInstance();
 
+
+private:
+
+      Console() = default;
       bool mActive = false;
       std::string mCommand;
+
+      static Console mConsole;
 };
 
