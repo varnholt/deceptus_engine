@@ -29,6 +29,11 @@ void Console::append(char c)
 
 void Console::chop()
 {
+   if (mCommand.empty())
+   {
+      return;
+   }
+
    mCommand.pop_back();
 }
 

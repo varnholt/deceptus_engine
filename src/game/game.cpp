@@ -312,7 +312,7 @@ void Game::draw()
 
    if (mLevelLoadingFinished)
    {
-       mLevel->draw(mWindowRenderTexture, mScreenshot);
+      mLevel->draw(mWindowRenderTexture, mScreenshot);
    }
 
    mScreenshot = false;
@@ -320,15 +320,22 @@ void Game::draw()
    mInfoLayer->setLoading(!mLevelLoadingFinished);
    mInfoLayer->draw(*mWindowRenderTexture.get());
 
-   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
+
+   const auto debugEnabled = DisplayMode::getInstance().isSet(Display::DisplayDebug);
+
+   if (debugEnabled || Console::getInstance().isActive())
    {
-     mInfoLayer->drawDebugInfo(*mWindowRenderTexture.get());
-     DebugDraw::debugCameraSystem(*mWindowRenderTexture.get());
+      mInfoLayer->drawDebugInfo(*mWindowRenderTexture.get());
+   }
+
+   if (debugEnabled)
+   {
+      DebugDraw::debugCameraSystem(*mWindowRenderTexture.get());
    }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
    {
-     mInventoryLayer->draw(*mWindowRenderTexture.get());
+      mInventoryLayer->draw(*mWindowRenderTexture.get());
    }
 
    Menu::getInstance()->draw(*mWindowRenderTexture.get(), {sf::BlendAlpha});
@@ -523,7 +530,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       else if (event.key.code == sf::Keyboard::Backspace)
       {
-          Console::getInstance().chop();
+         Console::getInstance().chop();
       }
 
       return;
@@ -725,8 +732,13 @@ void Game::processEvents()
             return;
          }
 
-         mPlayer->keyboardKeyPressed(event.key.code);
-         Menu::getInstance()->keyboardKeyPressed(event.key.code);
+         // todo: process keyboard events in the console class, just like done in the message box
+         if (!Console::getInstance().isActive())
+         {
+            mPlayer->keyboardKeyPressed(event.key.code);
+            Menu::getInstance()->keyboardKeyPressed(event.key.code);
+         }
+
          processKeyPressedEvents(event);
       }
 
@@ -741,7 +753,12 @@ void Game::processEvents()
       {
          if (Console::getInstance().isActive())
          {
-            Console::getInstance().append(static_cast<char>(event.text.unicode));
+            auto unicode = event.text.unicode;
+
+            if (unicode > 0x1F && unicode < 0x80)
+            {
+               Console::getInstance().append(static_cast<char>(unicode));
+            }
          }
       }
    }
