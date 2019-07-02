@@ -1086,6 +1086,19 @@ void Player::setJoystickInfo(const GameControllerInfo &joystickInfo)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::impulse(float intensity)
+{
+   if (intensity > 1.0f)
+   {
+      std::cout << "impulse: " << intensity << std::endl;
+
+      auto damage = (static_cast<int>(intensity) - 1) * 20;
+      Player::getPlayer(0)->damage(damage);
+   }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::damage(int damage, const sf::Vector2f& force)
 {
    if (damage == 0)
