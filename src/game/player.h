@@ -149,6 +149,7 @@ public:
    const GameControllerInfo& getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
+   void impulse(float intensity);
    void damage(int damage, const sf::Vector2f& force = vector2fZero);
 
    void updateClimb();

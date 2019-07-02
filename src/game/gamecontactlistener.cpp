@@ -345,14 +345,9 @@ void GameContactListener::PostSolve(b2Contact *contact, const b2ContactImpulse *
 
 void GameContactListener::processImpulse(float impulse)
 {
-   auto damage = (static_cast<int>(impulse) - 1) * 20;
-
-   if (impulse > 1.3f)
-   {
-      // printf("impulse a: %f\n", impulse);
-      Player::getPlayer(0)->damage(damage);
-   }
+   Player::getPlayer(0)->impulse(impulse);
 }
+
 
 void GameContactListener::processPlayerDamage(const b2ContactImpulse *contactImpulse, b2Contact *contact)
 {
