@@ -494,8 +494,16 @@ void Level::loadTmx()
                );
 
                bouncer->setZ(objectGroup->mZ);
+
                mBouncers.push_back(bouncer);
-               addDebugRect(bouncer->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+
+               addDebugRect(
+                  bouncer->getBody(),
+                  tmxObject->mX,
+                  tmxObject->mY,
+                  tmxObject->mWidth,
+                  tmxObject->mHeight
+               );
             }
 
             else if (objectGroup->mName == "conveyorbelts")
@@ -1806,6 +1814,24 @@ Portal* Level::getNearbyPortal() const
    }
 
    return nearbyPortal;
+}
+
+
+//-----------------------------------------------------------------------------
+Bouncer* Level::getNearbyBouncer() const
+{
+   Bouncer* nearbyBouncer = nullptr;
+
+   for (Bouncer* bouncer : mBouncers)
+   {
+      if (bouncer->isPlayerAtBouncer())
+      {
+         nearbyBouncer = bouncer;
+         break;
+      }
+   }
+
+   return nearbyBouncer;
 }
 
 

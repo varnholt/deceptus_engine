@@ -39,16 +39,16 @@ protected:
 private:
 
    void processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture);
-   void processPlayerDamage(const b2ContactImpulse *contactImpulse, b2Contact *contact);
    void processImpulse(float impulse);
 
 
 private:
 
-   int mNumFootContacts = 0;
-   int mNumPlayerContacts = 0;
-   int mNumDeadlyContacts = 0;
-   int mNumMovingPlatformContacts = 0;
+   int32_t mNumFootContacts = 0;
+   int32_t mNumPlayerContacts = 0;
+   int32_t mNumDeadlyContacts = 0;
+   int32_t mNumMovingPlatformContacts = 0;
+   int32_t mBouncerCycles = 5;
 
    static GameContactListener* sInstance;
 };

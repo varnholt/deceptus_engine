@@ -10,6 +10,8 @@
 #include "fixturenode.h"
 #include "player.h"
 
+#include <iostream>
+
 
 // http://www.iforce2d.net/b2dtut/collision-anatomy
 //
@@ -337,45 +339,45 @@ void GameContactListener::PreSolve(b2Contact *contact, const b2Manifold* /*oldMa
 }
 
 
-void GameContactListener::PostSolve(b2Contact *contact, const b2ContactImpulse *contactImpulse)
+void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *contactImpulse)
 {
-   processPlayerDamage(contactImpulse, contact);
+   // check if the player hits something at a heigh speed or
+   // if something hits the player at a nigh speed
+   auto userDataA = contact->GetFixtureA()->GetUserData();
+   auto userDataB = contact->GetFixtureB()->GetUserData();
+   auto impulse = contactImpulse->normalImpulses[0];
+
+   if (userDataA)
+   {
+      auto nodeA = static_cast<FixtureNode*>(userDataA);
+
+      if (nodeA->getType() == ObjectTypePlayer)
+      {
+         processImpulse(impulse);
+      }
+   }
+
+   if (userDataB)
+   {
+      auto nodeB = static_cast<FixtureNode*>(userDataB);
+
+      if (nodeB->getType() == ObjectTypePlayer)
+      {
+         processImpulse(impulse);
+      }
+   }
 }
 
 
 void GameContactListener::processImpulse(float impulse)
 {
+   // filter just ordinary ground contact
+   if (impulse < 0.03f)
+   {
+      return;
+   }
+
    Player::getPlayer(0)->impulse(impulse);
-}
-
-
-void GameContactListener::processPlayerDamage(const b2ContactImpulse *contactImpulse, b2Contact *contact)
-{
-  // check if the player hits something at a heigh speed or
-  // if something hits the player at a nigh speed
-  auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
-  auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
-  auto impulse = contactImpulse->normalImpulses[0];
-
-  if (fixtureUserDataA)
-  {
-     auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
-
-     if (fixtureNode->getType() == ObjectTypePlayer)
-     {
-        processImpulse(impulse);
-     }
-  }
-
-  if (fixtureUserDataB)
-  {
-     auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
-
-     if (fixtureNode->getType() == ObjectTypePlayer)
-     {
-        processImpulse(impulse);
-     }
-  }
 }
 
 
