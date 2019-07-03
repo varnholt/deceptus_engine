@@ -178,6 +178,7 @@ private:
    void updateLostGroundContact();
    void updatePlayerOrientation();
    void updateDash(Dash dir = Dash::None);
+   void updateCrouch();
    bool isDashActive() const;
 
    void createHead();
@@ -248,6 +249,7 @@ private:
 
    bool mHadGroundContact = true;
    bool mGroundContactJustLost = false;
+   bool mHardLanding = false;
 
    float mBeltVelocity = 0.0f;
    bool mIsOnBelt = false;
@@ -282,6 +284,5 @@ private:
 
    static int sNextId;
    static std::vector<Player*> sPlayerList;
-   void updateCrouch();
 };
 

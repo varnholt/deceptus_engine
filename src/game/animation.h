@@ -21,11 +21,11 @@ public:
    void play();
    void pause();
    void stop();
+   void seekToStart();
+   void setFrame(int32_t newFrame, bool resetTime = true);
 
    sf::FloatRect getLocalBounds() const;
    sf::FloatRect getGlobalBounds() const;
-
-   void setFrame(int32_t newFrame, bool resetTime = true);
 
    std::string mName;
 
@@ -43,6 +43,5 @@ public:
 
    bool mPaused = false;
    bool mLooped = false;
-   void seekToStart();
 };
 
