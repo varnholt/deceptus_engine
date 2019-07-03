@@ -109,6 +109,8 @@ public:
    static Level *getCurrentLevel();
 
    Portal* getNearbyPortal() const;
+   Bouncer* getNearbyBouncer() const;
+
    void toggleDoor();
    void boom(float x, float y, float intensity);
 

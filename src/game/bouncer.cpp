@@ -91,7 +91,7 @@ Bouncer::Bouncer(
   sensorFixtureDef.isSensor = true;
 
   auto fixture = mBody->CreateFixture(&sensorFixtureDef);
-  fixture->SetUserData((void*)this);
+  fixture->SetUserData(static_cast<void*>(this));
 
   // load texture
   if (mTexture.loadFromFile("data/level-crypt/tilesets/bumper.png"))
@@ -113,79 +113,102 @@ void Bouncer::draw(sf::RenderTarget &window)
 
 void Bouncer::update(float /*dt*/)
 {
-  auto now = GlobalClock::getInstance()->getElapsedTime();
-  auto delta = (now - mActivationTime).asMilliseconds();
+   auto player = Player::getPlayer(0);
 
-  int step = static_cast<int>(delta * 0.02f);
-  if (step > 9)
-  {
-    step = 0;
-  }
+   // yeah, this is super dirty.
+   // should have a static function to determine whether the player will collide
+   // with one of the bouncers within the next few frames
+   const auto a = sf::Vector2i{
+      static_cast<int32_t>(mPositionSf.x / TILE_WIDTH) + 1,
+      static_cast<int32_t>(mPositionSf.y / TILE_HEIGHT) - 1
+   };
+
+   const auto b = sf::Vector2i{
+      static_cast<int32_t>(player->getPixelPosition().x / TILE_WIDTH),
+      static_cast<int32_t>(player->getPixelPosition().y / TILE_HEIGHT)
+   };
+
+   mPlayerAtBouncer = (a == b);
+
+   // std::cout << "a: " << a.x << ", " << a.y << " b: " << b.x << ", " << b.y << std::endl;
+
+   auto now = GlobalClock::getInstance()->getElapsedTime();
+   auto delta = (now - mActivationTime).asMilliseconds();
+
+   int step = static_cast<int>(delta * 0.02f);
+   if (step > 9)
+   {
+      step = 0;
+   }
 
   // printf("step: %d\n", step);
 
   mSprite.setTextureRect(
-     sf::IntRect(
-        step * SPRITE_WIDTH,
-        0,
-        SPRITE_WIDTH,
-        SPRITE_HEIGHT
-     )
-  );
+      sf::IntRect(
+         step * SPRITE_WIDTH,
+         0,
+         SPRITE_WIDTH,
+         SPRITE_HEIGHT
+      )
+   );
+}
+
+
+bool Bouncer::isPlayerAtBouncer()
+{
+   return mPlayerAtBouncer;
 }
 
 
 Bouncer::~Bouncer()
 {
-  mBody->GetWorld()->DestroyBody(mBody);
+   mBody->GetWorld()->DestroyBody(mBody);
 }
 
 
 void Bouncer::activate()
 {
-  auto now = GlobalClock::getInstance()->getElapsedTime();
-  auto delta = (now - mActivationTime).asSeconds();
+   auto now = GlobalClock::getInstance()->getElapsedTime();
+   auto delta = (now - mActivationTime).asSeconds();
 
-  if (delta < 0.3f) // set to 0.5?
-  {
-    // printf("hop, ignore\n");
-    return;
-  }
+   if (delta < 0.3f) // set to 0.5?
+   {
+      return;
+   }
 
-  // printf("hop %f\n", delta);
+   mActivationTime = now;
 
-  mActivationTime = now;
+   auto forceValue = 0.6f;
 
-  auto forceValue = 0.6f;
+   b2Vec2 force;
+   switch (mAlignment)
+   {
+      case PointsUp:
+         force = b2Vec2{0.0f, -forceValue};
+         break;
+      case PointsDown:
+         force = b2Vec2{0.0f, forceValue};
+         break;
+      case PointsLeft:
+         force = b2Vec2{-forceValue, 0};
+          break;
+      case PointsRight:
+         force = b2Vec2{forceValue, 0};
+         break;
+      case PointsNowhere:
+          break;
+   }
 
-  b2Vec2 force;
-  switch (mAlignment)
-  {
-    case PointsUp:
-      force = b2Vec2{0.0f, -forceValue};
-      break;
-    case PointsDown:
-      force = b2Vec2{0.0f, forceValue};
-      break;
-    case PointsLeft:
-      force = b2Vec2{-forceValue, 0};
-      break;
-    case PointsRight:
-      force = b2Vec2{forceValue, 0};
-      break;
-    case PointsNowhere:
-    break;
-  }
+   auto player = Player::getPlayer(0);
+   auto body = player->getBody();
 
-  auto body = Player::getPlayer(0)->getBody();
+   // it's pretty important to reset the body's y velocity
+   const auto& velocity = body->GetLinearVelocity();
+   body->SetLinearVelocity(b2Vec2(velocity.x, 0.0f));
 
-  // it's pretty important to reset the body's y velocity
-  const auto& velocity = body->GetLinearVelocity();
-  body->SetLinearVelocity(b2Vec2(velocity.x, 0.0f));
-
-  // aaaaand.. up!
-  const auto& pos = body->GetWorldCenter();
-  body->ApplyLinearImpulse(force, pos, true);
+   // aaaaand.. up!
+   const auto& pos = body->GetWorldCenter();
+   body->ApplyLinearImpulse(force, pos, true);
 }
 
 

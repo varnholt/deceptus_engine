@@ -38,7 +38,7 @@ ConveyorBelt::ConveyorBelt(
   auto halfPhysicsWidth = width * MPP * 0.5f;
   auto halfPhysicsHeight = height * MPP * 0.5f;
 
-  // create fixture for physical boundaries of the bouncer object
+  // create fixture for physical boundaries of the belt object
   mShapeBounds.SetAsBox(
     halfPhysicsWidth, halfPhysicsHeight,
     b2Vec2(halfPhysicsWidth, halfPhysicsHeight),

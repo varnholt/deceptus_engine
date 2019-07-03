@@ -693,10 +693,10 @@ float Player::getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity,
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getDeceleration() const
 {
-  auto deceleration =
-     (isInAir())
-        ? PhysicsConfiguration::getInstance().mPlayerDecelerationAir
-        : PhysicsConfiguration::getInstance().mPlayerDecelerationGround;
+   auto deceleration =
+      (isInAir())
+         ? PhysicsConfiguration::getInstance().mPlayerDecelerationAir
+         : PhysicsConfiguration::getInstance().mPlayerDecelerationGround;
 
   return deceleration;
 }
@@ -705,12 +705,12 @@ float Player::getDeceleration() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getAcceleration() const
 {
-  auto acceleration =
-     (isInAir())
-        ? PhysicsConfiguration::getInstance().mPlayerAccelerationAir
-        : PhysicsConfiguration::getInstance().mPlayerAccelerationGround;
+   auto acceleration =
+      (isInAir())
+         ? PhysicsConfiguration::getInstance().mPlayerAccelerationAir
+         : PhysicsConfiguration::getInstance().mPlayerAccelerationGround;
 
-  return acceleration;
+   return acceleration;
 }
 
 
@@ -1097,10 +1097,12 @@ void Player::impulse(float intensity)
 {
    if (intensity > 1.0f)
    {
-      std::cout << "impulse: " << intensity << std::endl;
+      if (Level::getCurrentLevel()->getNearbyBouncer())
+      {
+         return;
+      }
 
       mHardLanding = true;
-
       auto damage = static_cast<int>((intensity - 1.0f) * 20.0f);
       Player::getPlayer(0)->damage(damage);
    }
@@ -1125,14 +1127,11 @@ void Player::damage(int damage, const sf::Vector2f& force)
       auto body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-      printf("player damage: %d\n", damage);
       mExtraTable->mHealth->mHealth -= damage;
       mDamageClock.restart();
 
       if (mExtraTable->mHealth->mHealth < 0)
       {
-         printf("player is dead\n");
-
          // the function below is not called since 'damage(...)' is evaluated
          // within the box2d step function; no further box2d related adjustments
          // can be made until step() is finished
