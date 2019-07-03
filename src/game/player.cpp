@@ -88,6 +88,7 @@ void Player::initialize()
 
    mWeaponSystem->initialize();
 
+   // none of the player animations are managed by the animation pool, they're just paused when finished
    mIdleRightAligned        = AnimationPool::getInstance().add("player_idle_right_aligned",         0.0f, 0.0f, true, false);
    mIdleLeftAligned         = AnimationPool::getInstance().add("player_idle_left_aligned",          0.0f, 0.0f, true, false);
    mRunRightAligned         = AnimationPool::getInstance().add("player_run_right_aligned",          0.0f, 0.0f, true, false);
@@ -792,38 +793,44 @@ void Player::updateAnimation(const sf::Time& dt)
    {
       if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
       {
-         // std::cout << "jump ignition" << std::endl;
+         // jump ignition
          mJumpAnimationReference = 0;
          nextCycle = isPointingRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
       }
       else if (inAir && !inWater)
       {
+         // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            // std::cout << "jump up" << std::endl;
             nextCycle = isPointingRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
             mJumpAnimationReference = 1;
          }
+         // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            // std::cout << "jump down" << std::endl;
             nextCycle = isPointingRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
             mJumpAnimationReference = 2;
          }
          else
          {
-             // means: we haven't been moving down yet
+            // jump midair
             if (mJumpAnimationReference == 1)
             {
-               // std::cout << "jump midair" << std::endl;
                nextCycle = isPointingRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
             }
          }
       }
-      else if (mJumpAnimationReference == 2)
+      // hard landing
+      else if (mJumpAnimationReference == 2 && mHardLanding)
       {
-         // std::cout << "jump landing" << std::endl;
-         mJumpAnimationReference = 3;
+         nextCycle = isPointingRight() ? mJumpLandingRightAligned : mJumpLandingLeftAligned;
+
+         if (nextCycle->mCurrentFrame == nextCycle->mFrames.size() - 1)
+         {
+             mJumpAnimationReference = 3;
+             mHardLanding = false;
+             nextCycle->seekToStart();
+         }
       }
    }
 
@@ -1092,7 +1099,9 @@ void Player::impulse(float intensity)
    {
       std::cout << "impulse: " << intensity << std::endl;
 
-      auto damage = (static_cast<int>(intensity) - 1) * 20;
+      mHardLanding = true;
+
+      auto damage = static_cast<int>((intensity - 1.0f) * 20.0f);
       Player::getPlayer(0)->damage(damage);
    }
 }
