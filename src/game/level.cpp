@@ -692,7 +692,7 @@ void Level::updateLookVector()
       auto x = axisValues[static_cast<uint32_t>(xAxis)] / 32767.0f;
       auto y = axisValues[static_cast<uint32_t>(yAxis)] / 32767.0f;
 
-      if (fabs(x)> 0.1f || fabs(y)> 0.1f)
+      if (fabs(x) > 0.1f || fabs(y) > 0.1f)
       {
          auto w = GameConfiguration::getInstance().mViewWidth * 0.5f;
          auto h = GameConfiguration::getInstance().mViewHeight * 0.5f;

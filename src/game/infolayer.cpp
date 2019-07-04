@@ -67,42 +67,55 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto health = mLayers["health"];
-   auto health_energy = mLayers["health_energy"];
-   auto health_weapon = mLayers["health_weapon"];
+   auto layerHealth = mLayers["health"];
+   auto layerHealthEnergy = mLayers["health_energy"];
+   auto layerHealthWeapon = mLayers["health_weapon"];
 
-   if (health_energy->mVisible)
+   if (layerHealthEnergy->mVisible)
    {
-       auto h = (Player::getPlayer(0)->mExtraTable->mHealth->mHealth) * 0.01f;
-       health_energy->mSprite->setTextureRect(
+       const auto health = (Player::getPlayer(0)->mExtraTable->mHealth->mHealth) * 0.01f;
+
+       const auto healthLayerWidth  = layerHealthEnergy->mSprite->getTexture()->getSize().x * health;
+       const auto healthLayerHeight = layerHealthEnergy->mSprite->getTexture()->getSize().y;
+
+       layerHealthEnergy->mSprite->setTextureRect(
           sf::IntRect{
              0,
              0,
-             static_cast<int32_t>(health_energy->mSprite->getTexture()->getSize().x * h),
-             static_cast<int32_t>(health_energy->mSprite->getTexture()->getSize().y)
+             static_cast<int32_t>(healthLayerWidth),
+             static_cast<int32_t>(healthLayerHeight)
           }
        );
 
+       // std::cout << "energy: " << healthLayerWidth << std::endl;
+
        auto t = (now - mShowTime).asSeconds();
        const auto duration = 1.0f;
-       t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * M_PI))) * 200;
+       t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * static_cast<float>(M_PI)))) * 200;
 
-       health_energy->mSprite->setOrigin(t, 0.0f);
-       health_weapon->mSprite->setOrigin(t, 0.0f);
-       health->mSprite->setOrigin(t, 0.0f);
+       layerHealth->mSprite->setOrigin(t, 0.0f);
+       layerHealthEnergy->mSprite->setOrigin(t, 0.0f);
+       layerHealthWeapon->mSprite->setOrigin(t, 0.0f);
 
-       health_energy->draw(window, states);
-       health_weapon->draw(window, states);
-       health->draw(window, states);
+       layerHealth->draw(window, states);
+       layerHealthEnergy->draw(window, states);
+       layerHealthWeapon->draw(window, states);
    }
 
    auto autosave = mLayers["autosave"];
    if (autosave->mVisible)
    {
       auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      autosave->mSprite->setColor(sf::Color(255, 255, 255, alpha * 255));
+      autosave->mSprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
       autosave->draw(window, states);
    }
+
+
+   // support cpan
+   // cpan_up
+   // cpan_down
+   // cpan_left
+   // cpan_right
 }
 
 
