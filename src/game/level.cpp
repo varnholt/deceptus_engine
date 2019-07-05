@@ -23,8 +23,6 @@
 #include "sfmlmath.h"
 #include "squaremarcher.h"
 #include "tilemap.h"
-#include "gamecontrollerintegration.h"
-#include "joystick/gamecontroller.h"
 
 // sfml
 #include <SFML/Window/Event.hpp>
@@ -61,32 +59,29 @@ Level* Level::sCurrentLevel = nullptr;
 const std::string parallaxIdentifier = "parallax_";
 
 
+
 //-----------------------------------------------------------------------------
-GameControllerInfo Level::getJoystickInfo() const
-{
-  return mJoystickInfo;
-}
-
-void Level::setJoystickInfo(const GameControllerInfo &joystickInfo)
-{
-  mJoystickInfo = joystickInfo;
-}
-
 std::string Level::getDescriptionFilename() const
 {
    return mDescriptionFilename;
 }
 
+
+//-----------------------------------------------------------------------------
 void Level::setDescriptionFilename(const std::string &descriptionFilename)
 {
    mDescriptionFilename = descriptionFilename;
 }
 
+
+//-----------------------------------------------------------------------------
 const Level::Atmosphere& Level::getPhysics() const
 {
    return mAtmosphere;
 }
 
+
+//-----------------------------------------------------------------------------
 void Level::initializeTextures()
 {
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
@@ -575,13 +570,6 @@ void Level::loadTmx()
 
 
 //-----------------------------------------------------------------------------
-bool Level::isLookActive() const
-{
-   return (mLook & LookActive);
-}
-
-
-//-----------------------------------------------------------------------------
 void Level::load()
 {
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
@@ -677,83 +665,6 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Level::updateLookVector()
-{
-  auto speed = 3.0f;
-  //  auto maxLength = 100.0f;
-
-  if (isControllerUsed())
-  {
-      auto axisValues = mJoystickInfo.getAxisValues();
-
-      auto xAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
-      auto yAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
-
-      auto x = axisValues[static_cast<uint32_t>(xAxis)] / 32767.0f;
-      auto y = axisValues[static_cast<uint32_t>(yAxis)] / 32767.0f;
-
-      if (fabs(x) > 0.1f || fabs(y) > 0.1f)
-      {
-         auto w = GameConfiguration::getInstance().mViewWidth * 0.5f;
-         auto h = GameConfiguration::getInstance().mViewHeight * 0.5f;
-
-         mLookVector.x = x * w;
-         mLookVector.y = y * h;
-      }
-      else
-      {
-         mLookVector.x = 0.0f;
-         mLookVector.y = 0.0f;
-      }
-   }
-   else if (mLook & LookActive)
-   {
-      if (mLook & LookUp)
-      {
-         mLookVector += sf::Vector2f(0.0f, -speed);
-      }
-      if (mLook & LookDown)
-      {
-         mLookVector += sf::Vector2f(0.0f, speed);
-      }
-      if (mLook & LookLeft)
-      {
-         mLookVector += sf::Vector2f(-speed, 0.0f);
-      }
-      if (mLook & LookRight)
-      {
-         mLookVector += sf::Vector2f(speed, 0.0f);
-      }
-
-      //    auto len = SfmlMath::lengthSquared(mLookVector);
-      //    if (len > maxLength)
-      //    {
-      //      mLookVector = SfmlMath::normalize(mLookVector);
-      //      mLookVector *= maxLength;
-      //    }
-   }
-   else
-   {
-      mLookVector *= 0.85f;
-   }
-}
-
-
-//-----------------------------------------------------------------------------
-void Level::updateLookState(Look look, bool enable)
-{
-   if (enable)
-   {
-      mLook |= look;
-   }
-   else
-   {
-      mLook &= ~look;
-   }
-}
-
-
-//-----------------------------------------------------------------------------
 std::shared_ptr<sf::View> Level::getLevelView()
 {
   return mLevelView;
@@ -786,15 +697,16 @@ void Level::createViews()
    mMapView->setViewport(sf::FloatRect(0.65f, 0.05f, 0.32f, 0.18f));
 }
 
-
+#include "camerapane.h"
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
    auto& cameraSystem = CameraSystem::getCameraSystem();
    cameraSystem.update(mViewWidth, mViewHeight);
 
-   auto levelViewX = cameraSystem.getX() + mLookVector.x;
-   auto levelViewY = cameraSystem.getY() + mLookVector.y;
+   const auto lookVector = CameraPane::getInstance().getLookVector();
+   auto levelViewX = cameraSystem.getX() + lookVector.x;
+   auto levelViewY = cameraSystem.getY() + lookVector.y;
 
    /*
    if (levelViewX < 0)
@@ -1225,7 +1137,7 @@ void Level::update(const sf::Time& dt)
    // http://www.iforce2d.net/b2dtut/worlds
    mWorld->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
 
-   updateLookVector();
+   CameraPane::getInstance().update();
    updateBoom(dt);
 
    for (auto& tileMap : mTileMaps)
@@ -1879,8 +1791,3 @@ std::map<b2Body *, b2Vec2 *>* Level::getPointMap()
 }
 
 
-//-----------------------------------------------------------------------------
-bool Level::isControllerUsed() const
-{
-  return !mJoystickInfo.getAxisValues().empty();
-}

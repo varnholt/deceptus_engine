@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "audio.h"
+#include "camerapane.h"
 #include "displaymode.h"
 #include "gamecontactlistener.h"
 #include "gamecontrollerintegration.h"
@@ -722,7 +723,9 @@ void Player::updateAnimation(const sf::Time& dt)
    auto velocity = mBody->GetLinearVelocity();
    const auto inAir = isInAir();
    const auto inWater = isInWater();
-   const auto lookActive = (Level::getCurrentLevel()->isLookActive());
+
+   const auto lookActive = CameraPane::getInstance().isLookActive();
+
    auto requiresUpdate = true;
 
    // dash

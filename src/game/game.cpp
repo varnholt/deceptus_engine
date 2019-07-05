@@ -3,10 +3,12 @@
 #include "animationpool.h"
 #include "audio.h"
 #include "bullethitanimation.h"
+#include "camerapane.h"
 #include "debugdraw.h"
 #include "displaymode.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
+#include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
 #include "gamejoystickmapping.h"
 #include "gamestate.h"
@@ -385,7 +387,7 @@ void Game::updateGameControllerForGame()
   {
      auto info = gji->getController()->getInfo();
      mPlayer->setJoystickInfo(info);
-     mLevel->setJoystickInfo(info);
+     GameControllerData::getInstance().setJoystickInfo(info);
   }
 }
 
@@ -631,19 +633,20 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::LShift:
       {
-         mLevel->updateLookState(Look::LookActive, true);
+
+         CameraPane::getInstance().updateLookState(Look::LookActive, true);
          break;
       }
       case sf::Keyboard::Left:
       {
          mInventoryLayer->left();
-         mLevel->updateLookState(Look::LookLeft, true);
+         CameraPane::getInstance().updateLookState(Look::LookLeft, true);
          break;
       }
       case sf::Keyboard::Right:
       {
          mInventoryLayer->right();
-         mLevel->updateLookState(Look::LookRight, true);
+         CameraPane::getInstance().updateLookState(Look::LookRight, true);
          break;
       }
       case sf::Keyboard::Return:
@@ -653,12 +656,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Up:
       {
-         mLevel->updateLookState(Look::LookUp, true);
+         CameraPane::getInstance().updateLookState(Look::LookUp, true);
          break;
       }
       case sf::Keyboard::Down:
       {
-         mLevel->updateLookState(Look::LookDown, true);
+         CameraPane::getInstance().updateLookState(Look::LookDown, true);
          break;
       }
       case sf::Keyboard::Slash:
@@ -681,27 +684,27 @@ void Game::processKeyReleasedEvents(const sf::Event& event)
    {
       case sf::Keyboard::LShift:
       {
-         mLevel->updateLookState(Look::LookActive, false);
+         CameraPane::getInstance().updateLookState(Look::LookActive, false);
          break;
       }
       case sf::Keyboard::Left:
       {
-         mLevel->updateLookState(Look::LookLeft, false);
+         CameraPane::getInstance().updateLookState(Look::LookLeft, false);
          break;
       }
       case sf::Keyboard::Right:
       {
-         mLevel->updateLookState(Look::LookRight, false);
+         CameraPane::getInstance().updateLookState(Look::LookRight, false);
          break;
       }
       case sf::Keyboard::Up:
       {
-         mLevel->updateLookState(Look::LookUp, false);
+         CameraPane::getInstance().updateLookState(Look::LookUp, false);
          break;
       }
       case sf::Keyboard::Down:
       {
-         mLevel->updateLookState(Look::LookDown, false);
+         CameraPane::getInstance().updateLookState(Look::LookDown, false);
          break;
       }
 
