@@ -123,14 +123,7 @@ public:
 
    void drawStaticChains(sf::RenderTarget& target);
 
-   void updateLookVector();
-   void updateLookState(Look look, bool enable);
-   bool isLookActive() const;
-
    std::shared_ptr<sf::View> getLevelView();
-
-   GameControllerInfo getJoystickInfo() const;
-   void setJoystickInfo(const GameControllerInfo &joystickInfo);
 
    std::string getDescriptionFilename() const;
    void setDescriptionFilename(const std::string &descriptionFilename);
@@ -177,7 +170,6 @@ protected:
    );
 
    void load();
-   bool isControllerUsed() const;
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
 
@@ -209,7 +201,6 @@ protected:
    float mBoomOffsetX = 0.0f;
    float mBoomOffsetY = 0.0f;
    float mCameraBoomIntensity = 1.0f;
-   int32_t mLook = LookInactive;
 
    std::shared_ptr<LevelDescription> mDescription;
 
@@ -232,7 +223,6 @@ protected:
    Physics mPhysics;
 
    sf::Vector2f mStartPosition;
-   sf::Vector2f mLookVector;
 
    std::unique_ptr<TmxParser> mTmxParser;
    std::string mDescriptionFilename;
@@ -242,7 +232,6 @@ protected:
 
    AmbientOcclusion mAo;
    std::vector<std::shared_ptr<ImageLayer>> mImageLayers;
-   GameControllerInfo mJoystickInfo;
 
    bool mAtmosphereEnabled = false;
    sf::Shader mAtmosphereShader;
