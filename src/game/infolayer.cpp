@@ -1,5 +1,6 @@
 #include "infolayer.h"
 
+#include "camerapane.h"
 #include "console.h"
 #include "extratable.h"
 #include "globalclock.h"
@@ -110,12 +111,19 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
       autosave->draw(window, states);
    }
 
-
    // support cpan
-   // cpan_up
-   // cpan_down
-   // cpan_left
-   // cpan_right
+   if (CameraPane::getInstance().isLookActive())
+   {
+       auto layerCameraPaneUp = mLayers["cpan_up"];
+       auto layerCameraPaneDown = mLayers["cpan_down"];
+       auto layerCameraPaneLeft = mLayers["cpan_left"];
+       auto layerCameraPaneRight = mLayers["cpan_right"];
+
+       layerCameraPaneUp->draw(window, states);
+       layerCameraPaneDown->draw(window, states);
+       layerCameraPaneLeft->draw(window, states);
+       layerCameraPaneRight->draw(window, states);
+   }
 }
 
 
