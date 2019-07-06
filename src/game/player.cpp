@@ -9,8 +9,10 @@
 #include "gamecontrollerintegration.h"
 #include "gamestate.h"
 #include "globalclock.h"
+#include "fan.h"
 #include "fixturenode.h"
 #include "joystick/gamecontroller.h"
+#include "laser.h"
 #include "level.h"
 #include "animationpool.h"
 #include "physicsconfiguration.h"
@@ -1848,6 +1850,15 @@ void Player::updatePixelCollisions()
    const auto rect = getPlayerRect();
    mExtraManager->collide(rect);
    Laser::collide(rect);
+
+   auto dir = Fan::collide(rect);
+   if (dir.has_value())
+   {
+      mBody->ApplyForceToCenter(
+         b2Vec2(2.0f * dir->x, -dir->y),
+         true
+      );
+   }
 }
 
 

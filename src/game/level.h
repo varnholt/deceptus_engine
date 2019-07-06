@@ -5,10 +5,8 @@
 #include "ambientocclusion.h"
 #include "camerasystem.h"
 #include "constants.h"
-#include "door.h"
 #include "gamenode.h"
 #include "imagelayer.h"
-#include "laser.h"
 #include "luanode.h"
 #include "portal.h"
 #include "squaremarcher.h"
@@ -33,7 +31,9 @@
 
 class Bouncer;
 class ConveyorBelt;
+class Door;
 struct ExtraItem;
+class Laser;
 struct LevelDescription;
 class MovingPlatform;
 class TileMap;
