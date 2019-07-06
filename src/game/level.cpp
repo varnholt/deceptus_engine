@@ -9,9 +9,11 @@
 #include "door.h"
 #include "extraitem.h"
 #include "extramanager.h"
+#include "fan.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
 #include "globalclock.h"
+#include "laser.h"
 #include "leveldescription.h"
 #include "luainterface.h"
 #include "maptools.h"
@@ -426,7 +428,11 @@ void Level::loadTmx()
 
             auto pushTileMap = true;
 
-            if (layer->mName == "atmosphere")
+            if (layer->mName == "fans")
+            {
+               Fan::load(layer, tileset, mWorld);
+            }
+            else if (layer->mName == "atmosphere")
             {
                mAtmosphere.mTileMap = tileMap;
                parseAtmosphereLayer(layer, tileset);
@@ -468,7 +474,10 @@ void Level::loadTmx()
             {
                Laser::addObject(tmxObject);
             }
-
+            else if (objectGroup->mName == "fans")
+            {
+               Fan::addObject(tmxObject);
+            }
             else if (objectGroup->mName == "portals")
             {
                if (tmxObject->mPolyLine)
@@ -476,7 +485,6 @@ void Level::loadTmx()
                   Portal::link(mPortals, tmxObject);
                }
             }
-
             else if (objectGroup->mName == "bouncers")
             {
                Bouncer* bouncer = new Bouncer(
@@ -559,6 +567,7 @@ void Level::loadTmx()
    }
 
    Laser::merge();
+   Fan::merge();
 
    if (!mAtmosphere.mTileMap)
    {

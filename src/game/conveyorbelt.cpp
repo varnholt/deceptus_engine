@@ -14,6 +14,7 @@ void ConveyorBelt::setVelocity(float velocity)
   mVelocity = velocity;
 }
 
+
 ConveyorBelt::ConveyorBelt(
    GameNode* parent,
    const std::shared_ptr<b2World>& world,
@@ -58,12 +59,6 @@ ConveyorBelt::ConveyorBelt(
     b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
     0.0f
   );
-
-//  b2FixtureDef sensorFixtureDef;
-//  sensorFixtureDef.shape = &mShapeBounds;
-//  sensorFixtureDef.isSensor = true;
-//  auto fixture = mBody->CreateFixture(&sensorFixtureDef);
-//  fixture->SetUserData((void*)this);
 }
 
 
@@ -136,20 +131,20 @@ void ConveyorBelt::processFixtureNode(
 
 void ConveyorBelt::processContact(b2Contact* contact)
 {
-  auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
-  auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
+   auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
+   auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
 
-  if (fixtureUserDataA)
-  {
-     auto fixtureNode = (FixtureNode*)fixtureUserDataA;
-     processFixtureNode(fixtureNode, contact->GetFixtureB()->GetBody());
-  }
+   if (fixtureUserDataA)
+   {
+      auto fixtureNode = (FixtureNode*)fixtureUserDataA;
+      processFixtureNode(fixtureNode, contact->GetFixtureB()->GetBody());
+   }
 
-  if (fixtureUserDataB)
-  {
-     auto fixtureNode = (FixtureNode*)fixtureUserDataB;
-     processFixtureNode(fixtureNode, contact->GetFixtureA()->GetBody());
-  }
+   if (fixtureUserDataB)
+   {
+      auto fixtureNode = (FixtureNode*)fixtureUserDataB;
+      processFixtureNode(fixtureNode, contact->GetFixtureA()->GetBody());
+   }
 }
 
 
