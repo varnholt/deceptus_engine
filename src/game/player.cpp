@@ -839,6 +839,12 @@ void Player::updateAnimation(const sf::Time& dt)
       }
    }
 
+   // swimming - no animation provided yet.
+   if (isInWater())
+   {
+      nextCycle = isPointingRight() ? mIdleRightAligned : mIdleLeftAligned;
+   }
+
    // reset x if animation cycle changed
    if (nextCycle != mCurrentCycle)
    {
