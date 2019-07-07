@@ -15,6 +15,7 @@
 #include "globalclock.h"
 #include "laser.h"
 #include "leveldescription.h"
+#include "levelmap.h"
 #include "luainterface.h"
 #include "maptools.h"
 #include "meshtools.h"
@@ -176,6 +177,8 @@ Level::Level()
 
    mRaycastLight = std::make_shared<RaycastLight>();
    mStaticLight = std::make_shared<StaticLight>();
+
+   mMap = std::make_unique<LevelMap>();
 }
 
 
@@ -1124,6 +1127,11 @@ void Level::draw(
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
       drawMap(*window.get());
+   }
+
+   if (DisplayMode::getInstance().isSet(Display::DisplayMap))
+   {
+      mMap->draw(*window.get());
    }
 }
 

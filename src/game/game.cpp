@@ -322,7 +322,6 @@ void Game::draw()
    mInfoLayer->setLoading(!mLevelLoadingFinished);
    mInfoLayer->draw(*mWindowRenderTexture.get());
 
-
    const auto debugEnabled = DisplayMode::getInstance().isSet(Display::DisplayDebug);
 
    if (debugEnabled || Console::getInstance().isActive())
@@ -669,6 +668,10 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          Console::getInstance().setActive(true);
          break;
       }
+      case sf::Keyboard::Tab:
+         GameState::getInstance().enqueueTogglePauseResume();
+         DisplayMode::getInstance().enqueueToggle(Display::DisplayMap);
+         break;
       default:
       {
          break;
