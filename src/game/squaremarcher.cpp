@@ -9,9 +9,6 @@
 #include <sstream>
 
 
-int32_t SquareMarcher::sPathDumpCounter = 0;
-
-
 SquareMarcher::SquareMarcher(
    uint32_t w,
    uint32_t h,
@@ -117,8 +114,6 @@ void SquareMarcher::scan()
    std::ifstream fileIn(mCachePath);
    if (fileIn.fail())
    {
-      std::cout << std::endl << "rebuilding cache for '" << mCachePath.string() << "'" << std::endl;
-
       // scan tiles until collision hit that wasn't visited
       for (auto y = 0u; y < mHeight; y++)
       {
@@ -146,48 +141,47 @@ void SquareMarcher::scan()
    else
    {
       deserialize();
-      // debugPaths();
    }
 }
 
 
-void SquareMarcher::debugPaths()
+void SquareMarcher::writeToImage(const std::filesystem::path& imagePath)
 {
-   std::cout << "[x] dumping " << mPaths.size() << " paths..." << std::endl;
-
-   uint32_t factor = 1;
-   sf::RenderTexture renderTexture;
-   if (!renderTexture.create(mWidth * factor, mHeight * factor))
+   std::ifstream fileIn(imagePath);
+   if (fileIn.fail())
    {
-       std::cout << "failed to create render texture" << std::endl;
-       return;
-   }
-
-   renderTexture.clear();
-
-   for (const auto& path : mPaths)
-   {
-      std::vector<sf::Vertex> vertices;
-      for (const auto& pos : path.mPolygon)
+      uint32_t factor = 1;
+      sf::RenderTexture renderTexture;
+      if (!renderTexture.create(mWidth * factor, mHeight * factor))
       {
-         vertices.push_back(
-            sf::Vector2f{
-               static_cast<float>(pos.x * factor),
-               static_cast<float>(pos.y * factor)
-            }
-         );
+          std::cout << "failed to create render texture" << std::endl;
+          return;
       }
-      vertices.push_back(vertices.at(0));
-      renderTexture.draw(&vertices[0], vertices.size(), sf::LineStrip);
+
+      renderTexture.clear();
+
+      for (const auto& path : mPaths)
+      {
+         std::vector<sf::Vertex> vertices;
+         for (const auto& pos : path.mPolygon)
+         {
+            vertices.push_back(
+               sf::Vector2f{
+                  static_cast<float>(pos.x * factor),
+                  static_cast<float>(pos.y * factor)
+               }
+            );
+         }
+         vertices.push_back(vertices.at(0));
+         renderTexture.draw(&vertices[0], vertices.size(), sf::LineStrip);
+      }
+
+      renderTexture.display();
+
+      // get the target texture (where the stuff has been drawn)
+      const sf::Texture& texture = renderTexture.getTexture();
+      texture.copyToImage().saveToFile(imagePath.string());
    }
-
-   renderTexture.display();
-
-   // get the target texture (where the stuff has been drawn)
-   const sf::Texture& texture = renderTexture.getTexture();
-   std::ostringstream num;
-   num << std::setfill('0') << std::setw(2) << sPathDumpCounter++;
-   texture.copyToImage().saveToFile("path_" + num.str() + ".png");
 }
 
 

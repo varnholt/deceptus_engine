@@ -22,7 +22,7 @@ public:
 
    void printMap();
    void dumpMap();
-
+   void writeToImage(const std::filesystem::path& imagePath);
 
    enum class Direction {
       None,
@@ -63,7 +63,6 @@ private:
    bool isVisited(uint32_t x, uint32_t y);
    void serialize();
    void deserialize();
-   void debugPaths();
    void optimize();
    void scale();
 
@@ -83,7 +82,6 @@ private:
    Direction mDirCurrent = Direction::None;
    Direction mDirPrevious = Direction::None;
    float mScale = 1.0f;
-   static int32_t sPathDumpCounter;
 };
 
 #endif // SQUAREMARCHER_H

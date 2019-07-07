@@ -312,6 +312,9 @@ void Game::draw()
 
    mWindowRenderTexture->clear();
 
+   const auto debugEnabled = DisplayMode::getInstance().isSet(Display::DisplayDebug);
+   const auto mapEnabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
+
    if (mLevelLoadingFinished)
    {
       mLevel->draw(mWindowRenderTexture, mScreenshot);
@@ -319,10 +322,11 @@ void Game::draw()
 
    mScreenshot = false;
 
-   mInfoLayer->setLoading(!mLevelLoadingFinished);
-   mInfoLayer->draw(*mWindowRenderTexture.get());
-
-   const auto debugEnabled = DisplayMode::getInstance().isSet(Display::DisplayDebug);
+   if (!mapEnabled)
+   {
+      mInfoLayer->setLoading(!mLevelLoadingFinished);
+      mInfoLayer->draw(*mWindowRenderTexture.get());
+   }
 
    if (debugEnabled || Console::getInstance().isActive())
    {
