@@ -572,6 +572,8 @@ void Level::loadTmx()
    Laser::merge();
    Fan::merge();
 
+   mMap->loadLevelTexture(path / std::filesystem::path("physics_path_solid.png"));
+
    if (!mAtmosphere.mTileMap)
    {
       std::cerr << "fatal: no physics layer (called 'physics') found!" << std::endl;
@@ -1469,6 +1471,8 @@ void Level::parsePhysicsTiles(
       basePath / std::filesystem::path("physics_path_solid.csv"),
       scale
    );
+
+   solid.writeToImage(basePath / std::filesystem::path("physics_path_solid.png"));
 
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
 

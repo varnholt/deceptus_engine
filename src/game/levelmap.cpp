@@ -58,6 +58,13 @@ LevelMap::LevelMap()
 }
 
 
+void LevelMap::loadLevelTexture(const std::filesystem::path& path)
+{
+   mLevelTexture.loadFromFile(path.string());
+   mLevelSprite.setTexture(mLevelTexture);
+}
+
+
 void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    auto w = GameConfiguration::getInstance().mViewWidth;
@@ -66,11 +73,6 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   // for (auto layer : mLayerStack)
-   // {
-   //    layer->draw(window, states);
-   // }
-
    auto layerLayout = mLayers["layout"];
    auto layerHideBorders = mLayers["hide_borders"];
    auto layerGrid = mLayers["grid"];
@@ -78,34 +80,33 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto layerTextZoom = mLayers["text_zoom"];
    auto layerTextPan = mLayers["text_pan"];
 
+   // 1 pixel in the level layer should be 8 pixels in the player world
+   auto playerPosition = Player::getPlayer(0)->getPixelPosition() * 0.125f;
+   playerPosition.x -= w/2;
+   playerPosition.y -= h/2;
+   mLevelSprite.setOrigin(playerPosition);
+
    layerBlue->draw(window, states);
-   layerGrid->draw(window, states);
+   mLevelSprite.setColor(sf::Color{70, 70, 140, 255});
+   window.draw(mLevelSprite, sf::BlendMode{sf::BlendAdd});
+   layerGrid->draw(window, sf::BlendMode{sf::BlendAdd});
    layerHideBorders->draw(window, states);
-   layerTextZoom->draw(window, states);
-   layerTextPan->draw(window, states);
+
+   if (mZoomEnabled)
+   {
+      layerTextZoom->draw(window, states);
+   }
+
+   if (mPanEnabled)
+   {
+      layerTextPan->draw(window, states);
+   }
+
    layerLayout->draw(window, states);
-
-   // location_center
-   // location_crosshhair
-   // map_keys
-   // zoom_slider
-   // zoom_slider_handle
-   // zoom_scale
-
-   // auto layerHealth = mLayers["health"];
-   // auto layerHealthEnergy = mLayers["health_energy"];
-   // auto layerHealthWeapon = mLayers["health_weapon"];
-   //
-   // if (layerHealthEnergy->mVisible)
-   // {
-   //     layerHealth->draw(window, states);
-   //     layerHealthEnergy->draw(window, states);
-   //     layerHealthWeapon->draw(window, states);
-   // }
 }
 
 
-void LevelMap::drawMapInfo(sf::RenderTarget& window)
+void LevelMap::drawMapInfo(sf::RenderTarget& /*window*/)
 {
    // auto w = GameConfiguration::getInstance().mViewWidth;
    // auto h = GameConfiguration::getInstance().mViewHeight;
