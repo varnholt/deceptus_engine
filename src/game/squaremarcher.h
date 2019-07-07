@@ -83,6 +83,7 @@ private:
    Direction mDirCurrent = Direction::None;
    Direction mDirPrevious = Direction::None;
    float mScale = 1.0f;
+   static int32_t sPathDumpCounter;
 };
 
 #endif // SQUAREMARCHER_H

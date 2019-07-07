@@ -9,6 +9,9 @@
 #include <sstream>
 
 
+int32_t SquareMarcher::sPathDumpCounter = 0;
+
+
 SquareMarcher::SquareMarcher(
    uint32_t w,
    uint32_t h,
@@ -150,7 +153,9 @@ void SquareMarcher::scan()
 
 void SquareMarcher::debugPaths()
 {
-   uint32_t factor = 5;
+   std::cout << "[x] dumping " << mPaths.size() << " paths..." << std::endl;
+
+   uint32_t factor = 1;
    sf::RenderTexture renderTexture;
    if (!renderTexture.create(mWidth * factor, mHeight * factor))
    {
@@ -173,7 +178,6 @@ void SquareMarcher::debugPaths()
          );
       }
       vertices.push_back(vertices.at(0));
-
       renderTexture.draw(&vertices[0], vertices.size(), sf::LineStrip);
    }
 
@@ -181,7 +185,9 @@ void SquareMarcher::debugPaths()
 
    // get the target texture (where the stuff has been drawn)
    const sf::Texture& texture = renderTexture.getTexture();
-   texture.copyToImage().saveToFile("paths.png");
+   std::ostringstream num;
+   num << std::setfill('0') << std::setw(2) << sPathDumpCounter++;
+   texture.copyToImage().saveToFile("path_" + num.str() + ".png");
 }
 
 

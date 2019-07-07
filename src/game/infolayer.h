@@ -1,5 +1,4 @@
-#ifndef INFOLAYER_H
-#define INFOLAYER_H
+#pragma once
 
 #include "bitmapfont.h"
 
@@ -33,4 +32,3 @@ private:
    std::map<std::string, std::shared_ptr<Layer>> mLayers;
 };
 
-#endif // INFOLAYER_H

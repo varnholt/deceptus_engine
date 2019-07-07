@@ -1,5 +1,4 @@
-#ifndef LEVEL_H
-#define LEVEL_H
+#pragma once
 
 // game
 #include "ambientocclusion.h"
@@ -35,6 +34,7 @@ class Door;
 struct ExtraItem;
 class Laser;
 struct LevelDescription;
+class LevelMap;
 class MovingPlatform;
 class TileMap;
 struct TmxElement;
@@ -204,18 +204,8 @@ protected:
 
    std::shared_ptr<LevelDescription> mDescription;
 
-   std::map<b2Body*, b2Vec2*> mPointMap;
-   std::map<b2Body*, size_t> mPointCountMap;
-
    std::vector<std::shared_ptr<TileMap>> mTileMaps;
    std::vector<std::shared_ptr<TileMap>> mParallaxMaps;
-
-   std::vector<Bouncer*> mBouncers;
-   std::vector<ConveyorBelt*> mConveyorBelts;
-   std::vector<Door*> mDoors;
-   std::vector<Laser*> mLasers;
-   std::vector<MovingPlatform*> mPlatforms;
-   std::vector<Portal*> mPortals;
 
    std::vector<std::shared_ptr<LuaNode>> mEnemies;
 
@@ -227,6 +217,17 @@ protected:
    std::unique_ptr<TmxParser> mTmxParser;
    std::string mDescriptionFilename;
 
+   std::unique_ptr<LevelMap> mMap;
+
+   // mechanisms
+   std::vector<Bouncer*> mBouncers;
+   std::vector<ConveyorBelt*> mConveyorBelts;
+   std::vector<Door*> mDoors;
+   std::vector<Laser*> mLasers;
+   std::vector<MovingPlatform*> mPlatforms;
+   std::vector<Portal*> mPortals;
+
+   // graphic effects
    std::shared_ptr<RaycastLight> mRaycastLight;
    std::shared_ptr<StaticLight> mStaticLight;
 
@@ -242,9 +243,11 @@ protected:
    // box2d
 
    // box2d world
+   std::map<b2Body*, b2Vec2*> mPointMap;
+   std::map<b2Body*, size_t> mPointCountMap;
+
    std::shared_ptr<b2World> mWorld;
 
    static Level* sCurrentLevel;
 };
 
-#endif // LEVEL_H
