@@ -198,7 +198,8 @@ SOURCES += \
     src/game/animationsettings.cpp \
     src/menus/menuscreenpause.cpp \
     src/game/camerapane.cpp \
-    src/game/gamecontrollerdata.cpp
+    src/game/gamecontrollerdata.cpp \
+    src/game/boomeffect.cpp
 
 
 # add box2d
@@ -322,7 +323,8 @@ HEADERS += \
     src/game/animationsettings.h \
     src/menus/menuscreenpause.h \
     src/game/camerapane.h \
-    src/game/gamecontrollerdata.h
+    src/game/gamecontrollerdata.h \
+    src/game/boomeffect.h
 
 
 SOURCES += \

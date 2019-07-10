@@ -2,6 +2,7 @@
 
 // game
 #include "bouncer.h"
+#include "camerapane.h"
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "debugdraw.h"
@@ -375,7 +376,7 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
       if (itParallaxView != map.end())
       {
          int view = itParallaxView->second->mValueInt;
-         mParallaxFactor[view] = parallax;
+         mParallaxFactors[view] = parallax;
       }
    }
 }
@@ -584,6 +585,13 @@ void Level::loadTmx()
 
 
 //-----------------------------------------------------------------------------
+BoomEffect& Level::getBoomEffect()
+{
+    return mBoomEffect;
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::load()
 {
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
@@ -711,7 +719,7 @@ void Level::createViews()
    mMapView->setViewport(sf::FloatRect(0.65f, 0.05f, 0.32f, 0.18f));
 }
 
-#include "camerapane.h"
+
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
@@ -743,8 +751,8 @@ void Level::updateViews()
    {
       mParallaxView[i]->reset(
          sf::FloatRect(
-            levelViewX * mParallaxFactor[i],
-            levelViewY * mParallaxFactor[i],
+            levelViewX * mParallaxFactors[i],
+            levelViewY * mParallaxFactors[i],
             mViewWidth,
             mViewHeight
          )
@@ -1118,8 +1126,7 @@ void Level::draw(
 
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
 
-   // disabling boom effect for now.
-   // levelTextureSprite.setPosition(mBoomOffsetX, mBoomOffsetY);
+   levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
 
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
@@ -1157,7 +1164,7 @@ void Level::update(const sf::Time& dt)
    mWorld->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
 
    CameraPane::getInstance().update();
-   updateBoom(dt);
+   mBoomEffect.update(dt);
 
    for (auto& tileMap : mTileMaps)
    {
@@ -1194,27 +1201,6 @@ void Level::update(const sf::Time& dt)
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
 }
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Level::updateBoom(const sf::Time& dt)
-{
-   if (mBoomIntensity > 0.0f)
-   {
-      mBoomOffsetX = mViewWidth  * 0.2f * mCameraBoomIntensity * 0.5f * sin(dt.asSeconds() * 71.0f)  * mBoomIntensity;
-      mBoomOffsetY = mViewHeight * 0.2f * mCameraBoomIntensity * 0.5f * sin(dt.asSeconds() * 113.0f) * mBoomIntensity;
-
-      // one detionation should take a third of a second
-      mBoomIntensity -= 3.0f * dt.asSeconds();
-   }
-   else
-   {
-      mBoomIntensity = 0.0f;
-      mBoomOffsetX = 0.0f;
-      mBoomOffsetY = 0.0f;
-   }
-}
-
 
 
 //-----------------------------------------------------------------------------
@@ -1774,16 +1760,6 @@ void Level::toggleDoor()
    for (auto& door : mDoors)
    {
       door->toggle();
-   }
-}
-
-
-//-----------------------------------------------------------------------------
-void Level::boom(float /*x*/, float /*y*/, float intensity)
-{
-   if (intensity > mBoomIntensity)
-   {
-      mBoomIntensity = intensity;
    }
 }
 

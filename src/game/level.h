@@ -2,6 +2,7 @@
 
 // game
 #include "ambientocclusion.h"
+#include "boomeffect.h"
 #include "camerasystem.h"
 #include "constants.h"
 #include "gamenode.h"
@@ -112,8 +113,6 @@ public:
    Bouncer* getNearbyBouncer() const;
 
    void toggleDoor();
-   void boom(float x, float y, float intensity);
-
    void reset();
 
    int getZ() const;
@@ -140,13 +139,13 @@ public:
 
    bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
 
+   BoomEffect& getBoomEffect();
+
 
 protected:
 
-   void updateBoom(const sf::Time& dt);
-
    void parsePolyline(
-       float offsetX,
+           float offsetX,
        float offsetY,
        const std::vector<sf::Vector2f> &poly
    );
@@ -194,13 +193,11 @@ protected:
    std::shared_ptr<sf::View> mMapView;
 
    std::map<std::string, int32_t> mScreenshotCounters;
-   float mParallaxFactor[3] = {0.9f, 0.85f, 0.8f};
+   float mParallaxFactors[3] = {0.9f, 0.85f, 0.8f};
    float mViewWidth = 0.0f;
    float mViewHeight = 0.0f;
-   float mBoomIntensity = 0.0f;
-   float mBoomOffsetX = 0.0f;
-   float mBoomOffsetY = 0.0f;
-   float mCameraBoomIntensity = 1.0f;
+
+   BoomEffect mBoomEffect;
 
    std::shared_ptr<LevelDescription> mDescription;
 
