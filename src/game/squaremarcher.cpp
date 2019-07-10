@@ -145,7 +145,54 @@ void SquareMarcher::scan()
 }
 
 
-void SquareMarcher::writeToImage(const std::filesystem::path& imagePath)
+
+void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
+{
+   std::ifstream fileIn(imagePath);
+   if (fileIn.fail())
+   {
+      float factor = 0.3333333333333f;
+      sf::RenderTexture renderTexture;
+      if (!renderTexture.create(mWidth * factor, mHeight * factor))
+      {
+          std::cout << "failed to create render texture" << std::endl;
+          return;
+      }
+
+      renderTexture.clear();
+
+      sf::VertexArray quad(sf::Quads, 4);
+      quad[0].color = sf::Color::Red;
+      quad[1].color = sf::Color::Red;
+      quad[2].color = sf::Color::Red;
+      quad[3].color = sf::Color::Red;
+
+      for (auto y = 0u; y < mHeight; y++)
+      {
+         for (auto x = 0u; x < mWidth; x++)
+         {
+            if (isColliding(x, y))
+            {
+               quad[0].position = sf::Vector2f(static_cast<float>(x * factor),          static_cast<float>(y * factor));
+               quad[1].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor));
+               quad[2].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor + factor));
+               quad[3].position = sf::Vector2f(static_cast<float>(x * factor),          static_cast<float>(y * factor + factor));
+
+               renderTexture.draw(&quad[0], 4, sf::Quads);
+            }
+         }
+      }
+
+      renderTexture.display();
+
+      // get the target texture (where the stuff has been drawn)
+      const sf::Texture& texture = renderTexture.getTexture();
+      texture.copyToImage().saveToFile(imagePath.string());
+   }
+}
+
+
+void SquareMarcher::writePathToImage(const std::filesystem::path& imagePath)
 {
    std::ifstream fileIn(imagePath);
    if (fileIn.fail())
