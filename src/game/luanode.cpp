@@ -730,7 +730,7 @@ void LuaNode::damage(int32_t playerId, int32_t damage, float forceX, float force
 
 void LuaNode::boom(float x, float y, float intensity)
 {
-   Level::getCurrentLevel()->boom(x, y, intensity);
+   Level::getCurrentLevel()->getBoomEffect().boom(x, y, intensity);
 }
 
 
