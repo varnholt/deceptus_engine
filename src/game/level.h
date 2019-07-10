@@ -186,6 +186,7 @@ protected:
    std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
    std::shared_ptr<sf::RenderTexture> mBlurRenderTexture;
    std::shared_ptr<sf::RenderTexture> mBlurRenderTextureScaled;
+   std::vector<std::shared_ptr<sf::RenderTexture>> mRenderTextures;
 
    float mViewToTextureScale = 1.0f;
    std::shared_ptr<sf::View> mLevelView;

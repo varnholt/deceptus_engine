@@ -8,7 +8,6 @@
 
 void MenuScreen::update(float /*dt*/)
 {
-
 }
 
 
@@ -21,16 +20,6 @@ void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
          layer->draw(window, states);
       }
    }
-
-//   for (auto& kv : mLayers)
-//   {
-//      auto& layer = kv.second;
-//
-//      if (layer.mVisible)
-//      {
-//         layer.draw(window, states);
-//      }
-//   }
 }
 
 

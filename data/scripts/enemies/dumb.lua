@@ -35,7 +35,7 @@ function initialize()
    addWeapon(300, 0.1) -- interval, radius
    updateBulletTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
 
-   print("dumb.lua initialized")
+   -- print("dumb.lua initialized")
 end
 
 

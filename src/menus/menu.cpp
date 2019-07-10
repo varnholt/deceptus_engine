@@ -69,14 +69,8 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto w = gameConfig.mViewWidth;
    auto h = gameConfig.mViewHeight;
 
-   // int32_t textureWidth = (gameConfig.mVideoModeWidth / gameConfig.mViewWidth) * gameConfig.mViewWidth;
-   // int32_t textureHeight = (gameConfig.mVideoModeHeight / gameConfig.mViewHeight) * gameConfig.mViewHeight;
-   // auto ratioX = textureWidth / static_cast<float>(gameConfig.mVideoModeWidth);
-   // auto ratioY = textureHeight / static_cast<float>(gameConfig.mVideoModeHeight);
-
    // set up an ortho view with screen dimensions
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   // view.setViewport(sf::FloatRect(0.f, 0.f, ratioX, ratioY));
 
    window.setView(view);
 
@@ -208,8 +202,10 @@ const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) cons
         case MenuType::None:
           break;
     }
+
     return mMenuInvalid;
 }
+
 
 void Menu::initialize()
 {
