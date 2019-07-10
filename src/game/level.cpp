@@ -1470,7 +1470,8 @@ void Level::parsePhysicsTiles(
       scale
    );
 
-   solid.writeToImage(basePath / std::filesystem::path("physics_path_solid.png"));
+   solid.writeGridToImage(basePath / std::filesystem::path("physics_grid_solid.png"));
+   solid.writePathToImage(basePath / std::filesystem::path("physics_path_solid.png"));
 
    addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
 

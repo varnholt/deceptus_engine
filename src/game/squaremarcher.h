@@ -22,7 +22,9 @@ public:
 
    void printMap();
    void dumpMap();
-   void writeToImage(const std::filesystem::path& imagePath);
+
+   void writeGridToImage(const std::filesystem::path& imagePath);
+   void writePathToImage(const std::filesystem::path& imagePath);
 
    enum class Direction {
       None,
