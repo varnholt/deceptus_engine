@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -8,7 +9,9 @@
 
 class MenuScreen
 {
+
 public:
+
    MenuScreen() = default;
    virtual ~MenuScreen() = default;
 
@@ -24,14 +27,12 @@ public:
    virtual void keyboardKeyPressed(sf::Keyboard::Key key);
    virtual void keyboardKeyReleased(sf::Keyboard::Key key);
 
-
    bool isControllerUsed() const;
 
 
 protected:
 
    std::string mFilename;
-
    std::vector<std::shared_ptr<Layer>> mLayerStack;
    std::map<std::string, std::shared_ptr<Layer>> mLayers;
 };

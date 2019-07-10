@@ -44,7 +44,7 @@ void MenuScreenOptions::back()
    {
       if ((*it) == Menu::MenuType::Game)
       {
-         menu = Menu::MenuType::Game;
+         menu = Menu::MenuType::Main;
          break;
       }
       else if ((*it) == Menu::MenuType::Pause)

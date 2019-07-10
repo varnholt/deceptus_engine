@@ -153,6 +153,18 @@ void Level::initializeTextures()
    mBlurRenderTextureScaled->create(960, 540);
    mBlurRenderTextureScaled->setSmooth(true);
 
+   // keep track of those textures
+   mRenderTextures.clear();
+   mRenderTextures.push_back(mLevelRenderTexture);
+   mRenderTextures.push_back(mLevelBackgroundRenderTexture);
+   mRenderTextures.push_back(mAtmosphereRenderTexture);
+   mRenderTextures.push_back(mBlurRenderTexture);
+   mRenderTextures.push_back(mBlurRenderTextureScaled);
+   // for (const auto& fb : mRenderTextures)
+   // {
+   //    std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
+   // }
+
    initializeAtmosphereShader();
    initializeGammaShader();
    initializeBlurShader();
@@ -186,7 +198,7 @@ Level::Level()
 //-----------------------------------------------------------------------------
 Level::~Level()
 {
-   std::cout << "deleting current level" << std::endl;
+   std::cout << "[x] deleting current level" << std::endl;
 }
 
 
@@ -390,15 +402,15 @@ void Level::loadTmx()
    sf::Clock elapsed;
 
    // parse tmx
-   std::cout << "[x] parsing tmx... ";
+   std::cout << "[x] parsing tmx... " << std::endl;
 
    mTmxParser = std::make_unique<TmxParser>();
    mTmxParser->parse(mDescription->mFilename);
 
-   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   std::cout << "[x] parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
    elapsed.restart();
 
-   std::cout << "[x] loading tmx... ";
+   std::cout << "[x] loading tmx... " << std::endl;
 
    auto elements = mTmxParser->getElements();
 
@@ -577,10 +589,10 @@ void Level::loadTmx()
 
    if (!mAtmosphere.mTileMap)
    {
-      std::cerr << "fatal: no physics layer (called 'physics') found!" << std::endl;
+      std::cerr << "[E] fatal: no physics layer (called 'physics') found!" << std::endl;
    }
 
-   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   std::cout << "[x] loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
 }
 
 
@@ -602,30 +614,30 @@ void Level::load()
    sf::Clock elapsed;
 
    // load static lights
-   std::cout << "[x] loading static lights...";
+   std::cout << "[x] loading static lights..." << std::endl;
    if (!mStaticLight->mLights.empty())
    {
       mStaticLight->load();
    }
-   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   std::cout << "[x] loading static lights, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
    elapsed.restart();
 
    // load raycast lights
-   std::cout << "[x] loading raycast lights...";
+   std::cout << "[x] loading raycast lights..." << std::endl;
    if (!mRaycastLight->mLights.empty())
    {
       mRaycastLight->load();
    }
-   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   std::cout << "[x] loading raycast lights, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
    elapsed.restart();
 
    // loading ao
-   std::cout << "[x] loading ao... ";
+   std::cout << "[x] loading ao... " << std::endl;
    mAo.load(path, std::filesystem::path(mDescription->mFilename).stem().string());
 
-   std::cout << "done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   std::cout << "[x] loading ao, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
 
-   std::cout << "level loading complete" << std::endl;
+   std::cout << "[x] level loading complete" << std::endl;
 }
 
 
@@ -1625,7 +1637,7 @@ void Level::parsePolyline(
 
       fflush(stdout);
 
-      p2t::Point* p = new p2t::Point(pos.x / PPM, pos.y / PPM);
+      p2t::Point* p = new p2t::Point(static_cast<double>(pos.x / PPM), static_cast<double>(pos.y / PPM));
       polyLine.push_back(p);
    }
 
