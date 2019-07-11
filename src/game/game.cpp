@@ -439,6 +439,12 @@ void Game::update()
       updateGameController();
       updateGameControllerForInventory();
       mInventoryLayer->update(dt.asSeconds());
+
+      // this is not beautiful. simplify!
+      if (DisplayMode::getInstance().isSet(Display::DisplayMap))
+      {
+         CameraPane::getInstance().update();
+      }
    }
    else if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {

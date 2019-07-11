@@ -151,7 +151,8 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
    std::ifstream fileIn(imagePath);
    if (fileIn.fail())
    {
-      float factor = 0.3333333333333f;
+      // float factor = 0.3333333333333f;
+      float factor = 1.0f;
       sf::RenderTexture renderTexture;
       if (!renderTexture.create(mWidth * factor, mHeight * factor))
       {

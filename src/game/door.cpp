@@ -129,7 +129,6 @@ void Door::reset()
          break;
       case State::Opening:
       case State::Closing:
-      default:
          break;
    }
 }
@@ -214,6 +213,13 @@ void Door::open()
 void Door::close()
 {
    mState = State::Closing;
+}
+
+
+//-----------------------------------------------------------------------------
+const sf::Vector2i& Door::getTilePosition() const
+{
+   return mTilePosition;
 }
 
 

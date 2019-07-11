@@ -54,8 +54,10 @@ public:
 
    void reset();
 
+   const sf::Vector2i& getTilePosition() const;
 
-protected:
+
+   protected:
 
    void open();
    void close();

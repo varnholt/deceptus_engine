@@ -585,7 +585,9 @@ void Level::loadTmx()
    Laser::merge();
    Fan::merge();
 
-   mMap->loadLevelTexture(path / std::filesystem::path("physics_path_solid.png"));
+   mMap->loadLevelTexture(path / std::filesystem::path("physics_grid_solid.png"));
+   mMap->setDoors(mDoors);
+   mMap->setPortals(mPortals);
 
    if (!mAtmosphere.mTileMap)
    {
