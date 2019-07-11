@@ -8,8 +8,10 @@
 
 #include <filesystem>
 #include <memory>
+#include <vector>
 
-
+class Door;
+class Portal;
 
 class LevelMap
 {
@@ -20,10 +22,11 @@ class LevelMap
       void loadLevelTexture(const std::filesystem::path& path);
       void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
+      void setDoors(const std::vector<Door*>& doors);
+      void setPortals(const std::vector<Portal*>& portals);
+
 
    private:
-
-      void drawMapInfo(sf::RenderTarget& window);
 
       BitmapFont mFont;
       std::vector<std::shared_ptr<Layer>> mLayerStack;
@@ -31,6 +34,9 @@ class LevelMap
 
       sf::Texture mLevelTexture;
       sf::Sprite mLevelSprite;
+
+      std::vector<Door*> mDoors;
+      std::vector<Portal*> mPortals;
 
       bool mZoomEnabled = false;
       bool mPanEnabled = false;

@@ -62,9 +62,6 @@ void ExtraManager::load(
                case ExtraItem::Type::Apple:
                   // printf("extra apple at: %d, %d\n", i, j);
                   break;
-               default:
-                  // printf("extra tile: %d\n", tileNumber - firstId);
-                  break;
             }
 
             auto it = tileMap.find(tileNumber - firstId);
@@ -129,8 +126,6 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
             break;
          case ExtraItem::Type::Apple:
             Audio::getInstance()->playSample("powerup");
-            break;
-         default:
             break;
       }
    }

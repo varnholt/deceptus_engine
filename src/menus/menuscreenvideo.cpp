@@ -111,9 +111,6 @@ void MenuScreenVideo::select(int32_t step)
            mVsyncCallback();
            break;
         }
-
-        default:
-            break;
     }
 
     GameConfiguration::getInstance().serializeToFile();

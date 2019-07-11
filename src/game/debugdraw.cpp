@@ -239,6 +239,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   delete[] vertices;
                   break;
                }
+
                case b2Shape::e_circle:
                {
                   b2Vec2 offset;
@@ -257,6 +258,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   );
                   break;
                }
+
                case b2Shape::e_chain:
                {
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
@@ -282,6 +284,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   delete[] vertices;
                   break;
                }
+
                default:
                {
                   break;

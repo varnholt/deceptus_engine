@@ -10,7 +10,7 @@ CameraPane CameraPane::sInstance;
 
 
 //-----------------------------------------------------------------------------
-CameraPane&CameraPane::getInstance()
+CameraPane& CameraPane::getInstance()
 {
    return sInstance;
 }
