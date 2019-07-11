@@ -119,7 +119,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       quad[2].color = sf::Color::White;
       quad[3].color = sf::Color::White;
 
-      auto pos = sf::Vector2f(door->getTilePosition().x * 3, door->getTilePosition().y * 3) + CameraPane::getInstance().getLookVector();
+      auto pos = sf::Vector2f(door->getTilePosition().x, door->getTilePosition().y) + CameraPane::getInstance().getLookVector();
 
       quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale),         static_cast<float>(pos.y * scale));
       quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + scale), static_cast<float>(pos.y * scale));
