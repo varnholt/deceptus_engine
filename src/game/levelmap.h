@@ -43,5 +43,7 @@ class LevelMap
 
       bool mZoomEnabled = false;
       bool mPanEnabled = false;
+
+      float mZoom = 1.0f;
 };
 
