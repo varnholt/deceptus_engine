@@ -92,6 +92,7 @@ SOURCES += \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/game/console.cpp \
+   src/game/controlleroverlay.cpp \
    src/game/fan.cpp \
    src/game/laser.cpp \
    src/game/levelmap.cpp \
@@ -209,6 +210,7 @@ HEADERS += \
     src/game/camerasystemconfiguration.h \
     src/game/console.h \
     src/game/constants.h \
+    src/game/controlleroverlay.h \
     src/game/fan.h \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
