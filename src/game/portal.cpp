@@ -18,9 +18,6 @@
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::draw
- */
 void Portal::draw(sf::RenderTarget& window)
 {
    for (const auto& sprite : mSprites)
@@ -31,10 +28,6 @@ void Portal::draw(sf::RenderTarget& window)
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::getPortalPosition
- * \return
- */
 sf::Vector2f Portal::getPortalPosition()
 {
    sf::Vector2f portalPos = mSprites.at(mSprites.size()-1).getPosition();
@@ -42,11 +35,15 @@ sf::Vector2f Portal::getPortalPosition()
 }
 
 
+
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::getDst
- * \return
- */
+const sf::Vector2f& Portal::getTilePosition() const
+{
+   return mTilePosition;
+}
+
+
+//-----------------------------------------------------------------------------
 Portal *Portal::getDestination() const
 {
    return mDestination;
@@ -54,10 +51,6 @@ Portal *Portal::getDestination() const
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::setDst
- * \param dst
- */
 void Portal::setDestination(Portal *dst)
 {
    mDestination = dst;
@@ -65,10 +58,6 @@ void Portal::setDestination(Portal *dst)
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::update
- * \param dt
- */
 void Portal::update(float /*dt*/)
 {
    sf::Vector2f playerPos = Player::getPlayer(0)->getPixelPosition();
@@ -109,10 +98,6 @@ void Portal::update(float /*dt*/)
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Level::link
- * \param srcdst
- */
 void Portal::link(
    std::vector<Portal*>& portals,
    TmxObject* tmxObject
@@ -168,10 +153,6 @@ void Portal::link(
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::addSprite
- * \param sprite
- */
 void Portal::addSprite(const sf::Sprite& sprite)
 {
    mSprites.push_back(sprite);
@@ -179,10 +160,6 @@ void Portal::addSprite(const sf::Sprite& sprite)
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::getZ
- * \return
- */
 int Portal::getZ() const
 {
    return mZ;
@@ -190,10 +167,6 @@ int Portal::getZ() const
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::setZ
- * \param z
- */
 void Portal::setZ(int z)
 {
    mZ = z;
@@ -201,10 +174,6 @@ void Portal::setZ(int z)
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::isPlayerAtPortal
- * \return
- */
 bool Portal::isPlayerAtPortal() const
 {
    return mPlayerAtPortal;
@@ -213,10 +182,6 @@ bool Portal::isPlayerAtPortal() const
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::setPlayerAtPortal
- * \param playerAtPortal
- */
 void Portal::setPlayerAtPortal(bool playerAtPortal)
 {
    mPlayerAtPortal = playerAtPortal;
@@ -224,12 +189,6 @@ void Portal::setPlayerAtPortal(bool playerAtPortal)
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Portal::load
- * \param layer
- * \param tileSet
- * \return
- */
 std::vector<Portal *> Portal::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
