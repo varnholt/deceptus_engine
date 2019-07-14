@@ -90,6 +90,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View levelView;
    levelView.setSize(mLevelSprite.getTexture()->getSize().x, mLevelSprite.getTexture()->getSize().y);
    levelView.setCenter(center);
+   levelView.zoom(mZoom); // 1.5f works well, too
    mLevelSprite.setColor(sf::Color{70, 70, 140, 255});
    mLevelRenderTexture.clear();
    mLevelRenderTexture.draw(mLevelSprite, sf::BlendMode{sf::BlendAdd});
@@ -117,7 +118,6 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    window.draw(levelTextureSprite, sf::BlendMode{sf::BlendAdd});
 
-   // layerGrid->draw(window, sf::BlendMode{sf::BlendAdd});
    layerHideBorders->draw(window, states);
 
    if (mZoomEnabled)
@@ -125,7 +125,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       layerTextZoom->draw(window, states);
    }
 
-   if (mPanEnabled)
+   if (CameraPane::getInstance().isLookActive())
    {
       layerTextPan->draw(window, states);
    }
@@ -185,7 +185,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
    // draw doors
    float doorWidth = 2.0f;
-   float doorHeight = 8.0f;
+   float doorHeight = 9.0f;
 
    for (auto door : mDoors)
    {
@@ -207,7 +207,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
    // draw portals
    float portalWidth = 3.0f;
-   float portalHeight = 5.0f;
+   float portalHeight = 6.0f;
    for (auto portal : mPortals)
    {
       sf::VertexArray quad(sf::Quads, 4);
