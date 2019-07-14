@@ -55,7 +55,6 @@ LevelMap::LevelMap()
       tmp->mTexture = texture;
       tmp->mSprite = sprite;
 
-      mLayerStack.push_back(tmp);
       mLayers[layer.getName()] = tmp;
    }
 }

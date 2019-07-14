@@ -254,8 +254,8 @@ void Game::initialize()
   loadLevel();
 
   mInfoLayer = std::make_unique<InfoLayer>();
-
   mInventoryLayer = std::make_unique<InventoryLayer>();
+  mControllerOverlay = std::make_unique<ControllerOverlay>();
 
   Audio::getInstance();
 
@@ -336,6 +336,7 @@ void Game::draw()
    if (debugEnabled)
    {
       DebugDraw::debugCameraSystem(*mWindowRenderTexture.get());
+      mControllerOverlay->draw(*mWindowRenderTexture.get());
    }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
