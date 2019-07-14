@@ -45,7 +45,7 @@ LevelMap::LevelMap()
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
 
-      texture->create(layer.getWidth(), layer.getHeight());
+      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
@@ -82,13 +82,13 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::Vector2f center;
    center += Player::getPlayer(0)->getPixelPosition() * 0.125f;
    center += CameraPane::getInstance().getLookVector();
-   center.x += mLevelSprite.getTexture()->getSize().x / 2;
-   center.y += mLevelSprite.getTexture()->getSize().y / 2;
-   center.x -= 220;
-   center.y -= 80;
+   center.x += mLevelSprite.getTexture()->getSize().x / 2.0f;
+   center.y += mLevelSprite.getTexture()->getSize().y / 2.0f;
+   center.x -= 220.0f;
+   center.y -= 80.0f;
 
    sf::View levelView;
-   levelView.setSize(mLevelSprite.getTexture()->getSize().x, mLevelSprite.getTexture()->getSize().y);
+   levelView.setSize(static_cast<float>(mLevelSprite.getTexture()->getSize().x), static_cast<float>(mLevelSprite.getTexture()->getSize().y));
    levelView.setCenter(center);
    levelView.zoom(mZoom); // 1.5f works well, too
    mLevelSprite.setColor(sf::Color{70, 70, 140, 255});
@@ -101,7 +101,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    // std::cout << "dx/dy: " << CameraPane::getInstance().getLookVector().x << " " << CameraPane::getInstance().getLookVector().y << std::endl;
 
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture.getTexture());
-   levelTextureSprite.move(10, 48);
+   levelTextureSprite.move(10.0f, 48.0f);
 
    // draw layers
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
@@ -159,10 +159,10 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    float scale = 3.0f;
 
    // draw grid
-   for (auto y = 0; y < target.getSize().y; y += 16)
+   for (auto y = 0u; y < target.getSize().y; y += 16)
    {
-      sf::Vertex a(sf::Vector2f(0, y));
-      sf::Vertex b(sf::Vector2f(target.getSize().x, y));
+      sf::Vertex a(sf::Vector2f(0.0f, static_cast<float>(y)));
+      sf::Vertex b(sf::Vector2f(static_cast<float>(target.getSize().x), static_cast<float>(y)));
       a.color.a = 30;
       b.color.a = 30;
 
@@ -171,10 +171,10 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
       target.draw(line, 2, sf::Lines);
    }
 
-   for (auto x = 0; x < target.getSize().x; x += 16)
+   for (auto x = 0u; x < target.getSize().x; x += 16)
    {
-      sf::Vertex a(sf::Vector2f(x, 0));
-      sf::Vertex b(sf::Vector2f(x, target.getSize().y));
+      sf::Vertex a(sf::Vector2f(static_cast<float>(x), 0.0f));
+      sf::Vertex b(sf::Vector2f(static_cast<float>(x), static_cast<float>(target.getSize().y)));
       a.color.a = 30;
       b.color.a = 30;
 
@@ -195,7 +195,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
       quad[2].color = sf::Color::White;
       quad[3].color = sf::Color::White;
 
-      auto pos = sf::Vector2f(door->getTilePosition().x, door->getTilePosition().y);
+      auto pos = sf::Vector2f(static_cast<float>(door->getTilePosition().x), static_cast<float>(door->getTilePosition().y));
 
       quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale),             static_cast<float>(pos.y * scale));
       quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale));
@@ -227,11 +227,11 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    }
 
    // draw player
-   auto playerWidth = 5;
+   auto playerWidth = 5.0f;
    auto playerHeight = 4;
-   sf::CircleShape square(playerWidth, playerHeight);
+   sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
    square.setPosition(Player::getPlayer(0)->getPixelPosition() * 0.125f);
-   square.move(-playerWidth, -playerHeight*2);
+   square.move(-playerWidth, -playerHeight * 2.0f);
    square.setFillColor(sf::Color::White);
    target.draw(square);
 }
