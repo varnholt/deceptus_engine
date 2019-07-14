@@ -28,10 +28,13 @@ class LevelMap
 
    private:
 
+      void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+
       BitmapFont mFont;
       std::vector<std::shared_ptr<Layer>> mLayerStack;
       std::map<std::string, std::shared_ptr<Layer>> mLayers;
 
+      sf::RenderTexture mLevelRenderTexture;
       sf::Texture mLevelTexture;
       sf::Sprite mLevelSprite;
 

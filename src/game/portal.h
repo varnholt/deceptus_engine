@@ -18,7 +18,8 @@ struct TmxTileSet;
 
 class Portal
 {
-public:
+
+   public:
 
    Portal() = default;
 
@@ -46,6 +47,7 @@ public:
    void setDestination(Portal* dst);
 
    sf::Vector2f getPortalPosition();
+   const sf::Vector2f& getTilePosition() const;
 
 
 protected:
