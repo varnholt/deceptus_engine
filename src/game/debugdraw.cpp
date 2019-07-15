@@ -1,6 +1,10 @@
 #include "debugdraw.h"
 
 
+static const auto outlineThickness = 1.0f;
+
+
+//----------------------------------------------------------------------------------------------------------------------
 sf::Color DebugDraw::GLColorToSFML(const b2Color& color, sf::Uint8 alpha)
 {
   return sf::Color(
@@ -12,6 +16,7 @@ sf::Color DebugDraw::GLColorToSFML(const b2Color& color, sf::Uint8 alpha)
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 sf::Vector2f DebugDraw::B2VecToSFVec(const b2Vec2 &vector)
 {
    return sf::Vector2f(
@@ -21,6 +26,7 @@ sf::Vector2f DebugDraw::B2VecToSFVec(const b2Vec2 &vector)
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawPolygon(
    sf::RenderTarget& target,
    const b2Vec2* vertices,
@@ -43,7 +49,7 @@ void DebugDraw::DrawPolygon(
       );
    }
 
-   polygon.setOutlineThickness(-0.3f);
+   polygon.setOutlineThickness(outlineThickness);
    polygon.setFillColor(sf::Color::Transparent);
    polygon.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
@@ -51,6 +57,7 @@ void DebugDraw::DrawPolygon(
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawSolidPolygon(
    sf::RenderTarget& target,
    const b2Vec2* vertices,
@@ -61,14 +68,11 @@ void DebugDraw::DrawSolidPolygon(
    sf::ConvexShape polygon(vertexCount);
    for(int i = 0; i < vertexCount; i++)
    {
-      //polygon.setPoint(i, SFMLDraw::B2VecToSFVec(vertices[i]));
       sf::Vector2f transformedVec = DebugDraw::B2VecToSFVec(vertices[i]);
       polygon.setPoint(i, sf::Vector2f(std::floor(transformedVec.x), std::floor(transformedVec.y)));
-      // flooring the coords to fix distorted lines on flat surfaces
    }
 
-   // they still show up though.. but less frequently
-   polygon.setOutlineThickness(-0.3f);
+   polygon.setOutlineThickness(outlineThickness);
    polygon.setFillColor(DebugDraw::GLColorToSFML(color, 60));
    polygon.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
@@ -76,6 +80,7 @@ void DebugDraw::DrawSolidPolygon(
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawCircle(
    sf::RenderTarget& target,
    const b2Vec2& center,
@@ -87,19 +92,20 @@ void DebugDraw::DrawCircle(
    circle.setOrigin(radius * PPM, radius * PPM);
    circle.setPosition(DebugDraw::B2VecToSFVec(center));
    circle.setFillColor(sf::Color::Transparent);
-   circle.setOutlineThickness(-0.3f);
+   circle.setOutlineThickness(outlineThickness);
    circle.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
    target.draw(circle);
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
    circle.setPosition(DebugDraw::B2VecToSFVec(center));
-   circle.setFillColor(DebugDraw::GLColorToSFML(color, 255 /*60*/));
+   circle.setFillColor(DebugDraw::GLColorToSFML(color, 255));
    circle.setOutlineThickness(1.f);
    circle.setOutlineColor(DebugDraw::GLColorToSFML(color));
 
@@ -116,6 +122,7 @@ void DebugDraw::DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawSegment(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
    sf::Vertex line[] =
@@ -129,11 +136,11 @@ void DebugDraw::DrawSegment(sf::RenderTarget& target, const b2Vec2& p1, const b2
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
 {
    float lineLength = 0.4f;
 
-   /*b2Vec2 xAxis(b2Vec2(xf.p.x + (lineLength * xf.q.c), xf.p.y + (lineLength * xf.q.s)));*/
    b2Vec2 xAxis = xf.p + lineLength * xf.q.GetXAxis();
    sf::Vertex redLine[] =
    {
@@ -141,9 +148,6 @@ void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
       sf::Vertex(DebugDraw::B2VecToSFVec(xAxis), sf::Color::Red)
    };
 
-   // You might notice that the ordinate(Y axis) points downward unlike the one in Box2D testbed
-   // That's because the ordinate in SFML coordinate system points downward while the OpenGL(testbed) points upward
-   /*b2Vec2 yAxis(b2Vec2(xf.p.x + (lineLength * -xf.q.s), xf.p.y + (lineLength * xf.q.c)));*/
    b2Vec2 yAxis = xf.p + lineLength * xf.q.GetYAxis();
    sf::Vertex greenLine[] =
    {
@@ -159,7 +163,7 @@ void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape)
 {
-   shape.setOutlineThickness(-0.3f);
+   shape.setOutlineThickness(outlineThickness);
    shape.setFillColor(sf::Color::Transparent);
    shape.setOutlineColor(sf::Color::Red);
    target.draw(shape);
@@ -316,6 +320,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
 {
    auto& cameraSystem = CameraSystem::getCameraSystem();
