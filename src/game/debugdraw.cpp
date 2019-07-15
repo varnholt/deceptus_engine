@@ -1,7 +1,7 @@
 #include "debugdraw.h"
 
 
-static const auto outlineThickness = 1.0f;
+static const auto outlineThickness = 0.5f;
 
 
 //----------------------------------------------------------------------------------------------------------------------
