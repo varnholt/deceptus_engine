@@ -60,16 +60,19 @@ LevelMap::LevelMap()
 }
 
 
-void LevelMap::loadLevelTexture(const std::filesystem::path& path)
+void LevelMap::loadLevelTextures(
+   const std::filesystem::path& grid,
+   const std::filesystem::path& outlines
+)
 {
-   mLevelTexture.loadFromFile(path.string());
+   mLevelGridTexture.loadFromFile(grid.string());
+   mLevelGridSprite.setTexture(mLevelGridTexture);
 
-   mLevelSprite.setTexture(mLevelTexture);
+   mLevelOutlineTexture.loadFromFile(outlines.string());
+   mLevelOutlineSprite.setTexture(mLevelOutlineTexture);
 
-   mLevelRenderTexture.create(
-      mLevelTexture.getSize().x,
-      mLevelTexture.getSize().y
-   );
+   // that render texture should have the same size as our level textures
+   mLevelRenderTexture.create(mLevelGridTexture.getSize().x, mLevelGridTexture.getSize().y);
 }
 
 
@@ -81,18 +84,20 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::Vector2f center;
    center += Player::getPlayer(0)->getPixelPosition() * 0.125f;
    center += CameraPane::getInstance().getLookVector();
-   center.x += mLevelSprite.getTexture()->getSize().x / 2.0f;
-   center.y += mLevelSprite.getTexture()->getSize().y / 2.0f;
+   center.x += mLevelGridSprite.getTexture()->getSize().x / 2.0f;
+   center.y += mLevelGridSprite.getTexture()->getSize().y / 2.0f;
    center.x -= 220.0f;
    center.y -= 80.0f;
 
    sf::View levelView;
-   levelView.setSize(static_cast<float>(mLevelSprite.getTexture()->getSize().x), static_cast<float>(mLevelSprite.getTexture()->getSize().y));
+   levelView.setSize(static_cast<float>(mLevelGridSprite.getTexture()->getSize().x), static_cast<float>(mLevelGridSprite.getTexture()->getSize().y));
    levelView.setCenter(center);
    levelView.zoom(mZoom); // 1.5f works well, too
-   mLevelSprite.setColor(sf::Color{70, 70, 140, 255});
+   mLevelGridSprite.setColor(sf::Color{70, 70, 140, 255});
+   mLevelOutlineSprite.setColor(sf::Color{255, 255, 255, 80});
    mLevelRenderTexture.clear();
-   mLevelRenderTexture.draw(mLevelSprite, sf::BlendMode{sf::BlendAdd});
+   mLevelRenderTexture.draw(mLevelGridSprite, sf::BlendMode{sf::BlendAdd});
+   mLevelRenderTexture.draw(mLevelOutlineSprite, sf::BlendMode{sf::BlendAdd});
    drawLevelItems(mLevelRenderTexture);
    mLevelRenderTexture.setView(levelView);
    mLevelRenderTexture.display();

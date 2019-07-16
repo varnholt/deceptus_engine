@@ -19,7 +19,11 @@ class LevelMap
 
       LevelMap();
 
-      void loadLevelTexture(const std::filesystem::path& path);
+      void loadLevelTextures(
+         const std::filesystem::path& grid,
+         const std::filesystem::path& outlines
+      );
+
       void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
       void setDoors(const std::vector<Door*>& doors);
@@ -34,8 +38,12 @@ class LevelMap
       std::map<std::string, std::shared_ptr<Layer>> mLayers;
 
       sf::RenderTexture mLevelRenderTexture;
-      sf::Texture mLevelTexture;
-      sf::Sprite mLevelSprite;
+
+      sf::Texture mLevelGridTexture;
+      sf::Sprite mLevelGridSprite;
+
+      sf::Texture mLevelOutlineTexture;
+      sf::Sprite mLevelOutlineSprite;
 
       std::vector<Door*> mDoors;
       std::vector<Portal*> mPortals;
