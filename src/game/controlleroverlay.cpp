@@ -18,8 +18,6 @@ ControllerOverlay::ControllerOverlay()
 
    for (const auto& layer : psd.getLayers())
    {
-      // std::cout << layer.getName() << std::endl;
-
       auto tmp = std::make_shared<Layer>();
       tmp->mVisible = layer.isVisible();
 
@@ -39,29 +37,6 @@ ControllerOverlay::ControllerOverlay()
       mLayers[layer.getName()] = tmp;
    }
 }
-
-
-/*
-   black
-   controller_bg
-   analog_l
-   analog_r
-   button_a
-   button_x
-   button_b
-   button_y
-   dp_down
-   dp_up
-   dp_left
-   dp_right
-   lb
-   rt
-   rb
-   lt
-   view
-   menu
-   xbox
-*/
 
 
 void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -98,45 +73,59 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (GameControllerData::getInstance().isControllerUsed())
    {
-      auto pressed = [](SDL_GameControllerButton button) -> bool {
-         auto controller = GameControllerIntegration::getInstance(0)->getController();
-         auto buttonId = controller->getButtonId(button);
-         auto buttonValues = GameControllerData::getInstance().getJoystickInfo().getButtonValues();
-         auto buttonPressed = buttonValues[static_cast<size_t>(buttonId)];
+      auto controller = GameControllerIntegration::getInstance(0)->getController();
+      auto joystickInfo = GameControllerData::getInstance().getJoystickInfo();
+
+      auto pressed = [&](SDL_GameControllerButton button) -> bool {
+         auto buttonValues = joystickInfo.getButtonValues();
+         auto buttonPressed = buttonValues[static_cast<size_t>(button /*Id*/)];
          return buttonPressed;
       };
 
-      auto axis = [](SDL_GameControllerAxis axis) -> float {
-         auto controller = GameControllerIntegration::getInstance(0)->getController();
-         auto axisValues = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
+      auto axis = [&](SDL_GameControllerAxis axis) -> float {
+         auto axisValues = joystickInfo.getAxisValues();
          auto axisId= controller->getAxisIndex(axis);
          return axisValues[static_cast<uint32_t>(axisId)] / 32767.0f;
       };
 
-      // that's a tomorrow-problem :)
-      // SDL_CONTROLLER_AXIS_RIGHTX
-      // auto y = axisValues[static_cast<uint32_t>(yAxis)] / 32767.0f;
+      auto hat = [&](int32_t hat) -> bool {
+         auto buttonValues = joystickInfo.getHatValues();
+         auto dpadPressed = buttonValues.empty() ? false : buttonValues.at(0) & hat;
+         return dpadPressed;
+      };
 
+      // draw analog axes
+      static const float analogFactor = 3.0f;
+      auto x0 = axis(SDL_CONTROLLER_AXIS_LEFTX);
+      auto y0 = axis(SDL_CONTROLLER_AXIS_LEFTY);
+      auto x1 = axis(SDL_CONTROLLER_AXIS_RIGHTX);
+      auto y1 = axis(SDL_CONTROLLER_AXIS_RIGHTY);
+      auto tl = axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+      auto tr = axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+      analog_l->mSprite->setOrigin(-x0 * analogFactor, -y0 * analogFactor);
+      analog_r->mSprite->setOrigin(-x1 * analogFactor, -y1 * analogFactor);
+      analog_l->mSprite->setColor(pressed(SDL_CONTROLLER_BUTTON_LEFTSTICK) ? sf::Color::Red : sf::Color::White);
+      analog_r->mSprite->setColor(pressed(SDL_CONTROLLER_BUTTON_RIGHTSTICK) ? sf::Color::Red : sf::Color::White);
       analog_l->draw(window, states);
       analog_r->draw(window, states);
+      if (tr > -0.8f) rt->draw(window, states);
+      if (tl > -0.8f) lt->draw(window, states);
 
+      // draw buttons
       if (pressed(SDL_CONTROLLER_BUTTON_A)) button_a->draw(window, states);
       if (pressed(SDL_CONTROLLER_BUTTON_X)) button_x->draw(window, states);
       if (pressed(SDL_CONTROLLER_BUTTON_B)) button_b->draw(window, states);
       if (pressed(SDL_CONTROLLER_BUTTON_Y)) button_y->draw(window, states);
-
-      if (pressed(SDL_CONTROLLER_BUTTON_DPAD_UP)) dp_up->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_DPAD_DOWN)) dp_down->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_DPAD_LEFT)) dp_left->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) dp_right->draw(window, states);
-
-      if (pressed(SDL_CONTROLLER_BUTTON_LEFTSTICK)) lb->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) rt->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_RIGHTSTICK)) rb->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_LEFTSHOULDER)) lt->draw(window, states);
-
+      if (pressed(SDL_CONTROLLER_BUTTON_LEFTSHOULDER)) lb->draw(window, states);
+      if (pressed(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) rb->draw(window, states);
       if (pressed(SDL_CONTROLLER_BUTTON_BACK)) view->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_GUIDE)) menu->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_START)) xbox->draw(window, states);
+      if (pressed(SDL_CONTROLLER_BUTTON_GUIDE)) xbox->draw(window, states);
+      if (pressed(SDL_CONTROLLER_BUTTON_START)) menu->draw(window, states);
+
+      // draw dpad
+      if (hat(SDL_HAT_UP)) dp_up->draw(window, states);
+      if (hat(SDL_HAT_DOWN)) dp_down->draw(window, states);
+      if (hat(SDL_HAT_LEFT)) dp_left->draw(window, states);
+      if (hat(SDL_HAT_RIGHT)) dp_right->draw(window, states);
    }
 }
