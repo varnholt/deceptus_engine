@@ -1,3 +1,4 @@
+#include <deque>
 #include <string>
 
 class Console
@@ -11,7 +12,8 @@ class Console
       void chop();
       void execute();
 
-      std::string getCommand() const;
+      const std::string& getCommand() const;
+      const std::deque<std::string>& getLog() const;
 
       static Console& getInstance();
 
@@ -19,8 +21,11 @@ class Console
 private:
 
       Console() = default;
+
       bool mActive = false;
       std::string mCommand;
+
+      std::deque<std::string> mLog;
 
       static Console mConsole;
 };

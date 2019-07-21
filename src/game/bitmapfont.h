@@ -7,20 +7,8 @@
 #include <SFML/System.hpp>
 
 
-class BitmapFont
+struct BitmapFont
 {
-
-public:
-
-   sf::Texture mTexture;
-   sf::Sprite mSprite;
-   std::map<char, std::shared_ptr<sf::IntRect>> mMap;
-   int32_t mCharWidth = 0;
-   int32_t mCharHeight = 0;
-
-
-public:
-
    BitmapFont();
    void load(const std::string& texture, const std::string &map);
    std::vector<std::shared_ptr<sf::IntRect>> getCoords(const std::string& text);
@@ -31,6 +19,13 @@ public:
       int32_t x = 0,
       int32_t y = 0
    );
+
+   sf::Texture mTexture;
+   sf::Sprite mSprite;
+   std::map<char, std::shared_ptr<sf::IntRect>> mMap;
+   int32_t mCharWidth = 0;
+   int32_t mCharHeight = 0;
+   int32_t mTextWidth = 0;
 };
 
 #endif // BITMAPFONT_H

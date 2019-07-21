@@ -71,7 +71,7 @@ void GameConfiguration::deserialize(const std::string& data)
 }
 
 
-void GameConfiguration::deserializeFromFile(const std::string &filename)
+void GameConfiguration::deserializeFromFile(const std::string& filename)
 {
   std::ifstream ifs (filename, std::ifstream::in);
 

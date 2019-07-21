@@ -81,7 +81,10 @@ private:
    int32_t mFps;
    uint32_t mLevelIndex = 0;
    bool mScreenshot = false;
-   bool mDrawPhysics = false;
+   bool mDrawConsole = false;
+   bool mDrawDebugInfo = false;
+   bool mDrawControllerOverlay = false;
+   bool mDrawCameraSystem = false;
    sf::Vector2u mRenderTextureOffset;
 
    bool mRecording = false;
