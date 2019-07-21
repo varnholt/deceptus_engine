@@ -198,7 +198,7 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& imagePath)
    std::ifstream fileIn(imagePath);
    if (fileIn.fail())
    {
-      uint32_t factor = 1;
+      const uint32_t factor = 1;
       sf::RenderTexture renderTexture;
       if (!renderTexture.create(mWidth * factor, mHeight * factor))
       {
@@ -213,13 +213,13 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& imagePath)
          std::vector<sf::Vertex> vertices;
          for (const auto& pos : path.mPolygon)
          {
-            vertices.push_back(
-               sf::Vector2f{
-                  static_cast<float>(pos.x * factor),
-                  static_cast<float>(pos.y * factor)
-               }
-            );
+            sf::Vertex vertex;
+            vertex.color = sf::Color::White;
+            vertex.position.x = static_cast<float>(pos.x * factor);
+            vertex.position.y = static_cast<float>(pos.y * factor);
+            vertices.push_back(vertex);
          }
+
          vertices.push_back(vertices.at(0));
          renderTexture.draw(&vertices[0], vertices.size(), sf::LineStrip);
       }

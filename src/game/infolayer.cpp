@@ -139,8 +139,39 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto pos = Player::getPlayer(0)->getPixelPosition();
    stream << "player pos: " << static_cast<int>(pos.x / TILE_WIDTH) << ", " << static_cast<int>(pos.y / TILE_HEIGHT);
 
-   mFont.draw(window, mFont.getCoords(stream.str()), 5, 50);
-   mFont.draw(window, mFont.getCoords(Console::getInstance().getCommand()), 5, 100);
+   mFont.draw(window, mFont.getCoords(stream.str()), 360, 5);
+}
+
+
+void InfoLayer::drawConsole(sf::RenderTarget& window)
+{
+   auto w = GameConfiguration::getInstance().mViewWidth;
+   auto h = GameConfiguration::getInstance().mViewHeight;
+
+   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   window.setView(view);
+
+   auto& console = Console::getInstance();
+   const auto& command = console.getCommand();
+   const auto& commands = console.getLog();
+
+   static const auto offset = 240;
+   auto y = 0;
+   for (auto it = commands.crbegin(); it != commands.crend(); ++it)
+   {
+      mFont.draw(window, mFont.getCoords(*it), 5, offset - ( (y + 1) * 14));
+      y++;
+   }
+
+   auto bitmapFont = mFont.getCoords(command);
+   mFont.draw(window, bitmapFont, 5, offset);
+
+   // draw cursor
+   auto elapsed = GlobalClock::getInstance()->getElapsedTime();
+   if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
+   {
+      mFont.draw(window, mFont.getCoords("_"), mFont.mTextWidth + 5, offset);
+   }
 }
 
 

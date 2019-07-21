@@ -328,14 +328,23 @@ void Game::draw()
       mInfoLayer->draw(*mWindowRenderTexture.get());
    }
 
-   if (debugEnabled || Console::getInstance().isActive())
+   if (mDrawDebugInfo)
    {
       mInfoLayer->drawDebugInfo(*mWindowRenderTexture.get());
    }
 
-   if (debugEnabled)
+   if (mDrawConsole)
+   {
+      mInfoLayer->drawConsole(*mWindowRenderTexture.get());
+   }
+
+   if (mDrawCameraSystem)
    {
       DebugDraw::debugCameraSystem(*mWindowRenderTexture.get());
+   }
+
+   if (mDrawControllerOverlay)
+   {
       mControllerOverlay->draw(*mWindowRenderTexture.get());
    }
 
@@ -540,6 +549,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Console::getInstance().execute();
       }
+      if (event.key.code == sf::Keyboard::F3)
+      {
+         mDrawConsole = !mDrawConsole;
+         Console::getInstance().setActive(mDrawConsole);
+      }
       else if (event.key.code == sf::Keyboard::Backspace)
       {
          Console::getInstance().chop();
@@ -564,9 +578,30 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          }
          break;
       }
-      case sf::Keyboard::D:
+      case sf::Keyboard::F1:
       {
          DisplayMode::getInstance().enqueueToggle(Display::DisplayDebug);
+         break;
+      }
+      case sf::Keyboard::F2:
+      {
+         mDrawControllerOverlay = !mDrawControllerOverlay;
+         break;
+      }
+      case sf::Keyboard::F3:
+      {
+         mDrawConsole = !mDrawConsole;
+         Console::getInstance().setActive(mDrawConsole);
+         break;
+      }
+      case sf::Keyboard::F4:
+      {
+         mDrawCameraSystem = !mDrawCameraSystem;
+         break;
+      }
+      case sf::Keyboard::F5:
+      {
+         mDrawDebugInfo = !mDrawDebugInfo;
          break;
       }
       case sf::Keyboard::F:
@@ -577,11 +612,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::I:
       {
          openInventory();
-         break;
-      }
-      case sf::Keyboard::J:
-      {
-         mPlayer->updateClimb();
          break;
       }
       case sf::Keyboard::L:
@@ -628,11 +658,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          mPlayer->setVisible(!mPlayer->getVisible());
          break;
       }
-      case sf::Keyboard::Y:
-      {
-         mDrawPhysics = !mDrawPhysics;
-         break;
-      }
       case sf::Keyboard::Escape:
       {
          if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
@@ -643,7 +668,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::LShift:
       {
-
          CameraPane::getInstance().updateLookState(Look::LookActive, true);
          break;
       }
@@ -674,15 +698,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          CameraPane::getInstance().updateLookState(Look::LookDown, true);
          break;
       }
-      case sf::Keyboard::Slash:
-      {
-         Console::getInstance().setActive(true);
-         break;
-      }
       case sf::Keyboard::Tab:
+      {
          GameState::getInstance().enqueueTogglePauseResume();
          DisplayMode::getInstance().enqueueToggle(Display::DisplayMap);
          break;
+      }
       default:
       {
          break;

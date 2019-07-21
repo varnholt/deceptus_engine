@@ -131,4 +131,6 @@ void BitmapFont::draw(
       window.draw(mSprite);
       xOffset += mCharWidth;
    }
+
+   mTextWidth = xOffset;
 }
