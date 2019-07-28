@@ -97,6 +97,7 @@ SOURCES += \
    src/game/laser.cpp \
    src/game/levelmap.cpp \
    src/game/maptools.cpp \
+   src/game/rainoverlay.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/main.cpp \
@@ -220,6 +221,7 @@ HEADERS += \
     src/game/maptools.h \
     src/game/player.h \
     src/game/level.h \
+    src/game/rainoverlay.h \
     src/game/test.h \
     src/game/texturepool.h \
     src/tmxparser/tmxanimation.h \
