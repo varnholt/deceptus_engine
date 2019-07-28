@@ -9,9 +9,7 @@
 
 namespace
 {
-   static const auto w = 320;
-   static const auto h = 200;
-   static const auto maxParts = 1000;
+   static const auto dropCount = 2000;
 }
 
 
@@ -19,7 +17,7 @@ RainOverlay::RainOverlay()
 {
    std::srand(std::time(nullptr)); // use current time as seed for random generator
 
-   for (auto a = 0; a < maxParts; a++)
+   for (auto a = 0; a < dropCount; a++)
    {
       mDrops.push_back(RainDrop());
    }
@@ -36,10 +34,12 @@ void RainOverlay::draw(sf::RenderTarget& window, sf::RenderStates /*states*/)
 
    sf::Vertex line[2];
 
+   static const auto color = sf::Color{174, 194, 224, 50};
+
    for (auto& d : mDrops)
    {
-      line[0] = sf::Vertex{sf::Vector2f{d.mPos.x, d.mPos.y}};
-      line[1] = sf::Vertex{sf::Vector2f{d.mPos.x + d.mLength * d.mDir.x, d.mPos.y + d.mLength * d.mDir.y}};
+      line[0] = sf::Vertex{sf::Vector2f{d.mPos.x, d.mPos.y}, color};
+      line[1] = sf::Vertex{sf::Vector2f{d.mPos.x + d.mLength * d.mDir.x, d.mPos.y + d.mLength * d.mDir.y}, color};
 
       window.draw(line, 2, sf::Lines);
    }
@@ -48,7 +48,10 @@ void RainOverlay::draw(sf::RenderTarget& window, sf::RenderStates /*states*/)
 
 void RainOverlay::update()
 {
-   for (auto p : mDrops)
+   auto w = GameConfiguration::getInstance().mViewWidth;
+   auto h = GameConfiguration::getInstance().mViewHeight;
+
+   for (auto& p : mDrops)
    {
       p.mPos += p.mDir;
 
@@ -63,6 +66,9 @@ void RainOverlay::update()
 
 RainOverlay::RainDrop::RainDrop()
 {
+   auto w = GameConfiguration::getInstance().mViewWidth;
+   auto h = GameConfiguration::getInstance().mViewHeight;
+
    mPos.x = static_cast<float>(std::rand() % w);
    mPos.y = static_cast<float>(std::rand() % h);
 

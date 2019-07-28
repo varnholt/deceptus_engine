@@ -256,6 +256,7 @@ void Game::initialize()
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
   mControllerOverlay = std::make_unique<ControllerOverlay>();
+  mRainOverlay = std::make_unique<RainOverlay>();
 
   Audio::getInstance();
 
@@ -347,6 +348,8 @@ void Game::draw()
    {
       mControllerOverlay->draw(*mWindowRenderTexture.get());
    }
+
+   mRainOverlay->draw(*mWindowRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
    {
@@ -469,6 +472,7 @@ void Game::update()
           mLevel->update(dt);
           mPlayer->update(dt);
           updateGameState();
+          mRainOverlay->update();
       }
    }
 

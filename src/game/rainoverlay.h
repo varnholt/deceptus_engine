@@ -22,7 +22,7 @@ public:
 
    RainOverlay();
 
-   void draw(sf::RenderTarget& window, sf::RenderStates states);
+   void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
    void update();
 
 
