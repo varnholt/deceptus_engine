@@ -5,6 +5,8 @@
 #include "constants.h"
 #include "infolayer.h"
 #include "inventorylayer.h"
+#include "rainoverlay.h"
+
 #include "menus/menu.h"
 
 #include "Box2D/Box2D.h"
@@ -71,6 +73,7 @@ private:
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
    std::unique_ptr<ControllerOverlay> mControllerOverlay;
+   std::unique_ptr<RainOverlay> mRainOverlay;
 
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;
