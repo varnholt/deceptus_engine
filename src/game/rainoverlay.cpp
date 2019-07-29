@@ -9,7 +9,7 @@
 
 namespace
 {
-   static const auto dropCount = 5000;
+   static const auto dropCount = 3000;
    static const auto w = GameConfiguration::getInstance().mViewWidth;
    static const auto h = GameConfiguration::getInstance().mViewHeight;
 }
