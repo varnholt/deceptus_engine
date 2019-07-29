@@ -349,7 +349,10 @@ void Game::draw()
       mControllerOverlay->draw(*mWindowRenderTexture.get());
    }
 
-   mRainOverlay->draw(*mWindowRenderTexture.get());
+   if (mDrawWeather)
+   {
+      mRainOverlay->draw(*mWindowRenderTexture.get());
+   }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
    {
@@ -472,7 +475,7 @@ void Game::update()
           mLevel->update(dt);
           mPlayer->update(dt);
           updateGameState();
-          mRainOverlay->update();
+          mRainOverlay->update(dt);
       }
    }
 
@@ -606,6 +609,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::F5:
       {
          mDrawDebugInfo = !mDrawDebugInfo;
+         break;
+      }
+      case sf::Keyboard::F6:
+      {
+         mDrawWeather = !mDrawWeather;
          break;
       }
       case sf::Keyboard::F:
