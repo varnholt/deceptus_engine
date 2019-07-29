@@ -323,6 +323,11 @@ void Game::draw()
 
    mScreenshot = false;
 
+   if (mDrawWeather)
+   {
+      mRainOverlay->draw(*mWindowRenderTexture.get());
+   }
+
    if (!mapEnabled)
    {
       mInfoLayer->setLoading(!mLevelLoadingFinished);
@@ -347,11 +352,6 @@ void Game::draw()
    if (mDrawControllerOverlay)
    {
       mControllerOverlay->draw(*mWindowRenderTexture.get());
-   }
-
-   if (mDrawWeather)
-   {
-      mRainOverlay->draw(*mWindowRenderTexture.get());
    }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
