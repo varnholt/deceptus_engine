@@ -38,8 +38,8 @@ void MovingPlatform::draw(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
 {
-   double mu2 = (1 - cos(mu * M_PI)) * 0.5f;
-   return (y1 * (1.0f - mu2) + y2 * mu2);
+   double mu2 = (1.0 - cos(mu * M_PI)) * 0.5;
+   return (y1 * (1.0 - mu2) + y2 * mu2);
 }
 
 
@@ -97,7 +97,7 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
    auto fixture = mBody->CreateFixture(&polygonShape, 0);
    auto objectData = new FixtureNode(this);
    objectData->setType(ObjectTypeMovingPlatform);
-   fixture->SetUserData((void*)objectData);
+   fixture->SetUserData(static_cast<void*>(objectData));
 }
 
 
@@ -117,11 +117,11 @@ std::vector<MovingPlatform*> MovingPlatform::load(
 )
 {
    std::vector<MovingPlatform*> movingPlatforms;
-   auto tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
-   auto tiles    = layer->mData;
-   auto width    = layer->mWidth;
-   auto height   = layer->mHeight;
-   auto firstId  = tileSet->mFirstGid;
+   const auto tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
+   const auto tiles    = layer->mData;
+   const auto width    = layer->mWidth;
+   const auto height   = layer->mHeight;
+   const auto firstId  = tileSet->mFirstGid;
 
    // populate the vertex array, with one quad per tile
    for (auto y = 0u; y < height; y++)
@@ -180,13 +180,13 @@ std::vector<MovingPlatform*> MovingPlatform::load(
 
             movingPlatform->setupBody(world);
 
-            //            printf(
-            //              "created MovingPlatform %zd at %d, %d (width: %zd)\n",
-            //              movingPlatforms.size(),
-            //              x,
-            //              y,
-            //              movingPlatform->mSprites.size()
-            //            );
+            // printf(
+            //   "created MovingPlatform %zd at %d, %d (width: %zd)\n",
+            //   movingPlatforms.size(),
+            //   x,
+            //   y,
+            //   movingPlatform->mSprites.size()
+            // );
          }
       }
    }
@@ -276,24 +276,12 @@ void MovingPlatform::update(float /*dt*/)
    if (mInterpolation.update(mBody->GetPosition()))
    {
       // PhysicsConfiguration::getInstance().mTimeStep
-      mBody->SetLinearVelocity(error * (PPM/60.0f)*mInterpolation.getVelocity());
+      mBody->SetLinearVelocity(error * (PPM / 60.0f) * mInterpolation.getVelocity());
    }
-
-//   dt *= 0.1f;
-//   auto time = mInterpolation.updateZeroOneZeroOne(dt);
-//   time = 0.5f*(tanh((time-0.5f) * 5.0f)+1.0f);
-//   // printf("%f\n", time);
-//
-//   b2Vec2 vel = 5.0f * mInterpolation.compute(mBody->GetPosition(), time);
-//   mBody->SetLinearVelocity(vel);
 
    auto pos = 0;
    auto horizontal = (mWidth  > 1) ? 1 : 0;
    auto vertical   = (mHeight > 1) ? 1 : 0;
-
-   // auto xp = mBody->GetPosition().x * PPM + horizontal * TILE_WIDTH;
-   // auto yp = mBody->GetPosition().y * PPM + vertical   * TILE_HEIGHT;
-   // printf("pixel pos: %f, %f\n", xp, yp);
 
    for (auto& sprite : mSprites)
    {
