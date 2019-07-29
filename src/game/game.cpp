@@ -468,14 +468,18 @@ void Game::update()
 
       if (mLevelLoadingFinished)
       {
-          AnimationPool::getInstance().updateAnimations(dt.asSeconds());
-          Bullet::updateHitAnimations(dt.asSeconds());
-          updateGameController();
-          updateGameControllerForGame();
-          mLevel->update(dt);
-          mPlayer->update(dt);
-          updateGameState();
-          mRainOverlay->update(dt);
+         AnimationPool::getInstance().updateAnimations(dt.asSeconds());
+         Bullet::updateHitAnimations(dt.asSeconds());
+         updateGameController();
+         updateGameControllerForGame();
+         mLevel->update(dt);
+         mPlayer->update(dt);
+         updateGameState();
+
+         if (mDrawWeather)
+         {
+            mRainOverlay->update(dt);
+         }
       }
    }
 

@@ -92,6 +92,11 @@ bool PathInterpolation::checkKeyReached(const b2Vec2& currentPos)
 {
   auto reached = false;
 
+  if (mTrack.empty())
+  {
+     return false;
+  }
+
   if ((currentPos - mTrack[mCurrentKeyIndex].mPos).LengthSquared() < 0.1f)
   {
      reached = true;
