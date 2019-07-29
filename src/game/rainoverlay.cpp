@@ -9,7 +9,9 @@
 
 namespace
 {
-   static const auto dropCount = 2000;
+   static const auto dropCount = 5000;
+   static const auto w = GameConfiguration::getInstance().mViewWidth;
+   static const auto h = GameConfiguration::getInstance().mViewHeight;
 }
 
 
@@ -21,39 +23,43 @@ RainOverlay::RainOverlay()
    {
       mDrops.push_back(RainDrop());
    }
+
+   mRenderTexture.create(w, h);
 }
 
 
 void RainOverlay::draw(sf::RenderTarget& window, sf::RenderStates /*states*/)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   mRenderTexture.clear();
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
    sf::Vertex line[2];
 
-   static const auto color = sf::Color{174, 194, 224, 50};
+   static const auto color = sf::Color{174, 194, 224, 30};
 
    for (auto& d : mDrops)
    {
       line[0] = sf::Vertex{sf::Vector2f{d.mPos.x, d.mPos.y}, color};
       line[1] = sf::Vertex{sf::Vector2f{d.mPos.x + d.mLength * d.mDir.x, d.mPos.y + d.mLength * d.mDir.y}, color};
 
-      window.draw(line, 2, sf::Lines);
+      mRenderTexture.draw(line, 2, sf::Lines);
    }
+
+   mRenderTexture.setView(view);
+   mRenderTexture.display();
+
+   auto sprite = sf::Sprite(mRenderTexture.getTexture());
+   window.draw(sprite, sf::BlendMode{sf::BlendAdd});
 }
 
 
-void RainOverlay::update()
+void RainOverlay::update(const sf::Time& dt)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
-
    for (auto& p : mDrops)
    {
-      p.mPos += p.mDir;
+      p.mPos += p.mDir * dt.asSeconds() * 30.0f;
 
       if (p.mPos.x > w || p.mPos.y > h)
       {
@@ -66,9 +72,6 @@ void RainOverlay::update()
 
 RainOverlay::RainDrop::RainDrop()
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
-
    mPos.x = static_cast<float>(std::rand() % w);
    mPos.y = static_cast<float>(std::rand() % h);
 

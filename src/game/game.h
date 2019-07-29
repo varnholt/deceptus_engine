@@ -88,6 +88,7 @@ private:
    bool mDrawDebugInfo = false;
    bool mDrawControllerOverlay = false;
    bool mDrawCameraSystem = false;
+   bool mDrawWeather = false;
    sf::Vector2u mRenderTextureOffset;
 
    bool mRecording = false;

@@ -23,9 +23,11 @@ public:
    RainOverlay();
 
    void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
-   void update();
+   void update(const sf::Time& dt);
 
+private:
 
+   sf::RenderTexture mRenderTexture;
    std::vector<RainDrop> mDrops;
 };
 
