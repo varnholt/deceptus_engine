@@ -52,8 +52,32 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   -- update sprite index
+
    mElapsed = mElapsed + dt
+
+   -- make sure block is on same x as player
+   if (mPosition:getX() // 24 == mPlayerPosition:getX() // 24) then
+
+      -- make sure stone is not too far away (10 tiles) and above player
+      yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+      if (yDiff < 0 and yDiff > -10) then
+
+         -- make sure there's nothing in the way
+         if (
+            isPhsyicsPathClear(
+               mPosition:getX(),
+               mPosition:getY(),
+               mPlayerPosition:getX(),
+               mPlayerPosition:getY()
+            )
+         )
+         then
+            print("klonk!")
+         end
+      end
+   end
+
 end
 
 
