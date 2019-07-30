@@ -39,9 +39,16 @@ void from_json(const json &j, EnemyDescription &d)
 {
    d.mScript = j.at("script").get<std::string>();
    d.mStartPosition = j.at("startposition").get<std::vector<int>>();
+
    if (j.find("patrolpath") != j.end())
+   {
       d.mPatrolPath = j.at("patrolpath").get<std::vector<int>>();
-   d.mProperties = j.at("properties").get<std::vector<ScriptProperty>>();
+   }
+
+   if (j.find("properties") != j.end())
+   {
+      d.mProperties = j.at("properties").get<std::vector<ScriptProperty>>();
+   }
 }
 
 
@@ -59,8 +66,11 @@ void from_json(const json &j, LevelDescription &d)
 {
    d.mFilename = j.at("filename").get<std::string>();
    d.mStartPosition = j.at("startposition").get<std::vector<int>>();
+
    if (j.find("enemies") != j.end())
-   d.mEnemies = j.at("enemies").get<std::vector<EnemyDescription>>();
+   {
+      d.mEnemies = j.at("enemies").get<std::vector<EnemyDescription>>();
+   }
 }
 
 

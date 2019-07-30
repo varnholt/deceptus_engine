@@ -38,6 +38,27 @@
       ]
     },
     {
+      "script": "klonk.lua",
+      "startposition": [
+        254,
+        96
+      ]
+    },
+    {
+      "script": "klonk.lua",
+      "startposition": [
+        256,
+        96
+      ]
+    },
+    {
+      "script": "klonk.lua",
+      "startposition": [
+        258,
+        96
+      ]
+    },
+    {
       "script": "landmine.lua",
       "startposition": [
         29,
