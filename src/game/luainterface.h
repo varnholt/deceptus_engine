@@ -1,5 +1,5 @@
-#ifndef LUAINTERFACE_H
-#define LUAINTERFACE_H
+#pragma once
+
 
 #include <memory>
 #include <string>
@@ -41,4 +41,3 @@ private:
    std::vector<std::shared_ptr<LuaNode>> mObjectList;
 };
 
-#endif // LUAINTERFACE_H
