@@ -1,5 +1,4 @@
-#ifndef LUACONSTANTS_H
-#define LUACONSTANTS_H
+#pragma once
 
 // functions that are supposed to be available in lua scripts
 #define FUNCTION_INITIALIZE          "initialize"
@@ -10,4 +9,3 @@
 #define FUNCTION_SET_PATH            "setPath"
 #define FUNCTION_TIMEOUT             "timeout"
 
-#endif // LUACONSTANTS_H

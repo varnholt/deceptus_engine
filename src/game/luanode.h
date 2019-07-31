@@ -29,38 +29,40 @@ struct LuaNode : public GameNode
       int16_t mGroupIndex = -1; // 0 is default
    };
 
+   void draw(sf::RenderTarget& window);
    void initialize();
 
    void setupLua();
    void setupTexture();
 
-   void synchronizeProperties();
-   void updateVelocity();
+   void addShapeCircle(float radius, float x, float y);
+   void addShapePoly(const b2Vec2* points, int32_t size);
+   void addShapeRect(float width, float height, float x, float y);
+   void addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval);
+   void boom(float x, float y, float intensity);
+   void damage(int32_t playerId, int32_t damage, float forceX, float forceY);
+   b2Vec2 getLinearVelocity() const;
+   void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
+   void makeDynamic();
+   void makeStatic();
+   void setActive(bool active);
+   void setGravityScale(float scale);
    void updatePosition();
    void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
-   void addShapeCircle(float radius, float x, float y);
-   void addShapeRect(float width, float height, float x, float y);
-   void addShapePoly(const b2Vec2* points, int32_t size);
-   void addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval);
-   void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
+   void updateVelocity();
 
-   void draw(sf::RenderTarget& window);
-
+   void luaDie();
    void luaInitialize();
-   void luaUpdate(float dt);
    void luaMovedTo();
    void luaPlayerMovedTo();
-   void luaDie();
    void luaRetrieveProperties();
-   void luaTimeout(int32_t timerId);
-   void luaSendPatrolPath();
    void luaSendPath(const std::vector<sf::Vector2f> &vec);
-   void damage(int32_t playerId, int32_t damage, float forceX, float forceY);
-   void boom(float x, float y, float intensity);
-   void setGravityScale(float scale);
-   void makeDynamic();
+   void luaSendPatrolPath();
+   void luaTimeout(int32_t timerId);
+   void luaUpdate(float dt);
 
    // property accessors
+   void synchronizeProperties();
    bool getPropertyBool(const std::string& key);
    double getPropertyDouble(const std::string& key);
    int64_t getPropertyInt64(const std::string& key);
