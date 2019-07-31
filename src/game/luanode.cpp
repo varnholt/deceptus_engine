@@ -114,6 +114,19 @@ extern "C" int32_t makeDynamic(lua_State* state)
 }
 
 
+extern "C" int32_t makeStatic(lua_State* state)
+{
+   auto node = OBJINSTANCE;
+
+   if (!node)
+   {
+      return 0;
+   }
+
+   node->makeStatic();
+   return 0;
+}
+
 
 extern "C" int32_t setGravityScale(lua_State* state)
 {
@@ -133,6 +146,30 @@ extern "C" int32_t setGravityScale(lua_State* state)
       }
 
       node->setGravityScale(scale);
+   }
+
+   return 0;
+}
+
+
+extern "C" int32_t setActive(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 1)
+   {
+
+      auto active = static_cast<bool>(lua_toboolean(state, 1));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setActive(active);
    }
 
    return 0;
@@ -160,6 +197,25 @@ extern "C" int32_t isPhsyicsPathClear(lua_State* state)
    }
 
    // 1 return value
+   return 1;
+}
+
+
+extern "C" int32_t getLinearVelocity(lua_State* state)
+{
+   auto node = OBJINSTANCE;
+   auto velocity = node->getLinearVelocity();
+
+   lua_createtable(state, 2, 0);
+
+   auto table = lua_gettop(state);
+   auto index = 1;
+
+   lua_pushnumber(state, velocity.x);
+   lua_rawseti(state, table, index++);
+   lua_pushnumber(state, velocity.y);
+   lua_rawseti(state, table, index++);
+
    return 1;
 }
 
@@ -605,9 +661,12 @@ void LuaNode::setupLua()
    lua_register(mState, "debug", ::debug);
    lua_register(mState, "die", ::die);
    lua_register(mState, "fireWeapon", ::fireWeapon);
+   lua_register(mState, "getLinearVelocity", ::getLinearVelocity);
    lua_register(mState, "playSample", ::playSample);
    lua_register(mState, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(mState, "makeDynamic", ::makeDynamic);
+   lua_register(mState, "makeStatic", ::makeStatic);
+   lua_register(mState, "setActive", ::setActive);
    lua_register(mState, "setGravityScale", ::setGravityScale);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
@@ -745,6 +804,19 @@ void LuaNode::damage(int32_t playerId, int32_t damage, float forceX, float force
 }
 
 
+b2Vec2 LuaNode::getLinearVelocity() const
+{
+   b2Vec2 velocity;
+
+   if (mBody)
+   {
+      velocity = mBody->GetLinearVelocity();
+   }
+
+   return velocity;
+}
+
+
 void LuaNode::boom(float x, float y, float intensity)
 {
    Level::getCurrentLevel()->getBoomEffect().boom(x, y, intensity);
@@ -753,14 +825,25 @@ void LuaNode::boom(float x, float y, float intensity)
 
 void LuaNode::setGravityScale(float scale)
 {
-    mBody->SetGravityScale(scale);
+   mBody->SetGravityScale(scale);
+}
+
+
+void LuaNode::setActive(bool active)
+{
+   mBody->SetActive(active);
 }
 
 
 void LuaNode::makeDynamic()
 {
-    mBody->SetType(b2_dynamicBody);
-    mBody->SetAwake(true);
+   mBody->SetType(b2_dynamicBody);
+}
+
+
+void LuaNode::makeStatic()
+{
+   mBody->SetType(b2_staticBody);
 }
 
 
@@ -856,7 +939,7 @@ void LuaNode::createBody()
       FixtureNode* fn = new FixtureNode(this);
       fn->setType(ObjectTypeEnemy);
       fn->setProperty("damage", damage); // probably retrieve from player properties
-      ft->SetUserData((void*)fn);
+      ft->SetUserData(static_cast<void*>(fn));
    }
 
    // if the startposition doesn't match the enemy boundaries in the future
