@@ -99,6 +99,22 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
 }
 
 
+
+extern "C" int32_t makeDynamic(lua_State* state)
+{
+   auto node = OBJINSTANCE;
+
+   if (!node)
+   {
+      return 0;
+   }
+
+   node->makeDynamic();
+   return 0;
+}
+
+
+
 extern "C" int32_t setGravityScale(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -591,6 +607,7 @@ void LuaNode::setupLua()
    lua_register(mState, "fireWeapon", ::fireWeapon);
    lua_register(mState, "playSample", ::playSample);
    lua_register(mState, "isPhsyicsPathClear", ::isPhsyicsPathClear);
+   lua_register(mState, "makeDynamic", ::makeDynamic);
    lua_register(mState, "setGravityScale", ::setGravityScale);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
@@ -736,7 +753,14 @@ void LuaNode::boom(float x, float y, float intensity)
 
 void LuaNode::setGravityScale(float scale)
 {
-   mBody->SetGravityScale(scale);
+    mBody->SetGravityScale(scale);
+}
+
+
+void LuaNode::makeDynamic()
+{
+    mBody->SetType(b2_dynamicBody);
+    mBody->SetAwake(true);
 }
 
 

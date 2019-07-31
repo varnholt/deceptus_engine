@@ -6,7 +6,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    staticBody = true,
    sprite = "data/sprites/klonk.png",
-   damage = 0
+   damage = 200
 }
 
 
@@ -19,7 +19,8 @@ mElapsed = 0.0
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
+
+   addShapeRect(0.2, 0.2, 0.0, 0.0)
    updateSpriteRect(0, 2 * 72, 72, 72) -- x, y, width, height
 end
 
@@ -73,7 +74,8 @@ function update(dt)
             )
          )
          then
-            print("klonk!")
+            -- print("klonk!")
+            makeDynamic()
          end
       end
    end
