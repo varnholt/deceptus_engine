@@ -26,11 +26,10 @@ void BoomEffect::update(const sf::Time& /*dt*/)
 
       GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
-
       x = (mBoomDuration - x);
       x *= effectVelocity;
 
-      const auto fx = effectAmplitude * 2.0f * sin(x * x) * (1.0f / (1.0f + x * x));
+      const auto fx = mBoomFactor * effectAmplitude * 2.0f * sin(x * x) * (1.0f / (1.0f + x * x));
       mBoomOffsetY = gameConfig.mViewHeight * fx;
    }
    else

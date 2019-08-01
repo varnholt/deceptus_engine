@@ -1,4 +1,4 @@
-
+------------------------------------------------------------------------------------------------------------------------
 require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
 
@@ -17,37 +17,12 @@ mSpriteIndex = 0
 mElapsed = 0.0
 mCycle = 0
 
+
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
 
    addShapeRect(0.2, 0.2, 0.0, 0.0)
    updateSpriteRect(0, 2 * 72, 72, 72) -- x, y, width, height
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function timeout(id)
-   -- print(string.format("timeout: %d", id))
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function retrieveProperties()
-   updateProperties(properties)
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function movedTo(x, y)
-   -- print(string.format("moved to: %f, %f", x, y))
-   mPosition = v2d.Vector2D(x, y)
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function playerMovedTo(x, y)
-   -- print(string.format("player moved to: %f, %f", x, y))
-   mPlayerPosition = v2d.Vector2D(x, y)
 end
 
 
@@ -113,11 +88,42 @@ function update(dt)
          velocity = getLinearVelocity()
          mCycle = 4
          setActive(false)
+         boom(mPosition:getX(), mPosition:getY(), 0.5)
+         mElapsed = 0.0
       end
-
-      -- todo: player hit ground animation
    end
 
+   -- stone hit floor animation
+   if (mCycle == 4) then
+
+       mElapsed = mElapsed + dt
+       mSpriteIndex = math.floor(mElapsed * 10.0)
+
+       if (mSpriteIndex < 7) then
+          updateSpriteRect(mSpriteIndex * 72, 5 * 72, 72, 72)
+        else
+          -- done? go back up?
+          mCycle = 5
+       end
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function retrieveProperties()
+   updateProperties(properties)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function movedTo(x, y)
+   mPosition = v2d.Vector2D(x, y)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function playerMovedTo(x, y)
+   mPlayerPosition = v2d.Vector2D(x, y)
 end
 
 
@@ -125,3 +131,7 @@ end
 function setPath(name, table)
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+function timeout(id)
+end
