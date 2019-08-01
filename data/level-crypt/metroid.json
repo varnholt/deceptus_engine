@@ -41,20 +41,33 @@
       "script": "klonk.lua",
       "startposition": [
         254,
-        96
+        40
       ]
     },
     {
       "script": "klonk.lua",
       "startposition": [
         256,
-        96
+        40
       ]
     },
     {
       "script": "klonk.lua",
       "startposition": [
         258,
+        40
+      ]
+    },
+    {
+      "script": "bonefish.lua",
+      "startposition": [
+        258,
+        96
+      ],
+      "patrolpath": [
+        258,
+        96,
+        264,
         96
       ]
     },

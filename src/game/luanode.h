@@ -47,6 +47,7 @@ struct LuaNode : public GameNode
    void makeStatic();
    void setActive(bool active);
    void setGravityScale(float scale);
+   void setTransform(const b2Vec2& position, float32 angle = 0.0);
    void updatePosition();
    void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
    void updateVelocity();
