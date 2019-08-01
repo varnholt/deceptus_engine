@@ -5,7 +5,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    staticBody = true,
-   sprite = "data/sprites/klonk.png",
+   sprite = "data/sprites/enemy_klonk.png",
    damage = 200
 }
 
