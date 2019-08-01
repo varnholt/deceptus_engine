@@ -437,6 +437,7 @@ OTHER_FILES += \
 DISTFILES += \
     data/level-crypt/metroid.json \
     data/level.tmx \
+    data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/dumb.lua \
     data/config/game.json \
     data/config/physics.json \
