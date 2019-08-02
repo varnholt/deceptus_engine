@@ -264,7 +264,7 @@ extern "C" int32_t setTransform(lua_State* state)
          return 0;
       }
 
-      b2Vec2 pos{x, y};
+      b2Vec2 pos{x / PPM, y / PPM};
       node->setTransform(pos, angle);
    }
 
