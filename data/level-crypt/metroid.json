@@ -69,6 +69,31 @@
         96,
         264,
         96
+      ],
+      "properties": [
+        {
+            "name": "tick",
+            "value": "1000"
+        }
+      ]      
+    },
+    {
+      "script": "bonefish.lua",
+      "startposition": [
+        250,
+        99
+      ],
+      "patrolpath": [
+        250,
+        99,
+        256,
+        99
+      ],
+      "properties": [
+        {
+            "name": "tick",
+            "value": "2000"
+        }
       ]
     },
     {
