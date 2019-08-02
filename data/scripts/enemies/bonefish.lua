@@ -7,8 +7,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    staticBody = true,
    sprite = "data/sprites/enemy_bonefish.png",
-   damage = 200,
-   tick = 0
+   damage = 200
 }
 
 
@@ -17,7 +16,7 @@ mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mCenter = v2d.Vector2D(0, 0)
 mWidth = 0
-mElapsed = 0.0
+mElapsed = math.random(0, 3)
 mSpriteIndex = 0
 mPointsLeft = false
 mPrevX = 0.0
@@ -37,10 +36,6 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-
-   -- need a way to pass back properties to script
-   -- print(tick)
-
    yOffset = 0
    updateSprite = false
 
