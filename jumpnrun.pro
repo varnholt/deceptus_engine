@@ -443,6 +443,7 @@ DISTFILES += \
     data/config/physics.json \
     data/scripts/enemies/blob.lua \
     data/scripts/enemies/klonk.lua \
+    data/scripts/enemies/spikeball.lua \
     data/scripts/enemies/vector2.lua \
     data/shaders/raycast.frag \
     data/shaders/raycast.vert \
