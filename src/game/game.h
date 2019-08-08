@@ -6,6 +6,7 @@
 #include "infolayer.h"
 #include "inventorylayer.h"
 #include "rainoverlay.h"
+#include "weather.h"
 
 #include "menus/menu.h"
 
@@ -73,7 +74,7 @@ private:
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
    std::unique_ptr<ControllerOverlay> mControllerOverlay;
-   std::unique_ptr<RainOverlay> mRainOverlay;
+   std::unique_ptr<Weather> mWeather;
 
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;
