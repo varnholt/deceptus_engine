@@ -256,7 +256,7 @@ void Game::initialize()
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
   mControllerOverlay = std::make_unique<ControllerOverlay>();
-  mRainOverlay = std::make_unique<RainOverlay>();
+  mWeather = std::make_unique<Weather>();
 
   Audio::getInstance();
 
@@ -325,7 +325,7 @@ void Game::draw()
 
    if (mDrawWeather)
    {
-      mRainOverlay->draw(*mWindowRenderTexture.get());
+      mWeather->draw(*mWindowRenderTexture.get());
    }
 
    if (!mapEnabled)
@@ -478,7 +478,7 @@ void Game::update()
 
          if (mDrawWeather)
          {
-            mRainOverlay->update(dt);
+            mWeather->update(dt);
          }
       }
    }
