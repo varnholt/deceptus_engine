@@ -1,11 +1,14 @@
 #pragma once
 
+#include "weatheroverlay.h"
+
 #include <cstdint>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
 
-class RainOverlay
+
+class RainOverlay : public WeatherOverlay
 {
 
 public:

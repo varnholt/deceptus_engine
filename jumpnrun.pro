@@ -101,6 +101,7 @@ SOURCES += \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/weather.cpp \
+   src/game/weatheroverlay.cpp \
    src/main.cpp \
     src/game/debugdraw.cpp \
     src/game/globalclock.cpp \
@@ -226,6 +227,7 @@ HEADERS += \
     src/game/test.h \
     src/game/texturepool.h \
     src/game/weather.h \
+    src/game/weatheroverlay.h \
     src/tmxparser/tmxanimation.h \
     src/tmxparser/tmxelement.h \
     src/tmxparser/tmxframe.h \

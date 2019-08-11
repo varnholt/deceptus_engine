@@ -21,6 +21,7 @@
 #include "physicsconfiguration.h"
 #include "timer.h"
 #include "weapon.h"
+#include "weather.h"
 #include "joystick/gamecontroller.h"
 
 #include "menus/menuscreenmain.h"
@@ -256,7 +257,6 @@ void Game::initialize()
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
   mControllerOverlay = std::make_unique<ControllerOverlay>();
-  mWeather = std::make_unique<Weather>();
 
   Audio::getInstance();
 
@@ -325,7 +325,7 @@ void Game::draw()
 
    if (mDrawWeather)
    {
-      mWeather->draw(*mWindowRenderTexture.get());
+      Weather::getInstance().draw(*mWindowRenderTexture.get());
    }
 
    if (!mapEnabled)
@@ -478,7 +478,7 @@ void Game::update()
 
          if (mDrawWeather)
          {
-            mWeather->update(dt);
+            Weather::getInstance().update(dt);
          }
       }
    }
