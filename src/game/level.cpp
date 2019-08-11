@@ -27,6 +27,7 @@
 #include "sfmlmath.h"
 #include "squaremarcher.h"
 #include "tilemap.h"
+#include "weather.h"
 
 // sfml
 #include <SFML/Window/Event.hpp>
@@ -524,7 +525,6 @@ void Level::loadTmx()
                   tmxObject->mHeight
                );
             }
-
             else if (objectGroup->mName == "conveyorbelts")
             {
                ConveyorBelt* belt = new ConveyorBelt(
@@ -552,7 +552,6 @@ void Level::loadTmx()
                mConveyorBelts.push_back(belt);
                addDebugRect(belt->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
             }
-
             else if (objectGroup->mName == "platform_paths")
             {
                if (tmxObject->mPolyLine)
@@ -560,13 +559,38 @@ void Level::loadTmx()
                   MovingPlatform::link(mPlatforms, tmxObject);
                }
             }
+            else if (objectGroup->mName == "weather")
+            {
+               sf::IntRect rect{
+                  static_cast<int32_t>(tmxObject->mX),
+                  static_cast<int32_t>(tmxObject->mY),
+                  static_cast<int32_t>(tmxObject->mWidth),
+                  static_cast<int32_t>(tmxObject->mHeight)
+               };
 
+               // b2BodyDef bodyDef;
+               // bodyDef.type = b2_kinematicBody;
+               // auto body = mWorld->CreateBody(&bodyDef);
+               // addDebugRect(body, tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
+
+               if (tmxObject->mName.rfind("rain", 0) == 0)
+               {
+                  Weather::getInstance().add(Weather::WeatherType::Rain, rect);
+               }
+
+               // printf(
+               //    "weather data: %d, %d, %d, %d\n",
+               //    static_cast<int32_t>(tmxObject->mX),
+               //    static_cast<int32_t>(tmxObject->mY),
+               //    static_cast<int32_t>(tmxObject->mWidth),
+               //    static_cast<int32_t>(tmxObject->mHeight)
+               // );
+            }
             else if (objectGroup->mName == "lights")
             {
                auto light = deserializeRaycastLight(tmxObject);
                mRaycastLight->mLights.push_back(light);
             }
-
             else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
                auto light = deserializeStaticLight(tmxObject, objectGroup);
@@ -612,6 +636,8 @@ BoomEffect& Level::getBoomEffect()
 void Level::load()
 {
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
+
+   Weather::getInstance().clear();
 
    // load tmx
    loadTmx();

@@ -6,7 +6,6 @@
 #include "infolayer.h"
 #include "inventorylayer.h"
 #include "rainoverlay.h"
-#include "weather.h"
 
 #include "menus/menu.h"
 
@@ -74,7 +73,6 @@ private:
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
    std::unique_ptr<ControllerOverlay> mControllerOverlay;
-   std::unique_ptr<Weather> mWeather;
 
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;
@@ -89,7 +87,7 @@ private:
    bool mDrawDebugInfo = false;
    bool mDrawControllerOverlay = false;
    bool mDrawCameraSystem = false;
-   bool mDrawWeather = false;
+   bool mDrawWeather = true;
    sf::Vector2u mRenderTextureOffset;
 
    bool mRecording = false;

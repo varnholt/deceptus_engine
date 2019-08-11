@@ -116,7 +116,7 @@ public:
    void setOnBelt(bool onBelt);
    void applyBeltVelocity(float &desiredVel);
 
-   sf::Rect<int32_t> getPlayerRect() const;
+   sf::IntRect getPlayerRect() const;
 
 
    b2Body* getBody() const;

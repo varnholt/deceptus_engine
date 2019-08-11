@@ -260,14 +260,14 @@ void Player::setPixelPosition(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-sf::Rect<int32_t> Player::getPlayerRect() const
+sf::IntRect Player::getPlayerRect() const
 {
-   sf::Rect<int32_t> rect;
+   sf::IntRect rect;
 
    const auto dh = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
    rect.left = static_cast<int>(mPixelPosition.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(mPixelPosition.y) - dh - dh/2;
+   rect.top = static_cast<int>(mPixelPosition.y) - dh - (dh / 2);
    rect.width = PLAYER_ACTUAL_WIDTH;
    rect.height = PLAYER_ACTUAL_HEIGHT;
 

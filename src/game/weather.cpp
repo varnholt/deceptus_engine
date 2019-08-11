@@ -1,22 +1,69 @@
 #include "weather.h"
 
+#include "player.h"
+
+
+Weather Weather::sInstance;
+
+
 Weather::Weather()
 {
-   mRainOverlay = std::make_unique<RainOverlay>();
+   mRainOverlay = std::make_shared<RainOverlay>();
 }
 
 
 void Weather::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   // todo: check if player intersects with weather rect
+   auto playerRect = Player::getPlayer(0)->getPlayerRect();
 
-   mRainOverlay->draw(window, states);
+   for (const auto& data : mData)
+   {
+      if (data.mRect.intersects(playerRect))
+      {
+         data.mOverlay->draw(window, states);
+      }
+   }
 }
 
 
 void Weather::update(const sf::Time& dt)
 {
-   // todo: check if player intersects with weather rect
+   auto playerRect = Player::getPlayer(0)->getPlayerRect();
 
-   mRainOverlay->update(dt);
+   for (const auto& data : mData)
+   {
+      if (data.mRect.intersects(playerRect))
+      {
+         data.mOverlay->update(dt);
+      }
+   }
+}
+
+
+void Weather::add(Weather::WeatherType weatherType, const sf::IntRect& range)
+{
+   std::shared_ptr<WeatherOverlay> overlay;
+
+   switch (weatherType)
+   {
+      case WeatherType::Rain:
+         overlay = mRainOverlay;
+         break;
+      case WeatherType::Invalid:
+         break;
+   }
+
+   mData.push_back({overlay, range});
+}
+
+
+void Weather::clear()
+{
+   mData.clear();
+}
+
+
+Weather& Weather::getInstance()
+{
+   return sInstance;
 }
