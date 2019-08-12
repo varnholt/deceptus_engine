@@ -42,6 +42,7 @@ private:
 
    sf::Texture mTexture;
    sf::Sprite mSprite;
+   sf::IntRect mRect;
    int mZ = 0;
    sf::Time mActivationTime;
    bool mPlayerAtBouncer = false;
