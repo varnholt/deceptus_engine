@@ -1017,6 +1017,11 @@ void Player::updateJumpBuffer()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePortal()
 {
+   if (CameraPane::getInstance().isLookActive())
+   {
+      return;
+   }
+
    if (mPortalClock.getElapsedTime().asSeconds() > 1.0f)
    {
       auto axisValues = mJoystickInfo.getAxisValues();
