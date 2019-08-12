@@ -111,13 +111,14 @@ void Bouncer::draw(sf::RenderTarget &window)
 }
 
 
-void Bouncer::update(float /*dt*/)
+void Bouncer::updatePlayerAtBouncer()
 {
    auto player = Player::getPlayer(0);
 
    // yeah, this is super dirty.
    // should have a static function to determine whether the player will collide
    // with one of the bouncers within the next few frames
+
    const auto a = sf::Vector2i{
       static_cast<int32_t>(mPositionSf.x / TILE_WIDTH) + 1,
       static_cast<int32_t>(mPositionSf.y / TILE_HEIGHT) - 1
@@ -129,6 +130,12 @@ void Bouncer::update(float /*dt*/)
    };
 
    mPlayerAtBouncer = (a == b);
+}
+
+
+void Bouncer::update(float /*dt*/)
+{
+   updatePlayerAtBouncer();
 
    // std::cout << "a: " << a.x << ", " << a.y << " b: " << b.x << ", " << b.y << std::endl;
 
