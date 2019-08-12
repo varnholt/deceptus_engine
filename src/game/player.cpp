@@ -953,6 +953,13 @@ void Player::applyBeltVelocity(float& desiredVel)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
 {
+   // if we just landed hard on the ground, we need a break :)
+   if (mHardLanding)
+   {
+      mBody->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
+
    auto desiredVel = getDesiredVelocity();
    auto currentVelocity = mBody->GetLinearVelocity();
 
@@ -2068,6 +2075,7 @@ void Player::reset()
 {
    // check for checkpoints
    // so start position could vary here
+   mHardLanding = false;
 
    mBody->SetLinearVelocity(b2Vec2(0,0));
 

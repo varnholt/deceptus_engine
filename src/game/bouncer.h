@@ -45,4 +45,5 @@ private:
    int mZ = 0;
    sf::Time mActivationTime;
    bool mPlayerAtBouncer = false;
+   void updatePlayerAtBouncer();
 };
