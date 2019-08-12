@@ -47,61 +47,66 @@ Bouncer::Bouncer(
 )
  : FixtureNode(parent)
 {
-  // std::cout << "creating bouncer at " << x << ", " << y << " (" << width << " x " << height << ")" << std::endl;
+   // std::cout << "creating bouncer at " << x << ", " << y << " (" << width << " x " << height << ")" << std::endl;
 
-  setType(ObjectTypeBouncer);
-  mActivationTime = GlobalClock::getInstance()->getElapsedTime();
+   mRect.left = static_cast<int32_t>(x);
+   mRect.top = static_cast<int32_t>(y);
+   mRect.width = static_cast<int32_t>(width);
+   mRect.height = static_cast<int32_t>(height);
 
-  mPositionB2d = b2Vec2(x * MPP, y * MPP);
-  mPositionSf.x = x;
-  mPositionSf.y = y + height;
+   setType(ObjectTypeBouncer);
+   mActivationTime = GlobalClock::getInstance()->getElapsedTime();
 
-  b2BodyDef bodyDef;
-  bodyDef.type = b2_staticBody;
-  bodyDef.position = mPositionB2d;
+   mPositionB2d = b2Vec2(x * MPP, y * MPP);
+   mPositionSf.x = x;
+   mPositionSf.y = y + height;
 
-  mBody = world->CreateBody(&bodyDef);
+   b2BodyDef bodyDef;
+   bodyDef.type = b2_staticBody;
+   bodyDef.position = mPositionB2d;
 
-  auto halfPhysicsWidth = width * MPP * 0.5f;
-  auto halfPhysicsHeight = height * MPP * 0.5f;
+   mBody = world->CreateBody(&bodyDef);
+
+   auto halfPhysicsWidth = width * MPP * 0.5f;
+   auto halfPhysicsHeight = height * MPP * 0.5f;
 
   // create fixture for physical boundaries of the bouncer object
   mShapeBounds.SetAsBox(
-    halfPhysicsWidth, halfPhysicsHeight,
-    b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
-    0.0f
+      halfPhysicsWidth, halfPhysicsHeight,
+      b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
+      0.0f
   );
 
-  b2FixtureDef boundaryFixtureDef;
-  boundaryFixtureDef.shape = &mShapeBounds;
-  boundaryFixtureDef.density = 1.0f;
-  boundaryFixtureDef.isSensor = false;
+   b2FixtureDef boundaryFixtureDef;
+   boundaryFixtureDef.shape = &mShapeBounds;
+   boundaryFixtureDef.density = 1.0f;
+   boundaryFixtureDef.isSensor = false;
 
-  mBody->CreateFixture(&boundaryFixtureDef);
+   mBody->CreateFixture(&boundaryFixtureDef);
 
-  // create fixture for the sensor behavior, collision notification
-  mShapeBounds.SetAsBox(
-    halfPhysicsWidth, halfPhysicsHeight,
-    b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
-    0.0f
-  );
+   // create fixture for the sensor behavior, collision notification
+   mShapeBounds.SetAsBox(
+      halfPhysicsWidth, halfPhysicsHeight,
+      b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
+      0.0f
+   );
 
-  b2FixtureDef sensorFixtureDef;
-  sensorFixtureDef.shape = &mShapeBounds;
-  sensorFixtureDef.isSensor = true;
+   b2FixtureDef sensorFixtureDef;
+   sensorFixtureDef.shape = &mShapeBounds;
+   sensorFixtureDef.isSensor = true;
 
-  auto fixture = mBody->CreateFixture(&sensorFixtureDef);
-  fixture->SetUserData(static_cast<void*>(this));
+   auto fixture = mBody->CreateFixture(&sensorFixtureDef);
+   fixture->SetUserData(static_cast<void*>(this));
 
-  // load texture
-  if (mTexture.loadFromFile("data/level-crypt/tilesets/bumper.png"))
-  {
-     mSprite.setTexture(mTexture);
-  }
+   // load texture
+   if (mTexture.loadFromFile("data/level-crypt/tilesets/bumper.png"))
+   {
+      mSprite.setTexture(mTexture);
+   }
 
-  mSprite.setPosition(
-    mPositionSf - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT))
-  );
+   mSprite.setPosition(
+      mPositionSf - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT))
+   );
 }
 
 
@@ -114,22 +119,26 @@ void Bouncer::draw(sf::RenderTarget &window)
 void Bouncer::updatePlayerAtBouncer()
 {
    auto player = Player::getPlayer(0);
+   auto rect = player->getPlayerRect();
+   rect.height *= 2;
 
-   // yeah, this is super dirty.
-   // should have a static function to determine whether the player will collide
-   // with one of the bouncers within the next few frames
+   mPlayerAtBouncer = rect.intersects(mRect);
 
-   const auto a = sf::Vector2i{
-      static_cast<int32_t>(mPositionSf.x / TILE_WIDTH) + 1,
-      static_cast<int32_t>(mPositionSf.y / TILE_HEIGHT) - 1
-   };
-
-   const auto b = sf::Vector2i{
-      static_cast<int32_t>(player->getPixelPosition().x / TILE_WIDTH),
-      static_cast<int32_t>(player->getPixelPosition().y / TILE_HEIGHT)
-   };
-
-   mPlayerAtBouncer = (a == b);
+   // // yeah, this is super dirty.
+   // // should have a static function to determine whether the player will collide
+   // // with one of the bouncers within the next few frames
+   //
+   // const auto a = sf::Vector2i{
+   //    static_cast<int32_t>(mPositionSf.x / TILE_WIDTH) + 1,
+   //    static_cast<int32_t>(mPositionSf.y / TILE_HEIGHT) - 1
+   // };
+   //
+   // const auto b = sf::Vector2i{
+   //    static_cast<int32_t>(player->getPixelPosition().x / TILE_WIDTH),
+   //    static_cast<int32_t>(player->getPixelPosition().y / TILE_HEIGHT)
+   // };
+   //
+   // mPlayerAtBouncer = (a == b);
 }
 
 
