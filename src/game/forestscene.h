@@ -15,7 +15,7 @@ class ForestScene
       ForestScene();
 
       void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-
+      void update(const sf::Time& time);
 
    private:
       std::vector<std::shared_ptr<Layer>> mLayerStack;

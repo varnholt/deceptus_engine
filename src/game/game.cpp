@@ -257,6 +257,7 @@ void Game::initialize()
   mInfoLayer = std::make_unique<InfoLayer>();
   mInventoryLayer = std::make_unique<InventoryLayer>();
   mControllerOverlay = std::make_unique<ControllerOverlay>();
+  mTestScene = std::make_unique<ForestScene>();
 
   Audio::getInstance();
 
@@ -357,6 +358,11 @@ void Game::draw()
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
    {
       mInventoryLayer->draw(*mWindowRenderTexture.get());
+   }
+
+   if (mDrawTestScene)
+   {
+      mTestScene->draw(*mWindowRenderTexture.get());
    }
 
    Menu::getInstance()->draw(*mWindowRenderTexture.get(), {sf::BlendAlpha});
@@ -475,6 +481,7 @@ void Game::update()
          mLevel->update(dt);
          mPlayer->update(dt);
          updateGameState();
+         mTestScene->update(dt);
 
          if (mDrawWeather)
          {
@@ -618,6 +625,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::F6:
       {
          mDrawWeather = !mDrawWeather;
+         break;
+      }
+      case sf::Keyboard::F7:
+      {
+         mDrawTestScene = ! mDrawTestScene;
          break;
       }
       case sf::Keyboard::F:

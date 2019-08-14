@@ -37,3 +37,9 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates)
 {
 
 }
+
+
+void ForestScene::update(const sf::Time& time)
+{
+
+}
