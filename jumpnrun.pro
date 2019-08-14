@@ -89,7 +89,7 @@ INCLUDEPATH += src
 
 
 SOURCES += \
-   forestscene.cpp \
+   src/game/forestscene.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/game/console.cpp \
@@ -210,7 +210,7 @@ SOURCES += \
 # add box2d
 
 HEADERS += \
-    forestscene.h \
+    src/game/forestscene.h \
     src/game/camerasystem.h \
     src/game/camerasystemconfiguration.h \
     src/game/console.h \

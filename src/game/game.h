@@ -3,6 +3,7 @@
 #include "controlleroverlay.h"
 #include "console.h"
 #include "constants.h"
+#include "forestscene.h"
 #include "infolayer.h"
 #include "inventorylayer.h"
 #include "rainoverlay.h"
@@ -73,6 +74,10 @@ private:
    std::unique_ptr<InfoLayer> mInfoLayer;
    std::unique_ptr<InventoryLayer> mInventoryLayer;
    std::unique_ptr<ControllerOverlay> mControllerOverlay;
+
+   // temporary here for debugging only
+   std::unique_ptr<ForestScene> mTestScene;
+   bool mDrawTestScene = false;
 
    sf::Clock mDeltaClock;
    bool mLevelLoadingFinished = false;
