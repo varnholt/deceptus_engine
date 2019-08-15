@@ -99,6 +99,7 @@ SOURCES += \
    src/game/levelmap.cpp \
    src/game/maptools.cpp \
    src/game/rainoverlay.cpp \
+   src/game/spikeball.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/weather.cpp \
@@ -226,6 +227,7 @@ HEADERS += \
     src/game/player.h \
     src/game/level.h \
     src/game/rainoverlay.h \
+    src/game/spikeball.h \
     src/game/test.h \
     src/game/texturepool.h \
     src/game/weather.h \
