@@ -80,6 +80,7 @@ struct LuaNode : public GameNode
    lua_State* mState = nullptr;
    FilterDefaults mFilterDefaults;
 
+   // visualization
    sf::Vector2f mStartPosition;
    sf::Texture mTexture;
    sf::Sprite mSprite;
@@ -89,6 +90,7 @@ struct LuaNode : public GameNode
    sf::Vector2f mPosition;
    std::vector<sf::Vector2f> mPatrolPath;
 
+   // physics
    b2Body* mBody = nullptr;
    b2BodyDef* mBodyDef = nullptr;
    std::vector<b2Shape*> mShapes;

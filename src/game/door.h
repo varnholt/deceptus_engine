@@ -1,6 +1,4 @@
-#ifndef DOOR_H
-#define DOOR_H
-
+#pragma once
 
 #include "gamenode.h"
 
@@ -80,4 +78,3 @@ public:
    b2Body* mBody = nullptr;
 };
 
-#endif // DOOR_H
