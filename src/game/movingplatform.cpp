@@ -261,7 +261,7 @@ void MovingPlatform::link(const std::vector<MovingPlatform *> platforms, TmxObje
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::update(float /*dt*/)
+void MovingPlatform::update(const sf::Time& /*dt*/)
 {
    // configured timestep is 1/35
    // frame update timestep is 1/60

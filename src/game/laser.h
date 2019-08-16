@@ -29,7 +29,7 @@ public:
    Laser() = default;
 
    void draw(sf::RenderTarget& window);
-   void update(float dt);
+   void update(const sf::Time& dt);
 
    static std::vector<Laser*> load(
       TmxLayer *layer,

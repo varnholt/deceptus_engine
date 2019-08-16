@@ -64,7 +64,7 @@ public:
    );
 
 
-   void update(float dt);
+   void update(const sf::Time& dt);
 
    int getZ() const;
    void setZ(int getZ);

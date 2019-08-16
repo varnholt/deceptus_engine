@@ -21,7 +21,7 @@ public:
    );
 
    void draw(sf::RenderTarget &window);
-   void update(float dt);
+   void update(const sf::Time& dt);
    bool isPlayerAtBouncer();
 
    virtual ~Bouncer();

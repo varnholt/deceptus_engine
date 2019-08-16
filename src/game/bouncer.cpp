@@ -142,7 +142,7 @@ void Bouncer::updatePlayerAtBouncer()
 }
 
 
-void Bouncer::update(float /*dt*/)
+void Bouncer::update(const sf::Time& /*dt*/)
 {
    updatePlayerAtBouncer();
 

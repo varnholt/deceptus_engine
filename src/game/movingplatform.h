@@ -45,7 +45,7 @@ public:
    static void link(const std::vector<MovingPlatform*> platforms, TmxObject* tmxObject);
 
    void draw(sf::RenderTarget& target);
-   void update(float dt);
+   void update(const sf::Time& dt);
    void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
    void setOffset(float x, float y);

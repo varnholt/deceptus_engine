@@ -18,5 +18,21 @@ class SpikeBall : public GameNode
 
       void setup(const std::shared_ptr<b2World>& world);
 
+      int32_t getZ() const;
+      void setZ(const int32_t& z);
+
+
+   private:
+      b2BodyDef mGroundDef;
+      b2Body* mGround = nullptr;
+      b2EdgeShape mGroundShape;
+
+      b2RevoluteJointDef mJointDef;
+      b2PolygonShape mChainElementShape;
+      b2FixtureDef mChainElementFixtureDef;
+      float mChainElementLength = 25.0f;
+      std::vector<b2Body*> mChainElements;
+
+      int32_t mZ = 0;
 };
 

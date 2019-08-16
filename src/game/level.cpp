@@ -25,6 +25,7 @@
 #include "player.h"
 #include "physicsconfiguration.h"
 #include "sfmlmath.h"
+#include "spikeball.h"
 #include "squaremarcher.h"
 #include "tilemap.h"
 #include "weather.h"
@@ -622,6 +623,13 @@ void Level::loadTmx()
    }
 
    std::cout << "[x] loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+
+   {
+      // testbed
+      auto spikeBall = new SpikeBall(this);
+      spikeBall->setup(mWorld);
+      mSpikeBalls.push_back(spikeBall);
+   }
 }
 
 
@@ -903,6 +911,14 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
          if (bouncer->getZ() == z)
          {
             bouncer->draw(target);
+         }
+      }
+
+      for (auto& ball : mSpikeBalls)
+      {
+         if (ball->getZ() == z)
+         {
+            ball->draw(target);
          }
       }
 
@@ -1211,32 +1227,37 @@ void Level::update(const sf::Time& dt)
 
    for (auto& tileMap : mTileMaps)
    {
-      tileMap->update(dt.asSeconds());
+      tileMap->update(dt);
    }
 
    for (auto& platform : mPlatforms)
    {
-      platform->update(dt.asSeconds());
+      platform->update(dt);
    }
 
    for (auto& door : mDoors)
    {
-      door->update(dt.asSeconds());
+      door->update(dt);
    }
 
    for (auto& bouncer : mBouncers)
    {
-      bouncer->update(dt.asSeconds());
+      bouncer->update(dt);
    }
 
    for (auto& portal : mPortals)
    {
-      portal->update(dt.asSeconds());
+      portal->update(dt);
    }
 
    for (auto& laser : mLasers)
    {
-      laser->update(dt.asSeconds());
+      laser->update(dt);
+   }
+
+   for (auto& ball : mSpikeBalls)
+   {
+      ball->update(dt);
    }
 
    LuaInterface::instance()->update(dt.asSeconds());

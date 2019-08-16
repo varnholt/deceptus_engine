@@ -1,5 +1,7 @@
 #include "spikeball.h"
 
+#include "constants.h"
+
 // spike ball concept
 //
 //                      +-----------+
@@ -32,6 +34,25 @@ SpikeBall::SpikeBall(GameNode* node)
 
 }
 
+void SpikeBall::draw(sf::RenderTarget& window)
+{
+   for (auto i = 0u; i < mChainElements.size() - 1; i++)
+   {
+      auto c1 = mChainElements[i];
+      auto c2 = mChainElements[i + 1];
+      const auto c1Pos = c1->GetPosition();
+      const auto c2Pos = c2->GetPosition();
+
+      sf::Vertex line[] =
+      {
+         sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM)),
+         sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM)),
+      };
+
+      window.draw(line, 2, sf::Lines);
+   }
+}
+
 
 void SpikeBall::update(const sf::Time& /*dt*/)
 {
@@ -41,115 +62,43 @@ void SpikeBall::update(const sf::Time& /*dt*/)
 
 void SpikeBall::setup(const std::shared_ptr<b2World>& world)
 {
-   b2Body* m_bodyA;
-   b2Body* m_bodyB;
-   b2RevoluteJoint* m_joint;
+   // can be removed later
+   mGround = world->CreateBody(&mGroundDef);
+   mGroundShape.Set(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+   mGround->CreateFixture(&mGroundShape, 0.0f);
 
-   //create the two bodies
+   // chain element setup
+   mChainElementShape.SetAsBox(0.6f, 0.125f);
+   mChainElementFixtureDef.shape = &mChainElementShape;
+   mChainElementFixtureDef.density = 20.0f;
+   mChainElementFixtureDef.friction = 0.2f;
+
+   mJointDef.collideConnected = false;
+
+   auto prevBody = mGround;
+   for (auto i = 0; i < 10; ++i)
    {
-      // body and fixture defs - the common parts
-      b2BodyDef bodyDef;
-      bodyDef.type = b2_dynamicBody;
-      b2FixtureDef fixtureDef;
-      fixtureDef.density = 1;
+      b2BodyDef bd;
+      bd.type = b2_dynamicBody;
+      bd.position.Set(0.5f + i, mChainElementLength);
+      auto chainBody = world->CreateBody(&bd);
+      chainBody->CreateFixture(&mChainElementFixtureDef);
+      mChainElements.push_back(chainBody);
 
-      // two shapes
-      b2PolygonShape boxShape;
-      boxShape.SetAsBox(2,2);
-      b2CircleShape circleShape;
-      circleShape.m_radius = 2;
+      b2Vec2 anchor(static_cast<float>(i), mChainElementLength);
+      mJointDef.Initialize(prevBody, chainBody, anchor);
+      world->CreateJoint(&mJointDef);
 
-      // make box a little to the left
-      bodyDef.position.Set(-13, 10);
-      fixtureDef.shape = &boxShape;
-      m_bodyA = world->CreateBody( &bodyDef );
-      m_bodyA->CreateFixture( &fixtureDef );
-
-      // and circle a little to the right
-      bodyDef.position.Set( -7, 10);
-      fixtureDef.shape = &circleShape;
-      m_bodyB = world->CreateBody( &bodyDef );
-      m_bodyB->CreateFixture( &fixtureDef );
+      prevBody = chainBody;
    }
+}
 
-   //set up a revolute joint
-   {
-      b2RevoluteJointDef revoluteJointDef;
-      revoluteJointDef.bodyA = m_bodyA;
-      revoluteJointDef.bodyB = m_bodyB;
-      revoluteJointDef.collideConnected = false;
+int32_t SpikeBall::getZ() const
+{
+   return mZ;
+}
 
-      // anchor points
-      revoluteJointDef.localAnchorA.Set(2,2); //the top right corner of the box
-      revoluteJointDef.localAnchorB.Set(0,0); //center of the circle
-
-      // limits
-      revoluteJointDef.enableLimit = true;
-      revoluteJointDef.lowerAngle = -45 * DEGTORAD;
-      revoluteJointDef.upperAngle =  45 * DEGTORAD;
-
-      // motor
-      revoluteJointDef.enableMotor = false; //let user toggle this later
-      revoluteJointDef.maxMotorTorque = 50;
-      revoluteJointDef.motorSpeed = 90 * DEGTORAD; //90 degrees per second
-
-      m_joint = (b2RevoluteJoint*)world->CreateJoint( &revoluteJointDef );
-   }
-
-   //make a chain
-   {
-      // body and fixture defs are common to all chain links
-      b2BodyDef bodyDef;
-      bodyDef.type = b2_dynamicBody;
-      bodyDef.position.Set(5,10);
-      b2FixtureDef fixtureDef;
-      fixtureDef.density = 1;
-      b2PolygonShape polygonShape;
-      polygonShape.SetAsBox(1,0.25);
-      fixtureDef.shape = &polygonShape;
-
-      // set up the common properties of the joint before entering the loop
-      b2RevoluteJointDef revoluteJointDef;
-      revoluteJointDef.localAnchorA.Set( 0.75,0);
-      revoluteJointDef.localAnchorB.Set(-0.75,0);
-
-      b2Body* link = world->CreateBody( &bodyDef );
-      link->CreateFixture( &fixtureDef );
-
-      for (auto i = 0; i < 10; i++)
-      {
-         b2Body* newLink = world->CreateBody( &bodyDef );
-         newLink->CreateFixture( &fixtureDef );
-
-         // inside the loop, only need to change the bodies
-         revoluteJointDef.bodyA = link;
-         revoluteJointDef.bodyB = newLink;
-         world->CreateJoint( &revoluteJointDef );
-
-         //prepare for next iteration
-         link = newLink;
-      }
-
-      // body with circle fixture
-      b2CircleShape circleShape;
-      circleShape.m_radius = 2;
-      fixtureDef.shape = &circleShape;
-      b2Body* chainBase = world->CreateBody( &bodyDef );
-      chainBase->CreateFixture( &fixtureDef );
-
-      // a revolute joint to connect the circle to the ground
-      // revoluteJointDef.bodyA = m_groundBody;//provided by testbed
-      revoluteJointDef.bodyB = chainBase;
-      revoluteJointDef.localAnchorA.Set(4,20);//world coords, because m_groundBody is at (0,0)
-      revoluteJointDef.localAnchorB.Set(0,0);//center of circle
-      world->CreateJoint( &revoluteJointDef );
-
-      // another revolute joint to connect the chain to the circle
-      revoluteJointDef.bodyA = link;//the last added link of the chain
-      revoluteJointDef.bodyB = chainBase;
-      revoluteJointDef.localAnchorA.Set(0.75,0);//the regular position for chain link joints, as above
-      revoluteJointDef.localAnchorB.Set(1.75,0);//a little in from the edge of the circle
-      world->CreateJoint( &revoluteJointDef );
-   }
-
+void SpikeBall::setZ(const int32_t& z)
+{
+   mZ = z;
 }
