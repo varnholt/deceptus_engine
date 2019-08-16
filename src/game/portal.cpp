@@ -58,7 +58,7 @@ void Portal::setDestination(Portal *dst)
 
 
 //-----------------------------------------------------------------------------
-void Portal::update(float /*dt*/)
+void Portal::update(const sf::Time& /*dt*/)
 {
    sf::Vector2f playerPos = Player::getPlayer(0)->getPixelPosition();
    sf::Vector2f PortalPos = getPortalPosition();

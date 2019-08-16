@@ -35,7 +35,7 @@ void Door::draw(sf::RenderTarget& window)
 
 
 //-----------------------------------------------------------------------------
-void Door::update(float dt)
+void Door::update(const sf::Time& dt)
 {
    auto playerPos = Player::getPlayer(0)->getPixelPosition();
    auto doorPos = mSprites.at(mSprites.size()- 1 ).getPosition();
@@ -78,7 +78,7 @@ void Door::update(float dt)
    {
       case State::Opening:
       {
-         mOffset -= openSpeed * dt;
+         mOffset -= openSpeed * dt.asSeconds();
          if (fabs(mOffset) >= TILE_HEIGHT * mHeight)
          {
             mState = State::Open;
@@ -88,7 +88,7 @@ void Door::update(float dt)
       }
       case State::Closing:
       {
-         mOffset += openSpeed * dt;
+         mOffset += openSpeed * dt.asSeconds();
          if (mOffset >= 0.0f)
          {
             mState = State::Closed;

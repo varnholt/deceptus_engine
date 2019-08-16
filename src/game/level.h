@@ -38,6 +38,7 @@ struct LevelDescription;
 class LevelMap;
 class MovingPlatform;
 class TileMap;
+class SpikeBall;
 struct TmxElement;
 struct TmxObjectGroup;
 class TmxParser;
@@ -224,6 +225,7 @@ protected:
    std::vector<Laser*> mLasers;
    std::vector<MovingPlatform*> mPlatforms;
    std::vector<Portal*> mPortals;
+   std::vector<SpikeBall*> mSpikeBalls;
 
    // graphic effects
    std::shared_ptr<RaycastLight> mRaycastLight;

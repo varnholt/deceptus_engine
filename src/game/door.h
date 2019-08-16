@@ -27,7 +27,7 @@ public:
    Door(GameNode *parent);
 
    void draw(sf::RenderTarget& window);
-   void update(float dt);
+   void update(const sf::Time& dt);
    void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
 

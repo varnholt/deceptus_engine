@@ -150,9 +150,8 @@ bool TileMap::load(
 }
 
 
-void TileMap::update(float dt)
+void TileMap::update(const sf::Time& dt)
 {
-   dt *= 1000.0f;
    mVerticesAnimated.clear();
 
    for (auto anim : mAnimations)
@@ -160,7 +159,7 @@ void TileMap::update(float dt)
       if (!anim->mVisible)
          continue;
 
-      anim->mElapsed += dt;
+      anim->mElapsed += dt.asMilliseconds();
       anim->mElapsed = fmod(anim->mElapsed, anim->mDuration);
 
       int index = 0;

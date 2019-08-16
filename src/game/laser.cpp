@@ -41,9 +41,9 @@ void Laser::draw(sf::RenderTarget& window)
 
 
 //-----------------------------------------------------------------------------
-void Laser::update(float dt)
+void Laser::update(const sf::Time& dt)
 {
-   mTime += static_cast<uint32_t>(dt * 1000.0f);
+   mTime += dt.asMilliseconds();
 
    const auto& sig = mSignalPlot.at(mSignalIndex);
 
@@ -66,7 +66,7 @@ void Laser::update(float dt)
       // off sprite is rightmost, on sprite is leftmost
       auto dir = mOn ? -1 : 1;
 
-      mTileAnimation += (dt * 10.0f * dir);
+      mTileAnimation += (dt.asSeconds() * 10.0f * dir);
       mTileIndex = static_cast<int32_t>(mTileAnimation);
 
       // clamp tile index
