@@ -627,6 +627,7 @@ void Level::loadTmx()
    {
       // testbed
       auto spikeBall = new SpikeBall(this);
+      spikeBall->setPixelPosition(sf::Vector2i{260 * PIXELS_PER_TILE, 57 * PIXELS_PER_TILE});
       spikeBall->setup(mWorld);
       mSpikeBalls.push_back(spikeBall);
    }
@@ -689,8 +690,8 @@ void Level::initialize()
 
    load();
 
-   mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * TILE_WIDTH  + PLAYER_ACTUAL_WIDTH / 2);
-   mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * TILE_HEIGHT + DIFF_PLAYER_TILE_TO_PHYSICS);
+   mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
+   mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 
    spawnEnemies();
 }
@@ -706,8 +707,8 @@ void Level::spawnEnemies()
       {
          patrolPath.push_back(
             sf::Vector2f(
-               static_cast<float_t>(desc.mPatrolPath.at(i)     * TILE_WIDTH + TILE_WIDTH / 2),
-               static_cast<float_t>(desc.mPatrolPath.at(i + 1) * TILE_HEIGHT)
+               static_cast<float_t>(desc.mPatrolPath.at(i)     * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
+               static_cast<float_t>(desc.mPatrolPath.at(i + 1) * PIXELS_PER_TILE)
             )
          );
       }
@@ -715,8 +716,8 @@ void Level::spawnEnemies()
       auto enemy = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + desc.mScript);
 
       enemy->mStartPosition = sf::Vector2f(
-         static_cast<float_t>(desc.mStartPosition.at(0) * TILE_WIDTH + TILE_WIDTH / 2),
-         static_cast<float_t>(desc.mStartPosition.at(1) * TILE_HEIGHT + TILE_HEIGHT / 2)
+         static_cast<float_t>(desc.mStartPosition.at(0) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
+         static_cast<float_t>(desc.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
       );
 
       enemy->mPatrolPath = patrolPath;
@@ -1207,7 +1208,7 @@ void Level::draw(
 //-----------------------------------------------------------------------------
 sf::Vector2f Level::getSize()
 {
-   sf::Vector2f vec(500 * TILE_WIDTH, 500 * TILE_WIDTH);
+   sf::Vector2f vec(500 * PIXELS_PER_TILE, 500 * PIXELS_PER_TILE);
    return vec;
 }
 
@@ -1310,8 +1311,8 @@ void Level::addPathsToWorld(
          {
             sf::Vertex visibleVertex;
             visibleVertex.color = color;
-            visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * TILE_WIDTH);
-            visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * TILE_HEIGHT);
+            visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * PIXELS_PER_TILE);
+            visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * PIXELS_PER_TILE);
 
             visiblePath.push_back(visibleVertex);
          }
@@ -1327,8 +1328,8 @@ void Level::addPathsToWorld(
          b2Vec2 chainPos;
 
          chainPos.Set(
-            (pos.x + offsetX)* TILE_WIDTH / PPM,
-            (pos.y + offsetY)* TILE_HEIGHT / PPM
+            (pos.x + offsetX)* PIXELS_PER_TILE / PPM,
+            (pos.y + offsetY)* PIXELS_PER_TILE / PPM
          );
 
          chain.push_back(chainPos);
@@ -1602,8 +1603,8 @@ void Level::parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet)
                         for (const auto& p : points)
                         {
 
-                           const auto px = (offsetX + x) * TILE_WIDTH + p.x;
-                           const auto py = (offsetY + y) * TILE_HEIGHT + p.y;
+                           const auto px = (offsetX + x) * PIXELS_PER_TILE + p.x;
+                           const auto py = (offsetY + y) * PIXELS_PER_TILE + p.y;
 
                            vertices.push_back(b2Vec2(px, py));
                            face.push_back(static_cast<int32_t>(vertices.size()) - 1);
@@ -1775,8 +1776,8 @@ AtmosphereTile Level::Atmosphere::getTileForPosition(const b2Vec2& pos) const
   //     << x << " x " << y
   //     << std::endl;
 
-   auto tx = static_cast<uint32_t>(x * PPM / TILE_WIDTH);
-   auto ty = static_cast<uint32_t>(y * PPM / TILE_HEIGHT);
+   auto tx = static_cast<uint32_t>(x * PPM / PIXELS_PER_TILE);
+   auto ty = static_cast<uint32_t>(y * PPM / PIXELS_PER_TILE);
 
    AtmosphereTile tile = static_cast<AtmosphereTile>(mMap[ty * mMapWidth + tx]);
    return tile;

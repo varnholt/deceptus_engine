@@ -41,10 +41,10 @@ void Door::update(const sf::Time& dt)
    auto doorPos = mSprites.at(mSprites.size()- 1 ).getPosition();
 
    sf::Vector2f a(playerPos.x, playerPos.y);
-   sf::Vector2f b(doorPos.x + TILE_WIDTH * 0.5f, doorPos.y);
+   sf::Vector2f b(doorPos.x + PIXELS_PER_TILE * 0.5f, doorPos.y);
 
    auto distance = SfmlMath::length(a - b);
-   auto atDoor = (distance < TILE_WIDTH * 1.5f);
+   auto atDoor = (distance < PIXELS_PER_TILE * 1.5f);
 
    setPlayerAtDoor(atDoor);
 
@@ -64,8 +64,8 @@ void Door::update(const sf::Time& dt)
 
       sprite.setPosition(
          sf::Vector2f(
-            static_cast<float>(x * TILE_WIDTH),
-            static_cast<float>((i + y) * TILE_HEIGHT  + mOffset)
+            static_cast<float>(x * PIXELS_PER_TILE),
+            static_cast<float>((i + y) * PIXELS_PER_TILE  + mOffset)
          )
       );
 
@@ -79,10 +79,10 @@ void Door::update(const sf::Time& dt)
       case State::Opening:
       {
          mOffset -= openSpeed * dt.asSeconds();
-         if (fabs(mOffset) >= TILE_HEIGHT * mHeight)
+         if (fabs(mOffset) >= PIXELS_PER_TILE * mHeight)
          {
             mState = State::Open;
-            mOffset = static_cast<float_t>(-TILE_HEIGHT * mHeight);
+            mOffset = static_cast<float_t>(-PIXELS_PER_TILE * mHeight);
          }
          break;
       }
@@ -108,8 +108,8 @@ void Door::update(const sf::Time& dt)
 //-----------------------------------------------------------------------------
 void Door::updateTransform()
 {
-   auto x =            mTilePosition.x * TILE_WIDTH / PPM;
-   auto y = (mOffset + mTilePosition.y * TILE_HEIGHT) / PPM;
+   auto x =            mTilePosition.x * PIXELS_PER_TILE / PPM;
+   auto y = (mOffset + mTilePosition.y * PIXELS_PER_TILE) / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -138,8 +138,8 @@ void Door::reset()
 void Door::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygonShape;
-   auto sizeX = (TILE_WIDTH / PPM) * 0.26f;
-   auto sizeY = (TILE_HEIGHT / PPM);
+   auto sizeX = (PIXELS_PER_TILE / PPM) * 0.26f;
+   auto sizeY = (PIXELS_PER_TILE / PPM);
    auto offsetX = 0.17f;
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(offsetX,         0);
@@ -322,17 +322,17 @@ std::vector<Door *> Door::load(
             sprite.setTexture(door->mTexture);
             sprite.setTextureRect(
                sf::IntRect(
-                  tu * TILE_WIDTH,
-                  tv * TILE_HEIGHT,
-                  TILE_WIDTH,
-                  TILE_HEIGHT
+                  tu * PIXELS_PER_TILE,
+                  tv * PIXELS_PER_TILE,
+                  PIXELS_PER_TILE,
+                  PIXELS_PER_TILE
                )
             );
 
             sprite.setPosition(
                sf::Vector2f(
-                  static_cast<float_t>(i * TILE_WIDTH),
-                  static_cast<float_t>(j * TILE_HEIGHT)
+                  static_cast<float_t>(i * PIXELS_PER_TILE),
+                  static_cast<float_t>(j * PIXELS_PER_TILE)
                )
             );
 

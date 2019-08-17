@@ -19,10 +19,8 @@
 #define PPM 48.0f
 #define MPP (1.0f/PPM)
 
-#define TILE_WIDTH 24
-#define TILE_HEIGHT 24
-
-#define PHYSICS_TILE_WIDTH 8 // each tile is 8x8 px
+#define PIXELS_PER_TILE 24
+#define PIXELS_PER_PHYSICS_TILE 8 // each tile is 8x8 px
 
 #define DIFF_PLAYER_TILE_TO_PHYSICS 15 // 20
 
