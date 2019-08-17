@@ -27,6 +27,9 @@ class SpikeBall : public GameNode
 
    private:
 
+      sf::Texture mTexture;
+      sf::Sprite mSprite;
+
       sf::Vector2i mPixelPosition;
 
       b2BodyDef mGroundDef;
@@ -37,6 +40,11 @@ class SpikeBall : public GameNode
       b2PolygonShape mChainElementShape;
       b2FixtureDef mChainElementFixtureDef;
       std::vector<b2Body*> mChainElements;
+
+      b2Body* mBallBody = nullptr;
+      b2CircleShape mBallShape;
+      b2BodyDef mBallBodyDef;
+      b2FixtureDef mBallFixtureDef;
 
       int32_t mZ = 0;
 };

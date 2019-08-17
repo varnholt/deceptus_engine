@@ -36,6 +36,11 @@ SpikeBall::SpikeBall(GameNode* node)
    mChainElementFixtureDef.shape = &mChainElementShape;
    mChainElementFixtureDef.density = 20.0f;
    mChainElementFixtureDef.friction = 0.2f;
+
+   mTexture.loadFromFile("data/sprites/enemy_spikeball.png");
+   mSprite.setTexture(mTexture);
+   mSprite.setTextureRect(sf::IntRect(24, 0, 48, 48));
+   // mSprite.setRotation()
 }
 
 
@@ -59,6 +64,26 @@ void SpikeBall::draw(sf::RenderTarget& window)
       window.draw(line, 2, sf::Lines);
       // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
    }
+
+   if (mBallBody)
+   {
+      mSprite.setPosition(
+         mBallBody->GetPosition().x * PPM - mBallShape.m_radius * PPM,
+         mBallBody->GetPosition().y * PPM - mBallShape.m_radius * PPM
+      );
+
+      window.draw(mSprite);
+
+
+      // sf::CircleShape shape(mBallShape.m_radius * PPM);
+      // shape.setFillColor(sf::Color(100, 250, 50));
+      // shape.setPosition(
+      //    mBallBody->GetPosition().x * PPM - mBallShape.m_radius * PPM,
+      //    mBallBody->GetPosition().y * PPM - mBallShape.m_radius * PPM
+      // );
+      //
+      // window.draw(shape);
+   }
 }
 
 
@@ -69,7 +94,8 @@ void SpikeBall::update(const sf::Time& /*dt*/)
 
 void SpikeBall::setup(const std::shared_ptr<b2World>& world)
 {
-   static const auto chainElementLength = 0.4f;
+   static const auto chainElementLength = 0.3f;
+   //static const auto chainElementLength = 0.1f;
 
    auto pos = b2Vec2{static_cast<float>(mPixelPosition.x * MPP), static_cast<float>(mPixelPosition.y * MPP)};
 
@@ -92,17 +118,41 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
       mChainElements.push_back(chainBody);
 
       b2Vec2 anchor(pos.x + i * chainElementLength, pos.y);
-      mJointDef.enableMotor = true;
-      mJointDef.Initialize(prevBody, chainBody, anchor);
-      auto joint = world->CreateJoint(&mJointDef);
 
-      if (i==0)
-      {
-         dynamic_cast<b2RevoluteJoint*>(joint)->SetMotorSpeed(1.1f);
-      }
+      //      if (i==0)
+      //      {
+      //         mJointDef.enableMotor = true;
+      //         mJointDef.maxMotorTorque = 5;
+      //         mJointDef.motorSpeed = 90 * DEGTORAD;
+      //      }
+      //      else {
+      //         mJointDef.enableMotor = false;
+      //         mJointDef.maxMotorTorque = 5;
+      //         mJointDef.motorSpeed = 90 * DEGTORAD;
+      //      }
+
+      mJointDef.Initialize(prevBody, chainBody, anchor);
+      world->CreateJoint(&mJointDef);
 
       prevBody = chainBody;
    }
+
+   //   revoluteJointDef.enableLimit = true;
+   //   revoluteJointDef.lowerAngle = -45 * DEGTORAD;
+   //   revoluteJointDef.upperAngle =  45 * DEGTORAD;
+
+   // https://www.iforce2d.net/b2dtut/joints-revolute
+   mBallBodyDef.type = b2_dynamicBody;
+   mBallFixtureDef.density = 1;
+   mBallShape.m_radius = 0.4f;
+   mBallBodyDef.position.Set(pos.x + 0.01f + 10 * chainElementLength, pos.y);
+   mBallFixtureDef.shape = &mBallShape;
+   mBallBody = world->CreateBody( &mBallBodyDef );
+   /*auto fixture = */ mBallBody->CreateFixture( &mBallFixtureDef );
+   b2Vec2 anchor(pos.x + 10 * chainElementLength, pos.y);
+   mJointDef.Initialize(prevBody, mBallBody, anchor);
+   world->CreateJoint(&mJointDef);
+
 }
 
 int32_t SpikeBall::getZ() const
