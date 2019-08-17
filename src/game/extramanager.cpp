@@ -44,8 +44,8 @@ void ExtraManager::load(
             std::shared_ptr<ExtraItem> item = std::make_shared<ExtraItem>();
             item->mSpriteOffset.x = i;
             item->mSpriteOffset.y = j;
-            item->mPosition.x = static_cast<float>(i * TILE_WIDTH);
-            item->mPosition.y = static_cast<float>(j * TILE_HEIGHT);
+            item->mPosition.x = static_cast<float>(i * PIXELS_PER_TILE);
+            item->mPosition.y = static_cast<float>(j * PIXELS_PER_TILE);
             item->mType = static_cast<ExtraItem::Type>(tileNumber - firstId);
 
             switch (item->mType)
@@ -93,9 +93,9 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
       {
          sf::Rect<int32_t> itemRect;
          itemRect.left = static_cast<int32_t>(item->mPosition.x);
-         itemRect.top = static_cast<int32_t>(item->mPosition.y + TILE_HEIGHT);
-         itemRect.width = TILE_WIDTH;
-         itemRect.height = TILE_HEIGHT;
+         itemRect.top = static_cast<int32_t>(item->mPosition.y + PIXELS_PER_TILE);
+         itemRect.width = PIXELS_PER_TILE;
+         itemRect.height = PIXELS_PER_TILE;
 
          return item->mActive && playerRect.intersects(itemRect);
       }

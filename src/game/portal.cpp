@@ -64,10 +64,10 @@ void Portal::update(const sf::Time& /*dt*/)
    sf::Vector2f PortalPos = getPortalPosition();
 
    sf::Vector2f a(playerPos.x, playerPos.y);
-   sf::Vector2f b(PortalPos.x + TILE_WIDTH * 0.5f, PortalPos.y);
+   sf::Vector2f b(PortalPos.x + PIXELS_PER_TILE * 0.5f, PortalPos.y);
 
    float distance = SfmlMath::length(a - b);
-   bool atPortal = (distance < TILE_WIDTH * 1.0f);
+   bool atPortal = (distance < PIXELS_PER_TILE * 1.0f);
 
    setPlayerAtPortal(atPortal);
 
@@ -87,8 +87,8 @@ void Portal::update(const sf::Time& /*dt*/)
 
       sprite.setPosition(
          sf::Vector2f(
-            static_cast<float>(x * TILE_WIDTH),
-            static_cast<float>((i + y) * TILE_HEIGHT)
+            static_cast<float>(x * PIXELS_PER_TILE),
+            static_cast<float>((i + y) * PIXELS_PER_TILE)
          )
       );
 
@@ -110,10 +110,10 @@ void Portal::link(
    sf::Vector2i src(static_cast<int32_t>(floor(srcf.x)), static_cast<int32_t>(floor(srcf.y)));
    sf::Vector2i dst(static_cast<int32_t>(floor(dstf.x)), static_cast<int32_t>(floor(dstf.y)));
 
-   const auto srcX = static_cast<int32_t>(src.x + tmxObject->mX) / TILE_WIDTH;
-   const auto srcY = static_cast<int32_t>(src.y + tmxObject->mY) / TILE_HEIGHT;
-   const auto dstX = static_cast<int32_t>(dst.x + tmxObject->mX) / TILE_WIDTH;
-   const auto dstY = static_cast<int32_t>(dst.y + tmxObject->mY) / TILE_HEIGHT;
+   const auto srcX = static_cast<int32_t>(src.x + tmxObject->mX) / PIXELS_PER_TILE;
+   const auto srcY = static_cast<int32_t>(src.y + tmxObject->mY) / PIXELS_PER_TILE;
+   const auto dstX = static_cast<int32_t>(dst.x + tmxObject->mX) / PIXELS_PER_TILE;
+   const auto dstY = static_cast<int32_t>(dst.y + tmxObject->mY) / PIXELS_PER_TILE;
 
    Portal* srcPortal = nullptr;
    Portal* dstPortal = nullptr;
@@ -122,8 +122,8 @@ void Portal::link(
    {
       sf::Vector2f portalPos = portal->getPortalPosition();
 
-      const auto px = static_cast<int32_t>(portalPos.x / TILE_WIDTH);
-      const auto py = static_cast<int32_t>(portalPos.y / TILE_HEIGHT);
+      const auto px = static_cast<int32_t>(portalPos.x / PIXELS_PER_TILE);
+      const auto py = static_cast<int32_t>(portalPos.y / PIXELS_PER_TILE);
 
       // todo: go to py..(py + mHeight)
       if (px == srcX && (py == srcY || py + 1 == srcY))
@@ -252,17 +252,17 @@ std::vector<Portal *> Portal::load(
             sprite.setTexture(portal->mTexture);
             sprite.setTextureRect(
                sf::IntRect(
-                  tu * TILE_WIDTH,
-                  tv * TILE_HEIGHT,
-                  TILE_WIDTH,
-                  TILE_HEIGHT
+                  tu * PIXELS_PER_TILE,
+                  tv * PIXELS_PER_TILE,
+                  PIXELS_PER_TILE,
+                  PIXELS_PER_TILE
                )
             );
 
             sprite.setPosition(
                sf::Vector2f(
-                  static_cast<float>(i * TILE_WIDTH),
-                  static_cast<float>(j * TILE_HEIGHT)
+                  static_cast<float>(i * PIXELS_PER_TILE),
+                  static_cast<float>(j * PIXELS_PER_TILE)
                )
             );
 

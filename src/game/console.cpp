@@ -82,7 +82,7 @@ void Console::execute()
       os << "teleport to " << x << ", " <<  y << std::endl;
       mLog.push_back(os.str());
 
-      Player::getPlayer(0)->setBodyViaPixelPosition(static_cast<float>(x * TILE_WIDTH), static_cast<float>(y * TILE_HEIGHT));
+      Player::getPlayer(0)->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
    }
    else
    {

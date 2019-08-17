@@ -14,7 +14,7 @@
 //                  ./                   thin box body + distance joint     '---------' '---------' '---------'
 //            \- __^_ -/
 //             .`    '.
-//           < : O  o : >                circular body (bad spiky ball, dynamic body)
+//           < : O  x : >                circular body (bad spiky ball, dynamic body)
 //             :  __  :
 //            /_`----'_\
 //                \/
@@ -31,11 +31,18 @@
 SpikeBall::SpikeBall(GameNode* node)
  : GameNode(node)
 {
-
+   // chain element setup
+   mChainElementShape.SetAsBox(0.06f, 0.0125f);
+   mChainElementFixtureDef.shape = &mChainElementShape;
+   mChainElementFixtureDef.density = 20.0f;
+   mChainElementFixtureDef.friction = 0.2f;
 }
+
 
 void SpikeBall::draw(sf::RenderTarget& window)
 {
+   static const auto color = sf::Color(255, 0, 0);
+
    for (auto i = 0u; i < mChainElements.size() - 1; i++)
    {
       auto c1 = mChainElements[i];
@@ -45,33 +52,31 @@ void SpikeBall::draw(sf::RenderTarget& window)
 
       sf::Vertex line[] =
       {
-         sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM)),
-         sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM)),
+         sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM), color),
+         sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM), color),
       };
 
       window.draw(line, 2, sf::Lines);
+      // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
    }
 }
 
 
 void SpikeBall::update(const sf::Time& /*dt*/)
 {
-
 }
 
 
 void SpikeBall::setup(const std::shared_ptr<b2World>& world)
 {
+   static const auto chainElementLength = 0.4f;
+
+   auto pos = b2Vec2{static_cast<float>(mPixelPosition.x * MPP), static_cast<float>(mPixelPosition.y * MPP)};
+
    // can be removed later
    mGround = world->CreateBody(&mGroundDef);
-   mGroundShape.Set(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
+   mGroundShape.Set(b2Vec2(pos.x - 0.1f, pos.y), b2Vec2(pos.x + 0.1f, pos.y));
    mGround->CreateFixture(&mGroundShape, 0.0f);
-
-   // chain element setup
-   mChainElementShape.SetAsBox(0.6f, 0.125f);
-   mChainElementFixtureDef.shape = &mChainElementShape;
-   mChainElementFixtureDef.density = 20.0f;
-   mChainElementFixtureDef.friction = 0.2f;
 
    mJointDef.collideConnected = false;
 
@@ -80,14 +85,21 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
    {
       b2BodyDef bd;
       bd.type = b2_dynamicBody;
-      bd.position.Set(0.5f + i, mChainElementLength);
+      bd.position.Set(pos.x + 0.01f + i * chainElementLength, pos.y);
       auto chainBody = world->CreateBody(&bd);
-      chainBody->CreateFixture(&mChainElementFixtureDef);
+      auto chainFixture = chainBody->CreateFixture(&mChainElementFixtureDef);
+      chainFixture->SetSensor(true);
       mChainElements.push_back(chainBody);
 
-      b2Vec2 anchor(static_cast<float>(i), mChainElementLength);
+      b2Vec2 anchor(pos.x + i * chainElementLength, pos.y);
+      mJointDef.enableMotor = true;
       mJointDef.Initialize(prevBody, chainBody, anchor);
-      world->CreateJoint(&mJointDef);
+      auto joint = world->CreateJoint(&mJointDef);
+
+      if (i==0)
+      {
+         dynamic_cast<b2RevoluteJoint*>(joint)->SetMotorSpeed(1.1f);
+      }
 
       prevBody = chainBody;
    }
@@ -98,7 +110,22 @@ int32_t SpikeBall::getZ() const
    return mZ;
 }
 
+
 void SpikeBall::setZ(const int32_t& z)
 {
    mZ = z;
 }
+
+
+sf::Vector2i SpikeBall::getPixelPosition() const
+{
+   return mPixelPosition;
+}
+
+
+void SpikeBall::setPixelPosition(const sf::Vector2i& pixelPosition)
+{
+   mPixelPosition = pixelPosition;
+}
+
+

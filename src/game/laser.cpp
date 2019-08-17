@@ -29,10 +29,10 @@ void Laser::draw(sf::RenderTarget& window)
 {
    mSprite.setTextureRect(
       sf::IntRect(
-         mTu * TILE_WIDTH + mTileIndex * TILE_WIDTH,
-         mTv * TILE_HEIGHT,
-         TILE_WIDTH,
-         TILE_HEIGHT
+         mTu * PIXELS_PER_TILE + mTileIndex * PIXELS_PER_TILE,
+         mTv * PIXELS_PER_TILE,
+         PIXELS_PER_TILE,
+         PIXELS_PER_TILE
       )
    );
 
@@ -144,8 +144,8 @@ std::vector<Laser*> Laser::load(
             sprite.setTexture(*laser->mTexture);
             sprite.setPosition(
                sf::Vector2f(
-                  static_cast<float>(i * TILE_WIDTH),
-                  static_cast<float>(j * TILE_HEIGHT)
+                  static_cast<float>(i * PIXELS_PER_TILE),
+                  static_cast<float>(j * PIXELS_PER_TILE)
                )
             );
 
@@ -195,11 +195,11 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
       std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](Laser* laser){
             sf::Rect<int32_t> itemRect;
 
-            itemRect.left = static_cast<int32_t>(laser->mTilePosition.x * TILE_WIDTH);
-            itemRect.top = static_cast<int32_t>(laser->mTilePosition.y * TILE_HEIGHT);
+            itemRect.left = static_cast<int32_t>(laser->mTilePosition.x * PIXELS_PER_TILE);
+            itemRect.top = static_cast<int32_t>(laser->mTilePosition.y * PIXELS_PER_TILE);
 
-            itemRect.width = TILE_WIDTH;
-            itemRect.height = TILE_HEIGHT;
+            itemRect.width = PIXELS_PER_TILE;
+            itemRect.height = PIXELS_PER_TILE;
 
             const auto roughIntersection = playerRect.intersects(itemRect);
 
@@ -216,11 +216,11 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
                   {
                      sf::Rect<int32_t> rect;
 
-                     rect.left = static_cast<int32_t>(laser->mTilePosition.x * TILE_WIDTH) + (x * PHYSICS_TILE_WIDTH);
-                     rect.top = static_cast<int32_t>(laser->mTilePosition.y * TILE_HEIGHT) + (y * PHYSICS_TILE_WIDTH);
+                     rect.left = static_cast<int32_t>(laser->mTilePosition.x * PIXELS_PER_TILE) + (x * PIXELS_PER_PHYSICS_TILE);
+                     rect.top = static_cast<int32_t>(laser->mTilePosition.y * PIXELS_PER_TILE) + (y * PIXELS_PER_PHYSICS_TILE);
 
-                     rect.width = PHYSICS_TILE_WIDTH;
-                     rect.height = PHYSICS_TILE_WIDTH;
+                     rect.width = PIXELS_PER_PHYSICS_TILE;
+                     rect.height = PIXELS_PER_PHYSICS_TILE;
 
                      const auto fineIntersection = playerRect.intersects(rect);
 
@@ -258,10 +258,10 @@ void Laser::merge()
 {
    for (auto object : mObjects)
    {
-      const auto x = static_cast<int32_t>(object->mX      / TILE_WIDTH );
-      const auto y = static_cast<int32_t>(object->mY      / TILE_HEIGHT);
-      const auto w = static_cast<int32_t>(object->mWidth  / TILE_WIDTH );
-      const auto h = static_cast<int32_t>(object->mHeight / TILE_HEIGHT);
+      const auto x = static_cast<int32_t>(object->mX      / PIXELS_PER_TILE );
+      const auto y = static_cast<int32_t>(object->mY      / PIXELS_PER_TILE);
+      const auto w = static_cast<int32_t>(object->mWidth  / PIXELS_PER_TILE );
+      const auto h = static_cast<int32_t>(object->mHeight / PIXELS_PER_TILE);
 
       for (auto yi = y; yi < y + h; yi++)
       {

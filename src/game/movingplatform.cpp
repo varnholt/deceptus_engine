@@ -68,8 +68,8 @@ void MovingPlatform::setOffset(float x, float y)
 //-----------------------------------------------------------------------------
 void MovingPlatform::updateTransform()
 {
-   auto x = mTilePosition.x * TILE_WIDTH / PPM;
-   auto y = mTilePosition.y * TILE_HEIGHT / PPM;
+   auto x = mTilePosition.x * PIXELS_PER_TILE / PPM;
+   auto y = mTilePosition.y * PIXELS_PER_TILE / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -78,8 +78,8 @@ void MovingPlatform::updateTransform()
 void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygonShape;
-   auto sizeX = TILE_WIDTH / PPM;
-   auto sizeY = TILE_HEIGHT / PPM;
+   auto sizeX = PIXELS_PER_TILE / PPM;
+   auto sizeY = PIXELS_PER_TILE / PPM;
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(0,              0              );
    vertices[1] = b2Vec2(0,              sizeY * mHeight);
@@ -156,17 +156,17 @@ std::vector<MovingPlatform*> MovingPlatform::load(
                sprite.setTexture(movingPlatform->mTexture);
                sprite.setTextureRect(
                   sf::IntRect(
-                     tu * TILE_WIDTH,
-                     tv * TILE_HEIGHT,
-                     TILE_WIDTH,
-                     TILE_HEIGHT
+                     tu * PIXELS_PER_TILE,
+                     tv * PIXELS_PER_TILE,
+                     PIXELS_PER_TILE,
+                     PIXELS_PER_TILE
                   )
                );
 
                sprite.setPosition(
                   sf::Vector2f(
-                     static_cast<float_t>(x * TILE_WIDTH),
-                     static_cast<float_t>(y * TILE_HEIGHT)
+                     static_cast<float_t>(x * PIXELS_PER_TILE),
+                     static_cast<float_t>(y * PIXELS_PER_TILE)
                   )
                );
 
@@ -202,8 +202,8 @@ void MovingPlatform::link(const std::vector<MovingPlatform *> platforms, TmxObje
 
    auto pos = polyline.at(0);
 
-   auto x = static_cast<int>((pos.x + tmxObject->mX) / TILE_WIDTH);
-   auto y = static_cast<int>((pos.y + tmxObject->mY) / TILE_HEIGHT);
+   auto x = static_cast<int>((pos.x + tmxObject->mX) / PIXELS_PER_TILE);
+   auto y = static_cast<int>((pos.y + tmxObject->mY) / PIXELS_PER_TILE);
    MovingPlatform* platform = nullptr;
 
    for (auto tmp : platforms)
@@ -236,8 +236,8 @@ void MovingPlatform::link(const std::vector<MovingPlatform *> platforms, TmxObje
          auto time = i / static_cast<float>(polyline.size() - 1);
 
          // where do those 4px error come from?!
-         auto x = (tmxObject->mX + polyPos.x - 4 - (platform->mWidth * TILE_WIDTH) / 2.0f) * MPP;
-         auto y = (tmxObject->mY + polyPos.y - (platform->mHeight * TILE_HEIGHT) / 2.0f) * MPP;
+         auto x = (tmxObject->mX + polyPos.x - 4 - (platform->mWidth * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto y = (tmxObject->mY + polyPos.y - (platform->mHeight * PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platformPos.x = x;
          platformPos.y = y;
@@ -285,8 +285,8 @@ void MovingPlatform::update(const sf::Time& /*dt*/)
 
    for (auto& sprite : mSprites)
    {
-      auto x = mBody->GetPosition().x * PPM + horizontal * pos * TILE_WIDTH;
-      auto y = mBody->GetPosition().y * PPM + vertical   * pos * TILE_HEIGHT;
+      auto x = mBody->GetPosition().x * PPM + horizontal * pos * PIXELS_PER_TILE;
+      auto y = mBody->GetPosition().y * PPM + vertical   * pos * PIXELS_PER_TILE;
 
       sprite.setPosition(x, y);
 

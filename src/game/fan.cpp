@@ -29,8 +29,8 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, FanTile* tile)
    bodyDef.position = posb2d;
    tile->mBody = world->CreateBody(&bodyDef);
 
-   auto width = TILE_WIDTH * MPP * 0.5f;
-   auto height = TILE_HEIGHT * MPP * 0.5f;
+   auto width = PIXELS_PER_TILE * MPP * 0.5f;
+   auto height = PIXELS_PER_TILE * MPP * 0.5f;
 
    // create fixture for physical boundaries of the belt object
    b2PolygonShape shape;
@@ -88,11 +88,11 @@ void Fan::load(
             }
 
             FanTile* tile = new FanTile();
-            tile->mPosition = sf::Vector2i(i * TILE_WIDTH, j * TILE_HEIGHT);
-            tile->mRect.left = i * TILE_WIDTH;
-            tile->mRect.top = j * TILE_HEIGHT;
-            tile->mRect.width = TILE_WIDTH;
-            tile->mRect.height = TILE_HEIGHT;
+            tile->mPosition = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
+            tile->mRect.left = i * PIXELS_PER_TILE;
+            tile->mRect.top = j * PIXELS_PER_TILE;
+            tile->mRect.width = PIXELS_PER_TILE;
+            tile->mRect.height = PIXELS_PER_TILE;
             tile->mDirection = directionVector;
             sTiles.push_back(tile);
 

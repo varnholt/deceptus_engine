@@ -185,10 +185,10 @@ extern "C" int32_t isPhsyicsPathClear(lua_State* state)
    {
       // the lua scripts think in pixels; the physics grid has a resolution of 8x8 for each tile.
       // so that needs to be scaled first.
-      auto x0 = static_cast<int32_t>(lua_tonumber(state, 1) / PHYSICS_TILE_WIDTH);
-      auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PHYSICS_TILE_WIDTH);
-      auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PHYSICS_TILE_WIDTH);
-      auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PHYSICS_TILE_WIDTH);
+      auto x0 = static_cast<int32_t>(lua_tonumber(state, 1) / PIXELS_PER_PHYSICS_TILE);
+      auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PIXELS_PER_PHYSICS_TILE);
+      auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PIXELS_PER_PHYSICS_TILE);
+      auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PIXELS_PER_PHYSICS_TILE);
 
       // check map for collision
       auto collides = Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
