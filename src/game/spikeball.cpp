@@ -145,7 +145,7 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
    // attach the spiky ball to the last chain element
    mBallBodyDef.type = b2_dynamicBody;
    mBallFixtureDef.density = 1;
-   mBallShape.m_radius = 0.4f;
+   mBallShape.m_radius = 0.45f;
    mBallBodyDef.position.Set(pos.x + 0.01f + mChainElementCount * chainElementLength, pos.y);
    mBallFixtureDef.shape = &mBallShape;
    mBallBody = world->CreateBody( &mBallBodyDef );
