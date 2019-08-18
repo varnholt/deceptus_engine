@@ -119,7 +119,7 @@ void Bouncer::draw(sf::RenderTarget &window)
 void Bouncer::updatePlayerAtBouncer()
 {
    auto player = Player::getPlayer(0);
-   auto rect = player->getPlayerRect();
+   auto rect = player->getPlayerPixelRect();
    rect.height *= 2;
 
    mPlayerAtBouncer = rect.intersects(mRect);

@@ -14,7 +14,7 @@ Weather::Weather()
 
 void Weather::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto playerRect = Player::getPlayer(0)->getPlayerRect();
+   auto playerRect = Player::getPlayer(0)->getPlayerPixelRect();
 
    for (const auto& data : mData)
    {
@@ -28,7 +28,7 @@ void Weather::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void Weather::update(const sf::Time& dt)
 {
-   auto playerRect = Player::getPlayer(0)->getPlayerRect();
+   auto playerRect = Player::getPlayer(0)->getPlayerPixelRect();
 
    for (const auto& data : mData)
    {

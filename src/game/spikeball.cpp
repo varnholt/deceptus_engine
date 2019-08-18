@@ -1,6 +1,8 @@
 #include "spikeball.h"
 
 #include "constants.h"
+#include "fixturenode.h"
+#include "player.h"
 
 // spike ball concept
 //
@@ -38,15 +40,19 @@ SpikeBall::SpikeBall(GameNode* node)
    mChainElementFixtureDef.friction = 0.2f;
 
    mTexture.loadFromFile("data/sprites/enemy_spikeball.png");
-   mSprite.setTexture(mTexture);
-   mSprite.setTextureRect(sf::IntRect(24, 0, 48, 48));
-   // mSprite.setRotation()
+   mSpikeSprite.setTexture(mTexture);
+   mSpikeSprite.setTextureRect(sf::IntRect(24, 0, 48, 48));
+   mSpikeSprite.setOrigin(24, 24);
+
+   mBoxSprite.setTexture(mTexture);
+   mBoxSprite.setTextureRect(sf::IntRect(72, 48, 24, 24));
+   mBoxSprite.setOrigin(12, 12);
 }
 
 
 void SpikeBall::draw(sf::RenderTarget& window)
 {
-   static const auto color = sf::Color(255, 0, 0);
+   static const auto color = sf::Color(200, 200, 240);
 
    for (auto i = 0u; i < mChainElements.size() - 1; i++)
    {
@@ -65,37 +71,48 @@ void SpikeBall::draw(sf::RenderTarget& window)
       // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
    }
 
-   if (mBallBody)
-   {
-      mSprite.setPosition(
-         mBallBody->GetPosition().x * PPM - mBallShape.m_radius * PPM,
-         mBallBody->GetPosition().y * PPM - mBallShape.m_radius * PPM
-      );
-
-      window.draw(mSprite);
-
-
-      // sf::CircleShape shape(mBallShape.m_radius * PPM);
-      // shape.setFillColor(sf::Color(100, 250, 50));
-      // shape.setPosition(
-      //    mBallBody->GetPosition().x * PPM - mBallShape.m_radius * PPM,
-      //    mBallBody->GetPosition().y * PPM - mBallShape.m_radius * PPM
-      // );
-      //
-      // window.draw(shape);
-   }
+   window.draw(mSpikeSprite);
+   window.draw(mBoxSprite);
 }
 
 
-void SpikeBall::update(const sf::Time& /*dt*/)
+void SpikeBall::update(const sf::Time& dt)
 {
+   mSpikeSprite.setPosition(
+      mBallBody->GetPosition().x * PPM,
+      mBallBody->GetPosition().y * PPM
+   );
+
+   static const b2Vec2 up{0.0, 1.0};
+
+   auto c1 = mChainElements[0]->GetPosition();
+   auto c2 = mChainElements[static_cast<size_t>(mChainElementCount - 1)]->GetPosition();
+
+   auto c = (c2 - c1);
+   c.Normalize();
+
+   // mAngle = acos(b2Dot(up, c) / (c.Length() * up.Length()));
+   mAngle = acos(b2Dot(up, c) / (c.LengthSquared() * up.LengthSquared()));
+
+   if (c.x > 0.0f)
+   {
+      mAngle = -mAngle;
+   }
+
+   mSpikeSprite.setRotation(mAngle * RADTODEG);
+
+   // slightly push the ball all the way while it's moving from the right to the left
+   auto f = dt.asSeconds() * 0.625f;
+   if (mBallBody->GetLinearVelocity().x < 0.0f)
+   {
+      mBallBody->ApplyLinearImpulse(b2Vec2{-f, f}, mBallBody->GetWorldCenter(), true);
+   }
 }
 
 
 void SpikeBall::setup(const std::shared_ptr<b2World>& world)
 {
    static const auto chainElementLength = 0.3f;
-   //static const auto chainElementLength = 0.1f;
 
    auto pos = b2Vec2{static_cast<float>(mPixelPosition.x * MPP), static_cast<float>(mPixelPosition.y * MPP)};
 
@@ -107,7 +124,7 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
    mJointDef.collideConnected = false;
 
    auto prevBody = mGround;
-   for (auto i = 0; i < 10; ++i)
+   for (auto i = 0; i < mChainElementCount; ++i)
    {
       b2BodyDef bd;
       bd.type = b2_dynamicBody;
@@ -119,41 +136,36 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
 
       b2Vec2 anchor(pos.x + i * chainElementLength, pos.y);
 
-      //      if (i==0)
-      //      {
-      //         mJointDef.enableMotor = true;
-      //         mJointDef.maxMotorTorque = 5;
-      //         mJointDef.motorSpeed = 90 * DEGTORAD;
-      //      }
-      //      else {
-      //         mJointDef.enableMotor = false;
-      //         mJointDef.maxMotorTorque = 5;
-      //         mJointDef.motorSpeed = 90 * DEGTORAD;
-      //      }
-
       mJointDef.Initialize(prevBody, chainBody, anchor);
       world->CreateJoint(&mJointDef);
 
       prevBody = chainBody;
    }
 
-   //   revoluteJointDef.enableLimit = true;
-   //   revoluteJointDef.lowerAngle = -45 * DEGTORAD;
-   //   revoluteJointDef.upperAngle =  45 * DEGTORAD;
-
-   // https://www.iforce2d.net/b2dtut/joints-revolute
+   // attach the spiky ball to the last chain element
    mBallBodyDef.type = b2_dynamicBody;
    mBallFixtureDef.density = 1;
    mBallShape.m_radius = 0.4f;
-   mBallBodyDef.position.Set(pos.x + 0.01f + 10 * chainElementLength, pos.y);
+   mBallBodyDef.position.Set(pos.x + 0.01f + mChainElementCount * chainElementLength, pos.y);
    mBallFixtureDef.shape = &mBallShape;
    mBallBody = world->CreateBody( &mBallBodyDef );
-   /*auto fixture = */ mBallBody->CreateFixture( &mBallFixtureDef );
-   b2Vec2 anchor(pos.x + 10 * chainElementLength, pos.y);
+   auto ballFixture = mBallBody->CreateFixture( &mBallFixtureDef );
+   b2Vec2 anchor(pos.x + mChainElementCount * chainElementLength, pos.y);
    mJointDef.Initialize(prevBody, mBallBody, anchor);
    world->CreateJoint(&mJointDef);
 
+   auto objectData = new FixtureNode(this);
+   objectData->setType(ObjectTypeDeadly);
+   ballFixture->SetUserData(static_cast<void*>(objectData));
+
+
+   // that box only needs to be set up once
+   mBoxSprite.setPosition(
+      mChainElements[0]->GetPosition().x * PPM,
+      mChainElements[0]->GetPosition().y * PPM
+   );
 }
+
 
 int32_t SpikeBall::getZ() const
 {

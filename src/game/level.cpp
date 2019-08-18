@@ -1149,7 +1149,7 @@ void Level::draw(
          0,
          static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y),
          static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().x),
-         static_cast<int32_t>(-blurScaleSprite.getTexture()->getSize().y)
+         -static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y)
       )
    );
 
@@ -1168,7 +1168,7 @@ void Level::draw(
    {
       drawStaticChains(*mLevelRenderTexture.get());
       DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
-      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getPlayer(0)->getPlayerRect());
+      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getPlayer(0)->getPlayerPixelRect());
    }
 
    // display the whole texture
