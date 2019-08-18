@@ -390,7 +390,7 @@ void GameContactListener::reset()
 }
 
 
-GameContactListener *GameContactListener::getInstance()
+GameContactListener* GameContactListener::getInstance()
 {
   if (!sInstance)
   {

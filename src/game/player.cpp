@@ -260,7 +260,7 @@ void Player::setPixelPosition(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-sf::IntRect Player::getPlayerRect() const
+sf::IntRect Player::getPlayerPixelRect() const
 {
    sf::IntRect rect;
 
@@ -1865,7 +1865,7 @@ bool Player::isDashActive() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelCollisions()
 {
-   const auto rect = getPlayerRect();
+   const auto rect = getPlayerPixelRect();
    mExtraManager->collide(rect);
    Laser::collide(rect);
 

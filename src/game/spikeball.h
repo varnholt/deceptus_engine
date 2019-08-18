@@ -28,7 +28,8 @@ class SpikeBall : public GameNode
    private:
 
       sf::Texture mTexture;
-      sf::Sprite mSprite;
+      sf::Sprite mSpikeSprite;
+      sf::Sprite mBoxSprite;
 
       sf::Vector2i mPixelPosition;
 
@@ -46,6 +47,8 @@ class SpikeBall : public GameNode
       b2BodyDef mBallBodyDef;
       b2FixtureDef mBallFixtureDef;
 
+      int32_t mChainElementCount = 10;
       int32_t mZ = 0;
+      float mAngle = 0.0f;
 };
 
