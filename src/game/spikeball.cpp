@@ -117,10 +117,9 @@ void SpikeBall::draw(sf::RenderTarget& window)
       }
    }
 
-   drawSpline(window);
-
-   window.draw(mSpikeSprite);
    window.draw(mBoxSprite);
+   drawSpline(window);
+   window.draw(mSpikeSprite);
 }
 
 
