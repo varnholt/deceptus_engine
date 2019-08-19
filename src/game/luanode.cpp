@@ -211,9 +211,9 @@ extern "C" int32_t getLinearVelocity(lua_State* state)
    auto table = lua_gettop(state);
    auto index = 1;
 
-   lua_pushnumber(state, velocity.x);
+   lua_pushnumber(state, static_cast<double>(velocity.x));
    lua_rawseti(state, table, index++);
-   lua_pushnumber(state, velocity.y);
+   lua_pushnumber(state, static_cast<double>(velocity.y));
    lua_rawseti(state, table, index++);
 
    return 1;
@@ -354,7 +354,7 @@ extern "C" int32_t addShapePoly(lua_State* state)
    if (argc >= 2 && (argc % 2 == 0))
    {
       auto size = argc / 2;
-      b2Vec2* poly = new b2Vec2[size];
+      b2Vec2* poly = new b2Vec2[static_cast<uint32_t>(size)];
       auto polyIndex = 0;
       for (auto i = 0; i < argc; i += 2)
       {
@@ -746,13 +746,13 @@ void LuaNode::synchronizeProperties()
 
 void LuaNode::luaMovedTo()
 {
-   float x = mPosition.x;
-   float y = mPosition.y;
+   const auto x = mPosition.x;
+   const auto y = mPosition.y;
 
    lua_getglobal(mState, FUNCTION_MOVED_TO);
 
-   lua_pushnumber(mState, x);
-   lua_pushnumber(mState, y);
+   lua_pushnumber(mState, static_cast<double>(x));
+   lua_pushnumber(mState, static_cast<double>(y));
 
    // 3 args, 0 result
    auto result = lua_pcall(mState, 2, 0, 0);
@@ -1131,15 +1131,15 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
-   mSpriteOffset.x = x;
-   mSpriteOffset.y = y;
+   mSpriteOffset.x = static_cast<uint32_t>(x);
+   mSpriteOffset.y = static_cast<uint32_t>(y);
    mSpriteWidth = w;
    mSpriteHeight = h;
 
    mSprite.setTextureRect(
       sf::IntRect(
-         mSpriteOffset.x,
-         mSpriteOffset.y,
+         x,
+         y,
          mSpriteWidth,
          mSpriteHeight
       )

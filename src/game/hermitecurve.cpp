@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <math.h>
 
+static const auto clamp = true;
+
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setPositionKeys(const std::vector<HermiteCurveKey>& keys)
@@ -49,44 +51,31 @@ const std::vector<HermiteCurveKey>& HermiteCurve::getOrientationKeys() const
 
 
 //-----------------------------------------------------------------------------
-void HermiteCurve::initialize()
+void HermiteCurve::compute()
 {
-   sf::Vector2f p1;
-   sf::Vector2f p2;
-
    // calculate the tangents (catmull-rom splines)
    // Ti = 0.5 * (Pi + 1 - Pi - 1)
 
-   std::vector<HermiteCurveKey>& source = mPositionKeys;
-   std::vector<sf::Vector2f>& destination = mPositionTangents;
-
-   for (auto pass = 0u; pass < 2; pass++)
+   auto comp = [](std::vector<HermiteCurveKey>& source, std::vector<sf::Vector2f>& destination)
    {
-      if (pass == 1)
-      {
-          if (!mOrientationKeys.empty())
-          {
-             source = mOrientationKeys;
-             destination = mOrientationTangents;
-          }
-      }
-
       if (source.empty())
       {
-          continue;
+          return;
       }
 
-      for (auto i = 0u; i < mPositionKeys.size(); i++)
+      sf::Vector2f p1;
+      sf::Vector2f p2;
+      for (auto i = 0u; i < source.size(); i++)
       {
-         if (i == source.size() - 1)
+         if (i == 0)
          {
-            p1 = source[0].mPosition;
-            p2 = source[i - 1].mPosition;
+            p1 = source[        0                      ].mPosition;
+            p2 = source[clamp ? 0 : (source.size() - 1)].mPosition;
          }
-         else if (i == 0)
+         else if (i == source.size() - 1)
          {
-            p1 = source[1].mPosition;
-            p2 = source[source.size() - 1].mPosition;
+            p1 = source[clamp ? (i - 1) : 0].mPosition;
+            p2 = source[         i - 1     ].mPosition;
          }
          else
          {
@@ -103,24 +92,41 @@ void HermiteCurve::initialize()
 
          destination.push_back(tangent);
       }
-   }
+   };
+
+   comp(mPositionKeys, mPositionTangents);
+   comp(mOrientationKeys, mOrientationTangents);
 }
 
 
 //-----------------------------------------------------------------------------
 sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
 {
-   // scale time to 0..1
-   if (time >= 1.0f)
+   if (clamp)
    {
-      time -= floor(time);
+      if (time > 1.0f)
+      {
+         time = 1.0f;
+      }
+      else if (time < 0.0f)
+      {
+         time = 0.0f;
+      }
    }
-   else if (time < 0.0f)
+   else
    {
-      // -0.7 => 0.3
-      time = -time;
-      time -= floor(time);
-      time = 1.0f - time;
+      // scale time to 0..1
+      if (time >= 1.0f)
+      {
+         time -= floor(time);
+      }
+      else if (time < 0.0f)
+      {
+         // -0.7 => 0.3
+         time = -time;
+         time -= floor(time);
+         time = 1.0f - time;
+      }
    }
 
    // init data to work on

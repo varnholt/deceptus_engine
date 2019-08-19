@@ -2,6 +2,7 @@
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "hermitecurve.h"
 #include "player.h"
 
 // spike ball concept
@@ -47,29 +48,76 @@ SpikeBall::SpikeBall(GameNode* node)
    mBoxSprite.setTexture(mTexture);
    mBoxSprite.setTextureRect(sf::IntRect(72, 48, 24, 24));
    mBoxSprite.setOrigin(12, 12);
+
+   mChainElementA.setTexture(mTexture);
+   mChainElementA.setTextureRect(sf::IntRect(0, 64, 8, 8));
+   mChainElementA.setOrigin(4, 4);
+
+   mChainElementB.setTexture(mTexture);
+   mChainElementB.setTextureRect(sf::IntRect(34, 64, 8, 8));
+   mChainElementB.setOrigin(4, 4);
+}
+
+
+void SpikeBall::drawSpline(sf::RenderTarget& window)
+{
+   std::vector<HermiteCurveKey> keys;
+
+   auto t = 0.0f;
+   auto ti = 1.0f / mChainElements.size();
+   for (auto c : mChainElements)
+   {
+      HermiteCurveKey k;
+      k.mPosition = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
+      k.mTime = (t += ti);
+      keys.push_back(k);
+   }
+
+   HermiteCurve curve;
+   curve.setPositionKeys(keys);
+   curve.compute();
+
+   auto val = 0.0f;
+   auto count = 25;
+   auto increment = 1.0f / count;
+   for (auto i = 0; i < count; i++)
+   {
+      auto point = curve.computePoint(val += increment);
+
+      auto& element = (i % 2 == 0) ? mChainElementA : mChainElementB;
+      element.setPosition(point);
+
+      window.draw(element);
+   }
 }
 
 
 void SpikeBall::draw(sf::RenderTarget& window)
 {
    static const auto color = sf::Color(200, 200, 240);
+   static const bool drawDebugLine = false;
 
-   for (auto i = 0u; i < mChainElements.size() - 1; i++)
+   if (drawDebugLine)
    {
-      auto c1 = mChainElements[i];
-      auto c2 = mChainElements[i + 1];
-      const auto c1Pos = c1->GetPosition();
-      const auto c2Pos = c2->GetPosition();
-
-      sf::Vertex line[] =
+      for (auto i = 0u; i < mChainElements.size() - 1; i++)
       {
-         sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM), color),
-         sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM), color),
-      };
+         auto c1 = mChainElements[i];
+         auto c2 = mChainElements[i + 1];
+         const auto c1Pos = c1->GetPosition();
+         const auto c2Pos = c2->GetPosition();
 
-      window.draw(line, 2, sf::Lines);
-      // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
+         sf::Vertex line[] =
+         {
+            sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM), color),
+            sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM), color),
+         };
+
+         window.draw(line, 2, sf::Lines);
+         // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
+      }
    }
+
+   drawSpline(window);
 
    window.draw(mSpikeSprite);
    window.draw(mBoxSprite);

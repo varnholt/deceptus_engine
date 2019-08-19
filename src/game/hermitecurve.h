@@ -18,7 +18,7 @@ class HermiteCurve
 
       HermiteCurve() = default;
       virtual ~HermiteCurve() = default;
-      void initialize();
+      void compute();
       sf::Vector2f computePoint(float time, Mode mode = Mode::Position);
 
       void setPositionKeys(const std::vector<HermiteCurveKey>&);

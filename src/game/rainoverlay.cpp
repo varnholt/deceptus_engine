@@ -29,14 +29,14 @@ namespace
 
 RainOverlay::RainOverlay()
 {
-   std::srand(std::time(nullptr)); // use current time as seed for random generator
+   std::srand(static_cast<uint32_t>(std::time(nullptr))); // use current time as seed for random generator
 
    for (auto a = 0; a < dropCount; a++)
    {
       mDrops.push_back(RainDrop());
    }
 
-   mRenderTexture.create(w, h);
+   mRenderTexture.create(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
 }
 
 

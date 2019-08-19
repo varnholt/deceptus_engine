@@ -27,9 +27,13 @@ class SpikeBall : public GameNode
 
    private:
 
+      void drawSpline(sf::RenderTarget& window);
+
       sf::Texture mTexture;
       sf::Sprite mSpikeSprite;
       sf::Sprite mBoxSprite;
+      sf::Sprite mChainElementA;
+      sf::Sprite mChainElementB;
 
       sf::Vector2i mPixelPosition;
 

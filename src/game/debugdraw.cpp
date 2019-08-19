@@ -312,7 +312,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                target,
                vtxIt->second,
                vtxCountIt->second,
-               b2Color(1,0,0)
+               b2Color(1.0f, 0.0f, 0.0f)
             );
          }
       }
