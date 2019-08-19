@@ -205,7 +205,8 @@ SOURCES += \
     src/menus/menuscreenpause.cpp \
     src/game/camerapane.cpp \
     src/game/gamecontrollerdata.cpp \
-    src/game/boomeffect.cpp
+    src/game/boomeffect.cpp \
+    src/game/hermitecurve.cpp
 
 
 # add box2d
@@ -336,7 +337,9 @@ HEADERS += \
     src/menus/menuscreenpause.h \
     src/game/camerapane.h \
     src/game/gamecontrollerdata.h \
-    src/game/boomeffect.h
+    src/game/boomeffect.h \
+    src/game/hermitecurve.h \
+    src/game/hermitecurvekey.h
 
 
 SOURCES += \
