@@ -190,11 +190,11 @@ void RaycastLight::debug() const
 
       for (auto p2 : light->mIntersections)
       {
-         sf::Vertex line[] =
-         {
-            sf::Vertex(sf::Vector2f(p1.x, p1.y) * PPM, light->mColor),
-            sf::Vertex(sf::Vector2f(p2.x, p2.y) * PPM, light->mColor)
-         };
+         // sf::Vertex line[] =
+         // {
+         //    sf::Vertex(sf::Vector2f(p1.x, p1.y) * PPM, light->mColor),
+         //    sf::Vertex(sf::Vector2f(p2.x, p2.y) * PPM, light->mColor)
+         // };
 
          printf("ray: %f, %f -> %f, %f\n", p1.x, p1.y, p2.x, p2.y);
       }

@@ -48,73 +48,79 @@ void MenuScreenVideo::down()
 
 void MenuScreenVideo::select(int32_t step)
 {
-    switch (mSelection)
-    {
-        case Selection::DisplayMode:
-        {
-            mFullscreenCallback();
-            updateLayers();
-            break;
-        }
+   switch (mSelection)
+   {
+       case Selection::DisplayMode:
+       {
+          mFullscreenCallback();
+          updateLayers();
+          break;
+       }
 
-        case Selection::Resolution:
-        {
-            auto next = [this, step]() -> std::array<int32_t, 2> {
-                auto it = std::find_if(std::begin(mVideoModes), std::end(mVideoModes), [](const std::array<int32_t, 2> arr){
-                    return
-                           arr[0] == GameConfiguration::getInstance().mVideoModeWidth
-                        && arr[1] == GameConfiguration::getInstance().mVideoModeHeight;
-                });
+       case Selection::Resolution:
+       {
+          auto next = [this, step]() -> std::array<int32_t, 2> {
+              auto it = std::find_if(std::begin(mVideoModes), std::end(mVideoModes), [](const std::array<int32_t, 2> arr){
+                  return
+                         arr[0] == GameConfiguration::getInstance().mVideoModeWidth
+                      && arr[1] == GameConfiguration::getInstance().mVideoModeHeight;
+              });
 
-                auto index = it - mVideoModes.begin();
-                if (step < 0)
-                    index--;
-                else
-                    index++;
+              auto index = it - mVideoModes.begin();
+              if (step < 0)
+                  index--;
+              else
+                  index++;
 
-                if (index < 0)
-                {
-                    index = mVideoModes.size() - 1;
-                }
-                else if (index > static_cast<int32_t>(mVideoModes.size() - 1))
-                {
-                    index = 0;
-                }
-                return mVideoModes[index];
-            }();
+              if (index < 0)
+              {
+                  index = mVideoModes.size() - 1;
+              }
+              else if (index > static_cast<int32_t>(mVideoModes.size() - 1))
+              {
+                  index = 0;
+              }
+              return mVideoModes[index];
+          }();
 
-            mResolutionCallback(next[0], next[1]);
-            break;
-        }
+          mResolutionCallback(next[0], next[1]);
+          break;
+      }
 
-        case Selection::Brightness:
-        {
-           float brightness = GameConfiguration::getInstance().mBrightness;
-           brightness += (0.01f * step);
+      case Selection::Brightness:
+      {
+         float brightness = GameConfiguration::getInstance().mBrightness;
+         brightness += (0.01f * step);
 
-           if (brightness < 0.0f)
-           {
-              brightness = 0.0f;
-           }
-           else if (brightness > 1.0f)
-           {
-              brightness = 1.0f;
-           }
+         if (brightness < 0.0f)
+         {
+            brightness = 0.0f;
+         }
+         else if (brightness > 1.0f)
+         {
+            brightness = 1.0f;
+         }
 
-           GameConfiguration::getInstance().mBrightness = brightness;
-           break;
-        }
+         GameConfiguration::getInstance().mBrightness = brightness;
+         break;
+      }
 
-        case Selection::VSync:
-        {
-           GameConfiguration::getInstance().mVSync = !GameConfiguration::getInstance().mVSync;
-           mVsyncCallback();
-           break;
-        }
-    }
+      case Selection::VSync:
+      {
+         GameConfiguration::getInstance().mVSync = !GameConfiguration::getInstance().mVSync;
+         mVsyncCallback();
+         break;
+      }
 
-    GameConfiguration::getInstance().serializeToFile();
-    updateLayers();
+      case Selection::Monitor:
+      case Selection::Count:
+      {
+         break;
+      }
+   }
+
+   GameConfiguration::getInstance().serializeToFile();
+   updateLayers();
 }
 
 
