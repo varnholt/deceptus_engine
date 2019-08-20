@@ -134,7 +134,10 @@ void GameContactListener::BeginContact(b2Contact* contact)
       {
          case ObjectTypePlayerFootSensor:
          {
-            mNumFootContacts++;
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumFootContacts++;
+            }
             break;
          }
          case ObjectTypeBullet:
@@ -202,7 +205,10 @@ void GameContactListener::BeginContact(b2Contact* contact)
       {
          case ObjectTypePlayerFootSensor:
          {
-            mNumFootContacts++;
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumFootContacts++;
+            }
             break;
          }
          case ObjectTypeBullet:
@@ -284,8 +290,13 @@ void GameContactListener::EndContact(b2Contact* contact)
       switch (fixtureNode->getType())
       {
          case ObjectTypePlayerFootSensor:
-            mNumFootContacts--;
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumFootContacts--;
+            }
             break;
+         }
          case ObjectTypePlayer:
             mNumPlayerContacts--;
             break;
@@ -310,8 +321,13 @@ void GameContactListener::EndContact(b2Contact* contact)
       switch (fixtureNode->getType())
       {
          case ObjectTypePlayerFootSensor:
-            mNumFootContacts--;
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumFootContacts--;
+            }
             break;
+         }
          case ObjectTypePlayer:
             mNumPlayerContacts--;
             break;
