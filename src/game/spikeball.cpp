@@ -5,31 +5,26 @@
 #include "hermitecurve.h"
 #include "player.h"
 
-// spike ball concept
-//
-//                      +-----------+
-//                      |           |
-//                      |     x     |    box body + rotating revolute joint (static body)
-//                      |   ./      |
-//                      +-./--------+
-//                      ./               thin box body + distance joint      _________   _________   _________
-//                    ./                 thin box body + distance joint    -[-o     o-]-[-o     o-]-[-o     o-]-
-//                  ./                   thin box body + distance joint     '---------' '---------' '---------'
-//            \- __^_ -/
-//             .`    '.
-//           < : O  x : >                circular body (bad spiky ball, dynamic body)
-//             :  __  :
-//            /_`----'_\
-//                \/
-//
-// https://www.iforce2d.net/b2dtut/joints-revolute
+/*
+   spike ball concept
 
+                        +-----------+
+                        |           |
+                        |     x     |    box body + rotating revolute joint (static body)
+                        |   ./      |
+                        +-./--------+
+                        ./               thin box body + distance joint      _________   _________   _________
+                      ./                 thin box body + distance joint    -[-o     o-]-[-o     o-]-[-o     o-]-
+                    ./                   thin box body + distance joint     '---------' '---------' '---------'
+              \- __^_ -/
+               .`    '.
+             < : O  x : >                circular body (bad spiky ball, dynamic body)
+               :  __  :
+              /_`----'_\
+                  \/
 
-#ifndef DEGTORAD
-#define DEGTORAD 0.0174532925199432957f
-#define RADTODEG 57.295779513082320876f
-#endif
-
+   https://www.iforce2d.net/b2dtut/joints-revolute
+*/
 
 SpikeBall::SpikeBall(GameNode* node)
  : GameNode(node)

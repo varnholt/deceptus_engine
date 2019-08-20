@@ -11,55 +11,55 @@
 
 
 namespace {
-  const auto iconWidth  = 40;
-  const auto iconHeight = 24;
-  const auto quadWidth  = 38;
-  const auto quadHeight = 38;
-  const auto dist = 9.1f;
-  const auto iconQuadDist = (iconWidth - quadWidth);
+   const auto iconWidth  = 40;
+   const auto iconHeight = 24;
+   const auto quadWidth  = 38;
+   const auto quadHeight = 38;
+   const auto dist = 9.1f;
+   const auto iconQuadDist = (iconWidth - quadWidth);
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InventoryLayer::getJoystickInfo() const
 {
-  return mJoystickInfo;
+   return mJoystickInfo;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::setJoystickInfo(const GameControllerInfo &joystickInfo)
 {
-  mJoystickInfo = joystickInfo;
+   mJoystickInfo = joystickInfo;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 InventoryLayer::InventoryLayer()
 {
-  addDemoInventory();
-  mInventuryTexture.loadFromFile("data/game/inventory.png");
-  mCursorSprite.setTexture(mInventuryTexture);
-  mCursorSprite.setTextureRect({0, 512-48, 48, 48});
-  initializeController();
+   addDemoInventory();
+   mInventuryTexture.loadFromFile("data/game/inventory.png");
+   mCursorSprite.setTexture(mInventuryTexture);
+   mCursorSprite.setTextureRect({0, 512-48, 48, 48});
+   initializeController();
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::initializeController()
 {
-  if (GameControllerIntegration::getCount() > 0)
-  {
-     auto gji = GameControllerIntegration::getInstance(0);
-     gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [/*this*/](){/*jump();*/});
-  }
+   if (GameControllerIntegration::getCount() > 0)
+   {
+      auto gji = GameControllerIntegration::getInstance(0);
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [/*this*/](){/*jump();*/});
+   }
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 std::vector<std::shared_ptr<InventoryItem>>* InventoryLayer::getInventory()
 {
-  return &Player::getPlayer(0)->getExtraManager()->mInventory;
+   return &Player::getPlayer(0)->getExtraManager()->mInventory;
 }
 
 
@@ -67,84 +67,86 @@ std::vector<std::shared_ptr<InventoryItem>>* InventoryLayer::getInventory()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
 {
-  auto item = std::make_shared<InventoryItem>();
-  item->mType = type;
-  item->mSprite.setTexture(mInventuryTexture);
-  item->mSprite.setTextureRect({x * iconWidth, y * iconHeight, iconWidth, iconHeight});
-  getInventory()->push_back(item);
+   auto item = std::make_shared<InventoryItem>();
+   item->mType = type;
+   item->mSprite.setTexture(mInventuryTexture);
+   item->mSprite.setTextureRect({x * iconWidth, y * iconHeight, iconWidth, iconHeight});
+   getInventory()->push_back(item);
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::addDemoInventory()
 {
-  addItem(0,3 , ItemType::KeyCrypt);
-  addItem(8,3 , ItemType::KeySkull);
-  addItem(4,1 , ItemType::Shovel  );
-  addItem(7,6 , ItemType::Knife   );
-  addItem(9,6 , ItemType::Saw     );
-  addItem(9,7 , ItemType::Crowbar );
-  addItem(0,8 , ItemType::Dynamite);
-  addItem(5,9 , ItemType::Money   );
-  addItem(0,11, ItemType::Match   );
-  addItem(4,12, ItemType::LoveBomb);
+   addItem(0,3 , ItemType::KeyCrypt);
+   addItem(8,3 , ItemType::KeySkull);
+   addItem(4,1 , ItemType::Shovel  );
+   addItem(7,6 , ItemType::Knife   );
+   addItem(9,6 , ItemType::Saw     );
+   addItem(9,7 , ItemType::Crowbar );
+   addItem(0,8 , ItemType::Dynamite);
+   addItem(5,9 , ItemType::Money   );
+   addItem(0,11, ItemType::Match   );
+   addItem(4,12, ItemType::LoveBomb);
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::draw(sf::RenderTarget &window)
 {
-  auto w = GameConfiguration::getInstance().mViewWidth;
-  auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance().mViewWidth;
+   auto h = GameConfiguration::getInstance().mViewHeight;
 
-  sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-  window.setView(view);
+   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   window.setView(view);
 
-  const sf::Color color = {50, 70, 100, 150};
+   const sf::Color color = {50, 70, 100, 150};
 
-  auto x = dist;
-  auto y = 220;
+   auto x = dist;
+   auto y = 220;
 
-  for (int i = 0; i < 12; i++)
-  {
-    sf::Vertex quad[] =
-    {
-       sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y)                                 ), color),
-       sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y) + static_cast<float>(quadHeight)), color),
-       sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quadWidth), static_cast<float>(y) + static_cast<float>(quadHeight)), color),
-       sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quadWidth), static_cast<float>(y)                                 ), color)
-    };
-    window.draw(quad, 4, sf::Quads);
-    x += quadWidth + dist;
-  }
+   for (int i = 0; i < 12; i++)
+   {
+      sf::Vertex quad[] =
+      {
+         sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y)                                 ), color),
+         sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y) + static_cast<float>(quadHeight)), color),
+         sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quadWidth), static_cast<float>(y) + static_cast<float>(quadHeight)), color),
+         sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quadWidth), static_cast<float>(y)                                 ), color)
+      };
 
-  y = 230;
-  x = dist;
+      window.draw(quad, 4, sf::Quads);
+      x += quadWidth + dist;
+   }
 
-  for (auto item : Player::getPlayer(0)->getExtraManager()->mInventory)
-  {
-    item->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-    window.draw(item->mSprite);
-    x += iconWidth + dist - iconQuadDist;
-  }
+   y = 230;
+   x = dist;
 
-  mCursorPosition.y = 215.0f;
-  mCursorSprite.setPosition(mCursorPosition);
-  window.draw(mCursorSprite);
+   for (auto item : Player::getPlayer(0)->getExtraManager()->mInventory)
+   {
+      item->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
+      window.draw(item->mSprite);
+      x += iconWidth + dist - iconQuadDist;
+   }
+
+   mCursorPosition.y = 215.0f;
+   mCursorSprite.setPosition(mCursorPosition);
+   window.draw(mCursorSprite);
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 bool InventoryLayer::isControllerActionSkipped() const
 {
-  auto skipped = false;
-  auto now = GlobalClock::getInstance()->getElapsedTimeInS();
-  if (now - mJoystickUpdateTime < 0.3f)
-  {
-    skipped = true;
-  }
+   auto skipped = false;
+   auto now = GlobalClock::getInstance()->getElapsedTimeInS();
 
-  return skipped;
+   if (now - mJoystickUpdateTime < 0.3f)
+   {
+      skipped = true;
+   }
+
+   return skipped;
 }
 
 
@@ -225,15 +227,15 @@ void InventoryLayer::left()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::right()
 {
-  if (!mActive)
-  {
-    return;
-  }
+   if (!mActive)
+   {
+      return;
+   }
 
-  if (mSelectedItem < getInventory()->size() - 1)
-  {
-    mSelectedItem++;
-  }
+   if (mSelectedItem < static_cast<int32_t>(getInventory()->size()) - 1)
+   {
+      mSelectedItem++;
+   }
 }
 
 
@@ -259,24 +261,24 @@ void InventoryLayer::setActive(bool active)
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::confirm()
 {
-  if (!mActive)
-  {
-    return;
-  }
+   if (!mActive)
+   {
+      return;
+   }
 
-  hide();
+   hide();
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::cancel()
 {
-  if (!mActive)
-  {
-    return;
-  }
+   if (!mActive)
+   {
+      return;
+   }
 
-  hide();
+   hide();
 }
 
 
