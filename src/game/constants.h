@@ -32,6 +32,12 @@
 
 #define PLAYER_1_COLLISION_ID 3
 
+#ifndef DEGTORAD
+#define DEGTORAD 0.0174532925199432957f
+#define RADTODEG 57.295779513082320876f
+#endif
+
+
 enum Alignment {
   PointsNowhere = 0x00,
   PointsDown    = 0x01,

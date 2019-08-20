@@ -42,7 +42,7 @@ void AmbientOcclusion::load(
       mSprites.push_back(sprite);
 
       xi += w;
-      if (xi == mTexture.getSize().x)
+      if (xi == static_cast<int32_t>(mTexture.getSize().x))
       {
         xi = 0;
         yi += h;
