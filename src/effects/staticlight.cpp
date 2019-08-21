@@ -45,7 +45,7 @@ void StaticLight::onDraw(sf::RenderTarget &/*target*/, sf::RenderStates /*states
 }
 
 
-void StaticLight::onUpdate(float time, float /*x*/, float /*y*/)
+void StaticLight::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
 {
    auto y = 0;
    for (auto light : mLights)
@@ -54,7 +54,7 @@ void StaticLight::onUpdate(float time, float /*x*/, float /*y*/)
           light->mFlickerIntensity
         * fbm::fbm(
             fbm::vec2{
-              time * light->mFlickerSpeed,
+              time.asSeconds() * light->mFlickerSpeed,
               y / static_cast<float>(mLights.size())
           }
         );

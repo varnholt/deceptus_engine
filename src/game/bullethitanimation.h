@@ -13,7 +13,7 @@ public:
 
    static void initialize();
    static void add(float x, float y);
-   static void updateAnimations(float dt);
+   static void updateAnimations(const sf::Time& dt);
    static std::list<BulletHitAnimation*>* getAnimations();
 
 protected:

@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-void MenuScreen::update(float /*dt*/)
+void MenuScreen::update(const sf::Time& /*dt*/)
 {
 }
 

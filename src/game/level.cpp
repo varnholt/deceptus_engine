@@ -1261,10 +1261,10 @@ void Level::update(const sf::Time& dt)
       ball->update(dt);
    }
 
-   LuaInterface::instance()->update(dt.asSeconds());
+   LuaInterface::instance()->update(dt);
 
-   mStaticLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
-   mRaycastLight->update(GlobalClock::getInstance()->getElapsedTimeInS(), 0.0f, 0.0f);
+   mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+   mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
 }
 
 

@@ -83,7 +83,7 @@ void AnimationPool::drawAnimations(
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void AnimationPool::updateAnimations(float dt)
+void AnimationPool::updateAnimations(const sf::Time& dt)
 {
    if (mSettings.empty())
    {
@@ -92,7 +92,7 @@ void AnimationPool::updateAnimations(float dt)
 
    for (auto animation : mAnimations)
    {
-      animation.second->update(sf::seconds(dt));
+      animation.second->update(dt);
    }
 
    for (auto it = mAnimations.begin(); it != mAnimations.end();)
