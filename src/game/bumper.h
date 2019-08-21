@@ -33,7 +33,7 @@ public:
 
    Bumper();
    void touch();
-   void update(float dt);
+   void update(const sf::Time& dt);
 };
 
 #endif // BUMPER_H

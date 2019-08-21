@@ -4,26 +4,26 @@
 // const float checkRadius = 0.5f;
 
 
-void PathInterpolation::addKey(const b2Vec2& pos, float time)
+void PathInterpolation::addKey(const b2Vec2& pos, float timeValue)
 {
    Key key;
    key.mPos = pos;
-   key.mTime = time;
+   key.mTimeValue = timeValue;
 
    mTrack.push_back(key);
 }
 
 
-b2Vec2 PathInterpolation::compute(const b2Vec2& current, float time)
+b2Vec2 PathInterpolation::compute(const b2Vec2& current, float timeValue)
 {
    // clamp time
-   if (time > 1.0f)
+   if (timeValue > 1.0f)
    {
-      time = 1.0f;
+      timeValue = 1.0f;
    }
-   else if (time < 0.0f)
+   else if (timeValue < 0.0f)
    {
-      time = 0.0f;
+      timeValue = 0.0f;
    }
 
    b2Vec2 velocity;
@@ -43,10 +43,10 @@ b2Vec2 PathInterpolation::compute(const b2Vec2& current, float time)
             Key keyA = mTrack.at(indexCurrent);
             Key keyB = mTrack.at(indexNext);
 
-            if (time >= keyA.mTime && time < keyB.mTime)
+            if (timeValue >= keyA.mTimeValue && timeValue < keyB.mTimeValue)
             {
-               auto a = 1.0f - (time - keyA.mTime);
-               auto b = 1.0f - (keyB.mTime - time);
+               auto a = 1.0f - (timeValue - keyA.mTimeValue);
+               auto b = 1.0f - (keyB.mTimeValue - timeValue);
 
                velocity = (a * keyA.mPos + b * keyB.mPos) - current;
                // printf("a: %f, b: %f, current: %f, %f, velocity: %f, %f\n", a, b, current.x, current.y, velocity.x, velocity.y);
@@ -61,7 +61,7 @@ b2Vec2 PathInterpolation::compute(const b2Vec2& current, float time)
 }
 
 
-float PathInterpolation::updateZeroOneZeroOne(float dt)
+float PathInterpolation::updateZeroOneZeroOne(float delta)
 {
    if (mTime >= 1.0f)
    {
@@ -76,11 +76,11 @@ float PathInterpolation::updateZeroOneZeroOne(float dt)
 
    if (mUp)
    {
-      mTime += dt;
+      mTime += delta;
    }
    else
    {
-      mTime -= dt;
+      mTime -= delta;
    }
 
    return mTime;

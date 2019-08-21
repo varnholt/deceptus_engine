@@ -81,7 +81,7 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
 }
 
 
-void Menu::update(float dt)
+void Menu::update(const sf::Time& dt)
 {
    mCurrentMenu->update(dt);
 }

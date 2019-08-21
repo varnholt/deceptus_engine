@@ -20,7 +20,7 @@ public:
    void addDemoInventory();
 
    void draw(sf::RenderTarget& window);
-   void update(float dt);
+   void update(const sf::Time& dt);
 
    void left();
    void right();

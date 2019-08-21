@@ -15,7 +15,7 @@ void Bumper::touch()
 }
 
 
-void Bumper::update(float /*dt*/)
+void Bumper::update(const sf::Time& /*dt*/)
 {
 
 }

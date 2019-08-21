@@ -18,7 +18,7 @@ class MenuScreenPause : public MenuScreen
 
       MenuScreenPause();
 
-      void update(float dt) override;
+      void update(const sf::Time& dt) override;
 
       Selection mSelection = Selection::Resume;
 

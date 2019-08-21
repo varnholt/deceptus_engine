@@ -23,7 +23,7 @@ class AnimationPool
       );
 
       void drawAnimations(sf::RenderTarget& target, const std::vector<std::string>& animations);
-      void updateAnimations(float dt);
+      void updateAnimations(const sf::Time& dt);
       const std::map<std::string, std::shared_ptr<Animation> >& getAnimations();
 
       static AnimationPool& getInstance();

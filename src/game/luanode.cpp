@@ -1041,10 +1041,10 @@ void LuaNode::luaInitialize()
 }
 
 
-void LuaNode::luaUpdate(float dt)
+void LuaNode::luaUpdate(const sf::Time& dt)
 {
    lua_getglobal(mState, FUNCTION_UPDATE);
-   lua_pushnumber(mState, dt);
+   lua_pushnumber(mState, dt.asSeconds());
 
    auto result = lua_pcall(mState, 1, 0, 0);
 

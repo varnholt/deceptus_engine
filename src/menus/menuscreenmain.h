@@ -20,7 +20,7 @@ public:
 
    MenuScreenMain();
 
-   void update(float dt) override;
+   void update(const sf::Time& dt) override;
 
    Selection mSelection = Selection::Start;
 

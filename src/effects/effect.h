@@ -1,73 +1,42 @@
-#ifndef EFFECT_HPP
-#define EFFECT_HPP
+#pragma once
 
-////////////////////////////////////////////////////////////
-// Headers
-////////////////////////////////////////////////////////////
 #include <SFML/Graphics.hpp>
 #include <cassert>
 #include <string>
 
 
-////////////////////////////////////////////////////////////
-// Base class for effects
-////////////////////////////////////////////////////////////
 class Effect : public sf::Drawable
 {
 
 public:
 
-  virtual ~Effect() override
-  {
-  }
+  virtual ~Effect() override = default;
 
-  const std::string& getName() const
-  {
-    return m_name;
-  }
+  const std::string& getName() const;
 
-  void load()
-  {
-    mIsLoaded = /*sf::Shader::isAvailable() && */ onLoad();
-  }
+  void load();
 
-  void update(float time, float x, float y)
-  {
-    if (mIsLoaded)
-    {
-      onUpdate(time, x, y);
-    }
-  }
+  void update(const sf::Time& time, float x, float y);
 
-  void draw(sf::RenderTarget& target, sf::RenderStates states) const override
-  {
-    if (mIsLoaded)
-    {
-      onDraw(target, states);
-    }
-  }
+  void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
 
 protected:
 
-  Effect(const std::string& name) :
-  m_name(name),
-  mIsLoaded(false)
-  {
-  }
+  Effect(const std::string& name);
 
 
 private:
 
   // Virtual functions to be implemented in derived effects
   virtual bool onLoad() = 0;
-  virtual void onUpdate(float time, float x, float y) = 0;
+  virtual void onUpdate(const sf::Time& time, float x, float y) = 0;
   virtual void onDraw(sf::RenderTarget& target, sf::RenderStates states) const = 0;
 
 
 private:
 
-  std::string m_name;
-  bool mIsLoaded;
+  std::string mName;
+  bool mIsLoaded = false;
 };
 
-#endif // EFFECT_HPP
