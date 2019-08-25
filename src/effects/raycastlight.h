@@ -43,7 +43,7 @@ public:
 private:
 
    bool onLoad() override;
-   void onUpdate(float time, float x, float y) override;
+   void onUpdate(const sf::Time& time, float x, float y) override;
    void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
    void debug() const;
 

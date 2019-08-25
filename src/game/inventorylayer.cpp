@@ -202,7 +202,7 @@ void InventoryLayer::updateControllerActions()
 
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::update(float /*dt*/)
+void InventoryLayer::update(const sf::Time& /*dt*/)
 {
   mCursorPosition.x = dist * 0.5f + mSelectedItem * (quadWidth + dist) - 0.5f;
   updateControllerActions();

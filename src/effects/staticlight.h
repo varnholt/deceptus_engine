@@ -34,7 +34,7 @@ public:
 
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
    void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
-   void onUpdate(float time, float x, float y) override;
+   void onUpdate(const sf::Time& time, float x, float y) override;
    bool onLoad() override;
 };
 

@@ -30,7 +30,7 @@ bool RaycastLight::onLoad()
 
 
 //-----------------------------------------------------------------------------
-void RaycastLight::onUpdate(float /*time*/, float /*x*/, float /*y*/)
+void RaycastLight::onUpdate(const sf::Time& /*time*/, float /*x*/, float /*y*/)
 {
 }
 

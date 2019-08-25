@@ -42,7 +42,7 @@ void LuaInterface::removeObject(const std::shared_ptr<LuaNode>& node)
 }
 
 
-void LuaInterface::update(float dt)
+void LuaInterface::update(const sf::Time& dt)
 {
    for (auto it = mObjectList.begin(); it != mObjectList.end();)
    {

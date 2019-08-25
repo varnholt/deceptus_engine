@@ -17,7 +17,7 @@ public:
    struct Key
    {
       b2Vec2 mPos;
-      float mTime = 0.0f;
+      float mTimeValue = 0.0f;
    };
 
 
@@ -35,10 +35,10 @@ private:
 public:
 
    PathInterpolation() = default;
-   void addKey(const b2Vec2 &pos, float time);
+   void addKey(const b2Vec2 &pos, float timeValue);
 
-   b2Vec2 compute(const b2Vec2 &current, float time);
-   float updateZeroOneZeroOne(float dt);
+   b2Vec2 compute(const b2Vec2 &current, float timeValue);
+   float updateZeroOneZeroOne(float delta);
 
    bool update(const b2Vec2 &currentPos);
    const b2Vec2 getVelocity();

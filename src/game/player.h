@@ -171,7 +171,7 @@ private:
    void updateVelocity();
    void updateJumpBuffer();
    void updateJump();
-   void updatePlatformMovement(float dt);
+   void updatePlatformMovement(const sf::Time& dt);
    void updateFire();
    void updateFootsteps();
    void updatePortal();

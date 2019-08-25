@@ -146,6 +146,9 @@ SOURCES += \
     src/game/gamenode.cpp \
     src/game/luanode.cpp \
     src/game/fixturenode.cpp \
+    src/effects/blur.cpp \
+    src/effects/effect.cpp \
+    src/effects/pixelate.cpp \
     src/game/gamecontrollerintegration.cpp \
     src/joystick/gamecontrollerinfo.cpp \
     src/joystick/gamecontroller.cpp \
