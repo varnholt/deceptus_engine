@@ -82,8 +82,7 @@ namespace
    void read(std::vector<uint8_t>& val, std::istream& stream)
    {
       // std::cout << "reading " << val.size() * sizeof(uint8_t) << " bytes" << std::endl;
-      auto bytes = reinterpret_cast<char*>(&val);
-      stream.read(bytes, val.size());
+      stream.read(reinterpret_cast<char*>(val.data()), val.size());
       check(stream);
    }
 
