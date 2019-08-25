@@ -86,7 +86,7 @@ void Bullet::cleanup()
 }
 
 
-void Bullet::updateHitAnimations(float dt)
+void Bullet::updateHitAnimations(const sf::Time& dt)
 {
    cleanup();
 

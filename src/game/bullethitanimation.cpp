@@ -68,7 +68,7 @@ void BulletHitAnimation::add(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void BulletHitAnimation::updateAnimations(float dt)
+void BulletHitAnimation::updateAnimations(const sf::Time& dt)
 {
    std::list<BulletHitAnimation*>::iterator it;
    for (it = sAnimations.begin(); it != sAnimations.end();)
@@ -83,7 +83,7 @@ void BulletHitAnimation::updateAnimations(float dt)
       else
       {
          it++;
-         sprite->update(sf::seconds(dt));
+         sprite->update(dt);
       }
    }
 }

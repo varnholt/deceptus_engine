@@ -42,7 +42,7 @@ public:
    void setBody(b2Body *body);
 
    static void cleanup();
-   static void updateHitAnimations(float dt);
+   static void updateHitAnimations(const sf::Time& dt);
 
    void setDestroyedCallback(const DestroyedCallback& destroyedCallback);
 

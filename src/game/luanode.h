@@ -60,7 +60,7 @@ struct LuaNode : public GameNode
    void luaSendPath(const std::vector<sf::Vector2f> &vec);
    void luaSendPatrolPath();
    void luaTimeout(int32_t timerId);
-   void luaUpdate(float dt);
+   void luaUpdate(const sf::Time& dt);
 
    // property accessors
    void synchronizeProperties();

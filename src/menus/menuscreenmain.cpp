@@ -11,7 +11,7 @@ MenuScreenMain::MenuScreenMain()
 }
 
 
-void MenuScreenMain::update(float /*dt*/)
+void MenuScreenMain::update(const sf::Time& /*dt*/)
 {
 
 }

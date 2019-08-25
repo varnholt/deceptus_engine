@@ -11,7 +11,7 @@ MenuScreenPause::MenuScreenPause()
 }
 
 
-void MenuScreenPause::update(float /*dt*/)
+void MenuScreenPause::update(const sf::Time& /*dt*/)
 {
 
 }

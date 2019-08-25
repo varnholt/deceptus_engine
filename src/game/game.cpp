@@ -460,7 +460,7 @@ void Game::update()
    {
       updateGameController();
       updateGameControllerForInventory();
-      mInventoryLayer->update(dt.asSeconds());
+      mInventoryLayer->update(dt);
 
       // this is not beautiful. simplify!
       if (DisplayMode::getInstance().isSet(Display::DisplayMap))
@@ -474,8 +474,8 @@ void Game::update()
 
       if (mLevelLoadingFinished)
       {
-         AnimationPool::getInstance().updateAnimations(dt.asSeconds());
-         Bullet::updateHitAnimations(dt.asSeconds());
+         AnimationPool::getInstance().updateAnimations(dt);
+         Bullet::updateHitAnimations(dt);
          updateGameController();
          updateGameControllerForGame();
          mLevel->update(dt);

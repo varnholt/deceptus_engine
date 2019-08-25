@@ -22,7 +22,7 @@ public:
 
    void initialize();
 
-   void update(float dt);
+   void update(const sf::Time& dt);
 
    void requestMap(std::shared_ptr<LuaNode> obj);
 

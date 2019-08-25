@@ -27,7 +27,7 @@ public:
    Menu();
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-   void update(float dt);
+   void update(const sf::Time& dt);
 
    void show(MenuType menu);
    void hide();

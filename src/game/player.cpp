@@ -1241,7 +1241,7 @@ void Player::updateJump()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePlatformMovement(float dt)
+void Player::updatePlatformMovement(const sf::Time& dt)
 {
    // http://www.badlogicgames.com/forum/viewtopic.php?f=15&t=4695&hilit=+plattform
 
@@ -1252,7 +1252,7 @@ void Player::updatePlatformMovement(float dt)
    {
       mBody->SetTransform(
          b2Vec2(
-            mBody->GetPosition().x + dt * getPlatformVelocity(), // * 1.34f,
+            mBody->GetPosition().x + dt.asSeconds() * getPlatformVelocity(), // * 1.34f,
             mBody->GetPosition().y
          ),
          0.0f
@@ -1423,7 +1423,7 @@ void Player::update(const sf::Time& dt)
    updateJumpBuffer();
    updateDash();
    updateClimb();
-   updatePlatformMovement(dt.asSeconds());
+   updatePlatformMovement(dt);
    updatePixelPosition();
    updateFootsteps();
    updatePortal();
