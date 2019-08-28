@@ -26,11 +26,12 @@
    https://www.iforce2d.net/b2dtut/joints-revolute
 */
 
+
 SpikeBall::SpikeBall(GameNode* node)
  : GameNode(node)
 {
    // chain element setup
-   mChainElementShape.SetAsBox(0.06f, 0.0125f);
+   mChainElementShape.SetAsBox(mConfig.chainElementWidth, mConfig.chainElementHeight);
    mChainElementFixtureDef.shape = &mChainElementShape;
    mChainElementFixtureDef.density = 20.0f;
    mChainElementFixtureDef.friction = 0.2f;
@@ -73,9 +74,8 @@ void SpikeBall::drawSpline(sf::RenderTarget& window)
    curve.compute();
 
    auto val = 0.0f;
-   auto count = 25;
-   auto increment = 1.0f / count;
-   for (auto i = 0; i < count; i++)
+   auto increment = 1.0f / mConfig.splinePointCount;
+   for (auto i = 0; i < mConfig.splinePointCount; i++)
    {
       auto point = curve.computePoint(val += increment);
 
@@ -128,7 +128,7 @@ void SpikeBall::update(const sf::Time& dt)
    static const b2Vec2 up{0.0, 1.0};
 
    auto c1 = mChainElements[0]->GetPosition();
-   auto c2 = mChainElements[static_cast<size_t>(mChainElementCount - 1)]->GetPosition();
+   auto c2 = mChainElements[static_cast<size_t>(mConfig.chainElementCount - 1)]->GetPosition();
 
    auto c = (c2 - c1);
    c.Normalize();
@@ -144,7 +144,7 @@ void SpikeBall::update(const sf::Time& dt)
    mSpikeSprite.setRotation(mAngle * RADTODEG);
 
    // slightly push the ball all the way while it's moving from the right to the left
-   auto f = dt.asSeconds() * 0.625f;
+   auto f = dt.asSeconds() * mConfig.pushFactor;
    if (mBallBody->GetLinearVelocity().x < 0.0f)
    {
       mBallBody->ApplyLinearImpulse(b2Vec2{-f, f}, mBallBody->GetWorldCenter(), true);
@@ -154,8 +154,6 @@ void SpikeBall::update(const sf::Time& dt)
 
 void SpikeBall::setup(const std::shared_ptr<b2World>& world)
 {
-   static const auto chainElementLength = 0.3f;
-
    auto pos = b2Vec2{static_cast<float>(mPixelPosition.x * MPP), static_cast<float>(mPixelPosition.y * MPP)};
 
    // can be removed later
@@ -166,17 +164,17 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
    mJointDef.collideConnected = false;
 
    auto prevBody = mGround;
-   for (auto i = 0; i < mChainElementCount; ++i)
+   for (auto i = 0; i < mConfig.chainElementCount; ++i)
    {
       b2BodyDef bd;
       bd.type = b2_dynamicBody;
-      bd.position.Set(pos.x + 0.01f + i * chainElementLength, pos.y);
+      bd.position.Set(pos.x + 0.01f + i * mConfig.chainElementDistance, pos.y);
       auto chainBody = world->CreateBody(&bd);
       auto chainFixture = chainBody->CreateFixture(&mChainElementFixtureDef);
       chainFixture->SetSensor(true);
       mChainElements.push_back(chainBody);
 
-      b2Vec2 anchor(pos.x + i * chainElementLength, pos.y);
+      b2Vec2 anchor(pos.x + i * mConfig.chainElementDistance, pos.y);
 
       mJointDef.Initialize(prevBody, chainBody, anchor);
       world->CreateJoint(&mJointDef);
@@ -188,11 +186,11 @@ void SpikeBall::setup(const std::shared_ptr<b2World>& world)
    mBallBodyDef.type = b2_dynamicBody;
    mBallFixtureDef.density = 1;
    mBallShape.m_radius = 0.45f;
-   mBallBodyDef.position.Set(pos.x + 0.01f + mChainElementCount * chainElementLength, pos.y);
+   mBallBodyDef.position.Set(pos.x + 0.01f + mConfig.chainElementCount * mConfig.chainElementDistance, pos.y);
    mBallFixtureDef.shape = &mBallShape;
    mBallBody = world->CreateBody( &mBallBodyDef );
    auto ballFixture = mBallBody->CreateFixture( &mBallFixtureDef );
-   b2Vec2 anchor(pos.x + mChainElementCount * chainElementLength, pos.y);
+   b2Vec2 anchor(pos.x + mConfig.chainElementCount * mConfig.chainElementDistance, pos.y);
    mJointDef.Initialize(prevBody, mBallBody, anchor);
    world->CreateJoint(&mJointDef);
 

@@ -10,6 +10,22 @@
 class SpikeBall : public GameNode
 {
    public:
+
+      struct SpikeConfig
+      {
+         // factor to control the push force when ball moves from right to left
+         float pushFactor = 0.625f;
+
+         // number of points retrieved from the given spline
+         int32_t splinePointCount = 25;
+
+         // chain element setup
+         int32_t chainElementCount = 10;
+         float chainElementDistance = 0.3f;
+         float chainElementWidth = 0.06f;
+         float chainElementHeight = 0.0125f;
+      };
+
       SpikeBall(GameNode* parent);
 
       void draw(sf::RenderTarget& window);
@@ -51,8 +67,8 @@ class SpikeBall : public GameNode
       b2BodyDef mBallBodyDef;
       b2FixtureDef mBallFixtureDef;
 
-      int32_t mChainElementCount = 10;
       int32_t mZ = 0;
       float mAngle = 0.0f;
+      SpikeConfig mConfig;
 };
 

@@ -157,7 +157,7 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
    auto fixture = mBody->CreateFixture(&polygonShape, 0);
    auto objectData = new FixtureNode(this);
    objectData->setType(ObjectTypeDoor);
-   fixture->SetUserData((void*)objectData);
+   fixture->SetUserData(static_cast<void*>(objectData));
 }
 
 
@@ -269,9 +269,9 @@ std::vector<Door *> Door::load(
    auto firstId  = tileSet->mFirstGid;
 
    // populate the vertex array, with one quad per tile
-   for (auto j = 0; j < height; j++)
+   for (auto j = 0; j < static_cast<int32_t>(height); j++)
    {
-      for (auto i = 0; i < width; i++)
+      for (auto i = 0; i < static_cast<int32_t>(width); i++)
       {
          // get the current tile number
          auto tileNumber = tiles[i + j * width];
