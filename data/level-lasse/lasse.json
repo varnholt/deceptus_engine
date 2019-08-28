@@ -1,0 +1,112 @@
+{
+  "filename": "data/level-crypt/metroid.tmx",
+  "startposition": [
+    100,
+    26
+  ],
+  "enemies": [
+    {
+      "script": "blob.lua",
+      "startposition": [
+        14,
+        40
+      ],
+      "patrolpath": [
+        14,
+        40,
+        18,
+        40
+      ],
+      "properties": [
+        {
+          "name": "dummy",
+          "value": "dummy"
+        }
+      ]
+    },
+    {
+      "script": "cannon.lua",
+      "startposition": [
+        70,
+        41
+      ],
+      "properties": [
+        {
+            "name": "alignment",
+            "value": "down"
+        }
+      ]
+    },
+    {
+      "script": "klonk.lua",
+      "startposition": [
+        254,
+        40
+      ]
+    },
+    {
+      "script": "klonk.lua",
+      "startposition": [
+        256,
+        40
+      ]
+    },
+    {
+      "script": "klonk.lua",
+      "startposition": [
+        258,
+        40
+      ]
+    },
+    {
+      "script": "bonefish.lua",
+      "startposition": [
+        258,
+        96
+      ],
+      "patrolpath": [
+        258,
+        96,
+        264,
+        96
+      ]      
+    },
+    {
+      "script": "bonefish.lua",
+      "startposition": [
+        250,
+        99
+      ],
+      "patrolpath": [
+        250,
+        99,
+        256,
+        99
+      ]
+    },
+    {
+      "script": "landmine.lua",
+      "startposition": [
+        29,
+        41
+      ],
+      "properties": [
+        {
+            "name": "alignment",
+            "value": "down"
+        }
+      ]
+    },
+    {
+      "script": "dumb.lua",
+      "startposition": [60, 26],
+      "properties": [
+         {"name": "dummy", "value": "dummy"}
+      ],
+      "patrolpath": [
+        74, 26,
+        60, 26
+      ]
+    }
+  ]
+}
