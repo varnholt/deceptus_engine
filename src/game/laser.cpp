@@ -45,6 +45,11 @@ void Laser::update(const sf::Time& dt)
 {
    mTime += dt.asMilliseconds();
 
+   if (mSignalPlot.empty())
+   {
+      return;
+   }
+
    const auto& sig = mSignalPlot.at(mSignalIndex);
 
    // elapsed time exceeded signal duration

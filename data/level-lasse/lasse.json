@@ -1,8 +1,8 @@
 {
-  "filename": "data/level-crypt/metroid.tmx",
+  "filename": "data/level-lasse/lasse.tmx",
   "startposition": [
-    100,
-    26
+    47,
+    220
   ],
   "enemies": [
     {

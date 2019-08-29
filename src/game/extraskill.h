@@ -11,6 +11,7 @@ public:
    enum Skill
    {
       SkillClimb = 0x01,
+      SkillInvulnerable = 0x02
    };
 
    int mSkills = 0; // SkillClimb;
