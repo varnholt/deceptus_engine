@@ -84,6 +84,10 @@ void Console::execute()
 
       Player::getPlayer(0)->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
    }
+   else if (results.at(0) == "/iddqd")
+   {
+      Player::getPlayer(0)->mExtraTable->mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
+   }
    else
    {
       std::ostringstream os;

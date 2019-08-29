@@ -54,6 +54,16 @@ void Fan::load(
    const std::shared_ptr<b2World>& world
 )
 {
+   if (layer == nullptr)
+   {
+      return;
+   }
+
+   if (tileSet == nullptr)
+   {
+      return;
+   }
+
    const auto tiles    = layer->mData;
    const auto width    = layer->mWidth;
    const auto height   = layer->mHeight;

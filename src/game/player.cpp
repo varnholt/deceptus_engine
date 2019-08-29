@@ -1140,6 +1140,11 @@ void Player::damage(int damage, const sf::Vector2f& force)
       return;
    }
 
+   if (mExtraTable->mSkills->mSkills & ExtraSkill::SkillInvulnerable)
+   {
+      return;
+   }
+
    if (mDamageClock.getElapsedTime().asMilliseconds() > 3000)
    {
       mDamageInitialized = true;
