@@ -13,7 +13,7 @@ void ExtraHealth::reset()
 }
 
 
-void ExtraHealth::addHalth(int health)
+void ExtraHealth::addHealth(int health)
 {
    mHealth += health;
    if (mHealth > mHealthMax)

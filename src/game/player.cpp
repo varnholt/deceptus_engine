@@ -259,19 +259,26 @@ void Player::setPixelPosition(float x, float y)
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-sf::IntRect Player::getPlayerPixelRect() const
+void Player::updatePlayerPixelRect()
 {
    sf::IntRect rect;
 
    const auto dh = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
    rect.left = static_cast<int>(mPixelPosition.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(mPixelPosition.y) - dh - (dh / 2);
+   rect.top = static_cast<int>(mPixelPosition.y); // - dh - (dh / 2);
+
    rect.width = PLAYER_ACTUAL_WIDTH;
    rect.height = PLAYER_ACTUAL_HEIGHT;
 
-   return rect;
+   mPlayerPixelRect = rect;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+sf::IntRect Player::getPlayerPixelRect() const
+{
+   return mPlayerPixelRect;
 }
 
 
@@ -1416,6 +1423,7 @@ void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
+   updatePlayerPixelRect();
    updateCrouch();
    updateAnimation(dt);
    updatePixelCollisions();

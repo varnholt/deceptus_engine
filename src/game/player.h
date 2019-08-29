@@ -179,6 +179,7 @@ private:
    void updatePlayerOrientation();
    void updateDash(Dash dir = Dash::None);
    void updateCrouch();
+   void updatePlayerPixelRect();
    bool isDashActive() const;
 
    void createHead();
@@ -224,6 +225,7 @@ private:
    sf::Vector2u mSpriteAnim;
    sf::Time mGroundContactLostTime;
    sf::Time mLastJumpPressTime;
+   sf::IntRect mPlayerPixelRect;
 
    sf::Time mTime;
    sf::Clock mClock;

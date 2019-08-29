@@ -20,7 +20,7 @@ public:
    void load(TmxLayer *layer, TmxTileSet *tileSet);
    void collide(const sf::Rect<int32_t>& playerRect);
 
-   ExtraManager();
+   ExtraManager() = default;
 
    std::vector<std::shared_ptr<InventoryItem>> mInventory;
    std::vector<std::shared_ptr<ExtraItem>> mExtras;
