@@ -1,5 +1,4 @@
-#ifndef EXTRAHEALTH_H
-#define EXTRAHEALTH_H
+#pragma once
 
 #include "extra.h"
 
@@ -10,11 +9,10 @@ struct ExtraHealth : Extra
    void reset();
 
 
-   void addHalth(int health);
+   void addHealth(int health);
 
    int mLives = 5;
    int mHealth = 100;
    int mHealthMax = 100;
 };
 
-#endif // EXTRAHEALTH_H

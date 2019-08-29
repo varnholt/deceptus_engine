@@ -1,10 +1,13 @@
 [
-  {
-    "levelname": "data/level-crypt/metroid.json"
-  },
-  {
-    "levelname": "data/level-new/testlevel_00.json"
-  }
+   {
+      "levelname": "data/level-crypt/metroid.json"
+   },
+   {
+     "levelname": "data/level-lasse/lasse.json"
+   },
+   {
+      "levelname": "data/level-new/testlevel_00.json"
+   }
 ]
 
 

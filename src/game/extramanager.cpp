@@ -39,20 +39,20 @@ void ExtraManager::load(
             item->mSpriteOffset.y = j;
             item->mPosition.x = static_cast<float>(i * PIXELS_PER_TILE);
             item->mPosition.y = static_cast<float>(j * PIXELS_PER_TILE);
-            item->mType = static_cast<ExtraItem::Type>(tileNumber - firstId);
+            item->mType = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
 
             switch (item->mType)
             {
-               case ExtraItem::Type::Coin:
+               case ExtraItem::ExtraSpriteIndex::Coin:
                   // printf("extra coin at: %d, %d\n", i, j);
                   break;
-               case ExtraItem::Type::Cherry:
+               case ExtraItem::ExtraSpriteIndex::Cherry:
                   // printf("extra cherry at: %d, %d\n", i, j);
                   break;
-               case ExtraItem::Type::Banana:
+               case ExtraItem::ExtraSpriteIndex::Banana:
                   // printf("extra banana at: %d, %d\n", i, j);
                   break;
-               case ExtraItem::Type::Apple:
+               case ExtraItem::ExtraSpriteIndex::Apple:
                   // printf("extra apple at: %d, %d\n", i, j);
                   break;
             }
@@ -81,45 +81,49 @@ void ExtraManager::load(
 //-----------------------------------------------------------------------------
 void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 {
-   auto it =
-      std::find_if(std::begin(mExtras), std::end(mExtras), [playerRect](std::shared_ptr<ExtraItem> item)
-      {
-         sf::Rect<int32_t> itemRect;
-         itemRect.left = static_cast<int32_t>(item->mPosition.x);
-         itemRect.top = static_cast<int32_t>(item->mPosition.y + PIXELS_PER_TILE);
-         itemRect.width = PIXELS_PER_TILE;
-         itemRect.height = PIXELS_PER_TILE;
-
-         return item->mActive && playerRect.intersects(itemRect);
-      }
-   );
-
-   if (it != mExtras.end())
+   for (auto& extra : mExtras)
    {
-      printf("player hit extra\n");
-      (*it)->mActive = false;
-      mTilemap->hideTile(
-         (*it)->mSpriteOffset.x,
-         (*it)->mSpriteOffset.y,
-         (*it)->mVertexOffset
-      );
-
-      switch ((*it)->mType)
+      if (!extra->mActive)
       {
-         case ExtraItem::Type::Coin:
-            Audio::getInstance()->playSample("coin.wav");
-            break;
-         case ExtraItem::Type::Cherry:
-            Audio::getInstance()->playSample("healthup.wav");
-            Player::getPlayer(0)->mExtraTable->mHealth->addHalth(20);
-            break;
-         case ExtraItem::Type::Banana:
-            Audio::getInstance()->playSample("healthup.wav");
-            Player::getPlayer(0)->mExtraTable->mHealth->addHalth(10);
-            break;
-         case ExtraItem::Type::Apple:
-            Audio::getInstance()->playSample("powerup");
-            break;
+         continue;
+      }
+
+      sf::Rect<int32_t> itemRect;
+      itemRect.left = static_cast<int32_t>(extra->mPosition.x);
+      itemRect.top = static_cast<int32_t>(extra->mPosition.y + PIXELS_PER_TILE);
+      itemRect.width = PIXELS_PER_TILE;
+      itemRect.height = PIXELS_PER_TILE;
+
+      if (playerRect.intersects(itemRect))
+      {
+         printf("player hit extra\n");
+         extra->mActive = false;
+         mTilemap->hideTile(
+            extra->mSpriteOffset.x,
+            extra->mSpriteOffset.y,
+            extra->mVertexOffset
+         );
+
+         switch (extra->mType)
+         {
+            case ExtraItem::ExtraSpriteIndex::Coin:
+               Audio::getInstance()->playSample("coin.wav");
+               break;
+            case ExtraItem::ExtraSpriteIndex::Cherry:
+               Audio::getInstance()->playSample("healthup.wav");
+               Player::getPlayer(0)->mExtraTable->mHealth->addHealth(20);
+               break;
+            case ExtraItem::ExtraSpriteIndex::Banana:
+               Audio::getInstance()->playSample("healthup.wav");
+               Player::getPlayer(0)->mExtraTable->mHealth->addHealth(10);
+               break;
+            case ExtraItem::ExtraSpriteIndex::Apple:
+               Audio::getInstance()->playSample("powerup");
+               break;
+            default:
+               Audio::getInstance()->playSample("powerup");
+               break;
+         }
       }
    }
 }
