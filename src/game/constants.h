@@ -56,16 +56,21 @@ enum Display {
 };
 
 enum class ItemType {
-   KeyCrypt,
-   KeySkull,
-   Shovel,
-   Knife,
-   Saw,
+   Invalid,
    Crowbar,
    Dynamite,
-   Money,
+   KeyBlue,
+   KeyCrypt,
+   KeyGreen,
+   KeyRed,
+   KeySkull,
+   KeyYellow,
+   Knife,
+   LoveBomb,
    Match,
-   LoveBomb
+   Money,
+   Saw,
+   Shovel,
 };
 
 enum class ExecutionMode {
