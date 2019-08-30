@@ -176,12 +176,10 @@ void Door::addSprite(const sf::Sprite & sprite)
 //-----------------------------------------------------------------------------
 void Door::toggle()
 {
-   // TODO
-   // add door locking mechanism
-   //   if (mTileId == 161)
-   //   {
-   //      return;
-   //   }
+   if (!Player::getPlayer(0)->getExtraManager()->hasInventoryItem(mRequiredItem))
+   {
+      return;
+   }
 
    if (!isPlayerAtDoor())
       return;

@@ -22,7 +22,7 @@ struct ExtraItem : public GameNode
       KeyRed    = 64,
       KeyYellow = 65,
       KeyBlue   = 66,
-      KeyGreen  = 67
+      KeyGreen  = 67,
    };
 
    int mVertexOffset = 0;

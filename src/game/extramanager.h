@@ -1,10 +1,11 @@
-#ifndef EXTRAMANAGER_H
-#define EXTRAMANAGER_H
+#pragma once
 
 #include <memory>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
+
+#include "constants.h"
 
 struct ExtraItem;
 struct InventoryItem;
@@ -22,10 +23,11 @@ public:
 
    ExtraManager() = default;
 
+   bool hasInventoryItem(ItemType itemType) const;
+
    std::vector<std::shared_ptr<InventoryItem>> mInventory;
    std::vector<std::shared_ptr<ExtraItem>> mExtras;
 
    std::shared_ptr<TileMap> mTilemap;
 };
 
-#endif // EXTRAMANAGER_H

@@ -5,6 +5,7 @@
 #include "extraitem.h"
 #include "extrahealth.h"
 #include "extratable.h"
+#include "inventoryitem.h"
 #include "player.h"
 #include "tilemap.h"
 #include "tmxparser/tmxlayer.h"
@@ -40,22 +41,6 @@ void ExtraManager::load(
             item->mPosition.x = static_cast<float>(i * PIXELS_PER_TILE);
             item->mPosition.y = static_cast<float>(j * PIXELS_PER_TILE);
             item->mType = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
-
-            switch (item->mType)
-            {
-               case ExtraItem::ExtraSpriteIndex::Coin:
-                  // printf("extra coin at: %d, %d\n", i, j);
-                  break;
-               case ExtraItem::ExtraSpriteIndex::Cherry:
-                  // printf("extra cherry at: %d, %d\n", i, j);
-                  break;
-               case ExtraItem::ExtraSpriteIndex::Banana:
-                  // printf("extra banana at: %d, %d\n", i, j);
-                  break;
-               case ExtraItem::ExtraSpriteIndex::Apple:
-                  // printf("extra apple at: %d, %d\n", i, j);
-                  break;
-            }
 
             auto it = tileMap.find(tileNumber - firstId);
             if (it != tileMap.end())
@@ -120,10 +105,49 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
             case ExtraItem::ExtraSpriteIndex::Apple:
                Audio::getInstance()->playSample("powerup");
                break;
-            default:
+            case ExtraItem::ExtraSpriteIndex::KeyRed:
+            {
                Audio::getInstance()->playSample("powerup");
+               mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyRed));
                break;
+            }
+            case ExtraItem::ExtraSpriteIndex::KeyYellow:
+            {
+               Audio::getInstance()->playSample("powerup");
+               mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyYellow));
+               break;
+            }
+            case ExtraItem::ExtraSpriteIndex::KeyBlue:
+            {
+               Audio::getInstance()->playSample("powerup");
+               mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyBlue));
+               break;
+            }
+            case ExtraItem::ExtraSpriteIndex::KeyGreen:
+            {
+               Audio::getInstance()->playSample("powerup");
+               mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyGreen));
+               break;
+            }
          }
       }
    }
 }
+
+
+bool ExtraManager::hasInventoryItem(ItemType itemType) const
+{
+   if (itemType == ItemType::Invalid)
+   {
+      return true;
+   }
+
+   auto it = std::find_if(std::begin(mInventory), std::end(mInventory), [itemType](auto item) {
+         return (item->mType == itemType);
+      }
+   );
+
+   return it != mInventory.end();
+}
+
+

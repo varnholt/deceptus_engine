@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "gamenode.h"
 
 #include <filesystem>
@@ -55,7 +56,7 @@ public:
    const sf::Vector2i& getTilePosition() const;
 
 
-   protected:
+protected:
 
    void open();
    void close();
@@ -69,6 +70,8 @@ public:
    State mState = State::Closed;
 
    sf::Vector2i mTilePosition;
+
+   ItemType mRequiredItem = ItemType::Invalid;
 
    float mOffset = 0.0f;
    int mHeight = 0;
