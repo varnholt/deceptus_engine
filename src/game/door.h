@@ -55,6 +55,8 @@ public:
 
    const sf::Vector2i& getTilePosition() const;
 
+   void updateRequiredItem();
+
 
 protected:
 

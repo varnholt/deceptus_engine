@@ -75,7 +75,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 
       sf::Rect<int32_t> itemRect;
       itemRect.left = static_cast<int32_t>(extra->mPosition.x);
-      itemRect.top = static_cast<int32_t>(extra->mPosition.y + PIXELS_PER_TILE);
+      itemRect.top = static_cast<int32_t>(extra->mPosition.y);
       itemRect.width = PIXELS_PER_TILE;
       itemRect.height = PIXELS_PER_TILE;
 
@@ -132,6 +132,53 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
          }
       }
    }
+}
+
+
+void ExtraManager::resetInventory()
+{
+   mInventory.clear();
+}
+
+
+void ExtraManager::resetExtras()
+{
+   mExtras.clear();
+}
+
+
+void ExtraManager::resetKeys()
+{
+   mInventory.erase(
+      std::remove_if(
+         mInventory.begin(),
+         mInventory.end(),
+         [](auto& item) -> bool
+         {
+            if (
+                  item->mType == ItemType::KeyBlue
+               || item->mType == ItemType::KeyGreen
+               || item->mType == ItemType::KeyRed
+               || item->mType == ItemType::KeyYellow
+            )
+            {
+               return true;
+            }
+
+            return false;
+         }
+      ),
+      mInventory.end()
+   );
+}
+
+
+void ExtraManager::giveAllKeys()
+{
+   mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyRed));
+   mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyYellow));
+   mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyBlue));
+   mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyGreen));
 }
 
 

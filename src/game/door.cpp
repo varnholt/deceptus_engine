@@ -215,6 +215,40 @@ void Door::close()
 
 
 //-----------------------------------------------------------------------------
+void Door::updateRequiredItem()
+{
+   // that code depends on the current sprite set, needs to be updated later
+
+   auto requiredItem = ItemType::Invalid;
+   switch (mTileId)
+   {
+      case 160:
+      case 176:
+      case 192:
+         requiredItem = ItemType::KeyRed;
+         break;
+      case 161:
+      case 177:
+      case 193:
+         requiredItem = ItemType::KeyYellow;
+         break;
+      case 162:
+      case 178:
+      case 194:
+         requiredItem = ItemType::KeyBlue;
+         break;
+      case 163:
+      case 179:
+      case 195:
+         requiredItem = ItemType::KeyGreen;
+         break;
+   }
+
+   mRequiredItem = requiredItem;
+}
+
+
+//-----------------------------------------------------------------------------
 const sf::Vector2i& Door::getTilePosition() const
 {
    return mTilePosition;
@@ -260,7 +294,7 @@ std::vector<Door *> Door::load(
 {
    std::vector<Door*> doors;
 
-   auto tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
+   auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
    auto tiles    = layer->mData;
    auto width    = layer->mWidth;
    auto height   = layer->mHeight;
@@ -301,6 +335,9 @@ std::vector<Door *> Door::load(
                door->mTilePosition.x = i;
                door->mTilePosition.y = j;
                door->mTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
+
+               // check if door needs a key
+               door->updateRequiredItem();
 
                // printf("creating door %zd with tile %d at %d, %d\n", doors.size(), tileId, i, j);
 

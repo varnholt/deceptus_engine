@@ -445,7 +445,10 @@ void Game::updateGameState()
    {
       mPlayer->die();
       mPlayer->reset();
-      mLevel->reset();
+
+      // mLevel->reset();
+
+      loadLevel();
    }
 }
 

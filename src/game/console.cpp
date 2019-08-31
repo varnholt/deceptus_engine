@@ -87,6 +87,12 @@ void Console::execute()
    else if (results.at(0) == "/iddqd")
    {
       Player::getPlayer(0)->mExtraTable->mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
+      mLog.push_back("invulnerable");
+   }
+   else if (results.at(0) == "/idkfa")
+   {
+      Player::getPlayer(0)->getExtraManager()->giveAllKeys();
+      mLog.push_back("all keys");
    }
    else
    {

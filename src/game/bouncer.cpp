@@ -120,7 +120,7 @@ void Bouncer::updatePlayerAtBouncer()
 {
    auto player = Player::getPlayer(0);
    auto rect = player->getPlayerPixelRect();
-   rect.height *= 2;
+   rect.height *= 3;
 
    mPlayerAtBouncer = rect.intersects(mRect);
 
