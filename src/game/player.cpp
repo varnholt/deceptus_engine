@@ -266,7 +266,7 @@ void Player::updatePlayerPixelRect()
    const auto dh = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
    rect.left = static_cast<int>(mPixelPosition.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(mPixelPosition.y); // - dh - (dh / 2);
+   rect.top = static_cast<int>(mPixelPosition.y) - dh - (dh / 2);
 
    rect.width = PLAYER_ACTUAL_WIDTH;
    rect.height = PLAYER_ACTUAL_HEIGHT;
@@ -2100,6 +2100,8 @@ void Player::reset()
    );
 
    mExtraTable->mHealth->reset();
+
+   mExtraManager->resetKeys();
 }
 
 
