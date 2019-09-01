@@ -1007,6 +1007,16 @@ void Player::updateVelocity()
 
       mBody->SetLinearVelocity(linearVelocity);
    }
+
+   // cap speed
+   static const auto maxSpeed = 10.0f;
+   b2Vec2 vel = mBody->GetLinearVelocity();
+   const auto speed = vel.Normalize();
+   if (speed > maxSpeed)
+   {
+      std::cout << "cap speed" << std::endl;
+      mBody->SetLinearVelocity(maxSpeed * vel);
+   }
 }
 
 
