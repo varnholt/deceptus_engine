@@ -5,25 +5,16 @@
     220
   ],
   "enemies": [
-    {
-      "script": "blob.lua",
-      "startposition": [
-        14,
-        40
-      ],
-      "patrolpath": [
-        14,
-        40,
-        18,
-        40
-      ],
-      "properties": [
-        {
-          "name": "dummy",
-          "value": "dummy"
-        }
-      ]
-    },
+    {"script": "blob.lua", "startposition": [214, 214], "patrolpath": [221, 214]},
+    {"script": "blob.lua", "startposition": [212, 206], "patrolpath": [214, 206]},
+    {"script": "blob.lua", "startposition": [220, 199], "patrolpath": [222, 199]},
+    {"script": "blob.lua", "startposition": [216, 187], "patrolpath": [219, 187]},
+    {"script": "blob.lua", "startposition": [213, 175], "patrolpath": [215, 175]},
+    {"script": "blob.lua", "startposition": [219, 162], "patrolpath": [221, 162]},
+    {"script": "blob.lua", "startposition": [213, 153], "patrolpath": [215, 153]},
+    {"script": "blob.lua", "startposition": [215, 133], "patrolpath": [218, 133]},
+    {"script": "blob.lua", "startposition": [217, 125], "patrolpath": [219, 125]},
+    {"script": "blob.lua", "startposition": [212, 114], "patrolpath": [214, 114]},
     {
       "script": "cannon.lua",
       "startposition": [

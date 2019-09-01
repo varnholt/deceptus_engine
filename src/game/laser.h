@@ -46,6 +46,9 @@ public:
    int getZ() const;
    void setZ(int z);
 
+   void reset();
+   static void resetAll();
+
 
 protected:
 
@@ -65,7 +68,7 @@ protected:
 
    int32_t mZ = 0;
 
-   bool mOn = false;
+   bool mOn = true;
    int32_t mTileIndex = 0;
    float mTileAnimation = 0.0f;
    uint32_t mSignalIndex = 0;
