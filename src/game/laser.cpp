@@ -102,6 +102,26 @@ void Laser::setZ(int z)
 
 
 //-----------------------------------------------------------------------------
+void Laser::reset()
+{
+   mOn = true;
+   mTileIndex = 0;
+   mTileAnimation = 0.0f;
+   mSignalIndex = 0;
+   mTime = 0u;
+}
+
+
+//-----------------------------------------------------------------------------
+void Laser::resetAll()
+{
+   mObjects.clear();
+   mLasers.clear();
+   mTiles.clear();
+}
+
+
+//-----------------------------------------------------------------------------
 std::vector<Laser*> Laser::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
@@ -109,6 +129,8 @@ std::vector<Laser*> Laser::load(
    const std::shared_ptr<b2World>&
 )
 {
+   resetAll();
+
    addTiles();
 
    std::vector<Laser*> lasers;
@@ -208,6 +230,7 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
 
             const auto roughIntersection = playerRect.intersects(itemRect);
 
+            // tileindex at 0 is an active laser
             if (laser->mTileIndex == 0 && roughIntersection)
             {
                const auto tileId = static_cast<uint32_t>(laser->mTv);

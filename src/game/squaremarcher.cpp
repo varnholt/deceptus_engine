@@ -8,6 +8,35 @@
 #include <ostream>
 #include <sstream>
 
+namespace {
+ static const std::vector<std::string> verbs{
+       "crashing", "landing", "communicating", "deserving", "squealing", "testing", "attaching", "waving", "starting",
+       "flowering", "telephoning", "stuffing", "tempting", "baring", "sacking", "disliking", "parking", "combing",
+       "admiting", "facing", "passing", "replacing", "hoping", "fastening", "bleaching", "blinding", "switching",
+       "welcoming", "ending", "preceding", "suiting", "terrifying", "crying", "wanting", "annoying", "touching",
+       "peeling", "labelling", "beaming", "commanding", "wasting", "trembling", "pining", "confusing", "printing",
+       "waiting", "fitting", "competing", "staying", "entertaining", "puncturing", "existing", "sealing", "dressing",
+       "knocking", "breathing", "presenting", "offending", "mattering", "troting", "loving", "scratching", "carrying",
+       "including", "squashing", "examining", "itching", "humming", "uniting", "changing", "sucking", "attending",
+       "timing", "burying", "scraping", "whirling", "requesting", "launching", "belonging", "flooding", "dragging",
+       "watering", "camping", "interesting", "wondering", "detecting", "scaring", "suffering", "pinching", "noticing",
+       "completing", "mending", "settling", "leveling", "skiing", "smashing", "screaming", "stamping", "flapping",
+       "cleaning"
+   };
+
+   static const std::vector<std::string> nouns{
+      "quilts", "slaves", "fuel", "gates", "earth", "lumber", "senses", "payments", "chickens", "offers", "wires",
+      "roads", "crates", "signs", "tubs", "bears", "ice", "cats", "sisters", "bones", "butter", "sons", "quivers",
+      "strings", "lakes", "bells", "sides", "tests", "fingers", "toys", "things", "sugar", "apparels", "girls", "boys",
+      "lows", "flies", "respects", "forks", "talks", "crooks", "arguments", "sinks", "yams", "cactusses", "poisons",
+      "tendencies", "pencils", "doctors", "runs", "verses", "milk", "turns", "hate", "legs", "giants", "experts",
+      "cloth", "nations", "women", "bulbs", "companies", "shame", "berries", "offices", "machines", "temper", "quiet",
+      "jail", "grain", "lamps", "mailboxs", "laborers", "pens", "cakes", "nuts", "snails", "pins", "summers", "self",
+      "roses", "knees", "territories", "cherries", "coal", "furniture", "wings", "iron", "spaces", "marbles", "pets",
+      "copper", "cans", "harmony", "events", "harbors", "crackers", "branches", "pockets", "dust"
+   };
+}
+
 
 SquareMarcher::SquareMarcher(
    uint32_t w,
@@ -111,15 +140,18 @@ void SquareMarcher::deserialize()
 
 void SquareMarcher::scan()
 {
+   std::srand(std::time(nullptr));
+
    std::ifstream fileIn(mCachePath);
    if (fileIn.fail())
    {
       // scan tiles until collision hit that wasn't visited
       for (auto y = 0u; y < mHeight; y++)
       {
-         if ((y % 100) == 0)
+         if ((y % 30) == 0) // 100 might do, too
          {
-            std::cout << (y/static_cast<float>(mHeight)) * 100.0f << std::endl;
+            std::cout << "[x] " << verbs[std::rand() % 100] << " " << nouns[std::rand() % 100] << std::endl;
+            // std::cout << (y/static_cast<float>(mHeight)) * 100.0f << std::endl;
          }
 
          for (auto x = 0u; x < mWidth; x++)
