@@ -1231,6 +1231,8 @@ void Level::update(const sf::Time& dt)
    CameraPane::getInstance().update();
    mBoomEffect.update(dt);
 
+   Checkpoint::update();
+
    for (auto& tileMap : mTileMaps)
    {
       tileMap->update(dt);

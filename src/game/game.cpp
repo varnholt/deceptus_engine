@@ -3,6 +3,7 @@
 #include "animationpool.h"
 #include "audio.h"
 #include "bullethitanimation.h"
+#include "callbackmap.h"
 #include "camerapane.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -258,6 +259,8 @@ void Game::initialize()
   mInventoryLayer = std::make_unique<InventoryLayer>();
   mControllerOverlay = std::make_unique<ControllerOverlay>();
   mTestScene = std::make_unique<ForestScene>();
+
+  CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [&](){mDrawTestScene = true;});
 
   Audio::getInstance();
 

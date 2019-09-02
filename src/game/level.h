@@ -180,8 +180,6 @@ protected:
    void loadTmx();
 
 
-protected:
-
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
    std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;

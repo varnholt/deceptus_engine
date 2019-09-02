@@ -1,5 +1,6 @@
 #include "checkpoint.h"
 
+#include "callbackmap.h"
 #include "player.h"
 
 #include "tmxparser/tmxobject.h"
@@ -30,9 +31,16 @@ Checkpoint* Checkpoint::getCheckpoint(int32_t index)
 
 void Checkpoint::add(TmxObject* tmxObject)
 {
-    Checkpoint cp;
+   Checkpoint cp;
 
-    sCheckpoints.push_back(cp);
+   cp.mRect = sf::IntRect{
+      static_cast<int32_t>(tmxObject->mX),
+      static_cast<int32_t>(tmxObject->mY),
+      static_cast<int32_t>(tmxObject->mWidth),
+      static_cast<int32_t>(tmxObject->mHeight)
+   };
+
+   sCheckpoints.push_back(cp);
 }
 
 
@@ -58,12 +66,14 @@ void Checkpoint::resetAll()
 
 void Checkpoint::reached()
 {
-    // check if level is completed
-    if (mIndex == static_cast<int32_t>(sCheckpoints.size()) - 1)
-    {
-        if (mCallback != nullptr)
-        {
-            mCallback();
-        }
-    }
+   if (mCallback != nullptr)
+   {
+       mCallback();
+   }
+
+   // check if level is completed
+   if (mIndex == static_cast<int32_t>(sCheckpoints.size()) - 1)
+   {
+      CallbackMap::getInstance().call(CallbackMap::CallbackType::EndGame);
+   }
 }
