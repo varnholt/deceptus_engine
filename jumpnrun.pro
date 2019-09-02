@@ -209,7 +209,8 @@ SOURCES += \
     src/game/camerapane.cpp \
     src/game/gamecontrollerdata.cpp \
     src/game/boomeffect.cpp \
-    src/game/hermitecurve.cpp
+    src/game/hermitecurve.cpp \
+    src/game/checkpoint.cpp
 
 
 # add box2d
@@ -342,7 +343,8 @@ HEADERS += \
     src/game/gamecontrollerdata.h \
     src/game/boomeffect.h \
     src/game/hermitecurve.h \
-    src/game/hermitecurvekey.h
+    src/game/hermitecurvekey.h \
+    src/game/checkpoint.h
 
 
 SOURCES += \

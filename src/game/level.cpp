@@ -3,6 +3,7 @@
 // game
 #include "bouncer.h"
 #include "camerapane.h"
+#include "checkpoint.h"
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "debugdraw.h"
@@ -502,6 +503,10 @@ void Level::loadTmx()
                {
                   Portal::link(mPortals, tmxObject);
                }
+            }
+            else if (objectGroup->mName == "checkpoints")
+            {
+               Checkpoint::add(tmxObject);
             }
             else if (objectGroup->mName == "bouncers")
             {
