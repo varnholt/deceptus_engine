@@ -223,7 +223,7 @@ protected:
    std::vector<Laser*> mLasers;
    std::vector<MovingPlatform*> mPlatforms;
    std::vector<Portal*> mPortals;
-   std::vector<SpikeBall*> mSpikeBalls;
+   std::vector<std::shared_ptr<SpikeBall>> mSpikeBalls;
 
    // graphic effects
    std::shared_ptr<RaycastLight> mRaycastLight;

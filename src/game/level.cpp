@@ -504,6 +504,18 @@ void Level::loadTmx()
                   Portal::link(mPortals, tmxObject);
                }
             }
+            else if (objectGroup->mName == "spike_balls")
+            {
+               auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
+               spikeBall->setPixelPosition(
+                  sf::Vector2i{
+                     static_cast<int32_t>(tmxObject->mX),
+                     static_cast<int32_t>(tmxObject->mY)
+                  }
+               );
+               spikeBall->setup(mWorld);
+               mSpikeBalls.push_back(spikeBall);
+            }
             else if (objectGroup->mName == "checkpoints")
             {
                Checkpoint::add(tmxObject);
@@ -628,14 +640,6 @@ void Level::loadTmx()
    }
 
    std::cout << "[x] loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
-
-   {
-      // testbed
-      auto spikeBall = new SpikeBall(this);
-      spikeBall->setPixelPosition(sf::Vector2i{260 * PIXELS_PER_TILE, 57 * PIXELS_PER_TILE});
-      spikeBall->setup(mWorld);
-      mSpikeBalls.push_back(spikeBall);
-   }
 }
 
 
