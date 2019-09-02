@@ -260,7 +260,7 @@ void Game::initialize()
   mControllerOverlay = std::make_unique<ControllerOverlay>();
   mTestScene = std::make_unique<ForestScene>();
 
-  CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [&](){mDrawTestScene = true;});
+  CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [this](){mDrawTestScene = true;});
 
   Audio::getInstance();
 
