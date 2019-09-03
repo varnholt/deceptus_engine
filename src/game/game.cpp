@@ -317,7 +317,6 @@ void Game::draw()
 
    mWindowRenderTexture->clear();
 
-   const auto debugEnabled = DisplayMode::getInstance().isSet(Display::DisplayDebug);
    const auto mapEnabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
 
    if (mLevelLoadingFinished)

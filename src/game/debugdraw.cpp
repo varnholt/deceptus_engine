@@ -246,7 +246,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 
                case b2Shape::e_circle:
                {
-                  b2Vec2 offset;
+                  b2Vec2 offset{0.0f, 0.0f};
                   b2CircleShape* circleShape = nullptr;
                   circleShape = dynamic_cast<b2CircleShape*>(f->GetShape());
                   if (circleShape != nullptr)
