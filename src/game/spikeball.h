@@ -6,6 +6,8 @@
 
 #include "gamenode.h"
 
+struct TmxObject;
+
 
 class SpikeBall : public GameNode
 {
@@ -31,7 +33,7 @@ class SpikeBall : public GameNode
       void draw(sf::RenderTarget& window);
       void update(const sf::Time& dt);
 
-      void setup(const std::shared_ptr<b2World>& world);
+      void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
 
 
       int32_t getZ() const;

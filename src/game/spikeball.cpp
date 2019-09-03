@@ -4,6 +4,7 @@
 #include "fixturenode.h"
 #include "hermitecurve.h"
 #include "player.h"
+#include "tmxparser/tmxobject.h"
 
 /*
    spike ball concept
@@ -152,8 +153,15 @@ void SpikeBall::update(const sf::Time& dt)
 }
 
 
-void SpikeBall::setup(const std::shared_ptr<b2World>& world)
+void SpikeBall::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 {
+    setPixelPosition(
+       sf::Vector2i{
+          static_cast<int32_t>(tmxObject->mX),
+          static_cast<int32_t>(tmxObject->mY)
+       }
+    );
+
    auto pos = b2Vec2{static_cast<float>(mPixelPosition.x * MPP), static_cast<float>(mPixelPosition.y * MPP)};
 
    // can be removed later

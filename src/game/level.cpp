@@ -507,13 +507,7 @@ void Level::loadTmx()
             else if (objectGroup->mName == "spike_balls")
             {
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
-               spikeBall->setPixelPosition(
-                  sf::Vector2i{
-                     static_cast<int32_t>(tmxObject->mX),
-                     static_cast<int32_t>(tmxObject->mY)
-                  }
-               );
-               spikeBall->setup(mWorld);
+               spikeBall->setup(tmxObject, mWorld);
                mSpikeBalls.push_back(spikeBall);
             }
             else if (objectGroup->mName == "checkpoints")
