@@ -26,14 +26,14 @@ class Portal
    void draw(sf::RenderTarget& window);
    void update(const sf::Time& dt);
 
-   static std::vector<Portal*> load(
+   static std::vector<std::shared_ptr<Portal>> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
       const std::shared_ptr<b2World>& world
    );
 
-   static void link(std::vector<Portal*>& portals, TmxObject*);
+   static void link(std::vector<std::shared_ptr<Portal>>& portals, TmxObject*);
 
    bool isPlayerAtPortal() const;
    void setPlayerAtPortal(bool isPlayerAtPortal);
@@ -43,8 +43,8 @@ class Portal
    int getZ() const;
    void setZ(int z);
 
-   Portal* getDestination() const;
-   void setDestination(Portal* dst);
+   std::shared_ptr<Portal> getDestination() const;
+   void setDestination(const std::shared_ptr<Portal>& dst);
 
    sf::Vector2f getPortalPosition();
    const sf::Vector2f& getTilePosition() const;
@@ -62,7 +62,7 @@ protected:
    int mHeight = 0;
    bool mPlayerAtPortal = false;
    int mZ = 0;
-   Portal* mDestination = nullptr;
+   std::shared_ptr<Portal> mDestination;
 };
 
 #endif // PORTAL_H

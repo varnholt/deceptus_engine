@@ -146,13 +146,13 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 }
 
 
-void LevelMap::setDoors(const std::vector<Door*>& doors)
+void LevelMap::setDoors(const std::vector<std::shared_ptr<Door>>& doors)
 {
    mDoors = doors;
 }
 
 
-void LevelMap::setPortals(const std::vector<Portal*>& portals)
+void LevelMap::setPortals(const std::vector<std::shared_ptr<Portal>>& portals)
 {
    mPortals = portals;
 }

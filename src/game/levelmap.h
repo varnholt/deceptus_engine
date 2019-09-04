@@ -26,8 +26,8 @@ class LevelMap
 
       void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
-      void setDoors(const std::vector<Door*>& doors);
-      void setPortals(const std::vector<Portal*>& portals);
+      void setDoors(const std::vector<std::shared_ptr<Door>>& doors);
+      void setPortals(const std::vector<std::shared_ptr<Portal>>& portals);
 
 
    private:
@@ -45,8 +45,8 @@ class LevelMap
       sf::Texture mLevelOutlineTexture;
       sf::Sprite mLevelOutlineSprite;
 
-      std::vector<Door*> mDoors;
-      std::vector<Portal*> mPortals;
+      std::vector<std::shared_ptr<Door>> mDoors;
+      std::vector<std::shared_ptr<Portal>> mPortals;
 
       bool mZoomEnabled = false;
       bool mPanEnabled = false;
