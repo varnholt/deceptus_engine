@@ -31,7 +31,7 @@ Audio *Audio::getInstance()
    if (sInstance == nullptr)
    {
       new Audio();
-      sInstance->initialize();
+      sInstance->initializeSamples();
    }
 
    return sInstance;
@@ -56,7 +56,7 @@ void Audio::addSample(const std::string& sample)
 
 
 //-----------------------------------------------------------------------------
-void Audio::initialize()
+void Audio::initializeSamples()
 {
    addSample("coin.wav");
    addSample("death.wav");
