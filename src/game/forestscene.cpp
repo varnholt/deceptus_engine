@@ -8,6 +8,18 @@
 
 ForestScene::ForestScene()
 {
+   if (mFont.loadFromFile("data/fonts/deceptum.ttf"))
+   {
+      mText.setScale(0.25f, 0.25f);
+      mText.setFont(mFont);
+      mText.setCharacterSize(48);
+      mText.setString("Du hast es geschafft!\nAlles Gute zum Geburtstag, Lasse!\n- Dein Papa");
+      mText.setFillColor(sf::Color{232, 219, 243});
+   }
+   else
+   {
+      std::cerr << "font load fuckup" << std::endl;
+   }
 
    // load ingame psd
    PSD psd;
@@ -62,6 +74,13 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       layer->draw(window, states);
    }
+
+   // draw text
+   const auto rect = mText.getGlobalBounds();
+   const auto left = 143;
+   const auto x = left + (202 - rect.width) * 0.5f;
+   mText.setPosition(floor(x), 82);
+   window.draw(mText, states);
 }
 
 
