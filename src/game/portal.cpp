@@ -146,6 +146,16 @@ void Portal::link(
    // set the destination's destination to where we came from.
    // not sure if this is desired behavior. but for development purposes
    // it'll help :)
+   if (!dstPortal)
+   {
+      std::cerr << "please mark your dst portal correctly for id: " << tmxObject->mId << std::endl;
+   }
+
+   if (!srcPortal)
+   {
+      std::cerr << "please mark your src portal correctly for id: " << tmxObject->mId << std::endl;
+   }
+
    dstPortal->mDestination = srcPortal;
 
    // std::cout << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")" << std::endl;

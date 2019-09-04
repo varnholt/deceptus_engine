@@ -20,5 +20,8 @@ class ForestScene
    private:
       std::vector<std::shared_ptr<Layer>> mLayerStack;
       std::map<std::string, std::shared_ptr<Layer>> mLayers;
+
+      sf::Font mFont;
+      sf::Text mText;
 };
 
