@@ -44,14 +44,14 @@ const sf::Vector2f& Portal::getTilePosition() const
 
 
 //-----------------------------------------------------------------------------
-Portal *Portal::getDestination() const
+std::shared_ptr<Portal> Portal::getDestination() const
 {
    return mDestination;
 }
 
 
 //-----------------------------------------------------------------------------
-void Portal::setDestination(Portal *dst)
+void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 {
    mDestination = dst;
 }
@@ -99,7 +99,7 @@ void Portal::update(const sf::Time& /*dt*/)
 
 //-----------------------------------------------------------------------------
 void Portal::link(
-   std::vector<Portal*>& portals,
+   std::vector<std::shared_ptr<Portal>>& portals,
    TmxObject* tmxObject
 )
 {
@@ -115,8 +115,8 @@ void Portal::link(
    const auto dstX = static_cast<int32_t>(dst.x + tmxObject->mX) / PIXELS_PER_TILE;
    const auto dstY = static_cast<int32_t>(dst.y + tmxObject->mY) / PIXELS_PER_TILE;
 
-   Portal* srcPortal = nullptr;
-   Portal* dstPortal = nullptr;
+   std::shared_ptr<Portal> srcPortal;
+   std::shared_ptr<Portal> dstPortal;
 
    for (auto portal : portals)
    {
@@ -189,7 +189,7 @@ void Portal::setPlayerAtPortal(bool playerAtPortal)
 
 
 //-----------------------------------------------------------------------------
-std::vector<Portal *> Portal::load(
+std::vector<std::shared_ptr<Portal>> Portal::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
@@ -198,7 +198,7 @@ std::vector<Portal *> Portal::load(
 {
    // std::cout << "load portal layer" << std::endl;
 
-   std::vector<Portal*> portals;
+   std::vector<std::shared_ptr<Portal>> portals;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    const auto tiles    = layer->mData;
@@ -217,8 +217,8 @@ std::vector<Portal *> Portal::load(
          if (tileNumber != 0)
          {
             // find matching Portal
-            Portal* portal = nullptr;
-            for (Portal* tmp : portals)
+            std::shared_ptr<Portal> portal = nullptr;
+            for (auto& tmp : portals)
             {
                if (
                      static_cast<uint32_t>(tmp->mTilePosition.x) == i
@@ -231,7 +231,7 @@ std::vector<Portal *> Portal::load(
 
             if (portal == nullptr)
             {
-               portal = new Portal();
+               portal = std::make_shared<Portal>();
                portals.push_back(portal);
                portal->mTilePosition.x = static_cast<float>(i);
                portal->mTilePosition.y = static_cast<float>(j);

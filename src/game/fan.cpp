@@ -3,13 +3,15 @@
 #include "constants.h"
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxobject.h"
+#include "tmxparser/tmxproperty.h"
+#include "tmxparser/tmxproperties.h"
 #include "tmxparser/tmxtileset.h"
 
 #include <iostream>
 
 
-std::vector<Fan*> Fan::sFans;
-std::vector<Fan::FanTile*> Fan::sTiles;
+std::vector<std::shared_ptr<Fan>> Fan::sFans;
+std::vector<std::shared_ptr<Fan::FanTile>> Fan::sTiles;
 std::vector<TmxObject*> Fan::sObjects;
 std::vector<sf::Vector2f> Fan::sWeights;
 
@@ -19,7 +21,7 @@ static const sf::Vector2f vectorLeft{-1.0f, 0.0f};
 static const sf::Vector2f vectorRight{1.0f, 0.0f};
 
 
-void Fan::createPhysics(const std::shared_ptr<b2World>& world, FanTile* tile)
+void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
    auto possf = tile->mPosition;
    auto posb2d = b2Vec2(possf.x * MPP, possf.y * MPP);
@@ -64,6 +66,8 @@ void Fan::load(
       return;
    }
 
+   resetAll();
+
    const auto tiles    = layer->mData;
    const auto width    = layer->mWidth;
    const auto height   = layer->mHeight;
@@ -97,7 +101,7 @@ void Fan::load(
                   break;
             }
 
-            FanTile* tile = new FanTile();
+            auto tile = std::make_shared<FanTile>();
             tile->mPosition = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
             tile->mRect.left = i * PIXELS_PER_TILE;
             tile->mRect.top = j * PIXELS_PER_TILE;
@@ -112,12 +116,20 @@ void Fan::load(
    }
 }
 
+void Fan::resetAll()
+{
+    sFans.clear();
+    sTiles.clear();
+    sObjects.clear();
+    sWeights.clear();
+}
+
 
 void Fan::addObject(TmxObject* object)
 {
    sObjects.push_back(object);
 
-   Fan* fan = new Fan();
+   auto fan = std::make_shared<Fan>();
    sFans.push_back(fan);
 
    const auto w = static_cast<int32_t>(object->mWidth);
@@ -127,6 +139,12 @@ void Fan::addObject(TmxObject* object)
    fan->mRect.top = static_cast<int32_t>(object->mY);
    fan->mRect.width = w;
    fan->mRect.height = h;
+
+   if (object->mProperties)
+   {
+       auto speedProp = object->mProperties->mMap["speed"];
+       fan->mSpeed = speedProp ? speedProp->mValueFloat : 1.0f;
+   }
 }
 
 
@@ -157,16 +175,29 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
 }
 
 
+void Fan::collide(const sf::Rect<int32_t>& playerRect, b2Body* body)
+{
+    auto dir = collide(playerRect);
+    if (dir.has_value())
+    {
+       body->ApplyForceToCenter(
+          b2Vec2(2.0f * dir->x, -dir->y),
+          true
+       );
+    }
+}
+
+
 void Fan::merge()
 {
-   for (auto tile : sTiles)
+   for (auto& tile : sTiles)
    {
-      for (auto fan : sFans)
+      for (auto& fan : sFans)
       {
          if (tile->mRect.intersects(fan->mRect))
          {
             fan->mTiles.push_back(tile);
-            fan->mDirection = tile->mDirection;
+            fan->mDirection = tile->mDirection * fan->mSpeed;
          }
       }
    }

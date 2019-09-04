@@ -35,14 +35,14 @@ protected:
 public:
    MovingPlatform(GameNode* parent);
 
-   static std::vector<MovingPlatform *> load(
+   static std::vector<std::shared_ptr<MovingPlatform>> load(
       TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path &basePath,
       const std::shared_ptr<b2World>& world
    );
 
-   static void link(const std::vector<MovingPlatform*> platforms, TmxObject* tmxObject);
+   static void link(const std::vector<std::shared_ptr<MovingPlatform>>& platforms, TmxObject* tmxObject);
 
    void draw(sf::RenderTarget& target);
    void update(const sf::Time& dt);

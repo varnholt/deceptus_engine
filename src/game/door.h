@@ -34,7 +34,7 @@ public:
 
    void toggle();
 
-   static std::vector<Door*> load(
+   static std::vector<std::shared_ptr<Door>> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,

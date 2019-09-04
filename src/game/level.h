@@ -110,8 +110,8 @@ public:
 
    static Level *getCurrentLevel();
 
-   Portal* getNearbyPortal() const;
-   Bouncer* getNearbyBouncer() const;
+   std::shared_ptr<Portal> getNearbyPortal() const;
+   std::shared_ptr<Bouncer> getNearbyBouncer() const;
 
    void toggleDoor();
    void reset();
@@ -197,8 +197,6 @@ protected:
    float mViewWidth = 0.0f;
    float mViewHeight = 0.0f;
 
-   BoomEffect mBoomEffect;
-
    std::shared_ptr<LevelDescription> mDescription;
 
    std::vector<std::shared_ptr<TileMap>> mTileMaps;
@@ -217,15 +215,16 @@ protected:
    std::unique_ptr<LevelMap> mMap;
 
    // mechanisms
-   std::vector<Bouncer*> mBouncers;
-   std::vector<ConveyorBelt*> mConveyorBelts;
-   std::vector<Door*> mDoors;
-   std::vector<Laser*> mLasers;
-   std::vector<MovingPlatform*> mPlatforms;
-   std::vector<Portal*> mPortals;
+   std::vector<std::shared_ptr<Bouncer>> mBouncers;
+   std::vector<std::shared_ptr<ConveyorBelt>> mConveyorBelts;
+   std::vector<std::shared_ptr<Door>> mDoors;
+   std::vector<std::shared_ptr<Laser>> mLasers;
+   std::vector<std::shared_ptr<MovingPlatform>> mPlatforms;
+   std::vector<std::shared_ptr<Portal>> mPortals;
    std::vector<std::shared_ptr<SpikeBall>> mSpikeBalls;
 
    // graphic effects
+   BoomEffect mBoomEffect;
    std::shared_ptr<RaycastLight> mRaycastLight;
    std::shared_ptr<StaticLight> mStaticLight;
 

@@ -20,7 +20,7 @@
 
 //-----------------------------------------------------------------------------
 std::vector<TmxObject*> Laser::mObjects;
-std::vector<Laser*> Laser::mLasers;
+std::vector<std::shared_ptr<Laser>> Laser::mLasers;
 std::vector<std::array<int32_t, 9>> Laser::mTiles;
 
 
@@ -122,7 +122,7 @@ void Laser::resetAll()
 
 
 //-----------------------------------------------------------------------------
-std::vector<Laser*> Laser::load(
+std::vector<std::shared_ptr<Laser>> Laser::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
@@ -133,7 +133,7 @@ std::vector<Laser*> Laser::load(
 
    addTiles();
 
-   std::vector<Laser*> lasers;
+   std::vector<std::shared_ptr<Laser>> lasers;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    const auto tiles    = layer->mData;
@@ -151,7 +151,7 @@ std::vector<Laser*> Laser::load(
 
          if (tileNumber != 0)
          {
-            auto laser = new Laser();
+            auto laser = std::make_shared<Laser>();
             lasers.push_back(laser);
 
             laser->mTilePosition.x = static_cast<float>(i);
@@ -219,7 +219,7 @@ void Laser::addTiles()
 void Laser::collide(const sf::Rect<int32_t>& playerRect)
 {
    const auto it =
-      std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](Laser* laser){
+      std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](auto laser){
             sf::Rect<int32_t> itemRect;
 
             itemRect.left = static_cast<int32_t>(laser->mTilePosition.x * PIXELS_PER_TILE);

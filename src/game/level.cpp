@@ -516,7 +516,7 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "bouncers")
             {
-               Bouncer* bouncer = new Bouncer(
+               auto bouncer = std::make_shared<Bouncer>(
                   nullptr,
                   mWorld,
                   tmxObject->mX,
@@ -539,7 +539,7 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "conveyorbelts")
             {
-               ConveyorBelt* belt = new ConveyorBelt(
+               auto belt = std::make_shared<ConveyorBelt>(
                   nullptr,
                   mWorld,
                   tmxObject->mX,
@@ -1790,11 +1790,11 @@ AtmosphereTile Level::Atmosphere::getTileForPosition(const b2Vec2& pos) const
 
 
 //-----------------------------------------------------------------------------
-Portal* Level::getNearbyPortal() const
+std::shared_ptr<Portal> Level::getNearbyPortal() const
 {
-   Portal* nearbyPortal = nullptr;
+   std::shared_ptr<Portal> nearbyPortal;
 
-   for (Portal* portal : mPortals)
+   for (auto& portal : mPortals)
    {
       if (portal->isPlayerAtPortal())
       {
@@ -1808,11 +1808,11 @@ Portal* Level::getNearbyPortal() const
 
 
 //-----------------------------------------------------------------------------
-Bouncer* Level::getNearbyBouncer() const
+std::shared_ptr<Bouncer> Level::getNearbyBouncer() const
 {
-   Bouncer* nearbyBouncer = nullptr;
+   std::shared_ptr<Bouncer> nearbyBouncer;
 
-   for (Bouncer* bouncer : mBouncers)
+   for (auto bouncer : mBouncers)
    {
       if (bouncer->isPlayerAtBouncer())
       {

@@ -31,7 +31,7 @@ public:
    void draw(sf::RenderTarget& window);
    void update(const sf::Time& dt);
 
-   static std::vector<Laser*> load(
+   static std::vector<std::shared_ptr<Laser>> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
@@ -53,7 +53,7 @@ public:
 protected:
 
    static std::vector<TmxObject*> mObjects;
-   static std::vector<Laser*> mLasers;
+   static std::vector<std::shared_ptr<Laser>> mLasers;
    static std::vector<std::array<int32_t, 9>> mTiles;
 
    std::vector<Signal> mSignalPlot;

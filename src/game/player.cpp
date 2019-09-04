@@ -1578,16 +1578,16 @@ bool Player::edgeMatchesMovement(const b2Vec2& edgeDir)
    bool leftPressed = mKeysPressed & KeyPressedLeft;
 
    auto matchesMovement = false;
-   auto edgeType = Edge::None;
+   // auto edgeType = Edge::None;
 
    if (edgeDir.x < -0.01f)
    {
-      edgeType = Edge::Right;
+      // edgeType = Edge::Right;
       matchesMovement = rightPressed;
    }
    else if (edgeDir.x > 0.01f)
    {
-      edgeType = Edge::Left;
+      // edgeType = Edge::Left;
       matchesMovement = leftPressed;
    }
 
@@ -1891,15 +1891,7 @@ void Player::updatePixelCollisions()
    const auto rect = getPlayerPixelRect();
    mExtraManager->collide(rect);
    Laser::collide(rect);
-
-   auto dir = Fan::collide(rect);
-   if (dir.has_value())
-   {
-      mBody->ApplyForceToCenter(
-         b2Vec2(2.0f * dir->x, -dir->y),
-         true
-      );
-   }
+   Fan::collide(rect, mBody);
 }
 
 

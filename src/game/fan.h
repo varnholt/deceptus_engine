@@ -42,25 +42,28 @@ class Fan
          const std::shared_ptr<b2World>& world
       );
 
+      static void resetAll();
       static void addObject(TmxObject* object);
       static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& playerRect);
+      static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
       static void merge();
 
 
    private:
 
-      static void createPhysics(const std::shared_ptr<b2World>& world, FanTile* item);
+      static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
 
-      static std::vector<Fan*> sFans;
-      static std::vector<FanTile*> sTiles;
+      static std::vector<std::shared_ptr<Fan>> sFans;
+      static std::vector<std::shared_ptr<FanTile>> sTiles;
       static std::vector<TmxObject*> sObjects;
       static std::vector<sf::Vector2f> sWeights;
 
-      std::vector<FanTile*> mTiles;
+      std::vector<std::shared_ptr<FanTile>> mTiles;
 
       uint32_t mWidth;
       uint32_t mHeight;
       sf::Vector2f mDirection;
       sf::Rect<int32_t> mRect;
+      float mSpeed = 1.0f;
 };
 
