@@ -10,8 +10,7 @@ public:
 
    static Audio* getInstance();
 
-   void initialize();
-
+   void initializeSamples();
    void initializeMusicVolume();
 
    void addSample(const std::string& sample);

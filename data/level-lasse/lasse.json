@@ -62,19 +62,12 @@
     {"script": "bonefish.lua", "startposition": [213, 66], "patrolpath": [221, 66]},
     {"script": "bonefish.lua", "startposition": [214, 58], "patrolpath": [222, 58]},
     {"script": "bonefish.lua", "startposition": [214, 52], "patrolpath": [222, 52]},
-    {
-      "script": "landmine.lua",
-      "startposition": [
-        29,
-        41
-      ],
-      "properties": [
-        {
-            "name": "alignment",
-            "value": "down"
-        }
-      ]
-    },
+    {"script": "landmine.lua", "startposition": [217, 211], "properties": [{ "name": "alignment", "value": "down" } ] }, 
+    {"script": "landmine.lua", "startposition": [218, 211], "properties": [{ "name": "alignment", "value": "down" } ] }, 
+    {"script": "landmine.lua", "startposition": [216, 208], "properties": [{ "name": "alignment", "value": "down" } ] }, 
+    {"script": "landmine.lua", "startposition": [219, 208], "properties": [{ "name": "alignment", "value": "down" } ] }, 
+    {"script": "landmine.lua", "startposition": [214, 205], "properties": [{ "name": "alignment", "value": "down" } ] }, 
+    {"script": "landmine.lua", "startposition": [221, 205], "properties": [{ "name": "alignment", "value": "down" } ] }, 
     {
       "script": "dumb.lua",
       "startposition": [114, 297],
