@@ -1,37 +1,14 @@
 {
   "filename": "data/level-lasse/lasse.tmx",
-  "startposition": [
-    47,
-    220
-  ],
+  "startposition": [47, 220],
   "enemies": [
-    {
-      "script": "cannon.lua",
-      "startposition": [
-        255,
-        46
-      ],
-      "properties": [
-        {
-            "name": "alignment",
-            "value": "left"
-        }
-      ]
-    },
-    {
-      "script": "klonk.lua",
-      "startposition": [
-        254,
-        40
-      ]
-    },
-    {
-      "script": "klonk.lua",
-      "startposition": [
-        256,
-        40
-      ]
-    },
+    {"script": "cannon.lua","startposition": [255, 46], "properties": [{"name": "alignment", "value": "left"}]},
+    {"script": "cannon.lua","startposition": [124, 265], "properties": [{"name": "alignment", "value": "right"}]},
+    {"script": "cannon.lua","startposition": [124, 261], "properties": [{"name": "alignment", "value": "left"}]},
+    {"script": "blob.lua", "startposition": [214, 115], "patrolpath": [221, 115]},
+    {"script": "blob.lua", "startposition": [214, 109], "patrolpath": [221, 109]},
+    {"script": "blob.lua", "startposition": [214, 103], "patrolpath": [221, 103]},
+    {"script": "blob.lua", "startposition": [214, 214], "patrolpath": [221, 214]},
     {"script": "klonk.lua", "startposition": [174, 44]},
     {"script": "klonk.lua", "startposition": [175, 44]},
     {"script": "klonk.lua", "startposition": [176, 44]},
@@ -62,21 +39,12 @@
     {"script": "bonefish.lua", "startposition": [213, 66], "patrolpath": [221, 66]},
     {"script": "bonefish.lua", "startposition": [214, 58], "patrolpath": [222, 58]},
     {"script": "bonefish.lua", "startposition": [214, 52], "patrolpath": [222, 52]},
-    {"script": "landmine.lua", "startposition": [217, 211], "properties": [{ "name": "alignment", "value": "down" } ] }, 
-    {"script": "landmine.lua", "startposition": [218, 211], "properties": [{ "name": "alignment", "value": "down" } ] }, 
-    {"script": "landmine.lua", "startposition": [216, 208], "properties": [{ "name": "alignment", "value": "down" } ] }, 
-    {"script": "landmine.lua", "startposition": [219, 208], "properties": [{ "name": "alignment", "value": "down" } ] }, 
-    {"script": "landmine.lua", "startposition": [214, 205], "properties": [{ "name": "alignment", "value": "down" } ] }, 
-    {"script": "landmine.lua", "startposition": [221, 205], "properties": [{ "name": "alignment", "value": "down" } ] }, 
-    {
-      "script": "dumb.lua",
-      "startposition": [114, 297],
-      "properties": [
-         {"name": "dummy", "value": "dummy"}
-      ],
-      "patrolpath": [
-        123, 297
-      ]
-    }
-  ]
+    {"script": "landmine.lua", "startposition": [217, 211]},
+    {"script": "landmine.lua", "startposition": [218, 211]},
+    {"script": "landmine.lua", "startposition": [216, 208]},
+    {"script": "landmine.lua", "startposition": [219, 208]},
+    {"script": "landmine.lua", "startposition": [214, 205]},
+    {"script": "landmine.lua", "startposition": [221, 205]},
+    {"script": "dumb.lua","startposition": [114, 297], "patrolpath": [123, 297]}
+    ]
 }
