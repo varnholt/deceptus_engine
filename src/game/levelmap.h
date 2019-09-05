@@ -49,7 +49,6 @@ class LevelMap
       std::vector<std::shared_ptr<Portal>> mPortals;
 
       bool mZoomEnabled = false;
-      bool mPanEnabled = false;
 
       float mZoom = 1.0f;
 };

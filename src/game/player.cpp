@@ -1329,10 +1329,12 @@ bool Player::isJumping() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateFire()
 {
-   if (isFireButtonPressed())
-   {
-      fire();
-   }
+   // disabled for now
+   //
+   // if (isFireButtonPressed())
+   // {
+   //    fire();
+   // }
 }
 
 
@@ -1364,7 +1366,7 @@ void Player::updateFootsteps()
          if (mTime.asSeconds() > mNextFootStepTime)
          {
             // play footstep
-            Audio::getInstance()->playSample("footstep.wav", 1);
+            Audio::getInstance()->playSample("footstep.wav", 0.05f);
             mNextFootStepTime = mTime.asSeconds() + 1.0f / vel;
          }
       }
