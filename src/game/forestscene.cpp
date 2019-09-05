@@ -3,6 +3,7 @@
 #include "gameconfiguration.h"
 #include "image/psd.h"
 
+#include <math.h>
 #include <iostream>
 
 
