@@ -89,6 +89,7 @@ end
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1)
    updateSprite(0.0)
+   addSample("boom.wav")
    -- print("landmine.lua initialized")
 end
 

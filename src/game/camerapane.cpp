@@ -1,10 +1,12 @@
 #include "camerapane.h"
 
+#include "displaymode.h"
 #include "gameconfiguration.h"
+#include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
 #include "joystick/gamecontroller.h"
+#include "sfmlmath.h"
 
-#include "gamecontrollerdata.h"
 
 CameraPane CameraPane::sInstance;
 
@@ -20,7 +22,7 @@ CameraPane& CameraPane::getInstance()
 void CameraPane::update()
 {
   auto speed = 3.0f;
-  //  auto maxLength = 100.0f;
+  auto maxLength = 100.0f;
 
   if (GameControllerData::getInstance().isControllerUsed())
   {
@@ -65,12 +67,15 @@ void CameraPane::update()
          mLookVector += sf::Vector2f(speed, 0.0f);
       }
 
-      //    auto len = SfmlMath::lengthSquared(mLookVector);
-      //    if (len > maxLength)
-      //    {
-      //      mLookVector = SfmlMath::normalize(mLookVector);
-      //      mLookVector *= maxLength;
-      //    }
+      if (!DisplayMode::getInstance().isSet(Display::DisplayMap))
+      {
+         auto len = SfmlMath::length(mLookVector);
+         if (len > maxLength)
+         {
+            mLookVector = SfmlMath::normalize(mLookVector);
+            mLookVector *= maxLength;
+         }
+      }
    }
    else
    {

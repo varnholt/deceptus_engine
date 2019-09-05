@@ -103,29 +103,29 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                Player::getPlayer(0)->mExtraTable->mHealth->addHealth(10);
                break;
             case ExtraItem::ExtraSpriteIndex::Apple:
-               Audio::getInstance()->playSample("powerup");
+               Audio::getInstance()->playSample("powerup.wav");
                break;
             case ExtraItem::ExtraSpriteIndex::KeyRed:
             {
-               Audio::getInstance()->playSample("powerup");
+               Audio::getInstance()->playSample("powerup.wav");
                mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyRed));
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyYellow:
             {
-               Audio::getInstance()->playSample("powerup");
+               Audio::getInstance()->playSample("powerup.wav");
                mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyYellow));
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyBlue:
             {
-               Audio::getInstance()->playSample("powerup");
+               Audio::getInstance()->playSample("powerup.wav");
                mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyBlue));
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyGreen:
             {
-               Audio::getInstance()->playSample("powerup");
+               Audio::getInstance()->playSample("powerup.wav");
                mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyGreen));
                break;
             }

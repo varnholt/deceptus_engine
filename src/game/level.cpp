@@ -650,6 +650,7 @@ void Level::load()
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
 
    Weather::getInstance().clear();
+   Checkpoint::resetAll();
 
    // load tmx
    loadTmx();

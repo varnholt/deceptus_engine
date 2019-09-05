@@ -22,6 +22,7 @@ static const std::string SFX_ROOT = "data/sounds/";
 Audio::Audio()
 {
    sInstance = this;
+   initializeMusicVolume();
    initializeSamples();
    initializeTracks();
 }
@@ -103,8 +104,8 @@ void Audio::initializeTracks()
 void Audio::initializeMusicVolume()
 {
    const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
-   const auto music = (GameConfiguration::getInstance().mAudioVolumeMusic * 0.01f);
-   Audio::getInstance()->getMusic().setVolume(master * music);
+   const auto music = (GameConfiguration::getInstance().mAudioVolumeMusic);
+   mMusic.setVolume(master * music);
 }
 
 
@@ -133,7 +134,7 @@ void Audio::playSample(const std::string& sample, float volume)
       sound->setBuffer(it->second);
 
       const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
-      const auto sfx = (GameConfiguration::getInstance().mAudioVolumeSfx * 0.01f);
+      const auto sfx = (GameConfiguration::getInstance().mAudioVolumeSfx);
 
       sound->setVolume(master * sfx * volume);
       sound->play();
