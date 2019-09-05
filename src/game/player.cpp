@@ -1014,7 +1014,7 @@ void Player::updateVelocity()
    const auto speed = vel.Normalize();
    if (speed > maxSpeed)
    {
-      std::cout << "cap speed" << std::endl;
+      // std::cout << "cap speed" << std::endl;
       mBody->SetLinearVelocity(maxSpeed * vel);
    }
 }

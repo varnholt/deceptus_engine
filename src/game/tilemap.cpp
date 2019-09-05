@@ -238,7 +238,7 @@ void TileMap::hideTile(int x, int y, int vertexOffset)
 
    if (it != mAnimations.end())
    {
-      printf("setting animation at %d %d to invisible\n", (*it)->mTileX, (*it)->mTileX);
+      // printf("setting animation at %d %d to invisible\n", (*it)->mTileX, (*it)->mTileX);
       (*it)->mVisible = false;
    }
    else
