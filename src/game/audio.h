@@ -35,7 +35,7 @@ private:
 
    mutable sf::Music mMusic;
    std::vector<Track> mTracks;
-   uint32_t mCurrentTrack = 999;
+   uint32_t mCurrentTrackIndex = 999;
 
    static Audio* sInstance;
 };

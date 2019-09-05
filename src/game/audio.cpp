@@ -155,13 +155,13 @@ void Audio::updateMusic()
         return;
     }
 
-    mCurrentTrack++;
-    if (mCurrentTrack > mTracks.size())
+    mCurrentTrackIndex++;
+    if (mCurrentTrackIndex >= mTracks.size())
     {
-        mCurrentTrack = 0;
+        mCurrentTrackIndex = 0;
     }
 
-    mMusic.openFromFile(mTracks[mCurrentTrack].mFilename);
+    mMusic.openFromFile(mTracks[mCurrentTrackIndex].mFilename);
     mMusic.play();
 }
 
