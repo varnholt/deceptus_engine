@@ -2,6 +2,10 @@
 
 #include "gameconfiguration.h"
 
+#include <string>
+#include <iostream>
+#include <filesystem>
+
 
 Audio* Audio::sInstance = nullptr;
 
@@ -18,6 +22,8 @@ static const std::string SFX_ROOT = "data/sounds/";
 Audio::Audio()
 {
    sInstance = this;
+   initializeSamples();
+   initializeTracks();
 }
 
 
@@ -31,7 +37,6 @@ Audio *Audio::getInstance()
    if (sInstance == nullptr)
    {
       new Audio();
-      sInstance->initializeSamples();
    }
 
    return sInstance;
@@ -67,6 +72,30 @@ void Audio::initializeSamples()
    addSample("powerup.wav");
    addSample("splash.wav");
    addSample("impact.wav");
+}
+
+
+//-----------------------------------------------------------------------------
+void Audio::initializeTracks()
+{
+    try {
+        std::string path = "data/music";
+        for (const auto& entry : std::filesystem::directory_iterator(path))
+        {
+            const auto path = entry.path().string();
+            if (path.find(".ogg") != std::string::npos)
+            {
+                Track track;
+                track.mFilename = path;
+                mTracks.push_back(track);
+            }
+
+            std::cout << entry.path() << std::endl;
+        }
+    }
+    catch (std::exception&)
+    {
+    }
 }
 
 
@@ -109,6 +138,30 @@ void Audio::playSample(const std::string& sample, float volume)
       sound->setVolume(master * sfx * volume);
       sound->play();
    }
+}
+
+
+//-----------------------------------------------------------------------------
+void Audio::updateMusic()
+{
+    if (mTracks.empty())
+    {
+        return;
+    }
+
+    if (mMusic.getStatus() == sf::Music::Playing)
+    {
+        return;
+    }
+
+    mCurrentTrack++;
+    if (mCurrentTrack > mTracks.size())
+    {
+        mCurrentTrack = 0;
+    }
+
+    mMusic.openFromFile(mTracks[mCurrentTrack].mFilename);
+    mMusic.play();
 }
 
 

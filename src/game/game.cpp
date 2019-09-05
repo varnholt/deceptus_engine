@@ -461,6 +461,8 @@ void Game::update()
    const auto dt = mDeltaClock.getElapsedTime();
    mDeltaClock.restart();
 
+   Audio::getInstance()->updateMusic();
+
    if (GameState::getInstance().getMode() == ExecutionMode::Paused)
    {
       updateGameController();
