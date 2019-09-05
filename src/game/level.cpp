@@ -163,10 +163,10 @@ void Level::initializeTextures()
    mRenderTextures.push_back(mAtmosphereRenderTexture);
    mRenderTextures.push_back(mBlurRenderTexture);
    mRenderTextures.push_back(mBlurRenderTextureScaled);
-   // for (const auto& fb : mRenderTextures)
-   // {
-   //    std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
-   // }
+   for (const auto& fb : mRenderTextures)
+   {
+      std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
+   }
 
    initializeAtmosphereShader();
    initializeGammaShader();
