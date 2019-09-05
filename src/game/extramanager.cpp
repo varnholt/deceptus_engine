@@ -81,7 +81,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 
       if (playerRect.intersects(itemRect))
       {
-         printf("player hit extra\n");
+         // printf("player hit extra\n");
          extra->mActive = false;
          mTilemap->hideTile(
             extra->mSpriteOffset.x,
