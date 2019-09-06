@@ -49,6 +49,9 @@ public:
    void reset();
    static void resetAll();
 
+   const sf::Vector2f& getTilePosition() const;
+   const sf::Vector2f& getPixelPosition() const;
+
 
 protected:
 
@@ -65,6 +68,7 @@ protected:
    sf::Sprite mSprite;
 
    sf::Vector2f mTilePosition;
+   sf::Vector2f mPixelPosition;
 
    int32_t mZ = 0;
 

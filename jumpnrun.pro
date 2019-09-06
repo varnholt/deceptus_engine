@@ -25,9 +25,9 @@ win32 {
    # QMAKE_CXXFLAGS += -std:c++latest
 
    # link debug symbols
-   # QMAKE_CFLAGS_RELEASE += -Zi
-   # QMAKE_CXXFLAGS_RELEASE += -Zi
-   # QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF
+   QMAKE_CFLAGS_RELEASE += -Zi
+   QMAKE_CXXFLAGS_RELEASE += -Zi
+   QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF
 }
 
 linux {

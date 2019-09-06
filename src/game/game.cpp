@@ -213,37 +213,38 @@ void Game::showPauseMenu()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::loadLevel()
 {
-    mLevelLoadingThread = std::async(
-        std::launch::async, [this](){
-            mLevelLoadingFinished = false;
+   mLevelLoadingFinished = false;
 
-            // pick a level
-            auto levels = Levels::getInstance();
-            levels.deserializeFromFile();
-            auto levelOne = levels.mLevels.at(mLevelIndex);
+   mLevelLoadingThread = std::async(
+      std::launch::async, [this](){
 
-            mLevel.reset();
+         // pick a level
+         auto levels = Levels::getInstance();
+         levels.deserializeFromFile();
+         auto levelOne = levels.mLevels.at(mLevelIndex);
 
-            // load it
-            mLevel = std::make_shared<Level>();
-            mLevel->setDescriptionFilename(levelOne.mLevelName);
-            mLevel->initialize();
-            mLevel->initializeTextures();
+         mLevel.reset();
 
-            // put the player in there
-            mPlayer->setWorld(mLevel->getWorld());
-            mPlayer->initializeLevel();
+         // load it
+         mLevel = std::make_shared<Level>();
+         mLevel->setDescriptionFilename(levelOne.mLevelName);
+         mLevel->initialize();
+         mLevel->initializeTextures();
 
-            mLevelLoadingFinished = true;
+         // put the player in there
+         mPlayer->setWorld(mLevel->getWorld());
+         mPlayer->initializeLevel();
 
-            // jump back to stored position
-            if (mStoredPositionValid)
-            {
-               mPlayer->setBodyViaPixelPosition(mStoredPosition.x, mStoredPosition.y);
-               mStoredPositionValid = false;
-            }
-        }
-    );
+         mLevelLoadingFinished = true;
+
+         // jump back to stored position
+         if (mStoredPositionValid)
+         {
+            mPlayer->setBodyViaPixelPosition(mStoredPosition.x, mStoredPosition.y);
+            mStoredPositionValid = false;
+         }
+      }
+   );
 }
 
 
@@ -489,13 +490,19 @@ void Game::update()
          updateGameControllerForGame();
          mLevel->update(dt);
          mPlayer->update(dt);
-         updateGameState();
-         mTestScene->update(dt);
+
+         if (mDrawTestScene)
+         {
+            mTestScene->update(dt);
+         }
 
          if (mDrawWeather)
          {
             Weather::getInstance().update(dt);
          }
+
+         // this might trigger level-reloading, so this ought to be the last drawing call in the loop
+         updateGameState();
       }
    }
 
