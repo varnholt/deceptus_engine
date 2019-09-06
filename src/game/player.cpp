@@ -837,7 +837,7 @@ void Player::updateAnimation(const sf::Time& dt)
       {
          nextCycle = isPointingRight() ? mJumpLandingRightAligned : mJumpLandingLeftAligned;
 
-         if (nextCycle->mCurrentFrame == nextCycle->mFrames.size() - 1)
+         if (nextCycle->mCurrentFrame == static_cast<int32_t>(nextCycle->mFrames.size()) - 1)
          {
              mJumpAnimationReference = 3;
              mHardLanding = false;

@@ -157,6 +157,8 @@ void Game::initializeWindow()
       static_cast<uint32_t>(textureHeight)
    );
 
+   std::cout << "[x] created window render texture: " << textureWidth << " x " << textureHeight << std::endl;
+
    mLevel->initializeTextures();
 }
 
