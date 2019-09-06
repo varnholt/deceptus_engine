@@ -97,25 +97,10 @@ void Level::initializeTextures()
    sf::ContextSettings contextSettings;
    contextSettings.stencilBits = 8;
 
-   if (mLevelBackgroundRenderTexture != nullptr)
-   {
-      mLevelBackgroundRenderTexture.reset();
-   }
-
-   if (mAtmosphereRenderTexture != nullptr)
-   {
-      mAtmosphereRenderTexture.reset();
-   }
-
-   if (mBlurRenderTexture != nullptr)
-   {
-      mBlurRenderTexture.reset();
-   }
-
-   if (mBlurRenderTextureScaled != nullptr)
-   {
-      mBlurRenderTextureScaled.reset();
-   }
+   mLevelBackgroundRenderTexture.reset();
+   mAtmosphereRenderTexture.reset();
+   mBlurRenderTexture.reset();
+   mBlurRenderTextureScaled.reset();
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
@@ -655,16 +640,12 @@ void Level::load()
    // load tmx
    loadTmx();
 
-   sf::Clock elapsed;
-
    // load static lights
    std::cout << "[x] loading static lights..." << std::endl;
    if (!mStaticLight->mLights.empty())
    {
       mStaticLight->load();
    }
-   std::cout << "[x] loading static lights, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
-   elapsed.restart();
 
    // load raycast lights
    std::cout << "[x] loading raycast lights..." << std::endl;
@@ -672,14 +653,10 @@ void Level::load()
    {
       mRaycastLight->load();
    }
-   std::cout << "[x] loading raycast lights, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
-   elapsed.restart();
 
    // loading ao
    std::cout << "[x] loading ao... " << std::endl;
    mAo.load(path, std::filesystem::path(mDescription->mFilename).stem().string());
-
-   std::cout << "[x] loading ao, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
 
    std::cout << "[x] level loading complete" << std::endl;
 }
@@ -971,9 +948,17 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
   target.setView(*mLevelView);
 
+  const auto pPos = Player::getPlayer(0)->getPixelPosition();
+
   // draw lasers
   for (auto l : mLasers)
   {
+     const auto lPos = l->getPixelPosition();
+     if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
+     {
+        continue;
+     }
+
      l->draw(target);
   }
 }

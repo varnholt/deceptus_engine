@@ -80,7 +80,7 @@ private:
    bool mDrawTestScene = false;
 
    sf::Clock mDeltaClock;
-   bool mLevelLoadingFinished = false;
+   std::atomic<bool> mLevelLoadingFinished = false;
    std::future<void> mLevelLoadingThread;
    bool mStoredPositionValid = false;
    sf::Vector2f mStoredPosition;
