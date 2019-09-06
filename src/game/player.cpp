@@ -296,10 +296,15 @@ void Player::setCrouching(bool enabled)
 void Player::createHead()
 {
    b2FixtureDef fixtureDefHead;
-   fixtureDefHead.density = 1.f;
+   fixtureDefHead.density = 1.0f;
    fixtureDefHead.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
    fixtureDefHead.restitution = 0.0f;
    fixtureDefHead.filter.groupIndex = -1;
+
+   // this is what we want, with density to 0.45 or so
+   // b2PolygonShape headShape;
+   // headShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
+   // fixtureDefHead.shape = &headShape;
 
    b2CircleShape headShape;
    headShape.m_p.Set(0, -14 / PPM);
