@@ -157,8 +157,18 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
 //-----------------------------------------------------------------------------
 void RaycastLight::onDraw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
 {
-   for (auto light : mLights)
+   auto playerBody = Player::getPlayer(0)->getBody();
+
+   for (const auto& light : mLights)
    {
+       // don't draw lights that are too far away
+       auto distanceToPlayer = (playerBody->GetWorldCenter() - light->mPosMeters).LengthSquared();
+
+       if (distanceToPlayer > 50.0f)
+       {
+          continue;
+       }
+
       // fill stencil buffer
       glClear(GL_STENCIL_BUFFER_BIT);
       glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
