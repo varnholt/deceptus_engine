@@ -15,10 +15,11 @@ public:
 
    GameContactListener();
 
-   int getNumFootContacts() const;
-   int getDeadlyContacts() const;
-   int getNumMovingPlatformContacts() const;
-   int getNumPlayerContacts() const;
+   int32_t getNumHeadContacts() const;
+   int32_t getNumFootContacts() const;
+   int32_t getDeadlyContacts() const;
+   int32_t getNumMovingPlatformContacts() const;
+   int32_t getNumPlayerContacts() const;
 
    void BeginContact(b2Contact *contact) override;
    void EndContact(b2Contact *contact) override;
@@ -45,6 +46,7 @@ private:
 private:
 
    int32_t mNumFootContacts = 0;
+   int32_t mNumHeadContacts = 0;
    int32_t mNumPlayerContacts = 0;
    int32_t mNumDeadlyContacts = 0;
    int32_t mNumMovingPlatformContacts = 0;
