@@ -394,7 +394,7 @@ void Player::createFeet()
    b2Fixture* headSensorFixture = mBody->CreateFixture(&headSensorFixtureDef);
 
    FixtureNode* headObjectData = new FixtureNode(this);
-   headObjectData->setType(ObjectTypePlayerFootSensor);
+   headObjectData->setType(ObjectTypePlayerHeadSensor);
    headSensorFixture->SetUserData(static_cast<void*>(headObjectData));
 }
 
@@ -1448,6 +1448,12 @@ void Player::updateCrouch()
    else
    {
       downPressed = mKeysPressed & KeyPressedDown;
+   }
+
+   // if the head touches something while crouches, keep crouching
+   if (mCrouching && !downPressed && (GameContactListener::getInstance()->getNumHeadContacts() > 0))
+   {
+      return;
    }
 
    setCrouching(downPressed && !isInAir());
