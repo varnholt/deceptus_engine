@@ -38,7 +38,7 @@ public:
    void setResolutionCallback(ResolutionCallback callback);
    void setVSyncCallback(VSyncCallback callback);
 
-   Selection mSelection = Selection::Monitor;
+   Selection mSelection = Selection::Resolution;
 
 
 private:

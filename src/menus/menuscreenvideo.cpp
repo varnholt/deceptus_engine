@@ -53,7 +53,6 @@ void MenuScreenVideo::select(int32_t step)
        case Selection::DisplayMode:
        {
           mFullscreenCallback();
-          updateLayers();
           break;
        }
 
@@ -215,7 +214,7 @@ void MenuScreenVideo::updateLayers()
    }
 
    const auto brightnessValue = GameConfiguration::getInstance().mBrightness;
-   const auto vsyncSelection = (GameConfiguration::getInstance().mVSync) ? 0 : 1;
+   const auto vsyncSelection = (GameConfiguration::getInstance().mVSync) ? 1 : 0;
 
    mLayers["defaults_xbox_0"]->mVisible = isControllerUsed();
    mLayers["defaults_xbox_1"]->mVisible = false;
