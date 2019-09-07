@@ -296,7 +296,8 @@ void Player::setCrouching(bool enabled)
 void Player::createHead()
 {
    b2FixtureDef fixtureDefHead;
-   fixtureDefHead.density = 0.45f;
+//   fixtureDefHead.density = 1.0f;
+   fixtureDefHead.density = 0.4f;
    fixtureDefHead.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
    fixtureDefHead.restitution = 0.0f;
    fixtureDefHead.filter.groupIndex = -1;
@@ -306,10 +307,10 @@ void Player::createHead()
    headShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
    fixtureDefHead.shape = &headShape;
 
-   // b2CircleShape headShape;
-   // headShape.m_p.Set(0, -14 / PPM);
-   // headShape.m_radius = 0.16f;
-   // fixtureDefHead.shape = &headShape;
+//    b2CircleShape headShape;
+//    headShape.m_p.Set(0, -14 / PPM);
+//    headShape.m_radius = 0.16f;
+//    fixtureDefHead.shape = &headShape;
 
    mHeadFixture = mBody->CreateFixture(&fixtureDefHead);
 

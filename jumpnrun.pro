@@ -5,7 +5,6 @@ CONFIG_APP_NAME = deceptus
 DEFINES += _USE_MATH_DEFINES
 DEFINES += USE_GL
 
-CONFIG += console
 CONFIG += c++17
 CONFIG -= debug_and_release
 
@@ -18,6 +17,10 @@ QT -= gui
 QT -= core
 LIBS -= -lQtGui
 LIBS -= -lQtCore
+
+debug {
+   CONFIG += console
+}
 
 # code requires c++17
 win32 {
