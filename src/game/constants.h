@@ -218,6 +218,7 @@ enum ObjectType
 {
    ObjectTypePlayer,
    ObjectTypePlayerFootSensor,
+   ObjectTypePlayerHeadSensor,
    ObjectTypeBullet,
    ObjectTypeOneSidedWall,
    ObjectTypeDeadly,

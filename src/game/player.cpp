@@ -360,23 +360,42 @@ void Player::createFeet()
    }
 
    // attach foot sensor shape
-   b2PolygonShape polygonShape;
-   polygonShape.SetAsBox(
+   b2PolygonShape footPolygonShape;
+   footPolygonShape.SetAsBox(
       (width / 2.0f) / (PPM * 2.0f),
       (height / 4.0f) / (PPM * 2.0f),
-      b2Vec2(0.0f, (height * 0.5f) / (PPM * 2.0f)), //(height-5) / (PPM * 2.0f)
+      b2Vec2(0.0f, (height * 0.5f) / (PPM * 2.0f)),
       0.0f
    );
 
    b2FixtureDef footSensorFixtureDef;
    footSensorFixtureDef.isSensor = true;
-   footSensorFixtureDef.shape = &polygonShape;
+   footSensorFixtureDef.shape = &footPolygonShape;
 
    b2Fixture* footSensorFixture = mBody->CreateFixture(&footSensorFixtureDef);
 
-   FixtureNode* objectData = new FixtureNode(this);
-   objectData->setType(ObjectTypePlayerFootSensor);
-   footSensorFixture->SetUserData(static_cast<void*>(objectData));
+   FixtureNode* footObjectData = new FixtureNode(this);
+   footObjectData->setType(ObjectTypePlayerFootSensor);
+   footSensorFixture->SetUserData(static_cast<void*>(footObjectData));
+
+   // attach head sensor shape
+   b2PolygonShape headPolygonShape;
+   headPolygonShape.SetAsBox(
+      (width / 2.0f) / (PPM * 2.0f),
+      (height / 4.0f) / (PPM * 2.0f),
+      b2Vec2(0.0f, -height / (PPM * 2.0f)),
+      0.0f
+   );
+
+   b2FixtureDef headSensorFixtureDef;
+   headSensorFixtureDef.isSensor = true;
+   headSensorFixtureDef.shape = &headPolygonShape;
+
+   b2Fixture* headSensorFixture = mBody->CreateFixture(&headSensorFixtureDef);
+
+   FixtureNode* headObjectData = new FixtureNode(this);
+   headObjectData->setType(ObjectTypePlayerFootSensor);
+   headSensorFixture->SetUserData(static_cast<void*>(headObjectData));
 }
 
 

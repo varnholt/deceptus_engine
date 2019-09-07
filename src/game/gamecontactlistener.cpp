@@ -22,29 +22,25 @@ GameContactListener* GameContactListener::sInstance = nullptr;
 
 
 GameContactListener::GameContactListener()
- : b2ContactListener(),
-   mNumFootContacts(0),
-   mNumPlayerContacts(0),
-   mNumDeadlyContacts(0),
-   mNumMovingPlatformContacts(0)
+ : b2ContactListener()
 {
   sInstance = this;
 }
 
 
-int GameContactListener::getNumFootContacts() const
+int32_t GameContactListener::getNumFootContacts() const
 {
    return mNumFootContacts;
 }
 
 
-int GameContactListener::getDeadlyContacts() const
+int32_t GameContactListener::getDeadlyContacts() const
 {
    return mNumDeadlyContacts;
 }
 
 
-int GameContactListener::getPlayerId(FixtureNode* obj)
+int32_t GameContactListener::getPlayerId(FixtureNode* obj)
 {
    if (obj == nullptr)
    {
@@ -65,7 +61,7 @@ void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* pl
 {
    if (platformFixture != nullptr)
    {
-      int numPoints = contact->GetManifold()->pointCount;
+      int32_t numPoints = contact->GetManifold()->pointCount;
       b2WorldManifold worldManifold;
       contact->GetWorldManifold( &worldManifold );
 
@@ -75,7 +71,7 @@ void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* pl
       bool disable = false;
 
       // check if any of the contact points are moving from the bottom into platform
-      for (int i = 0; i < numPoints; i++)
+      for (int32_t i = 0; i < numPoints; i++)
       {
           b2Vec2 velocityPlatform = platformBody->GetLinearVelocityFromWorldPoint(worldManifold.points[i]);
           b2Vec2 velocityPlayer   = playerBody->GetLinearVelocityFromWorldPoint(worldManifold.points[i]);
@@ -92,7 +88,7 @@ void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* pl
          // if moving down faster than 1m/s, handle as before
          if (velocityDiff.y < -1.0f)
          {
-            // point is moving into platform, leave contact solid and exit
+            // point32_t is moving into platform, leave contact solid and exit
             disable = true;
             break;
          }
@@ -137,6 +133,14 @@ void GameContactListener::BeginContact(b2Contact* contact)
             if (!contact->GetFixtureB()->IsSensor())
             {
                mNumFootContacts++;
+            }
+            break;
+         }
+         case ObjectTypePlayerHeadSensor:
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumHeadContacts++;
             }
             break;
          }
@@ -208,6 +212,14 @@ void GameContactListener::BeginContact(b2Contact* contact)
             if (!contact->GetFixtureA()->IsSensor())
             {
                mNumFootContacts++;
+            }
+            break;
+         }
+         case ObjectTypePlayerHeadSensor:
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumHeadContacts++;
             }
             break;
          }
@@ -297,6 +309,14 @@ void GameContactListener::EndContact(b2Contact* contact)
             }
             break;
          }
+         case ObjectTypePlayerHeadSensor:
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumHeadContacts--;
+            }
+            break;
+         }
          case ObjectTypePlayer:
             mNumPlayerContacts--;
             break;
@@ -325,6 +345,14 @@ void GameContactListener::EndContact(b2Contact* contact)
             if (!contact->GetFixtureA()->IsSensor())
             {
                mNumFootContacts--;
+            }
+            break;
+         }
+         case ObjectTypePlayerHeadSensor:
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumHeadContacts--;
             }
             break;
          }
@@ -397,8 +425,15 @@ void GameContactListener::processImpulse(float impulse)
 }
 
 
+int32_t GameContactListener::getNumHeadContacts() const
+{
+   return mNumHeadContacts;
+}
+
+
 void GameContactListener::reset()
 {
+   mNumHeadContacts = 0;
    mNumFootContacts = 0;
    mNumPlayerContacts = 0;
    mNumDeadlyContacts = 0;
@@ -417,13 +452,13 @@ GameContactListener* GameContactListener::getInstance()
 }
 
 
-int GameContactListener::getNumPlayerContacts() const
+int32_t GameContactListener::getNumPlayerContacts() const
 {
    return mNumPlayerContacts;
 }
 
 
-int GameContactListener::getNumMovingPlatformContacts() const
+int32_t GameContactListener::getNumMovingPlatformContacts() const
 {
    return mNumMovingPlatformContacts;
 }
