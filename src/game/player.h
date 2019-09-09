@@ -138,6 +138,8 @@ public:
    bool isInAir() const;
    bool isClimbing() const;
    bool isInWater() const;
+   bool isOnPlatform() const;
+   bool isOnGround() const;
 
    void setInWater(bool inWater);
 
@@ -252,6 +254,7 @@ private:
    bool mHadGroundContact = true;
    bool mGroundContactJustLost = false;
    bool mHardLanding = false;
+   int32_t mHardLandingCycles = 0;
 
    float mBeltVelocity = 0.0f;
    bool mIsOnBelt = false;

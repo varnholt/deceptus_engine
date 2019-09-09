@@ -18,9 +18,9 @@ QT -= core
 LIBS -= -lQtGui
 LIBS -= -lQtCore
 
-debug {
-   CONFIG += console
-}
+#debug {
+#   CONFIG += console
+#}
 
 # code requires c++17
 win32 {
