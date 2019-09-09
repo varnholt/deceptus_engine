@@ -297,7 +297,7 @@ void Player::createHead()
 {
    b2FixtureDef fixtureDefHead;
 //   fixtureDefHead.density = 1.0f;
-   fixtureDefHead.density = 0.4f;
+   fixtureDefHead.density = 0.45f;
    fixtureDefHead.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
    fixtureDefHead.restitution = 0.0f;
    fixtureDefHead.filter.groupIndex = -1;
@@ -988,6 +988,23 @@ void Player::updateVelocity()
    // if we just landed hard on the ground, we need a break :)
    if (mHardLanding)
    {
+      if (mHardLandingCycles > 1)
+      {
+         // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
+         // maybe come up with a nice concept for this one day.
+         if (isOnPlatform())
+         {
+            mHardLanding = false;
+         }
+
+         if (!isOnGround())
+         {
+            mHardLanding = false;
+         }
+
+         // std::cout << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform() << std::endl;
+      }
+
       mBody->SetLinearVelocity({0.0, 0.0});
       return;
    }
@@ -1168,6 +1185,8 @@ void Player::impulse(float intensity)
       }
 
       mHardLanding = true;
+      mHardLandingCycles = 0;
+
       auto damage = static_cast<int>((intensity - 1.0f) * 20.0f);
       Player::getPlayer(0)->damage(damage);
    }
@@ -1288,14 +1307,29 @@ void Player::updateJump()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+bool Player::isOnPlatform() const
+{
+   const auto onPlatform =
+         GameContactListener::getInstance()->getNumMovingPlatformContacts() > 0
+      && isOnGround() > 0;
+
+   return onPlatform;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool Player::isOnGround() const
+{
+   return GameContactListener::getInstance()->getNumFootContacts() > 0;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlatformMovement(const sf::Time& dt)
 {
    // http://www.badlogicgames.com/forum/viewtopic.php?f=15&t=4695&hilit=+plattform
 
-   if (
-         GameContactListener::getInstance()->getNumMovingPlatformContacts() > 0
-      && GameContactListener::getInstance()->getNumFootContacts() > 0
-   )
+   if (isOnPlatform())
    {
       mBody->SetTransform(
          b2Vec2(
@@ -1465,6 +1499,13 @@ void Player::updateCrouch()
 void Player::update(const sf::Time& dt)
 {
    mTime += dt;
+
+   {
+      if (mHardLanding)
+      {
+         mHardLandingCycles++;
+      }
+   }
 
    updatePlayerPixelRect();
    updateCrouch();
