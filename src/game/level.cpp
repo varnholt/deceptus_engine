@@ -169,8 +169,8 @@ Level::Level()
 
    LuaInterface::instance()->reset();
 
-   // if there are bullets left in the game, clear them up
-   Bullet::cleanup();
+   // clear those here so the world destructor doesn't double-delete them
+   Bullet::clear();
 
    mWorld = std::make_shared<b2World>(gravity);
 
