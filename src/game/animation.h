@@ -24,6 +24,8 @@ public:
    void seekToStart();
    void setFrame(int32_t newFrame, bool resetTime = true);
 
+   void setAlpha(uint8_t alpha);
+
    sf::FloatRect getLocalBounds() const;
    sf::FloatRect getGlobalBounds() const;
 

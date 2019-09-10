@@ -85,6 +85,16 @@ void Animation::setFrame(int32_t, bool resetTime)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Animation::setAlpha(uint8_t alpha)
+{
+   mVertices[0].color.a = alpha;
+   mVertices[1].color.a = alpha;
+   mVertices[2].color.a = alpha;
+   mVertices[3].color.a = alpha;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Animation::update(const sf::Time& dt)
 {
    if (!mPaused)

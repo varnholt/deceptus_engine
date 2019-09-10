@@ -233,8 +233,25 @@ void Player::draw(sf::RenderTarget& target)
 
    if (mCurrentCycle)
    {
-      mCurrentCycle->setPosition(mPixelPosition + sf::Vector2f(0, 8)); // that y offset is to compensate the wonky box2d origin
+      // that y offset is to compensate the wonky box2d origin
+      const auto pos = mPixelPosition + sf::Vector2f(0, 8);
+
+      mCurrentCycle->setPosition(pos);
       mCurrentCycle->draw(target);
+
+      // draw dash with motion blur
+      for (auto i = 0u; i < mLastAnimations.size(); i++)
+      {
+         auto& anim = mLastAnimations[i];
+         anim.mAnimation->setPosition(anim.mPosition);
+         anim.mAnimation->setAlpha(255/(mLastAnimations.size()-i));
+         anim.mAnimation->draw(target);
+      }
+
+      if (isDashActive())
+      {
+         mLastAnimations.push_back({pos, mCurrentCycle});
+      }
    }
 
    AnimationPool::getInstance().drawAnimations(
@@ -1310,8 +1327,7 @@ void Player::updateJump()
 bool Player::isOnPlatform() const
 {
    const auto onPlatform =
-         GameContactListener::getInstance()->getNumMovingPlatformContacts() > 0
-      && isOnGround() > 0;
+      GameContactListener::getInstance()->getNumMovingPlatformContacts() > 0 && isOnGround();
 
    return onPlatform;
 }
@@ -1944,9 +1960,12 @@ void Player::updateDash(Dash dir)
 
    mDashSteps--;
 
-   // re-enabled gravity for player
    if (!isDashActive())
    {
+      // clear motion blur buffer
+      mLastAnimations.clear();
+
+      // re-enabled gravity for player
       mBody->SetGravityScale(1.0f);
    }
 }
