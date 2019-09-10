@@ -9,6 +9,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include "Box2D/Box2D.h"
+
+#include <deque>
 #include <functional>
 #include <memory>
 #include <set>
@@ -37,6 +39,12 @@ class Player : public GameNode
             // keep going to find all fixtures in the query area
             return true;
          }
+   };
+
+   struct PositionedAnimation
+   {
+      sf::Vector2f mPosition;
+      std::shared_ptr<Animation> mAnimation;
    };
 
    enum class Edge
@@ -286,6 +294,8 @@ private:
 
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
+
+   std::deque<PositionedAnimation> mLastAnimations;
 
    static int sNextId;
    static std::vector<Player*> sPlayerList;
