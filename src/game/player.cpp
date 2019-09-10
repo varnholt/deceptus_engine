@@ -237,14 +237,13 @@ void Player::draw(sf::RenderTarget& target)
       const auto pos = mPixelPosition + sf::Vector2f(0, 8);
 
       mCurrentCycle->setPosition(pos);
-      mCurrentCycle->draw(target);
 
       // draw dash with motion blur
       for (auto i = 0u; i < mLastAnimations.size(); i++)
       {
          auto& anim = mLastAnimations[i];
          anim.mAnimation->setPosition(anim.mPosition);
-         anim.mAnimation->setAlpha(255/(mLastAnimations.size()-i));
+         anim.mAnimation->setAlpha(255/(2*(mLastAnimations.size()-i)));
          anim.mAnimation->draw(target);
       }
 
@@ -252,6 +251,8 @@ void Player::draw(sf::RenderTarget& target)
       {
          mLastAnimations.push_back({pos, mCurrentCycle});
       }
+
+      mCurrentCycle->draw(target);
    }
 
    AnimationPool::getInstance().drawAnimations(
