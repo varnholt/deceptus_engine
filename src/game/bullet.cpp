@@ -61,7 +61,14 @@ b2Body *Bullet::getBody() const
 
 void Bullet::setBody(b2Body *body)
 {
-   mBody = body;
+    mBody = body;
+}
+
+
+void Bullet::clear()
+{
+    sDetonationPositions.clear();
+    sBullets.clear();
 }
 
 

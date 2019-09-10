@@ -41,6 +41,7 @@ public:
    b2Body *getBody() const;
    void setBody(b2Body *body);
 
+   static void clear();
    static void cleanup();
    static void updateHitAnimations(const sf::Time& dt);
 
