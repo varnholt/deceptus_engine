@@ -13,6 +13,7 @@
 #include "SFML/Graphics.hpp"
 
 // game
+#include "leveldescription.h"
 #include "gamenode.h"
 #include "weapon.h"
 
@@ -67,7 +68,10 @@ struct LuaNode : public GameNode
    bool getPropertyBool(const std::string& key);
    double getPropertyDouble(const std::string& key);
    int64_t getPropertyInt64(const std::string& key);
-
+   const FilterDefaults& getFilterDefaults() const;
+   void setFilterDefaults(const FilterDefaults& filterDefaults);
+   const EnemyDescription& getEnemyDescription() const;
+   void setEnemyDescription(const EnemyDescription& enemyDescription);
 
    // box2d related
    void createBody();
@@ -79,6 +83,7 @@ struct LuaNode : public GameNode
    std::string mScriptName;
    lua_State* mState = nullptr;
    FilterDefaults mFilterDefaults;
+   EnemyDescription mEnemyDescription;
 
    // visualization
    sf::Vector2f mStartPosition;
@@ -100,5 +105,8 @@ struct LuaNode : public GameNode
 
    // static
    static std::atomic<int32_t> sNextId;
+
+   public:
+   void deserializeEnemyDescription();
 };
 
