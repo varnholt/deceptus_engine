@@ -5,7 +5,7 @@
         "audio_volume_sfx": 50,
         "fullscreen": true,
         "video_mode_width": 1920,
-        "video_mode_\height": 1080,
+        "video_mode_height": 1080,
         "view_width": 480,
         "view_height": 270,
         "brightness": 0.5,
