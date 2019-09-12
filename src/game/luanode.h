@@ -52,6 +52,10 @@ struct LuaNode : public GameNode
    void updatePosition();
    void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
    void updateVelocity();
+   const FilterDefaults& getFilterDefaults() const;
+   void setFilterDefaults(const FilterDefaults& filterDefaults);
+   const EnemyDescription& getEnemyDescription() const;
+   void setEnemyDescription(const EnemyDescription& enemyDescription);
 
    void luaDie();
    void luaInitialize();
@@ -62,16 +66,13 @@ struct LuaNode : public GameNode
    void luaSendPatrolPath();
    void luaTimeout(int32_t timerId);
    void luaUpdate(const sf::Time& dt);
+   void luaWriteProperty(const std::string& key, const std::string& value);
 
    // property accessors
    void synchronizeProperties();
    bool getPropertyBool(const std::string& key);
    double getPropertyDouble(const std::string& key);
    int64_t getPropertyInt64(const std::string& key);
-   const FilterDefaults& getFilterDefaults() const;
-   void setFilterDefaults(const FilterDefaults& filterDefaults);
-   const EnemyDescription& getEnemyDescription() const;
-   void setEnemyDescription(const EnemyDescription& enemyDescription);
 
    // box2d related
    void createBody();

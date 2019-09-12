@@ -13,6 +13,8 @@ properties = {
    damage = 0
 }
 
+config = {
+}
 
 ------------------------------------------------------------------------------------------------------------------------
 mFireTimer = 1
@@ -32,6 +34,12 @@ function initialize()
    addSample("boom.wav")
    addWeapon(1000, 0.1) -- interval, radius
    updateBulletTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function writeProperty(key, value)
+   config[key] = value
 end
 
 
