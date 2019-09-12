@@ -966,6 +966,7 @@ void LuaNode::createBody()
 {
    auto staticBody = getPropertyBool("staticBody");
    auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
+   auto sensor = static_cast<bool>(getPropertyBool("sensor"));
 
    mBodyDef = new b2BodyDef();
    mBodyDef->type = staticBody ? b2_staticBody : b2_dynamicBody;
@@ -996,6 +997,11 @@ void LuaNode::createBody()
       fn->setType(ObjectTypeEnemy);
       fn->setProperty("damage", damage); // probably retrieve from player properties
       ft->SetUserData(static_cast<void*>(fn));
+
+      if (sensor)
+      {
+         ft->SetSensor(true);
+      }
    }
 
    // if the startposition doesn't match the enemy boundaries in the future
