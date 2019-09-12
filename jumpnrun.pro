@@ -93,6 +93,7 @@ INCLUDEPATH += src
 
 SOURCES += \
    src/game/callbackmap.cpp \
+   src/game/enemydescription.cpp \
    src/game/forestscene.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
@@ -103,6 +104,7 @@ SOURCES += \
    src/game/levelmap.cpp \
    src/game/maptools.cpp \
    src/game/rainoverlay.cpp \
+   src/game/scriptproperty.cpp \
    src/game/spikeball.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
@@ -221,6 +223,7 @@ SOURCES += \
 
 HEADERS += \
     src/game/callbackmap.h \
+    src/game/enemydescription.h \
     src/game/forestscene.h \
     src/game/camerasystem.h \
     src/game/camerasystemconfiguration.h \
@@ -237,6 +240,7 @@ HEADERS += \
     src/game/player.h \
     src/game/level.h \
     src/game/rainoverlay.h \
+    src/game/scriptproperty.h \
     src/game/spikeball.h \
     src/game/test.h \
     src/game/texturepool.h \

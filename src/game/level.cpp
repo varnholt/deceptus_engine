@@ -686,25 +686,9 @@ void Level::spawnEnemies()
 {
    for (auto& desc : mDescription->mEnemies)
    {
-      std::vector<sf::Vector2f> patrolPath;
-      for (auto i = 0u; i < desc.mPatrolPath.size(); i+= 2)
-      {
-         patrolPath.push_back(
-            sf::Vector2f(
-               static_cast<float_t>(desc.mPatrolPath.at(i)     * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
-               static_cast<float_t>(desc.mPatrolPath.at(i + 1) * PIXELS_PER_TILE)
-            )
-         );
-      }
-
       auto enemy = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + desc.mScript);
 
-      enemy->mStartPosition = sf::Vector2f(
-         static_cast<float_t>(desc.mStartPosition.at(0) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
-         static_cast<float_t>(desc.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
-      );
-
-      enemy->mPatrolPath = patrolPath;
+      enemy->setEnemyDescription(desc);
       enemy->initialize();
 
       mEnemies.push_back(enemy);

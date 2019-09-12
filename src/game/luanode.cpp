@@ -667,8 +667,31 @@ LuaNode::~LuaNode()
 }
 
 
+void LuaNode::deserializeEnemyDescription()
+{
+   std::vector<sf::Vector2f> patrolPath;
+   for (auto i = 0u; i < mEnemyDescription.mPatrolPath.size(); i+= 2)
+   {
+      patrolPath.push_back(
+         sf::Vector2f(
+            static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i)     * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
+            static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i + 1) * PIXELS_PER_TILE)
+         )
+      );
+   }
+
+   mStartPosition = sf::Vector2f(
+      static_cast<float_t>(mEnemyDescription.mStartPosition.at(0) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
+      static_cast<float_t>(mEnemyDescription.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
+   );
+
+   mPatrolPath = patrolPath;
+}
+
+
 void LuaNode::initialize()
 {
+   deserializeEnemyDescription();
    setupLua();
    createBody();
 }
@@ -1064,6 +1087,30 @@ void LuaNode::stopScript()
 
       printf("LuaInterface::StopScript: script stopped\n");
    }
+}
+
+
+const EnemyDescription& LuaNode::getEnemyDescription() const
+{
+   return mEnemyDescription;
+}
+
+
+void LuaNode::setEnemyDescription(const EnemyDescription& enemyDescription)
+{
+   mEnemyDescription = enemyDescription;
+}
+
+
+const LuaNode::FilterDefaults& LuaNode::getFilterDefaults() const
+{
+   return mFilterDefaults;
+}
+
+
+void LuaNode::setFilterDefaults(const FilterDefaults& filterDefaults)
+{
+   mFilterDefaults = filterDefaults;
 }
 
 
