@@ -8,4 +8,4 @@
 #define FUNCTION_PLAYER_MOVED_TO     "playerMovedTo"
 #define FUNCTION_SET_PATH            "setPath"
 #define FUNCTION_TIMEOUT             "timeout"
-
+#define FUNCTION_WRITE_PROPERTY      "writeProperty"

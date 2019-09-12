@@ -1083,6 +1083,15 @@ void LuaNode::luaUpdate(const sf::Time& dt)
    }
 }
 
+void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
+{
+   lua_getglobal(mState, FUNCTION_WRITE_PROPERTY);
+   if (lua_isfunction(mState, -1) )
+   {
+
+   }
+}
+
 
 void LuaNode::stopScript()
 {
