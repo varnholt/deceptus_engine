@@ -751,6 +751,12 @@ void LuaNode::setupLua()
    {
       error(mState);
    }
+
+   // register properties
+   for (auto& prop : mEnemyDescription.mProperties)
+   {
+      luaWriteProperty(prop.mName, prop.mValue);
+   }
 }
 
 
@@ -1088,7 +1094,15 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
    lua_getglobal(mState, FUNCTION_WRITE_PROPERTY);
    if (lua_isfunction(mState, -1) )
    {
+      lua_pushstring(mState, key.c_str());
+      lua_pushstring(mState, value.c_str());
 
+      auto result = lua_pcall(mState, 2, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_UPDATE);
+      }
    }
 }
 
