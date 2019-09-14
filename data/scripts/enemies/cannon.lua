@@ -13,6 +13,7 @@ properties = {
    damage = 0
 }
 
+------------------------------------------------------------------------------------------------------------------------
 config = {
 }
 
@@ -24,12 +25,14 @@ mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
+mX = 1.0
+mSpriteY = 24
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
-   updateSpriteRect(0, 0, 24, 24) -- x, y, width, height
+   updateSpriteRect(0, mSpriteY, 24, 24) -- x, y, width, height
 
    addSample("boom.wav")
    addWeapon(1000, 0.1) -- interval, radius
@@ -40,6 +43,14 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function writeProperty(key, value)
    config[key] = value
+
+   if (key == "alignment") then
+      if (value == "left") then
+         print("setting alignment to left")
+         mX = -1.0
+         mSpriteY = 0
+      end
+   end
 end
 
 
@@ -56,8 +67,16 @@ end
 function fire()
    mElapsed = 0.0
    mSpriteIndex = 1
-   fireWeapon(0, mPosition:getX() - 16, mPosition:getY() - 3, -0.1, 0.0);
-   updateSpriteRect(24, 0, 24, 24)
+
+fireWeapon(
+      0,
+      mPosition:getX() + mX * 16,
+      mPosition:getY() - 3,
+      mX * 0.1,
+      0.0
+   );
+
+   updateSpriteRect(24, mSpriteY, 24, 24)
    mFireReady = true
 end
 
@@ -102,7 +121,7 @@ function update(dt)
    end
 
    if (index ~= mSpriteIndex) then
-      updateSpriteRect(mSpriteIndex * 24, 0, 24, 24)
+      updateSpriteRect(mSpriteIndex * 24, mSpriteY, 24, 24)
    end
 end
 

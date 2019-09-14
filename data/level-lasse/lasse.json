@@ -3,8 +3,8 @@
   "startposition": [47, 220],
   "enemies": [
     {"script": "cannon.lua","startposition": [255, 46], "properties": [{"name": "alignment", "value": "left"}]},
-    {"script": "cannon.lua","startposition": [124, 265], "properties": [{"name": "alignment", "value": "right"}]},
-    {"script": "cannon.lua","startposition": [124, 261], "properties": [{"name": "alignment", "value": "left"}]},
+    {"script": "cannon.lua","startposition": [124, 265], "properties": [{"name": "alignment", "value": "left"}]},
+    {"script": "cannon.lua","startposition": [111, 261], "properties": [{"name": "alignment", "value": "right"}]},
     {"script": "blob.lua", "startposition": [214, 115], "patrolpath": [221, 115]},
     {"script": "blob.lua", "startposition": [214, 109], "patrolpath": [221, 109]},
     {"script": "blob.lua", "startposition": [214, 103], "patrolpath": [221, 103]},
