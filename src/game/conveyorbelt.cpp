@@ -51,7 +51,7 @@ ConveyorBelt::ConveyorBelt(
   boundaryFixtureDef.density = 1.0f;
   boundaryFixtureDef.isSensor = false;
   auto boundaryFixture = mBody->CreateFixture(&boundaryFixtureDef);
-  boundaryFixture->SetUserData((void*)this);
+  boundaryFixture->SetUserData(static_cast<void*>(this));
 
   // create fixture for the sensor behavior, collision notification
   mShapeBounds.SetAsBox(
@@ -136,13 +136,13 @@ void ConveyorBelt::processContact(b2Contact* contact)
 
    if (fixtureUserDataA)
    {
-      auto fixtureNode = (FixtureNode*)fixtureUserDataA;
+      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
       processFixtureNode(fixtureNode, contact->GetFixtureB()->GetBody());
    }
 
    if (fixtureUserDataB)
    {
-      auto fixtureNode = (FixtureNode*)fixtureUserDataB;
+      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
       processFixtureNode(fixtureNode, contact->GetFixtureA()->GetBody());
    }
 }
