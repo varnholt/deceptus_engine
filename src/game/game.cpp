@@ -221,13 +221,13 @@ void Game::loadLevel()
          // pick a level
          auto levels = Levels::getInstance();
          levels.deserializeFromFile();
-         auto levelOne = levels.mLevels.at(mLevelIndex);
+         auto levelItem = levels.mLevels.at(mLevelIndex);
 
          mLevel.reset();
 
          // load it
          mLevel = std::make_shared<Level>();
-         mLevel->setDescriptionFilename(levelOne.mLevelName);
+         mLevel->setDescriptionFilename(levelItem.mLevelName);
          mLevel->initialize();
          mLevel->initializeTextures();
 
