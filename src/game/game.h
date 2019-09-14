@@ -42,6 +42,7 @@ private:
 
    void drawLevel();
    void loadLevel();
+   void nextLevel();
 
    void reset();
 

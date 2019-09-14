@@ -249,6 +249,21 @@ void Game::loadLevel()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::nextLevel()
+{
+   mLevelIndex++;
+
+   auto levels = Levels::getInstance();
+   if (mLevelIndex == levels.mLevels.size())
+   {
+       mLevelIndex = 0;
+   }
+
+   loadLevel();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
   initializeController();
@@ -671,6 +686,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::M:
       {
          mRecording = !mRecording;
+         break;
+      }
+      case sf::Keyboard::N:
+      {
+         nextLevel();
          break;
       }
       case sf::Keyboard::P:
