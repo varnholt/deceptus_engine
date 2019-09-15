@@ -192,10 +192,9 @@ private:
    void updatePlayerPixelRect();
    bool isDashActive() const;
 
-   void createHead();
+   void createBody();
    void createFeet();
    void setCrouching(bool enabled);
-   void createBody();
 
    bool isClimbableEdge(b2ChainShape* shape, int currIndex);
    void removeClimbJoint();

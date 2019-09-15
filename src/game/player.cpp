@@ -24,6 +24,15 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
+namespace  {
+   uint16_t categoryBits = CategoryFriendly;
+   uint16_t maskBits = CategoryBoundary | CategoryEnemyCollideWith;
+   int16_t groupIndex = 0;
+   // int16_t groupIndex = -1; // 0 is default
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 Player* Player::sCurrent = nullptr;
 
 
@@ -183,6 +192,7 @@ void Player::initializeController()
          }
       );
 
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X,[](){Level::getCurrentLevel()->toggleDoor();});
       gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_LEFTSHOULDER, [this](){updateDash(Dash::Left);});
       gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [this](){updateDash(Dash::Right);});
    }
@@ -311,40 +321,8 @@ void Player::setCrouching(bool enabled)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::createHead()
-{
-   b2FixtureDef fixtureDefHead;
-//   fixtureDefHead.density = 1.0f;
-   fixtureDefHead.density = 0.45f;
-   fixtureDefHead.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
-   fixtureDefHead.restitution = 0.0f;
-   fixtureDefHead.filter.groupIndex = -1;
-
-   // this is what we want, with density to 0.45 or so
-   b2PolygonShape headShape;
-   headShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
-   fixtureDefHead.shape = &headShape;
-
-//    b2CircleShape headShape;
-//    headShape.m_p.Set(0, -14 / PPM);
-//    headShape.m_radius = 0.16f;
-//    fixtureDefHead.shape = &headShape;
-
-   mHeadFixture = mBody->CreateFixture(&fixtureDefHead);
-
-   FixtureNode* objectDataHead = new FixtureNode(this);
-   objectDataHead->setType(ObjectTypePlayer);
-   objectDataHead->setFlag("head", true);
-   mHeadFixture->SetUserData(static_cast<void*>(objectDataHead));
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 void Player::createFeet()
 {
-   auto width  = PLAYER_ACTUAL_WIDTH;
-   auto height = PLAYER_ACTUAL_HEIGHT;
-
    // feet
    //  (   )  (   )  (   )  (   )
    //      ____      _____
@@ -354,26 +332,31 @@ void Player::createFeet()
    //  ^                        ^
    //  count * (dist + radius)
 
-   int feetCount = 4;
-   float feetRadius = 0.16f / static_cast<float>(feetCount);
-   float feetDist = 0.0f;
-   float feetOffset = static_cast<float>(feetCount) * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
+   const auto width  = PLAYER_ACTUAL_WIDTH;
+   const auto height = PLAYER_ACTUAL_HEIGHT;
+   const auto feetCount = 4u;
+   const auto feetRadius = 0.16f / static_cast<float>(feetCount);
+   const auto feetDist = 0.0f;
+   const auto feetOffset = static_cast<float>(feetCount) * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
 
-   for (int i = 0; i < feetCount; i++)
+   for (auto i = 0u; i < feetCount; i++)
    {
       b2FixtureDef fixtureDefFeet;
       fixtureDefFeet.density = 1.f;
       fixtureDefFeet.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
       fixtureDefFeet.restitution = 0.0f;
-      fixtureDefFeet.filter.groupIndex = -1;
+      fixtureDefFeet.filter.categoryBits = categoryBits;
+      fixtureDefFeet.filter.maskBits = maskBits;
+      fixtureDefFeet.filter.groupIndex = groupIndex;
+
       b2CircleShape feetShape;
       feetShape.m_p.Set(i * (feetRadius * 2.0f + feetDist) - feetOffset, 0.12f);
       feetShape.m_radius = feetRadius;
       fixtureDefFeet.shape = &feetShape;
 
-      b2Fixture* feet = mBody->CreateFixture(&fixtureDefFeet);
+      auto feet = mBody->CreateFixture(&fixtureDefFeet);
 
-      FixtureNode* objectDataFeet = new FixtureNode(this);
+      auto objectDataFeet = new FixtureNode(this);
       objectDataFeet->setType(ObjectTypePlayer);
       feet->SetUserData(static_cast<void*>(objectDataFeet));
    }
@@ -391,9 +374,9 @@ void Player::createFeet()
    footSensorFixtureDef.isSensor = true;
    footSensorFixtureDef.shape = &footPolygonShape;
 
-   b2Fixture* footSensorFixture = mBody->CreateFixture(&footSensorFixtureDef);
+   auto footSensorFixture = mBody->CreateFixture(&footSensorFixtureDef);
 
-   FixtureNode* footObjectData = new FixtureNode(this);
+   auto footObjectData = new FixtureNode(this);
    footObjectData->setType(ObjectTypePlayerFootSensor);
    footSensorFixture->SetUserData(static_cast<void*>(footObjectData));
 
@@ -410,9 +393,9 @@ void Player::createFeet()
    headSensorFixtureDef.isSensor = true;
    headSensorFixtureDef.shape = &headPolygonShape;
 
-   b2Fixture* headSensorFixture = mBody->CreateFixture(&headSensorFixtureDef);
+   auto headSensorFixture = mBody->CreateFixture(&headSensorFixtureDef);
 
-   FixtureNode* headObjectData = new FixtureNode(this);
+   auto headObjectData = new FixtureNode(this);
    headObjectData->setType(ObjectTypePlayerHeadSensor);
    headSensorFixture->SetUserData(static_cast<void*>(headObjectData));
 }
@@ -432,6 +415,25 @@ void Player::createBody()
 
    mBody = mWorld->CreateBody(bodyDef);
    mBody->SetFixedRotation(true);
+
+   // add body shape
+   b2FixtureDef fixtureBodyDef;
+   fixtureBodyDef.density = 0.45f;
+   fixtureBodyDef.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
+   fixtureBodyDef.restitution = 0.0f;
+   fixtureBodyDef.filter.groupIndex = groupIndex;
+
+   b2PolygonShape headShape;
+   headShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
+   fixtureBodyDef.shape = &headShape;
+
+   mHeadFixture = mBody->CreateFixture(&fixtureBodyDef);
+
+   FixtureNode* objectDataHead = new FixtureNode(this);
+   objectDataHead->setType(ObjectTypePlayer);
+   objectDataHead->setFlag("head", true);
+   mHeadFixture->SetUserData(static_cast<void*>(objectDataHead));
+
 }
 
 
@@ -439,7 +441,6 @@ void Player::createBody()
 void Player::createPlayerBody()
 {
    createBody();
-   createHead();
    createFeet();
 }
 

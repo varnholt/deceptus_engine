@@ -24,12 +24,6 @@ struct LuaNode : public GameNode
    LuaNode(const std::string &filename);
    ~LuaNode();
 
-   struct FilterDefaults{
-      uint16_t mCategoryBits = 0x0001;
-      uint16_t mMaskBits = 0xFFFF;
-      int16_t mGroupIndex = -1; // 0 is default
-   };
-
    void draw(sf::RenderTarget& window);
    void initialize();
 
@@ -52,8 +46,6 @@ struct LuaNode : public GameNode
    void updatePosition();
    void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
    void updateVelocity();
-   const FilterDefaults& getFilterDefaults() const;
-   void setFilterDefaults(const FilterDefaults& filterDefaults);
    const EnemyDescription& getEnemyDescription() const;
    void setEnemyDescription(const EnemyDescription& enemyDescription);
 
@@ -83,7 +75,6 @@ struct LuaNode : public GameNode
    int32_t mKeysPressed = 0;
    std::string mScriptName;
    lua_State* mState = nullptr;
-   FilterDefaults mFilterDefaults;
    EnemyDescription mEnemyDescription;
 
    // visualization
