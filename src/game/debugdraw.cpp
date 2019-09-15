@@ -161,11 +161,11 @@ void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape)
+void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color)
 {
    shape.setOutlineThickness(outlineThickness);
    shape.setFillColor(sf::Color::Transparent);
-   shape.setOutlineColor(sf::Color::Red);
+   shape.setOutlineColor(color);
    target.draw(shape);
 }
 
@@ -178,7 +178,7 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::Rect<int32_t>& rect
    auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
    rs.setSize(size);
    rs.setPosition(pos);
-   drawShape(target, rs);
+   drawShape(target, rs, sf::Color::Blue);
 }
 
 

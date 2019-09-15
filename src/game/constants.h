@@ -43,7 +43,7 @@ enum Alignment {
   PointsDown    = 0x01,
   PointsUp      = 0x02,
   PointsRight   = 0x04,
-  PointsLeft    = 0x08
+  PointsLeft    = 0x08,
 };
 
 enum Display {
@@ -52,7 +52,7 @@ enum Display {
   DisplayMainMenu  = 0x02,
   DisplayMap       = 0x04,
   DisplayInventory = 0x08,
-  DisplayDebug     = 0x10
+  DisplayDebug     = 0x10,
 };
 
 enum class ItemType {
@@ -86,7 +86,7 @@ enum class MenuAction
   MoveUp,
   MoveDown,
   Decrease,
-  Increase
+  Increase,
 };
 
 enum class PlayerAction
@@ -106,7 +106,7 @@ enum class PlayerAction
   Swim,
   DashLeft,
   DashRight,
-  WallJump
+  WallJump,
 };
 
 enum SdlControllerButton
@@ -140,7 +140,7 @@ enum class InvetoryAction
   MoveUp,
   MoveDown,
   MoveRight,
-  MoveLeft
+  MoveLeft,
 };
 
 enum Look {
@@ -149,7 +149,7 @@ enum Look {
   LookUp       = 0x2,
   LookDown     = 0x4,
   LookLeft     = 0x8,
-  LookRight    = 0x10
+  LookRight    = 0x10,
 };
 
 enum KeyPressed {
@@ -160,7 +160,7 @@ enum KeyPressed {
    KeyPressedJump  = 0x10,
    KeyPressedFire  = 0x20,
    KeyPressedRun   = 0x40,
-   KeyPressedLook  = 0x80
+   KeyPressedLook  = 0x80,
 };
 
 enum AtmosphereTile // 16 cols per row
@@ -205,13 +205,13 @@ enum AtmosphereTile // 16 cols per row
    AtmosphereTileWaterCornerBottomLeft,   // not used
    AtmosphereTileWaterCornerTopLeft,      // not used
 
-   AtmosphereTileInvalid = 1024
+   AtmosphereTileInvalid = 1024,
 };
 
 enum ObjectBehavior
 {
    ObjectBehaviorSolid = 1,
-   ObjectBehaviorDeadly
+   ObjectBehaviorDeadly,
 };
 
 enum ObjectType
@@ -227,6 +227,13 @@ enum ObjectType
    ObjectTypeEnemy,
    ObjectTypeBouncer,
    ObjectTypeConveyorBelt,
-   ObjectTypeJumpPlatform
+   ObjectTypeJumpPlatform,
+};
+
+enum EntityCategory {
+   CategoryBoundary         = 0x01,
+   CategoryFriendly         = 0x02,
+   CategoryEnemyWalkThrough = 0x04,
+   CategoryEnemyCollideWith = 0x08,
 };
 

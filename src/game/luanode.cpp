@@ -22,6 +22,14 @@
 // static
 std::atomic<int32_t> LuaNode::sNextId = 0;
 
+namespace  {
+   uint16_t categoryBits = CategoryEnemyWalkThrough; // I am a ...
+   uint16_t maskBits = CategoryBoundary;             // I collide with ...
+   int16_t groupIndex = 0;                           // 0 is default
+   // int16_t groupIndex = -1; // 0 is default
+}
+
+
 #define OBJINSTANCE LuaInterface::instance()->getObject(state)
 
 
@@ -992,15 +1000,15 @@ void LuaNode::createBody()
       fd.shape = shape;
 
       // apply default filter
-      // // http://www.iforce2d.net/b2dtut/collision-filtering
-      fd.filter.groupIndex = mFilterDefaults.mGroupIndex;
-      fd.filter.maskBits = mFilterDefaults.mMaskBits;
-      fd.filter.categoryBits = mFilterDefaults.mCategoryBits;
+      // http://www.iforce2d.net/b2dtut/collision-filtering
+      fd.filter.groupIndex = groupIndex;
+      fd.filter.maskBits = maskBits;
+      fd.filter.categoryBits = categoryBits;
 
       b2Fixture* ft = mBody->CreateFixture(&fd);
       FixtureNode* fn = new FixtureNode(this);
       fn->setType(ObjectTypeEnemy);
-      fn->setProperty("damage", damage); // probably retrieve from player properties
+      fn->setProperty("damage", damage);
       ft->SetUserData(static_cast<void*>(fn));
 
       if (sensor)
@@ -1008,20 +1016,6 @@ void LuaNode::createBody()
          ft->SetSensor(true);
       }
    }
-
-   // if the startposition doesn't match the enemy boundaries in the future
-   // the combined aabb will be required
-   //
-   //   // create aabb
-   //   b2AABB aabb;
-   //   aabb.lowerBound = b2Vec2(FLT_MAX,FLT_MAX);
-   //   aabb.upperBound = b2Vec2(-FLT_MAX,-FLT_MAX);
-   //   auto fixture = mBody->GetFixtureList();
-   //   while (fixture != NULL)
-   //   {
-   //      aabb.Combine(aabb, fixture->GetAABB(0));
-   //      fixture = fixture->GetNext();
-   //   }
 }
 
 
@@ -1127,18 +1121,6 @@ const EnemyDescription& LuaNode::getEnemyDescription() const
 void LuaNode::setEnemyDescription(const EnemyDescription& enemyDescription)
 {
    mEnemyDescription = enemyDescription;
-}
-
-
-const LuaNode::FilterDefaults& LuaNode::getFilterDefaults() const
-{
-   return mFilterDefaults;
-}
-
-
-void LuaNode::setFilterDefaults(const FilterDefaults& filterDefaults)
-{
-   mFilterDefaults = filterDefaults;
 }
 
 
