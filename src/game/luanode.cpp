@@ -225,9 +225,8 @@ extern "C" int32_t damage(lua_State* state)
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
 
-   if (argc == 4)
+   if (argc == 3)
    {
-      auto playerId = static_cast<int32_t>(lua_tointeger(state, 1));
       auto damage = static_cast<int32_t>(lua_tonumber(state, 2));
       auto dx = static_cast<float>(lua_tonumber(state, 3));
       auto dy = static_cast<float>(lua_tonumber(state, 4));
@@ -239,7 +238,7 @@ extern "C" int32_t damage(lua_State* state)
          return 0;
       }
 
-      node->damage(playerId, damage, dx, dy);
+      node->damage(damage, dx, dy);
    }
 
    return 0;
@@ -795,7 +794,7 @@ void LuaNode::luaMovedTo()
 
 void LuaNode::luaPlayerMovedTo()
 {
-   const auto pos =  Player::getPlayer(0)->getPixelPosition();
+   const auto pos =  Player::getCurrent()->getPixelPosition();
 
    lua_getglobal(mState, FUNCTION_PLAYER_MOVED_TO);
 
@@ -855,9 +854,9 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 }
 
 
-void LuaNode::damage(int32_t playerId, int32_t damage, float forceX, float forceY)
+void LuaNode::damage(int32_t damage, float forceX, float forceY)
 {
-   Player::getPlayer(playerId)->damage(damage, sf::Vector2f(forceX, forceY));
+   Player::getCurrent()->damage(damage, sf::Vector2f(forceX, forceY));
 }
 
 

@@ -1,7 +1,6 @@
 #include "player.h"
 
-#include <SFML/Graphics.hpp>
-
+#include "animationpool.h"
 #include "audio.h"
 #include "camerapane.h"
 #include "displaymode.h"
@@ -14,16 +13,18 @@
 #include "joystick/gamecontroller.h"
 #include "laser.h"
 #include "level.h"
-#include "animationpool.h"
 #include "physicsconfiguration.h"
+#include "playerinfo.h"
 #include "weapon.h"
 #include "weaponsystem.h"
+
+#include <SFML/Graphics.hpp>
 
 #include <iostream>
 
 
-std::vector<Player*> Player::sPlayerList;
-int Player::sNextId = 0;
+//----------------------------------------------------------------------------------------------------------------------
+Player* Player::sCurrent = nullptr;
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -63,20 +64,19 @@ void Player::setOnBelt(bool onBelt)
 
 //----------------------------------------------------------------------------------------------------------------------
 Player::Player(GameNode* parent)
-  : GameNode(parent),
-    mId(sNextId++)
+  : GameNode(parent)
 {
-   sPlayerList.push_back(this);
+   sCurrent = this;
 
    mWeaponSystem = std::make_shared<WeaponSystem>();
    mExtraManager = std::make_shared<ExtraManager>();
-   mExtraTable = std::make_shared<ExtraTable>();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-Player::~Player()
+Player* Player::getCurrent()
 {
+   return sCurrent;
 }
 
 
@@ -1206,7 +1206,7 @@ void Player::impulse(float intensity)
       mHardLandingCycles = 0;
 
       auto damage = static_cast<int>((intensity - 1.0f) * 20.0f);
-      Player::getPlayer(0)->damage(damage);
+      Player::getCurrent()->damage(damage);
    }
 }
 
@@ -1219,7 +1219,7 @@ void Player::damage(int damage, const sf::Vector2f& force)
       return;
    }
 
-   if (mExtraTable->mSkills->mSkills & ExtraSkill::SkillInvulnerable)
+   if (PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills & ExtraSkill::SkillInvulnerable)
    {
       return;
    }
@@ -1234,10 +1234,10 @@ void Player::damage(int damage, const sf::Vector2f& force)
       auto body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-      mExtraTable->mHealth->mHealth -= damage;
+      PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth -= damage;
       mDamageClock.restart();
 
-      if (mExtraTable->mHealth->mHealth < 0)
+      if (PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth < 0)
       {
          // the function below is not called since 'damage(...)' is evaluated
          // within the box2d step function; no further box2d related adjustments
@@ -1689,7 +1689,7 @@ bool Player::edgeMatchesMovement(const b2Vec2& edgeDir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateClimb()
 {
-   if (!(mExtraTable->mSkills->mSkills & ExtraSkill::SkillClimb))
+   if (!(PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb))
    {
       return;
    }
@@ -2057,32 +2057,6 @@ void Player::setFriction(float friction)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-Player *Player::getPlayer(int id)
-{
-   // will we ever have multiplayer? hmmm :)
-   if (sPlayerList.size() == 1)
-   {
-      return sPlayerList[0];
-   }
-
-   Player* p = nullptr;
-   std::vector<Player*>::iterator it =
-      std::find_if(
-         sPlayerList.begin(),
-         sPlayerList.end(),
-         [id](auto p) { return p->mId == id; }
-      );
-
-   if (it != sPlayerList.end())
-   {
-      p = *it;
-   }
-
-   return p;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isInAir() const
 {
    return (GameContactListener::getInstance()->getNumFootContacts() == 0) && !isInWater();
@@ -2200,7 +2174,7 @@ void Player::reset()
       Level::getCurrentLevel()->getStartPosition().y
    );
 
-   mExtraTable->mHealth->reset();
+   PlayerInfo::getCurrent().mExtraTable.mHealth->reset();
 
    mExtraManager->resetKeys();
 }
@@ -2211,7 +2185,7 @@ bool Player::isDead() const
 {
    const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
    const auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
-   const auto outOfHealth = mExtraTable->mHealth->mHealth <= 0;
+   const auto outOfHealth = PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth <= 0;
 
    const auto dead = touchesSomethingDeadly || tooFast || outOfHealth;
 

@@ -294,7 +294,7 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
    if (it != mLasers.end())
    {
       // player is dead
-      Player::getPlayer(0)->damage(100);
+      Player::getCurrent()->damage(100);
    }
 }
 

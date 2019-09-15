@@ -118,7 +118,7 @@ void Bouncer::draw(sf::RenderTarget &window)
 
 void Bouncer::updatePlayerAtBouncer()
 {
-   auto player = Player::getPlayer(0);
+   auto player = Player::getCurrent();
    auto rect = player->getPlayerPixelRect();
    rect.height *= 3;
 
@@ -215,7 +215,7 @@ void Bouncer::activate()
           break;
    }
 
-   auto player = Player::getPlayer(0);
+   auto player = Player::getCurrent();
    auto body = player->getBody();
 
    // it's pretty important to reset the body's y velocity

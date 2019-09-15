@@ -19,6 +19,7 @@
 #include "messagebox.h"
 #include "luainterface.h"
 #include "player.h"
+#include "playerinfo.h"
 #include "physicsconfiguration.h"
 #include "timer.h"
 #include "weapon.h"
@@ -617,13 +618,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Audio::getInstance()->playSample("powerup.wav");
 
-         if (mPlayer->mExtraTable->mSkills->mSkills & ExtraSkill::SkillClimb)
+         if (PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb)
          {
-            mPlayer->mExtraTable->mSkills->mSkills &= ~ ExtraSkill::SkillClimb;
+            PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills &= ~ ExtraSkill::SkillClimb;
          }
          else
          {
-            mPlayer->mExtraTable->mSkills->mSkills |= ExtraSkill::SkillClimb;
+            PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillClimb;
          }
          break;
       }

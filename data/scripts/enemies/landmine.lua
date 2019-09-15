@@ -105,7 +105,7 @@ function timeout(id)
       distanceToPlayerLength = (distanceToPlayer):getLength()
       if (distanceToPlayerLength < mDamageDistance) then
         damageVal = mDamage * (mDamageDistance - distanceToPlayerLength) / mDamageDistance;
-        damage(0, damageVal, mExplosionStrength * distanceToPlayer:getX(), -mExplosionStrength * distanceToPlayer:getY())
+        damage(damageVal, mExplosionStrength * distanceToPlayer:getX(), -mExplosionStrength * distanceToPlayer:getY())
       end
    end
 end

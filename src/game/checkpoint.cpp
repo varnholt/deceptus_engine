@@ -46,7 +46,7 @@ void Checkpoint::add(TmxObject* tmxObject)
 
 void Checkpoint::update()
 {
-    auto playerRect = Player::getPlayer(0)->getPlayerPixelRect();
+    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
     for (auto& cp : sCheckpoints)
     {

@@ -30,7 +30,6 @@ public:
 
    bool hasInventoryItem(ItemType itemType) const;
 
-   std::vector<std::shared_ptr<InventoryItem>> mInventory;
    std::vector<std::shared_ptr<ExtraItem>> mExtras;
 
    std::shared_ptr<TileMap> mTilemap;

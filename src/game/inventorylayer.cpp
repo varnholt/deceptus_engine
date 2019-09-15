@@ -6,6 +6,7 @@
 #include "joystick/gamecontroller.h"
 
 #include "player.h"
+#include "playerinfo.h"
 #include "extramanager.h"
 #include "inventoryitem.h"
 
@@ -59,7 +60,7 @@ void InventoryLayer::initializeController()
 //---------------------------------------------------------------------------------------------------------------------
 std::vector<std::shared_ptr<InventoryItem>>* InventoryLayer::getInventory()
 {
-   return &Player::getPlayer(0)->getExtraManager()->mInventory;
+   return &PlayerInfo::getCurrent().mInventory;
 }
 
 
@@ -122,7 +123,7 @@ void InventoryLayer::draw(sf::RenderTarget &window)
    y = 230;
    x = dist;
 
-   for (auto item : Player::getPlayer(0)->getExtraManager()->mInventory)
+   for (auto item : PlayerInfo::getCurrent().mInventory)
    {
       item->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
       window.draw(item->mSprite);

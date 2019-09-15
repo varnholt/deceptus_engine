@@ -60,7 +60,7 @@ void CameraSystem::update(float viewWidth, float viewHeight)
 
 void CameraSystem::updateX()
 {
-   auto player = Player::getPlayer(0);
+   auto player = Player::getCurrent();
    auto& config = CameraSystemConfiguration::getInstance();
 
    const auto playerX = player->getPixelPosition().x;
@@ -123,7 +123,7 @@ void CameraSystem::updateY()
    const auto viewCenter = (mViewHeight / 2.0f);
 
    // test if out of panic line boundaries
-   auto player = Player::getPlayer(0);
+   auto player = Player::getCurrent();
    const auto playerY = player->getPixelPosition().y;
    const auto test = playerY - viewCenter;
 
