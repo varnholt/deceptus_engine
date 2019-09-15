@@ -103,7 +103,9 @@ SOURCES += \
    src/game/laser.cpp \
    src/game/levelmap.cpp \
    src/game/maptools.cpp \
+   src/game/playerinfo.cpp \
    src/game/rainoverlay.cpp \
+   src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
    src/game/spikeball.cpp \
    src/game/test.cpp \
@@ -239,7 +241,9 @@ HEADERS += \
     src/game/maptools.h \
     src/game/player.h \
     src/game/level.h \
+    src/game/playerinfo.h \
     src/game/rainoverlay.h \
+    src/game/savestate.h \
     src/game/scriptproperty.h \
     src/game/spikeball.h \
     src/game/test.h \

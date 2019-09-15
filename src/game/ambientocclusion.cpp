@@ -63,7 +63,7 @@ void AmbientOcclusion::load(
 
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-   auto pos = Player::getPlayer(0)->getPixelPosition();
+   auto pos = Player::getCurrent()->getPixelPosition();
 
    for (auto& sprite : mSprites)
    {

@@ -37,7 +37,7 @@ void Door::draw(sf::RenderTarget& window)
 //-----------------------------------------------------------------------------
 void Door::update(const sf::Time& dt)
 {
-   auto playerPos = Player::getPlayer(0)->getPixelPosition();
+   auto playerPos = Player::getCurrent()->getPixelPosition();
    auto doorPos = mSprites.at(mSprites.size()- 1 ).getPosition();
 
    sf::Vector2f a(playerPos.x, playerPos.y);
@@ -176,7 +176,7 @@ void Door::addSprite(const sf::Sprite & sprite)
 //-----------------------------------------------------------------------------
 void Door::toggle()
 {
-   if (!Player::getPlayer(0)->getExtraManager()->hasInventoryItem(mRequiredItem))
+   if (!Player::getCurrent()->getExtraManager()->hasInventoryItem(mRequiredItem))
    {
       return;
    }

@@ -40,20 +40,21 @@ int32_t GameContactListener::getDeadlyContacts() const
 }
 
 
-int32_t GameContactListener::getPlayerId(FixtureNode* obj)
+bool GameContactListener::isPlayer(FixtureNode* obj) const
 {
    if (obj == nullptr)
    {
-      return -1;
+      return false;
    }
 
    auto p = dynamic_cast<Player*>(obj->getParent());
+
    if (p == nullptr)
    {
-      return -1;
+      return false;
    }
 
-   return p->getId();
+   return true;
 }
 
 
@@ -146,10 +147,10 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeBullet:
          {
-            if (getPlayerId(fixtureNodeB) != -1)
+            if (isPlayer(fixtureNodeB))
             {
                auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
-               Player::getPlayer(0)->damage(damage);
+               Player::getCurrent()->damage(damage);
             }
             dynamic_cast<Bullet*>(fixtureNodeA)->setScheduledForRemoval(true);
             break;
@@ -167,7 +168,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeDeadly:
          {
-            if (getPlayerId(fixtureNodeB) != -1)
+            if (isPlayer(fixtureNodeB))
                mNumDeadlyContacts++;
             break;
          }
@@ -183,11 +184,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeEnemy:
          {
-            if (getPlayerId(fixtureNodeB) != -1)
+            if (isPlayer(fixtureNodeB))
             {
                printf("collision with enemy\n");
                auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
-               Player::getPlayer(0)->damage(damage);
+               Player::getCurrent()->damage(damage);
                break;
             }
             break;
@@ -225,10 +226,10 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeBullet:
          {
-            if (getPlayerId(fixtureNodeA) != -1)
+            if (isPlayer(fixtureNodeA))
             {
                auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
-               Player::getPlayer(0)->damage(damage);
+               Player::getCurrent()->damage(damage);
             }
             dynamic_cast<Bullet*>(fixtureNodeB)->setScheduledForRemoval(true);
             break;
@@ -246,7 +247,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeDeadly:
          {
-            if (getPlayerId(fixtureNodeA) != -1)
+            if (isPlayer(fixtureNodeA))
                mNumDeadlyContacts++;
             break;
          }
@@ -262,11 +263,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeEnemy:
          {
-            if (getPlayerId(fixtureNodeA) != -1)
+            if (isPlayer(fixtureNodeA))
             {
                printf("collision with enemy\n");
                auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
-               Player::getPlayer(0)->damage(damage);
+               Player::getCurrent()->damage(damage);
                break;
             }
             break;
@@ -421,7 +422,7 @@ void GameContactListener::processImpulse(float impulse)
       return;
    }
 
-   Player::getPlayer(0)->impulse(impulse);
+   Player::getCurrent()->impulse(impulse);
 }
 
 

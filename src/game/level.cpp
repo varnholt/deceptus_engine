@@ -446,8 +446,8 @@ void Level::loadTmx()
             }
             else if (layer->mName == "extras")
             {
-               Player::getPlayer(0)->getExtraManager()->mTilemap = tileMap;
-               Player::getPlayer(0)->getExtraManager()->load(layer, tileset);
+               Player::getCurrent()->getExtraManager()->mTilemap = tileMap;
+               Player::getCurrent()->getExtraManager()->load(layer, tileset);
             }
             else if (layer->mName.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
             {
@@ -900,7 +900,7 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
             enemy->draw(target);
          }
 
-         Player::getPlayer(0)->draw(target);
+         Player::getCurrent()->draw(target);
       }
 
       for_each(std::begin(mImageLayers), std::end(mImageLayers), [&](auto& layer)
@@ -935,7 +935,7 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
   target.setView(*mLevelView);
 
-  const auto pPos = Player::getPlayer(0)->getPixelPosition();
+  const auto pPos = Player::getCurrent()->getPixelPosition();
 
   // draw lasers
   for (auto l : mLasers)
@@ -1144,7 +1144,7 @@ void Level::draw(
    {
       drawStaticChains(*mLevelRenderTexture.get());
       DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
-      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getPlayer(0)->getPlayerPixelRect());
+      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getCurrent()->getPlayerPixelRect());
    }
 
    // display the whole texture

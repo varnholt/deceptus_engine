@@ -77,7 +77,9 @@ public:
    }
 
    Player(GameNode* parent = nullptr);
-   virtual ~Player();
+   virtual ~Player() = default;
+
+   static Player* getCurrent();
 
    void initialize();
    void initializeLevel();
@@ -136,8 +138,6 @@ public:
 
    bool getVisible() const;
    void setVisible(bool visible);
-
-   static Player* getPlayer(int id);
 
 
    float getPlatformVelocity() const;
@@ -207,11 +207,6 @@ private:
    float getDesiredVelocity() const;
    float getDeceleration() const;
    float getAcceleration() const;
-
-
-public:
-
-   std::shared_ptr<ExtraTable> mExtraTable;
 
 
 private:
@@ -297,7 +292,6 @@ private:
 
    std::deque<PositionedAnimation> mLastAnimations;
 
-   static int sNextId;
-   static std::vector<Player*> sPlayerList;
+   static Player* sCurrent;
 };
 

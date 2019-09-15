@@ -60,7 +60,7 @@ void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 //-----------------------------------------------------------------------------
 void Portal::update(const sf::Time& /*dt*/)
 {
-   sf::Vector2f playerPos = Player::getPlayer(0)->getPixelPosition();
+   sf::Vector2f playerPos = Player::getCurrent()->getPixelPosition();
    sf::Vector2f PortalPos = getPortalPosition();
 
    sf::Vector2f a(playerPos.x, playerPos.y);

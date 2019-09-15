@@ -89,7 +89,7 @@ float ConveyorBelt::getVelocity() const
 void ConveyorBelt::update()
 {
   sBodiesOnBelt.clear();
-  auto player = Player::getPlayer(0);
+  auto player = Player::getCurrent();
   player->setBeltVelocity(0.0f);
   player->setOnBelt(false);
 }
@@ -102,7 +102,7 @@ void ConveyorBelt::processFixtureNode(
 {
   if (fixtureNode->getType() == ObjectTypeConveyorBelt)
   {
-    auto playerBody = Player::getPlayer(0)->getBody();
+    auto playerBody = Player::getCurrent()->getBody();
 
     auto beltVelocity = dynamic_cast<ConveyorBelt*>(fixtureNode)->getVelocity();
 
@@ -120,7 +120,7 @@ void ConveyorBelt::processFixtureNode(
       else
       {
         // handle player differently because multiple linear velocities are applied to the player
-        auto player = Player::getPlayer(0);
+        auto player = Player::getCurrent();
         player->setOnBelt(true);
         player->setBeltVelocity(beltVelocity);
       }

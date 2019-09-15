@@ -34,7 +34,7 @@ public:
 
 protected:
 
-   int getPlayerId(FixtureNode *obj);
+   bool isPlayer(FixtureNode* obj) const;
 
 
 private:

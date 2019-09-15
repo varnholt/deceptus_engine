@@ -6,6 +6,7 @@
 #include "globalclock.h"
 #include "gameconfiguration.h"
 #include "player.h"
+#include "playerinfo.h"
 
 #include "image/psd.h"
 
@@ -74,7 +75,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (layerHealthEnergy->mVisible)
    {
-       const auto health = (Player::getPlayer(0)->mExtraTable->mHealth->mHealth) * 0.01f;
+       const auto health = (PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth) * 0.01f;
 
        const auto healthLayerWidth  = layerHealthEnergy->mSprite->getTexture()->getSize().x * health;
        const auto healthLayerHeight = layerHealthEnergy->mSprite->getTexture()->getSize().y;
@@ -136,7 +137,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    window.setView(view);
 
    std::stringstream stream;
-   auto pos = Player::getPlayer(0)->getPixelPosition();
+   auto pos = Player::getCurrent()->getPixelPosition();
    stream << "player pos: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
 
    mFont.draw(window, mFont.getCoords(stream.str()), 360, 5);

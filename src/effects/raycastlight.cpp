@@ -56,7 +56,7 @@ void RaycastLight::drawLines(sf::RenderTarget& target, std::shared_ptr<LightInst
 void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLight::LightInstance> light) const
 {
    // do not draw lights that are too far away
-   auto playerBody = Player::getPlayer(0)->getBody();
+   auto playerBody = Player::getCurrent()->getBody();
 
 // uhm.. not drawing into the stencil buffer and still drawing the light sprites later
 // is just dumb :)
@@ -157,7 +157,7 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
 //-----------------------------------------------------------------------------
 void RaycastLight::onDraw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
 {
-   auto playerBody = Player::getPlayer(0)->getBody();
+   auto playerBody = Player::getCurrent()->getBody();
 
    for (const auto& light : mLights)
    {

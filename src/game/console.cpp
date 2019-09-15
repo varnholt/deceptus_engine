@@ -1,6 +1,8 @@
 #include "console.h"
 
+#include "extramanager.h"
 #include "player.h"
+#include "playerinfo.h"
 
 #include <iostream>
 #include <ostream>
@@ -68,7 +70,7 @@ void Console::execute()
    {
       if (results.at(1) == "climb")
       {
-         Player::getPlayer(0)->updateClimb();
+         Player::getCurrent()->updateClimb();
          mLog.push_back("given climb extra to player");
       }
    }
@@ -82,16 +84,16 @@ void Console::execute()
       os << "teleport to " << x << ", " <<  y << std::endl;
       mLog.push_back(os.str());
 
-      Player::getPlayer(0)->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
+      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
    }
    else if (results.at(0) == "/iddqd")
    {
-      Player::getPlayer(0)->mExtraTable->mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
+      PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
       mLog.push_back("invulnerable");
    }
    else if (results.at(0) == "/idkfa")
    {
-      Player::getPlayer(0)->getExtraManager()->giveAllKeys();
+      Player::getCurrent()->getExtraManager()->giveAllKeys();
       mLog.push_back("all keys");
    }
    else
