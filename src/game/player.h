@@ -215,7 +215,7 @@ private:
 
    std::shared_ptr<b2World> mWorld;
    b2Body* mBody = nullptr;
-   b2Fixture* mHeadFixture = nullptr;
+   b2Fixture* mBodyFixture = nullptr;
    b2Joint* mClimbJoint = nullptr;
 
    GameControllerInfo mJoystickInfo;

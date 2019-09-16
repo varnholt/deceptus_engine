@@ -316,7 +316,7 @@ void Player::setCrouching(bool enabled)
    mCrouching = enabled;
    b2Filter filter;
    filter.maskBits = enabled ? 2 : 0xFFFF;
-   mHeadFixture->SetFilterData(filter);
+   mBodyFixture->SetFilterData(filter);
 }
 
 
@@ -421,18 +421,23 @@ void Player::createBody()
    fixtureBodyDef.density = 0.45f;
    fixtureBodyDef.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
    fixtureBodyDef.restitution = 0.0f;
+
+   fixtureBodyDef.filter.categoryBits = categoryBits;
+   fixtureBodyDef.filter.maskBits = maskBits;
    fixtureBodyDef.filter.groupIndex = groupIndex;
 
-   b2PolygonShape headShape;
-   headShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
-   fixtureBodyDef.shape = &headShape;
+   b2PolygonShape bodyShape;
+   bodyShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
+   fixtureBodyDef.shape = &bodyShape;
 
-   mHeadFixture = mBody->CreateFixture(&fixtureBodyDef);
+   mBodyFixture = mBody->CreateFixture(&fixtureBodyDef);
 
    FixtureNode* objectDataHead = new FixtureNode(this);
    objectDataHead->setType(ObjectTypePlayer);
    objectDataHead->setFlag("head", true);
-   mHeadFixture->SetUserData(static_cast<void*>(objectDataHead));
+   mBodyFixture->SetUserData(static_cast<void*>(objectDataHead));
+
+   // mBody->Dump();
 
 }
 
