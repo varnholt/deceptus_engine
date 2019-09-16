@@ -1010,12 +1010,15 @@ void LuaNode::createBody()
       fn->setType(ObjectTypeEnemy);
       fn->setProperty("damage", damage);
       ft->SetUserData(static_cast<void*>(fn));
+      ft->SetFilterData(fd.filter);
 
       if (sensor)
       {
          ft->SetSensor(true);
       }
    }
+
+   // mBody->Dump();
 }
 
 
