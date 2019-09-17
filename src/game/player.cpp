@@ -26,9 +26,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 namespace  {
    uint16_t categoryBits = CategoryFriendly;
-   uint16_t maskBits = CategoryBoundary | CategoryEnemyCollideWith;
+   uint16_t maskBitsStanding = CategoryBoundary | CategoryEnemyCollideWith;
+   uint16_t maskBitsCrouching = CategoryEnemyCollideWith;
    int16_t groupIndex = 0;
-   // int16_t groupIndex = -1; // 0 is default
 }
 
 
@@ -314,8 +314,8 @@ sf::IntRect Player::getPlayerPixelRect() const
 void Player::setCrouching(bool enabled)
 {
    mCrouching = enabled;
-   b2Filter filter;
-   filter.maskBits = enabled ? 2 : 0xFFFF;
+   b2Filter filter = mBodyFixture->GetFilterData();
+   filter.maskBits = enabled ? maskBitsCrouching : maskBitsStanding;
    mBodyFixture->SetFilterData(filter);
 }
 
@@ -346,7 +346,7 @@ void Player::createFeet()
       fixtureDefFeet.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
       fixtureDefFeet.restitution = 0.0f;
       fixtureDefFeet.filter.categoryBits = categoryBits;
-      fixtureDefFeet.filter.maskBits = maskBits;
+      fixtureDefFeet.filter.maskBits = maskBitsStanding;
       fixtureDefFeet.filter.groupIndex = groupIndex;
 
       b2CircleShape feetShape;
@@ -423,7 +423,7 @@ void Player::createBody()
    fixtureBodyDef.restitution = 0.0f;
 
    fixtureBodyDef.filter.categoryBits = categoryBits;
-   fixtureBodyDef.filter.maskBits = maskBits;
+   fixtureBodyDef.filter.maskBits = maskBitsStanding;
    fixtureBodyDef.filter.groupIndex = groupIndex;
 
    b2PolygonShape bodyShape;

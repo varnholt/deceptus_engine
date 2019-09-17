@@ -1253,12 +1253,6 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 }
 
 
-//-----------------------------------------------------------------------------
-void Level::setWorld(const std::shared_ptr<b2World>& world)
-{
-    mWorld = world;
-}
-
 
 //-----------------------------------------------------------------------------
 void Level::addPathsToWorld(
