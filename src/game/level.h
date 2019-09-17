@@ -103,7 +103,6 @@ public:
    void update(const sf::Time& dt);
 
    const std::shared_ptr<b2World>& getWorld() const;
-   void setWorld(const std::shared_ptr<b2World>& world);
 
    std::map<b2Body *, b2Vec2 *> *getPointMap() ;
    std::map<b2Body*, size_t>* getPointSizeMap();
