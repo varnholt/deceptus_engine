@@ -292,5 +292,6 @@ private:
    std::deque<PositionedAnimation> mLastAnimations;
 
    static Player* sCurrent;
+   void resetDash();
 };
 
