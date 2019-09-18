@@ -74,7 +74,7 @@ void BitmapFont::load(
 
       x += mCharWidth;
 
-      if (x == mTexture.getSize().x)
+      if (x == static_cast<int32_t>(mTexture.getSize().x))
       {
          x = 0;
          y += mCharHeight;

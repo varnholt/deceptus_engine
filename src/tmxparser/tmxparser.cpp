@@ -115,7 +115,7 @@ TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
    int tileId = 0;
    int tmpId = 0;
 
-   for (int i = 0; i < (layer->mHeight * layer->mWidth); i++)
+   for (auto i = 0u; i < (layer->mHeight * layer->mWidth); i++)
    {
       tmpId = layer->mData[i];
 

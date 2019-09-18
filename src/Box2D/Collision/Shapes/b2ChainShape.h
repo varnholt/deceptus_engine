@@ -96,7 +96,7 @@ inline b2ChainShape::b2ChainShape()
 {
 	m_type = e_chain;
 	m_radius = b2_polygonRadius;
-	m_vertices = NULL;
+	m_vertices = nullptr;
 	m_count = 0;
 	m_hasPrevVertex = false;
 	m_hasNextVertex = false;

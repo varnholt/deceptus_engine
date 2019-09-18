@@ -408,7 +408,7 @@ extern "C" int32_t addWeapon(lua_State* state)
       auto size = argc / 2;
       b2Vec2* poly = new b2Vec2[size];
       auto polyIndex = 0;
-      for (auto i = 2; i < argc; i += 2)
+      for (auto i = 2u; i < argc; i += 2u)
       {
          auto x = static_cast<float>(lua_tonumber(state, i));
          auto y = static_cast<float>(lua_tonumber(state, i + 1));

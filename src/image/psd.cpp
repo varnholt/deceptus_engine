@@ -31,11 +31,11 @@ namespace
        }
    }
 
-   void read(int8_t& val, std::istream& stream)
-   {
-      stream.read(reinterpret_cast<char*>(&val), 1);
-      check(stream);
-   }
+   // void read(int8_t& val, std::istream& stream)
+   // {
+   //    stream.read(reinterpret_cast<char*>(&val), 1);
+   //    check(stream);
+   // }
 
    void read(uint8_t& val, std::istream& stream)
    {
@@ -575,7 +575,7 @@ void PSD::Layer::Channel::unpackBits(
    std::istream& stream
 )
 {
-   auto bytesRead = 0;
+   auto bytesRead = 0u;
    while (bytesRead < bytesPerScanline)
    {
       uint8_t controlByte = 0;

@@ -6,11 +6,6 @@
 #include <iostream>
 #include <math.h>
 
-
-#ifdef __linux__
-#define setFillColor setColor
-#endif
-
 std::deque<MessageBox> MessageBox::mQueue;
 bool MessageBox::sInitialized = false;
 
