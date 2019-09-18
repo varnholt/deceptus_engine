@@ -36,6 +36,7 @@ win32 {
 linux {
     QMAKE_CXXFLAGS += -std=c++17
     QMAKE_CXXFLAGS += -lc++fs
+    QMAKE_CXXFLAGS += -Wno-multichar
 }
 
 

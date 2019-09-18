@@ -1776,7 +1776,7 @@ void Player::updateClimb()
 //   aabb.lowerBound = b2Vec2(FLT_MAX,FLT_MAX);
 //   aabb.upperBound = b2Vec2(-FLT_MAX,-FLT_MAX);
 //   auto fixture = mBody->GetFixtureList();
-//   while (fixture != NULL)
+//   while (fixture != nullptr)
 //   {
 //       aabb.Combine(aabb, fixture->GetAABB(0));
 //       fixture = fixture->GetNext();

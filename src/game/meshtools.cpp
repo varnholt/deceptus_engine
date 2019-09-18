@@ -60,7 +60,7 @@ void Mesh::writeObj(
 
 void Mesh::join(b2Vec2* a, b2Vec2* b)
 {
-   a = b;
+   *a = *b;
 }
 
 

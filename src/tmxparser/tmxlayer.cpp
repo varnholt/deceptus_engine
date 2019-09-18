@@ -115,7 +115,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
     int32_t yMin = chunks.at(0)->mY;
     int32_t yMax = chunks.at(0)->mY;
 
-    for (int i = 1; i < chunks.size(); i++)
+    for (auto i = 1u; i < chunks.size(); i++)
     {
       const auto c = chunks.at(i);
 
