@@ -210,9 +210,9 @@ void MenuScreenAudio::updateLayers()
    const auto masterVolume = GameConfiguration::getInstance().mAudioVolumeMaster;
    const auto sfxVolume = GameConfiguration::getInstance().mAudioVolumeSfx;
    const auto musicVolume = GameConfiguration::getInstance().mAudioVolumeMusic;
-   mLayers["master_h"]->mSprite->setOrigin(50 - masterVolume, 0);
-   mLayers["sfxVolume_h"]->mSprite->setOrigin(50 - sfxVolume, 0);
-   mLayers["mscVolume_h"]->mSprite->setOrigin(50 - musicVolume, 0);
+   mLayers["master_h"]->mSprite->setOrigin(50.0f - masterVolume, 0.0f);
+   mLayers["sfxVolume_h"]->mSprite->setOrigin(50.0f - sfxVolume, 0.0f);
+   mLayers["mscVolume_h"]->mSprite->setOrigin(50.0f - musicVolume, 0.0f);
 }
 
 

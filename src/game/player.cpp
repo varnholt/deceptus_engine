@@ -253,7 +253,7 @@ void Player::draw(sf::RenderTarget& target)
       {
          auto& anim = mLastAnimations[i];
          anim.mAnimation->setPosition(anim.mPosition);
-         anim.mAnimation->setAlpha(255/(2*(mLastAnimations.size()-i)));
+         anim.mAnimation->setAlpha(static_cast<uint8_t>(255/(2*(mLastAnimations.size()-i))));
          anim.mAnimation->draw(target);
       }
 

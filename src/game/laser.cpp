@@ -171,8 +171,8 @@ std::vector<std::shared_ptr<Laser>> Laser::load(
             laser->mTilePosition.x = static_cast<float>(i);
             laser->mTilePosition.y = static_cast<float>(j);
 
-            laser->mPixelPosition.x = static_cast<int32_t>(laser->mTilePosition.x * PIXELS_PER_TILE);
-            laser->mPixelPosition.y = static_cast<int32_t>(laser->mTilePosition.y * PIXELS_PER_TILE);
+            laser->mPixelPosition.x = laser->mTilePosition.x * PIXELS_PER_TILE;
+            laser->mPixelPosition.y = laser->mTilePosition.y * PIXELS_PER_TILE;
 
             laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->mImage->mSource);
 
@@ -239,8 +239,8 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
       std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](auto laser){
             sf::Rect<int32_t> itemRect;
 
-            itemRect.left = laser->mPixelPosition.x;
-            itemRect.top = laser->mPixelPosition.y;
+            itemRect.left = static_cast<int32_t>(laser->mPixelPosition.x);
+            itemRect.top = static_cast<int32_t>(laser->mPixelPosition.y);
 
             itemRect.width = PIXELS_PER_TILE;
             itemRect.height = PIXELS_PER_TILE;
@@ -261,8 +261,8 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
                   {
                      sf::Rect<int32_t> rect;
 
-                     rect.left = laser->mPixelPosition.x + (x * PIXELS_PER_PHYSICS_TILE);
-                     rect.top = laser->mPixelPosition.y + (y * PIXELS_PER_PHYSICS_TILE);
+                     rect.left = static_cast<int32_t>(laser->mPixelPosition.x + (x * PIXELS_PER_PHYSICS_TILE));
+                     rect.top = static_cast<int32_t>(laser->mPixelPosition.y + (y * PIXELS_PER_PHYSICS_TILE));
 
                      rect.width = PIXELS_PER_PHYSICS_TILE;
                      rect.height = PIXELS_PER_PHYSICS_TILE;
