@@ -391,7 +391,12 @@ void Game::draw()
 
    mWindowRenderTexture->display();
    auto windowTextureSprite = sf::Sprite(mWindowRenderTexture->getTexture());
-   windowTextureSprite.setPosition(mRenderTextureOffset.x, mRenderTextureOffset.y);
+
+   windowTextureSprite.setPosition(
+      static_cast<float>(mRenderTextureOffset.x),
+      static_cast<float>(mRenderTextureOffset.y)
+   );
+
    mWindow->draw(windowTextureSprite);
 
    mWindow->popGLStates();

@@ -311,7 +311,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
             DrawPolygon(
                target,
                vtxIt->second,
-               vtxCountIt->second,
+               static_cast<int32_t>(vtxCountIt->second),
                b2Color(1.0f, 0.0f, 0.0f)
             );
          }

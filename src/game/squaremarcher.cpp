@@ -140,7 +140,7 @@ void SquareMarcher::deserialize()
 
 void SquareMarcher::scan()
 {
-   std::srand(std::time(nullptr));
+   std::srand(static_cast<uint32_t>(std::time(nullptr)));
 
    std::ifstream fileIn(mCachePath);
    if (fileIn.fail())
@@ -186,7 +186,11 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
       // float factor = 0.3333333333333f;
       float factor = 1.0f;
       sf::RenderTexture renderTexture;
-      if (!renderTexture.create(mWidth * factor, mHeight * factor))
+      if (!renderTexture.create(
+            static_cast<uint32_t>(mWidth * factor),
+            static_cast<uint32_t>(mHeight * factor)
+         )
+      )
       {
           std::cout << "failed to create render texture" << std::endl;
           return;
@@ -247,8 +251,8 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& imagePath)
          {
             sf::Vertex vertex;
             vertex.color = sf::Color::White;
-            vertex.position.x = static_cast<float>(pos.x * factor);
-            vertex.position.y = static_cast<float>(pos.y * factor);
+            vertex.position.x = static_cast<float>(static_cast<uint32_t>(pos.x) * factor);
+            vertex.position.y = static_cast<float>(static_cast<uint32_t>(pos.y) * factor);
             vertices.push_back(vertex);
          }
 
@@ -539,7 +543,12 @@ SquareMarcher::Path SquareMarcher::march(uint32_t startX, uint32_t startY)
       if (mDirCurrent != Direction::None)
       {
          path.mDirs.push_back(mDirCurrent);
-         path.mPolygon.push_back(sf::Vector2i(mX, mY));
+         path.mPolygon.push_back(
+            sf::Vector2i(
+               static_cast<int32_t>(mX),
+               static_cast<int32_t>(mY)
+            )
+         );
       }
 
       if (mX == startX && mY == startY)

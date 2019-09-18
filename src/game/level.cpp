@@ -1148,7 +1148,15 @@ void Level::draw(
    }
 
    // display the whole texture
-   sf::View view(sf::FloatRect(0.0f, 0.0f, mLevelRenderTexture->getSize().x, mLevelRenderTexture->getSize().y));
+   sf::View view(
+      sf::FloatRect(
+         0.0f,
+         0.0f,
+         static_cast<float>(mLevelRenderTexture->getSize().x),
+         static_cast<float>(mLevelRenderTexture->getSize().y)
+      )
+   );
+
    view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
    mLevelRenderTexture->setView(view);
    mLevelRenderTexture->display();
