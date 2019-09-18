@@ -119,6 +119,8 @@ SOURCES += \
     src/game/game.cpp \
     src/game/player.cpp \
     src/game/level.cpp \
+   src/menus/menuscreenfileselect.cpp \
+   src/menus/menuscreennameselect.cpp \
     src/tmxparser/tmxanimation.cpp \
     src/tmxparser/tmxelement.cpp \
     src/tmxparser/tmxframe.cpp \
@@ -251,6 +253,8 @@ HEADERS += \
     src/game/texturepool.h \
     src/game/weather.h \
     src/game/weatheroverlay.h \
+    src/menus/menuscreenfileselect.h \
+    src/menus/menuscreennameselect.h \
     src/tmxparser/tmxanimation.h \
     src/tmxparser/tmxelement.h \
     src/tmxparser/tmxframe.h \

@@ -1926,6 +1926,17 @@ void Player::jumpForce()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::resetDash()
+{
+   // clear motion blur buffer
+   mLastAnimations.clear();
+
+   // re-enabled gravity for player
+   mBody->SetGravityScale(1.0f);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
    // dir is the initial dir passed in on button press
@@ -1969,11 +1980,7 @@ void Player::updateDash(Dash dir)
 
    if (!isDashActive())
    {
-      // clear motion blur buffer
-      mLastAnimations.clear();
-
-      // re-enabled gravity for player
-      mBody->SetGravityScale(1.0f);
+      resetDash();
    }
 }
 
@@ -2183,6 +2190,9 @@ void Player::reset()
    PlayerInfo::getCurrent().mExtraTable.mHealth->reset();
 
    mExtraManager->resetKeys();
+
+   mDashSteps = 0;
+   resetDash();
 }
 
 
