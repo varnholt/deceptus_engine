@@ -19,7 +19,7 @@ LIBS -= -lQtGui
 LIBS -= -lQtCore
 
 #debug {
-#   CONFIG += console
+   CONFIG += console
 #}
 
 # code requires c++17

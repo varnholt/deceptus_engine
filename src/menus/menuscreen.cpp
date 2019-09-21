@@ -58,12 +58,14 @@ void MenuScreen::load()
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
+      auto opacity = layer.getOpacity();
 
-      texture->create(layer.getWidth(), layer.getHeight());
+      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
 
       tmp->mTexture = texture;
       tmp->mSprite = sprite;

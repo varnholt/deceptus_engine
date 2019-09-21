@@ -12,6 +12,8 @@ public:
 
    enum class MenuType {
       None,
+      FileSelect,
+      NameSelect,
       Main,
       Options,
       Controls,
@@ -57,6 +59,8 @@ private:
    std::shared_ptr<MenuScreen> mCurrentMenu;
 
    std::shared_ptr<MenuScreen> mMenuMain;
+   std::shared_ptr<MenuScreen> mMenuFileSelect;
+   std::shared_ptr<MenuScreen> mMenuNameSelect;
    std::shared_ptr<MenuScreen> mMenuOptions;
    std::shared_ptr<MenuScreen> mMenuAudio;
    std::shared_ptr<MenuScreen> mMenuControls;
