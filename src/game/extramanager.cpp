@@ -3,7 +3,6 @@
 #include "audio.h"
 #include "constants.h"
 #include "extraitem.h"
-#include "extrahealth.h"
 #include "extratable.h"
 #include "inventoryitem.h"
 #include "player.h"

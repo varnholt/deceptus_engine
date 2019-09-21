@@ -6,8 +6,10 @@
 #include "menuscreenaudio.h"
 #include "menuscreencontrols.h"
 #include "menuscreencredits.h"
+#include "menuscreenfileselect.h"
 #include "menuscreengame.h"
 #include "menuscreenmain.h"
+#include "menuscreennameselect.h"
 #include "menuscreenoptions.h"
 #include "menuscreenpause.h"
 #include "menuscreenvideo.h"
@@ -24,6 +26,8 @@ std::shared_ptr<Menu> Menu::sInstance;
 Menu::Menu()
 {
    mMenuMain = std::make_shared<MenuScreenMain>();
+   mMenuFileSelect = std::make_shared<MenuScreenFileSelect>();
+   mMenuNameSelect = std::make_shared<MenuScreenNameSelect>();
    mMenuOptions = std::make_shared<MenuScreenOptions>();
    mMenuAudio = std::make_shared<MenuScreenAudio>();
    mMenuVideo = std::make_shared<MenuScreenVideo>();
@@ -34,6 +38,8 @@ Menu::Menu()
    mMenuPause = std::make_shared<MenuScreenPause>();
 
    mMenus.push_back(mMenuMain);
+   mMenus.push_back(mMenuFileSelect);
+   mMenus.push_back(mMenuNameSelect);
    mMenus.push_back(mMenuOptions);
    mMenus.push_back(mMenuAudio);
    mMenus.push_back(mMenuVideo);
@@ -99,6 +105,12 @@ void Menu::show(Menu::MenuType menu)
          break;
       case MenuType::Options:
          mCurrentMenu = mMenuOptions;
+         break;
+      case MenuType::FileSelect:
+         mCurrentMenu = mMenuFileSelect;
+         break;
+      case MenuType::NameSelect:
+         mCurrentMenu = mMenuNameSelect;
          break;
       case MenuType::Controls:
          mCurrentMenu = mMenuControls;
@@ -185,6 +197,10 @@ const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) cons
           return mMenuMain;
        case MenuType::Options:
           return mMenuOptions;
+       case MenuType::FileSelect:
+          return mMenuFileSelect;
+       case MenuType::NameSelect:
+          return mMenuNameSelect;
        case MenuType::Controls:
           return mMenuControls;
        case MenuType::Video:
@@ -277,7 +293,6 @@ void Menu::initialize()
          SDL_CONTROLLER_BUTTON_X,
          [this](){keyboardKeyPressed(sf::Keyboard::D);}
       );
-
    }
 }
 

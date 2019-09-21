@@ -5,6 +5,13 @@
 class MenuScreenFileSelect : public MenuScreen
 {
 public:
+
+   enum class Slot{
+      A = 0,
+      B = 1,
+      C = 2
+   };
+
    MenuScreenFileSelect();
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
@@ -15,5 +22,10 @@ public:
    void down();
    void select();
    void back();
+
+private:
+
+
+   Slot mSlot = Slot::A;
 };
 

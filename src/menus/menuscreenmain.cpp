@@ -5,6 +5,9 @@
 #include "menu.h"
 
 
+// #define DEV_SAVE_STATE 1
+
+
 MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/main.psd");
@@ -85,8 +88,12 @@ void MenuScreenMain::select()
    switch (mSelection)
    {
       case Selection::Start:
-         Menu::getInstance()->hide();
-         GameState::getInstance().enqueueResume();
+#ifdef DEV_SAVE_STATE
+      Menu::getInstance()->show(Menu::MenuType::FileSelect);
+#else
+      Menu::getInstance()->hide();
+      GameState::getInstance().enqueueResume();
+#endif
          break;
       case Selection::Options:
          Menu::getInstance()->show(Menu::MenuType::Options);
