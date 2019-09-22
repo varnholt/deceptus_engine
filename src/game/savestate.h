@@ -3,12 +3,7 @@
 #include <array>
 #include <string>
 
-
-class PlayerInfo
-{
-   std::string mName;
-};
-
+#include "playerinfo.h"
 
 class SaveState
 {
@@ -20,6 +15,9 @@ public:
    static std::array<SaveState, 3>& getSaveStates();
    bool isEmpty() const;
 
+   static PlayerInfo& getPlayerInfo();
+
+
 private:
 
    PlayerInfo mPlayerInfo;
@@ -27,6 +25,7 @@ private:
    int32_t mLevelIndex = 0;
    int32_t mCheckpoint = 0;
 
+   static uint32_t sSlot;
    static std::array<SaveState, 3> sSaveStates;
 };
 

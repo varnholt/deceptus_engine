@@ -16,9 +16,6 @@ public:
 
    std::shared_ptr<ExtraHealth> mHealth;
    std::shared_ptr<ExtraSkill> mSkills;
-
-   // keys are part of the inventory, hey?
-   // std::shared_ptr<ExtraKey> mKeys;
 };
 
 #endif // EXTRATABLE_H

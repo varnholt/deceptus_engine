@@ -1,7 +1,7 @@
-#ifndef INVENTORYLAYER_H
-#define INVENTORYLAYER_H
+#pragma once
 
 #include "constants.h"
+#include "inventory.h"
 #include "joystick/gamecontrollerinfo.h"
 
 #include <memory>
@@ -14,6 +14,10 @@ class InventoryLayer
 {
 
 public:
+
+   struct ItemSprite {
+      sf::Sprite mSprite;
+   };
 
    InventoryLayer();
 
@@ -37,7 +41,7 @@ public:
 private:
 
    void addItem(int32_t x, int32_t y, ItemType type);
-   std::vector<std::shared_ptr<InventoryItem>>* getInventory();
+   Inventory& getInventory();
    void initializeController();
    void updateControllerActions();
    bool isControllerActionSkipped() const;
@@ -46,16 +50,10 @@ private:
    sf::Vector2f mCursorPosition;
    sf::Texture mInventuryTexture;
 
+   std::map<ItemType, ItemSprite> mSprites;
    int32_t mSelectedItem = 0;
    bool mActive = false;
    GameControllerInfo mJoystickInfo;
    float mJoystickUpdateTime = 0.0f;
 };
-
-#endif // INVENTORYLAYER_H
-
-
-
-
-
 

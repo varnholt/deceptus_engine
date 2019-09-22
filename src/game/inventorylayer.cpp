@@ -9,7 +9,7 @@
 #include "playerinfo.h"
 #include "extramanager.h"
 #include "inventoryitem.h"
-
+#include "savestate.h"
 
 namespace {
    const auto iconWidth  = 40;
@@ -58,9 +58,9 @@ void InventoryLayer::initializeController()
 
 
 //---------------------------------------------------------------------------------------------------------------------
-std::vector<std::shared_ptr<InventoryItem>>* InventoryLayer::getInventory()
+Inventory& InventoryLayer::getInventory()
 {
-   return &PlayerInfo::getCurrent().mInventory;
+   return SaveState::getPlayerInfo().mInventory;
 }
 
 
@@ -68,11 +68,12 @@ std::vector<std::shared_ptr<InventoryItem>>* InventoryLayer::getInventory()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
 {
-   auto item = std::make_shared<InventoryItem>();
-   item->mType = type;
-   item->mSprite.setTexture(mInventuryTexture);
-   item->mSprite.setTextureRect({x * iconWidth, y * iconHeight, iconWidth, iconHeight});
-   getInventory()->push_back(item);
+   sf::Sprite sprite;
+   sprite.setTexture(mInventuryTexture);
+   sprite.setTextureRect({x * iconWidth, y * iconHeight, iconWidth, iconHeight});
+   mSprites[type].mSprite = sprite;
+
+   getInventory().add(type);
 }
 
 
@@ -123,10 +124,12 @@ void InventoryLayer::draw(sf::RenderTarget &window)
    y = 230;
    x = dist;
 
-   for (auto item : PlayerInfo::getCurrent().mInventory)
+   for (auto item : SaveState::getPlayerInfo().mInventory.getItems())
    {
-      item->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-      window.draw(item->mSprite);
+      auto visualization = mSprites[item.mType];
+
+      visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
+      window.draw(visualization.mSprite);
       x += iconWidth + dist - iconQuadDist;
    }
 
@@ -233,7 +236,7 @@ void InventoryLayer::right()
       return;
    }
 
-   if (mSelectedItem < static_cast<int32_t>(getInventory()->size()) - 1)
+   if (mSelectedItem < static_cast<int32_t>(getInventory().getItems().size()) - 1)
    {
       mSelectedItem++;
    }

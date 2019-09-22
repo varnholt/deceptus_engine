@@ -21,14 +21,9 @@ public:
    void load(TmxLayer *layer, TmxTileSet *tileSet);
    void collide(const sf::Rect<int32_t>& playerRect);
 
-   void resetInventory();
    void resetExtras();
-   void resetKeys();
-   void giveAllKeys();
 
    ExtraManager() = default;
-
-   bool hasInventoryItem(ItemType itemType) const;
 
    std::vector<std::shared_ptr<ExtraItem>> mExtras;
 

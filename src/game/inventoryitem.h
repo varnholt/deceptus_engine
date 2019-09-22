@@ -10,7 +10,5 @@ struct InventoryItem
    InventoryItem(ItemType);
 
    ItemType mType = ItemType::Invalid;
-   sf::Sprite mSprite;
-   sf::Texture mTexture;
 };
 
