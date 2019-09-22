@@ -8,6 +8,7 @@
 #include "player.h"
 #include "playerinfo.h"
 #include "tilemap.h"
+#include "savestate.h"
 
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxtile.h"
@@ -98,11 +99,11 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                break;
             case ExtraItem::ExtraSpriteIndex::Cherry:
                Audio::getInstance()->playSample("healthup.wav");
-               PlayerInfo::getCurrent().mExtraTable.mHealth->addHealth(20);
+               SaveState::getPlayerInfo().mExtraTable.mHealth->addHealth(20);
                break;
             case ExtraItem::ExtraSpriteIndex::Banana:
                Audio::getInstance()->playSample("healthup.wav");
-               PlayerInfo::getCurrent().mExtraTable.mHealth->addHealth(10);
+               SaveState::getPlayerInfo().mExtraTable.mHealth->addHealth(10);
                break;
             case ExtraItem::ExtraSpriteIndex::Apple:
                Audio::getInstance()->playSample("powerup.wav");
@@ -110,38 +111,30 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
             case ExtraItem::ExtraSpriteIndex::KeyRed:
             {
                Audio::getInstance()->playSample("powerup.wav");
-               PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyRed));
+               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyRed);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyYellow:
             {
                Audio::getInstance()->playSample("powerup.wav");
-               PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyYellow));
+               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyYellow);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyBlue:
             {
                Audio::getInstance()->playSample("powerup.wav");
-               PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyBlue));
+               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyBlue);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyGreen:
             {
                Audio::getInstance()->playSample("powerup.wav");
-               PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyGreen));
+               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyGreen);
                break;
             }
          }
       }
    }
-}
-
-
-
-void ExtraManager::resetInventory()
-{
-
-   PlayerInfo::getCurrent().mInventory.clear();
 }
 
 
@@ -151,54 +144,5 @@ void ExtraManager::resetExtras()
 }
 
 
-void ExtraManager::resetKeys()
-{
-   PlayerInfo::getCurrent().mInventory.erase(
-      std::remove_if(
-         PlayerInfo::getCurrent().mInventory.begin(),
-         PlayerInfo::getCurrent().mInventory.end(),
-         [](auto& item) -> bool
-         {
-            if (
-                  item->mType == ItemType::KeyBlue
-               || item->mType == ItemType::KeyGreen
-               || item->mType == ItemType::KeyRed
-               || item->mType == ItemType::KeyYellow
-            )
-            {
-               return true;
-            }
-
-            return false;
-         }
-      ),
-      PlayerInfo::getCurrent().mInventory.end()
-   );
-}
-
-
-void ExtraManager::giveAllKeys()
-{
-   PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyRed));
-   PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyYellow));
-   PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyBlue));
-   PlayerInfo::getCurrent().mInventory.push_back(std::make_shared<InventoryItem>(ItemType::KeyGreen));
-}
-
-
-bool ExtraManager::hasInventoryItem(ItemType itemType) const
-{
-   if (itemType == ItemType::Invalid)
-   {
-      return true;
-   }
-
-   auto it = std::find_if(std::begin(PlayerInfo::getCurrent().mInventory), std::end(PlayerInfo::getCurrent().mInventory), [itemType](auto item) {
-         return (item->mType == itemType);
-      }
-   );
-
-   return it != PlayerInfo::getCurrent().mInventory.end();
-}
 
 

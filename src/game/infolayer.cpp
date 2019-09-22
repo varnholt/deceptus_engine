@@ -7,6 +7,7 @@
 #include "gameconfiguration.h"
 #include "player.h"
 #include "playerinfo.h"
+#include "savestate.h"
 
 #include "image/psd.h"
 
@@ -75,7 +76,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (layerHealthEnergy->mVisible)
    {
-       const auto health = (PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth) * 0.01f;
+       const auto health = (SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth) * 0.01f;
 
        const auto healthLayerWidth  = layerHealthEnergy->mSprite->getTexture()->getSize().x * health;
        const auto healthLayerHeight = layerHealthEnergy->mSprite->getTexture()->getSize().y;

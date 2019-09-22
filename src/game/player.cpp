@@ -15,6 +15,7 @@
 #include "level.h"
 #include "physicsconfiguration.h"
 #include "playerinfo.h"
+#include "savestate.h"
 #include "weapon.h"
 #include "weaponsystem.h"
 
@@ -1225,7 +1226,7 @@ void Player::damage(int damage, const sf::Vector2f& force)
       return;
    }
 
-   if (PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills & ExtraSkill::SkillInvulnerable)
+   if (SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills & ExtraSkill::SkillInvulnerable)
    {
       return;
    }
@@ -1240,10 +1241,10 @@ void Player::damage(int damage, const sf::Vector2f& force)
       auto body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-      PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth -= damage;
+      SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth -= damage;
       mDamageClock.restart();
 
-      if (PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth < 0)
+      if (SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth < 0)
       {
          // the function below is not called since 'damage(...)' is evaluated
          // within the box2d step function; no further box2d related adjustments
@@ -1695,7 +1696,7 @@ bool Player::edgeMatchesMovement(const b2Vec2& edgeDir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateClimb()
 {
-   if (!(PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb))
+   if (!(SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb))
    {
       return;
    }
@@ -2187,9 +2188,8 @@ void Player::reset()
       Level::getCurrentLevel()->getStartPosition().y
    );
 
-   PlayerInfo::getCurrent().mExtraTable.mHealth->reset();
-
-   mExtraManager->resetKeys();
+   SaveState::getPlayerInfo().mExtraTable.mHealth->reset();
+   SaveState::getPlayerInfo().mInventory.resetKeys();
 
    mDashSteps = 0;
    resetDash();
@@ -2201,7 +2201,7 @@ bool Player::isDead() const
 {
    const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
    const auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
-   const auto outOfHealth = PlayerInfo::getCurrent().mExtraTable.mHealth->mHealth <= 0;
+   const auto outOfHealth = SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth <= 0;
 
    const auto dead = touchesSomethingDeadly || tooFast || outOfHealth;
 

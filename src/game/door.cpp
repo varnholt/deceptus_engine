@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "player.h"
+#include "savestate.h"
 #include "sfmlmath.h"
 #include "timer.h"
 
@@ -172,11 +173,10 @@ void Door::addSprite(const sf::Sprite & sprite)
 }
 
 
-
 //-----------------------------------------------------------------------------
 void Door::toggle()
 {
-   if (!Player::getCurrent()->getExtraManager()->hasInventoryItem(mRequiredItem))
+   if (!SaveState::getPlayerInfo().mInventory.hasInventoryItem(mRequiredItem))
    {
       return;
    }

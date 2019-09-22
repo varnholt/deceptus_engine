@@ -21,6 +21,7 @@
 #include "player.h"
 #include "playerinfo.h"
 #include "physicsconfiguration.h"
+#include "savestate.h"
 #include "timer.h"
 #include "weapon.h"
 #include "weather.h"
@@ -623,13 +624,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Audio::getInstance()->playSample("powerup.wav");
 
-         if (PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb)
+         if (SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb)
          {
-            PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills &= ~ ExtraSkill::SkillClimb;
+            SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills &= ~ ExtraSkill::SkillClimb;
          }
          else
          {
-            PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillClimb;
+            SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillClimb;
          }
          break;
       }

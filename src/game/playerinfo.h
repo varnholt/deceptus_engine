@@ -1,25 +1,19 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "extratable.h"
-#include "inventoryitem.h"
+#include "inventory.h"
 
 
 class PlayerInfo
 {
    public:
 
-      std::vector<std::shared_ptr<InventoryItem>> mInventory;
+      Inventory mInventory;
       ExtraTable mExtraTable;
-
-      static PlayerInfo& getCurrent();
-
-
-   private:
-
-      PlayerInfo() = default;
-      static PlayerInfo sCurrent;
+      std::string mName;
 };
 

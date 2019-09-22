@@ -101,6 +101,7 @@ SOURCES += \
    src/game/console.cpp \
    src/game/controlleroverlay.cpp \
    src/game/fan.cpp \
+   src/game/inventory.cpp \
    src/game/laser.cpp \
    src/game/levelmap.cpp \
    src/game/maptools.cpp \
@@ -239,6 +240,7 @@ HEADERS += \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
     src/game/game.h \
+    src/game/inventory.h \
     src/game/laser.h \
     src/game/levelmap.h \
     src/game/maptools.h \

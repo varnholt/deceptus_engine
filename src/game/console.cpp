@@ -3,6 +3,7 @@
 #include "extramanager.h"
 #include "player.h"
 #include "playerinfo.h"
+#include "savestate.h"
 
 #include <iostream>
 #include <ostream>
@@ -88,12 +89,12 @@ void Console::execute()
    }
    else if (results.at(0) == "/iddqd")
    {
-      PlayerInfo::getCurrent().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
+      SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
       mLog.push_back("invulnerable");
    }
    else if (results.at(0) == "/idkfa")
    {
-      Player::getCurrent()->getExtraManager()->giveAllKeys();
+      SaveState::getPlayerInfo().mInventory.giveAllKeys();
       mLog.push_back("all keys");
    }
    else
