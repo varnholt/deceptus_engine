@@ -5,7 +5,7 @@
 #include "menu.h"
 
 
-// #define DEV_SAVE_STATE 1
+#define DEV_SAVE_STATE 1
 
 
 MenuScreenMain::MenuScreenMain()

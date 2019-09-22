@@ -2,6 +2,7 @@
 
 #include "menu.h"
 
+#include "game/gamestate.h"
 #include "game/savestate.h"
 
 #include <iostream>
@@ -43,6 +44,18 @@ void MenuScreenFileSelect::down()
 
 void MenuScreenFileSelect::select()
 {
+   const auto newGame = true;
+
+   if (newGame)
+   {
+      Menu::getInstance()->show(Menu::MenuType::NameSelect);
+   }
+   else
+   {
+      Menu::getInstance()->hide();
+      GameState::getInstance().enqueueResume();
+   }
+
    // if current slot holds data, load it
 
    // if current slot is empty, create a new slot and go to name select
