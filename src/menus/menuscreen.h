@@ -16,7 +16,7 @@ public:
    virtual ~MenuScreen() = default;
 
    virtual void update(const sf::Time& dt);
-   void draw(sf::RenderTarget& window, sf::RenderStates states);
+   virtual void draw(sf::RenderTarget& window, sf::RenderStates states);
 
    const std::string& getFilename();
    void setFilename(const std::string& filename);

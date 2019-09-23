@@ -170,6 +170,11 @@ void Menu::keyboardKeyReleased(sf::Keyboard::Key key)
    }
 }
 
+bool Menu::isVisible() const
+{
+   return (mCurrentType != MenuType::None);
+}
+
 
 Menu::MenuType Menu::getCurrentType() const
 {

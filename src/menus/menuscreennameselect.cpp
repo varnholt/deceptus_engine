@@ -13,6 +13,13 @@ namespace {
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
+   mFont.loadFromFile("data/fonts/deceptum.ttf");
+
+   mText.setScale(0.25f, 0.25f);
+   mText.setFont(mFont);
+   mText.setCharacterSize(48);
+   mText.setFillColor(sf::Color{232, 219, 243});
+
    setFilename("data/menus/nameselect.psd");
 
    mChars = {
@@ -68,40 +75,23 @@ void MenuScreenNameSelect::back()
 }
 
 
-/*
-        A = 0,        ///< The A key
-        B,            ///< The B key
-        C,            ///< The C key
-        D,            ///< The D key
-        E,            ///< The E key
-        F,            ///< The F key
-        G,            ///< The G key
-        H,            ///< The H key
-        I,            ///< The I key
-        J,            ///< The J key
-        K,            ///< The K key
-        L,            ///< The L key
-        M,            ///< The M key
-        N,            ///< The N key
-        O,            ///< The O key
-        P,            ///< The P key
-        Q,            ///< The Q key
-        R,            ///< The R key
-        S,            ///< The S key
-        T,            ///< The T key
-        U,            ///< The U key
-        V,            ///< The V key
-        W,            ///< The W key
-        X,            ///< The X key
-        Y,            ///< The Y key
-        Z,            ///< The Z key
-
-        LShift,       ///< The left Shift key
-        RShift,       ///< The right Shift key
-*/
-
 void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
+   mShift += static_cast<int32_t>(key == sf::Keyboard::LShift);
+   mShift += static_cast<int32_t>(key == sf::Keyboard::RShift);
+
+   if (key >= sf::Keyboard::A && key <= sf::Keyboard::Z)
+   {
+      mName += mChars[static_cast<uint32_t>(key)];
+      updateLayers();
+   }
+
+   if (key == sf::Keyboard::Delete || key == sf::Keyboard::Backspace)
+   {
+      mName.pop_back();
+      updateLayers();
+   }
+
    if (key == sf::Keyboard::Up)
    {
       up();
@@ -134,11 +124,22 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 }
 
 
+void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
+{
+   mShift -= static_cast<int32_t>(key == sf::Keyboard::LShift);
+   mShift -= static_cast<int32_t>(key == sf::Keyboard::RShift);
+}
+
+
 void MenuScreenNameSelect::loadingFinished()
 {
     auto cursor = mLayers["cursor"];
     mCharOrigin.x = cursor->mSprite->getPosition().x;
     mCharOrigin.y = cursor->mSprite->getPosition().y;
+
+    auto playerName = mLayers["players-name"];
+    mNameOrigin.x = playerName->mSprite->getPosition().x;
+    mNameOrigin.y = playerName->mSprite->getPosition().y;
 
     updateLayers();
 }
@@ -153,10 +154,8 @@ void MenuScreenNameSelect::updateLayers()
 
    auto cursor = mLayers["cursor"];
    cursor->mSprite->setPosition(
-        mCharOrigin.x
-      + mCharOffset.x * charWidth,
-        mCharOrigin.y
-      + mCharOffset.y * charHeight
+      static_cast<float>(mCharOrigin.x + mCharOffset.x * charWidth),
+      static_cast<float>(mCharOrigin.y + mCharOffset.y * charHeight)
    );
 
    mLayers["header-bg"]->mVisible = true;
@@ -182,6 +181,20 @@ void MenuScreenNameSelect::updateLayers()
    mLayers["cancel_xbox_1"]->mVisible = false;
    mLayers["cancel_pc_0"]->mVisible = !isControllerUsed();
    mLayers["cancel_pc_1"]->mVisible = false;
+}
+
+
+void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   MenuScreen::draw(window, states);
+
+   // draw text
+   const auto rect = mText.getGlobalBounds();
+   const auto left = mNameOrigin.x;
+   const auto x = left + (202 - rect.width) * 0.5f;
+   mText.setString(mName);
+   mText.setPosition(left, mNameOrigin.y);
+   window.draw(mText, states);
 }
 
 

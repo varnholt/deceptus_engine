@@ -8,10 +8,14 @@ class MenuScreenNameSelect : public MenuScreen
 {
 public:
    MenuScreenNameSelect();
+
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
+   void keyboardKeyReleased(sf::Keyboard::Key key) override;
 
    void loadingFinished() override;
    void updateLayers();
+
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
 
    void up();
    void down();
@@ -24,9 +28,16 @@ public:
 private:
 
    std::string mName;
-   std::array<unsigned char, 13 * 5> mChars;
+   std::array<char, 13 * 5> mChars;
 
-   sf::Vector2i mCharOrigin;
+   sf::Vector2f mCharOrigin;
    sf::Vector2i mCharOffset;
+
+   sf::Vector2f mNameOrigin;
+
+   sf::Font mFont;
+   sf::Text mText;
+
+   int32_t mShift = 0;
 };
 
