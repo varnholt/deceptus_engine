@@ -63,6 +63,7 @@ private:
    void processKeyReleasedEvents(const sf::Event& event);
 
    void toggleFullScreen();
+   void togglePause();
    void changeResolution(int32_t w, int32_t h);
 
 

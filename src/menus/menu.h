@@ -37,6 +37,8 @@ public:
    void keyboardKeyPressed(sf::Keyboard::Key key);
    void keyboardKeyReleased(sf::Keyboard::Key key);
 
+   bool isVisible() const;
+
    MenuType getCurrentType() const;
    MenuType getPreviousType() const;
 

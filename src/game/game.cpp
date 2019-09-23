@@ -597,6 +597,22 @@ void Game::changeResolution(int32_t w, int32_t h)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::togglePause()
+{
+   if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
+   {
+      showPauseMenu();
+   }
+   else
+   {
+      Menu::getInstance()->hide();
+   }
+
+   GameState::getInstance().enqueueTogglePauseResume();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
    if (Console::getInstance().isActive())
@@ -702,16 +718,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::P:
       {
-         if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
-         {
-            showPauseMenu();
-         }
-         else
-         {
-            Menu::getInstance()->hide();
-         }
-
-         GameState::getInstance().enqueueTogglePauseResume();
+         togglePause();
          break;
       }
       case sf::Keyboard::R:
@@ -731,9 +738,10 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Escape:
       {
+         // this check can probably be removed
          if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
          {
-            showMainMenu();
+            togglePause();
          }
          break;
       }
@@ -844,8 +852,15 @@ void Game::processEvents()
          // todo: process keyboard events in the console class, just like done in the message box
          if (!Console::getInstance().isActive())
          {
-            mPlayer->keyboardKeyPressed(event.key.code);
-            Menu::getInstance()->keyboardKeyPressed(event.key.code);
+            if (Menu::getInstance()->isVisible())
+            {
+               Menu::getInstance()->keyboardKeyPressed(event.key.code);
+               return;
+            }
+            else
+            {
+               mPlayer->keyboardKeyPressed(event.key.code);
+            }
          }
 
          processKeyPressedEvents(event);
@@ -853,8 +868,16 @@ void Game::processEvents()
 
       else if (event.type == sf::Event::KeyReleased)
       {
-         mPlayer->keyboardKeyReleased(event.key.code);
-         Menu::getInstance()->keyboardKeyReleased(event.key.code);
+         if (Menu::getInstance()->isVisible())
+         {
+            Menu::getInstance()->keyboardKeyReleased(event.key.code);
+            return;
+         }
+         else
+         {
+            mPlayer->keyboardKeyReleased(event.key.code);
+         }
+
          processKeyReleasedEvents(event);
       }
 
