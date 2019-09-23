@@ -5,6 +5,11 @@
 
 #include <iostream>
 
+namespace {
+   const int32_t charWidth = 19;
+   const int32_t charHeight = 24;
+}
+
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
@@ -22,13 +27,31 @@ MenuScreenNameSelect::MenuScreenNameSelect()
 
 void MenuScreenNameSelect::up()
 {
-
+   mCharOffset.y--;
+   mCharOffset.y = std::max(mCharOffset.y, 0);
+   updateLayers();
 }
 
 
 void MenuScreenNameSelect::down()
 {
+   mCharOffset.y++;
+   mCharOffset.y = std::min(mCharOffset.y, 4);
+   updateLayers();
+}
 
+void MenuScreenNameSelect::left()
+{
+   mCharOffset.x--;
+   mCharOffset.x = std::max(mCharOffset.x, 0);
+   updateLayers();
+}
+
+void MenuScreenNameSelect::right()
+{
+   mCharOffset.x++;
+   mCharOffset.x = std::min(mCharOffset.x, 12);
+   updateLayers();
 }
 
 
@@ -45,6 +68,38 @@ void MenuScreenNameSelect::back()
 }
 
 
+/*
+        A = 0,        ///< The A key
+        B,            ///< The B key
+        C,            ///< The C key
+        D,            ///< The D key
+        E,            ///< The E key
+        F,            ///< The F key
+        G,            ///< The G key
+        H,            ///< The H key
+        I,            ///< The I key
+        J,            ///< The J key
+        K,            ///< The K key
+        L,            ///< The L key
+        M,            ///< The M key
+        N,            ///< The N key
+        O,            ///< The O key
+        P,            ///< The P key
+        Q,            ///< The Q key
+        R,            ///< The R key
+        S,            ///< The S key
+        T,            ///< The T key
+        U,            ///< The U key
+        V,            ///< The V key
+        W,            ///< The W key
+        X,            ///< The X key
+        Y,            ///< The Y key
+        Z,            ///< The Z key
+
+        LShift,       ///< The left Shift key
+        RShift,       ///< The right Shift key
+*/
+
 void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (key == sf::Keyboard::Up)
@@ -55,6 +110,16 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Down)
    {
       down();
+   }
+
+   if (key == sf::Keyboard::Left)
+   {
+      left();
+   }
+
+   else if (key == sf::Keyboard::Right)
+   {
+      right();
    }
 
    else if (key == sf::Keyboard::Return)
@@ -71,15 +136,12 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenNameSelect::loadingFinished()
 {
-   updateLayers();
+    auto cursor = mLayers["cursor"];
+    mCharOrigin.x = cursor->mSprite->getPosition().x;
+    mCharOrigin.y = cursor->mSprite->getPosition().y;
+
+    updateLayers();
 }
-
-
-/*
-
-cursor
-
-*/
 
 
 void MenuScreenNameSelect::updateLayers()
@@ -88,6 +150,14 @@ void MenuScreenNameSelect::updateLayers()
    // {
    //    std::cout << layer.first << std::endl;
    // }
+
+   auto cursor = mLayers["cursor"];
+   cursor->mSprite->setPosition(
+        mCharOrigin.x
+      + mCharOffset.x * charWidth,
+        mCharOrigin.y
+      + mCharOffset.y * charHeight
+   );
 
    mLayers["header-bg"]->mVisible = true;
    mLayers["players-name"]->mVisible = false;
