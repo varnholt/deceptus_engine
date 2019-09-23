@@ -15,13 +15,18 @@ public:
 
    void up();
    void down();
+   void left();
+   void right();
+
    void select();
    void back();
 
 private:
 
+   std::string mName;
    std::array<unsigned char, 13 * 5> mChars;
-   uint8_t mX = 0;
-   uint8_t mY = 0;
+
+   sf::Vector2i mCharOrigin;
+   sf::Vector2i mCharOffset;
 };
 
