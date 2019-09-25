@@ -82,12 +82,22 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (key >= sf::Keyboard::A && key <= sf::Keyboard::Z)
    {
-      mName += mChars[static_cast<uint32_t>(key)];
+      if (mName.size() > 10)
+      {
+         return;
+      }
+
+      mName += mChars[static_cast<uint32_t>(key + (mShift ? 0 : 26))];
       updateLayers();
    }
 
    if (key == sf::Keyboard::Delete || key == sf::Keyboard::Backspace)
    {
+      if (mName.empty())
+      {
+         return;
+      }
+
       mName.pop_back();
       updateLayers();
    }
@@ -138,8 +148,9 @@ void MenuScreenNameSelect::loadingFinished()
     mCharOrigin.y = cursor->mSprite->getPosition().y;
 
     auto playerName = mLayers["players-name"];
-    mNameOrigin.x = playerName->mSprite->getPosition().x;
-    mNameOrigin.y = playerName->mSprite->getPosition().y;
+    mNameRect.left = playerName->mSprite->getPosition().x;
+    mNameRect.top = playerName->mSprite->getPosition().y;
+    mNameRect.width = playerName->mTexture->getSize().x;
 
     updateLayers();
 }
@@ -189,11 +200,10 @@ void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates state
    MenuScreen::draw(window, states);
 
    // draw text
-   const auto rect = mText.getGlobalBounds();
-   const auto left = mNameOrigin.x;
-   const auto x = left + (202 - rect.width) * 0.5f;
+   const auto textRect = mText.getGlobalBounds();
+   const auto x = mNameRect.left + (mNameRect.width - textRect.width) * 0.5f;
    mText.setString(mName);
-   mText.setPosition(left, mNameOrigin.y);
+   mText.setPosition(x, mNameRect.top);
    window.draw(mText, states);
 }
 

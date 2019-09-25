@@ -473,6 +473,17 @@ OTHER_FILES += \
 DISTFILES += \
     data/level-crypt/metroid.json \
     data/level.tmx \
+    data/menus/achievements.psd \
+    data/menus/audio.psd \
+    data/menus/controls.psd \
+    data/menus/credits.psd \
+    data/menus/fileselect.psd \
+    data/menus/game.psd \
+    data/menus/main.psd \
+    data/menus/nameselect.psd \
+    data/menus/options.psd \
+    data/menus/pause.psd \
+    data/menus/video.psd \
     data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/dumb.lua \
     data/config/game.json \
