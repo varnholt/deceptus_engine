@@ -33,7 +33,7 @@ private:
    sf::Vector2f mCharOrigin;
    sf::Vector2i mCharOffset;
 
-   sf::Vector2f mNameOrigin;
+   sf::Rect<float> mNameRect;
 
    sf::Font mFont;
    sf::Text mText;
