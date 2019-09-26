@@ -66,6 +66,13 @@ void Checkpoint::resetAll()
 
 void Checkpoint::reached()
 {
+   if (mReached)
+   {
+      return;
+   }
+
+   mReached = true;
+
    if (mCallback != nullptr)
    {
        mCallback();
