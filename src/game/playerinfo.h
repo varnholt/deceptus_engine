@@ -4,16 +4,19 @@
 #include <string>
 #include <vector>
 
+#include "json/json.hpp"
+
 #include "extratable.h"
 #include "inventory.h"
 
 
-class PlayerInfo
+struct PlayerInfo
 {
-   public:
-
-      Inventory mInventory;
-      ExtraTable mExtraTable;
-      std::string mName;
+   Inventory mInventory;
+   ExtraTable mExtraTable;
+   std::string mName;
 };
 
+
+void to_json(nlohmann::json& j, const PlayerInfo& d);
+void from_json(const nlohmann::json& j, PlayerInfo& d);
