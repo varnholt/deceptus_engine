@@ -8,16 +8,16 @@
 
 #include "json/json.hpp"
 
-bool GameConfiguration::sInitialized = false;
-
-
 using json = nlohmann::json;
 
+
+bool GameConfiguration::sInitialized = false;
 GameConfiguration GameConfiguration::sInstance;
+GameConfiguration GameConfiguration::mDefaults;
+
 
 std::string GameConfiguration::serialize()
 {
-   // create a JSON value with different types
    json config =
    {
       {
@@ -73,21 +73,20 @@ void GameConfiguration::deserialize(const std::string& data)
 
 void GameConfiguration::deserializeFromFile(const std::string& filename)
 {
-  std::ifstream ifs (filename, std::ifstream::in);
+   std::ifstream ifs (filename, std::ifstream::in);
 
-  char c = ifs.get();
-  std::string data;
+   char c = ifs.get();
+   std::string data;
 
-  while (ifs.good())
-  {
-    // std::cout << c;
-    data.push_back(c);
-    c = ifs.get();
-  }
+   while (ifs.good())
+   {
+      data.push_back(c);
+      c = ifs.get();
+   }
 
-  ifs.close();
+   ifs.close();
 
-  deserialize(data);
+   deserialize(data);
 }
 
 
@@ -96,5 +95,32 @@ void GameConfiguration::serializeToFile(const std::string &filename)
   std::string data = serialize();
   std::ofstream file(filename);
   file << data;
+}
+
+
+GameConfiguration& GameConfiguration::getDefaults()
+{
+   return mDefaults;
+}
+
+
+GameConfiguration& GameConfiguration::getInstance()
+{
+   if (!sInitialized)
+   {
+      auto& c = sInstance;
+      sInstance.deserializeFromFile();
+      sInitialized = true;
+   }
+
+   return sInstance;
+}
+
+
+void GameConfiguration::resetAudioDefaults()
+{
+   getInstance().mAudioVolumeMaster = getDefaults().mAudioVolumeMaster;
+   getInstance().mAudioVolumeMusic = getDefaults().mAudioVolumeMusic;
+   getInstance().mAudioVolumeSfx = getDefaults().mAudioVolumeSfx;
 }
 

@@ -16,13 +16,13 @@ public:
 
     using CheckpointCallback = std::function<void(void)>;
 
-    Checkpoint* getCheckpoint(int32_t index);
-
-    static void add(TmxObject*);
+    static Checkpoint* getCheckpoint(int32_t index);
+    static int32_t add(TmxObject*);
     static void update();
     static void resetAll();
 
     void reached();
+    void addCallback(CheckpointCallback);
 
 
 private:
@@ -30,9 +30,12 @@ private:
     Checkpoint() = default;
 
     int32_t mIndex = 0;
+    std::string mName;
+
     sf::IntRect mRect;
     bool mReached = false;
-    CheckpointCallback mCallback;
+
+    std::vector<CheckpointCallback> mCallbacks;
 
     static std::vector<Checkpoint> sCheckpoints;
 };

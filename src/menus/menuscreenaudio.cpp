@@ -108,11 +108,7 @@ void MenuScreenAudio::set(int32_t x)
 
 void MenuScreenAudio::setDefaults()
 {
-    GameConfiguration defaults;
-    GameConfiguration::getInstance().mAudioVolumeMaster = defaults.mAudioVolumeMaster;
-    GameConfiguration::getInstance().mAudioVolumeMusic = defaults.mAudioVolumeMusic;
-    GameConfiguration::getInstance().mAudioVolumeSfx = defaults.mAudioVolumeSfx;
-
+    GameConfiguration::resetAudioDefaults();
     updateLayers();
 }
 

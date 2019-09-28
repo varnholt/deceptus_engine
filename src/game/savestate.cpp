@@ -21,13 +21,46 @@ std::array<SaveState, 3>& SaveState::getSaveStates()
 
 bool SaveState::isEmpty() const
 {
-   return mEmpty;
+   return mPlayerInfo.mName.empty();
+}
+
+
+void SaveState::invalidate()
+{
+   mPlayerInfo = {};
+   mLevelIndex = {};
+   mCheckpoint = {};
+}
+
+
+int32_t SaveState::computeProgress() const
+{
+   float progress = 0.0f;
+   return static_cast<int32_t>(progress * 100);
+}
+
+
+SaveState& SaveState::getSaveState(uint32_t slot)
+{
+   return sSaveStates[slot];
 }
 
 
 PlayerInfo& SaveState::getPlayerInfo()
 {
    return sSaveStates[sSlot].mPlayerInfo;
+}
+
+
+SaveState& SaveState::getCurrent()
+{
+   return sSaveStates[sSlot];
+}
+
+
+void SaveState::setCurrent(uint32_t slot)
+{
+   sSlot = slot;
 }
 
 
@@ -65,12 +98,13 @@ void SaveState::deserializeFromFile(const std::string &filename)
 }
 
 
-
-void SaveState::serializeToFile(const std::string &filename)
+void SaveState::serializeToFile(const std::string& filename)
 {
-  std::string data = serialize();
-  std::ofstream file(filename);
-  file << data;
+   std::cout << "saving " << filename << std::endl;
+
+   std::string data = serialize();
+   std::ofstream file(filename);
+   file << data;
 }
 
 
@@ -97,4 +131,5 @@ void from_json(const nlohmann::json& j, SaveState& data)
 {
    data.mLevelIndex = j.at("levelindex").get<int32_t>();
    data.mCheckpoint = j.at("checkpoint").get<int32_t>();
+   data.mPlayerInfo = j.at("playerinfo").get<PlayerInfo>();
 }

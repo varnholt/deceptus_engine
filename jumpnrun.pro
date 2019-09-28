@@ -471,6 +471,7 @@ OTHER_FILES += \
     data/shaders/bumpmap_vert.glsl
 
 DISTFILES += \
+    data/config/camera.json \
     data/level-crypt/metroid.json \
     data/level.tmx \
     data/menus/achievements.psd \

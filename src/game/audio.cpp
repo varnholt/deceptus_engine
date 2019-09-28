@@ -33,7 +33,7 @@ Audio::Audio()
  * \brief Audio::getInstance
  * \return
  */
-Audio *Audio::getInstance()
+Audio* Audio::getInstance()
 {
    if (sInstance == nullptr)
    {
@@ -103,8 +103,9 @@ void Audio::initializeTracks()
 //-----------------------------------------------------------------------------
 void Audio::initializeMusicVolume()
 {
-   const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
-   const auto music = (GameConfiguration::getInstance().mAudioVolumeMusic);
+   auto& config = GameConfiguration::getInstance();
+   const auto master = config.mAudioVolumeMaster * 0.01f;
+   const auto music = config.mAudioVolumeMusic;
    mMusic.setVolume(master * music);
 }
 

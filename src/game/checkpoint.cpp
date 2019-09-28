@@ -4,6 +4,10 @@
 #include "player.h"
 
 #include "tmxparser/tmxobject.h"
+#include "tmxparser/tmxproperties.h"
+#include "tmxparser/tmxproperty.h"
+
+#include <iostream>
 
 
 std::vector<Checkpoint> Checkpoint::sCheckpoints;
@@ -29,7 +33,7 @@ Checkpoint* Checkpoint::getCheckpoint(int32_t index)
 }
 
 
-void Checkpoint::add(TmxObject* tmxObject)
+int32_t Checkpoint::add(TmxObject* tmxObject)
 {
    Checkpoint cp;
 
@@ -40,7 +44,21 @@ void Checkpoint::add(TmxObject* tmxObject)
       static_cast<int32_t>(tmxObject->mHeight)
    };
 
+   cp.mName = tmxObject->mName;
+
+   if (tmxObject->mProperties)
+   {
+      auto it = tmxObject->mProperties->mMap.find("index");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         cp.mIndex = it->second->mValueInt;
+      }
+   }
+
+   std::cout << "registering checkpoint: " << cp.mIndex << std::endl;
+
    sCheckpoints.push_back(cp);
+   return cp.mIndex;
 }
 
 
@@ -71,16 +89,24 @@ void Checkpoint::reached()
       return;
    }
 
+   std::cout << "reached checkpoint: " << mIndex << std::endl;
+
    mReached = true;
 
-   if (mCallback != nullptr)
+   for (auto& callback : mCallbacks)
    {
-       mCallback();
+      callback();
    }
 
    // check if level is completed
-   if (mIndex == static_cast<int32_t>(sCheckpoints.size()) - 1)
+   if (mName == "end")
    {
       CallbackMap::getInstance().call(CallbackMap::CallbackType::EndGame);
    }
+}
+
+
+void Checkpoint::addCallback(Checkpoint::CheckpointCallback cb)
+{
+   mCallbacks.push_back(cb);
 }
