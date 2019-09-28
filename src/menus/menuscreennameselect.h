@@ -27,6 +27,9 @@ public:
 
 private:
 
+   void updateText();
+   void retrieveUsername();
+
    std::string mName;
    std::array<char, 13 * 5> mChars;
 

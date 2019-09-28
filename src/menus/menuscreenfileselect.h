@@ -13,9 +13,14 @@ public:
    };
 
    MenuScreenFileSelect();
-   void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+   void keyboardKeyPressed(sf::Keyboard::Key key) override;
    void loadingFinished() override;
+
+
+private:
+
    void updateLayers();
 
    void up();
@@ -23,8 +28,10 @@ public:
    void select();
    void back();
 
-private:
+   void remove();
 
+   sf::Font mFont;
+   sf::Text mNames[3];
 
    Slot mSlot = Slot::A;
 };

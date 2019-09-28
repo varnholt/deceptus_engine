@@ -2,12 +2,17 @@
 
 #include "menu.h"
 #include "game/gamestate.h"
+#include "game/savestate.h"
 
+#include <cstdlib>
 #include <iostream>
+#include <stdlib.h>
+
 
 namespace {
    const int32_t charWidth = 19;
    const int32_t charHeight = 24;
+   const size_t maxLength = 11;
 }
 
 
@@ -64,14 +69,31 @@ void MenuScreenNameSelect::right()
 
 void MenuScreenNameSelect::select()
 {
+   if (mName.empty())
+   {
+      return;
+   }
+
    Menu::getInstance()->hide();
    GameState::getInstance().enqueueResume();
+
+   SaveState::getCurrent().mPlayerInfo.mName = mName;
 }
 
 
 void MenuScreenNameSelect::back()
 {
    Menu::getInstance()->show(Menu::MenuType::FileSelect);
+}
+
+
+void MenuScreenNameSelect::updateText()
+{
+   // draw text
+   const auto textRect = mText.getGlobalBounds();
+   const auto x = mNameRect.left + (mNameRect.width - textRect.width) * 0.5f;
+   mText.setString(mName);
+   mText.setPosition(x, mNameRect.top);
 }
 
 
@@ -82,12 +104,13 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (key >= sf::Keyboard::A && key <= sf::Keyboard::Z)
    {
-      if (mName.size() > 10)
+      if (mName.size() >= maxLength)
       {
          return;
       }
 
       mName += mChars[static_cast<uint32_t>(key + (mShift ? 0 : 26))];
+      updateText();
       updateLayers();
    }
 
@@ -99,6 +122,7 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
       }
 
       mName.pop_back();
+      updateText();
       updateLayers();
    }
 
@@ -141,6 +165,21 @@ void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
 }
 
 
+void MenuScreenNameSelect::retrieveUsername()
+{
+   // probably requires a regular expression to filter out the unicode crap
+   auto u1 = std::getenv("USERNAME");
+   auto u2 = std::getenv("USER");
+   mName = u1 ? u1 : (u2 ? u2 : "");
+
+   if (!mName.empty())
+   {
+      mName[0] = std::toupper(mName[0]);
+      updateText();
+   }
+}
+
+
 void MenuScreenNameSelect::loadingFinished()
 {
     auto cursor = mLayers["cursor"];
@@ -151,6 +190,8 @@ void MenuScreenNameSelect::loadingFinished()
     mNameRect.left = playerName->mSprite->getPosition().x;
     mNameRect.top = playerName->mSprite->getPosition().y;
     mNameRect.width = playerName->mTexture->getSize().x;
+
+    retrieveUsername();
 
     updateLayers();
 }
@@ -198,12 +239,6 @@ void MenuScreenNameSelect::updateLayers()
 void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
-
-   // draw text
-   const auto textRect = mText.getGlobalBounds();
-   const auto x = mNameRect.left + (mNameRect.width - textRect.width) * 0.5f;
-   mText.setString(mName);
-   mText.setPosition(x, mNameRect.top);
    window.draw(mText, states);
 }
 

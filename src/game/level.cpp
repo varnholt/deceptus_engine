@@ -25,6 +25,7 @@
 #include "fixturenode.h"
 #include "player.h"
 #include "physicsconfiguration.h"
+#include "savestate.h"
 #include "sfmlmath.h"
 #include "spikeball.h"
 #include "squaremarcher.h"
@@ -500,7 +501,9 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "checkpoints")
             {
-               Checkpoint::add(tmxObject);
+               const auto cpi = Checkpoint::add(tmxObject);
+               auto cp = Checkpoint::getCheckpoint(cpi);
+               cp->addCallback([](){SaveState::serializeToFile();});
             }
             else if (objectGroup->mName == "bouncers")
             {
@@ -716,7 +719,7 @@ std::shared_ptr<sf::View> Level::getLevelView()
 //-----------------------------------------------------------------------------
 void Level::createViews()
 {
-   GameConfiguration& gameConfig = GameConfiguration::getInstance();
+   auto& gameConfig = GameConfiguration::getInstance();
 
    // the view dimensions never change
    mViewWidth = static_cast<float>(gameConfig.mViewWidth);
