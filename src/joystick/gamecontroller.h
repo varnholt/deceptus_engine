@@ -97,17 +97,17 @@ class GameController
 
       void addButtonPressedCallback(
          SDL_GameControllerButton,
-         ControllerCallback
+         const ControllerCallback&
       );
 
       void removeButtonPressedCallback(
          SDL_GameControllerButton,
-         ControllerCallback
+         const ControllerCallback&
       );
 
       void addButtonReleasedCallback(
          SDL_GameControllerButton,
-         ControllerCallback
+         const ControllerCallback&
       );
 
       void addAxisThresholdExceedCallback(const ThresholdCallback& threshold);

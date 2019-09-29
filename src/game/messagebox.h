@@ -13,8 +13,6 @@ class MessageBox
 {
    public:
 
-      virtual ~MessageBox();
-
       enum class Button {
          Invalid = 0x00,
          Ok      = 0x01,
@@ -30,6 +28,9 @@ class MessageBox
       };
 
       using MessageBoxCallback = std::function<void(Button)>;
+
+      MessageBox(Type type, const std::string& message, MessageBoxCallback cb, int32_t buttons);
+      virtual ~MessageBox();
 
       static bool empty();
       static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
@@ -50,6 +51,7 @@ class MessageBox
 
       MessageBox();
       static void messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons);
+      static void initializeLayers();
 
       Type mType;
       std::string mMessage;
@@ -66,5 +68,6 @@ class MessageBox
       static sf::Text sText;
 
       static bool sInitialized;
+      void initializeControllerCallbacks();
 };
 

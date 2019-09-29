@@ -441,8 +441,9 @@ const GameControllerInfo& GameController::getInfo() const
 
 
 //-----------------------------------------------------------------------------
-void GameController::addButtonPressedCallback(SDL_GameControllerButton button, ControllerCallback callback)
+void GameController::addButtonPressedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
 {
+   // std::cout<< "registering: " << &callback << std::endl;
    mButtonPressedCallbacks[button].push_back(callback);
 }
 
@@ -450,23 +451,28 @@ void GameController::addButtonPressedCallback(SDL_GameControllerButton button, C
 //-----------------------------------------------------------------------------
 void GameController::removeButtonPressedCallback(
    SDL_GameControllerButton button,
-   ControllerCallback callback
+   const ControllerCallback& callback
 )
 {
    auto& vec = mButtonPressedCallbacks[button];
-
    vec.erase(
       std::remove_if(
          vec.begin(),
          vec.end(),
-         [callback](ControllerCallback c){return c.target<ControllerCallback>() == callback.target<ControllerCallback>();}
+         [&](const ControllerCallback& c) {
+            const auto match =
+                  c.target_type() == callback.target_type()
+               && c.target<ControllerCallback>() == callback.target<ControllerCallback>();
+
+            return match;
+         }
       )
    );
 }
 
 
 //-----------------------------------------------------------------------------
-void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, ControllerCallback callback)
+void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
 {
    mButtonReleasedCallbacks[button].push_back(callback);
 }

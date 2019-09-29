@@ -42,18 +42,6 @@ InventoryLayer::InventoryLayer()
    mInventuryTexture.loadFromFile("data/game/inventory.png");
    mCursorSprite.setTexture(mInventuryTexture);
    mCursorSprite.setTextureRect({0, 512-48, 48, 48});
-   initializeController();
-}
-
-
-//---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::initializeController()
-{
-   if (GameControllerIntegration::getCount() > 0)
-   {
-      auto gji = GameControllerIntegration::getInstance(0);
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [/*this*/](){/*jump();*/});
-   }
 }
 
 

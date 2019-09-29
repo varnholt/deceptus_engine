@@ -42,7 +42,6 @@ private:
 
    void addItem(int32_t x, int32_t y, ItemType type);
    Inventory& getInventory();
-   void initializeController();
    void updateControllerActions();
    bool isControllerActionSkipped() const;
 
