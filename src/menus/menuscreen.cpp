@@ -23,7 +23,7 @@ void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
 }
 
 
-const std::string &MenuScreen::getFilename()
+const std::string& MenuScreen::getFilename()
 {
    return mFilename;
 }
@@ -95,6 +95,19 @@ void MenuScreen::keyboardKeyPressed(sf::Keyboard::Key /*key*/)
 
 
 void MenuScreen::keyboardKeyReleased(sf::Keyboard::Key /*key*/)
+{
+
+}
+
+
+void MenuScreen::controllerButtonX()
+{
+   // that's default behavior for most screens
+   keyboardKeyPressed(sf::Keyboard::D);
+}
+
+
+void MenuScreen::controllerButtonY()
 {
 
 }

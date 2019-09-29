@@ -21,6 +21,8 @@ class GameController
 {
    public:
 
+      using ControllerCallback = std::function<void()>;
+
       struct ThresholdCallback
       {
          enum class Boundary
@@ -34,7 +36,7 @@ class GameController
          float mThreshold = 0.3f;
          float mValue = 0.0f;
          bool mInitialized = false;
-         std::function<void()> mCallback;
+         ControllerCallback mCallback;
       };
 
 
@@ -95,12 +97,17 @@ class GameController
 
       void addButtonPressedCallback(
          SDL_GameControllerButton,
-         std::function<void()>
+         ControllerCallback
+      );
+
+      void removeButtonPressedCallback(
+         SDL_GameControllerButton,
+         ControllerCallback
       );
 
       void addButtonReleasedCallback(
          SDL_GameControllerButton,
-         std::function<void()>
+         ControllerCallback
       );
 
       void addAxisThresholdExceedCallback(const ThresholdCallback& threshold);
@@ -135,7 +142,7 @@ class GameController
       SDL_Haptic* mHaptic = nullptr;
 
       std::map<SDL_GameControllerAxis, std::vector<ThresholdCallback>> mThresholdCallbacks;
-      std::map<SDL_GameControllerButton, std::vector<std::function<void()>>> mButtonPressedCallbacks;
-      std::map<SDL_GameControllerButton, std::vector<std::function<void()>>> mButtonReleasedCallbacks;
+      std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> mButtonPressedCallbacks;
+      std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> mButtonReleasedCallbacks;
 };
 

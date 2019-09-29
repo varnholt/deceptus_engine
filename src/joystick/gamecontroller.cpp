@@ -2,6 +2,7 @@
 #include "gamecontroller.h"
 #include "game/timer.h"
 
+#include <algorithm>
 #include <iostream>
 
 
@@ -440,14 +441,32 @@ const GameControllerInfo& GameController::getInfo() const
 
 
 //-----------------------------------------------------------------------------
-void GameController::addButtonPressedCallback(SDL_GameControllerButton button, std::function<void ()> callback)
+void GameController::addButtonPressedCallback(SDL_GameControllerButton button, ControllerCallback callback)
 {
    mButtonPressedCallbacks[button].push_back(callback);
 }
 
 
 //-----------------------------------------------------------------------------
-void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, std::function<void ()> callback)
+void GameController::removeButtonPressedCallback(
+   SDL_GameControllerButton button,
+   ControllerCallback callback
+)
+{
+   auto& vec = mButtonPressedCallbacks[button];
+
+   vec.erase(
+      std::remove_if(
+         vec.begin(),
+         vec.end(),
+         [callback](ControllerCallback c){return c.target<ControllerCallback>() == callback.target<ControllerCallback>();}
+      )
+   );
+}
+
+
+//-----------------------------------------------------------------------------
+void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, ControllerCallback callback)
 {
    mButtonReleasedCallbacks[button].push_back(callback);
 }

@@ -139,6 +139,12 @@ void MenuScreenFileSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 }
 
 
+void MenuScreenFileSelect::controllerButtonX()
+{
+   remove();
+}
+
+
 void MenuScreenFileSelect::loadingFinished()
 {
    SaveState::deserializeFromFile();

@@ -26,6 +26,8 @@ public:
 
    virtual void keyboardKeyPressed(sf::Keyboard::Key key);
    virtual void keyboardKeyReleased(sf::Keyboard::Key key);
+   virtual void controllerButtonX();
+   virtual void controllerButtonY();
 
    bool isControllerUsed() const;
 

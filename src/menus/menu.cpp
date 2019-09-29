@@ -155,20 +155,47 @@ void Menu::hide()
 
 void Menu::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (mCurrentMenu != nullptr)
+   if (mCurrentMenu == nullptr)
    {
-      mCurrentMenu->keyboardKeyPressed(key);
+      return;
    }
+
+   mCurrentMenu->keyboardKeyPressed(key);
 }
 
 
 void Menu::keyboardKeyReleased(sf::Keyboard::Key key)
 {
-   if (mCurrentMenu != nullptr)
+   if (mCurrentMenu == nullptr)
    {
-      mCurrentMenu->keyboardKeyReleased(key);
+      return;
    }
+
+   mCurrentMenu->keyboardKeyReleased(key);
 }
+
+
+void Menu::controllerButtonX()
+{
+   if (mCurrentMenu == nullptr)
+   {
+      return;
+   }
+
+   mCurrentMenu->controllerButtonX();
+}
+
+
+void Menu::controllerButtonY()
+{
+   if (mCurrentMenu == nullptr)
+   {
+      return;
+   }
+
+   mCurrentMenu->controllerButtonY();
+}
+
 
 bool Menu::isVisible() const
 {
@@ -296,7 +323,12 @@ void Menu::initialize()
 
       gci->getController()->addButtonPressedCallback(
          SDL_CONTROLLER_BUTTON_X,
-         [this](){keyboardKeyPressed(sf::Keyboard::D);}
+         [this](){controllerButtonX();}
+      );
+
+      gci->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_Y,
+         [this](){controllerButtonY();}
       );
    }
 }

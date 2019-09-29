@@ -192,6 +192,13 @@ void Game::initializeController()
             checkCloseInventory();
          }
       );
+
+      gji->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_START,
+         [this](){
+            showPauseMenu();
+         }
+      );
    }
 }
 
@@ -207,8 +214,11 @@ void Game::showMainMenu()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::showPauseMenu()
 {
-   Menu::getInstance()->show(Menu::MenuType::Pause);
-   GameState::getInstance().enqueuePause();
+   if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
+   {
+      Menu::getInstance()->show(Menu::MenuType::Pause);
+      GameState::getInstance().enqueuePause();
+   }
 }
 
 
@@ -560,7 +570,7 @@ void Game::checkCloseInventory()
 {
   if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
   {
-     GameState::getInstance().enqueueTogglePauseResume();
+     GameState::getInstance().enqueueResume();
      DisplayMode::getInstance().enqueueUnset(Display::DisplayInventory);
   }
 }
@@ -569,9 +579,12 @@ void Game::checkCloseInventory()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::openInventory()
 {
-  GameState::getInstance().enqueuePause();
-  DisplayMode::getInstance().enqueueSet(Display::DisplayInventory);
-  mInventoryLayer->setActive(true);
+   if (GameState::getInstance().getMode() == ExecutionMode::Running)
+   {
+      GameState::getInstance().enqueuePause();
+      DisplayMode::getInstance().enqueueSet(Display::DisplayInventory);
+      mInventoryLayer->setActive(true);
+   }
 }
 
 
@@ -593,22 +606,6 @@ void Game::changeResolution(int32_t w, int32_t h)
 
     initializeWindow();
     mLevel->createViews();
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Game::togglePause()
-{
-   if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
-   {
-      showPauseMenu();
-   }
-   else
-   {
-      Menu::getInstance()->hide();
-   }
-
-   GameState::getInstance().enqueueTogglePauseResume();
 }
 
 
@@ -717,8 +714,9 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          break;
       }
       case sf::Keyboard::P:
+      case sf::Keyboard::Escape:
       {
-         togglePause();
+         showPauseMenu();
          break;
       }
       case sf::Keyboard::R:
@@ -734,15 +732,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::V:
       {
          mPlayer->setVisible(!mPlayer->getVisible());
-         break;
-      }
-      case sf::Keyboard::Escape:
-      {
-         // this check can probably be removed
-         if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
-         {
-            togglePause();
-         }
          break;
       }
       case sf::Keyboard::LShift:

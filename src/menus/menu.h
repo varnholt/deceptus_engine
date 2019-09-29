@@ -36,6 +36,8 @@ public:
 
    void keyboardKeyPressed(sf::Keyboard::Key key);
    void keyboardKeyReleased(sf::Keyboard::Key key);
+   void controllerButtonX();
+   void controllerButtonY();
 
    bool isVisible() const;
 

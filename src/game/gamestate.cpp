@@ -41,7 +41,6 @@ void GameState::setMode(const ExecutionMode &mode)
 //-----------------------------------------------------------------------------
 void GameState::enqueuePause()
 {
-   // mMode = ExecutionMode::Paused;
    enqueue(ExecutionMode::Paused);
 }
 
@@ -49,7 +48,6 @@ void GameState::enqueuePause()
 //-----------------------------------------------------------------------------
 void GameState::enqueueResume()
 {
-   // mMode = ExecutionMode::Running;
    enqueue(ExecutionMode::Running);
 }
 

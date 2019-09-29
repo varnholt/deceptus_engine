@@ -13,6 +13,8 @@ class MessageBox
 {
    public:
 
+      virtual ~MessageBox();
+
       enum class Button {
          Invalid = 0x00,
          Ok      = 0x01,
@@ -47,18 +49,17 @@ class MessageBox
    private:
 
       MessageBox();
-
       static void messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons);
-
-      static std::deque<MessageBox> mQueue;
-
 
       Type mType;
       std::string mMessage;
       MessageBoxCallback mCallback;
       int mButtons = 0;
       bool mDrawn = false;
+      std::function<void(void)> mButtonCallbackA;
+      std::function<void(void)> mButtonCallbackB;
 
+      static std::deque<MessageBox> mQueue;
       static std::vector<std::shared_ptr<Layer>> sLayerStack; // SLAYER!
       static std::map<std::string, std::shared_ptr<Layer>> sLayers;
       static sf::Font sFont;

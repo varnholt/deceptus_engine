@@ -165,6 +165,11 @@ void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
 }
 
 
+void MenuScreenNameSelect::controllerButtonX()
+{
+}
+
+
 void MenuScreenNameSelect::retrieveUsername()
 {
    // probably requires a regular expression to filter out the unicode crap
