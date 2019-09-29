@@ -185,17 +185,46 @@ void Player::initializeController()
       gji->getController()->addButtonPressedCallback(
         SDL_CONTROLLER_BUTTON_A,
         [this](){
-            auto mode = GameState::getInstance().getMode();
-            if (mode == ExecutionMode::Running)
+            if (GameState::getInstance().getMode() != ExecutionMode::Running)
             {
-               jump();
+               return;
             }
+            jump();
          }
       );
 
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X,[](){Level::getCurrentLevel()->toggleDoor();});
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_LEFTSHOULDER, [this](){updateDash(Dash::Left);});
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [this](){updateDash(Dash::Right);});
+      gji->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_X,
+         [](){
+            if (GameState::getInstance().getMode() != ExecutionMode::Running)
+            {
+               return;
+            }
+            Level::getCurrentLevel()->toggleDoor();
+         }
+      );
+
+      gji->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+         [this](){
+            if (GameState::getInstance().getMode() != ExecutionMode::Running)
+            {
+               return;
+            }
+            updateDash(Dash::Left);
+         }
+      );
+
+      gji->getController()->addButtonPressedCallback(
+         SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+         [this](){
+            if (GameState::getInstance().getMode() != ExecutionMode::Running)
+            {
+               return;
+            }
+            updateDash(Dash::Right);
+         }
+      );
    }
 }
 

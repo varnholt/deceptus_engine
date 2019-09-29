@@ -16,6 +16,36 @@ std::map<std::string, std::shared_ptr<Layer>> MessageBox::sLayers;
 sf::Font MessageBox::sFont;
 sf::Text MessageBox::sText;
 
+
+MessageBox::MessageBox()
+{
+   initializeLayers();
+   initializeControllerCallbacks();
+}
+
+
+MessageBox::MessageBox(MessageBox::Type type, const std::string& message, MessageBox::MessageBoxCallback cb, int32_t buttons)
+ : mType(type),
+   mMessage(message),
+   mCallback(cb),
+   mButtons(buttons)
+{
+   initializeLayers();
+   initializeControllerCallbacks();
+}
+
+
+MessageBox::~MessageBox()
+{
+   auto gci = GameControllerIntegration::getInstance(0);
+   if (gci)
+   {
+      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
+      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
+   }
+}
+
+
 bool MessageBox::empty()
 {
    return mQueue.empty();
@@ -72,7 +102,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 }
 
 
-MessageBox::MessageBox()
+void MessageBox::initializeLayers()
 {
    if (!sInitialized)
    {
@@ -114,7 +144,11 @@ MessageBox::MessageBox()
 
       sInitialized = true;
    }
+}
 
+
+void MessageBox::initializeControllerCallbacks()
+{
    auto gci = GameControllerIntegration::getInstance(0);
    if (gci)
    {
@@ -123,20 +157,6 @@ MessageBox::MessageBox()
 
       gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
       gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
-   }
-}
-
-
-MessageBox::~MessageBox()
-{
-   auto gci = GameControllerIntegration::getInstance(0);
-   if (gci)
-   {
-      mButtonCallbackA = [](){keyboardKeyPressed(sf::Keyboard::Return);};
-      mButtonCallbackB = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
-
-      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
-      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
    }
 }
 
@@ -205,13 +225,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void MessageBox::messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons)
 {
-   MessageBox m;
-   m.mMessage = message;
-   m.mType = type;
-   m.mCallback = callback;
-   m.mButtons = buttons;
-
-   mQueue.push_back(m);
+   mQueue.emplace_back(type, message, callback, buttons);
 }
 
 
