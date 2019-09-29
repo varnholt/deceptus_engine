@@ -36,7 +36,7 @@ void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (key == sf::Keyboard::Escape)
    {
-      // resume();
+      resume();
    }
 }
 

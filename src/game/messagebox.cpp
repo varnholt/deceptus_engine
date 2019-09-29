@@ -1,7 +1,9 @@
 #include "messagebox.h"
 
 #include "game/gameconfiguration.h"
+#include "game/gamecontrollerintegration.h"
 #include "image/psd.h"
+#include "joystick/gamecontroller.h"
 
 #include <iostream>
 #include <math.h>
@@ -112,6 +114,30 @@ MessageBox::MessageBox()
 
       sInitialized = true;
    }
+
+   auto gci = GameControllerIntegration::getInstance(0);
+   if (gci)
+   {
+      mButtonCallbackA = [](){keyboardKeyPressed(sf::Keyboard::Return);};
+      mButtonCallbackB = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
+
+      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
+      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
+   }
+}
+
+
+MessageBox::~MessageBox()
+{
+   auto gci = GameControllerIntegration::getInstance(0);
+   if (gci)
+   {
+      mButtonCallbackA = [](){keyboardKeyPressed(sf::Keyboard::Return);};
+      mButtonCallbackB = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
+
+      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
+      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
+   }
 }
 
 
@@ -125,7 +151,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto& box = mQueue.front();
    box.mDrawn = true;
 
-   const auto xbox = false;
+   const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
    const auto buttons = box.mButtons;
 
    sLayers["msg-copyssYN"]->mVisible = false;

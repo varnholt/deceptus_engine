@@ -16,6 +16,7 @@ public:
 
    void draw(sf::RenderTarget& window, sf::RenderStates states) override;
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
+   void controllerButtonX() override;
    void loadingFinished() override;
 
 

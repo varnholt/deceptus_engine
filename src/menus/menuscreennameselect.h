@@ -12,6 +12,8 @@ public:
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
    void keyboardKeyReleased(sf::Keyboard::Key key) override;
 
+   void controllerButtonX() override;
+
    void loadingFinished() override;
    void updateLayers();
 
