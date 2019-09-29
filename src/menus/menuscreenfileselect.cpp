@@ -171,10 +171,11 @@ void MenuScreenFileSelect::updateLayers()
       mLayers["slot_" + slotName + "_new_game_highlight"]->mVisible = empty;
       mLayers["slot_" + slotName + "_new_game_deselected"]->mVisible = empty && !selected;
       mLayers["slot_" + slotName + "_new_game_selected"]->mVisible = empty && selected;
-      mLayers["slot_" + slotName + "_selected"]->mVisible = empty && selected;
       mLayers["slot_" + slotName + "_shadow"]->mVisible = empty;
 
       // have data
+      mLayers["slot_" + slotName + "_selected"]->mVisible = !empty && selected;
+      mLayers["slot_" + slotName + "_deselected"]->mVisible = !empty && !selected;
       mLayers["slot_" + slotName + "_background"]->mVisible = !empty;
       mLayers["slot_" + slotName + "_bar_1"]->mVisible = !empty;
       mLayers["slot_" + slotName + "_bar_2"]->mVisible = !empty;
