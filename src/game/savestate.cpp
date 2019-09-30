@@ -66,6 +66,11 @@ void SaveState::setCurrent(uint32_t slot)
 
 void SaveState::deserialize(const std::string& data)
 {
+   if (data.empty())
+   {
+      return;
+   }
+
    json saveStates = json::parse(data);
 
    try
