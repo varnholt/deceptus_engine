@@ -138,6 +138,11 @@ void Menu::show(Menu::MenuType menu)
    mPreviousType = mCurrentType;
    mCurrentType = menu;
 
+   if (mCurrentMenu)
+   {
+      mCurrentMenu->showEvent();
+   }
+
    mHistory.push_back(menu);
    while (mHistory.size() > 10)
    {
@@ -148,6 +153,11 @@ void Menu::show(Menu::MenuType menu)
 
 void Menu::hide()
 {
+   if (mCurrentMenu)
+   {
+      mCurrentMenu->hideEvent();
+   }
+
    mCurrentMenu = nullptr;
    mCurrentType = MenuType::None;
 }

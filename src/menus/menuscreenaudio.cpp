@@ -158,6 +158,12 @@ void MenuScreenAudio::loadingFinished()
 }
 
 
+void MenuScreenAudio::showEvent()
+{
+   updateLayers();
+}
+
+
 void MenuScreenAudio::updateLayers()
 {
    auto master = mSelection == Selection::Master;

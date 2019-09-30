@@ -13,6 +13,7 @@ public:
    void keyboardKeyReleased(sf::Keyboard::Key key) override;
 
    void controllerButtonX() override;
+   void controllerButtonY() override;
 
    void loadingFinished() override;
    void updateLayers();
@@ -29,6 +30,8 @@ public:
 
 private:
 
+   void chop();
+   void appendChar(char enteredChar);
    void updateText();
    void retrieveUsername();
 

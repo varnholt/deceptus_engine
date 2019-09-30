@@ -97,6 +97,27 @@ void MenuScreenNameSelect::updateText()
 }
 
 
+void MenuScreenNameSelect::chop()
+{
+   if (mName.empty())
+   {
+      return;
+   }
+
+   mName.pop_back();
+   updateText();
+   updateLayers();
+}
+
+
+void MenuScreenNameSelect::appendChar(char c)
+{
+   mName += c;
+   updateText();
+   updateLayers();
+}
+
+
 void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    mShift += static_cast<int32_t>(key == sf::Keyboard::LShift);
@@ -109,21 +130,13 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
          return;
       }
 
-      mName += mChars[static_cast<uint32_t>(key + (mShift ? 0 : 26))];
-      updateText();
-      updateLayers();
+      const auto c = mChars[static_cast<uint32_t>(key + (mShift ? 0 : 26))];
+      appendChar(c);
    }
 
    if (key == sf::Keyboard::Delete || key == sf::Keyboard::Backspace)
    {
-      if (mName.empty())
-      {
-         return;
-      }
-
-      mName.pop_back();
-      updateText();
-      updateLayers();
+      chop();
    }
 
    if (key == sf::Keyboard::Up)
@@ -167,6 +180,14 @@ void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
 
 void MenuScreenNameSelect::controllerButtonX()
 {
+   chop();
+}
+
+
+void MenuScreenNameSelect::controllerButtonY()
+{
+   char c = mChars[static_cast<size_t>(mCharOffset.x + mCharOffset.y * 13)];
+   appendChar(c);
 }
 
 
