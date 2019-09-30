@@ -39,7 +39,7 @@ void MenuScreenOptions::back()
    const auto& history = Menu::getInstance()->getHistory();
 
    // choose whatever has been used the last time to open up the options menu
-   auto menu = Menu::MenuType::None;
+   auto menu = Menu::MenuType::Main;
    for (auto it = history.cbegin(); it != history.cend(); ++it)
    {
       if ((*it) == Menu::MenuType::Game)
