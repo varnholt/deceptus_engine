@@ -108,7 +108,6 @@ GameConfiguration& GameConfiguration::getInstance()
 {
    if (!sInitialized)
    {
-      auto& c = sInstance;
       sInstance.deserializeFromFile();
       sInitialized = true;
    }
