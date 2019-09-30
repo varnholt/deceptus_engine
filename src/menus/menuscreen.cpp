@@ -23,6 +23,18 @@ void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
 }
 
 
+void MenuScreen::showEvent()
+{
+
+}
+
+
+void MenuScreen::hideEvent()
+{
+
+}
+
+
 const std::string& MenuScreen::getFilename()
 {
    return mFilename;

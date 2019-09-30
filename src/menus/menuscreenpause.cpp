@@ -23,18 +23,15 @@ void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
    {
       up();
    }
-
    else if (key == sf::Keyboard::Down)
    {
       down();
    }
-
    else if (key == sf::Keyboard::Return)
    {
       select();
    }
-
-   if (key == sf::Keyboard::Escape)
+   else if (key == sf::Keyboard::Escape)
    {
       resume();
    }
@@ -104,17 +101,17 @@ void MenuScreenPause::select()
          break;
       case Selection::Quit:
          MessageBox::question(
-            "Are you sure you want to quit?",
-            [this](MessageBox::Button button) {if (button == MessageBox::Button::Yes) mExitCallback();}
+            "Do you want to end the game?",
+            [](MessageBox::Button button) {
+               if (button == MessageBox::Button::Yes)
+               {
+                  GameState::getInstance().enqueuePause();
+                  Menu::getInstance()->show(Menu::MenuType::Main);
+               }
+            }
          );
          break;
    }
-}
-
-
-void MenuScreenPause::setExitCallback(MenuScreenPause::ExitCallback callback)
-{
-    mExitCallback = callback;
 }
 
 

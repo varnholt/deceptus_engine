@@ -14,8 +14,6 @@ class MenuScreenPause : public MenuScreen
          Quit
       };
 
-      using ExitCallback = std::function<void(void)>;
-
       MenuScreenPause();
 
       void update(const sf::Time& dt) override;
@@ -31,12 +29,8 @@ class MenuScreenPause : public MenuScreen
       void down();
       void select();
 
-      void setExitCallback(ExitCallback callback);
-
 
    private:
-
-      ExitCallback mExitCallback;
 
       void resume();
 };

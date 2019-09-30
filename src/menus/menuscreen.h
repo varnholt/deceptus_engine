@@ -17,6 +17,8 @@ public:
 
    virtual void update(const sf::Time& dt);
    virtual void draw(sf::RenderTarget& window, sf::RenderStates states);
+   virtual void showEvent();
+   virtual void hideEvent();
 
    const std::string& getFilename();
    void setFilename(const std::string& filename);

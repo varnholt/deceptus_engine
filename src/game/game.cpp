@@ -299,10 +299,6 @@ void Game::initialize()
      [this](){mWindow->close();}
   );
 
-  std::dynamic_pointer_cast<MenuScreenPause>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Pause))->setExitCallback(
-     [this](){mWindow->close();}
-  );
-
   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
      [this](){toggleFullScreen();}
   );

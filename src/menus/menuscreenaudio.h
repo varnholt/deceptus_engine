@@ -20,6 +20,8 @@ public:
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
    void loadingFinished() override;
+   void showEvent() override;
+
    void updateLayers();
 
    void up();
