@@ -231,12 +231,24 @@ void MessageBox::messageBox(Type type, const std::string& message, MessageBoxCal
 
 void MessageBox::info(const std::string& message, MessageBoxCallback callback, int32_t buttons)
 {
+   // i don't think there's any valid use case for the queue :)
+   if (!mQueue.empty())
+   {
+      return;
+   }
+
    messageBox(MessageBox::Type::Info, message, callback, buttons);
 }
 
 
 void MessageBox::question(const std::string& message, MessageBox::MessageBoxCallback callback, int32_t buttons)
 {
+   // i don't think there's any valid use case for the queue :)
+   if (!mQueue.empty())
+   {
+      return;
+   }
+
    messageBox(MessageBox::Type::Info, message, callback, buttons);
 }
 
