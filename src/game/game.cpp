@@ -324,8 +324,9 @@ void Game::initialize()
       [this](ExecutionMode current, ExecutionMode previous){
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
-            std::cout << "reset keys pressed" << std::endl;
+            // std::cout << "reset keys pressed" << std::endl;
             mPlayer->setKeysPressed(0);
+            CameraPane::getInstance().updateLookState(Look::LookActive, false);
          }
       }
    );
