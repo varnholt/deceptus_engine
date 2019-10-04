@@ -278,47 +278,57 @@ void Game::nextLevel()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
-  initializeController();
+   initializeController();
 
-  mPlayer = std::make_shared<Player>();
-  mPlayer->initialize();
+   mPlayer = std::make_shared<Player>();
+   mPlayer->initialize();
 
-  loadLevel();
+   loadLevel();
 
-  mInfoLayer = std::make_unique<InfoLayer>();
-  mInventoryLayer = std::make_unique<InventoryLayer>();
-  mControllerOverlay = std::make_unique<ControllerOverlay>();
-  mTestScene = std::make_unique<ForestScene>();
+   mInfoLayer = std::make_unique<InfoLayer>();
+   mInventoryLayer = std::make_unique<InventoryLayer>();
+   mControllerOverlay = std::make_unique<ControllerOverlay>();
+   mTestScene = std::make_unique<ForestScene>();
 
-  CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [this](){mDrawTestScene = true;});
+   CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [this](){mDrawTestScene = true;});
 
-  Audio::getInstance();
+   Audio::getInstance();
 
-  // initially the game should be in main menu and paused
-  std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
-     [this](){mWindow->close();}
-  );
+   // initially the game should be in main menu and paused
+   std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
+      [this](){mWindow->close();}
+   );
 
-  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
-     [this](){toggleFullScreen();}
-  );
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
+      [this](){toggleFullScreen();}
+   );
 
-  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
-     [this](int32_t w, int32_t h){changeResolution(w, h);}
-  );
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
+      [this](int32_t w, int32_t h){changeResolution(w, h);}
+   );
 
-  std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
-     [this](){
-     initializeWindow();
-     mLevel->createViews();
-    }
-  );
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
+      [this](){
+      initializeWindow();
+      mLevel->createViews();
+      }
+   );
 
-  initializeWindow();
+   initializeWindow();
 
-  showMainMenu();
+   showMainMenu();
 
-  Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetitive);
+   Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetitive);
+
+   GameState::getInstance().addCallback(
+      [this](ExecutionMode current, ExecutionMode previous){
+         if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
+         {
+            std::cout << "reset keys pressed" << std::endl;
+            mPlayer->setKeysPressed(0);
+         }
+      }
+   );
 }
 
 

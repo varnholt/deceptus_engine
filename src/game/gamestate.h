@@ -1,19 +1,16 @@
-#ifndef GAMESTATE_H
-#define GAMESTATE_H
-
+#pragma once
 
 #include "constants.h"
+
+#include <functional>
 
 
 class GameState
 {
 
-private:
-
-   ExecutionMode mMode = ExecutionMode::Running;
-   ExecutionMode mQueuedMode = ExecutionMode::Running;
-
 public:
+
+   using StateChangeCallback = std::function<void(ExecutionMode current, ExecutionMode previous)>;
 
    GameState() = default;
 
@@ -29,6 +26,16 @@ public:
 
    ExecutionMode getMode() const;
    void setMode(const ExecutionMode &mode);
+
+   void addCallback(const StateChangeCallback& cb);
+
+
+private:
+
+   ExecutionMode mMode = ExecutionMode::Running;
+   ExecutionMode mQueuedMode = ExecutionMode::Running;
+
+   std::vector<StateChangeCallback> mCallbacks;
+
 };
 
-#endif // GAMESTATE_H

@@ -13,7 +13,7 @@ void GameState::enqueue(ExecutionMode mode)
 //-----------------------------------------------------------------------------
 void GameState::sync()
 {
-   mMode = mQueuedMode;
+   setMode(mQueuedMode);
 }
 
 
@@ -32,9 +32,27 @@ ExecutionMode GameState::getMode() const
 
 
 //-----------------------------------------------------------------------------
-void GameState::setMode(const ExecutionMode &mode)
+void GameState::setMode(const ExecutionMode& current)
 {
-   mMode = mode;
+   if (current == mMode)
+   {
+      return;
+   }
+
+   auto previous = mMode;
+   mMode = current;
+
+   for (auto& f : mCallbacks)
+   {
+      f(current, previous);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void GameState::addCallback(const GameState::StateChangeCallback& cb)
+{
+   mCallbacks.push_back(cb);
 }
 
 
