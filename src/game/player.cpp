@@ -1377,21 +1377,25 @@ bool Player::isOnGround() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePlatformMovement(const sf::Time& dt)
+void Player::updatePlatformMovement(const sf::Time& /*dt*/)
 {
    // http://www.badlogicgames.com/forum/viewtopic.php?f=15&t=4695&hilit=+plattform
 
    if (isOnPlatform())
    {
-      mBody->SetTransform(
-         b2Vec2(
-            mBody->GetPosition().x + dt.asSeconds() * getPlatformVelocity(), // * 1.34f,
-            mBody->GetPosition().y
-         ),
-         0.0f
-      );
+      // todo: just retrieve current platform velocity and apply that
+      // or use transform directly
+      //
+      // const auto error = 0.91192227210220912883854305376065f;
+      // const auto velocity = error * (PPM / 60.0f);
+      // const auto dx = dt.asSeconds() * velocity;
 
-      // printf("standing on platform\n");
+      const auto x = mBody->GetPosition().x; // + dx;
+      const auto y = mBody->GetPosition().y;
+
+      mBody->SetTransform(b2Vec2(x, y), 0.0f);
+
+      // printf("standing on platform, x: %f, y: %f, dx: %f \n", x, y, dx);
    }
 }
 
