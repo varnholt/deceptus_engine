@@ -216,6 +216,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
       processBeginContact(contact, playerFixture, otherThingFixture, playerFixtureNode, otherThingFixtureNode);
    }
 
+// that might have to be called before processOneSidedWalls or as part of it to make it work
+//
 //   if (playerFixture != nullptr && (static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head"))
 //   {
 //      contact->SetEnabled(false);
