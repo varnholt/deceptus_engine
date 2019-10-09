@@ -50,6 +50,12 @@ private:
       FixtureNode* otherThingFixtureNode
    );
 
+   void processEndContact(
+      b2Contact* contact,
+      b2Fixture* otherThingFixture,
+      FixtureNode* otherThingFixtureNode
+   );
+
 
 private:
 

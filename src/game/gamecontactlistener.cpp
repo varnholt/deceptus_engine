@@ -60,6 +60,11 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
 
 void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture)
 {
+   if (playerFixture != nullptr && (static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head"))
+   {
+      contact->SetEnabled(false);
+   }
+
    if (platformFixture != nullptr)
    {
       int32_t numPoints = contact->GetManifold()->pointCount;
@@ -215,15 +220,49 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
       processBeginContact(contact, playerFixture, otherThingFixture, playerFixtureNode, otherThingFixtureNode);
    }
-
-// that might have to be called before processOneSidedWalls or as part of it to make it work
-//
-//   if (playerFixture != nullptr && (static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head"))
-//   {
-//      contact->SetEnabled(false);
-//   }
 }
 
+
+void GameContactListener::processEndContact(
+   b2Contact* contact,
+   b2Fixture* otherThingFixture,
+   FixtureNode* otherThingFixtureNode
+)
+{
+   switch (otherThingFixtureNode->getType())
+   {
+      case ObjectTypePlayerFootSensor:
+      {
+         if (!otherThingFixture->IsSensor())
+         {
+            mNumFootContacts--;
+         }
+         break;
+      }
+      case ObjectTypePlayerHeadSensor:
+      {
+         if (!otherThingFixture->IsSensor())
+         {
+            mNumHeadContacts--;
+         }
+         break;
+      }
+      case ObjectTypePlayer:
+         mNumPlayerContacts--;
+         break;
+      case ObjectTypeOneSidedWall:
+         contact->SetEnabled(true);
+         break;
+      case ObjectTypeDeadly:
+         mNumDeadlyContacts--;
+         break;
+      case ObjectTypeMovingPlatform:
+         mNumMovingPlatformContacts--;
+         break;
+      default:
+         break;
+   }
+}
 
 void GameContactListener::EndContact(b2Contact* contact)
 {
@@ -232,80 +271,18 @@ void GameContactListener::EndContact(b2Contact* contact)
 
    if (fixtureUserDataA)
    {
-      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
+      auto otherThingFixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
+      auto otherThingFixture = contact->GetFixtureB();
 
-      switch (fixtureNode->getType())
-      {
-         case ObjectTypePlayerFootSensor:
-         {
-            if (!contact->GetFixtureB()->IsSensor())
-            {
-               mNumFootContacts--;
-            }
-            break;
-         }
-         case ObjectTypePlayerHeadSensor:
-         {
-            if (!contact->GetFixtureB()->IsSensor())
-            {
-               mNumHeadContacts--;
-            }
-            break;
-         }
-         case ObjectTypePlayer:
-            mNumPlayerContacts--;
-            break;
-         case ObjectTypeOneSidedWall:
-            contact->SetEnabled(true);
-            break;
-         case ObjectTypeDeadly:
-            mNumDeadlyContacts--;
-            break;
-         case ObjectTypeMovingPlatform:
-            mNumMovingPlatformContacts--;
-            break;
-         default:
-            break;
-      }
+      processEndContact(contact, otherThingFixture, otherThingFixtureNode);
    }
 
    if (fixtureUserDataB)
    {
-      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
+      auto otherThingFixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
+      auto otherThingFixture = contact->GetFixtureA();
 
-      switch (fixtureNode->getType())
-      {
-         case ObjectTypePlayerFootSensor:
-         {
-            if (!contact->GetFixtureA()->IsSensor())
-            {
-               mNumFootContacts--;
-            }
-            break;
-         }
-         case ObjectTypePlayerHeadSensor:
-         {
-            if (!contact->GetFixtureA()->IsSensor())
-            {
-               mNumHeadContacts--;
-            }
-            break;
-         }
-         case ObjectTypePlayer:
-            mNumPlayerContacts--;
-            break;
-         case ObjectTypeOneSidedWall:
-            contact->SetEnabled(true);
-            break;
-         case ObjectTypeDeadly:
-            mNumDeadlyContacts--;
-            break;
-         case ObjectTypeMovingPlatform:
-            mNumMovingPlatformContacts--;
-            break;
-         default:
-            break;
-      }
+      processEndContact(contact, otherThingFixture, otherThingFixtureNode);
    }
 
    // printf("end: %d\n", mNumPlayerContacts);
