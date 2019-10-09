@@ -468,7 +468,6 @@ void Player::createBody()
    mBodyFixture->SetUserData(static_cast<void*>(objectDataHead));
 
    // mBody->Dump();
-
 }
 
 
