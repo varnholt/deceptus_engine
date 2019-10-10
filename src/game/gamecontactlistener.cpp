@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "fixturenode.h"
+#include "movingplatform.h"
 #include "player.h"
 
 #include <iostream>
@@ -165,6 +166,11 @@ void GameContactListener::processBeginContact(
        }
        case ObjectTypeMovingPlatform:
        {
+          // so this can't be right
+          // todo: set up some asserts to check if the right data is passed in!
+          auto platformBody = playerFixture->GetBody();
+
+          Player::getCurrent()->setPlatformBody(platformBody);
           mNumMovingPlatformContacts++;
           break;
        }
