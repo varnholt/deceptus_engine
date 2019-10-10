@@ -53,7 +53,14 @@ int MovingPlatform::getZ() const
 //-----------------------------------------------------------------------------
 void MovingPlatform::setZ(int z)
 {
-   mZ = z;
+    mZ = z;
+}
+
+
+//-----------------------------------------------------------------------------
+b2Body* MovingPlatform::getBody()
+{
+    return mBody;
 }
 
 
@@ -66,7 +73,7 @@ void MovingPlatform::setOffset(float x, float y)
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::updateTransform()
+void MovingPlatform::setupTransform()
 {
    auto x = mTilePosition.x * PIXELS_PER_TILE / PPM;
    auto y = mTilePosition.y * PIXELS_PER_TILE / PPM;
@@ -92,7 +99,7 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
    mBody = world->CreateBody(&bodyDef);
    // mBody->SetGravityScale(0.0f);
 
-   updateTransform();
+   setupTransform();
 
    auto fixture = mBody->CreateFixture(&polygonShape, 0);
    auto objectData = new FixtureNode(this);

@@ -1,5 +1,4 @@
-#ifndef MOVINGPLATFORM_H
-#define MOVINGPLATFORM_H
+#pragma once
 
 #include "gamenode.h"
 
@@ -18,19 +17,6 @@ struct TmxTileSet;
 
 class MovingPlatform : public GameNode
 {
-
-protected:
-   sf::Texture mTexture;
-   std::vector<sf::Sprite> mSprites;
-   b2Body* mBody = nullptr;
-   sf::Vector2i mTilePosition;
-   float mX = 0.0f;
-   float mY = 0.0f;
-   int mWidth = 0;
-   int mHeight = 1;
-   int mZ = 0;
-   float mTime = 0.0f;
-   PathInterpolation mInterpolation;
 
 public:
    MovingPlatform(GameNode* parent);
@@ -51,16 +37,30 @@ public:
    void setOffset(float x, float y);
    int getZ() const;
    void setZ(int z);
+   b2Body* getBody();
 
 
-protected:
+private:
+
+   void setupTransform();
+
    double CosineInterpolate(
       double y1,double y2,
       double mu
    );
 
+
 private:
-   void updateTransform();
+   sf::Texture mTexture;
+   std::vector<sf::Sprite> mSprites;
+   b2Body* mBody = nullptr;
+   sf::Vector2i mTilePosition;
+   float mX = 0.0f;
+   float mY = 0.0f;
+   int mWidth = 0;
+   int mHeight = 1;
+   int mZ = 0;
+   float mTime = 0.0f;
+   PathInterpolation mInterpolation;
 };
 
-#endif // MOVINGPLATFORM_H
