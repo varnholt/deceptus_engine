@@ -13,8 +13,6 @@ class GameContactListener : public b2ContactListener
 
 public:
 
-   GameContactListener();
-
    int32_t getNumHeadContacts() const;
    int32_t getNumFootContacts() const;
    int32_t getDeadlyContacts() const;
@@ -27,6 +25,7 @@ public:
    void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) override;
    void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override;
 
+   void debug();
    void reset();
 
    static GameContactListener* getInstance();
@@ -38,6 +37,8 @@ protected:
 
 
 private:
+
+   GameContactListener();
 
    void processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture);
    void processImpulse(float impulse);
@@ -53,6 +54,7 @@ private:
    void processEndContact(
       b2Contact* contact,
       b2Fixture* otherThingFixture,
+      FixtureNode* playerFixtureNode,
       FixtureNode* otherThingFixtureNode
    );
 
