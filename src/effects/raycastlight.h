@@ -29,6 +29,8 @@ public:
       int mHeight = 256;
       int mOffsetX = 0;
       int mOffsetY = 0;
+
+      void updateSpritePosition();
    };
 
    std::vector<std::shared_ptr<LightInstance>> mLights;

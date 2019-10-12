@@ -20,7 +20,6 @@
 
 class Level;
 class Player;
-class RaycastLight;
 
 
 class Game
