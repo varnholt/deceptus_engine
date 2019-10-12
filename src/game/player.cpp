@@ -1379,13 +1379,11 @@ bool Player::isOnGround() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlatformMovement(const sf::Time& dt)
 {
-   // http://www.badlogicgames.com/forum/viewtopic.php?f=15&t=4695&hilit=+plattform
-
-   if (isOnPlatform())
+   if (isOnPlatform() && mPlatformBody)
    {
       const auto dx = dt.asSeconds() * getPlatformBody()->GetLinearVelocity().x;
 
-      const auto x = mBody->GetPosition().x + dx * 1.55;
+      const auto x = mBody->GetPosition().x + dx * 1.65f;
       const auto y = mBody->GetPosition().y;
 
       mBody->SetTransform(b2Vec2(x, y), 0.0f);
@@ -2222,7 +2220,7 @@ void Player::reset()
    mPlatformBody = nullptr;
 
    // reset dash
-   mDashSteps = 0;    
+   mDashSteps = 0;
    resetDash();
 }
 
