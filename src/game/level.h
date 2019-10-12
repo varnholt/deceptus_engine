@@ -226,6 +226,7 @@ protected:
    BoomEffect mBoomEffect;
    std::shared_ptr<RaycastLight> mRaycastLight;
    std::shared_ptr<StaticLight> mStaticLight;
+   std::shared_ptr<RaycastLight::LightInstance> mPlayerLight;
 
    AmbientOcclusion mAo;
    std::vector<std::shared_ptr<ImageLayer>> mImageLayers;

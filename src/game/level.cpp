@@ -67,6 +67,13 @@ Level* Level::sCurrentLevel = nullptr;
 const std::string parallaxIdentifier = "parallax_";
 
 
+//-----------------------------------------------------------------------------
+namespace
+{
+   static const auto PLAYER_LIGHT_SIZE_PX = 384;
+   static const auto PLAYER_LIGHT_SIZE_METERS = 384 * MPP;
+}
+
 
 //-----------------------------------------------------------------------------
 std::string Level::getDescriptionFilename() const
@@ -183,6 +190,14 @@ Level::Level()
    mRaycastLight = std::make_shared<RaycastLight>();
    mStaticLight = std::make_shared<StaticLight>();
 
+   // add raycast light for player
+   mPlayerLight = deserializeRaycastLight(nullptr);
+   mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, 20));
+//   mPlayerLight->mColor.r = 20;
+//   mPlayerLight->mColor.g = 20;
+//   mPlayerLight->mColor.b = 20;
+   mRaycastLight->mLights.push_back(mPlayerLight);
+
    mMap = std::make_unique<LevelMap>();
 }
 
@@ -197,60 +212,60 @@ Level::~Level()
 //-----------------------------------------------------------------------------
 std::shared_ptr<RaycastLight::LightInstance> Level::deserializeRaycastLight(TmxObject* tmxObject)
 {
-  auto light = std::make_shared<RaycastLight::LightInstance>();
-  light->mWidth = static_cast<int>(tmxObject->mWidth);
-  light->mHeight = static_cast<int>(tmxObject->mHeight);
-  light->mPosMeters = b2Vec2(
-    tmxObject->mX * MPP + (tmxObject->mWidth * 0.5f) * MPP,
-    tmxObject->mY * MPP + (tmxObject->mHeight * 0.5f) * MPP
-  );
+   auto light = std::make_shared<RaycastLight::LightInstance>();
 
-  std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
-  std::string texture = "data/light/smooth.png";
+   if (tmxObject)
+   {
+      light->mWidth = static_cast<int>(tmxObject->mWidth);
+      light->mHeight = static_cast<int>(tmxObject->mHeight);
 
-  if (tmxObject->mProperties != nullptr)
-  {
-     auto it = tmxObject->mProperties->mMap.find("color");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        rgba = TmxTools::color(it->second->mValueStr);
-     }
+      light->mPosMeters = b2Vec2(
+        tmxObject->mX * MPP + (tmxObject->mWidth * 0.5f) * MPP,
+        tmxObject->mY * MPP + (tmxObject->mHeight * 0.5f) * MPP
+      );
+   }
 
-     it = tmxObject->mProperties->mMap.find("texture");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
-     }
-  }
+   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
+   std::string texture = "data/light/smooth.png";
 
-  light->mColor.r = rgba[0];
-  light->mColor.g = rgba[1];
-  light->mColor.b = rgba[2];
-  light->mColor.a = rgba[3];
-  light->mSprite.setColor(light->mColor);
+   if (tmxObject && tmxObject->mProperties != nullptr)
+   {
+      auto it = tmxObject->mProperties->mMap.find("color");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         rgba = TmxTools::color(it->second->mValueStr);
+      }
 
-  light->mTexture.loadFromFile(texture);
-  light->mSprite.setTexture(light->mTexture);
-  light->mSprite.setTextureRect(
-    sf::IntRect(
-      0,
-      0,
-      static_cast<int32_t>(light->mTexture.getSize().x),
-      static_cast<int32_t>(light->mTexture.getSize().y)
-    )
-  );
+      it = tmxObject->mProperties->mMap.find("texture");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
+      }
+   }
 
-  light->mSprite.setPosition(
-     sf::Vector2f(
-        light->mPosMeters.x * PPM - light->mWidth * 0.5f + light->mOffsetX,
-        light->mPosMeters.y * PPM - light->mHeight * 0.5f + light->mOffsetY
+   light->mColor.r = rgba[0];
+   light->mColor.g = rgba[1];
+   light->mColor.b = rgba[2];
+   light->mColor.a = rgba[3];
+   light->mSprite.setColor(light->mColor);
+
+   light->mTexture.loadFromFile(texture);
+   light->mSprite.setTexture(light->mTexture);
+   light->mSprite.setTextureRect(
+     sf::IntRect(
+       0,
+       0,
+       static_cast<int32_t>(light->mTexture.getSize().x),
+       static_cast<int32_t>(light->mTexture.getSize().y)
      )
-  );
+   );
 
-  auto scale = static_cast<float>(light->mWidth) / light->mTexture.getSize().x;
-  light->mSprite.setScale(scale, scale);
+   light->updateSpritePosition();
 
-  return light;
+   auto scale = static_cast<float>(light->mWidth) / light->mTexture.getSize().x;
+   light->mSprite.setScale(scale, scale);
+
+   return light;
 }
 
 
@@ -1251,6 +1266,9 @@ void Level::update(const sf::Time& dt)
    }
 
    LuaInterface::instance()->update(dt);
+
+   mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();// + b2Vec2(0.0f, 0.0f);
+   mPlayerLight->updateSpritePosition();
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
