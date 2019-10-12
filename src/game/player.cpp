@@ -1377,20 +1377,15 @@ bool Player::isOnGround() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePlatformMovement(const sf::Time& /*dt*/)
+void Player::updatePlatformMovement(const sf::Time& dt)
 {
    // http://www.badlogicgames.com/forum/viewtopic.php?f=15&t=4695&hilit=+plattform
 
    if (isOnPlatform())
    {
-      // todo: just retrieve current platform velocity and apply that
-      // or use transform directly
-      //
-      // const auto error = 0.91192227210220912883854305376065f;
-      // const auto velocity = error * (PPM / 60.0f);
-      // const auto dx = dt.asSeconds() * velocity;
+      const auto dx = dt.asSeconds() * getPlatformBody()->GetLinearVelocity().x;
 
-      const auto x = mBody->GetPosition().x; // + dx;
+      const auto x = mBody->GetPosition().x + dx * 1.55;
       const auto y = mBody->GetPosition().y;
 
       mBody->SetTransform(b2Vec2(x, y), 0.0f);
@@ -2064,16 +2059,16 @@ void Player::updateAtmosphere()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-float Player::getPlatformVelocity() const
+b2Body* Player::getPlatformBody() const
 {
-   return mPlatformVelocity;
+   return mPlatformBody;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setPlatformVelocity(float platformVelocity)
+void Player::setPlatformBody(b2Body* body)
 {
-   mPlatformVelocity = platformVelocity;
+   mPlatformBody = body;
 }
 
 
@@ -2223,7 +2218,11 @@ void Player::reset()
    SaveState::getPlayerInfo().mExtraTable.mHealth->reset();
    SaveState::getPlayerInfo().mInventory.resetKeys();
 
-   mDashSteps = 0;
+   // reset moving platform
+   mPlatformBody = nullptr;
+
+   // reset dash
+   mDashSteps = 0;    
    resetDash();
 }
 

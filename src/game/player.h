@@ -140,8 +140,8 @@ public:
    void setVisible(bool visible);
 
 
-   float getPlatformVelocity() const;
-   void setPlatformVelocity(float platformVelocity);
+   b2Body* getPlatformBody() const;
+   void setPlatformBody(b2Body* body);
 
    bool isInAir() const;
    bool isClimbing() const;
@@ -247,7 +247,7 @@ private:
    bool mCrouching = false;
    bool mInWater = false;
 
-   float mPlatformVelocity = 0.0f;
+   b2Body* mPlatformBody = nullptr;
    float mNextFootStepTime = 0.0f;
 
    int mZ = 0;

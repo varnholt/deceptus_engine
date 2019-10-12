@@ -11,16 +11,9 @@
 
 class FixtureNode : public GameNode
 {
-   protected:
+   public:
 
       using Variant = std::variant<std::string, int32_t, double>;
-
-      ObjectType mType;
-      std::map<std::string, bool> mFlags;
-      std::map<std::string, Variant> mProperties;
-
-
-   public:
 
       FixtureNode(GameNode *parent);
       virtual ~FixtureNode();
@@ -33,5 +26,12 @@ class FixtureNode : public GameNode
 
       void setProperty(const std::string& key, const Variant& value);
       Variant getProperty(const std::string& key) const;
+
+
+   protected:
+
+      ObjectType mType;
+      std::map<std::string, bool> mFlags;
+      std::map<std::string, Variant> mProperties;
 };
 

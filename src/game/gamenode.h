@@ -1,6 +1,4 @@
-#ifndef GAMEOBJECT_H
-#define GAMEOBJECT_H
-
+#pragma once
 
 class GameNode
 {
@@ -8,9 +6,9 @@ public:
    GameNode(GameNode* parent = nullptr);
    virtual ~GameNode();
 
-   GameNode *getParent() const;
+   GameNode* getParent() const;
 
-   GameNode* mParent;
+private:
+   GameNode* mParent = nullptr;
 };
 
-#endif // GAMEOBJECT_H
