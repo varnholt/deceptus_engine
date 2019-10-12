@@ -410,14 +410,29 @@ void Game::draw()
    mWindowRenderTexture->display();
    auto windowTextureSprite = sf::Sprite(mWindowRenderTexture->getTexture());
 
-   windowTextureSprite.setPosition(
-      static_cast<float>(mRenderTextureOffset.x),
-      static_cast<float>(mRenderTextureOffset.y)
-   );
+   if (GameConfiguration::getInstance().mFullscreen)
+   {
+      // scale window texture up to available window size
+      const auto scaleX = mWindow->getSize().x / static_cast<float>(mWindowRenderTexture->getSize().x);
+      const auto scaleY = mWindow->getSize().y / static_cast<float>(mWindowRenderTexture->getSize().y);
+      const auto scaleMin = std::min(static_cast<int32_t>(scaleX), static_cast<int32_t>(scaleY));
+      const auto dx = (scaleX - scaleMin) * 0.5f;
+      const auto dy = (scaleY - scaleMin) * 0.5f;
+      windowTextureSprite.setPosition(mWindowRenderTexture->getSize().x * dx, mWindowRenderTexture->getSize().y * dy);
+      windowTextureSprite.scale(static_cast<float>(scaleMin), static_cast<float>(scaleMin));
+   }
+   else
+   {
+      windowTextureSprite.setPosition(
+         static_cast<float>(mRenderTextureOffset.x),
+         static_cast<float>(mRenderTextureOffset.y)
+      );
+   }
 
    mWindow->draw(windowTextureSprite);
 
    mWindow->popGLStates();
+
    mWindow->display();
 
    if (mRecording)
