@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
@@ -35,9 +36,6 @@ public:
 
    std::vector<std::shared_ptr<LightInstance>> mLights;
    sf::Shader mShader;
-
-
-public:
 
    RaycastLight();
 
