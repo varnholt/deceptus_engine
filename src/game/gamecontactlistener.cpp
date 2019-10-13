@@ -301,6 +301,9 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeMovingPlatform:
          {
+            auto platformBody = contact->GetFixtureA()->GetBody();
+            Player::getCurrent()->setPlatformBody(platformBody);
+
             mNumMovingPlatformContacts++;
             break;
          }
@@ -382,6 +385,9 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeMovingPlatform:
          {
+            auto platformBody = contact->GetFixtureB()->GetBody();
+            Player::getCurrent()->setPlatformBody(platformBody);
+
             mNumMovingPlatformContacts++;
             break;
          }

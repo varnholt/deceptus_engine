@@ -86,7 +86,7 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygonShape;
    auto sizeX = PIXELS_PER_TILE / PPM;
-   auto sizeY = PIXELS_PER_TILE / PPM;
+   auto sizeY = 0.5f * PIXELS_PER_TILE / PPM;
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(0,              0              );
    vertices[1] = b2Vec2(0,              sizeY * mHeight);
