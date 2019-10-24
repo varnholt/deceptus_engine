@@ -1335,7 +1335,6 @@ void Level::addPathsToWorld(
 
          chain.push_back(chainPos);
       }
-      chain.push_back(chain.at(0));
 
       // create 1 body per chain
       b2BodyDef bodyDef;
@@ -1343,7 +1342,7 @@ void Level::addPathsToWorld(
       bodyDef.type = b2_staticBody;
       b2Body* body = mWorld->CreateBody(&bodyDef);
       b2ChainShape chainShape;
-      chainShape.CreateChain(&chain.at(0), static_cast<int32_t>(chain.size()));
+      chainShape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
       b2FixtureDef fixtureDef;
       fixtureDef.density = 0.0f;
       fixtureDef.friction = 0.2f;

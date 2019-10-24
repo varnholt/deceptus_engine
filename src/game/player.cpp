@@ -1058,6 +1058,8 @@ void Player::updateVelocity()
          // std::cout << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform() << std::endl;
       }
 
+      // std::cout << "reset" << std::endl;
+
       mBody->SetLinearVelocity({0.0, 0.0});
       return;
    }
@@ -1379,6 +1381,11 @@ bool Player::isOnGround() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlatformMovement(const sf::Time& dt)
 {
+   if (isJumping())
+   {
+      return;
+   }
+
    if (isOnPlatform() && mPlatformBody)
    {
       const auto dx = dt.asSeconds() * getPlatformBody()->GetLinearVelocity().x;
@@ -2203,6 +2210,7 @@ void Player::reset()
    // check for checkpoints
    // so start position could vary here
    mHardLanding = false;
+   mHardLandingCycles = 0;
 
    mBody->SetLinearVelocity(b2Vec2(0,0));
 
