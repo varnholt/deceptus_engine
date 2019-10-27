@@ -36,6 +36,7 @@ struct ExtraItem;
 class Laser;
 struct LevelDescription;
 class LevelMap;
+class MoveableBox;
 class MovingPlatform;
 class TileMap;
 class SpikeBall;
@@ -221,6 +222,7 @@ protected:
    std::vector<std::shared_ptr<MovingPlatform>> mPlatforms;
    std::vector<std::shared_ptr<Portal>> mPortals;
    std::vector<std::shared_ptr<SpikeBall>> mSpikeBalls;
+   std::vector<std::shared_ptr<MoveableBox>> mMoveableBoxes;
 
    // graphic effects
    BoomEffect mBoomEffect;

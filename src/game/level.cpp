@@ -21,6 +21,7 @@
 #include "luainterface.h"
 #include "maptools.h"
 #include "meshtools.h"
+#include "moveablebox.h"
 #include "movingplatform.h"
 #include "fixturenode.h"
 #include "player.h"
@@ -513,6 +514,12 @@ void Level::loadTmx()
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
                spikeBall->setup(tmxObject, mWorld);
                mSpikeBalls.push_back(spikeBall);
+            }
+            else if (objectGroup->mName == "moveable_objects")
+            {
+               auto box = std::make_shared<MoveableBox>(dynamic_cast<GameNode*>(this));
+               box->setup(tmxObject, mWorld);
+               mMoveableBoxes.push_back(box);
             }
             else if (objectGroup->mName == "checkpoints")
             {
