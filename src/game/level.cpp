@@ -900,6 +900,14 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
          }
       }
 
+      for (auto& box : mMoveableBoxes)
+      {
+         if (box->getZ() == z)
+         {
+            box->draw(target);
+         }
+      }
+
       for (auto& bouncer : mBouncers)
       {
          if (bouncer->getZ() == z)

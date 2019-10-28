@@ -5,7 +5,7 @@
 
 #include "gamenode.h"
 
-class TmxObject;
+struct TmxObject;
 
 
 class MoveableBox : public GameNode
@@ -15,11 +15,13 @@ class MoveableBox : public GameNode
       void draw(sf::RenderTarget& window);
       void update(const sf::Time& dt);
       void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
+      int32_t getZ() const;
 
    private:
 
       std::shared_ptr<sf::Texture> mTexture;
-      std::vector<sf::Sprite> mSprites;
+      sf::Sprite mSprite;
       sf::Vector2f mSize;
+      int32_t mZ = 0;
 };
 
