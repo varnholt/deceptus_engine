@@ -1280,6 +1280,11 @@ void Level::update(const sf::Time& dt)
       ball->update(dt);
    }
 
+   for (auto& box : mMoveableBoxes)
+   {
+      box->update(dt);
+   }
+
    LuaInterface::instance()->update(dt);
 
    mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();// + b2Vec2(0.0f, 0.0f);
