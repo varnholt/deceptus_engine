@@ -19,9 +19,13 @@ class MoveableBox : public GameNode
 
    private:
 
+      void setupBody(const std::shared_ptr<b2World>& world);
+      void setupTransform();
+
       std::shared_ptr<sf::Texture> mTexture;
       sf::Sprite mSprite;
       sf::Vector2f mSize;
       int32_t mZ = 0;
+      b2Body* mBody = nullptr;
 };
 
