@@ -27,6 +27,9 @@ void MoveableBox::draw(sf::RenderTarget& window)
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
+   const auto x = mBody->GetPosition().x * PPM;
+   const auto y = mBody->GetPosition().y * PPM;
+   mSprite.setPosition(x, y - 24);
 }
 
 
@@ -66,10 +69,10 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 {
-   std::cout
-      << "box: pos: " << tmxObject->mX << " x " << tmxObject->mY
-      << " size: " << tmxObject->mWidth << " x " << tmxObject->mHeight
-      << std::endl;
+   //   std::cout
+   //      << "box: pos: " << tmxObject->mX << " x " << tmxObject->mY
+   //      << " size: " << tmxObject->mWidth << " x " << tmxObject->mHeight
+   //      << std::endl;
 
    mSize.x = tmxObject->mWidth;
    mSize.y = tmxObject->mHeight;
@@ -104,8 +107,8 @@ void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& wo
 //-----------------------------------------------------------------------------
 void MoveableBox::setupTransform()
 {
-   auto x = mSprite.getPosition().x * PIXELS_PER_TILE / PPM;
-   auto y = mSprite.getPosition().y * PIXELS_PER_TILE / PPM;
+   auto x = mSprite.getPosition().x / PPM;
+   auto y = mSprite.getPosition().y / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
 
