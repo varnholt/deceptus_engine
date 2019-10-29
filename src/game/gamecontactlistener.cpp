@@ -196,6 +196,8 @@ void GameContactListener::processBeginContact(
           break;
        case ObjectTypeJumpPlatform:
           break;
+       case ObjectTypeMoveableBox:
+          break;
     }
 }
 
@@ -329,6 +331,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeJumpPlatform:
             break;
+        case ObjectTypeMoveableBox:
+           break;
       }
    }
 
@@ -412,6 +416,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
          case ObjectTypeConveyorBelt:
             break;
          case ObjectTypeJumpPlatform:
+            break;
+         case ObjectTypeMoveableBox:
             break;
       }
    }

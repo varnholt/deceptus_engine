@@ -228,6 +228,7 @@ enum ObjectType
    ObjectTypeBouncer,
    ObjectTypeConveyorBelt,
    ObjectTypeJumpPlatform,
+   ObjectTypeMoveableBox,
 };
 
 enum EntityCategory {

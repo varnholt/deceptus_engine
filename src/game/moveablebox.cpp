@@ -1,11 +1,14 @@
 #include "moveablebox.h"
 
+#include "constants.h"
+#include "fixturenode.h"
 #include "texturepool.h"
 #include "tmxparser/tmxobject.h"
 
 #include <iostream>
 
 
+//--------------------------------------------------------------------------------------------------
 MoveableBox::MoveableBox(GameNode* node)
  : GameNode(node)
 {
@@ -14,17 +17,16 @@ MoveableBox::MoveableBox(GameNode* node)
 }
 
 
-//-----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void MoveableBox::draw(sf::RenderTarget& window)
 {
    window.draw(mSprite);
 }
 
 
-//-----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
-
 }
 
 
@@ -61,8 +63,8 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 // 1176, 0
 
 
-//-----------------------------------------------------------------------------
-void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*world*/)
+//--------------------------------------------------------------------------------------------------
+void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 {
    std::cout
       << "box: pos: " << tmxObject->mX << " x " << tmxObject->mY
@@ -93,9 +95,51 @@ void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*
          break;
       }
    }
+
+   setupBody(world);
+   setupTransform();
 }
 
 
+//-----------------------------------------------------------------------------
+void MoveableBox::setupTransform()
+{
+   auto x = mSprite.getPosition().x * PIXELS_PER_TILE / PPM;
+   auto y = mSprite.getPosition().y * PIXELS_PER_TILE / PPM;
+   mBody->SetTransform(b2Vec2(x, y), 0);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
+{
+   b2PolygonShape polygonShape;
+   auto sizeX = mSize.x / PPM;
+   auto sizeY = mSize.y / PPM;
+
+   b2Vec2 vertices[4];
+   vertices[0] = b2Vec2(0,     0);
+   vertices[1] = b2Vec2(0,     sizeY);
+   vertices[2] = b2Vec2(sizeX, sizeY);
+   vertices[3] = b2Vec2(sizeX, 0);
+
+   polygonShape.Set(vertices, 4);
+
+   b2BodyDef bodyDef;
+   bodyDef.type = b2_dynamicBody;
+   mBody = world->CreateBody(&bodyDef);
+   // mBody->SetGravityScale(0.0f);
+
+   setupTransform();
+
+   auto fixture = mBody->CreateFixture(&polygonShape, 0);
+   auto objectData = new FixtureNode(this);
+   objectData->setType(ObjectTypeMoveableBox);
+   fixture->SetUserData(static_cast<void*>(objectData));
+}
+
+
+//--------------------------------------------------------------------------------------------------
 int32_t MoveableBox::getZ() const
 {
    return mZ;
