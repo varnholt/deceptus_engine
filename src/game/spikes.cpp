@@ -15,6 +15,7 @@
 sf::Texture Spikes::sTexture;
 #define SPIKES_PER_ROW 22
 #define TOLERANCE_PIXELS 5
+#define TRAP_START_TILE (SPIKES_PER_ROW - 4)
 // -> 24 - 2 * 4 = 16px rect
 
 namespace
@@ -23,6 +24,7 @@ static const auto updateTimeUpMs = 5;
 static const auto updateTimeDownMs = 30;
 static const auto downTime = 2000;
 static const auto upTime = 2000;
+static const auto trapTime = 250;
 }
 
 
@@ -90,6 +92,81 @@ void Spikes::updateInterval()
 }
 
 
+void Spikes::updateTrap()
+{
+   if (mTu == 0)
+   {
+      mTriggered = false;
+
+      if (mElapsedMs < upTime)
+      {
+         return;
+      }
+      else
+      {
+         // skip the first few frames on the way back..
+         mTu = 7;
+      }
+   }
+
+   // trap trigger is done via intersection
+   if (mTu == TRAP_START_TILE)
+   {
+      auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+      if (playerRect.intersects(mRect))
+      {
+         // start counting from first intersection
+         if (!mTriggered)
+         {
+            mElapsedMs = 0;
+         }
+
+         mTriggered = true;
+      }
+
+      // trap was activated
+      if (mTriggered)
+      {
+         if (mElapsedMs < trapTime)
+         {
+            return;
+         }
+      }
+      else
+      {
+         return;
+      }
+   }
+
+   const auto updateTime = (mTriggered ? updateTimeUpMs : updateTimeDownMs);
+   if (mElapsedMs > updateTime)
+   {
+      mElapsedMs = (mElapsedMs % updateTime);
+
+      if (mTriggered)
+      {
+         // extract
+         mTu-=2;
+         if (mTu < 0)
+         {
+            mTu = 0;
+         }
+      }
+      else
+      {
+         // retract
+         mTu++;
+         if (mTu >= SPIKES_PER_ROW)
+         {
+            mTu = SPIKES_PER_ROW - 1;
+         }
+      }
+   }
+
+   mDeadly = (mTu < 10);
+}
+
+
 void Spikes::update(const sf::Time& dt)
 {
    mElapsedMs += dt.asMilliseconds();
@@ -98,6 +175,7 @@ void Spikes::update(const sf::Time& dt)
    {
       case Mode::Trap:
       {
+         updateTrap();
          break;
       }
       case Mode::Interval:
@@ -133,7 +211,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
-   const std::shared_ptr<b2World>& /*world*/
+   Mode mode
 )
 {
    sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "spikes.png");
@@ -157,7 +235,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
          {
             auto id = (tileNumber - firstId);
             auto spikes = std::make_shared<Spikes>();
-            spikes->mMode = Mode::Interval;
+
             allSpikes.push_back(spikes);
 
             spikes->mTilePosition.x = static_cast<float>(i);
@@ -167,6 +245,15 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
 
             spikes->mTu = static_cast<int32_t>(id % tilesPerRow);
             spikes->mTv = static_cast<int32_t>(id / tilesPerRow);
+
+            // spikes->mMode = Mode::Interval;
+            spikes->mMode = mode;
+
+            if (mode == Mode::Trap)
+            {
+               spikes->mTu = TRAP_START_TILE;
+               // spikes->mTu = SPIKES_PER_ROW - 1;
+            }
 
             if (layer->mProperties != nullptr)
             {

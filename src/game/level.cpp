@@ -446,9 +446,21 @@ void Level::loadTmx()
          {
             mPortals = Portal::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "spikes")
+         else if (layer->mName == "trap_spikes")
          {
-            mSpikes = Spikes::load(layer, tileset, path, mWorld);
+            auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
+            for (const auto &s : spikes)
+            {
+               mSpikes.push_back(s);
+            }
+         }
+         else if (layer->mName == "interval_spikes")
+         {
+            auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
+            for (const auto &s : spikes)
+            {
+               mSpikes.push_back(s);
+            }
          }
          else // tile map
          {
