@@ -49,16 +49,17 @@ private:
 
    sf::Vector2u mTileSize;
 
-   static sf::Texture mTexture;
+   static sf::Texture sTexture;
 
    int32_t mTu = 0;
    int32_t mTv = 0;
 
    sf::Sprite mSprite;
-   sf::Time mElapsed;
+   int32_t mElapsedMs = 0;
 
    sf::Vector2f mTilePosition;
    sf::Vector2f mPixelPosition;
+   sf::IntRect mRect;
 
    int32_t mZ = 0;
 

@@ -1,6 +1,7 @@
 #include "spikes.h"
 
 #include "constants.h"
+#include "player.h"
 #include "texturepool.h"
 
 #include "tmxparser/tmxlayer.h"
@@ -11,7 +12,7 @@
 #include <iostream>
 
 
-sf::Texture Spikes::mTexture;
+sf::Texture Spikes::sTexture;
 #define SPIKES_PER_ROW 22
 
 
@@ -19,8 +20,8 @@ namespace
 {
 static const auto updateTimeUpMs = 5;
 static const auto updateTimeDownMs = 30;
-static const auto downTime = 2.0f;
-static const auto upTime = 2.0f;
+static const auto downTime = 2000;
+static const auto upTime = 2000;
 }
 
 
@@ -38,7 +39,7 @@ void Spikes::updateInterval()
    {
       mTriggered = false;
 
-      if (mElapsed.asSeconds() < upTime)
+      if (mElapsedMs < upTime)
       {
          wait = true;
       }
@@ -53,22 +54,24 @@ void Spikes::updateInterval()
    {
       mTriggered = true;
 
-      if (mElapsed.asSeconds() < downTime)
+      if (mElapsedMs < downTime)
       {
          wait = true;
       }
    }
 
-   if (!wait && mElapsed.asMilliseconds() > (mTriggered ? updateTimeUpMs : updateTimeDownMs))
+   const auto updateTime = (mTriggered ? updateTimeUpMs : updateTimeDownMs);
+   if (!wait && mElapsedMs > updateTime)
    {
-      mElapsed = {};
+      mElapsedMs = (mElapsedMs % updateTime);
 
       if (mTriggered)
       {
-         mTu--;
+         // extract
+         mTu-=2;
          if (mTu < 0)
          {
-            mTu = SPIKES_PER_ROW - 1;
+            mTu = 0;
          }
       }
       else
@@ -77,16 +80,18 @@ void Spikes::updateInterval()
          mTu++;
          if (mTu >= SPIKES_PER_ROW)
          {
-            mTu = 0;
+            mTu = SPIKES_PER_ROW - 1;
          }
       }
    }
+
+   mDeadly = (mTu < 10);
 }
 
 
 void Spikes::update(const sf::Time& dt)
 {
-   mElapsed += dt;
+   mElapsedMs += dt.asMilliseconds();
 
    switch (mMode)
    {
@@ -114,6 +119,11 @@ void Spikes::update(const sf::Time& dt)
    if (mDeadly)
    {
       // check for intersection with player
+      auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+      if (playerRect.intersects(mRect))
+      {
+         Player::getCurrent()->damage(100);
+      }
    }
 }
 
@@ -125,7 +135,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    const std::shared_ptr<b2World>& /*world*/
 )
 {
-   mTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "spikes.png");
+   sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "spikes.png");
 
    std::vector<std::shared_ptr<Spikes>> allSpikes;
 
@@ -134,7 +144,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    const auto height   = layer->mHeight;
    const auto firstId  = tileSet->mFirstGid;
 
-   const auto tilesPerRow = mTexture.getSize().x / PIXELS_PER_TILE;
+   const int32_t tilesPerRow = sTexture.getSize().x / PIXELS_PER_TILE;
 
    for (auto i = 0u; i < width; ++i)
    {
@@ -152,21 +162,25 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             spikes->mTilePosition.x = static_cast<float>(i);
             spikes->mTilePosition.y = static_cast<float>(j);
 
-            spikes->mPixelPosition.x = spikes->mTilePosition.x * PIXELS_PER_TILE;
-            spikes->mPixelPosition.y = spikes->mTilePosition.y * PIXELS_PER_TILE;
-
             // std::cout << "look up: " << id << std::endl;
 
-            spikes->mTu = id % tilesPerRow;
-            spikes->mTv = id / tilesPerRow;
+            spikes->mTu = static_cast<int32_t>(id % tilesPerRow);
+            spikes->mTv = static_cast<int32_t>(id / tilesPerRow);
 
             if (layer->mProperties != nullptr)
             {
                spikes->setZ(layer->mProperties->mMap["z"]->mValueInt);
             }
 
+            spikes->mRect = {
+               static_cast<int32_t>(i * PIXELS_PER_TILE),
+               static_cast<int32_t>(j * PIXELS_PER_TILE),
+               PIXELS_PER_TILE,
+               PIXELS_PER_TILE
+            };
+
             sf::Sprite sprite;
-            sprite.setTexture(mTexture);
+            sprite.setTexture(sTexture);
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * PIXELS_PER_TILE),

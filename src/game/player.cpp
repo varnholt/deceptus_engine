@@ -334,7 +334,7 @@ void Player::updatePlayerPixelRect()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-sf::IntRect Player::getPlayerPixelRect() const
+const sf::IntRect& Player::getPlayerPixelRect() const
 {
    return mPlayerPixelRect;
 }
