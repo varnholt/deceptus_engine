@@ -23,6 +23,8 @@ void ExtraManager::load(
    TmxTileSet* tileSet
 )
 {
+   resetExtras();
+
    auto tiles = layer->mData;
    auto width = layer->mWidth;
    auto height = layer->mHeight;
