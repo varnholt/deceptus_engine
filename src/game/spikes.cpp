@@ -14,7 +14,8 @@
 
 sf::Texture Spikes::sTexture;
 #define SPIKES_PER_ROW 22
-
+#define TOLERANCE_PIXELS 5
+// -> 24 - 2 * 4 = 16px rect
 
 namespace
 {
@@ -173,10 +174,10 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             }
 
             spikes->mRect = {
-               static_cast<int32_t>(i * PIXELS_PER_TILE),
-               static_cast<int32_t>(j * PIXELS_PER_TILE),
-               PIXELS_PER_TILE,
-               PIXELS_PER_TILE
+               static_cast<int32_t>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
+               static_cast<int32_t>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
+               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
+               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)
             };
 
             sf::Sprite sprite;
