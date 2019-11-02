@@ -38,7 +38,7 @@ public:
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
-      const std::shared_ptr<b2World>& world
+      Mode mode
    );
 
    int32_t getZ() const;
@@ -46,6 +46,9 @@ public:
 
 
 private:
+
+   void updateInterval();
+   void updateTrap();
 
    sf::Vector2u mTileSize;
 
@@ -68,6 +71,5 @@ private:
 
    Mode mMode = Mode::Invalid;
    Orientation mOrientation = Orientation::Invalid;
-   void updateInterval();
 };
 
