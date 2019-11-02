@@ -126,7 +126,7 @@ public:
    void setOnBelt(bool onBelt);
    void applyBeltVelocity(float &desiredVel);
 
-   sf::IntRect getPlayerPixelRect() const;
+   const sf::IntRect& getPlayerPixelRect() const;
 
 
    b2Body* getBody() const;
