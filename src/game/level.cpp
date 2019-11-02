@@ -29,6 +29,7 @@
 #include "savestate.h"
 #include "sfmlmath.h"
 #include "spikeball.h"
+#include "spikes.h"
 #include "squaremarcher.h"
 #include "tilemap.h"
 #include "weather.h"
@@ -433,17 +434,21 @@ void Level::loadTmx()
          {
             mDoors = Door::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "portals")
+         else if (layer->mName == "lasers")
          {
-            mPortals = Portal::load(layer, tileset, path, mWorld);
+            mLasers = Laser::load(layer, tileset, path, mWorld);
          }
          else if (layer->mName == "platforms")
          {
             mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "lasers")
+         else if (layer->mName == "portals")
          {
-            mLasers = Laser::load(layer, tileset, path, mWorld);
+            mPortals = Portal::load(layer, tileset, path, mWorld);
+         }
+         else if (layer->mName == "spikes")
+         {
+            mSpikes = Spikes::load(layer, tileset, path, mWorld);
          }
          else // tile map
          {
@@ -860,6 +865,10 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
    {
       mStaticLight->drawToZ(target, {}, z);
 
+      // TODO: this should be unified by introducing a 'Mechanism' class
+      //       also it's not expected that tiles are in different z layers
+      //       and then unify them in one big loop
+
       for (auto& tileMap : mTileMaps)
       {
          if (tileMap->getZ() == z)
@@ -921,6 +930,14 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
          if (ball->getZ() == z)
          {
             ball->draw(target);
+         }
+      }
+
+      for (auto& spikes : mSpikes)
+      {
+         if (spikes->getZ() == z)
+         {
+            spikes->draw(target);
          }
       }
 
@@ -1278,6 +1295,11 @@ void Level::update(const sf::Time& dt)
    for (auto& ball : mSpikeBalls)
    {
       ball->update(dt);
+   }
+
+   for (auto& spike : mSpikes)
+   {
+      spike->update(dt);
    }
 
    for (auto& box : mMoveableBoxes)

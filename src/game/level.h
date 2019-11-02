@@ -40,6 +40,7 @@ class MoveableBox;
 class MovingPlatform;
 class TileMap;
 class SpikeBall;
+class Spikes;
 struct TmxElement;
 struct TmxObjectGroup;
 class TmxParser;
@@ -222,6 +223,7 @@ protected:
    std::vector<std::shared_ptr<MovingPlatform>> mPlatforms;
    std::vector<std::shared_ptr<Portal>> mPortals;
    std::vector<std::shared_ptr<SpikeBall>> mSpikeBalls;
+   std::vector<std::shared_ptr<Spikes>> mSpikes;
    std::vector<std::shared_ptr<MoveableBox>> mMoveableBoxes;
 
    // graphic effects
