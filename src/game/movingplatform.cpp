@@ -44,20 +44,6 @@ double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
 
 
 //-----------------------------------------------------------------------------
-int MovingPlatform::getZ() const
-{
-   return mZ;
-}
-
-
-//-----------------------------------------------------------------------------
-void MovingPlatform::setZ(int z)
-{
-    mZ = z;
-}
-
-
-//-----------------------------------------------------------------------------
 b2Body* MovingPlatform::getBody()
 {
     return mBody;

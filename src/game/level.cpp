@@ -877,8 +877,7 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
    {
       mStaticLight->drawToZ(target, {}, z);
 
-      // TODO: this should be unified by introducing a 'Mechanism' class
-      //       also it's not expected that tiles are in different z layers
+      // TODO: it's not expected that tiles are in different z layers
       //       and then unify them in one big loop
 
       for (auto& tileMap : mTileMaps)
@@ -955,13 +954,16 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
 
       if (z == 11)
       {
+         // ambient occlusion
          mAo.draw(target);
 
+         // enemies
          for (auto& enemy : mEnemies)
          {
             enemy->draw(target);
          }
 
+         // player
          Player::getCurrent()->draw(target);
       }
 

@@ -1,5 +1,7 @@
-#ifndef PORTAL_H
-#define PORTAL_H
+#pragma once
+
+#include "gamemechanism.h"
+#include "gamenode.h"
 
 // sfml
 #include "SFML/Graphics.hpp"
@@ -16,15 +18,15 @@ struct TmxTileSet;
 
 
 
-class Portal
+class Portal : public GameMechanism, public GameNode
 {
 
-   public:
+public:
 
-   Portal() = default;
+   Portal(GameNode* parent = nullptr);
 
-   void draw(sf::RenderTarget& window);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& window) override;
+   void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<Portal>> load(
       TmxLayer *layer,
@@ -39,9 +41,6 @@ class Portal
    void setPlayerAtPortal(bool isPlayerAtPortal);
 
    void addSprite(const sf::Sprite&);
-
-   int getZ() const;
-   void setZ(int z);
 
    std::shared_ptr<Portal> getDestination() const;
    void setDestination(const std::shared_ptr<Portal>& dst);
@@ -61,8 +60,6 @@ protected:
 
    int mHeight = 0;
    bool mPlayerAtPortal = false;
-   int mZ = 0;
    std::shared_ptr<Portal> mDestination;
 };
 
-#endif // PORTAL_H

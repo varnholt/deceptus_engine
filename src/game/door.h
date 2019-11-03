@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include "gamemechanism.h"
 #include "gamenode.h"
 
 #include <filesystem>
@@ -13,7 +14,7 @@
 struct TmxLayer;
 struct TmxTileSet;
 
-class Door : public GameNode
+class Door : public GameMechanism, public GameNode
 {
 public:
 
@@ -27,8 +28,9 @@ public:
 
    Door(GameNode *parent);
 
-   void draw(sf::RenderTarget& window);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& window) override;
+   void update(const sf::Time& dt) override;
+
    void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
 
@@ -44,10 +46,6 @@ public:
 
    bool isPlayerAtDoor() const;
    void setPlayerAtDoor(bool isPlayerAtDoor);
-
-
-   int getZ() const;
-   void setZ(int z);
 
    void updateTransform();
 
@@ -79,7 +77,6 @@ protected:
    int mHeight = 0;
    int mTileId = 0;
    bool mPlayerAtDoor = false;
-   int mZ = 0;
    b2Body* mBody = nullptr;
 };
 

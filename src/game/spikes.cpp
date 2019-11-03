@@ -28,6 +28,12 @@ static const auto trapTime = 250;
 }
 
 
+Spikes::Spikes(GameNode* parent)
+ : GameNode(parent)
+{
+}
+
+
 void Spikes::draw(sf::RenderTarget& window)
 {
    window.draw(mSprite);
@@ -282,17 +288,5 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    }
 
    return allSpikes;
-}
-
-
-int32_t Spikes::getZ() const
-{
-   return mZ;
-}
-
-
-void Spikes::setZ(const int32_t& z)
-{
-   mZ = z;
 }
 

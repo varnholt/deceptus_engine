@@ -215,18 +215,6 @@ void SpikeBall::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& worl
 }
 
 
-int32_t SpikeBall::getZ() const
-{
-   return mZ;
-}
-
-
-void SpikeBall::setZ(const int32_t& z)
-{
-   mZ = z;
-}
-
-
 sf::Vector2i SpikeBall::getPixelPosition() const
 {
    return mPixelPosition;
