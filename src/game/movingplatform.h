@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamemechanism.h"
 #include "gamenode.h"
 
 #include "pathinterpolation.h"
@@ -15,7 +16,7 @@ struct TmxObject;
 struct TmxTileSet;
 
 
-class MovingPlatform : public GameNode
+class MovingPlatform : public GameMechanism, public GameNode
 {
 
 public:
@@ -30,13 +31,12 @@ public:
 
    static void link(const std::vector<std::shared_ptr<MovingPlatform>>& platforms, TmxObject* tmxObject);
 
-   void draw(sf::RenderTarget& target);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& target) override;
+   void update(const sf::Time& dt) override;
+
    void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
    void setOffset(float x, float y);
-   int getZ() const;
-   void setZ(int z);
    b2Body* getBody();
 
 
@@ -59,7 +59,6 @@ private:
    float mY = 0.0f;
    int mWidth = 0;
    int mHeight = 1;
-   int mZ = 0;
    float mTime = 0.0f;
    PathInterpolation mInterpolation;
 };

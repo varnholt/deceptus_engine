@@ -1,5 +1,8 @@
 #pragma once
 
+#include "gamemechanism.h"
+#include "gamenode.h"
+
 #include "SFML/Graphics.hpp"
 
 #include <filesystem>
@@ -8,7 +11,7 @@
 struct TmxLayer;
 struct TmxTileSet;
 
-class Spikes
+class Spikes : public GameMechanism, public GameNode
 {
 public:
 
@@ -29,10 +32,10 @@ public:
       PointsDown
    };
 
-   Spikes() = default;
+   Spikes(GameNode* parent = nullptr);
 
-   void draw(sf::RenderTarget& window);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& window) override;
+   void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<Spikes>> load(
       TmxLayer *layer,
@@ -40,9 +43,6 @@ public:
       const std::filesystem::path& basePath,
       Mode mode
    );
-
-   int32_t getZ() const;
-   void setZ(const int32_t& z);
 
 
 private:
@@ -63,8 +63,6 @@ private:
    sf::Vector2f mTilePosition;
    sf::Vector2f mPixelPosition;
    sf::IntRect mRect;
-
-   int32_t mZ = 0;
 
    bool mTriggered = false;
    bool mDeadly = false;

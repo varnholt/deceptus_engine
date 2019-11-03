@@ -141,11 +141,3 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    fixture->SetUserData(static_cast<void*>(objectData));
 }
 
-
-//--------------------------------------------------------------------------------------------------
-int32_t MoveableBox::getZ() const
-{
-   return mZ;
-}
-
-

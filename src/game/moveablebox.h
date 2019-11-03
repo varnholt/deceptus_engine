@@ -3,19 +3,21 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
+#include "gamemechanism.h"
 #include "gamenode.h"
 
 struct TmxObject;
 
 
-class MoveableBox : public GameNode
+class MoveableBox : public GameMechanism, public GameNode
 {
    public:
       MoveableBox(GameNode* node);
-      void draw(sf::RenderTarget& window);
-      void update(const sf::Time& dt);
+
+      void draw(sf::RenderTarget& window) override;
+      void update(const sf::Time& dt) override;
+
       void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
-      int32_t getZ() const;
 
    private:
 
@@ -25,7 +27,6 @@ class MoveableBox : public GameNode
       std::shared_ptr<sf::Texture> mTexture;
       sf::Sprite mSprite;
       sf::Vector2f mSize;
-      int32_t mZ = 0;
       b2Body* mBody = nullptr;
 };
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gamemechanism.h"
+
 // sfml
 #include "SFML/Graphics.hpp"
 
@@ -16,7 +18,7 @@ struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
-class Laser
+class Laser : public GameMechanism
 {
 public:
 
@@ -28,8 +30,8 @@ public:
 
    Laser() = default;
 
-   void draw(sf::RenderTarget& window);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& window) override;
+   void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<Laser>> load(
       TmxLayer *layer,
@@ -42,9 +44,6 @@ public:
    static void addTiles();
    static void merge();
    static void collide(const sf::Rect<int32_t>& playerRect);
-
-   int getZ() const;
-   void setZ(int z);
 
    void reset();
    static void resetAll();
@@ -69,8 +68,6 @@ protected:
 
    sf::Vector2f mTilePosition;
    sf::Vector2f mPixelPosition;
-
-   int32_t mZ = 0;
 
    bool mOn = true;
    int32_t mTileIndex = 0;

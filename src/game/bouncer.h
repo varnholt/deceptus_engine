@@ -2,11 +2,12 @@
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "gamemechanism.h"
 #include "Box2D/Box2D.h"
 #include "SFML/Graphics.hpp"
 
 
-class Bouncer : public FixtureNode
+class Bouncer : public FixtureNode, public GameMechanism
 {
 
 public:
@@ -20,15 +21,15 @@ public:
       float height
    );
 
-   void draw(sf::RenderTarget &window);
-   void update(const sf::Time& dt);
+   ~Bouncer() override;
+
+   void draw(sf::RenderTarget& window) override;
+   void update(const sf::Time& dt) override;
+
    bool isPlayerAtBouncer();
 
-   virtual ~Bouncer();
    void activate();
    b2Body *getBody() const;
-   int getZ() const;
-   void setZ(int z);
 
 
 private:
@@ -43,7 +44,6 @@ private:
    sf::Texture mTexture;
    sf::Sprite mSprite;
    sf::IntRect mRect;
-   int mZ = 0;
    sf::Time mActivationTime;
    bool mPlayerAtBouncer = false;
    void updatePlayerAtBouncer();

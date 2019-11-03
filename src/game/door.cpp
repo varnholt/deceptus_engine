@@ -23,7 +23,6 @@ Door::Door(GameNode* parent)
 }
 
 
-
 //-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& window)
 {
@@ -32,7 +31,6 @@ void Door::draw(sf::RenderTarget& window)
       window.draw(sprite);
    }
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -252,20 +250,6 @@ void Door::updateRequiredItem()
 const sf::Vector2i& Door::getTilePosition() const
 {
    return mTilePosition;
-}
-
-
-//-----------------------------------------------------------------------------
-int Door::getZ() const
-{
-   return mZ;
-}
-
-
-//-----------------------------------------------------------------------------
-void Door::setZ(int z)
-{
-   mZ = z;
 }
 
 

@@ -18,6 +18,13 @@
 
 
 //-----------------------------------------------------------------------------
+Portal::Portal(GameNode* parent)
+ : GameNode(parent)
+{
+}
+
+
+//-----------------------------------------------------------------------------
 void Portal::draw(sf::RenderTarget& window)
 {
    for (const auto& sprite : mSprites)
@@ -166,20 +173,6 @@ void Portal::link(
 void Portal::addSprite(const sf::Sprite& sprite)
 {
    mSprites.push_back(sprite);
-}
-
-
-//-----------------------------------------------------------------------------
-int Portal::getZ() const
-{
-   return mZ;
-}
-
-
-//-----------------------------------------------------------------------------
-void Portal::setZ(int z)
-{
-   mZ = z;
 }
 
 

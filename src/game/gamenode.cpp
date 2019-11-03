@@ -9,11 +9,6 @@ GameNode::GameNode(GameNode *parent)
 }
 
 
-GameNode::~GameNode()
-{
-}
-
-
 GameNode *GameNode::getParent() const
 {
    return mParent;

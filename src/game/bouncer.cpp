@@ -27,15 +27,6 @@ b2Body *Bouncer::getBody() const
   return mBody;
 }
 
-int Bouncer::getZ() const
-{
-  return mZ;
-}
-
-void Bouncer::setZ(int z)
-{
-  mZ = z;
-}
 
 Bouncer::Bouncer(
    GameNode* parent,
@@ -110,9 +101,9 @@ Bouncer::Bouncer(
 }
 
 
-void Bouncer::draw(sf::RenderTarget &window)
+void Bouncer::draw(sf::RenderTarget& window)
 {
-  window.draw(mSprite);
+   window.draw(mSprite);
 }
 
 

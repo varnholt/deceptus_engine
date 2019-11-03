@@ -1,12 +1,13 @@
 #pragma once
 
 #include "constants.h"
+#include "gamemechanism.h"
 #include "fixturenode.h"
 #include "Box2D/Box2D.h"
 #include "SFML/Graphics.hpp"
 
 
-class ConveyorBelt : public FixtureNode
+class ConveyorBelt : public FixtureNode, public GameMechanism
 {
 
    public:
@@ -20,9 +21,10 @@ class ConveyorBelt : public FixtureNode
          float height
       );
 
+      void draw(sf::RenderTarget& target) override;
+      void update(const sf::Time& dt) override;
+
       b2Body *getBody() const;
-      int getZ() const;
-      void setZ(int z);
       float getVelocity() const;
       void setVelocity(float velocity);
 
@@ -40,7 +42,6 @@ class ConveyorBelt : public FixtureNode
 
       sf::Texture mTexture;
       sf::Sprite mSprite;
-      int mZ = 0;
 
       // bool mActive = true;
       float mVelocity = -0.2f;

@@ -4,12 +4,13 @@
 
 #include "Box2D/Box2D.h"
 
+#include "gamemechanism.h"
 #include "gamenode.h"
 
 struct TmxObject;
 
 
-class SpikeBall : public GameNode
+class SpikeBall : public GameMechanism, public GameNode
 {
    public:
 
@@ -30,14 +31,10 @@ class SpikeBall : public GameNode
 
       SpikeBall(GameNode* parent);
 
-      void draw(sf::RenderTarget& window);
-      void update(const sf::Time& dt);
+      void draw(sf::RenderTarget& window) override;
+      void update(const sf::Time& dt) override;
 
       void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
-
-
-      int32_t getZ() const;
-      void setZ(const int32_t& z);
 
       sf::Vector2i getPixelPosition() const;
       void setPixelPosition(const sf::Vector2i& pixelPosition);
@@ -69,7 +66,6 @@ class SpikeBall : public GameNode
       b2BodyDef mBallBodyDef;
       b2FixtureDef mBallFixtureDef;
 
-      int32_t mZ = 0;
       float mAngle = 0.0f;
       SpikeConfig mConfig;
 };
