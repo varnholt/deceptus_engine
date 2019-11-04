@@ -16,6 +16,7 @@ sf::Texture Spikes::sTexture;
 #define SPIKES_PER_ROW 22
 #define TOLERANCE_PIXELS 5
 #define TRAP_START_TILE (SPIKES_PER_ROW - 4)
+#define SPIKES_TILE_INDEX_UP 6
 // -> 24 - 2 * 4 = 16px rect
 
 namespace
@@ -44,18 +45,13 @@ void Spikes::updateInterval()
 {
    auto wait = false;
 
-   if (mTu == 0)
+   if (mTu == SPIKES_TILE_INDEX_UP)
    {
       mTriggered = false;
 
       if (mElapsedMs < upTime)
       {
          wait = true;
-      }
-      else
-      {
-         // skip the first few frames on the way back..
-         mTu = 7;
       }
    }
 
@@ -78,9 +74,9 @@ void Spikes::updateInterval()
       {
          // extract
          mTu-=2;
-         if (mTu < 0)
+         if (mTu < SPIKES_TILE_INDEX_UP)
          {
-            mTu = 0;
+            mTu = SPIKES_TILE_INDEX_UP;
          }
       }
       else
@@ -100,18 +96,13 @@ void Spikes::updateInterval()
 
 void Spikes::updateTrap()
 {
-   if (mTu == 0)
+   if (mTu == SPIKES_TILE_INDEX_UP)
    {
       mTriggered = false;
 
       if (mElapsedMs < upTime)
       {
          return;
-      }
-      else
-      {
-         // skip the first few frames on the way back..
-         mTu = 7;
       }
    }
 
@@ -153,9 +144,9 @@ void Spikes::updateTrap()
       {
          // extract
          mTu-=2;
-         if (mTu < 0)
+         if (mTu <= SPIKES_TILE_INDEX_UP)
          {
-            mTu = 0;
+            mTu = SPIKES_TILE_INDEX_UP;
          }
       }
       else
