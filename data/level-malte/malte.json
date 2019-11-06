@@ -1,5 +1,5 @@
 {
-  "filename": "data/level-lasse/lasse.tmx",
+  "filename": "data/level-malte/malte.tmx",
   "startposition": [47, 220],
   "enemies": [
     {"script": "cannon.lua","startposition": [255, 46], "properties": [{"name": "alignment", "value": "left"}]},
