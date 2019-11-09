@@ -13,7 +13,7 @@
 
 
 sf::Texture Spikes::sTexture;
-#define SPIKES_PER_ROW 22
+#define SPIKES_PER_ROW 18
 #define TOLERANCE_PIXELS 5
 #define TRAP_START_TILE (SPIKES_PER_ROW - 4)
 #define SPIKES_TILE_INDEX_UP 6
