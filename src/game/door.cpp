@@ -34,6 +34,49 @@ void Door::draw(sf::RenderTarget& window)
 
 
 //-----------------------------------------------------------------------------
+void Door::updateBars(const sf::Time& dt)
+{
+   auto openSpeed = 50.0f;
+
+   switch (mState)
+   {
+      case State::Opening:
+      {
+         mOffset -= openSpeed * dt.asSeconds();
+         if (fabs(mOffset) >= PIXELS_PER_TILE * mHeight)
+         {
+            mState = State::Open;
+            mOffset = static_cast<float_t>(-PIXELS_PER_TILE * mHeight);
+         }
+         break;
+      }
+      case State::Closing:
+      {
+         mOffset += openSpeed * dt.asSeconds();
+         if (mOffset >= 0.0f)
+         {
+            mState = State::Closed;
+            mOffset = 0.0f;
+         }
+         break;
+      }
+      case State::Open:
+      case State::Closed:
+         break;
+   }
+
+   updateTransform();
+}
+
+
+//-----------------------------------------------------------------------------
+void Door::updateConventional(const sf::Time& /*dt*/)
+{
+
+}
+
+
+//-----------------------------------------------------------------------------
 void Door::update(const sf::Time& dt)
 {
    auto playerPos = Player::getCurrent()->getPixelPosition();
@@ -71,36 +114,18 @@ void Door::update(const sf::Time& dt)
       i++;
    }
 
-   auto openSpeed = 50.0f;
-
-   switch (mState)
+   switch (mType)
    {
-      case State::Opening:
+      case Type::Conventional:
       {
-         mOffset -= openSpeed * dt.asSeconds();
-         if (fabs(mOffset) >= PIXELS_PER_TILE * mHeight)
-         {
-            mState = State::Open;
-            mOffset = static_cast<float_t>(-PIXELS_PER_TILE * mHeight);
-         }
          break;
       }
-      case State::Closing:
+      case Type::Bars:
       {
-         mOffset += openSpeed * dt.asSeconds();
-         if (mOffset >= 0.0f)
-         {
-            mState = State::Closed;
-            mOffset = 0.0f;
-         }
+         updateBars(dt);
          break;
       }
-      case State::Open:
-      case State::Closed:
-         break;
    }
-
-   updateTransform();
 }
 
 
