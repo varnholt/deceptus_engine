@@ -10,7 +10,7 @@
 
 namespace {
  static const std::vector<std::string> verbs{
-       "crashing", "landing", "communicating", "deserving", "squealing", "testing", "attaching", "waving", "starting",
+       "crashing", "landing", "communicating", "deserving", "squealing", "testing", "attaching", "flushing", "starting",
        "flowering", "telephoning", "stuffing", "tempting", "baring", "sacking", "disliking", "parking", "combing",
        "admiting", "facing", "passing", "replacing", "hoping", "fastening", "bleaching", "blinding", "switching",
        "welcoming", "ending", "preceding", "suiting", "terrifying", "crying", "wanting", "annoying", "touching",
@@ -18,9 +18,9 @@ namespace {
        "waiting", "fitting", "competing", "staying", "entertaining", "puncturing", "existing", "sealing", "dressing",
        "knocking", "breathing", "presenting", "offending", "mattering", "troting", "loving", "scratching", "carrying",
        "including", "squashing", "examining", "itching", "humming", "uniting", "changing", "sucking", "attending",
-       "timing", "burying", "scraping", "whirling", "requesting", "launching", "belonging", "flooding", "dragging",
-       "watering", "camping", "interesting", "wondering", "detecting", "scaring", "suffering", "pinching", "noticing",
-       "completing", "mending", "settling", "leveling", "skiing", "smashing", "screaming", "stamping", "flapping",
+       "timing", "burying", "scraping", "whirling", "requesting", "launching", "munching", "flooding", "dragging",
+       "watering", "camping", "debugging", "mashing", "detecting", "scaring", "chopping", "pinching", "noticing",
+       "completing", "mending", "settling", "leveling", "skiing", "smashing", "silencing", "stamping", "flapping",
        "cleaning"
    };
 
@@ -31,7 +31,7 @@ namespace {
       "lows", "flies", "respects", "forks", "talks", "crooks", "arguments", "sinks", "yams", "cactusses", "poisons",
       "tendencies", "pencils", "doctors", "runs", "verses", "milk", "turns", "hate", "legs", "giants", "experts",
       "cloth", "nations", "women", "bulbs", "companies", "shame", "berries", "offices", "machines", "temper", "quiet",
-      "jail", "grain", "lamps", "mailboxs", "laborers", "pens", "cakes", "nuts", "snails", "pins", "summers", "self",
+      "jail", "grain", "lamps", "mailboxes", "laborers", "pens", "cakes", "nuts", "snails", "pins", "summers", "self",
       "roses", "knees", "territories", "cherries", "coal", "furniture", "wings", "iron", "spaces", "marbles", "pets",
       "copper", "cans", "harmony", "events", "harbors", "crackers", "branches", "pockets", "dust"
    };
