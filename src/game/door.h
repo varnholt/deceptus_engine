@@ -18,12 +18,18 @@ class Door : public GameMechanism, public GameNode
 {
 public:
 
+   enum class Type
+   {
+      Bars,
+      Conventional,
+   };
+
    enum class State
    {
       Open,
       Opening,
       Closing,
-      Closed
+      Closed,
    };
 
    Door(GameNode *parent);
@@ -56,7 +62,10 @@ public:
    void updateRequiredItem();
 
 
-protected:
+private:
+
+   void updateBars(const sf::Time& dt);
+   void updateConventional(const sf::Time& dt);
 
    void open();
    void close();
@@ -66,6 +75,8 @@ protected:
 
    std::vector<sf::Sprite> mSprites;
 
+   Type mType = Type::Bars;
+
    State mInitialState = State::Closed;
    State mState = State::Closed;
 
@@ -74,8 +85,8 @@ protected:
    ItemType mRequiredItem = ItemType::Invalid;
 
    float mOffset = 0.0f;
-   int mHeight = 0;
-   int mTileId = 0;
+   int32_t mHeight = 0;
+   int32_t mTileId = 0;
    bool mPlayerAtDoor = false;
    b2Body* mBody = nullptr;
 };
