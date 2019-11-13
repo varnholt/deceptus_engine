@@ -85,6 +85,16 @@
       ]
     },
     {
+      "script": "watermine.lua",
+      "startposition": [265, 78],
+      "properties": [{"name": "size", "value": "large"}]
+    },
+    {
+      "script": "watermine.lua",
+      "startposition": [256, 85],
+      "properties": [{"name": "size", "value": "small"}]
+    },
+    {
       "script": "landmine.lua",
       "startposition": [
         29,
