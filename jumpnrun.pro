@@ -499,6 +499,7 @@ DISTFILES += \
     data/scripts/enemies/klonk.lua \
     data/scripts/enemies/spikeball.lua \
     data/scripts/enemies/vector2.lua \
+    data/scripts/enemies/watermine.lua \
     data/shaders/raycast.frag \
     data/shaders/raycast.vert \
     data/scripts/enemies/cannon.lua \

@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "gamenode.h"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -13,6 +14,7 @@ class FixtureNode : public GameNode
 {
    public:
 
+      using CollisionCallback = std::function<void(void)>;
       using Variant = std::variant<std::string, int32_t, double>;
 
       FixtureNode(GameNode *parent);
@@ -27,11 +29,15 @@ class FixtureNode : public GameNode
       void setProperty(const std::string& key, const Variant& value);
       Variant getProperty(const std::string& key) const;
 
+      virtual void collisionWithPlayer();
+      void setCollisionCallback(const CollisionCallback& collisionCallback);
+
 
    protected:
 
       ObjectType mType;
       std::map<std::string, bool> mFlags;
       std::map<std::string, Variant> mProperties;
+      CollisionCallback mCollisionCallback;
 };
 
