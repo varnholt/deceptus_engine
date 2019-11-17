@@ -15,6 +15,7 @@ properties = {
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mElapsed = math.random(0, 3)
+mDetonationElapsed = 0
 mActivated = false
 mSpriteIndex = 0
 mDetonationTimer = 1
@@ -22,6 +23,9 @@ mMoveRangeY = 48
 mSpriteOffsetY = 24
 mSpriteSize = 48
 mStartPosition = v2d.Vector2D(0, 0)
+mDetonating = false
+mDone = false
+mTransformY = 0
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -45,15 +49,27 @@ function update(dt)
 
    if (not mActivated) then
       spriteIndex = math.floor(math.fmod(mElapsed * 2.0, 3))
-   else
+
+   elseif (mActivated and not mDetonating) then
       spriteIndex = 2 + math.floor(math.fmod(mElapsed * 4.0, 2))
+
+   elseif (mDetonating) then
+      mSpriteOffsetY = 24 + 48
+      mDetonationElapsed = mDetonationElapsed + dt
+      spriteIndex = math.floor(mDetonationElapsed * 15.0)
+
+      if (spriteIndex > 6) then
+         mDone = true
+      end
    end
 
    -- get sprite direction
-   y = 0.5 * math.sin(mElapsed) * mMoveRangeY
+   if (not mDetonating) then
+      mTransformY = 0.5 * math.sin(mElapsed) * mMoveRangeY
+   end
 
    -- update transform
-   setTransform(mStartPosition:getX(), mStartPosition:getY() + y, 0.0)
+   setTransform(mStartPosition:getX(), mStartPosition:getY() + mTransformY, 0.0)
 
    -- update sprite index
    if (index ~= mSpriteIndex) then
@@ -69,6 +85,11 @@ function update(dt)
          mSpriteSize
       ) -- x, y, width, height
    end
+
+   if (mDone) then
+      die()
+   end
+
 end
 
 
@@ -78,7 +99,7 @@ function collisionWithPlayer()
    if (not mActivated) then
       print("collision with player!")
       mActivated = true
-      timer(5000, mDetonationTimer)
+      timer(3000, mDetonationTimer)
    end
 end
 
@@ -116,7 +137,9 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function timeout(id)
    if (id == mDetonationTimer) then
-      print("boom.")
+      mDetonating = true
+      playSample("boom.wav", 1.0)
+      damageRadius(200, mPosition:getX(), mPosition:getY(), 48)
    end
 end
 

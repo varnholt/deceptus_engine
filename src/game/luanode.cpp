@@ -12,11 +12,12 @@
 // game
 #include "audio.h"
 #include "constants.h"
-#include "level.h"
 #include "fixturenode.h"
-#include "player.h"
+#include "level.h"
 #include "luaconstants.h"
 #include "luainterface.h"
+#include "player.h"
+#include "sfmlmath.h"
 #include "timer.h"
 
 // static
@@ -271,6 +272,34 @@ extern "C" int32_t damage(lua_State* state)
 
    return 0;
 }
+
+
+
+extern "C" int32_t damageRadius(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 4)
+   {
+      auto damage = static_cast<int32_t>(lua_tonumber(state, 2));
+      auto x = static_cast<float>(lua_tonumber(state, 3));
+      auto y = static_cast<float>(lua_tonumber(state, 4));
+      auto radius = static_cast<float>(lua_tonumber(state, 5));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->damageRadius(damage, x, y, radius);
+   }
+
+   return 0;
+}
+
 
 
 extern "C" int32_t setTransform(lua_State* state)
@@ -737,6 +766,7 @@ void LuaNode::setupLua()
    lua_register(mState, "addWeapon", ::addWeapon);
    lua_register(mState, "boom", ::boom);
    lua_register(mState, "damage", ::damage);
+   lua_register(mState, "damageRadius", ::damageRadius);
    lua_register(mState, "debug", ::debug);
    lua_register(mState, "die", ::die);
    lua_register(mState, "fireWeapon", ::fireWeapon);
@@ -908,6 +938,21 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
       lua_rawseti(mState,-2,++i);
       lua_pushnumber(mState, v.y); // push y
       lua_rawseti(mState,-2,++i);
+   }
+}
+
+
+void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
+{
+   sf::Vector2f nodePosition{x, y};
+   const auto playerPosition =  Player::getCurrent()->getPixelPosition();
+
+   auto dist = (playerPosition - nodePosition);
+   auto len = SfmlMath::length(dist);
+
+   if (len <= radius)
+   {
+      Player::getCurrent()->damage(damage, SfmlMath::normalize(dist));
    }
 }
 
