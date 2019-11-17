@@ -41,6 +41,7 @@ struct LuaNode : public GameNode
    void makeDynamic();
    void makeStatic();
    void setActive(bool active);
+   void setDamage(int32 damage);
    void setGravityScale(float scale);
    void setTransform(const b2Vec2& position, float32 angle = 0.0);
    void updatePosition();
@@ -52,6 +53,7 @@ struct LuaNode : public GameNode
    void luaDie();
    void luaInitialize();
    void luaMovedTo();
+   void luaSetStartPosition();
    void luaPlayerMovedTo();
    void luaRetrieveProperties();
    void luaSendPath(const std::vector<sf::Vector2f> &vec);
@@ -59,6 +61,7 @@ struct LuaNode : public GameNode
    void luaTimeout(int32_t timerId);
    void luaUpdate(const sf::Time& dt);
    void luaWriteProperty(const std::string& key, const std::string& value);
+   void luaCollisionWithPlayer();
 
    // property accessors
    void synchronizeProperties();

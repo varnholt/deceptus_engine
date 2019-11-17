@@ -107,6 +107,27 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
 
 
 
+extern "C" int32_t setDamage(lua_State* state)
+{
+   auto argc = lua_gettop(state);
+
+   if (argc == 1)
+   {
+      auto damage = static_cast<int32_t>(lua_tointeger(state, 1));
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setDamage(damage);
+   }
+
+   return 0;
+}
+
+
 extern "C" int32_t makeDynamic(lua_State* state)
 {
    auto node = OBJINSTANCE;
@@ -691,6 +712,8 @@ void LuaNode::deserializeEnemyDescription()
       static_cast<float_t>(mEnemyDescription.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
    );
 
+   mPosition = mStartPosition;
+
    mPatrolPath = patrolPath;
 }
 
@@ -747,6 +770,7 @@ void LuaNode::setupLua()
       }
       else
       {
+         luaSetStartPosition();
          luaMovedTo();
          luaInitialize();
          luaRetrieveProperties();
@@ -786,15 +810,40 @@ void LuaNode::luaMovedTo()
 
    lua_getglobal(mState, FUNCTION_MOVED_TO);
 
-   lua_pushnumber(mState, static_cast<double>(x));
-   lua_pushnumber(mState, static_cast<double>(y));
-
-   // 3 args, 0 result
-   auto result = lua_pcall(mState, 2, 0, 0);
-
-   if (result != LUA_OK)
+   if (lua_isfunction(mState, -1))
    {
-      error(mState, FUNCTION_MOVED_TO);
+
+      lua_pushnumber(mState, static_cast<double>(x));
+      lua_pushnumber(mState, static_cast<double>(y));
+
+      auto result = lua_pcall(mState, 2, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_MOVED_TO);
+      }
+   }
+}
+
+
+void LuaNode::luaSetStartPosition()
+{
+   const auto x = mStartPosition.x;
+   const auto y = mStartPosition.y;
+
+   lua_getglobal(mState, FUNCTION_SET_START_POSITION);
+
+   if (lua_isfunction(mState, -1))
+   {
+      lua_pushnumber(mState, static_cast<double>(x));
+      lua_pushnumber(mState, static_cast<double>(y));
+
+      auto result = lua_pcall(mState, 2, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_SET_START_POSITION);
+      }
    }
 }
 
@@ -805,15 +854,17 @@ void LuaNode::luaPlayerMovedTo()
 
    lua_getglobal(mState, FUNCTION_PLAYER_MOVED_TO);
 
-   lua_pushnumber(mState, pos.x);
-   lua_pushnumber(mState, pos.y);
-
-   // 3 args, 0 result
-   auto result = lua_pcall(mState, 2, 0, 0);
-
-   if (result != LUA_OK)
+   if (lua_isfunction(mState, -1))
    {
-      error(mState, FUNCTION_PLAYER_MOVED_TO);
+      lua_pushnumber(mState, pos.x);
+      lua_pushnumber(mState, pos.y);
+
+      auto result = lua_pcall(mState, 2, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_PLAYER_MOVED_TO);
+      }
    }
 }
 
@@ -900,6 +951,23 @@ void LuaNode::setTransform(const b2Vec2& position, float32 angle)
 void LuaNode::setActive(bool active)
 {
    mBody->SetActive(active);
+}
+
+
+void LuaNode::setDamage(int32 damage)
+{
+   for (b2Fixture* fixture = mBody->GetFixtureList(); fixture; fixture = fixture->GetNext())
+   {
+      auto userData = fixture->GetUserData();
+
+      if (!userData)
+      {
+         continue;
+      }
+
+      auto fixtureNode = static_cast<FixtureNode*>(fixture->GetUserData());
+      fixtureNode->setProperty("damage", damage);
+   }
 }
 
 
@@ -1004,15 +1072,16 @@ void LuaNode::createBody()
       fd.filter.maskBits = maskBitsStanding;
       fd.filter.categoryBits = categoryBits;
 
-      b2Fixture* ft = mBody->CreateFixture(&fd);
-      FixtureNode* fn = new FixtureNode(this);
-      fn->setType(ObjectTypeEnemy);
-      fn->setProperty("damage", damage);
-      ft->SetUserData(static_cast<void*>(fn));
+      b2Fixture* fixture = mBody->CreateFixture(&fd);
+      FixtureNode* fixtureNode = new FixtureNode(this);
+      fixtureNode->setType(ObjectTypeEnemy);
+      fixtureNode->setProperty("damage", damage);
+      fixtureNode->setCollisionCallback([this](){luaCollisionWithPlayer();});
+      fixture->SetUserData(static_cast<void*>(fixtureNode));
 
       if (sensor)
       {
-         ft->SetSensor(true);
+         fixture->SetSensor(true);
       }
    }
 
@@ -1093,6 +1162,20 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
 
       auto result = lua_pcall(mState, 2, 0, 0);
 
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_UPDATE);
+      }
+   }
+}
+
+
+void LuaNode::luaCollisionWithPlayer()
+{
+   lua_getglobal(mState, FUNCTION_COLLISION_WITH_PLAYER);
+   if (lua_isfunction(mState, -1) )
+   {
+      auto result = lua_pcall(mState, 0, 0, 0);
       if (result != LUA_OK)
       {
          error(mState, FUNCTION_UPDATE);

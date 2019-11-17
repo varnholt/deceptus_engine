@@ -185,6 +185,7 @@ void GameContactListener::processBeginContact(
           {
              printf("collision with enemy\n");
              auto damage = std::get<int32_t>(otherThingFixtureNode->getProperty("damage"));
+             otherThingFixtureNode->collisionWithPlayer();
              Player::getCurrent()->damage(damage);
              break;
           }
@@ -320,6 +321,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             {
                printf("collision with enemy\n");
                auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
+               fixtureNodeA->collisionWithPlayer();
                Player::getCurrent()->damage(damage);
                break;
             }
@@ -406,6 +408,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             {
                printf("collision with enemy\n");
                auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
+               fixtureNodeB->collisionWithPlayer();
                Player::getCurrent()->damage(damage);
                break;
             }

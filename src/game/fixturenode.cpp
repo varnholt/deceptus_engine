@@ -50,3 +50,14 @@ FixtureNode::Variant FixtureNode::getProperty(const std::string& key) const
    return mProperties.find(key)->second;
 }
 
+
+void FixtureNode::collisionWithPlayer()
+{
+   mCollisionCallback();
+}
+
+void FixtureNode::setCollisionCallback(const CollisionCallback& collisionCallback)
+{
+   mCollisionCallback = collisionCallback;
+}
+
