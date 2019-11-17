@@ -36,6 +36,7 @@ struct LuaNode : public GameNode
    void addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval);
    void boom(float x, float y, float intensity);
    void damage(int32_t damage, float forceX, float forceY);
+   void damageRadius(int32_t damage, float x, float y, float radius);
    b2Vec2 getLinearVelocity() const;
    void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
    void makeDynamic();
