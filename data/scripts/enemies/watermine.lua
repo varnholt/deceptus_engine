@@ -99,7 +99,7 @@ function collisionWithPlayer()
    if (not mActivated) then
       print("collision with player!")
       mActivated = true
-      timer(3000, mDetonationTimer)
+      timer(2000, mDetonationTimer)
    end
 end
 
@@ -142,4 +142,5 @@ function timeout(id)
       damageRadius(200, mPosition:getX(), mPosition:getY(), 48)
    end
 end
+
 

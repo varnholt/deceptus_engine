@@ -282,10 +282,10 @@ extern "C" int32_t damageRadius(lua_State* state)
 
    if (argc == 4)
    {
-      auto damage = static_cast<int32_t>(lua_tonumber(state, 2));
-      auto x = static_cast<float>(lua_tonumber(state, 3));
-      auto y = static_cast<float>(lua_tonumber(state, 4));
-      auto radius = static_cast<float>(lua_tonumber(state, 5));
+      auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
+      auto x = static_cast<float>(lua_tonumber(state, 2));
+      auto y = static_cast<float>(lua_tonumber(state, 3));
+      auto radius = static_cast<float>(lua_tonumber(state, 4));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -952,7 +952,8 @@ void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
 
    if (len <= radius)
    {
-      Player::getCurrent()->damage(damage, SfmlMath::normalize(dist));
+      // does it really make sense to normalize this vector?
+      Player::getCurrent()->damage(damage, SfmlMath::normalize(-dist));
    }
 }
 
