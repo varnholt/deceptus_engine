@@ -105,6 +105,7 @@ SOURCES += \
    src/game/inventory.cpp \
    src/game/laser.cpp \
    src/game/levelmap.cpp \
+   src/game/lever.cpp \
    src/game/maptools.cpp \
    src/game/moveablebox.cpp \
    src/game/playerinfo.cpp \
@@ -247,6 +248,7 @@ HEADERS += \
     src/game/inventory.h \
     src/game/laser.h \
     src/game/levelmap.h \
+    src/game/lever.h \
     src/game/maptools.h \
     src/game/moveablebox.h \
     src/game/player.h \
