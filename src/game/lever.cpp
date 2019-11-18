@@ -10,7 +10,14 @@ void Lever::toggle()
          break;
       case State::On:
          mState = State::Off;
-         Callback(10);
          break;
    }
+
+   mCallback(mState == State::Off);
+}
+
+
+void Lever::setCallback(const Callback& callback)
+{
+   mCallback = callback;
 }
