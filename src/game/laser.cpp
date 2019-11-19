@@ -40,6 +40,14 @@ void Laser::draw(sf::RenderTarget& window)
 }
 
 
+
+//-----------------------------------------------------------------------------
+void Laser::setEnabled(bool enabled)
+{
+   GameMechanism::setEnabled(enabled);
+}
+
+
 //-----------------------------------------------------------------------------
 void Laser::update(const sf::Time& dt)
 {
@@ -52,19 +60,27 @@ void Laser::update(const sf::Time& dt)
 
    const auto& sig = mSignalPlot.at(mSignalIndex);
 
-   // elapsed time exceeded signal duration
-   if (mTime > sig.mDurationMs)
+   if (mEnabled)
    {
-      mOn = !mOn;
-      mTime = 0;
-
-      // reset signal index after 1 loop
-      mSignalIndex++;
-      if (mSignalIndex >= mSignalPlot.size())
+      // elapsed time exceeded signal duration
+      if (mTime > sig.mDurationMs)
       {
-         mSignalIndex = 0;
+         mOn = !mOn;
+         mTime = 0;
+
+         // reset signal index after 1 loop
+         mSignalIndex++;
+         if (mSignalIndex >= mSignalPlot.size())
+         {
+            mSignalIndex = 0;
+         }
       }
    }
+   else
+   {
+      mOn = false;
+   }
+
 
    if ( (mOn && mTileIndex > 0) || (!mOn && mTileIndex < 6) )
    {

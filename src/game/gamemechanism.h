@@ -12,15 +12,19 @@ class GameMechanism
       GameMechanism() = default;
       virtual ~GameMechanism() = default;
 
-      int32_t getZ() const;
-      void setZ(const int32_t& z);
-
       virtual void draw(sf::RenderTarget& target) = 0;
       virtual void update(const sf::Time& dt) = 0;
+
+      virtual bool getEnabled() const;
+      virtual void setEnabled(bool enabled);
+
+      virtual int32_t getZ() const;
+      virtual void setZ(const int32_t& z);
 
 
    protected:
 
       int32_t mZ = 0;
+      bool mEnabled = true;
 };
 

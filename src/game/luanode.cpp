@@ -1054,6 +1054,8 @@ void LuaNode::luaSendPatrolPath()
 void LuaNode::luaDie()
 {
    Level::getCurrentLevel()->getWorld()->DestroyBody(mBody);
+
+   // resetting the body will get it removed from the luainterface class
    mBody = nullptr;
 }
 
