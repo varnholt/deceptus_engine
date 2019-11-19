@@ -51,6 +51,8 @@ public:
    const sf::Vector2f& getTilePosition() const;
    const sf::Vector2f& getPixelPosition() const;
 
+   void setEnabled(bool enabled) override;
+
 
 protected:
 
