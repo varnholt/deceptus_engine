@@ -53,26 +53,28 @@ void Laser::update(const sf::Time& dt)
 {
    mTime += dt.asMilliseconds();
 
-   if (mSignalPlot.empty())
-   {
-      return;
-   }
-
-   const auto& sig = mSignalPlot.at(mSignalIndex);
-
    if (mEnabled)
    {
-      // elapsed time exceeded signal duration
-      if (mTime > sig.mDurationMs)
+      if (mSignalPlot.empty())
       {
-         mOn = !mOn;
-         mTime = 0;
+         mOn = true;
+      }
+      else
+      {
+         const auto& sig = mSignalPlot.at(mSignalIndex);
 
-         // reset signal index after 1 loop
-         mSignalIndex++;
-         if (mSignalIndex >= mSignalPlot.size())
+         // elapsed time exceeded signal duration
+         if (mTime > sig.mDurationMs)
          {
-            mSignalIndex = 0;
+            mOn = !mOn;
+            mTime = 0;
+
+            // reset signal index after 1 loop
+            mSignalIndex++;
+            if (mSignalIndex >= mSignalPlot.size())
+            {
+               mSignalIndex = 0;
+            }
          }
       }
    }
