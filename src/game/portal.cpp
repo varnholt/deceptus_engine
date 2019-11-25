@@ -106,7 +106,7 @@ void Portal::update(const sf::Time& /*dt*/)
 
 //-----------------------------------------------------------------------------
 void Portal::link(
-   std::vector<std::shared_ptr<Portal>>& portals,
+   std::vector<std::shared_ptr<GameMechanism>>& portals,
    TmxObject* tmxObject
 )
 {
@@ -125,8 +125,9 @@ void Portal::link(
    std::shared_ptr<Portal> srcPortal;
    std::shared_ptr<Portal> dstPortal;
 
-   for (auto portal : portals)
+   for (auto p : portals)
    {
+      auto portal = std::dynamic_pointer_cast<Portal>(p);
       sf::Vector2f portalPos = portal->getPortalPosition();
 
       const auto px = static_cast<int32_t>(portalPos.x / PIXELS_PER_TILE);
@@ -192,7 +193,7 @@ void Portal::setPlayerAtPortal(bool playerAtPortal)
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<Portal>> Portal::load(
+std::vector<std::shared_ptr<GameMechanism>> Portal::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
@@ -201,7 +202,7 @@ std::vector<std::shared_ptr<Portal>> Portal::load(
 {
    // std::cout << "load portal layer" << std::endl;
 
-   std::vector<std::shared_ptr<Portal>> portals;
+   std::vector<std::shared_ptr<GameMechanism>> portals;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    const auto tiles    = layer->mData;
@@ -221,8 +222,9 @@ std::vector<std::shared_ptr<Portal>> Portal::load(
          {
             // find matching Portal
             std::shared_ptr<Portal> portal = nullptr;
-            for (auto& tmp : portals)
+            for (auto& p : portals)
             {
+               auto tmp = std::dynamic_pointer_cast<Portal>(p);
                if (
                      static_cast<uint32_t>(tmp->mTilePosition.x) == i
                   && static_cast<uint32_t>(tmp->mTilePosition.y) + 1 == j )

@@ -102,14 +102,14 @@ void MovingPlatform::addSprite(const sf::Sprite& sprite)
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<MovingPlatform>> MovingPlatform::load(
+std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
    const std::shared_ptr<b2World>& world
 )
 {
-   std::vector<std::shared_ptr<MovingPlatform>> movingPlatforms;
+   std::vector<std::shared_ptr<GameMechanism>> movingPlatforms;
    const auto tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    const auto tiles    = layer->mData;
    const auto width    = layer->mWidth;
@@ -189,7 +189,7 @@ std::vector<std::shared_ptr<MovingPlatform>> MovingPlatform::load(
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::link(const std::vector<std::shared_ptr<MovingPlatform>>& platforms, TmxObject *tmxObject)
+void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, TmxObject *tmxObject)
 {
    std::vector<sf::Vector2f> polyline = tmxObject->mPolyLine->mPolyLine;
 
@@ -199,8 +199,9 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<MovingPlatform>>& pl
    auto y = static_cast<int>((pos.y + tmxObject->mY) / PIXELS_PER_TILE);
    std::shared_ptr<MovingPlatform> platform;
 
-   for (auto tmp : platforms)
+   for (auto p : platforms)
    {
+      auto tmp = std::dynamic_pointer_cast<MovingPlatform>(p);
       if (tmp->mTilePosition.y == y)
       {
          for (auto xi = 0; xi < tmp->mWidth; xi++)

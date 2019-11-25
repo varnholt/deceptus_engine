@@ -111,8 +111,8 @@ public:
 
    static Level *getCurrentLevel();
 
-   std::shared_ptr<Portal> getNearbyPortal() const;
-   std::shared_ptr<Bouncer> getNearbyBouncer() const;
+   std::shared_ptr<Portal> getNearbyPortal();
+   std::shared_ptr<Bouncer> getNearbyBouncer();
 
    void toggleDoor();
    void reset();
@@ -216,15 +216,16 @@ protected:
    std::unique_ptr<LevelMap> mMap;
 
    // mechanisms
-   std::vector<std::shared_ptr<Bouncer>> mBouncers;
-   std::vector<std::shared_ptr<ConveyorBelt>> mConveyorBelts;
-   std::vector<std::shared_ptr<Door>> mDoors;
-   std::vector<std::shared_ptr<Laser>> mLasers;
-   std::vector<std::shared_ptr<MovingPlatform>> mPlatforms;
-   std::vector<std::shared_ptr<Portal>> mPortals;
-   std::vector<std::shared_ptr<SpikeBall>> mSpikeBalls;
-   std::vector<std::shared_ptr<Spikes>> mSpikes;
-   std::vector<std::shared_ptr<MoveableBox>> mMoveableBoxes;
+   std::vector<std::vector<std::shared_ptr<GameMechanism>>*> mMechanisms;
+   std::vector<std::shared_ptr<GameMechanism>> mBouncers;
+   std::vector<std::shared_ptr<GameMechanism>> mConveyorBelts;
+   std::vector<std::shared_ptr<GameMechanism>> mDoors;
+   std::vector<std::shared_ptr<GameMechanism>> mLasers;
+   std::vector<std::shared_ptr<GameMechanism>> mPlatforms;
+   std::vector<std::shared_ptr<GameMechanism>> mPortals;
+   std::vector<std::shared_ptr<GameMechanism>> mSpikeBalls;
+   std::vector<std::shared_ptr<GameMechanism>> mSpikes;
+   std::vector<std::shared_ptr<GameMechanism>> mMoveableBoxes;
 
    // graphic effects
    BoomEffect mBoomEffect;

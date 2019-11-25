@@ -146,13 +146,13 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 }
 
 
-void LevelMap::setDoors(const std::vector<std::shared_ptr<Door>>& doors)
+void LevelMap::setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors)
 {
    mDoors = doors;
 }
 
 
-void LevelMap::setPortals(const std::vector<std::shared_ptr<Portal>>& portals)
+void LevelMap::setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals)
 {
    mPortals = portals;
 }
@@ -191,8 +191,10 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    float doorWidth = 2.0f;
    float doorHeight = 9.0f;
 
-   for (auto door : mDoors)
+   for (auto d : mDoors)
    {
+      auto door = std::dynamic_pointer_cast<Door>(d);
+
       sf::VertexArray quad(sf::Quads, 4);
       quad[0].color = sf::Color::White;
       quad[1].color = sf::Color::White;
@@ -212,7 +214,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    // draw portals
    float portalWidth = 3.0f;
    float portalHeight = 6.0f;
-   for (auto portal : mPortals)
+   for (auto p : mPortals)
    {
       sf::VertexArray quad(sf::Quads, 4);
       quad[0].color = sf::Color::Red;
@@ -220,6 +222,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
       quad[2].color = sf::Color::Red;
       quad[3].color = sf::Color::Red;
 
+      auto portal = std::dynamic_pointer_cast<Portal>(p);
       auto pos = sf::Vector2f(portal->getTilePosition().x, portal->getTilePosition().y);
 
       quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale),               static_cast<float>(pos.y * scale));

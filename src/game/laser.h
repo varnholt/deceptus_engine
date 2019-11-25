@@ -33,7 +33,7 @@ public:
    void draw(sf::RenderTarget& window) override;
    void update(const sf::Time& dt) override;
 
-   static std::vector<std::shared_ptr<Laser>> load(
+   static std::vector<std::shared_ptr<GameMechanism>> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
