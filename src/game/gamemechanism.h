@@ -12,8 +12,8 @@ class GameMechanism
       GameMechanism() = default;
       virtual ~GameMechanism() = default;
 
-      virtual void draw(sf::RenderTarget& target) = 0;
-      virtual void update(const sf::Time& dt) = 0;
+      virtual void draw(sf::RenderTarget& target);
+      virtual void update(const sf::Time& dt);
 
       virtual bool getEnabled() const;
       virtual void setEnabled(bool enabled);

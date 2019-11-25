@@ -13,6 +13,16 @@ void GameMechanism::setZ(const int32_t& z)
 }
 
 
+void GameMechanism::draw(sf::RenderTarget& /*target*/)
+{
+}
+
+
+void GameMechanism::update(const sf::Time& /*dt*/)
+{
+}
+
+
 bool GameMechanism::getEnabled() const
 {
    return mEnabled;

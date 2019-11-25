@@ -21,9 +21,6 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
          float height
       );
 
-      void draw(sf::RenderTarget& target) override;
-      void update(const sf::Time& dt) override;
-
       b2Body *getBody() const;
       float getVelocity() const;
       void setVelocity(float velocity);

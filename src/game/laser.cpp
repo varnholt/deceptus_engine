@@ -49,6 +49,13 @@ void Laser::setEnabled(bool enabled)
 
 
 //-----------------------------------------------------------------------------
+const sf::Rect<int32_t>& Laser::getPixelRect() const
+{
+   return mPixelRect;
+}
+
+
+//-----------------------------------------------------------------------------
 void Laser::update(const sf::Time& dt)
 {
    mTime += dt.asMilliseconds();
@@ -178,6 +185,11 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
             laser->mPixelPosition.x = laser->mTilePosition.x * PIXELS_PER_TILE;
             laser->mPixelPosition.y = laser->mTilePosition.y * PIXELS_PER_TILE;
 
+            laser->mPixelRect.left = static_cast<int32_t>(laser->mPixelPosition.x);
+            laser->mPixelRect.top = static_cast<int32_t>(laser->mPixelPosition.y);
+            laser->mPixelRect.width = PIXELS_PER_TILE;
+            laser->mPixelRect.height = PIXELS_PER_TILE;
+
             laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->mImage->mSource);
 
             laser->mTu = (tileNumber - firstId) % (laser->mTexture->getSize().x / tilesize.x);
@@ -240,16 +252,9 @@ void Laser::addTiles()
 void Laser::collide(const sf::Rect<int32_t>& playerRect)
 {
    const auto it =
-      std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](auto laser){
-            sf::Rect<int32_t> itemRect;
+      std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](auto laser) {
 
-            itemRect.left = static_cast<int32_t>(laser->mPixelPosition.x);
-            itemRect.top = static_cast<int32_t>(laser->mPixelPosition.y);
-
-            itemRect.width = PIXELS_PER_TILE;
-            itemRect.height = PIXELS_PER_TILE;
-
-            const auto roughIntersection = playerRect.intersects(itemRect);
+            const auto roughIntersection = playerRect.intersects(laser->mPixelRect);
 
             // tileindex at 0 is an active laser
             if (laser->mTileIndex == 0 && roughIntersection)

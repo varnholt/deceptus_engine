@@ -114,7 +114,7 @@ public:
    std::shared_ptr<Portal> getNearbyPortal();
    std::shared_ptr<Bouncer> getNearbyBouncer();
 
-   void toggleDoor();
+   void toggleMechanisms();
    void reset();
 
    int getZ() const;
@@ -220,7 +220,9 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> mBouncers;
    std::vector<std::shared_ptr<GameMechanism>> mConveyorBelts;
    std::vector<std::shared_ptr<GameMechanism>> mDoors;
+   std::vector<std::shared_ptr<GameMechanism>> mFans;
    std::vector<std::shared_ptr<GameMechanism>> mLasers;
+   std::vector<std::shared_ptr<GameMechanism>> mLevers;
    std::vector<std::shared_ptr<GameMechanism>> mPlatforms;
    std::vector<std::shared_ptr<GameMechanism>> mPortals;
    std::vector<std::shared_ptr<GameMechanism>> mSpikeBalls;

@@ -62,16 +62,6 @@ ConveyorBelt::ConveyorBelt(
 }
 
 
-void ConveyorBelt::draw(sf::RenderTarget& /*target*/)
-{
-}
-
-
-void ConveyorBelt::update(const sf::Time& /*dt*/)
-{
-}
-
-
 b2Body *ConveyorBelt::getBody() const
 {
    return mBody;
