@@ -201,6 +201,18 @@ Level::Level()
    mRaycastLight->mLights.push_back(mPlayerLight);
 
    mMap = std::make_unique<LevelMap>();
+
+   mMechanisms = {
+      &mBouncers,
+      &mConveyorBelts,
+      &mDoors,
+      &mLasers,
+      &mPlatforms,
+      &mPortals,
+      &mSpikeBalls,
+      &mSpikes,
+      &mMoveableBoxes
+   };
 }
 
 
@@ -655,6 +667,7 @@ void Level::loadTmx()
       path / std::filesystem::path("physics_grid_solid.png"),
       path / std::filesystem::path("physics_path_solid.png")
    );
+
    mMap->setDoors(mDoors);
    mMap->setPortals(mPortals);
 
@@ -888,67 +901,14 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
          }
       }
 
-      for (auto& platform : mPlatforms)
+      for (auto mechanismVector : mMechanisms)
       {
-         if (platform->getZ() == z)
+         for (auto& mechanism : *mechanismVector)
          {
-            platform->draw(target);
-         }
-      }
-
-      for (auto& door : mDoors)
-      {
-         if (door->getZ() == z)
-         {
-            door->draw(target);
-         }
-      }
-
-      for (auto& portal : mPortals)
-      {
-         if (portal->getZ() == z)
-         {
-            portal->draw(target);
-         }
-      }
-
-      for (auto& laser : mLasers)
-      {
-         if (laser->getZ() == z)
-         {
-            laser->draw(target);
-         }
-      }
-
-      for (auto& box : mMoveableBoxes)
-      {
-         if (box->getZ() == z)
-         {
-            box->draw(target);
-         }
-      }
-
-      for (auto& bouncer : mBouncers)
-      {
-         if (bouncer->getZ() == z)
-         {
-            bouncer->draw(target);
-         }
-      }
-
-      for (auto& ball : mSpikeBalls)
-      {
-         if (ball->getZ() == z)
-         {
-            ball->draw(target);
-         }
-      }
-
-      for (auto& spikes : mSpikes)
-      {
-         if (spikes->getZ() == z)
-         {
-            spikes->draw(target);
+            if (mechanism->getZ() == z)
+            {
+               mechanism->draw(target);
+            }
          }
       }
 
@@ -1004,7 +964,7 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
   // draw lasers
   for (auto l : mLasers)
   {
-     const auto lPos = l->getPixelPosition();
+     const auto lPos = std::dynamic_pointer_cast<Laser>(l)->getPixelPosition();
      if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
      {
         continue;
@@ -1281,44 +1241,12 @@ void Level::update(const sf::Time& dt)
       tileMap->update(dt);
    }
 
-   for (auto& platform : mPlatforms)
+   for (auto mechanismVector : mMechanisms)
    {
-      platform->update(dt);
-   }
-
-   for (auto& door : mDoors)
-   {
-      door->update(dt);
-   }
-
-   for (auto& bouncer : mBouncers)
-   {
-      bouncer->update(dt);
-   }
-
-   for (auto& portal : mPortals)
-   {
-      portal->update(dt);
-   }
-
-   for (auto& laser : mLasers)
-   {
-      laser->update(dt);
-   }
-
-   for (auto& ball : mSpikeBalls)
-   {
-      ball->update(dt);
-   }
-
-   for (auto& spike : mSpikes)
-   {
-      spike->update(dt);
-   }
-
-   for (auto& box : mMoveableBoxes)
-   {
-      box->update(dt);
+      for (auto& mechanism : *mechanismVector)
+      {
+         mechanism->update(dt);
+      }
    }
 
    LuaInterface::instance()->update(dt);
@@ -1841,12 +1769,13 @@ AtmosphereTile Level::Atmosphere::getTileForPosition(const b2Vec2& pos) const
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<Portal> Level::getNearbyPortal() const
+std::shared_ptr<Portal> Level::getNearbyPortal()
 {
    std::shared_ptr<Portal> nearbyPortal;
 
-   for (auto& portal : mPortals)
+   for (auto& p : mPortals)
    {
+      auto portal = std::dynamic_pointer_cast<Portal>(p);
       if (portal->isPlayerAtPortal())
       {
          nearbyPortal = portal;
@@ -1859,12 +1788,13 @@ std::shared_ptr<Portal> Level::getNearbyPortal() const
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<Bouncer> Level::getNearbyBouncer() const
+std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 {
    std::shared_ptr<Bouncer> nearbyBouncer;
 
-   for (auto bouncer : mBouncers)
+   for (auto tmp : mBouncers)
    {
+      auto bouncer = std::dynamic_pointer_cast<Bouncer>(tmp);
       if (bouncer->isPlayerAtBouncer())
       {
          nearbyBouncer = bouncer;
@@ -1881,7 +1811,7 @@ void Level::toggleDoor()
 {
    for (auto& door : mDoors)
    {
-      door->toggle();
+      std::dynamic_pointer_cast<Door>(door)->toggle();
    }
 }
 
@@ -1891,7 +1821,7 @@ void Level::reset()
 {
    for (auto& door : mDoors)
    {
-      door->reset();
+      std::dynamic_pointer_cast<Door>(door)->reset();
    }
 }
 

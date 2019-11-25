@@ -22,14 +22,14 @@ class MovingPlatform : public GameMechanism, public GameNode
 public:
    MovingPlatform(GameNode* parent);
 
-   static std::vector<std::shared_ptr<MovingPlatform>> load(
+   static std::vector<std::shared_ptr<GameMechanism>> load(
       TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path &basePath,
       const std::shared_ptr<b2World>& world
    );
 
-   static void link(const std::vector<std::shared_ptr<MovingPlatform>>& platforms, TmxObject* tmxObject);
+   static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, TmxObject* tmxObject);
 
    void draw(sf::RenderTarget& target) override;
    void update(const sf::Time& dt) override;

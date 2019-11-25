@@ -140,7 +140,7 @@ const sf::Vector2f& Laser::getPixelPosition() const
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<Laser>> Laser::load(
+std::vector<std::shared_ptr<GameMechanism>> Laser::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
@@ -151,7 +151,7 @@ std::vector<std::shared_ptr<Laser>> Laser::load(
 
    addTiles();
 
-   std::vector<std::shared_ptr<Laser>> lasers;
+   std::vector<std::shared_ptr<GameMechanism>> lasers;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    const auto tiles    = layer->mData;

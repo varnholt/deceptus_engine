@@ -28,14 +28,14 @@ public:
    void draw(sf::RenderTarget& window) override;
    void update(const sf::Time& dt) override;
 
-   static std::vector<std::shared_ptr<Portal>> load(
+   static std::vector<std::shared_ptr<GameMechanism>> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
       const std::shared_ptr<b2World>& world
    );
 
-   static void link(std::vector<std::shared_ptr<Portal>>& portals, TmxObject*);
+   static void link(std::vector<std::shared_ptr<GameMechanism>>& portals, TmxObject*);
 
    bool isPlayerAtPortal() const;
    void setPlayerAtPortal(bool isPlayerAtPortal);

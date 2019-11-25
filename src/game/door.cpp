@@ -294,14 +294,14 @@ void Door::setPlayerAtDoor(bool playerAtDoor)
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<Door>> Door::load(
+std::vector<std::shared_ptr<GameMechanism>> Door::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
    const std::shared_ptr<b2World>& world
 )
 {
-   std::vector<std::shared_ptr<Door>> doors;
+   std::vector<std::shared_ptr<GameMechanism>> doors;
 
    auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
    auto tiles    = layer->mData;
@@ -323,8 +323,9 @@ std::vector<std::shared_ptr<Door>> Door::load(
 
             // find matching door
             std::shared_ptr<Door> door;
-            for (auto& tmp : doors)
+            for (auto& d : doors)
             {
+               auto tmp = std::dynamic_pointer_cast<Door>(d);
                if (
                      (tmp->mTilePosition.x == i && tmp->mTilePosition.y + 1 == j)
                   || (tmp->mTilePosition.x == i && tmp->mTilePosition.y + 2 == j)
@@ -387,7 +388,7 @@ std::vector<std::shared_ptr<Door>> Door::load(
 
    for (auto tmp : doors)
    {
-      tmp->setupBody(world);
+      std::dynamic_pointer_cast<Door>(tmp)->setupBody(world);
    }
 
    return doors;

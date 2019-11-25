@@ -10,8 +10,7 @@
 #include <memory>
 #include <vector>
 
-class Door;
-class Portal;
+class GameMechanism;
 
 class LevelMap
 {
@@ -26,8 +25,8 @@ class LevelMap
 
       void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
-      void setDoors(const std::vector<std::shared_ptr<Door>>& doors);
-      void setPortals(const std::vector<std::shared_ptr<Portal>>& portals);
+      void setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors);
+      void setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals);
 
 
    private:
@@ -45,8 +44,8 @@ class LevelMap
       sf::Texture mLevelOutlineTexture;
       sf::Sprite mLevelOutlineSprite;
 
-      std::vector<std::shared_ptr<Door>> mDoors;
-      std::vector<std::shared_ptr<Portal>> mPortals;
+      std::vector<std::shared_ptr<GameMechanism>> mDoors;
+      std::vector<std::shared_ptr<GameMechanism>> mPortals;
 
       bool mZoomEnabled = false;
 

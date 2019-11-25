@@ -42,7 +42,7 @@ public:
 
    void toggle();
 
-   static std::vector<std::shared_ptr<Door>> load(
+   static std::vector<std::shared_ptr<GameMechanism>> load(
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,
