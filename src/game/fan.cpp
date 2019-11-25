@@ -10,7 +10,7 @@
 #include <iostream>
 
 
-std::vector<std::shared_ptr<Fan>> Fan::sFans;
+std::vector<std::shared_ptr<GameMechanism>> Fan::sFans;
 std::vector<std::shared_ptr<Fan::FanTile>> Fan::sTiles;
 std::vector<TmxObject*> Fan::sObjects;
 std::vector<sf::Vector2f> Fan::sWeights;
@@ -50,10 +50,16 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
 }
 
 
+std::vector<std::shared_ptr<GameMechanism> >& Fan::getFans()
+{
+   return sFans;
+}
+
+
 void Fan::load(
-   TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::shared_ptr<b2World>& world
+      TmxLayer* layer,
+      TmxTileSet* tileSet,
+      const std::shared_ptr<b2World>& world
 )
 {
    if (layer == nullptr)
@@ -154,8 +160,9 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
    auto valid = false;
    sf::Vector2f dir;
 
-   for (auto fan : sFans)
+   for (auto f : sFans)
    {
+      auto fan = std::dynamic_pointer_cast<Fan>(f);
       if (playerRect.intersects(fan->mRect))
       {
          dir += fan->mDirection;
@@ -192,8 +199,9 @@ void Fan::merge()
 {
    for (auto& tile : sTiles)
    {
-      for (auto& fan : sFans)
+      for (auto& f : sFans)
       {
+         auto fan = std::dynamic_pointer_cast<Fan>(f);
          if (tile->mRect.intersects(fan->mRect))
          {
             fan->mTiles.push_back(tile);

@@ -7,12 +7,14 @@
 #include <optional>
 #include <memory>
 
+#include "gamemechanism.h"
+
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
 
-class Fan
+class Fan : public GameMechanism
 {
    public:
 
@@ -48,12 +50,14 @@ class Fan
       static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
       static void merge();
 
+      static std::vector<std::shared_ptr<GameMechanism>>& getFans();
+
 
    private:
 
       static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
 
-      static std::vector<std::shared_ptr<Fan>> sFans;
+      static std::vector<std::shared_ptr<GameMechanism>> sFans;
       static std::vector<std::shared_ptr<FanTile>> sTiles;
       static std::vector<TmxObject*> sObjects;
       static std::vector<sf::Vector2f> sWeights;

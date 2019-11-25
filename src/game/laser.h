@@ -50,6 +50,7 @@ public:
 
    const sf::Vector2f& getTilePosition() const;
    const sf::Vector2f& getPixelPosition() const;
+   const sf::Rect<int32_t>& getPixelRect() const;
 
    void setEnabled(bool enabled) override;
 
@@ -70,6 +71,7 @@ protected:
 
    sf::Vector2f mTilePosition;
    sf::Vector2f mPixelPosition;
+   sf::Rect<int32_t> mPixelRect;
 
    bool mOn = true;
    int32_t mTileIndex = 0;

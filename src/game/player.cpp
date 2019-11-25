@@ -200,7 +200,7 @@ void Player::initializeController()
             {
                return;
             }
-            Level::getCurrentLevel()->toggleDoor();
+            Level::getCurrentLevel()->toggleMechanisms();
          }
       );
 
@@ -2306,7 +2306,7 @@ void Player::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (key == sf::Keyboard::Return)
    {
-      Level::getCurrentLevel()->toggleDoor();
+      Level::getCurrentLevel()->toggleMechanisms();
    }
 
    if (key == sf::Keyboard::LShift)

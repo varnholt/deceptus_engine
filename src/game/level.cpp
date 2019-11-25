@@ -18,6 +18,7 @@
 #include "laser.h"
 #include "leveldescription.h"
 #include "levelmap.h"
+#include "lever.h"
 #include "luainterface.h"
 #include "maptools.h"
 #include "meshtools.h"
@@ -206,7 +207,9 @@ Level::Level()
       &mBouncers,
       &mConveyorBelts,
       &mDoors,
+      &mFans,
       &mLasers,
+      &mLevers,
       &mPlatforms,
       &mPortals,
       &mSpikeBalls,
@@ -450,6 +453,10 @@ void Level::loadTmx()
          {
             mLasers = Laser::load(layer, tileset, path, mWorld);
          }
+         else if (layer->mName == "levers")
+         {
+            mLevers = Lever::load(layer, tileset, path, mWorld);
+         }
          else if (layer->mName == "platforms")
          {
             mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
@@ -650,6 +657,10 @@ void Level::loadTmx()
                auto light = deserializeStaticLight(tmxObject, objectGroup);
                mStaticLight->mLights.push_back(light);
             }
+            if (objectGroup->mName == "switchable_objects")
+            {
+               Lever::addSearchRect(tmxObject);
+            }
          }
       }
 
@@ -662,7 +673,13 @@ void Level::loadTmx()
 
    Laser::merge();
    Fan::merge();
+   mFans = Fan::getFans();
+   Lever::merge(mLasers, mPlatforms, mFans, mConveyorBelts);
 
+//   std::vector<std::shared_ptr<GameMechanism>> lasers,
+//   std::vector<std::shared_ptr<GameMechanism>> fans,
+//   std::vector<std::shared_ptr<GameMechanism>> platforms,
+//   std::vector<std::shared_ptr<GameMechanism>> belts
    mMap->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),
       path / std::filesystem::path("physics_path_solid.png")
@@ -1807,11 +1824,16 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 
 
 //-----------------------------------------------------------------------------
-void Level::toggleDoor()
+void Level::toggleMechanisms()
 {
    for (auto& door : mDoors)
    {
       std::dynamic_pointer_cast<Door>(door)->toggle();
+   }
+
+   for (auto& lever : mLevers)
+   {
+      std::dynamic_pointer_cast<Lever>(lever)->toggle();
    }
 }
 
