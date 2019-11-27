@@ -4,6 +4,7 @@
 #include "gamemechanism.h"
 #include "laser.h"
 #include "player.h"
+#include "texturepool.h"
 
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxobject.h"
@@ -12,18 +13,30 @@
 #include <iostream>
 
 
+sf::Texture Lever::sTexture;
+
 std::vector<TmxObject*> Lever::mRectangles;
 std::vector<std::shared_ptr<Lever>> Lever::sLevers;
+
+
+namespace
+{
+static const auto SPRITES_PER_ROW = 11;
+static const auto ROW_CENTER = 6;
+}
 
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Lever::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
-   const std::filesystem::path& /*basePath*/,
+   const std::filesystem::path& basePath,
    const std::shared_ptr<b2World>&
 )
 {
+   sLevers.clear();
+   sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
+
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
    auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
@@ -49,12 +62,23 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
                std::cout << "lever at " << i << ", " << j << std::endl;
 
                auto lever = std::make_shared<Lever>();
-               lever->mRect.left = PIXELS_PER_TILE * i;
-               lever->mRect.top = PIXELS_PER_TILE * j;
+
+               // sprite is two tiles high
+
+               const auto x = PIXELS_PER_TILE * i;
+               const auto y = PIXELS_PER_TILE * (j - 1);
+
+               lever->mRect.left = x;
+               lever->mRect.top = y;
                lever->mRect.width = PIXELS_PER_TILE * 3;
-               lever->mRect.height = PIXELS_PER_TILE;
+               lever->mRect.height = PIXELS_PER_TILE * 2;
+
+               lever->mSprite.setPosition(x, y);
+               lever->mSprite.setTexture(sTexture);
+               lever->updateSprite();
 
                sLevers.push_back(lever);
+               levers.push_back(lever);
             }
          }
       }
@@ -79,25 +103,76 @@ void Lever::setPlayerAtLever(bool playerAtLever)
 
 
 //-----------------------------------------------------------------------------
+void Lever::updateSprite()
+{
+   mSprite.setTextureRect({
+      mOffset * 3 * PIXELS_PER_TILE,
+      mLeftAligned ? 0 : 2 * PIXELS_PER_TILE,
+      PIXELS_PER_TILE * 3,
+      PIXELS_PER_TILE * 2
+   });
+}
+
+
+//-----------------------------------------------------------------------------
 void Lever::update(const sf::Time& /*dt*/)
 {
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
    setPlayerAtLever(mRect.intersects(playerRect));
+
+   bool reached = false;
+   int32_t dir = 0;
+   if (mTargetState == State::Left)
+   {
+      dir = -1;
+      reached = (mOffset == 0);
+   }
+   else if (mTargetState == State::Right)
+   {
+      dir = 1;
+      reached = (mOffset == SPRITES_PER_ROW - 1);
+   }
+   else if (mTargetState == State::Middle)
+   {
+      dir = (mPreviousState == State::Left) ? 1 : -1;
+      reached = (mOffset == ROW_CENTER);
+   };
+
+   if (reached)
+   {
+      return;
+   }
+
+   mOffset += dir;
+
+   updateSprite();
+}
+
+
+//-----------------------------------------------------------------------------
+void Lever::draw(sf::RenderTarget& target)
+{
+   target.draw(mSprite);
 }
 
 
 //-----------------------------------------------------------------------------
 void Lever::toggle()
 {
+   if (!mPlayerAtLever)
+   {
+      return;
+   }
+
    if (mType == Type::TwoState)
    {
-      switch (mState)
+      switch (mTargetState)
       {
          case State::Left:
-            mState = State::Right;
+            mTargetState = State::Right;
             break;
          case State::Right:
-            mState = State::Left;
+            mTargetState = State::Left;
             break;
          case State::Middle:
             break;
@@ -106,38 +181,38 @@ void Lever::toggle()
 
    else if (mType == Type::TriState)
    {
-      switch (mState)
+      switch (mTargetState)
       {
          case State::Left:
          {
-            mState = State::Middle;
+            mTargetState = State::Middle;
             break;
          }
          case State::Middle:
          {
             if (mPreviousState == State::Left)
             {
-               mState = State::Right;
+               mTargetState = State::Right;
             }
             else
             {
-               mState = State::Left;
+               mTargetState = State::Left;
             }
             break;
          }
          case State::Right:
          {
-            mState = State::Middle;
+            mTargetState = State::Middle;
             break;
          }
       }
 
-      mPreviousState = mState;
+      mPreviousState = mTargetState;
    }
 
    for (auto& cb : mCallbacks)
    {
-      cb(static_cast<int32_t>(mState));
+      cb(static_cast<int32_t>(mTargetState));
    }
 }
 
@@ -193,10 +268,10 @@ void Lever::merge(
 
                if (laser->getPixelRect().intersects(searchRect))
                {
-                  callbacks.push_back([&](int32_t state) {
-                        laser->setEnabled(state == -1 ? true : false);
-                     }
-                  );
+//                  callbacks.push_back([&](int32_t state) {
+//                        laser->setEnabled(state == -1 ? true : false);
+//                     }
+//                  );
                   std::cout << "found laser in search rect" << std::endl;
                }
             }
