@@ -34,7 +34,8 @@ public:
 
    Lever() = default;
 
-   void update(const sf::Time& dt);
+   void update(const sf::Time& dt) override;
+   void draw(sf::RenderTarget& target) override;
 
    void toggle();
    void setCallbacks(const std::vector<Callback>& callbacks);
@@ -61,14 +62,22 @@ public:
 private:
 
    Type mType = Type::TwoState;
-   State mState = State::Left;
+
+   State mTargetState = State::Left;
    State mPreviousState = State::Left;
+
    std::vector<Callback> mCallbacks;
    sf::Rect<int32_t> mRect;
    bool mPlayerAtLever = false;
+   sf::Sprite mSprite;
+   int32_t mOffset = 0;
+   bool mLeftAligned = true;
+
+   static sf::Texture sTexture;
 
    static std::vector<TmxObject*> mRectangles;
    static std::vector<std::shared_ptr<Lever>> sLevers;
+   void updateSprite();
 };
 
 
