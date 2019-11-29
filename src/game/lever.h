@@ -42,10 +42,10 @@ public:
 
    static void addSearchRect(TmxObject* rect);
    static void merge(
-      std::vector<std::shared_ptr<GameMechanism>> lasers,
-      std::vector<std::shared_ptr<GameMechanism>> fans,
-      std::vector<std::shared_ptr<GameMechanism>> platforms,
-      std::vector<std::shared_ptr<GameMechanism>> belts
+      const std::vector<std::shared_ptr<GameMechanism>>& lasers,
+      const std::vector<std::shared_ptr<GameMechanism>>& fans,
+      const std::vector<std::shared_ptr<GameMechanism>>& platforms,
+      const std::vector<std::shared_ptr<GameMechanism>>& belts
    );
 
    static std::vector<std::shared_ptr<GameMechanism>> load(
