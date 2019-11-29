@@ -233,10 +233,10 @@ void Lever::addSearchRect(TmxObject* rect)
 
 //-----------------------------------------------------------------------------
 void Lever::merge(
-   std::vector<std::shared_ptr<GameMechanism>> lasers,
-   std::vector<std::shared_ptr<GameMechanism>> fans,
-   std::vector<std::shared_ptr<GameMechanism>> platforms,
-   std::vector<std::shared_ptr<GameMechanism>> belts
+   const std::vector<std::shared_ptr<GameMechanism>>& lasers,
+   const std::vector<std::shared_ptr<GameMechanism>>& fans,
+   const std::vector<std::shared_ptr<GameMechanism>>& platforms,
+   const std::vector<std::shared_ptr<GameMechanism>>& belts
 )
 {
    for (auto rect : mRectangles)
@@ -268,11 +268,10 @@ void Lever::merge(
 
                if (laser->getPixelRect().intersects(searchRect))
                {
-//                  callbacks.push_back([&](int32_t state) {
-//                        laser->setEnabled(state == -1 ? true : false);
-//                     }
-//                  );
-                  std::cout << "found laser in search rect" << std::endl;
+                  callbacks.push_back([laser](int32_t state) {
+                        laser->setEnabled(state == -1 ? true : false);
+                     }
+                  );
                }
             }
 
