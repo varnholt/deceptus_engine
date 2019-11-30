@@ -38,6 +38,10 @@ class Fan : public GameMechanism
 
       Fan() = default;
 
+      void draw(sf::RenderTarget& target) override;
+      void update(const sf::Time& dt) override;
+
+
       static void load(
          TmxLayer* layer,
          TmxTileSet* tileSet,

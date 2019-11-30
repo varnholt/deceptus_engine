@@ -23,7 +23,7 @@ void GameMechanism::update(const sf::Time& /*dt*/)
 }
 
 
-bool GameMechanism::getEnabled() const
+bool GameMechanism::isEnabled() const
 {
    return mEnabled;
 }

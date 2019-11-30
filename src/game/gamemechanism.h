@@ -15,7 +15,7 @@ class GameMechanism
       virtual void draw(sf::RenderTarget& target);
       virtual void update(const sf::Time& dt);
 
-      virtual bool getEnabled() const;
+      virtual bool isEnabled() const;
       virtual void setEnabled(bool enabled);
 
       virtual int32_t getZ() const;

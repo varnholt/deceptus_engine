@@ -230,8 +230,8 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
          auto time = i / static_cast<float>(polyline.size() - 1);
 
          // where do those 4px error come from?!
-         auto x = (tmxObject->mX + polyPos.x - 4 - (platform->mWidth * PIXELS_PER_TILE) / 2.0f) * MPP;
-         auto y = (tmxObject->mY + polyPos.y - (platform->mHeight * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto x = (tmxObject->mX + polyPos.x - 4 - (platform->mWidth  * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto y = (tmxObject->mY + polyPos.y -     (platform->mHeight * PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platformPos.x = x;
          platformPos.y = y;
