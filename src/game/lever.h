@@ -72,6 +72,7 @@ private:
    sf::Sprite mSprite;
    int32_t mOffset = 0;
    bool mLeftAligned = true;
+   int32_t mDir = 0;
 
    static sf::Texture sTexture;
 

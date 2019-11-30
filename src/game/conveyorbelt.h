@@ -25,6 +25,12 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       float getVelocity() const;
       void setVelocity(float velocity);
 
+      void draw(sf::RenderTarget& target) override;
+      void update(const sf::Time& dt) override;
+
+      sf::IntRect getPixelRect() const;
+
+
       static void update();
       static void processContact(b2Contact *contact);
       static void processFixtureNode(FixtureNode* fixtureNode, b2Body* collidingBody);
@@ -36,6 +42,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       b2Vec2 mPositionB2d;
       sf::Vector2f mPositionSf;
       b2PolygonShape mShapeBounds;
+      sf::IntRect mPixelRect;
 
       sf::Texture mTexture;
       sf::Sprite mSprite;

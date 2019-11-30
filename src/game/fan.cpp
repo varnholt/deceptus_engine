@@ -56,6 +56,18 @@ std::vector<std::shared_ptr<GameMechanism> >& Fan::getFans()
 }
 
 
+void Fan::draw(sf::RenderTarget& target)
+{
+
+}
+
+
+void Fan::update(const sf::Time& dt)
+{
+
+}
+
+
 void Fan::load(
       TmxLayer* layer,
       TmxTileSet* tileSet,
@@ -108,12 +120,15 @@ void Fan::load(
             }
 
             auto tile = std::make_shared<FanTile>();
-            tile->mPosition = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
-            tile->mRect.left = i * PIXELS_PER_TILE;
-            tile->mRect.top = j * PIXELS_PER_TILE;
-            tile->mRect.width = PIXELS_PER_TILE;
+
+            tile->mPosition    = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
+
+            tile->mRect.left   = i * PIXELS_PER_TILE;
+            tile->mRect.top    = j * PIXELS_PER_TILE;
+            tile->mRect.width  = PIXELS_PER_TILE;
             tile->mRect.height = PIXELS_PER_TILE;
-            tile->mDirection = directionVector;
+
+            tile->mDirection   = directionVector;
             sTiles.push_back(tile);
 
             createPhysics(world, tile);

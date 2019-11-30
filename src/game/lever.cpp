@@ -1,6 +1,7 @@
 #include "lever.h"
 
 #include "constants.h"
+#include "conveyorbelt.h"
 #include "gamemechanism.h"
 #include "laser.h"
 #include "player.h"
@@ -107,7 +108,7 @@ void Lever::updateSprite()
 {
    mSprite.setTextureRect({
       mOffset * 3 * PIXELS_PER_TILE,
-      mLeftAligned ? 0 : 2 * PIXELS_PER_TILE,
+      mDir == -1 ? (2 * PIXELS_PER_TILE) : 0,
       PIXELS_PER_TILE * 3,
       PIXELS_PER_TILE * 2
    });
@@ -121,20 +122,20 @@ void Lever::update(const sf::Time& /*dt*/)
    setPlayerAtLever(mRect.intersects(playerRect));
 
    bool reached = false;
-   int32_t dir = 0;
+
    if (mTargetState == State::Left)
    {
-      dir = -1;
+      mDir = -1;
       reached = (mOffset == 0);
    }
    else if (mTargetState == State::Right)
    {
-      dir = 1;
+      mDir = 1;
       reached = (mOffset == SPRITES_PER_ROW - 1);
    }
    else if (mTargetState == State::Middle)
    {
-      dir = (mPreviousState == State::Left) ? 1 : -1;
+      mDir = (mPreviousState == State::Left) ? 1 : -1;
       reached = (mOffset == ROW_CENTER);
    };
 
@@ -143,7 +144,7 @@ void Lever::update(const sf::Time& /*dt*/)
       return;
    }
 
-   mOffset += dir;
+   mOffset += mDir;
 
    updateSprite();
 }
@@ -273,6 +274,29 @@ void Lever::merge(
                      }
                   );
                }
+            }
+
+            for (auto b : belts)
+            {
+               auto belt = std::dynamic_pointer_cast<ConveyorBelt>(b);
+
+               if (belt->getPixelRect().intersects(searchRect))
+               {
+                  callbacks.push_back([belt](int32_t state) {
+                        belt->setEnabled(state == -1 ? true : false);
+                     }
+                  );
+               }
+            }
+
+            for (auto f : fans)
+            {
+
+            }
+
+            for (auto p : platforms)
+            {
+
             }
 
             lever->setCallbacks(callbacks);

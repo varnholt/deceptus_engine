@@ -15,6 +15,18 @@ void ConveyorBelt::setVelocity(float velocity)
 }
 
 
+void ConveyorBelt::draw(sf::RenderTarget& target)
+{
+
+}
+
+
+void ConveyorBelt::update(const sf::Time& dt)
+{
+
+}
+
+
 ConveyorBelt::ConveyorBelt(
    GameNode* parent,
    const std::shared_ptr<b2World>& world,
@@ -53,12 +65,10 @@ ConveyorBelt::ConveyorBelt(
    auto boundaryFixture = mBody->CreateFixture(&boundaryFixtureDef);
    boundaryFixture->SetUserData(static_cast<void*>(this));
 
-   // create fixture for the sensor behavior, collision notification
-   mShapeBounds.SetAsBox(
-      halfPhysicsWidth, halfPhysicsHeight,
-      b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
-      0.0f
-            );
+   mPixelRect.left   = static_cast<int32_t>(x);
+   mPixelRect.top    = static_cast<int32_t>(y);
+   mPixelRect.height = static_cast<int32_t>(width * 0.5f);
+   mPixelRect.width  = static_cast<int32_t>(height * 0.5f);
 }
 
 
@@ -92,7 +102,14 @@ void ConveyorBelt::processFixtureNode(
    {
       auto playerBody = Player::getCurrent()->getBody();
 
-      auto beltVelocity = dynamic_cast<ConveyorBelt*>(fixtureNode)->getVelocity();
+      auto belt = dynamic_cast<ConveyorBelt*>(fixtureNode);
+
+      if (!belt->isEnabled())
+      {
+         return;
+      }
+
+      auto beltVelocity = belt->getVelocity();
 
       // only process a body once since bodies can have multiple fixtures
       if (std::find(sBodiesOnBelt.begin(), sBodiesOnBelt.end(), collidingBody) == sBodiesOnBelt.end())
@@ -114,6 +131,11 @@ void ConveyorBelt::processFixtureNode(
         }
       }
    }
+}
+
+sf::IntRect ConveyorBelt::getPixelRect() const
+{
+   return mPixelRect;
 }
 
 
