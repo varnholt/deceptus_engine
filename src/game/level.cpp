@@ -449,6 +449,10 @@ void Level::loadTmx()
          {
             mDoors = Door::load(layer, tileset, path, mWorld);
          }
+         else if (layer->mName == "fans")
+         {
+            Fan::load(layer, tileset, path, mWorld);
+         }
          else if (layer->mName == "lasers")
          {
             mLasers = Laser::load(layer, tileset, path, mWorld);
@@ -488,11 +492,7 @@ void Level::loadTmx()
 
             auto pushTileMap = true;
 
-            if (layer->mName == "fans")
-            {
-               Fan::load(layer, tileset, mWorld);
-            }
-            else if (layer->mName == "atmosphere")
+            if (layer->mName == "atmosphere")
             {
                mAtmosphere.mTileMap = tileMap;
                parseAtmosphereLayer(layer, tileset);

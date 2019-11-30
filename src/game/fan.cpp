@@ -7,6 +7,8 @@
 #include "tmxparser/tmxproperties.h"
 #include "tmxparser/tmxtileset.h"
 
+#include "texturepool.h"
+
 #include <iostream>
 
 
@@ -14,9 +16,11 @@ std::vector<std::shared_ptr<GameMechanism>> Fan::sFans;
 std::vector<std::shared_ptr<Fan::FanTile>> Fan::sTiles;
 std::vector<TmxObject*> Fan::sObjects;
 std::vector<sf::Vector2f> Fan::sWeights;
+sf::Texture Fan::sTexture;
 
 
 static const sf::Vector2f vectorUp{0.0f, 1.0f};
+static const sf::Vector2f vectorDown{0.0f, -1.0f};
 static const sf::Vector2f vectorLeft{-1.0f, 0.0f};
 static const sf::Vector2f vectorRight{1.0f, 0.0f};
 
@@ -50,28 +54,105 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
 }
 
 
+const sf::Rect<int32_t>& Fan::getPixelRect() const
+{
+   return mPixelRect;
+}
+
+
+void Fan::setEnabled(bool enabled)
+{
+   GameMechanism::setEnabled(enabled);
+   mLeverLag = enabled ? 0.0f : 1.0f;
+}
+
+
 std::vector<std::shared_ptr<GameMechanism> >& Fan::getFans()
 {
    return sFans;
 }
 
 
+void Fan::updateSprite()
+{
+   auto yOffset = 0;
+   const auto dir = mTiles.at(0)->mDir;
+   switch (dir)
+   {
+      case TileDirection::Up:
+         yOffset = 0;
+         break;
+      case TileDirection::Right:
+         yOffset = 1;
+         break;
+      case TileDirection::Left:
+         yOffset = 2;
+         break;
+      case TileDirection::Down:
+         yOffset = 3;
+         break;
+   }
+
+   auto index = 0u;
+   for (auto& sprite : mSprites)
+   {
+      auto xOffset = static_cast<int32_t>(mXOffsets[index]) % 8;
+      sprite.setTextureRect({
+         xOffset * PIXELS_PER_TILE,
+         yOffset * PIXELS_PER_TILE,
+         PIXELS_PER_TILE,
+         PIXELS_PER_TILE
+      });
+
+      index++;
+   }
+}
+
+
 void Fan::draw(sf::RenderTarget& target)
 {
-
+   for (auto& sprite : mSprites)
+   {
+      target.draw(sprite);
+   }
 }
 
 
 void Fan::update(const sf::Time& dt)
 {
+   if (!isEnabled())
+   {
+      if (mLeverLag <= 0.0f)
+      {
+         return;
+      }
+      else
+      {
+         mLeverLag -= dt.asSeconds();
+      }
+   }
+   else
+   {
+      if (mLeverLag < 1.0f)
+      {
+         mLeverLag += dt.asSeconds();
+      }
+   }
 
+   for (auto& xOffset : mXOffsets)
+   {
+      xOffset += dt.asSeconds() * 25.0f * mSpeed * mLeverLag;
+   }
+
+   updateSprite();
 }
 
 
 void Fan::load(
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
-      const std::shared_ptr<b2World>& world
+   TmxLayer* layer,
+   TmxTileSet* tileSet,
+   const std::filesystem::path& basePath,
+   const std::shared_ptr<b2World>& world
 )
 {
    if (layer == nullptr)
@@ -85,6 +166,8 @@ void Fan::load(
    }
 
    resetAll();
+
+   sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "fan.png");
 
    const auto tiles    = layer->mData;
    const auto width    = layer->mWidth;
@@ -103,31 +186,36 @@ void Fan::load(
          {
             // std::cout << tileNumber - firstId << std::endl;
 
-            const auto direction = static_cast<DirectionTile>(tileNumber - firstId);
+            const auto direction = static_cast<TileDirection>(tileNumber - firstId);
             sf::Vector2f directionVector;
 
             switch (direction)
             {
-               case DirectionTile::Up:
+               case TileDirection::Up:
                   directionVector = vectorUp;
                   break;
-               case DirectionTile::Left:
+               case TileDirection::Left:
                   directionVector = vectorLeft;
                   break;
-               case DirectionTile::Right:
+               case TileDirection::Right:
                   directionVector = vectorRight;
+                  break;
+               case TileDirection::Down:
+                  directionVector = vectorDown;
                   break;
             }
 
             auto tile = std::make_shared<FanTile>();
 
-            tile->mPosition    = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
+            const auto x = i * PIXELS_PER_TILE;
+            const auto y = j * PIXELS_PER_TILE;
 
-            tile->mRect.left   = i * PIXELS_PER_TILE;
-            tile->mRect.top    = j * PIXELS_PER_TILE;
+            tile->mPosition    = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
+            tile->mRect.left   = x;
+            tile->mRect.top    = y;
             tile->mRect.width  = PIXELS_PER_TILE;
             tile->mRect.height = PIXELS_PER_TILE;
-
+            tile->mDir         = direction;
             tile->mDirection   = directionVector;
             sTiles.push_back(tile);
 
@@ -156,10 +244,10 @@ void Fan::addObject(TmxObject* object)
    const auto w = static_cast<int32_t>(object->mWidth);
    const auto h = static_cast<int32_t>(object->mHeight);
 
-   fan->mRect.left = static_cast<int32_t>(object->mX);
-   fan->mRect.top = static_cast<int32_t>(object->mY);
-   fan->mRect.width = w;
-   fan->mRect.height = h;
+   fan->mPixelRect.left = static_cast<int32_t>(object->mX);
+   fan->mPixelRect.top = static_cast<int32_t>(object->mY);
+   fan->mPixelRect.width = w;
+   fan->mPixelRect.height = h;
 
    if (object->mProperties)
    {
@@ -178,7 +266,13 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
    for (auto f : sFans)
    {
       auto fan = std::dynamic_pointer_cast<Fan>(f);
-      if (playerRect.intersects(fan->mRect))
+
+      if (!fan->isEnabled())
+      {
+         continue;
+      }
+
+      if (playerRect.intersects(fan->mPixelRect))
       {
          dir += fan->mDirection;
          valid = true;
@@ -199,28 +293,38 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
 
 void Fan::collide(const sf::Rect<int32_t>& playerRect, b2Body* body)
 {
-    auto dir = collide(playerRect);
-    if (dir.has_value())
-    {
-       body->ApplyForceToCenter(
-          b2Vec2(2.0f * dir->x, -dir->y),
-          true
-       );
-    }
+   auto dir = collide(playerRect);
+   if (dir.has_value())
+   {
+      body->ApplyForceToCenter(
+         b2Vec2(2.0f * dir->x, -dir->y),
+         true
+      );
+   }
 }
 
 
 void Fan::merge()
 {
+   auto xOffset = 0.0f;
    for (auto& tile : sTiles)
    {
       for (auto& f : sFans)
       {
          auto fan = std::dynamic_pointer_cast<Fan>(f);
-         if (tile->mRect.intersects(fan->mRect))
+         if (tile->mRect.intersects(fan->mPixelRect))
          {
+            sf::Sprite sprite;
+            sprite.setTexture(sTexture);
+            sprite.setPosition(tile->mPosition.x, tile->mPosition.y);
+
             fan->mTiles.push_back(tile);
             fan->mDirection = tile->mDirection * fan->mSpeed;
+            fan->mSprites.push_back(sprite);
+            fan->mXOffsets.push_back(xOffset);
+            fan->updateSprite();
+
+            xOffset += 1.0f;
          }
       }
    }

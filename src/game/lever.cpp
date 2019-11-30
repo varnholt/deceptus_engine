@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "gamemechanism.h"
+#include "fan.h"
 #include "laser.h"
 #include "player.h"
 #include "texturepool.h"
@@ -235,8 +236,8 @@ void Lever::addSearchRect(TmxObject* rect)
 //-----------------------------------------------------------------------------
 void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& lasers,
-   const std::vector<std::shared_ptr<GameMechanism>>& fans,
    const std::vector<std::shared_ptr<GameMechanism>>& platforms,
+   const std::vector<std::shared_ptr<GameMechanism>>& fans,
    const std::vector<std::shared_ptr<GameMechanism>>& belts
 )
 {
@@ -291,7 +292,15 @@ void Lever::merge(
 
             for (auto f : fans)
             {
+               auto fan = std::dynamic_pointer_cast<Fan>(f);
 
+               if (fan->getPixelRect().intersects(searchRect))
+               {
+                  callbacks.push_back([fan](int32_t state) {
+                        fan->setEnabled(state == -1 ? true : false);
+                     }
+                  );
+               }
             }
 
             for (auto p : platforms)

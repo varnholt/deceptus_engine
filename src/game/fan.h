@@ -18,6 +18,13 @@ class Fan : public GameMechanism
 {
    public:
 
+      enum class TileDirection
+      {
+         Up    =  0,
+         Right =  8,
+         Left  = 16,
+         Down  = 24,
+      };
 
       struct FanTile
       {
@@ -25,26 +32,22 @@ class Fan : public GameMechanism
          sf::Vector2f mDirection;
          sf::Rect<int32_t> mRect;
          b2Body* mBody = nullptr;
+         TileDirection mDir;
 
          ~FanTile();
-      };
-
-      enum class DirectionTile
-      {
-         Up = 0,
-         Right = 8,
-         Left = 16,
       };
 
       Fan() = default;
 
       void draw(sf::RenderTarget& target) override;
       void update(const sf::Time& dt) override;
-
+      const sf::Rect<int32_t>& getPixelRect() const;
+      void setEnabled(bool enabled) override;
 
       static void load(
          TmxLayer* layer,
          TmxTileSet* tileSet,
+         const std::filesystem::path& basePath,
          const std::shared_ptr<b2World>& world
       );
 
@@ -59,6 +62,8 @@ class Fan : public GameMechanism
 
    private:
 
+      void updateSprite();
+
       static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
 
       static std::vector<std::shared_ptr<GameMechanism>> sFans;
@@ -71,7 +76,13 @@ class Fan : public GameMechanism
       uint32_t mWidth;
       uint32_t mHeight;
       sf::Vector2f mDirection;
-      sf::Rect<int32_t> mRect;
+      sf::Rect<int32_t> mPixelRect;
       float mSpeed = 1.0f;
+      float mLeverLag = 1.0f;
+
+      std::vector<sf::Sprite> mSprites;
+      std::vector<float> mXOffsets;
+
+      static sf::Texture sTexture;
 };
 
