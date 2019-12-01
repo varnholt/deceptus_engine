@@ -106,6 +106,12 @@ bool PathInterpolation::checkKeyReached(const b2Vec2& currentPos)
 }
 
 
+const std::vector<PathInterpolation::Key>& PathInterpolation::getTrack() const
+{
+   return mTrack;
+}
+
+
 
 bool PathInterpolation::update(const b2Vec2& currentPos)
 {

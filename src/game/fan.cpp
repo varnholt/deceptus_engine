@@ -137,6 +137,10 @@ void Fan::update(const sf::Time& dt)
       {
          mLeverLag += dt.asSeconds();
       }
+      else
+      {
+         mLeverLag = 1.0f;
+      }
    }
 
    for (auto& xOffset : mXOffsets)

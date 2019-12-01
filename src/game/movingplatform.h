@@ -38,6 +38,10 @@ public:
    void addSprite(const sf::Sprite&);
    void setOffset(float x, float y);
    b2Body* getBody();
+   void setEnabled(bool enabled) override;
+
+   const PathInterpolation& getInterpolation() const;
+   const std::vector<sf::Vector2f>& getPixelPath() const;
 
 
 private:
@@ -49,9 +53,7 @@ private:
       double mu
    );
 
-
-private:
-   sf::Texture mTexture;
+   static sf::Texture sTexture;
    std::vector<sf::Sprite> mSprites;
    b2Body* mBody = nullptr;
    sf::Vector2i mTilePosition;
@@ -60,6 +62,8 @@ private:
    int mWidth = 0;
    int mHeight = 1;
    float mTime = 0.0f;
+   float mLeverLag = 1.0f;
    PathInterpolation mInterpolation;
+   std::vector<sf::Vector2f> mPixelPath;
 };
 

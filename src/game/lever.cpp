@@ -5,6 +5,7 @@
 #include "gamemechanism.h"
 #include "fan.h"
 #include "laser.h"
+#include "movingplatform.h"
 #include "player.h"
 #include "texturepool.h"
 
@@ -305,6 +306,22 @@ void Lever::merge(
 
             for (auto p : platforms)
             {
+               auto platform = std::dynamic_pointer_cast<MovingPlatform>(p);
+
+               const auto& pixelPath = platform->getPixelPath();
+
+               for (const auto& pixel : pixelPath)
+               {
+                  if (searchRect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
+                  {
+                     callbacks.push_back([platform](int32_t state) {
+                           platform->setEnabled(state == -1 ? true : false);
+                        }
+                     );
+
+                     break;
+                  }
+               }
 
             }
 

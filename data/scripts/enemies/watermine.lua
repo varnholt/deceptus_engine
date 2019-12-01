@@ -117,7 +117,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setStartPosition(x, y)
-   print(string.format("object position: %f, %f", x, y))
+   -- print(string.format("object position: %f, %f", x, y))
    mStartPosition = v2d.Vector2D(x, y)
 end
 
