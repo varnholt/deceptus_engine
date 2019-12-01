@@ -55,7 +55,7 @@ int32_t Checkpoint::add(TmxObject* tmxObject)
       }
    }
 
-   std::cout << "registering checkpoint: " << cp.mIndex << std::endl;
+   // std::cout << "registering checkpoint: " << cp.mIndex << std::endl;
 
    sCheckpoints.push_back(cp);
    return cp.mIndex;

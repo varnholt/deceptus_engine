@@ -46,7 +46,7 @@ function writeProperty(key, value)
 
    if (key == "alignment") then
       if (value == "left") then
-         print("setting alignment to left")
+         -- print("setting alignment to left")
          mX = -1.0
          mSpriteY = 0
       end
