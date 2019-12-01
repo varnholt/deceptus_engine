@@ -1,13 +1,18 @@
 #include "conveyorbelt.h"
 #include "player.h"
+#include "texturepool.h"
+
+#include "tmxparser/tmxobject.h"
+#include "tmxparser/tmxproperty.h"
+#include "tmxparser/tmxproperties.h"
+
+#include <iostream>
+
 
 
 std::vector<b2Body*> ConveyorBelt::sBodiesOnBelt;
+sf::Texture ConveyorBelt::sTexture;
 
-
-// are belts always on?
-// are there going to be switches to turn them on or off?
-// in case they're always on, we can just animate them in the tmx
 
 void ConveyorBelt::setVelocity(float velocity)
 {
@@ -15,29 +20,48 @@ void ConveyorBelt::setVelocity(float velocity)
 }
 
 
-void ConveyorBelt::draw(sf::RenderTarget& target)
+void ConveyorBelt::draw(sf::RenderTarget& /*target*/)
 {
-
 }
 
 
-void ConveyorBelt::update(const sf::Time& dt)
+void ConveyorBelt::update(const sf::Time& /*dt*/)
 {
-
 }
 
 
 ConveyorBelt::ConveyorBelt(
    GameNode* parent,
    const std::shared_ptr<b2World>& world,
-   float x,
-   float y,
-   float width,
-   float height
+   TmxObject* tmxObject,
+   const std::filesystem::path& basePath
 )
  : FixtureNode(parent)
 {
    setType(ObjectTypeConveyorBelt);
+
+   if (sTexture.getSize().x == 0)
+   {
+      sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "cbelt.png");
+   }
+
+   float x      = tmxObject->mX;
+   float y      = tmxObject->mY;
+   float width  = tmxObject->mWidth;
+   float height = tmxObject->mHeight;
+
+   auto velocity = 0.0f;
+
+   if (tmxObject->mProperties)
+   {
+      auto it = tmxObject->mProperties->mMap.find("velocity");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         velocity = it->second->mValueFloat;
+      }
+   }
+
+   setVelocity(velocity);
 
    mPositionB2d = b2Vec2(x * MPP, y * MPP);
    mPositionSf.x = x;
@@ -67,8 +91,15 @@ ConveyorBelt::ConveyorBelt(
 
    mPixelRect.left   = static_cast<int32_t>(x);
    mPixelRect.top    = static_cast<int32_t>(y);
-   mPixelRect.height = static_cast<int32_t>(width * 0.5f);
-   mPixelRect.width  = static_cast<int32_t>(height * 0.5f);
+   mPixelRect.height = static_cast<int32_t>(height);
+   mPixelRect.width  = static_cast<int32_t>(width);
+
+   // auto tileCount = static_cast<int32_t>((width / PIXELS_PER_TILE));
+   // std::cout << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y << std::endl;
+   //
+   // 0:  left
+   // 8:  middle
+   // 16: right
 }
 
 

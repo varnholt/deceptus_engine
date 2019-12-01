@@ -591,27 +591,21 @@ void Level::loadTmx()
                auto belt = std::make_shared<ConveyorBelt>(
                   nullptr,
                   mWorld,
+                  tmxObject,
+                  path
+               );
+
+               belt->setZ(objectGroup->mZ);
+
+               mConveyorBelts.push_back(belt);
+
+               addDebugRect(
+                  belt->getBody(),
                   tmxObject->mX,
                   tmxObject->mY,
                   tmxObject->mWidth,
                   tmxObject->mHeight
                );
-
-               auto velocity = 0.0f;
-
-               if (tmxObject->mProperties)
-               {
-                  auto it = tmxObject->mProperties->mMap.find("velocity");
-                  if (it != tmxObject->mProperties->mMap.end())
-                  {
-                     velocity = it->second->mValueFloat;
-                  }
-               }
-
-               belt->setVelocity(velocity);
-               belt->setZ(objectGroup->mZ);
-               mConveyorBelts.push_back(belt);
-               addDebugRect(belt->getBody(), tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
             }
             else if (objectGroup->mName == "platform_paths")
             {

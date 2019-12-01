@@ -1,11 +1,14 @@
 #pragma once
 
+#include <filesystem>
+
 #include "constants.h"
 #include "gamemechanism.h"
 #include "fixturenode.h"
 #include "Box2D/Box2D.h"
 #include "SFML/Graphics.hpp"
 
+struct TmxObject;
 
 class ConveyorBelt : public FixtureNode, public GameMechanism
 {
@@ -15,10 +18,8 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       ConveyorBelt(
          GameNode* parent,
          const std::shared_ptr<b2World>& world,
-         float x,
-         float y,
-         float width,
-         float height
+         TmxObject* tmxObject,
+         const std::filesystem::path& basePath
       );
 
       b2Body *getBody() const;
@@ -44,7 +45,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       b2PolygonShape mShapeBounds;
       sf::IntRect mPixelRect;
 
-      sf::Texture mTexture;
+      static sf::Texture sTexture;
       sf::Sprite mSprite;
 
       // bool mActive = true;

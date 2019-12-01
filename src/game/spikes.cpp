@@ -164,6 +164,12 @@ void Spikes::updateTrap()
 }
 
 
+void Spikes::updateToggled()
+{
+
+}
+
+
 void Spikes::update(const sf::Time& dt)
 {
    mElapsedMs += dt.asMilliseconds();
@@ -182,6 +188,7 @@ void Spikes::update(const sf::Time& dt)
       }
       case Mode::Toggled:
       {
+         updateToggled();
          break;
       }
       case Mode::Invalid:

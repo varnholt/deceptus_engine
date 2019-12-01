@@ -49,6 +49,7 @@ private:
 
    void updateInterval();
    void updateTrap();
+   void updateToggled();
 
    sf::Vector2u mTileSize;
 
