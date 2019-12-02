@@ -21,6 +21,7 @@ sf::Texture ConveyorBelt::sTexture;
 void ConveyorBelt::setVelocity(float velocity)
 {
    mVelocity = velocity;
+   mPointsRight = (mVelocity > 0.0f);
 }
 
 
@@ -33,8 +34,45 @@ void ConveyorBelt::draw(sf::RenderTarget& target)
 }
 
 
-void ConveyorBelt::update(const sf::Time& /*dt*/)
+void ConveyorBelt::update(const sf::Time& dt)
 {
+   mElapsed += dt.asSeconds();
+   updateSprite();
+}
+
+
+void ConveyorBelt::updateSprite()
+{
+   const auto val = static_cast<int32_t>(mElapsed * 40.0f * fabs(mVelocity)) % 8;
+   const auto xOffset = mPointsRight ? 7 - val :  val;
+   auto yOffset = 0u;
+
+   for (auto i = 0u; i < mSprites.size(); i++)
+   {
+       if (i == 0u)
+       {
+           // left tile (row 0)
+           yOffset = 0;
+       }
+       else if (i == mSprites.size() - 1)
+       {
+           // right tile (row 2)
+           yOffset = PIXELS_PER_TILE * 2;
+       }
+       else
+       {
+           // middle tile (row 1)
+           yOffset = PIXELS_PER_TILE;
+       }
+
+       mSprites[i].setTextureRect({
+            xOffset * PIXELS_PER_TILE,
+            static_cast<int32_t>(yOffset),
+            PIXELS_PER_TILE,
+            PIXELS_PER_TILE
+         }
+      );
+   }
 }
 
 
@@ -58,7 +96,7 @@ ConveyorBelt::ConveyorBelt(
    float width  = tmxObject->mWidth;
    float height = tmxObject->mHeight;
 
-   auto velocity = 0.0f;
+   auto velocity = mVelocity;
 
    if (tmxObject->mProperties)
    {
@@ -106,31 +144,15 @@ ConveyorBelt::ConveyorBelt(
    auto tileCount = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
    // std::cout << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y << std::endl;
 
-   auto yOffset = 0u;
    for (auto i = 0u; i < tileCount; i++)
    {
-       if (i == 0u)
-       {
-           // left tile (row 0)
-           yOffset = 0;
-       }
-       else if (i == tileCount - 1)
-       {
-           // right tile (row 2)
-           yOffset = PIXELS_PER_TILE * 2;
-       }
-       else
-       {
-           // middle tile (row 1)
-           yOffset = PIXELS_PER_TILE;
-       }
-
-       sf::Sprite sprite;
-       sprite.setTexture(sTexture);
-       sprite.setTextureRect({0, static_cast<int32_t>(yOffset), PIXELS_PER_TILE, PIXELS_PER_TILE});
-       sprite.setPosition(x + i * PIXELS_PER_TILE, y + Y_OFFSET);
-       mSprites.push_back(sprite);
+      sf::Sprite sprite;
+      sprite.setTexture(sTexture);
+      sprite.setPosition(x + i * PIXELS_PER_TILE, y + Y_OFFSET);
+      mSprites.push_back(sprite);
    }
+
+   updateSprite();
 }
 
 
@@ -194,6 +216,7 @@ void ConveyorBelt::processFixtureNode(
       }
    }
 }
+
 
 sf::IntRect ConveyorBelt::getPixelRect() const
 {

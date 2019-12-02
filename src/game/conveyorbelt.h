@@ -37,6 +37,8 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       static void processFixtureNode(FixtureNode* fixtureNode, b2Body* collidingBody);
 
 
+      void updateSprite();
+
    private:
 
       b2Body* mBody = nullptr;
@@ -44,6 +46,8 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       sf::Vector2f mPositionSf;
       b2PolygonShape mShapeBounds;
       sf::IntRect mPixelRect;
+      float mElapsed = 0.0f;
+      bool mPointsRight = true;
 
       static sf::Texture sTexture;
       std::vector<sf::Sprite> mSprites;
