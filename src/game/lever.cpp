@@ -7,10 +7,13 @@
 #include "laser.h"
 #include "movingplatform.h"
 #include "player.h"
+#include "spikes.h"
 #include "texturepool.h"
 
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxobject.h"
+#include "tmxparser/tmxproperties.h"
+#include "tmxparser/tmxproperty.h"
 #include "tmxparser/tmxtileset.h"
 
 #include <iostream>
@@ -160,6 +163,32 @@ void Lever::draw(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
+void Lever::setEnabled(bool enabled)
+{
+   if (enabled)
+   {
+      mTargetState = State::Right;
+      mPreviousState = State::Left;
+   }
+   else
+   {
+      mTargetState = State::Left;
+      mPreviousState = State::Right;
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Lever::updateReceivers()
+{
+   for (auto& cb : mCallbacks)
+   {
+      cb(static_cast<int32_t>(mTargetState));
+   }
+}
+
+
+//-----------------------------------------------------------------------------
 void Lever::toggle()
 {
    if (!mPlayerAtLever)
@@ -213,10 +242,7 @@ void Lever::toggle()
       mPreviousState = mTargetState;
    }
 
-   for (auto& cb : mCallbacks)
-   {
-      cb(static_cast<int32_t>(mTargetState));
-   }
+   updateReceivers();
 }
 
 
@@ -239,7 +265,8 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& lasers,
    const std::vector<std::shared_ptr<GameMechanism>>& platforms,
    const std::vector<std::shared_ptr<GameMechanism>>& fans,
-   const std::vector<std::shared_ptr<GameMechanism>>& belts
+   const std::vector<std::shared_ptr<GameMechanism>>& belts,
+   const std::vector<std::shared_ptr<GameMechanism>>& spikes
 )
 {
    for (auto rect : mRectangles)
@@ -249,6 +276,16 @@ void Lever::merge(
       searchRect.top = static_cast<int32_t>(rect->mY);
       searchRect.width = static_cast<int32_t>(rect->mWidth);
       searchRect.height = static_cast<int32_t>(rect->mHeight);
+
+      bool enabled = true;
+      if (rect->mProperties)
+      {
+         auto enabledIt = rect->mProperties->mMap.find("enabled");
+         if (enabledIt != rect->mProperties->mMap.end())
+         {
+            enabled = enabledIt->second->mValueBool;
+         }
+      }
 
       // std::cout
       //    << "x: " << searchRect.left << " "
@@ -272,7 +309,7 @@ void Lever::merge(
                if (laser->getPixelRect().intersects(searchRect))
                {
                   callbacks.push_back([laser](int32_t state) {
-                        laser->setEnabled(state == -1 ? true : false);
+                        laser->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -285,7 +322,7 @@ void Lever::merge(
                if (belt->getPixelRect().intersects(searchRect))
                {
                   callbacks.push_back([belt](int32_t state) {
-                        belt->setEnabled(state == -1 ? true : false);
+                        belt->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -298,7 +335,7 @@ void Lever::merge(
                if (fan->getPixelRect().intersects(searchRect))
                {
                   callbacks.push_back([fan](int32_t state) {
-                        fan->setEnabled(state == -1 ? true : false);
+                        fan->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -315,17 +352,31 @@ void Lever::merge(
                   if (searchRect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
                   {
                      callbacks.push_back([platform](int32_t state) {
-                           platform->setEnabled(state == -1 ? true : false);
+                           platform->setEnabled(state == -1 ? false : true);
                         }
                      );
 
                      break;
                   }
                }
-
             }
 
+            for (auto s : spikes)
+            {
+               auto spikes = std::dynamic_pointer_cast<Spikes>(s);
+
+               if (spikes->getPixelRect().intersects(searchRect))
+               {
+                  callbacks.push_back([spikes](int32_t state) {
+                        spikes->setEnabled(state == -1 ? false : true);
+                     }
+                  );
+               }
+            }
+
+            lever->setEnabled(enabled);
             lever->setCallbacks(callbacks);
+            lever->updateReceivers();
 
             break;
          }

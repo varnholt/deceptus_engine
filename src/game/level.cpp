@@ -469,6 +469,14 @@ void Level::loadTmx()
          {
             mPortals = Portal::load(layer, tileset, path, mWorld);
          }
+         else if (layer->mName == "toggle_spikes")
+         {
+            auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
+            for (const auto &s : spikes)
+            {
+               mSpikes.push_back(s);
+            }
+         }
          else if (layer->mName == "trap_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
@@ -668,12 +676,8 @@ void Level::loadTmx()
    Laser::merge();
    Fan::merge();
    mFans = Fan::getFans();
-   Lever::merge(mLasers, mPlatforms, mFans, mConveyorBelts);
+   Lever::merge(mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
 
-//   std::vector<std::shared_ptr<GameMechanism>> lasers,
-//   std::vector<std::shared_ptr<GameMechanism>> fans,
-//   std::vector<std::shared_ptr<GameMechanism>> platforms,
-//   std::vector<std::shared_ptr<GameMechanism>> belts
    mMap->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),
       path / std::filesystem::path("physics_path_solid.png")

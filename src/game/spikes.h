@@ -44,6 +44,11 @@ public:
       Mode mode
    );
 
+   const sf::IntRect& getPixelRect() const;
+
+   Mode getMode() const;
+   void setMode(Mode mode);
+
 
 private:
 
@@ -63,7 +68,7 @@ private:
 
    sf::Vector2f mTilePosition;
    sf::Vector2f mPixelPosition;
-   sf::IntRect mRect;
+   sf::IntRect mPixelRect;
 
    bool mTriggered = false;
    bool mDeadly = false;
