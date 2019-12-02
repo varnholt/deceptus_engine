@@ -46,7 +46,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       sf::IntRect mPixelRect;
 
       static sf::Texture sTexture;
-      sf::Sprite mSprite;
+      std::vector<sf::Sprite> mSprites;
 
       // bool mActive = true;
       float mVelocity = -0.2f;
