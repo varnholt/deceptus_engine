@@ -8,6 +8,10 @@
 
 #include <iostream>
 
+namespace
+{
+static const auto Y_OFFSET = -10;
+}
 
 
 std::vector<b2Body*> ConveyorBelt::sBodiesOnBelt;
@@ -20,8 +24,12 @@ void ConveyorBelt::setVelocity(float velocity)
 }
 
 
-void ConveyorBelt::draw(sf::RenderTarget& /*target*/)
+void ConveyorBelt::draw(sf::RenderTarget& target)
 {
+    for (auto& sprite : mSprites)
+    {
+       target.draw(sprite);
+    }
 }
 
 
@@ -94,12 +102,35 @@ ConveyorBelt::ConveyorBelt(
    mPixelRect.height = static_cast<int32_t>(height);
    mPixelRect.width  = static_cast<int32_t>(width);
 
-   // auto tileCount = static_cast<int32_t>((width / PIXELS_PER_TILE));
+   static auto ROUND_EPSILON = 0.5f;
+   auto tileCount = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
    // std::cout << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y << std::endl;
-   //
-   // 0:  left
-   // 8:  middle
-   // 16: right
+
+   auto yOffset = 0u;
+   for (auto i = 0u; i < tileCount; i++)
+   {
+       if (i == 0u)
+       {
+           // left tile (row 0)
+           yOffset = 0;
+       }
+       else if (i == tileCount - 1)
+       {
+           // right tile (row 2)
+           yOffset = PIXELS_PER_TILE * 2;
+       }
+       else
+       {
+           // middle tile (row 1)
+           yOffset = PIXELS_PER_TILE;
+       }
+
+       sf::Sprite sprite;
+       sprite.setTexture(sTexture);
+       sprite.setTextureRect({0, static_cast<int32_t>(yOffset), PIXELS_PER_TILE, PIXELS_PER_TILE});
+       sprite.setPosition(x + i * PIXELS_PER_TILE, y + Y_OFFSET);
+       mSprites.push_back(sprite);
+   }
 }
 
 

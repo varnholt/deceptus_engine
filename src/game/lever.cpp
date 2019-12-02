@@ -42,7 +42,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
-   auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
+   // auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
    auto tiles    = layer->mData;
    auto width    = layer->mWidth;
    auto height   = layer->mHeight;
