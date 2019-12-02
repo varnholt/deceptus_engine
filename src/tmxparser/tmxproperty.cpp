@@ -14,21 +14,25 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element)
    TmxElement::deserialize(element);
 
    auto attrVal = element->Attribute("type");
-   mType = attrVal ? attrVal : "string";
+   mValueType = attrVal ? attrVal : "string";
 
-   if (mType == "int")
+   if (mValueType == "int")
    {
       mValueInt = element->IntAttribute("value");
    }
-   if (mType == "float")
+   if (mValueType == "bool")
+   {
+      mValueBool = element->BoolAttribute("value");
+   }
+   if (mValueType == "float")
    {
       mValueFloat = element->FloatAttribute("value");
    }
-   else if (mType == "string" )
+   else if (mValueType == "string" )
    {
       mValueStr = element->Attribute("value");
    }
-   else if (mType == "color")
+   else if (mValueType == "color")
    {
       mValueStr = element->Attribute("value");
    }

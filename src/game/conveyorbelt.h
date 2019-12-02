@@ -28,6 +28,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
 
       void draw(sf::RenderTarget& target) override;
       void update(const sf::Time& dt) override;
+      void setEnabled(bool enabled) override;
 
       sf::IntRect getPixelRect() const;
 
@@ -48,6 +49,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       sf::IntRect mPixelRect;
       float mElapsed = 0.0f;
       bool mPointsRight = true;
+      float mLeverLag = 1.0f;
 
       static sf::Texture sTexture;
       std::vector<sf::Sprite> mSprites;

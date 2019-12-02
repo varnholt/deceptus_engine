@@ -73,7 +73,7 @@ void Spikes::updateInterval()
       if (mTriggered)
       {
          // extract
-         mTu-=2;
+         mTu -= 2;
          if (mTu < SPIKES_TILE_INDEX_UP)
          {
             mTu = SPIKES_TILE_INDEX_UP;
@@ -110,7 +110,7 @@ void Spikes::updateTrap()
    if (mTu == TRAP_START_TILE)
    {
       auto playerRect = Player::getCurrent()->getPlayerPixelRect();
-      if (playerRect.intersects(mRect))
+      if (playerRect.intersects(mPixelRect))
       {
          // start counting from first intersection
          if (!mTriggered)
@@ -166,7 +166,45 @@ void Spikes::updateTrap()
 
 void Spikes::updateToggled()
 {
+   if (isEnabled())
+   {
+      // initially mTu is in some wonky state due to that weird sprite set
+      if (mTu > SPIKES_TILE_INDEX_UP)
+      {
+         mTu--;
+      }
+      else if (mTu < SPIKES_TILE_INDEX_UP)
+      {
+         mTu++;
+      }
+   }
+   else
+   {
+      if (mTu < SPIKES_PER_ROW)
+      {
+         mTu++;
+      }
+   }
 
+   mDeadly = (mTu < 10);
+}
+
+
+Spikes::Mode Spikes::getMode() const
+{
+   return mMode;
+}
+
+
+void Spikes::setMode(Mode mode)
+{
+   mMode = mode;
+}
+
+
+const sf::IntRect& Spikes::getPixelRect() const
+{
+   return mPixelRect;
 }
 
 
@@ -203,7 +241,7 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       auto playerRect = Player::getCurrent()->getPlayerPixelRect();
-      if (playerRect.intersects(mRect))
+      if (playerRect.intersects(mPixelRect))
       {
          Player::getCurrent()->damage(100);
       }
@@ -256,7 +294,6 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             if (mode == Mode::Trap)
             {
                spikes->mTu = TRAP_START_TILE;
-               // spikes->mTu = SPIKES_PER_ROW - 1;
             }
 
             if (layer->mProperties != nullptr)
@@ -264,7 +301,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
                spikes->setZ(layer->mProperties->mMap["z"]->mValueInt);
             }
 
-            spikes->mRect = {
+            spikes->mPixelRect = {
                static_cast<int32_t>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                static_cast<int32_t>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),

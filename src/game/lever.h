@@ -36,6 +36,7 @@ public:
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target) override;
+   void setEnabled(bool enabled) override;
 
    void toggle();
    void setCallbacks(const std::vector<Callback>& callbacks);
@@ -45,7 +46,8 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& lasers,
       const std::vector<std::shared_ptr<GameMechanism>>& platforms,
       const std::vector<std::shared_ptr<GameMechanism>>& fans,
-      const std::vector<std::shared_ptr<GameMechanism>>& belts
+      const std::vector<std::shared_ptr<GameMechanism>>& belts,
+      const std::vector<std::shared_ptr<GameMechanism>>& spikes
    );
 
    static std::vector<std::shared_ptr<GameMechanism>> load(
@@ -59,7 +61,9 @@ public:
    void setPlayerAtLever(bool playerAtLever);
 
 
-private:
+   void updateReceivers();
+
+   private:
 
    Type mType = Type::TwoState;
 

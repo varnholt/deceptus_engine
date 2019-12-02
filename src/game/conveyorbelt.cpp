@@ -36,8 +36,38 @@ void ConveyorBelt::draw(sf::RenderTarget& target)
 
 void ConveyorBelt::update(const sf::Time& dt)
 {
-   mElapsed += dt.asSeconds();
+   if (!isEnabled())
+   {
+      if (mLeverLag <= 0.0f)
+      {
+         return;
+      }
+      else
+      {
+         mLeverLag -= dt.asSeconds();
+      }
+   }
+   else
+   {
+      if (mLeverLag < 1.0f)
+      {
+         mLeverLag += dt.asSeconds();
+      }
+      else
+      {
+         mLeverLag = 1.0f;
+      }
+   }
+
+   mElapsed += mLeverLag * dt.asSeconds();
    updateSprite();
+}
+
+
+void ConveyorBelt::setEnabled(bool enabled)
+{
+   GameMechanism::setEnabled(enabled);
+   mLeverLag = enabled ? 0.0f : 1.0f;
 }
 
 
@@ -100,10 +130,10 @@ ConveyorBelt::ConveyorBelt(
 
    if (tmxObject->mProperties)
    {
-      auto it = tmxObject->mProperties->mMap.find("velocity");
-      if (it != tmxObject->mProperties->mMap.end())
+      auto velocityIt = tmxObject->mProperties->mMap.find("velocity");
+      if (velocityIt != tmxObject->mProperties->mMap.end())
       {
-         velocity = it->second->mValueFloat;
+         velocity = velocityIt->second->mValueFloat;
       }
    }
 
