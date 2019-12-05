@@ -493,6 +493,7 @@ DISTFILES += \
     data/menus/options.psd \
     data/menus/pause.psd \
     data/menus/video.psd \
+    data/scripts/enemies/bat.lua \
     data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/dumb.lua \
     data/config/game.json \
