@@ -3,6 +3,20 @@ require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
 
 
+-- 221, 77
+-- 210, 78
+-- 223, 77
+-- player: 206, 82
+
+------------------------------------------------------------------------------------------------------------------------
+-- interpolation keys
+Key = {x = 0, y = 0, time = 0}
+function Key:create(o)
+  o.parent = self
+  return o
+end
+
+
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    staticBody = true,
@@ -37,60 +51,85 @@ function initialize()
 end
 
 
--- https://repl.it/repls/TraumaticPartialOctagon
-print("start")
-
-Key = {x = 0, y = 0, time = 0}
-
-function Key:create(o)
-  o.parent = self
-  return o
-end
-
-function findIndex(track, time)
-  for k, v in pairs(track) do 
-    if (v.time > time) then
-       return k - 1
-    end
-  end
-end
-
+------------------------------------------------------------------------------------------------------------------------
 function cosineInterpolate(y1, y2, mu)
-   mu2 = (1 - math.cos(mu * math.pi))/2
-   return (y1 * (1 - mu2) + y2 * mu2)
-end 
-
-function getValue(track, time)
-  value = 0.0
-  index = findIndex(track, time)
-
-  y1 = track[index]
-  y2 = track[index+1]
-
-  mu = 0.0
-
-  value = cosineInterpolate(y1.x, y2.x, mu)
-
-  return value
+   mu2 = (1 - math.cos(mu * math.pi)) / 2
+   val = (y1 * (1 - mu2) + y2 * mu2)
+   -- print(string.format("y1: %f, y2: %f, mu: %f -> %f", y1, y2, mu, val))
+   return val
 end
 
 
-k1 = Key:create{x =  0, y =  0, time = 0.0}
-k2 = Key:create{x =  5, y =  5, time = 0.1}
-k3 = Key:create{x = -5, y = -5, time = 0.6}
-k4 = Key:create{x =  0, y =  0, time = 1.0}
+------------------------------------------------------------------------------------------------------------------------
+function tableLength(T)
+   local count = 0
+   for _ in pairs(T) do count = count + 1 end
+   return count
+end
 
-track = {k1, k2, k3, k4}
+
+------------------------------------------------------------------------------------------------------------------------
+function findIndex(track, time)
+   size = 0
+   for k, v in pairs(track) do
+      if (v.time > time) then
+         return k - 1
+      end
+         size = size +1
+   end
+   -- reached end of table
+   return size
+end
 
 
--- indices start at 1
+------------------------------------------------------------------------------------------------------------------------
+function getValue(track, time)
+   value = 0.0
+   y1i = findIndex(track, time)
+   size = tableLength(track)
 
--- for k,v in pairs(track) do 
---   print(v.x)
--- end
+   -- clamp
+   if (y1i < 1) then
+      y1i = 1
+   elseif (y1i > size) then
+      y1i = size
+      y2i = size
+   else
+      y2i = y1i + 1
+   end
 
-print(getValue(track, 0.7))
-print("done")
+   y1 = track[y1i]
+   y2 = track[y2i]
+
+   range = y2.time - y1.time
+   mu = (time - y1.time) / range
+
+   x = cosineInterpolate(y1.x, y2.x, mu)
+   y = cosineInterpolate(y1.x, y2.x, mu)
+   p = v2d.Vector2D(x, y)
+
+   return p
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function computePath()
+   print("start")
+
+   k1 = Key:create{x =  0, y =  0, time = 0.0}
+   k2 = Key:create{x =  5, y =  5, time = 0.1}
+   k3 = Key:create{x = -5, y = -5, time = 0.6}
+   k4 = Key:create{x =  0, y =  0, time = 1.0}
+
+   track = {k1, k2, k3, k4}
+
+   for i = 0, 1, 0.01 do
+      p = getValue(track, i)
+      print(string.format("i: %f, x: %f, y: %f", i, p:getX(), p:getY()))
+   end
+
+   print("done")
+end
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -102,6 +141,7 @@ function update(dt)
 
    if (not mActivated) then
       spriteIndex = math.floor(math.fmod(mElapsed * 2.0, 3))
+   end
 
    -- get sprite direction
    mTransformY = 0.5 * math.sin(mElapsed) * mMoveRangeY
