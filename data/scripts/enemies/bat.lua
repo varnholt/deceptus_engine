@@ -30,6 +30,7 @@ mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mElapsed = math.random(0, 3)
 mAttackTime = 0
+mIdleTime = 0
 mActivated = false
 mMoveRangeY = 48
 mSpriteOffsetX = 0
@@ -206,15 +207,17 @@ function update(dt)
    -- get sprite index
    mElapsed = mElapsed + dt
 
+   idle = mElapsed < mIdleTime
+
    -- make sure block is on same x as player
-   if (not mAttack) then
+   if (not mAttack or idle) then
       xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
       if (math.abs(xDiff) < 3) then
 
          -- make sure stone is not too far away (10 tiles) and above player
          yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
 
-         if (yDiff < 0 and yDiff > -10) then
+         if (yDiff < 0 and yDiff > -10 and not idle) then
             attack()
          end
       end
@@ -228,6 +231,11 @@ function update(dt)
       -- p = getValueCos(mPath, time)
       -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
       setTransform(p:getX(), p:getY(), 0.0)
+
+      if (time > 1.0) then
+         mAttack = false
+         mIdleTime = mElapsed + 3
+      end
    end
 
    spriteIndex = math.floor(math.fmod(mElapsed * 4.0, 3))
