@@ -897,7 +897,7 @@ void Level::drawParallaxMaps(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Level::drawLayers(sf::RenderTarget& target, int from, int to)
+void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
 {
    target.setView(*mLevelView);
 
@@ -927,16 +927,19 @@ void Level::drawLayers(sf::RenderTarget& target, int from, int to)
          }
       }
 
-      if (z == 11)
+      // enemies
+      for (auto& enemy : mEnemies)
       {
-         // ambient occlusion
-         mAo.draw(target);
-
-         // enemies
-         for (auto& enemy : mEnemies)
+         if (enemy->getZ() == z)
          {
             enemy->draw(target);
          }
+      }
+
+      if (z == ZDepthPlayer)
+      {
+         // ambient occlusion
+         mAo.draw(target);
 
          // player
          Player::getCurrent()->draw(target);
@@ -1123,7 +1126,7 @@ void Level::draw(
 
    updateViews();
    drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
-   drawLayers(*mLevelBackgroundRenderTexture.get(), 0, 15);
+   drawLayers(*mLevelBackgroundRenderTexture.get(), ZDepthBackgroundMin, ZDepthBackgroundMax);
    mLevelBackgroundRenderTexture->display();
 
    if (screenshot)
@@ -1173,7 +1176,7 @@ void Level::draw(
    mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
 
    // draw the level layers into the level texture
-   drawLayers(*mLevelRenderTexture.get(), 16);
+   drawLayers(*mLevelRenderTexture.get(), ZDepthForegroundMin, ZDepthForegroundMax);
 
    // draw all the other things
    drawRaycastLight(*mLevelRenderTexture.get());
