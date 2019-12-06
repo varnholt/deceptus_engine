@@ -129,6 +129,27 @@ extern "C" int32_t setDamage(lua_State* state)
 }
 
 
+extern "C" int32_t setZ(lua_State* state)
+{
+   auto argc = lua_gettop(state);
+
+   if (argc == 1)
+   {
+      auto z = static_cast<int32_t>(lua_tointeger(state, 1));
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setZ(z);
+   }
+
+   return 0;
+}
+
+
 extern "C" int32_t makeDynamic(lua_State* state)
 {
    auto node = OBJINSTANCE;
@@ -776,8 +797,10 @@ void LuaNode::setupLua()
    lua_register(mState, "makeDynamic", ::makeDynamic);
    lua_register(mState, "makeStatic", ::makeStatic);
    lua_register(mState, "setActive", ::setActive);
+   lua_register(mState, "setDamage", ::setDamage);
    lua_register(mState, "setGravityScale", ::setGravityScale);
    lua_register(mState, "setTransform", ::setTransform);
+   lua_register(mState, "setZ", ::setZ);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
    lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
@@ -1000,7 +1023,7 @@ void LuaNode::setActive(bool active)
 }
 
 
-void LuaNode::setDamage(int32 damage)
+void LuaNode::setDamage(int32_t damage)
 {
    for (b2Fixture* fixture = mBody->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
@@ -1241,6 +1264,16 @@ void LuaNode::stopScript()
 
       printf("LuaInterface::StopScript: script stopped\n");
    }
+}
+
+int32_t LuaNode::getZ() const
+{
+   return mZ;
+}
+
+void LuaNode::setZ(const int32_t& z)
+{
+   mZ = z;
 }
 
 

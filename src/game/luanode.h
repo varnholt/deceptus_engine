@@ -26,6 +26,7 @@ struct LuaNode : public GameNode
 
    void draw(sf::RenderTarget& window);
    void initialize();
+   void deserializeEnemyDescription();
 
    void setupLua();
    void setupTexture();
@@ -42,7 +43,7 @@ struct LuaNode : public GameNode
    void makeDynamic();
    void makeStatic();
    void setActive(bool active);
-   void setDamage(int32 damage);
+   void setDamage(int32_t damage);
    void setGravityScale(float scale);
    void setTransform(const b2Vec2& position, float32 angle = 0.0);
    void updatePosition();
@@ -50,6 +51,8 @@ struct LuaNode : public GameNode
    void updateVelocity();
    const EnemyDescription& getEnemyDescription() const;
    void setEnemyDescription(const EnemyDescription& enemyDescription);
+   int32_t getZ() const;
+   void setZ(const int32_t& z);
 
    void luaDie();
    void luaInitialize();
@@ -89,6 +92,7 @@ struct LuaNode : public GameNode
    int32_t mSpriteWidth = 0;
    int32_t mSpriteHeight = 0;
    sf::Vector2f mPosition;
+   int32_t mZ = ZDepthPlayer;
    std::vector<sf::Vector2f> mPatrolPath;
 
    // physics
@@ -101,8 +105,5 @@ struct LuaNode : public GameNode
 
    // static
    static std::atomic<int32_t> sNextId;
-
-   public:
-   void deserializeEnemyDescription();
 };
 

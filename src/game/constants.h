@@ -38,6 +38,16 @@
 #endif
 
 
+enum ZDepth
+{
+   ZDepthBackgroundMin = 0,
+   ZDepthBackgroundMax = 15,
+   ZDepthForegroundMin = 16,
+   ZDepthForegroundMax = 50,
+   ZDepthPlayer = 11
+};
+
+
 enum Alignment {
   PointsNowhere = 0x00,
   PointsDown    = 0x01,

@@ -95,7 +95,7 @@ public:
    void draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot);
    void drawRaycastLight(sf::RenderTarget& target);
    void drawParallaxMaps(sf::RenderTarget& target);
-   void drawLayers(sf::RenderTarget& target, int from = 0, int to = 50);
+   void drawLayers(sf::RenderTarget& target, int32_t from, int32_t to);
    void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawBlurLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
