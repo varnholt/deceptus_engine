@@ -499,6 +499,8 @@ DISTFILES += \
     data/config/game.json \
     data/config/physics.json \
     data/scripts/enemies/blob.lua \
+    data/scripts/enemies/ghost.lua \
+    data/scripts/enemies/interpolation.lua \
     data/scripts/enemies/klonk.lua \
     data/scripts/enemies/spikeball.lua \
     data/scripts/enemies/vector2.lua \

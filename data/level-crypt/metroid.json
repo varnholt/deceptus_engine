@@ -10,6 +10,11 @@
       "startposition": [210, 78]
     },
     {
+      "script": "ghost.lua",
+      "startposition": [233, 82],
+      "patrolpath": [238, 82]
+    },
+    {
       "script": "blob.lua",
       "startposition": [14, 40],
       "patrolpath": [14, 40, 18, 40],
