@@ -21,7 +21,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    staticBody = true,
-   sprite = "data/sprites/enemy_bat.png",
+   sprite = "data/sprites/enemy_ghost.png",
    damage = 0
 }
 
@@ -123,13 +123,14 @@ function update(dt)
       end
    end
 
-   spriteIndex = math.floor(math.fmod(mElapsed * 4.0, 3))
-
+   -- not needed for now
+   -- spriteIndex = math.floor(math.fmod(mElapsed * 4.0, 3))
+   -- 
    -- update sprite index
-   if (index ~= mSpriteOffsetX) then
-      mSpriteOffsetX = spriteIndex
-      updateSprite = true
-   end
+   -- if (index ~= mSpriteOffsetX) then
+   --    mSpriteOffsetX = spriteIndex
+   --    updateSprite = true
+   -- end
 
    if (updateSprite) then
       updateSpriteRect(
