@@ -42,6 +42,8 @@ mDone = false
 mTransformY = 0
 mAttack = false
 mPath = {}
+mPatrolPath = {}
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -103,13 +105,15 @@ function update(dt)
          yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
 
          if (yDiff < 0 and yDiff > -10 and not idle) then
-            attack()
+            -- attack()
          end
       end
 
+      p = getValueCos(mPatrolPath, math.fmod(mElapsed * 0.25, 1.0))
+
       -- update transform
       mTransformY = 0.25 * math.sin(mElapsed) * mMoveRangeY
-      setTransform(mStartPosition:getX(), mStartPosition:getY() + mTransformY, 0.0)
+      setTransform(p:getX(), mStartPosition:getY() + mTransformY, 0.0)
    else
       time = (mElapsed - mAttackTime) / 3.5
       p = getValueCubic(mPath, time)
@@ -125,7 +129,7 @@ function update(dt)
 
    -- not needed for now
    -- spriteIndex = math.floor(math.fmod(mElapsed * 4.0, 3))
-   -- 
+   --
    -- update sprite index
    -- if (index ~= mSpriteOffsetX) then
    --    mSpriteOffsetX = spriteIndex
@@ -150,7 +154,34 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setPath(name, table)
+   local i = 0
+   local x = 0.0;
+   local y = 0.0;
+   local v = {}
+
+   for key, value in pairs(table) do
+
+      if ((i % 2) == 0) then
+         x = value
+      else
+         y = value
+         print(string.format("v%d: %f, %f", (i - 1) / 2, x, y))
+         v[(i - 1) / 2] = v2d.Vector2D(x, y)
+      end
+
+      i = i + 1
+   end
+
+   if (name == "patrol_path") then
+
+      k1 = Key:create{x = v[0]:getX(), y = v[0]:getY(), time = 0.0}
+      k2 = Key:create{x = v[1]:getX(), y = v[1]:getY(), time = 0.5}
+      k3 = Key:create{x = v[0]:getX(), y = v[0]:getY(), time = 1.0}
+
+      mPatrolPath = {k1, k2, k3}
+   end
 end
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
