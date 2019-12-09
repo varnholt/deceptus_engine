@@ -18,5 +18,4 @@ before_build:
 
 build_script:
 - qmake jumpnrun.pro
-
-
+- nmake
