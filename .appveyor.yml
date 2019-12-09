@@ -1,0 +1,22 @@
+image: Visual Studio 2019
+
+environment:
+  matrix:
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    QTDIR: C:\Qt\5.13.2\msvc2017_64
+    VCVAR2019: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat'
+    PLATFORM: x64
+    VER_SUFFIX: win64
+
+init:
+- call "%QTDIR%\bin\qtenv2.bat"
+- set PATH=C:\Qt\Tools\QtCreator\bin;%PATH%
+- call "%VCVAR2019%" %PLATFORM%
+- cd /D "%APPVEYOR_BUILD_FOLDER%"
+
+before_build:
+
+build_script:
+- qmake jumpnrun.pro
+
+
