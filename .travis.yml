@@ -5,6 +5,8 @@ matrix:
   include:
 
   - os: windows
+    env:
+    - QMAKESPEC="C:\git\platformer\tools\qmake\win32-msvc\qmake.conf"  
     before_install:
     - dir C:/Program\ Files\ \(x86\)/Windows\ Kits/10/bin/10.0.17134.0/x64
     - cmd.exe /C 'cd && "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
