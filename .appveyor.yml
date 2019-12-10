@@ -19,9 +19,9 @@ before_build:
 build_script:
 - qmake jumpnrun.pro
 - nmake
+- call "deploy.bat"
 
 artifacts:
-- call "deploy.bat"
 - path: ..\build
   name: deceptus
   type: zip

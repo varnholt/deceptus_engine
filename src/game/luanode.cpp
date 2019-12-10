@@ -334,6 +334,8 @@ extern "C" int32_t setTransform(lua_State* state)
       auto y = static_cast<float>(lua_tonumber(state, 2));
       auto angle = static_cast<float>(lua_tonumber(state, 3));
 
+      // std::cout << "x: " << x << " y: " << y << " angle: " << angle << std::endl;
+
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
       if (!node)
