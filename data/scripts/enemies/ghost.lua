@@ -4,6 +4,27 @@ require "data/scripts/enemies/interpolation"
 v2d = require "data/scripts/enemies/vectorial2"
 
 
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+-- |P00|P01|   |   |<<<|###|###|###|###|###|###|###|###|###|###|###|>>>|   |   |   |   |
+-- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+--  <<<             <<< patrol path start           patrol path end >>>             >>>
+--  extended range                                                       extended range
+
+
 -- 221, 77
 -- 210, 78
 -- 223, 77
@@ -43,7 +64,9 @@ mTransformY = 0
 mAttack = false
 mPath = {}
 mPatrolPath = {}
-
+mFindPlayerInterval = 1000
+mFindPlayerTimer = 0
+mFindTimerStart = true
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +85,6 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function attack()
    mAttack = true
-
    mAttackTime = mElapsed
 
    print("attack")
@@ -73,16 +95,25 @@ function attack()
    px = mPlayerPosition:getX()
    py = mPlayerPosition:getY()
 
+   k1 = Key:create{x = bx, y = by, time = 0.0}
+   k2 = Key:create{x = px, y = py, time = 1.0}
+
+   mPath = {k1, k2}
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function backToStart()
+   bx = mPosition:getX()
+   by = mPosition:getY()
+
    sx = mStartPosition:getX()
    sy = mStartPosition:getY()
 
-   k1 = Key:create{x = bx,          y = by,             time = 0.0}
-   k2 = Key:create{x = px - 1 * 24, y = py - 1.75 * 24, time = 0.2} -- left of player
-   k3 = Key:create{x = px,          y = py - 1.5 * 24,  time = 0.5} -- player pos
-   k4 = Key:create{x = px + 1 * 24, y = py - 1.75 * 24, time = 0.8} -- right of player
-   k5 = Key:create{x = sx,          y = sy,             time = 1.0} -- go back
+   k1 = Key:create{x = bx, y = by, time = 0.0}
+   k2 = Key:create{x = sx, y = sy, time = 1.0}
 
-   mPath = {k1, k2, k3, k4, k5}
+   mPath = {k1, k2}
 end
 
 
@@ -96,72 +127,35 @@ function update(dt)
 
    idle = mElapsed < mIdleTime
 
-   --
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   -- |P00|P01|   |   |<<<|###|###|###|###|###|###|###|###|###|###|###|>>>|   |   |   |   |
-   -- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-   --  <<<             <<< patrol path start           patrol path end >>>             >>>
-   --  extended range                                                       extended range
+   -- locate player
+   if (mFindTimerStart) then
+      mFindTimerStart = false
+      timer(mFindPlayerInterval, mFindPlayerTimer)
+   end
 
-   -- every second or half second
-   -- if player within patrol path + extended range
-   --    path +=
-   --       player position
-   --
-
-   -- make sure block is on same x as player
+   -- idle
    if (not mAttack or idle) then
-      xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
-      if (math.abs(xDiff) < 3) then
-
-         -- make sure stone is not too far away (10 tiles) and above player
-         yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
-
-         if (yDiff < 0 and yDiff > -10 and not idle) then
-            -- attack()
-         end
-      end
-
       p = getValueCos(mPatrolPath, math.fmod(mElapsed * 0.25, 1.0))
-
-      -- update transform
       mTransformY = 0.25 * math.sin(mElapsed) * mMoveRangeY
       setTransform(p:getX(), mStartPosition:getY() + mTransformY, 0.0)
+
+   -- attack player
    else
       time = (mElapsed - mAttackTime) / 3.5
-      p = getValueCubic(mPath, time)
-      -- p = getValueCos(mPath, time)
+      p = getValueCos(mPath, time)
+      -- p = getValueCubic(mPath, time)
       -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
+
       setTransform(p:getX(), p:getY(), 0.0)
 
+      -- attack move finished, need to locate player again
       if (time > 1.0) then
          mAttack = false
+
+         -- actually there is no need to idle, could remove this code
          mIdleTime = mElapsed + 3
       end
    end
-
-   -- not needed for now
-   -- spriteIndex = math.floor(math.fmod(mElapsed * 4.0, 3))
-   --
-   -- update sprite index
-   -- if (index ~= mSpriteOffsetX) then
-   --    mSpriteOffsetX = spriteIndex
-   --    updateSprite = true
-   -- end
 
    if (updateSprite) then
       updateSpriteRect(
@@ -236,3 +230,32 @@ function playerMovedTo(x, y)
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
+function locatePlayer()
+
+   xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
+
+   if (math.abs(xDiff) < 10) then
+
+       yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+       if (yDiff < 0 and math.abs(yDiff) < 5) then
+          print("player in range")
+          attack()
+       else
+          print("player out of range, go home")
+          backToStart()
+       end
+    end
+end
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+function timeout(id)
+   print(string.format("timeout: %d", id))
+   if (id == mFindPlayerTimer) then
+      mFindTimerStart = true
+      locatePlayer()
+   end
+end
