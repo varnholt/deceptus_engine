@@ -301,6 +301,25 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
    const std::shared_ptr<b2World>& world
 )
 {
+   if (layer->mName == "doors")
+   {
+      return loadDeprecated(layer, tileSet, basePath, world);
+   }
+   else
+   {
+      return loadRevised(layer, tileSet, basePath, world);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+std::vector<std::shared_ptr<GameMechanism>> Door::loadDeprecated(
+   TmxLayer* layer,
+   TmxTileSet* tileSet,
+   const std::filesystem::path& basePath,
+   const std::shared_ptr<b2World>& world
+)
+{
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
    auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
@@ -395,3 +414,14 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 }
 
 
+//-----------------------------------------------------------------------------
+std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
+   TmxLayer* /*layer*/,
+   TmxTileSet* /*tileSet*/,
+   const std::filesystem::path& /*basePath*/,
+   const std::shared_ptr<b2World>& /*world*/
+)
+{
+   std::vector<std::shared_ptr<GameMechanism>> doors;
+   return doors;
+}

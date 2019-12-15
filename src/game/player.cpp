@@ -1964,6 +1964,12 @@ void Player::resetDash()
    // clear motion blur buffer
    mLastAnimations.clear();
 
+   // reset alphas if needed
+   for (auto& a: mAnimations)
+   {
+      a->setAlpha(255);
+   }
+
    // re-enabled gravity for player
    mBody->SetGravityScale(1.0f);
 }
@@ -1972,6 +1978,16 @@ void Player::resetDash()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
+   // don't allow a new dash move inside water
+   if (isInWater())
+   {
+      if (!isDashActive())
+      {
+         resetDash();
+         return;
+      }
+   }
+
    // dir is the initial dir passed in on button press
    // Dash::None is passed in on regular updates after the initial press
 

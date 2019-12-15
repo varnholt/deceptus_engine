@@ -445,7 +445,7 @@ void Level::loadTmx()
          auto layer = dynamic_cast<TmxLayer*>(element);
          auto tileset = mTmxParser->getTileSet(layer);
 
-         if (layer->mName == "doors")
+         if (layer->mName.rfind("doors", 0) == 0)
          {
             mDoors = Door::load(layer, tileset, path, mWorld);
          }
