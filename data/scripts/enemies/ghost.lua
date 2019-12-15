@@ -17,7 +17,7 @@ end
 properties = {
    staticBody = true,
    sprite = "data/sprites/enemy_ghost.png",
-   damage = 0
+   damage = 30
 }
 
 
