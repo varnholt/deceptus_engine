@@ -320,7 +320,7 @@ void Fan::merge()
          {
             sf::Sprite sprite;
             sprite.setTexture(sTexture);
-            sprite.setPosition(tile->mPosition.x, tile->mPosition.y);
+            sprite.setPosition(static_cast<float>(tile->mPosition.x), static_cast<float>(tile->mPosition.y));
 
             fan->mTiles.push_back(tile);
             fan->mDirection = tile->mDirection * fan->mSpeed;
