@@ -79,7 +79,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
                lever->mRect.width = PIXELS_PER_TILE * 3;
                lever->mRect.height = PIXELS_PER_TILE * 2;
 
-               lever->mSprite.setPosition(x, y);
+               lever->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
                lever->mSprite.setTexture(sTexture);
                lever->updateSprite();
 

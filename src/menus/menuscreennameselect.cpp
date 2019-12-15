@@ -217,7 +217,7 @@ void MenuScreenNameSelect::loadingFinished()
     auto playerName = mLayers["players-name"];
     mNameRect.left = playerName->mSprite->getPosition().x;
     mNameRect.top = playerName->mSprite->getPosition().y;
-    mNameRect.width = playerName->mTexture->getSize().x;
+    mNameRect.width = static_cast<float>(playerName->mTexture->getSize().x);
 
     retrieveUsername();
 
