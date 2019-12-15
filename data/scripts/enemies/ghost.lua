@@ -4,32 +4,6 @@ require "data/scripts/enemies/interpolation"
 v2d = require "data/scripts/enemies/vectorial2"
 
 
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |   |   |   |   |###|###|###|###|###|###|###|###|###|###|###|###|###|   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
--- |P00|P01|   |   |<<<|###|###|###|###|###|###|###|###|###|###|###|>>>|   |   |   |   |
--- +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
---  <<<             <<< patrol path start           patrol path end >>>             >>>
---  extended range                                                       extended range
-
-
--- 221, 77
--- 210, 78
--- 223, 77
--- player: 206, 82
-
 ------------------------------------------------------------------------------------------------------------------------
 -- interpolation keys
 Key = {x = 0, y = 0, time = 0}
@@ -51,9 +25,26 @@ properties = {
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mElapsed = math.random(0, 3)
+mPointsRight = false
+
+mAttack = false
 mAttackTime = 0
+mAttackPath = {}
+mAttackSpeed = 0.4
+
+mIdle = false
 mIdleTime = 0
-mActivated = false
+mIdlePosition = v2d.Vector2D(0, 0)
+
+mMoveHome = false
+mMoveHomeTime = 0
+mMoveHomePath = {}
+mMoveHomeSpeed = 0.6
+
+mPatrol = true
+mPatrolTime = 0
+mPatrolPath = {}
+
 mMoveRangeY = 48
 mSpriteOffsetX = 0
 mSpriteOffsetY = 0
@@ -61,12 +52,7 @@ mSpriteSize = 48
 mStartPosition = v2d.Vector2D(0, 0)
 mDone = false
 mTransformY = 0
-mAttack = false
-mPath = {}
-mPatrolPath = {}
-mFindPlayerInterval = 1000
-mFindPlayerTimer = 0
-mFindTimerStart = true
+mUpdateSprite = false
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -83,89 +69,201 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function attack()
+function updateSpriteDir(pointsRight)
+   pointsRightOld = mPointsRight
+   mPointsRight = pointsRight
+   mUpdateSprite = (mPointsRight ~= pointsRightOld)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateSprite(src, dst)
+   updateSpriteDir(dst > src)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function startAttack()
+
+   print("start attack")
+
    mAttack = true
    mAttackTime = mElapsed
-
-   print("attack")
 
    bx = mPosition:getX()
    by = mPosition:getY()
 
    px = mPlayerPosition:getX()
-   py = mPlayerPosition:getY()
+   py = mPlayerPosition:getY() - 24
 
    k1 = Key:create{x = bx, y = by, time = 0.0}
    k2 = Key:create{x = px, y = py, time = 1.0}
 
-   mPath = {k1, k2}
+   updateSprite(bx, px)
+
+   mAttackPath = {k1, k2}
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function backToStart()
+function startMoveHome()
+
+   print("start move home")
+
+   mMoveHome = true
+   mMoveHomeTime = mElapsed
+
+   -- current position
    bx = mPosition:getX()
    by = mPosition:getY()
 
+   -- where we came from
    sx = mStartPosition:getX()
    sy = mStartPosition:getY()
 
    k1 = Key:create{x = bx, y = by, time = 0.0}
    k2 = Key:create{x = sx, y = sy, time = 1.0}
 
-   mPath = {k1, k2}
+   updateSprite(bx, sx)
+
+   mMoveHomePath = {k1, k2}
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function startIdle()
+   print("start idle")
+   mIdle = true
+   mIdleTime = mElapsed
+   mIdlePosition = mPosition
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function startPatrol()
+   print("start patrol")
+   mPatrol = true
+   mPatrolTime = mElapsed
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function idle()
+
+   time = (mElapsed - mIdleTime)
+   mTransformY = 0.25 * math.sin(time) * mMoveRangeY
+   setTransform(mIdlePosition:getX(), mIdlePosition:getY() + mTransformY, 0.0)
+
+   if (time > 1.0) then
+      print("stop idle")
+      mIdle = false
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function moveHome()
+
+   time = (mElapsed - mMoveHomeTime) * mMoveHomeSpeed
+   p = getValueCos(mMoveHomePath, time)
+
+   setTransform(p:getX(), p:getY(), 0.0)
+
+   if (time > 1.0) then
+      print("stop move home")
+      mMoveHome = false
+      startPatrol()
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function attack()
+   time = (mElapsed - mAttackTime) * mAttackSpeed
+   p = getValueCos(mAttackPath, time)
+
+   setTransform(p:getX(), p:getY(), 0.0)
+
+   -- attack move finished, need to locate player again
+   if (time > 1.0) then
+      mAttack = false
+      print("stop attack")
+      startIdle()
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function patrol()
+
+   distanceToHomeX = mPosition:getX() // 24 - mStartPosition:getX() // 24
+
+   -- is ghost too far away from home, then go home
+   if (math.abs(distanceToHomeX) > 10) then
+      print("too far away from home, return home")
+      startMoveHome()
+      return
+   end
+
+   -- check if player is within range
+   distanceToPlayerX = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
+
+   if (math.abs(distanceToPlayerX) < 10) then
+
+      distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+      if (math.abs(distanceToPlayerY) < 5) then
+         mPatrol = false
+         print("player in range")
+         startAttack()
+         return
+      end
+   end
+
+   -- if player is too far away, then go home
+   if (not mPatrol) then
+      startMoveHome()
+   end
+
+   -- after moving home, start patrol cycle
+   if (mPatrol) then
+      time = mElapsed - mPatrolTime
+      timeVal = math.fmod(time * 0.25, 1.0)
+      updateSpriteDir(timeVal < 0.5) -- values from 0 .. 0.5 go to right
+      p = getValueCos(mPatrolPath, timeVal)
+      mTransformY = 0.25 * math.sin(time) * mMoveRangeY
+      setTransform(p:getX(), mStartPosition:getY() + mTransformY, 0.0)
+   end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
 
-   updateSprite = false
-
    -- get sprite index
    mElapsed = mElapsed + dt
 
-   idle = mElapsed < mIdleTime
-
-   -- locate player
-   if (mFindTimerStart) then
-      mFindTimerStart = false
-      timer(mFindPlayerInterval, mFindPlayerTimer)
-   end
-
-   -- idle
-   if (not mAttack or idle) then
-      p = getValueCos(mPatrolPath, math.fmod(mElapsed * 0.25, 1.0))
-      mTransformY = 0.25 * math.sin(mElapsed) * mMoveRangeY
-      setTransform(p:getX(), mStartPosition:getY() + mTransformY, 0.0)
-
-   -- attack player
+   if (mIdle) then
+      idle()
+   elseif (mMoveHome) then     -- if player is out of sight after idle, go home
+      moveHome()
+   elseif (mAttack) then       -- if player is in sight after idle, attack
+      attack()
    else
-      time = (mElapsed - mAttackTime) / 3.5
-      p = getValueCos(mPath, time)
-      -- p = getValueCubic(mPath, time)
-      -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
-
-      setTransform(p:getX(), p:getY(), 0.0)
-
-      -- attack move finished, need to locate player again
-      if (time > 1.0) then
-         mAttack = false
-
-         -- actually there is no need to idle, could remove this code
-         mIdleTime = mElapsed + 3
-      end
+      patrol()                 -- moved home, just patrol and locate player
    end
 
-   if (updateSprite) then
+   -- update sprite
+   if (mUpdateSprite) then
       updateSpriteRect(
          mSpriteOffsetX * mSpriteSize,
-         mSpriteOffsetY,
+         (mPointsRight and mSpriteSize or 0),
          mSpriteSize,
          mSpriteSize
       ) -- x, y, width, height
    end
 
+   -- die
    if (mDone) then
       die()
    end
@@ -204,7 +302,6 @@ function setPath(name, table)
 end
 
 
-
 ------------------------------------------------------------------------------------------------------------------------
 function retrieveProperties()
    updateProperties(properties)
@@ -229,33 +326,3 @@ function playerMovedTo(x, y)
    mPlayerPosition = v2d.Vector2D(x, y)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function locatePlayer()
-
-   xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
-
-   if (math.abs(xDiff) < 10) then
-
-       yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
-
-       if (yDiff < 0 and math.abs(yDiff) < 5) then
-          print("player in range")
-          attack()
-       else
-          print("player out of range, go home")
-          backToStart()
-       end
-    end
-end
-
-
-
-------------------------------------------------------------------------------------------------------------------------
-function timeout(id)
-   print(string.format("timeout: %d", id))
-   if (id == mFindPlayerTimer) then
-      mFindTimerStart = true
-      locatePlayer()
-   end
-end
