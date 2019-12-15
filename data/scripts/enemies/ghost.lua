@@ -31,6 +31,7 @@ mAttack = false
 mAttackTime = 0
 mAttackPath = {}
 mAttackSpeed = 0.4
+mAttackDistanceFactor = 1.0
 
 mIdle = false
 mIdleTime = 0
@@ -100,6 +101,13 @@ function startAttack()
    k2 = Key:create{x = px, y = py, time = 1.0}
 
    updateSprite(bx, px)
+
+   ax = px - bx
+   ay = py - by
+   dist = math.sqrt(ax * ax + ay * ay)
+   mAttackDistanceFactor = 200.0 / dist
+
+   -- print(mAttackDistanceFactor)
 
    mAttackPath = {k1, k2}
 end
@@ -179,7 +187,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function attack()
-   time = (mElapsed - mAttackTime) * mAttackSpeed
+   time = (mElapsed - mAttackTime) * mAttackSpeed * mAttackDistanceFactor
    p = getValueCos(mAttackPath, time)
 
    setTransform(p:getX(), p:getY(), 0.0)
