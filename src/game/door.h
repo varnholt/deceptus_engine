@@ -64,6 +64,20 @@ public:
 
 private:
 
+   static std::vector<std::shared_ptr<GameMechanism>> loadDeprecated(
+      TmxLayer *layer,
+      TmxTileSet *tileSet,
+      const std::filesystem::path& basePath,
+      const std::shared_ptr<b2World>&
+   );
+
+   static std::vector<std::shared_ptr<GameMechanism>> loadRevised(
+      TmxLayer *layer,
+      TmxTileSet *tileSet,
+      const std::filesystem::path& basePath,
+      const std::shared_ptr<b2World>&
+   );
+
    void updateBars(const sf::Time& dt);
    void updateConventional(const sf::Time& dt);
 
