@@ -36,6 +36,22 @@ void Door::draw(sf::RenderTarget& window)
 //-----------------------------------------------------------------------------
 void Door::updateBars(const sf::Time& dt)
 {
+   auto i = 0;
+   for (auto& sprite : mSprites)
+   {
+      auto x = mTilePosition.x;
+      auto y = mTilePosition.y;
+
+      sprite.setPosition(
+         sf::Vector2f(
+            static_cast<float>(x * PIXELS_PER_TILE),
+            static_cast<float>((i + y) * PIXELS_PER_TILE  + mOffset)
+         )
+      );
+
+      i++;
+   }
+
    auto openSpeed = 50.0f;
 
    switch (mState)
@@ -79,41 +95,6 @@ void Door::updateConventional(const sf::Time& /*dt*/)
 //-----------------------------------------------------------------------------
 void Door::update(const sf::Time& dt)
 {
-   auto playerPos = Player::getCurrent()->getPixelPosition();
-   auto doorPos = mSprites.at(mSprites.size()- 1 ).getPosition();
-
-   sf::Vector2f a(playerPos.x, playerPos.y);
-   sf::Vector2f b(doorPos.x + PIXELS_PER_TILE * 0.5f, doorPos.y);
-
-   auto distance = SfmlMath::length(a - b);
-   auto atDoor = (distance < PIXELS_PER_TILE * 1.5f);
-
-   setPlayerAtDoor(atDoor);
-
-   auto i = 0;
-   for (auto& sprite : mSprites)
-   {
-      sprite.setColor(
-         sf::Color(
-            255,
-            atDoor ? 150 : 255,
-            atDoor ? 150 : 255
-         )
-      );
-
-      auto x = mTilePosition.x;
-      auto y = mTilePosition.y;
-
-      sprite.setPosition(
-         sf::Vector2f(
-            static_cast<float>(x * PIXELS_PER_TILE),
-            static_cast<float>((i + y) * PIXELS_PER_TILE  + mOffset)
-         )
-      );
-
-      i++;
-   }
-
    switch (mType)
    {
       case Type::Conventional:
@@ -197,6 +178,22 @@ void Door::addSprite(const sf::Sprite & sprite)
 
 
 //-----------------------------------------------------------------------------
+bool Door::checkPlayerAtDoor() const
+{
+   auto playerPos = Player::getCurrent()->getPixelPosition();
+   auto doorPos = mSprites.at(mSprites.size()- 1 ).getPosition();
+
+   sf::Vector2f a(playerPos.x, playerPos.y);
+   sf::Vector2f b(doorPos.x + PIXELS_PER_TILE * 0.5f, doorPos.y);
+
+   auto distance = SfmlMath::length(a - b);
+   auto atDoor = (distance < PIXELS_PER_TILE * 1.5f);
+
+   return atDoor;
+}
+
+
+//-----------------------------------------------------------------------------
 void Door::toggle()
 {
    if (!SaveState::getPlayerInfo().mInventory.hasInventoryItem(mRequiredItem))
@@ -204,7 +201,9 @@ void Door::toggle()
       return;
    }
 
-   if (!isPlayerAtDoor())
+   auto atDoor = checkPlayerAtDoor();
+
+   if (!atDoor)
       return;
 
    switch (mState)
