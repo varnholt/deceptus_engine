@@ -69,6 +69,7 @@ private:
 
    void open();
    void close();
+   bool checkPlayerAtDoor() const;
 
    sf::Vector2u mTileSize;
    sf::Texture mTexture;
