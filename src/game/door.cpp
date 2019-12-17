@@ -14,6 +14,10 @@
 #include "tmxparser/tmxproperties.h"
 #include "tmxparser/tmxtileset.h"
 
+#include <iostream>
+
+
+sf::Texture Door::sTexture;
 
 
 //-----------------------------------------------------------------------------
@@ -88,7 +92,6 @@ void Door::updateBars(const sf::Time& dt)
 //-----------------------------------------------------------------------------
 void Door::updateConventional(const sf::Time& /*dt*/)
 {
-
 }
 
 
@@ -99,6 +102,7 @@ void Door::update(const sf::Time& dt)
    {
       case Type::Conventional:
       {
+         updateConventional(dt);
          break;
       }
       case Type::Bars:
@@ -146,6 +150,7 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
    auto sizeX = (PIXELS_PER_TILE / PPM) * 0.26f;
    auto sizeY = (PIXELS_PER_TILE / PPM);
    auto offsetX = 0.17f;
+
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(offsetX,         0);
    vertices[1] = b2Vec2(offsetX,         mHeight * sizeY);
@@ -319,6 +324,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadDeprecated(
    const std::shared_ptr<b2World>& world
 )
 {
+   sTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
    auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
@@ -362,7 +368,6 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadDeprecated(
                door->mTileId = tileId;
                door->mTilePosition.x = i;
                door->mTilePosition.y = j;
-               door->mTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
 
                // check if door needs a key
                door->updateRequiredItem();
@@ -378,11 +383,11 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadDeprecated(
             // update door height with every new tile
             door->mHeight++;
 
-            auto tu = (tileId) % (door->mTexture.getSize().x / tilesize.x);
-            auto tv = (tileId) / (door->mTexture.getSize().x / tilesize.x);
+            auto tu = (tileId) % (sTexture.getSize().x / tilesize.x);
+            auto tv = (tileId) / (sTexture.getSize().x / tilesize.x);
 
             sf::Sprite sprite;
-            sprite.setTexture(door->mTexture);
+            sprite.setTexture(sTexture);
             sprite.setTextureRect(
                sf::IntRect(
                   tu * PIXELS_PER_TILE,
@@ -415,12 +420,79 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadDeprecated(
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
-   TmxLayer* /*layer*/,
-   TmxTileSet* /*tileSet*/,
-   const std::filesystem::path& /*basePath*/,
-   const std::shared_ptr<b2World>& /*world*/
+   TmxLayer* layer,
+   TmxTileSet* tileSet,
+   const std::filesystem::path& basePath,
+   const std::shared_ptr<b2World>& world
 )
 {
+   sTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
+
    std::vector<std::shared_ptr<GameMechanism>> doors;
+
+   auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
+   auto tiles    = layer->mData;
+   auto width    = layer->mWidth;
+   auto height   = layer->mHeight;
+   auto firstId  = tileSet->mFirstGid;
+
+   // populate the vertex array, with one quad per tile
+   for (auto j = 0u; j < height; j++)
+   {
+      for (auto i = 0u; i < width; i++)
+      {
+         // get the current tile number
+         auto tileNumber = tiles[i + j * width];
+
+         if (tileNumber != 0)
+         {
+            auto tileId = tileNumber - firstId;
+
+            // 21: red
+            // 24: green
+            // 27: blue
+
+            auto requiredItem = ItemType::Invalid;
+
+            switch (tileId)
+            {
+               case 21:
+                  requiredItem = ItemType::KeyRed;
+                  break;
+               case 24:
+                  requiredItem = ItemType::KeyGreen;
+                  break;
+               case 27:
+                  requiredItem = ItemType::KeyBlue;
+                  break;
+
+               default:
+                  break;
+            }
+
+            if (requiredItem != ItemType::Invalid)
+            {
+               auto door = std::make_shared<Door>(nullptr);
+
+               doors.push_back(door);
+
+               door->mType = Type::Conventional;
+               door->mTileId = tileId;
+               door->mTilePosition.x = static_cast<int32_t>(i);
+               door->mTilePosition.y = static_cast<int32_t>(j);
+               door->mRequiredItem = requiredItem;
+               break;
+            }
+
+            std::cout << "found new door: " << tileId << std::endl;
+         }
+      }
+   }
+
+   for (auto tmp : doors)
+   {
+      std::dynamic_pointer_cast<Door>(tmp)->setupBody(world);
+   }
+
    return doors;
 }

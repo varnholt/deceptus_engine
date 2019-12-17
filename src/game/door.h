@@ -86,7 +86,7 @@ private:
    bool checkPlayerAtDoor() const;
 
    sf::Vector2u mTileSize;
-   sf::Texture mTexture;
+   static sf::Texture sTexture;
 
    std::vector<sf::Sprite> mSprites;
 
