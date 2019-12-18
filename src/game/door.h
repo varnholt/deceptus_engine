@@ -37,9 +37,6 @@ public:
    void draw(sf::RenderTarget& window) override;
    void update(const sf::Time& dt) override;
 
-   void setupBody(const std::shared_ptr<b2World>& world);
-   void addSprite(const sf::Sprite&);
-
    void toggle();
 
    static std::vector<std::shared_ptr<GameMechanism>> load(
@@ -49,17 +46,12 @@ public:
       const std::shared_ptr<b2World>&
    );
 
-
    bool isPlayerAtDoor() const;
    void setPlayerAtDoor(bool isPlayerAtDoor);
-
-   void updateTransform();
 
    void reset();
 
    const sf::Vector2i& getTilePosition() const;
-
-   void updateRequiredItem();
 
 
 private:
@@ -78,8 +70,18 @@ private:
       const std::shared_ptr<b2World>&
    );
 
+   void setupBody(
+      const std::shared_ptr<b2World>& world,
+      float xOffset = 0.0f,
+      float xScale = 1.0f
+   );
+
+   void addSprite(const sf::Sprite&);
+   void updateTransform();
+
    void updateBars(const sf::Time& dt);
    void updateConventional(const sf::Time& dt);
+   void updateRequiredItem();
 
    void open();
    void close();

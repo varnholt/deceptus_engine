@@ -144,18 +144,21 @@ void Door::reset()
 
 
 //-----------------------------------------------------------------------------
-void Door::setupBody(const std::shared_ptr<b2World>& world)
+void Door::setupBody(
+   const std::shared_ptr<b2World>& world,
+   float xOffset,
+   float xScale
+)
 {
    b2PolygonShape polygonShape;
-   auto sizeX = (PIXELS_PER_TILE / PPM) * 0.26f;
+   auto sizeX = (PIXELS_PER_TILE / PPM) * xScale;
    auto sizeY = (PIXELS_PER_TILE / PPM);
-   auto offsetX = 0.17f;
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(offsetX,         0);
-   vertices[1] = b2Vec2(offsetX,         mHeight * sizeY);
-   vertices[2] = b2Vec2(offsetX + sizeX, mHeight * sizeY);
-   vertices[3] = b2Vec2(offsetX + sizeX, 0);
+   vertices[0] = b2Vec2(xOffset,         0);
+   vertices[1] = b2Vec2(xOffset,         mHeight * sizeY);
+   vertices[2] = b2Vec2(xOffset + sizeX, mHeight * sizeY);
+   vertices[3] = b2Vec2(xOffset + sizeX, 0);
    polygonShape.Set(vertices, 4);
 
    b2BodyDef bodyDef;
@@ -176,7 +179,7 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
  * \brief Door::addSprite
  * \param sprite
  */
-void Door::addSprite(const sf::Sprite & sprite)
+void Door::addSprite(const sf::Sprite& sprite)
 {
    mSprites.push_back(sprite);
 }
@@ -411,7 +414,11 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadDeprecated(
 
    for (auto tmp : doors)
    {
-      std::dynamic_pointer_cast<Door>(tmp)->setupBody(world);
+      std::dynamic_pointer_cast<Door>(tmp)->setupBody(
+         world,
+         0.17f,
+         0.26f
+      );
    }
 
    return doors;
@@ -430,7 +437,6 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
 
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
-   auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
    auto tiles    = layer->mData;
    auto width    = layer->mWidth;
    auto height   = layer->mHeight;
@@ -458,12 +464,15 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
             {
                case 21:
                   requiredItem = ItemType::KeyRed;
+                  std::cout << "add red door" << std::endl;
                   break;
                case 24:
                   requiredItem = ItemType::KeyGreen;
+                  std::cout << "add green door" << std::endl;
                   break;
                case 27:
                   requiredItem = ItemType::KeyBlue;
+                  std::cout << "add blue door" << std::endl;
                   break;
 
                default:
@@ -472,6 +481,11 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
 
             if (requiredItem != ItemType::Invalid)
             {
+               sf::Sprite sprite;
+               sprite.setTexture(sTexture);
+               sprite.setTextureRect(sf::IntRect(0, 3 * 24, 3 * 24, 3 * 24));
+               sprite.setPosition(i * 24 - 24, j * 24 + 24);
+
                auto door = std::make_shared<Door>(nullptr);
 
                doors.push_back(door);
@@ -479,9 +493,11 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
                door->mType = Type::Conventional;
                door->mTileId = tileId;
                door->mTilePosition.x = static_cast<int32_t>(i);
-               door->mTilePosition.y = static_cast<int32_t>(j);
+               door->mTilePosition.y = static_cast<int32_t>(j) + 1; // the actual door is a tile lower
                door->mRequiredItem = requiredItem;
-               break;
+               door->mState = State::Closed;
+               door->mHeight = 3; // hardcoded 3 tiles
+               door->mSprites.push_back(sprite);
             }
 
             std::cout << "found new door: " << tileId << std::endl;
