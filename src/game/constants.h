@@ -44,6 +44,7 @@ enum ZDepth
    ZDepthBackgroundMax = 15,
    ZDepthForegroundMin = 16,
    ZDepthForegroundMax = 50,
+   ZDepthDoors = 40,
    ZDepthPlayer = 11
 };
 
