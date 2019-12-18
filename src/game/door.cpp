@@ -459,19 +459,23 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
             // 27: blue
 
             auto requiredItem = ItemType::Invalid;
+            auto iconOffset = 0;
 
             switch (tileId)
             {
                case 21:
                   requiredItem = ItemType::KeyRed;
+                  iconOffset = 1;
                   std::cout << "add red door" << std::endl;
                   break;
                case 24:
                   requiredItem = ItemType::KeyGreen;
+                  iconOffset = 4;
                   std::cout << "add green door" << std::endl;
                   break;
                case 27:
                   requiredItem = ItemType::KeyBlue;
+                  iconOffset = 7;
                   std::cout << "add blue door" << std::endl;
                   break;
 
@@ -481,10 +485,21 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
 
             if (requiredItem != ItemType::Invalid)
             {
-               sf::Sprite sprite;
-               sprite.setTexture(sTexture);
-               sprite.setTextureRect(sf::IntRect(0, 3 * 24, 3 * 24, 3 * 24));
-               sprite.setPosition(i * 24 - 24, j * 24 + 24);
+               sf::Sprite doorSprite;
+               doorSprite.setTexture(sTexture);
+               doorSprite.setTextureRect(sf::IntRect(0, 3 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE));
+               doorSprite.setPosition(
+                  static_cast<float>(i * PIXELS_PER_TILE - PIXELS_PER_TILE),
+                  static_cast<float>(j * PIXELS_PER_TILE + PIXELS_PER_TILE)
+               );
+
+               sf::Sprite iconSprite;
+               iconSprite.setTexture(sTexture);
+               iconSprite.setTextureRect(sf::IntRect(PIXELS_PER_TILE * iconOffset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
+               iconSprite.setPosition(
+                  static_cast<float>(i * PIXELS_PER_TILE),
+                  static_cast<float>(j * PIXELS_PER_TILE)
+               );
 
                auto door = std::make_shared<Door>(nullptr);
 
@@ -497,10 +512,16 @@ std::vector<std::shared_ptr<GameMechanism>> Door::loadRevised(
                door->mRequiredItem = requiredItem;
                door->mState = State::Closed;
                door->mHeight = 3; // hardcoded 3 tiles
-               door->mSprites.push_back(sprite);
+               door->mSprites.push_back(doorSprite);
+               door->mSprites.push_back(iconSprite);
+
+               if (layer->mProperties != nullptr)
+               {
+                  door->setZ(layer->mProperties->mMap["z"]->mValueInt);
+               }
             }
 
-            std::cout << "found new door: " << tileId << std::endl;
+            // std::cout << "found new door: " << tileId << std::endl;
          }
       }
    }
