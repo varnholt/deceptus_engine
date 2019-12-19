@@ -62,9 +62,6 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 
 */
 
-// 1128, 24
-// 1176, 0
-
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
@@ -83,13 +80,13 @@ void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& wo
    {
       case 24:
       {
-         mSprite.setTextureRect(sf::IntRect(1176, 0, 24, 2 * 24));
+         mSprite.setTextureRect(sf::IntRect(1392, 0, 24, 2 * 24));
          break;
       }
 
       case 48:
       {
-         mSprite.setTextureRect(sf::IntRect(1128, 24, 24 * 2, 3 * 24));
+         mSprite.setTextureRect(sf::IntRect(1296, 24, 2 * 24, 3 * 24));
          break;
       }
 
