@@ -109,7 +109,41 @@ void Console::execute()
       mLog.pop_front();
    }
 
+   mHistory.push_back(mCommand);
+   mHistoryIndex = static_cast<int32_t>(mHistory.size()); // n + 1 is intentional
    mCommand.clear();
+}
+
+
+void Console::previousCommand()
+{
+   if (mHistory.empty())
+   {
+      return;
+   }
+
+   mHistoryIndex--;
+   if (mHistoryIndex < 0)
+   {
+      mHistoryIndex = 0;
+   }
+   mCommand = mHistory[static_cast<size_t>(mHistoryIndex)];
+}
+
+
+void Console::nextCommand()
+{
+   if (mHistory.empty())
+   {
+      return;
+   }
+
+   mHistoryIndex++;
+   if (mHistoryIndex == static_cast<int32_t>(mHistory.size()))
+   {
+      mHistoryIndex = static_cast<int32_t>(mHistory.size() - 1);
+   }
+   mCommand = mHistory[static_cast<size_t>(mHistoryIndex)];
 }
 
 
