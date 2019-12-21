@@ -62,7 +62,6 @@ private:
       float xScale = 1.0f
    );
 
-   void addSprite(const sf::Sprite&);
    void updateTransform();
 
    void updateBars(const sf::Time& dt);
@@ -74,7 +73,8 @@ private:
    sf::Vector2u mTileSize;
    static sf::Texture sTexture;
 
-   std::vector<sf::Sprite> mSprites;
+   sf::VertexArray mDoorQuad{sf::Quads, 4};
+   sf::Sprite mSpriteIcon;
 
    Type mType = Type::Bars;
 

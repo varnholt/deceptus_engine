@@ -30,47 +30,26 @@ Door::Door(GameNode* parent)
 //-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& window)
 {
-   for (const auto& sprite : mSprites)
-   {
-      window.draw(sprite);
-   }
+   window.draw(mSpriteIcon);
+   window.draw(mDoorQuad, &sTexture);
 }
-
-
-/*
-
-
-   |###|
-   |###|
-   |###|
-   |###|
-   +---+ sprite rect: offset y to sprite height
-   |   |
-   |   |
-   |   |
-   |   |
-   |   |
-   |   |
-   +---+
-
-
-*/
 
 
 //-----------------------------------------------------------------------------
 void Door::updateBars(const sf::Time& dt)
 {
-   // not smooth yet, needs a real clipper instead of an int rect :/
-   mSprites[0].setTextureRect(
-      sf::IntRect(
-         0,
-         3 * PIXELS_PER_TILE - mOffset,
-         3 * PIXELS_PER_TILE,
-         mHeight * PIXELS_PER_TILE + mOffset
-      )
-   );
+   const float left   = 0.0f;
+   const float right  = left + 3.0f * PIXELS_PER_TILE;
+   const float top    = 3.0f * PIXELS_PER_TILE - mOffset;
+   const float bottom = top + 3.0f * PIXELS_PER_TILE;
+
+   mDoorQuad[0].texCoords = sf::Vector2f(left, top);
+   mDoorQuad[1].texCoords = sf::Vector2f(left, bottom);
+   mDoorQuad[2].texCoords = sf::Vector2f(right, bottom);
+   mDoorQuad[3].texCoords = sf::Vector2f(right, top);
 
    auto openSpeed = 50.0f;
+   auto closeSpeed = 200.0f;
 
    switch (mState)
    {
@@ -86,7 +65,7 @@ void Door::updateBars(const sf::Time& dt)
       }
       case State::Closing:
       {
-         mOffset += openSpeed * dt.asSeconds();
+         mOffset += closeSpeed * dt.asSeconds();
          if (mOffset >= 0.0f)
          {
             mState = State::Closed;
@@ -183,21 +162,10 @@ void Door::setupBody(
 
 
 //-----------------------------------------------------------------------------
-/*!
- * \brief Door::addSprite
- * \param sprite
- */
-void Door::addSprite(const sf::Sprite& sprite)
-{
-   mSprites.push_back(sprite);
-}
-
-
-//-----------------------------------------------------------------------------
 bool Door::checkPlayerAtDoor() const
 {
    auto playerPos = Player::getCurrent()->getPixelPosition();
-   auto doorPos = mSprites.at(mSprites.size()- 1 ).getPosition();
+   auto doorPos = mSpriteIcon.getPosition();
 
    sf::Vector2f a(playerPos.x, playerPos.y);
    sf::Vector2f b(doorPos.x + PIXELS_PER_TILE * 0.5f, doorPos.y + 3 * PIXELS_PER_TILE);
@@ -217,13 +185,13 @@ void Door::toggle()
 {
    if (!SaveState::getPlayerInfo().mInventory.hasInventoryItem(mRequiredItem))
    {
-      std::cout << "player doesn't have key" << std::endl;
+      // std::cout << "player doesn't have key" << std::endl;
       return;
    }
 
    if (!checkPlayerAtDoor())
    {
-      std::cout << "player not in front of door" << std::endl;
+      // std::cout << "player not in front of door" << std::endl;
       return;
    }
 
@@ -322,24 +290,20 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                   requiredItem = ItemType::KeyRed;
                   iconOffset = 1;
                   createDoor = true;
-                  std::cout << "add red door" << std::endl;
                   break;
                case 24:
                   requiredItem = ItemType::KeyGreen;
                   iconOffset = 4;
                   createDoor = true;
-                  std::cout << "add green door" << std::endl;
                   break;
                case 27:
                   requiredItem = ItemType::KeyBlue;
                   iconOffset = 7;
                   createDoor = true;
-                  std::cout << "add blue door" << std::endl;
                   break;
                case 30:
                   requiredItem = ItemType::Invalid;
                   createDoor = true;
-                  std::cout << "add door without key" << std::endl;
                   break;
 
                default:
@@ -348,49 +312,35 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 
             if (createDoor)
             {
-               sf::Sprite doorSprite;
-               doorSprite.setTexture(sTexture);
-               doorSprite.setTextureRect(
-                  sf::IntRect(
-                     0,
-                     3 * PIXELS_PER_TILE,
-                     3 * PIXELS_PER_TILE,
-                     3 * PIXELS_PER_TILE
-                  )
-               );
-
-               doorSprite.setPosition(
-                  static_cast<float>(i * PIXELS_PER_TILE - PIXELS_PER_TILE),
-                  static_cast<float>(j * PIXELS_PER_TILE + PIXELS_PER_TILE)
-               );
-
-               sf::Sprite iconSprite;
-
-               if (requiredItem != ItemType::Invalid)
-               {
-                  iconSprite.setTexture(sTexture);
-                  iconSprite.setTextureRect(sf::IntRect(PIXELS_PER_TILE * iconOffset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
-                  iconSprite.setPosition(
-                     static_cast<float>(i * PIXELS_PER_TILE),
-                     static_cast<float>(j * PIXELS_PER_TILE)
-                  );
-               }
+               const auto positionX = static_cast<float>(i * PIXELS_PER_TILE - PIXELS_PER_TILE);
+               const auto positionY = static_cast<float>(j * PIXELS_PER_TILE + PIXELS_PER_TILE);
 
                auto door = std::make_shared<Door>(nullptr);
-
                doors.push_back(door);
 
+               door->mDoorQuad[0].position.x = positionX;
+               door->mDoorQuad[0].position.y = positionY;
+               door->mDoorQuad[1].position.x = positionX;
+               door->mDoorQuad[1].position.y = positionY + 3 * PIXELS_PER_TILE;
+               door->mDoorQuad[2].position.x = positionX + 3 * PIXELS_PER_TILE;
+               door->mDoorQuad[2].position.y = positionY + 3 * PIXELS_PER_TILE;
+               door->mDoorQuad[3].position.x = positionX + 3 * PIXELS_PER_TILE;
+               door->mDoorQuad[3].position.y = positionY;
                door->mType = Type::Bars;
                door->mTileId = tileId;
                door->mTilePosition.x = static_cast<int32_t>(i);
                door->mTilePosition.y = static_cast<int32_t>(j) + 1; // the actual door is a tile lower
                door->mRequiredItem = requiredItem;
                door->mHeight = 3; // hardcoded 3 tiles
-               door->mSprites.push_back(doorSprite);
 
                if (requiredItem != ItemType::Invalid)
                {
-                  door->mSprites.push_back(iconSprite);
+                  door->mSpriteIcon.setTexture(sTexture);
+                  door->mSpriteIcon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * iconOffset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
+                  door->mSpriteIcon.setPosition(
+                     static_cast<float>(i * PIXELS_PER_TILE),
+                     static_cast<float>(j * PIXELS_PER_TILE)
+                  );
                }
 
                if (layer->mProperties != nullptr)
