@@ -636,6 +636,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 {
    if (Console::getInstance().isActive())
    {
+      // these should be moved to the console itself
       if (event.key.code == sf::Keyboard::Return)
       {
          Console::getInstance().execute();
@@ -648,6 +649,14 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       else if (event.key.code == sf::Keyboard::Backspace)
       {
          Console::getInstance().chop();
+      }
+      else if (event.key.code == sf::Keyboard::Up)
+      {
+         Console::getInstance().previousCommand();
+      }
+      else if (event.key.code == sf::Keyboard::Down)
+      {
+         Console::getInstance().nextCommand();
       }
 
       return;
