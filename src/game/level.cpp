@@ -7,6 +7,7 @@
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "debugdraw.h"
+#include "dialogue.h"
 #include "displaymode.h"
 #include "door.h"
 #include "extraitem.h"
@@ -196,9 +197,6 @@ Level::Level()
    // add raycast light for player
    mPlayerLight = deserializeRaycastLight(nullptr);
    mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, 20));
-//   mPlayerLight->mColor.r = 20;
-//   mPlayerLight->mColor.g = 20;
-//   mPlayerLight->mColor.b = 20;
    mRaycastLight->mLights.push_back(mPlayerLight);
 
    mMap = std::make_unique<LevelMap>();
@@ -291,62 +289,63 @@ std::shared_ptr<StaticLight::LightInstance> Level::deserializeStaticLight(TmxObj
 {
   // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
 
-  auto light = std::make_shared<StaticLight::LightInstance>();
-  std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
-  std::string texture = "data/light/smooth.png";
-  auto flickerIntensity = 0.0f;
-  auto flickerAlphaAmount = 1.0f;
-  auto flickerSpeed = 0.0f;
-  if (tmxObject->mProperties != nullptr)
-  {
-     auto it = tmxObject->mProperties->mMap.find("color");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        rgba = TmxTools::color(it->second->mValueStr);
-     }
+   auto light = std::make_shared<StaticLight::LightInstance>();
+   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
+   std::string texture = "data/light/smooth.png";
+   auto flickerIntensity = 0.0f;
+   auto flickerAlphaAmount = 1.0f;
+   auto flickerSpeed = 0.0f;
+   if (tmxObject->mProperties != nullptr)
+   {
+      auto it = tmxObject->mProperties->mMap.find("color");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         rgba = TmxTools::color(it->second->mValueStr);
+      }
 
-     it = tmxObject->mProperties->mMap.find("texture");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
-     }
+      it = tmxObject->mProperties->mMap.find("texture");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
+      }
 
-     it = tmxObject->mProperties->mMap.find("flicker_intensity");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        flickerIntensity = it->second->mValueFloat;
-     }
+      it = tmxObject->mProperties->mMap.find("flicker_intensity");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         flickerIntensity = it->second->mValueFloat;
+      }
 
-     it = tmxObject->mProperties->mMap.find("flicker_alpha_amount");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        flickerAlphaAmount = it->second->mValueFloat;
-     }
+      it = tmxObject->mProperties->mMap.find("flicker_alpha_amount");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         flickerAlphaAmount = it->second->mValueFloat;
+      }
 
-     it = tmxObject->mProperties->mMap.find("flicker_speed");
-     if (it != tmxObject->mProperties->mMap.end())
-     {
-        flickerSpeed = it->second->mValueFloat;
-     }
-  }
-  light->mColor.r = rgba[0];
-  light->mColor.g = rgba[1];
-  light->mColor.b = rgba[2];
-  light->mColor.a = rgba[3];
-  light->mFlickerIntensity = flickerIntensity;
-  light->mFlickerAlphaAmount = flickerAlphaAmount;
-  light->mFlickerSpeed = flickerSpeed;
-  light->mSprite.setColor(light->mColor);
-  light->mTexture.loadFromFile(texture);
-  light->mSprite.setTexture(light->mTexture);
-  light->mSprite.setPosition(tmxObject->mX, tmxObject->mY);
-  light->mZ = objectGroup->mZ;
+      it = tmxObject->mProperties->mMap.find("flicker_speed");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         flickerSpeed = it->second->mValueFloat;
+      }
+   }
 
-  auto scaleX = tmxObject->mWidth / light->mTexture.getSize().x;
-  auto scaleY = tmxObject->mHeight / light->mTexture.getSize().y;
-  light->mSprite.scale(scaleX, scaleY);
+   light->mColor.r = rgba[0];
+   light->mColor.g = rgba[1];
+   light->mColor.b = rgba[2];
+   light->mColor.a = rgba[3];
+   light->mFlickerIntensity = flickerIntensity;
+   light->mFlickerAlphaAmount = flickerAlphaAmount;
+   light->mFlickerSpeed = flickerSpeed;
+   light->mSprite.setColor(light->mColor);
+   light->mTexture.loadFromFile(texture);
+   light->mSprite.setTexture(light->mTexture);
+   light->mSprite.setPosition(tmxObject->mX, tmxObject->mY);
+   light->mZ = objectGroup->mZ;
 
-  return light;
+   auto scaleX = tmxObject->mWidth / light->mTexture.getSize().x;
+   auto scaleY = tmxObject->mHeight / light->mTexture.getSize().y;
+   light->mSprite.scale(scaleX, scaleY);
+
+   return light;
 }
 
 
@@ -571,6 +570,10 @@ void Level::loadTmx()
                auto cp = Checkpoint::getCheckpoint(cpi);
                cp->addCallback([](){SaveState::serializeToFile();});
             }
+            else if (objectGroup->mName == "dialogues")
+            {
+               Dialogue::add(tmxObject);
+            }
             else if (objectGroup->mName == "bouncers")
             {
                auto bouncer = std::make_shared<Bouncer>(
@@ -709,6 +712,7 @@ void Level::load()
 
    Weather::getInstance().clear();
    Checkpoint::resetAll();
+   Dialogue::resetAll();
 
    // load tmx
    loadTmx();
@@ -1253,6 +1257,7 @@ void Level::update(const sf::Time& dt)
    mBoomEffect.update(dt);
 
    Checkpoint::update();
+   Dialogue::update();
 
    for (auto& tileMap : mTileMaps)
    {

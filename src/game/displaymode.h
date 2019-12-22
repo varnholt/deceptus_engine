@@ -1,5 +1,4 @@
-#ifndef DISPLAYMODE_H
-#define DISPLAYMODE_H
+#pragma once
 
 #include "constants.h"
 #include <cstdint>
@@ -37,4 +36,3 @@ private:
    void toggle(Display mode);
 };
 
-#endif // DISPLAYMODE_H

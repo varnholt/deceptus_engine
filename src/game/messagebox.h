@@ -37,12 +37,14 @@ class MessageBox
       static bool keyboardKeyPressed(sf::Keyboard::Key key);
 
       static void info(
-         const std::string& message, MessageBoxCallback callback,
+         const std::string& message,
+         MessageBoxCallback callback,
          int buttons = static_cast<int32_t>(Button::Ok)
       );
 
       static void question(
-         const std::string& message, MessageBoxCallback callback,
+         const std::string& message,
+         MessageBoxCallback callback,
          int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
       );
 

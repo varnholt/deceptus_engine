@@ -1,5 +1,6 @@
 #include "menu.h"
 
+#include "game/displaymode.h"
 #include "game/gameconfiguration.h"
 
 #include "menuscreenachievements.h"
@@ -141,6 +142,7 @@ void Menu::show(Menu::MenuType menu)
    if (mCurrentMenu)
    {
       mCurrentMenu->showEvent();
+      DisplayMode::getInstance().enqueueSet(DisplayMainMenu);
    }
 
    mHistory.push_back(menu);
@@ -157,6 +159,8 @@ void Menu::hide()
    {
       mCurrentMenu->hideEvent();
    }
+
+   DisplayMode::getInstance().enqueueUnset(DisplayMainMenu);
 
    mCurrentMenu = nullptr;
    mCurrentType = MenuType::None;
