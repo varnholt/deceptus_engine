@@ -94,6 +94,7 @@ INCLUDEPATH += src
 
 SOURCES += \
    src/game/callbackmap.cpp \
+   src/game/dialogue.cpp \
    src/game/enemydescription.cpp \
    src/game/forestscene.cpp \
    src/game/camerasystem.cpp \
@@ -233,6 +234,7 @@ SOURCES += \
 
 HEADERS += \
     src/game/callbackmap.h \
+    src/game/dialogue.h \
     src/game/enemydescription.h \
     src/game/forestscene.h \
     src/game/camerasystem.h \

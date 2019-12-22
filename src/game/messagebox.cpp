@@ -1,5 +1,6 @@
 #include "messagebox.h"
 
+#include "displaymode.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontrollerintegration.h"
 #include "image/psd.h"
@@ -93,7 +94,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (button != MessageBox::Button::Invalid)
       {
-         box.mCallback(button);
+         if (box.mCallback)
+         {
+            box.mCallback(button);
+         }
+
          mQueue.pop_front();
       }
    }
@@ -180,6 +185,9 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    sLayers["msg-defaultsYN"]->mVisible = false;
    sLayers["msg-quitYN"]->mVisible = false;
 
+   bool menuShown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
+   sLayers["temp_bg"]->mVisible = menuShown;
+
    sLayers["yes_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::Yes);
    sLayers["no_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::No);
 
@@ -195,6 +203,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
          static_cast<float>(GameConfiguration::getInstance().mViewHeight)
       )
    );
+
    window.setView(pixelOrtho);
 
    for (auto& layer : sLayerStack)

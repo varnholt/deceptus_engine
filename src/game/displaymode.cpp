@@ -78,7 +78,7 @@ bool DisplayMode::isSet(Display mode)
 
 
 //-----------------------------------------------------------------------------
-DisplayMode &DisplayMode::getInstance()
+DisplayMode& DisplayMode::getInstance()
 {
   return sInstance;
 }
