@@ -39,12 +39,19 @@ public:
    static void resetAll();
    static void update();
 
-private:
+   bool isActive() const;
+   void setActive(bool active);
+   void showNext();
+
+   private:
+
    std::vector<DialogueItem> mDialogue;
+   uint32_t mIndex = 0;
+
    sf::IntRect mPixelRect;
    bool mRepeated = false;
    bool mPlayed = false;
-   bool mDisplayed = false;
+   bool mActive = false;
 
    static std::vector<Dialogue> sDialogues;
 };
