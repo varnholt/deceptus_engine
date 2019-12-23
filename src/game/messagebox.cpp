@@ -94,12 +94,12 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (button != MessageBox::Button::Invalid)
       {
+         mQueue.pop_front();
+
          if (box.mCallback)
          {
             box.mCallback(button);
          }
-
-         mQueue.pop_front();
       }
    }
 
