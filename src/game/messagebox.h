@@ -1,6 +1,5 @@
 #pragma once
 
-#include <deque>
 #include <functional>
 #include <memory>
 
@@ -32,7 +31,6 @@ class MessageBox
       MessageBox(Type type, const std::string& message, MessageBoxCallback cb, int32_t buttons);
       virtual ~MessageBox();
 
-      static bool empty();
       static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
       static bool keyboardKeyPressed(sf::Keyboard::Key key);
 
@@ -63,7 +61,7 @@ class MessageBox
       std::function<void(void)> mButtonCallbackA;
       std::function<void(void)> mButtonCallbackB;
 
-      static std::deque<MessageBox> mQueue;
+      static std::unique_ptr<MessageBox> mActive;
       static std::vector<std::shared_ptr<Layer>> sLayerStack; // SLAYER!
       static std::map<std::string, std::shared_ptr<Layer>> sLayers;
       static sf::Font sFont;

@@ -16,8 +16,6 @@ std::vector<Dialogue> Dialogue::sDialogues;
 
 void Dialogue::add(TmxObject* tmxObject)
 {
-   std::cout << "add text" << std::endl;
-
    Dialogue dialogue;
 
    auto properties = tmxObject->mProperties;
@@ -87,8 +85,6 @@ void Dialogue::setActive(bool active)
 
 void Dialogue::showNext()
 {
-   std::cout << "show text" << std::endl;
-
    if (mIndex == mDialogue.size())
    {
       mIndex = 0;

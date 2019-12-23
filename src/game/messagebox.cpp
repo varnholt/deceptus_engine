@@ -9,7 +9,7 @@
 #include <iostream>
 #include <math.h>
 
-std::deque<MessageBox> MessageBox::mQueue;
+std::unique_ptr<MessageBox> MessageBox::mActive;
 bool MessageBox::sInitialized = false;
 
 std::vector<std::shared_ptr<Layer>> MessageBox::sLayerStack;
@@ -47,33 +47,25 @@ MessageBox::~MessageBox()
 }
 
 
-bool MessageBox::empty()
-{
-   return mQueue.empty();
-}
-
-
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (empty())
+   if (!mActive)
    {
       return false;
    }
 
-   auto& box = mQueue.front();
-
-   if (box.mDrawn)
+   if (mActive->mDrawn)
    {
       MessageBox::Button button = MessageBox::Button::Invalid;
 
       // yay
       if (key == sf::Keyboard::Return)
       {
-         if (box.mButtons & static_cast<int32_t>(Button::Yes))
+         if (mActive->mButtons & static_cast<int32_t>(Button::Yes))
          {
             button = Button::Yes;
          }
-         else if (box.mButtons & static_cast<int32_t>(Button::Ok))
+         else if (mActive->mButtons & static_cast<int32_t>(Button::Ok))
          {
             button = Button::Ok;
          }
@@ -82,11 +74,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // nay
       if (key == sf::Keyboard::Escape)
       {
-         if (box.mButtons & static_cast<int32_t>(Button::No))
+         if (mActive->mButtons & static_cast<int32_t>(Button::No))
          {
             button = Button::No;
          }
-         else if (box.mButtons & static_cast<int32_t>(Button::Cancel))
+         else if (mActive->mButtons & static_cast<int32_t>(Button::Cancel))
          {
             button = Button::Cancel;
          }
@@ -94,11 +86,12 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (button != MessageBox::Button::Invalid)
       {
-         mQueue.pop_front();
+         auto callback = mActive->mCallback;
+         mActive.release();
 
-         if (box.mCallback)
+         if (callback)
          {
-            box.mCallback(button);
+            callback(button);
          }
       }
    }
@@ -168,16 +161,15 @@ void MessageBox::initializeControllerCallbacks()
 
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   if (empty())
+   if (!mActive)
    {
       return;
    }
 
-   auto& box = mQueue.front();
-   box.mDrawn = true;
+   mActive->mDrawn = true;
 
    const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
-   const auto buttons = box.mButtons;
+   const auto buttons = mActive->mButtons;
 
    sLayers["msg-copyssYN"]->mVisible = false;
    sLayers["msg-overwritessYN"]->mVisible = false;
@@ -217,7 +209,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    sText.setScale(0.25f, 0.25f);
    sText.setFont(sFont);
    sText.setCharacterSize(48);
-   sText.setString(box.mMessage);
+   sText.setString(mActive->mMessage);
    sText.setFillColor(sf::Color{232, 219, 243});
 
    // box top/left: 137 x 94
@@ -234,14 +226,14 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void MessageBox::messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons)
 {
-   mQueue.emplace_back(type, message, callback, buttons);
+   mActive = std::make_unique<MessageBox>(type, message, callback, buttons);
 }
 
 
 void MessageBox::info(const std::string& message, MessageBoxCallback callback, int32_t buttons)
 {
    // i don't think there's any valid use case for the queue :)
-   if (!mQueue.empty())
+   if (mActive)
    {
       return;
    }
@@ -253,7 +245,7 @@ void MessageBox::info(const std::string& message, MessageBoxCallback callback, i
 void MessageBox::question(const std::string& message, MessageBox::MessageBoxCallback callback, int32_t buttons)
 {
    // i don't think there's any valid use case for the queue :)
-   if (!mQueue.empty())
+   if (mActive)
    {
       return;
    }
