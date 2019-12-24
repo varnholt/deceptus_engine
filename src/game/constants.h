@@ -57,6 +57,7 @@ enum Alignment {
   PointsLeft    = 0x08,
 };
 
+
 enum Display {
   DisplayInvalid   = 0x00,
   DisplayGame      = 0x01,
@@ -65,6 +66,7 @@ enum Display {
   DisplayInventory = 0x08,
   DisplayDebug     = 0x10,
 };
+
 
 enum class ItemType {
    Invalid,
@@ -84,11 +86,13 @@ enum class ItemType {
    Shovel,
 };
 
+
 enum class ExecutionMode {
    None,
    Running,
    Paused,
 };
+
 
 enum class MenuAction
 {
@@ -100,68 +104,74 @@ enum class MenuAction
   Increase,
 };
 
+
 enum class PlayerAction
 {
-  None,
-  Jump,
-  Action,
-  Shoot,
-  Inventory,
-  EnterDoor,
-  MoveLeft,
-  MoveRight,
-  Crouch,
-  DropPlatform,
-  LookAround,
-  DoubleJump,
-  Swim,
-  DashLeft,
-  DashRight,
-  WallJump,
+   None,
+   Jump,
+   Action,
+   Shoot,
+   Inventory,
+   EnterDoor,
+   MoveLeft,
+   MoveRight,
+   Crouch,
+   DropPlatform,
+   LookAround,
+   DoubleJump,
+   Swim,
+   DashLeft,
+   DashRight,
+   WallJump,
 };
+
 
 enum SdlControllerButton
 {
-  SdlControllerButtonNone             = 0x0,
-  SdlControllerButtonA                = 0x1,
-  SdlControllerButtonB                = 0x2,
-  SdlControllerButtonX                = 0x4,
-  SdlControllerButtonY                = 0x8,
-  SdlControllerButtonBack             = 0x10,
-  SdlControllerButtonGuide            = 0x20,
-  SdlControllerButtonStart            = 0x40,
-  SdlControllerButtonLeftStick        = 0x80,
-  SdlControllerButtonRightStick       = 0x100,
-  SdlControllerButtonLeftShoulder     = 0x200,
-  SdlControllerButtonRightShoulder    = 0x400,
-  SdlControllerButtonDpadUp           = 0x800,
-  SdlControllerButtonDpadDown         = 0x1000,
-  SdlControllerButtonDpadLeft         = 0x2000,
-  SdlControllerButtonDpadRight        = 0x4000,
+   SdlControllerButtonNone             = 0x0,
+   SdlControllerButtonA                = 0x1,
+   SdlControllerButtonB                = 0x2,
+   SdlControllerButtonX                = 0x4,
+   SdlControllerButtonY                = 0x8,
+   SdlControllerButtonBack             = 0x10,
+   SdlControllerButtonGuide            = 0x20,
+   SdlControllerButtonStart            = 0x40,
+   SdlControllerButtonLeftStick        = 0x80,
+   SdlControllerButtonRightStick       = 0x100,
+   SdlControllerButtonLeftShoulder     = 0x200,
+   SdlControllerButtonRightShoulder    = 0x400,
+   SdlControllerButtonDpadUp           = 0x800,
+   SdlControllerButtonDpadDown         = 0x1000,
+   SdlControllerButtonDpadLeft         = 0x2000,
+   SdlControllerButtonDpadRight        = 0x4000,
 };
+
 
 enum class InvetoryAction
 {
-  ShowMap,
-  Pause,
-  Confirm,
-  Cancel,
-  PreviousPage,
-  NextPage,
-  MoveUp,
-  MoveDown,
-  MoveRight,
-  MoveLeft,
+   ShowMap,
+   Pause,
+   Confirm,
+   Cancel,
+   PreviousPage,
+   NextPage,
+   MoveUp,
+   MoveDown,
+   MoveRight,
+   MoveLeft,
 };
 
-enum Look {
-  LookInactive = 0x0,
-  LookActive   = 0x1,
-  LookUp       = 0x2,
-  LookDown     = 0x4,
-  LookLeft     = 0x8,
-  LookRight    = 0x10,
+
+enum Look
+{
+   LookInactive = 0x0,
+   LookActive   = 0x1,
+   LookUp       = 0x2,
+   LookDown     = 0x4,
+   LookLeft     = 0x8,
+   LookRight    = 0x10,
 };
+
 
 enum KeyPressed {
    KeyPressedUp    = 0x01,
@@ -174,6 +184,56 @@ enum KeyPressed {
    KeyPressedLook  = 0x80,
 };
 
+
+enum ObjectBehavior
+{
+   ObjectBehaviorSolid = 1,
+   ObjectBehaviorDeadly,
+};
+
+
+enum ObjectType
+{
+   ObjectTypePlayer,
+   ObjectTypePlayerFootSensor,
+   ObjectTypePlayerHeadSensor,
+   ObjectTypeBullet,
+   ObjectTypeOneSidedWall,
+   ObjectTypeDeadly,
+   ObjectTypeMovingPlatform,
+   ObjectTypeDoor,
+   ObjectTypeEnemy,
+   ObjectTypeBouncer,
+   ObjectTypeConveyorBelt,
+   ObjectTypeJumpPlatform,
+   ObjectTypeMoveableBox,
+};
+
+
+enum EntityCategory {
+   CategoryBoundary         = 0x01,
+   CategoryFriendly         = 0x02,
+   CategoryEnemyWalkThrough = 0x04,
+   CategoryEnemyCollideWith = 0x08,
+};
+
+
+enum class MessageBoxLocation
+{
+   Invalid = 0,
+   TopLeft,
+   TopCenter,
+   TopRight,
+   MiddleLeft,
+   MiddleCenter,
+   MiddleRight,
+   BottomLeft,
+   BottomCenter,
+   BottomRight,
+};
+
+
+// this enum should be removed
 enum AtmosphereTile // 16 cols per row
 {
    // PhysicsTileSolidFull = 0,
@@ -217,35 +277,5 @@ enum AtmosphereTile // 16 cols per row
    AtmosphereTileWaterCornerTopLeft,      // not used
 
    AtmosphereTileInvalid = 1024,
-};
-
-enum ObjectBehavior
-{
-   ObjectBehaviorSolid = 1,
-   ObjectBehaviorDeadly,
-};
-
-enum ObjectType
-{
-   ObjectTypePlayer,
-   ObjectTypePlayerFootSensor,
-   ObjectTypePlayerHeadSensor,
-   ObjectTypeBullet,
-   ObjectTypeOneSidedWall,
-   ObjectTypeDeadly,
-   ObjectTypeMovingPlatform,
-   ObjectTypeDoor,
-   ObjectTypeEnemy,
-   ObjectTypeBouncer,
-   ObjectTypeConveyorBelt,
-   ObjectTypeJumpPlatform,
-   ObjectTypeMoveableBox,
-};
-
-enum EntityCategory {
-   CategoryBoundary         = 0x01,
-   CategoryFriendly         = 0x02,
-   CategoryEnemyWalkThrough = 0x04,
-   CategoryEnemyCollideWith = 0x08,
 };
 

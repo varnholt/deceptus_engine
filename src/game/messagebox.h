@@ -5,6 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "constants.h"
 #include "image/layer.h"
 
 
@@ -26,6 +27,12 @@ class MessageBox
          Error
       };
 
+      struct Properties {
+         MessageBoxLocation mLocation = MessageBoxLocation::MiddleCenter;
+         sf::Color mBackgroundColor = sf::Color{47, 12, 75};
+         sf::Color mTextColor = sf::Color{232, 219, 243};
+      };
+
       using MessageBoxCallback = std::function<void(Button)>;
 
       MessageBox(Type type, const std::string& message, MessageBoxCallback cb, int32_t buttons);
@@ -37,12 +44,14 @@ class MessageBox
       static void info(
          const std::string& message,
          MessageBoxCallback callback,
+         const Properties& properties = sDefaultProperties,
          int buttons = static_cast<int32_t>(Button::Ok)
       );
 
       static void question(
          const std::string& message,
          MessageBoxCallback callback,
+         const Properties& properties = sDefaultProperties,
          int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
       );
 
@@ -50,24 +59,30 @@ class MessageBox
    private:
 
       MessageBox();
+
       static void messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons);
       static void initializeLayers();
+      static sf::Vector2i pixelLocation(MessageBoxLocation);
+
+      void initializeControllerCallbacks();
 
       Type mType;
+      std::string mTitle; // still unsupported
       std::string mMessage;
       MessageBoxCallback mCallback;
       int mButtons = 0;
       bool mDrawn = false;
       std::function<void(void)> mButtonCallbackA;
       std::function<void(void)> mButtonCallbackB;
+      Properties mProperties;
 
-      static std::unique_ptr<MessageBox> mActive;
+      static Properties sDefaultProperties;
+      static std::unique_ptr<MessageBox> sActive;
       static std::vector<std::shared_ptr<Layer>> sLayerStack; // SLAYER!
       static std::map<std::string, std::shared_ptr<Layer>> sLayers;
       static sf::Font sFont;
       static sf::Text sText;
-
       static bool sInitialized;
-      void initializeControllerCallbacks();
+
 };
 

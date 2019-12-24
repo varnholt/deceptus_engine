@@ -91,11 +91,13 @@ void Dialogue::showNext()
       return;
    }
 
+   const auto item = mDialogue.at(mIndex);
    MessageBox::info(
-      mDialogue.at(mIndex).mMessage,
+      item.mMessage,
       [this](MessageBox::Button /*b*/) {
          showNext();
-      }
+      },
+      MessageBox::Properties{item.mLocation, item.mBackgroundColor, item.mTextColor}
    );
 
    mIndex++;

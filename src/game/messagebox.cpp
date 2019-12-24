@@ -9,7 +9,8 @@
 #include <iostream>
 #include <math.h>
 
-std::unique_ptr<MessageBox> MessageBox::mActive;
+std::unique_ptr<MessageBox> MessageBox::sActive;
+MessageBox::Properties MessageBox::sDefaultProperties;
 bool MessageBox::sInitialized = false;
 
 std::vector<std::shared_ptr<Layer>> MessageBox::sLayerStack;
@@ -49,23 +50,23 @@ MessageBox::~MessageBox()
 
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (!mActive)
+   if (!sActive)
    {
       return false;
    }
 
-   if (mActive->mDrawn)
+   if (sActive->mDrawn)
    {
       MessageBox::Button button = MessageBox::Button::Invalid;
 
       // yay
       if (key == sf::Keyboard::Return)
       {
-         if (mActive->mButtons & static_cast<int32_t>(Button::Yes))
+         if (sActive->mButtons & static_cast<int32_t>(Button::Yes))
          {
             button = Button::Yes;
          }
-         else if (mActive->mButtons & static_cast<int32_t>(Button::Ok))
+         else if (sActive->mButtons & static_cast<int32_t>(Button::Ok))
          {
             button = Button::Ok;
          }
@@ -74,11 +75,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // nay
       if (key == sf::Keyboard::Escape)
       {
-         if (mActive->mButtons & static_cast<int32_t>(Button::No))
+         if (sActive->mButtons & static_cast<int32_t>(Button::No))
          {
             button = Button::No;
          }
-         else if (mActive->mButtons & static_cast<int32_t>(Button::Cancel))
+         else if (sActive->mButtons & static_cast<int32_t>(Button::Cancel))
          {
             button = Button::Cancel;
          }
@@ -86,8 +87,8 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (button != MessageBox::Button::Invalid)
       {
-         auto callback = mActive->mCallback;
-         mActive.release();
+         auto callback = sActive->mCallback;
+         sActive.release();
 
          if (callback)
          {
@@ -127,7 +128,7 @@ void MessageBox::initializeLayers()
          auto texture = std::make_shared<sf::Texture>();
          auto sprite = std::make_shared<sf::Sprite>();
 
-         texture->create(layer.getWidth(), layer.getHeight());
+         texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
          texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
          sprite->setTexture(*texture, true);
@@ -142,6 +143,74 @@ void MessageBox::initializeLayers()
 
       sInitialized = true;
    }
+}
+
+
+sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
+{
+   sf::Vector2i pos;
+
+   switch (location)
+   {
+      case MessageBoxLocation::TopLeft:
+      case MessageBoxLocation::MiddleLeft:
+      case MessageBoxLocation::BottomLeft:
+      {
+         pos.x = 83;
+         break;
+      }
+      case MessageBoxLocation::TopCenter:
+      case MessageBoxLocation::MiddleCenter:
+      case MessageBoxLocation::BottomCenter:
+      {
+         pos.x = 143;
+         break;
+      }
+      case MessageBoxLocation::TopRight:
+      case MessageBoxLocation::MiddleRight:
+      case MessageBoxLocation::BottomRight:
+      {
+         pos.x = 203;
+         break;
+      }
+      case MessageBoxLocation::Invalid:
+      {
+         break;
+      }
+   }
+
+   switch (location)
+   {
+      case MessageBoxLocation::TopLeft:
+      case MessageBoxLocation::TopCenter:
+      case MessageBoxLocation::TopRight:
+      {
+         pos.y = 62;
+         break;
+      }
+
+      case MessageBoxLocation::MiddleLeft:
+      case MessageBoxLocation::MiddleCenter:
+      case MessageBoxLocation::MiddleRight:
+      {
+         pos.y = 112;
+         break;
+      }
+
+      case MessageBoxLocation::BottomLeft:
+      case MessageBoxLocation::BottomCenter:
+      case MessageBoxLocation::BottomRight:
+      {
+         pos.y = 162;
+         break;
+      }
+      case MessageBoxLocation::Invalid:
+      {
+         break;
+      }
+   }
+
+   return pos;
 }
 
 
@@ -161,28 +230,25 @@ void MessageBox::initializeControllerCallbacks()
 
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   if (!mActive)
+   if (!sActive)
    {
       return;
    }
 
-   mActive->mDrawn = true;
+   sActive->mDrawn = true;
 
    const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
-   const auto buttons = mActive->mButtons;
+   const auto buttons = sActive->mButtons;
+   bool menuShown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
 
    sLayers["msg-copyssYN"]->mVisible = false;
    sLayers["msg-overwritessYN"]->mVisible = false;
    sLayers["msg-deletessYN"]->mVisible = false;
    sLayers["msg-defaultsYN"]->mVisible = false;
    sLayers["msg-quitYN"]->mVisible = false;
-
-   bool menuShown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
    sLayers["temp_bg"]->mVisible = menuShown;
-
    sLayers["yes_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::Yes);
    sLayers["no_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::No);
-
    sLayers["yes_pc_1"]->mVisible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
    sLayers["no_pc_1"]->mVisible = !xbox && buttons & static_cast<int32_t>(Button::No);
 
@@ -209,31 +275,36 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    sText.setScale(0.25f, 0.25f);
    sText.setFont(sFont);
    sText.setCharacterSize(48);
-   sText.setString(mActive->mMessage);
-   sText.setFillColor(sf::Color{232, 219, 243});
+   sText.setString(sActive->mMessage);
+   sText.setFillColor(sActive->mProperties.mTextColor);
 
    // box top/left: 137 x 94
    // box dimensions: 202 x 71
    // box left: 143
+   const auto pos = pixelLocation(sActive->mProperties.mLocation);
    const auto rect = sText.getGlobalBounds();
-   const auto left = 143;
+   const auto left = pos.x;
    const auto x = left + (202 - rect.width) * 0.5f;
 
-   sText.setPosition(floor(x), 112);
+   sText.setPosition(floor(x), static_cast<float>(pos.y));
    window.draw(sText, states);
 }
 
 
 void MessageBox::messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons)
 {
-   mActive = std::make_unique<MessageBox>(type, message, callback, buttons);
+   sActive = std::make_unique<MessageBox>(type, message, callback, buttons);
 }
 
 
-void MessageBox::info(const std::string& message, MessageBoxCallback callback, int32_t buttons)
+void MessageBox::info(
+   const std::string& message,
+   MessageBoxCallback callback,
+   const Properties& /*properties*/,
+   int32_t buttons
+)
 {
-   // i don't think there's any valid use case for the queue :)
-   if (mActive)
+   if (sActive)
    {
       return;
    }
@@ -242,18 +313,19 @@ void MessageBox::info(const std::string& message, MessageBoxCallback callback, i
 }
 
 
-void MessageBox::question(const std::string& message, MessageBox::MessageBoxCallback callback, int32_t buttons)
+void MessageBox::question(
+   const std::string& message,
+   MessageBox::MessageBoxCallback callback,
+   const Properties& /*properties*/,
+   int32_t buttons
+)
 {
-   // i don't think there's any valid use case for the queue :)
-   if (mActive)
+   if (sActive)
    {
       return;
    }
 
    messageBox(MessageBox::Type::Info, message, callback, buttons);
 }
-
-
-// https://www.sfml-dev.org/tutorials/2.5/graphics-text.php
 
 
