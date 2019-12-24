@@ -3,7 +3,9 @@
 #include <vector>
 #include <string>
 
-#include <sfml/Graphics.hpp>
+#include <SFML/Graphics.hpp>
+
+#include "constants.h"
 
 struct TmxObject;
 
@@ -12,26 +14,13 @@ class Dialogue
 
 public:
 
-   enum class Location
-   {
-      Invalid,
-      TopLeft,
-      TopCenter,
-      TopRight,
-      MiddleLeft,
-      MiddleCenter,
-      MiddleRight,
-      BottomLeft,
-      BottomCenter,
-      BottomRight,
-   };
-
    struct DialogueItem
    {
-      std::string mName;
+      std::string mTitle;
       std::string mMessage;
-      sf::Color mColor;
-      Location mLocation;
+      sf::Color mTextColor = sf::Color{232, 219, 243};
+      sf::Color mBackgroundColor = sf::Color{47, 12, 75};
+      MessageBoxLocation mLocation = MessageBoxLocation::MiddleCenter;
    };
 
    Dialogue() = default;
@@ -43,7 +32,7 @@ public:
    void setActive(bool active);
    void showNext();
 
-   private:
+private:
 
    std::vector<DialogueItem> mDialogue;
    uint32_t mIndex = 0;
