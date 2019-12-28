@@ -7,6 +7,7 @@
 #include "globalclock.h"
 #include "image/psd.h"
 #include "joystick/gamecontroller.h"
+#include "player.h"
 
 #include <algorithm>
 #include <iostream>
@@ -39,11 +40,21 @@ MessageBox::MessageBox(
    initializeControllerCallbacks();
    mShowTime = GlobalClock::getInstance()->getElapsedTime();
 
-   mPreviousMode = GameState::getInstance().getMode();
-//   if (mPreviousMode == ExecutionMode::Running)
-//   {
-//      GameState::getInstance().enqueuePause();
-//   }
+   DisplayMode::getInstance().enqueueSet(Display::DisplayModal);
+
+   Player::getCurrent()->setKeysPressed(0);
+
+   sText.setScale(0.25f, 0.25f);
+   sText.setFont(sFont);
+   sText.setCharacterSize(48);
+   sText.setFillColor(mProperties.mTextColor);
+   sText.setString("");
+
+   //   mPreviousMode = GameState::getInstance().getMode();
+   //   if (mPreviousMode == ExecutionMode::Running)
+   //   {
+   //      GameState::getInstance().enqueuePause();
+   //   }
 }
 
 
@@ -56,12 +67,12 @@ MessageBox::~MessageBox()
       gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
    }
 
-   std::cout << "destroyed" << std::endl;
+   DisplayMode::getInstance().enqueueUnset(Display::DisplayModal);
 
-//   if (mPreviousMode == ExecutionMode::Running)
-//   {
-//      GameState::getInstance().enqueueResume();
-//   }
+   //   if (mPreviousMode == ExecutionMode::Running)
+   //   {
+   //      GameState::getInstance().enqueueResume();
+   //   }
 }
 
 
@@ -74,16 +85,6 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (sActive->mDrawn)
    {
-      if (sActive->mProperties.mAnimate)
-      {
-         if (sActive->mCharsShown < sActive->mMessage.length())
-         {
-            sActive->mProperties.mAnimate = false;
-            std::cout << "complete message" << std::endl;
-            return true;
-         }
-      }
-
       MessageBox::Button button = MessageBox::Button::Invalid;
 
       // yay
@@ -96,6 +97,15 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
          else if (sActive->mButtons & static_cast<int32_t>(Button::Ok))
          {
             button = Button::Ok;
+         }
+
+         if (sActive->mProperties.mAnimate)
+         {
+            if (sActive->mCharsShown < sActive->mMessage.length())
+            {
+               sActive->mProperties.mAnimate = false;
+               return true;
+            }
          }
       }
 
@@ -112,13 +122,12 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
          }
       }
 
-
-      std::cout << "release that ptr!" << std::endl;
-      auto callback = sActive->mCallback;
-      sActive.release();
-
+      // call callback and close message box
       if (button != MessageBox::Button::Invalid)
       {
+         auto callback = sActive->mCallback;
+         sActive.reset();
+
          if (callback)
          {
             callback(button);
@@ -300,10 +309,6 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       }
    }
 
-   sText.setScale(0.25f, 0.25f);
-   sText.setFont(sFont);
-   sText.setCharacterSize(48);
-
    if (sActive->mProperties.mAnimate)
    {
       auto x = (GlobalClock::getInstance()->getElapsedTime().asSeconds() - sActive->mShowTime.asSeconds()) * 10.0f;
@@ -318,8 +323,6 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       sText.setString(sActive->mMessage);
    }
-
-   sText.setFillColor(sActive->mProperties.mTextColor);
 
    // text alignment
    const auto pos = pixelLocation(sActive->mProperties.mLocation);

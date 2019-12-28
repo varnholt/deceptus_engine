@@ -74,6 +74,7 @@ void Dialogue::update()
    }
 }
 
+
 bool Dialogue::isActive() const
 {
    return mActive;
@@ -94,6 +95,7 @@ void Dialogue::replace(std::string& str, const std::string& what, const std::str
       str.replace(index, what.size(), with);
    }
 }
+
 
 void Dialogue::replaceTags(std::string& str)
 {

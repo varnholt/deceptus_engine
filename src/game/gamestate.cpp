@@ -55,6 +55,11 @@ void GameState::addCallback(const GameState::StateChangeCallback& cb)
    mCallbacks.push_back(cb);
 }
 
+ExecutionMode GameState::getQueuedMode() const
+{
+   return mQueuedMode;
+}
+
 
 //-----------------------------------------------------------------------------
 void GameState::enqueuePause()
