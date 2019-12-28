@@ -2,14 +2,17 @@
 
 #include "messagebox.h"
 #include "player.h"
+#include "savestate.h"
 
 #include "tmxparser/tmxobject.h"
 #include "tmxparser/tmxproperty.h"
 #include "tmxparser/tmxproperties.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 std::vector<Dialogue> Dialogue::sDialogues;
 
@@ -83,6 +86,22 @@ void Dialogue::setActive(bool active)
 }
 
 
+void Dialogue::replace(std::string& str, const std::string& what, const std::string& with)
+{
+   auto index = str.find(what, 0);
+   if (index != std::string::npos)
+   {
+      str.replace(index, what.size(), with);
+   }
+}
+
+void Dialogue::replaceTags(std::string& str)
+{
+   replace(str, "<player>", SaveState::getPlayerInfo().mName);
+   replace(str, "<br>", "\n");
+}
+
+
 void Dialogue::showNext()
 {
    if (mIndex == mDialogue.size())
@@ -92,14 +111,21 @@ void Dialogue::showNext()
    }
 
    const auto item = mDialogue.at(mIndex);
+
+   auto str = item.mMessage;
+
+   replaceTags(str);
+
    MessageBox::info(
-      item.mMessage,
+      str,
       [this](MessageBox::Button /*b*/) {
          showNext();
       },
-      MessageBox::Properties{item.mLocation, item.mBackgroundColor, item.mTextColor}
+      MessageBox::LayoutProperties{item.mLocation, item.mBackgroundColor, item.mTextColor, true, false}
    );
 
    mIndex++;
 }
+
+
 

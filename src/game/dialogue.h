@@ -34,6 +34,9 @@ public:
 
 private:
 
+   void replaceTags(std::string& str);
+   void replace(std::string& str, const std::string& what, const std::string& with);
+
    std::vector<DialogueItem> mDialogue;
    uint32_t mIndex = 0;
 
