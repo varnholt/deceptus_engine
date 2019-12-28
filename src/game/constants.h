@@ -50,21 +50,22 @@ enum ZDepth
 
 
 enum Alignment {
-  PointsNowhere = 0x00,
-  PointsDown    = 0x01,
-  PointsUp      = 0x02,
-  PointsRight   = 0x04,
-  PointsLeft    = 0x08,
+   PointsNowhere = 0x00,
+   PointsDown    = 0x01,
+   PointsUp      = 0x02,
+   PointsRight   = 0x04,
+   PointsLeft    = 0x08,
 };
 
 
 enum Display {
-  DisplayInvalid   = 0x00,
-  DisplayGame      = 0x01,
-  DisplayMainMenu  = 0x02,
-  DisplayMap       = 0x04,
-  DisplayInventory = 0x08,
-  DisplayDebug     = 0x10,
+   DisplayInvalid   = 0x00,
+   DisplayGame      = 0x01,
+   DisplayMainMenu  = 0x02,
+   DisplayMap       = 0x04,
+   DisplayInventory = 0x08,
+   DisplayDebug     = 0x10,
+   DisplayModal     = 0x20
 };
 
 

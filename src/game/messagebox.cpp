@@ -3,14 +3,17 @@
 #include "displaymode.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontrollerintegration.h"
+#include "gamestate.h"
+#include "globalclock.h"
 #include "image/psd.h"
 #include "joystick/gamecontroller.h"
 
+#include <algorithm>
 #include <iostream>
 #include <math.h>
 
 std::unique_ptr<MessageBox> MessageBox::sActive;
-MessageBox::Properties MessageBox::sDefaultProperties;
+MessageBox::LayoutProperties MessageBox::sDefaultProperties;
 bool MessageBox::sInitialized = false;
 
 std::vector<std::shared_ptr<Layer>> MessageBox::sLayerStack;
@@ -19,21 +22,28 @@ sf::Font MessageBox::sFont;
 sf::Text MessageBox::sText;
 
 
-MessageBox::MessageBox()
-{
-   initializeLayers();
-   initializeControllerCallbacks();
-}
-
-
-MessageBox::MessageBox(MessageBox::Type type, const std::string& message, MessageBox::MessageBoxCallback cb, int32_t buttons)
+MessageBox::MessageBox(
+   MessageBox::Type type,
+   const std::string& message,
+   MessageBox::MessageBoxCallback cb,
+   const LayoutProperties& properties,
+   int32_t buttons
+)
  : mType(type),
    mMessage(message),
    mCallback(cb),
+   mProperties(properties),
    mButtons(buttons)
 {
    initializeLayers();
    initializeControllerCallbacks();
+   mShowTime = GlobalClock::getInstance()->getElapsedTime();
+
+   mPreviousMode = GameState::getInstance().getMode();
+//   if (mPreviousMode == ExecutionMode::Running)
+//   {
+//      GameState::getInstance().enqueuePause();
+//   }
 }
 
 
@@ -45,6 +55,13 @@ MessageBox::~MessageBox()
       gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
       gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
    }
+
+   std::cout << "destroyed" << std::endl;
+
+//   if (mPreviousMode == ExecutionMode::Running)
+//   {
+//      GameState::getInstance().enqueueResume();
+//   }
 }
 
 
@@ -57,6 +74,16 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (sActive->mDrawn)
    {
+      if (sActive->mProperties.mAnimate)
+      {
+         if (sActive->mCharsShown < sActive->mMessage.length())
+         {
+            sActive->mProperties.mAnimate = false;
+            std::cout << "complete message" << std::endl;
+            return true;
+         }
+      }
+
       MessageBox::Button button = MessageBox::Button::Invalid;
 
       // yay
@@ -85,11 +112,13 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
          }
       }
 
+
+      std::cout << "release that ptr!" << std::endl;
+      auto callback = sActive->mCallback;
+      sActive.release();
+
       if (button != MessageBox::Button::Invalid)
       {
-         auto callback = sActive->mCallback;
-         sActive.release();
-
          if (callback)
          {
             callback(button);
@@ -221,7 +250,6 @@ void MessageBox::initializeControllerCallbacks()
    {
       mButtonCallbackA = [](){keyboardKeyPressed(sf::Keyboard::Return);};
       mButtonCallbackB = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
-
       gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
       gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
    }
@@ -275,32 +303,62 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    sText.setScale(0.25f, 0.25f);
    sText.setFont(sFont);
    sText.setCharacterSize(48);
-   sText.setString(sActive->mMessage);
+
+   if (sActive->mProperties.mAnimate)
+   {
+      auto x = (GlobalClock::getInstance()->getElapsedTime().asSeconds() - sActive->mShowTime.asSeconds()) * 10.0f;
+      auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(sActive->mMessage.size()));
+      if (sActive->mCharsShown != to)
+      {
+         sActive->mCharsShown = to;
+         sText.setString(sActive->mMessage.substr(0, to));
+      }
+   }
+   else
+   {
+      sText.setString(sActive->mMessage);
+   }
+
    sText.setFillColor(sActive->mProperties.mTextColor);
 
-   // box top/left: 137 x 94
-   // box dimensions: 202 x 71
-   // box left: 143
+   // text alignment
    const auto pos = pixelLocation(sActive->mProperties.mLocation);
-   const auto rect = sText.getGlobalBounds();
-   const auto left = pos.x;
-   const auto x = left + (202 - rect.width) * 0.5f;
+   auto x = 0;
+   if (sActive->mProperties.mCentered)
+   {
+      // box top/left: 137 x 94
+      // box dimensions: 202 x 71
+      // box left: 143
+      const auto rect = sText.getGlobalBounds();
+      const auto left = pos.x;
+      x = static_cast<int32_t>(left + (202 - rect.width) * 0.5f);
+   }
+   else
+   {
+      x = pos.x;
+   }
 
-   sText.setPosition(floor(x), static_cast<float>(pos.y));
+   sText.setPosition(x, pos.y);
    window.draw(sText, states);
 }
 
 
-void MessageBox::messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons)
+void MessageBox::messageBox(
+   Type type,
+   const std::string& message,
+   MessageBoxCallback callback,
+   const LayoutProperties& properties,
+   int32_t buttons
+)
 {
-   sActive = std::make_unique<MessageBox>(type, message, callback, buttons);
+   sActive = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
 }
 
 
 void MessageBox::info(
    const std::string& message,
    MessageBoxCallback callback,
-   const Properties& /*properties*/,
+   const LayoutProperties& properties,
    int32_t buttons
 )
 {
@@ -309,14 +367,14 @@ void MessageBox::info(
       return;
    }
 
-   messageBox(MessageBox::Type::Info, message, callback, buttons);
+   messageBox(MessageBox::Type::Info, message, callback, properties, buttons);
 }
 
 
 void MessageBox::question(
    const std::string& message,
    MessageBox::MessageBoxCallback callback,
-   const Properties& /*properties*/,
+   const LayoutProperties& properties,
    int32_t buttons
 )
 {
@@ -325,7 +383,7 @@ void MessageBox::question(
       return;
    }
 
-   messageBox(MessageBox::Type::Info, message, callback, buttons);
+   messageBox(MessageBox::Type::Info, message, callback, properties, buttons);
 }
 
 

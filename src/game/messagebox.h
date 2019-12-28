@@ -27,15 +27,24 @@ class MessageBox
          Error
       };
 
-      struct Properties {
+      struct LayoutProperties {
          MessageBoxLocation mLocation = MessageBoxLocation::MiddleCenter;
          sf::Color mBackgroundColor = sf::Color{47, 12, 75};
          sf::Color mTextColor = sf::Color{232, 219, 243};
+         bool mAnimate = false;
+         bool mCentered = true;
       };
 
       using MessageBoxCallback = std::function<void(Button)>;
 
-      MessageBox(Type type, const std::string& message, MessageBoxCallback cb, int32_t buttons);
+      MessageBox(
+         Type type,
+         const std::string& message,
+         MessageBoxCallback cb,
+         const LayoutProperties& properties,
+         int32_t buttons
+      );
+
       virtual ~MessageBox();
 
       static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
@@ -44,23 +53,28 @@ class MessageBox
       static void info(
          const std::string& message,
          MessageBoxCallback callback,
-         const Properties& properties = sDefaultProperties,
+         const LayoutProperties& properties = sDefaultProperties,
          int buttons = static_cast<int32_t>(Button::Ok)
       );
 
       static void question(
          const std::string& message,
          MessageBoxCallback callback,
-         const Properties& properties = sDefaultProperties,
+         const LayoutProperties& properties = sDefaultProperties,
          int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
       );
 
 
    private:
 
-      MessageBox();
+      static void messageBox(
+         Type type,
+         const std::string& message,
+         MessageBoxCallback callback,
+         const LayoutProperties& properties,
+         int32_t buttons
+      );
 
-      static void messageBox(Type type, const std::string& message, MessageBoxCallback callback, int32_t buttons);
       static void initializeLayers();
       static sf::Vector2i pixelLocation(MessageBoxLocation);
 
@@ -70,13 +84,16 @@ class MessageBox
       std::string mTitle; // still unsupported
       std::string mMessage;
       MessageBoxCallback mCallback;
-      int mButtons = 0;
+      LayoutProperties mProperties;
+      int32_t mButtons = 0;
+      uint32_t mCharsShown = 0;
       bool mDrawn = false;
       std::function<void(void)> mButtonCallbackA;
       std::function<void(void)> mButtonCallbackB;
-      Properties mProperties;
+      sf::Time mShowTime;
+      ExecutionMode mPreviousMode = ExecutionMode::None;
 
-      static Properties sDefaultProperties;
+      static LayoutProperties sDefaultProperties;
       static std::unique_ptr<MessageBox> sActive;
       static std::vector<std::shared_ptr<Layer>> sLayerStack; // SLAYER!
       static std::map<std::string, std::shared_ptr<Layer>> sLayers;
