@@ -25,7 +25,8 @@ public:
    static GameState& getInstance();
 
    ExecutionMode getMode() const;
-   void setMode(const ExecutionMode &mode);
+   ExecutionMode getQueuedMode() const;
+   void setMode(const ExecutionMode& mode);
 
    void addCallback(const StateChangeCallback& cb);
 
