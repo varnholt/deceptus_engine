@@ -27,6 +27,7 @@ mSpriteIndex = 0
 mElapsed = 0.0
 mX = 1.0
 mSpriteY = 24
+mSpeed = 0.07
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -68,11 +69,11 @@ function fire()
    mElapsed = 0.0
    mSpriteIndex = 1
 
-fireWeapon(
+   fireWeapon(
       0,
       mPosition:getX() + mX * 16,
       mPosition:getY() - 3,
-      mX * 0.1,
+      mX * mSpeed,
       0.0
    );
 

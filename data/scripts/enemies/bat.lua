@@ -75,9 +75,9 @@ function attack()
    sy = mStartPosition:getY()
 
    k1 = Key:create{x = bx,          y = by,             time = 0.0}
-   k2 = Key:create{x = px - 1 * 24, y = py - 1.75 * 24, time = 0.2} -- left of player
+   k2 = Key:create{x = px + 2 * 24, y = py - 1.75 * 24, time = 0.2} -- right of player
    k3 = Key:create{x = px,          y = py - 1.5 * 24,  time = 0.5} -- player pos
-   k4 = Key:create{x = px + 2 * 24, y = py - 1.75 * 24, time = 0.8} -- right of player
+   k4 = Key:create{x = px - 1 * 24, y = py - 1.75 * 24, time = 0.8} -- left of player
    k5 = Key:create{x = sx,          y = sy,             time = 1.0} -- go back
 
    mPath = {k1, k2, k3, k4, k5}
