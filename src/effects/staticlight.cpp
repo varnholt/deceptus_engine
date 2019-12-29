@@ -54,7 +54,7 @@ void StaticLight::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
           light->mFlickerIntensity
         * fbm::fbm(
             fbm::vec2{
-              time.asSeconds() * light->mFlickerSpeed,
+              y + time.asSeconds() * light->mFlickerSpeed,
               y / static_cast<float>(mLights.size())
           }
         );
