@@ -2,6 +2,9 @@
   "filename": "data/level-malte/malte.tmx",
   "startposition": [47, 220],
   "enemies": [
+    {"script": "bat.lua", "startposition": [67, 215]},
+    {"script": "bat.lua", "startposition": [77, 215]},
+    {"script": "bat.lua", "startposition": [87, 215]},
     {"script": "cannon.lua","startposition": [255, 46], "properties": [{"name": "alignment", "value": "left"}]},
     {"script": "cannon.lua","startposition": [124, 265], "properties": [{"name": "alignment", "value": "left"}]},
     {"script": "cannon.lua","startposition": [111, 261], "properties": [{"name": "alignment", "value": "right"}]},
