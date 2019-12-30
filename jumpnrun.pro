@@ -227,6 +227,7 @@ SOURCES += \
     src/game/boomeffect.cpp \
     src/game/hermitecurve.cpp \
     src/game/checkpoint.cpp \
+    src/game/checksum.cpp \
     src/game/spikes.cpp
 
 
@@ -374,6 +375,7 @@ HEADERS += \
     src/game/hermitecurve.h \
     src/game/hermitecurvekey.h \
     src/game/checkpoint.h \
+    src/game/checksum.h \
     src/game/spikes.h
 
 

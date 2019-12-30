@@ -4,6 +4,7 @@
 #include "bouncer.h"
 #include "camerapane.h"
 #include "checkpoint.h"
+#include "checksum.h"
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "debugdraw.h"
@@ -421,6 +422,18 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
 void Level::loadTmx()
 {
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
+
+   const auto checksumOld = Checksum::readChecksum(mDescription->mFilename + ".crc");
+   const auto checksumNew = Checksum::calcChecksum(mDescription->mFilename);
+   if (checksumOld != checksumNew)
+   {
+      std::cout << "[x] checksum mismatch, deleting cached data" << std::endl;
+      std::filesystem::remove(path / "physics_grid_solid.png");
+      std::filesystem::remove(path / "physics_path_deadly.csv");
+      std::filesystem::remove(path / "physics_path_solid.csv");
+      std::filesystem::remove(path / "physics_path_solid.png");
+      Checksum::writeChecksum(mDescription->mFilename + ".crc", checksumNew);
+   }
 
    sf::Clock elapsed;
 
