@@ -124,7 +124,7 @@ void CameraSystem::updateY()
 
    // test if out of panic line boundaries
    auto player = Player::getCurrent();
-   const auto playerY = player->getPixelPosition().y;
+   const auto playerY = player->getPixelPosition().y + config.getPlayerOffsetY();
    const auto test = playerY - viewCenter;
 
    const auto p0 = mY - mPanicLineY1;

@@ -7,7 +7,8 @@
         "focus_zone_divider": 6.0,
         "panic_line_divider": 2.5,
         "target_shift_factor": 0.75,
-        "view_ratio_y": 1.5
+        "view_ratio_y": 1.5,
+        "player_offset_y" : 12
     }
 }
 
