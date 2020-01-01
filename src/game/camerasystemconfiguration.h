@@ -18,7 +18,7 @@ class CameraSystemConfiguration
       float getPanicLineDivider() const;
       float getViewRatioY() const;
       int32_t getBackInBoundsToleranceY() const;
-
+      int32_t getPlayerOffsetY() const;
 
    private:
 
@@ -38,6 +38,7 @@ class CameraSystemConfiguration
       float mPanicLineDivider = 2.5f;
       float mViewRatioY = 1.5f;
       int32_t mBackInBoundsToleranceY = 10;
+      int32_t mPlayerOffsetY = 0;
 
       static bool sInitialized;
       static CameraSystemConfiguration sInstance;
