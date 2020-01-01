@@ -110,3 +110,10 @@ void Checkpoint::addCallback(Checkpoint::CheckpointCallback cb)
 {
    mCallbacks.push_back(cb);
 }
+
+
+sf::Vector2i Checkpoint::calcCenter() const
+{
+   sf::Vector2i pos{mRect.left + mRect.width / 2, mRect.top};
+   return pos;
+}

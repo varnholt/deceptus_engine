@@ -582,6 +582,7 @@ void Level::loadTmx()
                const auto cpi = Checkpoint::add(tmxObject);
                auto cp = Checkpoint::getCheckpoint(cpi);
                cp->addCallback([](){SaveState::serializeToFile();});
+               cp->addCallback([cpi](){SaveState::getCurrent().mCheckpoint = cpi;});
             }
             else if (objectGroup->mName == "dialogues")
             {
@@ -763,6 +764,16 @@ void Level::initialize()
 
    mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
    mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+
+   auto checkpointIndex = SaveState::getCurrent().mCheckpoint;
+   auto checkpoint = Checkpoint::getCheckpoint(checkpointIndex);
+   if (checkpoint)
+   {
+      auto pos = checkpoint->calcCenter();
+      mStartPosition.x = pos.x;
+      mStartPosition.y = pos.y;
+      std::cout << "move to checkpoint: " << checkpointIndex << std::endl;
+   }
 
    spawnEnemies();
 }

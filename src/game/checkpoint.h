@@ -23,6 +23,7 @@ public:
 
     void reached();
     void addCallback(CheckpointCallback);
+    sf::Vector2i calcCenter() const;
 
 
 private:
