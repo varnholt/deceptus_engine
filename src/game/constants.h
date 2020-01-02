@@ -71,20 +71,11 @@ enum Display {
 
 enum class ItemType {
    Invalid,
-   Crowbar,
-   Dynamite,
    KeyBlue,
-   KeyCrypt,
+   KeyOrange,
    KeyGreen,
    KeyRed,
-   KeySkull,
    KeyYellow,
-   Knife,
-   LoveBomb,
-   Match,
-   Money,
-   Saw,
-   Shovel,
 };
 
 
