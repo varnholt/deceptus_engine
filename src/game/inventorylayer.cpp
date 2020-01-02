@@ -41,7 +41,7 @@ InventoryLayer::InventoryLayer()
    addDemoInventory();
    mInventuryTexture.loadFromFile("data/game/inventory.png");
    mCursorSprite.setTexture(mInventuryTexture);
-   mCursorSprite.setTextureRect({0, 512-48, 48, 48});
+   mCursorSprite.setTextureRect({0, 512 - 48, 48, 48});
 }
 
 
@@ -68,16 +68,11 @@ void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::addDemoInventory()
 {
-   addItem(0,  3, ItemType::KeyCrypt);
-   addItem(8,  3, ItemType::KeySkull);
-   addItem(4,  1, ItemType::Shovel  );
-   addItem(7,  6, ItemType::Knife   );
-   addItem(9,  6, ItemType::Saw     );
-   addItem(9,  7, ItemType::Crowbar );
-   addItem(0,  8, ItemType::Dynamite);
-   addItem(5,  9, ItemType::Money   );
-   addItem(0, 11, ItemType::Match   );
-   addItem(4, 12, ItemType::LoveBomb);
+   addItem(0,  0, ItemType::KeyRed   );
+   addItem(1,  0, ItemType::KeyOrange);
+   addItem(2,  0, ItemType::KeyBlue  );
+   addItem(3,  0, ItemType::KeyGreen );
+   addItem(4,  0, ItemType::KeyYellow);
 }
 
 

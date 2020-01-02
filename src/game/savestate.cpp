@@ -84,9 +84,9 @@ void SaveState::deserialize(const std::string& data)
 }
 
 
-void SaveState::deserializeFromFile(const std::string &filename)
+void SaveState::deserializeFromFile(const std::string& filename)
 {
-  std::ifstream ifs (filename, std::ifstream::in);
+  std::ifstream ifs(filename, std::ifstream::in);
 
    auto c = ifs.get();
    std::string data;
