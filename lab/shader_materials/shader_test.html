@@ -1,0 +1,164 @@
+<!doctype html>
+
+<html>
+<body bgcolor='#333333'>
+
+<script src="js/Three.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/THREEx.KeyboardState.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
+
+
+
+<script id="vertexShader" type="x-shader/x-vertex">
+uniform float time; // 0..1
+varying vec2 vUv;
+
+void main() 
+{
+   vUv = uv;
+   
+   vec4 pos = vec4(position, 1.0);
+   pos.x += (time * 256.0);
+   pos.y += (time * 512.0);
+
+   gl_Position = projectionMatrix * modelViewMatrix * pos;
+}
+
+</script>
+
+
+
+<script id="fragmentShader" type="x-shader/x-vertex"> 
+uniform float time;
+varying vec2 vUv;
+
+uniform sampler2D distort;
+uniform sampler2D player;
+
+void main() 
+{
+   vec2 offset_shift = vec2(0.0, 0.7);
+   vec2 offset_lookup = vec2(vUv.x, vUv.y);
+   vec2 offset = texture2D(distort, offset_lookup + offset_shift).xy;
+   vec4 texelColor = texture2D(player, vUv.xy + time * offset);
+
+   // fade out alpha
+   texelColor.a = (1.0 - time);
+
+   // remove crap
+   if (texelColor.r < 0.1)
+   {
+      texelColor.a = 0.0;
+   }
+   else
+   {
+      texelColor = mix(texelColor, vec4(1.0, 1.0, 1.0, 1.0 - time), time);
+   }
+
+   gl_FragColor = texelColor;
+}
+</script>
+
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+
+
+<script>
+
+// standard global variables
+var container, scene, camera, renderer, controls;
+var keyboard = new THREEx.KeyboardState();
+var clock = new THREE.Clock();
+
+init();
+animate();
+
+function init() 
+{
+	scene = new THREE.Scene();
+	
+   // set up camera
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45;
+   var ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT;
+   var NEAR = 0.1;
+   var FAR = 20000;
+	
+   camera = new THREE.OrthographicCamera(SCREEN_WIDTH/-2, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, SCREEN_HEIGHT/-2, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0, 0, 1000);
+	camera.lookAt(scene.position);	
+
+   renderer = new THREE.WebGLRenderer({antialias:true});
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	container = document.getElementById('ThreeJS');
+	container.appendChild( renderer.domElement );
+
+	// add window resize handler
+	THREEx.WindowResize(renderer, camera);
+
+	// add orbit controls
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	
+   // shader
+	var flowfieldTexture = new THREE.ImageUtils.loadTexture('images/flowfield_1.png');
+	var playerTexture = new THREE.ImageUtils.loadTexture('images/player.png');
+	flowfieldTexture.wrapS = flowfieldTexture.wrapT = THREE.RepeatWrapping; 		
+	playerTexture.wrapS = playerTexture.wrapT = THREE.RepeatWrapping; 
+	
+	this.customUniforms = {
+		player:           {type: "t", value: playerTexture},
+		distort:          {type: "t", value: flowfieldTexture},
+		time:             {type: "f", value: 1.0}
+	};
+	
+	// create custom material from the shader code
+	var customMaterial = new THREE.ShaderMaterial({
+         uniforms:       customUniforms,
+         vertexShader:   document.getElementById('vertexShader'  ).textContent,
+         fragmentShader: document.getElementById('fragmentShader').textContent
+      }   
+   );
+
+	// other material properties
+	customMaterial.side = THREE.DoubleSide;
+   customMaterial.transparent = true;
+
+	// apply the material to a surface
+   var flatGeometry = new THREE.PlaneGeometry(512, 512);
+   var surface = new THREE.Mesh(flatGeometry, customMaterial);
+   surface.position.set(0, 0, 150);
+   scene.add(surface);	
+}
+
+
+function animate() 
+{
+   requestAnimationFrame(animate);
+	render();		
+	update();
+}
+
+
+var time = 0.0;
+function update()
+{
+	var delta = clock.getDelta();
+   time += delta * 0.1;
+	customUniforms.time.value = time % 1.0;
+	controls.update();
+}
+
+function render() 
+{
+	renderer.render( scene, camera );
+}
+
+
+</script>
+
+</body>
+</html>
