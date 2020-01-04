@@ -567,8 +567,12 @@ void Level::loadTmx()
             {
                const auto cpi = Checkpoint::add(tmxObject);
                auto cp = Checkpoint::getCheckpoint(cpi);
-               cp->addCallback([](){SaveState::serializeToFile();});
+
+               // whenever we reach a checkpoint, update the checkpoint index in the save state
                cp->addCallback([cpi](){SaveState::getCurrent().mCheckpoint = cpi;});
+
+               // whenever we reach a checkpoint, serialize the save state
+               cp->addCallback([](){SaveState::serializeToFile();});               
             }
             else if (objectGroup->mName == "dialogues")
             {

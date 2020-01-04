@@ -114,6 +114,7 @@ void Checkpoint::addCallback(Checkpoint::CheckpointCallback cb)
 
 sf::Vector2i Checkpoint::calcCenter() const
 {
-   sf::Vector2i pos{mRect.left + mRect.width / 2, mRect.top};
+   // that y offset is a litte dodgy, could have something cleaner in the future
+   sf::Vector2i pos{mRect.left + mRect.width / 2, mRect.top + mRect.height - 5};
    return pos;
 }
