@@ -95,7 +95,7 @@ void Level::setDescriptionFilename(const std::string &descriptionFilename)
 
 
 //-----------------------------------------------------------------------------
-const Level::Atmosphere& Level::getPhysics() const
+const Atmosphere& Level::getPhysics() const
 {
    return mAtmosphere;
 }
@@ -111,9 +111,10 @@ void Level::initializeTextures()
    contextSettings.stencilBits = 8;
 
    mLevelBackgroundRenderTexture.reset();
-   mAtmosphereRenderTexture.reset();
-   mBlurRenderTexture.reset();
-   mBlurRenderTextureScaled.reset();
+
+   mAtmosphereShader.reset();
+   mGammaShader.reset();
+   mBlurShader.reset();
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
@@ -138,37 +139,22 @@ void Level::initializeTextures()
       contextSettings // the lights require stencils
    );
 
-   mAtmosphereRenderTexture = std::make_shared<sf::RenderTexture>();
-   mAtmosphereRenderTexture->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
-   );
-
-   mBlurRenderTexture = std::make_shared<sf::RenderTexture>();
-   mBlurRenderTexture->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
-   );
-
-   mBlurRenderTextureScaled = std::make_shared<sf::RenderTexture>();
-   mBlurRenderTextureScaled->create(960, 540);
-   mBlurRenderTextureScaled->setSmooth(true);
+   mAtmosphereShader = std::make_unique<AtmosphereShader>(textureWidth, textureHeight);
+   mGammaShader = std::make_unique<GammaShader>();
+   mBlurShader = std::make_unique<BlurShader>(textureWidth, textureHeight);
 
    // keep track of those textures
    mRenderTextures.clear();
    mRenderTextures.push_back(mLevelRenderTexture);
    mRenderTextures.push_back(mLevelBackgroundRenderTexture);
-   mRenderTextures.push_back(mAtmosphereRenderTexture);
-   mRenderTextures.push_back(mBlurRenderTexture);
-   mRenderTextures.push_back(mBlurRenderTextureScaled);
    for (const auto& fb : mRenderTextures)
    {
       std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
    }
 
-   initializeAtmosphereShader();
-   initializeGammaShader();
-   initializeBlurShader();
+   mAtmosphereShader->initialize();
+   mGammaShader->initialize(mLevelRenderTexture->getTexture());
+   mBlurShader->initialize();
 }
 
 
@@ -1022,64 +1008,6 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Level::initializeAtmosphereShader()
-{
-  if (!mAtmosphereShader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
-  {
-    std::cout << "error loading water shader" << std::endl;
-    return;
-  }
-
-  if (!mAtmosphereDistortionMap.loadFromFile("data/effects/distortion_map.png"))
-  {
-    std::cout << "error loading distortion map" << std::endl;
-    return;
-  }
-
-  mAtmosphereDistortionMap.setRepeated(true);
-  mAtmosphereDistortionMap.setSmooth(true);
-
-  mAtmosphereShader.setUniform("currentTexture", sf::Shader::CurrentTexture);
-  mAtmosphereShader.setUniform("distortionMapTexture", mAtmosphereDistortionMap);
-  mAtmosphereShader.setUniform("physicsTexture", mAtmosphereRenderTexture->getTexture());
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Level::initializeGammaShader()
-{
-   if (!mGammaShader.loadFromFile("data/shaders/brightness.frag", sf::Shader::Fragment))
-   {
-      std::cout << "error loading gamma shader" << std::endl;
-      return;
-   }
-
-   mGammaShader.setUniform("texture", mLevelRenderTexture->getTexture());
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Level::initializeBlurShader()
-{
-   if (!mBlurShader.loadFromFile("data/shaders/blur.frag", sf::Shader::Fragment))
-   {
-      std::cout << "error loading blur shader" << std::endl;
-      return;
-   }
-
-   mBlurShader.setUniform("texture", mBlurRenderTexture->getTexture());
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Level::updateGammaShader()
-{
-   float gamma = 2.2f - (GameConfiguration::getInstance().mBrightness - 0.5f);
-   mGammaShader.setUniform("gamma", gamma);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const
 {
    auto blocks = [this](uint32_t x, uint32_t y) -> bool {
@@ -1087,28 +1015,6 @@ bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) con
    };
 
    return MapTools::lineCollide(a.x, a.y, b.x, b.y, blocks);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Level::updateAtmosphereShader()
-{
-  float distortionFactor = 0.02f;
-
-  mAtmosphereShader.setUniform("time", GlobalClock::getInstance()->getElapsedTimeInS() * 0.2f);
-  mAtmosphereShader.setUniform("distortionFactor", distortionFactor);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Level::updateBlurShader()
-{
-   // that implicitly scales the effect up by 2
-   mBlurShader.setUniform("texture_width", 960/2);
-   mBlurShader.setUniform("texture_height", 540/2);
-
-   mBlurShader.setUniform("blur_radius", 20.0f);
-   mBlurShader.setUniform("add_factor", 1.0f);
 }
 
 
@@ -1130,23 +1036,23 @@ void Level::draw(
 )
 {
    // render atmosphere to atmosphere texture, that texture is used in the shader only
-   mAtmosphereRenderTexture->clear();
-   drawAtmosphereLayer(*mAtmosphereRenderTexture.get());
-   mAtmosphereRenderTexture->display();
+   mAtmosphereShader->getRenderTexture()->clear();
+   drawAtmosphereLayer(*mAtmosphereShader->getRenderTexture().get());
+   mAtmosphereShader->getRenderTexture()->display();
 
    if (screenshot)
    {
-      takeScreenshot("screenshot_atmosphere", *mAtmosphereRenderTexture.get());
+      takeScreenshot("screenshot_atmosphere", *mAtmosphereShader->getRenderTexture().get());
    }
 
    // render glowing elements
-   mBlurRenderTexture->clear({0, 0, 0, 0});
-   drawBlurLayer(*mBlurRenderTexture.get());
-   mBlurRenderTexture->display();
+   mBlurShader->clearTexture();
+   drawBlurLayer(*mBlurShader->getRenderTexture().get());
+   mBlurShader->getRenderTexture()->display();
 
    if (screenshot)
    {
-      takeScreenshot("screenshot_blur", *mBlurRenderTexture.get());
+      takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
    }
 
    // render layers affected by the atmosphere
@@ -1164,8 +1070,8 @@ void Level::draw(
 
    // draw the atmospheric parts into the level texture
    sf::Sprite backgroundSprite(mLevelBackgroundRenderTexture->getTexture());
-   updateAtmosphereShader();
-   mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader);
+   mAtmosphereShader->update();
+   mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader->getShader());
 
    // draw the glowing parts into the level texture
    //
@@ -1178,17 +1084,17 @@ void Level::draw(
    //   states.shader = &mBlurShader;
    //   mLevelRenderTexture->draw(blurSprite, states);
 
-   sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
-   const auto downScaleX = mBlurRenderTextureScaled->getSize().x / static_cast<float>(mBlurRenderTexture->getSize().x);
-   const auto downScaleY = mBlurRenderTextureScaled->getSize().y / static_cast<float>(mBlurRenderTexture->getSize().y);
+   sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
+   const auto downScaleX = mBlurShader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
+   const auto downScaleY = mBlurShader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
    blurSprite.scale({downScaleX, downScaleY});
 
    sf::RenderStates statesShader;
-   updateBlurShader();
-   statesShader.shader = &mBlurShader;
-   mBlurRenderTextureScaled->draw(blurSprite, statesShader);
+   mBlurShader->update();
+   statesShader.shader = &mBlurShader->getShader();
+   mBlurShader->getRenderTextureScaled()->draw(blurSprite, statesShader);
 
-   sf::Sprite blurScaleSprite(mBlurRenderTextureScaled->getTexture());
+   sf::Sprite blurScaleSprite(mBlurShader->getRenderTextureScaled()->getTexture());
    blurScaleSprite.scale(1.0f / downScaleX, 1.0f / downScaleY);
    blurScaleSprite.setTextureRect(
       sf::IntRect(
@@ -1244,8 +1150,8 @@ void Level::draw(
 
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
-   updateGammaShader();
-   window->draw(levelTextureSprite, &mGammaShader);
+   mGammaShader->update();
+   window->draw(levelTextureSprite, &mGammaShader->getGammaShader());
 
    // if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    // {
@@ -1694,84 +1600,6 @@ Level *Level::getCurrentLevel()
 }
 
 
-//-----------------------------------------------------------------------------
-void Level::parsePolyline(
-   float offsetX,
-   float offsetY,
-   const std::vector<sf::Vector2f>& poly
-)
-{
-   auto positionCount = poly.size();
-   b2Vec2* points = new b2Vec2[positionCount];
-
-   std::vector<p2t::Point*> polyLine;
-
-   for (auto positionIndex = 0u; positionIndex < positionCount; positionIndex++)
-   {
-      sf::Vector2f pos = poly.at(positionIndex) + sf::Vector2f(offsetX, offsetY);
-
-      points[positionIndex].x = pos.x / PPM;
-      points[positionIndex].y = pos.y / PPM;
-
-      // printf(
-      //    "pos: %d, x: %f, y: %f\n",
-      //    positionIndex,
-      //    pos.x / PPM,
-      //    pos.y / PPM
-      // );
-
-      fflush(stdout);
-
-      p2t::Point* p = new p2t::Point(static_cast<double>(pos.x / PPM), static_cast<double>(pos.y / PPM));
-      polyLine.push_back(p);
-   }
-
-   p2t::CDT cdt(polyLine);
-   cdt.Triangulate();
-
-   std::vector<p2t::Triangle*> triangles = cdt.GetTriangles();
-
-   b2BodyDef bodyDef;
-   bodyDef.position.Set(0, 0);
-   bodyDef.type = b2_staticBody;
-   b2Body* body = mWorld->CreateBody(&bodyDef);
-
-   mPointMap[body]=points;
-   mPointCountMap[body]=positionCount;
-
-   for (auto i = 0u; i < triangles.size(); i++)
-   {
-      p2t::Point* a = triangles[i]->GetPoint(0);
-      p2t::Point* b = triangles[i]->GetPoint(1);
-      p2t::Point* c = triangles[i]->GetPoint(2);
-
-      printf(
-         "tri %d: %f,%f | %f,%f | %f,%f\n",
-         i,
-         a->x, a->y, b->x, b->y, c->x, c->y
-      );
-
-      fflush(stdout);
-
-      b2Vec2* trianglePoints = new b2Vec2[3];
-      trianglePoints[0].x = static_cast<float>(a->x);
-      trianglePoints[0].y = static_cast<float>(a->y);
-      trianglePoints[1].x = static_cast<float>(b->x);
-      trianglePoints[1].y = static_cast<float>(b->y);
-      trianglePoints[2].x = static_cast<float>(c->x);
-      trianglePoints[2].y = static_cast<float>(c->y);
-
-      b2PolygonShape polygonShape;
-      polygonShape.Set(trianglePoints, 3);
-
-      b2FixtureDef fixtureDef;
-      fixtureDef.density = 0.0f;
-      fixtureDef.shape = &polygonShape;
-
-      body->CreateFixture(&fixtureDef);
-   }
-}
-
 void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 {
   auto points = new b2Vec2[4];
@@ -1785,7 +1613,7 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 }
 
 
-AtmosphereTile Level::Atmosphere::getTileForPosition(const b2Vec2& pos) const
+AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
 {
    auto x = pos.x - mMapOffsetX;
    auto y = pos.y - mMapOffsetY;

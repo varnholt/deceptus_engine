@@ -93,6 +93,9 @@ INCLUDEPATH += src
 
 
 SOURCES += \
+   src/game/atmosphere.cpp \
+   src/game/atmosphereshader.cpp \
+   src/game/blurshader.cpp \
    src/game/callbackmap.cpp \
    src/game/dialogue.cpp \
    src/game/enemydescription.cpp \
@@ -103,12 +106,14 @@ SOURCES += \
    src/game/controlleroverlay.cpp \
    src/game/fan.cpp \
    src/game/gamemechanism.cpp \
+   src/game/gammashader.cpp \
    src/game/inventory.cpp \
    src/game/laser.cpp \
    src/game/levelmap.cpp \
    src/game/lever.cpp \
    src/game/maptools.cpp \
    src/game/moveablebox.cpp \
+   src/game/physics.cpp \
    src/game/playerinfo.cpp \
    src/game/rainoverlay.cpp \
    src/game/savestate.cpp \
@@ -234,6 +239,9 @@ SOURCES += \
 # add box2d
 
 HEADERS += \
+    src/game/atmosphere.h \
+    src/game/atmosphereshader.h \
+    src/game/blurshader.h \
     src/game/callbackmap.h \
     src/game/dialogue.h \
     src/game/enemydescription.h \
@@ -245,6 +253,7 @@ HEADERS += \
     src/game/controlleroverlay.h \
     src/game/fan.h \
     src/game/gamemechanism.h \
+    src/game/gammashader.h \
     src/game/globalclock.h \
     src/game/bulletplayer.h \
     src/game/game.h \
@@ -254,6 +263,7 @@ HEADERS += \
     src/game/lever.h \
     src/game/maptools.h \
     src/game/moveablebox.h \
+    src/game/physics.h \
     src/game/player.h \
     src/game/level.h \
     src/game/playerinfo.h \
