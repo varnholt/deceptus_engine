@@ -2,12 +2,17 @@
 
 // game
 #include "ambientocclusion.h"
+#include "atmosphere.h"
+#include "atmosphereshader.h"
+#include "blurshader.h"
 #include "boomeffect.h"
 #include "camerasystem.h"
 #include "constants.h"
 #include "gamenode.h"
+#include "gammashader.h"
 #include "imagelayer.h"
 #include "luanode.h"
+#include "physics.h"
 #include "portal.h"
 #include "squaremarcher.h"
 #include "joystick/gamecontrollerinfo.h"
@@ -53,35 +58,6 @@ class Level : GameNode
 
 public:
 
-   struct Atmosphere
-   {
-      Atmosphere() = default;
-
-      std::vector<int32_t> mMap;
-
-      int32_t mMapOffsetX = 0;
-      int32_t mMapOffsetY = 0;
-      uint32_t mMapWidth = 0;
-      uint32_t mMapHeight = 0;
-
-      std::vector<std::vector<sf::Vertex>> mOutlines;
-      std::vector<std::vector<b2Vec2>> mChains;
-      std::shared_ptr<TileMap> mTileMap;
-
-      AtmosphereTile getTileForPosition(const b2Vec2& playerPos) const;
-   };
-
-
-   struct Physics
-   {
-      uint32_t mGridWidth = 0;
-      uint32_t mGridHeight = 0;
-      uint32_t mGridSize = 0;
-
-      std::vector<int32_t> mPhysicsMap;
-   };
-
-
    Level();
    virtual ~Level();
 
@@ -106,10 +82,10 @@ public:
 
    const std::shared_ptr<b2World>& getWorld() const;
 
-   std::map<b2Body *, b2Vec2 *> *getPointMap() ;
+   std::map<b2Body *, b2Vec2 *>* getPointMap() ;
    std::map<b2Body*, size_t>* getPointSizeMap();
 
-   static Level *getCurrentLevel();
+   static Level* getCurrentLevel();
 
    std::shared_ptr<Portal> getNearbyPortal();
    std::shared_ptr<Bouncer> getNearbyBouncer();
@@ -117,10 +93,7 @@ public:
    void toggleMechanisms();
    void reset();
 
-   int getZ() const;
-   void setZ(int z);
-
-   const sf::Vector2f &getStartPosition() const;
+   const sf::Vector2f& getStartPosition() const;
 
    void drawStaticChains(sf::RenderTarget& target);
 
@@ -132,12 +105,6 @@ public:
    const Atmosphere& getPhysics() const;
 
    void initializeTextures();
-   void initializeAtmosphereShader();
-   void updateAtmosphereShader();
-   void initializeGammaShader();
-   void updateGammaShader();
-   void initializeBlurShader();
-   void updateBlurShader();
 
    bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
 
@@ -145,12 +112,6 @@ public:
 
 
 protected:
-
-   void parsePolyline(
-           float offsetX,
-       float offsetY,
-       const std::vector<sf::Vector2f> &poly
-   );
 
    void addDebugRect(b2Body* body, float x, float y, float w, float h);
 
@@ -180,12 +141,8 @@ protected:
    void deserializeParallaxMap(TmxLayer *layer);
    void loadTmx();
 
-
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mAtmosphereRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mBlurRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mBlurRenderTextureScaled;
    std::vector<std::shared_ptr<sf::RenderTexture>> mRenderTextures;
 
    float mViewToTextureScale = 1.0f;
@@ -238,11 +195,9 @@ protected:
    AmbientOcclusion mAo;
    std::vector<std::shared_ptr<ImageLayer>> mImageLayers;
 
-   bool mAtmosphereEnabled = false;
-   sf::Shader mAtmosphereShader;
-   sf::Texture mAtmosphereDistortionMap;
-   sf::Shader mGammaShader;
-   sf::Shader mBlurShader;
+   std::unique_ptr<AtmosphereShader> mAtmosphereShader;
+   std::unique_ptr<BlurShader> mBlurShader;
+   std::unique_ptr<GammaShader> mGammaShader;
 
    // box2d
 

@@ -1,0 +1,29 @@
+#pragma once
+
+#include <SFML/Graphics.hpp>
+
+class BlurShader
+{
+   public:
+      BlurShader(
+         uint32_t width,
+         uint32_t height
+      );
+
+      ~BlurShader();
+
+      void initialize();
+      void update();
+      void clearTexture();
+
+      const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;
+      const std::shared_ptr<sf::RenderTexture>& getRenderTextureScaled() const;
+
+      const sf::Shader& getShader() const;
+
+   private:
+      sf::Shader mShader;
+      std::shared_ptr<sf::RenderTexture> mRenderTexture;
+      std::shared_ptr<sf::RenderTexture> mRenderTextureScaled;
+};
+
