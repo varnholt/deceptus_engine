@@ -4,6 +4,11 @@
 #include "game/level.h"
 #include "game/player.h"
 
+#include "tmxparser/tmxobject.h"
+#include "tmxparser/tmxtools.h"
+#include "tmxparser/tmxproperties.h"
+#include "tmxparser/tmxproperty.h"
+
 #include <iostream>
 
 #include <SFML/OpenGL.hpp>
@@ -290,3 +295,65 @@ void RaycastLight::LightInstance::updateSpritePosition()
          )
       );
 }
+
+
+
+//-----------------------------------------------------------------------------
+std::shared_ptr<RaycastLight::LightInstance> RaycastLight::deserialize(TmxObject* tmxObject)
+{
+   auto light = std::make_shared<RaycastLight::LightInstance>();
+
+   if (tmxObject)
+   {
+      light->mWidth = static_cast<int>(tmxObject->mWidth);
+      light->mHeight = static_cast<int>(tmxObject->mHeight);
+
+      light->mPosMeters = b2Vec2(
+        tmxObject->mX * MPP + (tmxObject->mWidth * 0.5f) * MPP,
+        tmxObject->mY * MPP + (tmxObject->mHeight * 0.5f) * MPP
+      );
+   }
+
+   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
+   std::string texture = "data/light/smooth.png";
+
+   if (tmxObject && tmxObject->mProperties != nullptr)
+   {
+      auto it = tmxObject->mProperties->mMap.find("color");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         rgba = TmxTools::color(it->second->mValueStr);
+      }
+
+      it = tmxObject->mProperties->mMap.find("texture");
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
+      }
+   }
+
+   light->mColor.r = rgba[0];
+   light->mColor.g = rgba[1];
+   light->mColor.b = rgba[2];
+   light->mColor.a = rgba[3];
+   light->mSprite.setColor(light->mColor);
+
+   light->mTexture.loadFromFile(texture);
+   light->mSprite.setTexture(light->mTexture);
+   light->mSprite.setTextureRect(
+     sf::IntRect(
+       0,
+       0,
+       static_cast<int32_t>(light->mTexture.getSize().x),
+       static_cast<int32_t>(light->mTexture.getSize().y)
+     )
+   );
+
+   light->updateSpritePosition();
+
+   auto scale = static_cast<float>(light->mWidth) / light->mTexture.getSize().x;
+   light->mSprite.setScale(scale, scale);
+
+   return light;
+}
+

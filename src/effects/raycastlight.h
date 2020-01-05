@@ -9,6 +9,8 @@
 #include <SFML/Graphics.hpp>
 
 
+struct TmxObject;
+
 class RaycastLight : public Effect
 {
 
@@ -39,6 +41,7 @@ public:
 
    RaycastLight();
 
+   static std::shared_ptr<RaycastLight::LightInstance> deserialize(TmxObject* tmxObject);
 
 private:
 

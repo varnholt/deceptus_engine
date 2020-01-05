@@ -76,8 +76,6 @@ public:
    void drawBlurLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
 
-   sf::Vector2f getSize();
-
    void update(const sf::Time& dt);
 
    const std::shared_ptr<b2World>& getWorld() const;
@@ -135,10 +133,7 @@ protected:
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
 
-   std::shared_ptr<RaycastLight::LightInstance> deserializeRaycastLight(TmxObject* tmxObject);
-   std::shared_ptr<StaticLight::LightInstance> deserializeStaticLight(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
-   std::shared_ptr<ImageLayer> deserializeImageLayer(TmxElement* tmxElement, const std::filesystem::path &levelPath);
-   void deserializeParallaxMap(TmxLayer *layer);
+   void deserializeParallaxMap(TmxLayer* layer);
    void loadTmx();
 
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
