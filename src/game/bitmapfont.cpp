@@ -8,11 +8,6 @@
 #include <stdio.h>
 
 
-BitmapFont::BitmapFont()
-{
-}
-
-
 void BitmapFont::load(
    const std::string& texturePath,
    const std::string& mapPath
