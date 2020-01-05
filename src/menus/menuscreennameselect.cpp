@@ -20,10 +20,11 @@ namespace {
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
    mFont.loadFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
 
    mText.setScale(textScale, textScale);
    mText.setFont(mFont);
-   mText.setCharacterSize(48);
+   mText.setCharacterSize(12);
    mText.setFillColor(sf::Color{232, 219, 243});
 
    setFilename("data/menus/nameselect.psd");

@@ -11,9 +11,9 @@ ForestScene::ForestScene()
 {
    if (mFont.loadFromFile("data/fonts/deceptum.ttf"))
    {
-      mText.setScale(0.25f, 0.25f);
+      const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
       mText.setFont(mFont);
-      mText.setCharacterSize(48);
+      mText.setCharacterSize(12);
       mText.setString("Du hast es geschafft!\nAlles Gute zum Geburtstag, Lasse!\n- Dein Papa");
       mText.setFillColor(sf::Color{232, 219, 243});
    }

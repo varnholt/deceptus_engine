@@ -44,9 +44,9 @@ MessageBox::MessageBox(
 
    Player::getCurrent()->setKeysPressed(0);
 
-   sText.setScale(0.25f, 0.25f);
+   //sText.setScale(0.25f, 0.25f);
    sText.setFont(sFont);
-   sText.setCharacterSize(48);
+   sText.setCharacterSize(12);
    sText.setFillColor(mProperties.mTextColor);
    sText.setString("");
 
@@ -151,6 +151,8 @@ void MessageBox::initializeLayers()
       {
          std::cerr << "font load fuckup" << std::endl;
       }
+
+      const_cast<sf::Texture&>(sFont.getTexture(12)).setSmooth(false);
 
       // load layers
       for (const auto& layer : psd.getLayers())

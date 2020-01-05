@@ -21,12 +21,12 @@ MenuScreenFileSelect::MenuScreenFileSelect()
    setFilename("data/menus/fileselect.psd");
 
    mFont.loadFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
 
    for (auto i = 0u; i < 3; i++)
    {
-      mNames[i].setScale(0.25f, 0.25f);
       mNames[i].setFont(mFont);
-      mNames[i].setCharacterSize(48);
+      mNames[i].setCharacterSize(12);
       mNames[i].setFillColor(sf::Color{232, 219, 243});
    }
 }

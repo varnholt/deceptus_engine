@@ -1,5 +1,4 @@
-#ifndef BITMAPFONT_H
-#define BITMAPFONT_H
+#pragma once
 
 #include <cstdint>
 #include <memory>
@@ -9,7 +8,7 @@
 
 struct BitmapFont
 {
-   BitmapFont();
+   BitmapFont() = default;
    void load(const std::string& texture, const std::string &map);
    std::vector<std::shared_ptr<sf::IntRect>> getCoords(const std::string& text);
 
@@ -28,4 +27,3 @@ struct BitmapFont
    int32_t mTextWidth = 0;
 };
 
-#endif // BITMAPFONT_H
