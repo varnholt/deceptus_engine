@@ -73,14 +73,6 @@ const std::string parallaxIdentifier = "parallax_";
 
 
 //-----------------------------------------------------------------------------
-namespace
-{
-   static const auto PLAYER_LIGHT_SIZE_PX = 384;
-   static const auto PLAYER_LIGHT_SIZE_METERS = 384 * MPP;
-}
-
-
-//-----------------------------------------------------------------------------
 std::string Level::getDescriptionFilename() const
 {
    return mDescriptionFilename;
@@ -182,7 +174,7 @@ Level::Level()
    mStaticLight = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   mPlayerLight = deserializeRaycastLight(nullptr);
+   mPlayerLight = RaycastLight::deserialize(nullptr);
    mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, 20));
    mRaycastLight->mLights.push_back(mPlayerLight);
 
@@ -208,176 +200,6 @@ Level::Level()
 Level::~Level()
 {
    std::cout << "[x] deleting current level" << std::endl;
-}
-
-
-//-----------------------------------------------------------------------------
-std::shared_ptr<RaycastLight::LightInstance> Level::deserializeRaycastLight(TmxObject* tmxObject)
-{
-   auto light = std::make_shared<RaycastLight::LightInstance>();
-
-   if (tmxObject)
-   {
-      light->mWidth = static_cast<int>(tmxObject->mWidth);
-      light->mHeight = static_cast<int>(tmxObject->mHeight);
-
-      light->mPosMeters = b2Vec2(
-        tmxObject->mX * MPP + (tmxObject->mWidth * 0.5f) * MPP,
-        tmxObject->mY * MPP + (tmxObject->mHeight * 0.5f) * MPP
-      );
-   }
-
-   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
-   std::string texture = "data/light/smooth.png";
-
-   if (tmxObject && tmxObject->mProperties != nullptr)
-   {
-      auto it = tmxObject->mProperties->mMap.find("color");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         rgba = TmxTools::color(it->second->mValueStr);
-      }
-
-      it = tmxObject->mProperties->mMap.find("texture");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
-      }
-   }
-
-   light->mColor.r = rgba[0];
-   light->mColor.g = rgba[1];
-   light->mColor.b = rgba[2];
-   light->mColor.a = rgba[3];
-   light->mSprite.setColor(light->mColor);
-
-   light->mTexture.loadFromFile(texture);
-   light->mSprite.setTexture(light->mTexture);
-   light->mSprite.setTextureRect(
-     sf::IntRect(
-       0,
-       0,
-       static_cast<int32_t>(light->mTexture.getSize().x),
-       static_cast<int32_t>(light->mTexture.getSize().y)
-     )
-   );
-
-   light->updateSpritePosition();
-
-   auto scale = static_cast<float>(light->mWidth) / light->mTexture.getSize().x;
-   light->mSprite.setScale(scale, scale);
-
-   return light;
-}
-
-
-//-----------------------------------------------------------------------------
-std::shared_ptr<StaticLight::LightInstance> Level::deserializeStaticLight(TmxObject* tmxObject, TmxObjectGroup* objectGroup)
-{
-  // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
-
-   auto light = std::make_shared<StaticLight::LightInstance>();
-   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
-   std::string texture = "data/light/smooth.png";
-   auto flickerIntensity = 0.0f;
-   auto flickerAlphaAmount = 1.0f;
-   auto flickerSpeed = 0.0f;
-   if (tmxObject->mProperties != nullptr)
-   {
-      auto it = tmxObject->mProperties->mMap.find("color");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         rgba = TmxTools::color(it->second->mValueStr);
-      }
-
-      it = tmxObject->mProperties->mMap.find("texture");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
-      }
-
-      it = tmxObject->mProperties->mMap.find("flicker_intensity");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         flickerIntensity = it->second->mValueFloat;
-      }
-
-      it = tmxObject->mProperties->mMap.find("flicker_alpha_amount");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         flickerAlphaAmount = it->second->mValueFloat;
-      }
-
-      it = tmxObject->mProperties->mMap.find("flicker_speed");
-      if (it != tmxObject->mProperties->mMap.end())
-      {
-         flickerSpeed = it->second->mValueFloat;
-      }
-   }
-
-   light->mColor.r = rgba[0];
-   light->mColor.g = rgba[1];
-   light->mColor.b = rgba[2];
-   light->mColor.a = rgba[3];
-   light->mFlickerIntensity = flickerIntensity;
-   light->mFlickerAlphaAmount = flickerAlphaAmount;
-   light->mFlickerSpeed = flickerSpeed;
-   light->mSprite.setColor(light->mColor);
-   light->mTexture.loadFromFile(texture);
-   light->mSprite.setTexture(light->mTexture);
-   light->mSprite.setPosition(tmxObject->mX, tmxObject->mY);
-   light->mZ = objectGroup->mZ;
-
-   auto scaleX = tmxObject->mWidth / light->mTexture.getSize().x;
-   auto scaleY = tmxObject->mHeight / light->mTexture.getSize().y;
-   light->mSprite.scale(scaleX, scaleY);
-
-   return light;
-}
-
-
-//-----------------------------------------------------------------------------
-std::shared_ptr<ImageLayer> Level::deserializeImageLayer(TmxElement* element, const std::filesystem::path& levelPath)
-{
-  std::shared_ptr<ImageLayer> image = std::make_shared<ImageLayer>();
-  auto imageLayer = dynamic_cast<TmxImageLayer*>(element);
-  image->mZ = imageLayer->mZ;
-  image->mTexture.loadFromFile((levelPath / imageLayer->mImage->mSource).string());
-  image->mSprite.setPosition(imageLayer->mOffsetX, imageLayer->mOffsetY);
-  image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(imageLayer->mOpacity * 255.0f)));
-  image->mSprite.setTexture(image->mTexture);
-
-  sf::BlendMode blendMode = sf::BlendAdd;
-  if (imageLayer->mProperties != nullptr)
-  {
-     std::string blendModeStr;
-     auto it = imageLayer->mProperties->mMap.find("blendmode");
-     if (it != imageLayer->mProperties->mMap.end())
-     {
-        blendModeStr = it->second->mValueStr;
-
-        if (blendModeStr == "alpha")
-        {
-           blendMode = sf::BlendAlpha;
-        }
-        else if (blendModeStr == "multiply")
-        {
-           blendMode = sf::BlendMultiply;
-        }
-        else if (blendModeStr == "add")
-        {
-           blendMode = sf::BlendAdd;
-        }
-        else if (blendModeStr == "none")
-        {
-           blendMode = sf::BlendNone;
-        }
-     }
-  }
-
-  image->mBlendMode = blendMode;
-
-  return image;
 }
 
 
@@ -572,7 +394,7 @@ void Level::loadTmx()
                cp->addCallback([cpi](){SaveState::getCurrent().mCheckpoint = cpi;});
 
                // whenever we reach a checkpoint, serialize the save state
-               cp->addCallback([](){SaveState::serializeToFile();});               
+               cp->addCallback([](){SaveState::serializeToFile();});
             }
             else if (objectGroup->mName == "dialogues")
             {
@@ -638,32 +460,19 @@ void Level::loadTmx()
                   static_cast<int32_t>(tmxObject->mHeight)
                };
 
-               // b2BodyDef bodyDef;
-               // bodyDef.type = b2_kinematicBody;
-               // auto body = mWorld->CreateBody(&bodyDef);
-               // addDebugRect(body, tmxObject->mX, tmxObject->mY, tmxObject->mWidth, tmxObject->mHeight);
-
                if (tmxObject->mName.rfind("rain", 0) == 0)
                {
                   Weather::getInstance().add(Weather::WeatherType::Rain, rect);
                }
-
-               // printf(
-               //    "weather data: %d, %d, %d, %d\n",
-               //    static_cast<int32_t>(tmxObject->mX),
-               //    static_cast<int32_t>(tmxObject->mY),
-               //    static_cast<int32_t>(tmxObject->mWidth),
-               //    static_cast<int32_t>(tmxObject->mHeight)
-               // );
             }
             else if (objectGroup->mName == "lights")
             {
-               auto light = deserializeRaycastLight(tmxObject);
+               auto light = RaycastLight::deserialize(tmxObject);
                mRaycastLight->mLights.push_back(light);
             }
             else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
-               auto light = deserializeStaticLight(tmxObject, objectGroup);
+               auto light = StaticLight::deserialize(tmxObject, objectGroup);
                mStaticLight->mLights.push_back(light);
             }
             if (objectGroup->mName == "switchable_objects")
@@ -675,7 +484,7 @@ void Level::loadTmx()
 
       else if (element->mType == TmxElement::TypeImageLayer)
       {
-         auto image = deserializeImageLayer(element, path);
+         auto image = ImageLayer::deserialize(element, path);
          mImageLayers.push_back(image);
       }
    }
@@ -757,11 +566,12 @@ void Level::initialize()
 
    auto checkpointIndex = SaveState::getCurrent().mCheckpoint;
    auto checkpoint = Checkpoint::getCheckpoint(checkpointIndex);
+
    if (checkpoint)
    {
       auto pos = checkpoint->calcCenter();
-      mStartPosition.x = pos.x;
-      mStartPosition.y = pos.y;
+      mStartPosition.x = static_cast<float>(pos.x);
+      mStartPosition.y = static_cast<float>(pos.y);
       std::cout << "move to checkpoint: " << checkpointIndex << std::endl;
    }
 
@@ -837,21 +647,6 @@ void Level::updateViews()
    const auto lookVector = CameraPane::getInstance().getLookVector();
    auto levelViewX = cameraSystem.getX() + lookVector.x;
    auto levelViewY = cameraSystem.getY() + lookVector.y;
-
-   /*
-   if (levelViewX < 0)
-      levelViewX = 0;
-   if (levelViewY < 0)
-      levelViewY = 0;
-
-   auto levelWidth  = getSize().x;
-   auto levelHeight = getSize().y;
-
-   if (levelViewX > levelWidth - mViewWidth)
-      levelViewX = levelWidth - mViewWidth;
-   if (levelViewY > levelHeight - mViewHeight)
-      levelViewY = levelHeight - mViewHeight;
-   */
 
    mLevelView->reset(sf::FloatRect(levelViewX, levelViewY, mViewWidth, mViewHeight));
 
@@ -977,37 +772,37 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
 //-----------------------------------------------------------------------------
 void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 {
-  updateViews();
+   updateViews();
 
-  mAtmosphere.mTileMap->setVisible(true);
+   mAtmosphere.mTileMap->setVisible(true);
 
-  target.setView(*mLevelView);
-  target.draw(*mAtmosphere.mTileMap);
+   target.setView(*mLevelView);
+   target.draw(*mAtmosphere.mTileMap);
 
-  mAtmosphere.mTileMap->setVisible(false);
+   mAtmosphere.mTileMap->setVisible(false);
 }
 
 
 //-----------------------------------------------------------------------------
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
-  updateViews();
+   updateViews();
 
-  target.setView(*mLevelView);
+   target.setView(*mLevelView);
 
-  const auto pPos = Player::getCurrent()->getPixelPosition();
+   const auto pPos = Player::getCurrent()->getPixelPosition();
 
-  // draw lasers
-  for (auto l : mLasers)
-  {
-     const auto lPos = std::dynamic_pointer_cast<Laser>(l)->getPixelPosition();
-     if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
-     {
-        continue;
-     }
+   // draw lasers
+   for (auto laser : mLasers)
+   {
+      const auto lPos = std::dynamic_pointer_cast<Laser>(laser)->getPixelPosition();
+      if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
+      {
+         continue;
+      }
 
-     l->draw(target);
-  }
+      laser->draw(target);
+   }
 }
 
 
@@ -1077,17 +872,6 @@ void Level::draw(
    mAtmosphereShader->update();
    mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader->getShader());
 
-   // draw the glowing parts into the level texture
-   //
-   // simple but slow approach:
-   //
-   //   sf::Sprite blurSprite(mBlurRenderTexture->getTexture());
-   //   updateBlurShader();
-   //   sf::RenderStates states;
-   //   states.blendMode = sf::BlendAdd;
-   //   states.shader = &mBlurShader;
-   //   mLevelRenderTexture->draw(blurSprite, states);
-
    sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
    const auto downScaleX = mBlurShader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
    const auto downScaleY = mBlurShader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
@@ -1151,29 +935,15 @@ void Level::draw(
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
 
    levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
-
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
    mGammaShader->update();
    window->draw(levelTextureSprite, &mGammaShader->getGammaShader());
 
-   // if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
-   // {
-   //    drawMap(*window.get());
-   // }
-
    if (DisplayMode::getInstance().isSet(Display::DisplayMap))
    {
       mMap->draw(*window.get());
    }
-}
-
-
-//-----------------------------------------------------------------------------
-sf::Vector2f Level::getSize()
-{
-   sf::Vector2f vec(500 * PIXELS_PER_TILE, 500 * PIXELS_PER_TILE);
-   return vec;
 }
 
 
@@ -1221,7 +991,6 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 {
    return mWorld;
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -1606,14 +1375,14 @@ Level *Level::getCurrentLevel()
 
 void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 {
-  auto points = new b2Vec2[4];
-  points[0] = b2Vec2(x * MPP,           y * MPP          );
-  points[1] = b2Vec2(x * MPP + w * MPP, y * MPP          );
-  points[2] = b2Vec2(x * MPP + w * MPP, y * MPP + h * MPP);
-  points[3] = b2Vec2(x * MPP,           y * MPP + h * MPP);
+   auto points = new b2Vec2[4];
+   points[0] = b2Vec2(x * MPP,           y * MPP          );
+   points[1] = b2Vec2(x * MPP + w * MPP, y * MPP          );
+   points[2] = b2Vec2(x * MPP + w * MPP, y * MPP + h * MPP);
+   points[3] = b2Vec2(x * MPP,           y * MPP + h * MPP);
 
-  mPointMap[body] = points;
-  mPointCountMap[body] = 4;
+   mPointMap[body] = points;
+   mPointCountMap[body] = 4;
 }
 
 
@@ -1631,13 +1400,6 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
    {
       return AtmosphereTileInvalid;
    }
-
-  //   std::cout
-  //     << "physics tile position: "
-  //     << playerPos.x << " x " << playerPos.y
-  //     << ", translated tile position: "
-  //     << x << " x " << y
-  //     << std::endl;
 
    auto tx = static_cast<uint32_t>(x * PPM / PIXELS_PER_TILE);
    auto ty = static_cast<uint32_t>(y * PPM / PIXELS_PER_TILE);

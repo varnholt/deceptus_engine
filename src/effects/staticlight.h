@@ -1,10 +1,12 @@
-#ifndef STATICLIGHT_H
-#define STATICLIGHT_H
+#pragma once
 
 #include "effect.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
+
+struct TmxObject;
+struct TmxObjectGroup;
 
 class StaticLight : public Effect
 {
@@ -28,6 +30,9 @@ public:
 
    std::vector<std::shared_ptr<LightInstance>> mLights;
 
+   static std::shared_ptr<StaticLight::LightInstance> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
+
+
 public:
 
    StaticLight();
@@ -38,4 +43,3 @@ public:
    bool onLoad() override;
 };
 
-#endif // STATICLIGHT_H

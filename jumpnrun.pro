@@ -97,6 +97,7 @@ SOURCES += \
    src/game/atmosphereshader.cpp \
    src/game/blurshader.cpp \
    src/game/callbackmap.cpp \
+   src/game/deathshader.cpp \
    src/game/dialogue.cpp \
    src/game/enemydescription.cpp \
    src/game/forestscene.cpp \
@@ -243,6 +244,7 @@ HEADERS += \
     src/game/atmosphereshader.h \
     src/game/blurshader.h \
     src/game/callbackmap.h \
+    src/game/deathshader.h \
     src/game/dialogue.h \
     src/game/enemydescription.h \
     src/game/forestscene.h \
@@ -519,6 +521,8 @@ DISTFILES += \
     data/scripts/enemies/spikeball.lua \
     data/scripts/enemies/vector2.lua \
     data/scripts/enemies/watermine.lua \
+    data/shaders/death.frag \
+    data/shaders/death.vert \
     data/shaders/raycast.frag \
     data/shaders/raycast.vert \
     data/scripts/enemies/cannon.lua \

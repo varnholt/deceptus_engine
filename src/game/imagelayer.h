@@ -1,15 +1,21 @@
-#ifndef IMAGELAYER_H
-#define IMAGELAYER_H
+#pragma once
 
 #include <SFML/Graphics.hpp>
 
+#include <filesystem>
+
+struct TmxElement;
 
 struct ImageLayer
 {
-  sf::Sprite mSprite;
-  sf::Texture mTexture;
-  sf::BlendMode mBlendMode = sf::BlendAdd;
-  int32_t mZ = 0;
+   sf::Sprite mSprite;
+   sf::Texture mTexture;
+   sf::BlendMode mBlendMode = sf::BlendAdd;
+   int32_t mZ = 0;
+
+   static std::shared_ptr<ImageLayer> deserialize(
+      TmxElement* element,
+      const std::filesystem::path& levelPath
+   );
 };
 
-#endif // IMAGELAYER_H
