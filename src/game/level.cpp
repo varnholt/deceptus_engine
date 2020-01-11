@@ -1078,6 +1078,7 @@ void Level::parsePhysicsTiles(
 )
 {
    mPhysics.parse(layer, tileSet, basePath);
+   mPhysics.parseCollidingTiles(layer, tileSet);
 
    static const float scale = 0.33333333333333333f;
 

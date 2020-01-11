@@ -2,11 +2,13 @@
 
 #include <array>
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <sstream>
 
 #include "Box2D/Box2D.h"
 #include "constants.h"
+#include "meshtools.h"
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxobject.h"
 #include "tmxparser/tmxobjectgroup.h"
@@ -140,7 +142,7 @@ void Physics::parseCollidingTiles(TmxLayer* layer, TmxTileSet* tileSet)
    const auto tileMap = tileSet->mTileMap;
 
    std::vector<b2Vec2> vertices;
-   std::vector<std::vector<int32_t>> faces;
+   std::vector<std::vector<uint32_t>> faces;
 
    for (auto y = 0u; y < height; y++)
    {
@@ -161,10 +163,12 @@ void Physics::parseCollidingTiles(TmxLayer* layer, TmxTileSet* tileSet)
 
                if (objects)
                {
-                  for (auto o : objects->mObjects)
+                  for (auto it : objects->mObjects)
                   {
-                     auto poly = o.second->mPolygon;
-                     auto line = o.second->mPolyLine;
+                     auto object = it.second;
+
+                     auto poly = object->mPolygon;
+                     auto line = object->mPolyLine;
 
                      std::vector<sf::Vector2f> points;
 
@@ -176,25 +180,52 @@ void Physics::parseCollidingTiles(TmxLayer* layer, TmxTileSet* tileSet)
                      {
                         points = line->mPolyLine;
                      }
+                     else
+                     {
+                        auto x = object->mX;
+                        auto y = object->mY;
+                        auto w = object->mWidth;
+                        auto h = object->mHeight;
+
+                        points = {
+                           {x,     y    },
+                           {x,     y + h},
+                           {x + w, y + h},
+                           {x + w, y    },
+                        };
+                     }
 
                      if (!points.empty())
                      {
-                        // std::cout << "poly[" << points.size() << "]: { " << std::endl;
-                        std::vector<int32_t> face;
+                        std::vector<uint32_t> face;
                         for (const auto& p : points)
                         {
+                           const auto px = (offsetX + static_cast<int32_t>(x)) * PIXELS_PER_TILE + p.x;
+                           const auto py = (offsetY + static_cast<int32_t>(y)) * PIXELS_PER_TILE + p.y;
+                           const auto v = b2Vec2(px, py);
 
-                           const auto px = (offsetX + x) * PIXELS_PER_TILE + p.x;
-                           const auto py = (offsetY + y) * PIXELS_PER_TILE + p.y;
+                           const auto& it = std::find_if(vertices.begin(), vertices.end(), [v](const b2Vec2& other){
+                              return (
+                                    fabs(v.x - other.x) < 0.001f
+                                 && fabs(v.y - other.y) < 0.001f
+                              );
+                           });
 
-                           vertices.push_back(b2Vec2(px, py));
-                           face.push_back(static_cast<int32_t>(vertices.size()) - 1);
+                           auto vertexId = 0u;
+                           if (it == vertices.end())
+                           {
+                              vertexId = static_cast<uint32_t>(vertices.size());
+                              vertices.push_back(v);
+                           }
+                           else
+                           {
+                              vertexId = static_cast<uint32_t>(it - vertices.begin());
+                           }
 
-                           // std::cout << "   " << px << ", " << py << std::endl;
+                           face.push_back(vertexId + 1); // wavefront obj starts indexing at 1
                         }
 
                         faces.push_back(face);
-                        // std::cout << "}" << std::endl;
                      }
                   }
                }
@@ -204,7 +235,7 @@ void Physics::parseCollidingTiles(TmxLayer* layer, TmxTileSet* tileSet)
    }
 
    // https://en.wikipedia.org/wiki/Wavefront_.obj_file
-   // Mesh::writeObj("layer_" + layer->mName + ".obj", vertices, faces);
+   Mesh::writeObj("layer_" + layer->mName + ".obj", vertices, faces);
 
    // weld all the things
    //
