@@ -9,9 +9,14 @@
 #include <cstdint>
 #include <vector>
 
+struct TmxLayer;
+struct TmxTileSet;
+
 struct Atmosphere
 {
    Atmosphere() = default;
+
+   void parse(TmxLayer* layer, TmxTileSet* tileSet);
 
    std::vector<int32_t> mMap;
 

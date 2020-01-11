@@ -113,9 +113,6 @@ protected:
 
    void addDebugRect(b2Body* body, float x, float y, float w, float h);
 
-   void parseAtmosphereLayer(TmxLayer* layer, TmxTileSet* tileSet);
-   void parseDynamicPhyicsLayer(TmxLayer* layer, TmxTileSet* tileSet);
-
    void parsePhysicsTiles(
       TmxLayer* layer,
       TmxTileSet* tileSet,
