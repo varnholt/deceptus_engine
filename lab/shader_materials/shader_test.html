@@ -78,8 +78,39 @@ var container, scene, camera, renderer, controls;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
+var flowfieldTexture1Initialized = false;
+var flowfieldTexture2Initialized = false;
+var playerTextureInitialized = false;
+
+function flowfieldTexture1Loaded()
+{
+   flowfieldTexture1Initialized = true;
+}
+
+function flowfieldTexture2Loaded()
+{
+   flowfieldTexture2Initialized = true;
+}
+
+function playerTextureLoaded()
+{
+   playerTextureInitialized = true;
+}
+
+function isInitialized()
+{
+   var initialized =      
+         flowfieldTexture1Initialized 
+      && flowfieldTexture2Initialized
+      && playerTextureInitialized;
+
+   return initialized;
+}
+
+
 init();
 animate();
+
 
 function init() 
 {
@@ -110,9 +141,9 @@ function init()
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	
    // shader
-	var flowfieldTexture1 = new THREE.ImageUtils.loadTexture('images/flowfield_1.png');
-   var flowfieldTexture2 = new THREE.ImageUtils.loadTexture('images/flowfield_3.png');
-	var playerTexture = new THREE.ImageUtils.loadTexture('images/player.png');
+	var flowfieldTexture1 = new THREE.ImageUtils.loadTexture('images/flowfield_1.png', undefined, flowfieldTexture1Loaded);
+   var flowfieldTexture2 = new THREE.ImageUtils.loadTexture('images/flowfield_3.png', undefined, flowfieldTexture2Loaded);
+	var playerTexture = new THREE.ImageUtils.loadTexture('images/player.png', undefined, playerTextureLoaded);
 	
 	this.customUniforms = {
 		player:           {type: "t", value: playerTexture},
@@ -138,6 +169,8 @@ function init()
    var surface = new THREE.Mesh(flatGeometry, customMaterial);
    surface.position.set(0, 0, 150);
    scene.add(surface);	
+   
+   initialized = true;
 }
 
 
@@ -160,6 +193,11 @@ function update()
 
 function render() 
 {
+   if (!isInitialized())
+   {
+      return;
+   }
+   
 	renderer.render( scene, camera );
 }
 
