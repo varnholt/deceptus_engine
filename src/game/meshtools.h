@@ -25,10 +25,7 @@ namespace Mesh
 
    void readObj(
       const std::string& filename,
-      std::vector<b2Vec3>& points,
-      std::vector<b2Vec3>& normals,
-      std::vector<b2Vec2>& texCoords,
-      std::vector<uint32_t>& faces,
-      std::vector<Vertex>& vertices
+      std::vector<b2Vec2>& points,
+      std::vector<std::vector<uint32_t>>& faces
    );
 }

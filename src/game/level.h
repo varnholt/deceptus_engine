@@ -126,6 +126,20 @@ protected:
       ObjectBehavior behavior
    );
 
+   void addChainToWorld(
+      const std::vector<b2Vec2>& chain,
+      ObjectBehavior behavior
+   );
+
+   void addDebugOutlines(
+      int32_t offsetX,
+      int32_t offsetY,
+      std::vector<sf::Vector2f> positions,
+      ObjectBehavior behavior
+   );
+
+   void parseObj(TmxLayer* layer, ObjectBehavior behavior);
+
    void load();
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);

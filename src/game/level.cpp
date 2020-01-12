@@ -992,10 +992,38 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 
 
 //-----------------------------------------------------------------------------
-void Level::addPathsToWorld(
+void Level::addChainToWorld(
+   const std::vector<b2Vec2>& chain,
+   ObjectBehavior behavior
+)
+{
+   b2BodyDef bodyDef;
+   bodyDef.position.Set(0, 0);
+   bodyDef.type = b2_staticBody;
+   b2Body* body = mWorld->CreateBody(&bodyDef);
+   b2ChainShape chainShape;
+   chainShape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
+   b2FixtureDef fixtureDef;
+   fixtureDef.density = 0.0f;
+   fixtureDef.friction = 0.2f;
+   fixtureDef.shape = &chainShape;
+   auto fixture = body->CreateFixture(&fixtureDef);
+
+   // deadly objects are deadly :)
+   if (behavior == ObjectBehaviorDeadly)
+   {
+      auto objectData = new FixtureNode(this);
+      objectData->setType(ObjectTypeDeadly);
+      fixture->SetUserData(static_cast<void*>(objectData));
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::addDebugOutlines(
    int32_t offsetX,
    int32_t offsetY,
-   const std::vector<SquareMarcher::Path>& paths,
+   std::vector<sf::Vector2f> positions,
    ObjectBehavior behavior
 )
 {
@@ -1010,62 +1038,87 @@ void Level::addPathsToWorld(
          break;
    }
 
+   // path.printPoly();
+   std::vector<sf::Vertex> visiblePath;
+   for (auto& pos : positions)
+   {
+      sf::Vertex visibleVertex;
+      visibleVertex.color = color;
+      visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * PIXELS_PER_TILE);
+      visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * PIXELS_PER_TILE);
+
+      visiblePath.push_back(visibleVertex);
+   }
+
+   visiblePath.push_back(visiblePath.at(0));
+   mAtmosphere.mOutlines.push_back(visiblePath);
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::addPathsToWorld(
+   int32_t offsetX,
+   int32_t offsetY,
+   const std::vector<SquareMarcher::Path>& paths,
+   ObjectBehavior behavior
+)
+{
+   // just for debugging purposes, this section can be removed later
    for (auto& path : paths)
    {
-      // just for debugging purposes, this section can be removed later
-      {
-         // path.printPoly();
-         std::vector<sf::Vertex> visiblePath;
-         for (auto& pos : path.mScaled)
-         {
-            sf::Vertex visibleVertex;
-            visibleVertex.color = color;
-            visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * PIXELS_PER_TILE);
-            visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * PIXELS_PER_TILE);
+      const auto& scaled = path.mScaled;
+      addDebugOutlines(offsetX, offsetY, scaled, behavior);
+   }
 
-            visiblePath.push_back(visibleVertex);
-         }
-
-         visiblePath.push_back(visiblePath.at(0));
-         mAtmosphere.mOutlines.push_back(visiblePath);
-      }
-
-      // create the physical chain
+   // create the physical chain with 1 body per chain
+   for (auto& path : paths)
+   {
       std::vector<b2Vec2> chain;
       for (auto& pos : path.mScaled)
       {
-         b2Vec2 chainPos;
+         chain.push_back({
+               (pos.x + offsetX) * PIXELS_PER_TILE / PPM,
+               (pos.y + offsetY) * PIXELS_PER_TILE / PPM
+            }
+         );
+      }
 
-         chainPos.Set(
-            (pos.x + offsetX)* PIXELS_PER_TILE / PPM,
-            (pos.y + offsetY)* PIXELS_PER_TILE / PPM
+      addChainToWorld(chain, behavior);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::parseObj(TmxLayer* layer, ObjectBehavior behavior)
+{
+   std::vector<b2Vec2> points;
+   std::vector<std::vector<uint32_t>> faces;
+   Mesh::readObj("layer_" + layer->mName + "_out.obj", points, faces);
+   for (const auto& face : faces)
+   {
+      std::vector<b2Vec2> chain;
+      std::vector<sf::Vector2f> debugPath;
+      for (auto index : face)
+      {
+         const auto& p = points[index];
+         chain.push_back({
+               (p.x + layer->mOffsetX) / PPM,
+               (p.y + layer->mOffsetY) / PPM
+            }
          );
 
-         chain.push_back(chainPos);
+         debugPath.push_back({
+               p.x / PIXELS_PER_TILE,
+               p.y / PIXELS_PER_TILE
+            }
+         );
       }
 
-      // create 1 body per chain
-      b2BodyDef bodyDef;
-      bodyDef.position.Set(0, 0);
-      bodyDef.type = b2_staticBody;
-      b2Body* body = mWorld->CreateBody(&bodyDef);
-      b2ChainShape chainShape;
-      chainShape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
-      b2FixtureDef fixtureDef;
-      fixtureDef.density = 0.0f;
-      fixtureDef.friction = 0.2f;
-      fixtureDef.shape = &chainShape;
-      auto fixture = body->CreateFixture(&fixtureDef);
+      // creating a box2d chain is automatically closing the path
+      chain.pop_back();
 
-      // deadly objects are deadly :)
-      if (behavior == ObjectBehaviorDeadly)
-      {
-         auto objectData = new FixtureNode(this);
-         objectData->setType(ObjectTypeDeadly);
-         fixture->SetUserData(static_cast<void*>(objectData));
-      }
-
-      mAtmosphere.mChains.push_back(chain);
+      addChainToWorld(chain, behavior);
+      addDebugOutlines(layer->mOffsetX, layer->mOffsetY, debugPath, behavior);
    }
 }
 
@@ -1077,8 +1130,14 @@ void Level::parsePhysicsTiles(
    const std::filesystem::path& basePath
 )
 {
+   // just enable this code when diagonale tiles are available, then integrate in toolchain
+   // parseObj(layer, ObjectBehavior::ObjectBehaviorSolid);
+   // return;
+
    mPhysics.parse(layer, tileSet, basePath);
-   mPhysics.parseCollidingTiles(layer, tileSet);
+
+   // enabled anytime to re-generate obj files
+   // mPhysics.parseCollidingTiles(layer, tileSet);
 
    static const float scale = 0.33333333333333333f;
 
