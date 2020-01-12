@@ -26,7 +26,6 @@ struct Atmosphere
    uint32_t mMapHeight = 0;
 
    std::vector<std::vector<sf::Vertex>> mOutlines;
-   std::vector<std::vector<b2Vec2>> mChains;
    std::shared_ptr<TileMap> mTileMap;
 
    AtmosphereTile getTileForPosition(const b2Vec2& playerPos) const;

@@ -7,6 +7,12 @@
 #include <sstream>
 
 
+namespace
+{
+static const auto triangulate = false;
+}
+
+
 void Mesh::weldVertices(b2Vec2* verts, int32_t count, float threshold)
 {
    for (auto i = 0; i < count; i++)
@@ -60,13 +66,14 @@ void Mesh::writeObj(
 
 void Mesh::readObj(
    const std::string& filename,
-   std::vector<b2Vec3>& points,
-   std::vector<b2Vec3>& normals,
-   std::vector<b2Vec2>& uvs,
-   std::vector<uint32_t>& faces,
-   std::vector<Vertex>& vertices
+   std::vector<b2Vec2>& points,
+   std::vector<std::vector<uint32_t>>& faces
 )
 {
+   std::vector<Mesh::Vertex> vertices;
+   std::vector<b2Vec2> normals;
+   std::vector<b2Vec2> uvs;
+
    auto trimString = [](std::string& str) {
       const char* whiteSpace = " \t\n\r";
       size_t location = str.find_first_not_of(whiteSpace);
@@ -106,7 +113,7 @@ void Mesh::readObj(
              float z = 0.0f;
 
              lineStream >> x >> y >> z;
-             points.push_back(b2Vec3(x, y, z));
+             points.push_back(b2Vec2(x, y));
          }
          else if (token == "vt")
          {
@@ -123,14 +130,13 @@ void Mesh::readObj(
             float z = 0.0f;
 
             lineStream >> x >> y >> z;
-            normals.push_back(b2Vec3(x, y, z));
+            normals.push_back(b2Vec2(x, y));
          }
          else if (token == "f")
          {
             faceCount++;
 
             std::vector<uint32_t> face;
-            std::vector<Vertex> faceVertices;
 
             size_t slash1 = 0;
             size_t slash2 = 0;
@@ -163,32 +169,34 @@ void Mesh::readObj(
                   nIndex = static_cast<uint32_t>(atoi( vertString.substr(slash2 + 1,vertString.length()).c_str() ) - 1);
                }
 
-               Vertex vertex;
+               Mesh::Vertex vertex;
                vertex.pIndex = pIndex;
                vertex.nIndex = nIndex;
                vertex.tcIndex = tcIndex;
 
                face.push_back(pIndex);
-               faceVertices.push_back(vertex);
+               vertices.push_back(vertex);
             }
 
             // obj: f pos/tex/norm  pos/tex/norm  pos/tex/norm
 
             // If number of edges in face is greater than 3,
             // decompose into triangles as a triangle fan.
-            if (face.size() > 3)
+
+            std::vector<uint32_t> faceIndices;
+            if (face.size() > 3 && triangulate)
             {
                auto v0 = face[0];
                auto v1 = face[1];
                auto v2 = face[2];
 
-               Vertex vt0 = faceVertices[0];
-               Vertex vt1 = faceVertices[1];
-               Vertex vt2 = faceVertices[2];
+               Mesh::Vertex vt0 = vertices[0];
+               Mesh::Vertex vt1 = vertices[1];
+               Mesh::Vertex vt2 = vertices[2];
 
-               faces.push_back(v0);
-               faces.push_back(v1);
-               faces.push_back(v2);
+               faceIndices.push_back(v0);
+               faceIndices.push_back(v1);
+               faceIndices.push_back(v2);
 
                vertices.push_back(vt0);
                vertices.push_back(vt1);
@@ -200,11 +208,11 @@ void Mesh::readObj(
                   v2 = face[i];
 
                   vt1 = vt2;
-                  vt2 = faceVertices[i];
+                  vt2 = vertices[i];
 
-                  faces.push_back(v0);
-                  faces.push_back(v1);
-                  faces.push_back(v2);
+                  faceIndices.push_back(v0);
+                  faceIndices.push_back(v1);
+                  faceIndices.push_back(v2);
 
                   vertices.push_back(vt0);
                   vertices.push_back(vt1);
@@ -213,14 +221,14 @@ void Mesh::readObj(
             }
             else
             {
-               faces.push_back(face[0]);
-               faces.push_back(face[1]);
-               faces.push_back(face[2]);
-
-               vertices.push_back(faceVertices[0]);
-               vertices.push_back(faceVertices[1]);
-               vertices.push_back(faceVertices[2]);
+               for (auto i = 0u; i < face.size(); i++)
+               {
+                  faceIndices.push_back(face[i]);
+                  vertices.push_back(vertices[i]);
+               }
             }
+
+            faces.push_back(faceIndices);
          }
       }
 
@@ -237,3 +245,4 @@ void Mesh::readObj(
    std::cout << " " << normals.size()    << " normals"     << std::endl;
    std::cout << " " << uvs.size()        << " uvs"         << std::endl;
 }
+

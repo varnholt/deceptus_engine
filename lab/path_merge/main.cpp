@@ -197,13 +197,13 @@ void readObj(
 
    objStream.close();
 
-   std::cout << "Loaded mesh from: " << filename << std::endl;
-
-   std::cout << " " << points.size()     << " points"      << std::endl;
-   std::cout << " " << faceCount         << " faces"       << std::endl;
-   std::cout << " " << faces.size() / 3  << " triangles."  << std::endl;
-   std::cout << " " << normals.size()    << " normals"     << std::endl;
-   std::cout << " " << uvs.size()        << " uvs"         << std::endl;
+   // std::cout << "Loaded mesh from: " << filename << std::endl;
+   //
+   // std::cout << " " << points.size()     << " points"      << std::endl;
+   // std::cout << " " << faceCount         << " faces"       << std::endl;
+   // std::cout << " " << faces.size() / 3  << " triangles."  << std::endl;
+   // std::cout << " " << normals.size()    << " normals"     << std::endl;
+   // std::cout << " " << uvs.size()        << " uvs"         << std::endl;
 }
 
 
@@ -237,9 +237,18 @@ void writeObj(
 }
 
 
-int main()
+int main(int32_t argc, char** argv)
 {
-   auto in = "C:\\git\\build\\layer_level.obj";
+   if (argc != 3)
+   {
+      std::cout << "usage: " << argv[0] << " input_file.obj output_file.obj" << std::endl;
+      exit(0);
+   }
+
+   // auto in = "C:\\git\\build\\layer_level.obj";
+   // auto out = "C:\\git\\build\\layer_level_out.obj";
+   auto in = argv[1];
+   auto out = argv[2];
 
    std::vector<QVector3D> points;
    std::vector<std::vector<uint32_t>> faces;
@@ -268,7 +277,6 @@ int main()
    }
 
    QPainterPath simplified = path.simplified();
-   std::cout << path.elementCount() << " -> " << simplified.elementCount() << std::endl;
 
    QTransform transform;
    auto simplifiedPolys = simplified.toSubpathPolygons(transform);
@@ -307,8 +315,22 @@ int main()
       simplifiedFaces.push_back(face);
    }
 
-   auto out = "C:\\git\\build\\layer_level_out.obj";
    writeObj(out, simplifiedPoints, simplifiedFaces);
+
+   std::cout
+      << "optimised mesh written to '"
+      << out
+      << "', points: "
+      << points.size()
+      << " -> "
+      << simplifiedPoints.size()
+      << ", faces: "
+      << path.elementCount()
+      << " -> "
+      << simplified.elementCount()
+      << ", factor: "
+      << simplifiedPoints.size() / static_cast<float>(points.size())
+      << std::endl;
 
    return 0;
 }
