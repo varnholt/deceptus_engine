@@ -6,6 +6,7 @@ TARGET = path_merge
 TEMPLATE = app
 
 CONFIG += c++11
+CONFIG += console
 
 SOURCES += \
         main.cpp \

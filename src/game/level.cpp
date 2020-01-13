@@ -1089,11 +1089,15 @@ void Level::addPathsToWorld(
 
 
 //-----------------------------------------------------------------------------
-void Level::parseObj(TmxLayer* layer, ObjectBehavior behavior)
+void Level::parseObj(
+   TmxLayer* layer,
+   ObjectBehavior behavior,
+   const std::filesystem::path& path
+)
 {
    std::vector<b2Vec2> points;
    std::vector<std::vector<uint32_t>> faces;
-   Mesh::readObj("layer_" + layer->mName + "_out.obj", points, faces);
+   Mesh::readObj(path.string(), points, faces);
    for (const auto& face : faces)
    {
       std::vector<b2Vec2> chain;
@@ -1130,41 +1134,57 @@ void Level::parsePhysicsTiles(
    const std::filesystem::path& basePath
 )
 {
-   // just enable this code when diagonale tiles are available, then integrate in toolchain
-   // parseObj(layer, ObjectBehavior::ObjectBehaviorSolid);
-   // return;
-
-   mPhysics.parse(layer, tileSet, basePath);
-
-   // enabled anytime to re-generate obj files
-   // mPhysics.parseCollidingTiles(layer, tileSet);
-
    static const float scale = 0.33333333333333333f;
 
-   SquareMarcher solid(
-      mPhysics.mGridWidth,
-      mPhysics.mGridHeight,
-      mPhysics.mPhysicsMap,
-      std::vector<int32_t>{1},
-      basePath / std::filesystem::path("physics_path_solid.csv"),
-      scale
-   );
+   auto pathSolid = basePath / std::filesystem::path("layer_" + layer->mName + "_solid.obj");
+   auto pathDeadly = basePath / std::filesystem::path("layer_" + layer->mName + "_deadly.obj");
 
-   solid.writeGridToImage(basePath / std::filesystem::path("physics_grid_solid.png"));
-   solid.writePathToImage(basePath / std::filesystem::path("physics_path_solid.png"));
+   std::cout << "[x] loading: " << pathSolid.make_preferred().generic_string() << std::endl;
 
-   addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
+   // enabled anytime to re-generate obj files
+   mPhysics.parseCollidingTiles(layer, tileSet);
 
-   SquareMarcher deadly(
-      mPhysics.mGridWidth,
-      mPhysics.mGridHeight,
-      mPhysics.mPhysicsMap,
-      std::vector<int32_t>{3},
-      basePath / std::filesystem::path("physics_path_deadly.csv"),
-      scale
-   );
+   if (std::filesystem::exists(pathSolid))
+   {
+      // just enable this code when diagonale tiles are available, then integrate in toolchain
+      parseObj(layer, ObjectBehavior::ObjectBehaviorSolid, pathSolid);
+   }
+   else
+   {
+      mPhysics.parse(layer, tileSet, basePath);
 
-   addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectBehaviorDeadly);
+      SquareMarcher solid(
+         mPhysics.mGridWidth,
+         mPhysics.mGridHeight,
+         mPhysics.mPhysicsMap,
+         std::vector<int32_t>{1},
+         basePath / std::filesystem::path("physics_path_solid.csv"),
+         scale
+      );
+
+      solid.writeGridToImage(basePath / std::filesystem::path("physics_grid_solid.png")); // not needed
+      solid.writePathToImage(basePath / std::filesystem::path("physics_path_solid.png")); // needed from obj as well
+
+      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
+   }
+
+   if (std::filesystem::exists(pathDeadly))
+   {
+      parseObj(layer, ObjectBehavior::ObjectBehaviorDeadly, pathDeadly);
+   }
+   else
+   {
+      SquareMarcher deadly(
+         mPhysics.mGridWidth,
+         mPhysics.mGridHeight,
+         mPhysics.mPhysicsMap,
+         std::vector<int32_t>{3},
+         basePath / std::filesystem::path("physics_path_deadly.csv"),
+         scale
+      );
+
+      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectBehaviorDeadly);
+   }
 }
 
 
