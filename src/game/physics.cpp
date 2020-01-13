@@ -175,10 +175,24 @@ void Physics::parseCollidingTiles(TmxLayer* layer, TmxTileSet* tileSet)
                      if (poly)
                      {
                         points = poly->mPolyLine;
+
+                        // for (auto& p : points)
+                        // {
+                        //    std::cout << "x: " << p.x << " y: " << p.y << std::endl;
+                        // }
+                        //
+                        // std::cout << "--" << std::endl;
                      }
                      else if (line)
                      {
                         points = line->mPolyLine;
+
+                        // for (auto& p : points)
+                        // {
+                        //    std::cout << "x: " << p.x << " y: " << p.y << std::endl;
+                        // }
+                        //
+                        // std::cout << "--" << std::endl;
                      }
                      else
                      {

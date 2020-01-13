@@ -138,7 +138,11 @@ protected:
       ObjectBehavior behavior
    );
 
-   void parseObj(TmxLayer* layer, ObjectBehavior behavior);
+   void parseObj(
+      TmxLayer* layer,
+      ObjectBehavior behavior,
+      const std::filesystem::path& path
+   );
 
    void load();
 
