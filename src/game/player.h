@@ -174,7 +174,6 @@ private:
    void jumpImpulse();
    void jumpForce();
 
-
    void updateAnimation(const sf::Time& dt);
    void updatePixelCollisions();
    void updateAtmosphere();
@@ -190,7 +189,11 @@ private:
    void updateDash(Dash dir = Dash::None);
    void updateCrouch();
    void updatePlayerPixelRect();
+   void updateHardLanding();
+   void updateSurfaceAngle();
+
    bool isDashActive() const;
+   void resetDash();
 
    void createBody();
    void createFeet();
@@ -292,6 +295,5 @@ private:
    std::deque<PositionedAnimation> mLastAnimations;
 
    static Player* sCurrent;
-   void resetDash();
 };
 
