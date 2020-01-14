@@ -1552,17 +1552,76 @@ void Player::updateCrouch()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::update(const sf::Time& dt)
+void Player::updateHardLanding()
 {
-   mTime += dt;
-
    {
       if (mHardLanding)
       {
          mHardLandingCycles++;
       }
    }
+}
 
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updateSurfaceAngle()
+{
+   if (!isOnGround())
+   {
+      return;
+   }
+
+   // raycast down to determine terrain slope
+   b2RayCastInput input;
+   input.p1 = mBody->GetPosition();
+   input.p2 = mBody->GetPosition() + b2Vec2(0.0f, 1.0f);
+   input.maxFraction = 1.0f;
+
+   float closestFraction = 1.0f;
+   b2Vec2 intersectionNormal(0.0f, -1.0f);
+
+   for (b2Body* b = mWorld->GetBodyList(); b; b = b->GetNext())
+   {
+      for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
+      {
+         // terrain is made out of chains, so only process those
+         if (f->GetShape()->GetType() != b2Shape::e_chain)
+         {
+            continue;
+         }
+
+         b2RayCastOutput output;
+
+         for (auto childIndex = 0; childIndex < f->GetShape()->GetChildCount(); childIndex++)
+         {
+            if (!f->RayCast(&output, input, childIndex))
+               continue;
+
+            if (output.fraction < closestFraction)
+            {
+               closestFraction = output.fraction;
+               intersectionNormal = output.normal;
+            }
+         }
+      }
+   }
+
+   // std::cout << intersectionNormal.x << " " << intersectionNormal.y << std::endl;
+   //
+   // x: -0.447
+   // y: -0.894
+
+   // std::cout << 1.0 / intersectionNormal.x << std::endl;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::update(const sf::Time& dt)
+{
+   mTime += dt;
+
+   updateSurfaceAngle();
+   updateHardLanding();
    updatePlayerPixelRect();
    updateCrouch();
    updateAnimation(dt);
