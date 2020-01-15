@@ -1071,11 +1071,11 @@ void Player::updateVelocity()
    applyBeltVelocity(desiredVel);
 
    // calc impulse, disregard time factor
-   auto velChange = desiredVel - currentVelocity.x;
-   auto impulse = mBody->GetMass() * velChange;
+   auto velocityChangeX = desiredVel - currentVelocity.x;
+   auto impulseX = mBody->GetMass() * velocityChangeX;
 
    mBody->ApplyLinearImpulse(
-      b2Vec2(impulse, 0.0f),
+      b2Vec2(impulseX, 0.0f),
       mBody->GetWorldCenter(),
       true
    );
@@ -1564,10 +1564,11 @@ void Player::updateHardLanding()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateSurfaceAngle()
+void Player::updateGroundAngle()
 {
    if (!isOnGround())
    {
+      mGroundNormal.Set(0.0f, -1.0f);
       return;
    }
 
@@ -1580,38 +1581,41 @@ void Player::updateSurfaceAngle()
    float closestFraction = 1.0f;
    b2Vec2 intersectionNormal(0.0f, -1.0f);
 
-   for (b2Body* b = mWorld->GetBodyList(); b; b = b->GetNext())
+   // for (b2Body* b = mWorld->GetBodyList(); b; b = b->GetNext())
+   for (b2Fixture* f = mGroundBody->GetFixtureList(); f; f = f->GetNext())
    {
-      for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
+      // terrain is made out of chains, so only process those
+      if (f->GetShape()->GetType() != b2Shape::e_chain)
       {
-         // terrain is made out of chains, so only process those
-         if (f->GetShape()->GetType() != b2Shape::e_chain)
-         {
+         continue;
+      }
+
+      b2RayCastOutput output;
+
+      for (auto childIndex = 0; childIndex < f->GetShape()->GetChildCount(); childIndex++)
+      {
+         if (!f->RayCast(&output, input, childIndex))
             continue;
-         }
 
-         b2RayCastOutput output;
-
-         for (auto childIndex = 0; childIndex < f->GetShape()->GetChildCount(); childIndex++)
+         if (output.fraction < closestFraction)
          {
-            if (!f->RayCast(&output, input, childIndex))
-               continue;
-
-            if (output.fraction < closestFraction)
-            {
-               closestFraction = output.fraction;
-               intersectionNormal = output.normal;
-            }
+            closestFraction = output.fraction;
+            intersectionNormal = output.normal;
          }
       }
    }
+
+   mGroundNormal = intersectionNormal;
 
    // std::cout << intersectionNormal.x << " " << intersectionNormal.y << std::endl;
    //
    // x: -0.447
    // y: -0.894
 
-   // std::cout << 1.0 / intersectionNormal.x << std::endl;
+   // x:  0.0
+   // y: -1.0
+
+   // std::cout << 1.0 / intersectionNormal.y << std::endl;
 }
 
 
@@ -1620,7 +1624,7 @@ void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
-   updateSurfaceAngle();
+   updateGroundAngle();
    updateHardLanding();
    updatePlayerPixelRect();
    updateCrouch();
@@ -2153,6 +2157,13 @@ void Player::setPlatformBody(b2Body* body)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::setGroundBody(b2Body* body)
+{
+   mGroundBody = body;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 bool Player::getVisible() const
 {
    return mVisible;
@@ -2169,11 +2180,15 @@ void Player::setVisible(bool visible)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::setFriction(float friction)
 {
+   std::cout << "setting friction to: " << friction << std::endl;
+
    for (b2Fixture* fixture = mBody->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       fixture->SetFriction(friction);
    }
-   mBody->ResetMassData();
+
+   // only needed for setDensity
+   // mBody->ResetMassData();
 }
 
 
@@ -2299,8 +2314,9 @@ void Player::reset()
    SaveState::getPlayerInfo().mExtraTable.mHealth->reset();
    SaveState::getPlayerInfo().mInventory.resetKeys();
 
-   // reset moving platform
+   // reset bodies passed from the contact listener
    mPlatformBody = nullptr;
+   mGroundBody = nullptr;
 
    // reset dash
    mDashSteps = 0;

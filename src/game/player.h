@@ -142,6 +142,7 @@ public:
 
    b2Body* getPlatformBody() const;
    void setPlatformBody(b2Body* body);
+   void setGroundBody(b2Body* body);
 
    bool isInAir() const;
    bool isClimbing() const;
@@ -190,7 +191,7 @@ private:
    void updateCrouch();
    void updatePlayerPixelRect();
    void updateHardLanding();
-   void updateSurfaceAngle();
+   void updateGroundAngle();
 
    bool isDashActive() const;
    void resetDash();
@@ -251,6 +252,8 @@ private:
    bool mInWater = false;
 
    b2Body* mPlatformBody = nullptr;
+   b2Body* mGroundBody = nullptr;
+   b2Vec2 mGroundNormal;
    float mNextFootStepTime = 0.0f;
 
    int mZ = 0;
