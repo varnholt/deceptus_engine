@@ -1064,6 +1064,17 @@ void Player::updateVelocity()
       return;
    }
 
+   {
+      if (isOnGround() && fabs(mGroundNormal.x) > 0.05f)
+      {
+         setFriction(2.0f);
+      }
+      else
+      {
+         setFriction(0.0f);
+      }
+   }
+
    auto desiredVel = getDesiredVelocity();
    auto currentVelocity = mBody->GetLinearVelocity();
 
@@ -2180,13 +2191,17 @@ void Player::setVisible(bool visible)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::setFriction(float friction)
 {
-   std::cout << "setting friction to: " << friction << std::endl;
+   // std::cout << "setting friction to: " << friction << std::endl;
 
    for (b2Fixture* fixture = mBody->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       fixture->SetFriction(friction);
    }
 
+   for (auto contact = mBody->GetContactList(); contact; contact = contact->next)
+   {
+      contact->contact->ResetFriction();
+   }
    // only needed for setDensity
    // mBody->ResetMassData();
 }
