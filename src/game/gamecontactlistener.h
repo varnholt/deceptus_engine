@@ -43,21 +43,6 @@ private:
    void processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture);
    void processImpulse(float impulse);
 
-   void processBeginContact(
-      b2Contact* contact,
-      b2Fixture* playerFixture,
-      b2Fixture* otherThingFixture,
-      FixtureNode* playerFixtureNode,
-      FixtureNode* otherThingFixtureNode
-   );
-
-   void processEndContact(
-      b2Contact* contact,
-      b2Fixture* otherThingFixture,
-      FixtureNode* playerFixtureNode,
-      FixtureNode* otherThingFixtureNode
-   );
-
 
 private:
 
