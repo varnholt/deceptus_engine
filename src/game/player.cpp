@@ -2191,8 +2191,6 @@ void Player::setVisible(bool visible)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::setFriction(float friction)
 {
-   // std::cout << "setting friction to: " << friction << std::endl;
-
    for (b2Fixture* fixture = mBody->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       fixture->SetFriction(friction);
@@ -2202,8 +2200,6 @@ void Player::setFriction(float friction)
    {
       contact->contact->ResetFriction();
    }
-   // only needed for setDensity
-   // mBody->ResetMassData();
 }
 
 
