@@ -1123,6 +1123,8 @@ void Level::parseObj(
 
       addChainToWorld(chain, behavior);
       addDebugOutlines(layer->mOffsetX, layer->mOffsetY, debugPath, behavior);
+
+      // Mesh::writeVerticesToImage(points, faces, {1200, 1200}, "yo_yo.png");
    }
 }
 
