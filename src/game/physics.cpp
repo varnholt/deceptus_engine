@@ -125,7 +125,7 @@ void Physics::parse(
 
 
 //-----------------------------------------------------------------------------
-void Physics::parseCollidingTiles(TmxLayer* layer, TmxTileSet* tileSet)
+void Physics::dumpObj(TmxLayer* layer, TmxTileSet* tileSet)
 {
    const auto tiles  = layer->mData;
    const auto width  = layer->mWidth;

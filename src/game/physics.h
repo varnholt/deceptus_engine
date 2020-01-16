@@ -16,7 +16,7 @@ struct Physics
       const std::filesystem::path& basePath
    );
 
-   void parseCollidingTiles(
+   void dumpObj(
       TmxLayer* layer,
       TmxTileSet* tileSet
    );
