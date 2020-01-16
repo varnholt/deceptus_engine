@@ -1,10 +1,12 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
 
 #include "Box2D/Box2D.h"
+#include <SFML/Graphics.hpp>
 
 
 namespace Mesh
@@ -27,5 +29,12 @@ namespace Mesh
       const std::string& filename,
       std::vector<b2Vec2>& points,
       std::vector<std::vector<uint32_t>>& faces
+   );
+
+   void writeVerticesToImage(
+      const std::vector<b2Vec2>& points,
+      const std::vector<std::vector<uint32_t>>& faces,
+      const sf::Vector2i& textureSize,
+      const std::filesystem::path& imagePath
    );
 }
