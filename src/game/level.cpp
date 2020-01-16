@@ -1142,7 +1142,21 @@ void Level::parsePhysicsTiles(
    std::cout << "[x] loading: " << pathSolid.make_preferred().generic_string() << std::endl;
 
    // enabled anytime to re-generate obj files
-   mPhysics.parseCollidingTiles(layer, tileSet);
+   // mPhysics.dumpObj(layer, tileSet);
+
+   mPhysics.parse(layer, tileSet, basePath);
+
+   SquareMarcher solid(
+      mPhysics.mGridWidth,
+      mPhysics.mGridHeight,
+      mPhysics.mPhysicsMap,
+      std::vector<int32_t>{1},
+      basePath / std::filesystem::path("physics_path_solid.csv"),
+      scale
+   );
+
+   solid.writeGridToImage(basePath / std::filesystem::path("physics_grid_solid.png")); // not needed
+   solid.writePathToImage(basePath / std::filesystem::path("physics_path_solid.png")); // needed from obj as well
 
    if (std::filesystem::exists(pathSolid))
    {
@@ -1151,20 +1165,6 @@ void Level::parsePhysicsTiles(
    }
    else
    {
-      mPhysics.parse(layer, tileSet, basePath);
-
-      SquareMarcher solid(
-         mPhysics.mGridWidth,
-         mPhysics.mGridHeight,
-         mPhysics.mPhysicsMap,
-         std::vector<int32_t>{1},
-         basePath / std::filesystem::path("physics_path_solid.csv"),
-         scale
-      );
-
-      solid.writeGridToImage(basePath / std::filesystem::path("physics_grid_solid.png")); // not needed
-      solid.writePathToImage(basePath / std::filesystem::path("physics_path_solid.png")); // needed from obj as well
-
       addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
    }
 

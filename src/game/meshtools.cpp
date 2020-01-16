@@ -237,12 +237,12 @@ void Mesh::readObj(
 
    objStream.close();
 
-   std::cout << "Loaded mesh from: " << filename << std::endl;
-
-   std::cout << " " << points.size()     << " points"      << std::endl;
-   std::cout << " " << faceCount         << " faces"       << std::endl;
-   std::cout << " " << faces.size() / 3  << " triangles."  << std::endl;
-   std::cout << " " << normals.size()    << " normals"     << std::endl;
-   std::cout << " " << uvs.size()        << " uvs"         << std::endl;
+   // std::cout << "Loaded mesh from: " << filename << std::endl;
+   //
+   // std::cout << " " << points.size()     << " points"      << std::endl;
+   // std::cout << " " << faceCount         << " faces"       << std::endl;
+   // std::cout << " " << faces.size() / 3  << " triangles."  << std::endl;
+   // std::cout << " " << normals.size()    << " normals"     << std::endl;
+   // std::cout << " " << uvs.size()        << " uvs"         << std::endl;
 }
 
