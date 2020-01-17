@@ -6,15 +6,21 @@ class DeathShader
 {
    public:
 
-      DeathShader();
+      DeathShader() = default;
 
       void initialize();
-      void update();
+      void update(const sf::Time& dt);
+
+      const sf::Shader& getShader() const;
 
    private:
 
       sf::Shader mShader;
+
       std::shared_ptr<sf::RenderTexture> mRenderTexture;
+
       sf::Texture mFlowField1;
       sf::Texture mFlowField2;
+
+      float mElapsed = 0.0f;
 };

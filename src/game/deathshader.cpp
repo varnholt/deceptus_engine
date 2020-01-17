@@ -3,11 +3,6 @@
 #include <iostream>
 
 
-DeathShader::DeathShader()
-{
-}
-
-
 void DeathShader::initialize()
 {
    if (!mShader.loadFromFile(
@@ -20,16 +15,41 @@ void DeathShader::initialize()
       return;
    }
 
-    mShader.setUniform("texture", mRenderTexture->getTexture());
+   if (!mFlowField1.loadFromFile("data/effects/flowfield_1.png"))
+   {
+      std::cout << "error loading flowfield 1" << std::endl;
+      return;
+   }
+
+   if (!mFlowField2.loadFromFile("data/effects/flowfield_3.png"))
+   {
+      std::cout << "error loading flowfield 2" << std::endl;
+      return;
+   }
+
+   //   mFlowField1.setRepeated(true);
+   //   mFlowField1.setSmooth(true);
+   //   mFlowField2.setRepeated(true);
+   //   mFlowField2.setSmooth(true);
+
+   mShader.setUniform("current_texture", sf::Shader::CurrentTexture);
+   mShader.setUniform("flowfield_1", mFlowField1);
+   mShader.setUniform("flowfield_2", mFlowField2);
 }
 
 
-void DeathShader::update()
+void DeathShader::update(const sf::Time& dt)
 {
-   // that implicitly scales the effect up by 2
-   mShader.setUniform("texture_width", 960/2);
-   mShader.setUniform("texture_height", 540/2);
+   mElapsed += fmod(dt.asSeconds() * 0.01f, 1.0f);
 
-   mShader.setUniform("blur_radius", 20.0f);
-   mShader.setUniform("add_factor", 1.0f);
+   // std::cout << mElapsed << std::endl;
+   mShader.setUniform("time", mElapsed);
 }
+
+
+const sf::Shader& DeathShader::getShader() const
+{
+   return mShader;
+}
+
+
