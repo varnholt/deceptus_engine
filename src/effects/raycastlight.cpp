@@ -163,13 +163,18 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
                }
 
                auto v0 = chainShape->m_vertices[vCurr];
+               auto v1 = chainShape->m_vertices[vNext];
 
                // printf("%f\n", (lightPos - v0).LengthSquared());
 
-               if ((lightPos - v0).LengthSquared() > 100.0f)
+               if (
+                     (lightPos - v0).LengthSquared() > 100.0f
+                  && (lightPos - v1).LengthSquared() > 100.0f
+               )
+               {
                   continue;
+               }
 
-               auto v1 = chainShape->m_vertices[vNext];
                auto v0far = 10000.0f * (v0 - lightPos);
                auto v1far = 10000.0f * (v1 - lightPos);
 

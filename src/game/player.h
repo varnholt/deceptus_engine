@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include "deathshader.h"
 #include "extramanager.h"
 #include "extratable.h"
 #include "gamenode.h"
@@ -175,6 +176,7 @@ private:
    void jumpImpulse();
    void jumpForce();
 
+   void updateShaders(const sf::Time& dt);
    void updateAnimation(const sf::Time& dt);
    void updatePixelCollisions();
    void updateAtmosphere();
@@ -296,6 +298,9 @@ private:
    std::shared_ptr<Animation> mCurrentCycle;
 
    std::deque<PositionedAnimation> mLastAnimations;
+
+   sf::RenderTexture mDeathRenderTexture;
+   DeathShader mDeathEffect;
 
    static Player* sCurrent;
 };
