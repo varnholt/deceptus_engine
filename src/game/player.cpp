@@ -160,8 +160,6 @@ void Player::initialize()
    }
 
    initializeController();
-
-   mDeathEffect.initialize();
 }
 
 
@@ -292,13 +290,6 @@ void Player::draw(sf::RenderTarget& target)
       if (isDashActive())
       {
          mLastAnimations.push_back({pos, mCurrentCycle});
-      }
-
-      if (isDead())
-      {
-         // draw to mDeathRenderTexture
-         // position that, render with activated shader
-         // mCurrentCycle->draw(target, &mDeathEffect.getShader());
       }
 
       mCurrentCycle->draw(target);
@@ -1644,7 +1635,6 @@ void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
-   updateShaders(dt);
    updateGroundAngle();
    updateHardLanding();
    updatePlayerPixelRect();
@@ -2039,13 +2029,6 @@ void Player::jumpForce()
 {
    mJumpClock.restart();
    mJumpSteps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::updateShaders(const sf::Time& dt)
-{
-   mDeathEffect.update(dt);
 }
 
 

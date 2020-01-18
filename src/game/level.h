@@ -8,6 +8,7 @@
 #include "boomeffect.h"
 #include "camerasystem.h"
 #include "constants.h"
+#include "deathshader.h"
 #include "gamenode.h"
 #include "gammashader.h"
 #include "imagelayer.h"
@@ -208,6 +209,8 @@ protected:
    std::unique_ptr<AtmosphereShader> mAtmosphereShader;
    std::unique_ptr<BlurShader> mBlurShader;
    std::unique_ptr<GammaShader> mGammaShader;
+   std::unique_ptr<DeathShader> mDeathShader;
+   bool mScreenshot = false;
 
    // box2d
 

@@ -34,7 +34,9 @@ public:
    void draw();
 
 
-private:
+   void takeScreenshot();
+   
+   private:
 
    void initializeWindow();
    void initializeController();

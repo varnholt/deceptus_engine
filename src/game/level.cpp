@@ -107,6 +107,7 @@ void Level::initializeTextures()
    mAtmosphereShader.reset();
    mGammaShader.reset();
    mBlurShader.reset();
+   mDeathShader.reset();
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
@@ -134,6 +135,7 @@ void Level::initializeTextures()
    mAtmosphereShader = std::make_unique<AtmosphereShader>(textureWidth, textureHeight);
    mGammaShader = std::make_unique<GammaShader>();
    mBlurShader = std::make_unique<BlurShader>(textureWidth, textureHeight);
+   mDeathShader = std::make_unique<DeathShader>(textureWidth, textureHeight);
 
    // keep track of those textures
    mRenderTextures.clear();
@@ -147,6 +149,7 @@ void Level::initializeTextures()
    mAtmosphereShader->initialize();
    mGammaShader->initialize(mLevelRenderTexture->getTexture());
    mBlurShader->initialize();
+   mDeathShader->initialize();
 }
 
 
@@ -752,8 +755,44 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
          // ambient occlusion
          mAo.draw(target);
 
-         // player
-         Player::getCurrent()->draw(target);
+         // draw player
+         auto player = Player::getCurrent();
+
+         if (player->isDead())
+         {
+            auto deathRenderTexture = mDeathShader->getRenderTexture();
+
+            // render player to texture
+            deathRenderTexture->clear(sf::Color{0,0,0,0});
+            deathRenderTexture->setView(*mLevelView);
+            player->draw(*deathRenderTexture);
+            deathRenderTexture->display();
+
+            // render texture with shader applied
+            auto deathShaderSprite = sf::Sprite(deathRenderTexture->getTexture());
+
+            // TODO: have a static view for rendertexture quads
+            sf::View view(
+               sf::FloatRect(
+                  0.0f,
+                  0.0f,
+                  static_cast<float>(mLevelRenderTexture->getSize().x),
+                  static_cast<float>(mLevelRenderTexture->getSize().y)
+               )
+            );
+
+            view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+            target.setView(view);
+            target.draw(deathShaderSprite, &mDeathShader->getShader());
+
+            takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
+
+            target.setView(*mLevelView);
+         }
+         else
+         {
+            player->draw(target);
+         }
       }
 
       for_each(std::begin(mImageLayers), std::end(mImageLayers), [&](auto& layer)
@@ -818,12 +857,16 @@ bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) con
 //----------------------------------------------------------------------------------------------------------------------
 void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& texture)
 {
+   if (!mScreenshot)
+   {
+      return;
+   }
+
    std::ostringstream ss;
    ss << basename << "_" << std::setw(2) << std::setfill('0') << mScreenshotCounters[basename] << ".png";
    mScreenshotCounters[basename]++;
    texture.getTexture().copyToImage().saveToFile(ss.str());
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -832,25 +875,19 @@ void Level::draw(
    bool screenshot
 )
 {
+   mScreenshot = screenshot;
+
    // render atmosphere to atmosphere texture, that texture is used in the shader only
    mAtmosphereShader->getRenderTexture()->clear();
    drawAtmosphereLayer(*mAtmosphereShader->getRenderTexture().get());
    mAtmosphereShader->getRenderTexture()->display();
-
-   if (screenshot)
-   {
-      takeScreenshot("screenshot_atmosphere", *mAtmosphereShader->getRenderTexture().get());
-   }
+   takeScreenshot("screenshot_atmosphere", *mAtmosphereShader->getRenderTexture().get());
 
    // render glowing elements
    mBlurShader->clearTexture();
    drawBlurLayer(*mBlurShader->getRenderTexture().get());
    mBlurShader->getRenderTexture()->display();
-
-   if (screenshot)
-   {
-      takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
-   }
+   takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
 
    // render layers affected by the atmosphere
    mLevelBackgroundRenderTexture->clear();
@@ -859,11 +896,7 @@ void Level::draw(
    drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
    drawLayers(*mLevelBackgroundRenderTexture.get(), ZDepthBackgroundMin, ZDepthBackgroundMax);
    mLevelBackgroundRenderTexture->display();
-
-   if (screenshot)
-   {
-      takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
-   }
+   takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
 
    // draw the atmospheric parts into the level texture
    sf::Sprite backgroundSprite(mLevelBackgroundRenderTexture->getTexture());
@@ -922,13 +955,7 @@ void Level::draw(
    view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
    mLevelRenderTexture->setView(view);
    mLevelRenderTexture->display();
-
-   if (screenshot)
-   {
-       takeScreenshot("screenshot_level", *mLevelRenderTexture.get());
-   }
-
-   screenshot = false;
+   takeScreenshot("screenshot_level", *mLevelRenderTexture.get());
 
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
 
@@ -981,6 +1008,8 @@ void Level::update(const sf::Time& dt)
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+
+   mDeathShader->update(dt);
 }
 
 

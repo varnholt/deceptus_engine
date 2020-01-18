@@ -6,12 +6,18 @@ class DeathShader
 {
    public:
 
-      DeathShader() = default;
+      DeathShader(
+         uint32_t width,
+         uint32_t height
+      );
+      virtual ~DeathShader();
 
       void initialize();
       void update(const sf::Time& dt);
 
       const sf::Shader& getShader() const;
+      const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;
+
 
    private:
 

@@ -632,6 +632,13 @@ void Game::changeResolution(int32_t w, int32_t h)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::takeScreenshot()
+{
+   mScreenshot = true;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
    if (Console::getInstance().isActive())
@@ -757,7 +764,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::S:
       {
-         mScreenshot = true;
+         takeScreenshot();
          break;
       }
       case sf::Keyboard::V:
