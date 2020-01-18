@@ -1,6 +1,22 @@
 #include "deathshader.h"
 
+#include "player.h"
+
 #include <iostream>
+
+
+DeathShader::DeathShader(uint32_t width, uint32_t height)
+{
+   mRenderTexture = std::make_shared<sf::RenderTexture>();
+   mRenderTexture->create(width, height);
+}
+
+
+DeathShader::~DeathShader()
+{
+   mRenderTexture.reset();
+}
+
 
 
 void DeathShader::initialize()
@@ -27,10 +43,10 @@ void DeathShader::initialize()
       return;
    }
 
-   //   mFlowField1.setRepeated(true);
-   //   mFlowField1.setSmooth(true);
-   //   mFlowField2.setRepeated(true);
-   //   mFlowField2.setSmooth(true);
+   mFlowField1.setRepeated(true);
+   mFlowField1.setSmooth(true);
+   mFlowField2.setRepeated(true);
+   mFlowField2.setSmooth(true);
 
    mShader.setUniform("current_texture", sf::Shader::CurrentTexture);
    mShader.setUniform("flowfield_1", mFlowField1);
@@ -40,16 +56,29 @@ void DeathShader::initialize()
 
 void DeathShader::update(const sf::Time& dt)
 {
-   mElapsed += fmod(dt.asSeconds() * 0.01f, 1.0f);
+   mElapsed += dt.asSeconds() * 0.5f;
+   mElapsed = fmod(mElapsed, 1.0f);
 
    // std::cout << mElapsed << std::endl;
    mShader.setUniform("time", mElapsed);
+   mShader.setUniform(
+      "flowfield_offset",
+      Player::getCurrent()->isPointingLeft()
+         ? sf::Glsl::Vec2(0.5f, -0.32f) // picked randomly
+         : sf::Glsl::Vec2(0.8f, 0.8f)
+   );
 }
 
 
 const sf::Shader& DeathShader::getShader() const
 {
    return mShader;
+}
+
+
+const std::shared_ptr<sf::RenderTexture>& DeathShader::getRenderTexture() const
+{
+   return mRenderTexture;
 }
 
 
