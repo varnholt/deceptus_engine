@@ -57,6 +57,7 @@ void DeathShader::initialize()
 void DeathShader::reset()
 {
    mElapsed = 0.0f;
+   mShader.setUniform("time", mElapsed);
 }
 
 

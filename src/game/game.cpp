@@ -538,7 +538,7 @@ void Game::updateGameState(const sf::Time& dt)
    if (mPlayer->isDead())
    {
       mDeathWaitTimeMs += dt.asMilliseconds();
-      if (mDeathWaitTimeMs > 2000)
+      if (mDeathWaitTimeMs > 2500)
       {
          // std::cout << "reload" << std::endl;
          mPlayer->reset();
