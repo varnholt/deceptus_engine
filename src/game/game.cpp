@@ -247,14 +247,16 @@ void Game::loadLevel()
          mPlayer->setWorld(mLevel->getWorld());
          mPlayer->initializeLevel();
 
-         mLevelLoadingFinished = true;
-
          // jump back to stored position
          if (mStoredPositionValid)
          {
             mPlayer->setBodyViaPixelPosition(mStoredPosition.x, mStoredPosition.y);
             mStoredPositionValid = false;
          }
+
+         mPlayer->updatePlayerPixelRect();
+
+         mLevelLoadingFinished = true;
       }
    );
 }
@@ -498,16 +500,50 @@ void Game::updateWindowTitle()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::updateGameState()
+void Game::updateGameState(const sf::Time& dt)
 {
+   // check if player is dead
+   auto deathReason = mPlayer->checkDead();
+   if (!mPlayer->isDead() && deathReason != DeathReason::None)
+   {
+      mDeathWaitTimeMs = 0;
+      mLevel->resetDeathShader();
+
+      switch (deathReason)
+      {
+         case DeathReason::TouchesDeadly:
+         {
+            std::cout << "dead: touched something deadly" << std::endl;
+            break;
+         }
+         case DeathReason::TooFast:
+         {
+            std::cout << "dead: too fast" << std::endl;
+            break;
+         }
+         case DeathReason::OutOfHealth:
+         {
+            std::cout << "dead: out of health" << std::endl;
+            break;
+         }
+         case DeathReason::None:
+         {
+            break;
+         }
+      }
+
+      mPlayer->die();
+   }
+
    if (mPlayer->isDead())
    {
-      mPlayer->die();
-      mPlayer->reset();
-
-      // mLevel->reset();
-
-      loadLevel();
+      mDeathWaitTimeMs += dt.asMilliseconds();
+      if (mDeathWaitTimeMs > 2000)
+      {
+         // std::cout << "reload" << std::endl;
+         mPlayer->reset();
+         loadLevel();
+      }
    }
 }
 
@@ -556,7 +592,7 @@ void Game::update()
          }
 
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
-         updateGameState();
+         updateGameState(dt);
       }
    }
 
@@ -582,7 +618,6 @@ int Game::loop()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::reset()
 {
-   mLevel->reset();
    mPlayer->reset();
 }
 

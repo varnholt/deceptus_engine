@@ -63,6 +63,8 @@ public:
    virtual ~Level();
 
    virtual void initialize();
+   void reset();
+   void resetDeathShader();
 
    void createViews();
    void updateViews();
@@ -90,7 +92,6 @@ public:
    std::shared_ptr<Bouncer> getNearbyBouncer();
 
    void toggleMechanisms();
-   void reset();
 
    const sf::Vector2f& getStartPosition() const;
 

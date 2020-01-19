@@ -35,8 +35,8 @@ public:
 
 
    void takeScreenshot();
-   
-   private:
+
+private:
 
    void initializeWindow();
    void initializeController();
@@ -48,7 +48,7 @@ public:
    void reset();
 
    void update();
-   void updateGameState();
+   void updateGameState(const sf::Time& dt);
    void updateGameController();
    void updateGameControllerForGame();
    void updateGameControllerForInventory();
@@ -97,6 +97,7 @@ private:
    bool mDrawCameraSystem = false;
    bool mDrawWeather = true;
    sf::Vector2u mRenderTextureOffset;
+   int32_t mDeathWaitTimeMs = 0;
 
    bool mRecording = false;
    int32_t mRecordingCounter = 0;

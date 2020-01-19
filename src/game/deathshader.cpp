@@ -54,10 +54,23 @@ void DeathShader::initialize()
 }
 
 
+void DeathShader::reset()
+{
+   mElapsed = 0.0f;
+}
+
+
 void DeathShader::update(const sf::Time& dt)
 {
    mElapsed += dt.asSeconds() * 0.5f;
-   mElapsed = fmod(mElapsed, 1.0f);
+
+   if (mElapsed > 1.0f)
+   {
+      mElapsed = 1.0f;
+   }
+
+   // for testing
+   // mElapsed = fmod(mElapsed, 1.0f);
 
    // std::cout << mElapsed << std::endl;
    mShader.setUniform("time", mElapsed);

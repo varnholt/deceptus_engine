@@ -261,13 +261,18 @@ void Player::draw(sf::RenderTarget& target)
       return;
    }
 
-   auto time = GlobalClock::getInstance()->getElapsedTimeInMs();
-   auto damageTime = mDamageClock.getElapsedTime().asMilliseconds();
-   if (mDamageInitialized && time > 3000 && damageTime < 3000)
+   // dead players shouldn't flash
+   if (!isDead())
    {
-      if ((damageTime / 100) % 2 == 0)
+      // damaged player flashes
+      auto time = GlobalClock::getInstance()->getElapsedTimeInMs();
+      auto damageTime = mDamageClock.getElapsedTime().asMilliseconds();
+      if (mDamageInitialized && time > 3000 && damageTime < 3000)
       {
-         return;
+         if ((damageTime / 100) % 2 == 0)
+         {
+            return;
+         }
       }
    }
 
@@ -691,6 +696,11 @@ bool Player::isPointingLeft() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlayerOrientation()
 {
+   if (isDead())
+   {
+      return;
+   }
+
    if (isControllerUsed())
    {
       auto axisValues = mJoystickInfo.getAxisValues();
@@ -803,8 +813,20 @@ float Player::getAcceleration() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
+bool Player::isDead() const
+{
+   return mDead;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updateAnimation(const sf::Time& dt)
 {
+   if (isDead())
+   {
+      return;
+   }
+
    std::shared_ptr<Animation> nextCycle = nullptr;
 
    auto velocity = mBody->GetLinearVelocity();
@@ -1038,6 +1060,12 @@ void Player::applyBeltVelocity(float& desiredVel)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
 {
+   if (isDead())
+   {
+      mBody->SetLinearVelocity(b2Vec2{0.0, 0.0});
+      return;
+   }
+
    // if we just landed hard on the ground, we need a break :)
    if (mHardLanding)
    {
@@ -1253,8 +1281,7 @@ void Player::impulse(float intensity)
       mHardLanding = true;
       mHardLandingCycles = 0;
 
-      auto damage = static_cast<int>((intensity - 1.0f) * 20.0f);
-      Player::getCurrent()->damage(damage);
+      damage(static_cast<int>((intensity - 1.0f) * 20.0f));
    }
 }
 
@@ -1262,6 +1289,11 @@ void Player::impulse(float intensity)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::damage(int damage, const sf::Vector2f& force)
 {
+   if (isDead())
+   {
+      return;
+   }
+
    if (damage == 0)
    {
       return;
@@ -2301,6 +2333,7 @@ void Player::fire()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::die()
 {
+   mDead = true;
    Audio::getInstance()->playSample("death.wav");
 }
 
@@ -2332,24 +2365,36 @@ void Player::reset()
    // reset dash
    mDashSteps = 0;
    resetDash();
+   mDead = false;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool Player::isDead() const
+DeathReason Player::checkDead() const
 {
+   DeathReason reason = DeathReason::None;
+
    const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
    const auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
    const auto outOfHealth = SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth <= 0;
 
-   const auto dead = touchesSomethingDeadly || tooFast || outOfHealth;
+   if (touchesSomethingDeadly)
+   {
+      reason = DeathReason::TouchesDeadly;
+      // std::cout << "dead: touches something deadly" << std::endl;
+   }
+   else if (tooFast)
+   {
+      reason = DeathReason::TooFast;
+      // std::cout << "dead: too fast" << std::endl;
+   }
+   else if (outOfHealth)
+   {
+      reason = DeathReason::OutOfHealth;
+      // std::cout << "dead: out of health" << std::endl;
+   }
 
-//   if (dead)
-//   {
-//      std::cout << "DEAD!" << std::endl;
-//   }
-
-   return dead;
+   return reason;
 }
 
 

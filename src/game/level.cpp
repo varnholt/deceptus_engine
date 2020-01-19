@@ -581,6 +581,23 @@ void Level::initialize()
 
 
 //-----------------------------------------------------------------------------
+void Level::reset()
+{
+   for (auto& door : mDoors)
+   {
+      door.reset();
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::resetDeathShader()
+{
+   mDeathShader->reset();
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
    for (auto& desc : mDescription->mEnemies)
@@ -760,10 +777,12 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
 
          if (player->isDead())
          {
+            // std::cout << "render death shader" << std::endl;
+
             auto deathRenderTexture = mDeathShader->getRenderTexture();
 
             // render player to texture
-            deathRenderTexture->clear(sf::Color{0,0,0,0});
+            deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
             deathRenderTexture->setView(*mLevelView);
             player->draw(*deathRenderTexture);
             deathRenderTexture->display();
@@ -1318,16 +1337,6 @@ void Level::toggleMechanisms()
    for (auto& lever : mLevers)
    {
       std::dynamic_pointer_cast<Lever>(lever)->toggle();
-   }
-}
-
-
-//-----------------------------------------------------------------------------
-void Level::reset()
-{
-   for (auto& door : mDoors)
-   {
-      std::dynamic_pointer_cast<Door>(door)->reset();
    }
 }
 
