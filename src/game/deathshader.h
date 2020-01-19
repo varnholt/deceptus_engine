@@ -13,6 +13,7 @@ class DeathShader
       virtual ~DeathShader();
 
       void initialize();
+      void reset();
       void update(const sf::Time& dt);
 
       const sf::Shader& getShader() const;

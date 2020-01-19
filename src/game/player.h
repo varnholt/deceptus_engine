@@ -104,7 +104,7 @@ public:
    void fire();
    void die();
    void reset();
-   bool isDead() const;
+   DeathReason checkDead() const;
 
    bool isMovingRight() const;
    bool isMovingLeft() const;
@@ -133,6 +133,7 @@ public:
    b2Body* getBody() const;
    void setWorld(const std::shared_ptr<b2World>& world);
    void updatePixelPosition();
+   void updatePlayerPixelRect();
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
 
@@ -150,6 +151,7 @@ public:
    bool isInWater() const;
    bool isOnPlatform() const;
    bool isOnGround() const;
+   bool isDead() const;
 
    void setInWater(bool inWater);
 
@@ -190,7 +192,6 @@ private:
    void updatePlayerOrientation();
    void updateDash(Dash dir = Dash::None);
    void updateCrouch();
-   void updatePlayerPixelRect();
    void updateHardLanding();
    void updateGroundAngle();
 
@@ -251,6 +252,7 @@ private:
    bool mVisible = true;
    bool mCrouching = false;
    bool mInWater = false;
+   bool mDead = false;
 
    b2Body* mPlatformBody = nullptr;
    b2Body* mGroundBody = nullptr;
