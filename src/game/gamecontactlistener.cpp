@@ -438,6 +438,34 @@ void GameContactListener::PreSolve(b2Contact* contact, const b2Manifold* /*oldMa
 
 void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *contactImpulse)
 {
+   // normal impulse
+   //
+   //    The normal force is the force applied at a contact point to prevent the shapes from penetrating.
+   //    For convenience, Box2D works with impulses. The normal impulse is just the normal force multiplied
+   //    by the time step.
+   //
+   //
+   // tangent impulse
+   //
+   //    The tangent force is generated at a contact point to simulate friction. For convenience,
+   //    this is stored as an impulse.
+   //
+   //
+   // for debugging
+   //
+   // auto normalMax = 0.0f;
+   // auto tangentMax = 0.0f;
+   // for (auto i = 0; i < contactImpulse->count; i++)
+   // {
+   //    normalMax = std::max(normalMax, contactImpulse->normalImpulses[i]);
+   //    tangentMax = std::max(tangentMax, contactImpulse->tangentImpulses[i]);
+   // }
+   //
+   // if (normalMax > 0.025f || tangentMax > 0.01f)
+   // {
+   //    std::cout << "normal max: " << normalMax << " tangent max: " << tangentMax << std::endl;
+   // }
+
    // check if the player hits something at a heigh speed or
    // if something hits the player at a nigh speed
    auto userDataA = contact->GetFixtureA()->GetUserData();

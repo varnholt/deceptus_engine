@@ -133,6 +133,7 @@ public:
    b2Body* getBody() const;
    void setWorld(const std::shared_ptr<b2World>& world);
    void updatePixelPosition();
+   void updatePreviousBodyState();
    void updatePlayerPixelRect();
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
@@ -254,6 +255,8 @@ private:
    bool mInWater = false;
    bool mDead = false;
 
+   b2Vec2 mPositionPrevious;
+   b2Vec2 mVelocityPrevious;
    b2Body* mPlatformBody = nullptr;
    b2Body* mGroundBody = nullptr;
    b2Vec2 mGroundNormal;
