@@ -322,6 +322,7 @@ void Player::setPixelPosition(float x, float y)
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlayerPixelRect()
 {
    sf::IntRect rect;
@@ -1271,12 +1272,33 @@ void Player::setJoystickInfo(const GameControllerInfo &joystickInfo)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::impulse(float intensity)
 {
+   const auto dx = mVelocityPrevious.x - mBody->GetLinearVelocity().x;
+   const auto dy = mVelocityPrevious.y - mBody->GetLinearVelocity().y;
+   const auto horizontal = (fabs(dx) > fabs(dy));
+
+   // std::cout
+   //    << "intensity: " << intensity
+   //    << " dx: " << dx
+   //    << " dy: " << dy
+   //    << " dir: " << (horizontal ? "x" : "y")
+   //   << std::endl;
+
+   if (horizontal)
+   {
+      if (intensity > 0.4f)
+      {
+         Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
+      }
+   }
+
    if (intensity > 1.0f)
    {
       if (Level::getCurrentLevel()->getNearbyBouncer())
       {
          return;
       }
+
+      Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f);
 
       mHardLanding = true;
       mHardLandingCycles = 0;
@@ -1686,6 +1708,7 @@ void Player::update(const sf::Time& dt)
    updatePixelPosition();
    updateFootsteps();
    updatePortal();
+   updatePreviousBodyState();
 }
 
 
@@ -2434,6 +2457,14 @@ void Player::updatePixelPosition()
    float y = mBody->GetPosition().y * PPM;
 
    setPixelPosition(x, y);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updatePreviousBodyState()
+{
+   mPositionPrevious = mBody->GetPosition();
+   mVelocityPrevious = mBody->GetLinearVelocity();
 }
 
 
