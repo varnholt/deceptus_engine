@@ -88,7 +88,7 @@ function update(dt)
          velocity = getLinearVelocity()
          mCycle = 4
          setActive(false)
-         boom(mPosition:getX(), mPosition:getY(), 0.5)
+         boom(0.0, 1.0, 0.5)
          mElapsed = 0.0
       end
    end
