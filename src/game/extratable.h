@@ -1,5 +1,4 @@
-#ifndef EXTRATABLE_H
-#define EXTRATABLE_H
+#pragma once
 
 #include "extrahealth.h"
 #include "extraskill.h"
@@ -8,14 +7,18 @@
 #include <memory>
 #include <vector>
 
+#include "json/json.hpp"
+
 
 class ExtraTable
 {
 public:
-   ExtraTable();
+   ExtraTable() = default;
 
-   std::shared_ptr<ExtraHealth> mHealth;
-   std::shared_ptr<ExtraSkill> mSkills;
+   ExtraHealth mHealth;
+   ExtraSkill mSkills;
 };
 
-#endif // EXTRATABLE_H
+void to_json(nlohmann::json& j, const ExtraTable& d);
+void from_json(const nlohmann::json& j, ExtraTable& d);
+

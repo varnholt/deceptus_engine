@@ -1,12 +1,16 @@
-#ifndef EXTRASKILL_H
-#define EXTRASKILL_H
+#pragma once
 
 #include "extra.h"
+
+#include <cstdint>
+
+#include "json/json.hpp"
+
 
 class ExtraSkill : public Extra
 {
 public:
-   ExtraSkill();
+   ExtraSkill() = default;
 
    enum Skill
    {
@@ -14,7 +18,10 @@ public:
       SkillInvulnerable = 0x02
    };
 
-   int mSkills = 0; // SkillClimb;
+   int32_t mSkills = 0;
 };
 
-#endif // EXTRASKILL_H
+
+void to_json(nlohmann::json& j, const ExtraSkill& d);
+void from_json(const nlohmann::json& j, ExtraSkill& d);
+

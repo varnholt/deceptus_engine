@@ -89,7 +89,7 @@ void Console::execute()
    }
    else if (results.at(0) == "/iddqd")
    {
-      SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillInvulnerable;
+      SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillInvulnerable;
       mLog.push_back("invulnerable");
    }
    else if (results.at(0) == "/idkfa")

@@ -1,5 +1,7 @@
 #include "inventory.h"
 
+using json = nlohmann::json;
+
 
 void Inventory::add(ItemType itemType)
 {
@@ -71,5 +73,24 @@ bool Inventory::hasInventoryItem(ItemType itemType) const
 
    return it != mItems.end();
 }
+
+
+
+void to_json(nlohmann::json& j, const Inventory& d)
+{
+   j = json{
+      {"items", d.mItems}
+   };
+}
+
+
+void from_json(const nlohmann::json& j, Inventory& d)
+{
+   if (j.find("items") != j.end())
+   {
+      d.mItems = j.at("items").get<std::vector<InventoryItem>>();
+   }
+}
+
 
 

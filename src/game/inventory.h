@@ -2,24 +2,25 @@
 
 #include "inventoryitem.h"
 
+#include "json/json.hpp"
 
-class Inventory
+
+struct Inventory
 {
-   public:
+   Inventory() = default;
 
-      Inventory() = default;
+   void add(ItemType);
+   bool hasInventoryItem(ItemType itemType) const;
+   const std::vector<InventoryItem>& getItems() const;
+   void clear();
 
-      void add(ItemType);
-      bool hasInventoryItem(ItemType itemType) const;
-      const std::vector<InventoryItem>& getItems() const;
-      void clear();
+   void resetKeys();
+   void giveAllKeys();
 
-      void resetKeys();
-      void giveAllKeys();
-
-
-   private:
-
-      std::vector<InventoryItem> mItems;
+   std::vector<InventoryItem> mItems;
 };
+
+
+void to_json(nlohmann::json& j, const Inventory& d);
+void from_json(const nlohmann::json& j, Inventory& d);
 
