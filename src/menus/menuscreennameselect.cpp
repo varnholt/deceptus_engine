@@ -13,7 +13,6 @@ namespace {
    static const int32_t charWidth = 19;
    static const int32_t charHeight = 24;
    static const size_t maxLength = 11;
-   static const float textScale = 0.25f;
 }
 
 
@@ -22,7 +21,6 @@ MenuScreenNameSelect::MenuScreenNameSelect()
    mFont.loadFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
 
-   mText.setScale(textScale, textScale);
    mText.setFont(mFont);
    mText.setCharacterSize(12);
    mText.setFillColor(sf::Color{232, 219, 243});
@@ -94,7 +92,7 @@ void MenuScreenNameSelect::updateText()
    // draw text
    mText.setString(mName);
    const auto textRect = mText.getLocalBounds();
-   const auto xOffset = (mNameRect.width - textRect.width * textScale) * 0.5f;
+   const auto xOffset = (mNameRect.width - textRect.width) * 0.5f;
    const auto x = mNameRect.left + xOffset;
    mText.setPosition(x, mNameRect.top);
 }
