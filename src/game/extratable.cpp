@@ -2,9 +2,22 @@
 
 #include "extrahealth.h"
 
+using json = nlohmann::json;
 
-ExtraTable::ExtraTable()
+
+void to_json(nlohmann::json& j, const ExtraTable& d)
 {
-   mHealth = std::make_shared<ExtraHealth>();
-   mSkills = std::make_shared<ExtraSkill>();
+   j = json{
+      {"health", d.mHealth},
+      {"skills", d.mSkills}
+   };
 }
+
+
+void from_json(const nlohmann::json& j, ExtraTable& d)
+{
+   d.mHealth = j.at("health").get<ExtraHealth>();
+   d.mSkills = j.at("skills").get<ExtraSkill>();
+}
+
+

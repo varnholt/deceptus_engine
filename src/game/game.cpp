@@ -710,13 +710,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Audio::getInstance()->playSample("powerup.wav");
 
-         if (SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb)
+         if (SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillClimb)
          {
-            SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills &= ~ ExtraSkill::SkillClimb;
+            SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills &= ~ ExtraSkill::SkillClimb;
          }
          else
          {
-            SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills |= ExtraSkill::SkillClimb;
+            SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillClimb;
          }
          break;
       }

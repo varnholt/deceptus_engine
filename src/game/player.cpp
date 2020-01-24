@@ -1321,7 +1321,7 @@ void Player::damage(int damage, const sf::Vector2f& force)
       return;
    }
 
-   if (SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills & ExtraSkill::SkillInvulnerable)
+   if (SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillInvulnerable)
    {
       return;
    }
@@ -1336,10 +1336,10 @@ void Player::damage(int damage, const sf::Vector2f& force)
       auto body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-      SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth -= damage;
+      SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth -= damage;
       mDamageClock.restart();
 
-      if (SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth < 0)
+      if (SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth < 0)
       {
          // the function below is not called since 'damage(...)' is evaluated
          // within the box2d step function; no further box2d related adjustments
@@ -1857,7 +1857,7 @@ bool Player::edgeMatchesMovement(const b2Vec2& edgeDir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateClimb()
 {
-   if (!(SaveState::getPlayerInfo().mExtraTable.mSkills->mSkills & ExtraSkill::SkillClimb))
+   if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillClimb))
    {
       return;
    }
@@ -2378,7 +2378,7 @@ void Player::reset()
       Level::getCurrentLevel()->getStartPosition().y
    );
 
-   SaveState::getPlayerInfo().mExtraTable.mHealth->reset();
+   SaveState::getPlayerInfo().mExtraTable.mHealth.reset();
    SaveState::getPlayerInfo().mInventory.resetKeys();
 
    // reset bodies passed from the contact listener
@@ -2399,7 +2399,7 @@ DeathReason Player::checkDead() const
 
    const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
    const auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
-   const auto outOfHealth = SaveState::getPlayerInfo().mExtraTable.mHealth->mHealth <= 0;
+   const auto outOfHealth = SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth <= 0;
 
    if (touchesSomethingDeadly)
    {
