@@ -771,7 +771,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          if (mLevelLoadingFinished)
          {
             mStoredPositionValid = true;
-            mStoredPosition = mPlayer->getPixelPosition();
+            mStoredPosition = mPlayer->getPixelPositionf();
             loadLevel();
          }
          break;

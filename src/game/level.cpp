@@ -851,7 +851,7 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
    target.setView(*mLevelView);
 
-   const auto pPos = Player::getCurrent()->getPixelPosition();
+   const auto pPos = Player::getCurrent()->getPixelPositionf();
 
    // draw lasers
    for (auto laser : mLasers)

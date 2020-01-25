@@ -63,7 +63,7 @@ void CameraSystem::updateX()
    auto player = Player::getCurrent();
    auto& config = CameraSystemConfiguration::getInstance();
 
-   const auto playerX = player->getPixelPosition().x;
+   const auto playerX = player->getPixelPositionf().x;
    const auto dx = (playerX - mX) / config.getDampingFactorX();
    const auto fCenter = mViewWidth / 2.0f;
    const auto fRange  = mViewWidth / config.getFocusZoneDivider();
@@ -124,7 +124,7 @@ void CameraSystem::updateY()
 
    // test if out of panic line boundaries
    auto player = Player::getCurrent();
-   const auto playerY = player->getPixelPosition().y + config.getPlayerOffsetY();
+   const auto playerY = player->getPixelPositionf().y + config.getPlayerOffsetY();
    const auto test = playerY - viewCenter;
 
    const auto p0 = mY - mPanicLineY1;

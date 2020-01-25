@@ -1,10 +1,10 @@
-#ifndef TILEMAP_H
-#define TILEMAP_H
+#pragma once
 
 // sfml
 #include "SFML/Graphics.hpp"
 
 // std
+#include <array>
 #include <filesystem>
 #include <vector>
 
@@ -43,6 +43,8 @@ private:
    sf::Vector2u mTileSize;
 
    sf::VertexArray mVerticesStatic;
+   //std::array<std::shared_ptr<sf::VertexArray>, 128 * 128> mVerticesStaticBlocks;
+   mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> mVerticesStaticBlocks;
    sf::VertexArray mVerticesAnimated;
 
    sf::Texture mTexture;
@@ -80,4 +82,3 @@ protected:
    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 };
 
-#endif // TILEMAP_H

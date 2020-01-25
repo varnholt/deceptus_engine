@@ -279,7 +279,7 @@ void Player::draw(sf::RenderTarget& target)
    if (mCurrentCycle)
    {
       // that y offset is to compensate the wonky box2d origin
-      const auto pos = mPixelPosition + sf::Vector2f(0, 8);
+      const auto pos = mPixelPositionf + sf::Vector2f(0, 8);
 
       mCurrentCycle->setPosition(pos);
 
@@ -308,17 +308,27 @@ void Player::draw(sf::RenderTarget& target)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-sf::Vector2f Player::getPixelPosition() const
+const sf::Vector2f& Player::getPixelPositionf() const
 {
-   return mPixelPosition;
+   return mPixelPositionf;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+const sf::Vector2i& Player::getPixelPositioni() const
+{
+   return mPixelPositioni;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Player::setPixelPosition(float x, float y)
 {
-   mPixelPosition.x = x;
-   mPixelPosition.y = y;
+   mPixelPositionf.x = x;
+   mPixelPositionf.y = y;
+
+   mPixelPositioni.x = static_cast<int32_t>(x);
+   mPixelPositioni.y = static_cast<int32_t>(y);
 }
 
 
@@ -329,8 +339,8 @@ void Player::updatePlayerPixelRect()
 
    const auto dh = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
-   rect.left = static_cast<int>(mPixelPosition.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(mPixelPosition.y) - dh - (dh / 2);
+   rect.left = static_cast<int>(mPixelPositionf.x) - PLAYER_ACTUAL_WIDTH / 2;
+   rect.top = static_cast<int>(mPixelPositionf.y) - dh - (dh / 2);
 
    rect.width = PLAYER_ACTUAL_WIDTH;
    rect.height = PLAYER_ACTUAL_HEIGHT;
@@ -443,8 +453,8 @@ void Player::createBody()
    // create player body
    auto bodyDef = new b2BodyDef();
    bodyDef->position.Set(
-      getPixelPosition().x * MPP,
-      getPixelPosition().y * MPP
+      getPixelPositionf().x * MPP,
+      getPixelPositionf().y * MPP
    );
 
    bodyDef->type = b2_dynamicBody;
@@ -2301,8 +2311,8 @@ void Player::jump()
                mPointsToLeft
                 ? "player_jump_dust_left_aligned"
                 : "player_jump_dust_right_aligned",
-               mPixelPosition.x,
-               mPixelPosition.y
+               mPixelPositionf.x,
+               mPixelPositionf.y
             );
 
             Audio::getInstance()->playSample("jump.wav");
@@ -2342,8 +2352,8 @@ void Player::fire()
    dir.x = dir.x * force;
    dir.y = dir.y * force;
 
-   pos.x = xOffset + mPixelPosition.x * MPP;
-   pos.y = yOffset + mPixelPosition.y * MPP;
+   pos.x = xOffset + mPixelPositionf.x * MPP;
+   pos.y = yOffset + mPixelPositionf.y * MPP;
 
    mWeaponSystem->mSelected->fireInIntervals(
       mWorld,

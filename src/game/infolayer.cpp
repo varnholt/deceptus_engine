@@ -138,7 +138,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    window.setView(view);
 
    std::stringstream stream;
-   auto pos = Player::getCurrent()->getPixelPosition();
+   auto pos = Player::getCurrent()->getPixelPositionf();
    stream << "player pos: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
 
    mFont.draw(window, mFont.getCoords(stream.str()), 360, 5);

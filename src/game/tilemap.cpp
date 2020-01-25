@@ -5,6 +5,7 @@
 #include <iostream>
 
 // tmx
+#include "player.h"
 #include "tmxparser/tmxanimation.h"
 #include "tmxparser/tmxframe.h"
 #include "tmxparser/tmximage.h"
@@ -13,6 +14,12 @@
 #include "tmxparser/tmxtileset.h"
 #include "tmxparser/tmxproperties.h"
 #include "tmxparser/tmxproperty.h"
+
+
+namespace
+{
+   static const int32_t blockSize = 128;
+}
 
 
 bool TileMap::isVisible() const
@@ -137,10 +144,33 @@ bool TileMap::load(
             else
             {
                // if no animation is available, just store the tile in the static buffer
-               mVerticesStatic.append(quad[0]);
-               mVerticesStatic.append(quad[1]);
-               mVerticesStatic.append(quad[2]);
-               mVerticesStatic.append(quad[3]);
+               //int32_t blockId = (tx * blockWidth / blockSize + ty / blockSize);
+
+               const auto bx = tx / blockSize;
+               const auto by = ty / blockSize;
+
+               auto yIt = mVerticesStaticBlocks.find(by);
+               if (yIt == mVerticesStaticBlocks.end())
+               {
+                  std::map<int32_t, sf::VertexArray> map;
+                  mVerticesStaticBlocks.insert(std::make_pair(by, map));
+               }
+
+               const auto xIt = mVerticesStaticBlocks[by].find(bx);
+               if (xIt == mVerticesStaticBlocks[by].end())
+               {
+                  mVerticesStaticBlocks[by][bx].setPrimitiveType(sf::Quads);
+               }
+
+               mVerticesStaticBlocks[by][bx].append(quad[0]);
+               mVerticesStaticBlocks[by][bx].append(quad[1]);
+               mVerticesStaticBlocks[by][bx].append(quad[2]);
+               mVerticesStaticBlocks[by][bx].append(quad[3]);
+
+               // mVerticesStaticBlocks[blockId]->append(quad[0]);
+               // mVerticesStaticBlocks[blockId]->append(quad[1]);
+               // mVerticesStaticBlocks[blockId]->append(quad[2]);
+               // mVerticesStaticBlocks[blockId]->append(quad[3]);
             }
          }
       }
@@ -211,7 +241,30 @@ void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
    states.texture = &mTexture;
 
    // draw the vertex arrays
-   target.draw(mVerticesStatic, states);
+   const auto pos = Player::getCurrent()->getPixelPositioni();
+
+   int32_t bx = (pos.x / PIXELS_PER_TILE) / blockSize;
+   int32_t by = (pos.y / PIXELS_PER_TILE) / blockSize;
+
+   int32_t yRange = 1;
+   int32_t xRange = 2;
+
+   for (auto iy = by - yRange; iy < by + yRange; iy++)
+   {
+      auto yIt = mVerticesStaticBlocks.find(iy);
+      if (yIt != mVerticesStaticBlocks.end())
+      {
+         for (auto ix = bx - xRange; ix < bx + xRange; ix++)
+         {
+            const auto xIt = mVerticesStaticBlocks[iy].find(ix);
+            if (xIt != mVerticesStaticBlocks[iy].end())
+            {
+               target.draw(xIt->second, states);
+            }
+         }
+      }
+   }
+
    target.draw(mVerticesAnimated, states);
 }
 

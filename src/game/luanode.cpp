@@ -905,7 +905,7 @@ void LuaNode::luaSetStartPosition()
 
 void LuaNode::luaPlayerMovedTo()
 {
-   const auto pos =  Player::getCurrent()->getPixelPosition();
+   const auto pos =  Player::getCurrent()->getPixelPositionf();
 
    lua_getglobal(mState, FUNCTION_PLAYER_MOVED_TO);
 
@@ -970,7 +970,7 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
 {
    sf::Vector2f nodePosition{x, y};
-   const auto playerPosition =  Player::getCurrent()->getPixelPosition();
+   const auto playerPosition =  Player::getCurrent()->getPixelPositionf();
 
    auto dist = (playerPosition - nodePosition);
    auto len = SfmlMath::length(dist);

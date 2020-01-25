@@ -82,7 +82,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance().mViewHeight;
 
    sf::Vector2f center;
-   center += Player::getCurrent()->getPixelPosition() * 0.125f;
+   center += Player::getCurrent()->getPixelPositionf() * 0.125f;
    center += CameraPane::getInstance().getLookVector();
    center.x += mLevelGridSprite.getTexture()->getSize().x / 2.0f;
    center.y += mLevelGridSprite.getTexture()->getSize().y / 2.0f;
@@ -237,7 +237,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    auto playerWidth = 5.0f;
    auto playerHeight = 4;
    sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
-   square.setPosition(Player::getCurrent()->getPixelPosition() * 0.125f);
+   square.setPosition(Player::getCurrent()->getPixelPositionf() * 0.125f);
    square.move(-playerWidth, -playerHeight * 2.0f);
    square.setFillColor(sf::Color::White);
    target.draw(square);
