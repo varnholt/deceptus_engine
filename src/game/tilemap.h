@@ -17,6 +17,32 @@ struct TmxTileSet;
 
 class TileMap : public sf::Drawable, public sf::Transformable
 {
+public:
+
+   TileMap() = default;
+
+   bool load(
+      TmxLayer* layer,
+      TmxTileSet* tileSet,
+      const std::filesystem::path& basePath
+   );
+
+
+   void update(const sf::Time& dt);
+
+   int getZ() const;
+   void setZ(int getZ);
+
+   void hideTile(int x, int y);
+
+   bool isVisible() const;
+   void setVisible(bool visible);
+
+
+protected:
+
+   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 
 private:
 
@@ -42,8 +68,6 @@ private:
 
    sf::Vector2u mTileSize;
 
-   sf::VertexArray mVerticesStatic;
-   //std::array<std::shared_ptr<sf::VertexArray>, 128 * 128> mVerticesStaticBlocks;
    mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> mVerticesStaticBlocks;
    sf::VertexArray mVerticesAnimated;
 
@@ -53,32 +77,5 @@ private:
 
    int mZ = 0;
    bool mVisible = true;
-
-
-public:
-
-   TileMap() = default;
-
-   bool load(
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
-      const std::filesystem::path& basePath
-   );
-
-
-   void update(const sf::Time& dt);
-
-   int getZ() const;
-   void setZ(int getZ);
-
-   void hideTile(int x, int y, int vertexOffset);
-
-   bool isVisible() const;
-   void setVisible(bool visible);
-
-
-protected:
-
-   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 };
 

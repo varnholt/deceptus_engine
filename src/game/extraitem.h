@@ -25,7 +25,6 @@ struct ExtraItem : public GameNode
       KeyGreen  = 67,
    };
 
-   int mVertexOffset = 0;
    bool mActive = true;
    sf::Vector2u mSpriteOffset;
    sf::Vector2f mPosition;
