@@ -18,7 +18,7 @@
 
 namespace
 {
-   static const int32_t blockSize = 128;
+   static const int32_t blockSize = 16;
 }
 
 
@@ -54,13 +54,24 @@ bool TileMap::load(
       return false;
    }
 
+   float parallaxScale = 1.0f;
+   if (layer->mProperties)
+   {
+      auto& map = layer->mProperties->mMap;
+
+      auto itParallaxValue = map.find("parallax");
+      if (itParallaxValue != map.end())
+      {
+         parallaxScale = itParallaxValue->second->mValueFloat;
+      }
+   }
+
    // std::cout << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path << std::endl;
 
    mTileSize    = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    mVisible     = layer->mVisible;
    mZ           = layer->mZ;
 
-   mVerticesStatic.setPrimitiveType(sf::Quads);
    mVerticesAnimated.setPrimitiveType(sf::Quads);
 
    std::map<int, TmxTile*> tileMap = tileSet->mTileMap;
@@ -84,6 +95,7 @@ bool TileMap::load(
 
             // define its 4 corners
             sf::Vertex quad[4];
+
             quad[0].position = sf::Vector2f(static_cast<float>( tx      * mTileSize.x), static_cast<float>( ty      * mTileSize.y));
             quad[1].position = sf::Vector2f(static_cast<float>((tx + 1) * mTileSize.x), static_cast<float>( ty      * mTileSize.y));
             quad[2].position = sf::Vector2f(static_cast<float>((tx + 1) * mTileSize.x), static_cast<float>((ty + 1) * mTileSize.y));
@@ -144,10 +156,8 @@ bool TileMap::load(
             else
             {
                // if no animation is available, just store the tile in the static buffer
-               //int32_t blockId = (tx * blockWidth / blockSize + ty / blockSize);
-
-               const auto bx = tx / blockSize;
-               const auto by = ty / blockSize;
+               const auto bx = static_cast<int32_t>((tx / parallaxScale) / blockSize);
+               const auto by = static_cast<int32_t>((ty / parallaxScale) / blockSize);
 
                auto yIt = mVerticesStaticBlocks.find(by);
                if (yIt == mVerticesStaticBlocks.end())
@@ -166,11 +176,6 @@ bool TileMap::load(
                mVerticesStaticBlocks[by][bx].append(quad[1]);
                mVerticesStaticBlocks[by][bx].append(quad[2]);
                mVerticesStaticBlocks[by][bx].append(quad[3]);
-
-               // mVerticesStaticBlocks[blockId]->append(quad[0]);
-               // mVerticesStaticBlocks[blockId]->append(quad[1]);
-               // mVerticesStaticBlocks[blockId]->append(quad[2]);
-               // mVerticesStaticBlocks[blockId]->append(quad[3]);
             }
          }
       }
@@ -192,7 +197,7 @@ void TileMap::update(const sf::Time& dt)
       anim->mElapsed += dt.asMilliseconds();
       anim->mElapsed = fmod(anim->mElapsed, anim->mDuration);
 
-      int index = 0;
+      auto index = 0u;
       float frameDuration = 0.0f;
       for (auto frame : anim->mFrames)
       {
@@ -210,8 +215,8 @@ void TileMap::update(const sf::Time& dt)
 
       AnimatedTileFrame* frame = anim->mFrames.at(index);
 
-      int tu = frame->mX;
-      int tv = frame->mY;
+      const auto tu = static_cast<uint32_t>(frame->mX);
+      const auto tv = static_cast<uint32_t>(frame->mY);
 
       // re-define its 4 texture coordinates
       anim->mVertices[0].texCoords = sf::Vector2f(static_cast<float>( tu      * mTileSize.x), static_cast<float>( tv      * mTileSize.y));
@@ -246,7 +251,7 @@ void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
    int32_t bx = (pos.x / PIXELS_PER_TILE) / blockSize;
    int32_t by = (pos.y / PIXELS_PER_TILE) / blockSize;
 
-   int32_t yRange = 1;
+   int32_t yRange = 2;
    int32_t xRange = 2;
 
    for (auto iy = by - yRange; iy < by + yRange; iy++)
@@ -281,7 +286,7 @@ void TileMap::setZ(int z)
 }
 
 
-void TileMap::hideTile(int x, int y, int vertexOffset)
+void TileMap::hideTile(int x, int y)
 {
    auto it =
       std::find_if(std::begin(mAnimations), std::end(mAnimations), [x, y](AnimatedTile* tile) {
@@ -296,10 +301,40 @@ void TileMap::hideTile(int x, int y, int vertexOffset)
    }
    else
    {
-      mVerticesStatic[vertexOffset * 4    ].color.a = 0;
-      mVerticesStatic[vertexOffset * 4 + 1].color.a = 0;
-      mVerticesStatic[vertexOffset * 4 + 2].color.a = 0;
-      mVerticesStatic[vertexOffset * 4 + 3].color.a = 0;
+      const auto bx = static_cast<int32_t>(x / blockSize);
+      const auto by = static_cast<int32_t>(y / blockSize);
+
+      auto yIt = mVerticesStaticBlocks.find(by);
+      if (yIt != mVerticesStaticBlocks.end())
+      {
+         const auto xIt = mVerticesStaticBlocks[by].find(bx);
+         if (xIt != mVerticesStaticBlocks[by].end())
+         {
+            auto& vertices = xIt->second;
+            for (auto i = 0u; i < vertices.getVertexCount(); i += 4)
+            {
+               if (
+                     static_cast<int32_t>(vertices[i].position.x) / PIXELS_PER_TILE == x
+                  && static_cast<int32_t>(vertices[i].position.y) / PIXELS_PER_TILE == y
+               )
+               {
+                  vertices[i    ].color.a = 0;
+                  vertices[i + 1].color.a = 0;
+                  vertices[i + 2].color.a = 0;
+                  vertices[i + 3].color.a = 0;
+               }
+            }
+         }
+      }
    }
 }
+
+
+
+//   // if no animation is available, just store the tile in the static buffer
+//
+//   mVerticesStaticBlocks[by][bx].append(quad[0]);
+//   mVerticesStaticBlocks[by][bx].append(quad[1]);
+//   mVerticesStaticBlocks[by][bx].append(quad[2]);
+//   mVerticesStaticBlocks[by][bx].append(quad[3]);
 

@@ -216,13 +216,13 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
       auto itParallaxValue = map.find("parallax");
       if (itParallaxValue != map.end())
       {
-        parallax = itParallaxValue->second->mValueFloat;
+         parallax = itParallaxValue->second->mValueFloat;
       }
 
       auto itParallaxView = map.find("parallax_view");
       if (itParallaxView != map.end())
       {
-         int view = itParallaxView->second->mValueInt;
+         const auto view = itParallaxView->second->mValueInt;
          mParallaxFactors[view] = parallax;
       }
    }

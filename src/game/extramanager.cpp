@@ -30,8 +30,6 @@ void ExtraManager::load(
    auto height = layer->mHeight;
    auto firstId = tileSet->mFirstGid;
    auto tileMap = tileSet->mTileMap;
-   auto tileIdAnimated = 0;
-   auto tileIdStatic = 0;
 
    for (auto i = 0u; i < width; ++i)
    {
@@ -46,21 +44,6 @@ void ExtraManager::load(
             item->mPosition.x = static_cast<float>(i * PIXELS_PER_TILE);
             item->mPosition.y = static_cast<float>(j * PIXELS_PER_TILE);
             item->mType = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
-
-            auto it = tileMap.find(tileNumber - firstId);
-            if (it != tileMap.end())
-            {
-               TmxTile* tile = it->second;
-               if (tile->mAnimation)
-               {
-                  item->mVertexOffset = tileIdAnimated++;
-               }
-            }
-            else
-            {
-               item->mVertexOffset = tileIdStatic++;
-            }
-
             mExtras.push_back(item);
          }
       }
@@ -90,8 +73,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
          extra->mActive = false;
          mTilemap->hideTile(
             extra->mSpriteOffset.x,
-            extra->mSpriteOffset.y,
-            extra->mVertexOffset
+            extra->mSpriteOffset.y
          );
 
          switch (extra->mType)
