@@ -118,7 +118,8 @@ public:
    void setKeysPressed(int keys);
 
    b2Vec2 getBodyPosition() const;
-   sf::Vector2f getPixelPosition() const;
+   const sf::Vector2f& getPixelPositionf() const;
+   const sf::Vector2i& getPixelPositioni() const;
    void setPixelPosition(float x, float y);
 
    float getBeltVelocity() const;
@@ -229,7 +230,8 @@ private:
    int mKeysPressed = 0;
    bool mControllerRunPressed = false;
 
-   sf::Vector2f mPixelPosition;
+   sf::Vector2f mPixelPositionf;
+   sf::Vector2i mPixelPositioni;
    sf::Texture mTexture;
    sf::Sprite mSprite;
    sf::Vector2u mSpritePrev;
