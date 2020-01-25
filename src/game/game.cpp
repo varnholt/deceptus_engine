@@ -133,7 +133,7 @@ void Game::initializeWindow()
    mWindow->setVerticalSyncEnabled(gameConfig.mVSync);
    mWindow->setFramerateLimit(60);
    mWindow->setKeyRepeatEnabled(false);
-   mWindow->setMouseCursorVisible(false);
+   // mWindow->setMouseCursorVisible(false);
 
    // reset render textures if needed
    if (mWindowRenderTexture != nullptr)
