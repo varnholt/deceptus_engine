@@ -22,6 +22,7 @@ namespace
    static const auto segments = 20;
    static const sf::Color black = {0, 0, 0, 255};
    static std::array<b2Vec2, segments> unitCircle;
+   static const auto maxDistance = 100.0f; // depends on the view dimensions
 }
 
 
@@ -78,17 +79,6 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
    // do not draw lights that are too far away
    auto playerBody = Player::getCurrent()->getBody();
 
-// uhm.. not drawing into the stencil buffer and still drawing the light sprites later
-// is just dumb :)
-// -> think about how this can be properly optimized!
-//
-//   auto distanceToPlayer = (playerBody->GetWorldCenter() - light->mPosMeters).LengthSquared();
-//
-//   if (distanceToPlayer > 40.0f)
-//   {
-//      return;
-//   }
-
    auto lightPos = light->mPosMeters;
 
    for (b2Body* b = Level::getCurrentLevel()->getWorld()->GetBodyList(); b; b = b->GetNext())
@@ -112,7 +102,7 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
          if (circleShape)
          {
             auto center = circleShape->GetVertex(0) + b->GetTransform().p;
-            if ((lightPos - center).LengthSquared() > 100.0f)
+            if ((lightPos - center).LengthSquared() > maxDistance)
                continue;
 
             std::array<b2Vec2, segments> circlePositions;
@@ -168,8 +158,8 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
                // printf("%f\n", (lightPos - v0).LengthSquared());
 
                if (
-                     (lightPos - v0).LengthSquared() > 100.0f
-                  && (lightPos - v1).LengthSquared() > 100.0f
+                     (lightPos - v0).LengthSquared() > maxDistance
+                  && (lightPos - v1).LengthSquared() > maxDistance
                )
                {
                   continue;
@@ -203,7 +193,7 @@ void RaycastLight::drawQuads(sf::RenderTarget& target, std::shared_ptr<RaycastLi
 
                // printf("%f\n", (lightPos - v0).LengthSquared());
 
-               if ((lightPos - v0).LengthSquared() > 100.0f)
+               if ((lightPos - v0).LengthSquared() > maxDistance)
                   continue;
 
                auto v1 = polygonShape->GetVertex(vNext) + b->GetTransform().p;
@@ -236,7 +226,7 @@ void RaycastLight::onDraw(sf::RenderTarget& target, sf::RenderStates /*states*/)
        // don't draw lights that are too far away
        auto distanceToPlayer = (playerBody->GetWorldCenter() - light->mPosMeters).LengthSquared();
 
-       if (distanceToPlayer > 50.0f)
+       if (distanceToPlayer > maxDistance)
        {
           continue;
        }

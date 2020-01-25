@@ -208,6 +208,12 @@ const sf::IntRect& Spikes::getPixelRect() const
 }
 
 
+void Spikes::updateSpriteRect()
+{
+   mSprite.setTextureRect({mTu * PIXELS_PER_TILE, mTv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+}
+
+
 void Spikes::update(const sf::Time& dt)
 {
    mElapsedMs += dt.asMilliseconds();
@@ -235,7 +241,7 @@ void Spikes::update(const sf::Time& dt)
       }
    }
 
-   mSprite.setTextureRect({mTu * PIXELS_PER_TILE, mTv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+   updateSpriteRect();
 
    if (mDeadly)
    {
@@ -318,6 +324,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             );
 
             spikes->mSprite = sprite;
+            spikes->updateSpriteRect();
          }
       }
    }

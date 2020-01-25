@@ -75,5 +75,6 @@ private:
 
    Mode mMode = Mode::Invalid;
    Orientation mOrientation = Orientation::Invalid;
+   void updateSpriteRect();
 };
 
