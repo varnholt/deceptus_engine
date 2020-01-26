@@ -716,7 +716,7 @@ void Level::drawMap(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawRaycastLight(sf::RenderTarget& target)
 {
-#define ATTEMPT_BLUR 1
+// #define ATTEMPT_BLUR 1
 
 #ifdef ATTEMPT_BLUR
    auto blurRenderTexture = mBlurShader->getRenderTexture();
