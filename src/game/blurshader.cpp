@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+// #define SUPPORT_STENCIL_BITS 1
+
 
 //----------------------------------------------------------------------------------------------------------------------
 BlurShader::BlurShader(
@@ -9,10 +11,26 @@ BlurShader::BlurShader(
    uint32_t height
 )
 {
+#ifdef SUPPORT_STENCIL_BITS
+   sf::ContextSettings contextSettings;
+   contextSettings.stencilBits = 8;
+#endif
+
    mRenderTexture = std::make_shared<sf::RenderTexture>();
+
+#ifdef SUPPORT_STENCIL_BITS
+   mRenderTexture->create(width, height, contextSettings);
+#else
    mRenderTexture->create(width, height);
+#endif
+
    mRenderTextureScaled = std::make_shared<sf::RenderTexture>();
+
+#ifdef SUPPORT_STENCIL_BITS
+   mRenderTextureScaled->create(960, 540, contextSettings);
+#else
    mRenderTextureScaled->create(960, 540);
+#endif
    mRenderTextureScaled->setSmooth(true);
 }
 
