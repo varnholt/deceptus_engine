@@ -716,8 +716,41 @@ void Level::drawMap(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawRaycastLight(sf::RenderTarget& target)
 {
-  target.setView(*mLevelView);
-  mRaycastLight->draw(target, {});
+#define ATTEMPT_BLUR 1
+
+#ifdef ATTEMPT_BLUR
+   auto blurRenderTexture = mBlurShader->getRenderTexture();
+
+   // render player to texture
+   blurRenderTexture->clear(sf::Color{0, 0, 0, 0});
+   blurRenderTexture->setView(*mLevelView);
+   mRaycastLight->draw(*blurRenderTexture, {});
+   blurRenderTexture->display();
+
+   // render texture with shader applied
+   auto sprite = sf::Sprite(blurRenderTexture->getTexture());
+
+   // TODO: have a static view for rendertexture quads
+   sf::View view(
+      sf::FloatRect(
+         0.0f,
+         0.0f,
+         static_cast<float>(mLevelRenderTexture->getSize().x),
+         static_cast<float>(mLevelRenderTexture->getSize().y)
+      )
+   );
+
+   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   target.setView(view);
+   target.draw(sprite, &mBlurShader->getShader());
+
+   takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
+
+   target.setView(*mLevelView);
+#else
+   target.setView(*mLevelView);
+   mRaycastLight->draw(target, {});
+#endif
 }
 
 
@@ -1027,7 +1060,7 @@ void Level::update(const sf::Time& dt)
 
    LuaInterface::instance()->update(dt);
 
-   mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();// + b2Vec2(0.0f, 0.0f);
+   mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();
    mPlayerLight->updateSpritePosition();
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
@@ -1257,6 +1290,7 @@ Level *Level::getCurrentLevel()
 }
 
 
+//-----------------------------------------------------------------------------
 void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 {
    auto points = new b2Vec2[4];
@@ -1270,6 +1304,7 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 }
 
 
+//-----------------------------------------------------------------------------
 AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
 {
    auto x = pos.x - mMapOffsetX;
