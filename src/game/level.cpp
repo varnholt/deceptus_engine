@@ -716,7 +716,51 @@ void Level::drawMap(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawRaycastLight(sf::RenderTarget& target)
 {
-// #define ATTEMPT_BLUR 1
+   // if (!mRaycastTexture)
+   // {
+   //    sf::ContextSettings contextSettings;
+   //    contextSettings.stencilBits = 8;
+   //
+   //    mRaycastTexture = std::make_shared<sf::RenderTexture>();
+   //    mRaycastTexture->create(320, 180, contextSettings);
+   //    mRaycastTexture->setSmooth(true);
+   //
+   //    mRaycastTextureBlurred = std::make_shared<sf::RenderTexture>();
+   //    mRaycastTextureBlurred->create(320, 180, contextSettings);
+   //    mRaycastTextureBlurred->setSmooth(true);
+   // }
+   //
+   // // render player to texture
+   // mRaycastTexture->clear(sf::Color{0, 0, 0, 0});
+   // mRaycastTexture->setView(*mLevelView);
+   // mRaycastLight->draw(*mRaycastTexture, {});
+   // mRaycastTexture->display();
+   //
+   // // render texture with shader applied
+   // auto sprite = sf::Sprite(mRaycastTexture->getTexture());
+   //
+   // // TODO: have a static view for rendertexture quads
+   // sf::View view(
+   //    sf::FloatRect(
+   //       0.0f,
+   //       0.0f,
+   //       static_cast<float>(mRaycastTexture->getSize().x),
+   //       static_cast<float>(mRaycastTexture->getSize().y)
+   //    )
+   // );
+   //
+   // view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   // target.setView(view);
+   //
+   // // &mBlurShader->getShader()
+   // sf::RenderStates statesAdd;
+   // statesAdd.blendMode = sf::BlendAdd;
+   // target.draw(sprite, statesAdd);
+   //
+   // target.setView(*mLevelView);
+
+
+   // #define ATTEMPT_BLUR 1
 
 #ifdef ATTEMPT_BLUR
    auto blurRenderTexture = mBlurShader->getRenderTexture();

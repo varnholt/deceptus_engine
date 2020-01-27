@@ -196,21 +196,21 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::MiddleLeft:
       case MessageBoxLocation::BottomLeft:
       {
-         pos.x = 83;
+         pos.x = 110;
          break;
       }
       case MessageBoxLocation::TopCenter:
       case MessageBoxLocation::MiddleCenter:
       case MessageBoxLocation::BottomCenter:
       {
-         pos.x = 143;
+         pos.x = 190;
          break;
       }
       case MessageBoxLocation::TopRight:
       case MessageBoxLocation::MiddleRight:
       case MessageBoxLocation::BottomRight:
       {
-         pos.x = 203;
+         pos.x = 270;
          break;
       }
       case MessageBoxLocation::Invalid:
@@ -225,7 +225,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::TopCenter:
       case MessageBoxLocation::TopRight:
       {
-         pos.y = 62;
+         pos.y = 82;
          break;
       }
 
@@ -233,7 +233,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::MiddleCenter:
       case MessageBoxLocation::MiddleRight:
       {
-         pos.y = 112;
+         pos.y = 149;
          break;
       }
 
@@ -241,7 +241,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::BottomCenter:
       case MessageBoxLocation::BottomRight:
       {
-         pos.y = 162;
+         pos.y = 216;
          break;
       }
       case MessageBoxLocation::Invalid:
