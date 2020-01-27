@@ -157,7 +157,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window)
    const auto& command = console.getCommand();
    const auto& commands = console.getLog();
 
-   static const auto offset = 240;
+   static const auto offset = 320;
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {

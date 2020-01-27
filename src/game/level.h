@@ -157,6 +157,9 @@ protected:
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
    std::vector<std::shared_ptr<sf::RenderTexture>> mRenderTextures;
 
+   std::shared_ptr<sf::RenderTexture> mRaycastTexture;
+   std::shared_ptr<sf::RenderTexture> mRaycastTextureBlurred;
+
    float mViewToTextureScale = 1.0f;
    std::shared_ptr<sf::View> mLevelView;
    std::shared_ptr<sf::View> mParallaxView[3];
