@@ -67,6 +67,11 @@
       "startposition": [60, 26],
       "properties": [{"name": "dummy", "value": "dummy"}],
       "patrolpath": [74, 26, 60, 26]
+    },
+    {
+      "script": "skeleton.lua",
+      "startposition": [175, 64],
+      "patrolpath": [175, 64, 180, 64]
     }
   ]
 }
