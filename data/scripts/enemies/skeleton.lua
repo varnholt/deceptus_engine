@@ -4,7 +4,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 -- enemy configuration
 properties = {
-   sprite = "data/sprites/skeleton.png",
+   sprite = "data/sprites/enemy_skeleton.png",
    velocity_walk_max = 1.0,
    acceleration_ground = 0.1
 }
@@ -14,8 +14,9 @@ mPatrolTimer = 1
 mKeyPressed = 0
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
-mPointsToLeft = false
-
+mPointsLeft = false
+mElapsed = math.random(0, 3)
+mSpriteIndex = 0
 
 -- x: 720..792 (30..33 x 24)
 -- y: 984 (41 x 24)
@@ -27,9 +28,8 @@ function initialize()
    patrolIndex = 1
    patrolEpsilon = 1.0
    wait = false
-   addShapeCircle(0.12, 0.0, 0.12)
-   addShapeRect(0.2, 0.07, 0.0, 0.1)
-   updateSpriteRect(0, 0, 64, 64)
+   addShapeRect(0.2, 0.5, 0.0, 0.23)
+   updateSpriteRect(0, 0, 72, 72)
 
    -- print("dumb.lua initialized")
 end
@@ -64,8 +64,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   mPointsToLeft = true
-   updateSpriteRect(0, 64, 64, 64)
+   mPointsLeft = true
    keyReleased(Key["KeyRight"])
    keyPressed(Key["KeyLeft"])
 end
@@ -73,8 +72,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   mPointsToLeft = false
-   updateSpriteRect(0, 0, 64, 64)
+   mPointsLeft = false
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
 end
@@ -131,7 +129,7 @@ function patrol()
       -- print("arrived.")
       wait = true
       mKeyPressed = 0
-      timer(5000, mPatrolTimer)
+      timer(3000, mPatrolTimer)
       patrolIndex = patrolIndex + 1
       if (patrolIndex > count) then
          patrolIndex = 0
@@ -142,16 +140,49 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function updateAttackCondition()
-
-
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   patrol()   
+
+   mElapsed = mElapsed + dt
+   spriteCount = 12
+   updateSprite = false
+   pointsLeftPrev = mPointsLeft
+   mAnimationOffset = 0
+
+   -- as in: if skeleton isn't idle
+   if (mKeyPressed == 0) then
+      mAnimationOffset = 144
+      spriteCount = 10
+   end
+
+   spriteIndex = math.floor(math.fmod(mElapsed * 15.0, spriteCount))
+
+   patrol()
    updateAttackCondition()
    updateKeysPressed(mKeyPressed)
+
+   -- update sprite index
+   if (spriteIndex ~= mSpriteIndex) then
+      mSpriteIndex = spriteIndex
+      updateSprite = true
+   end
+
+   if (pointsLeftPrev ~= mPointsLeft) then
+      updateSprite = true
+   end
+
+   if (updateSprite) then
+      updateSpriteRect(
+         mSpriteIndex * 72,
+         mAnimationOffset + (mPointsLeft and 72 or 0),
+         72,
+         72
+      ) -- x, y, width, height
+   end
+
 end
 
 
