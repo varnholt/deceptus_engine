@@ -38,6 +38,7 @@ end
 function update(dt)
    yOffset = 0
    updateSprite = false
+   pointsLeft = true
 
    -- get sprite index
    mElapsed = mElapsed + dt
@@ -47,6 +48,7 @@ function update(dt)
    x = 0.5 * math.sin(mElapsed) * mWidth
 
    if (x > mPrevX) then
+      pointsLeft = false
       yOffset = 24
    end
 
@@ -56,7 +58,7 @@ function update(dt)
    setTransform(mCenter:getX() + x, mCenter:getY(), 0.0)
 
    -- update sprite index
-   if (index ~= mSpriteIndex) then
+   if (spriteIndex ~= mSpriteIndex) then
       mSpriteIndex = spriteIndex
       updateSprite = true
    end

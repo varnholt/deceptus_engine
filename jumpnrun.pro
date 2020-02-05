@@ -518,6 +518,7 @@ DISTFILES += \
     data/scripts/enemies/ghost.lua \
     data/scripts/enemies/interpolation.lua \
     data/scripts/enemies/klonk.lua \
+    data/scripts/enemies/skeleton.lua \
     data/scripts/enemies/spikeball.lua \
     data/scripts/enemies/vector2.lua \
     data/scripts/enemies/watermine.lua \
