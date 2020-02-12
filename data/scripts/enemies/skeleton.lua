@@ -18,6 +18,15 @@ mPointsLeft = false
 mElapsed = math.random(0, 3)
 mSpriteIndex = 0
 
+ActionIdle = 0
+ActionPatrol = 1
+ActionHit = 2
+ActionDie = 3
+ActionAttack = 4
+
+SpriteCounts = {12, 10, 8, 14, 14}
+
+
 -- x: 720..792 (30..33 x 24)
 -- y: 984 (41 x 24)
 
