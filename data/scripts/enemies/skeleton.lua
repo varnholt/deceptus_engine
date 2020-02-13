@@ -9,6 +9,14 @@ properties = {
    acceleration_ground = 0.1
 }
 
+Action = {
+   Idle =   0,
+   Patrol = 1,
+   Hit =    2,
+   Die =    3,
+   Attack = 4
+}
+
 ------------------------------------------------------------------------------------------------------------------------
 mPatrolTimer = 1
 mKeyPressed = 0
@@ -17,14 +25,10 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 mPointsLeft = false
 mElapsed = math.random(0, 3)
 mSpriteIndex = 0
-
-ActionIdle = 0
-ActionPatrol = 1
-ActionHit = 2
-ActionDie = 3
-ActionAttack = 4
-
-SpriteCounts = {12, 10, 8, 14, 14}
+mSpriteCounts = {12, 10, 8, 14, 14}
+mCurrentAction = Action["Idle"]
+mEnergy = 100
+mDead = false
 
 
 -- x: 720..792 (30..33 x 24)
@@ -121,7 +125,8 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function patrol()
+function act()
+
    if (wait == true) then
       return
    end
@@ -135,29 +140,73 @@ function patrol()
    elseif (mPosition:getX() < keyVec:getX() - patrolEpsilon) then
       goRight()
    else
+
       -- print("arrived.")
       wait = true
+
       mKeyPressed = 0
       timer(3000, mPatrolTimer)
       patrolIndex = patrolIndex + 1
+
       if (patrolIndex > count) then
          patrolIndex = 0
       end
+
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateAttackCondition()
+function canAttack()
+   return false
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function update(dt)
+function isHit()
+   return false
+end
 
-   mElapsed = mElapsed + dt
+
+
+------------------------------------------------------------------------------------------------------------------------
+function isWaiting()
+   return false
+end
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+function think()
+
+   nextAction = mCurrentAction
+
+   -- determine next action
+
+   if (mDead == 0) then
+      nextAction = Action["Die"]
+   elseif (canAttack()) then
+      nextAction = Action["Attack"]
+   elseif (isHit()) then
+      nextAction = Action["Hit"]
+   elseif (isWaiting()) then
+      nextAction = Action["Patrol"]
+   else
+      nextAction = Action["Idle"]
+   end
+
+   -- if action changed, reset sprite index to 0
+
+   updateSprite()
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateSprite()
+
    spriteCount = 12
-   updateSprite = false
+   updateRequired = false
    pointsLeftPrev = mPointsLeft
    mAnimationOffset = 0
 
@@ -169,21 +218,17 @@ function update(dt)
 
    spriteIndex = math.floor(math.fmod(mElapsed * 15.0, spriteCount))
 
-   patrol()
-   updateAttackCondition()
-   updateKeysPressed(mKeyPressed)
-
    -- update sprite index
    if (spriteIndex ~= mSpriteIndex) then
       mSpriteIndex = spriteIndex
-      updateSprite = true
+      updateRequired = true
    end
 
    if (pointsLeftPrev ~= mPointsLeft) then
-      updateSprite = true
+      updateRequired = true
    end
 
-   if (updateSprite) then
+   if (updateRequired) then
       updateSpriteRect(
          mSpriteIndex * 72,
          mAnimationOffset + (mPointsLeft and 72 or 0),
@@ -191,6 +236,19 @@ function update(dt)
          72
       ) -- x, y, width, height
    end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function update(dt)
+
+   mElapsed = mElapsed + dt
+
+   think()
+   act()
+
+   updateKeysPressed(mKeyPressed)
 
 end
 
