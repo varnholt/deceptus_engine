@@ -9,13 +9,15 @@ properties = {
    acceleration_ground = 0.1
 }
 
+-- those are in sprite sheet order
 Action = {
-   Idle =   0,
-   Patrol = 1,
+   Walk =   0,
+   Idle =   1,
    Hit =    2,
    Die =    3,
    Attack = 4
 }
+
 
 ------------------------------------------------------------------------------------------------------------------------
 mPatrolTimer = 1
@@ -25,26 +27,22 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 mPointsLeft = false
 mElapsed = math.random(0, 3)
 mSpriteIndex = 0
-mSpriteCounts = {12, 10, 8, 14, 14}
+mSpriteCounts = {12, 10, 6, 14, 14}
+mSpriteOffsets = {0, 144, 288, 432, 576}
 mCurrentAction = Action["Idle"]
 mEnergy = 100
 mDead = false
-
-
--- x: 720..792 (30..33 x 24)
--- y: 984 (41 x 24)
+mWaiting = false
+mAttackLaunched = false
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   patrolPath = {}
-   patrolIndex = 1
-   patrolEpsilon = 1.0
-   wait = false
+   mPatrolPath = {}
+   mPatrolIndex = 1
+   mPatrolEpsilon = 1.0
    addShapeRect(0.2, 0.5, 0.0, 0.23)
    updateSpriteRect(0, 0, 72, 72)
-
-   -- print("dumb.lua initialized")
 end
 
 
@@ -52,7 +50,7 @@ end
 function timeout(id)
    -- print(string.format("timeout: %d", id))
    if (id == mPatrolTimer) then
-      wait = false
+      mWaiting = false
    end
 end
 
@@ -92,17 +90,13 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function setPatrolPositions(x1, y1, x2, y2)
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
    -- print(string.format("moved to: %f, %f", x, y))
    mPosition = v2d.Vector2D(x, y)
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
    -- print(string.format("player moved to: %f, %f", x, y))
    mPlayerPosition = v2d.Vector2D(x, y)
@@ -113,6 +107,7 @@ end
 -- |          o      p          | x
 -- |          p      o          | x
 function followPlayer()
+
    local epsilon = 5
    if (mPlayerPosition:getX() > mPosition:getX() + epsilon) then
       goRight()
@@ -121,59 +116,165 @@ function followPlayer()
    else
       mKeyPressed = 0
    end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function wait()
+
+   if (mWaiting) then
+      return
+   end
+
+   mWaiting = true
+
+   local count = #mPatrolPath
+   mKeyPressed = 0
+   timer(3000, mPatrolTimer)
+   mPatrolIndex = mPatrolIndex + 1
+
+   if (mPatrolIndex > count) then
+      mPatrolIndex = 0
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function patrol()
+
+   local key = mPatrolPath[mPatrolIndex]
+   local keyVec = v2d.Vector2D(key:getX(), key:getY())
+
+   if     (mPosition:getX() > keyVec:getX() + mPatrolEpsilon) then
+      goLeft()
+   elseif (mPosition:getX() < keyVec:getX() - mPatrolEpsilon) then
+      goRight()
+   else
+      wait()
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function walk()
+
+   if (isPlayerInReach()) then
+      followPlayer()
+   else
+      patrol()
+   end
+
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function act()
 
-   if (wait == true) then
-      return
+   if (mCurrentAction == Action["Walk"]) then
+      walk()
+   elseif (mCurrentAction == Action["Attack"]) then
+      attack()
    end
 
-   local key = patrolPath[patrolIndex]
-   local keyVec = v2d.Vector2D(key:getX(), key:getY())
-   local count = #patrolPath
-
-   if     (mPosition:getX() > keyVec:getX() + patrolEpsilon) then
-      goLeft()
-   elseif (mPosition:getX() < keyVec:getX() - patrolEpsilon) then
-      goRight()
-   else
-
-      -- print("arrived.")
-      wait = true
-
-      mKeyPressed = 0
-      timer(3000, mPatrolTimer)
-      patrolIndex = patrolIndex + 1
-
-      if (patrolIndex > count) then
-         patrolIndex = 0
-      end
-
-   end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function canAttack()
-   return false
+function attack()
+
+   mKeyPressed = 0
+
+   if (mSpriteIndex == 6) then
+      if (not mAttackLaunched) then
+         mAttackLaunched = true
+         damage(30, mPointsLeft and -5000.0 or 5000.0, 0.0)
+      end
+   else
+      mAttackLaunched = false
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function isPlayerInReach()
+
+   inReach = false
+
+   -- check if player is within range
+   distanceToPlayerX = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
+
+   if (math.abs(distanceToPlayerX) < 10) then
+
+      distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+      inReach = true
+
+      -- if (math.abs(distanceToPlayerY) == 0) then
+      --    if (
+      --       isPhsyicsPathClear(
+      --          mPosition:getX(),
+      --          mPosition:getY(),
+      --          mPlayerPosition:getX(),
+      --          mPlayerPosition:getY()
+      --       )
+      --    ) then
+      --       inReach = true
+      --    end
+      -- end
+   end
+
+   return inReach
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function hit(damage)
+   -- need to store the current hit time
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function isHit()
+   -- current time smaller than damage time + hit duration?
    return false
 end
-
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function isWaiting()
-   return false
+   return mWaiting
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+function canAttack()
+   can = false
+
+   -- check if player is within range
+   distanceToPlayerX = (mPosition:getX() - mPlayerPosition:getX()) / 24.0
+
+   -- print(distanceToPlayerX)
+
+   if (math.abs(distanceToPlayerX) <= 1.5) then
+
+      distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+      -- print(distanceToPlayerY)
+
+      if (math.abs(distanceToPlayerY) <= 1) then
+         -- print("attack!")
+         can = true
+      end
+
+   end
+
+   return can
+end
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -189,34 +290,40 @@ function think()
       nextAction = Action["Attack"]
    elseif (isHit()) then
       nextAction = Action["Hit"]
-   elseif (isWaiting()) then
-      nextAction = Action["Patrol"]
+   elseif (not isWaiting()) then
+      nextAction = Action["Walk"]
    else
       nextAction = Action["Idle"]
    end
 
-   -- if action changed, reset sprite index to 0
+   changed = nextAction ~= mCurrentAction
 
-   updateSprite()
+   if (changed) then
+      print(string.format("%d -> %d", mCurrentAction, nextAction))
+   end
+
+   updateSprite(changed)
+   mCurrentAction = nextAction
 
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateSprite()
+function updateSprite(changed)
 
-   spriteCount = 12
+   spriteCount = mSpriteCounts[mCurrentAction + 1]
+   spriteOffset = mSpriteOffsets[mCurrentAction + 1]
+
    updateRequired = false
    pointsLeftPrev = mPointsLeft
-   mAnimationOffset = 0
 
-   -- as in: if skeleton isn't idle
-   if (mKeyPressed == 0) then
-      mAnimationOffset = 144
-      spriteCount = 10
+   -- if action changed, reset sprite index to 0
+   if (changed) then
+      spriteIndex = 0
+      updateRequired = true
+   else
+      spriteIndex = math.floor(math.fmod(mElapsed * 15.0, spriteCount))
    end
-
-   spriteIndex = math.floor(math.fmod(mElapsed * 15.0, spriteCount))
 
    -- update sprite index
    if (spriteIndex ~= mSpriteIndex) then
@@ -231,7 +338,7 @@ function updateSprite()
    if (updateRequired) then
       updateSpriteRect(
          mSpriteIndex * 72,
-         mAnimationOffset + (mPointsLeft and 72 or 0),
+         spriteOffset + (mPointsLeft and 72 or 0),
          72,
          72
       ) -- x, y, width, height
@@ -276,7 +383,7 @@ function setPath(name, table)
    end
 
    if (name == "patrol_path") then
-      patrolPath = v
+      mPatrolPath = v
    end
 end
 

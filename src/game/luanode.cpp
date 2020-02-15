@@ -277,9 +277,11 @@ extern "C" int32_t damage(lua_State* state)
 
    if (argc == 3)
    {
-      auto damage = static_cast<int32_t>(lua_tonumber(state, 2));
-      auto dx = static_cast<float>(lua_tonumber(state, 3));
-      auto dy = static_cast<float>(lua_tonumber(state, 4));
+      auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
+      auto dx = static_cast<float>(lua_tonumber(state, 2));
+      auto dy = static_cast<float>(lua_tonumber(state, 3));
+
+      std::cout << "damage: " << damage << " dx: " << dx << " dy: " << dy << std::endl;
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
