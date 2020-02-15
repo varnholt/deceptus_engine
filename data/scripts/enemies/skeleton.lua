@@ -33,6 +33,7 @@ mCurrentAction = Action["Idle"]
 mEnergy = 100
 mDead = false
 mWaiting = false
+mAttackStarted = true
 mAttackLaunched = false
 
 
@@ -186,6 +187,7 @@ end
 function attack()
 
    mKeyPressed = 0
+   mAttackStarted = true
 
    if (mSpriteIndex == 6) then
       if (not mAttackLaunched) then
@@ -193,6 +195,11 @@ function attack()
          damage(30, mPointsLeft and -5000.0 or 5000.0, 0.0)
       end
    else
+
+      if (mSpriteIndex == mSpriteCounts[Action["Attack"]] -1) then
+         mAttackStarted = false
+      end
+
       mAttackLaunched = false
    end
 
@@ -255,6 +262,11 @@ end
 function canAttack()
    can = false
 
+   -- if an attack has started, finish the attack
+   if (mAttackStarted) then
+      return true
+   end
+
    -- check if player is within range
    distanceToPlayerX = (mPosition:getX() - mPlayerPosition:getX()) / 24.0
 
@@ -298,9 +310,9 @@ function think()
 
    changed = nextAction ~= mCurrentAction
 
-   if (changed) then
-      print(string.format("%d -> %d", mCurrentAction, nextAction))
-   end
+   -- if (changed) then
+   --    print(string.format("%d -> %d", mCurrentAction, nextAction))
+   -- end
 
    updateSprite(changed)
    mCurrentAction = nextAction
@@ -321,6 +333,7 @@ function updateSprite(changed)
    if (changed) then
       spriteIndex = 0
       updateRequired = true
+      mElapsed = 0
    else
       spriteIndex = math.floor(math.fmod(mElapsed * 15.0, spriteCount))
    end

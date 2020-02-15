@@ -984,6 +984,11 @@ void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
    }
 }
 
+void LuaNode::hit(int32_t damage)
+{
+   std::cout << "thing was hit: " << damage << std::endl;
+}
+
 
 void LuaNode::damage(int32_t damage, float forceX, float forceY)
 {

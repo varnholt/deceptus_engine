@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "fixturenode.h"
+#include "luanode.h"
 #include "movingplatform.h"
 #include "player.h"
 
@@ -158,11 +159,21 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeBullet:
          {
+            auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
+
             if (isPlayer(fixtureNodeB))
             {
-               auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
                Player::getCurrent()->damage(damage);
             }
+            else if (fixtureNodeB && fixtureNodeB->getType() == ObjectTypeEnemy)
+            {
+               auto p = dynamic_cast<LuaNode*>(fixtureNodeB->getParent());
+               if (p != nullptr)
+               {
+                  p->hit(damage);
+               }
+            }
+
             dynamic_cast<Bullet*>(fixtureNodeA)->setScheduledForRemoval(true);
             break;
          }
@@ -251,11 +262,21 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeBullet:
          {
+            auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
+
             if (isPlayer(fixtureNodeA))
             {
-               auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
                Player::getCurrent()->damage(damage);
             }
+            else if (fixtureNodeA && fixtureNodeA->getType() == ObjectTypeEnemy)
+            {
+               auto p = dynamic_cast<LuaNode*>(fixtureNodeA->getParent());
+               if (p != nullptr)
+               {
+                  p->hit(damage);
+               }
+            }
+
             dynamic_cast<Bullet*>(fixtureNodeB)->setScheduledForRemoval(true);
             break;
          }
