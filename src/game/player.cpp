@@ -1521,10 +1521,10 @@ void Player::updateFire()
 {
    // disabled for now
    //
-   // if (isFireButtonPressed())
-   // {
-   //    fire();
-   // }
+   if (isFireButtonPressed())
+   {
+      fire();
+   }
 }
 
 
