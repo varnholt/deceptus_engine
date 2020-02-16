@@ -57,7 +57,7 @@ void Weapon::fireNow(
 
    auto bullet = new Bullet();
    bullet->setDestroyedCallback([this, bullet](){mBullets.erase(bullet);});
-   bullet->setProperty("damage", 100);
+   bullet->setProperty("damage", 10);
    bullet->setBody(body);
    fixture->SetUserData(static_cast<void*>(bullet));
 

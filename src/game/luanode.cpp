@@ -984,11 +984,6 @@ void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
    }
 }
 
-void LuaNode::hit(int32_t damage)
-{
-   std::cout << "thing was hit: " << damage << std::endl;
-}
-
 
 void LuaNode::damage(int32_t damage, float forceX, float forceY)
 {
@@ -1242,6 +1237,24 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
 
       auto result = lua_pcall(mState, 2, 0, 0);
 
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_UPDATE);
+      }
+   }
+}
+
+
+void LuaNode::luaHit(int32_t damage)
+{
+   std::cout << "thing was hit: " << damage << std::endl;
+
+   lua_getglobal(mState, FUNCTION_HIT);
+   if (lua_isfunction(mState, -1) )
+   {
+      lua_pushinteger(mState, damage);
+
+      auto result = lua_pcall(mState, 1, 0, 0);
       if (result != LUA_OK)
       {
          error(mState, FUNCTION_UPDATE);

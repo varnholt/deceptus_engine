@@ -170,7 +170,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
                auto p = dynamic_cast<LuaNode*>(fixtureNodeB->getParent());
                if (p != nullptr)
                {
-                  p->hit(damage);
+                  p->luaHit(damage);
                }
             }
 
@@ -273,7 +273,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
                auto p = dynamic_cast<LuaNode*>(fixtureNodeA->getParent());
                if (p != nullptr)
                {
-                  p->hit(damage);
+                  p->luaHit(damage);
                }
             }
 
