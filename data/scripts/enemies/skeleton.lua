@@ -1,3 +1,4 @@
+
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
 v2d = require "data/scripts/enemies/vectorial2"
@@ -25,7 +26,8 @@ mKeyPressed = 0
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mPointsLeft = false
-mElapsed = math.random(0, 3)
+mSpriteTime = math.random(0, 3)
+mTime = 0
 mSpriteIndex = 0
 mSpriteCounts = {12, 10, 6, 14, 14}
 mSpriteOffsets = {0, 144, 288, 432, 576}
@@ -174,10 +176,22 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function act()
 
-   if (mCurrentAction == Action["Walk"]) then
+   if (mCurrentAction == Action["Die"]) then
+      checkDead()
+   elseif (mCurrentAction == Action["Walk"]) then
       walk()
    elseif (mCurrentAction == Action["Attack"]) then
       attack()
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function checkDead()
+
+   if (mSpriteIndex == mSpriteCounts[Action["Die"]] -1) then
+      die()
    end
 
 end
@@ -241,7 +255,17 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage)
+
    -- need to store the current hit time
+   print(string.format("hit: %d", damage))
+
+   mEnergy = mEnergy - damage
+
+   if (mEnergy <= 0) then
+      mDead = true
+      mKeyPressed = 0
+   end
+
 end
 
 
@@ -296,7 +320,7 @@ function think()
 
    -- determine next action
 
-   if (mDead == 0) then
+   if (mDead) then
       nextAction = Action["Die"]
    elseif (canAttack()) then
       nextAction = Action["Attack"]
@@ -333,9 +357,9 @@ function updateSprite(changed)
    if (changed) then
       spriteIndex = 0
       updateRequired = true
-      mElapsed = 0
+      mSpriteTime = 0
    else
-      spriteIndex = math.floor(math.fmod(mElapsed * 15.0, spriteCount))
+      spriteIndex = math.floor(math.fmod(mSpriteTime * 15.0, spriteCount))
    end
 
    -- update sprite index
@@ -363,7 +387,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
 
-   mElapsed = mElapsed + dt
+   mTime = mTime + dt
+   mSpriteTime = mSpriteTime + dt -- that one might get reset
 
    think()
    act()
