@@ -37,6 +37,7 @@ mDead = false
 mWaiting = false
 mAttackStarted = true
 mAttackLaunched = false
+mHit = false
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -176,8 +177,10 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function act()
 
-   if (mCurrentAction == Action["Die"]) then
-      checkDead()
+   if (mCurrentAction == Action["Hit"]) then
+      updateHit()
+   elseif (mCurrentAction == Action["Die"]) then
+      updateDead()
    elseif (mCurrentAction == Action["Walk"]) then
       walk()
    elseif (mCurrentAction == Action["Attack"]) then
@@ -188,10 +191,12 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function checkDead()
+function updateDead()
 
-   if (mSpriteIndex == mSpriteCounts[Action["Die"]] -1) then
+   if (mSpriteIndex == mSpriteCounts[Action["Die"] + 1] - 1) then
+
       die()
+
    end
 
 end
@@ -199,6 +204,8 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function attack()
+
+   -- print(mTime)
 
    mKeyPressed = 0
    mAttackStarted = true
@@ -256,14 +263,34 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage)
 
-   -- need to store the current hit time
-   print(string.format("hit: %d", damage))
+   if (not mHit) then
 
-   mEnergy = mEnergy - damage
-
-   if (mEnergy <= 0) then
-      mDead = true
+      mHit = true
       mKeyPressed = 0
+
+      -- need to store the current hit time
+      -- print(string.format("hit: %d", damage))
+
+      mEnergy = mEnergy - damage
+
+      if (mEnergy <= 0) then
+         mDead = true
+      end
+
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateHit()
+
+   if (mHit) then
+
+      if (mSpriteIndex >= mSpriteCounts[Action["Hit"] + 1] - 1) then
+         mHit = false
+      end
+
    end
 
 end
@@ -271,8 +298,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function isHit()
-   -- current time smaller than damage time + hit duration?
-   return false
+   return mHit
 end
 
 
