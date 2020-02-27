@@ -1247,7 +1247,7 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
 
 void LuaNode::luaHit(int32_t damage)
 {
-   std::cout << "thing was hit: " << damage << std::endl;
+   // std::cout << "thing was hit: " << damage << std::endl;
 
    lua_getglobal(mState, FUNCTION_HIT);
    if (lua_isfunction(mState, -1) )

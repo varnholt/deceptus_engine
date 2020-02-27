@@ -35,7 +35,7 @@ mCurrentAction = Action["Idle"]
 mEnergy = 100
 mDead = false
 mWaiting = false
-mAttackStarted = true
+mAttackStarted = false
 mAttackLaunched = false
 mHit = false
 
@@ -261,7 +261,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function hit(damage)
+function hit(damage_value)
 
    if (not mHit) then
 
@@ -269,9 +269,9 @@ function hit(damage)
       mKeyPressed = 0
 
       -- need to store the current hit time
-      -- print(string.format("hit: %d", damage))
+      -- print(string.format("hit: %d", damage_value))
 
-      mEnergy = mEnergy - damage
+      mEnergy = mEnergy - damage_value
 
       if (mEnergy <= 0) then
          mDead = true
@@ -329,7 +329,6 @@ function canAttack()
       -- print(distanceToPlayerY)
 
       if (math.abs(distanceToPlayerY) <= 1) then
-         -- print("attack!")
          can = true
       end
 
