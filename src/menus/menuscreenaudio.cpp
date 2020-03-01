@@ -187,7 +187,8 @@ void MenuScreenAudio::updateLayers()
    mLayers["sfxVolume_highlight"]->mVisible = sfx;
    mLayers["sfxVolume_help"]->mVisible = sfx;
    mLayers["sfxVolume_arrows"]->mVisible = sfx;
-   mLayers["sfxVolume_h"]->mVisible = true;
+   mLayers["sfxVolume_h_0"]->mVisible = !sfx;
+   mLayers["sfxVolume_h_1"]->mVisible = sfx;
    mLayers["sfxVolume_value"]->mVisible = true;
 
    mLayers["mscVolume_body_0"]->mVisible = !music;
@@ -197,7 +198,8 @@ void MenuScreenAudio::updateLayers()
    mLayers["mscVolume_highlight"]->mVisible = music;
    mLayers["mscVolume_help"]->mVisible = music;
    mLayers["mscVolume_arrows"]->mVisible = music;
-   mLayers["mscVolume_h"]->mVisible = true;
+   mLayers["mscVolume_h_0"]->mVisible = !music;
+   mLayers["mscVolume_h_1"]->mVisible = music;
    mLayers["mscVolume_value"]->mVisible = true;
 
    mLayers["master_text_0"]->mVisible = !master;
@@ -206,15 +208,21 @@ void MenuScreenAudio::updateLayers()
    mLayers["master_highlight"]->mVisible = master;
    mLayers["master_help"]->mVisible = master;
    mLayers["master_arrows"]->mVisible = master;
-   mLayers["master_h"]->mVisible = true;
+   mLayers["master_h_0"]->mVisible = !master;
+   mLayers["master_h_1"]->mVisible = master;
    mLayers["master_value"]->mVisible = true;
 
    const auto masterVolume = GameConfiguration::getInstance().mAudioVolumeMaster;
    const auto sfxVolume = GameConfiguration::getInstance().mAudioVolumeSfx;
    const auto musicVolume = GameConfiguration::getInstance().mAudioVolumeMusic;
-   mLayers["master_h"]->mSprite->setOrigin(50.0f - masterVolume, 0.0f);
-   mLayers["sfxVolume_h"]->mSprite->setOrigin(50.0f - sfxVolume, 0.0f);
-   mLayers["mscVolume_h"]->mSprite->setOrigin(50.0f - musicVolume, 0.0f);
+
+   mLayers["master_h_0"]->mSprite->setOrigin(50.0f - masterVolume, 0.0f);
+   mLayers["sfxVolume_h_0"]->mSprite->setOrigin(50.0f - sfxVolume, 0.0f);
+   mLayers["mscVolume_h_0"]->mSprite->setOrigin(50.0f - musicVolume, 0.0f);
+
+   mLayers["master_h_1"]->mSprite->setOrigin(50.0f - masterVolume, 0.0f);
+   mLayers["sfxVolume_h_1"]->mSprite->setOrigin(50.0f - sfxVolume, 0.0f);
+   mLayers["mscVolume_h_1"]->mSprite->setOrigin(50.0f - musicVolume, 0.0f);
 }
 
 
