@@ -23,6 +23,7 @@ struct SaveState
 
    static SaveState& getSaveState(uint32_t);
    static std::array<SaveState, 3>& getSaveStates();
+   static bool allEmpty();
    static PlayerInfo& getPlayerInfo();
 
    static SaveState& getCurrent();

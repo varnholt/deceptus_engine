@@ -2,6 +2,7 @@
 
 #include "game/messagebox.h"
 #include "game/gamestate.h"
+#include "game/savestate.h"
 #include "menu.h"
 
 
@@ -41,6 +42,7 @@ void MenuScreenMain::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenMain::loadingFinished()
 {
+   SaveState::deserializeFromFile();
    updateLayers();
 }
 
@@ -116,14 +118,17 @@ void MenuScreenMain::setExitCallback(MenuScreenMain::ExitCallback callback)
 
 void MenuScreenMain::updateLayers()
 {
+   const auto canContinue = !SaveState::allEmpty();
 
-   mLayers["continue_0"]->mVisible = false;
-   mLayers["continue_1"]->mVisible = false;
+   mLayers["continue_0"]->mVisible = canContinue && (mSelection != Selection::Start);
+   mLayers["continue_1"]->mVisible = canContinue && (mSelection == Selection::Start);
 
-   mLayers["start_0"]->mVisible = (mSelection != Selection::Start);
-   mLayers["start_1"]->mVisible = (mSelection == Selection::Start);
+   mLayers["start_0"]->mVisible = !canContinue && (mSelection != Selection::Start);
+   mLayers["start_1"]->mVisible = !canContinue && (mSelection == Selection::Start);
+
    mLayers["options_0"]->mVisible = (mSelection != Selection::Options);
    mLayers["options_1"]->mVisible = (mSelection == Selection::Options);
+
    mLayers["quit_0"]->mVisible = (mSelection != Selection::Quit);
    mLayers["quit_1"]->mVisible = (mSelection == Selection::Quit);
 }

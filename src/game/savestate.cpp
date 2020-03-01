@@ -19,6 +19,15 @@ std::array<SaveState, 3>& SaveState::getSaveStates()
 }
 
 
+bool SaveState::allEmpty()
+{
+   return std::all_of(sSaveStates.begin(), sSaveStates.end(), [](const auto& s) {
+         return s.isEmpty();
+      }
+   );
+}
+
+
 bool SaveState::isEmpty() const
 {
    return mPlayerInfo.mName.empty();
