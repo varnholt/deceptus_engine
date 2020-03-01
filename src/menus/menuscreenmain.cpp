@@ -10,7 +10,7 @@
 
 MenuScreenMain::MenuScreenMain()
 {
-   setFilename("data/menus/main.psd");
+   setFilename("data/menus/titlescreen.psd");
 }
 
 
@@ -127,7 +127,7 @@ void MenuScreenMain::updateLayers()
 
 
 /*
-data/menus/main.psd
+data/menus/titlescreen.psd
     bg_temp
     quit_0
     quit_1
