@@ -65,7 +65,7 @@ void MenuScreenControls::loadingFinished()
 
 void MenuScreenControls::updateLayers()
 {
-   mLayers["body"]->mVisible = false;
+   // mLayers["body"]->mVisible = false;
 
    mLayers["defaults_xbox_0"]->mVisible = isControllerUsed();
    mLayers["defaults_xbox_1"]->mVisible = false;

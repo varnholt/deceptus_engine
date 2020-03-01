@@ -245,9 +245,11 @@ void MenuScreenVideo::updateLayers()
    mLayers["brightness_highlight"]->mVisible = brightness;
    mLayers["brightness_help"]->mVisible = brightness;
    mLayers["brightness_arrows"]->mVisible = brightness;
-   mLayers["brightness_h"]->mVisible = true;
+   mLayers["brightness_h_0"]->mVisible = !brightness;
+   mLayers["brightness_h_1"]->mVisible = brightness;
    mLayers["brightness_value"]->mVisible = true;
-   mLayers["brightness_h"]->mSprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
+   mLayers["brightness_h_0"]->mSprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
+   mLayers["brightness_h_1"]->mSprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
 
    mLayers["displayMode_text_0"]->mVisible = !displayMode;
    mLayers["displayMode_text_1"]->mVisible = displayMode;

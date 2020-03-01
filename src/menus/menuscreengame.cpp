@@ -107,9 +107,7 @@ void MenuScreenGame::updateLayers()
 
    mLayers["textSpeed_text_0"]->mVisible = !textSpeed;
    mLayers["textSpeed_text_1"]->mVisible = textSpeed;
-   mLayers["textSpeed_body_0"]->mVisible = textSpeed;
    mLayers["textSpeed_highlight"]->mVisible = textSpeed;
-   mLayers["textSpeed_body_1"]->mVisible = textSpeed;
    mLayers["textSpeed_help"]->mVisible = textSpeed;
    mLayers["textSpeed_arrows"]->mVisible = textSpeed;
    mLayers["textSpeed_1"]->mVisible = textSpeedSelection == 0;
@@ -117,7 +115,6 @@ void MenuScreenGame::updateLayers()
    mLayers["textSpeed_3"]->mVisible = textSpeedSelection == 2;
    mLayers["textSpeed_4"]->mVisible = textSpeedSelection == 3;
    mLayers["textSpeed_5"]->mVisible = textSpeedSelection == 4;
-   mLayers["textSpeed_h"]->mVisible = true;
 }
 
 

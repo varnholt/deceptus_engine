@@ -116,6 +116,10 @@ void MenuScreenMain::setExitCallback(MenuScreenMain::ExitCallback callback)
 
 void MenuScreenMain::updateLayers()
 {
+
+   mLayers["continue_0"]->mVisible = false;
+   mLayers["continue_1"]->mVisible = false;
+
    mLayers["start_0"]->mVisible = (mSelection != Selection::Start);
    mLayers["start_1"]->mVisible = (mSelection == Selection::Start);
    mLayers["options_0"]->mVisible = (mSelection != Selection::Options);
