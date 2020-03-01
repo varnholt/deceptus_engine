@@ -504,10 +504,10 @@ DISTFILES += \
     data/menus/credits.psd \
     data/menus/fileselect.psd \
     data/menus/game.psd \
-    data/menus/main.psd \
     data/menus/nameselect.psd \
     data/menus/options.psd \
     data/menus/pause.psd \
+    data/menus/titlescreen.psd \
     data/menus/video.psd \
     data/scripts/enemies/bat.lua \
     data/scripts/enemies/bonefish.lua \
