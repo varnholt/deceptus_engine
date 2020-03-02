@@ -203,7 +203,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::MiddleCenter:
       case MessageBoxLocation::BottomCenter:
       {
-         pos.x = 190;
+         pos.x = 225;
          break;
       }
       case MessageBoxLocation::TopRight:
@@ -290,6 +290,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    sLayers["no_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::No);
    sLayers["yes_pc_1"]->mVisible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
    sLayers["no_pc_1"]->mVisible = !xbox && buttons & static_cast<int32_t>(Button::No);
+   sLayers["temp_bg"]->mVisible = false;
 
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(
