@@ -1274,7 +1274,7 @@ void Level::parsePhysicsTiles(
    std::cout << "[x] loading: " << pathSolid.make_preferred().generic_string() << std::endl;
 
    // enabled anytime to re-generate obj files
-   // mPhysics.dumpObj(layer, tileSet);
+   mPhysics.dumpObj(layer, tileSet);
 
    mPhysics.parse(layer, tileSet, basePath);
 
