@@ -114,6 +114,7 @@ SOURCES += \
    src/game/lever.cpp \
    src/game/maptools.cpp \
    src/game/moveablebox.cpp \
+    src/game/movingspikebox.cpp \
    src/game/physics.cpp \
    src/game/playerinfo.cpp \
    src/game/rainoverlay.cpp \
@@ -265,6 +266,7 @@ HEADERS += \
     src/game/lever.h \
     src/game/maptools.h \
     src/game/moveablebox.h \
+    src/game/movingspikebox.h \
     src/game/physics.h \
     src/game/player.h \
     src/game/level.h \
