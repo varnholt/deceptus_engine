@@ -1657,6 +1657,12 @@ void Player::updateGroundAngle()
    b2Vec2 intersectionNormal(0.0f, -1.0f);
 
    // for (b2Body* b = mWorld->GetBodyList(); b; b = b->GetNext())
+
+   if (!mGroundBody)
+   {
+      return;
+   }
+
    for (b2Fixture* f = mGroundBody->GetFixtureList(); f; f = f->GetNext())
    {
       // terrain is made out of chains, so only process those
