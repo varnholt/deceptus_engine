@@ -1660,6 +1660,7 @@ void Player::updateGroundAngle()
 
    if (!mGroundBody)
    {
+      mGroundNormal.Set(0.0f, -1.0f);
       return;
    }
 

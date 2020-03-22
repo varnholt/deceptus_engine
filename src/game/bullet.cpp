@@ -13,9 +13,7 @@ std::set<Bullet*> Bullet::sBullets;
 
 
 Bullet::Bullet()
- : FixtureNode(this),
-   mScheduledForRemoval(false),
-   mBody(nullptr)
+ : FixtureNode(this)
 {
    mType = ObjectTypeBullet;
    sBullets.insert(this);
@@ -74,7 +72,6 @@ void Bullet::clear()
 
 void Bullet::cleanup()
 {
-   // todo: port to remove_if
    sDetonationPositions.clear();
    for (auto it = sBullets.begin(); it != sBullets.end(); )
    {
@@ -117,3 +114,4 @@ void Bullet::setDestroyedCallback(const DestroyedCallback& destroyedCallback)
 {
    mDestroyedCallback = destroyedCallback;
 }
+

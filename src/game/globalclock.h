@@ -1,13 +1,10 @@
-
-#ifndef GLOBALCLOCK_H
-#define GLOBALCLOCK_H
+#pragma once
 
 #include <SFML/System/Clock.hpp>
 
 class GlobalClock
 {
 public:
-
 
    GlobalClock();
 
@@ -23,7 +20,5 @@ private:
    sf::Clock mClock;
 
    static GlobalClock* sInstance;
-
 };
 
-#endif // GLOBALCLOCK_H

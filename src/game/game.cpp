@@ -320,7 +320,7 @@ void Game::initialize()
 
    showMainMenu();
 
-   Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repetitive);
+   Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repeated);
 
    GameState::getInstance().addCallback(
       [this](ExecutionMode current, ExecutionMode previous){

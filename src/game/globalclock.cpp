@@ -1,7 +1,7 @@
 #include "globalclock.h"
 
 
-GlobalClock* GlobalClock::sInstance = 0;
+GlobalClock* GlobalClock::sInstance = nullptr;
 
 
 GlobalClock::GlobalClock()

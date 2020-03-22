@@ -100,6 +100,5 @@ class MessageBox
       static sf::Font sFont;
       static sf::Text sText;
       static bool sInitialized;
-
 };
 
