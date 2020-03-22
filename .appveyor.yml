@@ -3,7 +3,7 @@ image: Visual Studio 2019
 environment:
   matrix:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    QTDIR: C:\Qt\5.14.0\msvc2017_64
+    QTDIR: C:\Qt\5.14.1\msvc2017_64
     VCVAR2019: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat'
     PLATFORM: x64
     VER_SUFFIX: win64
@@ -17,7 +17,7 @@ init:
 before_build:
 
 build_script:
-- C:\Qt\5.14.0\msvc2017_64\bin\qmake jumpnrun.pro
+- C:\Qt\5.14.1\msvc2017_64\bin\qmake jumpnrun.pro
 - nmake
 - call "deploy_appveyor.bat"
 
