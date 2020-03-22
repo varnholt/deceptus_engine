@@ -1,5 +1,4 @@
-#ifndef BULLET_H
-#define BULLET_H
+#pragma once
 
 // sfml
 #include <SFML/Graphics.hpp>
@@ -22,7 +21,7 @@ class Bullet : public FixtureNode
 
 public:
 
-   enum BulletType
+   enum class BulletType
    {
       BulletTypePistol
    };
@@ -50,17 +49,13 @@ public:
 
 protected:
 
-   BulletType mBulletType;
-   bool mScheduledForRemoval;
-   b2Body* mBody;
+   BulletType mBulletType = BulletType::BulletTypePistol;
+   bool mScheduledForRemoval = false;
+   b2Body* mBody = nullptr;
    DestroyedCallback mDestroyedCallback;
 
    static std::set<Bullet*> sBullets;
    static std::list<b2Vec2> sDetonationPositions;
-
 };
 
 
-
-
-#endif // BULLET_H

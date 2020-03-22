@@ -1,5 +1,4 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include <chrono>
 #include <functional>
@@ -15,7 +14,7 @@ public:
    enum class Type
    {
       Singleshot,
-      Repetitive
+      Repeated
    };
 
    Timer() = default;
@@ -42,4 +41,3 @@ private:
 
 };
 
-#endif // TIMER_H
