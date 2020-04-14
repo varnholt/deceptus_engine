@@ -161,6 +161,12 @@ void Game::initializeWindow()
 
    std::cout << "[x] created window render texture: " << textureWidth << " x " << textureHeight << std::endl;
 
+   if (!mLevel)
+   {
+      std::cerr << "[!] level not initialized" << std::endl;
+      return;
+   }
+
    mLevel->initializeTextures();
 }
 

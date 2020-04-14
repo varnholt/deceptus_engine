@@ -12,40 +12,38 @@ Levels Levels::sInstance;
 
 void Levels::deserialize(const std::string& data)
 {
-   json config = json::parse(data);
-
    try
    {
-     mLevels = config.get<std::vector<LevelItem>>();
+      json config = json::parse(data);
+      mLevels = config.get<std::vector<LevelItem>>();
    }
    catch (const std::exception& e)
    {
-     std::cout << e.what() << std::endl;
+      std::cout << e.what() << std::endl;
    }
 }
 
 
 void Levels::deserializeFromFile(const std::string &filename)
 {
-  std::ifstream ifs (filename, std::ifstream::in);
+   std::ifstream ifs (filename, std::ifstream::in);
 
-  auto c = ifs.get();
-  std::string data;
+   auto c = ifs.get();
+   std::string data;
 
-  while (ifs.good())
-  {
-    // std::cout << c;
-    data.push_back(static_cast<char>(c));
-    c = ifs.get();
-  }
+   while (ifs.good())
+   {
+      data.push_back(static_cast<char>(c));
+      c = ifs.get();
+   }
 
-  ifs.close();
+   ifs.close();
 
-  deserialize(data);
+   deserialize(data);
 }
 
 
 void from_json(const json &j, LevelItem &item)
 {
-  item.mLevelName = j.at("levelname").get<std::string>();
+   item.mLevelName = j.at("levelname").get<std::string>();
 }
