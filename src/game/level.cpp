@@ -1297,16 +1297,17 @@ void Level::parsePhysicsTiles(
    else
    {
       // dump the tileset into an obj file, optimise that and load it
-      mPhysics.dumpObj(layer, tileSet, pathSolidNotOptimised);
+      if (mPhysics.dumpObj(layer, tileSet, pathSolidNotOptimised))
+      {
+         auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
+               + pathSolidNotOptimised.string() + " "
+               + pathSolidOptimized.string();
 
-      auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
-            + pathSolidNotOptimised.string() + " "
-            + pathSolidOptimized.string();
-
-      std::system(cmd.c_str());
+         std::system(cmd.c_str());
+      }
 
       // fallback to square marched level
-      if (std::filesystem::exists(pathSolidOptimized))
+      if (!std::filesystem::exists(pathSolidOptimized))
       {
          std::cerr << "[!] could not find " << pathSolidOptimized.string() << ", obj generator failed" << std::endl;
          addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);

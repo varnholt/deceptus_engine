@@ -125,7 +125,7 @@ void Physics::parse(
 
 
 //-----------------------------------------------------------------------------
-void Physics::dumpObj(
+bool Physics::dumpObj(
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& path
@@ -140,7 +140,7 @@ void Physics::dumpObj(
    if (tileSet == nullptr)
    {
       // std::cout << "tileset is a nullptr" << std::endl;
-      return;
+      return false;
    }
 
    const auto tileMap = tileSet->mTileMap;
@@ -252,6 +252,12 @@ void Physics::dumpObj(
       }
    }
 
+   if (vertices.empty())
+   {
+      std::cerr << "[!] tmx doesn't contain polygon data" << std::endl;
+      return false;
+   }
+
    // https://en.wikipedia.org/wiki/Wavefront_.obj_file
    Mesh::writeObj(path.string(), vertices, faces);
 
@@ -276,5 +282,7 @@ void Physics::dumpObj(
    //
    //    After creating a closed path, delete all vertices with almost identical x or y positions
    //    edges: 1-4, 4-5, 5-8, 8-1
+
+   return true;
 }
 
