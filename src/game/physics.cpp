@@ -125,7 +125,11 @@ void Physics::parse(
 
 
 //-----------------------------------------------------------------------------
-void Physics::dumpObj(TmxLayer* layer, TmxTileSet* tileSet)
+void Physics::dumpObj(
+   TmxLayer* layer,
+   TmxTileSet* tileSet,
+   const std::filesystem::path& path
+)
 {
    const auto tiles  = layer->mData;
    const auto width  = layer->mWidth;
@@ -249,7 +253,7 @@ void Physics::dumpObj(TmxLayer* layer, TmxTileSet* tileSet)
    }
 
    // https://en.wikipedia.org/wiki/Wavefront_.obj_file
-   Mesh::writeObj("layer_" + layer->mName + ".obj", vertices, faces);
+   Mesh::writeObj(path.string(), vertices, faces);
 
    // weld all the things
    //
@@ -273,3 +277,4 @@ void Physics::dumpObj(TmxLayer* layer, TmxTileSet* tileSet)
    //    After creating a closed path, delete all vertices with almost identical x or y positions
    //    edges: 1-4, 4-5, 5-8, 8-1
 }
+
