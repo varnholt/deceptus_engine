@@ -18,7 +18,8 @@ struct Physics
 
    void dumpObj(
       TmxLayer* layer,
-      TmxTileSet* tileSet
+      TmxTileSet* tileSet,
+      const std::filesystem::path& path
    );
 
    uint32_t mGridWidth = 0;
