@@ -1,12 +1,12 @@
 [
    {
-      "levelname": "data/level-keen/keen.json"
+      "levelname": "data/level-crypt/metroid.json"
    },
    {
       "levelname": "data/level-malte/malte.json"
    },
    {
-      "levelname": "data/level-crypt/metroid.json"
+      "levelname": "data/level-keen/keen.json"
    }
 ]
 

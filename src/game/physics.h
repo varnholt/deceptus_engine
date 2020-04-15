@@ -16,7 +16,7 @@ struct Physics
       const std::filesystem::path& basePath
    );
 
-   void dumpObj(
+   bool dumpObj(
       TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path& path
