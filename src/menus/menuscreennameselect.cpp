@@ -78,6 +78,9 @@ void MenuScreenNameSelect::select()
    GameState::getInstance().enqueueResume();
 
    SaveState::getCurrent().mPlayerInfo.mName = mName;
+
+   // request level-reloading since we updated the save state
+   SaveState::getCurrent().mLoadLevelRequested = true;
 }
 
 

@@ -1,0 +1,67 @@
+[
+    {
+        "checkpoint": 0,
+        "levelindex": 0,
+        "playerinfo": {
+            "extras": {
+                "health": {
+                    "health": 100,
+                    "health_max": 100,
+                    "lives": 5
+                },
+                "skills": {
+                    "skills": 0
+                }
+            },
+            "inventory": {
+                "items": [
+                    {
+                        "item": 2
+                    }
+                ]
+            },
+            "name": "level dev"
+        }
+    },
+    {
+        "checkpoint": 0,
+        "levelindex": 1,
+        "playerinfo": {
+            "extras": {
+                "health": {
+                    "health": 100,
+                    "health_max": 100,
+                    "lives": 5
+                },
+                "skills": {
+                    "skills": 0
+                }
+            },
+            "inventory": {
+                "items": []
+            },
+            "name": "level malte"
+        }
+    },
+    {
+        "checkpoint": 0,
+        "levelindex": 2,
+        "playerinfo": {
+            "extras": {
+                "health": {
+                    "health": 100,
+                    "health_max": 100,
+                    "lives": 5
+                },
+                "skills": {
+                    "skills": 0
+                }
+            },
+            "inventory": {
+                "items": []
+            },
+            "name": "level keen"
+        }
+    }
+]
+

@@ -16,8 +16,10 @@ struct SaveState
 
    PlayerInfo mPlayerInfo;
 
-   int32_t mLevelIndex = 0;
-   int32_t mCheckpoint = 0;
+   uint32_t mLevelIndex = 0;
+   uint32_t mCheckpoint = 0;
+
+   bool mLoadLevelRequested = false;
 
    int32_t computeProgress() const;
 

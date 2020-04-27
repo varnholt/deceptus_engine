@@ -191,6 +191,7 @@ protected:
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> mMechanisms;
    std::vector<std::shared_ptr<GameMechanism>> mBouncers;
    std::vector<std::shared_ptr<GameMechanism>> mConveyorBelts;
+   std::vector<std::shared_ptr<GameMechanism>> mDeathBlocks;
    std::vector<std::shared_ptr<GameMechanism>> mDoors;
    std::vector<std::shared_ptr<GameMechanism>> mFans;
    std::vector<std::shared_ptr<GameMechanism>> mLasers;

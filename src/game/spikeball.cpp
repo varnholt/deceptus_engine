@@ -31,6 +31,8 @@
 SpikeBall::SpikeBall(GameNode* node)
  : GameNode(node)
 {
+   setZ(16);
+
    // chain element setup
    mChainElementShape.SetAsBox(mConfig.chainElementWidth, mConfig.chainElementHeight);
    mChainElementFixtureDef.shape = &mChainElementShape;

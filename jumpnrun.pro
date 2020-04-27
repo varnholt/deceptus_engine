@@ -97,6 +97,7 @@ SOURCES += \
    src/game/atmosphereshader.cpp \
    src/game/blurshader.cpp \
    src/game/callbackmap.cpp \
+   src/game/deathblock.cpp \
    src/game/deathshader.cpp \
    src/game/dialogue.cpp \
    src/game/enemydescription.cpp \
@@ -245,6 +246,7 @@ HEADERS += \
     src/game/atmosphereshader.h \
     src/game/blurshader.h \
     src/game/callbackmap.h \
+    src/game/deathblock.h \
     src/game/deathshader.h \
     src/game/dialogue.h \
     src/game/enemydescription.h \
