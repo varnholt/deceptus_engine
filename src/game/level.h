@@ -78,6 +78,7 @@ public:
    void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawBlurLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
+   void drawPlayer(sf::RenderTarget& target);
 
    void update(const sf::Time& dt);
 
@@ -226,5 +227,6 @@ protected:
    std::shared_ptr<b2World> mWorld;
 
    static Level* sCurrentLevel;
+   private:
 };
 

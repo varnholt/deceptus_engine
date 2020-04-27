@@ -33,6 +33,7 @@ void TmxParser::parse(const std::string &filename)
          if (subElement != nullptr)
          {
             TmxElement* element = nullptr;
+            TmxLayer* layer = nullptr;
 
             if (subElement->Name() == std::string("tileset"))
             {
@@ -42,35 +43,36 @@ void TmxParser::parse(const std::string &filename)
             else if (subElement->Name() == std::string("layer"))
             {
                element = new TmxLayer();
-
-               // that code does not belong here... should go to the level parser code!`
-              // update z
-               auto layer = dynamic_cast<TmxLayer*>(element);
-               if (layer->mProperties)
-               {
-                  auto& map = layer->mProperties->mMap;
-                  auto it = map.find("z");
-                  if (it != map.end())
-                  {
-                    z = it->second->mValueInt;
-                  }
-               }
-               dynamic_cast<TmxLayer*>(element)->mZ = z++;
+               layer = dynamic_cast<TmxLayer*>(element);
             }
             else if (subElement->Name() == std::string("imagelayer"))
             {
                element = new TmxImageLayer();
-               dynamic_cast<TmxImageLayer*>(element)->mZ = z++;
+               dynamic_cast<TmxImageLayer*>(element)->mZ = z;
             }
             else if (subElement->Name() == std::string("objectgroup"))
             {
                element = new TmxObjectGroup();
-               dynamic_cast<TmxObjectGroup*>(element)->mZ = z++;
+               dynamic_cast<TmxObjectGroup*>(element)->mZ = z;
             }
 
             if (element != nullptr)
             {
                element->deserialize(subElement);
+
+               if (layer && layer->mProperties)
+               {
+                  auto& map = layer->mProperties->mMap;
+                  auto it = map.find("z");
+                  if (it != map.end())
+                  {
+                     z = it->second->mValueInt;
+                  }
+                  dynamic_cast<TmxLayer*>(element)->mZ = z;
+               }
+
+               std::cout << "layer: " << element->mName << " z: " << z << std::endl;
+
                mElements.push_back(element);
             }
             else

@@ -825,6 +825,50 @@ void Level::drawParallaxMaps(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
+void Level::drawPlayer(sf::RenderTarget& target)
+{
+   auto player = Player::getCurrent();
+
+   if (player->isDead())
+   {
+      // std::cout << "render death shader" << std::endl;
+
+      auto deathRenderTexture = mDeathShader->getRenderTexture();
+
+      // render player to texture
+      deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
+      deathRenderTexture->setView(*mLevelView);
+      player->draw(*deathRenderTexture);
+      deathRenderTexture->display();
+
+      // render texture with shader applied
+      auto deathShaderSprite = sf::Sprite(deathRenderTexture->getTexture());
+
+      // TODO: have a static view for rendertexture quads
+      sf::View view(
+         sf::FloatRect(
+            0.0f,
+            0.0f,
+            static_cast<float>(mLevelRenderTexture->getSize().x),
+            static_cast<float>(mLevelRenderTexture->getSize().y)
+         )
+      );
+
+      view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+      target.setView(view);
+      target.draw(deathShaderSprite, &mDeathShader->getShader());
+
+      takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
+
+      target.setView(*mLevelView);
+   }
+   else
+   {
+      player->draw(target);
+   }
+}
+
+
 void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
 {
    target.setView(*mLevelView);
@@ -844,7 +888,7 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
          }
       }
 
-      for (auto mechanismVector : mMechanisms)
+      for (auto& mechanismVector : mMechanisms)
       {
          for (auto& mechanism : *mechanismVector)
          {
@@ -870,54 +914,16 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
          mAo.draw(target);
 
          // draw player
-         auto player = Player::getCurrent();
-
-         if (player->isDead())
-         {
-            // std::cout << "render death shader" << std::endl;
-
-            auto deathRenderTexture = mDeathShader->getRenderTexture();
-
-            // render player to texture
-            deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
-            deathRenderTexture->setView(*mLevelView);
-            player->draw(*deathRenderTexture);
-            deathRenderTexture->display();
-
-            // render texture with shader applied
-            auto deathShaderSprite = sf::Sprite(deathRenderTexture->getTexture());
-
-            // TODO: have a static view for rendertexture quads
-            sf::View view(
-               sf::FloatRect(
-                  0.0f,
-                  0.0f,
-                  static_cast<float>(mLevelRenderTexture->getSize().x),
-                  static_cast<float>(mLevelRenderTexture->getSize().y)
-               )
-            );
-
-            view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-            target.setView(view);
-            target.draw(deathShaderSprite, &mDeathShader->getShader());
-
-            takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
-
-            target.setView(*mLevelView);
-         }
-         else
-         {
-            player->draw(target);
-         }
+         drawPlayer(target);
       }
 
-      for_each(std::begin(mImageLayers), std::end(mImageLayers), [&](auto& layer)
+      for (auto& layer : mImageLayers)
       {
          if (layer->mZ == z)
          {
             target.draw(layer->mSprite, {layer->mBlendMode});
          }
-      });
+      };
    }
 }
 
