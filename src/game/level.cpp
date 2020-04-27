@@ -246,6 +246,8 @@ void Level::loadTmx()
       std::filesystem::remove(path / "physics_path_deadly.csv");
       std::filesystem::remove(path / "physics_path_solid.csv");
       std::filesystem::remove(path / "physics_path_solid.png");
+      std::filesystem::remove(path / "layer_level_solid.obj");
+      std::filesystem::remove(path / "layer_level_solid_not_optimised.obj");
       Checksum::writeChecksum(mDescription->mFilename + ".crc", checksumNew);
    }
 

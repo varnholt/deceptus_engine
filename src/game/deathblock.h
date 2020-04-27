@@ -6,6 +6,7 @@
 
 #include <Box2D/Box2D.h>
 
+#include <array>
 #include <filesystem>
 
 struct TmxLayer;
@@ -41,7 +42,7 @@ private:
    int32_t mTu = 0;
    int32_t mTv = 0;
 
-   std::vector<sf::Sprite> mSprites;
+   std::array<sf::Sprite, 5> mSprites;
    int32_t mElapsedMs = 0;
 
    sf::Vector2f mTilePosition;
