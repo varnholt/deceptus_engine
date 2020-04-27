@@ -202,6 +202,7 @@ enum ObjectType
    ObjectTypeBullet,
    ObjectTypeOneSidedWall,
    ObjectTypeDeadly,
+   ObjectTypeDeathBlock,
    ObjectTypeMovingPlatform,
    ObjectTypeDoor,
    ObjectTypeEnemy,

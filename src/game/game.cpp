@@ -239,7 +239,7 @@ void Game::loadLevel()
          // pick a level
          auto levels = Levels::getInstance();
          levels.deserializeFromFile();
-         auto levelItem = levels.mLevels.at(mLevelIndex);
+         auto levelItem = levels.mLevels.at(SaveState::getCurrent().mLevelIndex);
 
          mLevel.reset();
 
@@ -271,12 +271,12 @@ void Game::loadLevel()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::nextLevel()
 {
-   mLevelIndex++;
+   SaveState::getCurrent().mLevelIndex++;
 
    auto levels = Levels::getInstance();
-   if (mLevelIndex == levels.mLevels.size())
+   if (SaveState::getCurrent().mLevelIndex == levels.mLevels.size())
    {
-       mLevelIndex = 0;
+       SaveState::getCurrent().mLevelIndex = 0;
    }
 
    loadLevel();
@@ -291,7 +291,7 @@ void Game::initialize()
    mPlayer = std::make_shared<Player>();
    mPlayer->initialize();
 
-   loadLevel();
+   // loadLevel();
 
    mInfoLayer = std::make_unique<InfoLayer>();
    mInventoryLayer = std::make_unique<InventoryLayer>();
@@ -561,6 +561,13 @@ void Game::update()
    mDeltaClock.restart();
 
    Audio::getInstance()->updateMusic();
+
+   // reload the level when the save state has been invalidated
+   if (SaveState::getCurrent().mLoadLevelRequested)
+   {
+      SaveState::getCurrent().mLoadLevelRequested = false;
+      loadLevel();
+   }
 
    if (GameState::getInstance().getMode() == ExecutionMode::Paused)
    {

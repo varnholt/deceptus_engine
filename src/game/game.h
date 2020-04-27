@@ -89,7 +89,6 @@ private:
    sf::Vector2f mStoredPosition;
 
    int32_t mFps;
-   uint32_t mLevelIndex = 0;
    bool mScreenshot = false;
    bool mDrawConsole = false;
    bool mDrawDebugInfo = false;

@@ -7,6 +7,7 @@
 #include "checksum.h"
 #include "constants.h"
 #include "conveyorbelt.h"
+#include "deathblock.h"
 #include "debugdraw.h"
 #include "dialogue.h"
 #include "displaymode.h"
@@ -195,7 +196,8 @@ Level::Level()
       &mPortals,
       &mSpikeBalls,
       &mSpikes,
-      &mMoveableBoxes
+      &mMoveableBoxes,
+      &mDeathBlocks
    };
 }
 
@@ -387,6 +389,12 @@ void Level::loadTmx()
                box->setup(tmxObject, mWorld);
                mMoveableBoxes.push_back(box);
             }
+            else if (objectGroup->mName == "death_blocks")
+            {
+               auto box = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
+               box->setup(tmxObject, mWorld);
+               mDeathBlocks.push_back(box);
+            }
             else if (objectGroup->mName == "checkpoints")
             {
                const auto cpi = Checkpoint::add(tmxObject);
@@ -575,6 +583,10 @@ void Level::initialize()
       mStartPosition.x = static_cast<float>(pos.x);
       mStartPosition.y = static_cast<float>(pos.y);
       std::cout << "move to checkpoint: " << checkpointIndex << std::endl;
+   }
+   else
+   {
+      std::cerr << "level doesn't have a start check point set up, falling back to start position" << std::endl;
    }
 
    spawnEnemies();

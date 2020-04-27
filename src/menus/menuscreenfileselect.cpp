@@ -84,6 +84,9 @@ void MenuScreenFileSelect::select()
       // if current slot holds data, load it
       Menu::getInstance()->hide();
       GameState::getInstance().enqueueResume();
+
+      // request level-reloading since we updated the save state
+      SaveState::getCurrent().mLoadLevelRequested = true;
    }
 }
 
