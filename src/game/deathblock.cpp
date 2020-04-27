@@ -22,6 +22,40 @@ void DeathBlock::draw(sf::RenderTarget& /*window*/)
 }
 
 
+// enemy_deathblock
+// 14 animation cycles
+// 0: spikes out
+// 13: spikes in
+//
+// sprite setup:
+//
+//           +---+
+//           | 0 |
+//       +---+---+---+
+//       | 1 | 2 | 3 |
+//       +---+---+---+
+//           | 4 |
+//           +---+
+//
+// offsets:
+//
+//    0: 1, 0
+//    1: 0, 1
+//    2: 1, 1
+//    3: 2, 1
+//    4: 1, 2
+
+
+enum SpikeOrientation
+{
+   Up     = 0,
+   Left   = 1,
+   Center = 2,
+   Right  = 3,
+   Down   = 4
+};
+
+
 //-----------------------------------------------------------------------------
 void DeathBlock::setupTransform()
 {
