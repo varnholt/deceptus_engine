@@ -20,6 +20,7 @@ class ControllerOverlay
    private:
 
       std::map<std::string, std::shared_ptr<Layer>> mLayers;
+      sf::Vector2i mTextureSize;
 
 };
 

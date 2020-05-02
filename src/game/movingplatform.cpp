@@ -313,21 +313,11 @@ void MovingPlatform::update(const sf::Time& dt)
       }
    }
 
-   // configured timestep is 1/35
-   // frame update timestep is 1/60
-   // causes an error
-   //   pixel pos: 2808.000000, 8739.437500
-   //   pixel pos: 2808.000000, 8740.535156
-   // 8739.437500 - 8740.535156 = 1.097656
-   // 1 / 1.097656 => 0.91103223596463737272879663574016
-
-   const float error = 0.91192227210220912883854305376065f;
-
    // if (mInterpolation.update(mBody->GetPosition()))
    mInterpolation.update(mBody->GetPosition());
    {
       // PhysicsConfiguration::getInstance().mTimeStep
-      mBody->SetLinearVelocity(mLeverLag * error * (PPM / 60.0f) * mInterpolation.getVelocity());
+      mBody->SetLinearVelocity(mLeverLag * TIMESTEP_ERROR * (PPM / 60.0f) * mInterpolation.getVelocity());
    }
 
    auto pos = 0;

@@ -28,10 +28,13 @@ class DeathBlock : public GameMechanism, public GameNode
 
       DeathBlock(GameNode* parent = nullptr);
 
-      void draw(sf::RenderTarget& window) override;
+      void draw(sf::RenderTarget& target) override;
       void update(const sf::Time& dt) override;
 
-      void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
+      void setup(
+         TmxObject* tmxObject,
+         const std::shared_ptr<b2World>& world
+      );
 
 
 private:
@@ -42,7 +45,24 @@ private:
    int32_t mTu = 0;
    int32_t mTv = 0;
 
+   //     +---+
+   //     | 0 |
+   // +---+---+---+
+   // | 1 | 2 | 3 |
+   // +---+---+---+
+   //     | 4 |
+   //     +---+
+
    std::array<sf::Sprite, 5> mSprites;
+   std::array<int32_t, 5> mStates = {};
+   std::array<sf::Vector2i, 5> mOffsets = {
+      sf::Vector2i{1, 0},
+      sf::Vector2i{0, 1},
+      sf::Vector2i{1, 1},
+      sf::Vector2i{1, 2},
+      sf::Vector2i{2, 1}
+   };
+
    int32_t mElapsedMs = 0;
 
    sf::Vector2f mTilePosition;

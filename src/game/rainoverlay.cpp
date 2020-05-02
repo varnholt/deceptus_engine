@@ -11,8 +11,8 @@ namespace
 {
    // todo: resolve static initialization fiasco
    // https://isocpp.org/wiki/faq/ctors#static-init-order
-   static const auto w = 480; // GameConfiguration::getInstance().mViewWidth;
-   static const auto h = 270; // GameConfiguration::getInstance().mViewHeight;
+   static const auto w = 640; // GameConfiguration::getInstance().mViewWidth;
+   static const auto h = 360; // GameConfiguration::getInstance().mViewHeight;
 
    static const auto color = sf::Color{174, 194, 224, 30};
    static const auto dropCount = 500;

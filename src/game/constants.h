@@ -37,6 +37,15 @@
 #define RADTODEG 57.295779513082320876f
 #endif
 
+// configured timestep is 1/35
+// frame update timestep is 1/60
+// causes an error
+//   pixel pos: 2808.000000, 8739.437500
+//   pixel pos: 2808.000000, 8740.535156
+// 8739.437500 - 8740.535156 = 1.097656
+// 1 / 1.097656 => 0.91103223596463737272879663574016
+#define TIMESTEP_ERROR 0.91192227210220912883854305376065f
+
 
 enum class DeathReason
 {

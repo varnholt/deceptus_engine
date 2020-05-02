@@ -5,20 +5,26 @@
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "texturepool.h"
 
 #include <iostream>
+
+
+sf::Texture DeathBlock::sTexture;
 
 
 DeathBlock::DeathBlock(GameNode* parent)
  : GameNode(parent)
 {
-
 }
 
 
-void DeathBlock::draw(sf::RenderTarget& /*window*/)
+void DeathBlock::draw(sf::RenderTarget& target)
 {
-
+   for (auto& sprite : mSprites)
+   {
+      target.draw(sprite);
+   }
 }
 
 
@@ -119,21 +125,21 @@ void DeathBlock::update(const sf::Time& dt)
       }
    }
 
-   // configured timestep is 1/35
-   // frame update timestep is 1/60
-   // causes an error
-   //   pixel pos: 2808.000000, 8739.437500
-   //   pixel pos: 2808.000000, 8740.535156
-   // 8739.437500 - 8740.535156 = 1.097656
-   // 1 / 1.097656 => 0.91103223596463737272879663574016
-
-   const float error = 0.91192227210220912883854305376065f;
-
-   // if (mInterpolation.update(mBody->GetPosition()))
    mInterpolation.update(mBody->GetPosition());
    {
-      // PhysicsConfiguration::getInstance().mTimeStep
-      mBody->SetLinearVelocity(mLeverLag * error * (PPM / 60.0f) * mInterpolation.getVelocity());
+      mBody->SetLinearVelocity(mLeverLag * TIMESTEP_ERROR * (PPM / 60.0f) * mInterpolation.getVelocity());
+   }
+
+   for (auto i = 0u; i < mSprites.size(); i++)
+   {
+      mSprites[i].setTextureRect(
+         sf::IntRect(
+            mOffsets[i].x * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
+            mOffsets[i].x * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
+            PIXELS_PER_TILE,
+            PIXELS_PER_TILE
+         )
+      );
    }
 
    for (auto& sprite : mSprites)
@@ -146,8 +152,21 @@ void DeathBlock::update(const sf::Time& dt)
 }
 
 
-void DeathBlock::setup(TmxObject *tmxObject, const std::shared_ptr<b2World>& world)
+void DeathBlock::setup(
+   TmxObject *tmxObject,
+   const std::shared_ptr<b2World>& world
+)
 {
+   if (sTexture.getSize().x == 0)
+   {
+      sTexture = *TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
+   }
+
+   for (auto& sprite : mSprites)
+   {
+      sprite.setTexture(sTexture);
+   }
+
    std::shared_ptr<DeathBlock> deathBlock = std::make_shared<DeathBlock>(nullptr);
 
    setupBody(world);

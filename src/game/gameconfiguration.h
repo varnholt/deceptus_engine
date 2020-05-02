@@ -5,10 +5,10 @@
 
 struct GameConfiguration
 {
-   int32_t mVideoModeWidth = 960;
-   int32_t mVideoModeHeight = 540;
-   int32_t mViewWidth = 480;
-   int32_t mViewHeight = 270;
+   int32_t mVideoModeWidth = 1280;
+   int32_t mVideoModeHeight = 720;
+   int32_t mViewWidth = 640;
+   int32_t mViewHeight = 360;
    bool mFullscreen = false;
    float mViewScaleWidth = 1.0f;
    float mViewScaleHeight = 1.0f;

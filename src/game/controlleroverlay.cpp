@@ -16,6 +16,9 @@ ControllerOverlay::ControllerOverlay()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/controller.psd");
 
+   mTextureSize.x = psd.getWidth();
+   mTextureSize.y = psd.getHeight();
+
    for (const auto& layer : psd.getLayers())
    {
       auto tmp = std::make_shared<Layer>();
@@ -46,7 +49,7 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // draw layers
    auto windowView = sf::View(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   windowView.move(-385, -210);
+   windowView.move(-w + mTextureSize.x + 10, -h + mTextureSize.y + 10);
    window.setView(windowView);
 
    auto controller_bg = mLayers["controller_bg"];
