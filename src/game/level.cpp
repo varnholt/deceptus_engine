@@ -393,9 +393,9 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "death_blocks")
             {
-               auto box = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
-               box->setup(tmxObject, mWorld);
-               mDeathBlocks.push_back(box);
+               auto deathBlock = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
+               deathBlock->setup(tmxObject, mWorld);
+               mDeathBlocks.push_back(deathBlock);
             }
             else if (objectGroup->mName == "checkpoints")
             {
