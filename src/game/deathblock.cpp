@@ -52,21 +52,11 @@ void DeathBlock::draw(sf::RenderTarget& target)
 //    4: 1, 2
 
 
-enum SpikeOrientation
-{
-   Up     = 0,
-   Left   = 1,
-   Center = 2,
-   Right  = 3,
-   Down   = 4
-};
-
-
 //-----------------------------------------------------------------------------
 void DeathBlock::setupTransform()
 {
-   auto x = mTilePosition.x * PIXELS_PER_TILE / PPM;
-   auto y = mTilePosition.y * PIXELS_PER_TILE / PPM;
+   auto x = mPixelPosition.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
+   auto y = mPixelPosition.y / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -77,7 +67,7 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
    b2PolygonShape polygonShape;
 
    auto sizeX = PIXELS_PER_TILE / PPM;
-   auto sizeY = 0.5f * PIXELS_PER_TILE / PPM;
+   auto sizeY = PIXELS_PER_TILE / PPM;
 
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(0,     0);
@@ -100,7 +90,7 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
 }
 
 
-void DeathBlock::update(const sf::Time& dt)
+void DeathBlock::updateLeverLag(const sf::Time& dt)
 {
    if (!isEnabled())
    {
@@ -124,6 +114,12 @@ void DeathBlock::update(const sf::Time& dt)
          mLeverLag = 1.0f;
       }
    }
+}
+
+
+void DeathBlock::update(const sf::Time& dt)
+{
+   updateLeverLag(dt);
 
    mInterpolation.update(mBody->GetPosition());
    {
@@ -135,25 +131,23 @@ void DeathBlock::update(const sf::Time& dt)
       mSprites[i].setTextureRect(
          sf::IntRect(
             mOffsets[i].x * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
-            mOffsets[i].x * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
+            mOffsets[i].y * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
             PIXELS_PER_TILE,
             PIXELS_PER_TILE
          )
       );
-   }
 
-   for (auto& sprite : mSprites)
-   {
-      auto x = mBody->GetPosition().x * PPM + PIXELS_PER_TILE;
-      auto y = mBody->GetPosition().y * PPM + PIXELS_PER_TILE;
+      // need to move by one tile because the center is not 0, 0 but -24, -24
+      auto x = mBody->GetPosition().x * PPM + mOffsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      auto y = mBody->GetPosition().y * PPM + mOffsets[i].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
 
-      sprite.setPosition(x, y);
+      mSprites[i].setPosition(x, y);
    }
 }
 
 
 void DeathBlock::setup(
-   TmxObject *tmxObject,
+   TmxObject* tmxObject,
    const std::shared_ptr<b2World>& world
 )
 {
@@ -167,7 +161,10 @@ void DeathBlock::setup(
       sprite.setTexture(sTexture);
    }
 
-   std::shared_ptr<DeathBlock> deathBlock = std::make_shared<DeathBlock>(nullptr);
+   setZ(ZDepthForegroundMin + 1);
+
+   mPixelPosition.x = tmxObject->mX;
+   mPixelPosition.y = tmxObject->mY;
 
    setupBody(world);
 
@@ -186,8 +183,8 @@ void DeathBlock::setup(
       worldPos.x = x;
       worldPos.y = y;
 
-      deathBlock->mInterpolation.addKey(worldPos, time);
-      deathBlock->mPixelPath.push_back({(pos.x + tmxObject->mX), (pos.y + tmxObject->mY)});
+      mInterpolation.addKey(worldPos, time);
+      mPixelPath.push_back({(pos.x + tmxObject->mX), (pos.y + tmxObject->mY)});
 
       std::cout << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY << std::endl;
 

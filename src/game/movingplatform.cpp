@@ -110,7 +110,6 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
    b2BodyDef bodyDef;
    bodyDef.type = b2_kinematicBody;
    mBody = world->CreateBody(&bodyDef);
-   // mBody->SetGravityScale(0.0f);
 
    setupTransform();
 
@@ -288,7 +287,7 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::update(const sf::Time& dt)
+void MovingPlatform::updateLeverLag(const sf::Time& dt)
 {
    if (!isEnabled())
    {
@@ -312,11 +311,16 @@ void MovingPlatform::update(const sf::Time& dt)
          mLeverLag = 1.0f;
       }
    }
+}
 
-   // if (mInterpolation.update(mBody->GetPosition()))
+
+//-----------------------------------------------------------------------------
+void MovingPlatform::update(const sf::Time& dt)
+{
+   updateLeverLag(dt);
+
    mInterpolation.update(mBody->GetPosition());
    {
-      // PhysicsConfiguration::getInstance().mTimeStep
       mBody->SetLinearVelocity(mLeverLag * TIMESTEP_ERROR * (PPM / 60.0f) * mInterpolation.getVelocity());
    }
 
