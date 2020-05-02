@@ -47,6 +47,7 @@ public:
 private:
 
    void setupTransform();
+   void updateLeverLag(const sf::Time& dt);
 
    double CosineInterpolate(
       double y1,double y2,

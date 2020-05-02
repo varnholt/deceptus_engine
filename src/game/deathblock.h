@@ -37,44 +37,53 @@ class DeathBlock : public GameMechanism, public GameNode
       );
 
 
-private:
+   private:
 
-   void setupTransform();
-   void setupBody(const std::shared_ptr<b2World>& world);
+      enum SpikeOrientation
+      {
+         Up     = 0,
+         Left   = 1,
+         Center = 2,
+         Right  = 3,
+         Down   = 4
+      };
 
-   int32_t mTu = 0;
-   int32_t mTv = 0;
+      void setupTransform();
+      void setupBody(const std::shared_ptr<b2World>& world);
+      void updateLeverLag(const sf::Time& dt);
 
-   //     +---+
-   //     | 0 |
-   // +---+---+---+
-   // | 1 | 2 | 3 |
-   // +---+---+---+
-   //     | 4 |
-   //     +---+
+      int32_t mTu = 0;
+      int32_t mTv = 0;
 
-   std::array<sf::Sprite, 5> mSprites;
-   std::array<int32_t, 5> mStates = {};
-   std::array<sf::Vector2i, 5> mOffsets = {
-      sf::Vector2i{1, 0},
-      sf::Vector2i{0, 1},
-      sf::Vector2i{1, 1},
-      sf::Vector2i{1, 2},
-      sf::Vector2i{2, 1}
-   };
+      //     +---+
+      //     | 0 |
+      // +---+---+---+
+      // | 1 | 2 | 3 |
+      // +---+---+---+
+      //     | 4 |
+      //     +---+
 
-   int32_t mElapsedMs = 0;
+      std::array<sf::Sprite, 5> mSprites;
+      std::array<int32_t, 5> mStates = {};
+      std::array<sf::Vector2i, 5> mOffsets = {
+         sf::Vector2i{1, 0},
+         sf::Vector2i{0, 1},
+         sf::Vector2i{1, 1},
+         sf::Vector2i{1, 2},
+         sf::Vector2i{2, 1}
+      };
 
-   sf::Vector2f mTilePosition;
-   sf::Vector2f mPixelPosition;
-   sf::IntRect mPixelRect;
-   std::vector<sf::Vector2f> mPixelPath;
+      int32_t mElapsedMs = 0;
 
-   b2Body* mBody = nullptr;
-   std::vector<b2Vec2> mPath;
-   PathInterpolation mInterpolation;
-   float mLeverLag = 1.0f; // maybe make them switchable as well?
+      sf::Vector2f mPixelPosition;
+      sf::IntRect mPixelRect;
+      std::vector<sf::Vector2f> mPixelPath;
 
-   static sf::Texture sTexture;
+      b2Body* mBody = nullptr;
+      std::vector<b2Vec2> mPath;
+      PathInterpolation mInterpolation;
+      float mLeverLag = 1.0f; // maybe make them switchable as well?
+
+      static sf::Texture sTexture;
 };
 
