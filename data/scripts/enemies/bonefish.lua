@@ -55,7 +55,7 @@ function update(dt)
    mPrevX = x
 
    -- update transform
-   setTransform(mCenter:getX() + x, mCenter:getY(), 0.0)
+   setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * 3.0) * 5.0, 0.0)
 
    -- update sprite index
    if (spriteIndex ~= mSpriteIndex) then

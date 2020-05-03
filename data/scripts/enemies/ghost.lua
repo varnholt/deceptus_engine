@@ -292,7 +292,7 @@ function setPath(name, table)
          x = value
       else
          y = value
-         print(string.format("v%d: %f, %f", (i - 1) / 2, x, y))
+         -- print(string.format("v%d: %f, %f", (i - 1) / 2, x, y))
          v[(i - 1) / 2] = v2d.Vector2D(x, y)
       end
 
