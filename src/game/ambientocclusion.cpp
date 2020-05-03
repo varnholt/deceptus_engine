@@ -17,6 +17,12 @@ void AmbientOcclusion::load(
   auto texture = (path / (aoBaseFilename + "_ao_tiles.png")).string();
   auto uv = (path / (aoBaseFilename + "_ao_tiles.uv")).string();
 
+  if (!std::filesystem::exists(texture))
+  {
+     std::cerr << "[!] need to create an ambient occlusion map (" << texture << ")" << std::endl;
+     return;
+  }
+
    mTexture.loadFromFile(texture);
 
    auto xi = 0;

@@ -1333,12 +1333,21 @@ void Level::parsePhysicsTiles(
             std::cout << "[x] command succeeded" << std::endl;
          }
       }
+      else
+      {
+         std::cerr << "[!] dumping unoptimized obj (" << pathSolidNotOptimised<< ") failed" << std::endl;
+      }
 
       // fallback to square marched level
       if (!std::filesystem::exists(pathSolidOptimized))
       {
          std::cerr << "[!] could not find " << pathSolidOptimized.string() << ", obj generator failed" << std::endl;
          addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
+      }
+      else
+      {
+         // parse the optimised obj
+         parseObj(layer, ObjectBehavior::ObjectBehaviorSolid, pathSolidOptimized);
       }
    }
 
