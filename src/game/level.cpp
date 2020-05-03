@@ -1324,7 +1324,7 @@ void Level::parsePhysicsTiles(
 
          std::cout << "[x] running cmd: " << cmd << std::endl;
 
-         if (std::system(cmd.c_str()) == 0)
+         if (std::system(cmd.c_str()) != 0)
          {
             std::cerr << "[!] command failed" << std::endl;
          }
