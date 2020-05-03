@@ -89,7 +89,7 @@ void Checkpoint::reached()
       return;
    }
 
-   std::cout << "reached checkpoint: " << mIndex << std::endl;
+   std::cout << "[-] reached checkpoint: " << mIndex << std::endl;
 
    mReached = true;
 

@@ -246,7 +246,6 @@ void Level::loadTmx()
       std::filesystem::remove(path / "physics_path_deadly.csv");
       std::filesystem::remove(path / "physics_path_solid.csv");
       std::filesystem::remove(path / "physics_path_solid.png");
-      std::filesystem::remove(path / "layer_level_solid.obj");
       std::filesystem::remove(path / "layer_level_solid_not_optimised.obj");
       Checksum::writeChecksum(mDescription->mFilename + ".crc", checksumNew);
    }
@@ -584,11 +583,11 @@ void Level::initialize()
       auto pos = checkpoint->calcCenter();
       mStartPosition.x = static_cast<float>(pos.x);
       mStartPosition.y = static_cast<float>(pos.y);
-      std::cout << "move to checkpoint: " << checkpointIndex << std::endl;
+      std::cout << "[-] move to checkpoint: " << checkpointIndex << std::endl;
    }
    else
    {
-      std::cerr << "level doesn't have a start check point set up, falling back to start position" << std::endl;
+      std::cerr << "[!] level doesn't have a start check point set up, falling back to start position" << std::endl;
    }
 
    spawnEnemies();
@@ -1323,7 +1322,16 @@ void Level::parsePhysicsTiles(
                + pathSolidNotOptimised.string() + " "
                + pathSolidOptimized.string();
 
-         std::system(cmd.c_str());
+         std::cout << "[x] running cmd: " << cmd << std::endl;
+
+         if (std::system(cmd.c_str()) == 0)
+         {
+            std::cerr << "[!] command failed" << std::endl;
+         }
+         else
+         {
+            std::cout << "[x] command succeeded" << std::endl;
+         }
       }
 
       // fallback to square marched level
