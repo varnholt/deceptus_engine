@@ -16,6 +16,7 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
 mCycle = 0
+mSpeed = 35.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -59,7 +60,7 @@ function update(dt)
    if (mCycle == 1) then
 
       mElapsed = mElapsed + dt
-      mSpriteIndex = math.floor(mElapsed * 10.0)
+      mSpriteIndex = math.floor(mElapsed * mSpeed)
 
       -- maybe close eyes again if player is out of sight?
       if (mSpriteIndex < 12) then
@@ -97,7 +98,7 @@ function update(dt)
    if (mCycle == 4) then
 
        mElapsed = mElapsed + dt
-       mSpriteIndex = math.floor(mElapsed * 10.0)
+       mSpriteIndex = math.floor(mElapsed * mSpeed)
 
        if (mSpriteIndex < 7) then
           updateSpriteRect(mSpriteIndex * 72, 5 * 72, 72, 72)
