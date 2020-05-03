@@ -114,7 +114,7 @@ void SaveState::deserializeFromFile(const std::string& filename)
 
 void SaveState::serializeToFile(const std::string& filename)
 {
-   std::cout << "saving " << filename << std::endl;
+   std::cout << "[-] saving " << filename << std::endl;
 
    std::string data = serialize();
    std::ofstream file(filename);

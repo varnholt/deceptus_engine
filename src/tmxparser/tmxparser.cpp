@@ -71,7 +71,7 @@ void TmxParser::parse(const std::string &filename)
                   dynamic_cast<TmxLayer*>(element)->mZ = z;
                }
 
-               std::cout << "layer: " << element->mName << " z: " << z << std::endl;
+               // std::cout << "layer: " << element->mName << " z: " << z << std::endl;
 
                mElements.push_back(element);
             }
