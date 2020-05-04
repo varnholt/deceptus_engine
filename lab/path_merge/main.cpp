@@ -5,6 +5,8 @@
 #include <ostream>
 #include <sstream>
 
+#include <math.h>
+
 #include <QPainterPath>
 #include <QPolygonF>
 #include <QTransform>
