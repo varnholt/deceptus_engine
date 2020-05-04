@@ -115,6 +115,11 @@ const std::vector<PathInterpolation::Key>& PathInterpolation::getTrack() const
 
 bool PathInterpolation::update(const b2Vec2& currentPos)
 {
+   if (mTrack.empty())
+   {
+       return false;
+   }
+
    auto reached = false;
 
    // just check whether the speed needs to be updated (i.e. if one of the keys
