@@ -1318,9 +1318,15 @@ void Level::parsePhysicsTiles(
       // dump the tileset into an obj file, optimise that and load it
       if (mPhysics.dumpObj(layer, tileSet, pathSolidNotOptimised))
       {
-         auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
-               + pathSolidNotOptimised.string() + " "
-               + pathSolidOptimized.string();
+#ifdef __linux__
+          auto cmd = std::string("tools/path_merge/path_merge") + " "
+                + pathSolidNotOptimised.string() + " "
+                + pathSolidOptimized.string();
+#else
+          auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
+                + pathSolidNotOptimised.string() + " "
+                + pathSolidOptimized.string();
+#endif
 
          std::cout << "[x] running cmd: " << cmd << std::endl;
 
