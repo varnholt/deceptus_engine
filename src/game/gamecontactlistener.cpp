@@ -229,6 +229,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
         case ObjectTypeMoveableBox:
            break;
+        case ObjectTypeDeathBlock:
+           break;
       }
    }
 
@@ -332,6 +334,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeMoveableBox:
             break;
+          case ObjectTypeDeathBlock:
+             break;
       }
    }
 

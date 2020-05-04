@@ -2,7 +2,6 @@
 
 #include "tmxelement.h"
 
-// Qt
 #include "SFML/Graphics.hpp"
 
 struct TmxChunk : TmxElement

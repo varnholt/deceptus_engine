@@ -13,44 +13,41 @@ TmxChunk::~TmxChunk()
 
 void TmxChunk::deserialize(tinyxml2::XMLElement *element)
 {
-  TmxElement::deserialize(element);
+   TmxElement::deserialize(element);
 
-  mX = element->IntAttribute("x");
-  mY = element->IntAttribute("y");
-  mWidth = element->IntAttribute("width");
-  mHeight = element->IntAttribute("height");
+   mX = element->IntAttribute("x");
+   mY = element->IntAttribute("y");
+   mWidth = element->IntAttribute("width");
+   mHeight = element->IntAttribute("height");
 
-  mData = new int32_t[mWidth * mHeight];
+   mData = new int32_t[mWidth * mHeight];
 
-  std::string data = element->FirstChild()->Value();
+   std::string data = element->FirstChild()->Value();
 
-  // parse csv data and store it in mData array
-  std::stringstream stream(data);
-  std::string line;
-  int y = 0;
+   // parse csv data and store it in mData array
+   std::stringstream stream(data);
+   std::string line;
 
-  while(std::getline(stream, line, '\n'))
-  {
-     TmxTools::trim(line);
-     if (line.empty())
-        continue;
+   auto y = 0;
+   while (std::getline(stream, line, '\n'))
+   {
+      TmxTools::trim(line);
 
-     int x = 0;
-     std::vector<std::string> rowContent = TmxTools::split(line, ',');
+      if (line.empty())
+         continue;
 
-     for (std::string valStr : rowContent)
-     {
-        int val = std::stoi(valStr);
-        mData[y * mWidth + x] = val;
-        x++;
+      auto x = 0;
+      const auto rowContent = TmxTools::split(line, ',');
 
-        // std::cout << val << ", ";
-     }
+      for (const auto& valStr : rowContent)
+      {
+         auto val = std::stoi(valStr);
+         mData[y * mWidth + x] = val;
+         x++;
+      }
 
-     // std::cout << std::endl;
-
-     y++;
-  }
+      y++;
+   }
 }
 
 
