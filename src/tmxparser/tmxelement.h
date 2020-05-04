@@ -18,7 +18,6 @@ struct TmxElement
    TmxElement() = default;
    virtual ~TmxElement() = default;
 
-
    virtual void deserialize(tinyxml2::XMLElement* e);
    std::string mName;
 

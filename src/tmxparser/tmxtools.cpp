@@ -7,39 +7,34 @@
 #include <sstream>
 
 
-TmxTools::TmxTools()
+std::vector<std::string> TmxTools::split(const std::string& points, char splitChar)
 {
-}
-
-
-std::vector<std::string> TmxTools::split(std::string points, char splitChar)
-{
-   std::vector<std::string> pairs;
+   std::vector<std::string> elements;
    std::istringstream parseStream(points);
    std::string tmp;
    while (std::getline(parseStream, tmp, splitChar))
    {
-      pairs.push_back(tmp);
+      elements.push_back(tmp);
    }
 
-   return pairs;
+   return elements;
 }
 
-void TmxTools::ltrim(std::string &s)
+void TmxTools::ltrim(std::string& s)
 {
    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
       return !std::isspace(ch);
    }));
 }
 
-void TmxTools::rtrim(std::string &s)
+void TmxTools::rtrim(std::string& s)
 {
    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
       return !std::isspace(ch);
    }).base(), s.end());
 }
 
-void TmxTools::trim(std::string &s)
+void TmxTools::trim(std::string& s)
 {
    ltrim(s);
    rtrim(s);
@@ -76,4 +71,21 @@ std::array<uint8_t, 4> TmxTools::color(const std::string& c)
    return {r,g,b,a};
 }
 
+std::array<std::string, 2> TmxTools::splitPair(const std::string& points, char splitChar)
+{
+    std::array<std::string, 2> pairs;
+    std::istringstream parseStream(points);
+    std::string tmp;
+    auto i = 0;
+    while (std::getline(parseStream, tmp, splitChar))
+    {
+       pairs[i++] = tmp;
 
+       if (i == 2)
+       {
+          break;
+       }
+    }
+
+    return pairs;
+}

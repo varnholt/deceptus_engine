@@ -4,7 +4,7 @@
 
 struct TmxFrame : TmxElement
 {
-   TmxFrame();
+   TmxFrame() = default;
 
    void deserialize(tinyxml2::XMLElement* e) override;
 
