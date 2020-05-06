@@ -18,7 +18,6 @@ class FixtureNode : public GameNode
       using Variant = std::variant<std::string, int32_t, double>;
 
       FixtureNode(GameNode *parent);
-      virtual ~FixtureNode();
 
       ObjectType getType() const;
       void setType(const ObjectType &type);

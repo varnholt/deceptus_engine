@@ -21,6 +21,7 @@
 Portal::Portal(GameNode* parent)
  : GameNode(parent)
 {
+   setName(typeid(Portal).name());
 }
 
 

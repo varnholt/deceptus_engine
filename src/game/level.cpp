@@ -157,9 +157,10 @@ void Level::initializeTextures()
 
 //-----------------------------------------------------------------------------
 Level::Level()
-  : GameNode(nullptr),
-    mWorld(nullptr)
+  : GameNode(nullptr)
 {
+   setName(typeid(Level).name());
+
    // init world for this level
    b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance().mGravity);
 
@@ -1385,7 +1386,7 @@ const sf::Vector2f &Level::getStartPosition() const
 
 
 //-----------------------------------------------------------------------------
-Level *Level::getCurrentLevel()
+Level* Level::getCurrentLevel()
 {
    return sCurrentLevel;
 }

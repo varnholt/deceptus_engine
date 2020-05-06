@@ -15,6 +15,7 @@ std::set<Bullet*> Bullet::sBullets;
 Bullet::Bullet()
  : FixtureNode(this)
 {
+   setName(typeid(Bullet).name());
    mType = ObjectTypeBullet;
    sBullets.insert(this);
 }

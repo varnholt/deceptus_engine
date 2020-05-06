@@ -114,6 +114,7 @@ ConveyorBelt::ConveyorBelt(
 )
  : FixtureNode(parent)
 {
+   setName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 
    if (sTexture.getSize().x == 0)

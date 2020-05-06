@@ -3,6 +3,7 @@
 MovingSpikeBox::MovingSpikeBox(GameNode* parent)
  : GameNode(parent)
 {
+   setName("MovingSpikeBox");
 }
 
 

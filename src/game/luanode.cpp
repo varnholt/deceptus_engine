@@ -737,14 +737,10 @@ void LuaNode::setupTexture()
 
 
 LuaNode::LuaNode(const std::string &filename)
- : GameNode(nullptr),
+ : GameNode(Level::getCurrentLevel()),
    mScriptName(filename)
 {
-}
-
-
-LuaNode::~LuaNode()
-{
+   setName(typeid(LuaNode).name());
 }
 
 

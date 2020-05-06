@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "globalclock.h"
+#include "level.h"
 #include "player.h"
 #include "physicsconfiguration.h"
 #include "tmxparser/tmximage.h"
@@ -27,6 +28,7 @@ sf::Texture MovingPlatform::sTexture;
 MovingPlatform::MovingPlatform(GameNode *parent)
  : GameNode(parent)
 {
+   setName(typeid(MovingPlatform).name());
 }
 
 
@@ -154,7 +156,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
          if (tileNumber != 0)
          {
             // find matching platform
-            auto movingPlatform = std::make_shared<MovingPlatform>(nullptr);
+            auto movingPlatform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
 
             // std::cout << "creating moving platform at: " << x << ", " << y << std::endl;
 

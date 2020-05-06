@@ -16,6 +16,7 @@ sf::Texture DeathBlock::sTexture;
 DeathBlock::DeathBlock(GameNode* parent)
  : GameNode(parent)
 {
+   setName("DeathBlock");
 }
 
 

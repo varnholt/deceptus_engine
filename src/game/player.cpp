@@ -76,6 +76,8 @@ void Player::setOnBelt(bool onBelt)
 Player::Player(GameNode* parent)
   : GameNode(parent)
 {
+   setName(typeid(Player).name());
+
    sCurrent = this;
 
    mWeaponSystem = std::make_shared<WeaponSystem>();

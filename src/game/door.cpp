@@ -3,6 +3,7 @@
 // game
 #include "constants.h"
 #include "fixturenode.h"
+#include "level.h"
 #include "player.h"
 #include "savestate.h"
 #include "sfmlmath.h"
@@ -24,6 +25,7 @@ sf::Texture Door::sTexture;
 Door::Door(GameNode* parent)
  : GameNode(parent)
 {
+   setName(typeid(Door).name());
 }
 
 
@@ -315,7 +317,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                const auto positionX = static_cast<float>(i * PIXELS_PER_TILE - PIXELS_PER_TILE);
                const auto positionY = static_cast<float>(j * PIXELS_PER_TILE + PIXELS_PER_TILE);
 
-               auto door = std::make_shared<Door>(nullptr);
+               auto door = std::make_shared<Door>(Level::getCurrentLevel());
                doors.push_back(door);
 
                door->mDoorQuad[0].position.x = positionX;
