@@ -12,6 +12,8 @@
 MoveableBox::MoveableBox(GameNode* node)
  : GameNode(node)
 {
+   setName("MoveableBox");
+
    mTexture = TexturePool::getInstance().get("data/level-malte/tilesets/crypts.png");
    mSprite.setTexture(*mTexture.get());
 }

@@ -54,7 +54,7 @@ struct TmxLayer;
 struct TmxTileSet;
 
 
-class Level : GameNode
+class Level : public GameNode
 {
 
 public:
@@ -224,9 +224,8 @@ protected:
    std::map<b2Body*, b2Vec2*> mPointMap;
    std::map<b2Body*, size_t> mPointCountMap;
 
-   std::shared_ptr<b2World> mWorld;
+   std::shared_ptr<b2World> mWorld = nullptr;
 
    static Level* sCurrentLevel;
-   private:
 };
 

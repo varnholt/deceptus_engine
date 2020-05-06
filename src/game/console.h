@@ -24,6 +24,7 @@ class Console
 private:
 
       Console() = default;
+      void showHelp();
 
       bool mActive = false;
       std::string mCommand;

@@ -22,6 +22,11 @@ bool Console::isActive() const
 void Console::setActive(bool active)
 {
    mActive = active;
+
+   if (mActive && mHistory.empty())
+   {
+       showHelp();
+   }
 }
 
 
@@ -39,6 +44,14 @@ void Console::chop()
    }
 
    mCommand.pop_back();
+}
+
+
+void Console::showHelp()
+{
+    mLog.push_back("help:");
+    mLog.push_back("/extra <name> | give extra | available extras: climb");
+    mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100,330");
 }
 
 
@@ -62,9 +75,7 @@ void Console::execute()
 
    if (results.at(0) == "/help")
    {
-      mLog.push_back("help:");
-      mLog.push_back("/extra <name> | give extra | available extras: climb");
-      mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100,330");
+      showHelp();
    }
 
    else if (results.at(0) == "/extra" && results.size() == 2)

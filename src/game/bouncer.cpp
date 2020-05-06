@@ -38,6 +38,8 @@ Bouncer::Bouncer(
 )
  : FixtureNode(parent)
 {
+   setName(typeid(Bouncer).name());
+
    // std::cout << "creating bouncer at " << x << ", " << y << " (" << width << " x " << height << ")" << std::endl;
 
    mRect.left = static_cast<int32_t>(x);

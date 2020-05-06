@@ -32,6 +32,7 @@ static const auto trapTime = 250;
 Spikes::Spikes(GameNode* parent)
  : GameNode(parent)
 {
+   setName(typeid(Spikes).name());
 }
 
 

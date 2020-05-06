@@ -696,7 +696,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Console::getInstance().execute();
       }
-      if (event.key.code == sf::Keyboard::F3)
+      if (event.key.code == sf::Keyboard::F12)
       {
          mDrawConsole = !mDrawConsole;
          Console::getInstance().setActive(mDrawConsole);
@@ -745,28 +745,28 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F3:
       {
-         mDrawConsole = !mDrawConsole;
-         Console::getInstance().setActive(mDrawConsole);
+         mDrawCameraSystem = !mDrawCameraSystem;
          break;
       }
       case sf::Keyboard::F4:
       {
-         mDrawCameraSystem = !mDrawCameraSystem;
+         mDrawDebugInfo = !mDrawDebugInfo;
          break;
       }
       case sf::Keyboard::F5:
       {
-         mDrawDebugInfo = !mDrawDebugInfo;
+         mDrawWeather = !mDrawWeather;
          break;
       }
       case sf::Keyboard::F6:
       {
-         mDrawWeather = !mDrawWeather;
+         mDrawTestScene = ! mDrawTestScene;
          break;
       }
-      case sf::Keyboard::F7:
+      case sf::Keyboard::F12:
       {
-         mDrawTestScene = ! mDrawTestScene;
+         mDrawConsole = !mDrawConsole;
+         Console::getInstance().setActive(mDrawConsole);
          break;
       }
       case sf::Keyboard::F:
