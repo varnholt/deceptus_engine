@@ -5,6 +5,7 @@
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "player.h"
 #include "texturepool.h"
 
 #include <iostream>
@@ -117,6 +118,27 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
    }
 }
 
+void DeathBlock::updateCollision()
+{
+    // check for intersection with player
+    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+
+    auto x = mBody->GetPosition().x * PPM - PIXELS_PER_TILE;
+    auto y = mBody->GetPosition().y * PPM - PIXELS_PER_TILE;
+
+    // want a copy of the original rect
+    for (auto rect : mCollisionRects)
+    {
+        rect.left += x;
+        rect.top += y;
+
+        if (playerRect.intersects(rect))
+        {
+           Player::getCurrent()->damage(100);
+        }
+    }
+}
+
 
 void DeathBlock::update(const sf::Time& dt)
 {
@@ -144,6 +166,8 @@ void DeathBlock::update(const sf::Time& dt)
 
       mSprites[i].setPosition(x, y);
    }
+
+   updateCollision();
 }
 
 
