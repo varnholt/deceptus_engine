@@ -100,6 +100,7 @@ SOURCES += \
    src/game/deathblock.cpp \
    src/game/deathshader.cpp \
    src/game/dialogue.cpp \
+   src/game/enemy.cpp \
    src/game/enemydescription.cpp \
    src/game/forestscene.cpp \
    src/game/camerasystem.cpp \
@@ -248,6 +249,7 @@ HEADERS += \
     src/game/deathblock.h \
     src/game/deathshader.h \
     src/game/dialogue.h \
+    src/game/enemy.h \
     src/game/enemydescription.h \
     src/game/forestscene.h \
     src/game/camerasystem.h \

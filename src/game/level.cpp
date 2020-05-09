@@ -368,6 +368,12 @@ void Level::loadTmx()
             {
                Laser::addObject(tmxObject);
             }
+            else if (objectGroup->mName == "enemies")
+            {
+               Enemy enemy;
+               enemy.parse(tmxObject);
+               mEnemyRects[enemy.mId]=enemy;
+            }
             else if (objectGroup->mName == "fans")
             {
                Fan::addObject(tmxObject);
@@ -505,6 +511,11 @@ void Level::loadTmx()
    Fan::merge();
    mFans = Fan::getFans();
    Lever::merge(mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
+
+   for (auto& enemy : mEnemyRects)
+   {
+      enemy.second.addChain(mWorldChains);
+   }
 
    mMap->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),
@@ -1148,16 +1159,24 @@ void Level::addChainToWorld(
    ObjectBehavior behavior
 )
 {
-   b2BodyDef bodyDef;
-   bodyDef.position.Set(0, 0);
-   bodyDef.type = b2_staticBody;
-   b2Body* body = mWorld->CreateBody(&bodyDef);
+   // it's easier to store all the physics chains in a separate data structure
+   // than to parse the box2d world every time we want those loops.
+   mWorldChains.push_back(chain);
+
    b2ChainShape chainShape;
    chainShape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
+
    b2FixtureDef fixtureDef;
    fixtureDef.density = 0.0f;
    fixtureDef.friction = 0.2f;
    fixtureDef.shape = &chainShape;
+
+   b2BodyDef bodyDef;
+   bodyDef.position.Set(0, 0);
+   bodyDef.type = b2_staticBody;
+
+   b2Body* body = mWorld->CreateBody(&bodyDef);
+
    auto fixture = body->CreateFixture(&fixtureDef);
 
    // deadly objects are deadly :)

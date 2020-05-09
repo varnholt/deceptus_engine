@@ -9,6 +9,7 @@
 #include "camerasystem.h"
 #include "constants.h"
 #include "deathshader.h"
+#include "enemy.h"
 #include "gamenode.h"
 #include "gammashader.h"
 #include "imagelayer.h"
@@ -177,6 +178,7 @@ protected:
    std::vector<std::shared_ptr<TileMap>> mParallaxMaps;
 
    std::vector<std::shared_ptr<LuaNode>> mEnemies;
+   std::map<std::string, Enemy> mEnemyRects;
 
    Atmosphere mAtmosphere;
    Physics mPhysics;
@@ -225,6 +227,7 @@ protected:
    std::map<b2Body*, size_t> mPointCountMap;
 
    std::shared_ptr<b2World> mWorld = nullptr;
+   std::vector<std::vector<b2Vec2>> mWorldChains;
 
    static Level* sCurrentLevel;
 };

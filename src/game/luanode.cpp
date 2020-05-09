@@ -757,14 +757,17 @@ void LuaNode::deserializeEnemyDescription()
       );
    }
 
-   mStartPosition = sf::Vector2f(
-      static_cast<float_t>(mEnemyDescription.mStartPosition.at(0) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
-      static_cast<float_t>(mEnemyDescription.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
-   );
-
-   mPosition = mStartPosition;
-
    mPatrolPath = patrolPath;
+
+   if (!mEnemyDescription.mStartPosition.empty())
+   {
+      mStartPosition = sf::Vector2f(
+         static_cast<float_t>(mEnemyDescription.mStartPosition.at(0) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
+         static_cast<float_t>(mEnemyDescription.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
+      );
+
+      mPosition = mStartPosition;
+   }
 }
 
 
