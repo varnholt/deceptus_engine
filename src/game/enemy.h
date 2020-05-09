@@ -1,0 +1,23 @@
+#pragma once
+
+#include <SFML/Graphics.hpp>
+#include <Box2D/Box2D.h>
+
+#include <array>
+#include <string>
+
+struct TmxObject;
+
+struct Enemy
+{
+   Enemy() = default;
+
+   void parse(TmxObject* object);
+   void addChain(const std::vector<std::vector<b2Vec2> >& chains);
+
+   std::string mId;
+   std::string mName;
+   std::array<sf::Vector2i, 4> mVertices;
+   std::vector<b2Vec2> mChain;
+};
+

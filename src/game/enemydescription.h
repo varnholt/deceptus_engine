@@ -9,6 +9,7 @@ struct EnemyDescription
 {
    EnemyDescription() = default;
 
+   std::string mId;
    std::string mScript;
    std::vector<int> mStartPosition;
    std::vector<int> mPatrolPath;

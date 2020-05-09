@@ -72,6 +72,54 @@
       "script": "skeleton.lua",
       "startposition": [175, 64],
       "patrolpath": [175, 64, 180, 64]
+    },
+    {
+      "script": "critter.lua",
+      "id": "152"
+    },
+    {
+      "script": "critter.lua",
+      "id": "153"
+    },
+    {
+      "script": "critter.lua",
+      "id": "154"
+    },
+    {
+      "script": "critter.lua",
+      "id": "155"
+    },
+    {
+      "script": "critter.lua",
+      "id": "156"
+    },
+    {
+      "script": "critter.lua",
+      "id": "157"
+    },
+    {
+      "script": "critter.lua",
+      "id": "158"
+    },
+    {
+      "script": "critter.lua",
+      "id": "159"
+    },
+    {
+      "script": "critter.lua",
+      "id": "160"
+    },
+    {
+      "script": "critter.lua",
+      "id": "161"
+    },
+    {
+      "script": "critter.lua",
+      "id": "162"
+    },
+    {
+      "script": "critter.lua",
+      "id": "163"
     }
   ]
 }

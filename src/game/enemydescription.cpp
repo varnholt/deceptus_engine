@@ -22,7 +22,16 @@ void to_json(json &j, const EnemyDescription &d)
 void from_json(const json &j, EnemyDescription &d)
 {
    d.mScript = j.at("script").get<std::string>();
-   d.mStartPosition = j.at("startposition").get<std::vector<int>>();
+
+   if (j.find("id") != j.end())
+   {
+      d.mId = j.at("id").get<std::string>();
+   }
+
+   if (j.find("startposition") != j.end())
+   {
+      d.mStartPosition = j.at("startposition").get<std::vector<int>>();
+   }
 
    if (j.find("patrolpath") != j.end())
    {
