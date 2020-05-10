@@ -515,6 +515,7 @@ DISTFILES += \
     data/menus/video.psd \
     data/scripts/enemies/bat.lua \
     data/scripts/enemies/bonefish.lua \
+    data/scripts/enemies/critter.lua \
     data/scripts/enemies/dumb.lua \
     data/config/game.json \
     data/config/physics.json \

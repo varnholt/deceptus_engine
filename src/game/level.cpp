@@ -372,7 +372,7 @@ void Level::loadTmx()
             {
                Enemy enemy;
                enemy.parse(tmxObject);
-               mEnemyRects[enemy.mId]=enemy;
+               mEnemyObjectData[enemy.mId]=enemy;
             }
             else if (objectGroup->mName == "fans")
             {
@@ -512,7 +512,7 @@ void Level::loadTmx()
    mFans = Fan::getFans();
    Lever::merge(mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
 
-   for (auto& enemy : mEnemyRects)
+   for (auto& enemy : mEnemyObjectData)
    {
       enemy.second.addChain(mWorldChains);
    }
@@ -630,7 +630,14 @@ void Level::spawnEnemies()
    {
       auto enemy = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + desc.mScript);
 
-      enemy->setEnemyDescription(desc);
+      const auto& it = mEnemyObjectData.find(desc.mId);
+      if (it != mEnemyObjectData.end())
+      {
+         desc.mPatrolPath = it->second.mPixelChain;
+         desc.mTransformPatrolPath = false;
+      }
+
+      enemy->mEnemyDescription = desc;
       enemy->initialize();
 
       mEnemies.push_back(enemy);
@@ -913,7 +920,7 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
       // enemies
       for (auto& enemy : mEnemies)
       {
-         if (enemy->getZ() == z)
+         if (enemy->mZ == z)
          {
             enemy->draw(target);
          }

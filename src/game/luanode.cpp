@@ -143,7 +143,7 @@ extern "C" int32_t setZ(lua_State* state)
          return 0;
       }
 
-      node->setZ(z);
+      node->mZ = z;
    }
 
    return 0;
@@ -746,18 +746,34 @@ LuaNode::LuaNode(const std::string &filename)
 
 void LuaNode::deserializeEnemyDescription()
 {
-   std::vector<sf::Vector2f> patrolPath;
-   for (auto i = 0u; i < mEnemyDescription.mPatrolPath.size(); i+= 2)
+   if (!mEnemyDescription.mPatrolPath.empty())
    {
-      patrolPath.push_back(
-         sf::Vector2f(
-            static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i)     * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
-            static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i + 1) * PIXELS_PER_TILE)
-         )
-      );
-   }
+      std::vector<sf::Vector2f> patrolPath;
+      for (auto i = 0u; i < mEnemyDescription.mPatrolPath.size(); i+= 2)
+      {
+         // by defautl the path is given is tiles.
+         // if we override it, we're setting pixel positions which are already transformed
+         if (mEnemyDescription.mTransformPatrolPath)
+         {
+            patrolPath.push_back(
+               sf::Vector2f(
+                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i)     * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
+                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i + 1) * PIXELS_PER_TILE)
+               )
+            );
+         }
+         else {
+            patrolPath.push_back(
+               sf::Vector2f(
+                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i)),
+                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i + 1))
+               )
+            );
+         }
+      }
 
-   mPatrolPath = patrolPath;
+      mPatrolPath = patrolPath;
+   }
 
    if (!mEnemyDescription.mStartPosition.empty())
    {
@@ -1285,28 +1301,6 @@ void LuaNode::stopScript()
 
       printf("LuaInterface::StopScript: script stopped\n");
    }
-}
-
-int32_t LuaNode::getZ() const
-{
-   return mZ;
-}
-
-void LuaNode::setZ(const int32_t& z)
-{
-   mZ = z;
-}
-
-
-const EnemyDescription& LuaNode::getEnemyDescription() const
-{
-   return mEnemyDescription;
-}
-
-
-void LuaNode::setEnemyDescription(const EnemyDescription& enemyDescription)
-{
-   mEnemyDescription = enemyDescription;
 }
 
 

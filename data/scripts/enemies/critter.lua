@@ -1,6 +1,16 @@
 ------------------------------------------------------------------------------------------------------------------------
 require "data/scripts/enemies/constants"
+require "data/scripts/enemies/interpolation"
 v2d = require "data/scripts/enemies/vectorial2"
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- interpolation keys
+Key = {x = 0, y = 0, time = 0}
+function Key:create(o)
+  o.parent = self
+  return o
+end
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -45,26 +55,37 @@ mLoop = false
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
 
-   patrolPath = {}
+   mPatrolPath = {}
 
    addShapeRect(0.2, 0.2, -0.05, 0.0)
-   updateSpriteRect(0, 0, 48, 24)
+   updateSpriteRect(0, 0, 48, 48)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
+
+   if (#mPatrolPath == 0) then
+      return
+   end
+
+   setTransform(
+      mPatrolPath[1]:getX(),
+      mPatrolPath[1]:getY(),
+      0.0
+   )
+
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function setPath(name, table)
-   -- print(string.format("Received %d arguments:", #table))
+   print(string.format("Received %s, %d arguments:", name, #table))
 
    local i = 0
    local x = 0.0;
    local y = 0.0;
-   local v = {}
+   local path = {}
 
    for key, value in pairs(table) do
 
@@ -73,14 +94,21 @@ function setPath(name, table)
       else
          y = value
          print(string.format("v%d: %f, %f", (i - 1) / 2, x, y))
-         v[(i - 1) / 2] = v2d.Vector2D(x, y)
+         path[(i - 1) / 2] = v2d.Vector2D(x, y)
       end
 
       i = i + 1
    end
 
    if (name == "patrol_path") then
-      patrolPath = v
+
+      i = 0
+      for key, value in pairs(path) do
+         Key:create{x = value:getX(), y = value:getY(), time = i / #path}
+         i = i + 1
+      end
+
+      mPatrolPath = path
    end
 end
 
