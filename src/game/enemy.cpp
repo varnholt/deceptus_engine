@@ -119,6 +119,9 @@ void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
          mPixelChain.push_back(static_cast<int32_t>(v.x * PPM));
          mPixelChain.push_back(static_cast<int32_t>(v.y * PPM));
       }
+
+      // mPixelChain.push_back(static_cast<int32_t>(mChain[0].x * PPM));
+      // mPixelChain.push_back(static_cast<int32_t>(mChain[0].y * PPM));
    }
 }
 
