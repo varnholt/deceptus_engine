@@ -46,7 +46,7 @@ properties = {
 ------------------------------------------------------------------------------------------------------------------------
 mPosition = v2d.Vector2D(0, 0)
 mCenter = v2d.Vector2D(0, 0)
-mElapsed = math.random(0, 3)
+mElapsed = 0.0
 mSpriteIndex = 0
 mPointsLeft = false
 mLoop = false
@@ -63,17 +63,50 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function updateSprite(p)
+
+   vertical = (mPosition.y - p:getY() > 0.0)
+
+   updateSpriteRect(0, 0, 48, 48)
+
+end
+
+-- 0: right, horizontal, up
+-- 1: left, horizontal, up
+-- 2: right, horizontal, down
+-- 3: left, horizontal, down
+-- 4: right, vertical, down
+-- 5: right, vertical, up
+-- 6: left, vertical, down
+-- 7: left, vertical, up
+--
+-- clockwise
+-- 0 -> 4 -> 3 -> 7
+--
+-- counter clockwise
+-- 1 -> 6 -> 2 -> 5
+
+
+------------------------------------------------------------------------------------------------------------------------
 function update(dt)
 
    if (#mPatrolPath == 0) then
       return
    end
 
+   mElapsed = mElapsed + dt
+
+   p = getValueLinear(mPatrolPath, math.fmod(mElapsed * 0.25, 1.0));
+
    setTransform(
-      mPatrolPath[1]:getX(),
-      mPatrolPath[1]:getY(),
+      p:getX(),
+      p:getY(),
       0.0
    )
+
+   updateSprite(p)
+
+   mPosition = p
 
 end
 
@@ -93,8 +126,9 @@ function setPath(name, table)
          x = value
       else
          y = value
-         print(string.format("v%d: %f, %f", (i - 1) / 2, x, y))
-         path[(i - 1) / 2] = v2d.Vector2D(x, y)
+         index = (i - 1) / 2
+         -- print(string.format("v%d: %f, %f", index, x, y))
+         path[index] = v2d.Vector2D(x, y)
       end
 
       i = i + 1
@@ -102,13 +136,21 @@ function setPath(name, table)
 
    if (name == "patrol_path") then
 
-      i = 0
+      -- create loop and leave space for one extra item at the end
+      i = 1
       for key, value in pairs(path) do
-         Key:create{x = value:getX(), y = value:getY(), time = i / #path}
+         mPatrolPath[i] = Key:create{x = value:getX(), y = value:getY(), time = (i - 1) / (#path + 1)}
          i = i + 1
       end
 
-      mPatrolPath = path
+      -- close the loop
+      value = path[1]
+      mPatrolPath[i]  = Key:create{x = value:getX(), y = value:getY(), time = 1.0}
+   end
+
+   -- debug the loop
+   for key, value in pairs(mPatrolPath) do
+      print(string.format("patrolpath: %d: %f, %f, time: %f", key, value.x, value.y, value.time))
    end
 end
 
