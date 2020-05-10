@@ -4,6 +4,8 @@
 
 #include "scriptproperty.h"
 
+#include <cstdint>
+
 
 struct EnemyDescription
 {
@@ -11,9 +13,10 @@ struct EnemyDescription
 
    std::string mId;
    std::string mScript;
-   std::vector<int> mStartPosition;
-   std::vector<int> mPatrolPath;
+   std::vector<int32_t> mStartPosition;
+   std::vector<int32_t> mPatrolPath;
    std::vector<ScriptProperty> mProperties;
+   bool mTransformPatrolPath = true;
 };
 
 

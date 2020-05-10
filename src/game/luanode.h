@@ -48,10 +48,6 @@ struct LuaNode : public GameNode
    void updatePosition();
    void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
    void updateVelocity();
-   const EnemyDescription& getEnemyDescription() const;
-   void setEnemyDescription(const EnemyDescription& enemyDescription);
-   int32_t getZ() const;
-   void setZ(const int32_t& z);
 
    void luaHit(int32_t damage);
    void luaDie();

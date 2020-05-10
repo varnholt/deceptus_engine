@@ -25,10 +25,10 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   patrolPath = {}
-   patrolIndex = 1
-   patrolEpsilon = 1.0
-   wait = false
+   mPatrolPath = {}
+   mPatrolIndex = 1
+   mPatrolEpsilon = 1.0
+   mWait = false
 
    addShapeCircle(0.12, 0.0, 0.12)   -- radius, x, y
    addShapeRect(0.2, 0.07, 0.0, 0.1) -- width, height, x, y
@@ -42,7 +42,7 @@ end
 function timeout(id)
    -- print(string.format("timeout: %d", id))
    if (id == mPatrolTimer) then
-      wait = false
+      mWait = false
    end
 end
 
@@ -117,26 +117,26 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function patrol()
-   if (wait == true) then
+   if (mWait == true) then
       return
    end
 
-   local key = patrolPath[patrolIndex]
+   local key = mPatrolPath[mPatrolIndex]
    local keyVec = v2d.Vector2D(key:getX(), key:getY())
-   local count = #patrolPath
+   local count = #mPatrolPath
 
-   if     (mPosition:getX() > keyVec:getX() + patrolEpsilon) then
+   if     (mPosition:getX() > keyVec:getX() + mPatrolEpsilon) then
       goLeft()
-   elseif (mPosition:getX() < keyVec:getX() - patrolEpsilon) then
+   elseif (mPosition:getX() < keyVec:getX() - mPatrolEpsilon) then
       goRight()
    else
       -- print("arrived.")
-      wait = true
+      mWait = true
       mKeyPressed = 0
       timer(500, mPatrolTimer)
-      patrolIndex = patrolIndex + 1
-      if (patrolIndex > count) then
-         patrolIndex = 0
+      mPatrolIndex = mPatrolIndex + 1
+      if (mPatrolIndex > count) then
+         mPatrolIndex = 0
       end
    end
 end
@@ -172,7 +172,7 @@ function setPath(name, table)
    end
 
    if (name == "patrol_path") then
-      patrolPath = v
+      mPatrolPath = v
    end
 end
 
