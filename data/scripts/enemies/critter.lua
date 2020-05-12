@@ -1,3 +1,4 @@
+
 ------------------------------------------------------------------------------------------------------------------------
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/interpolation"
@@ -17,7 +18,7 @@ end
 properties = {
    staticBody = true,
    sprite = "data/sprites/enemy_critter.png",
-   damage = 200
+   damage = 20
 }
 
 
@@ -63,14 +64,6 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateSprite(p)
-
-   vertical = (mPosition.y - p:getY() > 0.0)
-
-   updateSpriteRect(0, 0, 48, 48)
-
-end
-
 -- 0: right, horizontal, up
 -- 1: left, horizontal, up
 -- 2: right, horizontal, down
@@ -85,6 +78,33 @@ end
 --
 -- counter clockwise
 -- 1 -> 6 -> 2 -> 5
+function updateSprite(p)
+
+   if (mPosition == nil) then
+      return
+   end
+
+   dx = (p:getX() - mPosition:getX())
+   dy = (p:getY() - mPosition:getY())
+
+   row = 0
+
+   epsilon = 0.001
+
+   if (dx > epsilon) then
+      row = 2
+   elseif  (dx < -epsilon) then
+      row = 1
+   end
+
+   if  (dy > epsilon) then
+      row = 6
+   elseif (dy < -epsilon) then
+      row = 5
+   end
+
+   updateSpriteRect(0, row * 48, 48, 48)
+end
 
 
 ------------------------------------------------------------------------------------------------------------------------
