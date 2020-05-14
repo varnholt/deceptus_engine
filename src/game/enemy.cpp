@@ -103,7 +103,7 @@ void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
 
    if (!assigned)
    {
-      std::cerr << "object " << mId << " (" << mName << ") has invalid chain" << std::endl;
+      // std::cerr << "object " << mId << " (" << mName << ") has invalid chain" << std::endl;
    }
    else
    {

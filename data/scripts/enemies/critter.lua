@@ -46,11 +46,9 @@ properties = {
 
 ------------------------------------------------------------------------------------------------------------------------
 mPosition = v2d.Vector2D(0, 0)
-mOffset = v2d.Vector2D(0, 0)
-mElapsed = 0.0
+mElapsed = math.random(0, 100)
 mSpriteIndex = 0
-mPointsLeft = false
-mLoop = false
+mPointsLeft = math.random() < 0.5
 mSpeed = 1.0
 
 EPSILON = 0.0001
@@ -98,20 +96,30 @@ function updateSprite(p)
 
    row = 0
 
-   if (dx > EPSILON) then
-      row = 2
-      -- mOffset = v2d.Vector2D(0, DISTANCE_FROM_PATH_PX)
-   elseif  (dx < -EPSILON) then
-      row = 1
-      -- mOffset = v2d.Vector2D(0, -DISTANCE_FROM_PATH_PX)
-   end
+   if (mPointsLeft) then
+      if (dx > EPSILON) then
+         row = 2
+      elseif  (dx < -EPSILON) then
+         row = 1
+      end
 
-   if (dy > EPSILON) then
-      row = 6
-      -- mOffset = v2d.Vector2D(-DISTANCE_FROM_PATH_PX, 0)
-   elseif (dy < -EPSILON) then
-      row = 5
-      -- mOffset = v2d.Vector2D(DISTANCE_FROM_PATH_PX, 0)
+      if (dy > EPSILON) then
+         row = 6
+      elseif (dy < -EPSILON) then
+         row = 5
+      end
+   else
+      if (dx > EPSILON) then
+         row = 0
+      elseif  (dx < -EPSILON) then
+         row = 3
+      end
+
+      if (dy > EPSILON) then
+         row = 4
+      elseif (dy < -EPSILON) then
+         row = 7
+      end
    end
 
    updateSpriteRect(0, row * 48, 48, 48)
@@ -127,11 +135,16 @@ function update(dt)
 
    mElapsed = mElapsed + dt
 
-   p = getValueLinear(mPatrolPath, math.fmod(mSpeed * mElapsed * 0.2, 1.0));
+   val = math.fmod(mSpeed * mElapsed * 0.2, 1.0)
+   if (mPointsLeft) then
+      p = getValueLinear(mPatrolPath, val);
+   else
+      p = getValueLinear(mPatrolPath, 1.0 - val);
+   end
 
    setTransform(
-      p:getX() + mOffset:getX(),
-      p:getY() + mOffset:getY(),
+      p:getX(),
+      p:getY(),
       0.0
    )
 
@@ -144,7 +157,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setPath(name, table)
-   print(string.format("Received %s, %d arguments:", name, #table))
+   -- print(string.format("Received %s, %d arguments:", name, #table))
 
    local i = 0
    local x = 0.0;
@@ -188,7 +201,7 @@ function setPath(name, table)
       factorX = (width + 24.0) / width
       factorY = (height + 24.0) / height
 
-      print(string.format("width: %f, height: %f, factorX: %f, factorY: %f", width, height, factorX, factorY))
+      -- print(string.format("width: %f, height: %f, factorX: %f, factorY: %f", width, height, factorX, factorY))
 
       for key, value in pairs(path) do
          value:setX(minX + (value:getX() - minX) * factorX - 12)
@@ -237,6 +250,5 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   -- mPosition = v2d.Vector2D(x, y)
 end
 
