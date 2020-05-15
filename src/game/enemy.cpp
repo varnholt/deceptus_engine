@@ -26,8 +26,11 @@ void Enemy::parse(TmxObject* object)
       h = PIXELS_PER_TILE;
    }
 
-   const auto left = static_cast<int32_t>(object->mX);
-   const auto top = static_cast<int32_t>(object->mY);
+   auto left = static_cast<int32_t>(object->mX);
+   auto top = static_cast<int32_t>(object->mY);
+
+   top -= PIXELS_PER_TILE / 2;
+   left -= PIXELS_PER_TILE / 2;
 
    mRect.top = top;
    mRect.left = left;
