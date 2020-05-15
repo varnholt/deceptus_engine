@@ -965,6 +965,11 @@ void Player::updateAnimation(const sf::Time& dt)
       nextCycle = isPointingRight() ? mIdleRightAligned : mIdleLeftAligned;
    }
 
+   if (mClimbJoint)
+   {
+      // need to support climb animation
+   }
+
    // reset x if animation cycle changed
    if (nextCycle != mCurrentCycle)
    {

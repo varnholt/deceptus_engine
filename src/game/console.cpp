@@ -82,7 +82,7 @@ void Console::execute()
    {
       if (results.at(1) == "climb")
       {
-         Player::getCurrent()->updateClimb();
+         SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillClimb;
          mLog.push_back("given climb extra to player");
       }
    }

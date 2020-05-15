@@ -143,7 +143,7 @@ void to_json(nlohmann::json& j, const SaveState& data)
 
 void from_json(const nlohmann::json& j, SaveState& data)
 {
-   data.mLevelIndex = j.at("levelindex").get<int32_t>();
-   data.mCheckpoint = j.at("checkpoint").get<int32_t>();
+   data.mLevelIndex = j.at("levelindex").get<uint32_t>();
+   data.mCheckpoint = j.at("checkpoint").get<uint32_t>();
    data.mPlayerInfo = j.at("playerinfo").get<PlayerInfo>();
 }
