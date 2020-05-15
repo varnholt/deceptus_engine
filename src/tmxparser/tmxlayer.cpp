@@ -145,8 +145,8 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
     mOffsetY = yMin;
 
     // assume identical chunk sizes
-    int32_t chunkWidth  = chunks.at(0)->mWidth;
-    int32_t chunkHeight = chunks.at(0)->mHeight;
+    const auto chunkWidth  = chunks.at(0)->mWidth;
+    const auto chunkHeight = chunks.at(0)->mHeight;
 
     mWidth  = (xMax - xMin) + chunkWidth;
     mHeight = (yMax - yMin) + chunkHeight;
@@ -165,9 +165,9 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 
     for (const auto c : chunks)
     {
-      for (int y = 0; y < chunkHeight; y++)
+      for (auto y = 0; y < chunkHeight; y++)
       {
-        for (int x = 0; x < chunkWidth; x++)
+        for (auto x = 0; x < chunkWidth; x++)
         {
           // translate chunk coordinates to layer coordinates starting at 0; 0
           auto xl = c->mX + x -xMin;

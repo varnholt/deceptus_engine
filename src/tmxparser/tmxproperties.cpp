@@ -6,10 +6,10 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
 {
    TmxElement::deserialize(element);
 
-   tinyxml2::XMLNode* node = element->FirstChild();
+   auto node = element->FirstChild();
    while (node != nullptr)
    {
-      tinyxml2::XMLElement* subElement = node->ToElement();
+      auto subElement = node->ToElement();
       if (subElement != nullptr)
       {
          TmxElement* element = nullptr;

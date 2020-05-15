@@ -86,7 +86,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function startAttack()
 
-   print("start attack")
+   -- print("start attack")
 
    mAttack = true
    mAttackTime = mElapsed
@@ -116,7 +116,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function startMoveHome()
 
-   print("start move home")
+   -- print("start move home")
 
    mMoveHome = true
    mMoveHomeTime = mElapsed
@@ -140,7 +140,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function startIdle()
-   print("start idle")
+   -- print("start idle")
    mIdle = true
    mIdleTime = mElapsed
    mIdlePosition = mPosition
@@ -149,7 +149,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function startPatrol()
-   print("start patrol")
+   -- print("start patrol")
    mPatrol = true
    mPatrolTime = mElapsed
 end
@@ -163,7 +163,7 @@ function idle()
    setTransform(mIdlePosition:getX(), mIdlePosition:getY() + mTransformY, 0.0)
 
    if (time > 1.0) then
-      print("stop idle")
+      -- print("stop idle")
       mIdle = false
    end
 end
@@ -178,7 +178,7 @@ function moveHome()
    setTransform(p:getX(), p:getY(), 0.0)
 
    if (time > 1.0) then
-      print("stop move home")
+      -- print("stop move home")
       mMoveHome = false
       startPatrol()
    end
@@ -195,7 +195,7 @@ function attack()
    -- attack move finished, need to locate player again
    if (time > 1.0) then
       mAttack = false
-      print("stop attack")
+      -- print("stop attack")
       startIdle()
    end
 end
@@ -208,7 +208,7 @@ function patrol()
 
    -- is ghost too far away from home, then go home
    if (math.abs(distanceToHomeX) > 10) then
-      print("too far away from home, return home")
+      -- print("too far away from home, return home")
       startMoveHome()
       return
    end
@@ -222,7 +222,7 @@ function patrol()
 
       if (math.abs(distanceToPlayerY) < 5) then
          mPatrol = false
-         print("player in range")
+         -- print("player in range")
          startAttack()
          return
       end
