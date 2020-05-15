@@ -26,6 +26,7 @@ public:
       float mFlickerIntensity = 0.0f;
       float mFlickerSpeed = 0.0f;
       float mFlickerAlphaAmount = 1.0f;
+      float mTimeOffset = 0.0f;
    };
 
    std::vector<std::shared_ptr<LightInstance>> mLights;

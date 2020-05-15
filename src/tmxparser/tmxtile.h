@@ -7,7 +7,7 @@ struct TmxObjectGroup;
 
 struct TmxTile : TmxElement
 {
-   TmxTile();
+   TmxTile() = default;
 
    void deserialize(tinyxml2::XMLElement* e) override;
 

@@ -12,12 +12,14 @@
 #include "savestate.h"
 
 namespace {
-   const auto iconWidth  = 40;
-   const auto iconHeight = 24;
-   const auto quadWidth  = 38;
-   const auto quadHeight = 38;
-   const auto dist = 9.1f;
-   const auto iconQuadDist = (iconWidth - quadWidth);
+   static const auto iconWidth  = 40;
+   static const auto iconHeight = 24;
+   static const auto quadWidth  = 38;
+   static const auto quadHeight = 38;
+   static const auto dist = 10.2f;
+   static const auto iconQuadDist = (iconWidth - quadWidth);
+   static const auto yOffset = 300.0f;
+   static const auto itemCount = 13;
 }
 
 
@@ -88,9 +90,9 @@ void InventoryLayer::draw(sf::RenderTarget &window)
    const sf::Color color = {50, 70, 100, 150};
 
    auto x = dist;
-   auto y = 220;
+   auto y = yOffset + 5.0f;
 
-   for (int i = 0; i < 12; i++)
+   for (int i = 0; i < itemCount; i++)
    {
       sf::Vertex quad[] =
       {
@@ -104,7 +106,7 @@ void InventoryLayer::draw(sf::RenderTarget &window)
       x += quadWidth + dist;
    }
 
-   y = 230;
+   y = yOffset  + 15.0f;
    x = dist;
 
    for (auto item : SaveState::getPlayerInfo().mInventory.getItems())
@@ -116,7 +118,7 @@ void InventoryLayer::draw(sf::RenderTarget &window)
       x += iconWidth + dist - iconQuadDist;
    }
 
-   mCursorPosition.y = 215.0f;
+   mCursorPosition.y = yOffset;
    mCursorSprite.setPosition(mCursorPosition);
    window.draw(mCursorSprite);
 }

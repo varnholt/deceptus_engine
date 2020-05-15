@@ -5,12 +5,6 @@
 #include "tmxobjectgroup.h"
 #include <iostream>
 
-TmxTile::TmxTile()
- : mId(0),
-   mAnimation(nullptr)
-{
-}
-
 
 void TmxTile::deserialize(tinyxml2::XMLElement* element)
 {
@@ -20,10 +14,10 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
 
    // std::cout << "   tile (id: " << mId << ")" << std::endl;
 
-   tinyxml2::XMLNode* node = element->FirstChild();
+   auto node = element->FirstChild();
    while (node != nullptr)
    {
-      tinyxml2::XMLElement* childElement = node->ToElement();
+      auto childElement = node->ToElement();
       if (childElement != nullptr)
       {
          TmxElement* tmp = nullptr;

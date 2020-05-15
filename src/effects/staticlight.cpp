@@ -58,14 +58,14 @@ void StaticLight::onDraw(sf::RenderTarget &/*target*/, sf::RenderStates /*states
 void StaticLight::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
 {
    auto y = 0;
-   for (auto light : mLights)
+   for (auto& light : mLights)
    {
       light->mFlickerAmount =
           light->mFlickerIntensity
         * fbm::fbm(
             fbm::vec2{
               y + time.asSeconds() * light->mFlickerSpeed,
-              y / static_cast<float>(mLights.size())
+              light->mTimeOffset + y / static_cast<float>(mLights.size())
           }
         );
 
@@ -141,6 +141,11 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* 
    auto scaleX = tmxObject->mWidth / light->mTexture.getSize().x;
    auto scaleY = tmxObject->mHeight / light->mTexture.getSize().y;
    light->mSprite.scale(scaleX, scaleY);
+
+   // init each light with a different time offset
+   // probably passing the position itself to FBM would be enough
+   std::srand(static_cast<uint32_t>(tmxObject->mX * tmxObject->mY));
+   light->mTimeOffset = (std::rand() % 100) * 0.01f;
 
    return light;
 }
