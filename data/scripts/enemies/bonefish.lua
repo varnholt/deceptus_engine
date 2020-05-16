@@ -1,3 +1,4 @@
+
 ------------------------------------------------------------------------------------------------------------------------
 require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
@@ -7,7 +8,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    staticBody = true,
    sprite = "data/sprites/enemy_bonefish.png",
-   damage = 200
+   damage = 40
 }
 
 

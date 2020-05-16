@@ -212,32 +212,41 @@ function setPath(name, table)
       length = 0.0
       posPrev = path[1]
 
-      -- create loop and leave space for one extra item at the end
+      -- calc overall loop length
       i = 1
       for key, value in pairs(path) do
-         mPatrolPath[i] = Key:create{x = value:getX(), y = value:getY(), time = (i - 1) / (#path + 1)}
-         i = i + 1
-
-         -- append to length
-         length = length + (value - posPrev):getLength()
+         l = (value - posPrev):getLength()
+         length = length + l
          posPrev = value
       end
 
-      -- close the loop
+      value = path[1]
+      length = length + (value - posPrev):getLength()
+
+      -- create loop and leave space for one extra item at the end
+      posPrev = path[1]
+      i = 1
+      l = 0.0
+      for key, value in pairs(path) do
+
+         l = l + (value - posPrev):getLength()
+         mPatrolPath[i] = Key:create{x = value:getX(), y = value:getY(), time = l / length}
+         i = i + 1
+         posPrev = value
+      end
+
       value = path[1]
       mPatrolPath[i]  = Key:create{x = value:getX(), y = value:getY(), time = 1.0}
-      length = length + (value - posPrev):getLength()
    end
 
    -- the length of 3 tiles next to each other is the default length for the speed computation
    mSpeed = 192 / length
 
-
    -- print(string.format("length: %f, speed: %f", length, mSpeed))
 
    -- debug the loop
    -- for key, value in pairs(mPatrolPath) do
-   --   print(string.format("patrolpath: %d: %f, %f, time: %f", key, value.x, value.y, value.time))
+   --    print(string.format("patrolpath: %d: %f, %f, time: %f", key, value.x, value.y, value.time))
    -- end
 end
 

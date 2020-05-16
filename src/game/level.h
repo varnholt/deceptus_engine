@@ -230,5 +230,7 @@ protected:
    std::vector<std::vector<b2Vec2>> mWorldChains;
 
    static Level* sCurrentLevel;
+   private:
+   void loadCheckpoint();
 };
 
