@@ -50,7 +50,7 @@ void Console::chop()
 void Console::showHelp()
 {
     mLog.push_back("help:");
-    mLog.push_back("/extra <name> | give extra | available extras: climb");
+    mLog.push_back("/extra <name> | give extra | available extras: climb, dash");
     mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100,330");
 }
 
@@ -85,8 +85,12 @@ void Console::execute()
          SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillClimb;
          mLog.push_back("given climb extra to player");
       }
+      else if (results.at(1) == "dash")
+      {
+         SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillDash;
+         mLog.push_back("given dash extra to player");
+      }
    }
-
    else if (results.at(0) == "/tp" && results.size() == 3)
    {
       auto x = std::atoi(results.at(1).c_str());

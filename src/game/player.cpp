@@ -2135,6 +2135,11 @@ void Player::resetDash()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
+   if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillDash))
+   {
+      return;
+   }
+
    // don't allow a new dash move inside water
    if (isInWater())
    {

@@ -13,6 +13,21 @@
 #include <iostream>
 #include <math.h>
 
+namespace
+{
+   std::string replaceAll(std::string str, const std::string& from, const std::string& to)
+   {
+      size_t start_pos = 0;
+      while((start_pos = str.find(from, start_pos)) != std::string::npos)
+      {
+         str.replace(start_pos, from.length(), to);
+         start_pos += to.length();
+      }
+      return str;
+   }
+}
+
+
 std::unique_ptr<MessageBox> MessageBox::sActive;
 MessageBox::LayoutProperties MessageBox::sDefaultProperties;
 bool MessageBox::sInitialized = false;
@@ -311,6 +326,8 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
          layer->draw(window, states);
       }
    }
+
+   replaceAll(sActive->mMessage, "[br]", "\n");
 
    if (sActive->mProperties.mAnimate)
    {

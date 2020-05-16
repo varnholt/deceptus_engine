@@ -15,7 +15,8 @@ public:
    enum Skill
    {
       SkillClimb = 0x01,
-      SkillInvulnerable = 0x02
+      SkillDash = 0x02,
+      SkillInvulnerable = 0x04
    };
 
    int32_t mSkills = 0;

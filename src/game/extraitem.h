@@ -23,6 +23,7 @@ struct ExtraItem : public GameNode
       KeyYellow = 65,
       KeyBlue   = 66,
       KeyGreen  = 67,
+      Dash      = 80,
    };
 
    bool mActive = true;
