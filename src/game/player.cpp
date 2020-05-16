@@ -106,6 +106,8 @@ void Player::initialize()
    // none of the player animations are managed by the animation pool, they're just paused when finished
    mIdleRightAligned        = AnimationPool::getInstance().add("player_idle_right_aligned",         0.0f, 0.0f, true, false);
    mIdleLeftAligned         = AnimationPool::getInstance().add("player_idle_left_aligned",          0.0f, 0.0f, true, false);
+   mSwimRightAligned        = AnimationPool::getInstance().add("player_swim_right_aligned",         0.0f, 0.0f, true, false);
+   mSwimLeftAligned         = AnimationPool::getInstance().add("player_swim_left_aligned",          0.0f, 0.0f, true, false);
    mRunRightAligned         = AnimationPool::getInstance().add("player_run_right_aligned",          0.0f, 0.0f, true, false);
    mRunLeftAligned          = AnimationPool::getInstance().add("player_run_left_aligned",           0.0f, 0.0f, true, false);
    mDashRightAligned        = AnimationPool::getInstance().add("player_dash_right_aligned",         0.0f, 0.0f, true, false);
@@ -127,6 +129,8 @@ void Player::initialize()
 
    mAnimations.push_back(mIdleRightAligned);
    mAnimations.push_back(mIdleLeftAligned);
+   mAnimations.push_back(mSwimRightAligned);
+   mAnimations.push_back(mSwimLeftAligned);
    mAnimations.push_back(mRunRightAligned);
    mAnimations.push_back(mRunLeftAligned);
    mAnimations.push_back(mDashRightAligned);
@@ -962,7 +966,7 @@ void Player::updateAnimation(const sf::Time& dt)
    // swimming - no animation provided yet.
    if (isInWater())
    {
-      nextCycle = isPointingRight() ? mIdleRightAligned : mIdleLeftAligned;
+      nextCycle = isPointingRight() ? mSwimRightAligned : mSwimLeftAligned;
    }
 
    if (mClimbJoint)

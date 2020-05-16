@@ -18,26 +18,28 @@
 
 namespace
 {
-   static const int32_t blockSize = 16;
+   static const auto blockSize = 16;
+   static const auto yRange = 2;
+   static const auto xRange = 3;
 }
 
 
 bool TileMap::isVisible() const
 {
-  return mVisible;
+   return mVisible;
 }
 
 
 void TileMap::setVisible(bool visible)
 {
-  mVisible = visible;
+   mVisible = visible;
 }
 
 
 bool TileMap::load(
-    TmxLayer* layer,
-    TmxTileSet* tileSet,
-    const std::filesystem::path& basePath
+   TmxLayer* layer,
+   TmxTileSet* tileSet,
+   const std::filesystem::path& basePath
 )
 {
    if (tileSet == nullptr)
@@ -251,9 +253,6 @@ void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
    int32_t bx = (pos.x / PIXELS_PER_TILE) / blockSize;
    int32_t by = (pos.y / PIXELS_PER_TILE) / blockSize;
 
-   int32_t yRange = 2;
-   int32_t xRange = 2;
-
    for (auto iy = by - yRange; iy < by + yRange; iy++)
    {
       auto yIt = mVerticesStaticBlocks.find(iy);
@@ -328,8 +327,6 @@ void TileMap::hideTile(int x, int y)
       }
    }
 }
-
-
 
 //   // if no animation is available, just store the tile in the static buffer
 //

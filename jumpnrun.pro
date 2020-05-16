@@ -34,35 +34,42 @@ win32 {
 }
 
 linux {
-    QMAKE_CXXFLAGS += -std=c++17
-    QMAKE_CXXFLAGS += -lc++fs
-    QMAKE_CXXFLAGS += -Wno-multichar
+   QMAKE_CXXFLAGS += -std=c++17
+   QMAKE_CXXFLAGS += -lc++fs
+   QMAKE_CXXFLAGS += -Wno-multichar
 }
+
+# openmp support
+# msvc:QMAKE_CXXFLAGS_RELEASE += /openmp
+# QMAKE_CXXFLAGS += -openmp
 
 
 win32 {
-    LIBS += -Llib64
-    LIBS += -LSDL\lib\x64
-    LIBS += -lSDL2
-    LIBS += -lglu32
-    LIBS += -lopengl32
-    LIBS += -llua53
+   LIBS += -Llib64
 
-    # sfml
-    LIBS += -Lsfml\lib
-    CONFIG(release, debug|release) {
+   LIBS += -LSDL\lib\x64
+   LIBS += -lSDL2
+   LIBS += -lglu32
+   LIBS += -lopengl32
+   LIBS += -llua53
+
+   # LIBS += -lvcomp
+
+   # sfml
+   LIBS += -Lsfml\lib
+   CONFIG(release, debug|release) {
       LIBS += -lsfml-audio
       LIBS += -lsfml-graphics
       LIBS += -lsfml-network
       LIBS += -lsfml-window
       LIBS += -lsfml-system
-    } else {
+   } else {
       LIBS += -lsfml-audio-d
       LIBS += -lsfml-graphics-d
       LIBS += -lsfml-network-d
       LIBS += -lsfml-window-d
       LIBS += -lsfml-system-d
-    }
+   }
 }
 
 
