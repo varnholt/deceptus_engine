@@ -111,9 +111,12 @@ void Lever::setPlayerAtLever(bool playerAtLever)
 //-----------------------------------------------------------------------------
 void Lever::updateSprite()
 {
+   const auto left = mDir == -1;
+   static const auto leftOffset = (SPRITES_PER_ROW - 1) * 3 * PIXELS_PER_TILE;
+
    mSprite.setTextureRect({
-      mOffset * 3 * PIXELS_PER_TILE,
-      mDir == -1 ? (2 * PIXELS_PER_TILE) : 0,
+      left ? (leftOffset - mOffset * 3 * PIXELS_PER_TILE) : (mOffset * 3 * PIXELS_PER_TILE),
+      left ? (3 * PIXELS_PER_TILE) : 0,
       PIXELS_PER_TILE * 3,
       PIXELS_PER_TILE * 2
    });
