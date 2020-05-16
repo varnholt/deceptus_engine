@@ -116,6 +116,12 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                SaveState::getPlayerInfo().mInventory.add(ItemType::KeyGreen);
                break;
             }
+            case ExtraItem::ExtraSpriteIndex::Dash:
+            {
+               Audio::getInstance()->playSample("powerup.wav");
+               SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillDash;
+               break;
+            }
          }
       }
    }
