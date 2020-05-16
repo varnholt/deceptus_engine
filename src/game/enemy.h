@@ -21,6 +21,6 @@ struct Enemy
    std::array<sf::Vector2i, 4> mVertices;
    std::vector<b2Vec2> mChain;
    std::vector<int32_t> mPixelChain;
-   // std::vector<sf::Vector2f> mPixelChain;
+   bool mHasChain = false;
 };
 

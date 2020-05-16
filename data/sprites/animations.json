@@ -15,6 +15,22 @@
       "origin": [12.0, 12.0],
       "texture": "data/sprites/player.png"
    },
+   "player_swim_right_aligned": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 480],
+      "sprite_count": 1,
+      "frame_durations": [100],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_swim_left_aligned": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 528],
+      "sprite_count": 1,
+      "frame_durations": [100],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
    "player_idle_right_aligned": {
       "frame_size": [72, 48],
       "frame_offset": [0, 0],

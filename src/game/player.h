@@ -280,6 +280,8 @@ private:
 
    std::shared_ptr<Animation> mIdleRightAligned;
    std::shared_ptr<Animation> mIdleLeftAligned;
+   std::shared_ptr<Animation> mSwimRightAligned;
+   std::shared_ptr<Animation> mSwimLeftAligned;
    std::shared_ptr<Animation> mRunRightAligned;
    std::shared_ptr<Animation> mRunLeftAligned;
    std::shared_ptr<Animation> mDashRightAligned;

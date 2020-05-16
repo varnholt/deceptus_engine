@@ -519,17 +519,17 @@ void Game::updateGameState(const sf::Time& dt)
       {
          case DeathReason::TouchesDeadly:
          {
-            std::cout << "dead: touched something deadly" << std::endl;
+            std::cout << "[i] dead: touched something deadly" << std::endl;
             break;
          }
          case DeathReason::TooFast:
          {
-            std::cout << "dead: too fast" << std::endl;
+            std::cout << "[i] dead: too fast" << std::endl;
             break;
          }
          case DeathReason::OutOfHealth:
          {
-            std::cout << "dead: out of health" << std::endl;
+            std::cout << "[i] dead: out of health" << std::endl;
             break;
          }
          case DeathReason::None:

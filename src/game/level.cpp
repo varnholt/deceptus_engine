@@ -181,7 +181,7 @@ Level::Level()
 
    // add raycast light for player
    mPlayerLight = RaycastLight::deserialize(nullptr);
-   mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, 20));
+   mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, 10));
    mRaycastLight->mLights.push_back(mPlayerLight);
 
    mMap = std::make_unique<LevelMap>();

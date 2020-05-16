@@ -53,8 +53,6 @@ void Enemy::parse(TmxObject* object)
 
 void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
 {
-   bool assigned = false;
-
    // a player rect can only overlap with a single chain.
    // this function finds this chain and assigns it.
    for (const auto& chain : chains)
@@ -70,7 +68,7 @@ void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
          if (mRect.contains(v0))
          {
             mChain = chain;
-            assigned = true;
+            mHasChain = true;
             break;
          }
          else
@@ -97,15 +95,16 @@ void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
             {
                // std::cout << "assigned chain to: " << mId << std::endl;
                mChain = chain;
-               assigned = true;
+               mHasChain = true;
                break;
             }
          }
       }
    }
 
-   if (!assigned)
+   if (!mHasChain)
    {
+      // not an error, enemy might just have a fixed position
       // std::cerr << "object " << mId << " (" << mName << ") has invalid chain" << std::endl;
    }
    else

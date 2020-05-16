@@ -8,6 +8,8 @@
 #include <ostream>
 #include <sstream>
 
+// #include <omp.h>
+
 namespace {
  static const std::vector<std::string> verbs{
        "crashing", "landing", "communicating", "deserving", "squealing", "testing", "attaching", "flushing", "starting",
