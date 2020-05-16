@@ -57,7 +57,7 @@ void Console::showHelp()
 
 void Console::execute()
 {
-   std::cout << "process command: " << mCommand << std::endl;
+   std::cout << "[i] process command: " << mCommand << std::endl;
 
    // not sure what's the best behavior, probably just staying active until deactivated
    // mActive = false;

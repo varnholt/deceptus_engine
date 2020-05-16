@@ -131,7 +131,7 @@ function playerMovedTo(x, y)
 
    if (not mTriggered and distanceToPlayer < 20.0) then
       mTriggered = true
-      timer(2000, mDetonationTimer)
+      timer(500, mDetonationTimer)
    end
 end
 

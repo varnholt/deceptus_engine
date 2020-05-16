@@ -587,6 +587,15 @@ void Level::initialize()
    mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
    mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 
+   loadCheckpoint();
+
+   spawnEnemies();
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::loadCheckpoint()
+{
    auto checkpointIndex = SaveState::getCurrent().mCheckpoint;
    auto checkpoint = Checkpoint::getCheckpoint(checkpointIndex);
 
@@ -601,8 +610,6 @@ void Level::initialize()
    {
       std::cerr << "[!] level doesn't have a start check point set up, falling back to start position" << std::endl;
    }
-
-   spawnEnemies();
 }
 
 

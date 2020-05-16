@@ -45,7 +45,6 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
-   // auto tilesize = sf::Vector2u(static_cast<uint32_t>(tileSet->mTileWidth), static_cast<uint32_t>(tileSet->mTileHeight));
    auto tiles    = layer->mData;
    auto width    = layer->mWidth;
    auto height   = layer->mHeight;
@@ -65,7 +64,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
             if (tileId == 33)
             {
-               // std::cout << "lever at " << i << ", " << j << std::endl;
+               std::cout << "lever at " << i << ", " << j << std::endl;
 
                auto lever = std::make_shared<Lever>();
 
