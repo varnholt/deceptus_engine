@@ -16,8 +16,8 @@ public:
 
     using CheckpointCallback = std::function<void(void)>;
 
-    static Checkpoint* getCheckpoint(int32_t index);
-    static int32_t add(TmxObject*);
+    static Checkpoint* getCheckpoint(uint32_t index);
+    static uint32_t add(TmxObject*);
     static void update();
     static void resetAll();
 
@@ -30,7 +30,7 @@ private:
 
     Checkpoint() = default;
 
-    int32_t mIndex = 0;
+    uint32_t mIndex = 0;
     std::string mName;
 
     sf::IntRect mRect;

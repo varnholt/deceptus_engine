@@ -1,5 +1,6 @@
 #include "console.h"
 
+#include "checkpoint.h"
 #include "extramanager.h"
 #include "player.h"
 #include "playerinfo.h"
@@ -52,6 +53,7 @@ void Console::showHelp()
     mLog.push_back("help:");
     mLog.push_back("/extra <name> | give extra | available extras: climb, dash");
     mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100,330");
+    mLog.push_back("/cp <n> | jump to checkpoint | example: /cp 0");
 }
 
 
@@ -101,6 +103,26 @@ void Console::execute()
       mLog.push_back(os.str());
 
       Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
+   }
+   else if (results.at(0) == "/cp" && results.size() == 2)
+   {
+      auto n = std::atoi(results.at(1).c_str());
+
+      std::ostringstream os;
+
+      auto checkpoint = Checkpoint::getCheckpoint(n);
+      if (checkpoint)
+      {
+         auto pos = checkpoint->calcCenter();
+         os << "jumped to checkpoint " << n << std::endl;
+         Player::getCurrent()->setBodyViaPixelPosition(pos.x,  pos.y);
+      }
+      else
+      {
+         os << "invalid checkpoint " << std::endl;
+      }
+
+      mLog.push_back(os.str());
    }
    else if (results.at(0) == "/iddqd")
    {
