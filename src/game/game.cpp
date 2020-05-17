@@ -133,7 +133,7 @@ void Game::initializeWindow()
    mWindow->setVerticalSyncEnabled(gameConfig.mVSync);
    mWindow->setFramerateLimit(60);
    mWindow->setKeyRepeatEnabled(false);
-   // mWindow->setMouseCursorVisible(false);
+   mWindow->setMouseCursorVisible(!gameConfig.mFullscreen);
 
    // reset render textures if needed
    if (mWindowRenderTexture != nullptr)
@@ -547,6 +547,7 @@ void Game::updateGameState(const sf::Time& dt)
       if (mDeathWaitTimeMs > 2500)
       {
          // std::cout << "reload" << std::endl;
+         SaveState::deserializeFromFile();
          mPlayer->reset();
          loadLevel();
       }

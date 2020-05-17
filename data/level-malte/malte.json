@@ -11,36 +11,14 @@
     {"script": "cannon.lua","startposition": [111, 273], "properties": [{"name": "alignment", "value": "right"}]},
     {"script": "cannon.lua","startposition": [111, 285], "properties": [{"name": "alignment", "value": "right"}]},
     {"script": "cannon.lua","startposition": [255, 46], "properties": [{"name": "alignment", "value": "left"}]},
-    {
-      "script": "critter.lua",
-      "id": "257"
-    },
-    {
-      "script": "critter.lua",
-      "id": "258"
-    },
-    {
-      "script": "critter.lua",
-      "id": "259"
-    },
-    {
-      "script": "critter.lua",
-      "id": "260"
-    },
-    {
-      "script": "critter.lua",
-      "id": "262"
-    },
-    {
-      "script": "watermine.lua",
-      "startposition": [196, 252],
-      "properties": [{"name": "size", "value": "large"}]
-    },
-    {
-      "script": "watermine.lua",
-      "startposition": [205, 251],
-      "properties": [{"name": "size", "value": "large"}]
-    },    
+    {"script": "critter.lua","id": "257"},
+    {"script": "critter.lua","id": "258"},
+    {"script": "critter.lua","id": "259"},
+    {"script": "critter.lua","id": "260"},
+    {"script": "critter.lua","id": "262"},
+    {"script": "watermine.lua", "startposition": [196, 252], "properties": [{"name": "size", "value": "large"}]},
+    {"script": "watermine.lua", "startposition": [204, 251], "properties": [{"name": "size", "value": "large"}]},    
+    {"script": "landmine.lua", "startposition": [211, 245], "properties": [{"name": "alignment", "value": "down"}]},
     {"script": "landmine.lua", "startposition": [292, 166], "properties": [{"name": "alignment", "value": "down"}]},
     {"script": "landmine.lua", "startposition": [298, 163], "properties": [{"name": "alignment", "value": "down"}]},
     {"script": "landmine.lua", "startposition": [291, 160], "properties": [{"name": "alignment", "value": "down"}]},
@@ -52,6 +30,38 @@
     {"script": "landmine.lua", "startposition": [300, 143], "properties": [{"name": "alignment", "value": "down"}]},
     {"script": "bonefish.lua", "startposition": [174, 248], "patrolpath": [184, 248]},
     {"script": "bonefish.lua", "startposition": [183, 252], "patrolpath": [173, 252]},
-    {"script": "dumb.lua","startposition": [114, 297], "patrolpath": [123, 297]}
+    {"script": "dumb.lua","startposition": [114, 297], "patrolpath": [123, 297]},
+    {"script": "klonk.lua","startposition": [225, 142]},
+    {"script": "klonk.lua","startposition": [226, 142]},
+    {"script": "klonk.lua","startposition": [227, 142]},
+    {"script": "klonk.lua","startposition": [228, 142]},
+    {"script": "klonk.lua","startposition": [229, 142]},
+    {"script": "klonk.lua","startposition": [230, 142]},
+    {"script": "klonk.lua","startposition": [231, 142]},
+    {"script": "klonk.lua","startposition": [232, 142]},
+    {"script": "klonk.lua","startposition": [233, 142]},
+    {"script": "klonk.lua","startposition": [234, 142]},
+    {"script": "klonk.lua","startposition": [235, 142]},
+    {"script": "klonk.lua","startposition": [236, 142]},
+    {"script": "klonk.lua","startposition": [237, 142]},
+    {"script": "klonk.lua","startposition": [238, 142]},
+    {"script": "klonk.lua","startposition": [239, 142]},
+    {"script": "klonk.lua","startposition": [240, 142]},
+    {"script": "klonk.lua","startposition": [241, 142]},
+    {"script": "klonk.lua","startposition": [242, 142]},
+    {"script": "klonk.lua","startposition": [243, 142]},
+    {"script": "klonk.lua","startposition": [244, 142]},
+    {"script": "klonk.lua","startposition": [245, 142]},
+    {"script": "klonk.lua","startposition": [246, 142]},
+    {"script": "klonk.lua","startposition": [247, 142]},
+    {"script": "klonk.lua","startposition": [248, 142]},
+    {"script": "klonk.lua","startposition": [249, 142]},
+    {"script": "klonk.lua","startposition": [250, 142]},
+    {"script": "klonk.lua","startposition": [251, 142]},
+    {"script": "klonk.lua","startposition": [252, 142]},
+    {"script": "klonk.lua","startposition": [253, 142]},
+    {"script": "klonk.lua","startposition": [254, 142]},
+    {"script": "klonk.lua","startposition": [255, 142]},
+    {"script": "klonk.lua","startposition": [256, 142]}
     ]
 }

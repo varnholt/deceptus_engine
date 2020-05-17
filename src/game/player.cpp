@@ -260,7 +260,10 @@ void Player::setBodyViaPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& target)
 {
-   mWeaponSystem->mSelected->drawBullets(target);
+   if (mWeaponSystem->mSelected)
+   {
+      mWeaponSystem->mSelected->drawBullets(target);
+   }
 
    if (!mVisible)
    {
@@ -1048,7 +1051,7 @@ void Player::applyBeltVelocity(float& desiredVel)
            desiredVel = 0.0f;
          }
          desiredVel *= 2.0f;
-         desiredVel = minimum(desiredVel, getMaxVelocity());
+         desiredVel = std::min(desiredVel, getMaxVelocity());
        }
        else
        {
@@ -1068,7 +1071,7 @@ void Player::applyBeltVelocity(float& desiredVel)
            desiredVel = 0.0f;
          }
          desiredVel *= 2.0f;
-         desiredVel = maximum(desiredVel, -getMaxVelocity());
+         desiredVel = std::max(desiredVel, -getMaxVelocity());
        }
        else
        {
@@ -2357,6 +2360,11 @@ void Player::jump()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::fire()
 {
+   if (!mWeaponSystem->mSelected)
+   {
+      return;
+   }
+
    b2Vec2 dir;
 
    dir.x =
@@ -2412,7 +2420,10 @@ void Player::reset()
    );
 
    SaveState::getPlayerInfo().mExtraTable.mHealth.reset();
-   SaveState::getPlayerInfo().mInventory.resetKeys();
+
+   // resetting any player info apart form the health doesn't make sense
+   // since it's loaded from disk when the player dies
+   // SaveState::getPlayerInfo().mInventory.resetKeys();
 
    // reset bodies passed from the contact listener
    mPlatformBody = nullptr;

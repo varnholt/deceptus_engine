@@ -1,3 +1,4 @@
+
 ------------------------------------------------------------------------------------------------------------------------
 require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
@@ -99,7 +100,7 @@ function collisionWithPlayer()
    if (not mActivated) then
       print("collision with player!")
       mActivated = true
-      timer(2000, mDetonationTimer)
+      timer(1000, mDetonationTimer)
    end
 end
 

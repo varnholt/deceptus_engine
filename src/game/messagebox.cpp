@@ -327,7 +327,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       }
    }
 
-   replaceAll(sActive->mMessage, "[br]", "\n");
+   sActive->mMessage = replaceAll(sActive->mMessage, "[br]", "\n");
 
    if (sActive->mProperties.mAnimate)
    {

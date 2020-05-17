@@ -64,7 +64,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
             if (tileId == 33)
             {
-               std::cout << "lever at " << i << ", " << j << std::endl;
+               // std::cout << "lever at " << i << ", " << j << std::endl;
 
                auto lever = std::make_shared<Lever>();
 
