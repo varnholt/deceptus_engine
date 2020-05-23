@@ -514,32 +514,24 @@ void Player::setWorld(const std::shared_ptr<b2World>& world)
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getMaxVelocity() const
 {
-  auto velocityMax = 0.0f;
+   if (isInWater())
+   {
+      return PhysicsConfiguration::getInstance().mPlayerSpeedMaxWater;
+   }
 
-  if (isInWater())
-  {
-     velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWater;
-  }
-  else
-  {
-     if ((mKeysPressed & KeyPressedRun) || mControllerRunPressed)
-     {
-        velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
-     }
-     else
-     {
-        if (isInAir())
-        {
-           velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxAir;
-        }
-        else
-        {
-           velocityMax = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
-        }
-     }
-  }
-  return velocityMax;
+   if ((mKeysPressed & KeyPressedRun) || mControllerRunPressed)
+   {
+      return PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
+   }
+
+   if (isInAir())
+   {
+      return PhysicsConfiguration::getInstance().mPlayerSpeedMaxAir;
+   }
+
+   return PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
 }
+
 
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isLookingAround() const
@@ -559,51 +551,66 @@ bool Player::isLookingAround() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-float Player::getVelocityFromController(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const
+float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
    auto axisValues = mJoystickInfo.getAxisValues();
-   auto desiredVel = 0.0f;
 
    if (isLookingAround())
    {
       return 0.0f;
    }
 
-   // normalize to -1..1
-   const auto axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-   auto axisLeftXNormalized = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
+   // analogue input normalized to -1..1
+   const auto axisValue = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   auto axisValueNormalized = axisValues[static_cast<size_t>(axisValue)] / 32767.0f;
 
+   // digital input
    const auto hatValue = mJoystickInfo.getHatValues().at(0);
-
    const auto dpadLeftPressed  = hatValue & SDL_HAT_LEFT;
    const auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
 
    if (dpadLeftPressed)
    {
-      axisLeftXNormalized = -1.0f;
+      axisValueNormalized = -1.0f;
    }
    else if (dpadRightPressed)
    {
-      axisLeftXNormalized = 1.0f;
+      axisValueNormalized = 1.0f;
    }
 
-   if (fabs(axisLeftXNormalized) > 0.3f && !isDashActive())
+   // controller is not used, so slow down
+   if (fabs(axisValueNormalized) <= 0.3f)
    {
-      axisLeftXNormalized *= acceleration;
+      return speed.currentVelocity.x * speed.deceleration;
+   }
 
-      if (axisLeftXNormalized < 0.0f)
-      {
-         desiredVel = b2Max(velocity.x + axisLeftXNormalized, -velocityMax);
-      }
-      else
-      {
-         desiredVel = b2Min(velocity.x + axisLeftXNormalized, velocityMax);
-      }
+   axisValueNormalized *= speed.acceleration;
+
+   // checking for the current speed here because even if the player pushes a controller axis
+   // to the left side, it might still dash to the other side with quite a strong impulse.
+   // that would confuse the speed capping and would accelerate to infinity. true story.
+   auto desiredVel = 0.0f;
+   if (speed.currentVelocity.x < 0.0f)
+   {
+      desiredVel = b2Max(speed.currentVelocity.x + axisValueNormalized, -speed.velocityMax);
+
+      // std::cout
+      //    << "desired: " << desiredVel << " "
+      //    << "current: " << speed.currentVelocity.x << " "
+      //    << "axis value: " << axisValueNormalized << " "
+      //    << "max: " << -speed.velocityMax
+      //    << std::endl;
    }
    else
    {
-      // if neither x axis nor dpad is used, trigger slowdown
-      desiredVel = velocity.x * slowdown;
+      desiredVel = b2Min(speed.currentVelocity.x + axisValueNormalized, speed.velocityMax);
+
+      // std::cout
+      //    << "desired: " << desiredVel << " "
+      //    << "current: " << speed.currentVelocity.x << " "
+      //    << "axis value: " << axisValueNormalized << " "
+      //    << "max: " << speed.velocityMax
+      //    << std::endl;
    }
 
    return desiredVel;
@@ -766,23 +773,23 @@ void Player::updatePlayerOrientation()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-float Player::getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const
+float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
-   float desiredVel = 0.0f;
-
    if (mKeysPressed & KeyPressedLook)
    {
-      return desiredVel;
+      return 0.0f;
    }
+
+   float desiredVel = 0.0f;
 
    if (mKeysPressed & KeyPressedLeft)
    {
-      desiredVel = b2Max(velocity.x - acceleration, -velocityMax);
+      desiredVel = b2Max(speed.currentVelocity.x - speed.acceleration, -speed.velocityMax);
    }
 
    if (mKeysPressed & KeyPressedRight)
    {
-      desiredVel = b2Min(velocity.x + acceleration, velocityMax);
+      desiredVel = b2Min(speed.currentVelocity.x + speed.acceleration, speed.velocityMax);
    }
 
    // slowdown as soon as
@@ -794,14 +801,14 @@ float Player::getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity,
       && (!(mKeysPressed & KeyPressedRight));
 
    const auto velocityOppositeToGivenDir =
-         (velocity.x < -0.01f && mKeysPressed & KeyPressedRight)
-      || (velocity.x >  0.01f && mKeysPressed & KeyPressedLeft);
+         (speed.currentVelocity.x < -0.01f && mKeysPressed & KeyPressedRight)
+      || (speed.currentVelocity.x >  0.01f && mKeysPressed & KeyPressedLeft);
 
    const auto noMovement = (fabs(desiredVel) < 0.0001f);
 
    if (noMovementToLeftOrRight || velocityOppositeToGivenDir || noMovement)
    {
-      desiredVel = velocity.x * slowdown;
+      desiredVel = speed.currentVelocity.x * speed.deceleration;
    }
 
    return desiredVel;
@@ -1002,31 +1009,39 @@ bool Player::isControllerUsed() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getDesiredVelocity() const
 {
-  const auto acceleration = getAcceleration();
-  const auto deceleration = getDeceleration();
+   const auto acceleration = getAcceleration();
+   const auto deceleration = getDeceleration();
 
-  const auto velocity = mBody->GetLinearVelocity();
-  const auto velocityMax = getMaxVelocity();
+   const auto currentVelocity = mBody->GetLinearVelocity();
+   const auto velocityMax = getMaxVelocity();
 
-  const auto desiredVel = getDesiredVelocity(velocityMax, velocity, deceleration, acceleration);
-  return desiredVel;
+   PlayerSpeed speed
+   {
+      currentVelocity,
+      velocityMax,
+      acceleration,
+      deceleration
+   };
+
+   const auto desiredVel = getDesiredVelocity(speed);
+   return desiredVel;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-float Player::getDesiredVelocity(float velocityMax, const b2Vec2& velocity, float deceleration, float acceleration) const
+float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 {
   auto desiredVel = 0.0f;
 
   if (isControllerUsed())
   {
      // controller
-     desiredVel = getVelocityFromController(velocityMax, velocity, deceleration, acceleration);
+     desiredVel = getVelocityFromController(speed);
   }
   else
   {
      // keyboard
-     desiredVel = getVelocityFromKeyboard(velocityMax, velocity, deceleration, acceleration);
+     desiredVel = getVelocityFromKeyboard(speed);
   }
 
   return desiredVel;

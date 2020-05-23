@@ -62,6 +62,14 @@ class Player : public GameNode
      Right
    };
 
+   struct PlayerSpeed
+   {
+      b2Vec2 currentVelocity;
+      float velocityMax = 0.0f;
+      float acceleration = 0.0f;
+      float deceleration = 0.0f;
+   };
+
 
 public:
 
@@ -196,9 +204,9 @@ private:
    void removeClimbJoint();
    bool edgeMatchesMovement(const b2Vec2 &edgeDir);
    float getMaxVelocity() const;
-   float getVelocityFromController(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const;
-   float getVelocityFromKeyboard(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const;
-   float getDesiredVelocity(float velocityMax, const b2Vec2& velocity, float slowdown, float acceleration) const;
+   float getVelocityFromController(const PlayerSpeed& speed) const;
+   float getVelocityFromKeyboard(const PlayerSpeed& speed) const;
+   float getDesiredVelocity(const PlayerSpeed& speed) const;
    float getDesiredVelocity() const;
    float getDeceleration() const;
    float getAcceleration() const;

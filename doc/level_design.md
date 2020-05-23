@@ -26,8 +26,8 @@ Object layer: fans
 
 ## Lasers
 
-Tile layer: layers  
-Object layer: layers
+Tile layer: lasers  
+Object layer: lasers
 
 Have one rectangle per 'laser unit'.  
 Snap rectangle to tiles.
@@ -42,8 +42,9 @@ Properties
 
 ## Platforms
 
-Tile layer: playforms  
-Object layers: platform_rails
+Tile layer: platforms  
+Rail layer: platform_rails  
+Object layer: platforms
 
 ## Portals
 
