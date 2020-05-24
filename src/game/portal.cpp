@@ -203,6 +203,11 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
 {
    // std::cout << "load portal layer" << std::endl;
 
+   if (!tileSet)
+   {
+      return {};
+   }
+
    std::vector<std::shared_ptr<GameMechanism>> portals;
 
    sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);

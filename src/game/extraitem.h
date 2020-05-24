@@ -20,9 +20,10 @@ struct ExtraItem : public GameNode
       Banana    = 32,
       Apple     = 48,
       KeyRed    = 64,
-      KeyYellow = 65,
+      KeyOrange = 65,
       KeyBlue   = 66,
       KeyGreen  = 67,
+      KeyYellow = 68,
       Dash      = 80,
    };
 

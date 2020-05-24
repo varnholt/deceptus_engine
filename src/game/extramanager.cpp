@@ -98,10 +98,10 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                SaveState::getPlayerInfo().mInventory.add(ItemType::KeyRed);
                break;
             }
-            case ExtraItem::ExtraSpriteIndex::KeyYellow:
+            case ExtraItem::ExtraSpriteIndex::KeyOrange:
             {
                Audio::getInstance()->playSample("powerup.wav");
-               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyYellow);
+               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyOrange);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyBlue:
@@ -114,6 +114,12 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
             {
                Audio::getInstance()->playSample("powerup.wav");
                SaveState::getPlayerInfo().mInventory.add(ItemType::KeyGreen);
+               break;
+            }
+            case ExtraItem::ExtraSpriteIndex::KeyYellow:
+            {
+               Audio::getInstance()->playSample("powerup.wav");
+               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyYellow);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::Dash:
