@@ -306,10 +306,12 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                   break;
                case 30:
                   requiredItem = ItemType::KeyYellow;
+                  iconOffset = 10;
                   createDoor = true;
                   break;
                case 33:
                   requiredItem = ItemType::KeyOrange;
+                  iconOffset = 13;
                   createDoor = true;
                   break;
                case 36:
