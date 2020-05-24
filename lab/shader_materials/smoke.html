@@ -1,0 +1,93 @@
+<!doctype html>
+
+<html>
+<body bgcolor='#333333'>
+
+<script src="js/Three.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/THREEx.KeyboardState.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+
+<script>
+
+var camera; 
+var scene; 
+var renderer;
+var geometry; 
+var material;
+ 
+var NUM_PARTICLES = 30;
+ 
+init();
+animate(); 
+
+
+function init() 
+{
+    clock = new THREE.Clock();
+    elapsed = 0;
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    scene = new THREE.Scene();
+ 
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+    camera.position.z = 1000;
+    scene.add(camera);
+    
+    texture = THREE.ImageUtils.loadTexture('images/smoke.png');
+    material = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture, transparent: true, blending: THREE.AdditiveBlending});
+    material.opacity = 0.1;
+    quad = new THREE.PlaneGeometry(300, 300);
+    particles = [];
+
+    for (p = 0; p < NUM_PARTICLES; p++) 
+    {
+        var particle = new THREE.Mesh(quad, material);
+        
+        var x = Math.random() * 500 - 250;
+        var y = Math.random() * 500 - 250;
+        var z = Math.random() * 250;
+        var r = Math.random() * 360;
+        
+        particle.position.set(x, y, z);
+        particle.rotation.z = r;
+
+        particle.scale.set(Math.random() * 2.0 + 1.0, Math.random() * 2.0 + 1.0, Math.random() * 2.0 + 1.0);
+        
+        scene.add(particle);
+        particles.push(particle);
+    }
+ 
+    document.body.appendChild( renderer.domElement ); 
+}
+ 
+ 
+function animate() 
+{
+   delta = clock.getDelta();
+   elapsed += delta;
+
+   requestAnimationFrame(animate);
+
+   for (i = 0; i < particles.length; i++) 
+   {
+      particles[i].rotation.z += (delta * 0.2);
+   }
+   
+   render();
+}
+ 
+
+function render() 
+{ 
+   renderer.render(scene, camera);
+}
+
+</script>
+
+</body>
+</html>
