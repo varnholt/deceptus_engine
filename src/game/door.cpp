@@ -281,6 +281,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
             // 21: red
             // 24: green
             // 27: blue
+            // ...
 
             auto requiredItem = ItemType::Invalid;
             auto iconOffset = 0;
@@ -304,6 +305,14 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                   createDoor = true;
                   break;
                case 30:
+                  requiredItem = ItemType::KeyYellow;
+                  createDoor = true;
+                  break;
+               case 33:
+                  requiredItem = ItemType::KeyOrange;
+                  createDoor = true;
+                  break;
+               case 36:
                   requiredItem = ItemType::Invalid;
                   createDoor = true;
                   break;
