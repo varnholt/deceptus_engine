@@ -45,8 +45,8 @@ SpikeBall::SpikeBall(GameNode* node)
    mSpikeSprite.setOrigin(24, 24);
 
    mBoxSprite.setTexture(mTexture);
-   mBoxSprite.setTextureRect(sf::IntRect(72, 48, 24, 24));
-   mBoxSprite.setOrigin(12, 12);
+   mBoxSprite.setTextureRect(sf::IntRect(72, 45, 24, 27));
+   mBoxSprite.setOrigin(12, 15);
 
    mChainElementA.setTexture(mTexture);
    mChainElementA.setTextureRect(sf::IntRect(0, 64, 8, 8));

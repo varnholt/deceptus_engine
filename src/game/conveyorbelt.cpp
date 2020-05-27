@@ -149,15 +149,31 @@ ConveyorBelt::ConveyorBelt(
    bodyDef.position = mPositionB2d;
    mBody = world->CreateBody(&bodyDef);
 
-   auto halfPhysicsWidth = width * MPP * 0.5f;
-   auto halfPhysicsHeight = height * MPP * 0.5f;
-
+   // auto halfPhysicsWidth = width * MPP * 0.5f;
+   // auto halfPhysicsHeight = height * MPP * 0.5f;
+   //
    // create fixture for physical boundaries of the belt object
-   mShapeBounds.SetAsBox(
-      halfPhysicsWidth, halfPhysicsHeight,
-      b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
-      0.0f
-   );
+   // mShapeBounds.SetAsBox(
+   //    halfPhysicsWidth, halfPhysicsHeight,
+   //    b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
+   //    0.0f
+   // );
+
+   const auto pWidth = width * MPP;
+   const auto pHeight = height * MPP;
+
+   constexpr auto dx = 0.002f;
+   constexpr auto dy = 0.001f;
+   std::array<b2Vec2, 6> vertices {
+      b2Vec2{dx,           0.0},
+      b2Vec2{0.0,          pHeight - dy},
+      b2Vec2{0.0,          pHeight},
+      b2Vec2{pWidth,       pHeight},
+      b2Vec2{pWidth,       pHeight - dy},
+      b2Vec2{pWidth - dx,  0.0}
+   };
+
+   mShapeBounds.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    b2FixtureDef boundaryFixtureDef;
    boundaryFixtureDef.shape = &mShapeBounds;
