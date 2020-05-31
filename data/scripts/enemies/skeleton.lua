@@ -213,7 +213,7 @@ function attack()
    if (mSpriteIndex == 6) then
       if (not mAttackLaunched) then
          mAttackLaunched = true
-         damage(30, mPointsLeft and -5000.0 or 5000.0, 0.0)
+         damage(50, mPointsLeft and -5000.0 or 5000.0, 0.0)
       end
    else
 

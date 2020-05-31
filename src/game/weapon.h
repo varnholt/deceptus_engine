@@ -29,7 +29,7 @@ public:
    };
 
    Weapon();
-   Weapon(std::unique_ptr<b2Shape>, int fireInterval);
+   Weapon(std::unique_ptr<b2Shape>, int32_t fireInterval, int32_t damage);
 
    void fireInIntervals(
       const std::shared_ptr<b2World>& world,
@@ -69,7 +69,8 @@ protected:
    std::unique_ptr<b2Shape> mShape;
 
    sf::Clock mFireClock;
-   int mFireInterval = 100;
+   int32_t mFireInterval = 100;
+   int32_t mDamage = 100;
    std::filesystem::path mTexturePath = "data/weapons/bullet.png";
    sf::Rect<int32_t> mTextureRect;
 

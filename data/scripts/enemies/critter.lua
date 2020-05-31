@@ -18,7 +18,7 @@ end
 properties = {
    staticBody = true,
    sprite = "data/sprites/enemy_critter.png",
-   damage = 20
+   damage = 30
 }
 
 

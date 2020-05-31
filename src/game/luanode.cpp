@@ -462,22 +462,30 @@ extern "C" int32_t addShapePoly(lua_State* state)
 extern "C" int32_t addWeapon(lua_State* state)
 {
    auto argc = static_cast<size_t>(lua_gettop(state));
+
+   if (argc < 3)
+   {
+      return 0;
+   }
+
    auto fireInterval = 0;
+   auto damage = 0;
    std::unique_ptr<b2Shape> shape;
 
+   fireInterval = static_cast<int>(lua_tointeger(state, 1));
+   damage = static_cast<int>(lua_tointeger(state, 2));
+
    // add weapon with bullet radius only
-   if (argc == 2)
+   if (argc == 3)
    {
-      fireInterval = static_cast<int>(lua_tointeger(state, 1));
-      auto radius = static_cast<float>(lua_tonumber(state, 2));
+      auto radius = static_cast<float>(lua_tonumber(state, 3));
       shape = std::make_unique<b2CircleShape>();
       dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
    }
 
    // add weapon with polygon bullet shape
-   if (argc >= 3 && ((argc + 1) % 2 == 0))
+   if (argc >= 4 && ((argc + 1) % 2 == 0))
    {
-      fireInterval = static_cast<int>(lua_tointeger(state, 1));
       shape = std::make_unique<b2PolygonShape>();
 
       auto size = argc / 2;
@@ -501,7 +509,7 @@ extern "C" int32_t addWeapon(lua_State* state)
       return 0;
    }
 
-   node->addWeapon(std::move(shape), fireInterval);
+   node->addWeapon(std::move(shape), fireInterval, damage);
 
    return 0;
 }
@@ -1204,9 +1212,9 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 }
 
 
-void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval)
+void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t damage)
 {
-   auto weapon = std::make_unique<Weapon>(std::move(shape), fireInterval);
+   auto weapon = std::make_unique<Weapon>(std::move(shape), fireInterval, damage);
    mWeapons.push_back(std::move(weapon));
 }
 

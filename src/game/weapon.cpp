@@ -21,9 +21,10 @@ Weapon::Weapon()
 }
 
 
-Weapon::Weapon(std::unique_ptr<b2Shape> shape, int fireInterval)
+Weapon::Weapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t damage)
  : mShape(std::move(shape)),
-   mFireInterval(fireInterval)
+   mFireInterval(fireInterval),
+   mDamage(damage)
 {
    loadTextures();
 }
@@ -57,7 +58,7 @@ void Weapon::fireNow(
 
    auto bullet = new Bullet();
    bullet->setDestroyedCallback([this, bullet](){mBullets.erase(bullet);});
-   bullet->setProperty("damage", 10);
+   bullet->setProperty("damage", mDamage);
    bullet->setBody(body);
    fixture->SetUserData(static_cast<void*>(bullet));
 
