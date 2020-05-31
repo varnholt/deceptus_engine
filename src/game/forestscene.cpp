@@ -78,7 +78,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // draw text
    const auto rect = mText.getGlobalBounds();
-   const auto left = w / 2 - rect.width;
+   const auto left = w / 2 - rect.width / 2;
    mText.setPosition(floor(left), 82);
    window.draw(mText, states);
 }

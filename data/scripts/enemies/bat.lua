@@ -22,7 +22,7 @@ end
 properties = {
    staticBody = true,
    sprite = "data/sprites/enemy_bat.png",
-   damage = 10
+   damage = 20
 }
 
 
