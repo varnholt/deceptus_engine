@@ -63,7 +63,8 @@ private:
    int mWidth = 0;
    int mHeight = 1;
    float mTime = 0.0f;
-   float mLeverLag = 1.0f;
+   float mLeverLag = 0.0f;
+   bool mInitialized = false;
    PathInterpolation mInterpolation;
    std::vector<sf::Vector2f> mPixelPath;
 };
