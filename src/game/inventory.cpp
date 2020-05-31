@@ -37,6 +37,7 @@ void Inventory::resetKeys()
                || item.mType == ItemType::KeyGreen
                || item.mType == ItemType::KeyRed
                || item.mType == ItemType::KeyYellow
+               || item.mType == ItemType::KeyOrange
             )
             {
                return true;
@@ -56,6 +57,7 @@ void Inventory::giveAllKeys()
    add(ItemType::KeyYellow);
    add(ItemType::KeyBlue);
    add(ItemType::KeyGreen);
+   add(ItemType::KeyOrange);
 }
 
 
