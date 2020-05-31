@@ -14,7 +14,7 @@ ForestScene::ForestScene()
       const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
       mText.setFont(mFont);
       mText.setCharacterSize(12);
-      mText.setString("Du hast es geschafft!\nAlles Gute zum Geburtstag, Lasse!\n- Dein Papa");
+      mText.setString("Congratulations!\nYou completed the game!");
       mText.setFillColor(sf::Color{232, 219, 243});
    }
    else
@@ -78,11 +78,24 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // draw text
    const auto rect = mText.getGlobalBounds();
-   const auto left = 143;
-   const auto x = left + (202 - rect.width) * 0.5f;
-   mText.setPosition(floor(x), 82);
+   const auto left = w / 2 - rect.width;
+   mText.setPosition(floor(left), 82);
    window.draw(mText, states);
 }
+
+/*
+                                360px
+                                |
+   +--------------------------------------------------------+
+   |                  +-------------------+                 |
+   |                  | Congratulations   |                 |
+   |                  | You won the game! |                 |
+   |                  +-------------------+                 |
+   +--------------------------------------------------------+
+                      |                   |                 720px
+                      |                   |
+                      rect.width = 200px
+*/
 
 
 /*
