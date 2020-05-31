@@ -75,7 +75,16 @@ b2Body* MovingPlatform::getBody()
 void MovingPlatform::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
-   mLeverLag = enabled ? 0.0f : 1.0f;
+
+   // the lever lag shouldn't have any effect during lever initialisation
+   if (mInitialized)
+   {
+      mLeverLag = enabled ? 0.0f : 1.0f;
+   }
+   else
+   {
+      mInitialized = true;
+   }
 }
 
 
