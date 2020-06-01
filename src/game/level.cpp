@@ -510,7 +510,7 @@ void Level::loadTmx()
    Laser::merge();
    Fan::merge();
    mFans = Fan::getFans();
-   Lever::merge(mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
+   Lever::merge(mLevers, mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
 
    for (auto& enemy : mEnemyObjectData)
    {

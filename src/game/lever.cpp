@@ -22,7 +22,6 @@
 sf::Texture Lever::sTexture;
 
 std::vector<TmxObject*> Lever::mRectangles;
-std::vector<std::shared_ptr<Lever>> Lever::sLevers;
 
 
 namespace
@@ -40,7 +39,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
    const std::shared_ptr<b2World>&
 )
 {
-   sLevers.clear();
+   mRectangles.clear();
    sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
@@ -82,7 +81,6 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
                lever->mSprite.setTexture(sTexture);
                lever->updateSprite();
 
-               sLevers.push_back(lever);
                levers.push_back(lever);
             }
          }
@@ -264,6 +262,7 @@ void Lever::addSearchRect(TmxObject* rect)
 
 //-----------------------------------------------------------------------------
 void Lever::merge(
+   const std::vector<std::shared_ptr<GameMechanism>>& levers,
    const std::vector<std::shared_ptr<GameMechanism>>& lasers,
    const std::vector<std::shared_ptr<GameMechanism>>& platforms,
    const std::vector<std::shared_ptr<GameMechanism>>& fans,
@@ -296,8 +295,10 @@ void Lever::merge(
       //    << "h: " << searchRect.height << " "
       //    << std::endl;
 
-      for (auto& lever : sLevers)
+      for (auto& tmp : levers)
       {
+         auto lever = std::dynamic_pointer_cast<Lever>(tmp);
+
          if (lever->mRect.intersects(searchRect))
          {
             // std::cout << "found match" << std::endl;
