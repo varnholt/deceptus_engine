@@ -77,6 +77,7 @@
     {"script": "klonk.lua","startposition": [253, 142]},
     {"script": "klonk.lua","startposition": [254, 142]},
     {"script": "klonk.lua","startposition": [255, 142]},
-    {"script": "klonk.lua","startposition": [256, 142]}
+    {"script": "klonk.lua","startposition": [256, 142]},
+    {"script": "endboss_1.lua","startposition": [307, 271]}
     ]
 }

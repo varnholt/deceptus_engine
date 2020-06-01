@@ -465,7 +465,8 @@ extern "C" int32_t addWeapon(lua_State* state)
 
    if (argc < 3)
    {
-      return 0;
+      printf("bad paramters for addWeapon");
+      exit(1);
    }
 
    auto fireInterval = 0;
@@ -484,14 +485,15 @@ extern "C" int32_t addWeapon(lua_State* state)
    }
 
    // add weapon with polygon bullet shape
-   if (argc >= 4 && ((argc + 1) % 2 == 0))
+   if (argc >= 4 && (argc % 2 == 0))
    {
+      auto constexpr parameterCount = 2u;
       shape = std::make_unique<b2PolygonShape>();
 
-      auto size = argc / 2;
-      b2Vec2* poly = new b2Vec2[size];
+      b2Vec2* poly = new b2Vec2[(argc - parameterCount) / 2];
+
       auto polyIndex = 0;
-      for (auto i = 2u; i < argc; i += 2u)
+      for (auto i = parameterCount + 1; i < argc - parameterCount; i += 2u)
       {
          auto x = static_cast<float>(lua_tonumber(state, i));
          auto y = static_cast<float>(lua_tonumber(state, i + 1));
@@ -572,7 +574,6 @@ extern "C" int32_t updateBulletTexture(lua_State* state)
       rect.height = height;
    }
 
-
    if (valid)
    {
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
@@ -587,7 +588,6 @@ extern "C" int32_t updateBulletTexture(lua_State* state)
 
    return 0;
 }
-
 
 
 extern "C" int32_t timer(lua_State* state)
