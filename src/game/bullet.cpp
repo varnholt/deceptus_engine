@@ -28,18 +28,6 @@ Bullet::~Bullet()
 }
 
 
-Bullet::BulletType Bullet::getBulletType() const
-{
-   return mBulletType;
-}
-
-
-void Bullet::setBulletType(const BulletType &bulletType)
-{
-   mBulletType = bulletType;
-}
-
-
 bool Bullet::isScheduledForRemoval() const
 {
    return mScheduledForRemoval;

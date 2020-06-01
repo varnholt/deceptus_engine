@@ -21,18 +21,10 @@ class Bullet : public FixtureNode
 
 public:
 
-   enum class BulletType
-   {
-      BulletTypePistol
-   };
-
    using DestroyedCallback = std::function<void(void)>;
 
    Bullet();
    ~Bullet();
-
-   BulletType getBulletType() const;
-   void setBulletType(const BulletType &type);
 
    bool isScheduledForRemoval() const;
    void setScheduledForRemoval(bool isScheduledForRemoval);
@@ -49,7 +41,6 @@ public:
 
 protected:
 
-   BulletType mBulletType = BulletType::BulletTypePistol;
    bool mScheduledForRemoval = false;
    b2Body* mBody = nullptr;
    DestroyedCallback mDestroyedCallback;

@@ -8,6 +8,12 @@
 
 #include <iostream>
 
+namespace
+{
+   uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
+   uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
+   int16_t groupIndex = 0;                                          // 0 is default
+}
 
 sf::Rect<int32_t> Weapon::mEmptyRect;
 
@@ -46,7 +52,11 @@ void Weapon::fireNow(
 
    b2FixtureDef fixtureDef;
    fixtureDef.shape = mShape.get();
-   fixtureDef.density = 1.0f;
+   fixtureDef.density = 0.0f;
+
+   fixtureDef.filter.groupIndex = groupIndex;
+   fixtureDef.filter.maskBits = maskBitsStanding;
+   fixtureDef.filter.categoryBits = categoryBits;
 
    auto fixture = body->CreateFixture(&fixtureDef);
 
@@ -142,24 +152,33 @@ void Weapon::loadTextures()
       std::cout << "Weapon::loadTextures(): couldn't load texture " << mTexturePath.string() << std::endl;
    }
 
-   if (mTextureRect.width > 0)
+   if (mShape->GetType() == b2Shape::e_polygon)
    {
-      mBulletSprite.setOrigin(
-         static_cast<float_t>(mTextureRect.width / 2),
-         static_cast<float_t>(mTextureRect.height / 2)
-      );
-
+      mBulletSprite.setOrigin(0, 0);
       mBulletSprite.setTextureRect(mTextureRect);
       mBulletSprite.setTexture(mBulletTexture);
    }
-   else
+   else if (mShape->GetType() == b2Shape::e_circle)
    {
-      mBulletSprite.setOrigin(
-         static_cast<float_t>(mBulletTexture.getSize().x / 2),
-         static_cast<float_t>(mBulletTexture.getSize().y / 2)
-      );
+      if (mTextureRect.width > 0)
+      {
+         mBulletSprite.setOrigin(
+            static_cast<float_t>(mTextureRect.width / 2),
+            static_cast<float_t>(mTextureRect.height / 2)
+         );
 
-      mBulletSprite.setTexture(mBulletTexture, true);
+         mBulletSprite.setTextureRect(mTextureRect);
+         mBulletSprite.setTexture(mBulletTexture);
+      }
+      else
+      {
+         mBulletSprite.setOrigin(
+            static_cast<float_t>(mBulletTexture.getSize().x / 2),
+            static_cast<float_t>(mBulletTexture.getSize().y / 2)
+         );
+
+         mBulletSprite.setTexture(mBulletTexture, true);
+      }
    }
 }
 
