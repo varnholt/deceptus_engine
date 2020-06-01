@@ -43,6 +43,7 @@ public:
 
    static void addSearchRect(TmxObject* rect);
    static void merge(
+      const std::vector<std::shared_ptr<GameMechanism>>& levers,
       const std::vector<std::shared_ptr<GameMechanism>>& lasers,
       const std::vector<std::shared_ptr<GameMechanism>>& platforms,
       const std::vector<std::shared_ptr<GameMechanism>>& fans,
@@ -80,7 +81,7 @@ public:
    static sf::Texture sTexture;
 
    static std::vector<TmxObject*> mRectangles;
-   static std::vector<std::shared_ptr<Lever>> sLevers;
+   //static std::vector<std::shared_ptr<Lever>> sLevers;
    void updateSprite();
 };
 

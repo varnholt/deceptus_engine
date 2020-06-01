@@ -74,9 +74,10 @@ b2Body* MovingPlatform::getBody()
 //-----------------------------------------------------------------------------
 void MovingPlatform::setEnabled(bool enabled)
 {
+   // std::cout << mInitialized << std::endl;
+
    GameMechanism::setEnabled(enabled);
 
-   // the lever lag shouldn't have any effect during lever initialisation
    if (mInitialized)
    {
       mLeverLag = enabled ? 0.0f : 1.0f;
@@ -331,9 +332,8 @@ void MovingPlatform::update(const sf::Time& dt)
    updateLeverLag(dt);
 
    mInterpolation.update(mBody->GetPosition());
-   {
-      mBody->SetLinearVelocity(mLeverLag * TIMESTEP_ERROR * (PPM / 60.0f) * mInterpolation.getVelocity());
-   }
+
+   mBody->SetLinearVelocity(mLeverLag * TIMESTEP_ERROR * (PPM / 60.0f) * mInterpolation.getVelocity());
 
    auto pos = 0;
    auto horizontal = (mWidth  > 1) ? 1 : 0;

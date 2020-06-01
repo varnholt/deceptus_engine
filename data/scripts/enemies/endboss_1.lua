@@ -5,6 +5,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- enemy configuration
 properties = {
    sprite = "data/sprites/enemy_endboss_1.png",
+   damage = 100
 }
 
 
