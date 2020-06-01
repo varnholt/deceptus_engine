@@ -1413,13 +1413,14 @@ void LuaNode::draw(sf::RenderTarget& target)
    }
    */
 
-   mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));
-   target.draw(mSprite);
-
+   // draw sprite on top of bullets
    for (auto& w : mWeapons)
    {
       w->drawBullets(target);
    }
+
+   mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));
+   target.draw(mSprite);
 }
 
 

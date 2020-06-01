@@ -5,14 +5,16 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- enemy configuration
 properties = {
    sprite = "data/sprites/enemy_endboss_1.png",
-   acceleration_ground = 0.1
 }
+
 
 ------------------------------------------------------------------------------------------------------------------------
 mKeyPressed = 0
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
-mFireDistance = 300
+mStartPosition = v2d.Vector2D(0, 0)
+mElapsed = 0
+mFirePause = 0
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +24,7 @@ function initialize()
    addShapeRect(0.6, 1.05, 0.25, 0.0)
    updateSpriteRect(0, 0, 80, 104)
 
-   addWeapon(500, 80, 0,0, 0,0.01666, 1.0,0.01666, 1.0,0, 0,0) -- interval, damage, radius/shape
+   addWeapon(250, 80, 0,0, 0,0.1666, 1.0,0.1666, 1.0,0, 0,0) -- interval, damage, radius/shape
    updateBulletTexture(0, "data/sprites/enemy_endboss_1.png", 0, 112, 49, 8) -- index, path, x, y, width, height
 end
 
@@ -51,43 +53,67 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function setPatrolPositions(x1, y1, x2, y2)
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   -- print(string.format("moved to: %f, %f", x, y))
    mPosition = v2d.Vector2D(x, y)
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   -- print(string.format("player moved to: %f, %f", x, y))
    mPlayerPosition = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateShootCondition()
+function updateFire()
 
    fireWeapon(
       0,
-      mPosition:getX() - 70,
-      mPosition:getY() - 1,
-      -0.04,
-      0.0
+      mPosition:getX() - 80,
+      mPosition:getY() - 9,
+      -3.0,
+      (math.random(0, 50) * 0.08 - 2.0)
    );
 
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function update(dt)
-   updateShootCondition()
-   updateKeysPressed(mKeyPressed)
+function updateFirePause(dt)
+
+   mFirePause = mFirePause + dt
+
+   if (mFirePause > 8) then
+      mFirePause = 0
+   end
+
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
+function update(dt)
+
+   mElapsed = mElapsed + dt
+
+   -- update transform
+   setTransform(
+      mStartPosition:getX(),
+      mStartPosition:getY() + 104 - math.abs(math.sin(mElapsed * 4.0)) * 100,
+      0.0
+   )
+
+   if (mFirePause < 3 or mFirePause > 5) then
+      updateFire()
+   end
+
+   updateFirePause(dt)
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function setStartPosition(x, y)
+   mStartPosition = v2d.Vector2D(x, y)
+end
 
 
