@@ -1,3 +1,4 @@
+
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
 v2d = require "data/scripts/enemies/vectorial2"
@@ -108,6 +109,10 @@ function update(dt)
    end
 
    updateFirePause(dt)
+
+   elevator = queryRayCast(7347, 6666, 7347, 6679)
+
+   -- 311, 277
 
 end
 

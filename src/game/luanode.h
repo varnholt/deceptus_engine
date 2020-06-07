@@ -41,6 +41,8 @@ struct LuaNode : public GameNode
    void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
    void makeDynamic();
    void makeStatic();
+   int32_t queryAABB(const b2AABB& aabb);
+   int32_t queryRaycast(const b2Vec2& point1, const b2Vec2& point2);
    void setActive(bool active);
    void setDamage(int32_t damage);
    void setGravityScale(float scale);

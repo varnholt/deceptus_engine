@@ -107,6 +107,84 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
 }
 
 
+extern "C" int32_t queryAABB(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 4)
+   {
+      b2AABB aabb;
+
+      b2Vec2 lower;
+      b2Vec2 upper;
+
+      auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
+      auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
+      auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
+      auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
+
+      lower.Set(x1, y1);
+      upper.Set(x2, y2);
+
+      aabb.lowerBound = lower;
+      aabb.upperBound = upper;
+
+      // std::cout << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y << std::endl;
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      const auto hitCount = node->queryAABB(aabb);
+      lua_pushinteger(state, hitCount);
+      return 1;
+   }
+
+   return 0;
+}
+
+
+extern "C" int32_t queryRayCast(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 4)
+   {
+      b2AABB aabb;
+
+      b2Vec2 p1;
+      b2Vec2 p2;
+
+      auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
+      auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
+      auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
+      auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
+
+      p1.Set(x1, y1);
+      p2.Set(x2, y2);
+
+      // std::cout << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y << std::endl;
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      const auto hitCount = node->queryRaycast(p1, p2);
+      lua_pushinteger(state, hitCount);
+      return 1;
+   }
+
+   return 0;
+}
+
 
 extern "C" int32_t setDamage(lua_State* state)
 {
@@ -669,7 +747,7 @@ extern "C" int32_t debug(lua_State* state)
 }
 
 
-void error(lua_State* state, const char* /*scope*/ = nullptr)
+[[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
   // the error message is on top of the stack.
   // fetch it, print32_t it and then pop it off the stack.
@@ -820,6 +898,8 @@ void LuaNode::setupLua()
    lua_register(mState, "fireWeapon", ::fireWeapon);
    lua_register(mState, "getLinearVelocity", ::getLinearVelocity);
    lua_register(mState, "playSample", ::playSample);
+   lua_register(mState, "queryAABB", ::queryAABB);
+   lua_register(mState, "queryRayCast", ::queryRayCast);
    lua_register(mState, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(mState, "makeDynamic", ::makeDynamic);
    lua_register(mState, "makeStatic", ::makeStatic);
@@ -1079,6 +1159,61 @@ void LuaNode::makeStatic()
 }
 
 
+class LuaQueryCallback : public b2QueryCallback
+{
+   public:
+
+      std::vector<b2Body*> mBodies;
+
+      bool ReportFixture(b2Fixture* fixture)
+      {
+         mBodies.push_back(fixture->GetBody());
+
+         // to keep going to find all fixtures in the query area
+         return true;
+      }
+};
+
+
+int32_t LuaNode::queryAABB(const b2AABB& aabb)
+{
+   LuaQueryCallback queryCallback;
+   Level::getCurrentLevel()->getWorld()->QueryAABB(&queryCallback, aabb);
+
+   // std::cout << queryCallback.mBodies.size() << std::endl;
+   return static_cast<int32_t>(queryCallback.mBodies.size());
+}
+
+
+class LuaRaycastCallback : public b2RayCastCallback
+{
+   public:
+
+      std::vector<b2Body*> mBodies;
+
+      float ReportFixture(
+         b2Fixture* fixture,
+         const b2Vec2& /*point*/,
+         const b2Vec2& /*normal*/,
+         float32 /*fraction*/
+      )
+      {
+         mBodies.push_back(fixture->GetBody());
+         return 0.0f;
+      }
+};
+
+
+int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
+{
+   LuaRaycastCallback queryCallback;
+   Level::getCurrentLevel()->getWorld()->RayCast(&queryCallback, point1, point2);
+
+   // std::cout << queryCallback.mBodies.size() << std::endl;
+   return static_cast<int32_t>(queryCallback.mBodies.size());
+}
+
+
 void LuaNode::luaSendPatrolPath()
 {
    if (mPatrolPath.size() == 0)
@@ -1249,6 +1384,7 @@ void LuaNode::luaUpdate(const sf::Time& dt)
       error(mState, FUNCTION_UPDATE);
    }
 }
+
 
 void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
 {
