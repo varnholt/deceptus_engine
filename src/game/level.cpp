@@ -948,7 +948,7 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
          {
             target.draw(layer->mSprite, {layer->mBlendMode});
          }
-      };
+      }
    }
 }
 

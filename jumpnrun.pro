@@ -100,6 +100,7 @@ INCLUDEPATH += src
 
 
 SOURCES += \
+   src/effects/smokeeffect.cpp \
    src/game/atmosphere.cpp \
    src/game/atmosphereshader.cpp \
    src/game/blurshader.cpp \
@@ -249,6 +250,7 @@ SOURCES += \
 # add box2d
 
 HEADERS += \
+    src/effects/smokeeffect.h \
     src/game/atmosphere.h \
     src/game/atmosphereshader.h \
     src/game/blurshader.h \
