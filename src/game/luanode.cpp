@@ -348,6 +348,31 @@ extern "C" int32_t getLinearVelocity(lua_State* state)
 }
 
 
+extern "C" int32_t setLinearVelocity(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 2)
+   {
+      auto vx = static_cast<float>(lua_tonumber(state, 1));
+      auto vy = static_cast<float>(lua_tonumber(state, 2));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setLinearVelocity(b2Vec2{vx, vy});
+   }
+
+   return 0;
+}
+
+
+
 extern "C" int32_t damage(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -373,7 +398,6 @@ extern "C" int32_t damage(lua_State* state)
 
    return 0;
 }
-
 
 
 extern "C" int32_t damageRadius(lua_State* state)
@@ -402,7 +426,6 @@ extern "C" int32_t damageRadius(lua_State* state)
 }
 
 
-
 extern "C" int32_t setTransform(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -413,8 +436,6 @@ extern "C" int32_t setTransform(lua_State* state)
       auto x = static_cast<float>(lua_tonumber(state, 1));
       auto y = static_cast<float>(lua_tonumber(state, 2));
       auto angle = static_cast<float>(lua_tonumber(state, 3));
-
-      // std::cout << "x: " << x << " y: " << y << " angle: " << angle << std::endl;
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -429,7 +450,6 @@ extern "C" int32_t setTransform(lua_State* state)
 
    return 0;
 }
-
 
 
 extern "C" int32_t boom(lua_State* state)
@@ -906,6 +926,7 @@ void LuaNode::setupLua()
    lua_register(mState, "setActive", ::setActive);
    lua_register(mState, "setDamage", ::setDamage);
    lua_register(mState, "setGravityScale", ::setGravityScale);
+   lua_register(mState, "setLinearVelocity", ::setLinearVelocity);
    lua_register(mState, "setTransform", ::setTransform);
    lua_register(mState, "setZ", ::setZ);
    lua_register(mState, "timer", ::timer);
@@ -1104,6 +1125,15 @@ b2Vec2 LuaNode::getLinearVelocity() const
    }
 
    return velocity;
+}
+
+
+void LuaNode::setLinearVelocity(const b2Vec2& vel)
+{
+   if (mBody)
+   {
+      mBody->SetLinearVelocity(vel);
+   }
 }
 
 
@@ -1480,7 +1510,7 @@ void LuaNode::updateVelocity()
 
    if (mKeysPressed & KeyPressedRight)
    {
-      desiredVel = static_cast<float>(b2Min( velocity.x + acceleration, velocityMax));
+      desiredVel = static_cast<float>(b2Min(velocity.x + acceleration, velocityMax));
    }
 
    // calc impulse, disregard time factor

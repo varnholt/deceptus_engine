@@ -17,6 +17,8 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 mStartPosition = v2d.Vector2D(0, 0)
 mElapsed = 0
 mFirePause = 0
+mSinking = false
+mYPrev = 0.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -57,6 +59,10 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
    mPosition = v2d.Vector2D(x, y)
+
+   if (mPosition:getY() > 6917) then
+      die()
+   end
 end
 
 
@@ -98,22 +104,36 @@ function update(dt)
    mElapsed = mElapsed + dt
 
    -- update transform
-   setTransform(
-      mStartPosition:getX(),
-      mStartPosition:getY() + 104 - math.abs(math.sin(mElapsed * 4.0)) * 100,
-      0.0
-   )
+   if (not mSinking) then
 
-   if (mFirePause < 3 or mFirePause > 5) then
-      updateFire()
+      y = mStartPosition:getY() + 104 - math.abs(math.sin(mElapsed * 4.0)) * 100;
+
+      setTransform(
+         mStartPosition:getX(),
+         y,
+         0.0
+      )
+
+      if (mFirePause < 3 or mFirePause > 5) then
+         updateFire()
+      end
+
+      updateFirePause(dt)
+
+      -- check if elevator is moving down
+      queryCount = queryRayCast(7347, 6666, 7347, 6679)
+
+      if (queryCount == 0) then
+
+         -- since the endboss is just moved a long a fixed path, it's required to
+         -- pass a linear velocity once box2d will do the position handling again
+         setLinearVelocity(0.0, y - mYPrev)
+         mSinking = true
+      end
+
+      mYPrev = y
+
    end
-
-   updateFirePause(dt)
-
-   elevator = queryRayCast(7347, 6666, 7347, 6679)
-
-   -- 311, 277
-
 end
 
 
