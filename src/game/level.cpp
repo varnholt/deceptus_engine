@@ -385,6 +385,11 @@ void Level::loadTmx()
                   Portal::link(mPortals, tmxObject);
                }
             }
+            else if (objectGroup->mName == "smoke")
+            {
+               auto smoke = SmokeEffect::deserialize(tmxObject, objectGroup);
+               mSmokeEffect.push_back(smoke);
+            }
             else if (objectGroup->mName == "spike_balls")
             {
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
@@ -902,6 +907,11 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
    {
       mStaticLight->drawToZ(target, {}, z);
 
+      for (auto smoke : mSmokeEffect)
+      {
+         smoke->drawToZ(target, {}, z);
+      }
+
       // TODO: it's not expected that tiles are in different z layers
       //       and then unify them in one big loop
 
@@ -1155,6 +1165,11 @@ void Level::update(const sf::Time& dt)
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+
+   for (auto smoke : mSmokeEffect)
+   {
+      smoke->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+   }
 
    mDeathShader->update(dt);
 }

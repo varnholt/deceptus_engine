@@ -21,6 +21,7 @@
 
 // effects
 #include "effects/raycastlight.h"
+#include "effects/smokeeffect.h"
 #include "effects/staticlight.h"
 
 // sfml
@@ -210,6 +211,7 @@ protected:
    std::shared_ptr<RaycastLight> mRaycastLight;
    std::shared_ptr<StaticLight> mStaticLight;
    std::shared_ptr<RaycastLight::LightInstance> mPlayerLight;
+   std::vector<std::shared_ptr<SmokeEffect>> mSmokeEffect;
 
    AmbientOcclusion mAo;
    std::vector<std::shared_ptr<ImageLayer>> mImageLayers;
