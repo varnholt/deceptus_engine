@@ -10,6 +10,7 @@
 
 #include <array>
 #include <filesystem>
+#include <iostream>
 
 
 sf::Texture SmokeEffect::mTexture;
@@ -18,27 +19,28 @@ const std::string SmokeEffect::sLayerName = "smoke_effect";
 
 namespace
 {
-   sf::BlendMode mBlendMode = sf::BlendAdd;
-   sf::Color mColor = {255, 255, 255, 10};
+   sf::BlendMode mBlendMode = sf::BlendMultiply;
+   //sf::Color mColor = {255, 255, 255, 255};
 }
 
 
 SmokeEffect::SmokeEffect()
  : Effect("smoke effect")
 {
+   mIsLoaded = true;
 }
 
 
 void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates /*states*/, int /*z*/) const
 {
-   for (auto particle : mParticles)
+   //   sf::BlendMode masksCombining = sf::BlendAdd;
+   //   masksCombining.colorEquation = sf::BlendMode::Add;
+   //   masksCombining.alphaEquation = sf::BlendMode::ReverseSubtract;
+
+   return;
+
+   for (auto& particle : mParticles)
    {
-      // todo
-      // apply translation
-
-      // todo
-      // apply rotation
-
       target.draw(particle.mSprite, mBlendMode);
    }
 }
@@ -49,8 +51,16 @@ void SmokeEffect::onDraw(sf::RenderTarget &/*target*/, sf::RenderStates /*states
 }
 
 
-void SmokeEffect::onUpdate(const sf::Time& /*time*/, float /*x*/, float /*y*/)
+void SmokeEffect::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
 {
+   const auto dt = time.asSeconds() - mLastUpdateTime.asSeconds();
+   mLastUpdateTime = time;
+
+   for (auto& particle : mParticles)
+   {
+      particle.mRot += dt;
+      particle.mSprite.setRotation(particle.mRot);
+   }
 }
 
 
@@ -61,12 +71,12 @@ bool SmokeEffect::onLoad()
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* /*tmxObject*/, TmxObjectGroup* /*objectGroup*/)
+std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxObjectGroup* /*objectGroup*/)
 {
    // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
 
    auto smokeEffect = std::make_shared<SmokeEffect>();
-   std::string texture = "data/light/smoke.png";
+   std::string texture = "data/effects/smoke.png";
 
    // if (tmxObject->mProperties != nullptr)
    // {
@@ -82,14 +92,19 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* /*tmxObject*/, 
       mTexture.loadFromFile(texture);
    }
 
+   constexpr auto range = 50;
+
    for (auto& particle : smokeEffect->mParticles)
    {
-      const auto x = static_cast<float>(std::rand() % 500 - 250);
-      const auto y = static_cast<float>(std::rand() % 500 - 250);
+      auto x = static_cast<float>(std::rand() % range - range/2);
+      auto y = static_cast<float>(std::rand() % range - range/2);
       const auto r = static_cast<float>(std::rand() % 360);
 
-      const auto sx = (std::rand() % 100 + 100) * 0.01f; // scale from 0..2
-      const auto sy = (std::rand() % 100 + 100) * 0.01f;
+      x += tmxObject->mX;
+      y += tmxObject->mY;
+
+      const auto sx = (std::rand() % 100 + 100) * 0.002f; // scale from 0..0.4
+      const auto sy = (std::rand() % 100 + 100) * 0.002f;
 
       particle.mSprite.setPosition(x, y);
       particle.mSprite.setRotation(r);
@@ -97,7 +112,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* /*tmxObject*/, 
       particle.mSprite.scale(sx, sy);
 
       particle.mSprite.setTexture(mTexture);
-      particle.mSprite.setColor(mColor);
+      //particle.mSprite.setColor(mColor);
    }
 
    return smokeEffect;

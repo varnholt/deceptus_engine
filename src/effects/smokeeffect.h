@@ -26,7 +26,7 @@ public:
       float mTimeOffset = 0.0f;
    };
 
-   std::array<SmokeParticle, 30> mParticles;
+   std::array<SmokeParticle, 20> mParticles;
 
    static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
 
@@ -38,6 +38,7 @@ public:
    static sf::Texture mTexture;
 
    int mZ = 0;
+   sf::Time mLastUpdateTime;
 
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
    void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
