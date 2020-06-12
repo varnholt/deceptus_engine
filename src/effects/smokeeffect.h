@@ -17,32 +17,27 @@ class SmokeEffect : public Effect
 
 public:
 
+   SmokeEffect();
+   void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
+   void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
+   void onUpdate(const sf::Time& time, float x, float y) override;
+   bool onLoad() override;
+
+private:
    static const std::string sLayerName;
+   static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
+   static sf::Texture mTexture;
 
    struct SmokeParticle
    {
       sf::Sprite mSprite;
       float mRot = 0.0f;
+      float mRotationSpeed = 1.0f;
       float mTimeOffset = 0.0f;
    };
 
-   std::array<SmokeParticle, 20> mParticles;
-
-   static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
-
-
-public:
-
-   SmokeEffect();
-
-   static sf::Texture mTexture;
-
-   int mZ = 0;
+   std::array<SmokeParticle, 50> mParticles;
+   int32_t mZ = 0;
    sf::Time mLastUpdateTime;
-
-   void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
-   void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
-   void onUpdate(const sf::Time& time, float x, float y) override;
-   bool onLoad() override;
 };
 
