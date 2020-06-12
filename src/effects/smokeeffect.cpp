@@ -57,8 +57,14 @@ void SmokeEffect::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
 
    for (auto& particle : mParticles)
    {
-      particle.mRot += dt * 10.0f * particle.mRotationSpeed;
+      particle.mRot += dt * 10.0f * particle.mRotDir;
       particle.mSprite.setRotation(particle.mRot);
+
+      // fake z rotation
+      const auto x = 0.5f * (1.0f + sin(particle.mTimeOffset + time.asSeconds())) * particle.mOffset.x;
+      const auto y = 0.5f * (1.0f + cos(particle.mTimeOffset + time.asSeconds())) * particle.mOffset.y;
+
+      particle.mSprite.setPosition(particle.mCenter.x + x, particle.mCenter.y + y);
    }
 }
 
@@ -77,14 +83,15 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
    auto smokeEffect = std::make_shared<SmokeEffect>();
    std::string texture = "data/effects/smoke.png";
 
-   // if (tmxObject->mProperties != nullptr)
-   // {
-   //    auto it = tmxObject->mProperties->mMap.find("color");
-   //    if (it != tmxObject->mProperties->mMap.end())
-   //    {
-   //       rgba = TmxTools::color(it->second->mValueStr);
-   //    }
-   // }
+   if (tmxObject->mProperties)
+   {
+      auto z = tmxObject->mProperties->mMap.find("z");
+      if (z != tmxObject->mProperties->mMap.end())
+      {
+         smokeEffect->mZ = tmxObject->mProperties->mMap["z"]->mValueInt;
+         std::cout << "smoke effect layer has z: " << smokeEffect->mZ << std::endl;
+      }
+   }
 
    if (mTexture.getSize().x == 0)
    {
@@ -99,22 +106,27 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
    {
       auto x = static_cast<float>(std::rand() % rangeX - rangeX / 2);
       auto y = static_cast<float>(std::rand() % rangeY - rangeY / 2);
-      const auto r = static_cast<float>(std::rand() % 360);
+      const auto rotation = static_cast<float>(std::rand() % 360);
+      const auto timeOffset = static_cast<float>(std::rand() % 100) * 0.01f * 2.0f * static_cast<float>(M_PI);
 
-      x += tmxObject->mX + tmxObject->mWidth / 2;
-      y += tmxObject->mY + tmxObject->mHeight / 2;
+      const auto centerX = tmxObject->mX + tmxObject->mWidth / 2;
+      const auto centerY = tmxObject->mY + tmxObject->mHeight / 2;
 
       const auto sx = (std::rand() % 50 + 50) * 0.008f; // scale from 0..0.4
       const auto sy = (std::rand() % 50 + 50) * 0.008f;
 
       particle.mSprite.setScale(sx, sy);
+      particle.mSprite.setRotation(rotation);
+      particle.mSprite.setPosition(x + centerX, y + centerY);
 
-      particle.mSprite.setRotation(r);
-      particle.mSprite.setPosition(x, y);
+      particle.mRotDir = static_cast<float>((std::rand() % 200) - 100) * 0.01f;
+      particle.mCenter = sf::Vector2f{centerX, centerY};
+      particle.mOffset = sf::Vector2f{x, y};
+      particle.mTimeOffset = timeOffset;
 
       particle.mSprite.setTexture(mTexture);
       particle.mSprite.setColor(mColor);
-      
+
       const auto bounds = particle.mSprite.getGlobalBounds();
       particle.mSprite.setOrigin(bounds.width * sx, bounds.height * sy);
    }

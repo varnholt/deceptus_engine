@@ -34,8 +34,11 @@ private:
    {
       sf::Sprite mSprite;
       float mRot = 0.0f;
-      float mRotationSpeed = 1.0f;
+      float mRotDir = 1.0f;
       float mTimeOffset = 0.0f;
+
+      sf::Vector2f mOffset;
+      sf::Vector2f mCenter;
    };
 
    std::array<SmokeParticle, 50> mParticles;
