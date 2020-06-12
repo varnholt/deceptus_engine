@@ -27,7 +27,7 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const s
      if (z != imageLayer->mProperties->mMap.end())
      {
         image->mZ = imageLayer->mProperties->mMap["z"]->mValueInt;
-        std::cout << "image layer has z: " << image->mZ << std::endl;
+        // std::cout << "image layer has z: " << image->mZ << std::endl;
      }
 
      std::string blendModeStr;
