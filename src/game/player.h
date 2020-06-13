@@ -211,6 +211,8 @@ private:
    float getDeceleration() const;
    float getAcceleration() const;
 
+   void traceJumpCurve();
+
 
 private:
 
