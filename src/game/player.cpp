@@ -1155,6 +1155,7 @@ void Player::updateVelocity()
       return;
    }
 
+   // we need friction to walk up diagonales
    {
       if (isOnGround() && fabs(mGroundNormal.x) > 0.05f)
       {
@@ -2340,11 +2341,56 @@ b2Vec2 Player::getBodyPosition() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
+namespace
+{
+   bool jumpStarted = false;
+   sf::Time jumpStartTime;
+   float jumpStartY = 0.0f;
+   float jumpEpsilon = 0.00001f;
+   float jumpPrevY = 0.0f;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::traceJumpCurve()
+{
+   if (isJumpButtonPressed())
+   {
+      if (!jumpStarted)
+      {
+         jumpStartTime = mTime;
+         jumpStartY = mBody->GetPosition().y;
+         jumpStarted = true;
+         std::cout << std::endl << "time; y" << std::endl;
+      }
+
+      const auto jumpNextY = -(mBody->GetPosition().y - jumpStartY);
+      if (fabs(jumpNextY - jumpPrevY) > jumpEpsilon)
+      {
+         std::cout
+            << mTime.asSeconds() - jumpStartTime.asSeconds()
+            << "; "
+            << jumpNextY
+            << std::endl;
+      }
+
+      jumpPrevY = jumpNextY;
+   }
+   else
+   {
+      jumpStarted = false;
+   }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelPosition()
 {
    // sync player sprite with with box2d data
    float x = mBody->GetPosition().x * PPM;
    float y = mBody->GetPosition().y * PPM;
+
+   // traceJumpCurve();
 
    setPixelPosition(x, y);
 }

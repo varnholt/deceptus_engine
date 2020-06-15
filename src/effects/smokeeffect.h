@@ -23,17 +23,22 @@ public:
    void onUpdate(const sf::Time& time, float x, float y) override;
    bool onLoad() override;
 
-private:
-   static const std::string sLayerName;
    static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
+
+private:
+
    static sf::Texture mTexture;
+   static const std::string sLayerName;
 
    struct SmokeParticle
    {
       sf::Sprite mSprite;
       float mRot = 0.0f;
-      float mRotationSpeed = 1.0f;
+      float mRotDir = 1.0f;
       float mTimeOffset = 0.0f;
+
+      sf::Vector2f mOffset;
+      sf::Vector2f mCenter;
    };
 
    std::array<SmokeParticle, 50> mParticles;
