@@ -9,12 +9,13 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool jumpButtonPressed)
+void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, bool jumpButtonPressed)
 {
    mInAir = inAir;
    mInWater = inWater;
 
    mCrouching = crouching;
+   mClimbing = climbing;
 
    mJumpButtonPressed = jumpButtonPressed;
 
@@ -137,10 +138,10 @@ void PlayerJump::jump()
    // only allow a new jump after a a couple of milliseconds
    if (elapsed.asMilliseconds() > 100)
    {
-      if (!mInAir || mGroundContactJustLost || mClimbJoint != nullptr)
+      if (!mInAir || mGroundContactJustLost || mClimbing)
       {
          mRemoveClimbJoint();
-         mClimbJoint = nullptr;
+         mClimbing = false;
 
          jumpForce();
 

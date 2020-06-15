@@ -15,7 +15,7 @@ struct PlayerJump
     void jumpImpulse(b2Body*);
     void jumpForce();
 
-    void update(b2Body* body, bool inAir, bool inWater, bool crouching, bool jumpButtonPressed);
+    void update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, bool jumpButtonPressed);
 
     void updateJumpBuffer();
     void updateJump(b2Body*);
@@ -36,7 +36,7 @@ struct PlayerJump
     bool mInWater = false;
     bool mCrouching = false;
     bool mJumpButtonPressed = false;
-    b2Joint* mClimbJoint = nullptr;
+    bool mClimbing = false;
 
     std::function<void(void)> mDustAnimation;
     std::function<void(void)> mRemoveClimbJoint;

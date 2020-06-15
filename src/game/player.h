@@ -6,6 +6,7 @@
 #include "extratable.h"
 #include "gamenode.h"
 #include "joystick/gamecontrollerinfo.h"
+#include "playerclimb.h"
 #include "playerjump.h"
 
 #include <SFML/Graphics.hpp>
@@ -26,23 +27,6 @@ const sf::Vector2f vector2fZero;
 
 class Player : public GameNode
 {
-
-   class PlayerAABBQueryCallback : public b2QueryCallback
-   {
-      public:
-         std::set<b2Body*> mBodies;
-
-      public:
-         bool ReportFixture(b2Fixture* fixture)
-         {
-            // foundBodies.push_back(fixture->GetBody());
-            mBodies.insert(fixture->GetBody());
-
-            // keep going to find all fixtures in the query area
-            return true;
-         }
-   };
-
    struct PositionedAnimation
    {
       sf::Vector2f mPosition;
@@ -144,7 +128,6 @@ public:
    void setGroundBody(b2Body* body);
 
    bool isInAir() const;
-   bool isClimbing() const;
    bool isInWater() const;
    bool isOnPlatform() const;
    bool isOnGround() const;
@@ -163,8 +146,6 @@ public:
 
    void impulse(float intensity);
    void damage(int damage, const sf::Vector2f& force = vector2fZero);
-
-   void updateClimb();
 
    std::shared_ptr<ExtraManager> getExtraManager() const;
 
@@ -194,9 +175,6 @@ private:
    void createFeet();
    void setCrouching(bool enabled);
 
-   bool isClimbableEdge(b2ChainShape* shape, int currIndex);
-   void removeClimbJoint();
-   bool edgeMatchesMovement(const b2Vec2 &edgeDir);
    float getMaxVelocity() const;
    float getVelocityFromController(const PlayerSpeed& speed) const;
    float getVelocityFromKeyboard(const PlayerSpeed& speed) const;
@@ -217,7 +195,6 @@ private:
    std::shared_ptr<b2World> mWorld;
    b2Body* mBody = nullptr;
    b2Fixture* mBodyFixture = nullptr;
-   b2Joint* mClimbJoint = nullptr;
 
    GameControllerInfo mJoystickInfo;
    int mKeysPressed = 0;
@@ -293,6 +270,7 @@ private:
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
 
+   PlayerClimb mClimb;
    PlayerJump mJump;
 
    std::deque<PositionedAnimation> mLastAnimations;
