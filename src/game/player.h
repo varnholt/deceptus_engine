@@ -6,6 +6,7 @@
 #include "extratable.h"
 #include "gamenode.h"
 #include "joystick/gamecontrollerinfo.h"
+#include "playerjump.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -94,9 +95,7 @@ public:
    bool isControllerButtonPressed(int buttonEnum) const;
    bool isFireButtonPressed() const;
    bool isJumpButtonPressed() const;
-   bool isJumping() const;
 
-   void jump();
    void fire();
    void die();
    void reset();
@@ -150,6 +149,7 @@ public:
    bool isOnPlatform() const;
    bool isOnGround() const;
    bool isDead() const;
+   bool isCrouching() const;
 
    void setInWater(bool inWater);
 
@@ -173,20 +173,14 @@ private:
 
    void createPlayerBody();
 
-   void jumpImpulse();
-   void jumpForce();
-
    void updateAnimation(const sf::Time& dt);
    void updatePixelCollisions();
    void updateAtmosphere();
    void updateVelocity();
-   void updateJumpBuffer();
-   void updateJump();
    void updatePlatformMovement(const sf::Time& dt);
    void updateFire();
    void updateFootsteps();
    void updatePortal();
-   void updateLostGroundContact();
    void updatePlayerOrientation();
    void updateDash(Dash dir = Dash::None);
    void updateCrouch();
@@ -211,6 +205,7 @@ private:
    float getDeceleration() const;
    float getAcceleration() const;
 
+   void playDustAnimation();
 
 private:
 
@@ -232,20 +227,15 @@ private:
    sf::Sprite mSprite;
    sf::Vector2u mSpritePrev;
    sf::Vector2u mSpriteAnim;
-   sf::Time mGroundContactLostTime;
-   sf::Time mLastJumpPressTime;
    sf::IntRect mPlayerPixelRect;
 
    sf::Time mTime;
    sf::Clock mClock;
-   sf::Clock mJumpClock;
    sf::Clock mPortalClock;
    sf::Clock mDamageClock;
    bool mDamageInitialized = false;
 
    int mAnimSpeed = 50;
-   int mJumpSteps = 0;
-   int mJumpAnimationReference = 0;
 
    bool mPointsToLeft = false;
    bool mVisible = true;
@@ -263,8 +253,6 @@ private:
    int mZ = 0;
    int mId = 0;
 
-   bool mHadGroundContact = true;
-   bool mGroundContactJustLost = false;
    bool mHardLanding = false;
    int32_t mHardLandingCycles = 0;
 
@@ -298,8 +286,12 @@ private:
    std::shared_ptr<Animation> mJumpDownLeftAligned;
    std::shared_ptr<Animation> mJumpLandingLeftAligned;
 
+   int mJumpAnimationReference = 0;
+
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
+
+   PlayerJump mJump;
 
    std::deque<PositionedAnimation> mLastAnimations;
 

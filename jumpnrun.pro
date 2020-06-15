@@ -126,6 +126,7 @@ SOURCES += \
    src/game/moveablebox.cpp \
    src/game/physics.cpp \
    src/game/playerinfo.cpp \
+    src/game/playerjump.cpp \
    src/game/rainoverlay.cpp \
    src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
@@ -282,6 +283,7 @@ HEADERS += \
     src/game/player.h \
     src/game/level.h \
     src/game/playerinfo.h \
+    src/game/playerjump.h \
     src/game/rainoverlay.h \
     src/game/savestate.h \
     src/game/scriptproperty.h \
