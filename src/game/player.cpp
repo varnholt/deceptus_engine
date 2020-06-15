@@ -155,6 +155,9 @@ void Player::initialize()
       i->mLooped = true;
    }
 
+   mJump.mDustAnimation = std::bind(&Player::playDustAnimation, this);
+   mJump.mRemoveClimbJoint = std::bind(&Player::removeClimbJoint, this);
+
    if (mTexture.loadFromFile("data/sprites/player.png"))
    {
       // mSprite.scale(4.0f, 4.0f);
@@ -195,7 +198,7 @@ void Player::initializeController()
             {
                return;
             }
-            jump();
+            mJump.jump();
          }
       );
 
@@ -840,9 +843,29 @@ float Player::getAcceleration() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::playDustAnimation()
+{
+   AnimationPool::getInstance().add(
+      mPointsToLeft
+       ? "player_jump_dust_left_aligned"
+       : "player_jump_dust_right_aligned",
+      mPixelPositionf.x,
+      mPixelPositionf.y
+   );
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 bool Player::isDead() const
 {
    return mDead;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool Player::isCrouching() const
+{
+   return mCrouching;
 }
 
 
@@ -930,7 +953,7 @@ void Player::updateAnimation(const sf::Time& dt)
    // jump init
    if (!isDashActive())
    {
-      if (mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+      if (mJump.mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
       {
          // jump ignition
          mJumpAnimationReference = 0;
@@ -1197,24 +1220,6 @@ void Player::updateVelocity()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateJumpBuffer()
-{
-   // if jump is pressed while the ground is just a few centimeters away,
-   // store the information and jump as soon as the places touches ground
-   auto now = GlobalClock::getInstance()->getElapsedTime();
-   auto timeDiff = (now - mLastJumpPressTime).asMilliseconds();
-
-   if (!isInAir())
-   {
-      if (timeDiff < PhysicsConfiguration::getInstance().mPlayerJumpBufferMs)
-      {
-         jump();
-      }
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePortal()
 {
    if (CameraPane::getInstance().isLookActive())
@@ -1256,41 +1261,6 @@ void Player::updatePortal()
          }
       }
    }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::updateLostGroundContact()
-{
-   // when losing contact to the ground allow jumping for 2-3 more frames
-   //
-   // if player had ground contact in previous frame but now lost ground
-   // contact then start counting to 200ms
-   if (mHadGroundContact && isInAir() && !isJumping())
-   {
-      auto now = GlobalClock::getInstance()->getElapsedTime();
-      mGroundContactLostTime = now;
-      mGroundContactJustLost = true;
-   }
-
-   // flying now, probably allow jump
-   else if (isInAir())
-   {
-      auto now = GlobalClock::getInstance()->getElapsedTime();
-      auto timeDiff = (now - mGroundContactLostTime).asMilliseconds();
-      mGroundContactJustLost = (timeDiff < PhysicsConfiguration::getInstance().mPlayerJumpAfterContactLostMs);
-
-      // if (mGroundContactJustLost)
-      // {
-      //    std::cout << "allowed to jump for another " << timeDiff << "ms" << std::endl;
-      // }
-   }
-   else
-   {
-      mGroundContactJustLost = false;
-   }
-
-   mHadGroundContact = !isInAir();
 }
 
 
@@ -1407,65 +1377,6 @@ bool Player::isControllerButtonPressed(int buttonEnum) const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateJump()
-{
-   auto jumpPressed = isJumpButtonPressed();
-
-   if (isInWater() && jumpPressed)
-   {
-      mBody->ApplyForce(b2Vec2(0, -1.0f), mBody->GetWorldCenter(), true);
-   }
-   else if (
-         (mJumpSteps > 0 && jumpPressed)
-      || mJumpClock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance().mPlayerJumpMinimalDurationMs
-   )
-   {
-      // jump higher if a faster
-      auto maxWalk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
-      auto vel = fabs(mBody->GetLinearVelocity().x) - maxWalk;
-      auto factor = 1.0f;
-
-      if (vel > 0.0f)
-      {
-         auto maxRun = PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
-
-         factor =
-              1.0f
-            + PhysicsConfiguration::getInstance().mPlayerJumpSpeedFactor
-            * (vel / (maxRun - maxWalk));
-      }
-
-      /*
-       * +---+
-         |###|
-         |###| <- current speed => factor
-         |###|
-         +###+
-         |   |
-         |   |
-         |   |
-       * +---+
-      */
-
-     // to change velocity by 5 in one time step
-     auto force = factor * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / (1.0f / 60.0f) /*dt*/; //f = mv/t
-
-     // spread this over 6 time steps
-     force /= PhysicsConfiguration::getInstance().mPlayerJumpFalloff;
-
-     // printf("force: %f\n", force);
-     mBody->ApplyForceToCenter(b2Vec2(0.0f, -force), true );
-
-     mJumpSteps--;
-   }
-   else
-   {
-      mJumpSteps = 0;
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnPlatform() const
 {
    const auto onPlatform =
@@ -1485,7 +1396,7 @@ bool Player::isOnGround() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlatformMovement(const sf::Time& dt)
 {
-   if (isJumping())
+   if (mJump.isJumping())
    {
       return;
    }
@@ -1535,13 +1446,6 @@ bool Player::isJumpButtonPressed() const
   }
 
   return false;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-bool Player::isJumping() const
-{
-   return (mJumpSteps > 0);
 }
 
 
@@ -1745,9 +1649,7 @@ void Player::update(const sf::Time& dt)
    updateFire();
    updateVelocity();
    updatePlayerOrientation();
-   updateLostGroundContact();
-   updateJump();
-   updateJumpBuffer();
+   mJump.update(mBody, isInAir(), isInWater(), isCrouching(), isJumpButtonPressed());
    updateDash();
    updateClimb();
    updatePlatformMovement(dt);
@@ -2095,6 +1997,7 @@ void Player::updateClimb()
 
                   Audio::getInstance()->playSample("impact.wav");
                   mClimbJoint = mWorld->CreateJoint(&jointDefinition);
+                  mJump.mClimbJoint = mClimbJoint;
                }
 
                // no need to continue processing
@@ -2107,29 +2010,6 @@ void Player::updateClimb()
    }
 
    // mDistanceJoint->SetLength(distanceJoint.GetLength() * 0.99f);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::jumpImpulse()
-{
-   mJumpClock.restart();
-
-   float impulse = mBody->GetMass() * 6.0f;
-
-   mBody->ApplyLinearImpulse(
-      b2Vec2(0.0f, -impulse),
-      mBody->GetWorldCenter(),
-      true
-   );
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::jumpForce()
-{
-   mJumpClock.restart();
-   mJumpSteps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
 }
 
 
@@ -2324,55 +2204,6 @@ bool Player::isClimbing() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::jump()
-{
-   if (mCrouching)
-   {
-      return;
-   }
-
-   sf::Time elapsed = mJumpClock.getElapsedTime();
-
-   // only allow a new jump after a a couple of milliseconds
-   if (elapsed.asMilliseconds() > 100)
-   {
-      if (!isInAir() || mGroundContactJustLost || mClimbJoint != nullptr)
-      {
-         removeClimbJoint();
-
-         jumpForce();
-
-         if (isInWater())
-         {
-            // play some waterish sample?
-         }
-         else
-         {
-            AnimationPool::getInstance().add(
-               mPointsToLeft
-                ? "player_jump_dust_left_aligned"
-                : "player_jump_dust_right_aligned",
-               mPixelPositionf.x,
-               mPixelPositionf.y
-            );
-
-            Audio::getInstance()->playSample("jump.wav");
-         }
-      }
-      else
-      {
-         // player pressed jump but is still in air.
-         // buffer that information to trigger the jump a few millis later.
-         if (isInAir())
-         {
-            mLastJumpPressTime = GlobalClock::getInstance()->getElapsedTime();
-         }
-      }
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 void Player::fire()
 {
    if (!mWeaponSystem->mSelected)
@@ -2538,7 +2369,7 @@ void Player::keyboardKeyPressed(sf::Keyboard::Key key)
    if (key == sf::Keyboard::Space)
    {
       mKeysPressed |= KeyPressedJump;
-      jump();
+      mJump.jump();
    }
 
    if (key == sf::Keyboard::Return)
