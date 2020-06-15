@@ -11,6 +11,7 @@
 #include <array>
 #include <filesystem>
 #include <iostream>
+#include <math.h>
 
 
 sf::Texture SmokeEffect::mTexture;
