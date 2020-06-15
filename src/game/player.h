@@ -206,6 +206,8 @@ private:
    float getAcceleration() const;
 
    void playDustAnimation();
+   void traceJumpCurve();
+
 
 private:
 
