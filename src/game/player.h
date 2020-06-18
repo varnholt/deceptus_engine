@@ -7,6 +7,7 @@
 #include "gamenode.h"
 #include "joystick/gamecontrollerinfo.h"
 #include "playerclimb.h"
+#include "playercontrols.h"
 #include "playerjump.h"
 
 #include <SFML/Graphics.hpp>
@@ -69,32 +70,16 @@ public:
    void draw(sf::RenderTarget& target);
 
    void update(const sf::Time& dt);
-   void keyboardKeyPressed(sf::Keyboard::Key key);
-   void keyboardKeyReleased(sf::Keyboard::Key key);
-
-   void controllerRunButtonPressed();
-   void controllerRunButtonReleased();
-   bool isLookingAround() const;
-   bool isControllerUsed() const;
-   bool isControllerButtonPressed(int buttonEnum) const;
-   bool isFireButtonPressed() const;
-   bool isJumpButtonPressed() const;
 
    void fire();
    void die();
    void reset();
    DeathReason checkDead() const;
 
-   bool isMovingRight() const;
-   bool isMovingLeft() const;
-   bool isMoving() const;
    bool isPointingRight() const;
    bool isPointingLeft() const;
 
    void setStartPixelPosition(float x, float y);
-
-   int getKeysPressed() const;
-   void setKeysPressed(int keys);
 
    b2Vec2 getBodyPosition() const;
    const sf::Vector2f& getPixelPositionf() const;
@@ -141,14 +126,12 @@ public:
 
    int getId() const;
 
-   const GameControllerInfo& getJoystickInfo() const;
-   void setJoystickInfo(const GameControllerInfo& joystickInfo);
-
    void impulse(float intensity);
    void damage(int damage, const sf::Vector2f& force = vector2fZero);
 
    std::shared_ptr<ExtraManager> getExtraManager() const;
 
+   PlayerControls& getControls();
 
 private:
 
@@ -185,9 +168,8 @@ private:
 
    void playDustAnimation();
    void traceJumpCurve();
+   void keyPressed(sf::Keyboard::Key key);
 
-
-private:
 
    std::shared_ptr<WeaponSystem> mWeaponSystem;
    std::shared_ptr<ExtraManager> mExtraManager;
@@ -195,10 +177,6 @@ private:
    std::shared_ptr<b2World> mWorld;
    b2Body* mBody = nullptr;
    b2Fixture* mBodyFixture = nullptr;
-
-   GameControllerInfo mJoystickInfo;
-   int mKeysPressed = 0;
-   bool mControllerRunPressed = false;
 
    sf::Vector2f mPixelPositionf;
    sf::Vector2i mPixelPositioni;
@@ -252,7 +230,6 @@ private:
    std::shared_ptr<Animation> mCrouchRightAligned;
    std::shared_ptr<Animation> mCrouchLeftAligned;
 
-
    std::shared_ptr<Animation> mJumpInitRightAligned;
    std::shared_ptr<Animation> mJumpUpRightAligned;
    std::shared_ptr<Animation> mJumpMidairRightAligned;
@@ -270,6 +247,7 @@ private:
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
 
+   PlayerControls mControls;
    PlayerClimb mClimb;
    PlayerJump mJump;
 

@@ -157,10 +157,10 @@ void Player::initialize()
 
    mJump.mDustAnimation = std::bind(&Player::playDustAnimation, this);
    mJump.mRemoveClimbJoint = std::bind(&PlayerClimb::removeClimbJoint, mClimb);
+   mControls.addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
 
    if (mTexture.loadFromFile("data/sprites/player.png"))
    {
-      // mSprite.scale(4.0f, 4.0f);
       mSprite.setTexture(mTexture);
    }
    else
@@ -522,10 +522,13 @@ float Player::getMaxVelocity() const
       return PhysicsConfiguration::getInstance().mPlayerSpeedMaxWater;
    }
 
-   if ((mKeysPressed & KeyPressedRun) || mControllerRunPressed)
-   {
-      return PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
-   }
+   // running is actually not supported
+   // do we need an extra for higher speeds?
+   //
+   // if (mKeysPressed & KeyPressedRun)
+   // {
+   //    return PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
+   // }
 
    if (isInAir())
    {
@@ -537,28 +540,11 @@ float Player::getMaxVelocity() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool Player::isLookingAround() const
-{
-  if (mKeysPressed & KeyPressedLook)
-  {
-    return true;
-  }
-
-  if (isControllerUsed())
-  {
-    return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-  }
-
-  return false;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
-   auto axisValues = mJoystickInfo.getAxisValues();
+   auto axisValues = mControls.getJoystickInfo().getAxisValues();
 
-   if (isLookingAround())
+   if (mControls.isLookingAround())
    {
       return 0.0f;
    }
@@ -568,7 +554,7 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    auto axisValueNormalized = axisValues[static_cast<size_t>(axisValue)] / 32767.0f;
 
    // digital input
-   const auto hatValue = mJoystickInfo.getHatValues().at(0);
+   const auto hatValue = mControls.getJoystickInfo().getHatValues().at(0);
    const auto dpadLeftPressed  = hatValue & SDL_HAT_LEFT;
    const auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
 
@@ -621,95 +607,6 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool Player::isMovingLeft() const
-{
-  if (isControllerUsed())
-  {
-     auto axisValues = mJoystickInfo.getAxisValues();
-     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-     auto hatValue = mJoystickInfo.getHatValues().at(0);
-     auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
-     auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
-
-     if (dpadLeftPressed)
-     {
-        xl = -1.0f;
-     }
-     else if (dpadRightPressed)
-     {
-        xl = 1.0f;
-     }
-
-     if (fabs(xl) >  0.3f)
-     {
-        if (xl < 0.0f)
-        {
-           return true;
-        }
-     }
-  }
-  else
-  {
-     if (mKeysPressed & KeyPressedLeft)
-     {
-        return true;
-     }
-  }
-
-  return false;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-bool Player::isMovingRight() const
-{
-  if (isControllerUsed())
-  {
-     auto axisValues = mJoystickInfo.getAxisValues();
-     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-     auto hatValue = mJoystickInfo.getHatValues().at(0);
-     auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
-     auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
-
-     if (dpadLeftPressed)
-     {
-        xl = -1.0f;
-     }
-     else if (dpadRightPressed)
-     {
-        xl = 1.0f;
-     }
-
-     if (fabs(xl)> 0.3f)
-     {
-        if (xl > 0.0f)
-        {
-           return true;
-        }
-     }
-  }
-  else
-  {
-     if (mKeysPressed & KeyPressedRight)
-     {
-        return true;
-     }
-  }
-
-  return false;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-bool Player::isMoving() const
-{
-   return isMovingLeft() || isMovingRight();
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isPointingRight() const
 {
    return !mPointsToLeft;
@@ -731,12 +628,12 @@ void Player::updatePlayerOrientation()
       return;
    }
 
-   if (isControllerUsed())
+   if (mControls.isControllerUsed())
    {
-      auto axisValues = mJoystickInfo.getAxisValues();
+      auto axisValues = mControls.getJoystickInfo().getAxisValues();
       int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
       auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-      auto hatValue = mJoystickInfo.getHatValues().at(0);
+      auto hatValue = mControls.getJoystickInfo().getHatValues().at(0);
       auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
       auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
       if (dpadLeftPressed)
@@ -762,12 +659,12 @@ void Player::updatePlayerOrientation()
    }
    else
    {
-      if (mKeysPressed & KeyPressedLeft)
+      if (mControls.hasFlag(KeyPressedLeft))
       {
          mPointsToLeft = true;
       }
 
-      if (mKeysPressed & KeyPressedRight)
+      if (mControls.hasFlag(KeyPressedRight))
       {
          mPointsToLeft = false;
       }
@@ -778,19 +675,19 @@ void Player::updatePlayerOrientation()
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
-   if (mKeysPressed & KeyPressedLook)
+   if (mControls.hasFlag(KeyPressedLook))
    {
       return 0.0f;
    }
 
    float desiredVel = 0.0f;
 
-   if (mKeysPressed & KeyPressedLeft)
+   if (mControls.hasFlag(KeyPressedLeft))
    {
       desiredVel = b2Max(speed.currentVelocity.x - speed.acceleration, -speed.velocityMax);
    }
 
-   if (mKeysPressed & KeyPressedRight)
+   if (mControls.hasFlag(KeyPressedRight))
    {
       desiredVel = b2Min(speed.currentVelocity.x + speed.acceleration, speed.velocityMax);
    }
@@ -800,12 +697,12 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
    // b) movement is opposite to given direction
    // c) no movement at all
    const auto noMovementToLeftOrRight =
-         (!(mKeysPressed & KeyPressedLeft))
-      && (!(mKeysPressed & KeyPressedRight));
+         (!(mControls.hasFlag(KeyPressedLeft)))
+      && (!(mControls.hasFlag(KeyPressedRight)));
 
    const auto velocityOppositeToGivenDir =
-         (speed.currentVelocity.x < -0.01f && mKeysPressed & KeyPressedRight)
-      || (speed.currentVelocity.x >  0.01f && mKeysPressed & KeyPressedLeft);
+         (speed.currentVelocity.x < -0.01f && mControls.hasFlag(KeyPressedRight))
+      || (speed.currentVelocity.x >  0.01f && mControls.hasFlag(KeyPressedLeft));
 
    const auto noMovement = (fabs(desiredVel) < 0.0001f);
 
@@ -901,7 +798,7 @@ void Player::updateAnimation(const sf::Time& dt)
    }
 
    // run / crouch
-   else if (isMovingRight() && !inAir && !inWater && !lookActive)
+   else if (mControls.isMovingRight() && !inAir && !inWater && !lookActive)
    {
       if (mCrouching)
       {
@@ -912,7 +809,7 @@ void Player::updateAnimation(const sf::Time& dt)
          nextCycle = mRunRightAligned;
       }
    }
-   else if (isMovingLeft() && !inAir && !inWater && !lookActive)
+   else if (mControls.isMovingLeft() && !inAir && !inWater && !lookActive)
    {
       if (mCrouching)
       {
@@ -1023,13 +920,6 @@ void Player::updateAnimation(const sf::Time& dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool Player::isControllerUsed() const
-{
-  return !mJoystickInfo.getAxisValues().empty();
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getDesiredVelocity() const
 {
    const auto acceleration = getAcceleration();
@@ -1056,7 +946,7 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 {
   auto desiredVel = 0.0f;
 
-  if (isControllerUsed())
+  if (mControls.isControllerUsed())
   {
      // controller
      desiredVel = getVelocityFromController(speed);
@@ -1078,11 +968,11 @@ void Player::applyBeltVelocity(float& desiredVel)
   {
      if (getBeltVelocity() < 0.0f)
      {
-       if (isMovingRight())
+       if (mControls.isMovingRight())
        {
          desiredVel *= 0.5f;
        }
-       else if (isMovingLeft())
+       else if (mControls.isMovingLeft())
        {
          if (desiredVel > 0.0f)
          {
@@ -1098,11 +988,11 @@ void Player::applyBeltVelocity(float& desiredVel)
      }
      else if (getBeltVelocity() > 0.0f)
      {
-       if (isMovingLeft())
+       if (mControls.isMovingLeft())
        {
          desiredVel *= 0.5f;
        }
-       else if (isMovingRight())
+       else if (mControls.isMovingRight())
        {
          if (desiredVel < 0.0f)
          {
@@ -1230,14 +1120,16 @@ void Player::updatePortal()
 
    if (mPortalClock.getElapsedTime().asSeconds() > 1.0f)
    {
-      auto axisValues = mJoystickInfo.getAxisValues();
+      const auto& joystickInfo = mControls.getJoystickInfo();
+      const auto& axisValues = joystickInfo.getAxisValues();
       auto joystickPointsUp = false;
+
       if (!axisValues.empty())
       {
          auto dpadUpPressed = false;
-         if (!mJoystickInfo.getHatValues().empty())
+         if (!joystickInfo.getHatValues().empty())
          {
-            dpadUpPressed = mJoystickInfo.getHatValues().at(0) & SDL_HAT_UP;
+            dpadUpPressed = joystickInfo.getHatValues().at(0) & SDL_HAT_UP;
          }
 
          auto y1 = axisValues[1] / 32767.0f;
@@ -1245,7 +1137,7 @@ void Player::updatePortal()
       }
 
       if (
-            mKeysPressed & KeyPressedUp
+            mControls.hasFlag(KeyPressedUp)
          || joystickPointsUp
       )
       {
@@ -1262,20 +1154,6 @@ void Player::updatePortal()
          }
       }
    }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-const GameControllerInfo& Player::getJoystickInfo() const
-{
-   return mJoystickInfo;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::setJoystickInfo(const GameControllerInfo &joystickInfo)
-{
-   mJoystickInfo = joystickInfo;
 }
 
 
@@ -1362,22 +1240,6 @@ void Player::damage(int damage, const sf::Vector2f& force)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool Player::isControllerButtonPressed(int buttonEnum) const
-{
-  auto pressed = false;
-
-  auto gji = GameControllerIntegration::getInstance(0);
-  if (gji != nullptr)
-  {
-     auto buttonId = gji->getController()->getButtonId(static_cast<SDL_GameControllerButton>(buttonEnum));
-     pressed = (mJoystickInfo.getButtonValues()[static_cast<size_t>(buttonId)]);
-  }
-
-  return pressed;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnPlatform() const
 {
    const auto onPlatform =
@@ -1416,46 +1278,13 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-bool Player::isFireButtonPressed() const
-{
-  if (mKeysPressed & KeyPressedFire)
-  {
-    return true;
-  }
-
-  if (isControllerUsed())
-  {
-    return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_X);
-  }
-
-  return false;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-bool Player::isJumpButtonPressed() const
-{
-  if (mKeysPressed & KeyPressedJump)
-  {
-    return true;
-  }
-
-  if (isControllerUsed())
-  {
-     return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_A);
-  }
-
-  return false;
-}
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateFire()
 {
    // disabled for now
    //
-   if (isFireButtonPressed())
+   if (mControls.isFireButtonPressed())
    {
       fire();
    }
@@ -1524,12 +1353,14 @@ void Player::updateCrouch()
 {
    auto downPressed = false;
 
-   if (isControllerUsed())
+   if (mControls.isControllerUsed())
    {
-      auto axisValues = mJoystickInfo.getAxisValues();
+      const auto& joystickInfo = mControls.getJoystickInfo();
+      const auto& axisValues = joystickInfo.getAxisValues();
+
       int axisLeftY = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
       auto yl = axisValues[static_cast<size_t>(axisLeftY)] / 32767.0f;
-      auto hatValue = mJoystickInfo.getHatValues().at(0);
+      const auto& hatValue = joystickInfo.getHatValues().at(0);
       auto dpadDownPressed = hatValue & SDL_HAT_DOWN;
 
       if (dpadDownPressed)
@@ -1547,7 +1378,7 @@ void Player::updateCrouch()
    }
    else
    {
-      downPressed = mKeysPressed & KeyPressedDown;
+      downPressed = mControls.hasFlag(KeyPressedDown);
    }
 
    // if the head touches something while crouches, keep crouching
@@ -1650,9 +1481,9 @@ void Player::update(const sf::Time& dt)
    updateFire();
    updateVelocity();
    updatePlayerOrientation();
-   mJump.update(mBody, isInAir(), isInWater(), isCrouching(), mClimb.isClimbing(), isJumpButtonPressed());
+   mJump.update(mBody, isInAir(), isInWater(), isCrouching(), mClimb.isClimbing(), mControls);
    updateDash();
-   mClimb.update(mBody, mKeysPressed, isInAir());
+   mClimb.update(mBody, mControls, isInAir());
    updatePlatformMovement(dt);
    updatePixelPosition();
    updateFootsteps();
@@ -1960,20 +1791,6 @@ void Player::setStartPixelPosition(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-int Player::getKeysPressed() const
-{
-   return mKeysPressed;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::setKeysPressed(int keysPressed)
-{
-   mKeysPressed = keysPressed;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 b2Vec2 Player::getBodyPosition() const
 {
    return mBody->GetPosition();
@@ -1994,7 +1811,7 @@ namespace
 //----------------------------------------------------------------------------------------------------------------------
 void Player::traceJumpCurve()
 {
-   if (isJumpButtonPressed())
+   if (mControls.isJumpButtonPressed())
    {
       if (!jumpStarted)
       {
@@ -2024,6 +1841,38 @@ void Player::traceJumpCurve()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::keyPressed(sf::Keyboard::Key key)
+{
+   if (key == sf::Keyboard::Space)
+   {
+      mJump.jump();
+   }
+
+   if (key == sf::Keyboard::Return)
+   {
+      Level::getCurrentLevel()->toggleMechanisms();
+   }
+
+   if (key == sf::Keyboard::Z)
+   {
+      updateDash(Dash::Left);
+   }
+
+   if (key == sf::Keyboard::X)
+   {
+      updateDash(Dash::Right);
+   }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+PlayerControls& Player::getControls()
+{
+   return mControls;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelPosition()
 {
    // sync player sprite with with box2d data
@@ -2044,131 +1893,3 @@ void Player::updatePreviousBodyState()
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-void Player::keyboardKeyPressed(sf::Keyboard::Key key)
-{
-   if (GameControllerIntegration::getCount() > 0)
-   {
-      return;
-   }
-
-   if (key == sf::Keyboard::Space)
-   {
-      mKeysPressed |= KeyPressedJump;
-      mJump.jump();
-   }
-
-   if (key == sf::Keyboard::Return)
-   {
-      Level::getCurrentLevel()->toggleMechanisms();
-   }
-
-   if (key == sf::Keyboard::LShift)
-   {
-      mKeysPressed |= KeyPressedLook;
-   }
-
-   if (key == sf::Keyboard::Up)
-   {
-      mKeysPressed |= KeyPressedUp;
-   }
-
-   if (key == sf::Keyboard::Down)
-   {
-      mKeysPressed |= KeyPressedDown;
-   }
-
-   if (key == sf::Keyboard::Left)
-   {
-      mKeysPressed |= KeyPressedLeft;
-   }
-
-   if (key == sf::Keyboard::Right)
-   {
-      mKeysPressed |= KeyPressedRight;
-   }
-
-   if (key == sf::Keyboard::LAlt)
-   {
-      mKeysPressed |= KeyPressedRun;
-   }
-
-   if (key == sf::Keyboard::LControl)
-   {
-      mKeysPressed |= KeyPressedFire;
-   }
-
-   if (key == sf::Keyboard::Z)
-   {
-      updateDash(Dash::Left);
-   }
-
-   if (key == sf::Keyboard::X)
-   {
-      updateDash(Dash::Right);
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::keyboardKeyReleased(sf::Keyboard::Key key)
-{
-   if (GameControllerIntegration::getCount() > 0)
-   {
-      return;
-   }
-
-   if (key == sf::Keyboard::LShift)
-   {
-      mKeysPressed &= ~KeyPressedLook;
-   }
-
-   if (key == sf::Keyboard::Up)
-   {
-      mKeysPressed &= ~KeyPressedUp;
-   }
-
-   if (key == sf::Keyboard::Down)
-   {
-      mKeysPressed &= ~KeyPressedDown;
-   }
-
-   if (key == sf::Keyboard::Left)
-   {
-      mKeysPressed &= ~KeyPressedLeft;
-   }
-
-   if (key == sf::Keyboard::Right)
-   {
-      mKeysPressed &= ~KeyPressedRight;
-   }
-
-   if (key == sf::Keyboard::Space)
-   {
-      mKeysPressed &= ~KeyPressedJump;
-   }
-
-   if (key == sf::Keyboard::LAlt)
-   {
-      mKeysPressed &= ~KeyPressedRun;
-   }
-
-   if (key == sf::Keyboard::LControl)
-   {
-      mKeysPressed &= ~KeyPressedFire;
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::controllerRunButtonPressed()
-{
-   mControllerRunPressed = true;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::controllerRunButtonReleased()
-{
-   mControllerRunPressed = false;
-}

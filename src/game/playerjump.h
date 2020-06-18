@@ -1,5 +1,7 @@
 #pragma once
 
+#include "playercontrols.h"
+
 #include <SFML/Graphics.hpp>
 
 #include <functional>
@@ -15,7 +17,7 @@ struct PlayerJump
     void jumpImpulse(b2Body*);
     void jumpForce();
 
-    void update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, bool jumpButtonPressed);
+    void update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, const PlayerControls& controls);
 
     void updateJumpBuffer();
     void updateJump(b2Body*);
