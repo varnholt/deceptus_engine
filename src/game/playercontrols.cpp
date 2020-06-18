@@ -204,7 +204,7 @@ bool PlayerControls::isMovingLeft() const
 {
   if (isControllerUsed())
   {
-     auto axisValues = mJoystickInfo.getAxisValues();
+     const auto& axisValues = mJoystickInfo.getAxisValues();
      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
      auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
      auto hatValue = mJoystickInfo.getHatValues().at(0);
@@ -245,7 +245,7 @@ bool PlayerControls::isMovingRight() const
 {
   if (isControllerUsed())
   {
-     auto axisValues = mJoystickInfo.getAxisValues();
+     const auto& axisValues = mJoystickInfo.getAxisValues();
      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
      auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
      auto hatValue = mJoystickInfo.getHatValues().at(0);
