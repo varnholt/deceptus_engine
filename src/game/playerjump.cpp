@@ -9,7 +9,7 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, bool jumpButtonPressed)
+void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, const PlayerControls& controls)
 {
    mInAir = inAir;
    mInWater = inWater;
@@ -17,7 +17,7 @@ void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, 
    mCrouching = crouching;
    mClimbing = climbing;
 
-   mJumpButtonPressed = jumpButtonPressed;
+   mJumpButtonPressed = controls.isJumpButtonPressed();
 
    updateLostGroundContact();
    updateJump(body);

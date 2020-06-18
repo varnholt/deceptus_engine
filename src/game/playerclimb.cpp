@@ -26,14 +26,14 @@ class PlayerAABBQueryCallback : public b2QueryCallback
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerClimb::update(b2Body* playerBody, int32_t keysPressed, bool inAir)
+void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, bool inAir)
 {
    if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillClimb))
    {
       return;
    }
 
-   mKeysPressed = keysPressed;
+   mKeysPressed = controls.getKeysPressed();
 
    // http://www.iforce2d.net/b2dtut/world-querying
 

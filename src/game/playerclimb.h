@@ -1,5 +1,6 @@
 #pragma once
 
+#include "playercontrols.h"
 #include <Box2D/Box2D.h>
 #include <functional>
 
@@ -10,7 +11,7 @@ struct PlayerClimb
 {
    PlayerClimb() = default;
 
-   void update(b2Body* body, int32_t keysPressed, bool inAir);
+   void update(b2Body* body, const PlayerControls& controls, bool inAir);
    void removeClimbJoint();
    bool isClimbableEdge(b2ChainShape* shape, int currIndex);
    bool edgeMatchesMovement(const b2Vec2 &edgeDir);
