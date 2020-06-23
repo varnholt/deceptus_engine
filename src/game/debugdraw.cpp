@@ -120,7 +120,19 @@ void DebugDraw::DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
    target.draw(line, 2, sf::Lines);
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::DrawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
+{
+   sf::Vertex line[] =
+   {
+      sf::Vertex(DebugDraw::B2VecToSFVec(p) + sf::Vector2f{-3, 0}, DebugDraw::GLColorToSFML(color)),
+      sf::Vertex(DebugDraw::B2VecToSFVec(p) + sf::Vector2f{3, 0}, DebugDraw::GLColorToSFML(color)),
+      sf::Vertex(DebugDraw::B2VecToSFVec(p) + sf::Vector2f{0, -3}, DebugDraw::GLColorToSFML(color)),
+      sf::Vertex(DebugDraw::B2VecToSFVec(p) + sf::Vector2f{0, 3}, DebugDraw::GLColorToSFML(color))
+   };
 
+   target.draw(line, 4, sf::Lines);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::DrawSegment(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
@@ -210,6 +222,18 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
          || body->GetType() == b2_kinematicBody
       )
       {
+         // Draw position and velocity
+         DrawPoint(target, body->GetPosition(), b2Color(1.0f, 1.0f, 0.0f, 1.0f));
+         float norm = hypotf(body->GetLinearVelocity().x, body->GetLinearVelocity().y);
+
+         if (norm > b2_epsilon)
+         {
+            b2Vec2 normalizedVelocity{body->GetLinearVelocity().x / norm, body->GetLinearVelocity().y / norm};
+            normalizedVelocity.x *= std::clamp(norm / 5.0f, 0.10f, 1.25f);
+            normalizedVelocity.y *= std::clamp(norm / 5.0f, 0.10f, 1.25f);
+            DrawSegment(target, body->GetPosition(), body->GetPosition() + normalizedVelocity, b2Color(1.0f, norm / 5.0f, 0.0, 1.0f));
+         }
+         // Draw fixtures
          auto f = body->GetFixtureList();
          while (f)
          {

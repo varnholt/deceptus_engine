@@ -22,6 +22,7 @@ class DebugDraw
       static void DrawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
       static void DrawCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Color& color);
       static void DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color);
+      static void DrawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color);
       static void DrawSegment(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color);
       static void DrawTransform(sf::RenderTarget& target, const b2Transform& xf);
 
