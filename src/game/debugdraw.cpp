@@ -223,11 +223,16 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       )
       {
          // Draw position and velocity
-         b2Vec2 center{body->GetPosition().x, body->GetPosition().y};
-         b2Vec2 velocity{body->GetLinearVelocity().x, body->GetLinearVelocity().y};
-         DrawPoint(target, center, b2Color(1.0f, 1.0f, 0.0f, 1.0f));
-         DrawSegment(target, center, center + velocity, b2Color(1.0f, 0.0f, 1.0f, 1.0f));
-         
+         DrawPoint(target, body->GetPosition(), b2Color(1.0f, 1.0f, 0.0f, 1.0f));
+         float norm = hypotf(body->GetLinearVelocity().x, body->GetLinearVelocity().y);
+
+         if (norm > b2_epsilon)
+         {
+            b2Vec2 normalizedVelocity{body->GetLinearVelocity().x / norm, body->GetLinearVelocity().y / norm};
+            normalizedVelocity.x *= std::clamp(norm / 5.0f, 0.10f, 1.25f);
+            normalizedVelocity.y *= std::clamp(norm / 5.0f, 0.10f, 1.25f);
+            DrawSegment(target, body->GetPosition(), body->GetPosition() + normalizedVelocity, b2Color(1.0f, norm / 5.0f, 0.0, 1.0f));
+         }
          // Draw fixtures
          auto f = body->GetFixtureList();
          while (f)
