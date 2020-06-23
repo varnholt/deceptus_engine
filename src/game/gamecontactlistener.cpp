@@ -213,7 +213,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (isPlayer(fixtureNodeB))
             {
-               printf("collision with enemy\n");
+               // printf("collision with enemy\n");
                auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
                fixtureNodeA->collisionWithPlayer();
                Player::getCurrent()->damage(damage);
@@ -318,7 +318,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (isPlayer(fixtureNodeA))
             {
-               printf("collision with enemy\n");
+               // printf("collision with enemy\n");
                auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
                fixtureNodeB->collisionWithPlayer();
                Player::getCurrent()->damage(damage);
