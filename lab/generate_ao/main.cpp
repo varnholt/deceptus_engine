@@ -21,12 +21,12 @@ QImage blurImage(const QImage& inputImage)
    auto blur = new QGraphicsBlurEffect();
    blur->setBlurRadius(blurRadius);
 
-   QGraphicsPixmapItem item;
-   item.setPixmap(QPixmap::fromImage(inputImage));
-   item.setGraphicsEffect(blur);
+   auto item = new QGraphicsPixmapItem();
+   item->setPixmap(QPixmap::fromImage(inputImage));
+   item->setGraphicsEffect(blur);
 
    QGraphicsScene scene;
-   scene.addItem(&item);
+   scene.addItem(item);
 
    QImage outputImage(inputImage.size(), QImage::Format_ARGB32);
    outputImage.fill(Qt::transparent);
@@ -79,7 +79,6 @@ int32_t main(int32_t argc, char* argv[])
    const QImage source(fileInfo.filePath());
    const QImage result = blurImage(source);
    result.save(outputFilename);
-
    std::cout << "[x] written ao texture to: " << outputFilename.toStdString() << std::endl;
 
    return 0;
