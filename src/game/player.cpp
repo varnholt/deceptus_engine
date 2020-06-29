@@ -1601,7 +1601,21 @@ void Player::updateAtmosphere()
    bool inWater = tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft;
    setInWater(inWater);
 
+#ifdef JUMP_GRAVITY_SCALING
+   // entering water
+   if (inWater && !wasInwater)
+   {
+      mBody->SetGravityScale(0.5f);
+   }
+
+   // leaving water
+   if (!inWater && wasInwater)
+   {
+      mBody->SetGravityScale(1.0f);
+   }
+#else
    mBody->SetGravityScale(inWater ? 0.5f : 1.0f);
+#endif
 
    if (!wasInwater && isInWater())
    {

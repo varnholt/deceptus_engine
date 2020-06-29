@@ -6,11 +6,20 @@
 #include "physicsconfiguration.h"
 
 #include <Box2D/Box2D.h>
+#include <iostream>
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, const PlayerControls& controls)
 {
+#ifdef JUMP_GRAVITY_SCALING
+   if (mInAir && !inAir)
+   {
+      // std::cout << "reset" << std::endl;
+      body->SetGravityScale(1.0f);
+   }
+#endif
+
    mInAir = inAir;
    mInWater = inWater;
 
@@ -94,6 +103,12 @@ void PlayerJump::updateJump(b2Body* body)
      body->ApplyForceToCenter(b2Vec2(0.0f, -force), true );
 
      mJumpSteps--;
+
+     if (mJumpSteps == 0)
+     {
+        body->SetGravityScale(1.35);
+        // std::cout << "blam" << std::endl;
+     }
    }
    else
    {
