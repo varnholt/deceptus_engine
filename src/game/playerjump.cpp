@@ -18,6 +18,11 @@ void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, 
       // std::cout << "reset" << std::endl;
       body->SetGravityScale(1.0f);
    }
+
+   if (mInWater)
+   {
+      body->SetGravityScale(0.5f);
+   }
 #endif
 
    mInAir = inAir;
