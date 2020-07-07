@@ -17,7 +17,7 @@
         "player_speed_max_walk": 2.5,
         "player_speed_max_water": 1.5,
         "player_speed_max_air": 2.8,
-        "player_dash_steps": 30,
+        "player_dash_steps": 40,
         "player_dash_factor": 5,
         "timestep": 0.0285714287310839
     }
