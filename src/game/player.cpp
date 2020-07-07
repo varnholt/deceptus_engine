@@ -1545,8 +1545,14 @@ void Player::updateDash(Dash dir)
       mDashSteps = PhysicsConfiguration::getInstance().mPlayerDashSteps;
       mDashDir = dir;
 
+#ifndef JUMP_GRAVITY_SCALING
       // disable gravity for player while dash is active
+      // but only do this if gravity scaling is not used
       mBody->SetGravityScale(0.0f);
+      mDashSteps = 30; // hardcoded to keep it working
+#else
+
+#endif
    }
 
    if (!isDashActive() || mDashDir == Dash::None)
