@@ -1,11 +1,10 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <memory>
 #include <vector>
 
-class PackTexture;
+struct PackTexture;
 
 namespace Ui {
 class MainWindow;
@@ -36,4 +35,3 @@ public slots:
   void setSize();
 };
 
-#endif // MAINWINDOW_H
