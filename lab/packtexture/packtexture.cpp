@@ -6,10 +6,10 @@
 #include <QPainter>
 
 
-void PackTexture::load(const QString& filename)
+bool PackTexture::load(const QString& filename)
 {
    filename_ = filename;
-   image_.load(filename_);
+   return image_.load(filename_);
 }
 
 
@@ -93,7 +93,9 @@ void PackTexture::dump()
    QImage out(textureSize_, textureSize_, image_.format());
    QPainter painter(&out);
 
-   std::ofstream uvFile(QString("%1.uv").arg(QFileInfo(filename_).baseName()).toStdString());
+   const auto uvFilename = QString("%1_tiles.uv").arg(QFileInfo(filename_).baseName()).toStdString();
+   std::cout << "[x] dumping uvs to: " << uvFilename << std::endl;
+   std::ofstream uvFile(uvFilename);
    auto x = 0;
    auto y = 0;
    auto progress = 0;
@@ -121,11 +123,15 @@ void PackTexture::dump()
 
    painter.end();
 
-   out.save(QString("%1_tiles.png").arg(QFileInfo(filename_).baseName()));
+   const auto textureFilename = QString("%1_tiles.png").arg(QFileInfo(filename_).baseName());
+   std::cout << "[x] dumping texture to: " << textureFilename.toStdString() << std::endl;
+   out.save(textureFilename);
 
    if (updateProgress_)
    {
       updateProgress_(100);
    }
+
+   std::cout << "[x] done!" << std::endl;
 }
 

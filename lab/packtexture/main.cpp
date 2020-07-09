@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
          if (!ok)
          {
-            std::cerr << "bad value for size parameter" << std::endl;
+            std::cerr << "[!] bad value for size parameter" << std::endl;
             parser.showHelp(1);
          }
 
@@ -53,13 +53,17 @@ int main(int argc, char *argv[])
          auto it = std::find(supportedValues.begin(), supportedValues.end(), size);
          if (it == supportedValues.end())
          {
-            std::cerr << "bad value for size parameter" << std::endl;
+            std::cerr << "[!] bad value for size parameter" << std::endl;
             parser.showHelp(2);
          }
       }
 
       pt.size_ = size;
-      pt.load(parser.value(inputOption));
+      if (!pt.load(parser.value(inputOption)))
+      {
+         std::cerr << "[!] unable to load file: " << parser.value(inputOption).toStdString() << std::endl;
+         exit(3);
+      }
       pt.pack();
       pt.dump();
 
