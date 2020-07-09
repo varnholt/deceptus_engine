@@ -8,7 +8,7 @@ struct PackTexture
 {
    PackTexture() = default;
 
-   void load(const QString& filename);
+   bool load(const QString& filename);
    void pack();
    void dump();
 
