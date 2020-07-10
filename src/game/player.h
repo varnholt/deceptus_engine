@@ -133,6 +133,7 @@ public:
 
    PlayerControls& getControls();
 
+
 private:
 
    void createPlayerBody();
@@ -150,6 +151,7 @@ private:
    void updateCrouch();
    void updateHardLanding();
    void updateGroundAngle();
+   void updateDeadFixtures();
 
    bool isDashActive() const;
    void resetDash();
@@ -176,7 +178,10 @@ private:
 
    std::shared_ptr<b2World> mWorld;
    b2Body* mBody = nullptr;
+
+   static const int32_t sFootCount = 4u;
    b2Fixture* mBodyFixture = nullptr;
+   b2Fixture* mFootFixtures[sFootCount];
 
    sf::Vector2f mPixelPositionf;
    sf::Vector2i mPixelPositioni;

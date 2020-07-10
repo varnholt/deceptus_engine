@@ -392,12 +392,11 @@ void Player::createFeet()
 
    const auto width  = PLAYER_ACTUAL_WIDTH;
    const auto height = PLAYER_ACTUAL_HEIGHT;
-   const auto feetCount = 4u;
-   const auto feetRadius = 0.16f / static_cast<float>(feetCount);
+   const auto feetRadius = 0.16f / static_cast<float>(sFootCount);
    const auto feetDist = 0.0f;
-   const auto feetOffset = static_cast<float>(feetCount) * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
+   const auto feetOffset = static_cast<float>(sFootCount) * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
 
-   for (auto i = 0u; i < feetCount; i++)
+   for (auto i = 0u; i < sFootCount; i++)
    {
       b2FixtureDef fixtureDefFeet;
       fixtureDefFeet.density = 1.f;
@@ -412,11 +411,12 @@ void Player::createFeet()
       feetShape.m_radius = feetRadius;
       fixtureDefFeet.shape = &feetShape;
 
-      auto feet = mBody->CreateFixture(&fixtureDefFeet);
+      auto foot = mBody->CreateFixture(&fixtureDefFeet);
+      mFootFixtures[i] = foot;
 
       auto objectDataFeet = new FixtureNode(this);
       objectDataFeet->setType(ObjectTypePlayer);
-      feet->SetUserData(static_cast<void*>(objectDataFeet));
+      foot->SetUserData(static_cast<void*>(objectDataFeet));
    }
 
    // attach foot sensor shape
@@ -1733,9 +1733,24 @@ void Player::fire()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateDeadFixtures()
+{
+   for (int32_t i = 0; i < sFootCount; i++)
+   {
+      mFootFixtures[i]->SetSensor(mDead);
+   }
+
+   mBodyFixture->SetSensor(mDead);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::die()
 {
    mDead = true;
+
+   updateDeadFixtures();
+
    Audio::getInstance()->playSample("death.wav");
 }
 
@@ -1771,6 +1786,9 @@ void Player::reset()
    mDashSteps = 0;
    resetDash();
    mDead = false;
+
+   // fixtures are no longer dead
+   updateDeadFixtures();
 }
 
 
