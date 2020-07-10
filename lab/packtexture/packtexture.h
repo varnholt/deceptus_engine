@@ -12,11 +12,11 @@ struct PackTexture
    void pack();
    void dump();
 
-   int size_ = 512;
-   int textureSize_ = 0;
-   QImage image_;
-   QString filename_;
-   std::vector<Quad> quads_;
-   std::function<void(int)> updateProgress_;
+   int mSize = 512;
+   int mTextureSize = 0;
+   QImage mImage;
+   QString mFilename;
+   std::vector<Quad> mQuads;
+   std::function<void(int)> mUpdateProgress;
 };
 

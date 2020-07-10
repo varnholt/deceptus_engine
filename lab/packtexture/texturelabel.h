@@ -7,10 +7,10 @@ class TextureLabel : public QLabel
 {
 
 public:
-   QPixmap pixmap_;
-   std::vector<Quad>* quads_ = nullptr;
-   float scaleX_ = 1.0f;
-   float scaleY_ = 1.0f;
+   QPixmap mPixmap;
+   std::vector<Quad>* mQuads = nullptr;
+   float mScaleX = 1.0f;
+   float mScaleY = 1.0f;
 
 
 public:
