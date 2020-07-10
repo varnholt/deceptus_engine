@@ -11,19 +11,19 @@ const auto defaultSize = 512;
 
 MainWindow::MainWindow(QWidget *parent)
  : QMainWindow(parent),
-   ui_(new Ui::MainWindow)
+   mUi(new Ui::MainWindow)
 {
-   ui_->setupUi(this);
+   mUi->setupUi(this);
 
-   auto menu = ui_->menuBar_->addMenu(tr("file"));
+   auto menu = mUi->menuBar_->addMenu(tr("file"));
    menu->addAction(tr("load"), this, &MainWindow::load);
    menu->addAction(tr("pack"), this, &MainWindow::pack);
 
-   auto options = ui_->menuBar_->addMenu(tr("options"));
+   auto options = mUi->menuBar_->addMenu(tr("options"));
 
-   sizes_ = {1024, 512, 256, 128, 64, 32, 24, 16};
+   mSizes = {1024, 512, 256, 128, 64, 32, 24, 16};
 
-  std::for_each(std::begin(sizes_), std::end(sizes_), [&](auto val) {
+  std::for_each(std::begin(mSizes), std::end(mSizes), [&](auto val) {
      auto option = options->addAction(tr("%1x%1").arg(val), this, &MainWindow::setSize);
      option->setCheckable(true);
 
@@ -32,18 +32,18 @@ MainWindow::MainWindow(QWidget *parent)
         option->setChecked(true);
      }
 
-     sizeActions_.push_back(option);
+     mSizeActions.push_back(option);
   });
 
-   packTexture_ = std::make_unique<PackTexture>();
-   packTexture_->size_ = defaultSize;
-   packTexture_->updateProgress_ = [&](int value){ui_->progressBar_->setValue(value);};
+   mPackTexture = std::make_unique<PackTexture>();
+   mPackTexture->mSize = defaultSize;
+   mPackTexture->mUpdateProgress = [&](int value){mUi->progressBar_->setValue(value);};
 }
 
 
 MainWindow::~MainWindow()
 {
-   delete ui_;
+   delete mUi;
 }
 
 
@@ -56,11 +56,11 @@ void MainWindow::load()
 
    if (!filename.isEmpty())
    {
-      packTexture_->load(filename);
-      QPixmap pm = QPixmap::fromImage(packTexture_->image_);
-      ui_->textureLabel_->pixmap_ = pm.scaled(512, 512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-      ui_->textureLabel_->scaleX_ = 512.0f / pm.width();
-      ui_->textureLabel_->scaleY_ = 512.0f / pm.height();
+      mPackTexture->load(filename);
+      QPixmap pm = QPixmap::fromImage(mPackTexture->mImage);
+      mUi->textureLabel_->mPixmap = pm.scaled(512, 512, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+      mUi->textureLabel_->mScaleX = 512.0f / pm.width();
+      mUi->textureLabel_->mScaleY = 512.0f / pm.height();
       fileSettings.setValue("path", QFileInfo(filename).absolutePath());
       fileSettings.sync();
    }
@@ -69,22 +69,22 @@ void MainWindow::load()
 
 void MainWindow::pack()
 {
-   ui_->info_->clear();
-   ui_->info_->setText(tr("detecting empty areas..."));
-   packTexture_->pack();
-   ui_->textureLabel_->quads_ = &packTexture_->quads_;
-   ui_->textureLabel_->repaint();
-   ui_->info_->setText(tr("creating texture..."));
-   packTexture_->dump();
-   ui_->info_->setText(tr("created %1x%1px texture").arg(packTexture_->textureSize_));
+   mUi->info_->clear();
+   mUi->info_->setText(tr("detecting empty areas..."));
+   mPackTexture->pack();
+   mUi->textureLabel_->mQuads = &mPackTexture->mQuads;
+   mUi->textureLabel_->repaint();
+   mUi->info_->setText(tr("creating texture..."));
+   mPackTexture->dump();
+   mUi->info_->setText(tr("created %1x%1px texture").arg(mPackTexture->mTextureSize));
 }
 
 
 void MainWindow::setSize()
 {
-   auto it = std::find_if(std::begin(sizeActions_), std::end(sizeActions_), [&](auto action){return action == sender();});
-   std::for_each(std::begin(sizeActions_), std::end(sizeActions_), [&](auto action){action->setChecked(false);});
+   auto it = std::find_if(std::begin(mSizeActions), std::end(mSizeActions), [&](auto action){return action == sender();});
+   std::for_each(std::begin(mSizeActions), std::end(mSizeActions), [&](auto action){action->setChecked(false);});
    (*it)->setChecked(true);
-   auto size = sizes_[it - sizeActions_.begin()];
-   packTexture_->size_ = size;
+   auto size = mSizes[it - mSizeActions.begin()];
+   mPackTexture->mSize = size;
 }

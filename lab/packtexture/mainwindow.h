@@ -14,24 +14,20 @@ class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
-
-private:
-
-  std::vector<int> sizes_;
-  std::vector<QAction*> sizeActions_;
-
-  Ui::MainWindow* ui_;
-  std::unique_ptr<PackTexture> packTexture_;
-
-
 public:
-  explicit MainWindow(QWidget *parent = 0);
-  ~MainWindow();
+   explicit MainWindow(QWidget *parent = 0);
+   ~MainWindow();
 
 public slots:
+   void load();
+   void pack();
+   void setSize();
 
-  void load();
-  void pack();
-  void setSize();
+private:
+   std::vector<int> mSizes;
+   std::vector<QAction*> mSizeActions;
+
+   Ui::MainWindow* mUi;
+   std::unique_ptr<PackTexture> mPackTexture;
 };
 

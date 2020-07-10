@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
    if (parser.isSet(inputOption))
    {
       PackTexture pt;
-      int32_t size = pt.size_;
+      int32_t size = pt.mSize;
 
       if (parser.isSet(sizeOption))
       {
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
          }
       }
 
-      pt.size_ = size;
+      pt.mSize = size;
       if (!pt.load(parser.value(inputOption)))
       {
          std::cerr << "[!] unable to load file: " << parser.value(inputOption).toStdString() << std::endl;
