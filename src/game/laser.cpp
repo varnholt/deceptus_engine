@@ -90,7 +90,10 @@ void Laser::update(const sf::Time& dt)
       mOn = false;
    }
 
-
+   // shift tile index in right direction depending on the on/off state
+   //
+   // if the laser is switched on, move the tile index to the left
+   // if the laser is switched off, move the tile index to the right
    if ( (mOn && mTileIndex > 0) || (!mOn && mTileIndex < 6) )
    {
       // off sprite is rightmost, on sprite is leftmost
@@ -104,11 +107,37 @@ void Laser::update(const sf::Time& dt)
       {
          mTileIndex = 0;
       }
-      if (mTileIndex > 6)
+      else if (mTileIndex > 6)
       {
          mTileIndex = 6;
       }
    }
+
+   //   +---------+-----------+
+   //   | frame   | state     |
+   //   +---------+-----------+
+   //   |  0 -  1 | disabled  |
+   //   |  2 -  9 | enabling  |
+   //   | 10 - 16 | enabled   |
+   //   | 17 - 21 | disabling |
+   //   +---------+-----------+
+
+   // static constexpr std::pair<int32_t, int32_t> rangeDisabled{0, 1};
+   // static constexpr std::pair<int32_t, int32_t> rangeEnabling{2, 9};
+   // static constexpr std::pair<int32_t, int32_t> rangeEnabled{10, 16};
+   // static constexpr std::pair<int32_t, int32_t> rangeDisabling{17, 21};
+
+   // disabled (!mOn and mTileIndex inside 0..1)
+   // loop 0..1
+
+   // enabled (mOn and mTileIndex inside 10..16)
+   // loop 10..16
+
+   // enabling (mOn and mTileIndex outside 10..16)
+   // go from 2..9, when 10 go to rangeEnabled[0]
+
+   // disabling (!mOn and mTileIndex outside 0..1)
+   // go from 17..21, when 21 to to rangeDisabled[1]
 }
 
 
