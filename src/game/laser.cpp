@@ -23,7 +23,7 @@ namespace
    static constexpr std::pair<int32_t, int32_t> rangeDisabled{0, 1};
    static constexpr std::pair<int32_t, int32_t> rangeEnabling{2, 9};
    static constexpr std::pair<int32_t, int32_t> rangeEnabled{10, 16};
-   static constexpr std::pair<int32_t, int32_t> rangeDisabling{17, 21};
+   static constexpr std::pair<int32_t, int32_t> rangeDisabling{17, 20};
 
    static constexpr auto rangeDisabledDelta  = rangeDisabled.second  - rangeDisabled.first;
    static constexpr auto rangeEnabledDelta   = rangeEnabled.second   - rangeEnabled.first;
@@ -103,6 +103,8 @@ void Laser::update(const sf::Time& dt)
       mOn = false;
    }
 
+   const auto previousTileIndex = mTileIndex;
+
    if (mVersion == MechanismVersion::Version1)
    {
       // shift tile index in right direction depending on the on/off state
@@ -141,7 +143,7 @@ void Laser::update(const sf::Time& dt)
 
       // disabled (!mOn and mTileIndex inside 0..1)
       // loop 0..1
-      if (!mOn && (mTileIndex >= rangeDisabled.first || mTileIndex <= rangeDisabled.second))
+      if (!mOn && mTileIndex >= rangeDisabled.first && mTileIndex <= rangeDisabled.second)
       {
          mTileAnimation += dt.asSeconds();
          mTileIndex = rangeDisabled.first + static_cast<int32_t>(mTileAnimation + mAnimationOffset) % (rangeDisabledDelta + 1);
@@ -149,7 +151,7 @@ void Laser::update(const sf::Time& dt)
 
       // enabled (mOn and mTileIndex inside 10..16)
       // loop 10..16
-      else if (mOn && (mTileIndex >= rangeEnabled.first || mTileIndex <= rangeEnabled.second))
+      else if (mOn && mTileIndex >= rangeEnabled.first && mTileIndex <= rangeEnabled.second)
       {
          mTileAnimation += dt.asSeconds() * 10.0f;
          mTileIndex = rangeEnabled.first + static_cast<int32_t>(mTileAnimation + mAnimationOffset) % (rangeEnabledDelta + 1);
@@ -194,7 +196,10 @@ void Laser::update(const sf::Time& dt)
    // {
    //    if (mGroupId == 2)
    //    {
-   //       std::cout << mGroupId << ": " << mTileIndex << std::endl;
+   //       if (previousTileIndex != mTileIndex)
+   //       {
+   //          std::cout << mGroupId << ": " << mTileIndex << std::endl;
+   //       }
    //    }
    // }
 }
