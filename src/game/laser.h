@@ -28,6 +28,12 @@ public:
       bool mOn = false;
    };
 
+   enum class MechanismVersion
+   {
+      Version1,
+      Version2
+   };
+
    Laser() = default;
 
    void draw(sf::RenderTarget& window) override;
@@ -41,7 +47,8 @@ public:
    );
 
    static void addObject(TmxObject* object);
-   static void addTiles();
+   static void addTilesVersion1();
+   static void addTilesVersion2();
    static void merge();
    static void collide(const sf::Rect<int32_t>& playerRect);
 
@@ -59,7 +66,8 @@ protected:
 
    static std::vector<TmxObject*> mObjects;
    static std::vector<std::shared_ptr<Laser>> mLasers;
-   static std::vector<std::array<int32_t, 9>> mTiles;
+   static std::vector<std::array<int32_t, 9>> mTilesVersion1;
+   static std::vector<std::array<int32_t, 9>> mTilesVersion2;
 
    std::vector<Signal> mSignalPlot;
 
@@ -76,7 +84,11 @@ protected:
    bool mOn = true;
    int32_t mTileIndex = 0;
    float mTileAnimation = 0.0f;
+   int32_t mAnimationOffset = 0;
    uint32_t mSignalIndex = 0;
    uint32_t mTime = 0u;
+   int32_t mGroupId = 0; // only for debugging purposes
+
+   MechanismVersion mVersion = MechanismVersion::Version1;
 };
 
