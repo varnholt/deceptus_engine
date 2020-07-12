@@ -254,7 +254,7 @@ void Level::loadTmx()
    sf::Clock elapsed;
 
    // parse tmx
-   std::cout << "[x] parsing tmx... " << std::endl;
+   std::cout << "[x] parsing tmx: " << mDescription->mFilename << std::endl;
 
    mTmxParser = std::make_unique<TmxParser>();
    mTmxParser->parse(mDescription->mFilename);
@@ -283,7 +283,13 @@ void Level::loadTmx()
          }
          else if (layer->mName == "lasers")
          {
-            mLasers = Laser::load(layer, tileset, path, mWorld);
+            const auto lasers = Laser::load(layer, tileset, path, mWorld);
+            mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
+         }
+         else if (layer->mName == "lasers_2") // support for dstar's new laser tileset
+         {
+            const auto lasers = Laser::load(layer, tileset, path, mWorld);
+            mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->mName == "levers")
          {
@@ -364,7 +370,7 @@ void Level::loadTmx()
          {
             TmxObject* tmxObject = object.second;
 
-            if (objectGroup->mName == "lasers")
+            if (objectGroup->mName == "lasers" || objectGroup->mName == "lasers_2")
             {
                Laser::addObject(tmxObject);
             }
