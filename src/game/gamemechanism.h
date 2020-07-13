@@ -1,5 +1,7 @@
 #pragma once
 
+#include "constants.h"
+
 #include "SFML/Graphics.hpp"
 
 #include <cstdint>
@@ -26,5 +28,6 @@ class GameMechanism
 
       int32_t mZ = 0;
       bool mEnabled = true;
+      MechanismVersion mVersion = MechanismVersion::Version1;
 };
 

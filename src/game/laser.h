@@ -28,12 +28,6 @@ public:
       bool mOn = false;
    };
 
-   enum class MechanismVersion
-   {
-      Version1,
-      Version2
-   };
-
    Laser() = default;
 
    void draw(sf::RenderTarget& window) override;
@@ -88,7 +82,5 @@ protected:
    uint32_t mSignalIndex = 0;
    uint32_t mTime = 0u;
    int32_t mGroupId = 0; // only for debugging purposes
-
-   MechanismVersion mVersion = MechanismVersion::Version1;
 };
 

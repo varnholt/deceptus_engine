@@ -57,6 +57,12 @@ enum class DeathReason
    TouchesDeadly,
 };
 
+enum class MechanismVersion
+{
+   Version1,
+   Version2
+};
+
 enum ZDepth
 {
    ZDepthBackgroundMin = 0,
