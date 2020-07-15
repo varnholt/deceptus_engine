@@ -18,26 +18,29 @@ config = {
 }
 
 ------------------------------------------------------------------------------------------------------------------------
-mFireTimer = 1
+mStartFireTimer = 1
 mFireInterval = 3000
-mFireReady = true
+mReadytoFire = true
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
-mX = 1.0
-mSpriteY = 24
+mX = -1.0
+mAlignmentOffset = 0
 mSpeed = 1.5
+
+mIdle = true
+
+SPRITE_WIDTH = 6 * 24
+SPRITE_HEIGHT = 5 * 24
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
-   updateSpriteRect(0, mSpriteY, 24, 24) -- x, y, width, height
-
    addSample("boom.wav")
    addWeapon(1000, 60, 0.1) -- interval, damage, radius
-   updateBulletTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
+   updateBulletTexture(0, "data/sprites/enemy_pirate_cannon.png", 144, 984, 48, 24) -- index, path, x, y, width, height
 end
 
 
@@ -46,10 +49,10 @@ function writeProperty(key, value)
    config[key] = value
 
    if (key == "alignment") then
-      if (value == "left") then
+      if (value == "right") then
          -- print("setting alignment to left")
-         mX = -1.0
-         mSpriteY = 0
+         mX = 1.0
+         mAlignmentOffset = 4 * SPRITE_HEIGHT
       end
    end
 end
@@ -58,27 +61,23 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function timeout(id)
    -- print(string.format("timeout: %d", id))
-   if (id == mFireTimer) then
-      fire()
+
+   if (id == mStartFireTimer) then
+      mReadytoFire = true
    end
+
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   mElapsed = 0.0
-   mSpriteIndex = 1
-
    fireWeapon(
       0,
       mPosition:getX() + mX * 16,
-      mPosition:getY() - 3,
+      mPosition:getY() - 12,
       mX * mSpeed,
       0.0
    );
-
-   updateSpriteRect(24, mSpriteY, 24, 24)
-   mFireReady = true
 end
 
 
@@ -104,26 +103,56 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   if (mFireReady == true) then
-      mFireReady = false
-      timer(mFireInterval, mFireTimer)
+
+   -- if timer elapsed, go from idle animation to fire animation
+   if (mReadytoFire) then
+      mReadytoFire = false
+      timer(mFireInterval, mStartFireTimer)
+      mIdle = false
+      mElapsed = 0
    end
 
    -- update sprite index
    mElapsed = mElapsed + dt
    index = mSpriteIndex
 
-   if (mSpriteIndex > 0) then
-      mSpriteIndex = 1 + math.floor(mElapsed * 10.0)
+   mSpriteIndex = math.floor(mElapsed * 10.0)
+
+   col = 0
+   row = 0
+
+   -- idle animation
+   if (mIdle) then
+      col = mSpriteIndex % 8
+      row = 3
+
+   -- fire animation
+   else
+      col = mSpriteIndex % 8
+      row = (math.floor(mSpriteIndex / 8)) % 3
+
+      -- fire the bullet at the right sprite index
+      if (col == 7 and row == 0) then
+         fire()
+      end
+
+      -- animation is done, go to idle animation
+      if (col == 7 and row == 2) then
+         mIdle = true
+      end
    end
 
-   if (mSpriteIndex > 7) then
-      mSpriteIndex = 0
-   end
+   -- print(string.format("col: %f, row: %f", col, row))
 
    if (index ~= mSpriteIndex) then
-      updateSpriteRect(mSpriteIndex * 24, mSpriteY, 24, 24)
+      updateSpriteRect(
+         col * SPRITE_WIDTH,
+         row * SPRITE_HEIGHT + mAlignmentOffset,
+         SPRITE_WIDTH,
+         SPRITE_HEIGHT
+      )
    end
+
 end
 
 
