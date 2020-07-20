@@ -14,7 +14,8 @@ ForestScene::ForestScene()
       const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
       mText.setFont(mFont);
       mText.setCharacterSize(12);
-      mText.setString("Congratulations!\nYou completed the game!");
+      // mText.setString("Congratulations!\nYou completed the game!");
+      mText.setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
       mText.setFillColor(sf::Color{232, 219, 243});
    }
    else
