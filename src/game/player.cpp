@@ -1764,6 +1764,7 @@ void Player::reset()
    mHardLandingCycles = 0;
 
    mBody->SetLinearVelocity(b2Vec2(0,0));
+   mBody->SetGravityScale(1.0);
 
    mClimb.removeClimbJoint();
 
