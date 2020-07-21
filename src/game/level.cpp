@@ -990,19 +990,23 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
    target.setView(*mLevelView);
 
-   const auto pPos = Player::getCurrent()->getPixelPositionf();
+   // draw elements that are supposed to glow / to be blurred here
 
+   // lasers have been removed here because dstar added the glow to the spriteset
+   //
+   // const auto pPos = Player::getCurrent()->getPixelPositionf();
+   //
    // draw lasers
-   for (auto laser : mLasers)
-   {
-      const auto lPos = std::dynamic_pointer_cast<Laser>(laser)->getPixelPosition();
-      if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
-      {
-         continue;
-      }
-
-      laser->draw(target);
-   }
+   // for (auto laser : mLasers)
+   // {
+   //    const auto lPos = std::dynamic_pointer_cast<Laser>(laser)->getPixelPosition();
+   //    if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
+   //    {
+   //       continue;
+   //    }
+   //
+   //    laser->draw(target);
+   // }
 }
 
 
