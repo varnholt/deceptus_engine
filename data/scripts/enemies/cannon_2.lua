@@ -116,7 +116,7 @@ function update(dt)
    mElapsed = mElapsed + dt
    index = mSpriteIndex
 
-   mSpriteIndex = math.floor(mElapsed * 10.0)
+   mSpriteIndex = math.floor(mElapsed * 20.0)
 
    col = 0
    row = 0
