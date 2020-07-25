@@ -213,7 +213,10 @@ function attack()
    if (mSpriteIndex == 6) then
       if (not mAttackLaunched) then
          mAttackLaunched = true
-         damage(50, mPointsLeft and -5000.0 or 5000.0, 0.0)
+
+         if (checkAttackDistance()) then
+            damage(50, mPointsLeft and -5000.0 or 5000.0, 0.0)
+         end
       end
    else
 
@@ -309,32 +312,34 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function checkAttackDistance()
+
+   -- check if player is within range
+   distanceToPlayerX = (mPosition:getX() - mPlayerPosition:getX()) / 24.0
+
+   if (math.abs(distanceToPlayerX) <= 1.5) then
+
+      distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+      if (math.abs(distanceToPlayerY) <= 1) then
+         return true
+      end
+
+   end
+
+   return false
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function canAttack()
-   can = false
 
    -- if an attack has started, finish the attack
    if (mAttackStarted) then
       return true
    end
 
-   -- check if player is within range
-   distanceToPlayerX = (mPosition:getX() - mPlayerPosition:getX()) / 24.0
-
-   -- print(distanceToPlayerX)
-
-   if (math.abs(distanceToPlayerX) <= 1.5) then
-
-      distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
-
-      -- print(distanceToPlayerY)
-
-      if (math.abs(distanceToPlayerY) <= 1) then
-         can = true
-      end
-
-   end
-
-   return can
+   return checkAttackDistance()
 end
 
 
