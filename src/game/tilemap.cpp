@@ -98,10 +98,12 @@ bool TileMap::load(
             // define its 4 corners
             sf::Vertex quad[4];
 
-            quad[0].position = sf::Vector2f(static_cast<float>( tx      * mTileSize.x), static_cast<float>( ty      * mTileSize.y));
-            quad[1].position = sf::Vector2f(static_cast<float>((tx + 1) * mTileSize.x), static_cast<float>( ty      * mTileSize.y));
-            quad[2].position = sf::Vector2f(static_cast<float>((tx + 1) * mTileSize.x), static_cast<float>((ty + 1) * mTileSize.y));
-            quad[3].position = sf::Vector2f(static_cast<float>( tx      * mTileSize.x), static_cast<float>((ty + 1) * mTileSize.y));
+            static constexpr auto size = 1;
+
+            quad[0].position = sf::Vector2f(static_cast<float>( tx         * mTileSize.x), static_cast<float>( ty         * mTileSize.y));
+            quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * mTileSize.x), static_cast<float>( ty         * mTileSize.y));
+            quad[2].position = sf::Vector2f(static_cast<float>((tx + size) * mTileSize.x), static_cast<float>((ty + size) * mTileSize.y));
+            quad[3].position = sf::Vector2f(static_cast<float>( tx         * mTileSize.x), static_cast<float>((ty + size) * mTileSize.y));
 
             // define its 4 texture coordinates
             quad[0].texCoords = sf::Vector2f(static_cast<float>( tu      * mTileSize.x), static_cast<float>( tv      * mTileSize.y));

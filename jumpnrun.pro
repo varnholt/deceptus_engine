@@ -130,6 +130,7 @@ SOURCES += \
    src/game/playerinfo.cpp \
     src/game/playerjump.cpp \
    src/game/rainoverlay.cpp \
+   src/game/room.cpp \
    src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
    src/game/spikeball.cpp \
@@ -289,6 +290,7 @@ HEADERS += \
     src/game/playerinfo.h \
     src/game/playerjump.h \
     src/game/rainoverlay.h \
+    src/game/room.h \
     src/game/savestate.h \
     src/game/scriptproperty.h \
     src/game/spikeball.h \

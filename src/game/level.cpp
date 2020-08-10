@@ -717,11 +717,6 @@ void Level::updateViews()
    auto levelViewX = cameraSystem.getX() + lookVector.x;
    auto levelViewY = cameraSystem.getY() + lookVector.y;
 
-   // resolves tearing
-   //
-   // levelViewX = floor(levelViewX);
-   // levelViewY = floor(levelViewY);
-
    mLevelView->reset(sf::FloatRect(levelViewX, levelViewY, mViewWidth, mViewHeight));
 
    for (auto i = 0; i < 3; i++)
