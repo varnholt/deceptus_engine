@@ -16,6 +16,7 @@
 #include "luanode.h"
 #include "physics.h"
 #include "portal.h"
+#include "room.h"
 #include "squaremarcher.h"
 #include "joystick/gamecontrollerinfo.h"
 
@@ -150,11 +151,15 @@ protected:
    );
 
    void load();
+   void loadTmx();
+   void loadCheckpoint();
+
+   void deserializeParallaxMap(TmxLayer* layer);
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
 
-   void deserializeParallaxMap(TmxLayer* layer);
-   void loadTmx();
+   std::vector<Room> mRooms;
+   std::optional<Room> mCurrentRoom;
 
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
@@ -223,8 +228,6 @@ protected:
    bool mScreenshot = false;
 
    // box2d
-
-   // box2d world
    std::map<b2Body*, b2Vec2*> mPointMap;
    std::map<b2Body*, size_t> mPointCountMap;
 
@@ -232,7 +235,5 @@ protected:
    std::vector<std::vector<b2Vec2>> mWorldChains;
 
    static Level* sCurrentLevel;
-   private:
-   void loadCheckpoint();
 };
 
