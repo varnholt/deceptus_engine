@@ -473,6 +473,10 @@ void Level::loadTmx()
                   tmxObject->mHeight
                );
             }
+            else if (objectGroup->mName == "rooms")
+            {
+               Room::deserialize(tmxObject, mRooms);
+            }
             else if (objectGroup->mName == "platform_paths")
             {
                if (tmxObject->mPolyLine)
