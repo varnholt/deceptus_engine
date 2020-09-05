@@ -38,36 +38,47 @@
 */
 
 
-Room::Room(const sf::IntRect& rect)
+Room::Room(const sf::FloatRect& rect)
 {
+   static int32_t sId = 0;
+
    mRects.push_back(rect);
+   mId = sId;
+   sId++;
 }
 
 
-Room::Room(const std::vector<sf::IntRect>& rect)
- : mRects(rect)
+std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p) const
 {
-}
+   const auto it = std::find_if(
+         mRects.begin(),
+         mRects.end(),
+         [p](const sf::FloatRect& rect){
+            return rect.contains(p);
+         }
+      );
 
-
-std::vector<sf::IntRect>::const_iterator Room::findRect(const sf::Vector2i& p) const
-{
-   const auto it = std::find_if(mRects.begin(),mRects.end(), [p](const sf::IntRect& rect){return rect.contains(p);});
    return it;
 }
 
 
-std::optional<sf::Vector2i> Room::correctedCamera(const sf::Vector2i& cameraCenter, const Room& /*activeRoom*/)
+void Room::correctedCamera(float& x, float& y) const
 {
+   if (mRects.empty())
+   {
+      return;
+   }
+
    // workflow (only for 'current' room)
    //
    // 1) check which in which rectangle the current camera center lies
-   //    -> find the right intrect
-   const auto rectIt =  findRect(cameraCenter);
+   //    -> find the right FloatRect
+   auto pos = sf::Vector2f{x, y};
+   const auto rectIt =  findRect(pos);
    if (rectIt == mRects.end())
    {
       // that's an error.
-      return {};
+      return;
    }
 
    // 2) check if
@@ -79,48 +90,48 @@ std::optional<sf::Vector2i> Room::correctedCamera(const sf::Vector2i& cameraCent
    const auto rect = *rectIt;
 
    const auto config = GameConfiguration::getInstance();
-   const auto halfWidth = config.mViewWidth / 2;
-   const auto halfHeight = config.mViewHeight / 2;
 
-   const auto l = cameraCenter + sf::Vector2i{- halfWidth, 0};
-   const auto r = cameraCenter + sf::Vector2i{  halfWidth, 0};
-   const auto u = cameraCenter + sf::Vector2i{0, - halfHeight};
-   const auto d = cameraCenter + sf::Vector2i{0,   halfHeight};
+   const auto halfWidth  = static_cast<float>(config.mViewWidth / 2.0f);
+   const auto halfHeight = static_cast<float>(config.mViewHeight / 2.0f);
 
-   bool corrected = false;
-   std::optional<sf::Vector2i> correctedRect = cameraCenter;
+   const auto l = pos + sf::Vector2f{- halfWidth, 0.0f      };
+   const auto r = pos + sf::Vector2f{  halfWidth, 0.0f      };
+   const auto u = pos + sf::Vector2f{0.0f,      - halfHeight};
+   const auto d = pos + sf::Vector2f{0.0f,        halfHeight};
 
    if (!rect.contains(l))
    {
       // camera center is out of left boundary
-      correctedRect->x = l.x + halfWidth;
-      corrected = true;
+      // std::cout << "correct left" << std::endl;
+      x = rect.left + halfWidth;
    }
    else if (!rect.contains(r))
    {
       // camera center is out of right boundary
-      correctedRect->x = r.x - halfWidth;
-      corrected = true;
+      // std::cout << "correct right" << std::endl;
+      x = rect.left + rect.width - halfWidth;
    }
 
    if (!rect.contains(u))
    {
       // camera center is out of upper boundary
-      correctedRect->y = u.y + halfHeight;
-      corrected = true;
+      y = rect.top + halfHeight;
    }
    else if (!rect.contains(d))
    {
       // camera center is out of lower boundary
-      correctedRect->y = d.y - halfHeight;
-      corrected = true;
+      y = rect.top + rect.height - halfHeight;
    }
-
-   return corrected ? correctedRect : std::optional<sf::Vector2i>{};
 }
 
 
-std::optional<Room> Room::find(const sf::Vector2i& p, const std::vector<Room>& rooms)
+std::optional<Room> Room::computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const
+{
+   return Room::find(cameraCenter, rooms);
+}
+
+
+std::optional<Room> Room::find(const sf::Vector2f& p, const std::vector<Room>& rooms)
 {
    const auto roomIt = std::find_if(rooms.begin(), rooms.end(), [p, rooms](const Room& r){
          const auto& it = r.findRect(p);
@@ -137,9 +148,22 @@ std::optional<Room> Room::find(const sf::Vector2i& p, const std::vector<Room>& r
 }
 
 
-
 void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
 {
+   // ignore invalid rects
+   const auto config = GameConfiguration::getInstance();
+   if (tmxObject->mWidth < config.mViewWidth)
+   {
+      std::cerr << "[!] ignoring rect, room width smaller than screen width" << std::endl;
+      return;
+   }
+
+   if (tmxObject->mHeight < config.mViewHeight)
+   {
+      std::cerr << "[!] ignoring rect, room height smaller than screen height" << std::endl;
+      return;
+   }
+
    // read key from tmx object
    std::istringstream f(tmxObject->mName);
    std::string key;
@@ -150,21 +174,22 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
 
    if (key.empty())
    {
-      std::cerr << "ignoring unnamed room" << std::endl;
+      std::cerr << "[!] ignoring unnamed room" << std::endl;
       return;
    }
 
+   auto rect = sf::FloatRect{
+      tmxObject->mX,
+      tmxObject->mY,
+      tmxObject->mWidth,
+      tmxObject->mHeight
+   };
+
+   // check if room already exists
    const auto it = std::find_if(rooms.begin(), rooms.end(), [key](const Room& r){
          return (r.mName == key);
       }
    );
-
-   auto rect = sf::IntRect{
-      static_cast<int32_t>(tmxObject->mX),
-      static_cast<int32_t>(tmxObject->mY),
-      static_cast<int32_t>(tmxObject->mWidth),
-      static_cast<int32_t>(tmxObject->mHeight)
-   };
 
    if (it == rooms.end())
    {
@@ -173,7 +198,7 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
       room.mName = key;
       rooms.push_back(room);
 
-      std::cout << "adding room: " << key << std::endl;
+      std::cout << "[i] adding room: " << key << std::endl;
    }
    else
    {
@@ -181,13 +206,13 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
       auto& room = *it;
 
       // test for overlaps
-      if (std::any_of(room.mRects.begin(), room.mRects.end(), [rect](const sf::IntRect& r){
+      if (std::any_of(room.mRects.begin(), room.mRects.end(), [rect](const sf::FloatRect& r){
                return r.intersects(rect);
             }
          )
       )
       {
-         std::cerr << "bad rect intersection for room " << key << std::endl;
+         std::cerr << "[!] bad rect intersection for room " << key << std::endl;
       }
 
       room.mRects.push_back(rect);
