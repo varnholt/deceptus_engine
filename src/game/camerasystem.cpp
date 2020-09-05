@@ -55,6 +55,26 @@ void CameraSystem::update(float viewWidth, float viewHeight)
 
    updateX();
    updateY();
+
+#ifdef ROOM_SYSTEM_ENABLED
+   if (mRoom.has_value())
+   {
+      mRoomX = mX;
+      mRoomY = mY;
+
+      mRoom->correctedCamera(mRoomX, mRoomY);
+
+      mX = mRoomInterpolation * mRoomX + (1.0f - mRoomInterpolation) * mX;
+      mY = mRoomInterpolation * mRoomY + (1.0f - mRoomInterpolation) * mY;
+
+      mRoomInterpolation += 0.01f;
+      mRoomInterpolation = std::min(mRoomInterpolation, 1.0f);
+   }
+   else
+   {
+      mRoomInterpolation = 0.0f;
+   }
+#endif
 }
 
 
@@ -151,6 +171,18 @@ void CameraSystem::updateY()
 
    const auto dy = (playerY - mY) / config.getDampingFactorY();
    mY += dy;
+}
+
+
+void CameraSystem::setRoom(const std::optional<Room>& room)
+{
+   if (mRoom->mId != room->mId)
+   {
+      mRoomInterpolation = 0.0f;
+      std::cout << "[i] reset room interpolation" << std::endl;
+   }
+
+   mRoom = room;
 }
 
 

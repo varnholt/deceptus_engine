@@ -1,8 +1,11 @@
 #pragma once
 
 #include "camerasystemconfiguration.h"
+#include "room.h"
 
 #include <SFML/Graphics.hpp>
+
+#include <optional>
 
 class CameraSystem
 {
@@ -19,6 +22,7 @@ class CameraSystem
       float getPanicLineY0() const;
       float getPanicLineY1() const;
 
+      void setRoom(const std::optional<Room>& room);
 
       static CameraSystem& getCameraSystem();
 
@@ -46,6 +50,11 @@ class CameraSystem
 
       bool mFocusXTriggered = false;
       bool mFocusYTriggered = false;
+
+      std::optional<Room> mRoom;
+      float mRoomInterpolation = 0.0f;
+      float mRoomX = 0.0f;
+      float mRoomY = 0.0f;
 
       static CameraSystem sInstance;
 };

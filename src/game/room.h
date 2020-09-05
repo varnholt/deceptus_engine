@@ -11,17 +11,17 @@
 
 struct Room
 {
-   Room() = default;
-   Room(const sf::IntRect& rect);
-   Room(const std::vector<sf::IntRect>& rect);
+   Room(const sf::FloatRect& rect);
 
    static void deserialize(TmxObject* tmxObject, std::vector<Room>& rooms);
-   static std::optional<Room> find(const sf::Vector2i& p, const std::vector<Room>& rooms);
+   static std::optional<Room> find(const sf::Vector2f& p, const std::vector<Room>& rooms);
 
-   std::vector<sf::IntRect>::const_iterator findRect(const sf::Vector2i& p) const;
-   std::optional<sf::Vector2i> correctedCamera(const sf::Vector2i& cameraCenter, const Room& activeRoom);
+   std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
+   void correctedCamera(float& x, float& y) const;
+   std::optional<Room> computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const;
 
-   std::vector<sf::IntRect> mRects;
+   std::vector<sf::FloatRect> mRects;
    std::string mName;
+   int32_t mId = 0;
 };
 
