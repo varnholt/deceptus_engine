@@ -160,6 +160,7 @@ protected:
 
    std::vector<Room> mRooms;
    std::optional<Room> mCurrentRoom;
+   int32_t mCurrentRoomId = -1;
 
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;

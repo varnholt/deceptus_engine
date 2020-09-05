@@ -715,6 +715,23 @@ void Level::createViews()
 void Level::updateViews()
 {
    auto& cameraSystem = CameraSystem::getCameraSystem();
+
+   // update room
+   mCurrentRoom = Room::find(Player::getCurrent()->getPixelPositionf(), mRooms);
+   const auto prevRoomId = mCurrentRoomId;
+   mCurrentRoomId = mCurrentRoom.has_value() ? mCurrentRoom->mId : -1;
+
+   if (prevRoomId != mCurrentRoomId)
+   {
+      std::cout
+         << "[i] player moved to room: "
+         << (mCurrentRoom.has_value() ? mCurrentRoom->mName : "undefined")
+         << std::endl;
+
+      cameraSystem.setRoom(mCurrentRoom);
+   }
+
+   // update camera system
    cameraSystem.update(mViewWidth, mViewHeight);
 
    const auto lookVector = CameraPane::getInstance().getLookVector();
