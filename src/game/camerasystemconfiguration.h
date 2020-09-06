@@ -20,6 +20,9 @@ class CameraSystemConfiguration
       int32_t getBackInBoundsToleranceY() const;
       int32_t getPlayerOffsetY() const;
 
+      float getRoomDampingFactorX() const;
+      float getRoomDampingFactorY() const;
+
    private:
 
       std::string serialize();
@@ -32,6 +35,7 @@ class CameraSystemConfiguration
       float mFocusZoneDivider = 6.0f;
       float mTargetShiftFactor = 0.75f;
       int32_t mBackInBoundsToleranceX = 10;
+      float mRoomDampingFactorX = 64.0f;
 
       // y
       float mDampingFactorY = 16.0f;
@@ -39,6 +43,7 @@ class CameraSystemConfiguration
       float mViewRatioY = 1.5f;
       int32_t mBackInBoundsToleranceY = 10;
       int32_t mPlayerOffsetY = 0;
+      float mRoomDampingFactorY = 32.0f;
 
       static bool sInitialized;
       static CameraSystemConfiguration sInstance;
