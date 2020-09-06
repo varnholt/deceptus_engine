@@ -56,7 +56,6 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    updateX();
    updateY();
 
-#ifdef ROOM_SYSTEM_ENABLED
    if (mRoom.has_value())
    {
       mRoomX = mX;
@@ -64,17 +63,18 @@ void CameraSystem::update(float viewWidth, float viewHeight)
 
       mRoom->correctedCamera(mRoomX, mRoomY);
 
-      mX = mRoomInterpolation * mRoomX + (1.0f - mRoomInterpolation) * mX;
-      mY = mRoomInterpolation * mRoomY + (1.0f - mRoomInterpolation) * mY;
+      auto& config = CameraSystemConfiguration::getInstance();
 
-      mRoomInterpolation += 0.01f;
-      mRoomInterpolation = std::min(mRoomInterpolation, 1.0f);
+      float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
+      float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
+
+      mX += dx;
+      mY += dy;
    }
    else
    {
-      mRoomInterpolation = 0.0f;
+      // invalid room
    }
-#endif
 }
 
 
