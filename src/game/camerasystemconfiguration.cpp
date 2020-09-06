@@ -98,6 +98,19 @@ void CameraSystemConfiguration::serializeToFile(const std::string &filename)
   file << data;
 }
 
+
+float CameraSystemConfiguration::getRoomDampingFactorY() const
+{
+   return mRoomDampingFactorY;
+}
+
+
+float CameraSystemConfiguration::getRoomDampingFactorX() const
+{
+   return mRoomDampingFactorX;
+}
+
+
 int32_t CameraSystemConfiguration::getPlayerOffsetY() const
 {
    return mPlayerOffsetY;
