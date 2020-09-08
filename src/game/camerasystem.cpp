@@ -56,20 +56,25 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    updateX();
    updateY();
 
+   return;
+
    if (mRoom.has_value())
    {
       mRoomX = mX;
       mRoomY = mY;
 
-      mRoom->correctedCamera(mRoomX, mRoomY);
+      mRoom->correctedCamera(mRoomX, mRoomY, mFocusOffset);
 
-      auto& config = CameraSystemConfiguration::getInstance();
+      mX = mRoomX;
+      mY = mRoomY;
 
-      float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
-      float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
-
-      mX += dx;
-      mY += dy;
+      // auto& config = CameraSystemConfiguration::getInstance();
+      //
+      // float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
+      // float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
+      //
+      // mX += dx;
+      // mY += dy;
    }
    else
    {
@@ -92,7 +97,11 @@ void CameraSystem::updateX()
    mFocusZoneX1 = fCenter + fRange;
 
    // shift focus zone based on player orientation
-   const auto targetOffset = player->isPointingLeft() ? (fRange * config.getTargetShiftFactor()) : (-fRange * config.getTargetShiftFactor());
+   const auto targetOffset =
+      player->isPointingLeft()
+         ? ( fRange * config.getTargetShiftFactor())
+         : (-fRange * config.getTargetShiftFactor());
+
    const auto fcd = (targetOffset - mFocusOffset) / config.getDampingFactorX();
    if (fabs(mFocusOffset) < fabs(fRange * config.getTargetShiftFactor()))
    {
