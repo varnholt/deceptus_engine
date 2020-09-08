@@ -1123,6 +1123,14 @@ void Level::draw(
       drawStaticChains(*mLevelRenderTexture.get());
       DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
       DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getCurrent()->getPlayerPixelRect());
+
+      for (const auto& room : mRooms)
+      {
+         for (const auto& rect : room.mRects)
+         {
+            DebugDraw::drawRect(*mLevelRenderTexture.get(), rect, sf::Color::Yellow);
+         }
+      }
    }
 
    // display the whole texture

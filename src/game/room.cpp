@@ -62,7 +62,7 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
 }
 
 
-void Room::correctedCamera(float& x, float& y) const
+void Room::correctedCamera(float& x, float& y, float focusOffset) const
 {
    if (mRects.empty())
    {
@@ -91,36 +91,42 @@ void Room::correctedCamera(float& x, float& y) const
 
    const auto config = GameConfiguration::getInstance();
 
+   // need to incorporate the focus offset here because the player is not
+   // necessarily in the middle of the screen but maybe a little more to the
+   // left or to the right depending on its orientation
    const auto halfWidth  = static_cast<float>(config.mViewWidth / 2.0f);
    const auto halfHeight = static_cast<float>(config.mViewHeight / 2.0f);
 
-   const auto l = pos + sf::Vector2f{- halfWidth, 0.0f      };
-   const auto r = pos + sf::Vector2f{  halfWidth, 0.0f      };
-   const auto u = pos + sf::Vector2f{0.0f,      - halfHeight};
-   const auto d = pos + sf::Vector2f{0.0f,        halfHeight};
+   const auto l = pos + sf::Vector2f{- halfWidth - focusOffset, 0.0f};
+   const auto r = pos + sf::Vector2f{  halfWidth - focusOffset, 0.0f};
+
+   // TODO: CLEAN UP
+   const auto u = pos + sf::Vector2f{0.0f, - halfHeight / 0.66666666666f + 12};
+   const auto d = pos + sf::Vector2f{0.0f,   halfHeight * 0.66666666666f};
 
    if (!rect.contains(l))
    {
       // camera center is out of left boundary
       // std::cout << "correct left" << std::endl;
-      x = rect.left + halfWidth;
+      x = rect.left + halfWidth + focusOffset;
    }
    else if (!rect.contains(r))
    {
       // camera center is out of right boundary
       // std::cout << "correct right" << std::endl;
-      x = rect.left + rect.width - halfWidth;
+      x = rect.left + rect.width - halfWidth + focusOffset;
    }
 
+   // TODO: CLEAN UP
    if (!rect.contains(u))
    {
       // camera center is out of upper boundary
-      y = rect.top + halfHeight;
+      y = rect.top + halfHeight / 0.66666666666f - 12;
    }
    else if (!rect.contains(d))
    {
       // camera center is out of lower boundary
-      y = rect.top + rect.height - halfHeight;
+      y = rect.top + rect.height - halfHeight * 0.666666666666666f;
    }
 }
 
