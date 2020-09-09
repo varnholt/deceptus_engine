@@ -56,7 +56,7 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    updateX();
    updateY();
 
-   return;
+//   return;
 
    if (mRoom.has_value())
    {

@@ -64,6 +64,36 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
 
 void Room::correctedCamera(float& x, float& y, float focusOffset) const
 {
+
+/*
+
+      +--------------->----+-----<--------------------------------+
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      +--------------->----+-----<--------------------------------+--- y = player y + screen height / 1.5
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      |               |    |     |                                |
+      +--------------->----+-----<--------------------------------+
+                      |    |     |
+                      |    |     |
+                   focus   |   focus
+                   zone 0  |   zone 1
+                           |
+                           |
+                         player x
+*/
+
+
    if (mRects.empty())
    {
       return;
@@ -96,13 +126,16 @@ void Room::correctedCamera(float& x, float& y, float focusOffset) const
    // left or to the right depending on its orientation
    const auto halfWidth  = static_cast<float>(config.mViewWidth / 2.0f);
    const auto halfHeight = static_cast<float>(config.mViewHeight / 2.0f);
+   const auto height = static_cast<float>(config.mViewHeight);
 
    const auto l = pos + sf::Vector2f{- halfWidth - focusOffset, 0.0f};
    const auto r = pos + sf::Vector2f{  halfWidth - focusOffset, 0.0f};
 
    // TODO: CLEAN UP
-   const auto u = pos + sf::Vector2f{0.0f, - halfHeight / 0.66666666666f + 12};
-   const auto d = pos + sf::Vector2f{0.0f,   halfHeight * 0.66666666666f};
+//   const auto u = pos + sf::Vector2f{0.0f, - halfHeight / 0.66666666666f + 12};
+//   const auto d = pos + sf::Vector2f{0.0f,   halfHeight * 0.66666666666f};
+   const auto u = pos + sf::Vector2f{0.0f, - (height / 1.5f) /*- 12*/};
+   const auto d = pos + sf::Vector2f{0.0f, (height * 0.33333333333f) /*- 12*/};
 
    if (!rect.contains(l))
    {
@@ -121,12 +154,14 @@ void Room::correctedCamera(float& x, float& y, float focusOffset) const
    if (!rect.contains(u))
    {
       // camera center is out of upper boundary
-      y = rect.top + halfHeight / 0.66666666666f - 12;
+//      y = rect.top + halfHeight / 0.66666666666f - 12;
+      y = rect.top + (height / 1.5f) /*- 12*/;
    }
    else if (!rect.contains(d))
    {
       // camera center is out of lower boundary
-      y = rect.top + rect.height - halfHeight * 0.666666666666666f;
+//      y = rect.top + rect.height - halfHeight * 0.666666666666666f;
+      y = rect.top + rect.height - (height * 0.33333333333f) /*+ 12*/;
    }
 }
 
