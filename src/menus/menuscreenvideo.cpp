@@ -13,7 +13,7 @@ MenuScreenVideo::MenuScreenVideo()
 {
    setFilename("data/menus/video.psd");
 
-   mVideoModes = { {1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080} };
+   mVideoModes = { {1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080}, {3840, 2160} };
 }
 
 
@@ -237,6 +237,7 @@ void MenuScreenVideo::updateLayers()
    mLayers["resolution_value_1536x864"]->mVisible = resolutionSelection == 3;
    mLayers["resolution_value_1600x900"]->mVisible = resolutionSelection == 4;
    mLayers["resolution_value_1920x1080"]->mVisible = resolutionSelection == 5;
+   mLayers["resolution_value_3840x2160"]->mVisible = resolutionSelection == 6;
 
    mLayers["brightness_text_0"]->mVisible = !brightness;
    mLayers["brightness_text_1"]->mVisible = brightness;
