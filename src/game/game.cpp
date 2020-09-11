@@ -676,7 +676,11 @@ void Game::changeResolution(int32_t w, int32_t h)
     GameConfiguration::getInstance().serializeToFile();
 
     initializeWindow();
-    mLevel->createViews();
+
+    if (mLevel)
+    {
+       mLevel->createViews();
+    }
 }
 
 
