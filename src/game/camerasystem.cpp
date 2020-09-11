@@ -63,12 +63,13 @@ void CameraSystem::update(float viewWidth, float viewHeight)
       mRoomX = mX;
       mRoomY = mY;
 
-      mRoom->correctedCamera(mRoomX, mRoomY, mFocusOffset);
+      auto& config = CameraSystemConfiguration::getInstance();
+
+      mRoom->correctedCamera(mRoomX, mRoomY, mFocusOffset, config.getViewRatioY());
 
       mX = mRoomX;
       mY = mRoomY;
 
-      // auto& config = CameraSystemConfiguration::getInstance();
       //
       // float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
       // float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
