@@ -56,26 +56,22 @@ void CameraSystem::update(float viewWidth, float viewHeight)
    updateX();
    updateY();
 
-//   return;
-
    if (mRoom.has_value())
    {
-      mRoomX = mX;
-      mRoomY = mY;
+//      mRoomX = mX;
+//      mRoomY = mY;
 
-      auto& config = CameraSystemConfiguration::getInstance();
+//      auto& config = CameraSystemConfiguration::getInstance();
+//      mRoom->correctedCamera(mRoomX, mRoomY, mFocusOffset, config.getViewRatioY());
 
-      mRoom->correctedCamera(mRoomX, mRoomY, mFocusOffset, config.getViewRatioY());
+//      mX = mRoomX;
+//      mY = mRoomY;
 
-      mX = mRoomX;
-      mY = mRoomY;
-
-      //
-      // float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
-      // float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
-      //
-      // mX += dx;
-      // mY += dy;
+//       float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
+//       float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
+//
+//       mX += dx;
+//       mY += dy;
    }
    else
    {
@@ -89,7 +85,11 @@ void CameraSystem::updateX()
    auto player = Player::getCurrent();
    auto& config = CameraSystemConfiguration::getInstance();
 
-   const auto playerX = player->getPixelPositionf().x;
+   auto playerX = player->getPixelPositionf().x;
+
+   // auto playerY = player->getPixelPositionf().y;
+   // mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
+
    const auto dx = (playerX - mX) / config.getDampingFactorX();
    const auto fCenter = mViewWidth / 2.0f;
    const auto fRange  = mViewWidth / config.getFocusZoneDivider();
@@ -154,7 +154,13 @@ void CameraSystem::updateY()
 
    // test if out of panic line boundaries
    auto player = Player::getCurrent();
+
    const auto playerY = player->getPixelPositionf().y + config.getPlayerOffsetY();
+
+   // auto playerX = player->getPixelPositionf().x;
+   // auto playerY = player->getPixelPositionf().y;
+   // mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
+
    const auto test = playerY - viewCenter;
 
    const auto p0 = mY - mPanicLineY1;
