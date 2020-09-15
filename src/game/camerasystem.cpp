@@ -55,28 +55,6 @@ void CameraSystem::update(float viewWidth, float viewHeight)
 
    updateX();
    updateY();
-
-   if (mRoom.has_value())
-   {
-//      mRoomX = mX;
-//      mRoomY = mY;
-
-//      auto& config = CameraSystemConfiguration::getInstance();
-//      mRoom->correctedCamera(mRoomX, mRoomY, mFocusOffset, config.getViewRatioY());
-
-//      mX = mRoomX;
-//      mY = mRoomY;
-
-//       float dx = (mRoomX - mX) / config.getRoomDampingFactorX();
-//       float dy = (mRoomY - mY) / config.getRoomDampingFactorY();
-//
-//       mX += dx;
-//       mY += dy;
-   }
-   else
-   {
-      // invalid room
-   }
 }
 
 
@@ -86,9 +64,8 @@ void CameraSystem::updateX()
    auto& config = CameraSystemConfiguration::getInstance();
 
    auto playerX = player->getPixelPositionf().x;
-
-   // auto playerY = player->getPixelPositionf().y;
-   // mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
+   auto playerY = player->getPixelPositionf().y;
+   const auto corrected = mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
 
    const auto dx = (playerX - mX) / config.getDampingFactorX();
    const auto fCenter = mViewWidth / 2.0f;
@@ -133,7 +110,7 @@ void CameraSystem::updateX()
       mFocusXTriggered = false;
    }
 
-   if (mFocusXTriggered)
+   if (mFocusXTriggered || corrected)
    {
       mX += dx;
    }
@@ -155,11 +132,9 @@ void CameraSystem::updateY()
    // test if out of panic line boundaries
    auto player = Player::getCurrent();
 
-   const auto playerY = player->getPixelPositionf().y + config.getPlayerOffsetY();
-
-   // auto playerX = player->getPixelPositionf().x;
-   // auto playerY = player->getPixelPositionf().y;
-   // mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
+   auto playerX = player->getPixelPositionf().x;
+   auto playerY = player->getPixelPositionf().y + config.getPlayerOffsetY();
+   const auto corrected = mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
 
    const auto test = playerY - viewCenter;
 
@@ -180,7 +155,7 @@ void CameraSystem::updateY()
       mFocusYTriggered = false;
    }
 
-   if (player->isInAir() && !mFocusYTriggered)
+   if (player->isInAir() && !mFocusYTriggered &&! corrected)
    {
       return;
    }
