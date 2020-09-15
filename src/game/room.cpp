@@ -62,7 +62,7 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
 }
 
 
-void Room::correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const
+bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const
 {
 
 /*
@@ -96,7 +96,7 @@ void Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
 
    if (mRects.empty())
    {
-      return;
+      return false;
    }
 
    // workflow (only for 'current' room)
@@ -108,7 +108,7 @@ void Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
    if (rectIt == mRects.end())
    {
       // that's an error.
-      return;
+      return false;
    }
 
    // 2) check if
@@ -136,27 +136,35 @@ void Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
    const auto u = pos + sf::Vector2f{0.0f, -heightBottom};
    const auto d = pos + sf::Vector2f{0.0f, heightTop};
 
+   auto corrected = false;
+
    if (!rect.contains(l))
    {
       // camera center is out of left boundary
       x = rect.left + halfWidth + focusOffset;
+      corrected = true;
    }
    else if (!rect.contains(r))
    {
       // camera center is out of right boundary
       x = rect.left + rect.width - halfWidth + focusOffset;
+      corrected = true;
    }
 
    if (!rect.contains(u))
    {
       // camera center is out of upper boundary
       y = rect.top + heightBottom;
+      corrected = true;
    }
    else if (!rect.contains(d))
    {
       // camera center is out of lower boundary
       y = rect.top + rect.height - heightTop;
+      corrected = true;
    }
+
+   return corrected;
 }
 
 

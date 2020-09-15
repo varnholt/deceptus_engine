@@ -17,7 +17,7 @@ struct Room
    static std::optional<Room> find(const sf::Vector2f& p, const std::vector<Room>& rooms);
 
    std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
-   void correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
+   bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
    std::optional<Room> computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const;
 
    std::vector<sf::FloatRect> mRects;
