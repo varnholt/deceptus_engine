@@ -157,6 +157,22 @@ void GameContactListener::BeginContact(b2Contact* contact)
             }
             break;
          }
+         case ObjectTypePlayerLeftArmSensor:
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumArmLeftContacts++;
+            }
+            break;
+         }
+         case ObjectTypePlayerRightArmSensor:
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumArmRightContacts++;
+            }
+            break;
+         }
          case ObjectTypeBullet:
          {
             auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
@@ -231,6 +247,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
            break;
         case ObjectTypeDeathBlock:
            break;
+        case ObjectTypeWall:
+           break;
       }
    }
 
@@ -259,6 +277,22 @@ void GameContactListener::BeginContact(b2Contact* contact)
             if (!contact->GetFixtureA()->IsSensor())
             {
                mNumHeadContacts++;
+            }
+            break;
+         }
+         case ObjectTypePlayerLeftArmSensor:
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumArmLeftContacts++;
+            }
+            break;
+         }
+         case ObjectTypePlayerRightArmSensor:
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumArmRightContacts++;
             }
             break;
          }
@@ -334,8 +368,10 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeMoveableBox:
             break;
-          case ObjectTypeDeathBlock:
-             break;
+         case ObjectTypeDeathBlock:
+            break;
+         case ObjectTypeWall:
+            break;
       }
    }
 
@@ -389,6 +425,22 @@ void GameContactListener::EndContact(b2Contact* contact)
             }
             break;
          }
+         case ObjectTypePlayerLeftArmSensor:
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumArmLeftContacts--;
+            }
+            break;
+         }
+         case ObjectTypePlayerRightArmSensor:
+         {
+            if (!contact->GetFixtureB()->IsSensor())
+            {
+               mNumArmRightContacts--;
+            }
+            break;
+         }
          case ObjectTypePlayer:
             mNumPlayerContacts--;
             break;
@@ -431,6 +483,22 @@ void GameContactListener::EndContact(b2Contact* contact)
             }
             break;
          }
+         case ObjectTypePlayerLeftArmSensor:
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumArmLeftContacts--;
+            }
+            break;
+         }
+         case ObjectTypePlayerRightArmSensor:
+         {
+            if (!contact->GetFixtureA()->IsSensor())
+            {
+               mNumArmRightContacts--;
+            }
+            break;
+         }
          case ObjectTypePlayer:
             mNumPlayerContacts--;
             break;
@@ -451,7 +519,9 @@ void GameContactListener::EndContact(b2Contact* contact)
       }
    }
 
-   // printf("end: %d\n", mNumPlayerContacts);
+   // debug();
+
+   std::cout << "left arm: " << mNumArmLeftContacts << " " << "right arm: " << mNumArmRightContacts << std::endl;
 }
 
 
@@ -555,6 +625,8 @@ void GameContactListener::reset()
    mNumHeadContacts = 0;
    mNumFootContacts = 0;
    mNumPlayerContacts = 0;
+   mNumArmLeftContacts = 0;
+   mNumArmRightContacts = 0;
    mNumDeadlyContacts = 0;
    mNumMovingPlatformContacts = 0;
 }

@@ -456,6 +456,47 @@ void Player::createFeet()
    auto headObjectData = new FixtureNode(this);
    headObjectData->setType(ObjectTypePlayerHeadSensor);
    headSensorFixture->SetUserData(static_cast<void*>(headObjectData));
+
+   // wallslide sensors
+   const auto wallSlideSensorWidth = 8.0f;
+   const auto wallSlideSensorHeight = 0.75f;
+   const auto wallSlideSensorDistance = 0.21f;
+
+   b2PolygonShape leftArmPolygonShape;
+   leftArmPolygonShape.SetAsBox(
+      wallSlideSensorWidth / (PPM * 2.0f),
+      wallSlideSensorHeight / (PPM * 2.0f),
+      b2Vec2(-wallSlideSensorDistance, -height / (PPM * 2.0f)),
+      0.0f
+   );
+
+   b2FixtureDef leftArmSensorFixtureDef;
+   leftArmSensorFixtureDef.isSensor = true;
+   leftArmSensorFixtureDef.shape = &leftArmPolygonShape;
+
+   auto leftArmSensorFixture = mBody->CreateFixture(&leftArmSensorFixtureDef);
+
+   auto leftArmObjectData = new FixtureNode(this);
+   leftArmObjectData->setType(ObjectTypePlayerLeftArmSensor);
+   leftArmSensorFixture->SetUserData(static_cast<void*>(leftArmObjectData));
+
+   b2PolygonShape rightArmPolygonShape;
+   rightArmPolygonShape.SetAsBox(
+      wallSlideSensorWidth / (PPM * 2.0f),
+      wallSlideSensorHeight / (PPM * 2.0f),
+      b2Vec2(wallSlideSensorDistance, -height / (PPM * 2.0f)),
+      0.0f
+   );
+
+   b2FixtureDef rightArmSensorFixtureDef;
+   rightArmSensorFixtureDef.isSensor = true;
+   rightArmSensorFixtureDef.shape = &rightArmPolygonShape;
+
+   auto rightArmSensorFixture = mBody->CreateFixture(&rightArmSensorFixtureDef);
+
+   auto rightArmObjectData = new FixtureNode(this);
+   rightArmObjectData->setType(ObjectTypePlayerRightArmSensor);
+   rightArmSensorFixture->SetUserData(static_cast<void*>(rightArmObjectData));
 }
 
 

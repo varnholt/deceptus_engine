@@ -49,6 +49,8 @@ private:
    int32_t mNumFootContacts = 0;
    int32_t mNumHeadContacts = 0;
    int32_t mNumPlayerContacts = 0;
+   int32_t mNumArmLeftContacts = 0;
+   int32_t mNumArmRightContacts = 0;
    int32_t mNumDeadlyContacts = 0;
    int32_t mNumMovingPlatformContacts = 0;
    int32_t mBouncerCycles = 5;
