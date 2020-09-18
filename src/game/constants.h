@@ -216,6 +216,8 @@ enum ObjectType
    ObjectTypePlayer,
    ObjectTypePlayerFootSensor,
    ObjectTypePlayerHeadSensor,
+   ObjectTypePlayerLeftArmSensor,
+   ObjectTypePlayerRightArmSensor,
    ObjectTypeBullet,
    ObjectTypeOneSidedWall,
    ObjectTypeDeadly,
@@ -227,6 +229,7 @@ enum ObjectType
    ObjectTypeConveyorBelt,
    ObjectTypeJumpPlatform,
    ObjectTypeMoveableBox,
+   ObjectTypeWall,
 };
 
 
