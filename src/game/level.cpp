@@ -1242,13 +1242,19 @@ void Level::addChainToWorld(
 
    auto fixture = body->CreateFixture(&fixtureDef);
 
+   auto objectData = new FixtureNode(this);
+
    // deadly objects are deadly :)
    if (behavior == ObjectBehaviorDeadly)
    {
-      auto objectData = new FixtureNode(this);
       objectData->setType(ObjectTypeDeadly);
-      fixture->SetUserData(static_cast<void*>(objectData));
    }
+   else if (behavior == ObjectBehaviorSolid)
+   {
+      objectData->setType(ObjectTypeWall);
+   }
+
+   fixture->SetUserData(static_cast<void*>(objectData));
 }
 
 
