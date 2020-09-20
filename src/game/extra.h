@@ -1,6 +1,4 @@
-#ifndef EXTRA_H
-#define EXTRA_H
-
+#pragma once
 
 class Extra
 {
@@ -9,10 +7,7 @@ public:
    enum class ExtraType
    {
       Invalid,
-      Health,
-      PowerJump,
-      AirJump,
-      Crouch
+      Health
    };
 
    Extra() = default;
@@ -20,4 +15,3 @@ public:
    ExtraType mExtraType = ExtraType::Invalid;
 };
 
-#endif // EXTRA_H

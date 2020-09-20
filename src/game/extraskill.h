@@ -14,9 +14,14 @@ public:
 
    enum Skill
    {
-      SkillClimb = 0x01,
-      SkillDash = 0x02,
-      SkillInvulnerable = 0x04
+      SkillWallClimb    = 0x01,
+      SkillDash         = 0x02,
+      SkillInvulnerable = 0x04,
+      SkillWallSlide    = 0x08,
+      SkillWallJump     = 0x10,
+      SkillDoubleJump   = 0x20,
+      SkillCrouch       = 0x40,
+      SkillSwim         = 0x80
    };
 
    int32_t mSkills = 0;

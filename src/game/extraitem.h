@@ -6,7 +6,6 @@
 #include "SFML/Graphics.hpp"
 #include "SFML/System.hpp"
 
-#include "extra.h"
 #include "gamenode.h"
 #include "tmxparser/tmxtile.h"
 
