@@ -108,6 +108,16 @@ void Console::execute()
          skills |= ExtraSkill::SkillDoubleJump;
          mLog.push_back("given doublejump extra to player");
       }
+      else if (results.at(1) == "invulnerable")
+      {
+         skills |= ExtraSkill::SkillInvulnerable;
+         mLog.push_back("given invulnerable extra to player");
+      }
+      else if (results.at(1) == "all")
+      {
+         skills = 0xffffffff;
+         mLog.push_back("given all extras to player");
+      }
    }
    else if (results.at(0) == "/tp" && results.size() == 3)
    {
