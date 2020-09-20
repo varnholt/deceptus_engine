@@ -33,12 +33,18 @@ void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, 
    mCrouching = crouching;
    mClimbing = climbing;
 
+   if (!mInAir)
+   {
+      mDoubleJumpConsumed = false;
+   }
+
    mJumpButtonPressed = controls.isJumpButtonPressed();
 
    updateLostGroundContact();
    updateJump(body);
    updateJumpBuffer();
    updateWallSlide(body, inAir, controls);
+   updateWallJump(body);
 }
 
 
@@ -107,15 +113,25 @@ void PlayerJump::updateJump(b2Body* body)
      // spread this over 6 time steps
      force /= PhysicsConfiguration::getInstance().mPlayerJumpFalloff;
 
+     // more force is required to compensate falling velocity for scenarios
+     // - wall jump
+     // - double jump
+     if (mCompensateVelocity)
+     {
+        const auto bodyVelocity = body->GetLinearVelocity();
+        force *= 1.75f * bodyVelocity.y;
+
+        mCompensateVelocity = false;
+     }
+
      // printf("force: %f\n", force);
-     body->ApplyForceToCenter(b2Vec2(0.0f, -force), true );
+     body->ApplyForceToCenter(b2Vec2(0.0f, -force), true);
 
      mJumpSteps--;
 
      if (mJumpSteps == 0)
      {
-        body->SetGravityScale(1.35);
-        // std::cout << "blam" << std::endl;
+        body->SetGravityScale(1.35f);
      }
    }
    else
@@ -149,6 +165,49 @@ void PlayerJump::jumpForce()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void PlayerJump::doubleJump()
+{
+   const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+   const auto canDoubleJump = (skills & ExtraSkill::SkillDoubleJump);
+
+   if (!canDoubleJump)
+   {
+      return;
+   }
+
+   if (mDoubleJumpConsumed)
+   {
+      return;
+   }
+
+   mDoubleJumpConsumed = true;
+   mCompensateVelocity = true;
+
+   jumpForce();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerJump::wallJump()
+{
+   const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+   const auto canWallJump = (skills & ExtraSkill::SkillWallJump);
+
+   if (!canWallJump)
+   {
+      return;
+   }
+
+   if (!mWallSliding)
+   {
+      return;
+   }
+
+   jumpForce();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jump()
 {
    if (mCrouching)
@@ -161,6 +220,7 @@ void PlayerJump::jump()
    // only allow a new jump after a a couple of milliseconds
    if (elapsed.asMilliseconds() > 100)
    {
+      // handle regular jump
       if (!mInAir || mGroundContactJustLost || mClimbing)
       {
          mRemoveClimbJoint();
@@ -185,6 +245,12 @@ void PlayerJump::jump()
          if (mInAir)
          {
             mLastJumpPressTime = GlobalClock::getInstance()->getElapsedTime();
+
+            // handle wall jump
+            wallJump();
+
+            // handle double jump
+            doubleJump();
          }
       }
    }
@@ -232,6 +298,7 @@ void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls&
 {
    if (!inAir)
    {
+      mWallSliding = false;
       return;
    }
 
@@ -240,6 +307,7 @@ void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls&
 
    if (!canWallSlide)
    {
+      mWallSliding = false;
       return;
    }
 
@@ -251,11 +319,23 @@ void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls&
       && !(rightTouching && controls.isMovingRight())
    )
    {
+      mWallSliding = false;
       return;
    }
 
    b2Vec2 vel = body->GetLinearVelocity();
    body->ApplyForce(0.4 * -vel, body->GetWorldCenter(), false);
+   mWallSliding = true;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerJump::updateWallJump(b2Body*)
+{
+   if (!mWallSliding)
+   {
+      return;
+   }
 }
 
 
