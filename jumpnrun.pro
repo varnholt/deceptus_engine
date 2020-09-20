@@ -189,7 +189,6 @@ SOURCES += \
     src/joystick/gamecontrollerinfo.cpp \
     src/joystick/gamecontroller.cpp \
     src/game/extramanager.cpp \
-    src/game/extra.cpp \
     src/game/extrahealth.cpp \
     src/game/extratable.cpp \
     src/game/extraitem.cpp \

@@ -2,8 +2,10 @@
 
 #include "animationpool.h"
 #include "audio.h"
+#include "gamecontactlistener.h"
 #include "globalclock.h"
 #include "physicsconfiguration.h"
+#include "savestate.h"
 
 #include <Box2D/Box2D.h>
 #include <iostream>
@@ -36,6 +38,7 @@ void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, 
    updateLostGroundContact();
    updateJump(body);
    updateJumpBuffer();
+   updateWallSlide(body, inAir, controls);
 }
 
 
@@ -221,6 +224,38 @@ void PlayerJump::updateLostGroundContact()
    }
 
    mHadGroundContact = !mInAir;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls& controls)
+{
+   if (!inAir)
+   {
+      return;
+   }
+
+   const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+   const auto canWallSlide = (skills & ExtraSkill::SkillWallSlide);
+
+   if (!canWallSlide)
+   {
+      return;
+   }
+
+   const auto leftTouching = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
+   const auto rightTouching = (GameContactListener::getInstance()->getNumArmRightContacts() > 0);
+
+   if (
+         !(leftTouching  && controls.isMovingLeft())
+      && !(rightTouching && controls.isMovingRight())
+   )
+   {
+      return;
+   }
+
+   b2Vec2 vel = body->GetLinearVelocity();
+   body->ApplyForce(0.4 * -vel, body->GetWorldCenter(), false);
 }
 
 

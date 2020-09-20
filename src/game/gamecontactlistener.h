@@ -18,6 +18,8 @@ public:
    int32_t getDeadlyContacts() const;
    int32_t getNumMovingPlatformContacts() const;
    int32_t getNumPlayerContacts() const;
+   int32_t getNumArmLeftContacts() const;
+   int32_t getNumArmRightContacts() const;
 
    void BeginContact(b2Contact *contact) override;
    void EndContact(b2Contact *contact) override;
@@ -30,8 +32,7 @@ public:
 
    static GameContactListener* getInstance();
 
-
-protected:
+   protected:
 
    bool isPlayer(FixtureNode* obj) const;
 

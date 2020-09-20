@@ -520,8 +520,7 @@ void GameContactListener::EndContact(b2Contact* contact)
    }
 
    // debug();
-
-   std::cout << "left arm: " << mNumArmLeftContacts << " " << "right arm: " << mNumArmRightContacts << std::endl;
+   // std::cout << "left arm: " << mNumArmLeftContacts << " " << "right arm: " << mNumArmRightContacts << std::endl;
 }
 
 
@@ -611,6 +610,16 @@ void GameContactListener::processImpulse(float impulse)
    }
 
    Player::getCurrent()->impulse(impulse);
+}
+
+int32_t GameContactListener::getNumArmRightContacts() const
+{
+   return mNumArmRightContacts;
+}
+
+int32_t GameContactListener::getNumArmLeftContacts() const
+{
+   return mNumArmLeftContacts;
 }
 
 

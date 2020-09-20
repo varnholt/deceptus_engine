@@ -22,6 +22,7 @@ struct PlayerJump
     void updateJumpBuffer();
     void updateJump(b2Body*);
     void updateLostGroundContact();
+    void updateWallSlide(b2Body*, bool inAir, const PlayerControls& controls);
 
     bool isJumping() const;
 

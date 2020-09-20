@@ -82,15 +82,31 @@ void Console::execute()
 
    else if (results.at(0) == "/extra" && results.size() == 2)
    {
+      auto& skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
       if (results.at(1) == "climb")
       {
-         SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillClimb;
+         skills |= ExtraSkill::SkillWallClimb;
          mLog.push_back("given climb extra to player");
       }
       else if (results.at(1) == "dash")
       {
-         SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillDash;
+         skills |= ExtraSkill::SkillDash;
          mLog.push_back("given dash extra to player");
+      }
+      else if (results.at(1) == "wallslide")
+      {
+         skills |= ExtraSkill::SkillWallSlide;
+         mLog.push_back("given wallslide extra to player");
+      }
+      else if (results.at(1) == "walljump")
+      {
+         skills |= ExtraSkill::SkillWallJump;
+         mLog.push_back("given walljump extra to player");
+      }
+      else if (results.at(1) == "doublejump")
+      {
+         skills |= ExtraSkill::SkillDoubleJump;
+         mLog.push_back("given doublejump extra to player");
       }
    }
    else if (results.at(0) == "/tp" && results.size() == 3)
