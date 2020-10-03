@@ -461,8 +461,6 @@ void Level::loadTmx()
                   path
                );
 
-               belt->setZ(objectGroup->mZ);
-
                mConveyorBelts.push_back(belt);
 
                addDebugRect(

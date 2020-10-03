@@ -200,6 +200,8 @@ ConveyorBelt::ConveyorBelt(
    }
 
    updateSprite();
+
+   setZ(ZDepthForegroundMin);
 }
 
 
