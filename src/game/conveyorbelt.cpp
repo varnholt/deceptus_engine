@@ -11,6 +11,10 @@
 namespace
 {
 static const auto Y_OFFSET = -10;
+static const auto BELT_TILE_COUNT = 8;
+static const auto ARROW_INDEX_X = 11;
+static const auto ARROW_INDEX_LEFT_Y = 0;
+static const auto ARROW_INDEX_RIGHT_Y = 1;
 }
 
 
@@ -27,10 +31,16 @@ void ConveyorBelt::setVelocity(float velocity)
 
 void ConveyorBelt::draw(sf::RenderTarget& target)
 {
-    for (auto& sprite : mSprites)
+    for (auto& sprite : mBeltSprites)
     {
        target.draw(sprite);
     }
+
+// disable for now
+//    for (auto& sprite : mArrowSprites)
+//    {
+//       target.draw(sprite);
+//    }
 }
 
 
@@ -73,18 +83,18 @@ void ConveyorBelt::setEnabled(bool enabled)
 
 void ConveyorBelt::updateSprite()
 {
-   const auto val = static_cast<int32_t>(mElapsed * 40.0f * fabs(mVelocity)) % 8;
+   const auto val = static_cast<int32_t>(mElapsed * 40.0f * fabs(mVelocity)) % BELT_TILE_COUNT;
    const auto xOffset = mPointsRight ? 7 - val :  val;
    auto yOffset = 0u;
 
-   for (auto i = 0u; i < mSprites.size(); i++)
+   for (auto i = 0u; i < mBeltSprites.size(); i++)
    {
        if (i == 0u)
        {
            // left tile (row 0)
            yOffset = 0;
        }
-       else if (i == mSprites.size() - 1)
+       else if (i == mBeltSprites.size() - 1)
        {
            // right tile (row 2)
            yOffset = PIXELS_PER_TILE * 2;
@@ -95,7 +105,7 @@ void ConveyorBelt::updateSprite()
            yOffset = PIXELS_PER_TILE;
        }
 
-       mSprites[i].setTextureRect({
+       mBeltSprites[i].setTextureRect({
             xOffset * PIXELS_PER_TILE,
             static_cast<int32_t>(yOffset),
             PIXELS_PER_TILE,
@@ -182,10 +192,10 @@ ConveyorBelt::ConveyorBelt(
    auto boundaryFixture = mBody->CreateFixture(&boundaryFixtureDef);
    boundaryFixture->SetUserData(static_cast<void*>(this));
 
-   mPixelRect.left   = static_cast<int32_t>(x);
-   mPixelRect.top    = static_cast<int32_t>(y);
-   mPixelRect.height = static_cast<int32_t>(height);
-   mPixelRect.width  = static_cast<int32_t>(width);
+   mBeltPixelRect.left   = static_cast<int32_t>(x);
+   mBeltPixelRect.top    = static_cast<int32_t>(y);
+   mBeltPixelRect.height = static_cast<int32_t>(height);
+   mBeltPixelRect.width  = static_cast<int32_t>(width);
 
    static auto ROUND_EPSILON = 0.5f;
    auto tileCount = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
@@ -193,10 +203,34 @@ ConveyorBelt::ConveyorBelt(
 
    for (auto i = 0u; i < tileCount; i++)
    {
-      sf::Sprite sprite;
-      sprite.setTexture(sTexture);
-      sprite.setPosition(x + i * PIXELS_PER_TILE, y + Y_OFFSET);
-      mSprites.push_back(sprite);
+      sf::Sprite beltSprite;
+      beltSprite.setTexture(sTexture);
+      beltSprite.setPosition(
+         x + i * PIXELS_PER_TILE,
+         y + Y_OFFSET
+      );
+
+      mBeltSprites.push_back(beltSprite);
+   }
+
+   for (auto i = 0u; i < tileCount - 1; i++)
+   {
+      sf::Sprite arrowSprite;
+      arrowSprite.setTexture(sTexture);
+      arrowSprite.setPosition(
+         x + i * PIXELS_PER_TILE + 12,
+         y - 12
+      );
+
+      arrowSprite.setTextureRect({
+           ARROW_INDEX_X * PIXELS_PER_TILE,
+           (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE,
+           PIXELS_PER_TILE,
+           PIXELS_PER_TILE
+        }
+      );
+
+      mArrowSprites.push_back(arrowSprite);
    }
 
    updateSprite();
@@ -269,7 +303,7 @@ void ConveyorBelt::processFixtureNode(
 
 sf::IntRect ConveyorBelt::getPixelRect() const
 {
-   return mPixelRect;
+   return mBeltPixelRect;
 }
 
 
