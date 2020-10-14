@@ -76,7 +76,7 @@ enum ZDepth
 };
 
 
-enum Alignment {
+enum class Alignment {
    PointsNowhere = 0x00,
    PointsDown    = 0x01,
    PointsUp      = 0x02,

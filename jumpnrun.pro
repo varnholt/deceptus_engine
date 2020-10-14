@@ -134,6 +134,7 @@ SOURCES += \
    src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
    src/game/spikeball.cpp \
+   src/game/stomper.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/weather.cpp \
@@ -293,6 +294,7 @@ HEADERS += \
     src/game/savestate.h \
     src/game/scriptproperty.h \
     src/game/spikeball.h \
+    src/game/stomper.h \
     src/game/test.h \
     src/game/texturepool.h \
     src/game/weather.h \
