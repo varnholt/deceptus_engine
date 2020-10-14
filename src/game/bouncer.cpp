@@ -192,19 +192,19 @@ void Bouncer::activate()
    b2Vec2 force;
    switch (mAlignment)
    {
-      case PointsUp:
+      case Alignment::PointsUp:
          force = b2Vec2{0.0f, -forceValue};
          break;
-      case PointsDown:
+      case Alignment::PointsDown:
          force = b2Vec2{0.0f, forceValue};
          break;
-      case PointsLeft:
+      case Alignment::PointsLeft:
          force = b2Vec2{-forceValue, 0};
           break;
-      case PointsRight:
+      case Alignment::PointsRight:
          force = b2Vec2{forceValue, 0};
          break;
-      case PointsNowhere:
+      case Alignment::PointsNowhere:
           break;
    }
 
