@@ -2,16 +2,16 @@
 
 #include "constants.h"
 #include "gamemechanism.h"
+#include "gamenode.h"
 
 #include <filesystem>
 
 #include <Box2D/Box2D.h>
 
 
-struct TmxLayer;
-struct TmxTileSet;
+struct TmxObject;
 
-class Stomper : public GameMechanism
+class Stomper : public GameMechanism, public GameNode
 {
    public:
 
@@ -21,22 +21,26 @@ class Stomper : public GameMechanism
          Distance
       };
 
-      Stomper();
+      Stomper(GameNode* parent = nullptr);
+
+      void draw(sf::RenderTarget& target) override;
+      void update(const sf::Time& dt) override;
 
 
-      static std::vector<std::shared_ptr<GameMechanism> > load(
-         TmxLayer* layer,
-         TmxTileSet* tileSet,
-         const std::filesystem::path& basePath,
-         const std::shared_ptr<b2World>&
+      void setup(
+         TmxObject* tmxObject,
+         const std::shared_ptr<b2World>& world
       );
 
 
    private:
 
+      void setupTransform();
+      void setupBody(const std::shared_ptr<b2World>& world);
+
+      b2Body* mBody = nullptr;
+      sf::Vector2f mPixelPosition;
       Mode mMode = Mode::Distance;
       Alignment mAlignment = Alignment::PointsDown;
-
-      sf::Vector2i mPosition;
 };
 
