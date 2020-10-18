@@ -87,7 +87,7 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
 
    auto fixture = mBody->CreateFixture(&polygonShape, 0);
    auto objectData = new FixtureNode(this);
-   objectData->setType(ObjectTypeMovingPlatform);
+   objectData->setType(ObjectTypeDeathBlock);
    fixture->SetUserData(static_cast<void*>(objectData));
 }
 
@@ -117,6 +117,7 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
       }
    }
 }
+
 
 void DeathBlock::updateCollision()
 {
