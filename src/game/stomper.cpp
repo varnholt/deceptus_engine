@@ -11,6 +11,8 @@
 #include "tmxparser/tmxtileset.h"
 
 
+// 7 x 5
+//
 //         0123456 789ABC
 //
 //         <#          #>      0
