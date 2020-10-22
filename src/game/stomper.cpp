@@ -10,6 +10,8 @@
 #include "tmxparser/tmxproperties.h"
 #include "tmxparser/tmxtileset.h"
 
+#include <iostream>
+
 
 // 7 x 5
 //
@@ -56,9 +58,9 @@ void Stomper::update(const sf::Time& /*dt*/)
 
 
 //-----------------------------------------------------------------------------
-void Stomper::setup(TmxObject* /*tmxObject*/, const std::shared_ptr<b2World>& /*world*/)
+void Stomper::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*world*/)
 {
-
+   std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
 }
 
 

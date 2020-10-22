@@ -4,6 +4,7 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
+#include <array>
 #include <filesystem>
 
 #include <Box2D/Box2D.h>
@@ -42,5 +43,9 @@ class Stomper : public GameMechanism, public GameNode
       sf::Vector2f mPixelPosition;
       Mode mMode = Mode::Distance;
       Alignment mAlignment = Alignment::PointsDown;
+
+      sf::Sprite mSpriteSpike;
+      sf::Sprite mSpritePusher;
+      sf::Sprite mSpriteMount;
 };
 
