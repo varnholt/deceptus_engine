@@ -209,6 +209,12 @@ Level::Level()
 Level::~Level()
 {
    std::cout << "[x] deleting current level" << std::endl;
+
+   // properly delete point map
+   for (auto& kv : mPointMap)
+   {
+      delete kv.second;
+   }
 }
 
 
@@ -476,16 +482,8 @@ void Level::loadTmx()
             else if (objectGroup->mName == "crushers")
             {
                auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
-               crusher->setZ(objectGroup->mZ);
+               crusher->setup(tmxObject, mWorld);
                mCrushers.push_back(crusher);
-
-               // addDebugRect(
-               //    crusher->getBody(),
-               //    tmxObject->mX,
-               //    tmxObject->mY,
-               //    tmxObject->mWidth,
-               //    tmxObject->mHeight
-               // );
             }
             else if (objectGroup->mName == "rooms")
             {
@@ -1498,6 +1496,7 @@ Level* Level::getCurrentLevel()
 void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 {
    auto points = new b2Vec2[4];
+
    points[0] = b2Vec2(x * MPP,           y * MPP          );
    points[1] = b2Vec2(x * MPP + w * MPP, y * MPP          );
    points[2] = b2Vec2(x * MPP + w * MPP, y * MPP + h * MPP);
