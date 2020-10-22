@@ -105,6 +105,7 @@ SOURCES += \
    src/game/atmosphereshader.cpp \
    src/game/blurshader.cpp \
    src/game/callbackmap.cpp \
+   src/game/crusher.cpp \
    src/game/deathblock.cpp \
    src/game/deathshader.cpp \
    src/game/dialogue.cpp \
@@ -134,7 +135,6 @@ SOURCES += \
    src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
    src/game/spikeball.cpp \
-   src/game/stomper.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/weather.cpp \
@@ -259,6 +259,7 @@ HEADERS += \
     src/game/atmosphereshader.h \
     src/game/blurshader.h \
     src/game/callbackmap.h \
+    src/game/crusher.h \
     src/game/deathblock.h \
     src/game/deathshader.h \
     src/game/dialogue.h \
@@ -294,7 +295,6 @@ HEADERS += \
     src/game/savestate.h \
     src/game/scriptproperty.h \
     src/game/spikeball.h \
-    src/game/stomper.h \
     src/game/test.h \
     src/game/texturepool.h \
     src/game/weather.h \

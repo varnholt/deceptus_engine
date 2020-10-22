@@ -1,4 +1,4 @@
-#include "stomper.h"
+#include "crusher.h"
 
 #include "fixturenode.h"
 
@@ -36,7 +36,7 @@
 //         0123456 0123456     E
 
 //-----------------------------------------------------------------------------
-Stomper::Stomper(GameNode* parent)
+Crusher::Crusher(GameNode* parent)
    : GameNode(parent)
 {
    setName("DeathBlock");
@@ -44,28 +44,28 @@ Stomper::Stomper(GameNode* parent)
 
 
 //-----------------------------------------------------------------------------
-void Stomper::draw(sf::RenderTarget& /*target*/)
+void Crusher::draw(sf::RenderTarget& /*target*/)
 {
 
 }
 
 
 //-----------------------------------------------------------------------------
-void Stomper::update(const sf::Time& /*dt*/)
+void Crusher::update(const sf::Time& /*dt*/)
 {
 
 }
 
 
 //-----------------------------------------------------------------------------
-void Stomper::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*world*/)
+void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*world*/)
 {
    std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
 }
 
 
 //-----------------------------------------------------------------------------
-void Stomper::setupTransform()
+void Crusher::setupTransform()
 {
    auto x = mPixelPosition.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
    auto y = mPixelPosition.y / PPM;
@@ -87,7 +87,7 @@ void Stomper::setupTransform()
 
 
 //-----------------------------------------------------------------------------
-void Stomper::setupBody(const std::shared_ptr<b2World>& world)
+void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 {
    static constexpr auto BLADE_HORIZONTAL_TILES = 5;
    static constexpr auto BLADE_VERTICAL_TILES = 1;

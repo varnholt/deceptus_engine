@@ -7,6 +7,7 @@
 #include "checksum.h"
 #include "constants.h"
 #include "conveyorbelt.h"
+#include "crusher.h"
 #include "deathblock.h"
 #include "debugdraw.h"
 #include "dialogue.h"
@@ -189,6 +190,7 @@ Level::Level()
    mMechanisms = {
       &mBouncers,
       &mConveyorBelts,
+      &mCrushers,
       &mDoors,
       &mFans,
       &mLasers,
@@ -432,7 +434,7 @@ void Level::loadTmx()
             else if (objectGroup->mName == "bouncers")
             {
                auto bouncer = std::make_shared<Bouncer>(
-                  nullptr,
+                  dynamic_cast<GameNode*>(this),
                   mWorld,
                   tmxObject->mX,
                   tmxObject->mY,
@@ -455,7 +457,7 @@ void Level::loadTmx()
             else if (objectGroup->mName == "conveyorbelts")
             {
                auto belt = std::make_shared<ConveyorBelt>(
-                  nullptr,
+                  dynamic_cast<GameNode*>(this),
                   mWorld,
                   tmxObject,
                   path
@@ -470,6 +472,20 @@ void Level::loadTmx()
                   tmxObject->mWidth,
                   tmxObject->mHeight
                );
+            }
+            else if (objectGroup->mName == "crushers")
+            {
+               auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
+               crusher->setZ(objectGroup->mZ);
+               mCrushers.push_back(crusher);
+
+               // addDebugRect(
+               //    crusher->getBody(),
+               //    tmxObject->mX,
+               //    tmxObject->mY,
+               //    tmxObject->mWidth,
+               //    tmxObject->mHeight
+               // );
             }
             else if (objectGroup->mName == "rooms")
             {
