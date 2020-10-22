@@ -12,7 +12,7 @@
 
 struct TmxObject;
 
-class Stomper : public GameMechanism, public GameNode
+class Crusher : public GameMechanism, public GameNode
 {
    public:
 
@@ -22,7 +22,7 @@ class Stomper : public GameMechanism, public GameNode
          Distance
       };
 
-      Stomper(GameNode* parent = nullptr);
+      Crusher(GameNode* parent = nullptr);
 
       void draw(sf::RenderTarget& target) override;
       void update(const sf::Time& dt) override;
