@@ -47,5 +47,7 @@ class Crusher : public GameMechanism, public GameNode
       sf::Sprite mSpriteSpike;
       sf::Sprite mSpritePusher;
       sf::Sprite mSpriteMount;
+
+      static sf::Texture mTexture;
 };
 
