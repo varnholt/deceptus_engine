@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+sf::Texture Crusher::mTexture;
+
 
 // 7 x 5
 //
@@ -44,9 +46,11 @@ Crusher::Crusher(GameNode* parent)
 
 
 //-----------------------------------------------------------------------------
-void Crusher::draw(sf::RenderTarget& /*target*/)
+void Crusher::draw(sf::RenderTarget& target)
 {
-
+   target.draw(mSpriteSpike);
+   target.draw(mSpritePusher);
+   target.draw(mSpriteMount);
 }
 
 
@@ -60,7 +64,21 @@ void Crusher::update(const sf::Time& /*dt*/)
 //-----------------------------------------------------------------------------
 void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*world*/)
 {
+   if (mTexture.getSize().x == 0)
+   {
+      mTexture.loadFromFile("data/level-crypt/tilesets/crushers.png");
+   }
+
+   // crusher down
+   // 216, 122 -> 240, 168 -> mount, 2 tiles offset from left, 16px offset from top
+   // 216, 168 -> 240, 192 -> pusher
+   // 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
+
    std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
+
+   mSpriteSpike.setPosition(sf::Vector2f{tmxObject->mX, tmxObject->mY});
+   mSpritePusher.setPosition(sf::Vector2f{tmxObject->mX, tmxObject->mY});
+   mSpriteMount.setPosition(sf::Vector2f{tmxObject->mX, tmxObject->mY});
 }
 
 
