@@ -70,15 +70,74 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*worl
    }
 
    // crusher down
-   // 216, 122 -> 240, 168 -> mount, 2 tiles offset from left, 16px offset from top
-   // 216, 168 -> 240, 192 -> pusher
-   // 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
+   //
+   //    A        5
+   //    A        6
+   //    B        7
+   //    C        8
+   //  #####      9
+   //  VVVVV      A
+   //
+   // A: 216, 122 -> 240, 168 -> mount, 2 tiles offset from left, 16px offset from top
+   // B: 216, 168 -> 240, 192 -> pusher
+   // C: 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
 
    std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
 
-   mSpriteSpike.setPosition(sf::Vector2f{tmxObject->mX, tmxObject->mY});
-   mSpritePusher.setPosition(sf::Vector2f{tmxObject->mX, tmxObject->mY});
-   mSpriteMount.setPosition(sf::Vector2f{tmxObject->mX, tmxObject->mY});
+   mSpriteMount.setTexture(mTexture);
+   mSpritePusher.setTexture(mTexture);
+   mSpriteSpike.setTexture(mTexture);
+
+   mSpriteMount.setTextureRect({
+         7 * PIXELS_PER_TILE,
+         5 * PIXELS_PER_TILE,
+         5 * PIXELS_PER_TILE,
+         2 * PIXELS_PER_TILE
+      }
+   );
+
+   mSpritePusher.setTextureRect({
+         7 * PIXELS_PER_TILE,
+         7 * PIXELS_PER_TILE,
+         5 * PIXELS_PER_TILE,
+         1 * PIXELS_PER_TILE
+      }
+   );
+
+   mSpriteSpike.setTextureRect({
+         7 * PIXELS_PER_TILE,
+         8 * PIXELS_PER_TILE,
+         5 * PIXELS_PER_TILE,
+         3 * PIXELS_PER_TILE
+      }
+   );
+
+   mSpriteMount.setPosition(
+      sf::Vector2f{
+         tmxObject->mX,
+         tmxObject->mY
+      }
+   );
+
+   mSpritePusher.setPosition(
+      sf::Vector2f{
+         tmxObject->mX,
+         tmxObject->mY + 2 * PIXELS_PER_TILE
+      }
+   );
+
+   mSpriteSpike.setPosition(
+      sf::Vector2f{
+         tmxObject->mX,
+         tmxObject->mY + 3 * PIXELS_PER_TILE
+      }
+   );
+
+   // alignment:
+   //    down
+   //    up
+   //    right
+   //    left
 }
 
 
@@ -131,10 +190,38 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 
    auto fixture = mBody->CreateFixture(&polygonShape, 0);
    auto objectData = new FixtureNode(this);
-   objectData->setType(ObjectTypeMovingPlatform);
+   objectData->setType(ObjectTypeCrusher);
    fixture->SetUserData(static_cast<void*>(objectData));
 }
 
+// how to set up the base box:
+//
+// void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
+// {
+//    b2PolygonShape polygonShape;
+//    auto sizeX = mSize.x / PPM;
+//    auto sizeY = mSize.y / PPM;
+//
+//    b2Vec2 vertices[4];
+//    vertices[0] = b2Vec2(0,     0);
+//    vertices[1] = b2Vec2(0,     sizeY);
+//    vertices[2] = b2Vec2(sizeX, sizeY);
+//    vertices[3] = b2Vec2(sizeX, 0);
+//
+//    polygonShape.Set(vertices, 4);
+//
+//    b2BodyDef bodyDef;
+//    bodyDef.type = b2_dynamicBody;
+//    mBody = world->CreateBody(&bodyDef);
+//
+//    setupTransform();
+//
+//    auto fixture = mBody->CreateFixture(&polygonShape, 0);
+//    auto objectData = new FixtureNode(this);
+//    objectData->setType(ObjectTypeMoveableBox);
+//    fixture->SetUserData(static_cast<void*>(objectData));
+// }
+//
 // http://www.iforce2d.net/b2dtut/custom-gravity
 
 
