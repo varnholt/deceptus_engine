@@ -62,7 +62,7 @@ void Crusher::update(const sf::Time& /*dt*/)
 
 
 //-----------------------------------------------------------------------------
-void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*world*/)
+void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 {
    if (mTexture.getSize().x == 0)
    {
@@ -82,7 +82,10 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*worl
    // B: 216, 168 -> 240, 192 -> pusher
    // C: 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
 
-   std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
+   // std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
+
+   mPixelPosition.x = tmxObject->mX;
+   mPixelPosition.y = tmxObject->mY;
 
    mSpriteMount.setTexture(mTexture);
    mSpritePusher.setTexture(mTexture);
@@ -138,29 +141,20 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& /*worl
    //    up
    //    right
    //    left
+
+   setupBody(world);
 }
 
 
 //-----------------------------------------------------------------------------
 void Crusher::setupTransform()
 {
-   auto x = mPixelPosition.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
-   auto y = mPixelPosition.y / PPM;
+   auto x = mPixelPosition.x / PPM;
+   auto y = mPixelPosition.y / PPM + (5 * PIXELS_PER_TILE) / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
 
 
-//
-//
-//       +-+
-//       | |
-//       | |
-//       | |
-//       | |
-// +-----+-+------+
-// \             /
-//  \___________/
-//
 
 
 //-----------------------------------------------------------------------------
@@ -169,60 +163,63 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    static constexpr auto BLADE_HORIZONTAL_TILES = 5;
    static constexpr auto BLADE_VERTICAL_TILES = 1;
 
-   b2PolygonShape polygonShape;
+   constexpr auto sizeX = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
+   constexpr auto sizeY = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
 
-   auto sizeX = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
-   auto sizeY = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
+   constexpr auto sharpness = 0.1f;
+   constexpr auto tolerance = 0.06f;
 
-   b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0,     0);
-   vertices[1] = b2Vec2(0,     sizeY);
-   vertices[2] = b2Vec2(sizeX, sizeY);
-   vertices[3] = b2Vec2(sizeX, 0);
+   //       +-+
+   //       | |
+   //       | |
+   //       | |
+   //       | |
+   // +-----+-+------+
+   // \             /
+   //  \___________/
 
-   polygonShape.Set(vertices, 4);
+   b2Vec2 spikeVertices[4];
+   spikeVertices[0] = b2Vec2(tolerance, 0);
+   spikeVertices[1] = b2Vec2(sharpness + tolerance, sizeY);
+   spikeVertices[2] = b2Vec2(sizeX - sharpness - tolerance, sizeY);
+   spikeVertices[3] = b2Vec2(sizeX - tolerance, 0);
 
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_kinematicBody;
-   mBody = world->CreateBody(&bodyDef);
+   b2BodyDef deadlyBodyDef;
+   deadlyBodyDef.type = b2_kinematicBody;
+   mBody = world->CreateBody(&deadlyBodyDef);
 
    setupTransform();
 
-   auto fixture = mBody->CreateFixture(&polygonShape, 0);
+   b2PolygonShape spikeShape;
+   spikeShape.Set(spikeVertices, 4);
+   auto deadlyFixture = mBody->CreateFixture(&spikeShape, 0);
    auto objectData = new FixtureNode(this);
    objectData->setType(ObjectTypeCrusher);
-   fixture->SetUserData(static_cast<void*>(objectData));
+   deadlyFixture->SetUserData(static_cast<void*>(objectData));
+
+   b2PolygonShape boxShape;
+   boxShape.SetAsBox(
+      ((PIXELS_PER_TILE * 5) / PPM) * 0.5f,
+      (PIXELS_PER_TILE / PPM) * 0.5f,
+      {
+         ((PIXELS_PER_TILE * 5) / PPM) * 0.5f,
+         -(PIXELS_PER_TILE / PPM) * 0.5f
+      },
+      0.0f
+   );
+   mBody->CreateFixture(&boxShape, 0);
 }
 
-// how to set up the base box:
+// https://easings.net/#easeOutElastic
 //
-// void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
-// {
-//    b2PolygonShape polygonShape;
-//    auto sizeX = mSize.x / PPM;
-//    auto sizeY = mSize.y / PPM;
+// function easeOutElastic(x: number): number {
+// const c4 = (2 * Math.PI) / 3;
 //
-//    b2Vec2 vertices[4];
-//    vertices[0] = b2Vec2(0,     0);
-//    vertices[1] = b2Vec2(0,     sizeY);
-//    vertices[2] = b2Vec2(sizeX, sizeY);
-//    vertices[3] = b2Vec2(sizeX, 0);
-//
-//    polygonShape.Set(vertices, 4);
-//
-//    b2BodyDef bodyDef;
-//    bodyDef.type = b2_dynamicBody;
-//    mBody = world->CreateBody(&bodyDef);
-//
-//    setupTransform();
-//
-//    auto fixture = mBody->CreateFixture(&polygonShape, 0);
-//    auto objectData = new FixtureNode(this);
-//    objectData->setType(ObjectTypeMoveableBox);
-//    fixture->SetUserData(static_cast<void*>(objectData));
-// }
-//
-// http://www.iforce2d.net/b2dtut/custom-gravity
+// return x === 0
+//   ? 0
+//   : x === 1
+//   ? 1
+//   : pow(2, -10 * x) * sin((x * 10 - 0.75) * c4) + 1;
 
 
 /*
