@@ -361,7 +361,11 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       x = pos.x;
    }
 
-   sText.setPosition(x, pos.y);
+   sText.setPosition(
+      static_cast<float>(x),
+      static_cast<float>(pos.y)
+   );
+
    window.draw(sText, states);
 }
 

@@ -141,7 +141,11 @@ void Console::execute()
       {
          auto pos = checkpoint->calcCenter();
          os << "jumped to checkpoint " << n << std::endl;
-         Player::getCurrent()->setBodyViaPixelPosition(pos.x,  pos.y);
+
+         Player::getCurrent()->setBodyViaPixelPosition(
+            static_cast<float>(pos.x),
+            static_cast<float>(pos.y)
+         );
       }
       else
       {

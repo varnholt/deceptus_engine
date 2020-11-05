@@ -324,7 +324,7 @@ void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls&
    }
 
    b2Vec2 vel = body->GetLinearVelocity();
-   body->ApplyForce(0.4 * -vel, body->GetWorldCenter(), false);
+   body->ApplyForce(0.4f * -vel, body->GetWorldCenter(), false);
    mWallSliding = true;
 }
 
