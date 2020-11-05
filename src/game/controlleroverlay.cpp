@@ -49,7 +49,7 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // draw layers
    auto windowView = sf::View(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   windowView.move(-w + mTextureSize.x + 10, -h + mTextureSize.y + 10);
+   windowView.move(-w + mTextureSize.x + 10.0f, -h + mTextureSize.y + 10.0f);
    window.setView(windowView);
 
    auto controller_bg = mLayers["controller_bg"];

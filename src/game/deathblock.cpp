@@ -124,8 +124,8 @@ void DeathBlock::updateCollision()
     // check for intersection with player
     auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
-    auto x = mBody->GetPosition().x * PPM - PIXELS_PER_TILE;
-    auto y = mBody->GetPosition().y * PPM - PIXELS_PER_TILE;
+    auto x = static_cast<int32_t>(mBody->GetPosition().x * PPM - PIXELS_PER_TILE);
+    auto y = static_cast<int32_t>(mBody->GetPosition().y * PPM - PIXELS_PER_TILE);
 
     // want a copy of the original rect
     for (auto rect : mCollisionRects)
