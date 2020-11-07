@@ -2,6 +2,8 @@
 
 #include "fixturenode.h"
 
+#include "easings/easings.h"
+
 #include "tmxparser/tmximage.h"
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxobject.h"
@@ -13,6 +15,7 @@
 #include <iostream>
 
 sf::Texture Crusher::mTexture;
+int32_t Crusher::mInstanceCounter = 0;
 
 
 // 7 x 5
@@ -42,6 +45,9 @@ Crusher::Crusher(GameNode* parent)
    : GameNode(parent)
 {
    setName("DeathBlock");
+
+   mInstanceId = mInstanceCounter;
+   mInstanceCounter++;
 }
 
 
@@ -55,9 +61,106 @@ void Crusher::draw(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Crusher::update(const sf::Time& /*dt*/)
+void Crusher::update(const sf::Time& dt)
 {
+   updateState();
 
+   const auto distance_to_be_traveled = 48.0f;
+
+   switch (mState)
+   {
+      case State::Idle:
+      {
+         mIdleTime += dt;
+         break;
+      }
+      case State::Extract:
+      {
+         const auto val = distance_to_be_traveled * Easings::easeOutElastic<float>(mExtractionTime.asSeconds());
+         mOffset.y = val;
+
+         mExtractionTime += dt * 0.4f;
+
+         break;
+      }
+      case State::Retract:
+      {
+         const auto val = distance_to_be_traveled * (1.0f - Easings::easeInSine<float>(mRetractionTime.asSeconds()));
+         mOffset.y = val;
+
+         mRetractionTime += dt * 0.4f;
+
+         if (mInstanceId == 0)
+         {
+            std::cout << val << std::endl;
+         }
+
+         break;
+      }
+   }
+
+   updateSpritePositions();
+}
+
+
+//-----------------------------------------------------------------------------
+void Crusher::updateState()
+{
+   switch (mMode)
+   {
+      case Mode::Interval:
+      {
+         switch (mState)
+         {
+            case State::Idle:
+            {
+               // go to extract when idle time is elapsed
+               if (mIdleTime.asSeconds() > 3.0f)
+               {
+                  mIdleTime = {};
+
+                  if (mPreviousState == State::Retract || mPreviousState == State::Idle)
+                  {
+                     mState = State::Extract;
+                  }
+                  else
+                  {
+                     mState = State::Retract;
+                  }
+               }
+               break;
+            }
+            case State::Extract:
+            {
+               // extract until normalised extraction time is 1
+               if (mExtractionTime.asSeconds() >= 1.0f)
+               {
+                  mState = State::Idle;
+                  mPreviousState = State::Extract;
+                  mExtractionTime = {};
+               }
+               break;
+            }
+            case State::Retract:
+            {
+               // retract until normalised retraction time is 1
+               if (mRetractionTime.asSeconds() >= 1.0f)
+               {
+                  mState = State::Idle;
+                  mPreviousState = State::Retract;
+                  mRetractionTime = {};
+               }
+               break;
+            }
+         }
+
+         break;
+      }
+      case Mode::Distance:
+      {
+         break;
+      }
+   }
 }
 
 
@@ -103,7 +206,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          7 * PIXELS_PER_TILE,
          7 * PIXELS_PER_TILE,
          5 * PIXELS_PER_TILE,
-         1 * PIXELS_PER_TILE
+         1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
       }
    );
 
@@ -112,27 +215,6 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          8 * PIXELS_PER_TILE,
          5 * PIXELS_PER_TILE,
          3 * PIXELS_PER_TILE
-      }
-   );
-
-   mSpriteMount.setPosition(
-      sf::Vector2f{
-         tmxObject->mX,
-         tmxObject->mY
-      }
-   );
-
-   mSpritePusher.setPosition(
-      sf::Vector2f{
-         tmxObject->mX,
-         tmxObject->mY + 2 * PIXELS_PER_TILE
-      }
-   );
-
-   mSpriteSpike.setPosition(
-      sf::Vector2f{
-         tmxObject->mX,
-         tmxObject->mY + 3 * PIXELS_PER_TILE
       }
    );
 
@@ -153,8 +235,6 @@ void Crusher::setupTransform()
    auto y = mPixelPosition.y / PPM + (5 * PIXELS_PER_TILE) / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
-
-
 
 
 //-----------------------------------------------------------------------------
@@ -207,33 +287,39 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
       },
       0.0f
    );
+
    mBody->CreateFixture(&boxShape, 0);
 }
 
-// https://easings.net/#easeOutElastic
-//
-// function easeOutElastic(x: number): number {
-// const c4 = (2 * Math.PI) / 3;
-//
-// return x === 0
-//   ? 0
-//   : x === 1
-//   ? 1
-//   : pow(2, -10 * x) * sin((x * 10 - 0.75) * c4) + 1;
 
-
-/*
-
-void LuaNode::makeDynamic()
+void Crusher::updateSpritePositions()
 {
-   mBody->SetType(b2_dynamicBody);
+   // the mount stays where it is
+   mSpriteMount.setPosition(
+      sf::Vector2f{
+         mPixelPosition.x,
+         mPixelPosition.y
+      }
+   );
+
+   mSpritePusher.setScale(1.0f, mOffset.y);
+
+   mSpritePusher.setPosition(
+      sf::Vector2f{
+         mPixelPosition.x,
+         mPixelPosition.y + 2 * PIXELS_PER_TILE
+      }
+   );
+
+   auto pixelPosition = mPixelPosition;
+   pixelPosition += mOffset;
+
+   mSpriteSpike.setPosition(
+      sf::Vector2f{
+         pixelPosition.x,
+         pixelPosition.y + 2 * PIXELS_PER_TILE
+      }
+   );
+
 }
-
-
-void LuaNode::makeStatic()
-{
-   mBody->SetType(b2_staticBody);
-}
-
-*/
 
