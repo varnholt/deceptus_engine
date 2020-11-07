@@ -61,10 +61,8 @@ void Crusher::draw(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Crusher::update(const sf::Time& dt)
+void Crusher::step(const sf::Time& dt)
 {
-   updateState();
-
    const auto distance_to_be_traveled = 48.0f;
 
    switch (mState)
@@ -76,10 +74,10 @@ void Crusher::update(const sf::Time& dt)
       }
       case State::Extract:
       {
-         const auto val = distance_to_be_traveled * Easings::easeOutElastic<float>(mExtractionTime.asSeconds());
+         const auto val = distance_to_be_traveled * Easings::easeOutBounce<float>(mExtractionTime.asSeconds());
          mOffset.y = val;
 
-         mExtractionTime += dt * 0.4f;
+         mExtractionTime += dt * 1.0f;
 
          break;
       }
@@ -90,16 +88,23 @@ void Crusher::update(const sf::Time& dt)
 
          mRetractionTime += dt * 0.4f;
 
-         if (mInstanceId == 0)
-         {
-            std::cout << val << std::endl;
-         }
+         // if (mInstanceId == 0)
+         // {
+         //    std::cout << val << std::endl;
+         // }
 
          break;
       }
    }
+}
 
+
+void Crusher::update(const sf::Time& dt)
+{
+   updateState();
+   step(dt);
    updateSpritePositions();
+   updateTransform();
 }
 
 
@@ -229,10 +234,10 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 
 
 //-----------------------------------------------------------------------------
-void Crusher::setupTransform()
+void Crusher::updateTransform()
 {
    auto x = mPixelPosition.x / PPM;
-   auto y = mPixelPosition.y / PPM + (5 * PIXELS_PER_TILE) / PPM;
+   auto y = (mOffset.y + mPixelPosition.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -268,7 +273,7 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    deadlyBodyDef.type = b2_kinematicBody;
    mBody = world->CreateBody(&deadlyBodyDef);
 
-   setupTransform();
+   updateTransform();
 
    b2PolygonShape spikeShape;
    spikeShape.Set(spikeVertices, 4);

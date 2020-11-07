@@ -43,9 +43,10 @@ class Crusher : public GameMechanism, public GameNode
 
    private:
 
-      void setupTransform();
+      void updateTransform();
       void setupBody(const std::shared_ptr<b2World>& world);
 
+      void step(const sf::Time& dt);
       void updateState();
       void updateSpritePositions();
 
