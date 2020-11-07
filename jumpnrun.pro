@@ -254,6 +254,7 @@ SOURCES += \
 # add box2d
 
 HEADERS += \
+    src/easings/easings.h \
     src/effects/smokeeffect.h \
     src/game/atmosphere.h \
     src/game/atmosphereshader.h \

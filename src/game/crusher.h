@@ -22,6 +22,13 @@ class Crusher : public GameMechanism, public GameNode
          Distance
       };
 
+      enum class State
+      {
+         Idle,
+         Extract,
+         Retract
+      };
+
       Crusher(GameNode* parent = nullptr);
 
       void draw(sf::RenderTarget& target) override;
@@ -39,15 +46,29 @@ class Crusher : public GameMechanism, public GameNode
       void setupTransform();
       void setupBody(const std::shared_ptr<b2World>& world);
 
+      void updateState();
+      void updateSpritePositions();
+
+      Mode mMode = Mode::Interval;
+      State mState = State::Idle;
+      State mPreviousState = State::Idle;
+      Alignment mAlignment = Alignment::PointsDown;
+
       b2Body* mBody = nullptr;
       sf::Vector2f mPixelPosition;
-      Mode mMode = Mode::Distance;
-      Alignment mAlignment = Alignment::PointsDown;
+      sf::Vector2f mOffset;
+
+      sf::Time mIdleTime;
+      sf::Time mExtractionTime;
+      sf::Time mRetractionTime;
 
       sf::Sprite mSpriteSpike;
       sf::Sprite mSpritePusher;
       sf::Sprite mSpriteMount;
 
+      int32_t mInstanceId = 0;
+
       static sf::Texture mTexture;
+      static int32_t mInstanceCounter;
 };
 
