@@ -136,6 +136,14 @@ void GameContactListener::BeginContact(b2Contact* contact)
    {
       switch (fixtureNodeA->getType())
       {
+         case ObjectTypeCrusher:
+         {
+            if (isPlayer(fixtureNodeB))
+            {
+               mNumDeadlyContacts++;
+            }
+            break;
+         }
          case ObjectTypePlayerFootSensor:
          {
             if (!contact->GetFixtureB()->IsSensor())
@@ -258,6 +266,14 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
       switch (fixtureNodeB->getType())
       {
+         case ObjectTypeCrusher:
+         {
+            if (isPlayer(fixtureNodeA))
+            {
+               mNumDeadlyContacts++;
+            }
+            break;
+         }
          case ObjectTypePlayerFootSensor:
          {
             if (!contact->GetFixtureA()->IsSensor())
@@ -409,6 +425,14 @@ void GameContactListener::EndContact(b2Contact* contact)
 
       switch (fixtureNodeA->getType())
       {
+         case ObjectTypeCrusher:
+         {
+            if (isPlayer(fixtureNodeB))
+            {
+               mNumDeadlyContacts--;
+            }
+            break;
+         }
          case ObjectTypePlayerFootSensor:
          {
             if (!contact->GetFixtureB()->IsSensor())
@@ -442,22 +466,32 @@ void GameContactListener::EndContact(b2Contact* contact)
             break;
          }
          case ObjectTypePlayer:
+         {
             mNumPlayerContacts--;
             break;
+         }
          case ObjectTypeOneSidedWall:
+         {
             contact->SetEnabled(true);
             break;
+         }
          case ObjectTypeDeadly:
+         {
             if (isPlayer(fixtureNodeB))
             {
                mNumDeadlyContacts--;
             }
             break;
+         }
          case ObjectTypeMovingPlatform:
+         {
             mNumMovingPlatformContacts--;
             break;
+         }
          default:
+         {
             break;
+         }
       }
    }
 
@@ -467,6 +501,14 @@ void GameContactListener::EndContact(b2Contact* contact)
 
       switch (fixtureNode->getType())
       {
+         case ObjectTypeCrusher:
+         {
+            if (isPlayer(fixtureNodeA))
+            {
+               mNumDeadlyContacts--;
+            }
+            break;
+         }
          case ObjectTypePlayerFootSensor:
          {
             if (!contact->GetFixtureA()->IsSensor())
@@ -500,22 +542,32 @@ void GameContactListener::EndContact(b2Contact* contact)
             break;
          }
          case ObjectTypePlayer:
+         {
             mNumPlayerContacts--;
             break;
+         }
          case ObjectTypeOneSidedWall:
+         {
             contact->SetEnabled(true);
             break;
+         }
          case ObjectTypeDeadly:
+         {
             if (isPlayer(fixtureNodeA))
             {
                mNumDeadlyContacts--;
             }
             break;
+         }
          case ObjectTypeMovingPlatform:
+         {
             mNumMovingPlatformContacts--;
             break;
+         }
          default:
+         {
             break;
+         }
       }
    }
 
