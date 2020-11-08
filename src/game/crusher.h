@@ -54,6 +54,7 @@ class Crusher : public GameMechanism, public GameNode
       State mState = State::Idle;
       State mPreviousState = State::Idle;
       Alignment mAlignment = Alignment::PointsDown;
+      float mAngle = 0.0f;
 
       b2Body* mBody = nullptr;
       sf::Vector2f mPixelPosition;
