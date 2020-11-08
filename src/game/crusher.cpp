@@ -229,6 +229,34 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    //    right
    //    left
 
+   if (tmxObject->mProperties)
+   {
+      const auto it = tmxObject->mProperties->mMap.find("alignment");
+
+      if (it != tmxObject->mProperties->mMap.end())
+      {
+         // std::cout << it->second->mValueStr << std::endl;
+
+         const auto alignment = it->second->mValueStr;
+         if (alignment == "up")
+         {
+            mAlignment = Alignment::PointsUp;
+         }
+         else if (alignment == "down")
+         {
+            mAlignment = Alignment::PointsDown;
+         }
+         else if (alignment == "left")
+         {
+            mAlignment = Alignment::PointsLeft;
+         }
+         else if (alignment == "right")
+         {
+            mAlignment = Alignment::PointsRight;
+         }
+      }
+   }
+
    setupBody(world);
 }
 
@@ -238,7 +266,7 @@ void Crusher::updateTransform()
 {
    auto x = mPixelPosition.x / PPM;
    auto y = (mOffset.y + mPixelPosition.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
-   mBody->SetTransform(b2Vec2(x, y), 0);
+   mBody->SetTransform(b2Vec2(x, y), mAngle);
 }
 
 
@@ -273,11 +301,10 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    deadlyBodyDef.type = b2_kinematicBody;
    mBody = world->CreateBody(&deadlyBodyDef);
 
-   updateTransform();
-
    b2PolygonShape spikeShape;
    spikeShape.Set(spikeVertices, 4);
    auto deadlyFixture = mBody->CreateFixture(&spikeShape, 0);
+
    auto objectData = new FixtureNode(this);
    objectData->setType(ObjectTypeCrusher);
    deadlyFixture->SetUserData(static_cast<void*>(objectData));
@@ -294,6 +321,28 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    );
 
    mBody->CreateFixture(&boxShape, 0);
+
+   switch (mAlignment)
+   {
+      case Alignment::PointsUp:
+      {
+         // mAngle = static_cast<float>(M_PI);
+         break;
+      }
+      case Alignment::PointsLeft:
+      {
+         break;
+      }
+      case Alignment::PointsRight:
+      {
+         break;
+      }
+      case Alignment::PointsNowhere:
+      case Alignment::PointsDown:
+      {
+         break;
+      }
+   }
 }
 
 
