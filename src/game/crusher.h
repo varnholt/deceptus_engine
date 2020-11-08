@@ -56,6 +56,9 @@ class Crusher : public GameMechanism, public GameNode
       Alignment mAlignment = Alignment::PointsDown;
       float mAngle = 0.0f;
 
+      b2Vec2 mOffsetBox;
+      b2Vec2 mOffsetBlade;
+
       b2Body* mBody = nullptr;
       sf::Vector2f mPixelPosition;
       sf::Vector2f mOffset;
