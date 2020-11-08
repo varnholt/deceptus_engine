@@ -17,6 +17,15 @@
 sf::Texture Crusher::mTexture;
 int32_t Crusher::mInstanceCounter = 0;
 
+static constexpr auto BLADE_HORIZONTAL_TILES = 5;
+static constexpr auto BLADE_VERTICAL_TILES = 1;
+
+static constexpr auto BLADE_SIZE_X = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
+static constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
+
+static constexpr auto BLADE_SHARPNESS = 0.1f;
+static constexpr auto BLADE_TOLERANCE = 0.06f;
+
 
 // 7 x 5
 //
@@ -87,11 +96,6 @@ void Crusher::step(const sf::Time& dt)
          mOffset.y = val;
 
          mRetractionTime += dt * 0.4f;
-
-         // if (mInstanceId == 0)
-         // {
-         //    std::cout << val << std::endl;
-         // }
 
          break;
       }
@@ -266,21 +270,41 @@ void Crusher::updateTransform()
 {
    auto x = mPixelPosition.x / PPM;
    auto y = (mOffset.y + mPixelPosition.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
-   mBody->SetTransform(b2Vec2(x, y), mAngle);
+   mBody->SetTransform(b2Vec2(x, y), 0.0f);
 }
 
 
 //-----------------------------------------------------------------------------
 void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 {
-   static constexpr auto BLADE_HORIZONTAL_TILES = 5;
-   static constexpr auto BLADE_VERTICAL_TILES = 1;
-
-   constexpr auto sizeX = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
-   constexpr auto sizeY = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
-
-   constexpr auto sharpness = 0.1f;
-   constexpr auto tolerance = 0.06f;
+   switch (mAlignment)
+   {
+      case Alignment::PointsUp:
+      {
+         mAngle = 0;
+         mOffsetBox.y = PIXELS_PER_TILE / PPM;
+         mOffsetBlade.y = -PIXELS_PER_TILE / PPM;
+         break;
+      }
+      case Alignment::PointsLeft:
+      {
+         mAngle = static_cast<float>(M_PI / 2.0f);
+         mOffsetBlade.x = PIXELS_PER_TILE / PPM;
+         break;
+      }
+      case Alignment::PointsRight:
+      {
+         mAngle = static_cast<float>(-M_PI / 2.0f);
+         mOffsetBlade.x = -PIXELS_PER_TILE / PPM;
+         break;
+      }
+      case Alignment::PointsNowhere:
+      case Alignment::PointsDown:
+      {
+         mAngle = static_cast<float>(M_PI);
+         break;
+      }
+   }
 
    //       +-+
    //       | |
@@ -291,18 +315,34 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    // \             /
    //  \___________/
 
-   b2Vec2 spikeVertices[4];
-   spikeVertices[0] = b2Vec2(tolerance, 0);
-   spikeVertices[1] = b2Vec2(sharpness + tolerance, sizeY);
-   spikeVertices[2] = b2Vec2(sizeX - sharpness - tolerance, sizeY);
-   spikeVertices[3] = b2Vec2(sizeX - tolerance, 0);
+   b2Vec2 bladeVertices[4];
+   bladeVertices[0] = b2Vec2(                                 BLADE_TOLERANCE, 0);
+   bladeVertices[1] = b2Vec2(               BLADE_SHARPNESS + BLADE_TOLERANCE, BLADE_SIZE_Y);
+   bladeVertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, BLADE_SIZE_Y);
+   bladeVertices[3] = b2Vec2(BLADE_SIZE_X                   - BLADE_TOLERANCE, 0);
+
+   // manually rotate the blade vertices according to the angle
+   b2Vec2 origin{BLADE_SIZE_X / 2.0f, BLADE_SIZE_Y / 2.0f};
+
+   for (auto i = 0; i < 4; i++)
+   {
+      bladeVertices[i] -= mOffsetBlade;
+
+      const auto x = bladeVertices[i].x;
+      const auto y = bladeVertices[i].y;
+
+      bladeVertices[i].x = ((x - origin.x) * cos(mAngle)) - ((origin.y - y) * sin(mAngle)) + origin.x;
+      bladeVertices[i].y = ((origin.y - y) * cos(mAngle)) - ((x - origin.x) * sin(mAngle)) + origin.y;
+
+      // bladeVertices[i] += mOffsetBlade;
+   }
 
    b2BodyDef deadlyBodyDef;
    deadlyBodyDef.type = b2_kinematicBody;
    mBody = world->CreateBody(&deadlyBodyDef);
 
    b2PolygonShape spikeShape;
-   spikeShape.Set(spikeVertices, 4);
+   spikeShape.Set(bladeVertices, 4);
    auto deadlyFixture = mBody->CreateFixture(&spikeShape, 0);
 
    auto objectData = new FixtureNode(this);
@@ -311,38 +351,16 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 
    b2PolygonShape boxShape;
    boxShape.SetAsBox(
-      ((PIXELS_PER_TILE * 5) / PPM) * 0.5f,
-      (PIXELS_PER_TILE / PPM) * 0.5f,
-      {
-         ((PIXELS_PER_TILE * 5) / PPM) * 0.5f,
-         -(PIXELS_PER_TILE / PPM) * 0.5f
+      ((PIXELS_PER_TILE * 5) / PPM) * 0.5f,     // hx
+      (PIXELS_PER_TILE / PPM) * 0.5f,           // hy
+      {                                         // center
+         ((PIXELS_PER_TILE * 5) / PPM) * 0.5f + mOffsetBox.x,
+         -(PIXELS_PER_TILE / PPM)      * 0.5f + mOffsetBox.y
       },
-      0.0f
+      mAngle
    );
 
    mBody->CreateFixture(&boxShape, 0);
-
-   switch (mAlignment)
-   {
-      case Alignment::PointsUp:
-      {
-         // mAngle = static_cast<float>(M_PI);
-         break;
-      }
-      case Alignment::PointsLeft:
-      {
-         break;
-      }
-      case Alignment::PointsRight:
-      {
-         break;
-      }
-      case Alignment::PointsNowhere:
-      case Alignment::PointsDown:
-      {
-         break;
-      }
-   }
 }
 
 
