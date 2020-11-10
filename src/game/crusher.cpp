@@ -84,7 +84,25 @@ void Crusher::step(const sf::Time& dt)
       case State::Extract:
       {
          const auto val = distance_to_be_traveled * Easings::easeOutBounce<float>(mExtractionTime.asSeconds());
-         mOffset.y = val;
+
+         switch (mAlignment)
+         {
+            case Alignment::PointsDown:
+               mOffset.y = val;
+               break;
+            case Alignment::PointsUp:
+               mOffset.y = -val;
+               break;
+            case Alignment::PointsLeft:
+               mOffset.x = -val;
+               break;
+            case Alignment::PointsRight:
+               mOffset.x = val;
+               break;
+            default:
+               break;
+         }
+
 
          mExtractionTime += dt * 1.0f;
 
@@ -93,7 +111,24 @@ void Crusher::step(const sf::Time& dt)
       case State::Retract:
       {
          const auto val = distance_to_be_traveled * (1.0f - Easings::easeInSine<float>(mRetractionTime.asSeconds()));
-         mOffset.y = val;
+
+         switch (mAlignment)
+         {
+            case Alignment::PointsDown:
+               mOffset.y = val;
+               break;
+            case Alignment::PointsUp:
+               mOffset.y = -val;
+               break;
+            case Alignment::PointsLeft:
+               mOffset.x = -val;
+               break;
+            case Alignment::PointsRight:
+               mOffset.x = val;
+               break;
+            default:
+               break;
+         }
 
          mRetractionTime += dt * 0.4f;
 
@@ -268,7 +303,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 //-----------------------------------------------------------------------------
 void Crusher::updateTransform()
 {
-   auto x = mPixelPosition.x / PPM;
+   auto x = (mOffset.x + mPixelPosition.x) / PPM;
    auto y = (mOffset.y + mPixelPosition.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0.0f);
 }
