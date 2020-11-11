@@ -216,58 +216,6 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
       mTexture.loadFromFile("data/level-crypt/tilesets/crushers.png");
    }
 
-   // crusher down
-   //
-   //    A        5
-   //    A        6
-   //    B        7
-   //    C        8
-   //  #####      9
-   //  VVVVV      A
-   //
-   // A: 216, 122 -> 240, 168 -> mount, 2 tiles offset from left, 16px offset from top
-   // B: 216, 168 -> 240, 192 -> pusher
-   // C: 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
-
-   // std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
-
-   mPixelPosition.x = tmxObject->mX;
-   mPixelPosition.y = tmxObject->mY;
-
-   mSpriteMount.setTexture(mTexture);
-   mSpritePusher.setTexture(mTexture);
-   mSpriteSpike.setTexture(mTexture);
-
-   mSpriteMount.setTextureRect({
-         7 * PIXELS_PER_TILE,
-         5 * PIXELS_PER_TILE,
-         5 * PIXELS_PER_TILE,
-         2 * PIXELS_PER_TILE
-      }
-   );
-
-   mSpritePusher.setTextureRect({
-         7 * PIXELS_PER_TILE,
-         7 * PIXELS_PER_TILE,
-         5 * PIXELS_PER_TILE,
-         1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
-      }
-   );
-
-   mSpriteSpike.setTextureRect({
-         7 * PIXELS_PER_TILE,
-         8 * PIXELS_PER_TILE,
-         5 * PIXELS_PER_TILE,
-         3 * PIXELS_PER_TILE
-      }
-   );
-
-   // alignment:
-   //    down
-   //    up
-   //    right
-   //    left
-
    if (tmxObject->mProperties)
    {
       const auto it = tmxObject->mProperties->mMap.find("alignment");
@@ -295,6 +243,171 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          }
       }
    }
+
+   //    0123456789012
+   //   +-------------+
+   //  0|<#         #>|
+   //  1|<#         #>|
+   //  2|<#CBAA AABC#>|
+   //  3|<#         #>|
+   //  4|<#         #>|
+   //  6|^^^^^    A   |
+   //  7|#####    A   |
+   //  8|  C      B   |
+   //  9|  B      C   |
+   //  0|  A    ##### |
+   //  1|  A    VVVVV |
+   //   +-------------+
+   //    0123456789012
+   //
+   //
+   // down
+   //    A: 216, 122 -> 240, 168 -> mount, 2 tiles offset from left, 16px offset from top
+   //    B: 216, 168 -> 240, 192 -> pusher
+   //    C: 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
+   //
+   // left
+   //    spikes: 0,0 -> 3,4 (<#C)
+   //    pusher: 2,1 -> 3,2 (BA)
+   //    mount:
+
+   // std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
+
+   mPixelPosition.x = tmxObject->mX;
+   mPixelPosition.y = tmxObject->mY;
+
+   mSpriteMount.setTexture(mTexture);
+   mSpritePusher.setTexture(mTexture);
+   mSpriteSpike.setTexture(mTexture);
+
+   switch (mAlignment)
+   {
+      case Alignment::PointsDown:
+      {
+         mSpriteMount.setTextureRect({
+               7 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               2 * PIXELS_PER_TILE
+            }
+         );
+
+         mSpritePusher.setTextureRect({
+               7 * PIXELS_PER_TILE,
+               7 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+            }
+         );
+
+         mSpriteSpike.setTextureRect({
+               7 * PIXELS_PER_TILE,
+               8 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               3 * PIXELS_PER_TILE
+            }
+         );
+
+         break;
+      }
+
+      case Alignment::PointsUp:
+      {
+         mSpriteMount.setTextureRect({
+               0 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               2 * PIXELS_PER_TILE
+            }
+         );
+
+         mSpritePusher.setTextureRect({
+               0 * PIXELS_PER_TILE,
+               7 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+            }
+         );
+
+         mSpriteSpike.setTextureRect({
+               0 * PIXELS_PER_TILE,
+               8 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
+               3 * PIXELS_PER_TILE
+            }
+         );
+
+         break;
+      }
+
+      case Alignment::PointsLeft:
+      {
+         mSpriteMount.setTextureRect({
+               0 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               2 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE
+            }
+         );
+
+         mSpritePusher.setTextureRect({
+               2 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               1 * PIXELS_PER_TILE,
+               5 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+            }
+         );
+
+         mSpriteSpike.setTextureRect({
+               3 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               3 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE
+            }
+         );
+
+         break;
+      }
+
+      case Alignment::PointsRight:
+      {
+         mSpriteMount.setTextureRect({
+               7 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               2 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE
+            }
+         );
+
+         mSpritePusher.setTextureRect({
+               8 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               1 * PIXELS_PER_TILE,
+               5 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+            }
+         );
+
+         mSpriteSpike.setTextureRect({
+              10 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               3 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE
+            }
+         );
+
+         break;
+      }
+
+      default:
+         break;
+   }
+
+
+   // alignment:
+   //    down
+   //    up
+   //    right
+   //    left
 
    setupBody(world);
 }
