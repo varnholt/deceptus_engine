@@ -69,6 +69,9 @@ class Crusher : public GameMechanism, public GameNode
       sf::Sprite mSpriteSpike;
       sf::Sprite mSpritePusher;
       sf::Sprite mSpriteMount;
+      sf::Vector2f mPixelOffsetMount;
+      sf::Vector2f mPixelOffsetPusher;
+      sf::Vector2f mPixelOffsetSpike;
 
       int32_t mInstanceId = 0;
 
