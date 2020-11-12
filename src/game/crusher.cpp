@@ -260,18 +260,6 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    //   +-------------+
    //    0123456789012
    //
-   //
-   // down
-   //    A: 216, 122 -> 240, 168 -> mount, 2 tiles offset from left, 16px offset from top
-   //    B: 216, 168 -> 240, 192 -> pusher
-   //    C: 168, 192 -> 288, 264 -> spikes, 2 tiles offset from left
-   //
-   // left
-   //    spikes: 0,0 -> 3,4 (<#C)
-   //    pusher: 2,1 -> 3,2 (BA)
-   //    mount:
-
-   // std::cout << "set up crusher: '" << tmxObject->mName << "'" << std::endl;
 
    mPixelPosition.x = tmxObject->mX;
    mPixelPosition.y = tmxObject->mY;
@@ -315,7 +303,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
       {
          mSpriteMount.setTextureRect({
                0 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
+               9 * PIXELS_PER_TILE,
                5 * PIXELS_PER_TILE,
                2 * PIXELS_PER_TILE
             }
@@ -323,7 +311,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 
          mSpritePusher.setTextureRect({
                0 * PIXELS_PER_TILE,
-               7 * PIXELS_PER_TILE,
+               8 * PIXELS_PER_TILE,
                5 * PIXELS_PER_TILE,
                1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
             }
@@ -331,7 +319,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 
          mSpriteSpike.setTextureRect({
                0 * PIXELS_PER_TILE,
-               8 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE,
                5 * PIXELS_PER_TILE,
                3 * PIXELS_PER_TILE
             }
@@ -342,24 +330,24 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 
       case Alignment::PointsLeft:
       {
-         mSpriteMount.setTextureRect({
-               0 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               2 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE
-            }
-         );
-
          mSpritePusher.setTextureRect({
-               2 * PIXELS_PER_TILE,
+               3 * PIXELS_PER_TILE,
                0 * PIXELS_PER_TILE,
                1 * PIXELS_PER_TILE,
                5 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
             }
          );
 
+         mSpriteMount.setTextureRect({
+               4 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
+               2 * PIXELS_PER_TILE,
+               5 * PIXELS_PER_TILE
+            }
+         );
+
          mSpriteSpike.setTextureRect({
-               3 * PIXELS_PER_TILE,
+               0 * PIXELS_PER_TILE,
                0 * PIXELS_PER_TILE,
                3 * PIXELS_PER_TILE,
                5 * PIXELS_PER_TILE
@@ -380,7 +368,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          );
 
          mSpritePusher.setTextureRect({
-               8 * PIXELS_PER_TILE,
+               9 * PIXELS_PER_TILE,
                0 * PIXELS_PER_TILE,
                1 * PIXELS_PER_TILE,
                5 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
@@ -401,13 +389,6 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
       default:
          break;
    }
-
-
-   // alignment:
-   //    down
-   //    up
-   //    right
-   //    left
 
    setupBody(world);
 }
@@ -547,32 +528,48 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 
 void Crusher::updateSpritePositions()
 {
-   // the mount stays where it is
-   mSpriteMount.setPosition(
-      sf::Vector2f{
-         mPixelPosition.x,
-         mPixelPosition.y
+
+   switch (mAlignment)
+   {
+      case Alignment::PointsDown:
+      {
+         mSpritePusher.setScale(1.0f, mOffset.y);
+
+         mPixelOffsetPusher.y = 2 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.y = 2 * PIXELS_PER_TILE;
+         break;
       }
-   );
+      case Alignment::PointsUp:
+      {
+         mSpritePusher.setScale(1.0f, mOffset.y);
 
-   mSpritePusher.setScale(1.0f, mOffset.y);
-
-   mSpritePusher.setPosition(
-      sf::Vector2f{
-         mPixelPosition.x,
-         mPixelPosition.y + 2 * PIXELS_PER_TILE
+         mPixelOffsetPusher.y = 5 * PIXELS_PER_TILE + 16;
+         mPixelOffsetSpike.y = 3 * PIXELS_PER_TILE;
+         mPixelOffsetMount.y = 5 * PIXELS_PER_TILE + 16;
+         break;
       }
-   );
-
-   auto pixelPosition = mPixelPosition;
-   pixelPosition += mOffset;
-
-   mSpriteSpike.setPosition(
-      sf::Vector2f{
-         pixelPosition.x,
-         pixelPosition.y + 2 * PIXELS_PER_TILE
+      case Alignment::PointsLeft:
+      {
+         mPixelOffsetPusher.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetMount.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetMount.x = 3 * PIXELS_PER_TILE;
+         mSpritePusher.setScale(mOffset.x, 1.0f);
+         break;
       }
-   );
+      case Alignment::PointsRight:
+      {
+         mSpritePusher.setScale(mOffset.x, 1.0f);
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }
 
+   mSpriteMount.setPosition(mPixelPosition + mPixelOffsetMount);
+   mSpritePusher.setPosition(mPixelPosition + mPixelOffsetPusher);
+   mSpriteSpike.setPosition(mPixelPosition + mOffset + mPixelOffsetSpike);
 }
 
