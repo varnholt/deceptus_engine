@@ -60,7 +60,7 @@ class Crusher : public GameMechanism, public GameNode
 
       b2Body* mBody = nullptr;
       sf::Vector2f mPixelPosition;
-      sf::Vector2f mOffset;
+      sf::Vector2f mBladeOffset;
 
       sf::Time mIdleTime;
       sf::Time mExtractionTime;
