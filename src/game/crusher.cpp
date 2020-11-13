@@ -27,28 +27,6 @@ static constexpr auto BLADE_SHARPNESS = 0.1f;
 static constexpr auto BLADE_TOLERANCE = 0.06f;
 
 
-// 7 x 5
-//
-//         0123456 789ABC
-//
-//         <#          #>      0
-//         <#          #>      1
-//         <#####  #####>      2
-//         <#          #>      3
-//         <#          #>      4
-//
-//         MMMMM      #        5
-//         #####      #        6
-//           #        #        7
-//           #        #        8
-//           #      #####      9
-//           #      VVVVV      A
-//
-//         0123456 0123456     B
-//         0123456 0123456     C
-//         0123456 0123456     D
-//         0123456 0123456     E
-
 //-----------------------------------------------------------------------------
 Crusher::Crusher(GameNode* parent)
    : GameNode(parent)
@@ -88,18 +66,18 @@ void Crusher::step(const sf::Time& dt)
          switch (mAlignment)
          {
             case Alignment::PointsDown:
-               mOffset.y = val;
+               mBladeOffset.y = val;
                break;
             case Alignment::PointsUp:
-               mOffset.y = -val;
+               mBladeOffset.y = -val;
                break;
             case Alignment::PointsLeft:
-               mOffset.x = -val;
+               mBladeOffset.x = -val;
                break;
             case Alignment::PointsRight:
-               mOffset.x = val;
+               mBladeOffset.x = val;
                break;
-            default:
+            case Alignment::PointsNowhere:
                break;
          }
 
@@ -115,18 +93,18 @@ void Crusher::step(const sf::Time& dt)
          switch (mAlignment)
          {
             case Alignment::PointsDown:
-               mOffset.y = val;
+               mBladeOffset.y = val;
                break;
             case Alignment::PointsUp:
-               mOffset.y = -val;
+               mBladeOffset.y = -val;
                break;
             case Alignment::PointsLeft:
-               mOffset.x = -val;
+               mBladeOffset.x = -val;
                break;
             case Alignment::PointsRight:
-               mOffset.x = val;
+               mBladeOffset.x = val;
                break;
-            default:
+            case Alignment::PointsNowhere:
                break;
          }
 
@@ -259,7 +237,6 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    //  1|  A    VVVVV |
    //   +-------------+
    //    0123456789012
-   //
 
    mPixelPosition.x = tmxObject->mX;
    mPixelPosition.y = tmxObject->mY;
@@ -296,6 +273,9 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
             }
          );
 
+         mPixelOffsetPusher.y = 2 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.y = 2 * PIXELS_PER_TILE;
+
          break;
       }
 
@@ -313,7 +293,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
                0 * PIXELS_PER_TILE,
                8 * PIXELS_PER_TILE,
                5 * PIXELS_PER_TILE,
-               1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+               1
             }
          );
 
@@ -325,6 +305,10 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
             }
          );
 
+         mPixelOffsetPusher.y = 6 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.y = 3 * PIXELS_PER_TILE;
+         mPixelOffsetMount.y = 6 * PIXELS_PER_TILE;
+
          break;
       }
 
@@ -333,8 +317,8 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          mSpritePusher.setTextureRect({
                3 * PIXELS_PER_TILE,
                0 * PIXELS_PER_TILE,
-               1 * PIXELS_PER_TILE,
-               5 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+               1,
+               5 * PIXELS_PER_TILE
             }
          );
 
@@ -354,6 +338,12 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
             }
          );
 
+         mPixelOffsetPusher.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetPusher.x = 3 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetMount.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetMount.x = 3 * PIXELS_PER_TILE;
+
          break;
       }
 
@@ -370,8 +360,8 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          mSpritePusher.setTextureRect({
                9 * PIXELS_PER_TILE,
                0 * PIXELS_PER_TILE,
-               1 * PIXELS_PER_TILE,
-               5 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+               1,
+               5 * PIXELS_PER_TILE
             }
          );
 
@@ -383,10 +373,17 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
             }
          );
 
+         mPixelOffsetPusher.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetPusher.x = -1 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetSpike.x = -1 * PIXELS_PER_TILE;
+         mPixelOffsetMount.y = -1 * PIXELS_PER_TILE;
+         mPixelOffsetMount.x = -3 * PIXELS_PER_TILE;
+
          break;
       }
 
-      default:
+      case Alignment::PointsNowhere:
          break;
    }
 
@@ -397,8 +394,8 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 //-----------------------------------------------------------------------------
 void Crusher::updateTransform()
 {
-   auto x = (mOffset.x + mPixelPosition.x) / PPM;
-   auto y = (mOffset.y + mPixelPosition.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
+   auto x = (mBladeOffset.x + mPixelPosition.x) / PPM;
+   auto y = (mBladeOffset.y + mPixelPosition.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    mBody->SetTransform(b2Vec2(x, y), 0.0f);
 }
 
@@ -452,7 +449,7 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
          bladeVertices[3] = b2Vec2(BLADE_SIZE_X                   - BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
          break;
       }
-      default:
+      case Alignment::PointsNowhere:
       {
          break;
       }
@@ -508,7 +505,7 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
          box_center.y -= PIXELS_PER_TILE / PPM;
          break;
       }
-      default:
+      case Alignment::PointsNowhere:
       {
          break;
       }
@@ -533,36 +530,25 @@ void Crusher::updateSpritePositions()
    {
       case Alignment::PointsDown:
       {
-         mSpritePusher.setScale(1.0f, mOffset.y);
-
-         mPixelOffsetPusher.y = 2 * PIXELS_PER_TILE;
-         mPixelOffsetSpike.y = 2 * PIXELS_PER_TILE;
+         mSpritePusher.setScale(1.0f, mBladeOffset.y);
          break;
       }
       case Alignment::PointsUp:
       {
-         mSpritePusher.setScale(1.0f, mOffset.y);
-
-         mPixelOffsetPusher.y = 5 * PIXELS_PER_TILE + 16;
-         mPixelOffsetSpike.y = 3 * PIXELS_PER_TILE;
-         mPixelOffsetMount.y = 5 * PIXELS_PER_TILE + 16;
+         mSpritePusher.setScale(1.0f, mBladeOffset.y);
          break;
       }
       case Alignment::PointsLeft:
       {
-         mPixelOffsetPusher.y = -1 * PIXELS_PER_TILE;
-         mPixelOffsetSpike.y = -1 * PIXELS_PER_TILE;
-         mPixelOffsetMount.y = -1 * PIXELS_PER_TILE;
-         mPixelOffsetMount.x = 3 * PIXELS_PER_TILE;
-         mSpritePusher.setScale(mOffset.x, 1.0f);
+         mSpritePusher.setScale(mBladeOffset.x, 1.0f);
          break;
       }
       case Alignment::PointsRight:
       {
-         mSpritePusher.setScale(mOffset.x, 1.0f);
+         mSpritePusher.setScale(mBladeOffset.x, 1.0f);
          break;
       }
-      default:
+      case Alignment::PointsNowhere:
       {
          break;
       }
@@ -570,6 +556,6 @@ void Crusher::updateSpritePositions()
 
    mSpriteMount.setPosition(mPixelPosition + mPixelOffsetMount);
    mSpritePusher.setPosition(mPixelPosition + mPixelOffsetPusher);
-   mSpriteSpike.setPosition(mPixelPosition + mOffset + mPixelOffsetSpike);
+   mSpriteSpike.setPosition(mPixelPosition + mPixelOffsetSpike + mBladeOffset);
 }
 
