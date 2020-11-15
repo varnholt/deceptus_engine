@@ -113,23 +113,18 @@ SOURCES += \
    src/game/animationpool.cpp \
    src/game/animationsettings.cpp \
    src/game/atmosphere.cpp \
-   src/game/atmosphereshader.cpp \
    src/game/audio.cpp \
    src/game/bitmapfont.cpp \
-   src/game/blurshader.cpp \
    src/game/boomeffect.cpp \
    src/game/bow.cpp \
    src/game/bullet.cpp \
    src/game/bullethitanimation.cpp \
-   src/game/callbackmap.cpp \
    src/game/camerapane.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/game/checkpoint.cpp \
-   src/game/checksum.cpp \
    src/game/console.cpp \
-   src/game/controlleroverlay.cpp \
-   src/game/deathshader.cpp \
+   src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
    src/game/dialogue.cpp \
    src/game/displaymode.cpp \
@@ -140,9 +135,12 @@ SOURCES += \
    src/game/extramanager.cpp \
    src/game/extraskill.cpp \
    src/game/extratable.cpp \
-   src/game/fbm.cpp \
    src/game/fixturenode.cpp \
    src/game/forestscene.cpp \
+   src/game/framework/callbackmap.cpp \
+   src/game/framework/checksum.cpp \
+   src/game/framework/globalclock.cpp \
+   src/game/framework/timer.cpp \
    src/game/game.cpp \
    src/game/gameconfiguration.cpp \
    src/game/gamecontactlistener.cpp \
@@ -151,61 +149,63 @@ SOURCES += \
    src/game/gamemechanism.cpp \
    src/game/gamenode.cpp \
    src/game/gamestate.cpp \
-   src/game/gammashader.cpp \
-   src/game/globalclock.cpp \
-   src/game/hermitecurve.cpp \
    src/game/imagelayer.cpp \
    src/game/infolayer.cpp \
    src/game/inventory.cpp \
    src/game/inventoryitem.cpp \
    src/game/inventorylayer.cpp \
-   src/game/jumpplatform.cpp \
    src/game/level.cpp \
    src/game/leveldescription.cpp \
    src/game/levelmap.cpp \
    src/game/levels.cpp \
    src/game/luainterface.cpp \
    src/game/luanode.cpp \
-   src/game/maptools.cpp \
+   src/game/math/fbm.cpp \
+   src/game/math/hermitecurve.cpp \
+   src/game/math/maptools.cpp \
+   src/game/math/pathinterpolation.cpp \
+   src/game/math/sfmlmath.cpp \
    src/game/mechanisms/bouncer.cpp \
    src/game/mechanisms/conveyorbelt.cpp \
    src/game/mechanisms/crusher.cpp \
    src/game/mechanisms/deathblock.cpp \
    src/game/mechanisms/door.cpp \
    src/game/mechanisms/fan.cpp \
+   src/game/mechanisms/jumpplatform.cpp \
    src/game/mechanisms/laser.cpp \
    src/game/mechanisms/lever.cpp \
+   src/game/mechanisms/moveablebox.cpp \
    src/game/mechanisms/movingplatform.cpp \
    src/game/mechanisms/portal.cpp \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikes.cpp \
    src/game/meshtools.cpp \
    src/game/messagebox.cpp \
-   src/game/moveablebox.cpp \
-   src/game/pathinterpolation.cpp \
-   src/game/physics.cpp \
-   src/game/physicsconfiguration.cpp \
-   src/game/player.cpp \
-   src/game/playerclimb.cpp \
-   src/game/playerconfiguration.cpp \
-   src/game/playercontrols.cpp \
-   src/game/playerinfo.cpp \
-   src/game/playerjump.cpp \
+   src/game/physics/physics.cpp \
+   src/game/physics/physicsconfiguration.cpp \
+   src/game/player/player.cpp \
+   src/game/player/playerclimb.cpp \
+   src/game/player/playerconfiguration.cpp \
+   src/game/player/playercontrols.cpp \
+   src/game/player/playerinfo.cpp \
+   src/game/player/playerjump.cpp \
    src/game/progresssettings.cpp \
-   src/game/rainoverlay.cpp \
+   src/game/overlays/rainoverlay.cpp \
    src/game/room.cpp \
    src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
-   src/game/sfmlmath.cpp \
+   src/game/shaders/atmosphereshader.cpp \
+   src/game/shaders/blurshader.cpp \
+   src/game/shaders/deathshader.cpp \
+   src/game/shaders/gammashader.cpp \
    src/game/squaremarcher.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/tilemap.cpp \
-   src/game/timer.cpp \
    src/game/weapon.cpp \
    src/game/weaponsystem.cpp \
    src/game/weather.cpp \
-   src/game/weatheroverlay.cpp \
+   src/game/overlays/weatheroverlay.cpp \
    src/game/worldconfiguration.cpp \
    src/image/image.cpp \
    src/image/layer.cpp \
@@ -268,25 +268,20 @@ HEADERS += \
    src/game/animationpool.h \
    src/game/animationsettings.h \
    src/game/atmosphere.h \
-   src/game/atmosphereshader.h \
    src/game/audio.h \
    src/game/bitmapfont.h \
-   src/game/blurshader.h \
    src/game/boomeffect.h \
    src/game/bow.h \
    src/game/bullet.h \
    src/game/bullethitanimation.h \
    src/game/bulletplayer.h \
-   src/game/callbackmap.h \
    src/game/camerapane.h \
    src/game/camerasystem.h \
    src/game/camerasystemconfiguration.h \
    src/game/checkpoint.h \
-   src/game/checksum.h \
    src/game/console.h \
    src/game/constants.h \
-   src/game/controlleroverlay.h \
-   src/game/deathshader.h \
+   src/game/overlays/controlleroverlay.h \
    src/game/debugdraw.h \
    src/game/dialogue.h \
    src/game/displaymode.h \
@@ -298,9 +293,12 @@ HEADERS += \
    src/game/extramanager.h \
    src/game/extraskill.h \
    src/game/extratable.h \
-   src/game/fbm.h \
    src/game/fixturenode.h \
    src/game/forestscene.h \
+   src/game/framework/callbackmap.h \
+   src/game/framework/checksum.h \
+   src/game/framework/globalclock.h \
+   src/game/framework/timer.h \
    src/game/game.h \
    src/game/gameconfiguration.h \
    src/game/gamecontactlistener.h \
@@ -309,16 +307,11 @@ HEADERS += \
    src/game/gamemechanism.h \
    src/game/gamenode.h \
    src/game/gamestate.h \
-   src/game/gammashader.h \
-   src/game/globalclock.h \
-   src/game/hermitecurve.h \
-   src/game/hermitecurvekey.h \
    src/game/imagelayer.h \
    src/game/infolayer.h \
    src/game/inventory.h \
    src/game/inventoryitem.h \
    src/game/inventorylayer.h \
-   src/game/jumpplatform.h \
    src/game/laser.h \
    src/game/level.h \
    src/game/leveldescription.h \
@@ -327,45 +320,52 @@ HEADERS += \
    src/game/luaconstants.h \
    src/game/luainterface.h \
    src/game/luanode.h \
-   src/game/maptools.h \
+   src/game/math/fbm.h \
+   src/game/math/hermitecurve.h \
+   src/game/math/hermitecurvekey.h \
+   src/game/math/maptools.h \
+   src/game/math/pathinterpolation.h \
+   src/game/math/sfmlmath.h \
    src/game/mechanisms/bouncer.h \
    src/game/mechanisms/conveyorbelt.h \
    src/game/mechanisms/crusher.h \
    src/game/mechanisms/deathblock.h \
    src/game/mechanisms/door.h \
    src/game/mechanisms/fan.h \
+   src/game/mechanisms/jumpplatform.h \
    src/game/mechanisms/lever.h \
+   src/game/mechanisms/moveablebox.h \
    src/game/mechanisms/movingplatform.h \
    src/game/mechanisms/portal.h \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikes.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
-   src/game/moveablebox.h \
-   src/game/pathinterpolation.h \
-   src/game/physics.h \
-   src/game/physicsconfiguration.h \
-   src/game/player.h \
-   src/game/playerclimb.h \
-   src/game/playerconfiguration.h \
-   src/game/playercontrols.h \
-   src/game/playerinfo.h \
-   src/game/playerjump.h \
+   src/game/physics/physics.h \
+   src/game/physics/physicsconfiguration.h \
+   src/game/player/player.h \
+   src/game/player/playerclimb.h \
+   src/game/player/playerconfiguration.h \
+   src/game/player/playercontrols.h \
+   src/game/player/playerinfo.h \
+   src/game/player/playerjump.h \
    src/game/progresssettings.h \
-   src/game/rainoverlay.h \
+   src/game/overlays/rainoverlay.h \
    src/game/room.h \
    src/game/savestate.h \
    src/game/scriptproperty.h \
-   src/game/sfmlmath.h \
+   src/game/shaders/atmosphereshader.h \
+   src/game/shaders/blurshader.h \
+   src/game/shaders/deathshader.h \
+   src/game/shaders/gammashader.h \
    src/game/squaremarcher.h \
    src/game/test.h \
    src/game/texturepool.h \
    src/game/tilemap.h \
-   src/game/timer.h \
    src/game/weapon.h \
    src/game/weaponsystem.h \
    src/game/weather.h \
-   src/game/weatheroverlay.h \
+   src/game/overlays/weatheroverlay.h \
    src/game/worldconfiguration.h \
    src/image/image.h \
    src/image/layer.h \
