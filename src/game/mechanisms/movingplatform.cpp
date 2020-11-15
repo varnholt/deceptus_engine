@@ -3,7 +3,7 @@
 
 #include "constants.h"
 #include "fixturenode.h"
-#include "globalclock.h"
+#include "framework/globalclock.h"
 #include "level.h"
 #include "player/player.h"
 #include "physics/physicsconfiguration.h"

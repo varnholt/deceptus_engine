@@ -1,12 +1,12 @@
 #pragma once
 
-#include "controlleroverlay.h"
 #include "console.h"
 #include "constants.h"
 #include "forestscene.h"
 #include "infolayer.h"
 #include "inventorylayer.h"
-#include "rainoverlay.h"
+#include "overlays/controlleroverlay.h"
+#include "overlays/rainoverlay.h"
 
 #include "menus/menu.h"
 

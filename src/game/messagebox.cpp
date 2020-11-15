@@ -4,7 +4,7 @@
 #include "game/gameconfiguration.h"
 #include "game/gamecontrollerintegration.h"
 #include "gamestate.h"
-#include "globalclock.h"
+#include "framework/globalclock.h"
 #include "image/psd.h"
 #include "joystick/gamecontroller.h"
 #include "player/player.h"
