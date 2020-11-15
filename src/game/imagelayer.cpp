@@ -1,9 +1,9 @@
 #include "imagelayer.h"
 
-#include "tmxparser/tmximage.h"
-#include "tmxparser/tmximagelayer.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmximage.h"
+#include "framework/tmxparser/tmximagelayer.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 
 #include <iostream>
 

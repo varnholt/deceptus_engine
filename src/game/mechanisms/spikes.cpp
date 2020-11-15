@@ -4,10 +4,10 @@
 #include "player/player.h"
 #include "texturepool.h"
 
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxtileset.h"
-#include "tmxparser/tmxproperty.h"
-#include "tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxproperties.h"
 
 #include <iostream>
 

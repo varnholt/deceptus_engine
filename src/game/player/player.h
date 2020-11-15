@@ -4,7 +4,7 @@
 #include "extramanager.h"
 #include "extratable.h"
 #include "gamenode.h"
-#include "joystick/gamecontrollerinfo.h"
+#include "framework/joystick/gamecontrollerinfo.h"
 #include "playerclimb.h"
 #include "playercontrols.h"
 #include "playerjump.h"

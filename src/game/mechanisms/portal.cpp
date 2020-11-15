@@ -6,13 +6,13 @@
 #include "fixturenode.h"
 #include "math/sfmlmath.h"
 
-#include "tmxparser/tmximage.h"
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxpolyline.h"
-#include "tmxparser/tmxproperty.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmximage.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxtileset.h"
 
 #include <iostream>
 

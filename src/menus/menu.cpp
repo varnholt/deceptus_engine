@@ -16,7 +16,7 @@
 #include "menuscreenvideo.h"
 
 #include "game/gamecontrollerintegration.h"
-#include "joystick/gamecontroller.h"
+#include "framework/joystick/gamecontroller.h"
 
 #include <iostream>
 

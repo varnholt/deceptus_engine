@@ -7,7 +7,7 @@
 #include "SFML/System.hpp"
 
 #include "gamenode.h"
-#include "tmxparser/tmxtile.h"
+#include "framework/tmxparser/tmxtile.h"
 
 
 struct ExtraItem : public GameNode

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "joystick/gamecontrollerinfo.h"
+#include "framework/joystick/gamecontrollerinfo.h"
 #include <functional>
 #include <SFML/Graphics.hpp>
 

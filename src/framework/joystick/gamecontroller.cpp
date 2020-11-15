@@ -1,6 +1,6 @@
 // header
 #include "gamecontroller.h"
-#include "game/framework/timer.h"
+#include "game/tools/timer.h"
 
 #include <algorithm>
 #include <iostream>

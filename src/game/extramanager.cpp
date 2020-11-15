@@ -10,9 +10,9 @@
 #include "tilemap.h"
 #include "savestate.h"
 
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxtile.h"
-#include "tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxtile.h"
+#include "framework/tmxparser/tmxtileset.h"
 
 #include "SFML/Graphics.hpp"
 
