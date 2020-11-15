@@ -3,13 +3,13 @@
 
 // game
 #include "audio.h"
-#include "bouncer.h"
 #include "bullet.h"
 #include "constants.h"
-#include "conveyorbelt.h"
 #include "fixturenode.h"
 #include "luanode.h"
-#include "movingplatform.h"
+#include "mechanisms/bouncer.h"
+#include "mechanisms/conveyorbelt.h"
+#include "mechanisms/movingplatform.h"
 #include "player.h"
 
 #include <iostream>
