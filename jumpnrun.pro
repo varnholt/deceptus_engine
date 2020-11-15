@@ -101,12 +101,6 @@ INCLUDEPATH += src/game
 INCLUDEPATH += src/thirdparty
 
 SOURCES += \
-   src/effects/blur.cpp \
-   src/effects/effect.cpp \
-   src/effects/pixelate.cpp \
-   src/effects/raycastlight.cpp \
-   src/effects/smokeeffect.cpp \
-   src/effects/staticlight.cpp \
    src/game/actioncontrollermap.cpp \
    src/game/ambientocclusion.cpp \
    src/game/animation.cpp \
@@ -128,6 +122,12 @@ SOURCES += \
    src/game/debugdraw.cpp \
    src/game/dialogue.cpp \
    src/game/displaymode.cpp \
+   src/game/effects/blur.cpp \
+   src/game/effects/effect.cpp \
+   src/game/effects/pixelate.cpp \
+   src/game/effects/raycastlight.cpp \
+   src/game/effects/smokeeffect.cpp \
+   src/game/effects/staticlight.cpp \
    src/game/enemy.cpp \
    src/game/enemydescription.cpp \
    src/game/extrahealth.cpp \
