@@ -12,7 +12,7 @@
 #include "joystick/gamecontrollerinfo.h"
 #include "luanode.h"
 #include "mechanisms/portal.h"
-#include "physics.h"
+#include "physics/physics.h"
 #include "room.h"
 #include "shaders/atmosphereshader.h"
 #include "shaders/blurshader.h"

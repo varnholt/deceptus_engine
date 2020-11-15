@@ -3,7 +3,7 @@
 #include "tmxparser/tmxobject.h"
 
 #include "constants.h"
-#include "sfmlmath.h"
+#include "math/sfmlmath.h"
 
 #include <iostream>
 

@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "maptools.h"
+#include "math/maptools.h"
 
 #include <iostream>
 
