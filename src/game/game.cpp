@@ -20,7 +20,7 @@
 #include "luainterface.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
-#include "physicsconfiguration.h"
+#include "physics/physicsconfiguration.h"
 #include "savestate.h"
 #include "timer.h"
 #include "weapon.h"

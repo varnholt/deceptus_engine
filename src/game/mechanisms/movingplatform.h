@@ -2,10 +2,10 @@
 
 #include "gamemechanism.h"
 #include "gamenode.h"
+#include "math/pathinterpolation.h"
 
-#include "pathinterpolation.h"
-#include <filesystem>
 #include "Box2D/Box2D.h"
+#include <filesystem>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>

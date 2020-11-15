@@ -6,7 +6,7 @@
 #include "level.h"
 #include "player/player.h"
 #include "savestate.h"
-#include "sfmlmath.h"
+#include "math/sfmlmath.h"
 #include "timer.h"
 
 #include "tmxparser/tmximage.h"

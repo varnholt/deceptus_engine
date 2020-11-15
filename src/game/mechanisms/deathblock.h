@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
-#include "pathinterpolation.h"
+#include "math/pathinterpolation.h"
 
 #include <Box2D/Box2D.h>
 

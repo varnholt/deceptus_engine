@@ -6,7 +6,7 @@
 #include "globalclock.h"
 #include "level.h"
 #include "player/player.h"
-#include "physicsconfiguration.h"
+#include "physics/physicsconfiguration.h"
 #include "tmxparser/tmximage.h"
 #include "tmxparser/tmxlayer.h"
 #include "tmxparser/tmxobject.h"

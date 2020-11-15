@@ -13,7 +13,7 @@
 #include "level.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
-#include "physicsconfiguration.h"
+#include "physics/physicsconfiguration.h"
 #include "playerinfo.h"
 #include "savestate.h"
 #include "weapon.h"

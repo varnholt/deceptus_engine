@@ -4,7 +4,7 @@
 #include "audio.h"
 #include "gamecontactlistener.h"
 #include "globalclock.h"
-#include "physicsconfiguration.h"
+#include "physics/physicsconfiguration.h"
 #include "savestate.h"
 
 #include <Box2D/Box2D.h>
