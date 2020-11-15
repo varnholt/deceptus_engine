@@ -5,8 +5,8 @@
 #include "globalclock.h"
 #include "joystick/gamecontroller.h"
 
-#include "player.h"
-#include "playerinfo.h"
+#include "player/player.h"
+#include "player/playerinfo.h"
 #include "extramanager.h"
 #include "inventoryitem.h"
 #include "savestate.h"

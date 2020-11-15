@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "player.h"
+#include "player/player.h"
 #include "sfmlmath.h"
 
 

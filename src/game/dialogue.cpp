@@ -1,7 +1,7 @@
 #include "dialogue.h"
 
 #include "messagebox.h"
-#include "player.h"
+#include "player/player.h"
 #include "savestate.h"
 
 #include "tmxparser/tmxobject.h"

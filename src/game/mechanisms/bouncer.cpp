@@ -1,7 +1,7 @@
 #include "bouncer.h"
 #include "fixturenode.h"
 #include "globalclock.h"
-#include "player.h"
+#include "player/player.h"
 
 #include <iostream>
 

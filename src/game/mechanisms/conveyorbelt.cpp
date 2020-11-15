@@ -1,5 +1,5 @@
 #include "conveyorbelt.h"
-#include "player.h"
+#include "player/player.h"
 #include "texturepool.h"
 
 #include "tmxparser/tmxobject.h"

@@ -5,7 +5,7 @@
 #include "fixturenode.h"
 #include "globalclock.h"
 #include "level.h"
-#include "player.h"
+#include "player/player.h"
 #include "physicsconfiguration.h"
 #include "tmxparser/tmximage.h"
 #include "tmxparser/tmxlayer.h"

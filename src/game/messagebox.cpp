@@ -7,7 +7,7 @@
 #include "globalclock.h"
 #include "image/psd.h"
 #include "joystick/gamecontroller.h"
-#include "player.h"
+#include "player/player.h"
 
 #include <algorithm>
 #include <iostream>

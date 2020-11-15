@@ -2,7 +2,7 @@
 
 // game
 #include "constants.h"
-#include "player.h"
+#include "player/player.h"
 #include "fixturenode.h"
 #include "sfmlmath.h"
 #include "texturepool.h"

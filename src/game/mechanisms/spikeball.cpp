@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "hermitecurve.h"
-#include "player.h"
+#include "player/player.h"
 #include "tmxparser/tmxobject.h"
 
 /*

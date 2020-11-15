@@ -7,7 +7,7 @@
 #include "gameconfiguration.h"
 #include "mechanisms/door.h"
 #include "mechanisms/portal.h"
-#include "player.h"
+#include "player/player.h"
 
 #include "image/psd.h"
 
