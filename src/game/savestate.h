@@ -5,7 +5,7 @@
 
 #include "json/json.hpp"
 
-#include "playerinfo.h"
+#include "player/playerinfo.h"
 
 struct SaveState
 {

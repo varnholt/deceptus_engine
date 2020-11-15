@@ -2,8 +2,8 @@
 
 #include "checkpoint.h"
 #include "extramanager.h"
-#include "player.h"
-#include "playerinfo.h"
+#include "player/player.h"
+#include "player/playerinfo.h"
 #include "savestate.h"
 
 #include <iostream>

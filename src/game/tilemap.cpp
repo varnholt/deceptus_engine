@@ -5,7 +5,7 @@
 #include <iostream>
 
 // tmx
-#include "player.h"
+#include "player/player.h"
 #include "tmxparser/tmxanimation.h"
 #include "tmxparser/tmxframe.h"
 #include "tmxparser/tmximage.h"

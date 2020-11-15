@@ -1,6 +1,6 @@
 #include "deathshader.h"
 
-#include "player.h"
+#include "player/player.h"
 
 #include <iostream>
 

@@ -10,7 +10,7 @@
 #include "mechanisms/bouncer.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/movingplatform.h"
-#include "player.h"
+#include "player/player.h"
 
 #include <iostream>
 

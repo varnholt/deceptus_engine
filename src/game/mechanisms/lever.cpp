@@ -6,7 +6,7 @@
 #include "fan.h"
 #include "laser.h"
 #include "movingplatform.h"
-#include "player.h"
+#include "player/player.h"
 #include "spikes.h"
 #include "texturepool.h"
 

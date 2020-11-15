@@ -4,7 +4,7 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "level.h"
-#include "player.h"
+#include "player/player.h"
 #include "savestate.h"
 #include "sfmlmath.h"
 #include "timer.h"
