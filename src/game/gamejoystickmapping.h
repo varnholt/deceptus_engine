@@ -3,7 +3,7 @@
 
 
 // joystick
-#include "../joystick/gamecontrollerinfo.h"
+#include "../framework/joystick/gamecontrollerinfo.h"
 
 class GameControllerMapping
 {

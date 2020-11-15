@@ -4,10 +4,10 @@
 #include "game/level.h"
 #include "game/player/player.h"
 
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxtools.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxtools.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 
 #include <iostream>
 

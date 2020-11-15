@@ -5,15 +5,15 @@
 #include <iostream>
 
 // tmx
+#include "framework/tmxparser/tmxanimation.h"
+#include "framework/tmxparser/tmxframe.h"
+#include "framework/tmxparser/tmximage.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxtile.h"
+#include "framework/tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "player/player.h"
-#include "tmxparser/tmxanimation.h"
-#include "tmxparser/tmxframe.h"
-#include "tmxparser/tmximage.h"
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxtile.h"
-#include "tmxparser/tmxtileset.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxproperty.h"
 
 
 namespace

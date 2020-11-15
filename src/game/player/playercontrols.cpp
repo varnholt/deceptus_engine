@@ -2,7 +2,7 @@
 
 #include "constants.h"
 #include "gamecontrollerintegration.h"
-#include "joystick/gamecontroller.h"
+#include "framework/joystick/gamecontroller.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------

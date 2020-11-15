@@ -1,10 +1,10 @@
 #include "staticlight.h"
 
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxobjectgroup.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxproperty.h"
-#include "tmxparser/tmxtools.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobjectgroup.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtools.h"
 
 #include "game/math/fbm.h"
 

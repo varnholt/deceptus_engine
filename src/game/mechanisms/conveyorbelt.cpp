@@ -2,9 +2,9 @@
 #include "player/player.h"
 #include "texturepool.h"
 
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxproperty.h"
-#include "tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxproperties.h"
 
 #include <iostream>
 

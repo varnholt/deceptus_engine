@@ -1,9 +1,9 @@
 #include "inventorylayer.h"
 
+#include "framework/joystick/gamecontroller.h"
 #include "gameconfiguration.h"
 #include "gamecontrollerintegration.h"
-#include "framework/globalclock.h"
-#include "joystick/gamecontroller.h"
+#include "tools/globalclock.h"
 
 #include "player/player.h"
 #include "player/playerinfo.h"

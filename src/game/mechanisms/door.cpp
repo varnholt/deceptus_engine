@@ -3,17 +3,17 @@
 // game
 #include "constants.h"
 #include "fixturenode.h"
-#include "framework/timer.h"
 #include "level.h"
+#include "math/sfmlmath.h"
 #include "player/player.h"
 #include "savestate.h"
-#include "math/sfmlmath.h"
+#include "tools/timer.h"
 
-#include "tmxparser/tmximage.h"
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxproperty.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmximage.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxtileset.h"
 
 #include <iostream>
 

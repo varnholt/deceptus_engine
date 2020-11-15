@@ -4,7 +4,7 @@
 #include "gameconfiguration.h"
 #include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
-#include "joystick/gamecontroller.h"
+#include "framework/joystick/gamecontroller.h"
 #include "math/sfmlmath.h"
 
 

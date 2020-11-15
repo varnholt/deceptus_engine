@@ -2,7 +2,7 @@
 
 #include "constants.h"
 #include "inventory.h"
-#include "joystick/gamecontrollerinfo.h"
+#include "framework/joystick/gamecontrollerinfo.h"
 
 #include <memory>
 #include <vector>

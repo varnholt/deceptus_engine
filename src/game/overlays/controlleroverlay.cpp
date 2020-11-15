@@ -3,8 +3,8 @@
 #include "gameconfiguration.h"
 #include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
-#include "image/psd.h"
-#include "joystick/gamecontroller.h"
+#include "framework/image/psd.h"
+#include "framework/joystick/gamecontroller.h"
 
 #include <iostream>
 
