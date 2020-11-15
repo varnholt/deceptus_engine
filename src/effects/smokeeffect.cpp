@@ -6,7 +6,7 @@
 #include "tmxparser/tmxproperty.h"
 #include "tmxparser/tmxtools.h"
 
-#include "game/fbm.h"
+#include "game/math/fbm.h"
 
 #include <array>
 #include <filesystem>
