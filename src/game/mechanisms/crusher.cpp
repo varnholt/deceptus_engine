@@ -2,7 +2,7 @@
 
 #include "fixturenode.h"
 
-#include "easings/easings.h"
+#include "framework/easings/easings.h"
 
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
