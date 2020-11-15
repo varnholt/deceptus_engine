@@ -4,7 +4,7 @@
 #include "fixturenode.h"
 #include "math/hermitecurve.h"
 #include "player/player.h"
-#include "tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobject.h"
 
 /*
    spike ball concept

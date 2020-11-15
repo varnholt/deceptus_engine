@@ -1,7 +1,7 @@
 #include "forestscene.h"
 
 #include "gameconfiguration.h"
-#include "image/psd.h"
+#include "framework/image/psd.h"
 
 #include <math.h>
 #include <iostream>

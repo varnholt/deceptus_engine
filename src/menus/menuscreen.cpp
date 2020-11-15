@@ -1,6 +1,6 @@
 #include "menuscreen.h"
 
-#include "image/psd.h"
+#include "framework/image/psd.h"
 #include "game/gamecontrollerintegration.h"
 
 #include <iostream>

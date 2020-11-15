@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxtileset.h"
 
 
 //-----------------------------------------------------------------------------

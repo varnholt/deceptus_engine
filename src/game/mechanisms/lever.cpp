@@ -10,11 +10,11 @@
 #include "spikes.h"
 #include "texturepool.h"
 
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxproperties.h"
-#include "tmxparser/tmxproperty.h"
-#include "tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtileset.h"
 
 #include <iostream>
 

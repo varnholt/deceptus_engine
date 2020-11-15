@@ -11,7 +11,7 @@
 #endif
 #define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_9
 #endif
-#include "../joystick/gamecontroller.h"
+#include "../framework/joystick/gamecontroller.h"
 
 
 GameControllerIntegration* GameControllerIntegration::sInstances[10];

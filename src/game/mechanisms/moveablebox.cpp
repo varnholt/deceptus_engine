@@ -2,8 +2,8 @@
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "framework/tmxparser/tmxobject.h"
 #include "texturepool.h"
-#include "tmxparser/tmxobject.h"
 
 #include <iostream>
 

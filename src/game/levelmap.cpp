@@ -3,13 +3,13 @@
 #include "camerapane.h"
 #include "console.h"
 #include "extratable.h"
-#include "framework/globalclock.h"
+#include "framework/image/psd.h"
 #include "gameconfiguration.h"
 #include "mechanisms/door.h"
 #include "mechanisms/portal.h"
 #include "player/player.h"
+#include "tools/globalclock.h"
 
-#include "image/psd.h"
 
 #include <iostream>
 #include <sstream>

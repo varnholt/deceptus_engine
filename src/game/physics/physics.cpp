@@ -9,13 +9,13 @@
 #include "Box2D/Box2D.h"
 #include "constants.h"
 #include "meshtools.h"
-#include "tmxparser/tmxlayer.h"
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxobjectgroup.h"
-#include "tmxparser/tmxpolygon.h"
-#include "tmxparser/tmxpolyline.h"
-#include "tmxparser/tmxtile.h"
-#include "tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobjectgroup.h"
+#include "framework/tmxparser/tmxpolygon.h"
+#include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tmxparser/tmxtile.h"
+#include "framework/tmxparser/tmxtileset.h"
 
 
 

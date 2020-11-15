@@ -1,13 +1,13 @@
 #include "messagebox.h"
 
 #include "displaymode.h"
+#include "framework/image/psd.h"
+#include "framework/joystick/gamecontroller.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontrollerintegration.h"
 #include "gamestate.h"
-#include "framework/globalclock.h"
-#include "image/psd.h"
-#include "joystick/gamecontroller.h"
 #include "player/player.h"
+#include "tools/globalclock.h"
 
 #include <algorithm>
 #include <iostream>

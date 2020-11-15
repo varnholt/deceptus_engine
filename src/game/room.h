@@ -7,7 +7,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobject.h"
 
 struct Room
 {

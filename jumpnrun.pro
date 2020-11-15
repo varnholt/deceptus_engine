@@ -98,7 +98,7 @@ DEPENDPATH += sfml/include
 INCLUDEPATH += .
 INCLUDEPATH += src
 INCLUDEPATH += src/game
-
+INCLUDEPATH += src/thirdparty
 
 SOURCES += \
    src/effects/blur.cpp \
@@ -137,10 +137,10 @@ SOURCES += \
    src/game/extratable.cpp \
    src/game/fixturenode.cpp \
    src/game/forestscene.cpp \
-   src/game/framework/callbackmap.cpp \
-   src/game/framework/checksum.cpp \
-   src/game/framework/globalclock.cpp \
-   src/game/framework/timer.cpp \
+   src/game/tools/callbackmap.cpp \
+   src/game/tools/checksum.cpp \
+   src/game/tools/globalclock.cpp \
+   src/game/tools/timer.cpp \
    src/game/game.cpp \
    src/game/gameconfiguration.cpp \
    src/game/gamecontactlistener.cpp \
@@ -207,12 +207,6 @@ SOURCES += \
    src/game/weather.cpp \
    src/game/overlays/weatheroverlay.cpp \
    src/game/worldconfiguration.cpp \
-   src/image/image.cpp \
-   src/image/layer.cpp \
-   src/image/psd.cpp \
-   src/image/tga.cpp \
-   src/joystick/gamecontroller.cpp \
-   src/joystick/gamecontrollerinfo.cpp \
    src/main.cpp \
    src/menus/menu.cpp \
    src/menus/menuscreen.cpp \
@@ -227,29 +221,62 @@ SOURCES += \
    src/menus/menuscreenoptions.cpp \
    src/menus/menuscreenpause.cpp \
    src/menus/menuscreenvideo.cpp \
-   src/poly2tri/common/shapes.cc \
-   src/poly2tri/sweep/advancing_front.cc \
-   src/poly2tri/sweep/cdt.cc \
-   src/poly2tri/sweep/sweep.cc \
-   src/poly2tri/sweep/sweep_context.cc \
-   src/tinyxml2/tinyxml2.cpp \
-   src/tmxparser/tmxanimation.cpp \
-   src/tmxparser/tmxchunk.cpp \
-   src/tmxparser/tmxelement.cpp \
-   src/tmxparser/tmxframe.cpp \
-   src/tmxparser/tmximage.cpp \
-   src/tmxparser/tmximagelayer.cpp \
-   src/tmxparser/tmxlayer.cpp \
-   src/tmxparser/tmxobject.cpp \
-   src/tmxparser/tmxobjectgroup.cpp \
-   src/tmxparser/tmxparser.cpp \
-   src/tmxparser/tmxpolygon.cpp \
-   src/tmxparser/tmxpolyline.cpp \
-   src/tmxparser/tmxproperties.cpp \
-   src/tmxparser/tmxproperty.cpp \
-   src/tmxparser/tmxtile.cpp \
-   src/tmxparser/tmxtileset.cpp \
-   src/tmxparser/tmxtools.cpp \
+
+
+# framework
+
+SOURCES += \
+   src/framework/image/image.cpp \
+   src/framework/image/layer.cpp \
+   src/framework/image/psd.cpp \
+   src/framework/image/tga.cpp \
+   src/framework/joystick/gamecontroller.cpp \
+   src/framework/joystick/gamecontrollerinfo.cpp \
+   src/framework/tmxparser/tmxanimation.cpp \
+   src/framework/tmxparser/tmxchunk.cpp \
+   src/framework/tmxparser/tmxelement.cpp \
+   src/framework/tmxparser/tmxframe.cpp \
+   src/framework/tmxparser/tmximage.cpp \
+   src/framework/tmxparser/tmximagelayer.cpp \
+   src/framework/tmxparser/tmxlayer.cpp \
+   src/framework/tmxparser/tmxobject.cpp \
+   src/framework/tmxparser/tmxobjectgroup.cpp \
+   src/framework/tmxparser/tmxparser.cpp \
+   src/framework/tmxparser/tmxpolygon.cpp \
+   src/framework/tmxparser/tmxpolyline.cpp \
+   src/framework/tmxparser/tmxproperties.cpp \
+   src/framework/tmxparser/tmxproperty.cpp \
+   src/framework/tmxparser/tmxtile.cpp \
+   src/framework/tmxparser/tmxtileset.cpp \
+   src/framework/tmxparser/tmxtools.cpp \
+
+
+HEADERS += \
+   src/framework/image/image.h \
+   src/framework/image/layer.h \
+   src/framework/image/psd.h \
+   src/framework/image/tga.h \
+   src/framework/joystick/gamecontroller.h \
+   src/framework/joystick/gamecontrollerballvector.h \
+   src/framework/joystick/gamecontrollerinfo.h \
+   src/framework/tmxparser/tmxanimation.h \
+   src/framework/tmxparser/tmxchunk.h \
+   src/framework/tmxparser/tmxelement.h \
+   src/framework/tmxparser/tmxframe.h \
+   src/framework/tmxparser/tmximage.h \
+   src/framework/tmxparser/tmximagelayer.h \
+   src/framework/tmxparser/tmxlayer.h \
+   src/framework/tmxparser/tmxobject.h \
+   src/framework/tmxparser/tmxobjectgroup.h \
+   src/framework/tmxparser/tmxparser.h \
+   src/framework/tmxparser/tmxpolygon.h \
+   src/framework/tmxparser/tmxpolyline.h \
+   src/framework/tmxparser/tmxproperties.h \
+   src/framework/tmxparser/tmxproperty.h \
+   src/framework/tmxparser/tmxtile.h \
+   src/framework/tmxparser/tmxtileset.h \
+   src/framework/tmxparser/tmxtools.h \
+
 
 
 # add box2d
@@ -295,10 +322,10 @@ HEADERS += \
    src/game/extratable.h \
    src/game/fixturenode.h \
    src/game/forestscene.h \
-   src/game/framework/callbackmap.h \
-   src/game/framework/checksum.h \
-   src/game/framework/globalclock.h \
-   src/game/framework/timer.h \
+   src/game/tools/callbackmap.h \
+   src/game/tools/checksum.h \
+   src/game/tools/globalclock.h \
+   src/game/tools/timer.h \
    src/game/game.h \
    src/game/gameconfiguration.h \
    src/game/gamecontactlistener.h \
@@ -367,14 +394,6 @@ HEADERS += \
    src/game/weather.h \
    src/game/overlays/weatheroverlay.h \
    src/game/worldconfiguration.h \
-   src/image/image.h \
-   src/image/layer.h \
-   src/image/psd.h \
-   src/image/tga.h \
-   src/joystick/gamecontroller.h \
-   src/joystick/gamecontrollerballvector.h \
-   src/joystick/gamecontrollerinfo.h \
-   src/json/json.hpp \
    src/menus/menu.h \
    src/menus/menuscreen.h \
    src/menus/menuscreenachievements.h \
@@ -388,129 +407,127 @@ HEADERS += \
    src/menus/menuscreenoptions.h \
    src/menus/menuscreenpause.h \
    src/menus/menuscreenvideo.h \
-   src/poly2tri/common/shapes.h \
-   src/poly2tri/common/utils.h \
-   src/poly2tri/poly2tri.h \
-   src/poly2tri/sweep/advancing_front.h \
-   src/poly2tri/sweep/cdt.h \
-   src/poly2tri/sweep/sweep.h \
-   src/poly2tri/sweep/sweep_context.h \
-   src/tinyxml2/tinyxml2.h \
-   src/tmxparser/tmxanimation.h \
-   src/tmxparser/tmxchunk.h \
-   src/tmxparser/tmxelement.h \
-   src/tmxparser/tmxframe.h \
-   src/tmxparser/tmximage.h \
-   src/tmxparser/tmximagelayer.h \
-   src/tmxparser/tmxlayer.h \
-   src/tmxparser/tmxobject.h \
-   src/tmxparser/tmxobjectgroup.h \
-   src/tmxparser/tmxparser.h \
-   src/tmxparser/tmxpolygon.h \
-   src/tmxparser/tmxpolyline.h \
-   src/tmxparser/tmxproperties.h \
-   src/tmxparser/tmxproperty.h \
-   src/tmxparser/tmxtile.h \
-   src/tmxparser/tmxtileset.h \
-   src/tmxparser/tmxtools.h \
+
+
+# thirdparty
+
+SOURCES += \
+   src/thirdparty/poly2tri/common/shapes.cc \
+   src/thirdparty/poly2tri/sweep/advancing_front.cc \
+   src/thirdparty/poly2tri/sweep/cdt.cc \
+   src/thirdparty/poly2tri/sweep/sweep.cc \
+   src/thirdparty/poly2tri/sweep/sweep_context.cc \
+   src/thirdparty/tinyxml2/tinyxml2.cpp \
+
+
+HEADERS += \
+   src/thirdparty/poly2tri/common/shapes.h \
+   src/thirdparty/poly2tri/common/utils.h \
+   src/thirdparty/poly2tri/poly2tri.h \
+   src/thirdparty/poly2tri/sweep/advancing_front.h \
+   src/thirdparty/poly2tri/sweep/cdt.h \
+   src/thirdparty/poly2tri/sweep/sweep.h \
+   src/thirdparty/poly2tri/sweep/sweep_context.h \
+   src/thirdparty/tinyxml2/tinyxml2.h \
+   src/thirdparty/json/json.hpp \
 
 
 SOURCES += \
-    src/Box2D/Collision/Shapes/b2ChainShape.cpp \
-    src/Box2D/Collision/Shapes/b2CircleShape.cpp \
-    src/Box2D/Collision/Shapes/b2EdgeShape.cpp \
-    src/Box2D/Collision/Shapes/b2PolygonShape.cpp \
-    src/Box2D/Common/b2BlockAllocator.cpp \
-    src/Box2D/Common/b2Draw.cpp \
-    src/Box2D/Common/b2Math.cpp \
-    src/Box2D/Common/b2Settings.cpp \
-    src/Box2D/Common/b2StackAllocator.cpp \
-    src/Box2D/Common/b2Timer.cpp \
-    src/Box2D/Collision/b2BroadPhase.cpp \
-    src/Box2D/Collision/b2CollideCircle.cpp \
-    src/Box2D/Collision/b2CollideEdge.cpp \
-    src/Box2D/Collision/b2CollidePolygon.cpp \
-    src/Box2D/Collision/b2Collision.cpp \
-    src/Box2D/Collision/b2Distance.cpp \
-    src/Box2D/Collision/b2DynamicTree.cpp \
-    src/Box2D/Collision/b2TimeOfImpact.cpp \
-    src/Box2D/Dynamics/b2Body.cpp \
-    src/Box2D/Dynamics/b2ContactManager.cpp \
-    src/Box2D/Dynamics/b2Fixture.cpp \
-    src/Box2D/Dynamics/b2Island.cpp \
-    src/Box2D/Dynamics/b2World.cpp \
-    src/Box2D/Dynamics/b2WorldCallbacks.cpp \
-    src/Box2D/Rope/b2Rope.cpp \
-    src/Box2D/Dynamics/Joints/b2DistanceJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2FrictionJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2GearJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2Joint.cpp \
-    src/Box2D/Dynamics/Joints/b2MotorJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2MouseJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2PrismaticJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2PulleyJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2RevoluteJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2RopeJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2WeldJoint.cpp \
-    src/Box2D/Dynamics/Joints/b2WheelJoint.cpp \
-    src/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2CircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2Contact.cpp \
-    src/Box2D/Dynamics/Contacts/b2ContactSolver.cpp \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.cpp \
-    src/Box2D/Dynamics/Contacts/b2PolygonContact.cpp
+    src/thirdparty/Box2D/Collision/Shapes/b2ChainShape.cpp \
+    src/thirdparty/Box2D/Collision/Shapes/b2CircleShape.cpp \
+    src/thirdparty/Box2D/Collision/Shapes/b2EdgeShape.cpp \
+    src/thirdparty/Box2D/Collision/Shapes/b2PolygonShape.cpp \
+    src/thirdparty/Box2D/Common/b2BlockAllocator.cpp \
+    src/thirdparty/Box2D/Common/b2Draw.cpp \
+    src/thirdparty/Box2D/Common/b2Math.cpp \
+    src/thirdparty/Box2D/Common/b2Settings.cpp \
+    src/thirdparty/Box2D/Common/b2StackAllocator.cpp \
+    src/thirdparty/Box2D/Common/b2Timer.cpp \
+    src/thirdparty/Box2D/Collision/b2BroadPhase.cpp \
+    src/thirdparty/Box2D/Collision/b2CollideCircle.cpp \
+    src/thirdparty/Box2D/Collision/b2CollideEdge.cpp \
+    src/thirdparty/Box2D/Collision/b2CollidePolygon.cpp \
+    src/thirdparty/Box2D/Collision/b2Collision.cpp \
+    src/thirdparty/Box2D/Collision/b2Distance.cpp \
+    src/thirdparty/Box2D/Collision/b2DynamicTree.cpp \
+    src/thirdparty/Box2D/Collision/b2TimeOfImpact.cpp \
+    src/thirdparty/Box2D/Dynamics/b2Body.cpp \
+    src/thirdparty/Box2D/Dynamics/b2ContactManager.cpp \
+    src/thirdparty/Box2D/Dynamics/b2Fixture.cpp \
+    src/thirdparty/Box2D/Dynamics/b2Island.cpp \
+    src/thirdparty/Box2D/Dynamics/b2World.cpp \
+    src/thirdparty/Box2D/Dynamics/b2WorldCallbacks.cpp \
+    src/thirdparty/Box2D/Rope/b2Rope.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2DistanceJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2FrictionJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2GearJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2Joint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2MotorJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2MouseJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2PrismaticJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2PulleyJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2RevoluteJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2RopeJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2WeldJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Joints/b2WheelJoint.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2CircleContact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2Contact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2ContactSolver.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.cpp \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2PolygonContact.cpp
 
 HEADERS += \
-    src/Box2D/Collision/Shapes/b2ChainShape.h \
-    src/Box2D/Collision/Shapes/b2CircleShape.h \
-    src/Box2D/Collision/Shapes/b2EdgeShape.h \
-    src/Box2D/Collision/Shapes/b2PolygonShape.h \
-    src/Box2D/Collision/Shapes/b2Shape.h \
-    src/Box2D/Box2D.h \
-    src/Box2D/Common/b2BlockAllocator.h \
-    src/Box2D/Common/b2Draw.h \
-    src/Box2D/Common/b2GrowableStack.h \
-    src/Box2D/Common/b2Math.h \
-    src/Box2D/Common/b2Settings.h \
-    src/Box2D/Common/b2StackAllocator.h \
-    src/Box2D/Common/b2Timer.h \
-    src/Box2D/Collision/b2BroadPhase.h \
-    src/Box2D/Collision/b2Collision.h \
-    src/Box2D/Collision/b2Distance.h \
-    src/Box2D/Collision/b2DynamicTree.h \
-    src/Box2D/Collision/b2TimeOfImpact.h \
-    src/Box2D/Dynamics/b2Body.h \
-    src/Box2D/Dynamics/b2ContactManager.h \
-    src/Box2D/Dynamics/b2Fixture.h \
-    src/Box2D/Dynamics/b2Island.h \
-    src/Box2D/Dynamics/b2TimeStep.h \
-    src/Box2D/Dynamics/b2World.h \
-    src/Box2D/Dynamics/b2WorldCallbacks.h \
-    src/Box2D/Rope/b2Rope.h \
-    src/Box2D/Dynamics/Joints/b2DistanceJoint.h \
-    src/Box2D/Dynamics/Joints/b2FrictionJoint.h \
-    src/Box2D/Dynamics/Joints/b2GearJoint.h \
-    src/Box2D/Dynamics/Joints/b2Joint.h \
-    src/Box2D/Dynamics/Joints/b2MotorJoint.h \
-    src/Box2D/Dynamics/Joints/b2MouseJoint.h \
-    src/Box2D/Dynamics/Joints/b2PrismaticJoint.h \
-    src/Box2D/Dynamics/Joints/b2PulleyJoint.h \
-    src/Box2D/Dynamics/Joints/b2RevoluteJoint.h \
-    src/Box2D/Dynamics/Joints/b2RopeJoint.h \
-    src/Box2D/Dynamics/Joints/b2WeldJoint.h \
-    src/Box2D/Dynamics/Joints/b2WheelJoint.h \
-    src/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.h \
-    src/Box2D/Dynamics/Contacts/b2CircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2Contact.h \
-    src/Box2D/Dynamics/Contacts/b2ContactSolver.h \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.h \
-    src/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.h \
-    src/Box2D/Dynamics/Contacts/b2PolygonContact.h
+    src/thirdparty/Box2D/Collision/Shapes/b2ChainShape.h \
+    src/thirdparty/Box2D/Collision/Shapes/b2CircleShape.h \
+    src/thirdparty/Box2D/Collision/Shapes/b2EdgeShape.h \
+    src/thirdparty/Box2D/Collision/Shapes/b2PolygonShape.h \
+    src/thirdparty/Box2D/Collision/Shapes/b2Shape.h \
+    src/thirdparty/Box2D/Box2D.h \
+    src/thirdparty/Box2D/Common/b2BlockAllocator.h \
+    src/thirdparty/Box2D/Common/b2Draw.h \
+    src/thirdparty/Box2D/Common/b2GrowableStack.h \
+    src/thirdparty/Box2D/Common/b2Math.h \
+    src/thirdparty/Box2D/Common/b2Settings.h \
+    src/thirdparty/Box2D/Common/b2StackAllocator.h \
+    src/thirdparty/Box2D/Common/b2Timer.h \
+    src/thirdparty/Box2D/Collision/b2BroadPhase.h \
+    src/thirdparty/Box2D/Collision/b2Collision.h \
+    src/thirdparty/Box2D/Collision/b2Distance.h \
+    src/thirdparty/Box2D/Collision/b2DynamicTree.h \
+    src/thirdparty/Box2D/Collision/b2TimeOfImpact.h \
+    src/thirdparty/Box2D/Dynamics/b2Body.h \
+    src/thirdparty/Box2D/Dynamics/b2ContactManager.h \
+    src/thirdparty/Box2D/Dynamics/b2Fixture.h \
+    src/thirdparty/Box2D/Dynamics/b2Island.h \
+    src/thirdparty/Box2D/Dynamics/b2TimeStep.h \
+    src/thirdparty/Box2D/Dynamics/b2World.h \
+    src/thirdparty/Box2D/Dynamics/b2WorldCallbacks.h \
+    src/thirdparty/Box2D/Rope/b2Rope.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2DistanceJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2FrictionJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2GearJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2Joint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2MotorJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2MouseJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2PrismaticJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2PulleyJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2RevoluteJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2RopeJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2WeldJoint.h \
+    src/thirdparty/Box2D/Dynamics/Joints/b2WheelJoint.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2ChainAndCircleContact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2ChainAndPolygonContact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2CircleContact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2Contact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2ContactSolver.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.h \
+    src/thirdparty/Box2D/Dynamics/Contacts/b2PolygonContact.h
 
 OTHER_FILES += \
     data/shaders/parallax_frag.glsl \

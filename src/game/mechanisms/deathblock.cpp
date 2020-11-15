@@ -1,7 +1,7 @@
 #include "deathblock.h"
 
-#include "tmxparser/tmxobject.h"
-#include "tmxparser/tmxpolyline.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxpolyline.h"
 
 #include "constants.h"
 #include "fixturenode.h"

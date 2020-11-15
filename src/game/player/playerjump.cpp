@@ -2,10 +2,10 @@
 
 #include "animationpool.h"
 #include "audio.h"
-#include "framework/globalclock.h"
 #include "gamecontactlistener.h"
 #include "physics/physicsconfiguration.h"
 #include "savestate.h"
+#include "tools/globalclock.h"
 
 #include <Box2D/Box2D.h>
 #include <iostream>
