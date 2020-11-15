@@ -4,7 +4,7 @@
 #include "constants.h"
 #include "player/player.h"
 #include "fixturenode.h"
-#include "sfmlmath.h"
+#include "math/sfmlmath.h"
 #include "texturepool.h"
 
 #include "tmxparser/tmximage.h"
