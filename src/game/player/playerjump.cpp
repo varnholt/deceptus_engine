@@ -2,8 +2,8 @@
 
 #include "animationpool.h"
 #include "audio.h"
+#include "framework/globalclock.h"
 #include "gamecontactlistener.h"
-#include "globalclock.h"
 #include "physics/physicsconfiguration.h"
 #include "savestate.h"
 

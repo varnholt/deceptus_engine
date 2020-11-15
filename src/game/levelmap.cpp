@@ -3,7 +3,7 @@
 #include "camerapane.h"
 #include "console.h"
 #include "extratable.h"
-#include "globalclock.h"
+#include "framework/globalclock.h"
 #include "gameconfiguration.h"
 #include "mechanisms/door.h"
 #include "mechanisms/portal.h"
