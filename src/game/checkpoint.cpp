@@ -1,6 +1,6 @@
 #include "checkpoint.h"
 
-#include "callbackmap.h"
+#include "framework/callbackmap.h"
 #include "player/player.h"
 
 #include "tmxparser/tmxobject.h"

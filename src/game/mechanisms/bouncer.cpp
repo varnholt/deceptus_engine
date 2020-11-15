@@ -1,6 +1,6 @@
 #include "bouncer.h"
 #include "fixturenode.h"
-#include "globalclock.h"
+#include "framework/globalclock.h"
 #include "player/player.h"
 
 #include <iostream>

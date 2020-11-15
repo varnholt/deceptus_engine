@@ -1,6 +1,6 @@
 #include "atmosphereshader.h"
 
-#include "globalclock.h"
+#include "framework/globalclock.h"
 
 #include <iostream>
 

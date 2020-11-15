@@ -2,7 +2,7 @@
 
 #include "gameconfiguration.h"
 #include "gamecontrollerintegration.h"
-#include "globalclock.h"
+#include "framework/globalclock.h"
 #include "joystick/gamecontroller.h"
 
 #include "player/player.h"
