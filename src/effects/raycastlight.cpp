@@ -2,7 +2,7 @@
 
 #include "game/debugdraw.h"
 #include "game/level.h"
-#include "game/player.h"
+#include "game/player/player.h"
 
 #include "tmxparser/tmxobject.h"
 #include "tmxparser/tmxtools.h"

@@ -16,7 +16,7 @@
 #include "level.h"
 #include "luaconstants.h"
 #include "luainterface.h"
-#include "player.h"
+#include "player/player.h"
 #include "sfmlmath.h"
 #include "timer.h"
 

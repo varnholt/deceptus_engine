@@ -5,8 +5,8 @@
 #include "extraitem.h"
 #include "extratable.h"
 #include "inventoryitem.h"
-#include "player.h"
-#include "playerinfo.h"
+#include "player/player.h"
+#include "player/playerinfo.h"
 #include "tilemap.h"
 #include "savestate.h"
 

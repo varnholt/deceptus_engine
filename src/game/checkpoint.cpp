@@ -1,7 +1,7 @@
 #include "checkpoint.h"
 
 #include "callbackmap.h"
-#include "player.h"
+#include "player/player.h"
 
 #include "tmxparser/tmxobject.h"
 #include "tmxparser/tmxproperties.h"

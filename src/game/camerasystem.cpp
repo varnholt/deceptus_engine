@@ -1,6 +1,6 @@
 #include "camerasystem.h"
 
-#include "player.h"
+#include "player/player.h"
 
 #include <iostream>
 
