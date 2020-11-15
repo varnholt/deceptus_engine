@@ -1,7 +1,6 @@
 #pragma once
 
 #include "constants.h"
-#include "deathshader.h"
 #include "extramanager.h"
 #include "extratable.h"
 #include "gamenode.h"
@@ -9,6 +8,7 @@
 #include "playerclimb.h"
 #include "playercontrols.h"
 #include "playerjump.h"
+#include "shaders/deathshader.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
