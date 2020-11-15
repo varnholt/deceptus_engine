@@ -2,12 +2,12 @@
 
 #include "camerapane.h"
 #include "console.h"
-#include "door.h"
 #include "extratable.h"
 #include "globalclock.h"
 #include "gameconfiguration.h"
+#include "mechanisms/door.h"
+#include "mechanisms/portal.h"
 #include "player.h"
-#include "portal.h"
 
 #include "image/psd.h"
 
