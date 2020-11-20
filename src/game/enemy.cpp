@@ -1,9 +1,8 @@
 #include "enemy.h"
 
-#include "framework/tmxparser/tmxobject.h"
-
 #include "constants.h"
-#include "math/sfmlmath.h"
+#include "framework/math/sfmlmath.h"
+#include "framework/tmxparser/tmxobject.h"
 
 #include <iostream>
 

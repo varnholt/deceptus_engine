@@ -137,10 +137,6 @@ SOURCES += \
    src/game/extratable.cpp \
    src/game/fixturenode.cpp \
    src/game/forestscene.cpp \
-   src/game/tools/callbackmap.cpp \
-   src/game/tools/checksum.cpp \
-   src/game/tools/globalclock.cpp \
-   src/game/tools/timer.cpp \
    src/game/game.cpp \
    src/game/gameconfiguration.cpp \
    src/game/gamecontactlistener.cpp \
@@ -160,11 +156,6 @@ SOURCES += \
    src/game/levels.cpp \
    src/game/luainterface.cpp \
    src/game/luanode.cpp \
-   src/game/math/fbm.cpp \
-   src/game/math/hermitecurve.cpp \
-   src/game/math/maptools.cpp \
-   src/game/math/pathinterpolation.cpp \
-   src/game/math/sfmlmath.cpp \
    src/game/mechanisms/bouncer.cpp \
    src/game/mechanisms/conveyorbelt.cpp \
    src/game/mechanisms/crusher.cpp \
@@ -232,6 +223,11 @@ SOURCES += \
    src/framework/image/tga.cpp \
    src/framework/joystick/gamecontroller.cpp \
    src/framework/joystick/gamecontrollerinfo.cpp \
+   src/framework/math/fbm.cpp \
+   src/framework/math/hermitecurve.cpp \
+   src/framework/math/maptools.cpp \
+   src/framework/math/pathinterpolation.cpp \
+   src/framework/math/sfmlmath.cpp \
    src/framework/tmxparser/tmxanimation.cpp \
    src/framework/tmxparser/tmxchunk.cpp \
    src/framework/tmxparser/tmxelement.cpp \
@@ -249,6 +245,10 @@ SOURCES += \
    src/framework/tmxparser/tmxtile.cpp \
    src/framework/tmxparser/tmxtileset.cpp \
    src/framework/tmxparser/tmxtools.cpp \
+   src/framework/tools/callbackmap.cpp \
+   src/framework/tools/checksum.cpp \
+   src/framework/tools/globalclock.cpp \
+   src/framework/tools/timer.cpp \
 
 
 HEADERS += \
@@ -259,6 +259,12 @@ HEADERS += \
    src/framework/joystick/gamecontroller.h \
    src/framework/joystick/gamecontrollerballvector.h \
    src/framework/joystick/gamecontrollerinfo.h \
+   src/framework/math/fbm.h \
+   src/framework/math/hermitecurve.h \
+   src/framework/math/hermitecurvekey.h \
+   src/framework/math/maptools.h \
+   src/framework/math/pathinterpolation.h \
+   src/framework/math/sfmlmath.h \
    src/framework/tmxparser/tmxanimation.h \
    src/framework/tmxparser/tmxchunk.h \
    src/framework/tmxparser/tmxelement.h \
@@ -276,7 +282,6 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
-
 
 
 # add box2d
@@ -347,12 +352,6 @@ HEADERS += \
    src/game/luaconstants.h \
    src/game/luainterface.h \
    src/game/luanode.h \
-   src/game/math/fbm.h \
-   src/game/math/hermitecurve.h \
-   src/game/math/hermitecurvekey.h \
-   src/game/math/maptools.h \
-   src/game/math/pathinterpolation.h \
-   src/game/math/sfmlmath.h \
    src/game/mechanisms/bouncer.h \
    src/game/mechanisms/conveyorbelt.h \
    src/game/mechanisms/crusher.h \

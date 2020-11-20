@@ -10,10 +10,10 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/globalclock.h"
 #include "level.h"
 #include "player/player.h"
 #include "physics/physicsconfiguration.h"
-#include "tools/globalclock.h"
 
 #include <iostream>
 #include <math.h>

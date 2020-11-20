@@ -4,11 +4,11 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "level.h"
-#include "math/sfmlmath.h"
 #include "player/player.h"
 #include "savestate.h"
-#include "tools/timer.h"
 
+#include "framework/math/sfmlmath.h"
+#include "framework/tools/timer.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxproperty.h"

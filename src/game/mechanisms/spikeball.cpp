@@ -2,7 +2,7 @@
 
 #include "constants.h"
 #include "fixturenode.h"
-#include "math/hermitecurve.h"
+#include "framework/math/hermitecurve.h"
 #include "player/player.h"
 #include "framework/tmxparser/tmxobject.h"
 
