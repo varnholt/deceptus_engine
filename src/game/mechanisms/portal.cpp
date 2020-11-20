@@ -4,8 +4,8 @@
 #include "constants.h"
 #include "player/player.h"
 #include "fixturenode.h"
-#include "math/sfmlmath.h"
 
+#include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"

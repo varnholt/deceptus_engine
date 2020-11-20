@@ -5,8 +5,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "framework/math/sfmlmath.h"
 #include "player/player.h"
-#include "math/sfmlmath.h"
 
 
 void AmbientOcclusion::load(
