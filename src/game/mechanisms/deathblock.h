@@ -1,9 +1,9 @@
 #pragma once
 
 #include "constants.h"
+#include "framework/math/pathinterpolation.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
-#include "math/pathinterpolation.h"
 
 #include <Box2D/Box2D.h>
 

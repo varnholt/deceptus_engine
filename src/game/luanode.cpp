@@ -13,12 +13,12 @@
 #include "audio.h"
 #include "constants.h"
 #include "fixturenode.h"
+#include "framework/math/sfmlmath.h"
+#include "framework/tools/timer.h"
 #include "level.h"
 #include "luaconstants.h"
 #include "luainterface.h"
-#include "math/sfmlmath.h"
 #include "player/player.h"
-#include "tools/timer.h"
 
 // static
 std::atomic<int32_t> LuaNode::sNextId = 0;

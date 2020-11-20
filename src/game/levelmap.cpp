@@ -4,11 +4,11 @@
 #include "console.h"
 #include "extratable.h"
 #include "framework/image/psd.h"
+#include "framework/tools/globalclock.h"
 #include "gameconfiguration.h"
 #include "mechanisms/door.h"
 #include "mechanisms/portal.h"
 #include "player/player.h"
-#include "tools/globalclock.h"
 
 
 #include <iostream>

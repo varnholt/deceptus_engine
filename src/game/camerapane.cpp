@@ -5,7 +5,7 @@
 #include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
-#include "math/sfmlmath.h"
+#include "framework/math/sfmlmath.h"
 
 
 CameraPane CameraPane::sInstance;

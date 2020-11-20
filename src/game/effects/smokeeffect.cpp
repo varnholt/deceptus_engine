@@ -1,12 +1,12 @@
 #include "smokeeffect.h"
 
+#include "framework/math/fbm.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 
-#include "game/math/fbm.h"
 
 #include <array>
 #include <filesystem>
