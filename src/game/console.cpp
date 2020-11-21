@@ -1,10 +1,12 @@
 #include "console.h"
 
+#include "bow.h"
 #include "checkpoint.h"
 #include "extramanager.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
+#include "weaponsystem.h"
 
 #include <iostream>
 #include <ostream>
@@ -78,6 +80,15 @@ void Console::execute()
    if (results.at(0) == "/help")
    {
       showHelp();
+   }
+
+   // should become /weapon xxx in the future
+   else if (results.at(0) == "/bow")
+   {
+      auto bow = std::make_shared<Bow>();
+      bow->setLauncherBody(Player::getCurrent()->getBody());
+      Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(bow);
+      Player::getCurrent()->getWeaponSystem()->mSelected = bow;
    }
 
    else if (results.at(0) == "/extra" && results.size() == 2)

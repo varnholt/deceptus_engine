@@ -1946,6 +1946,13 @@ void Player::keyPressed(sf::Keyboard::Key key)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+std::shared_ptr<WeaponSystem> Player::getWeaponSystem() const
+{
+   return mWeaponSystem;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 PlayerControls& Player::getControls()
 {
    return mControls;
