@@ -21,6 +21,7 @@ public:
 
    enum class WeaponType
    {
+      Bow,
       Slingshot,
       Pistol,
       Bazooka,
@@ -31,13 +32,13 @@ public:
    Weapon();
    Weapon(std::unique_ptr<b2Shape>, int32_t fireInterval, int32_t damage);
 
-   void fireInIntervals(
+   virtual void fireInIntervals(
       const std::shared_ptr<b2World>& world,
       const b2Vec2 &pos,
       const b2Vec2 &dir
    );
 
-   void fireNow(
+   virtual void fireNow(
       const std::shared_ptr<b2World>& world,
       const b2Vec2& pos,
       const b2Vec2& dir

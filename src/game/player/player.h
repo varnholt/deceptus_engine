@@ -133,6 +133,8 @@ public:
 
    PlayerControls& getControls();
 
+   std::shared_ptr<WeaponSystem> getWeaponSystem() const;
+
 
 private:
 
