@@ -37,7 +37,7 @@ function initialize()
 
    addSample("boom.wav")
    addWeapon(1000, 60, 0.1) -- interval, damage, radius
-   updateBulletTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
+   updateProjectileTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
 end
 
 

@@ -40,7 +40,7 @@ function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
    addSample("boom.wav")
    addWeapon(1000, 60, 0.1) -- interval, damage, radius
-   updateBulletTexture(0, "data/sprites/enemy_pirate_cannon.png", 144, 984, 48, 24) -- index, path, x, y, width, height
+   updateProjectileTexture(0, "data/sprites/enemy_pirate_cannon.png", 144, 984, 48, 24) -- index, path, x, y, width, height
 end
 
 
@@ -131,7 +131,7 @@ function update(dt)
       col = mSpriteIndex % 8
       row = (math.floor(mSpriteIndex / 8)) % 3
 
-      -- fire the bullet at the right sprite index
+      -- fire the ball at the right sprite index
       if (col == 7 and row == 0) then
          fire()
       end

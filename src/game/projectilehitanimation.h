@@ -5,16 +5,16 @@
 #include <list>
 
 
-class BulletHitAnimation : public Animation
+class ProjectileHitAnimation : public Animation
 {
 public:
 
-   BulletHitAnimation();
+   ProjectileHitAnimation();
 
    static void initialize();
    static void add(float x, float y);
    static void updateAnimations(const sf::Time& dt);
-   static std::list<BulletHitAnimation*>* getAnimations();
+   static std::list<ProjectileHitAnimation*>* getAnimations();
 
 protected:
 
@@ -24,7 +24,7 @@ protected:
    static std::vector<sf::IntRect> sFrames;
 
 
-   static std::list<BulletHitAnimation*> sAnimations;
-   static std::list<BulletHitAnimation*> sElapsedAnimations;
+   static std::list<ProjectileHitAnimation*> sAnimations;
+   static std::list<ProjectileHitAnimation*> sElapsedAnimations;
 };
 

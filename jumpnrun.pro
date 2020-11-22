@@ -107,8 +107,6 @@ SOURCES += \
    src/game/bitmapfont.cpp \
    src/game/boomeffect.cpp \
    src/game/bow.cpp \
-   src/game/bullet.cpp \
-   src/game/bullethitanimation.cpp \
    src/game/camerapane.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
@@ -178,6 +176,8 @@ SOURCES += \
    src/game/player/playerjump.cpp \
    src/game/progresssettings.cpp \
    src/game/overlays/rainoverlay.cpp \
+   src/game/projectile.cpp \
+   src/game/projectilehitanimation.cpp \
    src/game/room.cpp \
    src/game/savestate.cpp \
    src/game/scriptproperty.cpp \
@@ -300,8 +300,6 @@ HEADERS += \
    src/game/bitmapfont.h \
    src/game/boomeffect.h \
    src/game/bow.h \
-   src/game/bullet.h \
-   src/game/bullethitanimation.h \
    src/game/bulletplayer.h \
    src/game/camerapane.h \
    src/game/camerasystem.h \
@@ -323,6 +321,8 @@ HEADERS += \
    src/game/extratable.h \
    src/game/fixturenode.h \
    src/game/forestscene.h \
+   src/game/projectile.h \
+   src/game/projectilehitanimation.h \
    src/game/tools/callbackmap.h \
    src/game/tools/checksum.h \
    src/game/tools/globalclock.h \

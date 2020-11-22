@@ -12,7 +12,7 @@
 #include <memory>
 
 // game
-#include "game/bullet.h"
+#include "game/projectile.h"
 
 
 class Weapon
@@ -47,9 +47,9 @@ public:
    int getFireInterval() const;
    void setFireInterval(int interval);
 
-   void drawBullets(sf::RenderTarget& target);
+   void drawProjectiles(sf::RenderTarget& target);
 
-   static void drawBulletHits(sf::RenderTarget& target);
+   static void drawProjectileHits(sf::RenderTarget& target);
 
    int damage() const;
    void loadTextures();
@@ -58,14 +58,14 @@ public:
 
 protected:
 
-   void cleanupBullets();
+   void cleanupProjectiles();
 
-   std::set<Bullet*> mBullets;
+   std::set<Projectile*> mProjectiles;
 
    WeaponType mType;
 
-   sf::Texture mBulletTexture;
-   sf::Sprite mBulletSprite;
+   sf::Texture mProjectileTexture;
+   sf::Sprite mProjectileSprite;
 
    std::unique_ptr<b2Shape> mShape;
 

@@ -265,7 +265,7 @@ void Player::draw(sf::RenderTarget& target)
 {
    if (mWeaponSystem->mSelected)
    {
-      mWeaponSystem->mSelected->drawBullets(target);
+      mWeaponSystem->mSelected->drawProjectiles(target);
    }
 
    if (!mVisible)

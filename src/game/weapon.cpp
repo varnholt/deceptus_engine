@@ -2,8 +2,8 @@
 #include "weapon.h"
 
 // game
-#include "bullet.h"
-#include "bullethitanimation.h"
+#include "projectile.h"
+#include "projectilehitanimation.h"
 #include "constants.h"
 
 #include <iostream>
@@ -66,14 +66,14 @@ void Weapon::fireNow(
       true
    );
 
-   auto bullet = new Bullet();
-   bullet->setDestroyedCallback([this, bullet](){mBullets.erase(bullet);});
-   bullet->setProperty("damage", mDamage);
-   bullet->setBody(body);
-   fixture->SetUserData(static_cast<void*>(bullet));
+   auto projectile = new Projectile();
+   projectile->setDestroyedCallback([this, projectile](){mProjectiles.erase(projectile);});
+   projectile->setProperty("damage", mDamage);
+   projectile->setBody(body);
+   fixture->SetUserData(static_cast<void*>(projectile));
 
-   // store bullet
-   mBullets.insert(bullet);
+   // store projectile
+   mProjectiles.insert(projectile);
 }
 
 
@@ -104,16 +104,16 @@ void Weapon::setFireInterval(int fireInterval)
 }
 
 
-void Weapon::drawBullets(sf::RenderTarget& target)
+void Weapon::drawProjectiles(sf::RenderTarget& target)
 {
-   for (auto bullet: mBullets)
+   for (auto projectile : mProjectiles)
    {
-      mBulletSprite.setPosition(
-         bullet->getBody()->GetPosition().x * PPM,
-         bullet->getBody()->GetPosition().y * PPM
+      mProjectileSprite.setPosition(
+         projectile->getBody()->GetPosition().x * PPM,
+         projectile->getBody()->GetPosition().y * PPM
       );
 
-      target.draw(mBulletSprite);
+      target.draw(mProjectileSprite);
    }
 }
 
@@ -147,37 +147,37 @@ void Weapon::loadTextures()
    //      << "height: " << mTextureRect.height
    //      << std::endl;
 
-   if (!mBulletTexture.loadFromFile(mTexturePath.string()))
+   if (!mProjectileTexture.loadFromFile(mTexturePath.string()))
    {
       std::cout << "Weapon::loadTextures(): couldn't load texture " << mTexturePath.string() << std::endl;
    }
 
    if (mShape->GetType() == b2Shape::e_polygon)
    {
-      mBulletSprite.setOrigin(0, 0);
-      mBulletSprite.setTextureRect(mTextureRect);
-      mBulletSprite.setTexture(mBulletTexture);
+      mProjectileSprite.setOrigin(0, 0);
+      mProjectileSprite.setTextureRect(mTextureRect);
+      mProjectileSprite.setTexture(mProjectileTexture);
    }
    else if (mShape->GetType() == b2Shape::e_circle)
    {
       if (mTextureRect.width > 0)
       {
-         mBulletSprite.setOrigin(
+         mProjectileSprite.setOrigin(
             static_cast<float_t>(mTextureRect.width / 2),
             static_cast<float_t>(mTextureRect.height / 2)
          );
 
-         mBulletSprite.setTextureRect(mTextureRect);
-         mBulletSprite.setTexture(mBulletTexture);
+         mProjectileSprite.setTextureRect(mTextureRect);
+         mProjectileSprite.setTexture(mProjectileTexture);
       }
       else
       {
-         mBulletSprite.setOrigin(
-            static_cast<float_t>(mBulletTexture.getSize().x / 2),
-            static_cast<float_t>(mBulletTexture.getSize().y / 2)
+         mProjectileSprite.setOrigin(
+            static_cast<float_t>(mProjectileTexture.getSize().x / 2),
+            static_cast<float_t>(mProjectileTexture.getSize().y / 2)
          );
 
-         mBulletSprite.setTexture(mBulletTexture, true);
+         mProjectileSprite.setTexture(mProjectileTexture, true);
       }
    }
 }
@@ -200,10 +200,10 @@ void Weapon::setTexture(
 }
 
 
-void Weapon::drawBulletHits(sf::RenderTarget& target)
+void Weapon::drawProjectileHits(sf::RenderTarget& target)
 {
-   auto bulletHits = BulletHitAnimation::getAnimations();
-   for (auto it = bulletHits->begin(); it != bulletHits->end(); ++it)
+   auto hits = ProjectileHitAnimation::getAnimations();
+   for (auto it = hits->begin(); it != hits->end(); ++it)
    {
       target.draw(*(*it));
    }

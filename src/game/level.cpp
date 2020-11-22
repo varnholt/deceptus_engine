@@ -168,7 +168,7 @@ Level::Level()
    LuaInterface::instance()->reset();
 
    // clear those here so the world destructor doesn't double-delete them
-   Bullet::clear();
+   Projectile::clear();
 
    mWorld = std::make_shared<b2World>(gravity);
 
@@ -1128,7 +1128,7 @@ void Level::draw(
 
    // draw all the other things
    drawRaycastLight(*mLevelRenderTexture.get());
-   Weapon::drawBulletHits(*mLevelRenderTexture.get());
+   Weapon::drawProjectileHits(*mLevelRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {

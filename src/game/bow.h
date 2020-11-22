@@ -29,7 +29,7 @@ public:
 
    void postSolve(b2Contact* contact, const b2ContactImpulse* impulse);
 
-   b2Body* getLauncheBody() const;
+   b2Body* getLauncherBody() const;
    void setLauncherBody(b2Body* launcher_body);
 
 

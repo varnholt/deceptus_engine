@@ -1,12 +1,12 @@
-#include "bullethitanimation.h"
+#include "projectilehitanimation.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool BulletHitAnimation::sInitialized = false;
-std::shared_ptr<sf::Texture> BulletHitAnimation::sTexture;
-std::vector<sf::IntRect> BulletHitAnimation::sFrames;
-std::list<BulletHitAnimation*> BulletHitAnimation::sAnimations;
-std::list<BulletHitAnimation*> BulletHitAnimation::sElapsedAnimations;
+bool ProjectileHitAnimation::sInitialized = false;
+std::shared_ptr<sf::Texture> ProjectileHitAnimation::sTexture;
+std::vector<sf::IntRect> ProjectileHitAnimation::sFrames;
+std::list<ProjectileHitAnimation*> ProjectileHitAnimation::sAnimations;
+std::list<ProjectileHitAnimation*> ProjectileHitAnimation::sElapsedAnimations;
 
 const auto width = 32;
 const auto height = 32;
@@ -16,7 +16,7 @@ const sf::Time animationDuration = sf::milliseconds(400);
 
 
 //----------------------------------------------------------------------------------------------------------------------
-BulletHitAnimation::BulletHitAnimation()
+ProjectileHitAnimation::ProjectileHitAnimation()
 {
    if (!sInitialized)
    {
@@ -33,7 +33,7 @@ BulletHitAnimation::BulletHitAnimation()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void BulletHitAnimation::initialize()
+void ProjectileHitAnimation::initialize()
 {
    sTexture = std::make_shared<sf::Texture>();
    if (sTexture->loadFromFile("data/weapons/detonation_big.png"))
@@ -53,9 +53,9 @@ void BulletHitAnimation::initialize()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void BulletHitAnimation::add(float x, float y)
+void ProjectileHitAnimation::add(float x, float y)
 {
-   auto anim = new BulletHitAnimation();
+   auto anim = new ProjectileHitAnimation();
 
    anim->mFrames = sFrames;
    anim->mTexture = sTexture;
@@ -68,12 +68,12 @@ void BulletHitAnimation::add(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void BulletHitAnimation::updateAnimations(const sf::Time& dt)
+void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 {
-   std::list<BulletHitAnimation*>::iterator it;
+   std::list<ProjectileHitAnimation*>::iterator it;
    for (it = sAnimations.begin(); it != sAnimations.end();)
    {
-      BulletHitAnimation* sprite = (*it);
+      ProjectileHitAnimation* sprite = (*it);
 
       if (sprite->mElapsed > animationDuration)
       {
@@ -90,7 +90,7 @@ void BulletHitAnimation::updateAnimations(const sf::Time& dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::list<BulletHitAnimation*> *BulletHitAnimation::getAnimations()
+std::list<ProjectileHitAnimation*> *ProjectileHitAnimation::getAnimations()
 {
    return &sAnimations;
 }
