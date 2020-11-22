@@ -574,7 +574,7 @@ extern "C" int32_t addWeapon(lua_State* state)
    fireInterval = static_cast<int>(lua_tointeger(state, 1));
    damage = static_cast<int>(lua_tointeger(state, 2));
 
-   // add weapon with bullet radius only
+   // add weapon with projectile radius only
    if (argc == 3)
    {
       auto radius = static_cast<float>(lua_tonumber(state, 3));
@@ -582,7 +582,7 @@ extern "C" int32_t addWeapon(lua_State* state)
       dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
    }
 
-   // add weapon with polygon bullet shape
+   // add weapon with polygon projectile shape
    if (argc >= 4 && (argc % 2 == 0))
    {
       auto constexpr parameterCount = 2u;
@@ -643,7 +643,7 @@ extern "C" int32_t fireWeapon(lua_State* state)
 }
 
 
-extern "C" int32_t updateBulletTexture(lua_State* state)
+extern "C" int32_t updateProjectileTexture(lua_State* state)
 {
    auto argc = lua_gettop(state);
    auto valid = (argc >= 2);
@@ -930,7 +930,7 @@ void LuaNode::setupLua()
    lua_register(mState, "setTransform", ::setTransform);
    lua_register(mState, "setZ", ::setZ);
    lua_register(mState, "timer", ::timer);
-   lua_register(mState, "updateBulletTexture", ::updateBulletTexture);
+   lua_register(mState, "updateProjectileTexture", ::updateProjectileTexture);
    lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
    lua_register(mState, "updateProperties", ::updateProperties);
    lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
@@ -1579,10 +1579,10 @@ void LuaNode::draw(sf::RenderTarget& target)
    }
    */
 
-   // draw sprite on top of bullets
+   // draw sprite on top of projectiles
    for (auto& w : mWeapons)
    {
-      w->drawBullets(target);
+      w->drawProjectiles(target);
    }
 
    mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));

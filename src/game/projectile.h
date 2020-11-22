@@ -16,15 +16,15 @@
 
 class b2Body;
 
-class Bullet : public FixtureNode
+class Projectile : public FixtureNode
 {
 
 public:
 
    using DestroyedCallback = std::function<void(void)>;
 
-   Bullet();
-   ~Bullet();
+   Projectile();
+   ~Projectile();
 
    bool isScheduledForRemoval() const;
    void setScheduledForRemoval(bool isScheduledForRemoval);
@@ -45,8 +45,8 @@ protected:
    b2Body* mBody = nullptr;
    DestroyedCallback mDestroyedCallback;
 
-   static std::set<Bullet*> sBullets;
-   static std::list<b2Vec2> sDetonationPositions;
+   static std::set<Projectile*> sProjectiles;
+   static std::list<b2Vec2> sHitPositions;
 };
 
 

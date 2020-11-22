@@ -218,7 +218,7 @@ enum ObjectType
    ObjectTypePlayerHeadSensor,
    ObjectTypePlayerLeftArmSensor,
    ObjectTypePlayerRightArmSensor,
-   ObjectTypeBullet,
+   ObjectTypeProjectile,
    ObjectTypeBouncer,
    ObjectTypeConveyorBelt,
    ObjectTypeCrusher,
