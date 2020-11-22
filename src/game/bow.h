@@ -5,6 +5,12 @@
 #include "weapon.h"
 #include "Box2D/Box2D.h"
 
+
+struct Arrow : public Projectile
+{
+};
+
+
 class Bow : public Weapon
 {
    struct ArrowCollision
@@ -35,9 +41,9 @@ public:
 
 private:
 
-   b2Body* _loaded_arrow_body = nullptr;
+   Arrow* _loaded_arrow = nullptr;
    b2Body* _launcher_body = nullptr;
-   std::vector<b2Body*> _arrow_bodies;
+   std::vector<Arrow*> _arrows;;
    std::vector<ArrowCollision> _arrow_collisions;
 };
 
