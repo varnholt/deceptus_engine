@@ -16,7 +16,7 @@
 
 namespace
 {
-static constexpr auto launch_speed = 10.0f;
+static constexpr auto launch_speed = 15.0f;
 static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
@@ -27,6 +27,8 @@ static constexpr auto scale = 0.1f;
 
 void Bow::load(b2World* world)
 {
+   _loaded_arrow = new Arrow();
+
    b2BodyDef bodyDef;
    bodyDef.type = b2_dynamicBody;
    bodyDef.position.Set(0, 5);
@@ -43,12 +45,12 @@ void Bow::load(b2World* world)
    fixtureDef.shape = &polygonShape;
    fixtureDef.density = 1.0f;
 
-   _loaded_arrow_body = world->CreateBody(&bodyDef);
-   _loaded_arrow_body->CreateFixture( &fixtureDef );
-   _loaded_arrow_body->SetAngularDamping(3);
+   auto loaded_arrow_body = world->CreateBody(&bodyDef);
+   loaded_arrow_body->CreateFixture( &fixtureDef );
+   loaded_arrow_body->SetAngularDamping(3);
+   loaded_arrow_body->SetGravityScale(0.0f);
 
-   // until fired
-   _loaded_arrow_body->SetGravityScale(0.0f);
+   _loaded_arrow->setBody(loaded_arrow_body);
 }
 
 
@@ -60,20 +62,16 @@ void Bow::fireNow(
 {
    load(world.get());
 
-   _loaded_arrow_body->SetAwake(true);
-   _loaded_arrow_body->SetGravityScale(1.0f);
-   _loaded_arrow_body->SetAngularVelocity(0.0f);
+   const auto angle = atan2(dir.y, dir.x);
+   const auto velocity = _launcher_body->GetWorldVector(b2Vec2(launch_speed, 0.0f));
 
-   _loaded_arrow_body->SetTransform(
-      pos,
-      atan2(dir.y, dir.x)
-   );
+   _loaded_arrow->getBody()->SetAwake(true);
+   _loaded_arrow->getBody()->SetGravityScale(1.0f);
+   _loaded_arrow->getBody()->SetAngularVelocity(0.0f);
+   _loaded_arrow->getBody()->SetTransform(pos, angle);
+   _loaded_arrow->getBody()->SetLinearVelocity(velocity);
 
-   _loaded_arrow_body->SetLinearVelocity(
-      _launcher_body->GetWorldVector(b2Vec2(launch_speed, 0.0f))
-   );
-
-   _arrow_bodies.push_back(_loaded_arrow_body);
+   _arrows.push_back(_loaded_arrow);
 }
 
 
@@ -117,12 +115,12 @@ void Bow::update()
 {
    // position the loaded arrow
    const auto start_position = _launcher_body->GetWorldPoint(b2Vec2(3.5f, 0));
-   _loaded_arrow_body->SetTransform(start_position, _launcher_body->GetAngle());
+   _loaded_arrow->getBody()->SetTransform(start_position, _launcher_body->GetAngle());
 
    // apply drag force to arrows
-   for (auto i = 0u; i < _arrow_bodies.size(); i++)
+   for (auto i = 0u; i < _arrows.size(); i++)
    {
-      auto arrow_body = _arrow_bodies[i];
+      auto arrow_body = _arrows[i]->getBody();
 
       const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
       const auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));

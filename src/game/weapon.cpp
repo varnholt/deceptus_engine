@@ -124,6 +124,7 @@ int Weapon::damage() const
 
    switch (mType)
    {
+      case WeaponType::Bow:
       case WeaponType::Slingshot:
       case WeaponType::Pistol:
       case WeaponType::Bazooka:
