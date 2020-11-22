@@ -2,7 +2,7 @@
 
 #include "animationpool.h"
 #include "audio.h"
-#include "bullethitanimation.h"
+#include "projectilehitanimation.h"
 #include "camerapane.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -589,7 +589,7 @@ void Game::update()
       if (mLevelLoadingFinished)
       {
          AnimationPool::getInstance().updateAnimations(dt);
-         Bullet::updateHitAnimations(dt);
+         Projectile::updateHitAnimations(dt);
          updateGameController();
          updateGameControllerForGame();
          mLevel->update(dt);

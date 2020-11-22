@@ -3,7 +3,7 @@
 
 // game
 #include "audio.h"
-#include "bullet.h"
+#include "projectile.h"
 #include "constants.h"
 #include "fixturenode.h"
 #include "luanode.h"
@@ -17,7 +17,7 @@
 
 // http://www.iforce2d.net/b2dtut/collision-anatomy
 //
-// TODO: pass collision normal to bullet detonation
+// TODO: pass collision normal to projectile detonation
 //       so animation can be aligned to detonation angle.
 
 GameContactListener* GameContactListener::sInstance = nullptr;
@@ -181,7 +181,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             }
             break;
          }
-         case ObjectTypeBullet:
+         case ObjectTypeProjectile:
          {
             auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
 
@@ -198,7 +198,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
                }
             }
 
-            dynamic_cast<Bullet*>(fixtureNodeA)->setScheduledForRemoval(true);
+            dynamic_cast<Projectile*>(fixtureNodeA)->setScheduledForRemoval(true);
             break;
          }
          case ObjectTypeOneSidedWall:
@@ -312,7 +312,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             }
             break;
          }
-         case ObjectTypeBullet:
+         case ObjectTypeProjectile:
          {
             auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
 
@@ -329,7 +329,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
                }
             }
 
-            dynamic_cast<Bullet*>(fixtureNodeB)->setScheduledForRemoval(true);
+            dynamic_cast<Projectile*>(fixtureNodeB)->setScheduledForRemoval(true);
             break;
          }
          case ObjectTypeOneSidedWall:

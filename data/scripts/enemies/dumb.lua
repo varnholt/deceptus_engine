@@ -30,7 +30,7 @@ function initialize()
    updateSpriteRect(0, 0, 64, 64)
 
    addWeapon(300, 10, 0.1) -- interval, damage, radius
-   updateBulletTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
+   updateProjectileTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
 end
 
 

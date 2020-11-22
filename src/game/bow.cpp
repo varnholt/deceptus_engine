@@ -101,7 +101,7 @@ void Bow::postSolve(b2Contact* contact, const b2ContactImpulse* impulse)
 }
 
 
-b2Body* Bow::getLauncheBody() const
+b2Body* Bow::getLauncherBody() const
 {
    return _launcher_body;
 }
