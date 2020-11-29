@@ -1,5 +1,4 @@
-#ifndef WEAPONSYSTEM_H
-#define WEAPONSYSTEM_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -17,4 +16,3 @@ struct WeaponSystem
    std::vector<std::shared_ptr<Weapon>> mWeapons;
 };
 
-#endif // WEAPONSYSTEM_H

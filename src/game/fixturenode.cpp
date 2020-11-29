@@ -12,48 +12,48 @@ FixtureNode::FixtureNode(GameNode* parent)
 
 ObjectType FixtureNode::getType() const
 {
-   return mType;
+   return _type;
 }
 
 
 void FixtureNode::setType(const ObjectType &type)
 {
-   mType = type;
+   _type = type;
 }
 
 
 void FixtureNode::setFlag(const std::string &flag, bool value)
 {
-   mFlags[flag]=value;
+   _flags[flag]=value;
 }
 
 
 bool FixtureNode::hasFlag(const std::string &flag)
 {
-   bool value = mFlags[flag];
+   bool value = _flags[flag];
    return value;
 }
 
 
 void FixtureNode::setProperty(const std::string &key, const Variant& value)
 {
-    mProperties[key] = value;
+    _properties[key] = value;
 }
 
 
 FixtureNode::Variant FixtureNode::getProperty(const std::string& key) const
 {
-   return mProperties.find(key)->second;
+   return _properties.find(key)->second;
 }
 
 
 void FixtureNode::collisionWithPlayer()
 {
-   mCollisionCallback();
+   _collision_callback();
 }
 
 void FixtureNode::setCollisionCallback(const CollisionCallback& collisionCallback)
 {
-   mCollisionCallback = collisionCallback;
+   _collision_callback = collisionCallback;
 }
 

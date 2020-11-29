@@ -1521,7 +1521,16 @@ void LuaNode::updateVelocity()
       b2Vec2(impulse, 0.0f),
       mBody->GetWorldCenter(),
       true
-   );
+            );
+}
+
+
+void LuaNode::updateWeapons(const sf::Time& dt)
+{
+   for (auto& w : mWeapons)
+   {
+      w->update(dt);
+   }
 }
 
 
@@ -1560,29 +1569,10 @@ void LuaNode::updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h)
 
 void LuaNode::draw(sf::RenderTarget& target)
 {
-   /*
-   if (!mVisible)
-   {
-      return;
-   }
-
-   sf::Time time = mClock.getElapsedTime();
-
-   if (time.asMilliseconds() >= mAnimSpeed)
-   {
-      mSpriteAnim.x++;
-
-      if ((mSpriteAnim.x * SPRITE_WIDTH) >= mTexture.getSize().x)
-         mSpriteAnim.x = 0;
-
-      mClock.restart();
-   }
-   */
-
    // draw sprite on top of projectiles
    for (auto& w : mWeapons)
    {
-      w->drawProjectiles(target);
+      w->draw(target);
    }
 
    mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));

@@ -7,8 +7,8 @@
 #include <memory>
 
 
-std::list<b2Vec2> Projectile::sHitPositions;
-std::set<Projectile*> Projectile::sProjectiles;
+std::list<b2Vec2> Projectile::_hit_positions;
+std::set<Projectile*> Projectile::_projectiles;
 
 
 
@@ -16,60 +16,60 @@ Projectile::Projectile()
  : FixtureNode(this)
 {
    setName(typeid(Projectile).name());
-   mType = ObjectTypeProjectile;
-   sProjectiles.insert(this);
+   _type = ObjectTypeProjectile;
+   _projectiles.insert(this);
 }
 
 
 Projectile::~Projectile()
 {
-   mDestroyedCallback();
-   mBody->GetWorld()->DestroyBody(mBody);
+   _destroyed_callback();
+   _body->GetWorld()->DestroyBody(_body);
 }
 
 
 bool Projectile::isScheduledForRemoval() const
 {
-   return mScheduledForRemoval;
+   return _scheduled_for_removal;
 }
 
 
 void Projectile::setScheduledForRemoval(bool remove)
 {
-   mScheduledForRemoval = remove;
+   _scheduled_for_removal = remove;
 }
 
 
 b2Body *Projectile::getBody() const
 {
-   return mBody;
+   return _body;
 }
 
 
 void Projectile::setBody(b2Body *body)
 {
-    mBody = body;
+    _body = body;
 }
 
 
 void Projectile::clear()
 {
-    sHitPositions.clear();
-    sProjectiles.clear();
+    _hit_positions.clear();
+    _projectiles.clear();
 }
 
 
 void Projectile::cleanup()
 {
-   sHitPositions.clear();
-   for (auto it = sProjectiles.begin(); it != sProjectiles.end(); )
+   _hit_positions.clear();
+   for (auto it = _projectiles.begin(); it != _projectiles.end(); )
    {
       auto projectile = *it;
       if (projectile->isScheduledForRemoval())
       {
-         sHitPositions.push_back(b2Vec2(projectile->getBody()->GetPosition()));
+         _hit_positions.push_back(b2Vec2(projectile->getBody()->GetPosition()));
          delete *it;
-         sProjectiles.erase(it++);
+         _projectiles.erase(it++);
       }
       else
       {
@@ -83,7 +83,7 @@ void Projectile::updateHitAnimations(const sf::Time& dt)
 {
    cleanup();
 
-   auto hitPositions = sHitPositions;
+   auto hitPositions = _hit_positions;
 
    std::list<b2Vec2>::iterator it;
    for (it = hitPositions.begin(); it != hitPositions.end(); ++it)
@@ -99,8 +99,20 @@ void Projectile::updateHitAnimations(const sf::Time& dt)
 }
 
 
-void Projectile::setDestroyedCallback(const DestroyedCallback& destroyedCallback)
+void Projectile::setDestroyedCallback(const DestroyedCallback& destroyed_callback)
 {
-   mDestroyedCallback = destroyedCallback;
+   _destroyed_callback = destroyed_callback;
+}
+
+
+bool Projectile::isSticky() const
+{
+   return _sticky;
+}
+
+
+void Projectile::setSticky(bool sticky)
+{
+   _sticky = sticky;
 }
 

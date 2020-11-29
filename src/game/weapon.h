@@ -44,36 +44,39 @@ public:
       const b2Vec2& dir
    );
 
-   int getFireInterval() const;
-   void setFireInterval(int interval);
+   virtual void draw(sf::RenderTarget& target);
+   virtual void update(const sf::Time& time);
 
-   void drawProjectiles(sf::RenderTarget& target);
+   static void drawProjectileHitAnimations(sf::RenderTarget& target);
 
-   static void drawProjectileHits(sf::RenderTarget& target);
 
    int damage() const;
+
    void loadTextures();
-   void setTexture(const std::filesystem::path& path, const sf::Rect<int32_t>& textureRect = mEmptyRect);
+   void setTexture(const std::filesystem::path& path, const sf::Rect<int32_t>& textureRect = _empty_rect);
+
+   int getFireIntervalMs() const;
+   void setFireIntervalMs(int interval);
 
 
 protected:
 
-   void cleanupProjectiles();
+   void drawProjectiles(sf::RenderTarget& target);
 
-   std::set<Projectile*> mProjectiles;
+   std::set<Projectile*> _projectiles;
 
-   WeaponType mType;
+   WeaponType _type;
 
-   sf::Texture mProjectileTexture;
-   sf::Sprite mProjectileSprite;
+   sf::Texture _projectile_texture;
+   sf::Sprite _projectile_sprite;
 
-   std::unique_ptr<b2Shape> mShape;
+   std::unique_ptr<b2Shape> _shape;
 
-   sf::Clock mFireClock;
-   int32_t mFireInterval = 100;
-   int32_t mDamage = 100;
-   std::filesystem::path mTexturePath = "data/weapons/bullet.png";
-   sf::Rect<int32_t> mTextureRect;
+   sf::Clock _fire_clock;
+   int32_t _fire_interval_ms = 100;
+   int32_t _damage = 100;
+   std::filesystem::path _texture_path = "data/weapons/bullet.png";
+   sf::Rect<int32_t> _texture_rect;
 
-   static sf::Rect<int32_t> mEmptyRect;
+   static sf::Rect<int32_t> _empty_rect;
 };
