@@ -198,7 +198,15 @@ void GameContactListener::BeginContact(b2Contact* contact)
                }
             }
 
-            dynamic_cast<Projectile*>(fixtureNodeA)->setScheduledForRemoval(true);
+            auto projectile = dynamic_cast<Projectile*>(fixtureNodeA);
+
+            // if it's an arrow, let postsolve handle it. if the impulse is not
+            // hard enough, the arrow should just fall on the ground
+            if (!projectile->isSticky())
+            {
+               projectile->setScheduledForRemoval(true);
+            }
+
             break;
          }
          case ObjectTypeOneSidedWall:
@@ -329,7 +337,15 @@ void GameContactListener::BeginContact(b2Contact* contact)
                }
             }
 
-            dynamic_cast<Projectile*>(fixtureNodeB)->setScheduledForRemoval(true);
+            auto projectile = dynamic_cast<Projectile*>(fixtureNodeB);
+
+            // if it's an arrow, let postsolve handle it. if the impulse is not
+            // hard enough, the arrow should just fall on the ground
+            if (!projectile->isSticky())
+            {
+               projectile->setScheduledForRemoval(true);
+            }
+
             break;
          }
          case ObjectTypeOneSidedWall:
@@ -627,6 +643,18 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
       {
          processImpulse(impulse);
       }
+      else if (nodeA->getType() == ObjectTypeProjectile)
+      {
+         auto projectile = dynamic_cast<Projectile*>(nodeA);
+
+         if (projectile->isSticky())
+         {
+            if (impulse > 0.5f)
+            {
+               std::cout << "arrow hit with " << impulse << std::endl;
+            }
+         }
+      }
    }
 
    if (userDataB)
@@ -637,8 +665,39 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
       {
          processImpulse(impulse);
       }
+      else if (nodeB->getType() == ObjectTypeProjectile)
+      {
+         auto projectile = dynamic_cast<Projectile*>(nodeB);
+
+         if (projectile->isSticky())
+         {
+            if (impulse > 0.5f)
+            {
+               std::cout << "arrow hit with " << impulse << std::endl;
+            }
+         }
+      }
    }
 }
+
+
+//   if (impulse->normalImpulses[0] > 0.5f) // targetInfoA->hardness
+//   {
+//      ArrowCollision collision;
+//      collision._target = fixtureA->GetBody();
+//      collision._arrow = fixtureB->GetBody();
+
+//      _arrow_collisions.push_back(collision);
+//   }
+//   else if (impulse->normalImpulses[0] > 0.5f) // targetInfoB->hardness
+//   {
+//      ArrowCollision collision;
+//      collision._target = fixtureB->GetBody();
+//      collision._arrow = fixtureA->GetBody();
+
+//      _arrow_collisions.push_back(collision);
+//   }
+
 
 
 void GameContactListener::debug()

@@ -18,8 +18,8 @@ protected:
    void setName(const std::string& name);
 
 private:
-   std::string mName;
-   std::vector<GameNode*> mChildren;
-   GameNode* mParent = nullptr;
+   std::string _name;
+   std::vector<GameNode*> _children;
+   GameNode* _parent = nullptr;
 };
 

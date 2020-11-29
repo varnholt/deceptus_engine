@@ -265,7 +265,7 @@ void Player::draw(sf::RenderTarget& target)
 {
    if (mWeaponSystem->mSelected)
    {
-      mWeaponSystem->mSelected->drawProjectiles(target);
+      mWeaponSystem->mSelected->draw(target);
    }
 
    if (!mVisible)
@@ -1530,6 +1530,7 @@ void Player::update(const sf::Time& dt)
    updateFootsteps();
    updatePortal();
    updatePreviousBodyState();
+   updateWeapons(dt);
 }
 
 
@@ -1782,6 +1783,16 @@ void Player::updateDeadFixtures()
    }
 
    mBodyFixture->SetSensor(mDead);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updateWeapons(const sf::Time& dt)
+{
+   for (auto& w : mWeaponSystem->mWeapons)
+   {
+      w->update(dt);
+   }
 }
 
 

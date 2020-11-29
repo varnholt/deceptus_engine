@@ -53,6 +53,7 @@ void LuaInterface::update(const sf::Time& dt)
       object->luaUpdate(dt);
       object->updateVelocity();
       object->updatePosition();
+      object->updateWeapons(dt);
 
       if (!object->mBody)
          it = mObjectList.erase(it);

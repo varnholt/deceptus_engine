@@ -1,5 +1,7 @@
 #include "bow.h"
 
+#include <iostream>
+
 // http://www.iforce2d.net/b2dtut/sticky-projectiles
 
 
@@ -16,12 +18,40 @@
 
 namespace
 {
-static constexpr auto launch_speed = 15.0f;
+static constexpr auto launch_speed = 200.0f;
 static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
 static constexpr auto drag_constant = 0.1f;
 static constexpr auto scale = 0.1f;
+}
+
+
+Bow::Bow()
+{
+   _fire_interval_ms = 3000;
+
+   // enough to create a box here
+   _shape = std::make_unique<b2PolygonShape>();
+   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
+      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
+      arrow_width * scale
+   );
+
+   _texture_path = "data/weapons/arrow.png";
+
+   _texture_rect.left   = 2 * PIXELS_PER_TILE;
+   _texture_rect.top    = 1 * PIXELS_PER_TILE;
+   _texture_rect.width  = PIXELS_PER_TILE;
+   _texture_rect.height = PIXELS_PER_TILE;
+
+   loadTextures();
+
+   // fix origin
+   _projectile_sprite.setOrigin(
+      static_cast<float_t>(_texture_rect.width / 2),
+      static_cast<float_t>(_texture_rect.height / 2)
+   );
 }
 
 
@@ -46,7 +76,7 @@ void Bow::load(b2World* world)
    fixtureDef.density = 1.0f;
 
    auto loaded_arrow_body = world->CreateBody(&bodyDef);
-   loaded_arrow_body->CreateFixture( &fixtureDef );
+   loaded_arrow_body->CreateFixture(&fixtureDef);
    loaded_arrow_body->SetAngularDamping(3);
    loaded_arrow_body->SetGravityScale(0.0f);
 
@@ -60,42 +90,35 @@ void Bow::fireNow(
    const b2Vec2& dir
 )
 {
+   b2Vec2 posCopy = pos;
+   posCopy.y -= 0.15f;
+
+   // let the bow always point up a bit
+   b2Vec2 dirCopy = dir;
+   dirCopy.y -= 0.01f;
+
+   // the bow workflow could be split up into
+   // 1) aim
+   // 2) pull
+   // 3) release
+   // Right now it's just firing into walking direction.
    load(world.get());
 
-   const auto angle = atan2(dir.y, dir.x);
-   const auto velocity = _launcher_body->GetWorldVector(b2Vec2(launch_speed, 0.0f));
+   const auto angle = atan2(dirCopy.y, dirCopy.x);
+   const auto velocity = _launcher_body->GetWorldVector(launch_speed * dirCopy);
 
    _loaded_arrow->getBody()->SetAwake(true);
    _loaded_arrow->getBody()->SetGravityScale(1.0f);
    _loaded_arrow->getBody()->SetAngularVelocity(0.0f);
-   _loaded_arrow->getBody()->SetTransform(pos, angle);
+   _loaded_arrow->getBody()->SetTransform(posCopy, angle);
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);
 
    _arrows.push_back(_loaded_arrow);
-}
 
+   // store projectile
+   _projectiles.insert(_loaded_arrow);
 
-void Bow::postSolve(b2Contact* contact, const b2ContactImpulse* impulse)
-{
-   b2Fixture* fixtureA = contact->GetFixtureA();
-   b2Fixture* fixtureB = contact->GetFixtureB();
-
-   if (impulse->normalImpulses[0] > 0.5f) // targetInfoA->hardness
-   {
-      ArrowCollision collision;
-      collision._target = fixtureA->GetBody();
-      collision._arrow = fixtureB->GetBody();
-
-      _arrow_collisions.push_back(collision);
-   }
-   else if (impulse->normalImpulses[0] > 0.5f) // targetInfoB->hardness
-   {
-      ArrowCollision collision;
-      collision._target = fixtureB->GetBody();
-      collision._arrow = fixtureA->GetBody();
-
-      _arrow_collisions.push_back(collision);
-   }
+   _loaded_arrow = nullptr;
 }
 
 
@@ -111,25 +134,33 @@ void Bow::setLauncherBody(b2Body* launcher_body)
 }
 
 
-void Bow::update()
+void Bow::update(const sf::Time&)
 {
    // position the loaded arrow
-   const auto start_position = _launcher_body->GetWorldPoint(b2Vec2(3.5f, 0));
-   _loaded_arrow->getBody()->SetTransform(start_position, _launcher_body->GetAngle());
+   if (_loaded_arrow)
+   {
+      // position the arrow next to the object carrying it (half a meter away)
+      const auto start_position = _launcher_body->GetWorldPoint(b2Vec2(0.5f, 0));
+      _loaded_arrow->getBody()->SetTransform(start_position, _launcher_body->GetAngle());
+   }
 
    // apply drag force to arrows
-   for (auto i = 0u; i < _arrows.size(); i++)
+   for (auto& arrow : _arrows)
    {
-      auto arrow_body = _arrows[i]->getBody();
+      auto arrow_body = arrow->getBody();
 
       const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
-      const auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));
+      auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));
+      arrow_pointing_direction.Normalize();
 
       auto arrow_velocity = arrow_body->GetLinearVelocity();
-      const auto arrow_dir = arrow_velocity.Normalize();
-      const auto dot = b2Dot(arrow_velocity, arrow_pointing_direction);
+      const auto arrlow_velocity_length = arrow_velocity.Normalize();
 
-      const auto draw_force_magnitude = (1 - fabs(dot)) * arrow_dir * arrow_dir * drag_constant * arrow_body->GetMass();
+      const auto dot = b2Dot(arrow_velocity, arrow_pointing_direction);
+      arrow->_angle = acos(dot);
+
+      const auto draw_force_magnitude =
+         (1 - fabs(dot)) * arrlow_velocity_length * arrlow_velocity_length * drag_constant * arrow_body->GetMass();
 
       arrow_body->ApplyForce(
          draw_force_magnitude * -arrow_velocity,
@@ -137,10 +168,12 @@ void Bow::update()
          false
       );
    }
-
-   // keep the arrow for a bit, then discard it
-   _arrow_collisions.clear();
-   // world->DestroyBody(arrow_body);
 }
+
+
+// keep the arrow for a bit, then discard it
+// _arrow_collisions.clear();
+// world->DestroyBody(arrow_body);
+
 
 
