@@ -15,22 +15,22 @@ namespace
    int16_t groupIndex = 0;                                          // 0 is default
 }
 
-sf::Rect<int32_t> Weapon::mEmptyRect;
+sf::Rect<int32_t> Weapon::_empty_rect;
 
 
 Weapon::Weapon()
 {
-   mShape = std::make_unique<b2CircleShape>();
-   mShape->m_radius = 0.05f;
+   _shape = std::make_unique<b2CircleShape>();
+   _shape->m_radius = 0.05f;
 
    loadTextures();
 }
 
 
 Weapon::Weapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t damage)
- : mShape(std::move(shape)),
-   mFireInterval(fireInterval),
-   mDamage(damage)
+ : _shape(std::move(shape)),
+   _fire_interval_ms(fireInterval),
+   _damage(damage)
 {
    loadTextures();
 }
@@ -51,11 +51,11 @@ void Weapon::fireNow(
    body->SetGravityScale(0.0f);
 
    b2FixtureDef fixtureDef;
-   fixtureDef.shape = mShape.get();
+   fixtureDef.shape = _shape.get();
    fixtureDef.density = 0.0f;
 
-   fixtureDef.filter.groupIndex = groupIndex;
-   fixtureDef.filter.maskBits = maskBitsStanding;
+   fixtureDef.filter.groupIndex   = groupIndex;
+   fixtureDef.filter.maskBits     = maskBitsStanding;
    fixtureDef.filter.categoryBits = categoryBits;
 
    auto fixture = body->CreateFixture(&fixtureDef);
@@ -67,13 +67,13 @@ void Weapon::fireNow(
    );
 
    auto projectile = new Projectile();
-   projectile->setDestroyedCallback([this, projectile](){mProjectiles.erase(projectile);});
-   projectile->setProperty("damage", mDamage);
+   projectile->setDestroyedCallback([this, projectile](){_projectiles.erase(projectile);});
+   projectile->setProperty("damage", _damage);
    projectile->setBody(body);
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
-   mProjectiles.insert(projectile);
+   _projectiles.insert(projectile);
 }
 
 
@@ -83,38 +83,49 @@ void Weapon::fireInIntervals(
    const b2Vec2& dir
 )
 {
-   if (mFireClock.getElapsedTime().asMilliseconds() > mFireInterval)
+   if (_fire_clock.getElapsedTime().asMilliseconds() > _fire_interval_ms)
    {
       fireNow(world, pos, dir);
 
-      mFireClock.restart();
+      _fire_clock.restart();
    }
 }
 
 
-int Weapon::getFireInterval() const
+int Weapon::getFireIntervalMs() const
 {
-   return mFireInterval;
+   return _fire_interval_ms;
 }
 
 
-void Weapon::setFireInterval(int fireInterval)
+void Weapon::setFireIntervalMs(int fireInterval)
 {
-   mFireInterval = fireInterval;
+   _fire_interval_ms = fireInterval;
 }
 
 
 void Weapon::drawProjectiles(sf::RenderTarget& target)
 {
-   for (auto projectile : mProjectiles)
+   for (auto projectile : _projectiles)
    {
-      mProjectileSprite.setPosition(
+      _projectile_sprite.setPosition(
          projectile->getBody()->GetPosition().x * PPM,
          projectile->getBody()->GetPosition().y * PPM
       );
 
-      target.draw(mProjectileSprite);
+      target.draw(_projectile_sprite);
    }
+}
+
+
+void Weapon::draw(sf::RenderTarget& target)
+{
+   drawProjectiles(target);
+}
+
+
+void Weapon::update(const sf::Time& /*time*/)
+{
 }
 
 
@@ -122,7 +133,7 @@ int Weapon::damage() const
 {
    int val = 0;
 
-   switch (mType)
+   switch (_type)
    {
       case WeaponType::Bow:
       case WeaponType::Slingshot:
@@ -148,37 +159,37 @@ void Weapon::loadTextures()
    //      << "height: " << mTextureRect.height
    //      << std::endl;
 
-   if (!mProjectileTexture.loadFromFile(mTexturePath.string()))
+   if (!_projectile_texture.loadFromFile(_texture_path.string()))
    {
-      std::cout << "Weapon::loadTextures(): couldn't load texture " << mTexturePath.string() << std::endl;
+      std::cout << "Weapon::loadTextures(): couldn't load texture " << _texture_path.string() << std::endl;
    }
 
-   if (mShape->GetType() == b2Shape::e_polygon)
+   if (_shape->GetType() == b2Shape::e_polygon)
    {
-      mProjectileSprite.setOrigin(0, 0);
-      mProjectileSprite.setTextureRect(mTextureRect);
-      mProjectileSprite.setTexture(mProjectileTexture);
+      _projectile_sprite.setOrigin(0, 0);
+      _projectile_sprite.setTextureRect(_texture_rect);
+      _projectile_sprite.setTexture(_projectile_texture);
    }
-   else if (mShape->GetType() == b2Shape::e_circle)
+   else if (_shape->GetType() == b2Shape::e_circle)
    {
-      if (mTextureRect.width > 0)
+      if (_texture_rect.width > 0)
       {
-         mProjectileSprite.setOrigin(
-            static_cast<float_t>(mTextureRect.width / 2),
-            static_cast<float_t>(mTextureRect.height / 2)
+         _projectile_sprite.setOrigin(
+            static_cast<float_t>(_texture_rect.width / 2),
+            static_cast<float_t>(_texture_rect.height / 2)
          );
 
-         mProjectileSprite.setTextureRect(mTextureRect);
-         mProjectileSprite.setTexture(mProjectileTexture);
+         _projectile_sprite.setTextureRect(_texture_rect);
+         _projectile_sprite.setTexture(_projectile_texture);
       }
       else
       {
-         mProjectileSprite.setOrigin(
-            static_cast<float_t>(mProjectileTexture.getSize().x / 2),
-            static_cast<float_t>(mProjectileTexture.getSize().y / 2)
+         _projectile_sprite.setOrigin(
+            static_cast<float_t>(_projectile_texture.getSize().x / 2),
+            static_cast<float_t>(_projectile_texture.getSize().y / 2)
          );
 
-         mProjectileSprite.setTexture(mProjectileTexture, true);
+         _projectile_sprite.setTexture(_projectile_texture, true);
       }
    }
 }
@@ -189,20 +200,21 @@ void Weapon::setTexture(
    const sf::Rect<int32_t>& textureRect
 )
 {
-   bool reload = ((path != mTexturePath) || (textureRect != mTextureRect));
+   bool reload = ((path != _texture_path) || (textureRect != _texture_rect));
 
    if (reload)
    {
-      mTextureRect = textureRect;
-      mTexturePath = path;
+      _texture_rect = textureRect;
+      _texture_path = path;
 
       loadTextures();
    }
 }
 
 
-void Weapon::drawProjectileHits(sf::RenderTarget& target)
+void Weapon::drawProjectileHitAnimations(sf::RenderTarget& target)
 {
+   // draw projectile hits
    auto hits = ProjectileHitAnimation::getAnimations();
    for (auto it = hits->begin(); it != hits->end(); ++it)
    {

@@ -4,18 +4,18 @@
 
 
 GameNode::GameNode(GameNode* parent)
- : mParent(parent)
+ : _parent(parent)
 {
     if (parent)
     {
-        parent->mChildren.push_back(this);
+        parent->_children.push_back(this);
     }
 }
 
 
 GameNode* GameNode::getParent() const
 {
-    return mParent;
+    return _parent;
 }
 
 
@@ -28,9 +28,9 @@ void GameNode::dump(int32_t depth)
         std::cout << "--";
     }
 
-    std::cout << " " << this << " (" << mName << ") " << "[" << mChildren.size() << "]" << std::endl;
+    std::cout << " " << this << " (" << _name << ") " << "[" << _children.size() << "]" << std::endl;
 
-    for (auto& c : mChildren)
+    for (auto& c : _children)
     {
         c->dump(depth + 1);
     }
@@ -39,6 +39,6 @@ void GameNode::dump(int32_t depth)
 
 void GameNode::setName(const std::string& name)
 {
-    mName = name;
+    _name = name;
 }
 

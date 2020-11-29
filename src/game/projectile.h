@@ -24,7 +24,7 @@ public:
    using DestroyedCallback = std::function<void(void)>;
 
    Projectile();
-   ~Projectile();
+   virtual ~Projectile();
 
    bool isScheduledForRemoval() const;
    void setScheduledForRemoval(bool isScheduledForRemoval);
@@ -38,15 +38,19 @@ public:
 
    void setDestroyedCallback(const DestroyedCallback& destroyedCallback);
 
+   bool isSticky() const;
+   void setSticky(bool sticky);
+
 
 protected:
 
-   bool mScheduledForRemoval = false;
-   b2Body* mBody = nullptr;
-   DestroyedCallback mDestroyedCallback;
+   bool _scheduled_for_removal = false;
+   b2Body* _body = nullptr;
+   DestroyedCallback _destroyed_callback;
+   bool _sticky = false;
 
-   static std::set<Projectile*> sProjectiles;
-   static std::list<b2Vec2> sHitPositions;
+   static std::set<Projectile*> _projectiles;
+   static std::list<b2Vec2> _hit_positions;
 };
 
 

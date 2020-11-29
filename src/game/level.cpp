@@ -1128,7 +1128,7 @@ void Level::draw(
 
    // draw all the other things
    drawRaycastLight(*mLevelRenderTexture.get());
-   Weapon::drawProjectileHits(*mLevelRenderTexture.get());
+   Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {

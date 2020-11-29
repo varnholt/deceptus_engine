@@ -154,6 +154,7 @@ private:
    void updateHardLanding();
    void updateGroundAngle();
    void updateDeadFixtures();
+   void updateWeapons(const sf::Time& dt);
 
    bool isDashActive() const;
    void resetDash();
