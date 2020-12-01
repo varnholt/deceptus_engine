@@ -647,7 +647,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
       {
          auto projectile = dynamic_cast<Projectile*>(nodeA);
 
-         if (projectile->isSticky())
+         // if (projectile->isSticky())
          {
             if (impulse > 0.5f)
             {
@@ -671,7 +671,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
          if (projectile->isSticky())
          {
-            if (impulse > 0.5f)
+            // if (impulse > 0.5f)
             {
                std::cout << "arrow hit with " << impulse << std::endl;
             }
