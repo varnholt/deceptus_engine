@@ -52,7 +52,9 @@ public:
 
    int damage() const;
 
-   void loadTextures();
+   virtual void initialize();
+   virtual void loadTextures();
+
    void setTexture(const std::filesystem::path& path, const sf::Rect<int32_t>& textureRect = _empty_rect);
 
    int getFireIntervalMs() const;

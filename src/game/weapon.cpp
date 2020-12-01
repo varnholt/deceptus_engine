@@ -10,9 +10,11 @@
 
 namespace
 {
-   uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
-   uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
-   int16_t groupIndex = 0;                                          // 0 is default
+
+uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
+int16_t groupIndex = 0;                                          // 0 is default
+
 }
 
 sf::Rect<int32_t> Weapon::_empty_rect;
@@ -22,8 +24,6 @@ Weapon::Weapon()
 {
    _shape = std::make_unique<b2CircleShape>();
    _shape->m_radius = 0.05f;
-
-   loadTextures();
 }
 
 
@@ -32,7 +32,6 @@ Weapon::Weapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t dam
    _fire_interval_ms(fireInterval),
    _damage(damage)
 {
-   loadTextures();
 }
 
 
@@ -146,6 +145,12 @@ int Weapon::damage() const
    }
 
    return val;
+}
+
+
+void Weapon::initialize()
+{
+   loadTextures();
 }
 
 
