@@ -42,6 +42,7 @@ public:
    b2Body* getLauncherBody() const;
    void setLauncherBody(b2Body* launcher_body);
 
+   void loadTextures() override;
 
 private:
 
