@@ -24,34 +24,16 @@ static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
 static constexpr auto drag_constant = 0.1f;
 static constexpr auto scale = 0.1f;
+
+uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
+int16_t groupIndex = 0;                                          // 0 is default
 }
 
 
 Bow::Bow()
 {
-   _fire_interval_ms = 3000;
-
-   // enough to create a box here
-   _shape = std::make_unique<b2PolygonShape>();
-   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
-      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
-      arrow_width * scale
-   );
-
-   _texture_path = "data/weapons/arrow.png";
-
-   _texture_rect.left   = 2 * PIXELS_PER_TILE;
-   _texture_rect.top    = 1 * PIXELS_PER_TILE;
-   _texture_rect.width  = PIXELS_PER_TILE;
-   _texture_rect.height = PIXELS_PER_TILE;
-
-   loadTextures();
-
-   // fix origin
-   _projectile_sprite.setOrigin(
-      static_cast<float_t>(_texture_rect.width / 2),
-      static_cast<float_t>(_texture_rect.height / 2)
-   );
+   _fire_interval_ms = 1500;
 }
 
 
@@ -74,11 +56,15 @@ void Bow::load(b2World* world)
    b2FixtureDef fixtureDef;
    fixtureDef.shape = &polygonShape;
    fixtureDef.density = 1.0f;
+   fixtureDef.filter.groupIndex   = groupIndex;
+   fixtureDef.filter.maskBits     = maskBitsStanding;
+   fixtureDef.filter.categoryBits = categoryBits;
 
    auto loaded_arrow_body = world->CreateBody(&bodyDef);
    loaded_arrow_body->CreateFixture(&fixtureDef);
    loaded_arrow_body->SetAngularDamping(3);
    loaded_arrow_body->SetGravityScale(0.0f);
+   loaded_arrow_body->SetUserData(_loaded_arrow);
 
    _loaded_arrow->setBody(loaded_arrow_body);
 }
@@ -115,7 +101,7 @@ void Bow::fireNow(
 
    _arrows.push_back(_loaded_arrow);
 
-   // store projectile
+   // store projectile so it gets drawn
    _projectiles.insert(_loaded_arrow);
 
    _loaded_arrow = nullptr;
@@ -131,6 +117,37 @@ b2Body* Bow::getLauncherBody() const
 void Bow::setLauncherBody(b2Body* launcher_body)
 {
    _launcher_body = launcher_body;
+}
+
+
+void Bow::loadTextures()
+{
+   // the shape is only defined here to align the texture on it
+   _shape = std::make_unique<b2PolygonShape>();
+   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
+      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
+      arrow_width * scale
+   );
+
+   _texture_path = "data/weapons/arrow.png";
+
+   if (!_projectile_texture.loadFromFile(_texture_path.string()))
+   {
+      std::cout << "Bow::loadTextures(): couldn't load texture " << _texture_path.string() << std::endl;
+   }
+
+   _texture_rect.left   = 2 * PIXELS_PER_TILE;
+   _texture_rect.top    = 1 * PIXELS_PER_TILE;
+   _texture_rect.width  = PIXELS_PER_TILE;
+   _texture_rect.height = PIXELS_PER_TILE;
+
+   _projectile_sprite.setTexture(_projectile_texture);
+   _projectile_sprite.setTextureRect(_texture_rect);
+
+   _projectile_sprite.setOrigin(
+      static_cast<float_t>(_texture_rect.width / 2),
+      static_cast<float_t>(_texture_rect.height / 2)
+   );
 }
 
 
@@ -169,11 +186,4 @@ void Bow::update(const sf::Time&)
       );
    }
 }
-
-
-// keep the arrow for a bit, then discard it
-// _arrow_collisions.clear();
-// world->DestroyBody(arrow_body);
-
-
 

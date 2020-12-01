@@ -86,6 +86,7 @@ void Console::execute()
    else if (results.at(0) == "/bow")
    {
       auto bow = std::make_shared<Bow>();
+      bow->initialize();
       bow->setLauncherBody(Player::getCurrent()->getBody());
       Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(bow);
       Player::getCurrent()->getWeaponSystem()->mSelected = bow;

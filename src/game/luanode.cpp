@@ -1380,6 +1380,7 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t damage)
 {
    auto weapon = std::make_unique<Weapon>(std::move(shape), fireInterval, damage);
+   weapon->initialize();
    mWeapons.push_back(std::move(weapon));
 }
 
