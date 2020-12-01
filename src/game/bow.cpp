@@ -61,10 +61,10 @@ void Bow::load(b2World* world)
    fixtureDef.filter.categoryBits = categoryBits;
 
    auto loaded_arrow_body = world->CreateBody(&bodyDef);
-   loaded_arrow_body->CreateFixture(&fixtureDef);
+   auto fixture = loaded_arrow_body->CreateFixture(&fixtureDef);
    loaded_arrow_body->SetAngularDamping(3);
    loaded_arrow_body->SetGravityScale(0.0f);
-   loaded_arrow_body->SetUserData(_loaded_arrow);
+   fixture->SetUserData(_loaded_arrow);
 
    _loaded_arrow->setBody(loaded_arrow_body);
 }
@@ -90,6 +90,11 @@ void Bow::fireNow(
    // Right now it's just firing into walking direction.
    load(world.get());
 
+   _arrows.push_back(_loaded_arrow);
+
+   // store projectile so it gets drawn
+   _projectiles.insert(_loaded_arrow);
+
    const auto angle = atan2(dirCopy.y, dirCopy.x);
    const auto velocity = _launcher_body->GetWorldVector(launch_speed * dirCopy);
 
@@ -98,12 +103,7 @@ void Bow::fireNow(
    _loaded_arrow->getBody()->SetAngularVelocity(0.0f);
    _loaded_arrow->getBody()->SetTransform(posCopy, angle);
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);
-
-   _arrows.push_back(_loaded_arrow);
-
-   // store projectile so it gets drawn
-   _projectiles.insert(_loaded_arrow);
-
+   _loaded_arrow->setProperty("damage", _damage);
    _loaded_arrow = nullptr;
 }
 
