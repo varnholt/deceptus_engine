@@ -6,6 +6,7 @@
 #include "projectile.h"
 #include "constants.h"
 #include "fixturenode.h"
+#include "framework/tools/timer.h"
 #include "luanode.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/conveyorbelt.h"
@@ -647,11 +648,25 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
       {
          auto projectile = dynamic_cast<Projectile*>(nodeA);
 
-         // if (projectile->isSticky())
+         if (projectile->isSticky())
          {
-            if (impulse > 0.5f)
+            if (projectile->hitSomething())
+            {
+               return;
+            }
+
+            projectile->setHitSomething(true);
+
+            Timer::add(
+               std::chrono::milliseconds(3000),
+               [projectile](){projectile->setScheduledForRemoval(true);},
+               Timer::Type::Singleshot
+            );
+
+            if (impulse > 0.0003f)
             {
                std::cout << "arrow hit with " << impulse << std::endl;
+               projectile->getBody()->SetActive(false);
             }
          }
       }
@@ -671,9 +686,24 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
          if (projectile->isSticky())
          {
-            // if (impulse > 0.5f)
+            if (projectile->hitSomething())
+            {
+               return;
+            }
+
+            projectile->setHitSomething(true);
+
+            Timer::add(
+               std::chrono::milliseconds(3000),
+               [projectile](){projectile->setScheduledForRemoval(true);},
+               Timer::Type::Singleshot
+            );
+
+
+            if (impulse > 0.0003f)
             {
                std::cout << "arrow hit with " << impulse << std::endl;
+               projectile->getBody()->SetActive(false);
             }
          }
       }
