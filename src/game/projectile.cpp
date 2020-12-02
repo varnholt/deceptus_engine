@@ -116,3 +116,13 @@ void Projectile::setSticky(bool sticky)
    _sticky = sticky;
 }
 
+bool Projectile::hitSomething() const
+{
+   return _hit_something;
+}
+
+void Projectile::setHitSomething(bool hit_something)
+{
+   _hit_something = hit_something;
+}
+
