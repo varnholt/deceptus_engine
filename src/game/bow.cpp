@@ -39,7 +39,10 @@ Bow::Bow()
 
 void Bow::load(b2World* world)
 {
-   _loaded_arrow = new Arrow();
+   auto arrow = _loaded_arrow = new Arrow();
+   _loaded_arrow->addDestroyedCallback([this, arrow](){
+      _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end());
+   });
 
    b2BodyDef bodyDef;
    bodyDef.type = b2_dynamicBody;
@@ -82,6 +85,22 @@ void Bow::fireNow(
    // let the bow always point up a bit
    b2Vec2 dirCopy = dir;
    dirCopy.y -= 0.01f;
+
+   // for now just let the arrow point in the fire direction
+   // rotation can be done later
+   if (dir.x < 0.0)
+   {
+      _texture_rect.top = 0 * PIXELS_PER_TILE;
+   }
+   else
+   {
+      _texture_rect.top = 1 * PIXELS_PER_TILE;
+   }
+
+   _texture_rect.left   = 2 * PIXELS_PER_TILE;
+   _texture_rect.width  = PIXELS_PER_TILE;
+   _texture_rect.height = PIXELS_PER_TILE;
+   _projectile_sprite.setTextureRect(_texture_rect);
 
    // the bow workflow could be split up into
    // 1) aim
@@ -136,13 +155,7 @@ void Bow::loadTextures()
       std::cout << "Bow::loadTextures(): couldn't load texture " << _texture_path.string() << std::endl;
    }
 
-   _texture_rect.left   = 2 * PIXELS_PER_TILE;
-   _texture_rect.top    = 1 * PIXELS_PER_TILE;
-   _texture_rect.width  = PIXELS_PER_TILE;
-   _texture_rect.height = PIXELS_PER_TILE;
-
    _projectile_sprite.setTexture(_projectile_texture);
-   _projectile_sprite.setTextureRect(_texture_rect);
 
    _projectile_sprite.setOrigin(
       static_cast<float_t>(_texture_rect.width / 2),
@@ -164,6 +177,11 @@ void Bow::update(const sf::Time&)
    // apply drag force to arrows
    for (auto& arrow : _arrows)
    {
+      if (!arrow->getBody()->IsActive())
+      {
+         continue;
+      }
+
       auto arrow_body = arrow->getBody();
 
       const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
