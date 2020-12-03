@@ -66,7 +66,7 @@ void Weapon::fireNow(
    );
 
    auto projectile = new Projectile();
-   projectile->setDestroyedCallback([this, projectile](){_projectiles.erase(projectile);});
+   projectile->addDestroyedCallback([this, projectile](){_projectiles.erase(projectile);});
    projectile->setProperty("damage", _damage);
    projectile->setBody(body);
    fixture->SetUserData(static_cast<void*>(projectile));
@@ -107,6 +107,11 @@ void Weapon::drawProjectiles(sf::RenderTarget& target)
 {
    for (auto projectile : _projectiles)
    {
+      if (projectile->isScheduledForRemoval())
+      {
+         continue;
+      }
+
       _projectile_sprite.setPosition(
          projectile->getBody()->GetPosition().x * PPM,
          projectile->getBody()->GetPosition().y * PPM

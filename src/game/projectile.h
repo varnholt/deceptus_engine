@@ -36,7 +36,7 @@ public:
    static void cleanup();
    static void updateHitAnimations(const sf::Time& dt);
 
-   void setDestroyedCallback(const DestroyedCallback& destroyedCallback);
+   void addDestroyedCallback(const DestroyedCallback& destroyedCallback);
 
    bool isSticky() const;
    void setSticky(bool sticky);
@@ -49,7 +49,7 @@ public:
 
    bool _scheduled_for_removal = false;
    b2Body* _body = nullptr;
-   DestroyedCallback _destroyed_callback;
+   std::vector<DestroyedCallback> _destroyed_callbacks;
    bool _sticky = false;
    bool _hit_something = false;
 
