@@ -23,7 +23,11 @@ Projectile::Projectile()
 
 Projectile::~Projectile()
 {
-   _destroyed_callback();
+   for (auto& cb : _destroyed_callbacks)
+   {
+      cb();
+   }
+
    _body->GetWorld()->DestroyBody(_body);
 }
 
@@ -99,9 +103,9 @@ void Projectile::updateHitAnimations(const sf::Time& dt)
 }
 
 
-void Projectile::setDestroyedCallback(const DestroyedCallback& destroyed_callback)
+void Projectile::addDestroyedCallback(const DestroyedCallback& destroyed_callback)
 {
-   _destroyed_callback = destroyed_callback;
+   _destroyed_callbacks.push_back(destroyed_callback);
 }
 
 
