@@ -226,7 +226,7 @@ void Weapon::drawProjectileHitAnimations(sf::RenderTarget& target)
 {
    // draw projectile hits
    auto hits = ProjectileHitAnimation::getAnimations();
-   for (auto it = hits->begin(); it != hits->end(); ++it)
+   for (auto it = hits.begin(); it != hits.end(); ++it)
    {
       target.draw(*(*it));
    }

@@ -59,6 +59,17 @@ void Console::showHelp()
 }
 
 
+void Console::giveBow()
+{
+   auto bow = std::make_shared<Bow>();
+   bow->initialize();
+   bow->setLauncherBody(Player::getCurrent()->getBody());
+   Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(bow);
+   Player::getCurrent()->getWeaponSystem()->mSelected = bow;
+   mLog.push_back("given bow to player");
+}
+
+
 void Console::execute()
 {
    std::cout << "[i] process command: " << mCommand << std::endl;
@@ -85,13 +96,15 @@ void Console::execute()
    // should become /weapon xxx in the future
    else if (results.at(0) == "/bow")
    {
-      auto bow = std::make_shared<Bow>();
-      bow->initialize();
-      bow->setLauncherBody(Player::getCurrent()->getBody());
-      Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(bow);
-      Player::getCurrent()->getWeaponSystem()->mSelected = bow;
+      giveBow();
    }
-
+   else if (results.at(0) == "/weapon" && results.size() == 2)
+   {
+      if (results.at(1) == "bow")
+      {
+         giveBow();
+      }
+   }
    else if (results.at(0) == "/extra" && results.size() == 2)
    {
       auto& skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
