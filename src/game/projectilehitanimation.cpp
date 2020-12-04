@@ -2,30 +2,27 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool ProjectileHitAnimation::sInitialized = false;
-std::shared_ptr<sf::Texture> ProjectileHitAnimation::sTexture;
-std::vector<sf::IntRect> ProjectileHitAnimation::sFrames;
-std::list<ProjectileHitAnimation*> ProjectileHitAnimation::sAnimations;
-std::list<ProjectileHitAnimation*> ProjectileHitAnimation::sElapsedAnimations;
+bool ProjectileHitAnimation::_initialized_default_animation = false;
+std::unique_ptr<ProjectileHitAnimation::FrameData> ProjectileHitAnimation::_frame_data;
+std::list<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
 
+
+namespace
+{
 const auto width = 32;
 const auto height = 32;
 const auto sprites = 6;
 const auto frameTime = 0.075f;
 const sf::Time animationDuration = sf::milliseconds(400);
+}
 
 
 //----------------------------------------------------------------------------------------------------------------------
 ProjectileHitAnimation::ProjectileHitAnimation()
 {
-   if (!sInitialized)
+   if (!_initialized_default_animation)
    {
       initialize();
-   }
-
-   for (auto i = 0u; i < sFrames.size(); i++)
-   {
-      mFrameTimes.push_back(sf::seconds(frameTime));
    }
 
    setOrigin(width / 2, height / 2);
@@ -33,17 +30,46 @@ ProjectileHitAnimation::ProjectileHitAnimation()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+ProjectileHitAnimation::FrameData::FrameData(
+   const std::shared_ptr<sf::Texture>& texture,
+   uint32_t frame_width,
+   uint32_t frame_height,
+   uint32_t sprite_count,
+   uint32_t sprites_per_row,
+   const std::vector<sf::Time>& frame_times
+)
+   : _texture(texture),
+     _frame_times(frame_times)
+{
+   for (auto i = 0u; i < sprite_count; i++)
+   {
+      _frames.push_back(
+         sf::IntRect(
+            i * frame_width,
+            (i % sprites_per_row) * frame_height,
+            frame_width,
+            frame_height
+         )
+      );
+   }
+}
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::initialize()
 {
-   sTexture = std::make_shared<sf::Texture>();
-   if (sTexture->loadFromFile("data/weapons/detonation_big.png"))
+   auto texture = std::make_shared<sf::Texture>();
+   if (texture->loadFromFile("data/weapons/detonation_big.png"))
    {
-      for (int i = 0; i < sprites; i++)
+      std::vector<sf::Time> frame_times;
+      for (auto i = 0u; i < sprites; i++)
       {
-         sFrames.push_back(sf::IntRect(i * (width + 1), 0, width, height));
+         frame_times.push_back(sf::seconds(frameTime));
       }
 
-      sInitialized = true;
+      _frame_data = std::make_unique<FrameData>(texture, width, height, sprites, sprites, frame_times);
+      _initialized_default_animation = true;
    }
    else
    {
@@ -57,13 +83,30 @@ void ProjectileHitAnimation::add(float x, float y)
 {
    auto anim = new ProjectileHitAnimation();
 
-   anim->mFrames = sFrames;
-   anim->mTexture = sTexture;
+   anim->mFrames = _frame_data->_frames;
+   anim->mTexture = _frame_data->_texture;
+   anim->mFrameTimes = _frame_data->_frame_times;
 
    anim->setPosition(x, y);
    anim->play();
 
-   sAnimations.push_back(anim);
+   _animations.push_back(anim);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void ProjectileHitAnimation::add(float x, float y, const ProjectileHitAnimation::FrameData& frames)
+{
+   auto anim = new ProjectileHitAnimation();
+
+   anim->mFrames = frames._frames;
+   anim->mTexture = frames._texture;
+   anim->mFrameTimes = frames._frame_times;
+
+   anim->setPosition(x, y);
+   anim->play();
+
+   _animations.push_back(anim);
 }
 
 
@@ -71,14 +114,14 @@ void ProjectileHitAnimation::add(float x, float y)
 void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 {
    std::list<ProjectileHitAnimation*>::iterator it;
-   for (it = sAnimations.begin(); it != sAnimations.end();)
+   for (it = _animations.begin(); it != _animations.end();)
    {
       ProjectileHitAnimation* sprite = (*it);
 
       if (sprite->mElapsed > animationDuration)
       {
          delete *it;
-         sAnimations.erase(it++);
+         _animations.erase(it++);
       }
       else
       {
@@ -90,9 +133,9 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::list<ProjectileHitAnimation*> *ProjectileHitAnimation::getAnimations()
+std::list<ProjectileHitAnimation*>& ProjectileHitAnimation::getAnimations()
 {
-   return &sAnimations;
+   return _animations;
 }
 
 

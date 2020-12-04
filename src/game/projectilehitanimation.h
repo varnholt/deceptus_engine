@@ -9,22 +9,37 @@ class ProjectileHitAnimation : public Animation
 {
 public:
 
+   struct FrameData
+   {
+      FrameData() = default;
+      FrameData(
+         const std::shared_ptr<sf::Texture>& texture,
+         uint32_t frame_width,
+         uint32_t frame_height,
+         uint32_t sprite_count,
+         uint32_t sprites_per_row,
+         const std::vector<sf::Time>& frame_times
+      );
+
+      std::shared_ptr<sf::Texture> _texture;
+      std::vector<sf::IntRect> _frames;
+      std::vector<sf::Time> _frame_times;
+   };
+
    ProjectileHitAnimation();
 
    static void initialize();
    static void add(float x, float y);
+   static void add(float x, float y, const FrameData& frames);
    static void updateAnimations(const sf::Time& dt);
-   static std::list<ProjectileHitAnimation*>* getAnimations();
+
+   static std::list<ProjectileHitAnimation*>& getAnimations();
+
 
 protected:
 
-   static bool sInitialized;
-
-   static std::shared_ptr<sf::Texture> sTexture;
-   static std::vector<sf::IntRect> sFrames;
-
-
-   static std::list<ProjectileHitAnimation*> sAnimations;
-   static std::list<ProjectileHitAnimation*> sElapsedAnimations;
+   static bool _initialized_default_animation;
+   static std::unique_ptr<FrameData> _frame_data;
+   static std::list<ProjectileHitAnimation*> _animations;
 };
 
