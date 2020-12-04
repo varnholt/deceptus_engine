@@ -25,6 +25,7 @@ private:
 
       Console() = default;
       void showHelp();
+      void giveBow();
 
       bool mActive = false;
       std::string mCommand;
