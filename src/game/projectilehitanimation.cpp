@@ -3,7 +3,6 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 bool ProjectileHitAnimation::_initialized_default_animation = false;
-std::unique_ptr<ProjectileHitAnimation::FrameData> ProjectileHitAnimation::_frame_data;
 std::list<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
 
 
@@ -59,38 +58,7 @@ ProjectileHitAnimation::FrameData::FrameData(
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::initialize()
 {
-   auto texture = std::make_shared<sf::Texture>();
-   if (texture->loadFromFile("data/weapons/detonation_big.png"))
-   {
-      std::vector<sf::Time> frame_times;
-      for (auto i = 0u; i < sprites; i++)
-      {
-         frame_times.push_back(sf::seconds(frameTime));
-      }
 
-      _frame_data = std::make_unique<FrameData>(texture, width, height, sprites, sprites, frame_times);
-      _initialized_default_animation = true;
-   }
-   else
-   {
-      printf("failed to load spritesheet!\n");
-   }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void ProjectileHitAnimation::add(float x, float y)
-{
-   auto anim = new ProjectileHitAnimation();
-
-   anim->mFrames = _frame_data->_frames;
-   anim->mTexture = _frame_data->_texture;
-   anim->mFrameTimes = _frame_data->_frame_times;
-
-   anim->setPosition(x, y);
-   anim->play();
-
-   _animations.push_back(anim);
 }
 
 
@@ -136,6 +104,25 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 std::list<ProjectileHitAnimation*>& ProjectileHitAnimation::getAnimations()
 {
    return _animations;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+ProjectileHitAnimation::FrameData ProjectileHitAnimation::getDefaultAnimation()
+{
+   auto texture = std::make_shared<sf::Texture>();
+   texture->loadFromFile("data/weapons/detonation_big.png");
+
+   std::vector<sf::Time> frame_times;
+   for (auto i = 0u; i < sprites; i++)
+   {
+      frame_times.push_back(sf::seconds(frameTime));
+   }
+
+   FrameData frame_data(texture, width, height, sprites, sprites, frame_times);
+
+   return frame_data;
+
 }
 
 

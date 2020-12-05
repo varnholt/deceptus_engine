@@ -7,7 +7,8 @@
 #include <memory>
 
 
-std::list<b2Vec2> Projectile::_hit_positions;
+std::map<WeaponType, ProjectileHitAnimation::FrameData> Projectile::_hit_animations;
+std::list<Projectile::HitInformation> Projectile::_hit_positions;
 std::set<Projectile*> Projectile::_projectiles;
 
 
@@ -18,6 +19,11 @@ Projectile::Projectile()
    setName(typeid(Projectile).name());
    _type = ObjectTypeProjectile;
    _projectiles.insert(this);
+
+   if (_hit_animations.empty())
+   {
+      _hit_animations[WeaponType::Default] = ProjectileHitAnimation::getDefaultAnimation();
+   }
 }
 
 
@@ -44,6 +50,18 @@ void Projectile::setScheduledForRemoval(bool remove)
 }
 
 
+bool Projectile::isScheduledForInactivity() const
+{
+   return _scheduled_for_inactivity;
+}
+
+
+void Projectile::setScheduledForInactivity(bool scheduled_for_inactivity)
+{
+   _scheduled_for_inactivity = scheduled_for_inactivity;
+}
+
+
 b2Body *Projectile::getBody() const
 {
    return _body;
@@ -52,26 +70,31 @@ b2Body *Projectile::getBody() const
 
 void Projectile::setBody(b2Body *body)
 {
-    _body = body;
+   _body = body;
 }
 
 
 void Projectile::clear()
 {
-    _hit_positions.clear();
-    _projectiles.clear();
+   _hit_positions.clear();
+   _projectiles.clear();
 }
 
 
 void Projectile::cleanup()
 {
    _hit_positions.clear();
+
    for (auto it = _projectiles.begin(); it != _projectiles.end(); )
    {
       auto projectile = *it;
       if (projectile->isScheduledForRemoval())
       {
-         _hit_positions.push_back(b2Vec2(projectile->getBody()->GetPosition()));
+         _hit_positions.push_back({
+               b2Vec2(projectile->getBody()->GetPosition()),
+               projectile->_weapon_type
+            }
+         );
          delete *it;
          _projectiles.erase(it++);
       }
@@ -89,14 +112,15 @@ void Projectile::updateHitAnimations(const sf::Time& dt)
 
    auto hitPositions = _hit_positions;
 
-   std::list<b2Vec2>::iterator it;
+   std::list<HitInformation>::iterator it;
    for (it = hitPositions.begin(); it != hitPositions.end(); ++it)
    {
-      b2Vec2 vec = *it;
+      const auto hit_info = *it;
+      b2Vec2 vec = hit_info._pos;
       float gx = vec.x * PPM;
       float gy = vec.y * PPM;
 
-      ProjectileHitAnimation::add(gx, gy);
+      ProjectileHitAnimation::add(gx, gy, _hit_animations[hit_info._weapon_type]);
    }
 
    ProjectileHitAnimation::updateAnimations(dt);
@@ -120,10 +144,12 @@ void Projectile::setSticky(bool sticky)
    _sticky = sticky;
 }
 
+
 bool Projectile::hitSomething() const
 {
    return _hit_something;
 }
+
 
 void Projectile::setHitSomething(bool hit_something)
 {

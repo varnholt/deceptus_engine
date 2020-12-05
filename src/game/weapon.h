@@ -19,16 +19,6 @@ class Weapon
 {
 public:
 
-   enum class WeaponType
-   {
-      Bow,
-      Slingshot,
-      Pistol,
-      Bazooka,
-      Laser,
-      Aliengun
-   };
-
    Weapon();
    Weapon(std::unique_ptr<b2Shape>, int32_t fireInterval, int32_t damage);
 
@@ -47,13 +37,12 @@ public:
    virtual void draw(sf::RenderTarget& target);
    virtual void update(const sf::Time& time);
 
-   static void drawProjectileHitAnimations(sf::RenderTarget& target);
-
-
-   int damage() const;
-
    virtual void initialize();
    virtual void loadTextures();
+
+   static void drawProjectileHitAnimations(sf::RenderTarget& target);
+
+   int damage() const;
 
    void setTexture(const std::filesystem::path& path, const sf::Rect<int32_t>& textureRect = _empty_rect);
 
@@ -65,20 +54,20 @@ protected:
 
    void drawProjectiles(sf::RenderTarget& target);
 
-   std::set<Projectile*> _projectiles;
+   std::vector<Projectile*> _projectiles;
 
-   WeaponType _type;
-
+   std::filesystem::path _texture_path = "data/weapons/bullet.png";
    sf::Texture _projectile_texture;
+   sf::Rect<int32_t> _projectile_texture_rect;
    sf::Sprite _projectile_sprite;
 
    std::unique_ptr<b2Shape> _shape;
 
    sf::Clock _fire_clock;
+
    int32_t _fire_interval_ms = 100;
    int32_t _damage = 100;
-   std::filesystem::path _texture_path = "data/weapons/bullet.png";
-   sf::Rect<int32_t> _texture_rect;
+   WeaponType _type = WeaponType::Default;
 
    static sf::Rect<int32_t> _empty_rect;
 };
