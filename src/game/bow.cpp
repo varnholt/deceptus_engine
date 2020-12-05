@@ -40,8 +40,13 @@ Bow::Bow()
 void Bow::load(b2World* world)
 {
    auto arrow = _loaded_arrow = new Arrow();
+
    _loaded_arrow->addDestroyedCallback([this, arrow](){
       _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end());
+   });
+
+   _loaded_arrow->addDestroyedCallback([this, arrow](){
+      _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), arrow), _projectiles.end());
    });
 
    b2BodyDef bodyDef;
@@ -90,17 +95,17 @@ void Bow::fireNow(
    // rotation can be done later
    if (dir.x < 0.0)
    {
-      _texture_rect.top = 0 * PIXELS_PER_TILE;
+      _projectile_texture_rect.top = 0 * PIXELS_PER_TILE;
    }
    else
    {
-      _texture_rect.top = 1 * PIXELS_PER_TILE;
+      _projectile_texture_rect.top = 1 * PIXELS_PER_TILE;
    }
 
-   _texture_rect.left   = 2 * PIXELS_PER_TILE;
-   _texture_rect.width  = PIXELS_PER_TILE;
-   _texture_rect.height = PIXELS_PER_TILE;
-   _projectile_sprite.setTextureRect(_texture_rect);
+   _projectile_texture_rect.left   = 2 * PIXELS_PER_TILE;
+   _projectile_texture_rect.width  = PIXELS_PER_TILE;
+   _projectile_texture_rect.height = PIXELS_PER_TILE;
+   _projectile_sprite.setTextureRect(_projectile_texture_rect);
 
    // the bow workflow could be split up into
    // 1) aim
@@ -112,7 +117,7 @@ void Bow::fireNow(
    _arrows.push_back(_loaded_arrow);
 
    // store projectile so it gets drawn
-   _projectiles.insert(_loaded_arrow);
+   _projectiles.push_back(_loaded_arrow);
 
    const auto angle = atan2(dirCopy.y, dirCopy.x);
    const auto velocity = _launcher_body->GetWorldVector(launch_speed * dirCopy);
@@ -154,18 +159,22 @@ void Bow::loadTextures()
    {
       std::cout << "Bow::loadTextures(): couldn't load texture " << _texture_path.string() << std::endl;
    }
+   else
+   {
+      _projectile_sprite.setTexture(_projectile_texture);
 
-   _projectile_sprite.setTexture(_projectile_texture);
-
-   _projectile_sprite.setOrigin(
-      static_cast<float_t>(_texture_rect.width / 2),
-      static_cast<float_t>(_texture_rect.height / 2)
-   );
+      _projectile_sprite.setOrigin(
+         static_cast<float_t>(PIXELS_PER_TILE / 2),
+         static_cast<float_t>(PIXELS_PER_TILE / 2)
+      );
+   }
 }
 
 
-void Bow::update(const sf::Time&)
+void Bow::update(const sf::Time& time)
 {
+   Weapon::update(time);
+
    // position the loaded arrow
    if (_loaded_arrow)
    {

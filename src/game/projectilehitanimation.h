@@ -29,17 +29,17 @@ public:
    ProjectileHitAnimation();
 
    static void initialize();
-   static void add(float x, float y);
    static void add(float x, float y, const FrameData& frames);
    static void updateAnimations(const sf::Time& dt);
 
    static std::list<ProjectileHitAnimation*>& getAnimations();
 
+   static FrameData getDefaultAnimation();
+
 
 protected:
 
    static bool _initialized_default_animation;
-   static std::unique_ptr<FrameData> _frame_data;
    static std::list<ProjectileHitAnimation*> _animations;
 };
 
