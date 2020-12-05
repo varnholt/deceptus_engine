@@ -2,7 +2,6 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool ProjectileHitAnimation::_initialized_default_animation = false;
 std::list<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
 
 
@@ -19,11 +18,6 @@ const sf::Time animationDuration = sf::milliseconds(400);
 //----------------------------------------------------------------------------------------------------------------------
 ProjectileHitAnimation::ProjectileHitAnimation()
 {
-   if (!_initialized_default_animation)
-   {
-      initialize();
-   }
-
    setOrigin(width / 2, height / 2);
 }
 
@@ -119,10 +113,7 @@ ProjectileHitAnimation::FrameData ProjectileHitAnimation::getDefaultAnimation()
       frame_times.push_back(sf::seconds(frameTime));
    }
 
-   FrameData frame_data(texture, width, height, sprites, sprites, frame_times);
-
-   return frame_data;
-
+   return FrameData{texture, width, height, sprites, sprites, frame_times};
 }
 
 

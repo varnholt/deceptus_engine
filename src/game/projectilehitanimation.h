@@ -39,7 +39,6 @@ public:
 
 protected:
 
-   static bool _initialized_default_animation;
    static std::list<ProjectileHitAnimation*> _animations;
 };
 

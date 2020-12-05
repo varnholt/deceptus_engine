@@ -31,6 +31,15 @@ int16_t groupIndex = 0;                                          // 0 is default
 }
 
 
+Arrow::Arrow()
+{
+   _sticky = true;
+   _weapon_type = WeaponType::Bow;
+
+   _hit_animations[WeaponType::Bow] = ProjectileHitAnimation::getDefaultAnimation();
+}
+
+
 Bow::Bow()
 {
    _fire_interval_ms = 1500;
@@ -213,4 +222,5 @@ void Bow::update(const sf::Time& time)
       );
    }
 }
+
 

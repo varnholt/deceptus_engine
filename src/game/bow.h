@@ -8,10 +8,7 @@
 
 struct Arrow : public Projectile
 {
-   Arrow()
-   {
-      _sticky = true;
-   }
+   Arrow();
 
    float _angle = 0.0f;
 };
@@ -19,12 +16,6 @@ struct Arrow : public Projectile
 
 class Bow : public Weapon
 {
-   struct ArrowCollision
-   {
-      b2Body* _arrow = nullptr;
-      b2Body* _target = nullptr;
-   };
-
 
 public:
 
@@ -49,7 +40,6 @@ private:
    Arrow* _loaded_arrow = nullptr;
    b2Body* _launcher_body = nullptr;
    std::vector<Arrow*> _arrows;
-   std::vector<ArrowCollision> _arrow_collisions;
 };
 
 
