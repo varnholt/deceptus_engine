@@ -711,25 +711,6 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 }
 
 
-//   if (impulse->normalImpulses[0] > 0.5f) // targetInfoA->hardness
-//   {
-//      ArrowCollision collision;
-//      collision._target = fixtureA->GetBody();
-//      collision._arrow = fixtureB->GetBody();
-
-//      _arrow_collisions.push_back(collision);
-//   }
-//   else if (impulse->normalImpulses[0] > 0.5f) // targetInfoB->hardness
-//   {
-//      ArrowCollision collision;
-//      collision._target = fixtureB->GetBody();
-//      collision._arrow = fixtureA->GetBody();
-
-//      _arrow_collisions.push_back(collision);
-//   }
-
-
-
 void GameContactListener::debug()
 {
    std::cout
