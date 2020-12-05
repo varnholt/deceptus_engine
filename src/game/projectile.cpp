@@ -20,6 +20,7 @@ Projectile::Projectile()
    _type = ObjectTypeProjectile;
    _projectiles.insert(this);
 
+   // have a default animation if case there are none yet
    if (_hit_animations.empty())
    {
       _hit_animations[WeaponType::Default] = ProjectileHitAnimation::getDefaultAnimation();
