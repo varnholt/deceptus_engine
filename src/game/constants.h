@@ -257,6 +257,18 @@ enum class MessageBoxLocation
 };
 
 
+enum class WeaponType
+{
+   Default,
+   Bow,
+   Slingshot,
+   Pistol,
+   Bazooka,
+   Laser,
+   Aliengun
+};
+
+
 // this enum should be removed
 enum AtmosphereTile // 16 cols per row
 {

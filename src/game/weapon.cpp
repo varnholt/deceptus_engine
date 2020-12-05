@@ -66,13 +66,15 @@ void Weapon::fireNow(
    );
 
    auto projectile = new Projectile();
-   projectile->addDestroyedCallback([this, projectile](){_projectiles.erase(projectile);});
+   projectile->addDestroyedCallback([this, projectile](){
+      _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), projectile), _projectiles.end());
+   });
    projectile->setProperty("damage", _damage);
    projectile->setBody(body);
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
-   _projectiles.insert(projectile);
+   _projectiles.push_back(projectile);
 }
 
 
@@ -130,6 +132,22 @@ void Weapon::draw(sf::RenderTarget& target)
 
 void Weapon::update(const sf::Time& /*time*/)
 {
+   // can't set the bodies inactive in the postsolve step because the world is still locked
+   for (auto& projectile : _projectiles)
+   {
+      if (projectile->isScheduledForRemoval())
+      {
+         continue;
+      }
+
+      if (projectile->isScheduledForInactivity())
+      {
+         if (projectile->getBody()->IsActive())
+         {
+            projectile->getBody()->SetActive(false);
+         }
+      }
+   }
 }
 
 
@@ -177,19 +195,19 @@ void Weapon::loadTextures()
    if (_shape->GetType() == b2Shape::e_polygon)
    {
       _projectile_sprite.setOrigin(0, 0);
-      _projectile_sprite.setTextureRect(_texture_rect);
+      _projectile_sprite.setTextureRect(_projectile_texture_rect);
       _projectile_sprite.setTexture(_projectile_texture);
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
-      if (_texture_rect.width > 0)
+      if (_projectile_texture_rect.width > 0)
       {
          _projectile_sprite.setOrigin(
-            static_cast<float_t>(_texture_rect.width / 2),
-            static_cast<float_t>(_texture_rect.height / 2)
+            static_cast<float_t>(_projectile_texture_rect.width / 2),
+            static_cast<float_t>(_projectile_texture_rect.height / 2)
          );
 
-         _projectile_sprite.setTextureRect(_texture_rect);
+         _projectile_sprite.setTextureRect(_projectile_texture_rect);
          _projectile_sprite.setTexture(_projectile_texture);
       }
       else
@@ -210,11 +228,11 @@ void Weapon::setTexture(
    const sf::Rect<int32_t>& textureRect
 )
 {
-   bool reload = ((path != _texture_path) || (textureRect != _texture_rect));
+   bool reload = ((path != _texture_path) || (textureRect != _projectile_texture_rect));
 
    if (reload)
    {
-      _texture_rect = textureRect;
+      _projectile_texture_rect = textureRect;
       _texture_path = path;
 
       loadTextures();
