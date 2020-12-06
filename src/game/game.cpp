@@ -589,7 +589,7 @@ void Game::update()
       if (mLevelLoadingFinished)
       {
          AnimationPool::getInstance().updateAnimations(dt);
-         Projectile::updateHitAnimations(dt);
+         Projectile::update(dt);
          updateGameController();
          updateGameControllerForGame();
          mLevel->update(dt);

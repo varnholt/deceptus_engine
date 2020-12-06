@@ -18,7 +18,8 @@ public:
          uint32_t frame_height,
          uint32_t sprite_count,
          uint32_t sprites_per_row,
-         const std::vector<sf::Time>& frame_times
+         const std::vector<sf::Time>& frame_times,
+         uint32_t start_frame = 0
       );
 
       std::shared_ptr<sf::Texture> _texture;

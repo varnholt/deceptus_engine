@@ -102,7 +102,7 @@ void Animation::update(const sf::Time& dt)
       mPreviousFrame = mCurrentFrame;
       mCurrentTime += dt;
 
-      const auto frameTime = mFrameTimes[static_cast<size_t>(mCurrentFrame)];
+      const auto& frameTime = mFrameTimes[static_cast<size_t>(mCurrentFrame)];
 
       // if current time is bigger then the frame time advance one frame
       if (mCurrentTime >= frameTime)

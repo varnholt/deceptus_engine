@@ -11,6 +11,8 @@ struct Arrow : public Projectile
    Arrow();
 
    float _angle = 0.0f;
+
+   static bool _animation_initialised;
 };
 
 
@@ -20,6 +22,7 @@ class Bow : public Weapon
 public:
 
    Bow();
+   virtual ~Bow();
 
    void load(b2World* world);
    void fireNow(
