@@ -8,7 +8,7 @@
 
 
 std::map<WeaponType, ProjectileHitAnimation::FrameData> Projectile::_hit_animations;
-std::list<Projectile::HitInformation> Projectile::_hit_positions;
+std::list<Projectile::HitInformation> Projectile::_hit_information;
 std::set<Projectile*> Projectile::_projectiles;
 
 
@@ -23,7 +23,7 @@ Projectile::Projectile()
    // have a default animation if case there are none yet
    if (_hit_animations.empty())
    {
-      _hit_animations[WeaponType::Default] = ProjectileHitAnimation::getDefaultAnimation();
+      _hit_animations.emplace(WeaponType::Default, ProjectileHitAnimation::getDefaultAnimation());
    }
 }
 
@@ -77,26 +77,28 @@ void Projectile::setBody(b2Body *body)
 
 void Projectile::clear()
 {
-   _hit_positions.clear();
+   _hit_information.clear();
    _projectiles.clear();
 }
 
 
-void Projectile::cleanup()
+void Projectile::collectHitInformation()
 {
-   _hit_positions.clear();
+   _hit_information.clear();
 
    for (auto it = _projectiles.begin(); it != _projectiles.end(); )
    {
       auto projectile = *it;
       if (projectile->isScheduledForRemoval())
       {
-         _hit_positions.push_back({
+         _hit_information.push_back({
                b2Vec2(projectile->getBody()->GetPosition()),
                projectile->_weapon_type
             }
          );
+
          delete *it;
+
          _projectiles.erase(it++);
       }
       else
@@ -107,23 +109,25 @@ void Projectile::cleanup()
 }
 
 
-void Projectile::updateHitAnimations(const sf::Time& dt)
+void Projectile::addHitAnimations()
 {
-   cleanup();
-
-   auto hitPositions = _hit_positions;
-
    std::list<HitInformation>::iterator it;
-   for (it = hitPositions.begin(); it != hitPositions.end(); ++it)
+   for (it = _hit_information.begin(); it != _hit_information.end(); ++it)
    {
-      const auto hit_info = *it;
-      b2Vec2 vec = hit_info._pos;
+      const auto& hit_info = *it;
+      const b2Vec2& vec = hit_info._pos;
       float gx = vec.x * PPM;
       float gy = vec.y * PPM;
 
       ProjectileHitAnimation::add(gx, gy, _hit_animations[hit_info._weapon_type]);
    }
+}
 
+
+void Projectile::update(const sf::Time& dt)
+{
+   collectHitInformation();
+   addHitAnimations();
    ProjectileHitAnimation::updateAnimations(dt);
 }
 

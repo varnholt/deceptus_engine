@@ -31,18 +31,65 @@ int16_t groupIndex = 0;                                          // 0 is default
 }
 
 
+namespace
+{
+const auto sprite_width = PIXELS_PER_TILE;
+const auto sprite_height = PIXELS_PER_TILE;
+const auto sprite_count = 4;
+const auto sprites_per_row = 4;
+const auto sprite_frame_time = 0.075f;
+const auto sprite_start_frame = 10;
+const sf::Time animation_duration = sf::milliseconds(400);
+}
+
+
+bool Arrow::_animation_initialised = false;
+
+
 Arrow::Arrow()
 {
    _sticky = true;
    _weapon_type = WeaponType::Bow;
 
-   _hit_animations[WeaponType::Bow] = ProjectileHitAnimation::getDefaultAnimation();
+   if (_animation_initialised)
+   {
+      _animation_initialised = true;
+
+      auto texture = std::make_shared<sf::Texture>();
+      texture->loadFromFile("data/weapons/arrow.png");
+
+      std::vector<sf::Time> frame_times;
+      for (auto i = 0u; i < sprite_count; i++)
+      {
+         frame_times.push_back(sf::seconds(sprite_frame_time));
+      }
+
+      _hit_animations.emplace(
+         _weapon_type,
+         ProjectileHitAnimation::FrameData{
+            texture,
+            sprite_width,
+            sprite_height,
+            sprite_count,
+            sprites_per_row,
+            frame_times,
+            sprite_start_frame
+         }
+      );
+   }
 }
 
 
 Bow::Bow()
 {
    _fire_interval_ms = 1500;
+}
+
+
+Bow::~Bow()
+{
+   std::for_each(begin(_arrows), end(_arrows), [](auto ptr) {delete ptr;});
+   _arrows.clear();
 }
 
 
