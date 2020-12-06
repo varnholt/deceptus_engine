@@ -10,8 +10,8 @@ namespace
 const auto width = 32;
 const auto height = 32;
 const auto sprites = 6;
-const auto frameTime = 0.075f;
-const sf::Time animationDuration = sf::milliseconds(400);
+const auto frame_time = 0.075f;
+const sf::Time animation_duration = sf::milliseconds(400);
 }
 
 
@@ -29,12 +29,13 @@ ProjectileHitAnimation::FrameData::FrameData(
    uint32_t frame_height,
    uint32_t sprite_count,
    uint32_t sprites_per_row,
-   const std::vector<sf::Time>& frame_times
+   const std::vector<sf::Time>& frame_times,
+   uint32_t start_frame
 )
    : _texture(texture),
      _frame_times(frame_times)
 {
-   for (auto i = 0u; i < sprite_count; i++)
+   for (auto i = start_frame; i < sprite_count + start_frame; i++)
    {
       _frames.push_back(
          sf::IntRect(
@@ -78,9 +79,9 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
    std::list<ProjectileHitAnimation*>::iterator it;
    for (it = _animations.begin(); it != _animations.end();)
    {
-      ProjectileHitAnimation* sprite = (*it);
+      auto animation = (*it);
 
-      if (sprite->mElapsed > animationDuration)
+      if (animation->mElapsed > animation_duration)
       {
          delete *it;
          _animations.erase(it++);
@@ -88,7 +89,7 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
       else
       {
          it++;
-         sprite->update(dt);
+         animation->update(dt);
       }
    }
 }
@@ -110,7 +111,7 @@ ProjectileHitAnimation::FrameData ProjectileHitAnimation::getDefaultAnimation()
    std::vector<sf::Time> frame_times;
    for (auto i = 0u; i < sprites; i++)
    {
-      frame_times.push_back(sf::seconds(frameTime));
+      frame_times.push_back(sf::seconds(frame_time));
    }
 
    return FrameData{texture, width, height, sprites, sprites, frame_times};

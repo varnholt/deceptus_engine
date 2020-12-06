@@ -34,8 +34,7 @@ public:
    void setBody(b2Body *body);
 
    static void clear();
-   static void cleanup();
-   static void updateHitAnimations(const sf::Time& dt);
+   static void update(const sf::Time& dt);
 
    void addDestroyedCallback(const DestroyedCallback& destroyedCallback);
 
@@ -54,6 +53,9 @@ public:
 
 protected:
 
+   static void collectHitInformation();
+   static void addHitAnimations();
+
    bool _scheduled_for_removal = false;
    bool _scheduled_for_inactivity = false;
    bool _sticky = false;
@@ -64,7 +66,7 @@ protected:
 
    static std::map<WeaponType, ProjectileHitAnimation::FrameData> _hit_animations;
    static std::set<Projectile*> _projectiles;
-   static std::list<HitInformation> _hit_positions;
+   static std::list<HitInformation> _hit_information;
 };
 
 

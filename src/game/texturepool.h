@@ -25,6 +25,5 @@ private:
 
    std::mutex mMutex;
    std::map<std::string, std::weak_ptr<sf::Texture>> mPool;
-
 };
 
