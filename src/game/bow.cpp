@@ -25,21 +25,16 @@ static constexpr auto arrow_width = 0.1f;
 static constexpr auto drag_constant = 0.1f;
 static constexpr auto scale = 0.1f;
 
-uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
-uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
-int16_t groupIndex = 0;                                          // 0 is default
-}
-
-
-namespace
-{
 const auto sprite_width = PIXELS_PER_TILE;
 const auto sprite_height = PIXELS_PER_TILE;
 const auto sprite_count = 4;
 const auto sprites_per_row = 4;
 const auto sprite_frame_time = 0.075f;
 const auto sprite_start_frame = 10;
-const sf::Time animation_duration = sf::milliseconds(400);
+
+uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
+int16_t groupIndex = 0;                                          // 0 is default
 }
 
 
@@ -51,7 +46,7 @@ Arrow::Arrow()
    _sticky = true;
    _weapon_type = WeaponType::Bow;
 
-   if (_animation_initialised)
+   if (!_animation_initialised)
    {
       _animation_initialised = true;
 
