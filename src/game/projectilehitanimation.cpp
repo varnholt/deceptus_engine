@@ -1,5 +1,7 @@
 #include "projectilehitanimation.h"
 
+#include <iostream>
+
 
 //----------------------------------------------------------------------------------------------------------------------
 std::list<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
@@ -11,7 +13,6 @@ const auto width = 32;
 const auto height = 32;
 const auto sprites = 6;
 const auto frame_time = 0.075f;
-const sf::Time animation_duration = sf::milliseconds(400);
 }
 
 
@@ -53,7 +54,6 @@ ProjectileHitAnimation::FrameData::FrameData(
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::initialize()
 {
-
 }
 
 
@@ -64,7 +64,7 @@ void ProjectileHitAnimation::add(float x, float y, const ProjectileHitAnimation:
 
    anim->mFrames = frames._frames;
    anim->mTexture = frames._texture;
-   anim->mFrameTimes = frames._frame_times;
+   anim->setFrameTimes(frames._frame_times);
 
    anim->setPosition(x, y);
    anim->play();
@@ -81,15 +81,16 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
    {
       auto animation = (*it);
 
-      if (animation->mElapsed > animation_duration)
+      // animation_duration
+      if (animation->mElapsed > animation->mOverallTime)
       {
-         delete *it;
-         _animations.erase(it++);
+         delete animation;
+         it = _animations.erase(it);
       }
       else
       {
-         it++;
          animation->update(dt);
+         it++;
       }
    }
 }
