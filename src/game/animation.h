@@ -36,14 +36,19 @@ public:
 
    sf::Vertex mVertices[4];
 
-   std::vector<sf::Time> mFrameTimes;
    sf::Time mCurrentTime;
    sf::Time mElapsed;
+   sf::Time mOverallTime;
 
    int32_t mCurrentFrame = 0;
    int32_t mPreviousFrame = -1;
 
    bool mPaused = false;
    bool mLooped = false;
+
+   void setFrameTimes(const std::vector<sf::Time>& frameTimes);
+
+private:
+   std::vector<sf::Time> mFrameTimes;
 };
 
