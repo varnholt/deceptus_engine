@@ -84,6 +84,7 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
       // animation_duration
       if (animation->mElapsed > animation->mOverallTime)
       {
+         // std::cout << "removing animation after " << animation->mElapsed.asMilliseconds() << "ms" << std::endl;
          delete animation;
          it = _animations.erase(it);
       }
