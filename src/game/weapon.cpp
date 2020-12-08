@@ -24,6 +24,9 @@ Weapon::Weapon()
 {
    _shape = std::make_unique<b2CircleShape>();
    _shape->m_radius = 0.05f;
+
+   // start it so the elapsed timer is exceeded on first use
+   _fire_clock.restart();
 }
 
 
@@ -32,6 +35,8 @@ Weapon::Weapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t dam
    _fire_interval_ms(fireInterval),
    _damage(damage)
 {
+   // start it so the elapsed timer is exceeded on first use
+   _fire_clock.restart();
 }
 
 
