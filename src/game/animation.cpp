@@ -59,7 +59,7 @@ void Animation::setFrameTimes(const std::vector<sf::Time>& frameTimes)
 {
    mFrameTimes = frameTimes;
 
-   for (auto& t : frameTimes)
+   for (const auto& t : frameTimes)
    {
       mOverallTime += t;
    }
