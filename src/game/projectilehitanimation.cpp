@@ -9,7 +9,7 @@ std::list<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
 
 namespace
 {
-const auto width = 32;
+const auto width = 33;
 const auto height = 32;
 const auto sprites = 6;
 const auto frame_time = 0.075f;
@@ -21,6 +21,16 @@ ProjectileHitAnimation::ProjectileHitAnimation()
 {
    setOrigin(width / 2, height / 2);
 }
+
+//   0   1   2   3   4   5   6   7
+// +---+---+---+---+---+---+---+---+
+// |   |   |   |   |   |###|###|###| 0
+// +---+---+---+---+---+---+---+---+
+// |###|###|###|   |   |   |   |   | 1
+// +---+---+---+---+---+---+---+---+
+// |   |   |   |   |   |   |   |   | 2
+// +---+---+---+---+---+---+---+---+
+//
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -38,10 +48,12 @@ ProjectileHitAnimation::FrameData::FrameData(
 {
    for (auto i = start_frame; i < sprite_count + start_frame; i++)
    {
+      auto row = static_cast<int32_t>((floor(static_cast<float>(start_frame + i) / sprites_per_row)) * frame_height);
+
       _frames.push_back(
          sf::IntRect(
             i * frame_width,
-            (i % sprites_per_row) * frame_height,
+            row,
             frame_width,
             frame_height
          )
