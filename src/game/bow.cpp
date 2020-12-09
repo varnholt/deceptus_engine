@@ -27,8 +27,8 @@ static constexpr auto scale = 0.1f;
 
 const auto sprite_width = PIXELS_PER_TILE;
 const auto sprite_height = PIXELS_PER_TILE;
-const auto sprite_count = 4;
-const auto sprites_per_row = 4;
+const auto sprite_count = 5;
+const auto sprites_per_row = 15;
 const auto sprite_frame_time = 0.075f;
 const auto sprite_start_frame = 10;
 
