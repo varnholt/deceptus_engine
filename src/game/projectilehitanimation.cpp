@@ -78,6 +78,12 @@ void ProjectileHitAnimation::add(float x, float y, const ProjectileHitAnimation:
    anim->mTexture = frames._texture;
    anim->setFrameTimes(frames._frame_times);
 
+   // TODO: add this to frame info
+   anim->setOrigin(
+      static_cast<float_t>(PIXELS_PER_TILE / 2),
+      static_cast<float_t>(PIXELS_PER_TILE / 2)
+   );
+
    anim->setPosition(x, y);
    anim->play();
 
