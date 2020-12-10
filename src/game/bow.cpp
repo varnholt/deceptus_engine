@@ -59,10 +59,16 @@ Arrow::Arrow()
          frame_times.push_back(sf::seconds(sprite_frame_time));
       }
 
+      sf::Vector2f origin(
+         static_cast<float_t>(PIXELS_PER_TILE / 2),
+         static_cast<float_t>(PIXELS_PER_TILE / 2)
+      );
+
       _hit_animations.emplace(
          _weapon_type,
          ProjectileHitAnimation::FrameData{
             texture,
+            origin,
             sprite_width,
             sprite_height,
             sprite_count,

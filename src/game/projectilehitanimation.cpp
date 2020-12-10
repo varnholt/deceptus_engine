@@ -16,12 +16,6 @@ const auto frame_time = 0.075f;
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-ProjectileHitAnimation::ProjectileHitAnimation()
-{
-   setOrigin(width / 2, height / 2);
-}
-
 //   0   1   2   3   4   5   6   7
 // +---+---+---+---+---+---+---+---+
 // |   |   |   |   |   |###|###|###| 0
@@ -36,6 +30,7 @@ ProjectileHitAnimation::ProjectileHitAnimation()
 //----------------------------------------------------------------------------------------------------------------------
 ProjectileHitAnimation::FrameData::FrameData(
    const std::shared_ptr<sf::Texture>& texture,
+   const sf::Vector2f& origin,
    uint32_t frame_width,
    uint32_t frame_height,
    uint32_t sprite_count,
@@ -44,6 +39,7 @@ ProjectileHitAnimation::FrameData::FrameData(
    uint32_t start_frame
 )
    : _texture(texture),
+     _origin(origin),
      _frame_times(frame_times)
 {
    for (auto i = start_frame; i < sprite_count + start_frame; i++)
@@ -77,13 +73,7 @@ void ProjectileHitAnimation::add(float x, float y, const ProjectileHitAnimation:
    anim->mFrames = frames._frames;
    anim->mTexture = frames._texture;
    anim->setFrameTimes(frames._frame_times);
-
-   // TODO: add this to frame info
-   anim->setOrigin(
-      static_cast<float_t>(PIXELS_PER_TILE / 2),
-      static_cast<float_t>(PIXELS_PER_TILE / 2)
-   );
-
+   anim->setOrigin(frames._origin);
    anim->setPosition(x, y);
    anim->play();
 
@@ -134,7 +124,9 @@ ProjectileHitAnimation::FrameData ProjectileHitAnimation::getDefaultAnimation()
       frame_times.push_back(sf::seconds(frame_time));
    }
 
-   return FrameData{texture, width, height, sprites, sprites, frame_times};
+   sf::Vector2f origin(width / 2, height / 2);
+
+   return FrameData{texture, origin, width, height, sprites, sprites, frame_times};
 }
 
 
