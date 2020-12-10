@@ -14,6 +14,7 @@ public:
       FrameData() = default;
       FrameData(
          const std::shared_ptr<sf::Texture>& texture,
+         const sf::Vector2f& origin,
          uint32_t frame_width,
          uint32_t frame_height,
          uint32_t sprite_count,
@@ -23,11 +24,12 @@ public:
       );
 
       std::shared_ptr<sf::Texture> _texture;
+      sf::Vector2f _origin;
       std::vector<sf::IntRect> _frames;
       std::vector<sf::Time> _frame_times;
    };
 
-   ProjectileHitAnimation();
+   ProjectileHitAnimation() = default;
 
    static void initialize();
    static void add(float x, float y, const FrameData& frames);
