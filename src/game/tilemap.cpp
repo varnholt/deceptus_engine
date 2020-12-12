@@ -14,7 +14,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "player/player.h"
-
+#include "texturepool.h"
 
 namespace
 {
@@ -50,11 +50,7 @@ bool TileMap::load(
 
    auto path = (basePath / tileSet->mImage->mSource).string();
 
-   if (!mTexture.loadFromFile(path))
-   {
-      std::cout << "TileMap::load: can't load texture: " << path << std::endl;
-      return false;
-   }
+   mTexture = TexturePool::getInstance().get(path);
 
    float parallaxScale = 1.0f;
    if (layer->mProperties)
@@ -89,8 +85,8 @@ bool TileMap::load(
          if (tileNumber != 0)
          {
             // find its position in the tileset texture
-            auto tu = (tileNumber - tileSet->mFirstGid) % (mTexture.getSize().x / mTileSize.x);
-            auto tv = (tileNumber - tileSet->mFirstGid) / (mTexture.getSize().x / mTileSize.x);
+            auto tu = (tileNumber - tileSet->mFirstGid) % (mTexture->getSize().x / mTileSize.x);
+            auto tv = (tileNumber - tileSet->mFirstGid) / (mTexture->getSize().x / mTileSize.x);
 
             auto tx = posX + layer->mOffsetX;
             auto ty = posY + layer->mOffsetY;
@@ -141,8 +137,8 @@ bool TileMap::load(
                   // );
 
                   auto offsetFrame = new AnimatedTileFrame();
-                  offsetFrame->mX = frame->mTileId % (mTexture.getSize().x / mTileSize.x);
-                  offsetFrame->mY = frame->mTileId / (mTexture.getSize().x / mTileSize.x);
+                  offsetFrame->mX = frame->mTileId % (mTexture->getSize().x / mTileSize.x);
+                  offsetFrame->mY = frame->mTileId / (mTexture->getSize().x / mTileSize.x);
                   offsetFrame->mDuration = frame->mDuration;
                   animatedTile->mFrames.push_back(offsetFrame);
                   duration += frame->mDuration;
@@ -247,7 +243,7 @@ void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
    states.transform *= getTransform();
 
    // apply the tileset texture
-   states.texture = &mTexture;
+   states.texture = mTexture.get();
 
    // draw the vertex arrays
    const auto pos = Player::getCurrent()->getPixelPositioni();

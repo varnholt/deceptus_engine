@@ -19,6 +19,7 @@
 #include "luaconstants.h"
 #include "luainterface.h"
 #include "player/player.h"
+#include "texturepool.h"
 
 // static
 std::atomic<int32_t> LuaNode::sNextId = 0;
@@ -830,15 +831,9 @@ extern "C" int32_t die(lua_State* state)
 void LuaNode::setupTexture()
 {
    std::string spriteName = std::get<std::string>(mProperties["sprite"]);
-   if (mTexture.loadFromFile(spriteName))
-   {
-      // mSprite.scale(4.0f, 4.0f);
-      mSprite.setTexture(mTexture);
-   }
-   else
-   {
-      printf("failed loading object spriteset");
-   }
+
+   mTexture = TexturePool::getInstance().get(spriteName);
+   mSprite.setTexture(*mTexture);
 }
 
 

@@ -10,6 +10,7 @@
 #include "extramanager.h"
 #include "inventoryitem.h"
 #include "savestate.h"
+#include "texturepool.h"
 
 namespace {
    static const auto iconWidth  = 40;
@@ -40,10 +41,10 @@ void InventoryLayer::setJoystickInfo(const GameControllerInfo &joystickInfo)
 //---------------------------------------------------------------------------------------------------------------------
 InventoryLayer::InventoryLayer()
 {
-   addDemoInventory();
-   mInventuryTexture.loadFromFile("data/game/inventory.png");
-   mCursorSprite.setTexture(mInventuryTexture);
+   mInventuryTexture = TexturePool::getInstance().get("data/game/inventory.png");
+   mCursorSprite.setTexture(*mInventuryTexture);
    mCursorSprite.setTextureRect({0, 512 - 48, 48, 48});
+   addDemoInventory();
 }
 
 
@@ -59,7 +60,7 @@ Inventory& InventoryLayer::getInventory()
 void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
 {
    sf::Sprite sprite;
-   sprite.setTexture(mInventuryTexture);
+   sprite.setTexture(*mInventuryTexture);
    sprite.setTextureRect({x * iconWidth, y * iconHeight, iconWidth, iconHeight});
    mSprites[type].mSprite = sprite;
 

@@ -27,3 +27,16 @@ std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
    return sp;
 }
 
+
+size_t TexturePool::computeSize() const
+{
+   size_t size = 0;
+
+   for (const auto& [key, value] : mPool)
+   {
+      size += (value.lock()->getSize().x * value.lock()->getSize().y * 4);
+   }
+
+   return size;
+}
+

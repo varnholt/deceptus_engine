@@ -86,7 +86,7 @@ struct LuaNode : public GameNode
 
    // visualization
    sf::Vector2f mStartPosition;
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
    sf::Sprite mSprite;
    sf::Vector2u mSpriteOffset;
    int32_t mSpriteWidth = 0;

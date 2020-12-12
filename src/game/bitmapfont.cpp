@@ -1,5 +1,7 @@
 #include "bitmapfont.h"
 
+#include "texturepool.h"
+
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -13,8 +15,8 @@ void BitmapFont::load(
    const std::string& mapPath
 )
 {
-   mTexture.loadFromFile(texturePath);
-   mSprite.setTexture(mTexture);
+   mTexture = TexturePool::getInstance().get(texturePath);
+   mSprite.setTexture(*mTexture);
 
    std::ifstream file(mapPath);
 
@@ -69,7 +71,7 @@ void BitmapFont::load(
 
       x += mCharWidth;
 
-      if (x == static_cast<int32_t>(mTexture.getSize().x))
+      if (x == static_cast<int32_t>(mTexture->getSize().x))
       {
          x = 0;
          y += mCharHeight;

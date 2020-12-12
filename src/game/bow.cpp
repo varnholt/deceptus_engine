@@ -1,4 +1,5 @@
 #include "bow.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -50,8 +51,7 @@ Arrow::Arrow()
    {
       _animation_initialised = true;
 
-      auto texture = std::make_shared<sf::Texture>();
-      texture->loadFromFile("data/weapons/arrow.png");
+      auto texture = TexturePool::getInstance().get("data/weapons/arrow.png");
 
       std::vector<sf::Time> frame_times;
       for (auto i = 0u; i < sprite_count; i++)
@@ -212,19 +212,13 @@ void Bow::loadTextures()
 
    _texture_path = "data/weapons/arrow.png";
 
-   if (!_projectile_texture.loadFromFile(_texture_path.string()))
-   {
-      std::cout << "Bow::loadTextures(): couldn't load texture " << _texture_path.string() << std::endl;
-   }
-   else
-   {
-      _projectile_sprite.setTexture(_projectile_texture);
+   _projectile_texture = TexturePool::getInstance().get(_texture_path);
 
-      _projectile_sprite.setOrigin(
-         static_cast<float_t>(PIXELS_PER_TILE / 2),
-         static_cast<float_t>(PIXELS_PER_TILE / 2)
-      );
-   }
+   _projectile_sprite.setTexture(*_projectile_texture);
+   _projectile_sprite.setOrigin(
+      static_cast<float_t>(PIXELS_PER_TILE / 2),
+      static_cast<float_t>(PIXELS_PER_TILE / 2)
+   );
 }
 
 

@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmximagelayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -15,10 +16,10 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const s
   auto imageLayer = dynamic_cast<TmxImageLayer*>(element);
 
   image->mZ = imageLayer->mZ;
-  image->mTexture.loadFromFile((levelPath / imageLayer->mImage->mSource).string());
+  image->mTexture = TexturePool::getInstance().get((levelPath / imageLayer->mImage->mSource).string());
   image->mSprite.setPosition(imageLayer->mOffsetX, imageLayer->mOffsetY);
   image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(imageLayer->mOpacity * 255.0f)));
-  image->mSprite.setTexture(image->mTexture);
+  image->mSprite.setTexture(*image->mTexture);
 
   sf::BlendMode blendMode = sf::BlendAdd;
   if (imageLayer->mProperties != nullptr)
