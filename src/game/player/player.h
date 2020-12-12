@@ -188,7 +188,7 @@ private:
 
    sf::Vector2f mPixelPositionf;
    sf::Vector2i mPixelPositioni;
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
    sf::Sprite mSprite;
    sf::Vector2u mSpritePrev;
    sf::Vector2u mSpriteAnim;

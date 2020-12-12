@@ -14,14 +14,12 @@
 #include "level.h"
 #include "player/player.h"
 #include "physics/physicsconfiguration.h"
+#include "texturepool.h"
 
 #include <iostream>
 #include <math.h>
 
 #include "Box2D/Box2D.h"
-
-
-sf::Texture MovingPlatform::sTexture;
 
 
 //-----------------------------------------------------------------------------
@@ -147,8 +145,6 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
    const std::shared_ptr<b2World>& world
 )
 {
-   sTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
-
    std::vector<std::shared_ptr<GameMechanism>> movingPlatforms;
    const auto tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
    const auto tiles    = layer->mData;
@@ -167,6 +163,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
          {
             // find matching platform
             auto movingPlatform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
+            movingPlatform->mTexture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
 
             // std::cout << "creating moving platform at: " << x << ", " << y << std::endl;
 
@@ -183,11 +180,11 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             while (tileNumber != 0)
             {
                auto tileId = tileNumber - firstId;
-               auto tu = (tileId) % (sTexture.getSize().x / tilesize.x);
-               auto tv = (tileId) / (sTexture.getSize().x / tilesize.x);
+               auto tu = (tileId) % (movingPlatform->mTexture->getSize().x / tilesize.x);
+               auto tv = (tileId) / (movingPlatform->mTexture->getSize().x / tilesize.x);
 
                sf::Sprite sprite;
-               sprite.setTexture(sTexture);
+               sprite.setTexture(*movingPlatform->mTexture);
                sprite.setTextureRect(
                   sf::IntRect(
                      tu * PIXELS_PER_TILE,

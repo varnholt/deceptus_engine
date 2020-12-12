@@ -94,6 +94,6 @@ class DeathBlock : public GameMechanism, public GameNode
       PathInterpolation mInterpolation;
       float mLeverLag = 1.0f; // maybe make them switchable as well?
 
-      static sf::Texture sTexture;
+      std::shared_ptr<sf::Texture> mTexture;
 };
 

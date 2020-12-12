@@ -52,7 +52,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       bool mPointsRight = true;
       float mLeverLag = 1.0f;
 
-      static sf::Texture sTexture;
+      std::shared_ptr<sf::Texture> mTexture;
       std::vector<sf::Sprite> mBeltSprites;
       std::vector<sf::Sprite> mArrowSprites;
 

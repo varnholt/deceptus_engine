@@ -9,7 +9,7 @@
 #include "mechanisms/door.h"
 #include "mechanisms/portal.h"
 #include "player/player.h"
-
+#include "texturepool.h"
 
 #include <iostream>
 #include <sstream>
@@ -65,14 +65,14 @@ void LevelMap::loadLevelTextures(
    const std::filesystem::path& outlines
 )
 {
-   mLevelGridTexture.loadFromFile(grid.string());
-   mLevelGridSprite.setTexture(mLevelGridTexture);
+   mLevelGridTexture = TexturePool::getInstance().get(grid.string());
+   mLevelGridSprite.setTexture(*mLevelGridTexture);
 
-   mLevelOutlineTexture.loadFromFile(outlines.string());
-   mLevelOutlineSprite.setTexture(mLevelOutlineTexture);
+   mLevelOutlineTexture = TexturePool::getInstance().get(outlines.string());
+   mLevelOutlineSprite.setTexture(*mLevelOutlineTexture);
 
    // that render texture should have the same size as our level textures
-   mLevelRenderTexture.create(mLevelGridTexture.getSize().x, mLevelGridTexture.getSize().y);
+   mLevelRenderTexture.create(mLevelGridTexture->getSize().x, mLevelGridTexture->getSize().y);
 }
 
 

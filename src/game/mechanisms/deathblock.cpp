@@ -11,9 +11,6 @@
 #include <iostream>
 
 
-sf::Texture DeathBlock::sTexture;
-
-
 DeathBlock::DeathBlock(GameNode* parent)
  : GameNode(parent)
 {
@@ -177,14 +174,11 @@ void DeathBlock::setup(
    const std::shared_ptr<b2World>& world
 )
 {
-   if (sTexture.getSize().x == 0)
-   {
-      sTexture = *TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
-   }
+   mTexture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
 
    for (auto& sprite : mSprites)
    {
-      sprite.setTexture(sTexture);
+      sprite.setTexture(*mTexture);
    }
 
    setZ(ZDepthForegroundMin + 1);
