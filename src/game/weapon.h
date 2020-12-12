@@ -57,7 +57,7 @@ protected:
    std::vector<Projectile*> _projectiles;
 
    std::filesystem::path _texture_path = "data/weapons/bullet.png";
-   sf::Texture _projectile_texture;
+   std::shared_ptr<sf::Texture> _projectile_texture;
    sf::Rect<int32_t> _projectile_texture_rect;
    sf::Sprite _projectile_sprite;
 

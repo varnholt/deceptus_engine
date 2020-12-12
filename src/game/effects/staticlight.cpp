@@ -5,8 +5,8 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
-
 #include "framework/math/fbm.h"
+#include "texturepool.h"
 
 #include <array>
 #include <filesystem>
@@ -133,13 +133,13 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* 
    light->mFlickerAlphaAmount = flickerAlphaAmount;
    light->mFlickerSpeed = flickerSpeed;
    light->mSprite.setColor(light->mColor);
-   light->mTexture.loadFromFile(texture);
-   light->mSprite.setTexture(light->mTexture);
+   light->mTexture = TexturePool::getInstance().get(texture);
+   light->mSprite.setTexture(*light->mTexture);
    light->mSprite.setPosition(tmxObject->mX, tmxObject->mY);
    light->mZ = objectGroup->mZ;
 
-   auto scaleX = tmxObject->mWidth / light->mTexture.getSize().x;
-   auto scaleY = tmxObject->mHeight / light->mTexture.getSize().y;
+   auto scaleX = tmxObject->mWidth / light->mTexture->getSize().x;
+   auto scaleY = tmxObject->mHeight / light->mTexture->getSize().y;
    light->mSprite.scale(scaleX, scaleY);
 
    // init each light with a different time offset

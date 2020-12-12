@@ -2,9 +2,10 @@
 #include "weapon.h"
 
 // game
+#include "constants.h"
 #include "projectile.h"
 #include "projectilehitanimation.h"
-#include "constants.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -193,16 +194,13 @@ void Weapon::loadTextures()
    //      << "height: " << mTextureRect.height
    //      << std::endl;
 
-   if (!_projectile_texture.loadFromFile(_texture_path.string()))
-   {
-      std::cout << "Weapon::loadTextures(): couldn't load texture " << _texture_path.string() << std::endl;
-   }
+   _projectile_texture = TexturePool::getInstance().get(_texture_path);
 
    if (_shape->GetType() == b2Shape::e_polygon)
    {
       _projectile_sprite.setOrigin(0, 0);
       _projectile_sprite.setTextureRect(_projectile_texture_rect);
-      _projectile_sprite.setTexture(_projectile_texture);
+      _projectile_sprite.setTexture(*_projectile_texture);
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
@@ -214,16 +212,16 @@ void Weapon::loadTextures()
          );
 
          _projectile_sprite.setTextureRect(_projectile_texture_rect);
-         _projectile_sprite.setTexture(_projectile_texture);
+         _projectile_sprite.setTexture(*_projectile_texture);
       }
       else
       {
          _projectile_sprite.setOrigin(
-            static_cast<float_t>(_projectile_texture.getSize().x / 2),
-            static_cast<float_t>(_projectile_texture.getSize().y / 2)
+            static_cast<float_t>(_projectile_texture->getSize().x / 2),
+            static_cast<float_t>(_projectile_texture->getSize().y / 2)
          );
 
-         _projectile_sprite.setTexture(_projectile_texture, true);
+         _projectile_sprite.setTexture(*_projectile_texture, true);
       }
    }
 }
