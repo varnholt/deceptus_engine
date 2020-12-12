@@ -2,6 +2,7 @@
 #include "fixturenode.h"
 #include "framework/tools/globalclock.h"
 #include "player/player.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -92,14 +93,9 @@ Bouncer::Bouncer(
    fixture->SetUserData(static_cast<void*>(this));
 
    // load texture
-   if (mTexture.loadFromFile("data/level-crypt/tilesets/bumper.png"))
-   {
-      mSprite.setTexture(mTexture);
-   }
-
-   mSprite.setPosition(
-      mPositionSf - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT))
-   );
+   mTexture = TexturePool::getInstance().get("data/level-crypt/tilesets/bumper.png");
+   mSprite.setTexture(*mTexture);
+   mSprite.setPosition(mPositionSf - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
 
 

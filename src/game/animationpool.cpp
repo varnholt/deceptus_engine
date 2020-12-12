@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "json/json.hpp"
+#include "texturepool.h"
 
 using json = nlohmann::json;
 
@@ -140,16 +141,8 @@ void AnimationPool::deserialize(const std::string& data)
          }
          else
          {
-            auto texture = std::make_shared<sf::Texture>();
-            if (texture->loadFromFile(settings->mTexturePath))
-            {
-               mTextures[settings->mTexturePath] = texture;
-               settings->mTexture = texture;
-            }
-            else
-            {
-               std::cerr << "AnimationPool::deserialize: texture '" << settings->mTexturePath << "' not found." << std::endl;
-            }
+            auto texture = TexturePool::getInstance().get(settings->mTexturePath);
+            settings->mTexture = texture;
          }
       }
    }

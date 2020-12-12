@@ -52,7 +52,7 @@ public:
 protected:
 
    sf::Vector2u mTileSize;
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
 
    std::vector<sf::Sprite> mSprites;
 

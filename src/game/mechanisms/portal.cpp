@@ -13,6 +13,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -246,7 +247,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
                portals.push_back(portal);
                portal->mTilePosition.x = static_cast<float>(i);
                portal->mTilePosition.y = static_cast<float>(j);
-               portal->mTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
+               portal->mTexture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
 
                if (layer->mProperties != nullptr)
                {
@@ -256,11 +257,11 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
 
             portal->mHeight++;
 
-            int tu = (tileNumber - firstId) % (portal->mTexture.getSize().x / tilesize.x);
-            int tv = (tileNumber - firstId) / (portal->mTexture.getSize().x / tilesize.x);
+            int tu = (tileNumber - firstId) % (portal->mTexture->getSize().x / tilesize.x);
+            int tv = (tileNumber - firstId) / (portal->mTexture->getSize().x / tilesize.x);
 
             sf::Sprite sprite;
-            sprite.setTexture(portal->mTexture);
+            sprite.setTexture(*portal->mTexture);
             sprite.setTextureRect(
                sf::IntRect(
                   tu * PIXELS_PER_TILE,

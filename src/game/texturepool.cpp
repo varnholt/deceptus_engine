@@ -24,6 +24,8 @@ std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
       sp->loadFromFile(key);
    }
 
+   // std::cout << computeSize() << std::endl;
+
    return sp;
 }
 
@@ -34,7 +36,15 @@ size_t TexturePool::computeSize() const
 
    for (const auto& [key, value] : mPool)
    {
-      size += (value.lock()->getSize().x * value.lock()->getSize().y * 4);
+      auto texture = value.lock();
+      if (texture)
+      {
+         size += (texture->getSize().x * texture->getSize().y * 4);
+      }
+      else
+      {
+         std::cout << key << " is dangling" << std::endl;
+      }
    }
 
    return size;

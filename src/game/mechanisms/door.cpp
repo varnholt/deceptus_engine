@@ -6,6 +6,7 @@
 #include "level.h"
 #include "player/player.h"
 #include "savestate.h"
+#include "texturepool.h"
 
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/timer.h"
@@ -16,9 +17,6 @@
 #include "framework/tmxparser/tmxtileset.h"
 
 #include <iostream>
-
-
-sf::Texture Door::sTexture;
 
 
 //-----------------------------------------------------------------------------
@@ -33,7 +31,7 @@ Door::Door(GameNode* parent)
 void Door::draw(sf::RenderTarget& window)
 {
    window.draw(mSpriteIcon);
-   window.draw(mDoorQuad, &sTexture);
+   window.draw(mDoorQuad, mTexture.get());
 }
 
 
@@ -257,8 +255,6 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
    const std::shared_ptr<b2World>& world
 )
 {
-   sTexture.loadFromFile((basePath / tileSet->mImage->mSource).string());
-
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
    auto tiles    = layer->mData;
@@ -331,6 +327,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                auto door = std::make_shared<Door>(Level::getCurrentLevel());
                doors.push_back(door);
 
+               door->mTexture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
                door->mDoorQuad[0].position.x = positionX;
                door->mDoorQuad[0].position.y = positionY;
                door->mDoorQuad[1].position.x = positionX;
@@ -348,7 +345,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 
                if (requiredItem != ItemType::Invalid)
                {
-                  door->mSpriteIcon.setTexture(sTexture);
+                  door->mSpriteIcon.setTexture(*door->mTexture);
                   door->mSpriteIcon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * iconOffset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
                   door->mSpriteIcon.setPosition(
                      static_cast<float>(i * PIXELS_PER_TILE),

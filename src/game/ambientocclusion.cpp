@@ -7,6 +7,7 @@
 
 #include "framework/math/sfmlmath.h"
 #include "player/player.h"
+#include "texturepool.h"
 
 
 void AmbientOcclusion::load(
@@ -17,13 +18,13 @@ void AmbientOcclusion::load(
   auto texture = (path / (aoBaseFilename + "_ao_tiles.png")).string();
   auto uv = (path / (aoBaseFilename + "_ao_tiles.uv")).string();
 
-  if (!std::filesystem::exists(texture))
-  {
-     std::cerr << "[!] need to create an ambient occlusion map (" << texture << ")" << std::endl;
-     return;
-  }
+   if (!std::filesystem::exists(texture))
+   {
+      std::cerr << "[!] need to create an ambient occlusion map (" << texture << ")" << std::endl;
+      return;
+   }
 
-   mTexture.loadFromFile(texture);
+   mTexture = TexturePool::getInstance().get(texture);
 
    auto xi = 0;
    auto yi = 0;
@@ -46,12 +47,12 @@ void AmbientOcclusion::load(
 
          sf::Sprite sprite;
          sprite.setPosition(static_cast<float>(x - 5), static_cast<float>(y - 6));
-         sprite.setTexture(mTexture);
+         sprite.setTexture(*mTexture);
          sprite.setTextureRect({xi, yi, w, h});
          mSprites.push_back(sprite);
 
          xi += w;
-         if (xi == static_cast<int32_t>(mTexture.getSize().x))
+         if (xi == static_cast<int32_t>(mTexture->getSize().x))
          {
             xi = 0;
             yi += h;

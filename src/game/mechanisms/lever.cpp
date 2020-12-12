@@ -19,8 +19,6 @@
 #include <iostream>
 
 
-sf::Texture Lever::sTexture;
-
 std::vector<TmxObject*> Lever::mRectangles;
 
 
@@ -40,7 +38,6 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 )
 {
    mRectangles.clear();
-   sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
@@ -78,7 +75,8 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
                lever->mRect.height = PIXELS_PER_TILE * 2;
 
                lever->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-               lever->mSprite.setTexture(sTexture);
+               lever->mTexture = TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
+               lever->mSprite.setTexture(*lever->mTexture);
                lever->updateSprite();
 
                levers.push_back(lever);

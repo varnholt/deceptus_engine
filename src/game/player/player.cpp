@@ -16,6 +16,7 @@
 #include "physics/physicsconfiguration.h"
 #include "playerinfo.h"
 #include "savestate.h"
+#include "texturepool.h"
 #include "weapon.h"
 #include "weaponsystem.h"
 
@@ -159,14 +160,7 @@ void Player::initialize()
    mJump.mRemoveClimbJoint = std::bind(&PlayerClimb::removeClimbJoint, mClimb);
    mControls.addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
 
-   if (mTexture.loadFromFile("data/sprites/player.png"))
-   {
-      mSprite.setTexture(mTexture);
-   }
-   else
-   {
-      printf("failed loading player spriteset");
-   }
+   mTexture = TexturePool::getInstance().get("data/sprites/player.png");
 
    initializeController();
 }

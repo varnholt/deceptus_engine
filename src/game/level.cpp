@@ -287,7 +287,7 @@ void Level::loadTmx()
          }
          else if (layer->mName == "fans")
          {
-            Fan::load(layer, tileset, path, mWorld);
+            Fan::load(layer, tileset, mWorld);
          }
          else if (layer->mName == "lasers")
          {
@@ -390,7 +390,7 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "fans")
             {
-               Fan::addObject(tmxObject);
+               Fan::addObject(tmxObject, path);
             }
             else if (objectGroup->mName == "portals")
             {

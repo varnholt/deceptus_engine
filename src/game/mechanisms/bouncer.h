@@ -41,7 +41,7 @@ private:
    b2PolygonShape mShapeBounds;
    b2PolygonShape mShapeSensor;
 
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
    sf::Sprite mSprite;
    sf::IntRect mRect;
    sf::Time mActivationTime;
