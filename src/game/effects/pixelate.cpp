@@ -1,5 +1,7 @@
 #include "pixelate.h"
 
+#include "texturepool.h"
+
 
 Pixelate::Pixelate() :
     Effect("pixelate")
@@ -9,17 +11,17 @@ Pixelate::Pixelate() :
 
 bool Pixelate::onLoad()
 {
-    // Load the texture and initialize the sprite
-    if (!mTexture.loadFromFile("resources/background.jpg"))
-        return false;
-    mSprite.setTexture(mTexture);
+   mTexture = TexturePool::getInstance().get("resources/background.jpg");
 
-    // Load the shader
-    if (!mShader.loadFromFile("resources/pixelate.frag", sf::Shader::Fragment))
-        return false;
-    mShader.setUniform("texture", sf::Shader::CurrentTexture);
+   mSprite.setTexture(*mTexture);
 
-    return true;
+   // Load the shader
+   if (!mShader.loadFromFile("resources/pixelate.frag", sf::Shader::Fragment))
+      return false;
+
+   mShader.setUniform("texture", sf::Shader::CurrentTexture);
+
+   return true;
 }
 
 

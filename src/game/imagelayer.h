@@ -9,7 +9,7 @@ struct TmxElement;
 struct ImageLayer
 {
    sf::Sprite mSprite;
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
    sf::BlendMode mBlendMode = sf::BlendAdd;
    int32_t mZ = 0;
 

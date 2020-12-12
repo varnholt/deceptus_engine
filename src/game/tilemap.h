@@ -71,7 +71,7 @@ private:
    mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> mVerticesStaticBlocks;
    sf::VertexArray mVerticesAnimated;
 
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
 
    std::vector<AnimatedTile*> mAnimations;
 

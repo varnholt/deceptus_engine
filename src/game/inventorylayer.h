@@ -47,7 +47,7 @@ private:
 
    sf::Sprite mCursorSprite;
    sf::Vector2f mCursorPosition;
-   sf::Texture mInventuryTexture;
+   std::shared_ptr<sf::Texture> mInventuryTexture;
 
    std::map<ItemType, ItemSprite> mSprites;
    int32_t mSelectedItem = 0;

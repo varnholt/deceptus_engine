@@ -1,13 +1,13 @@
 #include "raycastlight.h"
 
-#include "game/debugdraw.h"
-#include "game/level.h"
-#include "game/player/player.h"
-
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/debugdraw.h"
+#include "game/level.h"
+#include "game/player/player.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -333,20 +333,20 @@ std::shared_ptr<RaycastLight::LightInstance> RaycastLight::deserialize(TmxObject
    light->mColor.a = rgba[3];
    light->mSprite.setColor(light->mColor);
 
-   light->mTexture.loadFromFile(texture);
-   light->mSprite.setTexture(light->mTexture);
+   light->mTexture = TexturePool::getInstance().get(texture);
+   light->mSprite.setTexture(*light->mTexture);
    light->mSprite.setTextureRect(
      sf::IntRect(
        0,
        0,
-       static_cast<int32_t>(light->mTexture.getSize().x),
-       static_cast<int32_t>(light->mTexture.getSize().y)
+       static_cast<int32_t>(light->mTexture->getSize().x),
+       static_cast<int32_t>(light->mTexture->getSize().y)
      )
    );
 
    light->updateSpritePosition();
 
-   auto scale = static_cast<float>(light->mWidth) / light->mTexture.getSize().x;
+   auto scale = static_cast<float>(light->mWidth) / light->mTexture->getSize().x;
    light->mSprite.setScale(scale, scale);
 
    return light;

@@ -6,15 +6,13 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
-
+#include "texturepool.h"
 
 #include <array>
 #include <filesystem>
 #include <iostream>
 #include <math.h>
 
-
-sf::Texture SmokeEffect::mTexture;
 
 const std::string SmokeEffect::sLayerName = "smoke_effect";
 
@@ -29,6 +27,9 @@ SmokeEffect::SmokeEffect()
  : Effect("smoke effect")
 {
    mIsLoaded = true;
+
+   mTexture = TexturePool::getInstance().get("data/effects/smoke.png");
+   mTexture->setSmooth(true);
 }
 
 
@@ -82,7 +83,6 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
    // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
 
    auto smokeEffect = std::make_shared<SmokeEffect>();
-   std::string texture = "data/effects/smoke.png";
 
    if (tmxObject->mProperties)
    {
@@ -92,12 +92,6 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
          smokeEffect->mZ = tmxObject->mProperties->mMap["z"]->mValueInt;
          std::cout << "smoke effect layer has z: " << smokeEffect->mZ << std::endl;
       }
-   }
-
-   if (mTexture.getSize().x == 0)
-   {
-      mTexture.loadFromFile(texture);
-      mTexture.setSmooth(true);
    }
 
    const auto rangeX = static_cast<int32_t>(tmxObject->mWidth);
@@ -125,7 +119,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
       particle.mOffset = sf::Vector2f{x, y};
       particle.mTimeOffset = timeOffset;
 
-      particle.mSprite.setTexture(mTexture);
+      particle.mSprite.setTexture(*smokeEffect->mTexture);
       particle.mSprite.setColor(mColor);
 
       const auto bounds = particle.mSprite.getGlobalBounds();

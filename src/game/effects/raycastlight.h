@@ -25,7 +25,7 @@ public:
       std::vector<b2Vec2> mIntersections;
       float maxDist = 40.0f;
 
-      sf::Texture mTexture;
+      std::shared_ptr<sf::Texture> mTexture;
       sf::Sprite mSprite;
 
       int mWidth = 256;

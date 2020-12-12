@@ -16,6 +16,8 @@ public:
    static TexturePool& getInstance();
    std::shared_ptr<sf::Texture> get(const std::filesystem::path&);
 
+   size_t computeSize() const;
+
 
 private:
 

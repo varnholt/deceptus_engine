@@ -17,7 +17,7 @@ public:
 
    struct LightInstance
    {
-      sf::Texture mTexture;
+      std::shared_ptr<sf::Texture> mTexture;
       sf::Sprite mSprite;
       sf::BlendMode mBlendMode = sf::BlendAdd;
       sf::Color mColor = {255, 255, 255, 255};

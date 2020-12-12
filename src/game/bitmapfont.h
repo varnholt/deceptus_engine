@@ -19,7 +19,7 @@ struct BitmapFont
       int32_t y = 0
    );
 
-   sf::Texture mTexture;
+   std::shared_ptr<sf::Texture> mTexture;
    sf::Sprite mSprite;
    std::map<char, std::shared_ptr<sf::IntRect>> mMap;
    int32_t mCharWidth = 0;
