@@ -12,7 +12,6 @@
 #include <iostream>
 
 
-sf::Texture Spikes::sTexture;
 #define SPIKES_PER_ROW 18
 #define TOLERANCE_PIXELS 5
 #define TRAP_START_TILE (SPIKES_PER_ROW - 4)
@@ -263,7 +262,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    Mode mode
 )
 {
-   sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "spikes.png");
+   auto texture = TexturePool::getInstance().get(basePath / "tilesets" / "spikes.png");
 
    std::vector<std::shared_ptr<Spikes>> allSpikes;
 
@@ -272,7 +271,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    const auto height   = layer->mHeight;
    const auto firstId  = tileSet->mFirstGid;
 
-   const int32_t tilesPerRow = sTexture.getSize().x / PIXELS_PER_TILE;
+   const int32_t tilesPerRow = texture->getSize().x / PIXELS_PER_TILE;
 
    for (auto i = 0u; i < width; ++i)
    {
@@ -284,6 +283,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
          {
             auto id = (tileNumber - firstId);
             auto spikes = std::make_shared<Spikes>();
+            spikes->mTexture = texture;
 
             allSpikes.push_back(spikes);
 
@@ -316,7 +316,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             };
 
             sf::Sprite sprite;
-            sprite.setTexture(sTexture);
+            sprite.setTexture(*spikes->mTexture);
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * PIXELS_PER_TILE),

@@ -1,5 +1,7 @@
 #include "projectilehitanimation.h"
 
+#include "texturepool.h"
+
 #include <iostream>
 
 
@@ -115,8 +117,7 @@ std::list<ProjectileHitAnimation*>& ProjectileHitAnimation::getAnimations()
 //----------------------------------------------------------------------------------------------------------------------
 ProjectileHitAnimation::FrameData ProjectileHitAnimation::getDefaultAnimation()
 {
-   auto texture = std::make_shared<sf::Texture>();
-   texture->loadFromFile("data/weapons/detonation_big.png");
+   auto texture = TexturePool::getInstance().get("data/weapons/detonation_big.png");
 
    std::vector<sf::Time> frame_times;
    for (auto i = 0u; i < sprites; i++)

@@ -47,12 +47,11 @@ class Fan : public GameMechanism
       static void load(
          TmxLayer* layer,
          TmxTileSet* tileSet,
-         const std::filesystem::path& basePath,
          const std::shared_ptr<b2World>& world
       );
 
       static void resetAll();
-      static void addObject(TmxObject* object);
+      static void addObject(TmxObject* object, const std::filesystem::path& basePath);
       static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& playerRect);
       static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
       static void merge();
@@ -83,6 +82,6 @@ class Fan : public GameMechanism
       std::vector<sf::Sprite> mSprites;
       std::vector<float> mXOffsets;
 
-      static sf::Texture sTexture;
+      std::shared_ptr<sf::Texture> mTexture;
 };
 

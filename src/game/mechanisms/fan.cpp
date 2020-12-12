@@ -16,7 +16,6 @@ std::vector<std::shared_ptr<GameMechanism>> Fan::sFans;
 std::vector<std::shared_ptr<Fan::FanTile>> Fan::sTiles;
 std::vector<TmxObject*> Fan::sObjects;
 std::vector<sf::Vector2f> Fan::sWeights;
-sf::Texture Fan::sTexture;
 
 
 static const sf::Vector2f vectorUp{0.0f, 1.0f};
@@ -155,7 +154,6 @@ void Fan::update(const sf::Time& dt)
 void Fan::load(
    TmxLayer* layer,
    TmxTileSet* tileSet,
-   const std::filesystem::path& basePath,
    const std::shared_ptr<b2World>& world
 )
 {
@@ -170,8 +168,6 @@ void Fan::load(
    }
 
    resetAll();
-
-   sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "fan.png");
 
    const auto tiles    = layer->mData;
    const auto width    = layer->mWidth;
@@ -229,6 +225,7 @@ void Fan::load(
    }
 }
 
+
 void Fan::resetAll()
 {
     sFans.clear();
@@ -238,7 +235,7 @@ void Fan::resetAll()
 }
 
 
-void Fan::addObject(TmxObject* object)
+void Fan::addObject(TmxObject* object, const std::filesystem::path& basePath)
 {
    sObjects.push_back(object);
 
@@ -248,6 +245,7 @@ void Fan::addObject(TmxObject* object)
    const auto w = static_cast<int32_t>(object->mWidth);
    const auto h = static_cast<int32_t>(object->mHeight);
 
+   fan->mTexture = TexturePool::getInstance().get(basePath / "tilesets" / "fan.png");
    fan->mPixelRect.left = static_cast<int32_t>(object->mX);
    fan->mPixelRect.top = static_cast<int32_t>(object->mY);
    fan->mPixelRect.width = w;
@@ -319,7 +317,7 @@ void Fan::merge()
          if (tile->mRect.intersects(fan->mPixelRect))
          {
             sf::Sprite sprite;
-            sprite.setTexture(sTexture);
+            sprite.setTexture(*fan->mTexture);
             sprite.setPosition(static_cast<float>(tile->mPosition.x), static_cast<float>(tile->mPosition.y));
 
             fan->mTiles.push_back(tile);

@@ -19,7 +19,6 @@ static const auto ARROW_INDEX_RIGHT_Y = 1;
 
 
 std::vector<b2Body*> ConveyorBelt::sBodiesOnBelt;
-sf::Texture ConveyorBelt::sTexture;
 
 
 void ConveyorBelt::setVelocity(float velocity)
@@ -127,10 +126,7 @@ ConveyorBelt::ConveyorBelt(
    setName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 
-   if (sTexture.getSize().x == 0)
-   {
-      sTexture = *TexturePool::getInstance().get(basePath / "tilesets" / "cbelt.png");
-   }
+   mTexture = TexturePool::getInstance().get(basePath / "tilesets" / "cbelt.png");
 
    float x      = tmxObject->mX;
    float y      = tmxObject->mY;
@@ -204,7 +200,7 @@ ConveyorBelt::ConveyorBelt(
    for (auto i = 0u; i < tileCount; i++)
    {
       sf::Sprite beltSprite;
-      beltSprite.setTexture(sTexture);
+      beltSprite.setTexture(*mTexture);
       beltSprite.setPosition(
          x + i * PIXELS_PER_TILE,
          y + Y_OFFSET
@@ -216,7 +212,7 @@ ConveyorBelt::ConveyorBelt(
    for (auto i = 0u; i < tileCount - 1; i++)
    {
       sf::Sprite arrowSprite;
-      arrowSprite.setTexture(sTexture);
+      arrowSprite.setTexture(*mTexture);
       arrowSprite.setPosition(
          x + i * PIXELS_PER_TILE + 12,
          y - 12

@@ -38,10 +38,10 @@ class LevelMap
 
       sf::RenderTexture mLevelRenderTexture;
 
-      sf::Texture mLevelGridTexture;
+      std::shared_ptr<sf::Texture> mLevelGridTexture;
       sf::Sprite mLevelGridSprite;
 
-      sf::Texture mLevelOutlineTexture;
+      std::shared_ptr<sf::Texture> mLevelOutlineTexture;
       sf::Sprite mLevelOutlineSprite;
 
       std::vector<std::shared_ptr<GameMechanism>> mDoors;

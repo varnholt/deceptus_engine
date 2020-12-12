@@ -5,6 +5,7 @@
 #include "framework/math/hermitecurve.h"
 #include "player/player.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "texturepool.h"
 
 /*
    spike ball concept
@@ -39,20 +40,20 @@ SpikeBall::SpikeBall(GameNode* node)
    mChainElementFixtureDef.density = 20.0f;
    mChainElementFixtureDef.friction = 0.2f;
 
-   mTexture.loadFromFile("data/sprites/enemy_spikeball.png");
-   mSpikeSprite.setTexture(mTexture);
+   mTexture = TexturePool::getInstance().get("data/sprites/enemy_spikeball.png");
+   mSpikeSprite.setTexture(*mTexture);
    mSpikeSprite.setTextureRect(sf::IntRect(24, 0, 48, 48));
    mSpikeSprite.setOrigin(24, 24);
 
-   mBoxSprite.setTexture(mTexture);
+   mBoxSprite.setTexture(*mTexture);
    mBoxSprite.setTextureRect(sf::IntRect(72, 45, 24, 27));
    mBoxSprite.setOrigin(12, 15);
 
-   mChainElementA.setTexture(mTexture);
+   mChainElementA.setTexture(*mTexture);
    mChainElementA.setTextureRect(sf::IntRect(0, 64, 8, 8));
    mChainElementA.setOrigin(4, 4);
 
-   mChainElementB.setTexture(mTexture);
+   mChainElementB.setTexture(*mTexture);
    mChainElementB.setTextureRect(sf::IntRect(34, 64, 8, 8));
    mChainElementB.setOrigin(4, 4);
 }

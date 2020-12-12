@@ -71,7 +71,7 @@ private:
    bool checkPlayerAtDoor() const;
 
    sf::Vector2u mTileSize;
-   static sf::Texture sTexture;
+   std::shared_ptr<sf::Texture> mTexture;
 
    sf::VertexArray mDoorQuad{sf::Quads, 4};
    sf::Sprite mSpriteIcon;

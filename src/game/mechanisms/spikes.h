@@ -58,7 +58,7 @@ private:
 
    sf::Vector2u mTileSize;
 
-   static sf::Texture sTexture;
+   std::shared_ptr<sf::Texture> mTexture;
 
    int32_t mTu = 0;
    int32_t mTv = 0;

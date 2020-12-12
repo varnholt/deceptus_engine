@@ -11,10 +11,10 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "texturepool.h"
 
 #include <iostream>
 
-sf::Texture Crusher::mTexture;
 int32_t Crusher::mInstanceCounter = 0;
 
 static constexpr auto BLADE_HORIZONTAL_TILES = 5;
@@ -32,6 +32,8 @@ Crusher::Crusher(GameNode* parent)
    : GameNode(parent)
 {
    setName("DeathBlock");
+
+   mTexture = TexturePool::getInstance().get("data/level-crypt/tilesets/crushers.png");
 
    mInstanceId = mInstanceCounter;
    mInstanceCounter++;
@@ -189,11 +191,6 @@ void Crusher::updateState()
 //-----------------------------------------------------------------------------
 void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 {
-   if (mTexture.getSize().x == 0)
-   {
-      mTexture.loadFromFile("data/level-crypt/tilesets/crushers.png");
-   }
-
    if (tmxObject->mProperties)
    {
       const auto it = tmxObject->mProperties->mMap.find("alignment");
@@ -241,9 +238,9 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    mPixelPosition.x = tmxObject->mX;
    mPixelPosition.y = tmxObject->mY;
 
-   mSpriteMount.setTexture(mTexture);
-   mSpritePusher.setTexture(mTexture);
-   mSpriteSpike.setTexture(mTexture);
+   mSpriteMount.setTexture(*mTexture);
+   mSpritePusher.setTexture(*mTexture);
+   mSpriteSpike.setTexture(*mTexture);
 
    switch (mAlignment)
    {

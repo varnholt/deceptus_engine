@@ -54,7 +54,7 @@ private:
       double mu
    );
 
-   static sf::Texture sTexture;
+   std::shared_ptr<sf::Texture> mTexture;
    std::vector<sf::Sprite> mSprites;
    b2Body* mBody = nullptr;
    sf::Vector2i mTilePosition;

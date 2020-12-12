@@ -78,7 +78,7 @@ public:
    int32_t mOffset = 0;
    int32_t mDir = 0;
 
-   static sf::Texture sTexture;
+   std::shared_ptr<sf::Texture> mTexture;
 
    static std::vector<TmxObject*> mRectangles;
    //static std::vector<std::shared_ptr<Lever>> sLevers;

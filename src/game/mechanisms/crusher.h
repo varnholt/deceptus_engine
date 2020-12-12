@@ -75,7 +75,7 @@ class Crusher : public GameMechanism, public GameNode
 
       int32_t mInstanceId = 0;
 
-      static sf::Texture mTexture;
+      std::shared_ptr<sf::Texture> mTexture;
       static int32_t mInstanceCounter;
 };
 
