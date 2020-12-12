@@ -43,7 +43,7 @@ size_t TexturePool::computeSize() const
       }
       else
       {
-         std::cout << key << " is dangling" << std::endl;
+         // std::cout << key << " has been removed" << std::endl;
       }
    }
 
