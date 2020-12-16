@@ -27,7 +27,7 @@ function initialize()
    wait = false
    addShapeCircle(0.12, 0.0, 0.12)
    addShapeRect(0.2, 0.07, 0.0, 0.1)
-   updateSpriteRect(0, 0, 64, 64)
+   updateSpriteRect(0, 0, 0, 64, 64)
 
    addWeapon(300, 10, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
@@ -63,7 +63,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
    mPointsToLeft = true
-   updateSpriteRect(0, 64, 64, 64)
+   updateSpriteRect(0, 0, 64, 64, 64)
    keyReleased(Key["KeyRight"])
    keyPressed(Key["KeyLeft"])
 end
@@ -72,7 +72,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
    mPointsToLeft = false
-   updateSpriteRect(0, 0, 64, 64)
+   updateSpriteRect(0, 0, 0, 64, 64)
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
 end

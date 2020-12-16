@@ -49,7 +49,7 @@ struct LuaNode : public GameNode
    void setGravityScale(float scale);
    void setTransform(const b2Vec2& position, float32 angle = 0.0);
    void updatePosition();
-   void updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h);
+   void updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h);
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
 
@@ -87,10 +87,7 @@ struct LuaNode : public GameNode
    // visualization
    sf::Vector2f mStartPosition;
    std::shared_ptr<sf::Texture> mTexture;
-   sf::Sprite mSprite;
-   sf::Vector2u mSpriteOffset;
-   int32_t mSpriteWidth = 0;
-   int32_t mSpriteHeight = 0;
+   std::map<int32_t, sf::Sprite> mSprites;
    sf::Vector2f mPosition;
    int32_t mZ = ZDepthPlayer;
    std::vector<sf::Vector2f> mPatrolPath;

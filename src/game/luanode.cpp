@@ -87,12 +87,13 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
 
-   if (argc == 4)
+   if (argc == 5)
    {
-      auto x = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto y = static_cast<int32_t>(lua_tointeger(state, 2));
-      auto w = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto h = static_cast<int32_t>(lua_tointeger(state, 4));
+      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto x = static_cast<int32_t>(lua_tointeger(state, 2));
+      auto y = static_cast<int32_t>(lua_tointeger(state, 3));
+      auto w = static_cast<int32_t>(lua_tointeger(state, 4));
+      auto h = static_cast<int32_t>(lua_tointeger(state, 5));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -101,7 +102,7 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
          return 0;
       }
 
-      node->updateSpriteRect(x, y, w, h);
+      node->updateSpriteRect(id, x, y, w, h);
    }
 
    return 0;
@@ -833,7 +834,11 @@ void LuaNode::setupTexture()
    std::string spriteName = std::get<std::string>(mProperties["sprite"]);
 
    mTexture = TexturePool::getInstance().get(spriteName);
-   mSprite.setTexture(*mTexture);
+
+   for (auto& sprite : mSprites)
+   {
+      sprite.second.setTexture(*mTexture);
+   }
 }
 
 
@@ -1545,21 +1550,14 @@ void LuaNode::updatePosition()
 }
 
 
-void LuaNode::updateSpriteRect(int32_t x, int32_t y, int32_t w, int32_t h)
+void LuaNode::updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h)
 {
-   mSpriteOffset.x = static_cast<uint32_t>(x);
-   mSpriteOffset.y = static_cast<uint32_t>(y);
-   mSpriteWidth = w;
-   mSpriteHeight = h;
+   if (mTexture)
+   {
+      mSprites[id].setTexture(*mTexture);
+   }
 
-   mSprite.setTextureRect(
-      sf::IntRect(
-         x,
-         y,
-         mSpriteWidth,
-         mSpriteHeight
-      )
-   );
+   mSprites[id].setTextureRect(sf::IntRect(x, y, w, h));
 }
 
 
@@ -1571,8 +1569,15 @@ void LuaNode::draw(sf::RenderTarget& target)
       w->draw(target);
    }
 
-   mSprite.setPosition(mPosition - sf::Vector2f(mSpriteWidth / 2.0f, mSpriteHeight / 2.0f));
-   target.draw(mSprite);
+   for (auto& sprite : mSprites)
+   {
+      sprite.second.setPosition(
+         mPosition - sf::Vector2f(
+            sprite.second.getTextureRect().width / 2.0f,
+            sprite.second.getTextureRect().height / 2.0f)
+         );
+      target.draw(sprite.second);
+   }
 }
 
 

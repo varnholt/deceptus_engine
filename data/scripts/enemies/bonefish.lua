@@ -31,7 +31,7 @@ function initialize()
    patrolEpsilon = 1.0
 
    addShapeRect(0.2, 0.2, -0.05, 0.0)
-   updateSpriteRect(0, 0, 48, 24)
+   updateSpriteRect(0, 0, 0, 48, 24)
 end
 
 
@@ -70,7 +70,7 @@ function update(dt)
    end
 
    if (updateSprite) then
-      updateSpriteRect(mSpriteIndex * 48, yOffset, 48, 24) -- x, y, width, height
+      updateSpriteRect(0, mSpriteIndex * 48, yOffset, 48, 24) -- x, y, width, height
    end
 
 end

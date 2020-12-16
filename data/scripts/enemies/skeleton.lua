@@ -46,7 +46,7 @@ function initialize()
    mPatrolIndex = 1
    mPatrolEpsilon = 1.0
    addShapeRect(0.2, 0.5, 0.0, 0.23)
-   updateSpriteRect(0, 0, 72, 72)
+   updateSpriteRect(0, 0, 0, 72, 72)
 end
 
 
@@ -404,6 +404,7 @@ function updateSprite(changed)
 
    if (updateRequired) then
       updateSpriteRect(
+         0,
          mSpriteIndex * 72,
          spriteOffset + (mPointsLeft and 72 or 0),
          72,

@@ -62,6 +62,7 @@ function initialize()
    updateSpriteRect(
       0,
       0,
+      0,
       mSpriteSize,
       mSpriteSize
    )
@@ -264,6 +265,7 @@ function update(dt)
    -- update sprite
    if (mUpdateSprite) then
       updateSpriteRect(
+         0,
          mSpriteOffsetX * mSpriteSize,
          (mPointsRight and mSpriteSize or 0),
          mSpriteSize,
