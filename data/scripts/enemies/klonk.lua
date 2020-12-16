@@ -23,7 +23,7 @@ mSpeed = 35.0
 function initialize()
 
    addShapeRect(0.2, 0.2, 0.0, 0.0)
-   updateSpriteRect(0, 2 * 72, 72, 72) -- x, y, width, height
+   updateSpriteRect(0, 0, 2 * 72, 72, 72) -- id, x, y, width, height
 end
 
 
@@ -64,7 +64,7 @@ function update(dt)
 
       -- maybe close eyes again if player is out of sight?
       if (mSpriteIndex < 12) then
-         updateSpriteRect(mSpriteIndex * 72, 2 * 72, 72, 72)
+         updateSpriteRect(0, mSpriteIndex * 72, 2 * 72, 72, 72)
       else
          makeDynamic()
          mCycle = 2
@@ -101,7 +101,7 @@ function update(dt)
        mSpriteIndex = math.floor(mElapsed * mSpeed)
 
        if (mSpriteIndex < 7) then
-          updateSpriteRect(mSpriteIndex * 72, 5 * 72, 72, 72)
+          updateSpriteRect(0, mSpriteIndex * 72, 5 * 72, 72, 72)
         else
           -- done? go back up?
           mCycle = 5

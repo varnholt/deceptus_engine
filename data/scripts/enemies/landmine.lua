@@ -70,6 +70,7 @@ function updateSprite(dt)
 
    if (col ~= mSpriteCol or row ~= mSpriteRow) then
       updateSpriteRect(
+         0,
          col * mSpriteSize,
          row * mSpriteSize,
          mSpriteSize,

@@ -61,7 +61,7 @@ function initialize()
    mPatrolPath = {}
 
    addShapeRect(0.2, 0.2, -0.05, 0.0)
-   updateSpriteRect(0, 0, 48, 48)
+   updateSpriteRect(0, 0, 0, 48, 48)
 end
 
 
@@ -122,7 +122,7 @@ function updateSprite(p)
       end
    end
 
-   updateSpriteRect(0, row * 48, 48, 48)
+   updateSpriteRect(0, 0, row * 48, 48, 48)
 end
 
 

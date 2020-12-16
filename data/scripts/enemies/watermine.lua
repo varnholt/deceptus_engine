@@ -34,6 +34,7 @@ function initialize()
    addShapeCircle(0.27, 0.0, 0.0)
    updateSpriteRect(
       0,
+      0,
       mSpriteOffsetY,
       mSpriteSize,
       mSpriteSize
@@ -80,6 +81,7 @@ function update(dt)
 
    if (updateSprite) then
       updateSpriteRect(
+         0,
          mSpriteIndex * mSpriteSize,
          mSpriteOffsetY,
          mSpriteSize,

@@ -146,6 +146,7 @@ function update(dt)
 
    if (index ~= mSpriteIndex) then
       updateSpriteRect(
+         0,
          col * SPRITE_WIDTH,
          row * SPRITE_HEIGHT + mAlignmentOffset,
          SPRITE_WIDTH,

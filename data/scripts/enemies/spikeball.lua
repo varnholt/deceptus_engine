@@ -40,7 +40,7 @@ mSpriteIndex = 0
 function initialize()
 
    addShapeRect(0.2, 0.2, -0.05, 0.0)
-   updateSpriteRect(0, 0, 48, 48)
+   updateSpriteRect(0, 0, 0, 48, 48)
 end
 
 
