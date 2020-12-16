@@ -32,7 +32,7 @@ function initialize()
 
    addShapeCircle(0.12, 0.0, 0.12)   -- radius, x, y
    addShapeRect(0.2, 0.07, 0.0, 0.1) -- width, height, x, y
-   updateSpriteRect(0, 0, 24, 24)    -- x, y, width, height
+   updateSpriteRect(0, 0, 0, 24, 24) -- id, x, y, width, height
 
    -- print("blob.lua initialized")
 end
@@ -67,7 +67,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   updateSpriteRect(0, 0, 24, 24)
+   updateSpriteRect(0, 0, 0, 24, 24)
    keyReleased(Key["KeyRight"])
    keyPressed(Key["KeyLeft"])
 end
@@ -75,7 +75,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   updateSpriteRect(0, 24, 24, 24)
+   updateSpriteRect(0, 0, 24, 24, 24)
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
 end

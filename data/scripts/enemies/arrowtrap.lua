@@ -42,7 +42,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 
 -- TODO
--- add capability to luanode to add multiple sprites 
+-- add capability to luanode to add multiple sprites
 -- add capability to luanode to position multiple sprites
 -- add capability to luanode to set a texture rect for sprite n
 -- have lua enum for weapon types
@@ -188,6 +188,7 @@ function update(dt)
 
    if (index ~= mSpriteIndex) then
       updateSpriteRect(
+         0,
          col * SPRITE_WIDTH,
          row * SPRITE_HEIGHT + mAlignmentOffset,
          SPRITE_WIDTH,

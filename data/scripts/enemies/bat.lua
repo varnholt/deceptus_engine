@@ -50,6 +50,7 @@ function initialize()
    updateSpriteRect(
       0,
       0,
+      0,
       mSpriteSize,
       mSpriteSize
    )
@@ -133,6 +134,7 @@ function update(dt)
 
    if (updateSprite) then
       updateSpriteRect(
+         0,
          mSpriteOffsetX * mSpriteSize,
          mSpriteOffsetY,
          mSpriteSize,

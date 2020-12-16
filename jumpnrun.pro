@@ -533,6 +533,7 @@ OTHER_FILES += \
 DISTFILES += \
     data/config/camera.json \
     data/level-crypt/metroid.json \
+    data/level-malte/malte.json \
     data/level.tmx \
     data/menus/achievements.psd \
     data/menus/audio.psd \
@@ -545,6 +546,7 @@ DISTFILES += \
     data/menus/pause.psd \
     data/menus/titlescreen.psd \
     data/menus/video.psd \
+    data/scripts/enemies/arrowtrap.lua \
     data/scripts/enemies/bat.lua \
     data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/cannon_2.lua \
@@ -579,7 +581,6 @@ DISTFILES += \
     data/shaders/raycast.frag \
     data/shaders/water.frag \
     data/shaders/raycast.vert \
-    data/shaders/wave.vert \
-    data/level-crypt/metroid.tmx
+    data/shaders/wave.vert
 
 

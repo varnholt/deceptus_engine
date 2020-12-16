@@ -33,7 +33,13 @@ mSpeed = 1.5
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
-   updateSpriteRect(0, mSpriteY, 24, 24) -- x, y, width, height
+   updateSpriteRect(
+      0,
+      0,
+      mSpriteY,
+      24,
+      24
+   ) -- x, y, width, height
 
    addSample("boom.wav")
    addWeapon(1000, 60, 0.1) -- interval, damage, radius
@@ -75,9 +81,16 @@ function fire()
       mPosition:getY() - 3,
       mX * mSpeed,
       0.0
-   );
+   )
 
-   updateSpriteRect(24, mSpriteY, 24, 24)
+   updateSpriteRect(
+      0,
+      24,
+      mSpriteY,
+      24,
+      24
+   )
+
    mFireReady = true
 end
 
@@ -122,7 +135,13 @@ function update(dt)
    end
 
    if (index ~= mSpriteIndex) then
-      updateSpriteRect(mSpriteIndex * 24, mSpriteY, 24, 24)
+      updateSpriteRect(
+         0,
+         mSpriteIndex * 24,
+         mSpriteY,
+         24,
+         24
+      )
    end
 end
 
