@@ -40,7 +40,7 @@
     {
       "script": "bonefish.lua",
       "startposition": [258, 96 ],
-      "patrolpath": [258, 96, 264, 96]      
+      "patrolpath": [258, 96, 264, 96]
     },
     {
       "script": "bonefish.lua",
@@ -120,6 +120,18 @@
     {
       "script": "critter.lua",
       "id": "163"
+    },
+    {
+      "script": "arrowtrap.lua",
+      "id": "188"
+    },
+    {
+      "script": "arrowtrap.lua",
+      "id": "189"
+    },
+    {
+      "script": "arrowtrap.lua",
+      "id": "191"
     }
   ]
 }
