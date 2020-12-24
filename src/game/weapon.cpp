@@ -51,9 +51,9 @@ void Weapon::fireNow(
    bodyDef.type = b2_dynamicBody;
    bodyDef.position.Set(pos.x, pos.y);
 
-   auto body = world->CreateBody(&bodyDef);
-   body->SetBullet(true);
-   body->SetGravityScale(0.0f);
+   _body = world->CreateBody(&bodyDef);
+   _body->SetBullet(true);
+   _body->SetGravityScale(0.0f);
 
    b2FixtureDef fixtureDef;
    fixtureDef.shape = _shape.get();
@@ -63,9 +63,9 @@ void Weapon::fireNow(
    fixtureDef.filter.maskBits     = maskBitsStanding;
    fixtureDef.filter.categoryBits = categoryBits;
 
-   auto fixture = body->CreateFixture(&fixtureDef);
+   auto fixture = _body->CreateFixture(&fixtureDef);
 
-   body->ApplyLinearImpulse(
+   _body->ApplyLinearImpulse(
       dir,
       pos,
       true
@@ -76,7 +76,7 @@ void Weapon::fireNow(
       _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), projectile), _projectiles.end());
    });
    projectile->setProperty("damage", _damage);
-   projectile->setBody(body);
+   projectile->setBody(_body);
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
@@ -165,11 +165,6 @@ int Weapon::damage() const
    {
       case WeaponType::Default:
       case WeaponType::Bow:
-      case WeaponType::Slingshot:
-      case WeaponType::Pistol:
-      case WeaponType::Bazooka:
-      case WeaponType::Laser:
-      case WeaponType::Aliengun:
          val = 20;
          break;
    }

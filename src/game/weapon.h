@@ -68,6 +68,7 @@ protected:
    int32_t _fire_interval_ms = 100;
    int32_t _damage = 100;
    WeaponType _type = WeaponType::Default;
+   b2Body* _body = nullptr;
 
    static sf::Rect<int32_t> _empty_rect;
 };

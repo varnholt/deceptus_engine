@@ -20,6 +20,7 @@
 #include "luainterface.h"
 #include "player/player.h"
 #include "texturepool.h"
+#include "weaponfactory.h"
 
 // static
 std::atomic<int32_t> LuaNode::sNextId = 0;
@@ -569,23 +570,25 @@ extern "C" int32_t addWeapon(lua_State* state)
       exit(1);
    }
 
+   WeaponType weapon_type = WeaponType::Default;
    auto fireInterval = 0;
    auto damage = 0;
    std::unique_ptr<b2Shape> shape;
 
-   fireInterval = static_cast<int>(lua_tointeger(state, 1));
-   damage = static_cast<int>(lua_tointeger(state, 2));
+   weapon_type = static_cast<WeaponType>(lua_tointeger(state, 1));
+   fireInterval = static_cast<int>(lua_tointeger(state, 2));
+   damage = static_cast<int>(lua_tointeger(state, 3));
 
    // add weapon with projectile radius only
-   if (argc == 3)
+   if (argc == 4)
    {
-      auto radius = static_cast<float>(lua_tonumber(state, 3));
+      auto radius = static_cast<float>(lua_tonumber(state, 4));
       shape = std::make_unique<b2CircleShape>();
       dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
    }
 
    // add weapon with polygon projectile shape
-   if (argc >= 4 && (argc % 2 == 0))
+   if (argc >= 5 && ((argc - 5) % 2 == 0))
    {
       auto constexpr parameterCount = 2u;
       shape = std::make_unique<b2PolygonShape>();
@@ -611,7 +614,8 @@ extern "C" int32_t addWeapon(lua_State* state)
       return 0;
    }
 
-   node->addWeapon(std::move(shape), fireInterval, damage);
+   auto weapon = WeaponFactory::create(weapon_type, std::move(shape), fireInterval, damage);
+   node->addWeapon(std::move(weapon));
 
    return 0;
 }
@@ -1377,9 +1381,8 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 }
 
 
-void LuaNode::addWeapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t damage)
+void LuaNode::addWeapon(std::unique_ptr<Weapon> weapon)
 {
-   auto weapon = std::make_unique<Weapon>(std::move(shape), fireInterval, damage);
    weapon->initialize();
    mWeapons.push_back(std::move(weapon));
 }

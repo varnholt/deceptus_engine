@@ -259,13 +259,8 @@ enum class MessageBoxLocation
 
 enum class WeaponType
 {
-   Default,
-   Bow,
-   Slingshot,
-   Pistol,
-   Bazooka,
-   Laser,
-   Aliengun
+   Default = 0,
+   Bow = 1,
 };
 
 
