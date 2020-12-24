@@ -14,3 +14,7 @@ Alignment = {
    AlignmentRight = 0x08
 }
 
+WeaponType = {
+   Default = 0,
+   Bow = 1
+}

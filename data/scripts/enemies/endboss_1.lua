@@ -28,7 +28,7 @@ function initialize()
    addShapeRect(0.6, 1.05, 0.25, 0.0)
    updateSpriteRect(0, 0, 80, 104)
 
-   addWeapon(250, 80, 0,0, 0,0.1666, 1.0,0.1666, 1.0,0, 0,0) -- interval, damage, radius/shape
+   addWeapon(WeaponType["Default"], 250, 80, 0,0, 0,0.1666, 1.0,0.1666, 1.0,0, 0,0) -- interval, damage, radius/shape
    updateProjectileTexture(0, "data/sprites/enemy_endboss_1.png", 0, 112, 49, 8) -- index, path, x, y, width, height
 end
 

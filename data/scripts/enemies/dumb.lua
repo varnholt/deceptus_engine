@@ -29,7 +29,7 @@ function initialize()
    addShapeRect(0.2, 0.07, 0.0, 0.1)
    updateSpriteRect(0, 0, 0, 64, 64)
 
-   addWeapon(300, 10, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Default"], 300, 10, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/sprites/orb.png", 0, 0, 24, 24) -- index, path, x, y, width, height
 end
 

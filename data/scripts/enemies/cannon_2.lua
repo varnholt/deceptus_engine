@@ -39,7 +39,7 @@ SPRITE_HEIGHT = 5 * 24
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
    addSample("boom.wav")
-   addWeapon(1000, 60, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Default"], 1000, 60, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/sprites/enemy_pirate_cannon.png", 144, 984, 48, 24) -- index, path, x, y, width, height
 end
 
