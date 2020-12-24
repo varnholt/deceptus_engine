@@ -190,6 +190,7 @@ SOURCES += \
    src/game/texturepool.cpp \
    src/game/tilemap.cpp \
    src/game/weapon.cpp \
+   src/game/weaponfactory.cpp \
    src/game/weaponsystem.cpp \
    src/game/weather.cpp \
    src/game/overlays/weatheroverlay.cpp \
@@ -278,6 +279,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
+   src/game/weaponfactory.h
 
 
 # add box2d
