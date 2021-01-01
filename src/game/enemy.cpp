@@ -11,6 +11,7 @@ void Enemy::parse(TmxObject* object)
 {
    mId = object->mId;
    mName = object->mName;
+   mPixelPosition = {static_cast<int32_t>(object->mX), static_cast<int32_t>(object->mY)};
 
    auto w = static_cast<int32_t>(object->mWidth);
    auto h = static_cast<int32_t>(object->mHeight);
@@ -50,34 +51,34 @@ void Enemy::parse(TmxObject* object)
 }
 
 
-void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
+void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
 {
    // a player rect can only overlap with a single chain.
    // this function finds this chain and assigns it.
-   for (const auto& chain : chains)
+   for (const auto& path : paths)
    {
-      for (auto i0 = 0u; i0 < chain.size(); i0++)
+      for (auto i0 = 0u; i0 < path.size(); i0++)
       {
          sf::Vector2i v0{
-            static_cast<int32_t>(chain[i0].x * PPM),
-            static_cast<int32_t>(chain[i0].y * PPM)
+            static_cast<int32_t>(path[i0].x * PPM),
+            static_cast<int32_t>(path[i0].y * PPM)
          };
 
          // check if rect contains point, then we have a match
          if (mRect.contains(v0))
          {
-            mChain = chain;
-            mHasChain = true;
+            mPath = path;
+            mHasPath = true;
             break;
          }
          else
          {
             // otherwise check if the line intersects with the rect
-            const auto i1 = (i0 == chain.size() -1) ? 0u : (i0 + 1);
+            const auto i1 = (i0 == path.size() -1) ? 0u : (i0 + 1);
 
             sf::Vector2i v1{
-               static_cast<int32_t>(chain[i1].x * PPM),
-               static_cast<int32_t>(chain[i1].y * PPM)
+               static_cast<int32_t>(path[i1].x * PPM),
+               static_cast<int32_t>(path[i1].y * PPM)
             };
 
             const auto intersectsLeft   = SfmlMath::intersect(v0, v1, mVertices[0], mVertices[1]);
@@ -93,25 +94,25 @@ void Enemy::addChain(const std::vector<std::vector<b2Vec2>>& chains)
             )
             {
                // std::cout << "assigned chain to: " << mId << std::endl;
-               mChain = chain;
-               mHasChain = true;
+               mPath = path;
+               mHasPath = true;
                break;
             }
          }
       }
    }
 
-   if (!mHasChain)
+   if (!mHasPath)
    {
       // not an error, enemy might just have a fixed position
       // std::cerr << "object " << mId << " (" << mName << ") has invalid chain" << std::endl;
    }
    else
    {
-      for (const auto& v : mChain)
+      for (const auto& v : mPath)
       {
-         mPixelChain.push_back(static_cast<int32_t>(v.x * PPM));
-         mPixelChain.push_back(static_cast<int32_t>(v.y * PPM));
+         mPixelPath.push_back(static_cast<int32_t>(v.x * PPM));
+         mPixelPath.push_back(static_cast<int32_t>(v.y * PPM));
       }
    }
 }

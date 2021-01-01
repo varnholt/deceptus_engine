@@ -42,7 +42,7 @@ class SpikeBall : public GameMechanism, public GameNode
 
    private:
 
-      void drawSpline(sf::RenderTarget& window);
+      void drawChain(sf::RenderTarget& window);
 
       std::shared_ptr<sf::Texture> mTexture;
       sf::Sprite mSpikeSprite;

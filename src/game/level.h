@@ -185,7 +185,7 @@ protected:
    std::vector<std::shared_ptr<TileMap>> mParallaxMaps;
 
    std::vector<std::shared_ptr<LuaNode>> mEnemies;
-   std::map<std::string, Enemy> mEnemyObjectData;
+   std::map<std::string, Enemy> mEnemyDataFromTmxLayer;
 
    Atmosphere mAtmosphere;
    Physics mPhysics;

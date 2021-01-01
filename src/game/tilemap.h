@@ -55,6 +55,8 @@ private:
 
    struct AnimatedTile
    {
+      virtual ~AnimatedTile();
+
       int mTileX = 0;
       int mTileY = 0;
       std::vector<AnimatedTileFrame*> mFrames;
