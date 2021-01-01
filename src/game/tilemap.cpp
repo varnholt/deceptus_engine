@@ -333,3 +333,10 @@ void TileMap::hideTile(int x, int y)
 //   mVerticesStaticBlocks[by][bx].append(quad[2]);
 //   mVerticesStaticBlocks[by][bx].append(quad[3]);
 
+
+TileMap::AnimatedTile::~AnimatedTile()
+{
+   mFrames.clear();
+   delete mAnimation;
+}
+

@@ -6,6 +6,18 @@
   ],
   "enemies": [
     {
+      "script": "arrowtrap.lua",
+      "id": "188"
+    },
+    {
+      "script": "arrowtrap.lua",
+      "id": "189"
+    },
+    {
+      "script": "arrowtrap.lua",
+      "id": "191"
+    },
+    {
       "script": "bat.lua",
       "startposition": [210, 78]
     },
@@ -75,63 +87,63 @@
     },
     {
       "script": "critter.lua",
-      "id": "152"
+      "id": "152",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "153"
+      "id": "153",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "154"
+      "id": "154",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "155"
+      "id": "155",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "156"
+      "id": "156",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "157"
+      "id": "157",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "158"
+      "id": "158",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "159"
+      "id": "159",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "160"
+      "id": "160",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "161"
+      "id": "161",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "162"
+      "id": "162",
+      "generate_patrolpath" : true
     },
     {
       "script": "critter.lua",
-      "id": "163"
-    },
-    {
-      "script": "arrowtrap.lua",
-      "id": "188"
-    },
-    {
-      "script": "arrowtrap.lua",
-      "id": "189"
-    },
-    {
-      "script": "arrowtrap.lua",
-      "id": "191"
+      "id": "163",
+      "generate_patrolpath" : true
     }
   ]
 }

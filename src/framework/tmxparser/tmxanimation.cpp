@@ -2,8 +2,10 @@
 
 #include "tmxframe.h"
 
-TmxAnimation::TmxAnimation()
+
+TmxAnimation::~TmxAnimation()
 {
+   mFrames.clear();
 }
 
 

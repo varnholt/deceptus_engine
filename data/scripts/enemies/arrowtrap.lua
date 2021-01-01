@@ -1,27 +1,6 @@
-
 require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
 
--- place cannons here
--- 64,311
--- 78,311
-
-
---     c   u   d
---     e   p   o
---     n       w
---     t       n
---     e
---     r
---
---    01  23  45
---  +------------------
--- 0| xx  xx  xx left
--- 1| xx  xx  xx
---  |
--- 2| xx  xx  xx right
--- 3| xx  xx  xx
---
 -- arrow rows:
 --    points left:  5
 --    points right: 6
@@ -39,13 +18,6 @@ v2d = require "data/scripts/enemies/vectorial2"
 --
 -- arrow fade out
 --    column 19..23
-
-
--- TODO
--- add capability to luanode to add multiple sprites
--- add capability to luanode to position multiple sprites
--- add capability to luanode to set a texture rect for sprite n
--- have lua enum for weapon types
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -68,21 +40,71 @@ mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
 mX = -1.0
-mAlignmentOffset = 0
 mSpeed = 1.5
 
 mIdle = true
 
-SPRITE_WIDTH = 6 * 24
-SPRITE_HEIGHT = 5 * 24
+SPRITE_WIDTH = 3 * 24
+SPRITE_HEIGHT = 3 * 24
+
+
+------------------------------------------------------------------------------------------------------------------------
+function getOffset(alignment)
+   offset = v2d.Vector2D(0, 0)
+
+   if (alignment == Alignment["AlignmentUp"]) then
+      offset:setX(5)
+      offset:setY(1)
+   elseif (alignment == Alignment["AlignmentDown"]) then
+      offset:setX(5)
+      offset:setY(0)
+   elseif (alignment == Alignment["AlignmentLeft"]) then
+      offset:setX(0)
+      offset:setY(0)
+   elseif (alignment == Alignment["AlignmentRight"]) then
+      offset:setX(0)
+      offset:setY(1)
+   end
+
+   return offset
+end
+
+
+-- physical box is just 24 * 24px
+-- pixel box is 3 * 24 * 3 * 24px
+--
+--   +---+---+---+
+--   |   |   |   |
+--   +---+---+---+
+--   |   |///|   |
+--   +---+---+---+
+--   |   |   |   |
+--   +---+---+---+
+--
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
+
+   addShapeRect(0.25, 0.25, 0.25, 0.25)
    addSample("boom.wav")
    addWeapon(WeaponType["Bow"], 1000, 60, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/weapons/arrow.png", 144, 984, 48, 24) -- index, path, x, y, width, height
+
+   alignment = Alignment["AlignmentRight"]
+
+   offset = getOffset(alignment)
+
+   updateSpriteRect(
+      0,
+      offset:getX() * SPRITE_WIDTH,
+      offset:getY() * SPRITE_HEIGHT,
+      SPRITE_WIDTH,
+      SPRITE_HEIGHT
+   )
+
+   setSpriteOrigin(0, -12, -12)
+
 end
 
 
@@ -92,9 +114,7 @@ function writeProperty(key, value)
 
    if (key == "alignment") then
       if (value == "right") then
-         -- print("setting alignment to left")
-         mX = 1.0
-         mAlignmentOffset = 4 * SPRITE_HEIGHT
+         print("setting alignment to left")
       end
    end
 end
@@ -186,16 +206,15 @@ function update(dt)
 
    -- print(string.format("col: %f, row: %f", col, row))
 
-   if (index ~= mSpriteIndex) then
-      updateSpriteRect(
-         0,
-         col * SPRITE_WIDTH,
-         row * SPRITE_HEIGHT + mAlignmentOffset,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
-      )
-   end
-
+   -- if (index ~= mSpriteIndex) then
+   --    updateSpriteRect(
+   --       0,
+   --       col * SPRITE_WIDTH,
+   --       row * SPRITE_HEIGHT + mAlignmentOffset,
+   --       SPRITE_WIDTH,
+   --       SPRITE_HEIGHT
+   --    )
+   -- end
 end
 
 

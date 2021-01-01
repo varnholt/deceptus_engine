@@ -23,6 +23,7 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
 
 
 std::unique_ptr<Weapon> WeaponFactory::create(
+   b2Body* parent_body,
    WeaponType type,
    std::unique_ptr<b2Shape> shape,
    int32_t fireInterval,
@@ -40,7 +41,9 @@ std::unique_ptr<Weapon> WeaponFactory::create(
       }
       case WeaponType::Bow:
       {
-         weapon = std::make_unique<Bow>();
+         auto tmp = std::make_unique<Bow>();
+         tmp->setLauncherBody(parent_body);
+         weapon = std::move(tmp);
          break;
       }
    }

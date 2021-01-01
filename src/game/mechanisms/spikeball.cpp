@@ -59,7 +59,7 @@ SpikeBall::SpikeBall(GameNode* node)
 }
 
 
-void SpikeBall::drawSpline(sf::RenderTarget& window)
+void SpikeBall::drawChain(sf::RenderTarget& window)
 {
    std::vector<HermiteCurveKey> keys;
 
@@ -117,7 +117,7 @@ void SpikeBall::draw(sf::RenderTarget& window)
    }
 
    window.draw(mBoxSprite);
-   drawSpline(window);
+   drawChain(window);
    window.draw(mSpikeSprite);
 }
 

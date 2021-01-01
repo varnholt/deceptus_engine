@@ -234,8 +234,10 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       if (
             body->GetType() == b2_dynamicBody
          || body->GetType() == b2_kinematicBody
+      // || body->GetType() == b2_staticBody
       )
       {
+
          // draw position and velocity
          static const b2Color pointColor{1.0f, 1.0f, 0.0f, 1.0f};
          static const auto maxVelocity = 5.0f;
@@ -265,6 +267,14 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   auto poly = dynamic_cast<b2PolygonShape*>(shape);
 
                   auto vertexCount = poly->GetVertexCount();
+
+                  // to debug static bodies
+                  //
+                  // if (vertexCount > 100)
+                  // {
+                  //    break;
+                  // }
+
                   auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
 
                   for(auto i = 0; i < vertexCount; i++ )
@@ -310,6 +320,14 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
 
                   auto vertexCount = chain->m_count;
+
+                  // to debug static bodies
+                  //
+                  // if (vertexCount > 100)
+                  // {
+                  //    break;
+                  // }
+
                   auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
 
                   for(auto i = 0; i < vertexCount; i++ )

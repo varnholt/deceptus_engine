@@ -13,14 +13,15 @@ struct Enemy
    Enemy() = default;
 
    void parse(TmxObject* object);
-   void addChain(const std::vector<std::vector<b2Vec2> >& chains);
+   void addPaths(const std::vector<std::vector<b2Vec2> >& paths);
 
+   sf::Vector2i mPixelPosition;
    std::string mId;
    std::string mName;
    sf::IntRect mRect;
    std::array<sf::Vector2i, 4> mVertices;
-   std::vector<b2Vec2> mChain;
-   std::vector<int32_t> mPixelChain;
-   bool mHasChain = false;
+   std::vector<b2Vec2> mPath;
+   std::vector<int32_t> mPixelPath;
+   bool mHasPath = false;
 };
 

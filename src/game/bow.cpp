@@ -19,10 +19,11 @@
 
 namespace
 {
-static constexpr auto launch_speed = 200.0f;
+static constexpr auto launch_speed = 5.0f;
 static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
+static constexpr auto arrow_gravity_scale = 0.1f;
 static constexpr auto drag_constant = 0.1f;
 static constexpr auto scale = 0.1f;
 
@@ -180,7 +181,7 @@ void Bow::fireNow(
    const auto velocity = _launcher_body->GetWorldVector(launch_speed * dirCopy);
 
    _loaded_arrow->getBody()->SetAwake(true);
-   _loaded_arrow->getBody()->SetGravityScale(1.0f);
+   _loaded_arrow->getBody()->SetGravityScale(arrow_gravity_scale);
    _loaded_arrow->getBody()->SetAngularVelocity(0.0f);
    _loaded_arrow->getBody()->SetTransform(posCopy, angle);
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);

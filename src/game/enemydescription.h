@@ -14,9 +14,10 @@ struct EnemyDescription
    std::string mId;
    std::string mScript;
    std::vector<int32_t> mStartPosition;
-   std::vector<int32_t> mPatrolPath;
+   std::vector<int32_t> mPath;
    std::vector<ScriptProperty> mProperties;
-   bool mTransformPatrolPath = true;
+   bool mScaleTileToPixelPos = true;
+   bool mGeneratePatrolPath = false;
 };
 
 

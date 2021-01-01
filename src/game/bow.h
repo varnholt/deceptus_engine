@@ -38,6 +38,7 @@ public:
 
    void loadTextures() override;
 
+
 private:
 
    Arrow* _loaded_arrow = nullptr;
