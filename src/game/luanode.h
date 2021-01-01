@@ -29,29 +29,70 @@ struct LuaNode : public GameNode
 
    void setupLua();
    void setupTexture();
-
-   void addShapeCircle(float radius, float x, float y);
-   void addShapePoly(const b2Vec2* points, int32_t size);
-   void addShapeRect(float width, float height, float x, float y);
-   void addWeapon(std::unique_ptr<Weapon> weapon);
-   void boom(float x, float y, float intensity);
-   void damage(int32_t damage, float forceX, float forceY);
-   void damageRadius(int32_t damage, float x, float y, float radius);
-   b2Vec2 getLinearVelocity() const;
-   void setLinearVelocity(const b2Vec2& vel);
-   void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
-   void makeDynamic();
-   void makeStatic();
-   int32_t queryAABB(const b2AABB& aabb);
-   int32_t queryRaycast(const b2Vec2& point1, const b2Vec2& point2);
-   void setActive(bool active);
-   void setDamage(int32_t damage);
-   void setGravityScale(float scale);
-   void setTransform(const b2Vec2& position, float32 angle = 0.0);
    void updatePosition();
-   void updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h);
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
+
+   //! add a circle shape to the body of the object
+   void addShapeCircle(float radius, float x, float y);
+
+   //! add a polygon shape to the body of the object
+   void addShapePoly(const b2Vec2* points, int32_t size);
+
+   //! add a rectangular shape to the body of the object (given in metres)
+   void addShapeRect(float width, float height, float x, float y);
+
+   //! add a weapon to the node
+   void addWeapon(std::unique_ptr<Weapon> weapon);
+
+   //! trigger boom effect
+   void boom(float x, float y, float intensity);
+
+   //! cause damage to the player
+   void damage(int32_t damage, float forceX, float forceY);
+
+   //! cause damage within a given radius
+   void damageRadius(int32_t damage, float x, float y, float radius);
+
+   //! get the body's linear velocity
+   b2Vec2 getLinearVelocity() const;
+
+   //! set the body's linear velocity
+   void setLinearVelocity(const b2Vec2& vel);
+
+   //! fire a weapon
+   void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
+
+   //! make the body a dynamic object
+   void makeDynamic();
+
+   //! make the body a static object
+   void makeStatic();
+
+   //! query bodies within a given aabb
+   int32_t queryAABB(const b2AABB& aabb);
+
+   //! cast a ray between two points
+   int32_t queryRaycast(const b2Vec2& point1, const b2Vec2& point2);
+
+   //! activate or deactivate a body
+   void setActive(bool active);
+
+   //! set the node's damage for collisions with the player
+   void setDamage(int32_t damage);
+
+   //! set the object's gravity scale
+   void setGravityScale(float scale);
+
+   //! set the object's transform
+   void setTransform(const b2Vec2& position, float32 angle = 0.0);
+
+   //! set the object's origin
+   void setSpriteOrigin(int32_t id, float x, float y);
+
+   //! update the sprite's texture rect
+   void updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h);
+
 
    void luaHit(int32_t damage);
    void luaDie();
@@ -74,7 +115,7 @@ struct LuaNode : public GameNode
    int64_t getPropertyInt64(const std::string& key);
 
    // box2d related
-   void createBody();
+   void setupBody();
    void stopScript();
 
    // members

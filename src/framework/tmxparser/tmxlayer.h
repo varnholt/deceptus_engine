@@ -8,6 +8,7 @@ struct TmxProperties;
 struct TmxLayer : TmxElement
 {
    TmxLayer();
+   virtual ~TmxLayer();
 
    void deserialize(tinyxml2::XMLElement*) override;
 

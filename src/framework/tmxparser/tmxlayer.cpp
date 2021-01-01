@@ -15,6 +15,12 @@ TmxLayer::TmxLayer()
 }
 
 
+TmxLayer::~TmxLayer()
+{
+   delete[] mData;
+}
+
+
 void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 {
    TmxElement::deserialize(element);

@@ -365,15 +365,15 @@ void Image::buildNormalMap(int32_t z)
 
 void Image::buildDeltaMap()
 {
-   uint32_t *temp= mData.data();
-   uint32_t *src0= mData.data() + (mHeight-1)*mWidth;
-   uint32_t *src1= mData.data();
-   uint32_t *src2= mData.data() + mWidth;
+   uint32_t* temp= mData.data();
+   uint32_t* src0= mData.data() + (mHeight-1)*mWidth;
+   uint32_t* src1= mData.data();
+   uint32_t* src2= mData.data() + mWidth;
 
-   uint32_t *dst = new uint32_t[mWidth*mHeight];
-   int32_t s= 2;
+   uint32_t* dst = new uint32_t[mWidth * mHeight];
+   int32_t s = 2;
 
-   for (int32_t y=0;y<mHeight;y++)
+   for (int32_t y = 0; y < mHeight; y++)
    {
       dst[0]=
             ((128 + (src1[mWidth-1] & 0xff) * s - (src1[1]&0xff)*s) << 16)
@@ -390,15 +390,18 @@ void Image::buildDeltaMap()
            ((128 + (src1[mWidth - 2] & 0xff) * s - (src1[0]          & 0xff) * s) << 16)
          | ((128 + (src0[mWidth - 1] & 0xff) * s - (src2[mWidth - 1] & 0xff) * s) << 8);
 
-      dst+=mWidth;
-      src0= src1;
-      src1= src2;
+      dst += mWidth;
+      src0 = src1;
+      src1 = src2;
 
-      if (y<mHeight-2)
-         src2+=mWidth;
+      if (y < mHeight - 2)
+      {
+         src2 += mWidth;
+      }
       else
-         src2=mData.data();
-
+      {
+         src2 = mData.data();
+      }
    }
 
    delete[] temp;

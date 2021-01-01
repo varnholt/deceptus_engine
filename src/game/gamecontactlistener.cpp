@@ -665,7 +665,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
             if (impulse > 0.0003f)
             {
-               std::cout << "arrow hit with " << impulse << std::endl;
+               // std::cout << "arrow hit with " << impulse << std::endl;
                projectile->setScheduledForInactivity(true);
             }
          }
@@ -702,7 +702,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
             if (impulse > 0.0003f)
             {
-               std::cout << "arrow hit with " << impulse << std::endl;
+               // std::cout << "arrow hit with " << impulse << std::endl;
                projectile->setScheduledForInactivity(true);
             }
          }

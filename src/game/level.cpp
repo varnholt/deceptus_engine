@@ -386,7 +386,7 @@ void Level::loadTmx()
             {
                Enemy enemy;
                enemy.parse(tmxObject);
-               mEnemyObjectData[enemy.mId]=enemy;
+               mEnemyDataFromTmxLayer[enemy.mId]=enemy;
             }
             else if (objectGroup->mName == "fans")
             {
@@ -539,11 +539,6 @@ void Level::loadTmx()
    mFans = Fan::getFans();
    Lever::merge(mLevers, mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
 
-   for (auto& enemy : mEnemyObjectData)
-   {
-      enemy.second.addChain(mWorldChains);
-   }
-
    mMap->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),
       path / std::filesystem::path("physics_path_solid.png")
@@ -660,21 +655,36 @@ void Level::resetDeathShader()
 //-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
-   for (auto& desc : mDescription->mEnemies)
+   for (auto& enemy : mEnemyDataFromTmxLayer)
    {
-      auto enemy = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + desc.mScript);
+      enemy.second.addPaths(mWorldChains);
+   }
 
-      const auto& it = mEnemyObjectData.find(desc.mId);
-      if (it != mEnemyObjectData.end())
+   // iterate through all enemies in the json
+   for (auto& jsonDescription : mDescription->mEnemies)
+   {
+      auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + jsonDescription.mScript);
+
+      // find matching enemy data from the tmx layer and retrieve the patrol path from there
+      const auto& it = mEnemyDataFromTmxLayer.find(jsonDescription.mId);
+      if (it != mEnemyDataFromTmxLayer.end())
       {
-         desc.mPatrolPath = it->second.mPixelChain;
-         desc.mTransformPatrolPath = false;
+         // positions from the tmx are given in pixels, not tiles
+         jsonDescription.mScaleTileToPixelPos = false;
+
+         jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.x);
+         jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.y);
+
+         if (jsonDescription.mGeneratePatrolPath)
+         {
+            jsonDescription.mPath = it->second.mPixelPath;
+         }
       }
 
-      enemy->mEnemyDescription = desc;
-      enemy->initialize();
-
-      mEnemies.push_back(enemy);
+      // initialize lua node and store enemy
+      luaNode->mEnemyDescription = jsonDescription;
+      luaNode->initialize();
+      mEnemies.push_back(luaNode);
    }
 }
 

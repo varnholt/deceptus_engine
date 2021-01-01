@@ -455,6 +455,32 @@ extern "C" int32_t setTransform(lua_State* state)
 }
 
 
+extern "C" int32_t setSpriteOrigin(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 3)
+   {
+      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto x = static_cast<float>(lua_tonumber(state, 2));
+      auto y = static_cast<float>(lua_tonumber(state, 3));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setSpriteOrigin(id, x, y);
+   }
+
+   return 0;
+}
+
+
+
 extern "C" int32_t boom(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -614,7 +640,7 @@ extern "C" int32_t addWeapon(lua_State* state)
       return 0;
    }
 
-   auto weapon = WeaponFactory::create(weapon_type, std::move(shape), fireInterval, damage);
+   auto weapon = WeaponFactory::create(node->mBody, weapon_type, std::move(shape), fireInterval, damage);
    node->addWeapon(std::move(weapon));
 
    return 0;
@@ -780,7 +806,7 @@ extern "C" int32_t debug(lua_State* state)
    std::stringstream os;
    os << lua_tostring(state, -1);
 
-   printf("%s\n", os.str().c_str());
+   std::cout << os.str() << std::endl;
 
    lua_pop(state, 1);
 
@@ -851,46 +877,58 @@ LuaNode::LuaNode(const std::string &filename)
    mScriptName(filename)
 {
    setName(typeid(LuaNode).name());
+
+   // create instances
+   mBodyDef = new b2BodyDef();
+   mBody = Level::getCurrentLevel()->getWorld()->CreateBody(mBodyDef);
 }
 
 
 void LuaNode::deserializeEnemyDescription()
 {
-   if (!mEnemyDescription.mPatrolPath.empty())
+   // set up patrol path
+   if (!mEnemyDescription.mPath.empty())
    {
       std::vector<sf::Vector2f> patrolPath;
-      for (auto i = 0u; i < mEnemyDescription.mPatrolPath.size(); i+= 2)
+
+      for (auto i = 0u; i < mEnemyDescription.mPath.size(); i += 2)
       {
-         // by defautl the path is given is tiles.
+         auto pos = sf::Vector2f(
+            static_cast<float_t>(mEnemyDescription.mPath.at(i)),
+            static_cast<float_t>(mEnemyDescription.mPath.at(i + 1))
+         );
+
+         // by default the path is given is tiles.
          // if we override it, we're setting pixel positions which are already transformed
-         if (mEnemyDescription.mTransformPatrolPath)
+         if (mEnemyDescription.mScaleTileToPixelPos)
          {
-            patrolPath.push_back(
-               sf::Vector2f(
-                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i)     * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
-                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i + 1) * PIXELS_PER_TILE)
-               )
-            );
+            pos.x *= PIXELS_PER_TILE;
+            pos.y *= PIXELS_PER_TILE;
+            pos.x += PIXELS_PER_TILE / 2;
+            pos.y += PIXELS_PER_TILE / 2;
          }
-         else {
-            patrolPath.push_back(
-               sf::Vector2f(
-                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i)),
-                  static_cast<float_t>(mEnemyDescription.mPatrolPath.at(i + 1))
-               )
-            );
-         }
+
+         patrolPath.push_back(pos);
       }
 
       mPatrolPath = patrolPath;
    }
 
+   // set up start position
    if (!mEnemyDescription.mStartPosition.empty())
    {
       mStartPosition = sf::Vector2f(
-         static_cast<float_t>(mEnemyDescription.mStartPosition.at(0) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2),
-         static_cast<float_t>(mEnemyDescription.mStartPosition.at(1) * PIXELS_PER_TILE + PIXELS_PER_TILE / 2)
+         static_cast<float_t>(mEnemyDescription.mStartPosition.at(0)),
+         static_cast<float_t>(mEnemyDescription.mStartPosition.at(1))
       );
+
+      if (mEnemyDescription.mScaleTileToPixelPos)
+      {
+         mStartPosition.x *= PIXELS_PER_TILE;
+         mStartPosition.y *= PIXELS_PER_TILE;
+         mStartPosition.x += PIXELS_PER_TILE / 2;
+         mStartPosition.y += PIXELS_PER_TILE / 2;
+      }
 
       mPosition = mStartPosition;
    }
@@ -901,7 +939,7 @@ void LuaNode::initialize()
 {
    deserializeEnemyDescription();
    setupLua();
-   createBody();
+   setupBody();
 }
 
 
@@ -932,6 +970,7 @@ void LuaNode::setupLua()
    lua_register(mState, "setGravityScale", ::setGravityScale);
    lua_register(mState, "setLinearVelocity", ::setLinearVelocity);
    lua_register(mState, "setTransform", ::setTransform);
+   lua_register(mState, "setSpriteOrigin", ::setSpriteOrigin);
    lua_register(mState, "setZ", ::setZ);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateProjectileTexture", ::updateProjectileTexture);
@@ -1152,9 +1191,16 @@ void LuaNode::setGravityScale(float scale)
    mBody->SetGravityScale(scale);
 }
 
+
 void LuaNode::setTransform(const b2Vec2& position, float32 angle)
 {
    mBody->SetTransform(position, angle);
+}
+
+
+void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
+{
+   mSprites[id].setOrigin(x, y);
 }
 
 
@@ -1309,21 +1355,15 @@ int64_t LuaNode::getPropertyInt64(const std::string &key)
 }
 
 
-void LuaNode::createBody()
+void LuaNode::setupBody()
 {
    auto staticBody = getPropertyBool("staticBody");
    auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
    auto sensor = static_cast<bool>(getPropertyBool("sensor"));
 
-   mBodyDef = new b2BodyDef();
-   mBodyDef->type = staticBody ? b2_staticBody : b2_dynamicBody;
-   mBodyDef->position.Set(
-      mStartPosition.x * MPP,
-      mStartPosition.y * MPP
-   );
-
-   mBody = Level::getCurrentLevel()->getWorld()->CreateBody(mBodyDef);
+   mBody->SetTransform(b2Vec2{mStartPosition.x * MPP, mStartPosition.y * MPP}, 0.0f);
    mBody->SetFixedRotation(true);
+   mBody->SetType(staticBody ? b2_staticBody : b2_dynamicBody);
 
    for (auto shape : mShapes)
    {
@@ -1525,7 +1565,7 @@ void LuaNode::updateVelocity()
       b2Vec2(impulse, 0.0f),
       mBody->GetWorldCenter(),
       true
-            );
+   );
 }
 
 
