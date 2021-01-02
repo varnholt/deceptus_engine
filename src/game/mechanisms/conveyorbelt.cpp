@@ -140,7 +140,7 @@ ConveyorBelt::ConveyorBelt(
       auto velocityIt = tmxObject->mProperties->mMap.find("velocity");
       if (velocityIt != tmxObject->mProperties->mMap.end())
       {
-         velocity = velocityIt->second->mValueFloat;
+         velocity = velocityIt->second->mValueFloat.value();
       }
    }
 

@@ -308,7 +308,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
             if (layer->mProperties != nullptr)
             {
-               laser->setZ(layer->mProperties->mMap["z"]->mValueInt);
+               laser->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
             }
 
             sf::Sprite sprite;
@@ -491,13 +491,13 @@ void Laser::merge()
                      auto it = object->mProperties->mMap.find("on_time");
                      if (it != object->mProperties->mMap.end())
                      {
-                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt), true});
+                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt.value()), true});
                      }
 
                      it = object->mProperties->mMap.find("off_time");
                      if (it != object->mProperties->mMap.end())
                      {
-                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt), false});
+                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt.value()), false});
                      }
                   }
 

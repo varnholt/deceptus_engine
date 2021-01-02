@@ -27,7 +27,7 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const s
      auto z = imageLayer->mProperties->mMap.find("z");
      if (z != imageLayer->mProperties->mMap.end())
      {
-        image->mZ = imageLayer->mProperties->mMap["z"]->mValueInt;
+        image->mZ = imageLayer->mProperties->mMap["z"]->mValueInt.value();
         // std::cout << "image layer has z: " << image->mZ << std::endl;
      }
 
@@ -35,7 +35,7 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const s
      auto it = imageLayer->mProperties->mMap.find("blendmode");
      if (it != imageLayer->mProperties->mMap.end())
      {
-        blendModeStr = it->second->mValueStr;
+        blendModeStr = it->second->mValueStr.value();
 
         if (blendModeStr == "alpha")
         {

@@ -31,7 +31,7 @@ void Dialogue::add(TmxObject* tmxObject)
       if (it != properties->mMap.end())
       {
          DialogueItem item;
-         item.mMessage = (*it).second->mValueStr;
+         item.mMessage = (*it).second->mValueStr.value();
          dialogue.mDialogue.push_back(item);
       }
    }

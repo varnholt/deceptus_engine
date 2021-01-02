@@ -174,7 +174,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
 
             if (layer->mProperties != nullptr)
             {
-               movingPlatform->setZ(layer->mProperties->mMap["z"]->mValueInt);
+               movingPlatform->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
             }
 
             while (tileNumber != 0)

@@ -251,7 +251,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
 
                if (layer->mProperties != nullptr)
                {
-                  portal->setZ(layer->mProperties->mMap["z"]->mValueInt);
+                  portal->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
                }
             }
 

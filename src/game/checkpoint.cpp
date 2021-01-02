@@ -51,7 +51,7 @@ uint32_t Checkpoint::add(TmxObject* tmxObject)
       auto it = tmxObject->mProperties->mMap.find("index");
       if (it != tmxObject->mProperties->mMap.end())
       {
-         cp.mIndex = static_cast<uint32_t>(it->second->mValueInt);
+         cp.mIndex = static_cast<uint32_t>(it->second->mValueInt.value());
       }
    }
 
