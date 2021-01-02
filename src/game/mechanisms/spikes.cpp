@@ -305,7 +305,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
 
             if (layer->mProperties != nullptr)
             {
-               spikes->setZ(layer->mProperties->mMap["z"]->mValueInt);
+               spikes->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
             }
 
             spikes->mPixelRect = {

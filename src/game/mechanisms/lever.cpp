@@ -282,7 +282,7 @@ void Lever::merge(
          auto enabledIt = rect->mProperties->mMap.find("enabled");
          if (enabledIt != rect->mProperties->mMap.end())
          {
-            enabled = enabledIt->second->mValueBool;
+            enabled = enabledIt->second->mValueBool.value();
          }
       }
 

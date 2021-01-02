@@ -60,7 +60,7 @@ bool TileMap::load(
       auto itParallaxValue = map.find("parallax");
       if (itParallaxValue != map.end())
       {
-         parallaxScale = itParallaxValue->second->mValueFloat;
+         parallaxScale = itParallaxValue->second->mValueFloat.value();
       }
    }
 

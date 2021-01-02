@@ -110,6 +110,9 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function writeProperty(key, value)
+
+   print(string.format("write property: %s %s", key, value))
+
    config[key] = value
 
    if (key == "alignment") then

@@ -3,6 +3,8 @@
 #include "constants.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 
 #include <iostream>
 
@@ -12,6 +14,17 @@ void Enemy::parse(TmxObject* object)
    mId = object->mId;
    mName = object->mName;
    mPixelPosition = {static_cast<int32_t>(object->mX), static_cast<int32_t>(object->mY)};
+
+   if (object->mProperties)
+   {
+      for (const auto& [k, v] : object->mProperties->mMap)
+      {
+         ScriptProperty property;
+         property.mName = k;
+         property.mValue = v->toString();
+         mProperties.push_back(property);
+      }
+   }
 
    auto w = static_cast<int32_t>(object->mWidth);
    auto h = static_cast<int32_t>(object->mHeight);

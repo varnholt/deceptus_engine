@@ -66,7 +66,7 @@ void TmxParser::parse(const std::string &filename)
                   auto it = map.find("z");
                   if (it != map.end())
                   {
-                     z = it->second->mValueInt;
+                     z = it->second->mValueInt.value();
                   }
                   dynamic_cast<TmxLayer*>(element)->mZ = z;
                }

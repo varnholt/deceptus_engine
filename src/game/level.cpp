@@ -228,13 +228,13 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
       auto itParallaxValue = map.find("parallax");
       if (itParallaxValue != map.end())
       {
-         parallax = itParallaxValue->second->mValueFloat;
+         parallax = itParallaxValue->second->mValueFloat.value();
       }
 
       auto itParallaxView = map.find("parallax_view");
       if (itParallaxView != map.end())
       {
-         const auto view = itParallaxView->second->mValueInt;
+         const auto view = itParallaxView->second->mValueInt.value();
          mParallaxFactors[view] = parallax;
       }
    }
@@ -678,6 +678,12 @@ void Level::spawnEnemies()
          if (jsonDescription.mGeneratePatrolPath)
          {
             jsonDescription.mPath = it->second.mPixelPath;
+         }
+
+         // merge properties from tmx with those loaded from json
+         for (auto& property : it->second.mProperties)
+         {
+            jsonDescription.mProperties.push_back(property);
          }
       }
 
