@@ -89,7 +89,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
       auto z = tmxObject->mProperties->mMap.find("z");
       if (z != tmxObject->mProperties->mMap.end())
       {
-         smokeEffect->mZ = tmxObject->mProperties->mMap["z"]->mValueInt;
+         smokeEffect->mZ = tmxObject->mProperties->mMap["z"]->mValueInt.value();
          std::cout << "smoke effect layer has z: " << smokeEffect->mZ << std::endl;
       }
    }

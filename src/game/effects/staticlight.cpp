@@ -97,31 +97,31 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* 
       auto it = tmxObject->mProperties->mMap.find("color");
       if (it != tmxObject->mProperties->mMap.end())
       {
-         rgba = TmxTools::color(it->second->mValueStr);
+         rgba = TmxTools::color(it->second->mValueStr.value());
       }
 
       it = tmxObject->mProperties->mMap.find("texture");
       if (it != tmxObject->mProperties->mMap.end())
       {
-         texture = (std::filesystem::path("data/light/") / it->second->mValueStr).string();
+         texture = (std::filesystem::path("data/light/") / it->second->mValueStr.value()).string();
       }
 
       it = tmxObject->mProperties->mMap.find("flicker_intensity");
       if (it != tmxObject->mProperties->mMap.end())
       {
-         flickerIntensity = it->second->mValueFloat;
+         flickerIntensity = it->second->mValueFloat.value();
       }
 
       it = tmxObject->mProperties->mMap.find("flicker_alpha_amount");
       if (it != tmxObject->mProperties->mMap.end())
       {
-         flickerAlphaAmount = it->second->mValueFloat;
+         flickerAlphaAmount = it->second->mValueFloat.value();
       }
 
       it = tmxObject->mProperties->mMap.find("flicker_speed");
       if (it != tmxObject->mProperties->mMap.end())
       {
-         flickerSpeed = it->second->mValueFloat;
+         flickerSpeed = it->second->mValueFloat.value();
       }
    }
 

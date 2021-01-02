@@ -355,7 +355,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 
                if (layer->mProperties != nullptr)
                {
-                  door->setZ(layer->mProperties->mMap["z"]->mValueInt);
+                  door->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
                }
             }
 

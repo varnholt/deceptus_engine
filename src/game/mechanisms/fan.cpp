@@ -254,7 +254,7 @@ void Fan::addObject(TmxObject* object, const std::filesystem::path& basePath)
    if (object->mProperties)
    {
        auto speedProp = object->mProperties->mMap["speed"];
-       fan->mSpeed = speedProp ? speedProp->mValueFloat : 1.0f;
+       fan->mSpeed = speedProp ? speedProp->mValueFloat.value() : 1.0f;
    }
 }
 

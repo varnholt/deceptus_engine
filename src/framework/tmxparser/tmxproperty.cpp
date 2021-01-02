@@ -1,5 +1,7 @@
 #include "tmxproperty.h"
 
+#include <sstream>
+
 /*
 
   <properties>
@@ -36,5 +38,34 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element)
    {
       mValueStr = element->Attribute("value");
    }
+}
+
+
+std::string TmxProperty::toString() const
+{
+   if (mValueStr.has_value())
+   {
+      return mValueStr.value();
+   }
+   else if (mValueFloat.has_value())
+   {
+      std::ostringstream stream;
+      stream << mValueFloat.value();
+      return stream.str();
+   }
+   else if (mValueInt.has_value())
+   {
+      std::ostringstream stream;
+      stream << mValueInt.value();
+      return stream.str();
+   }
+   else if (mValueBool.has_value())
+   {
+      std::ostringstream stream;
+      stream << mValueBool.value();
+      return stream.str();
+   }
+
+   return {};
 }
 

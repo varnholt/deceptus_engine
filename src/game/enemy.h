@@ -6,6 +6,8 @@
 #include <array>
 #include <string>
 
+#include "scriptproperty.h"
+
 struct TmxObject;
 
 struct Enemy
@@ -23,5 +25,6 @@ struct Enemy
    std::vector<b2Vec2> mPath;
    std::vector<int32_t> mPixelPath;
    bool mHasPath = false;
+   std::vector<ScriptProperty> mProperties;
 };
 
