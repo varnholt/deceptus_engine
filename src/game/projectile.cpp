@@ -123,6 +123,29 @@ void Projectile::addHitAnimations()
    }
 }
 
+float Projectile::getRotation() const
+{
+   return _rotation;
+}
+
+
+void Projectile::setRotation(float rotation)
+{
+   _rotation = rotation;
+}
+
+
+bool Projectile::isRotating() const
+{
+   return _rotating;
+}
+
+
+void Projectile::setRotating(bool rotating)
+{
+   _rotating = rotating;
+}
+
 
 void Projectile::update(const sf::Time& dt)
 {
