@@ -32,7 +32,7 @@ public:
    ProjectileHitAnimation() = default;
 
    static void initialize();
-   static void add(float x, float y, const FrameData& frames);
+   static void add(float x, float y, float angle, const FrameData& frames);
    static void updateAnimations(const sf::Time& dt);
 
    static std::list<ProjectileHitAnimation*>& getAnimations();

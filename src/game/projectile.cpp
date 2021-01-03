@@ -93,6 +93,7 @@ void Projectile::collectHitInformation()
       {
          _hit_information.push_back({
                b2Vec2(projectile->getBody()->GetPosition()),
+               projectile->_rotation,
                projectile->_weapon_type
             }
          );
@@ -116,10 +117,11 @@ void Projectile::addHitAnimations()
    {
       const auto& hit_info = *it;
       const b2Vec2& vec = hit_info._pos;
+
       float gx = vec.x * PPM;
       float gy = vec.y * PPM;
 
-      ProjectileHitAnimation::add(gx, gy, _hit_animations[hit_info._weapon_type]);
+      ProjectileHitAnimation::add(gx, gy, it->_angle, _hit_animations[hit_info._weapon_type]);
    }
 }
 
