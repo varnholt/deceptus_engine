@@ -9,6 +9,7 @@
 struct Arrow : public Projectile
 {
    Arrow();
+   void updateTextureRect(const sf::Time& time);
    static bool _animation_initialised;
 };
 

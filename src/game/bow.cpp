@@ -19,11 +19,14 @@
 
 namespace
 {
+
+// those two need to be configurable (dynamic objects need higher launch speeds apparently)
 static constexpr auto launch_speed = 5.0f;
+static constexpr auto arrow_gravity_scale = 0.1f;
+
 static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
-static constexpr auto arrow_gravity_scale = 0.1f;
 // static constexpr auto drag_constant = 0.1f;
 static constexpr auto scale = 0.1f;
 
@@ -83,6 +86,18 @@ Arrow::Arrow()
 }
 
 
+void Arrow::updateTextureRect(const sf::Time& /*time*/)
+{
+   sf::Rect<int32_t> texture_rect;
+   texture_rect.top    = 1 * PIXELS_PER_TILE;
+   texture_rect.left   = 2 * PIXELS_PER_TILE;
+   texture_rect.width  = PIXELS_PER_TILE;
+   texture_rect.height = PIXELS_PER_TILE;
+
+   _sprite.setTextureRect(texture_rect);
+}
+
+
 Bow::Bow()
 {
    _fire_interval_ms = 1500;
@@ -99,6 +114,7 @@ Bow::~Bow()
 void Bow::load(b2World* world)
 {
    auto arrow = _loaded_arrow = new Arrow();
+   arrow->setSprite(_projectile_reference_sprite);
 
    _loaded_arrow->addDestroyedCallback([this, arrow](){
       _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end());
@@ -143,12 +159,6 @@ void Bow::fireNow(
    const b2Vec2& dir
 )
 {
-   _projectile_texture_rect.top    = 1 * PIXELS_PER_TILE;
-   _projectile_texture_rect.left   = 2 * PIXELS_PER_TILE;
-   _projectile_texture_rect.width  = PIXELS_PER_TILE;
-   _projectile_texture_rect.height = PIXELS_PER_TILE;
-   _projectile_sprite.setTextureRect(_projectile_texture_rect);
-
    // the bow workflow could be split up into
    // 1) aim
    // 2) pull
@@ -197,10 +207,10 @@ void Bow::loadTextures()
 
    _texture_path = "data/weapons/arrow.png";
 
-   _projectile_texture = TexturePool::getInstance().get(_texture_path);
+   _projectile_reference_texture = TexturePool::getInstance().get(_texture_path);
 
-   _projectile_sprite.setTexture(*_projectile_texture);
-   _projectile_sprite.setOrigin(
+   _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
+   _projectile_reference_sprite.setOrigin(
       static_cast<float_t>(PIXELS_PER_TILE / 2),
       static_cast<float_t>(PIXELS_PER_TILE / 2)
    );
@@ -222,6 +232,8 @@ void Bow::update(const sf::Time& time)
    // apply drag force to arrows
    for (auto& arrow : _arrows)
    {
+      arrow->updateTextureRect(time);
+
       if (!arrow->getBody()->IsActive())
       {
          continue;

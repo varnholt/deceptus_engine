@@ -72,6 +72,8 @@ void Weapon::fireNow(
    );
 
    auto projectile = new Projectile();
+   projectile->setSprite(_projectile_reference_sprite);
+   projectile->setTextureRect(_projectile_reference_texture_rect);
    projectile->addDestroyedCallback([this, projectile](){
       _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), projectile), _projectiles.end());
    });
@@ -120,18 +122,20 @@ void Weapon::drawProjectiles(sf::RenderTarget& target)
          continue;
       }
 
+      auto sprite = projectile->getSprite();
+
       if (projectile->isRotating())
       {
          // std::cout << "setting sprite rotation to " << projectile->getRotation() << std::endl;
-         _projectile_sprite.setRotation(RADTODEG * projectile->getRotation());
+         sprite.setRotation(RADTODEG * projectile->getRotation());
       }
 
-      _projectile_sprite.setPosition(
+      sprite.setPosition(
          projectile->getBody()->GetPosition().x * PPM,
          projectile->getBody()->GetPosition().y * PPM
       );
 
-      target.draw(_projectile_sprite);
+      target.draw(sprite);
    }
 }
 
@@ -195,34 +199,34 @@ void Weapon::loadTextures()
    //      << "height: " << mTextureRect.height
    //      << std::endl;
 
-   _projectile_texture = TexturePool::getInstance().get(_texture_path);
+   _projectile_reference_texture = TexturePool::getInstance().get(_texture_path);
 
    if (_shape->GetType() == b2Shape::e_polygon)
    {
-      _projectile_sprite.setOrigin(0, 0);
-      _projectile_sprite.setTextureRect(_projectile_texture_rect);
-      _projectile_sprite.setTexture(*_projectile_texture);
+      _projectile_reference_sprite.setOrigin(0, 0);
+      _projectile_reference_sprite.setTextureRect(_projectile_reference_texture_rect);
+      _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
-      if (_projectile_texture_rect.width > 0)
+      if (_projectile_reference_texture_rect.width > 0)
       {
-         _projectile_sprite.setOrigin(
-            static_cast<float_t>(_projectile_texture_rect.width / 2),
-            static_cast<float_t>(_projectile_texture_rect.height / 2)
+         _projectile_reference_sprite.setOrigin(
+            static_cast<float_t>(_projectile_reference_texture_rect.width / 2),
+            static_cast<float_t>(_projectile_reference_texture_rect.height / 2)
          );
 
-         _projectile_sprite.setTextureRect(_projectile_texture_rect);
-         _projectile_sprite.setTexture(*_projectile_texture);
+         _projectile_reference_sprite.setTextureRect(_projectile_reference_texture_rect);
+         _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
       }
       else
       {
-         _projectile_sprite.setOrigin(
-            static_cast<float_t>(_projectile_texture->getSize().x / 2),
-            static_cast<float_t>(_projectile_texture->getSize().y / 2)
+         _projectile_reference_sprite.setOrigin(
+            static_cast<float_t>(_projectile_reference_texture->getSize().x / 2),
+            static_cast<float_t>(_projectile_reference_texture->getSize().y / 2)
          );
 
-         _projectile_sprite.setTexture(*_projectile_texture, true);
+         _projectile_reference_sprite.setTexture(*_projectile_reference_texture, true);
       }
    }
 }
@@ -233,11 +237,11 @@ void Weapon::setTexture(
    const sf::Rect<int32_t>& textureRect
 )
 {
-   bool reload = ((path != _texture_path) || (textureRect != _projectile_texture_rect));
+   bool reload = ((path != _texture_path) || (textureRect != _projectile_reference_texture_rect));
 
    if (reload)
    {
-      _projectile_texture_rect = textureRect;
+      _projectile_reference_texture_rect = textureRect;
       _texture_path = path;
 
       loadTextures();
