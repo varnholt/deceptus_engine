@@ -9,9 +9,6 @@
 struct Arrow : public Projectile
 {
    Arrow();
-
-   float _angle = 0.0f;
-
    static bool _animation_initialised;
 };
 

@@ -120,6 +120,12 @@ void Weapon::drawProjectiles(sf::RenderTarget& target)
          continue;
       }
 
+      if (projectile->isRotating())
+      {
+         // std::cout << "setting sprite rotation to " << projectile->getRotation() << std::endl;
+         _projectile_sprite.setRotation(RADTODEG * projectile->getRotation());
+      }
+
       _projectile_sprite.setPosition(
          projectile->getBody()->GetPosition().x * PPM,
          projectile->getBody()->GetPosition().y * PPM

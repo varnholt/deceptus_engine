@@ -39,35 +39,16 @@ mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
-mX = -1.0
+mX = 0.0
+mY = 0.0
+mOffsetX = 0.0
+mOffsetY = 0.0
 mSpeed = 1.5
 
 mIdle = true
 
 SPRITE_WIDTH = 3 * 24
 SPRITE_HEIGHT = 3 * 24
-
-
-------------------------------------------------------------------------------------------------------------------------
-function getOffset(alignment)
-   offset = v2d.Vector2D(0, 0)
-
-   if (alignment == Alignment["AlignmentUp"]) then
-      offset:setX(5)
-      offset:setY(1)
-   elseif (alignment == Alignment["AlignmentDown"]) then
-      offset:setX(5)
-      offset:setY(0)
-   elseif (alignment == Alignment["AlignmentLeft"]) then
-      offset:setX(0)
-      offset:setY(0)
-   elseif (alignment == Alignment["AlignmentRight"]) then
-      offset:setX(0)
-      offset:setY(1)
-   end
-
-   return offset
-end
 
 
 -- physical box is just 24 * 24px
@@ -90,10 +71,45 @@ function initialize()
    addSample("boom.wav")
    addWeapon(WeaponType["Bow"], 1000, 60, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/weapons/arrow.png", 144, 984, 48, 24) -- index, path, x, y, width, height
+   updateAlignment(Alignment["AlignmentRight"])
+   setSpriteOrigin(0, -12, -12)
+end
 
-   alignment = Alignment["AlignmentRight"]
 
-   offset = getOffset(alignment)
+------------------------------------------------------------------------------------------------------------------------
+function updateAlignment(alignment)
+
+   offset = v2d.Vector2D(0, 0)
+
+   if (alignment == Alignment["AlignmentUp"]) then
+      offset:setX(5)
+      offset:setY(1)
+      mX = 0.0
+      mY = 1.0
+      mOffsetX = 0.0
+      mOffsetY = 16
+   elseif (alignment == Alignment["AlignmentDown"]) then
+      offset:setX(5)
+      offset:setY(0)
+      mX = 0.0
+      mY = 1.0
+      mOffsetX = 0.0
+      mOffsetY = 16
+   elseif (alignment == Alignment["AlignmentLeft"]) then
+      offset:setX(0)
+      offset:setY(0)
+      mX = -1.0
+      mY = 0.0
+      mOffsetX = -16
+      mOffsetY = 0.0
+   elseif (alignment == Alignment["AlignmentRight"]) then
+      offset:setX(0)
+      offset:setY(1)
+      mX = 1.0
+      mY = 0.0
+      mOffsetX = 32
+      mOffsetY = 0.0
+   end
 
    updateSpriteRect(
       0,
@@ -102,9 +118,6 @@ function initialize()
       SPRITE_WIDTH,
       SPRITE_HEIGHT
    )
-
-   setSpriteOrigin(0, -12, -12)
-
 end
 
 
@@ -116,9 +129,20 @@ function writeProperty(key, value)
    config[key] = value
 
    if (key == "alignment") then
+
+      alignment = Alignment["AlignmentRight"]
+
       if (value == "right") then
-         print("setting alignment to left")
+         alignment = Alignment["AlignmentRight"]
+      elseif (value == "left") then
+         alignment = Alignment["AlignmentLeft"]
+      elseif (value == "up") then
+         alignment = Alignment["AlignmentUp"]
+      elseif (value == "down") then
+         alignment = Alignment["AlignmentDown"]
       end
+
+      updateAlignment(alignment)
    end
 end
 
@@ -138,10 +162,10 @@ end
 function fire()
    fireWeapon(
       0,
-      mPosition:getX() + mX * 16,
-      mPosition:getY() - 12,
+      mPosition:getX() + mOffsetX,
+      mPosition:getY() + mOffsetY,
       mX * mSpeed,
-      0.0
+      mY * mSpeed
    );
 end
 
