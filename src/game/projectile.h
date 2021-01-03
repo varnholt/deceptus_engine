@@ -50,6 +50,12 @@ public:
    bool isScheduledForInactivity() const;
    void setScheduledForInactivity(bool scheduled_for_inactivity);
 
+   bool isRotating() const;
+   void setRotating(bool rotating);
+
+   float getRotation() const;
+   void setRotation(float rotation);
+
 
 protected:
 
@@ -60,6 +66,8 @@ protected:
    bool _scheduled_for_inactivity = false;
    bool _sticky = false;
    bool _hit_something = false;
+   bool _rotating = false;
+   float _rotation = 0.0f;
    b2Body* _body = nullptr;
    WeaponType _weapon_type = WeaponType::Default;
    std::vector<DestroyedCallback> _destroyed_callbacks;

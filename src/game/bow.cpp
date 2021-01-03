@@ -24,7 +24,7 @@ static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
 static constexpr auto arrow_gravity_scale = 0.1f;
-static constexpr auto drag_constant = 0.1f;
+// static constexpr auto drag_constant = 0.1f;
 static constexpr auto scale = 0.1f;
 
 const auto sprite_width = PIXELS_PER_TILE;
@@ -45,6 +45,7 @@ bool Arrow::_animation_initialised = false;
 
 Arrow::Arrow()
 {
+   _rotating = true;
    _sticky = true;
    _weapon_type = WeaponType::Bow;
 
@@ -142,24 +143,7 @@ void Bow::fireNow(
    const b2Vec2& dir
 )
 {
-   b2Vec2 posCopy = pos;
-   posCopy.y -= 0.15f;
-
-   // let the bow always point up a bit
-   b2Vec2 dirCopy = dir;
-   dirCopy.y -= 0.01f;
-
-   // for now just let the arrow point in the fire direction
-   // rotation can be done later
-   if (dir.x < 0.0)
-   {
-      _projectile_texture_rect.top = 0 * PIXELS_PER_TILE;
-   }
-   else
-   {
-      _projectile_texture_rect.top = 1 * PIXELS_PER_TILE;
-   }
-
+   _projectile_texture_rect.top    = 1 * PIXELS_PER_TILE;
    _projectile_texture_rect.left   = 2 * PIXELS_PER_TILE;
    _projectile_texture_rect.width  = PIXELS_PER_TILE;
    _projectile_texture_rect.height = PIXELS_PER_TILE;
@@ -177,13 +161,13 @@ void Bow::fireNow(
    // store projectile so it gets drawn
    _projectiles.push_back(_loaded_arrow);
 
-   const auto angle = atan2(dirCopy.y, dirCopy.x);
-   const auto velocity = _launcher_body->GetWorldVector(launch_speed * dirCopy);
+   const auto angle = atan2(dir.y, dir.x);
+   const auto velocity = _launcher_body->GetWorldVector(launch_speed * dir);
 
    _loaded_arrow->getBody()->SetAwake(true);
    _loaded_arrow->getBody()->SetGravityScale(arrow_gravity_scale);
    _loaded_arrow->getBody()->SetAngularVelocity(0.0f);
-   _loaded_arrow->getBody()->SetTransform(posCopy, angle);
+   _loaded_arrow->getBody()->SetTransform(pos, angle);
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);
    _loaded_arrow->setProperty("damage", _damage);
    _loaded_arrow = nullptr;
@@ -245,24 +229,27 @@ void Bow::update(const sf::Time& time)
 
       auto arrow_body = arrow->getBody();
 
-      const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
-      auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));
-      arrow_pointing_direction.Normalize();
-
       auto arrow_velocity = arrow_body->GetLinearVelocity();
-      const auto arrlow_velocity_length = arrow_velocity.Normalize();
+      /*const auto arrlow_velocity_length =*/ arrow_velocity.Normalize();
 
-      const auto dot = b2Dot(arrow_velocity, arrow_pointing_direction);
-      arrow->_angle = acos(dot);
+      arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
 
-      const auto draw_force_magnitude =
-         (1 - fabs(dot)) * arrlow_velocity_length * arrlow_velocity_length * drag_constant * arrow_body->GetMass();
-
-      arrow_body->ApplyForce(
-         draw_force_magnitude * -arrow_velocity,
-         arrow_tail_position,
-         false
-      );
+      // we don't really need realistic arrow drag in this game
+      //
+      // const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
+      // auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));
+      // arrow_pointing_direction.Normalize();
+      //
+      // const auto dot = b2Dot(arrow_velocity, arrow_pointing_direction);
+      //
+      // const auto draw_force_magnitude =
+      //    (1 - fabs(dot)) * arrlow_velocity_length * arrlow_velocity_length * drag_constant * arrow_body->GetMass();
+      //
+      // arrow_body->ApplyForce(
+      //    draw_force_magnitude * -arrow_velocity,
+      //    arrow_tail_position,
+      //    false
+      // );
    }
 }
 
