@@ -68,7 +68,7 @@ void ProjectileHitAnimation::initialize()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void ProjectileHitAnimation::add(float x, float y, const ProjectileHitAnimation::FrameData& frames)
+void ProjectileHitAnimation::add(float x, float y, float angle, const ProjectileHitAnimation::FrameData& frames)
 {
    auto anim = new ProjectileHitAnimation();
 
@@ -77,6 +77,10 @@ void ProjectileHitAnimation::add(float x, float y, const ProjectileHitAnimation:
    anim->setFrameTimes(frames._frame_times);
    anim->setOrigin(frames._origin);
    anim->setPosition(x, y);
+   anim->setRotation(RADTODEG * angle);
+
+   // std::cout << "setting animation rotation to " << angle << std::endl;
+
    anim->play();
 
    _animations.push_back(anim);
