@@ -56,10 +56,12 @@ protected:
 
    std::vector<Projectile*> _projectiles;
 
+   // projectile related
+   // introduce a struct for this?
    std::filesystem::path _texture_path = "data/weapons/bullet.png";
-   std::shared_ptr<sf::Texture> _projectile_texture;
-   sf::Rect<int32_t> _projectile_texture_rect;
-   sf::Sprite _projectile_sprite;
+   std::shared_ptr<sf::Texture> _projectile_reference_texture;
+   sf::Rect<int32_t> _projectile_reference_texture_rect;
+   sf::Sprite _projectile_reference_sprite;
 
    std::unique_ptr<b2Shape> _shape;
 
