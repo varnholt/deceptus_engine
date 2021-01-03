@@ -125,6 +125,31 @@ void Projectile::addHitAnimations()
    }
 }
 
+
+const sf::Rect<int32_t>& Projectile::getTextureRect() const
+{
+   return _texture_rect;
+}
+
+
+void Projectile::setTextureRect(const sf::Rect<int32_t>& texture_rect)
+{
+   _texture_rect = texture_rect;
+}
+
+
+sf::Sprite Projectile::getSprite() const
+{
+   return _sprite;
+}
+
+
+void Projectile::setSprite(const sf::Sprite& sprite)
+{
+   _sprite = sprite;
+}
+
+
 float Projectile::getRotation() const
 {
    return _rotation;

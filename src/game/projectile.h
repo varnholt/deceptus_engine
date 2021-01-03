@@ -57,6 +57,12 @@ public:
    float getRotation() const;
    void setRotation(float rotation);
 
+   sf::Sprite getSprite() const;
+   void setSprite(const sf::Sprite& sprite);
+
+   const sf::Rect<int32_t>& getTextureRect() const;
+   void setTextureRect(const sf::Rect<int32_t>& texture_rect);
+
 
 protected:
 
@@ -72,6 +78,9 @@ protected:
    b2Body* _body = nullptr;
    WeaponType _weapon_type = WeaponType::Default;
    std::vector<DestroyedCallback> _destroyed_callbacks;
+
+   sf::Sprite _sprite;
+   sf::Rect<int32_t> _texture_rect;
 
    static std::map<WeaponType, ProjectileHitAnimation::FrameData> _hit_animations;
    static std::set<Projectile*> _projectiles;
