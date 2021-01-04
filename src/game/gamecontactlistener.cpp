@@ -657,8 +657,9 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
             projectile->setHitSomething(true);
 
+            // this is only needed for arrows, so could be generalised
             Timer::add(
-               std::chrono::milliseconds(3000),
+               std::chrono::milliseconds(1000),
                [projectile](){projectile->setScheduledForRemoval(true);},
                Timer::Type::Singleshot
             );
@@ -693,12 +694,12 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
             projectile->setHitSomething(true);
 
+            // this is only needed for arrows, so could be generalised
             Timer::add(
-               std::chrono::milliseconds(3000),
+               std::chrono::milliseconds(1000),
                [projectile](){projectile->setScheduledForRemoval(true);},
                Timer::Type::Singleshot
             );
-
 
             if (impulse > 0.0003f)
             {

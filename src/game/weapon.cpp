@@ -117,11 +117,6 @@ void Weapon::drawProjectiles(sf::RenderTarget& target)
 {
    for (auto projectile : _projectiles)
    {
-      if (projectile->isScheduledForRemoval())
-      {
-         continue;
-      }
-
       auto sprite = projectile->getSprite();
 
       if (projectile->isRotating())

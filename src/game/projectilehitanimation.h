@@ -17,8 +17,8 @@ public:
          const sf::Vector2f& origin,
          uint32_t frame_width,
          uint32_t frame_height,
-         uint32_t sprite_count,
-         uint32_t sprites_per_row,
+         uint32_t frame_count,
+         uint32_t frames_per_row,
          const std::vector<sf::Time>& frame_times,
          uint32_t start_frame = 0
       );

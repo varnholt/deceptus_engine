@@ -128,7 +128,10 @@ void Animation::update(const sf::Time& dt)
          }
          else
          {
-            mCurrentFrame = 0;
+            if (mResetToFirstFrame)
+            {
+               mCurrentFrame = 0;
+            }
 
             if (!mLooped)
             {

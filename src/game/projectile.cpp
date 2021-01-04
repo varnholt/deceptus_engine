@@ -4,6 +4,7 @@
 
 #include "Box2D/Box2D.h"
 
+#include <iostream>
 #include <memory>
 
 
@@ -120,6 +121,8 @@ void Projectile::addHitAnimations()
 
       float gx = vec.x * PPM;
       float gy = vec.y * PPM;
+
+      // std::cout << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle << std::endl;
 
       ProjectileHitAnimation::add(gx, gy, it->_angle, _hit_animations[hit_info._weapon_type]);
    }
