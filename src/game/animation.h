@@ -45,6 +45,7 @@ public:
 
    bool mPaused = false;
    bool mLooped = false;
+   bool mResetToFirstFrame = true;
 
    void setFrameTimes(const std::vector<sf::Time>& frameTimes);
 
