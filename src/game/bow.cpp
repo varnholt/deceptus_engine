@@ -1,4 +1,6 @@
 #include "bow.h"
+
+#include "framework/tools/globalclock.h"
 #include "texturepool.h"
 
 #include <iostream>
@@ -86,11 +88,30 @@ Arrow::Arrow()
 }
 
 
-void Arrow::updateTextureRect(const sf::Time& /*time*/)
+void Arrow::updateTextureRect()
 {
+   const auto now = GlobalClock::getInstance()->getElapsedTimeInMs();
+
+   auto frame = 0;
+   const auto dt = now - _start_time;
+
+   if (dt < 300)
+   {
+      frame = 0;
+   }
+   else if (dt < 500)
+   {
+      frame = 1;
+   }
+   else
+   {
+      frame = 2;
+   }
+
    sf::Rect<int32_t> texture_rect;
+
    texture_rect.top    = 1 * PIXELS_PER_TILE;
-   texture_rect.left   = 2 * PIXELS_PER_TILE;
+   texture_rect.left   = frame * PIXELS_PER_TILE;
    texture_rect.width  = PIXELS_PER_TILE;
    texture_rect.height = PIXELS_PER_TILE;
 
@@ -115,6 +136,7 @@ void Bow::load(b2World* world)
 {
    auto arrow = _loaded_arrow = new Arrow();
    arrow->setSprite(_projectile_reference_sprite);
+   arrow->_start_time = GlobalClock::getInstance()->getElapsedTimeInMs();
 
    _loaded_arrow->addDestroyedCallback([this, arrow](){
       _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end());
@@ -232,7 +254,7 @@ void Bow::update(const sf::Time& time)
    // apply drag force to arrows
    for (auto& arrow : _arrows)
    {
-      arrow->updateTextureRect(time);
+      arrow->updateTextureRect();
 
       if (!arrow->getBody()->IsActive())
       {
