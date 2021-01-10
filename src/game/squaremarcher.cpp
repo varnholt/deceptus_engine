@@ -55,6 +55,8 @@ SquareMarcher::SquareMarcher(
    mCachePath(cachePath),
    mScale(scaleFactor)
 {
+   mVisited.resize(mWidth * mHeight);
+
    // dumpMap();
    scan();
    optimize();
@@ -185,7 +187,6 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
    std::ifstream fileIn(imagePath);
    if (fileIn.fail())
    {
-      // float factor = 0.3333333333333f;
       float factor = 1.0f;
       sf::RenderTexture renderTexture;
       if (!renderTexture.create(
@@ -495,8 +496,8 @@ bool SquareMarcher::isVisited(uint32_t x, uint32_t y)
       return false;
    }
 
-   auto val = y * mWidth + x;
-   return std::find(mVisited.begin(), mVisited.end(), val) != mVisited.end();
+   auto key = y * mWidth + x;
+   return mVisited[key];
 }
 
 
@@ -537,7 +538,7 @@ SquareMarcher::Path SquareMarcher::march(uint32_t startX, uint32_t startY)
 
    while (true)
    {
-      mVisited.push_back(mY * mWidth + mX);
+      mVisited[mY * mWidth + mX] = true;
 
       updateDirection();
       updatePosition();

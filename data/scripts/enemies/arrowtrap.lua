@@ -109,7 +109,8 @@ function updateAlignment(alignment)
       _offset = v2d.Vector2D(0, 9 * 24)
       _muzzle_width = 8
       _muzzle_height = 24
-      -- _muzzle_offset:setX(
+      _muzzle_offset:setX(4)
+      _muzzle_offset:setY(-12)
       setSpriteOffset(1, _muzzle_offset:getX(),                     _muzzle_offset:getY())
       setSpriteOffset(2, _muzzle_offset:getX() + _muzzle_width,     _muzzle_offset:getY())
       setSpriteOffset(3, _muzzle_offset:getX() + _muzzle_width * 2, _muzzle_offset:getY())

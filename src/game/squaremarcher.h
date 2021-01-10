@@ -76,7 +76,7 @@ private:
    uint32_t mHeight = 0u;
    std::vector<int32_t> mTiles;
    std::vector<int32_t> mCollidingTiles;
-   std::vector<uint32_t> mVisited;
+   std::vector<bool> mVisited;
    std::filesystem::path mCachePath;
 
    uint32_t mX = 0;
