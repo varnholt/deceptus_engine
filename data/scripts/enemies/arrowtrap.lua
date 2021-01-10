@@ -35,14 +35,13 @@ _fire_interval = 3.0
 _fire_delays = {}
 _fire_delay_elapsed = {}
 _sprite_indices = {}
+_fired = {false, false, false}
 
 _position = v2d.Vector2D(0, 0)
 _player_position = v2d.Vector2D(0, 0)
 _elapsed = 0.0
-_x = 0.0
-_y = 0.0
-_fire_offset_x = 0.0
-_fire_offset_y = 0.0
+_fire_direction = v2d.Vector2D(0, 0)
+_fire_offset = {v2d.Vector2D(0, 0), v2d.Vector2D(0, 0), v2d.Vector2D(0, 0)}
 _speed = 1.5
 _offset = v2d.Vector2D(0, 0)
 _muzzle_width = 0
@@ -80,7 +79,7 @@ function initialize()
 
    addShapeRect(0.25, 0.25, 0.25, 0.25)
    addSample("boom.wav")
-   addWeapon(WeaponType["Bow"], 1000, 60, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Bow"], 50, 60, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/weapons/arrow.png", 144, 984, 48, 24) -- index, path, x, y, width, height
    updateAlignment(Alignment["AlignmentRight"])
    setSpriteOffset(0, 12, 12)
@@ -102,10 +101,10 @@ function updateAlignment(alignment)
    if (alignment == Alignment["AlignmentUp"]) then
       offset:setX(5)
       offset:setY(1)
-      _x = 0.0
-      _y = 1.0
-      _fire_offset_x = 0.0
-      _fire_offset_y = 16
+      _fire_direction = v2d.Vector2D(0.0, -1.0)
+      _fire_offset[1] = v2d.Vector2D(3.0, -16.0)
+      _fire_offset[2] = v2d.Vector2D(11.0, -16.0)
+      _fire_offset[3] = v2d.Vector2D(19.0, -16.0)
       _offset = v2d.Vector2D(0, 9 * 24)
       _muzzle_width = 8
       _muzzle_height = 24
@@ -117,10 +116,10 @@ function updateAlignment(alignment)
    elseif (alignment == Alignment["AlignmentDown"]) then
       offset:setX(5)
       offset:setY(0)
-      _x = 0.0
-      _y = 1.0
-      _fire_offset_x = 0.0
-      _fire_offset_y = 16
+      _fire_direction = v2d.Vector2D(0.0, 1.0)
+      _fire_offset[1] = v2d.Vector2D(4.0, 40.0)
+      _fire_offset[2] = v2d.Vector2D(12.0, 40.0)
+      _fire_offset[3] = v2d.Vector2D(20.0, 40.0)
       _offset = v2d.Vector2D(0, 8 * 24)
       _muzzle_width = 8
       _muzzle_height = 24
@@ -132,10 +131,10 @@ function updateAlignment(alignment)
    elseif (alignment == Alignment["AlignmentLeft"]) then
       offset:setX(0)
       offset:setY(0)
-      _x = -1.0
-      _y = 0.0
-      _fire_offset_x = -16
-      _fire_offset_y = 0.0
+      _fire_direction = v2d.Vector2D(-1.0, 0.0)
+      _fire_offset[1] = v2d.Vector2D(-16.0, 3.0)
+      _fire_offset[2] = v2d.Vector2D(-16.0, 11.0)
+      _fire_offset[3] = v2d.Vector2D(-16.0, 19.0)
       _offset = v2d.Vector2D(0, 6 * 24)
       _muzzle_width = 24
       _muzzle_height = 8
@@ -147,10 +146,10 @@ function updateAlignment(alignment)
    elseif (alignment == Alignment["AlignmentRight"]) then
       offset:setX(0)
       offset:setY(1)
-      _x = 1.0
-      _y = 0.0
-      _fire_offset_x = 32
-      _fire_offset_y = 0.0
+      _fire_direction = v2d.Vector2D(1.0, 0.0)
+      _fire_offset[1] = v2d.Vector2D(36.0, 3.0)
+      _fire_offset[2] = v2d.Vector2D(36.0, 11.0)
+      _fire_offset[3] = v2d.Vector2D(36.0, 19.0)
       _offset = v2d.Vector2D(0, 7 * 24)
       _muzzle_width = 24
       _muzzle_height = 8
@@ -187,7 +186,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function writeProperty(key, value)
 
-   print(string.format("write property: %s %s", key, value))
+   -- print(string.format("write property: %s %s", key, value))
 
    if (key == "alignment") then
 
@@ -220,13 +219,13 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function fire()
+function fire(muzzle_index)
    fireWeapon(
       0,
-      _position:getX() + _fire_offset_x,
-      _position:getY() + _fire_offset_y,
-      _x * _speed,
-      _y * _speed
+      _position:getX() + _fire_offset[muzzle_index]:getX(),
+      _position:getY() + _fire_offset[muzzle_index]:getY(),
+      _fire_direction:getX() * _speed,
+      _fire_direction:getY() * _speed
    );
 end
 
@@ -260,36 +259,49 @@ function update(dt)
       _elapsed = 0.0
       _fire_delay_elapsed = {false, false, false}
       _sprite_indices = {0, 0, 0}
+      _fired = {false, false, false}
    end
 
    for i = 1, 3, 1
    do
       if (not _fire_delay_elapsed[i]) then
          if (_elapsed > _fire_delays[i]) then
-            -- print(string.format("fire: %d", i))
             _fire_delay_elapsed[i]=true
          end
       end
    end
 
-   -- set all to idle
+   -- init all muzzle sprites with idle (empty texture)
    sprite_indices_current = {9, 9, 9}
 
    for i = 1, 3, 1
    do
       if (_fire_delay_elapsed[i]) then
+
          index = math.floor((_elapsed - _fire_delays[i]) * 20.0)
+
+            -- fire actual arrow when the animation has been fully played
+         if (index > 8) then
+            if (not _fired[i]) then
+               _fired[i]=true
+               fire(i)
+               -- print(string.format("fire: %d", i))
+            end
+         end
+
+         -- clamp sprite index at 9
          if (index > 9) then
             index = 9
          end
+
          sprite_indices_current[i] = index
-         -- print(sprite_indices_current[i])
+
       end
    end
 
+   -- update each muzzle texture
    for i = 1, 3, 1
    do
-      -- if (_fire_delay_elapsed[i]) then
       if (sprite_indices_current[i] ~= _sprite_indices[i]) then
          updateSpriteRect(
             i,
@@ -298,16 +310,7 @@ function update(dt)
             _muzzle_width,
             _muzzle_height
          )
-
       end
    end
-
-
-   --
-   -- -- fire animation
-   -- else
-   --    col = mSpriteIndex % 8
-   --    row = (math.floor(mSpriteIndex / 8)) % 3
-   --
 end
 

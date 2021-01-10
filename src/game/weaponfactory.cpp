@@ -42,6 +42,7 @@ std::unique_ptr<Weapon> WeaponFactory::create(
       case WeaponType::Bow:
       {
          auto tmp = std::make_unique<Bow>();
+         tmp->setFireIntervalMs(fireInterval);
          tmp->setLauncherBody(parent_body);
          weapon = std::move(tmp);
          break;
