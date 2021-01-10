@@ -87,8 +87,14 @@ struct LuaNode : public GameNode
    //! set the object's transform
    void setTransform(const b2Vec2& position, float32 angle = 0.0);
 
-   //! set the object's origin
+   //! add a sprite
+   void addSprite();
+
+   //! set the sprite's origin
    void setSpriteOrigin(int32_t id, float x, float y);
+
+   //! set the sprite's position
+   void setSpriteOffset(int32_t id, float x, float y);
 
    //! update the sprite's texture rect
    void updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h);
@@ -128,7 +134,8 @@ struct LuaNode : public GameNode
    // visualization
    sf::Vector2f mStartPosition;
    std::shared_ptr<sf::Texture> mTexture;
-   std::map<int32_t, sf::Sprite> mSprites;
+   std::vector<sf::Sprite> mSprites = {{}};              // have 1 base sprite
+   std::vector<sf::Vector2f> mSpriteOffsets = {{0,0}};   // have 1 base sprite offset
    sf::Vector2f mPosition;
    int32_t mZ = ZDepthPlayer;
    std::vector<sf::Vector2f> mPatrolPath;
