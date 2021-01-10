@@ -18,6 +18,10 @@
       "id": "191"
     },
     {
+      "script": "arrowtrap.lua",
+      "id": "194"
+    },
+    {
       "script": "bat.lua",
       "startposition": [210, 78]
     },
