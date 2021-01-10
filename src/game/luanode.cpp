@@ -455,6 +455,22 @@ extern "C" int32_t setTransform(lua_State* state)
 }
 
 
+extern "C" int32_t addSprite(lua_State* state)
+{
+   std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+   if (!node)
+   {
+      return 0;
+   }
+
+   node->addSprite();
+
+   return 0;
+}
+
+
+
 extern "C" int32_t setSpriteOrigin(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -479,6 +495,30 @@ extern "C" int32_t setSpriteOrigin(lua_State* state)
    return 0;
 }
 
+
+extern "C" int32_t setSpriteOffset(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 3)
+   {
+      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto x = static_cast<float>(lua_tonumber(state, 2));
+      auto y = static_cast<float>(lua_tonumber(state, 3));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setSpriteOffset(id, x, y);
+   }
+
+   return 0;
+}
 
 
 extern "C" int32_t boom(lua_State* state)
@@ -867,7 +907,7 @@ void LuaNode::setupTexture()
 
    for (auto& sprite : mSprites)
    {
-      sprite.second.setTexture(*mTexture);
+      sprite.setTexture(*mTexture);
    }
 }
 
@@ -951,6 +991,7 @@ void LuaNode::setupLua()
    lua_register(mState, "addSample", ::addSample);
    lua_register(mState, "addShapeCircle", ::addShapeCircle);
    lua_register(mState, "addShapeRect", ::addShapeRect);
+   lua_register(mState, "addSprite", ::addSprite);
    lua_register(mState, "addWeapon", ::addWeapon);
    lua_register(mState, "boom", ::boom);
    lua_register(mState, "damage", ::damage);
@@ -971,6 +1012,7 @@ void LuaNode::setupLua()
    lua_register(mState, "setLinearVelocity", ::setLinearVelocity);
    lua_register(mState, "setTransform", ::setTransform);
    lua_register(mState, "setSpriteOrigin", ::setSpriteOrigin);
+   lua_register(mState, "setSpriteOffset", ::setSpriteOffset);
    lua_register(mState, "setZ", ::setZ);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateProjectileTexture", ::updateProjectileTexture);
@@ -1198,9 +1240,23 @@ void LuaNode::setTransform(const b2Vec2& position, float32 angle)
 }
 
 
+void LuaNode::addSprite()
+{
+   mSprites.push_back({});
+   mSpriteOffsets.push_back({});
+}
+
+
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
    mSprites[id].setOrigin(x, y);
+}
+
+
+void LuaNode::setSpriteOffset(int32_t id, float x, float y)
+{
+   mSpriteOffsets[id].x = x;
+   mSpriteOffsets[id].y = y;
 }
 
 
@@ -1595,10 +1651,15 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h)
 {
-   if (mTexture)
+   if (!mSprites[id].getTexture() && mTexture)
    {
       mSprites[id].setTexture(*mTexture);
    }
+
+   // if (id > 0)
+   // {
+   //    std::cout << "id: " << id << " pos: " << x << ", " << y << " size: " << w << ", " << h << std::endl;
+   // }
 
    mSprites[id].setTextureRect(sf::IntRect(x, y, w, h));
 }
@@ -1612,14 +1673,23 @@ void LuaNode::draw(sf::RenderTarget& target)
       w->draw(target);
    }
 
-   for (auto& sprite : mSprites)
+   for (auto i = 0u; i < mSprites.size(); i++)
    {
-      sprite.second.setPosition(
-         mPosition - sf::Vector2f(
-            sprite.second.getTextureRect().width / 2.0f,
-            sprite.second.getTextureRect().height / 2.0f)
+      auto& sprite = mSprites[i];
+      const auto& offset = mSpriteOffsets[i];
+
+      const auto center = sf::Vector2f(
+            sprite.getTextureRect().width / 2.0f ,
+            sprite.getTextureRect().height / 2.0f
          );
-      target.draw(sprite.second);
+
+      sprite.setPosition(
+           mPosition
+         - center
+         + offset
+      );
+
+      target.draw(sprite);
    }
 }
 
