@@ -26,6 +26,22 @@
       "startposition": [210, 78]
     },
     {
+      "script": "bat_2.lua",
+      "id": "196"
+    },
+    {
+      "script": "bat_2.lua",
+      "id": "197"
+    },
+    {
+      "script": "bat_2.lua",
+      "id": "198"
+    },
+    {
+      "script": "bat_2.lua",
+      "id": "199"
+    },
+    {
       "script": "ghost.lua",
       "startposition": [233, 82],
       "patrolpath": [238, 82]
