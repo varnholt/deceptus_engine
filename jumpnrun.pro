@@ -550,6 +550,7 @@ DISTFILES += \
     data/menus/video.psd \
     data/scripts/enemies/arrowtrap.lua \
     data/scripts/enemies/bat.lua \
+    data/scripts/enemies/bat_2.lua \
     data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/cannon_2.lua \
     data/scripts/enemies/critter.lua \
