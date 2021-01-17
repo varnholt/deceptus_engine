@@ -60,7 +60,7 @@ mDone = false
 mTransformY = 0
 mAttack = false
 mPath = {}
-ANIMATION_SPEED = 12.0
+ANIMATION_SPEED = 20.0
 HIT_RADIUS = 0.3
 ATTACK_DURATION = 3.0
 ATTACK_SPRITE_COUNT = 9
@@ -101,7 +101,7 @@ function attack()
    dy = mPlayerPosition:getY() - mPlayerPositionPrevious:getY()
 
    -- clamp dx, dy
-   max_delta = 24
+   max_delta = 48
    if (dx > max_delta) then
       dx = max_delta
    elseif (dx < -max_delta) then
@@ -125,9 +125,10 @@ function attack()
    k2 = Key:create{x = px0, y = py0, time = 0.3} -- right of player
    k3 = Key:create{x = px1, y = py1, time = 0.5} -- player pos
    k4 = Key:create{x = px2, y = py2, time = 0.7} -- left of player
-   k5 = Key:create{x = sx,  y = sy,  time = 1.0} -- go back
+   k5 = Key:create{x = sx,  y = sy,  time = 0.9} -- go back
+   k6 = Key:create{x = sx,  y = sy,  time = 1.0} -- go back
 
-   mPath = {k1, k2, k3, k4, k5}
+   mPath = {k1, k2, k3, k4, k5, k6}
 end
 
 
@@ -144,7 +145,7 @@ function update(dt)
    -- make sure block is on same x as player
    if (not mAttack or idle) then
       xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
-      if (math.abs(xDiff) < 5) then
+      if (math.abs(xDiff) < 3) then
 
          -- make sure stone is not too far away (10 tiles) and above player
          yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
@@ -171,7 +172,13 @@ function update(dt)
       end
    end
 
-   spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
+   if (idle or not mAttack) then
+      spriteIndex = 0
+      mSpriteOffsetY = 0
+   else
+      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
+      mSpriteOffsetY = 9 * 24
+   end
 
    -- update sprite index
    if (index ~= mSpriteOffsetX) then
