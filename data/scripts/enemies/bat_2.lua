@@ -45,7 +45,6 @@ properties = {
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mPlayerPositionPrevious = v2d.Vector2D(0, 0)
-mPlayerPositionSkip = 0
 mElapsed = math.random(0, 3)
 mAttackTime = 0
 mIdleTime = 0
@@ -62,7 +61,7 @@ mAttack = false
 mPath = {}
 ANIMATION_SPEED = 40.0
 HIT_RADIUS = 0.3
-ATTACK_DURATION = 3.0
+ATTACK_DURATION = 1.0
 ATTACK_SPRITE_COUNT = 9
 
 
@@ -91,42 +90,15 @@ function attack()
    bx = mPosition:getX()
    by = mPosition:getY()
 
-   px0 = mPlayerPositionPrevious:getX()
-   py0 = mPlayerPositionPrevious:getY()
-
-   px1 = mPlayerPosition:getX()
-   py1 = mPlayerPosition:getY()
-
-   dx = mPlayerPosition:getX() - mPlayerPositionPrevious:getX()
-   dy = mPlayerPosition:getY() - mPlayerPositionPrevious:getY()
-
-   -- clamp dx, dy
-   max_delta = 48
-   if (dx > max_delta) then
-      dx = max_delta
-   elseif (dx < -max_delta) then
-      dx = -max_delta
-   end
-
-   if (dy > max_delta) then
-      dy = max_delta
-   elseif (dy < -max_delta) then
-      dy = -max_delta
-   end
-
-   -- estimate new player position
-   px2 = px1 + dx * 3.0
-   py2 = py1 + dy * 3.0
+   px = mPlayerPosition:getX()
+   py = mPlayerPosition:getY()
 
    sx = mStartPosition:getX()
    sy = mStartPosition:getY()
 
-   k1 = Key:create{x = bx,  y = by,  time = 0.0}
-   k2 = Key:create{x = px0, y = py0 - 24, time = 0.3} -- right of player
-   k3 = Key:create{x = px1, y = py1 - 24, time = 0.5} -- player pos
-   k4 = Key:create{x = px2, y = py2 - 24, time = 0.7} -- left of player
-   k5 = Key:create{x = sx,  y = sy,  time = 0.9} -- go back
-   k6 = Key:create{x = sx,  y = sy,  time = 1.0} -- go back
+   k1 = Key:create{x = bx, y = by, time = 0.0}
+   k2 = Key:create{x = px, y = py, time = 0.5} -- player pos
+   k3 = Key:create{x = sx, y = sy, time = 1.0} -- go back
 
    mPath = {k1, k2, k3, k4, k5, k6}
 end
@@ -145,12 +117,12 @@ function update(dt)
    -- make sure block is on same x as player
    if (not mAttack or idle) then
       xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
-      if (math.abs(xDiff) < 3) then
+      if (math.abs(xDiff) < 6) then
 
          -- make sure stone is not too far away (10 tiles) and above player
          yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
 
-         if (yDiff < 0 and yDiff > -10 and not idle) then
+         if (yDiff < 0 and yDiff > -7 and not idle) then
             attack()
          end
       end
@@ -173,8 +145,8 @@ function update(dt)
    end
 
    if (idle or not mAttack) then
-      spriteIndex = 0
-      mSpriteOffsetY = 0
+      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED / 2, ATTACK_SPRITE_COUNT))
+      mSpriteOffsetY = 9 * 24
    else
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
       mSpriteOffsetY = 9 * 24
@@ -230,14 +202,6 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
    mPlayerPosition = v2d.Vector2D(x, y)
-
-   mPlayerPositionSkip = mPlayerPositionSkip + 1
-
-   -- store a player position that's 30 frames old
-   if (math.floor(math.fmod(mPlayerPositionSkip, 30)) == 0) then
-      mPlayerPositionPrevious = mPlayerPosition
-      -- print("update")
-   end
 end
 
 
