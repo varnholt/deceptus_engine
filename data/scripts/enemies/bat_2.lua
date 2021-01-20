@@ -93,6 +93,8 @@ function attack()
    px = mPlayerPosition:getX()
    py = mPlayerPosition:getY()
 
+   mSpriteOffsetY = (px > bx) and 9 * 24 or 12 * 24
+
    sx = mStartPosition:getX()
    sy = mStartPosition:getY()
 
@@ -146,10 +148,8 @@ function update(dt)
 
    if (idle or not mAttack) then
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED / 2, ATTACK_SPRITE_COUNT))
-      mSpriteOffsetY = 9 * 24
    else
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
-      mSpriteOffsetY = 9 * 24
    end
 
    -- update sprite index
