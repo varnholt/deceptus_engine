@@ -2,6 +2,7 @@
 
 #include "texturepool.h"
 
+#include <cmath>
 #include <iostream>
 
 
