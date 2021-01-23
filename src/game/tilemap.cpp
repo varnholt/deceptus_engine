@@ -96,16 +96,20 @@ bool TileMap::load(
 
             static constexpr auto size = 1;
 
+            // shrink UV range a TINY bit to avoid fetching data from undefined texture space
+            const auto tileEpsX = 0.5f * (1.0f / static_cast<float>(mTileSize.x));
+            const auto tileEpsY = 0.5f * (1.0f / static_cast<float>(mTileSize.y));
+
             quad[0].position = sf::Vector2f(static_cast<float>( tx         * mTileSize.x), static_cast<float>( ty         * mTileSize.y));
             quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * mTileSize.x), static_cast<float>( ty         * mTileSize.y));
             quad[2].position = sf::Vector2f(static_cast<float>((tx + size) * mTileSize.x), static_cast<float>((ty + size) * mTileSize.y));
             quad[3].position = sf::Vector2f(static_cast<float>( tx         * mTileSize.x), static_cast<float>((ty + size) * mTileSize.y));
 
             // define its 4 texture coordinates
-            quad[0].texCoords = sf::Vector2f(static_cast<float>( tu      * mTileSize.x), static_cast<float>( tv      * mTileSize.y));
-            quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * mTileSize.x), static_cast<float>( tv      * mTileSize.y));
-            quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * mTileSize.x), static_cast<float>((tv + 1) * mTileSize.y));
-            quad[3].texCoords = sf::Vector2f(static_cast<float>( tu      * mTileSize.x), static_cast<float>((tv + 1) * mTileSize.y));
+            quad[0].texCoords = sf::Vector2f(static_cast<float>( tu      * mTileSize.x) + tileEpsX, static_cast<float>( tv      * mTileSize.y) + tileEpsY);
+            quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * mTileSize.x),            static_cast<float>( tv      * mTileSize.y) + tileEpsY);
+            quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * mTileSize.x),            static_cast<float>((tv + 1) * mTileSize.y));
+            quad[3].texCoords = sf::Vector2f(static_cast<float>( tu      * mTileSize.x) + tileEpsX, static_cast<float>((tv + 1) * mTileSize.y));
 
             quad[0].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->mOpacity * 255.0f));
             quad[1].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->mOpacity * 255.0f));
