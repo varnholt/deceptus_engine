@@ -660,6 +660,8 @@ void Level::spawnEnemies()
       enemy.second.addPaths(mWorldChains);
    }
 
+   // deprecated approach:
+   // merge enemy layer from tmx with enemy info that's stored inside json
    // iterate through all enemies in the json
    for (auto& jsonDescription : mDescription->mEnemies)
    {
@@ -691,6 +693,43 @@ void Level::spawnEnemies()
       luaNode->mEnemyDescription = jsonDescription;
       luaNode->initialize();
       mEnemies.push_back(luaNode);
+   }
+
+   // those enemies that have a lua script associated inside the tmx layer don't need
+   // additional information from json, those can just be spawned.
+   // this should probably be the future and only approach how to handle enemy spawning.
+   for (auto& it : mEnemyDataFromTmxLayer)
+   {
+      auto& properties = it.second.mProperties;
+      auto prop_it = std::find_if(properties.begin(), properties.end(), [](auto& property){
+         return property.mName == "script";}
+      );
+
+      if (prop_it != properties.end())
+      {
+         auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + prop_it->mValue);
+
+         EnemyDescription jsonDescription;
+         jsonDescription.mScaleTileToPixelPos = false;
+         jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.x);
+         jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.y);
+
+         if (jsonDescription.mGeneratePatrolPath)
+         {
+            jsonDescription.mPath = it.second.mPixelPath;
+         }
+
+         // merge properties from tmx with those loaded from json
+         for (auto& property : it.second.mProperties)
+         {
+            jsonDescription.mProperties.push_back(property);
+         }
+
+         // initialize lua node and store enemy
+         luaNode->mEnemyDescription = jsonDescription;
+         luaNode->initialize();
+         mEnemies.push_back(luaNode);
+      }
    }
 }
 
