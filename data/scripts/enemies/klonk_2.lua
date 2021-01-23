@@ -5,7 +5,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    staticBody = true,
-   sprite = "data/sprites/enemy_klonk.png",
+   sprite = "data/sprites/enemy_klonk_2.png",
    damage = 200
 }
 
@@ -18,12 +18,27 @@ mElapsed = 0.0
 mCycle = 0
 mSpeed = 35.0
 
+SPRITE_SIZE_PX = 4 * 24
+CYCLE_IDLE = 0
+CYCLE_WAKE = 1
+CYCLE_STEADY = 2
+CYCLE_FALLING = 3
+CYCLE_COLLIDE = 4
+TILE_COUNT_IDLE = 3
+TILE_COUNT_WAKE = 12
+TILE_COUNT_STEADY = 12
+TILE_COUNT_FALLING = 1
+TILE_COUNT_COLLIDE = 12
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
 
-   addShapeRect(0.2, 0.2, 0.0, 0.0)
-   updateSpriteRect(0, 0, 2 * 72, 72, 72) -- id, x, y, width, height
+   box_size = 0.48
+   box_size_origin = 0.5 - box_size
+
+   addShapeRect(0.48, 0.48, box_size_origin, box_size_origin)
+   updateSpriteRect(0, 0, 0, SPRITE_SIZE_PX, SPRITE_SIZE_PX) -- id, x, y, width, height
 end
 
 
@@ -31,7 +46,7 @@ end
 function update(dt)
 
    -- make sure block is on same x as player
-   if (mCycle == 0) then
+   if (mCycle == CYCLE_IDLE) then
       if (mPosition:getX() // 24 == mPlayerPosition:getX() // 24) then
 
          -- make sure stone is not too far away (10 tiles) and above player
@@ -50,44 +65,49 @@ function update(dt)
             )
             then
                -- activate the stone
-               mCycle = 1
+               mCycle = CYCLE_WAKE
             end
          end
       end
    end
 
-   -- stone starts falling
-   if (mCycle == 1) then
+   -- stone wakes up
+   if (mCycle == CYCLE_WAKE) then
 
       mElapsed = mElapsed + dt
       mSpriteIndex = math.floor(mElapsed * mSpeed)
 
       -- maybe close eyes again if player is out of sight?
       if (mSpriteIndex < 12) then
-         updateSpriteRect(0, mSpriteIndex * 72, 2 * 72, 72, 72)
+         updateSpriteRect(
+            0,
+            mSpriteIndex * SPRITE_SIZE_PX, 2 * SPRITE_SIZE_PX,
+            SPRITE_SIZE_PX,
+            SPRITE_SIZE_PX
+         )
       else
          makeDynamic()
-         mCycle = 2
+         mCycle = CYCLE_STEADY
       end
 
    end
 
    -- block starts falling
-   if (mCycle == 2) then
+   if (mCycle == CYCLE_STEADY) then
       velocity = getLinearVelocity()
 
       if (velocity[2] > 1.0) then
-         mCycle = 3
+         mCycle = CYCLE_FALLING
       end
    end
 
    -- stone hit the floor
-   if (mCycle == 3) then
+   if (mCycle == CYCLE_FALLING) then
       velocity = getLinearVelocity()
 
       if (velocity[2] <= 0.01) then
          velocity = getLinearVelocity()
-         mCycle = 4
+         mCycle = CYCLE_COLLIDE
          setActive(false)
          boom(0.0, 1.0, 0.5)
          mElapsed = 0.0
@@ -95,13 +115,13 @@ function update(dt)
    end
 
    -- stone hit floor animation
-   if (mCycle == 4) then
+   if (mCycle == CYCLE_COLLIDE) then
 
        mElapsed = mElapsed + dt
        mSpriteIndex = math.floor(mElapsed * mSpeed)
 
        if (mSpriteIndex < 7) then
-          updateSpriteRect(0, mSpriteIndex * 72, 5 * 72, 72, 72)
+          updateSpriteRect(0, mSpriteIndex * SPRITE_SIZE_PX, 5 * SPRITE_SIZE_PX, SPRITE_SIZE_PX, SPRITE_SIZE_PX)
         else
           -- done? go back up?
           mCycle = 5
