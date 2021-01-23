@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <cmath>
-
+#include <memory>
 
 class Pixelate : public Effect
 {
