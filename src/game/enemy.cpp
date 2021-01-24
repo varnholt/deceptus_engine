@@ -130,3 +130,20 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
    }
 }
 
+
+std::optional<ScriptProperty> Enemy::findProperty(const std::string& key)
+{
+   std::optional<ScriptProperty> property;
+
+   auto prop_it = std::find_if(mProperties.begin(), mProperties.end(), [key](auto& property){
+      return property.mName == key;}
+   );
+
+   if (prop_it != mProperties.end())
+   {
+      return *prop_it;
+   }
+
+   return property;
+}
+
