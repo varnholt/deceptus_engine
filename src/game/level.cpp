@@ -700,15 +700,11 @@ void Level::spawnEnemies()
    // this should probably be the future and only approach how to handle enemy spawning.
    for (auto& it : mEnemyDataFromTmxLayer)
    {
-      auto& properties = it.second.mProperties;
+      auto script = it.second.findProperty("script");
 
-      auto prop_it = std::find_if(properties.begin(), properties.end(), [](auto& property){
-         return property.mName == "script";}
-      );
-
-      if (prop_it != properties.end())
+      if (script.has_value())
       {
-         auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + prop_it->mValue);
+         auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value().mValue);
 
          EnemyDescription jsonDescription;
          jsonDescription.mScaleTileToPixelPos = false;
