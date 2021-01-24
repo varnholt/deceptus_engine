@@ -701,6 +701,7 @@ void Level::spawnEnemies()
    for (auto& it : mEnemyDataFromTmxLayer)
    {
       auto& properties = it.second.mProperties;
+
       auto prop_it = std::find_if(properties.begin(), properties.end(), [](auto& property){
          return property.mName == "script";}
       );

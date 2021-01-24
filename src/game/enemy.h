@@ -4,6 +4,7 @@
 #include <Box2D/Box2D.h>
 
 #include <array>
+#include <optional>
 #include <string>
 
 #include "scriptproperty.h"
@@ -16,6 +17,8 @@ struct Enemy
 
    void parse(TmxObject* object);
    void addPaths(const std::vector<std::vector<b2Vec2> >& paths);
+
+   std::optional<ScriptProperty> findProperty(const std::string& key);
 
    sf::Vector2i mPixelPosition;
    std::string mId;
