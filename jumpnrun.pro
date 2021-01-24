@@ -551,6 +551,7 @@ DISTFILES += \
     data/scripts/enemies/arrowtrap.lua \
     data/scripts/enemies/bat.lua \
     data/scripts/enemies/bat_2.lua \
+    data/scripts/enemies/blob_2.lua \
     data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/cannon_2.lua \
     data/scripts/enemies/critter.lua \
