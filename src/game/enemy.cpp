@@ -7,7 +7,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 
 #include <iostream>
-
+#include <sstream>
 
 void Enemy::parse(TmxObject* object)
 {
@@ -24,6 +24,36 @@ void Enemy::parse(TmxObject* object)
          property.mValue = v->toString();
          mProperties.push_back(property);
       }
+   }
+
+   // add path property to path if exists
+   const auto path = findProperty("path");
+   if (path)
+   {
+      // std::cout << "parse path: " << path.value().mValue << std::endl;
+
+      std::istringstream s(path.value().mValue);
+      std::string field;
+      // std::vector<float> path_positions;
+      while (std::getline(s, field, ','))
+      {
+         if (!field.empty())
+         {
+            // std::cout << field << std::endl;
+            // path_positions.push_back(std::stof(field));
+            mPixelPath.push_back(std::stoi(field) * PIXELS_PER_TILE);
+         }
+      }
+
+      // for (auto i = 0u; i < path_positions.size(); i+=2)
+      // {
+      //    mPath.push_back(
+      //       {
+      //          path_positions[i],
+      //          path_positions[i + 1]
+      //       }
+      //    );
+      // }
    }
 
    auto w = static_cast<int32_t>(object->mWidth);
@@ -66,6 +96,12 @@ void Enemy::parse(TmxObject* object)
 
 void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
 {
+   // do destroy existing paths
+   if (!mPath.empty())
+   {
+      return;
+   }
+
    // a player rect can only overlap with a single chain.
    // this function finds this chain and assigns it.
    for (const auto& path : paths)
