@@ -535,7 +535,9 @@ OTHER_FILES += \
 DISTFILES += \
     data/config/camera.json \
     data/level-crypt/metroid.json \
+    data/level-crypt/metroid.tmx \
     data/level-malte/malte.json \
+    data/level-malte/malte.tmx \
     data/level.tmx \
     data/menus/achievements.psd \
     data/menus/audio.psd \
