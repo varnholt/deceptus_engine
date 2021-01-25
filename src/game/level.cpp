@@ -667,7 +667,7 @@ void Level::spawnEnemies()
       if (it != mEnemyDataFromTmxLayer.end())
       {
          // positions from the tmx are given in pixels, not tiles
-         jsonDescription.mScaleTileToPixelPos = false;
+         jsonDescription.mPositionGivenInTiles = false;
 
          jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.x);
          jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.y);
@@ -707,7 +707,7 @@ void Level::spawnEnemies()
          auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value().mValue);
 
          EnemyDescription jsonDescription;
-         jsonDescription.mScaleTileToPixelPos = false;
+         jsonDescription.mPositionGivenInTiles = false;
          jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.x);
          jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.y);
 
