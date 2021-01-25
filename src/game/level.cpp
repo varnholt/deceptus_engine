@@ -655,11 +655,6 @@ void Level::resetDeathShader()
 //-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
-   for (auto& enemy : mEnemyDataFromTmxLayer)
-   {
-      enemy.second.addPaths(mWorldChains);
-   }
-
    // deprecated approach:
    // merge enemy layer from tmx with enemy info that's stored inside json
    // iterate through all enemies in the json
@@ -678,6 +673,11 @@ void Level::spawnEnemies()
          jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.y);
 
          if (jsonDescription.mGeneratePatrolPath)
+         {
+            it->second.addPaths(mWorldChains);
+         }
+
+         if (!it->second.mPixelPath.empty())
          {
             jsonDescription.mPath = it->second.mPixelPath;
          }
@@ -712,6 +712,11 @@ void Level::spawnEnemies()
          jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.y);
 
          if (jsonDescription.mGeneratePatrolPath)
+         {
+            it.second.addPaths(mWorldChains);
+         }
+
+         if (!it.second.mPixelPath.empty())
          {
             jsonDescription.mPath = it.second.mPixelPath;
          }
