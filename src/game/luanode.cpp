@@ -940,7 +940,7 @@ void LuaNode::deserializeEnemyDescription()
 
          // by default the path is given is tiles.
          // if we override it, we're setting pixel positions which are already transformed
-         if (mEnemyDescription.mScaleTileToPixelPos)
+         if (mEnemyDescription.mPositionGivenInTiles)
          {
             pos.x *= PIXELS_PER_TILE;
             pos.y *= PIXELS_PER_TILE;
@@ -962,7 +962,7 @@ void LuaNode::deserializeEnemyDescription()
          static_cast<float_t>(mEnemyDescription.mStartPosition.at(1))
       );
 
-      if (mEnemyDescription.mScaleTileToPixelPos)
+      if (mEnemyDescription.mPositionGivenInTiles)
       {
          mStartPosition.x *= PIXELS_PER_TILE;
          mStartPosition.y *= PIXELS_PER_TILE;

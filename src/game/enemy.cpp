@@ -30,30 +30,21 @@ void Enemy::parse(TmxObject* object)
    const auto path = findProperty("path");
    if (path)
    {
-      // std::cout << "parse path: " << path.value().mValue << std::endl;
-
       std::istringstream s(path.value().mValue);
       std::string field;
-      // std::vector<float> path_positions;
       while (std::getline(s, field, ','))
       {
          if (!field.empty())
          {
-            // std::cout << field << std::endl;
-            // path_positions.push_back(std::stof(field));
             mPixelPath.push_back(std::stoi(field) * PIXELS_PER_TILE);
          }
       }
 
-      // for (auto i = 0u; i < path_positions.size(); i+=2)
-      // {
-      //    mPath.push_back(
-      //       {
-      //          path_positions[i],
-      //          path_positions[i + 1]
-      //       }
-      //    );
-      // }
+      if (mPixelPath.size() == 2)
+      {
+         mPixelPath.insert(mPixelPath.begin(), mPixelPosition.y);
+         mPixelPath.insert(mPixelPath.begin(), mPixelPosition.x);
+      }
    }
 
    auto w = static_cast<int32_t>(object->mWidth);
