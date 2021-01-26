@@ -4,7 +4,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
-   sprite = "data/sprites/enemy_blob.png",
+   sprite = "data/sprites/enemy_blob_2.png",
    velocity_walk_max = 1.0,
    acceleration_ground = 0.1,
    damage = 40
@@ -14,6 +14,23 @@ properties = {
 ------------------------------------------------------------------------------------------------------------------------
 mPatrolTimer = 1
 mKeyPressed = 0
+
+SPRITE_WIDTH = 72
+SPRITE_HEIGHT = 72
+
+-- idle         row 0    15 sprites
+-- left         row 1    16 sprites
+-- right        row 2    16 sprites
+-- jump up      row 3    12 sprites
+-- jump down    row 4    12 sprites
+-- die          row 5    12 sprites
+
+ROW_IDLE = 0
+ROW_LEFT = 1
+ROW_RIGHT = 2
+ROW_JUMP_UP = 3
+ROW_JUMP_DOWN = 4
+ROW_DIE = 5
 
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
@@ -30,9 +47,9 @@ function initialize()
    mPatrolEpsilon = 1.0
    mWait = false
 
-   addShapeCircle(0.12, 0.0, 0.12)   -- radius, x, y
-   addShapeRect(0.2, 0.07, 0.0, 0.1) -- width, height, x, y
-   updateSpriteRect(0, 0, 0, 24, 24) -- id, x, y, width, height
+   addShapeCircle(0.12, 0.0, 0.12)                        -- radius, x, y
+   addShapeRect(0.2, 0.07, 0.0, 0.1)                      -- width, height, x, y
+   updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
 
    -- print("blob.lua initialized")
 end
@@ -67,7 +84,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   updateSpriteRect(0, 0, 0, 24, 24)
+   updateSpriteRect(0, 0, ROW_LEFT * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT)
    keyReleased(Key["KeyRight"])
    keyPressed(Key["KeyLeft"])
 end
@@ -75,7 +92,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   updateSpriteRect(0, 0, 24, 24, 24)
+   updateSpriteRect(0, 0, ROW_RIGHT * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT)
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
 end
