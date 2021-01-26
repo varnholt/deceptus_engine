@@ -241,7 +241,7 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
       room.mName = key;
       rooms.push_back(room);
 
-      std::cout << "[i] adding room: " << key << std::endl;
+      // std::cout << "[i] adding room: " << key << std::endl;
    }
    else
    {
