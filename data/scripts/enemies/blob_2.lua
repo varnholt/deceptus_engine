@@ -32,9 +32,22 @@ ROW_JUMP_UP = 3
 ROW_JUMP_DOWN = 4
 ROW_DIE = 5
 
+SPRITE_COUNT_IDLE = 15
+SPRITE_COUNT_LEFT = 16
+SPRITE_COUNT_RIGHT = 16
+SPRITE_COUNT_JUMP_UP = 12
+SPRITE_COUNT_JUMP_DOWN = 12
+SPRITE_COUNT_DIE = 5
+
+ANIMATION_SPEED = 20.0
+IDLE_CYCLE_COUNT = 3
+
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
-
+mElapsed = 0.0
+mSpriteIndex = 0
+mAnimationRow = 0
+mIdleCycles = 0
 
 -- x: 720..792 (30..33 x 24)
 -- y: 984 (41 x 24)
@@ -84,7 +97,23 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   updateSpriteRect(0, 0, ROW_LEFT * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT)
+   spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, SPRITE_COUNT_LEFT))
+
+   if (mSpriteIndex ~= spriteIndex) then
+
+      mSpriteIndex = spriteIndex
+      mAnimationRow = ROW_LEFT
+
+      updateSpriteRect(
+         0,
+         spriteIndex * SPRITE_WIDTH,
+         mAnimationRow * SPRITE_HEIGHT,
+         SPRITE_WIDTH,
+         SPRITE_HEIGHT
+      )
+
+   end
+
    keyReleased(Key["KeyRight"])
    keyPressed(Key["KeyLeft"])
 end
@@ -92,7 +121,23 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   updateSpriteRect(0, 0, ROW_RIGHT * SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT)
+   spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, SPRITE_COUNT_RIGHT))
+
+   if (mSpriteIndex ~= spriteIndex) then
+
+      mSpriteIndex = spriteIndex
+      mAnimationRow = ROW_RIGHT
+
+      updateSpriteRect(
+         0,
+         spriteIndex * SPRITE_WIDTH,
+         mAnimationRow * SPRITE_HEIGHT,
+         SPRITE_WIDTH,
+         SPRITE_HEIGHT
+      )
+
+   end
+
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
 end
@@ -127,9 +172,59 @@ function followPlayer()
 end
 
 
+function wait()
+   -- finish left/right movement animation
+   if (mAnimationRow == ROW_LEFT or mAnimationRow == ROW_RIGHT) then
+      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, SPRITE_COUNT_LEFT))
+      if (spriteIndex ~= 0) then
+         if (spriteIndex ~= mSpriteIndex) then
+            mSpriteIndex = spriteIndex
+            updateSpriteRect(
+               0,
+               spriteIndex * SPRITE_WIDTH,
+               mAnimationRow * SPRITE_HEIGHT,
+               SPRITE_WIDTH,
+               SPRITE_HEIGHT
+            )
+         end
+      else
+         mAnimationRow = ROW_IDLE
+         mElapsed = 0.0
+      end
+   else
+      -- play idle animation for one cycle
+      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, SPRITE_COUNT_IDLE))
+
+      if (spriteIndex ~= mSpriteIndex) then
+         mSpriteIndex = spriteIndex
+         updateSpriteRect(
+            0,
+            spriteIndex * SPRITE_WIDTH,
+            mAnimationRow * SPRITE_HEIGHT,
+            SPRITE_WIDTH,
+            SPRITE_HEIGHT
+         )
+
+         -- after 1 cycle, go back to business
+         if (mSpriteIndex == 0) then
+            mIdleCycles = mIdleCycles + 1
+
+            -- loop idle animation n times
+            if (mIdleCycles == IDLE_CYCLE_COUNT) then
+               mWait = false
+               mIdleCycles = 0
+               mElapsed = 0.0
+            end
+         end
+      end
+   end
+end
+
+
 ------------------------------------------------------------------------------------------------------------------------
 function patrol()
    if (mWait == true) then
+      wait()
       return
    end
 
@@ -150,7 +245,7 @@ function patrol()
       -- print("arrived.")
       mWait = true
       mKeyPressed = 0
-      timer(500, mPatrolTimer)
+--      timer(500, mPatrolTimer)
       mPatrolIndex = mPatrolIndex + 1
       if (mPatrolIndex > count) then
          mPatrolIndex = 0
@@ -161,6 +256,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
+   mElapsed = mElapsed + dt
    patrol()
    updateKeysPressed(mKeyPressed)
 end
