@@ -170,7 +170,7 @@ void CameraSystem::setRoom(const std::optional<Room>& room)
    if (mRoom->mId != room->mId)
    {
       mRoomInterpolation = 0.0f;
-      std::cout << "[i] reset room interpolation" << std::endl;
+      // std::cout << "[i] reset room interpolation" << std::endl;
    }
 
    mRoom = room;

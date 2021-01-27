@@ -5,7 +5,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    sprite = "data/sprites/enemy_blob_2.png",
-   velocity_walk_max = 1.0,
+   velocity_walk_max = 0.4,
    acceleration_ground = 0.1,
    damage = 40
 }
@@ -39,7 +39,7 @@ SPRITE_COUNT_JUMP_UP = 12
 SPRITE_COUNT_JUMP_DOWN = 12
 SPRITE_COUNT_DIE = 5
 
-ANIMATION_SPEED = 20.0
+ANIMATION_SPEED = 10.0
 IDLE_CYCLE_COUNT = 3
 
 mPosition = v2d.Vector2D(0, 0)
@@ -48,6 +48,11 @@ mElapsed = 0.0
 mSpriteIndex = 0
 mAnimationRow = 0
 mIdleCycles = 0
+mGravityScale = 1.0
+mAlignmentOffset = 0
+mJump = false
+mJumpHeightPx = 0
+mJumpIntervalMs = 0
 
 -- x: 720..792 (30..33 x 24)
 -- y: 984 (41 x 24)
@@ -84,6 +89,24 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function writeProperty(key, value)
+
+   -- print(string.format("write property: %s %s", key, value))
+
+   if (key == "gravity_scale") then
+      mGravityScale = value
+      setGravityScale(mGravityScale)
+      mAlignmentOffset = 6 * 72 - 12
+   elseif (key == "jump_height_px") then
+      mJump = true
+      mJumpHeightPx = value
+   elseif (key == "jump_interval_ms") then
+      mJumpIntervalMs = value
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function keyPressed(key)
    mKeyPressed = (mKeyPressed | key)
 end
@@ -107,7 +130,7 @@ function goLeft()
       updateSpriteRect(
          0,
          spriteIndex * SPRITE_WIDTH,
-         mAnimationRow * SPRITE_HEIGHT,
+         mAnimationRow * SPRITE_HEIGHT + mAlignmentOffset,
          SPRITE_WIDTH,
          SPRITE_HEIGHT
       )
@@ -131,7 +154,7 @@ function goRight()
       updateSpriteRect(
          0,
          spriteIndex * SPRITE_WIDTH,
-         mAnimationRow * SPRITE_HEIGHT,
+         mAnimationRow * SPRITE_HEIGHT + mAlignmentOffset,
          SPRITE_WIDTH,
          SPRITE_HEIGHT
       )
@@ -182,7 +205,7 @@ function wait()
             updateSpriteRect(
                0,
                spriteIndex * SPRITE_WIDTH,
-               mAnimationRow * SPRITE_HEIGHT,
+               mAnimationRow * SPRITE_HEIGHT + mAlignmentOffset,
                SPRITE_WIDTH,
                SPRITE_HEIGHT
             )
@@ -200,7 +223,7 @@ function wait()
          updateSpriteRect(
             0,
             spriteIndex * SPRITE_WIDTH,
-            mAnimationRow * SPRITE_HEIGHT,
+            mAnimationRow * SPRITE_HEIGHT + mAlignmentOffset,
             SPRITE_WIDTH,
             SPRITE_HEIGHT
          )
