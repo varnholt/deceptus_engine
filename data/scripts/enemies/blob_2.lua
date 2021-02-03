@@ -85,29 +85,14 @@ function initialize()
    updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
 
    -- generate jump path
-
-   -- original values
-   -- -1.0  0.0
-   -- -0.8  0.01
-   -- -0.6  0.07
-   --  0.0  1.0
-   --  0.6 -0.075
-   --  0.7  0.05
-   --  0.8  0.01
-   --  0.9 -0.01
-   --  1.0  0.0
-
    k1 = SplineKey:create{x = 0.0, y =  0.0,   time = -1.0}
    k2 = SplineKey:create{x = 0.0, y =  0.01,  time = -0.8}
    k3 = SplineKey:create{x = 0.0, y =  0.07,  time = -0.6}
    k4 = SplineKey:create{x = 0.0, y =  1.0,   time =  0.0}
-   k5 = SplineKey:create{x = 0.0, y =  0.0,   time =  0.45} -- was negative before
-   k6 = SplineKey:create{x = 0.0, y =  0.0,   time =  0.7}
-   k7 = SplineKey:create{x = 0.0, y =  0.0,   time =  0.8}
-   k8 = SplineKey:create{x = 0.0, y =  0.0,   time =  0.9} -- was negative before
-   k9 = SplineKey:create{x = 0.0, y =  0.0,   time =  1.0}
+   k5 = SplineKey:create{x = 0.0, y =  0.0,   time =  0.45}
+   k6 = SplineKey:create{x = 0.0, y =  0.0,   time =  1.0}
 
-   mJumpPath = {k1, k2, k3, k4, k5, k6, k7, k8, k9}
+   mJumpPath = {k1, k2, k3, k4, k5, k6}
 
    mGood = true
 end
@@ -297,6 +282,10 @@ function patrol()
       return
    end
 
+   -- update the speed according to the sprite index
+   prop = {velocity_walk_max = (math.sin((mSpriteIndex / SPRITE_COUNT_LEFT) * 6.28318530718) + 1.0) * 0.4}
+   updateProperties(prop)
+
    local keyVec = v2d.Vector2D(key:getX(), key:getY())
    local count = #mPatrolPath
 
@@ -318,62 +307,60 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function jump(dt)
+
+   if (not mJumpStarted) then
+      mJumpTime = -1.0
+      mJumpStarted = true
+   end
+
+   jump_height = 4 * 24
+   jump_speed = 1.0
+
+   jump_value = getValueCubic(mJumpPath, mJumpTime):getY()
+   if (jump_value < 0.0) then
+      jump_value = 0.0
+   end
+
+   y = mJumpStartPosition:getY() - jump_height * jump_value + 12;
+
+   setTransform(mPosition:getX(), y, 0.0)
+
+   index = 0
+   row = 0
+
+   if (mJumpTime < 0.0) then
+      index = math.floor((mJumpTime + 1.0) * (SPRITE_COUNT_JUMP_UP))
+   else
+      index = math.floor(mJumpTime * SPRITE_COUNT_JUMP_DOWN)
+   end
+
+   row = (mJumpTime < 0.0) and ROW_JUMP_UP or ROW_JUMP_DOWN
+
+   updateSpriteRect(
+      0,
+      index * SPRITE_WIDTH,
+      row * SPRITE_HEIGHT,
+      SPRITE_WIDTH,
+      SPRITE_HEIGHT
+   )
+
+   mJumpTime = mJumpTime + dt * jump_speed
+
+   if (mJumpTime >= 1.0) then
+      mJumpStarted = false
+   end
+
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function update(dt)
    mElapsed = mElapsed + dt
 
-
    if (mJump) then
-
-      -- jump time goes from -1 to 1
-      -- results in a simple x * x curve from y=0 to y=1 to y=0
-
-      if (not mJumpStarted) then
-         mJumpTime = -1.0
-         mJumpStarted = true
-      end
-
-      jump_height = 4 * 24
-      jump_speed = 1.0
-
-      jump_value = getValueCubic(mJumpPath, mJumpTime):getY()
-      if (jump_value < 0.0) then
-         jump_value = 0.0
-      end
-
-      y = mJumpStartPosition:getY() - jump_height * jump_value + 12;
-
-      -- print(jump_value)
-
-      setTransform(mPosition:getX(), y, 0.0)
-
-      index = 0
-      row = 0
-
-      if (mJumpTime < 0.0) then
-         index = math.floor((mJumpTime + 1.0) * (SPRITE_COUNT_JUMP_UP))
-      else
-         index = math.floor(mJumpTime * SPRITE_COUNT_JUMP_DOWN)
-      end
-
-      -- print(index)
-      row = (mJumpTime < 0.0) and ROW_JUMP_UP or ROW_JUMP_DOWN
-
-      updateSpriteRect(
-         0,
-         index * SPRITE_WIDTH,
-         row * SPRITE_HEIGHT,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
-      )
-
-      mJumpTime = mJumpTime + dt * jump_speed
-
-      if (mJumpTime >= 1.0) then
-         mJumpStarted = false
-      end
-
+      jump(dt)
       return
-
    end
 
    patrol()
