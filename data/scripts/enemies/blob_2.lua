@@ -43,6 +43,8 @@ SPRITE_COUNT_DIE = 5
 ANIMATION_SPEED = 10.0
 IDLE_CYCLE_COUNT = 3
 
+COLLISION_THRESHOLD = 24
+
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mElapsed = 0.0
@@ -119,7 +121,7 @@ function writeProperty(key, value)
    -- print(string.format("write property: %s %s", key, value))
 
    if (key == "gravity_scale") then
-      mGravityScale = value
+      mGravityScale = tonumber(value)
       setGravityScale(mGravityScale)
       mAlignmentOffset = 6 * 72 - 12
    elseif (key == "jump_height_px") then
@@ -193,14 +195,12 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   -- print(string.format("moved to: %f, %f", x, y))
    mPosition = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   -- print(string.format("player moved to: %f, %f", x, y))
    mPlayerPosition = v2d.Vector2D(x, y)
 end
 
@@ -355,6 +355,40 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function checkDrop()
+
+   if (mGravityScale < 0.0) then
+
+      dx = mPosition:getX() - mPlayerPosition:getX()
+
+      if (dx > -COLLISION_THRESHOLD and dx < COLLISION_THRESHOLD) then
+
+         -- make sure stone is not too far away (10 tiles) and above player
+         yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+
+         if (yDiff < 0 and yDiff > -10) then
+
+            -- make sure there's nothing in the way
+            if (
+               isPhsyicsPathClear(
+                  mPosition:getX(),
+                  mPosition:getY(),
+                  mPlayerPosition:getX(),
+                  mPlayerPosition:getY()
+               )
+            )
+            then
+               mAlignmentOffset = 0
+               setGravityScale(-mGravityScale)
+            end
+         end
+      end
+
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function update(dt)
    mElapsed = mElapsed + dt
 
@@ -363,6 +397,7 @@ function update(dt)
       return
    end
 
+   checkDrop()
    patrol()
    updateKeysPressed(mKeyPressed)
 end
