@@ -434,7 +434,7 @@ function updateDrop(dt)
       -- starting to drop and then falling
       if (not mDropLanded) then
          mAnimationRow = ROW_DROP
-         spriteIndex = math.floor(mDropTime * ANIMATION_SPEED, SPRITE_COUNT_DROP)
+         spriteIndex = math.floor(mDropTime * ANIMATION_SPEED)
 
          -- clamp at end of the column for the whole drop
          if (spriteIndex >= SPRITE_COUNT_DROP) then
@@ -497,7 +497,7 @@ function updateDrop(dt)
 
          -- the blob landed on the ground, play the landing animation
          -- also skip the first 5 frames because they somewhat don't make sense
-         spriteIndex = 5 + math.floor(mDropTime * ANIMATION_SPEED, SPRITE_COUNT_LANDING)
+         spriteIndex = 5 + math.floor(mDropTime * ANIMATION_SPEED)
 
          -- once this animation cycle is complete, the whole drop is done
          if (spriteIndex >= SPRITE_COUNT_LANDING) then
