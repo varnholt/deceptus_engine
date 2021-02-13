@@ -32,6 +32,7 @@ ROW_RIGHT = 2
 ROW_JUMP_UP = 3
 ROW_JUMP_DOWN = 4
 ROW_DIE = 5
+ROW_DROP = 9
 
 SPRITE_COUNT_IDLE = 15
 SPRITE_COUNT_LEFT = 16
@@ -39,6 +40,8 @@ SPRITE_COUNT_RIGHT = 16
 SPRITE_COUNT_JUMP_UP = 12
 SPRITE_COUNT_JUMP_DOWN = 12
 SPRITE_COUNT_DIE = 5
+SPRITE_COUNT_DROP = 12
+SPRITE_COUNT_LANDING = 11 -- last one is skipped, that doesn't make sense
 
 ANIMATION_SPEED = 10.0
 IDLE_CYCLE_COUNT = 3
@@ -54,6 +57,7 @@ mIdleCycles = 0
 mGravityScale = 1.0
 mAlignmentOffset = 0
 
+-- jump related
 mJump = false
 mJumpStarted = false
 mJumpHeightPx = 0
@@ -61,6 +65,15 @@ mJumpIntervalMs = 0
 mJumpStartPosition = v2d.Vector2D(0, 0)
 mJumpTime = 0.0
 mJumpPath = {}
+
+-- drop related
+mDropping = false
+mDropPrepare = false
+mDropGravityFlipped = false
+mDropTime = 0.0
+mDropVelocityExceeded1 = false
+mDropPatrolVelocityFactor = 1.0
+mDropComplete = false
 
 -- x: 720..792 (30..33 x 24)
 -- y: 984 (41 x 24)
@@ -220,6 +233,7 @@ function followPlayer()
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
 function wait()
    -- finish left/right movement animation
    if (mAnimationRow == ROW_LEFT or mAnimationRow == ROW_RIGHT) then
@@ -270,7 +284,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function patrol()
+function updatePatrol()
    if (mWait == true) then
       wait()
       return
@@ -283,7 +297,7 @@ function patrol()
    end
 
    -- update the speed according to the sprite index
-   prop = {velocity_walk_max = (math.sin((mSpriteIndex / SPRITE_COUNT_LEFT) * 6.28318530718) + 1.0) * 0.4}
+   prop = {velocity_walk_max = mDropPatrolVelocityFactor * (math.sin((mSpriteIndex / SPRITE_COUNT_LEFT) * 6.28318530718) + 1.0) * 0.4}
    updateProperties(prop)
 
    local keyVec = v2d.Vector2D(key:getX(), key:getY())
@@ -294,10 +308,9 @@ function patrol()
    elseif (mPosition:getX() < keyVec:getX() - mPatrolEpsilon) then
       goRight()
    else
-      -- print("arrived.")
       mWait = true
       mKeyPressed = 0
---      timer(500, mPatrolTimer)
+
       mPatrolIndex = mPatrolIndex + 1
       if (mPatrolIndex > count) then
          mPatrolIndex = 0
@@ -307,7 +320,11 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function jump(dt)
+function updateJump(dt)
+
+   if (not mJump) then
+      return false
+   end
 
    if (not mJumpStarted) then
       mJumpTime = -1.0
@@ -351,13 +368,20 @@ function jump(dt)
       mJumpStarted = false
    end
 
+   return true
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function checkDrop()
+-- returns true if no subsequent code in the update loop should be executed
+function updateDrop(dt)
 
-   if (mGravityScale < 0.0) then
+   if (mDropComplete) then
+      return false
+   end
+
+   -- check if need to drop
+   if (not mDropPrepare and mAlignmentOffset > 0) then
 
       dx = mPosition:getX() - mPlayerPosition:getX()
 
@@ -378,13 +402,118 @@ function checkDrop()
                )
             )
             then
-               mAlignmentOffset = 0
-               setGravityScale(-mGravityScale)
+               mDropPrepare = true
+               return true
             end
          end
       end
-
    end
+
+   -- check if need to transition sprites to actual drop
+   if (mDropPrepare and not mDropping) then
+
+      -- apply a massive slow down on the patrol movement so the blob actually lands on the player
+      mDropPatrolVelocityFactor = 0.1
+
+      -- wait until sprite index reaches 0 or 1 so we can transition to drop animation
+      if (mSpriteIndex == 0 or mSpriteIndex == 1) then
+         mDropping = true
+         mDropPrepare = false
+      else
+         -- keep moving until reached the right sprite
+         return false
+      end
+   end
+
+   -- play drop animation
+   if (mDropping) then
+
+      mDropTime = mDropTime + dt
+
+      -- first half of the drop animation:
+      -- starting to drop and then falling
+      if (not mDropLanded) then
+         mAnimationRow = ROW_DROP
+         spriteIndex = math.floor(mDropTime * ANIMATION_SPEED, SPRITE_COUNT_DROP)
+
+         -- clamp at end of the column for the whole drop
+         if (spriteIndex >= SPRITE_COUNT_DROP) then
+            spriteIndex = SPRITE_COUNT_DROP - 1
+         end
+
+         if (mSpriteIndex ~= spriteIndex) then
+
+            mSpriteIndex = spriteIndex
+
+            updateSpriteRect(
+               0,
+               spriteIndex * SPRITE_WIDTH,
+               mAnimationRow * SPRITE_HEIGHT - (12 - spriteIndex),-- interpolate from 0 offset to -12 offset
+               SPRITE_WIDTH,
+               SPRITE_HEIGHT
+            )
+
+            -- once we reach column 5, the blob is more or less detach from the ceiling,
+            -- so now we allow actually letting it fall down
+            if (mSpriteIndex == 5) then
+               if (not mDropGravityFlipped) then
+                  setGravityScale(-mGravityScale)
+                  mDropGravityFlipped = true
+               end
+            end
+         end
+
+         -- as soon as our guy decelerates in y to something close to 0,
+         -- we know that it has collided with the ground -> time to draw the landing anim
+         velocity = getLinearVelocity()
+
+         if (velocity[2] > 1.0) then
+            mDropVelocityExceeded1 = true
+         end
+
+         if (mDropVelocityExceeded1 and velocity[2] <= 0.01) then
+            if (not mDropLanded) then
+               mDropLanded = true
+               mDropTime = 0.0
+
+               -- reset the slow down and move normally
+               mDropPatrolVelocityFactor = 1.0
+            end
+         end
+
+      else
+
+         mAnimationRow = ROW_JUMP_DOWN
+         mAlignmentOffset = 0
+
+         -- the blob landed on the ground, play the landing animation
+         -- also skip the first 5 frames because they somewhat don't make sense
+         spriteIndex = 5 + math.floor(mDropTime * ANIMATION_SPEED, SPRITE_COUNT_LANDING)
+
+         -- once this animation cycle is complete, the whole drop is done
+         if (spriteIndex >= SPRITE_COUNT_LANDING) then
+            spriteIndex = SPRITE_COUNT_LANDING - 1
+            mDropComplete = true
+         end
+
+         if (mSpriteIndex ~= spriteIndex) then
+
+            mSpriteIndex = spriteIndex
+
+            updateSpriteRect(
+               0,
+               spriteIndex * SPRITE_WIDTH,
+               mAnimationRow * SPRITE_HEIGHT,
+               SPRITE_WIDTH,
+               SPRITE_HEIGHT
+            )
+         end
+      end
+
+      return true
+   end
+
+   return false
 end
 
 
@@ -392,13 +521,15 @@ end
 function update(dt)
    mElapsed = mElapsed + dt
 
-   if (mJump) then
-      jump(dt)
+   if (updateJump(dt)) then
       return
    end
 
-   checkDrop()
-   patrol()
+   if (updateDrop(dt)) then
+      return
+   end
+
+   updatePatrol()
    updateKeysPressed(mKeyPressed)
 end
 
