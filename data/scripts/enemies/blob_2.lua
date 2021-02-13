@@ -445,10 +445,19 @@ function updateDrop(dt)
 
             mSpriteIndex = spriteIndex
 
+            -- interpolate from one to the other sprite offset
+            -- should go from -12 to +12 from the point the gravity scale
+            -- is inverted (that is sprite index 5).
+            -- spriteIndex goes from 0..11
+            spriteOffset = 0
+            if (spriteIndex >= 5) then
+               -- 0..6
+               spriteOffset = (spriteIndex - 5) * 4
+            end
             updateSpriteRect(
                0,
                spriteIndex * SPRITE_WIDTH,
-               mAnimationRow * SPRITE_HEIGHT - (12 - spriteIndex),-- interpolate from 0 offset to -12 offset
+               mAnimationRow * SPRITE_HEIGHT - (12 - spriteOffset),
                SPRITE_WIDTH,
                SPRITE_HEIGHT
             )
