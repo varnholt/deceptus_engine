@@ -51,7 +51,7 @@ mIdleTime = 0
 mActivated = false
 mMoveRangeY = 48
 mSpriteOffsetX = 0
-mSpriteOffsetY = 9 * 24
+mSpriteOffsetY = 0 -- 9 * 24
 mSpriteWidth = 72
 mSpriteHeight = 72
 mStartPosition = v2d.Vector2D(0, 0)
@@ -93,7 +93,7 @@ function attack()
    px = mPlayerPosition:getX()
    py = mPlayerPosition:getY()
 
-   mSpriteOffsetY = (px > bx) and 9 * 24 or 12 * 24
+   mSpriteOffsetY = (px > bx) and 0 * 24 or 3 * 24
 
    sx = mStartPosition:getX()
    sy = mStartPosition:getY()
