@@ -284,11 +284,11 @@ void RaycastLight::debug() const
 void RaycastLight::LightInstance::updateSpritePosition()
 {
    mSprite.setPosition(
-         sf::Vector2f(
-            mPosMeters.x * PPM - mWidth * 0.5f + mOffsetX,
-            mPosMeters.y * PPM - mHeight * 0.5f + mOffsetY
-         )
-      );
+      sf::Vector2f(
+         mPosMeters.x * PPM - mWidth * 0.5f + mOffsetX,
+         mPosMeters.y * PPM - mHeight * 0.5f + mOffsetY
+      )
+   );
 }
 
 
