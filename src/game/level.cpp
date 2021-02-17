@@ -1233,6 +1233,18 @@ void Level::draw(
 
 
 //-----------------------------------------------------------------------------
+void Level::updatePlayerLight()
+{
+   mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();
+   mPlayerLight->updateSpritePosition();
+
+   // the player, once he dies, becomes inactive and just sinks down
+   // so the player light is disabled to avoid any glitches
+   mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10));
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::update(const sf::Time& dt)
 {
    // clear conveyor belt state
@@ -1263,8 +1275,7 @@ void Level::update(const sf::Time& dt)
 
    LuaInterface::instance()->update(dt);
 
-   mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();
-   mPlayerLight->updateSpritePosition();
+   updatePlayerLight();
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);

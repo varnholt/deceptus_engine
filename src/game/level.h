@@ -157,6 +157,7 @@ protected:
    void deserializeParallaxMap(TmxLayer* layer);
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
+   void updatePlayerLight();
 
    std::vector<Room> mRooms;
    std::optional<Room> mCurrentRoom;
