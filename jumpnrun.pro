@@ -112,6 +112,7 @@ SOURCES += \
    src/game/camerasystemconfiguration.cpp \
    src/game/checkpoint.cpp \
    src/game/console.cpp \
+   src/game/fadetransitioneffect.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
    src/game/dialogue.cpp \
@@ -180,6 +181,8 @@ SOURCES += \
    src/game/projectilehitanimation.cpp \
    src/game/room.cpp \
    src/game/savestate.cpp \
+   src/game/screentransition.cpp \
+   src/game/screentransitioneffect.cpp \
    src/game/scriptproperty.cpp \
    src/game/shaders/atmosphereshader.cpp \
    src/game/shaders/blurshader.cpp \
@@ -279,6 +282,9 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
+   src/game/fadetransitioneffect.h \
+   src/game/screentransition.h \
+   src/game/screentransitioneffect.h \
    src/game/weaponfactory.h
 
 
