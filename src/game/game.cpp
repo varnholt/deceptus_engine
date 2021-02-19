@@ -24,6 +24,7 @@
 #include "player/playerinfo.h"
 #include "physics/physicsconfiguration.h"
 #include "savestate.h"
+#include "screentransition.h"
 #include "weapon.h"
 #include "weather.h"
 
@@ -371,9 +372,18 @@ void Game::draw()
 
    mScreenshot = false;
 
+   // TODO
+   // move this into the level class
+
    if (mDrawWeather)
    {
       Weather::getInstance().draw(*mWindowRenderTexture.get());
+   }
+
+   // draw screen transitions here
+   if (ScreenTransitionHandler::getInstance()._transition)
+   {
+      ScreenTransitionHandler::getInstance()._transition->draw(mWindowRenderTexture);
    }
 
    if (!mapEnabled)
