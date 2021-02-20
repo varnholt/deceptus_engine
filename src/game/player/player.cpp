@@ -1209,6 +1209,12 @@ void Player::updatePortal()
                }
             );
 
+            screen_transition->_callbacks_effect_2_ended.push_back(
+               [](){
+                  ScreenTransitionHandler::getInstance()._transition.release();
+               }
+            );
+
             ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
          }
       }

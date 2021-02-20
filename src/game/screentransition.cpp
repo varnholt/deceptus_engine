@@ -60,6 +60,11 @@ void ScreenTransition::effect1Done()
 
    _active_effect = _effect_2;
 
+   if (!_autostart_effect_2)
+   {
+      return;
+   }
+
    if (_delay_between_effects_ms.count() == 0)
    {
       Timer::add(_delay_between_effects_ms, [this](){startEffect2();});
