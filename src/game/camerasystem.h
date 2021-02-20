@@ -24,6 +24,8 @@ class CameraSystem
 
       void setRoom(const std::optional<Room>& room);
 
+      void syncNow();
+
       static CameraSystem& getCameraSystem();
 
 
