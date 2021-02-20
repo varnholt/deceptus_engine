@@ -11,7 +11,7 @@ struct FadeTransitionEffect : public ScreenTransitionEffect
       FadeOut
    };
 
-   FadeTransitionEffect();
+   FadeTransitionEffect(const sf::Color color = sf::Color::Black);
 
    void update(const sf::Time& dt) override;
    void draw(const std::shared_ptr<sf::RenderTexture>& window) override;
