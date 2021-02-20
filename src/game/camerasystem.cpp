@@ -177,6 +177,14 @@ void CameraSystem::setRoom(const std::optional<Room>& room)
 }
 
 
+void CameraSystem::syncNow()
+{
+   auto player = Player::getCurrent();
+   mX = player->getPixelPositionf().x;
+   mY = player->getPixelPositionf().y;
+}
+
+
 float CameraSystem::getX() const
 {
    // camera should be in the center of the focus zone

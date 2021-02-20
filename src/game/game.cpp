@@ -372,9 +372,8 @@ void Game::draw()
 
    mScreenshot = false;
 
-   // TODO
+   // refactoring idea:
    // move this into the level class
-
    if (mDrawWeather)
    {
       Weather::getInstance().draw(*mWindowRenderTexture.get());
@@ -572,6 +571,12 @@ void Game::update()
    mDeltaClock.restart();
 
    Audio::getInstance()->updateMusic();
+
+   // update screen transitions here
+   if (ScreenTransitionHandler::getInstance()._transition)
+   {
+      ScreenTransitionHandler::getInstance()._transition->update(dt);
+   }
 
    // reload the level when the save state has been invalidated
    if (SaveState::getCurrent().mLoadLevelRequested)

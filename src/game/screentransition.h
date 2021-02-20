@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <chrono>
 #include <functional>
 #include <memory>
 
@@ -13,12 +14,13 @@ struct ScreenTransition
 {
    ScreenTransition() = default;
 
-   void start();
+   void startEffect1();
    void update(const sf::Time& dt);
    void draw(const std::shared_ptr<sf::RenderTexture>& window);
 
    std::shared_ptr<ScreenTransitionEffect> _effect_1;
    std::shared_ptr<ScreenTransitionEffect> _effect_2;
+   std::chrono::milliseconds _delay_between_effects_ms;
 
    using TransitionCallback = std::function<void()>;
 
@@ -29,6 +31,7 @@ struct ScreenTransition
 
 private:
    void effect1Done();
+   void startEffect2();
    void effect2Done();
 
    std::shared_ptr<ScreenTransitionEffect> _active_effect;

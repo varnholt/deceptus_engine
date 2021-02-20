@@ -7,6 +7,7 @@
 #include "gamecontactlistener.h"
 #include "gamecontrollerintegration.h"
 #include "gamestate.h"
+#include "fadetransitioneffect.h"
 #include "fixturenode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
@@ -16,6 +17,7 @@
 #include "physics/physicsconfiguration.h"
 #include "playerinfo.h"
 #include "savestate.h"
+#include "screentransition.h"
 #include "texturepool.h"
 #include "weapon.h"
 #include "weaponsystem.h"
@@ -1181,11 +1183,33 @@ void Player::updatePortal()
          {
             mPortalClock.restart();
 
-            auto dstPos =  portal->getDestination()->getPortalPosition();
-            setBodyViaPixelPosition(
-               dstPos.x + PLAYER_ACTUAL_WIDTH / 2,
-               dstPos.y + DIFF_PLAYER_TILE_TO_PHYSICS
+            auto screen_transition = std::make_unique<ScreenTransition>();
+            auto fade_out = std::make_shared<FadeTransitionEffect>();
+            auto fade_in = std::make_shared<FadeTransitionEffect>();
+            fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+            fade_out->_speed = 2.0f;
+            fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+            fade_in->_value = 1.0f;
+            fade_in->_speed = 2.0f;
+            screen_transition->_effect_1 = fade_out;
+            screen_transition->_effect_2 = fade_in;
+            screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+            screen_transition->startEffect1();
+
+            screen_transition->_callbacks_effect_1_ended.push_back(
+               [this, portal](){
+                  auto dstPos =  portal->getDestination()->getPortalPosition();
+                  setBodyViaPixelPosition(
+                     dstPos.x + PLAYER_ACTUAL_WIDTH / 2,
+                     dstPos.y + DIFF_PLAYER_TILE_TO_PHYSICS
+                  );
+
+                  // update the camera system to point to the player position immediately
+                  CameraSystem::getCameraSystem().syncNow();
+               }
             );
+
+            ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
          }
       }
    }
