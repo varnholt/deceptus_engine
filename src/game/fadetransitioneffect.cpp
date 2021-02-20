@@ -3,7 +3,8 @@
 #include "gameconfiguration.h"
 
 
-FadeTransitionEffect::FadeTransitionEffect()
+FadeTransitionEffect::FadeTransitionEffect(const sf::Color color)
+ : _fade_color(color)
 {
    const auto w = static_cast<float>(GameConfiguration::getInstance().mViewWidth);
    const auto h = static_cast<float>(GameConfiguration::getInstance().mViewHeight);
