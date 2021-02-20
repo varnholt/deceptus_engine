@@ -1,9 +1,10 @@
 #include "screentransition.h"
 
+#include "framework/tools/timer.h"
 #include "screentransitioneffect.h"
 
 
-void ScreenTransition::start()
+void ScreenTransition::startEffect1()
 {
    _active_effect = _effect_1;
 
@@ -38,6 +39,17 @@ void ScreenTransition::draw(const std::shared_ptr<sf::RenderTexture>& window)
 }
 
 
+void ScreenTransition::startEffect2()
+{
+   _effect_2->start();
+
+   // tell everyone that effect 2 started
+   for (auto& cb : _callbacks_effect_2_started)
+   {
+      cb();
+   }
+}
+
 void ScreenTransition::effect1Done()
 {
    // tell everyone that effect 1 is done
@@ -47,12 +59,14 @@ void ScreenTransition::effect1Done()
    }
 
    _active_effect = _effect_2;
-   _effect_2->start();
 
-   // tell everyone that effect 2 started
-   for (auto& cb : _callbacks_effect_2_started)
+   if (_delay_between_effects_ms.count() == 0)
    {
-      cb();
+      Timer::add(_delay_between_effects_ms, [this](){startEffect2();});
+   }
+   else
+   {
+      startEffect2();
    }
 }
 

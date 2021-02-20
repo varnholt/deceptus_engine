@@ -9,12 +9,11 @@ FadeTransitionEffect::FadeTransitionEffect()
    const auto h = static_cast<float>(GameConfiguration::getInstance().mViewHeight);
 
    _vertices = {
-      sf::Vector2f{0, 0}, sf::Vector2f{0, h}, sf::Vector2f{w, h}, sf::Vector2f{w, 0}
+      sf::Vertex{sf::Vector2f{0, 0}, _fade_color},
+      sf::Vertex{sf::Vector2f{0, h}, _fade_color},
+      sf::Vertex{sf::Vector2f{w, h}, _fade_color},
+      sf::Vertex{sf::Vector2f{w, 0}, _fade_color}
    };
-
-//   triangle[0].color = sf::Color::Red;
-//   triangle[1].color = sf::Color::Blue;
-//   triangle[2].color = sf::Color::Green;
 }
 
 
@@ -33,6 +32,26 @@ void FadeTransitionEffect::update(const sf::Time& dt)
    }
 
    _value = _value + (_speed * sign * dt.asSeconds());
+
+   switch (_direction)
+   {
+      case Direction::FadeIn:
+      {
+         if (_value <= 0.0)
+         {
+            done();
+         }
+         break;
+      }
+      case Direction::FadeOut:
+      {
+         if (_value >= 1.0)
+         {
+            done();
+         }
+         break;
+      }
+   }
 }
 
 
@@ -43,6 +62,11 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window->setView(view);
+
+   _vertices[0].color.a = static_cast<uint8_t>(_value * 255);
+   _vertices[1].color.a = static_cast<uint8_t>(_value * 255);
+   _vertices[2].color.a = static_cast<uint8_t>(_value * 255);
+   _vertices[3].color.a = static_cast<uint8_t>(_value * 255);
 
    window->draw(_vertices.data(), _vertices.size(), sf::Quads);
 }
