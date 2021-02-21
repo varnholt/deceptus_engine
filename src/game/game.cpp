@@ -573,9 +573,10 @@ void Game::resetAfterDeath(const sf::Time& dt)
 
    if (mLevelLoadingFinished && !mLevelLoadingFinishedPrevious)
    {
+      mLevelLoadingFinishedPrevious = true;
+
       if (ScreenTransitionHandler::getInstance()._transition)
       {
-         mLevelLoadingFinishedPrevious = true;
          ScreenTransitionHandler::getInstance()._transition->startEffect2();
       }
    }
