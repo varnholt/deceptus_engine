@@ -20,6 +20,11 @@ FadeTransitionEffect::FadeTransitionEffect(const sf::Color color)
 
 void FadeTransitionEffect::update(const sf::Time& dt)
 {
+   if (_done)
+   {
+      return;
+   }
+
    float sign = 1.0f;
 
    switch (_direction)
@@ -40,6 +45,7 @@ void FadeTransitionEffect::update(const sf::Time& dt)
       {
          if (_value <= 0.0)
          {
+            _value = 0.0f;
             done();
          }
          break;
@@ -48,6 +54,7 @@ void FadeTransitionEffect::update(const sf::Time& dt)
       {
          if (_value >= 1.0)
          {
+            _value = 1.0f;
             done();
          }
          break;

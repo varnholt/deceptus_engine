@@ -6,6 +6,7 @@
 #include "camerapane.h"
 #include "debugdraw.h"
 #include "displaymode.h"
+#include "fadetransitioneffect.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/globalclock.h"
@@ -233,6 +234,7 @@ void Game::showPauseMenu()
 void Game::loadLevel()
 {
    mLevelLoadingFinished = false;
+   mLevelLoadingFinishedPrevious = false;
 
    mLevelLoadingThread = std::async(
       std::launch::async, [this](){
@@ -515,9 +517,74 @@ void Game::updateWindowTitle()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::resetAfterDeath(const sf::Time& dt)
+{
+   // not 100% if the screen transitions should actually drive the
+   // level loading and game workflow. it should rather be the other
+   // way round. on the other hand this approach allows very simple
+   // timing and the fading is very unlikely to fail anyway.
+
+   if (mPlayer->isDead())
+   {
+      mDeathWaitTimeMs += dt.asMilliseconds();
+
+      if (mDeathWaitTimeMs > 1000)
+      {
+         if (!ScreenTransitionHandler::getInstance()._transition)
+         {
+            // fade out/in
+            auto screen_transition = std::make_unique<ScreenTransition>();
+            sf::Color fade_color{60, 0, 0};
+            auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
+            auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
+            fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+            fade_out->_speed = 1.0f;
+            fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+            fade_in->_value = 1.0f;
+            fade_in->_speed = 2.0f;
+            screen_transition->_effect_1 = fade_out;
+            screen_transition->_effect_2 = fade_in;
+            screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+            screen_transition->_autostart_effect_2 = false;
+            screen_transition->startEffect1();
+
+            // do the actual level reset once the fade out has happened
+            screen_transition->_callbacks_effect_1_ended.push_back(
+               [this](){
+                  SaveState::deserializeFromFile();
+                  mPlayer->reset();
+                  loadLevel();
+
+                  // update the camera system to point to the player position immediately
+                  CameraSystem::getCameraSystem().syncNow();
+               }
+            );
+
+            screen_transition->_callbacks_effect_2_ended.push_back(
+               [](){
+                  ScreenTransitionHandler::getInstance()._transition.release();
+               }
+            );
+
+            ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
+         }
+      }
+   }
+
+   if (mLevelLoadingFinished && !mLevelLoadingFinishedPrevious)
+   {
+      if (ScreenTransitionHandler::getInstance()._transition)
+      {
+         mLevelLoadingFinishedPrevious = true;
+         ScreenTransitionHandler::getInstance()._transition->startEffect2();
+      }
+   }
+}
+
+
 void Game::updateGameState(const sf::Time& dt)
 {
-   // check if player is dead
+   // check if just died
    auto deathReason = mPlayer->checkDead();
    if (!mPlayer->isDead() && deathReason != DeathReason::None)
    {
@@ -550,17 +617,9 @@ void Game::updateGameState(const sf::Time& dt)
       mPlayer->die();
    }
 
-   if (mPlayer->isDead())
-   {
-      mDeathWaitTimeMs += dt.asMilliseconds();
-      if (mDeathWaitTimeMs > 2500)
-      {
-         // std::cout << "reload" << std::endl;
-         SaveState::deserializeFromFile();
-         mPlayer->reset();
-         loadLevel();
-      }
-   }
+   // fade out when the player dies
+   // when the level is faded out, then start reloading
+   resetAfterDeath(dt);
 }
 
 

@@ -46,6 +46,7 @@ private:
    void nextLevel();
 
    void reset();
+   void resetAfterDeath(const sf::Time& dt);
 
    void update();
    void updateGameState(const sf::Time& dt);
@@ -84,6 +85,7 @@ private:
 
    sf::Clock mDeltaClock;
    std::atomic<bool> mLevelLoadingFinished = false;
+   std::atomic<bool> mLevelLoadingFinishedPrevious = false; // keep track of level loading in an async manner
    std::future<void> mLevelLoadingThread;
    bool mStoredPositionValid = false;
    sf::Vector2f mStoredPosition;
