@@ -8,6 +8,7 @@ void ScreenTransitionEffect::start()
 
 void ScreenTransitionEffect::done()
 {
+   _done = true;
    _effect_ended();
 }
 
