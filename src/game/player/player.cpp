@@ -717,6 +717,12 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
       return 0.0f;
    }
 
+   // sanity check to avoid moonwalking
+   if (mControls.hasFlag(KeyPressedLeft) && mControls.hasFlag(KeyPressedRight))
+   {
+      return 0.0f;
+   }
+
    float desiredVel = 0.0f;
 
    if (mControls.hasFlag(KeyPressedLeft))
@@ -818,6 +824,7 @@ void Player::updateAnimation(const sf::Time& dt)
    const auto inWater = isInWater();
 
    const auto lookActive = CameraPane::getInstance().isLookActive();
+   const auto passesSanityCheck = !(mControls.isMovingRight() && mControls.isMovingLeft());
 
    auto requiresUpdate = true;
 
@@ -835,7 +842,7 @@ void Player::updateAnimation(const sf::Time& dt)
    }
 
    // run / crouch
-   else if (mControls.isMovingRight() && !inAir && !inWater && !lookActive)
+   else if (mControls.isMovingRight() && passesSanityCheck && !inAir && !inWater && !lookActive)
    {
       if (mCrouching)
       {
@@ -846,7 +853,7 @@ void Player::updateAnimation(const sf::Time& dt)
          nextCycle = mRunRightAligned;
       }
    }
-   else if (mControls.isMovingLeft() && !inAir && !inWater && !lookActive)
+   else if (mControls.isMovingLeft() && passesSanityCheck && !inAir && !inWater && !lookActive)
    {
       if (mCrouching)
       {
