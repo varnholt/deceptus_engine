@@ -41,6 +41,8 @@ void ScreenTransition::draw(const std::shared_ptr<sf::RenderTexture>& window)
 
 void ScreenTransition::startEffect2()
 {
+   _active_effect = _effect_2;
+
    _effect_2->start();
 
    // tell everyone that effect 2 started
@@ -58,8 +60,7 @@ void ScreenTransition::effect1Done()
       cb();
    }
 
-   _active_effect = _effect_2;
-
+   // effect 1 stays active until effect 2 actually starts
    if (!_autostart_effect_2)
    {
       return;

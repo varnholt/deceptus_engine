@@ -16,6 +16,7 @@ struct ScreenTransitionEffect
 
    using TransitionCallback = std::function<void()>;
    TransitionCallback _effect_ended;
+   bool _done = false;
 
 protected:
    virtual void done();
