@@ -115,6 +115,14 @@ void MenuScreenPause::select()
 }
 
 
+void MenuScreenPause::showEvent()
+{
+   // initial selection after coming from pause state should always be 'resume'
+   mSelection = Selection::Resume;
+   updateLayers();
+}
+
+
 void MenuScreenPause::updateLayers()
 {
    mLayers["resume_0"]->mVisible = (mSelection != Selection::Resume);
