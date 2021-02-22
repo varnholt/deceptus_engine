@@ -335,9 +335,21 @@ void Game::initialize()
       [this](ExecutionMode current, ExecutionMode previous){
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
-            // std::cout << "reset keys pressed" << std::endl;
             mPlayer->getControls().setKeysPressed(0);
             CameraPane::getInstance().updateLookState(Look::LookActive, false);
+         }
+      }
+   );
+
+   // it is quite likely that after going into paused state different keys are
+   // pressed compared to before. actually it's always going to happen. that results
+   // in unpredictable player behavior, such as running into a 'random' direction.
+   // this is why, after going into pause and back, the keyboard needs to be synced
+   GameState::getInstance().addCallback(
+      [this](ExecutionMode current, ExecutionMode previous){
+         if (current == ExecutionMode::Running && previous == ExecutionMode::Paused)
+         {
+            mPlayer->getControls().forceSync();
          }
       }
    );

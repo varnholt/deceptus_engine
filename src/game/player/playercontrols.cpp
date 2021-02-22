@@ -20,6 +20,51 @@ bool PlayerControls::hasFlag(int32_t flag) const
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void PlayerControls::forceSync()
+{
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+   {
+      mKeysPressed |= KeyPressedJump;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+   {
+      mKeysPressed |= KeyPressedLook;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+   {
+      mKeysPressed |= KeyPressedUp;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+   {
+      mKeysPressed |= KeyPressedDown;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+   {
+      mKeysPressed |= KeyPressedLeft;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+   {
+      mKeysPressed |= KeyPressedRight;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+   {
+      mKeysPressed |= KeyPressedRun;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+   {
+      mKeysPressed |= KeyPressedFire;
+   }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (GameControllerIntegration::getCount() > 0)
