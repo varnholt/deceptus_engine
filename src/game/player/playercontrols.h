@@ -16,6 +16,7 @@ public:
 
    void keyboardKeyPressed(sf::Keyboard::Key key);
    void keyboardKeyReleased(sf::Keyboard::Key key);
+   void forceSync();
 
    int getKeysPressed() const;
    void setKeysPressed(int keys);
