@@ -25,7 +25,6 @@ void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void MenuScreen::showEvent()
 {
-
 }
 
 
@@ -96,19 +95,16 @@ void MenuScreen::load()
 
 void MenuScreen::loadingFinished()
 {
-
 }
 
 
 void MenuScreen::keyboardKeyPressed(sf::Keyboard::Key /*key*/)
 {
-
 }
 
 
 void MenuScreen::keyboardKeyReleased(sf::Keyboard::Key /*key*/)
 {
-
 }
 
 
@@ -121,8 +117,8 @@ void MenuScreen::controllerButtonX()
 
 void MenuScreen::controllerButtonY()
 {
-
 }
+
 
 bool MenuScreen::isControllerUsed() const
 {

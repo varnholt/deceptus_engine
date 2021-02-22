@@ -29,6 +29,8 @@ class MenuScreenPause : public MenuScreen
       void down();
       void select();
 
+      void showEvent() override;
+
 
    private:
 
