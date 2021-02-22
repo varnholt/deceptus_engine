@@ -222,6 +222,12 @@ void Game::showMainMenu()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::showPauseMenu()
 {
+   // while the game is loading, don't bother to open the pause screen
+   if (!mLevelLoadingFinished)
+   {
+      return;
+   }
+
    if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
    {
       Menu::getInstance()->show(Menu::MenuType::Pause);
