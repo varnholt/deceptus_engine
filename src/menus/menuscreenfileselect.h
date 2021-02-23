@@ -19,6 +19,8 @@ public:
    void controllerButtonX() override;
    void loadingFinished() override;
 
+   void showEvent() override;
+
 
 private:
 
