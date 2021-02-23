@@ -155,6 +155,15 @@ void MenuScreenFileSelect::loadingFinished()
 }
 
 
+void MenuScreenFileSelect::showEvent()
+{
+   // always update to latest save state when the menu is shown.
+   // when a new game is started, the save state changes, so the
+   // layers become outdated.
+   updateLayers();
+}
+
+
 void MenuScreenFileSelect::updateLayers()
 {
    // for (auto& layer : mLayers)
