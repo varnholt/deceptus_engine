@@ -11,6 +11,12 @@
 #include <iostream>
 
 
+namespace
+{
+   constexpr auto minimum_jump_interval_ms = 150;
+}
+
+
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, const PlayerControls& controls)
 {
@@ -218,7 +224,7 @@ void PlayerJump::jump()
    sf::Time elapsed = mJumpClock.getElapsedTime();
 
    // only allow a new jump after a a couple of milliseconds
-   if (elapsed.asMilliseconds() > 100)
+   if (elapsed.asMilliseconds() > minimum_jump_interval_ms)
    {
       // handle regular jump
       if (!mInAir || mGroundContactJustLost || mClimbing)
