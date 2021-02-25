@@ -1,5 +1,6 @@
 #include "dialogue.h"
 
+#include "gamestate.h"
 #include "messagebox.h"
 #include "player/player.h"
 #include "savestate.h"
@@ -55,6 +56,13 @@ void Dialogue::resetAll()
 
 void Dialogue::update()
 {
+   // prevent 'pause visible' vs. 'dialogue visible' if both
+   // are activated in the same frame.
+   if (GameState::getInstance().getMode() == ExecutionMode::Paused)
+   {
+      return;
+   }
+
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
    for (auto& dialogue : sDialogues)
