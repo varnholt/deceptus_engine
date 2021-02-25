@@ -58,7 +58,10 @@ void Dialogue::update()
 {
    // prevent 'pause visible' vs. 'dialogue visible' if both
    // are activated in the same frame.
-   if (GameState::getInstance().getMode() == ExecutionMode::Paused)
+   if (
+         GameState::getInstance().getMode() == ExecutionMode::Paused
+      || GameState::getInstance().getQueuedMode() == ExecutionMode::Paused
+   )
    {
       return;
    }
