@@ -1459,6 +1459,11 @@ void Player::updateCrouch()
       return;
    }
 
+   if (!mCrouching && CameraPane::getInstance().isLookActive())
+   {
+      return;
+   }
+
    setCrouching(downPressed && !isInAir());
 }
 
