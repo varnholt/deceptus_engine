@@ -2,6 +2,7 @@
 
 #include "animationpool.h"
 #include "audio.h"
+#include "camerapane.h"
 #include "framework/tools/globalclock.h"
 #include "gamecontactlistener.h"
 #include "physics/physicsconfiguration.h"
@@ -217,6 +218,11 @@ void PlayerJump::wallJump()
 void PlayerJump::jump()
 {
    if (mCrouching)
+   {
+      return;
+   }
+
+   if (CameraPane::getInstance().isLookActive())
    {
       return;
    }
