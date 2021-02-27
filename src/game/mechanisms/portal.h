@@ -48,6 +48,10 @@ public:
    sf::Vector2f getPortalPosition();
    const sf::Vector2f& getTilePosition() const;
 
+   static void lock();
+   static void unlock();
+   static bool isLocked();
+
 
 protected:
 
@@ -61,5 +65,7 @@ protected:
    int mHeight = 0;
    bool mPlayerAtPortal = false;
    std::shared_ptr<Portal> mDestination;
+
+   static std::atomic<bool> mPortalLock;
 };
 

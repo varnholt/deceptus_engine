@@ -231,6 +231,16 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeMovingPlatform:
          {
+            // check if platform smashes the player
+            auto fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
+            if (fixtureNodeB && fixtureNodeB->getType() == ObjectType::ObjectTypePlayerHeadSensor)
+            {
+               if (Player::getCurrent()->isOnGround())
+               {
+                  mSmashed = true;
+               }
+            }
+
             auto platformBody = contact->GetFixtureA()->GetBody();
             Player::getCurrent()->setPlatformBody(platformBody);
 
@@ -370,6 +380,16 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeMovingPlatform:
          {
+            // check if platform smashes the player
+            auto fixtureNodeA = static_cast<FixtureNode*>(fixtureUserDataA);
+            if (fixtureNodeA && fixtureNodeA->getType() == ObjectType::ObjectTypePlayerHeadSensor)
+            {
+               if (Player::getCurrent()->isOnGround())
+               {
+                  mSmashed = true;
+               }
+            }
+
             auto platformBody = contact->GetFixtureB()->GetBody();
             Player::getCurrent()->setPlatformBody(platformBody);
 
@@ -735,10 +755,18 @@ void GameContactListener::processImpulse(float impulse)
    Player::getCurrent()->impulse(impulse);
 }
 
+
 int32_t GameContactListener::getNumArmRightContacts() const
 {
    return mNumArmRightContacts;
 }
+
+
+bool GameContactListener::isSmashed() const
+{
+   return mSmashed;
+}
+
 
 int32_t GameContactListener::getNumArmLeftContacts() const
 {
@@ -761,6 +789,7 @@ void GameContactListener::reset()
    mNumArmRightContacts = 0;
    mNumDeadlyContacts = 0;
    mNumMovingPlatformContacts = 0;
+   mSmashed = false;
 }
 
 

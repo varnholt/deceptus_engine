@@ -155,6 +155,7 @@ private:
    void updateGroundAngle();
    void updateDeadFixtures();
    void updateWeapons(const sf::Time& dt);
+   void updateImpulse();
 
    bool isDashActive() const;
    void resetDash();
@@ -223,6 +224,8 @@ private:
 
    float mBeltVelocity = 0.0f;
    bool mIsOnBelt = false;
+
+   float mImpulse = 0.0f;
 
    int mDashSteps = 0;
    Dash mDashDir = Dash::None;
