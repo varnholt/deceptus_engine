@@ -55,6 +55,7 @@ enum class DeathReason
    OutOfHealth,
    TooFast,
    TouchesDeadly,
+   Smashed,
 };
 
 enum class MechanismVersion

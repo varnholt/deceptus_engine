@@ -20,6 +20,7 @@ public:
    int32_t getNumPlayerContacts() const;
    int32_t getNumArmLeftContacts() const;
    int32_t getNumArmRightContacts() const;
+   bool isSmashed() const;
 
    void BeginContact(b2Contact *contact) override;
    void EndContact(b2Contact *contact) override;
@@ -55,6 +56,7 @@ private:
    int32_t mNumDeadlyContacts = 0;
    int32_t mNumMovingPlatformContacts = 0;
    int32_t mBouncerCycles = 5;
+   bool mSmashed = false;
 
    static GameContactListener* sInstance;
 };

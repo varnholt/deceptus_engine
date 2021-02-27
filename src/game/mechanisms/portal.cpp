@@ -18,6 +18,9 @@
 #include <iostream>
 
 
+std::atomic<bool> Portal::mPortalLock = false;
+
+
 //-----------------------------------------------------------------------------
 Portal::Portal(GameNode* parent)
  : GameNode(parent)
@@ -49,6 +52,27 @@ sf::Vector2f Portal::getPortalPosition()
 const sf::Vector2f& Portal::getTilePosition() const
 {
    return mTilePosition;
+}
+
+
+//-----------------------------------------------------------------------------
+void Portal::lock()
+{
+   mPortalLock = true;
+}
+
+
+//-----------------------------------------------------------------------------
+void Portal::unlock()
+{
+   mPortalLock = false;
+}
+
+
+//-----------------------------------------------------------------------------
+bool Portal::isLocked()
+{
+   return mPortalLock;
 }
 
 

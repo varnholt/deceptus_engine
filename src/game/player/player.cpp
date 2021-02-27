@@ -817,6 +817,11 @@ void Player::updateAnimation(const sf::Time& dt)
       return;
    }
 
+   if (Portal::isLocked())
+   {
+      return;
+   }
+
    std::shared_ptr<Animation> nextCycle = nullptr;
 
    auto velocity = mBody->GetLinearVelocity();
@@ -1063,6 +1068,12 @@ void Player::updateVelocity()
       return;
    }
 
+   if (Portal::isLocked())
+   {
+      mBody->SetLinearVelocity(b2Vec2{0.0, 0.0});
+      return;
+   }
+
    // if we just landed hard on the ground, we need a break :)
    if (mHardLanding)
    {
@@ -1188,6 +1199,7 @@ void Player::updatePortal()
          auto portal = Level::getCurrentLevel()->getNearbyPortal();
          if (portal != nullptr && portal->getDestination() != nullptr)
          {
+            Portal::lock();
             mPortalClock.restart();
 
             auto screen_transition = std::make_unique<ScreenTransition>();
@@ -1213,6 +1225,7 @@ void Player::updatePortal()
 
                   // update the camera system to point to the player position immediately
                   CameraSystem::getCameraSystem().syncNow();
+                  Portal::unlock();
                }
             );
 
@@ -1232,6 +1245,28 @@ void Player::updatePortal()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::impulse(float intensity)
 {
+   // just store the information we get from the post solve call for now.
+   // other evaluation from BeginContact / EndContact might make the impulse irrelevant
+   mImpulse = intensity;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updateImpulse()
+{
+   if (mImpulse < 0.0000001f)
+   {
+      return;
+   }
+
+   auto impulse = mImpulse;
+   mImpulse = 0.0f;
+
+   if (GameContactListener::getInstance()->isSmashed())
+   {
+      return;
+   }
+
    const auto dx = mVelocityPrevious.x - mBody->GetLinearVelocity().x;
    const auto dy = mVelocityPrevious.y - mBody->GetLinearVelocity().y;
    const auto horizontal = (fabs(dx) > fabs(dy));
@@ -1245,13 +1280,13 @@ void Player::impulse(float intensity)
 
    if (horizontal)
    {
-      if (intensity > 0.4f)
+      if (impulse > 0.4f)
       {
          Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
       }
    }
 
-   if (intensity > 1.0f)
+   if (impulse > 1.0f)
    {
       if (Level::getCurrentLevel()->getNearbyBouncer())
       {
@@ -1263,7 +1298,7 @@ void Player::impulse(float intensity)
       mHardLanding = true;
       mHardLandingCycles = 0;
 
-      damage(static_cast<int>((intensity - 1.0f) * 20.0f));
+      damage(static_cast<int>((impulse - 1.0f) * 20.0f));
    }
 }
 
@@ -1548,6 +1583,7 @@ void Player::update(const sf::Time& dt)
 {
    mTime += dt;
 
+   updateImpulse();
    updateGroundAngle();
    updateHardLanding();
    updatePlayerPixelRect();
@@ -1889,21 +1925,23 @@ DeathReason Player::checkDead() const
    const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
    const auto tooFast = fabs(mBody->GetLinearVelocity().y) > 40;
    const auto outOfHealth = SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth <= 0;
+   const auto smashed = GameContactListener::getInstance()->isSmashed();
 
    if (touchesSomethingDeadly)
    {
       reason = DeathReason::TouchesDeadly;
-      // std::cout << "dead: touches something deadly" << std::endl;
+   }
+   else if (smashed)
+   {
+      reason = DeathReason::Smashed;
    }
    else if (tooFast)
    {
       reason = DeathReason::TooFast;
-      // std::cout << "dead: too fast" << std::endl;
    }
    else if (outOfHealth)
    {
       reason = DeathReason::OutOfHealth;
-      // std::cout << "dead: out of health" << std::endl;
    }
 
    return reason;
