@@ -627,6 +627,11 @@ void Game::updateGameState(const sf::Time& dt)
             std::cout << "[i] dead: out of health" << std::endl;
             break;
          }
+         case DeathReason::Smashed:
+         {
+            std::cout << "[i] dead: player got smashed" << std::endl;
+            break;
+         }
          case DeathReason::None:
          {
             break;
