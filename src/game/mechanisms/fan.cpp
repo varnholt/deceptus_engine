@@ -9,6 +9,7 @@
 
 #include "texturepool.h"
 
+#include <array>
 #include <iostream>
 
 
@@ -34,16 +35,38 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    bodyDef.position = posb2d;
    tile->mBody = world->CreateBody(&bodyDef);
 
-   auto width = PIXELS_PER_TILE * MPP * 0.5f;
-   auto height = PIXELS_PER_TILE * MPP * 0.5f;
-
-   // create fixture for physical boundaries of the belt object
+   // create fixture for physical boundaries of the fan object
    b2PolygonShape shape;
-   shape.SetAsBox(
-     width, height,
-     b2Vec2(width, height),
-     0.0f
-   );
+
+   /* a rounded box prevents the player of getting stuck between the gaps
+      ____
+     x    x
+     |    |
+     x____x
+   */
+
+   static constexpr float e = 0.1f;
+   std::array<b2Vec2, 8> test{
+      b2Vec2{0,     e    },
+      b2Vec2{0,     1 - e},
+      b2Vec2{e,     1    },
+      b2Vec2{1 - e, 1    },
+      b2Vec2{1,     1 - e},
+      b2Vec2{1,     e    },
+      b2Vec2{1 - e, 0    },
+      b2Vec2{0,     e    },
+   };
+
+   // auto width = PIXELS_PER_TILE * MPP * 0.5f;
+   // auto height = PIXELS_PER_TILE * MPP * 0.5f;
+   //
+   //   shape.SetAsBox(
+   //     width, height,
+   //     b2Vec2(width, height),
+   //     0.0f
+   //   );
+
+   shape.Set(test.data(), test.size());
 
    b2FixtureDef boundaryFixtureDef;
    boundaryFixtureDef.shape = &shape;
@@ -265,7 +288,7 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
    auto valid = false;
    sf::Vector2f dir;
 
-   for (auto f : sFans)
+   for (const auto& f : sFans)
    {
       auto fan = std::dynamic_pointer_cast<Fan>(f);
 
