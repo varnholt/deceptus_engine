@@ -46,7 +46,7 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    */
 
    static constexpr float e = 0.1f;
-   std::array<b2Vec2, 8> test{
+   std::array<b2Vec2, 8> rounded_box{
       b2Vec2{0,     e    },
       b2Vec2{0,     1 - e},
       b2Vec2{e,     1    },
@@ -66,7 +66,7 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    //     0.0f
    //   );
 
-   shape.Set(test.data(), test.size());
+   shape.Set(rounded_box.data(), static_cast<int32_t>(rounded_box.size()));
 
    b2FixtureDef boundaryFixtureDef;
    boundaryFixtureDef.shape = &shape;
