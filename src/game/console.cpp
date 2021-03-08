@@ -74,9 +74,10 @@ void Console::giveWeaponBow()
 
 void Console::giveWeaponDefault()
 {
-   auto weapon = WeaponFactory::create(WeaponType::Default);
+   auto weapon = std::make_shared<Weapon>();
    weapon->initialize();
-   Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(std::move(weapon));
+   Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(weapon);
+   Player::getCurrent()->getWeaponSystem()->mSelected = weapon;
    mLog.push_back("given default weapon to player");
 }
 
