@@ -6,6 +6,7 @@
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
+#include "weaponfactory.h"
 #include "weaponsystem.h"
 
 #include <iostream>
@@ -53,13 +54,14 @@ void Console::chop()
 void Console::showHelp()
 {
     mLog.push_back("help:");
-    mLog.push_back("/extra <name> | give extra | available extras: climb, dash");
-    mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100,330");
     mLog.push_back("/cp <n> | jump to checkpoint | example: /cp 0");
+    mLog.push_back("/extra <name> | give extra | available extras: climb, dash");
+    mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100, 330");
+    mLog.push_back("/weapon <weapon> | give weapon to player | available weapons: bow");
 }
 
 
-void Console::giveBow()
+void Console::giveWeaponBow()
 {
    auto bow = std::make_shared<Bow>();
    bow->initialize();
@@ -67,6 +69,15 @@ void Console::giveBow()
    Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(bow);
    Player::getCurrent()->getWeaponSystem()->mSelected = bow;
    mLog.push_back("given bow to player");
+}
+
+
+void Console::giveWeaponDefault()
+{
+   auto weapon = WeaponFactory::create(WeaponType::Default);
+   weapon->initialize();
+   Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(std::move(weapon));
+   mLog.push_back("given default weapon to player");
 }
 
 
@@ -93,16 +104,15 @@ void Console::execute()
       showHelp();
    }
 
-   // should become /weapon xxx in the future
-   else if (results.at(0) == "/bow")
+   if (results.at(0) == "/weapon" && results.size() == 2)
    {
-      giveBow();
-   }
-   else if (results.at(0) == "/weapon" && results.size() == 2)
-   {
+      if (results.at(1) == "default")
+      {
+         giveWeaponDefault();
+      }
       if (results.at(1) == "bow")
       {
-         giveBow();
+         giveWeaponBow();
       }
    }
    else if (results.at(0) == "/extra" && results.size() == 2)
