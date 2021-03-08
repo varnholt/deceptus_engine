@@ -1389,8 +1389,6 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateFire()
 {
-   // disabled for now
-   //
    if (mControls.isFireButtonPressed())
    {
       fire();
@@ -1831,7 +1829,10 @@ void Player::fire()
 
    b2Vec2 pos;
 
-   float force = 0.1f;
+   // the force applied really depends on the weapon
+   // it might make sense to have a `virtual float forceFactor() const`
+   float force = 1.5f;
+
    dir.x = dir.x * force;
    dir.y = dir.y * force;
 
