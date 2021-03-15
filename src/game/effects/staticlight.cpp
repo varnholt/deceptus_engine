@@ -23,7 +23,7 @@ StaticLight::StaticLight()
 
 void StaticLight::drawToZ(sf::RenderTarget &target, sf::RenderStates /*states*/, int z) const
 {
-   for (auto light : mLights)
+   for (const auto& light : mLights)
    {
       if (z != light->mZ)
       {
