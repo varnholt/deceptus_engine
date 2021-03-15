@@ -256,7 +256,7 @@ void RaycastLight::onDraw(sf::RenderTarget& target, sf::RenderStates /*states*/)
 //-----------------------------------------------------------------------------
 void RaycastLight::debug() const
 {
-   for (auto light : mLights)
+   for (const auto& light : mLights)
    {
       auto p1 = light->mPosMeters;
 

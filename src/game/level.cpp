@@ -739,7 +739,7 @@ void Level::spawnEnemies()
 //-----------------------------------------------------------------------------
 void Level::drawStaticChains(sf::RenderTarget& target)
 {
-   for (auto path : mAtmosphere.mOutlines)
+   for (auto& path : mAtmosphere.mOutlines)
    {
       target.draw(&path.at(0), path.size(), sf::LineStrip);
    }
@@ -852,85 +852,8 @@ void Level::drawMap(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawRaycastLight(sf::RenderTarget& target)
 {
-   // if (!mRaycastTexture)
-   // {
-   //    sf::ContextSettings contextSettings;
-   //    contextSettings.stencilBits = 8;
-   //
-   //    mRaycastTexture = std::make_shared<sf::RenderTexture>();
-   //    mRaycastTexture->create(320, 180, contextSettings);
-   //    mRaycastTexture->setSmooth(true);
-   //
-   //    mRaycastTextureBlurred = std::make_shared<sf::RenderTexture>();
-   //    mRaycastTextureBlurred->create(320, 180, contextSettings);
-   //    mRaycastTextureBlurred->setSmooth(true);
-   // }
-   //
-   // // render player to texture
-   // mRaycastTexture->clear(sf::Color{0, 0, 0, 0});
-   // mRaycastTexture->setView(*mLevelView);
-   // mRaycastLight->draw(*mRaycastTexture, {});
-   // mRaycastTexture->display();
-   //
-   // // render texture with shader applied
-   // auto sprite = sf::Sprite(mRaycastTexture->getTexture());
-   //
-   // // TODO: have a static view for rendertexture quads
-   // sf::View view(
-   //    sf::FloatRect(
-   //       0.0f,
-   //       0.0f,
-   //       static_cast<float>(mRaycastTexture->getSize().x),
-   //       static_cast<float>(mRaycastTexture->getSize().y)
-   //    )
-   // );
-   //
-   // view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-   // target.setView(view);
-   //
-   // // &mBlurShader->getShader()
-   // sf::RenderStates statesAdd;
-   // statesAdd.blendMode = sf::BlendAdd;
-   // target.draw(sprite, statesAdd);
-   //
-   // target.setView(*mLevelView);
-
-
-   // #define ATTEMPT_BLUR 1
-
-#ifdef ATTEMPT_BLUR
-   auto blurRenderTexture = mBlurShader->getRenderTexture();
-
-   // render player to texture
-   blurRenderTexture->clear(sf::Color{0, 0, 0, 0});
-   blurRenderTexture->setView(*mLevelView);
-   mRaycastLight->draw(*blurRenderTexture, {});
-   blurRenderTexture->display();
-
-   // render texture with shader applied
-   auto sprite = sf::Sprite(blurRenderTexture->getTexture());
-
-   // TODO: have a static view for rendertexture quads
-   sf::View view(
-      sf::FloatRect(
-         0.0f,
-         0.0f,
-         static_cast<float>(mLevelRenderTexture->getSize().x),
-         static_cast<float>(mLevelRenderTexture->getSize().y)
-      )
-   );
-
-   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-   target.setView(view);
-   target.draw(sprite, &mBlurShader->getShader());
-
-   takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
-
-   target.setView(*mLevelView);
-#else
    target.setView(*mLevelView);
    mRaycastLight->draw(target, {});
-#endif
 }
 
 
@@ -952,8 +875,6 @@ void Level::drawPlayer(sf::RenderTarget& target)
 
    if (player->isDead())
    {
-      // std::cout << "render death shader" << std::endl;
-
       auto deathRenderTexture = mDeathShader->getRenderTexture();
 
       // render player to texture
@@ -1280,7 +1201,7 @@ void Level::update(const sf::Time& dt)
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
 
-   for (auto smoke : mSmokeEffect)
+   for (const auto& smoke : mSmokeEffect)
    {
       smoke->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    }
