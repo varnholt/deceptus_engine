@@ -74,6 +74,7 @@ private:
    sf::VertexArray mVerticesAnimated;
 
    std::shared_ptr<sf::Texture> mTexture;
+   std::shared_ptr<sf::Texture> mBumpMap;
 
    std::vector<AnimatedTile*> mAnimations;
 
