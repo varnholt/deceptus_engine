@@ -52,6 +52,12 @@ bool TileMap::load(
 
    mTexture = TexturePool::getInstance().get(path);
 
+   // check if we have a bumpmap and, if so, load it
+//   if (std::filesystem::exists(path + "_bumpmap"))
+//   {
+//      mTexture = TexturePool::getInstance().get(path);
+//   }
+
    float parallaxScale = 1.0f;
    if (layer->mProperties)
    {
@@ -217,7 +223,7 @@ void TileMap::update(const sf::Time& dt)
          }
       }
 
-      AnimatedTileFrame* frame = anim->mFrames.at(index);
+      auto frame = anim->mFrames.at(index);
 
       const auto tu = static_cast<uint32_t>(frame->mX);
       const auto tv = static_cast<uint32_t>(frame->mY);
@@ -329,13 +335,6 @@ void TileMap::hideTile(int x, int y)
       }
    }
 }
-
-//   // if no animation is available, just store the tile in the static buffer
-//
-//   mVerticesStaticBlocks[by][bx].append(quad[0]);
-//   mVerticesStaticBlocks[by][bx].append(quad[1]);
-//   mVerticesStaticBlocks[by][bx].append(quad[2]);
-//   mVerticesStaticBlocks[by][bx].append(quad[3]);
 
 
 TileMap::AnimatedTile::~AnimatedTile()

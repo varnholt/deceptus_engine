@@ -70,6 +70,9 @@
 #include <string>
 #include <thread>
 
+// hardcoded settings
+// #define GLOW_ENABLED
+
 
 Level* Level::sCurrentLevel = nullptr;
 const std::string parallaxIdentifier = "parallax_";
@@ -374,7 +377,7 @@ void Level::loadTmx()
       {
          TmxObjectGroup* objectGroup = dynamic_cast<TmxObjectGroup*>(element);
 
-         for (auto object : objectGroup->mObjects)
+         for (const auto& object : objectGroup->mObjects)
          {
             TmxObject* tmxObject = object.second;
 
@@ -919,7 +922,7 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
    {
       mStaticLight->drawToZ(target, {}, z);
 
-      for (auto smoke : mSmokeEffect)
+      for (const auto& smoke : mSmokeEffect)
       {
          smoke->drawToZ(target, {}, z);
       }
@@ -998,21 +1001,23 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
    // draw elements that are supposed to glow / to be blurred here
 
+#ifdef GLOW_ENABLED
    // lasers have been removed here because dstar added the glow to the spriteset
-   //
-   // const auto pPos = Player::getCurrent()->getPixelPositionf();
-   //
+
+   const auto pPos = Player::getCurrent()->getPixelPositionf();
+
    // draw lasers
-   // for (auto laser : mLasers)
-   // {
-   //    const auto lPos = std::dynamic_pointer_cast<Laser>(laser)->getPixelPosition();
-   //    if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
-   //    {
-   //       continue;
-   //    }
-   //
-   //    laser->draw(target);
-   // }
+   for (auto laser : mLasers)
+   {
+      const auto lPos = std::dynamic_pointer_cast<Laser>(laser)->getPixelPosition();
+      if (SfmlMath::lengthSquared(lPos - pPos) > 250000)
+      {
+         continue;
+      }
+
+      laser->draw(target);
+   }
+#endif
 }
 
 
@@ -1043,6 +1048,33 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
 
 
 //-----------------------------------------------------------------------------
+// Level Rendering Flow
+//
+//    textures/render targets:
+//    - atmosphere texture
+//    - level background texture
+//    - level texture
+//    - window
+//
+//    01) draw atmosphere (air / water)                           -> atmosphere texture
+//    02) draw parallax info                                      -> level background texture
+//    03) draw level background with atmosphere shader enabled    -> background texture
+//        - layers z=0..15
+//    04) draw level background                                   -> level texture
+//    05) draw level foreground                                   -> level texture
+//        - layers z=16..50
+//        - additive lights
+//        - smoke (z=20)
+//        - mechanisms
+//        - ambient occlusion
+//        - images with varying blend modes
+//        - player
+//    06) draw raycast lights                                     -> level texture
+//    07) draw projectiles                                        -> level texture
+//    08) flash and bounce -> move level texture
+//    09) draw level texture with gamma shader enabled            -> straight to window
+//    10) draw level map (if enabled)                             -> straight to window
+//
 void Level::draw(
    const std::shared_ptr<sf::RenderTexture>& window,
    bool screenshot
@@ -1057,10 +1089,12 @@ void Level::draw(
    takeScreenshot("screenshot_atmosphere", *mAtmosphereShader->getRenderTexture().get());
 
    // render glowing elements
+#ifdef GLOW_ENABLED
    mBlurShader->clearTexture();
    drawBlurLayer(*mBlurShader->getRenderTexture().get());
    mBlurShader->getRenderTexture()->display();
    takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
+#endif
 
    // render layers affected by the atmosphere
    mLevelBackgroundRenderTexture->clear();
@@ -1076,6 +1110,7 @@ void Level::draw(
    mAtmosphereShader->update();
    mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader->getShader());
 
+#ifdef GLOW_ENABLED
    sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
    const auto downScaleX = mBlurShader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
    const auto downScaleY = mBlurShader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
@@ -1100,6 +1135,7 @@ void Level::draw(
    sf::RenderStates statesAdd;
    statesAdd.blendMode = sf::BlendAdd;
    mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
+#endif
 
    // draw the level layers into the level texture
    drawLayers(*mLevelRenderTexture.get(), ZDepthForegroundMin, ZDepthForegroundMax);
