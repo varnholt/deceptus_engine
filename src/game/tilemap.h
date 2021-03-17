@@ -19,6 +19,12 @@ class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:
 
+   enum class DrawMode
+   {
+      ColorMap,
+      NormalMap
+   };
+
    TileMap() = default;
 
    bool load(
@@ -38,6 +44,9 @@ public:
    bool isVisible() const;
    void setVisible(bool visible);
 
+   DrawMode getDrawMode() const;
+   void setDrawMode(const DrawMode& draw_mode);
+
 
 protected:
 
@@ -48,37 +57,39 @@ private:
 
    struct AnimatedTileFrame
    {
-      int mX = 0;
-      int mY = 0;
-      int mDuration = 0;
+      int _x = 0;
+      int _y = 0;
+      int _duration = 0;
    };
 
    struct AnimatedTile
    {
       virtual ~AnimatedTile();
 
-      int mTileX = 0;
-      int mTileY = 0;
-      std::vector<AnimatedTileFrame*> mFrames;
-      int mCurrentFrame = 0;
-      float mElapsed = 0.0f;
-      float mDuration = 0.0f;
-      sf::Vertex mVertices[4];
-      bool mVisible = true;
-      TmxAnimation* mAnimation = nullptr;
+      int _tile_x = 0;
+      int _tile_y = 0;
+      std::vector<AnimatedTileFrame*> _frames;
+      int _current_frame = 0;
+      float _elapsed_ms = 0.0f;
+      float _duration = 0.0f;
+      sf::Vertex _vertices[4];
+      bool _visible = true;
+      TmxAnimation* _animation = nullptr;
    };
 
-   sf::Vector2u mTileSize;
+   sf::Vector2u _tile_size;
 
-   mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> mVerticesStaticBlocks;
-   sf::VertexArray mVerticesAnimated;
+   mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> _vertices_static_blocks;
+   sf::VertexArray _vertices_animated;
 
-   std::shared_ptr<sf::Texture> mTexture;
-   std::shared_ptr<sf::Texture> mBumpMap;
+   std::shared_ptr<sf::Texture> _texture_map;
+   std::shared_ptr<sf::Texture> _normal_map;
+   std::shared_ptr<sf::Texture> _active_texture;
 
-   std::vector<AnimatedTile*> mAnimations;
+   std::vector<AnimatedTile*> _animations;
 
-   int mZ = 0;
-   bool mVisible = true;
+   int _z = 0;
+   bool _visible = true;
+   DrawMode _draw_mode = DrawMode::ColorMap;
 };
 
