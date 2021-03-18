@@ -16,7 +16,7 @@ const std::string& Effect::getName() const
 
 void Effect::load()
 {
-    mIsLoaded = /*sf::Shader::isAvailable() && */ onLoad();
+    mIsLoaded = onLoad();
 }
 
 

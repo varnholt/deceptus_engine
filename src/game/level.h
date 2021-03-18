@@ -216,9 +216,9 @@ protected:
 
    // graphic effects
    BoomEffect mBoomEffect;
-   std::shared_ptr<RaycastLight> mRaycastLight;
+   std::shared_ptr<LightSystem> mRaycastLight;
    std::shared_ptr<StaticLight> mStaticLight;
-   std::shared_ptr<RaycastLight::LightInstance> mPlayerLight;
+   std::shared_ptr<LightSystem::LightInstance> mPlayerLight;
    std::vector<std::shared_ptr<SmokeEffect>> mSmokeEffect;
 
    AmbientOcclusion mAo;

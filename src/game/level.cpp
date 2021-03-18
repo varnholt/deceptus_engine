@@ -180,13 +180,13 @@ Level::Level()
 
    sCurrentLevel = this;
 
-   mRaycastLight = std::make_shared<RaycastLight>();
+   mRaycastLight = std::make_shared<LightSystem>();
    mStaticLight = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   mPlayerLight = RaycastLight::deserialize(nullptr);
-   mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, 10));
-   mRaycastLight->mLights.push_back(mPlayerLight);
+   mPlayerLight = LightSystem::deserialize(nullptr);
+   mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, 10));
+   mRaycastLight->_lights.push_back(mPlayerLight);
 
    mMap = std::make_unique<LevelMap>();
 
@@ -515,8 +515,8 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "lights")
             {
-               auto light = RaycastLight::deserialize(tmxObject);
-               mRaycastLight->mLights.push_back(light);
+               auto light = LightSystem::deserialize(tmxObject);
+               mRaycastLight->_lights.push_back(light);
             }
             else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
@@ -587,7 +587,7 @@ void Level::load()
 
    // load raycast lights
    std::cout << "[x] loading raycast lights..." << std::endl;
-   if (!mRaycastLight->mLights.empty())
+   if (!mRaycastLight->_lights.empty())
    {
       mRaycastLight->load();
    }
@@ -1192,12 +1192,12 @@ void Level::draw(
 //-----------------------------------------------------------------------------
 void Level::updatePlayerLight()
 {
-   mPlayerLight->mPosMeters = Player::getCurrent()->getBody()->GetPosition();
+   mPlayerLight->_pos_m = Player::getCurrent()->getBody()->GetPosition();
    mPlayerLight->updateSpritePosition();
 
    // the player, once he dies, becomes inactive and just sinks down
    // so the player light is disabled to avoid any glitches
-   mPlayerLight->mSprite.setColor(sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10));
+   mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10));
 }
 
 

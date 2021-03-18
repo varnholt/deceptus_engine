@@ -167,7 +167,7 @@ bool Physics::dumpObj(
 
                if (objects)
                {
-                  for (auto it : objects->mObjects)
+                  for (auto& it : objects->mObjects)
                   {
                      auto object = it.second;
 
