@@ -21,7 +21,7 @@
 #include "squaremarcher.h"
 
 // effects
-#include "effects/raycastlight.h"
+#include "effects/lightsystem.h"
 #include "effects/smokeeffect.h"
 #include "effects/staticlight.h"
 
@@ -75,7 +75,7 @@ public:
    void spawnEnemies();
 
    void draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot);
-   void drawRaycastLight(sf::RenderTarget& target);
+   void drawLightAndShadows(sf::RenderTarget& target);
    void drawParallaxMaps(sf::RenderTarget& target);
    void drawLayers(sf::RenderTarget& target, int32_t from, int32_t to);
    void drawAtmosphereLayer(sf::RenderTarget& target);
@@ -216,7 +216,7 @@ protected:
 
    // graphic effects
    BoomEffect mBoomEffect;
-   std::shared_ptr<LightSystem> mRaycastLight;
+   std::shared_ptr<LightSystem> mLightSystem;
    std::shared_ptr<StaticLight> mStaticLight;
    std::shared_ptr<LightSystem::LightInstance> mPlayerLight;
    std::vector<std::shared_ptr<SmokeEffect>> mSmokeEffect;

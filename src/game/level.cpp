@@ -180,13 +180,13 @@ Level::Level()
 
    sCurrentLevel = this;
 
-   mRaycastLight = std::make_shared<LightSystem>();
+   mLightSystem = std::make_shared<LightSystem>();
    mStaticLight = std::make_shared<StaticLight>();
 
    // add raycast light for player
    mPlayerLight = LightSystem::deserialize(nullptr);
    mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, 10));
-   mRaycastLight->_lights.push_back(mPlayerLight);
+   mLightSystem->_lights.push_back(mPlayerLight);
 
    mMap = std::make_unique<LevelMap>();
 
@@ -516,7 +516,7 @@ void Level::loadTmx()
             else if (objectGroup->mName == "lights")
             {
                auto light = LightSystem::deserialize(tmxObject);
-               mRaycastLight->_lights.push_back(light);
+               mLightSystem->_lights.push_back(light);
             }
             else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
@@ -583,13 +583,6 @@ void Level::load()
    if (!mStaticLight->mLights.empty())
    {
       mStaticLight->load();
-   }
-
-   // load raycast lights
-   std::cout << "[x] loading raycast lights..." << std::endl;
-   if (!mRaycastLight->_lights.empty())
-   {
-      mRaycastLight->load();
    }
 
    // loading ao
@@ -853,10 +846,10 @@ void Level::drawMap(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Level::drawRaycastLight(sf::RenderTarget& target)
+void Level::drawLightAndShadows(sf::RenderTarget& target)
 {
    target.setView(*mLevelView);
-   mRaycastLight->draw(target, {});
+   mLightSystem->draw(target, {});
 }
 
 
@@ -1141,7 +1134,7 @@ void Level::draw(
    drawLayers(*mLevelRenderTexture.get(), ZDepthForegroundMin, ZDepthForegroundMax);
 
    // draw all the other things
-   drawRaycastLight(*mLevelRenderTexture.get());
+   drawLightAndShadows(*mLevelRenderTexture.get());
    Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
@@ -1235,7 +1228,6 @@ void Level::update(const sf::Time& dt)
    updatePlayerLight();
 
    mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
-   mRaycastLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
 
    for (const auto& smoke : mSmokeEffect)
    {

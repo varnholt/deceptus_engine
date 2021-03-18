@@ -1,4 +1,4 @@
-#include "raycastlight.h"
+#include "lightsystem.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxtools.h"
@@ -28,7 +28,6 @@ namespace
 
 //-----------------------------------------------------------------------------
 LightSystem::LightSystem()
- : Effect("lighting")
 {
    // prepare unit circle for circle shapes
    for (auto i = 0u; i < segments; i++)
@@ -40,19 +39,6 @@ LightSystem::LightSystem()
 
       unit_circle[i] = b2Vec2{x, y};
    }
-}
-
-
-//-----------------------------------------------------------------------------
-bool LightSystem::onLoad()
-{
-   return true;
-}
-
-
-//-----------------------------------------------------------------------------
-void LightSystem::onUpdate(const sf::Time& /*time*/, float /*x*/, float /*y*/)
-{
 }
 
 
@@ -200,7 +186,7 @@ void LightSystem::drawShadows(sf::RenderTarget& target, std::shared_ptr<LightSys
 
 
 //-----------------------------------------------------------------------------
-void LightSystem::onDraw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
+void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
 {
    auto player_body = Player::getCurrent()->getBody();
 
