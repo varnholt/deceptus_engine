@@ -11,7 +11,7 @@
 
 struct TmxObject;
 
-class LightSystem : public Effect
+class LightSystem : public sf::Drawable
 {
 
 public:
@@ -42,11 +42,9 @@ public:
 
    static std::shared_ptr<LightSystem::LightInstance> deserialize(TmxObject* tmxObject);
 
-private:
+   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-   bool onLoad() override;
-   void onUpdate(const sf::Time& time, float x, float y) override;
-   void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
+private:
    void drawShadows(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
 };
 
