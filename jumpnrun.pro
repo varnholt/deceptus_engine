@@ -112,6 +112,7 @@ SOURCES += \
    src/game/camerasystemconfiguration.cpp \
    src/game/checkpoint.cpp \
    src/game/console.cpp \
+   src/game/effects/lightsystem.cpp \
    src/game/fadetransitioneffect.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
@@ -120,7 +121,6 @@ SOURCES += \
    src/game/effects/blur.cpp \
    src/game/effects/effect.cpp \
    src/game/effects/pixelate.cpp \
-   src/game/effects/raycastlight.cpp \
    src/game/effects/smokeeffect.cpp \
    src/game/effects/staticlight.cpp \
    src/game/enemy.cpp \
@@ -295,7 +295,7 @@ HEADERS += \
    src/effects/blur.h \
    src/effects/effect.h \
    src/effects/pixelate.h \
-   src/effects/raycastlight.h \
+   src/effects/lightsystem.h \
    src/effects/smokeeffect.h \
    src/effects/staticlight.h \
    src/game/actioncontrollermap.h \
@@ -578,8 +578,6 @@ DISTFILES += \
     data/scripts/enemies/watermine.lua \
     data/shaders/death.frag \
     data/shaders/death.vert \
-    data/shaders/raycast.frag \
-    data/shaders/raycast.vert \
     data/scripts/enemies/cannon.lua \
     data/shaders/water.frag \
     data/scripts/enemies/landmine.lua \
@@ -591,9 +589,7 @@ DISTFILES += \
     data/shaders/blur.frag \
     data/shaders/brightness.frag \
     data/shaders/pixelate.frag \
-    data/shaders/raycast.frag \
     data/shaders/water.frag \
-    data/shaders/raycast.vert \
     data/shaders/wave.vert
 
 
