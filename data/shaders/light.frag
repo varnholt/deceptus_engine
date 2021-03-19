@@ -1,0 +1,17 @@
+uniform sampler2D color_map;
+uniform sampler2D light_map;
+uniform sampler2D normal_map;
+
+void main()
+{
+   float ambient = 1.0;
+
+   vec2 uv = gl_TexCoord[0].xy;
+
+   vec4 color = texture2D(color_map, uv);
+   vec4 light = texture2D(light_map, uv);
+   vec4 normal = texture2D(normal_map, uv);
+
+   gl_FragColor = color * ambient + light * dot(light, normal);
+}
+

@@ -74,6 +74,10 @@
 // #define GLOW_ENABLED
 
 
+// things that should be optimised
+// - the tilemaps are unsorted, sort them by z once after deserializing a level
+
+
 Level* Level::sCurrentLevel = nullptr;
 const std::string parallaxIdentifier = "parallax_";
 
@@ -105,8 +109,8 @@ void Level::initializeTextures()
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
-   sf::ContextSettings contextSettings;
-   contextSettings.stencilBits = 8;
+   sf::ContextSettings stencilContextSettings;
+   stencilContextSettings.stencilBits = 8;
 
    mLevelBackgroundRenderTexture.reset();
 
@@ -135,7 +139,26 @@ void Level::initializeTextures()
    mLevelRenderTexture->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight),
-      contextSettings // the lights require stencils
+      stencilContextSettings // the lights require stencils
+   );
+
+   mLightingTexture = std::make_shared<sf::RenderTexture>();
+   mLightingTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight),
+      stencilContextSettings // the lights require stencils
+   );
+
+   mNormalTexture = std::make_shared<sf::RenderTexture>();
+   mNormalTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
+   );
+
+   mDeferredTexture = std::make_shared<sf::RenderTexture>();
+   mDeferredTexture->create(
+      static_cast<uint32_t>(textureWidth),
+      static_cast<uint32_t>(textureHeight)
    );
 
    mAtmosphereShader = std::make_unique<AtmosphereShader>(textureWidth, textureHeight);
@@ -147,6 +170,10 @@ void Level::initializeTextures()
    mRenderTextures.clear();
    mRenderTextures.push_back(mLevelRenderTexture);
    mRenderTextures.push_back(mLevelBackgroundRenderTexture);
+   mRenderTextures.push_back(mLightingTexture);
+   mRenderTextures.push_back(mNormalTexture);
+   mRenderTextures.push_back(mDeferredTexture);
+
    for (const auto& fb : mRenderTextures)
    {
       std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
@@ -831,17 +858,65 @@ void Level::updateViews()
 //-----------------------------------------------------------------------------
 void Level::drawMap(sf::RenderTarget& target)
 {
-  target.setView(*mMapView);
-  for (auto z = 0; z < 50; z++)
-  {
-     for (auto& tileMap : mTileMaps)
-     {
-        if (tileMap->getZ() == z)
-        {
-           target.draw(*tileMap);
-        }
-     }
-  }
+   target.setView(*mMapView);
+   for (auto z = 0; z < 50; z++)
+   {
+      for (auto& tileMap : mTileMaps)
+      {
+         if (tileMap->getZ() == z)
+         {
+            target.draw(*tileMap);
+         }
+      }
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::drawNormalMap()
+{
+   mNormalTexture->clear();
+   mNormalTexture->setView(*mLevelView);
+
+   auto tile_maps = mTileMaps;
+
+   std::sort(tile_maps.begin(), tile_maps.end(), []( const auto& lhs, const auto& rhs)
+   {
+      return lhs->getZ() < rhs->getZ();
+   });
+
+   for (auto& tile_map : tile_maps)
+   {
+      tile_map->setDrawMode(TileMap::DrawMode::NormalMap);
+      mNormalTexture->draw(*tile_map);
+      tile_map->setDrawMode(TileMap::DrawMode::ColorMap);
+   }
+
+   mNormalTexture->display();
+
+   //   static int32_t bump_map_save_counter = 0;
+   //   bump_map_save_counter++;
+   //   if (bump_map_save_counter % 60 == 0)
+   //   {
+   //      mNormalTexture->getTexture().copyToImage().saveToFile("normal_map.png");
+   //   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::drawLightMap()
+{
+   mLightingTexture->clear();
+   mLightingTexture->setView(*mLevelView);
+   mLightSystem->draw(*mLightingTexture, {});
+   mLightingTexture->display();
+
+   //   static int32_t light_map_save_counter = 0;
+   //   light_map_save_counter++;
+   //   if (light_map_save_counter % 60 == 0)
+   //   {
+   //      mLightingTexture->getTexture().copyToImage().saveToFile("light_map.png");
+   //   }
 }
 
 
@@ -1040,6 +1115,47 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
+void Level::drawDebugInformation()
+{
+   Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
+
+   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
+   {
+      drawStaticChains(*mLevelRenderTexture.get());
+      DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
+      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getCurrent()->getPlayerPixelRect());
+
+      for (const auto& room : mRooms)
+      {
+         for (const auto& rect : room.mRects)
+         {
+            DebugDraw::drawRect(*mLevelRenderTexture.get(), rect, sf::Color::Yellow);
+         }
+      }
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::displayLevelTexture()
+{
+   // display the whole texture
+   sf::View view(
+      sf::FloatRect(
+         0.0f,
+         0.0f,
+         static_cast<float>(mLevelRenderTexture->getSize().x),
+         static_cast<float>(mLevelRenderTexture->getSize().y)
+      )
+   );
+
+   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   mLevelRenderTexture->setView(view);
+   mLevelRenderTexture->display();
+}
+
+
 //-----------------------------------------------------------------------------
 // Level Rendering Flow
 //
@@ -1133,41 +1249,30 @@ void Level::draw(
    // draw the level layers into the level texture
    drawLayers(*mLevelRenderTexture.get(), ZDepthForegroundMin, ZDepthForegroundMax);
 
-   // draw all the other things
-   drawLightAndShadows(*mLevelRenderTexture.get());
-   Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
+   drawDebugInformation();
 
-   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
-   {
-      drawStaticChains(*mLevelRenderTexture.get());
-      DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
-      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getCurrent()->getPlayerPixelRect());
+   // we're done drawing to the level texture
+   displayLevelTexture();
 
-      for (const auto& room : mRooms)
-      {
-         for (const auto& rect : room.mRects)
-         {
-            DebugDraw::drawRect(*mLevelRenderTexture.get(), rect, sf::Color::Yellow);
-         }
-      }
-   }
+   // add lighting
+   drawNormalMap();
+   drawLightMap();
 
-   // display the whole texture
-   sf::View view(
-      sf::FloatRect(
-         0.0f,
-         0.0f,
-         static_cast<float>(mLevelRenderTexture->getSize().x),
-         static_cast<float>(mLevelRenderTexture->getSize().y)
-      )
+   mLightSystem->draw(
+      *mDeferredTexture.get(),
+      mLevelRenderTexture,
+      mLightingTexture,
+      mNormalTexture
    );
 
-   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-   mLevelRenderTexture->setView(view);
-   mLevelRenderTexture->display();
-   takeScreenshot("screenshot_level", *mLevelRenderTexture.get());
+   mDeferredTexture->display();
 
-   auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
+   takeScreenshot("map_color",    *mLevelRenderTexture.get());
+   takeScreenshot("map_light",    *mLightingTexture.get());
+   takeScreenshot("map_normal",   *mNormalTexture.get());
+   takeScreenshot("map_deferred", *mDeferredTexture.get());
+
+   auto levelTextureSprite = sf::Sprite(mDeferredTexture->getTexture());
 
    levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);

@@ -81,6 +81,8 @@ public:
    void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawBlurLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
+   void drawNormalMap();
+   void drawLightMap();
    void drawPlayer(sf::RenderTarget& target);
 
    void update(const sf::Time& dt);
@@ -165,10 +167,10 @@ protected:
 
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
+   std::shared_ptr<sf::RenderTexture> mLightingTexture;
+   std::shared_ptr<sf::RenderTexture> mNormalTexture;
+   std::shared_ptr<sf::RenderTexture> mDeferredTexture;
    std::vector<std::shared_ptr<sf::RenderTexture>> mRenderTextures;
-
-   std::shared_ptr<sf::RenderTexture> mRaycastTexture;
-   std::shared_ptr<sf::RenderTexture> mRaycastTextureBlurred;
 
    float mViewToTextureScale = 1.0f;
    std::shared_ptr<sf::View> mLevelView;
@@ -238,5 +240,8 @@ protected:
    std::vector<std::vector<b2Vec2>> mWorldChains;
 
    static Level* sCurrentLevel;
+   private:
+   void drawDebugInformation();
+   void displayLevelTexture();
 };
 
