@@ -40,7 +40,7 @@ public:
 
    LightSystem();
 
-   static std::shared_ptr<LightSystem::LightInstance> deserialize(TmxObject* tmxObject);
+   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(TmxObject* tmxObject);
 
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
