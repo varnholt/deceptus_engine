@@ -44,7 +44,14 @@ public:
 
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
+   void draw(
+      sf::RenderTarget& target,
+      const std::shared_ptr<sf::RenderTexture>& color_map,
+      const std::shared_ptr<sf::RenderTexture>& light_map,
+      const std::shared_ptr<sf::RenderTexture>& normal_map
+   );
+
 private:
-   void drawShadows(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
+   void drawShadowQuads(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
 };
 

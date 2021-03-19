@@ -579,6 +579,7 @@ DISTFILES += \
     data/shaders/death.frag \
     data/shaders/death.vert \
     data/scripts/enemies/cannon.lua \
+    data/shaders/light.frag \
     data/shaders/water.frag \
     data/scripts/enemies/landmine.lua \
     data/scripts/enemies/constants.lua \

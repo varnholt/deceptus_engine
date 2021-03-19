@@ -40,7 +40,7 @@ LightSystem::LightSystem()
       unit_circle[i] = b2Vec2{x, y};
    }
 
-   if (!_light_shader.loadFromFile("data/shaders/bump_mapping.frag", sf::Shader::Fragment))
+   if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Fragment))
    {
       std::cout << "[!] error loading bump mapping shader" << std::endl;
    }
@@ -224,6 +224,24 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
    }
 
    glDisable(GL_STENCIL_TEST);
+}
+
+
+//-----------------------------------------------------------------------------
+void LightSystem::draw(
+   sf::RenderTarget& target,
+   const std::shared_ptr<sf::RenderTexture>& color_map,
+   const std::shared_ptr<sf::RenderTexture>& light_map,
+   const std::shared_ptr<sf::RenderTexture>& normal_map
+)
+{
+   _light_shader.setUniform("color_map", color_map->getTexture());
+   _light_shader.setUniform("light_map", light_map->getTexture());
+   _light_shader.setUniform("normal_map", normal_map->getTexture());
+
+   sf::Sprite sprite;
+   sprite.setTexture(color_map->getTexture());
+   target.draw(sprite, &_light_shader);
 }
 
 
