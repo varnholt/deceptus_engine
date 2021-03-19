@@ -10,19 +10,19 @@
 #include "texturepool.h"
 
 #include <iostream>
+#include <math.h>
 
 #include <SFML/OpenGL.hpp>
 
-#include <math.h>
 
 
 //-----------------------------------------------------------------------------
 namespace
 {
-   static const auto segments = 20;
-   static const sf::Color black = {0, 0, 0, 255};
-   static std::array<b2Vec2, segments> unit_circle;
-   static const auto max_distance_m2 = 100.0f; // depends on the view dimensions
+static constexpr auto segments = 20;
+static constexpr auto max_distance_m2 = 100.0f; // depends on the view dimensions
+const sf::Color black{0, 0, 0, 255};
+std::array<b2Vec2, segments> unit_circle;
 }
 
 
@@ -39,11 +39,16 @@ LightSystem::LightSystem()
 
       unit_circle[i] = b2Vec2{x, y};
    }
+
+   if (!_light_shader.loadFromFile("data/shaders/bump_mapping.frag", sf::Shader::Fragment))
+   {
+      std::cout << "[!] error loading bump mapping shader" << std::endl;
+   }
 }
 
 
 //-----------------------------------------------------------------------------
-void LightSystem::drawShadows(sf::RenderTarget& target, std::shared_ptr<LightSystem::LightInstance> light) const
+void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightSystem::LightInstance> light) const
 {
    // do not draw lights that are too far away
    auto player_body = Player::getCurrent()->getBody();
@@ -99,10 +104,10 @@ void LightSystem::drawShadows(sf::RenderTarget& target, std::shared_ptr<LightSys
 
                sf::Vertex quad[] =
                {
-                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, black)
+                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
                target.draw(quad, 4, sf::Quads);
@@ -139,10 +144,10 @@ void LightSystem::drawShadows(sf::RenderTarget& target, std::shared_ptr<LightSys
 
                sf::Vertex quad[] =
                {
-                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, black)
+                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
                target.draw(quad, 4, sf::Quads);
@@ -171,10 +176,10 @@ void LightSystem::drawShadows(sf::RenderTarget& target, std::shared_ptr<LightSys
 
                sf::Vertex quad[] =
                {
-                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, black)
+                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
                target.draw(quad, 4, sf::Quads);
@@ -192,13 +197,13 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
 
    for (const auto& light : _lights)
    {
-       // don't draw lights that are too far away
-       auto distanceToPlayer = (player_body->GetWorldCenter() - light->_pos_m).LengthSquared();
+      // don't draw lights that are too far away
+      auto distanceToPlayer = (player_body->GetWorldCenter() - light->_pos_m).LengthSquared();
 
-       if (distanceToPlayer > max_distance_m2)
-       {
-          continue;
-       }
+      if (distanceToPlayer > max_distance_m2)
+      {
+         continue;
+      }
 
       // fill stencil buffer
       glClear(GL_STENCIL_BUFFER_BIT);
@@ -207,7 +212,7 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
       glStencilFunc(GL_ALWAYS, 1, 1);
       glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
-      drawShadows(target, light);
+      drawShadowQuads(target, light);
 
       // draw light quads with stencil boundaries
       glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -237,7 +242,7 @@ void LightSystem::LightInstance::updateSpritePosition()
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<LightSystem::LightInstance> LightSystem::deserialize(TmxObject* tmx_object)
+std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(TmxObject* tmx_object)
 {
    auto light = std::make_shared<LightSystem::LightInstance>();
 

@@ -184,7 +184,7 @@ Level::Level()
    mStaticLight = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   mPlayerLight = LightSystem::deserialize(nullptr);
+   mPlayerLight = LightSystem::createLightInstance(nullptr);
    mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, 10));
    mLightSystem->_lights.push_back(mPlayerLight);
 
@@ -515,7 +515,7 @@ void Level::loadTmx()
             }
             else if (objectGroup->mName == "lights")
             {
-               auto light = LightSystem::deserialize(tmxObject);
+               auto light = LightSystem::createLightInstance(tmxObject);
                mLightSystem->_lights.push_back(light);
             }
             else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
