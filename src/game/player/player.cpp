@@ -162,8 +162,6 @@ void Player::initialize()
    mJump.mRemoveClimbJoint = std::bind(&PlayerClimb::removeClimbJoint, mClimb);
    mControls.addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
 
-   mTexture = TexturePool::getInstance().get("data/sprites/player.png");
-
    initializeController();
 }
 
