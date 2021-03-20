@@ -40,8 +40,8 @@
 #include "weather.h"
 
 // sfml
-#include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Window/Event.hpp>
 
 #include "framework/tmxparser/tmxelement.h"
 #include "framework/tmxparser/tmximage.h"
@@ -180,7 +180,7 @@ void Level::initializeTextures()
    }
 
    mAtmosphereShader->initialize();
-   mGammaShader->initialize(mLevelRenderTexture->getTexture());
+   mGammaShader->initialize();
    mBlurShader->initialize();
    mDeathShader->initialize();
 }
@@ -1251,6 +1251,9 @@ void Level::draw(
 
    drawDebugInformation();
 
+   // old lighting approach
+   // drawLightAndShadows(*mLevelRenderTexture.get());
+
    // we're done drawing to the level texture
    displayLevelTexture();
 
@@ -1273,10 +1276,10 @@ void Level::draw(
    takeScreenshot("map_deferred", *mDeferredTexture.get());
 
    auto levelTextureSprite = sf::Sprite(mDeferredTexture->getTexture());
-
    levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
+   mGammaShader->setTexture(mDeferredTexture->getTexture());
    mGammaShader->update();
    window->draw(levelTextureSprite, &mGammaShader->getGammaShader());
 

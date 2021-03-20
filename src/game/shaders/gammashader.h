@@ -7,8 +7,9 @@ class GammaShader
    public:
       GammaShader() = default;
 
-      void initialize(const sf::Texture& texture);
+      void initialize();
       void update();
+      void setTexture(const sf::Texture& texture);
 
       const sf::Shader& getGammaShader() const;
 
