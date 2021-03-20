@@ -12,8 +12,15 @@ void main()
    vec4 normal = texture2D(normal_map, uv);
 
    vec4 light = texture2D(light_map, uv);
-   vec4 light_bump = texture2D(light_map, uv + normal.xy - vec2(0.5, 0.5));
 
-   gl_FragColor = color * ambient + 0.7* light + 0.3 * light_bump;
+   if (light.r < 0.001 && light.g < 0.001 && light.b < 0.001)
+   {
+      gl_FragColor = color * ambient;
+   }
+   else
+   {
+      vec4 light_bump = texture2D(light_map, uv + normal.xy - vec2(0.5, 0.5));
+      gl_FragColor = color * ambient + 0.7* light + 0.3 * light_bump;
+   }
 }
 
