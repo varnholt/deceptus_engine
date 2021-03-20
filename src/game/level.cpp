@@ -72,7 +72,7 @@
 
 // hardcoded settings
 // #define GLOW_ENABLED
-
+#define DEFERRED_RENDERING 1
 
 // things that should be optimised
 // - the tilemaps are unsorted, sort them by z once after deserializing a level
