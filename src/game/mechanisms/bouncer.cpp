@@ -99,9 +99,15 @@ Bouncer::Bouncer(
 }
 
 
-void Bouncer::draw(sf::RenderTarget& window)
+void Bouncer::draw(sf::RenderTarget& target)
 {
-   window.draw(mSprite);
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
+   target.draw(mSprite);
 }
 
 

@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <vector>
 
+#include "constants.h"
 
 struct TmxAnimation;
 struct TmxLayer;
@@ -18,12 +19,6 @@ struct TmxTileSet;
 class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:
-
-   enum class DrawMode
-   {
-      ColorMap,
-      NormalMap
-   };
 
    TileMap() = default;
 

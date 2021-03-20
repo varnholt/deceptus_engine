@@ -30,6 +30,12 @@ Door::Door(GameNode* parent)
 //-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& window)
 {
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
    window.draw(mSpriteIcon);
    window.draw(mDoorQuad, mTexture.get());
 }

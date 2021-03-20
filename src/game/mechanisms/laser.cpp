@@ -40,6 +40,12 @@ std::vector<std::array<int32_t, 9>> Laser::mTilesVersion2;
 //-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& window)
 {
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
    mSprite.setTextureRect(
       sf::IntRect(
          mTu * PIXELS_PER_TILE + mTileIndex * PIXELS_PER_TILE,

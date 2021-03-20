@@ -311,3 +311,11 @@ enum AtmosphereTile // 16 cols per row
    AtmosphereTileInvalid = 1024,
 };
 
+
+enum class DrawMode
+{
+   ColorMap,
+   NormalMap
+};
+
+

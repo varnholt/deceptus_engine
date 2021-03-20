@@ -287,7 +287,7 @@ void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 
-TileMap::DrawMode TileMap::getDrawMode() const
+DrawMode TileMap::getDrawMode() const
 {
    return _draw_mode;
 }
@@ -299,10 +299,10 @@ void TileMap::setDrawMode(const DrawMode& draw_mode)
 
    switch (_draw_mode)
    {
-      case TileMap::DrawMode::ColorMap:
+      case DrawMode::ColorMap:
          _active_texture = _texture_map;
          break;
-      case TileMap::DrawMode::NormalMap:
+      case DrawMode::NormalMap:
          _active_texture = _normal_map;
          break;
    }
