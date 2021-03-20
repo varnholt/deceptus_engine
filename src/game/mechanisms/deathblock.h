@@ -54,8 +54,8 @@ class DeathBlock : public GameMechanism, public GameNode
       void updateLeverLag(const sf::Time& dt);
       void updateCollision();
 
-      int32_t mTu = 0;
-      int32_t mTv = 0;
+      int32_t _tu = 0;
+      int32_t _tv = 0;
 
       //     +---+
       //     | 0 |
@@ -65,11 +65,11 @@ class DeathBlock : public GameMechanism, public GameNode
       //     | 4 |
       //     +---+
 
-      std::array<sf::Sprite, 5> mSprites;
+      std::array<sf::Sprite, 5> _sprites;
 
-      std::array<int32_t, 5> mStates = {};
+      std::array<int32_t, 5> _states = {};
 
-      std::array<sf::Vector2i, 5> mOffsets = {
+      std::array<sf::Vector2i, 5> _offsets = {
          sf::Vector2i{1, 0},
          sf::Vector2i{0, 1},
          sf::Vector2i{1, 1},
@@ -77,23 +77,23 @@ class DeathBlock : public GameMechanism, public GameNode
          sf::Vector2i{2, 1}
       };
 
-      std::array<sf::IntRect, 4> mCollisionRects = {
+      std::array<sf::IntRect, 4> _collision_rects = {
           sf::IntRect{1 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
           sf::IntRect{0 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
           sf::IntRect{1 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
           sf::IntRect{2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
-      int32_t mElapsedMs = 0;
+      int32_t _elapsed_ms = 0;
 
-      sf::Vector2f mPixelPosition;
-      std::vector<sf::Vector2f> mPixelPath;
+      sf::Vector2f _pixel_positions;
+      std::vector<sf::Vector2f> _pixel_paths;
 
-      b2Body* mBody = nullptr;
-      std::vector<b2Vec2> mPath;
-      PathInterpolation mInterpolation;
-      float mLeverLag = 1.0f; // maybe make them switchable as well?
+      b2Body* _body = nullptr;
+      std::vector<b2Vec2> _path;
+      PathInterpolation _interpolation;
+      float _lever_lag = 1.0f; // maybe make them switchable as well?
 
-      std::shared_ptr<sf::Texture> mTexture;
+      std::shared_ptr<sf::Texture> _texture;
 };
 

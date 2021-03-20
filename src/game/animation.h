@@ -29,27 +29,29 @@ public:
    sf::FloatRect getLocalBounds() const;
    sf::FloatRect getGlobalBounds() const;
 
-   std::string mName;
+   std::string _name;
 
-   std::vector<sf::IntRect> mFrames;
-   std::shared_ptr<sf::Texture> mTexture;
+   std::vector<sf::IntRect> _fames;
 
-   sf::Vertex mVertices[4];
+   std::shared_ptr<sf::Texture> _texture_map;
+   std::shared_ptr<sf::Texture> _normal_map;
 
-   sf::Time mCurrentTime;
-   sf::Time mElapsed;
-   sf::Time mOverallTime;
+   sf::Vertex _vertices[4];
 
-   int32_t mCurrentFrame = 0;
-   int32_t mPreviousFrame = -1;
+   sf::Time _current_time;
+   sf::Time _elapsed;
+   sf::Time _overall_time;
 
-   bool mPaused = false;
-   bool mLooped = false;
-   bool mResetToFirstFrame = true;
+   int32_t _current_frame = 0;
+   int32_t _previous_frame = -1;
+
+   bool _paused = false;
+   bool _looped = false;
+   bool _reset_to_first_frame = true;
 
    void setFrameTimes(const std::vector<sf::Time>& frameTimes);
 
 private:
-   std::vector<sf::Time> mFrameTimes;
+   std::vector<sf::Time> _frame_times;
 };
 

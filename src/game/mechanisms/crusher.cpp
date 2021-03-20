@@ -43,6 +43,12 @@ Crusher::Crusher(GameNode* parent)
 //-----------------------------------------------------------------------------
 void Crusher::draw(sf::RenderTarget& target)
 {
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
    target.draw(mSpriteSpike);
    target.draw(mSpritePusher);
    target.draw(mSpriteMount);

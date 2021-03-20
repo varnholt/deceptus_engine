@@ -6,30 +6,30 @@
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::play()
 {
-   mPaused = false;
+   _paused = false;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::pause()
 {
-   mPaused = true;
+   _paused = true;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::seekToStart()
 {
-   mPreviousFrame = -1;
-   mCurrentFrame = 0;
-   setFrame(mCurrentFrame);
+   _previous_frame = -1;
+   _current_frame = 0;
+   setFrame(_current_frame);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::stop()
 {
-   mPaused = true;
+   _paused = true;
    seekToStart();
 }
 
@@ -37,7 +37,7 @@ void Animation::stop()
 //----------------------------------------------------------------------------------------------------------------------
 sf::FloatRect Animation::getLocalBounds() const
 {
-   sf::IntRect rect = mFrames[static_cast<size_t>(mCurrentFrame)];
+   sf::IntRect rect = _fames[static_cast<size_t>(_current_frame)];
    return sf::FloatRect(
       0.f,
       0.f,
@@ -57,11 +57,11 @@ sf::FloatRect Animation::getGlobalBounds() const
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::setFrameTimes(const std::vector<sf::Time>& frameTimes)
 {
-   mFrameTimes = frameTimes;
+   _frame_times = frameTimes;
 
    for (const auto& t : frameTimes)
    {
-      mOverallTime += t;
+      _overall_time += t;
    }
 }
 
@@ -69,29 +69,29 @@ void Animation::setFrameTimes(const std::vector<sf::Time>& frameTimes)
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::setFrame(int32_t, bool resetTime)
 {
-   if (mFrames.size() > 0)
+   if (_fames.size() > 0)
    {
-      sf::IntRect rect = mFrames[static_cast<size_t>(mCurrentFrame)];
+      sf::IntRect rect = _fames[static_cast<size_t>(_current_frame)];
 
       const auto l =     static_cast<float>(rect.left) + 0.0001f;
       const auto r = l + static_cast<float>(rect.width);
       const auto t =     static_cast<float>(rect.top);
       const auto b = t + static_cast<float>(rect.height);
 
-      mVertices[0].position = sf::Vector2f(0.f, 0.f);
-      mVertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect.height));
-      mVertices[2].position = sf::Vector2f(static_cast<float>(rect.width), static_cast<float>(rect.height));
-      mVertices[3].position = sf::Vector2f(static_cast<float>(rect.width), 0.f);
+      _vertices[0].position = sf::Vector2f(0.f, 0.f);
+      _vertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect.height));
+      _vertices[2].position = sf::Vector2f(static_cast<float>(rect.width), static_cast<float>(rect.height));
+      _vertices[3].position = sf::Vector2f(static_cast<float>(rect.width), 0.f);
 
-      mVertices[0].texCoords = sf::Vector2f(l, t);
-      mVertices[1].texCoords = sf::Vector2f(l, b);
-      mVertices[2].texCoords = sf::Vector2f(r, b);
-      mVertices[3].texCoords = sf::Vector2f(r, t);
+      _vertices[0].texCoords = sf::Vector2f(l, t);
+      _vertices[1].texCoords = sf::Vector2f(l, b);
+      _vertices[2].texCoords = sf::Vector2f(r, b);
+      _vertices[3].texCoords = sf::Vector2f(r, t);
    }
 
    if (resetTime)
    {
-      this->mCurrentTime = sf::Time::Zero;
+      this->_current_time = sf::Time::Zero;
    }
 }
 
@@ -99,50 +99,50 @@ void Animation::setFrame(int32_t, bool resetTime)
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::setAlpha(uint8_t alpha)
 {
-   mVertices[0].color.a = alpha;
-   mVertices[1].color.a = alpha;
-   mVertices[2].color.a = alpha;
-   mVertices[3].color.a = alpha;
+   _vertices[0].color.a = alpha;
+   _vertices[1].color.a = alpha;
+   _vertices[2].color.a = alpha;
+   _vertices[3].color.a = alpha;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::update(const sf::Time& dt)
 {
-   if (!mPaused)
+   if (!_paused)
    {
-      mPreviousFrame = mCurrentFrame;
-      mCurrentTime += dt;
+      _previous_frame = _current_frame;
+      _current_time += dt;
 
-      const auto& frameTime = mFrameTimes[static_cast<size_t>(mCurrentFrame)];
+      const auto& frameTime = _frame_times[static_cast<size_t>(_current_frame)];
 
       // if current time is bigger then the frame time advance one frame
-      if (mCurrentTime >= frameTime)
+      if (_current_time >= frameTime)
       {
          // reset time, but keep the remainder
-         mCurrentTime = sf::microseconds(mCurrentTime.asMicroseconds() % frameTime.asMicroseconds());
+         _current_time = sf::microseconds(_current_time.asMicroseconds() % frameTime.asMicroseconds());
 
-         if (mCurrentFrame + 1 < static_cast<int32_t>(mFrames.size()))
+         if (_current_frame + 1 < static_cast<int32_t>(_fames.size()))
          {
-            mCurrentFrame++;
+            _current_frame++;
          }
          else
          {
-            if (mResetToFirstFrame)
+            if (_reset_to_first_frame)
             {
-               mCurrentFrame = 0;
+               _current_frame = 0;
             }
 
-            if (!mLooped)
+            if (!_looped)
             {
-               mPaused = true;
+               _paused = true;
             }
          }
 
-         setFrame(mCurrentFrame, false);
+         setFrame(_current_frame, false);
       }
 
-      mElapsed += dt;
+      _elapsed += dt;
    }
 }
 
@@ -151,8 +151,8 @@ void Animation::update(const sf::Time& dt)
 void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    states.transform *= getTransform();
-   states.texture = mTexture.get();
-   target.draw(mVertices, 4, sf::Quads, states);
+   states.texture = _texture_map.get();
+   target.draw(_vertices, 4, sf::Quads, states);
 }
 
 

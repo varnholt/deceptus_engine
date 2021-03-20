@@ -43,6 +43,8 @@ public:
    const PathInterpolation& getInterpolation() const;
    const std::vector<sf::Vector2f>& getPixelPath() const;
 
+   void setDrawMode(DrawMode mode) override;
+
 
 private:
 
@@ -54,18 +56,20 @@ private:
       double mu
    );
 
-   std::shared_ptr<sf::Texture> mTexture;
-   std::vector<sf::Sprite> mSprites;
-   b2Body* mBody = nullptr;
-   sf::Vector2i mTilePosition;
-   float mX = 0.0f;
-   float mY = 0.0f;
-   int mWidth = 0;
-   int mHeight = 1;
-   float mTime = 0.0f;
-   float mLeverLag = 0.0f;
-   bool mInitialized = false;
-   PathInterpolation mInterpolation;
-   std::vector<sf::Vector2f> mPixelPath;
+   std::shared_ptr<sf::Texture> _texture_map;
+   std::shared_ptr<sf::Texture> _normal_map;
+
+   std::vector<sf::Sprite> _sprites;
+   b2Body* _body = nullptr;
+   sf::Vector2i _tile_positions;
+   float _x = 0.0f;
+   float _y = 0.0f;
+   int32_t _width = 0;
+   int32_t _height = 1;
+   float _time = 0.0f;
+   float _lever_lag = 0.0f;
+   bool _initialized = false;
+   PathInterpolation _interpolation;
+   std::vector<sf::Vector2f> _pixel_path;
 };
 

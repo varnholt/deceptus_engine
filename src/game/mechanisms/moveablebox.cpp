@@ -22,6 +22,12 @@ MoveableBox::MoveableBox(GameNode* node)
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::draw(sf::RenderTarget& window)
 {
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
    window.draw(mSprite);
 }
 

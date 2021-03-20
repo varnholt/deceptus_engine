@@ -20,7 +20,13 @@ DeathBlock::DeathBlock(GameNode* parent)
 
 void DeathBlock::draw(sf::RenderTarget& target)
 {
-   for (auto& sprite : mSprites)
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
+   for (auto& sprite : _sprites)
    {
       target.draw(sprite);
    }
@@ -54,38 +60,38 @@ void DeathBlock::draw(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void DeathBlock::setupTransform()
 {
-   auto x = mPixelPosition.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
-   auto y = mPixelPosition.y / PPM;
-   mBody->SetTransform(b2Vec2(x, y), 0);
+   auto x = _pixel_positions.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
+   auto y = _pixel_positions.y / PPM;
+   _body->SetTransform(b2Vec2(x, y), 0);
 }
 
 
 //-----------------------------------------------------------------------------
 void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
 {
-   b2PolygonShape polygonShape;
+   b2PolygonShape polygon_shape;
 
-   auto sizeX = PIXELS_PER_TILE / PPM;
-   auto sizeY = PIXELS_PER_TILE / PPM;
+   auto size_x = PIXELS_PER_TILE / PPM;
+   auto size_y = PIXELS_PER_TILE / PPM;
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0,     0);
-   vertices[1] = b2Vec2(0,     sizeY);
-   vertices[2] = b2Vec2(sizeX, sizeY);
-   vertices[3] = b2Vec2(sizeX, 0);
+   vertices[0] = b2Vec2(0,      0);
+   vertices[1] = b2Vec2(0,      size_y);
+   vertices[2] = b2Vec2(size_x, size_y);
+   vertices[3] = b2Vec2(size_x, 0);
 
-   polygonShape.Set(vertices, 4);
+   polygon_shape.Set(vertices, 4);
 
    b2BodyDef bodyDef;
    bodyDef.type = b2_kinematicBody;
-   mBody = world->CreateBody(&bodyDef);
+   _body = world->CreateBody(&bodyDef);
 
    setupTransform();
 
-   auto fixture = mBody->CreateFixture(&polygonShape, 0);
-   auto objectData = new FixtureNode(this);
-   objectData->setType(ObjectTypeDeathBlock);
-   fixture->SetUserData(static_cast<void*>(objectData));
+   auto fixture = _body->CreateFixture(&polygon_shape, 0);
+   auto object_data = new FixtureNode(this);
+   object_data->setType(ObjectTypeDeathBlock);
+   fixture->SetUserData(static_cast<void*>(object_data));
 }
 
 
@@ -93,24 +99,24 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
 {
    if (!isEnabled())
    {
-      if (mLeverLag <= 0.0f)
+      if (_lever_lag <= 0.0f)
       {
-         mLeverLag = 0.0f;
+         _lever_lag = 0.0f;
       }
       else
       {
-         mLeverLag -= dt.asSeconds();
+         _lever_lag -= dt.asSeconds();
       }
    }
    else
    {
-      if (mLeverLag < 1.0f)
+      if (_lever_lag < 1.0f)
       {
-         mLeverLag += dt.asSeconds();
+         _lever_lag += dt.asSeconds();
       }
       else
       {
-         mLeverLag = 1.0f;
+         _lever_lag = 1.0f;
       }
    }
 }
@@ -119,18 +125,18 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
 void DeathBlock::updateCollision()
 {
     // check for intersection with player
-    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+    auto player_rect = Player::getCurrent()->getPlayerPixelRect();
 
-    auto x = static_cast<int32_t>(mBody->GetPosition().x * PPM - PIXELS_PER_TILE);
-    auto y = static_cast<int32_t>(mBody->GetPosition().y * PPM - PIXELS_PER_TILE);
+    auto x = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
+    auto y = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);
 
     // want a copy of the original rect
-    for (auto rect : mCollisionRects)
+    for (auto rect : _collision_rects)
     {
         rect.left += x;
         rect.top += y;
 
-        if (playerRect.intersects(rect))
+        if (player_rect.intersects(rect))
         {
            Player::getCurrent()->damage(100);
         }
@@ -142,27 +148,27 @@ void DeathBlock::update(const sf::Time& dt)
 {
    updateLeverLag(dt);
 
-   mInterpolation.update(mBody->GetPosition());
+   _interpolation.update(_body->GetPosition());
    {
-      mBody->SetLinearVelocity(mLeverLag * TIMESTEP_ERROR * (PPM / 60.0f) * mInterpolation.getVelocity());
+      _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
    }
 
-   for (auto i = 0u; i < mSprites.size(); i++)
+   for (auto i = 0u; i < _sprites.size(); i++)
    {
-      mSprites[i].setTextureRect(
+      _sprites[i].setTextureRect(
          sf::IntRect(
-            mOffsets[i].x * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
-            mOffsets[i].y * PIXELS_PER_TILE + mStates[i] * PIXELS_PER_TILE,
+            _offsets[i].x * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
+            _offsets[i].y * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
             PIXELS_PER_TILE,
             PIXELS_PER_TILE
          )
       );
 
       // need to move by one tile because the center is not 0, 0 but -24, -24
-      auto x = mBody->GetPosition().x * PPM + mOffsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
-      auto y = mBody->GetPosition().y * PPM + mOffsets[i].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      auto x = _body->GetPosition().x * PPM + _offsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      auto y = _body->GetPosition().y * PPM + _offsets[i].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
 
-      mSprites[i].setPosition(x, y);
+      _sprites[i].setPosition(x, y);
    }
 
    updateCollision();
@@ -174,37 +180,37 @@ void DeathBlock::setup(
    const std::shared_ptr<b2World>& world
 )
 {
-   mTexture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
+   _texture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
 
-   for (auto& sprite : mSprites)
+   for (auto& sprite : _sprites)
    {
-      sprite.setTexture(*mTexture);
+      sprite.setTexture(*_texture);
    }
 
    setZ(ZDepthForegroundMin + 1);
 
-   mPixelPosition.x = tmxObject->mX;
-   mPixelPosition.y = tmxObject->mY;
+   _pixel_positions.x = tmxObject->mX;
+   _pixel_positions.y = tmxObject->mY;
 
    setupBody(world);
 
-   std::vector<sf::Vector2f> pixelPath = tmxObject->mPolyLine->mPolyLine;
-   auto pos = pixelPath.at(0);
+   std::vector<sf::Vector2f> pixel_path = tmxObject->mPolyLine->mPolyLine;
+   auto pos = pixel_path.at(0);
 
    auto i = 0;
-   for (const auto& polyPos : pixelPath)
+   for (const auto& poly_pos : pixel_path)
    {
-      b2Vec2 worldPos;
-      auto time = i / static_cast<float>(pixelPath.size() - 1);
+      b2Vec2 world_pos;
+      auto time = i / static_cast<float>(pixel_path.size() - 1);
 
-      auto x = (tmxObject->mX + polyPos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
-      auto y = (tmxObject->mY + polyPos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto x = (tmxObject->mX + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto y = (tmxObject->mY + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
-      worldPos.x = x;
-      worldPos.y = y;
+      world_pos.x = x;
+      world_pos.y = y;
 
-      mInterpolation.addKey(worldPos, time);
-      mPixelPath.push_back({(pos.x + tmxObject->mX), (pos.y + tmxObject->mY)});
+      _interpolation.addKey(world_pos, time);
+      _pixel_paths.push_back({(pos.x + tmxObject->mX), (pos.y + tmxObject->mY)});
 
       // std::cout << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY << std::endl;
 

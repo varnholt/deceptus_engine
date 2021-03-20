@@ -75,15 +75,15 @@ void ProjectileHitAnimation::add(float x, float y, float angle, const Projectile
 {
    auto anim = new ProjectileHitAnimation();
 
-   anim->mFrames = frames._frames;
-   anim->mTexture = frames._texture;
+   anim->_fames = frames._frames;
+   anim->_texture_map = frames._texture;
    anim->setFrameTimes(frames._frame_times);
    anim->setOrigin(frames._origin);
    anim->setPosition(x, y);
    anim->setRotation(RADTODEG * angle);
 
    // stay at the last frame when animation is elapsed
-   anim->mResetToFirstFrame = false;
+   anim->_reset_to_first_frame = false;
 
    // can't simply play an animation, need to set a start frame!
    anim->setFrame(0);
@@ -105,7 +105,7 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
       auto animation = (*it);
 
       // after one loop animation will go into paused state
-      if (animation->mPaused)
+      if (animation->_paused)
       {
          // std::cout << "removing animation after " << animation->mElapsed.asMilliseconds() << "ms" << std::endl;
          delete animation;
