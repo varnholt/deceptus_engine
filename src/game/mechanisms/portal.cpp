@@ -18,7 +18,7 @@
 #include <iostream>
 
 
-std::atomic<bool> Portal::mPortalLock = false;
+std::atomic<bool> Portal::_portal_lock = false;
 
 
 //-----------------------------------------------------------------------------
@@ -32,7 +32,13 @@ Portal::Portal(GameNode* parent)
 //-----------------------------------------------------------------------------
 void Portal::draw(sf::RenderTarget& window)
 {
-   for (const auto& sprite : mSprites)
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
+   for (const auto& sprite : _sprites)
    {
       window.draw(sprite);
    }
@@ -42,8 +48,8 @@ void Portal::draw(sf::RenderTarget& window)
 //-----------------------------------------------------------------------------
 sf::Vector2f Portal::getPortalPosition()
 {
-   sf::Vector2f portalPos = mSprites.at(mSprites.size()-1).getPosition();
-   return portalPos;
+   const auto portal_pos = _sprites.at(_sprites.size()-1).getPosition();
+   return portal_pos;
 }
 
 
@@ -51,53 +57,53 @@ sf::Vector2f Portal::getPortalPosition()
 //-----------------------------------------------------------------------------
 const sf::Vector2f& Portal::getTilePosition() const
 {
-   return mTilePosition;
+   return _tile_positions;
 }
 
 
 //-----------------------------------------------------------------------------
 void Portal::lock()
 {
-   mPortalLock = true;
+   _portal_lock = true;
 }
 
 
 //-----------------------------------------------------------------------------
 void Portal::unlock()
 {
-   mPortalLock = false;
+   _portal_lock = false;
 }
 
 
 //-----------------------------------------------------------------------------
 bool Portal::isLocked()
 {
-   return mPortalLock;
+   return _portal_lock;
 }
 
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<Portal> Portal::getDestination() const
 {
-   return mDestination;
+   return _detination;
 }
 
 
 //-----------------------------------------------------------------------------
 void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 {
-   mDestination = dst;
+   _detination = dst;
 }
 
 
 //-----------------------------------------------------------------------------
 void Portal::update(const sf::Time& /*dt*/)
 {
-   sf::Vector2f playerPos = Player::getCurrent()->getPixelPositionf();
-   sf::Vector2f PortalPos = getPortalPosition();
+   sf::Vector2f player_pos = Player::getCurrent()->getPixelPositionf();
+   sf::Vector2f portal_pos = getPortalPosition();
 
-   sf::Vector2f a(playerPos.x, playerPos.y);
-   sf::Vector2f b(PortalPos.x + PIXELS_PER_TILE * 0.5f, PortalPos.y);
+   sf::Vector2f a(player_pos.x, player_pos.y);
+   sf::Vector2f b(portal_pos.x + PIXELS_PER_TILE * 0.5f, portal_pos.y);
 
    float distance = SfmlMath::length(a - b);
    bool atPortal = (distance < PIXELS_PER_TILE * 1.0f);
@@ -105,7 +111,7 @@ void Portal::update(const sf::Time& /*dt*/)
    setPlayerAtPortal(atPortal);
 
    int i = 0;
-   for (auto& sprite : mSprites)
+   for (auto& sprite : _sprites)
    {
       sprite.setColor(
          sf::Color(
@@ -115,8 +121,8 @@ void Portal::update(const sf::Time& /*dt*/)
          )
       );
 
-      int x = static_cast<int>(mTilePosition.x);
-      int y = static_cast<int>(mTilePosition.y);
+      const auto x = static_cast<int>(_tile_positions.x);
+      const auto y = static_cast<int>(_tile_positions.y);
 
       sprite.setPosition(
          sf::Vector2f(
@@ -133,46 +139,46 @@ void Portal::update(const sf::Time& /*dt*/)
 //-----------------------------------------------------------------------------
 void Portal::link(
    std::vector<std::shared_ptr<GameMechanism>>& portals,
-   TmxObject* tmxObject
+   TmxObject* tmx_object
 )
 {
-   auto srcdst = tmxObject->mPolyLine->mPolyLine;
+   auto src_dst = tmx_object->mPolyLine->mPolyLine;
 
-   sf::Vector2f srcf = srcdst.at(0);
-   sf::Vector2f dstf = srcdst.at(1);
-   sf::Vector2i src(static_cast<int32_t>(floor(srcf.x)), static_cast<int32_t>(floor(srcf.y)));
-   sf::Vector2i dst(static_cast<int32_t>(floor(dstf.x)), static_cast<int32_t>(floor(dstf.y)));
+   sf::Vector2f src_f = src_dst.at(0);
+   sf::Vector2f dst_f = src_dst.at(1);
+   sf::Vector2i src(static_cast<int32_t>(floor(src_f.x)), static_cast<int32_t>(floor(src_f.y)));
+   sf::Vector2i dst(static_cast<int32_t>(floor(dst_f.x)), static_cast<int32_t>(floor(dst_f.y)));
 
-   const auto srcX = static_cast<int32_t>(src.x + tmxObject->mX) / PIXELS_PER_TILE;
-   const auto srcY = static_cast<int32_t>(src.y + tmxObject->mY) / PIXELS_PER_TILE;
-   const auto dstX = static_cast<int32_t>(dst.x + tmxObject->mX) / PIXELS_PER_TILE;
-   const auto dstY = static_cast<int32_t>(dst.y + tmxObject->mY) / PIXELS_PER_TILE;
+   const auto src_x = static_cast<int32_t>(src.x + tmx_object->mX) / PIXELS_PER_TILE;
+   const auto src_y = static_cast<int32_t>(src.y + tmx_object->mY) / PIXELS_PER_TILE;
+   const auto dst_x = static_cast<int32_t>(dst.x + tmx_object->mX) / PIXELS_PER_TILE;
+   const auto dst_y = static_cast<int32_t>(dst.y + tmx_object->mY) / PIXELS_PER_TILE;
 
-   std::shared_ptr<Portal> srcPortal;
-   std::shared_ptr<Portal> dstPortal;
+   std::shared_ptr<Portal> src_portal;
+   std::shared_ptr<Portal> dst_portal;
 
    for (auto p : portals)
    {
       auto portal = std::dynamic_pointer_cast<Portal>(p);
-      sf::Vector2f portalPos = portal->getPortalPosition();
+      sf::Vector2f portal_pos = portal->getPortalPosition();
 
-      const auto px = static_cast<int32_t>(portalPos.x / PIXELS_PER_TILE);
-      const auto py = static_cast<int32_t>(portalPos.y / PIXELS_PER_TILE);
+      const auto px = static_cast<int32_t>(portal_pos.x / PIXELS_PER_TILE);
+      const auto py = static_cast<int32_t>(portal_pos.y / PIXELS_PER_TILE);
 
       // todo: go to py..(py + mHeight)
-      if (px == srcX && (py == srcY || py + 1 == srcY))
+      if (px == src_x && (py == src_y || py + 1 == src_y))
       {
-         srcPortal = portal;
+         src_portal = portal;
       }
 
-      if (px == dstX && (py == dstY || py + 1 == dstY))
+      if (px == dst_x && (py == dst_y || py + 1 == dst_y))
       {
-         dstPortal = portal;
+         dst_portal = portal;
       }
 
-      if (srcPortal != nullptr && dstPortal != nullptr)
+      if (src_portal != nullptr && dst_portal != nullptr)
       {
-         srcPortal->mDestination = dstPortal;
+         src_portal->_detination = dst_portal;
          break;
       }
    }
@@ -180,17 +186,17 @@ void Portal::link(
    // set the destination's destination to where we came from.
    // not sure if this is desired behavior. but for development purposes
    // it'll help :)
-   if (!dstPortal)
+   if (!dst_portal)
    {
-      std::cerr << "please mark your dst portal correctly for id: " << tmxObject->mId << std::endl;
+      std::cerr << "please mark your dst portal correctly for id: " << tmx_object->mId << std::endl;
    }
 
-   if (!srcPortal)
+   if (!src_portal)
    {
-      std::cerr << "please mark your src portal correctly for id: " << tmxObject->mId << std::endl;
+      std::cerr << "please mark your src portal correctly for id: " << tmx_object->mId << std::endl;
    }
 
-   dstPortal->mDestination = srcPortal;
+   dst_portal->_detination = src_portal;
 
    // std::cout << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")" << std::endl;
 }
@@ -199,14 +205,14 @@ void Portal::link(
 //-----------------------------------------------------------------------------
 void Portal::addSprite(const sf::Sprite& sprite)
 {
-   mSprites.push_back(sprite);
+   _sprites.push_back(sprite);
 }
 
 
 //-----------------------------------------------------------------------------
 bool Portal::isPlayerAtPortal() const
 {
-   return mPlayerAtPortal;
+   return _player_at_portal;
 }
 
 
@@ -214,7 +220,7 @@ bool Portal::isPlayerAtPortal() const
 //-----------------------------------------------------------------------------
 void Portal::setPlayerAtPortal(bool playerAtPortal)
 {
-   mPlayerAtPortal = playerAtPortal;
+   _player_at_portal = playerAtPortal;
 }
 
 
@@ -257,8 +263,8 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
             {
                auto tmp = std::dynamic_pointer_cast<Portal>(p);
                if (
-                     static_cast<uint32_t>(tmp->mTilePosition.x) == i
-                  && static_cast<uint32_t>(tmp->mTilePosition.y) + 1 == j )
+                     static_cast<uint32_t>(tmp->_tile_positions.x) == i
+                  && static_cast<uint32_t>(tmp->_tile_positions.y) + 1 == j )
                {
                   portal = tmp;
                   break;
@@ -269,9 +275,9 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
             {
                portal = std::make_shared<Portal>();
                portals.push_back(portal);
-               portal->mTilePosition.x = static_cast<float>(i);
-               portal->mTilePosition.y = static_cast<float>(j);
-               portal->mTexture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
+               portal->_tile_positions.x = static_cast<float>(i);
+               portal->_tile_positions.y = static_cast<float>(j);
+               portal->_texture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
 
                if (layer->mProperties != nullptr)
                {
@@ -279,13 +285,13 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
                }
             }
 
-            portal->mHeight++;
+            portal->_height++;
 
-            int tu = (tileNumber - firstId) % (portal->mTexture->getSize().x / tilesize.x);
-            int tv = (tileNumber - firstId) / (portal->mTexture->getSize().x / tilesize.x);
+            int tu = (tileNumber - firstId) % (portal->_texture->getSize().x / tilesize.x);
+            int tv = (tileNumber - firstId) / (portal->_texture->getSize().x / tilesize.x);
 
             sf::Sprite sprite;
-            sprite.setTexture(*portal->mTexture);
+            sprite.setTexture(*portal->_texture);
             sprite.setTextureRect(
                sf::IntRect(
                   tu * PIXELS_PER_TILE,

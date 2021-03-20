@@ -23,11 +23,15 @@ class GameMechanism
       virtual int32_t getZ() const;
       virtual void setZ(const int32_t& z);
 
+      virtual DrawMode getDrawMode() const;
+      virtual void setDrawMode(DrawMode draw_mode);
+
 
    protected:
 
       int32_t mZ = 0;
       bool mEnabled = true;
       MechanismVersion mVersion = MechanismVersion::Version1;
+      DrawMode _draw_mode = DrawMode::ColorMap;
 };
 

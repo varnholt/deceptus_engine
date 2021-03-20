@@ -887,9 +887,19 @@ void Level::drawNormalMap()
 
    for (auto& tile_map : tile_maps)
    {
-      tile_map->setDrawMode(TileMap::DrawMode::NormalMap);
+      tile_map->setDrawMode(DrawMode::NormalMap);
       mNormalTexture->draw(*tile_map);
-      tile_map->setDrawMode(TileMap::DrawMode::ColorMap);
+      tile_map->setDrawMode(DrawMode::ColorMap);
+   }
+
+   for (auto& mechanismVector : mMechanisms)
+   {
+      for (auto& mechanism : *mechanismVector)
+      {
+         mechanism->setDrawMode(DrawMode::NormalMap);
+         mechanism->draw(*mNormalTexture);
+         mechanism->setDrawMode(DrawMode::ColorMap);
+      }
    }
 
    mNormalTexture->display();
@@ -1252,9 +1262,13 @@ void Level::draw(
    drawDebugInformation();
 
    // old lighting approach
-   // drawLightAndShadows(*mLevelRenderTexture.get());
+#ifndef DEFERRED_RENDERING
+   drawLightAndShadows(*mLevelRenderTexture.get());
+   displayLevelTexture();
 
-   // we're done drawing to the level texture
+   auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
+   mGammaShader->setTexture(mLevelRenderTexture->getTexture());
+#else
    displayLevelTexture();
 
    // add lighting
@@ -1276,10 +1290,12 @@ void Level::draw(
    takeScreenshot("map_deferred", *mDeferredTexture.get());
 
    auto levelTextureSprite = sf::Sprite(mDeferredTexture->getTexture());
+   mGammaShader->setTexture(mDeferredTexture->getTexture());
+#endif
+
    levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
-   mGammaShader->setTexture(mDeferredTexture->getTexture());
    mGammaShader->update();
    window->draw(levelTextureSprite, &mGammaShader->getGammaShader());
 

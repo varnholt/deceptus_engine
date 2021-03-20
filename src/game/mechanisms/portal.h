@@ -55,17 +55,14 @@ public:
 
 protected:
 
-   sf::Vector2u mTileSize;
-   std::shared_ptr<sf::Texture> mTexture;
+   sf::Vector2u _tile_size;
+   std::shared_ptr<sf::Texture> _texture;
+   std::vector<sf::Sprite> _sprites;
+   sf::Vector2f _tile_positions;
+   int32_t _height = 0;
+   bool _player_at_portal = false;
+   std::shared_ptr<Portal> _detination;
 
-   std::vector<sf::Sprite> mSprites;
-
-   sf::Vector2f mTilePosition;
-
-   int mHeight = 0;
-   bool mPlayerAtPortal = false;
-   std::shared_ptr<Portal> mDestination;
-
-   static std::atomic<bool> mPortalLock;
+   static std::atomic<bool> _portal_lock;
 };
 

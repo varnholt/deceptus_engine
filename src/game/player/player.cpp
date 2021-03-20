@@ -155,7 +155,7 @@ void Player::initialize()
 
    for (auto& i : mAnimations)
    {
-      i->mLooped = true;
+      i->_looped = true;
    }
 
    mJump.mDustAnimation = std::bind(&Player::playDustAnimation, this);
@@ -931,7 +931,7 @@ void Player::updateAnimation(const sf::Time& dt)
       {
          nextCycle = isPointingRight() ? mJumpLandingRightAligned : mJumpLandingLeftAligned;
 
-         if (nextCycle->mCurrentFrame == static_cast<int32_t>(nextCycle->mFrames.size()) - 1)
+         if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_fames.size()) - 1)
          {
              mJumpAnimationReference = 3;
              mHardLanding = false;

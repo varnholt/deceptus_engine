@@ -93,6 +93,12 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
 
 void SpikeBall::draw(sf::RenderTarget& window)
 {
+   // bump maps are not supported for now
+   if (getDrawMode() == DrawMode::NormalMap)
+   {
+      return;
+   }
+
    static const auto color = sf::Color(200, 200, 240);
    static const bool drawDebugLine = false;
 

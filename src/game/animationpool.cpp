@@ -11,14 +11,14 @@
 using json = nlohmann::json;
 
 
-AnimationPool AnimationPool::sPlayerAnimation;
+AnimationPool AnimationPool::_player_animation;
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::initialize()
 {
    deserializeFromFile();
-   mInitialized = true;
+   _initialized = true;
 }
 
 
@@ -31,20 +31,20 @@ std::shared_ptr<Animation> AnimationPool::add(
    bool managedByPool
 )
 {
-   if (!mInitialized)
+   if (!_initialized)
    {
       initialize();
    }
 
-   const auto& settings = mSettings[name];
+   const auto& settings = _settings[name];
    auto animation = std::make_shared<Animation>();
 
    animation->setOrigin(settings->mOrigin[0], settings->mOrigin[1]);
    animation->setPosition(x, y);
 
-   animation->mName = name;
-   animation->mFrames = settings->mFrames;
-   animation->mTexture = settings->mTexture;
+   animation->_name = name;
+   animation->_fames = settings->mFrames;
+   animation->_texture_map = settings->mTexture;
    animation->setFrameTimes(settings->mFrameDurations);
 
    if (autoPlay)
@@ -58,7 +58,7 @@ std::shared_ptr<Animation> AnimationPool::add(
 
    if (managedByPool)
    {
-      mAnimations[name] = animation;
+      _animations[name] = animation;
    }
 
    return animation;
@@ -73,9 +73,9 @@ void AnimationPool::drawAnimations(
 {
    for (const auto& key : animations)
    {
-      const auto& animation = mAnimations.find(key);
+      const auto& animation = _animations.find(key);
 
-      if (animation != mAnimations.end())
+      if (animation != _animations.end())
       {
          animation->second->draw(target);
       }
@@ -86,22 +86,26 @@ void AnimationPool::drawAnimations(
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::updateAnimations(const sf::Time& dt)
 {
-   if (mSettings.empty())
+   if (_settings.empty())
    {
       return;
    }
 
-   for (auto animation : mAnimations)
+   for (auto& animation : _animations)
    {
       animation.second->update(dt);
    }
 
-   for (auto it = mAnimations.begin(); it != mAnimations.end();)
+   for (auto it = _animations.begin(); it != _animations.end();)
    {
-       if (it->second->mPaused == true && !it->second->mLooped)
-          it = mAnimations.erase(it);
-       else
-          ++it;
+      if (it->second->_paused == true && !it->second->_looped)
+      {
+         it = _animations.erase(it);
+      }
+      else
+      {
+         ++it;
+      }
    }
 }
 
@@ -109,14 +113,14 @@ void AnimationPool::updateAnimations(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 const std::map<std::string, std::shared_ptr<Animation>>& AnimationPool::getAnimations()
 {
-   return mAnimations;
+   return _animations;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 AnimationPool&AnimationPool::getInstance()
 {
-   return sPlayerAnimation;
+   return _player_animation;
 }
 
 
@@ -131,11 +135,11 @@ void AnimationPool::deserialize(const std::string& data)
       {
          auto name = item.first;
          auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
-         mSettings[name] = settings;
+         _settings[name] = settings;
 
          // use a single pool for textures only
-         auto textureIt = mTextures.find(settings->mTexturePath);
-         if (textureIt != mTextures.end())
+         auto textureIt = _textures.find(settings->mTexturePath);
+         if (textureIt != _textures.end())
          {
             settings->mTexture = textureIt->second;
          }
@@ -148,7 +152,7 @@ void AnimationPool::deserialize(const std::string& data)
    }
    catch (const std::exception& e)
    {
-     std::cout << e.what() << std::endl;
+      std::cout << e.what() << std::endl;
    }
 }
 
@@ -156,20 +160,20 @@ void AnimationPool::deserialize(const std::string& data)
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::deserializeFromFile(const std::string &filename)
 {
-  std::ifstream ifs (filename, std::ifstream::in);
+   std::ifstream ifs (filename, std::ifstream::in);
 
-  auto c = ifs.get();
-  std::string data;
+   auto c = ifs.get();
+   std::string data;
 
-  while (ifs.good())
-  {
-    data.push_back(static_cast<char>(c));
-    c = ifs.get();
-  }
+   while (ifs.good())
+   {
+      data.push_back(static_cast<char>(c));
+      c = ifs.get();
+   }
 
-  ifs.close();
+   ifs.close();
 
-  deserialize(data);
+   deserialize(data);
 }
 
 
