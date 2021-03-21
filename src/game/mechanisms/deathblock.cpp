@@ -18,17 +18,11 @@ DeathBlock::DeathBlock(GameNode* parent)
 }
 
 
-void DeathBlock::draw(sf::RenderTarget& target)
+void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
    for (auto& sprite : _sprites)
    {
-      target.draw(sprite);
+      color.draw(sprite);
    }
 }
 

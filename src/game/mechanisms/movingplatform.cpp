@@ -31,11 +31,26 @@ MovingPlatform::MovingPlatform(GameNode *parent)
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::draw(sf::RenderTarget& target)
+void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   for (auto& sprite : _sprites)
+   {
+      sprite.setTexture(*_texture_map.get());
+   }
+
    for (const auto& sprite : _sprites)
    {
-      target.draw(sprite);
+      color.draw(sprite);
+   }
+
+   for (auto& sprite : _sprites)
+   {
+      sprite.setTexture(*_normal_map.get());
+   }
+
+   for (const auto& sprite : _sprites)
+   {
+      normal.draw(sprite);
    }
 }
 
@@ -52,30 +67,6 @@ double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
 const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 {
    return _pixel_path;
-}
-
-
-//-----------------------------------------------------------------------------
-void MovingPlatform::setDrawMode(DrawMode mode)
-{
-   GameMechanism::setDrawMode(mode);
-
-   std::shared_ptr<sf::Texture> texture;
-
-   switch (mode)
-   {
-      case DrawMode::ColorMap:
-         texture = _texture_map;
-         break;
-      case DrawMode::NormalMap:
-         texture = _normal_map;
-         break;
-   }
-
-   for (auto& sprite : _sprites)
-   {
-      sprite.setTexture(*texture.get());
-   }
 }
 
 
