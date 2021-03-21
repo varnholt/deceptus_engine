@@ -45,6 +45,7 @@ std::shared_ptr<Animation> AnimationPool::add(
    animation->_name = name;
    animation->_fames = settings->mFrames;
    animation->_texture_map = settings->mTexture;
+   animation->_normal_map = settings->mNormalMap;
    animation->setFrameTimes(settings->mFrameDurations);
 
    if (autoPlay)
@@ -67,7 +68,8 @@ std::shared_ptr<Animation> AnimationPool::add(
 
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::drawAnimations(
-   sf::RenderTarget& target,
+   sf::RenderTarget& color,
+   sf::RenderTarget& normal,
    const std::vector<std::string>& animations
 )
 {
@@ -77,7 +79,7 @@ void AnimationPool::drawAnimations(
 
       if (animation != _animations.end())
       {
-         animation->second->draw(target);
+         animation->second->draw(color, normal);
       }
    }
 }
@@ -137,16 +139,16 @@ void AnimationPool::deserialize(const std::string& data)
          auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
          _settings[name] = settings;
 
-         // use a single pool for textures only
-         auto textureIt = _textures.find(settings->mTexturePath);
-         if (textureIt != _textures.end())
+         auto texture = TexturePool::getInstance().get(settings->mTexturePath);
+         settings->mTexture = texture;
+
+         const auto normal_map_filename = (settings->mTexturePath.stem().string() + "_normals" + settings->mTexturePath.extension().string());
+         const auto normal_map_path = (settings->mTexturePath.parent_path() / normal_map_filename);
+
+         if (std::filesystem::exists(normal_map_path))
          {
-            settings->mTexture = textureIt->second;
-         }
-         else
-         {
-            auto texture = TexturePool::getInstance().get(settings->mTexturePath);
-            settings->mTexture = texture;
+            auto normal_map = TexturePool::getInstance().get(normal_map_path);
+            settings->mNormalMap = normal_map;
          }
       }
    }
