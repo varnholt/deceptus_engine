@@ -39,7 +39,7 @@ class Fan : public GameMechanism
 
       Fan() = default;
 
-      void draw(sf::RenderTarget& target) override;
+      void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
       const sf::Rect<int32_t>& getPixelRect() const;
       void setEnabled(bool enabled) override;

@@ -67,7 +67,7 @@ public:
    void initialize();
    void initializeLevel();
    void initializeController();
-   void draw(sf::RenderTarget& target);
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal);
 
    void update(const sf::Time& dt);
 

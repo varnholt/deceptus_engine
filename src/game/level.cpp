@@ -875,8 +875,6 @@ void Level::drawMap(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawNormalMap()
 {
-   mNormalTexture->clear();
-   mNormalTexture->setView(*mLevelView);
 
    auto tile_maps = mTileMaps;
 
@@ -885,24 +883,7 @@ void Level::drawNormalMap()
       return lhs->getZ() < rhs->getZ();
    });
 
-   for (auto& tile_map : tile_maps)
-   {
-      tile_map->setDrawMode(DrawMode::NormalMap);
-      mNormalTexture->draw(*tile_map);
-      tile_map->setDrawMode(DrawMode::ColorMap);
-   }
 
-   for (auto& mechanismVector : mMechanisms)
-   {
-      for (auto& mechanism : *mechanismVector)
-      {
-         mechanism->setDrawMode(DrawMode::NormalMap);
-         mechanism->draw(*mNormalTexture);
-         mechanism->setDrawMode(DrawMode::ColorMap);
-      }
-   }
-
-   mNormalTexture->display();
 
    //   static int32_t bump_map_save_counter = 0;
    //   bump_map_save_counter++;
@@ -950,7 +931,7 @@ void Level::drawParallaxMaps(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Level::drawPlayer(sf::RenderTarget& target)
+void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
 
@@ -961,7 +942,7 @@ void Level::drawPlayer(sf::RenderTarget& target)
       // render player to texture
       deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
       deathRenderTexture->setView(*mLevelView);
-      player->draw(*deathRenderTexture);
+      player->draw(*deathRenderTexture, normal);
       deathRenderTexture->display();
 
       // render texture with shader applied
@@ -978,21 +959,26 @@ void Level::drawPlayer(sf::RenderTarget& target)
       );
 
       view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-      target.setView(view);
-      target.draw(deathShaderSprite, &mDeathShader->getShader());
+      color.setView(view);
+      color.draw(deathShaderSprite, &mDeathShader->getShader());
 
       takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
 
-      target.setView(*mLevelView);
+      color.setView(*mLevelView);
    }
    else
    {
-      player->draw(target);
+      player->draw(color, normal);
    }
 }
 
 
-void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
+void Level::drawLayers(
+   sf::RenderTarget& target,
+   sf::RenderTarget& normal,
+   int32_t from,
+   int32_t to
+)
 {
    target.setView(*mLevelView);
 
@@ -1012,6 +998,10 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
       {
          if (tileMap->getZ() == z)
          {
+            // this should use a single draw call just like for the mechanisms
+            tileMap->setDrawMode(DrawMode::NormalMap);
+            normal.draw(*tileMap);
+            tileMap->setDrawMode(DrawMode::ColorMap);
             target.draw(*tileMap);
          }
       }
@@ -1022,7 +1012,7 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
          {
             if (mechanism->getZ() == z)
             {
-               mechanism->draw(target);
+               mechanism->draw(target, *mNormalTexture.get());
             }
          }
       }
@@ -1042,7 +1032,7 @@ void Level::drawLayers(sf::RenderTarget& target, int32_t from, int32_t to)
          mAo.draw(target);
 
          // draw player
-         drawPlayer(target);
+         drawPlayer(target, *mNormalTexture.get());
       }
 
       for (auto& layer : mImageLayers)
@@ -1148,7 +1138,7 @@ void Level::drawDebugInformation()
 
 
 //-----------------------------------------------------------------------------
-void Level::displayLevelTexture()
+void Level::displayTextures()
 {
    // display the whole texture
    sf::View view(
@@ -1161,8 +1151,12 @@ void Level::displayLevelTexture()
    );
 
    view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+
    mLevelRenderTexture->setView(view);
    mLevelRenderTexture->display();
+
+   mNormalTexture->setView(*mLevelView);
+   mNormalTexture->display();
 }
 
 
@@ -1217,10 +1211,16 @@ void Level::draw(
 
    // render layers affected by the atmosphere
    mLevelBackgroundRenderTexture->clear();
+   mNormalTexture->clear();
 
    updateViews();
    drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
-   drawLayers(*mLevelBackgroundRenderTexture.get(), ZDepthBackgroundMin, ZDepthBackgroundMax);
+   drawLayers(
+      *mLevelBackgroundRenderTexture.get(),
+      *mNormalTexture.get(),
+      ZDepthBackgroundMin,
+      ZDepthBackgroundMax
+   );
    mLevelBackgroundRenderTexture->display();
    takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
 
@@ -1228,6 +1228,8 @@ void Level::draw(
    sf::Sprite backgroundSprite(mLevelBackgroundRenderTexture->getTexture());
    mAtmosphereShader->update();
    mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader->getShader());
+
+   // ^ same must be done for the bump map!
 
 #ifdef GLOW_ENABLED
    sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
@@ -1257,7 +1259,12 @@ void Level::draw(
 #endif
 
    // draw the level layers into the level texture
-   drawLayers(*mLevelRenderTexture.get(), ZDepthForegroundMin, ZDepthForegroundMax);
+   drawLayers(
+      *mLevelRenderTexture.get(),
+      *mNormalTexture.get(),
+      ZDepthForegroundMin,
+      ZDepthForegroundMax
+   );
 
    drawDebugInformation();
 
@@ -1269,10 +1276,9 @@ void Level::draw(
    auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
    mGammaShader->setTexture(mLevelRenderTexture->getTexture());
 #else
-   displayLevelTexture();
 
-   // add lighting
-   drawNormalMap();
+   displayTextures();
+
    drawLightMap();
 
    mLightSystem->draw(

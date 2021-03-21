@@ -31,7 +31,7 @@ class Crusher : public GameMechanism, public GameNode
 
       Crusher(GameNode* parent = nullptr);
 
-      void draw(sf::RenderTarget& target) override;
+      void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
 
 

@@ -30,7 +30,7 @@ public:
 
    Laser() = default;
 
-   void draw(sf::RenderTarget& window) override;
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<GameMechanism>> load(

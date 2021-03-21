@@ -28,17 +28,11 @@ void ConveyorBelt::setVelocity(float velocity)
 }
 
 
-void ConveyorBelt::draw(sf::RenderTarget& target)
+void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
    for (auto& sprite : mBeltSprites)
    {
-      target.draw(sprite);
+      color.draw(sprite);
    }
 
 // disable for now

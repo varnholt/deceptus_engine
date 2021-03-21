@@ -35,15 +35,9 @@ Spikes::Spikes(GameNode* parent)
 }
 
 
-void Spikes::draw(sf::RenderTarget& window)
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
-   window.draw(mSprite);
+   color.draw(mSprite);
 }
 
 

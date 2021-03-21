@@ -99,15 +99,9 @@ Bouncer::Bouncer(
 }
 
 
-void Bouncer::draw(sf::RenderTarget& target)
+void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
-   target.draw(mSprite);
+   color.draw(mSprite);
 }
 
 
