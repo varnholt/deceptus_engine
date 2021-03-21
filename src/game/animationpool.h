@@ -22,7 +22,12 @@ class AnimationPool
          bool managedByPool = true
       );
 
-      void drawAnimations(sf::RenderTarget& target, const std::vector<std::string>& animations);
+      void drawAnimations(
+         sf::RenderTarget& target,
+         sf::RenderTarget& normal,
+         const std::vector<std::string>& animations
+      );
+
       void updateAnimations(const sf::Time& dt);
       const std::map<std::string, std::shared_ptr<Animation> >& getAnimations();
 
@@ -38,7 +43,6 @@ class AnimationPool
       bool _initialized = false;
 
       std::map<std::string, std::shared_ptr<AnimationSettings>> _settings;
-      std::map<std::string, std::shared_ptr<sf::Texture>> _textures;
       std::map<std::string, std::shared_ptr<Animation>> _animations;
 
       static AnimationPool _player_animation;
