@@ -154,15 +154,9 @@ void Lever::update(const sf::Time& /*dt*/)
 
 
 //-----------------------------------------------------------------------------
-void Lever::draw(sf::RenderTarget& target)
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
-   target.draw(mSprite);
+   color.draw(mSprite);
 }
 
 

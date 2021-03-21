@@ -25,7 +25,7 @@ public:
 
    Portal(GameNode* parent = nullptr);
 
-   void draw(sf::RenderTarget& window) override;
+   void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<GameMechanism>> load(

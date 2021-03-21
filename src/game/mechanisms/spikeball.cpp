@@ -91,15 +91,9 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
 }
 
 
-void SpikeBall::draw(sf::RenderTarget& window)
+void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
-   static const auto color = sf::Color(200, 200, 240);
+   static const auto vertex_color = sf::Color(200, 200, 240);
    static const bool drawDebugLine = false;
 
    if (drawDebugLine)
@@ -113,18 +107,18 @@ void SpikeBall::draw(sf::RenderTarget& window)
 
          sf::Vertex line[] =
          {
-            sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM), color),
-            sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM), color),
+            sf::Vertex(sf::Vector2f(c1Pos.x * PPM, c1Pos.y * PPM), vertex_color),
+            sf::Vertex(sf::Vector2f(c2Pos.x * PPM, c2Pos.y * PPM), vertex_color),
          };
 
-         window.draw(line, 2, sf::Lines);
+         color.draw(line, 2, sf::Lines);
          // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
       }
    }
 
-   window.draw(mBoxSprite);
-   drawChain(window);
-   window.draw(mSpikeSprite);
+   color.draw(mBoxSprite);
+   drawChain(color);
+   color.draw(mSpikeSprite);
 }
 
 

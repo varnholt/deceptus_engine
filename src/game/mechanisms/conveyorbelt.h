@@ -26,7 +26,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       float getVelocity() const;
       void setVelocity(float velocity);
 
-      void draw(sf::RenderTarget& target) override;
+      void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
       void setEnabled(bool enabled) override;
 

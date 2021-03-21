@@ -13,19 +13,7 @@ void GameMechanism::setZ(const int32_t& z)
 }
 
 
-DrawMode GameMechanism::getDrawMode() const
-{
-   return _draw_mode;
-}
-
-
-void GameMechanism::setDrawMode(DrawMode draw_mode)
-{
-   _draw_mode = draw_mode;
-}
-
-
-void GameMechanism::draw(sf::RenderTarget& /*target*/)
+void GameMechanism::draw(sf::RenderTarget& /*target*/, sf::RenderTarget& /*normal*/)
 {
 }
 

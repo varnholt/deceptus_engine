@@ -255,11 +255,11 @@ void Player::setBodyViaPixelPosition(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::draw(sf::RenderTarget& target)
+void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    if (mWeaponSystem->mSelected)
    {
-      mWeaponSystem->mSelected->draw(target);
+      mWeaponSystem->mSelected->draw(color);
    }
 
    if (!mVisible)
@@ -295,7 +295,7 @@ void Player::draw(sf::RenderTarget& target)
          auto& anim = mLastAnimations[i];
          anim.mAnimation->setPosition(anim.mPosition);
          anim.mAnimation->setAlpha(static_cast<uint8_t>(255/(2*(mLastAnimations.size()-i))));
-         anim.mAnimation->draw(target);
+         anim.mAnimation->draw(color);
       }
 
       if (isDashActive())
@@ -303,11 +303,11 @@ void Player::draw(sf::RenderTarget& target)
          mLastAnimations.push_back({pos, mCurrentCycle});
       }
 
-      mCurrentCycle->draw(target);
+      mCurrentCycle->draw(color);
    }
 
    AnimationPool::getInstance().drawAnimations(
-      target,
+      color,
       {"player_jump_dust_left_aligned", "player_jump_dust_right_aligned"}
    );
 }

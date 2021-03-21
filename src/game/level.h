@@ -77,13 +77,13 @@ public:
    void draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot);
    void drawLightAndShadows(sf::RenderTarget& target);
    void drawParallaxMaps(sf::RenderTarget& target);
-   void drawLayers(sf::RenderTarget& target, int32_t from, int32_t to);
+   void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
    void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawBlurLayer(sf::RenderTarget& target);
    void drawMap(sf::RenderTarget& target);
    void drawNormalMap();
    void drawLightMap();
-   void drawPlayer(sf::RenderTarget& target);
+   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
 
    void update(const sf::Time& dt);
 
@@ -242,6 +242,6 @@ protected:
    static Level* sCurrentLevel;
    private:
    void drawDebugInformation();
-   void displayLevelTexture();
+   void displayTextures();
 };
 

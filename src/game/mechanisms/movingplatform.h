@@ -31,7 +31,7 @@ public:
 
    static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, TmxObject* tmxObject);
 
-   void draw(sf::RenderTarget& target) override;
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
    void setupBody(const std::shared_ptr<b2World>& world);
@@ -42,8 +42,6 @@ public:
 
    const PathInterpolation& getInterpolation() const;
    const std::vector<sf::Vector2f>& getPixelPath() const;
-
-   void setDrawMode(DrawMode mode) override;
 
 
 private:

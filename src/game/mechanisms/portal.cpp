@@ -30,14 +30,9 @@ Portal::Portal(GameNode* parent)
 
 
 //-----------------------------------------------------------------------------
-void Portal::draw(sf::RenderTarget& window)
+void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
 {
    // bump maps are not supported for now
-   if (getDrawMode() == DrawMode::NormalMap)
-   {
-      return;
-   }
-
    for (const auto& sprite : _sprites)
    {
       window.draw(sprite);
