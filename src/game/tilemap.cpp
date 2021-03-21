@@ -51,7 +51,6 @@ bool TileMap::load(
    auto path = (base_path / tilset->mImage->mSource);
 
    _texture_map = TexturePool::getInstance().get(path);
-   _active_texture = _texture_map;
 
    // check if we have a bumpmap and, if so, load it
    const auto normal_map_filename = (path.stem().string() + "_normals" + path.extension().string());
@@ -245,21 +244,9 @@ void TileMap::update(const sf::Time& dt)
 }
 
 
-void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) const
 {
-   if (!_visible)
-   {
-      return;
-   }
-
-   if (!_active_texture)
-   {
-      return;
-   }
-
-   // apply the transform and tileset texture
    states.transform *= getTransform();
-   states.texture = _active_texture.get();
 
    // draw the vertex arrays
    const auto& pos = Player::getCurrent()->getPixelPositioni();
@@ -287,24 +274,32 @@ void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 
-DrawMode TileMap::getDrawMode() const
+void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-   return _draw_mode;
+   if (!_visible)
+   {
+      return;
+   }
+
+   states.texture = _texture_map.get();
+   drawVertices(target, states);
 }
 
 
-void TileMap::setDrawMode(const DrawMode& draw_mode)
+void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
-   _draw_mode = draw_mode;
-
-   switch (_draw_mode)
+   if (!_visible)
    {
-      case DrawMode::ColorMap:
-         _active_texture = _texture_map;
-         break;
-      case DrawMode::NormalMap:
-         _active_texture = _normal_map;
-         break;
+      return;
+   }
+
+   states.texture = _texture_map.get();
+   drawVertices(color, states);
+
+   if (_normal_map)
+   {
+      states.texture = _normal_map.get();
+      drawVertices(normal, states);
    }
 }
 
