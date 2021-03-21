@@ -156,3 +156,19 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
+void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
+{
+   states.transform *= getTransform();
+
+   states.texture = _texture_map.get();
+   color.draw(_vertices, 4, sf::Quads, states);
+
+   if (_normal_map)
+   {
+      states.texture = _normal_map.get();
+      normal.draw(_vertices, 4, sf::Quads, states);
+   }
+}
+
+

@@ -15,7 +15,9 @@ public:
 
    Animation() = default;
 
-   virtual void draw(sf::RenderTarget& target, sf::RenderStates states = {}) const;
+   void draw(sf::RenderTarget& target, sf::RenderStates states = {}) const override;
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states = {}) const;
+
    void update(const sf::Time& dt);
 
    void play();

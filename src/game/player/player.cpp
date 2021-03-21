@@ -303,11 +303,12 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          mLastAnimations.push_back({pos, mCurrentCycle});
       }
 
-      mCurrentCycle->draw(color);
+      mCurrentCycle->draw(color, normal);
    }
 
    AnimationPool::getInstance().drawAnimations(
       color,
+      normal,
       {"player_jump_dust_left_aligned", "player_jump_dust_right_aligned"}
    );
 }
