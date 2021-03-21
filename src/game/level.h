@@ -80,7 +80,6 @@ public:
    void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
    void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawBlurLayer(sf::RenderTarget& target);
-   void drawMap(sf::RenderTarget& target);
    void drawNormalMap();
    void drawLightMap();
    void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);

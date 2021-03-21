@@ -39,16 +39,17 @@ public:
    bool isVisible() const;
    void setVisible(bool visible);
 
-   DrawMode getDrawMode() const;
-   void setDrawMode(const DrawMode& draw_mode);
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
 
 
 protected:
 
-   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 
 private:
+
+   void drawVertices(sf::RenderTarget &target, sf::RenderStates states) const;
 
    struct AnimatedTileFrame
    {
@@ -79,12 +80,10 @@ private:
 
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
-   std::shared_ptr<sf::Texture> _active_texture;
 
    std::vector<AnimatedTile*> _animations;
 
    int _z = 0;
    bool _visible = true;
-   DrawMode _draw_mode = DrawMode::ColorMap;
 };
 

@@ -856,23 +856,6 @@ void Level::updateViews()
 
 
 //-----------------------------------------------------------------------------
-void Level::drawMap(sf::RenderTarget& target)
-{
-   target.setView(*mMapView);
-   for (auto z = 0; z < 50; z++)
-   {
-      for (auto& tileMap : mTileMaps)
-      {
-         if (tileMap->getZ() == z)
-         {
-            target.draw(*tileMap);
-         }
-      }
-   }
-}
-
-
-//-----------------------------------------------------------------------------
 void Level::drawNormalMap()
 {
 
@@ -998,11 +981,7 @@ void Level::drawLayers(
       {
          if (tileMap->getZ() == z)
          {
-            // this should use a single draw call just like for the mechanisms
-            tileMap->setDrawMode(DrawMode::NormalMap);
-            normal.draw(*tileMap);
-            tileMap->setDrawMode(DrawMode::ColorMap);
-            target.draw(*tileMap);
+            tileMap->draw(target, normal, {});
          }
       }
 
