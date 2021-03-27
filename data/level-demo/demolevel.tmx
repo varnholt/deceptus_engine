@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="100" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="20" nextobjectid="1">
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="100" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="23" nextobjectid="3">
  <tileset firstgid="1" source="catacombs-level-albedo.tsx"/>
  <tileset firstgid="4097" source="catacombs-background-albedo.tsx"/>
  <tileset firstgid="4497" source="water.tsx"/>
@@ -627,6 +627,14 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="20" name="shader_quads">
+  <object id="1" name="waterfall_01" x="1248" y="599" width="72" height="152">
+   <properties>
+    <property name="fragment_shader" value="data/shaders/waterfall.frag"/>
+    <property name="texture" value="data/effects/cloud.png"/>
+   </properties>
+  </object>
+ </objectgroup>
  <layer id="12" name="WATER-FRONT" width="100" height="100">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
