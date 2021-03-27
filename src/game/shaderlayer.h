@@ -9,10 +9,11 @@ struct ShaderLayer
 {
    void draw(sf::RenderTarget& target);
 
-   sf::Shader mShader;
+   mutable sf::Shader mShader;
    sf::Sprite mSprite;
+   sf::Vector2f mPosition;
+   sf::Vector2f mSize;
    std::shared_ptr<sf::Texture> mTexture;
-   sf::RenderTexture mRenderTexture;
 
    int32_t mZ = 0;
 
