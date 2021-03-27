@@ -18,6 +18,7 @@
 #include "shaders/blurshader.h"
 #include "shaders/deathshader.h"
 #include "shaders/gammashader.h"
+#include "shaderlayer.h"
 #include "squaremarcher.h"
 
 // effects
@@ -224,6 +225,7 @@ protected:
 
    AmbientOcclusion mAo;
    std::vector<std::shared_ptr<ImageLayer>> mImageLayers;
+   std::vector<std::shared_ptr<ShaderLayer>> mShaderLayers;
 
    std::unique_ptr<AtmosphereShader> mAtmosphereShader;
    std::unique_ptr<BlurShader> mBlurShader;

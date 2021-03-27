@@ -540,6 +540,11 @@ void Level::loadTmx()
                   Weather::getInstance().add(Weather::WeatherType::Rain, rect);
                }
             }
+            else if (objectGroup->mName.rfind("shader_quads", 0) == 0)
+            {
+               auto quad = ShaderLayer::deserialize(tmxObject);
+               mShaderLayers.push_back(quad);
+            }
             else if (objectGroup->mName == "lights")
             {
                auto light = LightSystem::createLightInstance(tmxObject);
@@ -1019,6 +1024,14 @@ void Level::drawLayers(
          if (layer->mZ == z)
          {
             target.draw(layer->mSprite, {layer->mBlendMode});
+         }
+      }
+
+      for (auto& layer : mShaderLayers)
+      {
+         if (layer->mZ == z)
+         {
+            layer->draw(target);
          }
       }
    }
