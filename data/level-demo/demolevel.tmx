@@ -860,13 +860,12 @@
 </data>
  </layer>
  <objectgroup id="20" name="shader_quads_01">
-  <properties>
-   <property name="z" type="int" value="16"/>
-  </properties>
-  <object id="1" name="waterfall_01" x="1248" y="599" width="72" height="152">
+  <object id="1" name="waterfall_01" x="1248" y="599" width="72" height="154">
    <properties>
     <property name="fragment_shader" value="data/shaders/waterfall.frag"/>
     <property name="texture" value="data/effects/cloud.png"/>
+    <property name="vertex_shader" value="data/shaders/waterfall.vert"/>
+    <property name="z" type="int" value="15"/>
    </properties>
   </object>
  </objectgroup>
