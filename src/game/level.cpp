@@ -1028,6 +1028,11 @@ void Level::drawLayers(
 //-----------------------------------------------------------------------------
 void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 {
+   if (!mAtmosphere.mTileMap)
+   {
+      return;
+   }
+
    updateViews();
 
    mAtmosphere.mTileMap->setVisible(true);

@@ -184,6 +184,7 @@ SOURCES += \
    src/game/screentransition.cpp \
    src/game/screentransitioneffect.cpp \
    src/game/scriptproperty.cpp \
+   src/game/shaderlayer.cpp \
    src/game/shaders/atmosphereshader.cpp \
    src/game/shaders/blurshader.cpp \
    src/game/shaders/deathshader.cpp \
@@ -285,6 +286,7 @@ HEADERS += \
    src/game/fadetransitioneffect.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
+   src/game/shaderlayer.h \
    src/game/weaponfactory.h
 
 
