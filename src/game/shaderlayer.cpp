@@ -11,15 +11,29 @@
 
 void ShaderLayer::draw(sf::RenderTarget& target)
 {
-   mRenderTexture.clear();
+   float x = mPosition.x;
+   float y = mPosition.y;
+   float w = mSize.x;
+   float h = mSize.y;
+   const auto offset = target.mapCoordsToPixel(mPosition, target.getView());
 
-   mShader.setUniform("texture", *mTexture.get());
-   mShader.setUniform("time", GlobalClock::getInstance()->getElapsedTimeInS());
+   mShader.setUniform("u_texture", *mTexture.get());
+   mShader.setUniform("u_time", GlobalClock::getInstance()->getElapsedTimeInS());
+   mShader.setUniform("u_resolution", sf::Vector2f(w, h));
+   mShader.setUniform("u_offset", sf::Vector2f(offset.x, offset.y));
 
-   mRenderTexture.draw(mSprite, &mShader);
-   mRenderTexture.display();
+   sf::Vertex quad[] = {
+      sf::Vertex(sf::Vector2f(x,     y    )),
+      sf::Vertex(sf::Vector2f(x,     y + h)),
+      sf::Vertex(sf::Vector2f(x + w, y + h)),
+      sf::Vertex(sf::Vector2f(x + w, y    ))
+   };
 
-   target.draw(mSprite);
+   sf::RenderStates states;
+   states.shader = &mShader;
+
+
+   target.draw(quad, 4, sf::Quads, states);
 }
 
 
@@ -27,8 +41,10 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
 {
    std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>();
 
-   instance->mRenderTexture.create(static_cast<uint32_t>(object->mWidth), static_cast<uint32_t>(object->mHeight));
-   instance->mSprite.setPosition(object->mX, object->mY);
+   instance->mPosition.x = object->mX;
+   instance->mPosition.y = object->mY;
+   instance->mSize.x = object->mWidth;
+   instance->mSize.y = object->mHeight;
 
    if (object->mProperties != nullptr)
    {
@@ -56,6 +72,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
       if (texture_id != object->mProperties->mMap.end())
       {
          instance->mTexture = TexturePool::getInstance().get(texture_id->second->mValueStr.value());
+         instance->mTexture->setRepeated(true);
       }
    }
 

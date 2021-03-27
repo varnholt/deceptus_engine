@@ -1031,6 +1031,7 @@ void Level::drawLayers(
       {
          if (layer->mZ == z)
          {
+            // target.draw(*layer, {});
             layer->draw(target);
          }
       }

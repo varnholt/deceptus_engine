@@ -588,6 +588,8 @@ DISTFILES += \
     data/scripts/enemies/helpers.lua \
     data/scripts/enemies/vectorial2.lua \
     data/config/levels.json \
+    data/shaders/waterfall.frag \
+    data/shaders/waterfall.vert \
     data/sprites/animations.json \
     data/shaders/blur.frag \
     data/shaders/brightness.frag \
