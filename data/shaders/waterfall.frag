@@ -45,7 +45,7 @@ void main()
    float inv_uv = 1.0 - uv_pixel.y;
    color.xyz -= 0.45 * pow(uv_pixel.y, 8.0);
    color.a -= 0.2 * pow(uv_pixel.y, 8.0);
-   color += pow(inv_uv, 8.0);
+   //color += pow(inv_uv, 8.0);
 
    // make waterfall transparent
    color.a -= 0.2;
