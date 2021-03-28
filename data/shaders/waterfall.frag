@@ -7,6 +7,12 @@ uniform sampler2D u_texture;
 
 precision highp float;
 
+const vec4 col1 = vec4(0.510, 0.776, 0.486, 1.0);
+const vec4 col2 = vec4(0.200, 0.604, 0.318, 1.0);
+const vec4 col3 = vec4(0.145, 0.490 ,0.278, 1.0);
+const vec4 col4 = vec4(0.059, 0.255, 0.251, 1.0);
+
+
 void main()
 {
    vec2 uv = (gl_FragCoord.xy - u_offset) / u_resolution;
@@ -14,13 +20,7 @@ void main()
    float time = u_time * 0.4;
 
    // apply pixelate effect
-   // vec2 uv_pixel = uv;
    vec2 uv_pixel = floor(uv * (u_resolution/2)) / (u_resolution/2);
-
-   vec4 col1 = vec4(0.510, 0.776, 0.486, 1.0);
-   vec4 col2 = vec4(0.200, 0.604, 0.318, 1.0);
-   vec4 col3 = vec4(0.145, 0.490 ,0.278, 1.0);
-   vec4 col4 = vec4(0.059, 0.255, 0.251, 1.0);
 
    // displacement on top of y
    vec3 displace = texture(u_texture, vec2(uv_pixel.x, (uv_pixel.y + time) * 0.05)).xyz;
@@ -52,7 +52,7 @@ void main()
 
    gl_FragColor = vec4(color);
 
-   // hello world
+   // hello world / troubleshooting
    // gl_FragColor = vec4(1,0,0,1);
 }
 
