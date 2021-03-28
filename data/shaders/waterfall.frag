@@ -24,13 +24,14 @@ void main()
 
    // displacement on top of y
    vec3 displace = texture(u_texture, vec2(uv_pixel.x, (uv_pixel.y + time) * 0.05)).xyz;
-   displace *= 0.5;
+   displace *= 0.1; // tweak this scale a bit?
    displace.x -= 1.0;
    displace.y -= 1.0;
    displace.y *= 0.5;
 
    // color
    vec2 uv_tmp = uv_pixel;
+   // uv_tmp.x *= 0.5;
    uv_tmp.y *= 0.2;
    uv_tmp.y += time;
    vec4 color = texture(u_texture, uv_tmp + displace.xy);
