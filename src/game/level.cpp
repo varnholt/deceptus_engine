@@ -1029,9 +1029,8 @@ void Level::drawLayers(
 
       for (auto& layer : mShaderLayers)
       {
-         if (layer->mZ == z)
+         if (layer->_z == z)
          {
-            // target.draw(*layer, {});
             layer->draw(target);
          }
       }

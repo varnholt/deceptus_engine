@@ -9,13 +9,12 @@ struct ShaderLayer
 {
    void draw(sf::RenderTarget& target);
 
-   mutable sf::Shader mShader;
-   sf::Sprite mSprite;
-   sf::Vector2f mPosition;
-   sf::Vector2f mSize;
-   std::shared_ptr<sf::Texture> mTexture;
-
-   int32_t mZ = 0;
+   sf::Shader _shader;
+   sf::Sprite _sprite;
+   sf::Vector2f _position;
+   sf::Vector2f _size;
+   std::shared_ptr<sf::Texture> _texture;
+   int32_t _z = 0;
 
    static std::shared_ptr<ShaderLayer> deserialize(TmxObject* element);
 };
