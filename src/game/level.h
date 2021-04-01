@@ -131,24 +131,24 @@ protected:
       int32_t offsetX,
       int32_t offsetY,
       const std::vector<SquareMarcher::Path>& paths,
-      ObjectBehavior behavior
+      ObjectType behavior
    );
 
    void addChainToWorld(
       const std::vector<b2Vec2>& chain,
-      ObjectBehavior behavior
+      ObjectType behavior
    );
 
    void addDebugOutlines(
       int32_t offsetX,
       int32_t offsetY,
       std::vector<sf::Vector2f> positions,
-      ObjectBehavior behavior
+      ObjectType behavior
    );
 
    void parseObj(
       TmxLayer* layer,
-      ObjectBehavior behavior,
+      ObjectType behavior,
       const std::filesystem::path& path
    );
 

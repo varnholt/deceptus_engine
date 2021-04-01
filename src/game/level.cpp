@@ -1375,7 +1375,7 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 //-----------------------------------------------------------------------------
 void Level::addChainToWorld(
    const std::vector<b2Vec2>& chain,
-   ObjectBehavior behavior
+   ObjectType object_type
 )
 {
    // it's easier to store all the physics chains in a separate data structure
@@ -1399,16 +1399,7 @@ void Level::addChainToWorld(
    auto fixture = body->CreateFixture(&fixtureDef);
 
    auto objectData = new FixtureNode(this);
-
-   // deadly objects are deadly :)
-   if (behavior == ObjectBehaviorDeadly)
-   {
-      objectData->setType(ObjectTypeDeadly);
-   }
-   else if (behavior == ObjectBehaviorSolid)
-   {
-      objectData->setType(ObjectTypeWall);
-   }
+   objectData->setType(object_type);
 
    fixture->SetUserData(static_cast<void*>(objectData));
 }
@@ -1419,17 +1410,22 @@ void Level::addDebugOutlines(
    int32_t offsetX,
    int32_t offsetY,
    std::vector<sf::Vector2f> positions,
-   ObjectBehavior behavior
+   ObjectType behavior
 )
 {
    sf::Color color;
    switch (behavior)
    {
-      case ObjectBehaviorSolid:
+      case ObjectTypeSolid:
          color = sf::Color(255, 255, 255);
          break;
-      case ObjectBehaviorDeadly:
+      case ObjectTypeDeadly:
          color = sf::Color(255, 0, 0);
+         break;
+      case ObjectTypeSolidOneSided:
+         color = sf::Color(255, 255, 0);
+         break;
+      default:
          break;
    }
 
@@ -1455,7 +1451,7 @@ void Level::addPathsToWorld(
    int32_t offsetX,
    int32_t offsetY,
    const std::vector<SquareMarcher::Path>& paths,
-   ObjectBehavior behavior
+   ObjectType behavior
 )
 {
    // just for debugging purposes, this section can be removed later
@@ -1486,7 +1482,7 @@ void Level::addPathsToWorld(
 //-----------------------------------------------------------------------------
 void Level::parseObj(
    TmxLayer* layer,
-   ObjectBehavior behavior,
+   ObjectType behavior,
    const std::filesystem::path& path
 )
 {
@@ -1527,42 +1523,101 @@ void Level::parseObj(
 //-----------------------------------------------------------------------------
 void Level::parsePhysicsTiles(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::filesystem::path& basePath
+   TmxTileSet* tileset,
+   const std::filesystem::path& base_path
 )
 {
+   struct ParseData
+   {
+      std::string filename_obj_optimized;
+      std::string filename_obj_not_optimized;
+      std::string filename_physics_path_csv;
+      std::string filename_grid_image;
+      std::string filename_path_image;
+      ObjectType object_type = ObjectTypeSolid;
+      std::vector<int32_t> colliding_tiles;
+   };
+
+   ParseData level_pd;
+   level_pd.filename_obj_optimized = "layer_" + layer->mName + "_solid.obj";
+   level_pd.filename_obj_not_optimized = "layer_" + layer->mName + "_solid_not_optimised.obj";
+   level_pd.filename_physics_path_csv = "physics_path_solid.csv";
+   level_pd.filename_grid_image = "physics_grid_solid.png";
+   level_pd.filename_path_image = "physics_path_solid.png";
+   level_pd.object_type = ObjectTypeSolid;
+   level_pd.colliding_tiles = {1};
+
+   ParseData solid_onesided_pd;
+   solid_onesided_pd.filename_obj_optimized = "layer_" + layer->mName + "_solid_onesided.obj";
+   solid_onesided_pd.filename_obj_not_optimized = "layer_" + layer->mName + "_solid_onesided_not_optimised.obj";
+   solid_onesided_pd.filename_physics_path_csv = "physics_path_solid_onesided.csv";
+   solid_onesided_pd.filename_grid_image = "physics_grid_solid_onesided.png";
+   solid_onesided_pd.filename_path_image = "physics_path_solid_onesided.png";
+   solid_onesided_pd.object_type = ObjectTypeSolidOneSided;
+   solid_onesided_pd.colliding_tiles = {1};
+
+   ParseData deadly_pd;
+   deadly_pd.filename_obj_optimized = "layer_" + layer->mName + "_deadly.obj";
+   deadly_pd.filename_obj_not_optimized = "layer_" + layer->mName + "_deadly_not_optimised.obj";
+   deadly_pd.filename_physics_path_csv = "physics_path_deadly.csv";
+   deadly_pd.filename_grid_image = "physics_grid_deadly.png";
+   deadly_pd.filename_path_image = "physics_path_deadly.png";
+   deadly_pd.object_type = ObjectTypeDeadly;
+   deadly_pd.colliding_tiles = {3};
+
+
+   ParseData* pd = nullptr;
+
+   if (layer->mName == "level")
+   {
+      pd = &level_pd;
+   }
+   else if (layer->mName == "level_solid_onesided")
+   {
+      pd = &solid_onesided_pd;
+   }
+   else if (layer->mName == "level_deadly")
+   {
+      pd = &deadly_pd;
+   }
+
+   if (!pd)
+   {
+      return;
+   }
+
    static const float scale = 1.0f / 3.0f;
 
-   auto pathSolidOptimized = basePath / std::filesystem::path("layer_" + layer->mName + "_solid.obj");
+   auto pathSolidOptimized = base_path / std::filesystem::path(pd->filename_obj_optimized);
 
    std::cout << "[x] loading: " << pathSolidOptimized.make_preferred().generic_string() << std::endl;
 
-   mPhysics.parse(layer, tileSet, basePath);
+   mPhysics.parse(layer, tileset, base_path);
 
    // this whole block should be generated by an external tool
    // right now the squaremarcher output is still used for the in-game map visualization
-   SquareMarcher solid(
+   SquareMarcher square_marcher(
       mPhysics.mGridWidth,
       mPhysics.mGridHeight,
       mPhysics.mPhysicsMap,
-      std::vector<int32_t>{1},
-      basePath / std::filesystem::path("physics_path_solid.csv"),
+      pd->colliding_tiles,
+      base_path / std::filesystem::path(pd->filename_physics_path_csv),
       scale
    );
 
-   solid.writeGridToImage(basePath / std::filesystem::path("physics_grid_solid.png")); // not needed
-   solid.writePathToImage(basePath / std::filesystem::path("physics_path_solid.png")); // needed from obj as well
+   square_marcher.writeGridToImage(base_path / std::filesystem::path(pd->filename_grid_image)); // not needed
+   square_marcher.writePathToImage(base_path / std::filesystem::path(pd->filename_path_image)); // needed from obj as well
 
    if (std::filesystem::exists(pathSolidOptimized))
    {
-      parseObj(layer, ObjectBehavior::ObjectBehaviorSolid, pathSolidOptimized);
+      parseObj(layer, pd->object_type, pathSolidOptimized);
    }
    else
    {
-      const auto pathSolidNotOptimised = basePath / std::filesystem::path("layer_" + layer->mName + "_solid_not_optimised.obj");
+      const auto pathSolidNotOptimised = base_path / std::filesystem::path(pd->filename_obj_not_optimized);
 
       // dump the tileset into an obj file, optimise that and load it
-      if (mPhysics.dumpObj(layer, tileSet, pathSolidNotOptimised))
+      if (mPhysics.dumpObj(layer, tileset, pathSolidNotOptimised))
       {
 #ifdef __linux__
           auto cmd = std::string("tools/path_merge/path_merge") + " "
@@ -1594,34 +1649,34 @@ void Level::parsePhysicsTiles(
       if (!std::filesystem::exists(pathSolidOptimized))
       {
          std::cerr << "[!] could not find " << pathSolidOptimized.string() << ", obj generator failed" << std::endl;
-         addPathsToWorld(layer->mOffsetX, layer->mOffsetY, solid.mPaths, ObjectBehaviorSolid);
+         addPathsToWorld(layer->mOffsetX, layer->mOffsetY, square_marcher.mPaths, pd->object_type);
       }
       else
       {
          // parse the optimised obj
-         parseObj(layer, ObjectBehavior::ObjectBehaviorSolid, pathSolidOptimized);
+         parseObj(layer, pd->object_type, pathSolidOptimized);
       }
    }
 
-   // layer of deadly objects
-   const auto pathDeadly = basePath / std::filesystem::path("layer_" + layer->mName + "_deadly.obj");
-   if (std::filesystem::exists(pathDeadly))
-   {
-      parseObj(layer, ObjectBehavior::ObjectBehaviorDeadly, pathDeadly);
-   }
-   else
-   {
-      SquareMarcher deadly(
-         mPhysics.mGridWidth,
-         mPhysics.mGridHeight,
-         mPhysics.mPhysicsMap,
-         std::vector<int32_t>{3},
-         basePath / std::filesystem::path("physics_path_deadly.csv"),
-         scale
-      );
-
-      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectBehaviorDeadly);
-   }
+//   // layer of deadly objects
+//   const auto pathDeadly = basePath / std::filesystem::path("layer_" + layer->mName + "_deadly.obj");
+//   if (std::filesystem::exists(pathDeadly))
+//   {
+//      parseObj(layer, ObjectType::ObjectTypeDeadly, pathDeadly);
+//   }
+//   else
+//   {
+//      SquareMarcher deadly(
+//         mPhysics.mGridWidth,
+//         mPhysics.mGridHeight,
+//         mPhysics.mPhysicsMap,
+//         std::vector<int32_t>{3},
+//         basePath / std::filesystem::path("physics_path_deadly.csv"),
+//         scale
+//      );
+//
+//      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectTypeDeadly);
+//   }
 }
 
 
