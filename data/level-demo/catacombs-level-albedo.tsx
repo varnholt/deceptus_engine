@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.2" tiledversion="1.3.1" name="catacombs-level-albedo" tilewidth="24" tileheight="24" tilecount="4096" columns="64">
- <image source="tilesheets/catacombs-level-albedo.png" width="1536" height="1536"/>
+ <image source="tilesheets/catacombs-level-diffuse.png" width="1536" height="1536"/>
  <tile id="64">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="24" height="24"/>
