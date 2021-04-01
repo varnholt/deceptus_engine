@@ -210,7 +210,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
             break;
          }
-         case ObjectTypeOneSidedWall:
+         case ObjectTypeSolidOneSided:
          {
             platformFixture = contact->GetFixtureA();
             playerFixture = contact->GetFixtureB();
@@ -268,13 +268,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeConveyorBelt:
             break;
-         case ObjectTypeJumpPlatform:
-            break;
         case ObjectTypeMoveableBox:
            break;
         case ObjectTypeDeathBlock:
            break;
-        case ObjectTypeWall:
+        case ObjectTypeSolid:
            break;
       }
    }
@@ -359,7 +357,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
             break;
          }
-         case ObjectTypeOneSidedWall:
+         case ObjectTypeSolidOneSided:
          {
             platformFixture = contact->GetFixtureB();
             playerFixture = contact->GetFixtureA();
@@ -417,13 +415,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeConveyorBelt:
             break;
-         case ObjectTypeJumpPlatform:
-            break;
          case ObjectTypeMoveableBox:
             break;
          case ObjectTypeDeathBlock:
             break;
-         case ObjectTypeWall:
+         case ObjectTypeSolid:
             break;
       }
    }
@@ -507,7 +503,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             mNumPlayerContacts--;
             break;
          }
-         case ObjectTypeOneSidedWall:
+         case ObjectTypeSolidOneSided:
          {
             contact->SetEnabled(true);
             break;
@@ -583,7 +579,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             mNumPlayerContacts--;
             break;
          }
-         case ObjectTypeOneSidedWall:
+         case ObjectTypeSolidOneSided:
          {
             contact->SetEnabled(true);
             break;
