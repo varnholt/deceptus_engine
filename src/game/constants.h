@@ -205,13 +205,6 @@ enum KeyPressed {
 };
 
 
-enum ObjectBehavior
-{
-   ObjectBehaviorSolid = 1,
-   ObjectBehaviorDeadly,
-};
-
-
 enum ObjectType
 {
    ObjectTypePlayer,
@@ -227,11 +220,10 @@ enum ObjectType
    ObjectTypeDeathBlock,
    ObjectTypeDoor,
    ObjectTypeEnemy,
-   ObjectTypeJumpPlatform,
-   ObjectTypeOneSidedWall,
    ObjectTypeMoveableBox,
    ObjectTypeMovingPlatform,
-   ObjectTypeWall,
+   ObjectTypeSolid,
+   ObjectTypeSolidOneSided,
 };
 
 
