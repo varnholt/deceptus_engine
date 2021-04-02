@@ -905,7 +905,17 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::P:
       case sf::Keyboard::Escape:
       {
-         showPauseMenu();
+         const auto mapEnabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
+         if (!mapEnabled)
+         {
+            showPauseMenu();
+         }
+         else
+         {
+            // do the same as if the player had pressed tab again
+            GameState::getInstance().enqueueTogglePauseResume();
+            DisplayMode::getInstance().enqueueToggle(Display::DisplayMap);
+         }
          break;
       }
       case sf::Keyboard::R:
