@@ -388,7 +388,7 @@ void Level::loadTmx()
                mParallaxMaps.push_back(tileMap);
                pushTileMap = false;
             }
-            else if (layer->mName == "level")
+            else if (layer->mName == "level" || layer->mName == "level_solid_onesided" || layer->mName == "level_deadly")
             {
                parsePhysicsTiles(layer, tileset, path);
             }

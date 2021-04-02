@@ -411,6 +411,7 @@ void Player::createFeet()
 
       auto objectDataFeet = new FixtureNode(this);
       objectDataFeet->setType(ObjectTypePlayer);
+      objectDataFeet->setFlag("foot", true);
       foot->SetUserData(static_cast<void*>(objectDataFeet));
    }
 
