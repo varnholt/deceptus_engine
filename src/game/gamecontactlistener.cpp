@@ -63,52 +63,28 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
 
 void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture)
 {
+   // decide whether an incoming contact to the platform should be disabled or not
+
+   // if the head bounces against the one-sided wall, disable the contact
+   // until there is no more contact with the head (EndContact)
    if (playerFixture != nullptr && (static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head"))
    {
       contact->SetEnabled(false);
    }
 
-   if (platformFixture != nullptr)
+   if (!platformFixture)
    {
-      int32_t numPoints = contact->GetManifold()->pointCount;
-      b2WorldManifold worldManifold;
-      contact->GetWorldManifold( &worldManifold );
-
-      b2Body* platformBody = platformFixture->GetBody();
-      b2Body* playerBody = playerFixture->GetBody();
-
-      bool disable = false;
-
-      // check if any of the contact points are moving from the bottom into platform
-      for (int32_t i = 0; i < numPoints; i++)
-      {
-          b2Vec2 velocityPlatform = platformBody->GetLinearVelocityFromWorldPoint(worldManifold.points[i]);
-          b2Vec2 velocityPlayer   = playerBody->GetLinearVelocityFromWorldPoint(worldManifold.points[i]);
-          b2Vec2 velocityDiff     = platformBody->GetLocalVector(velocityPlayer - velocityPlatform);
-
-         /*
-            [#############] platform
-                  ^
-                  |
-                 (*) player
-
-         */
-
-         // if moving down faster than 1m/s, handle as before
-         if (velocityDiff.y < -1.0f)
-         {
-            // point32_t is moving into platform, leave contact solid and exit
-            disable = true;
-            break;
-         }
-      }
-
-      // no points are moving into platform, contact should not be solid
-      if (disable)
-      {
-         contact->SetEnabled(false);
-      }
+      return;
    }
+
+   // if moving down, the contact should be solid
+   if (playerFixture->GetBody()->GetLinearVelocity().y > 0.0f)
+   {
+      return;
+   }
+
+   // not all points are moving down towards the platform, the contact should not be solid
+   contact->SetEnabled(false);
 }
 
 
@@ -424,11 +400,6 @@ void GameContactListener::BeginContact(b2Contact* contact)
       }
    }
 
-   if (playerFixture != nullptr && ( static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head") )
-   {
-      contact->SetEnabled(false);
-   }
-
    // handle one sided walls
    processOneSidedWalls(contact, playerFixture, platformFixture);
 }
@@ -505,6 +476,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneSided:
          {
+            // reset the default state of the contact
             contact->SetEnabled(true);
             break;
          }
@@ -581,6 +553,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneSided:
          {
+            // reset the default state of the contact
             contact->SetEnabled(true);
             break;
          }
