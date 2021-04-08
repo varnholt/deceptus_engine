@@ -154,7 +154,7 @@ void Lever::update(const sf::Time& /*dt*/)
 
 
 //-----------------------------------------------------------------------------
-void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(mSprite);
 }
