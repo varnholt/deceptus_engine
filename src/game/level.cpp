@@ -29,6 +29,7 @@
 #include "mechanisms/lever.h"
 #include "mechanisms/moveablebox.h"
 #include "mechanisms/movingplatform.h"
+#include "mechanisms/rope.h"
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikes.h"
 #include "meshtools.h"
@@ -221,16 +222,17 @@ Level::Level()
       &mBouncers,
       &mConveyorBelts,
       &mCrushers,
+      &mDeathBlocks,
       &mDoors,
       &mFans,
       &mLasers,
       &mLevers,
+      &mMoveableBoxes,
       &mPlatforms,
       &mPortals,
+      &mRopes,
       &mSpikeBalls,
       &mSpikes,
-      &mMoveableBoxes,
-      &mDeathBlocks
    };
 }
 
@@ -428,6 +430,12 @@ void Level::loadTmx()
                {
                   Portal::link(mPortals, tmxObject);
                }
+            }
+            else if (objectGroup->mName == "ropes")
+            {
+               auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
+               rope->setup(tmxObject, mWorld);
+               mRopes.push_back(rope);
             }
             else if (objectGroup->mName == "smoke")
             {

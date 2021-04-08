@@ -17,16 +17,16 @@ class SpikeBall : public GameMechanism, public GameNode
       struct SpikeConfig
       {
          // factor to control the push force when ball moves from right to left
-         float pushFactor = 0.625f;
+         float _push_factor = 0.625f;
 
          // number of points retrieved from the given spline
-         int32_t splinePointCount = 25;
+         int32_t _spline_point_count = 25;
 
          // chain element setup
-         int32_t chainElementCount = 10;
-         float chainElementDistance = 0.3f;
-         float chainElementWidth = 0.06f;
-         float chainElementHeight = 0.0125f;
+         int32_t _chain_element_count = 10;
+         float _chain_element_distance = 0.3f;
+         float _chain_element_width = 0.06f;
+         float _chain_element_height = 0.0125f;
       };
 
       SpikeBall(GameNode* parent);
@@ -44,29 +44,29 @@ class SpikeBall : public GameMechanism, public GameNode
 
       void drawChain(sf::RenderTarget& window);
 
-      std::shared_ptr<sf::Texture> mTexture;
-      sf::Sprite mSpikeSprite;
-      sf::Sprite mBoxSprite;
-      sf::Sprite mChainElementA;
-      sf::Sprite mChainElementB;
+      std::shared_ptr<sf::Texture> _texture;
+      sf::Sprite _spike_sprite;
+      sf::Sprite _box_sprite;
+      sf::Sprite _chain_element_a;
+      sf::Sprite _chain_element_b;
 
-      sf::Vector2i mPixelPosition;
+      sf::Vector2i _pixel_position;
 
-      b2BodyDef mGroundDef;
-      b2Body* mGround = nullptr;
-      b2EdgeShape mGroundShape;
+      b2BodyDef _anchor_def;
+      b2Body* _anchor_body = nullptr;
+      b2EdgeShape _anchor_shape;
 
-      b2RevoluteJointDef mJointDef;
-      b2PolygonShape mChainElementShape;
-      b2FixtureDef mChainElementFixtureDef;
-      std::vector<b2Body*> mChainElements;
+      b2RevoluteJointDef _joint_def;
+      b2PolygonShape _chain_element_shape;
+      b2FixtureDef _chain_element_fixture_def;
+      std::vector<b2Body*> _chain_elements;
 
-      b2Body* mBallBody = nullptr;
-      b2CircleShape mBallShape;
-      b2BodyDef mBallBodyDef;
-      b2FixtureDef mBallFixtureDef;
+      b2Body* _ball_body = nullptr;
+      b2CircleShape _ball_shape;
+      b2BodyDef _ball_body_def;
+      b2FixtureDef _ball_fixture_def;
 
-      float mAngle = 0.0f;
-      SpikeConfig mConfig;
+      float _angle = 0.0f;
+      SpikeConfig _config;
 };
 

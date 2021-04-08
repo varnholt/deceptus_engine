@@ -28,7 +28,7 @@ void ConveyorBelt::setVelocity(float velocity)
 }
 
 
-void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (auto& sprite : mBeltSprites)
    {
