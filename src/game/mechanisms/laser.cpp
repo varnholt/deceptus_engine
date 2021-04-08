@@ -38,7 +38,7 @@ std::vector<std::array<int32_t, 9>> Laser::mTilesVersion2;
 
 
 //-----------------------------------------------------------------------------
-void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    mSprite.setTextureRect(
       sf::IntRect(

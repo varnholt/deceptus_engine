@@ -131,7 +131,7 @@ void Fan::updateSprite()
 }
 
 
-void Fan::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Fan::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (auto& sprite : mSprites)
    {
