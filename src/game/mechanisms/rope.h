@@ -28,7 +28,7 @@ class Rope : public GameMechanism, public GameNode
 
    private:
 
-      int32_t _segment_count = 5;
+      int32_t _segment_count = 7;
       float _segment_length_m = 0.01f;
 
       std::vector<b2Body*> _chain_elements;
@@ -44,4 +44,8 @@ class Rope : public GameMechanism, public GameNode
       b2PolygonShape _rope_element_shape;
       b2FixtureDef _rope_element_fixture_def;
       b2RevoluteJointDef _joint_def;
+
+      sf::Shader _shader;
+      std::shared_ptr<sf::Texture> _texture;
+      sf::IntRect _texture_rect_px;
 };
