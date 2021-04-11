@@ -3,7 +3,10 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolyline.h"
+#include "texturepool.h"
 
+#include <array>
+#include <iostream>
 
 Rope::Rope(GameNode* parent)
  : GameNode(parent)
@@ -17,46 +20,93 @@ Rope::Rope(GameNode* parent)
    _rope_element_fixture_def.shape = &_rope_element_shape;
    _rope_element_fixture_def.density = 20.0f;
    _rope_element_fixture_def.friction = 0.2f;
+
+   // load pixelate shader
+   _shader.loadFromFile("data/shaders/pixelate.frag", sf::Shader::Fragment);
+
+   // _texture = TexturePool::getInstance().get("data/textures/rope_diffuse.png");
+   _texture = TexturePool::getInstance().get("data/level-demo/tilesheets/catacombs-level-diffuse.png");
+
+   _shader.setUniform("u_texture", _texture.get());
+
+   // data/level-demo/tilesheets/catacombs-level-diffuse.png
+   //
+   // rope 1
+   // 971,  73 .. 973,  73
+   // 971, 211 .. 973, 211
+   _texture_rect_px.left = 971;
+   _texture_rect_px.top = 73;
+   _texture_rect_px.width = 3;
+   _texture_rect_px.height = 138;
+
+   // rope 2
+   // 1019,  72 .. 1021,  72
+   // 1019, 153 .. 1021, 153
+   //
+   // _texture_rect_px.left = 1019;
+   // _texture_rect_px.top = 72;
+   // _texture_rect_px.width = 3;
+   // _texture_rect_px.height = 81;
 }
 
 
 void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   static const auto vertex_color = sf::Color(200, 200, 240);
-   static const bool draw_debug_line = true;
+   std::optional<b2Vec2> q1_prev;
+   std::optional<b2Vec2> q4_prev;
 
-   if (draw_debug_line)
+   std::vector<sf::Vertex> quads;
+
+   for (auto i = 0u; i < _chain_elements.size() - 1; i++)
    {
-      for (auto i = 0u; i < _chain_elements.size() - 1; i++)
-      {
-         const auto c1 = _chain_elements[i];
-         const auto c2 = _chain_elements[i + 1];
+      const auto c1 = _chain_elements[i];
+      const auto c2 = _chain_elements[i + 1];
 
-         const auto c1_pos_m = c1->GetPosition();
-         const auto c2_pos_m = c2->GetPosition();
+      const auto c1_pos_m = c1->GetPosition();
+      const auto c2_pos_m = c2->GetPosition();
 
-         sf::Vertex line[] =
-         {
-            sf::Vertex(sf::Vector2f(c1_pos_m.x * PPM, c1_pos_m.y * PPM), vertex_color),
-            sf::Vertex(sf::Vector2f(c2_pos_m.x * PPM, c2_pos_m.y * PPM), vertex_color),
-         };
+      static constexpr auto thickness_m = 0.025f;
 
-         color.draw(line, 2, sf::Lines);
-      }
+      const auto dist = (c2_pos_m - c1_pos_m);
+      auto normal = b2Vec2(dist.y, -dist.x);
+      normal.Normalize();
+
+      const auto q1 = q1_prev.value_or(c1_pos_m - (thickness_m * normal));
+      const auto q2 = c2_pos_m - (thickness_m * normal);
+      const auto q3 = c2_pos_m + (thickness_m * normal);
+      const auto q4 = q4_prev.value_or(c1_pos_m + (thickness_m * normal));
+
+      q1_prev = q2;
+      q4_prev = q3;
+
+      auto u0 = static_cast<float>(i    ) / static_cast<float>(_segment_count);
+      auto u1 = static_cast<float>(i + 1) / static_cast<float>(_segment_count);
+
+      const auto v1 = sf::Vertex(sf::Vector2f(q1.x * PPM, q1.y * PPM), sf::Vector2f(_texture_rect_px.left,                          _texture_rect_px.top + u0 * _texture_rect_px.height));
+      const auto v2 = sf::Vertex(sf::Vector2f(q2.x * PPM, q2.y * PPM), sf::Vector2f(_texture_rect_px.left,                          _texture_rect_px.top + u1 * _texture_rect_px.height));
+      const auto v3 = sf::Vertex(sf::Vector2f(q3.x * PPM, q3.y * PPM), sf::Vector2f(_texture_rect_px.left + _texture_rect_px.width, _texture_rect_px.top + u1 * _texture_rect_px.height));
+      const auto v4 = sf::Vertex(sf::Vector2f(q4.x * PPM, q4.y * PPM), sf::Vector2f(_texture_rect_px.left + _texture_rect_px.width, _texture_rect_px.top + u0 * _texture_rect_px.height));
+
+      quads.push_back(v1);
+      quads.push_back(v2);
+      quads.push_back(v3);
+      quads.push_back(v4);
    }
 
-//   color.draw(_box_sprite);
-//   drawChain(color);
-//   color.draw(_spike_sprite);
+   // render out those quads
+   sf::RenderStates states;
+   //states.shader = &_shader;
+   states.texture = _texture.get();
+   color.draw(quads.data(), quads.size(), sf::Quads, states);
 }
 
 
 void Rope::update(const sf::Time& dt)
 {
    // slightly push the rope all the way while it's moving from the right to the left
-   auto f = dt.asSeconds() * 0.001f;
+   auto f = dt.asSeconds() * 0.01f;
    auto last_element = _chain_elements.at(_chain_elements.size() - 1);
-   if (last_element->GetLinearVelocity().x < 0.0f)
+   if (last_element->GetLinearVelocity().x <= 0.0f)
    {
       last_element->ApplyLinearImpulse(b2Vec2{-f, f}, last_element->GetWorldCenter(), true);
    }
@@ -70,6 +120,7 @@ void Rope::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    auto path_0_px = pixel_path.at(0);
    auto path_1_px = pixel_path.at(1);
    _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);
+   // std::cout << _segment_length_m << std::endl;
 
    // init start position
    setPixelPosition(
@@ -92,13 +143,13 @@ void Rope::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
       // create chain element
       b2BodyDef chain_body_def;
       chain_body_def.type = b2_dynamicBody;
-      chain_body_def.position.Set(pos_m.x + 0.01f + i * _segment_length_m, pos_m.y);
+      chain_body_def.position.Set(pos_m.x, pos_m.y + 0.01f + i * _segment_length_m);
       auto chain_body = world->CreateBody(&chain_body_def);
       auto chain_fixture = chain_body->CreateFixture(&_rope_element_fixture_def);
       chain_fixture->SetSensor(true);
 
       // attach chain element to the previous one
-      b2Vec2 anchor(pos_m.x + i * _segment_length_m, pos_m.y);
+      b2Vec2 anchor(pos_m.x, pos_m.y + i * _segment_length_m);
       _joint_def.Initialize(previous_body, chain_body, anchor);
       world->CreateJoint(&_joint_def);
 
