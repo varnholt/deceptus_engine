@@ -30,6 +30,7 @@
 #include "mechanisms/moveablebox.h"
 #include "mechanisms/movingplatform.h"
 #include "mechanisms/rope.h"
+#include "mechanisms/ropewithlight.h"
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikes.h"
 #include "meshtools.h"
@@ -434,6 +435,12 @@ void Level::loadTmx()
             else if (objectGroup->mName == "ropes")
             {
                auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
+               rope->setup(tmxObject, mWorld);
+               mRopes.push_back(rope);
+            }
+            else if (objectGroup->mName == "ropes_with_light")
+            {
+               auto rope = std::make_shared<RopeWithLight>(dynamic_cast<GameNode*>(this));
                rope->setup(tmxObject, mWorld);
                mRopes.push_back(rope);
             }
@@ -1326,6 +1333,13 @@ void Level::updatePlayerLight()
    // the player, once he dies, becomes inactive and just sinks down
    // so the player light is disabled to avoid any glitches
    mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10));
+}
+
+
+//-----------------------------------------------------------------------------
+std::shared_ptr<LightSystem> Level::getLightSystem() const
+{
+   return mLightSystem;
 }
 
 

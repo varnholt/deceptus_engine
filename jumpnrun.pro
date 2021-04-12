@@ -115,6 +115,7 @@ SOURCES += \
    src/game/effects/lightsystem.cpp \
    src/game/fadetransitioneffect.cpp \
    src/game/mechanisms/rope.cpp \
+   src/game/mechanisms/ropewithlight.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
    src/game/dialogue.cpp \
@@ -286,6 +287,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtools.h \
    src/game/fadetransitioneffect.h \
    src/game/mechanisms/rope.h \
+   src/game/mechanisms/ropewithlight.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
    src/game/shaderlayer.h \
