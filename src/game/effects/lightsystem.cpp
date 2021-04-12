@@ -67,6 +67,12 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
       for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
       {
+         // if something doesn't collide, it probably shouldn't have any impact on lighting, too
+         if (f->IsSensor())
+         {
+            continue;
+         }
+
          auto shape = f->GetShape();
 
          auto shape_polygon = dynamic_cast<b2PolygonShape*>(shape);

@@ -117,13 +117,15 @@ public:
 
    BoomEffect& getBoomEffect();
 
+   std::shared_ptr<LightSystem> getLightSystem() const;
+
 
 protected:
 
    void addDebugRect(b2Body* body, float x, float y, float w, float h);
 
    void parsePhysicsTiles(
-      TmxLayer* layer,
+         TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path& basePath
    );

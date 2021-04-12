@@ -21,16 +21,8 @@ Rope::Rope(GameNode* parent)
    _rope_element_fixture_def.density = 20.0f;
    _rope_element_fixture_def.friction = 0.2f;
 
-   // load pixelate shader
-   _shader.loadFromFile("data/shaders/pixelate.frag", sf::Shader::Fragment);
-
-   // _texture = TexturePool::getInstance().get("data/textures/rope_diffuse.png");
    _texture = TexturePool::getInstance().get("data/level-demo/tilesheets/catacombs-level-diffuse.png");
 
-   _shader.setUniform("u_texture", _texture.get());
-
-   // data/level-demo/tilesheets/catacombs-level-diffuse.png
-   //
    // rope 1
    // 971,  73 .. 973,  73
    // 971, 211 .. 973, 211
@@ -95,7 +87,6 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    // render out those quads
    sf::RenderStates states;
-   //states.shader = &_shader;
    states.texture = _texture.get();
    color.draw(quads.data(), quads.size(), sf::Quads, states);
 }
@@ -105,7 +96,7 @@ void Rope::update(const sf::Time& dt)
 {
    // slightly push the rope all the way while it's moving from the right to the left
    auto f = dt.asSeconds() * 0.01f;
-   auto last_element = _chain_elements.at(_chain_elements.size() - 1);
+   auto last_element = _chain_elements.back();
    if (last_element->GetLinearVelocity().x <= 0.0f)
    {
       last_element->ApplyLinearImpulse(b2Vec2{-f, f}, last_element->GetWorldCenter(), true);
@@ -134,7 +125,8 @@ void Rope::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
    _anchor_a_body = world->CreateBody(&_anchor_a_def);
    _anchor_a_shape.Set(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
-   _anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
+   auto anchor_fixture =_anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
+   anchor_fixture->SetSensor(true);
 
    auto previous_body = _anchor_a_body;
 
