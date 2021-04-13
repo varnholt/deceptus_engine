@@ -32,6 +32,7 @@ class Rope : public GameMechanism, public GameNode
       float _segment_length_m = 0.01f;
 
       std::vector<b2Body*> _chain_elements;
+      std::shared_ptr<sf::Texture> _texture;
 
 
    private:
@@ -48,6 +49,5 @@ class Rope : public GameMechanism, public GameNode
       b2FixtureDef _rope_element_fixture_def;
       b2RevoluteJointDef _joint_def;
 
-      std::shared_ptr<sf::Texture> _texture;
       sf::IntRect _texture_rect_px;
 };
