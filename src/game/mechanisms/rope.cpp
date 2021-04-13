@@ -96,6 +96,7 @@ void Rope::update(const sf::Time& dt)
 {
    // slightly push the rope all the way while it's moving from the right to the left
    auto f = dt.asSeconds() * 0.01f;
+
    auto last_element = _chain_elements.back();
    if (last_element->GetLinearVelocity().x <= 0.0f)
    {
