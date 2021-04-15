@@ -50,4 +50,13 @@ class Rope : public GameMechanism, public GameNode
       b2RevoluteJointDef _joint_def;
 
       sf::IntRect _texture_rect_px;
+
+      // wind
+      bool _wind_enabled = true;
+      float _push_time_s = 0.0f;
+      float _push_interval_s = 5.0f;
+      float _push_duration_s = 1.0f;
+      float _push_strength = 0.02f;
+
+      static int32_t _instance_counter;
 };
