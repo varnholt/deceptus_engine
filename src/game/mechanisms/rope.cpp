@@ -117,7 +117,7 @@ void Rope::update(const sf::Time& dt)
       auto last_element = _chain_elements.back();
       for (auto element : _chain_elements)
       {
-         element->ApplyLinearImpulse(b2Vec2{-f, f}, last_element->GetWorldCenter(), true);
+         element->ApplyLinearImpulse(b2Vec2{-f, 0.0f}, last_element->GetWorldCenter(), true);
       }
    }
 
