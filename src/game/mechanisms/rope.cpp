@@ -3,10 +3,15 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 
 #include <array>
 #include <iostream>
+
+int32_t Rope::_instance_counter = 0;
+
 
 Rope::Rope(GameNode* parent)
  : GameNode(parent)
@@ -39,6 +44,9 @@ Rope::Rope(GameNode* parent)
    // _texture_rect_px.top = 72;
    // _texture_rect_px.width = 3;
    // _texture_rect_px.height = 81;
+
+   _instance_counter++;
+   _push_time_s = _instance_counter;
 }
 
 
@@ -94,21 +102,61 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 void Rope::update(const sf::Time& dt)
 {
-   // slightly push the rope all the way while it's moving from the right to the left
-   auto f = dt.asSeconds() * 0.01f;
-
-   auto last_element = _chain_elements.back();
-   if (last_element->GetLinearVelocity().x <= 0.0f)
+   if (!_wind_enabled)
    {
-      last_element->ApplyLinearImpulse(b2Vec2{-f, f}, last_element->GetWorldCenter(), true);
+      return;
+   }
+
+   // slightly push the rope all the way while it's moving from the right to the left
+   _push_time_s += dt.asSeconds();
+
+   if (_push_time_s > _push_interval_s)
+   {
+      auto f = _push_strength * dt.asSeconds();
+
+      auto last_element = _chain_elements.back();
+      for (auto element : _chain_elements)
+      {
+         element->ApplyLinearImpulse(b2Vec2{-f, f}, last_element->GetWorldCenter(), true);
+      }
+   }
+
+   if (_push_time_s > _push_interval_s + _push_duration_s)
+   {
+      _push_time_s = 0.0f;
    }
 }
 
 
-void Rope::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
+void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
 {
+   // read properties
+   const auto push_interval_it = tmx_object->mProperties->mMap.find("push_interval");
+   if (push_interval_it != tmx_object->mProperties->mMap.end())
+   {
+      _push_interval_s = push_interval_it->second->mValueFloat.value();
+   }
+
+   const auto push_duration_it = tmx_object->mProperties->mMap.find("push_duration_s");
+   if (push_duration_it != tmx_object->mProperties->mMap.end())
+   {
+      _push_duration_s = push_duration_it->second->mValueFloat.value();
+   }
+
+   const auto push_strength_it = tmx_object->mProperties->mMap.find("push_strength");
+   if (push_strength_it != tmx_object->mProperties->mMap.end())
+   {
+      _push_strength = push_strength_it->second->mValueFloat.value();
+   }
+
+   const auto segment_it = tmx_object->mProperties->mMap.find("segments");
+   if (segment_it != tmx_object->mProperties->mMap.end())
+   {
+      _segment_count = segment_it->second->mValueInt.value();
+   }
+
    // init segment length
-   std::vector<sf::Vector2f> pixel_path = tmxObject->mPolyLine->mPolyLine;
+   std::vector<sf::Vector2f> pixel_path = tmx_object->mPolyLine->mPolyLine;
    auto path_0_px = pixel_path.at(0);
    auto path_1_px = pixel_path.at(1);
    _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);
@@ -117,8 +165,8 @@ void Rope::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    // init start position
    setPixelPosition(
       sf::Vector2i{
-         static_cast<int32_t>(tmxObject->mX),
-         static_cast<int32_t>(tmxObject->mY)
+         static_cast<int32_t>(tmx_object->mX),
+         static_cast<int32_t>(tmx_object->mY)
       }
    );
 
