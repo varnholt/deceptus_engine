@@ -878,15 +878,12 @@ void Level::updateViews()
 //-----------------------------------------------------------------------------
 void Level::drawNormalMap()
 {
-
    auto tile_maps = mTileMaps;
 
    std::sort(tile_maps.begin(), tile_maps.end(), []( const auto& lhs, const auto& rhs)
    {
       return lhs->getZ() < rhs->getZ();
    });
-
-
 
    //   static int32_t bump_map_save_counter = 0;
    //   bump_map_save_counter++;
