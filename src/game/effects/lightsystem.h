@@ -51,7 +51,13 @@ public:
       const std::shared_ptr<sf::RenderTexture>& normal_map
    );
 
+
 private:
+
    void drawShadowQuads(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
+   void updateLightShader(sf::RenderTarget& target);
+
+   mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
+
 };
 

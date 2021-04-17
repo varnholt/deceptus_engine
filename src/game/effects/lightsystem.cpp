@@ -197,8 +197,44 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
 
 //-----------------------------------------------------------------------------
+void LightSystem::updateLightShader(sf::RenderTarget& target)
+{
+   int32_t light_id = 0;
+   const auto size = target.getSize();
+
+   _light_shader.setUniform("light_count", static_cast<int32_t>(_active_lights.size()));
+
+   for (auto& light : _active_lights)
+   {
+      std::string id = "lights[" + std::to_string(light_id) + "]";
+
+      // transform light coordinates from box2d to screen coordinates
+      sf::Vector2i light_screen_pos = target.mapCoordsToPixel(
+         {
+            light->_pos_m.x * PPM,
+            light->_pos_m.y * PPM
+         },
+         target.getView()
+      );
+
+      // flip y
+      float y = static_cast<float>(static_cast<int>(size.y) - light_screen_pos.y);
+
+      _light_shader.setUniform(id + ".position", sf::Glsl::Vec2(light_screen_pos.x, y));
+      _light_shader.setUniform(id + ".color", sf::Glsl::Vec4(light->_color.r, light->_color.g, light->_color.b, light->_color.a));
+      _light_shader.setUniform(id + ".radius", light->_width_px * 0.5f);
+      _light_shader.setUniform(id + ".falloff", 0.1f);
+
+      light_id++;
+   }
+}
+
+
+//-----------------------------------------------------------------------------
 void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
 {
+   _active_lights.clear();
+
    auto player_body = Player::getCurrent()->getBody();
 
    for (const auto& light : _lights)
@@ -210,6 +246,8 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
       {
          continue;
       }
+
+      _active_lights.push_back(light);
 
       // fill stencil buffer
       glClear(GL_STENCIL_BUFFER_BIT);
@@ -230,6 +268,8 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
    }
 
    glDisable(GL_STENCIL_TEST);
+
+   // std::cout << _active_lights.size() << " active light sources " << std::endl;
 }
 
 
