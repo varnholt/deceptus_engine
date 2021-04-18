@@ -19,6 +19,9 @@ public:
    struct LightInstance
    {
       b2Vec2 _pos_m;
+      b2Vec2 _center_offset_m;
+      sf::Vector2i _center_offset_px;
+
       float _intensity = 1.0f;
       sf::Color _color = {255, 255, 255, 80};
       bool _enabled = true;
@@ -27,10 +30,8 @@ public:
       std::shared_ptr<sf::Texture> _texture;
       sf::Sprite _sprite;
 
-      int _width_px = 256;
-      int _height_px = 256;
-      int _offset_x_px = 0;
-      int _offset_y_px = 0;
+      int32_t _width_px = 256;
+      int32_t _height_px = 256;
 
       void updateSpritePosition();
    };
