@@ -15,7 +15,6 @@
 #include <SFML/OpenGL.hpp>
 
 
-
 //-----------------------------------------------------------------------------
 namespace
 {
@@ -53,7 +52,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
    // do not draw lights that are too far away
    auto player_body = Player::getCurrent()->getBody();
 
-   auto light_pos_m = light->_pos_m;
+   auto light_pos_m = light->_pos_m + light->_center_offset_m;
 
    for (b2Body* b = Level::getCurrentLevel()->getWorld()->GetBodyList(); b; b = b->GetNext())
    {
@@ -200,7 +199,6 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
-   const auto size = target.getSize();
 
    _light_shader.setUniform("light_count", static_cast<int32_t>(_active_lights.size()));
 
@@ -211,19 +209,26 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       // transform light coordinates from box2d to screen coordinates
       sf::Vector2i light_screen_pos = target.mapCoordsToPixel(
          {
-            light->_pos_m.x * PPM,
-            light->_pos_m.y * PPM
+            light->_pos_m.x * PPM + light->_center_offset_px.x,
+            light->_pos_m.y * PPM + light->_center_offset_px.y
          },
-         target.getView()
+         *Level::getCurrentLevel()->getLevelView().get()
       );
 
-      // flip y
-      float y = static_cast<float>(static_cast<int>(size.y) - light_screen_pos.y);
-
-      _light_shader.setUniform(id + ".position", sf::Glsl::Vec2(light_screen_pos.x, y));
+      _light_shader.setUniform(id + ".position", sf::Glsl::Vec2(light_screen_pos.x, light_screen_pos.y));
       _light_shader.setUniform(id + ".color", sf::Glsl::Vec4(light->_color.r, light->_color.g, light->_color.b, light->_color.a));
       _light_shader.setUniform(id + ".radius", light->_width_px * 0.5f);
       _light_shader.setUniform(id + ".falloff", 0.1f);
+
+      // std::cout
+      //    << "light position on screen "
+      //    << id << ": "
+      //    << light_screen_pos.x << ", "
+      //    << light_screen_pos.y << " | "
+      //    << "render target size is: "
+      //    << target.getSize().x << ", "
+      //    << target.getSize().y
+      //    << std::endl;
 
       light_id++;
    }
@@ -281,9 +286,13 @@ void LightSystem::draw(
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
+   // MOVE THIS IN FUNCTION BELOW
    _light_shader.setUniform("color_map", color_map->getTexture());
    _light_shader.setUniform("light_map", light_map->getTexture());
    _light_shader.setUniform("normal_map", normal_map->getTexture());
+
+   // update shader uniforms
+   updateLightShader(target);
 
    sf::Sprite sprite;
    sprite.setTexture(color_map->getTexture());
@@ -291,35 +300,22 @@ void LightSystem::draw(
 }
 
 
-
 //-----------------------------------------------------------------------------
 void LightSystem::LightInstance::updateSpritePosition()
 {
    _sprite.setPosition(
       sf::Vector2f(
-         _pos_m.x * PPM - _width_px * 0.5f + _offset_x_px,
-         _pos_m.y * PPM - _height_px * 0.5f + _offset_y_px
+         _pos_m.x * PPM - _width_px  * 0.5f,
+         _pos_m.y * PPM - _height_px * 0.5f
       )
    );
 }
-
 
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(TmxObject* tmx_object)
 {
    auto light = std::make_shared<LightSystem::LightInstance>();
-
-   if (tmx_object)
-   {
-      light->_width_px = static_cast<int>(tmx_object->mWidth);
-      light->_height_px = static_cast<int>(tmx_object->mHeight);
-
-      light->_pos_m = b2Vec2(
-        tmx_object->mX * MPP + (tmx_object->mWidth * 0.5f) * MPP,
-        tmx_object->mY * MPP + (tmx_object->mHeight * 0.5f) * MPP
-      );
-   }
 
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
@@ -337,6 +333,53 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
       {
          texture = (std::filesystem::path("data/light/") / it->second->mValueStr.value()).string();
       }
+
+      // A) center of the physical light is in the center of the textured quad
+      //
+      //   +----+----+
+      //   |    |    |
+      //   |   \|/   |
+      //   +----+----+
+      //   |   /|\   |
+      //   |    |    |
+      //   +----+----+
+      //
+      // B) center of the phyisical light is not in the center of the textured quad
+      //    but has some offset to it. here the center is, say -24px, higher
+      //
+      //   +----+----+
+      //   |   \|/   |
+      //   +----+----+ center_offset_x_px = 0
+      //   |   /|\   | center_offset_y_px= -24
+      //   |    |    |
+      //   |    |    |
+      //   +----+----+
+
+      it = tmx_object->mProperties->mMap.find("center_offset_x_px");
+      if (it != tmx_object->mProperties->mMap.end())
+      {
+         light->_center_offset_px.x = it->second->mValueInt.value();
+         light->_center_offset_m.x = it->second->mValueInt.value() * MPP;
+      }
+
+      it = tmx_object->mProperties->mMap.find("center_offset_y_px");
+      if (it != tmx_object->mProperties->mMap.end())
+      {
+         light->_center_offset_px.y = it->second->mValueInt.value();
+         light->_center_offset_m.y = it->second->mValueInt.value() * MPP;
+      }
+   }
+
+   if (tmx_object)
+   {
+      light->_width_px  = static_cast<int>(tmx_object->mWidth);
+      light->_height_px = static_cast<int>(tmx_object->mHeight);
+
+      // set up the box2d position of the light
+      light->_pos_m = b2Vec2(
+         tmx_object->mX * MPP + (tmx_object->mWidth  * 0.5f) * MPP,
+         tmx_object->mY * MPP + (tmx_object->mHeight * 0.5f) * MPP
+      );
    }
 
    light->_color.r = rgba[0];
