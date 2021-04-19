@@ -200,11 +200,22 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
 
-   _light_shader.setUniform("light_count", static_cast<int32_t>(_active_lights.size()));
+   _light_shader.setUniform(
+      "u_light_count",
+      static_cast<int32_t>(_active_lights.size())
+   );
+
+   _light_shader.setUniform(
+      "u_resolution",
+      sf::Glsl::Vec2(
+         static_cast<float>(target.getSize().x),
+         static_cast<float>(target.getSize().y)
+      )
+   );
 
    for (auto& light : _active_lights)
    {
-      std::string id = "lights[" + std::to_string(light_id) + "]";
+      std::string id = "u_lights[" + std::to_string(light_id) + "]";
 
       // transform light coordinates from box2d to screen coordinates
       sf::Vector2i light_screen_pos = target.mapCoordsToPixel(
@@ -215,10 +226,24 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          *Level::getCurrentLevel()->getLevelView().get()
       );
 
-      _light_shader.setUniform(id + ".position", sf::Glsl::Vec2(light_screen_pos.x, light_screen_pos.y));
-      _light_shader.setUniform(id + ".color", sf::Glsl::Vec4(light->_color.r, light->_color.g, light->_color.b, light->_color.a));
-      _light_shader.setUniform(id + ".radius", light->_width_px * 0.5f);
-      _light_shader.setUniform(id + ".falloff", 0.1f);
+      _light_shader.setUniform(
+         id + "._position",
+         sf::Glsl::Vec3(
+            static_cast<float>(light_screen_pos.x),
+            static_cast<float>(light_screen_pos.y),
+            250.0f
+         )
+      );
+
+      _light_shader.setUniform(
+         id + "._color",
+         sf::Glsl::Vec4(
+            static_cast<float>(light->_color.r) / 255.0f,
+            static_cast<float>(light->_color.g) / 255.0f,
+            static_cast<float>(light->_color.b) / 255.0f,
+            static_cast<float>(light->_color.a) / 255.0f
+         )
+      );
 
       // std::cout
       //    << "light position on screen "
@@ -386,7 +411,10 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
    light->_color.g = rgba[1];
    light->_color.b = rgba[2];
    light->_color.a = rgba[3];
-   light->_sprite.setColor(light->_color);
+
+   // for now the sprite color is left white since it'll be used as attenuation value in the light shader
+   //
+   // light->_sprite.setColor(light->_color);
 
    light->_texture = TexturePool::getInstance().get(texture);
    light->_sprite.setTexture(*light->_texture);
