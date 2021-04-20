@@ -230,8 +230,8 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          id + "._position",
          sf::Glsl::Vec3(
             static_cast<float>(light_screen_pos.x),
-            static_cast<float>(light_screen_pos.y),
-            250.0f
+            static_cast<float>(target.getSize().y - light_screen_pos.y),
+            0.075 // default z
          )
       );
 
@@ -419,12 +419,12 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
    light->_texture = TexturePool::getInstance().get(texture);
    light->_sprite.setTexture(*light->_texture);
    light->_sprite.setTextureRect(
-     sf::IntRect(
-       0,
-       0,
-       static_cast<int32_t>(light->_texture->getSize().x),
-       static_cast<int32_t>(light->_texture->getSize().y)
-     )
+      sf::IntRect(
+         0,
+         0,
+         static_cast<int32_t>(light->_texture->getSize().x),
+         static_cast<int32_t>(light->_texture->getSize().y)
+      )
    );
 
    light->updateSpritePosition();
