@@ -22,7 +22,6 @@ public:
       b2Vec2 _center_offset_m;
       sf::Vector2i _center_offset_px;
 
-      float _intensity = 1.0f;
       sf::Color _color = {255, 255, 255, 80};
       bool _enabled = true;
       float max_dist_m2 = 40.0f;
