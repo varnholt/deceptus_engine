@@ -38,6 +38,7 @@
 #include "player/player.h"
 #include "savestate.h"
 #include "squaremarcher.h"
+#include "texturepool.h"
 #include "tilemap.h"
 #include "weather.h"
 
@@ -214,7 +215,7 @@ Level::Level()
 
    // add raycast light for player
    mPlayerLight = LightSystem::createLightInstance(nullptr);
-   mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, 10));
+   mPlayerLight->_color = sf::Color(255, 255, 255, 10);
    mLightSystem->_lights.push_back(mPlayerLight);
 
    mMap = std::make_unique<LevelMap>();
