@@ -23,6 +23,5 @@ class RopeWithLight : public Rope
       sf::IntRect _lamp_sprite_rect_1;
       sf::IntRect _lamp_sprite_rect_2;
       std::shared_ptr<LightSystem::LightInstance> _light;
-      std::array<uint8_t, 4> _color = {255, 255, 255, 100};
 };
 
