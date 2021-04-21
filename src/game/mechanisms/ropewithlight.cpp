@@ -40,7 +40,6 @@ void RopeWithLight::update(const sf::Time& dt)
    _light->_pos_m = _chain_elements.back()->GetPosition();
    _light->updateSpritePosition();
 
-
    const auto c1_pos_m = _chain_elements[_chain_elements.size() - 2]->GetPosition();
    const auto c2_pos_m = _chain_elements[_chain_elements.size() - 1]->GetPosition();
    const auto c_m = (c1_pos_m - c2_pos_m);
@@ -59,10 +58,12 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
 {
    Rope::setup(tmx_object, world);
 
+   std::array<uint8_t, 4> color = {255, 255, 255, 100};
+
    const auto color_it = tmx_object->mProperties->mMap.find("color");
    if (color_it != tmx_object->mProperties->mMap.end())
    {
-      _color = TmxTools::color(color_it->second->mValueStr.value());
+      color = TmxTools::color(color_it->second->mValueStr.value());
    }
 
    auto sprite = 1;
@@ -86,6 +87,6 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
    // add raycast light
    _light = LightSystem::createLightInstance();
    // _light->_sprite.setColor(sf::Color(_color[0], _color[1], _color[2], _color[3]));
-   _light->_color = sf::Color(_color[0], _color[1], _color[2], _color[3]);
+   _light->_color = sf::Color(color[0], color[1], color[2], color[3]);
    Level::getCurrentLevel()->getLightSystem()->_lights.push_back(_light);
 }
