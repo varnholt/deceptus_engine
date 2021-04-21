@@ -21,7 +21,7 @@ public:
 
    struct HitInformation
    {
-      b2Vec2 _pos;
+      b2Vec2 _pos = b2Vec2{0.0f, 0.0};
       float _angle = 0.0f;
       WeaponType _weapon_type = WeaponType::Default;
    };

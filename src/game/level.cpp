@@ -214,7 +214,7 @@ Level::Level()
    mStaticLight = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   mPlayerLight = LightSystem::createLightInstance(nullptr);
+   mPlayerLight = LightSystem::createLightInstance();
    mPlayerLight->_color = sf::Color(255, 255, 255, 10);
    mLightSystem->_lights.push_back(mPlayerLight);
 
@@ -1330,7 +1330,7 @@ void Level::updatePlayerLight()
 
    // the player, once he dies, becomes inactive and just sinks down
    // so the player light is disabled to avoid any glitches
-   mPlayerLight->_sprite.setColor(sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10));
+   mPlayerLight->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10);
 }
 
 
