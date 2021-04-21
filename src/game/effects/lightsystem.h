@@ -18,8 +18,8 @@ public:
 
    struct LightInstance
    {
-      b2Vec2 _pos_m;
-      b2Vec2 _center_offset_m;
+      b2Vec2 _pos_m = b2Vec2{0.0f, 0.0f};
+      b2Vec2 _center_offset_m = b2Vec2{0.0f, 0.0f};
       sf::Vector2i _center_offset_px;
 
       sf::Color _color = {255, 255, 255, 80};
@@ -40,7 +40,7 @@ public:
 
    LightSystem();
 
-   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(TmxObject* tmxObject);
+   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(TmxObject* tmxObject = nullptr);
 
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
