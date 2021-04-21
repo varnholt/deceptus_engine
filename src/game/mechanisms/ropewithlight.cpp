@@ -84,7 +84,8 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
    }
 
    // add raycast light
-   _light = LightSystem::createLightInstance(nullptr);
-   _light->_sprite.setColor(sf::Color(_color[0], _color[1], _color[2], _color[3]));
+   _light = LightSystem::createLightInstance();
+   // _light->_sprite.setColor(sf::Color(_color[0], _color[1], _color[2], _color[3]));
+   _light->_color = sf::Color(_color[0], _color[1], _color[2], _color[3]);
    Level::getCurrentLevel()->getLightSystem()->_lights.push_back(_light);
 }
