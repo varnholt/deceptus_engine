@@ -44,7 +44,8 @@ void main()
       vec3 l = normalize(light_dir);
 
       // pre-multiply light color with its alpha then do 'n . l' to determine diffuse
-      float attenuation = 1.0 / ( light_falloff.x + (light_falloff.y * d) + (light_falloff.z * d * d));
+      //                        constant           linear                   quadratic
+      float attenuation = 1.0 / (light_falloff.x + (light_falloff.y * d) + (light_falloff.z * d * d));
       vec3 diffuse_light = (light_col.rgb * light_col.a) * max(dot(n, l), 0.0);
       vec3 diffuse_light_weighted = diffuse_light * attenuation;
 
