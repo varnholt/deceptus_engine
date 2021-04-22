@@ -399,6 +399,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
       //   |    |    |
       //   +----+----+
 
+      // read offset
       it = tmx_object->mProperties->mMap.find("center_offset_x_px");
       if (it != tmx_object->mProperties->mMap.end())
       {
@@ -411,6 +412,34 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
       {
          light->_center_offset_px.y = it->second->mValueInt.value();
          light->_center_offset_m.y = it->second->mValueInt.value() * MPP;
+      }
+
+      // read falloff
+      //
+      // constant falloff:   basically ambient light amount
+      // linear falloff:    light = 1 / distance to light
+      // quadratic falloff: light = 1 / (distance to light)^2
+      //
+      //                                                                1.0
+      // attenuation = --------------------------------------------------------------------------------------------
+      //                (constant falloff + (linear falloff * distance) + (quadratic falloff * distane * distance))
+      //
+      it = tmx_object->mProperties->mMap.find("falloff_constant");
+      if (it != tmx_object->mProperties->mMap.end())
+      {
+         light->_falloff[0] = it->second->mValueFloat.value();
+      }
+
+      it = tmx_object->mProperties->mMap.find("falloff_linear");
+      if (it != tmx_object->mProperties->mMap.end())
+      {
+         light->_falloff[1] = it->second->mValueFloat.value();
+      }
+
+      it = tmx_object->mProperties->mMap.find("falloff_quadratic");
+      if (it != tmx_object->mProperties->mMap.end())
+      {
+         light->_falloff[2] = it->second->mValueFloat.value();
       }
    }
 
