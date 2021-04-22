@@ -2,6 +2,7 @@
 
 #include "effect.h"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -23,6 +24,8 @@ public:
       sf::Vector2i _center_offset_px;
 
       sf::Color _color = {255, 255, 255, 80};
+      std::array<float, 3> _falloff = {0.4f, 3.0f, 20.0f};
+
       bool _enabled = true;
       float max_dist_m2 = 40.0f;
 
@@ -59,5 +62,6 @@ private:
 
    mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
 
+   std::array<float, 4> _ambient_color = {1.0f, 1.0f, 1.0f, 1.0f};
 };
 

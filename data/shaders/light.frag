@@ -2,20 +2,18 @@ uniform sampler2D color_map;
 uniform sampler2D light_map;
 uniform sampler2D normal_map;
 
-
-//----------------------------------------------------------------------------------------------------------------------
-uniform int u_light_count;
+uniform vec2 u_resolution;
+uniform vec4 u_ambient;
 
 struct Light{
    vec3 _position;
    vec4 _color;
+   vec3 _falloff;
 };
 
+uniform int u_light_count;
 uniform Light u_lights[5];
-uniform vec2 u_resolution;
-/*uniform*/ vec4 u_ambient = vec4(1.0, 1.0, 1.0, 1.0);      // not used for now
-/*uniform*/ vec4 u_vertex_color = vec4(1.0, 1.0, 1.0, 1.0); // not used for now
-/*uniform*/ vec3 u_falloff = vec3(0.4, 3.0, 20.0);
+
 
 void main()
 {
@@ -34,6 +32,7 @@ void main()
       vec3 light_pos = light._position;
       vec4 light_col = light._color;
       vec2 light_pos_normalized = light_pos.xy / u_resolution.xy;
+      vec3 light_falloff = light._falloff;
 
       vec3 light_dir = vec3(light_pos_normalized - frag_coord_normalized, light_pos.z);
       light_dir.x *= u_resolution.x / u_resolution.y;
@@ -45,7 +44,7 @@ void main()
       vec3 l = normalize(light_dir);
 
       // pre-multiply light color with its alpha then do 'n . l' to determine diffuse
-      float attenuation = 1.0 / ( u_falloff.x + (u_falloff.y * d) + (u_falloff.z * d * d));
+      float attenuation = 1.0 / ( light_falloff.x + (light_falloff.y * d) + (light_falloff.z * d * d));
       vec3 diffuse_light = (light_col.rgb * light_col.a) * max(dot(n, l), 0.0);
       vec3 diffuse_light_weighted = diffuse_light * attenuation;
 
@@ -55,31 +54,6 @@ void main()
    // apply light texture on top of light and apply shadow
    light_sum *= light_mask;
 
-   // vertex color should be 1 anyway, remove it?
-   gl_FragColor = u_vertex_color * vec4(u_ambient.rgb * diffuse_color.rgb + light_sum, diffuse_color.a);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void main2()
-{
-   float ambient = 1.0;
-
-   vec2 uv = gl_TexCoord[0].xy;
-
-   vec4 color = texture2D(color_map, uv);
-   vec4 normal = texture2D(normal_map, uv);
-
-   vec4 light = texture2D(light_map, uv);
-
-   if (light.r < 0.001 && light.g < 0.001 && light.b < 0.001)
-   {
-      gl_FragColor = color * ambient;
-   }
-   else
-   {
-      vec4 light_bump = texture2D(light_map, uv + normal.xy - vec2(0.5, 0.5));
-      gl_FragColor = color * ambient + 0.7* light + 0.3 * light_bump;
-   }
+   gl_FragColor = vec4(u_ambient.rgb * diffuse_color.rgb + light_sum, diffuse_color.a);
 }
 
