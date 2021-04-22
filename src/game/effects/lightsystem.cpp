@@ -213,6 +213,16 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       )
    );
 
+   _light_shader.setUniform(
+      "u_ambient",
+      sf::Glsl::Vec4(
+         _ambient_color[0],
+         _ambient_color[1],
+         _ambient_color[2],
+         _ambient_color[3]
+      )
+   );
+
    for (auto& light : _active_lights)
    {
       std::string id = "u_lights[" + std::to_string(light_id) + "]";
@@ -242,6 +252,15 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
             static_cast<float>(light->_color.g) / 255.0f,
             static_cast<float>(light->_color.b) / 255.0f,
             static_cast<float>(light->_color.a) / 255.0f
+         )
+      );
+
+      _light_shader.setUniform(
+         id + "._falloff",
+         sf::Glsl::Vec3(
+            light->_falloff[0],
+            light->_falloff[1],
+            light->_falloff[2]
          )
       );
 

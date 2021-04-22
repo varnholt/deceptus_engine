@@ -102,6 +102,13 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 void Rope::update(const sf::Time& dt)
 {
+   // prevent glitches`
+   // it might make sense to come up with a more high level concept for this
+   if (dt.asMilliseconds() > 500)
+   {
+      return;
+   }
+
    if (!_wind_enabled)
    {
       return;
