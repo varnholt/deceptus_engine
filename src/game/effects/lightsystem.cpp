@@ -483,3 +483,22 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
    return light;
 }
 
+
+void LightSystem::increaseAmbient(float amount)
+{
+   for (auto& val : _ambient_color)
+   {
+      val += amount;
+   }
+}
+
+
+void LightSystem::decreaseAmbient(float amount)
+{
+   for (auto& val : _ambient_color)
+   {
+      val -= amount;
+   }
+}
+
+
