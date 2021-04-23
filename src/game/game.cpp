@@ -971,6 +971,16 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          DisplayMode::getInstance().enqueueToggle(Display::DisplayMap);
          break;
       }
+      case sf::Keyboard::PageUp:
+      {
+         Level::getCurrentLevel()->getLightSystem()->increaseAmbient(0.1f);
+         break;
+      }
+      case sf::Keyboard::PageDown:
+      {
+         Level::getCurrentLevel()->getLightSystem()->decreaseAmbient(0.1f);
+         break;
+      }
       default:
       {
          break;

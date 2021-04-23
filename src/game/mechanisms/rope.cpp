@@ -46,7 +46,7 @@ Rope::Rope(GameNode* parent)
    // _texture_rect_px.height = 81;
 
    _instance_counter++;
-   _push_time_s = _instance_counter;
+   _push_time_s = static_cast<float>(_instance_counter);
 }
 
 
