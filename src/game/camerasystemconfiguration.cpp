@@ -36,15 +36,15 @@ std::string CameraSystemConfiguration::serialize()
       {
          "CameraSystemConfiguration",
          {
-            {"velocity_factor_x",          mCameraVelocityFactorX},
-            {"focus_zone_divider",         mFocusZoneDivider},
-            {"target_shift_factor",        mTargetShiftFactor},
-            {"back_in_bounds_tolerance_x", mBackInBoundsToleranceX},
-            {"velocity_factor_y",          mCameraVelocityFactorY},
-            {"panic_line_divider",         mPanicLineDivider},
-            {"view_ratio_y",               mViewRatioY},
-            {"back_in_bounds_tolerance_y", mBackInBoundsToleranceY},
-            {"player_offset_y",            mPlayerOffsetY},
+            {"velocity_factor_x",          _camera_velocity_factor_x},
+            {"focus_zone_divider",         _focus_zone_divider},
+            {"target_shift_factor",        _target_shift_factor},
+            {"back_in_bounds_tolerance_x", _back_in_bounds_tolerance_x},
+            {"velocity_factor_y",          _camera_velocity_factor_y},
+            {"panic_line_divider",         _panic_line_divider},
+            {"view_ratio_y",               _view_ratio_y},
+            {"back_in_bounds_tolerance_y", _back_in_bounds_tolerance_y},
+            {"player_offset_y",            _player_offset_y},
          }
       }
    };
@@ -59,15 +59,15 @@ void CameraSystemConfiguration::deserialize(const std::string& data)
 {
    json config = json::parse(data);
 
-   mCameraVelocityFactorX  = config["CameraSystemConfiguration"]["velocity_factor_x"].get<float>();
-   mFocusZoneDivider       = config["CameraSystemConfiguration"]["focus_zone_divider"].get<float>();
-   mTargetShiftFactor      = config["CameraSystemConfiguration"]["target_shift_factor"].get<float>();
-   mBackInBoundsToleranceX = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_x"].get<int32_t>();
-   mCameraVelocityFactorY  = config["CameraSystemConfiguration"]["velocity_factor_y"].get<float>();
-   mPanicLineDivider       = config["CameraSystemConfiguration"]["panic_line_divider"].get<float>();
-   mViewRatioY             = config["CameraSystemConfiguration"]["view_ratio_y"].get<float>();
-   mBackInBoundsToleranceY = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_y"].get<int32_t>();
-   mPlayerOffsetY          = config["CameraSystemConfiguration"]["player_offset_y"].get<int32_t>();
+   _camera_velocity_factor_x   = config["CameraSystemConfiguration"]["velocity_factor_x"].get<float>();
+   _focus_zone_divider         = config["CameraSystemConfiguration"]["focus_zone_divider"].get<float>();
+   _target_shift_factor        = config["CameraSystemConfiguration"]["target_shift_factor"].get<float>();
+   _back_in_bounds_tolerance_x = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_x"].get<int32_t>();
+   _camera_velocity_factor_y   = config["CameraSystemConfiguration"]["velocity_factor_y"].get<float>();
+   _panic_line_divider         = config["CameraSystemConfiguration"]["panic_line_divider"].get<float>();
+   _view_ratio_y               = config["CameraSystemConfiguration"]["view_ratio_y"].get<float>();
+   _back_in_bounds_tolerance_y = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_y"].get<int32_t>();
+   _player_offset_y            = config["CameraSystemConfiguration"]["player_offset_y"].get<int32_t>();
 }
 
 
@@ -101,54 +101,54 @@ void CameraSystemConfiguration::serializeToFile(const std::string &filename)
 
 int32_t CameraSystemConfiguration::getPlayerOffsetY() const
 {
-   return mPlayerOffsetY;
+   return _player_offset_y;
 }
 
 
 int32_t CameraSystemConfiguration::getBackInBoundsToleranceY() const
 {
-   return mBackInBoundsToleranceY;
+   return _back_in_bounds_tolerance_y;
 }
 
 
 float CameraSystemConfiguration::getViewRatioY() const
 {
-   return mViewRatioY;
+   return _view_ratio_y;
 }
 
 
 float CameraSystemConfiguration::getPanicLineDivider() const
 {
-   return mPanicLineDivider;
+   return _panic_line_divider;
 }
 
 
 float CameraSystemConfiguration::getCameraVelocityFactorY() const
 {
-   return mCameraVelocityFactorY;
+   return _camera_velocity_factor_y;
 }
 
 
 int32_t CameraSystemConfiguration::getBackInBoundsToleranceX() const
 {
-   return mBackInBoundsToleranceX;
+   return _back_in_bounds_tolerance_x;
 }
 
 
 float CameraSystemConfiguration::getTargetShiftFactor() const
 {
-   return mTargetShiftFactor;
+   return _target_shift_factor;
 }
 
 
 float CameraSystemConfiguration::getFocusZoneDivider() const
 {
-   return mFocusZoneDivider;
+   return _focus_zone_divider;
 }
 
 
 float CameraSystemConfiguration::getCameraVelocityFactorX() const
 {
-   return mCameraVelocityFactorX;
+   return _camera_velocity_factor_x;
 }
 
