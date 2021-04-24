@@ -827,27 +827,10 @@ void Level::createViews()
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
+   const auto lookVector = CameraPane::getInstance().getLookVector();
+
    auto& cameraSystem = CameraSystem::getCameraSystem();
 
-   // update room
-   mCurrentRoom = Room::find(Player::getCurrent()->getPixelPositionf(), mRooms);
-   const auto prevRoomId = mCurrentRoomId;
-   mCurrentRoomId = mCurrentRoom.has_value() ? mCurrentRoom->mId : -1;
-
-   if (prevRoomId != mCurrentRoomId)
-   {
-      std::cout
-         << "[i] player moved to room: "
-         << (mCurrentRoom.has_value() ? mCurrentRoom->mName : "undefined")
-         << std::endl;
-
-      cameraSystem.setRoom(mCurrentRoom);
-   }
-
-   // update camera system
-   cameraSystem.update(mViewWidth, mViewHeight);
-
-   const auto lookVector = CameraPane::getInstance().getLookVector();
    auto levelViewX = cameraSystem.getX() + lookVector.x;
    auto levelViewY = cameraSystem.getY() + lookVector.y;
 
@@ -873,6 +856,31 @@ void Level::updateViews()
         mViewHeight * 5.0f
       )
    );
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::updateCameraSystem(const sf::Time& dt)
+{
+   auto& cameraSystem = CameraSystem::getCameraSystem();
+
+   // update room
+   mCurrentRoom = Room::find(Player::getCurrent()->getPixelPositionf(), mRooms);
+   const auto prevRoomId = mCurrentRoomId;
+   mCurrentRoomId = mCurrentRoom.has_value() ? mCurrentRoom->mId : -1;
+
+   if (prevRoomId != mCurrentRoomId)
+   {
+      std::cout
+         << "[i] player moved to room: "
+         << (mCurrentRoom.has_value() ? mCurrentRoom->mName : "undefined")
+         << std::endl;
+
+      cameraSystem.setRoom(mCurrentRoom);
+   }
+
+   // update camera system
+   cameraSystem.update(dt, mViewWidth, mViewHeight);
 }
 
 
@@ -1059,8 +1067,6 @@ void Level::drawAtmosphereLayer(sf::RenderTarget& target)
       return;
    }
 
-   updateViews();
-
    mAtmosphere.mTileMap->setVisible(true);
 
    target.setView(*mLevelView);
@@ -1073,8 +1079,6 @@ void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
-   updateViews();
-
    target.setView(*mLevelView);
 
    // draw elements that are supposed to glow / to be blurred here
@@ -1223,7 +1227,6 @@ void Level::draw(
    mLevelBackgroundRenderTexture->clear();
    mNormalTexture->clear();
 
-   updateViews();
    drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
    drawLayers(
       *mLevelBackgroundRenderTexture.get(),
@@ -1346,6 +1349,9 @@ void Level::update(const sf::Time& dt)
 {
    // clear conveyor belt state
    ConveyorBelt::update();
+
+   updateCameraSystem(dt);
+   updateViews();
 
    // 80.0f * dt / 60.f
    // http://www.iforce2d.net/b2dtut/worlds

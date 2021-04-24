@@ -72,7 +72,10 @@ public:
    void resetDeathShader();
 
    void createViews();
+
+   void update(const sf::Time& dt);
    void updateViews();
+   void updateCameraSystem(const sf::Time& dt);
 
    void spawnEnemies();
 
@@ -85,8 +88,6 @@ public:
    void drawNormalMap();
    void drawLightMap();
    void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
-
-   void update(const sf::Time& dt);
 
    const std::shared_ptr<b2World>& getWorld() const;
 

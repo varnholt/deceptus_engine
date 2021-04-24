@@ -147,10 +147,20 @@ void Game::initializeWindow()
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
    const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
    const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+
    const auto sizeRatio = std::min(ratioWidth, ratioHeight);
 
    int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
    int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
+
+   std::cout
+      << "[x] video mode: "
+      << gameConfig.mVideoModeWidth << " x " << gameConfig.mVideoModeHeight
+      << ", view size: "
+      << gameConfig.mViewWidth << " x " << gameConfig.mViewHeight
+      << ", ratio: "
+      << sizeRatio
+      << std::endl;
 
    mRenderTextureOffset.x = static_cast<uint32_t>((gameConfig.mVideoModeWidth - textureWidth) / 2);
    mRenderTextureOffset.y = static_cast<uint32_t>((gameConfig.mVideoModeHeight - textureHeight) / 2);

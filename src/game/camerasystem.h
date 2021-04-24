@@ -11,7 +11,7 @@ class CameraSystem
 {
    public:
 
-      void update(float viewWidth, float viewHeight);
+      void update(const sf::Time& dt, float viewWidth, float viewHeight);
 
       float getX() const;
       float getY() const;
@@ -33,8 +33,8 @@ class CameraSystem
 
       CameraSystem() = default;
 
-      void updateX();
-      void updateY();
+      void updateX(const sf::Time& dt);
+      void updateY(const sf::Time& dt);
 
       float mX = 0.0f;
       float mY = 0.0f;
