@@ -40,6 +40,8 @@ public:
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
    sf::Shader _light_shader;
+   void increaseAmbient(float amount);
+   void decreaseAmbient(float amount);
 
    LightSystem();
 
