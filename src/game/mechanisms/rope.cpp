@@ -82,10 +82,34 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       auto u0 = static_cast<float>(i    ) / static_cast<float>(_segment_count);
       auto u1 = static_cast<float>(i + 1) / static_cast<float>(_segment_count);
 
-      const auto v1 = sf::Vertex(sf::Vector2f(q1.x * PPM, q1.y * PPM), sf::Vector2f(_texture_rect_px.left,                          _texture_rect_px.top + u0 * _texture_rect_px.height));
-      const auto v2 = sf::Vertex(sf::Vector2f(q2.x * PPM, q2.y * PPM), sf::Vector2f(_texture_rect_px.left,                          _texture_rect_px.top + u1 * _texture_rect_px.height));
-      const auto v3 = sf::Vertex(sf::Vector2f(q3.x * PPM, q3.y * PPM), sf::Vector2f(_texture_rect_px.left + _texture_rect_px.width, _texture_rect_px.top + u1 * _texture_rect_px.height));
-      const auto v4 = sf::Vertex(sf::Vector2f(q4.x * PPM, q4.y * PPM), sf::Vector2f(_texture_rect_px.left + _texture_rect_px.width, _texture_rect_px.top + u0 * _texture_rect_px.height));
+      const auto v1 = sf::Vertex(
+         sf::Vector2f(q1.x * PPM, q1.y * PPM),
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.left),
+            static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height)
+         )
+      );
+      const auto v2 = sf::Vertex(
+         sf::Vector2f(q2.x * PPM, q2.y * PPM),
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.left),
+            static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height)
+         )
+      );
+      const auto v3 = sf::Vertex(
+         sf::Vector2f(q3.x * PPM, q3.y * PPM),
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
+            static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height)
+         )
+      );
+      const auto v4 = sf::Vertex(
+         sf::Vector2f(q4.x * PPM, q4.y * PPM),
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
+            static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height)
+         )
+      );
 
       quads.push_back(v1);
       quads.push_back(v2);

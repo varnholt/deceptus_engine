@@ -183,8 +183,12 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
             const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
 
+            if (std::filesystem::exists(normal_map_path))
+            {
+               moving_platform->_normal_map = TexturePool::getInstance().get(normal_map_path);
+            }
+
             moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
-            moving_platform->_normal_map = TexturePool::getInstance().get(normal_map_path);
             moving_platform->_tile_positions.x = x;
             moving_platform->_tile_positions.y = y;
 
