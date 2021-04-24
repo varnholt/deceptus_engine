@@ -76,12 +76,18 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
    if (sprite == 2)
    {
       _lamp_sprite.setTextureRect(_lamp_sprite_rect_2);
-      _lamp_sprite.setOrigin(_lamp_sprite_rect_2.width / 2, _lamp_sprite_rect_2.height / 2);
+      _lamp_sprite.setOrigin(
+         static_cast<float>(_lamp_sprite_rect_2.width / 2),
+         static_cast<float>(_lamp_sprite_rect_2.height / 2)
+      );
    }
    else
    {
       _lamp_sprite.setTextureRect(_lamp_sprite_rect_1);
-      _lamp_sprite.setOrigin(_lamp_sprite_rect_1.width / 2, _lamp_sprite_rect_1.height / 2);
+      _lamp_sprite.setOrigin(
+         static_cast<float>(_lamp_sprite_rect_1.width / 2),
+         static_cast<float>(_lamp_sprite_rect_1.height / 2)
+      );
    }
 
    // add raycast light

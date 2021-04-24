@@ -29,19 +29,19 @@ class CameraSystemConfiguration
       void serializeToFile(const std::string& filename = "data/config/camera.json");
 
       // x
-      float mCameraVelocityFactorX = 4.0f;
-      float mFocusZoneDivider = 6.0f;
-      float mTargetShiftFactor = 0.75f;
-      int32_t mBackInBoundsToleranceX = 10;
-      float mRoomDampingFactorX = 64.0f;
+      float _camera_velocity_factor_x = 4.0f;
+      float _focus_zone_divider = 6.0f;
+      float _target_shift_factor = 0.75f;
+      int32_t _back_in_bounds_tolerance_x = 10;
+      float _room_damping_factor_x = 64.0f;
 
       // y
-      float mCameraVelocityFactorY = 3.0f;
-      float mPanicLineDivider = 2.5f;
-      float mViewRatioY = 1.5f;
-      int32_t mBackInBoundsToleranceY = 10;
-      int32_t mPlayerOffsetY = 0;
-      float mRoomDampingFactorY = 32.0f;
+      float _camera_velocity_factor_y = 3.0f;
+      float _panic_line_divider = 2.5f;
+      float _view_ratio_y = 1.5f;
+      int32_t _back_in_bounds_tolerance_y = 10;
+      int32_t _player_offset_y = 0;
+      float _room_damping_factor_y = 32.0f;
 
       static bool sInitialized;
       static CameraSystemConfiguration sInstance;

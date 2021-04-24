@@ -241,7 +241,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          sf::Glsl::Vec3(
             static_cast<float>(light_screen_pos.x),
             static_cast<float>(target.getSize().y - light_screen_pos.y),
-            0.075 // default z
+            0.075f // default z
          )
       );
 

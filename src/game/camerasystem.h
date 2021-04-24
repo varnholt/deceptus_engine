@@ -36,27 +36,30 @@ class CameraSystem
       void updateX(const sf::Time& dt);
       void updateY(const sf::Time& dt);
 
-      float mX = 0.0f;
-      float mY = 0.0f;
+      float _x = 0.0f;
+      float _y = 0.0f;
 
-      float mFocusZoneX0 = 0.0f;
-      float mFocusZoneX1 = 0.0f;
-      float mFocusZoneCenter = 0.0f;
-      float mFocusOffset = 0.0f;
+      float _focus_zone_x0 = 0.0f;
+      float _focus_zone_x1 = 0.0f;
+      float _focus_zone_center = 0.0f;
+      float _focus_offset = 0.0f;
 
-      float mPanicLineY0 = 0.0f;
-      float mPanicLineY1 = 0.0f;
+      float _panic_line_y0 = 0.0f;
+      float _panic_line_y1 = 0.0f;
 
-      float mViewWidth = 0.0f;
-      float mViewHeight = 0.0f;
+      float _view_width = 0.0f;
+      float _view_height = 0.0f;
 
-      bool mFocusXTriggered = false;
-      bool mFocusYTriggered = false;
+      bool _focus_x_triggered = false;
+      bool _focus_y_triggered = false;
 
-      std::optional<Room> mRoom;
-      float mRoomInterpolation = 0.0f;
-      float mRoomX = 0.0f;
-      float mRoomY = 0.0f;
+      std::optional<Room> _room;
+      float _room_interpolation = 0.0f;
+      float _room_x = 0.0f;
+      float _room_y = 0.0f;
+
+      bool _no_y_update_triggered = false;
+      sf::Time _y_update_start_time;
 
       static CameraSystem sInstance;
 };
