@@ -142,8 +142,9 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    const auto p0 = _y - _panic_line_y1;
    const auto p1 = _y - _panic_line_y0;
+   const auto panic = (test < p0 || test > p1);
 
-   if ((test < p0 || test > p1) /*|| !player->isInAir()*/)
+   if (panic)
    {
       _focus_y_triggered = true;
    }
@@ -174,7 +175,10 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    // have some acceleration in the y update velocity so it doesn't got at full speed instantly
    const auto y_update_start_time_s = _y_update_start_time.asSeconds();
-   const auto y_update_acceleration = std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
+   const auto y_update_acceleration =
+      panic
+         ? 2.0f
+         : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
 
    const auto dy = (player_y - _y) * dt.asSeconds() * config.getCameraVelocityFactorY() * y_update_acceleration;
 

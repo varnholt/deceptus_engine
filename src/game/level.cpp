@@ -129,8 +129,8 @@ void Level::initializeTextures()
    const auto sizeRatio = std::min(ratioWidth, ratioHeight);
    mViewToTextureScale = 1.0f / sizeRatio;
 
-   int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
-   int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
+   const auto textureWidth = static_cast<int32_t>(sizeRatio * gameConfig.mViewWidth);
+   const auto textureHeight = static_cast<int32_t>(sizeRatio * gameConfig.mViewHeight);
 
    mLevelBackgroundRenderTexture = std::make_shared<sf::RenderTexture>();
    mLevelBackgroundRenderTexture->create(

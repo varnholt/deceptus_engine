@@ -8,6 +8,7 @@
         "panic_line_divider": 2.5,
         "target_shift_factor": 0.5,
         "view_ratio_y": 1.5,
-        "player_offset_y" : 12
+        "player_offset_y" : 12,
+        "panic_acceleration_factor_y" : 2.0
     }
 }
