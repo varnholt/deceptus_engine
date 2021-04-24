@@ -36,11 +36,11 @@ std::string CameraSystemConfiguration::serialize()
       {
          "CameraSystemConfiguration",
          {
-            {"damping_factor_x",           mDampingFactorX},
+            {"velocity_factor_x",          mCameraVelocityFactorX},
             {"focus_zone_divider",         mFocusZoneDivider},
             {"target_shift_factor",        mTargetShiftFactor},
             {"back_in_bounds_tolerance_x", mBackInBoundsToleranceX},
-            {"damping_factor_y",           mDampingFactorY},
+            {"velocity_factor_y",          mCameraVelocityFactorY},
             {"panic_line_divider",         mPanicLineDivider},
             {"view_ratio_y",               mViewRatioY},
             {"back_in_bounds_tolerance_y", mBackInBoundsToleranceY},
@@ -59,11 +59,11 @@ void CameraSystemConfiguration::deserialize(const std::string& data)
 {
    json config = json::parse(data);
 
-   mDampingFactorX         = config["CameraSystemConfiguration"]["damping_factor_x"].get<float>();
+   mCameraVelocityFactorX  = config["CameraSystemConfiguration"]["velocity_factor_x"].get<float>();
    mFocusZoneDivider       = config["CameraSystemConfiguration"]["focus_zone_divider"].get<float>();
    mTargetShiftFactor      = config["CameraSystemConfiguration"]["target_shift_factor"].get<float>();
    mBackInBoundsToleranceX = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_x"].get<int32_t>();
-   mDampingFactorY         = config["CameraSystemConfiguration"]["damping_factor_y"].get<float>();
+   mCameraVelocityFactorY  = config["CameraSystemConfiguration"]["velocity_factor_y"].get<float>();
    mPanicLineDivider       = config["CameraSystemConfiguration"]["panic_line_divider"].get<float>();
    mViewRatioY             = config["CameraSystemConfiguration"]["view_ratio_y"].get<float>();
    mBackInBoundsToleranceY = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_y"].get<int32_t>();
@@ -99,18 +99,6 @@ void CameraSystemConfiguration::serializeToFile(const std::string &filename)
 }
 
 
-float CameraSystemConfiguration::getRoomDampingFactorY() const
-{
-   return mRoomDampingFactorY;
-}
-
-
-float CameraSystemConfiguration::getRoomDampingFactorX() const
-{
-   return mRoomDampingFactorX;
-}
-
-
 int32_t CameraSystemConfiguration::getPlayerOffsetY() const
 {
    return mPlayerOffsetY;
@@ -135,9 +123,9 @@ float CameraSystemConfiguration::getPanicLineDivider() const
 }
 
 
-float CameraSystemConfiguration::getDampingFactorY() const
+float CameraSystemConfiguration::getCameraVelocityFactorY() const
 {
-   return mDampingFactorY;
+   return mCameraVelocityFactorY;
 }
 
 
@@ -159,8 +147,8 @@ float CameraSystemConfiguration::getFocusZoneDivider() const
 }
 
 
-float CameraSystemConfiguration::getDampingFactorX() const
+float CameraSystemConfiguration::getCameraVelocityFactorX() const
 {
-   return mDampingFactorX;
+   return mCameraVelocityFactorX;
 }
 
