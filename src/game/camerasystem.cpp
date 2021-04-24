@@ -48,17 +48,17 @@
 CameraSystem CameraSystem::sInstance;
 
 
-void CameraSystem::update(float viewWidth, float viewHeight)
+void CameraSystem::update(const sf::Time& dt, float viewWidth, float viewHeight)
 {
    mViewWidth = viewWidth;
    mViewHeight = viewHeight;
 
-   updateX();
-   updateY();
+   updateX(dt);
+   updateY(dt);
 }
 
 
-void CameraSystem::updateX()
+void CameraSystem::updateX(const sf::Time& dt)
 {
    auto player = Player::getCurrent();
    auto& config = CameraSystemConfiguration::getInstance();
@@ -67,7 +67,8 @@ void CameraSystem::updateX()
    auto playerY = player->getPixelPositionf().y;
    const auto corrected = mRoom->correctedCamera(playerX, playerY, mFocusOffset, config.getViewRatioY());
 
-   const auto dx = (playerX - mX) / config.getDampingFactorX();
+   const auto dx = (playerX - mX) * dt.asSeconds() * config.getCameraVelocityFactorX();
+
    const auto fCenter = mViewWidth / 2.0f;
    const auto fRange  = mViewWidth / config.getFocusZoneDivider();
 
@@ -80,7 +81,7 @@ void CameraSystem::updateX()
          ? ( fRange * config.getTargetShiftFactor())
          : (-fRange * config.getTargetShiftFactor());
 
-   const auto fcd = (targetOffset - mFocusOffset) / config.getDampingFactorX();
+   const auto fcd = (targetOffset - mFocusOffset) * dt.asSeconds() * config.getCameraVelocityFactorX();
    if (fabs(mFocusOffset) < fabs(fRange * config.getTargetShiftFactor()))
    {
       mFocusOffset += fcd;
@@ -117,7 +118,7 @@ void CameraSystem::updateX()
 }
 
 
-void CameraSystem::updateY()
+void CameraSystem::updateY(const sf::Time& dt)
 {
    auto& config = CameraSystemConfiguration::getInstance();
 
@@ -160,7 +161,8 @@ void CameraSystem::updateY()
       return;
    }
 
-   const auto dy = (playerY - mY) / config.getDampingFactorY();
+   const auto dy = (playerY - mY) * dt.asSeconds() * config.getCameraVelocityFactorY();
+
    mY += dy;
 }
 
