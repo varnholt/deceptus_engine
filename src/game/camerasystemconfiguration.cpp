@@ -36,15 +36,16 @@ std::string CameraSystemConfiguration::serialize()
       {
          "CameraSystemConfiguration",
          {
-            {"velocity_factor_x",          _camera_velocity_factor_x},
-            {"focus_zone_divider",         _focus_zone_divider},
-            {"target_shift_factor",        _target_shift_factor},
-            {"back_in_bounds_tolerance_x", _back_in_bounds_tolerance_x},
-            {"velocity_factor_y",          _camera_velocity_factor_y},
-            {"panic_line_divider",         _panic_line_divider},
-            {"view_ratio_y",               _view_ratio_y},
-            {"back_in_bounds_tolerance_y", _back_in_bounds_tolerance_y},
-            {"player_offset_y",            _player_offset_y},
+            {"velocity_factor_x",           _camera_velocity_factor_x},
+            {"focus_zone_divider",          _focus_zone_divider},
+            {"target_shift_factor",         _target_shift_factor},
+            {"back_in_bounds_tolerance_x",  _back_in_bounds_tolerance_x},
+            {"velocity_factor_y",           _camera_velocity_factor_y},
+            {"panic_line_divider",          _panic_line_divider},
+            {"view_ratio_y",                _view_ratio_y},
+            {"back_in_bounds_tolerance_y",  _back_in_bounds_tolerance_y},
+            {"player_offset_y",             _player_offset_y},
+            {"panic_acceleration_factor_y", _panic_acceleration_factor_y}
          }
       }
    };
@@ -59,15 +60,18 @@ void CameraSystemConfiguration::deserialize(const std::string& data)
 {
    json config = json::parse(data);
 
-   _camera_velocity_factor_x   = config["CameraSystemConfiguration"]["velocity_factor_x"].get<float>();
-   _focus_zone_divider         = config["CameraSystemConfiguration"]["focus_zone_divider"].get<float>();
-   _target_shift_factor        = config["CameraSystemConfiguration"]["target_shift_factor"].get<float>();
-   _back_in_bounds_tolerance_x = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_x"].get<int32_t>();
-   _camera_velocity_factor_y   = config["CameraSystemConfiguration"]["velocity_factor_y"].get<float>();
-   _panic_line_divider         = config["CameraSystemConfiguration"]["panic_line_divider"].get<float>();
-   _view_ratio_y               = config["CameraSystemConfiguration"]["view_ratio_y"].get<float>();
-   _back_in_bounds_tolerance_y = config["CameraSystemConfiguration"]["back_in_bounds_tolerance_y"].get<int32_t>();
-   _player_offset_y            = config["CameraSystemConfiguration"]["player_offset_y"].get<int32_t>();
+   const auto camera_config = config["CameraSystemConfiguration"];
+
+   _camera_velocity_factor_x    = camera_config["velocity_factor_x"].get<float>();
+   _focus_zone_divider          = camera_config["focus_zone_divider"].get<float>();
+   _target_shift_factor         = camera_config["target_shift_factor"].get<float>();
+   _back_in_bounds_tolerance_x  = camera_config["back_in_bounds_tolerance_x"].get<int32_t>();
+   _camera_velocity_factor_y    = camera_config["velocity_factor_y"].get<float>();
+   _panic_line_divider          = camera_config["panic_line_divider"].get<float>();
+   _view_ratio_y                = camera_config["view_ratio_y"].get<float>();
+   _back_in_bounds_tolerance_y  = camera_config["back_in_bounds_tolerance_y"].get<int32_t>();
+   _player_offset_y             = camera_config["player_offset_y"].get<int32_t>();
+   _panic_acceleration_factor_y = camera_config["panic_acceleration_factor_y"].get<float>();
 }
 
 
