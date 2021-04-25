@@ -195,6 +195,36 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 }
 
 
+sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)
+{
+    // first, transform the point by the view matrix
+    sf::Vector2f normalized = view.getTransform().transformPoint(point);
+
+    // then convert to viewport coordinates
+    sf::Vector2f pixel;
+
+    pixel.x = ( normalized.x + 1.0f) / 2.0f;
+    pixel.y = (-normalized.y + 1.0f) / 2.0f;
+
+    return pixel;
+}
+
+
+sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf::Vector2f& point, const sf::View& view)
+{
+    // first, transform the point by the view matrix
+    sf::Vector2f normalized = view.getTransform().transformPoint(point);
+
+    // then convert to viewport coordinates
+    sf::Vector2f pixel;
+    const auto viewport = target.getViewport(view);
+    pixel.x = ( normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.width) + static_cast<float>(viewport.left);
+    pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.height) + static_cast<float>(viewport.top);
+
+    return pixel;
+}
+
+
 //-----------------------------------------------------------------------------
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
@@ -227,8 +257,8 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    {
       std::string id = "u_lights[" + std::to_string(light_id) + "]";
 
-      // transform light coordinates from box2d to screen coordinates
-      sf::Vector2i light_screen_pos = target.mapCoordsToPixel(
+      // transform light coordinates from box2d to normalized screen coordinates
+      sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
          {
             light->_pos_m.x * PPM + light->_center_offset_px.x,
             light->_pos_m.y * PPM + light->_center_offset_px.y
@@ -240,7 +270,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          id + "._position",
          sf::Glsl::Vec3(
             static_cast<float>(light_screen_pos.x),
-            static_cast<float>(target.getSize().y - light_screen_pos.y),
+            static_cast<float>(1.0f - light_screen_pos.y),
             0.075f // default z
          )
       );

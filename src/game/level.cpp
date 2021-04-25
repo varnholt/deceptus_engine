@@ -818,9 +818,6 @@ void Level::createViews()
       mParallaxView[i]->reset(sf::FloatRect(0.0f, 0.0f, mViewWidth, mViewHeight));
       mParallaxView[i]->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
    }
-
-   mMapView = std::make_shared<sf::View>();
-   mMapView->setViewport(sf::FloatRect(0.65f, 0.05f, 0.32f, 0.18f));
 }
 
 
@@ -829,12 +826,19 @@ void Level::updateViews()
 {
    const auto lookVector = CameraPane::getInstance().getLookVector();
 
-   auto& cameraSystem = CameraSystem::getCameraSystem();
+   const auto& cameraSystem = CameraSystem::getCameraSystem();
 
-   auto levelViewX = cameraSystem.getX() + lookVector.x;
-   auto levelViewY = cameraSystem.getY() + lookVector.y;
+   const auto levelViewX = cameraSystem.getX() + lookVector.x;
+   const auto levelViewY = cameraSystem.getY() + lookVector.y;
 
-   mLevelView->reset(sf::FloatRect(levelViewX, levelViewY, mViewWidth, mViewHeight));
+   mLevelView->reset(
+      sf::FloatRect(
+         levelViewX,
+         levelViewY,
+         mViewWidth,
+         mViewHeight
+      )
+   );
 
    for (auto i = 0; i < 3; i++)
    {
@@ -847,15 +851,6 @@ void Level::updateViews()
          )
       );
    }
-
-   mMapView->reset(
-     sf::FloatRect(
-        levelViewX,
-        levelViewY,
-        mViewWidth * 5.0f,
-        mViewHeight * 5.0f
-      )
-   );
 }
 
 

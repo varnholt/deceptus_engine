@@ -29,12 +29,11 @@ void main()
    {
       Light light = u_lights[i];
 
-      vec3 light_pos = light._position;
       vec4 light_col = light._color;
-      vec2 light_pos_normalized = light_pos.xy / u_resolution.xy;
+      vec2 light_pos_normalized = light._position.xy; // xy are already in 0..1
       vec3 light_falloff = light._falloff;
 
-      vec3 light_dir = vec3(light_pos_normalized - frag_coord_normalized, light_pos.z);
+      vec3 light_dir = vec3(light_pos_normalized - frag_coord_normalized, light._position.z);
       light_dir.x *= u_resolution.x / u_resolution.y;
 
       float d = length(light_dir);

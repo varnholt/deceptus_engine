@@ -179,7 +179,6 @@ protected:
    float mViewToTextureScale = 1.0f;
    std::shared_ptr<sf::View> mLevelView;
    std::shared_ptr<sf::View> mParallaxView[3];
-   std::shared_ptr<sf::View> mMapView;
 
    std::map<std::string, int32_t> mScreenshotCounters;
    float mParallaxFactors[3] = {0.9f, 0.85f, 0.8f};

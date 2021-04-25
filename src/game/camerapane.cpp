@@ -106,6 +106,7 @@ bool CameraPane::isLookActive() const
    return (mLook & LookActive);
 }
 
+
 const sf::Vector2f& CameraPane::getLookVector() const
 {
     return mLookVector;
