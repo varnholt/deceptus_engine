@@ -195,6 +195,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 }
 
 
+//-----------------------------------------------------------------------------
 sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)
 {
     // first, transform the point by the view matrix
@@ -210,6 +211,7 @@ sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::Vie
 }
 
 
+//-----------------------------------------------------------------------------
 sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf::Vector2f& point, const sf::View& view)
 {
     // first, transform the point by the view matrix
