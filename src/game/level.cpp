@@ -981,6 +981,7 @@ void Level::drawLayers(
 )
 {
    target.setView(*mLevelView);
+   normal.setView(*mLevelView);
 
    for (auto z = from; z <= to; z++)
    {
