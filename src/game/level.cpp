@@ -73,10 +73,6 @@
 #include <string>
 #include <thread>
 
-// hardcoded settings
-// #define GLOW_ENABLED
-#define DEFERRED_RENDERING 1
-
 // things that should be optimised
 // - the tilemaps are unsorted, sort them by z once after deserializing a level
 
@@ -1169,6 +1165,48 @@ void Level::displayTextures()
 }
 
 
+void Level::drawGlowLayer()
+{
+   #ifdef GLOW_ENABLED
+      mBlurShader->clearTexture();
+      drawBlurLayer(*mBlurShader->getRenderTexture().get());
+      mBlurShader->getRenderTexture()->display();
+      takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
+   #endif
+}
+
+
+void Level::drawGlowSprite()
+{
+#ifdef GLOW_ENABLED
+   sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
+   const auto downScaleX = mBlurShader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
+   const auto downScaleY = mBlurShader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
+   blurSprite.scale({downScaleX, downScaleY});
+
+   sf::RenderStates statesShader;
+   mBlurShader->update();
+   statesShader.shader = &mBlurShader->getShader();
+   mBlurShader->getRenderTextureScaled()->draw(blurSprite, statesShader);
+
+   sf::Sprite blurScaleSprite(mBlurShader->getRenderTextureScaled()->getTexture());
+   blurScaleSprite.scale(1.0f / downScaleX, 1.0f / downScaleY);
+   blurScaleSprite.setTextureRect(
+      sf::IntRect(
+         0,
+         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y),
+         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().x),
+         -static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y)
+      )
+   );
+
+   sf::RenderStates statesAdd;
+   statesAdd.blendMode = sf::BlendAdd;
+   mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
+#endif
+}
+
+
 //-----------------------------------------------------------------------------
 // Level Rendering Flow
 //
@@ -1211,12 +1249,7 @@ void Level::draw(
    takeScreenshot("screenshot_atmosphere", *mAtmosphereShader->getRenderTexture().get());
 
    // render glowing elements
-#ifdef GLOW_ENABLED
-   mBlurShader->clearTexture();
-   drawBlurLayer(*mBlurShader->getRenderTexture().get());
-   mBlurShader->getRenderTexture()->display();
-   takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
-#endif
+   drawGlowLayer();
 
    // render layers affected by the atmosphere
    mLevelBackgroundRenderTexture->clear();
@@ -1237,34 +1270,7 @@ void Level::draw(
    mAtmosphereShader->update();
    mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader->getShader());
 
-   // ^ same must be done for the bump map!
-
-#ifdef GLOW_ENABLED
-   sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
-   const auto downScaleX = mBlurShader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
-   const auto downScaleY = mBlurShader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
-   blurSprite.scale({downScaleX, downScaleY});
-
-   sf::RenderStates statesShader;
-   mBlurShader->update();
-   statesShader.shader = &mBlurShader->getShader();
-   mBlurShader->getRenderTextureScaled()->draw(blurSprite, statesShader);
-
-   sf::Sprite blurScaleSprite(mBlurShader->getRenderTextureScaled()->getTexture());
-   blurScaleSprite.scale(1.0f / downScaleX, 1.0f / downScaleY);
-   blurScaleSprite.setTextureRect(
-      sf::IntRect(
-         0,
-         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y),
-         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().x),
-         -static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y)
-      )
-   );
-
-   sf::RenderStates statesAdd;
-   statesAdd.blendMode = sf::BlendAdd;
-   mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
-#endif
+   drawGlowSprite();
 
    // draw the level layers into the level texture
    drawLayers(
@@ -1275,15 +1281,6 @@ void Level::draw(
    );
 
    drawDebugInformation();
-
-   // old lighting approach
-#ifndef DEFERRED_RENDERING
-   drawLightAndShadows(*mLevelRenderTexture.get());
-   displayLevelTexture();
-
-   auto levelTextureSprite = sf::Sprite(mLevelRenderTexture->getTexture());
-   mGammaShader->setTexture(mLevelRenderTexture->getTexture());
-#else
 
    displayTextures();
 
@@ -1305,7 +1302,6 @@ void Level::draw(
 
    auto levelTextureSprite = sf::Sprite(mDeferredTexture->getTexture());
    mGammaShader->setTexture(mDeferredTexture->getTexture());
-#endif
 
    levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
