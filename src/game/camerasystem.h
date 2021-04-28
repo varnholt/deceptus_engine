@@ -46,6 +46,7 @@ class CameraSystem
 
       float _panic_line_y0 = 0.0f;
       float _panic_line_y1 = 0.0f;
+      bool _panic = false;
 
       float _view_width = 0.0f;
       float _view_height = 0.0f;
