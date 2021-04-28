@@ -12,28 +12,20 @@
 
 void ShaderLayer::draw(sf::RenderTarget& target)
 {
-   const auto look_vector = CameraPane::getInstance().getLookVector();
-
    float x = _position.x;
    float y = _position.y;
    float w = _size.x;
    float h = _size.y;
 
-   // not really sure why the look vector y coordinate inside the camera view is not
-   // part of the target view in the first place. workaround: '2 * look_vector.y'
-   const auto offset_fix = 2 * look_vector.y;
-   const auto position_offset = target.mapCoordsToPixel(sf::Vector2f(x, y + offset_fix), target.getView());
-
    _shader.setUniform("u_texture", *_texture.get());
    _shader.setUniform("u_time", GlobalClock::getInstance()->getElapsedTimeInS());
    _shader.setUniform("u_resolution", sf::Vector2f(w, h));
-   _shader.setUniform("u_offset", sf::Vector2f(static_cast<float>(position_offset.x), static_cast<float>(position_offset.y)));
 
    sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(x,     y    )),
-      sf::Vertex(sf::Vector2f(x,     y + h)),
-      sf::Vertex(sf::Vector2f(x + w, y + h)),
-      sf::Vertex(sf::Vector2f(x + w, y    ))
+      sf::Vertex(sf::Vector2f(x,     y    ), sf::Vector2f(0.0f, 1.0f)),
+      sf::Vertex(sf::Vector2f(x,     y + h), sf::Vector2f(0.0f, 0.0f)),
+      sf::Vertex(sf::Vector2f(x + w, y + h), sf::Vector2f(1.0f, 0.0f)),
+      sf::Vertex(sf::Vector2f(x + w, y    ), sf::Vector2f(1.0f, 1.0f))
    };
 
    sf::RenderStates states;
