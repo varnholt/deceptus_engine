@@ -1,11 +1,6 @@
-#version 330
-
 uniform vec2 u_resolution;
-uniform vec2 u_offset;
 uniform float u_time;
 uniform sampler2D u_texture;
-
-precision highp float;
 
 const vec4 col1 = vec4(0.510, 0.776, 0.486, 1.0);
 const vec4 col2 = vec4(0.200, 0.604, 0.318, 1.0);
@@ -15,15 +10,15 @@ const vec4 col4 = vec4(0.059, 0.255, 0.251, 1.0);
 
 void main()
 {
-   vec2 uv = (gl_FragCoord.xy - u_offset) / u_resolution;
+   vec2 uv = gl_TexCoord[0].xy;
 
-   float time = u_time * 0.4;
+   float time = u_time * 0.3;
 
    // apply pixelate effect
-   vec2 uv_pixel = floor(uv * (u_resolution/2)) / (u_resolution/2);
+   vec2 uv_pixel = floor(uv * u_resolution * 2) / (u_resolution * 2);
 
    // displacement on top of y
-   vec3 displace = texture(u_texture, vec2(uv_pixel.x, (uv_pixel.y + time) * 0.05)).xyz;
+   vec3 displace = texture2D(u_texture, vec2(uv_pixel.x, (uv_pixel.y + time) * 0.05)).xyz;
    displace *= 0.1; // tweak this scale a bit?
    displace.x -= 1.0;
    displace.y -= 1.0;
@@ -31,10 +26,9 @@ void main()
 
    // color
    vec2 uv_tmp = uv_pixel;
-   // uv_tmp.x *= 0.5;
    uv_tmp.y *= 0.2;
    uv_tmp.y += time;
-   vec4 color = texture(u_texture, uv_tmp + displace.xy);
+   vec4 color = texture2D(u_texture, uv_tmp + displace.xy);
 
    // match to colors
    vec4 noise = floor(color * 10.0) / 5.0;
@@ -43,10 +37,8 @@ void main()
    color = mix(dark, bright, noise);
 
    // add gradients (top dark and transparent, bottom bright)
-   float inv_uv = 1.0 - uv_pixel.y;
    color.xyz -= 0.45 * pow(uv_pixel.y, 8.0);
    color.a -= 0.2 * pow(uv_pixel.y, 8.0);
-   //color += pow(inv_uv, 8.0);
 
    // make waterfall transparent
    color.a -= 0.2;
