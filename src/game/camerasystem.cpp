@@ -142,15 +142,24 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    const auto p0 = _y - _panic_line_y1;
    const auto p1 = _y - _panic_line_y0;
-   const auto panic = (test < p0 || test > p1);
 
-   if (panic)
+   // if once panicking, keep following the player in panic mode until he's back on the ground
+   if (_panic)
    {
+      if (!player->isInAir())
+      {
+         _panic = false;
+      }
+
       _focus_y_triggered = true;
+   }
+   else
+   {
+      _panic = (test < p0 || test + player->getPlayerPixelRect().height > p1);
    }
 
    // test if back within close boundaries
-   else if (
+   if (
          (test > _y - view_center - config.getBackInBoundsToleranceY())
       && (test < _y - view_center + config.getBackInBoundsToleranceY())
    )
@@ -176,7 +185,7 @@ void CameraSystem::updateY(const sf::Time& dt)
    // have some acceleration in the y update velocity so it doesn't got at full speed instantly
    const auto y_update_start_time_s = _y_update_start_time.asSeconds();
    const auto y_update_acceleration =
-      panic
+      _panic
          ? 2.0f
          : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
 
