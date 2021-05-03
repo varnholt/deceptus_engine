@@ -60,6 +60,8 @@ void AmbientOcclusion::load(
       }
 
       uvFile.close();
+
+      std::cout << "[x] loaded " << mSprites.size() << " ao sprites" << std::endl;
    }
    else
    {
@@ -68,9 +70,13 @@ void AmbientOcclusion::load(
 }
 
 
+// optimize this!
+// just check if the sprite is outside the current screen
+// also group sprites to blocks of equal positions
+
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-   auto pos = Player::getCurrent()->getPixelPositionf();
+   const auto pos = Player::getCurrent()->getPixelPositionf();
 
    for (auto& sprite : mSprites)
    {
