@@ -7,6 +7,12 @@
 #include <QObject>
 #include <QPainter>
 
+// support qt6
+#if QT_VERSION > 0x060000
+#include <QImageReader>
+#endif
+
+
 #include <cstdint>
 #include <iostream>
 
@@ -86,6 +92,11 @@ QImage blurImage(const QImage& inputImage)
 int32_t main(int32_t argc, char* argv[])
 {
    QApplication a(argc, argv);
+
+   // support qt6
+#if QT_VERSION > 0x060000
+   QImageReader::setAllocationLimit(4096);
+#endif
 
    static constexpr auto inputParam = "input";
 
