@@ -14,10 +14,12 @@
 
 
 #include <cstdint>
+#include <optional>
 #include <iostream>
 
 namespace
 {
+   std::optional<float> alpha;
    constexpr auto blurRadius = 8;
    static const auto black = qRgba(0, 0, 0, 128);
    static const auto transparent = qRgba(0, 0, 0, 0);
@@ -37,7 +39,13 @@ QImage blurImage(const QImage& inputImage)
          const auto px = inputImage.pixel(x, y);
          if (qAlpha(px) != 0)
          {
-            blackWhite.setPixel(x, y, black);
+            blackWhite.setPixel(
+               x,
+               y,
+               alpha.has_value()
+                  ? qRgba(0, 0, 0, std::min(static_cast<int32_t>(alpha.value() * 255), 255))
+                  : black
+            );
          }
       }
    }
@@ -100,9 +108,17 @@ int32_t main(int32_t argc, char* argv[])
 
    static constexpr auto inputParam = "input";
 
+   QCommandLineOption alphaOption(
+      QStringList() << "a" << "alpha",
+      QCoreApplication::translate("main", "specify the alpha value for the ambient occlusion (range: 0..1, default = 0.5)"),
+      QCoreApplication::translate("main", "transparency")
+   );
+
    QCommandLineParser parser;
    parser.addHelpOption();
    parser.addPositionalArgument(inputParam, QCoreApplication::translate("main", "input texture"));
+   parser.addOption(alphaOption);
+
    parser.parse(QCoreApplication::arguments());
 
    const auto& args = parser.positionalArguments();
@@ -110,6 +126,18 @@ int32_t main(int32_t argc, char* argv[])
    if (args.isEmpty())
    {
       parser.showHelp(1);
+   }
+
+   if (parser.isSet(alphaOption))
+   {
+      bool ok = false;
+      alpha = parser.value(alphaOption).toFloat(&ok);
+
+      if (!ok)
+      {
+         std::cerr << "[!] bad value for alpha" << std::endl;
+         parser.showHelp(1);
+      }
    }
 
    std::cout << "[x] processing texture: " << args.first().toStdString() << std::endl;
