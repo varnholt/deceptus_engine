@@ -5,9 +5,20 @@
 #include <QApplication>
 #include <QCommandLineParser>
 
+// support qt6
+#if QT_VERSION > 0x060000
+#include <QImageReader>
+#endif
+
+
 int main(int argc, char *argv[])
 {
    QApplication a(argc, argv);
+
+   // support qt6
+#if QT_VERSION > 0x060000
+   QImageReader::setAllocationLimit(4096);
+#endif
 
    QCoreApplication::setApplicationName("packtexture");
    QCoreApplication::setApplicationVersion("1.0");
