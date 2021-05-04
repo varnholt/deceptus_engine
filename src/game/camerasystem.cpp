@@ -77,10 +77,13 @@ void CameraSystem::updateX(const sf::Time& dt)
    _focus_zone_x1 = f_center + f_range;
 
    // shift focus zone based on player orientation
-   const auto target_offset =
-      player->isPointingLeft()
+   auto target_offset = 0.0f;
+   if (config.isFollowingPlayerOrientation())
+   {
+      target_offset = player->isPointingLeft()
          ? ( f_range * config.getTargetShiftFactor())
          : (-f_range * config.getTargetShiftFactor());
+   }
 
    const auto fcd = (target_offset - _focus_offset) * dt.asSeconds() * config.getCameraVelocityFactorX();
    if (fabs(_focus_offset) < fabs(f_range * config.getTargetShiftFactor()))
