@@ -40,6 +40,7 @@ std::string CameraSystemConfiguration::serialize()
             {"focus_zone_divider",          _focus_zone_divider},
             {"target_shift_factor",         _target_shift_factor},
             {"back_in_bounds_tolerance_x",  _back_in_bounds_tolerance_x},
+            {"follow_player_orientation",   _follow_player_orientation},
             {"velocity_factor_y",           _camera_velocity_factor_y},
             {"panic_line_divider",          _panic_line_divider},
             {"view_ratio_y",                _view_ratio_y},
@@ -66,6 +67,7 @@ void CameraSystemConfiguration::deserialize(const std::string& data)
    _focus_zone_divider          = camera_config["focus_zone_divider"].get<float>();
    _target_shift_factor         = camera_config["target_shift_factor"].get<float>();
    _back_in_bounds_tolerance_x  = camera_config["back_in_bounds_tolerance_x"].get<int32_t>();
+   _follow_player_orientation   = camera_config["follow_player_orientation"].get<bool>();
    _camera_velocity_factor_y    = camera_config["velocity_factor_y"].get<float>();
    _panic_line_divider          = camera_config["panic_line_divider"].get<float>();
    _view_ratio_y                = camera_config["view_ratio_y"].get<float>();
@@ -100,6 +102,12 @@ void CameraSystemConfiguration::serializeToFile(const std::string &filename)
   std::string data = serialize();
   std::ofstream file(filename);
   file << data;
+}
+
+
+bool CameraSystemConfiguration::isFollowingPlayerOrientation() const
+{
+   return _follow_player_orientation;
 }
 
 

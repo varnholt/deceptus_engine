@@ -13,13 +13,13 @@ class CameraSystemConfiguration
       float getFocusZoneDivider() const;
       float getTargetShiftFactor() const;
       int32_t getBackInBoundsToleranceX() const;
+      bool isFollowingPlayerOrientation() const;
 
       float getCameraVelocityFactorY() const;
       float getPanicLineDivider() const;
       float getViewRatioY() const;
       int32_t getBackInBoundsToleranceY() const;
       int32_t getPlayerOffsetY() const;
-
 
    private:
 
@@ -33,6 +33,7 @@ class CameraSystemConfiguration
       float _focus_zone_divider = 6.0f;
       float _target_shift_factor = 0.75f;
       int32_t _back_in_bounds_tolerance_x = 10;
+      bool _follow_player_orientation = false;
 
       // y
       float _camera_velocity_factor_y = 3.0f;
