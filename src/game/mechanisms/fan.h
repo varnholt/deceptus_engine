@@ -34,7 +34,7 @@ class Fan : public GameMechanism
          b2Body* mBody = nullptr;
          TileDirection mDir;
 
-         ~FanTile();
+         ~FanTile() = default;
       };
 
       Fan() = default;
@@ -65,23 +65,21 @@ class Fan : public GameMechanism
 
       static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
 
-      static std::vector<std::shared_ptr<GameMechanism>> sFans;
-      static std::vector<std::shared_ptr<FanTile>> sTiles;
-      static std::vector<TmxObject*> sObjects;
-      static std::vector<sf::Vector2f> sWeights;
+      static std::vector<std::shared_ptr<GameMechanism>> _fan_instances;
+      static std::vector<std::shared_ptr<FanTile>> _tile_instances;
+      static std::vector<TmxObject*> _object_instances;
+      static std::vector<sf::Vector2f> _weight_instances;
 
-      std::vector<std::shared_ptr<FanTile>> mTiles;
+      std::vector<std::shared_ptr<FanTile>> _tiles;
 
-      uint32_t mWidth;
-      uint32_t mHeight;
-      sf::Vector2f mDirection;
-      sf::Rect<int32_t> mPixelRect;
-      float mSpeed = 1.0f;
-      float mLeverLag = 1.0f;
+      sf::Vector2f _direction;
+      sf::Rect<int32_t> _pixel_rect;
+      float _speed = 1.0f;
+      float _lever_lag = 1.0f;
 
-      std::vector<sf::Sprite> mSprites;
-      std::vector<float> mXOffsets;
+      std::vector<sf::Sprite> _sprites;
+      std::vector<float> _x_offsets_px;
 
-      std::shared_ptr<sf::Texture> mTexture;
+      std::shared_ptr<sf::Texture> _texture;
 };
 

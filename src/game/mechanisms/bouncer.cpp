@@ -165,10 +165,12 @@ bool Bouncer::isPlayerAtBouncer()
 }
 
 
-Bouncer::~Bouncer()
-{
-   mBody->GetWorld()->DestroyBody(mBody);
-}
+// destroying a world will also delete all its bodies
+//
+//Bouncer::~Bouncer()
+//{
+//   mBody->GetWorld()->DestroyBody(mBody);
+//}
 
 
 void Bouncer::activate()
