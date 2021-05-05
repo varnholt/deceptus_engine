@@ -1473,11 +1473,11 @@ void Level::addPathsToWorld(
 )
 {
    // just for debugging purposes, this section can be removed later
-   for (auto& path : paths)
-   {
-      const auto& scaled = path.mScaled;
-      addDebugOutlines(offsetX, offsetY, scaled, behavior);
-   }
+   // for (auto& path : paths)
+   // {
+   //    const auto& scaled = path.mScaled;
+   //    addDebugOutlines(offsetX, offsetY, scaled, behavior);
+   // }
 
    // create the physical chain with 1 body per chain
    for (auto& path : paths)
@@ -1531,7 +1531,9 @@ void Level::parseObj(
       chain.pop_back();
 
       addChainToWorld(chain, behavior);
-      addDebugOutlines(layer->mOffsetX, layer->mOffsetY, debugPath, behavior);
+
+      // not required any longer
+      // addDebugOutlines(layer->mOffsetX, layer->mOffsetY, debugPath, behavior);
 
       // Mesh::writeVerticesToImage(points, faces, {1200, 1200}, "yo_yo.png");
    }
