@@ -97,6 +97,7 @@ public:
 
    b2Body* getBody() const;
    void setWorld(const std::shared_ptr<b2World>& world);
+   void resetWorld();
    void updatePixelPosition();
    void updatePreviousBodyState();
    void updatePlayerPixelRect();

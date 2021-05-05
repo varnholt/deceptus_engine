@@ -260,6 +260,7 @@ void Game::loadLevel()
          levels.deserializeFromFile();
          auto levelItem = levels.mLevels.at(SaveState::getCurrent().mLevelIndex);
 
+         mPlayer->resetWorld();
          mLevel.reset();
 
          // load it
