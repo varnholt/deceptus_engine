@@ -38,23 +38,29 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    // create fixture for physical boundaries of the fan object
    b2PolygonShape shape;
 
-   /* a rounded box prevents the player of getting stuck between the gaps
-      ____
-     x    x
-     |    |
-     x____x
-   */
+   // a rounded box prevents the player of getting stuck between the gaps
+   //
+   //      h        g
+   //      _________
+   //     /         \
+   //   a |         | f
+   //     |         |
+   //   b |         | e
+   //     \________/
+   //
+   //      c      d
 
-   static constexpr float e = 0.1f;
+   static constexpr float w = 0.5f;
+   static constexpr float e = 0.1f; // 219, 194
    std::array<b2Vec2, 8> rounded_box{
-      b2Vec2{0,     e    },
-      b2Vec2{0,     1 - e},
-      b2Vec2{e,     1    },
-      b2Vec2{1 - e, 1    },
-      b2Vec2{1,     1 - e},
-      b2Vec2{1,     e    },
-      b2Vec2{1 - e, 0    },
-      b2Vec2{0,     e    },
+      b2Vec2{0,     e    }, // a
+      b2Vec2{0,     w - e}, // b
+      b2Vec2{e,     w    }, // c
+      b2Vec2{w - e, w    }, // d
+      b2Vec2{w,     w - e}, // e
+      b2Vec2{w,     e    }, // f
+      b2Vec2{w - e, 0    }, // g
+      b2Vec2{e,     0    }, // h
    };
 
    // auto width = PIXELS_PER_TILE * MPP * 0.5f;
