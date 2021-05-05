@@ -15,6 +15,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "texturepool.h"
 
+#include <atomic>
 #include <iostream>
 
 
