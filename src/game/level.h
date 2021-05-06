@@ -199,6 +199,8 @@ protected:
    sf::Vector2f mStartPosition;
 
    std::unique_ptr<TmxParser> mTmxParser;
+   std::vector<TmxElement*> mTmxElements;
+
    std::string mDescriptionFilename;
 
    std::unique_ptr<LevelMap> mMap;

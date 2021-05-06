@@ -245,6 +245,14 @@ Level::~Level()
    {
       delete kv.second;
    }
+
+   // clear tmx elements
+   for (auto tmx_element : mTmxElements)
+   {
+      delete tmx_element;
+   }
+
+   mTmxElements.clear();
 }
 
 
@@ -302,9 +310,9 @@ void Level::loadTmx()
 
    std::cout << "[x] loading tmx... " << std::endl;
 
-   auto elements = mTmxParser->getElements();
+   mTmxElements = mTmxParser->getElements();
 
-   for (auto element : elements)
+   for (auto element : mTmxElements)
    {
       if (element->mType == TmxElement::TypeLayer)
       {

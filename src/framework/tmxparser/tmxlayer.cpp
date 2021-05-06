@@ -86,7 +86,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 
                     int x = 0;
                     std::vector<std::string> rowContent = TmxTools::split(line, ',');
-                    for (std::string valStr : rowContent)
+                    for (const std::string& valStr : rowContent)
                     {
                        int val = std::stoi(valStr);
                        mData[y * mWidth + x] = val;

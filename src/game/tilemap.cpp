@@ -184,10 +184,11 @@ bool TileMap::load(
                   _vertices_static_blocks[by][bx].setPrimitiveType(sf::Quads);
                }
 
-               _vertices_static_blocks[by][bx].append(quad[0]);
-               _vertices_static_blocks[by][bx].append(quad[1]);
-               _vertices_static_blocks[by][bx].append(quad[2]);
-               _vertices_static_blocks[by][bx].append(quad[3]);
+               sf::VertexArray& vertex_array = _vertices_static_blocks[by][bx];
+               vertex_array.append(quad[0]);
+               vertex_array.append(quad[1]);
+               vertex_array.append(quad[2]);
+               vertex_array.append(quad[3]);
             }
          }
       }
