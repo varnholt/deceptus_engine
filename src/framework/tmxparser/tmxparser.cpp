@@ -90,7 +90,7 @@ void TmxParser::parse(const std::string &filename)
 }
 
 
-std::vector<TmxElement *> TmxParser::getElements() const
+std::vector<TmxElement*> TmxParser::getElements() const
 {
    return mElements;
 }
