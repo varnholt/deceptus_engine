@@ -22,14 +22,15 @@ LIBS -= -lQtCore
    CONFIG += console
 #}
 
-+win32-msvc {
+win32-msvc {
    # link debug symbols
-   QMAKE_CFLAGS_RELEASE += -Zi
-   QMAKE_CXXFLAGS_RELEASE += -Zi
-   QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF
+   message("configured for msvc")
+   QMAKE_CXXFLAGS_RELEASE += /Zi
+   QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
 }
 
-+linux|win32-g++ {
+linux|win32-g++ {
+   message("configured for g++")
    QMAKE_CXXFLAGS += -std=c++17
    QMAKE_CXXFLAGS += -lc++fs
    QMAKE_CXXFLAGS += -Wno-multichar
