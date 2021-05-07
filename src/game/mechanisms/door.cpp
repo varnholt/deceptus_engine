@@ -257,10 +257,10 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 {
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
-   auto tiles    = layer->mData;
-   auto width    = layer->mWidth;
-   auto height   = layer->mHeight;
-   auto firstId  = tileSet->mFirstGid;
+   auto tiles    = layer->_data;
+   auto width    = layer->_width_px;
+   auto height   = layer->_height_px;
+   auto firstId  = tileSet->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto j = 0u; j < height; j++)
@@ -327,7 +327,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                auto door = std::make_shared<Door>(Level::getCurrentLevel());
                doors.push_back(door);
 
-               door->mTexture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
+               door->mTexture = TexturePool::getInstance().get((basePath / tileSet->_image->_source).string());
                door->mDoorQuad[0].position.x = positionX;
                door->mDoorQuad[0].position.y = positionY;
                door->mDoorQuad[1].position.x = positionX;
@@ -353,9 +353,9 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                   );
                }
 
-               if (layer->mProperties != nullptr)
+               if (layer->_properties != nullptr)
                {
-                  door->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
+                  door->setZ(layer->_properties->_map["z"]->_value_int.value());
                }
             }
 

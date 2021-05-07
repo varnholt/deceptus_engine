@@ -191,15 +191,15 @@ void Crusher::updateState()
 //-----------------------------------------------------------------------------
 void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 {
-   if (tmxObject->mProperties)
+   if (tmxObject->_properties)
    {
-      const auto it = tmxObject->mProperties->mMap.find("alignment");
+      const auto it = tmxObject->_properties->_map.find("alignment");
 
-      if (it != tmxObject->mProperties->mMap.end())
+      if (it != tmxObject->_properties->_map.end())
       {
          // std::cout << it->second->mValueStr << std::endl;
 
-         const auto alignment = it->second->mValueStr;
+         const auto alignment = it->second->_value_string;
          if (alignment == "up")
          {
             mAlignment = Alignment::PointsUp;
@@ -235,8 +235,8 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    //   +-------------+
    //    0123456789012
 
-   mPixelPosition.x = tmxObject->mX;
-   mPixelPosition.y = tmxObject->mY;
+   mPixelPosition.x = tmxObject->_x_px;
+   mPixelPosition.y = tmxObject->_y_px;
 
    mSpriteMount.setTexture(*mTexture);
    mSpritePusher.setTexture(*mTexture);

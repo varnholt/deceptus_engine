@@ -92,36 +92,36 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* 
    auto flickerAlphaAmount = 1.0f;
    auto flickerSpeed = 0.0f;
 
-   if (tmxObject->mProperties != nullptr)
+   if (tmxObject->_properties != nullptr)
    {
-      auto it = tmxObject->mProperties->mMap.find("color");
-      if (it != tmxObject->mProperties->mMap.end())
+      auto it = tmxObject->_properties->_map.find("color");
+      if (it != tmxObject->_properties->_map.end())
       {
-         rgba = TmxTools::color(it->second->mValueStr.value());
+         rgba = TmxTools::color(it->second->_value_string.value());
       }
 
-      it = tmxObject->mProperties->mMap.find("texture");
-      if (it != tmxObject->mProperties->mMap.end())
+      it = tmxObject->_properties->_map.find("texture");
+      if (it != tmxObject->_properties->_map.end())
       {
-         texture = (std::filesystem::path("data/light/") / it->second->mValueStr.value()).string();
+         texture = (std::filesystem::path("data/light/") / it->second->_value_string.value()).string();
       }
 
-      it = tmxObject->mProperties->mMap.find("flicker_intensity");
-      if (it != tmxObject->mProperties->mMap.end())
+      it = tmxObject->_properties->_map.find("flicker_intensity");
+      if (it != tmxObject->_properties->_map.end())
       {
-         flickerIntensity = it->second->mValueFloat.value();
+         flickerIntensity = it->second->_value_float.value();
       }
 
-      it = tmxObject->mProperties->mMap.find("flicker_alpha_amount");
-      if (it != tmxObject->mProperties->mMap.end())
+      it = tmxObject->_properties->_map.find("flicker_alpha_amount");
+      if (it != tmxObject->_properties->_map.end())
       {
-         flickerAlphaAmount = it->second->mValueFloat.value();
+         flickerAlphaAmount = it->second->_value_float.value();
       }
 
-      it = tmxObject->mProperties->mMap.find("flicker_speed");
-      if (it != tmxObject->mProperties->mMap.end())
+      it = tmxObject->_properties->_map.find("flicker_speed");
+      if (it != tmxObject->_properties->_map.end())
       {
-         flickerSpeed = it->second->mValueFloat.value();
+         flickerSpeed = it->second->_value_float.value();
       }
    }
 
@@ -135,16 +135,16 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* 
    light->mSprite.setColor(light->mColor);
    light->mTexture = TexturePool::getInstance().get(texture);
    light->mSprite.setTexture(*light->mTexture);
-   light->mSprite.setPosition(tmxObject->mX, tmxObject->mY);
-   light->mZ = objectGroup->mZ;
+   light->mSprite.setPosition(tmxObject->_x_px, tmxObject->_y_px);
+   light->mZ = objectGroup->_z;
 
-   auto scaleX = tmxObject->mWidth / light->mTexture->getSize().x;
-   auto scaleY = tmxObject->mHeight / light->mTexture->getSize().y;
+   auto scaleX = tmxObject->_width_px / light->mTexture->getSize().x;
+   auto scaleY = tmxObject->_height_px / light->mTexture->getSize().y;
    light->mSprite.scale(scaleX, scaleY);
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough
-   std::srand(static_cast<uint32_t>(tmxObject->mX * tmxObject->mY));
+   std::srand(static_cast<uint32_t>(tmxObject->_x_px * tmxObject->_y_px));
    light->mTimeOffset = (std::rand() % 100) * 0.01f;
 
    return light;

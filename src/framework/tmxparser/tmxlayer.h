@@ -8,22 +8,20 @@ struct TmxProperties;
 struct TmxLayer : TmxElement
 {
    TmxLayer();
-   virtual ~TmxLayer();
+   ~TmxLayer() override;
 
    void deserialize(tinyxml2::XMLElement*) override;
 
-   uint32_t mWidth = 0;
-   uint32_t mHeight = 0;
-   float mOpacity = 1.0f;
-   bool mVisible = true;
-   TmxProperties* mProperties = nullptr;
-   int32_t mZ = 0;
+   uint32_t _width_px = 0;
+   uint32_t _height_px = 0;
+   float _opacity = 1.0f;
+   bool _visible = true;
+   TmxProperties* _properties = nullptr;
+   int32_t _z = 0;
 
-   int32_t mOffsetX = 0;
-   int32_t mOffsetY = 0;
+   int32_t _offset_x_px = 0;
+   int32_t _offset_y_px = 0;
 
-   int32_t* mData = nullptr;
-
-  std::vector<TmxChunk*> chunks;
+   int32_t* _data = nullptr;
 };
 

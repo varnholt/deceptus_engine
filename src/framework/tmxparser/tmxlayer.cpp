@@ -11,13 +11,14 @@
 
 TmxLayer::TmxLayer()
 {
-   mType = TmxElement::TypeLayer;
+   _type = TmxElement::TypeLayer;
 }
 
 
 TmxLayer::~TmxLayer()
 {
-   delete[] mData;
+   delete[] _data;
+   delete _properties;
 }
 
 
@@ -25,10 +26,10 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 {
    TmxElement::deserialize(element);
 
-   mWidth  = element->IntAttribute("width");
-   mHeight = element->IntAttribute("height");
-   mOpacity = element->FloatAttribute("opacity", 1.0f);
-   mVisible = element->BoolAttribute("visible", true);
+   _width_px  = element->IntAttribute("width");
+   _height_px = element->IntAttribute("height");
+   _opacity = element->FloatAttribute("opacity", 1.0f);
+   _visible = element->BoolAttribute("visible", true);
 
   //   printf(
   //      "layer: %s (width: %d, height: %d, opacity: %f)\n",
@@ -38,40 +39,42 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
   //      mOpacity
   //   );
 
+   std::vector<TmxChunk*> chunks;
+
    tinyxml2::XMLNode* node = element->FirstChild();
    while (node != nullptr)
    {
-      tinyxml2::XMLElement* subElement = node->ToElement();
+      tinyxml2::XMLElement* sub_element = node->ToElement();
 
-      if (subElement != nullptr)
+      if (sub_element != nullptr)
       {
-         if (subElement->Name() == std::string("data"))
+         if (sub_element->Name() == std::string("data"))
          {
-            tinyxml2::XMLNode* dataNode = subElement->FirstChild();
+            tinyxml2::XMLNode* data_node = sub_element->FirstChild();
 
-            while (dataNode != nullptr)
+            while (data_node != nullptr)
             {
-              tinyxml2::XMLElement* chunkElement = dataNode->ToElement();
+              tinyxml2::XMLElement* chunk_element = data_node->ToElement();
 
-              TmxElement* innerElement = nullptr;
+              TmxElement* inner_element = nullptr;
 
               // process chunk data
-              if (chunkElement != nullptr)
+              if (chunk_element)
               {
-                 if (chunkElement->Name() == std::string("chunk"))
+                 if (chunk_element->Name() == std::string("chunk"))
                  {
                     auto chunk = new TmxChunk();
-                    chunk->deserialize(chunkElement);
-                    innerElement = chunk;
+                    chunk->deserialize(chunk_element);
+                    inner_element = chunk;
                     chunks.push_back(chunk);
                  }
               }
 
               // there are no chunks, the layer data is raw
-              if (!innerElement && dataNode != nullptr)
+              if (!inner_element && data_node != nullptr)
               {
-                 mData = new int32_t[mWidth * mHeight];
-                 std::string data = subElement->FirstChild()->Value();
+                 _data = new int32_t[_width_px * _height_px];
+                 std::string data = sub_element->FirstChild()->Value();
 
                  // parse csv data and store it in mData array
                  std::stringstream stream(data);
@@ -89,7 +92,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
                     for (const std::string& valStr : rowContent)
                     {
                        int val = std::stoi(valStr);
-                       mData[y * mWidth + x] = val;
+                       _data[y * _width_px + x] = val;
                        x++;
                     }
 
@@ -97,13 +100,13 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
                  }
               }
 
-              dataNode = dataNode->NextSibling();
+              data_node = data_node->NextSibling();
             }
          }
-         else if (subElement->Name() == std::string("properties"))
+         else if (sub_element->Name() == std::string("properties"))
          {
-            mProperties = new TmxProperties();
-            mProperties->deserialize(subElement);
+            _properties = new TmxProperties();
+            _properties->deserialize(sub_element);
          }
       }
 
@@ -112,78 +115,80 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 
    if (!chunks.empty())
    {
-     // after parsing all tmx chunks
-     // - determine boundaries of all chunks
-     // - create level with given dimensions
-     // - merge chunks to layer
-    int32_t xMin = chunks.at(0)->mX;
-    int32_t xMax = chunks.at(0)->mX;
-    int32_t yMin = chunks.at(0)->mY;
-    int32_t yMax = chunks.at(0)->mY;
+      // after parsing all tmx chunks
+      // - determine boundaries of all chunks
+      // - create level with given dimensions
+      // - merge chunks to layer
+      int32_t xMin = chunks.at(0)->_x_px;
+      int32_t xMax = chunks.at(0)->_x_px;
+      int32_t yMin = chunks.at(0)->_y_px;
+      int32_t yMax = chunks.at(0)->_y_px;
 
-    for (auto i = 1u; i < chunks.size(); i++)
-    {
-      const auto c = chunks.at(i);
-
-      if (c->mX < xMin)
+      for (auto i = 1u; i < chunks.size(); i++)
       {
-        xMin = c->mX;
+         const auto c = chunks.at(i);
+
+         if (c->_x_px < xMin)
+         {
+            xMin = c->_x_px;
+         }
+
+         if (c->_y_px < yMin)
+         {
+            yMin = c->_y_px;
+         }
+
+         if (c->_x_px > xMax)
+         {
+            xMax = c->_x_px;
+         }
+
+         if (c->_y_px > yMax)
+         {
+            yMax = c->_y_px;
+         }
       }
 
-      if (c->mY < yMin)
+      // the layer gets the smallest chunk offset
+      _offset_x_px = xMin;
+      _offset_y_px = yMin;
+
+      // assume identical chunk sizes
+      const auto chunkWidth  = chunks.at(0)->_width_px;
+      const auto chunkHeight = chunks.at(0)->_height_px;
+
+      _width_px  = (xMax - xMin) + chunkWidth;
+      _height_px = (yMax - yMin) + chunkHeight;
+
+      _data = new int32_t[_width_px * _height_px];
+
+      // since we're dealing with patches of chunks there might be 'holes' in the map
+      memset(_data, 0, _width_px * _height_px * sizeof (int32_t));
+
+      // std::cout
+      //   << "TmxLayer::deserialize: layer: " << mName << std::endl
+      //   << "  dimensions: width: " << mWidth << "; height: " << mHeight << std::endl
+      //   << "  offset: " << mOffsetX << "; " << mOffsetY << std::endl
+      //   << "  x min: " << xMin << "; x max: " << xMax << std::endl
+      //   << "  y min: " << yMin << "; y max: " << yMax << std::endl;
+
+      for (const auto c : chunks)
       {
-        yMin = c->mY;
+         for (auto y = 0; y < chunkHeight; y++)
+         {
+            for (auto x = 0; x < chunkWidth; x++)
+            {
+               // translate chunk coordinates to layer coordinates starting at 0; 0
+               auto xl = c->_x_px + x -xMin;
+               auto yl = c->_y_px + y -yMin;
+
+               _data[yl * _width_px + xl] = c->_data[y * chunkWidth + x];
+            }
+         }
       }
+   }
 
-      if (c->mX > xMax)
-      {
-        xMax = c->mX;
-      }
-
-      if (c->mY > yMax)
-      {
-        yMax = c->mY;
-      }
-    }
-
-    // the layer gets the smallest chunk offset
-    mOffsetX = xMin;
-    mOffsetY = yMin;
-
-    // assume identical chunk sizes
-    const auto chunkWidth  = chunks.at(0)->mWidth;
-    const auto chunkHeight = chunks.at(0)->mHeight;
-
-    mWidth  = (xMax - xMin) + chunkWidth;
-    mHeight = (yMax - yMin) + chunkHeight;
-
-    mData = new int32_t[mWidth * mHeight];
-
-    // since we're dealing with patches of chunks there might be 'holes' in the map
-    memset(mData, 0, mWidth * mHeight * sizeof (int32_t));
-
-    // std::cout
-    //   << "TmxLayer::deserialize: layer: " << mName << std::endl
-    //   << "  dimensions: width: " << mWidth << "; height: " << mHeight << std::endl
-    //   << "  offset: " << mOffsetX << "; " << mOffsetY << std::endl
-    //   << "  x min: " << xMin << "; x max: " << xMax << std::endl
-    //   << "  y min: " << yMin << "; y max: " << yMax << std::endl;
-
-    for (const auto c : chunks)
-    {
-      for (auto y = 0; y < chunkHeight; y++)
-      {
-        for (auto x = 0; x < chunkWidth; x++)
-        {
-          // translate chunk coordinates to layer coordinates starting at 0; 0
-          auto xl = c->mX + x -xMin;
-          auto yl = c->mY + y -yMin;
-
-          mData[yl * mWidth + xl] = c->mData[y * chunkWidth + x];
-        }
-      }
-    }
-  }
+   chunks.clear();
 }
 
 /*

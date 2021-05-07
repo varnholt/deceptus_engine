@@ -7,6 +7,13 @@
 
 
 //-----------------------------------------------------------------------------
+Atmosphere::~Atmosphere()
+{
+   mMap.clear();
+}
+
+
+//-----------------------------------------------------------------------------
 void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
 {
    if (layer == nullptr)
@@ -21,11 +28,11 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
      exit(-1);
    }
 
-   auto tiles  = layer->mData;
-   auto width  = layer->mWidth;
-   auto height = layer->mHeight;
-   auto offsetX = layer->mOffsetX;
-   auto offsetY = layer->mOffsetY;
+   auto tiles  = layer->_data;
+   auto width  = layer->_width_px;
+   auto height = layer->_height_px;
+   auto offsetX = layer->_offset_x_px;
+   auto offsetY = layer->_offset_y_px;
 
    mMap.resize(width * height);
    mMapWidth = width;
@@ -42,7 +49,7 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
          auto tileRelative = static_cast<int32_t>(AtmosphereTileInvalid);
          if (tileNumber != 0)
          {
-            tileRelative = tileNumber - tileSet->mFirstGid;
+            tileRelative = tileNumber - tileSet->_first_gid;
             mMap[y * width + x] = tileRelative;
          }
 

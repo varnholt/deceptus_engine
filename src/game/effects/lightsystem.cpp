@@ -396,18 +396,18 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
 
-   if (tmx_object && tmx_object->mProperties != nullptr)
+   if (tmx_object && tmx_object->_properties != nullptr)
    {
-      auto it = tmx_object->mProperties->mMap.find("color");
-      if (it != tmx_object->mProperties->mMap.end())
+      auto it = tmx_object->_properties->_map.find("color");
+      if (it != tmx_object->_properties->_map.end())
       {
-         rgba = TmxTools::color(it->second->mValueStr.value());
+         rgba = TmxTools::color(it->second->_value_string.value());
       }
 
-      it = tmx_object->mProperties->mMap.find("texture");
-      if (it != tmx_object->mProperties->mMap.end())
+      it = tmx_object->_properties->_map.find("texture");
+      if (it != tmx_object->_properties->_map.end())
       {
-         texture = (std::filesystem::path("data/light/") / it->second->mValueStr.value()).string();
+         texture = (std::filesystem::path("data/light/") / it->second->_value_string.value()).string();
       }
 
       // A) center of the physical light is in the center of the textured quad
@@ -432,18 +432,18 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
       //   +----+----+
 
       // read offset
-      it = tmx_object->mProperties->mMap.find("center_offset_x_px");
-      if (it != tmx_object->mProperties->mMap.end())
+      it = tmx_object->_properties->_map.find("center_offset_x_px");
+      if (it != tmx_object->_properties->_map.end())
       {
-         light->_center_offset_px.x = it->second->mValueInt.value();
-         light->_center_offset_m.x = it->second->mValueInt.value() * MPP;
+         light->_center_offset_px.x = it->second->_value_int.value();
+         light->_center_offset_m.x = it->second->_value_int.value() * MPP;
       }
 
-      it = tmx_object->mProperties->mMap.find("center_offset_y_px");
-      if (it != tmx_object->mProperties->mMap.end())
+      it = tmx_object->_properties->_map.find("center_offset_y_px");
+      if (it != tmx_object->_properties->_map.end())
       {
-         light->_center_offset_px.y = it->second->mValueInt.value();
-         light->_center_offset_m.y = it->second->mValueInt.value() * MPP;
+         light->_center_offset_px.y = it->second->_value_int.value();
+         light->_center_offset_m.y = it->second->_value_int.value() * MPP;
       }
 
       // read falloff
@@ -456,34 +456,34 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
       // attenuation = --------------------------------------------------------------------------------------------
       //                (constant falloff + (linear falloff * distance) + (quadratic falloff * distane * distance))
       //
-      it = tmx_object->mProperties->mMap.find("falloff_constant");
-      if (it != tmx_object->mProperties->mMap.end())
+      it = tmx_object->_properties->_map.find("falloff_constant");
+      if (it != tmx_object->_properties->_map.end())
       {
-         light->_falloff[0] = it->second->mValueFloat.value();
+         light->_falloff[0] = it->second->_value_float.value();
       }
 
-      it = tmx_object->mProperties->mMap.find("falloff_linear");
-      if (it != tmx_object->mProperties->mMap.end())
+      it = tmx_object->_properties->_map.find("falloff_linear");
+      if (it != tmx_object->_properties->_map.end())
       {
-         light->_falloff[1] = it->second->mValueFloat.value();
+         light->_falloff[1] = it->second->_value_float.value();
       }
 
-      it = tmx_object->mProperties->mMap.find("falloff_quadratic");
-      if (it != tmx_object->mProperties->mMap.end())
+      it = tmx_object->_properties->_map.find("falloff_quadratic");
+      if (it != tmx_object->_properties->_map.end())
       {
-         light->_falloff[2] = it->second->mValueFloat.value();
+         light->_falloff[2] = it->second->_value_float.value();
       }
    }
 
    if (tmx_object)
    {
-      light->_width_px  = static_cast<int>(tmx_object->mWidth);
-      light->_height_px = static_cast<int>(tmx_object->mHeight);
+      light->_width_px  = static_cast<int>(tmx_object->_width_px);
+      light->_height_px = static_cast<int>(tmx_object->_height_px);
 
       // set up the box2d position of the light
       light->_pos_m = b2Vec2(
-         tmx_object->mX * MPP + (tmx_object->mWidth  * 0.5f) * MPP,
-         tmx_object->mY * MPP + (tmx_object->mHeight * 0.5f) * MPP
+         tmx_object->_x_px * MPP + (tmx_object->_width_px  * 0.5f) * MPP,
+         tmx_object->_y_px * MPP + (tmx_object->_height_px * 0.5f) * MPP
       );
    }
 

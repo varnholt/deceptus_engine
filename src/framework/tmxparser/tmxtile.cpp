@@ -6,6 +6,12 @@
 #include <iostream>
 
 
+TmxTile::~TmxTile()
+{
+   delete _animation;
+   delete _object_group;
+}
+
 void TmxTile::deserialize(tinyxml2::XMLElement* element)
 {
    TmxElement::deserialize(element);
@@ -24,13 +30,13 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
 
          if (childElement->Name() == std::string("animation"))
          {
-            mAnimation = new TmxAnimation();
-            tmp = mAnimation;
+            _animation = new TmxAnimation();
+            tmp = _animation;
          }
          else if (childElement->Name() == std::string("objectgroup"))
          {
-           mObjectGroup = new TmxObjectGroup();
-           tmp = mObjectGroup;
+           _object_group = new TmxObjectGroup();
+           tmp = _object_group;
          }
 
          if (tmp != nullptr)

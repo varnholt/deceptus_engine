@@ -84,18 +84,18 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
 
    auto smokeEffect = std::make_shared<SmokeEffect>();
 
-   if (tmxObject->mProperties)
+   if (tmxObject->_properties)
    {
-      auto z = tmxObject->mProperties->mMap.find("z");
-      if (z != tmxObject->mProperties->mMap.end())
+      auto z = tmxObject->_properties->_map.find("z");
+      if (z != tmxObject->_properties->_map.end())
       {
-         smokeEffect->mZ = tmxObject->mProperties->mMap["z"]->mValueInt.value();
+         smokeEffect->mZ = tmxObject->_properties->_map["z"]->_value_int.value();
          std::cout << "smoke effect layer has z: " << smokeEffect->mZ << std::endl;
       }
    }
 
-   const auto rangeX = static_cast<int32_t>(tmxObject->mWidth);
-   const auto rangeY = static_cast<int32_t>(tmxObject->mHeight);
+   const auto rangeX = static_cast<int32_t>(tmxObject->_width_px);
+   const auto rangeY = static_cast<int32_t>(tmxObject->_height_px);
 
    for (auto& particle : smokeEffect->mParticles)
    {
@@ -104,8 +104,8 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
       const auto rotation = static_cast<float>(std::rand() % 360);
       const auto timeOffset = static_cast<float>(std::rand() % 100) * 0.01f * 2.0f * static_cast<float>(M_PI);
 
-      const auto centerX = tmxObject->mX + tmxObject->mWidth / 2;
-      const auto centerY = tmxObject->mY + tmxObject->mHeight / 2;
+      const auto centerX = tmxObject->_x_px + tmxObject->_width_px / 2;
+      const auto centerY = tmxObject->_y_px + tmxObject->_height_px / 2;
 
       const auto sx = (std::rand() % 50 + 50) * 0.008f; // scale from 0..0.4
       const auto sy = (std::rand() % 50 + 50) * 0.008f;

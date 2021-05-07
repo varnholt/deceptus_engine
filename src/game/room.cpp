@@ -195,24 +195,24 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
 {
    // ignore invalid rects
    const auto config = GameConfiguration::getInstance();
-   if (tmxObject->mWidth < config.mViewWidth)
+   if (tmxObject->_width_px < config.mViewWidth)
    {
       std::cerr << "[!] ignoring rect, room width smaller than screen width" << std::endl;
       return;
    }
 
-   if (tmxObject->mHeight < config.mViewHeight)
+   if (tmxObject->_height_px < config.mViewHeight)
    {
       std::cerr << "[!] ignoring rect, room height smaller than screen height" << std::endl;
       return;
    }
 
    // read key from tmx object
-   std::istringstream f(tmxObject->mName);
+   std::istringstream f(tmxObject->_name);
    std::string key;
    if (!getline(f, key, '_'))
    {
-      key = tmxObject->mName;
+      key = tmxObject->_name;
    }
 
    if (key.empty())
@@ -222,10 +222,10 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
    }
 
    auto rect = sf::FloatRect{
-      tmxObject->mX,
-      tmxObject->mY,
-      tmxObject->mWidth,
-      tmxObject->mHeight
+      tmxObject->_x_px,
+      tmxObject->_y_px,
+      tmxObject->_width_px,
+      tmxObject->_height_px
    };
 
    // check if room already exists

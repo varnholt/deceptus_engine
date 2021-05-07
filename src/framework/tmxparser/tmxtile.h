@@ -8,12 +8,13 @@ struct TmxObjectGroup;
 struct TmxTile : TmxElement
 {
    TmxTile() = default;
+   ~TmxTile() override;
 
    void deserialize(tinyxml2::XMLElement* e) override;
 
    int mId = 0;
 
-   TmxAnimation* mAnimation = nullptr;
-   TmxObjectGroup* mObjectGroup = nullptr;
+   TmxAnimation* _animation = nullptr;
+   TmxObjectGroup* _object_group = nullptr;
 };
 

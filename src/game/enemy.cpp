@@ -11,13 +11,13 @@
 
 void Enemy::parse(TmxObject* object)
 {
-   mId = object->mId;
-   mName = object->mName;
-   mPixelPosition = {static_cast<int32_t>(object->mX), static_cast<int32_t>(object->mY)};
+   mId = object->_id;
+   mName = object->_name;
+   mPixelPosition = {static_cast<int32_t>(object->_x_px), static_cast<int32_t>(object->_y_px)};
 
-   if (object->mProperties)
+   if (object->_properties)
    {
-      for (const auto& [k, v] : object->mProperties->mMap)
+      for (const auto& [k, v] : object->_properties->_map)
       {
          ScriptProperty property;
          property.mName = k;
@@ -47,8 +47,8 @@ void Enemy::parse(TmxObject* object)
       }
    }
 
-   auto w = static_cast<int32_t>(object->mWidth);
-   auto h = static_cast<int32_t>(object->mHeight);
+   auto w = static_cast<int32_t>(object->_width_px);
+   auto h = static_cast<int32_t>(object->_height_px);
 
    if (w == 0)
    {
@@ -60,8 +60,8 @@ void Enemy::parse(TmxObject* object)
       h = PIXELS_PER_TILE;
    }
 
-   auto left = static_cast<int32_t>(object->mX);
-   auto top = static_cast<int32_t>(object->mY);
+   auto left = static_cast<int32_t>(object->_x_px);
+   auto top = static_cast<int32_t>(object->_y_px);
 
    top -= PIXELS_PER_TILE / 2;
    left -= PIXELS_PER_TILE / 2;

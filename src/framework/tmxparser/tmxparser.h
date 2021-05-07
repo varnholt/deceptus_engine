@@ -23,6 +23,6 @@ class TmxParser
 
    protected:
 
-      std::vector<TmxElement*> mElements;
+      std::vector<TmxElement*> _elements;
 };
 

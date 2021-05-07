@@ -5,7 +5,7 @@
 
 TmxAnimation::~TmxAnimation()
 {
-   mFrames.clear();
+   _frames.clear();
 }
 
 
@@ -14,14 +14,14 @@ void TmxAnimation::deserialize(tinyxml2::XMLElement *element)
    tinyxml2::XMLNode* node = element->FirstChild();
    while(node != nullptr)
    {
-      tinyxml2::XMLElement* subElement = node->ToElement();
-      if (subElement != nullptr)
+      tinyxml2::XMLElement* sub_element = node->ToElement();
+      if (sub_element != nullptr)
       {
-         if (subElement->Name() == std::string("frame"))
+         if (sub_element->Name() == std::string("frame"))
          {
             TmxFrame* frame = new TmxFrame();
-            mFrames.push_back(frame);
-            frame->deserialize(subElement);
+            _frames.push_back(frame);
+            frame->deserialize(sub_element);
          }
       }
 

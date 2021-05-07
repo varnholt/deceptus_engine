@@ -38,20 +38,20 @@ uint32_t Checkpoint::add(TmxObject* tmxObject)
    Checkpoint cp;
 
    cp.mRect = sf::IntRect{
-      static_cast<int32_t>(tmxObject->mX),
-      static_cast<int32_t>(tmxObject->mY),
-      static_cast<int32_t>(tmxObject->mWidth),
-      static_cast<int32_t>(tmxObject->mHeight)
+      static_cast<int32_t>(tmxObject->_x_px),
+      static_cast<int32_t>(tmxObject->_y_px),
+      static_cast<int32_t>(tmxObject->_width_px),
+      static_cast<int32_t>(tmxObject->_height_px)
    };
 
-   cp.mName = tmxObject->mName;
+   cp.mName = tmxObject->_name;
 
-   if (tmxObject->mProperties)
+   if (tmxObject->_properties)
    {
-      auto it = tmxObject->mProperties->mMap.find("index");
-      if (it != tmxObject->mProperties->mMap.end())
+      auto it = tmxObject->_properties->_map.find("index");
+      if (it != tmxObject->_properties->_map.end())
       {
-         cp.mIndex = static_cast<uint32_t>(it->second->mValueInt.value());
+         cp.mIndex = static_cast<uint32_t>(it->second->_value_int.value());
       }
    }
 

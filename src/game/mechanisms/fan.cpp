@@ -198,10 +198,10 @@ void Fan::load(
 
    resetAll();
 
-   const auto tiles    = layer->mData;
-   const auto width    = layer->mWidth;
-   const auto height   = layer->mHeight;
-   const auto firstId  = tileset->mFirstGid;
+   const auto tiles    = layer->_data;
+   const auto width    = layer->_width_px;
+   const auto height   = layer->_height_px;
+   const auto firstId  = tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -271,19 +271,19 @@ void Fan::addObject(TmxObject* object, const std::filesystem::path& basePath)
    auto fan = std::make_shared<Fan>();
    _fan_instances.push_back(fan);
 
-   const auto w = static_cast<int32_t>(object->mWidth);
-   const auto h = static_cast<int32_t>(object->mHeight);
+   const auto w = static_cast<int32_t>(object->_width_px);
+   const auto h = static_cast<int32_t>(object->_height_px);
 
    fan->_texture = TexturePool::getInstance().get(basePath / "tilesets" / "fan.png");
-   fan->_pixel_rect.left = static_cast<int32_t>(object->mX);
-   fan->_pixel_rect.top = static_cast<int32_t>(object->mY);
+   fan->_pixel_rect.left = static_cast<int32_t>(object->_x_px);
+   fan->_pixel_rect.top = static_cast<int32_t>(object->_y_px);
    fan->_pixel_rect.width = w;
    fan->_pixel_rect.height = h;
 
-   if (object->mProperties)
+   if (object->_properties)
    {
-       auto speedProp = object->mProperties->mMap["speed"];
-       fan->_speed = speedProp ? speedProp->mValueFloat.value() : 1.0f;
+       auto speedProp = object->_properties->_map["speed"];
+       fan->_speed = speedProp ? speedProp->_value_float.value() : 1.0f;
    }
 }
 
