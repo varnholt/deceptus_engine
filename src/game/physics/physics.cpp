@@ -178,7 +178,7 @@ bool Physics::dumpObj(
 
                      if (poly)
                      {
-                        points = poly->mPolyLine;
+                        points = poly->_polyline;
 
                         // for (auto& p : points)
                         // {
@@ -189,7 +189,7 @@ bool Physics::dumpObj(
                      }
                      else if (line)
                      {
-                        points = line->mPolyLine;
+                        points = line->_polyline;
 
                         // for (auto& p : points)
                         // {

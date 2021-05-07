@@ -10,6 +10,6 @@ struct TmxPolyLine : TmxElement
 
    void deserialize(tinyxml2::XMLElement* e) override;
 
-   std::vector<sf::Vector2f> mPolyLine;
+   std::vector<sf::Vector2f> _polyline;
 };
 
