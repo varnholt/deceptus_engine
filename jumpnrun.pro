@@ -114,6 +114,7 @@ SOURCES += \
    src/game/checkpoint.cpp \
    src/game/console.cpp \
    src/game/effects/lightsystem.cpp \
+   src/game/eventserializer.cpp \
    src/game/fadetransitioneffect.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
@@ -286,6 +287,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
+   src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \

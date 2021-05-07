@@ -38,6 +38,8 @@ public:
 
 private:
 
+   void processEvent(const sf::Event& event);
+
    void initializeWindow();
    void initializeController();
 
