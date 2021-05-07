@@ -187,7 +187,7 @@ void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
    }
 
    // init segment length
-   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->mPolyLine;
+   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
    auto path_0_px = pixel_path.at(0);
    auto path_1_px = pixel_path.at(1);
    _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);

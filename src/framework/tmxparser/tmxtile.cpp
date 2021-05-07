@@ -23,17 +23,17 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
    auto node = element->FirstChild();
    while (node != nullptr)
    {
-      auto childElement = node->ToElement();
-      if (childElement != nullptr)
+      auto child_element = node->ToElement();
+      if (child_element != nullptr)
       {
          TmxElement* tmp = nullptr;
 
-         if (childElement->Name() == std::string("animation"))
+         if (child_element->Name() == std::string("animation"))
          {
             _animation = new TmxAnimation();
             tmp = _animation;
          }
-         else if (childElement->Name() == std::string("objectgroup"))
+         else if (child_element->Name() == std::string("objectgroup"))
          {
            _object_group = new TmxObjectGroup();
            tmp = _object_group;
@@ -41,13 +41,13 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
 
          if (tmp != nullptr)
          {
-            tmp->deserialize(childElement);
+            tmp->deserialize(child_element);
          }
          else
          {
             printf(
                "%s is not supported for TmxTile\n",
-               childElement->Name()
+               child_element->Name()
             );
          }
       }

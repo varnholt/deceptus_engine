@@ -8,6 +8,6 @@ struct TmxPolygon : TmxElement
 {
    TmxPolygon() = default;
    void deserialize(tinyxml2::XMLElement* element);
-   std::vector<sf::Vector2f> mPolyLine;
+   std::vector<sf::Vector2f> _polyline;
 };
 
