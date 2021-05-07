@@ -6,6 +6,7 @@
 #include "camerapane.h"
 #include "debugdraw.h"
 #include "displaymode.h"
+#include "eventserializer.h"
 #include "fadetransitioneffect.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/callbackmap.h"
@@ -801,6 +802,69 @@ void Game::takeScreenshot()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::processEvent(const sf::Event& event)
+{
+   if (event.type == sf::Event::Closed)
+   {
+      mWindow->close();
+   }
+
+   else if (event.type == sf::Event::KeyPressed)
+   {
+      if (MessageBox::keyboardKeyPressed(event.key.code))
+      {
+         // nom nom nom
+         return;
+      }
+
+      // todo: process keyboard events in the console class, just like done in the message box
+      if (!Console::getInstance().isActive())
+      {
+         if (Menu::getInstance()->isVisible())
+         {
+            Menu::getInstance()->keyboardKeyPressed(event.key.code);
+            return;
+         }
+         else
+         {
+            mPlayer->getControls().keyboardKeyPressed(event.key.code);
+         }
+      }
+
+      processKeyPressedEvents(event);
+   }
+
+   else if (event.type == sf::Event::KeyReleased)
+   {
+      if (Menu::getInstance()->isVisible())
+      {
+         Menu::getInstance()->keyboardKeyReleased(event.key.code);
+         return;
+      }
+      else
+      {
+         mPlayer->getControls().keyboardKeyReleased(event.key.code);
+      }
+
+      processKeyReleasedEvents(event);
+   }
+
+   else if (event.type == sf::Event::TextEntered)
+   {
+      if (Console::getInstance().isActive())
+      {
+         auto unicode = event.text.unicode;
+
+         if (unicode > 0x1F && unicode < 0x80)
+         {
+            Console::getInstance().append(static_cast<char>(unicode));
+         }
+      }
+   }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
    if (Console::getInstance().isActive())
@@ -1042,66 +1106,14 @@ void Game::processKeyReleasedEvents(const sf::Event& event)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processEvents()
 {
+   static EventSerializer serializer;
+
    sf::Event event;
    while (mWindow->pollEvent(event))
    {
-      if (event.type == sf::Event::Closed)
-      {
-         mWindow->close();
-      }
+      processEvent(event);
 
-      else if (event.type == sf::Event::KeyPressed)
-      {
-         if (MessageBox::keyboardKeyPressed(event.key.code))
-         {
-            // nom nom nom
-            return;
-         }
-
-         // todo: process keyboard events in the console class, just like done in the message box
-         if (!Console::getInstance().isActive())
-         {
-            if (Menu::getInstance()->isVisible())
-            {
-               Menu::getInstance()->keyboardKeyPressed(event.key.code);
-               return;
-            }
-            else
-            {
-               mPlayer->getControls().keyboardKeyPressed(event.key.code);
-            }
-         }
-
-         processKeyPressedEvents(event);
-      }
-
-      else if (event.type == sf::Event::KeyReleased)
-      {
-         if (Menu::getInstance()->isVisible())
-         {
-            Menu::getInstance()->keyboardKeyReleased(event.key.code);
-            return;
-         }
-         else
-         {
-            mPlayer->getControls().keyboardKeyReleased(event.key.code);
-         }
-
-         processKeyReleasedEvents(event);
-      }
-
-      else if (event.type == sf::Event::TextEntered)
-      {
-         if (Console::getInstance().isActive())
-         {
-            auto unicode = event.text.unicode;
-
-            if (unicode > 0x1F && unicode < 0x80)
-            {
-               Console::getInstance().append(static_cast<char>(unicode));
-            }
-         }
-      }
+      serializer.add(event);
    }
 }
 
