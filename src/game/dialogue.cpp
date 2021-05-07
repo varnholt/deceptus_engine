@@ -22,26 +22,26 @@ void Dialogue::add(TmxObject* tmxObject)
 {
    Dialogue dialogue;
 
-   auto properties = tmxObject->mProperties;
+   auto properties = tmxObject->_properties;
    for (auto i = 0u; i < 99; i++)
    {
       std::ostringstream oss;
       oss << std::setw(2) << std::setfill('0') << i;
 
-      auto it = properties->mMap.find(oss.str());
-      if (it != properties->mMap.end())
+      auto it = properties->_map.find(oss.str());
+      if (it != properties->_map.end())
       {
          DialogueItem item;
-         item.mMessage = (*it).second->mValueStr.value();
+         item.mMessage = (*it).second->_value_string.value();
          dialogue.mDialogue.push_back(item);
       }
    }
 
    dialogue.mPixelRect = sf::IntRect{
-      static_cast<int32_t>(tmxObject->mX),
-      static_cast<int32_t>(tmxObject->mY),
-      static_cast<int32_t>(tmxObject->mWidth),
-      static_cast<int32_t>(tmxObject->mHeight)
+      static_cast<int32_t>(tmxObject->_x_px),
+      static_cast<int32_t>(tmxObject->_y_px),
+      static_cast<int32_t>(tmxObject->_width_px),
+      static_cast<int32_t>(tmxObject->_height_px)
    };
 
    sDialogues.push_back(dialogue);

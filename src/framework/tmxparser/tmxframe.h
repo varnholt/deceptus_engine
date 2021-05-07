@@ -8,7 +8,7 @@ struct TmxFrame : TmxElement
 
    void deserialize(tinyxml2::XMLElement* e) override;
 
-   int mTileId;
-   int mDuration;
+   int _tile_id = 0;
+   int _duration_ms = 0;
 };
 

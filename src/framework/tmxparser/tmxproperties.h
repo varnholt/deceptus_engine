@@ -12,6 +12,6 @@ struct TmxProperties : public TmxElement
 public:
    TmxProperties() = default;
    void deserialize(tinyxml2::XMLElement* e) override;
-   std::map<std::string, TmxProperty*> mMap;
+   std::map<std::string, TmxProperty*> _map;
 };
 

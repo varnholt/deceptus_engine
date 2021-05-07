@@ -924,6 +924,12 @@ LuaNode::LuaNode(const std::string &filename)
 }
 
 
+LuaNode::~LuaNode()
+{
+   stopScript();
+}
+
+
 void LuaNode::deserializeEnemyDescription()
 {
    // set up patrol path
@@ -1568,12 +1574,12 @@ void LuaNode::luaCollisionWithPlayer()
 
 void LuaNode::stopScript()
 {
-   if (mState != nullptr)
+   if (mState)
    {
       lua_close(mState);
       mState = nullptr;
 
-      printf("LuaInterface::StopScript: script stopped\n");
+      // printf("LuaInterface::StopScript: script stopped\n");
    }
 }
 

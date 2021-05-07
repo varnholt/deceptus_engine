@@ -2,7 +2,7 @@
 
 void TmxFrame::deserialize(tinyxml2::XMLElement *e)
 {
-   mTileId   = e->IntAttribute("tileid");
-   mDuration = e->IntAttribute("duration");
+   _tile_id = e->IntAttribute("tileid");
+   _duration_ms = e->IntAttribute("duration");
 }
 

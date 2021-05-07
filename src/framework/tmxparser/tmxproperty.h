@@ -13,10 +13,11 @@ struct TmxProperty : TmxElement
 
    std::string toString() const;
 
-   std::string mValueType;
-   std::optional<std::string> mValueStr;
-   std::optional<float> mValueFloat = 0.0f;
-   std::optional<int32_t> mValueInt = 0;
-   std::optional<bool> mValueBool = false;
+   std::string _value_type;
+
+   std::optional<std::string> _value_string;
+   std::optional<float> _value_float = 0.0f;
+   std::optional<int32_t> _value_int = 0;
+   std::optional<bool> _value_bool = false;
 };
 

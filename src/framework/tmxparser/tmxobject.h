@@ -9,17 +9,18 @@ struct TmxProperties;
 struct TmxObject : TmxElement
 {
    TmxObject() = default;
+   ~TmxObject() override;
 
    void deserialize(tinyxml2::XMLElement* e) override;
 
-   std::string mId;
-   float mX = 0.0f;
-   float mY = 0.0f;
-   float mWidth = 0.0f;
-   float mHeight = 0.0f;
+   std::string _id;
+   float _x_px = 0.0f;
+   float _y_px = 0.0f;
+   float _width_px = 0.0f;
+   float _height_px = 0.0f;
 
-   TmxPolygon* mPolygon = nullptr;
-   TmxPolyLine* mPolyLine = nullptr;
-   TmxProperties* mProperties = nullptr;
+   TmxPolygon* _polygon = nullptr;
+   TmxPolyLine* _polyline = nullptr;
+   TmxProperties* _properties = nullptr;
 };
 

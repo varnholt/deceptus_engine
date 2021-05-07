@@ -161,11 +161,11 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
 )
 {
    std::vector<std::shared_ptr<GameMechanism>> movingPlatforms;
-   const auto tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
-   const auto tiles    = layer->mData;
-   const auto width    = layer->mWidth;
-   const auto height   = layer->mHeight;
-   const auto firstId  = tileSet->mFirstGid;
+   const auto tilesize = sf::Vector2u(tileSet->_tile_width_px, tileSet->_tile_height_px);
+   const auto tiles    = layer->_data;
+   const auto width    = layer->_width_px;
+   const auto height   = layer->_height_px;
+   const auto firstId  = tileSet->_first_gid;
 
    for (auto y = 0u; y < height; y++)
    {
@@ -179,7 +179,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             // find matching platform
             auto moving_platform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
 
-            const auto texture_path = basePath / tileSet->mImage->mSource;
+            const auto texture_path = basePath / tileSet->_image->_source;
             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
             const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
 
@@ -192,9 +192,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             moving_platform->_tile_positions.x = x;
             moving_platform->_tile_positions.y = y;
 
-            if (layer->mProperties != nullptr)
+            if (layer->_properties != nullptr)
             {
-               moving_platform->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
+               moving_platform->setZ(layer->_properties->_map["z"]->_value_int.value());
             }
 
             movingPlatforms.push_back(moving_platform);
@@ -251,12 +251,12 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
 //-----------------------------------------------------------------------------
 void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, TmxObject *tmx_object)
 {
-   std::vector<sf::Vector2f> pixel_path = tmx_object->mPolyLine->mPolyLine;
+   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
 
    auto pos = pixel_path.at(0);
 
-   auto x = static_cast<int>((pos.x + tmx_object->mX) / PIXELS_PER_TILE);
-   auto y = static_cast<int>((pos.y + tmx_object->mY) / PIXELS_PER_TILE);
+   auto x = static_cast<int>((pos.x + tmx_object->_x_px) / PIXELS_PER_TILE);
+   auto y = static_cast<int>((pos.y + tmx_object->_y_px) / PIXELS_PER_TILE);
 
    std::shared_ptr<MovingPlatform> platform;
 
@@ -291,14 +291,14 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
          auto time = i / static_cast<float>(pixel_path.size() - 1);
 
          // where do those 4px error come from?!
-         auto x = (tmx_object->mX + poly_pos.x - 4 - (platform->_width  * PIXELS_PER_TILE) / 2.0f) * MPP;
-         auto y = (tmx_object->mY + poly_pos.y -     (platform->_height * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto x = (tmx_object->_x_px + poly_pos.x - 4 - (platform->_width  * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto y = (tmx_object->_y_px + poly_pos.y -     (platform->_height * PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos.x = x;
          platform_pos.y = y;
 
          platform->_interpolation.addKey(platform_pos, time);
-         platform->_pixel_path.push_back({(pos.x + tmx_object->mX), (pos.y + tmx_object->mY)});
+         platform->_pixel_path.push_back({(pos.x + tmx_object->_x_px), (pos.y + tmx_object->_y_px)});
 
          i++;
       }

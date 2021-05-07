@@ -15,6 +15,7 @@ struct TmxTileSet;
 struct Atmosphere
 {
    Atmosphere() = default;
+   ~Atmosphere();
 
    void parse(TmxLayer* layer, TmxTileSet* tileSet);
 

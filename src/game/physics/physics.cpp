@@ -82,23 +82,23 @@ void Physics::parse(
       // std::cout << std::endl;
    }
 
-   mGridWidth  = layer->mWidth  * 3;
-   mGridHeight = layer->mHeight * 3;
+   mGridWidth  = layer->_width_px  * 3;
+   mGridHeight = layer->_height_px * 3;
    mGridSize   = mGridWidth * mGridHeight;
 
    // a larger grid and copy tile contents in there
    mPhysicsMap.resize(mGridSize);
 
    auto yi = 0u;
-   for (auto y = 0u; y < layer->mHeight; y++)
+   for (auto y = 0u; y < layer->_height_px; y++)
    {
-      for (auto x = 0u; x < layer->mWidth; x++)
+      for (auto x = 0u; x < layer->_width_px; x++)
       {
-         const auto key = layer->mData[y * layer->mWidth + x];
+         const auto key = layer->_data[y * layer->_width_px + x];
 
          if (key != 0)
          {
-            const auto it = map.find(key - tileSet->mFirstGid);
+            const auto it = map.find(key - tileSet->_first_gid);
 
             // std::cout << key << ",";
 
@@ -131,11 +131,11 @@ bool Physics::dumpObj(
    const std::filesystem::path& path
 )
 {
-   const auto tiles  = layer->mData;
-   const auto width  = layer->mWidth;
-   const auto height = layer->mHeight;
-   const auto offsetX = layer->mOffsetX;
-   const auto offsetY = layer->mOffsetY;
+   const auto tiles  = layer->_data;
+   const auto width  = layer->_width_px;
+   const auto height = layer->_height_px;
+   const auto offsetX = layer->_offset_x_px;
+   const auto offsetY = layer->_offset_y_px;
 
    if (tileSet == nullptr)
    {
@@ -143,7 +143,7 @@ bool Physics::dumpObj(
       return false;
    }
 
-   const auto tileMap = tileSet->mTileMap;
+   const auto tileMap = tileSet->_tile_map;
 
    std::vector<b2Vec2> vertices;
    std::vector<std::vector<uint32_t>> faces;
@@ -157,22 +157,22 @@ bool Physics::dumpObj(
 
          if (tileNumber != 0)
          {
-            tileRelative = tileNumber - tileSet->mFirstGid;
+            tileRelative = tileNumber - tileSet->_first_gid;
             auto tileIt = tileMap.find(tileRelative);
 
             if (tileIt != tileMap.end())
             {
                auto tile = tileIt->second;
-               auto objects = tile->mObjectGroup;
+               auto objects = tile->_object_group;
 
                if (objects)
                {
-                  for (auto& it : objects->mObjects)
+                  for (auto& it : objects->_objects)
                   {
                      auto object = it.second;
 
-                     auto poly = object->mPolygon;
-                     auto line = object->mPolyLine;
+                     auto poly = object->_polygon;
+                     auto line = object->_polyline;
 
                      std::vector<sf::Vector2f> points;
 
@@ -200,10 +200,10 @@ bool Physics::dumpObj(
                      }
                      else
                      {
-                        auto x = object->mX;
-                        auto y = object->mY;
-                        auto w = object->mWidth;
-                        auto h = object->mHeight;
+                        auto x = object->_x_px;
+                        auto y = object->_y_px;
+                        auto w = object->_width_px;
+                        auto h = object->_height_px;
 
                         points = {
                            {x,     y    },

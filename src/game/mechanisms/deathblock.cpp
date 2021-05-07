@@ -183,12 +183,12 @@ void DeathBlock::setup(
 
    setZ(ZDepthForegroundMin + 1);
 
-   _pixel_positions.x = tmxObject->mX;
-   _pixel_positions.y = tmxObject->mY;
+   _pixel_positions.x = tmxObject->_x_px;
+   _pixel_positions.y = tmxObject->_y_px;
 
    setupBody(world);
 
-   std::vector<sf::Vector2f> pixel_path = tmxObject->mPolyLine->mPolyLine;
+   std::vector<sf::Vector2f> pixel_path = tmxObject->_polyline->_polyline;
    auto pos = pixel_path.at(0);
 
    auto i = 0;
@@ -197,14 +197,14 @@ void DeathBlock::setup(
       b2Vec2 world_pos;
       auto time = i / static_cast<float>(pixel_path.size() - 1);
 
-      auto x = (tmxObject->mX + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
-      auto y = (tmxObject->mY + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto x = (tmxObject->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto y = (tmxObject->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
       world_pos.x = x;
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.push_back({(pos.x + tmxObject->mX), (pos.y + tmxObject->mY)});
+      _pixel_paths.push_back({(pos.x + tmxObject->_x_px), (pos.y + tmxObject->_y_px)});
 
       // std::cout << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY << std::endl;
 

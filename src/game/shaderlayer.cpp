@@ -40,37 +40,37 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
 {
    std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>();
 
-   instance->_position.x = object->mX;
-   instance->_position.y = object->mY;
-   instance->_size.x = object->mWidth;
-   instance->_size.y = object->mHeight;
+   instance->_position.x = object->_x_px;
+   instance->_position.y = object->_y_px;
+   instance->_size.x = object->_width_px;
+   instance->_size.y = object->_height_px;
 
-   if (object->mProperties != nullptr)
+   if (object->_properties != nullptr)
    {
-      auto z = object->mProperties->mMap.find("z");
-      if (z != object->mProperties->mMap.end())
+      auto z = object->_properties->_map.find("z");
+      if (z != object->_properties->_map.end())
       {
-         instance->_z = z->second->mValueInt.value();
+         instance->_z = z->second->_value_int.value();
       }
 
       // shader
-      auto vertex_shader_it = object->mProperties->mMap.find("vertex_shader");
-      if (vertex_shader_it != object->mProperties->mMap.end())
+      auto vertex_shader_it = object->_properties->_map.find("vertex_shader");
+      if (vertex_shader_it != object->_properties->_map.end())
       {
-         instance->_shader.loadFromFile(vertex_shader_it->second->mValueStr.value(), sf::Shader::Vertex);
+         instance->_shader.loadFromFile(vertex_shader_it->second->_value_string.value(), sf::Shader::Vertex);
       }
 
-      auto fragment_shader_it = object->mProperties->mMap.find("fragment_shader");
-      if (fragment_shader_it != object->mProperties->mMap.end())
+      auto fragment_shader_it = object->_properties->_map.find("fragment_shader");
+      if (fragment_shader_it != object->_properties->_map.end())
       {
-         instance->_shader.loadFromFile(fragment_shader_it->second->mValueStr.value(), sf::Shader::Fragment);
+         instance->_shader.loadFromFile(fragment_shader_it->second->_value_string.value(), sf::Shader::Fragment);
       }
 
       // texture uniform
-      auto texture_id = object->mProperties->mMap.find("texture");
-      if (texture_id != object->mProperties->mMap.end())
+      auto texture_id = object->_properties->_map.find("texture");
+      if (texture_id != object->_properties->_map.end())
       {
-         instance->_texture = TexturePool::getInstance().get(texture_id->second->mValueStr.value());
+         instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
          instance->_texture->setRepeated(true);
       }
    }

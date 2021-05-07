@@ -21,6 +21,7 @@ class TileMap : public sf::Drawable, public sf::Transformable
 public:
 
    TileMap() = default;
+   ~TileMap() override;
 
    bool load(
       TmxLayer* layer,
@@ -53,9 +54,9 @@ private:
 
    struct AnimatedTileFrame
    {
-      int _x = 0;
-      int _y = 0;
-      int _duration = 0;
+      int _x_px = 0;
+      int _y_px = 0;
+      int _duration_ms = 0;
    };
 
    struct AnimatedTile

@@ -162,32 +162,32 @@ void Rope::update(const sf::Time& dt)
 void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
 {
    // read properties
-   const auto push_interval_it = tmx_object->mProperties->mMap.find("push_interval");
-   if (push_interval_it != tmx_object->mProperties->mMap.end())
+   const auto push_interval_it = tmx_object->_properties->_map.find("push_interval");
+   if (push_interval_it != tmx_object->_properties->_map.end())
    {
-      _push_interval_s = push_interval_it->second->mValueFloat.value();
+      _push_interval_s = push_interval_it->second->_value_float.value();
    }
 
-   const auto push_duration_it = tmx_object->mProperties->mMap.find("push_duration_s");
-   if (push_duration_it != tmx_object->mProperties->mMap.end())
+   const auto push_duration_it = tmx_object->_properties->_map.find("push_duration_s");
+   if (push_duration_it != tmx_object->_properties->_map.end())
    {
-      _push_duration_s = push_duration_it->second->mValueFloat.value();
+      _push_duration_s = push_duration_it->second->_value_float.value();
    }
 
-   const auto push_strength_it = tmx_object->mProperties->mMap.find("push_strength");
-   if (push_strength_it != tmx_object->mProperties->mMap.end())
+   const auto push_strength_it = tmx_object->_properties->_map.find("push_strength");
+   if (push_strength_it != tmx_object->_properties->_map.end())
    {
-      _push_strength = push_strength_it->second->mValueFloat.value();
+      _push_strength = push_strength_it->second->_value_float.value();
    }
 
-   const auto segment_it = tmx_object->mProperties->mMap.find("segments");
-   if (segment_it != tmx_object->mProperties->mMap.end())
+   const auto segment_it = tmx_object->_properties->_map.find("segments");
+   if (segment_it != tmx_object->_properties->_map.end())
    {
-      _segment_count = segment_it->second->mValueInt.value();
+      _segment_count = segment_it->second->_value_int.value();
    }
 
    // init segment length
-   std::vector<sf::Vector2f> pixel_path = tmx_object->mPolyLine->mPolyLine;
+   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->mPolyLine;
    auto path_0_px = pixel_path.at(0);
    auto path_1_px = pixel_path.at(1);
    _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);
@@ -196,8 +196,8 @@ void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
    // init start position
    setPixelPosition(
       sf::Vector2i{
-         static_cast<int32_t>(tmx_object->mX),
-         static_cast<int32_t>(tmx_object->mY)
+         static_cast<int32_t>(tmx_object->_x_px),
+         static_cast<int32_t>(tmx_object->_y_px)
       }
    );
 

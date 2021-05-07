@@ -16,53 +16,53 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element)
    TmxElement::deserialize(element);
 
    auto attrVal = element->Attribute("type");
-   mValueType = attrVal ? attrVal : "string";
+   _value_type = attrVal ? attrVal : "string";
 
-   if (mValueType == "int")
+   if (_value_type == "int")
    {
-      mValueInt = element->IntAttribute("value");
+      _value_int = element->IntAttribute("value");
    }
-   if (mValueType == "bool")
+   if (_value_type == "bool")
    {
-      mValueBool = element->BoolAttribute("value");
+      _value_bool = element->BoolAttribute("value");
    }
-   if (mValueType == "float")
+   if (_value_type == "float")
    {
-      mValueFloat = element->FloatAttribute("value");
+      _value_float = element->FloatAttribute("value");
    }
-   else if (mValueType == "string" )
+   else if (_value_type == "string" )
    {
-      mValueStr = element->Attribute("value");
+      _value_string = element->Attribute("value");
    }
-   else if (mValueType == "color")
+   else if (_value_type == "color")
    {
-      mValueStr = element->Attribute("value");
+      _value_string = element->Attribute("value");
    }
 }
 
 
 std::string TmxProperty::toString() const
 {
-   if (mValueStr.has_value())
+   if (_value_string.has_value())
    {
-      return mValueStr.value();
+      return _value_string.value();
    }
-   else if (mValueFloat.has_value())
+   else if (_value_float.has_value())
    {
       std::ostringstream stream;
-      stream << mValueFloat.value();
+      stream << _value_float.value();
       return stream.str();
    }
-   else if (mValueInt.has_value())
+   else if (_value_int.has_value())
    {
       std::ostringstream stream;
-      stream << mValueInt.value();
+      stream << _value_int.value();
       return stream.str();
    }
-   else if (mValueBool.has_value())
+   else if (_value_bool.has_value())
    {
       std::ostringstream stream;
-      stream << mValueBool.value();
+      stream << _value_bool.value();
       return stream.str();
    }
 

@@ -41,10 +41,10 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
-   auto tiles    = layer->mData;
-   auto width    = layer->mWidth;
-   auto height   = layer->mHeight;
-   auto firstId  = tileSet->mFirstGid;
+   auto tiles    = layer->_data;
+   auto width    = layer->_width_px;
+   auto height   = layer->_height_px;
+   auto firstId  = tileSet->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto j = 0; j < static_cast<int32_t>(height); j++)
@@ -271,18 +271,18 @@ void Lever::merge(
    for (auto rect : mRectangles)
    {
       sf::Rect<int32_t> searchRect;
-      searchRect.left = static_cast<int32_t>(rect->mX);
-      searchRect.top = static_cast<int32_t>(rect->mY);
-      searchRect.width = static_cast<int32_t>(rect->mWidth);
-      searchRect.height = static_cast<int32_t>(rect->mHeight);
+      searchRect.left = static_cast<int32_t>(rect->_x_px);
+      searchRect.top = static_cast<int32_t>(rect->_y_px);
+      searchRect.width = static_cast<int32_t>(rect->_width_px);
+      searchRect.height = static_cast<int32_t>(rect->_height_px);
 
       bool enabled = true;
-      if (rect->mProperties)
+      if (rect->_properties)
       {
-         auto enabledIt = rect->mProperties->mMap.find("enabled");
-         if (enabledIt != rect->mProperties->mMap.end())
+         auto enabledIt = rect->_properties->_map.find("enabled");
+         if (enabledIt != rect->_properties->_map.end())
          {
-            enabled = enabledIt->second->mValueBool.value();
+            enabled = enabledIt->second->_value_bool.value();
          }
       }
 

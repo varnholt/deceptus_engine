@@ -7,7 +7,13 @@
 
 TmxTileSet::TmxTileSet()
 {
-   mType = TmxElement::TypeTileSet;
+   _type = TmxElement::TypeTileSet;
+}
+
+
+TmxTileSet::~TmxTileSet()
+{
+   delete _image;
 }
 
 
@@ -15,11 +21,11 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 {
    TmxElement::deserialize(element);
 
-   mTileWidth  = element->IntAttribute("tilewidth");
-   mTileHeight = element->IntAttribute("tileheight");
-   mTileCount  = element->IntAttribute("tilecount");
-   mColumns    = element->IntAttribute("columns");
-   mRows       = mColumns > 0 ? (mTileCount / mColumns) : 0;
+   _tile_width_px  = element->IntAttribute("tilewidth");
+   _tile_height_px = element->IntAttribute("tileheight");
+   _tile_count  = element->IntAttribute("tilecount");
+   _columns    = element->IntAttribute("columns");
+   _rows       = _columns > 0 ? (_tile_count / _columns) : 0;
 
    //   printf(
    //      "tileset (name: %s, width: %d, height: %d, count: %d, cols: %d, rows: %d)\n",
@@ -42,8 +48,8 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 
          if (childElement->Name() == std::string("image"))
          {
-            mImage = new TmxImage();
-            tmp = mImage;
+            _image = new TmxImage();
+            tmp = _image;
          }
          else if (childElement->Name() == std::string("tile"))
          {
@@ -66,7 +72,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 
          if (tile != nullptr)
          {
-            mTileMap[tile->mId] = tile;
+            _tile_map[tile->mId] = tile;
          }
       }
 
@@ -77,15 +83,15 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 
 void TmxTileSet::deserialize(tinyxml2::XMLElement *element)
 {
-   mFirstGid   = element->IntAttribute("firstgid");
-   mSource     = element->Attribute("source") ? element->Attribute("source") : "";
+   _first_gid   = element->IntAttribute("firstgid");
+   _source     = element->Attribute("source") ? element->Attribute("source") : "";
 
    // id is read later because source can be an external file
-   if (!mSource.empty())
+   if (!_source.empty())
    {
       tinyxml2::XMLDocument doc;
 
-      std::string filename = mPath.append(mSource).string();
+      std::string filename = _path.append(_source).string();
       if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
       {
          tinyxml2::XMLElement* docElem = doc.FirstChildElement();

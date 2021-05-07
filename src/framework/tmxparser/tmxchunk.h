@@ -8,14 +8,14 @@ struct TmxChunk : TmxElement
 {
 
   TmxChunk() = default;
-  ~TmxChunk();
+  ~TmxChunk() override;
 
   void deserialize(tinyxml2::XMLElement* element);
-  std::vector<sf::Vector2f> mPolyLine;
-  int32_t mX = 0;
-  int32_t mY = 0;
-  int32_t mWidth = 0;
-  int32_t mHeight = 0;
-  int32_t* mData = nullptr;
+  std::vector<sf::Vector2f> _polyline;
+  int32_t _x_px = 0;
+  int32_t _y_px = 0;
+  int32_t _width_px = 0;
+  int32_t _height_px = 0;
+  int32_t* _data = nullptr;
 };
 

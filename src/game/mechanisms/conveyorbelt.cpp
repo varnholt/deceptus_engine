@@ -128,19 +128,19 @@ ConveyorBelt::ConveyorBelt(
 
    mTexture = TexturePool::getInstance().get(basePath / "tilesets" / "cbelt.png");
 
-   float x      = tmxObject->mX;
-   float y      = tmxObject->mY;
-   float width  = tmxObject->mWidth;
-   float height = tmxObject->mHeight;
+   float x      = tmxObject->_x_px;
+   float y      = tmxObject->_y_px;
+   float width  = tmxObject->_width_px;
+   float height = tmxObject->_height_px;
 
    auto velocity = mVelocity;
 
-   if (tmxObject->mProperties)
+   if (tmxObject->_properties)
    {
-      auto velocityIt = tmxObject->mProperties->mMap.find("velocity");
-      if (velocityIt != tmxObject->mProperties->mMap.end())
+      auto velocityIt = tmxObject->_properties->_map.find("velocity");
+      if (velocityIt != tmxObject->_properties->_map.end())
       {
-         velocity = velocityIt->second->mValueFloat.value();
+         velocity = velocityIt->second->_value_float.value();
       }
    }
 

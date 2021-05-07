@@ -10,13 +10,13 @@ void TmxPolyLine::deserialize(tinyxml2::XMLElement *element)
 
    for (auto& pair : pairs)
    {
-      const auto twoPoints = TmxTools::splitPair(pair, ',');
-      if (twoPoints.size() == 2)
+      const auto two_points = TmxTools::splitPair(pair, ',');
+      if (two_points.size() == 2)
       {
-         const auto x = std::stof(twoPoints.at(0));
-         const auto y = std::stof(twoPoints.at(1));
+         const auto x = std::stof(two_points.at(0));
+         const auto y = std::stof(two_points.at(1));
 
-         mPolyLine.push_back(sf::Vector2f(x, y));
+         _polyline.push_back(sf::Vector2f(x, y));
       }
       else
       {

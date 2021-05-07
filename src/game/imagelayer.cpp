@@ -15,27 +15,27 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const s
   std::shared_ptr<ImageLayer> image = std::make_shared<ImageLayer>();
   auto imageLayer = dynamic_cast<TmxImageLayer*>(element);
 
-  image->mZ = imageLayer->mZ;
-  image->mTexture = TexturePool::getInstance().get((levelPath / imageLayer->mImage->mSource).string());
-  image->mSprite.setPosition(imageLayer->mOffsetX, imageLayer->mOffsetY);
-  image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(imageLayer->mOpacity * 255.0f)));
+  image->mZ = imageLayer->_z;
+  image->mTexture = TexturePool::getInstance().get((levelPath / imageLayer->_image->_source).string());
+  image->mSprite.setPosition(imageLayer->_offset_x_px, imageLayer->_offset_y_px);
+  image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(imageLayer->_opacity * 255.0f)));
   image->mSprite.setTexture(*image->mTexture);
 
   sf::BlendMode blendMode = sf::BlendAdd;
-  if (imageLayer->mProperties != nullptr)
+  if (imageLayer->_properties != nullptr)
   {
-     auto z = imageLayer->mProperties->mMap.find("z");
-     if (z != imageLayer->mProperties->mMap.end())
+     auto z = imageLayer->_properties->_map.find("z");
+     if (z != imageLayer->_properties->_map.end())
      {
-        image->mZ = imageLayer->mProperties->mMap["z"]->mValueInt.value();
+        image->mZ = imageLayer->_properties->_map["z"]->_value_int.value();
         // std::cout << "image layer has z: " << image->mZ << std::endl;
      }
 
      std::string blendModeStr;
-     auto it = imageLayer->mProperties->mMap.find("blendmode");
-     if (it != imageLayer->mProperties->mMap.end())
+     auto it = imageLayer->_properties->_map.find("blendmode");
+     if (it != imageLayer->_properties->_map.end())
      {
-        blendModeStr = it->second->mValueStr.value();
+        blendModeStr = it->second->_value_string.value();
 
         if (blendModeStr == "alpha")
         {

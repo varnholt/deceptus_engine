@@ -35,7 +35,7 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
 
          if (property != nullptr)
          {
-            mMap[property->mName] = property;
+            _map[property->_name] = property;
          }
       }
 

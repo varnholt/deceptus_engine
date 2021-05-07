@@ -25,6 +25,20 @@ static constexpr auto x_range = 3;
 }
 
 
+TileMap::~TileMap()
+{
+   _vertices_animated.clear();
+
+   for (auto& [k1, v1] : _vertices_static_blocks)
+   {
+      for (auto& [k2, v2] : v1)
+      {
+         v2.clear();
+      }
+   }
+}
+
+
 bool TileMap::isVisible() const
 {
    return _visible;
@@ -48,7 +62,7 @@ bool TileMap::load(
       return false;
    }
 
-   auto path = (base_path / tilset->mImage->mSource);
+   auto path = (base_path / tilset->_image->_source);
 
    _texture_map = TexturePool::getInstance().get(path);
 
@@ -62,43 +76,43 @@ bool TileMap::load(
    }
 
    auto parallax_scale = 1.0f;
-   if (layer->mProperties)
+   if (layer->_properties)
    {
-      auto& map = layer->mProperties->mMap;
+      auto& map = layer->_properties->_map;
 
       auto itParallaxValue = map.find("parallax");
       if (itParallaxValue != map.end())
       {
-         parallax_scale = itParallaxValue->second->mValueFloat.value();
+         parallax_scale = itParallaxValue->second->_value_float.value();
       }
    }
 
    // std::cout << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path << std::endl;
 
-   _tile_size = sf::Vector2u(tilset->mTileWidth, tilset->mTileHeight);
-   _visible = layer->mVisible;
-   _z = layer->mZ;
+   _tile_size = sf::Vector2u(tilset->_tile_width_px, tilset->_tile_height_px);
+   _visible = layer->_visible;
+   _z = layer->_z;
 
    _vertices_animated.setPrimitiveType(sf::Quads);
 
-   auto& tileMap = tilset->mTileMap;
+   auto& tileMap = tilset->_tile_map;
 
    // populate the vertex array, with one quad per tile
-   for (auto posX = 0u; posX < layer->mWidth; ++posX)
+   for (auto posX = 0u; posX < layer->_width_px; ++posX)
    {
-      for (auto posY = 0u; posY < layer->mHeight; ++posY)
+      for (auto posY = 0u; posY < layer->_height_px; ++posY)
       {
          // get the current tile number
-         auto tileNumber = layer->mData[posX + posY * layer->mWidth];
+         auto tileNumber = layer->_data[posX + posY * layer->_width_px];
 
          if (tileNumber != 0)
          {
             // find its position in the tileset texture
-            auto tu = (tileNumber - tilset->mFirstGid) % (_texture_map->getSize().x / _tile_size.x);
-            auto tv = (tileNumber - tilset->mFirstGid) / (_texture_map->getSize().x / _tile_size.x);
+            auto tu = (tileNumber - tilset->_first_gid) % (_texture_map->getSize().x / _tile_size.x);
+            auto tv = (tileNumber - tilset->_first_gid) / (_texture_map->getSize().x / _tile_size.x);
 
-            auto tx = posX + layer->mOffsetX;
-            auto ty = posY + layer->mOffsetY;
+            auto tx = posX + layer->_offset_x_px;
+            auto ty = posY + layer->_offset_y_px;
 
             // define its 4 corners
             sf::Vertex quad[4];
@@ -120,18 +134,18 @@ bool TileMap::load(
             quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x),            static_cast<float>((tv + 1) * _tile_size.y));
             quad[3].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tileEpsX, static_cast<float>((tv + 1) * _tile_size.y));
 
-            quad[0].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->mOpacity * 255.0f));
-            quad[1].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->mOpacity * 255.0f));
-            quad[2].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->mOpacity * 255.0f));
-            quad[3].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->mOpacity * 255.0f));
+            quad[0].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
+            quad[1].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
+            quad[2].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
+            quad[3].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
 
             // build animation shader data
-            auto it = tileMap.find(tileNumber - tilset->mFirstGid);
-            if (it != tileMap.end() && it->second->mAnimation)
+            auto it = tileMap.find(tileNumber - tilset->_first_gid);
+            if (it != tileMap.end() && it->second->_animation)
             {
                // only animated tiles are defined, non-animated tiles can be considered static tiles
-               auto animation = it->second->mAnimation;
-               auto& frames = animation->mFrames;
+               auto animation = it->second->_animation;
+               auto& frames = animation->_frames;
 
                auto animated_tile = new AnimatedTile();
                animated_tile->_tile_x = tx;
@@ -149,11 +163,11 @@ bool TileMap::load(
                   // );
 
                   auto offset_frame = new AnimatedTileFrame();
-                  offset_frame->_x = frame->mTileId % (_texture_map->getSize().x / _tile_size.x);
-                  offset_frame->_y = frame->mTileId / (_texture_map->getSize().x / _tile_size.x);
-                  offset_frame->_duration = frame->mDuration;
+                  offset_frame->_x_px = frame->_tile_id % (_texture_map->getSize().x / _tile_size.x);
+                  offset_frame->_y_px = frame->_tile_id / (_texture_map->getSize().x / _tile_size.x);
+                  offset_frame->_duration_ms = frame->_duration_ms;
                   animated_tile->_frames.push_back(offset_frame);
-                  duration += frame->mDuration;
+                  duration += frame->_duration_ms;
                }
 
                animated_tile->_duration = duration;
@@ -214,7 +228,7 @@ void TileMap::update(const sf::Time& dt)
       float frameDuration = 0.0f;
       for (auto& frame : anim->_frames)
       {
-         frameDuration += frame->_duration;
+         frameDuration += frame->_duration_ms;
 
          if (frameDuration > anim->_elapsed_ms)
          {
@@ -228,8 +242,8 @@ void TileMap::update(const sf::Time& dt)
 
       auto frame = anim->_frames.at(index);
 
-      const auto tu = static_cast<uint32_t>(frame->_x);
-      const auto tv = static_cast<uint32_t>(frame->_y);
+      const auto tu = static_cast<uint32_t>(frame->_x_px);
+      const auto tv = static_cast<uint32_t>(frame->_y_px);
 
       // re-define its 4 texture coordinates
       anim->_vertices[0].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x), static_cast<float>( tv      * _tile_size.y));

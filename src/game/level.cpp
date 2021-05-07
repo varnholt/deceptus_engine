@@ -259,20 +259,20 @@ Level::~Level()
 //-----------------------------------------------------------------------------
 void Level::deserializeParallaxMap(TmxLayer* layer)
 {
-   if (layer->mProperties)
+   if (layer->_properties)
    {
       auto parallax = 1.0f;
-      auto& map = layer->mProperties->mMap;
+      auto& map = layer->_properties->_map;
       auto itParallaxValue = map.find("parallax");
       if (itParallaxValue != map.end())
       {
-         parallax = itParallaxValue->second->mValueFloat.value();
+         parallax = itParallaxValue->second->_value_float.value();
       }
 
       auto itParallaxView = map.find("parallax_view");
       if (itParallaxView != map.end())
       {
-         const auto view = itParallaxView->second->mValueInt.value();
+         const auto view = itParallaxView->second->_value_int.value();
          mParallaxFactors[view] = parallax;
       }
    }
@@ -314,42 +314,42 @@ void Level::loadTmx()
 
    for (auto element : mTmxElements)
    {
-      if (element->mType == TmxElement::TypeLayer)
+      if (element->_type == TmxElement::TypeLayer)
       {
          auto layer = dynamic_cast<TmxLayer*>(element);
          auto tileset = mTmxParser->getTileSet(layer);
 
-         if (layer->mName.rfind("doors", 0) == 0)
+         if (layer->_name.rfind("doors", 0) == 0)
          {
             mDoors = Door::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "fans")
+         else if (layer->_name == "fans")
          {
             Fan::load(layer, tileset, mWorld);
          }
-         else if (layer->mName == "lasers")
+         else if (layer->_name == "lasers")
          {
             const auto lasers = Laser::load(layer, tileset, path, mWorld);
             mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
          }
-         else if (layer->mName == "lasers_2") // support for dstar's new laser tileset
+         else if (layer->_name == "lasers_2") // support for dstar's new laser tileset
          {
             const auto lasers = Laser::load(layer, tileset, path, mWorld);
             mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
          }
-         else if (layer->mName == "levers")
+         else if (layer->_name == "levers")
          {
             mLevers = Lever::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "platforms")
+         else if (layer->_name == "platforms")
          {
             mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "portals")
+         else if (layer->_name == "portals")
          {
             mPortals = Portal::load(layer, tileset, path, mWorld);
          }
-         else if (layer->mName == "toggle_spikes")
+         else if (layer->_name == "toggle_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
             for (const auto &s : spikes)
@@ -357,7 +357,7 @@ void Level::loadTmx()
                mSpikes.push_back(s);
             }
          }
-         else if (layer->mName == "trap_spikes")
+         else if (layer->_name == "trap_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
             for (const auto &s : spikes)
@@ -365,7 +365,7 @@ void Level::loadTmx()
                mSpikes.push_back(s);
             }
          }
-         else if (layer->mName == "interval_spikes")
+         else if (layer->_name == "interval_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
             for (const auto &s : spikes)
@@ -380,23 +380,23 @@ void Level::loadTmx()
 
             auto pushTileMap = true;
 
-            if (layer->mName == "atmosphere")
+            if (layer->_name == "atmosphere")
             {
                mAtmosphere.mTileMap = tileMap;
                mAtmosphere.parse(layer, tileset);
             }
-            else if (layer->mName == "extras")
+            else if (layer->_name == "extras")
             {
                Player::getCurrent()->getExtraManager()->mTilemap = tileMap;
                Player::getCurrent()->getExtraManager()->load(layer, tileset);
             }
-            else if (layer->mName.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
+            else if (layer->_name.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
             {
                deserializeParallaxMap(layer);
                mParallaxMaps.push_back(tileMap);
                pushTileMap = false;
             }
-            else if (layer->mName == "level" || layer->mName == "level_solid_onesided" || layer->mName == "level_deadly")
+            else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
             {
                parsePhysicsTiles(layer, tileset, path);
             }
@@ -408,71 +408,71 @@ void Level::loadTmx()
          }
       }
 
-      else if (element->mType == TmxElement::TypeObjectGroup)
+      else if (element->_type == TmxElement::TypeObjectGroup)
       {
          TmxObjectGroup* objectGroup = dynamic_cast<TmxObjectGroup*>(element);
 
-         for (const auto& object : objectGroup->mObjects)
+         for (const auto& object : objectGroup->_objects)
          {
             TmxObject* tmxObject = object.second;
 
-            if (objectGroup->mName == "lasers" || objectGroup->mName == "lasers_2")
+            if (objectGroup->_name == "lasers" || objectGroup->_name == "lasers_2")
             {
                Laser::addObject(tmxObject);
             }
-            else if (objectGroup->mName == "enemies")
+            else if (objectGroup->_name == "enemies")
             {
                Enemy enemy;
                enemy.parse(tmxObject);
                mEnemyDataFromTmxLayer[enemy.mId]=enemy;
             }
-            else if (objectGroup->mName == "fans")
+            else if (objectGroup->_name == "fans")
             {
                Fan::addObject(tmxObject, path);
             }
-            else if (objectGroup->mName == "portals")
+            else if (objectGroup->_name == "portals")
             {
-               if (tmxObject->mPolyLine)
+               if (tmxObject->_polyline)
                {
                   Portal::link(mPortals, tmxObject);
                }
             }
-            else if (objectGroup->mName == "ropes")
+            else if (objectGroup->_name == "ropes")
             {
                auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
                rope->setup(tmxObject, mWorld);
                mRopes.push_back(rope);
             }
-            else if (objectGroup->mName == "ropes_with_light")
+            else if (objectGroup->_name == "ropes_with_light")
             {
                auto rope = std::make_shared<RopeWithLight>(dynamic_cast<GameNode*>(this));
                rope->setup(tmxObject, mWorld);
                mRopes.push_back(rope);
             }
-            else if (objectGroup->mName == "smoke")
+            else if (objectGroup->_name == "smoke")
             {
                auto smoke = SmokeEffect::deserialize(tmxObject, objectGroup);
                mSmokeEffect.push_back(smoke);
             }
-            else if (objectGroup->mName == "spike_balls")
+            else if (objectGroup->_name == "spike_balls")
             {
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
                spikeBall->setup(tmxObject, mWorld);
                mSpikeBalls.push_back(spikeBall);
             }
-            else if (objectGroup->mName == "moveable_objects")
+            else if (objectGroup->_name == "moveable_objects")
             {
                auto box = std::make_shared<MoveableBox>(dynamic_cast<GameNode*>(this));
                box->setup(tmxObject, mWorld);
                mMoveableBoxes.push_back(box);
             }
-            else if (objectGroup->mName == "death_blocks")
+            else if (objectGroup->_name == "death_blocks")
             {
                auto deathBlock = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
                deathBlock->setup(tmxObject, mWorld);
                mDeathBlocks.push_back(deathBlock);
             }
-            else if (objectGroup->mName == "checkpoints")
+            else if (objectGroup->_name == "checkpoints")
             {
                const auto cpi = Checkpoint::add(tmxObject);
                auto cp = Checkpoint::getCheckpoint(cpi);
@@ -483,34 +483,34 @@ void Level::loadTmx()
                // whenever we reach a checkpoint, serialize the save state
                cp->addCallback([](){SaveState::serializeToFile();});
             }
-            else if (objectGroup->mName == "dialogues")
+            else if (objectGroup->_name == "dialogues")
             {
                Dialogue::add(tmxObject);
             }
-            else if (objectGroup->mName == "bouncers")
+            else if (objectGroup->_name == "bouncers")
             {
                auto bouncer = std::make_shared<Bouncer>(
                   dynamic_cast<GameNode*>(this),
                   mWorld,
-                  tmxObject->mX,
-                  tmxObject->mY,
-                  tmxObject->mWidth,
-                  tmxObject->mHeight
+                  tmxObject->_x_px,
+                  tmxObject->_y_px,
+                  tmxObject->_width_px,
+                  tmxObject->_height_px
                );
 
-               bouncer->setZ(objectGroup->mZ);
+               bouncer->setZ(objectGroup->_z);
 
                mBouncers.push_back(bouncer);
 
                addDebugRect(
                   bouncer->getBody(),
-                  tmxObject->mX,
-                  tmxObject->mY,
-                  tmxObject->mWidth,
-                  tmxObject->mHeight
+                  tmxObject->_x_px,
+                  tmxObject->_y_px,
+                  tmxObject->_width_px,
+                  tmxObject->_height_px
                );
             }
-            else if (objectGroup->mName == "conveyorbelts")
+            else if (objectGroup->_name == "conveyorbelts")
             {
                auto belt = std::make_shared<ConveyorBelt>(
                   dynamic_cast<GameNode*>(this),
@@ -523,66 +523,66 @@ void Level::loadTmx()
 
                addDebugRect(
                   belt->getBody(),
-                  tmxObject->mX,
-                  tmxObject->mY,
-                  tmxObject->mWidth,
-                  tmxObject->mHeight
+                  tmxObject->_x_px,
+                  tmxObject->_y_px,
+                  tmxObject->_width_px,
+                  tmxObject->_height_px
                );
             }
-            else if (objectGroup->mName == "crushers")
+            else if (objectGroup->_name == "crushers")
             {
                auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
                crusher->setup(tmxObject, mWorld);
                mCrushers.push_back(crusher);
             }
-            else if (objectGroup->mName == "rooms")
+            else if (objectGroup->_name == "rooms")
             {
                Room::deserialize(tmxObject, mRooms);
             }
-            else if (objectGroup->mName == "platform_paths")
+            else if (objectGroup->_name == "platform_paths")
             {
-               if (tmxObject->mPolyLine)
+               if (tmxObject->_polyline)
                {
                   MovingPlatform::link(mPlatforms, tmxObject);
                }
             }
-            else if (objectGroup->mName == "weather")
+            else if (objectGroup->_name == "weather")
             {
                sf::IntRect rect{
-                  static_cast<int32_t>(tmxObject->mX),
-                  static_cast<int32_t>(tmxObject->mY),
-                  static_cast<int32_t>(tmxObject->mWidth),
-                  static_cast<int32_t>(tmxObject->mHeight)
+                  static_cast<int32_t>(tmxObject->_x_px),
+                  static_cast<int32_t>(tmxObject->_y_px),
+                  static_cast<int32_t>(tmxObject->_width_px),
+                  static_cast<int32_t>(tmxObject->_height_px)
                };
 
-               if (tmxObject->mName.rfind("rain", 0) == 0)
+               if (tmxObject->_name.rfind("rain", 0) == 0)
                {
                   Weather::getInstance().add(Weather::WeatherType::Rain, rect);
                }
             }
-            else if (objectGroup->mName.rfind("shader_quads", 0) == 0)
+            else if (objectGroup->_name.rfind("shader_quads", 0) == 0)
             {
                auto quad = ShaderLayer::deserialize(tmxObject);
                mShaderLayers.push_back(quad);
             }
-            else if (objectGroup->mName == "lights")
+            else if (objectGroup->_name == "lights")
             {
                auto light = LightSystem::createLightInstance(tmxObject);
                mLightSystem->_lights.push_back(light);
             }
-            else if (objectGroup->mName.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
+            else if (objectGroup->_name.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
                auto light = StaticLight::deserialize(tmxObject, objectGroup);
                mStaticLight->mLights.push_back(light);
             }
-            if (objectGroup->mName == "switchable_objects")
+            if (objectGroup->_name == "switchable_objects")
             {
                Lever::addSearchRect(tmxObject);
             }
          }
       }
 
-      else if (element->mType == TmxElement::TypeImageLayer)
+      else if (element->_type == TmxElement::TypeImageLayer)
       {
          auto image = ImageLayer::deserialize(element, path);
          mImageLayers.push_back(image);
@@ -1523,8 +1523,8 @@ void Level::parseObj(
       {
          const auto& p = points[index];
          chain.push_back({
-               (p.x + layer->mOffsetX) / PPM,
-               (p.y + layer->mOffsetY) / PPM
+               (p.x + layer->_offset_x_px) / PPM,
+               (p.y + layer->_offset_y_px) / PPM
             }
          );
 
@@ -1567,8 +1567,8 @@ void Level::parsePhysicsTiles(
    };
 
    ParseData level_pd;
-   level_pd.filename_obj_optimized = "layer_" + layer->mName + "_solid.obj";
-   level_pd.filename_obj_not_optimized = "layer_" + layer->mName + "_solid_not_optimised.obj";
+   level_pd.filename_obj_optimized = "layer_" + layer->_name + "_solid.obj";
+   level_pd.filename_obj_not_optimized = "layer_" + layer->_name + "_solid_not_optimised.obj";
    level_pd.filename_physics_path_csv = "physics_path_solid.csv";
    level_pd.filename_grid_image = "physics_grid_solid.png";
    level_pd.filename_path_image = "physics_path_solid.png";
@@ -1576,8 +1576,8 @@ void Level::parsePhysicsTiles(
    level_pd.colliding_tiles = {1};
 
    ParseData solid_onesided_pd;
-   solid_onesided_pd.filename_obj_optimized = "layer_" + layer->mName + "_solid_onesided.obj";
-   solid_onesided_pd.filename_obj_not_optimized = "layer_" + layer->mName + "_solid_onesided_not_optimised.obj";
+   solid_onesided_pd.filename_obj_optimized = "layer_" + layer->_name + "_solid_onesided.obj";
+   solid_onesided_pd.filename_obj_not_optimized = "layer_" + layer->_name + "_solid_onesided_not_optimised.obj";
    solid_onesided_pd.filename_physics_path_csv = "physics_path_solid_onesided.csv";
    solid_onesided_pd.filename_grid_image = "physics_grid_solid_onesided.png";
    solid_onesided_pd.filename_path_image = "physics_path_solid_onesided.png";
@@ -1585,8 +1585,8 @@ void Level::parsePhysicsTiles(
    solid_onesided_pd.colliding_tiles = {1};
 
    ParseData deadly_pd;
-   deadly_pd.filename_obj_optimized = "layer_" + layer->mName + "_deadly.obj";
-   deadly_pd.filename_obj_not_optimized = "layer_" + layer->mName + "_deadly_not_optimised.obj";
+   deadly_pd.filename_obj_optimized = "layer_" + layer->_name + "_deadly.obj";
+   deadly_pd.filename_obj_not_optimized = "layer_" + layer->_name + "_deadly_not_optimised.obj";
    deadly_pd.filename_physics_path_csv = "physics_path_deadly.csv";
    deadly_pd.filename_grid_image = "physics_grid_deadly.png";
    deadly_pd.filename_path_image = "physics_path_deadly.png";
@@ -1596,15 +1596,15 @@ void Level::parsePhysicsTiles(
 
    ParseData* pd = nullptr;
 
-   if (layer->mName == "level")
+   if (layer->_name == "level")
    {
       pd = &level_pd;
    }
-   else if (layer->mName == "level_solid_onesided")
+   else if (layer->_name == "level_solid_onesided")
    {
       pd = &solid_onesided_pd;
    }
-   else if (layer->mName == "level_deadly")
+   else if (layer->_name == "level_deadly")
    {
       pd = &deadly_pd;
    }
@@ -1677,7 +1677,7 @@ void Level::parsePhysicsTiles(
       if (!std::filesystem::exists(pathSolidOptimized))
       {
          std::cerr << "[!] could not find " << pathSolidOptimized.string() << ", obj generator failed" << std::endl;
-         addPathsToWorld(layer->mOffsetX, layer->mOffsetY, square_marcher.mPaths, pd->object_type);
+         addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher.mPaths, pd->object_type);
       }
       else
       {

@@ -248,7 +248,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
    const std::shared_ptr<b2World>&
 )
 {
-   const auto version = (layer->mName == "lasers") ? MechanismVersion::Version1 : MechanismVersion::Version2;
+   const auto version = (layer->_name == "lasers") ? MechanismVersion::Version1 : MechanismVersion::Version2;
 
    resetAll();
 
@@ -263,11 +263,11 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
    std::vector<std::shared_ptr<GameMechanism>> lasers;
 
-   sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
-   const auto tiles    = layer->mData;
-   const auto width    = layer->mWidth;
-   const auto height   = layer->mHeight;
-   const auto firstId  = tileSet->mFirstGid;
+   sf::Vector2u tilesize = sf::Vector2u(tileSet->_tile_width_px, tileSet->_tile_height_px);
+   const auto tiles    = layer->_data;
+   const auto width    = layer->_width_px;
+   const auto height   = layer->_height_px;
+   const auto firstId  = tileSet->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -296,7 +296,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
             laser->mPixelRect.width  = PIXELS_PER_TILE;
             laser->mPixelRect.height = PIXELS_PER_TILE;
 
-            laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->mImage->mSource);
+            laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->_image->_source);
 
             laser->mTu = (tileNumber - firstId) % (laser->mTexture->getSize().x / tilesize.x);
             laser->mTv = (tileNumber - firstId) / (laser->mTexture->getSize().x / tilesize.x);
@@ -306,9 +306,9 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
                laser->mTu = 0;
             }
 
-            if (layer->mProperties != nullptr)
+            if (layer->_properties != nullptr)
             {
-               laser->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
+               laser->setZ(layer->_properties->_map["z"]->_value_int.value());
             }
 
             sf::Sprite sprite;
@@ -466,10 +466,10 @@ void Laser::merge()
 
    for (auto object : mObjects)
    {
-      const auto x = static_cast<int32_t>(object->mX      / PIXELS_PER_TILE );
-      const auto y = static_cast<int32_t>(object->mY      / PIXELS_PER_TILE);
-      const auto w = static_cast<int32_t>(object->mWidth  / PIXELS_PER_TILE );
-      const auto h = static_cast<int32_t>(object->mHeight / PIXELS_PER_TILE);
+      const auto x = static_cast<int32_t>(object->_x_px      / PIXELS_PER_TILE );
+      const auto y = static_cast<int32_t>(object->_y_px      / PIXELS_PER_TILE);
+      const auto w = static_cast<int32_t>(object->_width_px  / PIXELS_PER_TILE );
+      const auto h = static_cast<int32_t>(object->_height_px / PIXELS_PER_TILE);
 
       const auto animationOffset = std::rand() % 100;
 
@@ -486,18 +486,18 @@ void Laser::merge()
                   && static_cast<int32_t>(laser->mTilePosition.y) == yi
                )
                {
-                  if (object->mProperties != nullptr)
+                  if (object->_properties != nullptr)
                   {
-                     auto it = object->mProperties->mMap.find("on_time");
-                     if (it != object->mProperties->mMap.end())
+                     auto it = object->_properties->_map.find("on_time");
+                     if (it != object->_properties->_map.end())
                      {
-                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt.value()), true});
+                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), true});
                      }
 
-                     it = object->mProperties->mMap.find("off_time");
-                     if (it != object->mProperties->mMap.end())
+                     it = object->_properties->_map.find("off_time");
+                     if (it != object->_properties->_map.end())
                      {
-                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->mValueInt.value()), false});
+                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), false});
                      }
                   }
 
