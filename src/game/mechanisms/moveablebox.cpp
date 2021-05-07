@@ -73,10 +73,10 @@ void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& wo
    //      << " size: " << tmxObject->mWidth << " x " << tmxObject->mHeight
    //      << std::endl;
 
-   mSize.x = tmxObject->mWidth;
-   mSize.y = tmxObject->mHeight;
+   mSize.x = tmxObject->_width_px;
+   mSize.y = tmxObject->_height_px;
 
-   mSprite.setPosition(tmxObject->mX, tmxObject->mY - 24);
+   mSprite.setPosition(tmxObject->_x_px, tmxObject->_y_px - 24);
 
    switch (static_cast<int32_t>(mSize.x))
    {

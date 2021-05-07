@@ -160,8 +160,8 @@ void SpikeBall::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& wor
 {
     setPixelPosition(
        sf::Vector2i{
-          static_cast<int32_t>(tmx_object->mX),
-          static_cast<int32_t>(tmx_object->mY)
+          static_cast<int32_t>(tmx_object->_x_px),
+          static_cast<int32_t>(tmx_object->_y_px)
        }
     );
 

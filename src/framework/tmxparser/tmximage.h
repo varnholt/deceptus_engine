@@ -8,8 +8,8 @@ struct TmxImage : TmxElement
 
    void deserialize(tinyxml2::XMLElement *e) override;
 
-   std::string mSource;
-   int mWidth = 0;
-   int mHeight = 0;
+   std::string _source;
+   int _width_px = 0;
+   int _height_px = 0;
 };
 

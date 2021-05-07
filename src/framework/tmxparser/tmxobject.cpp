@@ -4,15 +4,23 @@
 #include "tmxproperties.h"
 
 
+TmxObject::~TmxObject()
+{
+   delete _polygon;
+   delete _polyline;
+   delete _properties;
+}
+
+
 void TmxObject::deserialize(tinyxml2::XMLElement *element)
 {
   TmxElement::deserialize(element);
 
-   mId = element->Attribute("id");
-   mX = static_cast<float>(element->IntAttribute("x"));
-   mY = static_cast<float>(element->IntAttribute("y"));
-   mWidth  = element->FloatAttribute("width");
-   mHeight = element->FloatAttribute("height");
+   _id = element->Attribute("id");
+   _x_px = static_cast<float>(element->IntAttribute("x"));
+   _y_px = static_cast<float>(element->IntAttribute("y"));
+   _width_px  = element->FloatAttribute("width");
+   _height_px = element->FloatAttribute("height");
 
   //   printf("   object (id: %s, width: %f, height: %f)\n",
   //      mId.c_str(),
@@ -31,18 +39,18 @@ void TmxObject::deserialize(tinyxml2::XMLElement *element)
 
          if (subElement->Name() == std::string("polyline"))
          {
-            mPolyLine = new TmxPolyLine();
-            element = mPolyLine;
+            _polyline = new TmxPolyLine();
+            element = _polyline;
          }
          else if (subElement->Name() == std::string("polygon"))
          {
-            mPolygon = new TmxPolygon();
-            element = mPolygon;
+            _polygon = new TmxPolygon();
+            element = _polygon;
          }
          else if (subElement->Name() == std::string("properties"))
          {
-            mProperties = new TmxProperties();
-            mProperties->deserialize(subElement);
+            _properties = new TmxProperties();
+            _properties->deserialize(subElement);
             parsed = true;
          }
 

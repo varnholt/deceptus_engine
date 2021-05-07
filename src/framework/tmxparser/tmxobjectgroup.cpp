@@ -5,20 +5,31 @@
 
 TmxObjectGroup::TmxObjectGroup()
 {
-   mType = TmxElement::TypeObjectGroup;
+   _type = TmxElement::TypeObjectGroup;
 }
 
 
-void TmxObjectGroup::deserialize(tinyxml2::XMLElement *element)
+TmxObjectGroup::~TmxObjectGroup()
 {
-   TmxElement::deserialize(element);
+   for (auto& [k, v] : _objects)
+   {
+      delete v;
+   }
+
+   _objects.clear();
+}
+
+
+void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
+{
+   TmxElement::deserialize(xml_element);
 
 //   printf(
 //      "objectgroup: %s\n",
 //      mName.c_str()
 //   );
 
-   tinyxml2::XMLNode* node = element->FirstChild();
+   tinyxml2::XMLNode* node = xml_element->FirstChild();
    while(node != nullptr)
    {
       tinyxml2::XMLElement* subElement = node->ToElement();
@@ -47,7 +58,7 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement *element)
 
          if (object != nullptr)
          {
-            mObjects[object->mId] = object;
+            _objects[object->_id] = object;
          }
       }
 

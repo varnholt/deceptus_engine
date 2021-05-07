@@ -22,6 +22,7 @@ struct lua_State;
 struct LuaNode : public GameNode
 {
    LuaNode(const std::string &filename);
+   ~LuaNode();
 
    void draw(sf::RenderTarget& window);
    void initialize();

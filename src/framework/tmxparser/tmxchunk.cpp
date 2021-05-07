@@ -7,7 +7,7 @@
 
 TmxChunk::~TmxChunk()
 {
-  delete mData;
+   delete _data;
 }
 
 
@@ -15,12 +15,12 @@ void TmxChunk::deserialize(tinyxml2::XMLElement *element)
 {
    TmxElement::deserialize(element);
 
-   mX = element->IntAttribute("x");
-   mY = element->IntAttribute("y");
-   mWidth = element->IntAttribute("width");
-   mHeight = element->IntAttribute("height");
+   _x_px = element->IntAttribute("x");
+   _y_px = element->IntAttribute("y");
+   _width_px = element->IntAttribute("width");
+   _height_px = element->IntAttribute("height");
 
-   mData = new int32_t[mWidth * mHeight];
+   _data = new int32_t[_width_px * _height_px];
 
    std::string data = element->FirstChild()->Value();
 
@@ -37,12 +37,12 @@ void TmxChunk::deserialize(tinyxml2::XMLElement *element)
          continue;
 
       auto x = 0;
-      const auto rowContent = TmxTools::split(line, ',');
+      const auto row_content = TmxTools::split(line, ',');
 
-      for (const auto& valStr : rowContent)
+      for (const auto& valStr : row_content)
       {
          auto val = std::stoi(valStr);
-         mData[y * mWidth + x] = val;
+         _data[y * _width_px + x] = val;
          x++;
       }
 

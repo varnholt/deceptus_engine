@@ -12,6 +12,6 @@ struct TmxAnimation : TmxElement
    virtual ~TmxAnimation();
 
    void deserialize(tinyxml2::XMLElement* e);
-   std::vector<TmxFrame*> mFrames;
+   std::vector<TmxFrame*> _frames;
 };
 

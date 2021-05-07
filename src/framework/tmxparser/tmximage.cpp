@@ -3,8 +3,8 @@
 
 void TmxImage::deserialize(tinyxml2::XMLElement *e)
 {
-   mSource = e->Attribute("source");
-   mWidth  = e->IntAttribute("width");
-   mHeight = e->IntAttribute("height");
+   _source = e->Attribute("source");
+   _width_px  = e->IntAttribute("width");
+   _height_px = e->IntAttribute("height");
 }
 

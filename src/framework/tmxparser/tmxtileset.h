@@ -14,20 +14,21 @@ struct TmxTile;
 struct TmxTileSet : TmxElement
 {
    TmxTileSet();
+   ~TmxTileSet() override;
 
    void deserialize(tinyxml2::XMLElement* e) override;
    void parseTileSet(tinyxml2::XMLElement* element);
 
-   std::string mSource;
-   int32_t mFirstGid = 0;
-   int32_t mTileWidth = 0;
-   int32_t mTileHeight = 0;
-   int32_t mTileCount = 0;
-   int32_t mColumns = 0;
-   int32_t mRows = 0;
+   std::string _source;
+   int32_t _first_gid = 0;
+   int32_t _tile_width_px = 0;
+   int32_t _tile_height_px = 0;
+   int32_t _tile_count = 0;
+   int32_t _columns = 0;
+   int32_t _rows = 0;
 
-   TmxImage* mImage = nullptr;
-   std::map<int, TmxTile*> mTileMap;
-   std::filesystem::path mPath;
+   TmxImage* _image = nullptr;
+   std::map<int, TmxTile*> _tile_map;
+   std::filesystem::path _path;
 };
 

@@ -266,10 +266,10 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
 
    std::vector<std::shared_ptr<Spikes>> allSpikes;
 
-   const auto tiles    = layer->mData;
-   const auto width    = layer->mWidth;
-   const auto height   = layer->mHeight;
-   const auto firstId  = tileSet->mFirstGid;
+   const auto tiles    = layer->_data;
+   const auto width    = layer->_width_px;
+   const auto height   = layer->_height_px;
+   const auto firstId  = tileSet->_first_gid;
 
    const int32_t tilesPerRow = texture->getSize().x / PIXELS_PER_TILE;
 
@@ -303,9 +303,9 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
                spikes->mTu = TRAP_START_TILE;
             }
 
-            if (layer->mProperties != nullptr)
+            if (layer->_properties != nullptr)
             {
-               spikes->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
+               spikes->setZ(layer->_properties->_map["z"]->_value_int.value());
             }
 
             spikes->mPixelRect = {

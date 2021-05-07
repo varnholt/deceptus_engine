@@ -60,17 +60,17 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
 
    std::array<uint8_t, 4> color = {255, 255, 255, 100};
 
-   const auto color_it = tmx_object->mProperties->mMap.find("color");
-   if (color_it != tmx_object->mProperties->mMap.end())
+   const auto color_it = tmx_object->_properties->_map.find("color");
+   if (color_it != tmx_object->_properties->_map.end())
    {
-      color = TmxTools::color(color_it->second->mValueStr.value());
+      color = TmxTools::color(color_it->second->_value_string.value());
    }
 
    auto sprite = 1;
-   const auto sprite_it = tmx_object->mProperties->mMap.find("sprite");
-   if (sprite_it != tmx_object->mProperties->mMap.end())
+   const auto sprite_it = tmx_object->_properties->_map.find("sprite");
+   if (sprite_it != tmx_object->_properties->_map.end())
    {
-      sprite = sprite_it->second->mValueInt.value();
+      sprite = sprite_it->second->_value_int.value();
    }
 
    if (sprite == 2)

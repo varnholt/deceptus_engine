@@ -25,8 +25,9 @@ void TmxParser::parse(const std::string &filename)
    tinyxml2::XMLDocument doc;
    if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
    {
-      tinyxml2::XMLElement* docElem = doc.FirstChildElement();
-      tinyxml2::XMLNode* n = docElem->FirstChild();
+      tinyxml2::XMLElement* doc_element = doc.FirstChildElement();
+      tinyxml2::XMLNode* n = doc_element->FirstChild();
+
       while(n != nullptr)
       {
          tinyxml2::XMLElement* subElement = n->ToElement();
@@ -38,7 +39,7 @@ void TmxParser::parse(const std::string &filename)
             if (subElement->Name() == std::string("tileset"))
             {
                element = new TmxTileSet();
-               dynamic_cast<TmxTileSet*>(element)->mPath = std::filesystem::path(filename).parent_path();
+               dynamic_cast<TmxTileSet*>(element)->_path = std::filesystem::path(filename).parent_path();
             }
             else if (subElement->Name() == std::string("layer"))
             {
@@ -48,32 +49,32 @@ void TmxParser::parse(const std::string &filename)
             else if (subElement->Name() == std::string("imagelayer"))
             {
                element = new TmxImageLayer();
-               dynamic_cast<TmxImageLayer*>(element)->mZ = z;
+               dynamic_cast<TmxImageLayer*>(element)->_z = z;
             }
             else if (subElement->Name() == std::string("objectgroup"))
             {
                element = new TmxObjectGroup();
-               dynamic_cast<TmxObjectGroup*>(element)->mZ = z;
+               dynamic_cast<TmxObjectGroup*>(element)->_z = z;
             }
 
             if (element != nullptr)
             {
                element->deserialize(subElement);
 
-               if (layer && layer->mProperties)
+               if (layer && layer->_properties)
                {
-                  auto& map = layer->mProperties->mMap;
+                  auto& map = layer->_properties->_map;
                   auto it = map.find("z");
                   if (it != map.end())
                   {
-                     z = it->second->mValueInt.value();
+                     z = it->second->_value_int.value();
                   }
-                  dynamic_cast<TmxLayer*>(element)->mZ = z;
+                  dynamic_cast<TmxLayer*>(element)->_z = z;
                }
 
                // std::cout << "layer: " << element->mName << " z: " << z << std::endl;
 
-               mElements.push_back(element);
+               _elements.push_back(element);
             }
             else
             {
@@ -92,55 +93,55 @@ void TmxParser::parse(const std::string &filename)
 
 std::vector<TmxElement*> TmxParser::getElements() const
 {
-   return mElements;
+   return _elements;
 }
 
 
 std::vector<TmxObjectGroup *> TmxParser::retrieveObjectGroups() const
 {
-   std::vector<TmxObjectGroup *> objectGroups;
-   for (auto element : mElements)
+   std::vector<TmxObjectGroup *> object_groups;
+   for (auto element : _elements)
    {
-      if (element->mType == TmxElement::TypeObjectGroup)
+      if (element->_type == TmxElement::TypeObjectGroup)
       {
-         objectGroups.push_back(dynamic_cast<TmxObjectGroup*>(element));
+         object_groups.push_back(dynamic_cast<TmxObjectGroup*>(element));
       }
    }
 
-   return objectGroups;
+   return object_groups;
 }
 
 
 TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
 {
    // get maximum tile id per layer
-   int tileId = 0;
-   int tmpId = 0;
+   int tild_id = 0;
+   int tmp_id = 0;
 
-   for (auto i = 0u; i < (layer->mHeight * layer->mWidth); i++)
+   for (auto i = 0u; i < (layer->_height_px * layer->_width_px); i++)
    {
-      tmpId = layer->mData[i];
+      tmp_id = layer->_data[i];
 
-      if (tmpId > tileId)
+      if (tmp_id > tild_id)
       {
-         tileId = tmpId;
+         tild_id = tmp_id;
       }
    }
 
    // std::cout << "TmxParser::getTileSet: looking up tileId: " << tileId << std::endl;
 
    TmxTileSet* tileset = nullptr;
-   for (auto element : mElements)
+   for (auto element : _elements)
    {
-      if (element->mType == TmxElement::TypeTileSet)
+      if (element->_type == TmxElement::TypeTileSet)
       {
-         TmxTileSet* tmp = dynamic_cast<TmxTileSet*>(element);
+         auto tmp = dynamic_cast<TmxTileSet*>(element);
 
          if (tmp)
          {
             if (
-                  tileId >= tmp->mFirstGid
-               && tileId <  tmp->mFirstGid + tmp->mTileCount
+                  tild_id >= tmp->_first_gid
+               && tild_id <  tmp->_first_gid + tmp->_tile_count
             )
             {
                tileset = tmp;

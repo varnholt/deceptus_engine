@@ -6,7 +6,14 @@
 
 TmxImageLayer::TmxImageLayer()
 {
-  mType = TypeImageLayer;
+   _type = TypeImageLayer;
+}
+
+
+TmxImageLayer::~TmxImageLayer()
+{
+   delete _image;
+   delete _properties;
 }
 
 
@@ -14,9 +21,9 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
 {
    TmxElement::deserialize(element);
 
-   mOpacity = element->FloatAttribute("opacity", 1.0f);
-   mOffsetX = element->FloatAttribute("offsetx", 0.0f);
-   mOffsetY = element->FloatAttribute("offsety", 0.0f);
+   _opacity = element->FloatAttribute("opacity", 1.0f);
+   _offset_x_px = element->FloatAttribute("offsetx", 0.0f);
+   _offset_y_px = element->FloatAttribute("offsety", 0.0f);
 
    //  printf(
    //     "image layer: %s (opacity: %f, offset: %f, %f)\n",
@@ -29,38 +36,37 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
    tinyxml2::XMLNode* node = element->FirstChild();
    while(node != nullptr)
    {
-      tinyxml2::XMLElement* subElement = node->ToElement();
-      if (subElement != nullptr)
+      tinyxml2::XMLElement* sub_element = node->ToElement();
+      if (sub_element != nullptr)
       {
          TmxElement* element = nullptr;
          auto parsed = false;
 
-         if (subElement->Name() == std::string("image"))
+         if (sub_element->Name() == std::string("image"))
          {
-            mImage = new TmxImage();
-            element = mImage;
+            _image = new TmxImage();
+            element = _image;
          }
-         else if (subElement->Name() == std::string("properties"))
+         else if (sub_element->Name() == std::string("properties"))
          {
-            mProperties = new TmxProperties();
-            mProperties->deserialize(subElement);
+            _properties = new TmxProperties();
+            _properties->deserialize(sub_element);
             parsed = true;
          }
 
-        if (element != nullptr)
-        {
-           element->deserialize(subElement);
-        }
-        else if (!parsed)
-        {
-           printf(
+         if (element != nullptr)
+         {
+            element->deserialize(sub_element);
+         }
+         else if (!parsed)
+         {
+            printf(
               "%s is not supported for TmxElement\n",
-              subElement->Name()
-           );
-        }
-     }
+              sub_element->Name()
+            );
+         }
+      }
 
-     node = node->NextSibling();
-  }
-
+      node = node->NextSibling();
+   }
 }

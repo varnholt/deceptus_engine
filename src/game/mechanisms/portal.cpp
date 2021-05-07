@@ -138,17 +138,17 @@ void Portal::link(
    TmxObject* tmx_object
 )
 {
-   auto src_dst = tmx_object->mPolyLine->mPolyLine;
+   auto src_dst = tmx_object->_polyline->_polyline;
 
    sf::Vector2f src_f = src_dst.at(0);
    sf::Vector2f dst_f = src_dst.at(1);
    sf::Vector2i src(static_cast<int32_t>(floor(src_f.x)), static_cast<int32_t>(floor(src_f.y)));
    sf::Vector2i dst(static_cast<int32_t>(floor(dst_f.x)), static_cast<int32_t>(floor(dst_f.y)));
 
-   const auto src_x = static_cast<int32_t>(src.x + tmx_object->mX) / PIXELS_PER_TILE;
-   const auto src_y = static_cast<int32_t>(src.y + tmx_object->mY) / PIXELS_PER_TILE;
-   const auto dst_x = static_cast<int32_t>(dst.x + tmx_object->mX) / PIXELS_PER_TILE;
-   const auto dst_y = static_cast<int32_t>(dst.y + tmx_object->mY) / PIXELS_PER_TILE;
+   const auto src_x = static_cast<int32_t>(src.x + tmx_object->_x_px) / PIXELS_PER_TILE;
+   const auto src_y = static_cast<int32_t>(src.y + tmx_object->_y_px) / PIXELS_PER_TILE;
+   const auto dst_x = static_cast<int32_t>(dst.x + tmx_object->_x_px) / PIXELS_PER_TILE;
+   const auto dst_y = static_cast<int32_t>(dst.y + tmx_object->_y_px) / PIXELS_PER_TILE;
 
    std::shared_ptr<Portal> src_portal;
    std::shared_ptr<Portal> dst_portal;
@@ -184,12 +184,12 @@ void Portal::link(
    // it'll help :)
    if (!dst_portal)
    {
-      std::cerr << "please mark your dst portal correctly for id: " << tmx_object->mId << std::endl;
+      std::cerr << "please mark your dst portal correctly for id: " << tmx_object->_id << std::endl;
    }
 
    if (!src_portal)
    {
-      std::cerr << "please mark your src portal correctly for id: " << tmx_object->mId << std::endl;
+      std::cerr << "please mark your src portal correctly for id: " << tmx_object->_id << std::endl;
    }
 
    dst_portal->_detination = src_portal;
@@ -237,11 +237,11 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
 
    std::vector<std::shared_ptr<GameMechanism>> portals;
 
-   sf::Vector2u tilesize = sf::Vector2u(tileSet->mTileWidth, tileSet->mTileHeight);
-   const auto tiles    = layer->mData;
-   const auto width    = layer->mWidth;
-   const auto height   = layer->mHeight;
-   const auto firstId  = tileSet->mFirstGid;
+   sf::Vector2u tilesize = sf::Vector2u(tileSet->_tile_width_px, tileSet->_tile_height_px);
+   const auto tiles    = layer->_data;
+   const auto width    = layer->_width_px;
+   const auto height   = layer->_height_px;
+   const auto firstId  = tileSet->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -273,11 +273,11 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
                portals.push_back(portal);
                portal->_tile_positions.x = static_cast<float>(i);
                portal->_tile_positions.y = static_cast<float>(j);
-               portal->_texture = TexturePool::getInstance().get((basePath / tileSet->mImage->mSource).string());
+               portal->_texture = TexturePool::getInstance().get((basePath / tileSet->_image->_source).string());
 
-               if (layer->mProperties != nullptr)
+               if (layer->_properties != nullptr)
                {
-                  portal->setZ(layer->mProperties->mMap["z"]->mValueInt.value());
+                  portal->setZ(layer->_properties->_map["z"]->_value_int.value());
                }
             }
 

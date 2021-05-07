@@ -8,13 +8,14 @@ struct TmxProperties;
 struct TmxImageLayer : public TmxElement
 {
   TmxImageLayer();
+  ~TmxImageLayer() override;
 
-  float mOffsetX = 0.0f;
-  float mOffsetY = 0.0f;
-  float mOpacity = 1.0f;
-  TmxImage* mImage = nullptr;
-  TmxProperties* mProperties = nullptr;
-  int32_t mZ = 0;
+  float _offset_x_px = 0.0f;
+  float _offset_y_px = 0.0f;
+  float _opacity = 1.0f;
+  TmxImage* _image = nullptr;
+  TmxProperties* _properties = nullptr;
+  int32_t _z = 0;
 
   void deserialize(tinyxml2::XMLElement *e);
 };

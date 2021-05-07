@@ -25,11 +25,11 @@ void ExtraManager::load(
 {
    resetExtras();
 
-   auto tiles = layer->mData;
-   auto width = layer->mWidth;
-   auto height = layer->mHeight;
-   auto firstId = tileSet->mFirstGid;
-   auto tileMap = tileSet->mTileMap;
+   auto tiles = layer->_data;
+   auto width = layer->_width_px;
+   auto height = layer->_height_px;
+   auto firstId = tileSet->_first_gid;
+   auto tileMap = tileSet->_tile_map;
 
    for (auto i = 0u; i < width; ++i)
    {
