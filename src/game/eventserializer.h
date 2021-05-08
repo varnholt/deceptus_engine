@@ -23,8 +23,12 @@ class EventSerializer
       void serialize();
       void deserialize();
 
+      void play();
+
 
    private:
+
+      void playThread();
 
       std::vector<ChronoEvent> _events;
 };
