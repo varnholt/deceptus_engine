@@ -22,22 +22,26 @@ mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
+mFireElapsed = 0.0
 mX = -1.0
 mAlignmentOffset = 0
 mSpeed = 1.5
+mProjectileIndex = 0
 
 mIdle = true
+mFired = false
 
 SPRITE_WIDTH = 6 * 24
-SPRITE_HEIGHT = 5 * 24
+SPRITE_HEIGHT = 3 * 24
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeRect(0.2, 0.2, 0.0, 0.1) -- width, height, x, y
+   addShapeRect(0.4, 0.2, 0.0, 0.0) -- width, height, x, y
    addSample("boom.wav")
    addWeapon(WeaponType["Default"], 1000, 60, 0.2) -- interval, damage, radius
-   updateProjectileTexture(0, "data/sprites/enemy_pirate_cannon.png", 144, 984, 48, 24) -- index, path, x, y, width, height
+   updateProjectileTexture(0, "data/sprites/enemy_pirate_cannon_cannonball.png", 0, 0, 72, 72) -- index, path, x, y, width, height
+   setSpriteOffset(0, 0, -24);
 end
 
 
@@ -47,7 +51,7 @@ function writeProperty(key, value)
       if (value == "right") then
          -- print("setting alignment to left")
          mX = 1.0
-         mAlignmentOffset = 4 * SPRITE_HEIGHT
+         mAlignmentOffset = 5 * SPRITE_HEIGHT
       end
    end
 end
@@ -110,30 +114,59 @@ function update(dt)
    -- update sprite index
    mElapsed = mElapsed + dt
    index = mSpriteIndex
-
    mSpriteIndex = math.floor(mElapsed * 20.0)
+
+   -- update projectile index
+   projectileIndex = 0
+   if (mFired) then
+      mFireElapsed = mFireElapsed + dt
+      projectileIndex = math.floor(mFireElapsed * 20.0)
+      projectileIndex = math.min(3, projectileIndex)
+   end
 
    col = 0
    row = 0
 
    -- idle animation
    if (mIdle) then
-      col = mSpriteIndex % 8
-      row = 3
+      col = mSpriteIndex % 3
+      row = 0
 
    -- fire animation
    else
-      col = mSpriteIndex % 8
-      row = (math.floor(mSpriteIndex / 8)) % 3
+      col = mSpriteIndex % 12
+      row = 1 + (math.floor(mSpriteIndex / 12)) % 4
 
       -- fire the ball at the right sprite index
-      if (col == 7 and row == 0) then
+      if (col == 5 and row == 2) then
          fire()
+         mFired = true
+      end
+
+      -- update projectile index after the cannon has been fired
+      if (mFired) then
+
+         if (projectileIndex ~= mProjectileIndex) then
+
+            mProjectileIndex = projectileIndex
+
+            updateProjectileTexture(
+               0,
+               "data/sprites/enemy_pirate_cannon_cannonball.png",
+               mProjectileIndex * 72,
+               0,
+               72,
+               72
+            )
+
+         end
       end
 
       -- animation is done, go to idle animation
-      if (col == 7 and row == 2) then
+      if (col == 3 and row == 4) then
          mIdle = true
+         mFired = false
+         mFireElapsed = 0
       end
    end
 

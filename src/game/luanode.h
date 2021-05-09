@@ -41,7 +41,7 @@ struct LuaNode : public GameNode
    void addShapePoly(const b2Vec2* points, int32_t size);
 
    //! add a rectangular shape to the body of the object (given in metres)
-   void addShapeRect(float width, float height, float x, float y);
+   void addShapeRect(float width, float height, float center_x, float center_y);
 
    //! add a weapon to the node
    void addWeapon(std::unique_ptr<Weapon> weapon);
