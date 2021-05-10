@@ -120,7 +120,7 @@ function update(dt)
    projectileIndex = 0
    if (mFired) then
       mFireElapsed = mFireElapsed + dt
-      projectileIndex = math.floor(mFireElapsed * 20.0)
+      projectileIndex = math.floor(mFireElapsed * 5.0)
       projectileIndex = math.min(3, projectileIndex)
    end
 
@@ -150,14 +150,15 @@ function update(dt)
 
             mProjectileIndex = projectileIndex
 
-            updateProjectileTexture(
-               0,
-               "data/sprites/enemy_pirate_cannon_cannonball.png",
-               mProjectileIndex * 72,
-               0,
-               72,
-               72
-            )
+            -- this is the wrong function to call since we want to alter the fired projectile
+            -- updateProjectileTexture(
+            --    0,
+            --    "data/sprites/enemy_pirate_cannon_cannonball.png",
+            --    mProjectileIndex * 72,
+            --    0,
+            --    72,
+            --    72
+            -- )
 
          end
       end

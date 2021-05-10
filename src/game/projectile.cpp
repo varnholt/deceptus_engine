@@ -8,7 +8,7 @@
 #include <memory>
 
 
-std::map<WeaponType, ProjectileHitAnimation::FrameData> Projectile::_hit_animations;
+std::map<WeaponType, AnimationFrameData> Projectile::_hit_animations;
 std::list<Projectile::HitInformation> Projectile::_hit_information;
 std::set<Projectile*> Projectile::_projectiles;
 
