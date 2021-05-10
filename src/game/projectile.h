@@ -82,7 +82,7 @@ protected:
    sf::Sprite _sprite;
    sf::Rect<int32_t> _texture_rect;
 
-   static std::map<WeaponType, ProjectileHitAnimation::FrameData> _hit_animations;
+   static std::map<WeaponType, AnimationFrameData> _hit_animations;
    static std::set<Projectile*> _projectiles;
    static std::list<HitInformation> _hit_information;
 };

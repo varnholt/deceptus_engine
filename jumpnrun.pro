@@ -101,8 +101,10 @@ SOURCES += \
    src/game/actioncontrollermap.cpp \
    src/game/ambientocclusion.cpp \
    src/game/animation.cpp \
+   src/game/animationframedata.cpp \
    src/game/animationpool.cpp \
    src/game/animationsettings.cpp \
+   src/game/arrow.cpp \
    src/game/atmosphere.cpp \
    src/game/audio.cpp \
    src/game/bitmapfont.cpp \
@@ -287,6 +289,8 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
+   src/game/animationframedata.h \
+   src/game/arrow.h \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/mechanisms/rope.h \
