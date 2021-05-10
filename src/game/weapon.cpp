@@ -186,13 +186,13 @@ void Weapon::initialize()
 
 void Weapon::loadTextures()
 {
-   //   std::cout << mTexturePath.string() << std::endl;
-   //   std::cout
-   //      << "x1: " << mTextureRect.left << " "
-   //      << "y1: " << mTextureRect.top << " "
-   //      << "width: " << mTextureRect.width << " "
-   //      << "height: " << mTextureRect.height
-   //      << std::endl;
+   // std::cout << _texture_path.string() << std::endl;
+   // std::cout
+   //    << "x1: " << _projectile_reference_texture_rect.left << " "
+   //    << "y1: " << _projectile_reference_texture_rect.top << " "
+   //    << "width: " << _projectile_reference_texture_rect.width << " "
+   //    << "height: " << _projectile_reference_texture_rect.height
+   //    << std::endl;
 
    _projectile_reference_texture = TexturePool::getInstance().get(_texture_path);
 
@@ -232,7 +232,7 @@ void Weapon::setTexture(
    const sf::Rect<int32_t>& textureRect
 )
 {
-   bool reload = ((path != _texture_path) || (textureRect != _projectile_reference_texture_rect));
+   const auto reload = ((path != _texture_path) || (textureRect != _projectile_reference_texture_rect));
 
    if (reload)
    {
