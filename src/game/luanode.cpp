@@ -632,7 +632,7 @@ extern "C" int32_t addWeapon(lua_State* state)
 
    if (argc < 3)
    {
-      printf("bad paramters for addWeapon");
+      printf("bad parameters for addWeapon");
       exit(1);
    }
 
