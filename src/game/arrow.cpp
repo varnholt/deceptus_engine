@@ -11,12 +11,14 @@ const auto sprites_per_row = 15;
 const auto sprite_frame_time = 0.075f;
 const auto sprite_start_frame = 10;
 
+static constexpr auto default_bow_projectile_identifier = "arrow";
 
 bool Arrow::_animation_initialised = false;
 
 
 Arrow::Arrow()
 {
+   _identifier = default_bow_projectile_identifier;
    _rotating = true;
    _sticky = true;
    _weapon_type = WeaponType::Bow;
@@ -39,7 +41,7 @@ Arrow::Arrow()
       );
 
       _hit_animations.emplace(
-         _weapon_type,
+         default_bow_projectile_identifier,
          AnimationFrameData{
             texture,
             origin,

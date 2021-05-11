@@ -15,13 +15,13 @@ public:
    static void add(float x, float y, float angle, const AnimationFrameData& frames);
    static void updateAnimations(const sf::Time& dt);
 
-   static std::list<ProjectileHitAnimation*>& getAnimations();
+   static std::vector<ProjectileHitAnimation*>& getAnimations();
 
    static AnimationFrameData getDefaultAnimation();
 
 
 protected:
 
-   static std::list<ProjectileHitAnimation*> _animations;
+   static std::vector<ProjectileHitAnimation*> _animations;
 };
 

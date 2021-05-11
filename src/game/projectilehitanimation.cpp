@@ -7,7 +7,7 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::list<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
+std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
 
 
 namespace
@@ -48,7 +48,7 @@ void ProjectileHitAnimation::add(float x, float y, float angle, const AnimationF
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 {
-   std::list<ProjectileHitAnimation*>::iterator it;
+   std::vector<ProjectileHitAnimation*>::iterator it;
    for (it = _animations.begin(); it != _animations.end();)
    {
       auto animation = (*it);
@@ -70,7 +70,7 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::list<ProjectileHitAnimation*>& ProjectileHitAnimation::getAnimations()
+std::vector<ProjectileHitAnimation*>& ProjectileHitAnimation::getAnimations()
 {
    return _animations;
 }

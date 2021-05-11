@@ -8,10 +8,9 @@
 #include <memory>
 
 
-std::map<WeaponType, AnimationFrameData> Projectile::_hit_animations;
-std::list<Projectile::HitInformation> Projectile::_hit_information;
+std::map<std::string, AnimationFrameData> Projectile::_hit_animations;
+std::vector<Projectile::HitInformation> Projectile::_hit_information;
 std::set<Projectile*> Projectile::_projectiles;
-
 
 
 Projectile::Projectile()
@@ -24,7 +23,7 @@ Projectile::Projectile()
    // have a default animation if case there are none yet
    if (_hit_animations.empty())
    {
-      _hit_animations.emplace(WeaponType::Default, ProjectileHitAnimation::getDefaultAnimation());
+      _hit_animations.emplace(_identifier, ProjectileHitAnimation::getDefaultAnimation());
    }
 }
 
@@ -95,7 +94,8 @@ void Projectile::collectHitInformation()
          _hit_information.push_back({
                b2Vec2(projectile->getBody()->GetPosition()),
                projectile->_rotation,
-               projectile->_weapon_type
+               projectile->_weapon_type,
+               projectile->_identifier
             }
          );
 
@@ -113,7 +113,7 @@ void Projectile::collectHitInformation()
 
 void Projectile::addHitAnimations()
 {
-   std::list<HitInformation>::iterator it;
+   std::vector<HitInformation>::iterator it;
    for (it = _hit_information.begin(); it != _hit_information.end(); ++it)
    {
       const auto& hit_info = *it;
@@ -124,7 +124,7 @@ void Projectile::addHitAnimations()
 
       // std::cout << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle << std::endl;
 
-      ProjectileHitAnimation::add(gx, gy, it->_angle, _hit_animations[hit_info._weapon_type]);
+      ProjectileHitAnimation::add(gx, gy, it->_angle, _hit_animations[hit_info._projectile_animation_identifier]);
    }
 }
 
