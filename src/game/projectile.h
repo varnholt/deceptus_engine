@@ -24,6 +24,7 @@ public:
       b2Vec2 _pos = b2Vec2{0.0f, 0.0};
       float _angle = 0.0f;
       WeaponType _weapon_type = WeaponType::Default;
+      std::string _projectile_animation_identifier;
    };
 
    using DestroyedCallback = std::function<void(void)>;
@@ -69,6 +70,8 @@ protected:
    static void collectHitInformation();
    static void addHitAnimations();
 
+   static constexpr auto default_projectile_identifier = "default";
+
    bool _scheduled_for_removal = false;
    bool _scheduled_for_inactivity = false;
    bool _sticky = false;
@@ -77,14 +80,15 @@ protected:
    float _rotation = 0.0f;
    b2Body* _body = nullptr;
    WeaponType _weapon_type = WeaponType::Default;
+   std::string _identifier = default_projectile_identifier;
    std::vector<DestroyedCallback> _destroyed_callbacks;
 
    sf::Sprite _sprite;
    sf::Rect<int32_t> _texture_rect;
 
-   static std::map<WeaponType, AnimationFrameData> _hit_animations;
+   static std::map<std::string, AnimationFrameData> _hit_animations;
    static std::set<Projectile*> _projectiles;
-   static std::list<HitInformation> _hit_information;
+   static std::vector<HitInformation> _hit_information;
 };
 
 
