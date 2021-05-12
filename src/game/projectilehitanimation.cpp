@@ -117,7 +117,7 @@ void ProjectileHitAnimation::setupDefaultAnimation()
    // have a default animation in case there are none yet
    if (_reference_animations.empty())
    {
-      _reference_animations.emplace("default", ProjectileHitAnimation::getDefaultAnimation());
+      _reference_animations.emplace("default", getDefaultAnimation());
    }
 }
 
