@@ -247,7 +247,7 @@ void Weapon::setTexture(
 void Weapon::drawProjectileHitAnimations(sf::RenderTarget& target)
 {
    // draw projectile hits
-   auto hits = ProjectileHitAnimation::getAnimations();
+   auto hits = ProjectileHitAnimation::getHitAnimations();
    for (auto it = hits.begin(); it != hits.end(); ++it)
    {
       target.draw(*(*it));

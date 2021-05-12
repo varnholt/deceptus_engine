@@ -8,7 +8,6 @@
 #include <memory>
 
 
-std::map<std::string, AnimationFrameData> Projectile::_hit_animations;
 std::vector<Projectile::HitInformation> Projectile::_hit_information;
 std::set<Projectile*> Projectile::_projectiles;
 
@@ -20,11 +19,7 @@ Projectile::Projectile()
    _type = ObjectTypeProjectile;
    _projectiles.insert(this);
 
-   // have a default animation if case there are none yet
-   if (_hit_animations.empty())
-   {
-      _hit_animations.emplace(_identifier, ProjectileHitAnimation::getDefaultAnimation());
-   }
+   ProjectileHitAnimation::setupDefaultAnimation();
 }
 
 
@@ -124,7 +119,8 @@ void Projectile::addHitAnimations()
 
       // std::cout << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle << std::endl;
 
-      ProjectileHitAnimation::add(gx, gy, it->_angle, _hit_animations[hit_info._projectile_animation_identifier]);
+      auto reference_animation = ProjectileHitAnimation::getReferenceAnimation(hit_info._projectile_animation_identifier);
+      ProjectileHitAnimation::playHitAnimation(gx, gy, it->_angle, reference_animation->second);
    }
 }
 
@@ -181,7 +177,7 @@ void Projectile::update(const sf::Time& dt)
 {
    collectHitInformation();
    addHitAnimations();
-   ProjectileHitAnimation::updateAnimations(dt);
+   ProjectileHitAnimation::updateHitAnimations(dt);
 }
 
 
