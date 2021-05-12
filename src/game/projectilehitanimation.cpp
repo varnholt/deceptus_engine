@@ -7,7 +7,8 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::_animations;
+std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::_active_animations;
+std::map<std::string, AnimationFrameData> ProjectileHitAnimation::_reference_animations;
 
 
 namespace
@@ -20,7 +21,7 @@ const auto frame_time = 0.075f;
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void ProjectileHitAnimation::add(float x, float y, float angle, const AnimationFrameData& frames)
+void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, const AnimationFrameData& frames)
 {
    auto anim = new ProjectileHitAnimation();
 
@@ -41,15 +42,15 @@ void ProjectileHitAnimation::add(float x, float y, float angle, const AnimationF
 
    anim->play();
 
-   _animations.push_back(anim);
+   _active_animations.push_back(anim);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
+void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
 {
    std::vector<ProjectileHitAnimation*>::iterator it;
-   for (it = _animations.begin(); it != _animations.end();)
+   for (it = _active_animations.begin(); it != _active_animations.end();)
    {
       auto animation = (*it);
 
@@ -58,7 +59,7 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
       {
          // std::cout << "removing animation after " << animation->mElapsed.asMilliseconds() << "ms" << std::endl;
          delete animation;
-         it = _animations.erase(it);
+         it = _active_animations.erase(it);
       }
       else
       {
@@ -70,9 +71,19 @@ void ProjectileHitAnimation::updateAnimations(const sf::Time& dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::vector<ProjectileHitAnimation*>& ProjectileHitAnimation::getAnimations()
+std::vector<ProjectileHitAnimation*>& ProjectileHitAnimation::getHitAnimations()
 {
-   return _animations;
+   return _active_animations;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void ProjectileHitAnimation::addReferenceAnimation(
+   const std::string& id,
+   const AnimationFrameData& animation
+)
+{
+   _reference_animations.emplace(id, animation);
 }
 
 
@@ -90,6 +101,24 @@ AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
    sf::Vector2f origin(width / 2, height / 2);
 
    return AnimationFrameData{texture, origin, width, height, sprites, sprites, frame_times};
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation::getReferenceAnimation(const std::string& id)
+{
+   return _reference_animations.find(id);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void ProjectileHitAnimation::setupDefaultAnimation()
+{
+   // have a default animation in case there are none yet
+   if (_reference_animations.empty())
+   {
+      _reference_animations.emplace("default", ProjectileHitAnimation::getDefaultAnimation());
+   }
 }
 
 

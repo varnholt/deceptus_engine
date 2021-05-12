@@ -40,7 +40,7 @@ Arrow::Arrow()
          static_cast<float_t>(PIXELS_PER_TILE / 2)
       );
 
-      _hit_animations.emplace(
+      ProjectileHitAnimation::addReferenceAnimation(
          default_bow_projectile_identifier,
          AnimationFrameData{
             texture,
