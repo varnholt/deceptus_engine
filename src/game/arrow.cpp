@@ -8,10 +8,10 @@ const auto sprite_width = PIXELS_PER_TILE;
 const auto sprite_height = PIXELS_PER_TILE;
 const auto sprite_count = 5;
 const auto sprites_per_row = 15;
-const auto sprite_frame_time = 0.075f;
+const auto sprite_frame_time_s = 0.075f;
 const auto sprite_start_frame = 10;
 
-static constexpr auto default_bow_projectile_identifier = "arrow";
+static constexpr auto default_bow_projectile_identifier = "data/weapons/arrow.png";
 
 bool Arrow::_animation_initialised = false;
 
@@ -27,31 +27,14 @@ Arrow::Arrow()
    {
       _animation_initialised = true;
 
-      auto texture = TexturePool::getInstance().get("data/weapons/arrow.png");
-
-      std::vector<sf::Time> frame_times;
-      for (auto i = 0u; i < sprite_count; i++)
-      {
-         frame_times.push_back(sf::seconds(sprite_frame_time));
-      }
-
-      sf::Vector2f origin(
-         static_cast<float_t>(PIXELS_PER_TILE / 2),
-         static_cast<float_t>(PIXELS_PER_TILE / 2)
-      );
-
       ProjectileHitAnimation::addReferenceAnimation(
          default_bow_projectile_identifier,
-         AnimationFrameData{
-            texture,
-            origin,
-            sprite_width,
-            sprite_height,
-            sprite_count,
-            sprites_per_row,
-            frame_times,
-            sprite_start_frame
-         }
+         sprite_width,
+         sprite_height,
+         std::chrono::duration<float, std::chrono::seconds::period>{sprite_frame_time_s},
+         sprite_count,
+         sprites_per_row,
+         sprite_start_frame
       );
    }
 }
