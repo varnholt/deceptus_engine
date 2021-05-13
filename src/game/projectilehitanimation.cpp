@@ -88,6 +88,46 @@ void ProjectileHitAnimation::addReferenceAnimation(
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void ProjectileHitAnimation::addReferenceAnimation(
+   const std::filesystem::path& texture_path,
+   uint32_t frame_width,
+   uint32_t frame_height,
+   const std::chrono::duration<float, std::chrono::seconds::period>& time_per_frame,
+   uint32_t frame_count,
+   uint32_t frames_per_row,
+   uint32_t start_frame
+)
+{
+   auto texture = TexturePool::getInstance().get(texture_path);
+
+   std::vector<sf::Time> frame_times;
+   for (auto i = 0u; i < frame_count; i++)
+   {
+      frame_times.push_back(sf::seconds(time_per_frame.count()));
+   }
+
+   sf::Vector2f origin(
+      static_cast<float_t>(frame_width / 2),
+      static_cast<float_t>(frame_height / 2)
+   );
+
+   addReferenceAnimation(
+      texture_path.string(),
+      AnimationFrameData{
+         texture,
+         origin,
+         frame_width,
+         frame_height,
+         frame_count,
+         frames_per_row,
+         frame_times,
+         start_frame
+      }
+   );
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
 {
    const auto& texture = TexturePool::getInstance().get("data/weapons/detonation_big.png");
