@@ -18,7 +18,7 @@ bool Arrow::_animation_initialised = false;
 
 Arrow::Arrow()
 {
-   _identifier = default_bow_projectile_identifier;
+   _projectile_identifier = default_bow_projectile_identifier;
    _rotating = true;
    _sticky = true;
    _weapon_type = WeaponType::Bow;

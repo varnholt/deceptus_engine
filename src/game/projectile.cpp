@@ -90,7 +90,7 @@ void Projectile::collectHitInformation()
                b2Vec2(projectile->getBody()->GetPosition()),
                projectile->_rotation,
                projectile->_weapon_type,
-               projectile->_identifier
+               projectile->_projectile_identifier
             }
          );
 
