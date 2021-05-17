@@ -839,6 +839,36 @@ extern "C" int32_t debug(lua_State* state)
 }
 
 
+extern "C" int32_t registerHitAnimation(lua_State* state)
+{
+   int32_t argc = lua_gettop(state);
+
+   if (argc == 8)
+   {
+      auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
+      std::filesystem::path path = lua_tostring(state, 2);
+      auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
+      auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
+      auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 5));
+      auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 6));
+      auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 7));
+      auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 8));
+
+      ProjectileHitAnimation::addReferenceAnimation(
+         path,
+         frame_width,
+         frame_height,
+         std::chrono::duration<float, std::chrono::seconds::period>{time_per_frame_s},
+         frame_count,
+         frames_per_row,
+         start_frame
+      );
+   }
+
+   return 0;
+}
+
+
 [[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
   // the error message is on top of the stack.
