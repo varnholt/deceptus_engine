@@ -863,6 +863,15 @@ extern "C" int32_t registerHitAnimation(lua_State* state)
          frames_per_row,
          start_frame
       );
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->mWeapons[weapon_index]->setProjectileIdentifier(path.string());
    }
 
    return 0;

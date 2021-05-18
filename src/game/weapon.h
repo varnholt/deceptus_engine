@@ -49,6 +49,9 @@ public:
    int getFireIntervalMs() const;
    void setFireIntervalMs(int interval);
 
+   std::optional<std::string> getProjectileIdentifier() const;
+   void setProjectileIdentifier(const std::string& projectile_identifier);
+
 
 protected:
 
@@ -62,6 +65,7 @@ protected:
    std::shared_ptr<sf::Texture> _projectile_reference_texture;
    sf::Rect<int32_t> _projectile_reference_texture_rect;
    sf::Sprite _projectile_reference_sprite;
+   std::optional<std::string> _projectile_identifier;
 
    std::unique_ptr<b2Shape> _shape;
 
