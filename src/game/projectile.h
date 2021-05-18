@@ -64,6 +64,9 @@ public:
    const sf::Rect<int32_t>& getTextureRect() const;
    void setTextureRect(const sf::Rect<int32_t>& texture_rect);
 
+   std::string getProjectileIdentifier() const;
+   void setProjectileIdentifier(const std::string& projectile_identifier);
+
 
 protected:
 

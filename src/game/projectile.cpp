@@ -124,6 +124,16 @@ void Projectile::addHitAnimations()
    }
 }
 
+std::string Projectile::getProjectileIdentifier() const
+{
+   return _projectile_identifier;
+}
+
+void Projectile::setProjectileIdentifier(const std::string& projectile_identifier)
+{
+   _projectile_identifier = projectile_identifier;
+}
+
 
 const sf::Rect<int32_t>& Projectile::getTextureRect() const
 {
