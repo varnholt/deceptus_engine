@@ -79,6 +79,10 @@ void Weapon::fireNow(
    });
    projectile->setProperty("damage", _damage);
    projectile->setBody(_body);
+   if (_projectile_identifier.has_value())
+   {
+      projectile->setProjectileIdentifier(_projectile_identifier.value());
+   }
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
@@ -132,6 +136,18 @@ void Weapon::drawProjectiles(sf::RenderTarget& target)
 
       target.draw(sprite);
    }
+}
+
+
+std::optional<std::string> Weapon::getProjectileIdentifier() const
+{
+   return _projectile_identifier;
+}
+
+
+void Weapon::setProjectileIdentifier(const std::string& projectile_identifier)
+{
+   _projectile_identifier = projectile_identifier;
 }
 
 
