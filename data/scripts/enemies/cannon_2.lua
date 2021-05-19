@@ -39,7 +39,20 @@ SPRITE_HEIGHT = 3 * 24
 function initialize()
    addShapeRect(0.4, 0.2, 0.0, 0.0) -- width, height, x, y
    addSample("boom.wav")
+
    addWeapon(WeaponType["Default"], 1000, 60, 0.2) -- interval, damage, radius
+
+   registerHitAnimation(
+      0,
+      "data/sprites/enemy_pirate_cannon_cannonball.png",
+      3 * 24,
+      3 * 24,
+      0.1,
+      20,
+      24,
+      4
+   )
+
    updateProjectileTexture(0, "data/sprites/enemy_pirate_cannon_cannonball.png", 0, 0, 72, 72) -- index, path, x, y, width, height
    setSpriteOffset(0, 0, -24);
 end
