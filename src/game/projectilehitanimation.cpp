@@ -155,7 +155,8 @@ std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation
 void ProjectileHitAnimation::setupDefaultAnimation()
 {
    // have a default animation in case there are none yet
-   if (_reference_animations.empty())
+   const auto it = _reference_animations.find("default");
+   if (it == _reference_animations.end())
    {
       _reference_animations.emplace("default", getDefaultAnimation());
    }
