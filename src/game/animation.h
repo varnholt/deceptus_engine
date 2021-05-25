@@ -23,8 +23,9 @@ public:
    void play();
    void pause();
    void stop();
+
    void seekToStart();
-   void setFrame(int32_t newFrame, bool resetTime = true);
+   void updateVertices(bool resetTime = true);
 
    void setAlpha(uint8_t alpha);
 
@@ -33,10 +34,10 @@ public:
 
    std::string _name;
 
-   std::vector<sf::IntRect> _fames;
+   std::vector<sf::IntRect> _frames;
 
-   std::shared_ptr<sf::Texture> _texture_map;
-   std::shared_ptr<sf::Texture> _normal_map;
+   std::shared_ptr<sf::Texture> _color_texture;
+   std::shared_ptr<sf::Texture> _normal_texture;
 
    sf::Vertex _vertices[4];
 

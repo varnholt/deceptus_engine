@@ -42,6 +42,22 @@ int16_t groupIndex = 0;                                          // 0 is default
 Bow::Bow()
 {
    _fire_interval_ms = 1500;
+
+   // the shape is only defined here to align the texture on it
+   _shape = std::make_unique<b2PolygonShape>();
+   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
+      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
+      arrow_width * scale
+   );
+
+   AnimationFrameData frame_data;
+   frame_data._texture = TexturePool::getInstance().get("data/weapons/arrow.png");
+   frame_data._origin = {
+         static_cast<float_t>(PIXELS_PER_TILE / 2),
+         static_cast<float_t>(PIXELS_PER_TILE / 2)
+      };
+
+   setProjectileAnimation(frame_data);
 }
 
 
@@ -55,7 +71,8 @@ Bow::~Bow()
 void Bow::load(b2World* world)
 {
    auto arrow = _loaded_arrow = new Arrow();
-   arrow->setSprite(_projectile_reference_sprite);
+
+   arrow->setAnimation(_projectile_reference_animation._animation);
    arrow->_start_time = GlobalClock::getInstance()->getElapsedTimeInMs();
 
    _loaded_arrow->addDestroyedCallback([this, arrow](){
@@ -135,27 +152,6 @@ b2Body* Bow::getLauncherBody() const
 void Bow::setLauncherBody(b2Body* launcher_body)
 {
    _launcher_body = launcher_body;
-}
-
-
-void Bow::loadTextures()
-{
-   // the shape is only defined here to align the texture on it
-   _shape = std::make_unique<b2PolygonShape>();
-   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
-      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
-      arrow_width * scale
-   );
-
-   _texture_path = "data/weapons/arrow.png";
-
-   _projectile_reference_texture = TexturePool::getInstance().get(_texture_path);
-
-   _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
-   _projectile_reference_sprite.setOrigin(
-      static_cast<float_t>(PIXELS_PER_TILE / 2),
-      static_cast<float_t>(PIXELS_PER_TILE / 2)
-   );
 }
 
 

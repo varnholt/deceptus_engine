@@ -72,17 +72,21 @@ void Weapon::fireNow(
    );
 
    auto projectile = new Projectile();
-   projectile->setSprite(_projectile_reference_sprite);
-   projectile->setTextureRect(_projectile_reference_texture_rect);
+
+   projectile->setAnimation(_projectile_reference_animation._animation);
+   projectile->getAnimation().seekToStart();
+   projectile->setProperty("damage", _damage);
+   projectile->setBody(_body);
+
    projectile->addDestroyedCallback([this, projectile](){
       _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), projectile), _projectiles.end());
    });
-   projectile->setProperty("damage", _damage);
-   projectile->setBody(_body);
-   if (_projectile_identifier.has_value())
+
+   if (_projectile_reference_animation._identifier.has_value())
    {
-      projectile->setProjectileIdentifier(_projectile_identifier.value());
+      projectile->setProjectileIdentifier(_projectile_reference_animation._identifier.value());
    }
+
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
@@ -117,37 +121,47 @@ void Weapon::setFireIntervalMs(int fireInterval)
 }
 
 
+void Weapon::updateProjectiles(const sf::Time& time)
+{
+   for (auto projectile : _projectiles)
+   {
+      auto sprite = projectile->getAnimation();
+      sprite.update(time);
+   }
+}
+
+
 void Weapon::drawProjectiles(sf::RenderTarget& target)
 {
    for (auto projectile : _projectiles)
    {
-      auto sprite = projectile->getSprite();
+      auto& projectile_animation = projectile->getAnimation();
 
       if (projectile->isRotating())
       {
          // std::cout << "setting sprite rotation to " << projectile->getRotation() << std::endl;
-         sprite.setRotation(RADTODEG * projectile->getRotation());
+         projectile_animation.setRotation(RADTODEG * projectile->getRotation());
       }
 
-      sprite.setPosition(
+      projectile_animation.setPosition(
          projectile->getBody()->GetPosition().x * PPM,
          projectile->getBody()->GetPosition().y * PPM
       );
 
-      target.draw(sprite);
+      target.draw(projectile_animation);
    }
 }
 
 
 std::optional<std::string> Weapon::getProjectileIdentifier() const
 {
-   return _projectile_identifier;
+   return _projectile_reference_animation._identifier;
 }
 
 
 void Weapon::setProjectileIdentifier(const std::string& projectile_identifier)
 {
-   _projectile_identifier = projectile_identifier;
+   _projectile_reference_animation._identifier = projectile_identifier;
 }
 
 
@@ -157,8 +171,11 @@ void Weapon::draw(sf::RenderTarget& target)
 }
 
 
-void Weapon::update(const sf::Time& /*time*/)
+void Weapon::update(const sf::Time& time)
 {
+   // update all projectile animations
+   updateProjectiles(time);
+
    // can't set the bodies inactive in the postsolve step because the world is still locked
    for (auto& projectile : _projectiles)
    {
@@ -196,11 +213,11 @@ int Weapon::damage() const
 
 void Weapon::initialize()
 {
-   loadTextures();
+   createProjectileAnimation();
 }
 
 
-void Weapon::loadTextures()
+void Weapon::createProjectileAnimation()
 {
    // std::cout << _texture_path.string() << std::endl;
    // std::cout
@@ -210,53 +227,50 @@ void Weapon::loadTextures()
    //    << "height: " << _projectile_reference_texture_rect.height
    //    << std::endl;
 
-   _projectile_reference_texture = TexturePool::getInstance().get(_texture_path);
 
-   if (_shape->GetType() == b2Shape::e_polygon)
-   {
-      _projectile_reference_sprite.setOrigin(0, 0);
-      _projectile_reference_sprite.setTextureRect(_projectile_reference_texture_rect);
-      _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
-   }
-   else if (_shape->GetType() == b2Shape::e_circle)
-   {
-      if (_projectile_reference_texture_rect.width > 0)
-      {
-         _projectile_reference_sprite.setOrigin(
-            static_cast<float_t>(_projectile_reference_texture_rect.width / 2),
-            static_cast<float_t>(_projectile_reference_texture_rect.height / 2)
-         );
+// maybe the origin should no longer depend on the shape
 
-         _projectile_reference_sprite.setTextureRect(_projectile_reference_texture_rect);
-         _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
-      }
-      else
-      {
-         _projectile_reference_sprite.setOrigin(
-            static_cast<float_t>(_projectile_reference_texture->getSize().x / 2),
-            static_cast<float_t>(_projectile_reference_texture->getSize().y / 2)
-         );
+//   const auto& texture  = TexturePool::getInstance().get(_projectile_reference_animation._texture_path);
 
-         _projectile_reference_sprite.setTexture(*_projectile_reference_texture, true);
-      }
-   }
+//   if (_shape->GetType() == b2Shape::e_polygon)
+//   {
+//      _projectile_reference_animation._animation.setOrigin(0, 0);
+//      _projectile_reference_animation._animation._color_texture = texture;
+//   }
+//   else if (_shape->GetType() == b2Shape::e_circle)
+//   {
+//      _projectile_reference_animation._animation.setOrigin(
+//         static_cast<float_t>(_projectile_reference_animation._animation.getTextureRect().width / 2),
+//         static_cast<float_t>(_projectile_reference_animation._animation.getTextureRect().height / 2)
+//      );
+
+//      _projectile_reference_animation._animation._color_texture = texture;
+//   }
 }
 
 
-void Weapon::setTexture(
-   const std::filesystem::path& path,
+// create a reference animation from a single frame
+void Weapon::setProjectileAnimation(
+   const std::shared_ptr<sf::Texture>& texture,
    const sf::Rect<int32_t>& textureRect
 )
 {
-   const auto reload = ((path != _texture_path) || (textureRect != _projectile_reference_texture_rect));
+   _projectile_reference_animation._animation.setTextureRect(textureRect);
+   _projectile_reference_animation._animation._color_texture = texture;
+   _projectile_reference_animation._animation._frames.clear();
+   _projectile_reference_animation._animation._frames.push_back(textureRect);
+}
 
-   if (reload)
-   {
-      _projectile_reference_texture_rect = textureRect;
-      _texture_path = path;
 
-      loadTextures();
-   }
+// create a reference animation from multiple frames
+void Weapon::setProjectileAnimation(
+   const AnimationFrameData& frame_data
+)
+{
+   _projectile_reference_animation._animation._color_texture = frame_data._texture;
+   _projectile_reference_animation._animation.setOrigin(frame_data._origin);
+   _projectile_reference_animation._animation._frames = frame_data._frames;
+   _projectile_reference_animation._animation.setFrameTimes(frame_data._frame_times);
 }
 
 
