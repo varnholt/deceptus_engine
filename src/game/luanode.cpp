@@ -752,8 +752,8 @@ extern "C" int32_t updateProjectileTexture(lua_State* state)
       {
          return 0;
       }
-
-      node->mWeapons[index]->setTexture(path, rect);
+      const auto& texture = TexturePool::getInstance().get(path);
+      node->mWeapons[index]->setProjectileAnimation(texture, rect);
    }
 
    return 0;
