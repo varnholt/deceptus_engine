@@ -124,10 +124,12 @@ void Projectile::addHitAnimations()
    }
 }
 
+
 std::string Projectile::getProjectileIdentifier() const
 {
    return _projectile_identifier;
 }
+
 
 void Projectile::setProjectileIdentifier(const std::string& projectile_identifier)
 {
@@ -135,27 +137,15 @@ void Projectile::setProjectileIdentifier(const std::string& projectile_identifie
 }
 
 
-const sf::Rect<int32_t>& Projectile::getTextureRect() const
+Animation& Projectile::getAnimation()
 {
-   return _texture_rect;
+   return _animation;
 }
 
 
-void Projectile::setTextureRect(const sf::Rect<int32_t>& texture_rect)
+void Projectile::setAnimation(const Animation& sprite)
 {
-   _texture_rect = texture_rect;
-}
-
-
-sf::Sprite Projectile::getSprite() const
-{
-   return _sprite;
-}
-
-
-void Projectile::setSprite(const sf::Sprite& sprite)
-{
-   _sprite = sprite;
+   _animation = sprite;
 }
 
 

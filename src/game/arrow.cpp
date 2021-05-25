@@ -67,7 +67,7 @@ void Arrow::updateTextureRect()
    texture_rect.width  = PIXELS_PER_TILE;
    texture_rect.height = PIXELS_PER_TILE;
 
-   _sprite.setTextureRect(texture_rect);
+   _animation.setTextureRect(texture_rect);
 }
 
 
