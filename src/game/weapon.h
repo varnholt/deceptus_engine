@@ -46,7 +46,6 @@ public:
    virtual void update(const sf::Time& time);
 
    virtual void initialize();
-   virtual void createProjectileAnimation();
 
    static void drawProjectileHitAnimations(sf::RenderTarget& target);
 

@@ -14,6 +14,7 @@ class Animation : public sf::Sprite
 public:
 
    Animation() = default;
+   Animation(const Animation& anim);
 
    void draw(sf::RenderTarget& target, sf::RenderStates states = {}) const override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states = {}) const;
