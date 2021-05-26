@@ -155,6 +155,23 @@ void Animation::update(const sf::Time& dt)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+Animation::Animation(const Animation& anim)
+  : _name(anim._name),
+    _frames(anim._frames),
+    _color_texture(anim._color_texture),
+    _normal_texture(anim._normal_texture),
+    _frame_times(anim._frame_times)
+{
+   setOrigin(anim.getOrigin());
+
+   _vertices[0] = anim._vertices[0];
+   _vertices[1] = anim._vertices[1];
+   _vertices[2] = anim._vertices[2];
+   _vertices[3] = anim._vertices[3];
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    states.transform *= getTransform();

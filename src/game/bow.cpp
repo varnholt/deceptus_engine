@@ -50,12 +50,16 @@ Bow::Bow()
       arrow_width * scale
    );
 
-   AnimationFrameData frame_data;
-   frame_data._texture = TexturePool::getInstance().get("data/weapons/arrow.png");
-   frame_data._origin = {
-         static_cast<float_t>(PIXELS_PER_TILE / 2),
-         static_cast<float_t>(PIXELS_PER_TILE / 2)
-      };
+   // create reference animation from frame data
+   AnimationFrameData frame_data(
+      TexturePool::getInstance().get("data/weapons/arrow.png"),
+      {static_cast<float_t>(PIXELS_PER_TILE / 2), static_cast<float_t>(PIXELS_PER_TILE / 2)},
+      PIXELS_PER_TILE,
+      PIXELS_PER_TILE,
+      4,
+      4,
+      {sf::seconds(0.2f)}
+   );
 
    setProjectileAnimation(frame_data);
 }
@@ -170,36 +174,15 @@ void Bow::update(const sf::Time& time)
    // apply drag force to arrows
    for (auto& arrow : _arrows)
    {
-      arrow->updateTextureRect();
-
       if (!arrow->getBody()->IsActive())
       {
          continue;
       }
 
       auto arrow_body = arrow->getBody();
-
       auto arrow_velocity = arrow_body->GetLinearVelocity();
-      /*const auto arrlow_velocity_length =*/ arrow_velocity.Normalize();
-
+      arrow_velocity.Normalize();
       arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
-
-      // we don't really need realistic arrow drag in this game
-      //
-      // const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
-      // auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));
-      // arrow_pointing_direction.Normalize();
-      //
-      // const auto dot = b2Dot(arrow_velocity, arrow_pointing_direction);
-      //
-      // const auto draw_force_magnitude =
-      //    (1 - fabs(dot)) * arrlow_velocity_length * arrlow_velocity_length * drag_constant * arrow_body->GetMass();
-      //
-      // arrow_body->ApplyForce(
-      //    draw_force_magnitude * -arrow_velocity,
-      //    arrow_tail_position,
-      //    false
-      // );
    }
 }
 

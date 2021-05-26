@@ -73,7 +73,9 @@ void Weapon::fireNow(
 
    auto projectile = new Projectile();
 
-   projectile->setAnimation(_projectile_reference_animation._animation);
+   // create a projectile animation copy from the reference animation
+   Animation animation(_projectile_reference_animation._animation);
+   projectile->setAnimation(animation);
    projectile->getAnimation().seekToStart();
    projectile->setProperty("damage", _damage);
    projectile->setBody(_body);
@@ -125,7 +127,7 @@ void Weapon::updateProjectiles(const sf::Time& time)
 {
    for (auto projectile : _projectiles)
    {
-      auto sprite = projectile->getAnimation();
+      auto& sprite = projectile->getAnimation();
       sprite.update(time);
    }
 }
@@ -213,39 +215,6 @@ int Weapon::damage() const
 
 void Weapon::initialize()
 {
-   createProjectileAnimation();
-}
-
-
-void Weapon::createProjectileAnimation()
-{
-   // std::cout << _texture_path.string() << std::endl;
-   // std::cout
-   //    << "x1: " << _projectile_reference_texture_rect.left << " "
-   //    << "y1: " << _projectile_reference_texture_rect.top << " "
-   //    << "width: " << _projectile_reference_texture_rect.width << " "
-   //    << "height: " << _projectile_reference_texture_rect.height
-   //    << std::endl;
-
-
-// maybe the origin should no longer depend on the shape
-
-//   const auto& texture  = TexturePool::getInstance().get(_projectile_reference_animation._texture_path);
-
-//   if (_shape->GetType() == b2Shape::e_polygon)
-//   {
-//      _projectile_reference_animation._animation.setOrigin(0, 0);
-//      _projectile_reference_animation._animation._color_texture = texture;
-//   }
-//   else if (_shape->GetType() == b2Shape::e_circle)
-//   {
-//      _projectile_reference_animation._animation.setOrigin(
-//         static_cast<float_t>(_projectile_reference_animation._animation.getTextureRect().width / 2),
-//         static_cast<float_t>(_projectile_reference_animation._animation.getTextureRect().height / 2)
-//      );
-
-//      _projectile_reference_animation._animation._color_texture = texture;
-//   }
 }
 
 
@@ -259,6 +228,30 @@ void Weapon::setProjectileAnimation(
    _projectile_reference_animation._animation._color_texture = texture;
    _projectile_reference_animation._animation._frames.clear();
    _projectile_reference_animation._animation._frames.push_back(textureRect);
+
+   // auto-generate origin from shape
+   // this should move into the luanode; the engine should not 'guess' the origin
+   if (_shape->GetType() == b2Shape::e_polygon)
+   {
+      _projectile_reference_animation._animation.setOrigin(0, 0);
+   }
+   else if (_shape->GetType() == b2Shape::e_circle)
+   {
+      if (textureRect.width > 0)
+      {
+         _projectile_reference_animation._animation.setOrigin(
+            static_cast<float_t>(textureRect.width / 2),
+            static_cast<float_t>(textureRect.height / 2)
+         );
+      }
+      else
+      {
+         _projectile_reference_animation._animation.setOrigin(
+            static_cast<float_t>(texture->getSize().x / 2),
+            static_cast<float_t>(texture->getSize().y / 2)
+         );
+      }
+   }
 }
 
 
