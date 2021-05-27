@@ -56,9 +56,10 @@ Bow::Bow()
       {static_cast<float_t>(PIXELS_PER_TILE / 2), static_cast<float_t>(PIXELS_PER_TILE / 2)},
       PIXELS_PER_TILE,
       PIXELS_PER_TILE,
-      4,
-      4,
-      {sf::seconds(0.2f)}
+      4,  // frame count of this animation
+      15, // frames per row
+      {sf::seconds(0.075f), sf::seconds(0.075f), sf::seconds(0.075f), sf::seconds(0.075f)},
+      0   // start frame
    );
 
    setProjectileAnimation(frame_data);

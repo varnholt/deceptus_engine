@@ -30,7 +30,7 @@ AnimationFrameData::AnimationFrameData(
    for (auto i = start_frame; i < frame_count + start_frame; i++)
    {
       const auto x = (i % frames_per_row);
-      const auto y = static_cast<int32_t>((floor(static_cast<float>(start_frame + i) / frames_per_row)));
+      const auto y = static_cast<int32_t>((floor(static_cast<float>(i) / frames_per_row)));
 
       // std::cout << this << " x: " << x << " y: " << y << std::endl;
 
