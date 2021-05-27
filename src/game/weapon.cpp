@@ -127,16 +127,6 @@ void Weapon::updateProjectiles(const sf::Time& time)
 {
    for (auto projectile : _projectiles)
    {
-      auto& sprite = projectile->getAnimation();
-      sprite.update(time);
-   }
-}
-
-
-void Weapon::drawProjectiles(sf::RenderTarget& target)
-{
-   for (auto projectile : _projectiles)
-   {
       auto& projectile_animation = projectile->getAnimation();
 
       if (projectile->isRotating())
@@ -150,7 +140,16 @@ void Weapon::drawProjectiles(sf::RenderTarget& target)
          projectile->getBody()->GetPosition().y * PPM
       );
 
-      target.draw(projectile_animation);
+      projectile_animation.update(time);
+   }
+}
+
+
+void Weapon::drawProjectiles(sf::RenderTarget& target)
+{
+   for (auto projectile : _projectiles)
+   {
+      target.draw(projectile->getAnimation());
    }
 }
 

@@ -163,6 +163,7 @@ Animation::Animation(const Animation& anim)
     _frame_times(anim._frame_times)
 {
    setOrigin(anim.getOrigin());
+   setRotation(anim.getRotation());
 
    _vertices[0] = anim._vertices[0];
    _vertices[1] = anim._vertices[1];
