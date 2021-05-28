@@ -75,8 +75,11 @@ void Weapon::fireNow(
 
    // create a projectile animation copy from the reference animation
    Animation animation(_projectile_reference_animation._animation);
+   animation._reset_to_first_frame = false;
+   animation.updateVertices();
+   animation.play();
+
    projectile->setAnimation(animation);
-   projectile->getAnimation().seekToStart();
    projectile->setProperty("damage", _damage);
    projectile->setBody(_body);
 

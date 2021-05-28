@@ -234,7 +234,9 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       if (
             body->GetType() == b2_dynamicBody
          || body->GetType() == b2_kinematicBody
+#ifdef RELEASE_BUILD
          || body->GetType() == b2_staticBody
+#endif
       )
       {
 
