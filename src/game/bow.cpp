@@ -31,7 +31,10 @@ static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
 static constexpr auto scale = 0.1f;
-// static constexpr auto drag_constant = 0.1f;
+
+static constexpr auto start_frame = 15;
+static constexpr auto frames_per_row = 15;
+static constexpr auto animation_frame_count = 4;
 
 uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
 uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
@@ -56,10 +59,10 @@ Bow::Bow()
       {static_cast<float_t>(PIXELS_PER_TILE / 2), static_cast<float_t>(PIXELS_PER_TILE / 2)},
       PIXELS_PER_TILE,
       PIXELS_PER_TILE,
-      4,  // frame count of this animation
-      15, // frames per row
+      animation_frame_count,
+      frames_per_row,
       {sf::seconds(0.075f), sf::seconds(0.075f), sf::seconds(0.075f), sf::seconds(0.075f)},
-      0   // start frame
+      start_frame
    );
 
    setProjectileAnimation(frame_data);

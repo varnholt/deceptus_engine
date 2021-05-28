@@ -27,7 +27,7 @@ AnimationFrameData::AnimationFrameData(
      _origin(origin),
      _frame_times(frame_times)
 {
-   for (auto i = start_frame; i < frame_count + start_frame; i++)
+   for (auto i = start_frame; i < start_frame + frame_count; i++)
    {
       const auto x = (i % frames_per_row);
       const auto y = static_cast<int32_t>((floor(static_cast<float>(i) / frames_per_row)));
