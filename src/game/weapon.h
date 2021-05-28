@@ -69,6 +69,7 @@ protected:
 
    void drawProjectiles(sf::RenderTarget& target);
    void updateProjectiles(const sf::Time& time);
+   void copyReferenceAnimation(Projectile* projectile);
 
    std::vector<Projectile*> _projectiles;
 
