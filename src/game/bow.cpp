@@ -135,6 +135,8 @@ void Bow::fireNow(
 
    _arrows.push_back(_loaded_arrow);
 
+   copyReferenceAnimation(_loaded_arrow);
+
    // store projectile so it gets drawn
    _projectiles.push_back(_loaded_arrow);
 

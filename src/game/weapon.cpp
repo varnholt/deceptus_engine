@@ -41,6 +41,17 @@ Weapon::Weapon(std::unique_ptr<b2Shape> shape, int32_t fireInterval, int32_t dam
 }
 
 
+void Weapon::copyReferenceAnimation(Projectile* projectile)
+{
+   Animation animation(_projectile_reference_animation._animation);
+   animation._reset_to_first_frame = false;
+   animation.updateVertices();
+   animation.play();
+
+   projectile->setAnimation(animation);
+}
+
+
 void Weapon::fireNow(
    const std::shared_ptr<b2World>& world,
    const b2Vec2& pos,
@@ -74,12 +85,8 @@ void Weapon::fireNow(
    auto projectile = new Projectile();
 
    // create a projectile animation copy from the reference animation
-   Animation animation(_projectile_reference_animation._animation);
-   animation._reset_to_first_frame = false;
-   animation.updateVertices();
-   animation.play();
+   copyReferenceAnimation(projectile);
 
-   projectile->setAnimation(animation);
    projectile->setProperty("damage", _damage);
    projectile->setBody(_body);
 
