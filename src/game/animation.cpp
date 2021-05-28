@@ -70,25 +70,22 @@ void Animation::setFrameTimes(const std::vector<sf::Time>& frameTimes)
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::updateVertices(bool resetTime)
 {
-   if (!_frames.empty())
-   {
-      const sf::IntRect& rect = _frames[static_cast<size_t>(_current_frame)];
+   const sf::IntRect& rect = _frames[static_cast<size_t>(_current_frame)];
 
-      const auto l =     static_cast<float>(rect.left) + 0.0001f;
-      const auto r = l + static_cast<float>(rect.width);
-      const auto t =     static_cast<float>(rect.top);
-      const auto b = t + static_cast<float>(rect.height);
+   const auto l =     static_cast<float>(rect.left) + 0.0001f;
+   const auto r = l + static_cast<float>(rect.width);
+   const auto t =     static_cast<float>(rect.top);
+   const auto b = t + static_cast<float>(rect.height);
 
-      _vertices[0].position = sf::Vector2f(0.f, 0.f);
-      _vertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect.height));
-      _vertices[2].position = sf::Vector2f(static_cast<float>(rect.width), static_cast<float>(rect.height));
-      _vertices[3].position = sf::Vector2f(static_cast<float>(rect.width), 0.f);
+   _vertices[0].position = sf::Vector2f(0.f, 0.f);
+   _vertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect.height));
+   _vertices[2].position = sf::Vector2f(static_cast<float>(rect.width), static_cast<float>(rect.height));
+   _vertices[3].position = sf::Vector2f(static_cast<float>(rect.width), 0.f);
 
-      _vertices[0].texCoords = sf::Vector2f(l, t);
-      _vertices[1].texCoords = sf::Vector2f(l, b);
-      _vertices[2].texCoords = sf::Vector2f(r, b);
-      _vertices[3].texCoords = sf::Vector2f(r, t);
-   }
+   _vertices[0].texCoords = sf::Vector2f(l, t);
+   _vertices[1].texCoords = sf::Vector2f(l, b);
+   _vertices[2].texCoords = sf::Vector2f(r, b);
+   _vertices[3].texCoords = sf::Vector2f(r, t);
 
    if (resetTime)
    {
