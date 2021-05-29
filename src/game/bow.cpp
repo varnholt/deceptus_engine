@@ -135,8 +135,6 @@ void Bow::fireNow(
 
    _arrows.push_back(_loaded_arrow);
 
-   copyReferenceAnimation(_loaded_arrow);
-
    // store projectile so it gets drawn
    _projectiles.push_back(_loaded_arrow);
 
@@ -149,6 +147,10 @@ void Bow::fireNow(
    _loaded_arrow->getBody()->SetTransform(pos, angle);
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);
    _loaded_arrow->setProperty("damage", _damage);
+
+   updateRotation(_loaded_arrow);
+   copyReferenceAnimation(_loaded_arrow);
+
    _loaded_arrow = nullptr;
 }
 
@@ -162,6 +164,15 @@ b2Body* Bow::getLauncherBody() const
 void Bow::setLauncherBody(b2Body* launcher_body)
 {
    _launcher_body = launcher_body;
+}
+
+
+void Bow::updateRotation(Arrow* arrow)
+{
+   auto arrow_body = arrow->getBody();
+   auto arrow_velocity = arrow_body->GetLinearVelocity();
+   arrow_velocity.Normalize();
+   arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
 }
 
 
@@ -185,10 +196,7 @@ void Bow::update(const sf::Time& time)
          continue;
       }
 
-      auto arrow_body = arrow->getBody();
-      auto arrow_velocity = arrow_body->GetLinearVelocity();
-      arrow_velocity.Normalize();
-      arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
+      updateRotation(arrow);
    }
 }
 
