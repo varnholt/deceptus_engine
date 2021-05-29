@@ -616,6 +616,7 @@ extern "C" int32_t addShapePoly(lua_State* state)
 
       if (!node)
       {
+         delete[] poly;
          return 0;
       }
 
@@ -752,8 +753,8 @@ extern "C" int32_t updateProjectileTexture(lua_State* state)
       {
          return 0;
       }
-
-      node->mWeapons[index]->setTexture(path, rect);
+      const auto& texture = TexturePool::getInstance().get(path);
+      node->mWeapons[index]->setProjectileAnimation(texture, rect);
    }
 
    return 0;
@@ -1249,6 +1250,7 @@ void LuaNode::damage(int32_t damage, float forceX, float forceY)
 b2Vec2 LuaNode::getLinearVelocity() const
 {
    b2Vec2 velocity;
+   velocity.SetZero();
 
    if (mBody)
    {

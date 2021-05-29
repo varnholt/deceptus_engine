@@ -31,7 +31,10 @@ static constexpr auto arrow_tail = -1.4f;
 static constexpr auto arrow_tip = 0.6f;
 static constexpr auto arrow_width = 0.1f;
 static constexpr auto scale = 0.1f;
-// static constexpr auto drag_constant = 0.1f;
+
+static constexpr auto start_frame = 15;
+static constexpr auto frames_per_row = 15;
+static constexpr auto animation_frame_count = 4;
 
 uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
 uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
@@ -42,6 +45,27 @@ int16_t groupIndex = 0;                                          // 0 is default
 Bow::Bow()
 {
    _fire_interval_ms = 1500;
+
+   // the shape is only defined here to align the texture on it
+   _shape = std::make_unique<b2PolygonShape>();
+   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
+      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
+      arrow_width * scale
+   );
+
+   // create reference animation from frame data
+   AnimationFrameData frame_data(
+      TexturePool::getInstance().get("data/weapons/arrow.png"),
+      {static_cast<float_t>(PIXELS_PER_TILE / 2), static_cast<float_t>(PIXELS_PER_TILE / 2)},
+      PIXELS_PER_TILE,
+      PIXELS_PER_TILE,
+      animation_frame_count,
+      frames_per_row,
+      {sf::seconds(0.075f), sf::seconds(0.075f), sf::seconds(0.075f), sf::seconds(0.075f)},
+      start_frame
+   );
+
+   setProjectileAnimation(frame_data);
 }
 
 
@@ -55,7 +79,8 @@ Bow::~Bow()
 void Bow::load(b2World* world)
 {
    auto arrow = _loaded_arrow = new Arrow();
-   arrow->setSprite(_projectile_reference_sprite);
+
+   arrow->setAnimation(_projectile_reference_animation._animation);
    arrow->_start_time = GlobalClock::getInstance()->getElapsedTimeInMs();
 
    _loaded_arrow->addDestroyedCallback([this, arrow](){
@@ -122,6 +147,10 @@ void Bow::fireNow(
    _loaded_arrow->getBody()->SetTransform(pos, angle);
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);
    _loaded_arrow->setProperty("damage", _damage);
+
+   updateRotation(_loaded_arrow);
+   copyReferenceAnimation(_loaded_arrow);
+
    _loaded_arrow = nullptr;
 }
 
@@ -138,24 +167,12 @@ void Bow::setLauncherBody(b2Body* launcher_body)
 }
 
 
-void Bow::loadTextures()
+void Bow::updateRotation(Arrow* arrow)
 {
-   // the shape is only defined here to align the texture on it
-   _shape = std::make_unique<b2PolygonShape>();
-   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
-      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
-      arrow_width * scale
-   );
-
-   _texture_path = "data/weapons/arrow.png";
-
-   _projectile_reference_texture = TexturePool::getInstance().get(_texture_path);
-
-   _projectile_reference_sprite.setTexture(*_projectile_reference_texture);
-   _projectile_reference_sprite.setOrigin(
-      static_cast<float_t>(PIXELS_PER_TILE / 2),
-      static_cast<float_t>(PIXELS_PER_TILE / 2)
-   );
+   auto arrow_body = arrow->getBody();
+   auto arrow_velocity = arrow_body->GetLinearVelocity();
+   arrow_velocity.Normalize();
+   arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
 }
 
 
@@ -174,36 +191,12 @@ void Bow::update(const sf::Time& time)
    // apply drag force to arrows
    for (auto& arrow : _arrows)
    {
-      arrow->updateTextureRect();
-
       if (!arrow->getBody()->IsActive())
       {
          continue;
       }
 
-      auto arrow_body = arrow->getBody();
-
-      auto arrow_velocity = arrow_body->GetLinearVelocity();
-      /*const auto arrlow_velocity_length =*/ arrow_velocity.Normalize();
-
-      arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
-
-      // we don't really need realistic arrow drag in this game
-      //
-      // const auto arrow_tail_position = arrow_body->GetWorldPoint(b2Vec2(arrow_tail, 0.0f));
-      // auto arrow_pointing_direction = arrow_body->GetWorldVector(b2Vec2(1.0f, 0.0f));
-      // arrow_pointing_direction.Normalize();
-      //
-      // const auto dot = b2Dot(arrow_velocity, arrow_pointing_direction);
-      //
-      // const auto draw_force_magnitude =
-      //    (1 - fabs(dot)) * arrlow_velocity_length * arrlow_velocity_length * drag_constant * arrow_body->GetMass();
-      //
-      // arrow_body->ApplyForce(
-      //    draw_force_magnitude * -arrow_velocity,
-      //    arrow_tail_position,
-      //    false
-      // );
+      updateRotation(arrow);
    }
 }
 
