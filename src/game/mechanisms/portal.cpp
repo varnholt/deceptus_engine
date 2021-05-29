@@ -153,7 +153,7 @@ void Portal::link(
    std::shared_ptr<Portal> src_portal;
    std::shared_ptr<Portal> dst_portal;
 
-   for (auto p : portals)
+   for (auto& p : portals)
    {
       auto portal = std::dynamic_pointer_cast<Portal>(p);
       sf::Vector2f portal_pos = portal->getPortalPosition();

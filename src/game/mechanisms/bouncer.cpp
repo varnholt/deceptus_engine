@@ -187,7 +187,7 @@ void Bouncer::activate()
 
    auto forceValue = 0.6f;
 
-   b2Vec2 force;
+   b2Vec2 force(0.0f, 0.0f);
    switch (mAlignment)
    {
       case Alignment::PointsUp:

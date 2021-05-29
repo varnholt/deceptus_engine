@@ -191,7 +191,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    float doorWidth = 2.0f;
    float doorHeight = 9.0f;
 
-   for (auto d : mDoors)
+   for (auto& d : mDoors)
    {
       auto door = std::dynamic_pointer_cast<Door>(d);
 
@@ -214,7 +214,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    // draw portals
    float portalWidth = 3.0f;
    float portalHeight = 6.0f;
-   for (auto p : mPortals)
+   for (auto& p : mPortals)
    {
       sf::VertexArray quad(sf::Quads, 4);
       quad[0].color = sf::Color::Red;
