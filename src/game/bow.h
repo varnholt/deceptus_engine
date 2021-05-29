@@ -31,6 +31,7 @@ public:
 
 private:
 
+   void updateRotation(Arrow*);
    Arrow* _loaded_arrow = nullptr;
    b2Body* _launcher_body = nullptr;
    std::vector<Arrow*> _arrows;
