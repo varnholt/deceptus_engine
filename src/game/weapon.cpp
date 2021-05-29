@@ -237,6 +237,7 @@ void Weapon::setProjectileAnimation(
    _projectile_reference_animation._animation._color_texture = texture;
    _projectile_reference_animation._animation._frames.clear();
    _projectile_reference_animation._animation._frames.push_back(textureRect);
+   _projectile_reference_animation._animation.setFrameTimes({sf::seconds(0.1f)});
 
    // auto-generate origin from shape
    // this should move into the luanode; the engine should not 'guess' the origin

@@ -103,7 +103,7 @@ void Laser::update(const sf::Time& dt)
       mOn = false;
    }
 
-   const auto previousTileIndex = mTileIndex;
+   // const auto previousTileIndex = mTileIndex;
 
    if (mVersion == MechanismVersion::Version1)
    {

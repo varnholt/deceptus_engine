@@ -80,7 +80,7 @@ function initialize()
    addShapeRect(0.25, 0.25, 0.25, 0.25)
    addSample("boom.wav")
    addWeapon(WeaponType["Bow"], 50, 60, 0.1) -- interval, damage, radius
-   updateProjectileTexture(0, "data/weapons/arrow.png", 144, 984, 48, 24) -- index, path, x, y, width, height
+   -- updateProjectileTexture(0, "data/weapons/arrow.png", 48 * 2, 48, 48, 48) -- index, path, x, y, width, height
    updateAlignment(Alignment["AlignmentRight"])
    setSpriteOffset(0, 12, 12)
 
