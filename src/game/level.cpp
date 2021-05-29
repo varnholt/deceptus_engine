@@ -1785,7 +1785,7 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 {
    std::shared_ptr<Bouncer> nearbyBouncer;
 
-   for (auto tmp : mBouncers)
+   for (auto& tmp : mBouncers)
    {
       auto bouncer = std::dynamic_pointer_cast<Bouncer>(tmp);
       if (bouncer->isPlayerAtBouncer())

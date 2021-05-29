@@ -479,7 +479,7 @@ void Laser::merge()
       {
          for (auto xi = x; xi < x + w; xi++)
          {
-            for (auto laser : mLasers)
+            for (auto& laser : mLasers)
             {
                if (
                      static_cast<int32_t>(laser->mTilePosition.x) == xi
