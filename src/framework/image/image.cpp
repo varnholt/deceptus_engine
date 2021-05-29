@@ -340,23 +340,30 @@ void Image::buildNormalMap(int32_t z)
 
    uint32_t *dst= new uint32_t[mWidth*mHeight];
 
-   for (int32_t y=0;y<mHeight;y++)
+   for (int32_t y = 0; y < mHeight; y++)
    {
       dst[0]= calcNormal(z, src1[mWidth-1], src1[1], src0[0], src2[0]);
-      for (int32_t x=1;x<mWidth-1;x++)
+
+      for (int32_t x = 1; x < mWidth - 1; x++)
       {
-         dst[x]= calcNormal(z, src1[x-1], src1[x+1], src0[x], src2[x]);
+         dst[x]= calcNormal(z, src1[x - 1], src1[x + 1], src0[x], src2[x]);
       }
-      dst[mWidth-1]= calcNormal(z, src1[mWidth-2], src1[0], src0[mWidth-1], src2[mWidth-1]);
 
-      dst+=mWidth;
-      src0= src1;
-      src1= src2;
-      if (y<mHeight-2)
-         src2+=mWidth;
+      dst[mWidth - 1]= calcNormal(z, src1[mWidth - 2], src1[0], src0[mWidth - 1], src2[mWidth - 1]);
+
+      dst += mWidth;
+
+      src0 = src1;
+      src1 = src2;
+
+      if (y < mHeight - 2)
+      {
+         src2 += mWidth;
+      }
       else
-         src2=mData.data();
-
+      {
+         src2 = mData.data();
+      }
    }
 
    delete[] src;

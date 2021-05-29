@@ -364,7 +364,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
       }
    }
 
-   for (auto tmp : doors)
+   for (auto& tmp : doors)
    {
       std::dynamic_pointer_cast<Door>(tmp)->setupBody(world);
    }
