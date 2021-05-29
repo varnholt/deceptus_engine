@@ -28,11 +28,10 @@ public:
    b2Body* getLauncherBody() const;
    void setLauncherBody(b2Body* launcher_body);
 
-   void loadTextures() override;
-
 
 private:
 
+   void updateRotation(Arrow*);
    Arrow* _loaded_arrow = nullptr;
    b2Body* _launcher_body = nullptr;
    std::vector<Arrow*> _arrows;
