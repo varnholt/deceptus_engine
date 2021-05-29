@@ -19,6 +19,14 @@ class Weapon
 {
 public:
 
+   struct ProjectileAnimation
+   {
+      std::optional<std::string> _identifier;
+      std::filesystem::path _texture_path = "data/weapons/bullet.png";
+      Animation _animation;
+      AnimationFrameData _frame_data;
+   };
+
    Weapon();
    Weapon(std::unique_ptr<b2Shape>, int32_t fireInterval, int32_t damage);
 
@@ -38,13 +46,17 @@ public:
    virtual void update(const sf::Time& time);
 
    virtual void initialize();
-   virtual void loadTextures();
 
    static void drawProjectileHitAnimations(sf::RenderTarget& target);
 
    int damage() const;
 
-   void setTexture(const std::filesystem::path& path, const sf::Rect<int32_t>& textureRect = _empty_rect);
+   void setProjectileAnimation(
+      const std::shared_ptr<sf::Texture>& texture,
+      const sf::Rect<int32_t>& textureRect = _empty_rect
+   );
+
+   void setProjectileAnimation(const AnimationFrameData& frame_data);
 
    int getFireIntervalMs() const;
    void setFireIntervalMs(int interval);
@@ -56,16 +68,12 @@ public:
 protected:
 
    void drawProjectiles(sf::RenderTarget& target);
+   void updateProjectiles(const sf::Time& time);
+   void copyReferenceAnimation(Projectile* projectile);
 
    std::vector<Projectile*> _projectiles;
 
-   // projectile related
-   // introduce a struct for this?
-   std::filesystem::path _texture_path = "data/weapons/bullet.png";
-   std::shared_ptr<sf::Texture> _projectile_reference_texture;
-   sf::Rect<int32_t> _projectile_reference_texture_rect;
-   sf::Sprite _projectile_reference_sprite;
-   std::optional<std::string> _projectile_identifier;
+   ProjectileAnimation _projectile_reference_animation;
 
    std::unique_ptr<b2Shape> _shape;
 

@@ -103,7 +103,7 @@ void Laser::update(const sf::Time& dt)
       mOn = false;
    }
 
-   const auto previousTileIndex = mTileIndex;
+   // const auto previousTileIndex = mTileIndex;
 
    if (mVersion == MechanismVersion::Version1)
    {
@@ -479,7 +479,7 @@ void Laser::merge()
       {
          for (auto xi = x; xi < x + w; xi++)
          {
-            for (auto laser : mLasers)
+            for (auto& laser : mLasers)
             {
                if (
                      static_cast<int32_t>(laser->mTilePosition.x) == xi

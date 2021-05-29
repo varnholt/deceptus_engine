@@ -303,7 +303,7 @@ void Lever::merge(
 
             std::vector<Callback> callbacks;
 
-            for (auto l : lasers)
+            for (auto& l : lasers)
             {
                auto laser = std::dynamic_pointer_cast<Laser>(l);
 
@@ -316,7 +316,7 @@ void Lever::merge(
                }
             }
 
-            for (auto b : belts)
+            for (auto& b : belts)
             {
                auto belt = std::dynamic_pointer_cast<ConveyorBelt>(b);
 
@@ -329,7 +329,7 @@ void Lever::merge(
                }
             }
 
-            for (auto f : fans)
+            for (auto& f : fans)
             {
                auto fan = std::dynamic_pointer_cast<Fan>(f);
 
@@ -342,7 +342,7 @@ void Lever::merge(
                }
             }
 
-            for (auto p : platforms)
+            for (auto& p : platforms)
             {
                auto platform = std::dynamic_pointer_cast<MovingPlatform>(p);
 
@@ -362,7 +362,7 @@ void Lever::merge(
                }
             }
 
-            for (auto s : spikes)
+            for (auto& s : spikes)
             {
                auto spikes = std::dynamic_pointer_cast<Spikes>(s);
 

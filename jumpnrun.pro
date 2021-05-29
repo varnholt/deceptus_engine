@@ -18,6 +18,8 @@ QT -= core
 LIBS -= -lQtGui
 LIBS -= -lQtCore
 
+DEFINES_RELEASE += RELEASE_BUILD
+
 #debug {
    CONFIG += console
 #}

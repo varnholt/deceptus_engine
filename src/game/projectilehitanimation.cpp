@@ -25,8 +25,8 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
 {
    auto anim = new ProjectileHitAnimation();
 
-   anim->_fames = frames._frames;
-   anim->_texture_map = frames._texture;
+   anim->_frames = frames._frames;
+   anim->_color_texture = frames._texture;
    anim->setFrameTimes(frames._frame_times);
    anim->setOrigin(frames._origin);
    anim->setPosition(x, y);
@@ -36,7 +36,7 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
    anim->_reset_to_first_frame = false;
 
    // can't simply play an animation, need to set a start frame!
-   anim->setFrame(0);
+   anim->updateVertices();
 
    // std::cout << "setting animation rotation to " << angle << std::endl;
 

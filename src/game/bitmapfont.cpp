@@ -109,7 +109,7 @@ void BitmapFont::draw(
 )
 {
    auto xOffset = 0;
-   for (auto coord : coords)
+   for (auto& coord : coords)
    {
       mSprite.setTextureRect(
          sf::IntRect(

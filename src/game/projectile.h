@@ -58,11 +58,8 @@ public:
    float getRotation() const;
    void setRotation(float rotation);
 
-   sf::Sprite getSprite() const;
-   void setSprite(const sf::Sprite& sprite);
-
-   const sf::Rect<int32_t>& getTextureRect() const;
-   void setTextureRect(const sf::Rect<int32_t>& texture_rect);
+   Animation& getAnimation();
+   void setAnimation(const Animation& sprite);
 
    std::string getProjectileIdentifier() const;
    void setProjectileIdentifier(const std::string& projectile_identifier);
@@ -86,8 +83,8 @@ protected:
    std::string _projectile_identifier = default_projectile_identifier;
    std::vector<DestroyedCallback> _destroyed_callbacks;
 
-   sf::Sprite _sprite;
-   sf::Rect<int32_t> _texture_rect;
+   Animation _animation;
+   sf::Rect<int32_t> _animation_texture_rect;
 
    static std::set<Projectile*> _projectiles;
    static std::vector<HitInformation> _hit_information;
