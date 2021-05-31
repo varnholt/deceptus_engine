@@ -28,7 +28,6 @@ public:
 private:
 
    std::shared_ptr<sf::Texture> _texture;
-   static const std::string _layer_name;
 
    struct SmokeParticle
    {

@@ -1971,44 +1971,33 @@ b2Vec2 Player::getBodyPosition() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-namespace
-{
-   bool jumpStarted = false;
-   sf::Time jumpStartTime;
-   float jumpStartY = 0.0f;
-   float jumpEpsilon = 0.00001f;
-   float jumpPrevY = 0.0f;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 void Player::traceJumpCurve()
 {
    if (mControls.isJumpButtonPressed())
    {
-      if (!jumpStarted)
+      if (!mJumpTrace.jumpStarted)
       {
-         jumpStartTime = mTime;
-         jumpStartY = mBody->GetPosition().y;
-         jumpStarted = true;
+         mJumpTrace.jumpStartTime = mTime;
+         mJumpTrace.jumpStartY = mBody->GetPosition().y;
+         mJumpTrace.jumpStarted = true;
          std::cout << std::endl << "time; y" << std::endl;
       }
 
-      const auto jumpNextY = -(mBody->GetPosition().y - jumpStartY);
-      if (fabs(jumpNextY - jumpPrevY) > jumpEpsilon)
+      const auto jumpNextY = -(mBody->GetPosition().y - mJumpTrace.jumpStartY);
+      if (fabs(jumpNextY - mJumpTrace.jumpPrevY) > mJumpTrace.jumpEpsilon)
       {
          std::cout
-            << mTime.asSeconds() - jumpStartTime.asSeconds()
+            << mTime.asSeconds() - mJumpTrace.jumpStartTime.asSeconds()
             << "; "
             << jumpNextY
             << std::endl;
       }
 
-      jumpPrevY = jumpNextY;
+      mJumpTrace.jumpPrevY = jumpNextY;
    }
    else
    {
-      jumpStarted = false;
+      mJumpTrace.jumpStarted = false;
    }
 }
 

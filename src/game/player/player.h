@@ -24,15 +24,24 @@ class GameContactListener;
 class Weapon;
 struct WeaponSystem;
 
-const sf::Vector2f vector2fZero;
-
 class Player : public GameNode
 {
+   struct JumpTrace
+   {
+      bool jumpStarted = false;
+      sf::Time jumpStartTime;
+      float jumpStartY = 0.0f;
+      float jumpEpsilon = 0.00001f;
+      float jumpPrevY = 0.0f;
+   };
+
+
    struct PositionedAnimation
    {
       sf::Vector2f mPosition;
       std::shared_ptr<Animation> mAnimation;
    };
+
 
    enum class Edge
    {
@@ -41,12 +50,14 @@ class Player : public GameNode
       Right
    };
 
+
    enum class Dash
    {
      None,
      Left,
      Right
    };
+
 
    struct PlayerSpeed
    {
@@ -128,7 +139,7 @@ public:
    int getId() const;
 
    void impulse(float intensity);
-   void damage(int damage, const sf::Vector2f& force = vector2fZero);
+   void damage(int damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
 
    std::shared_ptr<ExtraManager> getExtraManager() const;
 
@@ -261,6 +272,7 @@ private:
    PlayerControls mControls;
    PlayerClimb mClimb;
    PlayerJump mJump;
+   JumpTrace mJumpTrace;
 
    std::deque<PositionedAnimation> mLastAnimations;
 
