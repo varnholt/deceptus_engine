@@ -65,5 +65,7 @@ private:
    mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
 
    std::array<float, 4> _ambient_color = {1.0f, 1.0f, 1.0f, 1.0f};
+   static constexpr auto segments = 20;
+   std::array<b2Vec2, segments> _unit_circle;
 };
 

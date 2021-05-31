@@ -14,12 +14,11 @@
 #include <math.h>
 
 
-const std::string SmokeEffect::sLayerName = "smoke_effect";
+const std::string SmokeEffect::_layer_name = "smoke_effect";
 
 namespace
 {
-   sf::BlendMode mBlendMode = sf::BlendAdd;
-   sf::Color mColor = sf::Color(255, 255, 255, 25);
+sf::BlendMode mBlendMode = sf::BlendAdd;
 }
 
 
@@ -28,8 +27,8 @@ SmokeEffect::SmokeEffect()
 {
    mIsLoaded = true;
 
-   mTexture = TexturePool::getInstance().get("data/effects/smoke.png");
-   mTexture->setSmooth(true);
+   _texture = TexturePool::getInstance().get("data/effects/smoke.png");
+   _texture->setSmooth(true);
 }
 
 
@@ -40,9 +39,9 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates /*states*/,
         return;
     }
 
-   for (auto& particle : mParticles)
+   for (auto& particle : _particles)
    {
-      target.draw(particle.mSprite, mBlendMode);
+      target.draw(particle._sprite, mBlendMode);
    }
 }
 
@@ -54,19 +53,19 @@ void SmokeEffect::onDraw(sf::RenderTarget &/*target*/, sf::RenderStates /*states
 
 void SmokeEffect::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
 {
-   const auto dt = time.asSeconds() - mLastUpdateTime.asSeconds();
-   mLastUpdateTime = time;
+   const auto dt = time.asSeconds() - _last_update_time.asSeconds();
+   _last_update_time = time;
 
-   for (auto& particle : mParticles)
+   for (auto& particle : _particles)
    {
-      particle.mRot += dt * 10.0f * particle.mRotDir;
-      particle.mSprite.setRotation(particle.mRot);
+      particle._rot += dt * 10.0f * particle._rot_dir;
+      particle._sprite.setRotation(particle._rot);
 
       // fake z rotation
-      const auto x = 0.5f * (1.0f + sin(particle.mTimeOffset + time.asSeconds())) * particle.mOffset.x;
-      const auto y = 0.5f * (1.0f + cos(particle.mTimeOffset + time.asSeconds())) * particle.mOffset.y;
+      const auto x = 0.5f * (1.0f + sin(particle._time_offset + time.asSeconds())) * particle._offset.x;
+      const auto y = 0.5f * (1.0f + cos(particle._time_offset + time.asSeconds())) * particle._offset.y;
 
-      particle.mSprite.setPosition(particle.mCenter.x + x, particle.mCenter.y + y);
+      particle._sprite.setPosition(particle._center.x + x, particle._center.y + y);
    }
 }
 
@@ -89,15 +88,15 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
       auto z = tmxObject->_properties->_map.find("z");
       if (z != tmxObject->_properties->_map.end())
       {
-         smokeEffect->mZ = tmxObject->_properties->_map["z"]->_value_int.value();
-         std::cout << "smoke effect layer has z: " << smokeEffect->mZ << std::endl;
+         smokeEffect->_z = tmxObject->_properties->_map["z"]->_value_int.value();
+         std::cout << "smoke effect layer has z: " << smokeEffect->_z << std::endl;
       }
    }
 
    const auto rangeX = static_cast<int32_t>(tmxObject->_width_px);
    const auto rangeY = static_cast<int32_t>(tmxObject->_height_px);
 
-   for (auto& particle : smokeEffect->mParticles)
+   for (auto& particle : smokeEffect->_particles)
    {
       auto x = static_cast<float>(std::rand() % rangeX - rangeX / 2);
       auto y = static_cast<float>(std::rand() % rangeY - rangeY / 2);
@@ -110,22 +109,21 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
       const auto sx = (std::rand() % 50 + 50) * 0.008f; // scale from 0..0.4
       const auto sy = (std::rand() % 50 + 50) * 0.008f;
 
-      particle.mSprite.setScale(sx, sy);
-      particle.mSprite.setRotation(rotation);
-      particle.mSprite.setPosition(x + centerX, y + centerY);
+      particle._sprite.setScale(sx, sy);
+      particle._sprite.setRotation(rotation);
+      particle._sprite.setPosition(x + centerX, y + centerY);
 
-      particle.mRotDir = static_cast<float>((std::rand() % 200) - 100) * 0.01f;
-      particle.mCenter = sf::Vector2f{centerX, centerY};
-      particle.mOffset = sf::Vector2f{x, y};
-      particle.mTimeOffset = timeOffset;
+      particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f;
+      particle._center = sf::Vector2f{centerX, centerY};
+      particle._offset = sf::Vector2f{x, y};
+      particle._time_offset = timeOffset;
 
-      particle.mSprite.setTexture(*smokeEffect->mTexture);
-      particle.mSprite.setColor(mColor);
+      particle._sprite.setTexture(*smokeEffect->_texture);
+      particle._sprite.setColor(sf::Color(255, 255, 255, 25));
 
-      const auto bounds = particle.mSprite.getGlobalBounds();
-      particle.mSprite.setOrigin(bounds.width * sx, bounds.height * sy);
+      const auto bounds = particle._sprite.getGlobalBounds();
+      particle._sprite.setOrigin(bounds.width * sx, bounds.height * sy);
    }
 
    return smokeEffect;
 }
-

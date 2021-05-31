@@ -325,7 +325,7 @@ void GameController::update()
             auto it = mButtonReleasedCallbacks.find(static_cast<SDL_GameControllerButton>(button));
             if (it != mButtonReleasedCallbacks.end())
             {
-               for (auto f : it->second)
+               for (auto& f : it->second)
                {
                   f();
                }
