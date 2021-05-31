@@ -761,6 +761,60 @@ extern "C" int32_t updateProjectileTexture(lua_State* state)
 }
 
 
+extern "C" int32_t updateProjectileAnimation(lua_State* state)
+{
+   // TODO
+
+   // change this to use AnimationFrameData struct
+
+   int32_t argc = lua_gettop(state);
+
+   if (argc == 8)
+   {
+      auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
+      std::filesystem::path path = lua_tostring(state, 2);
+      auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
+      auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
+      auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 5));
+      auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 6));
+      auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 7));
+      auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 8));
+
+      ProjectileHitAnimation::addReferenceAnimation(
+         path,
+         frame_width,
+         frame_height,
+         std::chrono::duration<float, std::chrono::seconds::period>{time_per_frame_s},
+         frame_count,
+         frames_per_row,
+         start_frame
+      );
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->mWeapons[weapon_index]->setProjectileIdentifier(path.string());
+   }
+
+   return 0;
+
+   //   AnimationFrameData(
+   //      const std::shared_ptr<sf::Texture>& texture,
+   //      const sf::Vector2f& origin,
+   //      uint32_t frame_width,
+   //      uint32_t frame_height,
+   //      uint32_t frame_count,
+   //      uint32_t frames_per_row,
+   //      const std::vector<sf::Time>& frame_times,
+   //      uint32_t start_frame = 0
+   //   );
+}
+
+
 extern "C" int32_t timer(lua_State* state)
 {
    // number of function arguments are on top of the stack.
