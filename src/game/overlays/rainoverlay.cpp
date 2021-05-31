@@ -14,7 +14,6 @@ namespace
    static const auto w = 640; // GameConfiguration::getInstance().mViewWidth;
    static const auto h = 360; // GameConfiguration::getInstance().mViewHeight;
 
-   static const auto color = sf::Color{174, 194, 224, 30};
    static const auto dropCount = 500;
    static const auto velocityFactor = 30.0f;
    static const auto widthStretchFactor = 1.5f;
@@ -44,6 +43,8 @@ RainOverlay::RainOverlay()
 
 void RainOverlay::draw(sf::RenderTarget& window, sf::RenderStates /*states*/)
 {
+   static const auto color = sf::Color{174, 194, 224, 30};
+
    mRenderTexture.clear();
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));

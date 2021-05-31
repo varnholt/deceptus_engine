@@ -11,7 +11,7 @@ Audio* Audio::sInstance = nullptr;
 
 namespace
 {
-static const std::string SFX_ROOT = "data/sounds/";
+static const auto SFX_ROOT = "data/sounds/";
 }
 
 //-----------------------------------------------------------------------------

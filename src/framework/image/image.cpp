@@ -331,25 +331,27 @@ uint32_t calcNormal(int32_t z, uint32_t x0, uint32_t x1, uint32_t y0, uint32_t y
    return (255<<24) | (x<<16) | (y<<8) | z;
 }
 
-void Image::buildNormalMap(int32_t z)
-{
-   uint32_t *src= mData.data();
-   uint32_t *src0= mData.data() + (mHeight-1)*mWidth;
-   uint32_t *src1= mData.data();
-   uint32_t *src2= mData.data() + mWidth;
 
-   uint32_t *dst= new uint32_t[mWidth*mHeight];
+uint32_t* Image::buildNormalMap(int32_t z)
+{
+   uint32_t* src = mData.data();
+
+   uint32_t* src0 = mData.data() + (mHeight - 1) * mWidth;
+   uint32_t* src1 = mData.data();
+   uint32_t* src2 = mData.data() + mWidth;
+
+   uint32_t* dst = new uint32_t[mWidth * mHeight];
 
    for (int32_t y = 0; y < mHeight; y++)
    {
-      dst[0]= calcNormal(z, src1[mWidth-1], src1[1], src0[0], src2[0]);
+      dst[0] = calcNormal(z, src1[mWidth - 1], src1[1], src0[0], src2[0]);
 
       for (int32_t x = 1; x < mWidth - 1; x++)
       {
-         dst[x]= calcNormal(z, src1[x - 1], src1[x + 1], src0[x], src2[x]);
+         dst[x] = calcNormal(z, src1[x - 1], src1[x+1], src0[x], src2[x]);
       }
 
-      dst[mWidth - 1]= calcNormal(z, src1[mWidth - 2], src1[0], src0[mWidth - 1], src2[mWidth - 1]);
+      dst[mWidth - 1] = calcNormal(z, src1[mWidth - 2], src1[0], src0[mWidth - 1], src2[mWidth - 1]);
 
       dst += mWidth;
 
@@ -367,17 +369,20 @@ void Image::buildNormalMap(int32_t z)
    }
 
    delete[] src;
+   return dst;
 }
 
 
-void Image::buildDeltaMap()
+uint32_t* Image::buildDeltaMap()
 {
-   uint32_t* temp= mData.data();
-   uint32_t* src0= mData.data() + (mHeight-1)*mWidth;
-   uint32_t* src1= mData.data();
-   uint32_t* src2= mData.data() + mWidth;
+   uint32_t* temp = mData.data();
+
+   uint32_t* src0 = mData.data() + (mHeight-1)*mWidth;
+   uint32_t* src1 = mData.data();
+   uint32_t* src2 = mData.data() + mWidth;
 
    uint32_t* dst = new uint32_t[mWidth * mHeight];
+
    int32_t s = 2;
 
    for (int32_t y = 0; y < mHeight; y++)
@@ -398,6 +403,7 @@ void Image::buildDeltaMap()
          | ((128 + (src0[mWidth - 1] & 0xff) * s - (src2[mWidth - 1] & 0xff) * s) << 8);
 
       dst += mWidth;
+
       src0 = src1;
       src1 = src2;
 
@@ -412,4 +418,6 @@ void Image::buildDeltaMap()
    }
 
    delete[] temp;
+   return dst;
 }
+

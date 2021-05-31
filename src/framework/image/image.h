@@ -28,8 +28,8 @@ class Image
       void premultiplyAlpha();
       void minimum(const Image& image);
       uint32_t getPixel(float u, float v) const;
-      void buildNormalMap(int32_t z);
-      void buildDeltaMap();
+      uint32_t* buildNormalMap(int32_t z);
+      uint32_t* buildDeltaMap();
       const std::string& path() const;
       const std::string& filename() const;
 
