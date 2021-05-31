@@ -8,7 +8,7 @@
 
 
 // SDL
-#ifdef Q_OS_MAC
+#ifdef TARGET_OS_MAC
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 #endif

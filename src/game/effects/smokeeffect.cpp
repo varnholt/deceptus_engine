@@ -14,8 +14,6 @@
 #include <math.h>
 
 
-const std::string SmokeEffect::_layer_name = "smoke_effect";
-
 namespace
 {
 sf::BlendMode mBlendMode = sf::BlendAdd;
