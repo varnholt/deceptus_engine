@@ -18,10 +18,7 @@
 //-----------------------------------------------------------------------------
 namespace
 {
-static constexpr auto segments = 20;
 static constexpr auto max_distance_m2 = 100.0f; // depends on the view dimensions
-const sf::Color black{0, 0, 0, 255};
-std::array<b2Vec2, segments> unit_circle;
 }
 
 
@@ -36,7 +33,7 @@ LightSystem::LightSystem()
       auto x = static_cast<float>(cos(angle));
       auto y = static_cast<float>(sin(angle));
 
-      unit_circle[i] = b2Vec2{x, y};
+      _unit_circle[i] = b2Vec2{x, y};
    }
 
    if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Fragment))
@@ -88,8 +85,8 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
             for (auto i = 0u; i < segments; i++)
             {
                circle_positions[i] = b2Vec2{
-                  center.x + unit_circle[i].x * shape_circle->m_radius * 1.2f,
-                  center.y + unit_circle[i].y * shape_circle->m_radius * 1.2f
+                  center.x + _unit_circle[i].x * shape_circle->m_radius * 1.2f,
+                  center.y + _unit_circle[i].y * shape_circle->m_radius * 1.2f
                };
             }
 

@@ -78,7 +78,6 @@
 
 
 Level* Level::sCurrentLevel = nullptr;
-const std::string parallaxIdentifier = "parallax_";
 
 
 //-----------------------------------------------------------------------------
@@ -282,6 +281,8 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
 //-----------------------------------------------------------------------------
 void Level::loadTmx()
 {
+   static const std::string parallaxIdentifier = "parallax_";
+
    auto path = std::filesystem::path(mDescription->mFilename).parent_path();
 
    const auto checksumOld = Checksum::readChecksum(mDescription->mFilename + ".crc");

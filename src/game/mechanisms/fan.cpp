@@ -18,13 +18,6 @@ std::vector<std::shared_ptr<Fan::FanTile>> Fan::_tile_instances;
 std::vector<TmxObject*> Fan::_object_instances;
 std::vector<sf::Vector2f> Fan::_weight_instances;
 
-
-static const sf::Vector2f vector_up{0.0f, 1.0f};
-static const sf::Vector2f vector_down{0.0f, -1.0f};
-static const sf::Vector2f vector_left{-1.0f, 0.0f};
-static const sf::Vector2f vector_right{1.0f, 0.0f};
-
-
 void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
    auto possf = tile->mPosition;
@@ -186,6 +179,11 @@ void Fan::load(
    const std::shared_ptr<b2World>& world
 )
 {
+   static const sf::Vector2f vector_up{0.0f, 1.0f};
+   static const sf::Vector2f vector_down{0.0f, -1.0f};
+   static const sf::Vector2f vector_left{-1.0f, 0.0f};
+   static const sf::Vector2f vector_right{1.0f, 0.0f};
+
    if (layer == nullptr)
    {
       return;

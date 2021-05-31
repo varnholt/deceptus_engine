@@ -27,22 +27,22 @@ public:
 
 private:
 
-   std::shared_ptr<sf::Texture> mTexture;
-   static const std::string sLayerName;
+   std::shared_ptr<sf::Texture> _texture;
+   static const std::string _layer_name;
 
    struct SmokeParticle
    {
-      sf::Sprite mSprite;
-      float mRot = 0.0f;
-      float mRotDir = 1.0f;
-      float mTimeOffset = 0.0f;
+      sf::Sprite _sprite;
+      float _rot = 0.0f;
+      float _rot_dir = 1.0f;
+      float _time_offset = 0.0f;
 
-      sf::Vector2f mOffset;
-      sf::Vector2f mCenter;
+      sf::Vector2f _offset;
+      sf::Vector2f _center;
    };
 
-   std::array<SmokeParticle, 50> mParticles;
-   int32_t mZ = 0;
-   sf::Time mLastUpdateTime;
+   std::array<SmokeParticle, 50> _particles;
+   int32_t _z = 0;
+   sf::Time _last_update_time;
 };
 
