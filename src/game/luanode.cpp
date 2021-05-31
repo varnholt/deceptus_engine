@@ -763,10 +763,6 @@ extern "C" int32_t updateProjectileTexture(lua_State* state)
 
 extern "C" int32_t updateProjectileAnimation(lua_State* state)
 {
-   // TODO
-
-   // change this to use AnimationFrameData struct
-
    int32_t argc = lua_gettop(state);
 
    if (argc == 8)
@@ -780,16 +776,6 @@ extern "C" int32_t updateProjectileAnimation(lua_State* state)
       auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 7));
       auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 8));
 
-      ProjectileHitAnimation::addReferenceAnimation(
-         path,
-         frame_width,
-         frame_height,
-         std::chrono::duration<float, std::chrono::seconds::period>{time_per_frame_s},
-         frame_count,
-         frames_per_row,
-         start_frame
-      );
-
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
       if (!node)
@@ -797,21 +783,31 @@ extern "C" int32_t updateProjectileAnimation(lua_State* state)
          return 0;
       }
 
-      node->mWeapons[weapon_index]->setProjectileIdentifier(path.string());
+      auto texture = TexturePool::getInstance().get(path);
+
+      sf::Vector2f frame_origin;
+      std::vector<sf::Time> frame_times;
+
+      for (auto i = 0u; i < frame_count; i++)
+      {
+         frame_times.push_back(sf::seconds(time_per_frame_s));
+      }
+
+      AnimationFrameData frame_data(
+         texture,
+         frame_origin,
+         frame_width,
+         frame_height,
+         frame_count,
+         frames_per_row,
+         frame_times,
+         start_frame
+      );
+
+      node->mWeapons[weapon_index]->setProjectileAnimation(frame_data);
    }
 
    return 0;
-
-   //   AnimationFrameData(
-   //      const std::shared_ptr<sf::Texture>& texture,
-   //      const sf::Vector2f& origin,
-   //      uint32_t frame_width,
-   //      uint32_t frame_height,
-   //      uint32_t frame_count,
-   //      uint32_t frames_per_row,
-   //      const std::vector<sf::Time>& frame_times,
-   //      uint32_t start_frame = 0
-   //   );
 }
 
 
