@@ -53,7 +53,19 @@ function initialize()
       4
    )
 
-   updateProjectileTexture(0, "data/sprites/enemy_pirate_cannon_cannonball.png", 0, 0, 72, 72) -- index, path, x, y, width, height
+   updateProjectileAnimation(
+      0,
+      "data/sprites/enemy_pirate_cannon_cannonball.png",
+      3 * 24,
+      3 * 24,
+      (3 * 24) / 2,
+      (3 * 24) / 2,
+      0.1,
+      4,
+      15,
+      0
+   )
+
    setSpriteOffset(0, 0, -24);
 end
 
