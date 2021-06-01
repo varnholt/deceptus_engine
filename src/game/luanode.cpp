@@ -765,16 +765,18 @@ extern "C" int32_t updateProjectileAnimation(lua_State* state)
 {
    int32_t argc = lua_gettop(state);
 
-   if (argc == 8)
+   if (argc == 10)
    {
       auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
       std::filesystem::path path = lua_tostring(state, 2);
       auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
       auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
-      auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 5));
-      auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 6));
-      auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 7));
-      auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 8));
+      auto frame_origin_x        = static_cast<float>(lua_tointeger(state, 5));
+      auto frame_origin_y        = static_cast<float>(lua_tointeger(state, 6));
+      auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 7));
+      auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 8));
+      auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 9));
+      auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 10));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -785,9 +787,10 @@ extern "C" int32_t updateProjectileAnimation(lua_State* state)
 
       auto texture = TexturePool::getInstance().get(path);
 
-      sf::Vector2f frame_origin;
-      std::vector<sf::Time> frame_times;
+      sf::Vector2f frame_origin{frame_origin_x, frame_origin_y};
 
+      // assume identical frame times for now
+      std::vector<sf::Time> frame_times;
       for (auto i = 0u; i < frame_count; i++)
       {
          frame_times.push_back(sf::seconds(time_per_frame_s));
@@ -1113,6 +1116,7 @@ void LuaNode::setupLua()
    lua_register(mState, "setZ", ::setZ);
    lua_register(mState, "timer", ::timer);
    lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
+   lua_register(mState, "updateProjectileAnimation", ::updateProjectileAnimation);
    lua_register(mState, "updateProjectileTexture", ::updateProjectileTexture);
    lua_register(mState, "updateProperties", ::updateProperties);
    lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
