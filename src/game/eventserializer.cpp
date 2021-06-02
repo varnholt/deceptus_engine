@@ -151,8 +151,8 @@ void EventSerializer::deserialize()
 
    for (auto i = 0; i < size; i++)
    {
-      auto time_point = readTimePoint(in);
-      auto event = readEvent(in);
+      const auto time_point = readTimePoint(in);
+      const auto event = readEvent(in);
       _events.push_back({time_point, event});
    }
 }
@@ -165,8 +165,7 @@ void EventSerializer::play()
    for (const auto& event : _events)
    {
       const auto& time_point = event._time_point;
-
-      auto dt = time_point - start;
+      const auto dt = time_point - start;
 
       std::cout << dt.count() << std::endl;
    }
