@@ -6,13 +6,13 @@
 #include <thread>
 
 
-void writeInt32(std::ofstream& stream, int32_t value)
+void writeInt32(std::ostream& stream, int32_t value)
 {
    stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 }
 
 
-int32_t readInt32(std::ifstream& stream)
+int32_t readInt32(std::istream& stream)
 {
    int32_t value = 0;
    stream.read(reinterpret_cast<char*>(&value), sizeof(value));
@@ -20,13 +20,13 @@ int32_t readInt32(std::ifstream& stream)
 }
 
 
-void writeUInt8(std::ofstream& stream, uint8_t value)
+void writeUInt8(std::ostream& stream, uint8_t value)
 {
    stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 }
 
 
-uint8_t readUint8(std::ifstream& stream)
+uint8_t readUint8(std::istream& stream)
 {
    uint8_t value = 0;
    stream.read(reinterpret_cast<char*>(&value), sizeof(value));
@@ -34,7 +34,7 @@ uint8_t readUint8(std::ifstream& stream)
 }
 
 
-void writeTimePoint(std::ofstream& stream, const std::chrono::high_resolution_clock::time_point& time_point)
+void writeTimePoint(std::ostream& stream, const std::chrono::high_resolution_clock::time_point& time_point)
 {
    using namespace std::chrono_literals;
    auto const cache_time = (time_point + 12h).time_since_epoch().count();
@@ -42,7 +42,7 @@ void writeTimePoint(std::ofstream& stream, const std::chrono::high_resolution_cl
 }
 
 
-std::chrono::high_resolution_clock::time_point readTimePoint(std::ifstream& stream)
+std::chrono::high_resolution_clock::time_point readTimePoint(std::istream& stream)
 {
    std::chrono::system_clock::rep file_time_rep;
    stream.read(reinterpret_cast<char*>(&file_time_rep), sizeof(file_time_rep));
@@ -69,7 +69,7 @@ void EventSerializer::clear()
 }
 
 
-void writeEvent(std::ofstream& stream, const sf::Event& event)
+void writeEvent(std::ostream& stream, const sf::Event& event)
 {
    switch (event.type)
    {
@@ -97,7 +97,7 @@ void writeEvent(std::ofstream& stream, const sf::Event& event)
 }
 
 
-sf::Event readEvent(std::ifstream& stream)
+sf::Event readEvent(std::istream& stream)
 {
    sf::Event event;
 
