@@ -311,7 +311,7 @@ void Game::nextLevel()
 //----------------------------------------------------------------------------------------------------------------------
 Game::~Game()
 {
-   _event_serializer.serialize();
+   // _event_serializer.serialize();
 }
 
 
