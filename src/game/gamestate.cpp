@@ -18,7 +18,7 @@ void GameState::sync()
 
 
 //-----------------------------------------------------------------------------
-GameState &GameState::getInstance()
+GameState& GameState::getInstance()
 {
    return sInstance;
 }

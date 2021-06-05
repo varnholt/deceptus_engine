@@ -30,9 +30,9 @@ int main(int /*argc*/, char** /*argv*/)
 {
    debugAuthors();
    Test test;
-   Game* game = new Game();
-   game->initialize();
-   return game->loop();
+   Game game;
+   game.initialize();
+   return game.loop();
 }
 
 
