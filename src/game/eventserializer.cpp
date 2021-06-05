@@ -80,6 +80,11 @@ HighResDuration readDuration(std::istream& stream)
 
 void EventSerializer::add(const sf::Event& event)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    if (_play_result.has_value() && !_play_result.value()._Is_ready())
    {
       return;
@@ -282,29 +287,11 @@ bool EventSerializer::filterMovementEvents(const sf::Event& event)
    switch (event.key.code)
    {
       case sf::Keyboard::LShift:
-      {
-         return true;
-      }
       case sf::Keyboard::Left:
-      {
-         return true;
-      }
       case sf::Keyboard::Right:
-      {
-         return true;
-      }
       case sf::Keyboard::Up:
-      {
-         return true;
-      }
       case sf::Keyboard::Down:
-      {
-         return true;
-      }
       case sf::Keyboard::Return:
-      {
-         return true;
-      }
       case sf::Keyboard::Space:
       {
          return true;
@@ -317,6 +304,25 @@ bool EventSerializer::filterMovementEvents(const sf::Event& event)
    }
 
    return false;
+}
+
+
+void EventSerializer::setEnabled(bool enabled)
+{
+   _enabled = enabled;
+}
+
+
+EventSerializer& EventSerializer::getInstance()
+{
+   static EventSerializer _instance;
+   return _instance;
+}
+
+
+bool EventSerializer::isEnabled() const
+{
+   return _enabled;
 }
 
 

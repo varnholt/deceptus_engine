@@ -183,8 +183,7 @@ void Game::initializeWindow()
       _level->initializeTextures();
    }
 
-   _event_serializer.deserialize();
-   _event_serializer.setCallback([this](const sf::Event& event){processEvent(event);});
+   EventSerializer::getInstance().setCallback([this](const sf::Event& event){processEvent(event);});
 }
 
 
@@ -952,11 +951,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          _draw_states._draw_test_scene = !_draw_states._draw_test_scene;
          break;
       }
-      case sf::Keyboard::F11:
-      {
-         _event_serializer.play();
-         break;
-      }
       case sf::Keyboard::F12:
       {
          _draw_states._draw_console = !_draw_states._draw_console;
@@ -1127,7 +1121,7 @@ void Game::processEvents()
    {
       processEvent(event);
 
-      _event_serializer.add(event);
+      EventSerializer::getInstance().add(event);
    }
 }
 
