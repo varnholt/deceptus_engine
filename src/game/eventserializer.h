@@ -39,8 +39,6 @@ class EventSerializer
 
       using EventCallback = std::function<void(const sf::Event& event)>;
 
-      EventSerializer() = default;
-
       void add(const sf::Event& event);
       void clear();
 
@@ -56,8 +54,15 @@ class EventSerializer
       std::optional<size_t> getMaxSize() const;
       void setMaxSize(size_t max_size);
 
+      bool isEnabled() const;
+      void setEnabled(bool enabled);
+
+      static EventSerializer& getInstance();
+
 
    private:
+
+      EventSerializer() = default;
 
       void playThread();
       bool filterMovementEvents(const sf::Event& event);
@@ -66,6 +71,7 @@ class EventSerializer
       std::vector<ChronoEvent> _events;
       std::optional<std::future<void>> _play_result;
       HighResTimePoint _play_start_time;
+      bool _enabled = false;
 
       EventCallback _callback;
 };

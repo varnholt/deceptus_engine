@@ -2,6 +2,7 @@
 
 #include "bow.h"
 #include "checkpoint.h"
+#include "eventserializer.h"
 #include "extramanager.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
@@ -56,6 +57,7 @@ void Console::showHelp()
     mLog.push_back("help:");
     mLog.push_back("/cp <n> | jump to checkpoint | example: /cp 0");
     mLog.push_back("/extra <name> | give extra | available extras: climb, dash");
+    mLog.push_back("/playback <command> | game playback | commands: enable, disable, load, save, replay, reset");
     mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100, 330");
     mLog.push_back("/weapon <weapon> | give weapon to player | available weapons: bow");
 }
@@ -189,6 +191,39 @@ void Console::execute()
       }
 
       mLog.push_back(os.str());
+   }
+   else if (results.at(0) == "/playback" && results.size() == 2)
+   {
+      if (results[1] == "enable")
+      {
+         EventSerializer::getInstance().setEnabled(true);
+         mLog.push_back("playback enabled");
+      }
+      else if (results[1] == "disable")
+      {
+         EventSerializer::getInstance().setEnabled(false);
+         mLog.push_back("playback disabled");
+      }
+      else if (results[1] == "save")
+      {
+         EventSerializer::getInstance().serialize();
+         mLog.push_back("playback saved");
+      }
+      else if (results[1] == "load")
+      {
+         EventSerializer::getInstance().deserialize();
+         mLog.push_back("playback loaded");
+      }
+      else if (results[1] == "replay")
+      {
+         EventSerializer::getInstance().play();
+         mLog.push_back("playback started");
+      }
+      else if (results[1] == "reset")
+      {
+         EventSerializer::getInstance().clear();
+         mLog.push_back("playback reset");
+      }
    }
    else if (results.at(0) == "/iddqd")
    {
