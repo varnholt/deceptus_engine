@@ -80,6 +80,11 @@ HighResDuration readDuration(std::istream& stream)
 
 void EventSerializer::add(const sf::Event& event)
 {
+   if (_play_result.has_value() && !_play_result.value()._Is_ready())
+   {
+      return;
+   }
+
    if (GameState::getInstance().getMode() != ExecutionMode::Running)
    {
       return;
@@ -128,6 +133,7 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
       }
       default:
       {
+         std::cerr << "writing unhandled event" << std::endl;
          break;
       }
    }
@@ -158,6 +164,7 @@ sf::Event readEvent(std::istream& stream)
 
       default:
       {
+         std::cerr << "reading unhandled event" << std::endl;
          break;
       }
    }
@@ -251,13 +258,12 @@ void EventSerializer::playThread()
       const auto now = HighResClock::now();
       const auto elapsed =  now - _play_start_time;
 
-      if (elapsed.count() > _events[recorded_index]._duration.count())
+      if (elapsed > _events[recorded_index]._duration)
       {
-         recorded_index++;
-
          // pass event to given event loop
          _callback(_events[recorded_index]._event);
 
+         recorded_index++;
          done = (recorded_index == static_cast<int32_t>(_events.size() - 1));
       }
 
