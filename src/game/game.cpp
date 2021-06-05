@@ -113,46 +113,46 @@ void Game::initializeWindow()
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
-   sf::ContextSettings contextSettings;
-   contextSettings.stencilBits = 8;
+   sf::ContextSettings context_settings;
+   context_settings.stencilBits = 8;
 
-   if (mWindow != nullptr)
+   if (_window != nullptr)
    {
-      mWindow->close();
-      mWindow.reset();
+      _window->close();
+      _window.reset();
    }
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
-   mWindow = std::make_shared<sf::RenderWindow>(
+   _window = std::make_shared<sf::RenderWindow>(
       sf::VideoMode(
          static_cast<uint32_t>(gameConfig.mVideoModeWidth),
          static_cast<uint32_t>(gameConfig.mVideoModeHeight)
       ),
       GAME_NAME,
       gameConfig.mFullscreen ? sf::Style::Fullscreen : sf::Style::Default,
-      contextSettings
+      context_settings
     );
 
-   mWindow->setVerticalSyncEnabled(gameConfig.mVSync);
-   mWindow->setFramerateLimit(60);
-   mWindow->setKeyRepeatEnabled(false);
-   mWindow->setMouseCursorVisible(!gameConfig.mFullscreen);
+   _window->setVerticalSyncEnabled(gameConfig.mVSync);
+   _window->setFramerateLimit(60);
+   _window->setKeyRepeatEnabled(false);
+   _window->setMouseCursorVisible(!gameConfig.mFullscreen);
 
    // reset render textures if needed
-   if (mWindowRenderTexture != nullptr)
+   if (_window_render_texture != nullptr)
    {
-      mWindowRenderTexture.reset();
+      _window_render_texture.reset();
    }
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
-   const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+   const auto ratio_width = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
+   const auto ratio_height = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
 
-   const auto sizeRatio = std::min(ratioWidth, ratioHeight);
+   const auto size_ratio = std::min(ratio_width, ratio_height);
 
-   int32_t textureWidth = sizeRatio * gameConfig.mViewWidth;
-   int32_t textureHeight = sizeRatio * gameConfig.mViewHeight;
+   int32_t texture_width = size_ratio * gameConfig.mViewWidth;
+   int32_t texture_height = size_ratio * gameConfig.mViewHeight;
 
    std::cout
       << "[x] video mode: "
@@ -160,27 +160,31 @@ void Game::initializeWindow()
       << ", view size: "
       << gameConfig.mViewWidth << " x " << gameConfig.mViewHeight
       << ", ratio: "
-      << sizeRatio
+      << size_ratio
       << std::endl;
 
-   mRenderTextureOffset.x = static_cast<uint32_t>((gameConfig.mVideoModeWidth - textureWidth) / 2);
-   mRenderTextureOffset.y = static_cast<uint32_t>((gameConfig.mVideoModeHeight - textureHeight) / 2);
+   _render_texture_offset.x = static_cast<uint32_t>((gameConfig.mVideoModeWidth - texture_width) / 2);
+   _render_texture_offset.y = static_cast<uint32_t>((gameConfig.mVideoModeHeight - texture_height) / 2);
 
-   mWindowRenderTexture = std::make_shared<sf::RenderTexture>();
-   mWindowRenderTexture->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
+   _window_render_texture = std::make_shared<sf::RenderTexture>();
+   _window_render_texture->create(
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height)
    );
 
-   std::cout << "[x] created window render texture: " << textureWidth << " x " << textureHeight << std::endl;
+   std::cout << "[x] created window render texture: " << texture_width << " x " << texture_height << std::endl;
 
-   if (!mLevel)
+   if (!_level)
    {
       std::cerr << "[!] level not initialized" << std::endl;
-      return;
+   }
+   else
+   {
+      _level->initializeTextures();
    }
 
-   mLevel->initializeTextures();
+   _event_serializer.deserialize();
+   _event_serializer.setCallback([this](const sf::Event& event){processEvent(event);});
 }
 
 
@@ -234,7 +238,7 @@ void Game::showMainMenu()
 void Game::showPauseMenu()
 {
    // while the game is loading, don't bother to open the pause screen
-   if (!mLevelLoadingFinished)
+   if (!_level_loading_finished)
    {
       return;
    }
@@ -250,40 +254,40 @@ void Game::showPauseMenu()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::loadLevel()
 {
-   mLevelLoadingFinished = false;
-   mLevelLoadingFinishedPrevious = false;
+   _level_loading_finished = false;
+   _level_loading_finished_previous = false;
 
-   mLevelLoadingThread = std::async(
+   _level_loading_thread = std::async(
       std::launch::async, [this](){
 
          // pick a level
          auto levels = Levels::getInstance();
          levels.deserializeFromFile();
-         auto levelItem = levels.mLevels.at(SaveState::getCurrent().mLevelIndex);
+         auto level_item = levels.mLevels.at(SaveState::getCurrent().mLevelIndex);
 
-         mPlayer->resetWorld();
-         mLevel.reset();
+         _player->resetWorld();
+         _level.reset();
 
          // load it
-         mLevel = std::make_shared<Level>();
-         mLevel->setDescriptionFilename(levelItem.mLevelName);
-         mLevel->initialize();
-         mLevel->initializeTextures();
+         _level = std::make_shared<Level>();
+         _level->setDescriptionFilename(level_item.mLevelName);
+         _level->initialize();
+         _level->initializeTextures();
 
          // put the player in there
-         mPlayer->setWorld(mLevel->getWorld());
-         mPlayer->initializeLevel();
+         _player->setWorld(_level->getWorld());
+         _player->initializeLevel();
 
          // jump back to stored position
-         if (mStoredPositionValid)
+         if (_stored_position_valid)
          {
-            mPlayer->setBodyViaPixelPosition(mStoredPosition.x, mStoredPosition.y);
-            mStoredPositionValid = false;
+            _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
+            _stored_position_valid = false;
          }
 
-         mPlayer->updatePlayerPixelRect();
+         _player->updatePlayerPixelRect();
 
-         mLevelLoadingFinished = true;
+         _level_loading_finished = true;
       }
    );
 }
@@ -305,27 +309,34 @@ void Game::nextLevel()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+Game::~Game()
+{
+   _event_serializer.serialize();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
    initializeController();
 
-   mPlayer = std::make_shared<Player>();
-   mPlayer->initialize();
+   _player = std::make_shared<Player>();
+   _player->initialize();
 
    // loadLevel();
 
-   mInfoLayer = std::make_unique<InfoLayer>();
-   mInventoryLayer = std::make_unique<InventoryLayer>();
-   mControllerOverlay = std::make_unique<ControllerOverlay>();
-   mTestScene = std::make_unique<ForestScene>();
+   _info_layer = std::make_unique<InfoLayer>();
+   _inventory_layer = std::make_unique<InventoryLayer>();
+   _controller_overlay = std::make_unique<ControllerOverlay>();
+   _test_scene = std::make_unique<ForestScene>();
 
-   CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [this](){mDrawTestScene = true;});
+   CallbackMap::getInstance().addCallback(CallbackMap::CallbackType::EndGame, [this](){_draw_states._draw_test_scene = true;});
 
    Audio::getInstance();
 
    // initially the game should be in main menu and paused
    std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
-      [this](){mWindow->close();}
+      [this](){_window->close();}
    );
 
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
@@ -339,7 +350,7 @@ void Game::initialize()
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
       [this](){
       initializeWindow();
-      mLevel->createViews();
+      _level->createViews();
       }
    );
 
@@ -353,7 +364,7 @@ void Game::initialize()
       [this](ExecutionMode current, ExecutionMode previous){
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
-            mPlayer->getControls().setKeysPressed(0);
+            _player->getControls().setKeysPressed(0);
             CameraPane::getInstance().updateLookState(Look::LookActive, false);
          }
       }
@@ -367,7 +378,7 @@ void Game::initialize()
       [this](ExecutionMode current, ExecutionMode previous){
          if (current == ExecutionMode::Running && previous == ExecutionMode::Paused)
          {
-            mPlayer->getControls().forceSync();
+            _player->getControls().forceSync();
          }
       }
    );
@@ -387,110 +398,110 @@ void Game::initialize()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::draw()
 {
-   mFps++;
+   _fps++;
 
-   mWindowRenderTexture->clear();
-   mWindow->clear(sf::Color::Black);
-   mWindow->pushGLStates();
+   _window_render_texture->clear();
+   _window->clear(sf::Color::Black);
+   _window->pushGLStates();
 
-   mWindowRenderTexture->clear();
+   _window_render_texture->clear();
 
    const auto mapEnabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
 
-   if (mLevelLoadingFinished)
+   if (_level_loading_finished)
    {
-      mLevel->draw(mWindowRenderTexture, mScreenshot);
+      _level->draw(_window_render_texture, _screenshot);
    }
 
-   mScreenshot = false;
+   _screenshot = false;
 
    // refactoring idea:
    // move this into the level class
-   if (mDrawWeather)
+   if (_draw_states._draw_weather)
    {
-      Weather::getInstance().draw(*mWindowRenderTexture.get());
+      Weather::getInstance().draw(*_window_render_texture.get());
    }
 
    // draw screen transitions here
    if (ScreenTransitionHandler::getInstance()._transition)
    {
-      ScreenTransitionHandler::getInstance()._transition->draw(mWindowRenderTexture);
+      ScreenTransitionHandler::getInstance()._transition->draw(_window_render_texture);
    }
 
    if (!mapEnabled)
    {
-      mInfoLayer->setLoading(!mLevelLoadingFinished);
-      mInfoLayer->draw(*mWindowRenderTexture.get());
+      _info_layer->setLoading(!_level_loading_finished);
+      _info_layer->draw(*_window_render_texture.get());
    }
 
-   if (mDrawDebugInfo)
+   if (_draw_states._draw_debug_info)
    {
-      mInfoLayer->drawDebugInfo(*mWindowRenderTexture.get());
+      _info_layer->drawDebugInfo(*_window_render_texture.get());
    }
 
-   if (mDrawConsole)
+   if (_draw_states._draw_console)
    {
-      mInfoLayer->drawConsole(*mWindowRenderTexture.get());
+      _info_layer->drawConsole(*_window_render_texture.get());
    }
 
-   if (mDrawCameraSystem)
+   if (_draw_states._draw_camera_system)
    {
-      DebugDraw::debugCameraSystem(*mWindowRenderTexture.get());
+      DebugDraw::debugCameraSystem(*_window_render_texture.get());
    }
 
-   if (mDrawControllerOverlay)
+   if (_draw_states._draw_controller_overlay)
    {
-      mControllerOverlay->draw(*mWindowRenderTexture.get());
+      _controller_overlay->draw(*_window_render_texture.get());
    }
 
    if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
    {
-      mInventoryLayer->draw(*mWindowRenderTexture.get());
+      _inventory_layer->draw(*_window_render_texture.get());
    }
 
-   if (mDrawTestScene)
+   if (_draw_states._draw_test_scene)
    {
-      mTestScene->draw(*mWindowRenderTexture.get());
+      _test_scene->draw(*_window_render_texture.get());
    }
 
-   Menu::getInstance()->draw(*mWindowRenderTexture.get(), {sf::BlendAlpha});
-   MessageBox::draw(*mWindowRenderTexture.get());
+   Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
+   MessageBox::draw(*_window_render_texture.get());
 
-   mWindowRenderTexture->display();
-   auto windowTextureSprite = sf::Sprite(mWindowRenderTexture->getTexture());
+   _window_render_texture->display();
+   auto windowTextureSprite = sf::Sprite(_window_render_texture->getTexture());
 
    if (GameConfiguration::getInstance().mFullscreen)
    {
       // scale window texture up to available window size
-      const auto scaleX = mWindow->getSize().x / static_cast<float>(mWindowRenderTexture->getSize().x);
-      const auto scaleY = mWindow->getSize().y / static_cast<float>(mWindowRenderTexture->getSize().y);
+      const auto scaleX = _window->getSize().x / static_cast<float>(_window_render_texture->getSize().x);
+      const auto scaleY = _window->getSize().y / static_cast<float>(_window_render_texture->getSize().y);
       const auto scaleMin = std::min(static_cast<int32_t>(scaleX), static_cast<int32_t>(scaleY));
       const auto dx = (scaleX - scaleMin) * 0.5f;
       const auto dy = (scaleY - scaleMin) * 0.5f;
-      windowTextureSprite.setPosition(mWindowRenderTexture->getSize().x * dx, mWindowRenderTexture->getSize().y * dy);
+      windowTextureSprite.setPosition(_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy);
       windowTextureSprite.scale(static_cast<float>(scaleMin), static_cast<float>(scaleMin));
    }
    else
    {
       windowTextureSprite.setPosition(
-         static_cast<float>(mRenderTextureOffset.x),
-         static_cast<float>(mRenderTextureOffset.y)
+         static_cast<float>(_render_texture_offset.x),
+         static_cast<float>(_render_texture_offset.y)
       );
    }
 
-   mWindow->draw(windowTextureSprite);
+   _window->draw(windowTextureSprite);
 
-   mWindow->popGLStates();
+   _window->popGLStates();
 
-   mWindow->display();
+   _window->display();
 
-   if (mRecording)
+   if (_recording)
    {
       const auto image = windowTextureSprite.getTexture()->copyToImage();
 
       std::thread record([this, image](){
             std::ostringstream num;
-            num << std::setfill('0') << std::setw(5) << mRecordingCounter++;
+            num << std::setfill('0') << std::setw(5) << _recording_counter++;
             image.saveToFile(num.str() + ".bmp");
          }
       );
@@ -507,7 +518,7 @@ void Game::updateGameController()
    if (gji != nullptr)
    {
       gji->getController()->update();
-      mPlayer->getControls().setJoystickInfo(gji->getController()->getInfo());
+      _player->getControls().setJoystickInfo(gji->getController()->getInfo());
    }
 }
 
@@ -519,7 +530,7 @@ void Game::updateGameControllerForGame()
   if (gji != nullptr)
   {
      auto info = gji->getController()->getInfo();
-     mPlayer->getControls().setJoystickInfo(info);
+     _player->getControls().setJoystickInfo(info);
      GameControllerData::getInstance().setJoystickInfo(info);
   }
 }
@@ -531,7 +542,7 @@ void Game::updateGameControllerForInventory()
   auto gji = GameControllerIntegration::getInstance(0);
   if (gji != nullptr)
   {
-     mInventoryLayer->setJoystickInfo(gji->getController()->getInfo());
+     _inventory_layer->setJoystickInfo(gji->getController()->getInfo());
   }
 }
 
@@ -540,9 +551,9 @@ void Game::updateGameControllerForInventory()
 void Game::updateWindowTitle()
 {
    std::ostringstream sStream;
-   sStream << GAME_NAME << " - " << mFps << "fps";
-   mWindow->setTitle(sStream.str());
-   mFps = 0;
+   sStream << GAME_NAME << " - " << _fps << "fps";
+   _window->setTitle(sStream.str());
+   _fps = 0;
 }
 
 
@@ -554,11 +565,11 @@ void Game::resetAfterDeath(const sf::Time& dt)
    // way round. on the other hand this approach allows very simple
    // timing and the fading is very unlikely to fail anyway.
 
-   if (mPlayer->isDead())
+   if (_player->isDead())
    {
-      mDeathWaitTimeMs += dt.asMilliseconds();
+      _death_wait_time_ms += dt.asMilliseconds();
 
-      if (mDeathWaitTimeMs > 1000)
+      if (_death_wait_time_ms > 1000)
       {
          if (!ScreenTransitionHandler::getInstance()._transition)
          {
@@ -582,7 +593,7 @@ void Game::resetAfterDeath(const sf::Time& dt)
             screen_transition->_callbacks_effect_1_ended.push_back(
                [this](){
                   SaveState::deserializeFromFile();
-                  mPlayer->reset();
+                  _player->reset();
                   loadLevel();
 
                   // update the camera system to point to the player position immediately
@@ -601,9 +612,9 @@ void Game::resetAfterDeath(const sf::Time& dt)
       }
    }
 
-   if (mLevelLoadingFinished && !mLevelLoadingFinishedPrevious)
+   if (_level_loading_finished && !_level_loading_finished_previous)
    {
-      mLevelLoadingFinishedPrevious = true;
+      _level_loading_finished_previous = true;
 
       if (ScreenTransitionHandler::getInstance()._transition)
       {
@@ -616,11 +627,11 @@ void Game::resetAfterDeath(const sf::Time& dt)
 void Game::updateGameState(const sf::Time& dt)
 {
    // check if just died
-   auto deathReason = mPlayer->checkDead();
-   if (!mPlayer->isDead() && deathReason != DeathReason::None)
+   auto deathReason = _player->checkDead();
+   if (!_player->isDead() && deathReason != DeathReason::None)
    {
-      mDeathWaitTimeMs = 0;
-      mLevel->resetDeathShader();
+      _death_wait_time_ms = 0;
+      _level->resetDeathShader();
 
       switch (deathReason)
       {
@@ -650,7 +661,7 @@ void Game::updateGameState(const sf::Time& dt)
          }
       }
 
-      mPlayer->die();
+      _player->die();
    }
 
    // fade out when the player dies
@@ -662,8 +673,8 @@ void Game::updateGameState(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::update()
 {
-   const auto dt = mDeltaClock.getElapsedTime();
-   mDeltaClock.restart();
+   const auto dt = _delta_clock.getElapsedTime();
+   _delta_clock.restart();
 
    Audio::getInstance()->updateMusic();
 
@@ -684,7 +695,7 @@ void Game::update()
    {
       updateGameController();
       updateGameControllerForInventory();
-      mInventoryLayer->update(dt);
+      _inventory_layer->update(dt);
 
       // this is not beautiful. simplify!
       if (DisplayMode::getInstance().isSet(Display::DisplayMap))
@@ -696,21 +707,21 @@ void Game::update()
    {
       Timer::update();
 
-      if (mLevelLoadingFinished)
+      if (_level_loading_finished)
       {
          AnimationPool::getInstance().updateAnimations(dt);
          Projectile::update(dt);
          updateGameController();
          updateGameControllerForGame();
-         mLevel->update(dt);
-         mPlayer->update(dt);
+         _level->update(dt);
+         _player->update(dt);
 
-         if (mDrawTestScene)
+         if (_draw_states._draw_test_scene)
          {
-            mTestScene->update(dt);
+            _test_scene->update(dt);
          }
 
-         if (mDrawWeather)
+         if (_draw_states._draw_weather)
          {
             Weather::getInstance().update(dt);
          }
@@ -728,7 +739,7 @@ void Game::update()
 //----------------------------------------------------------------------------------------------------------------------
 int Game::loop()
 {
-   while (mWindow->isOpen())
+   while (_window->isOpen())
    {
       processEvents();
       update();
@@ -742,7 +753,7 @@ int Game::loop()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::reset()
 {
-   mPlayer->reset();
+   _player->reset();
 }
 
 
@@ -764,7 +775,7 @@ void Game::openInventory()
    {
       GameState::getInstance().enqueuePause();
       DisplayMode::getInstance().enqueueSet(Display::DisplayInventory);
-      mInventoryLayer->setActive(true);
+      _inventory_layer->setActive(true);
    }
 }
 
@@ -774,7 +785,7 @@ void Game::toggleFullScreen()
 {
     GameConfiguration::getInstance().mFullscreen = !GameConfiguration::getInstance().mFullscreen;
     initializeWindow();
-    mLevel->createViews();
+    _level->createViews();
 }
 
 
@@ -787,9 +798,9 @@ void Game::changeResolution(int32_t w, int32_t h)
 
     initializeWindow();
 
-    if (mLevel)
+    if (_level)
     {
-       mLevel->createViews();
+       _level->createViews();
     }
 }
 
@@ -797,7 +808,7 @@ void Game::changeResolution(int32_t w, int32_t h)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::takeScreenshot()
 {
-   mScreenshot = true;
+   _screenshot = true;
 }
 
 
@@ -806,7 +817,7 @@ void Game::processEvent(const sf::Event& event)
 {
    if (event.type == sf::Event::Closed)
    {
-      mWindow->close();
+      _window->close();
    }
 
    else if (event.type == sf::Event::KeyPressed)
@@ -827,7 +838,7 @@ void Game::processEvent(const sf::Event& event)
          }
          else
          {
-            mPlayer->getControls().keyboardKeyPressed(event.key.code);
+            _player->getControls().keyboardKeyPressed(event.key.code);
          }
       }
 
@@ -843,7 +854,7 @@ void Game::processEvent(const sf::Event& event)
       }
       else
       {
-         mPlayer->getControls().keyboardKeyReleased(event.key.code);
+         _player->getControls().keyboardKeyReleased(event.key.code);
       }
 
       processKeyReleasedEvents(event);
@@ -876,8 +887,8 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       if (event.key.code == sf::Keyboard::F12)
       {
-         mDrawConsole = !mDrawConsole;
-         Console::getInstance().setActive(mDrawConsole);
+         _draw_states._draw_console = !_draw_states._draw_console;
+         Console::getInstance().setActive(_draw_states._draw_console);
       }
       else if (event.key.code == sf::Keyboard::Backspace)
       {
@@ -918,33 +929,38 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F2:
       {
-         mDrawControllerOverlay = !mDrawControllerOverlay;
+         _draw_states._draw_controller_overlay = !_draw_states._draw_controller_overlay;
          break;
       }
       case sf::Keyboard::F3:
       {
-         mDrawCameraSystem = !mDrawCameraSystem;
+         _draw_states._draw_camera_system = !_draw_states._draw_camera_system;
          break;
       }
       case sf::Keyboard::F4:
       {
-         mDrawDebugInfo = !mDrawDebugInfo;
+         _draw_states._draw_debug_info = !_draw_states._draw_debug_info;
          break;
       }
       case sf::Keyboard::F5:
       {
-         mDrawWeather = !mDrawWeather;
+         _draw_states._draw_weather = !_draw_states._draw_weather;
          break;
       }
       case sf::Keyboard::F6:
       {
-         mDrawTestScene = ! mDrawTestScene;
+         _draw_states._draw_test_scene = !_draw_states._draw_test_scene;
+         break;
+      }
+      case sf::Keyboard::F11:
+      {
+         _event_serializer.play();
          break;
       }
       case sf::Keyboard::F12:
       {
-         mDrawConsole = !mDrawConsole;
-         Console::getInstance().setActive(mDrawConsole);
+         _draw_states._draw_console = !_draw_states._draw_console;
+         Console::getInstance().setActive(_draw_states._draw_console);
          break;
       }
       case sf::Keyboard::F:
@@ -959,17 +975,17 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::L:
       {
-         if (mLevelLoadingFinished)
+         if (_level_loading_finished)
          {
-            mStoredPositionValid = true;
-            mStoredPosition = mPlayer->getPixelPositionf();
+            _stored_position_valid = true;
+            _stored_position = _player->getPixelPositionf();
             loadLevel();
          }
          break;
       }
       case sf::Keyboard::M:
       {
-         mRecording = !mRecording;
+         _recording = !_recording;
          break;
       }
       case sf::Keyboard::N:
@@ -1005,7 +1021,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::V:
       {
-         mPlayer->setVisible(!mPlayer->getVisible());
+         _player->setVisible(!_player->getVisible());
          break;
       }
       case sf::Keyboard::LShift:
@@ -1015,13 +1031,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Left:
       {
-         mInventoryLayer->left();
+         _inventory_layer->left();
          CameraPane::getInstance().updateLookState(Look::LookLeft, true);
          break;
       }
       case sf::Keyboard::Right:
       {
-         mInventoryLayer->right();
+         _inventory_layer->right();
          CameraPane::getInstance().updateLookState(Look::LookRight, true);
          break;
       }
@@ -1106,14 +1122,12 @@ void Game::processKeyReleasedEvents(const sf::Event& event)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processEvents()
 {
-   static EventSerializer serializer;
-
    sf::Event event;
-   while (mWindow->pollEvent(event))
+   while (_window->pollEvent(event))
    {
       processEvent(event);
 
-      serializer.add(event);
+      _event_serializer.add(event);
    }
 }
 
