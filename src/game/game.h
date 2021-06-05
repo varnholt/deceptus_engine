@@ -111,7 +111,5 @@ private:
    bool _recording = false;
    int32_t _recording_counter = 0;
    std::vector<sf::Image> _recording_images;
-
-   EventSerializer _event_serializer;
 };
 
