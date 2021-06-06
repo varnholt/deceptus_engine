@@ -35,6 +35,15 @@ namespace  {
 #define OBJINSTANCE LuaInterface::instance()->getObject(state)
 
 
+/**
+ * @brief updateProperties
+ * @param state lua state
+ *    param 1 key
+ *    param 2 value
+ *    param n key
+ *    param n + 1 value
+ * @return error code
+ */
 extern "C" int32_t updateProperties(lua_State* state)
 {
    lua_pushnil(state);
@@ -83,6 +92,16 @@ extern "C" int32_t updateProperties(lua_State* state)
 }
 
 
+/**
+ * @brief updateSpriteRect update node's sprite rect
+ * @param state lua state
+ *    param 1: id of sprite
+ *    param 2: x position of sprite
+ *    param 3: y position of sprite
+ *    param 4: sprite width
+ *    param 5: sprite height
+ * @return error code
+ */
 extern "C" int32_t updateSpriteRect(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -110,6 +129,16 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
 }
 
 
+/**
+ * @brief queryAABB do an aabb query
+ * @param state lua state
+ *    param 1: aabb x1
+ *    param 2: aabb y1
+ *    param 3: aabb x2
+ *    param 4: aabb y2
+ *    return hit count
+ * @return 1 if hit, 0 if no hit
+ */
 extern "C" int32_t queryAABB(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -151,6 +180,16 @@ extern "C" int32_t queryAABB(lua_State* state)
 }
 
 
+/**
+ * @brief queryRayCast do a raycast and see if we hit something
+ * @param state lua state
+ *    param 1 x1
+ *    param 2 y1
+ *    param 3 x2
+ *    param 4 y2
+ *    return number of objects hit
+ * @return exit code
+ */
 extern "C" int32_t queryRayCast(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -158,8 +197,6 @@ extern "C" int32_t queryRayCast(lua_State* state)
 
    if (argc == 4)
    {
-      b2AABB aabb;
-
       b2Vec2 p1;
       b2Vec2 p2;
 
@@ -170,8 +207,6 @@ extern "C" int32_t queryRayCast(lua_State* state)
 
       p1.Set(x1, y1);
       p2.Set(x2, y2);
-
-      // std::cout << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y << std::endl;
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -189,6 +224,12 @@ extern "C" int32_t queryRayCast(lua_State* state)
 }
 
 
+/**
+ * @brief setDamage set the damage of this lua node
+ * @param state lua state
+ *    param damage amount of damage (0..100)
+ * @return error code
+ */
 extern "C" int32_t setDamage(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -210,6 +251,13 @@ extern "C" int32_t setDamage(lua_State* state)
 }
 
 
+
+/**
+ * @brief setZ set the z layer of this node
+ * @param state lua state
+ *    param 1: z layer
+ * @return exit code
+ */
 extern "C" int32_t setZ(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -231,6 +279,11 @@ extern "C" int32_t setZ(lua_State* state)
 }
 
 
+/**
+ * @brief makeDynamic make this object a dynamic box2d object
+ * @param state lua state
+ * @return exit code
+ */
 extern "C" int32_t makeDynamic(lua_State* state)
 {
    auto node = OBJINSTANCE;
@@ -245,6 +298,11 @@ extern "C" int32_t makeDynamic(lua_State* state)
 }
 
 
+/**
+ * @brief makeStatic make this object a static box2d object
+ * @param state lua state
+ * @return exit code
+ */
 extern "C" int32_t makeStatic(lua_State* state)
 {
    auto node = OBJINSTANCE;
@@ -259,6 +317,12 @@ extern "C" int32_t makeStatic(lua_State* state)
 }
 
 
+/**
+ * @brief setGravityScale set the gravity scale of this node
+ * @param state lua state
+ *    param 1: gravity scale (0..1)
+ * @return error code
+ */
 extern "C" int32_t setGravityScale(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -283,6 +347,12 @@ extern "C" int32_t setGravityScale(lua_State* state)
 }
 
 
+/**
+ * @brief setActive set this node active/inactive
+ * @param state lua state
+ *    param 1: active flag
+ * @return error code
+ */
 extern "C" int32_t setActive(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -307,6 +377,16 @@ extern "C" int32_t setActive(lua_State* state)
 }
 
 
+/**
+ * @brief isPhsyicsPathClear check if a given path hits objects inside the tmx
+ * @param state lua state
+ *    param 1: x0
+ *    param 2: y0
+ *    param 3: x1
+ *    param 4: y1
+ *    return \c true on collision
+ * @return error code
+ */
 extern "C" int32_t isPhsyicsPathClear(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -332,6 +412,14 @@ extern "C" int32_t isPhsyicsPathClear(lua_State* state)
 }
 
 
+/**
+ * @brief getLinearVelocity reads the linear velocity of this object
+ * @param state lua state
+ *    return table
+ *       1: velocity x
+ *       2: velocity y
+ * @return error code
+ */
 extern "C" int32_t getLinearVelocity(lua_State* state)
 {
    auto node = OBJINSTANCE;
@@ -351,6 +439,13 @@ extern "C" int32_t getLinearVelocity(lua_State* state)
 }
 
 
+/**
+ * @brief setLinearVelocity setter for linear velocity
+ * @param state lua state
+ *    param 1: velocity x
+ *    param 2: velocity y
+ * @return error code
+ */
 extern "C" int32_t setLinearVelocity(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -834,12 +929,6 @@ extern "C" int32_t timer(lua_State* state)
          std::chrono::milliseconds(delay),
          [node, timerId](){node->luaTimeout(timerId);}
       );
-
-      //      std::thread([node, delay, timerId]() {
-      //            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-      //            node->luaTimeout(timerId);
-      //         }
-      //      ).detach();
    }
 
    return 0;
@@ -1170,6 +1259,153 @@ void LuaNode::synchronizeProperties()
 }
 
 
+
+/**
+ * @brief LuaNode::luaInitialize called to call the initialize function inside the lua script
+ * callback name: initialize
+ */
+void LuaNode::luaInitialize()
+{
+   lua_getglobal(mState, FUNCTION_INITIALIZE);
+   auto result = lua_pcall(mState, 0, 0, 0);
+
+   if (result != LUA_OK)
+   {
+      error(mState, FUNCTION_INITIALIZE);
+   }
+}
+
+
+/**
+ * @brief LuaNode::luaUpdate update the lua node
+ * @param dt delta time, passed to luanode in seconds
+ * callback name: update
+ */
+void LuaNode::luaUpdate(const sf::Time& dt)
+{
+   lua_getglobal(mState, FUNCTION_UPDATE);
+   lua_pushnumber(mState, dt.asSeconds());
+
+   auto result = lua_pcall(mState, 1, 0, 0);
+
+   if (result != LUA_OK)
+   {
+      error(mState, FUNCTION_UPDATE);
+   }
+}
+
+
+/**
+ * @brief LuaNode::luaWriteProperty write a property of the luanode
+ * @param key property key
+ * @param value property value
+ * callback name: writeProperty
+ */
+void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
+{
+   lua_getglobal(mState, FUNCTION_WRITE_PROPERTY);
+   if (lua_isfunction(mState, -1) )
+   {
+      lua_pushstring(mState, key.c_str());
+      lua_pushstring(mState, value.c_str());
+
+      auto result = lua_pcall(mState, 2, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_WRITE_PROPERTY);
+      }
+   }
+}
+
+
+/**
+ * @brief LuaNode::luaHit luanode got hit by something
+ * @param damage amount of damage from 0..100 while 100 is fatal
+ * callback name: hit
+ */
+void LuaNode::luaHit(int32_t damage)
+{
+   // std::cout << "thing was hit: " << damage << std::endl;
+
+   lua_getglobal(mState, FUNCTION_HIT);
+   if (lua_isfunction(mState, -1) )
+   {
+      lua_pushinteger(mState, damage);
+
+      auto result = lua_pcall(mState, 1, 0, 0);
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_HIT);
+      }
+   }
+}
+
+
+/**
+ * @brief LuaNode::luaCollisionWithPlayer indicate collision with player
+ * callback name: collisionWithPlayer
+ */
+void LuaNode::luaCollisionWithPlayer()
+{
+   lua_getglobal(mState, FUNCTION_COLLISION_WITH_PLAYER);
+   if (lua_isfunction(mState, -1) )
+   {
+      auto result = lua_pcall(mState, 0, 0, 0);
+      if (result != LUA_OK)
+      {
+         error(mState, FUNCTION_COLLISION_WITH_PLAYER);
+      }
+   }
+}
+
+
+
+
+/**
+ * @brief LuaNode::luaSendPatrolPath sends the patrol path coordinates to the lua script
+ * callback name: setPath
+ */
+void LuaNode::luaSendPatrolPath()
+{
+   if (mPatrolPath.size() == 0)
+   {
+      return;
+   }
+
+   lua_getglobal(mState, FUNCTION_SET_PATH);
+
+   lua_pushstring(mState, "patrol_path");
+   luaSendPath(mPatrolPath);
+
+   // vec.size + 1 args, 0 result
+   auto result = lua_pcall(mState, 2, 0, 0);
+
+   if (result != LUA_OK)
+   {
+      error(mState, FUNCTION_SET_PATH);
+   }
+}
+
+
+/**
+ * @brief LuaNode::luaDie lua script is told to die
+ */
+void LuaNode::luaDie()
+{
+   Level::getCurrentLevel()->getWorld()->DestroyBody(mBody);
+
+   // resetting the body will get it removed from the luainterface class
+   mBody = nullptr;
+}
+
+
+/**
+ * @brief LuaNode::luaMovedTo tell lua script where the engine moved it to
+ * callback name: movedTo
+ * lua param x: x position (double)
+ * lua param y: y position (double)
+ */
 void LuaNode::luaMovedTo()
 {
    const auto x = mPosition.x;
@@ -1193,6 +1429,12 @@ void LuaNode::luaMovedTo()
 }
 
 
+/**
+ * @brief LuaNode::luaSetStartPosition
+ * callback name: setStartPosition
+ * lua param x: x position of start position (double)
+ * lua param y: y position of start position (double)
+ */
 void LuaNode::luaSetStartPosition()
 {
    const auto x = mStartPosition.x;
@@ -1215,6 +1457,12 @@ void LuaNode::luaSetStartPosition()
 }
 
 
+/**
+ * @brief LuaNode::luaPlayerMovedTo engine moved player to a certain position
+ * callback name: playerMovedTo
+ * lua param x: x position of player position (double)
+ * lua param y: y position of player position (double)
+ */
 void LuaNode::luaPlayerMovedTo()
 {
    const auto pos =  Player::getCurrent()->getPixelPositionf();
@@ -1236,6 +1484,10 @@ void LuaNode::luaPlayerMovedTo()
 }
 
 
+/**
+ * @brief LuaNode::luaRetrieveProperties instruct lua node to retrieve properties now
+ * callback name: retrieveProperties
+ */
 void LuaNode::luaRetrieveProperties()
 {
    lua_getglobal(mState, FUNCTION_RETRIEVE_PROPERTIES);
@@ -1250,6 +1502,12 @@ void LuaNode::luaRetrieveProperties()
 }
 
 
+/**
+ * @brief LuaNode::luaTimeout timeout timer fired
+ * @param timerId timer id of timeout timer
+ * callback name: timeout
+ * lua param timerId: id of timeout timer
+ */
 void LuaNode::luaTimeout(int32_t timerId)
 {
    lua_getglobal(mState, FUNCTION_TIMEOUT);
@@ -1264,6 +1522,10 @@ void LuaNode::luaTimeout(int32_t timerId)
 }
 
 
+/**
+ * @brief LuaNode::luaSendPath inject a path into the current lua state
+ * @param vec vector of 2d vectors
+ */
 void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 {
    lua_newtable(mState);
@@ -1452,37 +1714,6 @@ int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
 }
 
 
-void LuaNode::luaSendPatrolPath()
-{
-   if (mPatrolPath.size() == 0)
-   {
-      return;
-   }
-
-   lua_getglobal(mState, FUNCTION_SET_PATH);
-
-   lua_pushstring(mState, "patrol_path");
-   luaSendPath(mPatrolPath);
-
-   // vec.size + 1 args, 0 result
-   auto result = lua_pcall(mState, 2, 0, 0);
-
-   if (result != LUA_OK)
-   {
-      error(mState, FUNCTION_SET_PATH);
-   }
-}
-
-
-void LuaNode::luaDie()
-{
-   Level::getCurrentLevel()->getWorld()->DestroyBody(mBody);
-
-   // resetting the body will get it removed from the luainterface class
-   mBody = nullptr;
-}
-
-
 bool LuaNode::getPropertyBool(const std::string& key)
 {
    auto value = false;
@@ -1592,90 +1823,12 @@ void LuaNode::fireWeapon(size_t index, b2Vec2 from, b2Vec2 to)
 }
 
 
-void LuaNode::luaInitialize()
-{
-   lua_getglobal(mState, FUNCTION_INITIALIZE);
-   auto result = lua_pcall(mState, 0, 0, 0);
-
-   if (result != LUA_OK)
-   {
-      error(mState, FUNCTION_INITIALIZE);
-   }
-}
-
-
-void LuaNode::luaUpdate(const sf::Time& dt)
-{
-   lua_getglobal(mState, FUNCTION_UPDATE);
-   lua_pushnumber(mState, dt.asSeconds());
-
-   auto result = lua_pcall(mState, 1, 0, 0);
-
-   if (result != LUA_OK)
-   {
-      error(mState, FUNCTION_UPDATE);
-   }
-}
-
-
-void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
-{
-   lua_getglobal(mState, FUNCTION_WRITE_PROPERTY);
-   if (lua_isfunction(mState, -1) )
-   {
-      lua_pushstring(mState, key.c_str());
-      lua_pushstring(mState, value.c_str());
-
-      auto result = lua_pcall(mState, 2, 0, 0);
-
-      if (result != LUA_OK)
-      {
-         error(mState, FUNCTION_UPDATE);
-      }
-   }
-}
-
-
-void LuaNode::luaHit(int32_t damage)
-{
-   // std::cout << "thing was hit: " << damage << std::endl;
-
-   lua_getglobal(mState, FUNCTION_HIT);
-   if (lua_isfunction(mState, -1) )
-   {
-      lua_pushinteger(mState, damage);
-
-      auto result = lua_pcall(mState, 1, 0, 0);
-      if (result != LUA_OK)
-      {
-         error(mState, FUNCTION_UPDATE);
-      }
-   }
-}
-
-
-void LuaNode::luaCollisionWithPlayer()
-{
-   lua_getglobal(mState, FUNCTION_COLLISION_WITH_PLAYER);
-   if (lua_isfunction(mState, -1) )
-   {
-      auto result = lua_pcall(mState, 0, 0, 0);
-      if (result != LUA_OK)
-      {
-         error(mState, FUNCTION_UPDATE);
-      }
-   }
-}
-
-
 void LuaNode::stopScript()
 {
    if (mState)
    {
       lua_close(mState);
       mState = nullptr;
-
-      // printf("LuaInterface::StopScript: script stopped\n");
    }
 }
 
@@ -1757,11 +1910,6 @@ void LuaNode::updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int3
    {
       mSprites[id].setTexture(*mTexture);
    }
-
-   // if (id > 0)
-   // {
-   //    std::cout << "id: " << id << " pos: " << x << ", " << y << " size: " << w << ", " << h << std::endl;
-   // }
 
    mSprites[id].setTextureRect(sf::IntRect(x, y, w, h));
 }
