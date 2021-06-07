@@ -44,7 +44,7 @@ namespace  {
  *    param n + 1 value
  * @return error code
  */
-extern "C" int32_t updateProperties(lua_State* state)
+int32_t updateProperties(lua_State* state)
 {
    lua_pushnil(state);
 
@@ -102,7 +102,7 @@ extern "C" int32_t updateProperties(lua_State* state)
  *    param 5: sprite height
  * @return error code
  */
-extern "C" int32_t updateSpriteRect(lua_State* state)
+int32_t updateSpriteRect(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -139,7 +139,7 @@ extern "C" int32_t updateSpriteRect(lua_State* state)
  *    return hit count
  * @return 1 if hit, 0 if no hit
  */
-extern "C" int32_t queryAABB(lua_State* state)
+int32_t queryAABB(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -190,7 +190,7 @@ extern "C" int32_t queryAABB(lua_State* state)
  *    return number of objects hit
  * @return exit code
  */
-extern "C" int32_t queryRayCast(lua_State* state)
+int32_t queryRayCast(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -230,7 +230,7 @@ extern "C" int32_t queryRayCast(lua_State* state)
  *    param damage amount of damage (0..100)
  * @return error code
  */
-extern "C" int32_t setDamage(lua_State* state)
+int32_t setDamage(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -258,7 +258,7 @@ extern "C" int32_t setDamage(lua_State* state)
  *    param 1: z layer
  * @return exit code
  */
-extern "C" int32_t setZ(lua_State* state)
+int32_t setZ(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -284,7 +284,7 @@ extern "C" int32_t setZ(lua_State* state)
  * @param state lua state
  * @return exit code
  */
-extern "C" int32_t makeDynamic(lua_State* state)
+int32_t makeDynamic(lua_State* state)
 {
    auto node = OBJINSTANCE;
 
@@ -303,7 +303,7 @@ extern "C" int32_t makeDynamic(lua_State* state)
  * @param state lua state
  * @return exit code
  */
-extern "C" int32_t makeStatic(lua_State* state)
+int32_t makeStatic(lua_State* state)
 {
    auto node = OBJINSTANCE;
 
@@ -323,7 +323,7 @@ extern "C" int32_t makeStatic(lua_State* state)
  *    param 1: gravity scale (0..1)
  * @return error code
  */
-extern "C" int32_t setGravityScale(lua_State* state)
+int32_t setGravityScale(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -353,7 +353,7 @@ extern "C" int32_t setGravityScale(lua_State* state)
  *    param 1: active flag
  * @return error code
  */
-extern "C" int32_t setActive(lua_State* state)
+int32_t setActive(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -387,7 +387,7 @@ extern "C" int32_t setActive(lua_State* state)
  *    return \c true on collision
  * @return error code
  */
-extern "C" int32_t isPhsyicsPathClear(lua_State* state)
+int32_t isPhsyicsPathClear(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -420,7 +420,7 @@ extern "C" int32_t isPhsyicsPathClear(lua_State* state)
  *       2: velocity y
  * @return error code
  */
-extern "C" int32_t getLinearVelocity(lua_State* state)
+int32_t getLinearVelocity(lua_State* state)
 {
    auto node = OBJINSTANCE;
    auto velocity = node->getLinearVelocity();
@@ -446,7 +446,7 @@ extern "C" int32_t getLinearVelocity(lua_State* state)
  *    param 2: velocity y
  * @return error code
  */
-extern "C" int32_t setLinearVelocity(lua_State* state)
+int32_t setLinearVelocity(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -478,7 +478,7 @@ extern "C" int32_t setLinearVelocity(lua_State* state)
  *    param 3: dy damage direction y
  * @return error code
  */
-extern "C" int32_t damage(lua_State* state)
+int32_t damage(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -514,7 +514,7 @@ extern "C" int32_t damage(lua_State* state)
  *    param 4: radius damage radius
  * @return error code
  */
-extern "C" int32_t damageRadius(lua_State* state)
+int32_t damageRadius(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -548,7 +548,7 @@ extern "C" int32_t damageRadius(lua_State* state)
  *    param 3: z rotation
  * @return error code
  */
-extern "C" int32_t setTransform(lua_State* state)
+int32_t setTransform(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -579,7 +579,7 @@ extern "C" int32_t setTransform(lua_State* state)
  * @param state lua state
  * @return error code
  */
-extern "C" int32_t addSprite(lua_State* state)
+int32_t addSprite(lua_State* state)
 {
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -602,7 +602,7 @@ extern "C" int32_t addSprite(lua_State* state)
  *    param 3: y position
  * @return error code
  */
-extern "C" int32_t setSpriteOrigin(lua_State* state)
+int32_t setSpriteOrigin(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -635,7 +635,7 @@ extern "C" int32_t setSpriteOrigin(lua_State* state)
  *    param 3: y position
  * @return error code
  */
-extern "C" int32_t setSpriteOffset(lua_State* state)
+int32_t setSpriteOffset(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -668,7 +668,7 @@ extern "C" int32_t setSpriteOffset(lua_State* state)
  *    param 3: boom intensity
  * @return error code
  */
-extern "C" int32_t boom(lua_State* state)
+int32_t boom(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -701,7 +701,7 @@ extern "C" int32_t boom(lua_State* state)
  *    param 3: circle y position
  * @return error code
  */
-extern "C" int32_t addShapeCircle(lua_State* state)
+int32_t addShapeCircle(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -734,7 +734,7 @@ extern "C" int32_t addShapeCircle(lua_State* state)
  *    param 4: rect position y
  * @return error code
  */
-extern "C" int32_t addShapeRect(lua_State* state)
+int32_t addShapeRect(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -766,7 +766,7 @@ extern "C" int32_t addShapeRect(lua_State* state)
  *    param n + 1 y coordinate
  * @return error code
  */
-extern "C" int32_t addShapePoly(lua_State* state)
+int32_t addShapePoly(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -808,7 +808,7 @@ extern "C" int32_t addShapePoly(lua_State* state)
  *    param 4..n: polygon x and y parameters if not a radial bullet
  * @return error code
  */
-extern "C" int32_t addWeapon(lua_State* state)
+int32_t addWeapon(lua_State* state)
 {
    auto argc = static_cast<size_t>(lua_gettop(state));
 
@@ -879,7 +879,7 @@ extern "C" int32_t addWeapon(lua_State* state)
  *    param 5: y direction
  * @return error code
  */
-extern "C" int32_t fireWeapon(lua_State* state)
+int32_t fireWeapon(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -918,7 +918,7 @@ extern "C" int32_t fireWeapon(lua_State* state)
  *    param 6: height of the texture rect
  * @return error code
  */
-extern "C" int32_t updateProjectileTexture(lua_State* state)
+int32_t updateProjectileTexture(lua_State* state)
 {
    auto argc = lua_gettop(state);
    auto valid = (argc >= 2);
@@ -978,7 +978,7 @@ extern "C" int32_t updateProjectileTexture(lua_State* state)
  *    param 10: start frame
  * @return error code
  */
-extern "C" int32_t updateProjectileAnimation(lua_State* state)
+int32_t updateProjectileAnimation(lua_State* state)
 {
    int32_t argc = lua_gettop(state);
 
@@ -1038,7 +1038,7 @@ extern "C" int32_t updateProjectileAnimation(lua_State* state)
  *    param 2: id of the timer in milliseconds
  * @return error code
  */
-extern "C" int32_t timer(lua_State* state)
+int32_t timer(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    auto argc = lua_gettop(state);
@@ -1070,7 +1070,7 @@ extern "C" int32_t timer(lua_State* state)
  *    param 1: name of the sample
  * @return error code
  */
-extern "C" int32_t addSample(lua_State* state)
+int32_t addSample(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    int32_t argc = lua_gettop(state);
@@ -1092,7 +1092,7 @@ extern "C" int32_t addSample(lua_State* state)
  *    param 2: volume (0..1)
  * @return
  */
-extern "C" int32_t playSample(lua_State* state)
+int32_t playSample(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    int32_t argc = lua_gettop(state);
@@ -1115,7 +1115,7 @@ extern "C" int32_t playSample(lua_State* state)
  *    param 1: debug message
  * @return error code
  */
-extern "C" int32_t debug(lua_State* state)
+int32_t debug(lua_State* state)
 {
    // number of function arguments are on top of the stack.
    int32_t argc = lua_gettop(state);
@@ -1142,7 +1142,7 @@ extern "C" int32_t debug(lua_State* state)
  *    param 7: start frame
  * @return error code
  */
-extern "C" int32_t registerHitAnimation(lua_State* state)
+int32_t registerHitAnimation(lua_State* state)
 {
    int32_t argc = lua_gettop(state);
 
@@ -1187,7 +1187,7 @@ extern "C" int32_t registerHitAnimation(lua_State* state)
  *    param 1: keypressed bitmask
  * @return error code
  */
-extern "C" int32_t updateKeysPressed(lua_State* state)
+int32_t updateKeysPressed(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -1211,7 +1211,7 @@ extern "C" int32_t updateKeysPressed(lua_State* state)
  * @param state lua state
  * @return error code
  */
-extern "C" int32_t requestMap(lua_State* state)
+int32_t requestMap(lua_State* state)
 {
    auto obj = LuaInterface::instance()->getObject(state);
    if (obj != nullptr)
@@ -1228,7 +1228,7 @@ extern "C" int32_t requestMap(lua_State* state)
  * @param state lua state
  * @return error code
  */
-extern "C" int32_t die(lua_State* state)
+int32_t die(lua_State* state)
 {
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
