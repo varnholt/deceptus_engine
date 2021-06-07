@@ -470,7 +470,14 @@ extern "C" int32_t setLinearVelocity(lua_State* state)
 }
 
 
-
+/**
+ * @brief damage the node sets some damage to the player
+ * @param state lua state
+ *    param 1: amount of damage from 0..100
+ *    param 2: dx damage direction x
+ *    param 3: dy damage direction y
+ * @return error code
+ */
 extern "C" int32_t damage(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -498,6 +505,15 @@ extern "C" int32_t damage(lua_State* state)
 }
 
 
+/**
+ * @brief damage the node damages the palyer if he's within a given radius
+ * @param state lua state
+ *    param 1: amount of damage from 0..100
+ *    param 2: dx damage direction x
+ *    param 3: dy damage direction y
+ *    param 4: radius damage radius
+ * @return error code
+ */
 extern "C" int32_t damageRadius(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -524,6 +540,14 @@ extern "C" int32_t damageRadius(lua_State* state)
 }
 
 
+/**
+ * @brief setTransform set the object's transform
+ * @param state lua state
+ *    param 1: x translation
+ *    param 2: y translation
+ *    param 3: z rotation
+ * @return error code
+ */
 extern "C" int32_t setTransform(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -550,6 +574,11 @@ extern "C" int32_t setTransform(lua_State* state)
 }
 
 
+/**
+ * @brief addSprite add another (empty) sprite to this node
+ * @param state lua state
+ * @return error code
+ */
 extern "C" int32_t addSprite(lua_State* state)
 {
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
@@ -565,7 +594,14 @@ extern "C" int32_t addSprite(lua_State* state)
 }
 
 
-
+/**
+ * @brief setSpriteOrigin set origin of a given sprite
+ * @param state lua state
+ *    param 1: sprite id
+ *    param 2: x position
+ *    param 3: y position
+ * @return error code
+ */
 extern "C" int32_t setSpriteOrigin(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -591,6 +627,14 @@ extern "C" int32_t setSpriteOrigin(lua_State* state)
 }
 
 
+/**
+ * @brief setSpriteOffset sets the offset for a given sprite
+ * @param state lua state
+ *    param 1: sprite id
+ *    param 2: x position
+ *    param 3: y position
+ * @return error code
+ */
 extern "C" int32_t setSpriteOffset(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -616,6 +660,14 @@ extern "C" int32_t setSpriteOffset(lua_State* state)
 }
 
 
+/**
+ * @brief boom make the game go booom
+ * @param state lua state
+ *    param 1: detonation center x
+ *    param 2: detonation center y
+ *    param 3: boom intensity
+ * @return error code
+ */
 extern "C" int32_t boom(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -641,6 +693,14 @@ extern "C" int32_t boom(lua_State* state)
 }
 
 
+/**
+ * @brief addShapeCircle add a circle shape to the node
+ * @param state lua state
+ *    param 1: circle radius
+ *    param 2: circle x position
+ *    param 3: circle y position
+ * @return error code
+ */
 extern "C" int32_t addShapeCircle(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -665,6 +725,15 @@ extern "C" int32_t addShapeCircle(lua_State* state)
 }
 
 
+/**
+ * @brief addShapeRect add a rectangular shape to the node
+ * @param state lua state
+ *    param 1: rect width
+ *    param 2: rect height
+ *    param 3: rect position x
+ *    param 4: rect position y
+ * @return error code
+ */
 extern "C" int32_t addShapeRect(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -690,6 +759,13 @@ extern "C" int32_t addShapeRect(lua_State* state)
 }
 
 
+/**
+ * @brief addShapePoly add a polygonal shape to the node
+ * @param state lua state
+ *    param n x coordinate
+ *    param n + 1 y coordinate
+ * @return error code
+ */
 extern "C" int32_t addShapePoly(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -722,6 +798,16 @@ extern "C" int32_t addShapePoly(lua_State* state)
 }
 
 
+/**
+ * @brief addWeapon add a weapon instance to the player
+ * @param state lua state
+ *    param 1: weapon type (enum)
+ *    param 2: fire interval in ms
+ *    param 3: damage for single hit (0..100)
+ *    param 4: bullet radius
+ *    param 4..n: polygon x and y parameters if not a radial bullet
+ * @return error code
+ */
 extern "C" int32_t addWeapon(lua_State* state)
 {
    auto argc = static_cast<size_t>(lua_gettop(state));
@@ -783,6 +869,16 @@ extern "C" int32_t addWeapon(lua_State* state)
 }
 
 
+/**
+ * @brief fireWeapon fire a weapon
+ * @param state lua state
+ *    param 1: index of the weapon
+ *    param 2: x position where the shot comes from
+ *    param 3: y position where the shot comes from
+ *    param 4: x direction
+ *    param 5: y direction
+ * @return error code
+ */
 extern "C" int32_t fireWeapon(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -811,6 +907,17 @@ extern "C" int32_t fireWeapon(lua_State* state)
 }
 
 
+/**
+ * @brief updateProjectileTexture change the texture of a projectile
+ * @param state lua state
+ *    param 1: index of the weapon
+ *    param 2: path of the texture
+ *    param 3: x position of the texture rect
+ *    param 4: y position of the texture rect
+ *    param 5: width of the texture rect
+ *    param 6: height of the texture rect
+ * @return error code
+ */
 extern "C" int32_t updateProjectileTexture(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -856,6 +963,21 @@ extern "C" int32_t updateProjectileTexture(lua_State* state)
 }
 
 
+/**
+ * @brief updateProjectileAnimation set projectile animation for a given weapon
+ * @param state lua state
+ *    param 1: weapon index
+ *    param 2: texture path
+ *    param 3: width of one frame
+ *    param 4: height of one frame
+ *    param 5: x origin of the frame
+ *    param 6: y origin of the frame
+ *    param 7: time for each frame in seconds
+ *    param 8: frame count
+ *    param 9: frames per row
+ *    param 10: start frame
+ * @return error code
+ */
 extern "C" int32_t updateProjectileAnimation(lua_State* state)
 {
    int32_t argc = lua_gettop(state);
@@ -909,6 +1031,13 @@ extern "C" int32_t updateProjectileAnimation(lua_State* state)
 }
 
 
+/**
+ * @brief timer start a timer
+ * @param state lua state
+ *    param 1: delay of the timer
+ *    param 2: id of the timer in milliseconds
+ * @return error code
+ */
 extern "C" int32_t timer(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -935,6 +1064,12 @@ extern "C" int32_t timer(lua_State* state)
 }
 
 
+/**
+ * @brief addSample add a sample to be played later
+ * @param state lua state
+ *    param 1: name of the sample
+ * @return error code
+ */
 extern "C" int32_t addSample(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -950,6 +1085,13 @@ extern "C" int32_t addSample(lua_State* state)
 }
 
 
+/**
+ * @brief playSample play a sample
+ * @param state lua state
+ *    param 1: name of the sample to play
+ *    param 2: volume (0..1)
+ * @return
+ */
 extern "C" int32_t playSample(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -967,6 +1109,12 @@ extern "C" int32_t playSample(lua_State* state)
 }
 
 
+/**
+ * @brief debug output a debug message to stdout
+ * @param state lua state
+ *    param 1: debug message
+ * @return error code
+ */
 extern "C" int32_t debug(lua_State* state)
 {
    // number of function arguments are on top of the stack.
@@ -982,6 +1130,18 @@ extern "C" int32_t debug(lua_State* state)
 }
 
 
+/**
+ * @brief registerHitAnimation register a hit animation for a given weapon
+ * @param state lua state
+ *    param 1: weapon index
+ *    param 2: texture path
+ *    param 3: width of one frame
+ *    param 4: height of one frame
+ *    param 5: frame count
+ *    param 6: frames per row
+ *    param 7: start frame
+ * @return error code
+ */
 extern "C" int32_t registerHitAnimation(lua_State* state)
 {
    int32_t argc = lua_gettop(state);
@@ -1021,21 +1181,12 @@ extern "C" int32_t registerHitAnimation(lua_State* state)
 }
 
 
-[[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
-{
-  // the error message is on top of the stack.
-  // fetch it, print32_t it and then pop it off the stack.
-   std::stringstream os;
-   os << lua_tostring(state, -1);
-
-   std::cout << os.str() << std::endl;
-
-   lua_pop(state, 1);
-
-   exit(1);
-}
-
-
+/**
+ * @brief updateKeysPressed fire keypressed events to the node instance
+ * @param state lua state
+ *    param 1: keypressed bitmask
+ * @return error code
+ */
 extern "C" int32_t updateKeysPressed(lua_State* state)
 {
    auto argc = lua_gettop(state);
@@ -1055,6 +1206,11 @@ extern "C" int32_t updateKeysPressed(lua_State* state)
 }
 
 
+/**
+ * @brief requestMap request the game map
+ * @param state lua state
+ * @return error code
+ */
 extern "C" int32_t requestMap(lua_State* state)
 {
    auto obj = LuaInterface::instance()->getObject(state);
@@ -1067,6 +1223,11 @@ extern "C" int32_t requestMap(lua_State* state)
 }
 
 
+/**
+ * @brief die let the node die
+ * @param state lua state
+ * @return error code
+ */
 extern "C" int32_t die(lua_State* state)
 {
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
@@ -1080,6 +1241,24 @@ extern "C" int32_t die(lua_State* state)
    return 0;
 }
 
+
+[[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
+{
+  // the error message is on top of the stack.
+  // fetch it, print32_t it and then pop it off the stack.
+   std::stringstream os;
+   os << lua_tostring(state, -1);
+
+   std::cout << os.str() << std::endl;
+
+   lua_pop(state, 1);
+
+   exit(1);
+}
+
+
+
+//-----------------------------------------------------------------------------
 
 void LuaNode::setupTexture()
 {
