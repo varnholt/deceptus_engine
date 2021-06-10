@@ -56,7 +56,7 @@ void Console::showHelp()
 {
     mLog.push_back("help:");
     mLog.push_back("/cp <n> | jump to checkpoint | example: /cp 0");
-    mLog.push_back("/extra <name> | give extra | available extras: climb, dash");
+    mLog.push_back("/extra <name> | give extra | available extras: climb, dash, wallslide, walljump, doublejump, invulnerable");
     mLog.push_back("/playback <command> | game playback | commands: enable, disable, load, save, replay, reset");
     mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100, 330");
     mLog.push_back("/weapon <weapon> | give weapon to player | available weapons: bow");
