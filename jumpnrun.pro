@@ -117,6 +117,7 @@ SOURCES += \
    src/game/camerasystemconfiguration.cpp \
    src/game/checkpoint.cpp \
    src/game/console.cpp \
+   src/game/detonationanimation.cpp \
    src/game/effects/lightsystem.cpp \
    src/game/eventserializer.cpp \
    src/game/fadetransitioneffect.cpp \
@@ -293,6 +294,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtools.h \
    src/game/animationframedata.h \
    src/game/arrow.h \
+   src/game/detonationanimation.h \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/mechanisms/rope.h \
