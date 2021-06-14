@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <SFML/Graphics.hpp>
 
+#include "animation.h"
 #include "animationframedata.h"
 
 class DetonationAnimation
@@ -11,6 +12,7 @@ public:
 
    struct DetonationRing
    {
+      int32_t _detonation_count = 1;
       sf::Vector2f _center;
       float _radius = 0.0f;
       AnimationFrameData _frame_data;
@@ -20,16 +22,12 @@ public:
 
    DetonationAnimation() = default;
 
-   DetonationAnimation(
-      const std::vector<DetonationRing>& rings,
-      float boom_intensity
-   );
+   DetonationAnimation(const std::vector<DetonationRing>& rings);
 
+   static void unitTest1();
 
 private:
 
-   std::vector<int32_t> _detonation_counts_small;
-   std::vector<int32_t> _detonation_counts_large;
-   float _boom_intensity = 1.0f;
+   std::vector<Animation> _animations;
 };
 

@@ -1,6 +1,8 @@
 #include "test.h"
 
+// things under test
 #include "framework/math/maptools.h"
+#include "detonationanimation.h"
 
 #include <iostream>
 
@@ -16,7 +18,15 @@ void testBresenham()
 }
 
 
+void testDetonationAnimation()
+{
+   DetonationAnimation::unitTest1();
+}
+
+
 Test::Test()
 {
    // testBresenham();
+
+   testDetonationAnimation();
 }
