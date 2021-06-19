@@ -49,6 +49,9 @@ struct LuaNode : public GameNode
    //! trigger boom effect
    void boom(float x, float y, float intensity);
 
+   //! player detonation animation
+   void playDetonationAnimation(float x, float y);
+
    //! cause damage to the player
    void damage(int32_t damage, float forceX, float forceY);
 

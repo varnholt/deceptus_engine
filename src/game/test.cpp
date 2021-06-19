@@ -18,15 +18,7 @@ void testBresenham()
 }
 
 
-void testDetonationAnimation()
-{
-   DetonationAnimation::unitTest1();
-}
-
-
 Test::Test()
 {
    // testBresenham();
-
-   testDetonationAnimation();
 }
