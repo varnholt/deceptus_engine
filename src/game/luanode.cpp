@@ -10,8 +10,10 @@
 #include <thread>
 
 // game
+#include "animationplayer.h"
 #include "audio.h"
 #include "constants.h"
+#include "detonationanimation.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/timer.h"
@@ -687,6 +689,37 @@ int32_t boom(lua_State* state)
       }
 
       node->boom(x, y, intensity);
+   }
+
+   return 0;
+}
+
+
+/**
+ * @brief play a detonation animation
+ * @param state lua state
+ *    param 1: detonation center x
+ *    param 2: detonation center y
+ * @return error code
+ */
+int32_t playDetonationAnimation(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 2)
+   {
+      auto x = static_cast<float>(lua_tonumber(state, 1));
+      auto y = static_cast<float>(lua_tonumber(state, 2));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->playDetonationAnimation(x, y);
    }
 
    return 0;
@@ -1370,6 +1403,7 @@ void LuaNode::setupLua()
    lua_register(mState, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(mState, "makeDynamic", ::makeDynamic);
    lua_register(mState, "makeStatic", ::makeStatic);
+   lua_register(mState, "playDetonationAnimation", ::playDetonationAnimation);
    lua_register(mState, "playSample", ::playSample);
    lua_register(mState, "queryAABB", ::queryAABB);
    lua_register(mState, "queryRayCast", ::queryRayCast);
@@ -1768,6 +1802,13 @@ void LuaNode::setLinearVelocity(const b2Vec2& vel)
 void LuaNode::boom(float x, float y, float intensity)
 {
    Level::getCurrentLevel()->getBoomEffect().boom(x, y, intensity);
+}
+
+
+void LuaNode::playDetonationAnimation(float x, float y)
+{
+   auto detonation = DetonationAnimation::makeHugeExplosion(sf::Vector2f{x, y});
+   AnimationPlayer::getInstance().add(detonation.getAnimations());
 }
 
 

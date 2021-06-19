@@ -104,6 +104,7 @@ SOURCES += \
    src/game/ambientocclusion.cpp \
    src/game/animation.cpp \
    src/game/animationframedata.cpp \
+   src/game/animationplayer.cpp \
    src/game/animationpool.cpp \
    src/game/animationsettings.cpp \
    src/game/arrow.cpp \
@@ -293,6 +294,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
    src/game/animationframedata.h \
+   src/game/animationplayer.h \
    src/game/arrow.h \
    src/game/detonationanimation.h \
    src/game/eventserializer.h \

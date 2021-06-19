@@ -10,21 +10,28 @@ class DetonationAnimation
 {
 public:
 
-   struct DetonationRing
+   enum class DetonationType
    {
-      int32_t _detonation_count = 1;
-      sf::Vector2f _center;
-      float _radius = 0.0f;
-      AnimationFrameData _frame_data;
-      float _variance_animation_speed = 0.0f;
-      sf::Vector2f _variance_position;
+      Big = 0,
+      Small = 1
    };
 
-   DetonationAnimation() = default;
+   struct DetonationRing
+   {
+      int32_t _detonation_count = 1;               //!< detonations inside ring
+      sf::Vector2f _center;                        //!< ring center
+      float _radius = 0.0f;                        //!< ring radius
+      float _variance_animation_speed = 0.0f;      //!< error in animation speed
+      sf::Vector2f _variance_position;             //!< error in positioning
+   };
 
+   DetonationAnimation() = delete;
    DetonationAnimation(const std::vector<DetonationRing>& rings);
 
-   static void unitTest1();
+   const std::vector<Animation>& getAnimations() const;
+
+   static DetonationAnimation makeHugeExplosion(const sf::Vector2f center);
+
 
 private:
 

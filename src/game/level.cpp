@@ -1,6 +1,7 @@
 #include "level.h"
 
 // game
+#include "animationplayer.h"
 #include "camerapane.h"
 #include "checkpoint.h"
 #include "constants.h"
@@ -1133,8 +1134,6 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
 //----------------------------------------------------------------------------------------------------------------------
 void Level::drawDebugInformation()
 {
-   Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
-
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
       drawStaticChains(*mLevelRenderTexture.get());
@@ -1290,6 +1289,9 @@ void Level::draw(
       ZDepthForegroundMax
    );
 
+   Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
+   AnimationPlayer::getInstance().draw(*mLevelRenderTexture.get());
+
    drawDebugInformation();
 
    displayTextures();
@@ -1363,6 +1365,8 @@ void Level::update(const sf::Time& dt)
 
    Checkpoint::update();
    Dialogue::update();
+
+   AnimationPlayer::getInstance().update(dt);
 
    for (auto& tileMap : mTileMaps)
    {

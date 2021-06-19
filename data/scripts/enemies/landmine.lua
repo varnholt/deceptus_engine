@@ -25,6 +25,7 @@ properties = {
 ------------------------------------------------------------------------------------------------------------------------
 mTriggered = false
 mExploded = false
+mExplosionStarted = false
 mDone = false
 mDetonationTimer = 1
 mPosition = v2d.Vector2D(0, 0)
@@ -57,6 +58,12 @@ function updateSprite(dt)
          col = 2
       end
    elseif (mExploded) then
+
+      if (not mExplosionStarted) then
+         mExplosionStarted = true
+         playDetonationAnimation(mPosition:getX(), mPosition:getY())
+      end
+
       mExplosionFrame = mExplosionFrame + dt * 30.0
       if (mExplosionFrame >= 10.0) then
          mDone = true
