@@ -28,13 +28,13 @@ public:
    DetonationAnimation() = delete;
    DetonationAnimation(const std::vector<DetonationRing>& rings);
 
-   const std::vector<Animation>& getAnimations() const;
+   const std::vector<std::shared_ptr<Animation>>& getAnimations() const;
 
-   static DetonationAnimation makeHugeExplosion(const sf::Vector2f center);
+   static DetonationAnimation makeHugeExplosion(const sf::Vector2f& center);
 
 
 private:
 
-   std::vector<Animation> _animations;
+   std::vector<std::shared_ptr<Animation>> _animations;
 };
 
