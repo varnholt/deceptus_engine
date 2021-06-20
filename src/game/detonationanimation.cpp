@@ -1,5 +1,6 @@
 #include "detonationanimation.h"
 
+#include <cassert>
 #include <ctime>
 #include <iostream>
 #include <math.h>
@@ -75,6 +76,7 @@ AnimationFrameData& getFrameData(DetonationAnimation::DetonationType type)
    }
 
    // this is an error
+   assert(false);
    return _frame_data_small[0];
 }
 
@@ -93,16 +95,16 @@ DetonationAnimation::DetonationAnimation(
    {
       auto detonation_type = (ring_index == 0) ? DetonationType::Big : DetonationType::Small;
 
-      float angle = 0.0f;
-      float angle_increment = static_cast<float>(M_PI) / static_cast<float>(ring._detonation_count);
+      auto angle = 0.0f;
+      const auto angle_increment = static_cast<float>(M_PI) / static_cast<float>(ring._detonation_count);
 
       for (auto i = 0; i < ring._detonation_count; i++)
       {
          const auto rand_x_normalized = (2.0f * std::rand() / static_cast<float>(RAND_MAX)) - 1.0f;
          const auto rand_y_normalized = (2.0f * std::rand() / static_cast<float>(RAND_MAX)) - 1.0f;
 
-         const auto x = ring._center.x + ring._variance_position.x * rand_x_normalized + (cos(angle) * ring._radius);
-         const auto y = ring._center.x + ring._variance_position.y * rand_y_normalized + (sin(angle) * ring._radius);
+         const auto x = ring._center.x + (cos(angle) * ring._radius) + ring._variance_position.x * rand_x_normalized;
+         const auto y = ring._center.x + (sin(angle) * ring._radius) + ring._variance_position.y * rand_y_normalized;
 
          angle += angle_increment;
 
@@ -118,19 +120,19 @@ DetonationAnimation::DetonationAnimation(
             frame_time += sf::seconds(time_stretch_factor);
          }
 
-         Animation animation;
-         animation.setPosition(x, y);
-         animation._frames = frame_data._frames;
-         animation._color_texture = frame_data._texture;
-         animation.setFrameTimes(frame_data._frame_times);
-         animation.setOrigin(frame_data._origin);
-         animation._reset_to_first_frame = false;
-         animation.updateVertices();
-         animation.play();
+         auto animation = std::make_shared<Animation>();
+         animation->setPosition(x, y);
+         animation->_frames = frame_data._frames;
+         animation->_color_texture = frame_data._texture;
+         animation->setFrameTimes(frame_data._frame_times);
+         animation->setOrigin(frame_data._origin);
+         animation->_reset_to_first_frame = false;
+         animation->updateVertices();
+         animation->play();
 
          // std::cout << "setting animation rotation to " << angle << std::endl;
 
-         _animations.push_back(animation);
+         _animations.push_back(std::move(animation));
       }
 
       ring_index++;
@@ -138,7 +140,7 @@ DetonationAnimation::DetonationAnimation(
 }
 
 
-DetonationAnimation DetonationAnimation::makeHugeExplosion(const sf::Vector2f center)
+DetonationAnimation DetonationAnimation::makeHugeExplosion(const sf::Vector2f& center)
 {
    DetonationRing ring_a;
    DetonationRing ring_b;
@@ -160,18 +162,12 @@ DetonationAnimation DetonationAnimation::makeHugeExplosion(const sf::Vector2f ce
    ring_c._variance_position = sf::Vector2f(0.3f, 0.3f);
    ring_c._variance_animation_speed = 0.005f;
 
-   std::vector<DetonationRing> rings;
-
-   rings.push_back(ring_a);
-   rings.push_back(ring_b);
-   rings.push_back(ring_c);
-
-   DetonationAnimation animation(rings);
+   DetonationAnimation animation({ring_a, ring_b, ring_c});
    return animation;
 }
 
 
-const std::vector<Animation>& DetonationAnimation::getAnimations() const
+const std::vector<std::shared_ptr<Animation>>& DetonationAnimation::getAnimations() const
 {
    return _animations;
 }

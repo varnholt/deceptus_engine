@@ -1,13 +1,13 @@
 #include "animationplayer.h"
 
 
-void AnimationPlayer::add(const Animation& animation)
+void AnimationPlayer::add(const std::shared_ptr<Animation>& animation)
 {
-   _animations.push_back(animation);
+   _animations.push_back(std::move(animation));
 }
 
 
-void AnimationPlayer::add(const std::vector<Animation>& animations)
+void AnimationPlayer::add(const std::vector<std::shared_ptr<Animation>>& animations)
 {
    _animations.insert(_animations.end(), animations.begin(), animations.end());
 }
@@ -17,7 +17,7 @@ void AnimationPlayer::update(const sf::Time& dt)
 {
    for (auto& anim : _animations)
    {
-      anim.update(dt);
+      anim->update(dt);
    }
 
    // clear all elapsed animations
@@ -25,7 +25,7 @@ void AnimationPlayer::update(const sf::Time& dt)
       std::remove_if(
          _animations.begin(),
          _animations.end(),
-         [](auto& animation){return animation._paused;}
+         [](auto& animation){return animation->_paused;}
       ),
       _animations.end()
    );
@@ -36,7 +36,7 @@ void AnimationPlayer::draw(sf::RenderTarget& target)
 {
    for (auto& anim : _animations)
    {
-      target.draw(anim);
+      target.draw(*anim);
    }
 }
 

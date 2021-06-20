@@ -13,8 +13,8 @@ class AnimationPlayer
 public:
    AnimationPlayer() = default;
 
-   void add(const Animation& animation);
-   void add(const std::vector<Animation>& animations);
+   void add(const std::shared_ptr<Animation>& animation);
+   void add(const std::vector<std::shared_ptr<Animation>>& animations);
    void update(const sf::Time& dt);
    void draw(sf::RenderTarget& target);
 
@@ -22,6 +22,6 @@ public:
 
 private:
 
-   std::vector<Animation> _animations;
+   std::vector<std::shared_ptr<Animation>> _animations;
 
 };
