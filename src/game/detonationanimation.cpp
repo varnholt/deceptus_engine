@@ -16,7 +16,7 @@
 //    16 columns
 //    frames per animation: 16
 
-AnimationFrameData& getFrameData(DetonationAnimation::DetonationType type)
+AnimationFrameData& DetonationAnimation::getFrameData(DetonationAnimation::DetonationType type)
 {
    static std::vector<AnimationFrameData> _frame_data_small;
    static std::vector<AnimationFrameData> _frame_data_big;
@@ -44,7 +44,11 @@ AnimationFrameData& getFrameData(DetonationAnimation::DetonationType type)
             i * 20
          );
 
-         _frame_data_small.push_back(fd);
+         // prepend empty frame for time offsetting
+         fd._frame_times.insert(fd._frame_times.begin(), sf::seconds(0.0f));
+         fd._frames.insert(fd._frames.begin(), {});
+
+         _frame_data_big.push_back(fd);
       }
 
       // small detonations
@@ -61,14 +65,18 @@ AnimationFrameData& getFrameData(DetonationAnimation::DetonationType type)
             16 * 32 + i * 32 // we wanna skip the first 16 rows since those are the big detonations
          );
 
-         _frame_data_big.push_back(fd);
+         // prepend empty frame for time offsetting
+         fd._frame_times.insert(fd._frame_times.begin(), sf::seconds(0.0f));
+         fd._frames.insert(fd._frames.begin(), {});
+
+         _frame_data_small.push_back(fd);
       }
    }
 
    switch (type)
    {
       case DetonationAnimation::DetonationType::Big:
-         return _frame_data_small[std::rand() % _frame_data_big.size()];
+         return _frame_data_big[std::rand() % _frame_data_big.size()];
          break;
       case DetonationAnimation::DetonationType::Small:
          return _frame_data_small[std::rand() % _frame_data_small.size()];
@@ -96,7 +104,7 @@ DetonationAnimation::DetonationAnimation(
       auto detonation_type = (ring_index == 0) ? DetonationType::Big : DetonationType::Small;
 
       auto angle = 0.0f;
-      const auto angle_increment = static_cast<float>(M_PI) / static_cast<float>(ring._detonation_count);
+      const auto angle_increment = static_cast<float>(2.0f * M_PI) / static_cast<float>(ring._detonation_count);
 
       for (auto i = 0; i < ring._detonation_count; i++)
       {
@@ -104,7 +112,7 @@ DetonationAnimation::DetonationAnimation(
          const auto rand_y_normalized = (2.0f * std::rand() / static_cast<float>(RAND_MAX)) - 1.0f;
 
          const auto x = ring._center.x + (cos(angle) * ring._radius) + ring._variance_position.x * rand_x_normalized;
-         const auto y = ring._center.x + (sin(angle) * ring._radius) + ring._variance_position.y * rand_y_normalized;
+         const auto y = ring._center.y + (sin(angle) * ring._radius) + ring._variance_position.y * rand_y_normalized;
 
          angle += angle_increment;
 
@@ -114,11 +122,15 @@ DetonationAnimation::DetonationAnimation(
          auto& frame_data = getFrameData(detonation_type);
 
          // bend the play time a bit so they don't all end at exactly the same time
-         const auto time_stretch_factor = (2.0f * (std::rand() / static_cast<float>(RAND_MAX)) - 1.0f) * ring._variance_animation_speed;
+         const auto rand_normalized = std::rand() / static_cast<float>(RAND_MAX);
+         const auto time_stretch_factor = (2.0f * rand_normalized - 1.0f) * ring._variance_animation_speed;
          for (auto& frame_time : frame_data._frame_times)
          {
             frame_time += sf::seconds(time_stretch_factor);
          }
+
+         // add offset, the further out, the bigger, 0 in the middle
+         frame_data._frame_times[0] = sf::seconds(ring_index * rand_normalized * ring._variance_animation_speed);
 
          auto animation = std::make_shared<Animation>();
          animation->setPosition(x, y);
@@ -151,15 +163,15 @@ DetonationAnimation DetonationAnimation::makeHugeExplosion(const sf::Vector2f& c
    ring_a._detonation_count = 1;
 
    ring_b._center = center;
-   ring_b._radius = 2;
+   ring_b._radius = 35;
    ring_b._detonation_count = 4;
-   ring_b._variance_position = sf::Vector2f(0.1f, 0.1f);
+   ring_b._variance_position = sf::Vector2f(10.0f, 10.0f);
    ring_b._variance_animation_speed = 0.005f;
 
    ring_c._center = center;
-   ring_c._radius = 5;
+   ring_c._radius = 75;
    ring_c._detonation_count = 9;
-   ring_c._variance_position = sf::Vector2f(0.3f, 0.3f);
+   ring_c._variance_position = sf::Vector2f(15.0f, 30.0f);
    ring_c._variance_animation_speed = 0.005f;
 
    DetonationAnimation animation({ring_a, ring_b, ring_c});

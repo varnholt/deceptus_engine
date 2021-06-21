@@ -31,7 +31,7 @@ public:
    const std::vector<std::shared_ptr<Animation>>& getAnimations() const;
 
    static DetonationAnimation makeHugeExplosion(const sf::Vector2f& center);
-
+   static AnimationFrameData& getFrameData(DetonationAnimation::DetonationType type);
 
 private:
 
