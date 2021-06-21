@@ -185,6 +185,7 @@ SOURCES += \
    src/game/player/playercontrols.cpp \
    src/game/player/playerinfo.cpp \
    src/game/player/playerjump.cpp \
+   src/game/preloader.cpp \
    src/game/progresssettings.cpp \
    src/game/overlays/rainoverlay.cpp \
    src/game/projectile.cpp \
@@ -301,6 +302,7 @@ HEADERS += \
    src/game/fadetransitioneffect.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
+   src/game/preloader.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
    src/game/shaderlayer.h \
