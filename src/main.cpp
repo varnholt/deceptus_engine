@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "game/constants.h"
+#include "game/preloader.h"
 #include "game/test.h"
 
 
@@ -32,6 +33,7 @@ int main(int /*argc*/, char** /*argv*/)
    Test test;
    Game game;
    game.initialize();
+   Preloader::preload();
    return game.loop();
 }
 

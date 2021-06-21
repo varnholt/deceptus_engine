@@ -124,7 +124,11 @@ void Animation::update(const sf::Time& dt)
       if (_current_time >= frameTime)
       {
          // reset time, but keep the remainder
-         _current_time = sf::microseconds(_current_time.asMicroseconds() % frameTime.asMicroseconds());
+         _current_time = sf::microseconds(
+            (frameTime.asMicroseconds() > 0)
+               ? _current_time.asMicroseconds() % frameTime.asMicroseconds()
+               : _current_time.asMicroseconds()
+         );
 
          if (_current_frame + 1 < static_cast<int32_t>(_frames.size()))
          {
