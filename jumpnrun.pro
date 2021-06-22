@@ -180,6 +180,7 @@ SOURCES += \
    src/game/physics/physics.cpp \
    src/game/physics/physicsconfiguration.cpp \
    src/game/player/player.cpp \
+   src/game/player/playeranimation.cpp \
    src/game/player/playerclimb.cpp \
    src/game/player/playerconfiguration.cpp \
    src/game/player/playercontrols.cpp \
@@ -302,6 +303,7 @@ HEADERS += \
    src/game/fadetransitioneffect.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
+   src/game/player/playeranimation.h \
    src/game/preloader.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
