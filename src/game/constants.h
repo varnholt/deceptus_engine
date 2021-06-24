@@ -311,3 +311,17 @@ enum class DrawMode
 };
 
 
+enum class Edge
+{
+   None,
+   Left,
+   Right
+};
+
+
+enum class Dash
+{
+  None,
+  Left,
+  Right
+};
