@@ -43,22 +43,6 @@ class Player : public GameNode
    };
 
 
-   enum class Edge
-   {
-      None,
-      Left,
-      Right
-   };
-
-
-   enum class Dash
-   {
-     None,
-     Left,
-     Right
-   };
-
-
    struct PlayerSpeed
    {
       b2Vec2 currentVelocity;
