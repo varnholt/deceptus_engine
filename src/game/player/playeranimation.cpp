@@ -62,12 +62,9 @@ PlayerAnimation::PlayerAnimation()
 }
 
 
-
 void PlayerAnimation::update(
    const sf::Time& dt,
-   const PlayerControls& controls,
-   const PlayerAnimationData& data,
-   const PlayerJump& jump
+   const PlayerAnimationData& data
 )
 {
    if (data._dead)
@@ -85,7 +82,7 @@ void PlayerAnimation::update(
    auto velocity = data._linear_velocity;
 
    const auto lookActive = CameraPane::getInstance().isLookActive();
-   const auto passesSanityCheck = !(controls.isMovingRight() && controls.isMovingLeft());
+   const auto passesSanityCheck = !(data._moving_right && data._moving_left);
 
    auto requiresUpdate = true;
 
@@ -103,7 +100,7 @@ void PlayerAnimation::update(
    }
 
    // run / crouch
-   else if (controls.isMovingRight() && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
+   else if (data._moving_right && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
       if (data._crouching)
       {
@@ -114,7 +111,7 @@ void PlayerAnimation::update(
          nextCycle = mRunRightAligned;
       }
    }
-   else if (controls.isMovingLeft() && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
+   else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
       if (data._crouching)
       {
@@ -155,48 +152,45 @@ void PlayerAnimation::update(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (jump.mJumpSteps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+      if (data._jump_steps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
       {
          // jump ignition
-         mJumpAnimationReference = 0;
-         nextCycle = data.pointsRight() ? mJumpInitRightAligned : mJumpInitLeftAligned;
+         _jump_animation_reference = 0;
+         nextCycle = data._points_right ? mJumpInitRightAligned : mJumpInitLeftAligned;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            nextCycle = data.pointsRight() ? mJumpUpRightAligned : mJumpUpLeftAligned;
-            mJumpAnimationReference = 1;
+            nextCycle = data._points_right ? mJumpUpRightAligned : mJumpUpLeftAligned;
+            _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            nextCycle = data.pointsRight() ? mJumpDownRightAligned : mJumpDownLeftAligned;
-            mJumpAnimationReference = 2;
+            nextCycle = data._points_right ? mJumpDownRightAligned : mJumpDownLeftAligned;
+            _jump_animation_reference = 2;
          }
          else
          {
             // jump midair
-            if (mJumpAnimationReference == 1)
+            if (_jump_animation_reference == 1)
             {
-               nextCycle = data.pointsRight() ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+               nextCycle = data._points_right ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
             }
          }
       }
+
       // hard landing
-      else if (mJumpAnimationReference == 2 && data._hard_landing)
+      else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data.pointsRight() ? mJumpLandingRightAligned : mJumpLandingLeftAligned;
+         nextCycle = data._points_right ? mJumpLandingRightAligned : mJumpLandingLeftAligned;
 
          if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
          {
-             mJumpAnimationReference = 3;
+             _jump_animation_reference = 3;
              nextCycle->seekToStart();
-
-             // TODO: animation class must be visualization only
-             // cannot modify jump behavior here
-             // data._hard_landing = false;
          }
       }
    }
@@ -204,7 +198,7 @@ void PlayerAnimation::update(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data.pointsRight() ? mSwimRightAligned : mSwimLeftAligned;
+      nextCycle = data._points_right ? mSwimRightAligned : mSwimLeftAligned;
    }
 
    if (data._climb_joint_present)
@@ -223,5 +217,27 @@ void PlayerAnimation::update(
    if (requiresUpdate)
    {
       mCurrentCycle->update(dt);
+   }
+}
+
+
+int32_t PlayerAnimation::getJumpAnimationReference() const
+{
+   return _jump_animation_reference;
+}
+
+
+std::shared_ptr<Animation> PlayerAnimation::getCurrentCycle() const
+{
+   return mCurrentCycle;
+}
+
+
+void PlayerAnimation::resetAlpha()
+{
+   // reset alphas if needed
+   for (auto& a: mAnimations)
+   {
+      a->setAlpha(255);
    }
 }
