@@ -5,6 +5,7 @@
 #include "extratable.h"
 #include "gamenode.h"
 #include "framework/joystick/gamecontrollerinfo.h"
+#include "playeranimation.h"
 #include "playerclimb.h"
 #include "playercontrols.h"
 #include "playerjump.h"
@@ -225,33 +226,7 @@ private:
    int mDashSteps = 0;
    Dash mDashDir = Dash::None;
 
-   std::shared_ptr<Animation> mIdleRightAligned;
-   std::shared_ptr<Animation> mIdleLeftAligned;
-   std::shared_ptr<Animation> mSwimRightAligned;
-   std::shared_ptr<Animation> mSwimLeftAligned;
-   std::shared_ptr<Animation> mRunRightAligned;
-   std::shared_ptr<Animation> mRunLeftAligned;
-   std::shared_ptr<Animation> mDashRightAligned;
-   std::shared_ptr<Animation> mDashLeftAligned;
-   std::shared_ptr<Animation> mCrouchRightAligned;
-   std::shared_ptr<Animation> mCrouchLeftAligned;
-
-   std::shared_ptr<Animation> mJumpInitRightAligned;
-   std::shared_ptr<Animation> mJumpUpRightAligned;
-   std::shared_ptr<Animation> mJumpMidairRightAligned;
-   std::shared_ptr<Animation> mJumpDownRightAligned;
-   std::shared_ptr<Animation> mJumpLandingRightAligned;
-
-   std::shared_ptr<Animation> mJumpInitLeftAligned;
-   std::shared_ptr<Animation> mJumpUpLeftAligned;
-   std::shared_ptr<Animation> mJumpMidairLeftAligned;
-   std::shared_ptr<Animation> mJumpDownLeftAligned;
-   std::shared_ptr<Animation> mJumpLandingLeftAligned;
-
-   int mJumpAnimationReference = 0;
-
-   std::vector<std::shared_ptr<Animation>> mAnimations;
-   std::shared_ptr<Animation> mCurrentCycle;
+   PlayerAnimation _player_animation;
 
    PlayerControls mControls;
    PlayerClimb mClimb;

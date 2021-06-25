@@ -25,22 +25,26 @@ public:
       bool _hard_landing = false;
       bool _crouching = false;
       bool _points_left = false;
+      bool _points_right = false;
       bool _climb_joint_present = false;
+      bool _moving_left = false;
+      bool _moving_right = false;
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
-
-      bool pointsRight() const
-      {
-         return !_points_left;
-      }
+      int32_t _jump_steps = 0;
    };
 
    void update(
       const sf::Time& dt,
-      const PlayerControls& controls,
-      const PlayerAnimationData& data,
-      const PlayerJump& jump
+      const PlayerAnimationData& data
    );
+
+   int32_t getJumpAnimationReference() const;
+
+   std::shared_ptr<Animation> getCurrentCycle() const;
+
+   void resetAlpha();
+
 
 private:
 
@@ -67,7 +71,7 @@ private:
    std::shared_ptr<Animation> mJumpDownLeftAligned;
    std::shared_ptr<Animation> mJumpLandingLeftAligned;
 
-   int32_t mJumpAnimationReference = 0;
+   int32_t _jump_animation_reference = 0;
 
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
