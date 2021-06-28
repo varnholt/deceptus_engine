@@ -241,3 +241,38 @@ void PlayerAnimation::resetAlpha()
       a->setAlpha(255);
    }
 }
+
+
+// 00 - player_idle_right_aligned, 8
+// 01 - player_idle_left_aligned, 8
+// 02 - player_bend_down_right_aligned, 8
+// 03 - player_bend_down_left_aligned, 8
+// 04 - player_idle_to_run_right_aligned, 2
+// 05 - player_idle_to_run_left_aligned, 2
+// 06 - player_runstop_right_aligned, 0
+// 07 - player_runstop_left_aligned, 0
+// 08 - player_run_right_aligned, 12
+// 09 - player_run_left_aligned, 12
+// 10 - player_dash_right_aligned, 5
+// 11 - player_dash_left_aligned, 5
+// 12 - player_jump_right_aligned, 0
+// 13 - player_jump_left_aligned, 0
+// 14 - player_double_jump_right_aligned, 0
+// 15 - player_double_jump_left_aligned, 0
+// 16 - player_swim_idle_right_aligned, 12
+// 17 - player_swim_idle_left_aligned, 12
+// 18 - player_swim_right_aligned, 0
+// 19 - player_swim_left_aligned, 0
+// 20 - player_wallslide_right_aligned, 6
+// 21 - player_wallslide_left_aligned, 6
+// 22 - player_wall_jump_right_aligned, 0
+// 23 - player_wall_jump_left_aligned, 0
+// 24 - player_appear_right_aligned, 12
+// 25 - player_appear_left_aligned, 12
+//
+//       "frame_size": [72, 48],
+//       "frame_offset": [0, 480],
+//       "sprite_count": 1,
+//       "frame_durations": [100],
+//       "origin": [36.0, 48.0],
+//       "texture": "data/sprites/player_spriteset.png"
