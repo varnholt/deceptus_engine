@@ -45,6 +45,8 @@ public:
 
    void resetAlpha();
 
+   void generateJson();
+
 
 private:
 

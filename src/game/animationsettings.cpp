@@ -42,3 +42,18 @@ void from_json(const nlohmann::json& j, AnimationSettings& settings)
    }
 }
 
+
+AnimationSettings::AnimationSettings(
+   const std::array<int32_t, 2>& frameSize,
+   const std::array<int32_t, 2>& frameOffset,
+   const std::array<float, 2>& origin,
+   const std::vector<sf::Time>& frameDurations,
+   const std::filesystem::path& texturePath
+)
+ : mFrameSize(frameSize),
+   mFrameOffset(frameOffset),
+   mOrigin(origin),
+   mFrameDurations(frameDurations),
+   mTexturePath(texturePath)
+{
+}
