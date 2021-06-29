@@ -20,6 +20,16 @@ struct AnimationSettings
    std::shared_ptr<sf::Texture> mTexture;
    std::shared_ptr<sf::Texture> mNormalMap;
    std::vector<sf::IntRect> mFrames;
+
+   AnimationSettings() = default;
+
+   AnimationSettings(
+      const std::array<int32_t, 2>& frameSize,
+      const std::array<int32_t, 2>& frameOffset,
+      const std::array<float, 2>& origin,
+      const std::vector<sf::Time>& frameDurations,
+      const std::filesystem::path& texturePath
+   );
 };
 
 void from_json(const nlohmann::json& j, AnimationSettings& settings);

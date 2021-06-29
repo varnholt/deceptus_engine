@@ -243,6 +243,35 @@ void PlayerAnimation::resetAlpha()
 }
 
 
+void PlayerAnimation::generateJson()
+{
+   std::vector<AnimationSettings> settings;
+
+   AnimationSettings player_idle_right_aligned({72, 48}, std::array<int32_t, 2>{0, 32}, {36.0, 48.0}, {sf::seconds(0.075f)}, "bla.png");
+
+   settings.push_back(player_idle_right_aligned);
+   //       "frame_size": [72, 48],
+   //       "frame_offset": [0, 480],
+   //       "sprite_count": 1,
+   //       "frame_durations": [100],
+   //       "origin": [36.0, 48.0],
+   //       "texture": "data/sprites/player_spriteset.png"
+
+//   {
+//      std::array<int32_t, 2> mFrameSize;
+//      std::array<int32_t, 2> mFrameOffset;
+//      std::array<float, 2> mOrigin;
+//      std::vector<sf::Time> mFrameDurations;
+//      std::filesystem::path mTexturePath;
+//      std::shared_ptr<sf::Texture> mTexture;
+//      std::shared_ptr<sf::Texture> mNormalMap;
+//      std::vector<sf::IntRect> mFrames;
+//   };
+}
+
+
+
+
 // 00 - player_idle_right_aligned, 8
 // 01 - player_idle_left_aligned, 8
 // 02 - player_bend_down_right_aligned, 8
@@ -270,9 +299,3 @@ void PlayerAnimation::resetAlpha()
 // 24 - player_appear_right_aligned, 12
 // 25 - player_appear_left_aligned, 12
 //
-//       "frame_size": [72, 48],
-//       "frame_offset": [0, 480],
-//       "sprite_count": 1,
-//       "frame_durations": [100],
-//       "origin": [36.0, 48.0],
-//       "texture": "data/sprites/player_spriteset.png"
