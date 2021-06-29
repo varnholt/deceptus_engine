@@ -247,26 +247,45 @@ void PlayerAnimation::generateJson()
 {
    std::vector<AnimationSettings> settings;
 
-   AnimationSettings player_idle_right_aligned({72, 48}, std::array<int32_t, 2>{0, 32}, {36.0, 48.0}, {sf::seconds(0.075f)}, "bla.png");
+   const auto d = sf::seconds(0.075f);
 
-   settings.push_back(player_idle_right_aligned);
+   AnimationSettings player_idle_r({72, 48}, {0, 0}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_idle_l({72, 48}, {0, 24}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_bend_down_r({72, 48}, {0, 48}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_bend_down_l({72, 48}, {0, 72}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_idle_to_run_r({72, 48}, {0, 96}, {36.0, 48.0}, {d,d}, "player_unarmed.png");
+   AnimationSettings player_idle_to_run_l({72, 48}, {0, 120}, {36.0, 48.0}, {d,d}, "player_unarmed.png");
+   AnimationSettings player_runstop_r({72, 48}, {0, 144}, {36.0, 48.0}, {d}, "player_unarmed.png");
+   AnimationSettings player_runstop_l({72, 48}, {0, 168}, {36.0, 48.0}, {d}, "player_unarmed.png");
+   AnimationSettings player_run_r({72, 48}, {0, 192}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_run_l({72, 48}, {0, 216}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_dash_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_dash_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+
+   AnimationSettings player_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_double_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_double_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_swim_idle_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_swim_idle_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_swim_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_swim_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_wallslide_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_wallslide_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_wall_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_wall_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_appear_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_appear_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+
+   settings.push_back(player_idle_r);
+   settings.push_back(player_idle_l);
+
    //       "frame_size": [72, 48],
    //       "frame_offset": [0, 480],
    //       "sprite_count": 1,
    //       "frame_durations": [100],
    //       "origin": [36.0, 48.0],
    //       "texture": "data/sprites/player_spriteset.png"
-
-//   {
-//      std::array<int32_t, 2> mFrameSize;
-//      std::array<int32_t, 2> mFrameOffset;
-//      std::array<float, 2> mOrigin;
-//      std::vector<sf::Time> mFrameDurations;
-//      std::filesystem::path mTexturePath;
-//      std::shared_ptr<sf::Texture> mTexture;
-//      std::shared_ptr<sf::Texture> mNormalMap;
-//      std::vector<sf::IntRect> mFrames;
-//   };
 }
 
 
@@ -284,6 +303,7 @@ void PlayerAnimation::generateJson()
 // 09 - player_run_left_aligned, 12
 // 10 - player_dash_right_aligned, 5
 // 11 - player_dash_left_aligned, 5
+
 // 12 - player_jump_right_aligned, 0
 // 13 - player_jump_left_aligned, 0
 // 14 - player_double_jump_right_aligned, 0
