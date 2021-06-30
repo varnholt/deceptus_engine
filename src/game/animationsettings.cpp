@@ -57,3 +57,23 @@ AnimationSettings::AnimationSettings(
    mTexturePath(texturePath)
 {
 }
+
+
+void to_json(nlohmann::json& j, const AnimationSettings& settings)
+{
+   std::vector<int32_t> durations;
+   for (auto& d : settings.mFrameDurations)
+   {
+      durations.push_back(d.asMilliseconds());
+   }
+
+   j = nlohmann::json{
+      {"sprite_count", durations.size()},
+      {"frame_size", settings.mFrameSize},
+      {"frame_offset", settings.mFrameOffset},
+      {"origin", settings.mOrigin},
+      {"texture", settings.mTexturePath.string()},
+      {"frame_durations", durations}
+   };
+}
+
