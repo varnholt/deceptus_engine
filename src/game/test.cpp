@@ -3,8 +3,16 @@
 // things under test
 #include "framework/math/maptools.h"
 #include "detonationanimation.h"
+#include "game/player/playeranimation.h"
 
 #include <iostream>
+
+
+void dumpAnimations()
+{
+   PlayerAnimation anim;
+   anim.generateJson();
+}
 
 
 void testBresenham()
@@ -21,4 +29,5 @@ void testBresenham()
 Test::Test()
 {
    // testBresenham();
+   dumpAnimations();
 }
