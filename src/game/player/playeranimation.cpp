@@ -1,5 +1,8 @@
 #include "playeranimation.h"
 
+#include <fstream>
+#include <sstream>
+
 #include "animationpool.h"
 #include "camerapane.h"
 #include "mechanisms/portal.h"
@@ -245,6 +248,33 @@ void PlayerAnimation::resetAlpha()
 
 void PlayerAnimation::generateJson()
 {
+   // 00 - player_idle_right_aligned, 8
+   // 01 - player_idle_left_aligned, 8
+   // 02 - player_bend_down_right_aligned, 8
+   // 03 - player_bend_down_left_aligned, 8
+   // 04 - player_idle_to_run_right_aligned, 2
+   // 05 - player_idle_to_run_left_aligned, 2
+   // 06 - player_runstop_right_aligned, 0
+   // 07 - player_runstop_left_aligned, 0
+   // 08 - player_run_right_aligned, 12
+   // 09 - player_run_left_aligned, 12
+   // 10 - player_dash_right_aligned, 5
+   // 11 - player_dash_left_aligned, 5
+   // 12 - player_jump_right_aligned, 0
+   // 13 - player_jump_left_aligned, 0
+   // 14 - player_double_jump_right_aligned, 0
+   // 15 - player_double_jump_left_aligned, 0
+   // 16 - player_swim_idle_right_aligned, 12
+   // 17 - player_swim_idle_left_aligned, 12
+   // 18 - player_swim_right_aligned, 0
+   // 19 - player_swim_left_aligned, 0
+   // 20 - player_wallslide_right_aligned, 6
+   // 21 - player_wallslide_left_aligned, 6
+   // 22 - player_wall_jump_right_aligned, 0
+   // 23 - player_wall_jump_left_aligned, 0
+   // 24 - player_appear_right_aligned, 12
+   // 25 - player_appear_left_aligned, 12
+
    std::vector<AnimationSettings> settings;
 
    const auto d = sf::seconds(0.075f);
@@ -261,7 +291,6 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_run_l({72, 48}, {0, 216}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, "player_unarmed.png");
    AnimationSettings player_dash_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
    AnimationSettings player_dash_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-
    AnimationSettings player_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
    AnimationSettings player_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
    AnimationSettings player_double_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
@@ -277,45 +306,39 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_appear_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
    AnimationSettings player_appear_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
 
-   settings.push_back(player_idle_r);
-   settings.push_back(player_idle_l);
+   nlohmann::json j;
+   j["player_idle_r"]         = player_idle_r;
+   j["player_idle_l"]         = player_idle_l;
+   j["player_bend_down_r"]    = player_bend_down_r;
+   j["player_bend_down_l"]    = player_bend_down_l;
+   j["player_idle_to_run_r"]  = player_idle_to_run_r;
+   j["player_idle_to_run_l"]  = player_idle_to_run_l;
+   j["player_runstop_r"]      = player_runstop_r;
+   j["player_runstop_l"]      = player_runstop_l;
+   j["player_run_r"]          = player_run_r;
+   j["player_run_l"]          = player_run_l;
+   j["player_dash_r"]         = player_dash_r;
+   j["player_dash_l"]         = player_dash_l;
+   j["player_jump_r"]         = player_jump_r;
+   j["player_jump_l"]         = player_jump_l;
+   j["player_double_jump_r"]  = player_double_jump_r;
+   j["player_double_jump_l"]  = player_double_jump_l;
+   j["player_swim_idle_r"]    = player_swim_idle_r;
+   j["player_swim_idle_l"]    = player_swim_idle_l;
+   j["player_swim_r"]         = player_swim_r;
+   j["player_swim_l"]         = player_swim_l;
+   j["player_wallslide_r"]    = player_wallslide_r;
+   j["player_wallslide_l"]    = player_wallslide_l;
+   j["player_wall_jump_r"]    = player_wall_jump_r;
+   j["player_wall_jump_l"]    = player_wall_jump_l;
+   j["player_appear_r"]       = player_appear_r;
+   j["player_appear_l"]       = player_appear_l;
 
-   //       "frame_size": [72, 48],
-   //       "frame_offset": [0, 480],
-   //       "sprite_count": 1,
-   //       "frame_durations": [100],
-   //       "origin": [36.0, 48.0],
-   //       "texture": "data/sprites/player_spriteset.png"
+   std::stringstream sstream;
+   sstream << std::setw(4) << j << "\n\n";
+   const auto data = sstream.str();
+
+   std::ofstream file("player_unarmed.json");
+   file << data;
 }
 
-
-
-
-// 00 - player_idle_right_aligned, 8
-// 01 - player_idle_left_aligned, 8
-// 02 - player_bend_down_right_aligned, 8
-// 03 - player_bend_down_left_aligned, 8
-// 04 - player_idle_to_run_right_aligned, 2
-// 05 - player_idle_to_run_left_aligned, 2
-// 06 - player_runstop_right_aligned, 0
-// 07 - player_runstop_left_aligned, 0
-// 08 - player_run_right_aligned, 12
-// 09 - player_run_left_aligned, 12
-// 10 - player_dash_right_aligned, 5
-// 11 - player_dash_left_aligned, 5
-
-// 12 - player_jump_right_aligned, 0
-// 13 - player_jump_left_aligned, 0
-// 14 - player_double_jump_right_aligned, 0
-// 15 - player_double_jump_left_aligned, 0
-// 16 - player_swim_idle_right_aligned, 12
-// 17 - player_swim_idle_left_aligned, 12
-// 18 - player_swim_right_aligned, 0
-// 19 - player_swim_left_aligned, 0
-// 20 - player_wallslide_right_aligned, 6
-// 21 - player_wallslide_left_aligned, 6
-// 22 - player_wall_jump_right_aligned, 0
-// 23 - player_wall_jump_left_aligned, 0
-// 24 - player_appear_right_aligned, 12
-// 25 - player_appear_left_aligned, 12
-//

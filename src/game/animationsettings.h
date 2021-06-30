@@ -33,3 +33,4 @@ struct AnimationSettings
 };
 
 void from_json(const nlohmann::json& j, AnimationSettings& settings);
+void to_json(nlohmann::json& j, const AnimationSettings& settings);
