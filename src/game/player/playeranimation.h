@@ -50,28 +50,28 @@ public:
 
 private:
 
-   std::shared_ptr<Animation> mIdleRightAligned;
-   std::shared_ptr<Animation> mIdleLeftAligned;
-   std::shared_ptr<Animation> mSwimRightAligned;
-   std::shared_ptr<Animation> mSwimLeftAligned;
-   std::shared_ptr<Animation> mRunRightAligned;
-   std::shared_ptr<Animation> mRunLeftAligned;
-   std::shared_ptr<Animation> mDashRightAligned;
-   std::shared_ptr<Animation> mDashLeftAligned;
-   std::shared_ptr<Animation> mCrouchRightAligned;
-   std::shared_ptr<Animation> mCrouchLeftAligned;
+   std::shared_ptr<Animation> mIdleR;
+   std::shared_ptr<Animation> mIdleL;
+   std::shared_ptr<Animation> mSwimR;
+   std::shared_ptr<Animation> mSwimL;
+   std::shared_ptr<Animation> mRunR;
+   std::shared_ptr<Animation> mRunL;
+   std::shared_ptr<Animation> mDashR;
+   std::shared_ptr<Animation> mDashL;
+   std::shared_ptr<Animation> mCrouchR;
+   std::shared_ptr<Animation> mCrouchL;
 
-   std::shared_ptr<Animation> mJumpInitRightAligned;
-   std::shared_ptr<Animation> mJumpUpRightAligned;
-   std::shared_ptr<Animation> mJumpMidairRightAligned;
-   std::shared_ptr<Animation> mJumpDownRightAligned;
-   std::shared_ptr<Animation> mJumpLandingRightAligned;
+   std::shared_ptr<Animation> mJumpInitR;
+   std::shared_ptr<Animation> mJumpUpR;
+   std::shared_ptr<Animation> mJumpMidairR;
+   std::shared_ptr<Animation> mJumpDownR;
+   std::shared_ptr<Animation> mJumpLandingR;
 
-   std::shared_ptr<Animation> mJumpInitLeftAligned;
-   std::shared_ptr<Animation> mJumpUpLeftAligned;
-   std::shared_ptr<Animation> mJumpMidairLeftAligned;
-   std::shared_ptr<Animation> mJumpDownLeftAligned;
-   std::shared_ptr<Animation> mJumpLandingLeftAligned;
+   std::shared_ptr<Animation> mJumpInitL;
+   std::shared_ptr<Animation> mJumpUpL;
+   std::shared_ptr<Animation> mJumpMidairL;
+   std::shared_ptr<Animation> mJumpDownL;
+   std::shared_ptr<Animation> mJumpLandingL;
 
    int32_t _jump_animation_reference = 0;
 
