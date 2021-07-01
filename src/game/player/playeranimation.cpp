@@ -12,51 +12,51 @@
 PlayerAnimation::PlayerAnimation()
 {
    // none of the player animations are managed by the animation pool, they're just paused when finished
-   mIdleRightAligned        = AnimationPool::getInstance().add("player_idle_right_aligned",         0.0f, 0.0f, true, false);
-   mIdleLeftAligned         = AnimationPool::getInstance().add("player_idle_left_aligned",          0.0f, 0.0f, true, false);
-   mSwimRightAligned        = AnimationPool::getInstance().add("player_swim_right_aligned",         0.0f, 0.0f, true, false);
-   mSwimLeftAligned         = AnimationPool::getInstance().add("player_swim_left_aligned",          0.0f, 0.0f, true, false);
-   mRunRightAligned         = AnimationPool::getInstance().add("player_run_right_aligned",          0.0f, 0.0f, true, false);
-   mRunLeftAligned          = AnimationPool::getInstance().add("player_run_left_aligned",           0.0f, 0.0f, true, false);
-   mDashRightAligned        = AnimationPool::getInstance().add("player_dash_right_aligned",         0.0f, 0.0f, true, false);
-   mDashLeftAligned         = AnimationPool::getInstance().add("player_dash_left_aligned",          0.0f, 0.0f, true, false);
-   mCrouchRightAligned      = AnimationPool::getInstance().add("player_crouch_right_aligned",       0.0f, 0.0f, true, false);
-   mCrouchLeftAligned       = AnimationPool::getInstance().add("player_crouch_left_aligned",        0.0f, 0.0f, true, false);
+   mIdleR        = AnimationPool::getInstance().add("player_idle_r",         0.0f, 0.0f, true, false);
+   mIdleL        = AnimationPool::getInstance().add("player_idle_l",         0.0f, 0.0f, true, false);
+   mSwimR        = AnimationPool::getInstance().add("player_swim_r",         0.0f, 0.0f, true, false);
+   mSwimL        = AnimationPool::getInstance().add("player_swim_l",         0.0f, 0.0f, true, false);
+   mRunR         = AnimationPool::getInstance().add("player_run_r",          0.0f, 0.0f, true, false);
+   mRunL         = AnimationPool::getInstance().add("player_run_l",          0.0f, 0.0f, true, false);
+   mDashR        = AnimationPool::getInstance().add("player_dash_r",         0.0f, 0.0f, true, false);
+   mDashL        = AnimationPool::getInstance().add("player_dash_l",         0.0f, 0.0f, true, false);
+   mCrouchR      = AnimationPool::getInstance().add("player_crouch_r",       0.0f, 0.0f, true, false);
+   mCrouchL      = AnimationPool::getInstance().add("player_crouch_l",       0.0f, 0.0f, true, false);
 
-   mJumpInitRightAligned    = AnimationPool::getInstance().add("player_jump_init_right_aligned",    0.0f, 0.0f, true, false);
-   mJumpUpRightAligned      = AnimationPool::getInstance().add("player_jump_up_right_aligned",      0.0f, 0.0f, true, false);
-   mJumpMidairRightAligned  = AnimationPool::getInstance().add("player_jump_midair_right_aligned",  0.0f, 0.0f, true, false);
-   mJumpDownRightAligned    = AnimationPool::getInstance().add("player_jump_down_right_aligned",    0.0f, 0.0f, true, false);
-   mJumpLandingRightAligned = AnimationPool::getInstance().add("player_jump_landing_right_aligned", 0.0f, 0.0f, true, false);
+   mJumpInitR    = AnimationPool::getInstance().add("player_jump_init_r",    0.0f, 0.0f, true, false);
+   mJumpUpR      = AnimationPool::getInstance().add("player_jump_up_r",      0.0f, 0.0f, true, false);
+   mJumpMidairR  = AnimationPool::getInstance().add("player_jump_midair_r",  0.0f, 0.0f, true, false);
+   mJumpDownR    = AnimationPool::getInstance().add("player_jump_down_r",    0.0f, 0.0f, true, false);
+   mJumpLandingR = AnimationPool::getInstance().add("player_jump_landing_r", 0.0f, 0.0f, true, false);
 
-   mJumpInitLeftAligned     = AnimationPool::getInstance().add("player_jump_init_left_aligned",     0.0f, 0.0f, true, false);
-   mJumpUpLeftAligned       = AnimationPool::getInstance().add("player_jump_up_left_aligned",       0.0f, 0.0f, true, false);
-   mJumpMidairLeftAligned   = AnimationPool::getInstance().add("player_jump_midair_left_aligned",   0.0f, 0.0f, true, false);
-   mJumpDownLeftAligned     = AnimationPool::getInstance().add("player_jump_down_left_aligned",     0.0f, 0.0f, true, false);
-   mJumpLandingLeftAligned  = AnimationPool::getInstance().add("player_jump_landing_left_aligned",  0.0f, 0.0f, true, false);
+   mJumpInitL    = AnimationPool::getInstance().add("player_jump_init_l",    0.0f, 0.0f, true, false);
+   mJumpUpL      = AnimationPool::getInstance().add("player_jump_up_l",      0.0f, 0.0f, true, false);
+   mJumpMidairL  = AnimationPool::getInstance().add("player_jump_midair_l",  0.0f, 0.0f, true, false);
+   mJumpDownL    = AnimationPool::getInstance().add("player_jump_down_l",    0.0f, 0.0f, true, false);
+   mJumpLandingL = AnimationPool::getInstance().add("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
-   mAnimations.push_back(mIdleRightAligned);
-   mAnimations.push_back(mIdleLeftAligned);
-   mAnimations.push_back(mSwimRightAligned);
-   mAnimations.push_back(mSwimLeftAligned);
-   mAnimations.push_back(mRunRightAligned);
-   mAnimations.push_back(mRunLeftAligned);
-   mAnimations.push_back(mDashRightAligned);
-   mAnimations.push_back(mDashLeftAligned);
-   mAnimations.push_back(mCrouchRightAligned);
-   mAnimations.push_back(mCrouchLeftAligned);
+   mAnimations.push_back(mIdleR);
+   mAnimations.push_back(mIdleL);
+   mAnimations.push_back(mSwimR);
+   mAnimations.push_back(mSwimL);
+   mAnimations.push_back(mRunR);
+   mAnimations.push_back(mRunL);
+   mAnimations.push_back(mDashR);
+   mAnimations.push_back(mDashL);
+   mAnimations.push_back(mCrouchR);
+   mAnimations.push_back(mCrouchL);
 
-   mAnimations.push_back(mJumpInitRightAligned);
-   mAnimations.push_back(mJumpUpRightAligned);
-   mAnimations.push_back(mJumpDownRightAligned);
-   mAnimations.push_back(mJumpLandingRightAligned);
-   mAnimations.push_back(mJumpMidairRightAligned);
+   mAnimations.push_back(mJumpInitR);
+   mAnimations.push_back(mJumpUpR);
+   mAnimations.push_back(mJumpDownR);
+   mAnimations.push_back(mJumpLandingR);
+   mAnimations.push_back(mJumpMidairR);
 
-   mAnimations.push_back(mJumpInitLeftAligned);
-   mAnimations.push_back(mJumpUpLeftAligned);
-   mAnimations.push_back(mJumpDownLeftAligned);
-   mAnimations.push_back(mJumpLandingLeftAligned);
-   mAnimations.push_back(mJumpMidairLeftAligned);
+   mAnimations.push_back(mJumpInitL);
+   mAnimations.push_back(mJumpUpL);
+   mAnimations.push_back(mJumpDownL);
+   mAnimations.push_back(mJumpLandingL);
+   mAnimations.push_back(mJumpMidairL);
 
    for (auto& i : mAnimations)
    {
@@ -94,11 +94,11 @@ void PlayerAnimation::update(
    {
       if (data._dash_dir == Dash::Left)
       {
-         nextCycle = mDashLeftAligned;
+         nextCycle = mDashL;
       }
       else
       {
-         nextCycle = mDashRightAligned;
+         nextCycle = mDashR;
       }
    }
 
@@ -107,22 +107,22 @@ void PlayerAnimation::update(
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchRightAligned;
+         nextCycle = mCrouchR;
       }
       else
       {
-         nextCycle = mRunRightAligned;
+         nextCycle = mRunR;
       }
    }
    else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchLeftAligned;
+         nextCycle = mCrouchL;
       }
       else
       {
-         nextCycle = mRunLeftAligned;
+         nextCycle = mRunL;
       }
    }
 
@@ -131,24 +131,24 @@ void PlayerAnimation::update(
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchLeftAligned;
+         nextCycle = mCrouchL;
          requiresUpdate = false;
       }
       else
       {
-         nextCycle = mIdleLeftAligned;
+         nextCycle = mIdleL;
       }
    }
    else
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchRightAligned;
+         nextCycle = mCrouchR;
          requiresUpdate = false;
       }
       else
       {
-         nextCycle = mIdleRightAligned;
+         nextCycle = mIdleR;
       }
    }
 
@@ -159,20 +159,20 @@ void PlayerAnimation::update(
       {
          // jump ignition
          _jump_animation_reference = 0;
-         nextCycle = data._points_right ? mJumpInitRightAligned : mJumpInitLeftAligned;
+         nextCycle = data._points_right ? mJumpInitR : mJumpInitL;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            nextCycle = data._points_right ? mJumpUpRightAligned : mJumpUpLeftAligned;
+            nextCycle = data._points_right ? mJumpUpR : mJumpUpL;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            nextCycle = data._points_right ? mJumpDownRightAligned : mJumpDownLeftAligned;
+            nextCycle = data._points_right ? mJumpDownR : mJumpDownL;
             _jump_animation_reference = 2;
          }
          else
@@ -180,7 +180,7 @@ void PlayerAnimation::update(
             // jump midair
             if (_jump_animation_reference == 1)
             {
-               nextCycle = data._points_right ? mJumpMidairRightAligned : mJumpMidairLeftAligned;
+               nextCycle = data._points_right ? mJumpMidairR : mJumpMidairL;
             }
          }
       }
@@ -188,7 +188,7 @@ void PlayerAnimation::update(
       // hard landing
       else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data._points_right ? mJumpLandingRightAligned : mJumpLandingLeftAligned;
+         nextCycle = data._points_right ? mJumpLandingR : mJumpLandingL;
 
          if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
          {
@@ -201,7 +201,7 @@ void PlayerAnimation::update(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data._points_right ? mSwimRightAligned : mSwimLeftAligned;
+      nextCycle = data._points_right ? mSwimR : mSwimL;
    }
 
    if (data._climb_joint_present)
@@ -248,32 +248,32 @@ void PlayerAnimation::resetAlpha()
 
 void PlayerAnimation::generateJson()
 {
-   // 00 - player_idle_right_aligned, 8
-   // 01 - player_idle_left_aligned, 8
-   // 02 - player_bend_down_right_aligned, 8
-   // 03 - player_bend_down_left_aligned, 8
-   // 04 - player_idle_to_run_right_aligned, 2
-   // 05 - player_idle_to_run_left_aligned, 2
-   // 06 - player_runstop_right_aligned, 0
-   // 07 - player_runstop_left_aligned, 0
-   // 08 - player_run_right_aligned, 12
-   // 09 - player_run_left_aligned, 12
-   // 10 - player_dash_right_aligned, 5
-   // 11 - player_dash_left_aligned, 5
-   // 12 - player_jump_right_aligned, 0
-   // 13 - player_jump_left_aligned, 0
-   // 14 - player_double_jump_right_aligned, 0
-   // 15 - player_double_jump_left_aligned, 0
-   // 16 - player_swim_idle_right_aligned, 12
-   // 17 - player_swim_idle_left_aligned, 12
-   // 18 - player_swim_right_aligned, 0
-   // 19 - player_swim_left_aligned, 0
-   // 20 - player_wallslide_right_aligned, 6
-   // 21 - player_wallslide_left_aligned, 6
-   // 22 - player_wall_jump_right_aligned, 0
-   // 23 - player_wall_jump_left_aligned, 0
-   // 24 - player_appear_right_aligned, 12
-   // 25 - player_appear_left_aligned, 12
+   // 00 - player_idle_r, 8
+   // 01 - player_idle_l, 8
+   // 02 - player_bend_down_r, 8
+   // 03 - player_bend_down_l, 8
+   // 04 - player_idle_to_run_r, 2
+   // 05 - player_idle_to_run_l, 2
+   // 06 - player_runstop_r, 0
+   // 07 - player_runstop_l, 0
+   // 08 - player_run_r, 12
+   // 09 - player_run_l, 12
+   // 10 - player_dash_r, 5
+   // 11 - player_dash_l, 5
+   // 12 - player_jump_r, 0
+   // 13 - player_jump_l, 0
+   // 14 - player_double_jump_r, 0
+   // 15 - player_double_jump_l, 0
+   // 16 - player_swim_idle_r, 12
+   // 17 - player_swim_idle_l, 12
+   // 18 - player_swim_r, 0
+   // 19 - player_swim_l, 0
+   // 20 - player_wallslide_r, 6
+   // 21 - player_wallslide_l, 6
+   // 22 - player_wall_jump_r, 0
+   // 23 - player_wall_jump_l, 0
+   // 24 - player_appear_r, 12
+   // 25 - player_appear_l, 12
 
    std::vector<AnimationSettings> settings;
 
