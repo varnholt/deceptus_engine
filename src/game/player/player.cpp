@@ -258,7 +258,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    AnimationPool::getInstance().drawAnimations(
       color,
       normal,
-      {"player_jump_dust_left_aligned", "player_jump_dust_right_aligned"}
+      {"player_jump_dust_l", "player_jump_dust_r"}
    );
 }
 
@@ -743,8 +743,8 @@ void Player::playDustAnimation()
 {
    AnimationPool::getInstance().add(
       mPointsToLeft
-       ? "player_jump_dust_left_aligned"
-       : "player_jump_dust_right_aligned",
+       ? "player_jump_dust_l"
+       : "player_jump_dust_r",
       mPixelPositionf.x,
       mPixelPositionf.y
    );
