@@ -132,6 +132,8 @@ public:
 
    std::shared_ptr<WeaponSystem> getWeaponSystem() const;
 
+   PlayerAnimation& getPlayerAnimation();
+
 
 private:
 

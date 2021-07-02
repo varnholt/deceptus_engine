@@ -1847,6 +1847,13 @@ void Player::keyPressed(sf::Keyboard::Key key)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+PlayerAnimation& Player::getPlayerAnimation()
+{
+   return _player_animation;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 std::shared_ptr<WeaponSystem> Player::getWeaponSystem() const
 {
    return mWeaponSystem;
