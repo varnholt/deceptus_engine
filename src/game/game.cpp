@@ -951,6 +951,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          _draw_states._draw_test_scene = !_draw_states._draw_test_scene;
          break;
       }
+      case sf::Keyboard::F7:
+      {
+         Player::getCurrent()->getPlayerAnimation().toggleVersion();
+         break;
+      }
       case sf::Keyboard::F12:
       {
          _draw_states._draw_console = !_draw_states._draw_console;
