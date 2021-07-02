@@ -17,6 +17,12 @@ public:
 
    PlayerAnimation();
 
+   enum class Version
+   {
+      V1 = 1,
+      V2 = 2
+   };
+
    struct PlayerAnimationData
    {
       bool _dead = false;
@@ -50,6 +56,18 @@ public:
 
 private:
 
+   void updateV1(
+      const sf::Time& dt,
+      const PlayerAnimationData& data
+   );
+
+
+   void updateV2(
+      const sf::Time& dt,
+      const PlayerAnimationData& data
+   );
+
+   // version 1
    std::shared_ptr<Animation> mIdleR;
    std::shared_ptr<Animation> mIdleL;
    std::shared_ptr<Animation> mSwimR;
@@ -73,10 +91,36 @@ private:
    std::shared_ptr<Animation> mJumpDownL;
    std::shared_ptr<Animation> mJumpLandingL;
 
+   // version 2
+   std::shared_ptr<Animation> mIdleR2;
+   std::shared_ptr<Animation> mIdleL2;
+   std::shared_ptr<Animation> mSwimR2;
+   std::shared_ptr<Animation> mSwimL2;
+   std::shared_ptr<Animation> mRunR2;
+   std::shared_ptr<Animation> mRunL2;
+   std::shared_ptr<Animation> mDashR2;
+   std::shared_ptr<Animation> mDashL2;
+   std::shared_ptr<Animation> mCrouchR2;
+   std::shared_ptr<Animation> mCrouchL2;
+
+   std::shared_ptr<Animation> mJumpInitR2;
+   std::shared_ptr<Animation> mJumpUpR2;
+   std::shared_ptr<Animation> mJumpMidairR2;
+   std::shared_ptr<Animation> mJumpDownR2;
+   std::shared_ptr<Animation> mJumpLandingR2;
+
+   std::shared_ptr<Animation> mJumpInitL2;
+   std::shared_ptr<Animation> mJumpUpL2;
+   std::shared_ptr<Animation> mJumpMidairL2;
+   std::shared_ptr<Animation> mJumpDownL2;
+   std::shared_ptr<Animation> mJumpLandingL2;
+
+
    int32_t _jump_animation_reference = 0;
 
    std::vector<std::shared_ptr<Animation>> mAnimations;
    std::shared_ptr<Animation> mCurrentCycle;
 
+   Version _version = Version::V1;
 };
 
