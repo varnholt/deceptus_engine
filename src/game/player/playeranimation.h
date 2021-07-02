@@ -53,6 +53,8 @@ public:
 
    void generateJson();
 
+   void toggleVersion();
+
 
 private:
 

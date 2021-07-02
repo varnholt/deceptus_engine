@@ -36,17 +36,17 @@ PlayerAnimation::PlayerAnimation()
    mJumpLandingL = AnimationPool::getInstance().add("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
    // version 2
-//   mIdleR2        = AnimationPool::getInstance().add("player_idle_r_2",         0.0f, 0.0f, true, false);
-//   mIdleL2        = AnimationPool::getInstance().add("player_idle_l_2",         0.0f, 0.0f, true, false);
-//   mSwimR2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
-//   mSwimL2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
-//   mRunR2         = AnimationPool::getInstance().add("player_run_r_2",          0.0f, 0.0f, true, false);
-//   mRunL2         = AnimationPool::getInstance().add("player_run_l_2",          0.0f, 0.0f, true, false);
-//   mDashR2        = AnimationPool::getInstance().add("player_dash_r_2",         0.0f, 0.0f, true, false);
-//   mDashL2        = AnimationPool::getInstance().add("player_dash_l_2",         0.0f, 0.0f, true, false);
+   mIdleR2        = AnimationPool::getInstance().add("player_idle_r_2",         0.0f, 0.0f, true, false);
+   mIdleL2        = AnimationPool::getInstance().add("player_idle_l_2",         0.0f, 0.0f, true, false);
+   mSwimR2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
+   mSwimL2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
+   mRunR2         = AnimationPool::getInstance().add("player_run_r_2",          0.0f, 0.0f, true, false);
+   mRunL2         = AnimationPool::getInstance().add("player_run_l_2",          0.0f, 0.0f, true, false);
+   mDashR2        = AnimationPool::getInstance().add("player_dash_r_2",         0.0f, 0.0f, true, false);
+   mDashL2        = AnimationPool::getInstance().add("player_dash_l_2",         0.0f, 0.0f, true, false);
+
 //   mCrouchR2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
 //   mCrouchL2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
-
 //   mJumpInitR2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
 //   mJumpUpR2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
 //   mJumpMidairR2  = AnimationPool::getInstance().add("player_jump_midair_r_2",  0.0f, 0.0f, true, false);
@@ -84,14 +84,14 @@ PlayerAnimation::PlayerAnimation()
    mAnimations.push_back(mJumpMidairL);
 
    // version 2
-//   mAnimations.push_back(mIdleR2);
-//   mAnimations.push_back(mIdleL2);
-//   mAnimations.push_back(mSwimR2);
-//   mAnimations.push_back(mSwimL2);
-//   mAnimations.push_back(mRunR2);
-//   mAnimations.push_back(mRunL2);
-//   mAnimations.push_back(mDashR2);
-//   mAnimations.push_back(mDashL2);
+   mAnimations.push_back(mIdleR2);
+   mAnimations.push_back(mIdleL2);
+   mAnimations.push_back(mSwimR2);
+   mAnimations.push_back(mSwimL2);
+   mAnimations.push_back(mRunR2);
+   mAnimations.push_back(mRunL2);
+   mAnimations.push_back(mDashR2);
+   mAnimations.push_back(mDashL2);
 //   mAnimations.push_back(mCrouchR2);
 //   mAnimations.push_back(mCrouchL2);
 
@@ -185,33 +185,36 @@ void PlayerAnimation::generateJson()
    std::vector<AnimationSettings> settings;
 
    const auto d = sf::seconds(0.075f);
+   const auto sprite_name = "data/sprites/player_unarmed.png";
+   auto row = 0;
+   const auto next_row = [&](){return (row++) * PIXELS_PER_TILE * 2;};
 
-   AnimationSettings player_idle_r({72, 48}, {0, 0}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_idle_l({72, 48}, {0, 24}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_bend_down_r({72, 48}, {0, 48}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_bend_down_l({72, 48}, {0, 72}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_idle_to_run_r({72, 48}, {0, 96}, {36.0, 48.0}, {d,d}, "player_unarmed.png");
-   AnimationSettings player_idle_to_run_l({72, 48}, {0, 120}, {36.0, 48.0}, {d,d}, "player_unarmed.png");
-   AnimationSettings player_runstop_r({72, 48}, {0, 144}, {36.0, 48.0}, {d}, "player_unarmed.png");
-   AnimationSettings player_runstop_l({72, 48}, {0, 168}, {36.0, 48.0}, {d}, "player_unarmed.png");
-   AnimationSettings player_run_r({72, 48}, {0, 192}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_run_l({72, 48}, {0, 216}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_dash_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_dash_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_double_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_double_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_swim_idle_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_swim_idle_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_swim_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_swim_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_wallslide_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_wallslide_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_wall_jump_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_wall_jump_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_appear_r({72, 48}, {0, 240}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
-   AnimationSettings player_appear_l({72, 48}, {0, 264}, {36.0, 48.0}, {d,d,d,d,d}, "player_unarmed.png");
+   AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
+   AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
+   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
+   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
+   AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d}, sprite_name);
+   AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d}, sprite_name);
+   AnimationSettings player_runstop_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d}, sprite_name);
+   AnimationSettings player_runstop_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d}, sprite_name);
+   AnimationSettings player_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, sprite_name);
+   AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, sprite_name);
+   AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_swim_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_wallslide_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_wallslide_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_appear_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_appear_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
 
    nlohmann::json j;
    j["player_idle_r_2"]         = player_idle_r;
@@ -247,6 +250,12 @@ void PlayerAnimation::generateJson()
 
    std::ofstream file("player_unarmed.json");
    file << data;
+}
+
+
+void PlayerAnimation::toggleVersion()
+{
+   _version = (_version == Version::V1) ? Version::V2 : Version::V1;
 }
 
 
@@ -438,11 +447,11 @@ void PlayerAnimation::updateV2(
    {
       if (data._dash_dir == Dash::Left)
       {
-         nextCycle = mDashL;
+         nextCycle = mDashL2;
       }
       else
       {
-         nextCycle = mDashR;
+         nextCycle = mDashR2;
       }
    }
 
@@ -455,7 +464,7 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = mRunR;
+         nextCycle = mRunR2;
       }
    }
    else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
@@ -466,7 +475,7 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = mRunL;
+         nextCycle = mRunL2;
       }
    }
 
@@ -480,7 +489,7 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = mIdleL;
+         nextCycle = mIdleL2;
       }
    }
    else
@@ -492,7 +501,7 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = mIdleR;
+         nextCycle = mIdleR2;
       }
    }
 
@@ -545,7 +554,7 @@ void PlayerAnimation::updateV2(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data._points_right ? mSwimR : mSwimL;
+      nextCycle = data._points_right ? mSwimR2 : mSwimL2;
    }
 
    if (data._climb_joint_present)
