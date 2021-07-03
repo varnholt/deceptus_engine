@@ -1,5 +1,6 @@
 #include "playeranimation.h"
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -7,6 +8,11 @@
 #include "camerapane.h"
 #include "mechanisms/portal.h"
 #include "physics/physicsconfiguration.h"
+
+
+constexpr auto FRAMES_COUNT_JUMP_INIT = 3;
+constexpr auto JUMP_UP_VELOCITY_THRESHOLD = -1.2f;
+constexpr auto JUMP_DOWN_VELOCITY_THRESHOLD = 1.2f;
 
 
 PlayerAnimation::PlayerAnimation()
@@ -205,6 +211,12 @@ void PlayerAnimation::generateJson()
 
    const auto jump_r_row = next_row();
    const auto jump_l_row = next_row();
+
+   // init:    3 frames
+   // up:      2 frames
+   // midair:  8 frames
+   // down:    2 frames
+   // landing: 4 frames
 
    AnimationSettings player_jump_init_r({72, 48}, {0, jump_r_row}, {36.0, 48.0}, v(3), sprite_name);
    AnimationSettings player_jump_up_r({72, 48}, {col(3), jump_r_row}, {36.0, 48.0}, v(2), sprite_name);
@@ -534,7 +546,7 @@ void PlayerAnimation::updateV2(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_steps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+      if (data._jump_steps > PhysicsConfiguration::getInstance().mPlayerJumpSteps - FRAMES_COUNT_JUMP_INIT)
       {
          // jump ignition
          _jump_animation_reference = 0;
@@ -543,13 +555,13 @@ void PlayerAnimation::updateV2(
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
-         if (velocity.y < -1.0f)
+         if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
          {
             nextCycle = data._points_right ? _jump_up_r_2 : _jump_up_l_2;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
-         else if (velocity.y > 1.0f)
+         else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
          {
             nextCycle = data._points_right ? _jump_down_r_2 : _jump_down_l_2;
             _jump_animation_reference = 2;
@@ -559,6 +571,8 @@ void PlayerAnimation::updateV2(
             // jump midair
             if (_jump_animation_reference == 1)
             {
+               // static int32_t counter = 0;
+               // std::cout << counter++ << std::endl;
                nextCycle = data._points_right ? _jump_midair_r_2 : _jump_midair_l_2;
             }
          }
