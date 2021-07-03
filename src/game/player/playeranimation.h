@@ -51,9 +51,9 @@ public:
 
    void resetAlpha();
 
-   void generateJson();
-
    void toggleVersion();
+
+   static void generateJson();
 
 
 private:

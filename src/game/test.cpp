@@ -10,8 +10,7 @@
 
 void dumpAnimations()
 {
-   PlayerAnimation anim;
-   anim.generateJson();
+   PlayerAnimation::generateJson();
 }
 
 
