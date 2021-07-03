@@ -47,17 +47,18 @@ PlayerAnimation::PlayerAnimation()
 
 //   mCrouchR2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
 //   mCrouchL2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
-//   mJumpInitR2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
-//   mJumpUpR2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
-//   mJumpMidairR2  = AnimationPool::getInstance().add("player_jump_midair_r_2",  0.0f, 0.0f, true, false);
-//   mJumpDownR2    = AnimationPool::getInstance().add("player_jump_down_r_2",    0.0f, 0.0f, true, false);
-//   mJumpLandingR2 = AnimationPool::getInstance().add("player_jump_landing_r_2", 0.0f, 0.0f, true, false);
 
-//   mJumpInitL2    = AnimationPool::getInstance().add("player_jump_init_l_2",    0.0f, 0.0f, true, false);
-//   mJumpUpL2      = AnimationPool::getInstance().add("player_jump_up_l_2",      0.0f, 0.0f, true, false);
-//   mJumpMidairL2  = AnimationPool::getInstance().add("player_jump_midair_l_2",  0.0f, 0.0f, true, false);
-//   mJumpDownL2    = AnimationPool::getInstance().add("player_jump_down_l_2",    0.0f, 0.0f, true, false);
-//   mJumpLandingL2 = AnimationPool::getInstance().add("player_jump_landing_l_2", 0.0f, 0.0f, true, false);
+   mJumpInitR2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
+   mJumpUpR2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
+   mJumpMidairR2  = AnimationPool::getInstance().add("player_jump_midair_r_2",  0.0f, 0.0f, true, false);
+   mJumpDownR2    = AnimationPool::getInstance().add("player_jump_down_r_2",    0.0f, 0.0f, true, false);
+   mJumpLandingR2 = AnimationPool::getInstance().add("player_jump_landing_r_2", 0.0f, 0.0f, true, false);
+
+   mJumpInitL2    = AnimationPool::getInstance().add("player_jump_init_l_2",    0.0f, 0.0f, true, false);
+   mJumpUpL2      = AnimationPool::getInstance().add("player_jump_up_l_2",      0.0f, 0.0f, true, false);
+   mJumpMidairL2  = AnimationPool::getInstance().add("player_jump_midair_l_2",  0.0f, 0.0f, true, false);
+   mJumpDownL2    = AnimationPool::getInstance().add("player_jump_down_l_2",    0.0f, 0.0f, true, false);
+   mJumpLandingL2 = AnimationPool::getInstance().add("player_jump_landing_l_2", 0.0f, 0.0f, true, false);
 
    // store all
    mAnimations.push_back(mIdleR);
@@ -92,21 +93,21 @@ PlayerAnimation::PlayerAnimation()
    mAnimations.push_back(mRunL2);
    mAnimations.push_back(mDashR2);
    mAnimations.push_back(mDashL2);
+
 //   mAnimations.push_back(mCrouchR2);
 //   mAnimations.push_back(mCrouchL2);
 
-//   mAnimations.push_back(mJumpInitR2);
-//   mAnimations.push_back(mJumpUpR2);
-//   mAnimations.push_back(mJumpDownR2);
-//   mAnimations.push_back(mJumpLandingR2);
-//   mAnimations.push_back(mJumpMidairR2);
+   mAnimations.push_back(mJumpInitR2);
+   mAnimations.push_back(mJumpUpR2);
+   mAnimations.push_back(mJumpDownR2);
+   mAnimations.push_back(mJumpLandingR2);
+   mAnimations.push_back(mJumpMidairR2);
 
-//   mAnimations.push_back(mJumpInitL2);
-//   mAnimations.push_back(mJumpUpL2);
-//   mAnimations.push_back(mJumpDownL2);
-//   mAnimations.push_back(mJumpLandingL2);
-//   mAnimations.push_back(mJumpMidairL2);
-
+   mAnimations.push_back(mJumpInitL2);
+   mAnimations.push_back(mJumpUpL2);
+   mAnimations.push_back(mJumpDownL2);
+   mAnimations.push_back(mJumpLandingL2);
+   mAnimations.push_back(mJumpMidairL2);
 
    for (auto& i : mAnimations)
    {
@@ -182,12 +183,12 @@ void PlayerAnimation::generateJson()
    // 24 - player_appear_r, 12
    // 25 - player_appear_l, 12
 
-   std::vector<AnimationSettings> settings;
-
    const auto d = sf::seconds(0.075f);
    const auto sprite_name = "data/sprites/player_unarmed.png";
    auto row = 0;
    const auto next_row = [&](){return (row++) * PIXELS_PER_TILE * 2;};
+   const auto col = [](int32_t x){return PIXELS_PER_TILE * 3 * x;};
+   const auto v = [d](int32_t size){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(d); return arr;};
 
    AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
    AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
@@ -201,8 +202,22 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, sprite_name);
    AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+
+   const auto jump_r_row = next_row();
+   const auto jump_l_row = next_row();
+
+   AnimationSettings player_jump_init_r({72, 48}, {0, jump_r_row}, {36.0, 48.0}, v(3), sprite_name);
+   AnimationSettings player_jump_up_r({72, 48}, {col(3), jump_r_row}, {36.0, 48.0}, v(2), sprite_name);
+   AnimationSettings player_jump_midair_r({72, 48}, {col(5), jump_r_row}, {36.0, 48.0}, v(8), sprite_name);
+   AnimationSettings player_jump_down_r({72, 48}, {col(13), jump_r_row}, {36.0, 48.0},  v(2), sprite_name);
+   AnimationSettings player_jump_landing_r({72, 48}, {col(15), jump_r_row}, {36.0, 48.0}, v(4), sprite_name);
+
+   AnimationSettings player_jump_init_l({72, 48}, {0, jump_l_row}, {36.0, 48.0}, v(3), sprite_name);
+   AnimationSettings player_jump_up_l({72, 48}, {col(3), jump_l_row}, {36.0, 48.0}, v(2), sprite_name);
+   AnimationSettings player_jump_midair_l({72, 48}, {col(5), jump_l_row}, {36.0, 48.0}, v(8), sprite_name);
+   AnimationSettings player_jump_down_l({72, 48}, {col(13), jump_l_row}, {36.0, 48.0},  v(2), sprite_name);
+   AnimationSettings player_jump_landing_l({72, 48}, {col(15), jump_l_row}, {36.0, 48.0}, v(4), sprite_name);
+
    AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
@@ -215,6 +230,12 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_appear_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_appear_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+
+//   mJumpInitR    = AnimationPool::getInstance().add("player_jump_init_r",    0.0f, 0.0f, true, false); <- FRAMES 1,2,3 (NO LOOP)
+//   mJumpUpR      = AnimationPool::getInstance().add("player_jump_up_r",      0.0f, 0.0f, true, false); <- FRAMES 4,5 (LOOP)
+//   mJumpMidairR  = AnimationPool::getInstance().add("player_jump_midair_r",  0.0f, 0.0f, true, false); <- FRAMES 6-13 (NO LOOP)
+//   mJumpDownR    = AnimationPool::getInstance().add("player_jump_down_r",    0.0f, 0.0f, true, false); <- FRAMES 14,15 (LOOP)
+//   mJumpLandingR = AnimationPool::getInstance().add("player_jump_landing_r", 0.0f, 0.0f, true, false); <- FRAMES 16-19 (NO LOOP)
 
    nlohmann::json j;
    j["player_idle_r_2"]         = player_idle_r;
@@ -229,8 +250,19 @@ void PlayerAnimation::generateJson()
    j["player_run_l_2"]          = player_run_l;
    j["player_dash_r_2"]         = player_dash_r;
    j["player_dash_l_2"]         = player_dash_l;
-   j["player_jump_r_2"]         = player_jump_r;
-   j["player_jump_l_2"]         = player_jump_l;
+
+   j["player_jump_init_r_2"]    = player_jump_init_r;
+   j["player_jump_up_r_2"]      = player_jump_up_r;
+   j["player_jump_midair_r_2"]  = player_jump_midair_r;
+   j["player_jump_down_r_2"]    = player_jump_down_r;
+   j["player_jump_landing_r_2"] = player_jump_landing_r;
+
+   j["player_jump_init_l_2"]    = player_jump_init_l;
+   j["player_jump_up_l_2"]      = player_jump_up_l;
+   j["player_jump_midair_l_2"]  = player_jump_midair_l;
+   j["player_jump_down_l_2"]    = player_jump_down_l;
+   j["player_jump_landing_l_2"] = player_jump_landing_l;
+
    j["player_double_jump_r_2"]  = player_double_jump_r;
    j["player_double_jump_l_2"]  = player_double_jump_l;
    j["player_swim_idle_r_2"]    = player_swim_idle_r;
@@ -512,20 +544,20 @@ void PlayerAnimation::updateV2(
       {
          // jump ignition
          _jump_animation_reference = 0;
-         nextCycle = data._points_right ? mJumpInitR : mJumpInitL;
+         nextCycle = data._points_right ? mJumpInitR2 : mJumpInitL2;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            nextCycle = data._points_right ? mJumpUpR : mJumpUpL;
+            nextCycle = data._points_right ? mJumpUpR2 : mJumpUpL2;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            nextCycle = data._points_right ? mJumpDownR : mJumpDownL;
+            nextCycle = data._points_right ? mJumpDownR2 : mJumpDownL2;
             _jump_animation_reference = 2;
          }
          else
@@ -533,7 +565,7 @@ void PlayerAnimation::updateV2(
             // jump midair
             if (_jump_animation_reference == 1)
             {
-               nextCycle = data._points_right ? mJumpMidairR : mJumpMidairL;
+               nextCycle = data._points_right ? mJumpMidairR2 : mJumpMidairL2;
             }
          }
       }
@@ -541,7 +573,7 @@ void PlayerAnimation::updateV2(
       // hard landing
       else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data._points_right ? mJumpLandingR : mJumpLandingL;
+         nextCycle = data._points_right ? mJumpLandingR2 : mJumpLandingL2;
 
          if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
          {
