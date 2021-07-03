@@ -70,58 +70,58 @@ private:
    );
 
    // version 1
-   std::shared_ptr<Animation> mIdleR;
-   std::shared_ptr<Animation> mIdleL;
-   std::shared_ptr<Animation> mSwimR;
-   std::shared_ptr<Animation> mSwimL;
-   std::shared_ptr<Animation> mRunR;
-   std::shared_ptr<Animation> mRunL;
-   std::shared_ptr<Animation> mDashR;
-   std::shared_ptr<Animation> mDashL;
-   std::shared_ptr<Animation> mCrouchR;
-   std::shared_ptr<Animation> mCrouchL;
+   std::shared_ptr<Animation> _idle_r;
+   std::shared_ptr<Animation> _idle_l;
+   std::shared_ptr<Animation> _swim_r;
+   std::shared_ptr<Animation> _swim_l;
+   std::shared_ptr<Animation> _run_r;
+   std::shared_ptr<Animation> _run_l;
+   std::shared_ptr<Animation> _dash_r;
+   std::shared_ptr<Animation> _dash_l;
+   std::shared_ptr<Animation> _crouch_r;
+   std::shared_ptr<Animation> _crouch_l;
 
-   std::shared_ptr<Animation> mJumpInitR;
-   std::shared_ptr<Animation> mJumpUpR;
-   std::shared_ptr<Animation> mJumpMidairR;
-   std::shared_ptr<Animation> mJumpDownR;
-   std::shared_ptr<Animation> mJumpLandingR;
+   std::shared_ptr<Animation> _jump_init_r;
+   std::shared_ptr<Animation> _jump_up_r;
+   std::shared_ptr<Animation> _jump_midair_r;
+   std::shared_ptr<Animation> _jump_down_r;
+   std::shared_ptr<Animation> _jump_landing_r;
 
-   std::shared_ptr<Animation> mJumpInitL;
-   std::shared_ptr<Animation> mJumpUpL;
-   std::shared_ptr<Animation> mJumpMidairL;
-   std::shared_ptr<Animation> mJumpDownL;
-   std::shared_ptr<Animation> mJumpLandingL;
+   std::shared_ptr<Animation> _jump_init_l;
+   std::shared_ptr<Animation> _jump_up_l;
+   std::shared_ptr<Animation> _jump_midair_l;
+   std::shared_ptr<Animation> _jump_down_l;
+   std::shared_ptr<Animation> _jump_landing_l;
 
    // version 2
-   std::shared_ptr<Animation> mIdleR2;
-   std::shared_ptr<Animation> mIdleL2;
-   std::shared_ptr<Animation> mSwimR2;
-   std::shared_ptr<Animation> mSwimL2;
-   std::shared_ptr<Animation> mRunR2;
-   std::shared_ptr<Animation> mRunL2;
-   std::shared_ptr<Animation> mDashR2;
-   std::shared_ptr<Animation> mDashL2;
-   std::shared_ptr<Animation> mCrouchR2;
-   std::shared_ptr<Animation> mCrouchL2;
+   std::shared_ptr<Animation> _idle_r_2;
+   std::shared_ptr<Animation> _idle_l_2;
+   std::shared_ptr<Animation> _swim_r_2;
+   std::shared_ptr<Animation> _swim_l_2;
+   std::shared_ptr<Animation> _run_r_2;
+   std::shared_ptr<Animation> _run_l_2;
+   std::shared_ptr<Animation> _dash_r_2;
+   std::shared_ptr<Animation> _dash_l_2;
+   std::shared_ptr<Animation> _crouch_r_2;
+   std::shared_ptr<Animation> _crouch_l_2;
 
-   std::shared_ptr<Animation> mJumpInitR2;
-   std::shared_ptr<Animation> mJumpUpR2;
-   std::shared_ptr<Animation> mJumpMidairR2;
-   std::shared_ptr<Animation> mJumpDownR2;
-   std::shared_ptr<Animation> mJumpLandingR2;
+   std::shared_ptr<Animation> _jump_init_r_2;
+   std::shared_ptr<Animation> _jump_up_r_2;
+   std::shared_ptr<Animation> _jump_midair_r_2;
+   std::shared_ptr<Animation> _jump_down_r_2;
+   std::shared_ptr<Animation> _jump_landing_r_2;
 
-   std::shared_ptr<Animation> mJumpInitL2;
-   std::shared_ptr<Animation> mJumpUpL2;
-   std::shared_ptr<Animation> mJumpMidairL2;
-   std::shared_ptr<Animation> mJumpDownL2;
-   std::shared_ptr<Animation> mJumpLandingL2;
+   std::shared_ptr<Animation> _jump_init_l_2;
+   std::shared_ptr<Animation> _jump_up_l_2;
+   std::shared_ptr<Animation> _jump_midair_l_2;
+   std::shared_ptr<Animation> _jump_down_l_2;
+   std::shared_ptr<Animation> _jump_landing_l_2;
 
 
    int32_t _jump_animation_reference = 0;
 
-   std::vector<std::shared_ptr<Animation>> mAnimations;
-   std::shared_ptr<Animation> mCurrentCycle;
+   std::vector<std::shared_ptr<Animation>> _animations;
+   std::shared_ptr<Animation> _current_cycle;
 
    Version _version = Version::V1;
 };

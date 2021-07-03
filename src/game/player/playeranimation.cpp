@@ -12,104 +12,104 @@
 PlayerAnimation::PlayerAnimation()
 {
    // none of the player animations are managed by the animation pool, they're just paused when finished
-   mIdleR        = AnimationPool::getInstance().add("player_idle_r",         0.0f, 0.0f, true, false);
-   mIdleL        = AnimationPool::getInstance().add("player_idle_l",         0.0f, 0.0f, true, false);
-   mSwimR        = AnimationPool::getInstance().add("player_swim_r",         0.0f, 0.0f, true, false);
-   mSwimL        = AnimationPool::getInstance().add("player_swim_l",         0.0f, 0.0f, true, false);
-   mRunR         = AnimationPool::getInstance().add("player_run_r",          0.0f, 0.0f, true, false);
-   mRunL         = AnimationPool::getInstance().add("player_run_l",          0.0f, 0.0f, true, false);
-   mDashR        = AnimationPool::getInstance().add("player_dash_r",         0.0f, 0.0f, true, false);
-   mDashL        = AnimationPool::getInstance().add("player_dash_l",         0.0f, 0.0f, true, false);
-   mCrouchR      = AnimationPool::getInstance().add("player_crouch_r",       0.0f, 0.0f, true, false);
-   mCrouchL      = AnimationPool::getInstance().add("player_crouch_l",       0.0f, 0.0f, true, false);
+   _idle_r        = AnimationPool::getInstance().add("player_idle_r",         0.0f, 0.0f, true, false);
+   _idle_l        = AnimationPool::getInstance().add("player_idle_l",         0.0f, 0.0f, true, false);
+   _swim_r        = AnimationPool::getInstance().add("player_swim_r",         0.0f, 0.0f, true, false);
+   _swim_l        = AnimationPool::getInstance().add("player_swim_l",         0.0f, 0.0f, true, false);
+   _run_r         = AnimationPool::getInstance().add("player_run_r",          0.0f, 0.0f, true, false);
+   _run_l         = AnimationPool::getInstance().add("player_run_l",          0.0f, 0.0f, true, false);
+   _dash_r        = AnimationPool::getInstance().add("player_dash_r",         0.0f, 0.0f, true, false);
+   _dash_l        = AnimationPool::getInstance().add("player_dash_l",         0.0f, 0.0f, true, false);
+   _crouch_r      = AnimationPool::getInstance().add("player_crouch_r",       0.0f, 0.0f, true, false);
+   _crouch_l      = AnimationPool::getInstance().add("player_crouch_l",       0.0f, 0.0f, true, false);
 
-   mJumpInitR    = AnimationPool::getInstance().add("player_jump_init_r",    0.0f, 0.0f, true, false);
-   mJumpUpR      = AnimationPool::getInstance().add("player_jump_up_r",      0.0f, 0.0f, true, false);
-   mJumpMidairR  = AnimationPool::getInstance().add("player_jump_midair_r",  0.0f, 0.0f, true, false);
-   mJumpDownR    = AnimationPool::getInstance().add("player_jump_down_r",    0.0f, 0.0f, true, false);
-   mJumpLandingR = AnimationPool::getInstance().add("player_jump_landing_r", 0.0f, 0.0f, true, false);
+   _jump_init_r    = AnimationPool::getInstance().add("player_jump_init_r",    0.0f, 0.0f, true, false);
+   _jump_up_r      = AnimationPool::getInstance().add("player_jump_up_r",      0.0f, 0.0f, true, false);
+   _jump_midair_r  = AnimationPool::getInstance().add("player_jump_midair_r",  0.0f, 0.0f, true, false);
+   _jump_down_r    = AnimationPool::getInstance().add("player_jump_down_r",    0.0f, 0.0f, true, false);
+   _jump_landing_r = AnimationPool::getInstance().add("player_jump_landing_r", 0.0f, 0.0f, true, false);
 
-   mJumpInitL    = AnimationPool::getInstance().add("player_jump_init_l",    0.0f, 0.0f, true, false);
-   mJumpUpL      = AnimationPool::getInstance().add("player_jump_up_l",      0.0f, 0.0f, true, false);
-   mJumpMidairL  = AnimationPool::getInstance().add("player_jump_midair_l",  0.0f, 0.0f, true, false);
-   mJumpDownL    = AnimationPool::getInstance().add("player_jump_down_l",    0.0f, 0.0f, true, false);
-   mJumpLandingL = AnimationPool::getInstance().add("player_jump_landing_l", 0.0f, 0.0f, true, false);
+   _jump_init_l    = AnimationPool::getInstance().add("player_jump_init_l",    0.0f, 0.0f, true, false);
+   _jump_up_l      = AnimationPool::getInstance().add("player_jump_up_l",      0.0f, 0.0f, true, false);
+   _jump_midair_l  = AnimationPool::getInstance().add("player_jump_midair_l",  0.0f, 0.0f, true, false);
+   _jump_down_l    = AnimationPool::getInstance().add("player_jump_down_l",    0.0f, 0.0f, true, false);
+   _jump_landing_l = AnimationPool::getInstance().add("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
    // version 2
-   mIdleR2        = AnimationPool::getInstance().add("player_idle_r_2",         0.0f, 0.0f, true, false);
-   mIdleL2        = AnimationPool::getInstance().add("player_idle_l_2",         0.0f, 0.0f, true, false);
-   mSwimR2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
-   mSwimL2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
-   mRunR2         = AnimationPool::getInstance().add("player_run_r_2",          0.0f, 0.0f, true, false);
-   mRunL2         = AnimationPool::getInstance().add("player_run_l_2",          0.0f, 0.0f, true, false);
-   mDashR2        = AnimationPool::getInstance().add("player_dash_r_2",         0.0f, 0.0f, true, false);
-   mDashL2        = AnimationPool::getInstance().add("player_dash_l_2",         0.0f, 0.0f, true, false);
+   _idle_r_2        = AnimationPool::getInstance().add("player_idle_r_2",         0.0f, 0.0f, true, false);
+   _idle_l_2        = AnimationPool::getInstance().add("player_idle_l_2",         0.0f, 0.0f, true, false);
+   _swim_r_2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
+   _swim_l_2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
+   _run_r_2         = AnimationPool::getInstance().add("player_run_r_2",          0.0f, 0.0f, true, false);
+   _run_l_2         = AnimationPool::getInstance().add("player_run_l_2",          0.0f, 0.0f, true, false);
+   _dash_r_2        = AnimationPool::getInstance().add("player_dash_r_2",         0.0f, 0.0f, true, false);
+   _dash_l_2        = AnimationPool::getInstance().add("player_dash_l_2",         0.0f, 0.0f, true, false);
 
 //   mCrouchR2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
 //   mCrouchL2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
 
-   mJumpInitR2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
-   mJumpUpR2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
-   mJumpMidairR2  = AnimationPool::getInstance().add("player_jump_midair_r_2",  0.0f, 0.0f, true, false);
-   mJumpDownR2    = AnimationPool::getInstance().add("player_jump_down_r_2",    0.0f, 0.0f, true, false);
-   mJumpLandingR2 = AnimationPool::getInstance().add("player_jump_landing_r_2", 0.0f, 0.0f, true, false);
+   _jump_init_r_2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
+   _jump_up_r_2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
+   _jump_midair_r_2  = AnimationPool::getInstance().add("player_jump_midair_r_2",  0.0f, 0.0f, true, false);
+   _jump_down_r_2    = AnimationPool::getInstance().add("player_jump_down_r_2",    0.0f, 0.0f, true, false);
+   _jump_landing_r_2 = AnimationPool::getInstance().add("player_jump_landing_r_2", 0.0f, 0.0f, true, false);
 
-   mJumpInitL2    = AnimationPool::getInstance().add("player_jump_init_l_2",    0.0f, 0.0f, true, false);
-   mJumpUpL2      = AnimationPool::getInstance().add("player_jump_up_l_2",      0.0f, 0.0f, true, false);
-   mJumpMidairL2  = AnimationPool::getInstance().add("player_jump_midair_l_2",  0.0f, 0.0f, true, false);
-   mJumpDownL2    = AnimationPool::getInstance().add("player_jump_down_l_2",    0.0f, 0.0f, true, false);
-   mJumpLandingL2 = AnimationPool::getInstance().add("player_jump_landing_l_2", 0.0f, 0.0f, true, false);
+   _jump_init_l_2    = AnimationPool::getInstance().add("player_jump_init_l_2",    0.0f, 0.0f, true, false);
+   _jump_up_l_2      = AnimationPool::getInstance().add("player_jump_up_l_2",      0.0f, 0.0f, true, false);
+   _jump_midair_l_2  = AnimationPool::getInstance().add("player_jump_midair_l_2",  0.0f, 0.0f, true, false);
+   _jump_down_l_2    = AnimationPool::getInstance().add("player_jump_down_l_2",    0.0f, 0.0f, true, false);
+   _jump_landing_l_2 = AnimationPool::getInstance().add("player_jump_landing_l_2", 0.0f, 0.0f, true, false);
 
    // store all
-   mAnimations.push_back(mIdleR);
-   mAnimations.push_back(mIdleL);
-   mAnimations.push_back(mSwimR);
-   mAnimations.push_back(mSwimL);
-   mAnimations.push_back(mRunR);
-   mAnimations.push_back(mRunL);
-   mAnimations.push_back(mDashR);
-   mAnimations.push_back(mDashL);
-   mAnimations.push_back(mCrouchR);
-   mAnimations.push_back(mCrouchL);
+   _animations.push_back(_idle_r);
+   _animations.push_back(_idle_l);
+   _animations.push_back(_swim_r);
+   _animations.push_back(_swim_l);
+   _animations.push_back(_run_r);
+   _animations.push_back(_run_l);
+   _animations.push_back(_dash_r);
+   _animations.push_back(_dash_l);
+   _animations.push_back(_crouch_r);
+   _animations.push_back(_crouch_l);
 
-   mAnimations.push_back(mJumpInitR);
-   mAnimations.push_back(mJumpUpR);
-   mAnimations.push_back(mJumpDownR);
-   mAnimations.push_back(mJumpLandingR);
-   mAnimations.push_back(mJumpMidairR);
+   _animations.push_back(_jump_init_r);
+   _animations.push_back(_jump_up_r);
+   _animations.push_back(_jump_down_r);
+   _animations.push_back(_jump_landing_r);
+   _animations.push_back(_jump_midair_r);
 
-   mAnimations.push_back(mJumpInitL);
-   mAnimations.push_back(mJumpUpL);
-   mAnimations.push_back(mJumpDownL);
-   mAnimations.push_back(mJumpLandingL);
-   mAnimations.push_back(mJumpMidairL);
+   _animations.push_back(_jump_init_l);
+   _animations.push_back(_jump_up_l);
+   _animations.push_back(_jump_down_l);
+   _animations.push_back(_jump_landing_l);
+   _animations.push_back(_jump_midair_l);
 
    // version 2
-   mAnimations.push_back(mIdleR2);
-   mAnimations.push_back(mIdleL2);
-   mAnimations.push_back(mSwimR2);
-   mAnimations.push_back(mSwimL2);
-   mAnimations.push_back(mRunR2);
-   mAnimations.push_back(mRunL2);
-   mAnimations.push_back(mDashR2);
-   mAnimations.push_back(mDashL2);
+   _animations.push_back(_idle_r_2);
+   _animations.push_back(_idle_l_2);
+   _animations.push_back(_swim_r_2);
+   _animations.push_back(_swim_l_2);
+   _animations.push_back(_run_r_2);
+   _animations.push_back(_run_l_2);
+   _animations.push_back(_dash_r_2);
+   _animations.push_back(_dash_l_2);
 
 //   mAnimations.push_back(mCrouchR2);
 //   mAnimations.push_back(mCrouchL2);
 
-   mAnimations.push_back(mJumpInitR2);
-   mAnimations.push_back(mJumpUpR2);
-   mAnimations.push_back(mJumpDownR2);
-   mAnimations.push_back(mJumpLandingR2);
-   mAnimations.push_back(mJumpMidairR2);
+   _animations.push_back(_jump_init_r_2);
+   _animations.push_back(_jump_up_r_2);
+   _animations.push_back(_jump_down_r_2);
+   _animations.push_back(_jump_landing_r_2);
+   _animations.push_back(_jump_midair_r_2);
 
-   mAnimations.push_back(mJumpInitL2);
-   mAnimations.push_back(mJumpUpL2);
-   mAnimations.push_back(mJumpDownL2);
-   mAnimations.push_back(mJumpLandingL2);
-   mAnimations.push_back(mJumpMidairL2);
+   _animations.push_back(_jump_init_l_2);
+   _animations.push_back(_jump_up_l_2);
+   _animations.push_back(_jump_down_l_2);
+   _animations.push_back(_jump_landing_l_2);
+   _animations.push_back(_jump_midair_l_2);
 
-   for (auto& i : mAnimations)
+   for (auto& i : _animations)
    {
       i->_looped = true;
    }
@@ -140,14 +140,14 @@ int32_t PlayerAnimation::getJumpAnimationReference() const
 
 std::shared_ptr<Animation> PlayerAnimation::getCurrentCycle() const
 {
-   return mCurrentCycle;
+   return _current_cycle;
 }
 
 
 void PlayerAnimation::resetAlpha()
 {
    // reset alphas if needed
-   for (auto& a: mAnimations)
+   for (auto& a: _animations)
    {
       a->setAlpha(255);
    }
@@ -230,12 +230,6 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_appear_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_appear_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-
-//   mJumpInitR    = AnimationPool::getInstance().add("player_jump_init_r",    0.0f, 0.0f, true, false); <- FRAMES 1,2,3 (NO LOOP)
-//   mJumpUpR      = AnimationPool::getInstance().add("player_jump_up_r",      0.0f, 0.0f, true, false); <- FRAMES 4,5 (LOOP)
-//   mJumpMidairR  = AnimationPool::getInstance().add("player_jump_midair_r",  0.0f, 0.0f, true, false); <- FRAMES 6-13 (NO LOOP)
-//   mJumpDownR    = AnimationPool::getInstance().add("player_jump_down_r",    0.0f, 0.0f, true, false); <- FRAMES 14,15 (LOOP)
-//   mJumpLandingR = AnimationPool::getInstance().add("player_jump_landing_r", 0.0f, 0.0f, true, false); <- FRAMES 16-19 (NO LOOP)
 
    nlohmann::json j;
    j["player_idle_r_2"]         = player_idle_r;
@@ -320,11 +314,11 @@ void PlayerAnimation::updateV1(
    {
       if (data._dash_dir == Dash::Left)
       {
-         nextCycle = mDashL;
+         nextCycle = _dash_l;
       }
       else
       {
-         nextCycle = mDashR;
+         nextCycle = _dash_r;
       }
    }
 
@@ -333,22 +327,22 @@ void PlayerAnimation::updateV1(
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchR;
+         nextCycle = _crouch_r;
       }
       else
       {
-         nextCycle = mRunR;
+         nextCycle = _run_r;
       }
    }
    else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchL;
+         nextCycle = _crouch_l;
       }
       else
       {
-         nextCycle = mRunL;
+         nextCycle = _run_l;
       }
    }
 
@@ -357,24 +351,24 @@ void PlayerAnimation::updateV1(
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchL;
+         nextCycle = _crouch_l;
          requiresUpdate = false;
       }
       else
       {
-         nextCycle = mIdleL;
+         nextCycle = _idle_l;
       }
    }
    else
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchR;
+         nextCycle = _crouch_r;
          requiresUpdate = false;
       }
       else
       {
-         nextCycle = mIdleR;
+         nextCycle = _idle_r;
       }
    }
 
@@ -385,20 +379,20 @@ void PlayerAnimation::updateV1(
       {
          // jump ignition
          _jump_animation_reference = 0;
-         nextCycle = data._points_right ? mJumpInitR : mJumpInitL;
+         nextCycle = data._points_right ? _jump_init_r : _jump_init_l;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            nextCycle = data._points_right ? mJumpUpR : mJumpUpL;
+            nextCycle = data._points_right ? _jump_up_r : _jump_up_l;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            nextCycle = data._points_right ? mJumpDownR : mJumpDownL;
+            nextCycle = data._points_right ? _jump_down_r : _jump_down_l;
             _jump_animation_reference = 2;
          }
          else
@@ -406,7 +400,7 @@ void PlayerAnimation::updateV1(
             // jump midair
             if (_jump_animation_reference == 1)
             {
-               nextCycle = data._points_right ? mJumpMidairR : mJumpMidairL;
+               nextCycle = data._points_right ? _jump_midair_r : _jump_midair_l;
             }
          }
       }
@@ -414,7 +408,7 @@ void PlayerAnimation::updateV1(
       // hard landing
       else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data._points_right ? mJumpLandingR : mJumpLandingL;
+         nextCycle = data._points_right ? _jump_landing_r : _jump_landing_l;
 
          if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
          {
@@ -427,7 +421,7 @@ void PlayerAnimation::updateV1(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data._points_right ? mSwimR : mSwimL;
+      nextCycle = data._points_right ? _swim_r : _swim_l;
    }
 
    if (data._climb_joint_present)
@@ -436,16 +430,16 @@ void PlayerAnimation::updateV1(
    }
 
    // reset x if animation cycle changed
-   if (nextCycle != mCurrentCycle)
+   if (nextCycle != _current_cycle)
    {
       nextCycle->seekToStart();
    }
 
-   mCurrentCycle = nextCycle;
+   _current_cycle = nextCycle;
 
    if (requiresUpdate)
    {
-      mCurrentCycle->update(dt);
+      _current_cycle->update(dt);
    }
 }
 
@@ -479,11 +473,11 @@ void PlayerAnimation::updateV2(
    {
       if (data._dash_dir == Dash::Left)
       {
-         nextCycle = mDashL2;
+         nextCycle = _dash_l_2;
       }
       else
       {
-         nextCycle = mDashR2;
+         nextCycle = _dash_r_2;
       }
    }
 
@@ -492,22 +486,22 @@ void PlayerAnimation::updateV2(
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchR;
+         nextCycle = _crouch_r;
       }
       else
       {
-         nextCycle = mRunR2;
+         nextCycle = _run_r_2;
       }
    }
    else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchL;
+         nextCycle = _crouch_l;
       }
       else
       {
-         nextCycle = mRunL2;
+         nextCycle = _run_l_2;
       }
    }
 
@@ -516,24 +510,24 @@ void PlayerAnimation::updateV2(
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchL;
+         nextCycle = _crouch_l;
          requiresUpdate = false;
       }
       else
       {
-         nextCycle = mIdleL2;
+         nextCycle = _idle_l_2;
       }
    }
    else
    {
       if (data._crouching)
       {
-         nextCycle = mCrouchR;
+         nextCycle = _crouch_r;
          requiresUpdate = false;
       }
       else
       {
-         nextCycle = mIdleR2;
+         nextCycle = _idle_r_2;
       }
    }
 
@@ -544,20 +538,20 @@ void PlayerAnimation::updateV2(
       {
          // jump ignition
          _jump_animation_reference = 0;
-         nextCycle = data._points_right ? mJumpInitR2 : mJumpInitL2;
+         nextCycle = data._points_right ? _jump_init_r_2 : _jump_init_l_2;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            nextCycle = data._points_right ? mJumpUpR2 : mJumpUpL2;
+            nextCycle = data._points_right ? _jump_up_r_2 : _jump_up_l_2;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            nextCycle = data._points_right ? mJumpDownR2 : mJumpDownL2;
+            nextCycle = data._points_right ? _jump_down_r_2 : _jump_down_l_2;
             _jump_animation_reference = 2;
          }
          else
@@ -565,7 +559,7 @@ void PlayerAnimation::updateV2(
             // jump midair
             if (_jump_animation_reference == 1)
             {
-               nextCycle = data._points_right ? mJumpMidairR2 : mJumpMidairL2;
+               nextCycle = data._points_right ? _jump_midair_r_2 : _jump_midair_l_2;
             }
          }
       }
@@ -573,7 +567,7 @@ void PlayerAnimation::updateV2(
       // hard landing
       else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data._points_right ? mJumpLandingR2 : mJumpLandingL2;
+         nextCycle = data._points_right ? _jump_landing_r_2 : _jump_landing_l_2;
 
          if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
          {
@@ -586,7 +580,7 @@ void PlayerAnimation::updateV2(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data._points_right ? mSwimR2 : mSwimL2;
+      nextCycle = data._points_right ? _swim_r_2 : _swim_l_2;
    }
 
    if (data._climb_joint_present)
@@ -595,16 +589,16 @@ void PlayerAnimation::updateV2(
    }
 
    // reset x if animation cycle changed
-   if (nextCycle != mCurrentCycle)
+   if (nextCycle != _current_cycle)
    {
       nextCycle->seekToStart();
    }
 
-   mCurrentCycle = nextCycle;
+   _current_cycle = nextCycle;
 
    if (requiresUpdate)
    {
-      mCurrentCycle->update(dt);
+      _current_cycle->update(dt);
    }
 }
 
