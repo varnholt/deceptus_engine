@@ -122,6 +122,7 @@ SOURCES += \
    src/game/effects/lightsystem.cpp \
    src/game/eventserializer.cpp \
    src/game/fadetransitioneffect.cpp \
+   src/game/gameclock.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
    src/game/overlays/controlleroverlay.cpp \
@@ -301,6 +302,7 @@ HEADERS += \
    src/game/detonationanimation.h \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
+   src/game/gameclock.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
    src/game/player/playeranimation.h \
