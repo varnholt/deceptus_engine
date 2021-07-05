@@ -6,6 +6,7 @@
 
 #include "animationpool.h"
 #include "camerapane.h"
+#include "game/gameclock.h"
 #include "mechanisms/portal.h"
 #include "physics/physicsconfiguration.h"
 
@@ -480,6 +481,8 @@ void PlayerAnimation::updateV2(
    const PlayerAnimationData& data
 )
 {
+   using namespace std::chrono_literals;
+
    if (data._dead)
    {
       return;
@@ -624,6 +627,11 @@ void PlayerAnimation::updateV2(
    if (data._wall_sliding)
    {
       nextCycle = data._points_right ? _wallslide_r_2 : _wallslide_l_2;
+   }
+
+   if (GameClock::getInstance().duration() < 3s)
+   {
+      nextCycle = data._points_right ? _appear_r_2 : _appear_l_2;
    }
 
    // reset x if animation cycle changed

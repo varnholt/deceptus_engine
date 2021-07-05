@@ -12,6 +12,7 @@
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/timer.h"
+#include "gameclock.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
 #include "gamecontrollerdata.h"
@@ -287,6 +288,8 @@ void Game::loadLevel()
          _player->updatePlayerPixelRect();
 
          _level_loading_finished = true;
+
+         GameClock::getInstance().reset();
       }
    );
 }
