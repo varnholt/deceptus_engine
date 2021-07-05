@@ -44,15 +44,19 @@ PlayerAnimation::PlayerAnimation()
    // version 2
    _idle_r_2        = AnimationPool::getInstance().add("player_idle_r_2",         0.0f, 0.0f, true, false);
    _idle_l_2        = AnimationPool::getInstance().add("player_idle_l_2",         0.0f, 0.0f, true, false);
-   _swim_r_2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
-   _swim_l_2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
+   _bend_down_r_2   = AnimationPool::getInstance().add("player_bend_down_r_2",    0.0f, 0.0f, true, false);
+   _bend_down_l_2   = AnimationPool::getInstance().add("player_bend_down_l_2",    0.0f, 0.0f, true, false);
+   _idle_to_run_r_2 = AnimationPool::getInstance().add("player_idle_to_run_r_2",  0.0f, 0.0f, true, false);
+   _idle_to_run_l_2 = AnimationPool::getInstance().add("player_idle_to_run_l_2",  0.0f, 0.0f, true, false);
+   _runstop_r_2     = AnimationPool::getInstance().add("player_runstop_r_2",      0.0f, 0.0f, true, false);
+   _runstop_l_2     = AnimationPool::getInstance().add("player_runstop_l_2",      0.0f, 0.0f, true, false);
    _run_r_2         = AnimationPool::getInstance().add("player_run_r_2",          0.0f, 0.0f, true, false);
    _run_l_2         = AnimationPool::getInstance().add("player_run_l_2",          0.0f, 0.0f, true, false);
    _dash_r_2        = AnimationPool::getInstance().add("player_dash_r_2",         0.0f, 0.0f, true, false);
    _dash_l_2        = AnimationPool::getInstance().add("player_dash_l_2",         0.0f, 0.0f, true, false);
 
-//   mCrouchR2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
-//   mCrouchL2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
+   // _crouch_r_2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
+   // _crouch_l_2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
 
    _jump_init_r_2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
    _jump_up_r_2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
@@ -65,6 +69,20 @@ PlayerAnimation::PlayerAnimation()
    _jump_midair_l_2  = AnimationPool::getInstance().add("player_jump_midair_l_2",  0.0f, 0.0f, true, false);
    _jump_down_l_2    = AnimationPool::getInstance().add("player_jump_down_l_2",    0.0f, 0.0f, true, false);
    _jump_landing_l_2 = AnimationPool::getInstance().add("player_jump_landing_l_2", 0.0f, 0.0f, true, false);
+
+   _double_jump_r_2 = AnimationPool::getInstance().add("player_double_jump_r_2",  0.0f, 0.0f, true, false);
+   _double_jump_l_2 = AnimationPool::getInstance().add("player_double_jump_l_2",  0.0f, 0.0f, true, false);
+   _swim_idle_r_2   = AnimationPool::getInstance().add("player_swim_idle_r_2",    0.0f, 0.0f, true, false);
+   _swim_idle_l_2   = AnimationPool::getInstance().add("player_swim_idle_l_2",    0.0f, 0.0f, true, false);
+   _swim_r_2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
+   _swim_l_2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
+
+   _wallslide_r_2   = AnimationPool::getInstance().add("player_wallslide_r_2",    0.0f, 0.0f, true, false);
+   _wallslide_l_2   = AnimationPool::getInstance().add("player_wallslide_l_2",    0.0f, 0.0f, true, false);
+   _wall_jump_r_2   = AnimationPool::getInstance().add("player_wall_jump_r_2",    0.0f, 0.0f, true, false);
+   _wall_jump_l_2   = AnimationPool::getInstance().add("player_wall_jump_l_2",    0.0f, 0.0f, true, false);
+   _appear_r_2      = AnimationPool::getInstance().add("player_appear_r_2",       0.0f, 0.0f, true, false);
+   _appear_l_2      = AnimationPool::getInstance().add("player_appear_l_2",       0.0f, 0.0f, true, false);
 
    // store all
    _animations.push_back(_idle_r);
@@ -275,6 +293,7 @@ void PlayerAnimation::generateJson()
    j["player_swim_idle_l_2"]    = player_swim_idle_l;
    j["player_swim_r_2"]         = player_swim_r;
    j["player_swim_l_2"]         = player_swim_l;
+
    j["player_wallslide_r_2"]    = player_wallslide_r;
    j["player_wallslide_l_2"]    = player_wallslide_l;
    j["player_wall_jump_r_2"]    = player_wall_jump_r;
@@ -600,6 +619,11 @@ void PlayerAnimation::updateV2(
    if (data._climb_joint_present)
    {
       // need to support climb animation
+   }
+
+   if (data._wall_sliding)
+   {
+      nextCycle = data._points_right ? _wallslide_r_2 : _wallslide_l_2;
    }
 
    // reset x if animation cycle changed
