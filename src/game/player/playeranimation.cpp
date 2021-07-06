@@ -1,3 +1,4 @@
+
 #include "playeranimation.h"
 
 #include <iostream>
@@ -249,6 +250,9 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_jump_down_l({72, 48}, {col(13), jump_l_row}, {36.0, 48.0},  v(2), sprite_name);
    AnimationSettings player_jump_landing_l({72, 48}, {col(15), jump_l_row}, {36.0, 48.0}, v(4), sprite_name);
 
+   next_row(); // reserved
+   next_row(); // reserved
+
    AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
@@ -259,6 +263,21 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_wallslide_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+
+   next_row(); // reserved
+   next_row(); // reserved
+   next_row(); // reserved
+   next_row(); // reserved
+   next_row(); // reserved
+
+   next_row(); // reserved
+   next_row(); // reserved
+   next_row(); // reserved
+
+   next_row(); // reserved
+   next_row(); // reserved
+   next_row(); // reserved
+
    AnimationSettings player_appear_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
    AnimationSettings player_appear_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
 
@@ -626,7 +645,7 @@ void PlayerAnimation::updateV2(
 
    if (data._wall_sliding)
    {
-      nextCycle = data._points_right ? _wallslide_r_2 : _wallslide_l_2;
+      nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
    }
 
    if (GameClock::getInstance().duration() < 3s)
