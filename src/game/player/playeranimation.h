@@ -139,7 +139,7 @@ private:
 
    int32_t _jump_animation_reference = 0;
 
-   std::vector<std::shared_ptr<Animation>> _animations;
+   std::vector<std::shared_ptr<Animation>> _looped_animations;
    std::shared_ptr<Animation> _current_cycle;
 
    Version _version = Version::V1;

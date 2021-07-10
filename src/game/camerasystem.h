@@ -36,6 +36,8 @@ class CameraSystem
       void updateX(const sf::Time& dt);
       void updateY(const sf::Time& dt);
 
+      void updatePlayerFocused();
+
       float _x = 0.0f;
       float _y = 0.0f;
 
@@ -61,6 +63,8 @@ class CameraSystem
 
       bool _no_y_update_triggered = false;
       sf::Time _y_update_start_time;
+
+      bool _player_focused = false;
 
       static CameraSystem sInstance;
 };
