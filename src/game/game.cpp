@@ -287,6 +287,8 @@ void Game::loadLevel()
 
          _player->updatePlayerPixelRect();
 
+         std::cout << "[x] level loading finished" << std::endl;
+
          _level_loading_finished = true;
 
          GameClock::getInstance().reset();

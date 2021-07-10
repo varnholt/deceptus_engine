@@ -86,56 +86,60 @@ PlayerAnimation::PlayerAnimation()
    _appear_r_2      = AnimationPool::getInstance().add("player_appear_r_2",       0.0f, 0.0f, true, false);
    _appear_l_2      = AnimationPool::getInstance().add("player_appear_l_2",       0.0f, 0.0f, true, false);
 
+   // we don't want these to jump back to the first frame
+   _appear_r_2->_reset_to_first_frame = false;
+   _appear_l_2->_reset_to_first_frame = false;
+
    // store all
-   _animations.push_back(_idle_r);
-   _animations.push_back(_idle_l);
-   _animations.push_back(_swim_r);
-   _animations.push_back(_swim_l);
-   _animations.push_back(_run_r);
-   _animations.push_back(_run_l);
-   _animations.push_back(_dash_r);
-   _animations.push_back(_dash_l);
-   _animations.push_back(_crouch_r);
-   _animations.push_back(_crouch_l);
+   _looped_animations.push_back(_idle_r);
+   _looped_animations.push_back(_idle_l);
+   _looped_animations.push_back(_swim_r);
+   _looped_animations.push_back(_swim_l);
+   _looped_animations.push_back(_run_r);
+   _looped_animations.push_back(_run_l);
+   _looped_animations.push_back(_dash_r);
+   _looped_animations.push_back(_dash_l);
+   _looped_animations.push_back(_crouch_r);
+   _looped_animations.push_back(_crouch_l);
 
-   _animations.push_back(_jump_init_r);
-   _animations.push_back(_jump_up_r);
-   _animations.push_back(_jump_down_r);
-   _animations.push_back(_jump_landing_r);
-   _animations.push_back(_jump_midair_r);
+   _looped_animations.push_back(_jump_init_r);
+   _looped_animations.push_back(_jump_up_r);
+   _looped_animations.push_back(_jump_down_r);
+   _looped_animations.push_back(_jump_landing_r);
+   _looped_animations.push_back(_jump_midair_r);
 
-   _animations.push_back(_jump_init_l);
-   _animations.push_back(_jump_up_l);
-   _animations.push_back(_jump_down_l);
-   _animations.push_back(_jump_landing_l);
-   _animations.push_back(_jump_midair_l);
+   _looped_animations.push_back(_jump_init_l);
+   _looped_animations.push_back(_jump_up_l);
+   _looped_animations.push_back(_jump_down_l);
+   _looped_animations.push_back(_jump_landing_l);
+   _looped_animations.push_back(_jump_midair_l);
 
    // version 2
-   _animations.push_back(_idle_r_2);
-   _animations.push_back(_idle_l_2);
-   _animations.push_back(_swim_r_2);
-   _animations.push_back(_swim_l_2);
-   _animations.push_back(_run_r_2);
-   _animations.push_back(_run_l_2);
-   _animations.push_back(_dash_r_2);
-   _animations.push_back(_dash_l_2);
+   _looped_animations.push_back(_idle_r_2);
+   _looped_animations.push_back(_idle_l_2);
+   _looped_animations.push_back(_swim_r_2);
+   _looped_animations.push_back(_swim_l_2);
+   _looped_animations.push_back(_run_r_2);
+   _looped_animations.push_back(_run_l_2);
+   _looped_animations.push_back(_dash_r_2);
+   _looped_animations.push_back(_dash_l_2);
 
 //   mAnimations.push_back(mCrouchR2);
 //   mAnimations.push_back(mCrouchL2);
 
-   _animations.push_back(_jump_init_r_2);
-   _animations.push_back(_jump_up_r_2);
-   _animations.push_back(_jump_down_r_2);
-   _animations.push_back(_jump_landing_r_2);
-   _animations.push_back(_jump_midair_r_2);
+   _looped_animations.push_back(_jump_init_r_2);
+   _looped_animations.push_back(_jump_up_r_2);
+   _looped_animations.push_back(_jump_down_r_2);
+   _looped_animations.push_back(_jump_landing_r_2);
+   _looped_animations.push_back(_jump_midair_r_2);
 
-   _animations.push_back(_jump_init_l_2);
-   _animations.push_back(_jump_up_l_2);
-   _animations.push_back(_jump_down_l_2);
-   _animations.push_back(_jump_landing_l_2);
-   _animations.push_back(_jump_midair_l_2);
+   _looped_animations.push_back(_jump_init_l_2);
+   _looped_animations.push_back(_jump_up_l_2);
+   _looped_animations.push_back(_jump_down_l_2);
+   _looped_animations.push_back(_jump_landing_l_2);
+   _looped_animations.push_back(_jump_midair_l_2);
 
-   for (auto& i : _animations)
+   for (auto& i : _looped_animations)
    {
       i->_looped = true;
    }
@@ -173,7 +177,7 @@ std::shared_ptr<Animation> PlayerAnimation::getCurrentCycle() const
 void PlayerAnimation::resetAlpha()
 {
    // reset alphas if needed
-   for (auto& a: _animations)
+   for (auto& a: _looped_animations)
    {
       a->setAlpha(255);
    }
@@ -213,8 +217,10 @@ void PlayerAnimation::generateJson()
    const auto sprite_name = "data/sprites/player_unarmed.png";
    auto row = 0;
    const auto next_row = [&](){return (row++) * PIXELS_PER_TILE * 2;};
+   const auto next_row_x = [&](int32_t height){return (row++) * height;};
    const auto col = [](int32_t x){return PIXELS_PER_TILE * 3 * x;};
    const auto v = [d](int32_t size){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(d); return arr;};
+   const auto vx = [](int32_t size, const sf::Time& t){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(t); return arr;};
 
    AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
    AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
@@ -278,8 +284,10 @@ void PlayerAnimation::generateJson()
    next_row(); // reserved
    next_row(); // reserved
 
-   AnimationSettings player_appear_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_appear_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   // const auto d2 = sf::seconds(0.2f);
+
+   AnimationSettings player_appear_r({72, 72}, {0, next_row()}, {36.0, 72.0}, vx(12, sf::seconds(0.1f)), sprite_name);
+   AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.1f)), sprite_name);
 
    nlohmann::json j;
    j["player_idle_r_2"]         = player_idle_r;
@@ -648,9 +656,28 @@ void PlayerAnimation::updateV2(
       nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
    }
 
-   if (GameClock::getInstance().duration() < 3s)
+   if (GameClock::getInstance().duration() < 2.3s)
    {
       nextCycle = data._points_right ? _appear_r_2 : _appear_l_2;
+
+      if (GameClock::getInstance().duration() < 1.0s)
+      {
+         // invisibility: 0 .. 1.0s (wait until player is focused)
+         _appear_r_2->seekToStart();
+         _appear_l_2->seekToStart();
+         _appear_r_2->setAlpha(0);
+         _appear_l_2->setAlpha(0);
+      }
+      else
+      {
+         // player appear animation for 12 x 100ms
+         _appear_r_2->play();
+         _appear_l_2->play();
+         _appear_r_2->setAlpha(255);
+         _appear_l_2->setAlpha(255);
+      }
+
+      requiresUpdate = true;
    }
 
    // reset x if animation cycle changed
