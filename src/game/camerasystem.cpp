@@ -1,6 +1,7 @@
 #include "camerasystem.h"
 
 #include "framework/easings/easings.h"
+#include "gameconfiguration.h"
 #include "player/player.h"
 
 #include <iostream>
@@ -56,6 +57,9 @@ void CameraSystem::update(const sf::Time& dt, float viewWidth, float viewHeight)
 
    updateX(dt);
    updateY(dt);
+
+   // this call can be removed if it turns out it's not needed
+   updatePlayerFocused();
 }
 
 
@@ -195,6 +199,20 @@ void CameraSystem::updateY(const sf::Time& dt)
    const auto dy = (player_y - _y) * dt.asSeconds() * config.getCameraVelocityFactorY() * y_update_acceleration;
 
    _y += dy;
+}
+
+
+void CameraSystem::updatePlayerFocused()
+{
+   const auto player_pixel_pos = Player::getCurrent()->getPixelPositionf();
+
+   const auto dx = fabs(_x - player_pixel_pos.x);
+   const auto dy = fabs(_y - player_pixel_pos.y);
+
+   const auto view_width_half = GameConfiguration::getInstance().mViewWidth / 2;
+   const auto view_height_half = GameConfiguration::getInstance().mViewHeight / 2;
+
+   _player_focused = (dx < view_width_half && dy < view_height_half);
 }
 
 
