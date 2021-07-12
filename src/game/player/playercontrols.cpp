@@ -6,16 +6,25 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void PlayerControls::update(const sf::Time& /*dt*/)
+{
+   setWasMoving(isMoving());
+   setWasMovingLeft(isMovingLeft());
+   setWasMovingRight(isMovingRight());
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::addKeypressedCallback(const KeypressedCallback& callback)
 {
-   mKeypressedCallbacks.push_back(callback);
+   _keypressed_callbacks.push_back(callback);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::hasFlag(int32_t flag) const
 {
-   return mKeysPressed & flag;
+   return _keys_pressed & flag;
 }
 
 
@@ -24,42 +33,42 @@ void PlayerControls::forceSync()
 {
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
    {
-      mKeysPressed |= KeyPressedJump;
+      _keys_pressed |= KeyPressedJump;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
    {
-      mKeysPressed |= KeyPressedLook;
+      _keys_pressed |= KeyPressedLook;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
    {
-      mKeysPressed |= KeyPressedUp;
+      _keys_pressed |= KeyPressedUp;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
    {
-      mKeysPressed |= KeyPressedDown;
+      _keys_pressed |= KeyPressedDown;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
    {
-      mKeysPressed |= KeyPressedLeft;
+      _keys_pressed |= KeyPressedLeft;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
    {
-      mKeysPressed |= KeyPressedRight;
+      _keys_pressed |= KeyPressedRight;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
    {
-      mKeysPressed |= KeyPressedRun;
+      _keys_pressed |= KeyPressedRun;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
    {
-      mKeysPressed |= KeyPressedFire;
+      _keys_pressed |= KeyPressedFire;
    }
 }
 
@@ -74,45 +83,45 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (key == sf::Keyboard::Space)
    {
-      mKeysPressed |= KeyPressedJump;
+      _keys_pressed |= KeyPressedJump;
    }
 
    if (key == sf::Keyboard::LShift)
    {
-      mKeysPressed |= KeyPressedLook;
+      _keys_pressed |= KeyPressedLook;
    }
 
    if (key == sf::Keyboard::Up)
    {
-      mKeysPressed |= KeyPressedUp;
+      _keys_pressed |= KeyPressedUp;
    }
 
    if (key == sf::Keyboard::Down)
    {
-      mKeysPressed |= KeyPressedDown;
+      _keys_pressed |= KeyPressedDown;
    }
 
    if (key == sf::Keyboard::Left)
    {
-      mKeysPressed |= KeyPressedLeft;
+      _keys_pressed |= KeyPressedLeft;
    }
 
    if (key == sf::Keyboard::Right)
    {
-      mKeysPressed |= KeyPressedRight;
+      _keys_pressed |= KeyPressedRight;
    }
 
    if (key == sf::Keyboard::LAlt)
    {
-      mKeysPressed |= KeyPressedRun;
+      _keys_pressed |= KeyPressedRun;
    }
 
    if (key == sf::Keyboard::LControl)
    {
-      mKeysPressed |= KeyPressedFire;
+      _keys_pressed |= KeyPressedFire;
    }
 
-   for (auto& callback : mKeypressedCallbacks)
+   for (auto& callback : _keypressed_callbacks)
    {
       callback(key);
    }
@@ -129,42 +138,42 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 
    if (key == sf::Keyboard::LShift)
    {
-      mKeysPressed &= ~KeyPressedLook;
+      _keys_pressed &= ~KeyPressedLook;
    }
 
    if (key == sf::Keyboard::Up)
    {
-      mKeysPressed &= ~KeyPressedUp;
+      _keys_pressed &= ~KeyPressedUp;
    }
 
    if (key == sf::Keyboard::Down)
    {
-      mKeysPressed &= ~KeyPressedDown;
+      _keys_pressed &= ~KeyPressedDown;
    }
 
    if (key == sf::Keyboard::Left)
    {
-      mKeysPressed &= ~KeyPressedLeft;
+      _keys_pressed &= ~KeyPressedLeft;
    }
 
    if (key == sf::Keyboard::Right)
    {
-      mKeysPressed &= ~KeyPressedRight;
+      _keys_pressed &= ~KeyPressedRight;
    }
 
    if (key == sf::Keyboard::Space)
    {
-      mKeysPressed &= ~KeyPressedJump;
+      _keys_pressed &= ~KeyPressedJump;
    }
 
    if (key == sf::Keyboard::LAlt)
    {
-      mKeysPressed &= ~KeyPressedRun;
+      _keys_pressed &= ~KeyPressedRun;
    }
 
    if (key == sf::Keyboard::LControl)
    {
-      mKeysPressed &= ~KeyPressedFire;
+      _keys_pressed &= ~KeyPressedFire;
    }
 }
 
@@ -172,7 +181,7 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isLookingAround() const
 {
-  if (mKeysPressed & KeyPressedLook)
+  if (_keys_pressed & KeyPressedLook)
   {
     return true;
   }
@@ -189,7 +198,7 @@ bool PlayerControls::isLookingAround() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isControllerUsed() const
 {
-  return !mJoystickInfo.getAxisValues().empty();
+  return !_joystick_info.getAxisValues().empty();
 }
 
 
@@ -202,7 +211,7 @@ bool PlayerControls::isControllerButtonPressed(int buttonEnum) const
   if (gji != nullptr)
   {
      auto buttonId = gji->getController()->getButtonId(static_cast<SDL_GameControllerButton>(buttonEnum));
-     pressed = (mJoystickInfo.getButtonValues()[static_cast<size_t>(buttonId)]);
+     pressed = (_joystick_info.getButtonValues()[static_cast<size_t>(buttonId)]);
   }
 
   return pressed;
@@ -212,7 +221,7 @@ bool PlayerControls::isControllerButtonPressed(int buttonEnum) const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isFireButtonPressed() const
 {
-  if (mKeysPressed & KeyPressedFire)
+  if (_keys_pressed & KeyPressedFire)
   {
     return true;
   }
@@ -229,7 +238,7 @@ bool PlayerControls::isFireButtonPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isJumpButtonPressed() const
 {
-  if (mKeysPressed & KeyPressedJump)
+  if (_keys_pressed & KeyPressedJump)
   {
     return true;
   }
@@ -249,10 +258,10 @@ bool PlayerControls::isMovingLeft() const
 {
   if (isControllerUsed())
   {
-     const auto& axisValues = mJoystickInfo.getAxisValues();
+     const auto& axisValues = _joystick_info.getAxisValues();
      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
      auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-     auto hatValue = mJoystickInfo.getHatValues().at(0);
+     auto hatValue = _joystick_info.getHatValues().at(0);
      auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
      auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
 
@@ -275,7 +284,7 @@ bool PlayerControls::isMovingLeft() const
   }
   else
   {
-     if (mKeysPressed & KeyPressedLeft)
+     if (_keys_pressed & KeyPressedLeft)
      {
         return true;
      }
@@ -290,10 +299,10 @@ bool PlayerControls::isMovingRight() const
 {
   if (isControllerUsed())
   {
-     const auto& axisValues = mJoystickInfo.getAxisValues();
+     const auto& axisValues = _joystick_info.getAxisValues();
      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
      auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-     auto hatValue = mJoystickInfo.getHatValues().at(0);
+     auto hatValue = _joystick_info.getHatValues().at(0);
      auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
      auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
 
@@ -316,7 +325,7 @@ bool PlayerControls::isMovingRight() const
   }
   else
   {
-     if (mKeysPressed & KeyPressedRight)
+     if (_keys_pressed & KeyPressedRight)
      {
         return true;
      }
@@ -336,26 +345,82 @@ bool PlayerControls::isMoving() const
 //----------------------------------------------------------------------------------------------------------------------
 int PlayerControls::getKeysPressed() const
 {
-   return mKeysPressed;
+   return _keys_pressed;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setKeysPressed(int keysPressed)
 {
-   mKeysPressed = keysPressed;
+   _keys_pressed = keysPressed;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 const GameControllerInfo& PlayerControls::getJoystickInfo() const
 {
-   return mJoystickInfo;
+   return _joystick_info;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setJoystickInfo(const GameControllerInfo &joystickInfo)
 {
-   mJoystickInfo = joystickInfo;
+   _joystick_info = joystickInfo;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::wasMoving() const
+{
+   return _was_moving;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerControls::setWasMoving(bool was_moving)
+{
+   _was_moving = was_moving;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::wasMovingLeft() const
+{
+   return _was_moving_left;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerControls::setWasMovingLeft(bool was_moving_left)
+{
+   _was_moving_left = was_moving_left;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::wasMovingRight() const
+{
+   return _was_moving_right;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerControls::setWasMovingRight(bool was_moving_right)
+{
+   _was_moving_right = was_moving_right;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::changedToIdle() const
+{
+   return wasMoving() && !isMoving();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::changedToMoving() const
+{
+   return !wasMoving() && isMoving();
 }

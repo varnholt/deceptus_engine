@@ -6,8 +6,11 @@
 
 class PlayerControls
 {
-public:
+
+   public:
    PlayerControls() = default;
+
+   void update(const sf::Time& dt);
 
    using KeypressedCallback = std::function<void(sf::Keyboard::Key)>;
    void addKeypressedCallback(const KeypressedCallback& callback);
@@ -34,11 +37,30 @@ public:
    const GameControllerInfo& getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
-private:
-   GameControllerInfo mJoystickInfo;
-   int mKeysPressed = 0;
+   bool wasMoving() const;
+   void setWasMoving(bool was_moving);
 
-   std::vector<KeypressedCallback> mKeypressedCallbacks;
+   bool wasMovingLeft() const;
+   void setWasMovingLeft(bool was_moving_left);
+
+   bool wasMovingRight() const;
+   void setWasMovingRight(bool was_moving_right);
+
+   bool changedToIdle() const;
+   bool changedToMoving() const;
+
+
+private:
+
+   GameControllerInfo _joystick_info;
+
+   int32_t _keys_pressed = 0;
+
+   bool _was_moving = false;
+   bool _was_moving_left = false;
+   bool _was_moving_right = false;
+
+   std::vector<KeypressedCallback> _keypressed_callbacks;
 };
 
 
