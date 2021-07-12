@@ -213,27 +213,28 @@ void PlayerAnimation::generateJson()
    // 24 - player_appear_r, 12
    // 25 - player_appear_l, 12
 
-   const auto d = sf::seconds(0.075f);
+   const auto d_60 = sf::seconds(0.060f);
+   const auto d_75 = sf::seconds(0.075f);
+   const auto d_100 = sf::seconds(0.100f);
    const auto sprite_name = "data/sprites/player_unarmed.png";
    auto row = 0;
    const auto next_row = [&](){return (row++) * PIXELS_PER_TILE * 2;};
-   const auto next_row_x = [&](int32_t height){return (row++) * height;};
    const auto col = [](int32_t x){return PIXELS_PER_TILE * 3 * x;};
-   const auto v = [d](int32_t size){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(d); return arr;};
+   const auto v = [d_75](int32_t size){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(d_75); return arr;};
    const auto vx = [](int32_t size, const sf::Time& t){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(t); return arr;};
 
-   AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
-   AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
-   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
-   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d}, sprite_name);
-   AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d}, sprite_name);
-   AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d}, sprite_name);
-   AnimationSettings player_runstop_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d}, sprite_name);
-   AnimationSettings player_runstop_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d}, sprite_name);
-   AnimationSettings player_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, sprite_name);
-   AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d,d,d,d,d,d,d,d}, sprite_name);
-   AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_75), sprite_name);
+   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_75), sprite_name);
+   AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
+   AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
+   AnimationSettings player_runstop_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75}, sprite_name);
+   AnimationSettings player_runstop_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75}, sprite_name);
+   AnimationSettings player_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
+   AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
+   AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
 
    const auto jump_r_row = next_row();
    const auto jump_l_row = next_row();
@@ -259,16 +260,16 @@ void PlayerAnimation::generateJson()
    next_row(); // reserved
    next_row(); // reserved
 
-   AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_swim_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_wallslide_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_wallslide_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
-   AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d,d,d,d,d}, sprite_name);
+   AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_swim_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_wallslide_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_wallslide_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
 
    next_row(); // reserved
    next_row(); // reserved
@@ -286,8 +287,8 @@ void PlayerAnimation::generateJson()
 
    // const auto d2 = sf::seconds(0.2f);
 
-   AnimationSettings player_appear_r({72, 72}, {0, next_row()}, {36.0, 72.0}, vx(12, sf::seconds(0.1f)), sprite_name);
-   AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.1f)), sprite_name);
+   AnimationSettings player_appear_r({72, 72}, {0, next_row()}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
+   AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
 
    nlohmann::json j;
    j["player_idle_r_2"]         = player_idle_r;
@@ -656,7 +657,7 @@ void PlayerAnimation::updateV2(
       nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
    }
 
-   if (GameClock::getInstance().duration() < 2.3s)
+   if (GameClock::getInstance().duration() < 1.260s)
    {
       nextCycle = data._points_right ? _appear_r_2 : _appear_l_2;
 
@@ -670,7 +671,7 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         // player appear animation for 12 x 100ms
+         // player appear animation for 12 x 20ms
          _appear_r_2->play();
          _appear_l_2->play();
          _appear_r_2->setAlpha(255);
