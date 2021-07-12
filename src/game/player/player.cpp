@@ -1432,6 +1432,7 @@ void Player::update(const sf::Time& dt)
    updatePortal();
    updatePreviousBodyState();
    updateWeapons(dt);
+   mControls.update(dt); // called at last just to backup previous controls
 }
 
 
