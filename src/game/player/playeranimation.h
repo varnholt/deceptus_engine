@@ -134,8 +134,8 @@ private:
    std::shared_ptr<Animation> _wallslide_l_2;
    std::shared_ptr<Animation> _wall_jump_r_2;
    std::shared_ptr<Animation> _wall_jump_l_2;
-   std::shared_ptr<Animation> _appear_r_2;
-   std::shared_ptr<Animation> _appear_l_2;
+   std::shared_ptr<Animation> _appear_r_2;               // supported
+   std::shared_ptr<Animation> _appear_l_2;               // supported
 
    int32_t _jump_animation_reference = 0;
 
