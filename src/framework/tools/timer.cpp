@@ -78,6 +78,8 @@ void Timer::add(
 
 void Timer::removeByCaller(const std::shared_ptr<void>& caller)
 {
+   std::lock_guard<std::mutex> guard(__mutex);
+
    __timers.erase(
       std::remove_if(
          __timers.begin(),

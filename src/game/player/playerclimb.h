@@ -16,7 +16,8 @@ struct PlayerClimb
    bool isClimbableEdge(b2ChainShape* shape, int currIndex);
    bool edgeMatchesMovement(const b2Vec2 &edgeDir);
    bool isClimbing() const;
-   b2Joint* mClimbJoint = nullptr;
-   int32_t mKeysPressed = 0;
+
+   b2Joint* _climb_joint = nullptr;
+   int32_t _keys_pressed = 0;
 };
 

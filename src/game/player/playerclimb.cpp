@@ -33,7 +33,7 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
       return;
    }
 
-   mKeysPressed = controls.getKeysPressed();
+   _keys_pressed = controls.getKeysPressed();
 
    // http://www.iforce2d.net/b2dtut/world-querying
 
@@ -60,17 +60,17 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
       return;
    }
 
-   if (mClimbJoint != nullptr)
+   if (_climb_joint != nullptr)
    {
       return;
    }
 
 
    // hold
-   if (mClimbJoint != nullptr)
+   if (_climb_joint != nullptr)
    {
       // remove that joint if it points down from the player perspective
-      auto jointDir = (mClimbJoint->GetAnchorA() - mClimbJoint->GetAnchorB());
+      auto jointDir = (_climb_joint->GetAnchorA() - _climb_joint->GetAnchorB());
       if (jointDir.y < -0.1f)
       {
          removeClimbJoint();
@@ -221,7 +221,7 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
                   // jointDefinition.length = 0.01f;
 
                   Audio::getInstance()->playSample("impact.wav");
-                  mClimbJoint = playerBody->GetWorld()->CreateJoint(&jointDefinition);
+                  _climb_joint = playerBody->GetWorld()->CreateJoint(&jointDefinition);
                }
 
                // no need to continue processing
@@ -240,11 +240,13 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::removeClimbJoint()
 {
-   if (mClimbJoint)
+   if (!_climb_joint)
    {
-      mClimbJoint->GetBodyA()->GetWorld()->DestroyJoint(mClimbJoint);
-      mClimbJoint = nullptr;
+      return;
    }
+
+   _climb_joint->GetBodyA()->GetWorld()->DestroyJoint(_climb_joint);
+   _climb_joint = nullptr;
 }
 
 
@@ -359,8 +361,8 @@ bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
 {
-   bool rightPressed = mKeysPressed & KeyPressedRight;
-   bool leftPressed = mKeysPressed & KeyPressedLeft;
+   bool rightPressed = _keys_pressed & KeyPressedRight;
+   bool leftPressed = _keys_pressed & KeyPressedLeft;
 
    auto matchesMovement = false;
    // auto edgeType = Edge::None;
@@ -384,5 +386,5 @@ bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbing() const
 {
-   return mClimbJoint != nullptr;
+   return _climb_joint != nullptr;
 }
