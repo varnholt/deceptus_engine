@@ -778,7 +778,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._crouching = mCrouching;
    data._points_left = mPointsToLeft;
    data._points_right = !mPointsToLeft;
-   data._climb_joint_present = mClimb.mClimbJoint;
+   data._climb_joint_present = mClimb._climb_joint;
    data._jump_steps = mJump.mJumpSteps;
    data._moving_left = mControls.isMovingLeft();
    data._moving_right = mControls.isMovingRight();
@@ -1062,7 +1062,7 @@ void Player::updatePortal()
 
             screen_transition->_callbacks_effect_2_ended.push_back(
                [](){
-                  ScreenTransitionHandler::getInstance()._transition.release();
+                  ScreenTransitionHandler::getInstance()._transition.reset();
                }
             );
 
@@ -1445,7 +1445,10 @@ void Player::resetDash()
    _player_animation.resetAlpha();
 
    // re-enabled gravity for player
-   mBody->SetGravityScale(1.0f);
+   if (mBody)
+   {
+      mBody->SetGravityScale(1.0f);
+   }
 }
 
 
@@ -1678,6 +1681,11 @@ void Player::fire()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDeadFixtures()
 {
+   if (!mBodyFixture)
+   {
+      return;
+   }
+
    for (int32_t i = 0; i < sFootCount; i++)
    {
       mFootFixtures[i]->SetSensor(mDead);
@@ -1716,15 +1724,21 @@ void Player::reset()
    mHardLanding = false;
    mHardLandingCycles = 0;
 
-   mBody->SetLinearVelocity(b2Vec2(0,0));
-   mBody->SetGravityScale(1.0);
+   if (mBody)
+   {
+      mBody->SetLinearVelocity(b2Vec2(0,0));
+      mBody->SetGravityScale(1.0);
+   }
 
    mClimb.removeClimbJoint();
 
-   setBodyViaPixelPosition(
-      Level::getCurrentLevel()->getStartPosition().x,
-      Level::getCurrentLevel()->getStartPosition().y
-   );
+   if (Level::getCurrentLevel())
+   {
+      setBodyViaPixelPosition(
+         Level::getCurrentLevel()->getStartPosition().x,
+         Level::getCurrentLevel()->getStartPosition().y
+      );
+   }
 
    SaveState::getPlayerInfo().mExtraTable.mHealth.reset();
 
