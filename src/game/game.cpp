@@ -607,7 +607,7 @@ void Game::resetAfterDeath(const sf::Time& dt)
 
             screen_transition->_callbacks_effect_2_ended.push_back(
                [](){
-                  ScreenTransitionHandler::getInstance()._transition.release();
+                  ScreenTransitionHandler::getInstance()._transition.reset();
                }
             );
 
@@ -691,6 +691,10 @@ void Game::update()
    // reload the level when the save state has been invalidated
    if (SaveState::getCurrent().mLoadLevelRequested)
    {
+      // reset active screen transitions, also make player alive to avoid starting a death animation
+      _player->reset();
+      ScreenTransitionHandler::getInstance()._transition.reset();
+
       SaveState::getCurrent().mLoadLevelRequested = false;
       loadLevel();
    }
