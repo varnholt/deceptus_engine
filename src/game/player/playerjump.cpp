@@ -149,6 +149,7 @@ void PlayerJump::updateJump(b2Body* body)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+// not used by the game
 void PlayerJump::jumpImpulse(b2Body* body)
 {
    mJumpClock.restart();
@@ -164,6 +165,8 @@ void PlayerJump::jumpImpulse(b2Body* body)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+// apply individual forces for a given number of frames
+// that's the approach this game is currently using
 void PlayerJump::jumpForce()
 {
    mJumpClock.restart();

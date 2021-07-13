@@ -15,6 +15,7 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/timer.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
 #include "leveldescription.h"
@@ -239,6 +240,12 @@ Level::Level()
 Level::~Level()
 {
    std::cout << "[x] deleting current level" << std::endl;
+
+   // stop active timers because their callbacks being called after destruction of the level/world can be nasty
+   for (auto& enemy : mEnemies)
+   {
+      Timer::removeByCaller(enemy);
+   }
 
    // properly delete point map
    for (auto& kv : mPointMap)

@@ -3,15 +3,15 @@
 #include <algorithm>
 
 
-std::vector<std::unique_ptr<Timer>> Timer::mTimers;
-std::mutex Timer::mMutex;
+std::vector<std::unique_ptr<Timer>> Timer::__timers;
+std::mutex Timer::__mutex;
 
 
 void Timer::update()
 {
    auto now = std::chrono::high_resolution_clock::now();
 
-   std::lock_guard<std::mutex> guard(mMutex);
+   std::lock_guard<std::mutex> guard(__mutex);
 
    // it might be better to
    // 1) lock
@@ -22,26 +22,26 @@ void Timer::update()
    //
    // background: if the callback starts another timer, the mutex is locked :/
 
-   mTimers.erase(
+   __timers.erase(
       std::remove_if(
-         mTimers.begin(),
-         mTimers.end(),
+         __timers.begin(),
+         __timers.end(),
          [now](auto& timer) -> bool
          {
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer->mStartTime);
-            auto delta = elapsed - timer->mInterval;
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer->_start_time);
+            auto delta = elapsed - timer->_interval;
 
             if (delta > std::chrono::milliseconds(0))
             {
-               timer->mCallback();
+               timer->_callback();
 
-               if (timer->mType == Type::Singleshot)
+               if (timer->_type == Type::Singleshot)
                {
                   return true;
                }
                else
                {
-                  timer->mStartTime = now + delta;
+                  timer->_start_time = now + delta;
                   return false;
                }
             }
@@ -49,7 +49,7 @@ void Timer::update()
             return false;
          }
       ),
-      mTimers.end()
+      __timers.end()
    );
 }
 
@@ -58,18 +58,33 @@ void Timer::add(
    std::chrono::milliseconds interval,
    std::function<void ()> callback,
    Type type,
-   std::shared_ptr<void> data
+   const std::shared_ptr<void>& data,
+   const std::shared_ptr<void>& caller
 )
 {
    std::unique_ptr<Timer> timer = std::make_unique<Timer>();
-   timer->mInterval = interval;
-   timer->mType = type;
-   timer->mStartTime = std::chrono::high_resolution_clock::now();
-   timer->mCallback = callback;
-   timer->mData = data;
+   timer->_interval = interval;
+   timer->_type = type;
+   timer->_start_time = std::chrono::high_resolution_clock::now();
+   timer->_callback = callback;
+   timer->_data = data;
+   timer->_caller = caller;
 
    // don't start another timer from the timed function in your lua code :)
-   std::lock_guard<std::mutex> guard(mMutex);
-   mTimers.push_back(std::move(timer));
+   std::lock_guard<std::mutex> guard(__mutex);
+   __timers.push_back(std::move(timer));
+}
+
+
+void Timer::removeByCaller(const std::shared_ptr<void>& caller)
+{
+   __timers.erase(
+      std::remove_if(
+         __timers.begin(),
+         __timers.end(),
+         [caller](auto& timer) -> bool {return timer->_caller == caller;}
+      ),
+      __timers.end()
+   );
 }
 
