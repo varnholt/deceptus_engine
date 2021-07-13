@@ -265,7 +265,7 @@ void Game::loadLevel()
          levels.deserializeFromFile();
          auto level_item = levels.mLevels.at(SaveState::getCurrent().mLevelIndex);
 
-         _player->resetWorld();
+         _player->resetWorld(); // free the pointer that's shared with the player
          _level.reset();
 
          // load it

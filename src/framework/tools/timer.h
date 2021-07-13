@@ -25,19 +25,21 @@ public:
       std::chrono::milliseconds interval,
       std::function<void()>,
       Type type = Type::Singleshot,
-      std::shared_ptr<void> data = nullptr
+      const std::shared_ptr<void>& data = nullptr,
+      const std::shared_ptr<void>& caller = nullptr
    );
 
-   std::chrono::milliseconds mInterval;
-   Type mType = Type::Singleshot;
-   std::function<void()> mCallback = nullptr;
-   std::chrono::high_resolution_clock::time_point mStartTime;
-   std::shared_ptr<void> mData;
+   static void removeByCaller(const std::shared_ptr<void>& caller);
 
+   std::chrono::milliseconds _interval;
+   Type _type = Type::Singleshot;
+   std::function<void()> _callback = nullptr;
+   std::chrono::high_resolution_clock::time_point _start_time;
+   std::shared_ptr<void> _data;
+   std::shared_ptr<void> _caller;
 
 private:
-   static std::vector<std::unique_ptr<Timer>> mTimers;
-   static std::mutex mMutex;
-
+   static std::vector<std::unique_ptr<Timer>> __timers;
+   static std::mutex __mutex;
 };
 
