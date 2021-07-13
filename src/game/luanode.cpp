@@ -1089,7 +1089,10 @@ int32_t timer(lua_State* state)
 
       Timer::add(
          std::chrono::milliseconds(delay),
-         [node, timerId](){node->luaTimeout(timerId);}
+         [node, timerId](){node->luaTimeout(timerId);},
+         Timer::Type::Singleshot,
+         nullptr,
+         node
       );
    }
 
