@@ -14,51 +14,46 @@
 
 namespace
 {
-   constexpr auto minimum_jump_interval_ms = 150;
+constexpr auto minimum_jump_interval_ms = 150;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, const PlayerControls& controls)
+void PlayerJump::update(const PlayerJumpInfo& info, const PlayerControls& controls)
 {
+   _jump_info = info;
+   _controls = controls;
+
 #ifdef JUMP_GRAVITY_SCALING
-   if (mInAir && !inAir)
+   if (_jump_info._in_air && !_jump_info._in_air)
    {
       // std::cout << "reset" << std::endl;
-      body->SetGravityScale(1.0f);
+      _body->SetGravityScale(1.0f);
    }
 
-   if (mInWater)
+   if (_jump_info._in_water)
    {
-      body->SetGravityScale(0.5f);
+      _body->SetGravityScale(0.5f);
    }
 #endif
 
-   mInAir = inAir;
-   mInWater = inWater;
-
-   mCrouching = crouching;
-   mClimbing = climbing;
-
-   if (!mInAir)
+   if (!_jump_info._in_air)
    {
-      mDoubleJumpConsumed = false;
+      _double_jump_consumed = false;
    }
 
-   mJumpButtonPressed = controls.isJumpButtonPressed();
-
    updateLostGroundContact();
-   updateJump(body);
+   updateJump();
    updateJumpBuffer();
-   updateWallSlide(body, inAir, controls);
-   updateWallJump(body);
+   updateWallSlide();
+   updateWallJump();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJumpBuffer()
 {
-   if (mInAir)
+   if (_jump_info._in_air)
    {
       return;
    }
@@ -66,9 +61,9 @@ void PlayerJump::updateJumpBuffer()
    // if jump is pressed while the ground is just a few centimeters away,
    // store the information and jump as soon as the places touches ground
    auto now = GlobalClock::getInstance()->getElapsedTime();
-   auto timeDiff = (now - mLastJumpPressTime).asMilliseconds();
+   auto time_diff = (now - _last_jump_press_time).asMilliseconds();
 
-   if (timeDiff < PhysicsConfiguration::getInstance().mPlayerJumpBufferMs)
+   if (time_diff < PhysicsConfiguration::getInstance().mPlayerJumpBufferMs)
    {
       jump();
    }
@@ -76,30 +71,30 @@ void PlayerJump::updateJumpBuffer()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::updateJump(b2Body* body)
+void PlayerJump::updateJump()
 {
-   if (mInWater && mJumpButtonPressed)
+   if (_jump_info._in_water && _controls.isJumpButtonPressed())
    {
-      body->ApplyForce(b2Vec2(0, -1.0f), body->GetWorldCenter(), true);
+      _body->ApplyForce(b2Vec2(0, -1.0f), _body->GetWorldCenter(), true);
    }
    else if (
-         (mJumpSteps > 0 && mJumpButtonPressed)
-      || mJumpClock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance().mPlayerJumpMinimalDurationMs
+         (_jump_steps > 0 && _controls.isJumpButtonPressed())
+      || _jump_clock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance().mPlayerJumpMinimalDurationMs
    )
    {
       // jump higher if a faster
-      auto maxWalk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
-      auto vel = fabs(body->GetLinearVelocity().x) - maxWalk;
+      auto max_walk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
+      auto vel = fabs(_body->GetLinearVelocity().x) - max_walk;
       auto factor = 1.0f;
 
       if (vel > 0.0f)
       {
-         auto maxRun = PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
+         auto max_run = PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
 
          factor =
               1.0f
             + PhysicsConfiguration::getInstance().mPlayerJumpSpeedFactor
-            * (vel / (maxRun - maxWalk));
+            * (vel / (max_run - max_walk));
       }
 
       /*
@@ -115,7 +110,7 @@ void PlayerJump::updateJump(b2Body* body)
       */
 
      // to change velocity by 5 in one time step
-     auto force = factor * body->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / (1.0f / 60.0f) /*dt*/; //f = mv/t
+     auto force = factor * _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / (1.0f / 60.0f) /*dt*/; //f = mv/t
 
      // spread this over 6 time steps
      force /= PhysicsConfiguration::getInstance().mPlayerJumpFalloff;
@@ -123,42 +118,55 @@ void PlayerJump::updateJump(b2Body* body)
      // more force is required to compensate falling velocity for scenarios
      // - wall jump
      // - double jump
-     if (mCompensateVelocity)
+     if (_compensate_velocity)
      {
-        const auto bodyVelocity = body->GetLinearVelocity();
+        const auto bodyVelocity = _body->GetLinearVelocity();
         force *= 1.75f * bodyVelocity.y;
 
-        mCompensateVelocity = false;
+        _compensate_velocity = false;
      }
 
      // printf("force: %f\n", force);
-     body->ApplyForceToCenter(b2Vec2(0.0f, -force), true);
+     _body->ApplyForceToCenter(b2Vec2(0.0f, -force), true);
 
-     mJumpSteps--;
+     _jump_steps--;
 
-     if (mJumpSteps == 0)
+     if (_jump_steps == 0)
      {
-        body->SetGravityScale(1.35f);
+        _body->SetGravityScale(1.35f);
      }
    }
    else
    {
-      mJumpSteps = 0;
+      _jump_steps = 0;
    }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 // not used by the game
-void PlayerJump::jumpImpulse(b2Body* body)
+void PlayerJump::jumpImpulse()
 {
-   mJumpClock.restart();
+   _jump_clock.restart();
 
-   float impulse = body->GetMass() * 6.0f;
+   float impulse = _body->GetMass() * 6.0f;
 
-   body->ApplyLinearImpulse(
+   _body->ApplyLinearImpulse(
       b2Vec2(0.0f, -impulse),
-      body->GetWorldCenter(),
+      _body->GetWorldCenter(),
+      true
+   );
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerJump::jumpImpulse(const b2Vec2& impulse)
+{
+   _jump_clock.restart();
+
+   _body->ApplyLinearImpulse(
+      impulse,
+      _body->GetWorldCenter(),
       true
    );
 }
@@ -169,8 +177,8 @@ void PlayerJump::jumpImpulse(b2Body* body)
 // that's the approach this game is currently using
 void PlayerJump::jumpForce()
 {
-   mJumpClock.restart();
-   mJumpSteps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
+   _jump_clock.restart();
+   _jump_steps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
 }
 
 
@@ -185,15 +193,21 @@ void PlayerJump::doubleJump()
       return;
    }
 
-   if (mDoubleJumpConsumed)
+   if (_double_jump_consumed)
    {
       return;
    }
 
-   mDoubleJumpConsumed = true;
-   mCompensateVelocity = true;
+   _double_jump_consumed = true;
+   _compensate_velocity = true;
 
-   jumpForce();
+   // double jump should happen with a constant impulse, no adjusting through button press duration
+   const auto current_velocity = _body->GetLinearVelocity();
+   _body->SetLinearVelocity(b2Vec2(current_velocity.x, 0.0f));
+   jumpImpulse(b2Vec2(0.0f, _body->GetMass() * 6.0f));
+
+   // old approach, can probably be removed
+   // jumpForce();
 }
 
 
@@ -208,19 +222,25 @@ void PlayerJump::wallJump()
       return;
    }
 
-   if (!mWallSliding)
+   if (!_wallsliding)
    {
       return;
    }
 
-   jumpForce();
+   // double jump should happen with a constant impulse, no adjusting through button press duration
+   const auto current_velocity = _body->GetLinearVelocity();
+   _body->SetLinearVelocity(b2Vec2(current_velocity.x, 0.0f));
+   jumpImpulse(b2Vec2(0.0f, _body->GetMass() * 6.0f));
+
+   // old approach, can probably be removed
+   // jumpForce();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jump()
 {
-   if (mCrouching)
+   if (_jump_info._crouching)
    {
       return;
    }
@@ -230,26 +250,26 @@ void PlayerJump::jump()
       return;
    }
 
-   sf::Time elapsed = mJumpClock.getElapsedTime();
+   sf::Time elapsed = _jump_clock.getElapsedTime();
 
    // only allow a new jump after a a couple of milliseconds
    if (elapsed.asMilliseconds() > minimum_jump_interval_ms)
    {
       // handle regular jump
-      if (!mInAir || mGroundContactJustLost || mClimbing)
+      if (!_jump_info._in_air || _ground_contact_just_lost || _jump_info._climbing)
       {
-         mRemoveClimbJoint();
-         mClimbing = false;
+         _remove_climb_joint_callback();
+         _jump_info._climbing = false; // only set for correctness until next frame
 
          jumpForce();
 
-         if (mInWater)
+         if (_jump_info._in_water)
          {
             // play some waterish sample?
          }
          else
          {
-            mDustAnimation();
+            _dust_animation_callback();
             Audio::getInstance()->playSample("jump.wav");
          }
       }
@@ -257,9 +277,9 @@ void PlayerJump::jump()
       {
          // player pressed jump but is still in air.
          // buffer that information to trigger the jump a few millis later.
-         if (mInAir)
+         if (_jump_info._in_air)
          {
-            mLastJumpPressTime = GlobalClock::getInstance()->getElapsedTime();
+            _last_jump_press_time = GlobalClock::getInstance()->getElapsedTime();
 
             // handle wall jump
             wallJump();
@@ -280,19 +300,19 @@ void PlayerJump::updateLostGroundContact()
    //
    // if player had ground contact in previous frame but now lost ground
    // contact then start counting to 200ms
-   if (mHadGroundContact && mInAir && !isJumping())
+   if (_had_ground_contact && _jump_info._in_air && !isJumping())
    {
       auto now = GlobalClock::getInstance()->getElapsedTime();
-      mGroundContactLostTime = now;
-      mGroundContactJustLost = true;
+      _ground_contact_lost_time = now;
+      _ground_contact_just_lost = true;
    }
 
    // flying now, probably allow jump
-   else if (mInAir)
+   else if (_jump_info._in_air)
    {
       auto now = GlobalClock::getInstance()->getElapsedTime();
-      auto timeDiff = (now - mGroundContactLostTime).asMilliseconds();
-      mGroundContactJustLost = (timeDiff < PhysicsConfiguration::getInstance().mPlayerJumpAfterContactLostMs);
+      auto timeDiff = (now - _ground_contact_lost_time).asMilliseconds();
+      _ground_contact_just_lost = (timeDiff < PhysicsConfiguration::getInstance().mPlayerJumpAfterContactLostMs);
 
       // if (mGroundContactJustLost)
       // {
@@ -301,19 +321,19 @@ void PlayerJump::updateLostGroundContact()
    }
    else
    {
-      mGroundContactJustLost = false;
+      _ground_contact_just_lost = false;
    }
 
-   mHadGroundContact = !mInAir;
+   _had_ground_contact = !_jump_info._in_air;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls& controls)
+void PlayerJump::updateWallSlide()
 {
-   if (!inAir)
+   if (!_jump_info._in_air)
    {
-      mWallSliding = false;
+      _wallsliding = false;
       return;
    }
 
@@ -322,7 +342,7 @@ void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls&
 
    if (!canWallSlide)
    {
-      mWallSliding = false;
+      _wallsliding = false;
       return;
    }
 
@@ -330,24 +350,24 @@ void PlayerJump::updateWallSlide(b2Body* body, bool inAir, const PlayerControls&
    const auto rightTouching = (GameContactListener::getInstance()->getNumArmRightContacts() > 0);
 
    if (
-         !(leftTouching  && controls.isMovingLeft())
-      && !(rightTouching && controls.isMovingRight())
+         !(leftTouching  && _controls.isMovingLeft())
+      && !(rightTouching && _controls.isMovingRight())
    )
    {
-      mWallSliding = false;
+      _wallsliding = false;
       return;
    }
 
-   b2Vec2 vel = body->GetLinearVelocity();
-   body->ApplyForce(0.4f * -vel, body->GetWorldCenter(), false);
-   mWallSliding = true;
+   b2Vec2 vel = _body->GetLinearVelocity();
+   _body->ApplyForce(0.4f * -vel, _body->GetWorldCenter(), false);
+   _wallsliding = true;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::updateWallJump(b2Body*)
+void PlayerJump::updateWallJump()
 {
-   if (!mWallSliding)
+   if (!_wallsliding)
    {
       return;
    }
@@ -357,5 +377,5 @@ void PlayerJump::updateWallJump(b2Body*)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerJump::isJumping() const
 {
-   return (mJumpSteps > 0);
+   return (_jump_steps > 0);
 }
