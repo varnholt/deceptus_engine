@@ -227,10 +227,16 @@ void PlayerJump::wallJump()
       return;
    }
 
+   const auto leftTouching = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
+
    // double jump should happen with a constant impulse, no adjusting through button press duration
-   const auto current_velocity = _body->GetLinearVelocity();
-   _body->SetLinearVelocity(b2Vec2(current_velocity.x, 0.0f));
-   jumpImpulse(b2Vec2(0.0f, _body->GetMass() * 6.0f));
+   _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
+
+   const auto impulse_horizontal = _body->GetMass() * 6.0f;
+   const auto impulse_vertical = _body->GetMass() * 3.0f;
+
+   // this doesn't work, should rather be implemented like dash
+   // jumpImpulse(b2Vec2(leftTouching ? impulse_horizontal : -impulse_horizontal, impulse_vertical));
 
    // old approach, can probably be removed
    // jumpForce();
