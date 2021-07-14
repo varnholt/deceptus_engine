@@ -44,47 +44,49 @@ PlayerAnimation::PlayerAnimation()
    _jump_landing_l = AnimationPool::getInstance().add("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
    // version 2
-   _idle_r_2        = AnimationPool::getInstance().add("player_idle_r_2",         0.0f, 0.0f, true, false);
-   _idle_l_2        = AnimationPool::getInstance().add("player_idle_l_2",         0.0f, 0.0f, true, false);
-   _bend_down_r_2   = AnimationPool::getInstance().add("player_bend_down_r_2",    0.0f, 0.0f, true, false);
-   _bend_down_l_2   = AnimationPool::getInstance().add("player_bend_down_l_2",    0.0f, 0.0f, true, false);
-   _idle_to_run_r_2 = AnimationPool::getInstance().add("player_idle_to_run_r_2",  0.0f, 0.0f, true, false);
-   _idle_to_run_l_2 = AnimationPool::getInstance().add("player_idle_to_run_l_2",  0.0f, 0.0f, true, false);
-   _runstop_r_2     = AnimationPool::getInstance().add("player_runstop_r_2",      0.0f, 0.0f, true, false);
-   _runstop_l_2     = AnimationPool::getInstance().add("player_runstop_l_2",      0.0f, 0.0f, true, false);
-   _run_r_2         = AnimationPool::getInstance().add("player_run_r_2",          0.0f, 0.0f, true, false);
-   _run_l_2         = AnimationPool::getInstance().add("player_run_l_2",          0.0f, 0.0f, true, false);
-   _dash_r_2        = AnimationPool::getInstance().add("player_dash_r_2",         0.0f, 0.0f, true, false);
-   _dash_l_2        = AnimationPool::getInstance().add("player_dash_l_2",         0.0f, 0.0f, true, false);
+   _idle_r_2             = AnimationPool::getInstance().add("player_idle_r_2",             0.0f, 0.0f, true, false);
+   _idle_l_2             = AnimationPool::getInstance().add("player_idle_l_2",             0.0f, 0.0f, true, false);
+   _bend_down_r_2        = AnimationPool::getInstance().add("player_bend_down_r_2",        0.0f, 0.0f, true, false);
+   _bend_down_l_2        = AnimationPool::getInstance().add("player_bend_down_l_2",        0.0f, 0.0f, true, false);
+   _idle_to_run_r_2      = AnimationPool::getInstance().add("player_idle_to_run_r_2",      0.0f, 0.0f, true, false);
+   _idle_to_run_l_2      = AnimationPool::getInstance().add("player_idle_to_run_l_2",      0.0f, 0.0f, true, false);
+   _runstop_r_2          = AnimationPool::getInstance().add("player_runstop_r_2",          0.0f, 0.0f, true, false);
+   _runstop_l_2          = AnimationPool::getInstance().add("player_runstop_l_2",          0.0f, 0.0f, true, false);
+   _run_r_2              = AnimationPool::getInstance().add("player_run_r_2",              0.0f, 0.0f, true, false);
+   _run_l_2              = AnimationPool::getInstance().add("player_run_l_2",              0.0f, 0.0f, true, false);
+   _dash_r_2             = AnimationPool::getInstance().add("player_dash_r_2",             0.0f, 0.0f, true, false);
+   _dash_l_2             = AnimationPool::getInstance().add("player_dash_l_2",             0.0f, 0.0f, true, false);
 
    // _crouch_r_2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
    // _crouch_l_2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
 
-   _jump_init_r_2    = AnimationPool::getInstance().add("player_jump_init_r_2",    0.0f, 0.0f, true, false);
-   _jump_up_r_2      = AnimationPool::getInstance().add("player_jump_up_r_2",      0.0f, 0.0f, true, false);
-   _jump_midair_r_2  = AnimationPool::getInstance().add("player_jump_midair_r_2",  0.0f, 0.0f, true, false);
-   _jump_down_r_2    = AnimationPool::getInstance().add("player_jump_down_r_2",    0.0f, 0.0f, true, false);
-   _jump_landing_r_2 = AnimationPool::getInstance().add("player_jump_landing_r_2", 0.0f, 0.0f, true, false);
+   _jump_init_r_2        = AnimationPool::getInstance().add("player_jump_init_r_2",        0.0f, 0.0f, true, false);
+   _jump_up_r_2          = AnimationPool::getInstance().add("player_jump_up_r_2",          0.0f, 0.0f, true, false);
+   _jump_midair_r_2      = AnimationPool::getInstance().add("player_jump_midair_r_2",      0.0f, 0.0f, true, false);
+   _jump_down_r_2        = AnimationPool::getInstance().add("player_jump_down_r_2",        0.0f, 0.0f, true, false);
+   _jump_landing_r_2     = AnimationPool::getInstance().add("player_jump_landing_r_2",     0.0f, 0.0f, true, false);
 
-   _jump_init_l_2    = AnimationPool::getInstance().add("player_jump_init_l_2",    0.0f, 0.0f, true, false);
-   _jump_up_l_2      = AnimationPool::getInstance().add("player_jump_up_l_2",      0.0f, 0.0f, true, false);
-   _jump_midair_l_2  = AnimationPool::getInstance().add("player_jump_midair_l_2",  0.0f, 0.0f, true, false);
-   _jump_down_l_2    = AnimationPool::getInstance().add("player_jump_down_l_2",    0.0f, 0.0f, true, false);
-   _jump_landing_l_2 = AnimationPool::getInstance().add("player_jump_landing_l_2", 0.0f, 0.0f, true, false);
+   _jump_init_l_2        = AnimationPool::getInstance().add("player_jump_init_l_2",        0.0f, 0.0f, true, false);
+   _jump_up_l_2          = AnimationPool::getInstance().add("player_jump_up_l_2",          0.0f, 0.0f, true, false);
+   _jump_midair_l_2      = AnimationPool::getInstance().add("player_jump_midair_l_2",      0.0f, 0.0f, true, false);
+   _jump_down_l_2        = AnimationPool::getInstance().add("player_jump_down_l_2",        0.0f, 0.0f, true, false);
+   _jump_landing_l_2     = AnimationPool::getInstance().add("player_jump_landing_l_2",     0.0f, 0.0f, true, false);
 
-   _double_jump_r_2 = AnimationPool::getInstance().add("player_double_jump_r_2",  0.0f, 0.0f, true, false);
-   _double_jump_l_2 = AnimationPool::getInstance().add("player_double_jump_l_2",  0.0f, 0.0f, true, false);
-   _swim_idle_r_2   = AnimationPool::getInstance().add("player_swim_idle_r_2",    0.0f, 0.0f, true, false);
-   _swim_idle_l_2   = AnimationPool::getInstance().add("player_swim_idle_l_2",    0.0f, 0.0f, true, false);
-   _swim_r_2        = AnimationPool::getInstance().add("player_swim_r_2",         0.0f, 0.0f, true, false);
-   _swim_l_2        = AnimationPool::getInstance().add("player_swim_l_2",         0.0f, 0.0f, true, false);
+   _double_jump_r_2      = AnimationPool::getInstance().add("player_double_jump_r_2",      0.0f, 0.0f, true, false);
+   _double_jump_l_2      = AnimationPool::getInstance().add("player_double_jump_l_2",      0.0f, 0.0f, true, false);
+   _swim_idle_r_2        = AnimationPool::getInstance().add("player_swim_idle_r_2",        0.0f, 0.0f, true, false);
+   _swim_idle_l_2        = AnimationPool::getInstance().add("player_swim_idle_l_2",        0.0f, 0.0f, true, false);
+   _swim_r_2             = AnimationPool::getInstance().add("player_swim_r_2",             0.0f, 0.0f, true, false);
+   _swim_l_2             = AnimationPool::getInstance().add("player_swim_l_2",             0.0f, 0.0f, true, false);
 
-   _wallslide_r_2   = AnimationPool::getInstance().add("player_wallslide_r_2",    0.0f, 0.0f, true, false);
-   _wallslide_l_2   = AnimationPool::getInstance().add("player_wallslide_l_2",    0.0f, 0.0f, true, false);
-   _wall_jump_r_2   = AnimationPool::getInstance().add("player_wall_jump_r_2",    0.0f, 0.0f, true, false);
-   _wall_jump_l_2   = AnimationPool::getInstance().add("player_wall_jump_l_2",    0.0f, 0.0f, true, false);
-   _appear_r_2      = AnimationPool::getInstance().add("player_appear_r_2",       0.0f, 0.0f, true, false);
-   _appear_l_2      = AnimationPool::getInstance().add("player_appear_l_2",       0.0f, 0.0f, true, false);
+   _wallslide_impact_r_2 = AnimationPool::getInstance().add("player_wallslide_impact_r_2", 0.0f, 0.0f, true, false);
+   _wallslide_impact_l_2 = AnimationPool::getInstance().add("player_wallslide_impact_l_2", 0.0f, 0.0f, true, false);
+   _wallslide_r_2        = AnimationPool::getInstance().add("player_wallslide_r_2",        0.0f, 0.0f, true, false);
+   _wallslide_l_2        = AnimationPool::getInstance().add("player_wallslide_l_2",        0.0f, 0.0f, true, false);
+   _wall_jump_r_2        = AnimationPool::getInstance().add("player_wall_jump_r_2",        0.0f, 0.0f, true, false);
+   _wall_jump_l_2        = AnimationPool::getInstance().add("player_wall_jump_l_2",        0.0f, 0.0f, true, false);
+   _appear_r_2           = AnimationPool::getInstance().add("player_appear_r_2",           0.0f, 0.0f, true, false);
+   _appear_l_2           = AnimationPool::getInstance().add("player_appear_l_2",           0.0f, 0.0f, true, false);
 
    // we don't want these to jump back to the first frame
    _appear_r_2->_reset_to_first_frame = false;
@@ -266,8 +268,15 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_swim_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_wallslide_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_wallslide_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+
+   const auto wallslide_row_r = next_row();
+   const auto wallslide_row_l = next_row();
+
+   AnimationSettings player_wallslide_impact_r({72, 48}, {0, wallslide_row_r}, {36.0, 48.0}, vx(6, d_75), sprite_name);
+   AnimationSettings player_wallslide_impact_l({72, 48}, {0, wallslide_row_l}, {36.0, 48.0}, vx(6, d_75), sprite_name);
+   AnimationSettings player_wallslide_r({72, 48}, {6 * 72, wallslide_row_r}, {36.0, 48.0}, vx(2, d_75), sprite_name);
+   AnimationSettings player_wallslide_l({72, 48}, {6 * 72, wallslide_row_l}, {36.0, 48.0}, vx(2, d_75), sprite_name);
+
    AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
 
@@ -291,44 +300,46 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
 
    nlohmann::json j;
-   j["player_idle_r_2"]         = player_idle_r;
-   j["player_idle_l_2"]         = player_idle_l;
-   j["player_bend_down_r_2"]    = player_bend_down_r;
-   j["player_bend_down_l_2"]    = player_bend_down_l;
-   j["player_idle_to_run_r_2"]  = player_idle_to_run_r;
-   j["player_idle_to_run_l_2"]  = player_idle_to_run_l;
-   j["player_runstop_r_2"]      = player_runstop_r;
-   j["player_runstop_l_2"]      = player_runstop_l;
-   j["player_run_r_2"]          = player_run_r;
-   j["player_run_l_2"]          = player_run_l;
-   j["player_dash_r_2"]         = player_dash_r;
-   j["player_dash_l_2"]         = player_dash_l;
+   j["player_idle_r_2"]             = player_idle_r;
+   j["player_idle_l_2"]             = player_idle_l;
+   j["player_bend_down_r_2"]        = player_bend_down_r;
+   j["player_bend_down_l_2"]        = player_bend_down_l;
+   j["player_idle_to_run_r_2"]      = player_idle_to_run_r;
+   j["player_idle_to_run_l_2"]      = player_idle_to_run_l;
+   j["player_runstop_r_2"]          = player_runstop_r;
+   j["player_runstop_l_2"]          = player_runstop_l;
+   j["player_run_r_2"]              = player_run_r;
+   j["player_run_l_2"]              = player_run_l;
+   j["player_dash_r_2"]             = player_dash_r;
+   j["player_dash_l_2"]             = player_dash_l;
 
-   j["player_jump_init_r_2"]    = player_jump_init_r;
-   j["player_jump_up_r_2"]      = player_jump_up_r;
-   j["player_jump_midair_r_2"]  = player_jump_midair_r;
-   j["player_jump_down_r_2"]    = player_jump_down_r;
-   j["player_jump_landing_r_2"] = player_jump_landing_r;
+   j["player_jump_init_r_2"]        = player_jump_init_r;
+   j["player_jump_up_r_2"]          = player_jump_up_r;
+   j["player_jump_midair_r_2"]      = player_jump_midair_r;
+   j["player_jump_down_r_2"]        = player_jump_down_r;
+   j["player_jump_landing_r_2"]     = player_jump_landing_r;
 
-   j["player_jump_init_l_2"]    = player_jump_init_l;
-   j["player_jump_up_l_2"]      = player_jump_up_l;
-   j["player_jump_midair_l_2"]  = player_jump_midair_l;
-   j["player_jump_down_l_2"]    = player_jump_down_l;
-   j["player_jump_landing_l_2"] = player_jump_landing_l;
+   j["player_jump_init_l_2"]        = player_jump_init_l;
+   j["player_jump_up_l_2"]          = player_jump_up_l;
+   j["player_jump_midair_l_2"]      = player_jump_midair_l;
+   j["player_jump_down_l_2"]        = player_jump_down_l;
+   j["player_jump_landing_l_2"]     = player_jump_landing_l;
 
-   j["player_double_jump_r_2"]  = player_double_jump_r;
-   j["player_double_jump_l_2"]  = player_double_jump_l;
-   j["player_swim_idle_r_2"]    = player_swim_idle_r;
-   j["player_swim_idle_l_2"]    = player_swim_idle_l;
-   j["player_swim_r_2"]         = player_swim_r;
-   j["player_swim_l_2"]         = player_swim_l;
+   j["player_double_jump_r_2"]      = player_double_jump_r;
+   j["player_double_jump_l_2"]      = player_double_jump_l;
+   j["player_swim_idle_r_2"]        = player_swim_idle_r;
+   j["player_swim_idle_l_2"]        = player_swim_idle_l;
+   j["player_swim_r_2"]             = player_swim_r;
+   j["player_swim_l_2"]             = player_swim_l;
 
-   j["player_wallslide_r_2"]    = player_wallslide_r;
-   j["player_wallslide_l_2"]    = player_wallslide_l;
-   j["player_wall_jump_r_2"]    = player_wall_jump_r;
-   j["player_wall_jump_l_2"]    = player_wall_jump_l;
-   j["player_appear_r_2"]       = player_appear_r;
-   j["player_appear_l_2"]       = player_appear_l;
+   j["player_wallslide_r_2"]        = player_wallslide_r;
+   j["player_wallslide_l_2"]        = player_wallslide_l;
+   j["player_wallslide_impact_r_2"] = player_wallslide_impact_r;
+   j["player_wallslide_impact_l_2"] = player_wallslide_impact_l;
+   j["player_wall_jump_r_2"]        = player_wall_jump_r;
+   j["player_wall_jump_l_2"]        = player_wall_jump_l;
+   j["player_appear_r_2"]           = player_appear_r;
+   j["player_appear_l_2"]           = player_appear_l;
 
    std::stringstream sstream;
    sstream << std::setw(4) << j << "\n\n";
