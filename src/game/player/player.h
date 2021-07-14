@@ -182,7 +182,7 @@ private:
    std::shared_ptr<b2World> mWorld;
    b2Body* mBody = nullptr;
 
-   static const int32_t sFootCount = 4u;
+   static constexpr int32_t sFootCount = 4u;
    b2Fixture* mBodyFixture = nullptr;
    b2Fixture* mFootFixtures[sFootCount];
 

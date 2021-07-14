@@ -106,8 +106,8 @@ void Player::initialize()
 
    mWeaponSystem->initialize();
 
-   mJump.mDustAnimation = std::bind(&Player::playDustAnimation, this);
-   mJump.mRemoveClimbJoint = std::bind(&PlayerClimb::removeClimbJoint, mClimb);
+   mJump._dust_animation_callback = std::bind(&Player::playDustAnimation, this);
+   mJump._remove_climb_joint_callback = std::bind(&PlayerClimb::removeClimbJoint, mClimb);
    mControls.addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
 
    initializeController();
@@ -482,6 +482,9 @@ void Player::createBody()
    mBodyFixture->SetUserData(static_cast<void*>(objectDataHead));
 
    // mBody->Dump();
+
+   // store body inside player jump
+   mJump._body = mBody;
 }
 
 
@@ -779,10 +782,10 @@ void Player::updateAnimation(const sf::Time& dt)
    data._points_left = mPointsToLeft;
    data._points_right = !mPointsToLeft;
    data._climb_joint_present = mClimb._climb_joint;
-   data._jump_steps = mJump.mJumpSteps;
+   data._jump_steps = mJump._jump_steps;
    data._moving_left = mControls.isMovingLeft();
    data._moving_right = mControls.isMovingRight();
-   data._wall_sliding = mJump.mWallSliding;
+   data._wall_sliding = mJump._wallsliding;
 
    if (isDashActive())
    {
@@ -1423,7 +1426,14 @@ void Player::update(const sf::Time& dt)
    updateFire();
    updateVelocity();
    updatePlayerOrientation();
-   mJump.update(mBody, isInAir(), isInWater(), isCrouching(), mClimb.isClimbing(), mControls);
+
+   PlayerJump::PlayerJumpInfo info;
+   info._in_air = isInAir();
+   info._in_water = isInWater();
+   info._crouching = isCrouching();
+   info._climbing = mClimb.isClimbing();
+   mJump.update(info, mControls);
+
    updateDash();
    mClimb.update(mBody, mControls, isInAir());
    updatePlatformMovement(dt);

@@ -2,6 +2,7 @@
 
 #include "playercontrols.h"
 
+#include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
 #include <functional>
@@ -11,43 +12,50 @@ class b2Joint;
 
 struct PlayerJump
 {
-    PlayerJump() = default;
+   PlayerJump() = default;
 
-    void jump();
-    void jumpImpulse(b2Body*);
-    void jumpForce();
-    void doubleJump();
-    void wallJump();
+   struct PlayerJumpInfo
+   {
+      bool _in_air = false;
+      bool _in_water = false;
+      bool _crouching = false;
+      bool _climbing = false;
+   };
 
-    void update(b2Body* body, bool inAir, bool inWater, bool crouching, bool climbing, const PlayerControls& controls);
+   void jump();
+   void jumpImpulse();
+   void jumpImpulse(const b2Vec2& impulse);
+   void jumpForce();
+   void doubleJump();
+   void wallJump();
 
-    void updateJumpBuffer();
-    void updateJump(b2Body*);
-    void updateLostGroundContact();
-    void updateWallSlide(b2Body*, bool inAir, const PlayerControls& controls);
-    void updateWallJump(b2Body*);
+   void update(const PlayerJumpInfo& info, const PlayerControls& controls);
 
-    bool isJumping() const;
+   void updateJumpBuffer();
+   void updateJump();
+   void updateLostGroundContact();
+   void updateWallSlide();
+   void updateWallJump();
 
-    sf::Clock mJumpClock;
-    sf::Time mLastJumpPressTime;
-    sf::Time mGroundContactLostTime;
+   bool isJumping() const;
 
-    int32_t mJumpSteps = 0;
+   PlayerJumpInfo _jump_info;
+   PlayerControls _controls;
+   b2Body* _body = nullptr;
 
-    bool mHadGroundContact = true;
-    bool mGroundContactJustLost = false;
+   sf::Clock _jump_clock;
+   sf::Time _last_jump_press_time;
+   sf::Time _ground_contact_lost_time;
 
-    bool mInAir = false;
-    bool mInWater = false;
-    bool mCrouching = false;
-    bool mJumpButtonPressed = false;
-    bool mClimbing = false;
-    bool mWallSliding = false;
-    bool mCompensateVelocity = false;
-    bool mDoubleJumpConsumed = false;
+   int32_t _jump_steps = 0;
 
-    std::function<void(void)> mDustAnimation;
-    std::function<void(void)> mRemoveClimbJoint;
+   bool _had_ground_contact = true;
+   bool _ground_contact_just_lost = false;
+   bool _wallsliding = false;
+   bool _compensate_velocity = false;
+   bool _double_jump_consumed = false;
+
+   std::function<void(void)> _dust_animation_callback;
+   std::function<void(void)> _remove_climb_joint_callback;
 };
 
