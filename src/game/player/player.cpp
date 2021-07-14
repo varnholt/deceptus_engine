@@ -1503,8 +1503,6 @@ void Player::updateDash(Dash dir)
       // but only do this if gravity scaling is not used
       mBody->SetGravityScale(0.0f);
       mDashSteps = 30; // hardcoded to keep it working
-#else
-
 #endif
    }
 
