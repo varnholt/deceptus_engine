@@ -204,7 +204,7 @@ void PlayerJump::doubleJump()
    // double jump should happen with a constant impulse, no adjusting through button press duration
    const auto current_velocity = _body->GetLinearVelocity();
    _body->SetLinearVelocity(b2Vec2(current_velocity.x, 0.0f));
-   jumpImpulse(b2Vec2(0.0f, _body->GetMass() * 6.0f));
+   jumpImpulse(b2Vec2(0.0f, _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerDoubleJumpFactor));
 
    // old approach, can probably be removed
    // jumpForce();
@@ -227,16 +227,16 @@ void PlayerJump::wallJump()
       return;
    }
 
-   const auto leftTouching = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
+   const auto jump_right = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
 
    // double jump should happen with a constant impulse, no adjusting through button press duration
    _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
 
-   const auto impulse_horizontal = _body->GetMass() * 6.0f;
-   const auto impulse_vertical = _body->GetMass() * 3.0f;
+   const auto impulse_horizontal = _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerWallJumpFactorHorizontal;
+   const auto impulse_vertical = -(_body->GetMass() * PhysicsConfiguration::getInstance().mPlayerWallJumpFactorVertical);
 
-   _walljump_steps = 10;
-   _walljump_direction = b2Vec2(leftTouching ? impulse_horizontal : -impulse_horizontal, impulse_vertical);
+   _walljump_steps = PhysicsConfiguration::getInstance().mPlayerWallJumpSteps;
+   _walljump_direction = b2Vec2(jump_right ? impulse_horizontal : -impulse_horizontal, impulse_vertical);
 
    // old approach, can probably be removed
    // jumpForce();
@@ -384,12 +384,9 @@ void PlayerJump::updateWallJump()
       return;
    }
 
-   _body->ApplyForceToCenter(
-      _walljump_direction,
-      true
-   );
+   _body->ApplyForceToCenter(static_cast<float>(_walljump_steps) * _walljump_direction, true);
 
-   std::cout << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y << std::endl;
+   // std::cout << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y << std::endl;
 
    _walljump_steps--;
 }
