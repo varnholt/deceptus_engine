@@ -43,6 +43,10 @@ std::string PhysicsConfiguration::serialize()
             {"player_jump_speed_factor",             mPlayerJumpSpeedFactor},
             {"player_dash_steps",                    mPlayerDashSteps},
             {"player_dash_factor",                   mPlayerDashFactor},
+            {"player_wall_jump_steps",               mPlayerWallJumpSteps},
+            {"player_wall_jump_factor_vertical",     mPlayerWallJumpFactorVertical},
+            {"player_wall_jump_factor_horizontal",   mPlayerWallJumpFactorHorizontal},
+            {"player_double_jump_factor",            mPlayerDoubleJumpFactor},
          }
       }
    };
@@ -57,26 +61,30 @@ void PhysicsConfiguration::deserialize(const std::string& data)
 {
    json config = json::parse(data);
 
-   mTimeStep                     = config["PhysicsConfiguration"]["timestep"].get<float>();
-   mGravity                      = config["PhysicsConfiguration"]["gravity"].get<float>();
-   mPlayerSpeedMaxWalk           = config["PhysicsConfiguration"]["player_speed_max_walk"].get<float>();
-   mPlayerSpeedMaxRun            = config["PhysicsConfiguration"]["player_speed_max_run"].get<float>();
-   mPlayerSpeedMaxWater          = config["PhysicsConfiguration"]["player_speed_max_water"].get<float>();
-   mPlayerSpeedMaxAir            = config["PhysicsConfiguration"]["player_speed_max_air"].get<float>();
-   mPlayerFriction               = config["PhysicsConfiguration"]["player_friction"].get<float>();
-   mPlayerJumpStrength           = config["PhysicsConfiguration"]["player_jump_strength"].get<float>();
-   mPlayerAccelerationGround     = config["PhysicsConfiguration"]["player_acceleration_ground"].get<float>();
-   mPlayerAccelerationAir        = config["PhysicsConfiguration"]["player_acceleration_air"].get<float>();
-   mPlayerDecelerationGround     = config["PhysicsConfiguration"]["player_deceleration_ground"].get<float>();
-   mPlayerDecelerationAir        = config["PhysicsConfiguration"]["player_deceleration_air"].get<float>();
-   mPlayerJumpSteps              = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
-   mPlayerJumpAfterContactLostMs = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
-   mPlayerJumpBufferMs           = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
-   mPlayerJumpMinimalDurationMs  = config["PhysicsConfiguration"]["player_jump_minimal_duration_in_ms"].get<int32_t>();
-   mPlayerJumpFalloff            = config["PhysicsConfiguration"]["player_jump_falloff"].get<float>();
-   mPlayerJumpSpeedFactor        = config["PhysicsConfiguration"]["player_jump_speed_factor"].get<float>();
-   mPlayerDashSteps              = config["PhysicsConfiguration"]["player_dash_steps"].get<int32_t>();
-   mPlayerDashFactor             = config["PhysicsConfiguration"]["player_dash_factor"].get<float>();
+   mTimeStep                        = config["PhysicsConfiguration"]["timestep"].get<float>();
+   mGravity                         = config["PhysicsConfiguration"]["gravity"].get<float>();
+   mPlayerSpeedMaxWalk              = config["PhysicsConfiguration"]["player_speed_max_walk"].get<float>();
+   mPlayerSpeedMaxRun               = config["PhysicsConfiguration"]["player_speed_max_run"].get<float>();
+   mPlayerSpeedMaxWater             = config["PhysicsConfiguration"]["player_speed_max_water"].get<float>();
+   mPlayerSpeedMaxAir               = config["PhysicsConfiguration"]["player_speed_max_air"].get<float>();
+   mPlayerFriction                  = config["PhysicsConfiguration"]["player_friction"].get<float>();
+   mPlayerJumpStrength              = config["PhysicsConfiguration"]["player_jump_strength"].get<float>();
+   mPlayerAccelerationGround        = config["PhysicsConfiguration"]["player_acceleration_ground"].get<float>();
+   mPlayerAccelerationAir           = config["PhysicsConfiguration"]["player_acceleration_air"].get<float>();
+   mPlayerDecelerationGround        = config["PhysicsConfiguration"]["player_deceleration_ground"].get<float>();
+   mPlayerDecelerationAir           = config["PhysicsConfiguration"]["player_deceleration_air"].get<float>();
+   mPlayerJumpSteps                 = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
+   mPlayerJumpAfterContactLostMs    = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
+   mPlayerJumpBufferMs              = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
+   mPlayerJumpMinimalDurationMs     = config["PhysicsConfiguration"]["player_jump_minimal_duration_in_ms"].get<int32_t>();
+   mPlayerJumpFalloff               = config["PhysicsConfiguration"]["player_jump_falloff"].get<float>();
+   mPlayerJumpSpeedFactor           = config["PhysicsConfiguration"]["player_jump_speed_factor"].get<float>();
+   mPlayerDashSteps                 = config["PhysicsConfiguration"]["player_dash_steps"].get<int32_t>();
+   mPlayerDashFactor                = config["PhysicsConfiguration"]["player_dash_factor"].get<float>();
+   mPlayerWallJumpSteps             = config["PhysicsConfiguration"]["player_wall_jump_steps"].get<int32_t>();
+   mPlayerWallJumpFactorVertical    = config["PhysicsConfiguration"]["player_wall_jump_factor_vertical"].get<float>();
+   mPlayerWallJumpFactorHorizontal  = config["PhysicsConfiguration"]["player_wall_jump_factor_horizontal"].get<float>();
+   mPlayerDoubleJumpFactor          = config["PhysicsConfiguration"]["player_double_jump_factor"].get<float>();
 }
 
 

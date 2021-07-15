@@ -19,6 +19,10 @@
         "player_speed_max_air": 2.8,
         "player_dash_steps": 40,
         "player_dash_factor": 5,
+        "player_wall_jump_steps" : 20,
+        "player_wall_jump_factor_vertical" : 1.0,
+        "player_wall_jump_factor_horizontal" : 6.0,
+        "player_double_jump_factor" : 6.0,
         "timestep": 0.0285714287310839
     }
 }

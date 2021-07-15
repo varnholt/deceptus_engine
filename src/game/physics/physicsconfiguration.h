@@ -28,6 +28,10 @@ struct PhysicsConfiguration
    float mPlayerJumpSpeedFactor = 0.1f;
    int32_t mPlayerDashSteps = 20;
    float mPlayerDashFactor = 3.0f;
+   int32_t mPlayerWallJumpSteps = 20;
+   float mPlayerWallJumpFactorVertical = 3.0f;
+   float mPlayerWallJumpFactorHorizontal = 6.0f;
+   float mPlayerDoubleJumpFactor = 6.0f;
 
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
