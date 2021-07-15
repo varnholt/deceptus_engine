@@ -235,8 +235,8 @@ void PlayerJump::wallJump()
    const auto impulse_horizontal = _body->GetMass() * 6.0f;
    const auto impulse_vertical = _body->GetMass() * 3.0f;
 
-   // this doesn't work, should rather be implemented like dash
-   // jumpImpulse(b2Vec2(leftTouching ? impulse_horizontal : -impulse_horizontal, impulse_vertical));
+   _walljump_steps = 10;
+   _walljump_direction = b2Vec2(leftTouching ? impulse_horizontal : -impulse_horizontal, impulse_vertical);
 
    // old approach, can probably be removed
    // jumpForce();
@@ -343,6 +343,12 @@ void PlayerJump::updateWallSlide()
       return;
    }
 
+   // early out if walljump still active
+   if (_walljump_steps > 0)
+   {
+      return;
+   }
+
    const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
    const auto canWallSlide = (skills & ExtraSkill::SkillWallSlide);
 
@@ -373,10 +379,19 @@ void PlayerJump::updateWallSlide()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallJump()
 {
-   if (!_wallsliding)
+   if (_walljump_steps == 0)
    {
       return;
    }
+
+   _body->ApplyForceToCenter(
+      _walljump_direction,
+      true
+   );
+
+   std::cout << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y << std::endl;
+
+   _walljump_steps--;
 }
 
 
