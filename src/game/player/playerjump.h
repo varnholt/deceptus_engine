@@ -48,6 +48,8 @@ struct PlayerJump
    sf::Time _ground_contact_lost_time;
 
    int32_t _jump_steps = 0;
+   int32_t _walljump_steps = 0;
+   b2Vec2 _walljump_direction;
 
    bool _had_ground_contact = true;
    bool _ground_contact_just_lost = false;
