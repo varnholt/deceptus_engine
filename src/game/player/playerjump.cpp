@@ -185,6 +185,11 @@ void PlayerJump::jumpForce()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::doubleJump()
 {
+   if (_walljump_steps > 0)
+   {
+      return;
+   }
+
    const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
    const auto canDoubleJump = (skills & ExtraSkill::SkillDoubleJump);
 
