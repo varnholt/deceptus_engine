@@ -47,8 +47,9 @@ struct PlayerJump
    sf::Time _last_jump_press_time;
    sf::Time _ground_contact_lost_time;
 
-   int32_t _jump_steps = 0;
-   int32_t _walljump_steps = 0;
+   int32_t _jump_frame_count = 0;
+   int32_t _walljump_frame_count = 0;
+   float _walljump_multiplier = 0.0f;
    b2Vec2 _walljump_direction;
 
    bool _had_ground_contact = true;

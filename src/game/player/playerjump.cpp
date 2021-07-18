@@ -78,11 +78,13 @@ void PlayerJump::updateJump()
       _body->ApplyForce(b2Vec2(0, -1.0f), _body->GetWorldCenter(), true);
    }
    else if (
-         (_jump_steps > 0 && _controls.isJumpButtonPressed())
+         (_jump_frame_count > 0 && _controls.isJumpButtonPressed())
       || _jump_clock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance().mPlayerJumpMinimalDurationMs
    )
    {
-      // jump higher if a faster
+      // probably dead code
+
+      // jump higher if faster than regular walk speed
       auto max_walk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
       auto vel = fabs(_body->GetLinearVelocity().x) - max_walk;
       auto factor = 1.0f;
@@ -93,8 +95,7 @@ void PlayerJump::updateJump()
 
          factor =
               1.0f
-            + PhysicsConfiguration::getInstance().mPlayerJumpSpeedFactor
-            * (vel / (max_run - max_walk));
+            + PhysicsConfiguration::getInstance().mPlayerJumpSpeedFactor * (vel / (max_run - max_walk));
       }
 
       /*
@@ -109,36 +110,42 @@ void PlayerJump::updateJump()
        * +---+
       */
 
-     // to change velocity by 5 in one time step
-     auto force = factor * _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / (1.0f / 60.0f) /*dt*/; //f = mv/t
+      // to change velocity by 5 in one time step
+      constexpr auto fixed_timestep = (1.0f / 60.0f);
 
-     // spread this over 6 time steps
-     force /= PhysicsConfiguration::getInstance().mPlayerJumpFalloff;
+      // f = mv / t
+      auto force = factor * _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerJumpStrength / fixed_timestep;
 
-     // more force is required to compensate falling velocity for scenarios
-     // - wall jump
-     // - double jump
-     if (_compensate_velocity)
-     {
-        const auto bodyVelocity = _body->GetLinearVelocity();
-        force *= 1.75f * bodyVelocity.y;
+      // spread the force over 6.5 time steps
+      force /= PhysicsConfiguration::getInstance().mPlayerJumpFalloff;
 
-        _compensate_velocity = false;
-     }
+      // more force is required to compensate falling velocity for scenarios
+      // - wall jump
+      // - double jump
+      if (_compensate_velocity)
+      {
+         const auto bodyVelocity = _body->GetLinearVelocity();
+         force *= 1.75f * bodyVelocity.y;
 
-     // printf("force: %f\n", force);
-     _body->ApplyForceToCenter(b2Vec2(0.0f, -force), true);
+         _compensate_velocity = false;
+      }
 
-     _jump_steps--;
+      // printf("force: %f\n", force);
+      _body->ApplyForceToCenter(b2Vec2(0.0f, -force), true);
 
-     if (_jump_steps == 0)
-     {
-        _body->SetGravityScale(1.35f);
-     }
+      _jump_frame_count--;
+
+      if (_jump_frame_count == 0)
+      {
+         // could be a bug
+         // all other code sets the gravity scale back to 1.0
+
+         _body->SetGravityScale(1.35f);
+      }
    }
    else
    {
-      _jump_steps = 0;
+      _jump_frame_count = 0;
    }
 }
 
@@ -178,14 +185,14 @@ void PlayerJump::jumpImpulse(const b2Vec2& impulse)
 void PlayerJump::jumpForce()
 {
    _jump_clock.restart();
-   _jump_steps = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
+   _jump_frame_count = PhysicsConfiguration::getInstance().mPlayerJumpSteps;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::doubleJump()
 {
-   if (_walljump_steps > 0)
+   if (_walljump_frame_count > 0)
    {
       return;
    }
@@ -237,11 +244,12 @@ void PlayerJump::wallJump()
    // double jump should happen with a constant impulse, no adjusting through button press duration
    _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
 
-   const auto impulse_horizontal = _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerWallJumpFactorHorizontal;
-   const auto impulse_vertical = -(_body->GetMass() * PhysicsConfiguration::getInstance().mPlayerWallJumpFactorVertical);
+   const auto impulse_x =   _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerWallJumpVectorX;
+   const auto impulse_y = -(_body->GetMass() * PhysicsConfiguration::getInstance().mPlayerWallJumpVectorY);
 
-   _walljump_steps = PhysicsConfiguration::getInstance().mPlayerWallJumpSteps;
-   _walljump_direction = b2Vec2(jump_right ? impulse_horizontal : -impulse_horizontal, impulse_vertical);
+   _walljump_frame_count = PhysicsConfiguration::getInstance().mPlayerWallJumpFrameCount;
+   _walljump_multiplier = PhysicsConfiguration::getInstance().mPlayerWallJumpMultiplier;
+   _walljump_direction = b2Vec2(jump_right ? impulse_x : -impulse_x, impulse_y);
 
    // old approach, can probably be removed
    // jumpForce();
@@ -349,7 +357,7 @@ void PlayerJump::updateWallSlide()
    }
 
    // early out if walljump still active
-   if (_walljump_steps > 0)
+   if (_walljump_frame_count > 0)
    {
       return;
    }
@@ -376,7 +384,7 @@ void PlayerJump::updateWallSlide()
    }
 
    b2Vec2 vel = _body->GetLinearVelocity();
-   _body->ApplyForce(0.4f * -vel, _body->GetWorldCenter(), false);
+   _body->ApplyForce(PhysicsConfiguration::getInstance().mPlayerWallSlideFriction * -vel, _body->GetWorldCenter(), false);
    _wallsliding = true;
 }
 
@@ -384,21 +392,24 @@ void PlayerJump::updateWallSlide()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallJump()
 {
-   if (_walljump_steps == 0)
+   if (_walljump_frame_count == 0)
    {
       return;
    }
 
-   _body->ApplyForceToCenter(static_cast<float>(_walljump_steps) * _walljump_direction, true);
+   _walljump_multiplier *= PhysicsConfiguration::getInstance().mPlayerWallJumpMultiplierScalePerFrame;
+   _walljump_multiplier += PhysicsConfiguration::getInstance().mPlayerWallJumpMultiplierIncrementPerFrame;
+
+   _body->ApplyForceToCenter(_walljump_multiplier * _walljump_direction, true);
 
    // std::cout << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y << std::endl;
 
-   _walljump_steps--;
+   _walljump_frame_count--;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerJump::isJumping() const
 {
-   return (_jump_steps > 0);
+   return (_jump_frame_count > 0);
 }

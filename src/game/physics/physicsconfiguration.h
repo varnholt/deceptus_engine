@@ -20,17 +20,34 @@ struct PhysicsConfiguration
    float mPlayerAccelerationAir = 0.05f;
    float mPlayerDecelerationGround = 0.6f;
    float mPlayerDecelerationAir = 0.65f;
+
+   // jump
    int32_t mPlayerJumpSteps = 9;
    int32_t mPlayerJumpAfterContactLostMs = 100;
    int32_t mPlayerJumpBufferMs = 100;
    int32_t mPlayerJumpMinimalDurationMs = 80;
    float mPlayerJumpFalloff = 6.5f;
    float mPlayerJumpSpeedFactor = 0.1f;
-   int32_t mPlayerDashSteps = 20;
-   float mPlayerDashFactor = 3.0f;
-   int32_t mPlayerWallJumpSteps = 20;
-   float mPlayerWallJumpFactorVertical = 3.0f;
-   float mPlayerWallJumpFactorHorizontal = 6.0f;
+
+   // dash
+   int32_t mPlayerDashFrameCount = 20;
+   float mPlayerDashMultiplier = 20.0f;
+   float mPlayerDashMultiplierIncrementPerFrame = -1.0f;
+   float mPlayerDashMultiplierScalePerFrame = 1.0f;
+   float mPlayerDashVector = 3.0f;
+
+   // wall slide
+   float mPlayerWallSlideFriction = 0.4f;
+
+   // wall jump
+   int32_t mPlayerWallJumpFrameCount = 20;
+   float mPlayerWallJumpVectorX = 6.0f;
+   float mPlayerWallJumpVectorY = 1.0f;
+   float mPlayerWallJumpMultiplier = 20.0f;
+   float mPlayerWallJumpMultiplierIncrementPerFrame = -1.0f;
+   float mPlayerWallJumpMultiplierScalePerFrame = 1.0f;
+
+   // double jump
    float mPlayerDoubleJumpFactor = 6.0f;
 
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
