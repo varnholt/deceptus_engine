@@ -782,7 +782,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._points_left = mPointsToLeft;
    data._points_right = !mPointsToLeft;
    data._climb_joint_present = mClimb._climb_joint;
-   data._jump_steps = mJump._jump_steps;
+   data._jump_frame_count = mJump._jump_frame_count;
    data._moving_left = mControls.isMovingLeft();
    data._moving_right = mControls.isMovingRight();
    data._wall_sliding = mJump._wallsliding;
@@ -1495,7 +1495,8 @@ void Player::updateDash(Dash dir)
          return;
       }
 
-      mDashSteps = PhysicsConfiguration::getInstance().mPlayerDashSteps;
+      mDashFrameCount = PhysicsConfiguration::getInstance().mPlayerDashFrameCount;
+      mDashMultiplier = PhysicsConfiguration::getInstance().mPlayerDashMultiplier;
       mDashDir = dir;
 
 #ifndef JUMP_GRAVITY_SCALING
@@ -1513,15 +1514,16 @@ void Player::updateDash(Dash dir)
 
    auto left = (dir == Dash::Left);
    mPointsToLeft = (left);
-   auto dashVector = mDashSteps * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerDashFactor;
+
+   mDashMultiplier += PhysicsConfiguration::getInstance().mPlayerDashMultiplierIncrementPerFrame;
+   mDashMultiplier *=PhysicsConfiguration::getInstance().mPlayerDashMultiplierScalePerFrame;
+
+   auto dashVector = mDashMultiplier * mBody->GetMass() * PhysicsConfiguration::getInstance().mPlayerDashVector;
    auto impulse = (left) ? -dashVector : dashVector;
 
-   mBody->ApplyForceToCenter(
-      b2Vec2(impulse, 0.0f),
-      false
-   );
+   mBody->ApplyForceToCenter(b2Vec2(impulse, 0.0f), false);
 
-   mDashSteps--;
+   mDashFrameCount--;
 
    if (!isDashActive())
    {
@@ -1533,7 +1535,7 @@ void Player::updateDash(Dash dir)
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isDashActive() const
 {
-   return (mDashSteps > 0);
+   return (mDashFrameCount > 0);
 }
 
 
@@ -1759,7 +1761,7 @@ void Player::reset()
    mGroundBody = nullptr;
 
    // reset dash
-   mDashSteps = 0;
+   mDashFrameCount = 0;
    resetDash();
    mDead = false;
 

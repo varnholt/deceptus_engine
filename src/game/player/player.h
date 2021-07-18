@@ -225,7 +225,8 @@ private:
 
    float mImpulse = 0.0f;
 
-   int mDashSteps = 0;
+   int32_t mDashFrameCount = 0;
+   float mDashMultiplier = 0.0f;
    Dash mDashDir = Dash::None;
 
    PlayerAnimation _player_animation;

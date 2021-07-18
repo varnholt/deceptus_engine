@@ -38,7 +38,7 @@ public:
       bool _wall_sliding = false;
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
-      int32_t _jump_steps = 0;
+      int32_t _jump_frame_count = 0;
    };
 
    void update(
