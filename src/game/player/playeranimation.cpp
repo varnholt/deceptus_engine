@@ -446,7 +446,7 @@ void PlayerAnimation::updateV1(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_steps == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+      if (data._jump_frame_count == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
       {
          // jump ignition
          _jump_animation_reference = 0;
@@ -607,7 +607,7 @@ void PlayerAnimation::updateV2(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_steps > PhysicsConfiguration::getInstance().mPlayerJumpSteps - FRAMES_COUNT_JUMP_INIT)
+      if (data._jump_frame_count > PhysicsConfiguration::getInstance().mPlayerJumpSteps - FRAMES_COUNT_JUMP_INIT)
       {
          // jump ignition
          _jump_animation_reference = 0;
