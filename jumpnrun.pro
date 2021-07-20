@@ -619,6 +619,8 @@ DISTFILES += \
     data/shaders/brightness.frag \
     data/shaders/pixelate.frag \
     data/shaders/water.frag \
-    data/shaders/wave.vert
+    data/shaders/wave.vert \
+    doc/lasers/lasers.md \
+    doc/level_design.md
 
 
