@@ -339,6 +339,13 @@
             75,
             75,
             75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
             75
         ],
         "frame_offset": [
@@ -353,16 +360,23 @@
             36.0,
             48.0
         ],
-        "sprite_count": 5,
+        "sprite_count": 12,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_double_jump_r_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75
+           75,
+           75,
+           75,
+           75,
+           75,
+           75,
+           75,
+           75,
+           75,
+           75,
+           75,
+           75
         ],
         "frame_offset": [
             0,
@@ -376,7 +390,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 5,
+        "sprite_count": 12,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_idle_l_2": {
