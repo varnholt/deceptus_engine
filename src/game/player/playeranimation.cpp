@@ -7,6 +7,7 @@
 
 #include "animationpool.h"
 #include "camerapane.h"
+#include "framework/tools/stopwatch.h"
 #include "game/gameclock.h"
 #include "mechanisms/portal.h"
 #include "physics/physicsconfiguration.h"
@@ -141,6 +142,21 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_jump_landing_l_2);
    _looped_animations.push_back(_jump_midair_l_2);
 
+   _looped_animations.push_back(_double_jump_r_2);
+   _looped_animations.push_back(_double_jump_l_2);
+   _looped_animations.push_back(_swim_idle_r_2);
+   _looped_animations.push_back(_swim_idle_l_2);
+   _looped_animations.push_back(_swim_r_2);
+   _looped_animations.push_back(_swim_l_2);
+
+   _looped_animations.push_back(_wallslide_impact_r_2);
+   _looped_animations.push_back(_wallslide_impact_l_2);
+   _looped_animations.push_back(_wallslide_r_2);
+   _looped_animations.push_back(_wallslide_l_2);
+   _looped_animations.push_back(_wall_jump_r_2);
+   _looped_animations.push_back(_wall_jump_l_2);
+
+
    for (auto& i : _looped_animations)
    {
       i->_looped = true;
@@ -262,8 +278,8 @@ void PlayerAnimation::generateJson()
    next_row(); // reserved
    next_row(); // reserved
 
-   AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
+   AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
    AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
@@ -532,6 +548,8 @@ void PlayerAnimation::updateV2(
       return;
    }
 
+   const auto now = StopWatch::now();
+
    std::shared_ptr<Animation> nextCycle = nullptr;
 
    auto velocity = data._linear_velocity;
@@ -668,6 +686,20 @@ void PlayerAnimation::updateV2(
       nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
    }
 
+   if (StopWatch::duration(data._timepoint_doublejump, now) < 12 * 75ms)
+   {
+      nextCycle = data._points_right ? _double_jump_r_2 : _double_jump_l_2;
+   }
+   else
+   {
+      // if (_double_jump_r_2->_previous_frame == -1 || _double_jump_l_2->_previous_frame == -1)
+      // {
+      //    _double_jump_r_2->seekToStart();
+      //    _double_jump_l_2->seekToStart();
+      // }
+   }
+
+   // appear animation
    if (GameClock::getInstance().duration() < 1.260s)
    {
       nextCycle = data._points_right ? _appear_r_2 : _appear_l_2;

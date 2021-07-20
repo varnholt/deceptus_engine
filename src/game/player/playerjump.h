@@ -5,6 +5,7 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
+#include <chrono>
 #include <functional>
 
 class b2Body;
@@ -12,6 +13,9 @@ class b2Joint;
 
 struct PlayerJump
 {
+   using HighResDuration = std::chrono::high_resolution_clock::duration;
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
    PlayerJump() = default;
 
    struct PlayerJumpInfo
@@ -43,9 +47,12 @@ struct PlayerJump
    PlayerControls _controls;
    b2Body* _body = nullptr;
 
-   sf::Clock _jump_clock;
-   sf::Time _last_jump_press_time;
-   sf::Time _ground_contact_lost_time;
+   sf::Clock _jump_clock;                 // replace by chrono
+   sf::Time _last_jump_press_time;        // replace by chrono
+   sf::Time _ground_contact_lost_time;    // replace by chrono
+
+   HighResTimePoint _timepoint_walljump;
+   HighResTimePoint _timepoint_doublejump;
 
    int32_t _jump_frame_count = 0;
    int32_t _walljump_frame_count = 0;

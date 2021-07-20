@@ -4,6 +4,7 @@
 #include "audio.h"
 #include "camerapane.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/stopwatch.h"
 #include "gamecontactlistener.h"
 #include "physics/physicsconfiguration.h"
 #include "savestate.h"
@@ -82,8 +83,6 @@ void PlayerJump::updateJump()
       || _jump_clock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance().mPlayerJumpMinimalDurationMs
    )
    {
-      // probably dead code
-
       // jump higher if faster than regular walk speed
       auto max_walk = PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
       auto vel = fabs(_body->GetLinearVelocity().x) - max_walk;
@@ -91,6 +90,7 @@ void PlayerJump::updateJump()
 
       if (vel > 0.0f)
       {
+         // probably dead code
          auto max_run = PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
 
          factor =
@@ -218,8 +218,7 @@ void PlayerJump::doubleJump()
    _body->SetLinearVelocity(b2Vec2(current_velocity.x, 0.0f));
    jumpImpulse(b2Vec2(0.0f, _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerDoubleJumpFactor));
 
-   // old approach, can probably be removed
-   // jumpForce();
+   _timepoint_doublejump = StopWatch::now();
 }
 
 
@@ -251,8 +250,7 @@ void PlayerJump::wallJump()
    _walljump_multiplier = PhysicsConfiguration::getInstance().mPlayerWallJumpMultiplier;
    _walljump_direction = b2Vec2(jump_right ? impulse_x : -impulse_x, impulse_y);
 
-   // old approach, can probably be removed
-   // jumpForce();
+   _timepoint_walljump = StopWatch::now();
 }
 
 
