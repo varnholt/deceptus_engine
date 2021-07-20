@@ -621,6 +621,7 @@ DISTFILES += \
     data/shaders/water.frag \
     data/shaders/wave.vert \
     doc/lasers/lasers.md \
-    doc/level_design.md
+    doc/level_design.md \
+    doc/physics/readme.md
 
 
