@@ -25,6 +25,9 @@ public:
 
    struct PlayerAnimationData
    {
+      using HighResDuration = std::chrono::high_resolution_clock::duration;
+      using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
       bool _dead = false;
       bool _in_air = false;
       bool _in_water = false;
@@ -39,6 +42,8 @@ public:
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
       int32_t _jump_frame_count = 0;
+      HighResTimePoint _timepoint_walljump;
+      HighResTimePoint _timepoint_doublejump;
    };
 
    void update(
