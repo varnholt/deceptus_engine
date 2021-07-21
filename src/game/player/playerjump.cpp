@@ -238,7 +238,7 @@ void PlayerJump::wallJump()
       return;
    }
 
-   const auto jump_right = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
+   _walljump_points_right = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
 
    // double jump should happen with a constant impulse, no adjusting through button press duration
    _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
@@ -248,8 +248,7 @@ void PlayerJump::wallJump()
 
    _walljump_frame_count = PhysicsConfiguration::getInstance().mPlayerWallJumpFrameCount;
    _walljump_multiplier = PhysicsConfiguration::getInstance().mPlayerWallJumpMultiplier;
-   _walljump_direction = b2Vec2(jump_right ? impulse_x : -impulse_x, impulse_y);
-
+   _walljump_direction = b2Vec2(_walljump_points_right ? impulse_x : -impulse_x, impulse_y);
    _timepoint_walljump = StopWatch::now();
 }
 

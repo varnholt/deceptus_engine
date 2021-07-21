@@ -243,14 +243,19 @@ void PlayerAnimation::generateJson()
 
    AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_100), sprite_name);
    AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+
    AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_75), sprite_name);
    AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_75), sprite_name);
+
    AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
    AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
+
    AnimationSettings player_runstop_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75}, sprite_name);
    AnimationSettings player_runstop_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75}, sprite_name);
+
    AnimationSettings player_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
    AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
+
    AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
 
@@ -280,8 +285,10 @@ void PlayerAnimation::generateJson()
 
    AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
    AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
+
    AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+
    AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_swim_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
 
@@ -290,11 +297,12 @@ void PlayerAnimation::generateJson()
 
    AnimationSettings player_wallslide_impact_r({72, 48}, {0, wallslide_row_r}, {36.0, 48.0}, vx(6, d_75), sprite_name);
    AnimationSettings player_wallslide_impact_l({72, 48}, {0, wallslide_row_l}, {36.0, 48.0}, vx(6, d_75), sprite_name);
+
    AnimationSettings player_wallslide_r({72, 48}, {6 * 72, wallslide_row_r}, {36.0, 48.0}, vx(2, d_75), sprite_name);
    AnimationSettings player_wallslide_l({72, 48}, {6 * 72, wallslide_row_l}, {36.0, 48.0}, vx(2, d_75), sprite_name);
 
-   AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
+   AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
 
    next_row(); // reserved
    next_row(); // reserved
@@ -690,13 +698,10 @@ void PlayerAnimation::updateV2(
    {
       nextCycle = data._points_right ? _double_jump_r_2 : _double_jump_l_2;
    }
-   else
+
+   if (StopWatch::duration(data._timepoint_walljump, now) < 12 * 75ms)
    {
-      // if (_double_jump_r_2->_previous_frame == -1 || _double_jump_l_2->_previous_frame == -1)
-      // {
-      //    _double_jump_r_2->seekToStart();
-      //    _double_jump_l_2->seekToStart();
-      // }
+      nextCycle = data._wall_jump_points_right ? _wall_jump_r_2 : _wall_jump_l_2;
    }
 
    // appear animation
