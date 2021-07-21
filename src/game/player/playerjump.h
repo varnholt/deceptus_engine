@@ -58,6 +58,7 @@ struct PlayerJump
    int32_t _walljump_frame_count = 0;
    float _walljump_multiplier = 0.0f;
    b2Vec2 _walljump_direction;
+   bool _walljump_points_right = false;
 
    bool _had_ground_contact = true;
    bool _ground_contact_just_lost = false;
