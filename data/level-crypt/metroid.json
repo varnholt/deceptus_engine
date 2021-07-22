@@ -22,7 +22,7 @@
       "id": "194"
     },
     {
-      "script": "bat.lua",
+      "script": "deprecated_bat.lua",
       "startposition": [210, 78]
     },
     {
@@ -47,26 +47,26 @@
       "patrolpath": [238, 82]
     },
     {
-      "script": "blob.lua",
+      "script": "deprecated_blob.lua",
       "startposition": [14, 40],
       "patrolpath": [14, 40, 18, 40],
       "properties": [{"name": "dummy", "value": "dummy"}]
     },
     {
-      "script": "cannon.lua",
+      "script": "deprecated_cannon.lua",
       "startposition": [70, 41],
       "properties": [{"name": "alignment", "value": "down"}]
     },
     {
-      "script": "klonk.lua",
+      "script": "deprecated_klonk.lua",
       "startposition": [254, 40]
     },
     {
-      "script": "klonk.lua",
+      "script": "deprecated_klonk.lua",
       "startposition": [256, 40]
     },
     {
-      "script": "klonk.lua",
+      "script": "deprecated_klonk.lua",
       "startposition": [258, 40]
     },
     {
@@ -95,13 +95,13 @@
       "properties": [{"name": "alignment", "value": "down"}]
     },
     {
-      "script": "dumb.lua",
+      "script": "deprecated_dumb.lua",
       "startposition": [60, 26],
       "properties": [{"name": "dummy", "value": "dummy"}],
       "patrolpath": [74, 26, 60, 26]
     },
     {
-      "script": "skeleton.lua",
+      "script": "deprecated_skeleton.lua",
       "startposition": [175, 64],
       "patrolpath": [175, 64, 180, 64]
     },
