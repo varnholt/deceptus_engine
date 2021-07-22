@@ -4,7 +4,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
-   sprite = "data/sprites/enemy_blob.png",
+   sprite = "data/sprites/deprecated_enemy_blob.png",
    velocity_walk_max = 1.0,
    acceleration_ground = 0.1,
    damage = 40
