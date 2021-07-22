@@ -585,28 +585,28 @@ DISTFILES += \
     data/menus/titlescreen.psd \
     data/menus/video.psd \
     data/scripts/enemies/arrowtrap.lua \
-    data/scripts/enemies/bat.lua \
+    data/scripts/enemies/deprecated_bat.lua \
     data/scripts/enemies/bat_2.lua \
     data/scripts/enemies/blob_2.lua \
     data/scripts/enemies/bonefish.lua \
     data/scripts/enemies/cannon_2.lua \
     data/scripts/enemies/critter.lua \
-    data/scripts/enemies/dumb.lua \
+    data/scripts/enemies/deprecated_dumb.lua \
     data/config/game.json \
     data/config/physics.json \
-    data/scripts/enemies/blob.lua \
-    data/scripts/enemies/endboss_1.lua \
+    data/scripts/enemies/deprecated_blob.lua \
+    data/scripts/enemies/deprecated_endboss_1.lua \
     data/scripts/enemies/ghost.lua \
     data/scripts/enemies/interpolation.lua \
-    data/scripts/enemies/klonk.lua \
+    data/scripts/enemies/deprecated_klonk.lua \
     data/scripts/enemies/klonk_2.lua \
-    data/scripts/enemies/skeleton.lua \
+    data/scripts/enemies/deprecated_skeleton.lua \
     data/scripts/enemies/spikeball.lua \
     data/scripts/enemies/vector2.lua \
     data/scripts/enemies/watermine.lua \
     data/shaders/death.frag \
     data/shaders/death.vert \
-    data/scripts/enemies/cannon.lua \
+    data/scripts/enemies/deprecated_cannon.lua \
     data/shaders/light.frag \
     data/shaders/water.frag \
     data/scripts/enemies/landmine.lua \
