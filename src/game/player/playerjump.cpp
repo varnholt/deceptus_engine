@@ -382,7 +382,12 @@ void PlayerJump::updateWallSlide()
 
    b2Vec2 vel = _body->GetLinearVelocity();
    _body->ApplyForce(PhysicsConfiguration::getInstance().mPlayerWallSlideFriction * -vel, _body->GetWorldCenter(), false);
-   _wallsliding = true;
+
+   if (!_wallsliding)
+   {
+      _timepoint_wallslide = StopWatch::now();
+      _wallsliding = true;
+   }
 }
 
 
