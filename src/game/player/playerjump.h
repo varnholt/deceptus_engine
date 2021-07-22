@@ -51,6 +51,7 @@ struct PlayerJump
    sf::Time _last_jump_press_time;        // replace by chrono
    sf::Time _ground_contact_lost_time;    // replace by chrono
 
+   HighResTimePoint _timepoint_wallslide;
    HighResTimePoint _timepoint_walljump;
    HighResTimePoint _timepoint_doublejump;
 
