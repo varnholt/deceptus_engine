@@ -4,7 +4,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 -- enemy configuration
 properties = {
-   sprite = "data/sprites/enemy_test.png",
+   sprite = "data/sprites/deprecated_enemy_test.png",
    velocity_walk_max = 1.0,
    acceleration_ground = 0.1
 }

@@ -1,7 +1,7 @@
 [
     {
         "checkpoint": 0,
-        "levelindex": 0,
+        "levelindex": 2,
         "playerinfo": {
             "extras": {
                 "health": {
@@ -14,13 +14,9 @@
                 }
             },
             "inventory": {
-                "items": [
-                    {
-                        "item": 2
-                    }
-                ]
+                "items": []
             },
-            "name": "level dev"
+            "name": "Demo"
         }
     },
     {
@@ -40,12 +36,12 @@
             "inventory": {
                 "items": []
             },
-            "name": "level malte"
+            "name": "Deprecated Gameplay Demo"
         }
     },
     {
         "checkpoint": 0,
-        "levelindex": 2,
+        "levelindex": 0,
         "playerinfo": {
             "extras": {
                 "health": {
@@ -58,9 +54,13 @@
                 }
             },
             "inventory": {
-                "items": []
+                "items": [
+                    {
+                        "item": 2
+                    }
+                ]
             },
-            "name": "level demo"
+            "name": "Deprecated Engine Test"
         }
     }
 ]
