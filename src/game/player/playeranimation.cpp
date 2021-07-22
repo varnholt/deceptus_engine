@@ -691,7 +691,14 @@ void PlayerAnimation::updateV2(
 
    if (data._wall_sliding)
    {
-      nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
+      if (StopWatch::duration(data._timepoint_wallslide, now) < 6 * 75ms)
+      {
+         nextCycle = data._points_right ? _wallslide_impact_l_2 : _wallslide_impact_r_2;
+      }
+      else
+      {
+         nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
+      }
    }
 
    if (StopWatch::duration(data._timepoint_doublejump, now) < 12 * 75ms)
