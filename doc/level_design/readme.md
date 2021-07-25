@@ -93,7 +93,7 @@ Deceptus currently supports 51 layers while the layer furthest away from your ey
 
 Deceptus could just use the layer order that you define inside your tmx file by moving layers up and down. However, the game engine wants to know the exact z coordinate of each layer since that's much more predictable than auto-computing the z coordinate from your layer stack inside Tiled. This is why each layer should have z custom property `z` of type `int`.
 
-|Property|Type|Description|
+|Custom Property|Type|Description|
 |-|-|-|
 |z|int|The z depth of your layer from 0 (far far away) to 50 (frontmost)|
 
@@ -109,7 +109,7 @@ Deceptus supports 3 Parallax layers.<br>
 All Parallax layer names must start with `parallax_`.
 
 They have the properties below:
-|Property|Type|Description|
+|Custom Property|Type|Description|
 |-|-|-|
 |parallax|float|The scrolling pace in relation to the foreground [`0..1`]|
 |parallax_view|int|The reference to the Parallax layer slot. Since Deceptus supports 3 slots, the value range goes from [`0..2`]|
@@ -124,7 +124,7 @@ If you want to insert images into your level without being restricted to the 24x
 Deceptus supports different blend modes for Image Layers.
 
 They have the properties below:
-|Property|Type|Description|
+|Custom Property|Type|Description|
 |-|-|-|
 |blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
 
@@ -170,6 +170,15 @@ Now change the object's default properties below:
 |Width|float|The width of the belt should be a multiple of `24.0`.|
 |Height|float|The height of the belt should be set to `12.0`.|
 
+Next add a custom property for the velocity:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|velocity|float|Negative values make the player move to the left, positive values move him to the right. Good values are probably something like `-0.6` and `0.6`.|
+
+Conveyor belts use the `tilesets/cbelt.png` texture inside your level directory.
+
+<br>
 
 ## Doors
 
