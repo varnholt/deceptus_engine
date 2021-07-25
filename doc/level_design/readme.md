@@ -4,6 +4,8 @@ Levels in Deceptus use the Tiled Editor file format _tmx_.
 In order to make your first level you will need two things:
 Tiled and a solid sprite sheet, also called tileset.
 
+<br>
+
 ## Some Terms
 A _sprite sheet_ is a big texture (an image) that contains all the elements that you want to use in your level. Those are called _sprites_.<br>
 You can use as many sprite sheets as you like, however Deceptus only supports one sprite sheet per _layer_.
@@ -11,10 +13,14 @@ A layer is something like a transparent sheet where you can draw things on. And 
 Likewise, your level can consist of many layers put on top of each other.
 So you can have a layer for things that should always be in the foreground, another layer for all the stuff that's directly located around our game character and another layer for the background. While writing this, our hero does not have a name yet, so let's just call him Adam for now.
 
+<br>
+
 ## Your Tileset
 
 Each game defines a particular tile size (the width and height) of a tile in the sprite sheet. Deceptus went for `24x24px`. If you want to go for a different tile size, you'd have to change the code of the game (`constants.h`).<br>
 Furthermore, we have decided that 2 tiles should represent 1m in the 'real world'. This is relevant for the physics behavior of the game. So it's good to keep in mind that 48 pixels are equivalent to 1 meter. This constant can also be altered in the game code if needed.
+
+<br>
 
 ## Your Tiles
 
@@ -77,6 +83,7 @@ The last step needed to be finally able to play your first level is to define th
 
 Now you're all set! Go and try out your first level!
 
+<br>
 
 ### Adding More Layers
 
@@ -86,73 +93,44 @@ Deceptus currently supports 51 layers while the layer furthest away from your ey
 
 Deceptus could just use the layer order that you define inside your tmx file by moving layers up and down. However, the game engine wants to know the exact z coordinate of each layer since that's much more predictable than auto-computing the z coordinate from your layer stack inside Tiled. This is why each layer should have z custom property `z` of type `int`.
 
+|Property|Type|Description|
+|-|-|-|
+|z|int|The z depth of your layer from 0 (far far away) to 50 (frontmost)|
+
+The next two paragraphs about _Parallax_ and _Image Layers_ are there just for completeness since you won't necessarily need them in your early design steps.
+
+<br>
 
 ### Adding Parallax Layers
 
-TBD.
+In order to create the illusion of depth, some time in the 90s Parallax layers were introduced. Those are basically layers in the background that scroll at a different pace than the foreground.
 
-```
-   float mParallaxFactors[3] = {0.9f, 0.85f, 0.8f};
-```
-```json
-[
-    {
-        "name": "parallax",
-        "type": "float",
-        "value": 0.9
-    }
-]
-[
-    {
-        "name": "parallax_view",
-        "type": "int",
-        "value": 0
-    }
-]
-```
+Deceptus supports 3 Parallax layers.<br>
+All Parallax layer names must start with `parallax_`.
 
+They have the properties below:
+|Property|Type|Description|
+|-|-|-|
+|parallax|float|The scrolling pace in relation to the foreground [`0..1`]|
+|parallax_view|int|The reference to the Parallax layer slot. Since Deceptus supports 3 slots, the value range goes from [`0..2`]|
+
+
+<br>
 
 ### Adding Image Layers
 
-TBD.
+If you want to insert images into your level without being restricted to the 24x24px tile size, you can use Image Layers. In order to do so, you can just create a new 'Image Layer' inside Tiled.
 
-```json
-[
-    {
-        "name": "blendmode",
-        "type": "string",
-        "value": "add"
-    }
-]
-```
-```
-[
-    {
-        "name": "z",
-        "type": "int",
-        "value": 15
-    }
-]
-```
+Deceptus supports different blend modes for Image Layers.
 
-```cpp
-   if (blendModeStr == "alpha")
-   {
-      blendMode = sf::BlendAlpha;
-   }
-   else if (blendModeStr == "multiply")
-   {
-      blendMode = sf::BlendMultiply;
-   }
-   else if (blendModeStr == "add")
-   {
-      blendMode = sf::BlendAdd;
-   }
-   else if (blendModeStr == "none")
-   {
-      blendMode = sf::BlendNone;
-   }
-```
+They have the properties below:
+|Property|Type|Description|
+|-|-|-|
+|blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
+
+
+<br>
+<br>
 
 # Mechanisms
 
