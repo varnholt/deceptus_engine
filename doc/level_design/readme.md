@@ -40,37 +40,119 @@ Keep in mind that the shapes used for each tile will be merged into one big 2D m
 
 ## Level Layers
 
-Custom Properties
-z
+### A First Test Run
 
-bg0
-bg1
-bg2
-bg3
+The first thing you want to do next is to define the colliding layer of your level because once you've done that, you are actually able to try it out inside the game engine.
 
-```
-enum ZDepth
+This layer _must_ be called 'level' and it should have a custom property of type `int` with the value `15`. More on that later.
+
+When you save the tmx file the game will evaluate all the collision information that you defined in the Collision Editor, merge that to one large mesh and pass that to the physics engine.
+
+Now you've got to define a JSON file that describes the most basic information about your level, such as
+- the filename of your level
+- Adam's start position
+
+To do so, create a subdirectory inside the game's `data` folder such as `level-awesome` and copy your tmx file and all related files such as your sprite sheets etc. to this folder. Now create a file called `level.json` that looks like the one below:
+
+```json
 {
-   ZDepthBackgroundMin = 0,
-   ZDepthBackgroundMax = 15,
-
-   ZDepthForegroundMin = 16,
-   ZDepthForegroundMax = 50,
-
-   ZDepthDoors = 40,
-   ZDepthPlayer = 16
-};
-
-
+  "filename": "data/level-awesome/my_awesome_level.tmx",
+  "startposition": [45, 27]
+}
 ```
 
-### Parallax Layers
+The `filename` property just points to your tmx file.<br>
+The `startposition` property is a x, y array that defines Adam's start position. This position is in tile coordinates. You can see the tile coordinates at Tiled's status bar at the bottom. This is why it's been decided that tile coordinates are more convenient than pixel coordinates.
+
+The last step needed to be finally able to play your first level is to define the order of your levels. For that purpose, open up `data/config/levels.json` and create a section for your level. If you put it first, it will load right after you start a new game:
+
+```json
+[
+   {
+      "levelname": "data/level-awesome/level.json"
+   },
+   ...
+]
+```
+
+Now you're all set! Go and try out your first level!
+
+
+### Adding More Layers
+
+Of course, having a single layer level will look a bit dull so you're probably interested in how to add layers to the foreground and background.
+
+Deceptus currently supports 51 layers while the layer furthest away from your eye (in the background) has the z coordinate `0` and the frontmost layer has the z coordinate `50`. Adam moves around on `z = 16`. If you take a look at the previous paragraph, you'll notice that this is right on top of the level layer.
+
+Deceptus could just use the layer order that you define inside your tmx file by moving layers up and down. However, the game engine wants to know the exact z coordinate of each layer since that's much more predictable than auto-computing the z coordinate from your layer stack inside Tiled. This is why each layer should have z custom property `z` of type `int`.
+
+
+### Adding Parallax Layers
+
+TBD.
+
 ```
    float mParallaxFactors[3] = {0.9f, 0.85f, 0.8f};
 ```
+```json
+[
+    {
+        "name": "parallax",
+        "type": "float",
+        "value": 0.9
+    }
+]
+[
+    {
+        "name": "parallax_view",
+        "type": "int",
+        "value": 0
+    }
+]
+```
 
 
+### Adding Image Layers
 
+TBD.
+
+```json
+[
+    {
+        "name": "blendmode",
+        "type": "string",
+        "value": "add"
+    }
+]
+```
+```
+[
+    {
+        "name": "z",
+        "type": "int",
+        "value": 15
+    }
+]
+```
+
+```cpp
+   if (blendModeStr == "alpha")
+   {
+      blendMode = sf::BlendAlpha;
+   }
+   else if (blendModeStr == "multiply")
+   {
+      blendMode = sf::BlendMultiply;
+   }
+   else if (blendModeStr == "add")
+   {
+      blendMode = sf::BlendAdd;
+   }
+   else if (blendModeStr == "none")
+   {
+      blendMode = sf::BlendNone;
+   }
+```
 
 # Mechanisms
 
