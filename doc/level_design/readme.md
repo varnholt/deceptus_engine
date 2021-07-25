@@ -182,35 +182,48 @@ Conveyor belts use the `tilesets/cbelt.png` texture inside your level directory.
 
 ## Doors
 
-Tile layer: doors
+Doors are not to be confused with 'Portals'. While the latter teleport you from one place to another, doors serve the purpose of a gate that allows you to move from one room to another.
 
+The door implementation is based on tiles only.
 
-## Extras
+All doors are defined in a layer labelled `doors`. Wherever there are 2 or more adjacent tiles inside this layer, they are merged together to a door. On top of the door there can be an indicator for a required key. There are different keys the player can pick up for different types of doors. At the moment they're all color-coded (red, green, blue, yellow, orange) but the implementation could be changed anytime.
 
-Tile layer: extras
+If the door should not require a key to open it, then just don't add a key tile at its top.
+
+Just like every other layer, doors also require a `z` custom property.
+
+![](images/door.png)
 
 
 ## Fans
 
-Tile layer: fans
-Object layer: fans
+Fans work just like fans from the real world, however they are _slightly_ stronger than in the real world. So, depending on where they are pointing to, they can make Adam fly or serve as an impassable obstacle.
+
+This mechanism uses a mix of layers and objects. While the fans inside the tile layer called `fans` determine the direction of the air flow, rectangles in the object layer `fans` determine the active area of the fans. The idea is that all fans within one rectangle work together as one unit. So when defining the rectangles make sure they nicely overlap with the fan tiles. You can achieve that by using the `ALT`-key inside Tiled.
+
+Apart from the `z` depth, fans have a 'speed' value:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|speed|float|The speed value typically ranges from [`0..1`], `0.9` turned out to be a suitable value.|
+
+![](images/fans.png)
 
 
 ## Lasers
 
-Tile layer: lasers
-Object layer: lasers
+Lasers follow the same concept as fans and are based on a combination of tiles and objects. Since the tileset allows rather complex laser shapes including mirror tiles, the object layer is used so you can group your laser tiles to one coherent 'unit'.
 
-Have one rectangle per 'laser unit'.
-Snap rectangle to tiles.
+So the first thing you do is to place all your laser tiles inside a tile layer called `lasers_2` and then create an object layer `lasers_2` where you draw a rectangle that covers all the laser tiles that belong together (`_2` because we want to use the 2nd version of the laser implementation).
 
-Properties
+Apart from the `z` depth, lasers have the custom properties below:
 
-|Name|Type|
-|-|-|
-|off_time|int (ms)|
-|on_time|int (ms)|
+|Custom Property|Type|Description|
+|-|-|-|
+|off_time|int|The duration the laser is in 'off' state (in ms)|
+|on_time|int|The duration the laser is in 'on' state (in ms)|
 
+![](images/lasers.png)
 
 ## Platforms
 
@@ -222,6 +235,21 @@ Object layer: platforms
 
 Tile layer: portals
 Object layer: portals
+
+
+## Crushers
+## Deathblocks
+## Levers
+## Ropes
+## Spikeballs
+## Spikes
+
+
+
+
+## Extras
+
+Tile layer: extras
 
 
 # Visualization
