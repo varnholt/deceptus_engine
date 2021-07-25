@@ -134,13 +134,42 @@ They have the properties below:
 
 # Mechanisms
 
+The next thing you might want to do is to either add mechanisms to your level or add enemies. With respect to the workflow, both is fine. So you can either jump to the _Enemies_ paragraph or keep reading about mechanisms.
+
+All mechanisms in the game are hard-coded. That means that the only way to change their basic design or behavior by altering the C++ code of the game. Mechanisms use different approaches for their setup. While some might be based on tile layers, others are based on object layers and some use a combination of both.
+
+<br>
+
 ## Bouncers
 
-Object layer: bouncers
+Bouncers allow the player to jump very high or bounce him far into the direction the bouncer points to. At the moment only bouncers pointing up are supported.
 
-## Conveyor belts
+In order to create a bouncer, create an object group '`bouncers`' and set the object group's `z` property. Then create one rectangle inside the 'bouncers' group for each bouncer.
 
-Object layer: conveyorbelts
+Now change the object's default properties below:
+|Property|Type|Description|
+|-|-|-|
+|Width|float|The width of the bouncer should be set to `24.0` for horizontally aligned bouncers.|
+|Height|float|The height of the bouncer should be set to `5.0` for horizontally aligned bouncers.|
+
+Bouncers use the `tilesets/bumper.png` texture inside your level directory.
+
+<br>
+
+## Conveyor Belts
+
+When Adam jumps onto a conveyor belt, he moves along the conveyor belt either to the left or to the right.
+
+Conveyor belts are created just like bouncers. First, create an object group '`conveyorbelts`' and set the object group's `z` property. Now create one rectangle inside the group for each belt.
+
+The belts have a height of half a tile, their width should be a multiple of 24px.
+
+Now change the object's default properties below:
+|Property|Type|Description|
+|-|-|-|
+|Width|float|The width of the belt should be a multiple of `24.0`.|
+|Height|float|The height of the belt should be set to `12.0`.|
+
 
 ## Doors
 
@@ -211,4 +240,8 @@ Object layer: portals
 
 # Advanced Topics
 
+## Checkpoints
+
 ## Rooms
+
+## Ambient Occlusion
