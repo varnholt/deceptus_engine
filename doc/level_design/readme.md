@@ -27,7 +27,7 @@ Furthermore, we have decided that 2 tiles should represent 1m in the 'real world
 Deceptus differentiates between _colliding_ and _non-colliding_ tiles. The latter are tiles that are just drawn onto the screen. They don't have any other influence on the behavior of the game. Colliding tiles on the other hand are those tiles Adam is standing on or bouncing into such as the floor, the walls, etc.<br>
 Tiled comes with a 'Tile Collision Editor' where you can define the shape of each tile. This is either a simple rectangle, but it can also be a more complex polygon. That's really up to your level design. In any case, defining the shape of the colliding tiles is probably the first chore that you have to do when starting the design of a level.
 
-_insert  image of Tile Collision Editor_
+![](images/tile_collision_editor.png)
 
 Keep in mind that the shapes used for each tile will be merged into one big 2D model ('mesh') later on. The merging step only works if the polygons are really accurate. The mesh optimizer used here will create 2 edges instead of 1 if a point of your polygon (vertex) is off by just 1px. To make sure that your vertices really align with each other, it is recommended to open up the tmx file in a text editor and compare if the values match:
 
@@ -97,37 +97,7 @@ Deceptus could just use the layer order that you define inside your tmx file by 
 |-|-|-|
 |z|int|The z depth of your layer from 0 (far far away) to 50 (frontmost)|
 
-The next two paragraphs about _Parallax_ and _Image Layers_ are there just for completeness since you won't necessarily need them in your early design steps.
-
-<br>
-
-### Adding Parallax Layers
-
-In order to create the illusion of depth, some time in the 90s Parallax layers were introduced. Those are basically layers in the background that scroll at a different pace than the foreground.
-
-Deceptus supports 3 Parallax layers.<br>
-All Parallax layer names must start with `parallax_`.
-
-They have the properties below:
-|Custom Property|Type|Description|
-|-|-|-|
-|parallax|float|The scrolling pace in relation to the foreground [`0..1`]|
-|parallax_view|int|The reference to the Parallax layer slot. Since Deceptus supports 3 slots, the value range goes from [`0..2`]|
-
-
-<br>
-
-### Adding Image Layers
-
-If you want to insert images into your level without being restricted to the 24x24px tile size, you can use Image Layers. In order to do so, you can just create a new 'Image Layer' inside Tiled.
-
-Deceptus supports different blend modes for Image Layers.
-
-They have the properties below:
-|Custom Property|Type|Description|
-|-|-|-|
-|blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
-
+Wait, there's more! The Deceptus Engine supports a bunch of 'custom' layers such as _Parallax_ or _Image Layers_ You won't need any of that during your early design steps but once your gameplay is solid, feel free to move on to the chapter 'Visualization'.
 
 <br>
 <br>
@@ -252,33 +222,73 @@ Object layer: portals
 Tile layer: extras
 
 
+
+# Enemies
+
+
+<br><br><br>
+
 # Visualization
 
-## Backgrounds
 
-## Parallax
+### Adding Parallax Layers
 
-## Foregrounds
+In order to create the illusion of depth, some time in the 90s Parallax layers were introduced. Those are basically layers in the background that scroll at a different pace than the foreground.
 
-## Static images
+Deceptus supports 3 Parallax layers.<br>
+All Parallax layer names must start with `parallax_`.
+
+They have the properties below:
+|Custom Property|Type|Description|
+|-|-|-|
+|parallax|float|The scrolling pace in relation to the foreground [`0..1`]|
+|parallax_view|int|The reference to the Parallax layer slot. Since Deceptus supports 3 slots, the value range goes from [`0..2`]|
+
+
+<br>
+
+### Adding Image Layers
+
+If you want to insert images into your level without being restricted to the 24x24px tile size, you can use Image Layers. In order to do so, you can just create a new 'Image Layer' inside Tiled.
+
+Deceptus supports different blend modes for Image Layers.
+
+They have the properties below:
+|Custom Property|Type|Description|
+|-|-|-|
+|blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
+
 
 ## Static lights
 
 ## Dynamic lights
 
-## Shadows
-
 ## Atmosphere layers
 
+## Ambient Occlusion
 
-# Enemies
 
+<br><br><br>
 
 
 # Advanced Topics
 
 ## Checkpoints
 
+Whenever Adam reaches a checkpoint, the current state of the game is saved. I.e. the player's current skills (such as double jump, wall slide, wall jump etc.) and the player's location within the level are serialized to disk. When the player dies later on, he would re-spawn at the last checkpoint.
+
+Checkpoints are implemented as simple rectangle objects inside your level. In order to add checkpoints to your level, define an object group '`checkpoints`' and add rectangles inside this group that have reasonable names. The last checkpoint, i.e. the end of your level, must have the name '`end`'.
+
+![](images/checkpoints.png)
+
 ## Rooms
 
-## Ambient Occlusion
+Usually the game's camera system keeps on following Adam so he always stays in focus. However, in Metroid-like games it's quite common to limit the camera range to one room, open a door, go to the next room and then move the camera's focus over to the other room.
+
+If you are using rooms, it is important to make them at least as large as your screen (640x360px). Having rooms smaller than one screen would defeat the point of having rooms, hey?
+
+If you define 2 rooms, the camera would limit the viewer's perspective to that room until the player has left that room. Then the camera would either move over to the next room or just focussing Adam if he entered a region where no room is defined.
+
+Rooms are rectangles, or combinations of rectangles. In order to define a room, create an object group '`rooms`' first, then draw rectangles around those area that are supposed to be your rooms. Rooms should be given descriptive labels such as '`kitchen`' or '`bathroom`'. If you want to merge multiple rects together to one larger room, you can also do that. Just append '`_0`', '`_1`' etc. to your room labels such as '`bedroom_0`', '`bedroom_1`' even though no sane person would ever voluntarily merge their bedrooms.
+
+![](images/rooms.png)
