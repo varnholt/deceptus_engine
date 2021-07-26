@@ -1,10 +1,9 @@
 #include "callbackmap.h"
 
-CallbackMap CallbackMap::sInstance;
-
 
 CallbackMap& CallbackMap::getInstance()
 {
+   static CallbackMap sInstance;
    return sInstance;
 }
 
