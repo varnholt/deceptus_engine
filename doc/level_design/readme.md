@@ -225,13 +225,76 @@ Tile layer: extras
 
 # Enemies
 
+## Arrowtrap
+
+```json
+[
+    {
+        "name": "alignment",
+        "type": "string",
+        "value": "up"
+    }
+]
+```
+
+## Bat
+
+## Blob
+
+```json
+[
+  [
+    {
+        "name": "gravity_scale",
+        "type": "float",
+        "value": -1
+    },
+    {
+        "name": "jump_height_px",
+        "type": "int",
+        "value": 128
+    },
+    {
+        "name": "jump_interval_ms",
+        "type": "int",
+        "value": 3000
+    },
+
+
+    {
+        "name": "path",
+        "type": "string",
+        "value": "82, 176"
+    },
+    {
+        "name": "script",
+        "type": "string",
+        "value": "blob_2.lua"
+    }
+]
+```
+
+## Critter
+
+## Klonk
+
+```json
+[
+    {
+        "name": "script",
+        "type": "string",
+        "value": "klonk_2.lua"
+    }
+]
+```
+
 
 <br><br><br>
 
 # Visualization
 
 
-### Adding Parallax Layers
+## Adding Parallax Layers
 
 In order to create the illusion of depth, some time in the 90s Parallax layers were introduced. Those are basically layers in the background that scroll at a different pace than the foreground.
 
@@ -247,7 +310,7 @@ They have the properties below:
 
 <br>
 
-### Adding Image Layers
+## Adding Image Layers
 
 If you want to insert images into your level without being restricted to the 24x24px tile size, you can use Image Layers. In order to do so, you can just create a new 'Image Layer' inside Tiled.
 
@@ -280,6 +343,9 @@ Whenever Adam reaches a checkpoint, the current state of the game is saved. I.e.
 Checkpoints are implemented as simple rectangle objects inside your level. In order to add checkpoints to your level, define an object group '`checkpoints`' and add rectangles inside this group that have reasonable names. The last checkpoint, i.e. the end of your level, must have the name '`end`'.
 
 ![](images/checkpoints.png)
+
+
+<br>
 
 ## Rooms
 
