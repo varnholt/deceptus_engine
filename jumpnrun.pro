@@ -624,6 +624,7 @@ DISTFILES += \
     data/shaders/wave.vert \
     doc/lasers/lasers.md \
     doc/level_design.md \
+    doc/level_design/readme.md \
     doc/physics/readme.md
 
 
