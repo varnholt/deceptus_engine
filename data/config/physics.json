@@ -8,7 +8,7 @@
         "player_friction": 0.0,
         "player_jump_falloff": 6,
         "player_jump_speed_factor": 0.100000001490116,
-        "player_jump_steps": 8,
+        "player_jump_steps": 9,
         "player_jump_after_contact_lost_in_ms": 100,
         "player_jump_minimal_duration_in_ms": 80,
         "player_jump_buffer_in_ms": 100,
