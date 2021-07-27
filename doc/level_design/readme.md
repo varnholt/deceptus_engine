@@ -225,7 +225,72 @@ Tile layer: extras
 
 # Enemies
 
+With the aim to give non-C++ programmers the ability to develop or adjust the behavior of enemies, all enemies were implemented in `lua`. Inside the folder `data/scripts/enemies` you will find a number of scripts you can use as a reference to implement your own enemies or alter their behavior as needed.
+
+The Deceptus Engine offers two ways to integrate enemies inside your level.
+
+## Adding Enemies
+
+In the early days of the Deceptus Engine enemies were added just by defining a huge list of references to the enemy lua scripts bundled together with a couple of properties such as their start positions or the path they move along.
+
+You can configure enemies by editing the json by hand, or - depending on your liking - directly position enemies inside Tiled.
+
+### Adding Enemies with level.json
+
+The first thing to do is to have a json array `enemies` inside your json file.
+```json
+  "enemies": [
+
+  ]
+```
+
+Next, you have to have one section for each enemy instance inside this array. For this purpose you would usually define the '`script`' as well as '`startposition`' of your enemy. The start position is entered in tile coordinates.
+```json
+    {
+      "script": "ghost.lua",
+      "startposition": [233, 82],
+      "path": [238, 82]
+    },
+    {
+      "script": "bonefish.lua",
+      "startposition": [250, 99],
+      "path": [250, 99, 256, 99]
+    },
+```
+
+All properties that are applicable for each enemy type are listed below.
+
+<br>
+
+### Adding Enemies with Tiled
+
+The Tiled approach follows the same concept with the only difference that properties required to configure an enemy are entered through Tiled's Custom Properties. Of course the start position does no longer need to be entered manually since you will just position your enemy inside Tiled.
+
+In order to insert an enemy in your level using the Tiled editor, create an object group called '`enemies`' and insert a rectangle at that location where your enemy should be positioned. Then define all enemy properties inside the Custom Properties, such as
+
+
+|Custom Property|Type|Description|
+|-|-|-|
+|script|string|Name of the enemy's lua script|
+|path|string|A comma separated list of positions in tile coordinates (x0, y0, x1, y1, etc.)
+
+![](images/enemies.png)
+
+
+### Adding Enemies with Tiled and level.json
+
+TBD
+
+```json
+    {
+      "script": "arrowtrap.lua",
+      "id": "189"
+    },
+```
+
 ## Arrowtrap
+
+TBD
 
 ```json
 [
