@@ -178,7 +178,7 @@ function setPath(name, table)
       i = i + 1
    end
 
-   if (name == "patrol_path") then
+   if (name == "path") then
 
       -- need to scale each path, so it increases in 24px width and 24px height
       minX = 9999
@@ -246,7 +246,7 @@ function setPath(name, table)
 
    -- debug the loop
    -- for key, value in pairs(mPatrolPath) do
-   --    print(string.format("patrolpath: %d: %f, %f, time: %f", key, value.x, value.y, value.time))
+   --    print(string.format("path: %d: %f, %f, time: %f", key, value.x, value.y, value.time))
    -- end
 end
 
