@@ -13,7 +13,7 @@ void to_json(json &j, const EnemyDescription &d)
    j = json{
       {"script", d.mScript},
       {"startposition", d.mStartPosition},
-      {"patrolpath", d.mPath},
+      {"path", d.mPath},
       {"properties", d.mProperties}
    };
 }
@@ -33,13 +33,13 @@ void from_json(const json &j, EnemyDescription &d)
       d.mStartPosition = j.at("startposition").get<std::vector<int>>();
    }
 
-   if (j.find("generate_patrolpath") != j.end())
+   if (j.find("generate_path") != j.end())
    {
       d.mGeneratePatrolPath = true;
    }
-   else if (j.find("patrolpath") != j.end())
+   else if (j.find("path") != j.end())
    {
-      d.mPath = j.at("patrolpath").get<std::vector<int>>();
+      d.mPath = j.at("path").get<std::vector<int>>();
 
       // allow patrol path to be just defined by a single position
       // i.e. the start position and one new position defines the
