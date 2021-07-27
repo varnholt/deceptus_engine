@@ -98,7 +98,7 @@ function setPath(name, table)
       i = i + 1
    end
 
-   if (name == "patrol_path") then
+   if (name == "path") then
       patrolPath = v
 
       -- just store the center and the width of that path

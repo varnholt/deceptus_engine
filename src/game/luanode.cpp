@@ -1591,7 +1591,7 @@ void LuaNode::luaSendPatrolPath()
 
    lua_getglobal(mState, FUNCTION_SET_PATH);
 
-   lua_pushstring(mState, "patrol_path");
+   lua_pushstring(mState, "path");
    luaSendPath(mPatrolPath);
 
    // vec.size + 1 args, 0 result

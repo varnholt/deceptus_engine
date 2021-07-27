@@ -201,7 +201,7 @@ function setPath(name, table)
       i = i + 1
    end
 
-   if (name == "patrol_path") then
+   if (name == "path") then
       patrolPath = v
    end
 end

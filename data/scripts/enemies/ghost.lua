@@ -301,7 +301,7 @@ function setPath(name, table)
       i = i + 1
    end
 
-   if (name == "patrol_path") then
+   if (name == "path") then
 
       k1 = Key:create{x = v[0]:getX(), y = v[0]:getY(), time = 0.0}
       k2 = Key:create{x = v[1]:getX(), y = v[1]:getY(), time = 0.5}

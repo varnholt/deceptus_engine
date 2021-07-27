@@ -44,12 +44,12 @@
     {
       "script": "ghost.lua",
       "startposition": [233, 82],
-      "patrolpath": [238, 82]
+      "path": [238, 82]
     },
     {
       "script": "deprecated_blob.lua",
       "startposition": [14, 40],
-      "patrolpath": [14, 40, 18, 40],
+      "path": [14, 40, 18, 40],
       "properties": [{"name": "dummy", "value": "dummy"}]
     },
     {
@@ -72,12 +72,12 @@
     {
       "script": "bonefish.lua",
       "startposition": [258, 96 ],
-      "patrolpath": [258, 96, 264, 96]
+      "path": [258, 96, 264, 96]
     },
     {
       "script": "bonefish.lua",
       "startposition": [250, 99],
-      "patrolpath": [250, 99, 256, 99]
+      "path": [250, 99, 256, 99]
     },
     {
       "script": "watermine.lua",
@@ -98,72 +98,72 @@
       "script": "deprecated_dumb.lua",
       "startposition": [60, 26],
       "properties": [{"name": "dummy", "value": "dummy"}],
-      "patrolpath": [74, 26, 60, 26]
+      "path": [74, 26, 60, 26]
     },
     {
       "script": "deprecated_skeleton.lua",
       "startposition": [175, 64],
-      "patrolpath": [175, 64, 180, 64]
+      "path": [175, 64, 180, 64]
     },
     {
       "script": "critter.lua",
       "id": "152",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "153",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "154",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "155",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "156",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "157",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "158",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "159",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "160",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "161",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "162",
-      "generate_patrolpath" : true
+      "generate_path" : true
     },
     {
       "script": "critter.lua",
       "id": "163",
-      "generate_patrolpath" : true
+      "generate_path" : true
     }
   ]
 }
