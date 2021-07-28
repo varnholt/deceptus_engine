@@ -222,6 +222,7 @@ Object layer: portals
 Tile layer: extras
 
 
+<br><br><br>
 
 # Enemies
 
@@ -276,82 +277,129 @@ In order to insert an enemy in your level using the Tiled editor, create an obje
 
 ![](images/enemies.png)
 
+<br>
 
 ### Adding Enemies with Tiled and level.json
 
-TBD
+In order to make things a bit more confusing, there's even a third way to place enemies inside your level. And the choice is really up to you, there's no 'wrong' way to do it. In this method, you just place a rectangle object inside your `enemies` object group and remember its _Object ID_.
+
+![](images/enemies_ref.png)
+
+Then, you open up the `level.json` description and add a reference to that object. Now, just add further enemy-related properties to the json as described in the first paragraph of this chapter.
 
 ```json
     {
-      "script": "arrowtrap.lua",
-      "id": "189"
+      "script": "critter.lua",
+      "id": "260",
+      "generate_path" : true
     },
 ```
 
-## Arrowtrap
+Below you will find a description of all enemies including a table of their properties.
 
-TBD
+<br><br>
 
-```json
-[
-    {
-        "name": "alignment",
-        "type": "string",
-        "value": "up"
-    }
-]
-```
+## Enemy Design and Properties
 
-## Bat
+### Arrow Trap
 
-## Blob
+Arrow Traps shoot arrows in a particular direction.
 
-```json
-[
-  [
-    {
-        "name": "gravity_scale",
-        "type": "float",
-        "value": -1
-    },
-    {
-        "name": "jump_height_px",
-        "type": "int",
-        "value": 128
-    },
-    {
-        "name": "jump_interval_ms",
-        "type": "int",
-        "value": 3000
-    },
+|Property|Type|Description|
+|-|-|-|
+|script|string|`arrowtrap.lua`|
+|alignment|string|Arrow direction: '`up`', '`down`', '`left`', '`right`'|
+
+<br>
+
+### Bat
+
+A bat usually sleeps somewhere at the ceiling of a room. When woken up by Adam, it attacks.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`bat_2.lua`|
+|script|string|Name of the enemy's lua script|
+
+<br>
+
+### Blob
+
+A Blob can either move left and right on the floor or ceiling of a room, jump up and down and actually even jump down and up.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`blob_2.lua`|
+|jump_height_px|string|If the Blob should jump, define its jump height in `px`|
+|gravity_scale|float|If the Blob should walk the ceiling instead of the floor, you can set its gravity scale to `-1.0`. It'll go positive once the Blob is right over Adam. Then it'll fall down.|
+|jump_interval_ms|int|If the Blob should jump, you have to define its jump interval (in `ms`).|
+|path|string|Usually you would only define a 2nd x,y-position here which will make the Blob go back and forth between its start position and the other position. You can also enter more than one position if needed. Format: `x0, y0, x1, y1, etc.`|
+
+<br>
+
+### Bonefish
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`bonefish.lua`|
+|path|string|Usually you would only define a 2nd x,y-position here which will make the Bonefish go back and forth between its start position and the other position. Format: `x0, y0, x1, y1, etc.`|
+
+<br>
+
+### Cannon
+
+Well... it's a cannon. It fires... cannon balls.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`cannon_2.lua`|
+|alignment|string|Cannons either point to the '`left`' or to the '`right`'.|
 
 
-    {
-        "name": "path",
-        "type": "string",
-        "value": "82, 176"
-    },
-    {
-        "name": "script",
-        "type": "string",
-        "value": "blob_2.lua"
-    }
-]
-```
 
-## Critter
+<br>
 
-## Klonk
+### Critter
 
-```json
-[
-    {
-        "name": "script",
-        "type": "string",
-        "value": "klonk_2.lua"
-    }
-]
-```
+Small spiky enemy that can crawl up walls and simply goes its way round and round and round without ever getting tired.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`critter.lua`|
+|generate_path|bool|If `true`, the Deceptus Engine will automatically trace the edge the Critter has been placed on and turn it into a path. Then the Critter will follow this path. This only works for closed loops.|
+
+<br>
+
+
+### Ghost
+
+Ghosts fly around following a given path. When Adam gets close by, they try to scare him away.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`critter.lua`|
+|path|string|The ghosts path given as a list of x,y-positions; format: `x0, y0, x1, y1, etc.`|
+
+<br>
+
+### Klonk
+
+A heavy solid piece of stone that gets angry when Adam is underneath and tries to squash him.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`klonk_2.lua`|
+
+
+<br>
+
+### Landmine
+
+Ugly piece of technology. When Adam steps onto one of these, it's time to run real quick.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`landmine.lua`|
 
 
 <br><br><br>
