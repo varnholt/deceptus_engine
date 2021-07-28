@@ -303,6 +303,8 @@ Below you will find a description of all enemies including a table of their prop
 
 ### Arrow Trap
 
+![](images/enemy_arrowtrap.png)
+
 Arrow Traps shoot arrows in a particular direction.
 
 |Property|Type|Description|
@@ -314,6 +316,8 @@ Arrow Traps shoot arrows in a particular direction.
 
 ### Bat
 
+![](images/enemy_bat.png)
+
 A bat usually sleeps somewhere at the ceiling of a room. When woken up by Adam, it attacks.
 
 |Property|Type|Description|
@@ -324,6 +328,8 @@ A bat usually sleeps somewhere at the ceiling of a room. When woken up by Adam, 
 <br>
 
 ### Blob
+
+![](images/enemy_blob.png)
 
 A Blob can either move left and right on the floor or ceiling of a room, jump up and down and actually even jump down and up.
 
@@ -339,6 +345,8 @@ A Blob can either move left and right on the floor or ceiling of a room, jump up
 
 ### Bonefish
 
+![](images/enemy_bonefish.png)
+
 |Property|Type|Description|
 |-|-|-|
 |script|string|`bonefish.lua`|
@@ -347,6 +355,8 @@ A Blob can either move left and right on the floor or ceiling of a room, jump up
 <br>
 
 ### Cannon
+
+![](images/enemy_cannon.png)
 
 Well... it's a cannon. It fires... cannon balls.
 
@@ -361,6 +371,8 @@ Well... it's a cannon. It fires... cannon balls.
 
 ### Critter
 
+![](images/enemy_critter.png)
+
 Small spiky enemy that can crawl up walls and simply goes its way round and round and round without ever getting tired.
 
 |Property|Type|Description|
@@ -373,6 +385,8 @@ Small spiky enemy that can crawl up walls and simply goes its way round and roun
 
 ### Ghost
 
+![](images/enemy_ghost_1.png)
+
 Ghosts fly around following a given path. When Adam gets close by, they try to scare him away.
 
 |Property|Type|Description|
@@ -383,6 +397,8 @@ Ghosts fly around following a given path. When Adam gets close by, they try to s
 <br>
 
 ### Klonk
+
+![](images/enemy_klonk.png)
 
 A heavy solid piece of stone that gets angry when Adam is underneath and tries to squash him.
 
@@ -395,11 +411,26 @@ A heavy solid piece of stone that gets angry when Adam is underneath and tries t
 
 ### Landmine
 
+![](images/enemy_landmine.png)
+
 Ugly piece of technology. When Adam steps onto one of these, it's time to run real quick.
 
 |Property|Type|Description|
 |-|-|-|
 |script|string|`landmine.lua`|
+
+<br>
+
+
+### Watermine
+
+![](images/enemy_watermine.png)
+
+Another ugly piece of technology. Same concept as landmine but underwater.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`watermine.lua`|
 
 
 <br><br><br>
