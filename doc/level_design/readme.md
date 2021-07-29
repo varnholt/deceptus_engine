@@ -486,7 +486,42 @@ The individual lights are created as rectangle objects with the parameters below
 
 <br><br>
 
-## Dynamic lights
+## Dynamic Lights
+
+In order to make the games atmosphere more lively, the Deceptus Engine comes with a shader (a program run on your GPU) that implements light sources that cast shadows and illuminate your objects. The latter uses bump maps. Those are texture that describe how your objects reflect light. Shadows are cast based on the collision information that you define in your `level` layer.
+
+In order to create a dynamic light source, have an object layer called `lights` inside your level. Into that layer you add rectangle objects. The width and height of that rectangle define the maximum range of your light. However, your actual light behavior is controlled by the custom properties below. They are based on the concept of 'Constant-Linear-Quadratic Falloff'. Yup, you can google that.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|color|color|The color of your light source (default is white)|
+|falloff_constant|float|The amount of illumination that is independent of the distance to the light source (range `0..1`). The name is a bit misleading. There's no falloff at all. The function is simply `attenuation = 1 / falloff_constant`. A good value is `0.4`. <br><br>![](images/falloff_constant.png)|
+|falloff_linear|float|The further away from the light, the darker it gets. `falloff_linear` is a factor for the distance (`attenuation = 1 / (falloff_linear * distance_to_light)`). A good value is `3`.<br><br>![](images/falloff_linear.png)|
+|falloff_quadratic|float|The further away from the light, the less illumination - but this time the distance is squared (`attenuation = 1 / (falloff_linear * distance_to_light^2)`). A good value is `20`.<br><br>![](images/falloff_quadratic.png)|
+
+```
+[
+    {
+        "name": "center_offset_x_px",
+        "type": "int",
+        "value": 0
+    }
+]
+[
+    {
+        "name": "center_offset_y_px",
+        "type": "int",
+        "value": -72
+    }
+]
+[
+    {
+        "name": "texture",
+        "type": "string",
+        "value": "topdown_large.png"
+    }
+]
+```
 
 <br><br>
 
