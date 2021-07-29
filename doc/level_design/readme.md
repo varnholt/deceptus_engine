@@ -162,7 +162,7 @@ If the door should not require a key to open it, then just don't add a key tile 
 
 Just like every other layer, doors also require a `z` custom property.
 
-![](images/door.png)
+![](images/mechanism_doors.png)
 
 
 ## Fans
@@ -177,7 +177,7 @@ Apart from the `z` depth, fans have a 'speed' value:
 |-|-|-|
 |speed|float|The speed value typically ranges from [`0..1`], `0.9` turned out to be a suitable value.|
 
-![](images/fans.png)
+![](images/mechanism_fans.png)
 
 
 ## Lasers
@@ -193,7 +193,7 @@ Apart from the `z` depth, lasers have the custom properties below:
 |off_time|int|The duration the laser is in 'off' state (in ms)|
 |on_time|int|The duration the laser is in 'on' state (in ms)|
 
-![](images/lasers.png)
+![](images/mechanism_lasers.png)
 
 ## Platforms
 
@@ -452,7 +452,7 @@ They have the properties below:
 |parallax_view|int|The reference to the Parallax layer slot. Since Deceptus supports 3 slots, the value range goes from [`0..2`]|
 
 
-<br>
+<br><br>
 
 ## Adding Image Layers
 
@@ -465,14 +465,37 @@ They have the properties below:
 |-|-|-|
 |blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
 
+<br><br>
 
 ## Static lights
 
+Static lights are probably the simplest 'visual effect' inside the Deceptus Engine. They are basically additive sprites, i.e. the sprites' color information is added on top of the color of your level.
+
+![](images/static_lights.png)
+
+Static lights are added by introducing a new object group starting with `static_lights`.
+
+The individual lights are created as rectangle objects with the parameters below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|color|color|Color of the light (optional, the default is white)|
+|flicker_intensity|float|If the light should flicker a bit, this controls the flicker intensity (optional, from `0..1`, a good value is `0.5`)|
+|flicker_alpha_amount|float|The opacity of your light source (optional, from `0..1`, a good value is `0.7`)|
+|flicker_speed|float|How fast to step through the flicker noise function (optional, from `0..100`, a good value is `5`|
+
+<br><br>
+
 ## Dynamic lights
+
+<br><br>
 
 ## Atmosphere layers
 
+<br><br>
+
 ## Ambient Occlusion
+
 
 
 <br><br><br>
