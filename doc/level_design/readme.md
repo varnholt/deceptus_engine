@@ -195,77 +195,68 @@ Apart from the `z` depth, lasers have the custom properties below:
 
 ![](images/mechanism_lasers.png)
 
-## Platforms
-
-`tbd`
-
-Tile layer: platforms
-Rail layer: platform_rails
-Object layer: platforms
 
 <br><br>
 
 ## Portals
 
-`tbd`
+Portals can teleport Adam from one location to another. For that reason, they give you a lot of freedom in your level design possibilities since you can have a coherent level, even though your individual rooms are distributed all over the map.
 
-Tile layer: portals
-Object layer: portals
+When the player enters a portal, a transition animation - like a fade-out/fade-in - is played so the viewer has no idea of what is happening behind the curtains.
+
+In order to create portals, first create a tile layer called `portals` where you place your portal tiles. Then, in an object layer, also called `portals`, you draw a polyline from the center of one portal to another. Now they are linked and the player can go back and forth between them. The first position of the polyline is the entrace, the 2nd position is the exit. Therefore, an exit also be an entrace to another portal. If you only draw a single polyline between two portals, it's just a simple two-way mechanism.
+
+![](images/mechanism_portals.png)
+
+In the screenshot above, Adam enters at the top left, exits at the bottom right, and when he enters again, teleports to the top right.
 
 <br><br>
 
 ## Crushers
 
-`tbd`
+As the name promises, Crushers can crush Adam. They consist of a bunch of spikes connected to a heavy weight that moves to one direction with high velocity and then retracts again.
 
-```cpp
-      const auto it = tmxObject->_properties->_map.find("alignment");
+`tbd: add screenshot`
 
-      if (it != tmxObject->_properties->_map.end())
-      {
-         // std::cout << it->second->mValueStr << std::endl;
+Crushers can be added to your level by adding an object layer called `crushers`. To change the Crushers' alignment, please refer to the Custom Properties below:
 
-         const auto alignment = it->second->_value_string;
-         if (alignment == "up")
-         {
-            mAlignment = Alignment::PointsUp;
-         }
-         else if (alignment == "down")
-         {
-            mAlignment = Alignment::PointsDown;
-         }
-         else if (alignment == "left")
-         {
-            mAlignment = Alignment::PointsLeft;
-         }
-         else if (alignment == "right")
-         {
-            mAlignment = Alignment::PointsRight;
-         }
-      }
-```
+|Custom Property|Type|Description|
+|-|-|-|
+|alignment|string|Direction of the Crusher (valid values are '`up`', '`down`', '`left`', '`right`')|
+
 <br><br>
 
-## Deathblocks
 
-`tbd`
+## Death Blocks
 
-`else if (objectGroup->_name == "death_blocks")`
+Death Blocks are spiky boxes that move back and forth along a given line. Depending on your tilesheet the direction of the Death Block's rails is either horizontal, vertical, but can actually be any arbitrary angle.
+
+![](images/mechanism_death_block.png)
+
+Since you draw the 'rails' of the Death Blocks just to a background layer, this mechanism only requires a polyline object added to the object group `death_blocks`
+
 <br><br>
 
-`_texture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");`
 
 ## Levers
 
-`tbd`
-```cpp
-   const std::vector<std::shared_ptr<GameMechanism>>& levers,
-   const std::vector<std::shared_ptr<GameMechanism>>& lasers,
-   const std::vector<std::shared_ptr<GameMechanism>>& platforms,
-   const std::vector<std::shared_ptr<GameMechanism>>& fans,
-   const std::vector<std::shared_ptr<GameMechanism>>& belts,
-   const std::vector<std::shared_ptr<GameMechanism>>& spikes
-```
+Levers! One of the most important mechanisms. In short, they do what levers do: They switch things on and off. Levers can be used to enable and disable the functionality of these mechanisms:
+- Conveyor Belts
+- Fans
+- Lasers
+- Platforms
+- Spikes
+
+While you draw your levers just into a tile layer called `levers`, a connection between another mechanism and the lever is created by adding an object group `switchable_objects`; in there you draw a rectangle that covers both the object(s) that should be switched on and off as well as the lever.
+
+![](images/mechanism_levers.png)
+
+In the screenshot above the fans will go off once the lever is activated.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|enabled|bool|Defines the initial state of the lever which is either enabled or disabled|
+
 <br><br>
 
 ## Ropes
@@ -274,9 +265,16 @@ Object layer: portals
 <br><br>
 
 
-## Spikeballs
+## Spike Balls
 
-`tbd`
+Spike Balls are nasty. They're heavy balls with spikes connected to a chain which move from left to right and back. Adam can either duck or jump to make his way past them, however it requires a little practice to master them.
+
+![](images/mechanism_spike_balls.png)
+
+In order to add Spike Balls to your level, you have to create an object layer called `spike_balls`. In there, you place a rectangle at the location where the Spike Ball's chain shall be mounted.
+
+It is very important to place that mount high enough, otherwise the ball will crash into the physics representation of your level and the physics engine will go a bit crazy.
+
 <br><br>
 
 ## Spikes
@@ -284,47 +282,20 @@ Object layer: portals
 `tbd`
 ```cpp
   else if (layer->_name == "toggle_spikes")
-  {
-    auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
-    for (const auto &s : spikes)
-    {
-        mSpikes.push_back(s);
-    }
-  }
   else if (layer->_name == "trap_spikes")
-  {
-    auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
-    for (const auto &s : spikes)
-    {
-        mSpikes.push_back(s);
-    }
-  }
   else if (layer->_name == "interval_spikes")
-  {
-    auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
-    for (const auto &s : spikes)
-    {
-        mSpikes.push_back(s);
-    }
-  }
 ```
 <br><br>
 
+
 ## Moving Platform
 
-`tbd`
+Moving Platforms are platforms that follow a certain path inside your level. They can be used just like an elevator or for any other purpose, like moving over a couple of deadly spikes, etc.
 
-`platforms`
+To create moving platforms, the first thing to do is to define the 'width' of your platform. You do this by creating a `platforms` tile layer where you put your platform tiles together. Then, you draw your platform rails into any background layer so know which path the platform is supposed to follow. This is only an optical change since the actual path your platform will follow is defined in an object group called `platform_paths`. In there you draw a polyline from start to end.
 
-```cpp
-    else if (objectGroup->_name == "platform_paths")
-    {
-        if (tmxObject->_polyline)
-        {
-          MovingPlatform::link(mPlatforms, tmxObject);
-        }
-    }
-```
+`tbd: screenshot`
+
 <br><br>
 
 ## Moveable Objects
@@ -689,8 +660,14 @@ That's all.
 
 ![](images/weather_rain.png)
 
-
 <br><br>
+
+
+## Smoke
+
+`tbd`
+<br><br>
+
 
 ## Ambient Occlusion
 `tbd`
