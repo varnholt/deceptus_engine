@@ -191,33 +191,169 @@ Apart from the `z` depth, lasers have the custom properties below:
 |Custom Property|Type|Description|
 |-|-|-|
 |off_time|int|The duration the laser is in 'off' state (in ms)|
-|on_time|int|The duration the laser is in 'on' state (in ms)|
+|on_time|int|The duration the laser is sin 'on' state (in ms)|
 
 ![](images/mechanism_lasers.png)
 
 ## Platforms
 
+`tbd`
+
 Tile layer: platforms
 Rail layer: platform_rails
 Object layer: platforms
 
+<br><br>
+
 ## Portals
+
+`tbd`
 
 Tile layer: portals
 Object layer: portals
 
+<br><br>
 
 ## Crushers
+
+`tbd`
+
+```cpp
+      const auto it = tmxObject->_properties->_map.find("alignment");
+
+      if (it != tmxObject->_properties->_map.end())
+      {
+         // std::cout << it->second->mValueStr << std::endl;
+
+         const auto alignment = it->second->_value_string;
+         if (alignment == "up")
+         {
+            mAlignment = Alignment::PointsUp;
+         }
+         else if (alignment == "down")
+         {
+            mAlignment = Alignment::PointsDown;
+         }
+         else if (alignment == "left")
+         {
+            mAlignment = Alignment::PointsLeft;
+         }
+         else if (alignment == "right")
+         {
+            mAlignment = Alignment::PointsRight;
+         }
+      }
+```
+<br><br>
+
 ## Deathblocks
+
+`tbd`
+
+`else if (objectGroup->_name == "death_blocks")`
+<br><br>
+
+`_texture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");`
+
 ## Levers
+
+`tbd`
+```cpp
+   const std::vector<std::shared_ptr<GameMechanism>>& levers,
+   const std::vector<std::shared_ptr<GameMechanism>>& lasers,
+   const std::vector<std::shared_ptr<GameMechanism>>& platforms,
+   const std::vector<std::shared_ptr<GameMechanism>>& fans,
+   const std::vector<std::shared_ptr<GameMechanism>>& belts,
+   const std::vector<std::shared_ptr<GameMechanism>>& spikes
+```
+<br><br>
+
 ## Ropes
+
+`tbd`
+<br><br>
+
+
 ## Spikeballs
+
+`tbd`
+<br><br>
+
 ## Spikes
 
+`tbd`
+```cpp
+  else if (layer->_name == "toggle_spikes")
+  {
+    auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
+    for (const auto &s : spikes)
+    {
+        mSpikes.push_back(s);
+    }
+  }
+  else if (layer->_name == "trap_spikes")
+  {
+    auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
+    for (const auto &s : spikes)
+    {
+        mSpikes.push_back(s);
+    }
+  }
+  else if (layer->_name == "interval_spikes")
+  {
+    auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
+    for (const auto &s : spikes)
+    {
+        mSpikes.push_back(s);
+    }
+  }
+```
+<br><br>
 
+## Moving Platform
+
+`tbd`
+
+`platforms`
+
+```cpp
+    else if (objectGroup->_name == "platform_paths")
+    {
+        if (tmxObject->_polyline)
+        {
+          MovingPlatform::link(mPlatforms, tmxObject);
+        }
+    }
+```
+<br><br>
+
+## Moveable Objects
+
+`tbd`
+
+`moveable_objects`
+
+```cpp
+   switch (static_cast<int32_t>(mSize.x))
+   {
+      case 24:
+      {
+         mSprite.setTextureRect(sf::IntRect(1392, 0, 24, 2 * 24));
+         break;
+      }
+
+      case 48:
+      {
+         mSprite.setTextureRect(sf::IntRect(1296, 24, 2 * 24, 3 * 24));
+         break;
+      }
+```
+<br><br>
 
 
 ## Extras
+
+`tbd`
 
 Tile layer: extras
 
@@ -490,6 +626,10 @@ The individual lights are created as rectangle objects with the parameters below
 
 In order to make the games atmosphere more lively, the Deceptus Engine comes with a shader (a program run on your GPU) that implements light sources that cast shadows and illuminate your objects. The latter uses bump maps. Those are texture that describe how your objects reflect light. Shadows are cast based on the collision information that you define in your `level` layer.
 
+The screenshot below shows a dynamic light creating reflection on the wall's bump map and casting shadows:<br>
+![](images/dynamic_lights.png)
+
+
 In order to create a dynamic light source, have an object layer called `lights` inside your level. Into that layer you add rectangle objects. The width and height of that rectangle define the maximum range of your light. However, your actual light behavior is controlled by the custom properties below. They are based on the concept of 'Constant-Linear-Quadratic Falloff'. Yup, you can google that.
 
 |Custom Property|Type|Description|
@@ -498,39 +638,62 @@ In order to create a dynamic light source, have an object layer called `lights` 
 |falloff_constant|float|The amount of illumination that is independent of the distance to the light source (range `0..1`). The name is a bit misleading. There's no falloff at all. The function is simply `attenuation = 1 / falloff_constant`. A good value is `0.4`. <br><br>![](images/falloff_constant.png)|
 |falloff_linear|float|The further away from the light, the darker it gets. `falloff_linear` is a factor for the distance (`attenuation = 1 / (falloff_linear * distance_to_light)`). A good value is `3`.<br><br>![](images/falloff_linear.png)|
 |falloff_quadratic|float|The further away from the light, the less illumination - but this time the distance is squared (`attenuation = 1 / (falloff_quadratic * distance_to_light^2)`). A good value is `20`.<br><br>![](images/falloff_quadratic.png)|
+|center_offset_x_px|int|You may adjust the center of your light source using this x-offset (optional)|
+|center_offset_y_px|int|You may adjust the center of your light source using this y-offset (optional)|
+|texture|string|You can use a texture to give your light source a specific look (optional), <br>Some examples:<br><br>![](images/light_scalemap.png) ![](images/light_star.png) ![](images/light_topdown.png)|
 
-```
-[
-    {
-        "name": "center_offset_x_px",
-        "type": "int",
-        "value": 0
-    }
-]
-[
-    {
-        "name": "center_offset_y_px",
-        "type": "int",
-        "value": -72
-    }
-]
-[
-    {
-        "name": "texture",
-        "type": "string",
-        "value": "topdown_large.png"
-    }
-]
-```
 
 <br><br>
 
 ## Atmosphere layers
 
+At the moment the Deceptus Engine supports two different types of atmosphere:
+- Air
+- Water
+
+If you would like to create an underwater area inside your level, you have to create a new tile layer called `atmosphere`. Now add the file `physics_tiles.tsx` to your level as well as `collision_tiles.png` to your tilesets directory. Then paint areas with water physics using the blue quad. The surface of your water should have the blue gradient.
+
+Once you're done, hide the layer so it's not shown when you run the game.
+
+All layers underneath the level z depth will then be drawn with a little distortion to simulate the refraction of the water.
+
+![](images/atmosphere.png)
+
+
+<br><br>
+
+## Shader Quads
+
+Shader Quads are rectangle objects you can place inside your level that will render the output of a shader inside the rectangle's canvas. So far vertex shaders and fragment shaders are supported. Vertex shaders work on a per-vertex basis while fragment shaders are executed for each pixel. In most cases you will probably just want to configure a fragment shader.
+
+To create a Shader Quad, create an object group starting with `shader_quads`. Then define a rectangle object with the custom properties below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The z depth of your object layer (as always)|
+|vertex_shader|string|the relative path to your vertex shader (optional)|
+|fragment_shader|string|the relative path to your fragment shader (optional)|
+|texture|string|a path to a texture used by the shader|
+
+Here's an example of a fragment shader implementing a waterfall:
+
+![](images/shader_quad_example.png)
+
+<br><br>
+
+## Weather
+
+While this document is written, the Deceptus Engine supports only a single weather type and that is rain. Great. So if you are planning to have any outdoorsy part in your level that's supposed to have shitty weather, then create an object group `weather` and define a rainy region by setting up a rectangle in there. The rectangle's name is supposed to start with `rain`.
+
+That's all.
+
+![](images/weather_rain.png)
+
+
 <br><br>
 
 ## Ambient Occlusion
-
+`tbd`
 
 
 <br><br><br>
