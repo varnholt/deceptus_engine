@@ -216,7 +216,7 @@ In the screenshot above, Adam enters at the top left, exits at the bottom right,
 
 As the name promises, Crushers can crush Adam. They consist of a bunch of spikes connected to a heavy weight that moves to one direction with high velocity and then retracts again.
 
-`tbd: add screenshot`
+![](images/mechanism_crushers.png)
 
 Crushers can be added to your level by adding an object layer called `crushers`. To change the Crushers' alignment, please refer to the Custom Properties below:
 
@@ -259,9 +259,24 @@ In the screenshot above the fans will go off once the lever is activated.
 
 <br><br>
 
+
 ## Ropes
 
-`tbd`
+The Deceptus Engine is able to connect other objects to ropes attached to mounts. So far this is only used for visual effects, later on - if there is any demand - the Engine can be extended to allow the player to hold on to the rope or attach other objects to it.
+
+Moreover, ropes have a number of properties to simulate 'wind behavior'. So you can also place them next to open windows out outside areas.
+
+So far you can create ropes in your level by creating an object group called `ropes`.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|push_interval_s|float|The interval how often the rope is pushed (in seconds, a good value is `5.0`)|
+|push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
+|push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
+|segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
+
+Read more about Ropes in the paragraph 'Ropes with Lights'.
+
 <br><br>
 
 
@@ -279,12 +294,19 @@ It is very important to place that mount high enough, otherwise the ball will cr
 
 ## Spikes
 
-`tbd`
-```cpp
-  else if (layer->_name == "toggle_spikes")
-  else if (layer->_name == "trap_spikes")
-  else if (layer->_name == "interval_spikes")
-```
+Sharp spikes moving out of the ground are making Adam's life even harder. There are three types of spikes:
+- Interval Spikes: They extend and retract in 2 second intervals.
+- Trap Spikes: They extend upon contact after 250ms.
+- Toggle Spikes: Those are enabled or disabled using a lever.
+
+In order to create any of the spike types above, create a tile layer named `toggle_spikes`, `trap_spikes`, or `interval_spikes`. Then draw your spike tiles into any of these layers as needed.
+
+If you do not know how levers work, you can read more about that in the description of the 'Lever' mechanism.
+
+As a side-note. If you want spikes that are extended, just put them into your `toggle_spikes` layer and don't create a connection to any lever.
+
+![](images/mechanism_spikes.png)
+
 <br><br>
 
 
@@ -294,39 +316,35 @@ Moving Platforms are platforms that follow a certain path inside your level. The
 
 To create moving platforms, the first thing to do is to define the 'width' of your platform. You do this by creating a `platforms` tile layer where you put your platform tiles together. Then, you draw your platform rails into any background layer so know which path the platform is supposed to follow. This is only an optical change since the actual path your platform will follow is defined in an object group called `platform_paths`. In there you draw a polyline from start to end.
 
-`tbd: screenshot`
+![](images/mechanism_moving_platforms.png)
 
 <br><br>
 
 ## Moveable Objects
 
-`tbd`
+At the moment this object type should rather be called 'Moveable Box' since their (rectangular) shape and texture is hardcoded. However, that might change in the future.
 
-`moveable_objects`
+Anyhow, Moveable Objects are objects the player can push from one position to another just by walking against it. This way Adam might be able to climb obstacles, block enemies, etc.
 
-```cpp
-   switch (static_cast<int32_t>(mSize.x))
-   {
-      case 24:
-      {
-         mSprite.setTextureRect(sf::IntRect(1392, 0, 24, 2 * 24));
-         break;
-      }
+The way to create a moveable object, create a rectangle object inside the object group `moveable_objects`. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
 
-      case 48:
-      {
-         mSprite.setTextureRect(sf::IntRect(1296, 24, 2 * 24, 3 * 24));
-         break;
-      }
-```
+![](images/mechanism_movable_objects.png)
+
 <br><br>
 
 
 ## Extras
 
-`tbd`
+Extras are currently hardcoded, i.e. the ID of each extra in the extra tileset is mapped to one particular extra inside the C++ code. Whenever Adam 'collides' with an extra tile, the Engine's `ExtraManager` is invoked. This is where you'd have to adjust the engine as needed.
 
-Tile layer: extras
+```cpp
+  case ExtraItem::ExtraSpriteIndex::Banana: // this is your tile id
+    SaveState::getPlayerInfo().mExtraTable.mHealth.addHealth(10);
+    break;
+```
+
+Apart from that, placing extras in your level is easy. Just create a tile layer called `extras` where you place your extra tiles.
+
 
 
 <br><br><br>
@@ -670,7 +688,60 @@ That's all.
 
 
 ## Ambient Occlusion
-`tbd`
+
+When you are _done_ with your level design and already went into the polishing phase, it might be the right time to add Ambient Occlusion (AO). Those are pre-baked shadow textures that will be rendered onto your level tiles and will make your level look a lot less sterile.
+
+The workflow how to create Ambient Occlusion tiles is not fully automated but also not too complicated to do by hand. Since you're not doing this every day, it's probably appropriate to run those 3 tools below to generate your AO.
+
+When you look at the different between a level without and with AO, I hope you agree that it's worth the effort.
+
+Level without AO enabled
+![](images/level_without_ao.png)
+
+Level with AO enabled
+![](images/level_with_ao.png)
+
+### First step: Convert your level layer into an image
+
+Since the AO shadows are based on your level's `level` layer, we'll use a modified version of Tiled's TMX Rasterizer which is stored inside `tools/tmx_rasterizer`. In order to generate a `png` out, we'll just point the tool to your tmx file and hide all layers but `level`:
+
+```bash
+c:\git\build\tools\tmx_rasterizer>tmxrasterizer.exe --show-layer "level" ..\..\data\level-malte\malte.tmx level.png
+```
+
+### Second step: Generate a shadow texture out of the level texture
+
+The Deceptus Engine comes with a tool called 'Generate AO' which will basically turn all color information in your level layer black, then blur it and make it rather transparent so the shadows won't be too intense.
+
+The tool is stored inside `tools/generate_ao` and is just pointed to the `png` file you generated in the first step:
+
+```bash
+C:\git\build\tools\generate_ao>generate_ao.exe level.png
+[x] processing texture: level.png
+[x] loading original texture
+[x] creating black/transparent texture
+[x] blurring black/transparent texture
+[x] cutting out original contents...
+[x] writing texture to disk
+[x] written ao texture to: level_ao.png
+```
+
+### Third step: Turn the large AO texture into tiles
+
+Your GPU would probably implode if we loaded a texture into it that has the texture size of your level, so we're gonna turn it into tiles.
+
+The tool inside the Deceptus Engine that's designed for this purpose is called 'Pack Texture' and it's stored inside `tools/pack_texture`.
+
+It's a simple UI tool that will load a very large texture, turn that into a grid and save every cell that is not entirely empty to a 'packed texture'. The output of this tool is therefore a new texture plus a 'UV file' which will tell the Deceptus Engine where each cell shall be drawn.
+
+Anyway, you should select a 'good' grid size (32x32 is good in most cases) that will allow packing to a texture that is as small as possible. You can play around with the options and select 'File', 'Pack' until you generate a texture that is equal or smaller than 4096 x 4096px. It really shouldn't be larger than that.
+
+![](images/packtexture.png)
+
+
+### Last step: Copy AO tiles and UV map to your level
+
+The last step is just to copy the `<level_name>_ao_tiles.png` and `<level_name>_ao_tiles.uv` to your level directory.
 
 
 <br><br><br>

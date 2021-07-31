@@ -162,7 +162,7 @@ void Rope::update(const sf::Time& dt)
 void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
 {
    // read properties
-   const auto push_interval_it = tmx_object->_properties->_map.find("push_interval");
+   const auto push_interval_it = tmx_object->_properties->_map.find("push_interval_s");
    if (push_interval_it != tmx_object->_properties->_map.end())
    {
       _push_interval_s = push_interval_it->second->_value_float.value();
