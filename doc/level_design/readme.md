@@ -83,6 +83,8 @@ The last step needed to be finally able to play your first level is to define th
 
 Now you're all set! Go and try out your first level!
 
+Check out the addendum for more info about the overall folder structure of the Deceptus Engine.
+
 <br>
 
 ### Adding More Layers
@@ -744,6 +746,19 @@ Anyway, you should select a 'good' grid size (32x32 is good in most cases) that 
 The last step is just to copy the `<level_name>_ao_tiles.png` and `<level_name>_ao_tiles.uv` to your level directory.
 
 
+### Gosh, I wanna automate all this!
+
+Okay, okay, okay - here you go.
+Place the script below inside your level directory and run it from there.
+
+`generate_ao.bat`
+```bash
+..\..\tools\tmx_rasterizer\tmxrasterizer.exe --show-layer level my_level.tmx my_level.png
+..\..\tools\generate_ao\generate_ao.exe my_level.png
+..\..\tools\pack_texture\packtexture.exe --input=my_level_ao.png --size=64
+```
+
+
 <br><br><br>
 
 
@@ -771,3 +786,44 @@ If you define 2 rooms, the camera would limit the viewer's perspective to that r
 Rooms are rectangles, or combinations of rectangles. In order to define a room, create an object group '`rooms`' first, then draw rectangles around those area that are supposed to be your rooms. Rooms should be given descriptive labels such as '`kitchen`' or '`bathroom`'. If you want to merge multiple rects together to one larger room, you can also do that. Just append '`_0`', '`_1`' etc. to your room labels such as '`bedroom_0`', '`bedroom_1`' even though no sane person would ever voluntarily merge their bedrooms.
 
 ![](images/rooms.png)
+
+
+# Addendum
+
+## Folder Structure
+
+Here's an overview of the game's folder structure and some guidance how to set up the file and folder structure of your level.
+
+- `📁 root`
+  - `📁 data`
+    - `📁 config`: This folder contains all the game's configuration files
+    - `📁 effects`: You can store texture custom graphics effects here
+    - `📁 fonts`: Truetype and bitmap fonts go here
+    - `📁 game`: In-game overlays and menus
+    - `📁 joystick`: The SDL game controller database
+    - `📁 level-your_level_name`
+      - `📄 your_level_name.json`
+      - `📄 your_level_name.tmx`
+      - 📄 all your `.tsx` files
+      - 📄 your ambient occlusion files
+      - `📁 images`:  Images for your image layers
+      - `📁 tilesets`: Tiles used inside your tmx/tsx files
+    - `📁 light`: Your light textures for static and dynamic lights
+    - `📁 menus`: All the menu images are stored here.
+    - `📁 music`: Well...
+    - `📁 scenes`: Image for in-game cut scenes etc.
+    - `📁 scripts`
+      - `📁 enemies`: All the lua scripts for the game's enemies
+    - `📁 shaders`: All shaders used by the Deceptus Engine
+    - `📁 sounds`: All sounds used by the engine as well as referened by the lua scripts
+    - `📁 sprites`: All enemy sprites, i.e. all sprites that do not depend on a particular level design
+    - `📁 weapons`: Weapon-related sprites
+  - `📁 doc`
+    - `📁 game_physics`: Information about the game physics (such as jump behavior, etc.)
+    - `📁 level_design`: This is what you are staring at right now
+    - `📁 lua_interface`: A description of the lua interface used by the game's enemies
+  - `📁 tools`
+    - `📁 generate_ao`: A tool that transforms a colored image into an AO texture
+    - `📁 pack_texture`: A program that strips empty areas from textures and creates a new texture plus UVs
+    - `📁 path_merge`: A tool that eliminates redundant vertices and generates an optimized coherent mesh
+    - `📁 tmx_rasterizer`: A program that extracts layers from a TMX file and generates a single image out of it
