@@ -636,6 +636,27 @@ In order to create a dynamic light source, have an object layer called `lights` 
 
 <br><br>
 
+## Playing with Dynamic Lights / Ropes with Lights
+
+Since bump maps are a lot more convincing when light is in motion, the 'Ropes with Lights' mechanism has been implemented. It is not listed under the mechanisms as it does not have any impact on the gameplay; it is just a cosmetic addition.
+
+Ropes with Lights are exactly what the name promises. They are based on the Rope mechanism while the light source is attached to a rope. In order to place them inside your level, create an object group called `ropes_with_light` and place a rectangle object in there.
+
+![](images/mechanism_ropes_with_light.png)
+
+So on top of the Rope properties, there are a few additional ones:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|push_interval_s|float|The interval how often the rope is pushed (in seconds, a good value is `5.0`)|
+|push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
+|push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
+|segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
+|_color_|color|The color of the dynamic light (the default is white)|
+|_sprite_|int|At the moment the mechanism just supports two different light types, so it's either just `1` or `2`|
+
+<br><br>
+
 ## Atmosphere layers
 
 At the moment the Deceptus Engine supports two different types of atmosphere:
