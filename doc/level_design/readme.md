@@ -704,9 +704,15 @@ That's all.
 <br><br>
 
 
-## Smoke
+## Smoke (experimental)
 
-`tbd`
+Smoke has been added to the Engine to be able to create foggy/smokey atmosphere that looks a little creepy. Even though it is not too configurable yet, it might be a good additional to your level wherever you think it is suitable. Smoke is added by creating an object group called `smoke` and adding a rectangle in there that is as big as the area that should be filled with large smoke sprites.
+
+So far that is all there is to know.
+A couple of custom properties such as thickness, texture and color are promised for the future.
+
+![](images/smoke.png)
+
 <br><br>
 
 
