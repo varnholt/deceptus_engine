@@ -22,13 +22,15 @@ constexpr auto minimum_jump_interval_ms = 150;
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::update(const PlayerJumpInfo& info, const PlayerControls& controls)
 {
+   const auto was_in_air = _jump_info._in_air;
+
    _jump_info = info;
    _controls = controls;
 
 #ifdef JUMP_GRAVITY_SCALING
-   if (_jump_info._in_air && !_jump_info._in_air)
+   if (was_in_air && !_jump_info._in_air)
    {
-      // std::cout << "reset" << std::endl;
+      // player touched ground
       _body->SetGravityScale(1.0f);
    }
 
@@ -137,9 +139,7 @@ void PlayerJump::updateJump()
 
       if (_jump_frame_count == 0)
       {
-         // could be a bug
-         // all other code sets the gravity scale back to 1.0
-
+         // out of 'push upward'-frames, now it goes down quickly until player hits ground
          _body->SetGravityScale(1.35f);
       }
    }
