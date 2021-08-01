@@ -97,49 +97,6 @@ That means the script has been loaded correctly. The next thing to do is to star
  */
 int32_t updateProperties(lua_State* state)
 {
-   lua_pushnil(state);
-
-   while(lua_next(state, -2) != 0)
-   {
-      std::string key = lua_tostring(state, -2);
-
-      if (lua_isboolean(state, -1)) // bool
-      {
-         OBJINSTANCE->mProperties[key] = static_cast<bool>(lua_toboolean(state, -1));
-         // printf("%s = %d\n", key.c_str(), lua_toboolean(state, -1));
-      }
-      if (lua_isnumber(state, -1))
-      {
-         if (lua_isinteger(state, -1)) // int64
-         {
-            OBJINSTANCE->mProperties[key] = static_cast<int64_t>(lua_tointeger(state, -1));
-            // printf("%s = %lld\n", key.c_str(), lua_tointeger(state, -1));
-         }
-         else // double
-         {
-            OBJINSTANCE->mProperties[key] = lua_tonumber(state, -1);
-            // printf("%s = %f\n", key.c_str(), lua_tonumber(state, -1));
-         }
-      }
-      else if (lua_isstring(state, -1)) // string
-      {
-         OBJINSTANCE->mProperties[key] = std::string(lua_tostring(state, -1));
-         // printf("%s = %s\n", key.c_str(), lua_tostring(state, -1));
-      }
-
-      // process nested tables
-      //
-      //      else if(lua_istable(state, -1))
-      //      {
-      //         return updateProperties(state);
-      //      }
-
-      lua_pop(state, 1);
-   }
-
-   OBJINSTANCE->synchronizeProperties();
-
-   return 0;
 }
 
 
@@ -155,28 +112,6 @@ int32_t updateProperties(lua_State* state)
  */
 int32_t updateSpriteRect(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 5)
-   {
-      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto x = static_cast<int32_t>(lua_tointeger(state, 2));
-      auto y = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto w = static_cast<int32_t>(lua_tointeger(state, 4));
-      auto h = static_cast<int32_t>(lua_tointeger(state, 5));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->updateSpriteRect(id, x, y, w, h);
-   }
-
-   return 0;
 }
 
 
@@ -192,42 +127,6 @@ int32_t updateSpriteRect(lua_State* state)
  */
 int32_t queryAABB(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
-   {
-      b2AABB aabb;
-
-      b2Vec2 lower;
-      b2Vec2 upper;
-
-      auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
-      auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
-      auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
-      auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
-
-      lower.Set(x1, y1);
-      upper.Set(x2, y2);
-
-      aabb.lowerBound = lower;
-      aabb.upperBound = upper;
-
-      // std::cout << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y << std::endl;
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      const auto hitCount = node->queryAABB(aabb);
-      lua_pushinteger(state, hitCount);
-      return 1;
-   }
-
-   return 0;
 }
 
 
@@ -243,35 +142,6 @@ int32_t queryAABB(lua_State* state)
  */
 int32_t queryRayCast(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
-   {
-      b2Vec2 p1;
-      b2Vec2 p2;
-
-      auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
-      auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
-      auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
-      auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
-
-      p1.Set(x1, y1);
-      p2.Set(x2, y2);
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      const auto hitCount = node->queryRaycast(p1, p2);
-      lua_pushinteger(state, hitCount);
-      return 1;
-   }
-
-   return 0;
 }
 
 
@@ -283,22 +153,6 @@ int32_t queryRayCast(lua_State* state)
  */
 int32_t setDamage(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
-   {
-      auto damage = static_cast<int32_t>(lua_tointeger(state, 1));
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setDamage(damage);
-   }
-
-   return 0;
 }
 
 
@@ -311,22 +165,6 @@ int32_t setDamage(lua_State* state)
  */
 int32_t setZ(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
-   {
-      auto z = static_cast<int32_t>(lua_tointeger(state, 1));
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->mZ = z;
-   }
-
-   return 0;
 }
 
 
@@ -337,15 +175,6 @@ int32_t setZ(lua_State* state)
  */
 int32_t makeDynamic(lua_State* state)
 {
-   auto node = OBJINSTANCE;
-
-   if (!node)
-   {
-      return 0;
-   }
-
-   node->makeDynamic();
-   return 0;
 }
 
 
@@ -356,15 +185,7 @@ int32_t makeDynamic(lua_State* state)
  */
 int32_t makeStatic(lua_State* state)
 {
-   auto node = OBJINSTANCE;
 
-   if (!node)
-   {
-      return 0;
-   }
-
-   node->makeStatic();
-   return 0;
 }
 
 
@@ -376,25 +197,6 @@ int32_t makeStatic(lua_State* state)
  */
 int32_t setGravityScale(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
-   {
-
-      auto scale = static_cast<float>(lua_tonumber(state, 1));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setGravityScale(scale);
-   }
-
-   return 0;
 }
 
 
@@ -406,25 +208,6 @@ int32_t setGravityScale(lua_State* state)
  */
 int32_t setActive(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
-   {
-
-      auto active = static_cast<bool>(lua_toboolean(state, 1));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setActive(active);
-   }
-
-   return 0;
 }
 
 
@@ -440,26 +223,6 @@ int32_t setActive(lua_State* state)
  */
 int32_t isPhsyicsPathClear(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
-   {
-      // the lua scripts think in pixels; the physics grid has a resolution of 8x8 for each tile.
-      // so that needs to be scaled first.
-      auto x0 = static_cast<int32_t>(lua_tonumber(state, 1) / PIXELS_PER_PHYSICS_TILE);
-      auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PIXELS_PER_PHYSICS_TILE);
-      auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PIXELS_PER_PHYSICS_TILE);
-      auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PIXELS_PER_PHYSICS_TILE);
-
-      // check map for collision
-      auto collides = Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
-
-      lua_pushboolean(state, !collides);
-   }
-
-   // 1 return value
-   return 1;
 }
 
 
@@ -473,20 +236,6 @@ int32_t isPhsyicsPathClear(lua_State* state)
  */
 int32_t getLinearVelocity(lua_State* state)
 {
-   auto node = OBJINSTANCE;
-   auto velocity = node->getLinearVelocity();
-
-   lua_createtable(state, 2, 0);
-
-   auto table = lua_gettop(state);
-   auto index = 1;
-
-   lua_pushnumber(state, static_cast<double>(velocity.x));
-   lua_rawseti(state, table, index++);
-   lua_pushnumber(state, static_cast<double>(velocity.y));
-   lua_rawseti(state, table, index++);
-
-   return 1;
 }
 
 
@@ -499,25 +248,6 @@ int32_t getLinearVelocity(lua_State* state)
  */
 int32_t setLinearVelocity(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 2)
-   {
-      auto vx = static_cast<float>(lua_tonumber(state, 1));
-      auto vy = static_cast<float>(lua_tonumber(state, 2));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setLinearVelocity(b2Vec2{vx, vy});
-   }
-
-   return 0;
 }
 
 
@@ -531,28 +261,6 @@ int32_t setLinearVelocity(lua_State* state)
  */
 int32_t damage(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
-   {
-      auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
-      auto dx = static_cast<float>(lua_tonumber(state, 2));
-      auto dy = static_cast<float>(lua_tonumber(state, 3));
-
-      std::cout << "damage: " << damage << " dx: " << dx << " dy: " << dy << std::endl;
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->damage(damage, dx, dy);
-   }
-
-   return 0;
 }
 
 
@@ -567,27 +275,6 @@ int32_t damage(lua_State* state)
  */
 int32_t damageRadius(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
-   {
-      auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
-      auto x = static_cast<float>(lua_tonumber(state, 2));
-      auto y = static_cast<float>(lua_tonumber(state, 3));
-      auto radius = static_cast<float>(lua_tonumber(state, 4));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->damageRadius(damage, x, y, radius);
-   }
-
-   return 0;
 }
 
 
