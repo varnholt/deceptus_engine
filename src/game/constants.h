@@ -207,6 +207,7 @@ enum KeyPressed {
 
 enum ObjectType
 {
+   ObjectTypeInvalid,
    ObjectTypePlayer,
    ObjectTypePlayerFootSensor,
    ObjectTypePlayerHeadSensor,
