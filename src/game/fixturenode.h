@@ -34,7 +34,7 @@ class FixtureNode : public GameNode
 
    protected:
 
-      ObjectType _type;
+      ObjectType _type = ObjectTypeInvalid;
       std::map<std::string, bool> _flags;
       std::map<std::string, Variant> _properties;
       CollisionCallback _collision_callback;

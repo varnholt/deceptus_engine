@@ -37,14 +37,14 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
 
    // http://www.iforce2d.net/b2dtut/world-querying
 
-//   // player must indicate the direction he wants to go to
-//   bool rightPressed = mKeysPressed & KeyPressedRight;
-//   bool leftPressed = mKeysPressed & KeyPressedLeft;
-//   if (!(leftPressed || rightPressed))
-//   {
-//      removeJoint();
-//      return;
-//   }
+   //   // player must indicate the direction he wants to go to
+   //   bool rightPressed = mKeysPressed & KeyPressedRight;
+   //   bool leftPressed = mKeysPressed & KeyPressedLeft;
+   //   if (!(leftPressed || rightPressed))
+   //   {
+   //      removeJoint();
+   //      return;
+   //   }
 
    // if player is standing somewhere, remove joint
    if (!inAir)
@@ -60,14 +60,8 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
       return;
    }
 
-   if (_climb_joint != nullptr)
-   {
-      return;
-   }
-
-
    // hold
-   if (_climb_joint != nullptr)
+   if (_climb_joint)
    {
       // remove that joint if it points down from the player perspective
       auto jointDir = (_climb_joint->GetAnchorA() - _climb_joint->GetAnchorB());
@@ -77,6 +71,12 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
       }
       // printf("joint dir: %f \n", jointDir.y);
 
+      return;
+   }
+
+   // there's nothing to do if there is a climb joint already
+   if (_climb_joint)
+   {
       return;
    }
 
