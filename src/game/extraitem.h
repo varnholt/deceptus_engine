@@ -24,12 +24,13 @@ struct ExtraItem : public GameNode
       KeyGreen  = 67,
       KeyYellow = 68,
       Dash      = 80,
+      Invalid   = 0xffff
    };
 
    bool mActive = true;
    sf::Vector2u mSpriteOffset;
    sf::Vector2f mPosition;
-   ExtraSpriteIndex mType;
+   ExtraSpriteIndex mType = ExtraSpriteIndex::Invalid;
 
    ExtraItem(GameNode* parent = nullptr);
 };

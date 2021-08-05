@@ -61,7 +61,7 @@ protected:
    sf::Vector2f _tile_positions;
    int32_t _height = 0;
    bool _player_at_portal = false;
-   std::shared_ptr<Portal> _detination;
+   std::shared_ptr<Portal> _destination;
 
    static std::atomic<bool> _portal_lock;
 };
