@@ -81,14 +81,14 @@ bool Portal::isLocked()
 //-----------------------------------------------------------------------------
 std::shared_ptr<Portal> Portal::getDestination() const
 {
-   return _detination;
+   return _destination;
 }
 
 
 //-----------------------------------------------------------------------------
 void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 {
-   _detination = dst;
+   _destination = dst;
 }
 
 
@@ -174,7 +174,7 @@ void Portal::link(
 
       if (src_portal != nullptr && dst_portal != nullptr)
       {
-         src_portal->_detination = dst_portal;
+         src_portal->_destination = dst_portal;
          break;
       }
    }
@@ -192,7 +192,7 @@ void Portal::link(
       std::cerr << "please mark your src portal correctly for id: " << tmx_object->_id << std::endl;
    }
 
-   dst_portal->_detination = src_portal;
+   dst_portal->_destination = src_portal;
 
    // std::cout << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")" << std::endl;
 }
