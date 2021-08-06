@@ -3,6 +3,7 @@
 The Deceptus Engine comes with an interface written in Lua that lets you define the visuals and behavior of enemies inside the game.
 The decision to go for Lua has been made as non-C++ programmers should be able to create their own enemies. Also creating or changing the behavior of enemies should be possible without making any change in the game engine.
 
+<br><br>
 
 # Creating Your First Own Enemy
 
@@ -80,545 +81,590 @@ When you now start the game, you should see your enemy at its predefined start p
 
 Now it's time to let your enemy move around, attack or do whatever you think it should be doing. For this purpose, it's time to take a closer look at the `update` function you defined earlier.
 
+In topics like real-time rendering or game development it is very common to have a function that's called every frame to update your data or model or whatever you want to call what you are maintaining internally. This function is usually called with a 'delta time' (`dt`) - the time that has passed since the last time the function has called. That helps you to write code that produces rather constant output. So no matter if your `frames per second` value drops a little - if you always multiple `dt` into your calculations, the output of your computations will remain the same.
 
+So what to do inside the `update` call? It's really up to you and totally depends on what kind of character you like to implement. What I recommend doing though, is to split up the function into steps like
+- `think()` - a function that evaluates the environment and decides on what to do next
+- `act()` - a function that actually carries out what has been just decided
 
+Here's an example for a typical `think` function:
+```lua
+function think()
+
+   nextAction = mCurrentAction
+
+   -- These are the actions you can choose from. E.g., if the player is nearby
+   -- canAttack will return true and your next action will be 'Attack'. Until
+   -- the player is around, you will probably just walk from A to B ('Walk'),
+   -- wait a little ('Idle') and then walk back from B to A.
+   if (isDead()) then
+      nextAction = Action["Die"]
+   elseif (canAttack()) then
+      nextAction = Action["Attack"]
+   elseif (isHit()) then
+      nextAction = Action["Hit"]
+   elseif (not isWaiting()) then
+      nextAction = Action["Walk"]
+   else
+      nextAction = Action["Idle"]
+   end
+
+   mChanged = nextAction ~= mCurrentAction
+   mCurrentAction = nextAction
+end
+```
+
+Your `act` function will look very similar:
+```lua
+function act()
+
+   if (mCurrentAction == Action["Hit"]) then
+      updateHit()
+   elseif (mCurrentAction == Action["Die"]) then
+      updateDead()
+   elseif (mCurrentAction == Action["Walk"]) then
+      walk()
+   elseif (mCurrentAction == Action["Attack"]) then
+      attack()
+   end
+
+end
+```
+
+Those are the basics. Of course the details are still missing so the next chapter will cover a bit about how to use the API.
+
+<br>
+
+## Using the API
+
+### Retrieving Positions
+
+The first thing you probably want to know is '_Where is the player?_' , '_Where am I?_'. There are two functions that you will have to add to your script to get this information.
+
+The first one is `playerMovedTo` which will give you the latest pixel coordinates of the player.
+```lua
+function playerMovedTo(x, y)
+   print(string.format("player moved to: %f, %f", x, y))
+   mPlayerPosition = v2d.Vector2D(x, y)
+end
+```
+
+You can compare these ones with your own coordinates that you can retrieve as shown below:
+```lua
+function movedTo(x, y)
+   print(string.format("moved to: %f, %f", x, y))
+   mPosition = v2d.Vector2D(x, y)
+end
+```
+<br>
+
+### Moving the Enemy
+So if the player is on your left (`player.x` is smaller than `enemy.x`), you might want to walk to the left. If the distance to the player is below a certain threshold, you might want to attack... or hand him flowers. Who knows.
+
+How can you make your enemy move? For that purpose, you can set the velocity and acceleration via its properties and then just emit simple keyboard events for your movement:
+
+Set the velocity and acceleration
+```lua
+   velocity_walk_max = 1.0,
+   acceleration_ground = 0.1
+```
+
+Emit keyboard events to the engine to make it
+```lua
+function goLeft()
+   keyReleased(Key["KeyRight"])
+   keyPressed(Key["KeyLeft"])
+end
+```
+
+```lua
+function goRight()
+   keyReleased(Key["KeyLeft"])
+   keyPressed(Key["KeyRight"])
+end
+```
+
+Alternatively, you can set the linear velocity directly by calling `setLinearVelocity`.
+
+You can even go full hard core, totally ignore the concept of velocity and acceleration and set the enemy's position directly using `setTransform`.
+
+<br>
+
+### Paths
+
+In the level design documentation's chapter about enemies you might have seen a paragraph about paths you can set for enemies.
+
+In order to use these paths, you have to implement the function `setPath` sends a bunch of x, y positions in pairs.
+
+Here's an example:
+
+```lua
+
+mPatrolPath = {}
+
+function setPath(name, table)
+
+   local i = 0
+   local x = 0.0;
+   local y = 0.0;
+   local v = {}
+
+   for key, value in pairs(table) do
+
+      if ((i % 2) == 0) then
+         x = value
+      else
+         y = value
+         v[(i - 1) / 2] = v2d.Vector2D(x, y)
+      end
+
+      i = i + 1
+   end
+
+   if (name == "path") then
+      mPatrolPath = v
+   end
+end
+```
+
+There's a `interpolation.lua` inside the `scripts/enemies` directory. Use that to interpolate between your path positions if needed. There are also a bunch of examples inside `scripts/enemies` that should serve as a good reference.
+
+<br><br>
 
 # The Lua API
 
-`addSample`
-`addShapeCircle`
-`addShapeRect`
-`addSprite`
-`addWeapon`
-`boom`
-`damage`
-`damageRadius`
-`debug`
-`die`
-`fireWeapon`
-`getLinearVelocity`
-`isPhsyicsPathClear`
-`makeDynamic`
-`makeStatic`
-`playDetonationAnimation`
-`playSample`
-`queryAABB`
-`queryRayCast`
-`registerHitAnimation`
-`setActive`
-`setDamage`
-`setGravityScale`
-`setLinearVelocity`
-`setSpriteOffset`
-`setSpriteOrigin`
-`setTransform`
-`setZ`
-`timer`
-`updateKeysPressed`
-`updateProjectileAnimation`
-`updateProjectileTexture`
-`updateProperties`
-`updateSpriteRect`
+## `addSample`
+
+Preload a sample to be played later
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Filename of the sample|
+
+<br>
+
+## `addShapeCircle`
+
+Add a circle shape to the node
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Circle radius (meters)|
+|2|float|Circle x-position (meters)|
+|3|float|Circle y-position (meters)|
+
+<br>
 
 
+## `addShapeRect`
+
+Add a rectangular shape to the node.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Rect width (in meters)|
+|2|float|Rect height (in meters)|
+|3|float|Rect position x (in meters)|
+|4|float|Rect position y (in meters)|
+
+<br>
+
+
+## `addShapePoly`
+
+Add a polygonal shape to the node.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|n|float|x-coordinate (in meters)|
+|n+1|float|y-coordinate (in meters)|
+
+<br>
+
+
+## `addSprite`
+
+Add another (empty) sprite to this node
+
+<br>
+
+
+## `addWeapon`
+
+Add a weapon instance to the player
 
 ```cpp
-
-/**
- * @brief updateProperties
- * @param state lua state
- *    param 1 key
- *    param 2 value
- *    param n key
- *    param n + 1 value
- * @return error code
- */
-int32_t updateProperties(lua_State* state)
+enum class WeaponType
 {
-}
-
-
-/**
- * @brief updateSpriteRect update node's sprite rect
- * @param state lua state
- *    param 1: id of sprite
- *    param 2: x position of sprite
- *    param 3: y position of sprite
- *    param 4: sprite width
- *    param 5: sprite height
- * @return error code
- */
-int32_t updateSpriteRect(lua_State* state)
-{
-}
-
-
-/**
- * @brief queryAABB do an aabb query
- * @param state lua state
- *    param 1: aabb x1
- *    param 2: aabb y1
- *    param 3: aabb x2
- *    param 4: aabb y2
- *    return hit count
- * @return 1 if hit, 0 if no hit
- */
-int32_t queryAABB(lua_State* state)
-{
-}
-
-
-/**
- * @brief queryRayCast do a raycast and see if we hit something
- * @param state lua state
- *    param 1 x1
- *    param 2 y1
- *    param 3 x2
- *    param 4 y2
- *    return number of objects hit
- * @return exit code
- */
-int32_t queryRayCast(lua_State* state)
-{
-}
-
-
-/**
- * @brief setDamage set the damage of this lua node
- * @param state lua state
- *    param damage amount of damage (0..100)
- * @return error code
- */
-int32_t setDamage(lua_State* state)
-{
-}
-
-
-
-/**
- * @brief setZ set the z layer of this node
- * @param state lua state
- *    param 1: z layer
- * @return exit code
- */
-int32_t setZ(lua_State* state)
-{
-}
-
-
-/**
- * @brief makeDynamic make this object a dynamic box2d object
- * @param state lua state
- * @return exit code
- */
-int32_t makeDynamic(lua_State* state)
-{
-}
-
-
-/**
- * @brief makeStatic make this object a static box2d object
- * @param state lua state
- * @return exit code
- */
-int32_t makeStatic(lua_State* state)
-{
-
-}
-
-
-/**
- * @brief setGravityScale set the gravity scale of this node
- * @param state lua state
- *    param 1: gravity scale (0..1)
- * @return error code
- */
-int32_t setGravityScale(lua_State* state)
-{
-}
-
-
-/**
- * @brief setActive set this node active/inactive
- * @param state lua state
- *    param 1: active flag
- * @return error code
- */
-int32_t setActive(lua_State* state)
-{
-}
-
-
-/**
- * @brief isPhsyicsPathClear check if a given path hits objects inside the tmx
- * @param state lua state
- *    param 1: x0
- *    param 2: y0
- *    param 3: x1
- *    param 4: y1
- *    return \c true on collision
- * @return error code
- */
-int32_t isPhsyicsPathClear(lua_State* state)
-{
-}
-
-
-/**
- * @brief getLinearVelocity reads the linear velocity of this object
- * @param state lua state
- *    return table
- *       1: velocity x
- *       2: velocity y
- * @return error code
- */
-int32_t getLinearVelocity(lua_State* state)
-{
-}
-
-
-/**
- * @brief setLinearVelocity setter for linear velocity
- * @param state lua state
- *    param 1: velocity x
- *    param 2: velocity y
- * @return error code
- */
-int32_t setLinearVelocity(lua_State* state)
-{
-}
-
-
-/**
- * @brief damage the node sets some damage to the player
- * @param state lua state
- *    param 1: amount of damage from 0..100
- *    param 2: dx damage direction x
- *    param 3: dy damage direction y
- * @return error code
- */
-int32_t damage(lua_State* state)
-{
-}
-
-
-/**
- * @brief damage the node damages the palyer if he's within a given radius
- * @param state lua state
- *    param 1: amount of damage from 0..100
- *    param 2: dx damage direction x
- *    param 3: dy damage direction y
- *    param 4: radius damage radius
- * @return error code
- */
-int32_t damageRadius(lua_State* state)
-{
-}
-
-
-/**
- * @brief setTransform set the object's transform
- * @param state lua state
- *    param 1: x translation
- *    param 2: y translation
- *    param 3: z rotation
- * @return error code
- */
-int32_t setTransform(lua_State* state)
-{
-}
-
-
-/**
- * @brief addSprite add another (empty) sprite to this node
- * @param state lua state
- * @return error code
- */
-int32_t addSprite(lua_State* state)
-{
-}
-
-
-/**
- * @brief setSpriteOrigin set origin of a given sprite
- * @param state lua state
- *    param 1: sprite id
- *    param 2: x position
- *    param 3: y position
- * @return error code
- */
-int32_t setSpriteOrigin(lua_State* state)
-{
-}
-
-
-/**
- * @brief setSpriteOffset sets the offset for a given sprite
- * @param state lua state
- *    param 1: sprite id
- *    param 2: x position
- *    param 3: y position
- * @return error code
- */
-int32_t setSpriteOffset(lua_State* state)
-{
-}
-
-
-/**
- * @brief boom make the game go booom
- * @param state lua state
- *    param 1: detonation center x
- *    param 2: detonation center y
- *    param 3: boom intensity
- * @return error code
- */
-int32_t boom(lua_State* state)
-{
-}
-
-
-/**
- * @brief play a detonation animation
- * @param state lua state
- *    param 1: detonation center x
- *    param 2: detonation center y
- * @return error code
- */
-int32_t playDetonationAnimation(lua_State* state)
-{
-}
-
-
-/**
- * @brief addShapeCircle add a circle shape to the node
- * @param state lua state
- *    param 1: circle radius
- *    param 2: circle x position
- *    param 3: circle y position
- * @return error code
- */
-int32_t addShapeCircle(lua_State* state)
-{
-}
-
-
-/**
- * @brief addShapeRect add a rectangular shape to the node
- * @param state lua state
- *    param 1: rect width
- *    param 2: rect height
- *    param 3: rect position x
- *    param 4: rect position y
- * @return error code
- */
-int32_t addShapeRect(lua_State* state)
-{
-}
-
-
-/**
- * @brief addShapePoly add a polygonal shape to the node
- * @param state lua state
- *    param n x coordinate
- *    param n + 1 y coordinate
- * @return error code
- */
-int32_t addShapePoly(lua_State* state)
-{
-}
-
-
-/**
- * @brief addWeapon add a weapon instance to the player
- * @param state lua state
- *    param 1: weapon type (enum)
- *    param 2: fire interval in ms
- *    param 3: damage for single hit (0..100)
- *    param 4: bullet radius
- *    param 4..n: polygon x and y parameters if not a radial bullet
- * @return error code
- */
-int32_t addWeapon(lua_State* state)
-{
-   // add weapon with projectile radius only
-   if (argc == 4)
-   {
-      auto radius = static_cast<float>(lua_tonumber(state, 4));
-      shape = std::make_unique<b2CircleShape>();
-      dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
-   }
-
-   // add weapon with polygon projectile shape
-   if (argc >= 5 && ((argc - 5) % 2 == 0))
-   {
-      auto constexpr parameterCount = 2u;
-      shape = std::make_unique<b2PolygonShape>();
-
-      b2Vec2* poly = new b2Vec2[(argc - parameterCount) / 2];
-
-      auto polyIndex = 0;
-      for (auto i = parameterCount + 1; i < argc - parameterCount; i += 2u)
-      {
-         auto x = static_cast<float>(lua_tonumber(state, i));
-         auto y = static_cast<float>(lua_tonumber(state, i + 1));
-         poly[polyIndex].Set(x, y);
-         polyIndex++;
-      }
-
-      dynamic_cast<b2PolygonShape*>(shape.get())->Set(poly, polyIndex);
-   }
-}
-
-
-/**
- * @brief fireWeapon fire a weapon
- * @param state lua state
- *    param 1: index of the weapon
- *    param 2: x position where the shot comes from
- *    param 3: y position where the shot comes from
- *    param 4: x direction
- *    param 5: y direction
- * @return error code
- */
-int32_t fireWeapon(lua_State* state)
-{
-}
-
-
-/**
- * @brief updateProjectileTexture change the texture of a projectile
- * @param state lua state
- *    param 1: index of the weapon
- *    param 2: path of the texture
- *    param 3: x position of the texture rect
- *    param 4: y position of the texture rect
- *    param 5: width of the texture rect
- *    param 6: height of the texture rect
- * @return error code
- */
-int32_t updateProjectileTexture(lua_State* state)
-{
-}
-
-
-/**
- * @brief updateProjectileAnimation set projectile animation for a given weapon
- * @param state lua state
- *    param 1: weapon index
- *    param 2: texture path
- *    param 3: width of one frame
- *    param 4: height of one frame
- *    param 5: x origin of the frame
- *    param 6: y origin of the frame
- *    param 7: time for each frame in seconds
- *    param 8: frame count
- *    param 9: frames per row
- *    param 10: start frame
- * @return error code
- */
-int32_t updateProjectileAnimation(lua_State* state)
-{
-}
-
-
-/**
- * @brief timer start a timer
- * @param state lua state
- *    param 1: delay of the timer
- *    param 2: id of the timer in milliseconds
- * @return error code
- */
-int32_t timer(lua_State* state)
-{
-}
-
-
-/**
- * @brief addSample add a sample to be played later
- * @param state lua state
- *    param 1: name of the sample
- * @return error code
- */
-int32_t addSample(lua_State* state)
-{
-}
-
-
-/**
- * @brief playSample play a sample
- * @param state lua state
- *    param 1: name of the sample to play
- *    param 2: volume (0..1)
- * @return
- */
-int32_t playSample(lua_State* state)
-{
-}
-
-
-/**
- * @brief debug output a debug message to stdout
- * @param state lua state
- *    param 1: debug message
- * @return error code
- */
-int32_t debug(lua_State* state)
-{
-}
-
-
-/**
- * @brief registerHitAnimation register a hit animation for a given weapon
- * @param state lua state
- *    param 1: weapon index
- *    param 2: texture path
- *    param 3: width of one frame
- *    param 4: height of one frame
- *    param 5: frame count
- *    param 6: frames per row
- *    param 7: start frame
- * @return error code
- */
-int32_t registerHitAnimation(lua_State* state)
-{
-}
-
-
-/**
- * @brief updateKeysPressed fire keypressed events to the node instance
- * @param state lua state
- *    param 1: keypressed bitmask
- * @return error code
- */
-int32_t updateKeysPressed(lua_State* state)
-{
-}
-
-
-/**
- * @brief requestMap request the game map
- * @param state lua state
- * @return error code
- */
-int32_t requestMap(lua_State* state)
-{
-}
-
-
-/**
- * @brief die let the node die
- * @param state lua state
- * @return error code
- */
-int32_t die(lua_State* state)
-{
-}
-
-
-[[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
-{
-}
-
-
+   Default = 0,
+   Bow = 1,
+};
 ```
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|enum class `WeaponType`|Weapon type|
+|2|int32_t|Fire interval (in ms)|
+|3|int32_t|Damage for single hit (0..100)|
+|4|float|Bullet radius (in meters)|
+|4..n|float|Polygon x and y parameters (in meters) if not a radial bullet|
+
+<br>
+
+
+## `boom`
+
+Let's the game's camera shake.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Detonation center x (in px)|
+|2|int32_t|Detonation center y (in px)|
+|3|float|Boom intensity (0..1)|
+
+<br>
+
+
+## `damage`
+
+The node passes a certain amount of damage to the player.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|amount of damage from 0..100|
+|2|float|damage direction-x (in meters)|
+|3|float|damage direction-y (in meters)|
+
+<br>
+
+## `damageRadius`
+
+The node damages the palyer if he's within a given radius.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_|amount of damage from 0..100|
+|2|float|damage direction-x (in meters)|
+|3|float|damage direction-y (in meters)|
+|4|float|radius damage radius|
+
+<br>
+
+## `debug`
+
+Output a debug message to stdout
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Debug message|
+
+<br>
+
+
+## `die`
+
+This will let the enemy instance die. The object gets deleted and will no longer be called.
+
+
+## `fireWeapon`
+
+This will fire a weapon from a given position into a given direction.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Index of the weapon|
+|2|int32_t|x-position where the shot comes from (in px)|
+|3|int32_t|y-position where the shot comes from (in px)|
+|4|float|x-direction (in meters)|
+|5|float|y-direction (in meters)|
+
+<br>
+
+## `getLinearVelocity`
+
+Reads the linear velocity of this object.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|Returns|lua table|1 is the linear velocity in x (in meters)<br>2 is the linear velocity in y (in meters)|
+
+<br>
+
+## `isPhsyicsPathClear` [deprecated]
+
+Check if a given path hits objects inside the physics information of the game.
+
+Use `queryRayCast` instead.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Ray start x-position (in px)|
+|2|int32_t|Ray start y-position (in px)|
+|3|int32_t|Ray stop x-position (in px)|
+|4|int32_t|Ray stop y-position (in px)|
+|Return|bool|Returns `true` on collision|
+
+<br>
+
+## `makeDynamic`
+
+Makes the object 'dynamic'
+
+A dynamic body is fully simulated. They can be moved manually by the user, but normally they move according to forces. A dynamic body can collide with all body types. A dynamic body always has finite, non-zero mass. If you try to set the mass of a dynamic body to zero, it will automatically acquire a mass of one kilogram and it won't rotate.
+
+<br>
+
+## `makeStatic`
+
+Makes the object 'static'.
+
+A static body does not move under simulation and behaves as if it has infinite mass. Internally, Box2D stores zero for the mass and the inverse mass. Static bodies can be moved manually by the user. A static body has zero velocity. Static bodies do not collide with other static or kinematic bodies.
+
+<br>
+
+## `playDetonationAnimation`
+
+Play a detonation animation
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Detonation center x (in px)|
+|2|int32_t|Detonation center y (in px)|
+
+<br>
+
+## `playSample`
+
+Plays a given sample
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Filename of the sample to play|
+|2|float|Volume (0..1)|
+
+<br>
+
+## `queryAABB`
+
+Query the world for all fixtures that potentially overlap the provided AABB.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|aabb x1|
+|2|float|aabb y1|
+|3|float|aabb x2|
+|4|float|aabb y2|
+|return|int32_t|The amount of hits within the AABB|
+
+## `queryRayCast`
+
+Ray-cast the world for all fixtures in the path of the ray.
+
+The ray-cast ignores shapes that contain the starting point.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|start x-position of your ray (in px)|
+|2|int32_t|start y-position of your ray (in px)|
+|3|int32_t|end x-position of your ray (in px)|
+|4|int32_t|end y-position of your ray (in px)|
+|return|int32_t|number of objects hit by the ray|
+
+<br>
+
+## `registerHitAnimation`
+
+Register a hit animation for a given weapon
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Weapon index|
+|2|string|Texture path|
+|3|int32_t|Width of one frame (in px)|
+|4|int32_t|Height of one frame (in px)|
+|5|int32_t|Frame count|
+|6|int32_t|Frames per row|
+|7|int32_t|Start frame|
+
+<br>
+
+## `setActive`
+
+Set this node active/inactive.
+An inactive body is not simulated and cannot be collided with or woken up.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|bool|Active flag|
+
+<br>
+
+## `setDamage`
+
+Set the damage property of this lua node.
+This will let the game's collision management know how much damage the player should retrieve on collision with the object.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Amount of damage (0..100)|
+
+<br>
+
+## `setGravityScale`
+
+Set the gravity scale of this node.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Gravity scale (-1..1), -1 is inverted, 0 is 'no gravity', 1 is normal|
+
+<br>
+
+## `setLinearVelocity`
+
+Sets the for linear velocity of this node
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Velocity x (in meters)|
+|2|float|Velocity y (in meters)|
+
+<br>
+
+
+## `setSpriteOffset`
+
+Sets the offset for a given sprite
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Sprite id|
+|2|int32_t|x-position (in px)|
+|3|int32_t|y-position (in px)|
+
+<br>
+
+
+## `setSpriteOrigin`
+
+Set the origin of a given sprite
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Sprite id|
+|2|int32_t|x-position (in px)|
+|3|int32_t|y-position (in px)|
+
+<br>
+
+
+## `setTransform`
+
+Set the object's transform
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|x-translation (in px)|
+|2|int32_t|y-translation (in px)|
+|3|float|z-rotation (in radians)|
+
+<br>
+
+## `setZ`
+
+Set the z layer of this node.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|z layer|
+
+<br>
+
+## `timer`
+
+Starts a timer for a given amount of milliseconds. When the time is elapsed the timeout callback will be called:
+
+```lua
+function timeout(id)
+   print(string.format("timeout: %d", id))
+end
+```
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Delay of the timer|
+|2|int32_t|Id of the timer in milliseconds|
+
+<br>
+
+## `updateKeysPressed`
+
+Send keypressed events to the node instance which will then be processed by the game engine.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Keypressed bitmask|
+
+<br>
+
+
+## `updateProjectileAnimation`
+
+Configure the projectile animation for a given weapon
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Weapon index|
+|2|string|Texture path|
+|3|int32_t|Width of one frame (in px)|
+|4|int32_t|Height of one frame (in px)|
+|5|int32_t|x-origin of the frame (in px)|
+|6|int32_t|y-origin of the frame (in px)|
+|7|float|Time for each frame in seconds|
+|8|int32_t|Frame count|
+|9|int32_t|Frames per row|
+|10|int32_t|Start frame|
+
+<br>
+
+## `updateProjectileTexture`
+
+Change the texture of a projectile
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|param 1|int32_t|Index of the weapon|
+|param 2|string|Path of the texture|
+|param 3|int32_t|x-position of the texture rect (in px)|
+|param 4|int32_t|y-position of the texture rect (in px)|
+|param 5|int32_t|Width of the texture rect (in px)|
+|param 6|int32_t|Height of the texture rect (in px)|
+
+<br>
+
+## `updateProperties`
+
+Update a number of properties by providing a key and value.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|key|
+|2|variant|value|
+|n|string|key|
+|n + 1|variant|value|
+
+<br>
+
+## `updateSpriteRect`
+
+Update the sprite rectangle for a particular sprite.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|id of the sprite|
+|2|int32_t|x-position of the rectangle within the sprite (in px)|
+|3|int32_t|y-position of the rectangle within the sprite (in px)|
+|4|int32_t|Rectangle width (in px)|
+|5|int32_t|Rectangle height (in px)|
+
+<br>
