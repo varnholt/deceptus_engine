@@ -47,6 +47,8 @@ PlayerAnimation::PlayerAnimation()
    // version 2
    _idle_r_2             = AnimationPool::getInstance().add("player_idle_r_2",             0.0f, 0.0f, true, false);
    _idle_l_2             = AnimationPool::getInstance().add("player_idle_l_2",             0.0f, 0.0f, true, false);
+   _idle_blink_r_2       = AnimationPool::getInstance().add("player_idle_blink_r_2",       0.0f, 0.0f, true, false);
+   _idle_blink_l_2       = AnimationPool::getInstance().add("player_idle_blink_l_2",       0.0f, 0.0f, true, false);
    _bend_down_r_2        = AnimationPool::getInstance().add("player_bend_down_r_2",        0.0f, 0.0f, true, false);
    _bend_down_l_2        = AnimationPool::getInstance().add("player_bend_down_l_2",        0.0f, 0.0f, true, false);
    _idle_to_run_r_2      = AnimationPool::getInstance().add("player_idle_to_run_r_2",      0.0f, 0.0f, true, false);
@@ -58,8 +60,8 @@ PlayerAnimation::PlayerAnimation()
    _dash_r_2             = AnimationPool::getInstance().add("player_dash_r_2",             0.0f, 0.0f, true, false);
    _dash_l_2             = AnimationPool::getInstance().add("player_dash_l_2",             0.0f, 0.0f, true, false);
 
-   // _crouch_r_2      = AnimationPool::getInstance().add("player_crouch_r_2",       0.0f, 0.0f, true, false);
-   // _crouch_l_2      = AnimationPool::getInstance().add("player_crouch_l_2",       0.0f, 0.0f, true, false);
+   // _crouch_r_2           = AnimationPool::getInstance().add("player_crouch_r_2",           0.0f, 0.0f, true, false);
+   // _crouch_l_2           = AnimationPool::getInstance().add("player_crouch_l_2",           0.0f, 0.0f, true, false);
 
    _jump_init_r_2        = AnimationPool::getInstance().add("player_jump_init_r_2",        0.0f, 0.0f, true, false);
    _jump_up_r_2          = AnimationPool::getInstance().add("player_jump_up_r_2",          0.0f, 0.0f, true, false);
@@ -120,6 +122,8 @@ PlayerAnimation::PlayerAnimation()
    // version 2
    _looped_animations.push_back(_idle_r_2);
    _looped_animations.push_back(_idle_l_2);
+   _looped_animations.push_back(_idle_blink_r_2);
+   _looped_animations.push_back(_idle_blink_l_2);
    _looped_animations.push_back(_swim_r_2);
    _looped_animations.push_back(_swim_l_2);
    _looped_animations.push_back(_run_r_2);
@@ -127,8 +131,11 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_dash_r_2);
    _looped_animations.push_back(_dash_l_2);
 
-//   mAnimations.push_back(mCrouchR2);
-//   mAnimations.push_back(mCrouchL2);
+   // _looped_animations.push_back(_bend_down_r_2);
+   // _looped_animations.push_back(_bend_down_l_2);
+
+   // _looped_animations.push_back(_crouch_r_2);
+   // _looped_animations.push_back(_crouch_l_2);
 
    _looped_animations.push_back(_jump_init_r_2);
    _looped_animations.push_back(_jump_up_r_2);
@@ -241,11 +248,15 @@ void PlayerAnimation::generateJson()
    const auto v = [d_75](int32_t size){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(d_75); return arr;};
    const auto vx = [](int32_t size, const sf::Time& t){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(t); return arr;};
 
-   AnimationSettings player_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_100), sprite_name);
-   AnimationSettings player_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   const auto idle_row_r = next_row();
+   const auto idle_row_l = next_row();
+   AnimationSettings player_idle_r({72, 48}, {0, idle_row_r}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   AnimationSettings player_idle_l({72, 48}, {0, idle_row_l}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   AnimationSettings player_idle_blink_r({72, 48}, {col(8), idle_row_r}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   AnimationSettings player_idle_blink_l({72, 48}, {col(8), idle_row_l}, {36.0, 48.0}, vx(8, d_100), sprite_name);
 
-   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_75), sprite_name);
-   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(8, d_75), sprite_name);
+   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_75), sprite_name);
+   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_75), sprite_name);
 
    AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
    AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
@@ -259,15 +270,14 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
    AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
 
-   const auto jump_r_row = next_row();
-   const auto jump_l_row = next_row();
-
    // init:    3 frames
    // up:      2 frames
    // midair:  8 frames
    // down:    2 frames
    // landing: 4 frames
 
+   const auto jump_r_row = next_row();
+   const auto jump_l_row = next_row();
    AnimationSettings player_jump_init_r({72, 48}, {0, jump_r_row}, {36.0, 48.0}, v(3), sprite_name);
    AnimationSettings player_jump_up_r({72, 48}, {col(3), jump_r_row}, {36.0, 48.0}, v(2), sprite_name);
    AnimationSettings player_jump_midair_r({72, 48}, {col(5), jump_r_row}, {36.0, 48.0}, v(8), sprite_name);
@@ -326,6 +336,8 @@ void PlayerAnimation::generateJson()
    nlohmann::json j;
    j["player_idle_r_2"]             = player_idle_r;
    j["player_idle_l_2"]             = player_idle_l;
+   j["player_idle_blink_r_2"]       = player_idle_blink_r;
+   j["player_idle_blink_l_2"]       = player_idle_blink_l;
    j["player_bend_down_r_2"]        = player_bend_down_r;
    j["player_bend_down_l_2"]        = player_bend_down_l;
    j["player_idle_to_run_r_2"]      = player_idle_to_run_r;
@@ -369,8 +381,11 @@ void PlayerAnimation::generateJson()
    sstream << std::setw(4) << j << "\n\n";
    const auto data = sstream.str();
 
-   std::ofstream file("player_unarmed.json");
+   constexpr auto json_filename = "player_unarmed.json";
+   std::ofstream file(json_filename);
    file << data;
+
+   std::cout << "[x] written updated animations to:  " << json_filename << std::endl;
 }
 
 
@@ -565,8 +580,6 @@ void PlayerAnimation::updateV2(
    const auto lookActive = CameraPane::getInstance().isLookActive();
    const auto passesSanityCheck = !(data._moving_right && data._moving_left);
 
-   auto requiresUpdate = true;
-
    // dash
    if (data._dash_dir.has_value())
    {
@@ -609,8 +622,7 @@ void PlayerAnimation::updateV2(
    {
       if (data._crouching)
       {
-         nextCycle = _crouch_l;
-         requiresUpdate = false;
+         nextCycle = _bend_down_l_2;
       }
       else
       {
@@ -621,8 +633,7 @@ void PlayerAnimation::updateV2(
    {
       if (data._crouching)
       {
-         nextCycle = _crouch_r;
-         requiresUpdate = false;
+         nextCycle = _bend_down_r_2;
       }
       else
       {
@@ -732,21 +743,16 @@ void PlayerAnimation::updateV2(
          _appear_r_2->setAlpha(255);
          _appear_l_2->setAlpha(255);
       }
-
-      requiresUpdate = true;
    }
 
    // reset x if animation cycle changed
    if (nextCycle != _current_cycle)
    {
       nextCycle->seekToStart();
+      nextCycle->play();
    }
 
    _current_cycle = nextCycle;
-
-   if (requiresUpdate)
-   {
-      _current_cycle->update(dt);
-   }
+   _current_cycle->update(dt);
 }
 
