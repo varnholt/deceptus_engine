@@ -243,7 +243,6 @@
             75,
             75,
             75,
-            75,
             75
         ],
         "frame_offset": [
@@ -258,12 +257,11 @@
             36.0,
             48.0
         ],
-        "sprite_count": 8,
+        "sprite_count": 7,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_bend_down_r_2": {
         "frame_durations": [
-            75,
             75,
             75,
             75,
@@ -284,7 +282,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 8,
+        "sprite_count": 7,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_dash_l_2": {
@@ -365,18 +363,18 @@
     },
     "player_double_jump_r_2": {
         "frame_durations": [
-           75,
-           75,
-           75,
-           75,
-           75,
-           75,
-           75,
-           75,
-           75,
-           75,
-           75,
-           75
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75
         ],
         "frame_offset": [
             0,
@@ -391,6 +389,58 @@
             48.0
         ],
         "sprite_count": 12,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_idle_blink_l_2": {
+        "frame_durations": [
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100
+        ],
+        "frame_offset": [
+            576,
+            48
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 8,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_idle_blink_r_2": {
+        "frame_durations": [
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100
+        ],
+        "frame_offset": [
+            576,
+            0
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 8,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_idle_l_2": {
