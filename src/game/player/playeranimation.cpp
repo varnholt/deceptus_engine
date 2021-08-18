@@ -1,6 +1,7 @@
 
 #include "playeranimation.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -91,9 +92,15 @@ PlayerAnimation::PlayerAnimation()
    _appear_r_2           = AnimationPool::getInstance().add("player_appear_r_2",           0.0f, 0.0f, true, false);
    _appear_l_2           = AnimationPool::getInstance().add("player_appear_l_2",           0.0f, 0.0f, true, false);
 
+   // we will replace those later as we go
+   _idle_r_tmp = _idle_r_2;
+   _idle_l_tmp = _idle_l_2;
+
    // we don't want these to jump back to the first frame
    _appear_r_2->_reset_to_first_frame = false;
    _appear_l_2->_reset_to_first_frame = false;
+   _bend_down_r_2->_reset_to_first_frame = false;
+   _bend_down_l_2->_reset_to_first_frame = false;
 
    // store all
    _looped_animations.push_back(_idle_r);
@@ -466,7 +473,12 @@ void PlayerAnimation::updateV1(
       }
       else
       {
-         nextCycle = _idle_l;
+         nextCycle = _idle_l_tmp;
+
+         if (_idle_l_tmp->_current_frame == 7)
+         {
+            _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
+         }
       }
    }
    else
@@ -478,7 +490,12 @@ void PlayerAnimation::updateV1(
       }
       else
       {
-         nextCycle = _idle_r;
+         nextCycle = _idle_r_tmp;
+
+         if (_idle_r_tmp->_current_frame == 7)
+         {
+            _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
+         }
       }
    }
 

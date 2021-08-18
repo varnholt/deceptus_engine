@@ -106,6 +106,9 @@ private:
    std::shared_ptr<Animation> _idle_l_2;                 // supported
    std::shared_ptr<Animation> _idle_blink_r_2;
    std::shared_ptr<Animation> _idle_blink_l_2;
+   std::shared_ptr<Animation> _idle_r_tmp;
+   std::shared_ptr<Animation> _idle_l_tmp;
+
    std::shared_ptr<Animation> _bend_down_r_2;
    std::shared_ptr<Animation> _bend_down_l_2;
    std::shared_ptr<Animation> _idle_to_run_r_2;
