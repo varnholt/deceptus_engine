@@ -52,6 +52,7 @@ public:
    bool _paused = false;
    bool _looped = false;
    bool _reset_to_first_frame = true;
+   bool _finished = false;
 
    void setFrameTimes(const std::vector<sf::Time>& frameTimes);
 
