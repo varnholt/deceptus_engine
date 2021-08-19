@@ -473,12 +473,7 @@ void PlayerAnimation::updateV1(
       }
       else
       {
-         nextCycle = _idle_l_tmp;
-
-         if (_idle_l_tmp->_current_frame == 7)
-         {
-            _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
-         }
+         nextCycle = _idle_l;
       }
    }
    else
@@ -490,12 +485,7 @@ void PlayerAnimation::updateV1(
       }
       else
       {
-         nextCycle = _idle_r_tmp;
-
-         if (_idle_r_tmp->_current_frame == 7)
-         {
-            _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
-         }
+         nextCycle = _idle_r;
       }
    }
 
@@ -643,7 +633,12 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = _idle_l_2;
+         nextCycle = _idle_l_tmp;
+
+         if (_idle_l_tmp->_finished)
+         {
+            _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
+         }
       }
    }
    else
@@ -654,7 +649,12 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = _idle_r_2;
+         nextCycle = _idle_r_tmp;
+
+         if (_idle_r_tmp->_finished)
+         {
+            _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
+         }
       }
    }
 
