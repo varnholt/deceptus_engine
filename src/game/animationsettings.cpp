@@ -59,6 +59,26 @@ AnimationSettings::AnimationSettings(
 }
 
 
+void AnimationSettings::reverse()
+{
+   std::reverse(mFrameDurations.begin(), mFrameDurations.end());
+   std::reverse(mFrames.begin(), mFrames.end());
+}
+
+
+AnimationSettings::AnimationSettings(const AnimationSettings& other)
+{
+   mFrameSize        = other.mFrameSize;
+   mFrameOffset      = other.mFrameOffset;
+   mOrigin           = other.mOrigin;
+   mFrameDurations   = other.mFrameDurations;
+   mTexturePath      = other.mTexturePath;
+   mTexture          = other.mTexture;
+   mNormalMap        = other.mNormalMap;
+   mFrames           = other.mFrames;
+}
+
+
 void to_json(nlohmann::json& j, const AnimationSettings& settings)
 {
    std::vector<int32_t> durations;

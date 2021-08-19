@@ -237,6 +237,56 @@
     },
     "player_bend_down_l_2": {
         "frame_durations": [
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40
+        ],
+        "frame_offset": [
+            0,
+            144
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 7,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_bend_down_r_2": {
+        "frame_durations": [
+            40,
+            40,
+            40,
+            40,
+            40,
+            40,
+            40
+        ],
+        "frame_offset": [
+            0,
+            96
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 7,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_bend_up_l_2": {
+        "frame_durations": [
             75,
             75,
             75,
@@ -260,7 +310,7 @@
         "sprite_count": 7,
         "texture": "data/sprites/player_unarmed.png"
     },
-    "player_bend_down_r_2": {
+    "player_bend_up_r_2": {
         "frame_durations": [
             75,
             75,
@@ -393,14 +443,14 @@
     },
     "player_idle_blink_l_2": {
         "frame_durations": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120
         ],
         "frame_offset": [
             576,
@@ -419,14 +469,14 @@
     },
     "player_idle_blink_r_2": {
         "frame_durations": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120
         ],
         "frame_offset": [
             576,
@@ -445,14 +495,14 @@
     },
     "player_idle_l_2": {
         "frame_durations": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120
         ],
         "frame_offset": [
             0,
@@ -471,14 +521,14 @@
     },
     "player_idle_r_2": {
         "frame_durations": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120
         ],
         "frame_offset": [
             0,
