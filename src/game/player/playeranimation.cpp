@@ -638,11 +638,20 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = _idle_l_tmp;
-
-         if (_idle_l_tmp->_finished)
+//         // bend up if player is releasing the crouch
+//         if (StopWatch::duration(data._timepoint_crouch_end, now) < 8 * 40ms)
+//         {
+//            nextCycle = _bend_up_l_2;
+//         }
+//         else
          {
-            _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
+            // otherwise randomly blink or idle
+            nextCycle = _idle_l_tmp;
+
+            if (_idle_l_tmp->_finished)
+            {
+               _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
+            }
          }
       }
    }
@@ -654,11 +663,19 @@ void PlayerAnimation::updateV2(
       }
       else
       {
-         nextCycle = _idle_r_tmp;
-
-         if (_idle_r_tmp->_finished)
+//         // bend up if player is releasing the crouch
+//         if (StopWatch::duration(data._timepoint_crouch_end, now) < 8 * 40ms)
+//         {
+//            nextCycle = _bend_up_r_2;
+//         }
+//         else
          {
-            _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
+            nextCycle = _idle_r_tmp;
+
+            if (_idle_r_tmp->_finished)
+            {
+               _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
+            }
          }
       }
    }

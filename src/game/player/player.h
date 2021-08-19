@@ -15,6 +15,7 @@
 #include <SFML/System.hpp>
 #include "Box2D/Box2D.h"
 
+#include <chrono>
 #include <deque>
 #include <functional>
 #include <memory>
@@ -27,6 +28,8 @@ struct WeaponSystem;
 
 class Player : public GameNode
 {
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
    struct JumpTrace
    {
       bool jumpStarted = false;
@@ -203,10 +206,14 @@ private:
 
    bool mPointsToLeft = false;
    bool mVisible = true;
-   bool mCrouching = false;
-   bool mWasCrouching = false;
    bool mInWater = false;
    bool mDead = false;
+
+   // move crouch code to separate class or struct?
+   bool mCrouching = false;
+   bool mWasCrouching = false;
+   HighResTimePoint _timepoint_crouch_start;
+   HighResTimePoint _timepoint_crouch_end;
 
    b2Vec2 mPositionPrevious;
    b2Vec2 mVelocityPrevious;
