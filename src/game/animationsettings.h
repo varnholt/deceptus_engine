@@ -23,6 +23,10 @@ struct AnimationSettings
 
    AnimationSettings() = default;
 
+   void reverse();
+
+   AnimationSettings(const AnimationSettings&);
+
    AnimationSettings(
       const std::array<int32_t, 2>& frameSize,
       const std::array<int32_t, 2>& frameOffset,

@@ -52,6 +52,8 @@ PlayerAnimation::PlayerAnimation()
    _idle_blink_l_2       = AnimationPool::getInstance().add("player_idle_blink_l_2",       0.0f, 0.0f, true, false);
    _bend_down_r_2        = AnimationPool::getInstance().add("player_bend_down_r_2",        0.0f, 0.0f, true, false);
    _bend_down_l_2        = AnimationPool::getInstance().add("player_bend_down_l_2",        0.0f, 0.0f, true, false);
+   _bend_up_r_2          = AnimationPool::getInstance().add("player_bend_up_r_2",          0.0f, 0.0f, true, false);
+   _bend_up_l_2          = AnimationPool::getInstance().add("player_bend_up_l_2",          0.0f, 0.0f, true, false);
    _idle_to_run_r_2      = AnimationPool::getInstance().add("player_idle_to_run_r_2",      0.0f, 0.0f, true, false);
    _idle_to_run_l_2      = AnimationPool::getInstance().add("player_idle_to_run_l_2",      0.0f, 0.0f, true, false);
    _runstop_r_2          = AnimationPool::getInstance().add("player_runstop_r_2",          0.0f, 0.0f, true, false);
@@ -101,6 +103,8 @@ PlayerAnimation::PlayerAnimation()
    _appear_l_2->_reset_to_first_frame = false;
    _bend_down_r_2->_reset_to_first_frame = false;
    _bend_down_l_2->_reset_to_first_frame = false;
+   _bend_up_r_2->_reset_to_first_frame = false;
+   _bend_up_l_2->_reset_to_first_frame = false;
 
    // store all
    _looped_animations.push_back(_idle_r);
@@ -137,12 +141,6 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_run_l_2);
    _looped_animations.push_back(_dash_r_2);
    _looped_animations.push_back(_dash_l_2);
-
-   // _looped_animations.push_back(_bend_down_r_2);
-   // _looped_animations.push_back(_bend_down_l_2);
-
-   // _looped_animations.push_back(_crouch_r_2);
-   // _looped_animations.push_back(_crouch_l_2);
 
    _looped_animations.push_back(_jump_init_r_2);
    _looped_animations.push_back(_jump_up_r_2);
@@ -245,9 +243,10 @@ void PlayerAnimation::generateJson()
    // 24 - player_appear_r, 12
    // 25 - player_appear_l, 12
 
+   const auto d_40 = sf::seconds(0.040f);
    const auto d_60 = sf::seconds(0.060f);
    const auto d_75 = sf::seconds(0.075f);
-   const auto d_100 = sf::seconds(0.100f);
+   const auto d_120 = sf::seconds(0.120f);
    const auto sprite_name = "data/sprites/player_unarmed.png";
    auto row = 0;
    const auto next_row = [&](){return (row++) * PIXELS_PER_TILE * 2;};
@@ -257,13 +256,17 @@ void PlayerAnimation::generateJson()
 
    const auto idle_row_r = next_row();
    const auto idle_row_l = next_row();
-   AnimationSettings player_idle_r({72, 48}, {0, idle_row_r}, {36.0, 48.0}, vx(8, d_100), sprite_name);
-   AnimationSettings player_idle_l({72, 48}, {0, idle_row_l}, {36.0, 48.0}, vx(8, d_100), sprite_name);
-   AnimationSettings player_idle_blink_r({72, 48}, {col(8), idle_row_r}, {36.0, 48.0}, vx(8, d_100), sprite_name);
-   AnimationSettings player_idle_blink_l({72, 48}, {col(8), idle_row_l}, {36.0, 48.0}, vx(8, d_100), sprite_name);
+   AnimationSettings player_idle_r({72, 48}, {0, idle_row_r}, {36.0, 48.0}, vx(8, d_120), sprite_name);
+   AnimationSettings player_idle_l({72, 48}, {0, idle_row_l}, {36.0, 48.0}, vx(8, d_120), sprite_name);
+   AnimationSettings player_idle_blink_r({72, 48}, {col(8), idle_row_r}, {36.0, 48.0}, vx(8, d_120), sprite_name);
+   AnimationSettings player_idle_blink_l({72, 48}, {col(8), idle_row_l}, {36.0, 48.0}, vx(8, d_120), sprite_name);
 
-   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_75), sprite_name);
-   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_75), sprite_name);
+   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_40), sprite_name);
+   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_40), sprite_name);
+   AnimationSettings player_bend_up_r(player_bend_down_r);
+   AnimationSettings player_bend_up_l(player_bend_down_l);
+   player_bend_up_r.reverse();
+   player_bend_up_l.reverse();
 
    AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
    AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
@@ -347,6 +350,8 @@ void PlayerAnimation::generateJson()
    j["player_idle_blink_l_2"]       = player_idle_blink_l;
    j["player_bend_down_r_2"]        = player_bend_down_r;
    j["player_bend_down_l_2"]        = player_bend_down_l;
+   j["player_bend_up_r_2"]          = player_bend_up_r;
+   j["player_bend_up_l_2"]          = player_bend_up_l;
    j["player_idle_to_run_r_2"]      = player_idle_to_run_r;
    j["player_idle_to_run_l_2"]      = player_idle_to_run_l;
    j["player_runstop_r_2"]          = player_runstop_r;

@@ -161,7 +161,7 @@ private:
 
    void createBody();
    void createFeet();
-   void setCrouching(bool enabled);
+   void setMaskBitsCrouching(bool enabled);
 
    float getMaxVelocity() const;
    float getVelocityFromController(const PlayerSpeed& speed) const;
@@ -204,6 +204,7 @@ private:
    bool mPointsToLeft = false;
    bool mVisible = true;
    bool mCrouching = false;
+   bool mWasCrouching = false;
    bool mInWater = false;
    bool mDead = false;
 
