@@ -8,6 +8,7 @@
 #include "gamecontrollerintegration.h"
 #include "gamestate.h"
 #include "fadetransitioneffect.h"
+#include "framework/tools/stopwatch.h"
 #include "fixturenode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
@@ -789,6 +790,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_doublejump = mJump._timepoint_doublejump;
    data._timepoint_wallslide = mJump._timepoint_wallslide;
    data._timepoint_walljump = mJump._timepoint_walljump;
+   data._timepoint_walljump = _timepoint_crouch_end;
 
    if (isDashActive())
    {
@@ -1338,6 +1340,16 @@ void Player::updateCrouch()
 
    mWasCrouching = mCrouching;
    mCrouching = crouching;
+
+   if (!mWasCrouching && mCrouching)
+   {
+      _timepoint_crouch_start = StopWatch::getInstance().now();
+   }
+
+   if (mWasCrouching && !mCrouching)
+   {
+      _timepoint_crouch_end = StopWatch::getInstance().now();
+   }
 
    setMaskBitsCrouching(crouching);
 }
