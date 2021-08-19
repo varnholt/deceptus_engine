@@ -115,6 +115,7 @@ void Animation::update(const sf::Time& dt)
 
    if (!_paused)
    {
+      _finished = false;
       _previous_frame = _current_frame;
       _current_time += dt;
 
@@ -136,6 +137,8 @@ void Animation::update(const sf::Time& dt)
          }
          else
          {
+            _finished = true;
+
             if (_reset_to_first_frame)
             {
                _current_frame = 0;
