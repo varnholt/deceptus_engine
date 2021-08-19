@@ -111,6 +111,9 @@ private:
 
    std::shared_ptr<Animation> _bend_down_r_2;
    std::shared_ptr<Animation> _bend_down_l_2;
+   std::shared_ptr<Animation> _bend_up_r_2;
+   std::shared_ptr<Animation> _bend_up_l_2;
+
    std::shared_ptr<Animation> _idle_to_run_r_2;
    std::shared_ptr<Animation> _idle_to_run_l_2;
    std::shared_ptr<Animation> _runstop_r_2;

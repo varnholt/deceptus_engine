@@ -313,9 +313,8 @@ const sf::IntRect& Player::getPlayerPixelRect() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setCrouching(bool enabled)
+void Player::setMaskBitsCrouching(bool enabled)
 {
-   mCrouching = enabled;
    b2Filter filter = mBodyFixture->GetFilterData();
    filter.maskBits = enabled ? maskBitsCrouching : maskBitsStanding;
    mBodyFixture->SetFilterData(filter);
@@ -1335,7 +1334,12 @@ void Player::updateCrouch()
       return;
    }
 
-   setCrouching(downPressed && !isInAir());
+   const auto crouching = downPressed && !isInAir();
+
+   mWasCrouching = mCrouching;
+   mCrouching = crouching;
+
+   setMaskBitsCrouching(crouching);
 }
 
 
