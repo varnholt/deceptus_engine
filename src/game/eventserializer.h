@@ -75,4 +75,3 @@ class EventSerializer
 
       EventCallback _callback;
 };
-
