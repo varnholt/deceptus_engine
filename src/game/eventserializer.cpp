@@ -16,6 +16,11 @@ using HighResClockRep = std::chrono::high_resolution_clock::rep;
 using HighResClock = std::chrono::high_resolution_clock;
 }
 
+template<typename R>
+static bool is_ready(std::future<R> const& f)
+{
+   return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+}
 
 void writeInt32(std::ostream& stream, int32_t value)
 {
@@ -77,7 +82,6 @@ HighResDuration readDuration(std::istream& stream)
    return duration;
 }
 
-
 void EventSerializer::add(const sf::Event& event)
 {
    if (!isEnabled())
@@ -85,7 +89,7 @@ void EventSerializer::add(const sf::Event& event)
       return;
    }
 
-   if (_play_result.has_value() && !_play_result.value()._Is_ready())
+   if (_play_result.has_value() && !is_ready(_play_result.value()))
    {
       return;
    }
@@ -235,7 +239,7 @@ void EventSerializer::debug()
 void EventSerializer::play()
 {
    // if still busy playing, don't allow calling another time
-   if (_play_result.has_value() && !_play_result.value()._Is_ready())
+   if (_play_result.has_value() && !is_ready(_play_result.value()))
    {
       return;
    }
@@ -342,5 +346,3 @@ void EventSerializer::setCallback(const EventCallback& callback)
 {
    _callback = callback;
 }
-
-
