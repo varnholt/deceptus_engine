@@ -56,6 +56,9 @@ public:
 
    void setFrameTimes(const std::vector<sf::Time>& frameTimes);
 
+   void reverse();
+
+
 private:
    std::vector<sf::Time> _frame_times;
 };

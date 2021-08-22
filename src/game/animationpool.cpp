@@ -39,14 +39,14 @@ std::shared_ptr<Animation> AnimationPool::add(
    const auto& settings = _settings[name];
    auto animation = std::make_shared<Animation>();
 
-   animation->setOrigin(settings->mOrigin[0], settings->mOrigin[1]);
+   animation->setOrigin(settings->_origin[0], settings->_origin[1]);
    animation->setPosition(x, y);
 
    animation->_name = name;
-   animation->_frames = settings->mFrames;
-   animation->_color_texture = settings->mTexture;
-   animation->_normal_texture = settings->mNormalMap;
-   animation->setFrameTimes(settings->mFrameDurations);
+   animation->_frames = settings->_frames;
+   animation->_color_texture = settings->_texture;
+   animation->_normal_texture = settings->_normal_map;
+   animation->setFrameTimes(settings->_frame_durations);
 
    if (autoPlay)
    {
@@ -120,7 +120,7 @@ const std::map<std::string, std::shared_ptr<Animation>>& AnimationPool::getAnima
 
 
 //----------------------------------------------------------------------------------------------------------------------
-AnimationPool&AnimationPool::getInstance()
+AnimationPool& AnimationPool::getInstance()
 {
    return _player_animation;
 }
@@ -139,16 +139,16 @@ void AnimationPool::deserialize(const std::string& data)
          auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
          _settings[name] = settings;
 
-         auto texture = TexturePool::getInstance().get(settings->mTexturePath);
-         settings->mTexture = texture;
+         auto texture = TexturePool::getInstance().get(settings->_texture_path);
+         settings->_texture = texture;
 
-         const auto normal_map_filename = (settings->mTexturePath.stem().string() + "_normals" + settings->mTexturePath.extension().string());
-         const auto normal_map_path = (settings->mTexturePath.parent_path() / normal_map_filename);
+         const auto normal_map_filename = (settings->_texture_path.stem().string() + "_normals" + settings->_texture_path.extension().string());
+         const auto normal_map_path = (settings->_texture_path.parent_path() / normal_map_filename);
 
          if (std::filesystem::exists(normal_map_path))
          {
             auto normal_map = TexturePool::getInstance().get(normal_map_path);
-            settings->mNormalMap = normal_map;
+            settings->_normal_map = normal_map;
          }
       }
    }

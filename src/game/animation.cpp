@@ -68,6 +68,14 @@ void Animation::setFrameTimes(const std::vector<sf::Time>& frameTimes)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Animation::reverse()
+{
+   std::reverse(_frame_times.begin(), _frame_times.end());
+   std::reverse(_frames.begin(), _frames.end());
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Animation::updateVertices(bool resetTime)
 {
    const sf::IntRect& rect = _frames[static_cast<size_t>(_current_frame)];
