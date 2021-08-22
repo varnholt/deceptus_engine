@@ -109,6 +109,8 @@ PlayerAnimation::PlayerAnimation()
    // we just reverse the bend down animation
    _bend_up_r_2->reverse();
    _bend_up_l_2->reverse();
+   _bend_up_r_2->_name = "player_bend_up_r_2";
+   _bend_up_l_2->_name = "player_bend_up_l_2";
 
    // store all
    _looped_animations.push_back(_idle_r);
@@ -787,6 +789,8 @@ void PlayerAnimation::updateV2(
    {
       nextCycle->seekToStart();
       nextCycle->play();
+
+      // std::cout << nextCycle->_name << std::endl;
    }
 
    _current_cycle = nextCycle;
