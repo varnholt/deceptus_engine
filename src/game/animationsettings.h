@@ -12,18 +12,16 @@
 
 struct AnimationSettings
 {
-   std::array<int32_t, 2> mFrameSize;
-   std::array<int32_t, 2> mFrameOffset;
-   std::array<float, 2> mOrigin;
-   std::vector<sf::Time> mFrameDurations;
-   std::filesystem::path mTexturePath;
-   std::shared_ptr<sf::Texture> mTexture;
-   std::shared_ptr<sf::Texture> mNormalMap;
-   std::vector<sf::IntRect> mFrames;
+   std::array<int32_t, 2> _frame_size;
+   std::array<int32_t, 2> _frame_offset;
+   std::array<float, 2> _origin;
+   std::vector<sf::Time> _frame_durations;
+   std::filesystem::path _texture_path;
+   std::shared_ptr<sf::Texture> _texture;
+   std::shared_ptr<sf::Texture> _normal_map;
+   std::vector<sf::IntRect> _frames;
 
    AnimationSettings() = default;
-
-   void reverse();
 
    AnimationSettings(const AnimationSettings&);
 
