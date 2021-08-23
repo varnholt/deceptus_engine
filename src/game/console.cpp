@@ -126,6 +126,11 @@ void Console::execute()
          skills |= ExtraSkill::SkillWallClimb;
          mLog.push_back("given climb extra to player");
       }
+      if (results.at(1) == "crouch")
+      {
+         skills |= ExtraSkill::SkillCrouch;
+         mLog.push_back("given crouch extra to player");
+      }
       else if (results.at(1) == "dash")
       {
          skills |= ExtraSkill::SkillDash;
