@@ -764,7 +764,7 @@ bool Player::isDead() const
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isCrouching() const
 {
-   return mCrouching;
+   return _bending_down;
 }
 
 
@@ -778,7 +778,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._in_water = isInWater();
    data._linear_velocity = mBody->GetLinearVelocity();
    data._hard_landing = mHardLanding;
-   data._crouching = mCrouching;
+   data._bending_down = _bending_down;
+   data._crouching = _crouching;
    data._points_left = mPointsToLeft;
    data._points_right = !mPointsToLeft;
    data._climb_joint_present = mClimb._climb_joint;
@@ -790,7 +791,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_doublejump = mJump._timepoint_doublejump;
    data._timepoint_wallslide = mJump._timepoint_wallslide;
    data._timepoint_walljump = mJump._timepoint_walljump;
-   data._timepoint_crouch_end = _timepoint_crouch_end;
+   data._timepoint_crouch_end = _timepoint_bend_down_end;
 
    if (isDashActive())
    {
@@ -911,6 +912,24 @@ void Player::updateVelocity()
    {
       mBody->SetLinearVelocity(b2Vec2{0.0, 0.0});
       return;
+   }
+
+   if (_bending_down)
+   {
+      if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillCrouch))
+      {
+         mBody->SetLinearVelocity(b2Vec2{0.0, 0.0});
+         return;
+      }
+
+      // from here the player is crouching
+      _was_crouching = _crouching;
+      _crouching = true;
+   }
+   else
+   {
+      _was_crouching = _crouching;
+      _crouching = false;
    }
 
    // if we just landed hard on the ground, we need a break :)
@@ -1293,7 +1312,7 @@ void Player::setZ(int z)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateCrouch()
+void Player::updateBendDown()
 {
    auto downPressed = false;
 
@@ -1326,32 +1345,32 @@ void Player::updateCrouch()
    }
 
    // if the head touches something while crouches, keep crouching
-   if (mCrouching && !downPressed && (GameContactListener::getInstance()->getNumHeadContacts() > 0))
+   if (_bending_down && !downPressed && (GameContactListener::getInstance()->getNumHeadContacts() > 0))
    {
       return;
    }
 
-   if (!mCrouching && CameraPane::getInstance().isLookActive())
+   if (!_bending_down && CameraPane::getInstance().isLookActive())
    {
       return;
    }
 
-   const auto crouching = downPressed && !isInAir();
+   const auto bending_down = downPressed && !isInAir();
 
-   mWasCrouching = mCrouching;
-   mCrouching = crouching;
+   _was_bending_down = _bending_down;
+   _bending_down = bending_down;
 
-   if (!mWasCrouching && mCrouching)
+   if (!_was_bending_down && _bending_down)
    {
-      _timepoint_crouch_start = StopWatch::getInstance().now();
+      _timepoint_bend_down_start = StopWatch::getInstance().now();
    }
 
-   if (mWasCrouching && !mCrouching)
+   if (_was_bending_down && !_bending_down)
    {
-      _timepoint_crouch_end = StopWatch::getInstance().now();
+      _timepoint_bend_down_end = StopWatch::getInstance().now();
    }
 
-   setMaskBitsCrouching(crouching);
+   setMaskBitsCrouching(bending_down);
 }
 
 
@@ -1439,7 +1458,7 @@ void Player::update(const sf::Time& dt)
    updateGroundAngle();
    updateHardLanding();
    updatePlayerPixelRect();
-   updateCrouch();
+   updateBendDown();
    updateAnimation(dt);
    updatePixelCollisions();
    updateAtmosphere();

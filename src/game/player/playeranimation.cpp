@@ -447,7 +447,7 @@ void PlayerAnimation::updateV1(
    // run / crouch
    else if (data._moving_right && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
-      if (data._crouching)
+      if (data._bending_down)
       {
          nextCycle = _crouch_r;
       }
@@ -458,7 +458,7 @@ void PlayerAnimation::updateV1(
    }
    else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
    {
-      if (data._crouching)
+      if (data._bending_down)
       {
          nextCycle = _crouch_l;
       }
@@ -471,7 +471,7 @@ void PlayerAnimation::updateV1(
    // idle or idle crouch
    else if (data._points_left)
    {
-      if (data._crouching)
+      if (data._bending_down)
       {
          nextCycle = _crouch_l;
          requiresUpdate = false;
@@ -483,7 +483,7 @@ void PlayerAnimation::updateV1(
    }
    else
    {
-      if (data._crouching)
+      if (data._bending_down)
       {
          nextCycle = _crouch_r;
          requiresUpdate = false;
@@ -585,68 +585,64 @@ void PlayerAnimation::updateV2(
 
    const auto now = StopWatch::now();
 
-   std::shared_ptr<Animation> nextCycle = nullptr;
+   std::shared_ptr<Animation> next_cycle = nullptr;
 
    auto velocity = data._linear_velocity;
 
-   const auto lookActive = CameraPane::getInstance().isLookActive();
-   const auto passesSanityCheck = !(data._moving_right && data._moving_left);
+   const auto look_active = CameraPane::getInstance().isLookActive();
+   const auto passes_sanity_check = !(data._moving_right && data._moving_left);
 
    // dash
    if (data._dash_dir.has_value())
    {
       if (data._dash_dir == Dash::Left)
       {
-         nextCycle = _dash_l_2;
+         next_cycle = _dash_l_2;
       }
       else
       {
-         nextCycle = _dash_r_2;
+         next_cycle = _dash_r_2;
       }
    }
 
-   // run / crouch
-   else if (data._moving_right && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
+   // run
+   else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching && !data._bending_down)
    {
-      if (data._crouching)
-      {
-         nextCycle = _crouch_r;
-      }
-      else
-      {
-         nextCycle = _run_r_2;
-      }
+      next_cycle = _run_r_2;
    }
-   else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
+   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching && !data._bending_down)
    {
-      if (data._crouching)
-      {
-         nextCycle = _crouch_l;
-      }
-      else
-      {
-         nextCycle = _run_l_2;
-      }
+      next_cycle = _run_l_2;
    }
 
-   // idle or idle crouch
+   // crouch
+   else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
+   {
+      next_cycle = _crouch_r;
+   }
+   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
+   {
+      next_cycle = _crouch_l;
+   }
+
+   // idle or bend down
    else if (data._points_left)
    {
-      if (data._crouching)
+      if (data._bending_down)
       {
-         nextCycle = _bend_down_l_2;
+         next_cycle = _bend_down_l_2;
       }
       else
       {
          // bend up if player is releasing the crouch
          if (StopWatch::duration(data._timepoint_crouch_end, now) < 7 * 40ms)
          {
-            nextCycle = _bend_up_l_2;
+            next_cycle = _bend_up_l_2;
          }
          else
          {
             // otherwise randomly blink or idle
-            nextCycle = _idle_l_tmp;
+            next_cycle = _idle_l_tmp;
 
             if (_idle_l_tmp->_finished)
             {
@@ -657,20 +653,20 @@ void PlayerAnimation::updateV2(
    }
    else
    {
-      if (data._crouching)
+      if (data._bending_down)
       {
-         nextCycle = _bend_down_r_2;
+         next_cycle = _bend_down_r_2;
       }
       else
       {
          // bend up if player is releasing the crouch
          if (StopWatch::duration(data._timepoint_crouch_end, now) < 7 * 40ms)
          {
-            nextCycle = _bend_up_r_2;
+            next_cycle = _bend_up_r_2;
          }
          else
          {
-            nextCycle = _idle_r_tmp;
+            next_cycle = _idle_r_tmp;
 
             if (_idle_r_tmp->_finished)
             {
@@ -687,20 +683,20 @@ void PlayerAnimation::updateV2(
       {
          // jump ignition
          _jump_animation_reference = 0;
-         nextCycle = data._points_right ? _jump_init_r_2 : _jump_init_l_2;
+         next_cycle = data._points_right ? _jump_init_r_2 : _jump_init_l_2;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
          {
-            nextCycle = data._points_right ? _jump_up_r_2 : _jump_up_l_2;
+            next_cycle = data._points_right ? _jump_up_r_2 : _jump_up_l_2;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
          {
-            nextCycle = data._points_right ? _jump_down_r_2 : _jump_down_l_2;
+            next_cycle = data._points_right ? _jump_down_r_2 : _jump_down_l_2;
             _jump_animation_reference = 2;
          }
          else
@@ -710,7 +706,7 @@ void PlayerAnimation::updateV2(
             {
                // static int32_t counter = 0;
                // std::cout << counter++ << std::endl;
-               nextCycle = data._points_right ? _jump_midair_r_2 : _jump_midair_l_2;
+               next_cycle = data._points_right ? _jump_midair_r_2 : _jump_midair_l_2;
             }
          }
       }
@@ -718,12 +714,12 @@ void PlayerAnimation::updateV2(
       // hard landing
       else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data._points_right ? _jump_landing_r_2 : _jump_landing_l_2;
+         next_cycle = data._points_right ? _jump_landing_r_2 : _jump_landing_l_2;
 
-         if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
+         if (next_cycle->_current_frame == static_cast<int32_t>(next_cycle->_frames.size()) - 1)
          {
              _jump_animation_reference = 3;
-             nextCycle->seekToStart();
+             next_cycle->seekToStart();
          }
       }
    }
@@ -731,7 +727,7 @@ void PlayerAnimation::updateV2(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data._points_right ? _swim_r_2 : _swim_l_2;
+      next_cycle = data._points_right ? _swim_r_2 : _swim_l_2;
    }
 
    if (data._climb_joint_present)
@@ -743,28 +739,28 @@ void PlayerAnimation::updateV2(
    {
       if (StopWatch::duration(data._timepoint_wallslide, now) < 6 * 75ms)
       {
-         nextCycle = data._points_right ? _wallslide_impact_l_2 : _wallslide_impact_r_2;
+         next_cycle = data._points_right ? _wallslide_impact_l_2 : _wallslide_impact_r_2;
       }
       else
       {
-         nextCycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
+         next_cycle = data._points_right ? _wallslide_l_2 : _wallslide_r_2;
       }
    }
 
    if (StopWatch::duration(data._timepoint_doublejump, now) < 12 * 75ms)
    {
-      nextCycle = data._points_right ? _double_jump_r_2 : _double_jump_l_2;
+      next_cycle = data._points_right ? _double_jump_r_2 : _double_jump_l_2;
    }
 
    if (StopWatch::duration(data._timepoint_walljump, now) < 12 * 75ms)
    {
-      nextCycle = data._wall_jump_points_right ? _wall_jump_r_2 : _wall_jump_l_2;
+      next_cycle = data._wall_jump_points_right ? _wall_jump_r_2 : _wall_jump_l_2;
    }
 
    // appear animation
    if (GameClock::getInstance().duration() < 1.260s)
    {
-      nextCycle = data._points_right ? _appear_r_2 : _appear_l_2;
+      next_cycle = data._points_right ? _appear_r_2 : _appear_l_2;
 
       if (GameClock::getInstance().duration() < 1.0s)
       {
@@ -785,15 +781,15 @@ void PlayerAnimation::updateV2(
    }
 
    // reset x if animation cycle changed
-   if (nextCycle != _current_cycle)
+   if (next_cycle != _current_cycle)
    {
-      nextCycle->seekToStart();
-      nextCycle->play();
+      next_cycle->seekToStart();
+      next_cycle->play();
 
       // std::cout << nextCycle->_name << std::endl;
    }
 
-   _current_cycle = nextCycle;
+   _current_cycle = next_cycle;
    _current_cycle->update(dt);
 }
 

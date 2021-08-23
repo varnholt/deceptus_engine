@@ -152,7 +152,7 @@ private:
    void updatePortal();
    void updatePlayerOrientation();
    void updateDash(Dash dir = Dash::None);
-   void updateCrouch();
+   void updateBendDown();
    void updateHardLanding();
    void updateGroundAngle();
    void updateDeadFixtures();
@@ -209,11 +209,13 @@ private:
    bool mInWater = false;
    bool mDead = false;
 
-   // move crouch code to separate class or struct?
-   bool mCrouching = false;
-   bool mWasCrouching = false;
-   HighResTimePoint _timepoint_crouch_start;
-   HighResTimePoint _timepoint_crouch_end;
+   // move bend down / crouch code to separate class or struct?
+   bool _bending_down = false;
+   bool _was_bending_down = false;
+   bool _crouching = false;
+   bool _was_crouching = false;
+   HighResTimePoint _timepoint_bend_down_start;
+   HighResTimePoint _timepoint_bend_down_end;
 
    b2Vec2 mPositionPrevious;
    b2Vec2 mVelocityPrevious;

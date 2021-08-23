@@ -32,6 +32,7 @@ public:
       bool _in_air = false;
       bool _in_water = false;
       bool _hard_landing = false;
+      bool _bending_down = false;
       bool _crouching = false;
       bool _points_left = false;
       bool _points_right = false;
