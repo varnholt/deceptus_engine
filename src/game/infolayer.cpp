@@ -144,34 +144,45 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 }
 
 
-void InfoLayer::drawConsole(sf::RenderTarget& window)
+void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth * 2;
-   auto h = GameConfiguration::getInstance().mViewHeight * 2;
+   auto w_view = GameConfiguration::getInstance().mViewWidth;
+   auto h_view = GameConfiguration::getInstance().mViewHeight;
 
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
    window.setView(view);
+
+   auto layerHealth = mLayers["console"];
+   layerHealth->draw(window, states);
+
+   auto w_screen = GameConfiguration::getInstance().mVideoModeWidth;
+   auto h_screen = GameConfiguration::getInstance().mVideoModeHeight;
+
+   sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
+   window.setView(view_screen);
 
    auto& console = Console::getInstance();
    const auto& command = console.getCommand();
    const auto& commands = console.getLog();
 
-   static const auto offset = h - 14;
+   static const auto offset_x = 16;
+   static const auto offset_y = h_screen - 48;
+
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
-      mFont.draw(window, mFont.getCoords(*it), 5, offset - ( (y + 1) * 14));
+      mFont.draw(window, mFont.getCoords(*it), offset_x, offset_y - ( (y + 1) * 14));
       y++;
    }
 
    auto bitmapFont = mFont.getCoords(command);
-   mFont.draw(window, bitmapFont, 5, offset);
+   mFont.draw(window, bitmapFont, offset_x, h_screen - 28);
 
    // draw cursor
    auto elapsed = GlobalClock::getInstance()->getElapsedTime();
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
-      mFont.draw(window, mFont.getCoords("_"), mFont.mTextWidth + 5, offset);
+      mFont.draw(window, mFont.getCoords("_"), mFont.mTextWidth + offset_x, h_screen - 28);
    }
 }
 
