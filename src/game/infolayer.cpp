@@ -146,8 +146,8 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
 void InfoLayer::drawConsole(sf::RenderTarget& window)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance().mViewWidth * 2;
+   auto h = GameConfiguration::getInstance().mViewHeight * 2;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
@@ -156,7 +156,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window)
    const auto& command = console.getCommand();
    const auto& commands = console.getLog();
 
-   static const auto offset = 320;
+   static const auto offset = h - 14;
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
