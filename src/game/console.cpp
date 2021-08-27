@@ -55,11 +55,21 @@ void Console::chop()
 void Console::showHelp()
 {
     mLog.push_back("help:");
-    mLog.push_back("/cp <n> | jump to checkpoint | example: /cp 0");
-    mLog.push_back("/extra <name> | give extra | available extras: climb, dash, wallslide, walljump, doublejump, invulnerable");
-    mLog.push_back("/playback <command> | game playback | commands: enable, disable, load, save, replay, reset");
-    mLog.push_back("/tp <x>,<y> | teleport to position | example: /tp 100, 330");
-    mLog.push_back("/weapon <weapon> | give weapon to player | available weapons: bow");
+    mLog.push_back("");
+    mLog.push_back("/cp <n>: jump to checkpoint");
+    mLog.push_back("   example: /cp 0");
+    mLog.push_back("");
+    mLog.push_back("/extra <name>: give extra");
+    mLog.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all");
+    mLog.push_back("");
+    mLog.push_back("/playback <command>: game playback");
+    mLog.push_back("   commands: enable, disable, load, save, replay, reset");
+    mLog.push_back("");
+    mLog.push_back("/tp <x>,<y>: teleport to position");
+    mLog.push_back("   example: /tp 100, 330");
+    mLog.push_back("");
+    mLog.push_back("/weapon <weapon>: give weapon to player");
+    mLog.push_back("   available weapons: bow");
 }
 
 

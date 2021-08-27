@@ -18,7 +18,7 @@ public:
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void drawDebugInfo(sf::RenderTarget& window);
-   void drawConsole(sf::RenderTarget& window);
+   void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
 
    void setLoading(bool loading);
 
