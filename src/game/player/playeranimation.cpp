@@ -105,6 +105,8 @@ PlayerAnimation::PlayerAnimation()
    _bend_down_l_2->_reset_to_first_frame = false;
    _bend_up_r_2->_reset_to_first_frame = false;
    _bend_up_l_2->_reset_to_first_frame = false;
+   _dash_r_2->_reset_to_first_frame = false;
+   _dash_l_2->_reset_to_first_frame = false;
 
    // we just reverse the bend down animation
    _bend_up_r_2->reverse();
