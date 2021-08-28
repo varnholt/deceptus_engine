@@ -28,9 +28,9 @@ void Console::setActive(bool active)
 {
    mActive = active;
 
-   if (mActive && mHistory.empty())
+   if (mActive && mLog.empty())
    {
-       showHelp();
+      showHelp();
    }
 }
 
