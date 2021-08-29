@@ -44,6 +44,7 @@ public:
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
       int32_t _jump_frame_count = 0;
+      int32_t _dash_frame_count = 0;
       HighResTimePoint _timepoint_wallslide;
       HighResTimePoint _timepoint_walljump;
       HighResTimePoint _timepoint_doublejump;
@@ -106,15 +107,15 @@ private:
    // version 2
    std::shared_ptr<Animation> _idle_r_2;                 // supported
    std::shared_ptr<Animation> _idle_l_2;                 // supported
-   std::shared_ptr<Animation> _idle_blink_r_2;
-   std::shared_ptr<Animation> _idle_blink_l_2;
-   std::shared_ptr<Animation> _idle_r_tmp;
-   std::shared_ptr<Animation> _idle_l_tmp;
+   std::shared_ptr<Animation> _idle_blink_r_2;           // supported
+   std::shared_ptr<Animation> _idle_blink_l_2;           // supported
+   std::shared_ptr<Animation> _idle_r_tmp;               // supported
+   std::shared_ptr<Animation> _idle_l_tmp;               // supported
 
-   std::shared_ptr<Animation> _bend_down_r_2;
-   std::shared_ptr<Animation> _bend_down_l_2;
-   std::shared_ptr<Animation> _bend_up_r_2;
-   std::shared_ptr<Animation> _bend_up_l_2;
+   std::shared_ptr<Animation> _bend_down_r_2;            // supported
+   std::shared_ptr<Animation> _bend_down_l_2;            // supported
+   std::shared_ptr<Animation> _bend_up_r_2;              // supported
+   std::shared_ptr<Animation> _bend_up_l_2;              // supported
 
    std::shared_ptr<Animation> _idle_to_run_r_2;
    std::shared_ptr<Animation> _idle_to_run_l_2;
@@ -122,8 +123,13 @@ private:
    std::shared_ptr<Animation> _runstop_l_2;
    std::shared_ptr<Animation> _run_r_2;                  // supported
    std::shared_ptr<Animation> _run_l_2;                  // supported
+
+   std::shared_ptr<Animation> _dash_init_r_2;            // supported
+   std::shared_ptr<Animation> _dash_init_l_2;            // supported
    std::shared_ptr<Animation> _dash_r_2;                 // supported
    std::shared_ptr<Animation> _dash_l_2;                 // supported
+   std::shared_ptr<Animation> _dash_stop_r_2;            // supported
+   std::shared_ptr<Animation> _dash_stop_l_2;            // supported
 
    std::shared_ptr<Animation> _crouch_r_2;
    std::shared_ptr<Animation> _crouch_l_2;

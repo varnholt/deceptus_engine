@@ -60,8 +60,13 @@ PlayerAnimation::PlayerAnimation()
    _runstop_l_2          = AnimationPool::getInstance().add("player_runstop_l_2",          0.0f, 0.0f, true, false);
    _run_r_2              = AnimationPool::getInstance().add("player_run_r_2",              0.0f, 0.0f, true, false);
    _run_l_2              = AnimationPool::getInstance().add("player_run_l_2",              0.0f, 0.0f, true, false);
+
+   _dash_init_r_2        = AnimationPool::getInstance().add("player_dash_init_r_2",        0.0f, 0.0f, true, false);
+   _dash_init_l_2        = AnimationPool::getInstance().add("player_dash_init_l_2",        0.0f, 0.0f, true, false);
    _dash_r_2             = AnimationPool::getInstance().add("player_dash_r_2",             0.0f, 0.0f, true, false);
    _dash_l_2             = AnimationPool::getInstance().add("player_dash_l_2",             0.0f, 0.0f, true, false);
+   _dash_stop_r_2        = AnimationPool::getInstance().add("player_dash_init_r_2",        0.0f, 0.0f, true, false);
+   _dash_stop_l_2        = AnimationPool::getInstance().add("player_dash_init_l_2",        0.0f, 0.0f, true, false);
 
    // _crouch_r_2           = AnimationPool::getInstance().add("player_crouch_r_2",           0.0f, 0.0f, true, false);
    // _crouch_l_2           = AnimationPool::getInstance().add("player_crouch_l_2",           0.0f, 0.0f, true, false);
@@ -105,14 +110,24 @@ PlayerAnimation::PlayerAnimation()
    _bend_down_l_2->_reset_to_first_frame = false;
    _bend_up_r_2->_reset_to_first_frame = false;
    _bend_up_l_2->_reset_to_first_frame = false;
+   _dash_init_r_2->_reset_to_first_frame = false;
+   _dash_init_l_2->_reset_to_first_frame = false;
    _dash_r_2->_reset_to_first_frame = false;
    _dash_l_2->_reset_to_first_frame = false;
+   _dash_stop_r_2->_reset_to_first_frame = false;
+   _dash_stop_l_2->_reset_to_first_frame = false;
 
    // we just reverse the bend down animation
    _bend_up_r_2->reverse();
    _bend_up_l_2->reverse();
    _bend_up_r_2->_name = "player_bend_up_r_2";
    _bend_up_l_2->_name = "player_bend_up_l_2";
+
+   // dash stop is also just reversed
+   _dash_stop_r_2->reverse();
+   _dash_stop_l_2->reverse();
+   _dash_stop_r_2->_name = "player_dash_stop_r_2";
+   _dash_stop_l_2->_name = "player_dash_stop_l_2";
 
    // store all
    _looped_animations.push_back(_idle_r);
@@ -148,7 +163,11 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_run_r_2);
    _looped_animations.push_back(_run_l_2);
    _looped_animations.push_back(_dash_r_2);
+   _looped_animations.push_back(_dash_init_l_2);
+   _looped_animations.push_back(_dash_init_r_2);
    _looped_animations.push_back(_dash_l_2);
+   _looped_animations.push_back(_dash_stop_r_2);
+   _looped_animations.push_back(_dash_stop_l_2);
 
    _looped_animations.push_back(_jump_init_r_2);
    _looped_animations.push_back(_jump_up_r_2);
@@ -281,15 +300,21 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
    AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
 
-   AnimationSettings player_dash_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_dash_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
+   // frames 1,2 = dash start
+   // frames 3,4 = dash loop
+   // frames 2,1 = dash stop
+   const auto dash_r_row = next_row();
+   const auto dash_l_row = next_row();
+   AnimationSettings player_dash_init_r({72, 48}, {0, dash_r_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
+   AnimationSettings player_dash_init_l({72, 48}, {0, dash_l_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
+   AnimationSettings player_dash_r({72, 48}, {col(2), dash_r_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
+   AnimationSettings player_dash_l({72, 48}, {col(2), dash_l_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
 
    // init:    3 frames
    // up:      2 frames
    // midair:  8 frames
    // down:    2 frames
    // landing: 4 frames
-
    const auto jump_r_row = next_row();
    const auto jump_l_row = next_row();
    AnimationSettings player_jump_init_r({72, 48}, {0, jump_r_row}, {36.0, 48.0}, v(3), sprite_name);
@@ -360,6 +385,8 @@ void PlayerAnimation::generateJson()
    j["player_runstop_l_2"]          = player_runstop_l;
    j["player_run_r_2"]              = player_run_r;
    j["player_run_l_2"]              = player_run_l;
+   j["player_dash_init_r_2"]        = player_dash_init_r;
+   j["player_dash_init_l_2"]        = player_dash_init_l;
    j["player_dash_r_2"]             = player_dash_r;
    j["player_dash_l_2"]             = player_dash_l;
 
@@ -597,6 +624,7 @@ void PlayerAnimation::updateV2(
    // dash
    if (data._dash_dir.has_value())
    {
+      std::cout << data._dash_frame_count << std::endl;
       if (data._dash_dir == Dash::Left)
       {
          next_cycle = _dash_l_2;
