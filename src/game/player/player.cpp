@@ -784,6 +784,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._points_right = !mPointsToLeft;
    data._climb_joint_present = mClimb._climb_joint;
    data._jump_frame_count = mJump._jump_frame_count;
+   data._dash_frame_count = mDashFrameCount;
    data._moving_left = mControls.isMovingLeft();
    data._moving_right = mControls.isMovingRight();
    data._wall_sliding = mJump._wallsliding;
