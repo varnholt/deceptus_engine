@@ -112,8 +112,6 @@ PlayerAnimation::PlayerAnimation()
    _bend_up_l_2->_reset_to_first_frame = false;
    _dash_init_r_2->_reset_to_first_frame = false;
    _dash_init_l_2->_reset_to_first_frame = false;
-   _dash_r_2->_reset_to_first_frame = false;
-   _dash_l_2->_reset_to_first_frame = false;
    _dash_stop_r_2->_reset_to_first_frame = false;
    _dash_stop_l_2->_reset_to_first_frame = false;
 
@@ -624,14 +622,27 @@ void PlayerAnimation::updateV2(
    // dash
    if (data._dash_dir.has_value())
    {
-      std::cout << data._dash_frame_count << std::endl;
-      if (data._dash_dir == Dash::Left)
+      // init  regular            stop
+      // |     |                  |
+      // +-----+------------------+----->
+      // t
+      const auto dash_count_max = PhysicsConfiguration::getInstance().mPlayerDashFrameCount;
+      const auto dash_count_regular = dash_count_max - (dash_count_max / 5);
+      const auto dash_count_stop = dash_count_max / 5;
+
+      // std::cout << data._dash_frame_count << std::endl;
+
+      if (data._dash_frame_count > dash_count_regular)
       {
-         next_cycle = _dash_l_2;
+         next_cycle = (data._dash_dir == Dash::Left) ? _dash_init_l_2 : _dash_init_r_2;
+      }
+      else if (data._dash_frame_count < dash_count_stop)
+      {
+         next_cycle = (data._dash_dir == Dash::Left) ? _dash_stop_l_2 : _dash_stop_r_2;
       }
       else
       {
-         next_cycle = _dash_r_2;
+         next_cycle = (data._dash_dir == Dash::Left) ? _dash_l_2 : _dash_r_2;
       }
    }
 
