@@ -18,6 +18,7 @@ void ExtraHealth::reset()
 void ExtraHealth::addHealth(int32_t health)
 {
    mHealth += health;
+
    if (mHealth > mHealthMax)
    {
       mHealth = mHealthMax;
