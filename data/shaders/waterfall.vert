@@ -1,4 +1,4 @@
-in vec2 pos;
+varying vec2 pos;
 
 void main()
 {

@@ -50,7 +50,7 @@ win32 {
    LIBS += -lSDL2
    LIBS += -lglu32
    LIBS += -lopengl32
-   LIBS += -llua53
+   LIBS += -llua
 
    # LIBS += -lvcomp
 
@@ -71,21 +71,12 @@ win32 {
    }
 }
 
-
 linux {
-   # apt install:
-   # libsfml-dev libsdl2-dev liblua5.3-dev
    LIBS += -lstdc++fs
-   LIBS += -llua5.3
-   LIBS += -lSDL2
+   LIBS += $$system(pkg-config lua --libs)
+   LIBS += $$system(pkg-config sdl2 --libs)
    LIBS += -lGL
-
-   LIBS += -Lsfml/lib
-   LIBS += -lsfml-audio
-   LIBS += -lsfml-graphics
-   LIBS += -lsfml-network
-   LIBS += -lsfml-window
-   LIBS += -lsfml-system
+   LIBS += $$system(pkg-config sfml-all --libs)
 }
 
 
@@ -626,5 +617,3 @@ DISTFILES += \
     doc/level_design.md \
     doc/level_design/readme.md \
     doc/physics/readme.md
-
-
