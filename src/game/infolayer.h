@@ -1,5 +1,6 @@
 #pragma once
 
+#include "animation.h"
 #include "bitmapfont.h"
 
 #include "framework/image/layer.h"
@@ -16,6 +17,7 @@ public:
 
    InfoLayer();
 
+   void update(const sf::Time& dt);
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void drawDebugInfo(sf::RenderTarget& window);
    void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
@@ -24,12 +26,17 @@ public:
 
 private:
 
-   BitmapFont mFont;
+   void playHeartAnimation();
+   void drawHeartAnimation(sf::RenderTarget& window);
 
-   bool mLoading = false;
-   sf::Time mShowTime;
+   BitmapFont _font;
 
-   std::vector<std::shared_ptr<Layer>> mLayerStack;
-   std::map<std::string, std::shared_ptr<Layer>> mLayers;
+   bool _loading = false;
+   sf::Time _show_time;
+
+   std::vector<std::shared_ptr<Layer>> _layer_stack;
+   std::map<std::string, std::shared_ptr<Layer>> _layers;
+
+   Animation _heart_animation;
 };
 

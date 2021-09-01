@@ -1,5 +1,6 @@
 #include "infolayer.h"
 
+#include "animationframedata.h"
 #include "camerapane.h"
 #include "console.h"
 #include "extratable.h"
@@ -9,6 +10,7 @@
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
+#include "texturepool.h"
 
 #include <iostream>
 #include <sstream>
@@ -16,7 +18,7 @@
 
 InfoLayer::InfoLayer()
 {
-   mFont.load(
+   _font.load(
       "data/game/font.png",
       "data/game/font.map"
    );
@@ -53,9 +55,34 @@ InfoLayer::InfoLayer()
       tmp->mTexture = texture;
       tmp->mSprite = sprite;
 
-      mLayerStack.push_back(tmp);
-      mLayers[layer.getName()] = tmp;
+      _layer_stack.push_back(tmp);
+      _layers[layer.getName()] = tmp;
    }
+
+   // load heart animation
+   const auto t = sf::milliseconds(100);
+   std::vector<sf::Time> ts;
+   static constexpr auto frame_count = 6 * 8 + 7;
+   for (auto i = 0; i < frame_count; i++)
+   {
+      ts.push_back(t);
+   }
+
+   AnimationFrameData frames {
+      TexturePool::getInstance().get("data/sprites/health.png"),
+      {0, 0},
+      24, 24,
+      frame_count,
+      8,
+      ts,
+      0
+   };
+
+   _heart_animation._frames = frames._frames;
+   _heart_animation._color_texture = frames._texture;
+   _heart_animation.setFrameTimes(frames._frame_times);
+   _heart_animation.setOrigin(frames._origin);
+   _heart_animation._reset_to_first_frame = false;
 }
 
 
@@ -69,18 +96,18 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto layerHealth = mLayers["health"];
-   auto layerHealthEnergy = mLayers["health_energy"];
-   auto layerHealthWeapon = mLayers["health_weapon"];
+   auto layer_health = _layers["health"];
+   auto layer_health_energy = _layers["health_energy"];
+   auto layer_health_weapon = _layers["health_weapon"];
 
-   if (layerHealthEnergy->mVisible)
+   if (layer_health_energy->mVisible)
    {
        const auto health = (SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth) * 0.01f;
 
-       const auto healthLayerWidth  = layerHealthEnergy->mSprite->getTexture()->getSize().x * health;
-       const auto healthLayerHeight = layerHealthEnergy->mSprite->getTexture()->getSize().y;
+       const auto healthLayerWidth  = layer_health_energy->mSprite->getTexture()->getSize().x * health;
+       const auto healthLayerHeight = layer_health_energy->mSprite->getTexture()->getSize().y;
 
-       layerHealthEnergy->mSprite->setTextureRect(
+       layer_health_energy->mSprite->setTextureRect(
           sf::IntRect{
              0,
              0,
@@ -91,20 +118,20 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
        // std::cout << "energy: " << healthLayerWidth << std::endl;
 
-       auto t = (now - mShowTime).asSeconds();
+       auto t = (now - _show_time).asSeconds();
        const auto duration = 1.0f;
        t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * static_cast<float>(M_PI)))) * 200;
 
-       layerHealth->mSprite->setOrigin(t, 0.0f);
-       layerHealthEnergy->mSprite->setOrigin(t, 0.0f);
-       layerHealthWeapon->mSprite->setOrigin(t, 0.0f);
+       layer_health->mSprite->setOrigin(t, 0.0f);
+       layer_health_energy->mSprite->setOrigin(t, 0.0f);
+       layer_health_weapon->mSprite->setOrigin(t, 0.0f);
 
-       layerHealth->draw(window, states);
-       layerHealthEnergy->draw(window, states);
-       layerHealthWeapon->draw(window, states);
+       layer_health->draw(window, states);
+       layer_health_energy->draw(window, states);
+       layer_health_weapon->draw(window, states);
    }
 
-   auto autosave = mLayers["autosave"];
+   auto autosave = _layers["autosave"];
    if (autosave->mVisible)
    {
       auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
@@ -115,15 +142,15 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    // support cpan
    if (CameraPane::getInstance().isLookActive())
    {
-       auto layerCameraPaneUp = mLayers["cpan_up"];
-       auto layerCameraPaneDown = mLayers["cpan_down"];
-       auto layerCameraPaneLeft = mLayers["cpan_left"];
-       auto layerCameraPaneRight = mLayers["cpan_right"];
+       auto layer_cpan_up = _layers["cpan_up"];
+       auto layer_cpan_down = _layers["cpan_down"];
+       auto layer_cpan_left = _layers["cpan_left"];
+       auto layer_cpan_right = _layers["cpan_right"];
 
-       layerCameraPaneUp->draw(window, states);
-       layerCameraPaneDown->draw(window, states);
-       layerCameraPaneLeft->draw(window, states);
-       layerCameraPaneRight->draw(window, states);
+       layer_cpan_up->draw(window, states);
+       layer_cpan_down->draw(window, states);
+       layer_cpan_left->draw(window, states);
+       layer_cpan_right->draw(window, states);
    }
 }
 
@@ -140,7 +167,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto pos = Player::getCurrent()->getPixelPositionf();
    stream << "player pos: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
 
-   mFont.draw(window, mFont.getCoords(stream.str()), 510, 5);
+   _font.draw(window, _font.getCoords(stream.str()), 510, 5);
 }
 
 
@@ -152,8 +179,8 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
    window.setView(view);
 
-   auto layerHealth = mLayers["console"];
-   layerHealth->draw(window, states);
+   auto layer_health = _layers["console"];
+   layer_health->draw(window, states);
 
    auto w_screen = GameConfiguration::getInstance().mVideoModeWidth;
    auto h_screen = GameConfiguration::getInstance().mVideoModeHeight;
@@ -171,36 +198,64 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
-      mFont.draw(window, mFont.getCoords(*it), offset_x, offset_y - ( (y + 1) * 14));
+      _font.draw(window, _font.getCoords(*it), offset_x, offset_y - ( (y + 1) * 14));
       y++;
    }
 
-   auto bitmapFont = mFont.getCoords(command);
-   mFont.draw(window, bitmapFont, offset_x, h_screen - 28);
+   auto bitmap_font = _font.getCoords(command);
+   _font.draw(window, bitmap_font, offset_x, h_screen - 28);
 
    // draw cursor
    auto elapsed = GlobalClock::getInstance()->getElapsedTime();
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
-      mFont.draw(window, mFont.getCoords("_"), mFont.mTextWidth + offset_x, h_screen - 28);
+      _font.draw(window, _font.getCoords("_"), _font.mTextWidth + offset_x, h_screen - 28);
    }
 }
 
 
 void InfoLayer::setLoading(bool loading)
 {
-   mLayers["autosave"]->mVisible = loading;
+   _layers["autosave"]->mVisible = loading;
 
-   mLayers["health"]->mVisible = !loading;
-   mLayers["health_energy"]->mVisible = !loading;
-   mLayers["health_weapon"]->mVisible = !loading;
+   _layers["health"]->mVisible = !loading;
+   _layers["health_energy"]->mVisible = !loading;
+   _layers["health_weapon"]->mVisible = !loading;
 
-   if (!loading && loading != mLoading)
+   if (!loading && loading != _loading)
    {
-       mShowTime = GlobalClock::getInstance()->getElapsedTime();
+       _show_time = GlobalClock::getInstance()->getElapsedTime();
    }
 
-   mLoading = loading;
+   _loading = loading;
+}
+
+
+void InfoLayer::update(const sf::Time& dt)
+{
+   if (_heart_animation._paused)
+   {
+      return;
+   }
+
+   _heart_animation.update(dt);
+}
+
+
+void InfoLayer::playHeartAnimation()
+{
+   static const auto x = 100;
+   static const auto y = 100;
+
+   _heart_animation.setPosition(x, y);
+   _heart_animation.updateVertices();
+   _heart_animation.play();
+}
+
+
+void InfoLayer::drawHeartAnimation(sf::RenderTarget& window)
+{
+   _heart_animation.draw(window);
 }
 
 
