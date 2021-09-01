@@ -50,7 +50,7 @@ win32 {
    LIBS += -lSDL2
    LIBS += -lglu32
    LIBS += -lopengl32
-   LIBS += -llua
+   LIBS += -llua53
 
    # LIBS += -lvcomp
 
