@@ -272,8 +272,10 @@ void PlayerAnimation::generateJson()
    const auto d_60 = sf::seconds(0.060f);
    const auto d_75 = sf::seconds(0.075f);
    const auto d_120 = sf::seconds(0.120f);
+
    const auto sprite_name = "data/sprites/player_unarmed.png";
    auto row = 0;
+
    const auto next_row = [&](){return (row++) * PIXELS_PER_TILE * 2;};
    const auto col = [](int32_t x){return PIXELS_PER_TILE * 3 * x;};
    const auto v = [d_75](int32_t size){std::vector<sf::Time> arr; for (auto i = 0; i < size; i++) arr.push_back(d_75); return arr;};
@@ -286,8 +288,14 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_idle_blink_r({72, 48}, {col(8), idle_row_r}, {36.0, 48.0}, vx(8, d_120), sprite_name);
    AnimationSettings player_idle_blink_l({72, 48}, {col(8), idle_row_l}, {36.0, 48.0}, vx(8, d_120), sprite_name);
 
-   AnimationSettings player_bend_down_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_40), sprite_name);
-   AnimationSettings player_bend_down_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(7, d_40), sprite_name);
+   const auto bend_down_row_r = next_row();
+   const auto bend_down_row_l = next_row();
+   AnimationSettings player_bend_down_r({72, 48}, {0, bend_down_row_r}, {36.0, 48.0}, vx(7, d_40), sprite_name);
+   AnimationSettings player_bend_down_l({72, 48}, {0, bend_down_row_l}, {36.0, 48.0}, vx(7, d_40), sprite_name);
+   AnimationSettings player_bend_down_idle_r({72, 48}, {col(6), bend_down_row_r}, {36.0, 48.0}, vx(1, d_40), sprite_name);
+   AnimationSettings player_bend_down_idle_l({72, 48}, {col(6), bend_down_row_l}, {36.0, 48.0}, vx(1, d_40), sprite_name);
+   AnimationSettings player_bend_down_idle_blink_r({72, 48}, {col(6), bend_down_row_r}, {36.0, 48.0}, vx(4, d_40), sprite_name);
+   AnimationSettings player_bend_down_idle_blink_l({72, 48}, {col(6), bend_down_row_l}, {36.0, 48.0}, vx(4, d_40), sprite_name);
 
    AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
    AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
@@ -371,50 +379,54 @@ void PlayerAnimation::generateJson()
    AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
 
    nlohmann::json j;
-   j["player_idle_r_2"]             = player_idle_r;
-   j["player_idle_l_2"]             = player_idle_l;
-   j["player_idle_blink_r_2"]       = player_idle_blink_r;
-   j["player_idle_blink_l_2"]       = player_idle_blink_l;
-   j["player_bend_down_r_2"]        = player_bend_down_r;
-   j["player_bend_down_l_2"]        = player_bend_down_l;
-   j["player_idle_to_run_r_2"]      = player_idle_to_run_r;
-   j["player_idle_to_run_l_2"]      = player_idle_to_run_l;
-   j["player_runstop_r_2"]          = player_runstop_r;
-   j["player_runstop_l_2"]          = player_runstop_l;
-   j["player_run_r_2"]              = player_run_r;
-   j["player_run_l_2"]              = player_run_l;
-   j["player_dash_init_r_2"]        = player_dash_init_r;
-   j["player_dash_init_l_2"]        = player_dash_init_l;
-   j["player_dash_r_2"]             = player_dash_r;
-   j["player_dash_l_2"]             = player_dash_l;
+   j["player_idle_r_2"]                 = player_idle_r;
+   j["player_idle_l_2"]                 = player_idle_l;
+   j["player_idle_blink_r_2"]           = player_idle_blink_r;
+   j["player_idle_blink_l_2"]           = player_idle_blink_l;
+   j["player_bend_down_r_2"]            = player_bend_down_r;
+   j["player_bend_down_l_2"]            = player_bend_down_l;
+   j["player_bend_down_idle_r_2"]       = player_bend_down_idle_r;
+   j["player_bend_down_idle_l_2"]       = player_bend_down_idle_l;
+   j["player_bend_down_idle_blink_r_2"] = player_bend_down_idle_blink_r;
+   j["player_bend_down_idle_blink_l_2"] = player_bend_down_idle_blink_l;
+   j["player_idle_to_run_r_2"]          = player_idle_to_run_r;
+   j["player_idle_to_run_l_2"]          = player_idle_to_run_l;
+   j["player_runstop_r_2"]              = player_runstop_r;
+   j["player_runstop_l_2"]              = player_runstop_l;
+   j["player_run_r_2"]                  = player_run_r;
+   j["player_run_l_2"]                  = player_run_l;
+   j["player_dash_init_r_2"]            = player_dash_init_r;
+   j["player_dash_init_l_2"]            = player_dash_init_l;
+   j["player_dash_r_2"]                 = player_dash_r;
+   j["player_dash_l_2"]                 = player_dash_l;
 
-   j["player_jump_init_r_2"]        = player_jump_init_r;
-   j["player_jump_up_r_2"]          = player_jump_up_r;
-   j["player_jump_midair_r_2"]      = player_jump_midair_r;
-   j["player_jump_down_r_2"]        = player_jump_down_r;
-   j["player_jump_landing_r_2"]     = player_jump_landing_r;
+   j["player_jump_init_r_2"]            = player_jump_init_r;
+   j["player_jump_up_r_2"]              = player_jump_up_r;
+   j["player_jump_midair_r_2"]          = player_jump_midair_r;
+   j["player_jump_down_r_2"]            = player_jump_down_r;
+   j["player_jump_landing_r_2"]         = player_jump_landing_r;
 
-   j["player_jump_init_l_2"]        = player_jump_init_l;
-   j["player_jump_up_l_2"]          = player_jump_up_l;
-   j["player_jump_midair_l_2"]      = player_jump_midair_l;
-   j["player_jump_down_l_2"]        = player_jump_down_l;
-   j["player_jump_landing_l_2"]     = player_jump_landing_l;
+   j["player_jump_init_l_2"]            = player_jump_init_l;
+   j["player_jump_up_l_2"]              = player_jump_up_l;
+   j["player_jump_midair_l_2"]          = player_jump_midair_l;
+   j["player_jump_down_l_2"]            = player_jump_down_l;
+   j["player_jump_landing_l_2"]         = player_jump_landing_l;
 
-   j["player_double_jump_r_2"]      = player_double_jump_r;
-   j["player_double_jump_l_2"]      = player_double_jump_l;
-   j["player_swim_idle_r_2"]        = player_swim_idle_r;
-   j["player_swim_idle_l_2"]        = player_swim_idle_l;
-   j["player_swim_r_2"]             = player_swim_r;
-   j["player_swim_l_2"]             = player_swim_l;
+   j["player_double_jump_r_2"]          = player_double_jump_r;
+   j["player_double_jump_l_2"]          = player_double_jump_l;
+   j["player_swim_idle_r_2"]            = player_swim_idle_r;
+   j["player_swim_idle_l_2"]            = player_swim_idle_l;
+   j["player_swim_r_2"]                 = player_swim_r;
+   j["player_swim_l_2"]                 = player_swim_l;
 
-   j["player_wallslide_r_2"]        = player_wallslide_r;
-   j["player_wallslide_l_2"]        = player_wallslide_l;
-   j["player_wallslide_impact_r_2"] = player_wallslide_impact_r;
-   j["player_wallslide_impact_l_2"] = player_wallslide_impact_l;
-   j["player_wall_jump_r_2"]        = player_wall_jump_r;
-   j["player_wall_jump_l_2"]        = player_wall_jump_l;
-   j["player_appear_r_2"]           = player_appear_r;
-   j["player_appear_l_2"]           = player_appear_l;
+   j["player_wallslide_r_2"]            = player_wallslide_r;
+   j["player_wallslide_l_2"]            = player_wallslide_l;
+   j["player_wallslide_impact_r_2"]     = player_wallslide_impact_r;
+   j["player_wallslide_impact_l_2"]     = player_wallslide_impact_l;
+   j["player_wall_jump_r_2"]            = player_wall_jump_r;
+   j["player_wall_jump_l_2"]            = player_wall_jump_l;
+   j["player_appear_r_2"]               = player_appear_r;
+   j["player_appear_l_2"]               = player_appear_l;
 
    std::stringstream sstream;
    sstream << std::setw(4) << j << "\n\n";
