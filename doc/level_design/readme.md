@@ -347,6 +347,31 @@ Extras are currently hardcoded, i.e. the ID of each extra in the extra tileset i
 
 Apart from that, placing extras in your level is easy. Just create a tile layer called `extras` where you place your extra tiles.
 
+<br><br>
+
+## Dialogues
+
+The Deceptus Engine can display message boxes which are shown when the player is inside a defined area and presses a button to activate the message box.
+This is usually the `up` button of your keyboard or dpad.
+
+![](images/mechanism_dialogs_ingame.png)
+
+The message boxes can vary in color and can contain multiple messages.
+In the future they might be extended so they can alter in location, color and animation.
+
+In order to introduce a message box, you create an object layer 'dialogues' where you define a rectangle that defines the area where a message box is shown when activated.
+
+![](images/mechanism_dialogs_tiled.png)
+
+Each message box has the custom properties below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|01|string|The first message to show|
+|02|string|The second message to show|
+|03|string|The third message to show|
+|nn|string|The nth message to show, you get the idea...|
+|color|color|The color of the message box|
 
 
 <br><br><br>

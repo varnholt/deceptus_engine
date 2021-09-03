@@ -252,6 +252,22 @@ bool PlayerControls::isJumpButtonPressed() const
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isUpButtonPressed() const
+{
+   if (_keys_pressed & KeyPressedUp)
+   {
+     return true;
+   }
+
+   if (isControllerUsed())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_UP);
+   }
+
+   return false;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
