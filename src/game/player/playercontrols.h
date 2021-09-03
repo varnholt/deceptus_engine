@@ -7,7 +7,7 @@
 class PlayerControls
 {
 
-   public:
+public:
    PlayerControls() = default;
 
    void update(const sf::Time& dt);
@@ -29,6 +29,7 @@ class PlayerControls
    bool isControllerButtonPressed(int buttonEnum) const;
    bool isFireButtonPressed() const;
    bool isJumpButtonPressed() const;
+   bool isUpButtonPressed() const;
 
    bool isMovingRight() const;
    bool isMovingLeft() const;
