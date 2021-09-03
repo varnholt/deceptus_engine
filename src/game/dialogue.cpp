@@ -66,6 +66,14 @@ void Dialogue::update()
       return;
    }
 
+   // check whether up button is pressed
+   // actually there could be a number of 'message box activation buttons' here but for
+   // now it might be sufficient to just check for the up button
+   if (!Player::getCurrent()->getControls().isUpButtonPressed())
+   {
+      return;
+   }
+
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
    for (auto& dialogue : sDialogues)
@@ -120,6 +128,9 @@ void Dialogue::showNext()
    if (mIndex == mDialogue.size())
    {
       mIndex = 0;
+
+      // when done, mark the dialogue as inactive so it can be reactivated on button press
+      setActive(false);
       return;
    }
 
