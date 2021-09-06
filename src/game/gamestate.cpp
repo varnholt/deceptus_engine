@@ -1,8 +1,5 @@
 #include "gamestate.h"
 
-//-----------------------------------------------------------------------------
-GameState GameState::sInstance;
-
 
 //-----------------------------------------------------------------------------
 void GameState::enqueue(ExecutionMode mode)
@@ -20,6 +17,7 @@ void GameState::sync()
 //-----------------------------------------------------------------------------
 GameState& GameState::getInstance()
 {
+   static GameState sInstance;
    return sInstance;
 }
 

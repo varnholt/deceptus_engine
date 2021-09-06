@@ -21,7 +21,6 @@ public:
    void enqueueResume();
    void enqueueTogglePauseResume();
 
-   static GameState sInstance;
    static GameState& getInstance();
 
    ExecutionMode getMode() const;
@@ -37,6 +36,5 @@ private:
    ExecutionMode mQueuedMode = ExecutionMode::Running;
 
    std::vector<StateChangeCallback> mCallbacks;
-
 };
 
