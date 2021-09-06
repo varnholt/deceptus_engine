@@ -884,11 +884,36 @@ void Level::updateCameraSystem(const sf::Time& dt)
          << (mCurrentRoom.has_value() ? mCurrentRoom->mName : "undefined")
          << std::endl;
 
-      cameraSystem.setRoom(mCurrentRoom);
+      const auto update_instantaneous = true;
+
+      if (update_instantaneous)
+      {
+         cameraSystem.setRoom(mCurrentRoom);
+      }
+      else
+      {
+         _camera_locked = true;
+
+         // delay shall be retrieved from room properties
+         // also trigger fade effect here if configured
+
+         Timer::add(std::chrono::milliseconds(1000),
+            [this](){
+               auto& cameraSystem = CameraSystem::getCameraSystem();
+               cameraSystem.setRoom(mCurrentRoom);
+               _camera_locked = false;
+            },
+            Timer::Type::Singleshot
+         );
+      }
    }
 
    // update camera system
-   cameraSystem.update(dt, mViewWidth, mViewHeight);
+   if (!_camera_locked)
+   {
+      cameraSystem.update(dt, mViewWidth, mViewHeight);
+   }
+
 }
 
 
