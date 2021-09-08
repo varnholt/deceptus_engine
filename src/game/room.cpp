@@ -4,7 +4,13 @@
 #include <iostream>
 #include <sstream>
 
+#include "camerasystem.h"
 #include "gameconfiguration.h"
+#include "screentransition.h"
+#include "fadetransitioneffect.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/timer.h"
 
 /*
 
@@ -42,8 +48,8 @@ Room::Room(const sf::FloatRect& rect)
 {
    static int32_t sId = 0;
 
-   mRects.push_back(rect);
-   mId = sId;
+   _rects.push_back(rect);
+   _id = sId;
    sId++;
 }
 
@@ -51,8 +57,8 @@ Room::Room(const sf::FloatRect& rect)
 std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p) const
 {
    const auto it = std::find_if(
-         mRects.begin(),
-         mRects.end(),
+         _rects.begin(),
+         _rects.end(),
          [p](const sf::FloatRect& rect){
             return rect.contains(p);
          }
@@ -94,7 +100,7 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
 */
 
 
-   if (mRects.empty())
+   if (_rects.empty())
    {
       return false;
    }
@@ -105,7 +111,7 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
    //    -> find the right FloatRect
    auto pos = sf::Vector2f{x, y};
    const auto rectIt =  findRect(pos);
-   if (rectIt == mRects.end())
+   if (rectIt == _rects.end())
    {
       // that's an error.
       return false;
@@ -168,26 +174,28 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
 }
 
 
-std::optional<Room> Room::computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const
-{
-   return Room::find(cameraCenter, rooms);
-}
+//std::optional<Room> Room::computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const
+//{
+//   return Room::find(cameraCenter, rooms);
+//}
 
 
-std::optional<Room> Room::find(const sf::Vector2f& p, const std::vector<Room>& rooms)
+std::vector<Room>::const_iterator Room::find(const sf::Vector2f& p, const std::vector<Room>& rooms)
 {
    const auto roomIt = std::find_if(rooms.begin(), rooms.end(), [p, rooms](const Room& r){
          const auto& it = r.findRect(p);
-         return (it != r.mRects.end());
+         return (it != r._rects.end());
       }
    );
 
-   if (roomIt == rooms.end())
-   {
-      return {};
-   }
+//   if (roomIt == rooms.end())
+//   {
+//      return {};
+//   }
 
-   return *roomIt;
+//   return *roomIt;
+
+   return roomIt;
 }
 
 
@@ -230,7 +238,7 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
 
    // check if room already exists
    const auto it = std::find_if(rooms.begin(), rooms.end(), [key](const Room& r){
-         return (r.mName == key);
+         return (r._name == key);
       }
    );
 
@@ -238,9 +246,46 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
    {
       // create new room
       Room room{rect};
-      room.mName = key;
-      rooms.push_back(room);
+      room._name = key;
 
+      // deserialize room properties
+      if (tmxObject->_properties)
+      {
+         const auto transition_it = tmxObject->_properties->_map.find("transition");
+         if (transition_it != tmxObject->_properties->_map.end())
+         {
+            if (transition_it->second->_value_string == "fade_out_fade_in")
+            {
+               room._transition_effect = TransitionEffect::FadeOutFadeIn;
+            }
+         }
+
+         const auto fade_in_speed_it = tmxObject->_properties->_map.find("fade_in_speed");
+         if (fade_in_speed_it != tmxObject->_properties->_map.end())
+         {
+            room._fade_in_speed = fade_in_speed_it->second->_value_float.value();
+         }
+
+         const auto fade_out_speed_it = tmxObject->_properties->_map.find("fade_out_speed");
+         if (fade_out_speed_it != tmxObject->_properties->_map.end())
+         {
+            room._fade_out_speed = fade_out_speed_it->second->_value_float.value();
+         }
+
+         const auto camera_sync_after_fade_out_it = tmxObject->_properties->_map.find("camera_sync_after_fade_out");
+         if (camera_sync_after_fade_out_it != tmxObject->_properties->_map.end())
+         {
+            room._camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
+         }
+
+         const auto delay_it = tmxObject->_properties->_map.find("camera_lock_delay_ms");
+         if (delay_it != tmxObject->_properties->_map.end())
+         {
+            room._camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
+         }
+      }
+
+      rooms.push_back(room);
       // std::cout << "[i] adding room: " << key << std::endl;
    }
    else
@@ -249,7 +294,7 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
       auto& room = *it;
 
       // test for overlaps
-      if (std::any_of(room.mRects.begin(), room.mRects.end(), [rect](const sf::FloatRect& r){
+      if (std::any_of(room._rects.begin(), room._rects.end(), [rect](const sf::FloatRect& r){
                return r.intersects(rect);
             }
          )
@@ -258,8 +303,74 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
          std::cerr << "[!] bad rect intersection for room " << key << std::endl;
       }
 
-      room.mRects.push_back(rect);
+      room._rects.push_back(rect);
    }
 }
 
 
+void Room::startTransition()
+{
+   if (!_transition_effect.has_value())
+   {
+      return;
+   }
+
+   switch (_transition_effect.value())
+   {
+      case TransitionEffect::FadeOutFadeIn:
+      {
+         auto screen_transition = std::make_unique<ScreenTransition>();
+         auto fade_out = std::make_shared<FadeTransitionEffect>();
+         auto fade_in = std::make_shared<FadeTransitionEffect>();
+
+         fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+         fade_out->_speed = _fade_out_speed;
+
+         fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+         fade_in->_value = 1.0f;
+         fade_in->_speed = _fade_in_speed;
+
+         screen_transition->_effect_1 = fade_out;
+         screen_transition->_effect_2 = fade_in;
+
+         screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{50};
+         screen_transition->startEffect1();
+
+         screen_transition->_callbacks_effect_1_ended.push_back(
+            [this](){
+               if (_camera_sync_after_fade_out)
+               {
+                  _camera_locked = false;
+                  CameraSystem::getCameraSystem().syncNow();
+               }
+            }
+         );
+
+         screen_transition->_callbacks_effect_2_ended.push_back(
+            [](){
+               ScreenTransitionHandler::getInstance()._transition.reset();
+            }
+         );
+
+         ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
+
+         break;
+      }
+   }
+}
+
+
+void Room::lockCamera()
+{
+   _camera_locked = true;
+
+   // delay shall be retrieved from room properties
+   Timer::add(_camera_lock_delay.value(),
+      [this](){
+         auto& cameraSystem = CameraSystem::getCameraSystem();
+         cameraSystem.setRoom(*this);
+         _camera_locked = false;
+      },
+      Timer::Type::Singleshot
+   );
+}
