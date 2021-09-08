@@ -70,7 +70,8 @@ void CameraSystem::updateX(const sf::Time& dt)
 
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y;
-   const auto corrected = _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
+
+   const auto room_corrected = _room ? _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY()) : false;
 
    const auto dx = (player_x - _x) * dt.asSeconds() * config.getCameraVelocityFactorX();
 
@@ -119,7 +120,7 @@ void CameraSystem::updateX(const sf::Time& dt)
       _focus_x_triggered = false;
    }
 
-   if (_focus_x_triggered || corrected)
+   if (_focus_x_triggered || room_corrected)
    {
       _x += dx;
    }
@@ -143,7 +144,8 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y + config.getPlayerOffsetY();
-   const auto corrected = _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
+
+   const auto room_corrected = _room ? _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY()) : false;
 
    const auto test = player_y - view_center;
 
@@ -174,7 +176,7 @@ void CameraSystem::updateY(const sf::Time& dt)
       _focus_y_triggered = false;
    }
 
-   if (player->isInAir() && !_focus_y_triggered &&! corrected)
+   if (player->isInAir() && !_focus_y_triggered &&! room_corrected)
    {
       _no_y_update_triggered = false;
       return;
@@ -216,15 +218,14 @@ void CameraSystem::updatePlayerFocused()
 }
 
 
-void CameraSystem::setRoom(const std::optional<Room>& room)
+void CameraSystem::setRoom(const std::shared_ptr<Room>& room)
 {
-   if (_room->_id != room->_id)
+   if (_room != room)
    {
-      _room_interpolation = 0.0f;
       // std::cout << "[i] reset room interpolation" << std::endl;
+      _room_interpolation = 0.0f;
+      _room = room;
    }
-
-   _room = room;
 }
 
 

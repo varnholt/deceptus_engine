@@ -174,32 +174,19 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
 }
 
 
-//std::optional<Room> Room::computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const
-//{
-//   return Room::find(cameraCenter, rooms);
-//}
-
-
-std::vector<Room>::const_iterator Room::find(const sf::Vector2f& p, const std::vector<Room>& rooms)
+std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms)
 {
-   const auto roomIt = std::find_if(rooms.begin(), rooms.end(), [p, rooms](const Room& r){
-         const auto& it = r.findRect(p);
-         return (it != r._rects.end());
+   const auto room_it = std::find_if(rooms.begin(), rooms.end(), [p, rooms](const std::shared_ptr<Room>& r){
+         const auto& it = r->findRect(p);
+         return (it != r->_rects.end());
       }
    );
 
-//   if (roomIt == rooms.end())
-//   {
-//      return {};
-//   }
-
-//   return *roomIt;
-
-   return roomIt;
+   return (room_it != rooms.end()) ? (*room_it) : nullptr;
 }
 
 
-void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
+void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>& rooms)
 {
    // ignore invalid rects
    const auto config = GameConfiguration::getInstance();
@@ -237,16 +224,16 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
    };
 
    // check if room already exists
-   const auto it = std::find_if(rooms.begin(), rooms.end(), [key](const Room& r){
-         return (r._name == key);
+   const auto it = std::find_if(rooms.begin(), rooms.end(), [key](const std::shared_ptr<Room>& r){
+         return (r->_name == key);
       }
    );
 
    if (it == rooms.end())
    {
       // create new room
-      Room room{rect};
-      room._name = key;
+      auto room = std::make_shared<Room>(rect);
+      room->_name = key;
 
       // deserialize room properties
       if (tmxObject->_properties)
@@ -256,32 +243,32 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
          {
             if (transition_it->second->_value_string == "fade_out_fade_in")
             {
-               room._transition_effect = TransitionEffect::FadeOutFadeIn;
+               room->_transition_effect = TransitionEffect::FadeOutFadeIn;
             }
          }
 
          const auto fade_in_speed_it = tmxObject->_properties->_map.find("fade_in_speed");
          if (fade_in_speed_it != tmxObject->_properties->_map.end())
          {
-            room._fade_in_speed = fade_in_speed_it->second->_value_float.value();
+            room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
          }
 
          const auto fade_out_speed_it = tmxObject->_properties->_map.find("fade_out_speed");
          if (fade_out_speed_it != tmxObject->_properties->_map.end())
          {
-            room._fade_out_speed = fade_out_speed_it->second->_value_float.value();
+            room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
          const auto camera_sync_after_fade_out_it = tmxObject->_properties->_map.find("camera_sync_after_fade_out");
          if (camera_sync_after_fade_out_it != tmxObject->_properties->_map.end())
          {
-            room._camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
+            room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
          }
 
          const auto delay_it = tmxObject->_properties->_map.find("camera_lock_delay_ms");
          if (delay_it != tmxObject->_properties->_map.end())
          {
-            room._camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
+            room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
          }
       }
 
@@ -294,7 +281,7 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
       auto& room = *it;
 
       // test for overlaps
-      if (std::any_of(room._rects.begin(), room._rects.end(), [rect](const sf::FloatRect& r){
+      if (std::any_of(room->_rects.begin(), room->_rects.end(), [rect](const sf::FloatRect& r){
                return r.intersects(rect);
             }
          )
@@ -303,7 +290,7 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<Room>& rooms)
          std::cerr << "[!] bad rect intersection for room " << key << std::endl;
       }
 
-      room._rects.push_back(rect);
+      room->_rects.push_back(rect);
    }
 }
 
@@ -360,16 +347,16 @@ void Room::startTransition()
 }
 
 
-void Room::lockCamera()
+void Room::lockCamera(const std::shared_ptr<Room>& room)
 {
-   _camera_locked = true;
+   room->_camera_locked = true;
 
    // delay shall be retrieved from room properties
-   Timer::add(_camera_lock_delay.value(),
-      [this](){
+   Timer::add(room->_camera_lock_delay.value(),
+      [room](){
          auto& cameraSystem = CameraSystem::getCameraSystem();
-         cameraSystem.setRoom(*this);
-         _camera_locked = false;
+         cameraSystem.setRoom(room);
+         room->_camera_locked = false;
       },
       Timer::Type::Singleshot
    );
