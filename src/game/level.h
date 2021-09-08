@@ -165,10 +165,9 @@ protected:
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
    void updatePlayerLight();
 
-   std::vector<Room> mRooms;
-   std::optional<Room> mCurrentRoom;
-   int32_t mCurrentRoomId = -1;
-   bool _camera_locked = false;
+   std::vector<std::shared_ptr<Room>> mRooms;
+   std::shared_ptr<Room> mCurrentRoom;
+   std::shared_ptr<Room> mPreviousRoom;
 
    std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
    std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
