@@ -45,7 +45,7 @@ struct Room : std::enable_shared_from_this<Room>
    float _fade_in_speed = 2.0f;
    float _fade_out_speed = 2.0f;
    std::chrono::milliseconds _delay_between_effects_ms{250};
-   bool _camera_sync_after_fade_out = false;
+   bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
 };
 
