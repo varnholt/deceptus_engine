@@ -873,47 +873,39 @@ void Level::updateCameraSystem(const sf::Time& dt)
    auto& cameraSystem = CameraSystem::getCameraSystem();
 
    // update room
-   mCurrentRoom = Room::find(Player::getCurrent()->getPixelPositionf(), mRooms);
+   const auto& room_it = Room::find(Player::getCurrent()->getPixelPositionf(), mRooms);
    const auto prevRoomId = mCurrentRoomId;
-   mCurrentRoomId = mCurrentRoom.has_value() ? mCurrentRoom->mId : -1;
+   mCurrentRoomId = (room_it != mRooms.end()) ? mCurrentRoom->_id : -1;
 
+   // room changed
    if (prevRoomId != mCurrentRoomId)
    {
       std::cout
          << "[i] player moved to room: "
-         << (mCurrentRoom.has_value() ? mCurrentRoom->mName : "undefined")
+         << (mCurrentRoom.has_value() ? mCurrentRoom->_name : "undefined")
          << std::endl;
 
-      const auto update_instantaneous = true;
-
-      if (update_instantaneous)
+      if (!mCurrentRoom.has_value() || !mCurrentRoom.value()._camera_lock_delay.has_value())
       {
          cameraSystem.setRoom(mCurrentRoom);
       }
       else
       {
-         _camera_locked = true;
+         mCurrentRoom.value().lockCamera();
+      }
 
-         // delay shall be retrieved from room properties
-         // also trigger fade effect here if configured
-
-         Timer::add(std::chrono::milliseconds(1000),
-            [this](){
-               auto& cameraSystem = CameraSystem::getCameraSystem();
-               cameraSystem.setRoom(mCurrentRoom);
-               _camera_locked = false;
-            },
-            Timer::Type::Singleshot
-         );
+      // also trigger fade effect here if configured
+      if (mCurrentRoom.has_value() && mCurrentRoom.value()._transition_effect.has_value())
+      {
+         mCurrentRoom.value().startTransition();
       }
    }
 
    // update camera system
-   if (!_camera_locked)
+   if (!mCurrentRoom.has_value() || !mCurrentRoom.value()._camera_locked)
    {
       cameraSystem.update(dt, mViewWidth, mViewHeight);
    }
-
 }
 
 
@@ -1174,7 +1166,7 @@ void Level::drawDebugInformation()
 
       for (const auto& room : mRooms)
       {
-         for (const auto& rect : room.mRects)
+         for (const auto& rect : room._rects)
          {
             DebugDraw::drawRect(*mLevelRenderTexture.get(), rect, sf::Color::Yellow);
          }
