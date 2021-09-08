@@ -887,7 +887,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
       // will update the current room in both cases, either after the camera lock delay or instantly
       if (mCurrentRoom && mCurrentRoom->_camera_lock_delay.has_value())
       {
-         Room::lockCamera(mCurrentRoom);
+         mCurrentRoom->lockCamera();
       }
       else
       {

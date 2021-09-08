@@ -10,11 +10,11 @@
 
 #include "framework/tmxparser/tmxobject.h"
 
-struct Room // : std::enable_shared_from_this<Room>
+struct Room : std::enable_shared_from_this<Room>
 {
-   // std::shared_ptr<Room> getptr() {
-   //     return shared_from_this();
-   // }
+   std::shared_ptr<Room> getptr() {
+       return shared_from_this();
+   }
 
    enum class TransitionEffect
    {
@@ -25,9 +25,9 @@ struct Room // : std::enable_shared_from_this<Room>
 
    static void deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
-   static void lockCamera(const std::shared_ptr<Room>& room);
 
    void startTransition();
+   void lockCamera();
 
    std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
    bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
@@ -44,6 +44,7 @@ struct Room // : std::enable_shared_from_this<Room>
    std::optional<TransitionEffect> _transition_effect;
    float _fade_in_speed = 2.0f;
    float _fade_out_speed = 2.0f;
+   std::chrono::milliseconds _delay_between_effects_ms{250};
    bool _camera_sync_after_fade_out = false;
    bool _camera_locked = false;
 };

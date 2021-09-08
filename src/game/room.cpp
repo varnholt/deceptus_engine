@@ -259,6 +259,12 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>&
             room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
+         const auto delay_between_effects_it = tmxObject->_properties->_map.find("delay_between_effects_ms");
+         if (delay_between_effects_it != tmxObject->_properties->_map.end())
+         {
+            room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
+         }
+
          const auto camera_sync_after_fade_out_it = tmxObject->_properties->_map.find("camera_sync_after_fade_out");
          if (camera_sync_after_fade_out_it != tmxObject->_properties->_map.end())
          {
@@ -320,7 +326,7 @@ void Room::startTransition()
          screen_transition->_effect_1 = fade_out;
          screen_transition->_effect_2 = fade_in;
 
-         screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{50};
+         screen_transition->_delay_between_effects_ms = _delay_between_effects_ms;
          screen_transition->startEffect1();
 
          screen_transition->_callbacks_effect_1_ended.push_back(
@@ -328,7 +334,9 @@ void Room::startTransition()
                if (_camera_sync_after_fade_out)
                {
                   _camera_locked = false;
-                  CameraSystem::getCameraSystem().syncNow();
+                  auto& camera = CameraSystem::getCameraSystem();
+                  camera.setRoom(getptr());
+                  camera.syncNow();
                }
             }
          );
@@ -347,16 +355,20 @@ void Room::startTransition()
 }
 
 
-void Room::lockCamera(const std::shared_ptr<Room>& room)
+void Room::lockCamera()
 {
-   room->_camera_locked = true;
+   _camera_locked = true;
 
    // delay shall be retrieved from room properties
-   Timer::add(room->_camera_lock_delay.value(),
-      [room](){
-         auto& cameraSystem = CameraSystem::getCameraSystem();
-         cameraSystem.setRoom(room);
-         room->_camera_locked = false;
+   Timer::add(_camera_lock_delay.value(),
+      [this](){
+         // could be that the camera has been unlocked in the meantime
+         if (_camera_locked)
+         {
+            auto& cameraSystem = CameraSystem::getCameraSystem();
+            cameraSystem.setRoom(getptr());
+            _camera_locked = false;
+         }
       },
       Timer::Type::Singleshot
    );
