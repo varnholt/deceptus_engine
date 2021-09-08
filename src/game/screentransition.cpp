@@ -66,7 +66,7 @@ void ScreenTransition::effect1Done()
       return;
    }
 
-   if (_delay_between_effects_ms.count() == 0)
+   if (_delay_between_effects_ms > std::chrono::milliseconds(0))
    {
       Timer::add(_delay_between_effects_ms, [this](){startEffect2();});
    }
