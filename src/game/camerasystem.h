@@ -22,7 +22,7 @@ class CameraSystem
       float getPanicLineY0() const;
       float getPanicLineY1() const;
 
-      void setRoom(const std::optional<Room>& room);
+      void setRoom(const std::shared_ptr<Room>& room);
 
       void syncNow();
 
@@ -56,7 +56,7 @@ class CameraSystem
       bool _focus_x_triggered = false;
       bool _focus_y_triggered = false;
 
-      std::optional<Room> _room;
+      std::shared_ptr<Room> _room;
       float _room_interpolation = 0.0f;
       float _room_x = 0.0f;
       float _room_y = 0.0f;
