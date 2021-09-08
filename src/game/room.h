@@ -10,8 +10,12 @@
 
 #include "framework/tmxparser/tmxobject.h"
 
-struct Room
+struct Room // : std::enable_shared_from_this<Room>
 {
+   // std::shared_ptr<Room> getptr() {
+   //     return shared_from_this();
+   // }
+
    enum class TransitionEffect
    {
       FadeOutFadeIn
@@ -19,11 +23,11 @@ struct Room
 
    Room(const sf::FloatRect& rect);
 
-   static void deserialize(TmxObject* tmxObject, std::vector<Room>& rooms);
-   static std::vector<Room>::const_iterator find(const sf::Vector2f& p, const std::vector<Room>& rooms);
+   static void deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>& rooms);
+   static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
+   static void lockCamera(const std::shared_ptr<Room>& room);
 
    void startTransition();
-   void lockCamera();
 
    std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
    bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
