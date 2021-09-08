@@ -218,7 +218,7 @@ void CameraSystem::updatePlayerFocused()
 
 void CameraSystem::setRoom(const std::optional<Room>& room)
 {
-   if (_room->mId != room->mId)
+   if (_room->_id != room->_id)
    {
       _room_interpolation = 0.0f;
       // std::cout << "[i] reset room interpolation" << std::endl;
