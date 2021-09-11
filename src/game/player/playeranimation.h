@@ -48,7 +48,8 @@ public:
       HighResTimePoint _timepoint_wallslide;
       HighResTimePoint _timepoint_walljump;
       HighResTimePoint _timepoint_doublejump;
-      HighResTimePoint _timepoint_crouch_end;
+      HighResTimePoint _timepoint_bend_down_start;
+      HighResTimePoint _timepoint_bend_down_end;
    };
 
    void update(
