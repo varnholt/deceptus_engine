@@ -99,9 +99,16 @@ PlayerAnimation::PlayerAnimation()
    _appear_r_2           = AnimationPool::getInstance().add("player_appear_r_2",           0.0f, 0.0f, true, false);
    _appear_l_2           = AnimationPool::getInstance().add("player_appear_l_2",           0.0f, 0.0f, true, false);
 
+   _bend_down_idle_r_2       = AnimationPool::getInstance().add("player_bend_down_idle_r_2", 0.0f, 0.0f, true, false);
+   _bend_down_idle_l_2       = AnimationPool::getInstance().add("player_bend_down_idle_l_2", 0.0f, 0.0f, true, false);
+   _bend_down_idle_blink_r_2 = AnimationPool::getInstance().add("player_bend_down_idle_blink_r_2", 0.0f, 0.0f, true, false);
+   _bend_down_idle_blink_l_2 = AnimationPool::getInstance().add("player_bend_down_idle_blink_l_2", 0.0f, 0.0f, true, false);
+
    // we will replace those later as we go
    _idle_r_tmp = _idle_r_2;
    _idle_l_tmp = _idle_l_2;
+   _bend_down_idle_r_tmp = _bend_down_idle_r_2;
+   _bend_down_idle_l_tmp = _bend_down_idle_l_2;
 
    // we don't want these to jump back to the first frame
    _appear_r_2->_reset_to_first_frame = false;
@@ -678,53 +685,63 @@ void PlayerAnimation::updateV2(
       next_cycle = _crouch_l;
    }
 
-   // idle or bend down
+   // bend down state
+   else if (data._bending_down)
+   {
+      next_cycle = data._points_left ? _bend_down_l_2 : _bend_down_r_2;
+
+      if (StopWatch::duration(data._timepoint_bend_down_start, now) > 7 * 40ms)
+      {
+         next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
+
+         // blink every now and then
+         if (_bend_down_idle_l_tmp->_finished)
+         {
+            _bend_down_idle_l_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_l_2 : _bend_down_idle_l_2;
+         }
+
+         if (_bend_down_idle_r_tmp->_finished)
+         {
+            _bend_down_idle_r_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_r_2 : _bend_down_idle_r_2;
+         }
+
+         // std::cout << "now in bend down idle" << std::endl;
+      }
+   }
+
+   // idle or bend back up
    else if (data._points_left)
    {
-      if (data._bending_down)
+      // bend up if player is releasing the crouch
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < 7 * 40ms)
       {
-         next_cycle = _bend_down_l_2;
+         next_cycle = _bend_up_l_2;
       }
       else
       {
-         // bend up if player is releasing the crouch
-         if (StopWatch::duration(data._timepoint_crouch_end, now) < 7 * 40ms)
-         {
-            next_cycle = _bend_up_l_2;
-         }
-         else
-         {
-            // otherwise randomly blink or idle
-            next_cycle = _idle_l_tmp;
+         // otherwise randomly blink or idle
+         next_cycle = _idle_l_tmp;
 
-            if (_idle_l_tmp->_finished)
-            {
-               _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
-            }
+         if (_idle_l_tmp->_finished)
+         {
+            _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l_2 : _idle_l_2;
          }
       }
    }
    else
    {
-      if (data._bending_down)
+      // bend up if player is releasing the crouch
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < 7 * 40ms)
       {
-         next_cycle = _bend_down_r_2;
+         next_cycle = _bend_up_r_2;
       }
       else
       {
-         // bend up if player is releasing the crouch
-         if (StopWatch::duration(data._timepoint_crouch_end, now) < 7 * 40ms)
-         {
-            next_cycle = _bend_up_r_2;
-         }
-         else
-         {
-            next_cycle = _idle_r_tmp;
+         next_cycle = _idle_r_tmp;
 
-            if (_idle_r_tmp->_finished)
-            {
-               _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
-            }
+         if (_idle_r_tmp->_finished)
+         {
+            _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r_2 : _idle_r_2;
          }
       }
    }
