@@ -792,7 +792,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_doublejump = mJump._timepoint_doublejump;
    data._timepoint_wallslide = mJump._timepoint_wallslide;
    data._timepoint_walljump = mJump._timepoint_walljump;
-   data._timepoint_crouch_end = _timepoint_bend_down_end;
+   data._timepoint_bend_down_start = _timepoint_bend_down_start;
+   data._timepoint_bend_down_end = _timepoint_bend_down_end;
 
    if (isDashActive())
    {
