@@ -224,29 +224,29 @@ protected:
 
    // graphic effects
    BoomEffect mBoomEffect;
-   std::shared_ptr<LightSystem> mLightSystem;
-   std::shared_ptr<StaticLight> mStaticLight;
-   std::shared_ptr<LightSystem::LightInstance> mPlayerLight;
-   std::vector<std::shared_ptr<SmokeEffect>> mSmokeEffect;
+   std::shared_ptr<LightSystem> _light_system;
+   std::shared_ptr<StaticLight> _static_light;
+   std::shared_ptr<LightSystem::LightInstance> _player_light;
+   std::vector<std::shared_ptr<SmokeEffect>> _smoke_effect;
 
    AmbientOcclusion mAo;
-   std::vector<std::shared_ptr<ImageLayer>> mImageLayers;
-   std::vector<std::shared_ptr<ShaderLayer>> mShaderLayers;
+   std::vector<std::shared_ptr<ImageLayer>> _image_layers;
+   std::vector<std::shared_ptr<ShaderLayer>> _shader_layers;
 
-   std::unique_ptr<AtmosphereShader> mAtmosphereShader;
-   std::unique_ptr<BlurShader> mBlurShader;
-   std::unique_ptr<GammaShader> mGammaShader;
-   std::unique_ptr<DeathShader> mDeathShader;
-   bool mScreenshot = false;
+   std::unique_ptr<AtmosphereShader> _atmosphere_shader;
+   std::unique_ptr<BlurShader> _blur_shader;
+   std::unique_ptr<GammaShader> _gamme_shader;
+   std::unique_ptr<DeathShader> _death_shader;
+   bool _screenshot = false;
 
    // box2d
-   std::map<b2Body*, b2Vec2*> mPointMap;
-   std::map<b2Body*, size_t> mPointCountMap;
+   std::map<b2Body*, b2Vec2*> _point_map;
+   std::map<b2Body*, size_t> _point_count_map;
 
-   std::shared_ptr<b2World> mWorld = nullptr;
-   std::vector<std::vector<b2Vec2>> mWorldChains;
+   std::shared_ptr<b2World> _world = nullptr;
+   std::vector<std::vector<b2Vec2>> _world_chains;
 
-   static Level* sCurrentLevel;
+   static Level* __current_level;
 
 private:
    void drawDebugInformation();
