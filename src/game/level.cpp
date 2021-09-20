@@ -85,21 +85,21 @@ Level* Level::__current_level = nullptr;
 //-----------------------------------------------------------------------------
 std::string Level::getDescriptionFilename() const
 {
-   return mDescriptionFilename;
+   return _description_filename;
 }
 
 
 //-----------------------------------------------------------------------------
 void Level::setDescriptionFilename(const std::string &descriptionFilename)
 {
-   mDescriptionFilename = descriptionFilename;
+   _description_filename = descriptionFilename;
 }
 
 
 //-----------------------------------------------------------------------------
 const Atmosphere& Level::getPhysics() const
 {
-   return mAtmosphere;
+   return _atmosphere;
 }
 
 
@@ -112,7 +112,7 @@ void Level::initializeTextures()
    sf::ContextSettings stencilContextSettings;
    stencilContextSettings.stencilBits = 8;
 
-   mLevelBackgroundRenderTexture.reset();
+   _render_texture_level_background.reset();
 
    _atmosphere_shader.reset();
    _gamme_shader.reset();
@@ -124,39 +124,39 @@ void Level::initializeTextures()
    const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
    const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
    const auto sizeRatio = std::min(ratioWidth, ratioHeight);
-   mViewToTextureScale = 1.0f / sizeRatio;
+   _view_to_texture_scale = 1.0f / sizeRatio;
 
    const auto textureWidth = static_cast<int32_t>(sizeRatio * gameConfig.mViewWidth);
    const auto textureHeight = static_cast<int32_t>(sizeRatio * gameConfig.mViewHeight);
 
-   mLevelBackgroundRenderTexture = std::make_shared<sf::RenderTexture>();
-   mLevelBackgroundRenderTexture->create(
+   _render_texture_level_background = std::make_shared<sf::RenderTexture>();
+   _render_texture_level_background->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight)
    );
 
-   mLevelRenderTexture = std::make_shared<sf::RenderTexture>();
-   mLevelRenderTexture->create(
+   _render_texture_level = std::make_shared<sf::RenderTexture>();
+   _render_texture_level->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight),
       stencilContextSettings // the lights require stencils
    );
 
-   mLightingTexture = std::make_shared<sf::RenderTexture>();
-   mLightingTexture->create(
+   _render_texture_lighting = std::make_shared<sf::RenderTexture>();
+   _render_texture_lighting->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight),
       stencilContextSettings // the lights require stencils
    );
 
-   mNormalTexture = std::make_shared<sf::RenderTexture>();
-   mNormalTexture->create(
+   _render_texture_normal = std::make_shared<sf::RenderTexture>();
+   _render_texture_normal->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight)
    );
 
-   mDeferredTexture = std::make_shared<sf::RenderTexture>();
-   mDeferredTexture->create(
+   _render_texture_deferred = std::make_shared<sf::RenderTexture>();
+   _render_texture_deferred->create(
       static_cast<uint32_t>(textureWidth),
       static_cast<uint32_t>(textureHeight)
    );
@@ -167,14 +167,14 @@ void Level::initializeTextures()
    _death_shader = std::make_unique<DeathShader>(textureWidth, textureHeight);
 
    // keep track of those textures
-   mRenderTextures.clear();
-   mRenderTextures.push_back(mLevelRenderTexture);
-   mRenderTextures.push_back(mLevelBackgroundRenderTexture);
-   mRenderTextures.push_back(mLightingTexture);
-   mRenderTextures.push_back(mNormalTexture);
-   mRenderTextures.push_back(mDeferredTexture);
+   _render_textures.clear();
+   _render_textures.push_back(_render_texture_level);
+   _render_textures.push_back(_render_texture_level_background);
+   _render_textures.push_back(_render_texture_lighting);
+   _render_textures.push_back(_render_texture_normal);
+   _render_textures.push_back(_render_texture_deferred);
 
-   for (const auto& fb : mRenderTextures)
+   for (const auto& fb : _render_textures)
    {
       std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
    }
@@ -215,23 +215,23 @@ Level::Level()
    _player_light->_color = sf::Color(255, 255, 255, 10);
    _light_system->_lights.push_back(_player_light);
 
-   mMap = std::make_unique<LevelMap>();
+   _map = std::make_unique<LevelMap>();
 
-   mMechanisms = {
-      &mBouncers,
-      &mConveyorBelts,
-      &mCrushers,
-      &mDeathBlocks,
-      &mDoors,
-      &mFans,
-      &mLasers,
-      &mLevers,
-      &mMoveableBoxes,
-      &mPlatforms,
-      &mPortals,
-      &mRopes,
-      &mSpikeBalls,
-      &mSpikes,
+   _mechanisms = {
+      &_mechanism_bouncers,
+      &_mechanism_conveyor_belts,
+      &_mechanism_crushers,
+      &_mechanism_death_blocks,
+      &_mechanism_doors,
+      &_mechanism_fans,
+      &_mechanism_lasers,
+      &_mechanism_levers,
+      &_mechanism_moveable_boxes,
+      &_mechanism_platforms,
+      &_mechanism_portals,
+      &_mechanism_ropes,
+      &_mechanism_spike_balls,
+      &_mechanism_spikes,
    };
 }
 
@@ -242,7 +242,7 @@ Level::~Level()
    std::cout << "[x] deleting current level" << std::endl;
 
    // stop active timers because their callbacks being called after destruction of the level/world can be nasty
-   for (auto& enemy : mEnemies)
+   for (auto& enemy : _enemies)
    {
       Timer::removeByCaller(enemy);
    }
@@ -254,12 +254,12 @@ Level::~Level()
    }
 
    // clear tmx elements
-   for (auto tmx_element : mTmxElements)
+   for (auto tmx_element : _tmx_elements)
    {
       delete tmx_element;
    }
 
-   mTmxElements.clear();
+   _tmx_elements.clear();
 }
 
 
@@ -280,7 +280,7 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
       if (itParallaxView != map.end())
       {
          const auto view = itParallaxView->second->_value_int.value();
-         mParallaxFactors[view] = parallax;
+         _parallax_factors[view] = parallax;
       }
    }
 }
@@ -291,10 +291,10 @@ void Level::loadTmx()
 {
    static const std::string parallaxIdentifier = "parallax_";
 
-   auto path = std::filesystem::path(mDescription->mFilename).parent_path();
+   auto path = std::filesystem::path(_description->mFilename).parent_path();
 
-   const auto checksumOld = Checksum::readChecksum(mDescription->mFilename + ".crc");
-   const auto checksumNew = Checksum::calcChecksum(mDescription->mFilename);
+   const auto checksumOld = Checksum::readChecksum(_description->mFilename + ".crc");
+   const auto checksumNew = Checksum::calcChecksum(_description->mFilename);
    if (checksumOld != checksumNew)
    {
       std::cout << "[x] checksum mismatch, deleting cached data" << std::endl;
@@ -303,34 +303,34 @@ void Level::loadTmx()
       std::filesystem::remove(path / "physics_path_solid.csv");
       std::filesystem::remove(path / "physics_path_solid.png");
       std::filesystem::remove(path / "layer_level_solid_not_optimised.obj");
-      Checksum::writeChecksum(mDescription->mFilename + ".crc", checksumNew);
+      Checksum::writeChecksum(_description->mFilename + ".crc", checksumNew);
    }
 
    sf::Clock elapsed;
 
    // parse tmx
-   std::cout << "[x] parsing tmx: " << mDescription->mFilename << std::endl;
+   std::cout << "[x] parsing tmx: " << _description->mFilename << std::endl;
 
-   mTmxParser = std::make_unique<TmxParser>();
-   mTmxParser->parse(mDescription->mFilename);
+   _tmx_parser = std::make_unique<TmxParser>();
+   _tmx_parser->parse(_description->mFilename);
 
    std::cout << "[x] parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
    elapsed.restart();
 
    std::cout << "[x] loading tmx... " << std::endl;
 
-   mTmxElements = mTmxParser->getElements();
+   _tmx_elements = _tmx_parser->getElements();
 
-   for (auto element : mTmxElements)
+   for (auto element : _tmx_elements)
    {
       if (element->_type == TmxElement::TypeLayer)
       {
          auto layer = dynamic_cast<TmxLayer*>(element);
-         auto tileset = mTmxParser->getTileSet(layer);
+         auto tileset = _tmx_parser->getTileSet(layer);
 
          if (layer->_name.rfind("doors", 0) == 0)
          {
-            mDoors = Door::load(layer, tileset, path, _world);
+            _mechanism_doors = Door::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "fans")
          {
@@ -339,31 +339,31 @@ void Level::loadTmx()
          else if (layer->_name == "lasers")
          {
             const auto lasers = Laser::load(layer, tileset, path, _world);
-            mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
+            _mechanism_lasers.insert(_mechanism_lasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->_name == "lasers_2") // support for dstar's new laser tileset
          {
             const auto lasers = Laser::load(layer, tileset, path, _world);
-            mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
+            _mechanism_lasers.insert(_mechanism_lasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->_name == "levers")
          {
-            mLevers = Lever::load(layer, tileset, path, _world);
+            _mechanism_levers = Lever::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "platforms")
          {
-            mPlatforms = MovingPlatform::load(layer, tileset, path, _world);
+            _mechanism_platforms = MovingPlatform::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "portals")
          {
-            mPortals = Portal::load(layer, tileset, path, _world);
+            _mechanism_portals = Portal::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "toggle_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
             for (const auto &s : spikes)
             {
-               mSpikes.push_back(s);
+               _mechanism_spikes.push_back(s);
             }
          }
          else if (layer->_name == "trap_spikes")
@@ -371,7 +371,7 @@ void Level::loadTmx()
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
             for (const auto &s : spikes)
             {
-               mSpikes.push_back(s);
+               _mechanism_spikes.push_back(s);
             }
          }
          else if (layer->_name == "interval_spikes")
@@ -379,7 +379,7 @@ void Level::loadTmx()
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
             for (const auto &s : spikes)
             {
-               mSpikes.push_back(s);
+               _mechanism_spikes.push_back(s);
             }
          }
          else // tile map
@@ -391,8 +391,8 @@ void Level::loadTmx()
 
             if (layer->_name == "atmosphere")
             {
-               mAtmosphere.mTileMap = tileMap;
-               mAtmosphere.parse(layer, tileset);
+               _atmosphere.mTileMap = tileMap;
+               _atmosphere.parse(layer, tileset);
             }
             else if (layer->_name == "extras")
             {
@@ -402,7 +402,7 @@ void Level::loadTmx()
             else if (layer->_name.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
             {
                deserializeParallaxMap(layer);
-               mParallaxMaps.push_back(tileMap);
+               _parallax_maps.push_back(tileMap);
                pushTileMap = false;
             }
             else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
@@ -412,7 +412,7 @@ void Level::loadTmx()
 
             if (pushTileMap)
             {
-               mTileMaps.push_back(tileMap);
+               _tile_maps.push_back(tileMap);
             }
          }
       }
@@ -433,7 +433,7 @@ void Level::loadTmx()
             {
                Enemy enemy;
                enemy.parse(tmxObject);
-               mEnemyDataFromTmxLayer[enemy.mId]=enemy;
+               _enemy_data_from_tmx_layer[enemy.mId]=enemy;
             }
             else if (objectGroup->_name == "fans")
             {
@@ -443,20 +443,20 @@ void Level::loadTmx()
             {
                if (tmxObject->_polyline)
                {
-                  Portal::link(mPortals, tmxObject);
+                  Portal::link(_mechanism_portals, tmxObject);
                }
             }
             else if (objectGroup->_name == "ropes")
             {
                auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
                rope->setup(tmxObject, _world);
-               mRopes.push_back(rope);
+               _mechanism_ropes.push_back(rope);
             }
             else if (objectGroup->_name == "ropes_with_light")
             {
                auto rope = std::make_shared<RopeWithLight>(dynamic_cast<GameNode*>(this));
                rope->setup(tmxObject, _world);
-               mRopes.push_back(rope);
+               _mechanism_ropes.push_back(rope);
             }
             else if (objectGroup->_name == "smoke")
             {
@@ -467,19 +467,19 @@ void Level::loadTmx()
             {
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
                spikeBall->setup(tmxObject, _world);
-               mSpikeBalls.push_back(spikeBall);
+               _mechanism_spike_balls.push_back(spikeBall);
             }
             else if (objectGroup->_name == "moveable_objects")
             {
                auto box = std::make_shared<MoveableBox>(dynamic_cast<GameNode*>(this));
                box->setup(tmxObject, _world);
-               mMoveableBoxes.push_back(box);
+               _mechanism_moveable_boxes.push_back(box);
             }
             else if (objectGroup->_name == "death_blocks")
             {
                auto deathBlock = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
                deathBlock->setup(tmxObject, _world);
-               mDeathBlocks.push_back(deathBlock);
+               _mechanism_death_blocks.push_back(deathBlock);
             }
             else if (objectGroup->_name == "checkpoints")
             {
@@ -509,7 +509,7 @@ void Level::loadTmx()
 
                bouncer->setZ(objectGroup->_z);
 
-               mBouncers.push_back(bouncer);
+               _mechanism_bouncers.push_back(bouncer);
 
                addDebugRect(
                   bouncer->getBody(),
@@ -528,7 +528,7 @@ void Level::loadTmx()
                   path
                );
 
-               mConveyorBelts.push_back(belt);
+               _mechanism_conveyor_belts.push_back(belt);
 
                addDebugRect(
                   belt->getBody(),
@@ -542,17 +542,17 @@ void Level::loadTmx()
             {
                auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
                crusher->setup(tmxObject, _world);
-               mCrushers.push_back(crusher);
+               _mechanism_crushers.push_back(crusher);
             }
             else if (objectGroup->_name == "rooms")
             {
-               Room::deserialize(tmxObject, mRooms);
+               Room::deserialize(tmxObject, _rooms);
             }
             else if (objectGroup->_name == "platform_paths")
             {
                if (tmxObject->_polyline)
                {
-                  MovingPlatform::link(mPlatforms, tmxObject);
+                  MovingPlatform::link(_mechanism_platforms, tmxObject);
                }
             }
             else if (objectGroup->_name == "weather")
@@ -600,18 +600,18 @@ void Level::loadTmx()
 
    Laser::merge();
    Fan::merge();
-   mFans = Fan::getFans();
-   Lever::merge(mLevers, mLasers, mPlatforms, mFans, mConveyorBelts, mSpikes);
+   _mechanism_fans = Fan::getFans();
+   Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes);
 
-   mMap->loadLevelTextures(
+   _map->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),
       path / std::filesystem::path("physics_path_solid.png")
    );
 
-   mMap->setDoors(mDoors);
-   mMap->setPortals(mPortals);
+   _map->setDoors(_mechanism_doors);
+   _map->setPortals(_mechanism_portals);
 
-   if (!mAtmosphere.mTileMap)
+   if (!_atmosphere.mTileMap)
    {
       std::cerr << "[E] fatal: no physics layer (called 'physics') found!" << std::endl;
    }
@@ -623,14 +623,14 @@ void Level::loadTmx()
 //-----------------------------------------------------------------------------
 BoomEffect& Level::getBoomEffect()
 {
-    return mBoomEffect;
+    return _boom_effect;
 }
 
 
 //-----------------------------------------------------------------------------
 void Level::load()
 {
-   auto path = std::filesystem::path(mDescription->mFilename).parent_path();
+   auto path = std::filesystem::path(_description->mFilename).parent_path();
 
    Weather::getInstance().clear();
    Checkpoint::resetAll();
@@ -648,7 +648,7 @@ void Level::load()
 
    // loading ao
    std::cout << "[x] loading ao... " << std::endl;
-   mAo.load(path, std::filesystem::path(mDescription->mFilename).stem().string());
+   mAo.load(path, std::filesystem::path(_description->mFilename).stem().string());
 
    std::cout << "[x] level loading complete" << std::endl;
 }
@@ -659,12 +659,12 @@ void Level::initialize()
 {
    createViews();
 
-   mDescription = LevelDescription::load(mDescriptionFilename);
+   _description = LevelDescription::load(_description_filename);
 
    load();
 
-   mStartPosition.x = static_cast<float_t>(mDescription->mStartPosition.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
-   mStartPosition.y = static_cast<float_t>(mDescription->mStartPosition.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+   _start_position.x = static_cast<float_t>(_description->mStartPosition.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
+   _start_position.y = static_cast<float_t>(_description->mStartPosition.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 
    loadCheckpoint();
 
@@ -681,8 +681,8 @@ void Level::loadCheckpoint()
    if (checkpoint)
    {
       auto pos = checkpoint->calcCenter();
-      mStartPosition.x = static_cast<float>(pos.x);
-      mStartPosition.y = static_cast<float>(pos.y);
+      _start_position.x = static_cast<float>(pos.x);
+      _start_position.y = static_cast<float>(pos.y);
       std::cout << "[-] move to checkpoint: " << checkpointIndex << std::endl;
    }
    else
@@ -695,7 +695,7 @@ void Level::loadCheckpoint()
 //-----------------------------------------------------------------------------
 void Level::reset()
 {
-   for (auto& door : mDoors)
+   for (auto& door : _mechanism_doors)
    {
       door.reset();
    }
@@ -715,13 +715,13 @@ void Level::spawnEnemies()
    // deprecated approach:
    // merge enemy layer from tmx with enemy info that's stored inside json
    // iterate through all enemies in the json
-   for (auto& jsonDescription : mDescription->mEnemies)
+   for (auto& jsonDescription : _description->mEnemies)
    {
       auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + jsonDescription.mScript);
 
       // find matching enemy data from the tmx layer and retrieve the patrol path from there
-      const auto& it = mEnemyDataFromTmxLayer.find(jsonDescription.mId);
-      if (it != mEnemyDataFromTmxLayer.end())
+      const auto& it = _enemy_data_from_tmx_layer.find(jsonDescription.mId);
+      if (it != _enemy_data_from_tmx_layer.end())
       {
          // positions from the tmx are given in pixels, not tiles
          jsonDescription.mPositionGivenInTiles = false;
@@ -749,13 +749,13 @@ void Level::spawnEnemies()
       // initialize lua node and store enemy
       luaNode->mEnemyDescription = jsonDescription;
       luaNode->initialize();
-      mEnemies.push_back(luaNode);
+      _enemies.push_back(luaNode);
    }
 
    // those enemies that have a lua script associated inside the tmx layer don't need
    // additional information from json, those can just be spawned.
    // this should probably be the future and only approach how to handle enemy spawning.
-   for (auto& it : mEnemyDataFromTmxLayer)
+   for (auto& it : _enemy_data_from_tmx_layer)
    {
       auto script = it.second.findProperty("script");
 
@@ -787,7 +787,7 @@ void Level::spawnEnemies()
          // initialize lua node and store enemy
          luaNode->mEnemyDescription = jsonDescription;
          luaNode->initialize();
-         mEnemies.push_back(luaNode);
+         _enemies.push_back(luaNode);
       }
    }
 }
@@ -796,7 +796,7 @@ void Level::spawnEnemies()
 //-----------------------------------------------------------------------------
 void Level::drawStaticChains(sf::RenderTarget& target)
 {
-   for (auto& path : mAtmosphere.mOutlines)
+   for (auto& path : _atmosphere.mOutlines)
    {
       target.draw(&path.at(0), path.size(), sf::LineStrip);
    }
@@ -806,7 +806,7 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 std::shared_ptr<sf::View> Level::getLevelView()
 {
-  return mLevelView;
+  return _level_view;
 }
 
 
@@ -816,20 +816,20 @@ void Level::createViews()
    auto& gameConfig = GameConfiguration::getInstance();
 
    // the view dimensions never change
-   mViewWidth = static_cast<float>(gameConfig.mViewWidth);
-   mViewHeight = static_cast<float>(gameConfig.mViewHeight);
+   _view_width = static_cast<float>(gameConfig.mViewWidth);
+   _view_height = static_cast<float>(gameConfig.mViewHeight);
 
-   mLevelView.reset();
-   mLevelView = std::make_shared<sf::View>();
-   mLevelView->reset(sf::FloatRect(0.0f, 0.0f, mViewWidth, mViewHeight));
-   mLevelView->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   _level_view.reset();
+   _level_view = std::make_shared<sf::View>();
+   _level_view->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
+   _level_view->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 
    for (auto i = 0; i < 3; i++)
    {
-      mParallaxView[i].reset();
-      mParallaxView[i] = std::make_shared<sf::View>();
-      mParallaxView[i]->reset(sf::FloatRect(0.0f, 0.0f, mViewWidth, mViewHeight));
-      mParallaxView[i]->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+      _parallax_view[i].reset();
+      _parallax_view[i] = std::make_shared<sf::View>();
+      _parallax_view[i]->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
+      _parallax_view[i]->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
    }
 }
 
@@ -844,23 +844,23 @@ void Level::updateViews()
    const auto levelViewX = cameraSystem.getX() + lookVector.x;
    const auto levelViewY = cameraSystem.getY() + lookVector.y;
 
-   mLevelView->reset(
+   _level_view->reset(
       sf::FloatRect(
          levelViewX,
          levelViewY,
-         mViewWidth,
-         mViewHeight
+         _view_width,
+         _view_height
       )
    );
 
    for (auto i = 0; i < 3; i++)
    {
-      mParallaxView[i]->reset(
+      _parallax_view[i]->reset(
          sf::FloatRect(
-            levelViewX * mParallaxFactors[i],
-            levelViewY * mParallaxFactors[i],
-            mViewWidth,
-            mViewHeight
+            levelViewX * _parallax_factors[i],
+            levelViewY * _parallax_factors[i],
+            _view_width,
+            _view_height
          )
       );
    }
@@ -873,38 +873,38 @@ void Level::updateCameraSystem(const sf::Time& dt)
    auto& cameraSystem = CameraSystem::getCameraSystem();
 
    // update room
-   const auto prevRoom = mCurrentRoom;
-   mCurrentRoom = Room::find(Player::getCurrent()->getPixelPositionf(), mRooms);
+   const auto prevRoom = _room_current;
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
 
    // room changed
-   if (prevRoom != mCurrentRoom)
+   if (prevRoom != _room_current)
    {
       std::cout
          << "[i] player moved to room: "
-         << (mCurrentRoom ? mCurrentRoom->_name : "undefined")
+         << (_room_current ? _room_current->_name : "undefined")
          << std::endl;
 
       // will update the current room in both cases, either after the camera lock delay or instantly
-      if (mCurrentRoom && mCurrentRoom->_camera_lock_delay.has_value())
+      if (_room_current && _room_current->_camera_lock_delay.has_value())
       {
-         mCurrentRoom->lockCamera();
+         _room_current->lockCamera();
       }
       else
       {
-         cameraSystem.setRoom(mCurrentRoom);
+         cameraSystem.setRoom(_room_current);
       }
 
       // trigger transition effect here if configured
-      if (mCurrentRoom && mCurrentRoom->_transition_effect.has_value())
+      if (_room_current && _room_current->_transition_effect.has_value())
       {
-         mCurrentRoom->startTransition();
+         _room_current->startTransition();
       }
    }
 
    // update camera system
-   if (!mCurrentRoom || (mCurrentRoom && !mCurrentRoom->_camera_locked))
+   if (!_room_current || (_room_current && !_room_current->_camera_locked))
    {
-      cameraSystem.update(dt, mViewWidth, mViewHeight);
+      cameraSystem.update(dt, _view_width, _view_height);
    }
 }
 
@@ -912,7 +912,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
 //-----------------------------------------------------------------------------
 void Level::drawNormalMap()
 {
-   auto tile_maps = mTileMaps;
+   auto tile_maps = _tile_maps;
 
    std::sort(tile_maps.begin(), tile_maps.end(), []( const auto& lhs, const auto& rhs)
    {
@@ -931,10 +931,10 @@ void Level::drawNormalMap()
 //-----------------------------------------------------------------------------
 void Level::drawLightMap()
 {
-   mLightingTexture->clear();
-   mLightingTexture->setView(*mLevelView);
-   _light_system->draw(*mLightingTexture, {});
-   mLightingTexture->display();
+   _render_texture_lighting->clear();
+   _render_texture_lighting->setView(*_level_view);
+   _light_system->draw(*_render_texture_lighting, {});
+   _render_texture_lighting->display();
 
    //   static int32_t light_map_save_counter = 0;
    //   light_map_save_counter++;
@@ -948,7 +948,7 @@ void Level::drawLightMap()
 //-----------------------------------------------------------------------------
 void Level::drawLightAndShadows(sf::RenderTarget& target)
 {
-   target.setView(*mLevelView);
+   target.setView(*_level_view);
    _light_system->draw(target, {});
 }
 
@@ -956,10 +956,10 @@ void Level::drawLightAndShadows(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawParallaxMaps(sf::RenderTarget& target)
 {
-  for (auto i = 0u; i < mParallaxMaps.size(); i++)
+  for (auto i = 0u; i < _parallax_maps.size(); i++)
   {
-     target.setView(*mParallaxView[i]);
-     target.draw(*mParallaxMaps[i]);
+     target.setView(*_parallax_view[i]);
+     target.draw(*_parallax_maps[i]);
   }
 }
 
@@ -975,7 +975,7 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
       // render player to texture
       deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
-      deathRenderTexture->setView(*mLevelView);
+      deathRenderTexture->setView(*_level_view);
       player->draw(*deathRenderTexture, normal);
       deathRenderTexture->display();
 
@@ -987,8 +987,8 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
          sf::FloatRect(
             0.0f,
             0.0f,
-            static_cast<float>(mLevelRenderTexture->getSize().x),
-            static_cast<float>(mLevelRenderTexture->getSize().y)
+            static_cast<float>(_render_texture_level->getSize().x),
+            static_cast<float>(_render_texture_level->getSize().y)
          )
       );
 
@@ -998,7 +998,7 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
       takeScreenshot("screenshot_death_anim", *_death_shader->getRenderTexture());
 
-      color.setView(*mLevelView);
+      color.setView(*_level_view);
    }
    else
    {
@@ -1014,8 +1014,8 @@ void Level::drawLayers(
    int32_t to
 )
 {
-   target.setView(*mLevelView);
-   normal.setView(*mLevelView);
+   target.setView(*_level_view);
+   normal.setView(*_level_view);
 
    for (auto z = from; z <= to; z++)
    {
@@ -1029,7 +1029,7 @@ void Level::drawLayers(
       // TODO: it's not expected that tiles are in different z layers
       //       and then unify them in one big loop
 
-      for (auto& tileMap : mTileMaps)
+      for (auto& tileMap : _tile_maps)
       {
          if (tileMap->getZ() == z)
          {
@@ -1037,19 +1037,19 @@ void Level::drawLayers(
          }
       }
 
-      for (auto& mechanismVector : mMechanisms)
+      for (auto& mechanismVector : _mechanisms)
       {
          for (auto& mechanism : *mechanismVector)
          {
             if (mechanism->getZ() == z)
             {
-               mechanism->draw(target, *mNormalTexture.get());
+               mechanism->draw(target, *_render_texture_normal.get());
             }
          }
       }
 
       // enemies
-      for (auto& enemy : mEnemies)
+      for (auto& enemy : _enemies)
       {
          if (enemy->mZ == z)
          {
@@ -1063,7 +1063,7 @@ void Level::drawLayers(
          mAo.draw(target);
 
          // draw player
-         drawPlayer(target, *mNormalTexture.get());
+         drawPlayer(target, *_render_texture_normal.get());
       }
 
       for (auto& layer : _image_layers)
@@ -1088,24 +1088,24 @@ void Level::drawLayers(
 //-----------------------------------------------------------------------------
 void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 {
-   if (!mAtmosphere.mTileMap)
+   if (!_atmosphere.mTileMap)
    {
       return;
    }
 
-   mAtmosphere.mTileMap->setVisible(true);
+   _atmosphere.mTileMap->setVisible(true);
 
-   target.setView(*mLevelView);
-   target.draw(*mAtmosphere.mTileMap);
+   target.setView(*_level_view);
+   target.draw(*_atmosphere.mTileMap);
 
-   mAtmosphere.mTileMap->setVisible(false);
+   _atmosphere.mTileMap->setVisible(false);
 }
 
 
 //-----------------------------------------------------------------------------
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
-   target.setView(*mLevelView);
+   target.setView(*_level_view);
 
    // draw elements that are supposed to glow / to be blurred here
 
@@ -1133,7 +1133,7 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const
 {
    auto blocks = [this](uint32_t x, uint32_t y) -> bool {
-      return mPhysics.mPhysicsMap[(mPhysics.mGridWidth * y) + x] == 1;
+      return _physics.mPhysicsMap[(_physics.mGridWidth * y) + x] == 1;
    };
 
    return MapTools::lineCollide(a.x, a.y, b.x, b.y, blocks);
@@ -1149,8 +1149,8 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
    }
 
    std::ostringstream ss;
-   ss << basename << "_" << std::setw(2) << std::setfill('0') << mScreenshotCounters[basename] << ".png";
-   mScreenshotCounters[basename]++;
+   ss << basename << "_" << std::setw(2) << std::setfill('0') << _screenshot_counters[basename] << ".png";
+   _screenshot_counters[basename]++;
    texture.getTexture().copyToImage().saveToFile(ss.str());
 }
 
@@ -1160,15 +1160,15 @@ void Level::drawDebugInformation()
 {
    if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
    {
-      drawStaticChains(*mLevelRenderTexture.get());
-      DebugDraw::debugBodies(*mLevelRenderTexture.get(), this);
-      DebugDraw::drawRect(*mLevelRenderTexture.get(), Player::getCurrent()->getPlayerPixelRect());
+      drawStaticChains(*_render_texture_level.get());
+      DebugDraw::debugBodies(*_render_texture_level.get(), this);
+      DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPlayerPixelRect());
 
-      for (const auto& room : mRooms)
+      for (const auto& room : _rooms)
       {
          for (const auto& rect : room->_rects)
          {
-            DebugDraw::drawRect(*mLevelRenderTexture.get(), rect, sf::Color::Yellow);
+            DebugDraw::drawRect(*_render_texture_level.get(), rect, sf::Color::Yellow);
          }
       }
    }
@@ -1183,18 +1183,18 @@ void Level::displayTextures()
       sf::FloatRect(
          0.0f,
          0.0f,
-         static_cast<float>(mLevelRenderTexture->getSize().x),
-         static_cast<float>(mLevelRenderTexture->getSize().y)
+         static_cast<float>(_render_texture_level->getSize().x),
+         static_cast<float>(_render_texture_level->getSize().y)
       )
    );
 
    view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 
-   mLevelRenderTexture->setView(view);
-   mLevelRenderTexture->display();
+   _render_texture_level->setView(view);
+   _render_texture_level->display();
 
-   mNormalTexture->setView(*mLevelView);
-   mNormalTexture->display();
+   _render_texture_normal->setView(*_level_view);
+   _render_texture_normal->display();
 }
 
 
@@ -1285,36 +1285,36 @@ void Level::draw(
    drawGlowLayer();
 
    // render layers affected by the atmosphere
-   mLevelBackgroundRenderTexture->clear();
-   mNormalTexture->clear();
+   _render_texture_level_background->clear();
+   _render_texture_normal->clear();
 
-   drawParallaxMaps(*mLevelBackgroundRenderTexture.get());
+   drawParallaxMaps(*_render_texture_level_background.get());
    drawLayers(
-      *mLevelBackgroundRenderTexture.get(),
-      *mNormalTexture.get(),
+      *_render_texture_level_background.get(),
+      *_render_texture_normal.get(),
       ZDepthBackgroundMin,
       ZDepthBackgroundMax
    );
-   mLevelBackgroundRenderTexture->display();
-   takeScreenshot("screenshot_level_background", *mLevelBackgroundRenderTexture.get());
+   _render_texture_level_background->display();
+   takeScreenshot("screenshot_level_background", *_render_texture_level_background.get());
 
    // draw the atmospheric parts into the level texture
-   sf::Sprite backgroundSprite(mLevelBackgroundRenderTexture->getTexture());
+   sf::Sprite backgroundSprite(_render_texture_level_background->getTexture());
    _atmosphere_shader->update();
-   mLevelRenderTexture->draw(backgroundSprite, &_atmosphere_shader->getShader());
+   _render_texture_level->draw(backgroundSprite, &_atmosphere_shader->getShader());
 
    drawGlowSprite();
 
    // draw the level layers into the level texture
    drawLayers(
-      *mLevelRenderTexture.get(),
-      *mNormalTexture.get(),
+      *_render_texture_level.get(),
+      *_render_texture_normal.get(),
       ZDepthForegroundMin,
       ZDepthForegroundMax
    );
 
-   Weapon::drawProjectileHitAnimations(*mLevelRenderTexture.get());
-   AnimationPlayer::getInstance().draw(*mLevelRenderTexture.get());
+   Weapon::drawProjectileHitAnimations(*_render_texture_level.get());
+   AnimationPlayer::getInstance().draw(*_render_texture_level.get());
 
    drawDebugInformation();
 
@@ -1323,31 +1323,31 @@ void Level::draw(
    drawLightMap();
 
    _light_system->draw(
-      *mDeferredTexture.get(),
-      mLevelRenderTexture,
-      mLightingTexture,
-      mNormalTexture
+      *_render_texture_deferred.get(),
+      _render_texture_level,
+      _render_texture_lighting,
+      _render_texture_normal
    );
 
-   mDeferredTexture->display();
+   _render_texture_deferred->display();
 
-   takeScreenshot("map_color",    *mLevelRenderTexture.get());
-   takeScreenshot("map_light",    *mLightingTexture.get());
-   takeScreenshot("map_normal",   *mNormalTexture.get());
-   takeScreenshot("map_deferred", *mDeferredTexture.get());
+   takeScreenshot("map_color",    *_render_texture_level.get());
+   takeScreenshot("map_light",    *_render_texture_lighting.get());
+   takeScreenshot("map_normal",   *_render_texture_normal.get());
+   takeScreenshot("map_deferred", *_render_texture_deferred.get());
 
-   auto levelTextureSprite = sf::Sprite(mDeferredTexture->getTexture());
-   _gamme_shader->setTexture(mDeferredTexture->getTexture());
+   auto levelTextureSprite = sf::Sprite(_render_texture_deferred->getTexture());
+   _gamme_shader->setTexture(_render_texture_deferred->getTexture());
 
-   levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
-   levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
+   levelTextureSprite.setPosition(_boom_effect.mBoomOffsetX, _boom_effect.mBoomOffsetY);
+   levelTextureSprite.scale(_view_to_texture_scale, _view_to_texture_scale);
 
    _gamme_shader->update();
    window->draw(levelTextureSprite, &_gamme_shader->getGammaShader());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayMap))
    {
-      mMap->draw(*window.get());
+      _map->draw(*window.get());
    }
 }
 
@@ -1385,19 +1385,19 @@ void Level::update(const sf::Time& dt)
    _world->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
 
    CameraPane::getInstance().update();
-   mBoomEffect.update(dt);
+   _boom_effect.update(dt);
 
    Checkpoint::update();
    Dialogue::update();
 
    AnimationPlayer::getInstance().update(dt);
 
-   for (auto& tileMap : mTileMaps)
+   for (auto& tileMap : _tile_maps)
    {
       tileMap->update(dt);
    }
 
-   for (auto mechanismVector : mMechanisms)
+   for (auto mechanismVector : _mechanisms)
    {
       for (auto& mechanism : *mechanismVector)
       {
@@ -1497,7 +1497,7 @@ void Level::addDebugOutlines(
    }
 
    visiblePath.push_back(visiblePath.at(0));
-   mAtmosphere.mOutlines.push_back(visiblePath);
+   _atmosphere.mOutlines.push_back(visiblePath);
 }
 
 
@@ -1649,14 +1649,14 @@ void Level::parsePhysicsTiles(
 
    std::cout << "[x] loading: " << pathSolidOptimized.make_preferred().generic_string() << std::endl;
 
-   mPhysics.parse(layer, tileset, base_path);
+   _physics.parse(layer, tileset, base_path);
 
    // this whole block should be generated by an external tool
    // right now the squaremarcher output is still used for the in-game map visualization
    SquareMarcher square_marcher(
-      mPhysics.mGridWidth,
-      mPhysics.mGridHeight,
-      mPhysics.mPhysicsMap,
+      _physics.mGridWidth,
+      _physics.mGridHeight,
+      _physics.mPhysicsMap,
       pd->colliding_tiles,
       base_path / std::filesystem::path(pd->filename_physics_path_csv),
       scale
@@ -1674,7 +1674,7 @@ void Level::parsePhysicsTiles(
       const auto pathSolidNotOptimised = base_path / std::filesystem::path(pd->filename_obj_not_optimized);
 
       // dump the tileset into an obj file, optimise that and load it
-      if (mPhysics.dumpObj(layer, tileset, pathSolidNotOptimised))
+      if (_physics.dumpObj(layer, tileset, pathSolidNotOptimised))
       {
 #ifdef __linux__
           auto cmd = std::string("tools/path_merge/path_merge") + " "
@@ -1740,7 +1740,7 @@ void Level::parsePhysicsTiles(
 //-----------------------------------------------------------------------------
 const sf::Vector2f &Level::getStartPosition() const
 {
-   return mStartPosition;
+   return _start_position;
 }
 
 
@@ -1795,7 +1795,7 @@ std::shared_ptr<Portal> Level::getNearbyPortal()
 {
    std::shared_ptr<Portal> nearbyPortal;
 
-   for (auto& p : mPortals)
+   for (auto& p : _mechanism_portals)
    {
       auto portal = std::dynamic_pointer_cast<Portal>(p);
       if (portal->isPlayerAtPortal())
@@ -1814,7 +1814,7 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 {
    std::shared_ptr<Bouncer> nearbyBouncer;
 
-   for (auto& tmp : mBouncers)
+   for (auto& tmp : _mechanism_bouncers)
    {
       auto bouncer = std::dynamic_pointer_cast<Bouncer>(tmp);
       if (bouncer->isPlayerAtBouncer())
@@ -1831,12 +1831,12 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 //-----------------------------------------------------------------------------
 void Level::toggleMechanisms()
 {
-   for (auto& door : mDoors)
+   for (auto& door : _mechanism_doors)
    {
       std::dynamic_pointer_cast<Door>(door)->toggle();
    }
 
-   for (auto& lever : mLevers)
+   for (auto& lever : _mechanism_levers)
    {
       std::dynamic_pointer_cast<Lever>(lever)->toggle();
    }

@@ -165,65 +165,64 @@ protected:
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
    void updatePlayerLight();
 
-   std::vector<std::shared_ptr<Room>> mRooms;
-   std::shared_ptr<Room> mCurrentRoom;
-   std::shared_ptr<Room> mPreviousRoom;
+   std::vector<std::shared_ptr<Room>> _rooms;
+   std::shared_ptr<Room> _room_current;
+   std::shared_ptr<Room> _room_previous;
 
-   std::shared_ptr<sf::RenderTexture> mLevelRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mLevelBackgroundRenderTexture;
-   std::shared_ptr<sf::RenderTexture> mLightingTexture;
-   std::shared_ptr<sf::RenderTexture> mNormalTexture;
-   std::shared_ptr<sf::RenderTexture> mDeferredTexture;
-   std::vector<std::shared_ptr<sf::RenderTexture>> mRenderTextures;
+   std::shared_ptr<sf::RenderTexture> _render_texture_level;
+   std::shared_ptr<sf::RenderTexture> _render_texture_level_background;
+   std::shared_ptr<sf::RenderTexture> _render_texture_lighting;
+   std::shared_ptr<sf::RenderTexture> _render_texture_normal;
+   std::shared_ptr<sf::RenderTexture> _render_texture_deferred;
+   std::vector<std::shared_ptr<sf::RenderTexture>> _render_textures;
 
-   float mViewToTextureScale = 1.0f;
-   std::shared_ptr<sf::View> mLevelView;
-   std::shared_ptr<sf::View> mParallaxView[3];
+   float _view_to_texture_scale = 1.0f;
+   std::shared_ptr<sf::View> _level_view;
+   std::shared_ptr<sf::View> _parallax_view[3];
 
-   std::map<std::string, int32_t> mScreenshotCounters;
-   float mParallaxFactors[3] = {0.9f, 0.85f, 0.8f};
-   float mViewWidth = 0.0f;
-   float mViewHeight = 0.0f;
+   std::map<std::string, int32_t> _screenshot_counters;
+   float _parallax_factors[3] = {0.9f, 0.85f, 0.8f};
+   float _view_width = 0.0f;
+   float _view_height = 0.0f;
 
-   std::shared_ptr<LevelDescription> mDescription;
+   std::shared_ptr<LevelDescription> _description;
+   std::string _description_filename;
 
-   std::vector<std::shared_ptr<TileMap>> mTileMaps;
-   std::vector<std::shared_ptr<TileMap>> mParallaxMaps;
+   std::vector<std::shared_ptr<TileMap>> _tile_maps;
+   std::vector<std::shared_ptr<TileMap>> _parallax_maps;
 
-   std::vector<std::shared_ptr<LuaNode>> mEnemies;
-   std::map<std::string, Enemy> mEnemyDataFromTmxLayer;
+   std::vector<std::shared_ptr<LuaNode>> _enemies;
+   std::map<std::string, Enemy> _enemy_data_from_tmx_layer;
 
-   Atmosphere mAtmosphere;
-   Physics mPhysics;
+   Atmosphere _atmosphere;
+   Physics _physics;
 
-   sf::Vector2f mStartPosition;
+   sf::Vector2f _start_position;
 
-   std::unique_ptr<TmxParser> mTmxParser;
-   std::vector<TmxElement*> mTmxElements;
+   std::unique_ptr<TmxParser> _tmx_parser;
+   std::vector<TmxElement*> _tmx_elements;
 
-   std::string mDescriptionFilename;
-
-   std::unique_ptr<LevelMap> mMap;
+   std::unique_ptr<LevelMap> _map;
 
    // mechanisms
-   std::vector<std::vector<std::shared_ptr<GameMechanism>>*> mMechanisms;
-   std::vector<std::shared_ptr<GameMechanism>> mBouncers;
-   std::vector<std::shared_ptr<GameMechanism>> mConveyorBelts;
-   std::vector<std::shared_ptr<GameMechanism>> mCrushers;
-   std::vector<std::shared_ptr<GameMechanism>> mDeathBlocks;
-   std::vector<std::shared_ptr<GameMechanism>> mDoors;
-   std::vector<std::shared_ptr<GameMechanism>> mFans;
-   std::vector<std::shared_ptr<GameMechanism>> mLasers;
-   std::vector<std::shared_ptr<GameMechanism>> mLevers;
-   std::vector<std::shared_ptr<GameMechanism>> mPlatforms;
-   std::vector<std::shared_ptr<GameMechanism>> mPortals;
-   std::vector<std::shared_ptr<GameMechanism>> mRopes;
-   std::vector<std::shared_ptr<GameMechanism>> mSpikeBalls;
-   std::vector<std::shared_ptr<GameMechanism>> mSpikes;
-   std::vector<std::shared_ptr<GameMechanism>> mMoveableBoxes;
+   std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_conveyor_belts;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_crushers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_death_blocks;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_platforms;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_portals;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
 
    // graphic effects
-   BoomEffect mBoomEffect;
+   BoomEffect _boom_effect;
    std::shared_ptr<LightSystem> _light_system;
    std::shared_ptr<StaticLight> _static_light;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
