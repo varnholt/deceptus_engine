@@ -79,7 +79,7 @@
 // - the tilemaps are unsorted, sort them by z once after deserializing a level
 
 
-Level* Level::sCurrentLevel = nullptr;
+Level* Level::__current_level = nullptr;
 
 
 //-----------------------------------------------------------------------------
@@ -114,10 +114,10 @@ void Level::initializeTextures()
 
    mLevelBackgroundRenderTexture.reset();
 
-   mAtmosphereShader.reset();
-   mGammaShader.reset();
-   mBlurShader.reset();
-   mDeathShader.reset();
+   _atmosphere_shader.reset();
+   _gamme_shader.reset();
+   _blur_shader.reset();
+   _death_shader.reset();
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
@@ -161,10 +161,10 @@ void Level::initializeTextures()
       static_cast<uint32_t>(textureHeight)
    );
 
-   mAtmosphereShader = std::make_unique<AtmosphereShader>(textureWidth, textureHeight);
-   mGammaShader = std::make_unique<GammaShader>();
-   mBlurShader = std::make_unique<BlurShader>(textureWidth, textureHeight);
-   mDeathShader = std::make_unique<DeathShader>(textureWidth, textureHeight);
+   _atmosphere_shader = std::make_unique<AtmosphereShader>(textureWidth, textureHeight);
+   _gamme_shader = std::make_unique<GammaShader>();
+   _blur_shader = std::make_unique<BlurShader>(textureWidth, textureHeight);
+   _death_shader = std::make_unique<DeathShader>(textureWidth, textureHeight);
 
    // keep track of those textures
    mRenderTextures.clear();
@@ -179,10 +179,10 @@ void Level::initializeTextures()
       std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
    }
 
-   mAtmosphereShader->initialize();
-   mGammaShader->initialize();
-   mBlurShader->initialize();
-   mDeathShader->initialize();
+   _atmosphere_shader->initialize();
+   _gamme_shader->initialize();
+   _blur_shader->initialize();
+   _death_shader->initialize();
 }
 
 
@@ -200,20 +200,20 @@ Level::Level()
    // clear those here so the world destructor doesn't double-delete them
    Projectile::clear();
 
-   mWorld = std::make_shared<b2World>(gravity);
+   _world = std::make_shared<b2World>(gravity);
 
    GameContactListener::getInstance()->reset();
-   mWorld->SetContactListener(GameContactListener::getInstance());
+   _world->SetContactListener(GameContactListener::getInstance());
 
-   sCurrentLevel = this;
+   __current_level = this;
 
-   mLightSystem = std::make_shared<LightSystem>();
-   mStaticLight = std::make_shared<StaticLight>();
+   _light_system = std::make_shared<LightSystem>();
+   _static_light = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   mPlayerLight = LightSystem::createLightInstance();
-   mPlayerLight->_color = sf::Color(255, 255, 255, 10);
-   mLightSystem->_lights.push_back(mPlayerLight);
+   _player_light = LightSystem::createLightInstance();
+   _player_light->_color = sf::Color(255, 255, 255, 10);
+   _light_system->_lights.push_back(_player_light);
 
    mMap = std::make_unique<LevelMap>();
 
@@ -248,7 +248,7 @@ Level::~Level()
    }
 
    // properly delete point map
-   for (auto& kv : mPointMap)
+   for (auto& kv : _point_map)
    {
       delete kv.second;
    }
@@ -330,33 +330,33 @@ void Level::loadTmx()
 
          if (layer->_name.rfind("doors", 0) == 0)
          {
-            mDoors = Door::load(layer, tileset, path, mWorld);
+            mDoors = Door::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "fans")
          {
-            Fan::load(layer, tileset, mWorld);
+            Fan::load(layer, tileset, _world);
          }
          else if (layer->_name == "lasers")
          {
-            const auto lasers = Laser::load(layer, tileset, path, mWorld);
+            const auto lasers = Laser::load(layer, tileset, path, _world);
             mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->_name == "lasers_2") // support for dstar's new laser tileset
          {
-            const auto lasers = Laser::load(layer, tileset, path, mWorld);
+            const auto lasers = Laser::load(layer, tileset, path, _world);
             mLasers.insert(mLasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->_name == "levers")
          {
-            mLevers = Lever::load(layer, tileset, path, mWorld);
+            mLevers = Lever::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "platforms")
          {
-            mPlatforms = MovingPlatform::load(layer, tileset, path, mWorld);
+            mPlatforms = MovingPlatform::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "portals")
          {
-            mPortals = Portal::load(layer, tileset, path, mWorld);
+            mPortals = Portal::load(layer, tileset, path, _world);
          }
          else if (layer->_name == "toggle_spikes")
          {
@@ -449,36 +449,36 @@ void Level::loadTmx()
             else if (objectGroup->_name == "ropes")
             {
                auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
-               rope->setup(tmxObject, mWorld);
+               rope->setup(tmxObject, _world);
                mRopes.push_back(rope);
             }
             else if (objectGroup->_name == "ropes_with_light")
             {
                auto rope = std::make_shared<RopeWithLight>(dynamic_cast<GameNode*>(this));
-               rope->setup(tmxObject, mWorld);
+               rope->setup(tmxObject, _world);
                mRopes.push_back(rope);
             }
             else if (objectGroup->_name == "smoke")
             {
                auto smoke = SmokeEffect::deserialize(tmxObject, objectGroup);
-               mSmokeEffect.push_back(smoke);
+               _smoke_effect.push_back(smoke);
             }
             else if (objectGroup->_name == "spike_balls")
             {
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
-               spikeBall->setup(tmxObject, mWorld);
+               spikeBall->setup(tmxObject, _world);
                mSpikeBalls.push_back(spikeBall);
             }
             else if (objectGroup->_name == "moveable_objects")
             {
                auto box = std::make_shared<MoveableBox>(dynamic_cast<GameNode*>(this));
-               box->setup(tmxObject, mWorld);
+               box->setup(tmxObject, _world);
                mMoveableBoxes.push_back(box);
             }
             else if (objectGroup->_name == "death_blocks")
             {
                auto deathBlock = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
-               deathBlock->setup(tmxObject, mWorld);
+               deathBlock->setup(tmxObject, _world);
                mDeathBlocks.push_back(deathBlock);
             }
             else if (objectGroup->_name == "checkpoints")
@@ -500,7 +500,7 @@ void Level::loadTmx()
             {
                auto bouncer = std::make_shared<Bouncer>(
                   dynamic_cast<GameNode*>(this),
-                  mWorld,
+                  _world,
                   tmxObject->_x_px,
                   tmxObject->_y_px,
                   tmxObject->_width_px,
@@ -523,7 +523,7 @@ void Level::loadTmx()
             {
                auto belt = std::make_shared<ConveyorBelt>(
                   dynamic_cast<GameNode*>(this),
-                  mWorld,
+                  _world,
                   tmxObject,
                   path
                );
@@ -541,7 +541,7 @@ void Level::loadTmx()
             else if (objectGroup->_name == "crushers")
             {
                auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
-               crusher->setup(tmxObject, mWorld);
+               crusher->setup(tmxObject, _world);
                mCrushers.push_back(crusher);
             }
             else if (objectGroup->_name == "rooms")
@@ -572,17 +572,17 @@ void Level::loadTmx()
             else if (objectGroup->_name.rfind("shader_quads", 0) == 0)
             {
                auto quad = ShaderLayer::deserialize(tmxObject);
-               mShaderLayers.push_back(quad);
+               _shader_layers.push_back(quad);
             }
             else if (objectGroup->_name == "lights")
             {
                auto light = LightSystem::createLightInstance(tmxObject);
-               mLightSystem->_lights.push_back(light);
+               _light_system->_lights.push_back(light);
             }
             else if (objectGroup->_name.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
                auto light = StaticLight::deserialize(tmxObject, objectGroup);
-               mStaticLight->mLights.push_back(light);
+               _static_light->mLights.push_back(light);
             }
             if (objectGroup->_name == "switchable_objects")
             {
@@ -594,7 +594,7 @@ void Level::loadTmx()
       else if (element->_type == TmxElement::TypeImageLayer)
       {
          auto image = ImageLayer::deserialize(element, path);
-         mImageLayers.push_back(image);
+         _image_layers.push_back(image);
       }
    }
 
@@ -641,9 +641,9 @@ void Level::load()
 
    // load static lights
    std::cout << "[x] loading static lights..." << std::endl;
-   if (!mStaticLight->mLights.empty())
+   if (!_static_light->mLights.empty())
    {
-      mStaticLight->load();
+      _static_light->load();
    }
 
    // loading ao
@@ -705,7 +705,7 @@ void Level::reset()
 //-----------------------------------------------------------------------------
 void Level::resetDeathShader()
 {
-   mDeathShader->reset();
+   _death_shader->reset();
 }
 
 
@@ -731,7 +731,7 @@ void Level::spawnEnemies()
 
          if (jsonDescription.mGeneratePatrolPath)
          {
-            it->second.addPaths(mWorldChains);
+            it->second.addPaths(_world_chains);
          }
 
          if (!it->second.mPixelPath.empty())
@@ -770,7 +770,7 @@ void Level::spawnEnemies()
 
          if (jsonDescription.mGeneratePatrolPath)
          {
-            it.second.addPaths(mWorldChains);
+            it.second.addPaths(_world_chains);
          }
 
          if (!it.second.mPixelPath.empty())
@@ -933,7 +933,7 @@ void Level::drawLightMap()
 {
    mLightingTexture->clear();
    mLightingTexture->setView(*mLevelView);
-   mLightSystem->draw(*mLightingTexture, {});
+   _light_system->draw(*mLightingTexture, {});
    mLightingTexture->display();
 
    //   static int32_t light_map_save_counter = 0;
@@ -949,7 +949,7 @@ void Level::drawLightMap()
 void Level::drawLightAndShadows(sf::RenderTarget& target)
 {
    target.setView(*mLevelView);
-   mLightSystem->draw(target, {});
+   _light_system->draw(target, {});
 }
 
 
@@ -971,7 +971,7 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    if (player->isDead())
    {
-      auto deathRenderTexture = mDeathShader->getRenderTexture();
+      auto deathRenderTexture = _death_shader->getRenderTexture();
 
       // render player to texture
       deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
@@ -994,9 +994,9 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
       view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
       color.setView(view);
-      color.draw(deathShaderSprite, &mDeathShader->getShader());
+      color.draw(deathShaderSprite, &_death_shader->getShader());
 
-      takeScreenshot("screenshot_death_anim", *mDeathShader->getRenderTexture());
+      takeScreenshot("screenshot_death_anim", *_death_shader->getRenderTexture());
 
       color.setView(*mLevelView);
    }
@@ -1019,9 +1019,9 @@ void Level::drawLayers(
 
    for (auto z = from; z <= to; z++)
    {
-      mStaticLight->drawToZ(target, {}, z);
+      _static_light->drawToZ(target, {}, z);
 
-      for (const auto& smoke : mSmokeEffect)
+      for (const auto& smoke : _smoke_effect)
       {
          smoke->drawToZ(target, {}, z);
       }
@@ -1066,7 +1066,7 @@ void Level::drawLayers(
          drawPlayer(target, *mNormalTexture.get());
       }
 
-      for (auto& layer : mImageLayers)
+      for (auto& layer : _image_layers)
       {
          if (layer->mZ == z)
          {
@@ -1074,7 +1074,7 @@ void Level::drawLayers(
          }
       }
 
-      for (auto& layer : mShaderLayers)
+      for (auto& layer : _shader_layers)
       {
          if (layer->_z == z)
          {
@@ -1143,7 +1143,7 @@ bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) con
 //----------------------------------------------------------------------------------------------------------------------
 void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& texture)
 {
-   if (!mScreenshot)
+   if (!_screenshot)
    {
       return;
    }
@@ -1273,13 +1273,13 @@ void Level::draw(
    bool screenshot
 )
 {
-   mScreenshot = screenshot;
+   _screenshot = screenshot;
 
    // render atmosphere to atmosphere texture, that texture is used in the shader only
-   mAtmosphereShader->getRenderTexture()->clear();
-   drawAtmosphereLayer(*mAtmosphereShader->getRenderTexture().get());
-   mAtmosphereShader->getRenderTexture()->display();
-   takeScreenshot("screenshot_atmosphere", *mAtmosphereShader->getRenderTexture().get());
+   _atmosphere_shader->getRenderTexture()->clear();
+   drawAtmosphereLayer(*_atmosphere_shader->getRenderTexture().get());
+   _atmosphere_shader->getRenderTexture()->display();
+   takeScreenshot("screenshot_atmosphere", *_atmosphere_shader->getRenderTexture().get());
 
    // render glowing elements
    drawGlowLayer();
@@ -1300,8 +1300,8 @@ void Level::draw(
 
    // draw the atmospheric parts into the level texture
    sf::Sprite backgroundSprite(mLevelBackgroundRenderTexture->getTexture());
-   mAtmosphereShader->update();
-   mLevelRenderTexture->draw(backgroundSprite, &mAtmosphereShader->getShader());
+   _atmosphere_shader->update();
+   mLevelRenderTexture->draw(backgroundSprite, &_atmosphere_shader->getShader());
 
    drawGlowSprite();
 
@@ -1322,7 +1322,7 @@ void Level::draw(
 
    drawLightMap();
 
-   mLightSystem->draw(
+   _light_system->draw(
       *mDeferredTexture.get(),
       mLevelRenderTexture,
       mLightingTexture,
@@ -1337,13 +1337,13 @@ void Level::draw(
    takeScreenshot("map_deferred", *mDeferredTexture.get());
 
    auto levelTextureSprite = sf::Sprite(mDeferredTexture->getTexture());
-   mGammaShader->setTexture(mDeferredTexture->getTexture());
+   _gamme_shader->setTexture(mDeferredTexture->getTexture());
 
    levelTextureSprite.setPosition(mBoomEffect.mBoomOffsetX, mBoomEffect.mBoomOffsetY);
    levelTextureSprite.scale(mViewToTextureScale, mViewToTextureScale);
 
-   mGammaShader->update();
-   window->draw(levelTextureSprite, &mGammaShader->getGammaShader());
+   _gamme_shader->update();
+   window->draw(levelTextureSprite, &_gamme_shader->getGammaShader());
 
    if (DisplayMode::getInstance().isSet(Display::DisplayMap))
    {
@@ -1355,19 +1355,19 @@ void Level::draw(
 //-----------------------------------------------------------------------------
 void Level::updatePlayerLight()
 {
-   mPlayerLight->_pos_m = Player::getCurrent()->getBody()->GetPosition();
-   mPlayerLight->updateSpritePosition();
+   _player_light->_pos_m = Player::getCurrent()->getBody()->GetPosition();
+   _player_light->updateSpritePosition();
 
    // the player, once he dies, becomes inactive and just sinks down
    // so the player light is disabled to avoid any glitches
-   mPlayerLight->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10);
+   _player_light->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead()? 0 : 10);
 }
 
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<LightSystem> Level::getLightSystem() const
 {
-   return mLightSystem;
+   return _light_system;
 }
 
 
@@ -1382,7 +1382,7 @@ void Level::update(const sf::Time& dt)
 
    // 80.0f * dt / 60.f
    // http://www.iforce2d.net/b2dtut/worlds
-   mWorld->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
+   _world->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
 
    CameraPane::getInstance().update();
    mBoomEffect.update(dt);
@@ -1409,21 +1409,21 @@ void Level::update(const sf::Time& dt)
 
    updatePlayerLight();
 
-   mStaticLight->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+   _static_light->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
 
-   for (const auto& smoke : mSmokeEffect)
+   for (const auto& smoke : _smoke_effect)
    {
       smoke->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
    }
 
-   mDeathShader->update(dt);
+   _death_shader->update(dt);
 }
 
 
 //-----------------------------------------------------------------------------
 const std::shared_ptr<b2World>& Level::getWorld() const
 {
-   return mWorld;
+   return _world;
 }
 
 
@@ -1435,7 +1435,7 @@ void Level::addChainToWorld(
 {
    // it's easier to store all the physics chains in a separate data structure
    // than to parse the box2d world every time we want those loops.
-   mWorldChains.push_back(chain);
+   _world_chains.push_back(chain);
 
    b2ChainShape chainShape;
    chainShape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
@@ -1449,7 +1449,7 @@ void Level::addChainToWorld(
    bodyDef.position.Set(0, 0);
    bodyDef.type = b2_staticBody;
 
-   b2Body* body = mWorld->CreateBody(&bodyDef);
+   b2Body* body = _world->CreateBody(&bodyDef);
 
    auto fixture = body->CreateFixture(&fixtureDef);
 
@@ -1747,7 +1747,7 @@ const sf::Vector2f &Level::getStartPosition() const
 //-----------------------------------------------------------------------------
 Level* Level::getCurrentLevel()
 {
-   return sCurrentLevel;
+   return __current_level;
 }
 
 
@@ -1761,8 +1761,8 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
    points[2] = b2Vec2(x * MPP + w * MPP, y * MPP + h * MPP);
    points[3] = b2Vec2(x * MPP,           y * MPP + h * MPP);
 
-   mPointMap[body] = points;
-   mPointCountMap[body] = 4;
+   _point_map[body] = points;
+   _point_count_map[body] = 4;
 }
 
 
@@ -1846,14 +1846,14 @@ void Level::toggleMechanisms()
 //-----------------------------------------------------------------------------
 std::map<b2Body*, size_t>* Level::getPointSizeMap()
 {
-   return &mPointCountMap;
+   return &_point_count_map;
 }
 
 
 //-----------------------------------------------------------------------------
 std::map<b2Body *, b2Vec2 *>* Level::getPointMap()
 {
-   return &mPointMap;
+   return &_point_map;
 }
 
 
