@@ -55,6 +55,33 @@ class Player : public GameNode
       float deceleration = 0.0f;
    };
 
+   struct PlayerDash
+   {
+      int32_t _dash_frame_count = 0;
+      float _dash_multiplier = 0.0f;
+      Dash _dash_dir = Dash::None;
+
+      bool isDashActive() const
+      {
+         return (_dash_frame_count > 0);
+      }
+   };
+
+   struct PlayerBend
+   {
+      bool _bending_down = false;
+      bool _was_bending_down = false;
+      bool _crouching = false;
+      bool _was_crouching = false;
+      HighResTimePoint _timepoint_bend_down_start;
+      HighResTimePoint _timepoint_bend_down_end;
+
+      bool isCrouching() const
+      {
+         return _bending_down;
+      }
+   };
+
 
 public:
 
@@ -117,17 +144,16 @@ public:
    bool isOnPlatform() const;
    bool isOnGround() const;
    bool isDead() const;
-   bool isCrouching() const;
 
    void setInWater(bool inWater);
 
-   int getZ() const;
-   void setZ(int z);
+   int getZIndex() const;
+   void setZIndex(int32_t z);
 
    int getId() const;
 
    void impulse(float intensity);
-   void damage(int damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
+   void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
 
    std::shared_ptr<ExtraManager> getExtraManager() const;
 
@@ -159,7 +185,6 @@ private:
    void updateWeapons(const sf::Time& dt);
    void updateImpulse();
 
-   bool isDashActive() const;
    void resetDash();
 
    void createBody();
@@ -178,76 +203,58 @@ private:
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
 
+   std::shared_ptr<WeaponSystem> _weapon_system;
+   std::shared_ptr<ExtraManager> _extra_manager;
 
-   std::shared_ptr<WeaponSystem> mWeaponSystem;
-   std::shared_ptr<ExtraManager> mExtraManager;
+   // all related to player physics and box2d
+   std::shared_ptr<b2World> _world;
+   b2Body* _body = nullptr;
+   static constexpr int32_t __foot_count = 4u;
+   b2Fixture* _body_fixture = nullptr;
+   b2Fixture* _foot_fixture[__foot_count];
+   b2Body* _platform_body = nullptr;
+   b2Body* _ground_body = nullptr;
+   b2Vec2 _ground_normal;
+   b2Vec2 _position_previous;
+   b2Vec2 _velocity_previous;
+   float _impulse = 0.0f;
 
-   std::shared_ptr<b2World> mWorld;
-   b2Body* mBody = nullptr;
+   sf::Vector2f _pixel_position_f;
+   sf::Vector2i _pixel_position_i;
+   sf::IntRect _pixel_rect;
 
-   static constexpr int32_t sFootCount = 4u;
-   b2Fixture* mBodyFixture = nullptr;
-   b2Fixture* mFootFixtures[sFootCount];
+   sf::Time _time;
+   sf::Clock _clock;
+   sf::Clock _portal_clock;
+   sf::Clock _damage_clock;
+   bool _damage_initialized = false;
 
-   sf::Vector2f mPixelPositionf;
-   sf::Vector2i mPixelPositioni;
-   sf::Sprite mSprite;
-   sf::Vector2u mSpritePrev;
-   sf::Vector2u mSpriteAnim;
-   sf::IntRect mPlayerPixelRect;
+   bool _points_to_left = false;
+   bool _visible = true;
+   bool _in_water = false;
+   bool _dead = false;
 
-   sf::Time mTime;
-   sf::Clock mClock;
-   sf::Clock mPortalClock;
-   sf::Clock mDamageClock;
-   bool mDamageInitialized = false;
+   float _next_footstep_time = 0.0f;
 
-   int mAnimSpeed = 50;
+   int _z_index = 0;
+   int _id = 0;
 
-   bool mPointsToLeft = false;
-   bool mVisible = true;
-   bool mInWater = false;
-   bool mDead = false;
+   bool _hard_landing = false;
+   int32_t _hard_landing_cycles = 0;
 
-   // move bend down / crouch code to separate class or struct?
-   bool _bending_down = false;
-   bool _was_bending_down = false;
-   bool _crouching = false;
-   bool _was_crouching = false;
-   HighResTimePoint _timepoint_bend_down_start;
-   HighResTimePoint _timepoint_bend_down_end;
+   float _belt_velocity = 0.0f;
+   bool _is_on_belt = false;
 
-   b2Vec2 mPositionPrevious;
-   b2Vec2 mVelocityPrevious;
-   b2Body* mPlatformBody = nullptr;
-   b2Body* mGroundBody = nullptr;
-   b2Vec2 mGroundNormal;
-   float mNextFootStepTime = 0.0f;
-
-   int mZ = 0;
-   int mId = 0;
-
-   bool mHardLanding = false;
-   int32_t mHardLandingCycles = 0;
-
-   float mBeltVelocity = 0.0f;
-   bool mIsOnBelt = false;
-
-   float mImpulse = 0.0f;
-
-   int32_t mDashFrameCount = 0;
-   float mDashMultiplier = 0.0f;
-   Dash mDashDir = Dash::None;
+   PlayerControls _controls;
+   PlayerBend _bend;
+   PlayerClimb _climb;
+   PlayerJump _jump;
+   PlayerDash _dash;
+   JumpTrace _jump_trace;
 
    PlayerAnimation _player_animation;
+   std::deque<PositionedAnimation> _last_animations;
 
-   PlayerControls mControls;
-   PlayerClimb mClimb;
-   PlayerJump mJump;
-   JumpTrace mJumpTrace;
-
-   std::deque<PositionedAnimation> mLastAnimations;
-
-   static Player* sCurrent;
+   static Player* __current;
 };
 
