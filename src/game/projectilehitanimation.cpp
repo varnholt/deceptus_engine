@@ -7,8 +7,8 @@
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::_active_animations;
-std::map<std::string, AnimationFrameData> ProjectileHitAnimation::_reference_animations;
+std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::__active_animations;
+std::map<std::string, AnimationFrameData> ProjectileHitAnimation::__reference_animations;
 
 
 namespace
@@ -42,7 +42,7 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
 
    anim->play();
 
-   _active_animations.push_back(anim);
+   __active_animations.push_back(anim);
 }
 
 
@@ -50,7 +50,7 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
 void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
 {
    std::vector<ProjectileHitAnimation*>::iterator it;
-   for (it = _active_animations.begin(); it != _active_animations.end();)
+   for (it = __active_animations.begin(); it != __active_animations.end();)
    {
       auto animation = (*it);
 
@@ -59,7 +59,7 @@ void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
       {
          // std::cout << "removing animation after " << animation->mElapsed.asMilliseconds() << "ms" << std::endl;
          delete animation;
-         it = _active_animations.erase(it);
+         it = __active_animations.erase(it);
       }
       else
       {
@@ -73,7 +73,7 @@ void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 std::vector<ProjectileHitAnimation*>& ProjectileHitAnimation::getHitAnimations()
 {
-   return _active_animations;
+   return __active_animations;
 }
 
 
@@ -83,7 +83,7 @@ void ProjectileHitAnimation::addReferenceAnimation(
    const AnimationFrameData& animation
 )
 {
-   _reference_animations.emplace(id, animation);
+   __reference_animations.emplace(id, animation);
 }
 
 
@@ -147,7 +147,7 @@ AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
 //----------------------------------------------------------------------------------------------------------------------
 std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation::getReferenceAnimation(const std::string& id)
 {
-   return _reference_animations.find(id);
+   return __reference_animations.find(id);
 }
 
 
@@ -155,10 +155,10 @@ std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation
 void ProjectileHitAnimation::setupDefaultAnimation()
 {
    // have a default animation in case there are none yet
-   const auto it = _reference_animations.find("default");
-   if (it == _reference_animations.end())
+   const auto it = __reference_animations.find("default");
+   if (it == __reference_animations.end())
    {
-      _reference_animations.emplace("default", getDefaultAnimation());
+      __reference_animations.emplace("default", getDefaultAnimation());
    }
 }
 

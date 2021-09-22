@@ -46,16 +46,16 @@ void MenuScreenPause::loadingFinished()
 
 void MenuScreenPause::up()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Resume:
-         mSelection = Selection::Quit;
+         _selection = Selection::Quit;
          break;
       case Selection::Options:
-         mSelection = Selection::Resume;
+         _selection = Selection::Resume;
          break;
       case Selection::Quit:
-         mSelection = Selection::Options;
+         _selection = Selection::Options;
          break;
    }
 
@@ -65,16 +65,16 @@ void MenuScreenPause::up()
 
 void MenuScreenPause::down()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Resume:
-         mSelection = Selection::Options;
+         _selection = Selection::Options;
          break;
       case Selection::Options:
-         mSelection = Selection::Quit;
+         _selection = Selection::Quit;
          break;
       case Selection::Quit:
-         mSelection = Selection::Resume;
+         _selection = Selection::Resume;
          break;
    }
 
@@ -91,7 +91,7 @@ void MenuScreenPause::resume()
 
 void MenuScreenPause::select()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Resume:
          resume();
@@ -118,28 +118,28 @@ void MenuScreenPause::select()
 void MenuScreenPause::showEvent()
 {
    // initial selection after coming from pause state should always be 'resume'
-   mSelection = Selection::Resume;
+   _selection = Selection::Resume;
    updateLayers();
 }
 
 
 void MenuScreenPause::updateLayers()
 {
-   mLayers["resume_0"]->_visible = (mSelection != Selection::Resume);
-   mLayers["resume_1"]->_visible = (mSelection == Selection::Resume);
-   mLayers["options_0"]->_visible = (mSelection != Selection::Options);
-   mLayers["options_1"]->_visible = (mSelection == Selection::Options);
-   mLayers["quit_game_0"]->_visible = (mSelection != Selection::Quit);
-   mLayers["quit_game_1"]->_visible = (mSelection == Selection::Quit);
+   _layers["resume_0"]->_visible = (_selection != Selection::Resume);
+   _layers["resume_1"]->_visible = (_selection == Selection::Resume);
+   _layers["options_0"]->_visible = (_selection != Selection::Options);
+   _layers["options_1"]->_visible = (_selection == Selection::Options);
+   _layers["quit_game_0"]->_visible = (_selection != Selection::Quit);
+   _layers["quit_game_1"]->_visible = (_selection == Selection::Quit);
 
-   mLayers["back_xbox_0"]->_visible = isControllerUsed();
-   mLayers["back_xbox_1"]->_visible = false;
-   mLayers["accept_xbox_0"]->_visible = isControllerUsed();
-   mLayers["accept_xbox_1"]->_visible = false;
+   _layers["back_xbox_0"]->_visible = isControllerUsed();
+   _layers["back_xbox_1"]->_visible = false;
+   _layers["accept_xbox_0"]->_visible = isControllerUsed();
+   _layers["accept_xbox_1"]->_visible = false;
 
-   mLayers["back_pc_0"]->_visible = !isControllerUsed();
-   mLayers["back_pc_1"]->_visible = false;
-   mLayers["accept_pc_0"]->_visible = !isControllerUsed();
-   mLayers["accept_pc_1"]->_visible = false;
+   _layers["back_pc_0"]->_visible = !isControllerUsed();
+   _layers["back_pc_1"]->_visible = false;
+   _layers["accept_pc_0"]->_visible = !isControllerUsed();
+   _layers["accept_pc_1"]->_visible = false;
 }
 

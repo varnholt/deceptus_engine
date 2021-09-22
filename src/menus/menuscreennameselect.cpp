@@ -18,16 +18,16 @@ namespace {
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-   mFont.loadFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
+   _font.loadFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
-   mText.setFont(mFont);
-   mText.setCharacterSize(12);
-   mText.setFillColor(sf::Color{232, 219, 243});
+   _text.setFont(_font);
+   _text.setCharacterSize(12);
+   _text.setFillColor(sf::Color{232, 219, 243});
 
    setFilename("data/menus/nameselect.psd");
 
-   mChars = {
+   _chars = {
       'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
       'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
       'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -39,37 +39,37 @@ MenuScreenNameSelect::MenuScreenNameSelect()
 
 void MenuScreenNameSelect::up()
 {
-   mCharOffset.y--;
-   mCharOffset.y = std::max(mCharOffset.y, 0);
+   _char_offset.y--;
+   _char_offset.y = std::max(_char_offset.y, 0);
    updateLayers();
 }
 
 
 void MenuScreenNameSelect::down()
 {
-   mCharOffset.y++;
-   mCharOffset.y = std::min(mCharOffset.y, 4);
+   _char_offset.y++;
+   _char_offset.y = std::min(_char_offset.y, 4);
    updateLayers();
 }
 
 void MenuScreenNameSelect::left()
 {
-   mCharOffset.x--;
-   mCharOffset.x = std::max(mCharOffset.x, 0);
+   _char_offset.x--;
+   _char_offset.x = std::max(_char_offset.x, 0);
    updateLayers();
 }
 
 void MenuScreenNameSelect::right()
 {
-   mCharOffset.x++;
-   mCharOffset.x = std::min(mCharOffset.x, 12);
+   _char_offset.x++;
+   _char_offset.x = std::min(_char_offset.x, 12);
    updateLayers();
 }
 
 
 void MenuScreenNameSelect::select()
 {
-   if (mName.empty())
+   if (_name.empty())
    {
       return;
    }
@@ -77,10 +77,10 @@ void MenuScreenNameSelect::select()
    Menu::getInstance()->hide();
    GameState::getInstance().enqueueResume();
 
-   SaveState::getCurrent().mPlayerInfo.mName = mName;
+   SaveState::getCurrent()._player_info.mName = _name;
 
    // request level-reloading since we updated the save state
-   SaveState::getCurrent().mLoadLevelRequested = true;
+   SaveState::getCurrent()._load_level_requested = true;
 }
 
 
@@ -93,22 +93,22 @@ void MenuScreenNameSelect::back()
 void MenuScreenNameSelect::updateText()
 {
    // draw text
-   mText.setString(mName);
-   const auto textRect = mText.getLocalBounds();
-   const auto xOffset = (mNameRect.width - textRect.width) * 0.5f;
-   const auto x = mNameRect.left + xOffset;
-   mText.setPosition(x, mNameRect.top);
+   _text.setString(_name);
+   const auto textRect = _text.getLocalBounds();
+   const auto xOffset = (_name_rect.width - textRect.width) * 0.5f;
+   const auto x = _name_rect.left + xOffset;
+   _text.setPosition(x, _name_rect.top);
 }
 
 
 void MenuScreenNameSelect::chop()
 {
-   if (mName.empty())
+   if (_name.empty())
    {
       return;
    }
 
-   mName.pop_back();
+   _name.pop_back();
    updateText();
    updateLayers();
 }
@@ -116,7 +116,7 @@ void MenuScreenNameSelect::chop()
 
 void MenuScreenNameSelect::appendChar(char c)
 {
-   mName += c;
+   _name += c;
    updateText();
    updateLayers();
 }
@@ -124,17 +124,17 @@ void MenuScreenNameSelect::appendChar(char c)
 
 void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   mShift += static_cast<int32_t>(key == sf::Keyboard::LShift);
-   mShift += static_cast<int32_t>(key == sf::Keyboard::RShift);
+   _shift += static_cast<int32_t>(key == sf::Keyboard::LShift);
+   _shift += static_cast<int32_t>(key == sf::Keyboard::RShift);
 
    if (key >= sf::Keyboard::A && key <= sf::Keyboard::Z)
    {
-      if (mName.size() >= maxLength)
+      if (_name.size() >= maxLength)
       {
          return;
       }
 
-      const auto c = mChars[static_cast<uint32_t>(key + (mShift ? 0 : 26))];
+      const auto c = _chars[static_cast<uint32_t>(key + (_shift ? 0 : 26))];
       appendChar(c);
    }
 
@@ -177,8 +177,8 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
 {
-   mShift -= static_cast<int32_t>(key == sf::Keyboard::LShift);
-   mShift -= static_cast<int32_t>(key == sf::Keyboard::RShift);
+   _shift -= static_cast<int32_t>(key == sf::Keyboard::LShift);
+   _shift -= static_cast<int32_t>(key == sf::Keyboard::RShift);
 }
 
 
@@ -190,7 +190,7 @@ void MenuScreenNameSelect::controllerButtonX()
 
 void MenuScreenNameSelect::controllerButtonY()
 {
-   char c = mChars[static_cast<size_t>(mCharOffset.x + mCharOffset.y * 13)];
+   char c = _chars[static_cast<size_t>(_char_offset.x + _char_offset.y * 13)];
    appendChar(c);
 }
 
@@ -200,11 +200,11 @@ void MenuScreenNameSelect::retrieveUsername()
    // probably requires a regular expression to filter out the unicode crap
    auto u1 = std::getenv("USERNAME");
    auto u2 = std::getenv("USER");
-   mName = u1 ? u1 : (u2 ? u2 : "");
+   _name = u1 ? u1 : (u2 ? u2 : "");
 
-   if (!mName.empty())
+   if (!_name.empty())
    {
-      mName[0] = std::toupper(mName[0]);
+      _name[0] = std::toupper(_name[0]);
       updateText();
    }
 }
@@ -212,14 +212,14 @@ void MenuScreenNameSelect::retrieveUsername()
 
 void MenuScreenNameSelect::loadingFinished()
 {
-    auto cursor = mLayers["cursor"];
-    mCharOrigin.x = cursor->_sprite->getPosition().x;
-    mCharOrigin.y = cursor->_sprite->getPosition().y;
+    auto cursor = _layers["cursor"];
+    _char_origin.x = cursor->_sprite->getPosition().x;
+    _char_origin.y = cursor->_sprite->getPosition().y;
 
-    auto playerName = mLayers["players-name"];
-    mNameRect.left = playerName->_sprite->getPosition().x;
-    mNameRect.top = playerName->_sprite->getPosition().y;
-    mNameRect.width = static_cast<float>(playerName->_texture->getSize().x);
+    auto playerName = _layers["players-name"];
+    _name_rect.left = playerName->_sprite->getPosition().x;
+    _name_rect.top = playerName->_sprite->getPosition().y;
+    _name_rect.width = static_cast<float>(playerName->_texture->getSize().x);
 
     retrieveUsername();
 
@@ -234,42 +234,42 @@ void MenuScreenNameSelect::updateLayers()
    //    std::cout << layer.first << std::endl;
    // }
 
-   auto cursor = mLayers["cursor"];
+   auto cursor = _layers["cursor"];
    cursor->_sprite->setPosition(
-      static_cast<float>(mCharOrigin.x + mCharOffset.x * charWidth),
-      static_cast<float>(mCharOrigin.y + mCharOffset.y * charHeight)
+      static_cast<float>(_char_origin.x + _char_offset.x * charWidth),
+      static_cast<float>(_char_origin.y + _char_offset.y * charHeight)
    );
 
-   mLayers["header-bg"]->_visible = true;
-   mLayers["players-name"]->_visible = false;
-   mLayers["temp_bg"]->_visible = true;
-   mLayers["title"]->_visible = true;
-   mLayers["window"]->_visible = true;
+   _layers["header-bg"]->_visible = true;
+   _layers["players-name"]->_visible = false;
+   _layers["temp_bg"]->_visible = true;
+   _layers["title"]->_visible = true;
+   _layers["window"]->_visible = true;
 
-   mLayers["name-error-msg"]->_visible = false;
-   mLayers["Please enter your name"]->_visible = true;
+   _layers["name-error-msg"]->_visible = false;
+   _layers["Please enter your name"]->_visible = true;
 
-   mLayers["delete_xbox_0"]->_visible = isControllerUsed();
-   mLayers["delete_xbox_1"]->_visible = false;
-   mLayers["delete_pc_0"]->_visible = !isControllerUsed();
-   mLayers["delete_pc_1"]->_visible = false;
+   _layers["delete_xbox_0"]->_visible = isControllerUsed();
+   _layers["delete_xbox_1"]->_visible = false;
+   _layers["delete_pc_0"]->_visible = !isControllerUsed();
+   _layers["delete_pc_1"]->_visible = false;
 
-   mLayers["confirm_xbox_0"]->_visible = isControllerUsed();
-   mLayers["confirm_xbox_1"]->_visible = false;
-   mLayers["confirm_pc_0"]->_visible = !isControllerUsed();
-   mLayers["confirm_pc_1"]->_visible = false;
+   _layers["confirm_xbox_0"]->_visible = isControllerUsed();
+   _layers["confirm_xbox_1"]->_visible = false;
+   _layers["confirm_pc_0"]->_visible = !isControllerUsed();
+   _layers["confirm_pc_1"]->_visible = false;
 
-   mLayers["cancel_xbox_0"]->_visible = isControllerUsed();
-   mLayers["cancel_xbox_1"]->_visible = false;
-   mLayers["cancel_pc_0"]->_visible = !isControllerUsed();
-   mLayers["cancel_pc_1"]->_visible = false;
+   _layers["cancel_xbox_0"]->_visible = isControllerUsed();
+   _layers["cancel_xbox_1"]->_visible = false;
+   _layers["cancel_pc_0"]->_visible = !isControllerUsed();
+   _layers["cancel_pc_1"]->_visible = false;
 }
 
 
 void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
-   window.draw(mText, states);
+   window.draw(_text, states);
 }
 
 

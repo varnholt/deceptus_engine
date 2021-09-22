@@ -263,7 +263,7 @@ void Game::loadLevel()
          // pick a level
          auto levels = Levels::getInstance();
          levels.deserializeFromFile();
-         auto level_item = levels._levels.at(SaveState::getCurrent().mLevelIndex);
+         auto level_item = levels._levels.at(SaveState::getCurrent()._level_index);
 
          _player->resetWorld(); // free the pointer that's shared with the player
          _level.reset();
@@ -300,12 +300,12 @@ void Game::loadLevel()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::nextLevel()
 {
-   SaveState::getCurrent().mLevelIndex++;
+   SaveState::getCurrent()._level_index++;
 
    auto levels = Levels::getInstance();
-   if (SaveState::getCurrent().mLevelIndex == levels._levels.size())
+   if (SaveState::getCurrent()._level_index == levels._levels.size())
    {
-       SaveState::getCurrent().mLevelIndex = 0;
+       SaveState::getCurrent()._level_index = 0;
    }
 
    loadLevel();
@@ -689,13 +689,13 @@ void Game::update()
    }
 
    // reload the level when the save state has been invalidated
-   if (SaveState::getCurrent().mLoadLevelRequested)
+   if (SaveState::getCurrent()._load_level_requested)
    {
       // reset active screen transitions, also make player alive to avoid starting a death animation
       _player->reset();
       ScreenTransitionHandler::getInstance()._transition.reset();
 
-      SaveState::getCurrent().mLoadLevelRequested = false;
+      SaveState::getCurrent()._load_level_requested = false;
       loadLevel();
    }
 

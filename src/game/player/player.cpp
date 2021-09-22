@@ -204,9 +204,9 @@ void Player::setBodyViaPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   if (_weapon_system->mSelected)
+   if (_weapon_system->_selected)
    {
-      _weapon_system->mSelected->draw(color);
+      _weapon_system->_selected->draw(color);
    }
 
    if (!_visible)
@@ -1684,7 +1684,7 @@ bool Player::isInAir() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::fire()
 {
-   if (!_weapon_system->mSelected)
+   if (!_weapon_system->_selected)
    {
       return;
    }
@@ -1713,7 +1713,7 @@ void Player::fire()
    pos.x = xOffset + _pixel_position_f.x * MPP;
    pos.y = yOffset + _pixel_position_f.y * MPP;
 
-   _weapon_system->mSelected->fireInIntervals(
+   _weapon_system->_selected->fireInIntervals(
       _world,
       pos,
       dir
@@ -1741,7 +1741,7 @@ void Player::updateDeadFixtures()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateWeapons(const sf::Time& dt)
 {
-   for (auto& w : _weapon_system->mWeapons)
+   for (auto& w : _weapon_system->_weapons)
    {
       w->update(dt);
    }

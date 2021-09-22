@@ -44,15 +44,15 @@ public:
 
    struct Path
    {
-      std::vector<sf::Vector2i> mPolygon;
-      std::vector<sf::Vector2f> mScaled;
-      std::vector<Direction> mDirs;
+      std::vector<sf::Vector2i> _polygon;
+      std::vector<sf::Vector2f> _scaled;
+      std::vector<Direction> _dirs;
 
       void printPoly();
       void printDirs();
    };
 
-   std::vector<Path> mPaths;
+   std::vector<Path> _paths;
 
 
 private:
@@ -71,19 +71,19 @@ private:
 
 private:
 
-   std::map<int, Direction> mMap;
-   uint32_t mWidth = 0u;
-   uint32_t mHeight = 0u;
-   std::vector<int32_t> mTiles;
-   std::vector<int32_t> mCollidingTiles;
-   std::vector<bool> mVisited;
-   std::filesystem::path mCachePath;
+   std::map<int, Direction> _map;
+   uint32_t _width = 0u;
+   uint32_t _height = 0u;
+   std::vector<int32_t> _tiles;
+   std::vector<int32_t> _colliding_tiles;
+   std::vector<bool> _visited;
+   std::filesystem::path _cache_path;
 
-   uint32_t mX = 0;
-   uint32_t mY = 0;
-   Direction mDirCurrent = Direction::None;
-   Direction mDirPrevious = Direction::None;
-   float mScale = 1.0f;
+   uint32_t _x = 0;
+   uint32_t _y = 0;
+   Direction _dir_current = Direction::None;
+   Direction _dir_previous = Direction::None;
+   float _scale = 1.0f;
 };
 
 #endif // SQUAREMARCHER_H

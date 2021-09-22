@@ -202,7 +202,6 @@ SOURCES += \
    src/game/weaponsystem.cpp \
    src/game/weather.cpp \
    src/game/overlays/weatheroverlay.cpp \
-   src/game/worldconfiguration.cpp \
    src/main.cpp \
    src/menus/menu.cpp \
    src/menus/menuscreen.cpp \
@@ -412,7 +411,6 @@ HEADERS += \
    src/game/weaponsystem.h \
    src/game/weather.h \
    src/game/overlays/weatheroverlay.h \
-   src/game/worldconfiguration.h \
    src/menus/menu.h \
    src/menus/menuscreen.h \
    src/menus/menuscreenachievements.h \

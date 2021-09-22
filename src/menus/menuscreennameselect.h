@@ -35,17 +35,17 @@ private:
    void updateText();
    void retrieveUsername();
 
-   std::string mName;
-   std::array<char, 13 * 5> mChars;
+   std::string _name;
+   std::array<char, 13 * 5> _chars;
 
-   sf::Vector2f mCharOrigin;
-   sf::Vector2i mCharOffset;
+   sf::Vector2f _char_origin;
+   sf::Vector2i _char_offset;
 
-   sf::Rect<float> mNameRect;
+   sf::Rect<float> _name_rect;
 
-   sf::Font mFont;
-   sf::Text mText;
+   sf::Font _font;
+   sf::Text _text;
 
-   int32_t mShift = 0;
+   int32_t _shift = 0;
 };
 

@@ -91,7 +91,7 @@ bool TileMap::load(
 
    _tile_size = sf::Vector2u(tilset->_tile_width_px, tilset->_tile_height_px);
    _visible = layer->_visible;
-   _z = layer->_z;
+   _z_index = layer->_z;
 
    _vertices_animated.setPrimitiveType(sf::Quads);
 
@@ -321,13 +321,13 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
 
 int TileMap::getZ() const
 {
-   return _z;
+   return _z_index;
 }
 
 
 void TileMap::setZ(int z)
 {
-   _z = z;
+   _z_index = z;
 }
 
 

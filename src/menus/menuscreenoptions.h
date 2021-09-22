@@ -27,6 +27,6 @@ public:
    void back();
    void select();
 
-   Selection mSelection = Selection::Controls;
+   Selection _selection = Selection::Controls;
 };
 

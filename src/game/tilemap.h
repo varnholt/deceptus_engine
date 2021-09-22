@@ -84,7 +84,7 @@ private:
 
    std::vector<AnimatedTile*> _animations;
 
-   int _z = 0;
+   int _z_index = 0;
    bool _visible = true;
 };
 

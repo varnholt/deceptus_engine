@@ -15,8 +15,8 @@ class Weather
       };
 
       struct WeatherData {
-         std::shared_ptr<WeatherOverlay> mOverlay;
-         sf::IntRect mRect;
+         std::shared_ptr<WeatherOverlay> _overlay;
+         sf::IntRect _rect;
       };
 
       void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
@@ -32,8 +32,7 @@ class Weather
 
       Weather();
 
-      static Weather sInstance;
-      std::shared_ptr<RainOverlay> mRainOverlay;
-      std::vector<WeatherData> mData;
+      std::shared_ptr<RainOverlay> _rain_overlay;
+      std::vector<WeatherData> _data;
 };
 

@@ -38,7 +38,7 @@ public:
 
 private:
 
-   ExitCallback mExitCallback;
+   ExitCallback _exit_callback;
 
 };
 

@@ -36,9 +36,9 @@ static constexpr auto start_frame = 15;
 static constexpr auto frames_per_row = 15;
 static constexpr auto animation_frame_count = 4;
 
-uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
-uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
-int16_t groupIndex = 0;                                          // 0 is default
+uint16_t category_bits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
+int16_t group_index = 0;                                          // 0 is default
 }
 
 
@@ -106,9 +106,9 @@ void Bow::load(b2World* world)
    b2FixtureDef fixtureDef;
    fixtureDef.shape = &polygonShape;
    fixtureDef.density = 1.0f;
-   fixtureDef.filter.groupIndex   = groupIndex;
-   fixtureDef.filter.maskBits     = maskBitsStanding;
-   fixtureDef.filter.categoryBits = categoryBits;
+   fixtureDef.filter.groupIndex   = group_index;
+   fixtureDef.filter.maskBits     = mask_bits_standing;
+   fixtureDef.filter.categoryBits = category_bits;
 
    auto loaded_arrow_body = world->CreateBody(&bodyDef);
    auto fixture = loaded_arrow_body->CreateFixture(&fixtureDef);
