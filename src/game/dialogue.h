@@ -37,15 +37,15 @@ private:
    void replaceTags(std::string& str);
    void replace(std::string& str, const std::string& what, const std::string& with);
 
-   std::vector<DialogueItem> mDialogue;
-   uint32_t mIndex = 0;
+   std::vector<DialogueItem> _dialogue;
+   uint32_t _index = 0;
 
-   sf::IntRect mPixelRect;
-   bool mRepeated = false;
-   bool mPlayed = false;
-   bool mActive = false;
+   sf::IntRect _pixel_rect;
+   bool _repeated = false;
+   bool _played = false;
+   bool _active = false;
 
-   static std::vector<Dialogue> sDialogues;
+   static std::vector<Dialogue> __dialogues;
 };
 
 

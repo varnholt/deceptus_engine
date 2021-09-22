@@ -6,15 +6,6 @@
 
 class DisplayMode
 {
-
-private:
-
-   int32_t mMode = Display::DisplayGame;
-
-   std::vector<Display> mQueuedSet;
-   std::vector<Display> mQueuedUnset;
-   std::vector<Display> mQueuedToggle;
-
 public:
 
    DisplayMode() = default;
@@ -34,5 +25,12 @@ public:
 private:
 
    void toggle(Display mode);
+
+   int32_t _mode = Display::DisplayGame;
+
+   std::vector<Display> _queued_set;
+   std::vector<Display> _queued_unset;
+   std::vector<Display> _queued_toggle;
+
 };
 
