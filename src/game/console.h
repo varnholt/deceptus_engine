@@ -29,14 +29,12 @@ private:
       void giveWeaponBow();
       void giveWeaponDefault();
 
-      bool mActive = false;
-      std::string mCommand;
+      bool _active = false;
+      std::string _command;
 
-      std::vector<std::string> mHistory;
-      int32_t mHistoryIndex = 0;
+      std::vector<std::string> _history;
+      int32_t _history_index = 0;
 
-      std::deque<std::string> mLog;
-
-      static Console mConsole;
+      std::deque<std::string> _log;
 };
 

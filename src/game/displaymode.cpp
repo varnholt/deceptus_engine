@@ -8,13 +8,13 @@ DisplayMode DisplayMode::sInstance;
 //-----------------------------------------------------------------------------
 void DisplayMode::toggle(Display mode)
 {
-  if (mMode & mode)
+  if (_mode & mode)
   {
-     mMode &= ~ mode;
+     _mode &= ~ mode;
   }
   else
   {
-     mMode |= mode;
+     _mode |= mode;
   }
 }
 
@@ -22,58 +22,58 @@ void DisplayMode::toggle(Display mode)
 //-----------------------------------------------------------------------------
 void DisplayMode::sync()
 {
-   for (auto& mode : mQueuedSet)
+   for (auto& mode : _queued_set)
    {
-      mMode |= mode;
+      _mode |= mode;
    }
 
-   for (auto& mode : mQueuedUnset)
+   for (auto& mode : _queued_unset)
    {
-      mMode &= ~ mode;
+      _mode &= ~ mode;
    }
 
-   for (auto& mode : mQueuedToggle)
+   for (auto& mode : _queued_toggle)
    {
       toggle(mode);
    }
 
-   mQueuedSet.clear();
-   mQueuedUnset.clear();
-   mQueuedToggle.clear();
+   _queued_set.clear();
+   _queued_unset.clear();
+   _queued_toggle.clear();
 }
 
 
 //-----------------------------------------------------------------------------
 void DisplayMode::enqueueSet(Display mode)
 {
-   mQueuedSet.push_back(mode);
+   _queued_set.push_back(mode);
 }
 
 
 //-----------------------------------------------------------------------------
 void DisplayMode::enqueueUnset(Display mode)
 {
-   mQueuedUnset.push_back(mode);
+   _queued_unset.push_back(mode);
 }
 
 
 void DisplayMode::enqueueToggle(Display mode)
 {
-   mQueuedToggle.push_back(mode);
+   _queued_toggle.push_back(mode);
 }
 
 
 //-----------------------------------------------------------------------------
 int32_t DisplayMode::get()
 {
-  return mMode;
+  return _mode;
 }
 
 
 //-----------------------------------------------------------------------------
 bool DisplayMode::isSet(Display mode)
 {
-   return mMode & mode;
+   return _mode & mode;
 }
 
 

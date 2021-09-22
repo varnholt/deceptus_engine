@@ -15,7 +15,7 @@
 #include <sstream>
 #include <string>
 
-std::vector<Dialogue> Dialogue::sDialogues;
+std::vector<Dialogue> Dialogue::__dialogues;
 
 
 void Dialogue::add(TmxObject* tmxObject)
@@ -33,24 +33,24 @@ void Dialogue::add(TmxObject* tmxObject)
       {
          DialogueItem item;
          item.mMessage = (*it).second->_value_string.value();
-         dialogue.mDialogue.push_back(item);
+         dialogue._dialogue.push_back(item);
       }
    }
 
-   dialogue.mPixelRect = sf::IntRect{
+   dialogue._pixel_rect = sf::IntRect{
       static_cast<int32_t>(tmxObject->_x_px),
       static_cast<int32_t>(tmxObject->_y_px),
       static_cast<int32_t>(tmxObject->_width_px),
       static_cast<int32_t>(tmxObject->_height_px)
    };
 
-   sDialogues.push_back(dialogue);
+   __dialogues.push_back(dialogue);
 }
 
 
 void Dialogue::resetAll()
 {
-   sDialogues.clear();
+   __dialogues.clear();
 }
 
 
@@ -76,9 +76,9 @@ void Dialogue::update()
 
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
-   for (auto& dialogue : sDialogues)
+   for (auto& dialogue : __dialogues)
    {
-      if (playerRect.intersects(dialogue.mPixelRect))
+      if (playerRect.intersects(dialogue._pixel_rect))
       {
          if (!dialogue.isActive())
          {
@@ -96,13 +96,13 @@ void Dialogue::update()
 
 bool Dialogue::isActive() const
 {
-   return mActive;
+   return _active;
 }
 
 
 void Dialogue::setActive(bool active)
 {
-   mActive = active;
+   _active = active;
 }
 
 
@@ -125,16 +125,16 @@ void Dialogue::replaceTags(std::string& str)
 
 void Dialogue::showNext()
 {
-   if (mIndex == mDialogue.size())
+   if (_index == _dialogue.size())
    {
-      mIndex = 0;
+      _index = 0;
 
       // when done, mark the dialogue as inactive so it can be reactivated on button press
       setActive(false);
       return;
    }
 
-   const auto item = mDialogue.at(mIndex);
+   const auto item = _dialogue.at(_index);
 
    auto str = item.mMessage;
 
@@ -148,7 +148,7 @@ void Dialogue::showNext()
       MessageBox::LayoutProperties{item.mLocation, item.mBackgroundColor, item.mTextColor, true, false}
    );
 
-   mIndex++;
+   _index++;
 }
 
 

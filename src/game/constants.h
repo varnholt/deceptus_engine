@@ -116,12 +116,12 @@ enum class ExecutionMode {
 
 enum class MenuAction
 {
-  Confirm,
-  Cancel,
-  MoveUp,
-  MoveDown,
-  Decrease,
-  Increase,
+   Confirm,
+   Cancel,
+   MoveUp,
+   MoveDown,
+   Decrease,
+   Increase,
 };
 
 
@@ -322,7 +322,7 @@ enum class Edge
 
 enum class Dash
 {
-  None,
-  Left,
-  Right
+   None,
+   Left,
+   Right
 };
