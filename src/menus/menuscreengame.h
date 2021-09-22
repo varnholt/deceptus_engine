@@ -24,6 +24,6 @@ public:
    void select();
    void back();
 
-   Selection mSelection = Selection::TextSpeed;
+   Selection _selection = Selection::TextSpeed;
 };
 

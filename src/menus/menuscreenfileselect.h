@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "menuscreen.h"
 
 class MenuScreenFileSelect : public MenuScreen
@@ -33,9 +34,9 @@ private:
 
    void remove();
 
-   sf::Font mFont;
-   sf::Text mNames[3];
+   sf::Font _font;
+   std::array<sf::Text, 3> _names;
 
-   Slot mSlot = Slot::A;
+   Slot _slot = Slot::A;
 };
 

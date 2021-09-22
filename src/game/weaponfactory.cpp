@@ -26,7 +26,7 @@ std::unique_ptr<Weapon> WeaponFactory::create(
    b2Body* parent_body,
    WeaponType type,
    std::unique_ptr<b2Shape> shape,
-   int32_t fireInterval,
+   int32_t fire_interval,
    int32_t damage
 )
 {
@@ -36,13 +36,13 @@ std::unique_ptr<Weapon> WeaponFactory::create(
    {
       case WeaponType::Default:
       {
-         weapon = std::make_unique<Weapon>(std::move(shape), fireInterval, damage);
+         weapon = std::make_unique<Weapon>(std::move(shape), fire_interval, damage);
          break;
       }
       case WeaponType::Bow:
       {
          auto tmp = std::make_unique<Bow>();
-         tmp->setFireIntervalMs(fireInterval);
+         tmp->setFireIntervalMs(fire_interval);
          tmp->setLauncherBody(parent_body);
          weapon = std::move(tmp);
          break;

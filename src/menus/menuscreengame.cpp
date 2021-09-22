@@ -11,28 +11,28 @@ MenuScreenGame::MenuScreenGame()
 
 void MenuScreenGame::up()
 {
-   auto next = static_cast<int32_t>(mSelection);
+   auto next = static_cast<int32_t>(_selection);
    next--;
    if (next < 0)
    {
       next = static_cast<int32_t>(Selection::Count) - 1;
    }
 
-   mSelection = static_cast<Selection>(next);
+   _selection = static_cast<Selection>(next);
    updateLayers();
 }
 
 
 void MenuScreenGame::down()
 {
-   auto next = static_cast<int32_t>(mSelection);
+   auto next = static_cast<int32_t>(_selection);
    next++;
    if (next == static_cast<int32_t>(Selection::Count))
    {
       next = 0;
    }
 
-   mSelection = static_cast<Selection>(next);
+   _selection = static_cast<Selection>(next);
    updateLayers();
 }
 
@@ -81,40 +81,40 @@ void MenuScreenGame::loadingFinished()
 
 void MenuScreenGame::updateLayers()
 {
-   auto autoPause = mSelection == Selection::AutomaticPause;
-   auto textSpeed = mSelection == Selection::TextSpeed;
+   auto autoPause = _selection == Selection::AutomaticPause;
+   auto textSpeed = _selection == Selection::TextSpeed;
 
    auto autoPauseSelection = 0;
    auto textSpeedSelection = 0;
 
-   mLayers["defaults_xbox_0"]->_visible = isControllerUsed();
-   mLayers["defaults_xbox_1"]->_visible = false;
-   mLayers["back_xbox_0"]->_visible = isControllerUsed();
-   mLayers["back_xbox_1"]->_visible = false;
+   _layers["defaults_xbox_0"]->_visible = isControllerUsed();
+   _layers["defaults_xbox_1"]->_visible = false;
+   _layers["back_xbox_0"]->_visible = isControllerUsed();
+   _layers["back_xbox_1"]->_visible = false;
 
-   mLayers["defaults_pc_0"]->_visible = !isControllerUsed();
-   mLayers["defaults_pc_1"]->_visible = false;
-   mLayers["back_pc_0"]->_visible = !isControllerUsed();
-   mLayers["back_pc_1"]->_visible = false;
+   _layers["defaults_pc_0"]->_visible = !isControllerUsed();
+   _layers["defaults_pc_1"]->_visible = false;
+   _layers["back_pc_0"]->_visible = !isControllerUsed();
+   _layers["back_pc_1"]->_visible = false;
 
-   mLayers["autoPause_text_0"]->_visible = !autoPause;
-   mLayers["autoPause_text_1"]->_visible = autoPause;
-   mLayers["autoPause_highlight"]->_visible = autoPause;
-   mLayers["autoPause_help"]->_visible = autoPause;
-   mLayers["autoPause_arrows"]->_visible = autoPause;
-   mLayers["autoPause_value_no"]->_visible = autoPauseSelection == 0;
-   mLayers["autoPause_value_yes"]->_visible = autoPauseSelection == 1;
+   _layers["autoPause_text_0"]->_visible = !autoPause;
+   _layers["autoPause_text_1"]->_visible = autoPause;
+   _layers["autoPause_highlight"]->_visible = autoPause;
+   _layers["autoPause_help"]->_visible = autoPause;
+   _layers["autoPause_arrows"]->_visible = autoPause;
+   _layers["autoPause_value_no"]->_visible = autoPauseSelection == 0;
+   _layers["autoPause_value_yes"]->_visible = autoPauseSelection == 1;
 
-   mLayers["textSpeed_text_0"]->_visible = !textSpeed;
-   mLayers["textSpeed_text_1"]->_visible = textSpeed;
-   mLayers["textSpeed_highlight"]->_visible = textSpeed;
-   mLayers["textSpeed_help"]->_visible = textSpeed;
-   mLayers["textSpeed_arrows"]->_visible = textSpeed;
-   mLayers["textSpeed_1"]->_visible = textSpeedSelection == 0;
-   mLayers["textSpeed_2"]->_visible = textSpeedSelection == 1;
-   mLayers["textSpeed_3"]->_visible = textSpeedSelection == 2;
-   mLayers["textSpeed_4"]->_visible = textSpeedSelection == 3;
-   mLayers["textSpeed_5"]->_visible = textSpeedSelection == 4;
+   _layers["textSpeed_text_0"]->_visible = !textSpeed;
+   _layers["textSpeed_text_1"]->_visible = textSpeed;
+   _layers["textSpeed_highlight"]->_visible = textSpeed;
+   _layers["textSpeed_help"]->_visible = textSpeed;
+   _layers["textSpeed_arrows"]->_visible = textSpeed;
+   _layers["textSpeed_1"]->_visible = textSpeedSelection == 0;
+   _layers["textSpeed_2"]->_visible = textSpeedSelection == 1;
+   _layers["textSpeed_3"]->_visible = textSpeedSelection == 2;
+   _layers["textSpeed_4"]->_visible = textSpeedSelection == 3;
+   _layers["textSpeed_5"]->_visible = textSpeedSelection == 4;
 }
 
 

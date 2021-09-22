@@ -10,7 +10,6 @@
 
 using json = nlohmann::json;
 
-ProgressSettings ProgressSettings::sInstance;
 
 std::string ProgressSettings::serialize()
 {
@@ -65,5 +64,12 @@ void ProgressSettings::serializeToFile(const std::string &filename)
   std::string data = serialize();
   std::ofstream file(filename);
   file << data;
+}
+
+
+ProgressSettings& ProgressSettings::getInstance()
+{
+   static ProgressSettings __instance;
+   return __instance;
 }
 

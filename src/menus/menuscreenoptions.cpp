@@ -66,35 +66,35 @@ void MenuScreenOptions::loadingFinished()
 
 void MenuScreenOptions::up()
 {
-   auto next = static_cast<int32_t>(mSelection);
+   auto next = static_cast<int32_t>(_selection);
    next--;
    if (next < 0)
    {
       next = static_cast<int32_t>(Selection::Count) - 1;
    }
 
-   mSelection = static_cast<Selection>(next);
+   _selection = static_cast<Selection>(next);
    updateLayers();
 }
 
 
 void MenuScreenOptions::down()
 {
-   auto next = static_cast<int32_t>(mSelection);
+   auto next = static_cast<int32_t>(_selection);
    next++;
    if (next == static_cast<int32_t>(Selection::Count))
    {
       next = 0;
    }
 
-   mSelection = static_cast<Selection>(next);
+   _selection = static_cast<Selection>(next);
    updateLayers();
 }
 
 
 void MenuScreenOptions::select()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Controls:
          Menu::getInstance()->show(Menu::MenuType::Controls);
@@ -122,30 +122,30 @@ void MenuScreenOptions::select()
 
 void MenuScreenOptions::updateLayers()
 {
-   mLayers["back_xbox_0"]->_visible = isControllerUsed();
-   mLayers["back_xbox_1"]->_visible = false;
+   _layers["back_xbox_0"]->_visible = isControllerUsed();
+   _layers["back_xbox_1"]->_visible = false;
 
-   mLayers["accept_xbox_0"]->_visible = isControllerUsed();
-   mLayers["accept_xbox_1"]->_visible = false;
+   _layers["accept_xbox_0"]->_visible = isControllerUsed();
+   _layers["accept_xbox_1"]->_visible = false;
 
-   mLayers["back_pc_0"]->_visible = !isControllerUsed();
-   mLayers["back_pc_1"]->_visible = false;
+   _layers["back_pc_0"]->_visible = !isControllerUsed();
+   _layers["back_pc_1"]->_visible = false;
 
-   mLayers["accept_pc_0"]->_visible = !isControllerUsed();
-   mLayers["accept_pc_1"]->_visible = false;
+   _layers["accept_pc_0"]->_visible = !isControllerUsed();
+   _layers["accept_pc_1"]->_visible = false;
 
-   mLayers["credits_0"]->_visible = (mSelection != Selection::Credits);
-   mLayers["credits_1"]->_visible = (mSelection == Selection::Credits);
-   mLayers["achievements_0"]->_visible = (mSelection != Selection::Achievements);
-   mLayers["achievements_1"]->_visible = (mSelection == Selection::Achievements);
-   mLayers["game_0"]->_visible = (mSelection != Selection::Game);
-   mLayers["game_1"]->_visible = (mSelection == Selection::Game);
-   mLayers["audio_0"]->_visible = (mSelection != Selection::Audio);
-   mLayers["audio_1"]->_visible = (mSelection == Selection::Audio);
-   mLayers["video_0"]->_visible = (mSelection != Selection::Video);
-   mLayers["video_1"]->_visible = (mSelection == Selection::Video);
-   mLayers["controls_0"]->_visible = (mSelection != Selection::Controls);
-   mLayers["controls_1"]->_visible = (mSelection == Selection::Controls);
+   _layers["credits_0"]->_visible = (_selection != Selection::Credits);
+   _layers["credits_1"]->_visible = (_selection == Selection::Credits);
+   _layers["achievements_0"]->_visible = (_selection != Selection::Achievements);
+   _layers["achievements_1"]->_visible = (_selection == Selection::Achievements);
+   _layers["game_0"]->_visible = (_selection != Selection::Game);
+   _layers["game_1"]->_visible = (_selection == Selection::Game);
+   _layers["audio_0"]->_visible = (_selection != Selection::Audio);
+   _layers["audio_1"]->_visible = (_selection == Selection::Audio);
+   _layers["video_0"]->_visible = (_selection != Selection::Video);
+   _layers["video_1"]->_visible = (_selection == Selection::Video);
+   _layers["controls_0"]->_visible = (_selection != Selection::Controls);
+   _layers["controls_1"]->_visible = (_selection == Selection::Controls);
 }
 
 

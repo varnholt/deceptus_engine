@@ -14,12 +14,12 @@ struct SaveState
    bool isEmpty() const;
    void invalidate();
 
-   PlayerInfo mPlayerInfo;
+   PlayerInfo _player_info;
 
-   uint32_t mLevelIndex = 0;
-   uint32_t mCheckpoint = 0;
+   uint32_t _level_index = 0;
+   uint32_t _checkpoint = 0;
 
-   bool mLoadLevelRequested = false;
+   bool _load_level_requested = false;
 
    int32_t computeProgress() const;
 
@@ -39,8 +39,8 @@ private:
    static std::string serialize();
    static void deserialize(const std::string& data);
 
-   static uint32_t sSlot;
-   static std::array<SaveState, 3> sSaveStates;
+   static uint32_t __slot;
+   static std::array<SaveState, 3> __save_states;
 };
 
 

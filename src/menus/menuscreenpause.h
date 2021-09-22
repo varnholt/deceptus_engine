@@ -18,8 +18,6 @@ class MenuScreenPause : public MenuScreen
 
       void update(const sf::Time& dt) override;
 
-      Selection mSelection = Selection::Resume;
-
       void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
       void loadingFinished() override;
@@ -30,6 +28,8 @@ class MenuScreenPause : public MenuScreen
       void select();
 
       void showEvent() override;
+
+      Selection _selection = Selection::Resume;
 
 
    private:

@@ -18,12 +18,6 @@ public:
   void deserializeFromFile(const std::string& filename = "data/config/progress.json");
   void serializeToFile(const std::string& filename = "data/config/progress.json");
 
-
-  static ProgressSettings sInstance;
-
-  static ProgressSettings& getInstance()
-  {
-     return sInstance;
-  }
+  static ProgressSettings& getInstance();
 
 };

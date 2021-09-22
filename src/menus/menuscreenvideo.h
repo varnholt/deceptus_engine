@@ -38,15 +38,15 @@ public:
    void setResolutionCallback(ResolutionCallback callback);
    void setVSyncCallback(VSyncCallback callback);
 
-   Selection mSelection = Selection::Resolution;
+   Selection _selection = Selection::Resolution;
 
 
 private:
 
-    FullscreenCallback mFullscreenCallback;
-    ResolutionCallback mResolutionCallback;
-    VSyncCallback mVsyncCallback;
-    std::vector<std::array<int32_t, 2>> mVideoModes;
+    FullscreenCallback _fullscreen_callback;
+    ResolutionCallback _resolution_callback;
+    VSyncCallback _vsync_callback;
+    std::vector<std::array<int32_t, 2>> _video_modes;
 
 };
 

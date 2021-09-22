@@ -3,12 +3,10 @@
 #include "player/player.h"
 
 
-Weather Weather::sInstance;
-
 
 Weather::Weather()
 {
-   mRainOverlay = std::make_shared<RainOverlay>();
+   _rain_overlay = std::make_shared<RainOverlay>();
 }
 
 
@@ -16,11 +14,11 @@ void Weather::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
-   for (const auto& data : mData)
+   for (const auto& data : _data)
    {
-      if (data.mRect.intersects(playerRect))
+      if (data._rect.intersects(playerRect))
       {
-         data.mOverlay->draw(window, states);
+         data._overlay->draw(window, states);
       }
    }
 }
@@ -30,11 +28,11 @@ void Weather::update(const sf::Time& dt)
 {
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
-   for (const auto& data : mData)
+   for (const auto& data : _data)
    {
-      if (data.mRect.intersects(playerRect))
+      if (data._rect.intersects(playerRect))
       {
-         data.mOverlay->update(dt);
+         data._overlay->update(dt);
       }
    }
 }
@@ -47,23 +45,24 @@ void Weather::add(Weather::WeatherType weatherType, const sf::IntRect& range)
    switch (weatherType)
    {
       case WeatherType::Rain:
-         overlay = mRainOverlay;
+         overlay = _rain_overlay;
          break;
       case WeatherType::Invalid:
          break;
    }
 
-   mData.push_back({overlay, range});
+   _data.push_back({overlay, range});
 }
 
 
 void Weather::clear()
 {
-   mData.clear();
+   _data.clear();
 }
 
 
 Weather& Weather::getInstance()
 {
-   return sInstance;
+   static Weather __instance;
+   return __instance;
 }

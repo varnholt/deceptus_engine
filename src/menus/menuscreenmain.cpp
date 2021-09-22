@@ -103,7 +103,7 @@ void MenuScreenMain::select()
       case Selection::Quit:
          MessageBox::question(
             "Are you sure you want to quit?",
-            [this](MessageBox::Button button) {if (button == MessageBox::Button::Yes) mExitCallback();}
+            [this](MessageBox::Button button) {if (button == MessageBox::Button::Yes) _exit_callback();}
          );
          break;
    }
@@ -112,7 +112,7 @@ void MenuScreenMain::select()
 
 void MenuScreenMain::setExitCallback(MenuScreenMain::ExitCallback callback)
 {
-    mExitCallback = callback;
+    _exit_callback = callback;
 }
 
 
@@ -120,17 +120,17 @@ void MenuScreenMain::updateLayers()
 {
    const auto canContinue = !SaveState::allEmpty();
 
-   mLayers["continue_0"]->_visible = canContinue && (mSelection != Selection::Start);
-   mLayers["continue_1"]->_visible = canContinue && (mSelection == Selection::Start);
+   _layers["continue_0"]->_visible = canContinue && (mSelection != Selection::Start);
+   _layers["continue_1"]->_visible = canContinue && (mSelection == Selection::Start);
 
-   mLayers["start_0"]->_visible = !canContinue && (mSelection != Selection::Start);
-   mLayers["start_1"]->_visible = !canContinue && (mSelection == Selection::Start);
+   _layers["start_0"]->_visible = !canContinue && (mSelection != Selection::Start);
+   _layers["start_1"]->_visible = !canContinue && (mSelection == Selection::Start);
 
-   mLayers["options_0"]->_visible = (mSelection != Selection::Options);
-   mLayers["options_1"]->_visible = (mSelection == Selection::Options);
+   _layers["options_0"]->_visible = (mSelection != Selection::Options);
+   _layers["options_1"]->_visible = (mSelection == Selection::Options);
 
-   mLayers["quit_0"]->_visible = (mSelection != Selection::Quit);
-   mLayers["quit_1"]->_visible = (mSelection == Selection::Quit);
+   _layers["quit_0"]->_visible = (mSelection != Selection::Quit);
+   _layers["quit_1"]->_visible = (mSelection == Selection::Quit);
 }
 
 

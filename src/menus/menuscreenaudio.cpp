@@ -15,28 +15,28 @@ MenuScreenAudio::MenuScreenAudio()
 
 void MenuScreenAudio::up()
 {
-   auto next = static_cast<int32_t>(mSelection);
+   auto next = static_cast<int32_t>(_selection);
    next--;
    if (next < 0)
    {
       next = static_cast<int32_t>(Selection::Count) - 1;
    }
 
-   mSelection = static_cast<Selection>(next);
+   _selection = static_cast<Selection>(next);
    updateLayers();
 }
 
 
 void MenuScreenAudio::down()
 {
-   auto next = static_cast<int32_t>(mSelection);
+   auto next = static_cast<int32_t>(_selection);
    next++;
    if (next == static_cast<int32_t>(Selection::Count))
    {
       next = 0;
    }
 
-   mSelection = static_cast<Selection>(next);
+   _selection = static_cast<Selection>(next);
    updateLayers();
 }
 
@@ -54,7 +54,7 @@ void MenuScreenAudio::back()
 
 void MenuScreenAudio::set(int32_t x)
 {
-    switch (mSelection)
+    switch (_selection)
     {
         case Selection::Master:
             GameConfiguration::getInstance()._audio_volume_master += x;
@@ -166,63 +166,63 @@ void MenuScreenAudio::showEvent()
 
 void MenuScreenAudio::updateLayers()
 {
-   auto master = mSelection == Selection::Master;
-   auto sfx = mSelection == Selection::SFX;
-   auto music = mSelection == Selection::Music;
+   auto master = _selection == Selection::Master;
+   auto sfx = _selection == Selection::SFX;
+   auto music = _selection == Selection::Music;
 
-   mLayers["defaults_xbox_0"]->_visible = isControllerUsed();
-   mLayers["defaults_xbox_1"]->_visible = false;
-   mLayers["back_xbox_0"]->_visible = isControllerUsed();
-   mLayers["back_xbox_1"]->_visible = false;
+   _layers["defaults_xbox_0"]->_visible = isControllerUsed();
+   _layers["defaults_xbox_1"]->_visible = false;
+   _layers["back_xbox_0"]->_visible = isControllerUsed();
+   _layers["back_xbox_1"]->_visible = false;
 
-   mLayers["defaults_pc_0"]->_visible = !isControllerUsed();
-   mLayers["defaults_pc_1"]->_visible = false;
-   mLayers["back_pc_0"]->_visible = !isControllerUsed();
-   mLayers["back_pc_1"]->_visible = false;
+   _layers["defaults_pc_0"]->_visible = !isControllerUsed();
+   _layers["defaults_pc_1"]->_visible = false;
+   _layers["back_pc_0"]->_visible = !isControllerUsed();
+   _layers["back_pc_1"]->_visible = false;
 
-   mLayers["sfxVolume_body_0"]->_visible = !sfx;
-   mLayers["sfxVolume_body_1"]->_visible = sfx;
-   mLayers["sfxVolume_text_0"]->_visible = !sfx;
-   mLayers["sfxVolume_text_1"]->_visible = sfx;
-   mLayers["sfxVolume_highlight"]->_visible = sfx;
-   mLayers["sfxVolume_help"]->_visible = sfx;
-   mLayers["sfxVolume_arrows"]->_visible = sfx;
-   mLayers["sfxVolume_h_0"]->_visible = !sfx;
-   mLayers["sfxVolume_h_1"]->_visible = sfx;
-   mLayers["sfxVolume_value"]->_visible = true;
+   _layers["sfxVolume_body_0"]->_visible = !sfx;
+   _layers["sfxVolume_body_1"]->_visible = sfx;
+   _layers["sfxVolume_text_0"]->_visible = !sfx;
+   _layers["sfxVolume_text_1"]->_visible = sfx;
+   _layers["sfxVolume_highlight"]->_visible = sfx;
+   _layers["sfxVolume_help"]->_visible = sfx;
+   _layers["sfxVolume_arrows"]->_visible = sfx;
+   _layers["sfxVolume_h_0"]->_visible = !sfx;
+   _layers["sfxVolume_h_1"]->_visible = sfx;
+   _layers["sfxVolume_value"]->_visible = true;
 
-   mLayers["mscVolume_body_0"]->_visible = !music;
-   mLayers["mscVolume_body_1"]->_visible = music;
-   mLayers["mscVolume_text_0"]->_visible = !music;
-   mLayers["mscVolume_text_1"]->_visible = music;
-   mLayers["mscVolume_highlight"]->_visible = music;
-   mLayers["mscVolume_help"]->_visible = music;
-   mLayers["mscVolume_arrows"]->_visible = music;
-   mLayers["mscVolume_h_0"]->_visible = !music;
-   mLayers["mscVolume_h_1"]->_visible = music;
-   mLayers["mscVolume_value"]->_visible = true;
+   _layers["mscVolume_body_0"]->_visible = !music;
+   _layers["mscVolume_body_1"]->_visible = music;
+   _layers["mscVolume_text_0"]->_visible = !music;
+   _layers["mscVolume_text_1"]->_visible = music;
+   _layers["mscVolume_highlight"]->_visible = music;
+   _layers["mscVolume_help"]->_visible = music;
+   _layers["mscVolume_arrows"]->_visible = music;
+   _layers["mscVolume_h_0"]->_visible = !music;
+   _layers["mscVolume_h_1"]->_visible = music;
+   _layers["mscVolume_value"]->_visible = true;
 
-   mLayers["master_text_0"]->_visible = !master;
-   mLayers["master_text_1"]->_visible = master;
-   mLayers["master_body_1"]->_visible = master;
-   mLayers["master_highlight"]->_visible = master;
-   mLayers["master_help"]->_visible = master;
-   mLayers["master_arrows"]->_visible = master;
-   mLayers["master_h_0"]->_visible = !master;
-   mLayers["master_h_1"]->_visible = master;
-   mLayers["master_value"]->_visible = true;
+   _layers["master_text_0"]->_visible = !master;
+   _layers["master_text_1"]->_visible = master;
+   _layers["master_body_1"]->_visible = master;
+   _layers["master_highlight"]->_visible = master;
+   _layers["master_help"]->_visible = master;
+   _layers["master_arrows"]->_visible = master;
+   _layers["master_h_0"]->_visible = !master;
+   _layers["master_h_1"]->_visible = master;
+   _layers["master_value"]->_visible = true;
 
-   const auto masterVolume = GameConfiguration::getInstance()._audio_volume_master;
-   const auto sfxVolume = GameConfiguration::getInstance()._audio_volume_sfx;
-   const auto musicVolume = GameConfiguration::getInstance()._audio_volume_music;
+   const auto master_volume = GameConfiguration::getInstance()._audio_volume_master;
+   const auto sfx_volume = GameConfiguration::getInstance()._audio_volume_sfx;
+   const auto music_volume = GameConfiguration::getInstance()._audio_volume_music;
 
-   mLayers["master_h_0"]->_sprite->setOrigin(50.0f - masterVolume, 0.0f);
-   mLayers["sfxVolume_h_0"]->_sprite->setOrigin(50.0f - sfxVolume, 0.0f);
-   mLayers["mscVolume_h_0"]->_sprite->setOrigin(50.0f - musicVolume, 0.0f);
+   _layers["master_h_0"]->_sprite->setOrigin(50.0f - master_volume, 0.0f);
+   _layers["sfxVolume_h_0"]->_sprite->setOrigin(50.0f - sfx_volume, 0.0f);
+   _layers["mscVolume_h_0"]->_sprite->setOrigin(50.0f - music_volume, 0.0f);
 
-   mLayers["master_h_1"]->_sprite->setOrigin(50.0f - masterVolume, 0.0f);
-   mLayers["sfxVolume_h_1"]->_sprite->setOrigin(50.0f - sfxVolume, 0.0f);
-   mLayers["mscVolume_h_1"]->_sprite->setOrigin(50.0f - musicVolume, 0.0f);
+   _layers["master_h_1"]->_sprite->setOrigin(50.0f - master_volume, 0.0f);
+   _layers["sfxVolume_h_1"]->_sprite->setOrigin(50.0f - sfx_volume, 0.0f);
+   _layers["mscVolume_h_1"]->_sprite->setOrigin(50.0f - music_volume, 0.0f);
 }
 
 
