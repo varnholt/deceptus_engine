@@ -12,10 +12,10 @@ struct Layer : public sf::Drawable
    void show();
    void hide();
 
-   bool mVisible = true;
+   bool _visible = true;
 
    //sf::Vector2f mOffset;
-   std::shared_ptr<sf::Texture> mTexture;
-   std::shared_ptr<sf::Sprite> mSprite;
+   std::shared_ptr<sf::Texture> _texture;
+   std::shared_ptr<sf::Sprite> _sprite;
 };
 

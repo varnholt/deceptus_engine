@@ -61,8 +61,8 @@ void MenuScreenVideo::select(int32_t step)
           auto next = [this, step]() -> std::array<int32_t, 2> {
               auto it = std::find_if(std::begin(mVideoModes), std::end(mVideoModes), [](const std::array<int32_t, 2> arr){
                   return
-                         arr[0] == GameConfiguration::getInstance().mVideoModeWidth
-                      && arr[1] == GameConfiguration::getInstance().mVideoModeHeight;
+                         arr[0] == GameConfiguration::getInstance()._video_mode_width
+                      && arr[1] == GameConfiguration::getInstance()._video_mode_height;
               });
 
               auto index = it - mVideoModes.begin();
@@ -88,7 +88,7 @@ void MenuScreenVideo::select(int32_t step)
 
       case Selection::Brightness:
       {
-         float brightness = GameConfiguration::getInstance().mBrightness;
+         float brightness = GameConfiguration::getInstance()._brightness;
          brightness += (0.01f * step);
 
          if (brightness < 0.0f)
@@ -100,13 +100,13 @@ void MenuScreenVideo::select(int32_t step)
             brightness = 1.0f;
          }
 
-         GameConfiguration::getInstance().mBrightness = brightness;
+         GameConfiguration::getInstance()._brightness = brightness;
          break;
       }
 
       case Selection::VSync:
       {
-         GameConfiguration::getInstance().mVSync = !GameConfiguration::getInstance().mVSync;
+         GameConfiguration::getInstance()._vsync_enabled = !GameConfiguration::getInstance()._vsync_enabled;
          mVsyncCallback();
          break;
       }
@@ -192,14 +192,14 @@ void MenuScreenVideo::updateLayers()
    auto resolutionSelection = 0u;
    auto displayModeSelection = 0;
 
-   auto fullscreen = GameConfiguration::getInstance().mFullscreen;
+   auto fullscreen = GameConfiguration::getInstance()._fullscreen;
    if (fullscreen)
    {
        displayModeSelection = 2;
    }
 
-   auto resolution_width = GameConfiguration::getInstance().mVideoModeWidth;
-   auto resolution_height = GameConfiguration::getInstance().mVideoModeHeight;
+   auto resolution_width = GameConfiguration::getInstance()._video_mode_width;
+   auto resolution_height = GameConfiguration::getInstance()._video_mode_height;
 
    for (auto index = 0u; index < mVideoModes.size(); index++)
    {
@@ -213,61 +213,61 @@ void MenuScreenVideo::updateLayers()
       }
    }
 
-   const auto brightnessValue = GameConfiguration::getInstance().mBrightness;
-   const auto vsyncSelection = (GameConfiguration::getInstance().mVSync) ? 1 : 0;
+   const auto brightnessValue = GameConfiguration::getInstance()._brightness;
+   const auto vsyncSelection = (GameConfiguration::getInstance()._vsync_enabled) ? 1 : 0;
 
-   mLayers["defaults_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["defaults_xbox_1"]->mVisible = false;
-   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["back_xbox_1"]->mVisible = false;
+   mLayers["defaults_xbox_0"]->_visible = isControllerUsed();
+   mLayers["defaults_xbox_1"]->_visible = false;
+   mLayers["back_xbox_0"]->_visible = isControllerUsed();
+   mLayers["back_xbox_1"]->_visible = false;
 
-   mLayers["defaults_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["defaults_pc_1"]->mVisible = false;
-   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["back_pc_1"]->mVisible = false;
+   mLayers["defaults_pc_0"]->_visible = !isControllerUsed();
+   mLayers["defaults_pc_1"]->_visible = false;
+   mLayers["back_pc_0"]->_visible = !isControllerUsed();
+   mLayers["back_pc_1"]->_visible = false;
 
-   mLayers["resolution_text_0"]->mVisible = !resolution;
-   mLayers["resolution_text_1"]->mVisible = resolution;
-   mLayers["resolution_help"]->mVisible = resolution;
-   mLayers["resolution_highlight"]->mVisible = resolution;
-   mLayers["resolution_arrows"]->mVisible = resolution;
-   mLayers["resolution_value_1024x576"]->mVisible = resolutionSelection == 0;
-   mLayers["resolution_value_1280x720"]->mVisible = resolutionSelection == 1;
-   mLayers["resolution_value_1366x768"]->mVisible = resolutionSelection == 2;
-   mLayers["resolution_value_1536x864"]->mVisible = resolutionSelection == 3;
-   mLayers["resolution_value_1600x900"]->mVisible = resolutionSelection == 4;
-   mLayers["resolution_value_1920x1080"]->mVisible = resolutionSelection == 5;
-   mLayers["resolution_value_3840x2160"]->mVisible = resolutionSelection == 6;
+   mLayers["resolution_text_0"]->_visible = !resolution;
+   mLayers["resolution_text_1"]->_visible = resolution;
+   mLayers["resolution_help"]->_visible = resolution;
+   mLayers["resolution_highlight"]->_visible = resolution;
+   mLayers["resolution_arrows"]->_visible = resolution;
+   mLayers["resolution_value_1024x576"]->_visible = resolutionSelection == 0;
+   mLayers["resolution_value_1280x720"]->_visible = resolutionSelection == 1;
+   mLayers["resolution_value_1366x768"]->_visible = resolutionSelection == 2;
+   mLayers["resolution_value_1536x864"]->_visible = resolutionSelection == 3;
+   mLayers["resolution_value_1600x900"]->_visible = resolutionSelection == 4;
+   mLayers["resolution_value_1920x1080"]->_visible = resolutionSelection == 5;
+   mLayers["resolution_value_3840x2160"]->_visible = resolutionSelection == 6;
 
-   mLayers["brightness_text_0"]->mVisible = !brightness;
-   mLayers["brightness_text_1"]->mVisible = brightness;
-   mLayers["brightness_body_0"]->mVisible = !brightness;
-   mLayers["brightness_body_1"]->mVisible = brightness;
-   mLayers["brightness_highlight"]->mVisible = brightness;
-   mLayers["brightness_help"]->mVisible = brightness;
-   mLayers["brightness_arrows"]->mVisible = brightness;
-   mLayers["brightness_h_0"]->mVisible = !brightness;
-   mLayers["brightness_h_1"]->mVisible = brightness;
-   mLayers["brightness_value"]->mVisible = true;
-   mLayers["brightness_h_0"]->mSprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
-   mLayers["brightness_h_1"]->mSprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
+   mLayers["brightness_text_0"]->_visible = !brightness;
+   mLayers["brightness_text_1"]->_visible = brightness;
+   mLayers["brightness_body_0"]->_visible = !brightness;
+   mLayers["brightness_body_1"]->_visible = brightness;
+   mLayers["brightness_highlight"]->_visible = brightness;
+   mLayers["brightness_help"]->_visible = brightness;
+   mLayers["brightness_arrows"]->_visible = brightness;
+   mLayers["brightness_h_0"]->_visible = !brightness;
+   mLayers["brightness_h_1"]->_visible = brightness;
+   mLayers["brightness_value"]->_visible = true;
+   mLayers["brightness_h_0"]->_sprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
+   mLayers["brightness_h_1"]->_sprite->setOrigin(50 - (brightnessValue * 100.0f), 0);
 
-   mLayers["displayMode_text_0"]->mVisible = !displayMode;
-   mLayers["displayMode_text_1"]->mVisible = displayMode;
-   mLayers["displayMode_highlight"]->mVisible = displayMode;
-   mLayers["displayMode_help"]->mVisible = displayMode;
-   mLayers["displayMode_arrows"]->mVisible = displayMode;
-   mLayers["displayMode_value_windowed"]->mVisible = displayModeSelection == 0;
-   mLayers["displayMode_value_borderless"]->mVisible = displayModeSelection == 1;
-   mLayers["displayMode_value_fullscreen"]->mVisible = displayModeSelection == 2;
+   mLayers["displayMode_text_0"]->_visible = !displayMode;
+   mLayers["displayMode_text_1"]->_visible = displayMode;
+   mLayers["displayMode_highlight"]->_visible = displayMode;
+   mLayers["displayMode_help"]->_visible = displayMode;
+   mLayers["displayMode_arrows"]->_visible = displayMode;
+   mLayers["displayMode_value_windowed"]->_visible = displayModeSelection == 0;
+   mLayers["displayMode_value_borderless"]->_visible = displayModeSelection == 1;
+   mLayers["displayMode_value_fullscreen"]->_visible = displayModeSelection == 2;
 
-   mLayers["vSync_text_0"]->mVisible = !vsync;
-   mLayers["vSync_text_1"]->mVisible = vsync;
-   mLayers["vSync_highlight"]->mVisible = vsync;
-   mLayers["vSync_help"]->mVisible = vsync;
-   mLayers["vSync_arrows"]->mVisible = vsync;
-   mLayers["vSync_value_0"]->mVisible = vsyncSelection == 0;
-   mLayers["vSync_value_1"]->mVisible = vsyncSelection == 1;
+   mLayers["vSync_text_0"]->_visible = !vsync;
+   mLayers["vSync_text_1"]->_visible = vsync;
+   mLayers["vSync_highlight"]->_visible = vsync;
+   mLayers["vSync_help"]->_visible = vsync;
+   mLayers["vSync_arrows"]->_visible = vsync;
+   mLayers["vSync_value_0"]->_visible = vsyncSelection == 0;
+   mLayers["vSync_value_1"]->_visible = vsyncSelection == 1;
 
 }
 

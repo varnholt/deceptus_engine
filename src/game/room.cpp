@@ -130,8 +130,8 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
    // need to incorporate the focus offset here because the player is not
    // necessarily in the middle of the screen but maybe a little more to the
    // left or to the right depending on its orientation
-   const auto halfWidth  = static_cast<float>(config.mViewWidth / 2.0f);
-   const auto height = static_cast<float>(config.mViewHeight);
+   const auto halfWidth  = static_cast<float>(config._view_width / 2.0f);
+   const auto height = static_cast<float>(config._view_height);
 
    const auto l = pos + sf::Vector2f{- halfWidth - focusOffset, 0.0f};
    const auto r = pos + sf::Vector2f{  halfWidth - focusOffset, 0.0f};
@@ -190,13 +190,13 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>&
 {
    // ignore invalid rects
    const auto config = GameConfiguration::getInstance();
-   if (tmxObject->_width_px < config.mViewWidth)
+   if (tmxObject->_width_px < config._view_width)
    {
       std::cerr << "[!] ignoring rect, room width smaller than screen width" << std::endl;
       return;
    }
 
-   if (tmxObject->_height_px < config.mViewHeight)
+   if (tmxObject->_height_px < config._view_height)
    {
       std::cerr << "[!] ignoring rect, room height smaller than screen height" << std::endl;
       return;

@@ -13,20 +13,20 @@
 #include <iostream>
 
 
-std::vector<std::shared_ptr<GameMechanism>> Fan::_fan_instances;
-std::vector<std::shared_ptr<Fan::FanTile>> Fan::_tile_instances;
-std::vector<TmxObject*> Fan::_object_instances;
-std::vector<sf::Vector2f> Fan::_weight_instances;
+std::vector<std::shared_ptr<GameMechanism>> Fan::__fan_instances;
+std::vector<std::shared_ptr<Fan::FanTile>> Fan::__tile_instances;
+std::vector<TmxObject*> Fan::__object_instances;
+std::vector<sf::Vector2f> Fan::__weight_instances;
 
 void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
    auto possf = tile->mPosition;
    auto posb2d = b2Vec2(possf.x * MPP, possf.y * MPP);
 
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_staticBody;
-   bodyDef.position = posb2d;
-   tile->mBody = world->CreateBody(&bodyDef);
+   b2BodyDef body_def;
+   body_def.type = b2_staticBody;
+   body_def.position = posb2d;
+   tile->mBody = world->CreateBody(&body_def);
 
    // create fixture for physical boundaries of the fan object
    b2PolygonShape shape;
@@ -90,7 +90,7 @@ void Fan::setEnabled(bool enabled)
 
 std::vector<std::shared_ptr<GameMechanism> >& Fan::getFans()
 {
-   return _fan_instances;
+   return __fan_instances;
 }
 
 
@@ -207,28 +207,28 @@ void Fan::load(
       for (auto j = 0u; j < height; ++j)
       {
          // get the current tile number
-         int tileNumber = tiles[i + j * width];
+         const auto tile_number = tiles[i + j * width];
 
-         if (tileNumber != 0)
+         if (tile_number != 0)
          {
             // std::cout << tileNumber - firstId << std::endl;
 
-            const auto direction = static_cast<TileDirection>(tileNumber - firstId);
-            sf::Vector2f directionVector;
+            const auto direction = static_cast<TileDirection>(tile_number - firstId);
+            sf::Vector2f direction_vector;
 
             switch (direction)
             {
                case TileDirection::Up:
-                  directionVector = vector_up;
+                  direction_vector = vector_up;
                   break;
                case TileDirection::Left:
-                  directionVector = vector_left;
+                  direction_vector = vector_left;
                   break;
                case TileDirection::Right:
-                  directionVector = vector_right;
+                  direction_vector = vector_right;
                   break;
                case TileDirection::Down:
-                  directionVector = vector_down;
+                  direction_vector = vector_down;
                   break;
             }
 
@@ -243,8 +243,8 @@ void Fan::load(
             tile->mRect.width  = PIXELS_PER_TILE;
             tile->mRect.height = PIXELS_PER_TILE;
             tile->mDir         = direction;
-            tile->mDirection   = directionVector;
-            _tile_instances.push_back(tile);
+            tile->mDirection   = direction_vector;
+            __tile_instances.push_back(tile);
 
             createPhysics(world, tile);
          }
@@ -255,19 +255,19 @@ void Fan::load(
 
 void Fan::resetAll()
 {
-    _fan_instances.clear();
-    _tile_instances.clear();
-    _object_instances.clear();
-    _weight_instances.clear();
+    __fan_instances.clear();
+    __tile_instances.clear();
+    __object_instances.clear();
+    __weight_instances.clear();
 }
 
 
 void Fan::addObject(TmxObject* object, const std::filesystem::path& basePath)
 {
-   _object_instances.push_back(object);
+   __object_instances.push_back(object);
 
    auto fan = std::make_shared<Fan>();
-   _fan_instances.push_back(fan);
+   __fan_instances.push_back(fan);
 
    const auto w = static_cast<int32_t>(object->_width_px);
    const auto h = static_cast<int32_t>(object->_height_px);
@@ -280,19 +280,19 @@ void Fan::addObject(TmxObject* object, const std::filesystem::path& basePath)
 
    if (object->_properties)
    {
-       auto speedProp = object->_properties->_map["speed"];
-       fan->_speed = speedProp ? speedProp->_value_float.value() : 1.0f;
+       auto speed_property = object->_properties->_map["speed"];
+       fan->_speed = speed_property ? speed_property->_value_float.value() : 1.0f;
    }
 }
 
 
-std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
+std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& player_rect)
 {
    // need to find all intersections since there can be more than one
    auto valid = false;
    sf::Vector2f dir;
 
-   for (const auto& f : _fan_instances)
+   for (const auto& f : __fan_instances)
    {
       auto fan = std::dynamic_pointer_cast<Fan>(f);
 
@@ -301,7 +301,7 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
          continue;
       }
 
-      if (playerRect.intersects(fan->_pixel_rect))
+      if (player_rect.intersects(fan->_pixel_rect))
       {
          dir += fan->_direction;
          valid = true;
@@ -320,9 +320,9 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& playerRect)
 }
 
 
-void Fan::collide(const sf::Rect<int32_t>& playerRect, b2Body* body)
+void Fan::collide(const sf::Rect<int32_t>& player_rect, b2Body* body)
 {
-   auto dir = collide(playerRect);
+   auto dir = collide(player_rect);
    if (dir.has_value())
    {
       body->ApplyForceToCenter(
@@ -336,9 +336,9 @@ void Fan::collide(const sf::Rect<int32_t>& playerRect, b2Body* body)
 void Fan::merge()
 {
    auto x_offset_px = 0.0f;
-   for (auto& tile : _tile_instances)
+   for (auto& tile : __tile_instances)
    {
-      for (auto& f : _fan_instances)
+      for (auto& f : __fan_instances)
       {
          auto fan = std::dynamic_pointer_cast<Fan>(f);
          if (tile->mRect.intersects(fan->_pixel_rect))
@@ -358,7 +358,7 @@ void Fan::merge()
       }
    }
 
-   _tile_instances.clear();
+   __tile_instances.clear();
 }
 
 

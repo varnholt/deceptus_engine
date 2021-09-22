@@ -184,57 +184,57 @@ void MenuScreenFileSelect::updateLayers()
       const auto selected = index == static_cast<int32_t>(mSlot);
 
       // no data
-      mLayers["slot_" + slotName + "_new_game"]->mVisible = empty;
-      mLayers["slot_" + slotName + "_new_game_background"]->mVisible = empty;
-      mLayers["slot_" + slotName + "_new_game_highlight"]->mVisible = empty;
-      mLayers["slot_" + slotName + "_new_game_deselected"]->mVisible = empty && !selected;
-      mLayers["slot_" + slotName + "_new_game_selected"]->mVisible = empty && selected;
-      mLayers["slot_" + slotName + "_shadow"]->mVisible = empty;
+      mLayers["slot_" + slotName + "_new_game"]->_visible = empty;
+      mLayers["slot_" + slotName + "_new_game_background"]->_visible = empty;
+      mLayers["slot_" + slotName + "_new_game_highlight"]->_visible = empty;
+      mLayers["slot_" + slotName + "_new_game_deselected"]->_visible = empty && !selected;
+      mLayers["slot_" + slotName + "_new_game_selected"]->_visible = empty && selected;
+      mLayers["slot_" + slotName + "_shadow"]->_visible = empty;
 
       // have data
-      mLayers["slot_" + slotName + "_selected"]->mVisible = !empty && selected;
-      mLayers["slot_" + slotName + "_deselected"]->mVisible = !empty && !selected;
-      mLayers["slot_" + slotName + "_background"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_bar_1"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_bar_2"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_energy"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_heart"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_highlight"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_letter_deselected"]->mVisible = !selected;
-      mLayers["slot_" + slotName + "_letter_selected"]->mVisible = selected;
-      mLayers["slot_" + slotName + "_lines"]->mVisible = !empty;
-      mLayers["slot_" + slotName + "_name"]->mVisible = false;
-      mLayers["slot_" + slotName + "_progress"]->mVisible = false;
-      mLayers["slot_" + slotName + "_time"]->mVisible = false;
+      mLayers["slot_" + slotName + "_selected"]->_visible = !empty && selected;
+      mLayers["slot_" + slotName + "_deselected"]->_visible = !empty && !selected;
+      mLayers["slot_" + slotName + "_background"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_bar_1"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_bar_2"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_energy"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_heart"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_highlight"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_letter_deselected"]->_visible = !selected;
+      mLayers["slot_" + slotName + "_letter_selected"]->_visible = selected;
+      mLayers["slot_" + slotName + "_lines"]->_visible = !empty;
+      mLayers["slot_" + slotName + "_name"]->_visible = false;
+      mLayers["slot_" + slotName + "_progress"]->_visible = false;
+      mLayers["slot_" + slotName + "_time"]->_visible = false;
 
       // both
-      mLayers["slot_" + slotName + "_arrow"]->mVisible = selected;
+      mLayers["slot_" + slotName + "_arrow"]->_visible = selected;
 
       // update names
       auto nameLayer = mLayers["slot_" + slotName + "_name"];
       mNames[index].setString(saveState.mPlayerInfo.mName);
       mNames[index].setPosition(
-         nameLayer->mSprite->getPosition().x,
-         nameLayer->mSprite->getPosition().y + nameOffsetY
+         nameLayer->_sprite->getPosition().x,
+         nameLayer->_sprite->getPosition().y + nameOffsetY
       );
 
       index++;
    }
 
-   mLayers["delete_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["delete_xbox_1"]->mVisible = false;
-   mLayers["delete_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["delete_pc_1"]->mVisible = false;
+   mLayers["delete_xbox_0"]->_visible = isControllerUsed();
+   mLayers["delete_xbox_1"]->_visible = false;
+   mLayers["delete_pc_0"]->_visible = !isControllerUsed();
+   mLayers["delete_pc_1"]->_visible = false;
 
-   mLayers["confirm_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["confirm_xbox_1"]->mVisible = false;
-   mLayers["confirm_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["confirm_pc_1"]->mVisible = false;
+   mLayers["confirm_xbox_0"]->_visible = isControllerUsed();
+   mLayers["confirm_xbox_1"]->_visible = false;
+   mLayers["confirm_pc_0"]->_visible = !isControllerUsed();
+   mLayers["confirm_pc_1"]->_visible = false;
 
-   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["back_xbox_1"]->mVisible = false;
-   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["back_pc_1"]->mVisible = false;
+   mLayers["back_xbox_0"]->_visible = isControllerUsed();
+   mLayers["back_xbox_1"]->_visible = false;
+   mLayers["back_pc_0"]->_visible = !isControllerUsed();
+   mLayers["back_pc_1"]->_visible = false;
 }
 
 

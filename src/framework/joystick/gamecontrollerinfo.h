@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 // joystick
@@ -15,14 +16,14 @@ class GameControllerInfo
 
       //! constructor b
       GameControllerInfo(
-         const std::vector<int>& axisValues,
-         const std::vector<bool>& buttonValues,
-         const std::vector<GameControllerBallVector>& ballValues,
-         const std::vector<int>& hatValues
+         const std::vector<int32_t>& axis_values,
+         const std::vector<bool>& button_values,
+         const std::vector<GameControllerBallVector>& ball_values,
+         const std::vector<int32_t>& hat_values
       );
 
       //! add axis value
-      void addAxisValue(int);
+      void addAxisValue(int32_t);
 
       //! add button state
       void addButtonState(bool);
@@ -31,10 +32,10 @@ class GameControllerInfo
       void addBallValue(const GameControllerBallVector&);
 
       //! add hat value
-      void addHatValue(int);
+      void addHatValue(int32_t);
 
       //! getter for axis values
-      const std::vector<int>& getAxisValues() const;
+      const std::vector<int32_t>& getAxisValues() const;
 
       //! getter for button values
       const std::vector<bool>& getButtonValues() const;
@@ -43,21 +44,21 @@ class GameControllerInfo
       const std::vector<GameControllerBallVector>& getBallValues() const;
 
       //! getter for hat values
-      const std::vector<int>& getHatValues() const;
+      const std::vector<int32_t>& getHatValues() const;
 
 
    protected:
 
       //! axis values
-      std::vector<int> mAxisValues;
+      std::vector<int32_t> _axis_values;
 
       //! button values
-      std::vector<bool> mButtonValues;
+      std::vector<bool> _button_values;
 
       //! ball values
-      std::vector<GameControllerBallVector> mBallValues;
+      std::vector<GameControllerBallVector> _ball_values;
 
       //! hat values
-      std::vector<int> mHatValues;
+      std::vector<int32_t> _hat_values;
 };
 

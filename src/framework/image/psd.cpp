@@ -108,13 +108,13 @@ namespace
 
 int32_t PSD::Header::getWidth() const
 {
-   return mWidth;
+   return _width;
 }
 
 
 int32_t PSD::Header::getHeight() const
 {
-   return mHeight;
+   return _height;
 }
 
 
@@ -143,14 +143,14 @@ void PSD::Header::load(std::istream& stream)
    //     Bitmap = 0; Grayscale = 1; Indexed = 2; RGB = 3; CMYK = 4; Multichannel = 7;
    //     Duotone = 8; Lab = 9.
 
-   read<sizeof(mSignature)>(mSignature, stream);
-   read(mVersion, stream);
-   read<sizeof(mReserved)>(mReserved, stream);
-   read(mChannels, stream);
-   read(mHeight, stream);
-   read(mWidth, stream);
-   read(mDepth, stream);
-   read(mMode, stream);
+   read<sizeof(_signature)>(_signature, stream);
+   read(_version, stream);
+   read<sizeof(_reserved)>(_reserved, stream);
+   read(_channels, stream);
+   read(_height, stream);
+   read(_width, stream);
+   read(_depth, stream);
+   read(_mode, stream);
 }
 
 
@@ -158,126 +158,126 @@ void PSD::Header::load(std::istream& stream)
 
 const std::string& PSD::Layer::getName() const
 {
-   return mName;
+   return _name;
 }
 
 int32_t PSD::Layer::getBottom() const
 {
-   return mBottom;
+   return _bottom;
 }
 
 int32_t PSD::Layer::getTop() const
 {
-   return mTop;
+   return _top;
 }
 
 int32_t PSD::Layer::getLeft() const
 {
-   return mLeft;
+   return _left;
 }
 
 int32_t PSD::Layer::getWidth() const
 {
-   return mRight - mLeft;
+   return _right - _left;
 }
 
 int32_t PSD::Layer::getHeight() const
 {
-   return mBottom - mTop;
+   return _bottom - _top;
 }
 
 void PSD::Layer::move(int32_t x, int32_t y)
 {
-   mRight += x;
-   mLeft += x;
+   _right += x;
+   _left += x;
 
-   mTop += y;
-   mBottom +=y;
+   _top += y;
+   _bottom +=y;
 }
 
 void PSD::Layer::setX(int32_t x)
 {
-   int32_t width = mRight - mLeft;
+   int32_t width = _right - _left;
 
-   mLeft = x;
-   mRight = x + width;
+   _left = x;
+   _right = x + width;
 }
 
 void PSD::Layer::setY(int32_t y)
 {
-   int32_t height = mBottom - mTop;
+   int32_t height = _bottom - _top;
 
-   mTop = y;
-   mBottom = y + height;
+   _top = y;
+   _bottom = y + height;
 }
 
 void PSD::Layer::setBottom(int32_t v)
 {
-   mBottom = v;
+   _bottom = v;
 }
 
 
 void PSD::Layer::setTop(int32_t v)
 {
-   mTop = v;
+   _top = v;
 }
 
 
 const Image& PSD::Layer::getImage() const
 {
-    return mImage;
+    return _image;
 }
 
 
 int32_t PSD::Layer::getOpacity() const
 {
-   return mOpacity;
+   return _opacity;
 }
 
 
 bool PSD::Layer::isVisible() const
 {
-   return ((mFlags & VISIBILITY_FLAG) != 2);
+   return ((_flags & VISIBILITY_FLAG) != 2);
 }
 
 
 void PSD::Layer::setVisible(bool visible)
 {
    if (visible)
-      mFlags &= ~VISIBILITY_FLAG;
+      _flags &= ~VISIBILITY_FLAG;
    else
-      mFlags |= VISIBILITY_FLAG;
+      _flags |= VISIBILITY_FLAG;
 }
 
 
 const PSD::Layer::Channel& PSD::Layer::getChannel(int32_t id) const
 {
-   auto it = std::find_if(mChannels.begin(), mChannels.end(), [id](const Channel& c){return c.getID() == id;});
+   auto it = std::find_if(_channels.begin(), _channels.end(), [id](const Channel& c){return c.getID() == id;});
    return *it;
 }
 
 
 PSD::Layer::SectionDivider PSD::Layer::getSectionDivider() const
 {
-   return mSectionDivider;
+   return _section_divider;
 }
 
 
 PSD::ColorFormat PSD::Layer::getColorFormat() const
 {
-   return mColorFormat;
+   return _color_format;
 }
 
 
 void PSD::Layer::setColorFormat(const PSD::ColorFormat& colorFormat)
 {
-   mColorFormat = colorFormat;
+   _color_format = colorFormat;
 }
 
 
 void PSD::Layer::setOpacity(int32_t opacity)
 {
-   mOpacity = opacity;
+   _opacity = opacity;
 }
 
 
@@ -307,32 +307,32 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
     // Variable         Layer blending ranges: See See Layer blending ranges data.
     // Variable         Layer name: Pascal string, padded to a multiple of 4 bytes.
 
-   read(mTop, stream);
-   read(mLeft, stream);
-   read(mBottom, stream);
-   read(mRight, stream);
+   read(_top, stream);
+   read(_left, stream);
+   read(_bottom, stream);
+   read(_right, stream);
 
-   read(mChannelCount, stream);
+   read(_channel_count, stream);
 
-   for (auto i = 0; i < mChannelCount; i++)
+   for (auto i = 0; i < _channel_count; i++)
    {
       Channel channel;
       channel.load(stream);
-      mChannels.push_back(channel);
+      _channels.push_back(channel);
    }
 
-   read(mBlendModeSignature, stream);
-   read(mBlendModeKey, stream);
-   read(mOpacity, stream);
-   read(mClipping, stream);
-   read(mFlags, stream);
+   read(_blend_mode_signature, stream);
+   read(_blend_mode_key, stream);
+   read(_opacity, stream);
+   read(_clipping, stream);
+   read(_flags, stream);
 
    stream.ignore(1); // filler
 
-   int32_t extraDataLength = 0;
-   read(extraDataLength, stream);
+   int32_t extra_data_length = 0;
+   read(extra_data_length, stream);
 
-   auto layerStart = stream.tellg();
+   auto layer_start = stream.tellg();
 
    // Layer mask / adjustment layer data (ignored)
    {
@@ -349,42 +349,42 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
    }
 
    // Layer name: Pascal string, padded to a multiple of 4 bytes.
-   mName = loadString(stream);
+   _name = loadString(stream);
 
    // std::cout << "layer name: " << mName << std::endl;
 
-   int32_t blockHeader= 0;
-   while (extraDataLength - (stream.tellg() - layerStart) > 4)
+   int32_t block_header= 0;
+   while (extra_data_length - (stream.tellg() - layer_start) > 4)
    {
-      if (blockHeader == 0)
+      if (block_header == 0)
       {
-         read(blockHeader, stream);
+         read(block_header, stream);
       }
       else
       {
          uint8_t byte = 0;
          read(byte, stream);
-         blockHeader = (blockHeader << 8) | byte;
+         block_header = (block_header << 8) | byte;
       }
 
-      if (blockHeader == '8BIM')
+      if (block_header == '8BIM')
       {
-         int32_t blockId = 0;
-         int32_t blockSize = 0;
+         int32_t block_id = 0;
+         int32_t block_size = 0;
 
-         read(blockId, stream);
-         read(blockSize, stream);
+         read(block_id, stream);
+         read(block_size, stream);
          auto blockPos = stream.tellg();
 
-         if (blockId == 'lsct')
+         if (block_id == 'lsct')
          {
-            int32_t sectionDivider;
-            read(sectionDivider, stream);
-            mSectionDivider = static_cast<SectionDivider>(sectionDivider);
+            int32_t section_divider;
+            read(section_divider, stream);
+            _section_divider = static_cast<SectionDivider>(section_divider);
          }
 
          // Unicode layer name
-         if (blockId == 'luni')
+         if (block_id == 'luni')
          {
             uint32_t length = 0;
             read(length, stream);
@@ -399,18 +399,18 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
                name[i] = word & 255;
             }
 
-            mName = std::string(name);
+            _name = std::string(name);
             delete[] name;
          }
 
          // skip rest of block
-         stream.ignore(blockSize - (stream.tellg() - blockPos));
-         blockHeader= 0;
+         stream.ignore(block_size - (stream.tellg() - blockPos));
+         block_header= 0;
       }
    }
 
    // skip rest of data
-   stream.ignore(extraDataLength - (stream.tellg() - layerStart));
+   stream.ignore(extra_data_length - (stream.tellg() - layer_start));
 }
 
 
@@ -430,10 +430,10 @@ void PSD::Layer::loadChannelImageData(std::istream& stream)
    //          If the layer's size, and therefore the data, is odd, a pad byte will be inserted at the end of the row.
    //          If the layer is an adjustment layer, the channel data is undefined (probably all white.)
 
-   int32_t height = mBottom - mTop;
-   int32_t width = mRight - mLeft;
+   int32_t height = _bottom - _top;
+   int32_t width = _right - _left;
 
-   for (auto& channel : mChannels)
+   for (auto& channel : _channels)
    {
       uint16_t compression = 0;
       read(compression, stream);
@@ -465,17 +465,17 @@ void PSD::Layer::loadChannelImageData(std::istream& stream)
       }
    }
 
-   if (mChannelCount == 3)
+   if (_channel_count == 3)
    {
-      mChannels[mChannelCount].init(-1, width, height);
-      mChannelCount++;
+      _channels[_channel_count].init(-1, width, height);
+      _channel_count++;
    }
 
-   mImage.init(width, height);
+   _image.init(width, height);
 
    for (auto y = 0; y < height; y++)
    {
-      uint32_t* dst = mImage.getScanline(y);
+      uint32_t* dst = _image.getScanline(y);
 
       uint8_t* red   = getChannel(0).getScanline(y);
       uint8_t* green = getChannel(1).getScanline(y);
@@ -501,7 +501,7 @@ void PSD::Layer::loadChannelImageData(std::istream& stream)
             b = 0;
          }
 
-         switch (mColorFormat)
+         switch (_color_format)
          {
             case PSD::ColorFormat::ARGB:
                dst[x] = (a << 24) | (r << 16) | (g << 8) | b;
@@ -519,19 +519,19 @@ void PSD::Layer::loadChannelImageData(std::istream& stream)
 
 short PSD::Layer::Channel::getID() const
 {
-   return mID;
+   return _id;
 }
 
 const std::vector<uint8_t>& PSD::Layer::Channel::data() const
 {
-   return mData;
+   return _data;
 }
 
 
 void PSD::Layer::Channel::load(std::istream& stream)
 {
-   read(mID, stream);
-   read(mSize, stream);
+   read(_id, stream);
+   read(_size, stream);
 }
 
 // https://web.archive.org/web/20080705155158/http://developer.apple.com/technotes/tn/tn1023.html
@@ -571,27 +571,27 @@ void PSD::Layer::Channel::load(std::istream& stream)
 void PSD::Layer::Channel::unpackBits(
    std::vector<uint8_t>& dest,
    int32_t offset,
-   size_t bytesPerScanline,
+   size_t bytes_per_scanline,
    std::istream& stream
 )
 {
-   auto bytesRead = 0u;
-   while (bytesRead < bytesPerScanline)
+   auto bytes_read = 0u;
+   while (bytes_read < bytes_per_scanline)
    {
       uint8_t controlByte = 0;
       read(controlByte, stream);
-      bytesRead++;
+      bytes_read++;
 
       if (controlByte <= 0x80)
       {
          for (auto j = 0; j < controlByte + 1; j++)
          {
-            uint8_t singleValue = 0;
-            read(singleValue, stream);
-            bytesRead++;
+            uint8_t single_value = 0;
+            read(single_value, stream);
+            bytes_read++;
 
             // printf("%x ", singleValue);
-            dest[offset] = singleValue;
+            dest[offset] = single_value;
             offset++;
          }
       }
@@ -599,7 +599,7 @@ void PSD::Layer::Channel::unpackBits(
       {
          uint8_t spanValue = 0;
          read(spanValue, stream);
-         bytesRead++;
+         bytes_read++;
 
          auto count = (256 - controlByte) + 1;
          for (auto j = 0; j < count; j++)
@@ -615,44 +615,44 @@ void PSD::Layer::Channel::unpackBits(
 
 void PSD::Layer::Channel::loadRLE(int32_t width, int32_t height, std::istream& stream)
 {
-   std::vector<uint16_t> scanlineByteCounts;
+   std::vector<uint16_t> scanline_byte_count;
    for (auto y = 0; y < height; y++)
    {
       uint16_t val = 0;
       read(val, stream);
-      scanlineByteCounts.push_back(val);
+      scanline_byte_count.push_back(val);
    }
 
-   mWidth = width;
-   mData.resize(width * height);
+   _width = width;
+   _data.resize(width * height);
 
    for (auto y = 0; y < height; y++)
    {
-      const auto bytesPerScanline = scanlineByteCounts[y];
+      const auto bytes_per_scanline = scanline_byte_count[y];
       const auto offset = y * width;
-      unpackBits(mData, offset, bytesPerScanline, stream);
+      unpackBits(_data, offset, bytes_per_scanline, stream);
    }
 }
 
 
 void PSD::Layer::Channel::loadRaw(int32_t width, int32_t height, std::istream& stream)
 {
-   mWidth = width;
-   mData.resize(width * height);
-   read(mData, stream);
+   _width = width;
+   _data.resize(width * height);
+   read(_data, stream);
 }
 
 
 void PSD::Layer::Channel::init(int32_t id, int32_t width, int32_t height)
 {
-   mID = id;
-   mData.resize(width * height, 0xff);
+   _id = id;
+   _data.resize(width * height, 0xff);
 }
 
 
 uint8_t* PSD::Layer::Channel::getScanline(int32_t y) const
 {
-   return const_cast<uint8_t*>(mData.data() + y * mWidth);
+   return const_cast<uint8_t*>(_data.data() + y * _width);
 }
 
 
@@ -661,50 +661,50 @@ uint8_t* PSD::Layer::Channel::getScanline(int32_t y) const
 
 int32_t PSD::getWidth() const
 {
-   return mHeader.getWidth();
+   return _header.getWidth();
 }
 
 
 int32_t PSD::getHeight() const
 {
-   return mHeader.getHeight();
+   return _header.getHeight();
 }
 
 
 PSD::ColorFormat PSD::getColorFormat() const
 {
-    return mColorFormat;
+    return _color_format;
 }
 
 void PSD::setColorFormat(const PSD::ColorFormat& colorFormat)
 {
-    mColorFormat = colorFormat;
+    _color_format = colorFormat;
 }
 
 
 size_t PSD::getLayerCount() const
 {
-   return mLayers.size();
+   return _layers.size();
 }
 
 
 const std::vector<PSD::Layer>& PSD::getLayers() const
 {
-   return mLayers;
+   return _layers;
 }
 
 
 const PSD::Layer& PSD::getLayer(int32_t index) const
 {
-   return mLayers[index];
+   return _layers[index];
 }
 
 
 std::vector<PSD::Layer>::const_iterator PSD::getLayer(const std::string& name) const
 {
    auto it = std::find_if(
-      mLayers.begin(),
-      mLayers.end(),
+      _layers.begin(),
+      _layers.end(),
       [name](const PSD::Layer& layer){return (layer.getName() == name);}
    );
 
@@ -763,44 +763,44 @@ void PSD::loadImageResourceSection(std::istream& stream)
 
    while (stream.tellg() < sectionStart + static_cast<std::streampos>(totalSize))
    {
-      int32_t blockSignature = 0;
-      read(blockSignature, stream);
+      int32_t block_signature = 0;
+      read(block_signature, stream);
 
-      if (blockSignature == '8BIM')
+      if (block_signature == '8BIM')
       {
-         uint16_t resourceIdentifier = 0;
-         read(resourceIdentifier, stream);
+         uint16_t resource_identifier = 0;
+         read(resource_identifier, stream);
 
          auto name = loadString(stream);
          // std::cout << "image resource: " << name << std::endl;
 
-         int32_t blockSize = 0;
-         read(blockSize, stream);
+         int32_t block_size = 0;
+         read(block_size, stream);
 
-         auto blockStart = stream.tellg();
+         auto block_start = stream.tellg();
 
          // path
-         if (resourceIdentifier >= 2000 && resourceIdentifier < 2999)
+         if (resource_identifier >= 2000 && resource_identifier < 2999)
          {
-             Path path(blockSize);
-             path.load(stream, mHeader.getWidth(), mHeader.getHeight());
+             Path path(block_size);
+             path.load(stream, _header.getWidth(), _header.getHeight());
              path.setName(name);
-             mPaths.push_back(path);
+             _paths.push_back(path);
          }
 
          // handle odd block size
-         if (blockSize & 1)
+         if (block_size & 1)
          {
-            blockSize++;
+            block_size++;
          }
 
          // ignore the whole block, meh
-         stream.ignore(blockSize);
+         stream.ignore(block_size);
 
          // ignore unprocessed block bytes
-         const auto blockBytesRead = stream.tellg() - blockStart;
-         const auto blockIgnoredBytes = blockSize - blockBytesRead;
-         stream.ignore(blockIgnoredBytes);
+         const auto block_bytes_read = stream.tellg() - block_start;
+         const auto block_ignored_bytes = block_size - block_bytes_read;
+         stream.ignore(block_ignored_bytes);
       }
       else
       {
@@ -848,21 +848,21 @@ void PSD::loadLayerAndMaskInformation(std::istream& stream)
    [[maybe_unused]] int32_t length = 0;
    read(length, stream);
 
-   int16_t layerCount = 0;
-   read(layerCount, stream);
-   layerCount = abs(layerCount);
+   int16_t layer_count = 0;
+   read(layer_count, stream);
+   layer_count = abs(layer_count);
 
    // load 'layer records'
-   for (auto i = 0; i < layerCount; i++)
+   for (auto i = 0; i < layer_count; i++)
    {
       Layer layer;
       layer.setColorFormat(getColorFormat());
       layer.loadLayerRecords(stream);
-      mLayers.push_back(layer);
+      _layers.push_back(layer);
    }
 
    // load 'channel image data'
-   for (auto& layer : mLayers)
+   for (auto& layer : _layers)
    {
       layer.loadChannelImageData(stream);
    }
@@ -888,7 +888,7 @@ void PSD::loadColorModeData(std::istream& stream)
 void PSD::load(std::istream& stream)
 {
    // assume big endian
-   mHeader.load(stream);
+   _header.load(stream);
    loadColorModeData(stream);
    loadImageResourceSection(stream);
    loadLayerAndMaskInformation(stream);
@@ -910,7 +910,7 @@ bool PSD::load(const std::string& filename)
 
 PSD::Path::Path(int32_t blockSize)
 {
-   mPathRecordCount = blockSize / 26;
+   _path_record_count = blockSize / 26;
 }
 
 void PSD::Path::Position::load(std::istream& stream, float invWidth, float invHeight)
@@ -924,30 +924,30 @@ void PSD::Path::Position::load(std::istream& stream, float invWidth, float invHe
 
 const std::string& PSD::Path::getName() const
 {
-   return mName;
+   return _name;
 }
 
 void PSD::Path::setName(const std::string& name)
 {
-   mName = name;
+   _name = name;
 }
 
 void PSD::Path::load(std::istream& stream, int32_t width, int32_t height)
 {
    const auto invScale= 1.0f / (1 << 24);
 
-   auto invWidth = width * invScale;
-   auto invHeight = height * invScale;
+   auto inv_width = width * invScale;
+   auto inv_height = height * invScale;
 
-   while (mPathRecordCount > 0)
+   while (_path_record_count > 0)
    {
       auto recordStart = stream.tellg();
 
       // read first two bytes of record
-      read(mRecordType, stream);
+      read(_record_type, stream);
 
       // all subsequent records have 24 bytes left
-      switch (mRecordType)
+      switch (_record_type)
       {
          case Path::ClosedSubpathLengthRecord:
          case Path::OpenSubpathLengthRecord:
@@ -962,7 +962,7 @@ void PSD::Path::load(std::istream& stream, int32_t width, int32_t height)
          case Path::OpenSubpathBezierKnotLinked:
          case Path::OpenSubpathBezierKnotUnlinked:
          {
-            readBezierKnot(stream, invWidth, invHeight);
+            readBezierKnot(stream, inv_width, inv_height);
             break;
          }
 
@@ -988,14 +988,14 @@ void PSD::Path::load(std::istream& stream, int32_t width, int32_t height)
       // default: skip rest of 26-byte block
       stream.ignore( (static_cast<int64_t>(recordStart) + 26) - static_cast<int64_t>(stream.tellg()) );
 
-      mPathRecordCount--;
+      _path_record_count--;
    }
 }
 
 
 void PSD::Path::readPathRecord(std::istream& stream)
 {
-   [[maybe_unused]] bool closedPath = (mRecordType == ClosedSubpathLengthRecord);
+   [[maybe_unused]] bool closedPath = (_record_type == ClosedSubpathLengthRecord);
 
    // read number of records and then kthxbye
    uint16_t recordCount;
@@ -1003,25 +1003,25 @@ void PSD::Path::readPathRecord(std::istream& stream)
 
    for (auto i = 0; i < recordCount; i++)
    {
-      mPositions.resize(recordCount);
+      _positions.resize(recordCount);
    }
 
-   mPositionCount= 0;
+   _position_count= 0;
 }
 
 
 void PSD::Path::readBezierKnot(std::istream& stream, float invWidth, float invHeight)
 {
-   mPositions[mPositionCount].in.load(stream, invWidth, invHeight);
-   mPositions[mPositionCount].pos.load(stream, invWidth, invHeight);
-   mPositions[mPositionCount].out.load(stream, invWidth, invHeight);
-   mPositionCount++;
+   _positions[_position_count].in.load(stream, invWidth, invHeight);
+   _positions[_position_count].pos.load(stream, invWidth, invHeight);
+   _positions[_position_count].out.load(stream, invWidth, invHeight);
+   _position_count++;
 }
 
 
 void PSD::Path::readInitialFill(std::istream& stream)
 {
-   read(mInitialFill, stream);
+   read(_initial_fill, stream);
    stream.ignore(22);
 }
 
@@ -1030,28 +1030,28 @@ void PSD::Path::readFillRuleRecord(std::istream& stream)
 {
    int32_t fill;
    read(fill, stream);
-   mFill = (fill != 0);
+   _fill = (fill != 0);
    stream.ignore(22);
 }
 
 int PSD::Path::getPositionCount() const
 {
-   return mPositionCount;
+   return _position_count;
 }
 
 const PSD::Path::Position &PSD::Path::getPosition(int index) const
 {
-   return mPositions[index].pos;
+   return _positions[index].pos;
 }
 
 const PSD::Path::Position &PSD::Path::getTangentIn(int index) const
 {
-   return mPositions[index].in;
+   return _positions[index].in;
 }
 
 const PSD::Path::Position &PSD::Path::getTangentOut(int index) const
 {
-   return mPositions[index].out;
+   return _positions[index].out;
 }
 
 
@@ -1065,7 +1065,7 @@ bool PSD::Path::isBesizer() const
 {
    bool bezier = false;
 
-   switch (mRecordType)
+   switch (_record_type)
    {
       case ClosedSubpathBezierKnotLinked:
       case ClosedSubpathBezierKnotUnlinked:

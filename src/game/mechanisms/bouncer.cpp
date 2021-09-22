@@ -25,7 +25,7 @@ const auto SPRITE_HEIGHT = 24;
 
 b2Body *Bouncer::getBody() const
 {
-  return mBody;
+  return _body;
 }
 
 
@@ -43,65 +43,65 @@ Bouncer::Bouncer(
 
    // std::cout << "creating bouncer at " << x << ", " << y << " (" << width << " x " << height << ")" << std::endl;
 
-   mRect.left = static_cast<int32_t>(x);
-   mRect.top = static_cast<int32_t>(y);
-   mRect.width = static_cast<int32_t>(width);
-   mRect.height = static_cast<int32_t>(height);
+   _rect.left = static_cast<int32_t>(x);
+   _rect.top = static_cast<int32_t>(y);
+   _rect.width = static_cast<int32_t>(width);
+   _rect.height = static_cast<int32_t>(height);
 
    setType(ObjectTypeBouncer);
-   mActivationTime = GlobalClock::getInstance()->getElapsedTime();
+   _activation_time = GlobalClock::getInstance()->getElapsedTime();
 
-   mPositionB2d = b2Vec2(x * MPP, y * MPP);
-   mPositionSf.x = x;
-   mPositionSf.y = y + height;
+   _position_b2d = b2Vec2(x * MPP, y * MPP);
+   _position_sfml.x = x;
+   _position_sfml.y = y + height;
 
    b2BodyDef bodyDef;
    bodyDef.type = b2_staticBody;
-   bodyDef.position = mPositionB2d;
+   bodyDef.position = _position_b2d;
 
-   mBody = world->CreateBody(&bodyDef);
+   _body = world->CreateBody(&bodyDef);
 
-   auto halfPhysicsWidth = width * MPP * 0.5f;
-   auto halfPhysicsHeight = height * MPP * 0.5f;
+   auto half_physics_width = width * MPP * 0.5f;
+   auto half_physics_height = height * MPP * 0.5f;
 
   // create fixture for physical boundaries of the bouncer object
-  mShapeBounds.SetAsBox(
-      halfPhysicsWidth, halfPhysicsHeight,
-      b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
+  _shape_bounds.SetAsBox(
+      half_physics_width, half_physics_height,
+      b2Vec2(half_physics_width, half_physics_height),
       0.0f
   );
 
    b2FixtureDef boundaryFixtureDef;
-   boundaryFixtureDef.shape = &mShapeBounds;
+   boundaryFixtureDef.shape = &_shape_bounds;
    boundaryFixtureDef.density = 1.0f;
    boundaryFixtureDef.isSensor = false;
 
-   mBody->CreateFixture(&boundaryFixtureDef);
+   _body->CreateFixture(&boundaryFixtureDef);
 
    // create fixture for the sensor behavior, collision notification
-   mShapeBounds.SetAsBox(
-      halfPhysicsWidth, halfPhysicsHeight,
-      b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
+   _shape_bounds.SetAsBox(
+      half_physics_width, half_physics_height,
+      b2Vec2(half_physics_width, half_physics_height),
       0.0f
    );
 
-   b2FixtureDef sensorFixtureDef;
-   sensorFixtureDef.shape = &mShapeBounds;
-   sensorFixtureDef.isSensor = true;
+   b2FixtureDef sensor_fixture_def;
+   sensor_fixture_def.shape = &_shape_bounds;
+   sensor_fixture_def.isSensor = true;
 
-   auto fixture = mBody->CreateFixture(&sensorFixtureDef);
+   auto fixture = _body->CreateFixture(&sensor_fixture_def);
    fixture->SetUserData(static_cast<void*>(this));
 
    // load texture
-   mTexture = TexturePool::getInstance().get("data/level-crypt/tilesets/bumper.png");
-   mSprite.setTexture(*mTexture);
-   mSprite.setPosition(mPositionSf - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
+   _texture = TexturePool::getInstance().get("data/level-crypt/tilesets/bumper.png");
+   _sprite.setTexture(*_texture);
+   _sprite.setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
 
 
 void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(mSprite);
+   color.draw(_sprite);
 }
 
 
@@ -111,7 +111,7 @@ void Bouncer::updatePlayerAtBouncer()
    auto rect = player->getPlayerPixelRect();
    rect.height *= 3;
 
-   mPlayerAtBouncer = rect.intersects(mRect);
+   _player_at_bouncer = rect.intersects(_rect);
 
    // // yeah, this is super dirty.
    // // should have a static function to determine whether the player will collide
@@ -138,9 +138,9 @@ void Bouncer::update(const sf::Time& /*dt*/)
    // std::cout << "a: " << a.x << ", " << a.y << " b: " << b.x << ", " << b.y << std::endl;
 
    auto now = GlobalClock::getInstance()->getElapsedTime();
-   auto delta = (now - mActivationTime).asMilliseconds();
+   auto delta = (now - _activation_time).asMilliseconds();
 
-   int step = static_cast<int>(delta * 0.02f);
+   auto step = static_cast<int32_t>(delta * 0.02f);
    if (step > 9)
    {
       step = 0;
@@ -148,7 +148,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
 
   // printf("step: %d\n", step);
 
-  mSprite.setTextureRect(
+  _sprite.setTextureRect(
       sf::IntRect(
          step * SPRITE_WIDTH,
          0,
@@ -161,7 +161,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
 
 bool Bouncer::isPlayerAtBouncer()
 {
-   return mPlayerAtBouncer;
+   return _player_at_bouncer;
 }
 
 
@@ -176,19 +176,19 @@ bool Bouncer::isPlayerAtBouncer()
 void Bouncer::activate()
 {
    auto now = GlobalClock::getInstance()->getElapsedTime();
-   auto delta = (now - mActivationTime).asSeconds();
+   auto delta = (now - _activation_time).asSeconds();
 
    if (delta < 0.3f) // set to 0.5?
    {
       return;
    }
 
-   mActivationTime = now;
+   _activation_time = now;
 
-   auto forceValue = 0.6f;
+   constexpr auto forceValue = 0.6f;
 
    b2Vec2 force(0.0f, 0.0f);
-   switch (mAlignment)
+   switch (_alignment)
    {
       case Alignment::PointsUp:
          force = b2Vec2{0.0f, -forceValue};
@@ -206,8 +206,7 @@ void Bouncer::activate()
           break;
    }
 
-   auto player = Player::getCurrent();
-   auto body = player->getBody();
+   auto body = Player::getCurrent()->getBody();
 
    // it's pretty important to reset the body's y velocity
    const auto& velocity = body->GetLinearVelocity();

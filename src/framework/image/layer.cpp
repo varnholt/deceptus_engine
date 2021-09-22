@@ -4,17 +4,17 @@
 void Layer::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
 {
    // TODO: use layer blendmode
-   target.draw(*mSprite, {sf::BlendAlpha});
+   target.draw(*_sprite, {sf::BlendAlpha});
 }
 
 
 void Layer::show()
 {
-   mVisible = true;
+   _visible = true;
 }
 
 
 void Layer::hide()
 {
-   mVisible = false;
+   _visible = false;
 }

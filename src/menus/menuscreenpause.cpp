@@ -125,21 +125,21 @@ void MenuScreenPause::showEvent()
 
 void MenuScreenPause::updateLayers()
 {
-   mLayers["resume_0"]->mVisible = (mSelection != Selection::Resume);
-   mLayers["resume_1"]->mVisible = (mSelection == Selection::Resume);
-   mLayers["options_0"]->mVisible = (mSelection != Selection::Options);
-   mLayers["options_1"]->mVisible = (mSelection == Selection::Options);
-   mLayers["quit_game_0"]->mVisible = (mSelection != Selection::Quit);
-   mLayers["quit_game_1"]->mVisible = (mSelection == Selection::Quit);
+   mLayers["resume_0"]->_visible = (mSelection != Selection::Resume);
+   mLayers["resume_1"]->_visible = (mSelection == Selection::Resume);
+   mLayers["options_0"]->_visible = (mSelection != Selection::Options);
+   mLayers["options_1"]->_visible = (mSelection == Selection::Options);
+   mLayers["quit_game_0"]->_visible = (mSelection != Selection::Quit);
+   mLayers["quit_game_1"]->_visible = (mSelection == Selection::Quit);
 
-   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["back_xbox_1"]->mVisible = false;
-   mLayers["accept_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["accept_xbox_1"]->mVisible = false;
+   mLayers["back_xbox_0"]->_visible = isControllerUsed();
+   mLayers["back_xbox_1"]->_visible = false;
+   mLayers["accept_xbox_0"]->_visible = isControllerUsed();
+   mLayers["accept_xbox_1"]->_visible = false;
 
-   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["back_pc_1"]->mVisible = false;
-   mLayers["accept_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["accept_pc_1"]->mVisible = false;
+   mLayers["back_pc_0"]->_visible = !isControllerUsed();
+   mLayers["back_pc_1"]->_visible = false;
+   mLayers["accept_pc_0"]->_visible = !isControllerUsed();
+   mLayers["accept_pc_1"]->_visible = false;
 }
 

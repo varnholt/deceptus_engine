@@ -42,23 +42,23 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
 
    private:
 
-      b2Body* mBody = nullptr;
-      b2Vec2 mPositionB2d;
-      sf::Vector2f mPositionSf;
-      b2PolygonShape mShapeBounds;
-      sf::IntRect mBeltPixelRect;
-      sf::IntRect mArrowPixelRect;
-      float mElapsed = 0.0f;
-      bool mPointsRight = true;
-      float mLeverLag = 1.0f;
+      b2Body* _body = nullptr;
+      b2Vec2 _position_b2d;
+      sf::Vector2f _position_sfml;
+      b2PolygonShape _shape_bounds;
+      sf::IntRect _belt_pixel_rect;
+      sf::IntRect _arrow_pixel_rect;
+      float _elapsed = 0.0f;
+      bool _points_right = true;
+      float _lever_lag = 1.0f;
 
-      std::shared_ptr<sf::Texture> mTexture;
-      std::vector<sf::Sprite> mBeltSprites;
-      std::vector<sf::Sprite> mArrowSprites;
+      std::shared_ptr<sf::Texture> _texture;
+      std::vector<sf::Sprite> _belt_sprites;
+      std::vector<sf::Sprite> _arrow_sprites;
 
       // bool mActive = true;
-      float mVelocity = -0.2f;
+      float _velocity = -0.2f;
 
-      static std::vector<b2Body*> sBodiesOnBelt;
+      static std::vector<b2Body*> __bodies_on_belt;
 };
 

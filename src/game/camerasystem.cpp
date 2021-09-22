@@ -211,8 +211,8 @@ void CameraSystem::updatePlayerFocused()
    const auto dx = fabs(_x - player_pixel_pos.x);
    const auto dy = fabs(_y - player_pixel_pos.y);
 
-   const auto view_width_half = GameConfiguration::getInstance().mViewWidth / 2;
-   const auto view_height_half = GameConfiguration::getInstance().mViewHeight / 2;
+   const auto view_width_half = GameConfiguration::getInstance()._view_width / 2;
+   const auto view_height_half = GameConfiguration::getInstance()._view_height / 2;
 
    _player_focused = (dx < view_width_half && dy < view_height_half);
 }

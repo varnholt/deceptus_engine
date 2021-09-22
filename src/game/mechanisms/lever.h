@@ -59,30 +59,31 @@ public:
    );
 
    bool getPlayerAtLever() const;
-   void setPlayerAtLever(bool playerAtLever);
+   void setPlayerAtLever(bool player_at_lever);
 
 
    void updateReceivers();
 
-   private:
+private:
 
-   Type mType = Type::TwoState;
-
-   State mTargetState = State::Left;
-   State mPreviousState = State::Left;
-
-   std::vector<Callback> mCallbacks;
-   sf::Rect<int32_t> mRect;
-   bool mPlayerAtLever = false;
-   sf::Sprite mSprite;
-   int32_t mOffset = 0;
-   int32_t mDir = 0;
-
-   std::shared_ptr<sf::Texture> mTexture;
-
-   static std::vector<TmxObject*> mRectangles;
-   //static std::vector<std::shared_ptr<Lever>> sLevers;
    void updateSprite();
+
+   Type _type = Type::TwoState;
+
+   State _target_state = State::Left;
+   State _state_previous = State::Left;
+
+   std::vector<Callback> _callbacks;
+   sf::Rect<int32_t> _rect;
+   bool _player_at_lever = false;
+   sf::Sprite _sprite;
+   int32_t _offset = 0;
+   int32_t _dir = 0;
+
+   std::shared_ptr<sf::Texture> _texture;
+
+   static std::vector<TmxObject*> __rectangles;
+   //static std::vector<std::shared_ptr<Lever>> sLevers;
 };
 
 

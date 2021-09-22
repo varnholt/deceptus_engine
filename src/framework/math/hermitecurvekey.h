@@ -4,6 +4,6 @@
 
 struct HermiteCurveKey
 {
-   float mTime = 0.0f;
-   sf::Vector2f mPosition;
+   float _time = 0.0f;
+   sf::Vector2f _position;
 };

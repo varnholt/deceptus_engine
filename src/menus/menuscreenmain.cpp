@@ -120,17 +120,17 @@ void MenuScreenMain::updateLayers()
 {
    const auto canContinue = !SaveState::allEmpty();
 
-   mLayers["continue_0"]->mVisible = canContinue && (mSelection != Selection::Start);
-   mLayers["continue_1"]->mVisible = canContinue && (mSelection == Selection::Start);
+   mLayers["continue_0"]->_visible = canContinue && (mSelection != Selection::Start);
+   mLayers["continue_1"]->_visible = canContinue && (mSelection == Selection::Start);
 
-   mLayers["start_0"]->mVisible = !canContinue && (mSelection != Selection::Start);
-   mLayers["start_1"]->mVisible = !canContinue && (mSelection == Selection::Start);
+   mLayers["start_0"]->_visible = !canContinue && (mSelection != Selection::Start);
+   mLayers["start_1"]->_visible = !canContinue && (mSelection == Selection::Start);
 
-   mLayers["options_0"]->mVisible = (mSelection != Selection::Options);
-   mLayers["options_1"]->mVisible = (mSelection == Selection::Options);
+   mLayers["options_0"]->_visible = (mSelection != Selection::Options);
+   mLayers["options_1"]->_visible = (mSelection == Selection::Options);
 
-   mLayers["quit_0"]->mVisible = (mSelection != Selection::Quit);
-   mLayers["quit_1"]->mVisible = (mSelection == Selection::Quit);
+   mLayers["quit_0"]->_visible = (mSelection != Selection::Quit);
+   mLayers["quit_1"]->_visible = (mSelection == Selection::Quit);
 }
 
 

@@ -31,11 +31,11 @@ class HermiteCurve
 
    private:
 
-      sf::Vector2f mPosition;
-      sf::Vector2f mOrientation;
-      std::vector<HermiteCurveKey> mPositionKeys;
-      std::vector<HermiteCurveKey> mOrientationKeys;
-      std::vector<sf::Vector2f> mPositionTangents;
-      std::vector<sf::Vector2f> mOrientationTangents;
+      sf::Vector2f _position;
+      sf::Vector2f _orientation;
+      std::vector<HermiteCurveKey> _position_keys;
+      std::vector<HermiteCurveKey> _orientation_keys;
+      std::vector<sf::Vector2f> _position_tangents;
+      std::vector<sf::Vector2f> _orientation_tangents;
 };
 

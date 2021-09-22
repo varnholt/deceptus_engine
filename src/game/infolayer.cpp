@@ -41,7 +41,7 @@ InfoLayer::InfoLayer()
       // std::cout << layer.getName() << std::endl;
 
       auto tmp = std::make_shared<Layer>();
-      tmp->mVisible = layer.isVisible();
+      tmp->_visible = layer.isVisible();
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -52,8 +52,8 @@ InfoLayer::InfoLayer()
       sprite->setTexture(*texture, true);
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
 
-      tmp->mTexture = texture;
-      tmp->mSprite = sprite;
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
 
       _layer_stack.push_back(tmp);
       _layers[layer.getName()] = tmp;
@@ -90,8 +90,8 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance()->getElapsedTime();
 
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
@@ -100,14 +100,14 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto layer_health_energy = _layers["health_energy"];
    auto layer_health_weapon = _layers["health_weapon"];
 
-   if (layer_health_energy->mVisible)
+   if (layer_health_energy->_visible)
    {
        const auto health = (SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth) * 0.01f;
 
-       const auto healthLayerWidth  = layer_health_energy->mSprite->getTexture()->getSize().x * health;
-       const auto healthLayerHeight = layer_health_energy->mSprite->getTexture()->getSize().y;
+       const auto healthLayerWidth  = layer_health_energy->_sprite->getTexture()->getSize().x * health;
+       const auto healthLayerHeight = layer_health_energy->_sprite->getTexture()->getSize().y;
 
-       layer_health_energy->mSprite->setTextureRect(
+       layer_health_energy->_sprite->setTextureRect(
           sf::IntRect{
              0,
              0,
@@ -122,9 +122,9 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
        const auto duration = 1.0f;
        t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * static_cast<float>(M_PI)))) * 200;
 
-       layer_health->mSprite->setOrigin(t, 0.0f);
-       layer_health_energy->mSprite->setOrigin(t, 0.0f);
-       layer_health_weapon->mSprite->setOrigin(t, 0.0f);
+       layer_health->_sprite->setOrigin(t, 0.0f);
+       layer_health_energy->_sprite->setOrigin(t, 0.0f);
+       layer_health_weapon->_sprite->setOrigin(t, 0.0f);
 
        layer_health->draw(window, states);
        layer_health_energy->draw(window, states);
@@ -132,10 +132,10 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    auto autosave = _layers["autosave"];
-   if (autosave->mVisible)
+   if (autosave->_visible)
    {
       auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      autosave->mSprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
+      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
       autosave->draw(window, states);
    }
 
@@ -157,8 +157,8 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
@@ -173,8 +173,8 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
 void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w_view = GameConfiguration::getInstance().mViewWidth;
-   auto h_view = GameConfiguration::getInstance().mViewHeight;
+   auto w_view = GameConfiguration::getInstance()._view_width;
+   auto h_view = GameConfiguration::getInstance()._view_height;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
    window.setView(view);
@@ -182,8 +182,8 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    auto layer_health = _layers["console"];
    layer_health->draw(window, states);
 
-   auto w_screen = GameConfiguration::getInstance().mVideoModeWidth;
-   auto h_screen = GameConfiguration::getInstance().mVideoModeHeight;
+   auto w_screen = GameConfiguration::getInstance()._video_mode_width;
+   auto h_screen = GameConfiguration::getInstance()._video_mode_height;
 
    sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
    window.setView(view_screen);
@@ -216,11 +216,11 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::setLoading(bool loading)
 {
-   _layers["autosave"]->mVisible = loading;
+   _layers["autosave"]->_visible = loading;
 
-   _layers["health"]->mVisible = !loading;
-   _layers["health_energy"]->mVisible = !loading;
-   _layers["health_weapon"]->mVisible = !loading;
+   _layers["health"]->_visible = !loading;
+   _layers["health_energy"]->_visible = !loading;
+   _layers["health_weapon"]->_visible = !loading;
 
    if (!loading && loading != _loading)
    {
