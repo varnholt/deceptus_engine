@@ -23,9 +23,9 @@ private:
 
    CameraPane() = default;
 
-   int32_t mLook = LookInactive;
-   sf::Vector2f mLookVector;
+   int32_t _look_state = LookInactive;
+   sf::Vector2f _look_vector;
 
-   static CameraPane sInstance;
+   static CameraPane __instance;
 };
 
