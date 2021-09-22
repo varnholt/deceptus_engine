@@ -109,8 +109,8 @@ void Level::initializeTextures()
    GameConfiguration& gameConfig = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
-   sf::ContextSettings stencilContextSettings;
-   stencilContextSettings.stencilBits = 8;
+   sf::ContextSettings stencil_context_settings;
+   stencil_context_settings.stencilBits = 8;
 
    _render_texture_level_background.reset();
 
@@ -121,50 +121,50 @@ void Level::initializeTextures()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratioWidth = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
-   const auto ratioHeight = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
-   const auto sizeRatio = std::min(ratioWidth, ratioHeight);
-   _view_to_texture_scale = 1.0f / sizeRatio;
+   const auto ratio_width = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
+   const auto ratio_height = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+   const auto size_ratio = std::min(ratio_width, ratio_height);
+   _view_to_texture_scale = 1.0f / size_ratio;
 
-   const auto textureWidth = static_cast<int32_t>(sizeRatio * gameConfig.mViewWidth);
-   const auto textureHeight = static_cast<int32_t>(sizeRatio * gameConfig.mViewHeight);
+   const auto texture_width = static_cast<int32_t>(size_ratio * gameConfig.mViewWidth);
+   const auto texture_height = static_cast<int32_t>(size_ratio * gameConfig.mViewHeight);
 
    _render_texture_level_background = std::make_shared<sf::RenderTexture>();
    _render_texture_level_background->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height)
    );
 
    _render_texture_level = std::make_shared<sf::RenderTexture>();
    _render_texture_level->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight),
-      stencilContextSettings // the lights require stencils
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height),
+      stencil_context_settings // the lights require stencils
    );
 
    _render_texture_lighting = std::make_shared<sf::RenderTexture>();
    _render_texture_lighting->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight),
-      stencilContextSettings // the lights require stencils
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height),
+      stencil_context_settings // the lights require stencils
    );
 
    _render_texture_normal = std::make_shared<sf::RenderTexture>();
    _render_texture_normal->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height)
    );
 
    _render_texture_deferred = std::make_shared<sf::RenderTexture>();
    _render_texture_deferred->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height)
    );
 
-   _atmosphere_shader = std::make_unique<AtmosphereShader>(textureWidth, textureHeight);
+   _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
    _gamme_shader = std::make_unique<GammaShader>();
-   _blur_shader = std::make_unique<BlurShader>(textureWidth, textureHeight);
-   _death_shader = std::make_unique<DeathShader>(textureWidth, textureHeight);
+   _blur_shader = std::make_unique<BlurShader>(texture_width, texture_height);
+   _death_shader = std::make_unique<DeathShader>(texture_width, texture_height);
 
    // keep track of those textures
    _render_textures.clear();
@@ -293,9 +293,9 @@ void Level::loadTmx()
 
    auto path = std::filesystem::path(_description->_filename).parent_path();
 
-   const auto checksumOld = Checksum::readChecksum(_description->_filename + ".crc");
-   const auto checksumNew = Checksum::calcChecksum(_description->_filename);
-   if (checksumOld != checksumNew)
+   const auto checksum_old = Checksum::readChecksum(_description->_filename + ".crc");
+   const auto checksum_new = Checksum::calcChecksum(_description->_filename);
+   if (checksum_old != checksum_new)
    {
       std::cout << "[x] checksum mismatch, deleting cached data" << std::endl;
       std::filesystem::remove(path / "physics_grid_solid.png");
@@ -303,7 +303,7 @@ void Level::loadTmx()
       std::filesystem::remove(path / "physics_path_solid.csv");
       std::filesystem::remove(path / "physics_path_solid.png");
       std::filesystem::remove(path / "layer_level_solid_not_optimised.obj");
-      Checksum::writeChecksum(_description->_filename + ".crc", checksumNew);
+      Checksum::writeChecksum(_description->_filename + ".crc", checksum_new);
    }
 
    sf::Clock elapsed;
@@ -419,71 +419,71 @@ void Level::loadTmx()
 
       else if (element->_type == TmxElement::TypeObjectGroup)
       {
-         TmxObjectGroup* objectGroup = dynamic_cast<TmxObjectGroup*>(element);
+         TmxObjectGroup* object_group = dynamic_cast<TmxObjectGroup*>(element);
 
-         for (const auto& object : objectGroup->_objects)
+         for (const auto& object : object_group->_objects)
          {
-            TmxObject* tmxObject = object.second;
+            TmxObject* tmx_object = object.second;
 
-            if (objectGroup->_name == "lasers" || objectGroup->_name == "lasers_2")
+            if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
             {
-               Laser::addObject(tmxObject);
+               Laser::addObject(tmx_object);
             }
-            else if (objectGroup->_name == "enemies")
+            else if (object_group->_name == "enemies")
             {
                Enemy enemy;
-               enemy.parse(tmxObject);
-               _enemy_data_from_tmx_layer[enemy.mId]=enemy;
+               enemy.parse(tmx_object);
+               _enemy_data_from_tmx_layer[enemy._id]=enemy;
             }
-            else if (objectGroup->_name == "fans")
+            else if (object_group->_name == "fans")
             {
-               Fan::addObject(tmxObject, path);
+               Fan::addObject(tmx_object, path);
             }
-            else if (objectGroup->_name == "portals")
+            else if (object_group->_name == "portals")
             {
-               if (tmxObject->_polyline)
+               if (tmx_object->_polyline)
                {
-                  Portal::link(_mechanism_portals, tmxObject);
+                  Portal::link(_mechanism_portals, tmx_object);
                }
             }
-            else if (objectGroup->_name == "ropes")
+            else if (object_group->_name == "ropes")
             {
                auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
-               rope->setup(tmxObject, _world);
+               rope->setup(tmx_object, _world);
                _mechanism_ropes.push_back(rope);
             }
-            else if (objectGroup->_name == "ropes_with_light")
+            else if (object_group->_name == "ropes_with_light")
             {
                auto rope = std::make_shared<RopeWithLight>(dynamic_cast<GameNode*>(this));
-               rope->setup(tmxObject, _world);
+               rope->setup(tmx_object, _world);
                _mechanism_ropes.push_back(rope);
             }
-            else if (objectGroup->_name == "smoke")
+            else if (object_group->_name == "smoke")
             {
-               auto smoke = SmokeEffect::deserialize(tmxObject, objectGroup);
+               auto smoke = SmokeEffect::deserialize(tmx_object, object_group);
                _smoke_effect.push_back(smoke);
             }
-            else if (objectGroup->_name == "spike_balls")
+            else if (object_group->_name == "spike_balls")
             {
                auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
-               spikeBall->setup(tmxObject, _world);
+               spikeBall->setup(tmx_object, _world);
                _mechanism_spike_balls.push_back(spikeBall);
             }
-            else if (objectGroup->_name == "moveable_objects")
+            else if (object_group->_name == "moveable_objects")
             {
                auto box = std::make_shared<MoveableBox>(dynamic_cast<GameNode*>(this));
-               box->setup(tmxObject, _world);
+               box->setup(tmx_object, _world);
                _mechanism_moveable_boxes.push_back(box);
             }
-            else if (objectGroup->_name == "death_blocks")
+            else if (object_group->_name == "death_blocks")
             {
                auto deathBlock = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
-               deathBlock->setup(tmxObject, _world);
+               deathBlock->setup(tmx_object, _world);
                _mechanism_death_blocks.push_back(deathBlock);
             }
-            else if (objectGroup->_name == "checkpoints")
+            else if (object_group->_name == "checkpoints")
             {
-               const auto cpi = Checkpoint::add(tmxObject);
+               const auto cpi = Checkpoint::add(tmx_object);
                auto cp = Checkpoint::getCheckpoint(cpi);
 
                // whenever we reach a checkpoint, update the checkpoint index in the save state
@@ -492,39 +492,39 @@ void Level::loadTmx()
                // whenever we reach a checkpoint, serialize the save state
                cp->addCallback([](){SaveState::serializeToFile();});
             }
-            else if (objectGroup->_name == "dialogues")
+            else if (object_group->_name == "dialogues")
             {
-               Dialogue::add(tmxObject);
+               Dialogue::add(tmx_object);
             }
-            else if (objectGroup->_name == "bouncers")
+            else if (object_group->_name == "bouncers")
             {
                auto bouncer = std::make_shared<Bouncer>(
                   dynamic_cast<GameNode*>(this),
                   _world,
-                  tmxObject->_x_px,
-                  tmxObject->_y_px,
-                  tmxObject->_width_px,
-                  tmxObject->_height_px
+                  tmx_object->_x_px,
+                  tmx_object->_y_px,
+                  tmx_object->_width_px,
+                  tmx_object->_height_px
                );
 
-               bouncer->setZ(objectGroup->_z);
+               bouncer->setZ(object_group->_z);
 
                _mechanism_bouncers.push_back(bouncer);
 
                addDebugRect(
                   bouncer->getBody(),
-                  tmxObject->_x_px,
-                  tmxObject->_y_px,
-                  tmxObject->_width_px,
-                  tmxObject->_height_px
+                  tmx_object->_x_px,
+                  tmx_object->_y_px,
+                  tmx_object->_width_px,
+                  tmx_object->_height_px
                );
             }
-            else if (objectGroup->_name == "conveyorbelts")
+            else if (object_group->_name == "conveyorbelts")
             {
                auto belt = std::make_shared<ConveyorBelt>(
                   dynamic_cast<GameNode*>(this),
                   _world,
-                  tmxObject,
+                  tmx_object,
                   path
                );
 
@@ -532,61 +532,61 @@ void Level::loadTmx()
 
                addDebugRect(
                   belt->getBody(),
-                  tmxObject->_x_px,
-                  tmxObject->_y_px,
-                  tmxObject->_width_px,
-                  tmxObject->_height_px
+                  tmx_object->_x_px,
+                  tmx_object->_y_px,
+                  tmx_object->_width_px,
+                  tmx_object->_height_px
                );
             }
-            else if (objectGroup->_name == "crushers")
+            else if (object_group->_name == "crushers")
             {
                auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
-               crusher->setup(tmxObject, _world);
+               crusher->setup(tmx_object, _world);
                _mechanism_crushers.push_back(crusher);
             }
-            else if (objectGroup->_name == "rooms")
+            else if (object_group->_name == "rooms")
             {
-               Room::deserialize(tmxObject, _rooms);
+               Room::deserialize(tmx_object, _rooms);
             }
-            else if (objectGroup->_name == "platform_paths")
+            else if (object_group->_name == "platform_paths")
             {
-               if (tmxObject->_polyline)
+               if (tmx_object->_polyline)
                {
-                  MovingPlatform::link(_mechanism_platforms, tmxObject);
+                  MovingPlatform::link(_mechanism_platforms, tmx_object);
                }
             }
-            else if (objectGroup->_name == "weather")
+            else if (object_group->_name == "weather")
             {
                sf::IntRect rect{
-                  static_cast<int32_t>(tmxObject->_x_px),
-                  static_cast<int32_t>(tmxObject->_y_px),
-                  static_cast<int32_t>(tmxObject->_width_px),
-                  static_cast<int32_t>(tmxObject->_height_px)
+                  static_cast<int32_t>(tmx_object->_x_px),
+                  static_cast<int32_t>(tmx_object->_y_px),
+                  static_cast<int32_t>(tmx_object->_width_px),
+                  static_cast<int32_t>(tmx_object->_height_px)
                };
 
-               if (tmxObject->_name.rfind("rain", 0) == 0)
+               if (tmx_object->_name.rfind("rain", 0) == 0)
                {
                   Weather::getInstance().add(Weather::WeatherType::Rain, rect);
                }
             }
-            else if (objectGroup->_name.rfind("shader_quads", 0) == 0)
+            else if (object_group->_name.rfind("shader_quads", 0) == 0)
             {
-               auto quad = ShaderLayer::deserialize(tmxObject);
+               auto quad = ShaderLayer::deserialize(tmx_object);
                _shader_layers.push_back(quad);
             }
-            else if (objectGroup->_name == "lights")
+            else if (object_group->_name == "lights")
             {
-               auto light = LightSystem::createLightInstance(tmxObject);
+               auto light = LightSystem::createLightInstance(tmx_object);
                _light_system->_lights.push_back(light);
             }
-            else if (objectGroup->_name.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
+            else if (object_group->_name.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
             {
-               auto light = StaticLight::deserialize(tmxObject, objectGroup);
+               auto light = StaticLight::deserialize(tmx_object, object_group);
                _static_light->mLights.push_back(light);
             }
-            if (objectGroup->_name == "switchable_objects")
+            if (object_group->_name == "switchable_objects")
             {
-               Lever::addSearchRect(tmxObject);
+               Lever::addSearchRect(tmx_object);
             }
          }
       }
@@ -675,15 +675,15 @@ void Level::initialize()
 //-----------------------------------------------------------------------------
 void Level::loadCheckpoint()
 {
-   auto checkpointIndex = SaveState::getCurrent().mCheckpoint;
-   auto checkpoint = Checkpoint::getCheckpoint(checkpointIndex);
+   auto checkpoint_index = SaveState::getCurrent().mCheckpoint;
+   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index);
 
    if (checkpoint)
    {
       auto pos = checkpoint->calcCenter();
       _start_position.x = static_cast<float>(pos.x);
       _start_position.y = static_cast<float>(pos.y);
-      std::cout << "[-] move to checkpoint: " << checkpointIndex << std::endl;
+      std::cout << "[-] move to checkpoint: " << checkpoint_index << std::endl;
    }
    else
    {
@@ -715,41 +715,41 @@ void Level::spawnEnemies()
    // deprecated approach:
    // merge enemy layer from tmx with enemy info that's stored inside json
    // iterate through all enemies in the json
-   for (auto& jsonDescription : _description->_enemies)
+   for (auto& json_description : _description->_enemies)
    {
-      auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + jsonDescription.mScript);
+      auto lua_node = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + json_description.mScript);
 
       // find matching enemy data from the tmx layer and retrieve the patrol path from there
-      const auto& it = _enemy_data_from_tmx_layer.find(jsonDescription.mId);
+      const auto& it = _enemy_data_from_tmx_layer.find(json_description.mId);
       if (it != _enemy_data_from_tmx_layer.end())
       {
          // positions from the tmx are given in pixels, not tiles
-         jsonDescription.mPositionGivenInTiles = false;
+         json_description.mPositionGivenInTiles = false;
 
-         jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.x);
-         jsonDescription.mStartPosition.push_back(it->second.mPixelPosition.y);
+         json_description.mStartPosition.push_back(it->second._pixel_position.x);
+         json_description.mStartPosition.push_back(it->second._pixel_position.y);
 
-         if (jsonDescription.mGeneratePatrolPath)
+         if (json_description.mGeneratePatrolPath)
          {
             it->second.addPaths(_world_chains);
          }
 
-         if (!it->second.mPixelPath.empty())
+         if (!it->second._pixel_path.empty())
          {
-            jsonDescription.mPath = it->second.mPixelPath;
+            json_description.mPath = it->second._pixel_path;
          }
 
          // merge properties from tmx with those loaded from json
-         for (auto& property : it->second.mProperties)
+         for (auto& property : it->second._properties)
          {
-            jsonDescription.mProperties.push_back(property);
+            json_description.mProperties.push_back(property);
          }
       }
 
       // initialize lua node and store enemy
-      luaNode->mEnemyDescription = jsonDescription;
-      luaNode->initialize();
-      _enemies.push_back(luaNode);
+      lua_node->mEnemyDescription = json_description;
+      lua_node->initialize();
+      _enemies.push_back(lua_node);
    }
 
    // those enemies that have a lua script associated inside the tmx layer don't need
@@ -761,33 +761,33 @@ void Level::spawnEnemies()
 
       if (script.has_value())
       {
-         auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value().mValue);
+         auto lua_node = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value().mValue);
 
-         EnemyDescription jsonDescription;
-         jsonDescription.mPositionGivenInTiles = false;
-         jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.x);
-         jsonDescription.mStartPosition.push_back(it.second.mPixelPosition.y);
+         EnemyDescription json_description;
+         json_description.mPositionGivenInTiles = false;
+         json_description.mStartPosition.push_back(it.second._pixel_position.x);
+         json_description.mStartPosition.push_back(it.second._pixel_position.y);
 
-         if (jsonDescription.mGeneratePatrolPath)
+         if (json_description.mGeneratePatrolPath)
          {
             it.second.addPaths(_world_chains);
          }
 
-         if (!it.second.mPixelPath.empty())
+         if (!it.second._pixel_path.empty())
          {
-            jsonDescription.mPath = it.second.mPixelPath;
+            json_description.mPath = it.second._pixel_path;
          }
 
          // merge properties from tmx with those loaded from json
-         for (auto& property : it.second.mProperties)
+         for (auto& property : it.second._properties)
          {
-            jsonDescription.mProperties.push_back(property);
+            json_description.mProperties.push_back(property);
          }
 
          // initialize lua node and store enemy
-         luaNode->mEnemyDescription = jsonDescription;
-         luaNode->initialize();
-         _enemies.push_back(luaNode);
+         lua_node->mEnemyDescription = json_description;
+         lua_node->initialize();
+         _enemies.push_back(lua_node);
       }
    }
 }
@@ -873,11 +873,11 @@ void Level::updateCameraSystem(const sf::Time& dt)
    auto& cameraSystem = CameraSystem::getCameraSystem();
 
    // update room
-   const auto prevRoom = _room_current;
+   const auto prev_room = _room_current;
    _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
 
    // room changed
-   if (prevRoom != _room_current)
+   if (prev_room != _room_current)
    {
       std::cout
          << "[i] player moved to room: "
@@ -971,16 +971,16 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    if (player->isDead())
    {
-      auto deathRenderTexture = _death_shader->getRenderTexture();
+      auto death_render_texture = _death_shader->getRenderTexture();
 
       // render player to texture
-      deathRenderTexture->clear(sf::Color{0, 0, 0, 0});
-      deathRenderTexture->setView(*_level_view);
-      player->draw(*deathRenderTexture, normal);
-      deathRenderTexture->display();
+      death_render_texture->clear(sf::Color{0, 0, 0, 0});
+      death_render_texture->setView(*_level_view);
+      player->draw(*death_render_texture, normal);
+      death_render_texture->display();
 
       // render texture with shader applied
-      auto deathShaderSprite = sf::Sprite(deathRenderTexture->getTexture());
+      auto deathShaderSprite = sf::Sprite(death_render_texture->getTexture());
 
       // TODO: have a static view for rendertexture quads
       sf::View view(
@@ -1437,26 +1437,26 @@ void Level::addChainToWorld(
    // than to parse the box2d world every time we want those loops.
    _world_chains.push_back(chain);
 
-   b2ChainShape chainShape;
-   chainShape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
+   b2ChainShape chain_shape;
+   chain_shape.CreateLoop(&chain.at(0), static_cast<int32_t>(chain.size()));
 
-   b2FixtureDef fixtureDef;
-   fixtureDef.density = 0.0f;
-   fixtureDef.friction = 0.2f;
-   fixtureDef.shape = &chainShape;
+   b2FixtureDef fixture_def;
+   fixture_def.density = 0.0f;
+   fixture_def.friction = 0.2f;
+   fixture_def.shape = &chain_shape;
 
-   b2BodyDef bodyDef;
-   bodyDef.position.Set(0, 0);
-   bodyDef.type = b2_staticBody;
+   b2BodyDef body_def;
+   body_def.position.Set(0, 0);
+   body_def.type = b2_staticBody;
 
-   b2Body* body = _world->CreateBody(&bodyDef);
+   b2Body* body = _world->CreateBody(&body_def);
 
-   auto fixture = body->CreateFixture(&fixtureDef);
+   auto fixture = body->CreateFixture(&fixture_def);
 
-   auto objectData = new FixtureNode(this);
-   objectData->setType(object_type);
+   auto object_data = new FixtureNode(this);
+   object_data->setType(object_type);
 
-   fixture->SetUserData(static_cast<void*>(objectData));
+   fixture->SetUserData(static_cast<void*>(object_data));
 }
 
 
@@ -1485,7 +1485,7 @@ void Level::addDebugOutlines(
    }
 
    // path.printPoly();
-   std::vector<sf::Vertex> visiblePath;
+   std::vector<sf::Vertex> visible_path;
    for (auto& pos : positions)
    {
       sf::Vertex visibleVertex;
@@ -1493,11 +1493,11 @@ void Level::addDebugOutlines(
       visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * PIXELS_PER_TILE);
       visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * PIXELS_PER_TILE);
 
-      visiblePath.push_back(visibleVertex);
+      visible_path.push_back(visibleVertex);
    }
 
-   visiblePath.push_back(visiblePath.at(0));
-   _atmosphere.mOutlines.push_back(visiblePath);
+   visible_path.push_back(visible_path.at(0));
+   _atmosphere.mOutlines.push_back(visible_path);
 }
 
 
@@ -1547,7 +1547,7 @@ void Level::parseObj(
    for (const auto& face : faces)
    {
       std::vector<b2Vec2> chain;
-      std::vector<sf::Vector2f> debugPath;
+      std::vector<sf::Vector2f> debug_path;
       for (auto index : face)
       {
          const auto& p = points[index];
@@ -1557,7 +1557,7 @@ void Level::parseObj(
             }
          );
 
-         debugPath.push_back({
+         debug_path.push_back({
                p.x / PIXELS_PER_TILE,
                p.y / PIXELS_PER_TILE
             }
@@ -1645,9 +1645,9 @@ void Level::parsePhysicsTiles(
 
    static const float scale = 1.0f / 3.0f;
 
-   auto pathSolidOptimized = base_path / std::filesystem::path(pd->filename_obj_optimized);
+   auto path_solid_optimized = base_path / std::filesystem::path(pd->filename_obj_optimized);
 
-   std::cout << "[x] loading: " << pathSolidOptimized.make_preferred().generic_string() << std::endl;
+   std::cout << "[x] loading: " << path_solid_optimized.make_preferred().generic_string() << std::endl;
 
    _physics.parse(layer, tileset, base_path);
 
@@ -1665,9 +1665,9 @@ void Level::parsePhysicsTiles(
    square_marcher.writeGridToImage(base_path / std::filesystem::path(pd->filename_grid_image)); // not needed
    square_marcher.writePathToImage(base_path / std::filesystem::path(pd->filename_path_image)); // needed from obj as well
 
-   if (std::filesystem::exists(pathSolidOptimized))
+   if (std::filesystem::exists(path_solid_optimized))
    {
-      parseObj(layer, pd->object_type, pathSolidOptimized);
+      parseObj(layer, pd->object_type, path_solid_optimized);
    }
    else
    {
@@ -1683,7 +1683,7 @@ void Level::parsePhysicsTiles(
 #else
           auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
                 + pathSolidNotOptimised.string() + " "
-                + pathSolidOptimized.string();
+                + path_solid_optimized.string();
 #endif
 
          std::cout << "[x] running cmd: " << cmd << std::endl;
@@ -1703,15 +1703,15 @@ void Level::parsePhysicsTiles(
       }
 
       // fallback to square marched level
-      if (!std::filesystem::exists(pathSolidOptimized))
+      if (!std::filesystem::exists(path_solid_optimized))
       {
-         std::cerr << "[!] could not find " << pathSolidOptimized.string() << ", obj generator failed" << std::endl;
+         std::cerr << "[!] could not find " << path_solid_optimized.string() << ", obj generator failed" << std::endl;
          addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher.mPaths, pd->object_type);
       }
       else
       {
          // parse the optimised obj
-         parseObj(layer, pd->object_type, pathSolidOptimized);
+         parseObj(layer, pd->object_type, path_solid_optimized);
       }
    }
 

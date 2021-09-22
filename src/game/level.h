@@ -165,6 +165,12 @@ protected:
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
    void updatePlayerLight();
 
+   void drawDebugInformation();
+   void displayTextures();
+   void drawGlowLayer();
+   void drawGlowSprite();
+
+
    std::vector<std::shared_ptr<Room>> _rooms;
    std::shared_ptr<Room> _room_current;
    std::shared_ptr<Room> _room_previous;
@@ -246,11 +252,5 @@ protected:
    std::vector<std::vector<b2Vec2>> _world_chains;
 
    static Level* __current_level;
-
-private:
-   void drawDebugInformation();
-   void displayTextures();
-   void drawGlowLayer();
-   void drawGlowSprite();
 };
 

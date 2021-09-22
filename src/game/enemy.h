@@ -20,14 +20,14 @@ struct Enemy
 
    std::optional<ScriptProperty> findProperty(const std::string& key);
 
-   sf::Vector2i mPixelPosition;
-   std::string mId;
-   std::string mName;
-   sf::IntRect mRect;
-   std::array<sf::Vector2i, 4> mVertices;
-   std::vector<b2Vec2> mPath;
-   std::vector<int32_t> mPixelPath;
-   bool mHasPath = false;
-   std::vector<ScriptProperty> mProperties;
+   sf::Vector2i _pixel_position;
+   std::string _id;
+   std::string _name;
+   sf::IntRect _pixel_rect;
+   std::array<sf::Vector2i, 4> _vertices;
+   std::vector<b2Vec2> _path;
+   std::vector<int32_t> _pixel_path;
+   bool _has_path = false;
+   std::vector<ScriptProperty> _properties;
 };
 

@@ -11,9 +11,9 @@
 
 void Enemy::parse(TmxObject* object)
 {
-   mId = object->_id;
-   mName = object->_name;
-   mPixelPosition = {static_cast<int32_t>(object->_x_px), static_cast<int32_t>(object->_y_px)};
+   _id = object->_id;
+   _name = object->_name;
+   _pixel_position = {static_cast<int32_t>(object->_x_px), static_cast<int32_t>(object->_y_px)};
 
    if (object->_properties)
    {
@@ -22,7 +22,7 @@ void Enemy::parse(TmxObject* object)
          ScriptProperty property;
          property.mName = k;
          property.mValue = v->toString();
-         mProperties.push_back(property);
+         _properties.push_back(property);
       }
    }
 
@@ -36,14 +36,14 @@ void Enemy::parse(TmxObject* object)
       {
          if (!field.empty())
          {
-            mPixelPath.push_back(std::stoi(field) * PIXELS_PER_TILE);
+            _pixel_path.push_back(std::stoi(field) * PIXELS_PER_TILE);
          }
       }
 
-      if (mPixelPath.size() == 2)
+      if (_pixel_path.size() == 2)
       {
-         mPixelPath.insert(mPixelPath.begin(), mPixelPosition.y);
-         mPixelPath.insert(mPixelPath.begin(), mPixelPosition.x);
+         _pixel_path.insert(_pixel_path.begin(), _pixel_position.y);
+         _pixel_path.insert(_pixel_path.begin(), _pixel_position.x);
       }
    }
 
@@ -66,29 +66,29 @@ void Enemy::parse(TmxObject* object)
    top -= PIXELS_PER_TILE / 2;
    left -= PIXELS_PER_TILE / 2;
 
-   mRect.top = top;
-   mRect.left = left;
-   mRect.width = w;
-   mRect.height = h;
+   _pixel_rect.top = top;
+   _pixel_rect.left = left;
+   _pixel_rect.width = w;
+   _pixel_rect.height = h;
 
-   mVertices[0].x = left;
-   mVertices[0].y = top;
+   _vertices[0].x = left;
+   _vertices[0].y = top;
 
-   mVertices[1].x = left;
-   mVertices[1].y = top  + h;
+   _vertices[1].x = left;
+   _vertices[1].y = top  + h;
 
-   mVertices[2].x = left + w;
-   mVertices[2].y = top  + h;
+   _vertices[2].x = left + w;
+   _vertices[2].y = top  + h;
 
-   mVertices[3].x = left + w;
-   mVertices[3].y = top;
+   _vertices[3].x = left + w;
+   _vertices[3].y = top;
 }
 
 
 void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
 {
    // do destroy existing paths
-   if (!mPath.empty())
+   if (!_path.empty())
    {
       return;
    }
@@ -105,10 +105,10 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
          };
 
          // check if rect contains point, then we have a match
-         if (mRect.contains(v0))
+         if (_pixel_rect.contains(v0))
          {
-            mPath = path;
-            mHasPath = true;
+            _path = path;
+            _has_path = true;
             break;
          }
          else
@@ -121,38 +121,38 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
                static_cast<int32_t>(path[i1].y * PPM)
             };
 
-            const auto intersectsLeft   = SfmlMath::intersect(v0, v1, mVertices[0], mVertices[1]);
-            const auto intersectsBottom = SfmlMath::intersect(v0, v1, mVertices[1], mVertices[2]);
-            const auto intersectsRight  = SfmlMath::intersect(v0, v1, mVertices[2], mVertices[3]);
-            const auto intersectsTop    = SfmlMath::intersect(v0, v1, mVertices[3], mVertices[0]);
+            const auto intersects_left   = SfmlMath::intersect(v0, v1, _vertices[0], _vertices[1]);
+            const auto intersects_bottom = SfmlMath::intersect(v0, v1, _vertices[1], _vertices[2]);
+            const auto intersects_right  = SfmlMath::intersect(v0, v1, _vertices[2], _vertices[3]);
+            const auto intersects_top    = SfmlMath::intersect(v0, v1, _vertices[3], _vertices[0]);
 
             if (
-                  intersectsLeft.has_value()
-               || intersectsBottom.has_value()
-               || intersectsRight.has_value()
-               || intersectsTop.has_value()
+                  intersects_left.has_value()
+               || intersects_bottom.has_value()
+               || intersects_right.has_value()
+               || intersects_top.has_value()
             )
             {
                // std::cout << "assigned chain to: " << mId << std::endl;
-               mPath = path;
-               mHasPath = true;
+               _path = path;
+               _has_path = true;
                break;
             }
          }
       }
    }
 
-   if (!mHasPath)
+   if (!_has_path)
    {
       // not an error, enemy might just have a fixed position
       // std::cerr << "object " << mId << " (" << mName << ") has invalid chain" << std::endl;
    }
    else
    {
-      for (const auto& v : mPath)
+      for (const auto& v : _path)
       {
-         mPixelPath.push_back(static_cast<int32_t>(v.x * PPM));
-         mPixelPath.push_back(static_cast<int32_t>(v.y * PPM));
+         _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
+         _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
       }
    }
 }
@@ -162,11 +162,11 @@ std::optional<ScriptProperty> Enemy::findProperty(const std::string& key)
 {
    std::optional<ScriptProperty> property;
 
-   auto prop_it = std::find_if(mProperties.begin(), mProperties.end(), [key](auto& property){
+   auto prop_it = std::find_if(_properties.begin(), _properties.end(), [key](auto& property){
       return property.mName == key;}
    );
 
-   if (prop_it != mProperties.end())
+   if (prop_it != _properties.end())
    {
       return *prop_it;
    }
