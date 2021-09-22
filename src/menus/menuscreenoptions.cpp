@@ -122,30 +122,30 @@ void MenuScreenOptions::select()
 
 void MenuScreenOptions::updateLayers()
 {
-   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["back_xbox_1"]->mVisible = false;
+   mLayers["back_xbox_0"]->_visible = isControllerUsed();
+   mLayers["back_xbox_1"]->_visible = false;
 
-   mLayers["accept_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["accept_xbox_1"]->mVisible = false;
+   mLayers["accept_xbox_0"]->_visible = isControllerUsed();
+   mLayers["accept_xbox_1"]->_visible = false;
 
-   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["back_pc_1"]->mVisible = false;
+   mLayers["back_pc_0"]->_visible = !isControllerUsed();
+   mLayers["back_pc_1"]->_visible = false;
 
-   mLayers["accept_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["accept_pc_1"]->mVisible = false;
+   mLayers["accept_pc_0"]->_visible = !isControllerUsed();
+   mLayers["accept_pc_1"]->_visible = false;
 
-   mLayers["credits_0"]->mVisible = (mSelection != Selection::Credits);
-   mLayers["credits_1"]->mVisible = (mSelection == Selection::Credits);
-   mLayers["achievements_0"]->mVisible = (mSelection != Selection::Achievements);
-   mLayers["achievements_1"]->mVisible = (mSelection == Selection::Achievements);
-   mLayers["game_0"]->mVisible = (mSelection != Selection::Game);
-   mLayers["game_1"]->mVisible = (mSelection == Selection::Game);
-   mLayers["audio_0"]->mVisible = (mSelection != Selection::Audio);
-   mLayers["audio_1"]->mVisible = (mSelection == Selection::Audio);
-   mLayers["video_0"]->mVisible = (mSelection != Selection::Video);
-   mLayers["video_1"]->mVisible = (mSelection == Selection::Video);
-   mLayers["controls_0"]->mVisible = (mSelection != Selection::Controls);
-   mLayers["controls_1"]->mVisible = (mSelection == Selection::Controls);
+   mLayers["credits_0"]->_visible = (mSelection != Selection::Credits);
+   mLayers["credits_1"]->_visible = (mSelection == Selection::Credits);
+   mLayers["achievements_0"]->_visible = (mSelection != Selection::Achievements);
+   mLayers["achievements_1"]->_visible = (mSelection == Selection::Achievements);
+   mLayers["game_0"]->_visible = (mSelection != Selection::Game);
+   mLayers["game_1"]->_visible = (mSelection == Selection::Game);
+   mLayers["audio_0"]->_visible = (mSelection != Selection::Audio);
+   mLayers["audio_1"]->_visible = (mSelection == Selection::Audio);
+   mLayers["video_0"]->_visible = (mSelection != Selection::Video);
+   mLayers["video_1"]->_visible = (mSelection == Selection::Video);
+   mLayers["controls_0"]->_visible = (mSelection != Selection::Controls);
+   mLayers["controls_1"]->_visible = (mSelection == Selection::Controls);
 }
 
 

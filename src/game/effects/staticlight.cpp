@@ -136,7 +136,7 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* 
    light->mTexture = TexturePool::getInstance().get(texture);
    light->mSprite.setTexture(*light->mTexture);
    light->mSprite.setPosition(tmxObject->_x_px, tmxObject->_y_px);
-   light->mZ = objectGroup->_z;
+   light->mZ = objectGroup->_z_index;
 
    auto scaleX = tmxObject->_width_px / light->mTexture->getSize().x;
    auto scaleY = tmxObject->_height_px / light->mTexture->getSize().y;

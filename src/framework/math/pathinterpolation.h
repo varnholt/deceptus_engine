@@ -1,5 +1,4 @@
-#ifndef PATHINTERPOLATION_H
-#define PATHINTERPOLATION_H
+#pragma once
 
 #include <vector>
 #include <Box2D/Box2D.h>
@@ -16,8 +15,8 @@ public:
 
    struct Key
    {
-      b2Vec2 mPos;
-      float mTimeValue = 0.0f;
+      b2Vec2 _pos;
+      float _time_value = 0.0f;
    };
 
    PathInterpolation() = default;
@@ -39,13 +38,12 @@ private:
    size_t nextKeyIndex();
    bool checkKeyReached(const b2Vec2& currentPos);
 
-   Mode mMode = Mode::Linear;
-   std::vector<Key> mTrack;
-   float mTime = 0.0f;
-   bool mUp = true;
+   Mode _mode = Mode::Linear;
+   std::vector<Key> _track;
+   float _time = 0.0f;
+   bool _up = true;
 
-   b2Vec2 mVelocity;
-   size_t mCurrentKeyIndex = 0;
+   b2Vec2 _velocity;
+   size_t _current_key_index = 0;
 };
 
-#endif // PATHINTERPOLATION_H

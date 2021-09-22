@@ -18,19 +18,19 @@ static const auto ARROW_INDEX_RIGHT_Y = 1;
 }
 
 
-std::vector<b2Body*> ConveyorBelt::sBodiesOnBelt;
+std::vector<b2Body*> ConveyorBelt::__bodies_on_belt;
 
 
 void ConveyorBelt::setVelocity(float velocity)
 {
-   mVelocity = velocity;
-   mPointsRight = (mVelocity > 0.0f);
+   _velocity = velocity;
+   _points_right = (_velocity > 0.0f);
 }
 
 
 void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   for (auto& sprite : mBeltSprites)
+   for (auto& sprite : _belt_sprites)
    {
       color.draw(sprite);
    }
@@ -47,28 +47,28 @@ void ConveyorBelt::update(const sf::Time& dt)
 {
    if (!isEnabled())
    {
-      if (mLeverLag <= 0.0f)
+      if (_lever_lag <= 0.0f)
       {
          return;
       }
       else
       {
-         mLeverLag -= dt.asSeconds();
+         _lever_lag -= dt.asSeconds();
       }
    }
    else
    {
-      if (mLeverLag < 1.0f)
+      if (_lever_lag < 1.0f)
       {
-         mLeverLag += dt.asSeconds();
+         _lever_lag += dt.asSeconds();
       }
       else
       {
-         mLeverLag = 1.0f;
+         _lever_lag = 1.0f;
       }
    }
 
-   mElapsed += mLeverLag * dt.asSeconds();
+   _elapsed += _lever_lag * dt.asSeconds();
    updateSprite();
 }
 
@@ -76,24 +76,24 @@ void ConveyorBelt::update(const sf::Time& dt)
 void ConveyorBelt::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
-   mLeverLag = enabled ? 0.0f : 1.0f;
+   _lever_lag = enabled ? 0.0f : 1.0f;
 }
 
 
 void ConveyorBelt::updateSprite()
 {
-   const auto val = static_cast<int32_t>(mElapsed * 40.0f * fabs(mVelocity)) % BELT_TILE_COUNT;
-   const auto xOffset = mPointsRight ? 7 - val :  val;
+   const auto val = static_cast<int32_t>(_elapsed * 40.0f * fabs(_velocity)) % BELT_TILE_COUNT;
+   const auto xOffset = _points_right ? 7 - val :  val;
    auto yOffset = 0u;
 
-   for (auto i = 0u; i < mBeltSprites.size(); i++)
+   for (auto i = 0u; i < _belt_sprites.size(); i++)
    {
        if (i == 0u)
        {
            // left tile (row 0)
            yOffset = 0;
        }
-       else if (i == mBeltSprites.size() - 1)
+       else if (i == _belt_sprites.size() - 1)
        {
            // right tile (row 2)
            yOffset = PIXELS_PER_TILE * 2;
@@ -104,7 +104,7 @@ void ConveyorBelt::updateSprite()
            yOffset = PIXELS_PER_TILE;
        }
 
-       mBeltSprites[i].setTextureRect({
+       _belt_sprites[i].setTextureRect({
             xOffset * PIXELS_PER_TILE,
             static_cast<int32_t>(yOffset),
             PIXELS_PER_TILE,
@@ -118,42 +118,42 @@ void ConveyorBelt::updateSprite()
 ConveyorBelt::ConveyorBelt(
    GameNode* parent,
    const std::shared_ptr<b2World>& world,
-   TmxObject* tmxObject,
-   const std::filesystem::path& basePath
+   TmxObject* tmx_object,
+   const std::filesystem::path& base_path
 )
  : FixtureNode(parent)
 {
    setName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 
-   mTexture = TexturePool::getInstance().get(basePath / "tilesets" / "cbelt.png");
+   _texture = TexturePool::getInstance().get(base_path / "tilesets" / "cbelt.png");
 
-   float x      = tmxObject->_x_px;
-   float y      = tmxObject->_y_px;
-   float width  = tmxObject->_width_px;
-   float height = tmxObject->_height_px;
+   const auto x      = tmx_object->_x_px;
+   const auto y      = tmx_object->_y_px;
+   const auto width  = tmx_object->_width_px;
+   const auto height = tmx_object->_height_px;
 
-   auto velocity = mVelocity;
+   auto velocity = _velocity;
 
-   if (tmxObject->_properties)
+   if (tmx_object->_properties)
    {
-      auto velocityIt = tmxObject->_properties->_map.find("velocity");
-      if (velocityIt != tmxObject->_properties->_map.end())
+      auto velocity_it = tmx_object->_properties->_map.find("velocity");
+      if (velocity_it != tmx_object->_properties->_map.end())
       {
-         velocity = velocityIt->second->_value_float.value();
+         velocity = velocity_it->second->_value_float.value();
       }
    }
 
    setVelocity(velocity);
 
-   mPositionB2d = b2Vec2(x * MPP, y * MPP);
-   mPositionSf.x = x;
-   mPositionSf.y = y;
+   _position_b2d = b2Vec2(x * MPP, y * MPP);
+   _position_sfml.x = x;
+   _position_sfml.y = y;
 
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_staticBody;
-   bodyDef.position = mPositionB2d;
-   mBody = world->CreateBody(&bodyDef);
+   b2BodyDef body_def;
+   body_def.type = b2_staticBody;
+   body_def.position = _position_b2d;
+   _body = world->CreateBody(&body_def);
 
    // auto halfPhysicsWidth = width * MPP * 0.5f;
    // auto halfPhysicsHeight = height * MPP * 0.5f;
@@ -165,60 +165,60 @@ ConveyorBelt::ConveyorBelt(
    //    0.0f
    // );
 
-   const auto pWidth = width * MPP;
-   const auto pHeight = height * MPP;
+   const auto pixel_width = width * MPP;
+   const auto pixel_height = height * MPP;
 
    constexpr auto dx = 0.002f;
    constexpr auto dy = 0.001f;
    std::array<b2Vec2, 6> vertices {
-      b2Vec2{dx,           0.0},
-      b2Vec2{0.0,          pHeight - dy},
-      b2Vec2{0.0,          pHeight},
-      b2Vec2{pWidth,       pHeight},
-      b2Vec2{pWidth,       pHeight - dy},
-      b2Vec2{pWidth - dx,  0.0}
+      b2Vec2{dx,                0.0},
+      b2Vec2{0.0,               pixel_height - dy},
+      b2Vec2{0.0,               pixel_height},
+      b2Vec2{pixel_width,       pixel_height},
+      b2Vec2{pixel_width,       pixel_height - dy},
+      b2Vec2{pixel_width - dx,  0.0}
    };
 
-   mShapeBounds.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
+   _shape_bounds.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
-   b2FixtureDef boundaryFixtureDef;
-   boundaryFixtureDef.shape = &mShapeBounds;
-   boundaryFixtureDef.density = 1.0f;
-   boundaryFixtureDef.isSensor = false;
-   auto boundaryFixture = mBody->CreateFixture(&boundaryFixtureDef);
-   boundaryFixture->SetUserData(static_cast<void*>(this));
+   b2FixtureDef boundary_fixture_def;
+   boundary_fixture_def.shape = &_shape_bounds;
+   boundary_fixture_def.density = 1.0f;
+   boundary_fixture_def.isSensor = false;
+   auto boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
+   boundary_fixture->SetUserData(static_cast<void*>(this));
 
-   mBeltPixelRect.left   = static_cast<int32_t>(x);
-   mBeltPixelRect.top    = static_cast<int32_t>(y);
-   mBeltPixelRect.height = static_cast<int32_t>(height);
-   mBeltPixelRect.width  = static_cast<int32_t>(width);
+   _belt_pixel_rect.left   = static_cast<int32_t>(x);
+   _belt_pixel_rect.top    = static_cast<int32_t>(y);
+   _belt_pixel_rect.height = static_cast<int32_t>(height);
+   _belt_pixel_rect.width  = static_cast<int32_t>(width);
 
    static auto ROUND_EPSILON = 0.5f;
-   auto tileCount = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
+   auto tile_count = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
    // std::cout << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y << std::endl;
 
-   for (auto i = 0u; i < tileCount; i++)
+   for (auto i = 0u; i < tile_count; i++)
    {
-      sf::Sprite beltSprite;
-      beltSprite.setTexture(*mTexture);
-      beltSprite.setPosition(
+      sf::Sprite belt_sprite;
+      belt_sprite.setTexture(*_texture);
+      belt_sprite.setPosition(
          x + i * PIXELS_PER_TILE,
          y + Y_OFFSET
       );
 
-      mBeltSprites.push_back(beltSprite);
+      _belt_sprites.push_back(belt_sprite);
    }
 
-   for (auto i = 0u; i < tileCount - 1; i++)
+   for (auto i = 0u; i < tile_count - 1; i++)
    {
-      sf::Sprite arrowSprite;
-      arrowSprite.setTexture(*mTexture);
-      arrowSprite.setPosition(
+      sf::Sprite arrow_sprite;
+      arrow_sprite.setTexture(*_texture);
+      arrow_sprite.setPosition(
          x + i * PIXELS_PER_TILE + 12,
          y - 12
       );
 
-      arrowSprite.setTextureRect({
+      arrow_sprite.setTextureRect({
            ARROW_INDEX_X * PIXELS_PER_TILE,
            (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE,
            PIXELS_PER_TILE,
@@ -226,7 +226,7 @@ ConveyorBelt::ConveyorBelt(
         }
       );
 
-      mArrowSprites.push_back(arrowSprite);
+      _arrow_sprites.push_back(arrow_sprite);
    }
 
    updateSprite();
@@ -237,19 +237,19 @@ ConveyorBelt::ConveyorBelt(
 
 b2Body *ConveyorBelt::getBody() const
 {
-   return mBody;
+   return _body;
 }
 
 
 float ConveyorBelt::getVelocity() const
 {
-   return mVelocity;
+   return _velocity;
 }
 
 
 void ConveyorBelt::update()
 {
-   sBodiesOnBelt.clear();
+   __bodies_on_belt.clear();
    auto player = Player::getCurrent();
    player->setBeltVelocity(0.0f);
    player->setOnBelt(false);
@@ -257,40 +257,40 @@ void ConveyorBelt::update()
 
 
 void ConveyorBelt::processFixtureNode(
-   FixtureNode* fixtureNode,
-   b2Body* collidingBody
+   FixtureNode* fixture_node,
+   b2Body* colliding_body
 )
 {
-   if (fixtureNode->getType() == ObjectTypeConveyorBelt)
+   if (fixture_node->getType() == ObjectTypeConveyorBelt)
    {
-      auto playerBody = Player::getCurrent()->getBody();
+      auto player_body = Player::getCurrent()->getBody();
 
-      auto belt = dynamic_cast<ConveyorBelt*>(fixtureNode);
+      auto belt = dynamic_cast<ConveyorBelt*>(fixture_node);
 
       if (!belt->isEnabled())
       {
          return;
       }
 
-      auto beltVelocity = belt->getVelocity();
+      auto belt_velocity = belt->getVelocity();
 
       // only process a body once since bodies can have multiple fixtures
-      if (std::find(sBodiesOnBelt.begin(), sBodiesOnBelt.end(), collidingBody) == sBodiesOnBelt.end())
+      if (std::find(__bodies_on_belt.begin(), __bodies_on_belt.end(), colliding_body) == __bodies_on_belt.end())
       {
-         auto velocity = collidingBody->GetLinearVelocity();
-         velocity.x += beltVelocity;
+         auto velocity = colliding_body->GetLinearVelocity();
+         velocity.x += belt_velocity;
 
-        if (collidingBody != playerBody)
+        if (colliding_body != player_body)
         {
-           collidingBody->SetLinearVelocity(velocity);
-           sBodiesOnBelt.push_back(collidingBody);
+           colliding_body->SetLinearVelocity(velocity);
+           __bodies_on_belt.push_back(colliding_body);
         }
         else
         {
            // handle player differently because multiple linear velocities are applied to the player
            auto player = Player::getCurrent();
            player->setOnBelt(true);
-           player->setBeltVelocity(beltVelocity);
+           player->setBeltVelocity(belt_velocity);
         }
       }
    }
@@ -299,7 +299,7 @@ void ConveyorBelt::processFixtureNode(
 
 sf::IntRect ConveyorBelt::getPixelRect() const
 {
-   return mBeltPixelRect;
+   return _belt_pixel_rect;
 }
 
 

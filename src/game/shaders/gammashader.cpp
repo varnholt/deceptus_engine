@@ -19,7 +19,7 @@ void GammaShader::initialize()
 //----------------------------------------------------------------------------------------------------------------------
 void GammaShader::update()
 {
-   float gamma = 2.2f - (GameConfiguration::getInstance().mBrightness - 0.5f);
+   float gamma = 2.2f - (GameConfiguration::getInstance()._brightness - 0.5f);
    mGammaShader.setUniform("gamma", gamma);
 }
 

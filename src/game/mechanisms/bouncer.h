@@ -34,17 +34,18 @@ public:
 
 private:
 
-   Alignment mAlignment = Alignment::PointsUp;
-   b2Body* mBody = nullptr;
-   b2Vec2 mPositionB2d;
-   sf::Vector2f mPositionSf;
-   b2PolygonShape mShapeBounds;
-   b2PolygonShape mShapeSensor;
-
-   std::shared_ptr<sf::Texture> mTexture;
-   sf::Sprite mSprite;
-   sf::IntRect mRect;
-   sf::Time mActivationTime;
-   bool mPlayerAtBouncer = false;
    void updatePlayerAtBouncer();
+
+   Alignment _alignment = Alignment::PointsUp;
+   b2Body* _body = nullptr;
+   b2Vec2 _position_b2d;
+   sf::Vector2f _position_sfml;
+   b2PolygonShape _shape_bounds;
+   b2PolygonShape _shape_sensor;
+
+   std::shared_ptr<sf::Texture> _texture;
+   sf::Sprite _sprite;
+   sf::IntRect _rect;
+   sf::Time _activation_time;
+   bool _player_at_bouncer = false;
 };

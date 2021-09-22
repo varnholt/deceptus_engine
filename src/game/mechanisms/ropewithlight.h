@@ -16,7 +16,6 @@ class RopeWithLight : public Rope
 
       void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world) override;
 
-
    private:
 
       sf::Sprite _lamp_sprite;

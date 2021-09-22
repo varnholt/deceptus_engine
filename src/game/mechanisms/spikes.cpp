@@ -37,7 +37,7 @@ Spikes::Spikes(GameNode* parent)
 
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(mSprite);
+   color.draw(_sprite);
 }
 
 
@@ -45,86 +45,86 @@ void Spikes::updateInterval()
 {
    auto wait = false;
 
-   if (mTu == SPIKES_TILE_INDEX_UP)
+   if (_tu == SPIKES_TILE_INDEX_UP)
    {
-      mTriggered = false;
+      _triggered = false;
 
-      if (mElapsedMs < upTime)
+      if (_elapsed_ms < upTime)
       {
          wait = true;
       }
    }
 
-   if (mTu == SPIKES_PER_ROW - 1)
+   if (_tu == SPIKES_PER_ROW - 1)
    {
-      mTriggered = true;
+      _triggered = true;
 
-      if (mElapsedMs < downTime)
+      if (_elapsed_ms < downTime)
       {
          wait = true;
       }
    }
 
-   const auto updateTime = (mTriggered ? updateTimeUpMs : updateTimeDownMs);
-   if (!wait && mElapsedMs > updateTime)
+   const auto updateTime = (_triggered ? updateTimeUpMs : updateTimeDownMs);
+   if (!wait && _elapsed_ms > updateTime)
    {
-      mElapsedMs = (mElapsedMs % updateTime);
+      _elapsed_ms = (_elapsed_ms % updateTime);
 
-      if (mTriggered)
+      if (_triggered)
       {
          // extract
-         mTu -= 2;
-         if (mTu < SPIKES_TILE_INDEX_UP)
+         _tu -= 2;
+         if (_tu < SPIKES_TILE_INDEX_UP)
          {
-            mTu = SPIKES_TILE_INDEX_UP;
+            _tu = SPIKES_TILE_INDEX_UP;
          }
       }
       else
       {
          // retract
-         mTu++;
-         if (mTu >= SPIKES_PER_ROW)
+         _tu++;
+         if (_tu >= SPIKES_PER_ROW)
          {
-            mTu = SPIKES_PER_ROW - 1;
+            _tu = SPIKES_PER_ROW - 1;
          }
       }
    }
 
-   mDeadly = (mTu < 10);
+   _deadly = (_tu < 10);
 }
 
 
 void Spikes::updateTrap()
 {
-   if (mTu == SPIKES_TILE_INDEX_UP)
+   if (_tu == SPIKES_TILE_INDEX_UP)
    {
-      mTriggered = false;
+      _triggered = false;
 
-      if (mElapsedMs < upTime)
+      if (_elapsed_ms < upTime)
       {
          return;
       }
    }
 
    // trap trigger is done via intersection
-   if (mTu == TRAP_START_TILE)
+   if (_tu == TRAP_START_TILE)
    {
       auto playerRect = Player::getCurrent()->getPlayerPixelRect();
-      if (playerRect.intersects(mPixelRect))
+      if (playerRect.intersects(_pixel_rect))
       {
          // start counting from first intersection
-         if (!mTriggered)
+         if (!_triggered)
          {
-            mElapsedMs = 0;
+            _elapsed_ms = 0;
          }
 
-         mTriggered = true;
+         _triggered = true;
       }
 
       // trap was activated
-      if (mTriggered)
+      if (_triggered)
       {
-         if (mElapsedMs < trapTime)
+         if (_elapsed_ms < trapTime)
          {
             return;
          }
@@ -135,32 +135,32 @@ void Spikes::updateTrap()
       }
    }
 
-   const auto updateTime = (mTriggered ? updateTimeUpMs : updateTimeDownMs);
-   if (mElapsedMs > updateTime)
+   const auto updateTime = (_triggered ? updateTimeUpMs : updateTimeDownMs);
+   if (_elapsed_ms > updateTime)
    {
-      mElapsedMs = (mElapsedMs % updateTime);
+      _elapsed_ms = (_elapsed_ms % updateTime);
 
-      if (mTriggered)
+      if (_triggered)
       {
          // extract
-         mTu-=2;
-         if (mTu <= SPIKES_TILE_INDEX_UP)
+         _tu-=2;
+         if (_tu <= SPIKES_TILE_INDEX_UP)
          {
-            mTu = SPIKES_TILE_INDEX_UP;
+            _tu = SPIKES_TILE_INDEX_UP;
          }
       }
       else
       {
          // retract
-         mTu++;
-         if (mTu >= SPIKES_PER_ROW)
+         _tu++;
+         if (_tu >= SPIKES_PER_ROW)
          {
-            mTu = SPIKES_PER_ROW - 1;
+            _tu = SPIKES_PER_ROW - 1;
          }
       }
    }
 
-   mDeadly = (mTu < 10);
+   _deadly = (_tu < 10);
 }
 
 
@@ -169,56 +169,56 @@ void Spikes::updateToggled()
    if (isEnabled())
    {
       // initially mTu is in some wonky state due to that weird sprite set
-      if (mTu > SPIKES_TILE_INDEX_UP)
+      if (_tu > SPIKES_TILE_INDEX_UP)
       {
-         mTu--;
+         _tu--;
       }
-      else if (mTu < SPIKES_TILE_INDEX_UP)
+      else if (_tu < SPIKES_TILE_INDEX_UP)
       {
-         mTu++;
+         _tu++;
       }
    }
    else
    {
-      if (mTu < SPIKES_PER_ROW)
+      if (_tu < SPIKES_PER_ROW)
       {
-         mTu++;
+         _tu++;
       }
    }
 
-   mDeadly = (mTu < 10);
+   _deadly = (_tu < 10);
 }
 
 
 Spikes::Mode Spikes::getMode() const
 {
-   return mMode;
+   return _mode;
 }
 
 
 void Spikes::setMode(Mode mode)
 {
-   mMode = mode;
+   _mode = mode;
 }
 
 
 const sf::IntRect& Spikes::getPixelRect() const
 {
-   return mPixelRect;
+   return _pixel_rect;
 }
 
 
 void Spikes::updateSpriteRect()
 {
-   mSprite.setTextureRect({mTu * PIXELS_PER_TILE, mTv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+   _sprite.setTextureRect({_tu * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
 }
 
 
 void Spikes::update(const sf::Time& dt)
 {
-   mElapsedMs += dt.asMilliseconds();
+   _elapsed_ms += dt.asMilliseconds();
 
-   switch (mMode)
+   switch (_mode)
    {
       case Mode::Trap:
       {
@@ -243,11 +243,11 @@ void Spikes::update(const sf::Time& dt)
 
    updateSpriteRect();
 
-   if (mDeadly)
+   if (_deadly)
    {
       // check for intersection with player
       auto playerRect = Player::getCurrent()->getPlayerPixelRect();
-      if (playerRect.intersects(mPixelRect))
+      if (playerRect.intersects(_pixel_rect))
       {
          Player::getCurrent()->damage(100);
       }
@@ -283,24 +283,24 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
          {
             auto id = (tileNumber - firstId);
             auto spikes = std::make_shared<Spikes>();
-            spikes->mTexture = texture;
+            spikes->_texture = texture;
 
             allSpikes.push_back(spikes);
 
-            spikes->mTilePosition.x = static_cast<float>(i);
-            spikes->mTilePosition.y = static_cast<float>(j);
+            spikes->_tile_position.x = static_cast<float>(i);
+            spikes->_tile_position.y = static_cast<float>(j);
 
             // std::cout << "look up: " << id << std::endl;
 
-            spikes->mTu = static_cast<int32_t>(id % tilesPerRow);
-            spikes->mTv = static_cast<int32_t>(id / tilesPerRow);
+            spikes->_tu = static_cast<int32_t>(id % tilesPerRow);
+            spikes->_tv = static_cast<int32_t>(id / tilesPerRow);
 
             // spikes->mMode = Mode::Interval;
-            spikes->mMode = mode;
+            spikes->_mode = mode;
 
             if (mode == Mode::Trap)
             {
-               spikes->mTu = TRAP_START_TILE;
+               spikes->_tu = TRAP_START_TILE;
             }
 
             if (layer->_properties != nullptr)
@@ -308,7 +308,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
                spikes->setZ(layer->_properties->_map["z"]->_value_int.value());
             }
 
-            spikes->mPixelRect = {
+            spikes->_pixel_rect = {
                static_cast<int32_t>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                static_cast<int32_t>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
@@ -316,7 +316,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             };
 
             sf::Sprite sprite;
-            sprite.setTexture(*spikes->mTexture);
+            sprite.setTexture(*spikes->_texture);
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * PIXELS_PER_TILE),
@@ -324,7 +324,7 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
                )
             );
 
-            spikes->mSprite = sprite;
+            spikes->_sprite = sprite;
             spikes->updateSpriteRect();
          }
       }

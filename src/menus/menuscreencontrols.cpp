@@ -67,23 +67,23 @@ void MenuScreenControls::updateLayers()
 {
    // mLayers["body"]->mVisible = false;
 
-   mLayers["defaults_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["defaults_xbox_1"]->mVisible = false;
+   mLayers["defaults_xbox_0"]->_visible = isControllerUsed();
+   mLayers["defaults_xbox_1"]->_visible = false;
 
-   mLayers["setKey_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["setKey_xbox_1"]->mVisible = false;
+   mLayers["setKey_xbox_0"]->_visible = isControllerUsed();
+   mLayers["setKey_xbox_1"]->_visible = false;
 
-   mLayers["defaults_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["defaults_pc_1"]->mVisible = false;
+   mLayers["defaults_pc_0"]->_visible = !isControllerUsed();
+   mLayers["defaults_pc_1"]->_visible = false;
 
-   mLayers["setKey_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["setKey_pc_1"]->mVisible = false;
+   mLayers["setKey_pc_0"]->_visible = !isControllerUsed();
+   mLayers["setKey_pc_1"]->_visible = false;
 
-   mLayers["back_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["back_xbox_1"]->mVisible = false;
+   mLayers["back_xbox_0"]->_visible = isControllerUsed();
+   mLayers["back_xbox_1"]->_visible = false;
 
-   mLayers["back_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["back_pc_1"]->mVisible = false;
+   mLayers["back_pc_0"]->_visible = !isControllerUsed();
+   mLayers["back_pc_1"]->_visible = false;
 }
 
 

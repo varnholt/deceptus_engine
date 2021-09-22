@@ -76,9 +76,9 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
 
    polygon_shape.Set(vertices, 4);
 
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_kinematicBody;
-   _body = world->CreateBody(&bodyDef);
+   b2BodyDef body_def;
+   body_def.type = b2_kinematicBody;
+   _body = world->CreateBody(&body_def);
 
    setupTransform();
 
@@ -170,7 +170,7 @@ void DeathBlock::update(const sf::Time& dt)
 
 
 void DeathBlock::setup(
-   TmxObject* tmxObject,
+   TmxObject* tmx_object,
    const std::shared_ptr<b2World>& world
 )
 {
@@ -183,12 +183,12 @@ void DeathBlock::setup(
 
    setZ(ZDepthForegroundMin + 1);
 
-   _pixel_positions.x = tmxObject->_x_px;
-   _pixel_positions.y = tmxObject->_y_px;
+   _pixel_positions.x = tmx_object->_x_px;
+   _pixel_positions.y = tmx_object->_y_px;
 
    setupBody(world);
 
-   std::vector<sf::Vector2f> pixel_path = tmxObject->_polyline->_polyline;
+   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
    auto pos = pixel_path.at(0);
 
    auto i = 0;
@@ -197,14 +197,14 @@ void DeathBlock::setup(
       b2Vec2 world_pos;
       auto time = i / static_cast<float>(pixel_path.size() - 1);
 
-      auto x = (tmxObject->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
-      auto y = (tmxObject->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto x = (tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto y = (tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
       world_pos.x = x;
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.push_back({(pos.x + tmxObject->_x_px), (pos.y + tmxObject->_y_px)});
+      _pixel_paths.push_back({(pos.x + tmx_object->_x_px), (pos.y + tmx_object->_y_px)});
 
       // std::cout << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY << std::endl;
 

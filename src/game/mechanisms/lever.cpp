@@ -19,7 +19,7 @@
 #include <iostream>
 
 
-std::vector<TmxObject*> Lever::mRectangles;
+std::vector<TmxObject*> Lever::__rectangles;
 
 
 namespace
@@ -37,7 +37,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
    const std::shared_ptr<b2World>&
 )
 {
-   mRectangles.clear();
+   __rectangles.clear();
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
@@ -69,14 +69,14 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
                const auto x = PIXELS_PER_TILE * i;
                const auto y = PIXELS_PER_TILE * (j - 1);
 
-               lever->mRect.left = x;
-               lever->mRect.top = y;
-               lever->mRect.width = PIXELS_PER_TILE * 3;
-               lever->mRect.height = PIXELS_PER_TILE * 2;
+               lever->_rect.left = x;
+               lever->_rect.top = y;
+               lever->_rect.width = PIXELS_PER_TILE * 3;
+               lever->_rect.height = PIXELS_PER_TILE * 2;
 
-               lever->mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-               lever->mTexture = TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
-               lever->mSprite.setTexture(*lever->mTexture);
+               lever->_sprite.setPosition(static_cast<float>(x), static_cast<float>(y));
+               lever->_texture = TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
+               lever->_sprite.setTexture(*lever->_texture);
                lever->updateSprite();
 
                levers.push_back(lever);
@@ -92,25 +92,25 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 //-----------------------------------------------------------------------------
 bool Lever::getPlayerAtLever() const
 {
-   return mPlayerAtLever;
+   return _player_at_lever;
 }
 
 
 //-----------------------------------------------------------------------------
-void Lever::setPlayerAtLever(bool playerAtLever)
+void Lever::setPlayerAtLever(bool player_at_lever)
 {
-   mPlayerAtLever = playerAtLever;
+   _player_at_lever = player_at_lever;
 }
 
 
 //-----------------------------------------------------------------------------
 void Lever::updateSprite()
 {
-   const auto left = mDir == -1;
-   static const auto leftOffset = (SPRITES_PER_ROW - 1) * 3 * PIXELS_PER_TILE;
+   const auto left = _dir == -1;
+   static const auto left_offset = (SPRITES_PER_ROW - 1) * 3 * PIXELS_PER_TILE;
 
-   mSprite.setTextureRect({
-      left ? (leftOffset - mOffset * 3 * PIXELS_PER_TILE) : (mOffset * 3 * PIXELS_PER_TILE),
+   _sprite.setTextureRect({
+      left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE),
       left ? (3 * PIXELS_PER_TILE) : 0,
       PIXELS_PER_TILE * 3,
       PIXELS_PER_TILE * 2
@@ -121,25 +121,25 @@ void Lever::updateSprite()
 //-----------------------------------------------------------------------------
 void Lever::update(const sf::Time& /*dt*/)
 {
-   auto playerRect = Player::getCurrent()->getPlayerPixelRect();
-   setPlayerAtLever(mRect.intersects(playerRect));
+   auto player_rect = Player::getCurrent()->getPlayerPixelRect();
+   setPlayerAtLever(_rect.intersects(player_rect));
 
    bool reached = false;
 
-   if (mTargetState == State::Left)
+   if (_target_state == State::Left)
    {
-      mDir = -1;
-      reached = (mOffset == 0);
+      _dir = -1;
+      reached = (_offset == 0);
    }
-   else if (mTargetState == State::Right)
+   else if (_target_state == State::Right)
    {
-      mDir = 1;
-      reached = (mOffset == SPRITES_PER_ROW - 1);
+      _dir = 1;
+      reached = (_offset == SPRITES_PER_ROW - 1);
    }
-   else if (mTargetState == State::Middle)
+   else if (_target_state == State::Middle)
    {
-      mDir = (mPreviousState == State::Left) ? 1 : -1;
-      reached = (mOffset == ROW_CENTER);
+      _dir = (_state_previous == State::Left) ? 1 : -1;
+      reached = (_offset == ROW_CENTER);
    };
 
    if (reached)
@@ -147,7 +147,7 @@ void Lever::update(const sf::Time& /*dt*/)
       return;
    }
 
-   mOffset += mDir;
+   _offset += _dir;
 
    updateSprite();
 }
@@ -156,7 +156,7 @@ void Lever::update(const sf::Time& /*dt*/)
 //-----------------------------------------------------------------------------
 void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(mSprite);
+   color.draw(_sprite);
 }
 
 
@@ -165,13 +165,13 @@ void Lever::setEnabled(bool enabled)
 {
    if (enabled)
    {
-      mTargetState = State::Right;
-      mPreviousState = State::Left;
+      _target_state = State::Right;
+      _state_previous = State::Left;
    }
    else
    {
-      mTargetState = State::Left;
-      mPreviousState = State::Right;
+      _target_state = State::Left;
+      _state_previous = State::Right;
    }
 }
 
@@ -179,9 +179,9 @@ void Lever::setEnabled(bool enabled)
 //-----------------------------------------------------------------------------
 void Lever::updateReceivers()
 {
-   for (auto& cb : mCallbacks)
+   for (auto& cb : _callbacks)
    {
-      cb(static_cast<int32_t>(mTargetState));
+      cb(static_cast<int32_t>(_target_state));
    }
 }
 
@@ -189,55 +189,55 @@ void Lever::updateReceivers()
 //-----------------------------------------------------------------------------
 void Lever::toggle()
 {
-   if (!mPlayerAtLever)
+   if (!_player_at_lever)
    {
       return;
    }
 
-   if (mType == Type::TwoState)
+   if (_type == Type::TwoState)
    {
-      switch (mTargetState)
+      switch (_target_state)
       {
          case State::Left:
-            mTargetState = State::Right;
+            _target_state = State::Right;
             break;
          case State::Right:
-            mTargetState = State::Left;
+            _target_state = State::Left;
             break;
          case State::Middle:
             break;
       }
    }
 
-   else if (mType == Type::TriState)
+   else if (_type == Type::TriState)
    {
-      switch (mTargetState)
+      switch (_target_state)
       {
          case State::Left:
          {
-            mTargetState = State::Middle;
+            _target_state = State::Middle;
             break;
          }
          case State::Middle:
          {
-            if (mPreviousState == State::Left)
+            if (_state_previous == State::Left)
             {
-               mTargetState = State::Right;
+               _target_state = State::Right;
             }
             else
             {
-               mTargetState = State::Left;
+               _target_state = State::Left;
             }
             break;
          }
          case State::Right:
          {
-            mTargetState = State::Middle;
+            _target_state = State::Middle;
             break;
          }
       }
 
-      mPreviousState = mTargetState;
+      _state_previous = _target_state;
    }
 
    updateReceivers();
@@ -247,14 +247,14 @@ void Lever::toggle()
 //-----------------------------------------------------------------------------
 void Lever::setCallbacks(const std::vector<Callback>& callbacks)
 {
-   mCallbacks = callbacks;
+   _callbacks = callbacks;
 }
 
 
 //-----------------------------------------------------------------------------
 void Lever::addSearchRect(TmxObject* rect)
 {
-   mRectangles.push_back(rect);
+   __rectangles.push_back(rect);
 }
 
 
@@ -268,7 +268,7 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& spikes
 )
 {
-   for (auto rect : mRectangles)
+   for (auto rect : __rectangles)
    {
       sf::Rect<int32_t> searchRect;
       searchRect.left = static_cast<int32_t>(rect->_x_px);
@@ -297,7 +297,7 @@ void Lever::merge(
       {
          auto lever = std::dynamic_pointer_cast<Lever>(tmp);
 
-         if (lever->mRect.intersects(searchRect))
+         if (lever->_rect.intersects(searchRect))
          {
             // std::cout << "found match" << std::endl;
 
@@ -346,9 +346,9 @@ void Lever::merge(
             {
                auto platform = std::dynamic_pointer_cast<MovingPlatform>(p);
 
-               const auto& pixelPath = platform->getPixelPath();
+               const auto& pixel_path = platform->getPixelPath();
 
-               for (const auto& pixel : pixelPath)
+               for (const auto& pixel : pixel_path)
                {
                   if (searchRect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
                   {

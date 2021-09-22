@@ -37,14 +37,14 @@ class PSD
             int32_t getHeight() const;
 
          private:
-            std::array<uint8_t, 4> mSignature;
-            uint16_t mVersion;
-            std::array<uint8_t, 6> mReserved;
-            uint16_t mChannels;
-            int32_t mHeight;
-            int32_t mWidth;
-            uint16_t mDepth;
-            uint16_t mMode;
+            std::array<uint8_t, 4> _signature;
+            uint16_t _version;
+            std::array<uint8_t, 6> _reserved;
+            uint16_t _channels;
+            int32_t _height;
+            int32_t _width;
+            uint16_t _depth;
+            uint16_t _mode;
       };
 
       class Layer
@@ -75,10 +75,10 @@ class PSD
 
 
             private:
-                  int16_t mID = 0;
-                  int32_t mSize = 0;
-                  int32_t mWidth = 0;
-                  std::vector<uint8_t> mData;
+                  int16_t _id = 0;
+                  int32_t _size = 0;
+                  int32_t _width = 0;
+                  std::vector<uint8_t> _data;
             };
 
             Layer() = default;
@@ -109,21 +109,21 @@ class PSD
 
          private:
 
-            int32_t mTop = 0;
-            int32_t mLeft = 0;
-            int32_t mBottom = 0;
-            int32_t mRight = 0;
-            uint16_t mChannelCount = 0;
-            Image mImage;
-            std::vector<Channel> mChannels;
-            std::array<uint8_t, 4> mBlendModeSignature;
-            std::array<uint8_t, 4> mBlendModeKey;
-            uint8_t mOpacity = 0;
-            uint8_t mClipping = 0;
-            uint8_t mFlags = 0;
-            std::string mName;
-            SectionDivider mSectionDivider = SectionDivider::None;
-            ColorFormat mColorFormat = ColorFormat::ABGR;
+            int32_t _top = 0;
+            int32_t _left = 0;
+            int32_t _bottom = 0;
+            int32_t _right = 0;
+            uint16_t _channel_count = 0;
+            Image _image;
+            std::vector<Channel> _channels;
+            std::array<uint8_t, 4> _blend_mode_signature;
+            std::array<uint8_t, 4> _blend_mode_key;
+            uint8_t _opacity = 0;
+            uint8_t _clipping = 0;
+            uint8_t _flags = 0;
+            std::string _name;
+            SectionDivider _section_divider = SectionDivider::None;
+            ColorFormat _color_format = ColorFormat::ABGR;
       };
 
       class Path
@@ -175,13 +175,13 @@ class PSD
             void setName(const std::string& name);
 
          protected:
-            int32_t mRecordType = 0;
-            int32_t mPathRecordCount = 0;
-            int32_t mInitialFill = 0;
-            bool mFill = false;
-            std::string mName;
-            int32_t mPositionCount = 0;
-            std::vector<BezierKey> mPositions;
+            int32_t _record_type = 0;
+            int32_t _path_record_count = 0;
+            int32_t _initial_fill = 0;
+            bool _fill = false;
+            std::string _name;
+            int32_t _position_count = 0;
+            std::vector<BezierKey> _positions;
       };
 
       PSD() = default;
@@ -207,9 +207,9 @@ class PSD
       void loadImageResourceSection(std::istream& stream);
       void loadLayerAndMaskInformation(std::istream& stream);
 
-      ColorFormat mColorFormat = ColorFormat::ARGB;
-      Header mHeader;
-      std::vector<Layer> mLayers;
-      std::vector<Path> mPaths;
+      ColorFormat _color_format = ColorFormat::ARGB;
+      Header _header;
+      std::vector<Layer> _layers;
+      std::vector<Path> _paths;
 };
 

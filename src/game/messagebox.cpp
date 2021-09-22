@@ -189,8 +189,8 @@ void MessageBox::initializeLayers()
          sprite->setTexture(*texture, true);
          sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
 
-         tmp->mTexture = texture;
-         tmp->mSprite = sprite;
+         tmp->_texture = texture;
+         tmp->_sprite = sprite;
 
          sLayerStack.push_back(tmp);
          sLayers[layer.getName()] = tmp;
@@ -295,25 +295,25 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto buttons = sActive->mButtons;
    bool menuShown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
 
-   sLayers["msg-copyssYN"]->mVisible = false;
-   sLayers["msg-overwritessYN"]->mVisible = false;
-   sLayers["msg-deletessYN"]->mVisible = false;
-   sLayers["msg-defaultsYN"]->mVisible = false;
-   sLayers["msg-quitYN"]->mVisible = false;
-   sLayers["temp_bg"]->mVisible = menuShown;
-   sLayers["yes_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::Yes);
-   sLayers["no_xbox_1"]->mVisible = xbox && buttons & static_cast<int32_t>(Button::No);
-   sLayers["yes_pc_1"]->mVisible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
-   sLayers["no_pc_1"]->mVisible = !xbox && buttons & static_cast<int32_t>(Button::No);
-   sLayers["temp_bg"]->mVisible = false;
+   sLayers["msg-copyssYN"]->_visible = false;
+   sLayers["msg-overwritessYN"]->_visible = false;
+   sLayers["msg-deletessYN"]->_visible = false;
+   sLayers["msg-defaultsYN"]->_visible = false;
+   sLayers["msg-quitYN"]->_visible = false;
+   sLayers["temp_bg"]->_visible = menuShown;
+   sLayers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
+   sLayers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
+   sLayers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
+   sLayers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
+   sLayers["temp_bg"]->_visible = false;
 
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(
       sf::FloatRect(
          0.0f,
          0.0f,
-         static_cast<float>(GameConfiguration::getInstance().mViewWidth),
-         static_cast<float>(GameConfiguration::getInstance().mViewHeight)
+         static_cast<float>(GameConfiguration::getInstance()._view_width),
+         static_cast<float>(GameConfiguration::getInstance()._view_height)
       )
    );
 
@@ -321,7 +321,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    for (auto& layer : sLayerStack)
    {
-      if (layer->mVisible)
+      if (layer->_visible)
       {
          layer->draw(window, states);
       }

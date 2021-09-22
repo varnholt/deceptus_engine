@@ -6,8 +6,8 @@
 FadeTransitionEffect::FadeTransitionEffect(const sf::Color color)
  : _fade_color(color)
 {
-   const auto w = static_cast<float>(GameConfiguration::getInstance().mViewWidth);
-   const auto h = static_cast<float>(GameConfiguration::getInstance().mViewHeight);
+   const auto w = static_cast<float>(GameConfiguration::getInstance()._view_width);
+   const auto h = static_cast<float>(GameConfiguration::getInstance()._view_height);
 
    _vertices = {
       sf::Vertex{sf::Vector2f{0, 0}, _fade_color},
@@ -65,8 +65,8 @@ void FadeTransitionEffect::update(const sf::Time& dt)
 
 void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window->setView(view);

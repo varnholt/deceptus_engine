@@ -68,8 +68,8 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
    for (auto c : _chain_elements)
    {
       HermiteCurveKey k;
-      k.mPosition = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
-      k.mTime = (t += ti);
+      k._position = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
+      k._time = (t += ti);
       keys.push_back(k);
    }
 

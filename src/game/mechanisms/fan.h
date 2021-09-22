@@ -51,8 +51,8 @@ class Fan : public GameMechanism
       );
 
       static void resetAll();
-      static void addObject(TmxObject* object, const std::filesystem::path& basePath);
-      static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& playerRect);
+      static void addObject(TmxObject* object, const std::filesystem::path& base_path);
+      static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& player_rect);
       static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
       static void merge();
 
@@ -65,10 +65,10 @@ class Fan : public GameMechanism
 
       static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
 
-      static std::vector<std::shared_ptr<GameMechanism>> _fan_instances;
-      static std::vector<std::shared_ptr<FanTile>> _tile_instances;
-      static std::vector<TmxObject*> _object_instances;
-      static std::vector<sf::Vector2f> _weight_instances;
+      static std::vector<std::shared_ptr<GameMechanism>> __fan_instances;
+      static std::vector<std::shared_ptr<FanTile>> __tile_instances;
+      static std::vector<TmxObject*> __object_instances;
+      static std::vector<sf::Vector2f> __weight_instances;
 
       std::vector<std::shared_ptr<FanTile>> _tiles;
 
