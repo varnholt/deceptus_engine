@@ -73,8 +73,8 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    auto gameConfig = GameConfiguration::getInstance();
 
-   auto w = gameConfig.mViewWidth;
-   auto h = gameConfig.mViewHeight;
+   auto w = gameConfig._view_width;
+   auto h = gameConfig._view_height;
 
    // set up an ortho view with screen dimensions
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
@@ -276,31 +276,31 @@ void Menu::initialize()
    if (gci)
    {
       GameController::ThresholdCallback up;
-      up.mAxis = SDL_CONTROLLER_AXIS_LEFTY;
-      up.mBoundary = GameController::ThresholdCallback::Boundary::Lower;
-      up.mThreshold = -0.3f;
-      up.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Up);};
+      up._axis = SDL_CONTROLLER_AXIS_LEFTY;
+      up._boundary = GameController::ThresholdCallback::Boundary::Lower;
+      up._threshold = -0.3f;
+      up._callback = [this](){keyboardKeyPressed(sf::Keyboard::Up);};
       gci->getController()->addAxisThresholdExceedCallback(up);
 
       GameController::ThresholdCallback down;
-      down.mAxis = SDL_CONTROLLER_AXIS_LEFTY;
-      down.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Down);};
-      down.mBoundary = GameController::ThresholdCallback::Boundary::Upper;
-      down.mThreshold = 0.3f;
+      down._axis = SDL_CONTROLLER_AXIS_LEFTY;
+      down._callback = [this](){keyboardKeyPressed(sf::Keyboard::Down);};
+      down._boundary = GameController::ThresholdCallback::Boundary::Upper;
+      down._threshold = 0.3f;
       gci->getController()->addAxisThresholdExceedCallback(down);
 
       GameController::ThresholdCallback left;
-      left.mAxis = SDL_CONTROLLER_AXIS_LEFTX;
-      left.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Left);};
-      left.mBoundary = GameController::ThresholdCallback::Boundary::Lower;
-      left.mThreshold = -0.3f;
+      left._axis = SDL_CONTROLLER_AXIS_LEFTX;
+      left._callback = [this](){keyboardKeyPressed(sf::Keyboard::Left);};
+      left._boundary = GameController::ThresholdCallback::Boundary::Lower;
+      left._threshold = -0.3f;
       gci->getController()->addAxisThresholdExceedCallback(left);
 
       GameController::ThresholdCallback right;
-      right.mAxis = SDL_CONTROLLER_AXIS_LEFTX;
-      right.mBoundary = GameController::ThresholdCallback::Boundary::Upper;
-      right.mThreshold = 0.3f;
-      right.mCallback = [this](){keyboardKeyPressed(sf::Keyboard::Right);};
+      right._axis = SDL_CONTROLLER_AXIS_LEFTX;
+      right._boundary = GameController::ThresholdCallback::Boundary::Upper;
+      right._threshold = 0.3f;
+      right._callback = [this](){keyboardKeyPressed(sf::Keyboard::Right);};
       gci->getController()->addAxisThresholdExceedCallback(right);
 
 

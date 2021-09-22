@@ -54,7 +54,7 @@ void TmxParser::parse(const std::string &filename)
             else if (subElement->Name() == std::string("objectgroup"))
             {
                element = new TmxObjectGroup();
-               dynamic_cast<TmxObjectGroup*>(element)->_z = z;
+               dynamic_cast<TmxObjectGroup*>(element)->_z_index = z;
             }
 
             if (element != nullptr)

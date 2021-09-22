@@ -50,32 +50,29 @@ class Crusher : public GameMechanism, public GameNode
       void updateState();
       void updateSpritePositions();
 
-      Mode mMode = Mode::Interval;
-      State mState = State::Idle;
-      State mPreviousState = State::Idle;
-      Alignment mAlignment = Alignment::PointsDown;
+      Mode _mode = Mode::Interval;
+      State _state = State::Idle;
+      State _state_previous = State::Idle;
+      Alignment _alignment = Alignment::PointsDown;
 
-      b2Vec2 mOffsetBox;
-      b2Vec2 mOffsetBlade;
+      b2Body* _body = nullptr;
+      sf::Vector2f _pixel_position;
+      sf::Vector2f _blade_offset;
 
-      b2Body* mBody = nullptr;
-      sf::Vector2f mPixelPosition;
-      sf::Vector2f mBladeOffset;
+      sf::Time _idle_time;
+      sf::Time _extraction_time;
+      sf::Time _retraction_time;
 
-      sf::Time mIdleTime;
-      sf::Time mExtractionTime;
-      sf::Time mRetractionTime;
+      sf::Sprite _sprite_spike;
+      sf::Sprite _sprite_pusher;
+      sf::Sprite _sprite_mount;
+      sf::Vector2f _pixel_offset_mount;
+      sf::Vector2f _pixel_offset_pusher;
+      sf::Vector2f _pixel_offset_spike;
 
-      sf::Sprite mSpriteSpike;
-      sf::Sprite mSpritePusher;
-      sf::Sprite mSpriteMount;
-      sf::Vector2f mPixelOffsetMount;
-      sf::Vector2f mPixelOffsetPusher;
-      sf::Vector2f mPixelOffsetSpike;
+      int32_t _instance_id = 0;
 
-      int32_t mInstanceId = 0;
-
-      std::shared_ptr<sf::Texture> mTexture;
-      static int32_t mInstanceCounter;
+      std::shared_ptr<sf::Texture> _texture;
+      static int32_t __instance_counter;
 };
 

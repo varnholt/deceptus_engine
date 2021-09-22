@@ -16,13 +16,13 @@ ControllerOverlay::ControllerOverlay()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/controller.psd");
 
-   mTextureSize.x = psd.getWidth();
-   mTextureSize.y = psd.getHeight();
+   _texture_size.x = psd.getWidth();
+   _texture_size.y = psd.getHeight();
 
    for (const auto& layer : psd.getLayers())
    {
       auto tmp = std::make_shared<Layer>();
-      tmp->mVisible = layer.isVisible();
+      tmp->_visible = layer.isVisible();
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -34,42 +34,42 @@ ControllerOverlay::ControllerOverlay()
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
-      tmp->mTexture = texture;
-      tmp->mSprite = sprite;
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
 
-      mLayers[layer.getName()] = tmp;
+      _layers[layer.getName()] = tmp;
    }
 }
 
 
 void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
    auto windowView = sf::View(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   windowView.move(-w + mTextureSize.x + 10.0f, -h + mTextureSize.y + 10.0f);
+   windowView.move(-w + _texture_size.x + 10.0f, -h + _texture_size.y + 10.0f);
    window.setView(windowView);
 
-   auto controller_bg = mLayers["controller_bg"];
-   auto analog_l      = mLayers["analog_l"];
-   auto analog_r      = mLayers["analog_r"];
-   auto button_a      = mLayers["button_a"];
-   auto button_x      = mLayers["button_x"];
-   auto button_b      = mLayers["button_b"];
-   auto button_y      = mLayers["button_y"];
-   auto dp_down       = mLayers["dp_down"];
-   auto dp_up         = mLayers["dp_up"];
-   auto dp_left       = mLayers["dp_left"];
-   auto dp_right      = mLayers["dp_right"];
-   auto lb            = mLayers["lb"];
-   auto rt            = mLayers["rt"];
-   auto rb            = mLayers["rb"];
-   auto lt            = mLayers["lt"];
-   auto view          = mLayers["view"];
-   auto menu          = mLayers["menu"];
-   auto xbox          = mLayers["xbox"];
+   auto controller_bg = _layers["controller_bg"];
+   auto analog_l      = _layers["analog_l"];
+   auto analog_r      = _layers["analog_r"];
+   auto button_a      = _layers["button_a"];
+   auto button_x      = _layers["button_x"];
+   auto button_b      = _layers["button_b"];
+   auto button_y      = _layers["button_y"];
+   auto dp_down       = _layers["dp_down"];
+   auto dp_up         = _layers["dp_up"];
+   auto dp_left       = _layers["dp_left"];
+   auto dp_right      = _layers["dp_right"];
+   auto lb            = _layers["lb"];
+   auto rt            = _layers["rt"];
+   auto rb            = _layers["rb"];
+   auto lt            = _layers["lt"];
+   auto view          = _layers["view"];
+   auto menu          = _layers["menu"];
+   auto xbox          = _layers["xbox"];
 
 
    controller_bg->draw(window, states);
@@ -105,10 +105,10 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
       auto y1 = axis(SDL_CONTROLLER_AXIS_RIGHTY);
       auto tl = axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT);
       auto tr = axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
-      analog_l->mSprite->setOrigin(-x0 * analogFactor, -y0 * analogFactor);
-      analog_r->mSprite->setOrigin(-x1 * analogFactor, -y1 * analogFactor);
-      analog_l->mSprite->setColor(pressed(SDL_CONTROLLER_BUTTON_LEFTSTICK) ? sf::Color::Red : sf::Color::White);
-      analog_r->mSprite->setColor(pressed(SDL_CONTROLLER_BUTTON_RIGHTSTICK) ? sf::Color::Red : sf::Color::White);
+      analog_l->_sprite->setOrigin(-x0 * analogFactor, -y0 * analogFactor);
+      analog_r->_sprite->setOrigin(-x1 * analogFactor, -y1 * analogFactor);
+      analog_l->_sprite->setColor(pressed(SDL_CONTROLLER_BUTTON_LEFTSTICK) ? sf::Color::Red : sf::Color::White);
+      analog_r->_sprite->setColor(pressed(SDL_CONTROLLER_BUTTON_RIGHTSTICK) ? sf::Color::Red : sf::Color::White);
       analog_l->draw(window, states);
       analog_r->draw(window, states);
       if (tr > -0.8f) rt->draw(window, states);

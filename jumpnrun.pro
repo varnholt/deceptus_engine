@@ -160,7 +160,6 @@ SOURCES += \
    src/game/mechanisms/deathblock.cpp \
    src/game/mechanisms/door.cpp \
    src/game/mechanisms/fan.cpp \
-   src/game/mechanisms/jumpplatform.cpp \
    src/game/mechanisms/laser.cpp \
    src/game/mechanisms/lever.cpp \
    src/game/mechanisms/moveablebox.cpp \
@@ -380,7 +379,6 @@ HEADERS += \
    src/game/mechanisms/deathblock.h \
    src/game/mechanisms/door.h \
    src/game/mechanisms/fan.h \
-   src/game/mechanisms/jumpplatform.h \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/moveablebox.h \
    src/game/mechanisms/movingplatform.h \

@@ -106,8 +106,8 @@ void Audio::initializeTracks()
 void Audio::initializeMusicVolume()
 {
    auto& config = GameConfiguration::getInstance();
-   const auto master = config.mAudioVolumeMaster * 0.01f;
-   const auto music = config.mAudioVolumeMusic;
+   const auto master = config._audio_volume_master * 0.01f;
+   const auto music = config._audio_volume_music;
    _music.setVolume(master * music);
 }
 
@@ -132,8 +132,8 @@ void Audio::playSample(const std::string& sample, float volume)
    {
       thread_it->setBuffer(it->second);
 
-      const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
-      const auto sfx = (GameConfiguration::getInstance().mAudioVolumeSfx);
+      const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
+      const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx);
 
       thread_it->setVolume(master * sfx * volume);
       thread_it->play();

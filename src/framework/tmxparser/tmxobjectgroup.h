@@ -12,7 +12,7 @@ struct TmxObjectGroup : TmxElement
    ~TmxObjectGroup() override;
 
    std::map<std::string, TmxObject*> _objects;
-   int _z = 0;
+   int _z_index = 0;
 
    void deserialize(tinyxml2::XMLElement* e) override;
 };

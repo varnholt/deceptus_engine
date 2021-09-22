@@ -121,13 +121,13 @@ void Level::initializeTextures()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratio_width = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
-   const auto ratio_height = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+   const auto ratio_width = gameConfig._video_mode_width / gameConfig._view_width;
+   const auto ratio_height = gameConfig._video_mode_height / gameConfig._view_height;
    const auto size_ratio = std::min(ratio_width, ratio_height);
    _view_to_texture_scale = 1.0f / size_ratio;
 
-   const auto texture_width = static_cast<int32_t>(size_ratio * gameConfig.mViewWidth);
-   const auto texture_height = static_cast<int32_t>(size_ratio * gameConfig.mViewHeight);
+   const auto texture_width = static_cast<int32_t>(size_ratio * gameConfig._view_width);
+   const auto texture_height = static_cast<int32_t>(size_ratio * gameConfig._view_height);
 
    _render_texture_level_background = std::make_shared<sf::RenderTexture>();
    _render_texture_level_background->create(
@@ -507,7 +507,7 @@ void Level::loadTmx()
                   tmx_object->_height_px
                );
 
-               bouncer->setZ(object_group->_z);
+               bouncer->setZ(object_group->_z_index);
 
                _mechanism_bouncers.push_back(bouncer);
 
@@ -816,8 +816,8 @@ void Level::createViews()
    auto& gameConfig = GameConfiguration::getInstance();
 
    // the view dimensions never change
-   _view_width = static_cast<float>(gameConfig.mViewWidth);
-   _view_height = static_cast<float>(gameConfig.mViewHeight);
+   _view_width = static_cast<float>(gameConfig._view_width);
+   _view_height = static_cast<float>(gameConfig._view_height);
 
    _level_view.reset();
    _level_view = std::make_shared<sf::View>();

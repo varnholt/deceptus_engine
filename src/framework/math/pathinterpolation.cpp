@@ -7,48 +7,48 @@
 void PathInterpolation::addKey(const b2Vec2& pos, float timeValue)
 {
    Key key;
-   key.mPos = pos;
-   key.mTimeValue = timeValue;
+   key._pos = pos;
+   key._time_value = timeValue;
 
-   mTrack.push_back(key);
+   _track.push_back(key);
 }
 
 
-b2Vec2 PathInterpolation::compute(const b2Vec2& current, float timeValue)
+b2Vec2 PathInterpolation::compute(const b2Vec2& current, float time_value)
 {
    // clamp time
-   if (timeValue > 1.0f)
+   if (time_value > 1.0f)
    {
-      timeValue = 1.0f;
+      time_value = 1.0f;
    }
-   else if (timeValue < 0.0f)
+   else if (time_value < 0.0f)
    {
-      timeValue = 0.0f;
+      time_value = 0.0f;
    }
 
    b2Vec2 velocity;
 
-   switch (mMode)
+   switch (_mode)
    {
       case Mode::Linear:
       {
-         for (auto indexCurrent = 0u; indexCurrent < mTrack.size(); indexCurrent++)
+         for (auto index_current = 0u; index_current < _track.size(); index_current++)
          {
-            size_t indexNext = indexCurrent + 1;
-            if (indexNext == mTrack.size())
+            size_t index_next = index_current + 1;
+            if (index_next == _track.size())
             {
-               indexNext = mTrack.size() - 1;
+               index_next = _track.size() - 1;
             }
 
-            Key keyA = mTrack.at(indexCurrent);
-            Key keyB = mTrack.at(indexNext);
+            const auto& key_a = _track.at(index_current);
+            const auto& key_b = _track.at(index_next);
 
-            if (timeValue >= keyA.mTimeValue && timeValue < keyB.mTimeValue)
+            if (time_value >= key_a._time_value && time_value < key_b._time_value)
             {
-               auto a = 1.0f - (timeValue - keyA.mTimeValue);
-               auto b = 1.0f - (keyB.mTimeValue - timeValue);
+               auto a = 1.0f - (time_value - key_a._time_value);
+               auto b = 1.0f - (key_b._time_value - time_value);
 
-               velocity = (a * keyA.mPos + b * keyB.mPos) - current;
+               velocity = (a * key_a._pos + b * key_b._pos) - current;
                // printf("a: %f, b: %f, current: %f, %f, velocity: %f, %f\n", a, b, current.x, current.y, velocity.x, velocity.y);
                break;
             }
@@ -63,27 +63,27 @@ b2Vec2 PathInterpolation::compute(const b2Vec2& current, float timeValue)
 
 float PathInterpolation::updateZeroOneZeroOne(float delta)
 {
-   if (mTime >= 1.0f)
+   if (_time >= 1.0f)
    {
-      mTime = 1.0f;
-      mUp = false;
+      _time = 1.0f;
+      _up = false;
    }
-   else if (mTime <= 0.0f)
+   else if (_time <= 0.0f)
    {
-      mTime = 0.0f;
-      mUp = true;
+      _time = 0.0f;
+      _up = true;
    }
 
-   if (mUp)
+   if (_up)
    {
-      mTime += delta;
+      _time += delta;
    }
    else
    {
-      mTime -= delta;
+      _time -= delta;
    }
 
-   return mTime;
+   return _time;
 }
 
 
@@ -92,12 +92,12 @@ bool PathInterpolation::checkKeyReached(const b2Vec2& currentPos)
 {
   auto reached = false;
 
-  if (mTrack.empty())
+  if (_track.empty())
   {
      return false;
   }
 
-  if ((currentPos - mTrack[mCurrentKeyIndex].mPos).LengthSquared() < 0.1f)
+  if ((currentPos - _track[_current_key_index]._pos).LengthSquared() < 0.1f)
   {
      reached = true;
   }
@@ -108,14 +108,14 @@ bool PathInterpolation::checkKeyReached(const b2Vec2& currentPos)
 
 const std::vector<PathInterpolation::Key>& PathInterpolation::getTrack() const
 {
-   return mTrack;
+   return _track;
 }
 
 
 
 bool PathInterpolation::update(const b2Vec2& currentPos)
 {
-   if (mTrack.empty())
+   if (_track.empty())
    {
        return false;
    }
@@ -124,9 +124,9 @@ bool PathInterpolation::update(const b2Vec2& currentPos)
 
    // just check whether the speed needs to be updated (i.e. if one of the keys
    // has been reached)
-   if (checkKeyReached(currentPos) || !mVelocity.IsValid())
+   if (checkKeyReached(currentPos) || !_velocity.IsValid())
    {
-      mCurrentKeyIndex = nextKeyIndex();
+      _current_key_index = nextKeyIndex();
       computeVelocity();
       reached = true;
    }
@@ -140,24 +140,24 @@ bool PathInterpolation::update(const b2Vec2& currentPos)
 
 void PathInterpolation::computeVelocity()
 {
-   b2Vec2 a = mTrack[mCurrentKeyIndex].mPos;
-   b2Vec2 b = mTrack[nextKeyIndex()].mPos;
+   b2Vec2 a = _track[_current_key_index]._pos;
+   b2Vec2 b = _track[nextKeyIndex()]._pos;
 
-   mVelocity = (a - b);
-   mVelocity.Normalize();
+   _velocity = (a - b);
+   _velocity.Normalize();
 }
 
 
 const b2Vec2 PathInterpolation::getVelocity()
 {
-   return mVelocity;
+   return _velocity;
 }
 
 
 size_t PathInterpolation::nextKeyIndex()
 {
-  auto nextIndex = mCurrentKeyIndex + 1;
-  if (nextIndex == mTrack.size())
+  auto nextIndex = _current_key_index + 1;
+  if (nextIndex == _track.size())
   {
     nextIndex = 0;
   }

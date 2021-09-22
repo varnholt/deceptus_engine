@@ -40,7 +40,7 @@ LevelMap::LevelMap()
       // std::cout << layer.getName() << std::endl;
 
       auto tmp = std::make_shared<Layer>();
-      tmp->mVisible = layer.isVisible();
+      tmp->_visible = layer.isVisible();
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -52,8 +52,8 @@ LevelMap::LevelMap()
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
-      tmp->mTexture = texture;
-      tmp->mSprite = sprite;
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
 
       mLayers[layer.getName()] = tmp;
    }
@@ -78,8 +78,8 @@ void LevelMap::loadLevelTextures(
 
 void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    sf::Vector2f center;
    center += Player::getCurrent()->getPixelPositionf() * 0.125f;

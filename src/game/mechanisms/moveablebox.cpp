@@ -14,24 +14,24 @@ MoveableBox::MoveableBox(GameNode* node)
 {
    setName("MoveableBox");
 
-   mTexture = TexturePool::getInstance().get("data/level-malte/tilesets/crypts.png");
-   mSprite.setTexture(*mTexture.get());
+   _texture = TexturePool::getInstance().get("data/level-malte/tilesets/crypts.png");
+   _sprite.setTexture(*_texture.get());
 }
 
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(mSprite);
+   color.draw(_sprite);
 }
 
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
-   const auto x = mBody->GetPosition().x * PPM;
-   const auto y = mBody->GetPosition().y * PPM;
-   mSprite.setPosition(x, y - 24);
+   const auto x = _body->GetPosition().x * PPM;
+   const auto y = _body->GetPosition().y * PPM;
+   _sprite.setPosition(x, y - 24);
 }
 
 
@@ -73,22 +73,22 @@ void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& wo
    //      << " size: " << tmxObject->mWidth << " x " << tmxObject->mHeight
    //      << std::endl;
 
-   mSize.x = tmxObject->_width_px;
-   mSize.y = tmxObject->_height_px;
+   _size.x = tmxObject->_width_px;
+   _size.y = tmxObject->_height_px;
 
-   mSprite.setPosition(tmxObject->_x_px, tmxObject->_y_px - 24);
+   _sprite.setPosition(tmxObject->_x_px, tmxObject->_y_px - 24);
 
-   switch (static_cast<int32_t>(mSize.x))
+   switch (static_cast<int32_t>(_size.x))
    {
       case 24:
       {
-         mSprite.setTextureRect(sf::IntRect(1392, 0, 24, 2 * 24));
+         _sprite.setTextureRect(sf::IntRect(1392, 0, 24, 2 * 24));
          break;
       }
 
       case 48:
       {
-         mSprite.setTextureRect(sf::IntRect(1296, 24, 2 * 24, 3 * 24));
+         _sprite.setTextureRect(sf::IntRect(1296, 24, 2 * 24, 3 * 24));
          break;
       }
 
@@ -106,18 +106,18 @@ void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& wo
 //-----------------------------------------------------------------------------
 void MoveableBox::setupTransform()
 {
-   auto x = mSprite.getPosition().x / PPM;
-   auto y = mSprite.getPosition().y / PPM;
-   mBody->SetTransform(b2Vec2(x, y), 0);
+   auto x = _sprite.getPosition().x / PPM;
+   auto y = _sprite.getPosition().y / PPM;
+   _body->SetTransform(b2Vec2(x, y), 0);
 }
 
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
 {
-   b2PolygonShape polygonShape;
-   auto sizeX = mSize.x / PPM;
-   auto sizeY = mSize.y / PPM;
+   b2PolygonShape polygon_shape;
+   auto sizeX = _size.x / PPM;
+   auto sizeY = _size.y / PPM;
 
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(0,     0);
@@ -125,18 +125,18 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    vertices[2] = b2Vec2(sizeX, sizeY);
    vertices[3] = b2Vec2(sizeX, 0);
 
-   polygonShape.Set(vertices, 4);
+   polygon_shape.Set(vertices, 4);
 
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_dynamicBody;
-   mBody = world->CreateBody(&bodyDef);
+   b2BodyDef body_def;
+   body_def.type = b2_dynamicBody;
+   _body = world->CreateBody(&body_def);
    // mBody->SetGravityScale(0.0f);
 
    setupTransform();
 
-   auto fixture = mBody->CreateFixture(&polygonShape, 0);
-   auto objectData = new FixtureNode(this);
-   objectData->setType(ObjectTypeMoveableBox);
-   fixture->SetUserData(static_cast<void*>(objectData));
+   auto fixture = _body->CreateFixture(&polygon_shape, 0);
+   auto object_data = new FixtureNode(this);
+   object_data->setType(ObjectTypeMoveableBox);
+   fixture->SetUserData(static_cast<void*>(object_data));
 }
 

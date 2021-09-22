@@ -36,8 +36,8 @@ void CameraPane::update()
 
       if (fabs(x) > 0.1f || fabs(y) > 0.1f)
       {
-         auto w = GameConfiguration::getInstance().mViewWidth * 0.5f;
-         auto h = GameConfiguration::getInstance().mViewHeight * 0.5f;
+         auto w = GameConfiguration::getInstance()._view_width * 0.5f;
+         auto h = GameConfiguration::getInstance()._view_height * 0.5f;
 
          _look_vector.x = x * w;
          _look_vector.y = y * h;

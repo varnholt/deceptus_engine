@@ -15,7 +15,7 @@ void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    for (auto& layer : mLayerStack)
    {
-      if (layer->mVisible)
+      if (layer->_visible)
       {
          layer->draw(window, states);
       }
@@ -78,8 +78,8 @@ void MenuScreen::load()
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
       sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
 
-      tmp->mTexture = texture;
-      tmp->mSprite = sprite;
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
 
       // std::cout << "    " << layer.getName() << std::endl;
 

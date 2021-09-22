@@ -39,29 +39,29 @@ namespace {
 
 TGAHeader::TGAHeader(uint16_t w, uint16_t h, uint8_t bits)
 {
-   imagetype = 2; // rgb + no rle
-   width = w;
-   height = h;
-   bpp = bits;
+   _image_type = 2; // rgb + no rle
+   _width = w;
+   _height = h;
+   _bpp = bits;
 }
 
 
 void TGAHeader::save(std::ostream& stream)
 {
-   write(identsize, stream);
-   write(cmaptype, stream);
-   write(imagetype, stream);
-   write(cmapstart, stream);
-   write(cmaplength, stream);
-   write(cmapformat, stream);
-   write(originx, stream);
-   write(originy, stream);
-   write(width, stream);
-   write(height, stream);
-   write(bpp, stream);
-   write(descr, stream);
+   write(_ident_size, stream);
+   write(_cmap_type, stream);
+   write(_image_type, stream);
+   write(_cmap_start, stream);
+   write(_cmap_length, stream);
+   write(_cmap_format, stream);
+   write(_origin_x, stream);
+   write(_origin_y, stream);
+   write(_width, stream);
+   write(_height, stream);
+   write(_bpp, stream);
+   write(_descr, stream);
 
-   for (auto i=0; i < identsize; i++)
+   for (auto i=0; i < _ident_size; i++)
    {
       write(uint8_t(0), stream);
    }
@@ -76,8 +76,8 @@ int savetga(const std::string& filename, uint32_t* data, int32_t width, int32_t 
 
    for (int y = 0; y < height; y++)
    {
-      auto src = data + (height - 1 - y) * header.width;
-      for (auto x = 0u; x < header.width; x++)
+      auto src = data + (height - 1 - y) * header._width;
+      for (auto x = 0u; x < header._width; x++)
       {
          auto c = src[x];
          uint8_t b = c & 255;

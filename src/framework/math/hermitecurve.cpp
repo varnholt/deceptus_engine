@@ -5,48 +5,52 @@
 #include <cstdint>
 #include <math.h>
 
+
+namespace
+{
 static const auto clamp = true;
+}
 
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setPositionKeys(const std::vector<HermiteCurveKey>& keys)
 {
-   mPositionKeys = keys;
+   _position_keys = keys;
 }
 
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setOrientationKeys(const std::vector<HermiteCurveKey>& keys)
 {
-   mOrientationKeys = keys;
+   _orientation_keys = keys;
 }
 
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setPosition(const sf::Vector2f& position)
 {
-   mPosition = position;
+   _position = position;
 }
 
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setOrientation(const sf::Vector2f& orientation)
 {
-   mOrientation = orientation;
+   _orientation = orientation;
 }
 
 
 //-----------------------------------------------------------------------------
 const std::vector<HermiteCurveKey>& HermiteCurve::getPositionKeys() const
 {
-   return mPositionKeys;
+   return _position_keys;
 }
 
 
 //-----------------------------------------------------------------------------
 const std::vector<HermiteCurveKey>& HermiteCurve::getOrientationKeys() const
 {
-   return mOrientationKeys;
+   return _orientation_keys;
 }
 
 
@@ -69,18 +73,18 @@ void HermiteCurve::compute()
       {
          if (i == 0)
          {
-            p1 = source[        0                      ].mPosition;
-            p2 = source[clamp ? 0 : (source.size() - 1)].mPosition;
+            p1 = source[        0                      ]._position;
+            p2 = source[clamp ? 0 : (source.size() - 1)]._position;
          }
          else if (i == source.size() - 1)
          {
-            p1 = source[clamp ? (i - 1) : 0].mPosition;
-            p2 = source[         i - 1     ].mPosition;
+            p1 = source[clamp ? (i - 1) : 0]._position;
+            p2 = source[         i - 1     ]._position;
          }
          else
          {
-            p1 = source[i + 1].mPosition;
-            p2 = source[i - 1].mPosition;
+            p1 = source[i + 1]._position;
+            p2 = source[i - 1]._position;
          }
 
          sf::Vector2f tangent;
@@ -94,8 +98,8 @@ void HermiteCurve::compute()
       }
    };
 
-   comp(mPositionKeys, mPositionTangents);
-   comp(mOrientationKeys, mOrientationTangents);
+   comp(_position_keys, _position_tangents);
+   comp(_orientation_keys, _orientation_tangents);
 }
 
 
@@ -135,13 +139,13 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
 
    if (mode == Mode::Position)
    {
-      keys = mPositionKeys;
-      tangents = mPositionTangents;
+      keys = _position_keys;
+      tangents = _position_tangents;
    }
    else
    {
-      keys = mOrientationKeys;
-      tangents = mOrientationTangents;
+      keys = _orientation_keys;
+      tangents = _orientation_tangents;
    }
 
    // init sf::Vector2fs
@@ -155,7 +159,7 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    auto index = 0;
    for (; index < static_cast<int32_t>(keys.size()); index++)
    {
-      if (keys[index].mTime > time)
+      if (keys[index]._time > time)
       {
          index--;
          break;
@@ -173,23 +177,23 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    // init points
    sf::Vector2f p1;
    sf::Vector2f p2;
-   auto p1Time = 0.0f;
-   auto p2Time = 0.0f;
+   auto p1_time = 0.0f;
+   auto p2_time = 0.0f;
 
    if (index >= static_cast<int32_t>(keys.size()))
    {
-      sf::Vector2f p = keys[keys.size() - 1].mPosition;
+      sf::Vector2f p = keys[keys.size() - 1]._position;
       return p;
    }
 
-   p1 = keys[index].mPosition;
-   p1Time = keys[index].mTime;
+   p1 = keys[index]._position;
+   p1_time = keys[index]._time;
 
-   p2 = keys[index + 1].mPosition;
-   p2Time = keys[index + 1].mTime;
+   p2 = keys[index + 1]._position;
+   p2_time = keys[index + 1]._time;
 
    // scale s to a value between 0 and 1
-   const auto s = (time - p1Time) / (p2Time - p1Time);
+   const auto s = (time - p1_time) / (p2_time - p1_time);
    const auto s2 = s * s;
    const auto s3 = s2 * s;
 

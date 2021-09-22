@@ -41,7 +41,7 @@ ForestScene::ForestScene()
       // std::cout << layer.getName() << std::endl;
 
       auto tmp = std::make_shared<Layer>();
-      tmp->mVisible = true; // layer.isVisible();
+      tmp->_visible = true; // layer.isVisible();
 
 
       auto texture = std::make_shared<sf::Texture>();
@@ -54,8 +54,8 @@ ForestScene::ForestScene()
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
-      tmp->mTexture = texture;
-      tmp->mSprite = sprite;
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
 
       mLayers[layer.getName()] = tmp;
       mLayerStack.push_back(tmp);
@@ -65,8 +65,8 @@ ForestScene::ForestScene()
 
 void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
@@ -124,7 +124,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void ForestScene::update(const sf::Time& time)
 {
-   mLayers["mfog_1"]->mSprite->move(3.0f * time.asSeconds(), 0.0f);
-   mLayers["mfog_2"]->mSprite->move(2.0f * time.asSeconds(), 0.0f);
-   mLayers["mfog_3"]->mSprite->move(time.asSeconds(), 0.0f);
+   mLayers["mfog_1"]->_sprite->move(3.0f * time.asSeconds(), 0.0f);
+   mLayers["mfog_2"]->_sprite->move(2.0f * time.asSeconds(), 0.0f);
+   mLayers["mfog_3"]->_sprite->move(time.asSeconds(), 0.0f);
 }

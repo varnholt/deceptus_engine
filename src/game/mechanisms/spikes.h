@@ -55,26 +55,26 @@ private:
    void updateInterval();
    void updateTrap();
    void updateToggled();
-
-   sf::Vector2u mTileSize;
-
-   std::shared_ptr<sf::Texture> mTexture;
-
-   int32_t mTu = 0;
-   int32_t mTv = 0;
-
-   sf::Sprite mSprite;
-   int32_t mElapsedMs = 0;
-
-   sf::Vector2f mTilePosition;
-   sf::Vector2f mPixelPosition;
-   sf::IntRect mPixelRect;
-
-   bool mTriggered = false;
-   bool mDeadly = false;
-
-   Mode mMode = Mode::Invalid;
-   Orientation mOrientation = Orientation::Invalid;
    void updateSpriteRect();
+
+   sf::Vector2u _tile_size;
+
+   std::shared_ptr<sf::Texture> _texture;
+
+   int32_t _tu = 0;
+   int32_t _tv = 0;
+
+   sf::Sprite _sprite;
+   int32_t _elapsed_ms = 0;
+
+   sf::Vector2f _tile_position;
+   sf::Vector2f _pixel_position;
+   sf::IntRect _pixel_rect;
+
+   bool _triggered = false;
+   bool _deadly = false;
+
+   Mode _mode = Mode::Invalid;
+   Orientation _orientation = Orientation::Invalid;
 };
 

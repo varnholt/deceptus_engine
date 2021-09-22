@@ -31,12 +31,12 @@ class GameController
             Lower
          };
 
-         SDL_GameControllerAxis mAxis = SDL_CONTROLLER_AXIS_INVALID;
-         Boundary mBoundary = Boundary::Upper;
-         float mThreshold = 0.3f;
-         float mValue = 0.0f;
-         bool mInitialized = false;
-         ControllerCallback mCallback;
+         SDL_GameControllerAxis _axis = SDL_CONTROLLER_AXIS_INVALID;
+         Boundary _boundary = Boundary::Upper;
+         float _threshold = 0.3f;
+         float _value = 0.0f;
+         bool _initialized = false;
+         ControllerCallback _callback;
       };
 
 
@@ -127,22 +127,22 @@ class GameController
 
    private:
 
-      GameControllerInfo mInfo;
+      GameControllerInfo _info;
 
       //! active joystick
-      SDL_Joystick* mActiveJoystick = nullptr;
+      SDL_Joystick* _active_joystick = nullptr;
 
-      SDL_GameController* mController = nullptr;
-      SDL_GameControllerButtonBind mDpadUpBind;
-      SDL_GameControllerButtonBind mDpadDownBind;
-      SDL_GameControllerButtonBind mDpadLeftBind;
-      SDL_GameControllerButtonBind mDpadRightBind;
+      SDL_GameController* _controller = nullptr;
+      SDL_GameControllerButtonBind _dpad_bind_up;
+      SDL_GameControllerButtonBind _dpad_bind_down;
+      SDL_GameControllerButtonBind _dpad_bind_left;
+      SDL_GameControllerButtonBind _dpad_bind_right;
 
       //! running haptic effect
-      SDL_Haptic* mHaptic = nullptr;
+      SDL_Haptic* _haptic = nullptr;
 
-      std::map<SDL_GameControllerAxis, std::vector<ThresholdCallback>> mThresholdCallbacks;
-      std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> mButtonPressedCallbacks;
-      std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> mButtonReleasedCallbacks;
+      std::map<SDL_GameControllerAxis, std::vector<ThresholdCallback>> _threshold_callbacks;
+      std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> _button_pressed_callbacks;
+      std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> _button_released_callbacks;
 };
 

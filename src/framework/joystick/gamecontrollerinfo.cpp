@@ -9,15 +9,15 @@
    \param hatValues hat values
 */
 GameControllerInfo::GameControllerInfo(
-   const std::vector<int>& axisValues,
-   const std::vector<bool>& buttonValues,
-   const std::vector<GameControllerBallVector>& ballValues,
-   const std::vector<int> &hatValues
+   const std::vector<int32_t>& axis_values,
+   const std::vector<bool>& button_values,
+   const std::vector<GameControllerBallVector>& ball_values,
+   const std::vector<int32_t>& hat_values
 )
-   : mAxisValues(axisValues),
-     mButtonValues(buttonValues),
-     mBallValues(ballValues),
-     mHatValues(hatValues)
+   : _axis_values(axis_values),
+     _button_values(button_values),
+     _ball_values(ball_values),
+     _hat_values(hat_values)
 {
 }
 
@@ -26,9 +26,9 @@ GameControllerInfo::GameControllerInfo(
 /*!
    \param val value to append
 */
-void GameControllerInfo::addAxisValue(int val)
+void GameControllerInfo::addAxisValue(int32_t val)
 {
-   mAxisValues.push_back(val);
+   _axis_values.push_back(val);
 }
 
 
@@ -38,7 +38,7 @@ void GameControllerInfo::addAxisValue(int val)
 */
 void GameControllerInfo::addButtonState(bool val)
 {
-   mButtonValues.push_back(val);
+   _button_values.push_back(val);
 }
 
 
@@ -48,16 +48,16 @@ void GameControllerInfo::addButtonState(bool val)
 */
 void GameControllerInfo::addBallValue(const GameControllerBallVector& val)
 {
-   mBallValues.push_back(val);
+   _ball_values.push_back(val);
 }
 
 //-----------------------------------------------------------------------------
 /*!
    \param val value to append
 */
-void GameControllerInfo::addHatValue(int val)
+void GameControllerInfo::addHatValue(int32_t val)
 {
-   mHatValues.push_back(val);
+   _hat_values.push_back(val);
 }
 
 
@@ -65,9 +65,9 @@ void GameControllerInfo::addHatValue(int val)
 /*!
    \return axis values
 */
-const std::vector<int>& GameControllerInfo::getAxisValues() const
+const std::vector<int32_t>& GameControllerInfo::getAxisValues() const
 {
-   return mAxisValues;
+   return _axis_values;
 }
 
 
@@ -77,7 +77,7 @@ const std::vector<int>& GameControllerInfo::getAxisValues() const
 */
 const std::vector<bool>& GameControllerInfo::getButtonValues() const
 {
-   return mButtonValues;
+   return _button_values;
 }
 
 
@@ -87,7 +87,7 @@ const std::vector<bool>& GameControllerInfo::getButtonValues() const
 */
 const std::vector<GameControllerBallVector>& GameControllerInfo::getBallValues() const
 {
-   return mBallValues;
+   return _ball_values;
 }
 
 
@@ -95,7 +95,7 @@ const std::vector<GameControllerBallVector>& GameControllerInfo::getBallValues()
 /*!
    \return hat values
 */
-const std::vector<int> &GameControllerInfo::getHatValues() const
+const std::vector<int32_t> &GameControllerInfo::getHatValues() const
 {
-   return mHatValues;
+   return _hat_values;
 }

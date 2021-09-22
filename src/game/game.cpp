@@ -126,18 +126,18 @@ void Game::initializeWindow()
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
       sf::VideoMode(
-         static_cast<uint32_t>(gameConfig.mVideoModeWidth),
-         static_cast<uint32_t>(gameConfig.mVideoModeHeight)
+         static_cast<uint32_t>(gameConfig._video_mode_width),
+         static_cast<uint32_t>(gameConfig._video_mode_height)
       ),
       GAME_NAME,
-      gameConfig.mFullscreen ? sf::Style::Fullscreen : sf::Style::Default,
+      gameConfig._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
       context_settings
     );
 
-   _window->setVerticalSyncEnabled(gameConfig.mVSync);
+   _window->setVerticalSyncEnabled(gameConfig._vsync_enabled);
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);
-   _window->setMouseCursorVisible(!gameConfig.mFullscreen);
+   _window->setMouseCursorVisible(!gameConfig._fullscreen);
 
    // reset render textures if needed
    if (_window_render_texture != nullptr)
@@ -147,25 +147,25 @@ void Game::initializeWindow()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratio_width = gameConfig.mVideoModeWidth / gameConfig.mViewWidth;
-   const auto ratio_height = gameConfig.mVideoModeHeight / gameConfig.mViewHeight;
+   const auto ratio_width = gameConfig._video_mode_width / gameConfig._view_width;
+   const auto ratio_height = gameConfig._video_mode_height / gameConfig._view_height;
 
    const auto size_ratio = std::min(ratio_width, ratio_height);
 
-   int32_t texture_width = size_ratio * gameConfig.mViewWidth;
-   int32_t texture_height = size_ratio * gameConfig.mViewHeight;
+   int32_t texture_width = size_ratio * gameConfig._view_width;
+   int32_t texture_height = size_ratio * gameConfig._view_height;
 
    std::cout
       << "[x] video mode: "
-      << gameConfig.mVideoModeWidth << " x " << gameConfig.mVideoModeHeight
+      << gameConfig._video_mode_width << " x " << gameConfig._video_mode_height
       << ", view size: "
-      << gameConfig.mViewWidth << " x " << gameConfig.mViewHeight
+      << gameConfig._view_width << " x " << gameConfig._view_height
       << ", ratio: "
       << size_ratio
       << std::endl;
 
-   _render_texture_offset.x = static_cast<uint32_t>((gameConfig.mVideoModeWidth - texture_width) / 2);
-   _render_texture_offset.y = static_cast<uint32_t>((gameConfig.mVideoModeHeight - texture_height) / 2);
+   _render_texture_offset.x = static_cast<uint32_t>((gameConfig._video_mode_width - texture_width) / 2);
+   _render_texture_offset.y = static_cast<uint32_t>((gameConfig._video_mode_height - texture_height) / 2);
 
    _window_render_texture = std::make_shared<sf::RenderTexture>();
    _window_render_texture->create(
@@ -474,7 +474,7 @@ void Game::draw()
    _window_render_texture->display();
    auto windowTextureSprite = sf::Sprite(_window_render_texture->getTexture());
 
-   if (GameConfiguration::getInstance().mFullscreen)
+   if (GameConfiguration::getInstance()._fullscreen)
    {
       // scale window texture up to available window size
       const auto scaleX = _window->getSize().x / static_cast<float>(_window_render_texture->getSize().x);
@@ -791,7 +791,7 @@ void Game::openInventory()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::toggleFullScreen()
 {
-    GameConfiguration::getInstance().mFullscreen = !GameConfiguration::getInstance().mFullscreen;
+    GameConfiguration::getInstance()._fullscreen = !GameConfiguration::getInstance()._fullscreen;
     initializeWindow();
     _level->createViews();
 }
@@ -800,8 +800,8 @@ void Game::toggleFullScreen()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::changeResolution(int32_t w, int32_t h)
 {
-    GameConfiguration::getInstance().mVideoModeWidth = w;
-    GameConfiguration::getInstance().mVideoModeHeight = h;
+    GameConfiguration::getInstance()._video_mode_width = w;
+    GameConfiguration::getInstance()._video_mode_height = h;
     GameConfiguration::getInstance().serializeToFile();
 
     initializeWindow();

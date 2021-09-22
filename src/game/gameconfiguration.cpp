@@ -11,9 +11,8 @@
 using json = nlohmann::json;
 
 
-bool GameConfiguration::sInitialized = false;
-GameConfiguration GameConfiguration::sInstance;
-GameConfiguration GameConfiguration::mDefaults;
+bool GameConfiguration::__initialized = false;
+GameConfiguration GameConfiguration::__defaults;
 
 
 std::string GameConfiguration::serialize()
@@ -23,17 +22,17 @@ std::string GameConfiguration::serialize()
       {
          "GameConfiguration",
          {
-            {"video_mode_width",  mVideoModeWidth},
-            {"video_mode_height", mVideoModeHeight},
-            {"view_width",        mViewWidth},
-            {"view_height",       mViewHeight},
-            {"fullscreen",        mFullscreen},
-            {"brightness",        mBrightness},
-            {"vsync",             mVSync},
+            {"video_mode_width",  _video_mode_width},
+            {"video_mode_height", _video_mode_height},
+            {"view_width",        _view_width},
+            {"view_height",       _view_height},
+            {"fullscreen",        _fullscreen},
+            {"brightness",        _brightness},
+            {"vsync",             _vsync_enabled},
 
-            {"audio_volume_master", mAudioVolumeMaster},
-            {"audio_volume_sfx",    mAudioVolumeSfx},
-            {"audio_volume_music",  mAudioVolumeMusic},
+            {"audio_volume_master", _audio_volume_master},
+            {"audio_volume_sfx",    _audio_volume_sfx},
+            {"audio_volume_music",  _audio_volume_music},
          }
       }
    };
@@ -49,20 +48,20 @@ void GameConfiguration::deserialize(const std::string& data)
    json config = json::parse(data);
 
    try {
-       mVideoModeWidth  = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
-       mVideoModeHeight = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
-       mViewWidth       = config["GameConfiguration"]["view_width"].get<int32_t>();
-       mViewHeight      = config["GameConfiguration"]["view_height"].get<int32_t>();
-       mFullscreen      = config["GameConfiguration"]["fullscreen"].get<bool>();
-       mBrightness      = config["GameConfiguration"]["brightness"].get<float>();
-       mVSync           = config["GameConfiguration"]["vsync"].get<bool>();
+       _video_mode_width  = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
+       _video_mode_height = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
+       _view_width       = config["GameConfiguration"]["view_width"].get<int32_t>();
+       _view_height      = config["GameConfiguration"]["view_height"].get<int32_t>();
+       _fullscreen      = config["GameConfiguration"]["fullscreen"].get<bool>();
+       _brightness      = config["GameConfiguration"]["brightness"].get<float>();
+       _vsync_enabled           = config["GameConfiguration"]["vsync"].get<bool>();
 
-       mViewScaleWidth = static_cast<float>(mViewWidth) / static_cast<float>(mVideoModeWidth);
-       mViewScaleHeight = static_cast<float>(mViewHeight) / static_cast<float>(mVideoModeHeight);
+       _view_scale_width = static_cast<float>(_view_width) / static_cast<float>(_video_mode_width);
+       _view_scale_height = static_cast<float>(_view_height) / static_cast<float>(_video_mode_height);
 
-       mAudioVolumeMaster = config["GameConfiguration"]["audio_volume_master"].get<int32_t>();
-       mAudioVolumeSfx    = config["GameConfiguration"]["audio_volume_sfx"].get<int32_t>();
-       mAudioVolumeMusic  = config["GameConfiguration"]["audio_volume_music"].get<int32_t>();
+       _audio_volume_master = config["GameConfiguration"]["audio_volume_master"].get<int32_t>();
+       _audio_volume_sfx    = config["GameConfiguration"]["audio_volume_sfx"].get<int32_t>();
+       _audio_volume_music  = config["GameConfiguration"]["audio_volume_music"].get<int32_t>();
    }
    catch (const std::exception& e)
    {
@@ -100,26 +99,28 @@ void GameConfiguration::serializeToFile(const std::string &filename)
 
 GameConfiguration& GameConfiguration::getDefaults()
 {
-   return mDefaults;
+   return __defaults;
 }
 
 
 GameConfiguration& GameConfiguration::getInstance()
 {
-   if (!sInitialized)
+   static GameConfiguration __instance;
+
+   if (!__initialized)
    {
-      sInstance.deserializeFromFile();
-      sInitialized = true;
+      __instance.deserializeFromFile();
+      __initialized = true;
    }
 
-   return sInstance;
+   return __instance;
 }
 
 
 void GameConfiguration::resetAudioDefaults()
 {
-   getInstance().mAudioVolumeMaster = getDefaults().mAudioVolumeMaster;
-   getInstance().mAudioVolumeMusic = getDefaults().mAudioVolumeMusic;
-   getInstance().mAudioVolumeSfx = getDefaults().mAudioVolumeSfx;
+   getInstance()._audio_volume_master = getDefaults()._audio_volume_master;
+   getInstance()._audio_volume_music = getDefaults()._audio_volume_music;
+   getInstance()._audio_volume_sfx = getDefaults()._audio_volume_sfx;
 }
 

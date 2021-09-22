@@ -213,13 +213,13 @@ void MenuScreenNameSelect::retrieveUsername()
 void MenuScreenNameSelect::loadingFinished()
 {
     auto cursor = mLayers["cursor"];
-    mCharOrigin.x = cursor->mSprite->getPosition().x;
-    mCharOrigin.y = cursor->mSprite->getPosition().y;
+    mCharOrigin.x = cursor->_sprite->getPosition().x;
+    mCharOrigin.y = cursor->_sprite->getPosition().y;
 
     auto playerName = mLayers["players-name"];
-    mNameRect.left = playerName->mSprite->getPosition().x;
-    mNameRect.top = playerName->mSprite->getPosition().y;
-    mNameRect.width = static_cast<float>(playerName->mTexture->getSize().x);
+    mNameRect.left = playerName->_sprite->getPosition().x;
+    mNameRect.top = playerName->_sprite->getPosition().y;
+    mNameRect.width = static_cast<float>(playerName->_texture->getSize().x);
 
     retrieveUsername();
 
@@ -235,34 +235,34 @@ void MenuScreenNameSelect::updateLayers()
    // }
 
    auto cursor = mLayers["cursor"];
-   cursor->mSprite->setPosition(
+   cursor->_sprite->setPosition(
       static_cast<float>(mCharOrigin.x + mCharOffset.x * charWidth),
       static_cast<float>(mCharOrigin.y + mCharOffset.y * charHeight)
    );
 
-   mLayers["header-bg"]->mVisible = true;
-   mLayers["players-name"]->mVisible = false;
-   mLayers["temp_bg"]->mVisible = true;
-   mLayers["title"]->mVisible = true;
-   mLayers["window"]->mVisible = true;
+   mLayers["header-bg"]->_visible = true;
+   mLayers["players-name"]->_visible = false;
+   mLayers["temp_bg"]->_visible = true;
+   mLayers["title"]->_visible = true;
+   mLayers["window"]->_visible = true;
 
-   mLayers["name-error-msg"]->mVisible = false;
-   mLayers["Please enter your name"]->mVisible = true;
+   mLayers["name-error-msg"]->_visible = false;
+   mLayers["Please enter your name"]->_visible = true;
 
-   mLayers["delete_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["delete_xbox_1"]->mVisible = false;
-   mLayers["delete_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["delete_pc_1"]->mVisible = false;
+   mLayers["delete_xbox_0"]->_visible = isControllerUsed();
+   mLayers["delete_xbox_1"]->_visible = false;
+   mLayers["delete_pc_0"]->_visible = !isControllerUsed();
+   mLayers["delete_pc_1"]->_visible = false;
 
-   mLayers["confirm_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["confirm_xbox_1"]->mVisible = false;
-   mLayers["confirm_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["confirm_pc_1"]->mVisible = false;
+   mLayers["confirm_xbox_0"]->_visible = isControllerUsed();
+   mLayers["confirm_xbox_1"]->_visible = false;
+   mLayers["confirm_pc_0"]->_visible = !isControllerUsed();
+   mLayers["confirm_pc_1"]->_visible = false;
 
-   mLayers["cancel_xbox_0"]->mVisible = isControllerUsed();
-   mLayers["cancel_xbox_1"]->mVisible = false;
-   mLayers["cancel_pc_0"]->mVisible = !isControllerUsed();
-   mLayers["cancel_pc_1"]->mVisible = false;
+   mLayers["cancel_xbox_0"]->_visible = isControllerUsed();
+   mLayers["cancel_xbox_1"]->_visible = false;
+   mLayers["cancel_pc_0"]->_visible = !isControllerUsed();
+   mLayers["cancel_pc_1"]->_visible = false;
 }
 
 

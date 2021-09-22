@@ -24,9 +24,9 @@ class MoveableBox : public GameMechanism, public GameNode
       void setupBody(const std::shared_ptr<b2World>& world);
       void setupTransform();
 
-      std::shared_ptr<sf::Texture> mTexture;
-      sf::Sprite mSprite;
-      sf::Vector2f mSize;
-      b2Body* mBody = nullptr;
+      std::shared_ptr<sf::Texture> _texture;
+      sf::Sprite _sprite;
+      sf::Vector2f _size;
+      b2Body* _body = nullptr;
 };
 

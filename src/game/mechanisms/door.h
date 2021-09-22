@@ -58,8 +58,8 @@ private:
 
    void setupBody(
       const std::shared_ptr<b2World>& world,
-      float xOffset = 0.0f,
-      float xScale = 1.0f
+      float x_offset = 0.0f,
+      float x_scale = 1.0f
    );
 
    void updateTransform();
@@ -70,25 +70,25 @@ private:
    void close();
    bool checkPlayerAtDoor() const;
 
-   sf::Vector2u mTileSize;
-   std::shared_ptr<sf::Texture> mTexture;
+   sf::Vector2u _tile_size;
+   std::shared_ptr<sf::Texture> _texture;
 
-   sf::VertexArray mDoorQuad{sf::Quads, 4};
-   sf::Sprite mSpriteIcon;
+   sf::VertexArray _door_quad{sf::Quads, 4};
+   sf::Sprite _sprite_icon;
 
-   Type mType = Type::Bars;
+   Type _type = Type::Bars;
 
-   State mInitialState = State::Closed;
-   State mState = State::Closed;
+   State _initial_state = State::Closed;
+   State _state = State::Closed;
 
-   sf::Vector2i mTilePosition;
+   sf::Vector2i _tile_position;
 
-   ItemType mRequiredItem = ItemType::Invalid;
+   ItemType _required_item = ItemType::Invalid;
 
-   float mOffset = 0.0f;
-   int32_t mHeight = 0;
-   int32_t mTileId = 0;
-   bool mPlayerAtDoor = false;
-   b2Body* mBody = nullptr;
+   float _offset = 0.0f;
+   int32_t _height = 0;
+   int32_t _tile_id = 0;
+   bool _player_at_door = false;
+   b2Body* _body = nullptr;
 };
 

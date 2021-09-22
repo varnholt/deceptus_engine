@@ -82,8 +82,8 @@ void InventoryLayer::addDemoInventory()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::draw(sf::RenderTarget &window)
 {
-   auto w = GameConfiguration::getInstance().mViewWidth;
-   auto h = GameConfiguration::getInstance().mViewHeight;
+   auto w = GameConfiguration::getInstance()._view_width;
+   auto h = GameConfiguration::getInstance()._view_height;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);

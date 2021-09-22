@@ -43,8 +43,8 @@ void BoomEffect::update(const sf::Time& /*dt*/)
 
       const auto fx = mBoomFactor * mEffectAmplitude * 2.0f * sin(xSquare) * (1.0f / (1.0f + xSquare));
 
-      mBoomOffsetX = mFactorX * gameConfig.mViewWidth * fx;
-      mBoomOffsetY = mFactorY * gameConfig.mViewHeight * fx;
+      mBoomOffsetX = mFactorX * gameConfig._view_width * fx;
+      mBoomOffsetY = mFactorY * gameConfig._view_height * fx;
    }
    else
    {
