@@ -13,7 +13,7 @@ void MenuScreen::update(const sf::Time& /*dt*/)
 
 void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   for (auto& layer : mLayerStack)
+   for (auto& layer : _layer_stack)
    {
       if (layer->_visible)
       {
@@ -30,19 +30,18 @@ void MenuScreen::showEvent()
 
 void MenuScreen::hideEvent()
 {
-
 }
 
 
 const std::string& MenuScreen::getFilename()
 {
-   return mFilename;
+   return _filename;
 }
 
 
 void MenuScreen::setFilename(const std::string& filename)
 {
-   mFilename = filename;
+   _filename = filename;
 }
 
 
@@ -50,7 +49,7 @@ void MenuScreen::load()
 {
    PSD psd;
    psd.setColorFormat(PSD::ColorFormat::ABGR);
-   psd.load(mFilename);
+   psd.load(_filename);
 
    // std::cout << mFilename << std::endl;
 
@@ -83,8 +82,8 @@ void MenuScreen::load()
 
       // std::cout << "    " << layer.getName() << std::endl;
 
-      mLayerStack.push_back(tmp);
-      mLayers[layer.getName()] = tmp;
+      _layer_stack.push_back(tmp);
+      _layers[layer.getName()] = tmp;
    }
 
    // std::cout << "---------" << std::endl;

@@ -20,8 +20,8 @@ void Enemy::parse(TmxObject* object)
       for (const auto& [k, v] : object->_properties->_map)
       {
          ScriptProperty property;
-         property.mName = k;
-         property.mValue = v->toString();
+         property._name = k;
+         property._value = v->toString();
          _properties.push_back(property);
       }
    }
@@ -30,7 +30,7 @@ void Enemy::parse(TmxObject* object)
    const auto path = findProperty("path");
    if (path)
    {
-      std::istringstream s(path.value().mValue);
+      std::istringstream s(path.value()._value);
       std::string field;
       while (std::getline(s, field, ','))
       {
@@ -163,7 +163,7 @@ std::optional<ScriptProperty> Enemy::findProperty(const std::string& key)
    std::optional<ScriptProperty> property;
 
    auto prop_it = std::find_if(_properties.begin(), _properties.end(), [key](auto& property){
-      return property.mName == key;}
+      return property._name == key;}
    );
 
    if (prop_it != _properties.end())

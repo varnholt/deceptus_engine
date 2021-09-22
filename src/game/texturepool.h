@@ -23,9 +23,7 @@ private:
 
    TexturePool() = default;
 
-   static TexturePool sPool;
-
-   std::mutex mMutex;
-   std::map<std::string, std::weak_ptr<sf::Texture>> mPool;
+   std::mutex _mutex;
+   std::map<std::string, std::weak_ptr<sf::Texture>> _pool;
 };
 

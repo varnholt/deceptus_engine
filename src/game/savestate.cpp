@@ -9,36 +9,33 @@
 using json = nlohmann::json;
 
 
-std::array<SaveState, 3> SaveState::sSaveStates;
-uint32_t SaveState::sSlot = 0;
+std::array<SaveState, 3> SaveState::__save_states;
+uint32_t SaveState::__slot = 0;
 
 
 std::array<SaveState, 3>& SaveState::getSaveStates()
 {
-   return sSaveStates;
+   return __save_states;
 }
 
 
 bool SaveState::allEmpty()
 {
-   return std::all_of(sSaveStates.begin(), sSaveStates.end(), [](const auto& s) {
-         return s.isEmpty();
-      }
-   );
+   return std::all_of(__save_states.begin(), __save_states.end(), [](const auto& s) {return s.isEmpty();});
 }
 
 
 bool SaveState::isEmpty() const
 {
-   return mPlayerInfo.mName.empty();
+   return _player_info.mName.empty();
 }
 
 
 void SaveState::invalidate()
 {
-   mPlayerInfo = {};
-   mLevelIndex = {};
-   mCheckpoint = {};
+   _player_info = {};
+   _level_index = {};
+   _checkpoint = {};
 }
 
 
@@ -51,25 +48,25 @@ int32_t SaveState::computeProgress() const
 
 SaveState& SaveState::getSaveState(uint32_t slot)
 {
-   return sSaveStates[slot];
+   return __save_states[slot];
 }
 
 
 PlayerInfo& SaveState::getPlayerInfo()
 {
-   return sSaveStates[sSlot].mPlayerInfo;
+   return __save_states[__slot]._player_info;
 }
 
 
 SaveState& SaveState::getCurrent()
 {
-   return sSaveStates[sSlot];
+   return __save_states[__slot];
 }
 
 
 void SaveState::setCurrent(uint32_t slot)
 {
-   sSlot = slot;
+   __slot = slot;
 }
 
 
@@ -84,7 +81,7 @@ void SaveState::deserialize(const std::string& data)
 
    try
    {
-      sSaveStates = saveStates.get<std::array<SaveState, 3>>();
+      __save_states = saveStates.get<std::array<SaveState, 3>>();
    }
    catch (const std::exception& e)
    {
@@ -125,7 +122,7 @@ void SaveState::serializeToFile(const std::string& filename)
 std::string SaveState::serialize()
 {
    std::stringstream out;
-   json arr(sSaveStates);
+   json arr(__save_states);
    out << std::setw(4) << arr << "\n\n";
    return out.str();
 }
@@ -134,16 +131,16 @@ std::string SaveState::serialize()
 void to_json(nlohmann::json& j, const SaveState& data)
 {
    j = json{
-      {"levelindex", data.mLevelIndex},
-      {"checkpoint", data.mCheckpoint},
-      {"playerinfo", data.mPlayerInfo}
+      {"levelindex", data._level_index},
+      {"checkpoint", data._checkpoint},
+      {"playerinfo", data._player_info}
    };
 }
 
 
 void from_json(const nlohmann::json& j, SaveState& data)
 {
-   data.mLevelIndex = j.at("levelindex").get<uint32_t>();
-   data.mCheckpoint = j.at("checkpoint").get<uint32_t>();
-   data.mPlayerInfo = j.at("playerinfo").get<PlayerInfo>();
+   data._level_index = j.at("levelindex").get<uint32_t>();
+   data._checkpoint = j.at("checkpoint").get<uint32_t>();
+   data._player_info = j.at("playerinfo").get<PlayerInfo>();
 }

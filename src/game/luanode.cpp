@@ -28,9 +28,9 @@
 std::atomic<int32_t> LuaNode::sNextId = 0;
 
 namespace  {
-   uint16_t categoryBits = CategoryEnemyWalkThrough;                // I am a ...
-   uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
-   int16_t groupIndex = 0;                                          // 0 is default
+   uint16_t category_bits = CategoryEnemyWalkThrough;                // I am a ...
+   uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
+   int16_t group_index = 0;                                          // 0 is default
 }
 
 
@@ -1457,7 +1457,7 @@ void LuaNode::setupLua()
    // register properties
    for (auto& prop : mEnemyDescription.mProperties)
    {
-      luaWriteProperty(prop.mName, prop.mValue);
+      luaWriteProperty(prop._name, prop._value);
    }
 }
 
@@ -1987,9 +1987,9 @@ void LuaNode::setupBody()
 
       // apply default filter
       // http://www.iforce2d.net/b2dtut/collision-filtering
-      fd.filter.groupIndex = groupIndex;
-      fd.filter.maskBits = maskBitsStanding;
-      fd.filter.categoryBits = categoryBits;
+      fd.filter.groupIndex = group_index;
+      fd.filter.maskBits = mask_bits_standing;
+      fd.filter.categoryBits = category_bits;
 
       b2Fixture* fixture = mBody->CreateFixture(&fd);
       FixtureNode* fixtureNode = new FixtureNode(this);

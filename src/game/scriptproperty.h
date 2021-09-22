@@ -7,8 +7,8 @@ struct ScriptProperty
 {
    ScriptProperty() = default;
 
-   std::string mName;
-   std::string mValue;
+   std::string _name;
+   std::string _value;
 };
 
 

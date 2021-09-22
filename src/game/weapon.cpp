@@ -12,9 +12,9 @@
 namespace
 {
 
-uint16_t categoryBits = CategoryEnemyCollideWith;                // I am a ...
-uint16_t maskBitsStanding = CategoryBoundary | CategoryFriendly; // I collide with ...
-int16_t groupIndex = 0;                                          // 0 is default
+uint16_t category_bits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
+int16_t group_index = 0;                                          // 0 is default
 
 }
 
@@ -70,9 +70,9 @@ void Weapon::fireNow(
    fixtureDef.shape = _shape.get();
    fixtureDef.density = 0.0f;
 
-   fixtureDef.filter.groupIndex   = groupIndex;
-   fixtureDef.filter.maskBits     = maskBitsStanding;
-   fixtureDef.filter.categoryBits = categoryBits;
+   fixtureDef.filter.groupIndex   = group_index;
+   fixtureDef.filter.maskBits     = mask_bits_standing;
+   fixtureDef.filter.categoryBits = category_bits;
 
    auto fixture = _body->CreateFixture(&fixtureDef);
 

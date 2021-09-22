@@ -31,6 +31,7 @@ public:
       uint32_t frames_per_row,
       uint32_t start_frame
    );
+
    static std::map<std::string, AnimationFrameData>::const_iterator getReferenceAnimation(const std::string& id);
    static void setupDefaultAnimation();
    static AnimationFrameData getDefaultAnimation();
@@ -38,8 +39,8 @@ public:
 
 protected:
 
-   static std::vector<ProjectileHitAnimation*> _active_animations;
-   static std::map<std::string, AnimationFrameData> _reference_animations;
+   static std::vector<ProjectileHitAnimation*> __active_animations;
+   static std::map<std::string, AnimationFrameData> __reference_animations;
 
 };
 

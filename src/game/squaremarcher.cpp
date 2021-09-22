@@ -13,18 +13,18 @@ SquareMarcher::SquareMarcher(
    uint32_t w,
    uint32_t h,
    const std::vector<int32_t>& tiles,
-   const std::vector<int32_t>& collidingTiles,
-   const std::filesystem::path& cachePath,
+   const std::vector<int32_t>& colliding_tiles,
+   const std::filesystem::path& cache_path,
    float scaleFactor
 )
- : mWidth(w),
-   mHeight(h),
-   mTiles(tiles),
-   mCollidingTiles(collidingTiles),
-   mCachePath(cachePath),
-   mScale(scaleFactor)
+ : _width(w),
+   _height(h),
+   _tiles(tiles),
+   _colliding_tiles(colliding_tiles),
+   _cache_path(cache_path),
+   _scale(scaleFactor)
 {
-   mVisited.resize(mWidth * mHeight);
+   _visited.resize(_width * _height);
 
    // dumpMap();
    scan();
@@ -35,9 +35,9 @@ SquareMarcher::SquareMarcher(
 
 void SquareMarcher::printMap()
 {
-   for (auto y = 0u; y < mHeight; y++)
+   for (auto y = 0u; y < _height; y++)
    {
-      for (auto x = 0u; x < mWidth; x++)
+      for (auto x = 0u; x < _width; x++)
       {
          printf("%d", isColliding(x, y));
       }
@@ -49,11 +49,11 @@ void SquareMarcher::printMap()
 void SquareMarcher::dumpMap()
 {
    std::ofstream fileOut("map.dump");
-   for (auto y = 0u; y < mHeight; y++)
+   for (auto y = 0u; y < _height; y++)
    {
-      for (auto x = 0u; x < mWidth; x++)
+      for (auto x = 0u; x < _width; x++)
       {
-         fileOut << mTiles[y * mWidth + x];
+         fileOut << _tiles[y * _width + x];
       }
       fileOut << std::endl;
    }
@@ -63,20 +63,20 @@ void SquareMarcher::dumpMap()
 
 void SquareMarcher::serialize()
 {
-   std::ofstream fileOut(mCachePath);
-   for (const auto& path : mPaths)
+   std::ofstream file_out(_cache_path);
+   for (const auto& path : _paths)
    {
-      for (const auto& pos : path.mPolygon)
+      for (const auto& pos : path._polygon)
       {
-         fileOut << std::fixed << std::setprecision(8) << pos.x;
-         fileOut << ",";
-         fileOut << std::fixed << std::setprecision(3) << pos.y;
-         fileOut << ";";
+         file_out << std::fixed << std::setprecision(8) << pos.x;
+         file_out << ",";
+         file_out << std::fixed << std::setprecision(3) << pos.y;
+         file_out << ";";
       }
 
-      fileOut << std::endl;
+      file_out << std::endl;
    }
-   fileOut.close();
+   file_out.close();
 }
 
 
@@ -84,8 +84,8 @@ void SquareMarcher::deserialize()
 {
    std::string line;
 
-   std::ifstream fileIn(mCachePath);
-   while (std::getline(fileIn, line))
+   std::ifstream file_in(_cache_path);
+   while (std::getline(file_in, line))
    {
       std::istringstream lineStream(line);
       std::string item;
@@ -103,10 +103,10 @@ void SquareMarcher::deserialize()
          std::getline(posStream, eatComma, ',');
          posStream >> y;
 
-         path.mPolygon.push_back(sf::Vector2i{x, y});
+         path._polygon.push_back(sf::Vector2i{x, y});
       }
 
-      mPaths.push_back(path);
+      _paths.push_back(path);
    }
 }
 
@@ -115,21 +115,21 @@ void SquareMarcher::scan()
 {
    std::srand(static_cast<uint32_t>(std::time(nullptr)));
 
-   std::ifstream fileIn(mCachePath);
+   std::ifstream fileIn(_cache_path);
    if (fileIn.fail())
    {
       // scan tiles until collision hit that wasn't visited
-      for (auto y = 0u; y < mHeight; y++)
+      for (auto y = 0u; y < _height; y++)
       {
-         for (auto x = 0u; x < mWidth; x++)
+         for (auto x = 0u; x < _width; x++)
          {
             if (!isVisited(x, y) && isColliding(x, y))
             {
                auto p = march(x, y);
 
-               if (!p.mPolygon.empty())
+               if (!p._polygon.empty())
                {
-                  mPaths.push_back(p);
+                  _paths.push_back(p);
                }
             }
          }
@@ -145,16 +145,16 @@ void SquareMarcher::scan()
 
 
 
-void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
+void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
 {
-   std::ifstream fileIn(imagePath);
-   if (fileIn.fail())
+   std::ifstream file_in(image_path);
+   if (file_in.fail())
    {
       float factor = 1.0f;
-      sf::RenderTexture renderTexture;
-      if (!renderTexture.create(
-            static_cast<uint32_t>(mWidth * factor),
-            static_cast<uint32_t>(mHeight * factor)
+      sf::RenderTexture render_texture;
+      if (!render_texture.create(
+            static_cast<uint32_t>(_width * factor),
+            static_cast<uint32_t>(_height * factor)
          )
       )
       {
@@ -162,7 +162,7 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
           return;
       }
 
-      renderTexture.clear();
+      render_texture.clear();
 
       sf::VertexArray quad(sf::Quads, 4);
       quad[0].color = sf::Color::Red;
@@ -170,9 +170,9 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
       quad[2].color = sf::Color::Red;
       quad[3].color = sf::Color::Red;
 
-      for (auto y = 0u; y < mHeight; y++)
+      for (auto y = 0u; y < _height; y++)
       {
-         for (auto x = 0u; x < mWidth; x++)
+         for (auto x = 0u; x < _width; x++)
          {
             if (isColliding(x, y))
             {
@@ -181,39 +181,39 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& imagePath)
                quad[2].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor + factor));
                quad[3].position = sf::Vector2f(static_cast<float>(x * factor),          static_cast<float>(y * factor + factor));
 
-               renderTexture.draw(&quad[0], 4, sf::Quads);
+               render_texture.draw(&quad[0], 4, sf::Quads);
             }
          }
       }
 
-      renderTexture.display();
+      render_texture.display();
 
       // get the target texture (where the stuff has been drawn)
-      const sf::Texture& texture = renderTexture.getTexture();
-      texture.copyToImage().saveToFile(imagePath.string());
+      const sf::Texture& texture = render_texture.getTexture();
+      texture.copyToImage().saveToFile(image_path.string());
    }
 }
 
 
-void SquareMarcher::writePathToImage(const std::filesystem::path& imagePath)
+void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
 {
-   std::ifstream fileIn(imagePath);
-   if (fileIn.fail())
+   std::ifstream file_in(image_path);
+   if (file_in.fail())
    {
       const uint32_t factor = 1;
-      sf::RenderTexture renderTexture;
-      if (!renderTexture.create(mWidth * factor, mHeight * factor))
+      sf::RenderTexture render_texture;
+      if (!render_texture.create(_width * factor, _height * factor))
       {
           std::cout << "failed to create render texture" << std::endl;
           return;
       }
 
-      renderTexture.clear();
+      render_texture.clear();
 
-      for (const auto& path : mPaths)
+      for (const auto& path : _paths)
       {
          std::vector<sf::Vertex> vertices;
-         for (const auto& pos : path.mPolygon)
+         for (const auto& pos : path._polygon)
          {
             sf::Vertex vertex;
             vertex.color = sf::Color::White;
@@ -223,14 +223,14 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& imagePath)
          }
 
          vertices.push_back(vertices.at(0));
-         renderTexture.draw(&vertices[0], vertices.size(), sf::LineStrip);
+         render_texture.draw(&vertices[0], vertices.size(), sf::LineStrip);
       }
 
-      renderTexture.display();
+      render_texture.display();
 
       // get the target texture (where the stuff has been drawn)
-      const sf::Texture& texture = renderTexture.getTexture();
-      texture.copyToImage().saveToFile(imagePath.string());
+      const sf::Texture& texture = render_texture.getTexture();
+      texture.copyToImage().saveToFile(image_path.string());
    }
 }
 
@@ -250,60 +250,60 @@ void SquareMarcher::optimize()
    //                     kick       kick
 
    // path is not suited to be optimized
-   if (mPaths.empty() || mPaths.at(0).mDirs.empty())
+   if (_paths.empty() || _paths.at(0)._dirs.empty())
    {
       return;
    }
 
-   std::vector<Path> optimizedPaths;
+   std::vector<Path> optimized_paths;
 
-   for (auto& path : mPaths)
+   for (auto& path : _paths)
    {
       Path optimized;
 
-      if (path.mPolygon.size() < 5)
+      if (path._polygon.size() < 5)
       {
          optimized = path;
       }
       else
       {
-         for (auto i = 0u; i < path.mPolygon.size(); i++)
+         for (auto i = 0u; i < path._polygon.size(); i++)
          {
-            if (i == 0 || i == path.mPolygon.size() - 1)
+            if (i == 0 || i == path._polygon.size() - 1)
             {
-               optimized.mPolygon.push_back(path.mPolygon.at(i));
+               optimized._polygon.push_back(path._polygon.at(i));
             }
             else
             {
-               auto prevDir = path.mDirs[i - 1];
-               auto currDir = path.mDirs[i    ];
-               auto nextDir = path.mDirs[i + 1];
+               auto prevDir = path._dirs[i - 1];
+               auto currDir = path._dirs[i    ];
+               auto nextDir = path._dirs[i + 1];
 
                if (!(prevDir == currDir && prevDir == nextDir))
                {
-                  optimized.mPolygon.push_back(path.mPolygon.at(i));
+                  optimized._polygon.push_back(path._polygon.at(i));
                }
             }
          }
       }
 
-      optimizedPaths.push_back(path);
+      optimized_paths.push_back(path);
    }
 
-   mPaths = optimizedPaths;
+   _paths = optimized_paths;
 }
 
 
 void SquareMarcher::scale()
 {
-   for (auto& path : mPaths)
+   for (auto& path : _paths)
    {
-      for (const auto& pos : path.mPolygon)
+      for (const auto& pos : path._polygon)
       {
-         path.mScaled.push_back(
+         path._scaled.push_back(
             sf::Vector2f{
-               pos.x * mScale,
-               pos.y * mScale
+               pos.x * _scale,
+               pos.y * _scale
             }
          );
       }
@@ -313,117 +313,117 @@ void SquareMarcher::scale()
 
 void SquareMarcher::updateDirection()
 {
-   auto fourPixels = 0;
+   auto four_pixels = 0;
 
-   if (isColliding(mX - 1, mY - 1))
+   if (isColliding(_x - 1, _y - 1))
    {
-      fourPixels |= static_cast<int32_t>(PixelLocation::TopLeft);
+      four_pixels |= static_cast<int32_t>(PixelLocation::TopLeft);
    }
-   if (isColliding(mX, mY - 1))
+   if (isColliding(_x, _y - 1))
    {
-      fourPixels |= static_cast<int32_t>(PixelLocation::TopRight);
+      four_pixels |= static_cast<int32_t>(PixelLocation::TopRight);
    }
-   if (isColliding(mX - 1, mY))
+   if (isColliding(_x - 1, _y))
    {
-      fourPixels |= static_cast<int32_t>(PixelLocation::BottomLeft);
+      four_pixels |= static_cast<int32_t>(PixelLocation::BottomLeft);
    }
-   if (isColliding(mX, mY))
+   if (isColliding(_x, _y))
    {
-      fourPixels |= static_cast<int32_t>(PixelLocation::BottomRight);
+      four_pixels |= static_cast<int32_t>(PixelLocation::BottomRight);
    }
 
-   mDirPrevious = mDirCurrent;
+   _dir_previous = _dir_current;
 
-   switch (fourPixels)
+   switch (four_pixels)
    {
       case 1:
       {
-         mDirCurrent = Direction::Up;
+         _dir_current = Direction::Up;
          break;
       }
       case 2:
       {
-         mDirCurrent = Direction::Right;
+         _dir_current = Direction::Right;
          break;
       }
       case 3:
       {
-         mDirCurrent = Direction::Right;
+         _dir_current = Direction::Right;
          break;
       }
       case 4:
       {
-         mDirCurrent = Direction::Left;
+         _dir_current = Direction::Left;
          break;
       }
       case 5:
       {
-         mDirCurrent = Direction::Up;
+         _dir_current = Direction::Up;
          break;
       }
       case 6:
       {
-         if (mDirPrevious == Direction::Up)
+         if (_dir_previous == Direction::Up)
          {
-            mDirCurrent = Direction::Left;
+            _dir_current = Direction::Left;
          }
          else
          {
-            mDirCurrent = Direction::Right;
+            _dir_current = Direction::Right;
          }
 
          break;
       }
       case 7:
       {
-         mDirCurrent = Direction::Right;
+         _dir_current = Direction::Right;
          break;
       }
       case 8:
       {
-         mDirCurrent = Direction::Down;
+         _dir_current = Direction::Down;
          break;
       }
       case 9:
       {
-         if (mDirPrevious == Direction::Right)
+         if (_dir_previous == Direction::Right)
          {
-            mDirCurrent = Direction::Up;
+            _dir_current = Direction::Up;
          }
          else
          {
-            mDirCurrent = Direction::Down;
+            _dir_current = Direction::Down;
          }
          break;
       }
       case 10:
       {
-         mDirCurrent = Direction::Down;
+         _dir_current = Direction::Down;
          break;
       }
       case 11:
       {
-         mDirCurrent = Direction::Down;
+         _dir_current = Direction::Down;
          break;
       }
       case 12:
       {
-         mDirCurrent = Direction::Left;
+         _dir_current = Direction::Left;
          break;
       }
       case 13:
       {
-         mDirCurrent = Direction::Up;
+         _dir_current = Direction::Up;
          break;
       }
       case 14:
       {
-         mDirCurrent = Direction::Left;
+         _dir_current = Direction::Left;
          break;
       }
       default:
       {
-         mDirCurrent = Direction::None;
+         _dir_current = Direction::None;
          break;
       }
    }
@@ -432,56 +432,56 @@ void SquareMarcher::updateDirection()
 
 bool SquareMarcher::isColliding(uint32_t x, uint32_t y)
 {
-   if (x >= mWidth)
+   if (x >= _width)
    {
       return false;
    }
 
-   if (y >= mHeight)
+   if (y >= _height)
    {
       return false;
    }
 
-   auto val = mTiles[y * mWidth + x];
-   return std::find(mCollidingTiles.begin(), mCollidingTiles.end(), val) != mCollidingTiles.end();
+   auto val = _tiles[y * _width + x];
+   return std::find(_colliding_tiles.begin(), _colliding_tiles.end(), val) != _colliding_tiles.end();
 }
 
 
 bool SquareMarcher::isVisited(uint32_t x, uint32_t y)
 {
-   if (x >= mWidth)
+   if (x >= _width)
    {
       return false;
    }
 
-   if (y >= mHeight)
+   if (y >= _height)
    {
       return false;
    }
 
-   auto key = y * mWidth + x;
-   return mVisited[key];
+   auto key = y * _width + x;
+   return _visited[key];
 }
 
 
 void SquareMarcher::updatePosition()
 {
-   switch (mDirCurrent)
+   switch (_dir_current)
    {
       case Direction::Up:
-         mY -= 1;
+         _y -= 1;
          break;
 
       case Direction::Down:
-         mY += 1;
+         _y += 1;
          break;
 
       case Direction::Left:
-         mX -= 1;
+         _x -= 1;
          break;
 
       case Direction::Right:
-         mX += 1;
+         _x += 1;
          break;
 
       case Direction::None:
@@ -490,34 +490,34 @@ void SquareMarcher::updatePosition()
 }
 
 
-SquareMarcher::Path SquareMarcher::march(uint32_t startX, uint32_t startY)
+SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
 {
-   mDirPrevious = Direction::None;
+   _dir_previous = Direction::None;
 
-   mX = startX;
-   mY = startY;
+   _x = start_x;
+   _y = start_y;
 
    Path path;
 
    while (true)
    {
-      mVisited[mY * mWidth + mX] = true;
+      _visited[_y * _width + _x] = true;
 
       updateDirection();
       updatePosition();
 
-      if (mDirCurrent != Direction::None)
+      if (_dir_current != Direction::None)
       {
-         path.mDirs.push_back(mDirCurrent);
-         path.mPolygon.push_back(
+         path._dirs.push_back(_dir_current);
+         path._polygon.push_back(
             sf::Vector2i(
-               static_cast<int32_t>(mX),
-               static_cast<int32_t>(mY)
+               static_cast<int32_t>(_x),
+               static_cast<int32_t>(_y)
             )
          );
       }
 
-      if (mX == startX && mY == startY)
+      if (_x == start_x && _y == start_y)
       {
          break;
       }
@@ -530,7 +530,7 @@ SquareMarcher::Path SquareMarcher::march(uint32_t startX, uint32_t startY)
 void SquareMarcher::Path::printPoly()
 {
    printf("{ ");
-   for (auto pos : mPolygon)
+   for (const auto& pos : _polygon)
    {
       printf("{%d, %d}; ", pos.x, pos.y);
    }
@@ -540,7 +540,7 @@ void SquareMarcher::Path::printPoly()
 
 void SquareMarcher::Path::printDirs()
 {
-   for (auto dir : mDirs)
+   for (const auto& dir : _dirs)
    {
       switch (dir)
       {

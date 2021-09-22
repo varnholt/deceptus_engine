@@ -75,8 +75,8 @@ void Console::giveWeaponBow()
    auto bow = std::make_shared<Bow>();
    bow->initialize();
    bow->setLauncherBody(Player::getCurrent()->getBody());
-   Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(bow);
-   Player::getCurrent()->getWeaponSystem()->mSelected = bow;
+   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(bow);
+   Player::getCurrent()->getWeaponSystem()->_selected = bow;
    _log.push_back("given bow to player");
 }
 
@@ -85,8 +85,8 @@ void Console::giveWeaponDefault()
 {
    auto weapon = std::make_shared<Weapon>();
    weapon->initialize();
-   Player::getCurrent()->getWeaponSystem()->mWeapons.push_back(weapon);
-   Player::getCurrent()->getWeaponSystem()->mSelected = weapon;
+   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(weapon);
+   Player::getCurrent()->getWeaponSystem()->_selected = weapon;
    _log.push_back("given default weapon to player");
 }
 

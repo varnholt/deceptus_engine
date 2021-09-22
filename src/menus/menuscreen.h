@@ -36,8 +36,8 @@ public:
 
 protected:
 
-   std::string mFilename;
-   std::vector<std::shared_ptr<Layer>> mLayerStack;
-   std::map<std::string, std::shared_ptr<Layer>> mLayers;
+   std::string _filename;
+   std::vector<std::shared_ptr<Layer>> _layer_stack;
+   std::map<std::string, std::shared_ptr<Layer>> _layers;
 };
 

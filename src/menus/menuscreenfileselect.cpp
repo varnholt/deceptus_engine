@@ -20,14 +20,14 @@ MenuScreenFileSelect::MenuScreenFileSelect()
 {
    setFilename("data/menus/fileselect.psd");
 
-   mFont.loadFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
+   _font.loadFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
    for (auto i = 0u; i < 3; i++)
    {
-      mNames[i].setFont(mFont);
-      mNames[i].setCharacterSize(12);
-      mNames[i].setFillColor(sf::Color{232, 219, 243});
+      _names[i].setFont(_font);
+      _names[i].setCharacterSize(12);
+      _names[i].setFillColor(sf::Color{232, 219, 243});
    }
 }
 
@@ -38,40 +38,40 @@ void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates state
 
    for (auto i = 0u; i < 3; i++)
    {
-      window.draw(mNames[i], states);
+      window.draw(_names[i], states);
    }
 }
 
 
 void MenuScreenFileSelect::up()
 {
-   auto idx = static_cast<int32_t>(mSlot);
+   auto idx = static_cast<int32_t>(_slot);
    idx--;
    if (idx < 0)
    {
       idx = 0;
    }
-   mSlot = static_cast<Slot>(idx);
+   _slot = static_cast<Slot>(idx);
    updateLayers();
 }
 
 
 void MenuScreenFileSelect::down()
 {
-   auto idx = static_cast<int32_t>(mSlot);
+   auto idx = static_cast<int32_t>(_slot);
    idx++;
    if (idx > 2)
    {
       idx = 2;
    }
-   mSlot = static_cast<Slot>(idx);
+   _slot = static_cast<Slot>(idx);
    updateLayers();
 }
 
 
 void MenuScreenFileSelect::select()
 {
-   SaveState::setCurrent(static_cast<uint32_t>(mSlot));
+   SaveState::setCurrent(static_cast<uint32_t>(_slot));
 
    auto& saveState = SaveState::getCurrent();
    if (saveState.isEmpty())
@@ -86,7 +86,7 @@ void MenuScreenFileSelect::select()
       GameState::getInstance().enqueueResume();
 
       // request level-reloading since we updated the save state
-      SaveState::getCurrent().mLoadLevelRequested = true;
+      SaveState::getCurrent()._load_level_requested = true;
    }
 }
 
@@ -104,7 +104,7 @@ void MenuScreenFileSelect::remove()
       [this](MessageBox::Button button) {
          if (button == MessageBox::Button::Yes)
          {
-            SaveState::getSaveState(static_cast<uint32_t>(mSlot)).invalidate();
+            SaveState::getSaveState(static_cast<uint32_t>(_slot)).invalidate();
             SaveState::serializeToFile();
             updateLayers();
          }
@@ -181,39 +181,39 @@ void MenuScreenFileSelect::updateLayers()
 
       const auto empty = saveState.isEmpty();
       const auto slotName = out.str();
-      const auto selected = index == static_cast<int32_t>(mSlot);
+      const auto selected = index == static_cast<int32_t>(_slot);
 
       // no data
-      mLayers["slot_" + slotName + "_new_game"]->_visible = empty;
-      mLayers["slot_" + slotName + "_new_game_background"]->_visible = empty;
-      mLayers["slot_" + slotName + "_new_game_highlight"]->_visible = empty;
-      mLayers["slot_" + slotName + "_new_game_deselected"]->_visible = empty && !selected;
-      mLayers["slot_" + slotName + "_new_game_selected"]->_visible = empty && selected;
-      mLayers["slot_" + slotName + "_shadow"]->_visible = empty;
+      _layers["slot_" + slotName + "_new_game"]->_visible = empty;
+      _layers["slot_" + slotName + "_new_game_background"]->_visible = empty;
+      _layers["slot_" + slotName + "_new_game_highlight"]->_visible = empty;
+      _layers["slot_" + slotName + "_new_game_deselected"]->_visible = empty && !selected;
+      _layers["slot_" + slotName + "_new_game_selected"]->_visible = empty && selected;
+      _layers["slot_" + slotName + "_shadow"]->_visible = empty;
 
       // have data
-      mLayers["slot_" + slotName + "_selected"]->_visible = !empty && selected;
-      mLayers["slot_" + slotName + "_deselected"]->_visible = !empty && !selected;
-      mLayers["slot_" + slotName + "_background"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_bar_1"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_bar_2"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_energy"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_heart"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_highlight"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_letter_deselected"]->_visible = !selected;
-      mLayers["slot_" + slotName + "_letter_selected"]->_visible = selected;
-      mLayers["slot_" + slotName + "_lines"]->_visible = !empty;
-      mLayers["slot_" + slotName + "_name"]->_visible = false;
-      mLayers["slot_" + slotName + "_progress"]->_visible = false;
-      mLayers["slot_" + slotName + "_time"]->_visible = false;
+      _layers["slot_" + slotName + "_selected"]->_visible = !empty && selected;
+      _layers["slot_" + slotName + "_deselected"]->_visible = !empty && !selected;
+      _layers["slot_" + slotName + "_background"]->_visible = !empty;
+      _layers["slot_" + slotName + "_bar_1"]->_visible = !empty;
+      _layers["slot_" + slotName + "_bar_2"]->_visible = !empty;
+      _layers["slot_" + slotName + "_energy"]->_visible = !empty;
+      _layers["slot_" + slotName + "_heart"]->_visible = !empty;
+      _layers["slot_" + slotName + "_highlight"]->_visible = !empty;
+      _layers["slot_" + slotName + "_letter_deselected"]->_visible = !selected;
+      _layers["slot_" + slotName + "_letter_selected"]->_visible = selected;
+      _layers["slot_" + slotName + "_lines"]->_visible = !empty;
+      _layers["slot_" + slotName + "_name"]->_visible = false;
+      _layers["slot_" + slotName + "_progress"]->_visible = false;
+      _layers["slot_" + slotName + "_time"]->_visible = false;
 
       // both
-      mLayers["slot_" + slotName + "_arrow"]->_visible = selected;
+      _layers["slot_" + slotName + "_arrow"]->_visible = selected;
 
       // update names
-      auto nameLayer = mLayers["slot_" + slotName + "_name"];
-      mNames[index].setString(saveState.mPlayerInfo.mName);
-      mNames[index].setPosition(
+      auto nameLayer = _layers["slot_" + slotName + "_name"];
+      _names[index].setString(saveState._player_info.mName);
+      _names[index].setPosition(
          nameLayer->_sprite->getPosition().x,
          nameLayer->_sprite->getPosition().y + nameOffsetY
       );
@@ -221,20 +221,20 @@ void MenuScreenFileSelect::updateLayers()
       index++;
    }
 
-   mLayers["delete_xbox_0"]->_visible = isControllerUsed();
-   mLayers["delete_xbox_1"]->_visible = false;
-   mLayers["delete_pc_0"]->_visible = !isControllerUsed();
-   mLayers["delete_pc_1"]->_visible = false;
+   _layers["delete_xbox_0"]->_visible = isControllerUsed();
+   _layers["delete_xbox_1"]->_visible = false;
+   _layers["delete_pc_0"]->_visible = !isControllerUsed();
+   _layers["delete_pc_1"]->_visible = false;
 
-   mLayers["confirm_xbox_0"]->_visible = isControllerUsed();
-   mLayers["confirm_xbox_1"]->_visible = false;
-   mLayers["confirm_pc_0"]->_visible = !isControllerUsed();
-   mLayers["confirm_pc_1"]->_visible = false;
+   _layers["confirm_xbox_0"]->_visible = isControllerUsed();
+   _layers["confirm_xbox_1"]->_visible = false;
+   _layers["confirm_pc_0"]->_visible = !isControllerUsed();
+   _layers["confirm_pc_1"]->_visible = false;
 
-   mLayers["back_xbox_0"]->_visible = isControllerUsed();
-   mLayers["back_xbox_1"]->_visible = false;
-   mLayers["back_pc_0"]->_visible = !isControllerUsed();
-   mLayers["back_pc_1"]->_visible = false;
+   _layers["back_xbox_0"]->_visible = isControllerUsed();
+   _layers["back_xbox_1"]->_visible = false;
+   _layers["back_pc_0"]->_visible = !isControllerUsed();
+   _layers["back_pc_1"]->_visible = false;
 }
 
 

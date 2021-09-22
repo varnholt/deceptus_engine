@@ -487,7 +487,7 @@ void Level::loadTmx()
                auto cp = Checkpoint::getCheckpoint(cpi);
 
                // whenever we reach a checkpoint, update the checkpoint index in the save state
-               cp->addCallback([cpi](){SaveState::getCurrent().mCheckpoint = cpi;});
+               cp->addCallback([cpi](){SaveState::getCurrent()._checkpoint = cpi;});
 
                // whenever we reach a checkpoint, serialize the save state
                cp->addCallback([](){SaveState::serializeToFile();});
@@ -675,7 +675,7 @@ void Level::initialize()
 //-----------------------------------------------------------------------------
 void Level::loadCheckpoint()
 {
-   auto checkpoint_index = SaveState::getCurrent().mCheckpoint;
+   auto checkpoint_index = SaveState::getCurrent()._checkpoint;
    auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index);
 
    if (checkpoint)
@@ -761,7 +761,7 @@ void Level::spawnEnemies()
 
       if (script.has_value())
       {
-         auto lua_node = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value().mValue);
+         auto lua_node = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value()._value);
 
          EnemyDescription json_description;
          json_description.mPositionGivenInTiles = false;
@@ -1520,7 +1520,7 @@ void Level::addPathsToWorld(
    for (auto& path : paths)
    {
       std::vector<b2Vec2> chain;
-      for (auto& pos : path.mScaled)
+      for (auto& pos : path._scaled)
       {
          chain.push_back({
                (pos.x + offsetX) * PIXELS_PER_TILE / PPM,
@@ -1706,7 +1706,7 @@ void Level::parsePhysicsTiles(
       if (!std::filesystem::exists(path_solid_optimized))
       {
          std::cerr << "[!] could not find " << path_solid_optimized.string() << ", obj generator failed" << std::endl;
-         addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher.mPaths, pd->object_type);
+         addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher._paths, pd->object_type);
       }
       else
       {

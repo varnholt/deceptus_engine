@@ -3,24 +3,22 @@
 #include <iostream>
 
 
-TexturePool TexturePool::sPool;
-
-
 TexturePool& TexturePool::getInstance()
 {
-   return sPool;
+   static TexturePool __instance;
+   return __instance;
 }
 
 
 std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
 {
-   std::lock_guard<std::mutex> hold(mMutex);
+   std::lock_guard<std::mutex> hold(_mutex);
 
    const auto key = path.string();
-   auto sp = mPool[key].lock();
+   auto sp = _pool[key].lock();
    if (!sp)
    {
-      mPool[key] = sp = std::make_shared<sf::Texture>();
+      _pool[key] = sp = std::make_shared<sf::Texture>();
       sp->loadFromFile(key);
    }
 
@@ -34,7 +32,7 @@ size_t TexturePool::computeSize() const
 {
    size_t size = 0;
 
-   for (const auto& [key, value] : mPool)
+   for (const auto& [key, value] : _pool)
    {
       auto texture = value.lock();
       if (texture)
