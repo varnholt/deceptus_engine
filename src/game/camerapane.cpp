@@ -8,78 +8,78 @@
 #include "framework/math/sfmlmath.h"
 
 
-CameraPane CameraPane::sInstance;
+CameraPane CameraPane::__instance;
 
 
 //-----------------------------------------------------------------------------
 CameraPane& CameraPane::getInstance()
 {
-   return sInstance;
+   return __instance;
 }
 
 
 //-----------------------------------------------------------------------------
 void CameraPane::update()
 {
-  auto speed = 3.0f;
-  auto maxLength = 100.0f;
+  constexpr auto speed = 3.0f;
+  constexpr auto max_length = 100.0f;
 
   if (GameControllerData::getInstance().isControllerUsed())
   {
-      auto axisValues = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
+      auto axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
 
-      auto xAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
-      auto yAxis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
+      auto x_axis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
+      auto y_axis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
 
-      auto x = axisValues[static_cast<uint32_t>(xAxis)] / 32767.0f;
-      auto y = axisValues[static_cast<uint32_t>(yAxis)] / 32767.0f;
+      auto x = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
+      auto y = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
 
       if (fabs(x) > 0.1f || fabs(y) > 0.1f)
       {
          auto w = GameConfiguration::getInstance().mViewWidth * 0.5f;
          auto h = GameConfiguration::getInstance().mViewHeight * 0.5f;
 
-         mLookVector.x = x * w;
-         mLookVector.y = y * h;
+         _look_vector.x = x * w;
+         _look_vector.y = y * h;
       }
       else
       {
-         mLookVector.x = 0.0f;
-         mLookVector.y = 0.0f;
+         _look_vector.x = 0.0f;
+         _look_vector.y = 0.0f;
       }
    }
-   else if (mLook & LookActive)
+   else if (_look_state & LookActive)
    {
-      if (mLook & LookUp)
+      if (_look_state & LookUp)
       {
-         mLookVector += sf::Vector2f(0.0f, -speed);
+         _look_vector += sf::Vector2f(0.0f, -speed);
       }
-      if (mLook & LookDown)
+      if (_look_state & LookDown)
       {
-         mLookVector += sf::Vector2f(0.0f, speed);
+         _look_vector += sf::Vector2f(0.0f, speed);
       }
-      if (mLook & LookLeft)
+      if (_look_state & LookLeft)
       {
-         mLookVector += sf::Vector2f(-speed, 0.0f);
+         _look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      if (mLook & LookRight)
+      if (_look_state & LookRight)
       {
-         mLookVector += sf::Vector2f(speed, 0.0f);
+         _look_vector += sf::Vector2f(speed, 0.0f);
       }
 
       if (!DisplayMode::getInstance().isSet(Display::DisplayMap))
       {
-         auto len = SfmlMath::length(mLookVector);
-         if (len > maxLength)
+         auto len = SfmlMath::length(_look_vector);
+         if (len > max_length)
          {
-            mLookVector = SfmlMath::normalize(mLookVector);
-            mLookVector *= maxLength;
+            _look_vector = SfmlMath::normalize(_look_vector);
+            _look_vector *= max_length;
          }
       }
    }
    else
    {
-      mLookVector *= 0.85f;
+      _look_vector *= 0.85f;
    }
 }
 
@@ -89,11 +89,11 @@ void CameraPane::updateLookState(Look look, bool enable)
 {
    if (enable)
    {
-      mLook |= look;
+      _look_state |= look;
    }
    else
    {
-      mLook &= ~look;
+      _look_state &= ~look;
    }
 }
 
@@ -103,12 +103,12 @@ void CameraPane::updateLookState(Look look, bool enable)
 //-----------------------------------------------------------------------------
 bool CameraPane::isLookActive() const
 {
-   return (mLook & LookActive);
+   return (_look_state & LookActive);
 }
 
 
 const sf::Vector2f& CameraPane::getLookVector() const
 {
-    return mLookVector;
+    return _look_vector;
 }
 

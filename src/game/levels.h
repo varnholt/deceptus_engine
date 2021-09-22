@@ -17,19 +17,12 @@ void from_json(const nlohmann::json& j, LevelItem& item);
 
 struct Levels
 {
+   Levels() = default;
 
-  Levels() = default;
+   std::vector<LevelItem> _levels;
 
-  std::vector<LevelItem> mLevels;
+   void deserialize(const std::string& data);
+   void deserializeFromFile(const std::string& filename = "data/config/levels.json");
 
-  void deserialize(const std::string& data);
-  void deserializeFromFile(const std::string& filename = "data/config/levels.json");
-
-  static Levels sInstance;
-
-  static Levels& getInstance()
-  {
-     return sInstance;
-  }
-
+   static Levels& getInstance();
 };

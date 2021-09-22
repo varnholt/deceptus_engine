@@ -291,10 +291,10 @@ void Level::loadTmx()
 {
    static const std::string parallaxIdentifier = "parallax_";
 
-   auto path = std::filesystem::path(_description->mFilename).parent_path();
+   auto path = std::filesystem::path(_description->_filename).parent_path();
 
-   const auto checksumOld = Checksum::readChecksum(_description->mFilename + ".crc");
-   const auto checksumNew = Checksum::calcChecksum(_description->mFilename);
+   const auto checksumOld = Checksum::readChecksum(_description->_filename + ".crc");
+   const auto checksumNew = Checksum::calcChecksum(_description->_filename);
    if (checksumOld != checksumNew)
    {
       std::cout << "[x] checksum mismatch, deleting cached data" << std::endl;
@@ -303,16 +303,16 @@ void Level::loadTmx()
       std::filesystem::remove(path / "physics_path_solid.csv");
       std::filesystem::remove(path / "physics_path_solid.png");
       std::filesystem::remove(path / "layer_level_solid_not_optimised.obj");
-      Checksum::writeChecksum(_description->mFilename + ".crc", checksumNew);
+      Checksum::writeChecksum(_description->_filename + ".crc", checksumNew);
    }
 
    sf::Clock elapsed;
 
    // parse tmx
-   std::cout << "[x] parsing tmx: " << _description->mFilename << std::endl;
+   std::cout << "[x] parsing tmx: " << _description->_filename << std::endl;
 
    _tmx_parser = std::make_unique<TmxParser>();
-   _tmx_parser->parse(_description->mFilename);
+   _tmx_parser->parse(_description->_filename);
 
    std::cout << "[x] parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
    elapsed.restart();
@@ -630,7 +630,7 @@ BoomEffect& Level::getBoomEffect()
 //-----------------------------------------------------------------------------
 void Level::load()
 {
-   auto path = std::filesystem::path(_description->mFilename).parent_path();
+   auto path = std::filesystem::path(_description->_filename).parent_path();
 
    Weather::getInstance().clear();
    Checkpoint::resetAll();
@@ -648,7 +648,7 @@ void Level::load()
 
    // loading ao
    std::cout << "[x] loading ao... " << std::endl;
-   mAo.load(path, std::filesystem::path(_description->mFilename).stem().string());
+   mAo.load(path, std::filesystem::path(_description->_filename).stem().string());
 
    std::cout << "[x] level loading complete" << std::endl;
 }
@@ -663,8 +663,8 @@ void Level::initialize()
 
    load();
 
-   _start_position.x = static_cast<float_t>(_description->mStartPosition.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
-   _start_position.y = static_cast<float_t>(_description->mStartPosition.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+   _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
+   _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 
    loadCheckpoint();
 
@@ -715,7 +715,7 @@ void Level::spawnEnemies()
    // deprecated approach:
    // merge enemy layer from tmx with enemy info that's stored inside json
    // iterate through all enemies in the json
-   for (auto& jsonDescription : _description->mEnemies)
+   for (auto& jsonDescription : _description->_enemies)
    {
       auto luaNode = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + jsonDescription.mScript);
 

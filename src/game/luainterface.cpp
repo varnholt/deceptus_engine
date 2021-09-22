@@ -7,44 +7,44 @@
 #include <sstream>
 
 
-LuaInterface* LuaInterface::sInstance = nullptr;
+LuaInterface* LuaInterface::__instance = nullptr;
 
 
 
 LuaInterface *LuaInterface::instance()
 {
-   if (sInstance == nullptr)
+   if (__instance == nullptr)
    {
       new LuaInterface();
    }
 
-   return sInstance;
+   return __instance;
 }
 
 
 LuaInterface::LuaInterface()
 {
-   sInstance = this;
+   __instance = this;
 }
 
 
 std::shared_ptr<LuaNode> LuaInterface::addObject(const std::string &filename)
 {
    std::shared_ptr<LuaNode> object = std::make_shared<LuaNode>(filename);
-   mObjectList.push_back(object);
+   _object_list.push_back(object);
    return object;
 }
 
 
 void LuaInterface::removeObject(const std::shared_ptr<LuaNode>& node)
 {
-   mObjectList.erase(std::remove(mObjectList.begin(), mObjectList.end(), node), mObjectList.end());
+   _object_list.erase(std::remove(_object_list.begin(), _object_list.end(), node), _object_list.end());
 }
 
 
 void LuaInterface::update(const sf::Time& dt)
 {
-   for (auto it = mObjectList.begin(); it != mObjectList.end();)
+   for (auto it = _object_list.begin(); it != _object_list.end();)
    {
       auto object = *it;
 
@@ -56,7 +56,7 @@ void LuaInterface::update(const sf::Time& dt)
       object->updateWeapons(dt);
 
       if (!object->mBody)
-         it = mObjectList.erase(it);
+         it = _object_list.erase(it);
       else
          ++it;
    }
@@ -69,12 +69,12 @@ std::shared_ptr<LuaNode> LuaInterface::getObject(lua_State* state)
 
    std::vector<std::shared_ptr<LuaNode>>::iterator it =
       std::find_if(
-         mObjectList.begin(),
-         mObjectList.end(),
+         _object_list.begin(),
+         _object_list.end(),
          [state](auto node) { return node->mState == state; }
       );
 
-   if (it != mObjectList.end())
+   if (it != _object_list.end())
    {
       obj = *it;
    }
@@ -98,7 +98,7 @@ void LuaInterface::updateKeysPressed(std::shared_ptr<LuaNode> obj, int keys)
 
 void LuaInterface::reset()
 {
-   mObjectList.clear();
+   _object_list.clear();
 }
 
 

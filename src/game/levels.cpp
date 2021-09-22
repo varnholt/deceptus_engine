@@ -7,15 +7,13 @@
 
 using json = nlohmann::json;
 
-Levels Levels::sInstance;
-
 
 void Levels::deserialize(const std::string& data)
 {
    try
    {
       json config = json::parse(data);
-      mLevels = config.get<std::vector<LevelItem>>();
+      _levels = config.get<std::vector<LevelItem>>();
    }
    catch (const std::exception& e)
    {
@@ -40,6 +38,13 @@ void Levels::deserializeFromFile(const std::string &filename)
    ifs.close();
 
    deserialize(data);
+}
+
+
+Levels& Levels::getInstance()
+{
+   static Levels __instance;
+   return __instance;
 }
 
 
