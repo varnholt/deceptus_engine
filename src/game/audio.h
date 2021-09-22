@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Audio.hpp>
+#include <array>
 #include <map>
 
 class Audio
@@ -30,13 +31,13 @@ private:
    void initializeSamples();
    void initializeTracks();
 
-   std::map<std::string, sf::SoundBuffer> mSounds;
-   sf::Sound mThreads[10];
+   std::map<std::string, sf::SoundBuffer> _sounds;
+   std::array<sf::Sound, 10> _threads;
 
-   mutable sf::Music mMusic;
-   std::vector<Track> mTracks;
-   uint32_t mCurrentTrackIndex = 999;
+   mutable sf::Music _music;
+   std::vector<Track> _tracks;
+   uint32_t _current_index = 999;
 
-   static Audio* sInstance;
+   static Audio* __instance;
 };
 

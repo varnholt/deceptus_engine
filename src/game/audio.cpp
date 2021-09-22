@@ -7,11 +7,12 @@
 #include <filesystem>
 
 
-Audio* Audio::sInstance = nullptr;
+Audio* Audio::__instance = nullptr;
 
 namespace
 {
-static const auto SFX_ROOT = "data/sounds/";
+static const auto sfx_root = "data/sounds/";
+static const std::string path = "data/music";
 }
 
 //-----------------------------------------------------------------------------
@@ -21,7 +22,7 @@ static const auto SFX_ROOT = "data/sounds/";
  */
 Audio::Audio()
 {
-   sInstance = this;
+   __instance = this;
    initializeMusicVolume();
    initializeSamples();
    initializeTracks();
@@ -35,12 +36,12 @@ Audio::Audio()
  */
 Audio* Audio::getInstance()
 {
-   if (sInstance == nullptr)
+   if (__instance == nullptr)
    {
       new Audio();
    }
 
-   return sInstance;
+   return __instance;
 }
 
 
@@ -49,13 +50,13 @@ void Audio::addSample(const std::string& sample)
 {
    auto loader = [](const std::string& fileName) -> sf::SoundBuffer {
       sf::SoundBuffer buf;
-      buf.loadFromFile(SFX_ROOT + fileName);
+      buf.loadFromFile(sfx_root + fileName);
       return buf;
    };
 
-   if (mSounds.find(sample) == mSounds.end())
+   if (_sounds.find(sample) == _sounds.end())
    {
-      mSounds[sample] = loader(sample);
+      _sounds[sample] = loader(sample);
    }
 }
 
@@ -79,24 +80,25 @@ void Audio::initializeSamples()
 //-----------------------------------------------------------------------------
 void Audio::initializeTracks()
 {
-    try {
-        std::string path = "data/music";
-        for (const auto& entry : std::filesystem::directory_iterator(path))
-        {
-            const auto path = entry.path().string();
-            if (path.find(".ogg") != std::string::npos)
-            {
-                Track track;
-                track.mFilename = path;
-                mTracks.push_back(track);
-            }
+   try
+   {
+      for (const auto& entry : std::filesystem::directory_iterator(path))
+      {
+         const auto path = entry.path().string();
 
-            // std::cout << entry.path() << std::endl;
-        }
-    }
-    catch (std::exception&)
-    {
-    }
+         if (path.find(".ogg") != std::string::npos)
+         {
+            Track track;
+            track.mFilename = path;
+            _tracks.push_back(track);
+         }
+
+         // std::cout << entry.path() << std::endl;
+      }
+   }
+   catch (std::exception&)
+   {
+   }
 }
 
 
@@ -106,39 +108,35 @@ void Audio::initializeMusicVolume()
    auto& config = GameConfiguration::getInstance();
    const auto master = config.mAudioVolumeMaster * 0.01f;
    const auto music = config.mAudioVolumeMusic;
-   mMusic.setVolume(master * music);
+   _music.setVolume(master * music);
 }
 
 
 //-----------------------------------------------------------------------------
 void Audio::playSample(const std::string& sample, float volume)
 {
-   sf::Sound* sound = nullptr;
-   for (int i = 0; i < 10; i++)
-   {
-      if (mThreads[i].getStatus() == sf::Sound::Stopped)
-      {
-         sound = &mThreads[i];
-         break;
-      }
-   }
+   const auto& thread_it = std::find_if(
+      _threads.begin(),
+      _threads.end(),
+      [](const auto& thread){return thread.getStatus() == sf::Sound::Stopped;}
+   );
 
-   if (sound == nullptr)
+   if (thread_it == _threads.end())
    {
       return;
    }
 
-   auto it = mSounds.find(sample);
+   auto it = _sounds.find(sample);
 
-   if (it != mSounds.end())
+   if (it != _sounds.end())
    {
-      sound->setBuffer(it->second);
+      thread_it->setBuffer(it->second);
 
       const auto master = (GameConfiguration::getInstance().mAudioVolumeMaster * 0.01f);
       const auto sfx = (GameConfiguration::getInstance().mAudioVolumeSfx);
 
-      sound->setVolume(master * sfx * volume);
-      sound->play();
+      thread_it->setVolume(master * sfx * volume);
+      thread_it->play();
    }
 }
 
@@ -146,30 +144,31 @@ void Audio::playSample(const std::string& sample, float volume)
 //-----------------------------------------------------------------------------
 void Audio::updateMusic()
 {
-    if (mTracks.empty())
+    if (_tracks.empty())
     {
         return;
     }
 
-    if (mMusic.getStatus() == sf::Music::Playing)
+    if (_music.getStatus() == sf::Music::Playing)
     {
         return;
     }
 
-    mCurrentTrackIndex++;
-    if (mCurrentTrackIndex >= mTracks.size())
+    _current_index++;
+
+    if (_current_index >= _tracks.size())
     {
-        mCurrentTrackIndex = 0;
+        _current_index = 0;
     }
 
-    mMusic.openFromFile(mTracks[mCurrentTrackIndex].mFilename);
-    mMusic.play();
+    _music.openFromFile(_tracks[_current_index].mFilename);
+    _music.play();
 }
 
 
 //-----------------------------------------------------------------------------
 sf::Music& Audio::getMusic() const
 {
-   return mMusic;
+   return _music;
 }
 

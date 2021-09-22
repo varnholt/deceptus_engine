@@ -37,7 +37,7 @@ private:
 
    explicit LuaInterface();
 
-   static LuaInterface* sInstance;
-   std::vector<std::shared_ptr<LuaNode>> mObjectList;
+   static LuaInterface* __instance;
+   std::vector<std::shared_ptr<LuaNode>> _object_list;
 };
 

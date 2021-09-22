@@ -9,9 +9,9 @@ struct LevelDescription
 {
    LevelDescription() = default;
 
-   std::string mFilename;
-   std::vector<int> mStartPosition;
-   std::vector<EnemyDescription> mEnemies;
+   std::string _filename;
+   std::vector<int> _start_position;
+   std::vector<EnemyDescription> _enemies;
 
    static std::shared_ptr<LevelDescription> load(const std::string& path);
 };

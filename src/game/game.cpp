@@ -263,7 +263,7 @@ void Game::loadLevel()
          // pick a level
          auto levels = Levels::getInstance();
          levels.deserializeFromFile();
-         auto level_item = levels.mLevels.at(SaveState::getCurrent().mLevelIndex);
+         auto level_item = levels._levels.at(SaveState::getCurrent().mLevelIndex);
 
          _player->resetWorld(); // free the pointer that's shared with the player
          _level.reset();
@@ -303,7 +303,7 @@ void Game::nextLevel()
    SaveState::getCurrent().mLevelIndex++;
 
    auto levels = Levels::getInstance();
-   if (SaveState::getCurrent().mLevelIndex == levels.mLevels.size())
+   if (SaveState::getCurrent().mLevelIndex == levels._levels.size())
    {
        SaveState::getCurrent().mLevelIndex = 0;
    }

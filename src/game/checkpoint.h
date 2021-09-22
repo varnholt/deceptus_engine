@@ -30,14 +30,14 @@ private:
 
     Checkpoint() = default;
 
-    uint32_t mIndex = 0;
-    std::string mName;
+    uint32_t _index = 0;
+    std::string _name;
 
-    sf::IntRect mRect;
-    bool mReached = false;
+    sf::IntRect _rect;
+    bool _reached = false;
 
-    std::vector<CheckpointCallback> mCallbacks;
+    std::vector<CheckpointCallback> _callbacks;
 
-    static std::vector<Checkpoint> sCheckpoints;
+    static std::vector<Checkpoint> __checkpoints;
 };
 

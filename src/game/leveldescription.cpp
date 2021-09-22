@@ -11,21 +11,21 @@ using json = nlohmann::json;
 void to_json(json &j, const LevelDescription &d)
 {
    j = json{
-      {"filename", d.mFilename},
-      {"startposition", d.mStartPosition},
-      {"enemies", d.mEnemies}
+      {"filename", d._filename},
+      {"startposition", d._start_position},
+      {"enemies", d._enemies}
    };
 }
 
 
 void from_json(const json &j, LevelDescription &d)
 {
-   d.mFilename = j.at("filename").get<std::string>();
-   d.mStartPosition = j.at("startposition").get<std::vector<int>>();
+   d._filename = j.at("filename").get<std::string>();
+   d._start_position = j.at("startposition").get<std::vector<int>>();
 
    if (j.find("enemies") != j.end())
    {
-      d.mEnemies = j.at("enemies").get<std::vector<EnemyDescription>>();
+      d._enemies = j.at("enemies").get<std::vector<EnemyDescription>>();
    }
 }
 
@@ -49,7 +49,7 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string &path
 
    try
    {
-     json config = json::parse(data);
+     const json config = json::parse(data);
      description = std::make_shared<LevelDescription>();
      *description = config;
    }
