@@ -11,7 +11,7 @@ struct InventoryItem
 
    InventoryItem(ItemType);
 
-   ItemType mType = ItemType::Invalid;
+   ItemType _type = ItemType::Invalid;
 };
 
 

@@ -22,10 +22,10 @@ struct Physics
       const std::filesystem::path& path
    );
 
-   uint32_t mGridWidth = 0;
-   uint32_t mGridHeight = 0;
-   uint32_t mGridSize = 0;
+   uint32_t _grid_width = 0;
+   uint32_t _grid_height = 0;
+   uint32_t _grid_size = 0;
 
-   std::vector<int32_t> mPhysicsMap;
+   std::vector<int32_t> _physics_map;
 };
 

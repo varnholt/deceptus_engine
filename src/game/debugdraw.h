@@ -17,8 +17,8 @@ namespace DebugDraw
 sf::Color GLColorToSFML(const b2Color &color, sf::Uint8 alpha = 255);
 sf::Vector2f B2VecToSFVec(const b2Vec2 &vector);
 
-void DrawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
-void DrawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertexCount, const b2Color& color);
+void DrawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color);
+void DrawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color);
 void DrawCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Color& color);
 void DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color);
 void DrawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color);
