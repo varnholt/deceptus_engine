@@ -14,7 +14,7 @@ class TmxParser
 {
    public:
 
-      TmxParser();
+      TmxParser() = default;
 
       void parse(const std::string& filename);
       std::vector<TmxElement *> getElements() const;

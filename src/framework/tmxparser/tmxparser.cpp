@@ -13,11 +13,6 @@
 #include <iostream>
 
 
-TmxParser::TmxParser()
-{
-}
-
-
 void TmxParser::parse(const std::string &filename)
 {
    auto z = 0;
@@ -115,16 +110,16 @@ std::vector<TmxObjectGroup *> TmxParser::retrieveObjectGroups() const
 TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
 {
    // get maximum tile id per layer
-   int tild_id = 0;
-   int tmp_id = 0;
+   int32_t tile_id = 0;
+   int32_t tmp_id = 0;
 
    for (auto i = 0u; i < (layer->_height_px * layer->_width_px); i++)
    {
       tmp_id = layer->_data[i];
 
-      if (tmp_id > tild_id)
+      if (tmp_id > tile_id)
       {
-         tild_id = tmp_id;
+         tile_id = tmp_id;
       }
    }
 
@@ -140,8 +135,8 @@ TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
          if (tmp)
          {
             if (
-                  tild_id >= tmp->_first_gid
-               && tild_id <  tmp->_first_gid + tmp->_tile_count
+                  tile_id >= tmp->_first_gid
+               && tile_id <  tmp->_first_gid + tmp->_tile_count
             )
             {
                tileset = tmp;
