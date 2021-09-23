@@ -14,8 +14,8 @@ class ExtraTable
 public:
    ExtraTable() = default;
 
-   ExtraHealth mHealth;
-   ExtraSkill mSkills;
+   ExtraHealth _health;
+   ExtraSkill _skills;
 };
 
 void to_json(nlohmann::json& j, const ExtraTable& d);

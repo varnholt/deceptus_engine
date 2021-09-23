@@ -197,7 +197,7 @@ void PlayerJump::doubleJump()
       return;
    }
 
-   const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+   const auto skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
    const auto canDoubleJump = (skills & ExtraSkill::SkillDoubleJump);
 
    if (!canDoubleJump)
@@ -225,7 +225,7 @@ void PlayerJump::doubleJump()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::wallJump()
 {
-   const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+   const auto skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
    const auto canWallJump = (skills & ExtraSkill::SkillWallJump);
 
    if (!canWallJump)
@@ -238,7 +238,7 @@ void PlayerJump::wallJump()
       return;
    }
 
-   _walljump_points_right = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
+   _walljump_points_right = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
 
    // double jump should happen with a constant impulse, no adjusting through button press duration
    _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
@@ -359,7 +359,7 @@ void PlayerJump::updateWallSlide()
       return;
    }
 
-   const auto skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+   const auto skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
    const auto canWallSlide = (skills & ExtraSkill::SkillWallSlide);
 
    if (!canWallSlide)
@@ -368,8 +368,8 @@ void PlayerJump::updateWallSlide()
       return;
    }
 
-   const auto leftTouching = (GameContactListener::getInstance()->getNumArmLeftContacts() > 0);
-   const auto rightTouching = (GameContactListener::getInstance()->getNumArmRightContacts() > 0);
+   const auto leftTouching = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
+   const auto rightTouching = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
 
    if (
          !(leftTouching  && _controls.isMovingLeft())

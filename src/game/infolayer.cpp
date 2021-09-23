@@ -102,7 +102,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (layer_health_energy->_visible)
    {
-       const auto health = (SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth) * 0.01f;
+       const auto health = (SaveState::getPlayerInfo().mExtraTable._health._health) * 0.01f;
 
        const auto healthLayerWidth  = layer_health_energy->_sprite->getTexture()->getSize().x * health;
        const auto healthLayerHeight = layer_health_energy->_sprite->getTexture()->getSize().y;

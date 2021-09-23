@@ -26,8 +26,8 @@ class GameMechanism
 
    protected:
 
-      int32_t mZ = 0;
-      bool mEnabled = true;
-      MechanismVersion mVersion = MechanismVersion::Version1;
+      int32_t _z_index = 0;
+      bool _enabled = true;
+      MechanismVersion _version = MechanismVersion::Version1;
 };
 

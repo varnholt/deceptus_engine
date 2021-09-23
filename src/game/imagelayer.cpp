@@ -10,53 +10,53 @@
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const std::filesystem::path& levelPath)
+std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const std::filesystem::path& level_path)
 {
   std::shared_ptr<ImageLayer> image = std::make_shared<ImageLayer>();
-  auto imageLayer = dynamic_cast<TmxImageLayer*>(element);
+  auto image_layer = dynamic_cast<TmxImageLayer*>(element);
 
-  image->mZ = imageLayer->_z;
-  image->mTexture = TexturePool::getInstance().get((levelPath / imageLayer->_image->_source).string());
-  image->mSprite.setPosition(imageLayer->_offset_x_px, imageLayer->_offset_y_px);
-  image->mSprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(imageLayer->_opacity * 255.0f)));
-  image->mSprite.setTexture(*image->mTexture);
+  image->_z_index = image_layer->_z;
+  image->_texture = TexturePool::getInstance().get((level_path / image_layer->_image->_source).string());
+  image->_sprite.setPosition(image_layer->_offset_x_px, image_layer->_offset_y_px);
+  image->_sprite.setColor(sf::Color(255, 255, 255, static_cast<uint32_t>(image_layer->_opacity * 255.0f)));
+  image->_sprite.setTexture(*image->_texture);
 
-  sf::BlendMode blendMode = sf::BlendAdd;
-  if (imageLayer->_properties != nullptr)
+  sf::BlendMode blend_mode = sf::BlendAdd;
+  if (image_layer->_properties != nullptr)
   {
-     auto z = imageLayer->_properties->_map.find("z");
-     if (z != imageLayer->_properties->_map.end())
+     auto z = image_layer->_properties->_map.find("z");
+     if (z != image_layer->_properties->_map.end())
      {
-        image->mZ = imageLayer->_properties->_map["z"]->_value_int.value();
+        image->_z_index = image_layer->_properties->_map["z"]->_value_int.value();
         // std::cout << "image layer has z: " << image->mZ << std::endl;
      }
 
-     std::string blendModeStr;
-     auto it = imageLayer->_properties->_map.find("blendmode");
-     if (it != imageLayer->_properties->_map.end())
+     std::string blend_mode_str;
+     auto it = image_layer->_properties->_map.find("blendmode");
+     if (it != image_layer->_properties->_map.end())
      {
-        blendModeStr = it->second->_value_string.value();
+        blend_mode_str = it->second->_value_string.value();
 
-        if (blendModeStr == "alpha")
+        if (blend_mode_str == "alpha")
         {
-           blendMode = sf::BlendAlpha;
+           blend_mode = sf::BlendAlpha;
         }
-        else if (blendModeStr == "multiply")
+        else if (blend_mode_str == "multiply")
         {
-           blendMode = sf::BlendMultiply;
+           blend_mode = sf::BlendMultiply;
         }
-        else if (blendModeStr == "add")
+        else if (blend_mode_str == "add")
         {
-           blendMode = sf::BlendAdd;
+           blend_mode = sf::BlendAdd;
         }
-        else if (blendModeStr == "none")
+        else if (blend_mode_str == "none")
         {
-           blendMode = sf::BlendNone;
+           blend_mode = sf::BlendNone;
         }
      }
   }
 
-  image->mBlendMode = blendMode;
+  image->_blend_mode = blend_mode;
 
   return image;
 }

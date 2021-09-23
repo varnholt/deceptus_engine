@@ -24,7 +24,7 @@ public:
       SkillSwim         = 0x80
    };
 
-   int32_t mSkills = 0;
+   int32_t _skills = 0;
 };
 
 

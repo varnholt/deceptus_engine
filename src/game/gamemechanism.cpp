@@ -3,13 +3,13 @@
 
 int32_t GameMechanism::getZ() const
 {
-   return mZ;
+   return _z_index;
 }
 
 
 void GameMechanism::setZ(const int32_t& z)
 {
-   mZ = z;
+   _z_index = z;
 }
 
 
@@ -25,11 +25,11 @@ void GameMechanism::update(const sf::Time& /*dt*/)
 
 bool GameMechanism::isEnabled() const
 {
-   return mEnabled;
+   return _enabled;
 }
 
 
 void GameMechanism::setEnabled(bool enabled)
 {
-   mEnabled = enabled;
+   _enabled = enabled;
 }

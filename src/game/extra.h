@@ -12,6 +12,6 @@ public:
 
    Extra() = default;
 
-   ExtraType mExtraType = ExtraType::Invalid;
+   ExtraType _extra_type = ExtraType::Invalid;
 };
 

@@ -18,10 +18,10 @@ class ForestScene
       void update(const sf::Time& time);
 
    private:
-      std::vector<std::shared_ptr<Layer>> mLayerStack;
-      std::map<std::string, std::shared_ptr<Layer>> mLayers;
+      std::vector<std::shared_ptr<Layer>> _layer_stack;
+      std::map<std::string, std::shared_ptr<Layer>> _layers;
 
-      sf::Font mFont;
-      sf::Text mText;
+      sf::Font _font;
+      sf::Text _text;
 };
 

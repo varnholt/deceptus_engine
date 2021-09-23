@@ -15,10 +15,10 @@ struct ExtraHealth : Extra
 
    void addHealth(int32_t health);
 
-   int32_t mLives = 5;
+   int32_t _life_count = 5;
 
-   int32_t mHealth = 100;
-   int32_t mHealthMax = 100;
+   int32_t _health = 100;
+   int32_t _health_max = 100;
 };
 
 

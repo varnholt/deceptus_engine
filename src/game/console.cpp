@@ -127,7 +127,7 @@ void Console::execute()
    }
    else if (results.at(0) == "/extra" && results.size() == 2)
    {
-      auto& skills = SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills;
+      auto& skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
       if (results.at(1) == "climb")
       {
          skills |= ExtraSkill::SkillWallClimb;
@@ -239,7 +239,7 @@ void Console::execute()
    }
    else if (results.at(0) == "/iddqd")
    {
-      SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillInvulnerable;
+      SaveState::getPlayerInfo().mExtraTable._skills._skills |= ExtraSkill::SkillInvulnerable;
       _log.push_back("invulnerable");
    }
    else if (results.at(0) == "/idkfa")

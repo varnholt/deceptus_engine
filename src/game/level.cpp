@@ -195,15 +195,15 @@ Level::Level()
    // init world for this level
    b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance().mGravity);
 
-   LuaInterface::instance()->reset();
+   LuaInterface::instance().reset();
 
    // clear those here so the world destructor doesn't double-delete them
    Projectile::clear();
 
    _world = std::make_shared<b2World>(gravity);
 
-   GameContactListener::getInstance()->reset();
-   _world->SetContactListener(GameContactListener::getInstance());
+   GameContactListener::getInstance().reset();
+   _world->SetContactListener(&GameContactListener::getInstance());
 
    __current_level = this;
 
@@ -717,7 +717,7 @@ void Level::spawnEnemies()
    // iterate through all enemies in the json
    for (auto& json_description : _description->_enemies)
    {
-      auto lua_node = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + json_description.mScript);
+      auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + json_description.mScript);
 
       // find matching enemy data from the tmx layer and retrieve the patrol path from there
       const auto& it = _enemy_data_from_tmx_layer.find(json_description.mId);
@@ -747,7 +747,7 @@ void Level::spawnEnemies()
       }
 
       // initialize lua node and store enemy
-      lua_node->mEnemyDescription = json_description;
+      lua_node->_enemy_description = json_description;
       lua_node->initialize();
       _enemies.push_back(lua_node);
    }
@@ -761,7 +761,7 @@ void Level::spawnEnemies()
 
       if (script.has_value())
       {
-         auto lua_node = LuaInterface::instance()->addObject(std::string("data/scripts/enemies/") + script.value()._value);
+         auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + script.value()._value);
 
          EnemyDescription json_description;
          json_description.mPositionGivenInTiles = false;
@@ -785,7 +785,7 @@ void Level::spawnEnemies()
          }
 
          // initialize lua node and store enemy
-         lua_node->mEnemyDescription = json_description;
+         lua_node->_enemy_description = json_description;
          lua_node->initialize();
          _enemies.push_back(lua_node);
       }
@@ -1051,7 +1051,7 @@ void Level::drawLayers(
       // enemies
       for (auto& enemy : _enemies)
       {
-         if (enemy->mZ == z)
+         if (enemy->_z_index == z)
          {
             enemy->draw(target);
          }
@@ -1068,9 +1068,9 @@ void Level::drawLayers(
 
       for (auto& layer : _image_layers)
       {
-         if (layer->mZ == z)
+         if (layer->_z_index == z)
          {
-            target.draw(layer->mSprite, {layer->mBlendMode});
+            target.draw(layer->_sprite, {layer->_blend_mode});
          }
       }
 
@@ -1405,7 +1405,7 @@ void Level::update(const sf::Time& dt)
       }
    }
 
-   LuaInterface::instance()->update(dt);
+   LuaInterface::instance().update(dt);
 
    updatePlayerLight();
 
