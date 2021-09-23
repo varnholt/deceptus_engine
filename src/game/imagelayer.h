@@ -8,14 +8,14 @@ struct TmxElement;
 
 struct ImageLayer
 {
-   sf::Sprite mSprite;
-   std::shared_ptr<sf::Texture> mTexture;
-   sf::BlendMode mBlendMode = sf::BlendAdd;
-   int32_t mZ = 0;
+   sf::Sprite _sprite;
+   std::shared_ptr<sf::Texture> _texture;
+   sf::BlendMode _blend_mode = sf::BlendAdd;
+   int32_t _z_index = 0;
 
    static std::shared_ptr<ImageLayer> deserialize(
       TmxElement* element,
-      const std::filesystem::path& levelPath
+      const std::filesystem::path& level_path
    );
 };
 

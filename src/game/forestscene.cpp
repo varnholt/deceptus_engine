@@ -9,14 +9,14 @@
 
 ForestScene::ForestScene()
 {
-   if (mFont.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font.loadFromFile("data/fonts/deceptum.ttf"))
    {
-      const_cast<sf::Texture&>(mFont.getTexture(12)).setSmooth(false);
-      mText.setFont(mFont);
-      mText.setCharacterSize(12);
+      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
+      _text.setFont(_font);
+      _text.setCharacterSize(12);
       // mText.setString("Congratulations!\nYou completed the game!");
-      mText.setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
-      mText.setFillColor(sf::Color{232, 219, 243});
+      _text.setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
+      _text.setFillColor(sf::Color{232, 219, 243});
    }
    else
    {
@@ -57,8 +57,8 @@ ForestScene::ForestScene()
       tmp->_texture = texture;
       tmp->_sprite = sprite;
 
-      mLayers[layer.getName()] = tmp;
-      mLayerStack.push_back(tmp);
+      _layers[layer.getName()] = tmp;
+      _layer_stack.push_back(tmp);
    }
 }
 
@@ -72,16 +72,16 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   for (auto& layer : mLayerStack)
+   for (auto& layer : _layer_stack)
    {
       layer->draw(window, states);
    }
 
    // draw text
-   const auto rect = mText.getGlobalBounds();
+   const auto rect = _text.getGlobalBounds();
    const auto left = w / 2 - rect.width / 2;
-   mText.setPosition(floor(left), 82);
-   window.draw(mText, states);
+   _text.setPosition(floor(left), 82);
+   window.draw(_text, states);
 }
 
 /*
@@ -124,7 +124,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void ForestScene::update(const sf::Time& time)
 {
-   mLayers["mfog_1"]->_sprite->move(3.0f * time.asSeconds(), 0.0f);
-   mLayers["mfog_2"]->_sprite->move(2.0f * time.asSeconds(), 0.0f);
-   mLayers["mfog_3"]->_sprite->move(time.asSeconds(), 0.0f);
+   _layers["mfog_1"]->_sprite->move(3.0f * time.asSeconds(), 0.0f);
+   _layers["mfog_2"]->_sprite->move(2.0f * time.asSeconds(), 0.0f);
+   _layers["mfog_3"]->_sprite->move(time.asSeconds(), 0.0f);
 }

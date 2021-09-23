@@ -2,8 +2,6 @@
 
 namespace Preloader
 {
-
 void preload();
-
-};
+}
 

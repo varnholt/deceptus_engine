@@ -4,13 +4,13 @@
 //-----------------------------------------------------------------------------
 void GameState::enqueue(ExecutionMode mode)
 {
-   mQueuedMode = mode;
+   _queued_mode = mode;
 }
 
 //-----------------------------------------------------------------------------
 void GameState::sync()
 {
-   setMode(mQueuedMode);
+   setMode(_queued_mode);
 }
 
 
@@ -25,22 +25,22 @@ GameState& GameState::getInstance()
 //-----------------------------------------------------------------------------
 ExecutionMode GameState::getMode() const
 {
-   return mMode;
+   return _mode;
 }
 
 
 //-----------------------------------------------------------------------------
 void GameState::setMode(const ExecutionMode& current)
 {
-   if (current == mMode)
+   if (current == _mode)
    {
       return;
    }
 
-   auto previous = mMode;
-   mMode = current;
+   auto previous = _mode;
+   _mode = current;
 
-   for (auto& f : mCallbacks)
+   for (auto& f : _callbacks)
    {
       f(current, previous);
    }
@@ -50,14 +50,14 @@ void GameState::setMode(const ExecutionMode& current)
 //-----------------------------------------------------------------------------
 void GameState::addCallback(const GameState::StateChangeCallback& cb)
 {
-   mCallbacks.push_back(cb);
+   _callbacks.push_back(cb);
 }
 
 
 //-----------------------------------------------------------------------------
 ExecutionMode GameState::getQueuedMode() const
 {
-   return mQueuedMode;
+   return _queued_mode;
 }
 
 
@@ -78,7 +78,7 @@ void GameState::enqueueResume()
 //-----------------------------------------------------------------------------
 void GameState::enqueueTogglePauseResume()
 {
-   if (mMode == ExecutionMode::Running)
+   if (_mode == ExecutionMode::Running)
    {
       enqueue(ExecutionMode::Paused);
    }

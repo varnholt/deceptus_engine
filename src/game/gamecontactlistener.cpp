@@ -21,25 +21,16 @@
 // TODO: pass collision normal to projectile detonation
 //       so animation can be aligned to detonation angle.
 
-GameContactListener* GameContactListener::sInstance = nullptr;
 
-
-GameContactListener::GameContactListener()
- : b2ContactListener()
+int32_t GameContactListener::getPlayerFootContactCount() const
 {
-  sInstance = this;
+   return _count_foot_contacts;
 }
 
 
-int32_t GameContactListener::getNumFootContacts() const
+int32_t GameContactListener::getDeadlyContactCount() const
 {
-   return mNumFootContacts;
-}
-
-
-int32_t GameContactListener::getDeadlyContacts() const
-{
-   return mNumDeadlyContacts;
+   return _count_deadly_contacts;
 }
 
 
@@ -61,24 +52,24 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
 }
 
 
-void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture)
+void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* player_fixture, b2Fixture* platform_fixture)
 {
    // decide whether an incoming contact to the platform should be disabled or not
 
    // if the head bounces against the one-sided wall, disable the contact
    // until there is no more contact with the head (EndContact)
-   if (playerFixture != nullptr && (static_cast<FixtureNode*>(playerFixture->GetUserData()))->hasFlag("head"))
+   if (player_fixture != nullptr && (static_cast<FixtureNode*>(player_fixture->GetUserData()))->hasFlag("head"))
    {
       contact->SetEnabled(false);
    }
 
-   if (!platformFixture)
+   if (!platform_fixture)
    {
       return;
    }
 
    // if moving down, the contact should be solid
-   if (playerFixture->GetBody()->GetLinearVelocity().y > 0.0f)
+   if (player_fixture->GetBody()->GetLinearVelocity().y > 0.0f)
    {
       return;
    }
@@ -90,34 +81,34 @@ void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* pl
 
 void GameContactListener::BeginContact(b2Contact* contact)
 {
-   auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
-   auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
+   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
+   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
 
-   b2Fixture* platformFixture = nullptr;
-   b2Fixture* playerFixture = nullptr;
+   b2Fixture* platform_fixture = nullptr;
+   b2Fixture* player_fixture = nullptr;
 
-   FixtureNode* fixtureNodeA = nullptr;
-   FixtureNode* fixtureNodeB = nullptr;
+   FixtureNode* fixture_node_a = nullptr;
+   FixtureNode* fixture_node_b = nullptr;
 
-   if (fixtureUserDataA)
+   if (fixture_user_data_a)
    {
-      fixtureNodeA = static_cast<FixtureNode*>(fixtureUserDataA);
+      fixture_node_a = static_cast<FixtureNode*>(fixture_user_data_a);
    }
 
-   if (fixtureUserDataB)
+   if (fixture_user_data_b)
    {
-      fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
+      fixture_node_b = static_cast<FixtureNode*>(fixture_user_data_b);
    }
 
-   if (fixtureUserDataA)
+   if (fixture_user_data_a)
    {
-      switch (fixtureNodeA->getType())
+      switch (fixture_node_a->getType())
       {
          case ObjectTypeCrusher:
          {
-            if (isPlayer(fixtureNodeB))
+            if (isPlayer(fixture_node_b))
             {
-               mNumDeadlyContacts++;
+               _count_deadly_contacts++;
             }
             break;
          }
@@ -130,7 +121,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
                {
                   Player::getCurrent()->setGroundBody(contact->GetFixtureB()->GetBody());
                }
-               mNumFootContacts++;
+               _count_foot_contacts++;
             }
             break;
          }
@@ -138,7 +129,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumHeadContacts++;
+               _count_head_contacts++;
             }
             break;
          }
@@ -146,7 +137,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumArmLeftContacts++;
+               _count_arm_left_contacts++;
             }
             break;
          }
@@ -154,28 +145,28 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumArmRightContacts++;
+               _count_arm_right_contacts++;
             }
             break;
          }
          case ObjectTypeProjectile:
          {
-            auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
+            auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
 
-            if (isPlayer(fixtureNodeB))
+            if (isPlayer(fixture_node_b))
             {
                Player::getCurrent()->damage(damage);
             }
-            else if (fixtureNodeB && fixtureNodeB->getType() == ObjectTypeEnemy)
+            else if (fixture_node_b && fixture_node_b->getType() == ObjectTypeEnemy)
             {
-               auto p = dynamic_cast<LuaNode*>(fixtureNodeB->getParent());
+               auto p = dynamic_cast<LuaNode*>(fixture_node_b->getParent());
                if (p != nullptr)
                {
                   p->luaHit(damage);
                }
             }
 
-            auto projectile = dynamic_cast<Projectile*>(fixtureNodeA);
+            auto projectile = dynamic_cast<Projectile*>(fixture_node_a);
 
             // if it's an arrow, let postsolve handle it. if the impulse is not
             // hard enough, the arrow should just fall on the ground
@@ -188,53 +179,53 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneSided:
          {
-            platformFixture = contact->GetFixtureA();
-            playerFixture = contact->GetFixtureB();
+            platform_fixture = contact->GetFixtureA();
+            player_fixture = contact->GetFixtureB();
             break;
          }
          case ObjectTypePlayer:
          {
-            mNumPlayerContacts++;
+            _count_player_contacts++;
             break;
          }
          case ObjectTypeDeadly:
          {
-            if (isPlayer(fixtureNodeB))
+            if (isPlayer(fixture_node_b))
             {
-               mNumDeadlyContacts++;
+               _count_deadly_contacts++;
             }
             break;
          }
          case ObjectTypeMovingPlatform:
          {
             // check if platform smashes the player
-            auto fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
-            if (fixtureNodeB && fixtureNodeB->getType() == ObjectType::ObjectTypePlayerHeadSensor)
+            auto fixture_node_b = static_cast<FixtureNode*>(fixture_user_data_b);
+            if (fixture_node_b && fixture_node_b->getType() == ObjectType::ObjectTypePlayerHeadSensor)
             {
                if (Player::getCurrent()->isOnGround())
                {
-                  mSmashed = true;
+                  _smashed = true;
                }
             }
 
-            auto platformBody = contact->GetFixtureA()->GetBody();
-            Player::getCurrent()->setPlatformBody(platformBody);
+            auto platform_body = contact->GetFixtureA()->GetBody();
+            Player::getCurrent()->setPlatformBody(platform_body);
 
-            mNumMovingPlatformContacts++;
+            _count_moving_platform_contacts++;
             break;
          }
          case ObjectTypeBouncer:
          {
-            dynamic_cast<Bouncer*>(fixtureNodeA)->activate();
+            dynamic_cast<Bouncer*>(fixture_node_a)->activate();
             break;
          }
          case ObjectTypeEnemy:
          {
-            if (isPlayer(fixtureNodeB))
+            if (isPlayer(fixture_node_b))
             {
                // printf("collision with enemy\n");
-               auto damage = std::get<int32_t>(fixtureNodeA->getProperty("damage"));
-               fixtureNodeA->collisionWithPlayer();
+               auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
+               fixture_node_a->collisionWithPlayer();
                Player::getCurrent()->damage(damage);
                break;
             }
@@ -253,17 +244,17 @@ void GameContactListener::BeginContact(b2Contact* contact)
       }
    }
 
-   if (fixtureUserDataB)
+   if (fixture_user_data_b)
    {
-      FixtureNode* fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
+      FixtureNode* fixture_node_b = static_cast<FixtureNode*>(fixture_user_data_b);
 
-      switch (fixtureNodeB->getType())
+      switch (fixture_node_b->getType())
       {
          case ObjectTypeCrusher:
          {
-            if (isPlayer(fixtureNodeA))
+            if (isPlayer(fixture_node_a))
             {
-               mNumDeadlyContacts++;
+               _count_deadly_contacts++;
             }
             break;
          }
@@ -277,7 +268,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
                   Player::getCurrent()->setGroundBody(contact->GetFixtureA()->GetBody());
                }
 
-               mNumFootContacts++;
+               _count_foot_contacts++;
             }
             break;
          }
@@ -285,7 +276,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumHeadContacts++;
+               _count_head_contacts++;
             }
             break;
          }
@@ -293,7 +284,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumArmLeftContacts++;
+               _count_arm_left_contacts++;
             }
             break;
          }
@@ -301,28 +292,28 @@ void GameContactListener::BeginContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumArmRightContacts++;
+               _count_arm_right_contacts++;
             }
             break;
          }
          case ObjectTypeProjectile:
          {
-            auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
+            auto damage = std::get<int32_t>(fixture_node_b->getProperty("damage"));
 
-            if (isPlayer(fixtureNodeA))
+            if (isPlayer(fixture_node_a))
             {
                Player::getCurrent()->damage(damage);
             }
-            else if (fixtureNodeA && fixtureNodeA->getType() == ObjectTypeEnemy)
+            else if (fixture_node_a && fixture_node_a->getType() == ObjectTypeEnemy)
             {
-               auto p = dynamic_cast<LuaNode*>(fixtureNodeA->getParent());
+               auto p = dynamic_cast<LuaNode*>(fixture_node_a->getParent());
                if (p != nullptr)
                {
                   p->luaHit(damage);
                }
             }
 
-            auto projectile = dynamic_cast<Projectile*>(fixtureNodeB);
+            auto projectile = dynamic_cast<Projectile*>(fixture_node_b);
 
             // if it's an arrow, let postsolve handle it. if the impulse is not
             // hard enough, the arrow should just fall on the ground
@@ -335,53 +326,53 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneSided:
          {
-            platformFixture = contact->GetFixtureB();
-            playerFixture = contact->GetFixtureA();
+            platform_fixture = contact->GetFixtureB();
+            player_fixture = contact->GetFixtureA();
             break;
          }
          case ObjectTypePlayer:
          {
-            mNumPlayerContacts++;
+            _count_player_contacts++;
             break;
          }
          case ObjectTypeDeadly:
          {
-            if (isPlayer(fixtureNodeA))
+            if (isPlayer(fixture_node_a))
             {
-               mNumDeadlyContacts++;
+               _count_deadly_contacts++;
             }
             break;
          }
          case ObjectTypeMovingPlatform:
          {
             // check if platform smashes the player
-            auto fixtureNodeA = static_cast<FixtureNode*>(fixtureUserDataA);
+            auto fixtureNodeA = static_cast<FixtureNode*>(fixture_user_data_a);
             if (fixtureNodeA && fixtureNodeA->getType() == ObjectType::ObjectTypePlayerHeadSensor)
             {
                if (Player::getCurrent()->isOnGround())
                {
-                  mSmashed = true;
+                  _smashed = true;
                }
             }
 
             auto platformBody = contact->GetFixtureB()->GetBody();
             Player::getCurrent()->setPlatformBody(platformBody);
 
-            mNumMovingPlatformContacts++;
+            _count_moving_platform_contacts++;
             break;
          }
          case ObjectTypeBouncer:
          {
-            dynamic_cast<Bouncer*>(fixtureNodeB)->activate();
+            dynamic_cast<Bouncer*>(fixture_node_b)->activate();
             break;
          }
          case ObjectTypeEnemy:
          {
-            if (isPlayer(fixtureNodeA))
+            if (isPlayer(fixture_node_a))
             {
                // printf("collision with enemy\n");
-               auto damage = std::get<int32_t>(fixtureNodeB->getProperty("damage"));
-               fixtureNodeB->collisionWithPlayer();
+               auto damage = std::get<int32_t>(fixture_node_b->getProperty("damage"));
+               fixture_node_b->collisionWithPlayer();
                Player::getCurrent()->damage(damage);
                break;
             }
@@ -401,39 +392,37 @@ void GameContactListener::BeginContact(b2Contact* contact)
    }
 
    // handle one sided walls
-   processOneSidedWalls(contact, playerFixture, platformFixture);
+   processOneSidedWalls(contact, player_fixture, platform_fixture);
 }
 
 
 void GameContactListener::EndContact(b2Contact* contact)
 {
-   auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
-   auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
+   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
+   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
 
-   FixtureNode* fixtureNodeA = nullptr;
-   FixtureNode* fixtureNodeB = nullptr;
+   FixtureNode* fixture_node_a = nullptr;
+   FixtureNode* fixture_node_b = nullptr;
 
-   if (fixtureUserDataA)
+   if (fixture_user_data_a)
    {
-      fixtureNodeA = static_cast<FixtureNode*>(fixtureUserDataA);
+      fixture_node_a = static_cast<FixtureNode*>(fixture_user_data_a);
    }
 
-   if (fixtureUserDataB)
+   if (fixture_user_data_b)
    {
-      fixtureNodeB = static_cast<FixtureNode*>(fixtureUserDataB);
+      fixture_node_b = static_cast<FixtureNode*>(fixture_user_data_b);
    }
 
-   if (fixtureUserDataA)
+   if (fixture_user_data_a)
    {
-      auto fixtureNodeA = static_cast<FixtureNode*>(fixtureUserDataA);
-
-      switch (fixtureNodeA->getType())
+      switch (fixture_node_a->getType())
       {
          case ObjectTypeCrusher:
          {
-            if (isPlayer(fixtureNodeB))
+            if (isPlayer(fixture_node_b))
             {
-               mNumDeadlyContacts--;
+               _count_deadly_contacts--;
             }
             break;
          }
@@ -441,7 +430,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumFootContacts--;
+               _count_foot_contacts--;
             }
             break;
          }
@@ -449,7 +438,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumHeadContacts--;
+               _count_head_contacts--;
             }
             break;
          }
@@ -457,7 +446,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumArmLeftContacts--;
+               _count_arm_left_contacts--;
             }
             break;
          }
@@ -465,13 +454,13 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureB()->IsSensor())
             {
-               mNumArmRightContacts--;
+               _count_arm_right_contacts--;
             }
             break;
          }
          case ObjectTypePlayer:
          {
-            mNumPlayerContacts--;
+            _count_player_contacts--;
             break;
          }
          case ObjectTypeSolidOneSided:
@@ -482,15 +471,15 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeDeadly:
          {
-            if (isPlayer(fixtureNodeB))
+            if (isPlayer(fixture_node_b))
             {
-               mNumDeadlyContacts--;
+               _count_deadly_contacts--;
             }
             break;
          }
          case ObjectTypeMovingPlatform:
          {
-            mNumMovingPlatformContacts--;
+            _count_moving_platform_contacts--;
             break;
          }
          default:
@@ -500,17 +489,15 @@ void GameContactListener::EndContact(b2Contact* contact)
       }
    }
 
-   if (fixtureUserDataB)
+   if (fixture_user_data_b)
    {
-      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
-
-      switch (fixtureNode->getType())
+      switch (fixture_node_b->getType())
       {
          case ObjectTypeCrusher:
          {
-            if (isPlayer(fixtureNodeA))
+            if (isPlayer(fixture_node_a))
             {
-               mNumDeadlyContacts--;
+               _count_deadly_contacts--;
             }
             break;
          }
@@ -518,7 +505,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumFootContacts--;
+               _count_foot_contacts--;
             }
             break;
          }
@@ -526,7 +513,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumHeadContacts--;
+               _count_head_contacts--;
             }
             break;
          }
@@ -534,7 +521,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumArmLeftContacts--;
+               _count_arm_left_contacts--;
             }
             break;
          }
@@ -542,13 +529,13 @@ void GameContactListener::EndContact(b2Contact* contact)
          {
             if (!contact->GetFixtureA()->IsSensor())
             {
-               mNumArmRightContacts--;
+               _count_arm_right_contacts--;
             }
             break;
          }
          case ObjectTypePlayer:
          {
-            mNumPlayerContacts--;
+            _count_player_contacts--;
             break;
          }
          case ObjectTypeSolidOneSided:
@@ -559,15 +546,15 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeDeadly:
          {
-            if (isPlayer(fixtureNodeA))
+            if (isPlayer(fixture_node_a))
             {
-               mNumDeadlyContacts--;
+               _count_deadly_contacts--;
             }
             break;
          }
          case ObjectTypeMovingPlatform:
          {
-            mNumMovingPlatformContacts--;
+            _count_moving_platform_contacts--;
             break;
          }
          default:
@@ -620,22 +607,22 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
    // check if the player hits something at a heigh speed or
    // if something hits the player at a nigh speed
-   auto userDataA = contact->GetFixtureA()->GetUserData();
-   auto userDataB = contact->GetFixtureB()->GetUserData();
+   auto user_data_a = contact->GetFixtureA()->GetUserData();
+   auto user_data_b = contact->GetFixtureB()->GetUserData();
 
    auto impulse = contactImpulse->normalImpulses[0];
 
-   if (userDataA)
+   if (user_data_a)
    {
-      auto nodeA = static_cast<FixtureNode*>(userDataA);
+      auto node_a = static_cast<FixtureNode*>(user_data_a);
 
-      if (nodeA->getType() == ObjectTypePlayer)
+      if (node_a->getType() == ObjectTypePlayer)
       {
          processImpulse(impulse);
       }
-      else if (nodeA->getType() == ObjectTypeProjectile)
+      else if (node_a->getType() == ObjectTypeProjectile)
       {
-         auto projectile = dynamic_cast<Projectile*>(nodeA);
+         auto projectile = dynamic_cast<Projectile*>(node_a);
 
          if (projectile->isSticky())
          {
@@ -662,17 +649,17 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
       }
    }
 
-   if (userDataB)
+   if (user_data_b)
    {
-      auto nodeB = static_cast<FixtureNode*>(userDataB);
+      auto node_b = static_cast<FixtureNode*>(user_data_b);
 
-      if (nodeB->getType() == ObjectTypePlayer)
+      if (node_b->getType() == ObjectTypePlayer)
       {
          processImpulse(impulse);
       }
-      else if (nodeB->getType() == ObjectTypeProjectile)
+      else if (node_b->getType() == ObjectTypeProjectile)
       {
-         auto projectile = dynamic_cast<Projectile*>(nodeB);
+         auto projectile = dynamic_cast<Projectile*>(node_b);
 
          if (projectile->isSticky())
          {
@@ -704,11 +691,11 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 void GameContactListener::debug()
 {
    std::cout
-      << "head contacts: " << getNumHeadContacts() << std::endl
-      << "foot contacts: " << getNumFootContacts() << std::endl
-      << "deadly contacts: " << getDeadlyContacts() << std::endl
-      << "moving platform contacts: " << getNumMovingPlatformContacts() << std::endl
-      << "player contacts: " << getNumPlayerContacts() << std::endl
+      << "head contacts: " << getPlayerHeadContactCount() << std::endl
+      << "foot contacts: " << getPlayerFootContactCount() << std::endl
+      << "deadly contacts: " << getDeadlyContactCount() << std::endl
+      << "moving platform contacts: " << getMovingPlatformContactCount() << std::endl
+      << "player contacts: " << getPlayerContactCount() << std::endl
    ;
 }
 
@@ -725,63 +712,59 @@ void GameContactListener::processImpulse(float impulse)
 }
 
 
-int32_t GameContactListener::getNumArmRightContacts() const
+int32_t GameContactListener::getPlayerArmRightContactCount() const
 {
-   return mNumArmRightContacts;
+   return _count_arm_right_contacts;
 }
 
 
-bool GameContactListener::isSmashed() const
+bool GameContactListener::isPlayerSmashed() const
 {
-   return mSmashed;
+   return _smashed;
 }
 
 
-int32_t GameContactListener::getNumArmLeftContacts() const
+int32_t GameContactListener::getPlayerArmLeftContactCount() const
 {
-   return mNumArmLeftContacts;
+   return _count_arm_left_contacts;
 }
 
 
-int32_t GameContactListener::getNumHeadContacts() const
+int32_t GameContactListener::getPlayerHeadContactCount() const
 {
-   return mNumHeadContacts;
+   return _count_head_contacts;
 }
 
 
 void GameContactListener::reset()
 {
-   mNumHeadContacts = 0;
-   mNumFootContacts = 0;
-   mNumPlayerContacts = 0;
-   mNumArmLeftContacts = 0;
-   mNumArmRightContacts = 0;
-   mNumDeadlyContacts = 0;
-   mNumMovingPlatformContacts = 0;
-   mSmashed = false;
+   _count_head_contacts = 0;
+   _count_foot_contacts = 0;
+   _count_player_contacts = 0;
+   _count_arm_left_contacts = 0;
+   _count_arm_right_contacts = 0;
+   _count_deadly_contacts = 0;
+   _count_moving_platform_contacts = 0;
+   _smashed = false;
 }
 
 
-GameContactListener* GameContactListener::getInstance()
+GameContactListener& GameContactListener::getInstance()
 {
-  if (!sInstance)
-  {
-    new GameContactListener();
-  }
-
-  return sInstance;
+   static GameContactListener __instance;
+   return __instance;
 }
 
 
-int32_t GameContactListener::getNumPlayerContacts() const
+int32_t GameContactListener::getPlayerContactCount() const
 {
-   return mNumPlayerContacts;
+   return _count_player_contacts;
 }
 
 
-int32_t GameContactListener::getNumMovingPlatformContacts() const
+int32_t GameContactListener::getMovingPlatformContactCount() const
 {
-   return mNumMovingPlatformContacts;
+   return _count_moving_platform_contacts;
 }
 
 

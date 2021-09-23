@@ -8,20 +8,24 @@ class GameControllerIntegration
    public:
 
       GameControllerIntegration();
+      virtual ~GameControllerIntegration() = default;
+
       static int initializeAll();
       static GameControllerIntegration* getInstance(int id);
-      virtual ~GameControllerIntegration();
+      static int getCount();
+
       void initialize(int id = 0);
       GameController* getController();
       void rumble(float intensity, int ms);
-      static int getCount();
 
 
 private:
 
-      static int sCount;
       static GameControllerIntegration* createInstance();
-      static GameControllerIntegration* sInstances[10];
-      GameController* mController = nullptr;
+
+      static int __count;
+      static GameControllerIntegration* __instances[10];
+
+      GameController* _controller = nullptr;
 };
 

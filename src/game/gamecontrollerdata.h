@@ -18,9 +18,6 @@ public:
 private:
 
     GameControllerData() = default;
-
-    static GameControllerData sInstance;
-
-    GameControllerInfo mJoystickInfo;
+    GameControllerInfo _joystick_info;
 };
 

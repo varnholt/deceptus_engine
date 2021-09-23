@@ -14,14 +14,14 @@
 #include "../framework/joystick/gamecontroller.h"
 
 
-GameControllerIntegration* GameControllerIntegration::sInstances[10];
-int GameControllerIntegration::sCount = 0;
+GameControllerIntegration* GameControllerIntegration::__instances[10];
+int GameControllerIntegration::__count = 0;
 
 
 //-----------------------------------------------------------------------------
 GameControllerIntegration::GameControllerIntegration()
 {
-   mController = new GameController();
+   _controller = new GameController();
 }
 
 
@@ -29,28 +29,24 @@ GameControllerIntegration::GameControllerIntegration()
 int GameControllerIntegration::initializeAll()
 {
    for (auto i = 0; i < 10; i++)
-      sInstances[i] = nullptr;
+   {
+      __instances[i] = nullptr;
+   }
 
    // used for obtaining some information from sdl
    auto tmp = new GameController();
-   sCount = tmp->getJoystickCount();
+   __count = tmp->getJoystickCount();
    delete tmp;
 
-   for (auto i = 0; i < sCount; i++)
+   for (auto i = 0; i < __count; i++)
    {
       auto gji = createInstance();
       gji->initialize(i);
 
-      sInstances[i] = gji;
+      __instances[i] = gji;
    }
 
-   return sCount;
-}
-
-
-//-----------------------------------------------------------------------------
-GameControllerIntegration::~GameControllerIntegration()
-{
+   return __count;
 }
 
 
@@ -58,9 +54,9 @@ GameControllerIntegration::~GameControllerIntegration()
 void GameControllerIntegration::initialize(int id)
 {
    // automatically select first in list
-   if (mController->getJoystickCount() > id)
+   if (_controller->getJoystickCount() > id)
    {
-      mController->setActiveJoystick(id);
+      _controller->setActiveJoystick(id);
    }
 }
 
@@ -68,21 +64,21 @@ void GameControllerIntegration::initialize(int id)
 //-----------------------------------------------------------------------------
 GameController* GameControllerIntegration::getController()
 {
-   return mController;
+   return _controller;
 }
 
 
 //-----------------------------------------------------------------------------
 void GameControllerIntegration::rumble(float intensity, int ms)
 {
-   mController->rumble(intensity, ms);
+   _controller->rumble(intensity, ms);
 }
 
 
 //-----------------------------------------------------------------------------
 int GameControllerIntegration::getCount()
 {
-   return sCount;
+   return __count;
 }
 
 
@@ -92,7 +88,7 @@ GameControllerIntegration* GameControllerIntegration::getInstance(int id)
    GameControllerIntegration* gji = nullptr;
 
    if (id >= 0 && id < 10)
-      gji = sInstances[id];
+      gji = __instances[id];
 
    return gji;
 }

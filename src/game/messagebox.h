@@ -28,11 +28,11 @@ class MessageBox
       };
 
       struct LayoutProperties {
-         MessageBoxLocation mLocation = MessageBoxLocation::MiddleCenter;
-         sf::Color mBackgroundColor = sf::Color{47, 12, 75};
-         sf::Color mTextColor = sf::Color{232, 219, 243};
-         bool mAnimate = false;
-         bool mCentered = true;
+         MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
+         sf::Color _background_color = sf::Color{47, 12, 75};
+         sf::Color _text_color = sf::Color{232, 219, 243};
+         bool _animate = false;
+         bool _centered = true;
       };
 
       using MessageBoxCallback = std::function<void(Button)>;
@@ -53,14 +53,14 @@ class MessageBox
       static void info(
          const std::string& message,
          MessageBoxCallback callback,
-         const LayoutProperties& properties = sDefaultProperties,
+         const LayoutProperties& properties = __default_properties,
          int buttons = static_cast<int32_t>(Button::Ok)
       );
 
       static void question(
          const std::string& message,
          MessageBoxCallback callback,
-         const LayoutProperties& properties = sDefaultProperties,
+         const LayoutProperties& properties = __default_properties,
          int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
       );
 
@@ -80,25 +80,25 @@ class MessageBox
 
       void initializeControllerCallbacks();
 
-      Type mType;
-      std::string mTitle; // still unsupported
-      std::string mMessage;
-      MessageBoxCallback mCallback;
-      LayoutProperties mProperties;
-      int32_t mButtons = 0;
-      uint32_t mCharsShown = 0;
-      bool mDrawn = false;
-      std::function<void(void)> mButtonCallbackA;
-      std::function<void(void)> mButtonCallbackB;
-      sf::Time mShowTime;
-      ExecutionMode mPreviousMode = ExecutionMode::None;
+      Type _type;
+      std::string _title; // still unsupported
+      std::string _message;
+      MessageBoxCallback _callback;
+      LayoutProperties _properties;
+      int32_t _buttons = 0;
+      uint32_t _chars_shown = 0;
+      bool _drawn = false;
+      std::function<void(void)> _button_callback_a;
+      std::function<void(void)> _button_callback_b;
+      sf::Time _show_time;
+      ExecutionMode _previous_mode = ExecutionMode::None;
 
-      static LayoutProperties sDefaultProperties;
-      static std::unique_ptr<MessageBox> sActive;
-      static std::vector<std::shared_ptr<Layer>> sLayerStack; // SLAYER!
-      static std::map<std::string, std::shared_ptr<Layer>> sLayers;
-      static sf::Font sFont;
-      static sf::Text sText;
-      static bool sInitialized;
+      static LayoutProperties __default_properties;
+      static std::unique_ptr<MessageBox> __active;
+      static std::vector<std::shared_ptr<Layer>> __layer_stack;
+      static std::map<std::string, std::shared_ptr<Layer>> __layers;
+      static sf::Font __font;
+      static sf::Text __text;
+      static bool __initialized;
 };
 

@@ -909,7 +909,7 @@ void Player::updateVelocity()
 
    if (_bend._bending_down)
    {
-      if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillCrouch))
+      if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillCrouch))
       {
          _body->SetLinearVelocity(b2Vec2{0.0, 0.0});
          return;
@@ -1113,7 +1113,7 @@ void Player::updateImpulse()
    auto impulse = _impulse;
    _impulse = 0.0f;
 
-   if (GameContactListener::getInstance()->isSmashed())
+   if (GameContactListener::getInstance().isPlayerSmashed())
    {
       return;
    }
@@ -1167,7 +1167,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
       return;
    }
 
-   if (SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillInvulnerable)
+   if (SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillInvulnerable)
    {
       return;
    }
@@ -1182,10 +1182,10 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
       auto body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-      SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth -= damage;
+      SaveState::getPlayerInfo().mExtraTable._health._health -= damage;
       _damage_clock.restart();
 
-      if (SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth < 0)
+      if (SaveState::getPlayerInfo().mExtraTable._health._health < 0)
       {
          // the function below is not called since 'damage(...)' is evaluated
          // within the box2d step function; no further box2d related adjustments
@@ -1201,7 +1201,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
 bool Player::isOnPlatform() const
 {
    const auto onPlatform =
-      GameContactListener::getInstance()->getNumMovingPlatformContacts() > 0 && isOnGround();
+      GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
 
    return onPlatform;
 }
@@ -1210,7 +1210,7 @@ bool Player::isOnPlatform() const
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnGround() const
 {
-   return GameContactListener::getInstance()->getNumFootContacts() > 0;
+   return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
 }
 
 
@@ -1264,7 +1264,7 @@ void Player::setInWater(bool inWater)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateFootsteps()
 {
-   if (GameContactListener::getInstance()->getNumFootContacts() > 0 && !isInWater())
+   if (GameContactListener::getInstance().getPlayerFootContactCount() > 0 && !isInWater())
    {
       auto vel = fabs(_body->GetLinearVelocity().x);
       if (vel > 0.1f)
@@ -1346,7 +1346,7 @@ void Player::updateBendDown()
    }
 
    // if the head touches something while crouches, keep crouching
-   if (_bend._bending_down && !downPressed && (GameContactListener::getInstance()->getNumHeadContacts() > 0))
+   if (_bend._bending_down && !downPressed && (GameContactListener::getInstance().getPlayerHeadContactCount() > 0))
    {
       return;
    }
@@ -1505,7 +1505,7 @@ void Player::resetDash()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
-   if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillDash))
+   if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillDash))
    {
       return;
    }
@@ -1677,7 +1677,7 @@ void Player::setFriction(float friction)
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isInAir() const
 {
-   return (GameContactListener::getInstance()->getNumFootContacts() == 0) && !isInWater();
+   return (GameContactListener::getInstance().getPlayerFootContactCount() == 0) && !isInWater();
 }
 
 
@@ -1783,7 +1783,7 @@ void Player::reset()
       );
    }
 
-   SaveState::getPlayerInfo().mExtraTable.mHealth.reset();
+   SaveState::getPlayerInfo().mExtraTable._health.reset();
 
    // resetting any player info apart form the health doesn't make sense
    // since it's loaded from disk when the player dies
@@ -1808,12 +1808,12 @@ DeathReason Player::checkDead() const
 {
    DeathReason reason = DeathReason::None;
 
-   const auto touchesSomethingDeadly = (GameContactListener::getInstance()->getDeadlyContacts() > 0);
-   const auto tooFast = fabs(_body->GetLinearVelocity().y) > 40;
-   const auto outOfHealth = SaveState::getPlayerInfo().mExtraTable.mHealth.mHealth <= 0;
-   const auto smashed = GameContactListener::getInstance()->isSmashed();
+   const auto touches_something_deadly = (GameContactListener::getInstance().getDeadlyContactCount() > 0);
+   const auto too_fast = fabs(_body->GetLinearVelocity().y) > 40;
+   const auto out_of_health = SaveState::getPlayerInfo().mExtraTable._health._health <= 0;
+   const auto smashed = GameContactListener::getInstance().isPlayerSmashed();
 
-   if (touchesSomethingDeadly)
+   if (touches_something_deadly)
    {
       reason = DeathReason::TouchesDeadly;
    }
@@ -1821,11 +1821,11 @@ DeathReason Player::checkDead() const
    {
       reason = DeathReason::Smashed;
    }
-   else if (tooFast)
+   else if (too_fast)
    {
       reason = DeathReason::TooFast;
    }
-   else if (outOfHealth)
+   else if (out_of_health)
    {
       reason = DeathReason::OutOfHealth;
    }

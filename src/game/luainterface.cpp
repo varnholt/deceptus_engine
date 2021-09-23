@@ -7,24 +7,10 @@
 #include <sstream>
 
 
-LuaInterface* LuaInterface::__instance = nullptr;
-
-
-
-LuaInterface *LuaInterface::instance()
+LuaInterface& LuaInterface::instance()
 {
-   if (__instance == nullptr)
-   {
-      new LuaInterface();
-   }
-
+   static LuaInterface __instance;
    return __instance;
-}
-
-
-LuaInterface::LuaInterface()
-{
-   __instance = this;
 }
 
 
@@ -55,10 +41,14 @@ void LuaInterface::update(const sf::Time& dt)
       object->updatePosition();
       object->updateWeapons(dt);
 
-      if (!object->mBody)
+      if (!object->_body)
+      {
          it = _object_list.erase(it);
+      }
       else
+      {
          ++it;
+      }
    }
 }
 
@@ -71,7 +61,7 @@ std::shared_ptr<LuaNode> LuaInterface::getObject(lua_State* state)
       std::find_if(
          _object_list.begin(),
          _object_list.end(),
-         [state](auto node) { return node->mState == state; }
+         [state](auto node) { return node->_lua_state == state; }
       );
 
    if (it != _object_list.end())
@@ -85,14 +75,14 @@ std::shared_ptr<LuaNode> LuaInterface::getObject(lua_State* state)
 
 void LuaInterface::requestMap(std::shared_ptr<LuaNode> obj)
 {
-   printf("requestMap: obj: %d\n", obj->mId);
+   printf("requestMap: obj: %d\n", obj->_id);
 }
 
 
 void LuaInterface::updateKeysPressed(std::shared_ptr<LuaNode> obj, int keys)
 {
    // printf("keyPressed: obj: %d, keys: %d\n", obj->mId, keys);
-   obj->mKeysPressed = keys;
+   obj->_keys_pressed = keys;
 }
 
 

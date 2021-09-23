@@ -73,7 +73,7 @@ void Laser::update(const sf::Time& dt)
 {
    mTime += dt.asMilliseconds();
 
-   if (mEnabled)
+   if (_enabled)
    {
       if (mSignalPlot.empty())
       {
@@ -105,7 +105,7 @@ void Laser::update(const sf::Time& dt)
 
    // const auto previousTileIndex = mTileIndex;
 
-   if (mVersion == MechanismVersion::Version1)
+   if (_version == MechanismVersion::Version1)
    {
       // shift tile index in right direction depending on the on/off state
       //
@@ -130,7 +130,7 @@ void Laser::update(const sf::Time& dt)
          }
       }
    }
-   else if (mVersion == MechanismVersion::Version2)
+   else if (_version == MechanismVersion::Version2)
    {
       //   +---------+-----------+
       //   | frame   | state     |
@@ -282,7 +282,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
             auto laser = std::make_shared<Laser>();
             lasers.push_back(laser);
 
-            laser->mVersion = version;
+            laser->_version = version;
 
             laser->mTilePosition.x = static_cast<float>(i);
             laser->mTilePosition.y = static_cast<float>(j);
@@ -394,11 +394,11 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
 
             auto active = false;
 
-            if (laser->mVersion == MechanismVersion::Version1)
+            if (laser->_version == MechanismVersion::Version1)
             {
                active = (laser->mTileIndex == 0);
             }
-            else if (laser->mVersion == MechanismVersion::Version2)
+            else if (laser->_version == MechanismVersion::Version2)
             {
                active = (laser->mTileIndex >= rangeEnabled.first) && (laser->mTileIndex <= rangeEnabled.second);
             }
@@ -409,7 +409,7 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
                const auto tileId = static_cast<uint32_t>(laser->mTv);
 
                const auto tile =
-                  (laser->mVersion == MechanismVersion::Version1)
+                  (laser->_version == MechanismVersion::Version1)
                      ? mTilesVersion1[tileId]
                      : mTilesVersion2[tileId];
 
