@@ -83,11 +83,11 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                break;
             case ExtraItem::ExtraSpriteIndex::Cherry:
                Audio::getInstance()->playSample("healthup.wav");
-               SaveState::getPlayerInfo().mExtraTable.mHealth.addHealth(20);
+               SaveState::getPlayerInfo().mExtraTable._health.addHealth(20);
                break;
             case ExtraItem::ExtraSpriteIndex::Banana:
                Audio::getInstance()->playSample("healthup.wav");
-               SaveState::getPlayerInfo().mExtraTable.mHealth.addHealth(10);
+               SaveState::getPlayerInfo().mExtraTable._health.addHealth(10);
                break;
             case ExtraItem::ExtraSpriteIndex::Apple:
                Audio::getInstance()->playSample("powerup.wav");
@@ -125,7 +125,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
             case ExtraItem::ExtraSpriteIndex::Dash:
             {
                Audio::getInstance()->playSample("powerup.wav");
-               SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillDash;
+               SaveState::getPlayerInfo().mExtraTable._skills._skills |= ExtraSkill::SkillDash;
                break;
             }
          }

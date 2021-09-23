@@ -5,23 +5,23 @@ using json = nlohmann::json;
 
 ExtraHealth::ExtraHealth()
 {
-   mExtraType = ExtraType::Health;
+   _extra_type = ExtraType::Health;
 }
 
 
 void ExtraHealth::reset()
 {
-   mHealth = 100;
+   _health = 100;
 }
 
 
 void ExtraHealth::addHealth(int32_t health)
 {
-   mHealth += health;
+   _health += health;
 
-   if (mHealth > mHealthMax)
+   if (_health > _health_max)
    {
-      mHealth = mHealthMax;
+      _health = _health_max;
    }
 }
 
@@ -29,17 +29,17 @@ void ExtraHealth::addHealth(int32_t health)
 void to_json(nlohmann::json& j, const ExtraHealth& d)
 {
    j = json{
-      {"lives", d.mLives},
-      {"health", d.mHealth},
-      {"health_max", d.mHealthMax},
+      {"lives", d._life_count},
+      {"health", d._health},
+      {"health_max", d._health_max},
    };
 }
 
 
 void from_json(const nlohmann::json& j, ExtraHealth& d)
 {
-   d.mLives = j.at("lives").get<int32_t>();
-   d.mHealth = j.at("health").get<int32_t>();
-   d.mHealthMax = j.at("health_max").get<int32_t>();
+   d._life_count = j.at("lives").get<int32_t>();
+   d._health = j.at("health").get<int32_t>();
+   d._health_max = j.at("health_max").get<int32_t>();
 }
 

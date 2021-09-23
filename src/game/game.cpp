@@ -410,8 +410,6 @@ void Game::draw()
 
    _window_render_texture->clear();
 
-   const auto mapEnabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
-
    if (_level_loading_finished)
    {
       _level->draw(_window_render_texture, _screenshot);
@@ -432,7 +430,8 @@ void Game::draw()
       ScreenTransitionHandler::getInstance()._transition->draw(_window_render_texture);
    }
 
-   if (!mapEnabled)
+   const auto map_enabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
+   if (!map_enabled)
    {
       _info_layer->setLoading(!_level_loading_finished);
       _info_layer->draw(*_window_render_texture.get());
@@ -554,9 +553,9 @@ void Game::updateGameControllerForInventory()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateWindowTitle()
 {
-   std::ostringstream sStream;
-   sStream << GAME_NAME << " - " << _fps << "fps";
-   _window->setTitle(sStream.str());
+   std::ostringstream out_stream;
+   out_stream << GAME_NAME << " - " << _fps << "fps";
+   _window->setTitle(out_stream.str());
    _fps = 0;
 }
 
@@ -631,13 +630,13 @@ void Game::resetAfterDeath(const sf::Time& dt)
 void Game::updateGameState(const sf::Time& dt)
 {
    // check if just died
-   auto deathReason = _player->checkDead();
-   if (!_player->isDead() && deathReason != DeathReason::None)
+   auto death_reason = _player->checkDead();
+   if (!_player->isDead() && death_reason != DeathReason::None)
    {
       _death_wait_time_ms = 0;
       _level->resetDeathShader();
 
-      switch (deathReason)
+      switch (death_reason)
       {
          case DeathReason::TouchesDeadly:
          {
@@ -920,13 +919,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Audio::getInstance()->playSample("powerup.wav");
 
-         if (SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillWallClimb)
+         if (SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillWallClimb)
          {
-            SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills &= ~ ExtraSkill::SkillWallClimb;
+            SaveState::getPlayerInfo().mExtraTable._skills._skills &= ~ ExtraSkill::SkillWallClimb;
          }
          else
          {
-            SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills |= ExtraSkill::SkillWallClimb;
+            SaveState::getPlayerInfo().mExtraTable._skills._skills |= ExtraSkill::SkillWallClimb;
          }
          break;
       }

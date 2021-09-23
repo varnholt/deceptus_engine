@@ -15,7 +15,7 @@ class LuaInterface
 
 public:
 
-   static LuaInterface* instance();
+   static LuaInterface& instance();
 
    std::shared_ptr<LuaNode> addObject(const std::string &filename);
    void removeObject(const std::shared_ptr<LuaNode>& node);
@@ -35,9 +35,8 @@ public:
 
 private:
 
-   explicit LuaInterface();
+   LuaInterface() = default;
 
-   static LuaInterface* __instance;
    std::vector<std::shared_ptr<LuaNode>> _object_list;
 };
 

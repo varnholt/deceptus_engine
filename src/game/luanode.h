@@ -129,30 +129,30 @@ struct LuaNode : public GameNode
    void stopScript();
 
    // members
-   int32_t mId = -1;
-   int32_t mKeysPressed = 0;
-   std::string mScriptName;
-   lua_State* mState = nullptr;
-   EnemyDescription mEnemyDescription;
+   int32_t _id = -1;
+   int32_t _keys_pressed = 0;
+   std::string _script_name;
+   lua_State* _lua_state = nullptr;
+   EnemyDescription _enemy_description;
 
    // visualization
-   sf::Vector2f mStartPosition;
-   std::shared_ptr<sf::Texture> mTexture;
-   std::vector<sf::Sprite> mSprites = {{}};              // have 1 base sprite
-   std::vector<sf::Vector2f> mSpriteOffsets = {{0,0}};   // have 1 base sprite offset
-   sf::Vector2f mPosition;
-   int32_t mZ = ZDepthPlayer;
-   std::vector<sf::Vector2f> mPatrolPath;
+   sf::Vector2f _start_position;
+   std::shared_ptr<sf::Texture> _texture;
+   std::vector<sf::Sprite> _sprites = {{}};              // have 1 base sprite
+   std::vector<sf::Vector2f> _sprite_offsets = {{0, 0}};   // have 1 base sprite offset
+   sf::Vector2f _position;
+   int32_t _z_index = ZDepthPlayer;
+   std::vector<sf::Vector2f> _movement_path;
 
    // physics
-   b2Body* mBody = nullptr;
-   b2BodyDef* mBodyDef = nullptr;
-   std::vector<b2Shape*> mShapes;
-   std::vector<std::unique_ptr<Weapon>> mWeapons;
+   b2Body* _body = nullptr;
+   b2BodyDef* _body_def = nullptr;
+   std::vector<b2Shape*> _shapes;
+   std::vector<std::unique_ptr<Weapon>> _weapons;
 
-   std::map<std::string, std::variant<std::string, int64_t, double, bool>> mProperties;
+   std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 
    // static
-   static std::atomic<int32_t> sNextId;
+   static std::atomic<int32_t> __next_id;
 };
 

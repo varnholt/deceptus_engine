@@ -28,7 +28,7 @@ class PlayerAABBQueryCallback : public b2QueryCallback
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, bool inAir)
 {
-   if (!(SaveState::getPlayerInfo().mExtraTable.mSkills.mSkills & ExtraSkill::SkillWallClimb))
+   if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillWallClimb))
    {
       return;
    }

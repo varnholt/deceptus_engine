@@ -11,8 +11,8 @@ Audio* Audio::__instance = nullptr;
 
 namespace
 {
-static const auto sfx_root = "data/sounds/";
-static const std::string path = "data/music";
+const std::string sfx_root = "data/sounds/";
+const std::string path = "data/music";
 }
 
 //-----------------------------------------------------------------------------

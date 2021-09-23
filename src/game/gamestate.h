@@ -32,9 +32,9 @@ public:
 
 private:
 
-   ExecutionMode mMode = ExecutionMode::Running;
-   ExecutionMode mQueuedMode = ExecutionMode::Running;
+   ExecutionMode _mode = ExecutionMode::Running;
+   ExecutionMode _queued_mode = ExecutionMode::Running;
 
-   std::vector<StateChangeCallback> mCallbacks;
+   std::vector<StateChangeCallback> _callbacks;
 };
 

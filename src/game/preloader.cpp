@@ -5,7 +5,6 @@
 #include "detonationanimation.h"
 
 
-
 void preloadDetonationAnimations()
 {
    std::cout << "[x] preloading detonation animations" << std::endl;

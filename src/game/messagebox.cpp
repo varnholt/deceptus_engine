@@ -28,14 +28,14 @@ namespace
 }
 
 
-std::unique_ptr<MessageBox> MessageBox::sActive;
-MessageBox::LayoutProperties MessageBox::sDefaultProperties;
-bool MessageBox::sInitialized = false;
+std::unique_ptr<MessageBox> MessageBox::__active;
+MessageBox::LayoutProperties MessageBox::__default_properties;
+bool MessageBox::__initialized = false;
 
-std::vector<std::shared_ptr<Layer>> MessageBox::sLayerStack;
-std::map<std::string, std::shared_ptr<Layer>> MessageBox::sLayers;
-sf::Font MessageBox::sFont;
-sf::Text MessageBox::sText;
+std::vector<std::shared_ptr<Layer>> MessageBox::__layer_stack;
+std::map<std::string, std::shared_ptr<Layer>> MessageBox::__layers;
+sf::Font MessageBox::__font;
+sf::Text MessageBox::__text;
 
 
 MessageBox::MessageBox(
@@ -45,25 +45,25 @@ MessageBox::MessageBox(
    const LayoutProperties& properties,
    int32_t buttons
 )
- : mType(type),
-   mMessage(message),
-   mCallback(cb),
-   mProperties(properties),
-   mButtons(buttons)
+ : _type(type),
+   _message(message),
+   _callback(cb),
+   _properties(properties),
+   _buttons(buttons)
 {
    initializeLayers();
    initializeControllerCallbacks();
-   mShowTime = GlobalClock::getInstance()->getElapsedTime();
+   _show_time = GlobalClock::getInstance()->getElapsedTime();
 
    DisplayMode::getInstance().enqueueSet(Display::DisplayModal);
 
    Player::getCurrent()->getControls().setKeysPressed(0);
 
    //sText.setScale(0.25f, 0.25f);
-   sText.setFont(sFont);
-   sText.setCharacterSize(12);
-   sText.setFillColor(mProperties.mTextColor);
-   sText.setString("");
+   __text.setFont(__font);
+   __text.setCharacterSize(12);
+   __text.setFillColor(_properties._text_color);
+   __text.setString("");
 
    //   mPreviousMode = GameState::getInstance().getMode();
    //   if (mPreviousMode == ExecutionMode::Running)
@@ -78,8 +78,8 @@ MessageBox::~MessageBox()
    auto gci = GameControllerIntegration::getInstance(0);
    if (gci)
    {
-      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
-      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
+      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
+      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::DisplayModal);
@@ -93,32 +93,32 @@ MessageBox::~MessageBox()
 
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (!sActive)
+   if (!__active)
    {
       return false;
    }
 
-   if (sActive->mDrawn)
+   if (__active->_drawn)
    {
       MessageBox::Button button = MessageBox::Button::Invalid;
 
       // yay
       if (key == sf::Keyboard::Return)
       {
-         if (sActive->mButtons & static_cast<int32_t>(Button::Yes))
+         if (__active->_buttons & static_cast<int32_t>(Button::Yes))
          {
             button = Button::Yes;
          }
-         else if (sActive->mButtons & static_cast<int32_t>(Button::Ok))
+         else if (__active->_buttons & static_cast<int32_t>(Button::Ok))
          {
             button = Button::Ok;
          }
 
-         if (sActive->mProperties.mAnimate)
+         if (__active->_properties._animate)
          {
-            if (sActive->mCharsShown < sActive->mMessage.length())
+            if (__active->_chars_shown < __active->_message.length())
             {
-               sActive->mProperties.mAnimate = false;
+               __active->_properties._animate = false;
                return true;
             }
          }
@@ -127,11 +127,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // nay
       if (key == sf::Keyboard::Escape)
       {
-         if (sActive->mButtons & static_cast<int32_t>(Button::No))
+         if (__active->_buttons & static_cast<int32_t>(Button::No))
          {
             button = Button::No;
          }
-         else if (sActive->mButtons & static_cast<int32_t>(Button::Cancel))
+         else if (__active->_buttons & static_cast<int32_t>(Button::Cancel))
          {
             button = Button::Cancel;
          }
@@ -140,8 +140,8 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // call callback and close message box
       if (button != MessageBox::Button::Invalid)
       {
-         auto callback = sActive->mCallback;
-         sActive.reset();
+         auto callback = __active->_callback;
+         __active.reset();
 
          if (callback)
          {
@@ -156,18 +156,18 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MessageBox::initializeLayers()
 {
-   if (!sInitialized)
+   if (!__initialized)
    {
       PSD psd;
       psd.setColorFormat(PSD::ColorFormat::ABGR);
       psd.load("data/game/messagebox.psd");
 
-      if (!sFont.loadFromFile("data/fonts/deceptum.ttf"))
+      if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
       {
          std::cerr << "font load fuckup" << std::endl;
       }
 
-      const_cast<sf::Texture&>(sFont.getTexture(12)).setSmooth(false);
+      const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
 
       // load layers
       for (const auto& layer : psd.getLayers())
@@ -192,11 +192,11 @@ void MessageBox::initializeLayers()
          tmp->_texture = texture;
          tmp->_sprite = sprite;
 
-         sLayerStack.push_back(tmp);
-         sLayers[layer.getName()] = tmp;
+         __layer_stack.push_back(tmp);
+         __layers[layer.getName()] = tmp;
       }
 
-      sInitialized = true;
+      __initialized = true;
    }
 }
 
@@ -274,38 +274,38 @@ void MessageBox::initializeControllerCallbacks()
    auto gci = GameControllerIntegration::getInstance(0);
    if (gci)
    {
-      mButtonCallbackA = [](){keyboardKeyPressed(sf::Keyboard::Return);};
-      mButtonCallbackB = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
-      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, mButtonCallbackA);
-      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, mButtonCallbackB);
+      _button_callback_a = [](){keyboardKeyPressed(sf::Keyboard::Return);};
+      _button_callback_b = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
+      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
+      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 }
 
 
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   if (!sActive)
+   if (!__active)
    {
       return;
    }
 
-   sActive->mDrawn = true;
+   __active->_drawn = true;
 
    const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
-   const auto buttons = sActive->mButtons;
-   bool menuShown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
+   const auto buttons = __active->_buttons;
+   bool menu_shown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
 
-   sLayers["msg-copyssYN"]->_visible = false;
-   sLayers["msg-overwritessYN"]->_visible = false;
-   sLayers["msg-deletessYN"]->_visible = false;
-   sLayers["msg-defaultsYN"]->_visible = false;
-   sLayers["msg-quitYN"]->_visible = false;
-   sLayers["temp_bg"]->_visible = menuShown;
-   sLayers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
-   sLayers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
-   sLayers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
-   sLayers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
-   sLayers["temp_bg"]->_visible = false;
+   __layers["msg-copyssYN"]->_visible = false;
+   __layers["msg-overwritessYN"]->_visible = false;
+   __layers["msg-deletessYN"]->_visible = false;
+   __layers["msg-defaultsYN"]->_visible = false;
+   __layers["msg-quitYN"]->_visible = false;
+   __layers["temp_bg"]->_visible = menu_shown;
+   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
+   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
+   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
+   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
+   __layers["temp_bg"]->_visible = false;
 
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(
@@ -319,7 +319,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    window.setView(pixelOrtho);
 
-   for (auto& layer : sLayerStack)
+   for (auto& layer : __layer_stack)
    {
       if (layer->_visible)
       {
@@ -327,32 +327,32 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       }
    }
 
-   sActive->mMessage = replaceAll(sActive->mMessage, "[br]", "\n");
+   __active->_message = replaceAll(__active->_message, "[br]", "\n");
 
-   if (sActive->mProperties.mAnimate)
+   if (__active->_properties._animate)
    {
-      auto x = (GlobalClock::getInstance()->getElapsedTime().asSeconds() - sActive->mShowTime.asSeconds()) * 10.0f;
-      auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(sActive->mMessage.size()));
-      if (sActive->mCharsShown != to)
+      auto x = (GlobalClock::getInstance()->getElapsedTime().asSeconds() - __active->_show_time.asSeconds()) * 10.0f;
+      auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
+      if (__active->_chars_shown != to)
       {
-         sActive->mCharsShown = to;
-         sText.setString(sActive->mMessage.substr(0, to));
+         __active->_chars_shown = to;
+         __text.setString(__active->_message.substr(0, to));
       }
    }
    else
    {
-      sText.setString(sActive->mMessage);
+      __text.setString(__active->_message);
    }
 
    // text alignment
-   const auto pos = pixelLocation(sActive->mProperties.mLocation);
+   const auto pos = pixelLocation(__active->_properties._location);
    auto x = 0;
-   if (sActive->mProperties.mCentered)
+   if (__active->_properties._centered)
    {
       // box top/left: 137 x 94
       // box dimensions: 202 x 71
       // box left: 143
-      const auto rect = sText.getGlobalBounds();
+      const auto rect = __text.getGlobalBounds();
       const auto left = pos.x;
       x = static_cast<int32_t>(left + (202 - rect.width) * 0.5f);
    }
@@ -361,12 +361,12 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       x = pos.x;
    }
 
-   sText.setPosition(
+   __text.setPosition(
       static_cast<float>(x),
       static_cast<float>(pos.y)
    );
 
-   window.draw(sText, states);
+   window.draw(__text, states);
 }
 
 
@@ -378,7 +378,7 @@ void MessageBox::messageBox(
    int32_t buttons
 )
 {
-   sActive = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
+   __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
 }
 
 
@@ -389,7 +389,7 @@ void MessageBox::info(
    int32_t buttons
 )
 {
-   if (sActive)
+   if (__active)
    {
       return;
    }
@@ -405,7 +405,7 @@ void MessageBox::question(
    int32_t buttons
 )
 {
-   if (sActive)
+   if (__active)
    {
       return;
    }

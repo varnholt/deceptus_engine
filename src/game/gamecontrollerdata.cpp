@@ -1,11 +1,10 @@
 #include "gamecontrollerdata.h"
 
-GameControllerData GameControllerData::sInstance;
-
 
 //-----------------------------------------------------------------------------
 GameControllerData& GameControllerData::getInstance()
 {
+   static GameControllerData sInstance;
    return sInstance;
 }
 
@@ -13,19 +12,19 @@ GameControllerData& GameControllerData::getInstance()
 //-----------------------------------------------------------------------------
 const GameControllerInfo& GameControllerData::getJoystickInfo() const
 {
-   return mJoystickInfo;
+   return _joystick_info;
 }
 
 
 //-----------------------------------------------------------------------------
 void GameControllerData::setJoystickInfo(const GameControllerInfo &joystickInfo)
 {
-   mJoystickInfo = joystickInfo;
+   _joystick_info = joystickInfo;
 }
 
 
 //-----------------------------------------------------------------------------
 bool GameControllerData::isControllerUsed() const
 {
-  return !mJoystickInfo.getAxisValues().empty();
+  return !_joystick_info.getAxisValues().empty();
 }

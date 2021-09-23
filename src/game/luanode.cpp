@@ -25,16 +25,16 @@
 #include "weaponfactory.h"
 
 // static
-std::atomic<int32_t> LuaNode::sNextId = 0;
+std::atomic<int32_t> LuaNode::__next_id = 0;
 
 namespace  {
-   uint16_t category_bits = CategoryEnemyWalkThrough;                // I am a ...
+   uint16_t category_bits = CategoryEnemyWalkThrough;                 // I am a ...
    uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
-   int16_t group_index = 0;                                          // 0 is default
+   int16_t group_index = 0;                                           // 0 is default
 }
 
 
-#define OBJINSTANCE LuaInterface::instance()->getObject(state)
+#define OBJINSTANCE LuaInterface::instance().getObject(state)
 
 
 /**
@@ -56,25 +56,25 @@ int32_t updateProperties(lua_State* state)
 
       if (lua_isboolean(state, -1)) // bool
       {
-         OBJINSTANCE->mProperties[key] = static_cast<bool>(lua_toboolean(state, -1));
+         OBJINSTANCE->_properties[key] = static_cast<bool>(lua_toboolean(state, -1));
          // printf("%s = %d\n", key.c_str(), lua_toboolean(state, -1));
       }
       if (lua_isnumber(state, -1))
       {
          if (lua_isinteger(state, -1)) // int64
          {
-            OBJINSTANCE->mProperties[key] = static_cast<int64_t>(lua_tointeger(state, -1));
+            OBJINSTANCE->_properties[key] = static_cast<int64_t>(lua_tointeger(state, -1));
             // printf("%s = %lld\n", key.c_str(), lua_tointeger(state, -1));
          }
          else // double
          {
-            OBJINSTANCE->mProperties[key] = lua_tonumber(state, -1);
+            OBJINSTANCE->_properties[key] = lua_tonumber(state, -1);
             // printf("%s = %f\n", key.c_str(), lua_tonumber(state, -1));
          }
       }
       else if (lua_isstring(state, -1)) // string
       {
-         OBJINSTANCE->mProperties[key] = std::string(lua_tostring(state, -1));
+         OBJINSTANCE->_properties[key] = std::string(lua_tostring(state, -1));
          // printf("%s = %s\n", key.c_str(), lua_tostring(state, -1));
       }
 
@@ -274,7 +274,7 @@ int32_t setZ(lua_State* state)
          return 0;
       }
 
-      node->mZ = z;
+      node->_z_index = z;
    }
 
    return 0;
@@ -895,7 +895,7 @@ int32_t addWeapon(lua_State* state)
       return 0;
    }
 
-   auto weapon = WeaponFactory::create(node->mBody, weapon_type, std::move(shape), fireInterval, damage);
+   auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fireInterval, damage);
    node->addWeapon(std::move(weapon));
 
    return 0;
@@ -989,7 +989,7 @@ int32_t updateProjectileTexture(lua_State* state)
          return 0;
       }
       const auto& texture = TexturePool::getInstance().get(path);
-      node->mWeapons[index]->setProjectileAnimation(texture, rect);
+      node->_weapons[index]->setProjectileAnimation(texture, rect);
    }
 
    return 0;
@@ -1057,7 +1057,7 @@ int32_t updateProjectileAnimation(lua_State* state)
          start_frame
       );
 
-      node->mWeapons[weapon_index]->setProjectileAnimation(frame_data);
+      node->_weapons[weapon_index]->setProjectileAnimation(frame_data);
    }
 
    return 0;
@@ -1210,7 +1210,7 @@ int32_t registerHitAnimation(lua_State* state)
          return 0;
       }
 
-      node->mWeapons[weapon_index]->setProjectileIdentifier(path.string());
+      node->_weapons[weapon_index]->setProjectileIdentifier(path.string());
    }
 
    return 0;
@@ -1231,10 +1231,10 @@ int32_t updateKeysPressed(lua_State* state)
    {
       auto keyPressed = static_cast<int32_t>(lua_tointeger(state, 1));
 
-      auto obj = LuaInterface::instance()->getObject(state);
+      auto obj = LuaInterface::instance().getObject(state);
       if (obj != nullptr)
       {
-         LuaInterface::instance()->updateKeysPressed(obj, keyPressed);
+         LuaInterface::instance().updateKeysPressed(obj, keyPressed);
       }
    }
 
@@ -1249,10 +1249,10 @@ int32_t updateKeysPressed(lua_State* state)
  */
 int32_t requestMap(lua_State* state)
 {
-   auto obj = LuaInterface::instance()->getObject(state);
+   auto obj = LuaInterface::instance().getObject(state);
    if (obj != nullptr)
    {
-      LuaInterface::instance()->requestMap(obj);
+      LuaInterface::instance().requestMap(obj);
    }
 
    return 0;
@@ -1298,26 +1298,26 @@ int32_t die(lua_State* state)
 
 void LuaNode::setupTexture()
 {
-   std::string spriteName = std::get<std::string>(mProperties["sprite"]);
+   std::string spriteName = std::get<std::string>(_properties["sprite"]);
 
-   mTexture = TexturePool::getInstance().get(spriteName);
+   _texture = TexturePool::getInstance().get(spriteName);
 
-   for (auto& sprite : mSprites)
+   for (auto& sprite : _sprites)
    {
-      sprite.setTexture(*mTexture);
+      sprite.setTexture(*_texture);
    }
 }
 
 
 LuaNode::LuaNode(const std::string &filename)
  : GameNode(Level::getCurrentLevel()),
-   mScriptName(filename)
+   _script_name(filename)
 {
    setName(typeid(LuaNode).name());
 
    // create instances
-   mBodyDef = new b2BodyDef();
-   mBody = Level::getCurrentLevel()->getWorld()->CreateBody(mBodyDef);
+   _body_def = new b2BodyDef();
+   _body = Level::getCurrentLevel()->getWorld()->CreateBody(_body_def);
 }
 
 
@@ -1330,20 +1330,20 @@ LuaNode::~LuaNode()
 void LuaNode::deserializeEnemyDescription()
 {
    // set up patrol path
-   if (!mEnemyDescription.mPath.empty())
+   if (!_enemy_description.mPath.empty())
    {
       std::vector<sf::Vector2f> patrolPath;
 
-      for (auto i = 0u; i < mEnemyDescription.mPath.size(); i += 2)
+      for (auto i = 0u; i < _enemy_description.mPath.size(); i += 2)
       {
          auto pos = sf::Vector2f(
-            static_cast<float_t>(mEnemyDescription.mPath.at(i)),
-            static_cast<float_t>(mEnemyDescription.mPath.at(i + 1))
+            static_cast<float_t>(_enemy_description.mPath.at(i)),
+            static_cast<float_t>(_enemy_description.mPath.at(i + 1))
          );
 
          // by default the path is given is tiles.
          // if we override it, we're setting pixel positions which are already transformed
-         if (mEnemyDescription.mPositionGivenInTiles)
+         if (_enemy_description.mPositionGivenInTiles)
          {
             pos.x *= PIXELS_PER_TILE;
             pos.y *= PIXELS_PER_TILE;
@@ -1354,26 +1354,26 @@ void LuaNode::deserializeEnemyDescription()
          patrolPath.push_back(pos);
       }
 
-      mPatrolPath = patrolPath;
+      _movement_path = patrolPath;
    }
 
    // set up start position
-   if (!mEnemyDescription.mStartPosition.empty())
+   if (!_enemy_description.mStartPosition.empty())
    {
-      mStartPosition = sf::Vector2f(
-         static_cast<float_t>(mEnemyDescription.mStartPosition.at(0)),
-         static_cast<float_t>(mEnemyDescription.mStartPosition.at(1))
+      _start_position = sf::Vector2f(
+         static_cast<float_t>(_enemy_description.mStartPosition.at(0)),
+         static_cast<float_t>(_enemy_description.mStartPosition.at(1))
       );
 
-      if (mEnemyDescription.mPositionGivenInTiles)
+      if (_enemy_description.mPositionGivenInTiles)
       {
-         mStartPosition.x *= PIXELS_PER_TILE;
-         mStartPosition.y *= PIXELS_PER_TILE;
-         mStartPosition.x += PIXELS_PER_TILE / 2;
-         mStartPosition.y += PIXELS_PER_TILE / 2;
+         _start_position.x *= PIXELS_PER_TILE;
+         _start_position.y *= PIXELS_PER_TILE;
+         _start_position.x += PIXELS_PER_TILE / 2;
+         _start_position.y += PIXELS_PER_TILE / 2;
       }
 
-      mPosition = mStartPosition;
+      _position = _start_position;
    }
 }
 
@@ -1388,57 +1388,57 @@ void LuaNode::initialize()
 
 void LuaNode::setupLua()
 {
-   mState = luaL_newstate();
+   _lua_state = luaL_newstate();
 
    // register callbacks
-   lua_register(mState, "addSample", ::addSample);
-   lua_register(mState, "addShapeCircle", ::addShapeCircle);
-   lua_register(mState, "addShapeRect", ::addShapeRect);
-   lua_register(mState, "addSprite", ::addSprite);
-   lua_register(mState, "addWeapon", ::addWeapon);
-   lua_register(mState, "boom", ::boom);
-   lua_register(mState, "damage", ::damage);
-   lua_register(mState, "damageRadius", ::damageRadius);
-   lua_register(mState, "debug", ::debug);
-   lua_register(mState, "die", ::die);
-   lua_register(mState, "fireWeapon", ::fireWeapon);
-   lua_register(mState, "getLinearVelocity", ::getLinearVelocity);
-   lua_register(mState, "isPhsyicsPathClear", ::isPhsyicsPathClear);
-   lua_register(mState, "makeDynamic", ::makeDynamic);
-   lua_register(mState, "makeStatic", ::makeStatic);
-   lua_register(mState, "playDetonationAnimation", ::playDetonationAnimation);
-   lua_register(mState, "playSample", ::playSample);
-   lua_register(mState, "queryAABB", ::queryAABB);
-   lua_register(mState, "queryRayCast", ::queryRayCast);
-   lua_register(mState, "registerHitAnimation", ::registerHitAnimation);
-   lua_register(mState, "setActive", ::setActive);
-   lua_register(mState, "setDamage", ::setDamage);
-   lua_register(mState, "setGravityScale", ::setGravityScale);
-   lua_register(mState, "setLinearVelocity", ::setLinearVelocity);
-   lua_register(mState, "setSpriteOffset", ::setSpriteOffset);
-   lua_register(mState, "setSpriteOrigin", ::setSpriteOrigin);
-   lua_register(mState, "setTransform", ::setTransform);
-   lua_register(mState, "setZ", ::setZ);
-   lua_register(mState, "timer", ::timer);
-   lua_register(mState, "updateKeysPressed", ::updateKeysPressed);
-   lua_register(mState, "updateProjectileAnimation", ::updateProjectileAnimation);
-   lua_register(mState, "updateProjectileTexture", ::updateProjectileTexture);
-   lua_register(mState, "updateProperties", ::updateProperties);
-   lua_register(mState, "updateSpriteRect", ::updateSpriteRect);
+   lua_register(_lua_state, "addSample", ::addSample);
+   lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
+   lua_register(_lua_state, "addShapeRect", ::addShapeRect);
+   lua_register(_lua_state, "addSprite", ::addSprite);
+   lua_register(_lua_state, "addWeapon", ::addWeapon);
+   lua_register(_lua_state, "boom", ::boom);
+   lua_register(_lua_state, "damage", ::damage);
+   lua_register(_lua_state, "damageRadius", ::damageRadius);
+   lua_register(_lua_state, "debug", ::debug);
+   lua_register(_lua_state, "die", ::die);
+   lua_register(_lua_state, "fireWeapon", ::fireWeapon);
+   lua_register(_lua_state, "getLinearVelocity", ::getLinearVelocity);
+   lua_register(_lua_state, "isPhsyicsPathClear", ::isPhsyicsPathClear);
+   lua_register(_lua_state, "makeDynamic", ::makeDynamic);
+   lua_register(_lua_state, "makeStatic", ::makeStatic);
+   lua_register(_lua_state, "playDetonationAnimation", ::playDetonationAnimation);
+   lua_register(_lua_state, "playSample", ::playSample);
+   lua_register(_lua_state, "queryAABB", ::queryAABB);
+   lua_register(_lua_state, "queryRayCast", ::queryRayCast);
+   lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
+   lua_register(_lua_state, "setActive", ::setActive);
+   lua_register(_lua_state, "setDamage", ::setDamage);
+   lua_register(_lua_state, "setGravityScale", ::setGravityScale);
+   lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
+   lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
+   lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);
+   lua_register(_lua_state, "setTransform", ::setTransform);
+   lua_register(_lua_state, "setZ", ::setZ);
+   lua_register(_lua_state, "timer", ::timer);
+   lua_register(_lua_state, "updateKeysPressed", ::updateKeysPressed);
+   lua_register(_lua_state, "updateProjectileAnimation", ::updateProjectileAnimation);
+   lua_register(_lua_state, "updateProjectileTexture", ::updateProjectileTexture);
+   lua_register(_lua_state, "updateProperties", ::updateProperties);
+   lua_register(_lua_state, "updateSpriteRect", ::updateSpriteRect);
 
    // make standard libraries available in the Lua object
-   luaL_openlibs(mState);
+   luaL_openlibs(_lua_state);
 
    // load program
-   auto result = luaL_loadfile(mState, mScriptName.c_str());
+   auto result = luaL_loadfile(_lua_state, _script_name.c_str());
    if (result == LUA_OK)
    {
       // execute program
-      result = lua_pcall(mState, 0, LUA_MULTRET, 0);
+      result = lua_pcall(_lua_state, 0, LUA_MULTRET, 0);
 
       if (result != LUA_OK)
       {
-         error(mState);
+         error(_lua_state);
       }
       else
       {
@@ -1451,11 +1451,11 @@ void LuaNode::setupLua()
    }
    else
    {
-      error(mState);
+      error(_lua_state);
    }
 
    // register properties
-   for (auto& prop : mEnemyDescription.mProperties)
+   for (auto& prop : _enemy_description.mProperties)
    {
       luaWriteProperty(prop._name, prop._value);
    }
@@ -1482,12 +1482,12 @@ void LuaNode::synchronizeProperties()
  */
 void LuaNode::luaInitialize()
 {
-   lua_getglobal(mState, FUNCTION_INITIALIZE);
-   auto result = lua_pcall(mState, 0, 0, 0);
+   lua_getglobal(_lua_state, FUNCTION_INITIALIZE);
+   auto result = lua_pcall(_lua_state, 0, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(mState, FUNCTION_INITIALIZE);
+      error(_lua_state, FUNCTION_INITIALIZE);
    }
 }
 
@@ -1499,14 +1499,14 @@ void LuaNode::luaInitialize()
  */
 void LuaNode::luaUpdate(const sf::Time& dt)
 {
-   lua_getglobal(mState, FUNCTION_UPDATE);
-   lua_pushnumber(mState, dt.asSeconds());
+   lua_getglobal(_lua_state, FUNCTION_UPDATE);
+   lua_pushnumber(_lua_state, dt.asSeconds());
 
-   auto result = lua_pcall(mState, 1, 0, 0);
+   auto result = lua_pcall(_lua_state, 1, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(mState, FUNCTION_UPDATE);
+      error(_lua_state, FUNCTION_UPDATE);
    }
 }
 
@@ -1519,17 +1519,17 @@ void LuaNode::luaUpdate(const sf::Time& dt)
  */
 void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
 {
-   lua_getglobal(mState, FUNCTION_WRITE_PROPERTY);
-   if (lua_isfunction(mState, -1) )
+   lua_getglobal(_lua_state, FUNCTION_WRITE_PROPERTY);
+   if (lua_isfunction(_lua_state, -1) )
    {
-      lua_pushstring(mState, key.c_str());
-      lua_pushstring(mState, value.c_str());
+      lua_pushstring(_lua_state, key.c_str());
+      lua_pushstring(_lua_state, value.c_str());
 
-      auto result = lua_pcall(mState, 2, 0, 0);
+      auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
-         error(mState, FUNCTION_WRITE_PROPERTY);
+         error(_lua_state, FUNCTION_WRITE_PROPERTY);
       }
    }
 }
@@ -1544,15 +1544,15 @@ void LuaNode::luaHit(int32_t damage)
 {
    // std::cout << "thing was hit: " << damage << std::endl;
 
-   lua_getglobal(mState, FUNCTION_HIT);
-   if (lua_isfunction(mState, -1) )
+   lua_getglobal(_lua_state, FUNCTION_HIT);
+   if (lua_isfunction(_lua_state, -1) )
    {
-      lua_pushinteger(mState, damage);
+      lua_pushinteger(_lua_state, damage);
 
-      auto result = lua_pcall(mState, 1, 0, 0);
+      auto result = lua_pcall(_lua_state, 1, 0, 0);
       if (result != LUA_OK)
       {
-         error(mState, FUNCTION_HIT);
+         error(_lua_state, FUNCTION_HIT);
       }
    }
 }
@@ -1564,13 +1564,13 @@ void LuaNode::luaHit(int32_t damage)
  */
 void LuaNode::luaCollisionWithPlayer()
 {
-   lua_getglobal(mState, FUNCTION_COLLISION_WITH_PLAYER);
-   if (lua_isfunction(mState, -1) )
+   lua_getglobal(_lua_state, FUNCTION_COLLISION_WITH_PLAYER);
+   if (lua_isfunction(_lua_state, -1) )
    {
-      auto result = lua_pcall(mState, 0, 0, 0);
+      auto result = lua_pcall(_lua_state, 0, 0, 0);
       if (result != LUA_OK)
       {
-         error(mState, FUNCTION_COLLISION_WITH_PLAYER);
+         error(_lua_state, FUNCTION_COLLISION_WITH_PLAYER);
       }
    }
 }
@@ -1584,22 +1584,22 @@ void LuaNode::luaCollisionWithPlayer()
  */
 void LuaNode::luaSendPatrolPath()
 {
-   if (mPatrolPath.size() == 0)
+   if (_movement_path.size() == 0)
    {
       return;
    }
 
-   lua_getglobal(mState, FUNCTION_SET_PATH);
+   lua_getglobal(_lua_state, FUNCTION_SET_PATH);
 
-   lua_pushstring(mState, "path");
-   luaSendPath(mPatrolPath);
+   lua_pushstring(_lua_state, "path");
+   luaSendPath(_movement_path);
 
    // vec.size + 1 args, 0 result
-   auto result = lua_pcall(mState, 2, 0, 0);
+   auto result = lua_pcall(_lua_state, 2, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(mState, FUNCTION_SET_PATH);
+      error(_lua_state, FUNCTION_SET_PATH);
    }
 }
 
@@ -1609,10 +1609,10 @@ void LuaNode::luaSendPatrolPath()
  */
 void LuaNode::luaDie()
 {
-   Level::getCurrentLevel()->getWorld()->DestroyBody(mBody);
+   Level::getCurrentLevel()->getWorld()->DestroyBody(_body);
 
    // resetting the body will get it removed from the luainterface class
-   mBody = nullptr;
+   _body = nullptr;
 }
 
 
@@ -1624,22 +1624,22 @@ void LuaNode::luaDie()
  */
 void LuaNode::luaMovedTo()
 {
-   const auto x = mPosition.x;
-   const auto y = mPosition.y;
+   const auto x = _position.x;
+   const auto y = _position.y;
 
-   lua_getglobal(mState, FUNCTION_MOVED_TO);
+   lua_getglobal(_lua_state, FUNCTION_MOVED_TO);
 
-   if (lua_isfunction(mState, -1))
+   if (lua_isfunction(_lua_state, -1))
    {
 
-      lua_pushnumber(mState, static_cast<double>(x));
-      lua_pushnumber(mState, static_cast<double>(y));
+      lua_pushnumber(_lua_state, static_cast<double>(x));
+      lua_pushnumber(_lua_state, static_cast<double>(y));
 
-      auto result = lua_pcall(mState, 2, 0, 0);
+      auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
-         error(mState, FUNCTION_MOVED_TO);
+         error(_lua_state, FUNCTION_MOVED_TO);
       }
    }
 }
@@ -1653,21 +1653,21 @@ void LuaNode::luaMovedTo()
  */
 void LuaNode::luaSetStartPosition()
 {
-   const auto x = mStartPosition.x;
-   const auto y = mStartPosition.y;
+   const auto x = _start_position.x;
+   const auto y = _start_position.y;
 
-   lua_getglobal(mState, FUNCTION_SET_START_POSITION);
+   lua_getglobal(_lua_state, FUNCTION_SET_START_POSITION);
 
-   if (lua_isfunction(mState, -1))
+   if (lua_isfunction(_lua_state, -1))
    {
-      lua_pushnumber(mState, static_cast<double>(x));
-      lua_pushnumber(mState, static_cast<double>(y));
+      lua_pushnumber(_lua_state, static_cast<double>(x));
+      lua_pushnumber(_lua_state, static_cast<double>(y));
 
-      auto result = lua_pcall(mState, 2, 0, 0);
+      auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
-         error(mState, FUNCTION_SET_START_POSITION);
+         error(_lua_state, FUNCTION_SET_START_POSITION);
       }
    }
 }
@@ -1683,18 +1683,18 @@ void LuaNode::luaPlayerMovedTo()
 {
    const auto pos =  Player::getCurrent()->getPixelPositionf();
 
-   lua_getglobal(mState, FUNCTION_PLAYER_MOVED_TO);
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_MOVED_TO);
 
-   if (lua_isfunction(mState, -1))
+   if (lua_isfunction(_lua_state, -1))
    {
-      lua_pushnumber(mState, pos.x);
-      lua_pushnumber(mState, pos.y);
+      lua_pushnumber(_lua_state, pos.x);
+      lua_pushnumber(_lua_state, pos.y);
 
-      auto result = lua_pcall(mState, 2, 0, 0);
+      auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
-         error(mState, FUNCTION_PLAYER_MOVED_TO);
+         error(_lua_state, FUNCTION_PLAYER_MOVED_TO);
       }
    }
 }
@@ -1706,14 +1706,14 @@ void LuaNode::luaPlayerMovedTo()
  */
 void LuaNode::luaRetrieveProperties()
 {
-   lua_getglobal(mState, FUNCTION_RETRIEVE_PROPERTIES);
+   lua_getglobal(_lua_state, FUNCTION_RETRIEVE_PROPERTIES);
 
    // 0 args, 0 result
-   auto result = lua_pcall(mState, 0, 0, 0);
+   auto result = lua_pcall(_lua_state, 0, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(mState, FUNCTION_RETRIEVE_PROPERTIES);
+      error(_lua_state, FUNCTION_RETRIEVE_PROPERTIES);
    }
 }
 
@@ -1726,14 +1726,14 @@ void LuaNode::luaRetrieveProperties()
  */
 void LuaNode::luaTimeout(int32_t timerId)
 {
-   lua_getglobal(mState, FUNCTION_TIMEOUT);
-   lua_pushinteger(mState, timerId);
+   lua_getglobal(_lua_state, FUNCTION_TIMEOUT);
+   lua_pushinteger(_lua_state, timerId);
 
-   auto result = lua_pcall(mState, 1, 0, 0);
+   auto result = lua_pcall(_lua_state, 1, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(mState, FUNCTION_TIMEOUT);
+      error(_lua_state, FUNCTION_TIMEOUT);
    }
 }
 
@@ -1744,15 +1744,15 @@ void LuaNode::luaTimeout(int32_t timerId)
  */
 void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 {
-   lua_newtable(mState);
+   lua_newtable(_lua_state);
 
    int32_t i = 0;
    for (const auto& v : vec)
    {
-      lua_pushnumber(mState, v.x); // push x
-      lua_rawseti(mState,-2,++i);
-      lua_pushnumber(mState, v.y); // push y
-      lua_rawseti(mState,-2,++i);
+      lua_pushnumber(_lua_state, v.x); // push x
+      lua_rawseti(_lua_state,-2,++i);
+      lua_pushnumber(_lua_state, v.y); // push y
+      lua_rawseti(_lua_state,-2,++i);
    }
 }
 
@@ -1784,9 +1784,9 @@ b2Vec2 LuaNode::getLinearVelocity() const
    b2Vec2 velocity;
    velocity.SetZero();
 
-   if (mBody)
+   if (_body)
    {
-      velocity = mBody->GetLinearVelocity();
+      velocity = _body->GetLinearVelocity();
    }
 
    return velocity;
@@ -1795,9 +1795,9 @@ b2Vec2 LuaNode::getLinearVelocity() const
 
 void LuaNode::setLinearVelocity(const b2Vec2& vel)
 {
-   if (mBody)
+   if (_body)
    {
-      mBody->SetLinearVelocity(vel);
+      _body->SetLinearVelocity(vel);
    }
 }
 
@@ -1817,45 +1817,45 @@ void LuaNode::playDetonationAnimation(float x, float y)
 
 void LuaNode::setGravityScale(float scale)
 {
-   mBody->SetGravityScale(scale);
+   _body->SetGravityScale(scale);
 }
 
 
 void LuaNode::setTransform(const b2Vec2& position, float32 angle)
 {
-   mBody->SetTransform(position, angle);
+   _body->SetTransform(position, angle);
 }
 
 
 void LuaNode::addSprite()
 {
-   mSprites.push_back({});
-   mSpriteOffsets.push_back({});
+   _sprites.push_back({});
+   _sprite_offsets.push_back({});
 }
 
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
-   mSprites[id].setOrigin(x, y);
+   _sprites[id].setOrigin(x, y);
 }
 
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)
 {
-   mSpriteOffsets[id].x = x;
-   mSpriteOffsets[id].y = y;
+   _sprite_offsets[id].x = x;
+   _sprite_offsets[id].y = y;
 }
 
 
 void LuaNode::setActive(bool active)
 {
-   mBody->SetActive(active);
+   _body->SetActive(active);
 }
 
 
 void LuaNode::setDamage(int32_t damage)
 {
-   for (b2Fixture* fixture = mBody->GetFixtureList(); fixture; fixture = fixture->GetNext())
+   for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       auto userData = fixture->GetUserData();
 
@@ -1872,13 +1872,13 @@ void LuaNode::setDamage(int32_t damage)
 
 void LuaNode::makeDynamic()
 {
-   mBody->SetType(b2_dynamicBody);
+   _body->SetType(b2_dynamicBody);
 }
 
 
 void LuaNode::makeStatic()
 {
-   mBody->SetType(b2_staticBody);
+   _body->SetType(b2_staticBody);
 }
 
 
@@ -1940,8 +1940,8 @@ int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
 bool LuaNode::getPropertyBool(const std::string& key)
 {
    auto value = false;
-   auto it = mProperties.find(key);
-   if (it !=  mProperties.end())
+   auto it = _properties.find(key);
+   if (it !=  _properties.end())
       value = std::get<bool>(it->second);
    return value;
 }
@@ -1950,8 +1950,8 @@ bool LuaNode::getPropertyBool(const std::string& key)
 double LuaNode::getPropertyDouble(const std::string& key)
 {
    auto value = 0.0;
-   auto it = mProperties.find(key);
-   if (it !=  mProperties.end())
+   auto it = _properties.find(key);
+   if (it !=  _properties.end())
       value = std::get<double>(it->second);
    return value;
 }
@@ -1960,8 +1960,8 @@ double LuaNode::getPropertyDouble(const std::string& key)
 int64_t LuaNode::getPropertyInt64(const std::string &key)
 {
    auto value = 0LL;
-   auto it = mProperties.find(key);
-   if (it !=  mProperties.end())
+   auto it = _properties.find(key);
+   if (it !=  _properties.end())
       value = std::get<int64_t>(it->second);
    return value;
 }
@@ -1973,11 +1973,11 @@ void LuaNode::setupBody()
    auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
    auto sensor = static_cast<bool>(getPropertyBool("sensor"));
 
-   mBody->SetTransform(b2Vec2{mStartPosition.x * MPP, mStartPosition.y * MPP}, 0.0f);
-   mBody->SetFixedRotation(true);
-   mBody->SetType(staticBody ? b2_staticBody : b2_dynamicBody);
+   _body->SetTransform(b2Vec2{_start_position.x * MPP, _start_position.y * MPP}, 0.0f);
+   _body->SetFixedRotation(true);
+   _body->SetType(staticBody ? b2_staticBody : b2_dynamicBody);
 
-   for (auto shape : mShapes)
+   for (auto shape : _shapes)
    {
       b2FixtureDef fd;
       fd.density = 1.f;
@@ -1991,7 +1991,7 @@ void LuaNode::setupBody()
       fd.filter.maskBits = mask_bits_standing;
       fd.filter.categoryBits = category_bits;
 
-      b2Fixture* fixture = mBody->CreateFixture(&fd);
+      b2Fixture* fixture = _body->CreateFixture(&fd);
       FixtureNode* fixtureNode = new FixtureNode(this);
       fixtureNode->setType(ObjectTypeEnemy);
       fixtureNode->setProperty("damage", damage);
@@ -2013,7 +2013,7 @@ void LuaNode::addShapeCircle(float radius, float x, float y)
    b2CircleShape* shape = new b2CircleShape();
    shape->m_p.Set(x, y);
    shape->m_radius = radius;
-   mShapes.push_back(shape);
+   _shapes.push_back(shape);
 }
 
 
@@ -2021,7 +2021,7 @@ void LuaNode::addShapeRect(float width, float height, float x, float y)
 {
    b2PolygonShape* shape = new b2PolygonShape();
    shape->SetAsBox(width, height, b2Vec2(x, y), 0.0f);
-   mShapes.push_back(shape);
+   _shapes.push_back(shape);
 }
 
 
@@ -2029,36 +2029,36 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 {
    b2PolygonShape* shape = new b2PolygonShape();
    shape->Set(points, size);
-   mShapes.push_back(shape);
+   _shapes.push_back(shape);
 }
 
 
 void LuaNode::addWeapon(std::unique_ptr<Weapon> weapon)
 {
    weapon->initialize();
-   mWeapons.push_back(std::move(weapon));
+   _weapons.push_back(std::move(weapon));
 }
 
 
 void LuaNode::fireWeapon(size_t index, b2Vec2 from, b2Vec2 to)
 {
-   mWeapons[index]->fireInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
+   _weapons[index]->fireInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
 }
 
 
 void LuaNode::stopScript()
 {
-   if (mState)
+   if (_lua_state)
    {
-      lua_close(mState);
-      mState = nullptr;
+      lua_close(_lua_state);
+      _lua_state = nullptr;
    }
 }
 
 
 void LuaNode::updateVelocity()
 {
-   if (!mBody)
+   if (!_body)
    {
       return;
    }
@@ -2066,38 +2066,38 @@ void LuaNode::updateVelocity()
    auto velocityMax = 0.0;
    auto acceleration = 0.0;
 
-   auto velIt = mProperties.find("velocity_walk_max");
-   if (velIt != mProperties.end())
+   auto velIt = _properties.find("velocity_walk_max");
+   if (velIt != _properties.end())
    {
       velocityMax = *std::get_if<double>(&(velIt->second));
    }
 
-   auto accIt = mProperties.find("acceleration_ground");
-   if (accIt != mProperties.end())
+   auto accIt = _properties.find("acceleration_ground");
+   if (accIt != _properties.end())
    {
       acceleration = *std::get_if<double>(&(accIt->second));
    }
 
    auto desiredVel = 0.0f;
-   auto velocity = mBody->GetLinearVelocity();
+   auto velocity = _body->GetLinearVelocity();
 
-   if (mKeysPressed & KeyPressedLeft)
+   if (_keys_pressed & KeyPressedLeft)
    {
       desiredVel = static_cast<float>(b2Max(velocity.x - acceleration, -velocityMax));
    }
 
-   if (mKeysPressed & KeyPressedRight)
+   if (_keys_pressed & KeyPressedRight)
    {
       desiredVel = static_cast<float>(b2Min(velocity.x + acceleration, velocityMax));
    }
 
    // calc impulse, disregard time factor
    auto velChange = desiredVel - velocity.x;
-   auto impulse = mBody->GetMass() * velChange;
+   auto impulse = _body->GetMass() * velChange;
 
-   mBody->ApplyLinearImpulse(
+   _body->ApplyLinearImpulse(
       b2Vec2(impulse, 0.0f),
-      mBody->GetWorldCenter(),
+      _body->GetWorldCenter(),
       true
    );
 }
@@ -2105,7 +2105,7 @@ void LuaNode::updateVelocity()
 
 void LuaNode::updateWeapons(const sf::Time& dt)
 {
-   for (auto& w : mWeapons)
+   for (auto& w : _weapons)
    {
       w->update(dt);
    }
@@ -2114,42 +2114,42 @@ void LuaNode::updateWeapons(const sf::Time& dt)
 
 void LuaNode::updatePosition()
 {
-   if (!mBody)
+   if (!_body)
    {
       return;
    }
 
-   auto x = mBody->GetPosition().x * PPM;
-   auto y = mBody->GetPosition().y * PPM;
+   auto x = _body->GetPosition().x * PPM;
+   auto y = _body->GetPosition().y * PPM;
 
-   mPosition.x = x;
-   mPosition.y = y;
+   _position.x = x;
+   _position.y = y;
 }
 
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h)
 {
-   if (!mSprites[id].getTexture() && mTexture)
+   if (!_sprites[id].getTexture() && _texture)
    {
-      mSprites[id].setTexture(*mTexture);
+      _sprites[id].setTexture(*_texture);
    }
 
-   mSprites[id].setTextureRect(sf::IntRect(x, y, w, h));
+   _sprites[id].setTextureRect(sf::IntRect(x, y, w, h));
 }
 
 
 void LuaNode::draw(sf::RenderTarget& target)
 {
    // draw sprite on top of projectiles
-   for (auto& w : mWeapons)
+   for (auto& w : _weapons)
    {
       w->draw(target);
    }
 
-   for (auto i = 0u; i < mSprites.size(); i++)
+   for (auto i = 0u; i < _sprites.size(); i++)
    {
-      auto& sprite = mSprites[i];
-      const auto& offset = mSpriteOffsets[i];
+      auto& sprite = _sprites[i];
+      const auto& offset = _sprite_offsets[i];
 
       const auto center = sf::Vector2f(
             sprite.getTextureRect().width / 2.0f ,
@@ -2157,7 +2157,7 @@ void LuaNode::draw(sf::RenderTarget& target)
          );
 
       sprite.setPosition(
-           mPosition
+           _position
          - center
          + offset
       );
