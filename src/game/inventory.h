@@ -17,7 +17,7 @@ struct Inventory
    void resetKeys();
    void giveAllKeys();
 
-   std::vector<InventoryItem> mItems;
+   std::vector<InventoryItem> _items;
 };
 
 

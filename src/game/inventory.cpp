@@ -6,38 +6,38 @@ using json = nlohmann::json;
 void Inventory::add(ItemType itemType)
 {
    InventoryItem item;
-   item.mType = itemType;
+   item._type = itemType;
 
-   mItems.push_back(item);
+   _items.push_back(item);
 }
 
 
 void Inventory::clear()
 {
-   mItems.clear();
+   _items.clear();
 }
 
 
 const std::vector<InventoryItem>& Inventory::getItems() const
 {
-   return mItems;
+   return _items;
 }
 
 
 void Inventory::resetKeys()
 {
-   mItems.erase(
+   _items.erase(
       std::remove_if(
-         mItems.begin(),
-         mItems.end(),
+         _items.begin(),
+         _items.end(),
          [](auto& item) -> bool
          {
             if (
-                  item.mType == ItemType::KeyBlue
-               || item.mType == ItemType::KeyGreen
-               || item.mType == ItemType::KeyRed
-               || item.mType == ItemType::KeyYellow
-               || item.mType == ItemType::KeyOrange
+                  item._type == ItemType::KeyBlue
+               || item._type == ItemType::KeyGreen
+               || item._type == ItemType::KeyRed
+               || item._type == ItemType::KeyYellow
+               || item._type == ItemType::KeyOrange
             )
             {
                return true;
@@ -46,7 +46,7 @@ void Inventory::resetKeys()
             return false;
          }
       ),
-      mItems.end()
+      _items.end()
    );
 }
 
@@ -61,19 +61,19 @@ void Inventory::giveAllKeys()
 }
 
 
-bool Inventory::hasInventoryItem(ItemType itemType) const
+bool Inventory::hasInventoryItem(ItemType item_type) const
 {
-   if (itemType == ItemType::Invalid)
+   if (item_type == ItemType::Invalid)
    {
       return true;
    }
 
-   const auto& it = std::find_if(std::begin(mItems), std::end(mItems), [itemType](auto item) {
-         return (item.mType == itemType);
+   const auto& it = std::find_if(std::begin(_items), std::end(_items), [item_type](auto item) {
+         return (item._type == item_type);
       }
    );
 
-   return it != mItems.end();
+   return it != _items.end();
 }
 
 
@@ -81,7 +81,7 @@ bool Inventory::hasInventoryItem(ItemType itemType) const
 void to_json(nlohmann::json& j, const Inventory& d)
 {
    j = json{
-      {"items", d.mItems}
+      {"items", d._items}
    };
 }
 
@@ -90,7 +90,7 @@ void from_json(const nlohmann::json& j, Inventory& d)
 {
    if (j.find("items") != j.end())
    {
-      d.mItems = j.at("items").get<std::vector<InventoryItem>>();
+      d._items = j.at("items").get<std::vector<InventoryItem>>();
    }
 }
 

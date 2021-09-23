@@ -84,7 +84,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 void TmxTileSet::deserialize(tinyxml2::XMLElement *element)
 {
    _first_gid   = element->IntAttribute("firstgid");
-   _source     = element->Attribute("source") ? element->Attribute("source") : "";
+   _source      = element->Attribute("source") ? element->Attribute("source") : "";
 
    // id is read later because source can be an external file
    if (!_source.empty())

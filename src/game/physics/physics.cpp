@@ -82,12 +82,12 @@ void Physics::parse(
       // std::cout << std::endl;
    }
 
-   mGridWidth  = layer->_width_px  * 3;
-   mGridHeight = layer->_height_px * 3;
-   mGridSize   = mGridWidth * mGridHeight;
+   _grid_width  = layer->_width_px  * 3;
+   _grid_height = layer->_height_px * 3;
+   _grid_size   = _grid_width * _grid_height;
 
    // a larger grid and copy tile contents in there
-   mPhysicsMap.resize(mGridSize);
+   _physics_map.resize(_grid_size);
 
    auto yi = 0u;
    for (auto y = 0u; y < layer->_height_px; y++)
@@ -106,13 +106,13 @@ void Physics::parse(
             {
                const auto& arr = (*it).second;
 
-               const auto row1 = ((y + yi + 0) * mGridWidth) + (x * 3);
-               const auto row2 = ((y + yi + 1) * mGridWidth) + (x * 3);
-               const auto row3 = ((y + yi + 2) * mGridWidth) + (x * 3);
+               const auto row1 = ((y + yi + 0) * _grid_width) + (x * 3);
+               const auto row2 = ((y + yi + 1) * _grid_width) + (x * 3);
+               const auto row3 = ((y + yi + 2) * _grid_width) + (x * 3);
 
-               for (auto xi = 0u; xi < 3; xi++) mPhysicsMap[row1 + xi] = arr[xi + 0];
-               for (auto xi = 0u; xi < 3; xi++) mPhysicsMap[row2 + xi] = arr[xi + 3];
-               for (auto xi = 0u; xi < 3; xi++) mPhysicsMap[row3 + xi] = arr[xi + 6];
+               for (auto xi = 0u; xi < 3; xi++) _physics_map[row1 + xi] = arr[xi + 0];
+               for (auto xi = 0u; xi < 3; xi++) _physics_map[row2 + xi] = arr[xi + 3];
+               for (auto xi = 0u; xi < 3; xi++) _physics_map[row3 + xi] = arr[xi + 6];
             }
          }
       }
@@ -127,23 +127,23 @@ void Physics::parse(
 //-----------------------------------------------------------------------------
 bool Physics::dumpObj(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
+   TmxTileSet* tileset,
    const std::filesystem::path& path
 )
 {
    const auto tiles  = layer->_data;
    const auto width  = layer->_width_px;
    const auto height = layer->_height_px;
-   const auto offsetX = layer->_offset_x_px;
-   const auto offsetY = layer->_offset_y_px;
+   const auto offset_x = layer->_offset_x_px;
+   const auto offset_y = layer->_offset_y_px;
 
-   if (tileSet == nullptr)
+   if (tileset == nullptr)
    {
       // std::cout << "tileset is a nullptr" << std::endl;
       return false;
    }
 
-   const auto tileMap = tileSet->_tile_map;
+   const auto tile_map = tileset->_tile_map;
 
    std::vector<b2Vec2> vertices;
    std::vector<std::vector<uint32_t>> faces;
@@ -152,17 +152,17 @@ bool Physics::dumpObj(
    {
       for (auto x = 0u; x < width; x++)
       {
-         const auto tileNumber = tiles[y * width + x];
-         auto tileRelative = -1;
+         const auto tile_number = tiles[y * width + x];
+         auto tile_relative = -1;
 
-         if (tileNumber != 0)
+         if (tile_number != 0)
          {
-            tileRelative = tileNumber - tileSet->_first_gid;
-            auto tileIt = tileMap.find(tileRelative);
+            tile_relative = tile_number - tileset->_first_gid;
+            auto tile_it = tile_map.find(tile_relative);
 
-            if (tileIt != tileMap.end())
+            if (tile_it != tile_map.end())
             {
-               auto tile = tileIt->second;
+               auto tile = tile_it->second;
                auto objects = tile->_object_group;
 
                if (objects)
@@ -218,8 +218,8 @@ bool Physics::dumpObj(
                         std::vector<uint32_t> face;
                         for (const auto& p : points)
                         {
-                           const auto px = (offsetX + static_cast<int32_t>(x)) * PIXELS_PER_TILE + p.x;
-                           const auto py = (offsetY + static_cast<int32_t>(y)) * PIXELS_PER_TILE + p.y;
+                           const auto px = (offset_x + static_cast<int32_t>(x)) * PIXELS_PER_TILE + p.x;
+                           const auto py = (offset_y + static_cast<int32_t>(y)) * PIXELS_PER_TILE + p.y;
                            const auto v = b2Vec2(px, py);
 
                            const auto& it = std::find_if(vertices.begin(), vertices.end(), [v](const b2Vec2& other){
@@ -229,18 +229,18 @@ bool Physics::dumpObj(
                               );
                            });
 
-                           auto vertexId = 0u;
+                           auto vertex_id = 0u;
                            if (it == vertices.end())
                            {
-                              vertexId = static_cast<uint32_t>(vertices.size());
+                              vertex_id = static_cast<uint32_t>(vertices.size());
                               vertices.push_back(v);
                            }
                            else
                            {
-                              vertexId = static_cast<uint32_t>(it - vertices.begin());
+                              vertex_id = static_cast<uint32_t>(it - vertices.begin());
                            }
 
-                           face.push_back(vertexId + 1); // wavefront obj starts indexing at 1
+                           face.push_back(vertex_id + 1); // wavefront obj starts indexing at 1
                         }
 
                         faces.push_back(face);

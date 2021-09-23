@@ -13,37 +13,37 @@
 #include "texturepool.h"
 
 namespace {
-   static const auto iconWidth  = 40;
-   static const auto iconHeight = 24;
-   static const auto quadWidth  = 38;
-   static const auto quadHeight = 38;
+   static const auto icon_width  = 40;
+   static const auto icon_height = 24;
+   static const auto quad_width  = 38;
+   static const auto quad_height = 38;
    static const auto dist = 10.2f;
-   static const auto iconQuadDist = (iconWidth - quadWidth);
-   static const auto yOffset = 300.0f;
-   static const auto itemCount = 13;
+   static const auto icon_quad_dist = (icon_width - quad_width);
+   static const auto y_offset = 300.0f;
+   static const auto item_count = 13;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InventoryLayer::getJoystickInfo() const
 {
-   return mJoystickInfo;
+   return _joystick_info;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::setJoystickInfo(const GameControllerInfo &joystickInfo)
 {
-   mJoystickInfo = joystickInfo;
+   _joystick_info = joystickInfo;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 InventoryLayer::InventoryLayer()
 {
-   mInventuryTexture = TexturePool::getInstance().get("data/game/inventory.png");
-   mCursorSprite.setTexture(*mInventuryTexture);
-   mCursorSprite.setTextureRect({0, 512 - 48, 48, 48});
+   _inventory_texture = TexturePool::getInstance().get("data/game/inventory.png");
+   _cursor_sprite.setTexture(*_inventory_texture);
+   _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
    addDemoInventory();
 }
 
@@ -60,9 +60,9 @@ Inventory& InventoryLayer::getInventory()
 void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
 {
    sf::Sprite sprite;
-   sprite.setTexture(*mInventuryTexture);
-   sprite.setTextureRect({x * iconWidth, y * iconHeight, iconWidth, iconHeight});
-   mSprites[type].mSprite = sprite;
+   sprite.setTexture(*_inventory_texture);
+   sprite.setTextureRect({x * icon_width, y * icon_height, icon_width, icon_height});
+   _sprites[type].mSprite = sprite;
 
    getInventory().add(type);
 }
@@ -91,37 +91,37 @@ void InventoryLayer::draw(sf::RenderTarget &window)
    const sf::Color color = {50, 70, 100, 150};
 
    auto x = dist;
-   auto y = yOffset + 5.0f;
+   auto y = y_offset + 5.0f;
 
-   for (int i = 0; i < itemCount; i++)
+   for (int i = 0; i < item_count; i++)
    {
       sf::Vertex quad[] =
       {
          sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y)                                 ), color),
-         sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y) + static_cast<float>(quadHeight)), color),
-         sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quadWidth), static_cast<float>(y) + static_cast<float>(quadHeight)), color),
-         sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quadWidth), static_cast<float>(y)                                 ), color)
+         sf::Vertex(sf::Vector2f(static_cast<float>(x),                                 static_cast<float>(y) + static_cast<float>(quad_height)), color),
+         sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quad_width), static_cast<float>(y) + static_cast<float>(quad_height)), color),
+         sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quad_width), static_cast<float>(y)                                 ), color)
       };
 
       window.draw(quad, 4, sf::Quads);
-      x += quadWidth + dist;
+      x += quad_width + dist;
    }
 
-   y = yOffset  + 15.0f;
+   y = y_offset  + 15.0f;
    x = dist;
 
    for (auto item : SaveState::getPlayerInfo().mInventory.getItems())
    {
-      auto visualization = mSprites[item.mType];
+      auto visualization = _sprites[item._type];
 
       visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
       window.draw(visualization.mSprite);
-      x += iconWidth + dist - iconQuadDist;
+      x += icon_width + dist - icon_quad_dist;
    }
 
-   mCursorPosition.y = yOffset;
-   mCursorSprite.setPosition(mCursorPosition);
-   window.draw(mCursorSprite);
+   _cursor_position.y = y_offset;
+   _cursor_sprite.setPosition(_cursor_position);
+   window.draw(_cursor_sprite);
 }
 
 
@@ -131,7 +131,7 @@ bool InventoryLayer::isControllerActionSkipped() const
    auto skipped = false;
    auto now = GlobalClock::getInstance()->getElapsedTimeInS();
 
-   if (now - mJoystickUpdateTime < 0.3f)
+   if (now - _joystick_update_time < 0.3f)
    {
       skipped = true;
    }
@@ -150,10 +150,10 @@ void InventoryLayer::updateControllerActions()
     return;
   }
 
-  auto axisValues = mJoystickInfo.getAxisValues();
+  auto axisValues = _joystick_info.getAxisValues();
   auto axisLeftX = gji->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
   auto xl = axisValues[axisLeftX] / 32767.0f;
-  auto hatValue = mJoystickInfo.getHatValues().at(0);
+  auto hatValue = _joystick_info.getHatValues().at(0);
   auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
   auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
   if (dpadLeftPressed)
@@ -171,7 +171,7 @@ void InventoryLayer::updateControllerActions()
      {
        if (!isControllerActionSkipped())
        {
-         mJoystickUpdateTime = GlobalClock::getInstance()->getElapsedTimeInS();
+         _joystick_update_time = GlobalClock::getInstance()->getElapsedTimeInS();
          left();
        }
      }
@@ -179,14 +179,14 @@ void InventoryLayer::updateControllerActions()
      {
        if (!isControllerActionSkipped())
        {
-         mJoystickUpdateTime = GlobalClock::getInstance()->getElapsedTimeInS();
+         _joystick_update_time = GlobalClock::getInstance()->getElapsedTimeInS();
          right();
        }
      }
   }
   else
   {
-    mJoystickUpdateTime = 0.0f;
+    _joystick_update_time = 0.0f;
   }
 }
 
@@ -194,7 +194,7 @@ void InventoryLayer::updateControllerActions()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::update(const sf::Time& /*dt*/)
 {
-  mCursorPosition.x = dist * 0.5f + mSelectedItem * (quadWidth + dist) - 0.5f;
+  _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
   updateControllerActions();
 }
 
@@ -202,14 +202,14 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::left()
 {
-  if (!mActive)
+  if (!_active)
   {
     return;
   }
 
-  if (mSelectedItem > 0)
+  if (_selected_item > 0)
   {
-    mSelectedItem--;
+    _selected_item--;
   }
 }
 
@@ -217,14 +217,14 @@ void InventoryLayer::left()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::right()
 {
-   if (!mActive)
+   if (!_active)
    {
       return;
    }
 
-   if (mSelectedItem < static_cast<int32_t>(getInventory().getItems().size()) - 1)
+   if (_selected_item < static_cast<int32_t>(getInventory().getItems().size()) - 1)
    {
-      mSelectedItem++;
+      _selected_item++;
    }
 }
 
@@ -244,14 +244,14 @@ void InventoryLayer::hide()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::setActive(bool active)
 {
-  mActive = active;
+  _active = active;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::confirm()
 {
-   if (!mActive)
+   if (!_active)
    {
       return;
    }
@@ -263,7 +263,7 @@ void InventoryLayer::confirm()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::cancel()
 {
-   if (!mActive)
+   if (!_active)
    {
       return;
    }

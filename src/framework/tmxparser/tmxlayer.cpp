@@ -79,7 +79,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
                  // parse csv data and store it in mData array
                  std::stringstream stream(data);
                  std::string line;
-                 int y = 0;
+                 int32_t y = 0;
 
                  while(std::getline(stream, line, '\n'))
                  {
@@ -87,7 +87,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
                     if (line.empty())
                        continue;
 
-                    int x = 0;
+                    int32_t x = 0;
                     std::vector<std::string> rowContent = TmxTools::split(line, ',');
                     for (const std::string& valStr : rowContent)
                     {
@@ -119,46 +119,46 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
       // - determine boundaries of all chunks
       // - create level with given dimensions
       // - merge chunks to layer
-      int32_t xMin = chunks.at(0)->_x_px;
-      int32_t xMax = chunks.at(0)->_x_px;
-      int32_t yMin = chunks.at(0)->_y_px;
-      int32_t yMax = chunks.at(0)->_y_px;
+      int32_t x_min = chunks.at(0)->_x_px;
+      int32_t x_max = chunks.at(0)->_x_px;
+      int32_t y_min = chunks.at(0)->_y_px;
+      int32_t y_max = chunks.at(0)->_y_px;
 
       for (auto i = 1u; i < chunks.size(); i++)
       {
          const auto c = chunks.at(i);
 
-         if (c->_x_px < xMin)
+         if (c->_x_px < x_min)
          {
-            xMin = c->_x_px;
+            x_min = c->_x_px;
          }
 
-         if (c->_y_px < yMin)
+         if (c->_y_px < y_min)
          {
-            yMin = c->_y_px;
+            y_min = c->_y_px;
          }
 
-         if (c->_x_px > xMax)
+         if (c->_x_px > x_max)
          {
-            xMax = c->_x_px;
+            x_max = c->_x_px;
          }
 
-         if (c->_y_px > yMax)
+         if (c->_y_px > y_max)
          {
-            yMax = c->_y_px;
+            y_max = c->_y_px;
          }
       }
 
       // the layer gets the smallest chunk offset
-      _offset_x_px = xMin;
-      _offset_y_px = yMin;
+      _offset_x_px = x_min;
+      _offset_y_px = y_min;
 
       // assume identical chunk sizes
-      const auto chunkWidth  = chunks.at(0)->_width_px;
-      const auto chunkHeight = chunks.at(0)->_height_px;
+      const auto chunk_width  = chunks.at(0)->_width_px;
+      const auto chunk_height = chunks.at(0)->_height_px;
 
-      _width_px  = (xMax - xMin) + chunkWidth;
-      _height_px = (yMax - yMin) + chunkHeight;
+      _width_px  = (x_max - x_min) + chunk_width;
+      _height_px = (y_max - y_min) + chunk_height;
 
       _data = new int32_t[_width_px * _height_px];
 
@@ -174,15 +174,15 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 
       for (const auto c : chunks)
       {
-         for (auto y = 0; y < chunkHeight; y++)
+         for (auto y = 0; y < chunk_height; y++)
          {
-            for (auto x = 0; x < chunkWidth; x++)
+            for (auto x = 0; x < chunk_width; x++)
             {
                // translate chunk coordinates to layer coordinates starting at 0; 0
-               auto xl = c->_x_px + x -xMin;
-               auto yl = c->_y_px + y -yMin;
+               auto xl = c->_x_px + x -x_min;
+               auto yl = c->_y_px + y -y_min;
 
-               _data[yl * _width_px + xl] = c->_data[y * chunkWidth + x];
+               _data[yl * _width_px + xl] = c->_data[y * chunk_width + x];
             }
          }
       }

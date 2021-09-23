@@ -53,16 +53,16 @@ void TileMap::setVisible(bool visible)
 
 bool TileMap::load(
    TmxLayer* layer,
-   TmxTileSet* tilset,
+   TmxTileSet* tileset,
    const std::filesystem::path& base_path
 )
 {
-   if (!tilset)
+   if (!tileset)
    {
       return false;
    }
 
-   auto path = (base_path / tilset->_image->_source);
+   auto path = (base_path / tileset->_image->_source);
 
    _texture_map = TexturePool::getInstance().get(path);
 
@@ -80,39 +80,39 @@ bool TileMap::load(
    {
       auto& map = layer->_properties->_map;
 
-      auto itParallaxValue = map.find("parallax");
-      if (itParallaxValue != map.end())
+      auto it_parallax_value = map.find("parallax");
+      if (it_parallax_value != map.end())
       {
-         parallax_scale = itParallaxValue->second->_value_float.value();
+         parallax_scale = it_parallax_value->second->_value_float.value();
       }
    }
 
    // std::cout << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path << std::endl;
 
-   _tile_size = sf::Vector2u(tilset->_tile_width_px, tilset->_tile_height_px);
+   _tile_size = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
    _visible = layer->_visible;
    _z_index = layer->_z;
 
    _vertices_animated.setPrimitiveType(sf::Quads);
 
-   auto& tileMap = tilset->_tile_map;
+   auto& tile_map = tileset->_tile_map;
 
    // populate the vertex array, with one quad per tile
-   for (auto posX = 0u; posX < layer->_width_px; ++posX)
+   for (auto pos_x = 0u; pos_x < layer->_width_px; ++pos_x)
    {
-      for (auto posY = 0u; posY < layer->_height_px; ++posY)
+      for (auto pos_y = 0u; pos_y < layer->_height_px; ++pos_y)
       {
          // get the current tile number
-         auto tileNumber = layer->_data[posX + posY * layer->_width_px];
+         auto tile_number = layer->_data[pos_x + pos_y * layer->_width_px];
 
-         if (tileNumber != 0)
+         if (tile_number != 0)
          {
             // find its position in the tileset texture
-            auto tu = (tileNumber - tilset->_first_gid) % (_texture_map->getSize().x / _tile_size.x);
-            auto tv = (tileNumber - tilset->_first_gid) / (_texture_map->getSize().x / _tile_size.x);
+            auto tu = (tile_number - tileset->_first_gid) % (_texture_map->getSize().x / _tile_size.x);
+            auto tv = (tile_number - tileset->_first_gid) / (_texture_map->getSize().x / _tile_size.x);
 
-            auto tx = posX + layer->_offset_x_px;
-            auto ty = posY + layer->_offset_y_px;
+            auto tx = pos_x + layer->_offset_x_px;
+            auto ty = pos_y + layer->_offset_y_px;
 
             // define its 4 corners
             sf::Vertex quad[4];
@@ -140,8 +140,8 @@ bool TileMap::load(
             quad[3].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
 
             // build animation shader data
-            auto it = tileMap.find(tileNumber - tilset->_first_gid);
-            if (it != tileMap.end() && it->second->_animation)
+            auto it = tile_map.find(tile_number - tileset->_first_gid);
+            if (it != tile_map.end() && it->second->_animation)
             {
                // only animated tiles are defined, non-animated tiles can be considered static tiles
                auto animation = it->second->_animation;

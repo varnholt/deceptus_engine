@@ -45,14 +45,14 @@ private:
    void updateControllerActions();
    bool isControllerActionSkipped() const;
 
-   sf::Sprite mCursorSprite;
-   sf::Vector2f mCursorPosition;
-   std::shared_ptr<sf::Texture> mInventuryTexture;
+   sf::Sprite _cursor_sprite;
+   sf::Vector2f _cursor_position;
+   std::shared_ptr<sf::Texture> _inventory_texture;
 
-   std::map<ItemType, ItemSprite> mSprites;
-   int32_t mSelectedItem = 0;
-   bool mActive = false;
-   GameControllerInfo mJoystickInfo;
-   float mJoystickUpdateTime = 0.0f;
+   std::map<ItemType, ItemSprite> _sprites;
+   int32_t _selected_item = 0;
+   bool _active = false;
+   GameControllerInfo _joystick_info;
+   float _joystick_update_time = 0.0f;
 };
 
