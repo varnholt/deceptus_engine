@@ -231,7 +231,7 @@ ConveyorBelt::ConveyorBelt(
 
    updateSprite();
 
-   setZ(ZDepthForegroundMin);
+   setZ(static_cast<int32_t>(ZDepth::ForegroundMin));
 }
 
 

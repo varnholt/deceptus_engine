@@ -3,26 +3,26 @@
 
 
 Effect::Effect(const std::string& name) :
-    mName(name)
+    _name(name)
 {
 }
 
 
 const std::string& Effect::getName() const
 {
-    return mName;
+    return _name;
 }
 
 
 void Effect::load()
 {
-    mIsLoaded = onLoad();
+    _is_loaded = onLoad();
 }
 
 
 void Effect::update(const sf::Time& time, float x, float y)
 {
-    if (mIsLoaded)
+    if (_is_loaded)
     {
         onUpdate(time, x, y);
     }
@@ -31,7 +31,7 @@ void Effect::update(const sf::Time& time, float x, float y)
 
 void Effect::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    if (mIsLoaded)
+    if (_is_loaded)
     {
         onDraw(target, states);
     }

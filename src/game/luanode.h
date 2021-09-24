@@ -141,7 +141,7 @@ struct LuaNode : public GameNode
    std::vector<sf::Sprite> _sprites = {{}};              // have 1 base sprite
    std::vector<sf::Vector2f> _sprite_offsets = {{0, 0}};   // have 1 base sprite offset
    sf::Vector2f _position;
-   int32_t _z_index = ZDepthPlayer;
+   int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
    std::vector<sf::Vector2f> _movement_path;
 
    // physics

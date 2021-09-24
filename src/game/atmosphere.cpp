@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 Atmosphere::~Atmosphere()
 {
-   mMap.clear();
+   _map.clear();
 }
 
 
@@ -34,11 +34,11 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
    auto offsetX = layer->_offset_x_px;
    auto offsetY = layer->_offset_y_px;
 
-   mMap.resize(width * height);
-   mMapWidth = width;
-   mMapHeight = height;
-   mMapOffsetX = offsetX;
-   mMapOffsetY = offsetY;
+   _map.resize(width * height);
+   _map_width = width;
+   _map_height = height;
+   _map_offset_x = offsetX;
+   _map_offset_y = offsetY;
 
    for (auto y = 0u; y < height; y++)
    {
@@ -50,10 +50,10 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
          if (tileNumber != 0)
          {
             tileRelative = tileNumber - tileSet->_first_gid;
-            mMap[y * width + x] = tileRelative;
+            _map[y * width + x] = tileRelative;
          }
 
-          mMap[y * width + x] = tileRelative;
+          _map[y * width + x] = tileRelative;
       }
    }
 }

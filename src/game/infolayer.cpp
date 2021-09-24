@@ -209,7 +209,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    auto elapsed = GlobalClock::getInstance()->getElapsedTime();
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
-      _font.draw(window, _font.getCoords("_"), _font.mTextWidth + offset_x, h_screen - 28);
+      _font.draw(window, _font.getCoords("_"), _font._text_width + offset_x, h_screen - 28);
    }
 }
 

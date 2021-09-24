@@ -8,13 +8,13 @@ DisplayMode DisplayMode::sInstance;
 //-----------------------------------------------------------------------------
 void DisplayMode::toggle(Display mode)
 {
-  if (_mode & mode)
+  if (_mode & static_cast<int32_t>(mode))
   {
-     _mode &= ~ mode;
+     _mode &= ~ static_cast<int32_t>(mode);
   }
   else
   {
-     _mode |= mode;
+     _mode |= static_cast<int32_t>(mode);
   }
 }
 
@@ -24,12 +24,12 @@ void DisplayMode::sync()
 {
    for (auto& mode : _queued_set)
    {
-      _mode |= mode;
+      _mode |= static_cast<int32_t>(mode);
    }
 
    for (auto& mode : _queued_unset)
    {
-      _mode &= ~ mode;
+      _mode &= ~ static_cast<int32_t>(mode);
    }
 
    for (auto& mode : _queued_toggle)
@@ -73,7 +73,7 @@ int32_t DisplayMode::get()
 //-----------------------------------------------------------------------------
 bool DisplayMode::isSet(Display mode)
 {
-   return _mode & mode;
+   return _mode & static_cast<int32_t>(mode);
 }
 
 

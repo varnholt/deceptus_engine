@@ -391,12 +391,12 @@ void Level::loadTmx()
 
             if (layer->_name == "atmosphere")
             {
-               _atmosphere.mTileMap = tileMap;
+               _atmosphere._tile_map = tileMap;
                _atmosphere.parse(layer, tileset);
             }
             else if (layer->_name == "extras")
             {
-               Player::getCurrent()->getExtraManager()->mTilemap = tileMap;
+               Player::getCurrent()->getExtraManager()->_tilemap = tileMap;
                Player::getCurrent()->getExtraManager()->load(layer, tileset);
             }
             else if (layer->_name.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
@@ -611,7 +611,7 @@ void Level::loadTmx()
    _map->setDoors(_mechanism_doors);
    _map->setPortals(_mechanism_portals);
 
-   if (!_atmosphere.mTileMap)
+   if (!_atmosphere._tile_map)
    {
       std::cerr << "[E] fatal: no physics layer (called 'physics') found!" << std::endl;
    }
@@ -648,7 +648,7 @@ void Level::load()
 
    // loading ao
    std::cout << "[x] loading ao... " << std::endl;
-   mAo.load(path, std::filesystem::path(_description->_filename).stem().string());
+   _ambient_occlusion.load(path, std::filesystem::path(_description->_filename).stem().string());
 
    std::cout << "[x] level loading complete" << std::endl;
 }
@@ -796,7 +796,7 @@ void Level::spawnEnemies()
 //-----------------------------------------------------------------------------
 void Level::drawStaticChains(sf::RenderTarget& target)
 {
-   for (auto& path : _atmosphere.mOutlines)
+   for (auto& path : _atmosphere._outlines)
    {
       target.draw(&path.at(0), path.size(), sf::LineStrip);
    }
@@ -1057,10 +1057,10 @@ void Level::drawLayers(
          }
       }
 
-      if (z == ZDepthPlayer)
+      if (z == static_cast<int32_t>(ZDepth::Player))
       {
          // ambient occlusion
-         mAo.draw(target);
+         _ambient_occlusion.draw(target);
 
          // draw player
          drawPlayer(target, *_render_texture_normal.get());
@@ -1088,17 +1088,17 @@ void Level::drawLayers(
 //-----------------------------------------------------------------------------
 void Level::drawAtmosphereLayer(sf::RenderTarget& target)
 {
-   if (!_atmosphere.mTileMap)
+   if (!_atmosphere._tile_map)
    {
       return;
    }
 
-   _atmosphere.mTileMap->setVisible(true);
+   _atmosphere._tile_map->setVisible(true);
 
    target.setView(*_level_view);
-   target.draw(*_atmosphere.mTileMap);
+   target.draw(*_atmosphere._tile_map);
 
-   _atmosphere.mTileMap->setVisible(false);
+   _atmosphere._tile_map->setVisible(false);
 }
 
 
@@ -1158,7 +1158,7 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
 //----------------------------------------------------------------------------------------------------------------------
 void Level::drawDebugInformation()
 {
-   if (DisplayMode::getInstance().isSet(Display::DisplayDebug))
+   if (DisplayMode::getInstance().isSet(Display::Debug))
    {
       drawStaticChains(*_render_texture_level.get());
       DebugDraw::debugBodies(*_render_texture_level.get(), this);
@@ -1292,8 +1292,8 @@ void Level::draw(
    drawLayers(
       *_render_texture_level_background.get(),
       *_render_texture_normal.get(),
-      ZDepthBackgroundMin,
-      ZDepthBackgroundMax
+      static_cast<int32_t>(ZDepth::BackgroundMin),
+      static_cast<int32_t>(ZDepth::BackgroundMax)
    );
    _render_texture_level_background->display();
    takeScreenshot("screenshot_level_background", *_render_texture_level_background.get());
@@ -1309,8 +1309,8 @@ void Level::draw(
    drawLayers(
       *_render_texture_level.get(),
       *_render_texture_normal.get(),
-      ZDepthForegroundMin,
-      ZDepthForegroundMax
+      static_cast<int32_t>(ZDepth::ForegroundMin),
+      static_cast<int32_t>(ZDepth::ForegroundMax)
    );
 
    Weapon::drawProjectileHitAnimations(*_render_texture_level.get());
@@ -1339,13 +1339,13 @@ void Level::draw(
    auto levelTextureSprite = sf::Sprite(_render_texture_deferred->getTexture());
    _gamme_shader->setTexture(_render_texture_deferred->getTexture());
 
-   levelTextureSprite.setPosition(_boom_effect.mBoomOffsetX, _boom_effect.mBoomOffsetY);
+   levelTextureSprite.setPosition(_boom_effect._boom_offset_x, _boom_effect._boom_offset_y);
    levelTextureSprite.scale(_view_to_texture_scale, _view_to_texture_scale);
 
    _gamme_shader->update();
    window->draw(levelTextureSprite, &_gamme_shader->getGammaShader());
 
-   if (DisplayMode::getInstance().isSet(Display::DisplayMap))
+   if (DisplayMode::getInstance().isSet(Display::Map))
    {
       _map->draw(*window.get());
    }
@@ -1497,7 +1497,7 @@ void Level::addDebugOutlines(
    }
 
    visible_path.push_back(visible_path.at(0));
-   _atmosphere.mOutlines.push_back(visible_path);
+   _atmosphere._outlines.push_back(visible_path);
 }
 
 
@@ -1768,15 +1768,15 @@ void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
 //-----------------------------------------------------------------------------
 AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
 {
-   auto x = pos.x - mMapOffsetX;
-   auto y = pos.y - mMapOffsetY;
+   auto x = pos.x - _map_offset_x;
+   auto y = pos.y - _map_offset_y;
 
-   if (x < 0 || x >= mMapWidth)
+   if (x < 0 || x >= _map_width)
    {
       return AtmosphereTileInvalid;
    }
 
-   if (y < 0 || y >= mMapHeight)
+   if (y < 0 || y >= _map_height)
    {
       return AtmosphereTileInvalid;
    }
@@ -1784,7 +1784,7 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
    auto tx = static_cast<uint32_t>(x * PPM / PIXELS_PER_TILE);
    auto ty = static_cast<uint32_t>(y * PPM / PIXELS_PER_TILE);
 
-   AtmosphereTile tile = static_cast<AtmosphereTile>(mMap[ty * mMapWidth + tx]);
+   AtmosphereTile tile = static_cast<AtmosphereTile>(_map[ty * _map_width + tx]);
    return tile;
 }
 

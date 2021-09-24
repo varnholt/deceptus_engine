@@ -58,29 +58,29 @@ public:
 
 protected:
 
-   static std::vector<TmxObject*> mObjects;
-   static std::vector<std::shared_ptr<Laser>> mLasers;
-   static std::vector<std::array<int32_t, 9>> mTilesVersion1;
-   static std::vector<std::array<int32_t, 9>> mTilesVersion2;
+   static std::vector<TmxObject*> __objects;
+   static std::vector<std::shared_ptr<Laser>> __lasers;
+   static std::vector<std::array<int32_t, 9>> __tiles_version_1;
+   static std::vector<std::array<int32_t, 9>> __tiles_version_2;
 
-   std::vector<Signal> mSignalPlot;
+   std::vector<Signal> _signal_plot;
 
-   int32_t mTu = 0;
-   int32_t mTv = 0;
+   int32_t _tu = 0;
+   int32_t _tv = 0;
 
-   std::shared_ptr<sf::Texture> mTexture;
-   sf::Sprite mSprite;
+   std::shared_ptr<sf::Texture> _texture;
+   sf::Sprite _sprite;
 
-   sf::Vector2f mTilePosition;
-   sf::Vector2f mPixelPosition;
-   sf::Rect<int32_t> mPixelRect;
+   sf::Vector2f _tile_position;
+   sf::Vector2f _pixel_position;
+   sf::Rect<int32_t> _pixel_rect;
 
-   bool mOn = true;
-   int32_t mTileIndex = 0;
-   float mTileAnimation = 0.0f;
-   int32_t mAnimationOffset = 0;
-   uint32_t mSignalIndex = 0;
-   uint32_t mTime = 0u;
-   int32_t mGroupId = 0; // only for debugging purposes
+   bool _on = true;
+   int32_t _tile_index = 0;
+   float _tile_animation = 0.0f;
+   int32_t _animation_offset = 0;
+   uint32_t _signal_index = 0;
+   uint32_t _time = 0u;
+   int32_t _group_id = 0; // only for debugging purposes
 };
 

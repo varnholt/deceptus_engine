@@ -19,11 +19,11 @@ struct BitmapFont
       int32_t y = 0
    );
 
-   std::shared_ptr<sf::Texture> mTexture;
-   sf::Sprite mSprite;
-   std::map<char, std::shared_ptr<sf::IntRect>> mMap;
-   int32_t mCharWidth = 0;
-   int32_t mCharHeight = 0;
-   int32_t mTextWidth = 0;
+   std::shared_ptr<sf::Texture> _texture;
+   sf::Sprite _sprite;
+   std::map<char, std::shared_ptr<sf::IntRect>> _map;
+   int32_t _char_width = 0;
+   int32_t _char_height = 0;
+   int32_t _text_width = 0;
 };
 

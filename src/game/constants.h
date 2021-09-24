@@ -64,16 +64,16 @@ enum class MechanismVersion
    Version2
 };
 
-enum ZDepth
+enum class ZDepth
 {
-   ZDepthBackgroundMin = 0,
-   ZDepthBackgroundMax = 15,
+   BackgroundMin = 0,
+   BackgroundMax = 15,
 
-   ZDepthForegroundMin = 16,
-   ZDepthForegroundMax = 50,
+   ForegroundMin = 16,
+   ForegroundMax = 50,
 
-   ZDepthDoors = 40,
-   ZDepthPlayer = 16
+   Doors = 40,
+   Player = 16
 };
 
 
@@ -86,14 +86,14 @@ enum class Alignment {
 };
 
 
-enum Display {
-   DisplayInvalid   = 0x00,
-   DisplayGame      = 0x01,
-   DisplayMainMenu  = 0x02,
-   DisplayMap       = 0x04,
-   DisplayInventory = 0x08,
-   DisplayDebug     = 0x10,
-   DisplayModal     = 0x20
+enum class Display {
+   Invalid   = 0x00,
+   Game      = 0x01,
+   MainMenu  = 0x02,
+   Map       = 0x04,
+   Inventory = 0x08,
+   Debug     = 0x10,
+   Modal     = 0x20
 };
 
 
@@ -146,27 +146,6 @@ enum class PlayerAction
 };
 
 
-enum SdlControllerButton
-{
-   SdlControllerButtonNone             = 0x0,
-   SdlControllerButtonA                = 0x1,
-   SdlControllerButtonB                = 0x2,
-   SdlControllerButtonX                = 0x4,
-   SdlControllerButtonY                = 0x8,
-   SdlControllerButtonBack             = 0x10,
-   SdlControllerButtonGuide            = 0x20,
-   SdlControllerButtonStart            = 0x40,
-   SdlControllerButtonLeftStick        = 0x80,
-   SdlControllerButtonRightStick       = 0x100,
-   SdlControllerButtonLeftShoulder     = 0x200,
-   SdlControllerButtonRightShoulder    = 0x400,
-   SdlControllerButtonDpadUp           = 0x800,
-   SdlControllerButtonDpadDown         = 0x1000,
-   SdlControllerButtonDpadLeft         = 0x2000,
-   SdlControllerButtonDpadRight        = 0x4000,
-};
-
-
 enum class InvetoryAction
 {
    ShowMap,
@@ -182,14 +161,14 @@ enum class InvetoryAction
 };
 
 
-enum Look
+enum class Look
 {
-   LookInactive = 0x0,
-   LookActive   = 0x1,
-   LookUp       = 0x2,
-   LookDown     = 0x4,
-   LookLeft     = 0x8,
-   LookRight    = 0x10,
+   Inactive = 0x0,
+   Active   = 0x1,
+   Up       = 0x2,
+   Down     = 0x4,
+   Left     = 0x8,
+   Right    = 0x10,
 };
 
 

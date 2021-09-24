@@ -7,21 +7,21 @@
 
 DeathShader::DeathShader(uint32_t width, uint32_t height)
 {
-   mRenderTexture = std::make_shared<sf::RenderTexture>();
-   mRenderTexture->create(width, height);
+   _render_texture = std::make_shared<sf::RenderTexture>();
+   _render_texture->create(width, height);
 }
 
 
 DeathShader::~DeathShader()
 {
-   mRenderTexture.reset();
+   _render_texture.reset();
 }
 
 
 
 void DeathShader::initialize()
 {
-   if (!mShader.loadFromFile(
+   if (!_shader.loadFromFile(
          "data/shaders/death.vert",
          "data/shaders/death.frag"
       )
@@ -31,51 +31,51 @@ void DeathShader::initialize()
       return;
    }
 
-   if (!mFlowField1.loadFromFile("data/effects/flowfield_1.png"))
+   if (!_flow_field_1.loadFromFile("data/effects/flowfield_1.png"))
    {
       std::cout << "error loading flowfield 1" << std::endl;
       return;
    }
 
-   if (!mFlowField2.loadFromFile("data/effects/flowfield_3.png"))
+   if (!_flow_field_2.loadFromFile("data/effects/flowfield_3.png"))
    {
       std::cout << "error loading flowfield 2" << std::endl;
       return;
    }
 
-   mFlowField1.setRepeated(true);
-   mFlowField1.setSmooth(true);
-   mFlowField2.setRepeated(true);
-   mFlowField2.setSmooth(true);
+   _flow_field_1.setRepeated(true);
+   _flow_field_1.setSmooth(true);
+   _flow_field_2.setRepeated(true);
+   _flow_field_2.setSmooth(true);
 
-   mShader.setUniform("current_texture", sf::Shader::CurrentTexture);
-   mShader.setUniform("flowfield_1", mFlowField1);
-   mShader.setUniform("flowfield_2", mFlowField2);
+   _shader.setUniform("current_texture", sf::Shader::CurrentTexture);
+   _shader.setUniform("flowfield_1", _flow_field_1);
+   _shader.setUniform("flowfield_2", _flow_field_2);
 }
 
 
 void DeathShader::reset()
 {
-   mElapsed = 0.0f;
-   mShader.setUniform("time", mElapsed);
+   _elapsed = 0.0f;
+   _shader.setUniform("time", _elapsed);
 }
 
 
 void DeathShader::update(const sf::Time& dt)
 {
-   mElapsed += dt.asSeconds() * 0.5f;
+   _elapsed += dt.asSeconds() * 0.5f;
 
-   if (mElapsed > 1.0f)
+   if (_elapsed > 1.0f)
    {
-      mElapsed = 1.0f;
+      _elapsed = 1.0f;
    }
 
    // for testing
    // mElapsed = fmod(mElapsed, 1.0f);
 
    // std::cout << mElapsed << std::endl;
-   mShader.setUniform("time", mElapsed);
-   mShader.setUniform(
+   _shader.setUniform("time", _elapsed);
+   _shader.setUniform(
       "flowfield_offset",
       Player::getCurrent()->isPointingLeft()
          ? sf::Glsl::Vec2(0.5f, -0.32f) // picked randomly
@@ -86,13 +86,13 @@ void DeathShader::update(const sf::Time& dt)
 
 const sf::Shader& DeathShader::getShader() const
 {
-   return mShader;
+   return _shader;
 }
 
 
 const std::shared_ptr<sf::RenderTexture>& DeathShader::getRenderTexture() const
 {
-   return mRenderTexture;
+   return _render_texture;
 }
 
 

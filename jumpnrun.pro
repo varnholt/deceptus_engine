@@ -92,7 +92,6 @@ INCLUDEPATH += src/thirdparty
 
 SOURCES += \
    src/framework/tools/stopwatch.cpp \
-   src/game/actioncontrollermap.cpp \
    src/game/ambientocclusion.cpp \
    src/game/animation.cpp \
    src/game/animationframedata.cpp \
@@ -314,7 +313,6 @@ HEADERS += \
    src/effects/lightsystem.h \
    src/effects/smokeeffect.h \
    src/effects/staticlight.h \
-   src/game/actioncontrollermap.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \
    src/game/animationpool.h \
