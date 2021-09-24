@@ -7,14 +7,14 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 AtmosphereShader::AtmosphereShader(
-   uint32_t textureWidth,
-   uint32_t textureHeight
+   uint32_t texture_width,
+   uint32_t texture_height
 )
 {
-   mRenderTexture = std::make_shared<sf::RenderTexture>();
-   mRenderTexture->create(
-      static_cast<uint32_t>(textureWidth),
-      static_cast<uint32_t>(textureHeight)
+   _render_texture = std::make_shared<sf::RenderTexture>();
+   _render_texture->create(
+      static_cast<uint32_t>(texture_width),
+      static_cast<uint32_t>(texture_height)
    );
 }
 
@@ -22,31 +22,31 @@ AtmosphereShader::AtmosphereShader(
 //----------------------------------------------------------------------------------------------------------------------
 AtmosphereShader::~AtmosphereShader()
 {
-   mRenderTexture.reset();
+   _render_texture.reset();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void AtmosphereShader::initialize()
 {
-   if (!mShader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
+   if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
    {
       std::cout << "error loading water shader" << std::endl;
       return;
    }
 
-   if (!mDistortionMap.loadFromFile("data/effects/distortion_map.png"))
+   if (!_distortion_map.loadFromFile("data/effects/distortion_map.png"))
    {
       std::cout << "error loading distortion map" << std::endl;
       return;
    }
 
-   mDistortionMap.setRepeated(true);
-   mDistortionMap.setSmooth(true);
+   _distortion_map.setRepeated(true);
+   _distortion_map.setSmooth(true);
 
-   mShader.setUniform("currentTexture", sf::Shader::CurrentTexture);
-   mShader.setUniform("distortionMapTexture", mDistortionMap);
-   mShader.setUniform("physicsTexture", mRenderTexture->getTexture());
+   _shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+   _shader.setUniform("distortionMapTexture", _distortion_map);
+   _shader.setUniform("physicsTexture", _render_texture->getTexture());
 }
 
 
@@ -55,21 +55,21 @@ void AtmosphereShader::update()
 {
   float distortionFactor = 0.02f;
 
-  mShader.setUniform("time", GlobalClock::getInstance()->getElapsedTimeInS() * 0.2f);
-  mShader.setUniform("distortionFactor", distortionFactor);
+  _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * 0.2f);
+  _shader.setUniform("distortionFactor", distortionFactor);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() const
 {
-   return mRenderTexture;
+   return _render_texture;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 const sf::Shader& AtmosphereShader::getShader() const
 {
-   return mShader;
+   return _shader;
 }
 

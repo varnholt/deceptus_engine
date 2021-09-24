@@ -55,28 +55,28 @@ public:
 
 private:
 
-   MenuType mCurrentType = MenuType::None;
-   MenuType mPreviousType = MenuType::None;
+   MenuType _current_type = MenuType::None;
+   MenuType _previous_type = MenuType::None;
 
-   std::deque<MenuType> mHistory;
+   std::deque<MenuType> _history;
 
-   std::shared_ptr<MenuScreen> mCurrentMenu;
+   std::shared_ptr<MenuScreen> _current_menu;
 
-   std::shared_ptr<MenuScreen> mMenuMain;
-   std::shared_ptr<MenuScreen> mMenuFileSelect;
-   std::shared_ptr<MenuScreen> mMenuNameSelect;
-   std::shared_ptr<MenuScreen> mMenuOptions;
-   std::shared_ptr<MenuScreen> mMenuAudio;
-   std::shared_ptr<MenuScreen> mMenuControls;
-   std::shared_ptr<MenuScreen> mMenuVideo;
-   std::shared_ptr<MenuScreen> mMenuGame;
-   std::shared_ptr<MenuScreen> mMenuAchievements;
-   std::shared_ptr<MenuScreen> mMenuCredits;
-   std::shared_ptr<MenuScreen> mMenuPause;
-   std::shared_ptr<MenuScreen> mMenuInvalid;
+   std::shared_ptr<MenuScreen> _menu_main;
+   std::shared_ptr<MenuScreen> _menu_file_select;
+   std::shared_ptr<MenuScreen> _menu_name_select;
+   std::shared_ptr<MenuScreen> _menu_options;
+   std::shared_ptr<MenuScreen> _menu_audio;
+   std::shared_ptr<MenuScreen> _menu_controls;
+   std::shared_ptr<MenuScreen> _menu_video;
+   std::shared_ptr<MenuScreen> _menu_game;
+   std::shared_ptr<MenuScreen> _menu_achievements;
+   std::shared_ptr<MenuScreen> _menu_credits;
+   std::shared_ptr<MenuScreen> _menu_pause;
+   std::shared_ptr<MenuScreen> _menu_invalid;
 
-   std::vector<std::shared_ptr<MenuScreen>> mMenus;
+   std::vector<std::shared_ptr<MenuScreen>> _menus;
 
-   static std::shared_ptr<Menu> sInstance;
+   static std::shared_ptr<Menu> __instance;
 };
 

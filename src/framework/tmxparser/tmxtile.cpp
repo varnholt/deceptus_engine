@@ -3,6 +3,7 @@
 //
 #include "tmxanimation.h"
 #include "tmxobjectgroup.h"
+
 #include <iostream>
 
 
@@ -45,10 +46,7 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
          }
          else
          {
-            printf(
-               "%s is not supported for TmxTile\n",
-               child_element->Name()
-            );
+            std::cerr << child_element->Name() << " is not supported for TmxTile" << std::endl;
          }
       }
 

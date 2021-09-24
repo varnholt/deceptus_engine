@@ -2,6 +2,7 @@
 
 #include "tmximage.h"
 #include "tmxtile.h"
+
 #include <iostream>
 
 
@@ -26,16 +27,6 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
    _tile_count  = element->IntAttribute("tilecount");
    _columns    = element->IntAttribute("columns");
    _rows       = _columns > 0 ? (_tile_count / _columns) : 0;
-
-   //   printf(
-   //      "tileset (name: %s, width: %d, height: %d, count: %d, cols: %d, rows: %d)\n",
-   //      mName.c_str(),
-   //      mTileWidth,
-   //      mTileHeight,
-   //      mTileCount,
-   //      mColumns,
-   //      mRows
-   //   );
 
    tinyxml2::XMLNode* node = element->FirstChild();
    while(node != nullptr)
@@ -64,10 +55,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
          }
          else
          {
-            printf(
-               "%s is not supported for TmxTileSet\n",
-               childElement->Name()
-            );
+            std::cerr << childElement->Name() << " is not supported for TmxTileSet" << std::endl;
          }
 
          if (tile != nullptr)

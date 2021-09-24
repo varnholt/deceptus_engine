@@ -218,7 +218,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    if (!isDead())
    {
       // damaged player flashes
-      auto time = GlobalClock::getInstance()->getElapsedTimeInMs();
+      auto time = GlobalClock::getInstance().getElapsedTimeInMs();
       auto damageTime = _damage_clock.getElapsedTime().asMilliseconds();
       if (_damage_initialized && time > 3000 && damageTime < 3000)
       {
@@ -342,7 +342,7 @@ void Player::createFeet()
    {
       b2FixtureDef fixtureDefFeet;
       fixtureDefFeet.density = 1.f;
-      fixtureDefFeet.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
+      fixtureDefFeet.friction = PhysicsConfiguration::getInstance()._player_friction;
       fixtureDefFeet.restitution = 0.0f;
       fixtureDefFeet.filter.categoryBits = category_bits;
       fixtureDefFeet.filter.maskBits = mask_bits_standing;
@@ -461,7 +461,7 @@ void Player::createBody()
    // add body shape
    b2FixtureDef fixtureBodyDef;
    fixtureBodyDef.density = 0.45f;
-   fixtureBodyDef.friction = PhysicsConfiguration::getInstance().mPlayerFriction;
+   fixtureBodyDef.friction = PhysicsConfiguration::getInstance()._player_friction;
    fixtureBodyDef.restitution = 0.0f;
 
    fixtureBodyDef.filter.categoryBits = category_bits;
@@ -513,7 +513,7 @@ float Player::getMaxVelocity() const
 {
    if (isInWater())
    {
-      return PhysicsConfiguration::getInstance().mPlayerSpeedMaxWater;
+      return PhysicsConfiguration::getInstance()._player_speed_max_water;
    }
 
    // running is actually not supported
@@ -526,10 +526,10 @@ float Player::getMaxVelocity() const
 
    if (isInAir())
    {
-      return PhysicsConfiguration::getInstance().mPlayerSpeedMaxAir;
+      return PhysicsConfiguration::getInstance()._player_speed_max_air;
    }
 
-   return PhysicsConfiguration::getInstance().mPlayerSpeedMaxWalk;
+   return PhysicsConfiguration::getInstance()._player_speed_max_walk;
 }
 
 
@@ -720,8 +720,8 @@ float Player::getDeceleration() const
 {
    auto deceleration =
       (isInAir())
-         ? PhysicsConfiguration::getInstance().mPlayerDecelerationAir
-         : PhysicsConfiguration::getInstance().mPlayerDecelerationGround;
+         ? PhysicsConfiguration::getInstance()._player_deceleration_air
+         : PhysicsConfiguration::getInstance()._player_deceleration_ground;
 
   return deceleration;
 }
@@ -732,8 +732,8 @@ float Player::getAcceleration() const
 {
    auto acceleration =
       (isInAir())
-         ? PhysicsConfiguration::getInstance().mPlayerAccelerationAir
-         : PhysicsConfiguration::getInstance().mPlayerAccelerationGround;
+         ? PhysicsConfiguration::getInstance()._player_acceleration_air
+         : PhysicsConfiguration::getInstance()._player_acceleration_ground;
 
    return acceleration;
 }
@@ -990,14 +990,14 @@ void Player::updateVelocity()
       {
          linearVelocity.Set(
             linearVelocity.x,
-            std::min(linearVelocity.y, PhysicsConfiguration::getInstance().mPlayerSpeedMaxWater)
+            std::min(linearVelocity.y, PhysicsConfiguration::getInstance()._player_speed_max_water)
          );
       }
       else if (linearVelocity.y < 0.0f)
       {
          linearVelocity.Set(
             linearVelocity.x,
-            std::max(linearVelocity.y, -PhysicsConfiguration::getInstance().mPlayerSpeedMaxWater)
+            std::max(linearVelocity.y, -PhysicsConfiguration::getInstance()._player_speed_max_water)
          );
       }
 
@@ -1535,15 +1535,15 @@ void Player::updateDash(Dash dir)
          return;
       }
 
-      _dash._dash_frame_count = PhysicsConfiguration::getInstance().mPlayerDashFrameCount;
-      _dash._dash_multiplier = PhysicsConfiguration::getInstance().mPlayerDashMultiplier;
+      _dash._dash_frame_count = PhysicsConfiguration::getInstance()._player_dash_frame_count;
+      _dash._dash_multiplier = PhysicsConfiguration::getInstance()._player_dash_multiplier;
       _dash._dash_dir = dir;
 
 #ifndef JUMP_GRAVITY_SCALING
       // disable gravity for player while dash is active
       // but only do this if gravity scaling is not used
-      mBody->SetGravityScale(0.0f);
-      mDashSteps = 30; // hardcoded to keep it working
+      _body->SetGravityScale(0.0f);
+      _dashSteps = 30; // hardcoded to keep it working
 #endif
    }
 
@@ -1555,10 +1555,10 @@ void Player::updateDash(Dash dir)
    auto left = (dir == Dash::Left);
    _points_to_left = (left);
 
-   _dash._dash_multiplier += PhysicsConfiguration::getInstance().mPlayerDashMultiplierIncrementPerFrame;
-   _dash._dash_multiplier *=PhysicsConfiguration::getInstance().mPlayerDashMultiplierScalePerFrame;
+   _dash._dash_multiplier += PhysicsConfiguration::getInstance()._player_dash_multiplier_increment_per_frame;
+   _dash._dash_multiplier *=PhysicsConfiguration::getInstance()._player_dash_multiplier_scale_per_frame;
 
-   auto dashVector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance().mPlayerDashVector;
+   auto dashVector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
    auto impulse = (left) ? -dashVector : dashVector;
 
    _body->ApplyForceToCenter(b2Vec2(impulse, 0.0f), false);
@@ -1606,7 +1606,7 @@ void Player::updateAtmosphere()
       _body->SetGravityScale(1.0f);
    }
 #else
-   mBody->SetGravityScale(inWater ? 0.5f : 1.0f);
+   _body->SetGravityScale(inWater ? 0.5f : 1.0f);
 #endif
 
    if (!wasInwater && isInWater())

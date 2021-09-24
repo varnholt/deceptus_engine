@@ -88,7 +88,7 @@ InfoLayer::InfoLayer()
 
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   const auto now = GlobalClock::getInstance()->getElapsedTime();
+   const auto now = GlobalClock::getInstance().getElapsedTime();
 
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
@@ -206,7 +206,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    _font.draw(window, bitmap_font, offset_x, h_screen - 28);
 
    // draw cursor
-   auto elapsed = GlobalClock::getInstance()->getElapsedTime();
+   auto elapsed = GlobalClock::getInstance().getElapsedTime();
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
       _font.draw(window, _font.getCoords("_"), _font._text_width + offset_x, h_screen - 28);
@@ -224,7 +224,7 @@ void InfoLayer::setLoading(bool loading)
 
    if (!loading && loading != _loading)
    {
-       _show_time = GlobalClock::getInstance()->getElapsedTime();
+       _show_time = GlobalClock::getInstance().getElapsedTime();
    }
 
    _loading = loading;

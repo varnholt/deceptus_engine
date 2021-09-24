@@ -16,43 +16,43 @@ BlurShader::BlurShader(
    contextSettings.stencilBits = 8;
 #endif
 
-   mRenderTexture = std::make_shared<sf::RenderTexture>();
+   _render_texture = std::make_shared<sf::RenderTexture>();
 
 #ifdef SUPPORT_STENCIL_BITS
-   mRenderTexture->create(width, height, contextSettings);
+   _render_texture->create(width, height, contextSettings);
 #else
-   mRenderTexture->create(width, height);
+   _render_texture->create(width, height);
 #endif
 
-   mRenderTextureScaled = std::make_shared<sf::RenderTexture>();
+   _render_texture_scaled = std::make_shared<sf::RenderTexture>();
 
 #ifdef SUPPORT_STENCIL_BITS
-   mRenderTextureScaled->create(960, 540, contextSettings);
+   _render_texture_scaled->create(960, 540, contextSettings);
 #else
-   mRenderTextureScaled->create(960, 540);
+   _render_texture->create(960, 540);
 #endif
-   mRenderTextureScaled->setSmooth(true);
+   _render_texture_scaled->setSmooth(true);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 BlurShader::~BlurShader()
 {
-   mRenderTexture.reset();
-   mRenderTextureScaled.reset();
+   _render_texture.reset();
+   _render_texture_scaled.reset();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void BlurShader::initialize()
 {
-   if (!mShader.loadFromFile("data/shaders/blur.frag", sf::Shader::Fragment))
+   if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Fragment))
    {
       std::cout << "error loading blur shader" << std::endl;
       return;
    }
 
-   mShader.setUniform("texture", mRenderTexture->getTexture());
+   _shader.setUniform("texture", _render_texture->getTexture());
 }
 
 
@@ -60,35 +60,35 @@ void BlurShader::initialize()
 void BlurShader::update()
 {
    // that implicitly scales the effect up by 2
-   mShader.setUniform("texture_width", 960/2);
-   mShader.setUniform("texture_height", 540/2);
+   _shader.setUniform("texture_width", 960/2);
+   _shader.setUniform("texture_height", 540/2);
 
-   mShader.setUniform("blur_radius", 20.0f);
-   mShader.setUniform("add_factor", 1.0f);
+   _shader.setUniform("blur_radius", 20.0f);
+   _shader.setUniform("add_factor", 1.0f);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void BlurShader::clearTexture()
 {
-   mRenderTexture->clear({0, 0, 0, 0});
+   _render_texture->clear({0, 0, 0, 0});
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<sf::RenderTexture>& BlurShader::getRenderTexture() const
 {
-   return mRenderTexture;
+   return _render_texture;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<sf::RenderTexture>& BlurShader::getRenderTextureScaled() const
 {
-   return mRenderTextureScaled;
+   return _render_texture_scaled;
 }
 
 const sf::Shader& BlurShader::getShader() const
 {
-   return mShader;
+   return _shader;
 }

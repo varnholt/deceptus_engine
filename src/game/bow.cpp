@@ -81,7 +81,7 @@ void Bow::load(b2World* world)
    auto arrow = _loaded_arrow = new Arrow();
 
    arrow->setAnimation(_projectile_reference_animation._animation);
-   arrow->_start_time = GlobalClock::getInstance()->getElapsedTimeInMs();
+   arrow->_start_time = GlobalClock::getInstance().getElapsedTimeInMs();
 
    _loaded_arrow->addDestroyedCallback([this, arrow](){
       _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end());

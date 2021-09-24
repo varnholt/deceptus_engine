@@ -39,11 +39,11 @@ void ExtraManager::load(
          if (tileNumber != 0)
          {
             std::shared_ptr<ExtraItem> item = std::make_shared<ExtraItem>();
-            item->mSpriteOffset.x = i;
-            item->mSpriteOffset.y = j;
-            item->mPosition.x = static_cast<float>(i * PIXELS_PER_TILE);
-            item->mPosition.y = static_cast<float>(j * PIXELS_PER_TILE);
-            item->mType = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
+            item->_sprite_offset.x = i;
+            item->_sprite_offset.y = j;
+            item->_position.x = static_cast<float>(i * PIXELS_PER_TILE);
+            item->_position.y = static_cast<float>(j * PIXELS_PER_TILE);
+            item->_type = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
             _extras.push_back(item);
          }
       }
@@ -56,27 +56,27 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 {
    for (auto& extra : _extras)
    {
-      if (!extra->mActive)
+      if (!extra->_active)
       {
          continue;
       }
 
       sf::Rect<int32_t> itemRect;
-      itemRect.left = static_cast<int32_t>(extra->mPosition.x);
-      itemRect.top = static_cast<int32_t>(extra->mPosition.y);
+      itemRect.left = static_cast<int32_t>(extra->_position.x);
+      itemRect.top = static_cast<int32_t>(extra->_position.y);
       itemRect.width = PIXELS_PER_TILE;
       itemRect.height = PIXELS_PER_TILE;
 
       if (playerRect.intersects(itemRect))
       {
-         // printf("player hit extra\n");
-         extra->mActive = false;
+         extra->_active = false;
+
          _tilemap->hideTile(
-            extra->mSpriteOffset.x,
-            extra->mSpriteOffset.y
+            extra->_sprite_offset.x,
+            extra->_sprite_offset.y
          );
 
-         switch (extra->mType)
+         switch (extra->_type)
          {
             case ExtraItem::ExtraSpriteIndex::Coin:
                Audio::getInstance()->playSample("coin.wav");

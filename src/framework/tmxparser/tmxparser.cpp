@@ -73,10 +73,7 @@ void TmxParser::parse(const std::string &filename)
             }
             else
             {
-               printf(
-                  "%s is not supported\n",
-                  subElement->Name()
-               );
+               std::cerr << subElement->Name() << " is not supported" << std::endl;
             }
          }
 

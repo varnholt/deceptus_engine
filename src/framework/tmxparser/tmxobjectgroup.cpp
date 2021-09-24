@@ -2,6 +2,8 @@
 
 #include "tmxobject.h"
 
+#include <iostream>
+
 
 TmxObjectGroup::TmxObjectGroup()
 {
@@ -24,21 +26,16 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
 {
    TmxElement::deserialize(xml_element);
 
-//   printf(
-//      "objectgroup: %s\n",
-//      mName.c_str()
-//   );
-
    tinyxml2::XMLNode* node = xml_element->FirstChild();
    while(node != nullptr)
    {
-      tinyxml2::XMLElement* subElement = node->ToElement();
-      if (subElement != nullptr)
+      tinyxml2::XMLElement* sub_element = node->ToElement();
+      if (sub_element != nullptr)
       {
          TmxElement* element = nullptr;
          TmxObject* object = nullptr;
 
-         if (subElement->Name() == std::string("object"))
+         if (sub_element->Name() == std::string("object"))
          {
             object = new TmxObject();
             element = object;
@@ -46,14 +43,11 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
 
          if (element != nullptr)
          {
-            element->deserialize(subElement);
+            element->deserialize(sub_element);
          }
          else
          {
-            printf(
-               "%s is not supported for TmxObjectGroup\n",
-               subElement->Name()
-            );
+            std::cerr << sub_element->Name() << " is not supported for TmxObjectGroup" << std::endl;
          }
 
          if (object != nullptr)

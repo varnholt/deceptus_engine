@@ -9,13 +9,13 @@ namespace
 class PlayerAABBQueryCallback : public b2QueryCallback
 {
    public:
-      std::set<b2Body*> mBodies;
+      std::set<b2Body*> _bodies;
 
    public:
       bool ReportFixture(b2Fixture* fixture)
       {
          // foundBodies.push_back(fixture->GetBody());
-         mBodies.insert(fixture->GetBody());
+         _bodies.insert(fixture->GetBody());
 
          // keep going to find all fixtures in the query area
          return true;
@@ -26,7 +26,7 @@ class PlayerAABBQueryCallback : public b2QueryCallback
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, bool inAir)
+void PlayerClimb::update(b2Body* player_body, const PlayerControls& controls, bool in_air)
 {
    if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillWallClimb))
    {
@@ -47,14 +47,14 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
    //   }
 
    // if player is standing somewhere, remove joint
-   if (!inAir)
+   if (!in_air)
    {
       removeClimbJoint();
       return;
    }
 
    // remove that joint if player is moving 'up'
-   if (playerBody->GetLinearVelocity().y < -0.51f)
+   if (player_body->GetLinearVelocity().y < -0.51f)
    {
       removeClimbJoint();
       return;
@@ -103,7 +103,7 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
    b2AABB aabb;
    float w = 0.1600171f;
    float h = 0.356224f;
-   b2Vec2 center = playerBody->GetWorldCenter();
+   b2Vec2 center = player_body->GetWorldCenter();
    aabb.lowerBound = b2Vec2(center.x - w, center.y - h);
    aabb.upperBound = b2Vec2(center.x + w, center.y + h);
 
@@ -119,21 +119,22 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
 
    // printf("player aabb is: %f, %f to %f %f\n", aabb.lowerBound.x, aabb.lowerBound.y, aabb.upperBound.x, aabb.upperBound.y);
 
-   playerBody->GetWorld()->QueryAABB(&queryCallback, aabb);
+   player_body->GetWorld()->QueryAABB(&queryCallback, aabb);
 
    // std::remove_if(queryCallback.foundBodies.begin(), queryCallback.foundBodies.end(), [this](b2Body* body){return body == mBody;});
-   queryCallback.mBodies.erase(playerBody);
+   queryCallback._bodies.erase(player_body);
 
    // printf("bodies in range:\n");
-   for (auto body : queryCallback.mBodies)
+   for (auto body : queryCallback._bodies)
    {
       if (body->GetType() == b2_staticBody)
       {
          // printf("- static body: %p\n", body);
 
          auto found = false;
-         auto distMax = 0.16f;
+         auto dist_max = 0.16f;
          auto fixture = body->GetFixtureList();
+
          while (fixture)
          {
             auto shape = dynamic_cast<b2ChainShape*>(fixture->GetShape());
@@ -142,13 +143,13 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
             {
                b2Vec2 closest;
 
-               auto edgeLengthMinimum = 1000.0f;
+               auto edge_length_minimum = 1000.0f;
                for (auto index = 0; index < shape->m_count; index++)
                {
                   auto curr = shape->m_vertices[index];
-                  auto edgeLengthSquared = (aabb.GetCenter() - curr).LengthSquared();
+                  auto edge_length_squared = (aabb.GetCenter() - curr).LengthSquared();
 
-                  if (edgeLengthSquared >= distMax)
+                  if (edge_length_squared >= dist_max)
                   {
                      continue;
                   }
@@ -160,8 +161,8 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
                   }
 
                   // joint in spe needs to point up, since we're holding somewhere4
-                  auto jointDir = (aabb.GetCenter() - curr);
-                  if  (jointDir.y <= 0.0f)
+                  auto joint_dir = (aabb.GetCenter() - curr);
+                  if  (joint_dir.y <= 0.0f)
                   {
                      continue;
                   }
@@ -175,9 +176,9 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
                   // printf("joint dir: %f \n", jointDir.y);
 
                   // if all that is the case, we have a joint
-                  if (edgeLengthSquared < edgeLengthMinimum)
+                  if (edge_length_squared < edge_length_minimum)
                   {
-                     edgeLengthMinimum = edgeLengthSquared;
+                     edge_length_minimum = edge_length_squared;
                      closest = curr;
                      found = true;
                   }
@@ -213,15 +214,15 @@ void PlayerClimb::update(b2Body* playerBody, const PlayerControls& controls, boo
 
                if (found)
                {
-                  b2DistanceJointDef jointDefinition;
-                  jointDefinition.Initialize(playerBody, body, aabb.GetCenter(), closest);
-                  jointDefinition.collideConnected = true;
+                  b2DistanceJointDef joint_def;
+                  joint_def.Initialize(player_body, body, aabb.GetCenter(), closest);
+                  joint_def.collideConnected = true;
                   // jointDefinition.dampingRatio = 0.5f;
                   // jointDefinition.frequencyHz = 5.0f;
                   // jointDefinition.length = 0.01f;
 
                   Audio::getInstance()->playSample("impact.wav");
-                  _climb_joint = playerBody->GetWorld()->CreateJoint(&jointDefinition);
+                  _climb_joint = player_body->GetWorld()->CreateJoint(&joint_def);
                }
 
                // no need to continue processing
@@ -361,24 +362,24 @@ bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
 {
-   bool rightPressed = _keys_pressed & KeyPressedRight;
-   bool leftPressed = _keys_pressed & KeyPressedLeft;
+   bool right_pressed = _keys_pressed & KeyPressedRight;
+   bool left_pressed = _keys_pressed & KeyPressedLeft;
 
-   auto matchesMovement = false;
+   auto matches_movement = false;
    // auto edgeType = Edge::None;
 
    if (edgeDir.x < -0.01f)
    {
       // edgeType = Edge::Right;
-      matchesMovement = rightPressed;
+      matches_movement = right_pressed;
    }
    else if (edgeDir.x > 0.01f)
    {
       // edgeType = Edge::Left;
-      matchesMovement = leftPressed;
+      matches_movement = left_pressed;
    }
 
-   return matchesMovement;
+   return matches_movement;
 }
 
 

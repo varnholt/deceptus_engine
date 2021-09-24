@@ -232,14 +232,6 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             }
 
             moving_platform->setupBody(world);
-
-            // printf(
-            //   "created MovingPlatform %zd at %d, %d (width: %zd)\n",
-            //   movingPlatforms.size(),
-            //   x,
-            //   y,
-            //   movingPlatform->mSprites.size()
-            // );
          }
       }
    }

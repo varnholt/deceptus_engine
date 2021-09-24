@@ -1,6 +1,8 @@
 #include "tmxpolyline.h"
 
+#include <iostream>
 #include <sstream>
+
 #include "tmxtools.h"
 
 void TmxPolyLine::deserialize(tinyxml2::XMLElement *element)
@@ -20,7 +22,7 @@ void TmxPolyLine::deserialize(tinyxml2::XMLElement *element)
       }
       else
       {
-         printf("bad polygon data\n");
+         std::cerr << "bad polygon data" << std::endl;
          break;
       }
    }

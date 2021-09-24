@@ -17,9 +17,9 @@ public:
    {
       RainDrop();
 
-      sf::Vector2f mPos;
-      sf::Vector2f mDir;
-      float mLength = 0.0f;
+      sf::Vector2f _pos;
+      sf::Vector2f _dir;
+      float _length = 0.0f;
    };
 
 
@@ -30,7 +30,7 @@ public:
 
 private:
 
-   sf::RenderTexture mRenderTexture;
-   std::vector<RainDrop> mDrops;
+   sf::RenderTexture _render_texture;
+   std::vector<RainDrop> _drops;
 };
 

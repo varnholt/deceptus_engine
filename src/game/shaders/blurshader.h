@@ -23,8 +23,8 @@ class BlurShader
       const sf::Shader& getShader() const;
 
    private:
-      sf::Shader mShader;
-      std::shared_ptr<sf::RenderTexture> mRenderTexture;
-      std::shared_ptr<sf::RenderTexture> mRenderTextureScaled;
+      sf::Shader _shader;
+      std::shared_ptr<sf::RenderTexture> _render_texture;
+      std::shared_ptr<sf::RenderTexture> _render_texture_scaled;
 };
 

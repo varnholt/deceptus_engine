@@ -21,36 +21,36 @@
 #include <iostream>
 
 
-std::shared_ptr<Menu> Menu::sInstance;
+std::shared_ptr<Menu> Menu::__instance;
 
 
 Menu::Menu()
 {
-   mMenuMain = std::make_shared<MenuScreenMain>();
-   mMenuFileSelect = std::make_shared<MenuScreenFileSelect>();
-   mMenuNameSelect = std::make_shared<MenuScreenNameSelect>();
-   mMenuOptions = std::make_shared<MenuScreenOptions>();
-   mMenuAudio = std::make_shared<MenuScreenAudio>();
-   mMenuVideo = std::make_shared<MenuScreenVideo>();
-   mMenuControls = std::make_shared<MenuScreenControls>();
-   mMenuGame = std::make_shared<MenuScreenGame>();
-   mMenuAchievements = std::make_shared<MenuScreenAchievements>();
-   mMenuCredits = std::make_shared<MenuScreenCredits>();
-   mMenuPause = std::make_shared<MenuScreenPause>();
+   _menu_main = std::make_shared<MenuScreenMain>();
+   _menu_file_select = std::make_shared<MenuScreenFileSelect>();
+   _menu_name_select = std::make_shared<MenuScreenNameSelect>();
+   _menu_options = std::make_shared<MenuScreenOptions>();
+   _menu_audio = std::make_shared<MenuScreenAudio>();
+   _menu_video = std::make_shared<MenuScreenVideo>();
+   _menu_controls = std::make_shared<MenuScreenControls>();
+   _menu_game = std::make_shared<MenuScreenGame>();
+   _menu_achievements = std::make_shared<MenuScreenAchievements>();
+   _menu_credits = std::make_shared<MenuScreenCredits>();
+   _menu_pause = std::make_shared<MenuScreenPause>();
 
-   mMenus.push_back(mMenuMain);
-   mMenus.push_back(mMenuFileSelect);
-   mMenus.push_back(mMenuNameSelect);
-   mMenus.push_back(mMenuOptions);
-   mMenus.push_back(mMenuAudio);
-   mMenus.push_back(mMenuVideo);
-   mMenus.push_back(mMenuControls);
-   mMenus.push_back(mMenuGame);
-   mMenus.push_back(mMenuAchievements);
-   mMenus.push_back(mMenuCredits);
-   mMenus.push_back(mMenuPause);
+   _menus.push_back(_menu_main);
+   _menus.push_back(_menu_file_select);
+   _menus.push_back(_menu_name_select);
+   _menus.push_back(_menu_options);
+   _menus.push_back(_menu_audio);
+   _menus.push_back(_menu_video);
+   _menus.push_back(_menu_controls);
+   _menus.push_back(_menu_game);
+   _menus.push_back(_menu_achievements);
+   _menus.push_back(_menu_credits);
+   _menus.push_back(_menu_pause);
 
-   for (auto& screen : mMenus)
+   for (auto& screen : _menus)
    {
       screen->load();
    }
@@ -59,38 +59,38 @@ Menu::Menu()
 
 std::shared_ptr<Menu>& Menu::getInstance()
 {
-   if (!sInstance)
+   if (!__instance)
    {
-      sInstance = std::make_shared<Menu>();
-      sInstance->initialize();
+      __instance = std::make_shared<Menu>();
+      __instance->initialize();
    }
 
-   return sInstance;
+   return __instance;
 }
 
 
 void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto gameConfig = GameConfiguration::getInstance();
+   auto game_config = GameConfiguration::getInstance();
 
-   auto w = gameConfig._view_width;
-   auto h = gameConfig._view_height;
+   auto w = game_config._view_width;
+   auto h = game_config._view_height;
 
    // set up an ortho view with screen dimensions
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
 
    window.setView(view);
 
-   if (mCurrentMenu)
+   if (_current_menu)
    {
-      mCurrentMenu->draw(window, states);
+      _current_menu->draw(window, states);
    }
 }
 
 
 void Menu::update(const sf::Time& dt)
 {
-   mCurrentMenu->update(dt);
+   _current_menu->update(dt);
 }
 
 
@@ -99,139 +99,139 @@ void Menu::show(Menu::MenuType menu)
    switch (menu)
    {
       case MenuType::None:
-         mCurrentMenu = nullptr;
+         _current_menu = nullptr;
          break;
       case MenuType::Main:
-         mCurrentMenu = mMenuMain;
+         _current_menu = _menu_main;
          break;
       case MenuType::Options:
-         mCurrentMenu = mMenuOptions;
+         _current_menu = _menu_options;
          break;
       case MenuType::FileSelect:
-         mCurrentMenu = mMenuFileSelect;
+         _current_menu = _menu_file_select;
          break;
       case MenuType::NameSelect:
-         mCurrentMenu = mMenuNameSelect;
+         _current_menu = _menu_name_select;
          break;
       case MenuType::Controls:
-         mCurrentMenu = mMenuControls;
+         _current_menu = _menu_controls;
          break;
       case MenuType::Video:
-         mCurrentMenu = mMenuVideo;
+         _current_menu = _menu_video;
          break;
       case MenuType::Audio:
-         mCurrentMenu = mMenuAudio;
+         _current_menu = _menu_audio;
          break;
       case MenuType::Game:
-         mCurrentMenu = mMenuGame;
+         _current_menu = _menu_game;
          break;
       case MenuType::Achievements:
-         mCurrentMenu = mMenuAchievements;
+         _current_menu = _menu_achievements;
          break;
       case MenuType::Credits:
-         mCurrentMenu = mMenuCredits;
+         _current_menu = _menu_credits;
          break;
       case MenuType::Pause:
-         mCurrentMenu = mMenuPause;
+         _current_menu = _menu_pause;
          break;
    }
 
-   mPreviousType = mCurrentType;
-   mCurrentType = menu;
+   _previous_type = _current_type;
+   _current_type = menu;
 
-   if (mCurrentMenu)
+   if (_current_menu)
    {
-      mCurrentMenu->showEvent();
+      _current_menu->showEvent();
       DisplayMode::getInstance().enqueueSet(Display::MainMenu);
    }
 
-   mHistory.push_back(menu);
-   while (mHistory.size() > 10)
+   _history.push_back(menu);
+   while (_history.size() > 10)
    {
-      mHistory.pop_front();
+      _history.pop_front();
    }
 }
 
 
 void Menu::hide()
 {
-   if (mCurrentMenu)
+   if (_current_menu)
    {
-      mCurrentMenu->hideEvent();
+      _current_menu->hideEvent();
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::MainMenu);
 
-   mCurrentMenu = nullptr;
-   mCurrentType = MenuType::None;
+   _current_menu = nullptr;
+   _current_type = MenuType::None;
 }
 
 
 void Menu::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (mCurrentMenu == nullptr)
+   if (_current_menu == nullptr)
    {
       return;
    }
 
-   mCurrentMenu->keyboardKeyPressed(key);
+   _current_menu->keyboardKeyPressed(key);
 }
 
 
 void Menu::keyboardKeyReleased(sf::Keyboard::Key key)
 {
-   if (mCurrentMenu == nullptr)
+   if (_current_menu == nullptr)
    {
       return;
    }
 
-   mCurrentMenu->keyboardKeyReleased(key);
+   _current_menu->keyboardKeyReleased(key);
 }
 
 
 void Menu::controllerButtonX()
 {
-   if (mCurrentMenu == nullptr)
+   if (_current_menu == nullptr)
    {
       return;
    }
 
-   mCurrentMenu->controllerButtonX();
+   _current_menu->controllerButtonX();
 }
 
 
 void Menu::controllerButtonY()
 {
-   if (mCurrentMenu == nullptr)
+   if (_current_menu == nullptr)
    {
       return;
    }
 
-   mCurrentMenu->controllerButtonY();
+   _current_menu->controllerButtonY();
 }
 
 
 bool Menu::isVisible() const
 {
-   return (mCurrentType != MenuType::None);
+   return (_current_type != MenuType::None);
 }
 
 
 Menu::MenuType Menu::getCurrentType() const
 {
-   return mCurrentType;
+   return _current_type;
 }
 
 
 Menu::MenuType Menu::getPreviousType() const
 {
-   return  mPreviousType;
+   return  _previous_type;
 }
 
 
 const std::deque<Menu::MenuType>& Menu::getHistory() const
 {
-   return mHistory;
+   return _history;
 }
 
 
@@ -240,32 +240,32 @@ const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) cons
     switch (type)
     {
        case MenuType::Main:
-          return mMenuMain;
+          return _menu_main;
        case MenuType::Options:
-          return mMenuOptions;
+          return _menu_options;
        case MenuType::FileSelect:
-          return mMenuFileSelect;
+          return _menu_file_select;
        case MenuType::NameSelect:
-          return mMenuNameSelect;
+          return _menu_name_select;
        case MenuType::Controls:
-          return mMenuControls;
+          return _menu_controls;
        case MenuType::Video:
-          return mMenuVideo;
+          return _menu_video;
        case MenuType::Audio:
-          return mMenuAudio;
+          return _menu_audio;
        case MenuType::Game:
-          return mMenuGame;
+          return _menu_game;
        case MenuType::Achievements:
-          return mMenuAchievements;
+          return _menu_achievements;
        case MenuType::Credits:
-          return mMenuCredits;
+          return _menu_credits;
        case MenuType::Pause:
-          return mMenuPause;
+          return _menu_pause;
         case MenuType::None:
           break;
     }
 
-    return mMenuInvalid;
+    return _menu_invalid;
 }
 
 

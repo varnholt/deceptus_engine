@@ -10,9 +10,8 @@
 
 using json = nlohmann::json;
 
-PhysicsConfiguration PhysicsConfiguration::sInstance;
 
-bool PhysicsConfiguration::sInitialized = false;
+bool PhysicsConfiguration::__initialized = false;
 
 
 std::string PhysicsConfiguration::serialize()
@@ -23,43 +22,43 @@ std::string PhysicsConfiguration::serialize()
       {
          "PhysicsConfiguration",
          {
-            {"timestep",                                          mTimeStep},
-            {"gravity",                                           mGravity},
+            {"timestep",                                          _time_step},
+            {"gravity",                                           _gravity},
 
-            {"player_speed_max_air",                              mPlayerSpeedMaxAir},
-            {"player_speed_max_walk",                             mPlayerSpeedMaxWalk},
-            {"player_speed_max_run",                              mPlayerSpeedMaxRun},
-            {"player_speed_max_water",                            mPlayerSpeedMaxWater},
-            {"player_friction",                                   mPlayerFriction},
-            {"player_acceleration_ground",                        mPlayerAccelerationGround},
-            {"player_deceleration_ground",                        mPlayerDecelerationGround},
-            {"player_acceleration_air",                           mPlayerAccelerationAir},
-            {"player_deceleration_air",                           mPlayerDecelerationAir},
+            {"player_speed_max_air",                              _player_speed_max_air},
+            {"player_speed_max_walk",                             _player_speed_max_walk},
+            {"player_speed_max_run",                              _player_speed_max_run},
+            {"player_speed_max_water",                            _player_speed_max_water},
+            {"player_friction",                                   _player_friction},
+            {"player_acceleration_ground",                        _player_acceleration_ground},
+            {"player_deceleration_ground",                        _player_deceleration_ground},
+            {"player_acceleration_air",                           _player_acceleration_air},
+            {"player_deceleration_air",                           _player_deceleration_air},
 
-            {"player_jump_strength",                              mPlayerJumpStrength},
-            {"player_jump_steps",                                 mPlayerJumpSteps},
-            {"player_jump_after_contact_lost_in_ms",              mPlayerJumpAfterContactLostMs},
-            {"player_jump_buffer_in_ms",                          mPlayerJumpBufferMs},
-            {"player_jump_minimal_duration_in_ms",                mPlayerJumpMinimalDurationMs},
-            {"player_jump_falloff",                               mPlayerJumpFalloff},
-            {"player_jump_speed_factor",                          mPlayerJumpSpeedFactor},
+            {"player_jump_strength",                              _player_jump_strength},
+            {"player_jump_steps",                                 _player_jump_steps},
+            {"player_jump_after_contact_lost_in_ms",              _player_jump_after_contact_lost_ms},
+            {"player_jump_buffer_in_ms",                          _player_jump_buffer_ms},
+            {"player_jump_minimal_duration_in_ms",                _player_jump_minimal_duration_ms},
+            {"player_jump_falloff",                               _player_jump_falloff},
+            {"player_jump_speed_factor",                          _player_jump_speed_factor},
 
-            {"player_dash_frame_count",                           mPlayerDashFrameCount},
-            {"player_dash_multiplier",                            mPlayerDashMultiplier},
-            {"player_dash_multiplier_increment_per_frame",        mPlayerDashMultiplierIncrementPerFrame},
-            {"player_dash_multiplier_scale_per_frame",            mPlayerDashMultiplierScalePerFrame},
-            {"player_dash_vector",                                mPlayerDashVector},
+            {"player_dash_frame_count",                           _player_dash_frame_count},
+            {"player_dash_multiplier",                            _player_dash_multiplier},
+            {"player_dash_multiplier_increment_per_frame",        _player_dash_multiplier_increment_per_frame},
+            {"player_dash_multiplier_scale_per_frame",            _player_dash_multiplier_scale_per_frame},
+            {"player_dash_vector",                                _player_dash_vector},
 
-            {"player_wall_slide_friction",                        mPlayerWallSlideFriction},
+            {"player_wall_slide_friction",                        _player_wall_slide_friction},
 
-            {"player_wall_jump_frame_count",                      mPlayerWallJumpFrameCount},
-            {"player_wall_jump_vector_x",                         mPlayerWallJumpVectorY},
-            {"player_wall_jump_vector_y",                         mPlayerWallJumpVectorX},
-            {"player_wall_jump_multiplier",                       mPlayerWallJumpMultiplier},
-            {"player_wall_jump_multiplier_increment_per_frame",   mPlayerWallJumpMultiplierIncrementPerFrame},
-            {"player_wall_jump_multiplier_scale_per_frame",       mPlayerWallJumpMultiplierScalePerFrame},
+            {"player_wall_jump_frame_count",                      _player_wall_jump_frame_count},
+            {"player_wall_jump_vector_x",                         _player_wall_jump_vector_y},
+            {"player_wall_jump_vector_y",                         _player_wall_jump_vector_x},
+            {"player_wall_jump_multiplier",                       _player_wall_jump_multiplier},
+            {"player_wall_jump_multiplier_increment_per_frame",   _player_wall_jump_multiplier_increment_per_frame},
+            {"player_wall_jump_multiplier_scale_per_frame",       _player_wall_jump_multiplier_scale_per_frame},
 
-            {"player_double_jump_factor",                         mPlayerDoubleJumpFactor},
+            {"player_double_jump_factor",                         _player_double_jump_factor},
          }
       }
    };
@@ -74,41 +73,41 @@ void PhysicsConfiguration::deserialize(const std::string& data)
 {
    json config = json::parse(data);
 
-   mTimeStep                                  = config["PhysicsConfiguration"]["timestep"].get<float>();
-   mGravity                                   = config["PhysicsConfiguration"]["gravity"].get<float>();
+   _time_step                                       = config["PhysicsConfiguration"]["timestep"].get<float>();
+   _gravity                                         = config["PhysicsConfiguration"]["gravity"].get<float>();
 
-   mPlayerSpeedMaxWalk                        = config["PhysicsConfiguration"]["player_speed_max_walk"].get<float>();
-   mPlayerSpeedMaxRun                         = config["PhysicsConfiguration"]["player_speed_max_run"].get<float>();
-   mPlayerSpeedMaxWater                       = config["PhysicsConfiguration"]["player_speed_max_water"].get<float>();
-   mPlayerSpeedMaxAir                         = config["PhysicsConfiguration"]["player_speed_max_air"].get<float>();
-   mPlayerFriction                            = config["PhysicsConfiguration"]["player_friction"].get<float>();
+   _player_speed_max_walk                           = config["PhysicsConfiguration"]["player_speed_max_walk"].get<float>();
+   _player_speed_max_run                            = config["PhysicsConfiguration"]["player_speed_max_run"].get<float>();
+   _player_speed_max_water                          = config["PhysicsConfiguration"]["player_speed_max_water"].get<float>();
+   _player_speed_max_air                            = config["PhysicsConfiguration"]["player_speed_max_air"].get<float>();
+   _player_friction                                 = config["PhysicsConfiguration"]["player_friction"].get<float>();
 
-   mPlayerAccelerationGround                  = config["PhysicsConfiguration"]["player_acceleration_ground"].get<float>();
-   mPlayerAccelerationAir                     = config["PhysicsConfiguration"]["player_acceleration_air"].get<float>();
-   mPlayerDecelerationGround                  = config["PhysicsConfiguration"]["player_deceleration_ground"].get<float>();
-   mPlayerDecelerationAir                     = config["PhysicsConfiguration"]["player_deceleration_air"].get<float>();
+   _player_acceleration_ground                      = config["PhysicsConfiguration"]["player_acceleration_ground"].get<float>();
+   _player_acceleration_air                         = config["PhysicsConfiguration"]["player_acceleration_air"].get<float>();
+   _player_deceleration_ground                      = config["PhysicsConfiguration"]["player_deceleration_ground"].get<float>();
+   _player_deceleration_air                         = config["PhysicsConfiguration"]["player_deceleration_air"].get<float>();
 
-   mPlayerJumpStrength                        = config["PhysicsConfiguration"]["player_jump_strength"].get<float>();
-   mPlayerJumpSteps                           = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
-   mPlayerJumpAfterContactLostMs              = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
-   mPlayerJumpBufferMs                        = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
-   mPlayerJumpMinimalDurationMs               = config["PhysicsConfiguration"]["player_jump_minimal_duration_in_ms"].get<int32_t>();
-   mPlayerJumpFalloff                         = config["PhysicsConfiguration"]["player_jump_falloff"].get<float>();
-   mPlayerJumpSpeedFactor                     = config["PhysicsConfiguration"]["player_jump_speed_factor"].get<float>();
+   _player_jump_strength                            = config["PhysicsConfiguration"]["player_jump_strength"].get<float>();
+   _player_jump_steps                               = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
+   _player_jump_after_contact_lost_ms               = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
+   _player_jump_buffer_ms                           = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
+   _player_jump_minimal_duration_ms                 = config["PhysicsConfiguration"]["player_jump_minimal_duration_in_ms"].get<int32_t>();
+   _player_jump_falloff                             = config["PhysicsConfiguration"]["player_jump_falloff"].get<float>();
+   _player_jump_speed_factor                        = config["PhysicsConfiguration"]["player_jump_speed_factor"].get<float>();
 
-   mPlayerDashFrameCount                      = config["PhysicsConfiguration"]["player_dash_frame_count"].get<int32_t>();
-   mPlayerDashMultiplier                      = config["PhysicsConfiguration"]["player_dash_multiplier"].get<float>();
-   mPlayerDashMultiplierIncrementPerFrame     = config["PhysicsConfiguration"]["player_dash_multiplier_increment_per_frame"].get<float>();
-   mPlayerDashMultiplierScalePerFrame         = config["PhysicsConfiguration"]["player_dash_multiplier_scale_per_frame"].get<float>();
-   mPlayerDashVector                          = config["PhysicsConfiguration"]["player_dash_vector"].get<float>();
+   _player_dash_frame_count                         = config["PhysicsConfiguration"]["player_dash_frame_count"].get<int32_t>();
+   _player_dash_multiplier                          = config["PhysicsConfiguration"]["player_dash_multiplier"].get<float>();
+   _player_dash_multiplier_increment_per_frame      = config["PhysicsConfiguration"]["player_dash_multiplier_increment_per_frame"].get<float>();
+   _player_dash_multiplier_scale_per_frame          = config["PhysicsConfiguration"]["player_dash_multiplier_scale_per_frame"].get<float>();
+   _player_dash_vector                              = config["PhysicsConfiguration"]["player_dash_vector"].get<float>();
 
-   mPlayerWallSlideFriction                   = config["PhysicsConfiguration"]["player_wall_slide_friction"].get<float>();
-   mPlayerWallJumpFrameCount                  = config["PhysicsConfiguration"]["player_wall_jump_frame_count"].get<int32_t>();
-   mPlayerWallJumpVectorX                     = config["PhysicsConfiguration"]["player_wall_jump_vector_x"].get<float>();
-   mPlayerWallJumpVectorY                     = config["PhysicsConfiguration"]["player_wall_jump_vector_y"].get<float>();
-   mPlayerWallJumpMultiplier                  = config["PhysicsConfiguration"]["player_wall_jump_multiplier"].get<float>();
-   mPlayerWallJumpMultiplierIncrementPerFrame = config["PhysicsConfiguration"]["player_wall_jump_multiplier_increment_per_frame"].get<float>();
-   mPlayerWallJumpMultiplierScalePerFrame     = config["PhysicsConfiguration"]["player_wall_jump_multiplier_scale_per_frame"].get<float>();
+   _player_wall_slide_friction                      = config["PhysicsConfiguration"]["player_wall_slide_friction"].get<float>();
+   _player_wall_jump_frame_count                    = config["PhysicsConfiguration"]["player_wall_jump_frame_count"].get<int32_t>();
+   _player_wall_jump_vector_x                       = config["PhysicsConfiguration"]["player_wall_jump_vector_x"].get<float>();
+   _player_wall_jump_vector_y                       = config["PhysicsConfiguration"]["player_wall_jump_vector_y"].get<float>();
+   _player_wall_jump_multiplier                     = config["PhysicsConfiguration"]["player_wall_jump_multiplier"].get<float>();
+   _player_wall_jump_multiplier_increment_per_frame = config["PhysicsConfiguration"]["player_wall_jump_multiplier_increment_per_frame"].get<float>();
+   _player_wall_jump_multiplier_scale_per_frame     = config["PhysicsConfiguration"]["player_wall_jump_multiplier_scale_per_frame"].get<float>();
 }
 
 
@@ -137,5 +136,19 @@ void PhysicsConfiguration::serializeToFile(const std::string &filename)
   std::string data = serialize();
   std::ofstream file(filename);
   file << data;
+}
+
+
+PhysicsConfiguration& PhysicsConfiguration::getInstance()
+{
+   static PhysicsConfiguration __instance;
+
+   if (!__initialized)
+   {
+      __initialized = true;
+      __instance.deserializeFromFile();
+   }
+
+   return __instance;
 }
 

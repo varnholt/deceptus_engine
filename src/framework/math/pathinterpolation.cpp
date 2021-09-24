@@ -113,7 +113,7 @@ const std::vector<PathInterpolation::Key>& PathInterpolation::getTrack() const
 
 
 
-bool PathInterpolation::update(const b2Vec2& currentPos)
+bool PathInterpolation::update(const b2Vec2& current_pos)
 {
    if (_track.empty())
    {
@@ -124,7 +124,7 @@ bool PathInterpolation::update(const b2Vec2& currentPos)
 
    // just check whether the speed needs to be updated (i.e. if one of the keys
    // has been reached)
-   if (checkKeyReached(currentPos) || !_velocity.IsValid())
+   if (checkKeyReached(current_pos) || !_velocity.IsValid())
    {
       _current_key_index = nextKeyIndex();
       computeVelocity();
