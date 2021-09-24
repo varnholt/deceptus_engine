@@ -11,15 +11,15 @@ Pixelate::Pixelate() :
 
 bool Pixelate::onLoad()
 {
-   mTexture = TexturePool::getInstance().get("resources/background.jpg");
+   _texture = TexturePool::getInstance().get("resources/background.jpg");
 
-   mSprite.setTexture(*mTexture);
+   _sprite.setTexture(*_texture);
 
    // Load the shader
-   if (!mShader.loadFromFile("resources/pixelate.frag", sf::Shader::Fragment))
+   if (!_shader.loadFromFile("resources/pixelate.frag", sf::Shader::Fragment))
       return false;
 
-   mShader.setUniform("texture", sf::Shader::CurrentTexture);
+   _shader.setUniform("texture", sf::Shader::CurrentTexture);
 
    return true;
 }
@@ -27,12 +27,12 @@ bool Pixelate::onLoad()
 
 void Pixelate::onUpdate(const sf::Time&, float x, float y)
 {
-    mShader.setUniform("pixel_threshold", (x + y) / 30);
+    _shader.setUniform("pixel_threshold", (x + y) / 30);
 }
 
 
 void Pixelate::onDraw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    states.shader = &mShader;
-    target.draw(mSprite, states);
+    states.shader = &_shader;
+    target.draw(_sprite, states);
 }

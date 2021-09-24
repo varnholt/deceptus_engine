@@ -36,9 +36,9 @@ static constexpr auto start_frame = 15;
 static constexpr auto frames_per_row = 15;
 static constexpr auto animation_frame_count = 4;
 
-uint16_t category_bits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t category_bits = CategoryEnemyCollideWith;                 // I am a ...
 uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
-int16_t group_index = 0;                                          // 0 is default
+int16_t group_index = 0;                                           // 0 is default
 }
 
 
@@ -91,27 +91,27 @@ void Bow::load(b2World* world)
       _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), arrow), _projectiles.end());
    });
 
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_dynamicBody;
-   bodyDef.position.Set(0, 5);
+   b2BodyDef body_def;
+   body_def.type = b2_dynamicBody;
+   body_def.position.Set(0, 5);
 
-   b2PolygonShape polygonShape;
+   b2PolygonShape polygon_shape;
    b2Vec2 vertices[4];
    vertices[0].Set(arrow_tail * scale,  0.0f               );
    vertices[1].Set( 0.0,               -arrow_width * scale);
    vertices[2].Set(arrow_tip * scale,   0.0f               );
    vertices[3].Set( 0.0,                arrow_width * scale);
-   polygonShape.Set(vertices, 4);
+   polygon_shape.Set(vertices, 4);
 
-   b2FixtureDef fixtureDef;
-   fixtureDef.shape = &polygonShape;
-   fixtureDef.density = 1.0f;
-   fixtureDef.filter.groupIndex   = group_index;
-   fixtureDef.filter.maskBits     = mask_bits_standing;
-   fixtureDef.filter.categoryBits = category_bits;
+   b2FixtureDef fixture_def;
+   fixture_def.shape = &polygon_shape;
+   fixture_def.density = 1.0f;
+   fixture_def.filter.groupIndex   = group_index;
+   fixture_def.filter.maskBits     = mask_bits_standing;
+   fixture_def.filter.categoryBits = category_bits;
 
-   auto loaded_arrow_body = world->CreateBody(&bodyDef);
-   auto fixture = loaded_arrow_body->CreateFixture(&fixtureDef);
+   auto loaded_arrow_body = world->CreateBody(&body_def);
+   auto fixture = loaded_arrow_body->CreateFixture(&fixture_def);
    loaded_arrow_body->SetAngularDamping(3);
    loaded_arrow_body->SetGravityScale(0.0f);
    fixture->SetUserData(_loaded_arrow);

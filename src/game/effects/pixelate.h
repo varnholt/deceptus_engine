@@ -16,8 +16,8 @@ public:
 
 private:
 
-    std::shared_ptr<sf::Texture> mTexture;
-    sf::Sprite mSprite;
-    sf::Shader mShader;
+    std::shared_ptr<sf::Texture> _texture;
+    sf::Sprite _sprite;
+    sf::Shader _shader;
 };
 

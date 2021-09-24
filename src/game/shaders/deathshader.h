@@ -23,12 +23,12 @@ class DeathShader
 
    private:
 
-      sf::Shader mShader;
+      sf::Shader _shader;
 
-      std::shared_ptr<sf::RenderTexture> mRenderTexture;
+      std::shared_ptr<sf::RenderTexture> _render_texture;
 
-      sf::Texture mFlowField1;
-      sf::Texture mFlowField2;
+      sf::Texture _flow_field_1;
+      sf::Texture _flow_field_2;
 
-      float mElapsed = 0.0f;
+      float _elapsed = 0.0f;
 };

@@ -26,7 +26,7 @@ private:
 
    void toggle(Display mode);
 
-   int32_t _mode = Display::DisplayGame;
+   int32_t _mode = static_cast<int32_t>(Display::Game);
 
    std::vector<Display> _queued_set;
    std::vector<Display> _queued_unset;

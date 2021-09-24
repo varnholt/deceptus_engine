@@ -181,7 +181,7 @@ void DeathBlock::setup(
       sprite.setTexture(*_texture);
    }
 
-   setZ(ZDepthForegroundMin + 1);
+   setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
    _pixel_positions.x = tmx_object->_x_px;
    _pixel_positions.y = tmx_object->_y_px;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 class ProgressSettings
@@ -9,8 +10,8 @@ public:
 
   ProgressSettings() = default;
 
-  std::string mLevel;
-  int mCheckpoint = 0;
+  std::string _level;
+  int32_t _checkpoint = 0;
 
   std::string serialize();
   void deserialize(const std::string& data);

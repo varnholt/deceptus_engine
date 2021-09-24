@@ -14,17 +14,17 @@ void BoomEffect::boom(float x, float y, float factor)
       return;
    }
 
-   mFactorX = x;
-   mFactorY = y;
-   mBoomFactor = factor;
-   mBoomTimeEnd = GlobalClock::getInstance()->getElapsedTime() + sf::seconds(mBoomDuration);
+   _factor_x = x;
+   _factor_y = y;
+   _boom_factor = factor;
+   _boom_time_end = GlobalClock::getInstance()->getElapsedTime() + sf::seconds(_boom_duration);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 float BoomEffect::getRemainingTime() const
 {
-   return (mBoomTimeEnd - GlobalClock::getInstance()->getElapsedTime()).asSeconds();
+   return (_boom_time_end - GlobalClock::getInstance()->getElapsedTime()).asSeconds();
 }
 
 
@@ -35,21 +35,21 @@ void BoomEffect::update(const sf::Time& /*dt*/)
 
    if (x > 0.0f)
    {
-      GameConfiguration& gameConfig = GameConfiguration::getInstance();
+      GameConfiguration& game_config = GameConfiguration::getInstance();
 
-      x = (mBoomDuration - x);
-      x *= mEffectVelocity;
-      const auto xSquare = x * x;
+      x = (_boom_duration - x);
+      x *= _effect_velocity;
+      const auto x_square = x * x;
 
-      const auto fx = mBoomFactor * mEffectAmplitude * 2.0f * sin(xSquare) * (1.0f / (1.0f + xSquare));
+      const auto fx = _boom_factor * _effect_amplitude * 2.0f * sin(x_square) * (1.0f / (1.0f + x_square));
 
-      mBoomOffsetX = mFactorX * gameConfig._view_width * fx;
-      mBoomOffsetY = mFactorY * gameConfig._view_height * fx;
+      _boom_offset_x = _factor_x * game_config._view_width * fx;
+      _boom_offset_y = _factor_y * game_config._view_height * fx;
    }
    else
    {
-      mBoomOffsetX = 0;
-      mBoomOffsetY = 0;
+      _boom_offset_x = 0;
+      _boom_offset_y = 0;
    }
 }
 

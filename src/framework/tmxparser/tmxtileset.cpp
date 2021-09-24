@@ -72,7 +72,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 
          if (tile != nullptr)
          {
-            _tile_map[tile->mId] = tile;
+            _tile_map[tile->_id] = tile;
          }
       }
 

@@ -9,14 +9,14 @@ struct BoomEffect
    void update(const sf::Time& dt);
    float getRemainingTime() const;
 
-   sf::Time mBoomTimeEnd;
-   float mBoomFactor = 1.0f;
-   float mBoomOffsetX = 0.0f;
-   float mBoomOffsetY = 0.0f;
-   float mBoomDuration = 1.0f;
-   float mFactorX = 0.0f;
-   float mFactorY = 0.0f;
-   float mEffectVelocity = 32.0f;
-   float mEffectAmplitude = 0.1f;
+   sf::Time _boom_time_end;
+   float _boom_factor = 1.0f;
+   float _boom_offset_x = 0.0f;
+   float _boom_offset_y = 0.0f;
+   float _boom_duration = 1.0f;
+   float _factor_x = 0.0f;
+   float _factor_y = 0.0f;
+   float _effect_velocity = 32.0f;
+   float _effect_amplitude = 0.1f;
 };
 

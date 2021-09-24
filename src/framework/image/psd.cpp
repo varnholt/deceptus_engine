@@ -913,13 +913,13 @@ PSD::Path::Path(int32_t blockSize)
    _path_record_count = blockSize / 26;
 }
 
-void PSD::Path::Position::load(std::istream& stream, float invWidth, float invHeight)
+void PSD::Path::Position::load(std::istream& stream, float inv_width, float inv_height)
 {
    int32_t x, y;
    read(y, stream);
    read(x, stream);
-   mY = y * invHeight;
-   mX = x * invWidth;
+   _y = y * inv_height;
+   _x = x * inv_width;
 }
 
 const std::string& PSD::Path::getName() const

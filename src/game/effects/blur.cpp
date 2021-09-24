@@ -10,7 +10,7 @@ WaveBlur::WaveBlur() :
 bool WaveBlur::onLoad()
 {
     // Create the text
-    mText.setString(
+    _text.setString(
         "Praesent suscipit augue in velit pulvinar hendrerit varius purus aliquam.\n"
         "Mauris mi odio, bibendum quis fringilla a, laoreet vel orci. Proin vitae vulputate tortor.\n"
         "Praesent cursus ultrices justo, ut feugiat ante vehicula quis.\n"
@@ -31,12 +31,12 @@ bool WaveBlur::onLoad()
         "In hac habitasse platea dictumst. Etiam fringilla est id odio dapibus sit amet semper dui laoreet.\n"
     );
 
-    mText.setFont(mFont);
-    mText.setCharacterSize(22);
-    mText.setPosition(30, 20);
+    _text.setFont(_font);
+    _text.setCharacterSize(22);
+    _text.setPosition(30, 20);
 
     // Load the shader
-    if (!mShader.loadFromFile("resources/wave.vert", "resources/blur.frag"))
+    if (!_shader.loadFromFile("resources/wave.vert", "resources/blur.frag"))
         return false;
 
     return true;
@@ -45,14 +45,14 @@ bool WaveBlur::onLoad()
 
 void WaveBlur::onUpdate(const sf::Time& time, float x, float y)
 {
-    mShader.setUniform("wave_phase", time.asSeconds());
-    mShader.setUniform("wave_amplitude", sf::Vector2f(x * 40, y * 40));
-    mShader.setUniform("blur_radius", (x + y) * 0.008f);
+    _shader.setUniform("wave_phase", time.asSeconds());
+    _shader.setUniform("wave_amplitude", sf::Vector2f(x * 40, y * 40));
+    _shader.setUniform("blur_radius", (x + y) * 0.008f);
 }
 
 
 void WaveBlur::onDraw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    states.shader = &mShader;
-    target.draw(mText, states);
+    states.shader = &_shader;
+    target.draw(_text, states);
 }

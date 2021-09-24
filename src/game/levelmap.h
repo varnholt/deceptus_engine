@@ -33,22 +33,21 @@ class LevelMap
 
       void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
-      BitmapFont mFont;
-      std::map<std::string, std::shared_ptr<Layer>> mLayers;
+      BitmapFont _font;
+      std::map<std::string, std::shared_ptr<Layer>> _layers;
 
-      sf::RenderTexture mLevelRenderTexture;
+      sf::RenderTexture _level_render_texture;
 
-      std::shared_ptr<sf::Texture> mLevelGridTexture;
-      sf::Sprite mLevelGridSprite;
+      std::shared_ptr<sf::Texture> _level_grid_texture;
+      sf::Sprite _level_grid_sprite;
 
-      std::shared_ptr<sf::Texture> mLevelOutlineTexture;
-      sf::Sprite mLevelOutlineSprite;
+      std::shared_ptr<sf::Texture> _level_outline_texture;
+      sf::Sprite _level_outline_sprite;
 
-      std::vector<std::shared_ptr<GameMechanism>> mDoors;
-      std::vector<std::shared_ptr<GameMechanism>> mPortals;
+      std::vector<std::shared_ptr<GameMechanism>> _doors;
+      std::vector<std::shared_ptr<GameMechanism>> _portals;
 
-      bool mZoomEnabled = false;
-
-      float mZoom = 1.0f;
+      bool _zoom_enabled = false;
+      float _zoom = 1.0f;
 };
 

@@ -17,8 +17,8 @@ public:
 
 private:
 
-    sf::Text mText;
-    sf::Shader mShader;
-    sf::Font mFont;
+    sf::Text _text;
+    sf::Shader _shader;
+    sf::Font _font;
 };
 

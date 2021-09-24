@@ -55,7 +55,7 @@ MessageBox::MessageBox(
    initializeControllerCallbacks();
    _show_time = GlobalClock::getInstance()->getElapsedTime();
 
-   DisplayMode::getInstance().enqueueSet(Display::DisplayModal);
+   DisplayMode::getInstance().enqueueSet(Display::Modal);
 
    Player::getCurrent()->getControls().setKeysPressed(0);
 
@@ -82,7 +82,7 @@ MessageBox::~MessageBox()
       gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 
-   DisplayMode::getInstance().enqueueUnset(Display::DisplayModal);
+   DisplayMode::getInstance().enqueueUnset(Display::Modal);
 
    //   if (mPreviousMode == ExecutionMode::Running)
    //   {
@@ -293,7 +293,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
    const auto buttons = __active->_buttons;
-   bool menu_shown = (DisplayMode::getInstance().isSet(Display::DisplayMainMenu));
+   bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
 
    __layers["msg-copyssYN"]->_visible = false;
    __layers["msg-overwritessYN"]->_visible = false;

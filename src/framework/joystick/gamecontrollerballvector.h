@@ -5,8 +5,8 @@ class GameControllerBallVector
    public:
 
       GameControllerBallVector(float x, float y)
-         : mX(x),
-           mY(y)
+         : _x(x),
+           _y(y)
       {
       }
 
@@ -16,17 +16,17 @@ class GameControllerBallVector
 
       float* getXPtr()
       {
-         return &mX;
+         return &_x;
       }
 
       float* getYPtr()
       {
-         return &mY;
+         return &_y;
       }
 
    protected:
 
-      float mX = 0.0f;
-      float mY = 0.0f;
+      float _x = 0.0f;
+      float _y = 0.0f;
 };
 
