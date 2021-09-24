@@ -8,7 +8,7 @@ public:
 
    GlobalClock();
 
-   static GlobalClock* getInstance();
+   static GlobalClock& getInstance();
 
    int getElapsedTimeInMs();
    float getElapsedTimeInS();
@@ -17,8 +17,6 @@ public:
 
 private:
 
-   sf::Clock mClock;
-
-   static GlobalClock* sInstance;
+   sf::Clock _clock;
 };
 

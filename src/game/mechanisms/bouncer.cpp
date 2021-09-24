@@ -49,7 +49,7 @@ Bouncer::Bouncer(
    _rect.height = static_cast<int32_t>(height);
 
    setType(ObjectTypeBouncer);
-   _activation_time = GlobalClock::getInstance()->getElapsedTime();
+   _activation_time = GlobalClock::getInstance().getElapsedTime();
 
    _position_b2d = b2Vec2(x * MPP, y * MPP);
    _position_sfml.x = x;
@@ -135,9 +135,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
 {
    updatePlayerAtBouncer();
 
-   // std::cout << "a: " << a.x << ", " << a.y << " b: " << b.x << ", " << b.y << std::endl;
-
-   auto now = GlobalClock::getInstance()->getElapsedTime();
+   auto now = GlobalClock::getInstance().getElapsedTime();
    auto delta = (now - _activation_time).asMilliseconds();
 
    auto step = static_cast<int32_t>(delta * 0.02f);
@@ -145,8 +143,6 @@ void Bouncer::update(const sf::Time& /*dt*/)
    {
       step = 0;
    }
-
-  // printf("step: %d\n", step);
 
   _sprite.setTextureRect(
       sf::IntRect(
@@ -169,13 +165,13 @@ bool Bouncer::isPlayerAtBouncer()
 //
 //Bouncer::~Bouncer()
 //{
-//   mBody->GetWorld()->DestroyBody(mBody);
+//   _body->GetWorld()->DestroyBody(mBody);
 //}
 
 
 void Bouncer::activate()
 {
-   auto now = GlobalClock::getInstance()->getElapsedTime();
+   auto now = GlobalClock::getInstance().getElapsedTime();
    auto delta = (now - _activation_time).asSeconds();
 
    if (delta < 0.3f) // set to 0.5?

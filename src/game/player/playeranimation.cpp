@@ -543,7 +543,7 @@ void PlayerAnimation::updateV1(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_frame_count == PhysicsConfiguration::getInstance().mPlayerJumpSteps)
+      if (data._jump_frame_count == PhysicsConfiguration::getInstance()._player_jump_steps)
       {
          // jump ignition
          _jump_animation_reference = 0;
@@ -645,7 +645,7 @@ void PlayerAnimation::updateV2(
       // |     |                  |
       // +-----+------------------+----->
       // t
-      const auto dash_count_max = PhysicsConfiguration::getInstance().mPlayerDashFrameCount;
+      const auto dash_count_max = PhysicsConfiguration::getInstance()._player_dash_frame_count;
       const auto dash_count_regular = dash_count_max - (dash_count_max / 5);
       const auto dash_count_stop = dash_count_max / 5;
 
@@ -749,7 +749,7 @@ void PlayerAnimation::updateV2(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_frame_count > PhysicsConfiguration::getInstance().mPlayerJumpSteps - FRAMES_COUNT_JUMP_INIT)
+      if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_steps - FRAMES_COUNT_JUMP_INIT)
       {
          // jump ignition
          _jump_animation_reference = 0;

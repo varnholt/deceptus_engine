@@ -1912,7 +1912,7 @@ class LuaRaycastCallback : public b2RayCastCallback
 {
    public:
 
-      std::vector<b2Body*> mBodies;
+      std::vector<b2Body*> _bodies;
 
       float ReportFixture(
          b2Fixture* fixture,
@@ -1921,7 +1921,7 @@ class LuaRaycastCallback : public b2RayCastCallback
          float32 /*fraction*/
       )
       {
-         mBodies.push_back(fixture->GetBody());
+         _bodies.push_back(fixture->GetBody());
          return 0.0f;
       }
 };
@@ -1929,11 +1929,11 @@ class LuaRaycastCallback : public b2RayCastCallback
 
 int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
 {
-   LuaRaycastCallback queryCallback;
-   Level::getCurrentLevel()->getWorld()->RayCast(&queryCallback, point1, point2);
+   LuaRaycastCallback query_callback;
+   Level::getCurrentLevel()->getWorld()->RayCast(&query_callback, point1, point2);
 
    // std::cout << queryCallback.mBodies.size() << std::endl;
-   return static_cast<int32_t>(queryCallback.mBodies.size());
+   return static_cast<int32_t>(query_callback._bodies.size());
 }
 
 

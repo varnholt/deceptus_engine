@@ -31,14 +31,6 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _visible = element->BoolAttribute("visible", true);
 
-  //   printf(
-  //      "layer: %s (width: %d, height: %d, opacity: %f)\n",
-  //      mName.c_str(),
-  //      mWidth,
-  //      mHeight,
-  //      mOpacity
-  //   );
-
    std::vector<TmxChunk*> chunks;
 
    tinyxml2::XMLNode* node = element->FirstChild();

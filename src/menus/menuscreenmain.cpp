@@ -49,16 +49,16 @@ void MenuScreenMain::loadingFinished()
 
 void MenuScreenMain::up()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Start:
-         mSelection = Selection::Quit;
+         _selection = Selection::Quit;
          break;
       case Selection::Options:
-         mSelection = Selection::Start;
+         _selection = Selection::Start;
          break;
       case Selection::Quit:
-         mSelection = Selection::Options;
+         _selection = Selection::Options;
          break;
    }
 
@@ -68,16 +68,16 @@ void MenuScreenMain::up()
 
 void MenuScreenMain::down()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Start:
-         mSelection = Selection::Options;
+         _selection = Selection::Options;
          break;
       case Selection::Options:
-         mSelection = Selection::Quit;
+         _selection = Selection::Quit;
          break;
       case Selection::Quit:
-         mSelection = Selection::Start;
+         _selection = Selection::Start;
          break;
    }
 
@@ -87,7 +87,7 @@ void MenuScreenMain::down()
 
 void MenuScreenMain::select()
 {
-   switch (mSelection)
+   switch (_selection)
    {
       case Selection::Start:
 #ifdef DEV_SAVE_STATE
@@ -120,17 +120,17 @@ void MenuScreenMain::updateLayers()
 {
    const auto canContinue = !SaveState::allEmpty();
 
-   _layers["continue_0"]->_visible = canContinue && (mSelection != Selection::Start);
-   _layers["continue_1"]->_visible = canContinue && (mSelection == Selection::Start);
+   _layers["continue_0"]->_visible = canContinue && (_selection != Selection::Start);
+   _layers["continue_1"]->_visible = canContinue && (_selection == Selection::Start);
 
-   _layers["start_0"]->_visible = !canContinue && (mSelection != Selection::Start);
-   _layers["start_1"]->_visible = !canContinue && (mSelection == Selection::Start);
+   _layers["start_0"]->_visible = !canContinue && (_selection != Selection::Start);
+   _layers["start_1"]->_visible = !canContinue && (_selection == Selection::Start);
 
-   _layers["options_0"]->_visible = (mSelection != Selection::Options);
-   _layers["options_1"]->_visible = (mSelection == Selection::Options);
+   _layers["options_0"]->_visible = (_selection != Selection::Options);
+   _layers["options_1"]->_visible = (_selection == Selection::Options);
 
-   _layers["quit_0"]->_visible = (mSelection != Selection::Quit);
-   _layers["quit_1"]->_visible = (mSelection == Selection::Quit);
+   _layers["quit_0"]->_visible = (_selection != Selection::Quit);
+   _layers["quit_1"]->_visible = (_selection == Selection::Quit);
 }
 
 

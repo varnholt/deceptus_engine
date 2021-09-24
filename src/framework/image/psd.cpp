@@ -590,7 +590,6 @@ void PSD::Layer::Channel::unpackBits(
             read(single_value, stream);
             bytes_read++;
 
-            // printf("%x ", singleValue);
             dest[offset] = single_value;
             offset++;
          }
@@ -604,7 +603,6 @@ void PSD::Layer::Channel::unpackBits(
          auto count = (256 - controlByte) + 1;
          for (auto j = 0; j < count; j++)
          {
-            // printf("%x ", spanValue);
             dest[offset] = spanValue;
             offset++;
          }

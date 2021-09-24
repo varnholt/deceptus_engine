@@ -4,6 +4,9 @@
 #include "tmxproperties.h"
 
 
+#include <iostream>
+
+
 TmxObject::~TmxObject()
 {
    delete _polygon;
@@ -22,48 +25,39 @@ void TmxObject::deserialize(tinyxml2::XMLElement *element)
    _width_px  = element->FloatAttribute("width");
    _height_px = element->FloatAttribute("height");
 
-  //   printf("   object (id: %s, width: %f, height: %f)\n",
-  //      mId.c_str(),
-  //      mWidth,
-  //      mHeight
-  //   );
-
    auto node = element->FirstChild();
    while(node != nullptr)
    {
-      auto subElement = node->ToElement();
-      if (subElement != nullptr)
+      auto sub_element = node->ToElement();
+      if (sub_element != nullptr)
       {
          TmxElement* element = nullptr;
          auto parsed = false;
 
-         if (subElement->Name() == std::string("polyline"))
+         if (sub_element->Name() == std::string("polyline"))
          {
             _polyline = new TmxPolyLine();
             element = _polyline;
          }
-         else if (subElement->Name() == std::string("polygon"))
+         else if (sub_element->Name() == std::string("polygon"))
          {
             _polygon = new TmxPolygon();
             element = _polygon;
          }
-         else if (subElement->Name() == std::string("properties"))
+         else if (sub_element->Name() == std::string("properties"))
          {
             _properties = new TmxProperties();
-            _properties->deserialize(subElement);
+            _properties->deserialize(sub_element);
             parsed = true;
          }
 
          if (element != nullptr)
          {
-            element->deserialize(subElement);
+            element->deserialize(sub_element);
          }
          else if (!parsed)
          {
-            printf(
-               "%s is not supported for TmxObject\n",
-               subElement->Name()
-            );
+            std::cerr << sub_element->Name() << " is not supported for TmxObject" << std::endl;
          }
       }
 

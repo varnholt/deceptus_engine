@@ -1,6 +1,8 @@
 #include "tmxproperties.h"
 #include "tmxproperty.h"
 
+#include <iostream>
+
 
 void TmxProperties::deserialize(tinyxml2::XMLElement *element)
 {
@@ -9,13 +11,13 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
    auto node = element->FirstChild();
    while (node != nullptr)
    {
-      auto subElement = node->ToElement();
-      if (subElement != nullptr)
+      auto sub_element = node->ToElement();
+      if (sub_element != nullptr)
       {
          TmxElement* element = nullptr;
          TmxProperty* property = nullptr;
 
-         if (subElement->Name() == std::string("property"))
+         if (sub_element->Name() == std::string("property"))
          {
             property = new TmxProperty();
             element = property;
@@ -23,14 +25,11 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
 
          if (element != nullptr)
          {
-            element->deserialize(subElement);
+            element->deserialize(sub_element);
          }
          else
          {
-            printf(
-               "%s is not supported for TmxProperties\n",
-               subElement->Name()
-            );
+            std::cerr << sub_element->Name() << " is not supported for TmxProperties" << std::endl;
          }
 
          if (property != nullptr)

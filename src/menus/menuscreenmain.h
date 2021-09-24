@@ -22,8 +22,6 @@ public:
 
    void update(const sf::Time& dt) override;
 
-   Selection mSelection = Selection::Start;
-
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
    void loadingFinished() override;
@@ -35,6 +33,7 @@ public:
 
    void setExitCallback(ExitCallback callback);
 
+   Selection _selection = Selection::Start;
 
 private:
 

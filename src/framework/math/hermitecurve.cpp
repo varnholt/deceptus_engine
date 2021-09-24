@@ -169,11 +169,6 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    if (index < 0)
       index = 0;
 
-//   if (index == -1)
-//   {
-//      fprintf(stdout,"HermiteCurve::getCameraTrackPoint: bad data!\n");
-//   }
-
    // init points
    sf::Vector2f p1;
    sf::Vector2f p2;

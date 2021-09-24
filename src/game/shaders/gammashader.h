@@ -14,5 +14,5 @@ class GammaShader
       const sf::Shader& getGammaShader() const;
 
    private:
-      sf::Shader mGammaShader;
+      sf::Shader _gamma_shader;
 };

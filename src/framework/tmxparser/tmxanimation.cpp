@@ -27,9 +27,4 @@ void TmxAnimation::deserialize(tinyxml2::XMLElement *element)
 
       node = node->NextSibling();
    }
-
-//   if (mFrames.size() > 0)
-//   {
-//      printf("      %zd animation frames added\n", mFrames.size());
-//   }
 }

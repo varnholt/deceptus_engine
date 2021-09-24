@@ -366,7 +366,7 @@ void Fan::merge()
 //
 //Fan::FanTile::~FanTile()
 //{
-//   mBody->GetWorld()->DestroyBody(mBody);
+//   _body->GetWorld()->DestroyBody(mBody);
 //}
 
 

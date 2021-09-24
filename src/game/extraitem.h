@@ -27,11 +27,11 @@ struct ExtraItem : public GameNode
       Invalid   = 0xffff
    };
 
-   bool mActive = true;
-   sf::Vector2u mSpriteOffset;
-   sf::Vector2f mPosition;
-   ExtraSpriteIndex mType = ExtraSpriteIndex::Invalid;
-
    ExtraItem(GameNode* parent = nullptr);
+
+   bool _active = true;
+   sf::Vector2u _sprite_offset;
+   sf::Vector2f _position;
+   ExtraSpriteIndex _type = ExtraSpriteIndex::Invalid;
 };
 

@@ -11,7 +11,7 @@ struct PlayerClimb
 {
    PlayerClimb() = default;
 
-   void update(b2Body* body, const PlayerControls& controls, bool inAir);
+   void update(b2Body* body, const PlayerControls& controls, bool in_air);
    void removeClimbJoint();
    bool isClimbableEdge(b2ChainShape* shape, int currIndex);
    bool edgeMatchesMovement(const b2Vec2 &edgeDir);

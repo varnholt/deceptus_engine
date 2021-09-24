@@ -3,11 +3,11 @@
 #include "texturepool.h"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <stdio.h>
 #include <string>
 #include <vector>
-
-#include <stdio.h>
 
 
 void BitmapFont::load(
@@ -53,7 +53,7 @@ void BitmapFont::load(
    }
    else
    {
-      printf("font map fucked.\n");
+      std::cerr << "font map fucked" << std::endl;
       return;
    }
 
@@ -79,7 +79,6 @@ void BitmapFont::load(
 
       i++;
    }
-   // printf("loaded font: %s\n", font.c_str());
 }
 
 
