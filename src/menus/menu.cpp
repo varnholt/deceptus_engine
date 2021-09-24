@@ -142,7 +142,7 @@ void Menu::show(Menu::MenuType menu)
    if (mCurrentMenu)
    {
       mCurrentMenu->showEvent();
-      DisplayMode::getInstance().enqueueSet(DisplayMainMenu);
+      DisplayMode::getInstance().enqueueSet(Display::MainMenu);
    }
 
    mHistory.push_back(menu);
@@ -160,7 +160,7 @@ void Menu::hide()
       mCurrentMenu->hideEvent();
    }
 
-   DisplayMode::getInstance().enqueueUnset(DisplayMainMenu);
+   DisplayMode::getInstance().enqueueUnset(Display::MainMenu);
 
    mCurrentMenu = nullptr;
    mCurrentType = MenuType::None;

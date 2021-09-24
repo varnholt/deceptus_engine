@@ -20,36 +20,36 @@
 
 namespace
 {
-   static constexpr std::pair<int32_t, int32_t> rangeDisabled{0, 1};
-   static constexpr std::pair<int32_t, int32_t> rangeEnabling{2, 9};
-   static constexpr std::pair<int32_t, int32_t> rangeEnabled{10, 16};
-   static constexpr std::pair<int32_t, int32_t> rangeDisabling{17, 20};
+   static constexpr std::pair<int32_t, int32_t> range_disabled{0, 1};
+   static constexpr std::pair<int32_t, int32_t> range_enabling{2, 9};
+   static constexpr std::pair<int32_t, int32_t> range_enabled{10, 16};
+   static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
 
-   static constexpr auto rangeDisabledDelta  = rangeDisabled.second  - rangeDisabled.first;
-   static constexpr auto rangeEnabledDelta   = rangeEnabled.second   - rangeEnabled.first;
+   static constexpr auto range_diabled_delta  = range_disabled.second  - range_disabled.first;
+   static constexpr auto range_enabled_delta  = range_enabled.second   - range_enabled.first;
 }
 
 
 //-----------------------------------------------------------------------------
-std::vector<TmxObject*> Laser::mObjects;
-std::vector<std::shared_ptr<Laser>> Laser::mLasers;
-std::vector<std::array<int32_t, 9>> Laser::mTilesVersion1;
-std::vector<std::array<int32_t, 9>> Laser::mTilesVersion2;
+std::vector<TmxObject*> Laser::__objects;
+std::vector<std::shared_ptr<Laser>> Laser::__lasers;
+std::vector<std::array<int32_t, 9>> Laser::__tiles_version_1;
+std::vector<std::array<int32_t, 9>> Laser::__tiles_version_2;
 
 
 //-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   mSprite.setTextureRect(
+   _sprite.setTextureRect(
       sf::IntRect(
-         mTu * PIXELS_PER_TILE + mTileIndex * PIXELS_PER_TILE,
-         mTv * PIXELS_PER_TILE,
+         _tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE,
+         _tv * PIXELS_PER_TILE,
          PIXELS_PER_TILE,
          PIXELS_PER_TILE
       )
    );
 
-   color.draw(mSprite);
+   color.draw(_sprite);
 }
 
 
@@ -64,43 +64,43 @@ void Laser::setEnabled(bool enabled)
 //-----------------------------------------------------------------------------
 const sf::Rect<int32_t>& Laser::getPixelRect() const
 {
-   return mPixelRect;
+   return _pixel_rect;
 }
 
 
 //-----------------------------------------------------------------------------
 void Laser::update(const sf::Time& dt)
 {
-   mTime += dt.asMilliseconds();
+   _time += dt.asMilliseconds();
 
    if (_enabled)
    {
-      if (mSignalPlot.empty())
+      if (_signal_plot.empty())
       {
-         mOn = true;
+         _on = true;
       }
       else
       {
-         const auto& sig = mSignalPlot.at(mSignalIndex);
+         const auto& sig = _signal_plot.at(_signal_index);
 
          // elapsed time exceeded signal duration
-         if (mTime > sig.mDurationMs)
+         if (_time > sig.mDurationMs)
          {
-            mOn = !mOn;
-            mTime = 0;
+            _on = !_on;
+            _time = 0;
 
             // reset signal index after 1 loop
-            mSignalIndex++;
-            if (mSignalIndex >= mSignalPlot.size())
+            _signal_index++;
+            if (_signal_index >= _signal_plot.size())
             {
-               mSignalIndex = 0;
+               _signal_index = 0;
             }
          }
       }
    }
    else
    {
-      mOn = false;
+      _on = false;
    }
 
    // const auto previousTileIndex = mTileIndex;
@@ -111,22 +111,22 @@ void Laser::update(const sf::Time& dt)
       //
       // if the laser is switched on, move the tile index to the left
       // if the laser is switched off, move the tile index to the right
-      if ( (mOn && mTileIndex > 0) || (!mOn && mTileIndex < 6) )
+      if ( (_on && _tile_index > 0) || (!_on && _tile_index < 6) )
       {
          // off sprite is rightmost, on sprite is leftmost
-         auto dir = mOn ? -1 : 1;
+         auto dir = _on ? -1 : 1;
 
-         mTileAnimation += (dt.asSeconds() * 10.0f * dir);
-         mTileIndex = static_cast<int32_t>(mTileAnimation);
+         _tile_animation += (dt.asSeconds() * 10.0f * dir);
+         _tile_index = static_cast<int32_t>(_tile_animation);
 
          // clamp tile index
-         if (mTileIndex < 0)
+         if (_tile_index < 0)
          {
-            mTileIndex = 0;
+            _tile_index = 0;
          }
-         else if (mTileIndex > 6)
+         else if (_tile_index > 6)
          {
-            mTileIndex = 6;
+            _tile_index = 6;
          }
       }
    }
@@ -143,51 +143,51 @@ void Laser::update(const sf::Time& dt)
 
       // disabled (!mOn and mTileIndex inside 0..1)
       // loop 0..1
-      if (!mOn && mTileIndex >= rangeDisabled.first && mTileIndex <= rangeDisabled.second)
+      if (!_on && _tile_index >= range_disabled.first && _tile_index <= range_disabled.second)
       {
-         mTileAnimation += dt.asSeconds();
-         mTileIndex = rangeDisabled.first + static_cast<int32_t>(mTileAnimation + mAnimationOffset) % (rangeDisabledDelta + 1);
+         _tile_animation += dt.asSeconds();
+         _tile_index = range_disabled.first + static_cast<int32_t>(_tile_animation + _animation_offset) % (range_diabled_delta + 1);
       }
 
       // enabled (mOn and mTileIndex inside 10..16)
       // loop 10..16
-      else if (mOn && mTileIndex >= rangeEnabled.first && mTileIndex <= rangeEnabled.second)
+      else if (_on && _tile_index >= range_enabled.first && _tile_index <= range_enabled.second)
       {
-         mTileAnimation += dt.asSeconds() * 10.0f;
-         mTileIndex = rangeEnabled.first + static_cast<int32_t>(mTileAnimation + mAnimationOffset) % (rangeEnabledDelta + 1);
+         _tile_animation += dt.asSeconds() * 10.0f;
+         _tile_index = range_enabled.first + static_cast<int32_t>(_tile_animation + _animation_offset) % (range_enabled_delta + 1);
       }
 
       // enabling (mOn and mTileIndex outside 10..16)
       // go from 2..9, when 10 go to rangeEnabled
-      else if (mOn)
+      else if (_on)
       {
-         mTileAnimation += dt.asSeconds() * 10.0f;
+         _tile_animation += dt.asSeconds() * 10.0f;
 
-         if (mTileIndex < rangeEnabling.first || mTileIndex > rangeEnabling.second)
+         if (_tile_index < range_enabling.first || _tile_index > range_enabling.second)
          {
-            mTileAnimation = 0;
+            _tile_animation = 0;
          }
 
-         mTileIndex = rangeEnabling.first + static_cast<int32_t>(mTileAnimation);
+         _tile_index = range_enabling.first + static_cast<int32_t>(_tile_animation);
       }
 
       // disabling (!mOn and mTileIndex outside 0..1)
       // go from 17..21, when 22 to to rangeDisabled
-      else if (!mOn)
+      else if (!_on)
       {
-         mTileAnimation += dt.asSeconds() * 10.0f;
+         _tile_animation += dt.asSeconds() * 10.0f;
 
-         if (mTileIndex < rangeDisabling.first || mTileIndex > rangeDisabling.second)
+         if (_tile_index < range_disabling.first || _tile_index > range_disabling.second)
          {
-            mTileAnimation = 0;
+            _tile_animation = 0;
          }
 
-         mTileIndex = rangeDisabling.first + static_cast<int32_t>(mTileAnimation);
+         _tile_index = range_disabling.first + static_cast<int32_t>(_tile_animation);
 
          // jumped out of range
-         if (mTileIndex == rangeDisabling.second + 1)
+         if (_tile_index == range_disabling.second + 1)
          {
-            mTileIndex = rangeDisabled.first;
+            _tile_index = range_disabled.first;
          }
       }
    }
@@ -208,43 +208,43 @@ void Laser::update(const sf::Time& dt)
 //-----------------------------------------------------------------------------
 void Laser::reset()
 {
-   mOn = true;
-   mTileIndex = 0;
-   mTileAnimation = 0.0f;
-   mSignalIndex = 0;
-   mTime = 0u;
+   _on = true;
+   _tile_index = 0;
+   _tile_animation = 0.0f;
+   _signal_index = 0;
+   _time = 0u;
 }
 
 
 //-----------------------------------------------------------------------------
 void Laser::resetAll()
 {
-   mObjects.clear();
-   mLasers.clear();
-   mTilesVersion1.clear();
-   mTilesVersion2.clear();
+   __objects.clear();
+   __lasers.clear();
+   __tiles_version_1.clear();
+   __tiles_version_2.clear();
 }
 
 
 //-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getTilePosition() const
 {
-   return mTilePosition;
+   return _tile_position;
 }
 
 
 //-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getPixelPosition() const
 {
-   return mPixelPosition;
+   return _pixel_position;
 }
 
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Laser::load(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::filesystem::path& basePath,
+   TmxTileSet* tileset,
+   const std::filesystem::path& base_path,
    const std::shared_ptr<b2World>&
 )
 {
@@ -263,11 +263,11 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
    std::vector<std::shared_ptr<GameMechanism>> lasers;
 
-   sf::Vector2u tilesize = sf::Vector2u(tileSet->_tile_width_px, tileSet->_tile_height_px);
+   sf::Vector2u tilesize = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
    const auto tiles    = layer->_data;
    const auto width    = layer->_width_px;
    const auto height   = layer->_height_px;
-   const auto firstId  = tileSet->_first_gid;
+   const auto firstId  = tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -284,26 +284,26 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
             laser->_version = version;
 
-            laser->mTilePosition.x = static_cast<float>(i);
-            laser->mTilePosition.y = static_cast<float>(j);
+            laser->_tile_position.x = static_cast<float>(i);
+            laser->_tile_position.y = static_cast<float>(j);
 
-            laser->mPixelPosition.x = laser->mTilePosition.x * PIXELS_PER_TILE;
-            laser->mPixelPosition.y = laser->mTilePosition.y * PIXELS_PER_TILE;
+            laser->_pixel_position.x = laser->_tile_position.x * PIXELS_PER_TILE;
+            laser->_pixel_position.y = laser->_tile_position.y * PIXELS_PER_TILE;
 
-            laser->mPixelRect.left = static_cast<int32_t>(laser->mPixelPosition.x);
-            laser->mPixelRect.top  = static_cast<int32_t>(laser->mPixelPosition.y);
+            laser->_pixel_rect.left = static_cast<int32_t>(laser->_pixel_position.x);
+            laser->_pixel_rect.top  = static_cast<int32_t>(laser->_pixel_position.y);
 
-            laser->mPixelRect.width  = PIXELS_PER_TILE;
-            laser->mPixelRect.height = PIXELS_PER_TILE;
+            laser->_pixel_rect.width  = PIXELS_PER_TILE;
+            laser->_pixel_rect.height = PIXELS_PER_TILE;
 
-            laser->mTexture = TexturePool::getInstance().get(basePath / tileSet->_image->_source);
+            laser->_texture = TexturePool::getInstance().get(base_path / tileset->_image->_source);
 
-            laser->mTu = (tileNumber - firstId) % (laser->mTexture->getSize().x / tilesize.x);
-            laser->mTv = (tileNumber - firstId) / (laser->mTexture->getSize().x / tilesize.x);
+            laser->_tu = (tileNumber - firstId) % (laser->_texture->getSize().x / tilesize.x);
+            laser->_tv = (tileNumber - firstId) / (laser->_texture->getSize().x / tilesize.x);
 
             if (version == MechanismVersion::Version2)
             {
-               laser->mTu = 0;
+               laser->_tu = 0;
             }
 
             if (layer->_properties != nullptr)
@@ -312,7 +312,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
             }
 
             sf::Sprite sprite;
-            sprite.setTexture(*laser->mTexture);
+            sprite.setTexture(*laser->_texture);
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * PIXELS_PER_TILE),
@@ -320,8 +320,8 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
                )
             );
 
-            laser->mSprite = sprite;
-            mLasers.push_back(laser);
+            laser->_sprite = sprite;
+            __lasers.push_back(laser);
          }
       }
    }
@@ -332,86 +332,86 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
 void Laser::addObject(TmxObject* object)
 {
-   mObjects.push_back(object);
+   __objects.push_back(object);
 }
 
 
 void Laser::addTilesVersion1()
 {
    // each tile is split up into 3 rows x 3 columns (3 x 8 pixels)
-   mTilesVersion1.push_back(
+   __tiles_version_1.push_back(
       {0,0,0,
        1,1,1,
        0,0,0}
    );
 
-   mTilesVersion1.push_back({0,1,0,0,1,0,0,1,0});
-   mTilesVersion1.push_back({0,1,0,0,1,0,0,1,0});
-   mTilesVersion1.push_back({0,1,0,0,1,0,0,1,0});
-   mTilesVersion1.push_back({0,0,0,1,1,1,0,0,0});
-   mTilesVersion1.push_back({0,0,0,1,1,1,0,0,0});
-   mTilesVersion1.push_back({0,1,0,1,1,1,0,1,0});
-   mTilesVersion1.push_back({0,0,0,1,1,1,0,1,0});
-   mTilesVersion1.push_back({0,1,0,1,1,0,0,1,0});
-   mTilesVersion1.push_back({0,1,0,1,1,1,0,0,0});
-   mTilesVersion1.push_back({0,1,0,0,1,1,0,1,0});
-   mTilesVersion1.push_back({0,0,0,0,1,1,0,1,0});
-   mTilesVersion1.push_back({0,0,0,1,1,0,0,1,0});
-   mTilesVersion1.push_back({0,1,0,0,1,1,0,0,0});
-   mTilesVersion1.push_back({0,1,0,1,1,0,0,0,0});
-   mTilesVersion1.push_back({0,1,0,0,1,0,0,0,0});
-   mTilesVersion1.push_back({0,0,0,0,1,0,0,1,0});
-   mTilesVersion1.push_back({0,0,0,0,1,1,0,0,0});
-   mTilesVersion1.push_back({0,0,0,1,1,0,0,0,0});
+   __tiles_version_1.push_back({0,1,0,0,1,0,0,1,0});
+   __tiles_version_1.push_back({0,1,0,0,1,0,0,1,0});
+   __tiles_version_1.push_back({0,1,0,0,1,0,0,1,0});
+   __tiles_version_1.push_back({0,0,0,1,1,1,0,0,0});
+   __tiles_version_1.push_back({0,0,0,1,1,1,0,0,0});
+   __tiles_version_1.push_back({0,1,0,1,1,1,0,1,0});
+   __tiles_version_1.push_back({0,0,0,1,1,1,0,1,0});
+   __tiles_version_1.push_back({0,1,0,1,1,0,0,1,0});
+   __tiles_version_1.push_back({0,1,0,1,1,1,0,0,0});
+   __tiles_version_1.push_back({0,1,0,0,1,1,0,1,0});
+   __tiles_version_1.push_back({0,0,0,0,1,1,0,1,0});
+   __tiles_version_1.push_back({0,0,0,1,1,0,0,1,0});
+   __tiles_version_1.push_back({0,1,0,0,1,1,0,0,0});
+   __tiles_version_1.push_back({0,1,0,1,1,0,0,0,0});
+   __tiles_version_1.push_back({0,1,0,0,1,0,0,0,0});
+   __tiles_version_1.push_back({0,0,0,0,1,0,0,1,0});
+   __tiles_version_1.push_back({0,0,0,0,1,1,0,0,0});
+   __tiles_version_1.push_back({0,0,0,1,1,0,0,0,0});
 }
 
 
 void Laser::addTilesVersion2()
 {
-   mTilesVersion2.push_back({0,1,0,0,1,0,0,0,0});
-   mTilesVersion2.push_back({0,0,0,0,1,0,0,1,0});
-   mTilesVersion2.push_back({0,0,0,0,1,1,0,0,0});
-   mTilesVersion2.push_back({0,0,0,1,1,0,0,0,0});
-   mTilesVersion2.push_back({0,1,0,0,1,0,0,1,0});
-   mTilesVersion2.push_back({0,0,0,1,1,1,0,0,0});
-   mTilesVersion2.push_back({0,0,0,0,1,1,0,1,0});
-   mTilesVersion2.push_back({0,0,0,1,1,0,0,1,0});
-   mTilesVersion2.push_back({0,1,0,0,1,1,0,0,0});
-   mTilesVersion2.push_back({0,1,0,1,1,0,0,0,0});
-   mTilesVersion2.push_back({0,1,0,0,1,0,0,0,0});
-   mTilesVersion2.push_back({0,0,0,0,1,0,0,1,0});
-   mTilesVersion2.push_back({0,0,0,0,1,1,0,0,0});
-   mTilesVersion2.push_back({0,0,0,1,1,0,0,0,0});
+   __tiles_version_2.push_back({0,1,0,0,1,0,0,0,0});
+   __tiles_version_2.push_back({0,0,0,0,1,0,0,1,0});
+   __tiles_version_2.push_back({0,0,0,0,1,1,0,0,0});
+   __tiles_version_2.push_back({0,0,0,1,1,0,0,0,0});
+   __tiles_version_2.push_back({0,1,0,0,1,0,0,1,0});
+   __tiles_version_2.push_back({0,0,0,1,1,1,0,0,0});
+   __tiles_version_2.push_back({0,0,0,0,1,1,0,1,0});
+   __tiles_version_2.push_back({0,0,0,1,1,0,0,1,0});
+   __tiles_version_2.push_back({0,1,0,0,1,1,0,0,0});
+   __tiles_version_2.push_back({0,1,0,1,1,0,0,0,0});
+   __tiles_version_2.push_back({0,1,0,0,1,0,0,0,0});
+   __tiles_version_2.push_back({0,0,0,0,1,0,0,1,0});
+   __tiles_version_2.push_back({0,0,0,0,1,1,0,0,0});
+   __tiles_version_2.push_back({0,0,0,1,1,0,0,0,0});
 }
 
 
 void Laser::collide(const sf::Rect<int32_t>& playerRect)
 {
    const auto it =
-      std::find_if(std::begin(mLasers), std::end(mLasers), [playerRect](auto laser) {
+      std::find_if(std::begin(__lasers), std::end(__lasers), [playerRect](auto laser) {
 
-            const auto roughIntersection = playerRect.intersects(laser->mPixelRect);
+            const auto roughIntersection = playerRect.intersects(laser->_pixel_rect);
 
             auto active = false;
 
             if (laser->_version == MechanismVersion::Version1)
             {
-               active = (laser->mTileIndex == 0);
+               active = (laser->_tile_index == 0);
             }
             else if (laser->_version == MechanismVersion::Version2)
             {
-               active = (laser->mTileIndex >= rangeEnabled.first) && (laser->mTileIndex <= rangeEnabled.second);
+               active = (laser->_tile_index >= range_enabled.first) && (laser->_tile_index <= range_enabled.second);
             }
 
             // tileindex at 0 is an active laser
             if (active && roughIntersection)
             {
-               const auto tileId = static_cast<uint32_t>(laser->mTv);
+               const auto tile_id = static_cast<uint32_t>(laser->_tv);
 
                const auto tile =
                   (laser->_version == MechanismVersion::Version1)
-                     ? mTilesVersion1[tileId]
-                     : mTilesVersion2[tileId];
+                     ? __tiles_version_1[tile_id]
+                     : __tiles_version_2[tile_id];
 
                auto x = 0u;
                auto y = 0u;
@@ -422,8 +422,8 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
                   {
                      sf::Rect<int32_t> rect;
 
-                     rect.left = static_cast<int32_t>(laser->mPixelPosition.x + (x * PIXELS_PER_PHYSICS_TILE));
-                     rect.top  = static_cast<int32_t>(laser->mPixelPosition.y + (y * PIXELS_PER_PHYSICS_TILE));
+                     rect.left = static_cast<int32_t>(laser->_pixel_position.x + (x * PIXELS_PER_PHYSICS_TILE));
+                     rect.top  = static_cast<int32_t>(laser->_pixel_position.y + (y * PIXELS_PER_PHYSICS_TILE));
 
                      rect.width  = PIXELS_PER_PHYSICS_TILE;
                      rect.height = PIXELS_PER_PHYSICS_TILE;
@@ -452,7 +452,7 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
          }
       );
 
-   if (it != mLasers.end())
+   if (it != __lasers.end())
    {
       // player is dead
       Player::getCurrent()->damage(100);
@@ -462,28 +462,28 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
 
 void Laser::merge()
 {
-   int32_t groupId = 0;
+   int32_t group_id = 0;
 
-   for (auto object : mObjects)
+   for (auto object : __objects)
    {
       const auto x = static_cast<int32_t>(object->_x_px      / PIXELS_PER_TILE );
       const auto y = static_cast<int32_t>(object->_y_px      / PIXELS_PER_TILE);
       const auto w = static_cast<int32_t>(object->_width_px  / PIXELS_PER_TILE );
       const auto h = static_cast<int32_t>(object->_height_px / PIXELS_PER_TILE);
 
-      const auto animationOffset = std::rand() % 100;
+      const auto animation_offset = std::rand() % 100;
 
-      groupId++;
+      group_id++;
 
       for (auto yi = y; yi < y + h; yi++)
       {
          for (auto xi = x; xi < x + w; xi++)
          {
-            for (auto& laser : mLasers)
+            for (auto& laser : __lasers)
             {
                if (
-                     static_cast<int32_t>(laser->mTilePosition.x) == xi
-                  && static_cast<int32_t>(laser->mTilePosition.y) == yi
+                     static_cast<int32_t>(laser->_tile_position.x) == xi
+                  && static_cast<int32_t>(laser->_tile_position.y) == yi
                )
                {
                   if (object->_properties != nullptr)
@@ -491,18 +491,18 @@ void Laser::merge()
                      auto it = object->_properties->_map.find("on_time");
                      if (it != object->_properties->_map.end())
                      {
-                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), true});
+                         laser->_signal_plot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), true});
                      }
 
                      it = object->_properties->_map.find("off_time");
                      if (it != object->_properties->_map.end())
                      {
-                         laser->mSignalPlot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), false});
+                         laser->_signal_plot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), false});
                      }
                   }
 
-                  laser->mAnimationOffset = animationOffset;
-                  laser->mGroupId = groupId;
+                  laser->_animation_offset = animation_offset;
+                  laser->_group_id = group_id;
                }
             }
          }

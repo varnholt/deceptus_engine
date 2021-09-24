@@ -44,7 +44,7 @@ void ExtraManager::load(
             item->mPosition.x = static_cast<float>(i * PIXELS_PER_TILE);
             item->mPosition.y = static_cast<float>(j * PIXELS_PER_TILE);
             item->mType = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
-            mExtras.push_back(item);
+            _extras.push_back(item);
          }
       }
    }
@@ -54,7 +54,7 @@ void ExtraManager::load(
 //-----------------------------------------------------------------------------
 void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 {
-   for (auto& extra : mExtras)
+   for (auto& extra : _extras)
    {
       if (!extra->mActive)
       {
@@ -71,7 +71,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
       {
          // printf("player hit extra\n");
          extra->mActive = false;
-         mTilemap->hideTile(
+         _tilemap->hideTile(
             extra->mSpriteOffset.x,
             extra->mSpriteOffset.y
          );
@@ -136,7 +136,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
 
 void ExtraManager::resetExtras()
 {
-   mExtras.clear();
+   _extras.clear();
 }
 
 

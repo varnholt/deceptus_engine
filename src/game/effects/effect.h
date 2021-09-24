@@ -26,7 +26,7 @@ private:
 
 protected:
 
-  std::string mName;
-  bool mIsLoaded = false;
+  std::string _name;
+  bool _is_loaded = false;
 };
 

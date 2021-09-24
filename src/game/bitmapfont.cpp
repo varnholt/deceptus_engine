@@ -15,8 +15,8 @@ void BitmapFont::load(
    const std::string& mapPath
 )
 {
-   mTexture = TexturePool::getInstance().get(texturePath);
-   mSprite.setTexture(*mTexture);
+   _texture = TexturePool::getInstance().get(texturePath);
+   _sprite.setTexture(*_texture);
 
    std::ifstream file(mapPath);
 
@@ -48,8 +48,8 @@ void BitmapFont::load(
 
    if (vals.size() == 2)
    {
-      mCharWidth = vals[0];
-      mCharHeight = vals[1];
+      _char_width = vals[0];
+      _char_height = vals[1];
    }
    else
    {
@@ -65,16 +65,16 @@ void BitmapFont::load(
       std::shared_ptr<sf::IntRect> rect = std::make_shared<sf::IntRect>();
       rect->left = x;
       rect->top = y;
-      rect->width = mCharWidth;
-      rect->height = mCharHeight;
-      mMap.insert(std::pair<char,std::shared_ptr<sf::IntRect>>(c, rect));
+      rect->width = _char_width;
+      rect->height = _char_height;
+      _map.insert(std::pair<char,std::shared_ptr<sf::IntRect>>(c, rect));
 
-      x += mCharWidth;
+      x += _char_width;
 
-      if (x == static_cast<int32_t>(mTexture->getSize().x))
+      if (x == static_cast<int32_t>(_texture->getSize().x))
       {
          x = 0;
-         y += mCharHeight;
+         y += _char_height;
       }
 
       i++;
@@ -89,9 +89,9 @@ std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::strin
 
    for (auto c : text)
    {
-      auto it = mMap.find(c);
+      auto it = _map.find(c);
 
-      if (it != mMap.end())
+      if (it != _map.end())
       {
         coords.push_back(it->second);
       }
@@ -103,15 +103,15 @@ std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::strin
 
 void BitmapFont::draw(
    sf::RenderTarget& window,
-   const std::vector<std::shared_ptr<sf::IntRect> > &coords,
+   const std::vector<std::shared_ptr<sf::IntRect> >& coords,
    int32_t x,
    int32_t y
 )
 {
-   auto xOffset = 0;
+   auto x_offset = 0;
    for (auto& coord : coords)
    {
-      mSprite.setTextureRect(
+      _sprite.setTextureRect(
          sf::IntRect(
             coord->left,
             coord->top,
@@ -120,14 +120,14 @@ void BitmapFont::draw(
          )
       );
 
-      mSprite.setPosition(
-         static_cast<float>(x + xOffset),
+      _sprite.setPosition(
+         static_cast<float>(x + x_offset),
          static_cast<float>(y)
       );
 
-      window.draw(mSprite);
-      xOffset += mCharWidth;
+      window.draw(_sprite);
+      x_offset += _char_width;
    }
 
-   mTextWidth = xOffset;
+   _text_width = x_offset;
 }

@@ -234,7 +234,7 @@ protected:
    std::shared_ptr<LightSystem::LightInstance> _player_light;
    std::vector<std::shared_ptr<SmokeEffect>> _smoke_effect;
 
-   AmbientOcclusion mAo;
+   AmbientOcclusion _ambient_occlusion;
    std::vector<std::shared_ptr<ImageLayer>> _image_layers;
    std::vector<std::shared_ptr<ShaderLayer>> _shader_layers;
 

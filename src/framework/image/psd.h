@@ -131,10 +131,10 @@ class PSD
          public:
             struct Position
             {
-               float mX;
-               float mY;
+               float _x;
+               float _y;
 
-               void load(std::istream& stream, float invWidth, float invHeight);
+               void load(std::istream& stream, float inv_width, float inv_height);
             };
 
             struct BezierKey

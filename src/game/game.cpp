@@ -369,7 +369,7 @@ void Game::initialize()
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
             _player->getControls().setKeysPressed(0);
-            CameraPane::getInstance().updateLookState(Look::LookActive, false);
+            CameraPane::getInstance().updateLookState(Look::Active, false);
          }
       }
    );
@@ -430,7 +430,7 @@ void Game::draw()
       ScreenTransitionHandler::getInstance()._transition->draw(_window_render_texture);
    }
 
-   const auto map_enabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
+   const auto map_enabled = DisplayMode::getInstance().isSet(Display::Map);
    if (!map_enabled)
    {
       _info_layer->setLoading(!_level_loading_finished);
@@ -457,7 +457,7 @@ void Game::draw()
       _controller_overlay->draw(*_window_render_texture.get());
    }
 
-   if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
+   if (DisplayMode::getInstance().isSet(Display::Inventory))
    {
       _inventory_layer->draw(*_window_render_texture.get());
    }
@@ -705,7 +705,7 @@ void Game::update()
       _inventory_layer->update(dt);
 
       // this is not beautiful. simplify!
-      if (DisplayMode::getInstance().isSet(Display::DisplayMap))
+      if (DisplayMode::getInstance().isSet(Display::Map))
       {
          CameraPane::getInstance().update();
       }
@@ -767,10 +767,10 @@ void Game::reset()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::checkCloseInventory()
 {
-  if (DisplayMode::getInstance().isSet(Display::DisplayInventory))
+  if (DisplayMode::getInstance().isSet(Display::Inventory))
   {
      GameState::getInstance().enqueueResume();
-     DisplayMode::getInstance().enqueueUnset(Display::DisplayInventory);
+     DisplayMode::getInstance().enqueueUnset(Display::Inventory);
   }
 }
 
@@ -781,7 +781,7 @@ void Game::openInventory()
    if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {
       GameState::getInstance().enqueuePause();
-      DisplayMode::getInstance().enqueueSet(Display::DisplayInventory);
+      DisplayMode::getInstance().enqueueSet(Display::Inventory);
       _inventory_layer->setActive(true);
    }
 }
@@ -931,7 +931,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F1:
       {
-         DisplayMode::getInstance().enqueueToggle(Display::DisplayDebug);
+         DisplayMode::getInstance().enqueueToggle(Display::Debug);
          break;
       }
       case sf::Keyboard::F2:
@@ -1003,7 +1003,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::P:
       case sf::Keyboard::Escape:
       {
-         const auto mapEnabled = DisplayMode::getInstance().isSet(Display::DisplayMap);
+         const auto mapEnabled = DisplayMode::getInstance().isSet(Display::Map);
          if (!mapEnabled)
          {
             showPauseMenu();
@@ -1012,7 +1012,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          {
             // do the same as if the player had pressed tab again
             GameState::getInstance().enqueueTogglePauseResume();
-            DisplayMode::getInstance().enqueueToggle(Display::DisplayMap);
+            DisplayMode::getInstance().enqueueToggle(Display::Map);
          }
          break;
       }
@@ -1033,19 +1033,19 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::LShift:
       {
-         CameraPane::getInstance().updateLookState(Look::LookActive, true);
+         CameraPane::getInstance().updateLookState(Look::Active, true);
          break;
       }
       case sf::Keyboard::Left:
       {
          _inventory_layer->left();
-         CameraPane::getInstance().updateLookState(Look::LookLeft, true);
+         CameraPane::getInstance().updateLookState(Look::Left, true);
          break;
       }
       case sf::Keyboard::Right:
       {
          _inventory_layer->right();
-         CameraPane::getInstance().updateLookState(Look::LookRight, true);
+         CameraPane::getInstance().updateLookState(Look::Right, true);
          break;
       }
       case sf::Keyboard::Return:
@@ -1055,18 +1055,18 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Up:
       {
-         CameraPane::getInstance().updateLookState(Look::LookUp, true);
+         CameraPane::getInstance().updateLookState(Look::Up, true);
          break;
       }
       case sf::Keyboard::Down:
       {
-         CameraPane::getInstance().updateLookState(Look::LookDown, true);
+         CameraPane::getInstance().updateLookState(Look::Down, true);
          break;
       }
       case sf::Keyboard::Tab:
       {
          GameState::getInstance().enqueueTogglePauseResume();
-         DisplayMode::getInstance().enqueueToggle(Display::DisplayMap);
+         DisplayMode::getInstance().enqueueToggle(Display::Map);
          break;
       }
       case sf::Keyboard::PageUp:
@@ -1094,27 +1094,27 @@ void Game::processKeyReleasedEvents(const sf::Event& event)
    {
       case sf::Keyboard::LShift:
       {
-         CameraPane::getInstance().updateLookState(Look::LookActive, false);
+         CameraPane::getInstance().updateLookState(Look::Active, false);
          break;
       }
       case sf::Keyboard::Left:
       {
-         CameraPane::getInstance().updateLookState(Look::LookLeft, false);
+         CameraPane::getInstance().updateLookState(Look::Left, false);
          break;
       }
       case sf::Keyboard::Right:
       {
-         CameraPane::getInstance().updateLookState(Look::LookRight, false);
+         CameraPane::getInstance().updateLookState(Look::Right, false);
          break;
       }
       case sf::Keyboard::Up:
       {
-         CameraPane::getInstance().updateLookState(Look::LookUp, false);
+         CameraPane::getInstance().updateLookState(Look::Up, false);
          break;
       }
       case sf::Keyboard::Down:
       {
-         CameraPane::getInstance().updateLookState(Look::LookDown, false);
+         CameraPane::getInstance().updateLookState(Look::Down, false);
          break;
       }
 

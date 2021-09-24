@@ -25,8 +25,8 @@ public:
 
    ExtraManager() = default;
 
-   std::vector<std::shared_ptr<ExtraItem>> mExtras;
+   std::vector<std::shared_ptr<ExtraItem>> _extras;
 
-   std::shared_ptr<TileMap> mTilemap;
+   std::shared_ptr<TileMap> _tilemap;
 };
 

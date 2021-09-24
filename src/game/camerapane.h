@@ -23,7 +23,7 @@ private:
 
    CameraPane() = default;
 
-   int32_t _look_state = LookInactive;
+   int32_t _look_state = static_cast<int32_t>(Look::Inactive);
    sf::Vector2f _look_vector;
 
    static CameraPane __instance;

@@ -217,8 +217,8 @@ int32_t queryRayCast(lua_State* state)
          return 0;
       }
 
-      const auto hitCount = node->queryRaycast(p1, p2);
-      lua_pushinteger(state, hitCount);
+      const auto hit_count = node->queryRaycast(p1, p2);
+      lua_pushinteger(state, hit_count);
       return 1;
    }
 
@@ -807,13 +807,13 @@ int32_t addShapePoly(lua_State* state)
    {
       auto size = argc / 2;
       b2Vec2* poly = new b2Vec2[static_cast<uint32_t>(size)];
-      auto polyIndex = 0;
+      auto poly_index = 0;
       for (auto i = 0; i < argc; i += 2)
       {
          auto x = static_cast<float>(lua_tonumber(state, i));
          auto y = static_cast<float>(lua_tonumber(state, i + 1));
-         poly[polyIndex].Set(x, y);
-         polyIndex++;
+         poly[poly_index].Set(x, y);
+         poly_index++;
       }
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
@@ -852,12 +852,12 @@ int32_t addWeapon(lua_State* state)
    }
 
    WeaponType weapon_type = WeaponType::Default;
-   auto fireInterval = 0;
+   auto fire_interval = 0;
    auto damage = 0;
    std::unique_ptr<b2Shape> shape;
 
    weapon_type = static_cast<WeaponType>(lua_tointeger(state, 1));
-   fireInterval = static_cast<int>(lua_tointeger(state, 2));
+   fire_interval = static_cast<int>(lua_tointeger(state, 2));
    damage = static_cast<int>(lua_tointeger(state, 3));
 
    // add weapon with projectile radius only
@@ -895,7 +895,7 @@ int32_t addWeapon(lua_State* state)
       return 0;
    }
 
-   auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fireInterval, damage);
+   auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fire_interval, damage);
    node->addWeapon(std::move(weapon));
 
    return 0;
@@ -920,11 +920,11 @@ int32_t fireWeapon(lua_State* state)
    {
       auto index = static_cast<size_t>(lua_tointeger(state, 1));
 
-      auto posX = static_cast<float>(lua_tonumber(state, 2)) * MPP;
-      auto posY = static_cast<float>(lua_tonumber(state, 3)) * MPP;
+      auto pos_x = static_cast<float>(lua_tonumber(state, 2)) * MPP;
+      auto pos_y = static_cast<float>(lua_tonumber(state, 3)) * MPP;
 
-      auto dirX = static_cast<float>(lua_tonumber(state, 4));
-      auto dirY = static_cast<float>(lua_tonumber(state, 5));
+      auto dir_x = static_cast<float>(lua_tonumber(state, 4));
+      auto dir_y = static_cast<float>(lua_tonumber(state, 5));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -933,7 +933,7 @@ int32_t fireWeapon(lua_State* state)
          return 0;
       }
 
-      node->fireWeapon(index, {posX, posY}, {dirX, dirY});
+      node->fireWeapon(index, {pos_x, pos_y}, {dir_x, dir_y});
    }
 
    return 0;
@@ -1886,11 +1886,11 @@ class LuaQueryCallback : public b2QueryCallback
 {
    public:
 
-      std::vector<b2Body*> mBodies;
+      std::vector<b2Body*> _bodies;
 
       bool ReportFixture(b2Fixture* fixture)
       {
-         mBodies.push_back(fixture->GetBody());
+         _bodies.push_back(fixture->GetBody());
 
          // to keep going to find all fixtures in the query area
          return true;
@@ -1904,7 +1904,7 @@ int32_t LuaNode::queryAABB(const b2AABB& aabb)
    Level::getCurrentLevel()->getWorld()->QueryAABB(&queryCallback, aabb);
 
    // std::cout << queryCallback.mBodies.size() << std::endl;
-   return static_cast<int32_t>(queryCallback.mBodies.size());
+   return static_cast<int32_t>(queryCallback._bodies.size());
 }
 
 

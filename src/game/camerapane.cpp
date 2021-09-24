@@ -48,26 +48,26 @@ void CameraPane::update()
          _look_vector.y = 0.0f;
       }
    }
-   else if (_look_state & LookActive)
+   else if (_look_state & static_cast<int32_t>(Look::Active))
    {
-      if (_look_state & LookUp)
+      if (_look_state & static_cast<int32_t>(Look::Up))
       {
          _look_vector += sf::Vector2f(0.0f, -speed);
       }
-      if (_look_state & LookDown)
+      if (_look_state & static_cast<int32_t>(Look::Down))
       {
          _look_vector += sf::Vector2f(0.0f, speed);
       }
-      if (_look_state & LookLeft)
+      if (_look_state & static_cast<int32_t>(Look::Left))
       {
          _look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      if (_look_state & LookRight)
+      if (_look_state & static_cast<int32_t>(Look::Right))
       {
          _look_vector += sf::Vector2f(speed, 0.0f);
       }
 
-      if (!DisplayMode::getInstance().isSet(Display::DisplayMap))
+      if (!DisplayMode::getInstance().isSet(Display::Map))
       {
          auto len = SfmlMath::length(_look_vector);
          if (len > max_length)
@@ -89,11 +89,11 @@ void CameraPane::updateLookState(Look look, bool enable)
 {
    if (enable)
    {
-      _look_state |= look;
+      _look_state |= static_cast<int32_t>(look);
    }
    else
    {
-      _look_state &= ~look;
+      _look_state &= ~static_cast<int32_t>(look);
    }
 }
 
@@ -103,7 +103,7 @@ void CameraPane::updateLookState(Look look, bool enable)
 //-----------------------------------------------------------------------------
 bool CameraPane::isLookActive() const
 {
-   return (_look_state & LookActive);
+   return (_look_state & static_cast<int32_t>(Look::Active));
 }
 
 

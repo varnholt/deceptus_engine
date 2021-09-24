@@ -17,7 +17,7 @@
 
 LevelMap::LevelMap()
 {
-   mFont.load(
+   _font.load(
       "data/game/font.png",
       "data/game/font.map"
    );
@@ -55,7 +55,7 @@ LevelMap::LevelMap()
       tmp->_texture = texture;
       tmp->_sprite = sprite;
 
-      mLayers[layer.getName()] = tmp;
+      _layers[layer.getName()] = tmp;
    }
 }
 
@@ -65,14 +65,14 @@ void LevelMap::loadLevelTextures(
    const std::filesystem::path& outlines
 )
 {
-   mLevelGridTexture = TexturePool::getInstance().get(grid.string());
-   mLevelGridSprite.setTexture(*mLevelGridTexture);
+   _level_grid_texture = TexturePool::getInstance().get(grid.string());
+   _level_grid_sprite.setTexture(*_level_grid_texture);
 
-   mLevelOutlineTexture = TexturePool::getInstance().get(outlines.string());
-   mLevelOutlineSprite.setTexture(*mLevelOutlineTexture);
+   _level_outline_texture = TexturePool::getInstance().get(outlines.string());
+   _level_outline_sprite.setTexture(*_level_outline_texture);
 
    // that render texture should have the same size as our level textures
-   mLevelRenderTexture.create(mLevelGridTexture->getSize().x, mLevelGridTexture->getSize().y);
+   _level_render_texture.create(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
 }
 
 
@@ -84,39 +84,39 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::Vector2f center;
    center += Player::getCurrent()->getPixelPositionf() * 0.125f;
    center += CameraPane::getInstance().getLookVector();
-   center.x += mLevelGridSprite.getTexture()->getSize().x / 2.0f;
-   center.y += mLevelGridSprite.getTexture()->getSize().y / 2.0f;
+   center.x += _level_grid_sprite.getTexture()->getSize().x / 2.0f;
+   center.y += _level_grid_sprite.getTexture()->getSize().y / 2.0f;
    center.x -= 220.0f;
    center.y -= 80.0f;
 
    sf::View levelView;
-   levelView.setSize(static_cast<float>(mLevelGridSprite.getTexture()->getSize().x), static_cast<float>(mLevelGridSprite.getTexture()->getSize().y));
+   levelView.setSize(static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y));
    levelView.setCenter(center);
-   levelView.zoom(mZoom); // 1.5f works well, too
-   mLevelGridSprite.setColor(sf::Color{70, 70, 140, 255});
-   mLevelOutlineSprite.setColor(sf::Color{255, 255, 255, 80});
-   mLevelRenderTexture.clear();
-   mLevelRenderTexture.draw(mLevelGridSprite, sf::BlendMode{sf::BlendAdd});
-   mLevelRenderTexture.draw(mLevelOutlineSprite, sf::BlendMode{sf::BlendAdd});
-   drawLevelItems(mLevelRenderTexture);
-   mLevelRenderTexture.setView(levelView);
-   mLevelRenderTexture.display();
+   levelView.zoom(_zoom); // 1.5f works well, too
+   _level_grid_sprite.setColor(sf::Color{70, 70, 140, 255});
+   _level_outline_sprite.setColor(sf::Color{255, 255, 255, 80});
+   _level_render_texture.clear();
+   _level_render_texture.draw(_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
+   _level_render_texture.draw(_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
+   drawLevelItems(_level_render_texture);
+   _level_render_texture.setView(levelView);
+   _level_render_texture.display();
 
    // std::cout << "dx/dy: " << CameraPane::getInstance().getLookVector().x << " " << CameraPane::getInstance().getLookVector().y << std::endl;
 
-   auto levelTextureSprite = sf::Sprite(mLevelRenderTexture.getTexture());
+   auto levelTextureSprite = sf::Sprite(_level_render_texture.getTexture());
    levelTextureSprite.move(10.0f, 48.0f);
 
    // draw layers
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto layerLayout = mLayers["layout"];
-   auto layerHideBorders = mLayers["hide_borders"];
-   auto layerGrid = mLayers["grid"];
-   auto layerBlue = mLayers["blue"];
-   auto layerTextZoom = mLayers["text_zoom"];
-   auto layerTextPan = mLayers["text_pan"];
+   auto layerLayout = _layers["layout"];
+   auto layerHideBorders = _layers["hide_borders"];
+   auto layerGrid = _layers["grid"];
+   auto layerBlue = _layers["blue"];
+   auto layerTextZoom = _layers["text_zoom"];
+   auto layerTextPan = _layers["text_pan"];
 
    layerBlue->draw(window, states);
 
@@ -124,7 +124,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    layerHideBorders->draw(window, states);
 
-   if (mZoomEnabled)
+   if (_zoom_enabled)
    {
       layerTextZoom->draw(window, states);
    }
@@ -148,13 +148,13 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void LevelMap::setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors)
 {
-   mDoors = doors;
+   _doors = doors;
 }
 
 
 void LevelMap::setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals)
 {
-   mPortals = portals;
+   _portals = portals;
 }
 
 
@@ -191,7 +191,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    float doorWidth = 2.0f;
    float doorHeight = 9.0f;
 
-   for (auto& d : mDoors)
+   for (auto& d : _doors)
    {
       auto door = std::dynamic_pointer_cast<Door>(d);
 
@@ -214,7 +214,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    // draw portals
    float portalWidth = 3.0f;
    float portalHeight = 6.0f;
-   for (auto& p : mPortals)
+   for (auto& p : _portals)
    {
       sf::VertexArray quad(sf::Quads, 4);
       quad[0].color = sf::Color::Red;

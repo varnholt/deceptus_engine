@@ -16,7 +16,7 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
 {
    TmxElement::deserialize(element);
 
-   mId = element->IntAttribute("id");
+   _id = element->IntAttribute("id");
 
    // std::cout << "   tile (id: " << mId << ")" << std::endl;
 

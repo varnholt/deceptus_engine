@@ -23,7 +23,7 @@ sf::BlendMode mBlendMode = sf::BlendAdd;
 SmokeEffect::SmokeEffect()
  : Effect("smoke effect")
 {
-   mIsLoaded = true;
+   _is_loaded = true;
 
    _texture = TexturePool::getInstance().get("data/effects/smoke.png");
    _texture->setSmooth(true);

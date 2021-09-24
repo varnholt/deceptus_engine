@@ -19,8 +19,8 @@ std::string ProgressSettings::serialize()
       {
          "ProgressSettings",
          {
-            {"level_name", mLevel},
-            {"level_checkpoint", mCheckpoint},
+            {"level_name", _level},
+            {"level_checkpoint", _checkpoint},
          }
       }
    };
@@ -34,8 +34,8 @@ std::string ProgressSettings::serialize()
 void ProgressSettings::deserialize(const std::string& data)
 {
    json config = json::parse(data);
-   mLevel  = config["ProgressSettings"]["level_name"].get<std::string>();
-   mCheckpoint = config["ProgressSettings"]["level_checkpoint"].get<int>();
+   _level  = config["ProgressSettings"]["level_name"].get<std::string>();
+   _checkpoint = config["ProgressSettings"]["level_checkpoint"].get<int>();
 }
 
 
