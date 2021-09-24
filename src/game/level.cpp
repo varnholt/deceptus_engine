@@ -193,7 +193,7 @@ Level::Level()
    setName(typeid(Level).name());
 
    // init world for this level
-   b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance().mGravity);
+   b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
 
    LuaInterface::instance().reset();
 
@@ -940,7 +940,7 @@ void Level::drawLightMap()
    //   light_map_save_counter++;
    //   if (light_map_save_counter % 60 == 0)
    //   {
-   //      mLightingTexture->getTexture().copyToImage().saveToFile("light_map.png");
+   //      _render_texture_lighting->getTexture().copyToImage().saveToFile("light_map.png");
    //   }
 }
 
@@ -1201,10 +1201,10 @@ void Level::displayTextures()
 void Level::drawGlowLayer()
 {
    #ifdef GLOW_ENABLED
-      mBlurShader->clearTexture();
+      _blur_shader->clearTexture();
       drawBlurLayer(*mBlurShader->getRenderTexture().get());
-      mBlurShader->getRenderTexture()->display();
-      takeScreenshot("screenshot_blur", *mBlurShader->getRenderTexture().get());
+      _blur_shader->getRenderTexture()->display();
+      takeScreenshot("screenshot_blur", *_blur_shader->getRenderTexture().get());
    #endif
 }
 
@@ -1212,30 +1212,30 @@ void Level::drawGlowLayer()
 void Level::drawGlowSprite()
 {
 #ifdef GLOW_ENABLED
-   sf::Sprite blurSprite(mBlurShader->getRenderTexture()->getTexture());
-   const auto downScaleX = mBlurShader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
-   const auto downScaleY = mBlurShader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
-   blurSprite.scale({downScaleX, downScaleY});
+   sf::Sprite blur_sprite(_blur_shader->getRenderTexture()->getTexture());
+   const auto down_scale_x = _blur_shader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
+   const auto down_scale_y = _blur_shader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
+   blur_sprite.scale({down_scale_x, down_scale_y});
 
    sf::RenderStates statesShader;
-   mBlurShader->update();
-   statesShader.shader = &mBlurShader->getShader();
-   mBlurShader->getRenderTextureScaled()->draw(blurSprite, statesShader);
+   _blur_shader->update();
+   states_shader.shader = &mBlurShader->getShader();
+   _blur_shader->getRenderTextureScaled()->draw(blur_sprite, statesShader);
 
-   sf::Sprite blurScaleSprite(mBlurShader->getRenderTextureScaled()->getTexture());
-   blurScaleSprite.scale(1.0f / downScaleX, 1.0f / downScaleY);
-   blurScaleSprite.setTextureRect(
+   sf::Sprite blur_scale_sprite(mBlurShader->getRenderTextureScaled()->getTexture());
+   blur_scale_sprite.scale(1.0f / down_scale_x, 1.0f / down_scale_y);
+   blur_scale_sprite.setTextureRect(
       sf::IntRect(
          0,
-         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y),
-         static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().x),
-         -static_cast<int32_t>(blurScaleSprite.getTexture()->getSize().y)
+         static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y),
+         static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().x),
+         -static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y)
       )
    );
 
-   sf::RenderStates statesAdd;
+   sf::RenderStates states_add;
    statesAdd.blendMode = sf::BlendAdd;
-   mLevelRenderTexture->draw(blurScaleSprite, statesAdd);
+   _level_render_texture->draw(blur_scale_sprite, states_add);
 #endif
 }
 
@@ -1382,7 +1382,7 @@ void Level::update(const sf::Time& dt)
 
    // 80.0f * dt / 60.f
    // http://www.iforce2d.net/b2dtut/worlds
-   _world->Step(PhysicsConfiguration::getInstance().mTimeStep, 8, 3);
+   _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
 
    CameraPane::getInstance().update();
    _boom_effect.update(dt);
@@ -1409,11 +1409,11 @@ void Level::update(const sf::Time& dt)
 
    updatePlayerLight();
 
-   _static_light->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+   _static_light->update(GlobalClock::getInstance().getElapsedTime(), 0.0f, 0.0f);
 
    for (const auto& smoke : _smoke_effect)
    {
-      smoke->update(GlobalClock::getInstance()->getElapsedTime(), 0.0f, 0.0f);
+      smoke->update(GlobalClock::getInstance().getElapsedTime(), 0.0f, 0.0f);
    }
 
    _death_shader->update(dt);
@@ -1723,9 +1723,9 @@ void Level::parsePhysicsTiles(
 //   else
 //   {
 //      SquareMarcher deadly(
-//         mPhysics.mGridWidth,
-//         mPhysics.mGridHeight,
-//         mPhysics.mPhysicsMap,
+//         _physics._grid_width,
+//         _physics._grid_height,
+//         _physics._physics_map,
 //         std::vector<int32_t>{3},
 //         basePath / std::filesystem::path("physics_path_deadly.csv"),
 //         scale

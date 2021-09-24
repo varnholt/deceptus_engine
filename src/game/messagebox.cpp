@@ -53,23 +53,16 @@ MessageBox::MessageBox(
 {
    initializeLayers();
    initializeControllerCallbacks();
-   _show_time = GlobalClock::getInstance()->getElapsedTime();
+   _show_time = GlobalClock::getInstance().getElapsedTime();
 
    DisplayMode::getInstance().enqueueSet(Display::Modal);
 
    Player::getCurrent()->getControls().setKeysPressed(0);
 
-   //sText.setScale(0.25f, 0.25f);
    __text.setFont(__font);
    __text.setCharacterSize(12);
    __text.setFillColor(_properties._text_color);
    __text.setString("");
-
-   //   mPreviousMode = GameState::getInstance().getMode();
-   //   if (mPreviousMode == ExecutionMode::Running)
-   //   {
-   //      GameState::getInstance().enqueuePause();
-   //   }
 }
 
 
@@ -331,7 +324,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (__active->_properties._animate)
    {
-      auto x = (GlobalClock::getInstance()->getElapsedTime().asSeconds() - __active->_show_time.asSeconds()) * 10.0f;
+      auto x = (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds()) * 10.0f;
       auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
       if (__active->_chars_shown != to)
       {

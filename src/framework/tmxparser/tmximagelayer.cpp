@@ -3,6 +3,8 @@
 #include "tmxproperties.h"
 
 
+#include <iostream>
+
 
 TmxImageLayer::TmxImageLayer()
 {
@@ -24,14 +26,6 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _offset_x_px = element->FloatAttribute("offsetx", 0.0f);
    _offset_y_px = element->FloatAttribute("offsety", 0.0f);
-
-   //  printf(
-   //     "image layer: %s (opacity: %f, offset: %f, %f)\n",
-   //     mName.c_str(),
-   //     mOpacity,
-   //     mOffsetX,
-   //     mOffsetY
-   //  );
 
    tinyxml2::XMLNode* node = element->FirstChild();
    while(node != nullptr)
@@ -60,10 +54,7 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
          }
          else if (!parsed)
          {
-            printf(
-              "%s is not supported for TmxElement\n",
-              sub_element->Name()
-            );
+            std::cerr << sub_element->Name() << " is not supported for TmxElement\n" << std::endl;
          }
       }
 

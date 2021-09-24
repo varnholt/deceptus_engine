@@ -155,13 +155,6 @@ bool TileMap::load(
                auto duration = 0.0f;
                for (auto& frame : frames)
                {
-                  // printf(
-                  //    "animate: tile: %d, subst: %d, duration: %d \n",
-                  //    tileNumber,
-                  //    frame->mTileId,
-                  //    frame->mDuration
-                  // );
-
                   auto offset_frame = new AnimatedTileFrame();
                   offset_frame->_x_px = frame->_tile_id % (_texture_map->getSize().x / _tile_size.x);
                   offset_frame->_y_px = frame->_tile_id / (_texture_map->getSize().x / _tile_size.x);

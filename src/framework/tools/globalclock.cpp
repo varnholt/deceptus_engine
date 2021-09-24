@@ -1,38 +1,32 @@
 #include "globalclock.h"
 
 
-GlobalClock* GlobalClock::sInstance = nullptr;
-
-
 GlobalClock::GlobalClock()
 {
-   sInstance = this;
-   mClock.restart();
+   _clock.restart();
 }
 
 
-GlobalClock *GlobalClock::getInstance()
+GlobalClock& GlobalClock::getInstance()
 {
-   if (!sInstance)
-      new GlobalClock;
-
-   return sInstance;
+   static GlobalClock __instance;
+   return __instance;
 }
 
 
 int GlobalClock::getElapsedTimeInMs()
 {
-   return mClock.getElapsedTime().asMilliseconds();
+   return _clock.getElapsedTime().asMilliseconds();
 }
 
 
 float GlobalClock::getElapsedTimeInS()
 {
-   return mClock.getElapsedTime().asMilliseconds() * 0.001f;
+   return _clock.getElapsedTime().asMilliseconds() * 0.001f;
 }
 
 
 sf::Time GlobalClock::getElapsedTime()
 {
-   return mClock.getElapsedTime();
+   return _clock.getElapsedTime();
 }

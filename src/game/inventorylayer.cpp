@@ -129,7 +129,7 @@ void InventoryLayer::draw(sf::RenderTarget &window)
 bool InventoryLayer::isControllerActionSkipped() const
 {
    auto skipped = false;
-   auto now = GlobalClock::getInstance()->getElapsedTimeInS();
+   auto now = GlobalClock::getInstance().getElapsedTimeInS();
 
    if (now - _joystick_update_time < 0.3f)
    {
@@ -171,7 +171,7 @@ void InventoryLayer::updateControllerActions()
      {
        if (!isControllerActionSkipped())
        {
-         _joystick_update_time = GlobalClock::getInstance()->getElapsedTimeInS();
+         _joystick_update_time = GlobalClock::getInstance().getElapsedTimeInS();
          left();
        }
      }
@@ -179,7 +179,7 @@ void InventoryLayer::updateControllerActions()
      {
        if (!isControllerActionSkipped())
        {
-         _joystick_update_time = GlobalClock::getInstance()->getElapsedTimeInS();
+         _joystick_update_time = GlobalClock::getInstance().getElapsedTimeInS();
          right();
        }
      }

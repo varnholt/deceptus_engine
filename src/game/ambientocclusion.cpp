@@ -24,7 +24,7 @@ void AmbientOcclusion::load(
       return;
    }
 
-   mTexture = TexturePool::getInstance().get(texture);
+   _texture = TexturePool::getInstance().get(texture);
 
    auto xi = 0;
    auto yi = 0;
@@ -35,33 +35,33 @@ void AmbientOcclusion::load(
    auto h = 0;
 
    std::string line;
-   std::ifstream uvFile(uv);
-   if (uvFile.is_open())
+   std::ifstream uv_file(uv);
+   if (uv_file.is_open())
    {
-      while (uvFile.good())
+      while (uv_file.good())
       {
-         std::getline(uvFile, line);
+         std::getline(uv_file, line);
          std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &i, &x, &y, &w, &h);
 
          // std::cout << "x: " << x << " y: " << y << " w: " << w << " h: " << h << std::endl;
 
          sf::Sprite sprite;
          sprite.setPosition(static_cast<float>(x - 5), static_cast<float>(y - 6));
-         sprite.setTexture(*mTexture);
+         sprite.setTexture(*_texture);
          sprite.setTextureRect({xi, yi, w, h});
-         mSprites.push_back(sprite);
+         _sprites.push_back(sprite);
 
          xi += w;
-         if (xi == static_cast<int32_t>(mTexture->getSize().x))
+         if (xi == static_cast<int32_t>(_texture->getSize().x))
          {
             xi = 0;
             yi += h;
          }
       }
 
-      uvFile.close();
+      uv_file.close();
 
-      std::cout << "[x] loaded " << mSprites.size() << " ao sprites" << std::endl;
+      std::cout << "[x] loaded " << _sprites.size() << " ao sprites" << std::endl;
    }
    else
    {
@@ -78,7 +78,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
    const auto pos = Player::getCurrent()->getPixelPositionf();
 
-   for (auto& sprite : mSprites)
+   for (auto& sprite : _sprites)
    {
       auto diff = SfmlMath::lengthSquared(pos - sprite.getPosition());
 

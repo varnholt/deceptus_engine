@@ -23,7 +23,7 @@ struct CallbackMap
 
 private:
 
-   std::array<std::vector<Callback>, static_cast<uint32_t>(CallbackType::Count)> mMap;
+   std::array<std::vector<Callback>, static_cast<uint32_t>(CallbackType::Count)> _map;
 
    CallbackMap() = default;
 };

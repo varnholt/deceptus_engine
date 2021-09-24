@@ -65,8 +65,8 @@ void Image::load(const std::string& /*filename*/)
    //    FileStream stream;
    //    if (stream.open(name))
    //    {
-   //       mPath= stream.getPath();
-   //       mFilename= filename;
+   //       _path = stream.getPath();
+   //       _filename = filename;
    //       stream.close();
    //    }
    // }

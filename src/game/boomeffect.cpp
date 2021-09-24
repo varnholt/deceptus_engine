@@ -17,14 +17,14 @@ void BoomEffect::boom(float x, float y, float factor)
    _factor_x = x;
    _factor_y = y;
    _boom_factor = factor;
-   _boom_time_end = GlobalClock::getInstance()->getElapsedTime() + sf::seconds(_boom_duration);
+   _boom_time_end = GlobalClock::getInstance().getElapsedTime() + sf::seconds(_boom_duration);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 float BoomEffect::getRemainingTime() const
 {
-   return (_boom_time_end - GlobalClock::getInstance()->getElapsedTime()).asSeconds();
+   return (_boom_time_end - GlobalClock::getInstance().getElapsedTime()).asSeconds();
 }
 
 

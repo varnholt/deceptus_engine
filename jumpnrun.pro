@@ -173,7 +173,6 @@ SOURCES += \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
    src/game/player/playerclimb.cpp \
-   src/game/player/playerconfiguration.cpp \
    src/game/player/playercontrols.cpp \
    src/game/player/playerinfo.cpp \
    src/game/player/playerjump.cpp \
@@ -388,7 +387,6 @@ HEADERS += \
    src/game/physics/physicsconfiguration.h \
    src/game/player/player.h \
    src/game/player/playerclimb.h \
-   src/game/player/playerconfiguration.h \
    src/game/player/playercontrols.h \
    src/game/player/playerinfo.h \
    src/game/player/playerjump.h \

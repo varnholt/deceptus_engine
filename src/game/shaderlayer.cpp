@@ -18,7 +18,7 @@ void ShaderLayer::draw(sf::RenderTarget& target)
    float h = _size.y;
 
    _shader.setUniform("u_texture", *_texture.get());
-   _shader.setUniform("u_time", GlobalClock::getInstance()->getElapsedTimeInS());
+   _shader.setUniform("u_time", GlobalClock::getInstance().getElapsedTimeInS());
    _shader.setUniform("u_resolution", sf::Vector2f(w, h));
 
    sf::Vertex quad[] = {
