@@ -74,16 +74,29 @@ void AmbientOcclusion::load(
 // just check if the sprite is outside the current screen
 // also group sprites to blocks of equal positions
 
+#include "level.h"
+
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
    const auto pos = Player::getCurrent()->getPixelPositionf();
 
+//   const auto& screen_rect = Level::getCurrentLevel()->getLevelView();
+
    for (auto& sprite : _sprites)
    {
+
+//      const auto& sprite_rect = sprite.getGlobalBounds();
+//      if (!screen_rect.get()->getViewport().intersects(sprite_rect))
+//      {
+//         continue;
+//      }
+
       auto diff = SfmlMath::lengthSquared(pos - sprite.getPosition());
 
       if (diff > 300000)
+      {
          continue;
+      }
 
       window.draw(sprite, {sf::BlendAlpha});
    }

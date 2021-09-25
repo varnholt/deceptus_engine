@@ -68,6 +68,7 @@ public:
    virtual ~Level();
 
    virtual void initialize();
+   void initializeTextures();
    void reset();
    void resetDeathShader();
 
@@ -91,13 +92,13 @@ public:
 
    const std::shared_ptr<b2World>& getWorld() const;
 
-   std::map<b2Body *, b2Vec2 *>* getPointMap() ;
+   std::map<b2Body*, b2Vec2*>* getPointMap();
    std::map<b2Body*, size_t>* getPointSizeMap();
 
    static Level* getCurrentLevel();
 
-   std::shared_ptr<Portal> getNearbyPortal();
-   std::shared_ptr<Bouncer> getNearbyBouncer();
+   const std::shared_ptr<Portal>& getNearbyPortal();
+   const std::shared_ptr<Bouncer>& getNearbyBouncer();
 
    void toggleMechanisms();
 
@@ -105,20 +106,18 @@ public:
 
    void drawStaticChains(sf::RenderTarget& target);
 
-   std::shared_ptr<sf::View> getLevelView();
-
    std::string getDescriptionFilename() const;
-   void setDescriptionFilename(const std::string &descriptionFilename);
+   void setDescriptionFilename(const std::string &description_filename);
 
    const Atmosphere& getPhysics() const;
-
-   void initializeTextures();
 
    bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
 
    BoomEffect& getBoomEffect();
 
-   std::shared_ptr<LightSystem> getLightSystem() const;
+   const std::shared_ptr<LightSystem>& getLightSystem() const;
+
+   const std::shared_ptr<sf::View>& getLevelView() const;
 
 
 protected:
