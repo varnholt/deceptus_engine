@@ -141,14 +141,14 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   continue;
                }
 
-               auto v0far = 10000.0f * (v0 - light_pos_m);
-               auto v1far = 10000.0f * (v1 - light_pos_m);
+               auto v0_far = 10000.0f * (v0 - light_pos_m);
+               auto v1_far = 10000.0f * (v1 - light_pos_m);
 
                sf::Vertex quad[] =
                {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v0_far.x, v0_far.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 

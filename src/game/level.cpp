@@ -90,9 +90,9 @@ std::string Level::getDescriptionFilename() const
 
 
 //-----------------------------------------------------------------------------
-void Level::setDescriptionFilename(const std::string &descriptionFilename)
+void Level::setDescriptionFilename(const std::string &description_filename)
 {
-   _description_filename = descriptionFilename;
+   _description_filename = description_filename;
 }
 
 
@@ -804,9 +804,9 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<sf::View> Level::getLevelView()
+const std::shared_ptr<sf::View>& Level::getLevelView() const
 {
-  return _level_view;
+   return _level_view;
 }
 
 
@@ -837,17 +837,17 @@ void Level::createViews()
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
-   const auto lookVector = CameraPane::getInstance().getLookVector();
+   const auto look_vector = CameraPane::getInstance().getLookVector();
 
-   const auto& cameraSystem = CameraSystem::getCameraSystem();
+   const auto& camera_system = CameraSystem::getCameraSystem();
 
-   const auto levelViewX = cameraSystem.getX() + lookVector.x;
-   const auto levelViewY = cameraSystem.getY() + lookVector.y;
+   const auto level_view_x = camera_system.getX() + look_vector.x;
+   const auto level_view_y = camera_system.getY() + look_vector.y;
 
    _level_view->reset(
       sf::FloatRect(
-         levelViewX,
-         levelViewY,
+         level_view_x,
+         level_view_y,
          _view_width,
          _view_height
       )
@@ -857,8 +857,8 @@ void Level::updateViews()
    {
       _parallax_view[i]->reset(
          sf::FloatRect(
-            levelViewX * _parallax_factors[i],
-            levelViewY * _parallax_factors[i],
+            level_view_x * _parallax_factors[i],
+            level_view_y * _parallax_factors[i],
             _view_width,
             _view_height
          )
@@ -870,7 +870,7 @@ void Level::updateViews()
 //-----------------------------------------------------------------------------
 void Level::updateCameraSystem(const sf::Time& dt)
 {
-   auto& cameraSystem = CameraSystem::getCameraSystem();
+   auto& camera_system = CameraSystem::getCameraSystem();
 
    // update room
    const auto prev_room = _room_current;
@@ -891,7 +891,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
       }
       else
       {
-         cameraSystem.setRoom(_room_current);
+         camera_system.setRoom(_room_current);
       }
 
       // trigger transition effect here if configured
@@ -904,7 +904,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
    // update camera system
    if (!_room_current || (_room_current && !_room_current->_camera_locked))
    {
-      cameraSystem.update(dt, _view_width, _view_height);
+      camera_system.update(dt, _view_width, _view_height);
    }
 }
 
@@ -1365,7 +1365,7 @@ void Level::updatePlayerLight()
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<LightSystem> Level::getLightSystem() const
+const std::shared_ptr<LightSystem>& Level::getLightSystem() const
 {
    return _light_system;
 }
@@ -1790,7 +1790,7 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<Portal> Level::getNearbyPortal()
+const std::shared_ptr<Portal>& Level::getNearbyPortal()
 {
    std::shared_ptr<Portal> nearbyPortal;
 
@@ -1809,7 +1809,7 @@ std::shared_ptr<Portal> Level::getNearbyPortal()
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<Bouncer> Level::getNearbyBouncer()
+const std::shared_ptr<Bouncer>& Level::getNearbyBouncer()
 {
    std::shared_ptr<Bouncer> nearbyBouncer;
 
