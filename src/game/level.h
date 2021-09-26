@@ -97,8 +97,8 @@ public:
 
    static Level* getCurrentLevel();
 
-   const std::shared_ptr<Portal>& getNearbyPortal();
-   const std::shared_ptr<Bouncer>& getNearbyBouncer();
+   std::shared_ptr<Portal> getNearbyPortal();
+   std::shared_ptr<Bouncer> getNearbyBouncer();
 
    void toggleMechanisms();
 

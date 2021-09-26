@@ -1790,7 +1790,7 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
 
 
 //-----------------------------------------------------------------------------
-const std::shared_ptr<Portal>& Level::getNearbyPortal()
+std::shared_ptr<Portal> Level::getNearbyPortal()
 {
    std::shared_ptr<Portal> nearbyPortal;
 
@@ -1809,7 +1809,7 @@ const std::shared_ptr<Portal>& Level::getNearbyPortal()
 
 
 //-----------------------------------------------------------------------------
-const std::shared_ptr<Bouncer>& Level::getNearbyBouncer()
+std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 {
    std::shared_ptr<Bouncer> nearbyBouncer;
 
