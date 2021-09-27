@@ -34,6 +34,9 @@ void AmbientOcclusion::load(
    auto w = 0;
    auto h = 0;
 
+   auto group_x = 0;
+   auto group_y = 0;
+
    std::string line;
    std::ifstream uv_file(uv);
    if (uv_file.is_open())
@@ -49,7 +52,15 @@ void AmbientOcclusion::load(
          sprite.setPosition(static_cast<float>(x - 5), static_cast<float>(y - 6));
          sprite.setTexture(*_texture);
          sprite.setTextureRect({xi, yi, w, h});
-         _sprites.push_back(sprite);
+
+         // no longer needed
+         // _sprites.push_back(sprite);
+
+         group_x = (x >> 8);
+         group_y = (y >> 8);
+         _sprite_map[group_y][group_x].push_back(sprite);
+
+         // std::cout << group_x << " " << group_y << std::endl;
 
          xi += w;
          if (xi == static_cast<int32_t>(_texture->getSize().x))
@@ -61,7 +72,7 @@ void AmbientOcclusion::load(
 
       uv_file.close();
 
-      std::cout << "[x] loaded " << _sprites.size() << " ao sprites" << std::endl;
+      // std::cout << "[x] loaded " << _sprites.size() << " ao sprites" << std::endl;
    }
    else
    {
@@ -70,34 +81,55 @@ void AmbientOcclusion::load(
 }
 
 
-// optimize this!
-// just check if the sprite is outside the current screen
-// also group sprites to blocks of equal positions
-
-#include "level.h"
-
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-   const auto pos = Player::getCurrent()->getPixelPositionf();
+   const auto& pos_i = Player::getCurrent()->getPixelPositioni();
+   const int32_t bx = pos_i.x >> 8;
+   const int32_t by = pos_i.y >> 8;
 
-//   const auto& screen_rect = Level::getCurrentLevel()->getLevelView();
+   // increase the range if you have smaller AO block sizes
+   constexpr int32_t rxl = 4;
+   constexpr int32_t rxr = 4;
 
-   for (auto& sprite : _sprites)
+   constexpr int32_t ryl = 3;
+   constexpr int32_t ryr = 3;
+
+   for (auto y = by - ryl; y < by + ryr; y++)
    {
-
-//      const auto& sprite_rect = sprite.getGlobalBounds();
-//      if (!screen_rect.get()->getViewport().intersects(sprite_rect))
-//      {
-//         continue;
-//      }
-
-      auto diff = SfmlMath::lengthSquared(pos - sprite.getPosition());
-
-      if (diff > 300000)
+      const auto& y_it = _sprite_map.find(y);
+      if (y_it == _sprite_map.end())
       {
          continue;
       }
 
-      window.draw(sprite, {sf::BlendAlpha});
+      for (auto x = bx - rxl; x < bx + rxr; x++)
+      {
+         const auto& x_it = y_it->second.find(x);
+         if (x_it == y_it->second.end())
+         {
+            continue;
+         }
+
+         // std::cout << "draw " << x_it->second.size() << " sprites" << std::endl;
+
+         for (const auto& sprite : x_it->second)
+         {
+            window.draw(sprite, {sf::BlendAlpha});
+         }
+      }
    }
+
+//   const auto pos_f = Player::getCurrent()->getPixelPositionf();
+//
+//   for (auto& sprite : _sprites)
+//   {
+//      auto diff = SfmlMath::lengthSquared(pos_f - sprite.getPosition());
+//
+//      if (diff > 300000)
+//      {
+//         continue;
+//      }
+//
+//      window.draw(sprite, {sf::BlendAlpha});
+//   }
 }
