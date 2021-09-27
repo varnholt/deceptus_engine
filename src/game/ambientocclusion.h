@@ -20,7 +20,10 @@ public:
 private:
 
    std::shared_ptr<sf::Texture> _texture;
-   std::vector<sf::Sprite> _sprites;
 
+   // for unoptimized approach
+   // std::vector<sf::Sprite> _sprites;
+
+   std::map<int32_t, std::map<int32_t, std::vector<sf::Sprite>>> _sprite_map;
 };
 
