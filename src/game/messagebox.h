@@ -64,6 +64,7 @@ class MessageBox
          int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
       );
 
+      static void showAnimation();
 
    private:
 
@@ -97,8 +98,10 @@ class MessageBox
       static std::unique_ptr<MessageBox> __active;
       static std::vector<std::shared_ptr<Layer>> __layer_stack;
       static std::map<std::string, std::shared_ptr<Layer>> __layers;
+      static std::vector<std::shared_ptr<Layer>> __box_content_layers;
       static sf::Font __font;
       static sf::Text __text;
+      static sf::Vector2f __window_position;
       static bool __initialized;
 };
 
