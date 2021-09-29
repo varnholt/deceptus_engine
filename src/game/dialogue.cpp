@@ -142,10 +142,14 @@ void Dialogue::showNext()
 
    MessageBox::info(
       str,
-      [this](MessageBox::Button /*b*/) {
-         showNext();
-      },
-      MessageBox::LayoutProperties{item.mLocation, item.mBackgroundColor, item.mTextColor, true, false}
+      [this](MessageBox::Button /*b*/) {showNext();},
+      MessageBox::LayoutProperties{
+         item.mLocation,
+         item.mBackgroundColor,
+         item.mTextColor,
+         true,
+         false
+      }
    );
 
    _index++;
