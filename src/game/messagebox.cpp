@@ -1,6 +1,7 @@
 #include "messagebox.h"
 
 #include "displaymode.h"
+#include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
@@ -44,8 +45,10 @@ bool MessageBox::__initialized = false;
 
 std::vector<std::shared_ptr<Layer>> MessageBox::__layer_stack;
 std::map<std::string, std::shared_ptr<Layer>> MessageBox::__layers;
+std::vector<std::shared_ptr<Layer>> MessageBox::__box_content_layers;
 sf::Font MessageBox::__font;
 sf::Text MessageBox::__text;
+sf::Vector2f MessageBox::__window_position;
 
 
 MessageBox::MessageBox(
@@ -199,6 +202,13 @@ void MessageBox::initializeLayers()
          __layers[layer.getName()] = tmp;
       }
 
+      __window_position = __layers["window"]->_sprite->getPosition();
+
+      __box_content_layers.push_back(__layers["yes_xbox_1"]);
+      __box_content_layers.push_back(__layers["no_xbox_1"]);
+      __box_content_layers.push_back(__layers["yes_pc_1"]);
+      __box_content_layers.push_back(__layers["no_pc_1"]);
+
       __initialized = true;
    }
 }
@@ -285,6 +295,45 @@ void MessageBox::initializeControllerCallbacks()
 }
 
 
+void MessageBox::showAnimation()
+{
+   __active->_properties._animate = true;
+
+   auto contents_alpha = 1.0f;
+   const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
+   if (visible_time < sf::seconds(1.0))
+   {
+      contents_alpha = 0.0f;
+      const auto scale_x = visible_time.asSeconds();
+      const auto scale_y = scale_x;
+      const auto scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
+      __layers["window"]->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(scale_x * 255)});
+      __layers["window"]->_sprite->setScale(scale_x, scale_y);
+      __layers["window"]->_sprite->setPosition(__window_position.x + scale_offset, __window_position.y);
+   }
+   else
+   {
+      __layers["window"]->_sprite->setColor(sf::Color{255, 255, 255, 255});
+      __layers["window"]->_sprite->setScale(1.0f, 1.0f);
+      __layers["window"]->_sprite->setPosition(__window_position);
+
+      if (visible_time < sf::seconds(2.0))
+      {
+         contents_alpha = visible_time.asSeconds() - 1.0f;
+      }
+   }
+
+   // fade in text and buttons
+   const auto color = sf::Color{255, 255, 255, static_cast<uint8_t>(contents_alpha * 255)};
+   for (const auto& layer : __box_content_layers)
+   {
+      layer->_sprite->setColor(color);
+   }
+
+   __text.setFillColor(color);
+}
+
+
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (!__active)
@@ -296,14 +345,19 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
    const auto buttons = __active->_buttons;
-   bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
 
-   __layers["temp_bg"]->_visible = menu_shown;
+   // background layer is unused for now
+   // bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
+   // __layers["temp_bg"]->_visible = menu_shown;
+   __layers["temp_bg"]->_visible = false;
+
+   // init button layers
    __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
    __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
    __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
    __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
-   __layers["temp_bg"]->_visible = false;
+
+   // showAnimation();
 
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(
@@ -329,7 +383,11 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (__active->_properties._animate)
    {
-      auto x = (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds()) * 10.0f;
+      auto x = (
+           GlobalClock::getInstance().getElapsedTime().asSeconds()
+         - __active->_show_time.asSeconds()
+      ) * 10.0f;
+
       auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
       if (__active->_chars_shown != to)
       {
