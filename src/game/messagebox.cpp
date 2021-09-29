@@ -15,17 +15,27 @@
 
 namespace
 {
-   std::string replaceAll(std::string str, const std::string& from, const std::string& to)
+std::string replaceAll(std::string str, const std::string& from, const std::string& to)
+{
+   size_t start_pos = 0;
+   while((start_pos = str.find(from, start_pos)) != std::string::npos)
    {
-      size_t start_pos = 0;
-      while((start_pos = str.find(from, start_pos)) != std::string::npos)
-      {
-         str.replace(start_pos, from.length(), to);
-         start_pos += to.length();
-      }
-      return str;
+      str.replace(start_pos, from.length(), to);
+      start_pos += to.length();
    }
+   return str;
 }
+
+static constexpr auto x_offset_left_px   = 110;
+static constexpr auto x_offset_center_px = 160;
+static constexpr auto x_offset_right_px  = 270;
+static constexpr auto y_offset_top_px    =  82;
+static constexpr auto y_offset_middle_px = 149;
+static constexpr auto y_offset_bottom_px = 216;
+static constexpr auto text_margin_x_px   =   8;
+static constexpr auto textbox_width_px   = 324;
+}
+
 
 
 std::unique_ptr<MessageBox> MessageBox::__active;
@@ -204,21 +214,21 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::MiddleLeft:
       case MessageBoxLocation::BottomLeft:
       {
-         pos.x = 110;
+         pos.x = x_offset_left_px;
          break;
       }
       case MessageBoxLocation::TopCenter:
       case MessageBoxLocation::MiddleCenter:
       case MessageBoxLocation::BottomCenter:
       {
-         pos.x = 225;
+         pos.x = x_offset_center_px;
          break;
       }
       case MessageBoxLocation::TopRight:
       case MessageBoxLocation::MiddleRight:
       case MessageBoxLocation::BottomRight:
       {
-         pos.x = 270;
+         pos.x = x_offset_right_px;
          break;
       }
       case MessageBoxLocation::Invalid:
@@ -233,7 +243,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::TopCenter:
       case MessageBoxLocation::TopRight:
       {
-         pos.y = 82;
+         pos.y = y_offset_top_px;
          break;
       }
 
@@ -241,7 +251,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::MiddleCenter:
       case MessageBoxLocation::MiddleRight:
       {
-         pos.y = 149;
+         pos.y = y_offset_middle_px;
          break;
       }
 
@@ -249,7 +259,7 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
       case MessageBoxLocation::BottomCenter:
       case MessageBoxLocation::BottomRight:
       {
-         pos.y = 216;
+         pos.y = y_offset_bottom_px;
          break;
       }
       case MessageBoxLocation::Invalid:
@@ -288,11 +298,6 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto buttons = __active->_buttons;
    bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
 
-   __layers["msg-copyssYN"]->_visible = false;
-   __layers["msg-overwritessYN"]->_visible = false;
-   __layers["msg-deletessYN"]->_visible = false;
-   __layers["msg-defaultsYN"]->_visible = false;
-   __layers["msg-quitYN"]->_visible = false;
    __layers["temp_bg"]->_visible = menu_shown;
    __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
    __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
@@ -342,16 +347,13 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto x = 0;
    if (__active->_properties._centered)
    {
-      // box top/left: 137 x 94
-      // box dimensions: 202 x 71
-      // box left: 143
       const auto rect = __text.getGlobalBounds();
       const auto left = pos.x;
-      x = static_cast<int32_t>(left + (202 - rect.width) * 0.5f);
+      x = static_cast<int32_t>(left + (textbox_width_px - rect.width) * 0.5f);
    }
    else
    {
-      x = pos.x;
+      x = pos.x + text_margin_x_px;
    }
 
    __text.setPosition(
