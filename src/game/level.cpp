@@ -232,6 +232,7 @@ Level::Level()
       &_mechanism_ropes,
       &_mechanism_spike_balls,
       &_mechanism_spikes,
+      &_mechanism_dialogues
    };
 }
 
@@ -494,7 +495,8 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "dialogues")
             {
-               Dialogue::add(tmx_object);
+               auto dialogue = Dialogue::deserialize(tmx_object);
+               _mechanism_dialogues.push_back(dialogue);
             }
             else if (object_group->_name == "bouncers")
             {
@@ -634,7 +636,6 @@ void Level::load()
 
    Weather::getInstance().clear();
    Checkpoint::resetAll();
-   Dialogue::resetAll();
 
    // load tmx
    loadTmx();
@@ -1388,7 +1389,6 @@ void Level::update(const sf::Time& dt)
    _boom_effect.update(dt);
 
    Checkpoint::update();
-   Dialogue::update();
 
    AnimationPlayer::getInstance().update(dt);
 
