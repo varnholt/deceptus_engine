@@ -35,6 +35,9 @@ static constexpr auto y_offset_middle_px = 149;
 static constexpr auto y_offset_bottom_px = 216;
 static constexpr auto text_margin_x_px   =   8;
 static constexpr auto textbox_width_px   = 324;
+
+static const auto animation_scale_time = sf::seconds(0.7f);
+static const auto animation_fade_time = sf::seconds(0.7f);
 }
 
 
@@ -120,11 +123,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
             button = Button::Ok;
          }
 
-         if (__active->_properties._animate)
+         if (__active->_properties._animate_text)
          {
             if (__active->_chars_shown < __active->_message.length())
             {
-               __active->_properties._animate = false;
+               __active->_properties._animate_text = false;
                return true;
             }
          }
@@ -297,17 +300,20 @@ void MessageBox::initializeControllerCallbacks()
 
 void MessageBox::showAnimation()
 {
-   __active->_properties._animate = true;
-
    auto contents_alpha = 1.0f;
    const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
-   if (visible_time < sf::seconds(1.0))
+   if (visible_time < animation_scale_time)
    {
       contents_alpha = 0.0f;
-      const auto scale_x = visible_time.asSeconds();
+
+      const auto t_normalized = visible_time.asSeconds() / animation_scale_time.asSeconds();
+
+      const auto scale_x = Easings::easeOutBack<float>(t_normalized);
       const auto scale_y = scale_x;
+
       const auto scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
-      __layers["window"]->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(scale_x * 255)});
+
+      __layers["window"]->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
       __layers["window"]->_sprite->setScale(scale_x, scale_y);
       __layers["window"]->_sprite->setPosition(__window_position.x + scale_offset, __window_position.y);
    }
@@ -317,9 +323,10 @@ void MessageBox::showAnimation()
       __layers["window"]->_sprite->setScale(1.0f, 1.0f);
       __layers["window"]->_sprite->setPosition(__window_position);
 
-      if (visible_time < sf::seconds(2.0))
+      if (visible_time < animation_scale_time + animation_fade_time)
       {
-         contents_alpha = visible_time.asSeconds() - 1.0f;
+         const auto t_normalized = (visible_time.asSeconds() - animation_scale_time.asSeconds()) / animation_fade_time.asSeconds();
+         contents_alpha = t_normalized;
       }
    }
 
@@ -357,7 +364,10 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
    __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
 
-   // showAnimation();
+   if (__active->_properties._animate_show_event)
+   {
+      showAnimation();
+   }
 
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(
@@ -381,12 +391,17 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    __active->_message = replaceAll(__active->_message, "[br]", "\n");
 
-   if (__active->_properties._animate)
+   if (__active->_properties._animate_text)
    {
       auto x = (
            GlobalClock::getInstance().getElapsedTime().asSeconds()
          - __active->_show_time.asSeconds()
+         - (__active->_properties._animate_show_event ? animation_scale_time.asSeconds() : 0.0f)
       ) * 10.0f;
+
+      // if the thing is animated we want to wait for the animation_scale_time to pass
+      // so x might go into negative for that duration.
+      x = std::max(0.0f, x);
 
       auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
       if (__active->_chars_shown != to)
