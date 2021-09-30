@@ -15,12 +15,10 @@
 #include <sstream>
 #include <string>
 
-std::vector<Dialogue> Dialogue::__dialogues;
 
-
-void Dialogue::add(TmxObject* tmxObject)
+std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmxObject)
 {
-   Dialogue dialogue;
+   auto dialogue = std::make_shared<Dialogue>();
 
    auto properties = tmxObject->_properties;
    for (auto i = 0u; i < 99; i++)
@@ -33,28 +31,22 @@ void Dialogue::add(TmxObject* tmxObject)
       {
          DialogueItem item;
          item.mMessage = (*it).second->_value_string.value();
-         dialogue._dialogue.push_back(item);
+         dialogue->_dialogue_items.push_back(item);
       }
    }
 
-   dialogue._pixel_rect = sf::IntRect{
+   dialogue->_pixel_rect = sf::IntRect{
       static_cast<int32_t>(tmxObject->_x_px),
       static_cast<int32_t>(tmxObject->_y_px),
       static_cast<int32_t>(tmxObject->_width_px),
       static_cast<int32_t>(tmxObject->_height_px)
    };
 
-   __dialogues.push_back(dialogue);
+   return dialogue;
 }
 
 
-void Dialogue::resetAll()
-{
-   __dialogues.clear();
-}
-
-
-void Dialogue::update()
+void Dialogue::update(const sf::Time& /*dt*/)
 {
    // prevent 'pause visible' vs. 'dialogue visible' if both
    // are activated in the same frame.
@@ -76,20 +68,17 @@ void Dialogue::update()
 
    auto playerRect = Player::getCurrent()->getPlayerPixelRect();
 
-   for (auto& dialogue : __dialogues)
+   if (playerRect.intersects(_pixel_rect))
    {
-      if (playerRect.intersects(dialogue._pixel_rect))
+      if (!isActive())
       {
-         if (!dialogue.isActive())
-         {
-            dialogue.setActive(true);
-            dialogue.showNext();
-         }
+         setActive(true);
+         showNext();
       }
-      else
-      {
-         dialogue.setActive(false);
-      }
+   }
+   else
+   {
+      setActive(false);
    }
 }
 
@@ -125,7 +114,7 @@ void Dialogue::replaceTags(std::string& str)
 
 void Dialogue::showNext()
 {
-   if (_index == _dialogue.size())
+   if (_index == _dialogue_items.size())
    {
       _index = 0;
 
@@ -134,7 +123,7 @@ void Dialogue::showNext()
       return;
    }
 
-   const auto item = _dialogue.at(_index);
+   const auto item = _dialogue_items.at(_index);
 
    auto str = item.mMessage;
 
@@ -148,7 +137,8 @@ void Dialogue::showNext()
          item.mBackgroundColor,
          item.mTextColor,
          true,
-         false
+         false,
+         (_index == 0)
       }
    );
 

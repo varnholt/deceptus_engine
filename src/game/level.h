@@ -225,6 +225,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
 
    // graphic effects
    BoomEffect _boom_effect;
