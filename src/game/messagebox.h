@@ -31,8 +31,9 @@ class MessageBox
          MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
          sf::Color _background_color = sf::Color{47, 12, 75};
          sf::Color _text_color = sf::Color{232, 219, 243};
-         bool _animate = false;
+         bool _animate_text = false;
          bool _centered = true;
+         bool _animate_show_event = true;
       };
 
       using MessageBoxCallback = std::function<void(Button)>;
