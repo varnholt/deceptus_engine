@@ -118,7 +118,7 @@ SOURCES += \
    src/game/mechanisms/ropewithlight.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
-   src/game/dialogue.cpp \
+   src/game/mechanisms/dialogue.cpp \
    src/game/displaymode.cpp \
    src/game/effects/blur.cpp \
    src/game/effects/effect.cpp \
@@ -330,7 +330,7 @@ HEADERS += \
    src/game/constants.h \
    src/game/overlays/controlleroverlay.h \
    src/game/debugdraw.h \
-   src/game/dialogue.h \
+   src/game/mechanisms/dialogue.h \
    src/game/displaymode.h \
    src/game/enemy.h \
    src/game/enemydescription.h \
