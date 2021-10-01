@@ -89,22 +89,19 @@ public:
    void drawNormalMap();
    void drawLightMap();
    void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void drawStaticChains(sf::RenderTarget& target);
 
    const std::shared_ptr<b2World>& getWorld() const;
+   const sf::Vector2f& getStartPosition() const;
 
-   std::map<b2Body*, b2Vec2*>* getPointMap();
-   std::map<b2Body*, size_t>* getPointSizeMap();
-
-   static Level* getCurrentLevel();
+   const std::map<b2Body*, b2Vec2*>& getPointMap();
+   const std::map<b2Body*, size_t>& getPointSizeMap();
 
    std::shared_ptr<Portal> getNearbyPortal();
    std::shared_ptr<Bouncer> getNearbyBouncer();
+   const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints();
 
    void toggleMechanisms();
-
-   const sf::Vector2f& getStartPosition() const;
-
-   void drawStaticChains(sf::RenderTarget& target);
 
    std::string getDescriptionFilename() const;
    void setDescriptionFilename(const std::string &description_filename);
@@ -116,8 +113,9 @@ public:
    BoomEffect& getBoomEffect();
 
    const std::shared_ptr<LightSystem>& getLightSystem() const;
-
    const std::shared_ptr<sf::View>& getLevelView() const;
+
+   static Level* getCurrentLevel();
 
 
 protected:
@@ -226,6 +224,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;
 
    // graphic effects
    BoomEffect _boom_effect;
