@@ -11,16 +11,14 @@ public:
    DisplayMode() = default;
 
    static DisplayMode& getInstance();
-   static DisplayMode sInstance;
-
 
    void sync();
    void enqueueSet(Display mode);
    void enqueueUnset(Display mode);
    void enqueueToggle(Display mode);
 
-   int32_t get();
-   bool isSet(Display mode);
+   int32_t get() const;
+   bool isSet(Display mode) const;
 
 private:
 

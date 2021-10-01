@@ -131,37 +131,37 @@ void Console::execute()
       auto& skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
       if (results.at(1) == "climb")
       {
-         skills |= ExtraSkill::SkillWallClimb;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
          _log.push_back("given climb extra to player");
       }
       if (results.at(1) == "crouch")
       {
-         skills |= ExtraSkill::SkillCrouch;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::Crouch);
          _log.push_back("given crouch extra to player");
       }
       else if (results.at(1) == "dash")
       {
-         skills |= ExtraSkill::SkillDash;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::Dash);
          _log.push_back("given dash extra to player");
       }
       else if (results.at(1) == "wallslide")
       {
-         skills |= ExtraSkill::SkillWallSlide;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::WallSlide);
          _log.push_back("given wallslide extra to player");
       }
       else if (results.at(1) == "walljump")
       {
-         skills |= ExtraSkill::SkillWallJump;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::WallJump);
          _log.push_back("given walljump extra to player");
       }
       else if (results.at(1) == "doublejump")
       {
-         skills |= ExtraSkill::SkillDoubleJump;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::DoubleJump);
          _log.push_back("given doublejump extra to player");
       }
       else if (results.at(1) == "invulnerable")
       {
-         skills |= ExtraSkill::SkillInvulnerable;
+         skills |= static_cast<int32_t>(ExtraSkill::Skill::Invulnerable);
          _log.push_back("given invulnerable extra to player");
       }
       else if (results.at(1) == "all")
@@ -240,7 +240,7 @@ void Console::execute()
    }
    else if (results.at(0) == "/iddqd")
    {
-      SaveState::getPlayerInfo().mExtraTable._skills._skills |= ExtraSkill::SkillInvulnerable;
+      SaveState::getPlayerInfo().mExtraTable._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Invulnerable);
       _log.push_back("invulnerable");
    }
    else if (results.at(0) == "/idkfa")

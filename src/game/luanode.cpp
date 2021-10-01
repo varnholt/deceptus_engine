@@ -1330,20 +1330,20 @@ LuaNode::~LuaNode()
 void LuaNode::deserializeEnemyDescription()
 {
    // set up patrol path
-   if (!_enemy_description.mPath.empty())
+   if (!_enemy_description._path.empty())
    {
       std::vector<sf::Vector2f> patrolPath;
 
-      for (auto i = 0u; i < _enemy_description.mPath.size(); i += 2)
+      for (auto i = 0u; i < _enemy_description._path.size(); i += 2)
       {
          auto pos = sf::Vector2f(
-            static_cast<float_t>(_enemy_description.mPath.at(i)),
-            static_cast<float_t>(_enemy_description.mPath.at(i + 1))
+            static_cast<float_t>(_enemy_description._path.at(i)),
+            static_cast<float_t>(_enemy_description._path.at(i + 1))
          );
 
          // by default the path is given is tiles.
          // if we override it, we're setting pixel positions which are already transformed
-         if (_enemy_description.mPositionGivenInTiles)
+         if (_enemy_description._position_in_tiles)
          {
             pos.x *= PIXELS_PER_TILE;
             pos.y *= PIXELS_PER_TILE;
@@ -1358,14 +1358,14 @@ void LuaNode::deserializeEnemyDescription()
    }
 
    // set up start position
-   if (!_enemy_description.mStartPosition.empty())
+   if (!_enemy_description._start_position.empty())
    {
       _start_position = sf::Vector2f(
-         static_cast<float_t>(_enemy_description.mStartPosition.at(0)),
-         static_cast<float_t>(_enemy_description.mStartPosition.at(1))
+         static_cast<float_t>(_enemy_description._start_position.at(0)),
+         static_cast<float_t>(_enemy_description._start_position.at(1))
       );
 
-      if (_enemy_description.mPositionGivenInTiles)
+      if (_enemy_description._position_in_tiles)
       {
          _start_position.x *= PIXELS_PER_TILE;
          _start_position.y *= PIXELS_PER_TILE;
@@ -1455,7 +1455,7 @@ void LuaNode::setupLua()
    }
 
    // register properties
-   for (auto& prop : _enemy_description.mProperties)
+   for (auto& prop : _enemy_description._properties)
    {
       luaWriteProperty(prop._name, prop._value);
    }

@@ -2,10 +2,6 @@
 
 
 //-----------------------------------------------------------------------------
-DisplayMode DisplayMode::sInstance;
-
-
-//-----------------------------------------------------------------------------
 void DisplayMode::toggle(Display mode)
 {
   if (_mode & static_cast<int32_t>(mode))
@@ -64,14 +60,14 @@ void DisplayMode::enqueueToggle(Display mode)
 
 
 //-----------------------------------------------------------------------------
-int32_t DisplayMode::get()
+int32_t DisplayMode::get() const
 {
   return _mode;
 }
 
 
 //-----------------------------------------------------------------------------
-bool DisplayMode::isSet(Display mode)
+bool DisplayMode::isSet(Display mode) const
 {
    return _mode & static_cast<int32_t>(mode);
 }
@@ -80,5 +76,6 @@ bool DisplayMode::isSet(Display mode)
 //-----------------------------------------------------------------------------
 DisplayMode& DisplayMode::getInstance()
 {
-  return sInstance;
+   static DisplayMode __instance;
+   return __instance;
 }
