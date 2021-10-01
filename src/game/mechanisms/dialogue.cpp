@@ -26,13 +26,25 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmxObject)
       std::ostringstream oss;
       oss << std::setw(2) << std::setfill('0') << i;
 
-      auto it = properties->_map.find(oss.str());
-      if (it != properties->_map.end())
+      const auto& it_dialogue_items = properties->_map.find(oss.str());
+      if (it_dialogue_items != properties->_map.end())
       {
          DialogueItem item;
-         item.mMessage = (*it).second->_value_string.value();
+         item.mMessage = (*it_dialogue_items).second->_value_string.value();
          dialogue->_dialogue_items.push_back(item);
       }
+
+      // after giving it some though, this should be done by the default mechanisms
+      //
+      // const auto& it_icon_texture_path = properties->map.find("icon_texture_path");
+      // if (it_icon_texture_path != properties->_map.end())
+      // {
+      // }
+      //
+      // const auto& it_icon_texture_path = properties->map.find("icon_texture_path");
+      // if (it_icon_texture_path != properties->_map.end())
+      // {
+      // }
    }
 
    dialogue->_pixel_rect = sf::IntRect{
