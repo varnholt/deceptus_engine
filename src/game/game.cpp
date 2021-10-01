@@ -919,13 +919,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Audio::getInstance()->playSample("powerup.wav");
 
-         if (SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillWallClimb)
+         if (SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
          {
-            SaveState::getPlayerInfo().mExtraTable._skills._skills &= ~ ExtraSkill::SkillWallClimb;
+            SaveState::getPlayerInfo().mExtraTable._skills._skills &= ~ static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
          }
          else
          {
-            SaveState::getPlayerInfo().mExtraTable._skills._skills |= ExtraSkill::SkillWallClimb;
+            SaveState::getPlayerInfo().mExtraTable._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
          }
          break;
       }

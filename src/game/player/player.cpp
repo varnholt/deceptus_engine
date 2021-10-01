@@ -909,7 +909,7 @@ void Player::updateVelocity()
 
    if (_bend._bending_down)
    {
-      if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillCrouch))
+      if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
       {
          _body->SetLinearVelocity(b2Vec2{0.0, 0.0});
          return;
@@ -1167,7 +1167,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
       return;
    }
 
-   if (SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillInvulnerable)
+   if (SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Invulnerable))
    {
       return;
    }
@@ -1505,7 +1505,7 @@ void Player::resetDash()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
-   if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & ExtraSkill::SkillDash))
+   if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Dash)))
    {
       return;
    }

@@ -12,16 +12,16 @@ class ExtraSkill : public Extra
 public:
    ExtraSkill() = default;
 
-   enum Skill
+   enum class Skill
    {
-      SkillWallClimb    = 0x01,
-      SkillDash         = 0x02,
-      SkillInvulnerable = 0x04,
-      SkillWallSlide    = 0x08,
-      SkillWallJump     = 0x10,
-      SkillDoubleJump   = 0x20,
-      SkillCrouch       = 0x40,
-      SkillSwim         = 0x80
+      WallClimb    = 0x01,
+      Dash         = 0x02,
+      Invulnerable = 0x04,
+      WallSlide    = 0x08,
+      WallJump     = 0x10,
+      DoubleJump   = 0x20,
+      Crouch       = 0x40,
+      Swim         = 0x80
    };
 
    int32_t _skills = 0;

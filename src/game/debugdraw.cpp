@@ -36,17 +36,9 @@ void DebugDraw::DrawPolygon(
 {
    sf::ConvexShape polygon(vertexCount);
 
-   for(int i = 0; i < vertexCount; i++)
+   for (auto i = 0; i < vertexCount; i++)
    {
-      sf::Vector2f transformedVec = DebugDraw::B2VecToSFVec(vertices[i]);
-
-      polygon.setPoint(
-         i,
-         sf::Vector2f(
-            transformedVec.x,
-            transformedVec.y
-         )
-      );
+      polygon.setPoint(i, DebugDraw::B2VecToSFVec(vertices[i]));
    }
 
    polygon.setOutlineThickness(outlineThickness);
