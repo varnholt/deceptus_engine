@@ -1,9 +1,10 @@
 #include "console.h"
 
 #include "bow.h"
-#include "checkpoint.h"
 #include "eventserializer.h"
 #include "extramanager.h"
+#include "level.h"
+#include "mechanisms/checkpoint.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
@@ -186,7 +187,7 @@ void Console::execute()
 
       std::ostringstream os;
 
-      auto checkpoint = Checkpoint::getCheckpoint(n);
+      auto checkpoint = Checkpoint::getCheckpoint(n, Level::getCurrentLevel()->getCheckpoints());
       if (checkpoint)
       {
          auto pos = checkpoint->calcCenter();

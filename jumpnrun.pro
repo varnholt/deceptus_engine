@@ -107,7 +107,7 @@ SOURCES += \
    src/game/camerapane.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
-   src/game/checkpoint.cpp \
+   src/game/mechanisms/checkpoint.cpp \
    src/game/console.cpp \
    src/game/detonationanimation.cpp \
    src/game/effects/lightsystem.cpp \
@@ -325,7 +325,7 @@ HEADERS += \
    src/game/camerapane.h \
    src/game/camerasystem.h \
    src/game/camerasystemconfiguration.h \
-   src/game/checkpoint.h \
+   src/game/mechanisms/checkpoint.h \
    src/game/console.h \
    src/game/constants.h \
    src/game/overlays/controlleroverlay.h \

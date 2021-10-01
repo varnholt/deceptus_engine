@@ -279,7 +279,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 
                   auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
 
-                  for(auto i = 0; i < vertexCount; i++ )
+                  for (auto i = 0; i < vertexCount; i++ )
                   {
                      auto vec2 = poly->GetVertex(i);
                      vertices[i] = vec2;
@@ -362,12 +362,12 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       }
       else
       {
-         auto vertex_it = level->getPointMap()->find(body);
-         auto vertex_count_it = level->getPointSizeMap()->find(body);
+         const auto& vertex_it = level->getPointMap().find(body);
+         const auto& vertex_count_it = level->getPointSizeMap().find(body);
 
          if (
-               vertex_it != level->getPointMap()->end()
-            && vertex_count_it != level->getPointSizeMap()->end()
+               vertex_it != level->getPointMap().end()
+            && vertex_count_it != level->getPointSizeMap().end()
          )
          {
             DrawPolygon(

@@ -3,7 +3,6 @@
 // game
 #include "animationplayer.h"
 #include "camerapane.h"
-#include "checkpoint.h"
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -21,6 +20,7 @@
 #include "levelmap.h"
 #include "luainterface.h"
 #include "mechanisms/bouncer.h"
+#include "mechanisms/checkpoint.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/crusher.h"
 #include "mechanisms/deathblock.h"
@@ -232,7 +232,8 @@ Level::Level()
       &_mechanism_ropes,
       &_mechanism_spike_balls,
       &_mechanism_spikes,
-      &_mechanism_dialogues
+      &_mechanism_dialogues,
+      &_mechanism_checkpoints
    };
 }
 
@@ -484,11 +485,13 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "checkpoints")
             {
-               const auto cpi = Checkpoint::add(tmx_object);
-               auto cp = Checkpoint::getCheckpoint(cpi);
+               const auto cp = Checkpoint::add(tmx_object);
+               const auto cp_index = cp->getIndex();
+
+               _mechanism_checkpoints.push_back(cp);
 
                // whenever we reach a checkpoint, update the checkpoint index in the save state
-               cp->addCallback([cpi](){SaveState::getCurrent()._checkpoint = cpi;});
+               cp->addCallback([cp_index](){SaveState::getCurrent()._checkpoint = cp_index;});
 
                // whenever we reach a checkpoint, serialize the save state
                cp->addCallback([](){SaveState::serializeToFile();});
@@ -635,7 +638,6 @@ void Level::load()
    auto path = std::filesystem::path(_description->_filename).parent_path();
 
    Weather::getInstance().clear();
-   Checkpoint::resetAll();
 
    // load tmx
    loadTmx();
@@ -677,7 +679,7 @@ void Level::initialize()
 void Level::loadCheckpoint()
 {
    auto checkpoint_index = SaveState::getCurrent()._checkpoint;
-   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index);
+   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, _mechanism_checkpoints);
 
    if (checkpoint)
    {
@@ -1388,8 +1390,6 @@ void Level::update(const sf::Time& dt)
    CameraPane::getInstance().update();
    _boom_effect.update(dt);
 
-   Checkpoint::update();
-
    AnimationPlayer::getInstance().update(dt);
 
    for (auto& tileMap : _tile_maps)
@@ -1828,6 +1828,13 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 
 
 //-----------------------------------------------------------------------------
+const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints()
+{
+   return _mechanism_checkpoints;
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::toggleMechanisms()
 {
    for (auto& door : _mechanism_doors)
@@ -1843,16 +1850,16 @@ void Level::toggleMechanisms()
 
 
 //-----------------------------------------------------------------------------
-std::map<b2Body*, size_t>* Level::getPointSizeMap()
+const std::map<b2Body*, size_t>& Level::getPointSizeMap()
 {
-   return &_point_count_map;
+   return _point_count_map;
 }
 
 
 //-----------------------------------------------------------------------------
-std::map<b2Body *, b2Vec2 *>* Level::getPointMap()
+const std::map<b2Body*, b2Vec2*>& Level::getPointMap()
 {
-   return &_point_map;
+   return _point_map;
 }
 
 
