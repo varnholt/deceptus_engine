@@ -11,13 +11,13 @@ struct EnemyDescription
 {
    EnemyDescription() = default;
 
-   std::string mId;
-   std::string mScript;
-   std::vector<int32_t> mStartPosition;
-   std::vector<int32_t> mPath;
-   std::vector<ScriptProperty> mProperties;
-   bool mPositionGivenInTiles = true;
-   bool mGeneratePatrolPath = false;
+   std::string _id;
+   std::string _script;
+   std::vector<int32_t> _start_position;
+   std::vector<int32_t> _path;
+   std::vector<ScriptProperty> _properties;
+   bool _position_in_tiles = true;
+   bool _generate_path = false;
 };
 
 

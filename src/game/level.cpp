@@ -720,32 +720,32 @@ void Level::spawnEnemies()
    // iterate through all enemies in the json
    for (auto& json_description : _description->_enemies)
    {
-      auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + json_description.mScript);
+      auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + json_description._script);
 
       // find matching enemy data from the tmx layer and retrieve the patrol path from there
-      const auto& it = _enemy_data_from_tmx_layer.find(json_description.mId);
+      const auto& it = _enemy_data_from_tmx_layer.find(json_description._id);
       if (it != _enemy_data_from_tmx_layer.end())
       {
          // positions from the tmx are given in pixels, not tiles
-         json_description.mPositionGivenInTiles = false;
+         json_description._position_in_tiles = false;
 
-         json_description.mStartPosition.push_back(it->second._pixel_position.x);
-         json_description.mStartPosition.push_back(it->second._pixel_position.y);
+         json_description._start_position.push_back(it->second._pixel_position.x);
+         json_description._start_position.push_back(it->second._pixel_position.y);
 
-         if (json_description.mGeneratePatrolPath)
+         if (json_description._generate_path)
          {
             it->second.addPaths(_world_chains);
          }
 
          if (!it->second._pixel_path.empty())
          {
-            json_description.mPath = it->second._pixel_path;
+            json_description._path = it->second._pixel_path;
          }
 
          // merge properties from tmx with those loaded from json
          for (auto& property : it->second._properties)
          {
-            json_description.mProperties.push_back(property);
+            json_description._properties.push_back(property);
          }
       }
 
@@ -767,24 +767,24 @@ void Level::spawnEnemies()
          auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + script.value()._value);
 
          EnemyDescription json_description;
-         json_description.mPositionGivenInTiles = false;
-         json_description.mStartPosition.push_back(it.second._pixel_position.x);
-         json_description.mStartPosition.push_back(it.second._pixel_position.y);
+         json_description._position_in_tiles = false;
+         json_description._start_position.push_back(it.second._pixel_position.x);
+         json_description._start_position.push_back(it.second._pixel_position.y);
 
-         if (json_description.mGeneratePatrolPath)
+         if (json_description._generate_path)
          {
             it.second.addPaths(_world_chains);
          }
 
          if (!it.second._pixel_path.empty())
          {
-            json_description.mPath = it.second._pixel_path;
+            json_description._path = it.second._pixel_path;
          }
 
          // merge properties from tmx with those loaded from json
          for (auto& property : it.second._properties)
          {
-            json_description.mProperties.push_back(property);
+            json_description._properties.push_back(property);
          }
 
          // initialize lua node and store enemy
