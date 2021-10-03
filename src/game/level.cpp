@@ -39,6 +39,7 @@
 #include "physics/physicsconfiguration.h"
 #include "player/player.h"
 #include "savestate.h"
+#include "screentransition.h"
 #include "squaremarcher.h"
 #include "texturepool.h"
 #include "tilemap.h"
@@ -1040,9 +1041,9 @@ void Level::drawLayers(
          }
       }
 
-      for (auto& mechanismVector : _mechanisms)
+      for (const auto& mechanism_vector : _mechanisms)
       {
-         for (auto& mechanism : *mechanismVector)
+         for (const auto& mechanism : *mechanism_vector)
          {
             if (mechanism->getZ() == z)
             {
@@ -1377,15 +1378,23 @@ const std::shared_ptr<LightSystem>& Level::getLightSystem() const
 //-----------------------------------------------------------------------------
 void Level::update(const sf::Time& dt)
 {
-   // clear conveyor belt state
-   ConveyorBelt::update();
-
    updateCameraSystem(dt);
    updateViews();
+
+   // don't update anything related to the level while a screen transition is active.
+   // an alternative to this could be just pausing and resuming the game while the transition
+   // is active. it doesn't really matter. so far this is the most simple approach
+   if (ScreenTransitionHandler::getInstance()._transition)
+   {
+      return;
+   }
 
    // 80.0f * dt / 60.f
    // http://www.iforce2d.net/b2dtut/worlds
    _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
+
+   // clear conveyor belt state
+   ConveyorBelt::update();
 
    CameraPane::getInstance().update();
    _boom_effect.update(dt);
@@ -1397,9 +1406,9 @@ void Level::update(const sf::Time& dt)
       tileMap->update(dt);
    }
 
-   for (auto mechanismVector : _mechanisms)
+   for (const auto& mechanism_vector : _mechanisms)
    {
-      for (auto& mechanism : *mechanismVector)
+      for (const auto& mechanism : *mechanism_vector)
       {
          mechanism->update(dt);
       }

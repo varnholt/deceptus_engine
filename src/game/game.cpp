@@ -726,6 +726,7 @@ void Game::update()
          Projectile::update(dt);
          updateGameController();
          updateGameControllerForGame();
+
          _level->update(dt);
          _player->update(dt);
 
