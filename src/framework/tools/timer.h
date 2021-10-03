@@ -17,14 +17,21 @@ public:
       Repeated
    };
 
+   enum class Scope
+   {
+      UpdateAlways,
+      UpdateIngame
+   };
+
    Timer() = default;
    ~Timer() = default;
 
-   static void update();
+   static void update(Scope scope);
    static void add(
       std::chrono::milliseconds interval,
       std::function<void()>,
       Type type = Type::Singleshot,
+      Scope scope = Scope::UpdateAlways,
       const std::shared_ptr<void>& data = nullptr,
       const std::shared_ptr<void>& caller = nullptr
    );
@@ -33,6 +40,7 @@ public:
 
    std::chrono::milliseconds _interval;
    Type _type = Type::Singleshot;
+   Scope _scope = Scope::UpdateAlways;
    std::function<void()> _callback = nullptr;
    std::chrono::high_resolution_clock::time_point _start_time;
    std::shared_ptr<void> _data;
