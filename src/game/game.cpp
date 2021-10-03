@@ -362,7 +362,12 @@ void Game::initialize()
 
    showMainMenu();
 
-   Timer::add(std::chrono::milliseconds(1000), [this](){updateWindowTitle();}, Timer::Type::Repeated);
+   Timer::add(
+      std::chrono::milliseconds(1000),
+      [this](){updateWindowTitle();},
+      Timer::Type::Repeated,
+      Timer::Scope::UpdateAlways
+   );
 
    GameState::getInstance().addCallback(
       [this](ExecutionMode current, ExecutionMode previous){
@@ -679,6 +684,7 @@ void Game::update()
    const auto dt = _delta_clock.getElapsedTime();
    _delta_clock.restart();
 
+   Timer::update(Timer::Scope::UpdateAlways);
    Audio::getInstance()->updateMusic();
 
    // update screen transitions here
@@ -712,7 +718,7 @@ void Game::update()
    }
    else if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {
-      Timer::update();
+      Timer::update(Timer::Scope::UpdateIngame);
 
       if (_level_loading_finished)
       {

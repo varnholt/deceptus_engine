@@ -637,7 +637,8 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
             Timer::add(
                std::chrono::milliseconds(1000),
                [projectile](){projectile->setScheduledForRemoval(true);},
-               Timer::Type::Singleshot
+               Timer::Type::Singleshot,
+               Timer::Scope::UpdateIngame
             );
 
             if (impulse > 0.0003f)
@@ -674,7 +675,8 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
             Timer::add(
                std::chrono::milliseconds(1000),
                [projectile](){projectile->setScheduledForRemoval(true);},
-               Timer::Type::Singleshot
+               Timer::Type::Singleshot,
+               Timer::Scope::UpdateIngame
             );
 
             if (impulse > 0.0003f)
