@@ -362,7 +362,12 @@ void GameController::rumble(float intensity, int ms)
             {
                if (SDL_HapticRumblePlay(_haptic, intensity, ms) == 0)
                {
-                  Timer::add(std::chrono::milliseconds(ms), [this](){cleanupRumble();}, Timer::Type::Singleshot);
+                  Timer::add(
+                     std::chrono::milliseconds(ms),
+                     [this](){cleanupRumble();},
+                     Timer::Type::Singleshot,
+                     Timer::Scope::UpdateAlways
+                  );
                }
             }
          }

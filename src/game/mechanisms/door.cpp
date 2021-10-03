@@ -214,7 +214,12 @@ void Door::toggle()
 void Door::open()
 {
    _state = State::Opening;
-   Timer::add(std::chrono::milliseconds(10000), [this](){close();}, Timer::Type::Singleshot);
+   Timer::add(
+      std::chrono::milliseconds(10000),
+      [this](){close();},
+      Timer::Type::Singleshot,
+      Timer::Scope::UpdateIngame
+   );
 }
 
 

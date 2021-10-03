@@ -7,7 +7,7 @@ std::vector<std::unique_ptr<Timer>> Timer::__timers;
 std::mutex Timer::__mutex;
 
 
-void Timer::update()
+void Timer::update(Scope scope)
 {
    auto now = std::chrono::high_resolution_clock::now();
 
@@ -26,8 +26,13 @@ void Timer::update()
       std::remove_if(
          __timers.begin(),
          __timers.end(),
-         [now](auto& timer) -> bool
+         [now, scope](auto& timer) -> bool
          {
+            if (timer->_scope != scope)
+            {
+               return false;
+            }
+
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer->_start_time);
             auto delta = elapsed - timer->_interval;
 
@@ -58,6 +63,7 @@ void Timer::add(
    std::chrono::milliseconds interval,
    std::function<void ()> callback,
    Type type,
+   Scope scope,
    const std::shared_ptr<void>& data,
    const std::shared_ptr<void>& caller
 )
@@ -65,6 +71,7 @@ void Timer::add(
    std::unique_ptr<Timer> timer = std::make_unique<Timer>();
    timer->_interval = interval;
    timer->_type = type;
+   timer->_scope = scope;
    timer->_start_time = std::chrono::high_resolution_clock::now();
    timer->_callback = callback;
    timer->_data = data;

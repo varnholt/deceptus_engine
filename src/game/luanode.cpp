@@ -1091,6 +1091,7 @@ int32_t timer(lua_State* state)
          std::chrono::milliseconds(delay),
          [node, timerId](){node->luaTimeout(timerId);},
          Timer::Type::Singleshot,
+         Timer::Scope::UpdateIngame,
          nullptr,
          node
       );
