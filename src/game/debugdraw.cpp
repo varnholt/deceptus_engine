@@ -1,5 +1,7 @@
 #include "debugdraw.h"
 
+#include "worldquery.h"
+
 
 static constexpr auto outline_thickness = 0.5f;
 
@@ -17,17 +19,21 @@ sf::Color DebugDraw::glColorToSfml(const b2Color& color, sf::Uint8 alpha)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-sf::Vector2f DebugDraw::b2VecToSfml(const b2Vec2 &vector)
+sf::Vector2f DebugDraw::vecB2S(const b2Vec2 &vector)
 {
-   return sf::Vector2f(
-      vector.x * PPM,
-      vector.y * PPM
-   );
+   return{vector.x * PPM, vector.y * PPM};
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawPolygon(
+b2Vec2 DebugDraw::vecS2B(const sf::Vector2f& vector)
+{
+   return{vector.x * MPP, vector.y * MPP};
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawPolygon(
    sf::RenderTarget& target,
    const b2Vec2* vertices,
    int32 vertexCount,
@@ -38,7 +44,7 @@ void DebugDraw::DrawPolygon(
 
    for (auto i = 0; i < vertexCount; i++)
    {
-      polygon.setPoint(i, DebugDraw::b2VecToSfml(vertices[i]));
+      polygon.setPoint(i, DebugDraw::vecB2S(vertices[i]));
    }
 
    polygon.setOutlineThickness(outline_thickness);
@@ -50,7 +56,7 @@ void DebugDraw::DrawPolygon(
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawSolidPolygon(
+void DebugDraw::drawSolidPolygon(
    sf::RenderTarget& target,
    const b2Vec2* vertices,
    int32 vertex_count,
@@ -60,7 +66,7 @@ void DebugDraw::DrawSolidPolygon(
    sf::ConvexShape polygon(vertex_count);
    for(auto i = 0; i < vertex_count; i++)
    {
-      sf::Vector2f transformedVec = DebugDraw::b2VecToSfml(vertices[i]);
+      sf::Vector2f transformedVec = DebugDraw::vecB2S(vertices[i]);
       polygon.setPoint(i, sf::Vector2f(std::floor(transformedVec.x), std::floor(transformedVec.y)));
    }
 
@@ -73,7 +79,7 @@ void DebugDraw::DrawSolidPolygon(
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawCircle(
+void DebugDraw::drawCircle(
    sf::RenderTarget& target,
    const b2Vec2& center,
    float32 radius,
@@ -82,7 +88,7 @@ void DebugDraw::DrawCircle(
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
-   circle.setPosition(DebugDraw::b2VecToSfml(center));
+   circle.setPosition(DebugDraw::vecB2S(center));
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -92,11 +98,11 @@ void DebugDraw::DrawCircle(
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
-   circle.setPosition(DebugDraw::b2VecToSfml(center));
+   circle.setPosition(DebugDraw::vecB2S(center));
    circle.setFillColor(DebugDraw::glColorToSfml(color, 255));
    circle.setOutlineThickness(1.f);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -104,46 +110,77 @@ void DebugDraw::DrawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
    const auto end_point = center + radius * axis;
    sf::Vertex line[2] =
    {
-      sf::Vertex(DebugDraw::b2VecToSfml(center), DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::b2VecToSfml(end_point), DebugDraw::glColorToSfml(color)),
+      sf::Vertex(DebugDraw::vecB2S(center), DebugDraw::glColorToSfml(color)),
+      sf::Vertex(DebugDraw::vecB2S(end_point), DebugDraw::glColorToSfml(color)),
    };
 
    target.draw(circle);
    target.draw(line, 2, sf::Lines);
 }
 
+
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
+void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
 {
    static constexpr auto pointSize = 3;
 
    sf::Vertex line[] =
    {
-      sf::Vertex(DebugDraw::b2VecToSfml(p) + sf::Vector2f{- pointSize, 0}, DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::b2VecToSfml(p) + sf::Vector2f{  pointSize, 0}, DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::b2VecToSfml(p) + sf::Vector2f{0, - pointSize}, DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::b2VecToSfml(p) + sf::Vector2f{0,   pointSize}, DebugDraw::glColorToSfml(color))
+      sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{- pointSize, 0}, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{  pointSize, 0}, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, - pointSize}, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0,   pointSize}, DebugDraw::glColorToSfml(color))
    };
 
    target.draw(line, 4, sf::Lines);
 }
 
+
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawSegment(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
    sf::Vertex line[] =
    {
-      sf::Vertex(DebugDraw::b2VecToSfml(p1), DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::b2VecToSfml(p2), DebugDraw::glColorToSfml(color))
+      sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)),
+      sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))
    };
 
    target.draw(line, 2, sf::Lines);
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color)
+{
+   const auto sf_color = DebugDraw::glColorToSfml(color);
+   std::vector<sf::Vertex> sf_lines;
+
+   std::transform(lines.begin(), lines.end(), sf_lines.begin(), [sf_color](const auto& val)
+   {
+      return sf::Vertex(vecB2S(val), sf_color);
+   });
+
+   target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
+void DebugDraw::drawLines(sf::RenderTarget& target, const b2Vec2* vertices, int32_t vertex_count, const b2Color& color)
+{
+   const auto sf_color = DebugDraw::glColorToSfml(color);
+   std::vector<sf::Vertex> sf_lines;
+
+   for (auto i = 0; i < vertex_count; i++)
+   {
+      sf_lines.push_back(sf::Vertex(vecB2S(vertices[i]), sf_color));
+   }
+
+   target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
 {
    static constexpr auto line_length = 0.4f;
 
@@ -152,14 +189,14 @@ void DebugDraw::DrawTransform(sf::RenderTarget& target, const b2Transform& xf)
 
    const sf::Vertex line_red[] =
    {
-      sf::Vertex(DebugDraw::b2VecToSfml(xf.p), sf::Color::Red),
-      sf::Vertex(DebugDraw::b2VecToSfml(x_axis), sf::Color::Red)
+      sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Red),
+      sf::Vertex(DebugDraw::vecB2S(x_axis), sf::Color::Red)
    };
 
    const sf::Vertex line_green[] =
    {
-      sf::Vertex(DebugDraw::b2VecToSfml(xf.p), sf::Color::Green),
-      sf::Vertex(DebugDraw::b2VecToSfml(y_axis), sf::Color::Green)
+      sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Green),
+      sf::Vertex(DebugDraw::vecB2S(y_axis), sf::Color::Green)
    };
 
    target.draw(line_red, 2, sf::Lines);
@@ -209,7 +246,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       auto distance_joint = dynamic_cast<b2DistanceJoint*>(joint);
       if (distance_joint != nullptr)
       {
-         DrawSegment(
+         drawLine(
             target,
             distance_joint->GetAnchorA(),
             distance_joint->GetAnchorB(),
@@ -217,6 +254,20 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
          );
       }
    }
+
+   // terribly slow, too :(
+   //
+   // const auto& screen_view = target.getView();
+   //
+   // sf::FloatRect screen = {
+   //    screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
+   //    screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
+   //    screen_view.getSize().x,
+   //    screen_view.getSize().y
+   // };
+   //
+   // auto bodies = retrieveBodiesOnScreen(level->getWorld(), screen);
+   // for (auto body : bodies)
 
    for (
       auto body = level->getWorld()->GetBodyList();
@@ -227,21 +278,21 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       if (
             body->GetType() == b2_dynamicBody
          || body->GetType() == b2_kinematicBody
-#ifdef RELEASE_BUILD
+//#ifdef RELEASE_BUILD
          || body->GetType() == b2_staticBody
-#endif
+//#endif
       )
       {
 
          // draw position and velocity
          static const b2Color point_color{1.0f, 1.0f, 0.0f, 1.0f};
          static constexpr auto max_velocity = 5.0f;
-         DrawPoint(target, body->GetPosition(), point_color);
+         drawPoint(target, body->GetPosition(), point_color);
 
          b2Vec2 normalized_velocity{body->GetLinearVelocity()};
          const auto length = std::clamp(normalized_velocity.Normalize(), 0.0f, max_velocity);
 
-         DrawSegment(
+         drawLine(
             target,
             body->GetPosition(),
             body->GetPosition() + normalized_velocity,
@@ -280,7 +331,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                      vertices[i].y += body->GetPosition().y;
                   }
 
-                  DrawPolygon(target, vertices, vertexCount, b2Color{1, 0, 0, 1});
+                  drawPolygon(target, vertices, vertexCount, b2Color{1, 0, 0, 1});
 
                   delete[] vertices;
                   break;
@@ -297,7 +348,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                      offset = circleShape->m_p;
                   }
 
-                  DrawCircle(
+                  drawCircle(
                      target,
                      body->GetPosition() + offset,
                      shape->m_radius,
@@ -310,7 +361,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                {
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
 
-                  auto vertexCount = chain->m_count;
+                  // auto vertexCount = chain->m_count;
 
                   // to debug static bodies
                   //
@@ -319,19 +370,22 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   //    break;
                   // }
 
-                  auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
+                  // auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
+                  //
+                  // for(auto i = 0; i < vertexCount; i++ )
+                  // {
+                  //    auto vec2 = chain->m_vertices[i];
+                  //    vertices[i] = vec2;
+                  //    vertices[i].x += body->GetPosition().x;
+                  //    vertices[i].y += body->GetPosition().y;
+                  // }
+                  //
+                  // drawPolygon(target, vertices, vertexCount, b2Color{1, 0, 0, 1});
+                  //
+                  // delete[] vertices;
 
-                  for(auto i = 0; i < vertexCount; i++ )
-                  {
-                     auto vec2 = chain->m_vertices[i];
-                     vertices[i] = vec2;
-                     vertices[i].x += body->GetPosition().x;
-                     vertices[i].y += body->GetPosition().y;
-                  }
+                  drawLines(target, chain->m_vertices, chain->m_count, b2Color{1, 0, 0, 1});
 
-                  DrawPolygon(target, vertices, vertexCount, b2Color{1, 0, 0, 1});
-
-                  delete[] vertices;
                   break;
                }
 
@@ -354,7 +408,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
             && vertex_count_it != level->getPointSizeMap().end()
          )
          {
-            DrawPolygon(
+            drawPolygon(
                target,
                vertex_it->second,
                static_cast<int32_t>(vertex_count_it->second),
@@ -399,5 +453,21 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
    target.draw(f1, 2, sf::Lines);
    target.draw(p0, 2, sf::Lines);
    target.draw(p1, 2, sf::Lines);
+}
+
+
+std::vector<b2Body*> DebugDraw::retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
+{
+   b2AABB aabb;
+
+   const auto l = screen.left;
+   const auto r = screen.left + screen.width;
+   const auto t = screen.top;
+   const auto b = screen.top + screen.height;
+
+   aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
+   aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
+
+   return WorldQuery::queryBodies(world, aabb);
 }
 

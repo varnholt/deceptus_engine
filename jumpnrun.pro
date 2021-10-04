@@ -200,6 +200,7 @@ SOURCES += \
    src/game/weaponsystem.cpp \
    src/game/weather.cpp \
    src/game/overlays/weatheroverlay.cpp \
+   src/game/worldquery.cpp \
    src/main.cpp \
    src/menus/menu.cpp \
    src/menus/menuscreen.cpp \
@@ -299,7 +300,8 @@ HEADERS += \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
    src/game/shaderlayer.h \
-   src/game/weaponfactory.h
+   src/game/weaponfactory.h \
+   src/game/worldquery.h
 
 
 # add box2d
