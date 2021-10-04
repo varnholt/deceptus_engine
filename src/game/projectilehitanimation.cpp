@@ -13,10 +13,10 @@ std::map<std::string, AnimationFrameData> ProjectileHitAnimation::__reference_an
 
 namespace
 {
-const auto width = 33;
-const auto height = 32;
-const auto sprites = 6;
-const auto frame_time = 0.075f;
+constexpr auto width = 33;
+constexpr auto height = 32;
+constexpr auto sprites = 6;
+constexpr auto frame_time = 0.075f;
 }
 
 
