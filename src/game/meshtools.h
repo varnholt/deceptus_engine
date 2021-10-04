@@ -11,30 +11,32 @@
 
 namespace Mesh
 {
-   struct Vertex {
-      uint32_t pIndex = 0;
-      uint32_t nIndex = 0;
-      uint32_t tcIndex = 0;
-   };
 
-   void weldVertices(b2Vec2* verts, int32_t count, float threshold = 0.3f);
+struct Vertex {
+   uint32_t pIndex = 0;
+   uint32_t nIndex = 0;
+   uint32_t tcIndex = 0;
+};
 
-   void writeObj(
-      const std::string& filename,
-      const std::vector<b2Vec2>& vertices,
-      const std::vector<std::vector<uint32_t> >& faces
-   );
+void weldVertices(b2Vec2* verts, int32_t count, float threshold = 0.3f);
 
-   void readObj(
-      const std::string& filename,
-      std::vector<b2Vec2>& points,
-      std::vector<std::vector<uint32_t>>& faces
-   );
+void writeObj(
+   const std::string& filename,
+   const std::vector<b2Vec2>& vertices,
+   const std::vector<std::vector<uint32_t> >& faces
+);
 
-   void writeVerticesToImage(
-      const std::vector<b2Vec2>& points,
-      const std::vector<std::vector<uint32_t>>& faces,
-      const sf::Vector2i& textureSize,
-      const std::filesystem::path& imagePath
-   );
+void readObj(
+   const std::string& filename,
+   std::vector<b2Vec2>& points,
+   std::vector<std::vector<uint32_t>>& faces
+);
+
+void writeVerticesToImage(
+   const std::vector<b2Vec2>& points,
+   const std::vector<std::vector<uint32_t>>& faces,
+   const sf::Vector2i& textureSize,
+   const std::filesystem::path& imagePath
+);
+
 }

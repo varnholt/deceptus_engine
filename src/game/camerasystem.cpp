@@ -47,9 +47,6 @@
 */
 
 
-CameraSystem CameraSystem::sInstance;
-
-
 void CameraSystem::update(const sf::Time& dt, float viewWidth, float viewHeight)
 {
    _view_width = viewWidth;
@@ -264,7 +261,8 @@ float CameraSystem::getFocusZoneX1() const
 
 CameraSystem& CameraSystem::getCameraSystem()
 {
-   return sInstance;
+   static CameraSystem __instance;
+   return __instance;
 }
 
 
