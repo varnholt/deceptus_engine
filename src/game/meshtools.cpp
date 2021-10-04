@@ -75,18 +75,18 @@ void Mesh::readObj(
    std::vector<b2Vec2> uvs;
 
    auto trimString = [](std::string& str) {
-      const char* whiteSpace = " \t\n\r";
-      size_t location = str.find_first_not_of(whiteSpace);
+      const char* whitespace = " \t\n\r";
+      size_t location = str.find_first_not_of(whitespace);
       str.erase(0, location);
-      location = str.find_last_not_of(whiteSpace);
+      location = str.find_last_not_of(whitespace);
       str.erase(location + 1);
    };
 
    auto faceCount = 0u;
 
-   std::ifstream objStream(filename, std::ios::in);
+   std::ifstream obj_stream(filename, std::ios::in);
 
-   if (!objStream)
+   if (!obj_stream)
    {
       std::cerr << "unable to open file: " << filename << std::endl;
       return;
@@ -94,17 +94,17 @@ void Mesh::readObj(
 
    std::string line, token;
 
-   getline(objStream, line);
+   getline(obj_stream, line);
 
-   while (!objStream.eof())
+   while (!obj_stream.eof())
    {
      trimString(line);
 
      if (line.length( ) > 0 && line.at(0) != '#')
      {
-         std::istringstream lineStream(line);
+         std::istringstream line_stream(line);
 
-         lineStream >> token;
+         line_stream >> token;
 
          if (token == "v")
          {
@@ -112,7 +112,7 @@ void Mesh::readObj(
              float y = 0.0f;
              float z = 0.0f;
 
-             lineStream >> x >> y >> z;
+             line_stream >> x >> y >> z;
              points.push_back(b2Vec2(x, y));
          }
          else if (token == "vt")
@@ -120,7 +120,7 @@ void Mesh::readObj(
              float s = 0.0f;
              float t = 0.0f;
 
-             lineStream >> s >> t;
+             line_stream >> s >> t;
              uvs.push_back(b2Vec2(s, t));
 
          } else if (token == "vn")
@@ -129,7 +129,7 @@ void Mesh::readObj(
             float y = 0.0f;
             float z = 0.0f;
 
-            lineStream >> x >> y >> z;
+            line_stream >> x >> y >> z;
             normals.push_back(b2Vec2(x, y));
          }
          else if (token == "f")
@@ -138,43 +138,43 @@ void Mesh::readObj(
 
             std::vector<uint32_t> face;
 
-            size_t slash1 = 0;
-            size_t slash2 = 0;
+            size_t slash_1 = 0;
+            size_t slash_2 = 0;
 
-            while (lineStream.good())
+            while (line_stream.good())
             {
-               std::string vertString;
-               lineStream >> vertString;
+               std::string vert_string;
+               line_stream >> vert_string;
 
-               auto pIndex = 0u;
+               auto p_index = 0u;
                auto nIndex = 0u;
                auto tcIndex = 0u;
 
-               slash1 = vertString.find("/");
+               slash_1 = vert_string.find("/");
 
-               if (slash1 == std::string::npos)
+               if (slash_1 == std::string::npos)
                {
-                  pIndex = static_cast<uint32_t>(atoi(vertString.c_str()) - 1);
+                  p_index = static_cast<uint32_t>(atoi(vert_string.c_str()) - 1);
                }
                else
                {
-                  slash2 = vertString.find("/", slash1 + 1);
-                  pIndex = static_cast<uint32_t>(atoi( vertString.substr(0,slash1).c_str() ) - 1);
+                  slash_2 = vert_string.find("/", slash_1 + 1);
+                  p_index = static_cast<uint32_t>(atoi( vert_string.substr(0,slash_1).c_str() ) - 1);
 
-                  if( slash2 > slash1 + 1 )
+                  if( slash_2 > slash_1 + 1 )
                   {
-                     tcIndex = static_cast<uint32_t>(atoi(vertString.substr(slash1 + 1, slash2).c_str() ) - 1);
+                     tcIndex = static_cast<uint32_t>(atoi(vert_string.substr(slash_1 + 1, slash_2).c_str() ) - 1);
                   }
 
-                  nIndex = static_cast<uint32_t>(atoi( vertString.substr(slash2 + 1,vertString.length()).c_str() ) - 1);
+                  nIndex = static_cast<uint32_t>(atoi( vert_string.substr(slash_2 + 1,vert_string.length()).c_str() ) - 1);
                }
 
                Mesh::Vertex vertex;
-               vertex.pIndex = pIndex;
+               vertex.pIndex = p_index;
                vertex.nIndex = nIndex;
                vertex.tcIndex = tcIndex;
 
-               face.push_back(pIndex);
+               face.push_back(p_index);
                vertices.push_back(vertex);
             }
 
@@ -183,7 +183,7 @@ void Mesh::readObj(
             // If number of edges in face is greater than 3,
             // decompose into triangles as a triangle fan.
 
-            std::vector<uint32_t> faceIndices;
+            std::vector<uint32_t> face_indices;
             if (face.size() > 3 && triangulate)
             {
                auto v0 = face[0];
@@ -194,9 +194,9 @@ void Mesh::readObj(
                Mesh::Vertex vt1 = vertices[1];
                Mesh::Vertex vt2 = vertices[2];
 
-               faceIndices.push_back(v0);
-               faceIndices.push_back(v1);
-               faceIndices.push_back(v2);
+               face_indices.push_back(v0);
+               face_indices.push_back(v1);
+               face_indices.push_back(v2);
 
                vertices.push_back(vt0);
                vertices.push_back(vt1);
@@ -210,9 +210,9 @@ void Mesh::readObj(
                   vt1 = vt2;
                   vt2 = vertices[i];
 
-                  faceIndices.push_back(v0);
-                  faceIndices.push_back(v1);
-                  faceIndices.push_back(v2);
+                  face_indices.push_back(v0);
+                  face_indices.push_back(v1);
+                  face_indices.push_back(v2);
 
                   vertices.push_back(vt0);
                   vertices.push_back(vt1);
@@ -223,19 +223,19 @@ void Mesh::readObj(
             {
                for (auto i = 0u; i < face.size(); i++)
                {
-                  faceIndices.push_back(face[i]);
+                  face_indices.push_back(face[i]);
                   vertices.push_back(vertices[i]);
                }
             }
 
-            faces.push_back(faceIndices);
+            faces.push_back(face_indices);
          }
       }
 
-      getline(objStream, line);
+      getline(obj_stream, line);
    }
 
-   objStream.close();
+   obj_stream.close();
 
    // std::cout << "Loaded mesh from: " << filename << std::endl;
    //
@@ -255,8 +255,8 @@ void Mesh::writeVerticesToImage(
 )
 {
    float scale = 1.0f;
-   sf::RenderTexture renderTexture;
-   if (!renderTexture.create(
+   sf::RenderTexture render_texture;
+   if (!render_texture.create(
          static_cast<uint32_t>(textureSize.x * scale),
          static_cast<uint32_t>(textureSize.y * scale)
       )
@@ -266,16 +266,16 @@ void Mesh::writeVerticesToImage(
        return;
    }
 
-   renderTexture.clear();
+   render_texture.clear();
 
    for (const auto& face : faces)
    {
       sf::VertexArray poly(sf::LineStrip, face.size() + 1);
 
       auto i = 0u;
-      for (const auto vertexIndex : face)
+      for (const auto vertex_index : face)
       {
-         const auto& pos = points[vertexIndex];
+         const auto& pos = points[vertex_index];
 
          poly[i].color = sf::Color::Red;
          poly[i].position = sf::Vector2f{pos.x * scale, pos.y * scale};
@@ -287,12 +287,12 @@ void Mesh::writeVerticesToImage(
       poly[face.size()].color = sf::Color::Red;
       poly[face.size()].position = sf::Vector2f{pos.x * scale, pos.y * scale};
 
-      renderTexture.draw(&poly[0], face.size() + 1, sf::LineStrip);
+      render_texture.draw(&poly[0], face.size() + 1, sf::LineStrip);
    }
 
-   renderTexture.display();
+   render_texture.display();
 
    // get the target texture (where the stuff has been drawn)
-   const sf::Texture& texture = renderTexture.getTexture();
+   const sf::Texture& texture = render_texture.getTexture();
    texture.copyToImage().saveToFile(imagePath.string());
 }

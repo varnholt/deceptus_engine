@@ -46,11 +46,11 @@
 
 Room::Room(const sf::FloatRect& rect)
 {
-   static int32_t sId = 0;
+   static int32_t __id = 0;
 
    _rects.push_back(rect);
-   _id = sId;
-   sId++;
+   _id = __id;
+   __id++;
 }
 
 
@@ -68,7 +68,7 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
 }
 
 
-bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const
+bool Room::correctedCamera(float& x, float& y, float focusOffset, float view_ratio_y) const
 {
 
 /*
@@ -110,8 +110,8 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
    // 1) check which in which rectangle the current camera center lies
    //    -> find the right FloatRect
    auto pos = sf::Vector2f{x, y};
-   const auto rectIt =  findRect(pos);
-   if (rectIt == _rects.end())
+   const auto rect_it =  findRect(pos);
+   if (rect_it == _rects.end())
    {
       // that's an error.
       return false;
@@ -123,50 +123,50 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float viewRati
    //    c) screen's top is within room bounds, assign if necessary
    //    d) screen's bottom is within room bounds, assign if necessary
 
-   const auto rect = *rectIt;
+   const auto rect = *rect_it;
 
    const auto config = GameConfiguration::getInstance();
 
    // need to incorporate the focus offset here because the player is not
    // necessarily in the middle of the screen but maybe a little more to the
    // left or to the right depending on its orientation
-   const auto halfWidth  = static_cast<float>(config._view_width / 2.0f);
+   const auto half_width  = static_cast<float>(config._view_width / 2.0f);
    const auto height = static_cast<float>(config._view_height);
 
-   const auto l = pos + sf::Vector2f{- halfWidth - focusOffset, 0.0f};
-   const auto r = pos + sf::Vector2f{  halfWidth - focusOffset, 0.0f};
+   const auto l = pos + sf::Vector2f{- half_width - focusOffset, 0.0f};
+   const auto r = pos + sf::Vector2f{  half_width - focusOffset, 0.0f};
 
-   const auto heightTop = height * (1.0f - 1.0f / viewRatioY);
-   const auto heightBottom = height / viewRatioY;
+   const auto height_top = height * (1.0f - 1.0f / view_ratio_y);
+   const auto height_bottom = height / view_ratio_y;
 
-   const auto u = pos + sf::Vector2f{0.0f, -heightBottom};
-   const auto d = pos + sf::Vector2f{0.0f, heightTop};
+   const auto u = pos + sf::Vector2f{0.0f, -height_bottom};
+   const auto d = pos + sf::Vector2f{0.0f, height_top};
 
    auto corrected = false;
 
    if (!rect.contains(l))
    {
       // camera center is out of left boundary
-      x = rect.left + halfWidth + focusOffset;
+      x = rect.left + half_width + focusOffset;
       corrected = true;
    }
    else if (!rect.contains(r))
    {
       // camera center is out of right boundary
-      x = rect.left + rect.width - halfWidth + focusOffset;
+      x = rect.left + rect.width - half_width + focusOffset;
       corrected = true;
    }
 
    if (!rect.contains(u))
    {
       // camera center is out of upper boundary
-      y = rect.top + heightBottom;
+      y = rect.top + height_bottom;
       corrected = true;
    }
    else if (!rect.contains(d))
    {
       // camera center is out of lower boundary
-      y = rect.top + rect.height - heightTop;
+      y = rect.top + rect.height - height_top;
       corrected = true;
    }
 
@@ -186,28 +186,28 @@ std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::s
 }
 
 
-void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>& rooms)
+void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>& rooms)
 {
    // ignore invalid rects
    const auto config = GameConfiguration::getInstance();
-   if (tmxObject->_width_px < config._view_width)
+   if (tmx_object->_width_px < config._view_width)
    {
       std::cerr << "[!] ignoring rect, room width smaller than screen width" << std::endl;
       return;
    }
 
-   if (tmxObject->_height_px < config._view_height)
+   if (tmx_object->_height_px < config._view_height)
    {
       std::cerr << "[!] ignoring rect, room height smaller than screen height" << std::endl;
       return;
    }
 
    // read key from tmx object
-   std::istringstream f(tmxObject->_name);
+   std::istringstream f(tmx_object->_name);
    std::string key;
    if (!getline(f, key, '_'))
    {
-      key = tmxObject->_name;
+      key = tmx_object->_name;
    }
 
    if (key.empty())
@@ -217,10 +217,10 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>&
    }
 
    auto rect = sf::FloatRect{
-      tmxObject->_x_px,
-      tmxObject->_y_px,
-      tmxObject->_width_px,
-      tmxObject->_height_px
+      tmx_object->_x_px,
+      tmx_object->_y_px,
+      tmx_object->_width_px,
+      tmx_object->_height_px
    };
 
    // check if room already exists
@@ -236,10 +236,10 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>&
       room->_name = key;
 
       // deserialize room properties
-      if (tmxObject->_properties)
+      if (tmx_object->_properties)
       {
-         const auto transition_it = tmxObject->_properties->_map.find("transition");
-         if (transition_it != tmxObject->_properties->_map.end())
+         const auto transition_it = tmx_object->_properties->_map.find("transition");
+         if (transition_it != tmx_object->_properties->_map.end())
          {
             if (transition_it->second->_value_string == "fade_out_fade_in")
             {
@@ -247,32 +247,32 @@ void Room::deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>&
             }
          }
 
-         const auto fade_in_speed_it = tmxObject->_properties->_map.find("fade_in_speed");
-         if (fade_in_speed_it != tmxObject->_properties->_map.end())
+         const auto fade_in_speed_it = tmx_object->_properties->_map.find("fade_in_speed");
+         if (fade_in_speed_it != tmx_object->_properties->_map.end())
          {
             room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
          }
 
-         const auto fade_out_speed_it = tmxObject->_properties->_map.find("fade_out_speed");
-         if (fade_out_speed_it != tmxObject->_properties->_map.end())
+         const auto fade_out_speed_it = tmx_object->_properties->_map.find("fade_out_speed");
+         if (fade_out_speed_it != tmx_object->_properties->_map.end())
          {
             room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
-         const auto delay_between_effects_it = tmxObject->_properties->_map.find("delay_between_effects_ms");
-         if (delay_between_effects_it != tmxObject->_properties->_map.end())
+         const auto delay_between_effects_it = tmx_object->_properties->_map.find("delay_between_effects_ms");
+         if (delay_between_effects_it != tmx_object->_properties->_map.end())
          {
             room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
          }
 
-         const auto camera_sync_after_fade_out_it = tmxObject->_properties->_map.find("camera_sync_after_fade_out");
-         if (camera_sync_after_fade_out_it != tmxObject->_properties->_map.end())
+         const auto camera_sync_after_fade_out_it = tmx_object->_properties->_map.find("camera_sync_after_fade_out");
+         if (camera_sync_after_fade_out_it != tmx_object->_properties->_map.end())
          {
             room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
          }
 
-         const auto delay_it = tmxObject->_properties->_map.find("camera_lock_delay_ms");
-         if (delay_it != tmxObject->_properties->_map.end())
+         const auto delay_it = tmx_object->_properties->_map.find("camera_lock_delay_ms");
+         if (delay_it != tmx_object->_properties->_map.end())
          {
             room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
          }

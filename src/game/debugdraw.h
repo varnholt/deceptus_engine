@@ -14,8 +14,8 @@
 namespace DebugDraw
 {
 
-sf::Color GLColorToSFML(const b2Color &color, sf::Uint8 alpha = 255);
-sf::Vector2f B2VecToSFVec(const b2Vec2 &vector);
+sf::Color glColorToSfml(const b2Color &color, sf::Uint8 alpha = 255);
+sf::Vector2f b2VecToSfml(const b2Vec2 &vector);
 
 void DrawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color);
 void DrawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color);
