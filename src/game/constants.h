@@ -16,21 +16,21 @@
 
 #define GAME_NAME "deceptus"
 
-#define PPM 48.0f
-#define MPP (1.0f/PPM)
+static constexpr auto PPM = 48.0f;
+static constexpr auto MPP = (1.0f / PPM);
 
-#define PIXELS_PER_TILE 24
-#define PIXELS_PER_PHYSICS_TILE 8 // each tile is 8x8 px
+static constexpr auto PIXELS_PER_TILE = 24;
+static constexpr auto PIXELS_PER_PHYSICS_TILE = 8; // each tile is 8x8 px
 
-#define DIFF_PLAYER_TILE_TO_PHYSICS 15 // 20
+static constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15; // 20
 
-#define PLAYER_ANIMATION_CYCLES 8
-#define PLAYER_TILES_WIDTH  24
-#define PLAYER_TILES_HEIGHT 48
-#define PLAYER_ACTUAL_WIDTH  20 // the actual width can be smaller than the tile width
-#define PLAYER_ACTUAL_HEIGHT 32 // the actual height can be smaller than the tile height
+static constexpr auto PLAYER_ANIMATION_CYCLES = 8;
+static constexpr auto PLAYER_TILES_WIDTH  = 24;
+static constexpr auto PLAYER_TILES_HEIGHT = 48;
+static constexpr auto PLAYER_ACTUAL_WIDTH  = 20; // the actual width can be smaller than the tile width
+static constexpr auto PLAYER_ACTUAL_HEIGHT = 32; // the actual height can be smaller than the tile height
 
-#define PLAYER_1_COLLISION_ID 3
+static constexpr auto PLAYER_1_COLLISION_ID = 3;
 
 #ifndef DEGTORAD
 #define DEGTORAD 0.0174532925199432957f
@@ -46,7 +46,7 @@
 //   pixel pos: 2808.000000, 8740.535156
 // 8739.437500 - 8740.535156 = 1.097656
 // 1 / 1.097656 => 0.91103223596463737272879663574016
-#define TIMESTEP_ERROR 0.91192227210220912883854305376065f
+static constexpr auto TIMESTEP_ERROR = 0.91192227210220912883854305376065f;
 
 
 enum class DeathReason
