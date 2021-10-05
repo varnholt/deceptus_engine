@@ -278,9 +278,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       if (
             body->GetType() == b2_dynamicBody
          || body->GetType() == b2_kinematicBody
-//#ifdef RELEASE_BUILD
          || body->GetType() == b2_staticBody
-//#endif
       )
       {
 
@@ -311,41 +309,18 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                case b2Shape::e_polygon:
                {
                   auto poly = dynamic_cast<b2PolygonShape*>(shape);
-
-                  auto vertexCount = poly->GetVertexCount();
-
-                  // to debug static bodies
-                  //
-                  // if (vertexCount > 100)
-                  // {
-                  //    break;
-                  // }
-
-                  auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
-
-                  for (auto i = 0; i < vertexCount; i++ )
-                  {
-                     auto vec2 = poly->GetVertex(i);
-                     vertices[i] = vec2;
-                     vertices[i].x += body->GetPosition().x;
-                     vertices[i].y += body->GetPosition().y;
-                  }
-
-                  drawPolygon(target, vertices, vertexCount, b2Color{1, 0, 0, 1});
-
-                  delete[] vertices;
+                  drawLines(target, poly->m_vertices, poly->m_count, b2Color{1, 0, 0, 1});
                   break;
                }
 
                case b2Shape::e_circle:
                {
                   b2Vec2 offset{0.0f, 0.0f};
-                  b2CircleShape* circleShape = nullptr;
-                  circleShape = dynamic_cast<b2CircleShape*>(f->GetShape());
+                  auto circle_shape = dynamic_cast<b2CircleShape*>(f->GetShape());
 
-                  if (circleShape != nullptr)
+                  if (circle_shape != nullptr)
                   {
-                     offset = circleShape->m_p;
+                     offset = circle_shape->m_p;
                   }
 
                   drawCircle(
@@ -360,32 +335,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                case b2Shape::e_chain:
                {
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
-
-                  // auto vertexCount = chain->m_count;
-
-                  // to debug static bodies
-                  //
-                  // if (vertexCount > 100)
-                  // {
-                  //    break;
-                  // }
-
-                  // auto vertices = new b2Vec2[static_cast<size_t>(vertexCount)];
-                  //
-                  // for(auto i = 0; i < vertexCount; i++ )
-                  // {
-                  //    auto vec2 = chain->m_vertices[i];
-                  //    vertices[i] = vec2;
-                  //    vertices[i].x += body->GetPosition().x;
-                  //    vertices[i].y += body->GetPosition().y;
-                  // }
-                  //
-                  // drawPolygon(target, vertices, vertexCount, b2Color{1, 0, 0, 1});
-                  //
-                  // delete[] vertices;
-
                   drawLines(target, chain->m_vertices, chain->m_count, b2Color{1, 0, 0, 1});
-
                   break;
                }
 
@@ -408,7 +358,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
             && vertex_count_it != level->getPointSizeMap().end()
          )
          {
-            drawPolygon(
+            drawLines(
                target,
                vertex_it->second,
                static_cast<int32_t>(vertex_count_it->second),
