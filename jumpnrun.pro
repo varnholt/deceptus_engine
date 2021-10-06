@@ -107,6 +107,7 @@ SOURCES += \
    src/game/camerapane.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
+   src/framework/tools/elapsedtimer.cpp \
    src/game/mechanisms/checkpoint.cpp \
    src/game/console.cpp \
    src/game/detonationanimation.cpp \
@@ -290,6 +291,7 @@ HEADERS += \
    src/game/animationplayer.h \
    src/game/arrow.h \
    src/game/detonationanimation.h \
+   src/framework/tools/elapsedtimer.h \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/gameclock.h \

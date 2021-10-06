@@ -1,5 +1,8 @@
 #include "debugdraw.h"
 
+#include <iostream>
+
+#include "framework/tools/elapsedtimer.h"
 #include "worldquery.h"
 
 
@@ -255,25 +258,30 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       }
    }
 
-   // terribly slow, too :(
-   //
-   // const auto& screen_view = target.getView();
-   //
-   // sf::FloatRect screen = {
-   //    screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
-   //    screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
-   //    screen_view.getSize().x,
-   //    screen_view.getSize().y
-   // };
-   //
-   // auto bodies = retrieveBodiesOnScreen(level->getWorld(), screen);
-   // for (auto body : bodies)
+   const auto& screen_view = target.getView();
 
-   for (
-      auto body = level->getWorld()->GetBodyList();
-      body != nullptr;
-      body = body->GetNext()
-   )
+   sf::FloatRect screen = {
+      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
+      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
+      screen_view.getSize().x,
+      screen_view.getSize().y
+   };
+
+   // optimization is to only use bodies on screen by doing some world querying.
+   // that reduces the amount of bodies to about 1/5, depending on the level complexity.
+   //
+   // std::cout << "bodies on screen " << bodies.size() << " / " << level->getWorld()->GetBodyCount() << std::endl;
+   //
+   // for (
+   //    auto body = level->getWorld()->GetBodyList();
+   //    body != nullptr;
+   //    body = body->GetNext()
+   // )
+   //
+
+   std::vector<b2Body*> bodies = retrieveBodiesOnScreen(level->getWorld(), screen);
+
+   for (auto body : bodies)
    {
       if (
             body->GetType() == b2_dynamicBody
