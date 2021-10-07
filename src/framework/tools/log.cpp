@@ -64,11 +64,11 @@ void Log::error(const std::string_view& message, const std::source_location& sou
 }
 
 
-Log::Info::Info(const std::source_location& source)
-   : _source_location(source)
+Log::Info::Info(const std::source_location& source_location)
+   : _source_location(source_location)
 {
-
 }
+
 
 Log::Info::~Info()
 {
