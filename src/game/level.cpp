@@ -13,6 +13,7 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/logger.h"
 #include "framework/tools/timer.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
@@ -320,7 +321,7 @@ void Level::loadTmx()
    std::cout << "[x] parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
    elapsed.restart();
 
-   std::cout << "[x] loading tmx... " << std::endl;
+   Logger::info("loading tmx... ");
 
    _tmx_elements = _tmx_parser->getElements();
 
