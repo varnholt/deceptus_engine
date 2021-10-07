@@ -5,7 +5,7 @@ CONFIG_APP_NAME = deceptus
 DEFINES += _USE_MATH_DEFINES
 DEFINES += USE_GL
 
-CONFIG += c++17
+CONFIG += c++latest
 CONFIG -= debug_and_release
 
 OBJECTS_DIR = .obj
@@ -91,6 +91,7 @@ INCLUDEPATH += src/game
 INCLUDEPATH += src/thirdparty
 
 SOURCES += \
+   src/framework/tools/logger.cpp \
    src/framework/tools/stopwatch.cpp \
    src/game/ambientocclusion.cpp \
    src/game/animation.cpp \
@@ -286,6 +287,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
+   src/framework/tools/logger.h \
    src/framework/tools/stopwatch.h \
    src/game/animationframedata.h \
    src/game/animationplayer.h \
