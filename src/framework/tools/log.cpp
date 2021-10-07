@@ -64,9 +64,15 @@ void Log::error(const std::string_view& message, const std::source_location& sou
 }
 
 
+Log::Info::Info(const std::source_location& source)
+   : _source_location(source)
+{
+
+}
+
 Log::Info::~Info()
 {
-   info(str(), std::source_location::current());
+   info(str(), _source_location);
 }
 
 
