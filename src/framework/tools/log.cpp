@@ -1,4 +1,4 @@
-#include "logger.h"
+#include "log.h"
 
 #include <chrono>
 #include <filesystem>
@@ -6,8 +6,18 @@
 
 // https://en.cppreference.com/w/cpp/utility/source_location
 
+namespace
+{
 
-void Logger::log(
+enum class Level : char
+{
+   Info    = 'i',
+   Warning = 'w',
+   Error   = 'e'
+};
+
+
+void log(
    Level level,
    const std::string_view& message,
    const std::source_location& source_location
@@ -17,7 +27,7 @@ void Logger::log(
    const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), now};
    const auto source_tag = std::format(
       "{}:{}:{}",
-      std::filesystem::path(source_location.file_name()).filename().string(),
+      std::filesystem::path{source_location.file_name()}.filename().string(),
       source_location.function_name(),
       source_location.line()
    );
@@ -33,21 +43,40 @@ void Logger::log(
    << std::endl;
 }
 
+}
 
-void Logger::info(const std::string_view& message, const std::source_location& source_location)
+
+void Log::info(const std::string_view& message, const std::source_location& source_location)
 {
    log(Level::Info, message, source_location);
 }
 
 
-void Logger::warning(const std::string_view& message, const std::source_location& source_location)
+void Log::warning(const std::string_view& message, const std::source_location& source_location)
 {
    log(Level::Warning, message, source_location);
 }
 
 
-void Logger::error(const std::string_view& message, const std::source_location& source_location)
+void Log::error(const std::string_view& message, const std::source_location& source_location)
 {
    log(Level::Error, message, source_location);
 }
 
+
+Log::Info::~Info()
+{
+   info(str(), std::source_location::current());
+}
+
+
+Log::Warning::~Warning()
+{
+   warning(str(), std::source_location::current());
+}
+
+
+Log::Error::~Error()
+{
+   error(str(), std::source_location::current());
+}

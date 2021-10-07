@@ -91,7 +91,7 @@ INCLUDEPATH += src/game
 INCLUDEPATH += src/thirdparty
 
 SOURCES += \
-   src/framework/tools/logger.cpp \
+   src/framework/tools/log.cpp \
    src/framework/tools/stopwatch.cpp \
    src/game/ambientocclusion.cpp \
    src/game/animation.cpp \
@@ -287,7 +287,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
-   src/framework/tools/logger.h \
+   src/framework/tools/log.h \
    src/framework/tools/stopwatch.h \
    src/game/animationframedata.h \
    src/game/animationplayer.h \
