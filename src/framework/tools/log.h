@@ -1,10 +1,8 @@
 #pragma once
 
-
-#include <string_view>
 #include <source_location>
-
 #include <sstream>
+#include <string_view>
 
 namespace Log
 {
