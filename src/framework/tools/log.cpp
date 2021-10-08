@@ -1,10 +1,13 @@
 #include "log.h"
 
+
 #include <chrono>
 #include <filesystem>
 #include <iostream>
 
 // https://en.cppreference.com/w/cpp/utility/source_location
+// https://en.cppreference.com/w/cpp/chrono/zoned_time/formatter
+
 
 namespace
 {
@@ -26,7 +29,7 @@ void log(
    const auto now = std::chrono::system_clock::now();
    const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), now};
    const auto source_tag = std::format(
-      "{}:{}:{}",
+      "{0}:{1}:{2}",
       std::filesystem::path{source_location.file_name()}.filename().string(),
       source_location.function_name(),
       source_location.line()
@@ -34,7 +37,7 @@ void log(
 
    std::cout
       << std::format(
-            "[{}] {} | {}: {}",
+            "[{0}] {1:%T} | {2}: {3}",
             static_cast<char>(level),
             now_local,
             source_tag,
@@ -64,25 +67,35 @@ void Log::error(const std::string_view& message, const std::source_location& sou
 }
 
 
+Log::Message::Message(const std::source_location& source_location, const LogFunction& log_function)
+ : _source_location(source_location),
+   _log_function(log_function)
+{
+}
+
+
+Log::Message::~Message()
+{
+   _log_function(str(), _source_location);
+}
+
+
 Log::Info::Info(const std::source_location& source_location)
-   : _source_location(source_location)
+ : Message(source_location, info)
 {
 }
 
 
-Log::Info::~Info()
+Log::Warning::Warning(const std::source_location& source_location)
+ : Message(source_location, warning)
 {
-   info(str(), _source_location);
 }
 
 
-Log::Warning::~Warning()
+Log::Error::Error(const std::source_location& source_location)
+ : Message(source_location, error)
 {
-   warning(str(), std::source_location::current());
 }
 
 
-Log::Error::~Error()
-{
-   error(str(), std::source_location::current());
-}
+
