@@ -20,11 +20,11 @@
 
 namespace
 {
-static const auto updateTimeUpMs = 5;
-static const auto updateTimeDownMs = 30;
-static const auto downTime = 2000;
-static const auto upTime = 2000;
-static const auto trapTime = 250;
+static const auto update_time_up_ms = 5;
+static const auto update_time_down_ms = 30;
+static const auto down_time_ms = 2000;
+static const auto up_tims_ms = 2000;
+static const auto trap_time_ms = 250;
 }
 
 
@@ -49,7 +49,7 @@ void Spikes::updateInterval()
    {
       _triggered = false;
 
-      if (_elapsed_ms < upTime)
+      if (_elapsed_ms < up_tims_ms)
       {
          wait = true;
       }
@@ -59,13 +59,13 @@ void Spikes::updateInterval()
    {
       _triggered = true;
 
-      if (_elapsed_ms < downTime)
+      if (_elapsed_ms < down_time_ms)
       {
          wait = true;
       }
    }
 
-   const auto updateTime = (_triggered ? updateTimeUpMs : updateTimeDownMs);
+   const auto updateTime = (_triggered ? update_time_up_ms : update_time_down_ms);
    if (!wait && _elapsed_ms > updateTime)
    {
       _elapsed_ms = (_elapsed_ms % updateTime);
@@ -100,7 +100,7 @@ void Spikes::updateTrap()
    {
       _triggered = false;
 
-      if (_elapsed_ms < upTime)
+      if (_elapsed_ms < up_tims_ms)
       {
          return;
       }
@@ -124,7 +124,7 @@ void Spikes::updateTrap()
       // trap was activated
       if (_triggered)
       {
-         if (_elapsed_ms < trapTime)
+         if (_elapsed_ms < trap_time_ms)
          {
             return;
          }
@@ -135,7 +135,7 @@ void Spikes::updateTrap()
       }
    }
 
-   const auto updateTime = (_triggered ? updateTimeUpMs : updateTimeDownMs);
+   const auto updateTime = (_triggered ? update_time_up_ms : update_time_down_ms);
    if (_elapsed_ms > updateTime)
    {
       _elapsed_ms = (_elapsed_ms % updateTime);
@@ -257,19 +257,19 @@ void Spikes::update(const sf::Time& dt)
 
 std::vector<std::shared_ptr<Spikes> > Spikes::load(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::filesystem::path& basePath,
+   TmxTileSet* tileset,
+   const std::filesystem::path& base_path,
    Mode mode
 )
 {
-   auto texture = TexturePool::getInstance().get(basePath / "tilesets" / "spikes.png");
+   auto texture = TexturePool::getInstance().get(base_path / "tilesets" / "spikes.png");
 
-   std::vector<std::shared_ptr<Spikes>> allSpikes;
+   std::vector<std::shared_ptr<Spikes>> all_spikes;
 
    const auto tiles    = layer->_data;
    const auto width    = layer->_width_px;
    const auto height   = layer->_height_px;
-   const auto firstId  = tileSet->_first_gid;
+   const auto firstId  = tileset->_first_gid;
 
    const int32_t tilesPerRow = texture->getSize().x / PIXELS_PER_TILE;
 
@@ -285,17 +285,14 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             auto spikes = std::make_shared<Spikes>();
             spikes->_texture = texture;
 
-            allSpikes.push_back(spikes);
+            all_spikes.push_back(spikes);
 
             spikes->_tile_position.x = static_cast<float>(i);
             spikes->_tile_position.y = static_cast<float>(j);
 
-            // std::cout << "look up: " << id << std::endl;
-
             spikes->_tu = static_cast<int32_t>(id % tilesPerRow);
             spikes->_tv = static_cast<int32_t>(id / tilesPerRow);
 
-            // spikes->mMode = Mode::Interval;
             spikes->_mode = mode;
 
             if (mode == Mode::Trap)
@@ -330,6 +327,6 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
       }
    }
 
-   return allSpikes;
+   return all_spikes;
 }
 

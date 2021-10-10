@@ -77,8 +77,6 @@ bool SmokeEffect::onLoad()
 //-----------------------------------------------------------------------------
 std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxObjectGroup* /*objectGroup*/)
 {
-   // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
-
    auto smokeEffect = std::make_shared<SmokeEffect>();
 
    if (tmxObject->_properties)
@@ -87,7 +85,6 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmxObject, TmxO
       if (z != tmxObject->_properties->_map.end())
       {
          smokeEffect->_z = tmxObject->_properties->_map["z"]->_value_int.value();
-         std::cout << "smoke effect layer has z: " << smokeEffect->_z << std::endl;
       }
    }
 

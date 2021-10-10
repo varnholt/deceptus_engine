@@ -33,7 +33,7 @@ AnimationFrameData::AnimationFrameData(
       const auto x = (i % frames_per_row);
       const auto y = static_cast<int32_t>((floor(static_cast<float>(i) / frames_per_row)));
 
-      // std::cout << this << " x: " << x << " y: " << y << std::endl;
+      // Log::Info() << this << " x: " << x << " y: " << y;
 
       _frames.push_back(
          sf::IntRect(

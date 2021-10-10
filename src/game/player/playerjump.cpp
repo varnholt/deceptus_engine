@@ -331,7 +331,7 @@ void PlayerJump::updateLostGroundContact()
 
       // if (mGroundContactJustLost)
       // {
-      //    std::cout << "allowed to jump for another " << timeDiff << "ms" << std::endl;
+      //    Log::Info() << "allowed to jump for another " << timeDiff << "ms";
       // }
    }
    else
@@ -403,7 +403,7 @@ void PlayerJump::updateWallJump()
 
    _body->ApplyForceToCenter(_walljump_multiplier * _walljump_direction, true);
 
-   // std::cout << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y << std::endl;
+   // Log::Info() << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y;
 
    _walljump_frame_count--;
 }

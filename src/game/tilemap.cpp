@@ -13,6 +13,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "player/player.h"
 #include "texturepool.h"
 
@@ -71,7 +72,7 @@ bool TileMap::load(
    const auto normal_map_path = (path.parent_path() / normal_map_filename);
    if (std::filesystem::exists(normal_map_path))
    {
-      std::cout << "[x] found normal map for " << path.string() << std::endl;
+      Log::Info() << "found normal map for " << path.string();
       _normal_map = TexturePool::getInstance().get(normal_map_path);
    }
 
@@ -87,7 +88,7 @@ bool TileMap::load(
       }
    }
 
-   // std::cout << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path << std::endl;
+   // Log::Info() << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path;
 
    _tile_size = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
    _visible = layer->_visible;

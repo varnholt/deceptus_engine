@@ -6,6 +6,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/log.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;
@@ -65,7 +66,7 @@ void GameConfiguration::deserialize(const std::string& data)
    }
    catch (const std::exception& e)
    {
-       std::cout << e.what() << std::endl;
+       Log::Error() << e.what();
    }
 }
 

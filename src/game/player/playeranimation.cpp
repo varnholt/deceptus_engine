@@ -8,6 +8,7 @@
 
 #include "animationpool.h"
 #include "camerapane.h"
+#include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "game/gameclock.h"
 #include "mechanisms/portal.h"
@@ -443,7 +444,7 @@ void PlayerAnimation::generateJson()
    std::ofstream file(json_filename);
    file << data;
 
-   std::cout << "[x] written updated animations to:  " << json_filename << std::endl;
+   Log::Info() << "written updated animations to:  " << json_filename;
 }
 
 
@@ -649,8 +650,6 @@ void PlayerAnimation::updateV2(
       const auto dash_count_regular = dash_count_max - (dash_count_max / 5);
       const auto dash_count_stop = dash_count_max / 5;
 
-      // std::cout << data._dash_frame_count << std::endl;
-
       if (data._dash_frame_count > dash_count_regular)
       {
          next_cycle = (data._dash_dir == Dash::Left) ? _dash_init_l_2 : _dash_init_r_2;
@@ -704,8 +703,6 @@ void PlayerAnimation::updateV2(
          {
             _bend_down_idle_r_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_r_2 : _bend_down_idle_r_2;
          }
-
-         // std::cout << "now in bend down idle" << std::endl;
       }
    }
 
@@ -774,8 +771,6 @@ void PlayerAnimation::updateV2(
             // jump midair
             if (_jump_animation_reference == 1)
             {
-               // static int32_t counter = 0;
-               // std::cout << counter++ << std::endl;
                next_cycle = data._points_right ? _jump_midair_r_2 : _jump_midair_l_2;
             }
          }
@@ -855,8 +850,6 @@ void PlayerAnimation::updateV2(
    {
       next_cycle->seekToStart();
       next_cycle->play();
-
-      // std::cout << nextCycle->_name << std::endl;
    }
 
    _current_cycle = next_cycle;

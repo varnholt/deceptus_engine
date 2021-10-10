@@ -3,6 +3,7 @@
 #include "bow.h"
 #include "eventserializer.h"
 #include "extramanager.h"
+#include "framework/tools/log.h"
 #include "level.h"
 #include "mechanisms/checkpoint.h"
 #include "player/player.h"
@@ -94,7 +95,7 @@ void Console::giveWeaponDefault()
 
 void Console::execute()
 {
-   std::cout << "[i] process command: " << _command << std::endl;
+   Log::Info() << "process command: " << _command;
 
    // not sure what's the best behavior, probably just staying active until deactivated
    // mActive = false;

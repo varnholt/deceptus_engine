@@ -565,7 +565,7 @@ void GameContactListener::EndContact(b2Contact* contact)
    }
 
    // debug();
-   // std::cout << "left arm: " << mNumArmLeftContacts << " " << "right arm: " << mNumArmRightContacts << std::endl;
+   // Log::Info() << "left arm: " << mNumArmLeftContacts << " " << "right arm: " << mNumArmRightContacts;
 }
 
 
@@ -602,7 +602,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
    //
    // if (normalMax > 0.025f || tangentMax > 0.01f)
    // {
-   //    std::cout << "normal max: " << normalMax << " tangent max: " << tangentMax << std::endl;
+   //    Log::Info() << "normal max: " << normalMax << " tangent max: " << tangentMax;
    // }
 
    // check if the player hits something at a heigh speed or
@@ -643,7 +643,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
             if (impulse > 0.0003f)
             {
-               // std::cout << "arrow hit with " << impulse << std::endl;
+               // Log::Info() << "arrow hit with " << impulse;
                projectile->setScheduledForInactivity(true);
             }
          }
@@ -681,7 +681,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
             if (impulse > 0.0003f)
             {
-               // std::cout << "arrow hit with " << impulse << std::endl;
+               // Log::Info() << "arrow hit with " << impulse;
                projectile->setScheduledForInactivity(true);
             }
          }

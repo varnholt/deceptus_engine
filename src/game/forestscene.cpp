@@ -2,6 +2,7 @@
 
 #include "gameconfiguration.h"
 #include "framework/image/psd.h"
+#include "framework/tools/log.h"
 
 #include <math.h>
 #include <iostream>
@@ -20,15 +21,13 @@ ForestScene::ForestScene()
    }
    else
    {
-      std::cerr << "font load fuckup" << std::endl;
+      Log::Error() << "font load fuckup";
    }
 
    // load ingame psd
    PSD psd;
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/scenes/forest.psd");
-
-   // std::cout << mFilename << std::endl;
 
    for (const auto& layer : psd.getLayers())
    {
@@ -37,8 +36,6 @@ ForestScene::ForestScene()
       {
          continue;
       }
-
-      // std::cout << layer.getName() << std::endl;
 
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = true; // layer.isVisible();

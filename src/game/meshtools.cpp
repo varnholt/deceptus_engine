@@ -1,5 +1,7 @@
 #include "meshtools.h"
 
+#include "framework/tools/log.h"
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -88,7 +90,7 @@ void Mesh::readObj(
 
    if (!obj_stream)
    {
-      std::cerr << "unable to open file: " << filename << std::endl;
+      Log::Error() << "unable to open file: " << filename;
       return;
    }
 
@@ -238,7 +240,6 @@ void Mesh::readObj(
    obj_stream.close();
 
    // std::cout << "Loaded mesh from: " << filename << std::endl;
-   //
    // std::cout << " " << points.size()     << " points"      << std::endl;
    // std::cout << " " << faceCount         << " faces"       << std::endl;
    // std::cout << " " << faces.size() / 3  << " triangles."  << std::endl;

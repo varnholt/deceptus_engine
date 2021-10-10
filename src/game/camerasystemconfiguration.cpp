@@ -86,7 +86,6 @@ void CameraSystemConfiguration::deserializeFromFile(const std::string &filename)
 
   while (ifs.good())
   {
-    // std::cout << c;
     data.push_back(c);
     c = ifs.get();
   }

@@ -229,11 +229,6 @@ void MenuScreenNameSelect::loadingFinished()
 
 void MenuScreenNameSelect::updateLayers()
 {
-   // for (auto& layer : mLayers)
-   // {
-   //    std::cout << layer.first << std::endl;
-   // }
-
    auto cursor = _layers["cursor"];
    cursor->_sprite->setPosition(
       static_cast<float>(_char_origin.x + _char_offset.x * charWidth),

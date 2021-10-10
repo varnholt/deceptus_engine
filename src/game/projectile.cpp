@@ -117,7 +117,7 @@ void Projectile::addHitAnimations()
       float gx = vec.x * PPM;
       float gy = vec.y * PPM;
 
-      // std::cout << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle << std::endl;
+      // Log::Info() << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle;
 
       auto reference_animation = ProjectileHitAnimation::getReferenceAnimation(hit_info._projectile_animation_identifier);
       ProjectileHitAnimation::playHitAnimation(gx, gy, it->_angle, reference_animation->second);

@@ -200,8 +200,6 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
 
       if (it != tmxObject->_properties->_map.end())
       {
-         // std::cout << it->second->mValueStr << std::endl;
-
          const auto alignment = it->second->_value_string;
          if (alignment == "up")
          {

@@ -109,6 +109,7 @@ SOURCES += \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/framework/tools/elapsedtimer.cpp \
+   src/game/mechanisms/bubblecube.cpp \
    src/game/mechanisms/checkpoint.cpp \
    src/game/console.cpp \
    src/game/detonationanimation.cpp \
@@ -118,6 +119,7 @@ SOURCES += \
    src/game/gameclock.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
+   src/game/mechanisms/spikeblock.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
    src/game/mechanisms/dialogue.cpp \
@@ -297,8 +299,10 @@ HEADERS += \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/gameclock.h \
+   src/game/mechanisms/bubblecube.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
+   src/game/mechanisms/spikeblock.h \
    src/game/player/playeranimation.h \
    src/game/preloader.h \
    src/game/screentransition.h \

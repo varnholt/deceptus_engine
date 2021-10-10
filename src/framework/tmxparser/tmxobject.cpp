@@ -1,4 +1,6 @@
 #include "tmxobject.h"
+
+#include "framework/tools/log.h"
 #include "tmxpolygon.h"
 #include "tmxpolyline.h"
 #include "tmxproperties.h"
@@ -57,7 +59,7 @@ void TmxObject::deserialize(tinyxml2::XMLElement *element)
          }
          else if (!parsed)
          {
-            std::cerr << sub_element->Name() << " is not supported for TmxObject" << std::endl;
+            Log::Error() << sub_element->Name() << " is not supported for TmxObject";
          }
       }
 

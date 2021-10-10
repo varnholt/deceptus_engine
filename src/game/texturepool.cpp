@@ -22,8 +22,6 @@ std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
       sp->loadFromFile(key);
    }
 
-   // std::cout << computeSize() << std::endl;
-
    return sp;
 }
 
@@ -38,10 +36,6 @@ size_t TexturePool::computeSize() const
       if (texture)
       {
          size += (texture->getSize().x * texture->getSize().y * 4);
-      }
-      else
-      {
-         // std::cout << key << " has been removed" << std::endl;
       }
    }
 

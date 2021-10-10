@@ -157,13 +157,6 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
       // since we're dealing with patches of chunks there might be 'holes' in the map
       memset(_data, 0, _width_px * _height_px * sizeof (int32_t));
 
-      // std::cout
-      //   << "TmxLayer::deserialize: layer: " << mName << std::endl
-      //   << "  dimensions: width: " << mWidth << "; height: " << mHeight << std::endl
-      //   << "  offset: " << mOffsetX << "; " << mOffsetY << std::endl
-      //   << "  x min: " << xMin << "; x max: " << xMax << std::endl
-      //   << "  y min: " << yMin << "; y max: " << yMax << std::endl;
-
       for (const auto c : chunks)
       {
          for (auto y = 0; y < chunk_height; y++)

@@ -166,11 +166,6 @@ void MenuScreenFileSelect::showEvent()
 
 void MenuScreenFileSelect::updateLayers()
 {
-   // for (auto& layer : mLayers)
-   // {
-   //    std::cout << layer.first << std::endl;
-   // }
-
    auto index = 0;
 
    const auto& saveStates = SaveState::getSaveStates();

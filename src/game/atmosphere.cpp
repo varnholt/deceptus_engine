@@ -4,6 +4,7 @@
 
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
 
 
 //-----------------------------------------------------------------------------
@@ -18,13 +19,13 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
 {
    if (layer == nullptr)
    {
-     std::cout << "physics tmx layer is a nullptr" << std::endl;
+     Log::Error() << "physics tmx layer is a nullptr";
      exit(-1);
    }
 
    if (tileSet == nullptr)
    {
-     std::cout << "physics tmx tileset is a nullptr" << std::endl;
+     Log::Error() << "physics tmx tileset is a nullptr";
      exit(-1);
    }
 

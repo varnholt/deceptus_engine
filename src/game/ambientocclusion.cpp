@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "framework/math/sfmlmath.h"
+#include "framework/tools/log.h"
 #include "player/player.h"
 #include "texturepool.h"
 
@@ -20,7 +21,7 @@ void AmbientOcclusion::load(
 
    if (!std::filesystem::exists(texture))
    {
-      std::cerr << "[!] need to create an ambient occlusion map (" << texture << ")" << std::endl;
+      Log::Error() << "need to create an ambient occlusion map (" << texture << ")";
       return;
    }
 
@@ -46,7 +47,7 @@ void AmbientOcclusion::load(
          std::getline(uv_file, line);
          std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &i, &x, &y, &w, &h);
 
-         // std::cout << "x: " << x << " y: " << y << " w: " << w << " h: " << h << std::endl;
+         // Log::Info() << "x: " << x << " y: " << y << " w: " << w << " h: " << h;
 
          sf::Sprite sprite;
          sprite.setPosition(static_cast<float>(x - 5), static_cast<float>(y - 6));
@@ -60,7 +61,7 @@ void AmbientOcclusion::load(
          group_y = (y >> 8);
          _sprite_map[group_y][group_x].push_back(sprite);
 
-         // std::cout << group_x << " " << group_y << std::endl;
+         // Log::Info() << group_x << " " << group_y;
 
          xi += w;
          if (xi == static_cast<int32_t>(_texture->getSize().x))
@@ -72,11 +73,11 @@ void AmbientOcclusion::load(
 
       uv_file.close();
 
-      // std::cout << "[x] loaded " << _sprites.size() << " ao sprites" << std::endl;
+      // Log::Info() << "loaded " << _sprites.size() << " ao sprites";
    }
    else
    {
-      std::cout << "AmbientOcclusion::load: unable to open uv file: " << uv << std::endl;
+      Log::Error() << "AmbientOcclusion::load: unable to open uv file: " << uv;
    }
 }
 
@@ -110,7 +111,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
             continue;
          }
 
-         // std::cout << "draw " << x_it->second.size() << " sprites" << std::endl;
+         // Log::Info() << "draw " << x_it->second.size() << " sprites";
 
          for (const auto& sprite : x_it->second)
          {

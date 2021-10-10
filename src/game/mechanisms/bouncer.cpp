@@ -41,8 +41,6 @@ Bouncer::Bouncer(
 {
    setName(typeid(Bouncer).name());
 
-   // std::cout << "creating bouncer at " << x << ", " << y << " (" << width << " x " << height << ")" << std::endl;
-
    _rect.left = static_cast<int32_t>(x);
    _rect.top = static_cast<int32_t>(y);
    _rect.width = static_cast<int32_t>(width);

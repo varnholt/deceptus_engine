@@ -1,5 +1,6 @@
 #include "deathshader.h"
 
+#include "framework/tools/log.h"
 #include "player/player.h"
 
 #include <iostream>
@@ -27,19 +28,19 @@ void DeathShader::initialize()
       )
    )
    {
-      std::cout << "error loading shader" << std::endl;
+      Log::Error() << "error loading shader";
       return;
    }
 
    if (!_flow_field_1.loadFromFile("data/effects/flowfield_1.png"))
    {
-      std::cout << "error loading flowfield 1" << std::endl;
+      Log::Error() << "error loading flowfield 1";
       return;
    }
 
    if (!_flow_field_2.loadFromFile("data/effects/flowfield_3.png"))
    {
-      std::cout << "error loading flowfield 2" << std::endl;
+      Log::Error() << "error loading flowfield 2";
       return;
    }
 
@@ -73,7 +74,6 @@ void DeathShader::update(const sf::Time& dt)
    // for testing
    // mElapsed = fmod(mElapsed, 1.0f);
 
-   // std::cout << mElapsed << std::endl;
    _shader.setUniform("time", _elapsed);
    _shader.setUniform(
       "flowfield_offset",

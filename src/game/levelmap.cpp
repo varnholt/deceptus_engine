@@ -27,7 +27,7 @@ LevelMap::LevelMap()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/map.psd");
 
-   // std::cout << mFilename << std::endl;
+   // Log::Info() << mFilename;
 
    for (const auto& layer : psd.getLayers())
    {
@@ -37,7 +37,7 @@ LevelMap::LevelMap()
          continue;
       }
 
-      // std::cout << layer.getName() << std::endl;
+      // Log::Info() << layer.getName();
 
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
@@ -89,52 +89,52 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    center.x -= 220.0f;
    center.y -= 80.0f;
 
-   sf::View levelView;
-   levelView.setSize(static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y));
-   levelView.setCenter(center);
-   levelView.zoom(_zoom); // 1.5f works well, too
+   sf::View level_view;
+   level_view.setSize(static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y));
+   level_view.setCenter(center);
+   level_view.zoom(_zoom); // 1.5f works well, too
    _level_grid_sprite.setColor(sf::Color{70, 70, 140, 255});
    _level_outline_sprite.setColor(sf::Color{255, 255, 255, 80});
    _level_render_texture.clear();
    _level_render_texture.draw(_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
    _level_render_texture.draw(_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
    drawLevelItems(_level_render_texture);
-   _level_render_texture.setView(levelView);
+   _level_render_texture.setView(level_view);
    _level_render_texture.display();
 
-   // std::cout << "dx/dy: " << CameraPane::getInstance().getLookVector().x << " " << CameraPane::getInstance().getLookVector().y << std::endl;
+   // Log::Info() << "dx/dy: " << CameraPane::getInstance().getLookVector().x << " " << CameraPane::getInstance().getLookVector().y;
 
-   auto levelTextureSprite = sf::Sprite(_level_render_texture.getTexture());
-   levelTextureSprite.move(10.0f, 48.0f);
+   auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
+   level_texture_sprite.move(10.0f, 48.0f);
 
    // draw layers
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto layerLayout = _layers["layout"];
-   auto layerHideBorders = _layers["hide_borders"];
-   auto layerGrid = _layers["grid"];
-   auto layerBlue = _layers["blue"];
-   auto layerTextZoom = _layers["text_zoom"];
-   auto layerTextPan = _layers["text_pan"];
+   auto layer_layout = _layers["layout"];
+   auto layer_hide_borders = _layers["hide_borders"];
+   auto layer_grid = _layers["grid"];
+   auto layeber_blue = _layers["blue"];
+   auto layer_text_zoom = _layers["text_zoom"];
+   auto layer_text_pan = _layers["text_pan"];
 
-   layerBlue->draw(window, states);
+   layeber_blue->draw(window, states);
 
-   window.draw(levelTextureSprite, sf::BlendMode{sf::BlendAdd});
+   window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
 
-   layerHideBorders->draw(window, states);
+   layer_hide_borders->draw(window, states);
 
    if (_zoom_enabled)
    {
-      layerTextZoom->draw(window, states);
+      layer_text_zoom->draw(window, states);
    }
 
    if (CameraPane::getInstance().isLookActive())
    {
-      layerTextPan->draw(window, states);
+      layer_text_pan->draw(window, states);
    }
 
-   layerLayout->draw(window, states);
+   layer_layout->draw(window, states);
 
 
    // std::stringstream stream;
