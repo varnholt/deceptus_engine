@@ -1,5 +1,6 @@
 #include "bitmapfont.h"
 
+#include "framework/tools/log.h"
 #include "texturepool.h"
 
 #include <fstream>
@@ -53,7 +54,7 @@ void BitmapFont::load(
    }
    else
    {
-      std::cerr << "font map fucked" << std::endl;
+      Log::Error() << "font map fucked";
       return;
    }
 

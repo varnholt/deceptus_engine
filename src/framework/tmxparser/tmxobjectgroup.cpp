@@ -1,5 +1,6 @@
 #include "tmxobjectgroup.h"
 
+#include "framework/tools/log.h"
 #include "tmxobject.h"
 
 #include <iostream>
@@ -47,7 +48,7 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
          }
          else
          {
-            std::cerr << sub_element->Name() << " is not supported for TmxObjectGroup" << std::endl;
+            Log::Error() << sub_element->Name() << " is not supported for TmxObjectGroup";
          }
 
          if (object != nullptr)

@@ -28,7 +28,6 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const s
      if (z != image_layer->_properties->_map.end())
      {
         image->_z_index = image_layer->_properties->_map["z"]->_value_int.value();
-        // std::cout << "image layer has z: " << image->mZ << std::endl;
      }
 
      std::string blend_mode_str;

@@ -11,6 +11,7 @@
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "gameclock.h"
 #include "gameconfiguration.h"
@@ -155,14 +156,13 @@ void Game::initializeWindow()
    int32_t texture_width = size_ratio * gameConfig._view_width;
    int32_t texture_height = size_ratio * gameConfig._view_height;
 
-   std::cout
-      << "[x] video mode: "
+   Log::Info()
+      << "video mode: "
       << gameConfig._video_mode_width << " x " << gameConfig._video_mode_height
       << ", view size: "
       << gameConfig._view_width << " x " << gameConfig._view_height
       << ", ratio: "
-      << size_ratio
-      << std::endl;
+      << size_ratio;
 
    _render_texture_offset.x = static_cast<uint32_t>((gameConfig._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((gameConfig._video_mode_height - texture_height) / 2);
@@ -173,11 +173,11 @@ void Game::initializeWindow()
       static_cast<uint32_t>(texture_height)
    );
 
-   std::cout << "[x] created window render texture: " << texture_width << " x " << texture_height << std::endl;
+   Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
    if (!_level)
    {
-      std::cerr << "[!] level not initialized" << std::endl;
+      Log::Warning() << "level not initialized";
    }
    else
    {
@@ -287,7 +287,7 @@ void Game::loadLevel()
 
          _player->updatePlayerPixelRect();
 
-         std::cout << "[x] level loading finished" << std::endl;
+         Log::Info() << "level loading finished";
 
          _level_loading_finished = true;
 
@@ -645,22 +645,22 @@ void Game::updateGameState(const sf::Time& dt)
       {
          case DeathReason::TouchesDeadly:
          {
-            std::cout << "[i] dead: touched something deadly" << std::endl;
+            Log::Info() << "dead: touched something deadly";
             break;
          }
          case DeathReason::TooFast:
          {
-            std::cout << "[i] dead: too fast" << std::endl;
+            Log::Info() << "dead: too fast";
             break;
          }
          case DeathReason::OutOfHealth:
          {
-            std::cout << "[i] dead: out of health" << std::endl;
+            Log::Info() << "dead: out of health";
             break;
          }
          case DeathReason::Smashed:
          {
-            std::cout << "[i] dead: player got smashed" << std::endl;
+            Log::Info() << "dead: player got smashed";
             break;
          }
          case DeathReason::None:

@@ -1,4 +1,6 @@
 #include "tmxproperties.h"
+
+#include "framework/tools/log.h"
 #include "tmxproperty.h"
 
 #include <iostream>
@@ -29,7 +31,7 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
          }
          else
          {
-            std::cerr << sub_element->Name() << " is not supported for TmxProperties" << std::endl;
+            Log::Error() << sub_element->Name() << " is not supported for TmxProperties";
          }
 
          if (property != nullptr)

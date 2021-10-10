@@ -60,7 +60,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
             if (tileId == 33)
             {
-               // std::cout << "lever at " << i << ", " << j << std::endl;
+               // Log::Info() << "lever at " << i << ", " << j;
 
                auto lever = std::make_shared<Lever>();
 
@@ -286,12 +286,11 @@ void Lever::merge(
          }
       }
 
-      // std::cout
+      // Log::Info()
       //    << "x: " << searchRect.left << " "
       //    << "y: " << searchRect.top << " "
       //    << "w: " << searchRect.width << " "
-      //    << "h: " << searchRect.height << " "
-      //    << std::endl;
+      //    << "h: " << searchRect.height << " ";
 
       for (auto& tmp : levers)
       {
@@ -299,8 +298,6 @@ void Lever::merge(
 
          if (lever->_rect.intersects(searchRect))
          {
-            // std::cout << "found match" << std::endl;
-
             std::vector<Callback> callbacks;
 
             for (auto& l : lasers)

@@ -1,5 +1,7 @@
 #include "blurshader.h"
 
+#include "framework/tools/log.h"
+
 #include <iostream>
 
 #define SUPPORT_STENCIL_BITS 1
@@ -48,7 +50,7 @@ void BlurShader::initialize()
 {
    if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Fragment))
    {
-      std::cout << "error loading blur shader" << std::endl;
+      Log::Error() << "error loading blur shader";
       return;
    }
 

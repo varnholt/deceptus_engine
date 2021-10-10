@@ -1,9 +1,10 @@
 #include "tmxpolygon.h"
 
+#include "framework/tools/log.h"
+#include "tmxtools.h"
+
 #include <iostream>
 #include <sstream>
-
-#include "tmxtools.h"
 
 
 void TmxPolygon::deserialize(tinyxml2::XMLElement* element)
@@ -23,7 +24,7 @@ void TmxPolygon::deserialize(tinyxml2::XMLElement* element)
       }
       else
       {
-         std::cerr << "bad polygon data" << std::endl;
+         Log::Error() << "bad polygon data";
          break;
       }
    }

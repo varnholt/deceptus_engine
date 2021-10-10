@@ -66,17 +66,12 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 
 
 //--------------------------------------------------------------------------------------------------
-void MoveableBox::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
+void MoveableBox::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
 {
-   //   std::cout
-   //      << "box: pos: " << tmxObject->mX << " x " << tmxObject->mY
-   //      << " size: " << tmxObject->mWidth << " x " << tmxObject->mHeight
-   //      << std::endl;
+   _size.x = tmx_object->_width_px;
+   _size.y = tmx_object->_height_px;
 
-   _size.x = tmxObject->_width_px;
-   _size.y = tmxObject->_height_px;
-
-   _sprite.setPosition(tmxObject->_x_px, tmxObject->_y_px - 24);
+   _sprite.setPosition(tmx_object->_x_px, tmx_object->_y_px - 24);
 
    switch (static_cast<int32_t>(_size.x))
    {

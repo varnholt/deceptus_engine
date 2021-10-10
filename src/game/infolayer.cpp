@@ -28,7 +28,7 @@ InfoLayer::InfoLayer()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/ingame_ui.psd");
 
-   // std::cout << mFilename << std::endl;
+   // Log::Info() << mFilename;
 
    for (const auto& layer : psd.getLayers())
    {
@@ -38,7 +38,7 @@ InfoLayer::InfoLayer()
          continue;
       }
 
-      // std::cout << layer.getName() << std::endl;
+      // Log::Info() << layer.getName();
 
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
@@ -116,7 +116,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
           }
        );
 
-       // std::cout << "energy: " << healthLayerWidth << std::endl;
+       // Log::Info() << "energy: " << healthLayerWidth;
 
        auto t = (now - _show_time).asSeconds();
        const auto duration = 1.0f;

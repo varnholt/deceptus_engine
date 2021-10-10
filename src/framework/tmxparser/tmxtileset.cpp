@@ -1,5 +1,6 @@
 #include "tmxtileset.h"
 
+#include "framework/tools/log.h"
 #include "tmximage.h"
 #include "tmxtile.h"
 
@@ -55,7 +56,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
          }
          else
          {
-            std::cerr << childElement->Name() << " is not supported for TmxTileSet" << std::endl;
+            Log::Error() << childElement->Name() << " is not supported for TmxTileSet";
          }
 
          if (tile != nullptr)
@@ -87,7 +88,7 @@ void TmxTileSet::deserialize(tinyxml2::XMLElement *element)
       }
       else
       {
-        std::cout << "TmxTileSet::deserialize: source not found: " << filename << std::endl;
+        Log::Error() << "TmxTileSet::deserialize: source not found: " << filename;
         exit(-1);
       }
    }

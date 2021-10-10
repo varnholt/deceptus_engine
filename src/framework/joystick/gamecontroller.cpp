@@ -201,8 +201,6 @@ void GameController::update()
 
             const auto threshold = tc._threshold;
 
-            // std::cout << valueCurrentNormalized << std::endl;
-
             // do not bother if value hasn't changed at all
             if (valueCurrent != valuePrevious)
             {
@@ -448,7 +446,6 @@ const GameControllerInfo& GameController::getInfo() const
 //-----------------------------------------------------------------------------
 void GameController::addButtonPressedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
 {
-   // std::cout<< "registering: " << &callback << std::endl;
    _button_pressed_callbacks[button].push_back(callback);
 }
 

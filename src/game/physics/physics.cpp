@@ -16,6 +16,7 @@
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
 
 
 
@@ -25,7 +26,7 @@ void Physics::parse(
    const std::filesystem::path& basePath
 )
 {
-   // std::cout << "parsing physics tiles vs. level layer (" << basePath.string() << ")" << std::endl;
+   // Log::Info() << "parsing physics tiles vs. level layer (" << basePath.string() << ")";
 
    std::ifstream phsyicsFile(basePath / std::filesystem::path("physics_tiles.csv").string());
 
@@ -46,11 +47,11 @@ void Physics::parse(
          }
          catch (const std::invalid_argument& /*e*/)
          {
-            // std::cerr << e.what() << std::endl;
+            // Log::Error() << e.what();
          }
          catch (const std::out_of_range& /*e*/)
          {
-            // std::cerr << e.what() << std::endl;
+            // Log::Error() << e.what();
          }
       }
 
@@ -74,12 +75,6 @@ void Physics::parse(
          std::copy_n(items.begin() + 1, 9, data.begin());
          map[items[0]] = data;
       }
-
-      // for (auto x : data)
-      // {
-      //    std::cout << x << ",";
-      // }
-      // std::cout << std::endl;
    }
 
    _grid_width  = layer->_width_px  * 3;
@@ -100,8 +95,6 @@ void Physics::parse(
          {
             const auto it = map.find(key - tileSet->_first_gid);
 
-            // std::cout << key << ",";
-
             if (it != map.end())
             {
                const auto& arr = (*it).second;
@@ -118,8 +111,6 @@ void Physics::parse(
       }
 
       yi += 2;
-
-      // std::cout << std::endl;
    }
 }
 
@@ -139,7 +130,7 @@ bool Physics::dumpObj(
 
    if (tileset == nullptr)
    {
-      // std::cout << "tileset is a nullptr" << std::endl;
+      // Log::Error() << "tileset is a nullptr";
       return false;
    }
 
@@ -179,24 +170,10 @@ bool Physics::dumpObj(
                      if (poly)
                      {
                         points = poly->_polyline;
-
-                        // for (auto& p : points)
-                        // {
-                        //    std::cout << "x: " << p.x << " y: " << p.y << std::endl;
-                        // }
-                        //
-                        // std::cout << "--" << std::endl;
                      }
                      else if (line)
                      {
                         points = line->_polyline;
-
-                        // for (auto& p : points)
-                        // {
-                        //    std::cout << "x: " << p.x << " y: " << p.y << std::endl;
-                        // }
-                        //
-                        // std::cout << "--" << std::endl;
                      }
                      else
                      {
@@ -254,7 +231,7 @@ bool Physics::dumpObj(
 
    if (vertices.empty())
    {
-      std::cerr << "[!] tmx doesn't contain polygon data" << std::endl;
+      Log::Error() << "tmx doesn't contain polygon data";
       return false;
    }
 

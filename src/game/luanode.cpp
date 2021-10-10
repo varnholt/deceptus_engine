@@ -16,6 +16,7 @@
 #include "detonationanimation.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
+#include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "level.h"
 #include "luaconstants.h"
@@ -164,7 +165,7 @@ int32_t queryAABB(lua_State* state)
       aabb.lowerBound = lower;
       aabb.upperBound = upper;
 
-      // std::cout << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y << std::endl;
+      // Log::Info() << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y;
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -491,7 +492,7 @@ int32_t damage(lua_State* state)
       auto dx = static_cast<float>(lua_tonumber(state, 2));
       auto dy = static_cast<float>(lua_tonumber(state, 3));
 
-      std::cout << "damage: " << damage << " dx: " << dx << " dy: " << dy << std::endl;
+      Log::Info() << "damage: " << damage << " dx: " << dx << " dy: " << dy;
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -1286,7 +1287,7 @@ int32_t die(lua_State* state)
    std::stringstream os;
    os << lua_tostring(state, -1);
 
-   std::cout << os.str() << std::endl;
+   Log::Error() << os.str();
 
    lua_pop(state, 1);
 
@@ -1543,7 +1544,7 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
  */
 void LuaNode::luaHit(int32_t damage)
 {
-   // std::cout << "thing was hit: " << damage << std::endl;
+   // Log::Info() << "thing was hit: " << damage;
 
    lua_getglobal(_lua_state, FUNCTION_HIT);
    if (lua_isfunction(_lua_state, -1) )
@@ -1904,7 +1905,7 @@ int32_t LuaNode::queryAABB(const b2AABB& aabb)
    LuaQueryCallback queryCallback;
    Level::getCurrentLevel()->getWorld()->QueryAABB(&queryCallback, aabb);
 
-   // std::cout << queryCallback.mBodies.size() << std::endl;
+   // Log::Info() << queryCallback.mBodies.size();
    return static_cast<int32_t>(queryCallback._bodies.size());
 }
 
@@ -1933,7 +1934,7 @@ int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
    LuaRaycastCallback query_callback;
    Level::getCurrentLevel()->getWorld()->RayCast(&query_callback, point1, point2);
 
-   // std::cout << queryCallback.mBodies.size() << std::endl;
+   // Log::Info() << queryCallback.mBodies.size();
    return static_cast<int32_t>(query_callback._bodies.size());
 }
 

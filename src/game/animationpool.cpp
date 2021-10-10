@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/log.h"
 #include "json/json.hpp"
 #include "texturepool.h"
 
@@ -154,7 +155,7 @@ void AnimationPool::deserialize(const std::string& data)
    }
    catch (const std::exception& e)
    {
-      std::cout << e.what() << std::endl;
+      Log::Error() << e.what();
    }
 }
 

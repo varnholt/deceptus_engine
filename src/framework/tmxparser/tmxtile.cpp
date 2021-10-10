@@ -1,6 +1,6 @@
 #include "tmxtile.h"
 
-//
+#include "framework/tools/log.h"
 #include "tmxanimation.h"
 #include "tmxobjectgroup.h"
 
@@ -18,8 +18,6 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
    TmxElement::deserialize(element);
 
    _id = element->IntAttribute("id");
-
-   // std::cout << "   tile (id: " << mId << ")" << std::endl;
 
    auto node = element->FirstChild();
    while (node != nullptr)
@@ -46,7 +44,7 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
          }
          else
          {
-            std::cerr << child_element->Name() << " is not supported for TmxTile" << std::endl;
+            Log::Error() << child_element->Name() << " is not supported for TmxTile";
          }
       }
 

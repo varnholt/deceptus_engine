@@ -351,8 +351,6 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
    // Layer name: Pascal string, padded to a multiple of 4 bytes.
    _name = loadString(stream);
 
-   // std::cout << "layer name: " << mName << std::endl;
-
    int32_t block_header= 0;
    while (extra_data_length - (stream.tellg() - layer_start) > 4)
    {
@@ -770,7 +768,6 @@ void PSD::loadImageResourceSection(std::istream& stream)
          read(resource_identifier, stream);
 
          auto name = loadString(stream);
-         // std::cout << "image resource: " << name << std::endl;
 
          int32_t block_size = 0;
          read(block_size, stream);

@@ -1,5 +1,6 @@
 #include "eventserializer.h"
 
+#include "framework/tools/log.h"
 #include "gamestate.h"
 
 #include <iostream>
@@ -142,7 +143,7 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
       }
       default:
       {
-         std::cerr << "writing unhandled event" << std::endl;
+         Log::Warning() << "writing unhandled event";
          break;
       }
    }
@@ -173,7 +174,7 @@ sf::Event readEvent(std::istream& stream)
 
       default:
       {
-         std::cerr << "reading unhandled event" << std::endl;
+         Log::Warning() << "reading unhandled event";
          break;
       }
    }
@@ -189,7 +190,7 @@ void EventSerializer::serialize()
        return;
    }
 
-   std::cout << "serializing " << _events.size() << " events" << std::endl;
+   Log::Info() << "serializing " << _events.size() << " events";
    std::ofstream out("events.dat", std::ios::out | std::ios::binary);
 
    writeInt32(out, static_cast<int32_t>(_events.size()));
@@ -231,7 +232,7 @@ void EventSerializer::debug()
       const auto& time_point = event._time_point;
       const auto dt = time_point - start;
 
-      std::cout << dt.count() << std::endl;
+      Log::Info() << dt.count();
    }
 }
 

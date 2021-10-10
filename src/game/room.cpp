@@ -10,6 +10,7 @@
 #include "fadetransitioneffect.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 
 /*
@@ -192,13 +193,13 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
    const auto config = GameConfiguration::getInstance();
    if (tmx_object->_width_px < config._view_width)
    {
-      std::cerr << "[!] ignoring rect, room width smaller than screen width" << std::endl;
+      Log::Error() << "ignoring rect, room width smaller than screen width";
       return;
    }
 
    if (tmx_object->_height_px < config._view_height)
    {
-      std::cerr << "[!] ignoring rect, room height smaller than screen height" << std::endl;
+      Log::Error() << "ignoring rect, room height smaller than screen height";
       return;
    }
 
@@ -212,7 +213,7 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
 
    if (key.empty())
    {
-      std::cerr << "[!] ignoring unnamed room" << std::endl;
+      Log::Error() << "ignoring unnamed room";
       return;
    }
 
@@ -279,7 +280,7 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
       }
 
       rooms.push_back(room);
-      // std::cout << "[i] adding room: " << key << std::endl;
+      // Log::Info() << "adding room: " << key;
    }
    else
    {
@@ -293,7 +294,7 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
          )
       )
       {
-         std::cerr << "[!] bad rect intersection for room " << key << std::endl;
+         Log::Error() << "bad rect intersection for room " << key;
       }
 
       room->_rects.push_back(rect);

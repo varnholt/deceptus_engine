@@ -198,7 +198,7 @@ void Laser::update(const sf::Time& dt)
    //    {
    //       if (previousTileIndex != mTileIndex)
    //       {
-   //          std::cout << mGroupId << ": " << mTileIndex << std::endl;
+   //          Log::Info() << mGroupId << ": " << mTileIndex;
    //       }
    //    }
    // }

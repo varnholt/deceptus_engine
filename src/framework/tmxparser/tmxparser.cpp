@@ -1,14 +1,13 @@
 #include "tmxparser.h"
 
-// tmxlayer
+#include "framework/tools/log.h"
+#include "tinyxml2/tinyxml2.h"
 #include "tmximagelayer.h"
 #include "tmxobjectgroup.h"
 #include "tmxlayer.h"
 #include "tmxtileset.h"
 #include "tmxproperty.h"
 #include "tmxproperties.h"
-
-#include "tinyxml2/tinyxml2.h"
 
 #include <iostream>
 
@@ -67,13 +66,11 @@ void TmxParser::parse(const std::string &filename)
                   dynamic_cast<TmxLayer*>(element)->_z = z;
                }
 
-               // std::cout << "layer: " << element->mName << " z: " << z << std::endl;
-
                _elements.push_back(element);
             }
             else
             {
-               std::cerr << subElement->Name() << " is not supported" << std::endl;
+               Log::Error() << subElement->Name() << " is not supported";
             }
          }
 
@@ -120,8 +117,6 @@ TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
       }
    }
 
-   // std::cout << "TmxParser::getTileSet: looking up tileId: " << tileId << std::endl;
-
    TmxTileSet* tileset = nullptr;
    for (auto element : _elements)
    {
@@ -141,11 +136,6 @@ TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
             }
          }
       }
-   }
-
-   if (!tileset)
-   {
-     // std::cout<< "TmxParser::getTileSet: loading fuckup for: " << layer->mName << std::endl;
    }
 
    return tileset;

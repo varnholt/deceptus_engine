@@ -13,6 +13,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
 #include "texturepool.h"
 
 #include <atomic>
@@ -184,17 +185,17 @@ void Portal::link(
    // it'll help :)
    if (!dst_portal)
    {
-      std::cerr << "please mark your dst portal correctly for id: " << tmx_object->_id << std::endl;
+      Log::Error() << "please mark your dst portal correctly for id: " << tmx_object->_id;
    }
 
    if (!src_portal)
    {
-      std::cerr << "please mark your src portal correctly for id: " << tmx_object->_id << std::endl;
+      Log::Error() << "please mark your src portal correctly for id: " << tmx_object->_id;
    }
 
    dst_portal->_destination = src_portal;
 
-   // std::cout << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")" << std::endl;
+   // Log::Info() << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")";
 }
 
 
@@ -228,7 +229,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
    const std::shared_ptr<b2World>&
 )
 {
-   // std::cout << "load portal layer" << std::endl;
+   // Log::Info() << "load portal layer";
 
    if (!tileSet)
    {
