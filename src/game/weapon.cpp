@@ -141,7 +141,6 @@ void Weapon::updateProjectiles(const sf::Time& time)
 
       if (projectile->isRotating())
       {
-         // std::cout << "setting sprite rotation to " << projectile->getRotation() << std::endl;
          projectile_animation.setRotation(RADTODEG * projectile->getRotation());
       }
 

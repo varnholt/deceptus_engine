@@ -1,5 +1,6 @@
 #include "gammashader.h"
 
+#include "framework/tools/log.h"
 #include "gameconfiguration.h"
 
 #include <iostream>
@@ -10,7 +11,7 @@ void GammaShader::initialize()
 {
    if (!_gamma_shader.loadFromFile("data/shaders/brightness.frag", sf::Shader::Fragment))
    {
-      std::cout << "error loading gamma shader" << std::endl;
+      Log::Error() << "error loading gamma shader";
       return;
    }
 }

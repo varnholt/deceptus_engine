@@ -173,9 +173,6 @@ bool Door::checkPlayerAtDoor() const
    const auto distance = SfmlMath::length(a - b);
    const auto at_door = (distance < PIXELS_PER_TILE * 1.5f);
 
-   // std::cout << fabs(a.x - b.x) << std::endl;
-   // std::cout << fabs(a.y - b.y) << std::endl;
-
    return at_door;
 }
 
@@ -185,13 +182,13 @@ void Door::toggle()
 {
    if (!SaveState::getPlayerInfo().mInventory.hasInventoryItem(_required_item))
    {
-      // std::cout << "player doesn't have key" << std::endl;
+      // Log::Info() << "player doesn't have key";
       return;
    }
 
    if (!checkPlayerAtDoor())
    {
-      // std::cout << "player not in front of door" << std::endl;
+      // Log::Info() << "player not in front of door";
       return;
    }
 
@@ -363,8 +360,6 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                   door->setZ(layer->_properties->_map["z"]->_value_int.value());
                }
             }
-
-            // std::cout << "found new door: " << tileId << std::endl;
          }
       }
    }

@@ -133,7 +133,7 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
                || intersects_top.has_value()
             )
             {
-               // std::cout << "assigned chain to: " << mId << std::endl;
+               // Log::Info() << "assigned chain to: " << mId;
                _path = path;
                _has_path = true;
                break;
@@ -145,7 +145,7 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
    if (!_has_path)
    {
       // not an error, enemy might just have a fixed position
-      // std::cerr << "object " << mId << " (" << mName << ") has invalid chain" << std::endl;
+      // Log::Warning << "object " << mId << " (" << mName << ") has invalid chain";
    }
    else
    {

@@ -5,6 +5,8 @@
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/log.h"
+
 using json = nlohmann::json;
 
 
@@ -17,7 +19,7 @@ void Levels::deserialize(const std::string& data)
    }
    catch (const std::exception& e)
    {
-      std::cout << e.what() << std::endl;
+      Log::Error() << e.what();
    }
 }
 

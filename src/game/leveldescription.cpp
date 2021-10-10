@@ -1,9 +1,12 @@
 #include "leveldescription.h"
 
+#include "framework/tools/log.h"
+
 #include <fstream>
 #include <iostream>
 #include <ostream>
 #include <sstream>
+
 
 using json = nlohmann::json;
 
@@ -55,7 +58,7 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string &path
    }
    catch (const std::exception& e)
    {
-     std::cout << e.what() << std::endl;
+     Log::Error() << e.what();
    }
 
    return description;

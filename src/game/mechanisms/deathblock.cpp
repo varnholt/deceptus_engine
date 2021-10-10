@@ -206,7 +206,7 @@ void DeathBlock::setup(
       _interpolation.addKey(world_pos, time);
       _pixel_paths.push_back({(pos.x + tmx_object->_x_px), (pos.y + tmx_object->_y_px)});
 
-      // std::cout << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY << std::endl;
+      // Log::Info() << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY;
 
       i++;
    }

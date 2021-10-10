@@ -178,7 +178,7 @@ void Level::initializeTextures()
 
    for (const auto& fb : _render_textures)
    {
-      std::cout << "[x] created render texture: " << fb->getSize().x << " x " << fb->getSize().y << std::endl;
+      Log::Info() << "created render texture: " << fb->getSize().x << " x " << fb->getSize().y;
    }
 
    _atmosphere_shader->initialize();
@@ -243,7 +243,7 @@ Level::Level()
 //-----------------------------------------------------------------------------
 Level::~Level()
 {
-   std::cout << "[x] deleting current level" << std::endl;
+   Log::Info() << "deleting current level";
 
    // stop active timers because their callbacks being called after destruction of the level/world can be nasty
    for (auto& enemy : _enemies)
@@ -301,7 +301,7 @@ void Level::loadTmx()
    const auto checksum_new = Checksum::calcChecksum(_description->_filename);
    if (checksum_old != checksum_new)
    {
-      std::cout << "[x] checksum mismatch, deleting cached data" << std::endl;
+      Log::Warning() << "checksum mismatch, deleting cached data";
       std::filesystem::remove(path / "physics_grid_solid.png");
       std::filesystem::remove(path / "physics_path_deadly.csv");
       std::filesystem::remove(path / "physics_path_solid.csv");
@@ -313,7 +313,7 @@ void Level::loadTmx()
    sf::Clock elapsed;
 
    // parse tmx
-   std::cout << "[x] parsing tmx: " << _description->_filename << std::endl;
+   Log::Info() << "parsing tmx: " << _description->_filename;
 
    _tmx_parser = std::make_unique<TmxParser>();
    _tmx_parser->parse(_description->_filename);
@@ -620,10 +620,10 @@ void Level::loadTmx()
 
    if (!_atmosphere._tile_map)
    {
-      std::cerr << "[E] fatal: no physics layer (called 'physics') found!" << std::endl;
+      Log::Error() << "fatal: no physics layer (called 'physics') found!";
    }
 
-   std::cout << "[x] loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s" << std::endl;
+   Log::Info() << "loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
 }
 
 
@@ -645,17 +645,17 @@ void Level::load()
    loadTmx();
 
    // load static lights
-   std::cout << "[x] loading static lights..." << std::endl;
+   Log::Info() << "loading static lights...";
    if (!_static_light->mLights.empty())
    {
       _static_light->load();
    }
 
    // loading ao
-   std::cout << "[x] loading ao... " << std::endl;
+   Log::Info() << "loading ao... ";
    _ambient_occlusion.load(path, std::filesystem::path(_description->_filename).stem().string());
 
-   std::cout << "[x] level loading complete" << std::endl;
+   Log::Info() << "level loading complete";
 }
 
 
@@ -688,11 +688,11 @@ void Level::loadCheckpoint()
       auto pos = checkpoint->calcCenter();
       _start_position.x = static_cast<float>(pos.x);
       _start_position.y = static_cast<float>(pos.y);
-      std::cout << "[-] move to checkpoint: " << checkpoint_index << std::endl;
+      Log::Info() << "move to checkpoint: " << checkpoint_index;
    }
    else
    {
-      std::cerr << "[!] level doesn't have a start check point set up, falling back to start position" << std::endl;
+      Log::Error() << "level doesn't have a start check point set up, falling back to start position";
    }
 }
 
@@ -884,10 +884,9 @@ void Level::updateCameraSystem(const sf::Time& dt)
    // room changed
    if (prev_room != _room_current)
    {
-      std::cout
-         << "[i] player moved to room: "
-         << (_room_current ? _room_current->_name : "undefined")
-         << std::endl;
+      Log::Info()
+         << "player moved to room: "
+         << (_room_current ? _room_current->_name : "undefined");
 
       // will update the current room in both cases, either after the camera lock delay or instantly
       if (_room_current && _room_current->_camera_lock_delay.has_value())
@@ -1656,7 +1655,7 @@ void Level::parsePhysicsTiles(
 
    auto path_solid_optimized = base_path / std::filesystem::path(pd->filename_obj_optimized);
 
-   std::cout << "[x] loading: " << path_solid_optimized.make_preferred().generic_string() << std::endl;
+   Log::Info() << "loading: " << path_solid_optimized.make_preferred().generic_string();
 
    _physics.parse(layer, tileset, base_path);
 
@@ -1695,26 +1694,26 @@ void Level::parsePhysicsTiles(
                 + path_solid_optimized.string();
 #endif
 
-         std::cout << "[x] running cmd: " << cmd << std::endl;
+         Log::Info() << "running cmd: " << cmd;
 
          if (std::system(cmd.c_str()) != 0)
          {
-            std::cerr << "[!] command failed" << std::endl;
+            Log::Error() << "command failed";
          }
          else
          {
-            std::cout << "[x] command succeeded" << std::endl;
+            Log::Info() << "command succeeded";
          }
       }
       else
       {
-         std::cerr << "[!] dumping unoptimized obj (" << pathSolidNotOptimised<< ") failed" << std::endl;
+         Log::Error() << "dumping unoptimized obj (" << pathSolidNotOptimised<< ") failed";
       }
 
       // fallback to square marched level
       if (!std::filesystem::exists(path_solid_optimized))
       {
-         std::cerr << "[!] could not find " << path_solid_optimized.string() << ", obj generator failed" << std::endl;
+         Log::Warning() << "could not find " << path_solid_optimized.string() << ", obj generator failed";
          addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher._paths, pd->object_type);
       }
       else

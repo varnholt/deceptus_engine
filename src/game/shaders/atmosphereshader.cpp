@@ -1,6 +1,7 @@
 #include "atmosphereshader.h"
 
 #include "framework/tools/globalclock.h"
+#include "framework/tools/log.h"
 
 #include <iostream>
 
@@ -31,13 +32,13 @@ void AtmosphereShader::initialize()
 {
    if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
    {
-      std::cout << "error loading water shader" << std::endl;
+      Log::Error() << "error loading water shader";
       return;
    }
 
    if (!_distortion_map.loadFromFile("data/effects/distortion_map.png"))
    {
-      std::cout << "error loading distortion map" << std::endl;
+      Log::Error() << "error loading distortion map";
       return;
    }
 

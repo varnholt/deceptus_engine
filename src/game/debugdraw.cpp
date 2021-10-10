@@ -270,8 +270,6 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    // optimization is to only use bodies on screen by doing some world querying.
    // that reduces the amount of bodies to about 1/5, depending on the level complexity.
    //
-   // std::cout << "bodies on screen " << bodies.size() << " / " << level->getWorld()->GetBodyCount() << std::endl;
-   //
    // for (
    //    auto body = level->getWorld()->GetBodyList();
    //    body != nullptr;

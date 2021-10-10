@@ -51,8 +51,6 @@ void MenuScreen::load()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load(_filename);
 
-   // std::cout << mFilename << std::endl;
-
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
@@ -61,10 +59,7 @@ void MenuScreen::load()
          continue;
       }
 
-      // std::cout << layer.getName() << std::endl;
-
       auto tmp = std::make_shared<Layer>();
-      // tmp.mVisible = layer.isVisible();
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -80,13 +75,9 @@ void MenuScreen::load()
       tmp->_texture = texture;
       tmp->_sprite = sprite;
 
-      // std::cout << "    " << layer.getName() << std::endl;
-
       _layer_stack.push_back(tmp);
       _layers[layer.getName()] = tmp;
    }
-
-   // std::cout << "---------" << std::endl;
 
    loadingFinished();
 }

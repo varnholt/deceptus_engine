@@ -211,7 +211,7 @@ void Fan::load(
 
          if (tile_number != 0)
          {
-            // std::cout << tileNumber - firstId << std::endl;
+            // Log::Info() << tileNumber - firstId;
 
             const auto direction = static_cast<TileDirection>(tile_number - firstId);
             sf::Vector2f direction_vector;
@@ -310,7 +310,7 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& player_rect)
 
    if (valid)
    {
-      // std::cout << "dir: " << dir.x << ", " << dir.y << std::endl;
+      // Log::Info() << "dir: " << dir.x << ", " << dir.y;
       return dir;
    }
    else

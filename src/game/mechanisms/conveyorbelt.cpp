@@ -195,7 +195,7 @@ ConveyorBelt::ConveyorBelt(
 
    static auto ROUND_EPSILON = 0.5f;
    auto tile_count = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
-   // std::cout << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y << std::endl;
+   // Log::Info() << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y;
 
    for (auto i = 0u; i < tile_count; i++)
    {

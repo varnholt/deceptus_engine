@@ -87,8 +87,6 @@ b2Body* MovingPlatform::getBody()
 //-----------------------------------------------------------------------------
 void MovingPlatform::setEnabled(bool enabled)
 {
-   // std::cout << mInitialized << std::endl;
-
    GameMechanism::setEnabled(enabled);
 
    if (_initialized)

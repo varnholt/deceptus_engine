@@ -1,5 +1,7 @@
 #include "savestate.h"
 
+#include "framework/tools/log.h"
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -85,7 +87,7 @@ void SaveState::deserialize(const std::string& data)
    }
    catch (const std::exception& e)
    {
-     std::cout << e.what() << std::endl;
+     Log::Error() << e.what();
    }
 }
 
@@ -111,7 +113,7 @@ void SaveState::deserializeFromFile(const std::string& filename)
 
 void SaveState::serializeToFile(const std::string& filename)
 {
-   std::cout << "[-] saving " << filename << std::endl;
+   Log::Info() << "saving " << filename;
 
    std::string data = serialize();
    std::ofstream file(filename);

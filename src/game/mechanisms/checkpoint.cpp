@@ -1,11 +1,11 @@
 #include "checkpoint.h"
 
-#include "framework/tools/callbackmap.h"
-#include "player/player.h"
-
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/callbackmap.h"
+#include "framework/tools/log.h"
+#include "player/player.h"
 
 #include <iostream>
 
@@ -78,7 +78,7 @@ void Checkpoint::reached()
       return;
    }
 
-   std::cout << "[-] reached checkpoint: " << _index << std::endl;
+   Log::Info() << "reached checkpoint: " << _index;
 
    _reached = true;
 

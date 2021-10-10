@@ -1,5 +1,7 @@
 #include "squaremarcher.h"
 
+#include "framework/tools/log.h"
+
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -158,7 +160,7 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
          )
       )
       {
-          std::cout << "failed to create render texture" << std::endl;
+          Log::Error() << "failed to create render texture";
           return;
       }
 
@@ -204,7 +206,7 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
       sf::RenderTexture render_texture;
       if (!render_texture.create(_width * factor, _height * factor))
       {
-          std::cout << "failed to create render texture" << std::endl;
+          Log::Error() << "failed to create render texture";
           return;
       }
 

@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "game/debugdraw.h"
 #include "game/level.h"
 #include "game/player/player.h"
@@ -38,7 +39,7 @@ LightSystem::LightSystem()
 
    if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Fragment))
    {
-      std::cout << "[!] error loading bump mapping shader" << std::endl;
+      Log::Error() << "error loading bump mapping shader";
    }
 }
 
@@ -293,15 +294,14 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          )
       );
 
-      // std::cout
+      // Log::Info()
       //    << "light position on screen "
       //    << id << ": "
       //    << light_screen_pos.x << ", "
       //    << light_screen_pos.y << " | "
       //    << "render target size is: "
       //    << target.getSize().x << ", "
-      //    << target.getSize().y
-      //    << std::endl;
+      //    << target.getSize().y;
 
       light_id++;
    }
@@ -347,7 +347,7 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
 
    glDisable(GL_STENCIL_TEST);
 
-   // std::cout << _active_lights.size() << " active light sources " << std::endl;
+   // Log::Info() << _active_lights.size() << " active light sources";
 }
 
 

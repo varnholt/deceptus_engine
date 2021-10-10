@@ -93,7 +93,7 @@ void Audio::initializeTracks()
             _tracks.push_back(track);
          }
 
-         // std::cout << entry.path() << std::endl;
+         // Log::Info() << entry.path();
       }
    }
    catch (std::exception&)

@@ -5,6 +5,7 @@
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/log.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontrollerintegration.h"
 #include "gamestate.h"
@@ -173,7 +174,7 @@ void MessageBox::initializeLayers()
 
       if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
       {
-         std::cerr << "font load fuckup" << std::endl;
+         Log::Error() << "font load fuckup";
       }
 
       const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);

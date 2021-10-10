@@ -38,7 +38,7 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
    // can't simply play an animation, need to set a start frame!
    anim->updateVertices();
 
-   // std::cout << "setting animation rotation to " << angle << std::endl;
+   // Log::Info() << "setting animation rotation to " << angle;
 
    anim->play();
 
@@ -57,7 +57,7 @@ void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
       // after one loop animation will go into paused state
       if (animation->_paused)
       {
-         // std::cout << "removing animation after " << animation->mElapsed.asMilliseconds() << "ms" << std::endl;
+         // Log::Info() << "removing animation after " << animation->mElapsed.asMilliseconds() << "ms";
          delete animation;
          it = __active_animations.erase(it);
       }

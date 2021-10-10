@@ -116,9 +116,6 @@ DetonationAnimation::DetonationAnimation(
 
          angle += angle_increment;
 
-         // std::cout << x << std::endl;
-         // std::cout << y << std::endl;
-
          auto& frame_data = getFrameData(detonation_type);
 
          // bend the play time a bit so they don't all end at exactly the same time
@@ -142,7 +139,7 @@ DetonationAnimation::DetonationAnimation(
          animation->updateVertices();
          animation->play();
 
-         // std::cout << "setting animation rotation to " << angle << std::endl;
+         // Log::Info() << "setting animation rotation to " << angle;
 
          _animations.push_back(std::move(animation));
       }

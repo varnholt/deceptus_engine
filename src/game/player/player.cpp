@@ -577,23 +577,21 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    {
       desiredVel = b2Max(speed.currentVelocity.x + axisValueNormalized, -speed.velocityMax);
 
-      // std::cout
+      // Log::Info()
       //    << "desired: " << desiredVel << " "
       //    << "current: " << speed.currentVelocity.x << " "
       //    << "axis value: " << axisValueNormalized << " "
-      //    << "max: " << -speed.velocityMax
-      //    << std::endl;
+      //    << "max: " << -speed.velocityMax;
    }
    else
    {
       desiredVel = b2Min(speed.currentVelocity.x + axisValueNormalized, speed.velocityMax);
 
-      // std::cout
+      // Log::Info()
       //    << "desired: " << desiredVel << " "
       //    << "current: " << speed.currentVelocity.x << " "
       //    << "axis value: " << axisValueNormalized << " "
-      //    << "max: " << speed.velocityMax
-      //    << std::endl;
+      //    << "max: " << speed.velocityMax;
    }
 
    return desiredVel;
@@ -942,10 +940,8 @@ void Player::updateVelocity()
             _hard_landing = false;
          }
 
-         // std::cout << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform() << std::endl;
+         // Log::Info() << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform();
       }
-
-      // std::cout << "reset" << std::endl;
 
       _body->SetLinearVelocity({0.0, 0.0});
       return;
@@ -1005,13 +1001,13 @@ void Player::updateVelocity()
    }
 
    // cap speed
-   static const auto maxSpeed = 10.0f;
+   static const auto max_speed = 10.0f;
    b2Vec2 vel = _body->GetLinearVelocity();
    const auto speed = vel.Normalize();
-   if (speed > maxSpeed)
+   if (speed > max_speed)
    {
-      // std::cout << "cap speed" << std::endl;
-      _body->SetLinearVelocity(maxSpeed * vel);
+      // Log::Info() << "cap speed";
+      _body->SetLinearVelocity(max_speed * vel);
    }
 }
 
@@ -1122,12 +1118,11 @@ void Player::updateImpulse()
    const auto dy = _velocity_previous.y - _body->GetLinearVelocity().y;
    const auto horizontal = (fabs(dx) > fabs(dy));
 
-   // std::cout
+   // Log::Info()
    //    << "intensity: " << intensity
    //    << " dx: " << dx
    //    << " dy: " << dy
-   //    << " dir: " << (horizontal ? "x" : "y")
-   //   << std::endl;
+   //    << " dir: " << (horizontal ? "x" : "y");
 
    if (horizontal)
    {
@@ -1437,16 +1432,6 @@ void Player::updateGroundAngle()
    }
 
    _ground_normal = intersectionNormal;
-
-   // std::cout << intersectionNormal.x << " " << intersectionNormal.y << std::endl;
-   //
-   // x: -0.447
-   // y: -0.894
-
-   // x:  0.0
-   // y: -1.0
-
-   // std::cout << 1.0 / intersectionNormal.y << std::endl;
 }
 
 
@@ -1858,6 +1843,7 @@ void Player::traceJumpCurve()
          _jump_trace.jumpStartTime = _time;
          _jump_trace.jumpStartY = _body->GetPosition().y;
          _jump_trace.jumpStarted = true;
+
          std::cout << std::endl << "time; y" << std::endl;
       }
 

@@ -83,8 +83,6 @@ bool StaticLight::onLoad()
 //-----------------------------------------------------------------------------
 std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup)
 {
-  // std::cout << "static light: " << objectGroup->mName << " at layer: " << objectGroup->mZ << std::endl;
-
    auto light = std::make_shared<StaticLight::LightInstance>();
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";

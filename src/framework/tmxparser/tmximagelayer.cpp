@@ -1,4 +1,6 @@
 #include "tmximagelayer.h"
+
+#include "framework/tools/log.h"
 #include "tmximage.h"
 #include "tmxproperties.h"
 
@@ -54,7 +56,7 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
          }
          else if (!parsed)
          {
-            std::cerr << sub_element->Name() << " is not supported for TmxElement\n" << std::endl;
+            Log::Error() << sub_element->Name() << " is not supported for TmxElement";
          }
       }
 
