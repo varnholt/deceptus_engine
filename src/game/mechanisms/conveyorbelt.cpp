@@ -128,10 +128,10 @@ ConveyorBelt::ConveyorBelt(
 
    _texture = TexturePool::getInstance().get(base_path / "tilesets" / "cbelt.png");
 
-   const auto x      = tmx_object->_x_px;
-   const auto y      = tmx_object->_y_px;
-   const auto width  = tmx_object->_width_px;
-   const auto height = tmx_object->_height_px;
+   const auto x         = tmx_object->_x_px;
+   const auto y         = tmx_object->_y_px;
+   const auto width_px  = tmx_object->_width_px;
+   const auto height_px = tmx_object->_height_px;
 
    auto velocity = _velocity;
 
@@ -165,24 +165,24 @@ ConveyorBelt::ConveyorBelt(
    //    0.0f
    // );
 
-   const auto pixel_width = width * MPP;
-   const auto pixel_height = height * MPP;
+   const auto width_m  = width_px * MPP;
+   const auto height_m = height_px * MPP;
 
    constexpr auto dx = 0.002f;
    constexpr auto dy = 0.001f;
    std::array<b2Vec2, 6> vertices {
       b2Vec2{dx,                0.0},
-      b2Vec2{0.0,               pixel_height - dy},
-      b2Vec2{0.0,               pixel_height},
-      b2Vec2{pixel_width,       pixel_height},
-      b2Vec2{pixel_width,       pixel_height - dy},
-      b2Vec2{pixel_width - dx,  0.0}
+      b2Vec2{0.0,               height_m - dy},
+      b2Vec2{0.0,               height_m},
+      b2Vec2{width_m,       height_m},
+      b2Vec2{width_m,       height_m - dy},
+      b2Vec2{width_m - dx,  0.0}
    };
 
-   _shape_bounds.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
+   _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    b2FixtureDef boundary_fixture_def;
-   boundary_fixture_def.shape = &_shape_bounds;
+   boundary_fixture_def.shape = &_shape;
    boundary_fixture_def.density = 1.0f;
    boundary_fixture_def.isSensor = false;
    auto boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
@@ -190,11 +190,11 @@ ConveyorBelt::ConveyorBelt(
 
    _belt_pixel_rect.left   = static_cast<int32_t>(x);
    _belt_pixel_rect.top    = static_cast<int32_t>(y);
-   _belt_pixel_rect.height = static_cast<int32_t>(height);
-   _belt_pixel_rect.width  = static_cast<int32_t>(width);
+   _belt_pixel_rect.height = static_cast<int32_t>(height_px);
+   _belt_pixel_rect.width  = static_cast<int32_t>(width_px);
 
    static auto ROUND_EPSILON = 0.5f;
-   auto tile_count = static_cast<uint32_t>( (width / PIXELS_PER_TILE) + ROUND_EPSILON);
+   auto tile_count = static_cast<uint32_t>( (width_px / PIXELS_PER_TILE) + ROUND_EPSILON);
    // Log::Info() << "estimating " << tileCount << " tiles per belt" << " at " << x << ", " << y;
 
    for (auto i = 0u; i < tile_count; i++)
