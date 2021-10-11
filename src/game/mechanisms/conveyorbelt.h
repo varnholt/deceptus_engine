@@ -45,7 +45,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       b2Body* _body = nullptr;
       b2Vec2 _position_b2d;
       sf::Vector2f _position_sfml;
-      b2PolygonShape _shape_bounds;
+      b2PolygonShape _shape;
       sf::IntRect _belt_pixel_rect;
       sf::IntRect _arrow_pixel_rect;
       float _elapsed = 0.0f;
