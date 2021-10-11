@@ -111,14 +111,14 @@ void MoveableBox::setupTransform()
 void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
-   auto sizeX = _size.x / PPM;
-   auto sizeY = _size.y / PPM;
+   auto size_x = _size.x / PPM;
+   auto size_y = _size.y / PPM;
 
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(0,     0);
-   vertices[1] = b2Vec2(0,     sizeY);
-   vertices[2] = b2Vec2(sizeX, sizeY);
-   vertices[3] = b2Vec2(sizeX, 0);
+   vertices[1] = b2Vec2(0,     size_y);
+   vertices[2] = b2Vec2(size_x, size_y);
+   vertices[3] = b2Vec2(size_x, 0);
 
    polygon_shape.Set(vertices, 4);
 

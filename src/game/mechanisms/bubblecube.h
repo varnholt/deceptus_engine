@@ -1,6 +1,4 @@
-#ifndef BUBBLECUBE_H
-#define BUBBLECUBE_H
-
+#pragma once
 
 //Bubble cube
 //
@@ -9,11 +7,44 @@
 //- cube reappears after n seconds.
 //- Basically is a 1-jump-platform before vanishes.
 
+class GameNode;
+struct TmxObject;
 
-class BubbleCube
+#include "fixturenode.h"
+#include "gamemechanism.h"
+
+#include "Box2D/Box2D.h"
+
+#include <filesystem>
+
+
+class BubbleCube : public FixtureNode, public GameMechanism
 {
-   public:
-      BubbleCube();
+
+public:
+
+   BubbleCube(
+      GameNode* parent,
+      const std::shared_ptr<b2World>& world,
+      TmxObject* tmx_object,
+      const std::filesystem::path& base_path
+   );
+
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+   void update(const sf::Time& dt) override;
+
+
+private:
+
+   float _elapsed = 0.0f;
+
+   // sf
+   std::shared_ptr<sf::Texture> _texture;
+   sf::Sprite _sprite;
+
+   // b2d
+   b2Body* _body = nullptr;
+   b2Vec2 _position_m;
+   b2PolygonShape _shape;
 };
 
-#endif // BUBBLECUBE_H

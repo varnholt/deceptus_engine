@@ -204,6 +204,7 @@ enum ObjectType
    ObjectTypeMovingPlatform,
    ObjectTypeSolid,
    ObjectTypeSolidOneSided,
+   ObjectTypeBubbleCube,
 };
 
 
