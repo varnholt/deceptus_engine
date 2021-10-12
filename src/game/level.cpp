@@ -21,6 +21,7 @@
 #include "levelmap.h"
 #include "luainterface.h"
 #include "mechanisms/bouncer.h"
+#include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/crusher.h"
@@ -34,6 +35,7 @@
 #include "mechanisms/movingplatform.h"
 #include "mechanisms/rope.h"
 #include "mechanisms/ropewithlight.h"
+#include "mechanisms/spikeblock.h"
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikes.h"
 #include "meshtools.h"
@@ -221,9 +223,12 @@ Level::Level()
 
    _mechanisms = {
       &_mechanism_bouncers,
+      &_mechanism_bubble_cubes,
+      &_mechanism_checkpoints,
       &_mechanism_conveyor_belts,
       &_mechanism_crushers,
       &_mechanism_death_blocks,
+      &_mechanism_dialogues,
       &_mechanism_doors,
       &_mechanism_fans,
       &_mechanism_lasers,
@@ -233,9 +238,8 @@ Level::Level()
       &_mechanism_portals,
       &_mechanism_ropes,
       &_mechanism_spike_balls,
+      &_mechanism_spike_blocks,
       &_mechanism_spikes,
-      &_mechanism_dialogues,
-      &_mechanism_checkpoints
    };
 }
 
@@ -429,7 +433,12 @@ void Level::loadTmx()
          {
             TmxObject* tmx_object = object.second;
 
-            if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
+            if (object_group->_name == "bubblecube")
+            {
+               auto cube = std::make_shared<BubbleCube>(dynamic_cast<GameNode*>(this), _world, tmx_object, path);
+               _mechanism_bubble_cubes.push_back(cube);
+            }
+            else if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
             {
                Laser::addObject(tmx_object);
             }

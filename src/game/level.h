@@ -210,21 +210,23 @@ protected:
    // mechanisms
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_bubble_cubes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_conveyor_belts;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_crushers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_death_blocks;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_platforms;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_portals;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;
 
    // graphic effects
    BoomEffect _boom_effect;
