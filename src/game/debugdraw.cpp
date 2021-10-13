@@ -168,14 +168,14 @@ void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& l
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawLines(sf::RenderTarget& target, const b2Vec2* vertices, int32_t vertex_count, const b2Color& color)
+void DebugDraw::drawLines(sf::RenderTarget& target, const b2Vec2* vertices, const b2Vec2& offset, int32_t vertex_count, const b2Color& color)
 {
    const auto sf_color = DebugDraw::glColorToSfml(color);
    std::vector<sf::Vertex> sf_lines;
 
    for (auto i = 0; i < vertex_count; i++)
    {
-      sf_lines.push_back(sf::Vertex(vecB2S(vertices[i]), sf_color));
+      sf_lines.push_back(sf::Vertex(vecB2S(vertices[i] + offset), sf_color));
    }
 
    target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
@@ -287,7 +287,6 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
          || body->GetType() == b2_staticBody
       )
       {
-
          // draw position and velocity
          static const b2Color point_color{1.0f, 1.0f, 0.0f, 1.0f};
          static constexpr auto max_velocity = 5.0f;
@@ -314,15 +313,16 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
             {
                case b2Shape::e_polygon:
                {
+                  const auto offset = body->GetPosition();
                   auto poly = dynamic_cast<b2PolygonShape*>(shape);
-                  drawLines(target, poly->m_vertices, poly->m_count, b2Color{1, 0, 0, 1});
+                  drawLines(target, poly->m_vertices, offset, poly->m_count, b2Color{1, 0, 0, 1});
                   break;
                }
 
                case b2Shape::e_circle:
                {
                   b2Vec2 offset{0.0f, 0.0f};
-                  auto circle_shape = dynamic_cast<b2CircleShape*>(f->GetShape());
+                  auto circle_shape = dynamic_cast<b2CircleShape*>(shape);
 
                   if (circle_shape != nullptr)
                   {
@@ -340,8 +340,9 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 
                case b2Shape::e_chain:
                {
+                  const auto offset = body->GetPosition();
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
-                  drawLines(target, chain->m_vertices, chain->m_count, b2Color{1, 0, 0, 1});
+                  drawLines(target, chain->m_vertices, offset, chain->m_count, b2Color{1, 0, 0, 1});
                   break;
                }
 
@@ -367,6 +368,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
             drawLines(
                target,
                vertex_it->second,
+               {},
                static_cast<int32_t>(vertex_count_it->second),
                b2Color(1.0f, 0.0f, 0.0f)
             );

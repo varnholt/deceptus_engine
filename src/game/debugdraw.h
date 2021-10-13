@@ -26,7 +26,7 @@ void drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 rad
 void drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color);
 void drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color);
 void drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color);
-void drawLines(sf::RenderTarget& target, const b2Vec2* vertices, int32_t vertex_count, const b2Color& color);
+void drawLines(sf::RenderTarget& target, const b2Vec2* vertices, const b2Vec2& offset, int32_t vertex_count, const b2Color& color);
 void drawTransform(sf::RenderTarget& target, const b2Transform& xf);
 
 void debugBodies(sf::RenderTarget& target, Level* level);

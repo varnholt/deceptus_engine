@@ -197,6 +197,19 @@ Apart from the `z` depth, lasers have the custom properties below:
 
 ![](images/mechanism_lasers.png)
 
+<br><br>
+
+
+## Bubble Cubes
+
+Bubble Cubes serve as a solid platform the player can land on and jump off again. However, once the player contact to the Bubble Cube ends, it pops and only respawns after a couple of seconds.
+
+In order to place Bubble Cubes in your level, create an object layer called `bubble_cubes`. In there, just place a rectangle where you'd like to position your Bubble Cube.
+Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust your rectangle accordingly.
+
+![](images/bubble_cubes.png)
+
+No Custom Properties so far.
 
 <br><br>
 

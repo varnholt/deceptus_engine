@@ -33,10 +33,16 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
+   void beginContact();
+   void endContact();
+
 
 private:
 
-   float _elapsed = 0.0f;
+   float _elapsed_s = 0.0f;
+   bool _popped = false;
+   int32_t _contact_count = 0;
+   sf::Time _pop_time;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;
@@ -44,6 +50,7 @@ private:
 
    // b2d
    b2Body* _body = nullptr;
+   b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2PolygonShape _shape;
 };

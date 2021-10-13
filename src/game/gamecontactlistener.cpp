@@ -9,6 +9,7 @@
 #include "framework/tools/timer.h"
 #include "luanode.h"
 #include "mechanisms/bouncer.h"
+#include "mechanisms/bubblecube.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/movingplatform.h"
 #include "player/player.h"
@@ -235,12 +236,17 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeConveyorBelt:
             break;
-        case ObjectTypeMoveableBox:
-           break;
-        case ObjectTypeDeathBlock:
-           break;
-        case ObjectTypeSolid:
-           break;
+         case ObjectTypeMoveableBox:
+            break;
+         case ObjectTypeDeathBlock:
+            break;
+         case ObjectTypeSolid:
+            break;
+         case ObjectTypeBubbleCube:
+         {
+            dynamic_cast<BubbleCube*>(fixture_node_a)->beginContact();
+            break;
+         }
       }
    }
 
@@ -388,6 +394,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          case ObjectTypeSolid:
             break;
+         case ObjectTypeBubbleCube:
+         {
+            dynamic_cast<BubbleCube*>(fixture_node_b)->beginContact();
+            break;
+         }
       }
    }
 
@@ -482,6 +493,11 @@ void GameContactListener::EndContact(b2Contact* contact)
             _count_moving_platform_contacts--;
             break;
          }
+         case ObjectTypeBubbleCube:
+         {
+            dynamic_cast<BubbleCube*>(fixture_node_a)->endContact();
+            break;
+         }
          default:
          {
             break;
@@ -555,6 +571,11 @@ void GameContactListener::EndContact(b2Contact* contact)
          case ObjectTypeMovingPlatform:
          {
             _count_moving_platform_contacts--;
+            break;
+         }
+         case ObjectTypeBubbleCube:
+         {
+            dynamic_cast<BubbleCube*>(fixture_node_b)->endContact();
             break;
          }
          default:

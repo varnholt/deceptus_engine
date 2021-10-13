@@ -433,7 +433,7 @@ void Level::loadTmx()
          {
             TmxObject* tmx_object = object.second;
 
-            if (object_group->_name == "bubblecube")
+            if (object_group->_name == "bubble_cubes")
             {
                auto cube = std::make_shared<BubbleCube>(dynamic_cast<GameNode*>(this), _world, tmx_object, path);
                _mechanism_bubble_cubes.push_back(cube);

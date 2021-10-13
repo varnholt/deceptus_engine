@@ -790,12 +790,6 @@ void Player::updateAnimation(const sf::Time& dt)
    }
 
    _player_animation.update(dt, data);
-
-   // reset hard landing if cycle reached
-   if (_hard_landing && _player_animation.getJumpAnimationReference() == 3)
-   {
-      _hard_landing = false;
-   }
 }
 
 
@@ -926,23 +920,6 @@ void Player::updateVelocity()
    // if we just landed hard on the ground, we need a break :)
    if (_hard_landing)
    {
-      if (_hard_landing_cycles > 1)
-      {
-         // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
-         // maybe come up with a nice concept for this one day.
-         if (isOnPlatform())
-         {
-            _hard_landing = false;
-         }
-
-         if (!isOnGround())
-         {
-            _hard_landing = false;
-         }
-
-         // Log::Info() << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform();
-      }
-
       _body->SetLinearVelocity({0.0, 0.0});
       return;
    }
@@ -1141,6 +1118,7 @@ void Player::updateImpulse()
 
       Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f);
 
+      _timepoint_hard_landing = StopWatch::getInstance().now();
       _hard_landing = true;
       _hard_landing_cycles = 0;
 
@@ -1373,11 +1351,35 @@ void Player::updateBendDown()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateHardLanding()
 {
+   using namespace std::chrono_literals;
+
+   if (_hard_landing)
    {
-      if (_hard_landing)
+      _hard_landing_cycles++;
+
+      // this should be longer and player should go into bend down position after a hard landing
+      if (StopWatch::getInstance().now() - _timepoint_hard_landing > 0.2s)
       {
-         _hard_landing_cycles++;
+         _hard_landing = false;
+         _hard_landing_cycles = 0;
       }
+   }
+
+   if (_hard_landing_cycles > 1)
+   {
+      // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
+      // maybe come up with a nice concept for this one day.
+      if (isOnPlatform())
+      {
+         _hard_landing = false;
+      }
+
+      if (!isOnGround())
+      {
+         _hard_landing = false;
+      }
+
+      // Log::Info() << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform();
    }
 }
 
