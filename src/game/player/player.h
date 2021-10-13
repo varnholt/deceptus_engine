@@ -241,6 +241,7 @@ private:
 
    bool _hard_landing = false;
    int32_t _hard_landing_cycles = 0;
+   HighResTimePoint _timepoint_hard_landing;
 
    float _belt_velocity = 0.0f;
    bool _is_on_belt = false;

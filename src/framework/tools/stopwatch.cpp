@@ -35,6 +35,6 @@ StopWatch::HighResDuration StopWatch::duration(const StopWatch::HighResTimePoint
 
 StopWatch::HighResTimePoint StopWatch::now()
 {
-   return std::chrono::high_resolution_clock::now();;
+   return std::chrono::high_resolution_clock::now();
 }
 
