@@ -39,9 +39,13 @@ public:
 
 private:
 
+   float _pop_time_respawn_s = 3.0f;
+   float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
+   float _pop_elapsed_s = 0.0f;
    bool _popped = false;
    int32_t _contact_count = 0;
+   float _mapped_value_normalized = 0.0f;
    sf::Time _pop_time;
 
    // sf
