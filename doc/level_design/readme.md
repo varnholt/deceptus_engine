@@ -209,7 +209,10 @@ Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust y
 
 ![](images/bubble_cubes.png)
 
-No Custom Properties so far.
+|Custom Property|Type|Description|
+|-|-|-|
+|animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
+|pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`)|
 
 <br><br>
 
