@@ -1,6 +1,8 @@
 #include "bubblecube.h"
 
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 
 #include "framework/tools/globalclock.h"
@@ -17,10 +19,10 @@ static constexpr auto tiles_per_box_width = 4;
 static constexpr auto tiles_per_box_height = 3;
 
 static constexpr auto animation_speed = 8.0f;
-static constexpr auto move_amplitude = 0.1f;
+static constexpr auto move_amplitude = 0.08f;
 static constexpr auto move_frequency = 4.19f;
 
-static constexpr auto pop_time_respawn_s = 3.0f;
+static constexpr auto pop_frequency = 15.0f;
 
 static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
@@ -37,6 +39,22 @@ BubbleCube::BubbleCube(
 {
    setName(typeid(BubbleCube).name());
    setType(ObjectTypeBubbleCube);
+
+   // read properties
+   if (tmx_object->_properties)
+   {
+      auto animation_offset_it = tmx_object->_properties->_map.find("animation_offset_s");
+      if (animation_offset_it != tmx_object->_properties->_map.end())
+      {
+         _animation_offset_s = animation_offset_it->second->_value_float.value();
+      }
+
+      auto pop_time_respawn_it = tmx_object->_properties->_map.find("pop_time_respawn_s");
+      if (pop_time_respawn_it != tmx_object->_properties->_map.end())
+      {
+         _pop_time_respawn_s = pop_time_respawn_it->second->_value_float.value();
+      }
+   }
 
    // set up shape
    //
@@ -90,20 +108,19 @@ BubbleCube::BubbleCube(
 
 void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   auto val = static_cast<int32_t>(_elapsed_s * animation_speed);
+   auto sprite_index = 0;
 
-   // popped animation is not looped
    if (_popped)
    {
-      val = std::min(val, columns - 1);
+      sprite_index = std::min(static_cast<int32_t>(_pop_elapsed_s * pop_frequency), columns - 1);
    }
    else
    {
-      val = val % columns;
+      sprite_index = static_cast<int32_t>(_mapped_value_normalized * columns + 6) % columns;
    }
 
    _sprite.setTextureRect({
-         val * PIXELS_PER_TILE * tiles_per_box_width,
+         sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
          (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
          PIXELS_PER_TILE * tiles_per_box_width,
          PIXELS_PER_TILE * tiles_per_box_height
@@ -130,13 +147,17 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 void BubbleCube::update(const sf::Time& dt)
 {
    _elapsed_s += dt.asSeconds();
+   _pop_elapsed_s += dt.asSeconds();
 
-   const auto move_offset = move_amplitude * -sin(_elapsed_s * move_frequency) * b2Vec2{0, 1};
+   const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
+   _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
+
+   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f};
 
    _body->SetTransform(_position_m + move_offset, 0.0f);
 
    // respawn when the time has come
-   if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > pop_time_respawn_s)
+   if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       _popped = false;
       _fixture->SetSensor(false);
@@ -146,12 +167,22 @@ void BubbleCube::update(const sf::Time& dt)
 
 void BubbleCube::beginContact()
 {
+   if (_popped)
+   {
+      return;
+   }
+
    _contact_count++;
 }
 
 
 void BubbleCube::endContact()
 {
+   if (_popped)
+   {
+      return;
+   }
+
    _contact_count--;
 
    if (_contact_count == 0)
@@ -159,7 +190,7 @@ void BubbleCube::endContact()
       _popped = true;
       _pop_time = GlobalClock::getInstance().getElapsedTime();
       _fixture->SetSensor(true);
-      _elapsed_s = 0.0f;
+      _pop_elapsed_s = 0.0f;
    }
 }
 
