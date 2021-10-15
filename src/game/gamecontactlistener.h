@@ -39,6 +39,7 @@ public:
 protected:
 
    bool isPlayer(FixtureNode* obj) const;
+   bool isBubbleCube(FixtureNode* obj) const;
 
 
 private:

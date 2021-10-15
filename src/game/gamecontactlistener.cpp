@@ -37,14 +37,32 @@ int32_t GameContactListener::getDeadlyContactCount() const
 
 bool GameContactListener::isPlayer(FixtureNode* obj) const
 {
-   if (obj == nullptr)
+   if (!obj)
    {
       return false;
    }
 
    auto p = dynamic_cast<Player*>(obj->getParent());
 
-   if (p == nullptr)
+   if (!p)
+   {
+      return false;
+   }
+
+   return true;
+}
+
+
+bool GameContactListener::isBubbleCube(FixtureNode* obj) const
+{
+   if (!obj)
+   {
+      return false;
+   }
+
+   auto p = dynamic_cast<BubbleCube*>(obj);
+
+   if (!p)
    {
       return false;
    }
@@ -122,8 +140,10 @@ void GameContactListener::BeginContact(b2Contact* contact)
                {
                   Player::getCurrent()->setGroundBody(contact->GetFixtureB()->GetBody());
                }
+
                _count_foot_contacts++;
             }
+
             break;
          }
          case ObjectTypePlayerHeadSensor:
@@ -132,6 +152,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             {
                _count_head_contacts++;
             }
+
             break;
          }
          case ObjectTypePlayerLeftArmSensor:
@@ -140,6 +161,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             {
                _count_arm_left_contacts++;
             }
+
             break;
          }
          case ObjectTypePlayerRightArmSensor:
@@ -148,6 +170,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
             {
                _count_arm_right_contacts++;
             }
+
             break;
          }
          case ObjectTypeProjectile:
@@ -233,18 +256,32 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          }
          case ObjectTypeDoor:
+         {
             break;
+         }
          case ObjectTypeConveyorBelt:
+         {
             break;
+         }
          case ObjectTypeMoveableBox:
+         {
             break;
+         }
          case ObjectTypeDeathBlock:
+         {
             break;
+         }
          case ObjectTypeSolid:
+         {
             break;
+         }
          case ObjectTypeBubbleCube:
          {
             dynamic_cast<BubbleCube*>(fixture_node_a)->beginContact();
+            break;
+         }
+         case ObjectTypeInvalid:
+         {
             break;
          }
       }
@@ -276,6 +313,12 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
                _count_foot_contacts++;
             }
+
+            // if (isBubbleCube(fixture_node_a))
+            // {
+            //    dynamic_cast<BubbleCube*>(fixture_node_a)->beginContact();
+            // }
+
             break;
          }
          case ObjectTypePlayerHeadSensor:
@@ -385,18 +428,32 @@ void GameContactListener::BeginContact(b2Contact* contact)
             break;
          }
          case ObjectTypeDoor:
+         {
             break;
+         }
          case ObjectTypeConveyorBelt:
+         {
             break;
+         }
          case ObjectTypeMoveableBox:
+         {
             break;
+         }
          case ObjectTypeDeathBlock:
+         {
             break;
+         }
          case ObjectTypeSolid:
+         {
             break;
+         }
          case ObjectTypeBubbleCube:
          {
             dynamic_cast<BubbleCube*>(fixture_node_b)->beginContact();
+            break;
+         }
+         case ObjectTypeInvalid:
+         {
             break;
          }
       }
@@ -404,6 +461,8 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
    // handle one sided walls
    processOneSidedWalls(contact, player_fixture, platform_fixture);
+
+   // std::cout << _count_foot_contacts << std::endl;
 }
 
 
@@ -435,6 +494,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_deadly_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerFootSensor:
@@ -443,6 +503,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_foot_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerHeadSensor:
@@ -451,6 +512,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_head_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerLeftArmSensor:
@@ -459,6 +521,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_arm_left_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerRightArmSensor:
@@ -467,6 +530,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_arm_right_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayer:
@@ -515,6 +579,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_deadly_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerFootSensor:
@@ -523,6 +588,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_foot_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerHeadSensor:
@@ -531,6 +597,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             {
                _count_head_contacts--;
             }
+
             break;
          }
          case ObjectTypePlayerLeftArmSensor:

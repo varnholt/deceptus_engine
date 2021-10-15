@@ -156,11 +156,16 @@ void BubbleCube::update(const sf::Time& dt)
 
    _body->SetTransform(_position_m + move_offset, 0.0f);
 
+   if (_popped)
+   {
+      _body->SetActive(false);
+   }
+
    // respawn when the time has come
    if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       _popped = false;
-      _fixture->SetSensor(false);
+      _body->SetActive(true);
    }
 }
 
@@ -189,7 +194,6 @@ void BubbleCube::endContact()
    {
       _popped = true;
       _pop_time = GlobalClock::getInstance().getElapsedTime();
-      _fixture->SetSensor(true);
       _pop_elapsed_s = 0.0f;
    }
 }
