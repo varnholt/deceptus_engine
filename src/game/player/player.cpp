@@ -1410,7 +1410,7 @@ void Player::updateGroundAngle()
       return;
    }
 
-   for (b2Fixture* f = _ground_body->GetFixtureList(); f; f = f->GetNext())
+   for (auto f = _ground_body->GetFixtureList(); f; f = f->GetNext())
    {
       // terrain is made out of chains, so only process those
       if (f->GetShape()->GetType() != b2Shape::e_chain)
@@ -1420,9 +1420,9 @@ void Player::updateGroundAngle()
 
       b2RayCastOutput output;
 
-      for (auto childIndex = 0; childIndex < f->GetShape()->GetChildCount(); childIndex++)
+      for (auto child_index = 0; child_index < f->GetShape()->GetChildCount(); child_index++)
       {
-         if (!f->RayCast(&output, input, childIndex))
+         if (!f->RayCast(&output, input, child_index))
             continue;
 
          if (output.fraction < closestFraction)
