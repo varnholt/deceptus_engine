@@ -571,6 +571,10 @@ void Level::loadTmx()
                   MovingPlatform::link(_mechanism_platforms, tmx_object);
                }
             }
+            else if (object_group->_name == "platforms")
+            {
+               MovingPlatform::deserialize(tmx_object);
+            }
             else if (object_group->_name == "weather")
             {
                sf::IntRect rect{
@@ -618,6 +622,7 @@ void Level::loadTmx()
    Fan::merge();
    _mechanism_fans = Fan::getFans();
    Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes);
+   MovingPlatform::merge(path, _world);
 
    _map->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),
