@@ -20,9 +20,11 @@ public:
    };
 
    PathInterpolation() = default;
-   void addKey(const b2Vec2 &pos, float timeValue);
+   void addKey(const b2Vec2 &pos, float time_value);
 
-   b2Vec2 compute(const b2Vec2 &current, float timeValue);
+   b2Vec2 computeVelocity(const b2Vec2 &current, float time_value);
+   b2Vec2 computePosition(float time_value);
+
    float updateZeroOneZeroOne(float delta);
 
    bool update(const b2Vec2 &currentPos);

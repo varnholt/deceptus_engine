@@ -16,8 +16,10 @@
 
 #define GAME_NAME "deceptus"
 
-static constexpr auto PPM = 48.0f;
-static constexpr auto MPP = (1.0f / PPM);
+static constexpr auto PPM = 48.0f;        // pixels per meter
+static constexpr auto MPP = (1.0f / PPM); // meters per pixel
+static constexpr auto TPM = 2.0f;         // tiles per meter
+static constexpr auto MPT = 0.5f;         // meters per tile
 
 static constexpr auto PIXELS_PER_TILE = 24;
 static constexpr auto PIXELS_PER_PHYSICS_TILE = 8; // each tile is 8x8 px
