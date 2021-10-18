@@ -49,7 +49,7 @@ public:
 
 private:
 
-   void setupTransform();
+   void setupTransformDeprecated();
    void updateLeverLag(const sf::Time& dt);
 
    double CosineInterpolate(
@@ -65,9 +65,11 @@ private:
    sf::Vector2i _tile_positions;
    float _x = 0.0f;
    float _y = 0.0f;
-   int32_t _width = 0;
-   int32_t _height = 1;
+   int32_t _element_count = 0;
    float _time = 0.0f;
+   float _interpolation_value = 0.0f;
+   bool _looped = false;
+   bool _move_up = true;
    float _lever_lag = 0.0f;
    bool _initialized = false;
    PathInterpolation _interpolation;
