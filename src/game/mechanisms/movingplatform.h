@@ -39,7 +39,6 @@ public:
 
    void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
-   void setOffset(float x, float y);
    b2Body* getBody();
    void setEnabled(bool enabled) override;
 
