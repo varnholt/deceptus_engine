@@ -108,14 +108,6 @@ void MovingPlatform::setEnabled(bool enabled)
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::setOffset(float x, float y)
-{
-   _x = x;
-   _y = y;
-}
-
-
-//-----------------------------------------------------------------------------
 void MovingPlatform::setupTransformDeprecated()
 {
    auto x = _tile_positions.x * PIXELS_PER_TILE / PPM;
@@ -337,6 +329,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
       moving_platforms.push_back(moving_platform);
 
       moving_platform->_element_count = static_cast<int32_t>(box->_width_px / PIXELS_PER_TILE);
+      moving_platform->_z_index = 10;
 
       // load textures
       if (std::filesystem::exists(normal_map_path))
@@ -351,34 +344,58 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
 
       for (auto i = 0; i < width_tl; i++)
       {
-         auto tu = 0;
-         auto tv = 0;
+         // 0123 4567
+         // anim        -> wheel animation
+         //      lmmr   -> regular parts
+         //
+         // 01 23 45 67 -> 2 tile animation
+         // a0 a1 a2 a3
+         auto tu_tl = 0;
+         auto tv_tl = 0;
 
-         if (i == 0) // first tile
+         if (width_tl == 3)
          {
+            if (i == 0) // first tile
+            {
+               tu_tl = 4;
+            }
+            else if (i == width_tl - 1) // last tile
+            {
+               tu_tl = 7;
+            }
+            else // other tiles
+            {
+               tu_tl = 5; // or 6
+            }
+
+            // handle middle tile
+            // ...
          }
-         else if (i == width_tl - 1) // last tile
+         else if (width_tl == 2)
          {
-         }
-         else // other tiles
-         {
+            if (i == 0)
+            {
+               tu_tl = 0;
+            }
+            else if (i == 1)
+            {
+               tu_tl = 1;
+            }
          }
 
          sf::Sprite sprite;
          sprite.setTexture(*moving_platform->_texture_map);
          sprite.setTextureRect(
             sf::IntRect(
-               tu * PIXELS_PER_TILE,
-               tv * PIXELS_PER_TILE,
+               tu_tl * PIXELS_PER_TILE,
+               tv_tl * PIXELS_PER_TILE,
                PIXELS_PER_TILE,
-               PIXELS_PER_TILE
+               PIXELS_PER_TILE * 2  // 1 platform tile and one background tile for perspective
             )
          );
 
          moving_platform->addSprite(sprite);
       }
-
-      // auto pos = path->_polyline->_polyline.at(0);
 
       b2Vec2 platform_pos_m;
       auto i = 0;
@@ -386,20 +403,16 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
       {
          auto time = i / static_cast<float>(path->_polyline->_polyline.size() - 1);
 
-         // where do those 4px error come from?!
-         auto x_px = (path->_x_px + poly_pos_px.x); // - 4 - (moving_platform->_element_count  * PIXELS_PER_TILE) / 2.0f) * MPP;
+         // we don't want to position the platform right on the path, we only
+         // want to move its center there
+         auto x_px = (path->_x_px + poly_pos_px.x) - (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
          auto y_px = (path->_y_px + poly_pos_px.y); // -     (moving_platform->_height_tl * PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos_m.x = x_px * MPP;
          platform_pos_m.y = y_px * MPP;
 
-         std::cout << "index: " << i << " x: " << platform_pos_m.x << " y: " << platform_pos_m.y << std::endl;
-
          moving_platform->_interpolation.addKey(platform_pos_m, time);
-         moving_platform->_pixel_path.push_back({
-            (/*pos.x +*/ path->_x_px),
-            (/*pos.y +*/ path->_y_px)}
-         );
+         moving_platform->_pixel_path.push_back({(path->_x_px + poly_pos_px.x), (path->_y_px + poly_pos_px.y)});
 
          i++;
       }
@@ -521,57 +534,16 @@ void MovingPlatform::updateLeverLag(const sf::Time& dt)
 void MovingPlatform::update(const sf::Time& dt)
 {
    updateLeverLag(dt);
-
    _interpolation.update(_body->GetPosition());
-
-   // std::cout <<  _interpolation.getVelocity().x << " " << _interpolation.getVelocity().y << std::endl;
-
     _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
-
-
-   /*
-   bool looped = false;
-
-   if (looped)
-   {
-      _interpolation_value = fmod(_time, 1.0f);
-   }
-   else
-   {
-      if (_move_up)
-      {
-         _interpolation_value += dt.asSeconds();
-      }
-      else
-      {
-         _interpolation_value -= dt.asSeconds();
-      }
-
-      if (_interpolation_value < 0.0f)
-      {
-         _move_up = true;
-         _interpolation_value = 0.0f;
-      }
-
-      if (_interpolation_value > 1.0f)
-      {
-         _move_up = false;
-         _interpolation_value = 1.0f;
-      }
-   }
-
-   _body->SetTransform(_interpolation.computePosition(_interpolation_value), 0.0f);
-   */
 
    auto pos = 0;
    auto horizontal = (_element_count  > 1) ? 1 : 0;
 
-   // std::cout << "x: " << _body->GetPosition().x << " y: " << _body->GetPosition().y << std::endl;
-
    for (auto& sprite : _sprites)
    {
       auto x = _body->GetPosition().x * PPM + horizontal * pos * PIXELS_PER_TILE;
-      auto y = _body->GetPosition().y * PPM;
+      auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE; // there's one tile offset for the perspective tile
 
       sprite.setPosition(x, y);
 

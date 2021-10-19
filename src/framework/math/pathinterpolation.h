@@ -44,6 +44,7 @@ private:
    std::vector<Key> _track;
    float _time = 0.0f;
    bool _up = true;
+   bool _initialized = false;
 
    b2Vec2 _velocity;
    size_t _current_key_index = 0;
