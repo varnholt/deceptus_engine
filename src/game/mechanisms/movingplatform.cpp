@@ -524,6 +524,8 @@ void MovingPlatform::update(const sf::Time& dt)
 
    _interpolation.update(_body->GetPosition());
 
+   // std::cout <<  _interpolation.getVelocity().x << " " << _interpolation.getVelocity().y << std::endl;
+
     _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
 
 
@@ -564,7 +566,7 @@ void MovingPlatform::update(const sf::Time& dt)
    auto pos = 0;
    auto horizontal = (_element_count  > 1) ? 1 : 0;
 
-   std::cout << "x: " << _body->GetPosition().x << " y: " << _body->GetPosition().y << std::endl;
+   // std::cout << "x: " << _body->GetPosition().x << " y: " << _body->GetPosition().y << std::endl;
 
    for (auto& sprite : _sprites)
    {
