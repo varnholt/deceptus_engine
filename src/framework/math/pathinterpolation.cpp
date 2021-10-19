@@ -169,7 +169,7 @@ bool PathInterpolation::update(const b2Vec2& current_pos)
    auto reached = false;
 
    // just check whether the speed needs to be updated (i.e. if one of the keys has been reached)
-   if (checkKeyReached(current_pos) || !_velocity.IsValid())
+   if (checkKeyReached(current_pos) || !_velocity.IsValid()) // NOT CALLED
    {
       _current_key_index = nextKeyIndex();
       computeVelocity();
