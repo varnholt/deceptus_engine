@@ -872,6 +872,17 @@ void Level::updateViews()
       )
    );
 
+   // fixes glitches but is choppy
+   //
+   //   _level_view->reset(
+   //      sf::FloatRect(
+   //         std::floor(level_view_x),
+   //         std::floor(level_view_y),
+   //         std::floor(_view_width),
+   //         std::floor(_view_height)
+   //      )
+   //   );
+
    for (auto i = 0; i < 3; i++)
    {
       _parallax_view[i]->reset(
