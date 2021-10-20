@@ -20,7 +20,7 @@
 
 namespace
 {
-static constexpr auto blockSize = 16;
+static constexpr auto block_size = 16;
 static constexpr auto y_range = 2;
 static constexpr auto x_range = 3;
 }
@@ -121,8 +121,8 @@ bool TileMap::load(
             static constexpr auto size = 1;
 
             // shrink UV range a TINY bit to avoid fetching data from undefined texture space
-            const auto tileEpsX = 0.5f * (1.0f / static_cast<float>(_tile_size.x));
-            const auto tileEpsY = 0.5f * (1.0f / static_cast<float>(_tile_size.y));
+            const auto tile_eps_x = 0.5f * (1.0f / static_cast<float>(_tile_size.x));
+            const auto tile_eps_y = 0.5f * (1.0f / static_cast<float>(_tile_size.y));
 
             quad[0].position = sf::Vector2f(static_cast<float>( tx         * _tile_size.x), static_cast<float>( ty         * _tile_size.y));
             quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>( ty         * _tile_size.y));
@@ -130,10 +130,10 @@ bool TileMap::load(
             quad[3].position = sf::Vector2f(static_cast<float>( tx         * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
 
             // define its 4 texture coordinates
-            quad[0].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tileEpsX, static_cast<float>( tv      * _tile_size.y) + tileEpsY);
-            quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x),            static_cast<float>( tv      * _tile_size.y) + tileEpsY);
-            quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x),            static_cast<float>((tv + 1) * _tile_size.y));
-            quad[3].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tileEpsX, static_cast<float>((tv + 1) * _tile_size.y));
+            quad[0].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tile_eps_x, static_cast<float>( tv      * _tile_size.y) + tile_eps_y);
+            quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>( tv      * _tile_size.y) + tile_eps_y);
+            quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
+            quad[3].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
 
             quad[0].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
             quad[1].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
@@ -176,8 +176,8 @@ bool TileMap::load(
             else
             {
                // if no animation is available, just store the tile in the static buffer
-               const auto bx = static_cast<int32_t>((tx / parallax_scale) / blockSize);
-               const auto by = static_cast<int32_t>((ty / parallax_scale) / blockSize);
+               const auto bx = static_cast<int32_t>((tx / parallax_scale) / block_size);
+               const auto by = static_cast<int32_t>((ty / parallax_scale) / block_size);
 
                auto y_it = _vertices_static_blocks.find(by);
                if (y_it == _vertices_static_blocks.end())
@@ -253,6 +253,17 @@ void TileMap::update(const sf::Time& dt)
 }
 
 
+// clamp to edge would be the correct way to fix the artifacts
+//
+//#include <SFML/OpenGL.hpp>
+//#define GL_CLAMP_TO_EDGE 0x812F
+//
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
 void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) const
 {
    states.transform *= getTransform();
@@ -260,8 +271,8 @@ void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) co
    // draw the vertex arrays
    const auto& pos = Player::getCurrent()->getPixelPositioni();
 
-   int32_t bx = (pos.x / PIXELS_PER_TILE) / blockSize;
-   int32_t by = (pos.y / PIXELS_PER_TILE) / blockSize;
+   int32_t bx = (pos.x / PIXELS_PER_TILE) / block_size;
+   int32_t by = (pos.y / PIXELS_PER_TILE) / block_size;
 
    for (auto iy = by - y_range; iy < by + y_range; iy++)
    {
@@ -340,8 +351,8 @@ void TileMap::hideTile(int x, int y)
    }
    else
    {
-      const auto bx = static_cast<int32_t>(x / blockSize);
-      const auto by = static_cast<int32_t>(y / blockSize);
+      const auto bx = static_cast<int32_t>(x / block_size);
+      const auto by = static_cast<int32_t>(y / block_size);
 
       const auto& y_it = _vertices_static_blocks.find(by);
       if (y_it != _vertices_static_blocks.end())
