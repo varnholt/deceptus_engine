@@ -535,7 +535,20 @@ void MovingPlatform::update(const sf::Time& dt)
 {
    updateLeverLag(dt);
    _interpolation.update(_body->GetPosition());
-    _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
+   auto previous_velocity = _velocity;
+   _velocity = _lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity();
+
+   // if player is standing on platform and the platform changes its direction in an instant,
+   // set the player velocity to the linear platform velocity, so he doesn't jump up for a second
+   if (std::signbit(previous_velocity.y) != std::signbit(_velocity.y))
+   {
+      if (Player::getCurrent()->isOnPlatform())
+      {
+         Player::getCurrent()->getBody()->SetLinearVelocity(_velocity);
+      }
+   }
+
+    _body->SetLinearVelocity(_velocity);
 
    auto pos = 0;
    auto horizontal = (_element_count  > 1) ? 1 : 0;
