@@ -72,6 +72,7 @@ private:
    float _lever_lag = 0.0f;
    bool _initialized = false;
    PathInterpolation _interpolation;
+   b2Vec2 _velocity;
    std::vector<sf::Vector2f> _pixel_path;
 };
 
