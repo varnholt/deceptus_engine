@@ -60,6 +60,9 @@ private:
    std::shared_ptr<sf::Texture> _normal_map;
 
    std::vector<sf::Sprite> _sprites;
+   int32_t _animated_tile_index_0 = 0;
+   int32_t _animated_tile_index_1 = 0;
+   float _animation_elapsed = 0.0f;
    b2Body* _body = nullptr;
    sf::Vector2i _tile_positions;
    float _x = 0.0f;
