@@ -339,21 +339,44 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
 
       moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
 
-      auto width_px = box->_width_px;
-      auto width_tl = width_px / PIXELS_PER_TILE;
+      auto width_px = static_cast<int32_t>(box->_width_px);
+      auto width_tl = static_cast<int32_t>(width_px / PIXELS_PER_TILE);
+
+      // animation
+      //
+      // uneven tile count
+      //
+      //    +-----+-----+-----+-----+-----+
+      //    |     |     |#####|     |     |
+      //    |     |     |#####|     |     |
+      //    +-----+-----+-----+-----+-----+
+      //                   ^ animate this guy
+      //
+      //
+      // even tile count
+      //
+      //    +-----+-----+-----+-----+-----+-----+
+      //    |     |     |#####|#####|     |     |
+      //    |     |     |#####|#####|     |     |
+      //    +-----+-----+-----+-----+-----+-----+
+      //                   ^     ^ animate these guys
+
+      if (width_tl % 2 != 0)
+      {
+         moving_platform->_animated_tile_index_0 = ((width_tl + 1) / 2) - 1;
+      }
+      else
+      {
+         moving_platform->_animated_tile_index_0 = (width_tl / 2) - 1;
+         moving_platform->_animated_tile_index_1 = (width_tl / 2);
+      }
 
       for (auto i = 0; i < width_tl; i++)
       {
-         // 0123 4567
-         // anim        -> wheel animation
-         //      lmmr   -> regular parts
-         //
-         // 01 23 45 67 -> 2 tile animation
-         // a0 a1 a2 a3
          auto tu_tl = 0;
          auto tv_tl = 0;
 
-         if (width_tl == 3)
+         if (width_tl > 2)
          {
             if (i == 0) // first tile
             {
@@ -365,11 +388,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
             }
             else // other tiles
             {
-               tu_tl = 5; // or 6
+               tu_tl = 5 + std::rand() % 1; // or 6
             }
-
-            // handle middle tile
-            // ...
          }
          else if (width_tl == 2)
          {
@@ -550,17 +570,79 @@ void MovingPlatform::update(const sf::Time& dt)
 
     _body->SetLinearVelocity(_velocity);
 
-   auto pos = 0;
+   // update sprite animation
+   //
+   //   0123 4567
+   // 0 aaaa lmmr    wheel animation for uneven tile count, uneven tiles
+   // 1
+   // 2 aaaa aaaa    wheel animation for even tile count, pairs of two
+   // 3
+   // 4 aaaa aaaa    wheel animation for 2 pair tile count
+   // 5
+   auto sprite_index = 0;
    auto horizontal = (_element_count  > 1) ? 1 : 0;
+
+   static constexpr auto animation_tile_count = 4;
+   static constexpr auto animation_speed_factor = 10.0f;
+   _animation_elapsed += _lever_lag * dt.asSeconds() * animation_speed_factor;
+   const auto animation_tile_index = static_cast<int32_t>(_animation_elapsed) % animation_tile_count;
 
    for (auto& sprite : _sprites)
    {
-      auto x = _body->GetPosition().x * PPM + horizontal * pos * PIXELS_PER_TILE;
+      auto x = _body->GetPosition().x * PPM + horizontal * sprite_index * PIXELS_PER_TILE;
       auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE; // there's one tile offset for the perspective tile
 
       sprite.setPosition(x, y);
+      bool update_sprite_rect = false;
+      auto u = 0;
+      auto v = 0;
 
-      pos++;
+      if (_sprites.size() == 2)
+      {
+         update_sprite_rect = true;
+         u = (animation_tile_index + sprite_index) * PIXELS_PER_TILE;
+         v = PIXELS_PER_TILE * 4;
+      }
+      else if (_sprites.size() > 2)
+      {
+         if (_sprites.size() % 2 == 0) // handle even tile counts
+         {
+            if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
+            {
+               update_sprite_rect = true;
+               u = animation_tile_index * PIXELS_PER_TILE;
+               v = PIXELS_PER_TILE * 2;
+            }
+            else if (sprite_index == ((_sprites.size() + 1) / 2))
+            {
+               update_sprite_rect = true;
+               u = (animation_tile_index + 1)* PIXELS_PER_TILE;
+               v = PIXELS_PER_TILE * 2;
+            }
+         }
+         else // handle uneven tile counts
+         {
+            if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
+            {
+               update_sprite_rect = true;
+               u = animation_tile_index * PIXELS_PER_TILE;
+               v = 0;
+            }
+         }
+      }
+
+      if (update_sprite_rect)
+      {
+         sprite.setTextureRect({
+               u,
+               v,
+               PIXELS_PER_TILE,
+               PIXELS_PER_TILE * 2
+            }
+         );
+      }
+
+      sprite_index++;
    }
 }
 
