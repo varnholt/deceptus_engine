@@ -610,13 +610,13 @@ void MovingPlatform::update(const sf::Time& dt)
             if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
             {
                update_sprite_rect = true;
-               u = animation_tile_index * PIXELS_PER_TILE;
+               u = (animation_tile_index * 2) * PIXELS_PER_TILE;
                v = PIXELS_PER_TILE * 2;
             }
             else if (sprite_index == ((_sprites.size() + 1) / 2))
             {
                update_sprite_rect = true;
-               u = (animation_tile_index + 1)* PIXELS_PER_TILE;
+               u = (animation_tile_index * 2 + 1)* PIXELS_PER_TILE;
                v = PIXELS_PER_TILE * 2;
             }
          }
