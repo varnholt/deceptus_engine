@@ -332,9 +332,12 @@ As a side-note. If you want spikes that are extended, just put them into your `t
 
 Moving Platforms are platforms that follow a certain path inside your level. They can be used just like an elevator or for any other purpose, like moving over a couple of deadly spikes, etc.
 
-To create moving platforms, the first thing to do is to define the 'width' of your platform. You do this by creating a `platforms` tile layer where you put your platform tiles together. Then, you draw your platform rails into any background layer so know which path the platform is supposed to follow. This is only an optical change since the actual path your platform will follow is defined in an object group called `platform_paths`. In there you draw a polyline from start to end.
-
 ![](images/mechanism_moving_platforms.png)
+
+To create moving platforms, the first thing to do is to draw your platform rail tiles into any background tile layer so know which path the platform is supposed to follow. This is only an optical change to your level since the actual path your platform will follow is defined in an object group called `platforms`. Therefore the next step is to create this object group and to draw a polyline from start to end. The last thing to do is to create the actual platform. That's done by simply placing a rectangle into the same layer which overlaps the path you defined in the previous step. The width should be a multiple of `24px` and the height should be `12px`.
+
+![](images/mechanism_moving_platforms_settings.png)
+
 
 <br><br>
 
