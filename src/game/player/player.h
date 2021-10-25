@@ -120,7 +120,6 @@ public:
 
    const sf::IntRect& getPlayerPixelRect() const;
 
-
    b2Body* getBody() const;
    void setWorld(const std::shared_ptr<b2World>& world);
    void resetWorld();
