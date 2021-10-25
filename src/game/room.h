@@ -21,6 +21,15 @@ struct Room : std::enable_shared_from_this<Room>
       FadeOutFadeIn
    };
 
+
+   enum class EnteredDirection
+   {
+      Left,
+      Right,
+      Top,
+      Bottom
+   };
+
    Room(const sf::FloatRect& rect);
 
    static void deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>& rooms);
@@ -29,9 +38,11 @@ struct Room : std::enable_shared_from_this<Room>
    void startTransition();
    void lockCamera();
 
+   EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
+   std::optional<sf::FloatRect> activeRect(const sf::Vector2f& player_pos_px) const;
+
    std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
    bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
-   // std::optional<Room> computeCurrentRoom(const sf::Vector2f& cameraCenter, const std::vector<Room>& rooms) const;
 
    std::vector<sf::FloatRect> _rects;
    std::string _name;
