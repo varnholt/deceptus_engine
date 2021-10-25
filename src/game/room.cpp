@@ -374,3 +374,58 @@ void Room::lockCamera()
       Timer::Type::Singleshot
    );
 }
+
+
+Room::EnteredDirection Room::enteredDirection(const sf::Vector2f& player_pos_px) const
+{
+   static constexpr auto eps_px = 100;
+
+   if (activeRect(player_pos_px).has_value())
+   {
+      const auto r = activeRect(player_pos_px).value();
+
+      sf::FloatRect rect_l{r.left,                    r.top,                     eps_px,  r.height};
+      sf::FloatRect rect_r{r.left + r.width - eps_px, r.top,                     eps_px,  r.height};
+      sf::FloatRect rect_t{r.left,                    r.top,                     r.width, eps_px};
+      sf::FloatRect rect_b{r.left,                    r.top + r.height - eps_px, r.width, eps_px};
+
+      if (rect_l.contains(player_pos_px))
+      {
+         return Room::EnteredDirection::Left;
+      }
+
+      if (rect_r.contains(player_pos_px))
+      {
+         return Room::EnteredDirection::Right;
+      }
+
+      if (rect_t.contains(player_pos_px))
+      {
+         return Room::EnteredDirection::Top;
+      }
+
+      if (rect_b.contains(player_pos_px))
+      {
+         return Room::EnteredDirection::Bottom;
+      }
+   }
+
+   return EnteredDirection::Left;
+}
+
+
+std::optional<sf::FloatRect> Room::activeRect(const sf::Vector2f& player_pos_px) const
+{
+   std::optional<sf::FloatRect> rect;
+
+   const auto& it = std::find_if(_rects.begin(), _rects.end(), [player_pos_px](const auto& rect){
+         return rect.contains(player_pos_px);}
+      );
+
+   if (it != _rects.end())
+   {
+      rect = *it;
+   }
+
+   return rect;
+}

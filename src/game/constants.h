@@ -60,11 +60,13 @@ enum class DeathReason
    Smashed,
 };
 
+
 enum class MechanismVersion
 {
    Version1,
    Version2
 };
+
 
 enum class ZDepth
 {
@@ -243,26 +245,6 @@ enum class WeaponType
 // this enum should be removed
 enum AtmosphereTile // 16 cols per row
 {
-   // PhysicsTileSolidFull = 0,
-   // PhysicsTileSolidTop,
-   // PhysicsTileSolidBottom,
-   // PhysicsTileSolidLeft,
-   // PhysicsTileSolidRight,
-   // PhysicsTileSolidCornerTopRight,
-   // PhysicsTileSolidCornerBottomRight,
-   // PhysicsTileSolidCornerBottomLeft,
-   // PhysicsTileSolidCornerTopLeft,
-   //
-   // PhysicsTileOneSidedFull = 16,
-   // PhysicsTileOneSidedTop,
-   // PhysicsTileOneSidedBottom,
-   // PhysicsTileOneSidedLeft,
-   // PhysicsTileOneSidedRight,
-   // PhysicsTileOneSidedCornerTopRight,
-   // PhysicsTileOneSidedCornerBottomRight,
-   // PhysicsTileOneSidedCornerBottomLeft,
-   // PhysicsTileOneSidedCornerTopLeft,
-   //
    // PhysicsTileDeadlyFull = 32,
    // PhysicsTileDeadlyTop,
    // PhysicsTileDeadlyBottom,
