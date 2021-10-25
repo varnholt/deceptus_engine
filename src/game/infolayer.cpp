@@ -163,11 +163,15 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   std::stringstream stream;
+   std::stringstream stream_tl;
+   std::stringstream stream_px;
    auto pos = Player::getCurrent()->getPixelPositionf();
-   stream << "player pos: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
 
-   _font.draw(window, _font.getCoords(stream.str()), 510, 5);
+   stream_tl << "player tl: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
+   stream_px << "player px: " << static_cast<int>(pos.x) << ", " << static_cast<int>(pos.y);
+
+   _font.draw(window, _font.getCoords(stream_tl.str()), 500, 5);
+   _font.draw(window, _font.getCoords(stream_px.str()), 500, 20);
 }
 
 

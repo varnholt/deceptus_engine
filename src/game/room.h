@@ -22,12 +22,13 @@ struct Room : std::enable_shared_from_this<Room>
    };
 
 
-   enum class EnteredDirection
+   enum class EnteredDirection : char
    {
-      Left,
-      Right,
-      Top,
-      Bottom
+      Invalid  = '?',
+      Left     = 'l',
+      Right    = 'r',
+      Top      = 't',
+      Bottom   = 'b'
    };
 
    Room(const sf::FloatRect& rect);
@@ -58,5 +59,13 @@ struct Room : std::enable_shared_from_this<Room>
    std::chrono::milliseconds _delay_between_effects_ms{250};
    bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
+
+   //! start positions when room was entered
+   std::optional<sf::Vector2i> _start_position_l;
+   std::optional<sf::Vector2i> _start_position_r;
+   std::optional<sf::Vector2i> _start_position_t;
+   std::optional<sf::Vector2i> _start_position_b;
+   std::optional<sf::Vector2i> _start_offset_l;
+   std::optional<sf::Vector2i> _start_offset_r;
 };
 

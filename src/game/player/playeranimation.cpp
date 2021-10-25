@@ -469,49 +469,49 @@ void PlayerAnimation::updateV1(
       return;
    }
 
-   std::shared_ptr<Animation> nextCycle = nullptr;
+   std::shared_ptr<Animation> next_cycle = nullptr;
 
    auto velocity = data._linear_velocity;
 
-   const auto lookActive = CameraPane::getInstance().isLookActive();
-   const auto passesSanityCheck = !(data._moving_right && data._moving_left);
+   const auto look_active = CameraPane::getInstance().isLookActive();
+   const auto passes_sanity_check = !(data._moving_right && data._moving_left);
 
-   auto requiresUpdate = true;
+   auto requires_update = true;
 
    // dash
    if (data._dash_dir.has_value())
    {
       if (data._dash_dir == Dash::Left)
       {
-         nextCycle = _dash_l;
+         next_cycle = _dash_l;
       }
       else
       {
-         nextCycle = _dash_r;
+         next_cycle = _dash_r;
       }
    }
 
    // run / crouch
-   else if (data._moving_right && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
+   else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active)
    {
       if (data._bending_down)
       {
-         nextCycle = _crouch_r;
+         next_cycle = _crouch_r;
       }
       else
       {
-         nextCycle = _run_r;
+         next_cycle = _run_r;
       }
    }
-   else if (data._moving_left && passesSanityCheck && !data._in_air && !data._in_water && !lookActive)
+   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active)
    {
       if (data._bending_down)
       {
-         nextCycle = _crouch_l;
+         next_cycle = _crouch_l;
       }
       else
       {
-         nextCycle = _run_l;
+         next_cycle = _run_l;
       }
    }
 
@@ -520,24 +520,24 @@ void PlayerAnimation::updateV1(
    {
       if (data._bending_down)
       {
-         nextCycle = _crouch_l;
-         requiresUpdate = false;
+         next_cycle = _crouch_l;
+         requires_update = false;
       }
       else
       {
-         nextCycle = _idle_l;
+         next_cycle = _idle_l;
       }
    }
    else
    {
       if (data._bending_down)
       {
-         nextCycle = _crouch_r;
-         requiresUpdate = false;
+         next_cycle = _crouch_r;
+         requires_update = false;
       }
       else
       {
-         nextCycle = _idle_r;
+         next_cycle = _idle_r;
       }
    }
 
@@ -548,20 +548,20 @@ void PlayerAnimation::updateV1(
       {
          // jump ignition
          _jump_animation_reference = 0;
-         nextCycle = data._points_right ? _jump_init_r : _jump_init_l;
+         next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
       }
       else if (data._in_air && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
          {
-            nextCycle = data._points_right ? _jump_up_r : _jump_up_l;
+            next_cycle = data._points_right ? _jump_up_r : _jump_up_l;
             _jump_animation_reference = 1;
          }
          // jump movement goes down
          else if (velocity.y > 1.0f)
          {
-            nextCycle = data._points_right ? _jump_down_r : _jump_down_l;
+            next_cycle = data._points_right ? _jump_down_r : _jump_down_l;
             _jump_animation_reference = 2;
          }
          else
@@ -569,7 +569,7 @@ void PlayerAnimation::updateV1(
             // jump midair
             if (_jump_animation_reference == 1)
             {
-               nextCycle = data._points_right ? _jump_midair_r : _jump_midair_l;
+               next_cycle = data._points_right ? _jump_midair_r : _jump_midair_l;
             }
          }
       }
@@ -577,12 +577,12 @@ void PlayerAnimation::updateV1(
       // hard landing
       else if (_jump_animation_reference == 2 && data._hard_landing)
       {
-         nextCycle = data._points_right ? _jump_landing_r : _jump_landing_l;
+         next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
 
-         if (nextCycle->_current_frame == static_cast<int32_t>(nextCycle->_frames.size()) - 1)
+         if (next_cycle->_current_frame == static_cast<int32_t>(next_cycle->_frames.size()) - 1)
          {
              _jump_animation_reference = 3;
-             nextCycle->seekToStart();
+             next_cycle->seekToStart();
          }
       }
    }
@@ -590,7 +590,7 @@ void PlayerAnimation::updateV1(
    // swimming - no animation provided yet.
    if (data._in_water)
    {
-      nextCycle = data._points_right ? _swim_r : _swim_l;
+      next_cycle = data._points_right ? _swim_r : _swim_l;
    }
 
    if (data._climb_joint_present)
@@ -599,14 +599,14 @@ void PlayerAnimation::updateV1(
    }
 
    // reset x if animation cycle changed
-   if (nextCycle != _current_cycle)
+   if (next_cycle != _current_cycle)
    {
-      nextCycle->seekToStart();
+      next_cycle->seekToStart();
    }
 
-   _current_cycle = nextCycle;
+   _current_cycle = next_cycle;
 
-   if (requiresUpdate)
+   if (requires_update)
    {
       _current_cycle->update(dt);
    }
