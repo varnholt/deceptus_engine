@@ -707,7 +707,7 @@ void Level::loadCheckpoint()
    }
    else
    {
-      Log::Error() << "level doesn't have a start check point set up, falling back to start position";
+      Log::Error() << "level doesn't have a start check point set up";
    }
 }
 

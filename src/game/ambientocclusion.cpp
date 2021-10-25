@@ -13,15 +13,16 @@
 
 void AmbientOcclusion::load(
   const std::filesystem::path& path,
-  const std::string &aoBaseFilename
+  const std::string& base_filename
 )
 {
-  auto texture = (path / (aoBaseFilename + "_ao_tiles.png")).string();
-  auto uv = (path / (aoBaseFilename + "_ao_tiles.uv")).string();
+   const auto ao_base_filename = base_filename + "_ao_tiles.png";
+   const auto texture = (path / ao_base_filename).string();
+   const auto uv = (path / (base_filename + "_ao_tiles.uv")).string();
 
    if (!std::filesystem::exists(texture))
    {
-      Log::Error() << "need to create an ambient occlusion map (" << texture << ")";
+      Log::Error() << "need to create an ambient occlusion map (" << ao_base_filename << ")";
       return;
    }
 
@@ -47,21 +48,14 @@ void AmbientOcclusion::load(
          std::getline(uv_file, line);
          std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &i, &x, &y, &w, &h);
 
-         // Log::Info() << "x: " << x << " y: " << y << " w: " << w << " h: " << h;
-
          sf::Sprite sprite;
          sprite.setPosition(static_cast<float>(x - 5), static_cast<float>(y - 6));
          sprite.setTexture(*_texture);
          sprite.setTextureRect({xi, yi, w, h});
 
-         // no longer needed
-         // _sprites.push_back(sprite);
-
          group_x = (x >> 8);
          group_y = (y >> 8);
          _sprite_map[group_y][group_x].push_back(sprite);
-
-         // Log::Info() << group_x << " " << group_y;
 
          xi += w;
          if (xi == static_cast<int32_t>(_texture->getSize().x))
@@ -72,8 +66,6 @@ void AmbientOcclusion::load(
       }
 
       uv_file.close();
-
-      // Log::Info() << "loaded " << _sprites.size() << " ao sprites";
    }
    else
    {
@@ -119,18 +111,4 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
          }
       }
    }
-
-//   const auto pos_f = Player::getCurrent()->getPixelPositionf();
-//
-//   for (auto& sprite : _sprites)
-//   {
-//      auto diff = SfmlMath::lengthSquared(pos_f - sprite.getPosition());
-//
-//      if (diff > 300000)
-//      {
-//         continue;
-//      }
-//
-//      window.draw(sprite, {sf::BlendAlpha});
-//   }
 }
