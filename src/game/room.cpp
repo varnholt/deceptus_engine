@@ -12,6 +12,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "player/player.h"
 
 /*
 
@@ -277,6 +278,73 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
          {
             room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
          }
+
+         // read start positions if available
+         const auto start_position_l_x_it = tmx_object->_properties->_map.find("start_position_left_x_px");
+         const auto start_position_l_y_it = tmx_object->_properties->_map.find("start_position_left_y_px");
+         if (start_position_l_x_it != tmx_object->_properties->_map.end())
+         {
+            room->_start_position_l = {
+               start_position_l_x_it->second->_value_int.value(),
+               start_position_l_y_it->second->_value_int.value()
+            };
+         }
+
+         const auto start_position_r_x_it = tmx_object->_properties->_map.find("start_position_right_x_px");
+         const auto start_position_r_y_it = tmx_object->_properties->_map.find("start_position_right_y_px");
+         if (start_position_r_x_it != tmx_object->_properties->_map.end())
+         {
+            room->_start_position_r = {
+               start_position_r_x_it->second->_value_int.value(),
+               start_position_r_y_it->second->_value_int.value()
+            };
+         }
+
+         const auto start_position_t_x_it = tmx_object->_properties->_map.find("start_position_top_x_px");
+         const auto start_position_t_y_it = tmx_object->_properties->_map.find("start_position_top_y_px");
+         if (start_position_t_x_it != tmx_object->_properties->_map.end())
+         {
+            room->_start_position_t = {
+               start_position_t_x_it->second->_value_int.value(),
+               start_position_t_y_it->second->_value_int.value()
+            };
+         }
+
+         const auto start_position_b_x_it = tmx_object->_properties->_map.find("start_position_bottom_x_px");
+         const auto start_position_b_y_it = tmx_object->_properties->_map.find("start_position_bottom_y_px");
+         if (start_position_b_x_it != tmx_object->_properties->_map.end())
+         {
+            room->_start_position_b = {
+               start_position_b_x_it->second->_value_int.value(),
+               start_position_b_y_it->second->_value_int.value()
+            };
+         }
+
+         const auto start_offset_l_x_it = tmx_object->_properties->_map.find("start_offset_left_x_px");
+         const auto start_offset_l_y_it = tmx_object->_properties->_map.find("start_offset_left_y_px");
+         if (start_offset_l_x_it != tmx_object->_properties->_map.end())
+         {
+            auto offset_y = 0;
+            if (start_offset_l_y_it != tmx_object->_properties->_map.end())
+            {
+               offset_y = start_offset_l_y_it->second->_value_int.value();
+            }
+
+            room->_start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
+         }
+
+         const auto start_offset_r_x_it = tmx_object->_properties->_map.find("start_offset_right_x_px");
+         const auto start_offset_r_y_it = tmx_object->_properties->_map.find("start_offset_right_y_px");
+         if (start_offset_r_x_it != tmx_object->_properties->_map.end())
+         {
+            auto offset_y = 0;
+            if (start_offset_r_y_it != tmx_object->_properties->_map.end())
+            {
+               offset_y = start_offset_r_y_it->second->_value_int.value();
+            }
+
+            room->_start_offset_r = {start_offset_r_x_it->second->_value_int.value(), offset_y};
+         }
       }
 
       rooms.push_back(room);
@@ -338,6 +406,37 @@ void Room::startTransition()
                   auto& camera = CameraSystem::getCameraSystem();
                   camera.setRoom(getptr());
                   camera.syncNow();
+
+                  // apply room start position if available
+                  if (_start_position_l.has_value())
+                  {
+                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_l.value().x, _start_position_l.value().y);
+                  }
+                  else if (_start_position_r.has_value())
+                  {
+                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_r.value().x, _start_position_r.value().y);
+                  }
+                  else if (_start_position_t.has_value())
+                  {
+                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_t.value().x, _start_position_t.value().y);
+                  }
+                  else if (_start_position_b.has_value())
+                  {
+                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_b.value().x, _start_position_b.value().y);
+                  }
+
+                  if (_start_offset_l.has_value())
+                  {
+                     auto player_pos = Player::getCurrent()->getPixelPositioni();
+                     player_pos += _start_offset_l.value();
+                     Player::getCurrent()->setBodyViaPixelPosition(player_pos.x, player_pos.y);
+                  }
+                  else if (_start_offset_r.has_value())
+                  {
+                     auto player_pos = Player::getCurrent()->getPixelPositioni();
+                     player_pos += _start_offset_r.value();
+                     Player::getCurrent()->setBodyViaPixelPosition(player_pos.x, player_pos.y);
+                  }
                }
             }
          );
@@ -410,7 +509,7 @@ Room::EnteredDirection Room::enteredDirection(const sf::Vector2f& player_pos_px)
       }
    }
 
-   return EnteredDirection::Left;
+   return EnteredDirection::Invalid;
 }
 
 

@@ -912,7 +912,10 @@ void Level::updateCameraSystem(const sf::Time& dt)
    {
       Log::Info()
          << "player moved to room: "
-         << (_room_current ? _room_current->_name : "undefined");
+         << (_room_current ? _room_current->_name : "undefined")
+         << " on side '"
+         << static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionf()))
+         << "'";
 
       // will update the current room in both cases, either after the camera lock delay or instantly
       if (_room_current && _room_current->_camera_lock_delay.has_value())

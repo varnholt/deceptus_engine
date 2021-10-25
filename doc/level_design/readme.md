@@ -868,6 +868,18 @@ There can be screen transitions between rooms. For example, you may define a 'fa
 |delay_between_effects_ms|int|The delay in ms to be elapsed between both parts (e.g. 'fade out', 'fade in') of the transition (optional). The default value is `250`.|
 |camera_sync_after_fade_out|bool|Move the camera focus to the new room immediately after fading out; the new room is then focussed when fading back in (optional). The default value is `true`.|
 |camera_lock_delay_ms|int|This value will 'hold' the camera focus in the old room, even though a new room has been entered already. Once the defined time in milliseconds is elapsed, the new room is focussed. The default value is `0`. <br> If `camera_sync_after_fade_out` is set to `true`, it'll override this setting and synchronize the camera position as promised. Actually these two settings work very well together. If you are uncertain what value to put here, you can just choose a rather long duration (1000ms) and enable `camera_sync_after_fade_out`. <br>This will lock the camera in the old room once the player entered a new room. Then, when the screen is black, the camera focus will be moved to the new room (the camera lock is released) and the new room is shown when fading in. It all sounds more complicated than it is. Just try a configuration like this and play around with it:<br>![](images/rooms_settings.png)|
+|start_position_left_x_px|int|When player entering from the left of the room, position him to the absolute x position, given in pixels. Also need to provide `start_position_left_y_px`|
+|start_position_left_y_px|int|When player entering from the left of the room, position him to the absolute y position, given in pixels. Also need to provide `start_position_left_x_px`|
+|start_position_right_x_px|int|When player entering from the right of the room, position him to the absolute x position, given in pixels. Also need to provide `start_position_right_y_px`|
+|start_position_right_y_px|int|When player entering from the right of the room, position him to the absolute y position, given in pixels. Also need to provide `start_position_right_x_px`|
+|start_position_top_x_px|int|When player entering from the top of the room, position him to the absolute x position, given in pixels. Also need to provide `start_position_top_y_px`|
+|start_position_top_y_px|int|When player entering from the top of the room, position him to the absolute y position, given in pixels. Also need to provide `start_position_top_x_px`|
+|start_position_bottom_x_px|int|When player entering from the bottom of the room, position him to the absolute x position, given in pixels. Also need to provide `start_position_bottom_y_px`|
+|start_position_bottom_y_px|int|When player entering from the bottom of the room, position him to the absolute y position, given in pixels. Also need to provide `start_position_bottom_x_px`|
+|start_offset_left_x_px|int|When player entering from the left of the room, position him to the relative x offset, given in pixels. The y counterpart `start_offset_left_y_px` is optional.|
+|start_offset_left_y_px|int|When player entering from the left of the room, position him to the relative x offset, given in pixels. The x counterpart `start_offset_right_x_px` must be provided.|
+|start_offset_right_x_px|int|When player entering from the right of the room, position him to the relative x offset, given in pixels. The y counterpart `start_offset_right_y_px` is optional.|
+|start_offset_right_y_px|int|When player entering from the right of the room, position him to the relative x offset, given in pixels. The x counterpart `start_offset_right_x_px` must be provided.|
 
 # Addendum
 
