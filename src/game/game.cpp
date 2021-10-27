@@ -353,8 +353,12 @@ void Game::initialize()
 
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
       [this](){
-      initializeWindow();
-      _level->createViews();
+         initializeWindow();
+         if (!_level)
+         {
+            return;
+         }
+         _level->createViews();
       }
    );
 
