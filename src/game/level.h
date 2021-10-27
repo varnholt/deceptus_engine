@@ -40,23 +40,8 @@
 #include <memory>
 
 class Bouncer;
-class ConveyorBelt;
-class Door;
-struct ExtraItem;
-class Laser;
-struct LevelDescription;
 class LevelMap;
-class MoveableBox;
-class MovingPlatform;
-class Rope;
-class SpikeBall;
-class Spikes;
-class TileMap;
-struct TmxElement;
-struct TmxObjectGroup;
 class TmxParser;
-struct TmxLayer;
-struct TmxTileSet;
 
 
 class Level : public GameNode

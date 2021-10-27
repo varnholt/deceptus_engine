@@ -479,9 +479,15 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "spike_balls")
             {
-               auto spikeBall = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
-               spikeBall->setup(tmx_object, _world);
-               _mechanism_spike_balls.push_back(spikeBall);
+               auto spike_ball = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
+               spike_ball->setup(tmx_object, _world);
+               _mechanism_spike_balls.push_back(spike_ball);
+            }
+            else if (object_group->_name == "spike_block")
+            {
+               auto spike_block = std::make_shared<SpikeBlock>(dynamic_cast<GameNode*>(this));
+               spike_block->deserialize(tmx_object);
+               _mechanism_spike_blocks.push_back(spike_block);
             }
             else if (object_group->_name == "moveable_objects")
             {
