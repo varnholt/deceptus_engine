@@ -229,8 +229,18 @@ void CameraSystem::setRoom(const std::shared_ptr<Room>& room)
 void CameraSystem::syncNow()
 {
    auto player = Player::getCurrent();
-   _x = player->getPixelPositionf().x;
-   _y = player->getPixelPositionf().y;
+
+   auto player_x = player->getPixelPositionf().x;
+   auto player_y = player->getPixelPositionf().y;
+
+   if (_room)
+   {
+      auto& config = CameraSystemConfiguration::getInstance();
+      _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
+   }
+
+   _x = player_x;
+   _y = player_y;
 }
 
 
