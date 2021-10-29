@@ -11,7 +11,7 @@ ExtraHealth::ExtraHealth()
 
 void ExtraHealth::reset()
 {
-   _health = 100;
+   _health = 12;
 }
 
 
