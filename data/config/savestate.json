@@ -5,8 +5,8 @@
         "playerinfo": {
             "extras": {
                 "health": {
-                    "health": 100,
-                    "health_max": 100,
+                    "health": 12,
+                    "health_max": 12,
                     "lives": 5
                 },
                 "skills": {
@@ -25,8 +25,8 @@
         "playerinfo": {
             "extras": {
                 "health": {
-                    "health": 100,
-                    "health_max": 100,
+                    "health": 12,
+                    "health_max": 12,
                     "lives": 5
                 },
                 "skills": {
@@ -45,8 +45,8 @@
         "playerinfo": {
             "extras": {
                 "health": {
-                    "health": 100,
-                    "health_max": 100,
+                    "health": 12,
+                    "health_max": 12,
                     "lives": 5
                 },
                 "skills": {

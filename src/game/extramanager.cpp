@@ -83,11 +83,11 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                break;
             case ExtraItem::ExtraSpriteIndex::Cherry:
                Audio::getInstance()->playSample("healthup.wav");
-               SaveState::getPlayerInfo().mExtraTable._health.addHealth(20);
+               SaveState::getPlayerInfo().mExtraTable._health.addHealth(4);
                break;
             case ExtraItem::ExtraSpriteIndex::Banana:
                Audio::getInstance()->playSample("healthup.wav");
-               SaveState::getPlayerInfo().mExtraTable._health.addHealth(10);
+               SaveState::getPlayerInfo().mExtraTable._health.addHealth(1);
                break;
             case ExtraItem::ExtraSpriteIndex::Apple:
                Audio::getInstance()->playSample("powerup.wav");
