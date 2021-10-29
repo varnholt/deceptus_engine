@@ -37,6 +37,15 @@ private:
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 
+   std::vector<std::shared_ptr<Layer>> _heart_layers;
+   std::vector<std::shared_ptr<Layer>> _heart_layers_background;
+   std::shared_ptr<Layer> _stamina_layer;
+   std::shared_ptr<Layer> _stamina_background_layer;
+   std::shared_ptr<Layer> _slot_1_item_layer;
+   std::shared_ptr<Layer> _slot_1_weapon_layer;
+   std::shared_ptr<Layer> _slot_2_item_layer;
+   std::shared_ptr<Layer> _slot_2_weapon_layer;
+
    Animation _heart_animation;
 };
 

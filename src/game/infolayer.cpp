@@ -12,8 +12,16 @@
 #include "savestate.h"
 #include "texturepool.h"
 
+#include <format>
 #include <iostream>
 #include <sstream>
+
+
+namespace
+{
+static constexpr auto heart_layer_count = 10;
+static constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
+}
 
 
 InfoLayer::InfoLayer()
@@ -59,6 +67,24 @@ InfoLayer::InfoLayer()
       _layers[layer.getName()] = tmp;
    }
 
+   // init heart layers
+   for (auto i = 1u; i <= 40; i++)
+   {
+      _heart_layers.push_back(_layers[std::format("{}", i)]);
+   }
+
+   for (auto i = 1u; i <= 10; i++)
+   {
+      _heart_layers_background.push_back(_layers[std::format("{}", i)]);
+   }
+
+   _stamina_layer            = _layers["stamina"];
+   _stamina_background_layer = _layers["stamina_bg"];
+   _slot_1_item_layer        = _layers["item_slot_1"];
+   _slot_2_item_layer        = _layers["item_slot_2"];
+   _slot_1_weapon_layer      = _layers["weapon_slot_1"];
+   _slot_2_weapon_layer      = _layers["weapon_slot_2"];
+
    // load heart animation
    const auto t = sf::milliseconds(100);
    std::vector<sf::Time> ts;
@@ -96,41 +122,6 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto layer_health = _layers["health"];
-   auto layer_health_energy = _layers["health_energy"];
-   auto layer_health_weapon = _layers["health_weapon"];
-
-   if (layer_health_energy->_visible)
-   {
-       const auto health = (SaveState::getPlayerInfo().mExtraTable._health._health) * 0.01f;
-
-       const auto healthLayerWidth  = layer_health_energy->_sprite->getTexture()->getSize().x * health;
-       const auto healthLayerHeight = layer_health_energy->_sprite->getTexture()->getSize().y;
-
-       layer_health_energy->_sprite->setTextureRect(
-          sf::IntRect{
-             0,
-             0,
-             static_cast<int32_t>(healthLayerWidth),
-             static_cast<int32_t>(healthLayerHeight)
-          }
-       );
-
-       // Log::Info() << "energy: " << healthLayerWidth;
-
-       auto t = (now - _show_time).asSeconds();
-       const auto duration = 1.0f;
-       t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * static_cast<float>(M_PI)))) * 200;
-
-       layer_health->_sprite->setOrigin(t, 0.0f);
-       layer_health_energy->_sprite->setOrigin(t, 0.0f);
-       layer_health_weapon->_sprite->setOrigin(t, 0.0f);
-
-       layer_health->draw(window, states);
-       layer_health_energy->draw(window, states);
-       layer_health_weapon->draw(window, states);
-   }
-
    auto autosave = _layers["autosave"];
    if (autosave->_visible)
    {
@@ -151,6 +142,28 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
        layer_cpan_down->draw(window, states);
        layer_cpan_left->draw(window, states);
        layer_cpan_right->draw(window, states);
+   }
+
+   if (!_loading)
+   {
+      int32_t heart_quarters = 4;
+      int32_t heart_count = 1;
+
+      for (auto i = 0; i < heart_quarters; i++)
+      {
+         _heart_layers[i]->draw(window, states);
+      }
+
+      for (auto i = 0; i < heart_count; i++)
+      {
+         _heart_layers_background[i]->draw(window, states);
+      }
+
+      _stamina_layer->draw(window, states);
+      _stamina_background_layer->draw(window, states);
+
+      _slot_1_item_layer->draw(window, states);
+      _slot_2_weapon_layer->draw(window, states);
    }
 }
 
@@ -222,10 +235,6 @@ void InfoLayer::setLoading(bool loading)
 {
    _layers["autosave"]->_visible = loading;
 
-   _layers["health"]->_visible = !loading;
-   _layers["health_energy"]->_visible = !loading;
-   _layers["health_weapon"]->_visible = !loading;
-
    if (!loading && loading != _loading)
    {
        _show_time = GlobalClock::getInstance().getElapsedTime();
@@ -263,3 +272,38 @@ void InfoLayer::drawHeartAnimation(sf::RenderTarget& window)
 }
 
 
+
+// auto layer_health = _layers["health"];
+// auto layer_health_energy = _layers["health_energy"];
+// auto layer_health_weapon = _layers["health_weapon"];
+//
+// if (layer_health_energy->_visible)
+// {
+//     const auto health = (SaveState::getPlayerInfo().mExtraTable._health._health) * 0.01f;
+//
+//     const auto healthLayerWidth  = layer_health_energy->_sprite->getTexture()->getSize().x * health;
+//     const auto healthLayerHeight = layer_health_energy->_sprite->getTexture()->getSize().y;
+//
+//     layer_health_energy->_sprite->setTextureRect(
+//        sf::IntRect{
+//           0,
+//           0,
+//           static_cast<int32_t>(healthLayerWidth),
+//           static_cast<int32_t>(healthLayerHeight)
+//        }
+//     );
+//
+//     // Log::Info() << "energy: " << healthLayerWidth;
+//
+//     auto t = (now - _show_time).asSeconds();
+//     const auto duration = 1.0f;
+//     t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * static_cast<float>(M_PI)))) * 200;
+//
+//     layer_health->_sprite->setOrigin(t, 0.0f);
+//     layer_health_energy->_sprite->setOrigin(t, 0.0f);
+//     layer_health_weapon->_sprite->setOrigin(t, 0.0f);
+//
+//     layer_health->draw(window, states);
+//     layer_health_energy->draw(window, states);
+//     layer_health_weapon->draw(window, states);
+// }
