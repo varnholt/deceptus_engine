@@ -153,7 +153,8 @@ void Dialogue::showNext()
          item.mTextColor,
          true,
          false,
-         (_index == 0)
+         (_index == 0),                         // the first item has a show animation
+         (_index == _dialogue_items.size() - 1) // the last item has a hide animation
       }
    );
 

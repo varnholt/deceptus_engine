@@ -34,6 +34,7 @@ class MessageBox
          bool _animate_text = false;
          bool _centered = true;
          bool _animate_show_event = true;
+         bool _animate_hide_event = true;
       };
 
       using MessageBoxCallback = std::function<void(Button)>;
@@ -66,6 +67,7 @@ class MessageBox
       );
 
       static void showAnimation();
+      static void hideAnimation();
 
    private:
 
@@ -79,6 +81,7 @@ class MessageBox
 
       static void initializeLayers();
       static sf::Vector2i pixelLocation(MessageBoxLocation);
+      static void close(Button button);
 
       void initializeControllerCallbacks();
 
@@ -90,9 +93,12 @@ class MessageBox
       int32_t _buttons = 0;
       uint32_t _chars_shown = 0;
       bool _drawn = false;
+      bool _closed = false;
+      bool _reset_instance = false;
       std::function<void(void)> _button_callback_a;
       std::function<void(void)> _button_callback_b;
       sf::Time _show_time;
+      sf::Time _hide_time;
       ExecutionMode _previous_mode = ExecutionMode::None;
 
       static LayoutProperties __default_properties;

@@ -37,8 +37,9 @@ static constexpr auto y_offset_bottom_px = 216;
 static constexpr auto text_margin_x_px   =   8;
 static constexpr auto textbox_width_px   = 324;
 
-static const auto animation_scale_time = sf::seconds(0.7f);
-static const auto animation_fade_time = sf::seconds(0.7f);
+static const auto animation_scale_time_show = sf::seconds(0.7f);
+static const auto animation_fade_time_show = sf::seconds(0.7f);
+static const auto animation_fade_time_hide = sf::seconds(0.5f);
 }
 
 
@@ -101,6 +102,27 @@ MessageBox::~MessageBox()
 }
 
 
+void MessageBox::close(MessageBox::Button button)
+{
+   auto callback = __active->_callback;
+
+   if (__active->_properties._animate_hide_event)
+   {
+      __active->_closed = true;
+      __active->_hide_time = GlobalClock::getInstance().getElapsedTime();
+   }
+   else
+   {
+      __active.reset();
+   }
+
+   if (callback)
+   {
+      callback(button);
+   }
+}
+
+
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (!__active)
@@ -150,13 +172,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // call callback and close message box
       if (button != MessageBox::Button::Invalid)
       {
-         auto callback = __active->_callback;
-         __active.reset();
-
-         if (callback)
-         {
-            callback(button);
-         }
+         close(button);
       }
    }
 
@@ -301,13 +317,18 @@ void MessageBox::initializeControllerCallbacks()
 
 void MessageBox::showAnimation()
 {
+   if (__active->_closed)
+   {
+      return;
+   }
+
    auto contents_alpha = 1.0f;
    const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
-   if (visible_time < animation_scale_time)
+   if (visible_time < animation_scale_time_show)
    {
       contents_alpha = 0.0f;
 
-      const auto t_normalized = visible_time.asSeconds() / animation_scale_time.asSeconds();
+      const auto t_normalized = visible_time.asSeconds() / animation_scale_time_show.asSeconds();
 
       const auto scale_x = Easings::easeOutBack<float>(t_normalized);
       const auto scale_y = scale_x;
@@ -324,9 +345,9 @@ void MessageBox::showAnimation()
       __layers["window"]->_sprite->setScale(1.0f, 1.0f);
       __layers["window"]->_sprite->setPosition(__window_position);
 
-      if (visible_time < animation_scale_time + animation_fade_time)
+      if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
-         const auto t_normalized = (visible_time.asSeconds() - animation_scale_time.asSeconds()) / animation_fade_time.asSeconds();
+         const auto t_normalized = (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
          contents_alpha = t_normalized;
       }
    }
@@ -339,6 +360,37 @@ void MessageBox::showAnimation()
    }
 
    __text.setFillColor(color);
+}
+
+
+void MessageBox::hideAnimation()
+{
+   if (!__active->_closed)
+   {
+      return;
+   }
+
+   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __active->_hide_time;
+
+   const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
+   const auto contents_alpha = 1.0f - t_normalized;
+
+   if (contents_alpha < 0.0f)
+   {
+      __active->_reset_instance = true;
+   }
+   else
+   {
+      const auto color = sf::Color{255, 255, 255, static_cast<uint8_t>(contents_alpha * 255)};
+
+      __layers["window"]->_sprite->setColor(color);
+      for (const auto& layer : __box_content_layers)
+      {
+         layer->_sprite->setColor(color);
+      }
+
+      __text.setFillColor(color);
+   }
 }
 
 
@@ -370,6 +422,11 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       showAnimation();
    }
 
+   if (__active->_properties._animate_hide_event)
+   {
+      hideAnimation();
+   }
+
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(
       sf::FloatRect(
@@ -397,7 +454,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       auto x = (
            GlobalClock::getInstance().getElapsedTime().asSeconds()
          - __active->_show_time.asSeconds()
-         - (__active->_properties._animate_show_event ? animation_scale_time.asSeconds() : 0.0f)
+         - (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f)
       ) * 10.0f;
 
       // if the thing is animated we want to wait for the animation_scale_time to pass
@@ -436,6 +493,12 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    );
 
    window.draw(__text, states);
+
+   // not particularly nice to delete the instance from inside the draw call
+   if (__active->_reset_instance)
+   {
+      __active.reset();
+   }
 }
 
 
