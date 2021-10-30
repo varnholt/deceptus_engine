@@ -408,30 +408,32 @@ void Room::startTransition()
                   camera.syncNow();
 
                   // apply room start position if available
-                  if (_start_position_l.has_value())
+                  const auto entered_direction = enteredDirection(Player::getCurrent()->getPixelPositionf());
+
+                  if (_start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
                   {
                      Player::getCurrent()->setBodyViaPixelPosition(_start_position_l.value().x, _start_position_l.value().y);
                   }
-                  else if (_start_position_r.has_value())
+                  else if (_start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
                   {
                      Player::getCurrent()->setBodyViaPixelPosition(_start_position_r.value().x, _start_position_r.value().y);
                   }
-                  else if (_start_position_t.has_value())
+                  else if (_start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
                   {
                      Player::getCurrent()->setBodyViaPixelPosition(_start_position_t.value().x, _start_position_t.value().y);
                   }
-                  else if (_start_position_b.has_value())
+                  else if (_start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
                   {
                      Player::getCurrent()->setBodyViaPixelPosition(_start_position_b.value().x, _start_position_b.value().y);
                   }
 
-                  if (_start_offset_l.has_value())
+                  if (_start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
                   {
                      auto player_pos = Player::getCurrent()->getPixelPositioni();
                      player_pos += _start_offset_l.value();
                      Player::getCurrent()->setBodyViaPixelPosition(player_pos.x, player_pos.y);
                   }
-                  else if (_start_offset_r.has_value())
+                  else if (_start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
                   {
                      auto player_pos = Player::getCurrent()->getPixelPositioni();
                      player_pos += _start_offset_r.value();
