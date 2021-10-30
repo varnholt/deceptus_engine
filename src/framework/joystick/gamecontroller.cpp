@@ -191,18 +191,18 @@ void GameController::update()
 
          for (auto& tc : thresholds.second)
          {
-            const auto axisIndex = getAxisIndex(axis);
+            const auto axis_index = getAxisIndex(axis);
 
-            const auto valuePrevious = _info.getAxisValues().at(static_cast<size_t>(axisIndex));
-            const auto valueCurrent = info.getAxisValues().at(static_cast<size_t>(axisIndex));
+            const auto value_previous = _info.getAxisValues().at(static_cast<size_t>(axis_index));
+            const auto value_current = info.getAxisValues().at(static_cast<size_t>(axis_index));
 
-            const auto valueCurrentNormalized = valueCurrent / 32767.0f;
-            const auto valuePreviousNormalized = tc._value;
+            const auto value_current_normalized = value_current / 32767.0f;
+            const auto value_previous_normalized = tc._value;
 
             const auto threshold = tc._threshold;
 
             // do not bother if value hasn't changed at all
-            if (valueCurrent != valuePrevious)
+            if (value_current != value_previous)
             {
                // threshold value must be initialized
                if (tc._initialized)
@@ -212,8 +212,8 @@ void GameController::update()
                   {
                      // the previous value was outside the threshold, but the new one is -> fire callback
                      if (
-                           valuePreviousNormalized < threshold
-                        && valueCurrentNormalized > threshold
+                           value_previous_normalized < threshold
+                        && value_current_normalized > threshold
                      )
                      {
                         tc._callback();
@@ -223,8 +223,8 @@ void GameController::update()
                   {
                      // the previous value was outside the threshold, but the new one is -> fire callback
                      if (
-                           valuePreviousNormalized > threshold
-                        && valueCurrentNormalized < threshold
+                           value_previous_normalized > threshold
+                        && value_current_normalized < threshold
                      )
                      {
                         tc._callback();
@@ -235,7 +235,7 @@ void GameController::update()
 
             // store current value
             tc._initialized = true;
-            tc._value = valueCurrentNormalized;
+            tc._value = value_current_normalized;
          }
       }
    }
@@ -259,10 +259,10 @@ void GameController::update()
    // emulate hat by evaluating the dpad buttons. some drivers do not register
    // the controller's dpad as hat so they just show up as ordinary buttons.
    // we don't want that.
-   auto hatCount = SDL_JoystickNumHats(_active_joystick);
-   if (hatCount == 0)
+   auto hat_count = SDL_JoystickNumHats(_active_joystick);
+   if (hat_count == 0)
    {
-      int hat = SDL_HAT_CENTERED;
+      auto hat = SDL_HAT_CENTERED;
 
       const auto up    = SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_UP);
       const auto down  = SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
@@ -270,30 +270,46 @@ void GameController::update()
       const auto right = SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
 
       if (left && up)
+      {
          hat = SDL_HAT_LEFTUP;
+      }
       else if (left && down)
+      {
          hat = SDL_HAT_LEFTDOWN;
+      }
       else if (right && up)
+      {
          hat = SDL_HAT_RIGHTUP;
+      }
       else if (right && down)
+      {
          hat = SDL_HAT_RIGHTDOWN;
+      }
       else if (up)
+      {
          hat = SDL_HAT_UP;
+      }
       else if (down)
+      {
          hat = SDL_HAT_DOWN;
+      }
       else if (left)
+      {
          hat = SDL_HAT_LEFT;
+      }
       else if (right)
+      {
          hat = SDL_HAT_RIGHT;
+      }
 
       info.addHatValue(hat);
    }
 
    // read hat values
-   for (auto i = 0; i < hatCount; i++)
+   for (auto i = 0; i < hat_count; i++)
    {
-      auto hatValue = SDL_JoystickGetHat(_active_joystick, i);
-      info.addHatValue(hatValue);
+      auto hat_value = SDL_JoystickGetHat(_active_joystick, i);
+      info.addHatValue(hat_value);
    }
 
    if (
@@ -385,30 +401,30 @@ void GameController::cleanupRumble()
 
 
 //-----------------------------------------------------------------------------
-SDL_GameControllerButton GameController::getButtonType(int buttonId) const
+SDL_GameControllerButton GameController::getButtonType(int button_id) const
 {
-   SDL_GameControllerButton buttonType = SDL_CONTROLLER_BUTTON_INVALID;
-   SDL_GameControllerButton tmpType = SDL_CONTROLLER_BUTTON_INVALID;
+   SDL_GameControllerButton button_type = SDL_CONTROLLER_BUTTON_INVALID;
+   SDL_GameControllerButton tmp_type = SDL_CONTROLLER_BUTTON_INVALID;
 
    SDL_GameControllerButtonBind binding;
 
-   for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
+   for (auto i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
    {
-      tmpType = static_cast<SDL_GameControllerButton>(i);
+      tmp_type = static_cast<SDL_GameControllerButton>(i);
 
       binding = SDL_GameControllerGetBindForButton(
          _controller,
-         tmpType
+         tmp_type
       );
 
-      if (binding.value.button == buttonId)
+      if (binding.value.button == button_id)
       {
-         buttonType = tmpType;
+         button_type = tmp_type;
          break;
       }
    }
 
-   return buttonType;
+   return button_type;
 }
 
 
@@ -552,18 +568,18 @@ void GameController::bindDpadButtons()
 /*!
    \return \c true if button is a dpad button
 */
-bool GameController::isDpadButton(int button) const
+bool GameController::isDpadButton(int32_t button) const
 {
-   bool dPadButton = false;
+   bool dpad_button = false;
 
-   dPadButton = (
+   dpad_button = (
           (button == _dpad_bind_up.value.button    && _dpad_bind_up.bindType    == SDL_CONTROLLER_BINDTYPE_BUTTON)
        || (button == _dpad_bind_down.value.button  && _dpad_bind_down.bindType  == SDL_CONTROLLER_BINDTYPE_BUTTON)
        || (button == _dpad_bind_left.value.button  && _dpad_bind_left.bindType  == SDL_CONTROLLER_BINDTYPE_BUTTON)
        || (button == _dpad_bind_right.value.button && _dpad_bind_right.bindType == SDL_CONTROLLER_BINDTYPE_BUTTON)
    );
 
-   return dPadButton;
+   return dpad_button;
 }
 
 
