@@ -49,16 +49,16 @@ void GameConfiguration::deserialize(const std::string& data)
    json config = json::parse(data);
 
    try {
-       _video_mode_width  = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
-       _video_mode_height = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
-       _view_width       = config["GameConfiguration"]["view_width"].get<int32_t>();
-       _view_height      = config["GameConfiguration"]["view_height"].get<int32_t>();
-       _fullscreen      = config["GameConfiguration"]["fullscreen"].get<bool>();
-       _brightness      = config["GameConfiguration"]["brightness"].get<float>();
-       _vsync_enabled           = config["GameConfiguration"]["vsync"].get<bool>();
+       _video_mode_width    = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
+       _video_mode_height   = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
+       _view_width          = config["GameConfiguration"]["view_width"].get<int32_t>();
+       _view_height         = config["GameConfiguration"]["view_height"].get<int32_t>();
+       _fullscreen          = config["GameConfiguration"]["fullscreen"].get<bool>();
+       _brightness          = config["GameConfiguration"]["brightness"].get<float>();
+       _vsync_enabled       = config["GameConfiguration"]["vsync"].get<bool>();
 
-       _view_scale_width = static_cast<float>(_view_width) / static_cast<float>(_video_mode_width);
-       _view_scale_height = static_cast<float>(_view_height) / static_cast<float>(_video_mode_height);
+       _view_scale_width    = static_cast<float>(_view_width) / static_cast<float>(_video_mode_width);
+       _view_scale_height   = static_cast<float>(_view_height) / static_cast<float>(_video_mode_height);
 
        _audio_volume_master = config["GameConfiguration"]["audio_volume_master"].get<int32_t>();
        _audio_volume_sfx    = config["GameConfiguration"]["audio_volume_sfx"].get<int32_t>();
