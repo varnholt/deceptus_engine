@@ -122,7 +122,7 @@ class GameController
       void bindDpadButtons();
 
       //! check if button is dpad button
-      bool isDpadButton(int button) const;
+      bool isDpadButton(int32_t button) const;
 
 
    private:
