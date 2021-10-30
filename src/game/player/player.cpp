@@ -537,7 +537,7 @@ float Player::getMaxVelocity() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
-   auto axisValues = _controls.getJoystickInfo().getAxisValues();
+   auto axis_values = _controls.getJoystickInfo().getAxisValues();
 
    if (_controls.isLookingAround())
    {
@@ -545,30 +545,30 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    }
 
    // analogue input normalized to -1..1
-   const auto axisValue = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-   auto axisValueNormalized = axisValues[static_cast<size_t>(axisValue)] / 32767.0f;
+   const auto axis_value = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   auto axis_value_normalized = axis_values[static_cast<size_t>(axis_value)] / 32767.0f;
 
    // digital input
-   const auto hatValue = _controls.getJoystickInfo().getHatValues().at(0);
-   const auto dpadLeftPressed  = hatValue & SDL_HAT_LEFT;
-   const auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
+   const auto hat_value = _controls.getJoystickInfo().getHatValues().at(0);
+   const auto dpad_left_pressed  = hat_value & SDL_HAT_LEFT;
+   const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
 
-   if (dpadLeftPressed)
+   if (dpad_left_pressed)
    {
-      axisValueNormalized = -1.0f;
+      axis_value_normalized = -1.0f;
    }
-   else if (dpadRightPressed)
+   else if (dpad_right_pressed)
    {
-      axisValueNormalized = 1.0f;
+      axis_value_normalized = 1.0f;
    }
 
    // controller is not used, so slow down
-   if (fabs(axisValueNormalized) <= 0.3f)
+   if (fabs(axis_value_normalized) <= 0.3f)
    {
       return speed.currentVelocity.x * speed.deceleration;
    }
 
-   axisValueNormalized *= speed.acceleration;
+   axis_value_normalized *= speed.acceleration;
 
    // checking for the current speed here because even if the player pushes a controller axis
    // to the left side, it might still dash to the other side with quite a strong impulse.
@@ -576,7 +576,7 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    auto desiredVel = 0.0f;
    if (speed.currentVelocity.x < 0.0f)
    {
-      desiredVel = b2Max(speed.currentVelocity.x + axisValueNormalized, -speed.velocityMax);
+      desiredVel = b2Max(speed.currentVelocity.x + axis_value_normalized, -speed.velocityMax);
 
       // Log::Info()
       //    << "desired: " << desiredVel << " "
@@ -586,7 +586,7 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    }
    else
    {
-      desiredVel = b2Min(speed.currentVelocity.x + axisValueNormalized, speed.velocityMax);
+      desiredVel = b2Min(speed.currentVelocity.x + axis_value_normalized, speed.velocityMax);
 
       // Log::Info()
       //    << "desired: " << desiredVel << " "
@@ -800,19 +800,19 @@ float Player::getDesiredVelocity() const
    const auto acceleration = getAcceleration();
    const auto deceleration = getDeceleration();
 
-   const auto currentVelocity = _body->GetLinearVelocity();
-   const auto velocityMax = getMaxVelocity();
+   const auto current_velocity = _body->GetLinearVelocity();
+   const auto velocity_max = getMaxVelocity();
 
    PlayerSpeed speed
    {
-      currentVelocity,
-      velocityMax,
+      current_velocity,
+      velocity_max,
       acceleration,
       deceleration
    };
 
-   const auto desiredVel = getDesiredVelocity(speed);
-   return desiredVel;
+   const auto desired_velocity = getDesiredVelocity(speed);
+   return desired_velocity;
 }
 
 
@@ -938,18 +938,18 @@ void Player::updateVelocity()
       }
    }
 
-   auto desiredVel = getDesiredVelocity();
-   auto currentVelocity = _body->GetLinearVelocity();
+   auto desired_velocity = getDesiredVelocity();
+   auto current_velocity = _body->GetLinearVelocity();
 
    // physically so wrong but gameplay-wise the best choice :)
-   applyBeltVelocity(desiredVel);
+   applyBeltVelocity(desired_velocity);
 
    // calc impulse, disregard time factor
-   auto velocityChangeX = desiredVel - currentVelocity.x;
-   auto impulseX = _body->GetMass() * velocityChangeX;
+   auto velocity_change_x = desired_velocity - current_velocity.x;
+   auto impulse_x = _body->GetMass() * velocity_change_x;
 
    _body->ApplyLinearImpulse(
-      b2Vec2(impulseX, 0.0f),
+      b2Vec2(impulse_x, 0.0f),
       _body->GetWorldCenter(),
       true
    );
