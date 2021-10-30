@@ -117,6 +117,7 @@ SOURCES += \
    src/game/eventserializer.cpp \
    src/game/fadetransitioneffect.cpp \
    src/game/gameclock.cpp \
+   src/game/mechanisms/controllerhelp.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
    src/game/mechanisms/spikeblock.cpp \
@@ -301,6 +302,7 @@ HEADERS += \
    src/game/fadetransitioneffect.h \
    src/game/gameclock.h \
    src/game/mechanisms/bubblecube.h \
+   src/game/mechanisms/controllerhelp.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
    src/game/mechanisms/spikeblock.h \

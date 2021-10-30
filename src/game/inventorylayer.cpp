@@ -143,7 +143,7 @@ bool InventoryLayer::isControllerActionSkipped() const
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::updateControllerActions()
 {
-  auto gji =GameControllerIntegration::getInstance(0);
+  auto gji = GameControllerIntegration::getInstance(0);
 
   if (gji == nullptr)
   {
