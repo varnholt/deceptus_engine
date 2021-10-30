@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 class JoystickHandler;
 class GameController;
 
@@ -10,20 +12,21 @@ class GameControllerIntegration
       GameControllerIntegration();
       virtual ~GameControllerIntegration() = default;
 
-      static int initializeAll();
-      static GameControllerIntegration* getInstance(int id);
-      static int getCount();
+      static int32_t initializeAll();
+      static GameControllerIntegration* getInstance(int32_t id);
+      static int32_t getCount();
+      static bool controllerConnected();
 
-      void initialize(int id = 0);
+      void initialize(int32_t id = 0);
       GameController* getController();
-      void rumble(float intensity, int ms);
+      void rumble(float intensity, int32_t ms);
 
 
 private:
 
       static GameControllerIntegration* createInstance();
 
-      static int __count;
+      static int32_t __count;
       static GameControllerIntegration* __instances[10];
 
       GameController* _controller = nullptr;

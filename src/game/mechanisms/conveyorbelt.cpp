@@ -83,30 +83,30 @@ void ConveyorBelt::setEnabled(bool enabled)
 void ConveyorBelt::updateSprite()
 {
    const auto val = static_cast<int32_t>(_elapsed * 40.0f * fabs(_velocity)) % BELT_TILE_COUNT;
-   const auto xOffset = _points_right ? 7 - val :  val;
-   auto yOffset = 0u;
+   const auto offset_x_px = _points_right ? 7 - val :  val;
+   auto offset_y_px = 0u;
 
    for (auto i = 0u; i < _belt_sprites.size(); i++)
    {
        if (i == 0u)
        {
            // left tile (row 0)
-           yOffset = 0;
+           offset_y_px = 0;
        }
        else if (i == _belt_sprites.size() - 1)
        {
            // right tile (row 2)
-           yOffset = PIXELS_PER_TILE * 2;
+           offset_y_px = PIXELS_PER_TILE * 2;
        }
        else
        {
            // middle tile (row 1)
-           yOffset = PIXELS_PER_TILE;
+           offset_y_px = PIXELS_PER_TILE;
        }
 
        _belt_sprites[i].setTextureRect({
-            xOffset * PIXELS_PER_TILE,
-            static_cast<int32_t>(yOffset),
+            offset_x_px * PIXELS_PER_TILE,
+            static_cast<int32_t>(offset_y_px),
             PIXELS_PER_TILE,
             PIXELS_PER_TILE
          }
@@ -305,19 +305,19 @@ sf::IntRect ConveyorBelt::getPixelRect() const
 
 void ConveyorBelt::processContact(b2Contact* contact)
 {
-   auto fixtureUserDataA = contact->GetFixtureA()->GetUserData();
-   auto fixtureUserDataB = contact->GetFixtureB()->GetUserData();
+   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
+   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
 
-   if (fixtureUserDataA)
+   if (fixture_user_data_a)
    {
-      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataA);
-      processFixtureNode(fixtureNode, contact->GetFixtureB()->GetBody());
+      auto fixture_node = static_cast<FixtureNode*>(fixture_user_data_a);
+      processFixtureNode(fixture_node, contact->GetFixtureB()->GetBody());
    }
 
-   if (fixtureUserDataB)
+   if (fixture_user_data_b)
    {
-      auto fixtureNode = static_cast<FixtureNode*>(fixtureUserDataB);
-      processFixtureNode(fixtureNode, contact->GetFixtureA()->GetBody());
+      auto fixture_node = static_cast<FixtureNode*>(fixture_user_data_b);
+      processFixtureNode(fixture_node, contact->GetFixtureA()->GetBody());
    }
 }
 

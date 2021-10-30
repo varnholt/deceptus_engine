@@ -23,6 +23,7 @@
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
+#include "mechanisms/controllerhelp.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/crusher.h"
 #include "mechanisms/deathblock.h"
@@ -226,6 +227,7 @@ Level::Level()
       &_mechanism_bouncers,
       &_mechanism_bubble_cubes,
       &_mechanism_checkpoints,
+      &_mechanism_controller_help,
       &_mechanism_conveyor_belts,
       &_mechanism_crushers,
       &_mechanism_death_blocks,
@@ -541,6 +543,12 @@ void Level::loadTmx()
                   tmx_object->_width_px,
                   tmx_object->_height_px
                );
+            }
+            else if (object_group->_name == "controller_help")
+            {
+               auto controller_help = std::make_shared<ControllerHelp>();
+               controller_help->deserialize(tmx_object);
+               _mechanism_controller_help.push_back(controller_help);
             }
             else if (object_group->_name == "conveyorbelts")
             {
