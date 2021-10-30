@@ -203,15 +203,20 @@ bool PlayerControls::isControllerUsed() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isControllerButtonPressed(int buttonEnum) const
+bool PlayerControls::isControllerButtonPressed(int button_enum) const
 {
   auto pressed = false;
 
   auto gji = GameControllerIntegration::getInstance(0);
   if (gji != nullptr)
   {
-     auto buttonId = gji->getController()->getButtonId(static_cast<SDL_GameControllerButton>(buttonEnum));
-     pressed = (_joystick_info.getButtonValues()[static_cast<size_t>(buttonId)]);
+     _joystick_info.getButtonValues();
+
+      // does not need to be mapped
+      // auto button_id = gji->getController()->getButtonId(static_cast<SDL_GameControllerButton>(button_enum));
+      // pressed = (_joystick_info.getButtonValues()[static_cast<size_t>(button_id)]);
+
+     pressed = (_joystick_info.getButtonValues()[static_cast<size_t>(button_enum)]);
   }
 
   return pressed;
@@ -275,17 +280,19 @@ bool PlayerControls::isMovingLeft() const
   if (isControllerUsed())
   {
      const auto& axisValues = _joystick_info.getAxisValues();
-     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-     auto hatValue = _joystick_info.getHatValues().at(0);
-     auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
-     auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
 
-     if (dpadLeftPressed)
+     const auto axis_left_x = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+     auto xl = axisValues[static_cast<size_t>(axis_left_x)] / 32767.0f;
+     const auto hat_value = _joystick_info.getHatValues().at(0);
+
+     const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+     const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+
+     if (dpad_left_pressed)
      {
         xl = -1.0f;
      }
-     else if (dpadRightPressed)
+     else if (dpad_right_pressed)
      {
         xl = 1.0f;
      }
