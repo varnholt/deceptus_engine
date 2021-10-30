@@ -13,7 +13,7 @@
 #include "game/gameclock.h"
 #include "mechanisms/portal.h"
 #include "physics/physicsconfiguration.h"
-
+#include "screentransition.h"
 
 constexpr auto FRAMES_COUNT_JUMP_INIT = 3;
 constexpr auto JUMP_UP_VELOCITY_THRESHOLD = -1.2f;
@@ -598,6 +598,12 @@ void PlayerAnimation::updateV1(
       // need to support climb animation
    }
 
+   // force idle for screen transitions
+   if ((ScreenTransitionHandler::getInstance()._transition != nullptr))
+   {
+      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
+   }
+
    // reset x if animation cycle changed
    if (next_cycle != _current_cycle)
    {
@@ -843,6 +849,12 @@ void PlayerAnimation::updateV2(
          _appear_r_2->setAlpha(255);
          _appear_l_2->setAlpha(255);
       }
+   }
+
+   // force idle for screen transitions
+   if ((ScreenTransitionHandler::getInstance()._transition != nullptr))
+   {
+      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
    }
 
    // reset x if animation cycle changed
