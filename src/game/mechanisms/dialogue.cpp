@@ -132,8 +132,11 @@ void Dialogue::showNext()
 
       // when done, mark the dialogue as inactive so it can be reactivated on button press
       setActive(false);
+      GameState::getInstance().enqueueResume();
       return;
    }
+
+   GameState::getInstance().enqueuePause();
 
    const auto item = _dialogue_items.at(_index);
 
