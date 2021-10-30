@@ -601,7 +601,7 @@ void PlayerAnimation::updateV1(
    // force idle for screen transitions
    if ((ScreenTransitionHandler::getInstance()._transition != nullptr))
    {
-      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
+      next_cycle = data._points_left ? _idle_l : _idle_r;
    }
 
    // reset x if animation cycle changed
