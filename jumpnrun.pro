@@ -199,6 +199,7 @@ SOURCES += \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/tilemap.cpp \
+   src/game/tweaks.cpp \
    src/game/weapon.cpp \
    src/game/weaponfactory.cpp \
    src/game/weaponsystem.cpp \
@@ -308,6 +309,7 @@ HEADERS += \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
    src/game/shaderlayer.h \
+   src/game/tweaks.h \
    src/game/weaponfactory.h \
    src/game/worldquery.h
 

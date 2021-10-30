@@ -20,6 +20,7 @@
 #include "savestate.h"
 #include "screentransition.h"
 #include "texturepool.h"
+#include "tweaks.h"
 #include "weapon.h"
 #include "weaponsystem.h"
 
@@ -1293,20 +1294,20 @@ void Player::updateBendDown()
 
    if (_controls.isControllerUsed())
    {
-      const auto& joystickInfo = _controls.getJoystickInfo();
-      const auto& axisValues = joystickInfo.getAxisValues();
+      const auto& joystick_info = _controls.getJoystickInfo();
+      const auto& axis_values = joystick_info.getAxisValues();
 
-      int axisLeftY = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
-      auto yl = axisValues[static_cast<size_t>(axisLeftY)] / 32767.0f;
-      const auto& hatValue = joystickInfo.getHatValues().at(0);
-      auto dpadDownPressed = hatValue & SDL_HAT_DOWN;
+      const auto axis_lefy_y = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+      auto yl = axis_values[static_cast<size_t>(axis_lefy_y)] / 32767.0f;
+      const auto& hat_value = joystick_info.getHatValues().at(0);
+      auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
 
-      if (dpadDownPressed)
+      if (dpad_down_pressed)
       {
          yl = 1.0f;
       }
 
-      if (fabs(yl) >  0.3f)
+      if (fabs(yl) >  Tweaks::instance()._bend_down_threshold)
       {
          if (yl > 0.0f)
          {
