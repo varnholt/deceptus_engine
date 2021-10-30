@@ -900,6 +900,13 @@ void Player::updateVelocity()
       return;
    }
 
+   if (ScreenTransitionHandler::getInstance()._transition)
+   {
+      const auto velocity = _body->GetLinearVelocity();
+      _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
+      return;
+   }
+
    if (_bend._bending_down)
    {
       if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))

@@ -1416,16 +1416,6 @@ void Level::update(const sf::Time& dt)
    updateCameraSystem(dt);
    updateViews();
 
-   // don't update anything related to the level while a screen transition is active.
-   // an alternative to this could be just pausing and resuming the game while the transition
-   // is active. it doesn't really matter. so far this is the most simple approach
-   if (ScreenTransitionHandler::getInstance()._transition)
-   {
-      return;
-   }
-
-   // 80.0f * dt / 60.f
-   // http://www.iforce2d.net/b2dtut/worlds
    _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
 
    // clear conveyor belt state

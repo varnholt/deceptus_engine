@@ -731,15 +731,8 @@ void Game::update()
          updateGameController();
          updateGameControllerForGame();
 
-         // just like for the player update below, this also checks for an active screen transition
-         // and only does the camera and view update while a screen transition is active. for the player
-         // we don't want any weird movement changes while transitioning from one room/screen to another.
          _level->update(dt);
-
-         if (!ScreenTransitionHandler::getInstance()._transition)
-         {
-            _player->update(dt);
-         }
+         _player->update(dt);
 
          if (_draw_states._draw_test_scene)
          {
