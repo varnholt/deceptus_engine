@@ -1503,47 +1503,6 @@ void Level::addChainToWorld(
 
 
 //-----------------------------------------------------------------------------
-void Level::addDebugOutlines(
-   int32_t offsetX,
-   int32_t offsetY,
-   std::vector<sf::Vector2f> positions,
-   ObjectType behavior
-)
-{
-   sf::Color color;
-   switch (behavior)
-   {
-      case ObjectTypeSolid:
-         color = sf::Color(255, 255, 255);
-         break;
-      case ObjectTypeDeadly:
-         color = sf::Color(255, 0, 0);
-         break;
-      case ObjectTypeSolidOneWay:
-         color = sf::Color(255, 255, 0);
-         break;
-      default:
-         break;
-   }
-
-   // path.printPoly();
-   std::vector<sf::Vertex> visible_path;
-   for (auto& pos : positions)
-   {
-      sf::Vertex visibleVertex;
-      visibleVertex.color = color;
-      visibleVertex.position.x = static_cast<float_t>((pos.x + offsetX) * PIXELS_PER_TILE);
-      visibleVertex.position.y = static_cast<float_t>((pos.y + offsetY) * PIXELS_PER_TILE);
-
-      visible_path.push_back(visibleVertex);
-   }
-
-   visible_path.push_back(visible_path.at(0));
-   _atmosphere._outlines.push_back(visible_path);
-}
-
-
-//-----------------------------------------------------------------------------
 void Level::addPathsToWorld(
    int32_t offsetX,
    int32_t offsetY,
@@ -1551,13 +1510,6 @@ void Level::addPathsToWorld(
    ObjectType behavior
 )
 {
-   // just for debugging purposes, this section can be removed later
-   // for (auto& path : paths)
-   // {
-   //    const auto& scaled = path.mScaled;
-   //    addDebugOutlines(offsetX, offsetY, scaled, behavior);
-   // }
-
    // create the physical chain with 1 body per chain
    for (auto& path : paths)
    {
@@ -1610,9 +1562,6 @@ void Level::parseObj(
       chain.pop_back();
 
       addChainToWorld(chain, behavior);
-
-      // not required any longer
-      // addDebugOutlines(layer->mOffsetX, layer->mOffsetY, debugPath, behavior);
 
       // Mesh::writeVerticesToImage(points, faces, {1200, 1200}, "yo_yo.png");
    }
