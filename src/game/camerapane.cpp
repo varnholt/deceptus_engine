@@ -6,6 +6,7 @@
 #include "gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/math/sfmlmath.h"
+#include "tweaks.h"
 
 
 CameraPane CameraPane::__instance;
@@ -33,8 +34,10 @@ void CameraPane::update()
 
       auto x = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
       auto y = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
+      const auto tx = Tweaks::instance()._cpan_tolerance_x;
+      const auto ty = Tweaks::instance()._cpan_tolerance_y;
 
-      if (fabs(x) > 0.1f || fabs(y) > 0.1f)
+      if (fabs(x) > tx || fabs(y) > ty)
       {
          auto w = GameConfiguration::getInstance()._view_width * 0.5f;
          auto h = GameConfiguration::getInstance()._view_height * 0.5f;
