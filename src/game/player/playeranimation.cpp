@@ -550,7 +550,7 @@ void PlayerAnimation::updateV1(
          _jump_animation_reference = 0;
          next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
       }
-      else if (data._in_air && !data._in_water)
+      else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < -1.0f)
@@ -758,7 +758,10 @@ void PlayerAnimation::updateV2(
          _jump_animation_reference = 0;
          next_cycle = data._points_right ? _jump_init_r_2 : _jump_init_l_2;
       }
-      else if (data._in_air && !data._in_water)
+      // jump is active when either
+      // - in the air
+      // - jumping through a one-sided wall (in that case player may have ground contacts)
+      else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
       {
          // jump movement goes up
          if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
@@ -860,6 +863,8 @@ void PlayerAnimation::updateV2(
    // reset x if animation cycle changed
    if (next_cycle != _current_cycle)
    {
+      // std::cout << next_cycle->_name << std::endl;
+
       next_cycle->seekToStart();
       next_cycle->play();
    }

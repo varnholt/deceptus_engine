@@ -143,6 +143,7 @@ public:
    bool isOnPlatform() const;
    bool isOnGround() const;
    bool isDead() const;
+   bool isJumpingThroughOneWayWall();
 
    void setInWater(bool inWater);
 
