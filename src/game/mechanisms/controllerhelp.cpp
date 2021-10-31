@@ -46,12 +46,21 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 
    const auto margin_x_px = (_sprites.size() - 1) * PIXELS_PER_TILE / 2.0f;
    const auto width_of_tiles_px = _sprites.size() * PIXELS_PER_TILE + margin_x_px;
+   const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
+   // draw background
+   _background.setPosition(
+      _rect_center.x - _background.getTextureRect().width / 2,
+      _rect_center.y + tile_offset_y - 11
+   );
+
+   target.draw(_background);
+
+   // draw icons
    auto index = 0;
    for (auto& sprite : _sprites)
    {
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
-      const auto tile_offset_y = sin(index + _time.asSeconds() * 5.0f) * 8.0f;
       sprite.setPosition(_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y);
       target.draw(sprite);
       index++;
@@ -152,6 +161,29 @@ void ControllerHelp::deserialize(TmxObject* tmx_object)
      );
 
       _sprites.push_back(sprite);
+   }
+
+   _background.setTexture(*_texture);
+
+   if (_sprites.size() == 1)
+   {
+      _background.setTextureRect({
+            6 * PIXELS_PER_TILE,
+            10 * PIXELS_PER_TILE,
+            PIXELS_PER_TILE * 2,
+            PIXELS_PER_TILE * 2
+         }
+      );
+   }
+   else if (_sprites.size() == 2)
+   {
+      _background.setTextureRect({
+            9 * PIXELS_PER_TILE,
+            10 * PIXELS_PER_TILE,
+            PIXELS_PER_TILE * 2,
+            PIXELS_PER_TILE * 3
+         }
+      );
    }
 }
 
