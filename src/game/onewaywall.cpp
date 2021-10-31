@@ -61,7 +61,6 @@ void OneWayWall::endContact(b2Contact* contact)
 
 void OneWayWall::drop()
 {
-   std::cout << "disable " << _contacts.size() << " contacts" << std::endl;
    for (auto contact : _contacts)
    {
       contact->SetEnabled(false);
