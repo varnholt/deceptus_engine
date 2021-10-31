@@ -12,6 +12,7 @@
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/movingplatform.h"
+#include "onewaywall.h"
 #include "player/player.h"
 
 #include <iostream>
@@ -50,51 +51,6 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
    }
 
    return true;
-}
-
-
-bool GameContactListener::isBubbleCube(FixtureNode* obj) const
-{
-   if (!obj)
-   {
-      return false;
-   }
-
-   auto p = dynamic_cast<BubbleCube*>(obj);
-
-   if (!p)
-   {
-      return false;
-   }
-
-   return true;
-}
-
-
-void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* player_fixture, b2Fixture* platform_fixture)
-{
-   // decide whether an incoming contact to the platform should be disabled or not
-
-   // if the head bounces against the one-sided wall, disable the contact
-   // until there is no more contact with the head (EndContact)
-   if (player_fixture != nullptr && (static_cast<FixtureNode*>(player_fixture->GetUserData()))->hasFlag("head"))
-   {
-      contact->SetEnabled(false);
-   }
-
-   if (!platform_fixture)
-   {
-      return;
-   }
-
-   // if moving down, the contact should be solid
-   if (player_fixture->GetBody()->GetLinearVelocity().y > 0.0f)
-   {
-      return;
-   }
-
-   // while going up, the contact should not be solid
-   contact->SetEnabled(false);
 }
 
 
@@ -201,7 +157,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
             break;
          }
-         case ObjectTypeSolidOneSided:
+         case ObjectTypeSolidOneWay:
          {
             onesided_platform_fixture = contact->GetFixtureA();
             player_fixture = contact->GetFixtureB();
@@ -255,31 +211,16 @@ void GameContactListener::BeginContact(b2Contact* contact)
             }
             break;
          }
-         case ObjectTypeDoor:
-         {
-            break;
-         }
-         case ObjectTypeConveyorBelt:
-         {
-            break;
-         }
-         case ObjectTypeMoveableBox:
-         {
-            break;
-         }
-         case ObjectTypeDeathBlock:
-         {
-            break;
-         }
-         case ObjectTypeSolid:
-         {
-            break;
-         }
          case ObjectTypeBubbleCube:
          {
             dynamic_cast<BubbleCube*>(fixture_node_a)->beginContact();
             break;
          }
+         case ObjectTypeDoor:
+         case ObjectTypeConveyorBelt:
+         case ObjectTypeMoveableBox:
+         case ObjectTypeDeathBlock:
+         case ObjectTypeSolid:
          case ObjectTypeInvalid:
          {
             break;
@@ -313,11 +254,6 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
                _count_foot_contacts++;
             }
-
-            // if (isBubbleCube(fixture_node_a))
-            // {
-            //    dynamic_cast<BubbleCube*>(fixture_node_a)->beginContact();
-            // }
 
             break;
          }
@@ -373,7 +309,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
             break;
          }
-         case ObjectTypeSolidOneSided:
+         case ObjectTypeSolidOneWay:
          {
             onesided_platform_fixture = contact->GetFixtureB();
             player_fixture = contact->GetFixtureA();
@@ -427,31 +363,16 @@ void GameContactListener::BeginContact(b2Contact* contact)
             }
             break;
          }
-         case ObjectTypeDoor:
-         {
-            break;
-         }
-         case ObjectTypeConveyorBelt:
-         {
-            break;
-         }
-         case ObjectTypeMoveableBox:
-         {
-            break;
-         }
-         case ObjectTypeDeathBlock:
-         {
-            break;
-         }
-         case ObjectTypeSolid:
-         {
-            break;
-         }
          case ObjectTypeBubbleCube:
          {
             dynamic_cast<BubbleCube*>(fixture_node_b)->beginContact();
             break;
          }
+         case ObjectTypeDoor:
+         case ObjectTypeConveyorBelt:
+         case ObjectTypeMoveableBox:
+         case ObjectTypeDeathBlock:
+         case ObjectTypeSolid:
          case ObjectTypeInvalid:
          {
             break;
@@ -460,7 +381,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
    }
 
    // handle one sided walls
-   processOneSidedWalls(contact, player_fixture, onesided_platform_fixture);
+   OneWayWall::process(contact, player_fixture, onesided_platform_fixture);
 
    // std::cout << _count_foot_contacts << std::endl;
 }
@@ -538,7 +459,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             _count_player_contacts--;
             break;
          }
-         case ObjectTypeSolidOneSided:
+         case ObjectTypeSolidOneWay:
          {
             // reset the default state of the contact
             contact->SetEnabled(true);
@@ -621,7 +542,7 @@ void GameContactListener::EndContact(b2Contact* contact)
             _count_player_contacts--;
             break;
          }
-         case ObjectTypeSolidOneSided:
+         case ObjectTypeSolidOneWay:
          {
             // reset the default state of the contact
             contact->SetEnabled(true);

@@ -1519,7 +1519,7 @@ void Level::addDebugOutlines(
       case ObjectTypeDeadly:
          color = sf::Color(255, 0, 0);
          break;
-      case ObjectTypeSolidOneSided:
+      case ObjectTypeSolidOneWay:
          color = sf::Color(255, 255, 0);
          break;
       default:
@@ -1652,7 +1652,7 @@ void Level::parsePhysicsTiles(
    solid_onesided_pd.filename_physics_path_csv = "physics_path_solid_onesided.csv";
    solid_onesided_pd.filename_grid_image = "physics_grid_solid_onesided.png";
    solid_onesided_pd.filename_path_image = "physics_path_solid_onesided.png";
-   solid_onesided_pd.object_type = ObjectTypeSolidOneSided;
+   solid_onesided_pd.object_type = ObjectTypeSolidOneWay;
    solid_onesided_pd.colliding_tiles = {1};
 
    ParseData deadly_pd;
