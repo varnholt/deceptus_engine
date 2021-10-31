@@ -30,10 +30,13 @@ public:
    bool isFireButtonPressed() const;
    bool isJumpButtonPressed() const;
    bool isUpButtonPressed() const;
+   bool isDownButtonPressed() const;
+   bool isDroppingDown() const;
 
    bool isMovingRight() const;
    bool isMovingLeft() const;
-   bool isMoving() const;
+   bool isMovingDown() const;
+   bool isMovingHorizontally() const;
 
    const GameControllerInfo& getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
