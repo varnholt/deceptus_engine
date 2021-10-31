@@ -93,7 +93,7 @@ void GameContactListener::processOneSidedWalls(b2Contact* contact, b2Fixture* pl
       return;
    }
 
-   // not all points are moving down towards the platform, the contact should not be solid
+   // while going up, the contact should not be solid
    contact->SetEnabled(false);
 }
 
