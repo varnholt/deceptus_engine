@@ -3,12 +3,7 @@
 #include "fixturenode.h"
 
 #include <iostream>
-#include <set>
 
-namespace
-{
-std::set<b2Contact*> contacts;
-}
 
 // the concept is simple:
 //    when the player moves upwards into a one way wall, the contact is disabled
@@ -25,9 +20,16 @@ std::set<b2Contact*> contacts;
 //    // m_flags |= e_enabledFlag;
 
 
+OneWayWall& OneWayWall::instance()
+{
+   static OneWayWall _instance;
+   return _instance;
+}
+
+
 void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture, b2Fixture* platform_fixture)
 {
-   contacts.insert(contact);
+   _contacts.insert(contact);
 
    // decide whether an incoming contact to the platform should be disabled or not
 
@@ -53,15 +55,27 @@ void OneWayWall::endContact(b2Contact* contact)
 {
    // reset the default state of the contact
    contact->SetEnabled(true);
-   contacts.erase(contact);
+   _contacts.erase(contact);
 }
 
 
 void OneWayWall::drop()
 {
-   std::cout << "disable " << contacts.size() << " contacts" << std::endl;
-   for (auto contact : contacts)
+   std::cout << "disable " << _contacts.size() << " contacts" << std::endl;
+   for (auto contact : _contacts)
    {
       contact->SetEnabled(false);
    }
+}
+
+
+bool OneWayWall::hasContacts() const
+{
+   return _contacts.size() > 0;
+}
+
+
+void OneWayWall::clear()
+{
+   _contacts.clear();
 }
