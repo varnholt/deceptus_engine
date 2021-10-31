@@ -2,13 +2,13 @@
 
 #include "fixturenode.h"
 
-// #define DEBUG_CONTACTS
-
-#ifdef DEBUG_CONTACTS
 #include <iostream>
 #include <set>
+
+namespace
+{
 std::set<b2Contact*> contacts;
-#endif
+}
 
 // the concept is simple:
 //    when the player moves upwards into a one way wall, the contact is disabled
@@ -27,9 +27,7 @@ std::set<b2Contact*> contacts;
 
 void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture, b2Fixture* platform_fixture)
 {
-#ifdef DEBUG_CONTACTS
    contacts.insert(contact);
-#endif
 
    // decide whether an incoming contact to the platform should be disabled or not
 
@@ -48,10 +46,6 @@ void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture, b2F
 
    // while going up, the contact should not be solid
    contact->SetEnabled(false);
-
-#ifdef DEBUG_CONTACTS
-   std::cout << contacts.size() << std::endl;
-#endif
 }
 
 
@@ -59,9 +53,15 @@ void OneWayWall::endContact(b2Contact* contact)
 {
    // reset the default state of the contact
    contact->SetEnabled(true);
-
-#ifdef DEBUG_CONTACTS
    contacts.erase(contact);
-   std::cout << contacts.size() << std::endl;
-#endif
+}
+
+
+void OneWayWall::drop()
+{
+   std::cout << "disable " << contacts.size() << " contacts" << std::endl;
+   for (auto contact : contacts)
+   {
+      contact->SetEnabled(false);
+   }
 }
