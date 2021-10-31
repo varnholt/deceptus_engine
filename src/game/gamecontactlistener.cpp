@@ -103,7 +103,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
    auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
 
-   b2Fixture* platform_fixture = nullptr;
+   b2Fixture* onesided_platform_fixture = nullptr;
    b2Fixture* player_fixture = nullptr;
 
    FixtureNode* fixture_node_a = nullptr;
@@ -203,7 +203,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneSided:
          {
-            platform_fixture = contact->GetFixtureA();
+            onesided_platform_fixture = contact->GetFixtureA();
             player_fixture = contact->GetFixtureB();
             break;
          }
@@ -375,7 +375,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneSided:
          {
-            platform_fixture = contact->GetFixtureB();
+            onesided_platform_fixture = contact->GetFixtureB();
             player_fixture = contact->GetFixtureA();
             break;
          }
@@ -460,7 +460,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
    }
 
    // handle one sided walls
-   processOneSidedWalls(contact, player_fixture, platform_fixture);
+   processOneSidedWalls(contact, player_fixture, onesided_platform_fixture);
 
    // std::cout << _count_foot_contacts << std::endl;
 }

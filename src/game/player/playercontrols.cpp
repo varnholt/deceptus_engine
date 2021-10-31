@@ -8,7 +8,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::update(const sf::Time& /*dt*/)
 {
-   setWasMoving(isMoving());
+   setWasMoving(isMovingHorizontally());
    setWasMovingLeft(isMovingLeft());
    setWasMovingRight(isMovingRight());
 }
@@ -275,6 +275,31 @@ bool PlayerControls::isUpButtonPressed() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isDownButtonPressed() const
+{
+   if (_keys_pressed & KeyPressedDown)
+   {
+     return true;
+   }
+
+   if (isControllerUsed())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+   }
+
+   return false;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isDroppingDown() const
+{
+
+   return isJumpButtonPressed() && isMovingDown();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
 {
   if (isControllerUsed())
@@ -318,48 +343,89 @@ bool PlayerControls::isMovingLeft() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isMovingRight() const
+bool PlayerControls::isMovingDown() const
 {
-  if (isControllerUsed())
-  {
-     const auto& axisValues = _joystick_info.getAxisValues();
-     int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-     auto hatValue = _joystick_info.getHatValues().at(0);
-     auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
-     auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
+   if (isControllerUsed())
+   {
+      const auto& axis_values = _joystick_info.getAxisValues();
+      const auto axis_left_y = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+      auto y1 = axis_values[static_cast<size_t>(axis_left_y)] / 32767.0f;
+      const auto hat_value = _joystick_info.getHatValues().at(0);
+      const auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
+      const auto dpad_right_pressed = hat_value & SDL_HAT_UP;
 
-     if (dpadLeftPressed)
-     {
-        xl = -1.0f;
-     }
-     else if (dpadRightPressed)
-     {
-        xl = 1.0f;
-     }
+      if (dpad_down_pressed)
+      {
+         y1 = 1.0f;
+      }
+      else if (dpad_right_pressed)
+      {
+         y1 = 1.0f;
+      }
 
-     if (fabs(xl)> 0.3f)
-     {
-        if (xl > 0.0f)
-        {
-           return true;
-        }
-     }
-  }
-  else
-  {
-     if (_keys_pressed & KeyPressedRight)
-     {
-        return true;
-     }
-  }
+      if (fabs(y1) > 0.3f)
+      {
+         if (y1 > 0.0f)
+         {
+            return true;
+         }
+      }
+   }
+   else
+   {
+      if (_keys_pressed & KeyPressedDown)
+      {
+         return true;
+      }
+   }
 
-  return false;
+   return false;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isMoving() const
+bool PlayerControls::isMovingRight() const
+{
+   if (isControllerUsed())
+   {
+      const auto& axis_values = _joystick_info.getAxisValues();
+      const auto axis_left_x = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+      auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
+      const auto hat_value = _joystick_info.getHatValues().at(0);
+      const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+      const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+
+      if (dpad_left_pressed)
+      {
+         xl = -1.0f;
+      }
+      else if (dpad_right_pressed)
+      {
+         xl = 1.0f;
+      }
+
+      if (fabs(xl) > 0.3f)
+      {
+         if (xl > 0.0f)
+         {
+            return true;
+         }
+      }
+   }
+   else
+   {
+      if (_keys_pressed & KeyPressedRight)
+      {
+         return true;
+      }
+   }
+
+   return false;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isMovingHorizontally() const
 {
    return isMovingLeft() || isMovingRight();
 }
@@ -438,12 +504,12 @@ void PlayerControls::setWasMovingRight(bool was_moving_right)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::changedToIdle() const
 {
-   return wasMoving() && !isMoving();
+   return wasMoving() && !isMovingHorizontally();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::changedToMoving() const
 {
-   return !wasMoving() && isMoving();
+   return !wasMoving() && isMovingHorizontally();
 }
