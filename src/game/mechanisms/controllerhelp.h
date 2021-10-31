@@ -22,6 +22,7 @@ class ControllerHelp : public GameMechanism, public GameNode
       sf::IntRect _rect_px;
       sf::Vector2f _rect_center;
       std::vector<sf::Sprite> _sprites;
+      sf::Sprite _background;
       bool _visible = false;
       sf::Time _time;
 };

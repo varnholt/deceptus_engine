@@ -136,7 +136,10 @@ void Dialogue::showNext()
       return;
    }
 
-   GameState::getInstance().enqueuePause();
+   if (_index == 0)
+   {
+      GameState::getInstance().enqueuePause();
+   }
 
    const auto item = _dialogue_items.at(_index);
 
