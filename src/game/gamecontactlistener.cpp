@@ -59,9 +59,6 @@ void GameContactListener::BeginContact(b2Contact* contact)
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
    auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
 
-   b2Fixture* onesided_platform_fixture = nullptr;
-   b2Fixture* player_fixture = nullptr;
-
    FixtureNode* fixture_node_a = nullptr;
    FixtureNode* fixture_node_b = nullptr;
 
@@ -159,8 +156,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            onesided_platform_fixture = contact->GetFixtureA();
-            player_fixture = contact->GetFixtureB();
+            OneWayWall::beginContact(contact, contact->GetFixtureB(), contact->GetFixtureA());
             break;
          }
          case ObjectTypePlayer:
@@ -311,8 +307,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            onesided_platform_fixture = contact->GetFixtureB();
-            player_fixture = contact->GetFixtureA();
+            OneWayWall::beginContact(contact, contact->GetFixtureA(), contact->GetFixtureB());
             break;
          }
          case ObjectTypePlayer:
@@ -379,9 +374,6 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
       }
    }
-
-   // handle one sided walls
-   OneWayWall::process(contact, player_fixture, onesided_platform_fixture);
 
    // std::cout << _count_foot_contacts << std::endl;
 }
@@ -461,8 +453,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            // reset the default state of the contact
-            contact->SetEnabled(true);
+            OneWayWall::endContact(contact);
             break;
          }
          case ObjectTypeDeadly:
@@ -544,8 +535,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            // reset the default state of the contact
-            contact->SetEnabled(true);
+            OneWayWall::endContact(contact);
             break;
          }
          case ObjectTypeDeadly:
