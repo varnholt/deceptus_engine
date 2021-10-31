@@ -341,6 +341,26 @@ To create moving platforms, the first thing to do is to draw your platform rail 
 
 <br><br>
 
+## One-Way Walls
+
+When making the decision to build a platform game engine on top of a realistic physics system such as Box2D, the need to have one-way walls is - from the software developer perspective - the greatest imaginable pain in the ass. Anyway, they're implemented. You are welcome.
+
+If you ever played any Mario title in your life, you will know what a one-way wall is. The concept is very simple: The player jumps up, the player passes through the wall. The player starts falling down again, the wall becomes solid.
+
+Like the `level` tile layer, there's also a layer for tiles with one-way behavior. It is called `level_solid_onesided`. When designing the shape of these tiles in Tiled's 'Tile Collision Editor', they should be defined as boxes with a height of 1px and a width of 24px:
+
+![](images/mechanism_one_way_walls_tile_collision_editor.png)
+
+So once all the tile shapes are set up, they can be drawn into the tile layer. When that's done, it is possible to debug the generated physics shapes in the game by pressing `F1`.
+
+![](images/mechanism_one_way_walls_in_game.png)
+
+While the player moves through the one-way walls by pressing the jump key / button, it is possible to drop from a one-way wall by pressing jump together with the down key / button.
+
+
+
+<br><br>
+
 ## Moveable Objects
 
 At the moment this object type should rather be called 'Moveable Box' since their (rectangular) shape and texture is hardcoded. However, that might change in the future.
@@ -350,6 +370,7 @@ Anyhow, Moveable Objects are objects the player can push from one position to an
 The way to create a moveable object, create a rectangle object inside the object group `moveable_objects`. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
 
 ![](images/mechanism_movable_objects.png)
+
 
 <br><br>
 

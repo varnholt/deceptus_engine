@@ -125,13 +125,6 @@ protected:
       ObjectType behavior
    );
 
-   void addDebugOutlines(
-      int32_t offsetX,
-      int32_t offsetY,
-      std::vector<sf::Vector2f> positions,
-      ObjectType behavior
-   );
-
    void parseObj(
       TmxLayer* layer,
       ObjectType behavior,
