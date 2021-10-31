@@ -39,14 +39,12 @@ public:
 protected:
 
    bool isPlayer(FixtureNode* obj) const;
-   bool isBubbleCube(FixtureNode* obj) const;
 
 
 private:
 
    GameContactListener() = default;
 
-   void processOneSidedWalls(b2Contact* contact, b2Fixture* playerFixture, b2Fixture* platformFixture);
    void processImpulse(float impulse);
 
    int32_t _count_foot_contacts = 0;
