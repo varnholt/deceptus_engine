@@ -15,6 +15,7 @@
 #include "level.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
+#include "onewaywall.h"
 #include "physics/physicsconfiguration.h"
 #include "playerinfo.h"
 #include "savestate.h"
@@ -1447,6 +1448,16 @@ void Player::updateGroundAngle()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateOneWayWallDrop()
+{
+   if (getControls().isDroppingDown())
+   {
+      OneWayWall::drop();
+   }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
@@ -1462,6 +1473,7 @@ void Player::update(const sf::Time& dt)
    updateFire();
    updateVelocity();
    updatePlayerOrientation();
+   updateOneWayWallDrop();
 
    PlayerJump::PlayerJumpInfo info;
    info._in_air = isInAir();

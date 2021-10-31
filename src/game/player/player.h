@@ -168,21 +168,22 @@ private:
    void createPlayerBody();
 
    void updateAnimation(const sf::Time& dt);
-   void updatePixelCollisions();
    void updateAtmosphere();
-   void updateVelocity();
-   void updatePlatformMovement(const sf::Time& dt);
+   void updateBendDown();
+   void updateDash(Dash dir = Dash::None);
+   void updateDeadFixtures();
    void updateFire();
    void updateFootsteps();
-   void updatePortal();
-   void updatePlayerOrientation();
-   void updateDash(Dash dir = Dash::None);
-   void updateBendDown();
-   void updateHardLanding();
    void updateGroundAngle();
-   void updateDeadFixtures();
-   void updateWeapons(const sf::Time& dt);
+   void updateHardLanding();
    void updateImpulse();
+   void updateOneWayWallDrop();
+   void updatePixelCollisions();
+   void updatePlatformMovement(const sf::Time& dt);
+   void updatePlayerOrientation();
+   void updatePortal();
+   void updateVelocity();
+   void updateWeapons(const sf::Time& dt);
 
    void resetDash();
 
