@@ -156,7 +156,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            OneWayWall::beginContact(contact, contact->GetFixtureB(), contact->GetFixtureA());
+            OneWayWall::instance().beginContact(contact, contact->GetFixtureB(), contact->GetFixtureA());
             break;
          }
          case ObjectTypePlayer:
@@ -307,7 +307,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            OneWayWall::beginContact(contact, contact->GetFixtureA(), contact->GetFixtureB());
+            OneWayWall::instance().beginContact(contact, contact->GetFixtureA(), contact->GetFixtureB());
             break;
          }
          case ObjectTypePlayer:
@@ -453,7 +453,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            OneWayWall::endContact(contact);
+            OneWayWall::instance().endContact(contact);
             break;
          }
          case ObjectTypeDeadly:
@@ -535,7 +535,7 @@ void GameContactListener::EndContact(b2Contact* contact)
          }
          case ObjectTypeSolidOneWay:
          {
-            OneWayWall::endContact(contact);
+            OneWayWall::instance().endContact(contact);
             break;
          }
          case ObjectTypeDeadly:
@@ -747,6 +747,7 @@ void GameContactListener::reset()
    _count_deadly_contacts = 0;
    _count_moving_platform_contacts = 0;
    _smashed = false;
+   OneWayWall::instance().clear();
 }
 
 

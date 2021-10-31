@@ -912,9 +912,18 @@ void Player::updateVelocity()
    {
       if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
       {
-         const auto velocity = _body->GetLinearVelocity();
-         _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
-         return;
+         if (getControls().isDroppingDown() && OneWayWall::instance().hasContacts())
+         {
+            // usually just stop the player from movement when bending down while he has no crouching ability
+            // however, when dropping from a platform, we don't want to mess with the velocity,
+            // just let the player fall
+         }
+         else
+         {
+            const auto velocity = _body->GetLinearVelocity();
+            _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
+            return;
+         }
       }
 
       // from here the player is crouching
@@ -1452,7 +1461,7 @@ void Player::updateOneWayWallDrop()
 {
    if (getControls().isDroppingDown())
    {
-      OneWayWall::drop();
+      OneWayWall::instance().drop();
    }
 }
 
