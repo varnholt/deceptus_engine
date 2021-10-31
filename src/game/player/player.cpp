@@ -760,6 +760,24 @@ bool Player::isDead() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
+bool Player::isJumpingThroughOneWayWall()
+{
+   // a player is considered jumping through a one-way wall when
+   // - the y velocity goes up
+   // - there are active contacts with a one-way wall
+   if (_body->GetLinearVelocity().y < 0.0f)
+   {
+      if (OneWayWall::instance().hasContacts())
+      {
+         return true;
+      }
+   }
+
+   return false;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updateAnimation(const sf::Time& dt)
 {
    PlayerAnimation::PlayerAnimationData data;
@@ -780,6 +798,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._moving_right = _controls.isMovingRight();
    data._wall_sliding = _jump._wallsliding;
    data._wall_jump_points_right = _jump._walljump_points_right;
+   data._jumping_through_one_way_wall = isJumpingThroughOneWayWall();
    data._timepoint_doublejump = _jump._timepoint_doublejump;
    data._timepoint_wallslide = _jump._timepoint_wallslide;
    data._timepoint_walljump = _jump._timepoint_walljump;

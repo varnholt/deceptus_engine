@@ -41,6 +41,7 @@ public:
       bool _moving_right = false;
       bool _wall_sliding = false;
       bool _wall_jump_points_right = false;
+      bool _jumping_through_one_way_wall = false;
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
       int32_t _jump_frame_count = 0;
