@@ -10,13 +10,13 @@
 
 void debugAuthors()
 {
-   auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-   auto year = (*gmtime(&now)).tm_year + 1900;
+   const std::chrono::time_point<std::chrono::system_clock> now{std::chrono::system_clock::now()};
+   const std::chrono::year_month_day ymd{std::chrono::floor<std::chrono::days>(now)};
 
    std::stringstream text;
    text << GAME_NAME;
    text << " (c) ";
-   text << year;
+   text << ymd.year();
    text << " dstar/mueslee";
    printf("%s\n", text.str().c_str());
    for (auto i = 0u; i < text.str().length(); i++)
