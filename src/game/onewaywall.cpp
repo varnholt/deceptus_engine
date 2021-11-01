@@ -27,7 +27,7 @@ OneWayWall& OneWayWall::instance()
 }
 
 
-void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture, b2Fixture* platform_fixture)
+void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture, b2Fixture* /*platform_fixture*/)
 {
    _contacts.insert(contact);
 
