@@ -15,7 +15,7 @@ public:
 
    struct RainDrop
    {
-      RainDrop();
+      void reset(const sf::FloatRect& rect);
 
       sf::Vector2f _pos;
       sf::Vector2f _dir;
@@ -25,12 +25,12 @@ public:
 
    RainOverlay();
 
-   void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
+   void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/);
    void update(const sf::Time& dt);
 
 private:
 
-   sf::RenderTexture _render_texture;
    std::vector<RainDrop> _drops;
+   sf::FloatRect _screen;
 };
 

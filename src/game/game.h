@@ -46,7 +46,6 @@ private:
       bool _draw_debug_info = false;
       bool _draw_controller_overlay = false;
       bool _draw_camera_system = false;
-      bool _draw_weather = true;
    };
 
    void processEvent(const sf::Event& event);

@@ -9,11 +9,6 @@
 
 namespace
 {
-   // todo: resolve static initialization fiasco
-   // https://isocpp.org/wiki/faq/ctors#static-init-order
-   static const auto w = 640; // GameConfiguration::getInstance().mViewWidth;
-   static const auto h = 360; // GameConfiguration::getInstance().mViewHeight;
-
    static const auto dropCount = 500;
    static const auto velocity_factor = 30.0f;
    static const auto width_stretch_factor = 1.5f;
@@ -36,19 +31,21 @@ RainOverlay::RainOverlay()
    {
       _drops.push_back(RainDrop());
    }
-
-   _render_texture.create(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
 }
 
 
-void RainOverlay::draw(sf::RenderTarget& window, sf::RenderStates /*states*/)
+void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   const auto& screen_view = target.getView();
+
+   _screen = {
+      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
+      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
+      screen_view.getSize().x,
+      screen_view.getSize().y
+   };
+
    static const auto color = sf::Color{174, 194, 224, 30};
-
-   _render_texture.clear();
-
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   window.setView(view);
 
    sf::Vertex line[2];
 
@@ -57,36 +54,38 @@ void RainOverlay::draw(sf::RenderTarget& window, sf::RenderStates /*states*/)
       line[0] = sf::Vertex{sf::Vector2f{d._pos.x, d._pos.y}, color};
       line[1] = sf::Vertex{sf::Vector2f{d._pos.x + d._length * d._dir.x, d._pos.y + d._length * d._dir.y}, color};
 
-      _render_texture.draw(line, 2, sf::Lines);
+      target.draw(line, 2, sf::Lines);
    }
-
-   _render_texture.setView(view);
-   _render_texture.display();
-
-   auto sprite = sf::Sprite(_render_texture.getTexture());
-   window.draw(sprite, sf::BlendMode{sf::BlendAdd});
 }
 
 
 void RainOverlay::update(const sf::Time& dt)
 {
+   // screen not initialized yet
+   if (_screen.width == 0)
+   {
+      return;
+   }
+
    for (auto& p : _drops)
    {
       p._pos += p._dir * dt.asSeconds() * velocity_factor;
 
-      if (p._pos.x > w || p._pos.y > h)
+      if (!_screen.contains(p._pos))
       {
-         p._pos.x = static_cast<float>(std::rand() % w) * width_stretch_factor + start_offset_x;
-         p._pos.y = start_offset_y;
+         p.reset(_screen);
       }
    }
 }
 
 
-RainOverlay::RainDrop::RainDrop()
+void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
 {
-   _pos.x = static_cast<float>(std::rand() % w);
-   _pos.y = static_cast<float>(std::rand() % h);
+   const auto x = std::rand() % static_cast<int32_t>(rect.width);
+   const auto y = std::rand() % static_cast<int32_t>(rect.height);
+
+   _pos.x = static_cast<float>(rect.left + x);
+   _pos.y = static_cast<float>(rect.top + y);
 
    _length = (std::rand() % 100) * randomize_factor_length + fixed_length;
 

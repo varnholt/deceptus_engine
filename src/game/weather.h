@@ -1,38 +1,29 @@
 #pragma once
 
+#include "gamenode.h"
+#include "game/gamemechanism.h"
 #include "overlays/rainoverlay.h"
 
 #include <memory>
 #include <SFML/Graphics.hpp>
 
-class Weather
+struct TmxObject;
+
+
+class Weather : public GameMechanism, public GameNode
 {
    public:
 
-      enum class WeatherType {
-         Rain,
-         Invalid
-      };
+      Weather(GameNode* parent = nullptr);
+      void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+      void update(const sf::Time& dt) override;
 
-      struct WeatherData {
-         std::shared_ptr<WeatherOverlay> _overlay;
-         sf::IntRect _rect;
-      };
-
-      void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
-      void update(const sf::Time& dt);
-
-      void add(WeatherType weatherType, const sf::IntRect& range);
-      void clear();
-
-      static Weather& getInstance();
+      static std::shared_ptr<Weather> deserialize(TmxObject* tmx_object);
 
 
    private:
 
-      Weather();
-
-      std::shared_ptr<RainOverlay> _rain_overlay;
-      std::vector<WeatherData> _data;
+      std::shared_ptr<WeatherOverlay> _overlay;
+      sf::IntRect _rect;
 };
 

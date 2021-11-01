@@ -30,7 +30,6 @@
 #include "savestate.h"
 #include "screentransition.h"
 #include "weapon.h"
-#include "weather.h"
 
 #include "menus/menuscreenmain.h"
 #include "menus/menuscreenpause.h"
@@ -426,13 +425,6 @@ void Game::draw()
 
    _screenshot = false;
 
-   // refactoring idea:
-   // move this into the level class
-   if (_draw_states._draw_weather)
-   {
-      Weather::getInstance().draw(*_window_render_texture.get());
-   }
-
    // draw screen transitions here
    if (ScreenTransitionHandler::getInstance()._transition)
    {
@@ -739,11 +731,6 @@ void Game::update()
             _test_scene->update(dt);
          }
 
-         if (_draw_states._draw_weather)
-         {
-            Weather::getInstance().update(dt);
-         }
-
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);
       }
@@ -958,11 +945,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::F4:
       {
          _draw_states._draw_debug_info = !_draw_states._draw_debug_info;
-         break;
-      }
-      case sf::Keyboard::F5:
-      {
-         _draw_states._draw_weather = !_draw_states._draw_weather;
          break;
       }
       case sf::Keyboard::F6:
