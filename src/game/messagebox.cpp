@@ -130,6 +130,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
+   if (__active->_closed)
+   {
+      return false;
+   }
+
    if (__active->_drawn)
    {
       MessageBox::Button button = MessageBox::Button::Invalid;
