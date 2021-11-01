@@ -221,7 +221,7 @@ protected:
 
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
-   std::unique_ptr<GammaShader> _gamme_shader;
+   std::unique_ptr<GammaShader> _gamma_shader;
    std::unique_ptr<DeathShader> _death_shader;
    bool _screenshot = false;
 
