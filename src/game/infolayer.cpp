@@ -68,14 +68,14 @@ InfoLayer::InfoLayer()
    }
 
    // init heart layers
-   for (auto i = 1u; i <= 40; i++)
+   for (auto i = 1u; i <= heart_quarter_layer_count; i++)
    {
       _heart_layers.push_back(_layers[std::format("{}", i)]);
    }
 
-   for (auto i = 1u; i <= 10; i++)
+   for (auto i = 1u; i <= heart_layer_count; i++)
    {
-      _heart_layers_background.push_back(_layers[std::format("{}", i)]);
+      _heart_layers_background.push_back(_layers[std::format("h{}", i)]);
    }
 
    _stamina_layer            = _layers["stamina"];
@@ -149,14 +149,14 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
       int32_t heart_quarters = SaveState::getPlayerInfo().mExtraTable._health._health;
       int32_t heart_count = SaveState::getPlayerInfo().mExtraTable._health._health_max / 4;
 
-      for (auto i = 0; i < heart_quarters; i++)
-      {
-         _heart_layers[i]->draw(window, states);
-      }
-
       for (auto i = 0; i < heart_count; i++)
       {
          _heart_layers_background[i]->draw(window, states);
+      }
+
+      for (auto i = 0; i < heart_quarters; i++)
+      {
+         _heart_layers[i]->draw(window, states);
       }
 
       _stamina_layer->draw(window, states);

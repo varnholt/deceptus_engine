@@ -121,7 +121,7 @@ void Level::initializeTextures()
    _render_texture_level_background.reset();
 
    _atmosphere_shader.reset();
-   _gamme_shader.reset();
+   _gamma_shader.reset();
    _blur_shader.reset();
    _death_shader.reset();
 
@@ -168,7 +168,7 @@ void Level::initializeTextures()
    );
 
    _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
-   _gamme_shader = std::make_unique<GammaShader>();
+   _gamma_shader = std::make_unique<GammaShader>();
    _blur_shader = std::make_unique<BlurShader>(texture_width, texture_height);
    _death_shader = std::make_unique<DeathShader>(texture_width, texture_height);
 
@@ -186,7 +186,7 @@ void Level::initializeTextures()
    }
 
    _atmosphere_shader->initialize();
-   _gamme_shader->initialize();
+   _gamma_shader->initialize();
    _blur_shader->initialize();
    _death_shader->initialize();
 }
@@ -1374,13 +1374,13 @@ void Level::draw(
    takeScreenshot("map_deferred", *_render_texture_deferred.get());
 
    auto levelTextureSprite = sf::Sprite(_render_texture_deferred->getTexture());
-   _gamme_shader->setTexture(_render_texture_deferred->getTexture());
+   _gamma_shader->setTexture(_render_texture_deferred->getTexture());
 
    levelTextureSprite.setPosition(_boom_effect._boom_offset_x, _boom_effect._boom_offset_y);
    levelTextureSprite.scale(_view_to_texture_scale, _view_to_texture_scale);
 
-   _gamme_shader->update();
-   window->draw(levelTextureSprite, &_gamme_shader->getGammaShader());
+   _gamma_shader->update();
+   window->draw(levelTextureSprite, &_gamma_shader->getGammaShader());
 
    if (DisplayMode::getInstance().isSet(Display::Map))
    {
