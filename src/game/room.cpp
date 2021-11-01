@@ -412,32 +412,50 @@ void Room::startTransition()
 
                   if (_start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
                   {
-                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_l.value().x, _start_position_l.value().y);
+                     Player::getCurrent()->setBodyViaPixelPosition(
+                        static_cast<float>(_start_position_l.value().x),
+                        static_cast<float>(_start_position_l.value().y)
+                     );
                   }
                   else if (_start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
                   {
-                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_r.value().x, _start_position_r.value().y);
+                     Player::getCurrent()->setBodyViaPixelPosition(
+                        static_cast<float>(_start_position_r.value().x),
+                        static_cast<float>(_start_position_r.value().y)
+                     );
                   }
                   else if (_start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
                   {
-                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_t.value().x, _start_position_t.value().y);
+                     Player::getCurrent()->setBodyViaPixelPosition(
+                        static_cast<float>(_start_position_t.value().x),
+                        static_cast<float>(_start_position_t.value().y)
+                     );
                   }
                   else if (_start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
                   {
-                     Player::getCurrent()->setBodyViaPixelPosition(_start_position_b.value().x, _start_position_b.value().y);
+                     Player::getCurrent()->setBodyViaPixelPosition(
+                        static_cast<float>(_start_position_b.value().x),
+                        static_cast<float>(_start_position_b.value().y)
+                     );
                   }
 
                   if (_start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
                   {
                      auto player_pos = Player::getCurrent()->getPixelPositioni();
                      player_pos += _start_offset_l.value();
-                     Player::getCurrent()->setBodyViaPixelPosition(player_pos.x, player_pos.y);
+                     Player::getCurrent()->setBodyViaPixelPosition(
+                        static_cast<float>(player_pos.x),
+                        static_cast<float>(player_pos.y)
+                     );
                   }
                   else if (_start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
                   {
                      auto player_pos = Player::getCurrent()->getPixelPositioni();
                      player_pos += _start_offset_r.value();
-                     Player::getCurrent()->setBodyViaPixelPosition(player_pos.x, player_pos.y);
+                     Player::getCurrent()->setBodyViaPixelPosition(
+                        static_cast<float>(player_pos.x),
+                        static_cast<float>(player_pos.y)
+                     );
                   }
                }
             }
