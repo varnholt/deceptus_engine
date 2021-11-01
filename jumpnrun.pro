@@ -35,7 +35,7 @@ linux|win32-g++ {
    message("configured for g++")
    QMAKE_CXXFLAGS += -std=c++17
    QMAKE_CXXFLAGS += -lc++fs
-   QMAKE_CXXFLAGS += -Wno-multichar
+   QMAKE_CXXFLAGS += -Wall
 }
 
 # openmp support
