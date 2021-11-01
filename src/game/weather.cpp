@@ -1,68 +1,55 @@
 #include "weather.h"
 
+#include "framework/tmxparser/tmxobject.h"
 #include "player/player.h"
 
 
-
-Weather::Weather()
+Weather::Weather(GameNode* parent)
+ : GameNode(parent)
 {
-   _rain_overlay = std::make_shared<RainOverlay>();
 }
 
 
-void Weather::draw(sf::RenderTarget& window, sf::RenderStates states)
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+   auto player_rect = Player::getCurrent()->getPlayerPixelRect();
 
-   for (const auto& data : _data)
+   if (_rect.intersects(player_rect))
    {
-      if (data._rect.intersects(playerRect))
-      {
-         data._overlay->draw(window, states);
-      }
+      _overlay->draw(target, normal);
    }
 }
 
 
 void Weather::update(const sf::Time& dt)
 {
-   auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+   auto player_rect = Player::getCurrent()->getPlayerPixelRect();
 
-   for (const auto& data : _data)
+   if (_rect.intersects(player_rect))
    {
-      if (data._rect.intersects(playerRect))
-      {
-         data._overlay->update(dt);
-      }
+      _overlay->update(dt);
    }
 }
 
 
-void Weather::add(Weather::WeatherType weatherType, const sf::IntRect& range)
+std::shared_ptr<Weather> Weather::deserialize(TmxObject* tmx_object)
 {
-   std::shared_ptr<WeatherOverlay> overlay;
+   auto weather = std::make_shared<Weather>();
 
-   switch (weatherType)
+   weather->_rect = sf::IntRect {
+      static_cast<int32_t>(tmx_object->_x_px),
+      static_cast<int32_t>(tmx_object->_y_px),
+      static_cast<int32_t>(tmx_object->_width_px),
+      static_cast<int32_t>(tmx_object->_height_px)
+   };
+
+   weather->setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
+
+   if (tmx_object->_name.rfind("rain", 0) == 0)
    {
-      case WeatherType::Rain:
-         overlay = _rain_overlay;
-         break;
-      case WeatherType::Invalid:
-         break;
+      weather->_overlay = std::make_shared<RainOverlay>();
    }
 
-   _data.push_back({overlay, range});
+   return weather;
 }
 
-
-void Weather::clear()
-{
-   _data.clear();
-}
-
-
-Weather& Weather::getInstance()
-{
-   static Weather __instance;
-   return __instance;
-}

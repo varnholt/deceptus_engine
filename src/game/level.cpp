@@ -243,6 +243,7 @@ Level::Level()
       &_mechanism_spike_balls,
       &_mechanism_spike_blocks,
       &_mechanism_spikes,
+      &_mechanism_weather,
    };
 }
 
@@ -592,17 +593,8 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "weather")
             {
-               sf::IntRect rect{
-                  static_cast<int32_t>(tmx_object->_x_px),
-                  static_cast<int32_t>(tmx_object->_y_px),
-                  static_cast<int32_t>(tmx_object->_width_px),
-                  static_cast<int32_t>(tmx_object->_height_px)
-               };
-
-               if (tmx_object->_name.rfind("rain", 0) == 0)
-               {
-                  Weather::getInstance().add(Weather::WeatherType::Rain, rect);
-               }
+               auto weather = Weather::deserialize(tmx_object);
+               _mechanism_weather.push_back(weather);
             }
             else if (object_group->_name.rfind("shader_quads", 0) == 0)
             {
@@ -667,8 +659,6 @@ BoomEffect& Level::getBoomEffect()
 void Level::load()
 {
    auto path = std::filesystem::path(_description->_filename).parent_path();
-
-   Weather::getInstance().clear();
 
    // load tmx
    loadTmx();
