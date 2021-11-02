@@ -15,11 +15,14 @@ public:
 
    struct RainDrop
    {
-      void reset(const sf::FloatRect& rect);
+      void resetPosition(const sf::FloatRect& rect);
 
-      sf::Vector2f _pos;
-      sf::Vector2f _dir;
+      sf::Vector2f _pos_px;
+      sf::Vector2f _dir_px;
       float _length = 0.0f;
+      float _age_s = 0.0f;
+      sf::Sprite _sprite;
+      void resetDirection();
    };
 
 
@@ -30,7 +33,11 @@ public:
 
 private:
 
-   std::vector<RainDrop> _drops;
+   bool _initialized = false;
    sf::FloatRect _screen;
+   sf::FloatRect _clip_rect;
+
+   std::vector<RainDrop> _drops;
+   std::shared_ptr<sf::Texture> _texture;
 };
 
