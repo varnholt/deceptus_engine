@@ -315,7 +315,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                {
                   const auto offset = body->GetPosition();
                   auto poly = dynamic_cast<b2PolygonShape*>(shape);
-                  drawLines(target, poly->m_vertices, offset, poly->m_count, b2Color{1, 0, 0, 1});
+                  drawLines(target, poly->m_vertices, offset, poly->m_count, b2Color{1.0f, 0.3f, 0.0f, 1.0f});
                   break;
                }
 
@@ -342,7 +342,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                {
                   const auto offset = body->GetPosition();
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
-                  drawLines(target, chain->m_vertices, offset, chain->m_count, b2Color{1, 0, 0, 1});
+                  drawLines(target, chain->m_vertices, offset, chain->m_count, b2Color{1.0f, 0.0f, 0.0f, 1.0f});
                   break;
                }
 
