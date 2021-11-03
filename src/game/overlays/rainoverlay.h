@@ -33,6 +33,8 @@ public:
 
 private:
 
+   void determineRainSurfaces(sf::RenderTarget& target);
+
    bool _initialized = false;
    sf::FloatRect _screen;
    sf::FloatRect _clip_rect;
