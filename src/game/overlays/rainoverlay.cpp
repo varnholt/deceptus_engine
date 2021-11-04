@@ -1,8 +1,13 @@
 #include "rainoverlay.h"
 
+#include "debugdraw.h"
+#include "framework/math/sfmlmath.h"
 #include "game/gameconfiguration.h"
+#include "level.h"
 #include "player/player.h"
 #include "texturepool.h"
+#include "worldquery.h"
+
 
 #include <cstdlib>
 #include <iostream>
@@ -11,13 +16,26 @@
 
 namespace
 {
-static const auto drop_count = 2000;
-static const auto max_age_s = 2.0f;
+static const auto drop_count = 500;
+static const auto max_age_s = 0.5f;
 static const auto velocity_factor = 30.0f;
 static const auto randomize_factor_x = 0.0f;
 static const auto randomize_factor_y = 0.02f;
-static const auto fixed_direction_x = 4.0f;
-static const auto fixed_direction_y = 10.0f;
+static const auto fixed_direction_x = 0.0f;
+static const auto fixed_direction_y = 40.0f;
+
+
+sf::Vector2f vecB2S(const b2Vec2 &vector)
+{
+   return{vector.x * PPM, vector.y * PPM};
+}
+
+
+b2Vec2 vecS2B(const sf::Vector2f& vector)
+{
+   return{vector.x * MPP, vector.y * MPP};
+}
+
 }
 
 
@@ -49,12 +67,30 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    sf::Vertex line[2];
 
+   // source: foreground
+   // dest:   background
+
+   static sf::BlendMode blend_mode(
+         sf::BlendMode::SrcAlpha,         // colorSourceFactor
+         sf::BlendMode::OneMinusSrcAlpha, // colorDestinationFactor
+         sf::BlendMode::Add,              // colorBlendEquation
+         sf::BlendMode::SrcAlpha,         // alphaSourceFactor
+         sf::BlendMode::OneMinusSrcAlpha, // alphaDestinationFactor
+         sf::BlendMode::Add               // alphaBlendEquation
+   );
+
    for (auto& d : _drops)
    {
-      target.draw(d._sprite);
+      target.draw(d._sprite, blend_mode);
    }
 
    determineRainSurfaces(target);
+
+   for (auto& p : _hits)
+   {
+      DebugDraw::drawPoint(target, vecS2B(p), {255, 0, 0});
+   }
+   _hits.clear();
 }
 
 
@@ -91,10 +127,10 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
-         p._sprite.setTextureRect({static_cast<int32_t>(sprite_index) * 11, 0, 11, 12});
+         p._sprite.setTextureRect({static_cast<int32_t>(sprite_index) * 11, 0, 11, 96});
          p._pos_px.x = _clip_rect.left + std::rand() % static_cast<int32_t>(_clip_rect.width);
          p._pos_px.y = _clip_rect.top + std::rand() % static_cast<int32_t>(_clip_rect.height);
-         p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s) * 1000)) * 0.001f;
+         p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
 
          p.resetDirection();
       }
@@ -120,13 +156,31 @@ void RainOverlay::update(const sf::Time& dt)
 
    for (auto& p : _drops)
    {
-      p._pos_px += p._dir_px * dt.asSeconds() * velocity_factor;
       p._age_s += dt.asSeconds();
 
-      p._sprite.setPosition(p._pos_px);
-      if (p._age_s > max_age_s)
+      if (p._age_s > 0.0f)
       {
-         p.resetPosition(_clip_rect);
+         auto p_prev_px = p._pos_px;
+         p._pos_px += p._dir_px * dt.asSeconds() * velocity_factor;
+         p._sprite.setPosition(p._pos_px);
+
+         if (p._age_s > max_age_s)
+         {
+            p.resetPosition(_clip_rect);
+         }
+         else
+         {
+            // intersect rain drop with edges
+            for (auto& edge : _edges)
+            {
+               auto intersection = SfmlMath::intersect(p_prev_px, p._pos_px, edge._p1_px, edge._p2_px);
+               if (intersection.has_value())
+               {
+                  _hits.push_back(p._pos_px);
+                  p.resetPosition(_clip_rect);
+               }
+            }
+         }
       }
    }
 }
@@ -144,33 +198,13 @@ void RainOverlay::RainDrop::resetDirection()
 
 void RainOverlay::RainDrop::resetPosition(const sf::FloatRect& rect)
 {
-   _age_s = 0.0f;
+   _age_s = -(std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
 
    const auto x = std::rand() % static_cast<int32_t>(rect.width);
-   const auto y = std::rand() % static_cast<int32_t>(rect.height / 3) - (rect.height / 3);
 
    _pos_px.x = static_cast<float>(rect.left + x);
-   _pos_px.y = static_cast<float>(rect.top + y);
+   _pos_px.y = static_cast<float>(rect.top);
 }
-
-
-
-
-#include "level.h"
-#include "worldquery.h"
-
-
-sf::Vector2f vecB2S(const b2Vec2 &vector)
-{
-   return{vector.x * PPM, vector.y * PPM};
-}
-
-
-b2Vec2 vecS2B(const sf::Vector2f& vector)
-{
-   return{vector.x * MPP, vector.y * MPP};
-}
-
 
 
 std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
@@ -189,10 +223,10 @@ std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& worl
 }
 
 
-
-#include "debugdraw.h"
 void RainOverlay::determineRainSurfaces(sf::RenderTarget& target)
 {
+   _edges.clear();
+
    auto level = Level::getCurrentLevel();
 
    std::vector<b2Body*> bodies = retrieveBodiesOnScreen(level->getWorld(), _screen);
@@ -227,15 +261,12 @@ void RainOverlay::determineRainSurfaces(sf::RenderTarget& target)
                      // filter out lines where the normal is facing down
                      if ((v2_m - v1_m).x < 0.0f)
                      {
-                        b2Color red(1,0,0);
-
-                        DebugDraw::drawLine(target, v1_m, v2_m, red);
-
-                        // DebugDraw::drawPoint(target, v1_m, red);
-                        // DebugDraw::drawPoint(target, v2_m, red);
+                        // b2Color red(1,0,0);
+                        // DebugDraw::drawLine(target, v1_m, v2_m, red);
+                        Edge edge{vecB2S(v1_m), vecB2S(v2_m)};
+                        _edges.push_back(edge);
                      }
                   }
-                  // drawLines(target, chain->m_vertices, offset, chain->m_count, b2Color{1, 0, 0, 1});
                   break;
                }
 
