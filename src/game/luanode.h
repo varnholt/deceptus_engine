@@ -103,6 +103,9 @@ struct LuaNode : public GameNode
    //! update the sprite's texture rect
    void updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h);
 
+   //! set a sprite's color
+   void setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+
 
    void luaHit(int32_t damage);
    void luaDie();

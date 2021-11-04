@@ -132,6 +132,43 @@ int32_t updateSpriteRect(lua_State* state)
 }
 
 
+
+/**
+ * @brief setSpriteColor change a sprite's color
+ * @param state lua state
+ *    param 1: id of sprite
+ *    param 2: r part in uint8
+ *    param 3: g part in uint8
+ *    param 4: b part in uint8
+ *    param 5: a part in uint8
+ * @return error code
+ */
+int32_t setSpriteColor(lua_State* state)
+{
+   auto argc = lua_gettop(state);
+
+   if (argc == 5)
+   {
+      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto r = static_cast<uint8_t>(lua_tointeger(state, 2));
+      auto g = static_cast<uint8_t>(lua_tointeger(state, 3));
+      auto b = static_cast<uint8_t>(lua_tointeger(state, 4));
+      auto a = static_cast<uint8_t>(lua_tointeger(state, 5));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->setSpriteColor(id, r, g, b, a);
+   }
+
+   return 0;
+}
+
+
 /**
  * @brief queryAABB do an aabb query
  * @param state lua state
@@ -1419,6 +1456,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
    lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
    lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);
+   lua_register(_lua_state, "setSpriteColor", ::setSpriteColor);
    lua_register(_lua_state, "setTransform", ::setTransform);
    lua_register(_lua_state, "setZ", ::setZ);
    lua_register(_lua_state, "timer", ::timer);
@@ -2137,6 +2175,12 @@ void LuaNode::updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int3
    }
 
    _sprites[id].setTextureRect(sf::IntRect(x, y, w, h));
+}
+
+
+void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+   _sprites[id].setColor({r, g, b, a});
 }
 
 

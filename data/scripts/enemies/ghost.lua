@@ -67,6 +67,7 @@ function initialize()
       mSpriteSize
    )
    setZ(30) -- somewhere in the foreground
+   setSpriteColor(0, 255, 255, 255, 150);
 end
 
 
