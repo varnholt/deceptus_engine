@@ -25,6 +25,12 @@ public:
       void resetDirection();
    };
 
+   struct Edge
+   {
+      sf::Vector2f _p1_px;
+      sf::Vector2f _p2_px;
+   };
+
 
    RainOverlay();
 
@@ -41,5 +47,7 @@ private:
 
    std::vector<RainDrop> _drops;
    std::shared_ptr<sf::Texture> _texture;
+   std::vector<Edge> _edges;
+   std::vector<sf::Vector2f> _hits;
 };
 

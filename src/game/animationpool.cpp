@@ -28,8 +28,8 @@ std::shared_ptr<Animation> AnimationPool::add(
    const std::string& name,
    float x,
    float y,
-   bool autoPlay,
-   bool managedByPool
+   bool auto_play,
+   bool managed_by_pool
 )
 {
    if (!_initialized)
@@ -49,7 +49,7 @@ std::shared_ptr<Animation> AnimationPool::add(
    animation->_normal_texture = settings->_normal_map;
    animation->setFrameTimes(settings->_frame_durations);
 
-   if (autoPlay)
+   if (auto_play)
    {
       animation->play();
    }
@@ -58,7 +58,7 @@ std::shared_ptr<Animation> AnimationPool::add(
       animation->pause();
    }
 
-   if (managedByPool)
+   if (managed_by_pool)
    {
       _animations[name] = animation;
    }
