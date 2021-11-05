@@ -13,6 +13,11 @@ class RainOverlay : public WeatherOverlay
 
 public:
 
+   struct RainSettings
+   {
+
+   };
+
    struct RainDrop
    {
       void resetPosition(const sf::FloatRect& rect);
@@ -23,6 +28,12 @@ public:
       float _age_s = 0.0f;
       sf::Sprite _sprite;
       void resetDirection();
+   };
+
+   struct DropHit
+   {
+      sf::Vector2f _pos_px;
+      float _age_s = 0.0f;
    };
 
    struct Edge
@@ -48,6 +59,9 @@ private:
    std::vector<RainDrop> _drops;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<Edge> _edges;
-   std::vector<sf::Vector2f> _hits;
+
+   std::vector<DropHit> _hits;
+
+   RainSettings _settings;
 };
 
