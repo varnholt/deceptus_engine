@@ -16,6 +16,7 @@
 
 namespace
 {
+
 static const auto drop_count = 500;
 static const auto max_age_s = 0.5f;
 static const auto velocity_factor = 30.0f;
@@ -65,8 +66,6 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       screen_view.getSize().y
    };
 
-   sf::Vertex line[2];
-
    // source: foreground
    // dest:   background
 
@@ -86,11 +85,10 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    determineRainSurfaces(target);
 
-   for (auto& p : _hits)
+   for (auto& hit : _hits)
    {
-      DebugDraw::drawPoint(target, vecS2B(p), {255, 0, 0});
+      DebugDraw::drawPoint(target, vecS2B(hit._pos_px), {255, 0, 0});
    }
-   _hits.clear();
 }
 
 
@@ -176,13 +174,29 @@ void RainOverlay::update(const sf::Time& dt)
                auto intersection = SfmlMath::intersect(p_prev_px, p._pos_px, edge._p1_px, edge._p2_px);
                if (intersection.has_value())
                {
-                  _hits.push_back(p._pos_px);
+                  DropHit hit;
+                  hit._pos_px = p._pos_px;
+                  _hits.push_back(hit);
+
                   p.resetPosition(_clip_rect);
                }
             }
          }
       }
    }
+
+   // update hit and erase those that are too old
+   _hits.erase(
+      std::remove_if(
+         _hits.begin(),
+         _hits.end(),
+         [dt](auto& hit) {
+             hit._age_s +=  dt.asSeconds();
+             return hit._age_s > 4.0f;
+         }
+      ),
+      _hits.end()
+   );
 }
 
 
