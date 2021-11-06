@@ -178,8 +178,6 @@ void RainOverlay::update(const sf::Time& dt)
       _initialized = true;
    }
 
-
-
    auto fallthrough_index = 0;
    for (auto& p : _drops)
    {

@@ -804,7 +804,15 @@ Here's an example of a fragment shader implementing a waterfall:
 
 While this document is written, the Deceptus Engine supports only a single weather type and that is rain. Great. So if you are planning to have any outdoorsy part in your level that's supposed to have shitty weather, then create an object group `weather` and define a rainy region by setting up a rectangle in there. The rectangle's name is supposed to start with `rain`.
 
-That's all.
+Rain layers have the custom properties below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The z depth of your rain layer|
+|collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through|
+|drop_count|int|Number of rain drops used inside this layer|
+|fall_through_rate|int|Decides how many nth rain drops are passed through to the collision detection. Set to `0` or `1` to make every rain drop colliding, set to `2` to pass every second drop to the collision detection, and so on. This setting is only relevant when `collide` is set to `true`.|
+
 
 ![](images/weather_rain.png)
 
