@@ -17,13 +17,9 @@
 namespace
 {
 
-static const auto drop_count = 500;
-static const auto max_age_s = 0.5f;
-static const auto velocity_factor = 30.0f;
-static const auto randomize_factor_x = 0.0f;
-static const auto randomize_factor_y = 0.02f;
-static const auto fixed_direction_x = 0.0f;
-static const auto fixed_direction_y = 40.0f;
+static const auto max_age_s = 1.5f;            // time for raindrop to move through all screens
+static const auto randomize_factor_y = 0.02f;  // randomized to 0..2
+static const auto fixed_direction_y = 1000.0f;
 
 
 sf::Vector2f vecB2S(const b2Vec2 &vector)
@@ -46,7 +42,7 @@ RainOverlay::RainOverlay()
 
    std::srand(static_cast<uint32_t>(std::time(nullptr))); // use current time as seed for random generator
 
-   for (auto a = 0; a < drop_count; a++)
+   for (auto a = 0; a < _settings._drop_count; a++)
    {
       RainDrop drop;
       drop._sprite.setTexture(*_texture);
@@ -80,14 +76,20 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    for (auto& d : _drops)
    {
-      target.draw(d._sprite, blend_mode);
+      if (d._age_s >= 0.0f)
+      {
+         // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
+         target.draw(d._sprite, blend_mode);
+      }
    }
 
-   determineRainSurfaces(target);
-
-   for (auto& hit : _hits)
+   if (_settings._collide)
    {
-      DebugDraw::drawPoint(target, vecS2B(hit._pos_px), {255, 0, 0});
+      for (auto& hit : _hits)
+      {
+         // DebugDraw::drawPoint(target, hit._pos_px, {1, 0, 0});
+         target.draw(hit._sprite);
+      }
    }
 }
 
@@ -126,17 +128,16 @@ void RainOverlay::update(const sf::Time& dt)
          const auto sprite_index = std::rand() % 4;
 
          p._sprite.setTextureRect({static_cast<int32_t>(sprite_index) * 11, 0, 11, 96});
+         p._sprite.setOrigin(6, 0);
          p._pos_px.x = _clip_rect.left + std::rand() % static_cast<int32_t>(_clip_rect.width);
          p._pos_px.y = _clip_rect.top + std::rand() % static_cast<int32_t>(_clip_rect.height);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
-
-         p.resetDirection();
+         p._dir_px.y = (std::rand() % 100) * randomize_factor_y + fixed_direction_y;
       }
 
       _initialized = true;
    }
 
-   //
    //   +- - - - +----------------------+- - - - +
    //   :        :                      :        :
    //   :        :                      :        :
@@ -150,74 +151,110 @@ void RainOverlay::update(const sf::Time& dt)
    //   :        :                      :        :
    //   :        :                      :        :
    //   +- - - - +----------------------+- - - - +
-   //
 
+   // auto update_colliding_edge = [this](const RainDrop& p){
+   //    for (const auto& edge : _edges)
+   //    {
+   //       auto intersection = SfmlMath::intersect(
+   //          p._origin_px,
+   //          p._pos_px + sf::Vector2f{0.0f, 1000.0f},
+   //          edge._p1_px,
+   //          edge._p2_px
+   //       );
+   //
+   //       if (intersection.has_value())
+   //       {
+   //          p._collision_point_px.emplace(intersection);
+   //       }
+   //    }
+   // };
+
+   auto fallthrough_index = 0;
    for (auto& p : _drops)
    {
       p._age_s += dt.asSeconds();
 
       if (p._age_s > 0.0f)
       {
-         auto p_prev_px = p._pos_px;
-         p._pos_px += p._dir_px * dt.asSeconds() * velocity_factor;
+         const auto step_width_px = p._dir_px * dt.asSeconds();
+         p._pos_px += step_width_px;
          p._sprite.setPosition(p._pos_px);
 
          if (p._age_s > max_age_s)
          {
-            p.resetPosition(_clip_rect);
+            p.reset(_clip_rect);
          }
          else
          {
-            // intersect rain drop with edges
-            for (auto& edge : _edges)
+            if (_settings._fall_through_rate == 0 || (fallthrough_index % _settings._fall_through_rate) == 0)
             {
-               auto intersection = SfmlMath::intersect(p_prev_px, p._pos_px, edge._p1_px, edge._p2_px);
-               if (intersection.has_value())
+               // intersect rain drop with edges
+               for (auto& edge : _edges)
                {
-                  DropHit hit;
-                  hit._pos_px = p._pos_px;
-                  _hits.push_back(hit);
+                  auto intersection = SfmlMath::intersect(p._origin_px, p._pos_px + sf::Vector2f{0.0f, 96.0f}, edge._p1_px, edge._p2_px);
+                  if (intersection.has_value())
+                  {
+                     DropHit hit;
+                     hit._sprite.setTexture(*_texture);
+                     hit._sprite.setPosition(intersection.value());
+                     hit._pos_px = intersection.value();
+                     _hits.push_back(hit);
 
-                  p.resetPosition(_clip_rect);
+                     p.reset(_clip_rect);
+                  }
                }
             }
          }
       }
+
+      fallthrough_index++;
    }
 
-   // update hit and erase those that are too old
-   _hits.erase(
-      std::remove_if(
-         _hits.begin(),
-         _hits.end(),
-         [dt](auto& hit) {
-             hit._age_s +=  dt.asSeconds();
-             return hit._age_s > 4.0f;
-         }
-      ),
-      _hits.end()
-   );
+   if (_settings._collide)
+   {
+      // only refresh the box2d information every 30 frames
+      if (_refresh_surface_counter == 30)
+      {
+         determineRainSurfaces();
+         _refresh_surface_counter = 0;
+      }
+
+      _refresh_surface_counter++;
+
+      // update hit and erase those that are too old
+      _hits.erase(
+         std::remove_if(
+            _hits.begin(),
+            _hits.end(),
+            [dt](auto& hit) {
+               hit._age_s +=  dt.asSeconds();
+               hit._sprite.setOrigin(5, 11);
+               hit._sprite.setTextureRect({
+                     11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)),
+                     96,
+                     11,
+                     12
+                  }
+               );
+               return hit._age_s > 1.0f;
+            }
+         ),
+         _hits.end()
+      );
+   }
 }
 
 
-void RainOverlay::RainDrop::resetDirection()
+void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
 {
-   auto rand_x = (std::rand() % 100) * randomize_factor_x;
-   auto rand_y = (std::rand() % 100) * randomize_factor_y;
-
-   _dir_px.x = rand_x + fixed_direction_x;
-   _dir_px.y = rand_y + fixed_direction_y;
-}
-
-
-void RainOverlay::RainDrop::resetPosition(const sf::FloatRect& rect)
-{
-   _age_s = -(std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
+   _age_s = - (std::rand() % 10000) * 0.0001f;
 
    const auto x = std::rand() % static_cast<int32_t>(rect.width);
 
    _pos_px.x = static_cast<float>(rect.left + x);
-   _pos_px.y = static_cast<float>(rect.top);
+   _pos_px.y = rect.top;
+
+   _origin_px = _pos_px;
 }
 
 
@@ -237,7 +274,7 @@ std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& worl
 }
 
 
-void RainOverlay::determineRainSurfaces(sf::RenderTarget& target)
+void RainOverlay::determineRainSurfaces()
 {
    _edges.clear();
 
@@ -253,7 +290,6 @@ void RainOverlay::determineRainSurfaces(sf::RenderTarget& target)
          || body->GetType() == b2_staticBody
       )
       {
-         // draw fixtures
          auto f = body->GetFixtureList();
          while (f)
          {
@@ -275,6 +311,7 @@ void RainOverlay::determineRainSurfaces(sf::RenderTarget& target)
                      // filter out lines where the normal is facing down
                      if ((v2_m - v1_m).x < 0.0f)
                      {
+                        // re-enable to debug colliding surfaces
                         // b2Color red(1,0,0);
                         // DebugDraw::drawLine(target, v1_m, v2_m, red);
                         Edge edge{vecB2S(v1_m), vecB2S(v2_m)};

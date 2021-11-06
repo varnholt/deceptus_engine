@@ -123,6 +123,23 @@ void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const b2Color& color)
+{
+   static constexpr auto pointSize = 3;
+
+   sf::Vertex line[] =
+   {
+      sf::Vertex(p + sf::Vector2f{- pointSize, 0}, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(p + sf::Vector2f{  pointSize, 0}, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(p + sf::Vector2f{0, - pointSize}, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(p + sf::Vector2f{0,   pointSize}, DebugDraw::glColorToSfml(color))
+   };
+
+   target.draw(line, 4, sf::Lines);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
 {
    static constexpr auto pointSize = 3;
@@ -146,6 +163,19 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec
    {
       sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)),
       sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))
+   };
+
+   target.draw(line, 2, sf::Lines);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const sf::Vector2f& p2, const b2Color& color)
+{
+   sf::Vertex line[] =
+   {
+      sf::Vertex(p1, DebugDraw::glColorToSfml(color)),
+      sf::Vertex(p2, DebugDraw::glColorToSfml(color))
    };
 
    target.draw(line, 2, sf::Lines);

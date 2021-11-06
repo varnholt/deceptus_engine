@@ -2,6 +2,7 @@
 
 #include "weatheroverlay.h"
 
+#include <optional>
 #include <cstdint>
 #include <vector>
 
@@ -15,25 +16,29 @@ public:
 
    struct RainSettings
    {
-
+      bool _collide = true;
+      int32_t _drop_count = 500;
+      int32_t _fall_through_rate = 0;
    };
 
    struct RainDrop
    {
-      void resetPosition(const sf::FloatRect& rect);
+      void reset(const sf::FloatRect& rect);
 
+      sf::Vector2f _origin_px;
       sf::Vector2f _pos_px;
       sf::Vector2f _dir_px;
       float _length = 0.0f;
       float _age_s = 0.0f;
       sf::Sprite _sprite;
-      void resetDirection();
+      std::optional<sf::Vector2f> _collision_point_px;
    };
 
    struct DropHit
    {
       sf::Vector2f _pos_px;
       float _age_s = 0.0f;
+      sf::Sprite _sprite;
    };
 
    struct Edge
@@ -50,9 +55,11 @@ public:
 
 private:
 
-   void determineRainSurfaces(sf::RenderTarget& target);
+   void determineRainSurfaces();
 
    bool _initialized = false;
+   uint8_t _refresh_surface_counter = 0;
+
    sf::FloatRect _screen;
    sf::FloatRect _clip_rect;
 
