@@ -31,7 +31,7 @@ public:
       float _length = 0.0f;
       float _age_s = 0.0f;
       sf::Sprite _sprite;
-      std::optional<sf::Vector2f> _collision_point_px;
+      std::vector<float> _intersections;
    };
 
    struct DropHit
@@ -53,7 +53,9 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/);
    void update(const sf::Time& dt);
 
-private:
+   void setSettings(const RainSettings& newSettings);
+
+   private:
 
    void determineRainSurfaces();
 

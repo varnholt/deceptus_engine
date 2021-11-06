@@ -1,6 +1,8 @@
 #include "weather.h"
 
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "player/player.h"
 
 
@@ -48,6 +50,37 @@ std::shared_ptr<Weather> Weather::deserialize(TmxObject* tmx_object)
    if (tmx_object->_name.rfind("rain", 0) == 0)
    {
       weather->_overlay = std::make_shared<RainOverlay>();
+
+      if (tmx_object->_properties)
+      {
+         const auto z_it                 = tmx_object->_properties->_map.find("z");
+         const auto collide_it           = tmx_object->_properties->_map.find("collide");
+         const auto drop_count_it        = tmx_object->_properties->_map.find("drop_count");
+         const auto fall_through_rate_it = tmx_object->_properties->_map.find("fall_through_rate");
+
+         if (z_it != tmx_object->_properties->_map.end())
+         {
+            weather->setZ(z_it->second->_value_int.value());
+         }
+
+         RainOverlay::RainSettings settings;
+         if (collide_it != tmx_object->_properties->_map.end())
+         {
+            settings._collide = collide_it->second->_value_bool.value();
+         }
+
+         if (drop_count_it != tmx_object->_properties->_map.end())
+         {
+            settings._drop_count = drop_count_it->second->_value_int.value();
+         }
+
+         if (fall_through_rate_it != tmx_object->_properties->_map.end())
+         {
+            settings._fall_through_rate = fall_through_rate_it->second->_value_int.value();
+         }
+
+         std::dynamic_pointer_cast<RainOverlay>(weather->_overlay)->setSettings(settings);
+      }
    }
 
    return weather;
