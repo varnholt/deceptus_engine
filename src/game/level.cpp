@@ -280,6 +280,7 @@ void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMa
 {
    if (layer->_properties)
    {
+      auto z_index = 0;
       auto parallax_factor_x = 1.0f;
       auto parallax_factor_y = 1.0f;
       auto parallax_offset_x = 0.0f;
@@ -310,6 +311,12 @@ void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMa
          parallax_offset_y = static_cast<float>(it_offset_y_value->second->_value_int.value());
       }
 
+      const auto& it_z_index_value = map.find("z");
+      if (it_z_index_value != map.end())
+      {
+         z_index = it_z_index_value->second->_value_int.value();
+      }
+
       // set up parallax layer with given properties
       const auto& it_parallax_view = map.find("slot");
       if (it_parallax_view != map.end())
@@ -319,6 +326,7 @@ void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMa
          auto& layer = _parallax_layers[slot];
 
          layer._used = true;
+         layer._z_index = z_index;
          layer._factor.x = parallax_factor_x;
          layer._factor.y = parallax_factor_y;
          layer._offset.x = parallax_offset_x;
@@ -1034,16 +1042,20 @@ void Level::drawLightAndShadows(sf::RenderTarget& target)
 
 
 //-----------------------------------------------------------------------------
-void Level::drawParallaxMaps(sf::RenderTarget& target)
+void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 {
-  for (const auto& parallax : _parallax_layers)
-  {
-     if (parallax._used)
-     {
-        target.setView(*parallax._view);
-        target.draw(*parallax._tile_map);
-     }
-  }
+   for (const auto& parallax : _parallax_layers)
+   {
+      if (parallax._used && parallax._z_index == z_index)
+      {
+         target.setView(*parallax._view);
+         target.draw(*parallax._tile_map);
+      }
+   }
+
+
+   // restore level view
+   target.setView(*_level_view);
 }
 
 
@@ -1100,21 +1112,20 @@ void Level::drawLayers(
    target.setView(*_level_view);
    normal.setView(*_level_view);
 
-   for (auto z = from; z <= to; z++)
+   for (auto z_index = from; z_index <= to; z_index++)
    {
-      _static_light->drawToZ(target, {}, z);
+      _static_light->drawToZ(target, {}, z_index);
 
       for (const auto& smoke : _smoke_effect)
       {
-         smoke->drawToZ(target, {}, z);
+         smoke->drawToZ(target, {}, z_index);
       }
 
-      // TODO: it's not expected that tiles are in different z layers
-      //       and then unify them in one big loop
+      drawParallaxMaps(*_render_texture_level_background.get(), z_index);
 
       for (auto& tileMap : _tile_maps)
       {
-         if (tileMap->getZ() == z)
+         if (tileMap->getZ() == z_index)
          {
             tileMap->draw(target, normal, {});
          }
@@ -1124,7 +1135,7 @@ void Level::drawLayers(
       {
          for (const auto& mechanism : *mechanism_vector)
          {
-            if (mechanism->getZ() == z)
+            if (mechanism->getZ() == z_index)
             {
                mechanism->draw(target, *_render_texture_normal.get());
             }
@@ -1134,13 +1145,13 @@ void Level::drawLayers(
       // enemies
       for (auto& enemy : _enemies)
       {
-         if (enemy->_z_index == z)
+         if (enemy->_z_index == z_index)
          {
             enemy->draw(target);
          }
       }
 
-      if (z == static_cast<int32_t>(ZDepth::Player))
+      if (z_index == static_cast<int32_t>(ZDepth::Player))
       {
          // ambient occlusion
          _ambient_occlusion.draw(target);
@@ -1151,7 +1162,7 @@ void Level::drawLayers(
 
       for (auto& layer : _image_layers)
       {
-         if (layer->_z_index == z)
+         if (layer->_z_index == z_index)
          {
             target.draw(layer->_sprite, {layer->_blend_mode});
          }
@@ -1159,7 +1170,7 @@ void Level::drawLayers(
 
       for (auto& layer : _shader_layers)
       {
-         if (layer->_z == z)
+         if (layer->_z == z_index)
          {
             layer->draw(target);
          }
@@ -1371,7 +1382,6 @@ void Level::draw(
    _render_texture_level_background->clear();
    _render_texture_normal->clear();
 
-   drawParallaxMaps(*_render_texture_level_background.get());
    drawLayers(
       *_render_texture_level_background.get(),
       *_render_texture_normal.get(),

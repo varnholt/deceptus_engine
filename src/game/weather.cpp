@@ -83,6 +83,30 @@ std::shared_ptr<Weather> Weather::deserialize(TmxObject* tmx_object)
       }
    }
 
+   if (tmx_object->_name.rfind("thunderstorm", 0) == 0)
+   {
+      weather->_overlay = std::make_shared<ThunderstormOverlay>();
+
+      if (tmx_object->_properties)
+      {
+         const auto z_it = tmx_object->_properties->_map.find("z");
+
+         if (z_it != tmx_object->_properties->_map.end())
+         {
+            weather->setZ(z_it->second->_value_int.value());
+         }
+      }
+
+      const auto rect = sf::FloatRect{
+         tmx_object->_x_px,
+         tmx_object->_y_px,
+         tmx_object->_width_px,
+         tmx_object->_height_px
+      };
+
+      std::dynamic_pointer_cast<ThunderstormOverlay>(weather->_overlay)->setRect(rect);
+   }
+
    return weather;
 }
 

@@ -123,6 +123,7 @@ SOURCES += \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
    src/game/mechanisms/spikeblock.cpp \
+   src/game/overlays/thunderstormoverlay.cpp \
    src/game/onewaywall.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/debugdraw.cpp \
@@ -309,6 +310,7 @@ HEADERS += \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
    src/game/mechanisms/spikeblock.h \
+   src/game/overlays/thunderstormoverlay.h \
    src/game/onewaywall.h \
    src/game/player/playeranimation.h \
    src/game/preloader.h \
