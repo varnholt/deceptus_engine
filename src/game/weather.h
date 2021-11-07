@@ -3,6 +3,7 @@
 #include "gamenode.h"
 #include "game/gamemechanism.h"
 #include "overlays/rainoverlay.h"
+#include "overlays/thunderstormoverlay.h"
 
 #include <memory>
 #include <SFML/Graphics.hpp>

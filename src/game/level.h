@@ -67,7 +67,7 @@ public:
 
    void draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot);
    void drawLightAndShadows(sf::RenderTarget& target);
-   void drawParallaxMaps(sf::RenderTarget& target);
+   void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
    void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
    void drawAtmosphereLayer(sf::RenderTarget& target);
    void drawBlurLayer(sf::RenderTarget& target);
@@ -186,6 +186,7 @@ protected:
    struct ParallaxLayer
    {
       bool _used = false;
+      int32_t _z_index = 0;
       sf::Vector2f _factor;
       sf::Vector2f _offset;
       sf::Vector2f _error;
