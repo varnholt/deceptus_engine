@@ -25,6 +25,7 @@ private:
 
    int32_t _look_state = static_cast<int32_t>(Look::Inactive);
    sf::Vector2f _look_vector;
+   float _max_length = 10000.0f;
 
    static CameraPane __instance;
 };

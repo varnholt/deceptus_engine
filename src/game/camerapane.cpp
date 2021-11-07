@@ -23,7 +23,6 @@ CameraPane& CameraPane::getInstance()
 void CameraPane::update()
 {
   constexpr auto speed = 3.0f;
-  constexpr auto max_length = 100.0f;
 
   if (GameControllerData::getInstance().isControllerUsed())
   {
@@ -73,10 +72,10 @@ void CameraPane::update()
       if (!DisplayMode::getInstance().isSet(Display::Map))
       {
          auto len = SfmlMath::length(_look_vector);
-         if (len > max_length)
+         if (len > _max_length)
          {
             _look_vector = SfmlMath::normalize(_look_vector);
-            _look_vector *= max_length;
+            _look_vector *= _max_length;
          }
       }
    }

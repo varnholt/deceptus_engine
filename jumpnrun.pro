@@ -22,9 +22,9 @@ RC_ICONS = data/game/deceptus.ico
 
 DEFINES_RELEASE += RELEASE_BUILD
 
-#debug {
-#   CONFIG += console
-#}
+debug {
+   CONFIG += console
+}
 
 win32-msvc {
    # link debug symbols

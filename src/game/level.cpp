@@ -276,23 +276,75 @@ Level::~Level()
 
 
 //-----------------------------------------------------------------------------
-void Level::deserializeParallaxMap(TmxLayer* layer)
+void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMap>& tile_map)
 {
    if (layer->_properties)
    {
-      auto parallax = 1.0f;
+      auto parallax_factor_x = 1.0f;
+      auto parallax_factor_y = 1.0f;
+      auto parallax_offset_x = 0.0f;
+      auto parallax_offset_y = 0.0f;
       auto& map = layer->_properties->_map;
-      auto it_parallax_value = map.find("parallax");
-      if (it_parallax_value != map.end())
+
+      const auto& it_parallax_x_value = map.find("factor_x");
+      if (it_parallax_x_value != map.end())
       {
-         parallax = it_parallax_value->second->_value_float.value();
+         parallax_factor_x = it_parallax_x_value->second->_value_float.value();
       }
 
-      auto it_parallax_view = map.find("parallax_view");
+      const auto& it_parallax_y_value = map.find("factor_y");
+      if (it_parallax_y_value != map.end())
+      {
+         parallax_factor_y = it_parallax_y_value->second->_value_float.value();
+      }
+
+      const auto& it_offset_x_value = map.find("offset_x_px");
+      if (it_offset_x_value != map.end())
+      {
+         parallax_offset_x = static_cast<float>(it_offset_x_value->second->_value_int.value());
+      }
+
+      const auto& it_offset_y_value = map.find("offset_y_px");
+      if (it_offset_y_value != map.end())
+      {
+         parallax_offset_y = static_cast<float>(it_offset_y_value->second->_value_int.value());
+      }
+
+      // set up parallax layer with given properties
+      const auto& it_parallax_view = map.find("slot");
       if (it_parallax_view != map.end())
       {
-         const auto view = it_parallax_view->second->_value_int.value();
-         _parallax_factors[view] = parallax;
+         const auto slot = it_parallax_view->second->_value_int.value();
+
+         auto& layer = _parallax_layers[slot];
+
+         layer._used = true;
+         layer._factor.x = parallax_factor_x;
+         layer._factor.y = parallax_factor_y;
+         layer._offset.x = parallax_offset_x;
+         layer._offset.y = parallax_offset_y;
+         layer._tile_map = tile_map;
+
+         // determine placement error
+         //
+         //  +------------------------------------+-------+-------+
+         //  |                                    |xxxxxxx|       |
+         //  |                                    |xxxxxxx|       |
+         //  |                                    |xxxxxxx|       |
+         //  +------------------------------------+-------+-------+
+         // 0px                                 800px   900px 1000px
+         //
+         //  800px   *   0.9     = 720px
+         //  offset      factor  = actual
+         //
+         //  800px   -   720px   = 80px error
+         //  offset      actual  = error
+
+         const auto& parallax_factor = layer._factor;
+         auto parallax_offset_with_error = layer._offset;
+         parallax_offset_with_error.x *= parallax_factor.x;
+         parallax_offset_with_error.y *= parallax_factor.y;
+         layer._error = layer._offset - parallax_offset_with_error;
       }
    }
 }
@@ -396,35 +448,34 @@ void Level::loadTmx()
          }
          else // tile map
          {
-            std::shared_ptr<TileMap> tileMap = std::make_shared<TileMap>();
-            tileMap->load(layer, tileset, path);
+            std::shared_ptr<TileMap> tile_map = std::make_shared<TileMap>();
+            tile_map->load(layer, tileset, path);
 
-            auto pushTileMap = true;
+            auto push_tile_map = true;
 
             if (layer->_name == "atmosphere")
             {
-               _atmosphere._tile_map = tileMap;
+               _atmosphere._tile_map = tile_map;
                _atmosphere.parse(layer, tileset);
             }
             else if (layer->_name == "extras")
             {
-               Player::getCurrent()->getExtraManager()->_tilemap = tileMap;
+               Player::getCurrent()->getExtraManager()->_tilemap = tile_map;
                Player::getCurrent()->getExtraManager()->load(layer, tileset);
             }
             else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
             {
-               deserializeParallaxMap(layer);
-               _parallax_maps.push_back(tileMap);
-               pushTileMap = false;
+               deserializeParallaxMap(layer, tile_map);
+               push_tile_map = false;
             }
             else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
             {
                parsePhysicsTiles(layer, tileset, path);
             }
 
-            if (pushTileMap)
+            if (push_tile_map)
             {
-               _tile_maps.push_back(tileMap);
+               _tile_maps.push_back(tile_map);
             }
          }
       }
@@ -848,12 +899,12 @@ void Level::createViews()
    _level_view->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
    _level_view->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 
-   for (auto i = 0; i < 3; i++)
+   for (auto& parallax_layer : _parallax_layers)
    {
-      _parallax_view[i].reset();
-      _parallax_view[i] = std::make_shared<sf::View>();
-      _parallax_view[i]->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
-      _parallax_view[i]->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+      parallax_layer._view.reset();
+      parallax_layer._view = std::make_shared<sf::View>();
+      parallax_layer._view->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
+      parallax_layer._view->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
    }
 }
 
@@ -877,27 +928,19 @@ void Level::updateViews()
       )
    );
 
-   // fixes glitches but is choppy
-   //
-   //   _level_view->reset(
-   //      sf::FloatRect(
-   //         std::floor(level_view_x),
-   //         std::floor(level_view_y),
-   //         std::floor(_view_width),
-   //         std::floor(_view_height)
-   //      )
-   //   );
-
-   for (auto i = 0; i < 3; i++)
+   for (const auto& parallax:  _parallax_layers)
    {
-      _parallax_view[i]->reset(
-         sf::FloatRect(
-            level_view_x * _parallax_factors[i],
-            level_view_y * _parallax_factors[i],
-            _view_width,
-            _view_height
-         )
-      );
+      if (parallax._used)
+      {
+         parallax._view->reset(
+            sf::FloatRect(
+               level_view_x * parallax._factor.x + parallax._error.x,
+               level_view_y * parallax._factor.y + parallax._error.y,
+               _view_width,
+               _view_height
+            )
+         );
+      }
    }
 }
 
@@ -993,10 +1036,13 @@ void Level::drawLightAndShadows(sf::RenderTarget& target)
 //-----------------------------------------------------------------------------
 void Level::drawParallaxMaps(sf::RenderTarget& target)
 {
-  for (auto i = 0u; i < _parallax_maps.size(); i++)
+  for (const auto& parallax : _parallax_layers)
   {
-     target.setView(*_parallax_view[i]);
-     target.draw(*_parallax_maps[i]);
+     if (parallax._used)
+     {
+        target.setView(*parallax._view);
+        target.draw(*parallax._tile_map);
+     }
   }
 }
 
