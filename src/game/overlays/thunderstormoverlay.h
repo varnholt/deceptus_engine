@@ -10,7 +10,12 @@ class ThunderstormOverlay : public WeatherOverlay
 
 public:
 
-   ThunderstormOverlay();
+   struct ThunderstormSettings{
+      float _thunderstorm_time_min_s = 3.0;
+      float _silence_time_s = 5.0f;
+   };
+
+   ThunderstormOverlay() = default;
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
@@ -20,10 +25,21 @@ public:
 
 private:
 
-   //sf::RectangleShape _shape;
+   enum class State
+   {
+      Lightning,
+      Silence
+   };
+
    sf::Sprite _sprite;
    sf::FloatRect _rect;
    float _value = 0.0f;
+   float _factor = 0.0f;
    float _time_s = 0.0f;
+   float _thunderstorm_time_elapsed_s = 0.0;
+   float _silence_time_elapsed_s = 0.0f;
+   State _state = State::Silence;
+
+   ThunderstormSettings _settings;
 };
 
