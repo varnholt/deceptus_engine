@@ -17,7 +17,7 @@
 namespace
 {
 
-static const auto max_age_s = 1.5f;            // time for raindrop to move through all screens
+static const auto max_age_s = 1.0f;            // time for raindrop to move through all screens
 static const auto randomize_factor_y = 0.02f;  // randomized to 0..2
 static const auto fixed_direction_y = 1000.0f;
 
