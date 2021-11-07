@@ -282,16 +282,16 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
    {
       auto parallax = 1.0f;
       auto& map = layer->_properties->_map;
-      auto itParallaxValue = map.find("parallax");
-      if (itParallaxValue != map.end())
+      auto it_parallax_value = map.find("parallax");
+      if (it_parallax_value != map.end())
       {
-         parallax = itParallaxValue->second->_value_float.value();
+         parallax = it_parallax_value->second->_value_float.value();
       }
 
-      auto itParallaxView = map.find("parallax_view");
-      if (itParallaxView != map.end())
+      auto it_parallax_view = map.find("parallax_view");
+      if (it_parallax_view != map.end())
       {
-         const auto view = itParallaxView->second->_value_int.value();
+         const auto view = it_parallax_view->second->_value_int.value();
          _parallax_factors[view] = parallax;
       }
    }
@@ -301,7 +301,7 @@ void Level::deserializeParallaxMap(TmxLayer* layer)
 //-----------------------------------------------------------------------------
 void Level::loadTmx()
 {
-   static const std::string parallaxIdentifier = "parallax_";
+   static const std::string parallax_identifier = "parallax_";
 
    auto path = std::filesystem::path(_description->_filename).parent_path();
 
@@ -411,7 +411,7 @@ void Level::loadTmx()
                Player::getCurrent()->getExtraManager()->_tilemap = tileMap;
                Player::getCurrent()->getExtraManager()->load(layer, tileset);
             }
-            else if (layer->_name.compare(0, parallaxIdentifier.length(), parallaxIdentifier) == 0)
+            else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
             {
                deserializeParallaxMap(layer);
                _parallax_maps.push_back(tileMap);

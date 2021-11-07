@@ -18,10 +18,12 @@ QT -= core
 LIBS -= -lQtGui
 LIBS -= -lQtCore
 
+RC_ICONS = data/game/deceptus.ico
+
 DEFINES_RELEASE += RELEASE_BUILD
 
 #debug {
-   CONFIG += console
+#   CONFIG += console
 #}
 
 win32-msvc {
