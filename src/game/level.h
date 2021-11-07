@@ -135,7 +135,7 @@ protected:
    void loadTmx();
    void loadCheckpoint();
 
-   void deserializeParallaxMap(TmxLayer* layer);
+   void deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMap>& tile_map);
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
    void updatePlayerLight();
@@ -159,10 +159,8 @@ protected:
 
    float _view_to_texture_scale = 1.0f;
    std::shared_ptr<sf::View> _level_view;
-   std::shared_ptr<sf::View> _parallax_view[3];
 
    std::map<std::string, int32_t> _screenshot_counters;
-   float _parallax_factors[3] = {0.9f, 0.85f, 0.8f};
    float _view_width = 0.0f;
    float _view_height = 0.0f;
 
@@ -170,7 +168,6 @@ protected:
    std::string _description_filename;
 
    std::vector<std::shared_ptr<TileMap>> _tile_maps;
-   std::vector<std::shared_ptr<TileMap>> _parallax_maps;
 
    std::vector<std::shared_ptr<LuaNode>> _enemies;
    std::map<std::string, Enemy> _enemy_data_from_tmx_layer;
@@ -184,6 +181,19 @@ protected:
    std::vector<TmxElement*> _tmx_elements;
 
    std::unique_ptr<LevelMap> _map;
+
+   // parallax (move to separate mechanism!)
+   struct ParallaxLayer
+   {
+      bool _used = false;
+      sf::Vector2f _factor;
+      sf::Vector2f _offset;
+      sf::Vector2f _error;
+      std::shared_ptr<sf::View> _view;
+      std::shared_ptr<TileMap> _tile_map;
+   };
+
+   std::array<ParallaxLayer, 3> _parallax_layers;
 
    // mechanisms
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms;
