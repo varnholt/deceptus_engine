@@ -28,5 +28,5 @@ void testBresenham()
 Test::Test()
 {
    // testBresenham();
-   dumpAnimations();
+   // dumpAnimations();
 }
