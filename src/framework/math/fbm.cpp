@@ -7,9 +7,9 @@
 // http://patriciogonzalezvivo.com
 
 //-----------------------------------------------------------------------------
-const auto OCTAVES = 6;
-const auto WIDTH = 512;
-const auto HEIGHT = 512;
+constexpr auto OCTAVES = 6;
+constexpr auto WIDTH = 512;
+constexpr auto HEIGHT = 512;
 
 
 //-----------------------------------------------------------------------------
