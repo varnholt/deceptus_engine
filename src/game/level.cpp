@@ -565,7 +565,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "checkpoints")
             {
-               const auto cp = Checkpoint::add(tmx_object);
+               const auto cp = Checkpoint::deserialize(tmx_object);
                const auto cp_index = cp->getIndex();
 
                _mechanism_checkpoints.push_back(cp);
