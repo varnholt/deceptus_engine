@@ -11,7 +11,7 @@ class ThunderstormOverlay : public WeatherOverlay
 public:
 
    struct ThunderstormSettings{
-      float _thunderstorm_time_min_s = 3.0;
+      float _thunderstorm_time_s = 3.0;
       float _silence_time_s = 5.0f;
    };
 
@@ -23,7 +23,9 @@ public:
    void setRect(const sf::FloatRect& newRect);
 
 
-private:
+   void setSettings(const ThunderstormSettings& newSettings);
+
+   private:
 
    enum class State
    {

@@ -87,13 +87,27 @@ std::shared_ptr<Weather> Weather::deserialize(TmxObject* tmx_object)
    {
       weather->_overlay = std::make_shared<ThunderstormOverlay>();
 
+      ThunderstormOverlay::ThunderstormSettings settings;
+
       if (tmx_object->_properties)
       {
-         const auto z_it = tmx_object->_properties->_map.find("z");
+         const auto z_it                     = tmx_object->_properties->_map.find("z");
+         const auto thunderstorm_time_min_it = tmx_object->_properties->_map.find("thunderstorm_time_s");
+         const auto silence_time_it          = tmx_object->_properties->_map.find("silence_time_s");
 
          if (z_it != tmx_object->_properties->_map.end())
          {
             weather->setZ(z_it->second->_value_int.value());
+         }
+
+         if (thunderstorm_time_min_it != tmx_object->_properties->_map.end())
+         {
+            settings._thunderstorm_time_s = thunderstorm_time_min_it->second->_value_float.value();
+         }
+
+         if (silence_time_it != tmx_object->_properties->_map.end())
+         {
+            settings._silence_time_s = silence_time_it->second->_value_float.value();
          }
       }
 
@@ -104,7 +118,9 @@ std::shared_ptr<Weather> Weather::deserialize(TmxObject* tmx_object)
          tmx_object->_height_px
       };
 
-      std::dynamic_pointer_cast<ThunderstormOverlay>(weather->_overlay)->setRect(rect);
+      auto thunderstorm = std::dynamic_pointer_cast<ThunderstormOverlay>(weather->_overlay);
+      thunderstorm->setRect(rect);
+      thunderstorm->setSettings(settings);
    }
 
    return weather;
