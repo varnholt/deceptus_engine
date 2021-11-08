@@ -806,7 +806,10 @@ Here's an example of a fragment shader implementing a waterfall:
 
 ## Weather
 
-While this document is written, the Deceptus Engine supports only a single weather type and that is rain. Great. So if you are planning to have any outdoorsy part in your level that's supposed to have shitty weather, then create an object group `weather` and define a rainy region by setting up a rectangle in there. The rectangle's name is supposed to start with `rain`.
+While this document is written, the Deceptus Engine supports only a the weather types 'rain' and 'thunderstorm'. Great. So if you are planning to have any outdoorsy part in your level or a view outside the window that's supposed to have real shitty weather, then create an object group `weather`.
+
+### Rain
+To define a rainy region, set up a rectangle inside your `weather` object layer. The rectangle's name is supposed to start with `rain`.
 
 Rain layers have the custom properties below:
 
@@ -819,6 +822,24 @@ Rain layers have the custom properties below:
 
 
 ![](images/weather_rain.png)
+
+<br><br>
+
+### Thunderstorm
+Usually you want to have your thunderstorm effect in the very back of your layer stack or somewhere in between your parallax layers.
+Thunderstorm layers are basically big quads that change their color to white for a short time based on a randomized function.
+They work well in combination with rain and will make your scene lively and atmospheric.
+
+To create a thunderstorm region, just create a rectangle starting with the name `thunderstorm` inside your `weather` layer.
+Thunderstorms have the custom properties below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The z depth of your thunderstorm layer|
+|thunderstorm_time_s|float|The duration of the lightning phase. The default is `3s`.|
+|silence_time_s|float|The duration for everything to be 'quiet', i.e. from one lightning phase to the other (given in seconds). The default is `5s`.|
+
+![](images/weather_thunderstorm_1.png) &nbsp;&nbsp; ![](images/weather_thunderstorm_2.png)
 
 <br><br>
 
