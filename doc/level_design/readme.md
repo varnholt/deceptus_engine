@@ -937,6 +937,16 @@ Whenever Adam reaches a checkpoint, the current state of the game is saved. I.e.
 
 Checkpoints are implemented as simple rectangle objects inside your level. In order to add checkpoints to your level, define an object group '`checkpoints`' and add rectangles inside this group that have reasonable names. The last checkpoint, i.e. the end of your level, must have the name '`end`'.
 
+Checkpoints have the custom properties below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|index|int|The index of your checkpoint. The player will always respawn at the last reached checkpoint with the largest index.|
+|sprite_pos_x_px|int|x position of the checkpoint sprite (given in px)|
+|sprite_pos_y_px|int|y position of the checkpoint sprite (given in px)|
+|z|int|The z index of the sprite layer|
+
+
 ![](images/checkpoints.png)
 
 
