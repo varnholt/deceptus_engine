@@ -38,7 +38,7 @@ void ThunderstormOverlay::update(const sf::Time& dt)
       _factor = std::min(_factor, 1.0f);
       _value *= _factor;
 
-      if (_thunderstorm_time_elapsed_s > _settings._thunderstorm_time_min_s)
+      if (_thunderstorm_time_elapsed_s > _settings._thunderstorm_time_s)
       {
          // start silence
          _silence_time_elapsed_s = 0.0f;
@@ -67,4 +67,10 @@ void ThunderstormOverlay::update(const sf::Time& dt)
 void ThunderstormOverlay::setRect(const sf::FloatRect& rect)
 {
    _rect = rect;
+}
+
+
+void ThunderstormOverlay::setSettings(const ThunderstormSettings& settings)
+{
+   _settings = settings;
 }
