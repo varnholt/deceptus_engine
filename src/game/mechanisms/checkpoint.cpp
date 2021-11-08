@@ -6,6 +6,7 @@
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
 #include "player/player.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -33,9 +34,13 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 }
 
 
-std::shared_ptr<Checkpoint> Checkpoint::add(TmxObject* tmx_object)
+std::shared_ptr<Checkpoint> Checkpoint::deserialize(TmxObject* tmx_object)
 {
    auto cp = std::make_shared<Checkpoint>();
+
+   cp->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
+   cp->_sprite.setTexture(*cp->_texture);
+   cp->updateSpriteRect();
 
    cp->_rect = sf::IntRect{
       static_cast<int32_t>(tmx_object->_x_px),
@@ -53,9 +58,40 @@ std::shared_ptr<Checkpoint> Checkpoint::add(TmxObject* tmx_object)
       {
          cp->_index = static_cast<uint32_t>(it->second->_value_int.value());
       }
+
+      auto z_it = tmx_object->_properties->_map.find("z");
+      if (z_it != tmx_object->_properties->_map.end())
+      {
+         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         cp->setZ(z_index);
+      }
+
+      // update sprite position
+      sf::Vector2f pos;
+
+      auto sprite_pos_x_it = tmx_object->_properties->_map.find("sprite_pos_x_px");
+      auto sprite_pos_y_it = tmx_object->_properties->_map.find("sprite_pos_y_px");
+
+      if (sprite_pos_x_it != tmx_object->_properties->_map.end())
+      {
+         pos.x = static_cast<float>(sprite_pos_x_it->second->_value_int.value());
+      }
+
+      if (sprite_pos_y_it != tmx_object->_properties->_map.end())
+      {
+         pos.y = static_cast<float>(sprite_pos_y_it->second->_value_int.value());
+      }
+
+      cp->_sprite.setPosition(pos);
    }
 
    return cp;
+}
+
+
+void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+{
+   target.draw(_sprite);
 }
 
 
@@ -70,7 +106,6 @@ void Checkpoint::update(const sf::Time& /*dt*/)
 }
 
 
-
 void Checkpoint::reached()
 {
    if (_reached)
@@ -81,6 +116,7 @@ void Checkpoint::reached()
    Log::Info() << "reached checkpoint: " << _index;
 
    _reached = true;
+   updateSpriteRect();
 
    for (auto& callback : _callbacks)
    {
@@ -113,3 +149,17 @@ uint32_t Checkpoint::getIndex() const
 {
    return _index;
 }
+
+
+void Checkpoint::updateSpriteRect()
+{
+   _sprite.setTextureRect({
+         _reached ? 48 : 0,
+         0,
+         48,
+         48
+      }
+   );
+}
+
+
