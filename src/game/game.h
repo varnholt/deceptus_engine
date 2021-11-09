@@ -83,9 +83,9 @@ private:
 
 private:
 
-   std::shared_ptr<Player> _player;
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
+   std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
    std::unique_ptr<InfoLayer> _info_layer;
    std::unique_ptr<InventoryLayer> _inventory_layer;
