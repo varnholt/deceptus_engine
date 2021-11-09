@@ -8,12 +8,12 @@
 
 #include "animationpool.h"
 #include "camerapane.h"
+#include "displaymode.h"
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "game/gameclock.h"
 #include "mechanisms/portal.h"
 #include "physics/physicsconfiguration.h"
-#include "screentransition.h"
 
 constexpr auto FRAMES_COUNT_JUMP_INIT = 3;
 constexpr auto JUMP_UP_VELOCITY_THRESHOLD = -1.2f;
@@ -599,7 +599,7 @@ void PlayerAnimation::updateV1(
    }
 
    // force idle for screen transitions
-   if ((ScreenTransitionHandler::getInstance()._transition != nullptr))
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
    {
       next_cycle = data._points_left ? _idle_l : _idle_r;
    }
@@ -855,7 +855,7 @@ void PlayerAnimation::updateV2(
    }
 
    // force idle for screen transitions
-   if ((ScreenTransitionHandler::getInstance()._transition != nullptr))
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
    {
       next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
    }

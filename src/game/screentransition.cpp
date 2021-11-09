@@ -1,11 +1,14 @@
 #include "screentransition.h"
 
+#include "displaymode.h"
 #include "framework/tools/timer.h"
 #include "screentransitioneffect.h"
 
 
 void ScreenTransition::startEffect1()
 {
+   DisplayMode::getInstance().enqueueSet(Display::ScreenTransition);
+
    _active_effect = _effect_1;
 
    _effect_1->_effect_ended = [&](){effect1Done();};
@@ -63,6 +66,7 @@ void ScreenTransition::effect1Done()
    // effect 1 stays active until effect 2 actually starts
    if (!_autostart_effect_2)
    {
+      DisplayMode::getInstance().enqueueUnset(Display::ScreenTransition);
       return;
    }
 
@@ -80,6 +84,8 @@ void ScreenTransition::effect1Done()
 void ScreenTransition::effect2Done()
 {
    _active_effect = nullptr;
+
+   DisplayMode::getInstance().enqueueUnset(Display::ScreenTransition);
 
    // tell everyone that effect 2 is done
    for (auto& cb : _callbacks_effect_2_ended)
