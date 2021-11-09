@@ -1,5 +1,6 @@
 #include "dialogue.h"
 
+#include "displaymode.h"
 #include "gamestate.h"
 #include "messagebox.h"
 #include "player/player.h"
@@ -33,18 +34,6 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmxObject)
          item.mMessage = (*it_dialogue_items).second->_value_string.value();
          dialogue->_dialogue_items.push_back(item);
       }
-
-      // after giving it some though, this should be done by the default mechanisms
-      //
-      // const auto& it_icon_texture_path = properties->map.find("icon_texture_path");
-      // if (it_icon_texture_path != properties->_map.end())
-      // {
-      // }
-      //
-      // const auto& it_icon_texture_path = properties->map.find("icon_texture_path");
-      // if (it_icon_texture_path != properties->_map.end())
-      // {
-      // }
    }
 
    dialogue->_pixel_rect = sf::IntRect{
@@ -82,7 +71,12 @@ void Dialogue::update(const sf::Time& /*dt*/)
 
    if (playerRect.intersects(_pixel_rect))
    {
-      if (!isActive())
+      // message boxes might already be marked as inactive, however
+      // they might still be fading out. the display mode 'modal', however
+      // is only removed when the messagebox is actually fully destroyed.
+      // thinking about this a little more, maybe the 'active' flag can actually
+      // be removed entirely.
+      if (!isActive() && !DisplayMode::getInstance().isSet(Display::Modal))
       {
          setActive(true);
          showNext();

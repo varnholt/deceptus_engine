@@ -91,13 +91,14 @@ enum class Alignment {
 
 
 enum class Display {
-   Invalid   = 0x00,
-   Game      = 0x01,
-   MainMenu  = 0x02,
-   Map       = 0x04,
-   Inventory = 0x08,
-   Debug     = 0x10,
-   Modal     = 0x20
+   Invalid          = 0x00,
+   Game             = 0x01,
+   MainMenu         = 0x02,
+   Map              = 0x04,
+   Inventory        = 0x08,
+   Debug            = 0x10,
+   Modal            = 0x20,
+   ScreenTransition = 0x40,
 };
 
 
