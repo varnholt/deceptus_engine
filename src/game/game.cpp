@@ -242,6 +242,12 @@ void Game::showPauseMenu()
       return;
    }
 
+   // don't allow to pause during screen transitions
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+   {
+      return;
+   }
+
    if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
    {
       Menu::getInstance()->show(Menu::MenuType::Pause);
@@ -778,6 +784,12 @@ void Game::openInventory()
 {
    if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {
+      // disallow inventory during screen transitions
+      if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+      {
+         return;
+      }
+
       GameState::getInstance().enqueuePause();
       DisplayMode::getInstance().enqueueSet(Display::Inventory);
       _inventory_layer->setActive(true);
