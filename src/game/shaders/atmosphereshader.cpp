@@ -11,8 +11,8 @@ AtmosphereShader::AtmosphereShader(
    uint32_t texture_width,
    uint32_t texture_height
 )
+ : _render_texture(std::make_shared<sf::RenderTexture>())
 {
-   _render_texture = std::make_shared<sf::RenderTexture>();
    _render_texture->create(
       static_cast<uint32_t>(texture_width),
       static_cast<uint32_t>(texture_height)

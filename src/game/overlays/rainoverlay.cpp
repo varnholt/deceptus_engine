@@ -37,9 +37,8 @@ b2Vec2 vecS2B(const sf::Vector2f& vector)
 
 
 RainOverlay::RainOverlay()
+ : _texture(TexturePool::getInstance().get("data/sprites/rain.png"))
 {
-   _texture = TexturePool::getInstance().get("data/sprites/rain.png");
-
    std::srand(static_cast<uint32_t>(std::time(nullptr))); // use current time as seed for random generator
 
    for (auto a = 0; a < _settings._drop_count; a++)

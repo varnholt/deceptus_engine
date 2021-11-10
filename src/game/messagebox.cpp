@@ -59,7 +59,7 @@ sf::Vector2f MessageBox::__window_position;
 MessageBox::MessageBox(
    MessageBox::Type type,
    const std::string& message,
-   MessageBox::MessageBoxCallback cb,
+   const MessageBox::MessageBoxCallback& cb,
    const LayoutProperties& properties,
    int32_t buttons
 )
@@ -510,7 +510,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 void MessageBox::messageBox(
    Type type,
    const std::string& message,
-   MessageBoxCallback callback,
+   const MessageBoxCallback& callback,
    const LayoutProperties& properties,
    int32_t buttons
 )
@@ -521,7 +521,7 @@ void MessageBox::messageBox(
 
 void MessageBox::info(
    const std::string& message,
-   MessageBoxCallback callback,
+   const MessageBoxCallback& callback,
    const LayoutProperties& properties,
    int32_t buttons
 )
@@ -537,7 +537,7 @@ void MessageBox::info(
 
 void MessageBox::question(
    const std::string& message,
-   MessageBox::MessageBoxCallback callback,
+   const MessageBox::MessageBoxCallback& callback,
    const LayoutProperties& properties,
    int32_t buttons
 )

@@ -33,7 +33,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       sf::IntRect getPixelRect() const;
 
 
-      static void update();
+      static void resetBeltState();
       static void processContact(b2Contact *contact);
       static void processFixtureNode(FixtureNode* fixtureNode, b2Body* collidingBody);
 

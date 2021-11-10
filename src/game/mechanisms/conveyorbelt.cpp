@@ -247,7 +247,7 @@ float ConveyorBelt::getVelocity() const
 }
 
 
-void ConveyorBelt::update()
+void ConveyorBelt::resetBeltState()
 {
    __bodies_on_belt.clear();
    auto player = Player::getCurrent();
@@ -291,6 +291,8 @@ void ConveyorBelt::processFixtureNode(
            auto player = Player::getCurrent();
            player->setOnBelt(true);
            player->setBeltVelocity(belt_velocity);
+
+           // std::cout << belt_velocity << std::endl;
         }
       }
    }
