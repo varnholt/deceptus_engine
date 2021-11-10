@@ -12,21 +12,19 @@ BlurShader::BlurShader(
    uint32_t width,
    uint32_t height
 )
+ : _render_texture(std::make_shared<sf::RenderTexture>()),
+   _render_texture_scaled(std::make_shared<sf::RenderTexture>())
 {
 #ifdef SUPPORT_STENCIL_BITS
    sf::ContextSettings contextSettings;
    contextSettings.stencilBits = 8;
 #endif
 
-   _render_texture = std::make_shared<sf::RenderTexture>();
-
 #ifdef SUPPORT_STENCIL_BITS
    _render_texture->create(width, height, contextSettings);
 #else
    _render_texture->create(width, height);
 #endif
-
-   _render_texture_scaled = std::make_shared<sf::RenderTexture>();
 
 #ifdef SUPPORT_STENCIL_BITS
    _render_texture_scaled->create(960, 540, contextSettings);

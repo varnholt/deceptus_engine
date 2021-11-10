@@ -59,9 +59,9 @@ float Player::getBeltVelocity() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setBeltVelocity(float beltVelocity)
+void Player::setBeltVelocity(float belt_velocity)
 {
-  _belt_velocity = beltVelocity;
+  _belt_velocity = belt_velocity;
 }
 
 
@@ -73,9 +73,9 @@ bool Player::isOnBelt() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setOnBelt(bool onBelt)
+void Player::setOnBelt(bool on_belt)
 {
-  _is_on_belt = onBelt;
+  _is_on_belt = on_belt;
 }
 
 
@@ -857,51 +857,53 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::applyBeltVelocity(float& desiredVel)
+void Player::applyBeltVelocity(float& desired_velocity)
 {
-  if (isOnBelt())
-  {
-     if (getBeltVelocity() < 0.0f)
-     {
-       if (_controls.isMovingRight())
-       {
-         desiredVel *= 0.5f;
-       }
-       else if (_controls.isMovingLeft())
-       {
-         if (desiredVel > 0.0f)
+   if (isOnBelt())
+   {
+      if (getBeltVelocity() < 0.0f)
+      {
+         if (_controls.isMovingRight())
          {
-           desiredVel = 0.0f;
+            desired_velocity *= 0.5f;
          }
-         desiredVel *= 2.0f;
-         desiredVel = std::min(desiredVel, getMaxVelocity());
-       }
-       else
-       {
-         desiredVel += getBeltVelocity();
-       }
-     }
-     else if (getBeltVelocity() > 0.0f)
-     {
-       if (_controls.isMovingLeft())
-       {
-         desiredVel *= 0.5f;
-       }
-       else if (_controls.isMovingRight())
-       {
-         if (desiredVel < 0.0f)
+         else if (_controls.isMovingLeft())
          {
-           desiredVel = 0.0f;
+            if (desired_velocity > 0.0f)
+            {
+               desired_velocity = 0.0f;
+            }
+
+            desired_velocity *= 2.0f;
+            desired_velocity = std::min(desired_velocity, getMaxVelocity());
          }
-         desiredVel *= 2.0f;
-         desiredVel = std::max(desiredVel, -getMaxVelocity());
-       }
-       else
-       {
-         desiredVel += getBeltVelocity();
-       }
-     }
-  }
+         else
+         {
+            desired_velocity += getBeltVelocity();
+         }
+      }
+      else if (getBeltVelocity() > 0.0f)
+      {
+         if (_controls.isMovingLeft())
+         {
+            desired_velocity *= 0.5f;
+         }
+         else if (_controls.isMovingRight())
+         {
+            if (desired_velocity < 0.0f)
+            {
+               desired_velocity = 0.0f;
+            }
+
+            desired_velocity *= 2.0f;
+            desired_velocity = std::max(desired_velocity, -getMaxVelocity());
+         }
+         else
+         {
+            desired_velocity += getBeltVelocity();
+         }
+      }
+   }
 }
 
 

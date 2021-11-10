@@ -445,22 +445,10 @@ HEADERS += \
 # thirdparty
 
 SOURCES += \
-   src/thirdparty/poly2tri/common/shapes.cc \
-   src/thirdparty/poly2tri/sweep/advancing_front.cc \
-   src/thirdparty/poly2tri/sweep/cdt.cc \
-   src/thirdparty/poly2tri/sweep/sweep.cc \
-   src/thirdparty/poly2tri/sweep/sweep_context.cc \
    src/thirdparty/tinyxml2/tinyxml2.cpp \
 
 
 HEADERS += \
-   src/thirdparty/poly2tri/common/shapes.h \
-   src/thirdparty/poly2tri/common/utils.h \
-   src/thirdparty/poly2tri/poly2tri.h \
-   src/thirdparty/poly2tri/sweep/advancing_front.h \
-   src/thirdparty/poly2tri/sweep/cdt.h \
-   src/thirdparty/poly2tri/sweep/sweep.h \
-   src/thirdparty/poly2tri/sweep/sweep_context.h \
    src/thirdparty/tinyxml2/tinyxml2.h \
    src/thirdparty/json/json.hpp \
 

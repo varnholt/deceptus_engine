@@ -60,15 +60,15 @@ AnimationSettings::AnimationSettings(
 
 
 AnimationSettings::AnimationSettings(const AnimationSettings& other)
+ : _frame_size(other._frame_size),
+   _frame_offset(other._frame_offset),
+   _origin(other._origin),
+   _frame_durations(other._frame_durations),
+   _texture_path(other._texture_path),
+   _texture(other._texture),
+   _normal_map(other._normal_map),
+   _frames(other._frames)
 {
-   _frame_size        = other._frame_size;
-   _frame_offset      = other._frame_offset;
-   _origin           = other._origin;
-   _frame_durations   = other._frame_durations;
-   _texture_path      = other._texture_path;
-   _texture          = other._texture;
-   _normal_map        = other._normal_map;
-   _frames           = other._frames;
 }
 
 

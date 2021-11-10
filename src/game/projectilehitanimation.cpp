@@ -64,7 +64,7 @@ void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
       else
       {
          animation->update(dt);
-         it++;
+         ++it;
       }
    }
 }

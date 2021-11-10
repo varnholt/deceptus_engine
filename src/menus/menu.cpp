@@ -25,19 +25,18 @@ std::shared_ptr<Menu> Menu::__instance;
 
 
 Menu::Menu()
+ : _menu_main(std::make_shared<MenuScreenMain>()),
+   _menu_file_select(std::make_shared<MenuScreenFileSelect>()),
+   _menu_name_select(std::make_shared<MenuScreenNameSelect>()),
+   _menu_options(std::make_shared<MenuScreenOptions>()),
+   _menu_audio(std::make_shared<MenuScreenAudio>()),
+   _menu_video(std::make_shared<MenuScreenVideo>()),
+   _menu_controls(std::make_shared<MenuScreenControls>()),
+   _menu_game(std::make_shared<MenuScreenGame>()),
+   _menu_achievements(std::make_shared<MenuScreenAchievements>()),
+   _menu_credits(std::make_shared<MenuScreenCredits>()),
+   _menu_pause(std::make_shared<MenuScreenPause>())
 {
-   _menu_main = std::make_shared<MenuScreenMain>();
-   _menu_file_select = std::make_shared<MenuScreenFileSelect>();
-   _menu_name_select = std::make_shared<MenuScreenNameSelect>();
-   _menu_options = std::make_shared<MenuScreenOptions>();
-   _menu_audio = std::make_shared<MenuScreenAudio>();
-   _menu_video = std::make_shared<MenuScreenVideo>();
-   _menu_controls = std::make_shared<MenuScreenControls>();
-   _menu_game = std::make_shared<MenuScreenGame>();
-   _menu_achievements = std::make_shared<MenuScreenAchievements>();
-   _menu_credits = std::make_shared<MenuScreenCredits>();
-   _menu_pause = std::make_shared<MenuScreenPause>();
-
    _menus.push_back(_menu_main);
    _menus.push_back(_menu_file_select);
    _menus.push_back(_menu_name_select);

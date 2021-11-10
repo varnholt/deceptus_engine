@@ -40,8 +40,8 @@ void InventoryLayer::setJoystickInfo(const GameControllerInfo &joystickInfo)
 
 //---------------------------------------------------------------------------------------------------------------------
 InventoryLayer::InventoryLayer()
+ : _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
 {
-   _inventory_texture = TexturePool::getInstance().get("data/game/inventory.png");
    _cursor_sprite.setTexture(*_inventory_texture);
    _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
    addDemoInventory();
