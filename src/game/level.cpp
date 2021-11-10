@@ -67,10 +67,6 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tmxparser/tmxtools.h"
 
-// poly2tri
-#include "poly2tri/poly2tri.h"
-#include "poly2tri/common/shapes.h"
-
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
@@ -1470,10 +1466,11 @@ void Level::update(const sf::Time& dt)
    updateCameraSystem(dt);
    updateViews();
 
-   _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
+   // clear conveyor belt state BEFORE updating the world
+   // i.e. all objects on the belt are cleared here, then in Step() they are re-collected
+   ConveyorBelt::resetBeltState();
 
-   // clear conveyor belt state
-   ConveyorBelt::update();
+   _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
 
    CameraPane::getInstance().update();
    _boom_effect.update(dt);

@@ -7,8 +7,8 @@
 
 
 DeathShader::DeathShader(uint32_t width, uint32_t height)
+ : _render_texture(std::make_shared<sf::RenderTexture>())
 {
-   _render_texture = std::make_shared<sf::RenderTexture>();
    _render_texture->create(width, height);
 }
 

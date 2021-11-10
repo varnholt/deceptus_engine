@@ -42,7 +42,7 @@ class MessageBox
       MessageBox(
          Type type,
          const std::string& message,
-         MessageBoxCallback cb,
+         const MessageBoxCallback& cb,
          const LayoutProperties& properties,
          int32_t buttons
       );
@@ -54,14 +54,14 @@ class MessageBox
 
       static void info(
          const std::string& message,
-         MessageBoxCallback callback,
+         const MessageBoxCallback& callback,
          const LayoutProperties& properties = __default_properties,
          int buttons = static_cast<int32_t>(Button::Ok)
       );
 
       static void question(
          const std::string& message,
-         MessageBoxCallback callback,
+         const MessageBoxCallback& callback,
          const LayoutProperties& properties = __default_properties,
          int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
       );
@@ -74,7 +74,7 @@ class MessageBox
       static void messageBox(
          Type type,
          const std::string& message,
-         MessageBoxCallback callback,
+         const MessageBoxCallback& callback,
          const LayoutProperties& properties,
          int32_t buttons
       );

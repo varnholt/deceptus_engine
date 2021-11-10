@@ -11,19 +11,18 @@
 
 namespace
 {
-
-uint16_t category_bits = CategoryEnemyCollideWith;                // I am a ...
+uint16_t category_bits = CategoryEnemyCollideWith;                 // I am a ...
 uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
-int16_t group_index = 0;                                          // 0 is default
-
+int16_t group_index = 0;                                           // 0 is default
 }
+
 
 sf::Rect<int32_t> Weapon::_empty_rect;
 
 
 Weapon::Weapon()
+ : _shape(std::make_unique<b2CircleShape>())
 {
-   _shape = std::make_unique<b2CircleShape>();
    _shape->m_radius = 0.05f;
 
    // start it so the elapsed timer is exceeded on first use
@@ -58,23 +57,23 @@ void Weapon::fireNow(
    const b2Vec2& dir
 )
 {
-   b2BodyDef bodyDef;
-   bodyDef.type = b2_dynamicBody;
-   bodyDef.position.Set(pos.x, pos.y);
+   b2BodyDef body_definition;
+   body_definition.type = b2_dynamicBody;
+   body_definition.position.Set(pos.x, pos.y);
 
-   _body = world->CreateBody(&bodyDef);
+   _body = world->CreateBody(&body_definition);
    _body->SetBullet(true);
    _body->SetGravityScale(0.0f);
 
-   b2FixtureDef fixtureDef;
-   fixtureDef.shape = _shape.get();
-   fixtureDef.density = 0.0f;
+   b2FixtureDef fixture_definition;
+   fixture_definition.shape = _shape.get();
+   fixture_definition.density = 0.0f;
 
-   fixtureDef.filter.groupIndex   = group_index;
-   fixtureDef.filter.maskBits     = mask_bits_standing;
-   fixtureDef.filter.categoryBits = category_bits;
+   fixture_definition.filter.groupIndex   = group_index;
+   fixture_definition.filter.maskBits     = mask_bits_standing;
+   fixture_definition.filter.categoryBits = category_bits;
 
-   auto fixture = _body->CreateFixture(&fixtureDef);
+   auto fixture = _body->CreateFixture(&fixture_definition);
 
    _body->ApplyLinearImpulse(
       dir,
@@ -207,7 +206,7 @@ void Weapon::update(const sf::Time& time)
 
 int Weapon::damage() const
 {
-   int val = 0;
+   auto val = 0;
 
    switch (_type)
    {
