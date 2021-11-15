@@ -33,6 +33,22 @@ b2Vec2 vecS2B(const sf::Vector2f& vector)
    return{vector.x * MPP, vector.y * MPP};
 }
 
+
+std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
+{
+   b2AABB aabb;
+
+   const auto l = screen.left;
+   const auto r = screen.left + screen.width;
+   const auto t = screen.top;
+   const auto b = screen.top + screen.height;
+
+   aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
+   aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
+
+   return WorldQuery::queryBodies(world, aabb);
+}
+
 }
 
 
@@ -269,22 +285,6 @@ void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
    _pos_px.y = rect.top;
 
    _origin_px = _pos_px;
-}
-
-
-std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
-{
-   b2AABB aabb;
-
-   const auto l = screen.left;
-   const auto r = screen.left + screen.width;
-   const auto t = screen.top;
-   const auto b = screen.top + screen.height;
-
-   aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
-   aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
-
-   return WorldQuery::queryBodies(world, aabb);
 }
 
 

@@ -53,10 +53,10 @@ struct LuaNode : public GameNode
    void playDetonationAnimation(float x, float y);
 
    //! cause damage to the player
-   void damage(int32_t damage, float forceX, float forceY);
+   void damagePlayer(int32_t damage, float forceX, float forceY);
 
    //! cause damage within a given radius
-   void damageRadius(int32_t damage, float x, float y, float radius);
+   void damagePlayerInRadius(int32_t damage, float x, float y, float radius);
 
    //! get the body's linear velocity
    b2Vec2 getLinearVelocity() const;
@@ -106,6 +106,9 @@ struct LuaNode : public GameNode
    //! set a sprite's color
    void setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
+   //! add a hitbox
+   void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
+
 
    void luaHit(int32_t damage);
    void luaDie();
@@ -139,19 +142,20 @@ struct LuaNode : public GameNode
    EnemyDescription _enemy_description;
 
    // visualization
-   sf::Vector2f _start_position;
+   sf::Vector2f _start_position_px;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<sf::Sprite> _sprites = {{}};              // have 1 base sprite
-   std::vector<sf::Vector2f> _sprite_offsets = {{0, 0}};   // have 1 base sprite offset
-   sf::Vector2f _position;
+   std::vector<sf::Vector2f> _sprite_offsets_px = {{0, 0}};   // have 1 base sprite offset
+   sf::Vector2f _position_px;
    int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
-   std::vector<sf::Vector2f> _movement_path;
+   std::vector<sf::Vector2f> _movement_path_px;
 
    // physics
    b2Body* _body = nullptr;
    b2BodyDef* _body_def = nullptr;
-   std::vector<b2Shape*> _shapes;
+   std::vector<b2Shape*> _shapes_m;
    std::vector<std::unique_ptr<Weapon>> _weapons;
+   std::vector<sf::FloatRect> _hit_boxes_px;
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 
