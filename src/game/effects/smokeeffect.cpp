@@ -21,10 +21,8 @@ sf::BlendMode mBlendMode = sf::BlendAdd;
 
 
 SmokeEffect::SmokeEffect()
- : Effect("smoke effect"),
-   _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
+ : _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
 {
-   _is_loaded = true;
    _texture->setSmooth(true);
 }
 
@@ -43,12 +41,7 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates /*states*/,
 }
 
 
-void SmokeEffect::onDraw(sf::RenderTarget &/*target*/, sf::RenderStates /*states*/) const
-{
-}
-
-
-void SmokeEffect::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
+void SmokeEffect::update(const sf::Time& time)
 {
    const auto dt = time.asSeconds() - _last_update_time.asSeconds();
    _last_update_time = time;
@@ -64,12 +57,6 @@ void SmokeEffect::onUpdate(const sf::Time& time, float /*x*/, float /*y*/)
 
       particle._sprite.setPosition(particle._center.x + x, particle._center.y + y);
    }
-}
-
-
-bool SmokeEffect::onLoad()
-{
-   return true;
 }
 
 

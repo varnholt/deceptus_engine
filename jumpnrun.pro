@@ -129,9 +129,6 @@ SOURCES += \
    src/game/debugdraw.cpp \
    src/game/mechanisms/dialogue.cpp \
    src/game/displaymode.cpp \
-   src/game/effects/blur.cpp \
-   src/game/effects/effect.cpp \
-   src/game/effects/pixelate.cpp \
    src/game/effects/smokeeffect.cpp \
    src/game/effects/staticlight.cpp \
    src/game/enemy.cpp \
@@ -328,7 +325,6 @@ HEADERS += \
 
 HEADERS += \
    src/easings/easings.h \
-   src/effects/blur.h \
    src/effects/effect.h \
    src/effects/pixelate.h \
    src/effects/lightsystem.h \
