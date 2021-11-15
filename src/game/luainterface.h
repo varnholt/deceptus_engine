@@ -17,20 +17,14 @@ public:
 
    static LuaInterface& instance();
 
-   std::shared_ptr<LuaNode> addObject(const std::string &filename);
-   void removeObject(const std::shared_ptr<LuaNode>& node);
-
    void initialize();
-
    void update(const sf::Time& dt);
-
-   void requestMap(std::shared_ptr<LuaNode> obj);
-
-   void updateKeysPressed(std::shared_ptr<LuaNode> obj, int keys);
-
    void reset();
 
+   std::shared_ptr<LuaNode> addObject(const std::string &filename);
+   void removeObject(const std::shared_ptr<LuaNode>& node);
    std::shared_ptr<LuaNode> getObject(lua_State*);
+   const std::vector<std::shared_ptr<LuaNode>>& getObjectList();
 
 
 private:
