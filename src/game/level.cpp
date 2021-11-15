@@ -661,10 +661,10 @@ void Level::loadTmx()
                auto light = LightSystem::createLightInstance(tmx_object);
                _light_system->_lights.push_back(light);
             }
-            else if (object_group->_name.compare(0, StaticLight::sLayerName.size(), StaticLight::sLayerName) == 0)
+            else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
             {
                auto light = StaticLight::deserialize(tmx_object, object_group);
-               _static_light->mLights.push_back(light);
+               _static_light->_lights.push_back(light);
             }
             if (object_group->_name == "switchable_objects")
             {
@@ -717,13 +717,6 @@ void Level::load()
 
    // load tmx
    loadTmx();
-
-   // load static lights
-   Log::Info() << "loading static lights...";
-   if (!_static_light->mLights.empty())
-   {
-      _static_light->load();
-   }
 
    // loading ao
    Log::Info() << "loading ao... ";
@@ -1494,11 +1487,11 @@ void Level::update(const sf::Time& dt)
 
    updatePlayerLight();
 
-   _static_light->update(GlobalClock::getInstance().getElapsedTime(), 0.0f, 0.0f);
+   _static_light->update(GlobalClock::getInstance().getElapsedTime());
 
    for (const auto& smoke : _smoke_effect)
    {
-      smoke->update(GlobalClock::getInstance().getElapsedTime(), 0.0f, 0.0f);
+      smoke->update(GlobalClock::getInstance().getElapsedTime());
    }
 
    _death_shader->update(dt);

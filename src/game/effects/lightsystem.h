@@ -1,7 +1,5 @@
 #pragma once
 
-#include "effect.h"
-
 #include <array>
 #include <memory>
 #include <vector>
