@@ -1,7 +1,5 @@
 #pragma once
 
-#include "effect.h"
-
 #include <SFML/Graphics.hpp>
 
 #include <array>
@@ -12,16 +10,14 @@
 struct TmxObject;
 struct TmxObjectGroup;
 
-class SmokeEffect : public Effect
+class SmokeEffect
 {
 
 public:
 
    SmokeEffect();
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
-   void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
-   void onUpdate(const sf::Time& time, float x, float y) override;
-   bool onLoad() override;
+   void update(const sf::Time& time);
 
    static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
 

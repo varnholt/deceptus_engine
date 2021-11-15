@@ -1,6 +1,5 @@
 #pragma once
 
-#include "effect.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -8,39 +7,37 @@
 struct TmxObject;
 struct TmxObjectGroup;
 
-class StaticLight : public Effect
+class StaticLight
 {
 
 public:
 
-   static const std::string sLayerName;
+   static const std::string __layer_name;
 
    struct LightInstance
    {
-      std::shared_ptr<sf::Texture> mTexture;
-      sf::Sprite mSprite;
-      sf::BlendMode mBlendMode = sf::BlendAdd;
-      sf::Color mColor = {255, 255, 255, 255};
-      int mZ = 0;
-      float mFlickerAmount = 1.0f;
-      float mFlickerIntensity = 0.0f;
-      float mFlickerSpeed = 0.0f;
-      float mFlickerAlphaAmount = 1.0f;
-      float mTimeOffset = 0.0f;
+      std::shared_ptr<sf::Texture> _texture;
+      sf::Sprite _sprite;
+      sf::BlendMode _blend_mode = sf::BlendAdd;
+      sf::Color _color = {255, 255, 255, 255};
+      int _z = 0;
+      float _flicker_amount = 1.0f;
+      float _flicker_intensity = 0.0f;
+      float _flicker_speed = 0.0f;
+      float _flicker_alpha_amount = 1.0f;
+      float _time_offset = 0.0f;
    };
 
-   std::vector<std::shared_ptr<LightInstance>> mLights;
+   std::vector<std::shared_ptr<LightInstance>> _lights;
 
-   static std::shared_ptr<StaticLight::LightInstance> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
+   static std::shared_ptr<StaticLight::LightInstance> deserialize(TmxObject* tmx_object, TmxObjectGroup* object_group);
 
 
 public:
 
-   StaticLight();
+   StaticLight() = default;
 
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
-   void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override;
-   void onUpdate(const sf::Time& time, float x, float y) override;
-   bool onLoad() override;
+   void draw(sf::RenderTarget& target, sf::RenderStates states);
+   void update(const sf::Time& time);
 };
-
