@@ -96,6 +96,41 @@ int32_t updateProperties(lua_State* state)
 
 
 /**
+ * @brief addHitBox add a hitbox to the enemy
+ * @param state lua state
+ *    param 1: x position of sprite
+ *    param 2: y position of sprite
+ *    param 3: sprite width
+ *    param 4: sprite height
+ * @return error code
+ */
+int32_t addHitBox(lua_State* state)
+{
+   // number of function arguments are on top of the stack.
+   auto argc = lua_gettop(state);
+
+   if (argc == 4)
+   {
+      auto x = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto y = static_cast<int32_t>(lua_tointeger(state, 2));
+      auto w = static_cast<int32_t>(lua_tointeger(state, 3));
+      auto h = static_cast<int32_t>(lua_tointeger(state, 4));
+
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
+      {
+         return 0;
+      }
+
+      node->addHitbox(x, y, w, h);
+   }
+
+   return 0;
+}
+
+
+/**
  * @brief updateSpriteRect update node's sprite rect
  * @param state lua state
  *    param 1: id of sprite
@@ -538,7 +573,7 @@ int32_t damage(lua_State* state)
          return 0;
       }
 
-      node->damage(damage, dx, dy);
+      node->damagePlayer(damage, dx, dy);
    }
 
    return 0;
@@ -573,7 +608,7 @@ int32_t damageRadius(lua_State* state)
          return 0;
       }
 
-      node->damageRadius(damage, x, y, radius);
+      node->damagePlayerInRadius(damage, x, y, radius);
    }
 
    return 0;
@@ -1268,30 +1303,16 @@ int32_t updateKeysPressed(lua_State* state)
 
    if (argc == 1)
    {
-      auto keyPressed = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto keyes_pressed = static_cast<int32_t>(lua_tointeger(state, 1));
 
-      auto obj = LuaInterface::instance().getObject(state);
-      if (obj != nullptr)
+      std::shared_ptr<LuaNode> node = OBJINSTANCE;
+
+      if (!node)
       {
-         LuaInterface::instance().updateKeysPressed(obj, keyPressed);
+         return 0;
       }
-   }
 
-   return 0;
-}
-
-
-/**
- * @brief requestMap request the game map
- * @param state lua state
- * @return error code
- */
-int32_t requestMap(lua_State* state)
-{
-   auto obj = LuaInterface::instance().getObject(state);
-   if (obj != nullptr)
-   {
-      LuaInterface::instance().requestMap(obj);
+      node->_keys_pressed = keyes_pressed;
    }
 
    return 0;
@@ -1393,26 +1414,26 @@ void LuaNode::deserializeEnemyDescription()
          patrolPath.push_back(pos);
       }
 
-      _movement_path = patrolPath;
+      _movement_path_px = patrolPath;
    }
 
    // set up start position
    if (!_enemy_description._start_position.empty())
    {
-      _start_position = sf::Vector2f(
+      _start_position_px = sf::Vector2f(
          static_cast<float_t>(_enemy_description._start_position.at(0)),
          static_cast<float_t>(_enemy_description._start_position.at(1))
       );
 
       if (_enemy_description._position_in_tiles)
       {
-         _start_position.x *= PIXELS_PER_TILE;
-         _start_position.y *= PIXELS_PER_TILE;
-         _start_position.x += PIXELS_PER_TILE / 2;
-         _start_position.y += PIXELS_PER_TILE / 2;
+         _start_position_px.x *= PIXELS_PER_TILE;
+         _start_position_px.y *= PIXELS_PER_TILE;
+         _start_position_px.x += PIXELS_PER_TILE / 2;
+         _start_position_px.y += PIXELS_PER_TILE / 2;
       }
 
-      _position = _start_position;
+      _position_px = _start_position_px;
    }
 }
 
@@ -1624,7 +1645,7 @@ void LuaNode::luaCollisionWithPlayer()
  */
 void LuaNode::luaSendPatrolPath()
 {
-   if (_movement_path.size() == 0)
+   if (_movement_path_px.size() == 0)
    {
       return;
    }
@@ -1632,7 +1653,7 @@ void LuaNode::luaSendPatrolPath()
    lua_getglobal(_lua_state, FUNCTION_SET_PATH);
 
    lua_pushstring(_lua_state, "path");
-   luaSendPath(_movement_path);
+   luaSendPath(_movement_path_px);
 
    // vec.size + 1 args, 0 result
    auto result = lua_pcall(_lua_state, 2, 0, 0);
@@ -1664,8 +1685,8 @@ void LuaNode::luaDie()
  */
 void LuaNode::luaMovedTo()
 {
-   const auto x = _position.x;
-   const auto y = _position.y;
+   const auto x = _position_px.x;
+   const auto y = _position_px.y;
 
    lua_getglobal(_lua_state, FUNCTION_MOVED_TO);
 
@@ -1693,8 +1714,8 @@ void LuaNode::luaMovedTo()
  */
 void LuaNode::luaSetStartPosition()
 {
-   const auto x = _start_position.x;
-   const auto y = _start_position.y;
+   const auto x = _start_position_px.x;
+   const auto y = _start_position_px.y;
 
    lua_getglobal(_lua_state, FUNCTION_SET_START_POSITION);
 
@@ -1797,7 +1818,7 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 }
 
 
-void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
+void LuaNode::damagePlayerInRadius(int32_t damage, float x, float y, float radius)
 {
    sf::Vector2f nodePosition{x, y};
    const auto playerPosition =  Player::getCurrent()->getPixelPositionf();
@@ -1813,7 +1834,7 @@ void LuaNode::damageRadius(int32_t damage, float x, float y, float radius)
 }
 
 
-void LuaNode::damage(int32_t damage, float forceX, float forceY)
+void LuaNode::damagePlayer(int32_t damage, float forceX, float forceY)
 {
    Player::getCurrent()->damage(damage, sf::Vector2f(forceX, forceY));
 }
@@ -1870,7 +1891,7 @@ void LuaNode::setTransform(const b2Vec2& position, float32 angle)
 void LuaNode::addSprite()
 {
    _sprites.push_back({});
-   _sprite_offsets.push_back({});
+   _sprite_offsets_px.push_back({});
 }
 
 
@@ -1882,8 +1903,8 @@ void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)
 {
-   _sprite_offsets[id].x = x;
-   _sprite_offsets[id].y = y;
+   _sprite_offsets_px[id].x = x;
+   _sprite_offsets_px[id].y = y;
 }
 
 
@@ -2013,11 +2034,11 @@ void LuaNode::setupBody()
    auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
    auto sensor = static_cast<bool>(getPropertyBool("sensor"));
 
-   _body->SetTransform(b2Vec2{_start_position.x * MPP, _start_position.y * MPP}, 0.0f);
+   _body->SetTransform(b2Vec2{_start_position_px.x * MPP, _start_position_px.y * MPP}, 0.0f);
    _body->SetFixedRotation(true);
    _body->SetType(staticBody ? b2_staticBody : b2_dynamicBody);
 
-   for (auto shape : _shapes)
+   for (auto shape : _shapes_m)
    {
       b2FixtureDef fd;
       fd.density = 1.f;
@@ -2053,7 +2074,7 @@ void LuaNode::addShapeCircle(float radius, float x, float y)
    b2CircleShape* shape = new b2CircleShape();
    shape->m_p.Set(x, y);
    shape->m_radius = radius;
-   _shapes.push_back(shape);
+   _shapes_m.push_back(shape);
 }
 
 
@@ -2061,7 +2082,7 @@ void LuaNode::addShapeRect(float width, float height, float x, float y)
 {
    b2PolygonShape* shape = new b2PolygonShape();
    shape->SetAsBox(width, height, b2Vec2(x, y), 0.0f);
-   _shapes.push_back(shape);
+   _shapes_m.push_back(shape);
 }
 
 
@@ -2069,7 +2090,7 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 {
    b2PolygonShape* shape = new b2PolygonShape();
    shape->Set(points, size);
-   _shapes.push_back(shape);
+   _shapes_m.push_back(shape);
 }
 
 
@@ -2162,25 +2183,37 @@ void LuaNode::updatePosition()
    auto x = _body->GetPosition().x * PPM;
    auto y = _body->GetPosition().y * PPM;
 
-   _position.x = x;
-   _position.y = y;
+   _position_px.x = x;
+   _position_px.y = y;
 }
 
 
-void LuaNode::updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h)
+void LuaNode::updateSpriteRect(int32_t id, int32_t px_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
    if (!_sprites[id].getTexture() && _texture)
    {
       _sprites[id].setTexture(*_texture);
    }
 
-   _sprites[id].setTextureRect(sf::IntRect(x, y, w, h));
+   _sprites[id].setTextureRect(sf::IntRect(px_px, y_px, w_px, h_px));
 }
 
 
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
    _sprites[id].setColor({r, g, b, a});
+}
+
+
+void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)
+{
+   _hit_boxes_px.push_back({
+         static_cast<float>(left_px),
+         static_cast<float>(top_px),
+         static_cast<float>(width_px),
+         static_cast<float>(height_px)
+      }
+   );
 }
 
 
@@ -2195,7 +2228,7 @@ void LuaNode::draw(sf::RenderTarget& target)
    for (auto i = 0u; i < _sprites.size(); i++)
    {
       auto& sprite = _sprites[i];
-      const auto& offset = _sprite_offsets[i];
+      const auto& offset = _sprite_offsets_px[i];
 
       const auto center = sf::Vector2f(
             sprite.getTextureRect().width / 2.0f ,
@@ -2203,7 +2236,7 @@ void LuaNode::draw(sf::RenderTarget& target)
          );
 
       sprite.setPosition(
-           _position
+           _position_px
          - center
          + offset
       );

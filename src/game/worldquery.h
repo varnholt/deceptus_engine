@@ -29,5 +29,5 @@ class BodyQueryCallback : public b2QueryCallback
 std::vector<b2Fixture*> queryFixtures(const std::shared_ptr<b2World>& world, const b2AABB& aabb);
 std::vector<b2Body*> queryBodies(const std::shared_ptr<b2World>& world, const b2AABB& aabb);
 
-};
+}
 

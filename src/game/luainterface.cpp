@@ -73,16 +73,9 @@ std::shared_ptr<LuaNode> LuaInterface::getObject(lua_State* state)
 }
 
 
-void LuaInterface::requestMap(std::shared_ptr<LuaNode> obj)
+const std::vector<std::shared_ptr<LuaNode> >& LuaInterface::getObjectList()
 {
-   printf("requestMap: obj: %d\n", obj->_id);
-}
-
-
-void LuaInterface::updateKeysPressed(std::shared_ptr<LuaNode> obj, int keys)
-{
-   // printf("keyPressed: obj: %d, keys: %d\n", obj->mId, keys);
-   obj->_keys_pressed = keys;
+   return _object_list;
 }
 
 

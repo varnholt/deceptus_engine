@@ -181,6 +181,7 @@ SOURCES += \
    src/game/physics/physicsconfiguration.cpp \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
+   src/game/player/playerattack.cpp \
    src/game/player/playerclimb.cpp \
    src/game/player/playercontrols.cpp \
    src/game/player/playerinfo.cpp \
@@ -313,6 +314,7 @@ HEADERS += \
    src/game/overlays/thunderstormoverlay.h \
    src/game/onewaywall.h \
    src/game/player/playeranimation.h \
+   src/game/player/playerattack.h \
    src/game/preloader.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
