@@ -12,7 +12,6 @@ void Dust::update(const sf::Time& dt)
    // do flowfield lookup?
    // generate flowfield?
 
-   const auto image = _flow_field.copyToImage();
    for (auto& p : _particles)
    {
       const auto x_px = p._position.x - _clip_rect.left;
@@ -30,13 +29,15 @@ void Dust::update(const sf::Time& dt)
          continue;
       }
 
-      const auto col = image.getPixel(x_px, y_px);
+      const auto col = _flow_field_image.getPixel(x_px, y_px);
 
       const auto col_x = (static_cast<float>(col.r) / 255.0f) - 0.5f;
       const auto col_y = (static_cast<float>(col.g) / 255.0f) - 0.5f;
       const auto col_z = (static_cast<float>(col.b) / 255.0f) - 0.5f;
 
-      p._position = p._position + sf::Vector3f{col_x, col_y, col_z};
+      const auto dir = sf::Vector3f{col_x, col_y, col_z};
+
+      p._position = p._position + dir * dt.asSeconds() * 100.0f;
       p._z = col_z;
 
       p._age += dt.asSeconds();
@@ -52,12 +53,28 @@ void Dust::update(const sf::Time& dt)
 
 void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   static const auto alpha_default = 50;
+
    for (const auto& p : _particles)
    {
       const auto pos = p._position;
       const auto val = 255;
-      const auto alpha = 50 + p._z * 0.1f;
-      const auto col = sf::Color{val, val, val, static_cast<uint8_t>((p._age > p._lifetime - 1.0f) ? ((p._lifetime - p._age) * alpha) : alpha)};
+      auto alpha = 0.0f;
+
+      if (p._age > p._lifetime - 1.0f)
+      {
+         alpha = (p._lifetime - p._age) * alpha_default;
+      }
+      else if (p._age < 1.0f)
+      {
+         alpha = p._age * alpha_default;
+      }
+      else
+      {
+         alpha = alpha_default + p._z * 50.0f;
+      }
+
+      const auto col = sf::Color{val, val, val, static_cast<uint8_t>(alpha)};
 
       sf::Vertex quad[] = {
          sf::Vertex(sf::Vector2f(pos.x,     pos.y    ), col),
@@ -107,6 +124,7 @@ std::shared_ptr<Dust> Dust::deserialize(TmxObject* tmx_object)
    }
 
    dust->_flow_field.loadFromFile("data/effects/flowfield_3.png");
+   dust->_flow_field_image = dust->_flow_field.copyToImage();
 
    return dust;
 }

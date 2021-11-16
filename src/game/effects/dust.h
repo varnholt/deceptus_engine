@@ -38,5 +38,6 @@ class Dust : public GameMechanism
       std::vector<Particle> _particles;
       sf::FloatRect _clip_rect;
       sf::Texture _flow_field;
+      sf::Image _flow_field_image;
 };
 
