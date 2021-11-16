@@ -37,7 +37,9 @@ class Dust : public GameMechanism
 
       std::vector<Particle> _particles;
       sf::FloatRect _clip_rect;
-      sf::Texture _flow_field;
       sf::Image _flow_field_image;
+      sf::Vector3f _wind_direction;
+      sf::Color _particle_color = {255, 255, 255, 255};
+      float _particle_velocity = 100.0f;
 };
 
