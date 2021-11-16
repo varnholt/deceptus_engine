@@ -15,6 +15,7 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "effects/dust.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
 #include "leveldescription.h"
@@ -229,6 +230,7 @@ Level::Level()
       &_mechanism_death_blocks,
       &_mechanism_dialogues,
       &_mechanism_doors,
+      &_mechanism_dust,
       &_mechanism_fans,
       &_mechanism_lasers,
       &_mechanism_levers,
@@ -655,6 +657,11 @@ void Level::loadTmx()
             {
                auto quad = ShaderLayer::deserialize(tmx_object);
                _shader_layers.push_back(quad);
+            }
+            else if (object_group->_name == "dust")
+            {
+               auto dust = Dust::deserialize(tmx_object);
+               _mechanism_dust.push_back(dust);
             }
             else if (object_group->_name == "lights")
             {
