@@ -66,10 +66,10 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       const auto col = sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(alpha)};
 
       sf::Vertex quad[] = {
-         sf::Vertex(sf::Vector2f(pos.x,     pos.y    ), col),
-         sf::Vertex(sf::Vector2f(pos.x,     pos.y + 2), col),
-         sf::Vertex(sf::Vector2f(pos.x + 2, pos.y + 2), col),
-         sf::Vertex(sf::Vector2f(pos.x + 2, pos.y    ), col)
+         sf::Vertex(sf::Vector2f(pos.x,                     pos.y                    ), col),
+         sf::Vertex(sf::Vector2f(pos.x,                     pos.y + _particle_size_px), col),
+         sf::Vertex(sf::Vector2f(pos.x + _particle_size_px, pos.y + _particle_size_px), col),
+         sf::Vertex(sf::Vector2f(pos.x + _particle_size_px, pos.y                    ), col)
       };
 
       sf::RenderStates states;
@@ -95,6 +95,7 @@ std::shared_ptr<Dust> Dust::deserialize(TmxObject* tmx_object)
    if (tmx_object->_properties)
    {
       const auto z_it                 = tmx_object->_properties->_map.find("z");
+      const auto particle_size_it     = tmx_object->_properties->_map.find("particle_size_px");
       const auto particle_count_it    = tmx_object->_properties->_map.find("particle_count");
       const auto color_it             = tmx_object->_properties->_map.find("particle_color");
       const auto velocity_it          = tmx_object->_properties->_map.find("particle_velocity");
@@ -105,6 +106,11 @@ std::shared_ptr<Dust> Dust::deserialize(TmxObject* tmx_object)
       if (z_it != tmx_object->_properties->_map.end())
       {
          dust->setZ(z_it->second->_value_int.value());
+      }
+
+      if (particle_size_it != tmx_object->_properties->_map.end())
+      {
+         dust->_particle_size_px = particle_size_it->second->_value_int.value();
       }
 
       if (particle_count_it != tmx_object->_properties->_map.end())
