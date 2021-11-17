@@ -111,10 +111,10 @@ int32_t addHitBox(lua_State* state)
 
    if (argc == 4)
    {
-      auto x = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto y = static_cast<int32_t>(lua_tointeger(state, 2));
-      auto w = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto h = static_cast<int32_t>(lua_tointeger(state, 4));
+      auto x_px = static_cast<int32_t>(lua_tointeger(state, 1));
+      auto y_px = static_cast<int32_t>(lua_tointeger(state, 2));
+      auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
+      auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -123,7 +123,7 @@ int32_t addHitBox(lua_State* state)
          return 0;
       }
 
-      node->addHitbox(x, y, w, h);
+      node->addHitbox(x_px, y_px, w_px, h_px);
    }
 
    return 0;
@@ -148,10 +148,10 @@ int32_t updateSpriteRect(lua_State* state)
    if (argc == 5)
    {
       auto id = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto x = static_cast<int32_t>(lua_tointeger(state, 2));
-      auto y = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto w = static_cast<int32_t>(lua_tointeger(state, 4));
-      auto h = static_cast<int32_t>(lua_tointeger(state, 5));
+      auto x_px = static_cast<int32_t>(lua_tointeger(state, 2));
+      auto y_px = static_cast<int32_t>(lua_tointeger(state, 3));
+      auto w_px = static_cast<int32_t>(lua_tointeger(state, 4));
+      auto h_px = static_cast<int32_t>(lua_tointeger(state, 5));
 
       std::shared_ptr<LuaNode> node = OBJINSTANCE;
 
@@ -160,7 +160,7 @@ int32_t updateSpriteRect(lua_State* state)
          return 0;
       }
 
-      node->updateSpriteRect(id, x, y, w, h);
+      node->updateSpriteRect(id, x_px, y_px, w_px, h_px);
    }
 
    return 0;
@@ -924,7 +924,7 @@ int32_t addWeapon(lua_State* state)
       exit(1);
    }
 
-   WeaponType weapon_type = WeaponType::Default;
+   auto weapon_type = WeaponType::Default;
    auto fire_interval = 0;
    auto damage = 0;
    std::unique_ptr<b2Shape> shape;
@@ -944,21 +944,21 @@ int32_t addWeapon(lua_State* state)
    // add weapon with polygon projectile shape
    if (argc >= 5 && ((argc - 5) % 2 == 0))
    {
-      auto constexpr parameterCount = 2u;
+      auto constexpr parameter_count = 2u;
       shape = std::make_unique<b2PolygonShape>();
 
-      b2Vec2* poly = new b2Vec2[(argc - parameterCount) / 2];
+      auto poly = new b2Vec2[(argc - parameter_count) / 2];
+      auto poly_index = 0;
 
-      auto polyIndex = 0;
-      for (auto i = parameterCount + 1; i < argc - parameterCount; i += 2u)
+      for (auto i = parameter_count + 1; i < argc - parameter_count; i += 2u)
       {
          auto x = static_cast<float>(lua_tonumber(state, i));
          auto y = static_cast<float>(lua_tonumber(state, i + 1));
-         poly[polyIndex].Set(x, y);
-         polyIndex++;
+         poly[poly_index].Set(x, y);
+         poly_index++;
       }
 
-      dynamic_cast<b2PolygonShape*>(shape.get())->Set(poly, polyIndex);
+      dynamic_cast<b2PolygonShape*>(shape.get())->Set(poly, poly_index);
    }
 
    std::shared_ptr<LuaNode> node = OBJINSTANCE;
@@ -2188,14 +2188,14 @@ void LuaNode::updatePosition()
 }
 
 
-void LuaNode::updateSpriteRect(int32_t id, int32_t px_px, int32_t y_px, int32_t w_px, int32_t h_px)
+void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
    if (!_sprites[id].getTexture() && _texture)
    {
       _sprites[id].setTexture(*_texture);
    }
 
-   _sprites[id].setTextureRect(sf::IntRect(px_px, y_px, w_px, h_px));
+   _sprites[id].setTextureRect(sf::IntRect(x_px, y_px, w_px, h_px));
 }
 
 
