@@ -95,7 +95,7 @@ std::shared_ptr<Dust> Dust::deserialize(TmxObject* tmx_object)
    if (tmx_object->_properties)
    {
       const auto z_it                 = tmx_object->_properties->_map.find("z");
-      const auto drop_count_it        = tmx_object->_properties->_map.find("particle_count");
+      const auto particle_count_it    = tmx_object->_properties->_map.find("particle_count");
       const auto color_it             = tmx_object->_properties->_map.find("particle_color");
       const auto velocity_it          = tmx_object->_properties->_map.find("particle_velocity");
       const auto wind_dir_x_it        = tmx_object->_properties->_map.find("wind_dir_x");
@@ -107,9 +107,9 @@ std::shared_ptr<Dust> Dust::deserialize(TmxObject* tmx_object)
          dust->setZ(z_it->second->_value_int.value());
       }
 
-      if (drop_count_it != tmx_object->_properties->_map.end())
+      if (particle_count_it != tmx_object->_properties->_map.end())
       {
-         const auto particle_count = drop_count_it->second->_value_int.value();
+         const auto particle_count = particle_count_it->second->_value_int.value();
          for (auto i = 0; i < particle_count; i++)
          {
             Particle p;
