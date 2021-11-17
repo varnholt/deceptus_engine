@@ -873,6 +873,7 @@ The Dust mechanism supports the custom properties below:
 |-|-|-|
 |z|int|The z index of the layer|
 |particle_count|int|The amount of particles to be spawned (mandatory).|
+|particle_size_px|int|The particle size, given in game pixels. The default is `2px`.|
 |particle_color|color|The particle base color; the default is `rgb(255, 255, 255)`|
 |particle_velocity|float|A factor applied to the velocity to make particle movement faster or slower; the default is `100.0`|
 |wind_dir_x|float|Wind direction x vector (`-1.0 .. 1.0`); default is `0.0f`|
