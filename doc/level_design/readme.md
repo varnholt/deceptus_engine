@@ -856,6 +856,32 @@ A couple of custom properties such as thickness, texture and color are promised 
 <br><br>
 
 
+## Dust
+
+In some cases, rendering a few dust particles can make a room appear a lot more atmospheric and lively. For that reason the Deceptus Engine supports layers of dust particles.
+These are rectangles that may contain a given amount of particles that are moved along a flow field.
+
+![](images/mechanism_dust.png)
+
+In order to add a dust layer to your level, insert an object group called `dust`. In there add a rectangle for the range where dust particles should spawn.
+
+![](images/mechanism_dust_tiled.png)
+
+The Dust mechanism supports the custom properties below:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The z index of the layer|
+|particle_count|int|The amount of particles to be spawned (mandatory).|
+|particle_color|color|The particle base color; the default is `rgb(255, 255, 255)`|
+|particle_velocity|float|A factor applied to the velocity to make particle movement faster or slower; the default is `100.0`|
+|wind_dir_x|float|Wind direction x vector (`-1.0 .. 1.0`); default is `0.0f`|
+|wind_dir_y|float|Wind direction y vector (`-1.0 .. 1.0`); default is `0.0f`|
+|flowfield_texture|string|A relative path to a flowfield texture, the default is `data/effects/flowfield_3.png`|
+
+
+<br><br>
+
 ## Ambient Occlusion
 
 When you are _done_ with your level design and already went into the polishing phase, it might be the right time to add Ambient Occlusion (AO). Those are pre-baked shadow textures that will be rendered onto your level tiles and will make your level look a lot less sterile.
