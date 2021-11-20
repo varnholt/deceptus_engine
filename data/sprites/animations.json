@@ -693,12 +693,10 @@
     },
     "player_jump_init_l_2": {
         "frame_durations": [
-            75,
-            75,
             75
         ],
         "frame_offset": [
-            0,
+            216,
             624
         ],
         "frame_size": [
@@ -709,17 +707,15 @@
             36.0,
             48.0
         ],
-        "sprite_count": 3,
+        "sprite_count": 2,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_jump_init_r_2": {
         "frame_durations": [
-            75,
-            75,
             75
         ],
         "frame_offset": [
-            0,
+            216,
             576
         ],
         "frame_size": [
@@ -730,7 +726,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 3,
+        "sprite_count": 2,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_jump_landing_l_2": {
@@ -779,17 +775,12 @@
     },
     "player_jump_midair_l_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            50,
+            50,
+            50
         ],
         "frame_offset": [
-            360,
+            504,
             624
         ],
         "frame_size": [
@@ -800,22 +791,17 @@
             36.0,
             48.0
         ],
-        "sprite_count": 8,
+        "sprite_count": 3,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_jump_midair_r_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            50,
+            50,
+            50
         ],
         "frame_offset": [
-            360,
+            504,
             576
         ],
         "frame_size": [
@@ -826,7 +812,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 8,
+        "sprite_count": 3,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_jump_up_l_2": {
