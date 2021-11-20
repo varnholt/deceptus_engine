@@ -16,10 +16,11 @@ class SmokeEffect
 public:
 
    SmokeEffect();
-   void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
+
+   void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z);
    void update(const sf::Time& time);
 
-   static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmxObject, TmxObjectGroup* objectGroup);
+   static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmx_object, TmxObjectGroup* object_group);
 
 private:
 
@@ -39,5 +40,8 @@ private:
    std::array<SmokeParticle, 50> _particles;
    int32_t _z = 0;
    sf::Time _last_update_time;
+
+   sf::Vector2u _size_px;
+   sf::Vector2f _offset_px;
 };
 
