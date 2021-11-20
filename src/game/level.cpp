@@ -1388,9 +1388,9 @@ void Level::draw(
    takeScreenshot("screenshot_level_background", *_render_texture_level_background.get());
 
    // draw the atmospheric parts into the level texture
-   sf::Sprite backgroundSprite(_render_texture_level_background->getTexture());
+   sf::Sprite background_sprite(_render_texture_level_background->getTexture());
    _atmosphere_shader->update();
-   _render_texture_level->draw(backgroundSprite, &_atmosphere_shader->getShader());
+   _render_texture_level->draw(background_sprite, &_atmosphere_shader->getShader());
 
    drawGlowSprite();
 
@@ -1425,14 +1425,14 @@ void Level::draw(
    takeScreenshot("map_normal",   *_render_texture_normal.get());
    takeScreenshot("map_deferred", *_render_texture_deferred.get());
 
-   auto levelTextureSprite = sf::Sprite(_render_texture_deferred->getTexture());
+   auto level_texture_sprite = sf::Sprite(_render_texture_deferred->getTexture());
    _gamma_shader->setTexture(_render_texture_deferred->getTexture());
 
-   levelTextureSprite.setPosition(_boom_effect._boom_offset_x, _boom_effect._boom_offset_y);
-   levelTextureSprite.scale(_view_to_texture_scale, _view_to_texture_scale);
+   level_texture_sprite.setPosition(_boom_effect._boom_offset_x, _boom_effect._boom_offset_y);
+   level_texture_sprite.scale(_view_to_texture_scale, _view_to_texture_scale);
 
    _gamma_shader->update();
-   window->draw(levelTextureSprite, &_gamma_shader->getGammaShader());
+   window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
 
    if (DisplayMode::getInstance().isSet(Display::Map))
    {
