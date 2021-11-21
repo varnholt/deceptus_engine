@@ -1,5 +1,6 @@
 uniform vec2 u_resolution;
 uniform float u_time;
+uniform float u_uv_height; // used as a uv stretch factor for the quad height
 uniform sampler2D u_texture;
 
 const vec4 col1 = vec4(0.510, 0.776, 0.486, 1.0);
@@ -32,13 +33,13 @@ void main()
 
    // match to colors
    vec4 noise = floor(color * 10.0) / 5.0;
-   vec4 dark   = mix(col1, col2, uv.y);
-   vec4 bright = mix(col3, col4, uv.y);
+   vec4 dark   = mix(col1, col2, uv.y / u_uv_height);
+   vec4 bright = mix(col3, col4, uv.y / u_uv_height);
    color = mix(dark, bright, noise);
 
    // add gradients (top dark and transparent, bottom bright)
-   color.xyz -= 0.45 * pow(uv_pixel.y, 8.0);
-   color.a -= 0.2 * pow(uv_pixel.y, 8.0);
+   color.xyz -= 0.45 * pow(uv_pixel.y / u_uv_height, 8.0);
+   color.a -= 0.2 * pow(uv_pixel.y / u_uv_height, 8.0);
 
    // make waterfall transparent
    color.a -= 0.2;
