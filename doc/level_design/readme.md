@@ -797,6 +797,9 @@ To create a Shader Quad, create an object group starting with `shader_quads`. Th
 |vertex_shader|string|the relative path to your vertex shader (optional)|
 |fragment_shader|string|the relative path to your fragment shader (optional)|
 |texture|string|a path to a texture used by the shader|
+|time_offset_s|float|Time offset in seconds; it is used to avoid that shader quads next to each other won't look identical.|
+|uv_width|float|UV x coordinate goes from `0` .. `uv_width`; the default value is `1.0`.|
+|uv_height|float|UV y coordinate goes from `0` .. `uv_height`; the default value is `1.0`.|
 
 Here's an example of a fragment shader implementing a waterfall:
 
