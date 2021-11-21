@@ -17,15 +17,16 @@ void ShaderLayer::draw(sf::RenderTarget& target)
    float w = _size.x;
    float h = _size.y;
 
+   _shader.setUniform("u_uv_height", _uv_height);
    _shader.setUniform("u_texture", *_texture.get());
-   _shader.setUniform("u_time", GlobalClock::getInstance().getElapsedTimeInS());
+   _shader.setUniform("u_time", GlobalClock::getInstance().getElapsedTimeInS() + _time_offset);
    _shader.setUniform("u_resolution", sf::Vector2f(w, h));
 
    sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(x,     y    ), sf::Vector2f(0.0f, 1.0f)),
-      sf::Vertex(sf::Vector2f(x,     y + h), sf::Vector2f(0.0f, 0.0f)),
-      sf::Vertex(sf::Vector2f(x + w, y + h), sf::Vector2f(1.0f, 0.0f)),
-      sf::Vertex(sf::Vector2f(x + w, y    ), sf::Vector2f(1.0f, 1.0f))
+      sf::Vertex(sf::Vector2f(x,     y    ), sf::Vector2f(0.0f,     _uv_height)),
+      sf::Vertex(sf::Vector2f(x,     y + h), sf::Vector2f(0.0f,     0.0f)),
+      sf::Vertex(sf::Vector2f(x + w, y + h), sf::Vector2f(_uv_width, 0.0f)),
+      sf::Vertex(sf::Vector2f(x + w, y    ), sf::Vector2f(_uv_width, _uv_height))
    };
 
    sf::RenderStates states;
@@ -53,7 +54,24 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
          instance->_z = z->second->_value_int.value();
       }
 
-      // shader
+      auto uv_width_it = object->_properties->_map.find("uv_width");
+      if (uv_width_it != object->_properties->_map.end())
+      {
+         instance->_uv_width = uv_width_it->second->_value_float.value();
+      }
+
+      auto uv_height_it = object->_properties->_map.find("uv_height");
+      if (uv_height_it != object->_properties->_map.end())
+      {
+         instance->_uv_height = uv_height_it->second->_value_float.value();
+      }
+
+      auto time_offset_it = object->_properties->_map.find("time_offset_s");
+      if (time_offset_it != object->_properties->_map.end())
+      {
+         instance->_time_offset = time_offset_it->second->_value_float.value();
+      }
+
       auto vertex_shader_it = object->_properties->_map.find("vertex_shader");
       if (vertex_shader_it != object->_properties->_map.end())
       {
@@ -66,7 +84,6 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
          instance->_shader.loadFromFile(fragment_shader_it->second->_value_string.value(), sf::Shader::Fragment);
       }
 
-      // texture uniform
       auto texture_id = object->_properties->_map.find("texture");
       if (texture_id != object->_properties->_map.end())
       {
