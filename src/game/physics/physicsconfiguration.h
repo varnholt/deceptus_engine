@@ -22,7 +22,7 @@ struct PhysicsConfiguration
    float _player_deceleration_air = 0.65f;
 
    // jump
-   int32_t _player_jump_steps = 9;
+   int32_t _player_jump_frame_count = 9;
    int32_t _player_jump_after_contact_lost_ms = 100;
    int32_t _player_jump_buffer_ms = 100;
    int32_t _player_jump_minimal_duration_ms = 80;
