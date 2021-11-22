@@ -15,9 +15,12 @@
 #include "mechanisms/portal.h"
 #include "physics/physicsconfiguration.h"
 
-constexpr auto FRAMES_COUNT_JUMP_INIT = 3;
+namespace
+{
+constexpr auto FRAMES_COUNT_JUMP_INIT = 5;
 constexpr auto JUMP_UP_VELOCITY_THRESHOLD = -1.2f;
 constexpr auto JUMP_DOWN_VELOCITY_THRESHOLD = 1.2f;
+}
 
 
 PlayerAnimation::PlayerAnimation()
@@ -544,7 +547,7 @@ void PlayerAnimation::updateV1(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_frame_count == PhysicsConfiguration::getInstance()._player_jump_steps)
+      if (data._jump_frame_count == PhysicsConfiguration::getInstance()._player_jump_frame_count)
       {
          // jump ignition
          _jump_animation_reference = 0;
@@ -752,7 +755,7 @@ void PlayerAnimation::updateV2(
    // jump init
    if (!data._dash_dir.has_value())
    {
-      if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_steps - FRAMES_COUNT_JUMP_INIT)
+      if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
       {
          // jump ignition
          _jump_animation_reference = 0;

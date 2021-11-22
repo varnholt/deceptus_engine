@@ -184,7 +184,7 @@ void PlayerJump::jumpImpulse(const b2Vec2& impulse)
 void PlayerJump::jumpForce()
 {
    _jump_clock.restart();
-   _jump_frame_count = PhysicsConfiguration::getInstance()._player_jump_steps;
+   _jump_frame_count = PhysicsConfiguration::getInstance()._player_jump_frame_count;
 }
 
 
