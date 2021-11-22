@@ -2,7 +2,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <array>
 #include <memory>
 #include <vector>
 
@@ -37,10 +36,11 @@ private:
       sf::Vector2f _center;
    };
 
-   std::array<SmokeParticle, 50> _particles;
-   int32_t _z = 0;
+   std::vector<SmokeParticle> _particles;
+   int32_t _z = 20;
    sf::Time _last_update_time;
 
+   float _pixel_ratio = 1.0f;
    sf::Vector2u _size_px;
    sf::Vector2f _offset_px;
 };
