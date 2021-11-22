@@ -36,7 +36,7 @@ std::string PhysicsConfiguration::serialize()
             {"player_deceleration_air",                           _player_deceleration_air},
 
             {"player_jump_strength",                              _player_jump_strength},
-            {"player_jump_steps",                                 _player_jump_steps},
+            {"player_jump_steps",                                 _player_jump_frame_count},
             {"player_jump_after_contact_lost_in_ms",              _player_jump_after_contact_lost_ms},
             {"player_jump_buffer_in_ms",                          _player_jump_buffer_ms},
             {"player_jump_minimal_duration_in_ms",                _player_jump_minimal_duration_ms},
@@ -88,7 +88,7 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    _player_deceleration_air                         = config["PhysicsConfiguration"]["player_deceleration_air"].get<float>();
 
    _player_jump_strength                            = config["PhysicsConfiguration"]["player_jump_strength"].get<float>();
-   _player_jump_steps                               = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
+   _player_jump_frame_count                         = config["PhysicsConfiguration"]["player_jump_steps"].get<int32_t>();
    _player_jump_after_contact_lost_ms               = config["PhysicsConfiguration"]["player_jump_after_contact_lost_in_ms"].get<int32_t>();
    _player_jump_buffer_ms                           = config["PhysicsConfiguration"]["player_jump_buffer_in_ms"].get<int32_t>();
    _player_jump_minimal_duration_ms                 = config["PhysicsConfiguration"]["player_jump_minimal_duration_in_ms"].get<int32_t>();
