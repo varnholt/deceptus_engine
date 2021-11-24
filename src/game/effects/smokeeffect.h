@@ -41,7 +41,9 @@ private:
    sf::Time _last_update_time;
 
    float _pixel_ratio = 1.0f;
+   float _velocity = 1.0f;
    sf::Vector2u _size_px;
    sf::Vector2f _offset_px;
+   sf::BlendMode _blend_mode = sf::BlendAdd;
 };
 
