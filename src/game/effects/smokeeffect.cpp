@@ -51,7 +51,6 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates states, int
    sf::Sprite rt_sprite(render_texture.getTexture());
    rt_sprite.setPosition(_offset_px);
    rt_sprite.scale(_pixel_ratio, _pixel_ratio);
-   rt_sprite.setColor({255, 255, 255, 150});
 
    target.draw(rt_sprite, states);
 }
