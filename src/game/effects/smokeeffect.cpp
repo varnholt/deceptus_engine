@@ -14,11 +14,6 @@
 #include <math.h>
 
 
-namespace
-{
-sf::BlendMode blend_mode = sf::BlendAdd;
-}
-
 
 SmokeEffect::SmokeEffect()
  : _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
@@ -47,7 +42,7 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates states, int
 
    for (auto& particle : _particles)
    {
-      render_texture.draw(particle._sprite, blend_mode);
+      render_texture.draw(particle._sprite, _blend_mode);
    }
 
    render_texture.setSmooth(false);
@@ -64,7 +59,7 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates states, int
 
 void SmokeEffect::update(const sf::Time& time)
 {
-   const auto dt = time.asSeconds() - _last_update_time.asSeconds();
+   const auto dt = (time.asSeconds() - _last_update_time.asSeconds()) * _velocity;
    _last_update_time = time;
 
    for (auto& particle : _particles)
@@ -73,15 +68,18 @@ void SmokeEffect::update(const sf::Time& time)
       particle._sprite.setRotation(particle._rot);
 
       // fake z rotation
-      const auto x = 0.5f * (1.0f + sin(particle._time_offset + time.asSeconds())) * particle._offset.x;
-      const auto y = 0.5f * (1.0f + cos(particle._time_offset + time.asSeconds())) * particle._offset.y;
+      const auto x = 0.5f * (1.0f + sin(particle._time_offset + time.asSeconds() * _velocity)) * particle._offset.x;
+      const auto y = 0.5f * (1.0f + cos(particle._time_offset + time.asSeconds() * _velocity)) * particle._offset.y;
 
-      particle._sprite.setPosition(particle._center.x + x, particle._center.y + y);
+      particle._sprite.setPosition(
+         particle._center.x + x,
+         particle._center.y + y
+      );
 
       // moved here from deserialize code
       // origin should always depend on rotation
       const auto bounds = particle._sprite.getGlobalBounds();
-      particle._sprite.setOrigin(bounds.width/2, bounds.height/2);
+      particle._sprite.setOrigin(bounds.width / 2, bounds.height / 2);
    }
 }
 
@@ -116,6 +114,12 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, Tmx
          spread_factor = spread_factor_it->second->_value_float.value();
       }
 
+      auto velocity_it = tmx_object->_properties->_map.find("velocity");
+      if (velocity_it != tmx_object->_properties->_map.end())
+      {
+         smoke_effect->_velocity = velocity_it->second->_value_float.value();
+      }
+
       auto sprite_scale_it = tmx_object->_properties->_map.find("sprite_scale");
       if (sprite_scale_it != tmx_object->_properties->_map.end())
       {
@@ -133,6 +137,24 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, Tmx
       {
          const auto rgba = TmxTools::color(particle_color_it->second->_value_string.value());
          particle_color = {rgba[0], rgba[1], rgba[2], rgba[3]};
+      }
+
+      auto blend_mode_it = tmx_object->_properties->_map.find("blend_mode");
+      if (blend_mode_it != tmx_object->_properties->_map.end())
+      {
+         const auto blend_mode = blend_mode_it->second->_value_string.value();
+         if (blend_mode == "add")
+         {
+            smoke_effect->_blend_mode = sf::BlendAdd;
+         }
+         else if (blend_mode == "alpha")
+         {
+            smoke_effect->_blend_mode = sf::BlendAlpha;
+         }
+         else if (blend_mode == "multiply")
+         {
+            smoke_effect->_blend_mode = sf::BlendMultiply;
+         }
       }
    }
 
@@ -155,30 +177,21 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, Tmx
       auto x = static_cast<float>(std::rand() % range_x - range_x / 2); // normalize form (-range / 2) to (range / 2)
       auto y = static_cast<float>(std::rand() % range_y - range_y / 2);
 
-      const auto rotation = static_cast<float>(std::rand() % 360);
-      const auto time_offset = static_cast<float>(std::rand() % 100) * 0.01f * 2.0f * static_cast<float>(M_PI);
-
       const auto center_x_px = (tmx_object->_width_px / 2) / smoke_effect->_pixel_ratio;
       const auto center_y_px = (tmx_object->_height_px / 2) / smoke_effect->_pixel_ratio;
 
       const auto sprite_scale_x = (std::rand() % 50 + 50) * 0.004f * sprite_scale;
       const auto sprite_scale_y = (std::rand() % 50 + 50) * 0.004f * sprite_scale;
 
-      particle._sprite.setScale(sprite_scale_x, sprite_scale_y);
-      particle._sprite.setRotation(rotation);
-
-      particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f;
+      particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f; // -1.0 .. 1.0
       particle._center = sf::Vector2f{center_x_px, center_y_px};
       particle._offset = sf::Vector2f{x, y};
-      particle._time_offset = time_offset;
+      particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * static_cast<float>(M_PI); // 0 .. 2_PI
 
+      particle._sprite.setScale(sprite_scale_x, sprite_scale_y);
+      particle._sprite.setRotation(static_cast<float>(std::rand() % 360));
       particle._sprite.setTexture(*smoke_effect->_texture);
       particle._sprite.setColor(particle_color);
-
-//      // moved here from deserialize code
-//      // origin should always depend on rotation
-//      const auto bounds = particle._sprite.getGlobalBounds();
-//      particle._sprite.setOrigin(bounds.width, bounds.height);
 
       smoke_effect->_particles.push_back(particle);
    }
