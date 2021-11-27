@@ -847,14 +847,27 @@ Thunderstorms have the custom properties below:
 <br><br>
 
 
-## Smoke (experimental)
+## Smoke / Fog
 
-Smoke has been added to the Engine to be able to create foggy/smokey atmosphere that looks a little creepy. Even though it is not too configurable yet, it might be a good additional to your level wherever you think it is suitable. Smoke is added by creating an object group called `smoke` and adding a rectangle in there that is as big as the area that should be filled with large smoke sprites.
+Smoke has been added to the Engine to be able to create foggy / smoky atmosphere that looks a little creepy. It might be a good addition to your level wherever you think it is suitable. Smoke is added by creating an object group called `smoke` and adding a rectangle in there that is as big as the area that should be filled with large smoke sprites.
 
-So far that is all there is to know.
-A couple of custom properties such as thickness, texture and color are promised for the future.
+![](images/smoke_1.png)
+![](images/smoke_2.png)
 
-![](images/smoke.png)
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The z depth of your layer|
+|particle_count|int|The number of particles used for the smoke/fog effect|
+|spread_factor|float|The smoke particles are rotating around the center of the smoke rectangle. If the spread factor is `1.0`, particles will be randomly placed all over the rectangle's area. If you reduce it to `0.5`, only half of the width and height around the center will be used and so on. This can be helpful when you want to use larger particles that should, however, not exceed your rectangle's boundaries. The default is `1.0`.|
+|velocity|float|A factor for the particle movement/rotation velocity. The default is `1.0`.|
+|sprite_scale|float|If you want large particles, you can bump the particle scale to `2.0`, `4.0`, etc. The default value is `1.0`.|
+|pixel_ratio|int|If your smoke / fog effect shall show up in a rather pixelated way, you can set the pixel ratio to `2.0`. The default is `1.0` and will make the effect show up in level pixel size.|
+|particle_color|color|The particle color; mostly used to control the particle transparency. The default is `255, 255, 255, 255`.|
+|layer_color|color|The layer color; mostly used to control the overall layer transparency. The default is `255, 255, 255, 255`.|
+|center_offset_x_px|int|This will move the center of your smoke effect by the given x offset, given in `px`. The default is `0`.|
+|center_offset_y_px|int|This will move the center of your smoke effect by the given y offset, given in `px`. The default is `0`.|
+|mode|string|This effect supports two different modes: `smoke` and `fog`. In both modes particles will move around the center. In `smoke` mode particles will appear more transparent the further they are away from the center. That's due to the additive or alpha blending combined with the particle sprite's transparency. In `fog` mode, this effect will be compensated by increasing the sprite opacity the further it is away from the center. This will result in a rather even distribution of particles.|
+|blend_mode|string|This allows you to choose between additive, alpha or multiplied blending. Therefore you can choose between the values `add`, `alpha`, or `multiply`. The default value is `add`.|
 
 <br><br>
 

@@ -14,6 +14,11 @@ class SmokeEffect
 
 public:
 
+   enum class Mode{
+      Smoke,
+      Fog,
+   };
+
    SmokeEffect();
 
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z);
@@ -45,5 +50,8 @@ private:
    sf::Vector2u _size_px;
    sf::Vector2f _offset_px;
    sf::BlendMode _blend_mode = sf::BlendAdd;
+   sf::Color _layer_color = {255, 255, 255, 255};
+   sf::Color _particle_color = {255, 255, 255, 25};
+   Mode _mode = Mode::Smoke;
 };
 

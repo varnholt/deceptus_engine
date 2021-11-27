@@ -51,6 +51,7 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates states, int
    sf::Sprite rt_sprite(render_texture.getTexture());
    rt_sprite.setPosition(_offset_px);
    rt_sprite.scale(_pixel_ratio, _pixel_ratio);
+   rt_sprite.setColor(_layer_color);
 
    target.draw(rt_sprite, states);
 }
@@ -67,13 +68,26 @@ void SmokeEffect::update(const sf::Time& time)
       particle._sprite.setRotation(particle._rot);
 
       // fake z rotation
-      const auto x = 0.5f * (1.0f + sin(particle._time_offset + time.asSeconds() * _velocity)) * particle._offset.x;
-      const auto y = 0.5f * (1.0f + cos(particle._time_offset + time.asSeconds() * _velocity)) * particle._offset.y;
+      const auto x_normalized = 0.5f * (1.0f + sin(particle._time_offset + time.asSeconds() * _velocity));
+      const auto y_normalized = 0.5f * (1.0f + cos(particle._time_offset + time.asSeconds() * _velocity));
+      const auto x = x_normalized * particle._offset.x;
+      const auto y = y_normalized * particle._offset.y;
 
       particle._sprite.setPosition(
          particle._center.x + x,
          particle._center.y + y
       );
+
+      if (_mode == Mode::Fog)
+      {
+         particle._sprite.setColor({
+               _particle_color.r,
+               _particle_color.g,
+               _particle_color.b,
+               static_cast<uint8_t>(_particle_color.a * fabs(x_normalized))
+            }
+         );
+      }
 
       // moved here from deserialize code
       // origin should always depend on rotation
@@ -90,8 +104,9 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, Tmx
 
    auto particle_count = 50;
    auto sprite_scale = 1.0f;
-   auto spread_factor = 1.5f;
-   sf::Color particle_color{255, 255, 255, 25};
+   auto spread_factor = 1.0f / 1.5f;
+   auto center_offset_x_px = 0;
+   auto center_offset_y_px = 0;
 
    if (tmx_object->_properties)
    {
@@ -135,7 +150,40 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, Tmx
       if (particle_color_it != tmx_object->_properties->_map.end())
       {
          const auto rgba = TmxTools::color(particle_color_it->second->_value_string.value());
-         particle_color = {rgba[0], rgba[1], rgba[2], rgba[3]};
+         smoke_effect->_particle_color = {rgba[0], rgba[1], rgba[2], rgba[3]};
+      }
+
+      auto layer_color_it = tmx_object->_properties->_map.find("layer_color");
+      if (layer_color_it != tmx_object->_properties->_map.end())
+      {
+         const auto rgba = TmxTools::color(layer_color_it->second->_value_string.value());
+         smoke_effect->_layer_color = {rgba[0], rgba[1], rgba[2], rgba[3]};
+      }
+
+      auto center_offset_x_it = tmx_object->_properties->_map.find("center_offset_x_px");
+      if (center_offset_x_it != tmx_object->_properties->_map.end())
+      {
+         center_offset_x_px = center_offset_x_it->second->_value_int.value();
+      }
+
+      auto center_offset_y_it = tmx_object->_properties->_map.find("center_offset_y_px");
+      if (center_offset_y_it != tmx_object->_properties->_map.end())
+      {
+         center_offset_y_px = center_offset_y_it->second->_value_int.value();
+      }
+
+      auto mode_it = tmx_object->_properties->_map.find("mode");
+      if (mode_it != tmx_object->_properties->_map.end())
+      {
+         const auto mode = mode_it->second->_value_string.value();
+         if (mode == "smoke")
+         {
+            smoke_effect->_mode = Mode::Smoke;
+         }
+         else if (mode == "fog")
+         {
+            smoke_effect->_mode = Mode::Fog;
+         }
       }
 
       auto blend_mode_it = tmx_object->_properties->_map.find("blend_mode");
@@ -167,30 +215,31 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, Tmx
    smoke_effect->_size_px.y = rect_height_px;
 
    // define the range within the defined rectangle where particles will spawn
-   const auto range_x = static_cast<int32_t>((rect_width_px / smoke_effect->_pixel_ratio) / spread_factor);
-   const auto range_y = static_cast<int32_t>((rect_height_px / smoke_effect->_pixel_ratio) / spread_factor);
+   const auto range_x = static_cast<int32_t>((rect_width_px / smoke_effect->_pixel_ratio) * spread_factor);
+   const auto range_y = static_cast<int32_t>((rect_height_px / smoke_effect->_pixel_ratio) * spread_factor);
+
+   const auto center_x_px = center_offset_x_px + (tmx_object->_width_px / 2) / smoke_effect->_pixel_ratio;
+   const auto center_y_px = center_offset_y_px + (tmx_object->_height_px / 2) / smoke_effect->_pixel_ratio;
 
    for (auto i = 0; i < particle_count; i++)
    {
       SmokeParticle particle;
-      auto x = static_cast<float>(std::rand() % range_x - range_x / 2); // normalize form (-range / 2) to (range / 2)
-      auto y = static_cast<float>(std::rand() % range_y - range_y / 2);
 
-      const auto center_x_px = (tmx_object->_width_px / 2) / smoke_effect->_pixel_ratio;
-      const auto center_y_px = (tmx_object->_height_px / 2) / smoke_effect->_pixel_ratio;
+      const auto offset_x_px = static_cast<float>((std::rand() % range_x) - range_x / 2); // normalize from (-range / 2) to (range / 2)
+      const auto offset_y_px = static_cast<float>((std::rand() % range_y) - range_y / 2);
 
-      const auto sprite_scale_x = (std::rand() % 50 + 50) * 0.004f * sprite_scale;
-      const auto sprite_scale_y = (std::rand() % 50 + 50) * 0.004f * sprite_scale;
+      const auto sprite_scale_x = ( (std::rand() % 50) + 50) * 0.004f * sprite_scale;
+      const auto sprite_scale_y = ( (std::rand() % 50) + 50) * 0.004f * sprite_scale;
 
       particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f; // -1.0 .. 1.0
       particle._center = sf::Vector2f{center_x_px, center_y_px};
-      particle._offset = sf::Vector2f{x, y};
+      particle._offset = sf::Vector2f{offset_x_px, offset_y_px};
       particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * static_cast<float>(M_PI); // 0 .. 2_PI
 
       particle._sprite.setScale(sprite_scale_x, sprite_scale_y);
       particle._sprite.setRotation(static_cast<float>(std::rand() % 360));
       particle._sprite.setTexture(*smoke_effect->_texture);
-      particle._sprite.setColor(particle_color);
+      particle._sprite.setColor(smoke_effect->_particle_color);
 
       smoke_effect->_particles.push_back(particle);
    }
