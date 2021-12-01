@@ -291,3 +291,11 @@ enum class Dash
    Left,
    Right
 };
+
+
+// it might make more sense to remove game related stuff here and use a simple uint32_t _id
+enum class CallbackType {
+   EndGame,
+   Count
+};
+

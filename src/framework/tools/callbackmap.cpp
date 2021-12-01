@@ -8,15 +8,15 @@ CallbackMap& CallbackMap::getInstance()
 }
 
 
-void CallbackMap::addCallback(CallbackMap::CallbackType cbType, CallbackMap::Callback cb)
+void CallbackMap::addCallback(int32_t cb_id, const Callback& cb)
 {
-   _map[static_cast<uint32_t>(cbType)].push_back(cb);
+   _map[cb_id].push_back(cb);
 }
 
 
-void CallbackMap::call(CallbackMap::CallbackType cbType)
+void CallbackMap::call(int32_t cb_id)
 {
-   for (auto& cb : _map[static_cast<uint32_t>(cbType)])
+   for (auto& cb : _map[cb_id])
    {
       cb();
    }

@@ -126,7 +126,7 @@ void Checkpoint::reached()
    // check if level is completed
    if (_name == "end")
    {
-      CallbackMap::getInstance().call(CallbackMap::CallbackType::EndGame);
+      CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::EndGame));
    }
 }
 
