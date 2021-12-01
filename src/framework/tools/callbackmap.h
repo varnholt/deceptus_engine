@@ -1,8 +1,8 @@
 #pragma once
 
-#include <array>
 #include <cstdint>
 #include <functional>
+#include <map>
 
 
 struct CallbackMap
@@ -11,20 +11,13 @@ struct CallbackMap
 
    static CallbackMap& getInstance();
 
-   // it might make more sense to remove game related stuff here and use a simple uint32_t _id
-   enum class CallbackType {
-      EndGame,
-      Count
-   };
-
-   void addCallback(CallbackType, Callback cb);
-   void call(CallbackType);
+   void addCallback(int32_t id, const Callback& cb);
+   void call(int32_t id);
 
 
 private:
 
-   std::array<std::vector<Callback>, static_cast<uint32_t>(CallbackType::Count)> _map;
-
+   std::map<int32_t, std::vector<Callback>> _map;
    CallbackMap() = default;
 };
 

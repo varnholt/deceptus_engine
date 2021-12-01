@@ -111,6 +111,7 @@ SOURCES += \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/framework/tools/elapsedtimer.cpp \
+   src/game/cutscene.cpp \
    src/game/effects/dust.cpp \
    src/game/mechanisms/bubblecube.cpp \
    src/game/mechanisms/checkpoint.cpp \
@@ -299,6 +300,7 @@ HEADERS += \
    src/game/animationframedata.h \
    src/game/animationplayer.h \
    src/game/arrow.h \
+   src/game/cutscene.h \
    src/game/detonationanimation.h \
    src/framework/tools/elapsedtimer.h \
    src/game/effects/dust.h \
