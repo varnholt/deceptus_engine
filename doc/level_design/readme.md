@@ -984,6 +984,7 @@ Checkpoints have the custom properties below:
 
 |Custom Property|Type|Description|
 |-|-|-|
+|Object Name|string|If your Tiled 'Object Name' is called '`end`', the next level will be loaded after reaching the checkpoint.|
 |index|int|The index of your checkpoint. The player will always respawn at the last reached checkpoint with the largest index.|
 |sprite_pos_x_px|int|x position of the checkpoint sprite (given in px)|
 |sprite_pos_y_px|int|y position of the checkpoint sprite (given in px)|
