@@ -73,6 +73,7 @@ class Player : public GameNode
       bool _was_bending_down = false;
       bool _crouching = false;
       bool _was_crouching = false;
+
       HighResTimePoint _timepoint_bend_down_start;
       HighResTimePoint _timepoint_bend_down_end;
 
@@ -157,7 +158,7 @@ public:
 
    std::shared_ptr<ExtraManager> getExtraManager() const;
 
-   PlayerControls& getControls();
+   const std::shared_ptr<PlayerControls>& getControls();
 
    std::shared_ptr<WeaponSystem> getWeaponSystem() const;
 
@@ -247,7 +248,7 @@ private:
    float _belt_velocity = 0.0f;
    bool _is_on_belt = false;
 
-   PlayerControls _controls;
+   std::shared_ptr<PlayerControls> _controls;
    PlayerBend _bend;
    PlayerClimb _climb;
    PlayerJump _jump;

@@ -85,38 +85,31 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    {
       _keys_pressed |= KeyPressedJump;
    }
-
-   if (key == sf::Keyboard::LShift)
+   else if (key == sf::Keyboard::LShift)
    {
       _keys_pressed |= KeyPressedLook;
    }
-
-   if (key == sf::Keyboard::Up)
+   else if (key == sf::Keyboard::Up)
    {
       _keys_pressed |= KeyPressedUp;
    }
-
-   if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Down)
    {
       _keys_pressed |= KeyPressedDown;
    }
-
-   if (key == sf::Keyboard::Left)
+   else if (key == sf::Keyboard::Left)
    {
       _keys_pressed |= KeyPressedLeft;
    }
-
-   if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Right)
    {
       _keys_pressed |= KeyPressedRight;
    }
-
-   if (key == sf::Keyboard::LAlt)
+   else if (key == sf::Keyboard::LAlt)
    {
       _keys_pressed |= KeyPressedRun;
    }
-
-   if (key == sf::Keyboard::LControl)
+   else if (key == sf::Keyboard::LControl)
    {
       _keys_pressed |= KeyPressedFire;
    }
@@ -140,38 +133,31 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    {
       _keys_pressed &= ~KeyPressedLook;
    }
-
-   if (key == sf::Keyboard::Up)
+   else if (key == sf::Keyboard::Up)
    {
       _keys_pressed &= ~KeyPressedUp;
    }
-
-   if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Down)
    {
       _keys_pressed &= ~KeyPressedDown;
    }
-
-   if (key == sf::Keyboard::Left)
+   else if (key == sf::Keyboard::Left)
    {
       _keys_pressed &= ~KeyPressedLeft;
    }
-
-   if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Right)
    {
       _keys_pressed &= ~KeyPressedRight;
    }
-
-   if (key == sf::Keyboard::Space)
+   else if (key == sf::Keyboard::Space)
    {
       _keys_pressed &= ~KeyPressedJump;
    }
-
-   if (key == sf::Keyboard::LAlt)
+   else if (key == sf::Keyboard::LAlt)
    {
       _keys_pressed &= ~KeyPressedRun;
    }
-
-   if (key == sf::Keyboard::LControl)
+   else if (key == sf::Keyboard::LControl)
    {
       _keys_pressed &= ~KeyPressedFire;
    }
@@ -279,7 +265,7 @@ bool PlayerControls::isDownButtonPressed() const
 {
    if (_keys_pressed & KeyPressedDown)
    {
-     return true;
+      return true;
    }
 
    if (isControllerUsed())

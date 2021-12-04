@@ -385,7 +385,7 @@ void Game::initialize()
       [this](ExecutionMode current, ExecutionMode previous){
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
-            _player->getControls().setKeysPressed(0);
+            _player->getControls()->setKeysPressed(0);
             CameraPane::getInstance().updateLookState(Look::Active, false);
          }
       }
@@ -399,7 +399,7 @@ void Game::initialize()
       [this](ExecutionMode current, ExecutionMode previous){
          if (current == ExecutionMode::Running && previous == ExecutionMode::Paused)
          {
-            _player->getControls().forceSync();
+            _player->getControls()->forceSync();
          }
       }
    );
@@ -531,7 +531,7 @@ void Game::updateGameController()
    if (gji != nullptr)
    {
       gji->getController()->update();
-      _player->getControls().setJoystickInfo(gji->getController()->getInfo());
+      _player->getControls()->setJoystickInfo(gji->getController()->getInfo());
    }
 }
 
@@ -543,7 +543,7 @@ void Game::updateGameControllerForGame()
   if (gji != nullptr)
   {
      auto info = gji->getController()->getInfo();
-     _player->getControls().setJoystickInfo(info);
+     _player->getControls()->setJoystickInfo(info);
      GameControllerData::getInstance().setJoystickInfo(info);
   }
 }
@@ -858,7 +858,7 @@ void Game::processEvent(const sf::Event& event)
          }
          else
          {
-            _player->getControls().keyboardKeyPressed(event.key.code);
+            _player->getControls()->keyboardKeyPressed(event.key.code);
          }
       }
 
@@ -874,7 +874,7 @@ void Game::processEvent(const sf::Event& event)
       }
       else
       {
-         _player->getControls().keyboardKeyReleased(event.key.code);
+         _player->getControls()->keyboardKeyReleased(event.key.code);
       }
 
       processKeyReleasedEvents(event);
