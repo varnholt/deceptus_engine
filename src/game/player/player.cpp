@@ -89,6 +89,10 @@ Player::Player(GameNode* parent)
 
    _weapon_system = std::make_shared<WeaponSystem>();
    _extra_manager = std::make_shared<ExtraManager>();
+   _controls = std::make_shared<PlayerControls>();
+
+   _climb.setControls(_controls);
+   _jump.setControls(_controls);
 }
 
 
@@ -109,7 +113,7 @@ void Player::initialize()
 
    _jump._dust_animation_callback = std::bind(&Player::playDustAnimation, this);
    _jump._remove_climb_joint_callback = std::bind(&PlayerClimb::removeClimbJoint, _climb);
-   _controls.addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
+   _controls->addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
 
    initializeController();
 }
@@ -538,9 +542,9 @@ float Player::getMaxVelocity() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
-   auto axis_values = _controls.getJoystickInfo().getAxisValues();
+   auto axis_values = _controls->getJoystickInfo().getAxisValues();
 
-   if (_controls.isLookingAround())
+   if (_controls->isLookingAround())
    {
       return 0.0f;
    }
@@ -550,7 +554,7 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    auto axis_value_normalized = axis_values[static_cast<size_t>(axis_value)] / 32767.0f;
 
    // digital input
-   const auto hat_value = _controls.getJoystickInfo().getHatValues().at(0);
+   const auto hat_value = _controls->getJoystickInfo().getHatValues().at(0);
    const auto dpad_left_pressed  = hat_value & SDL_HAT_LEFT;
    const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
 
@@ -622,12 +626,12 @@ void Player::updatePlayerOrientation()
       return;
    }
 
-   if (_controls.isControllerUsed())
+   if (_controls->isControllerUsed())
    {
-      auto axisValues = _controls.getJoystickInfo().getAxisValues();
+      auto axisValues = _controls->getJoystickInfo().getAxisValues();
       int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
       auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-      auto hatValue = _controls.getJoystickInfo().getHatValues().at(0);
+      auto hatValue = _controls->getJoystickInfo().getHatValues().at(0);
       auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
       auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
       if (dpadLeftPressed)
@@ -653,12 +657,12 @@ void Player::updatePlayerOrientation()
    }
    else
    {
-      if (_controls.hasFlag(KeyPressedLeft))
+      if (_controls->hasFlag(KeyPressedLeft))
       {
          _points_to_left = true;
       }
 
-      if (_controls.hasFlag(KeyPressedRight))
+      if (_controls->hasFlag(KeyPressedRight))
       {
          _points_to_left = false;
       }
@@ -669,25 +673,25 @@ void Player::updatePlayerOrientation()
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
-   if (_controls.hasFlag(KeyPressedLook))
+   if (_controls->hasFlag(KeyPressedLook))
    {
       return 0.0f;
    }
 
    // sanity check to avoid moonwalking
-   if (_controls.hasFlag(KeyPressedLeft) && _controls.hasFlag(KeyPressedRight))
+   if (_controls->hasFlag(KeyPressedLeft) && _controls->hasFlag(KeyPressedRight))
    {
       return 0.0f;
    }
 
    float desiredVel = 0.0f;
 
-   if (_controls.hasFlag(KeyPressedLeft))
+   if (_controls->hasFlag(KeyPressedLeft))
    {
       desiredVel = b2Max(speed.currentVelocity.x - speed.acceleration, -speed.velocityMax);
    }
 
-   if (_controls.hasFlag(KeyPressedRight))
+   if (_controls->hasFlag(KeyPressedRight))
    {
       desiredVel = b2Min(speed.currentVelocity.x + speed.acceleration, speed.velocityMax);
    }
@@ -697,12 +701,12 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
    // b) movement is opposite to given direction
    // c) no movement at all
    const auto noMovementToLeftOrRight =
-         (!(_controls.hasFlag(KeyPressedLeft)))
-      && (!(_controls.hasFlag(KeyPressedRight)));
+         (!(_controls->hasFlag(KeyPressedLeft)))
+      && (!(_controls->hasFlag(KeyPressedRight)));
 
    const auto velocityOppositeToGivenDir =
-         (speed.currentVelocity.x < -0.01f && _controls.hasFlag(KeyPressedRight))
-      || (speed.currentVelocity.x >  0.01f && _controls.hasFlag(KeyPressedLeft));
+         (speed.currentVelocity.x < -0.01f && _controls->hasFlag(KeyPressedRight))
+      || (speed.currentVelocity.x >  0.01f && _controls->hasFlag(KeyPressedLeft));
 
    const auto noMovement = (fabs(desiredVel) < 0.0001f);
 
@@ -794,8 +798,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._climb_joint_present = _climb._climb_joint;
    data._jump_frame_count = _jump._jump_frame_count;
    data._dash_frame_count = _dash._dash_frame_count;
-   data._moving_left = _controls.isMovingLeft();
-   data._moving_right = _controls.isMovingRight();
+   data._moving_left = _controls->isMovingLeft();
+   data._moving_right = _controls->isMovingRight();
    data._wall_sliding = _jump._wallsliding;
    data._wall_jump_points_right = _jump._walljump_points_right;
    data._jumping_through_one_way_wall = isJumpingThroughOneWayWall();
@@ -841,7 +845,7 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 {
   auto desiredVel = 0.0f;
 
-  if (_controls.isControllerUsed())
+  if (_controls->isControllerUsed())
   {
      // controller
      desiredVel = getVelocityFromController(speed);
@@ -863,11 +867,11 @@ void Player::applyBeltVelocity(float& desired_velocity)
    {
       if (getBeltVelocity() < 0.0f)
       {
-         if (_controls.isMovingRight())
+         if (_controls->isMovingRight())
          {
             desired_velocity *= 0.5f;
          }
-         else if (_controls.isMovingLeft())
+         else if (_controls->isMovingLeft())
          {
             if (desired_velocity > 0.0f)
             {
@@ -884,11 +888,11 @@ void Player::applyBeltVelocity(float& desired_velocity)
       }
       else if (getBeltVelocity() > 0.0f)
       {
-         if (_controls.isMovingLeft())
+         if (_controls->isMovingLeft())
          {
             desired_velocity *= 0.5f;
          }
-         else if (_controls.isMovingRight())
+         else if (_controls->isMovingRight())
          {
             if (desired_velocity < 0.0f)
             {
@@ -933,7 +937,7 @@ void Player::updateVelocity()
    {
       if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
       {
-         if (getControls().isDroppingDown() && OneWayWall::instance().hasContacts())
+         if (getControls()->isDroppingDown() && OneWayWall::instance().hasContacts())
          {
             // usually just stop the player from movement when bending down while he has no crouching ability
             // however, when dropping from a platform, we don't want to mess with the velocity,
@@ -1039,7 +1043,7 @@ void Player::updatePortal()
 
    if (_portal_clock.getElapsedTime().asSeconds() > 1.0f)
    {
-      const auto& joystickInfo = _controls.getJoystickInfo();
+      const auto& joystickInfo = _controls->getJoystickInfo();
       const auto& axisValues = joystickInfo.getAxisValues();
       auto joystickPointsUp = false;
 
@@ -1056,7 +1060,7 @@ void Player::updatePortal()
       }
 
       if (
-            _controls.hasFlag(KeyPressedUp)
+            _controls->hasFlag(KeyPressedUp)
          || joystickPointsUp
       )
       {
@@ -1253,7 +1257,7 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateFire()
 {
-   if (_controls.isFireButtonPressed())
+   if (_controls->isFireButtonPressed())
    {
       fire();
    }
@@ -1320,7 +1324,7 @@ void Player::setZIndex(int32_t z)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateBendDown()
 {
-   auto downPressed = false;
+   auto down_pressed = false;
 
    // disable bend down states when player hit dash button
    if (_dash.isDashActive())
@@ -1330,9 +1334,9 @@ void Player::updateBendDown()
       return;
    }
 
-   if (_controls.isControllerUsed())
+   if (_controls->isControllerUsed())
    {
-      const auto& joystick_info = _controls.getJoystickInfo();
+      const auto& joystick_info = _controls->getJoystickInfo();
       const auto& axis_values = joystick_info.getAxisValues();
 
       const auto axis_lefy_y = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
@@ -1349,17 +1353,17 @@ void Player::updateBendDown()
       {
          if (yl > 0.0f)
          {
-            downPressed = true;
+            down_pressed = true;
          }
       }
    }
    else
    {
-      downPressed = _controls.hasFlag(KeyPressedDown);
+      down_pressed = _controls->hasFlag(KeyPressedDown);
    }
 
    // if the head touches something while crouches, keep crouching
-   if (_bend._bending_down && !downPressed && (GameContactListener::getInstance().getPlayerHeadContactCount() > 0))
+   if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCount() > 0))
    {
       return;
    }
@@ -1369,7 +1373,7 @@ void Player::updateBendDown()
       return;
    }
 
-   const auto bending_down = downPressed && !isInAir();
+   const auto bending_down = down_pressed && !isInAir();
 
    _bend._was_bending_down = _bend._bending_down;
    _bend._bending_down = bending_down;
@@ -1480,7 +1484,7 @@ void Player::updateGroundAngle()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateOneWayWallDrop()
 {
-   if (getControls().isDroppingDown())
+   if (getControls()->isDroppingDown())
    {
       OneWayWall::instance().drop();
    }
@@ -1510,17 +1514,17 @@ void Player::update(const sf::Time& dt)
    info._in_water = isInWater();
    info._crouching = _bend.isCrouching();
    info._climbing = _climb.isClimbing();
-   _jump.update(info, _controls);
+   _jump.update(info);
 
    updateDash();
-   _climb.update(_body, _controls, isInAir());
+   _climb.update(_body, isInAir());
    updatePlatformMovement(dt);
    updatePixelPosition();
    updateFootsteps();
    updatePortal();
    updatePreviousBodyState();
    updateWeapons(dt);
-   _controls.update(dt); // called at last just to backup previous controls
+   _controls->update(dt); // called at last just to backup previous controls
 }
 
 
@@ -1889,7 +1893,7 @@ b2Vec2 Player::getBodyPosition() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::traceJumpCurve()
 {
-   if (_controls.isJumpButtonPressed())
+   if (_controls->isJumpButtonPressed())
    {
       if (!_jump_trace.jumpStarted)
       {
@@ -1959,7 +1963,7 @@ std::shared_ptr<WeaponSystem> Player::getWeaponSystem() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-PlayerControls& Player::getControls()
+const std::shared_ptr<PlayerControls>& Player::getControls()
 {
    return _controls;
 }

@@ -20,12 +20,11 @@ constexpr auto minimum_jump_interval_ms = 150;
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::update(const PlayerJumpInfo& info, const PlayerControls& controls)
+void PlayerJump::update(const PlayerJumpInfo& info)
 {
    const auto was_in_air = _jump_info._in_air;
 
    _jump_info = info;
-   _controls = controls;
 
 #ifdef JUMP_GRAVITY_SCALING
    if (was_in_air && !_jump_info._in_air)
@@ -76,12 +75,12 @@ void PlayerJump::updateJumpBuffer()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJump()
 {
-   if (_jump_info._in_water && _controls.isJumpButtonPressed())
+   if (_jump_info._in_water && _controls->isJumpButtonPressed())
    {
       _body->ApplyForce(b2Vec2(0, -1.0f), _body->GetWorldCenter(), true);
    }
    else if (
-         (_jump_frame_count > 0 && _controls.isJumpButtonPressed())
+         (_jump_frame_count > 0 && _controls->isJumpButtonPressed())
       || _jump_clock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance()._player_jump_minimal_duration_ms
    )
    {
@@ -255,8 +254,10 @@ void PlayerJump::wallJump()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jump()
 {
-   if (_jump_info._crouching)
+   if (_controls->isDownButtonPressed())
    {
+      // equivalent to check for bending down, but jump can be called via lamda
+      // which mich skip the bend state update in the player update loop.
       return;
    }
 
@@ -371,8 +372,8 @@ void PlayerJump::updateWallSlide()
    const auto rightTouching = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
 
    if (
-         !(leftTouching  && _controls.isMovingLeft())
-      && !(rightTouching && _controls.isMovingRight())
+         !(leftTouching  && _controls->isMovingLeft())
+      && !(rightTouching && _controls->isMovingRight())
    )
    {
       _wallsliding = false;
@@ -413,4 +414,11 @@ void PlayerJump::updateWallJump()
 bool PlayerJump::isJumping() const
 {
    return (_jump_frame_count > 0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& newControls)
+{
+   _controls = newControls;
 }

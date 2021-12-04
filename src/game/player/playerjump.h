@@ -18,6 +18,8 @@ struct PlayerJump
 
    PlayerJump() = default;
 
+   void setControls(const std::shared_ptr<PlayerControls>& newControls);
+
    struct PlayerJumpInfo
    {
       bool _in_air = false;
@@ -33,7 +35,7 @@ struct PlayerJump
    void doubleJump();
    void wallJump();
 
-   void update(const PlayerJumpInfo& info, const PlayerControls& controls);
+   void update(const PlayerJumpInfo& info);
 
    void updateJumpBuffer();
    void updateJump();
@@ -44,7 +46,7 @@ struct PlayerJump
    bool isJumping() const;
 
    PlayerJumpInfo _jump_info;
-   PlayerControls _controls;
+   std::shared_ptr<PlayerControls> _controls;
    b2Body* _body = nullptr;
 
    sf::Clock _jump_clock;                 // replace by chrono
