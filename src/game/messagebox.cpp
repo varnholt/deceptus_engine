@@ -75,7 +75,7 @@ MessageBox::MessageBox(
 
    DisplayMode::getInstance().enqueueSet(Display::Modal);
 
-   Player::getCurrent()->getControls().setKeysPressed(0);
+   Player::getCurrent()->getControls()->setKeysPressed(0);
 
    __text.setFont(__font);
    __text.setCharacterSize(12);

@@ -26,14 +26,14 @@ class PlayerAABBQueryCallback : public b2QueryCallback
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerClimb::update(b2Body* player_body, const PlayerControls& controls, bool in_air)
+void PlayerClimb::update(b2Body* player_body, bool in_air)
 {
    if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb)))
    {
       return;
    }
 
-   _keys_pressed = controls.getKeysPressed();
+   _keys_pressed = _controls->getKeysPressed();
 
    // http://www.iforce2d.net/b2dtut/world-querying
 
@@ -383,9 +383,15 @@ bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
 }
 
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbing() const
 {
    return _climb_joint != nullptr;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void PlayerClimb::setControls(const std::shared_ptr<PlayerControls>& newControls)
+{
+   _controls = newControls;
 }
