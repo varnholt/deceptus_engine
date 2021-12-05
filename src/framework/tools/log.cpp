@@ -1,9 +1,16 @@
 #include "log.h"
 
-
 #include <chrono>
 #include <filesystem>
 #include <iostream>
+
+#ifdef __GNUC__
+#define FMT_HEADER_ONLY
+#  include <ctime>
+#  include <fmt/core.h>
+#else
+namespace fmt = std;
+#endif
 
 // https://en.cppreference.com/w/cpp/utility/source_location
 // https://en.cppreference.com/w/cpp/chrono/zoned_time/formatter
@@ -27,17 +34,30 @@ void log(
 )
 {
    const auto now = std::chrono::system_clock::now();
-   const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), now};
-   const auto source_tag = std::format(
+   const auto source_tag = fmt::format(
       "{0}:{1}:{2}",
       std::filesystem::path{source_location.file_name()}.filename().string(),
       source_location.function_name(),
       source_location.line()
    );
 
+#ifdef __GNUC__
+   const auto now_time = std::chrono::system_clock::to_time_t(now);
+
+   std::stringstream ss;
+   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
+   const auto now_local = ss.str();
+#else
+   const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), now};
+#endif
+
    std::cout
-      << std::format(
+      << fmt::format(
+#ifdef __GNUC__
+            "[{0}] {1} | {2}: {3}",
+#else
             "[{0}] {1:%T} | {2}: {3}",
+#endif
             static_cast<char>(level),
             now_local,
             source_tag,

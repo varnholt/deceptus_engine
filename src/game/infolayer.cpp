@@ -12,7 +12,14 @@
 #include "savestate.h"
 #include "texturepool.h"
 
+#ifdef __GNUC__
+#define FMT_HEADER_ONLY
+#  include <fmt/core.h>
+#else
 #include <format>
+namespace fmt = std;
+#endif
+
 #include <iostream>
 #include <sstream>
 
@@ -70,12 +77,12 @@ InfoLayer::InfoLayer()
    // init heart layers
    for (auto i = 1u; i <= heart_quarter_layer_count; i++)
    {
-      _heart_layers.push_back(_layers[std::format("{}", i)]);
+      _heart_layers.push_back(_layers[fmt::format("{}", i)]);
    }
 
    for (auto i = 1u; i <= heart_layer_count; i++)
    {
-      _heart_layers_background.push_back(_layers[std::format("h{}", i)]);
+      _heart_layers_background.push_back(_layers[fmt::format("h{}", i)]);
    }
 
    _stamina_layer            = _layers["stamina"];
