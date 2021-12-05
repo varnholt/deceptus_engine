@@ -35,8 +35,9 @@ win32-msvc {
 
 linux|win32-g++ {
    message("configured for g++")
-   QMAKE_CXXFLAGS += -std=c++17
+   QMAKE_CXXFLAGS += -std=c++20
    QMAKE_CXXFLAGS += -lc++fs
+   QMAKE_CXXFLAGS += -lfmt
    QMAKE_CXXFLAGS += -Wall
 }
 

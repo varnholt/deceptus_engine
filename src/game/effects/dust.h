@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <array>
 #include <deque>
+#include <memory>
 
 
 struct TmxObject;

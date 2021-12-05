@@ -16,7 +16,7 @@ void debugAuthors()
    std::stringstream text;
    text << GAME_NAME;
    text << " (c) ";
-   text << ymd.year();
+   text << (int) ymd.year();
    text << " dstar/mueslee";
    printf("%s\n", text.str().c_str());
    for (auto i = 0u; i < text.str().length(); i++)

@@ -1712,7 +1712,7 @@ void Level::parsePhysicsTiles(
 #ifdef __linux__
           auto cmd = std::string("tools/path_merge/path_merge") + " "
                 + pathSolidNotOptimised.string() + " "
-                + pathSolidOptimized.string();
+                + path_solid_optimized.string();
 #else
           auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
                 + pathSolidNotOptimised.string() + " "
