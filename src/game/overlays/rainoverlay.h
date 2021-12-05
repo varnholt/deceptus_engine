@@ -2,10 +2,10 @@
 
 #include "weatheroverlay.h"
 
-#include <optional>
 #include <cstdint>
-#include <vector>
 #include <memory>
+#include <optional>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 

@@ -1,6 +1,7 @@
 #include "game/game.h"
 
 #include <chrono>
+#include <cstdint>
 #include <sstream>
 
 #include "game/constants.h"
@@ -16,7 +17,7 @@ void debugAuthors()
    std::stringstream text;
    text << GAME_NAME;
    text << " (c) ";
-   text << (int) ymd.year();
+   text << static_cast<int32_t>(ymd.year());
    text << " dstar/mueslee";
    printf("%s\n", text.str().c_str());
    for (auto i = 0u; i < text.str().length(); i++)

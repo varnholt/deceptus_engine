@@ -1704,18 +1704,18 @@ void Level::parsePhysicsTiles(
    }
    else
    {
-      const auto pathSolidNotOptimised = base_path / std::filesystem::path(pd->filename_obj_not_optimized);
+      const auto path_solid_not_optimized = base_path / std::filesystem::path(pd->filename_obj_not_optimized);
 
       // dump the tileset into an obj file, optimise that and load it
-      if (_physics.dumpObj(layer, tileset, pathSolidNotOptimised))
+      if (_physics.dumpObj(layer, tileset, path_solid_not_optimized))
       {
 #ifdef __linux__
           auto cmd = std::string("tools/path_merge/path_merge") + " "
-                + pathSolidNotOptimised.string() + " "
+                + path_solid_not_optimized.string() + " "
                 + path_solid_optimized.string();
 #else
           auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " "
-                + pathSolidNotOptimised.string() + " "
+                + path_solid_not_optimized.string() + " "
                 + path_solid_optimized.string();
 #endif
 
@@ -1732,7 +1732,7 @@ void Level::parsePhysicsTiles(
       }
       else
       {
-         Log::Error() << "dumping unoptimized obj (" << pathSolidNotOptimised<< ") failed";
+         Log::Error() << "dumping unoptimized obj (" << path_solid_not_optimized<< ") failed";
       }
 
       // fallback to square marched level

@@ -5,8 +5,8 @@
 #include "SFML/Graphics.hpp"
 
 #include <functional>
-#include <vector>
 #include <memory>
+#include <vector>
 
 
 struct TmxObject;
