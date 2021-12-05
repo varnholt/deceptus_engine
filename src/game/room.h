@@ -3,6 +3,7 @@
 #include <chrono>
 #include <optional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 

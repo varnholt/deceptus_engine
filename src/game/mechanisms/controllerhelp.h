@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 
 #include "gamenode.h"
 #include "gamemechanism.h"

@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <vector>
+#include <memory>
 
 
 struct TmxObject;
