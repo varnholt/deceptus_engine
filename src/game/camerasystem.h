@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <optional>
+#include <memory>
 
 class CameraSystem
 {
