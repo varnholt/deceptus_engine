@@ -1,19 +1,19 @@
 {
    "player_jump_dust_l": {
       "frame_size": [24, 24],
-      "frame_offset": [0, 192],
+      "frame_offset": [768, 120],
       "sprite_count": 6,
-      "frame_durations": [75],
+      "frame_durations": [100],
       "origin": [9.0, 12.0],
-      "texture": "data/sprites/player.png"
+      "texture": "data/sprites/player_unarmed.png"
    },
    "player_jump_dust_r": {
       "frame_size": [24, 24],
-      "frame_offset": [0, 192],
+      "frame_offset": [768, 120],
       "sprite_count": 6,
-      "frame_durations": [75],
+      "frame_durations": [100],
       "origin": [12.0, 12.0],
-      "texture": "data/sprites/player.png"
+      "texture": "data/sprites/player_unarmed.png"
    },
    "player_swim_r": {
       "frame_size": [72, 48],
@@ -657,7 +657,7 @@
             75
         ],
         "frame_offset": [
-            936,
+            360,
             624
         ],
         "frame_size": [
@@ -677,7 +677,7 @@
             75
         ],
         "frame_offset": [
-            936,
+            360,
             576
         ],
         "frame_size": [
@@ -731,53 +731,9 @@
     },
     "player_jump_landing_l_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75
-        ],
-        "frame_offset": [
-            1080,
-            624
-        ],
-        "frame_size": [
-            72,
-            48
-        ],
-        "origin": [
-            36.0,
-            48.0
-        ],
-        "sprite_count": 4,
-        "texture": "data/sprites/player_unarmed.png"
-    },
-    "player_jump_landing_r_2": {
-        "frame_durations": [
-            75,
-            75,
-            75,
-            75
-        ],
-        "frame_offset": [
-            1080,
-            576
-        ],
-        "frame_size": [
-            72,
-            48
-        ],
-        "origin": [
-            36.0,
-            48.0
-        ],
-        "sprite_count": 4,
-        "texture": "data/sprites/player_unarmed.png"
-    },
-    "player_jump_midair_l_2": {
-        "frame_durations": [
-            50,
-            50,
-            50
+            120,
+            120,
+            120
         ],
         "frame_offset": [
             504,
@@ -794,14 +750,56 @@
         "sprite_count": 3,
         "texture": "data/sprites/player_unarmed.png"
     },
-    "player_jump_midair_r_2": {
+    "player_jump_landing_r_2": {
         "frame_durations": [
-            50,
-            50,
-            50
+            120,
+            120,
+            120
         ],
         "frame_offset": [
             504,
+            576
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 3,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_jump_midair_l_2": {
+        "frame_durations": [
+            75,
+            75,
+            75
+        ],
+        "frame_offset": [
+            144,
+            624
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 3,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_jump_midair_r_2": {
+        "frame_durations": [
+            75,
+            75,
+            75
+        ],
+        "frame_offset": [
+            144,
             576
         ],
         "frame_size": [
@@ -821,7 +819,7 @@
             75
         ],
         "frame_offset": [
-            216,
+            0,
             624
         ],
         "frame_size": [
@@ -841,7 +839,7 @@
             75
         ],
         "frame_offset": [
-            216,
+            0,
             576
         ],
         "frame_size": [
@@ -1001,11 +999,14 @@
     },
     "player_swim_l_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140
         ],
         "frame_offset": [
             0,
@@ -1019,16 +1020,19 @@
             36.0,
             48.0
         ],
-        "sprite_count": 5,
+        "sprite_count": 8,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_swim_r_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140
         ],
         "frame_offset": [
             0,
@@ -1042,7 +1046,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 5,
+        "sprite_count": 8,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_wall_jump_l_2": {
