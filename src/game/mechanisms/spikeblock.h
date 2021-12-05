@@ -3,6 +3,7 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
+#include <memory>
 
 // Spikeblock
 //
