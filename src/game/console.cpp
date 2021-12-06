@@ -58,6 +58,9 @@ void Console::showHelp()
     _log.push_back("/cp <n>: jump to checkpoint");
     _log.push_back("   example: /cp 0");
     _log.push_back("");
+    _log.push_back("/damage <n>: cause damage to player");
+    _log.push_back("   example: /damage 100");
+    _log.push_back("");
     _log.push_back("/extra <name>: give extra");
     _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all");
     _log.push_back("");
@@ -115,8 +118,7 @@ void Console::execute()
    {
       showHelp();
    }
-
-   if (results.at(0) == "/weapon" && results.size() == 2)
+   else if (results.at(0) == "/weapon" && results.size() == 2)
    {
       if (results.at(1) == "default")
       {
@@ -248,6 +250,15 @@ void Console::execute()
    {
       SaveState::getPlayerInfo().mInventory.giveAllKeys();
       _log.push_back("all keys");
+   }
+   else if (results.at(0) == "/damage" && results.size() == 2)
+   {
+      const auto damage = std::atoi(results.at(1).c_str());
+      Player::getCurrent()->damage(damage);
+
+      std::ostringstream os;
+      os << "damage player " << damage << std::endl;
+      _log.push_back(os.str());
    }
    else
    {

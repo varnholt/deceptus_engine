@@ -1166,7 +1166,7 @@ void Player::updateImpulse()
       _hard_landing = true;
       _hard_landing_cycles = 0;
 
-      damage(static_cast<int>((impulse - 1.0f) * 20.0f));
+      damage(static_cast<int32_t>((impulse - 1.0f) * 20.0f));
    }
 }
 
@@ -1217,10 +1217,10 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
 //----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnPlatform() const
 {
-   const auto onPlatform =
+   const auto on_platform =
       GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
 
-   return onPlatform;
+   return on_platform;
 }
 
 
@@ -1766,17 +1766,22 @@ void Player::fire()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDeadFixtures()
 {
-   if (!_body_fixture)
-   {
-      return;
-   }
+   return;
 
-   for (int32_t i = 0; i < __foot_count; i++)
-   {
-      _foot_fixture[i]->SetSensor(_dead);
-   }
-
-   _body_fixture->SetSensor(_dead);
+   // disable all collision control for the player. this has been useful before
+   // but now can be removed permanently.
+   //
+   // if (!_body_fixture)
+   // {
+   //    return;
+   // }
+   //
+   // for (int32_t i = 0; i < __foot_count; i++)
+   // {
+   //    _foot_fixture[i]->SetSensor(_dead);
+   // }
+   //
+   // _body_fixture->SetSensor(_dead);
 }
 
 
@@ -1880,13 +1885,6 @@ DeathReason Player::checkDead() const
 void Player::setStartPixelPosition(float x, float y)
 {
    setPixelPosition(x, y);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-b2Vec2 Player::getBodyPosition() const
-{
-   return _body->GetPosition();
 }
 
 
