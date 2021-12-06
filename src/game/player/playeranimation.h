@@ -17,12 +17,6 @@ public:
 
    PlayerAnimation();
 
-   enum class Version
-   {
-      V1 = 1,
-      V2 = 2
-   };
-
    struct PlayerAnimationData
    {
       using HighResDuration = std::chrono::high_resolution_clock::duration;
@@ -64,49 +58,11 @@ public:
 
    void resetAlpha();
 
-   void toggleVersion();
-
    static void generateJson();
 
 
 private:
 
-   void updateV1(
-      const sf::Time& dt,
-      const PlayerAnimationData& data
-   );
-
-
-   void updateV2(
-      const sf::Time& dt,
-      const PlayerAnimationData& data
-   );
-
-   // version 1
-   std::shared_ptr<Animation> _idle_r;
-   std::shared_ptr<Animation> _idle_l;
-   std::shared_ptr<Animation> _swim_r;
-   std::shared_ptr<Animation> _swim_l;
-   std::shared_ptr<Animation> _run_r;
-   std::shared_ptr<Animation> _run_l;
-   std::shared_ptr<Animation> _dash_r;
-   std::shared_ptr<Animation> _dash_l;
-   std::shared_ptr<Animation> _crouch_r;
-   std::shared_ptr<Animation> _crouch_l;
-
-   std::shared_ptr<Animation> _jump_init_r;
-   std::shared_ptr<Animation> _jump_up_r;
-   std::shared_ptr<Animation> _jump_midair_r;
-   std::shared_ptr<Animation> _jump_down_r;
-   std::shared_ptr<Animation> _jump_landing_r;
-
-   std::shared_ptr<Animation> _jump_init_l;
-   std::shared_ptr<Animation> _jump_up_l;
-   std::shared_ptr<Animation> _jump_midair_l;
-   std::shared_ptr<Animation> _jump_down_l;
-   std::shared_ptr<Animation> _jump_landing_l;
-
-   // version 2
    std::shared_ptr<Animation> _idle_r_2;
    std::shared_ptr<Animation> _idle_l_2;
    std::shared_ptr<Animation> _idle_blink_r_2;
@@ -177,7 +133,5 @@ private:
 
    std::vector<std::shared_ptr<Animation>> _looped_animations;
    std::shared_ptr<Animation> _current_cycle;
-
-   Version _version = Version::V1;
 };
 
