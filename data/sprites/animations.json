@@ -731,9 +731,9 @@
     },
     "player_jump_landing_l_2": {
         "frame_durations": [
-            120,
-            120,
-            120
+            800,
+            100,
+            100
         ],
         "frame_offset": [
             504,
@@ -752,9 +752,9 @@
     },
     "player_jump_landing_r_2": {
         "frame_durations": [
-            120,
-            120,
-            120
+            800,
+            100,
+            100
         ],
         "frame_offset": [
             504,
@@ -1195,6 +1195,25 @@
             48.0
         ],
         "sprite_count": 2,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_death": {
+        "frame_durations": [
+            75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75
+        ],
+        "frame_offset": [
+            0,
+            1704
+        ],
+        "frame_size": [
+            72,
+            72
+        ],
+        "origin": [
+            36.0,
+            72.0
+        ],
+        "sprite_count": 18,
         "texture": "data/sprites/player_unarmed.png"
     }
 }
