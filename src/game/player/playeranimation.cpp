@@ -1,4 +1,3 @@
-
 #include "playeranimation.h"
 
 #include <cstdlib>
@@ -25,31 +24,6 @@ constexpr auto JUMP_DOWN_VELOCITY_THRESHOLD = 1.2f;
 
 PlayerAnimation::PlayerAnimation()
 {
-   // none of the player animations are managed by the animation pool, they're just paused when finished
-   _idle_r        = AnimationPool::getInstance().add("player_idle_r",         0.0f, 0.0f, true, false);
-   _idle_l        = AnimationPool::getInstance().add("player_idle_l",         0.0f, 0.0f, true, false);
-   _swim_r        = AnimationPool::getInstance().add("player_swim_r",         0.0f, 0.0f, true, false);
-   _swim_l        = AnimationPool::getInstance().add("player_swim_l",         0.0f, 0.0f, true, false);
-   _run_r         = AnimationPool::getInstance().add("player_run_r",          0.0f, 0.0f, true, false);
-   _run_l         = AnimationPool::getInstance().add("player_run_l",          0.0f, 0.0f, true, false);
-   _dash_r        = AnimationPool::getInstance().add("player_dash_r",         0.0f, 0.0f, true, false);
-   _dash_l        = AnimationPool::getInstance().add("player_dash_l",         0.0f, 0.0f, true, false);
-   _crouch_r      = AnimationPool::getInstance().add("player_crouch_r",       0.0f, 0.0f, true, false);
-   _crouch_l      = AnimationPool::getInstance().add("player_crouch_l",       0.0f, 0.0f, true, false);
-
-   _jump_init_r    = AnimationPool::getInstance().add("player_jump_init_r",    0.0f, 0.0f, true, false);
-   _jump_up_r      = AnimationPool::getInstance().add("player_jump_up_r",      0.0f, 0.0f, true, false);
-   _jump_midair_r  = AnimationPool::getInstance().add("player_jump_midair_r",  0.0f, 0.0f, true, false);
-   _jump_down_r    = AnimationPool::getInstance().add("player_jump_down_r",    0.0f, 0.0f, true, false);
-   _jump_landing_r = AnimationPool::getInstance().add("player_jump_landing_r", 0.0f, 0.0f, true, false);
-
-   _jump_init_l    = AnimationPool::getInstance().add("player_jump_init_l",    0.0f, 0.0f, true, false);
-   _jump_up_l      = AnimationPool::getInstance().add("player_jump_up_l",      0.0f, 0.0f, true, false);
-   _jump_midair_l  = AnimationPool::getInstance().add("player_jump_midair_l",  0.0f, 0.0f, true, false);
-   _jump_down_l    = AnimationPool::getInstance().add("player_jump_down_l",    0.0f, 0.0f, true, false);
-   _jump_landing_l = AnimationPool::getInstance().add("player_jump_landing_l", 0.0f, 0.0f, true, false);
-
-   // version 2
    _idle_r_2             = AnimationPool::getInstance().add("player_idle_r_2",             0.0f, 0.0f, true, false);
    _idle_l_2             = AnimationPool::getInstance().add("player_idle_l_2",             0.0f, 0.0f, true, false);
    _idle_blink_r_2       = AnimationPool::getInstance().add("player_idle_blink_r_2",       0.0f, 0.0f, true, false);
@@ -140,31 +114,6 @@ PlayerAnimation::PlayerAnimation()
    _dash_stop_r_2->_name = "player_dash_stop_r_2";
    _dash_stop_l_2->_name = "player_dash_stop_l_2";
 
-   // store all
-   _looped_animations.push_back(_idle_r);
-   _looped_animations.push_back(_idle_l);
-   _looped_animations.push_back(_swim_r);
-   _looped_animations.push_back(_swim_l);
-   _looped_animations.push_back(_run_r);
-   _looped_animations.push_back(_run_l);
-   _looped_animations.push_back(_dash_r);
-   _looped_animations.push_back(_dash_l);
-   _looped_animations.push_back(_crouch_r);
-   _looped_animations.push_back(_crouch_l);
-
-   _looped_animations.push_back(_jump_init_r);
-   _looped_animations.push_back(_jump_up_r);
-   _looped_animations.push_back(_jump_down_r);
-   _looped_animations.push_back(_jump_landing_r);
-   _looped_animations.push_back(_jump_midair_r);
-
-   _looped_animations.push_back(_jump_init_l);
-   _looped_animations.push_back(_jump_up_l);
-   _looped_animations.push_back(_jump_down_l);
-   _looped_animations.push_back(_jump_landing_l);
-   _looped_animations.push_back(_jump_midair_l);
-
-   // version 2
    _looped_animations.push_back(_idle_r_2);
    _looped_animations.push_back(_idle_l_2);
    _looped_animations.push_back(_idle_blink_r_2);
@@ -206,26 +155,9 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_wall_jump_r_2);
    _looped_animations.push_back(_wall_jump_l_2);
 
-
    for (auto& i : _looped_animations)
    {
       i->_looped = true;
-   }
-}
-
-
-void PlayerAnimation::update(
-   const sf::Time& dt,
-   const PlayerAnimationData& data
-)
-{
-   if (_version == Version::V1)
-   {
-      updateV1(dt, data);
-   }
-   else
-   {
-      updateV2(dt, data);
    }
 }
 
@@ -452,178 +384,7 @@ void PlayerAnimation::generateJson()
 }
 
 
-void PlayerAnimation::toggleVersion()
-{
-   _version = (_version == Version::V1) ? Version::V2 : Version::V1;
-}
-
-
-void PlayerAnimation::updateV1(
-   const sf::Time& dt,
-   const PlayerAnimationData& data
-)
-{
-   if (data._dead)
-   {
-      return;
-   }
-
-   if (Portal::isLocked())
-   {
-      return;
-   }
-
-   std::shared_ptr<Animation> next_cycle = nullptr;
-
-   auto velocity = data._linear_velocity;
-
-   const auto look_active = CameraPane::getInstance().isLookActive();
-   const auto passes_sanity_check = !(data._moving_right && data._moving_left);
-
-   auto requires_update = true;
-
-   // dash
-   if (data._dash_dir.has_value())
-   {
-      if (data._dash_dir == Dash::Left)
-      {
-         next_cycle = _dash_l;
-      }
-      else
-      {
-         next_cycle = _dash_r;
-      }
-   }
-
-   // run / crouch
-   else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active)
-   {
-      if (data._bending_down)
-      {
-         next_cycle = _crouch_r;
-      }
-      else
-      {
-         next_cycle = _run_r;
-      }
-   }
-   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active)
-   {
-      if (data._bending_down)
-      {
-         next_cycle = _crouch_l;
-      }
-      else
-      {
-         next_cycle = _run_l;
-      }
-   }
-
-   // idle or idle crouch
-   else if (data._points_left)
-   {
-      if (data._bending_down)
-      {
-         next_cycle = _crouch_l;
-         requires_update = false;
-      }
-      else
-      {
-         next_cycle = _idle_l;
-      }
-   }
-   else
-   {
-      if (data._bending_down)
-      {
-         next_cycle = _crouch_r;
-         requires_update = false;
-      }
-      else
-      {
-         next_cycle = _idle_r;
-      }
-   }
-
-   // jump init
-   if (!data._dash_dir.has_value())
-   {
-      if (data._jump_frame_count == PhysicsConfiguration::getInstance()._player_jump_frame_count)
-      {
-         // jump ignition
-         _jump_animation_reference = 0;
-         next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
-      }
-      else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
-      {
-         // jump movement goes up
-         if (velocity.y < -1.0f)
-         {
-            next_cycle = data._points_right ? _jump_up_r : _jump_up_l;
-            _jump_animation_reference = 1;
-         }
-         // jump movement goes down
-         else if (velocity.y > 1.0f)
-         {
-            next_cycle = data._points_right ? _jump_down_r : _jump_down_l;
-            _jump_animation_reference = 2;
-         }
-         else
-         {
-            // jump midair
-            if (_jump_animation_reference == 1)
-            {
-               next_cycle = data._points_right ? _jump_midair_r : _jump_midair_l;
-            }
-         }
-      }
-
-      // hard landing
-      else if (_jump_animation_reference == 2 && data._hard_landing)
-      {
-         next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
-
-         if (next_cycle->_current_frame == static_cast<int32_t>(next_cycle->_frames.size()) - 1)
-         {
-             _jump_animation_reference = 3;
-             next_cycle->seekToStart();
-         }
-      }
-   }
-
-   // swimming - no animation provided yet.
-   if (data._in_water)
-   {
-      next_cycle = data._points_right ? _swim_r : _swim_l;
-   }
-
-   if (data._climb_joint_present)
-   {
-      // need to support climb animation
-   }
-
-   // force idle for screen transitions
-   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
-   {
-      next_cycle = data._points_left ? _idle_l : _idle_r;
-   }
-
-   // reset x if animation cycle changed
-   if (next_cycle != _current_cycle)
-   {
-      next_cycle->seekToStart();
-   }
-
-   _current_cycle = next_cycle;
-
-   if (requires_update)
-   {
-      _current_cycle->update(dt);
-   }
-}
-
-
-void PlayerAnimation::updateV2(
+void PlayerAnimation::update(
    const sf::Time& dt,
    const PlayerAnimationData& data
 )
@@ -682,11 +443,13 @@ void PlayerAnimation::updateV2(
    // crouch
    else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
    {
-      next_cycle = _crouch_r;
+      // unsupported
+      // next_cycle = _crouch_r;
    }
    else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
    {
-      next_cycle = _crouch_l;
+      // unsupported
+      // next_cycle = _crouch_l;
    }
 
    // bend down state
