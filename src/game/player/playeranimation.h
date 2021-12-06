@@ -171,6 +171,8 @@ private:
    std::shared_ptr<Animation> _appear_r_2;
    std::shared_ptr<Animation> _appear_l_2;
 
+   std::shared_ptr<Animation> _death;
+
    int32_t _jump_animation_reference = 0;
 
    std::vector<std::shared_ptr<Animation>> _looped_animations;

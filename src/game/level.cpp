@@ -120,7 +120,6 @@ void Level::initializeTextures()
    _atmosphere_shader.reset();
    _gamma_shader.reset();
    _blur_shader.reset();
-   _death_shader.reset();
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
@@ -167,7 +166,6 @@ void Level::initializeTextures()
    _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
    _gamma_shader = std::make_unique<GammaShader>();
    _blur_shader = std::make_unique<BlurShader>(texture_width, texture_height);
-   _death_shader = std::make_unique<DeathShader>(texture_width, texture_height);
 
    // keep track of those textures
    _render_textures.clear();
@@ -185,7 +183,6 @@ void Level::initializeTextures()
    _atmosphere_shader->initialize();
    _gamma_shader->initialize();
    _blur_shader->initialize();
-   _death_shader->initialize();
 }
 
 
@@ -782,13 +779,6 @@ void Level::reset()
 
 
 //-----------------------------------------------------------------------------
-void Level::resetDeathShader()
-{
-   _death_shader->reset();
-}
-
-
-//-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
    // deprecated approach:
@@ -1059,45 +1049,11 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
-
-   if (player->isDead())
-   {
-      auto death_render_texture = _death_shader->getRenderTexture();
-
-      // render player to texture
-      death_render_texture->clear(sf::Color{0, 0, 0, 0});
-      death_render_texture->setView(*_level_view);
-      player->draw(*death_render_texture, normal);
-      death_render_texture->display();
-
-      // render texture with shader applied
-      auto deathShaderSprite = sf::Sprite(death_render_texture->getTexture());
-
-      // TODO: have a static view for rendertexture quads
-      sf::View view(
-         sf::FloatRect(
-            0.0f,
-            0.0f,
-            static_cast<float>(_render_texture_level->getSize().x),
-            static_cast<float>(_render_texture_level->getSize().y)
-         )
-      );
-
-      view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
-      color.setView(view);
-      color.draw(deathShaderSprite, &_death_shader->getShader());
-
-      takeScreenshot("screenshot_death_anim", *_death_shader->getRenderTexture());
-
-      color.setView(*_level_view);
-   }
-   else
-   {
-      player->draw(color, normal);
-   }
+   player->draw(color, normal);
 }
 
 
+//-----------------------------------------------------------------------------
 void Level::drawLayers(
    sf::RenderTarget& target,
    sf::RenderTarget& normal,
@@ -1500,8 +1456,6 @@ void Level::update(const sf::Time& dt)
    {
       smoke->update(GlobalClock::getInstance().getElapsedTime());
    }
-
-   _death_shader->update(dt);
 }
 
 
