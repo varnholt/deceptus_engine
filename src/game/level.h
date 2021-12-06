@@ -16,7 +16,6 @@
 #include "room.h"
 #include "shaders/atmosphereshader.h"
 #include "shaders/blurshader.h"
-#include "shaders/deathshader.h"
 #include "shaders/gammashader.h"
 #include "shaderlayer.h"
 #include "squaremarcher.h"
@@ -55,7 +54,6 @@ public:
    virtual void initialize();
    void initializeTextures();
    void reset();
-   void resetDeathShader();
 
    void createViews();
 
@@ -234,7 +232,6 @@ protected:
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
-   std::unique_ptr<DeathShader> _death_shader;
    bool _screenshot = false;
 
    // box2d

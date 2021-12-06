@@ -102,6 +102,7 @@ PlayerAnimation::PlayerAnimation()
    _wall_jump_l_2        = AnimationPool::getInstance().add("player_wall_jump_l_2",        0.0f, 0.0f, true, false);
    _appear_r_2           = AnimationPool::getInstance().add("player_appear_r_2",           0.0f, 0.0f, true, false);
    _appear_l_2           = AnimationPool::getInstance().add("player_appear_l_2",           0.0f, 0.0f, true, false);
+   _death                = AnimationPool::getInstance().add("player_death",                0.0f, 0.0f, true, false);
 
    _bend_down_idle_r_2       = AnimationPool::getInstance().add("player_bend_down_idle_r_2", 0.0f, 0.0f, true, false);
    _bend_down_idle_l_2       = AnimationPool::getInstance().add("player_bend_down_idle_l_2", 0.0f, 0.0f, true, false);
@@ -117,6 +118,7 @@ PlayerAnimation::PlayerAnimation()
    // we don't want these to jump back to the first frame
    _appear_r_2->_reset_to_first_frame = false;
    _appear_l_2->_reset_to_first_frame = false;
+   _death->_reset_to_first_frame = false;
    _bend_down_r_2->_reset_to_first_frame = false;
    _bend_down_l_2->_reset_to_first_frame = false;
    _bend_up_r_2->_reset_to_first_frame = false;
@@ -382,10 +384,8 @@ void PlayerAnimation::generateJson()
 
    next_row(); // reserved
    next_row(); // reserved
-   next_row(); // reserved
 
-   // const auto d2 = sf::seconds(0.2f);
-
+   AnimationSettings player_death({72, 72}, {0, next_row()}, {36.0, 36.0}, vx(18, sf::seconds(0.02f)), sprite_name);
    AnimationSettings player_appear_r({72, 72}, {0, next_row()}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
    AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
 
@@ -438,6 +438,7 @@ void PlayerAnimation::generateJson()
    j["player_wall_jump_l_2"]            = player_wall_jump_l;
    j["player_appear_r_2"]               = player_appear_r;
    j["player_appear_l_2"]               = player_appear_l;
+   j["player_death"]                    = player_death;
 
    std::stringstream sstream;
    sstream << std::setw(4) << j << "\n\n";
@@ -628,11 +629,6 @@ void PlayerAnimation::updateV2(
 )
 {
    using namespace std::chrono_literals;
-
-   if (data._dead)
-   {
-      return;
-   }
 
    if (Portal::isLocked())
    {
@@ -861,6 +857,11 @@ void PlayerAnimation::updateV2(
    if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
    {
       next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
+   }
+
+   if (data._dead)
+   {
+      next_cycle = _death;
    }
 
    // reset x if animation cycle changed

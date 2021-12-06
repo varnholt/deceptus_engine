@@ -9,7 +9,6 @@
 #include "playerclimb.h"
 #include "playercontrols.h"
 #include "playerjump.h"
-#include "shaders/deathshader.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -108,7 +107,6 @@ public:
 
    void setStartPixelPosition(float x, float y);
 
-   b2Vec2 getBodyPosition() const;
    const sf::Vector2f& getPixelPositionf() const;
    const sf::Vector2i& getPixelPositioni() const;
    void setPixelPosition(float x, float y);

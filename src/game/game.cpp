@@ -644,8 +644,6 @@ void Game::updateGameState(const sf::Time& dt)
    if (!_player->isDead() && death_reason != DeathReason::None)
    {
       _death_wait_time_ms = 0;
-      _level->resetDeathShader();
-
       switch (death_reason)
       {
          case DeathReason::TouchesDeadly:
