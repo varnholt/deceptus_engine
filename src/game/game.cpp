@@ -967,7 +967,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F7:
       {
-         Player::getCurrent()->getPlayerAnimation().toggleVersion();
+         // free to use
          break;
       }
       case sf::Keyboard::F12:
