@@ -54,7 +54,9 @@ public:
    bool _reset_to_first_frame = true;
    bool _finished = false;
 
-   void setFrameTimes(const std::vector<sf::Time>& frameTimes);
+   void setFrameTimes(const std::vector<sf::Time>& frame_times);
+   const std::vector<sf::Time> getFrameTimes() const;
+   size_t getFrameCount() const;
 
    void reverse();
 

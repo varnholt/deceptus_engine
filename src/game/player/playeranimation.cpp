@@ -594,7 +594,7 @@ void PlayerAnimation::update(
    }
 
    // appear animation
-   if (GameClock::getInstance().duration() < 1.260s)
+   if (GameClock::getInstance().duration() < 1.0s + (_appear_l_2->getFrameCount() + 1) * 0.20s)
    {
       next_cycle = data._points_right ? _appear_r_2 : _appear_l_2;
 
@@ -608,7 +608,7 @@ void PlayerAnimation::update(
       }
       else
       {
-         // player appear animation for 12 x 20ms
+         // player appear animation for 20 x 20ms, plus an extra frame - just to be sure :)
          _appear_r_2->play();
          _appear_l_2->play();
          _appear_r_2->setAlpha(255);
