@@ -594,7 +594,7 @@ void PlayerAnimation::update(
    }
 
    // appear animation
-   if (GameClock::getInstance().duration() < 1.0s + (_appear_l_2->getFrameCount() + 1) * 0.20s)
+   if (GameClock::getInstance().duration() < 1.0s + (_appear_l_2->getFrameCount() + 1) * 20ms)
    {
       next_cycle = data._points_right ? _appear_r_2 : _appear_l_2;
 
