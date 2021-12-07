@@ -56,14 +56,28 @@ sf::FloatRect Animation::getGlobalBounds() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Animation::setFrameTimes(const std::vector<sf::Time>& frameTimes)
+void Animation::setFrameTimes(const std::vector<sf::Time>& frame_times)
 {
-   _frame_times = frameTimes;
+   _frame_times = frame_times;
 
-   for (const auto& t : frameTimes)
+   for (const auto& t : frame_times)
    {
       _overall_time += t;
    }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+const std::vector<sf::Time> Animation::getFrameTimes() const
+{
+   return _frame_times;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+size_t Animation::getFrameCount() const
+{
+   return _frame_times.size();
 }
 
 
