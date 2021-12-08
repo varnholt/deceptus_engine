@@ -457,7 +457,7 @@ void PlayerAnimation::update(
    {
       next_cycle = data._points_left ? _bend_down_l_2 : _bend_down_r_2;
 
-      if (StopWatch::duration(data._timepoint_bend_down_start, now) > 7 * 40ms)
+      if (StopWatch::duration(data._timepoint_bend_down_start, now) > _bend_down_idle_l_tmp->_overall_time_chrono)
       {
          next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
 
@@ -478,7 +478,7 @@ void PlayerAnimation::update(
    else if (data._points_left)
    {
       // bend up if player is releasing the crouch
-      if (StopWatch::duration(data._timepoint_bend_down_end, now) < 7 * 40ms)
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < _bend_up_l_2->_overall_time_chrono)
       {
          next_cycle = _bend_up_l_2;
       }
@@ -496,7 +496,7 @@ void PlayerAnimation::update(
    else
    {
       // bend up if player is releasing the crouch
-      if (StopWatch::duration(data._timepoint_bend_down_end, now) < 7 * 40ms)
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < _bend_up_r_2->_overall_time_chrono)
       {
          next_cycle = _bend_up_r_2;
       }
@@ -573,7 +573,7 @@ void PlayerAnimation::update(
 
    if (data._wall_sliding)
    {
-      if (StopWatch::duration(data._timepoint_wallslide, now) < 6 * 75ms)
+      if (StopWatch::duration(data._timepoint_wallslide, now) < _wallslide_impact_l_2->_overall_time_chrono)
       {
          next_cycle = data._points_right ? _wallslide_impact_l_2 : _wallslide_impact_r_2;
       }
@@ -583,18 +583,18 @@ void PlayerAnimation::update(
       }
    }
 
-   if (StopWatch::duration(data._timepoint_doublejump, now) < 12 * 75ms)
+   if (StopWatch::duration(data._timepoint_doublejump, now) < _double_jump_r_2->_overall_time_chrono)
    {
       next_cycle = data._points_right ? _double_jump_r_2 : _double_jump_l_2;
    }
 
-   if (StopWatch::duration(data._timepoint_walljump, now) < 12 * 75ms)
+   if (StopWatch::duration(data._timepoint_walljump, now) < _wall_jump_r_2->_overall_time_chrono)
    {
       next_cycle = data._wall_jump_points_right ? _wall_jump_r_2 : _wall_jump_l_2;
    }
 
    // appear animation
-   if (GameClock::getInstance().duration() < 1.0s + (_appear_l_2->getFrameCount() + 1) * 20ms)
+   if (GameClock::getInstance().duration() < 1.0s + _appear_r_2->_overall_time_chrono + 20ms)
    {
       next_cycle = data._points_right ? _appear_r_2 : _appear_l_2;
 
