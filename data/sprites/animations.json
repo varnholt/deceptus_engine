@@ -188,21 +188,29 @@
             20,
             20,
             20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
             20
         ],
         "frame_offset": [
             0,
-            1848
+            1248
         ],
         "frame_size": [
-            72,
+            96,
             72
         ],
         "origin": [
-            36.0,
+            96.0,
             72.0
         ],
-        "sprite_count": 12,
+        "sprite_count": 20,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_appear_r_2": {
@@ -218,21 +226,29 @@
             20,
             20,
             20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
             20
         ],
         "frame_offset": [
             0,
-            1776
+            1344
         ],
         "frame_size": [
-            72,
+            96,
             72
         ],
         "origin": [
-            36.0,
+            96.0,
             72.0
         ],
-        "sprite_count": 12,
+        "sprite_count": 20,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_bend_down_idle_blink_l_2": {

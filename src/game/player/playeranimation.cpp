@@ -457,7 +457,7 @@ void PlayerAnimation::update(
    {
       next_cycle = data._points_left ? _bend_down_l_2 : _bend_down_r_2;
 
-      if (StopWatch::duration(data._timepoint_bend_down_start, now) > _bend_down_idle_l_tmp->_overall_time_chrono)
+      if (StopWatch::duration(data._timepoint_bend_down_start, now) > _bend_down_l_2->_overall_time_chrono)
       {
          next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
 
@@ -593,8 +593,14 @@ void PlayerAnimation::update(
       next_cycle = data._wall_jump_points_right ? _wall_jump_r_2 : _wall_jump_l_2;
    }
 
+   // force idle for screen transitions
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+   {
+      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
+   }
+
    // appear animation
-   if (GameClock::getInstance().duration() < 1.0s + _appear_r_2->_overall_time_chrono + 20ms)
+   if (GameClock::getInstance().duration() < 1.0s + _appear_l_2->_overall_time_chrono + 20ms)
    {
       next_cycle = data._points_right ? _appear_r_2 : _appear_l_2;
 
@@ -616,12 +622,7 @@ void PlayerAnimation::update(
       }
    }
 
-   // force idle for screen transitions
-   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
-   {
-      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
-   }
-
+   // death animation
    if (data._dead)
    {
       next_cycle = _death;
