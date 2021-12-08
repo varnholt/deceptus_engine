@@ -4,6 +4,7 @@
 
 #include "game/constants.h"
 
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -12,6 +13,8 @@ class Animation : public sf::Sprite
 {
 
 public:
+
+   using HighResDuration = std::chrono::high_resolution_clock::duration;
 
    Animation() = default;
    Animation(const Animation& anim);
@@ -45,6 +48,7 @@ public:
    sf::Time _current_time;
    sf::Time _elapsed;
    sf::Time _overall_time;
+   HighResDuration _overall_time_chrono;
 
    int32_t _current_frame = 0;
    int32_t _previous_frame = -1;
@@ -55,7 +59,7 @@ public:
    bool _finished = false;
 
    void setFrameTimes(const std::vector<sf::Time>& frame_times);
-   const std::vector<sf::Time> getFrameTimes() const;
+
    size_t getFrameCount() const;
 
    void reverse();
