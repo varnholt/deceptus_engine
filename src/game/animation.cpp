@@ -64,13 +64,8 @@ void Animation::setFrameTimes(const std::vector<sf::Time>& frame_times)
    {
       _overall_time += t;
    }
-}
 
-
-//----------------------------------------------------------------------------------------------------------------------
-const std::vector<sf::Time> Animation::getFrameTimes() const
-{
-   return _frame_times;
+   _overall_time_chrono = std::chrono::milliseconds(_overall_time.asMilliseconds());
 }
 
 
@@ -186,7 +181,9 @@ Animation::Animation(const Animation& anim)
     _frames(anim._frames),
     _color_texture(anim._color_texture),
     _normal_texture(anim._normal_texture),
-    _frame_times(anim._frame_times)
+    _frame_times(anim._frame_times),
+    _overall_time(anim._overall_time),
+    _overall_time_chrono(anim._overall_time_chrono)
 {
    setOrigin(anim.getOrigin());
    setRotation(anim.getRotation());
