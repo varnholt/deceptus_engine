@@ -219,7 +219,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire(muzzle_index)
-   fireWeapon(
+   useGun(
       0,
       _position:getX() + _fire_offset[muzzle_index]:getX(),
       _position:getY() + _fire_offset[muzzle_index]:getY(),

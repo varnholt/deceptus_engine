@@ -114,6 +114,7 @@ SOURCES += \
    src/framework/tools/elapsedtimer.cpp \
    src/game/cutscene.cpp \
    src/game/effects/dust.cpp \
+   src/game/gun.cpp \
    src/game/mechanisms/bubblecube.cpp \
    src/game/mechanisms/checkpoint.cpp \
    src/game/console.cpp \
@@ -186,6 +187,7 @@ SOURCES += \
    src/game/player/playercontrols.cpp \
    src/game/player/playerinfo.cpp \
    src/game/player/playerjump.cpp \
+   src/game/sword.cpp \
    src/game/preloader.cpp \
    src/game/progresssettings.cpp \
    src/game/overlays/rainoverlay.cpp \
@@ -308,6 +310,7 @@ HEADERS += \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/gameclock.h \
+   src/game/gun.h \
    src/game/mechanisms/bubblecube.h \
    src/game/mechanisms/controllerhelp.h \
    src/game/mechanisms/rope.h \
@@ -317,6 +320,7 @@ HEADERS += \
    src/game/onewaywall.h \
    src/game/player/playeranimation.h \
    src/game/player/playerattack.h \
+   src/game/sword.h \
    src/game/preloader.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \

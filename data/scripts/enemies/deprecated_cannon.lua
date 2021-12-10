@@ -39,7 +39,7 @@ function initialize()
    ) -- x, y, width, height
 
    addSample("boom.wav")
-   addWeapon(WeaponType["Default"], 1000, 60, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Gun"], 1000, 60, 0.1) -- interval, damage, radius
    updateProjectileTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
 end
 
@@ -70,7 +70,7 @@ function fire()
    mElapsed = 0.0
    mSpriteIndex = 1
 
-   fireWeapon(
+   useGun(
       0,
       mPosition:getX() + mX * 16,
       mPosition:getY() - 3,

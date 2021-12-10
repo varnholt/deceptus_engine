@@ -7,6 +7,7 @@ Key = {
    KeyRun   = 0x20
 }
 
+
 Alignment = {
    AlignmentUp    = 0x01,
    AlignmentDown  = 0x02,
@@ -14,7 +15,11 @@ Alignment = {
    AlignmentRight = 0x08
 }
 
+
 WeaponType = {
-   Default = 0,
-   Bow = 1
+   Invalid = 0,
+   Bow     = 1,
+   Gun     = 2,
+   Sowrd   = 3
 }
+

@@ -1,88 +1,24 @@
 #pragma once
 
-// sfml
 #include <SFML/Graphics.hpp>
-#include <SFML/System/Clock.hpp>
 
-// box2d
-#include <Box2D/Box2D.h>
-
-// std
-#include <filesystem>
-#include <memory>
-
-// game
-#include "game/projectile.h"
+#include "constants.h"
 
 
 class Weapon
 {
+
 public:
 
-   struct ProjectileAnimation
-   {
-      std::optional<std::string> _identifier;
-      std::filesystem::path _texture_path = "data/weapons/bullet.png";
-      Animation _animation;
-      AnimationFrameData _frame_data;
-   };
-
-   Weapon();
-   Weapon(std::unique_ptr<b2Shape>, int32_t fireInterval, int32_t damage);
-
-   virtual void fireInIntervals(
-      const std::shared_ptr<b2World>& world,
-      const b2Vec2 &pos,
-      const b2Vec2 &dir
-   );
-
-   virtual void fireNow(
-      const std::shared_ptr<b2World>& world,
-      const b2Vec2& pos,
-      const b2Vec2& dir
-   );
+   Weapon() = default;
 
    virtual void draw(sf::RenderTarget& target);
    virtual void update(const sf::Time& time);
-
    virtual void initialize();
 
-   static void drawProjectileHitAnimations(sf::RenderTarget& target);
-
-   int damage() const;
-
-   void setProjectileAnimation(
-      const std::shared_ptr<sf::Texture>& texture,
-      const sf::Rect<int32_t>& textureRect = _empty_rect
-   );
-
-   void setProjectileAnimation(const AnimationFrameData& frame_data);
-
-   int getFireIntervalMs() const;
-   void setFireIntervalMs(int interval);
-
-   std::optional<std::string> getProjectileIdentifier() const;
-   void setProjectileIdentifier(const std::string& projectile_identifier);
-
+   int32_t damage() const;
 
 protected:
 
-   void drawProjectiles(sf::RenderTarget& target);
-   void updateProjectiles(const sf::Time& time);
-   void copyReferenceAnimation(Projectile* projectile);
-
-   std::vector<Projectile*> _projectiles;
-
-   ProjectileAnimation _projectile_reference_animation;
-
-   std::unique_ptr<b2Shape> _shape;
-
-   sf::Clock _fire_clock;
-
-   int32_t _fire_interval_ms = 100;
-   int32_t _damage = 100;
-   WeaponType _type = WeaponType::Default;
-   b2Body* _body = nullptr;
-
-   static sf::Rect<int32_t> _empty_rect;
+   WeaponType _type = WeaponType::Invalid;
 };

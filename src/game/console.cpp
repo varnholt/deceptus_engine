@@ -86,13 +86,13 @@ void Console::giveWeaponBow()
 }
 
 
-void Console::giveWeaponDefault()
+void Console::giveWeaponGun()
 {
-   auto weapon = std::make_shared<Weapon>();
-   weapon->initialize();
-   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(weapon);
-   Player::getCurrent()->getWeaponSystem()->_selected = weapon;
-   _log.push_back("given default weapon to player");
+   auto gun = std::make_shared<Gun>();
+   gun->initialize();
+   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(gun);
+   Player::getCurrent()->getWeaponSystem()->_selected = gun;
+   _log.push_back("given gun to player");
 }
 
 
@@ -120,9 +120,9 @@ void Console::execute()
    }
    else if (results.at(0) == "/weapon" && results.size() == 2)
    {
-      if (results.at(1) == "default")
+      if (results.at(1) == "gun")
       {
-         giveWeaponDefault();
+         giveWeaponGun();
       }
       if (results.at(1) == "bow")
       {

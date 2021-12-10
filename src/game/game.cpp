@@ -726,7 +726,6 @@ void Game::update()
       if (_level_loading_finished)
       {
          AnimationPool::getInstance().updateAnimations(dt);
-         Projectile::update(dt);
          updateGameController();
          updateGameControllerForGame();
 

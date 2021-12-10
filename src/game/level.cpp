@@ -18,6 +18,7 @@
 #include "effects/dust.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
+#include "gun.h"
 #include "leveldescription.h"
 #include "levelmap.h"
 #include "luainterface.h"
@@ -1358,7 +1359,7 @@ void Level::draw(
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
 
-   Weapon::drawProjectileHitAnimations(*_render_texture_level.get());
+   Gun::drawProjectileHitAnimations(*_render_texture_level.get());
    AnimationPlayer::getInstance().draw(*_render_texture_level.get());
 
    drawDebugInformation();
@@ -1419,6 +1420,8 @@ const std::shared_ptr<LightSystem>& Level::getLightSystem() const
 //-----------------------------------------------------------------------------
 void Level::update(const sf::Time& dt)
 {
+   Projectile::update(dt);
+
    updateCameraSystem(dt);
    updateViews();
 

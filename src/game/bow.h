@@ -1,14 +1,16 @@
 #pragma once
 
+#include "gun.h"
+
 #include <vector>
 
-#include "weapon.h"
 #include "Box2D/Box2D.h"
+
 
 
 struct Arrow;
 
-class Bow : public Weapon
+class Bow : public Gun
 {
 
 public:
@@ -17,7 +19,8 @@ public:
    virtual ~Bow();
 
    void load(b2World* world);
-   void fireNow(
+
+   void useNow(
       const std::shared_ptr<b2World>& world,
       const b2Vec2& pos,
       const b2Vec2& dir

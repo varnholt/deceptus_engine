@@ -44,7 +44,8 @@ int16_t group_index = 0;                                           // 0 is defau
 
 Bow::Bow()
 {
-   _fire_interval_ms = 1500;
+   _type = WeaponType::Bow;
+   _use_interval_ms = 1500;
 
    // the shape is only defined here to align the texture on it
    _shape = std::make_unique<b2PolygonShape>();
@@ -120,7 +121,7 @@ void Bow::load(b2World* world)
 }
 
 
-void Bow::fireNow(
+void Bow::useNow(
    const std::shared_ptr<b2World>& world,
    const b2Vec2& pos,
    const b2Vec2& dir
@@ -178,7 +179,7 @@ void Bow::updateRotation(Arrow* arrow)
 
 void Bow::update(const sf::Time& time)
 {
-   Weapon::update(time);
+   Gun::update(time);
 
    // position the loaded arrow
    if (_loaded_arrow)
