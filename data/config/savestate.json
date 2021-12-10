@@ -1,7 +1,7 @@
 [
     {
-        "checkpoint": -1,
-        "levelindex": 0,
+        "checkpoint": 0,
+        "levelindex": 2,
         "playerinfo": {
             "extras": {
                 "health": {
@@ -41,7 +41,7 @@
     },
     {
         "checkpoint": 0,
-        "levelindex": 2,
+        "levelindex": 0,
         "playerinfo": {
             "extras": {
                 "health": {
