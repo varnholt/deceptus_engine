@@ -64,8 +64,8 @@ struct LuaNode : public GameNode
    //! set the body's linear velocity
    void setLinearVelocity(const b2Vec2& vel);
 
-   //! fire a weapon
-   void fireWeapon(size_t index, b2Vec2 from, b2Vec2 to);
+   //! fire a gun
+   void useGun(size_t index, b2Vec2 from, b2Vec2 to);
 
    //! make the body a dynamic object
    void makeDynamic();

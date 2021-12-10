@@ -1,6 +1,9 @@
 #include "weaponfactory.h"
 
 #include "bow.h"
+#include "gun.h"
+#include "sword.h"
+
 
 std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
 {
@@ -8,13 +11,20 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
 
    switch (type)
    {
-      case WeaponType::Default:
-      {
-         weapon = std::make_unique<Weapon>();
-      }
       case WeaponType::Bow:
       {
          weapon = std::make_unique<Bow>();
+         break;
+      }
+      case WeaponType::Gun:
+      {
+         weapon = std::make_unique<Gun>();
+         break;
+      }
+      case WeaponType::Sword:
+      {
+         weapon = std::make_unique<Sword>();
+         break;
       }
    }
 
@@ -34,17 +44,23 @@ std::unique_ptr<Weapon> WeaponFactory::create(
 
    switch (type)
    {
-      case WeaponType::Default:
-      {
-         weapon = std::make_unique<Weapon>(std::move(shape), fire_interval, damage);
-         break;
-      }
       case WeaponType::Bow:
       {
-         auto tmp = std::make_unique<Bow>();
-         tmp->setFireIntervalMs(fire_interval);
-         tmp->setLauncherBody(parent_body);
-         weapon = std::move(tmp);
+         auto bow = std::make_unique<Bow>();
+         bow->setUseIntervalMs(fire_interval);
+         bow->setLauncherBody(parent_body);
+         weapon = std::move(bow);
+         break;
+      }
+      case WeaponType::Gun:
+      {
+         weapon = std::make_unique<Gun>(std::move(shape), fire_interval, damage);
+         break;
+      }
+      case WeaponType::Sword:
+      {
+         auto sword = std::make_unique<Sword>();
+         weapon = std::move(sword);
          break;
       }
    }

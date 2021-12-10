@@ -40,7 +40,7 @@ function initialize()
    addShapeRect(0.4, 0.2, 0.0, 0.0) -- width, height, x, y
    addSample("boom.wav")
 
-   addWeapon(WeaponType["Default"], 1000, 60, 0.2) -- interval, damage, radius
+   addWeapon(WeaponType["Gun"], 1000, 60, 0.2) -- interval, damage, radius
 
    registerHitAnimation(
       0,
@@ -95,7 +95,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   fireWeapon(
+   useGun(
       0,
       mPosition:getX() + mX * 16,
       mPosition:getY() - 12,

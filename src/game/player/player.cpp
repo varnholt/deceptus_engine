@@ -12,6 +12,7 @@
 #include "fixturenode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
+#include "gun.h"
 #include "level.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
@@ -1732,34 +1733,21 @@ void Player::fire()
    }
 
    b2Vec2 dir;
-
-   dir.x =
-      _points_to_left
-         ? - 1.0f
-         :   1.0f;
-
+   dir.x = _points_to_left ? - 1.0f : 1.0f;
    dir.y = 0.0f;
 
-   auto xOffset = dir.x * 0.5f;
-   auto yOffset = -0.1f;
-
-   b2Vec2 pos;
+   auto x_offset = dir.x * 0.5f;
+   auto y_offset = -0.1f;
 
    // the force applied really depends on the weapon
    // it might make sense to have a `virtual float forceFactor() const`
-   float force = 1.5f;
+   constexpr auto force = 1.5f;
 
-   dir.x = dir.x * force;
-   dir.y = dir.y * force;
+   b2Vec2 pos;
+   pos.x = x_offset + _pixel_position_f.x * MPP;
+   pos.y = y_offset + _pixel_position_f.y * MPP;
 
-   pos.x = xOffset + _pixel_position_f.x * MPP;
-   pos.y = yOffset + _pixel_position_f.y * MPP;
-
-   _weapon_system->_selected->fireInIntervals(
-      _world,
-      pos,
-      dir
-   );
+   dynamic_pointer_cast<Gun>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
 }
 
 
