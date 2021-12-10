@@ -1,12 +1,12 @@
 [
    {
-      "levelname": "data/catacombs/catacombs.json"
+      "levelname": "data/level-crypt/metroid.json"
    },
    {
       "levelname": "data/level-malte/malte.json"
    },
    {
-      "levelname": "data/level-crypt/level.json"
+      "levelname": "data/level-demo/level.json"
    }
 ]
 

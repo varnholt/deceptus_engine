@@ -28,6 +28,7 @@ private:
 
       void giveWeaponBow();
       void giveWeaponGun();
+      void giveWeaponSword();
 
       bool _active = false;
       std::string _command;

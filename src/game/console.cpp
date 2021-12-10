@@ -9,6 +9,7 @@
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
+#include "sword.h"
 #include "weaponfactory.h"
 #include "weaponsystem.h"
 
@@ -71,7 +72,7 @@ void Console::showHelp()
     _log.push_back("   example: /tp 100, 330");
     _log.push_back("");
     _log.push_back("/weapon <weapon>: give weapon to player");
-    _log.push_back("   available weapons: bow");
+    _log.push_back("   available weapons: bow, gun, sword");
 }
 
 
@@ -93,6 +94,16 @@ void Console::giveWeaponGun()
    Player::getCurrent()->getWeaponSystem()->_weapons.push_back(gun);
    Player::getCurrent()->getWeaponSystem()->_selected = gun;
    _log.push_back("given gun to player");
+}
+
+
+void Console::giveWeaponSword()
+{
+   auto sword = std::make_shared<Sword>();
+   sword->initialize();
+   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(sword);
+   Player::getCurrent()->getWeaponSystem()->_selected = sword;
+   _log.push_back("given sword to player");
 }
 
 
@@ -124,9 +135,13 @@ void Console::execute()
       {
          giveWeaponGun();
       }
-      if (results.at(1) == "bow")
+      else if (results.at(1) == "gun")
       {
          giveWeaponBow();
+      }
+      else if (results.at(1) == "sword")
+      {
+         giveWeaponSword();
       }
    }
    else if (results.at(0) == "/extra" && results.size() == 2)
