@@ -18,6 +18,7 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "gun.h"
 #include "level.h"
 #include "luaconstants.h"
 #include "luainterface.h"
@@ -924,7 +925,7 @@ int32_t addWeapon(lua_State* state)
       exit(1);
    }
 
-   auto weapon_type = WeaponType::Default;
+   auto weapon_type = WeaponType::Invalid;
    auto fire_interval = 0;
    auto damage = 0;
    std::unique_ptr<b2Shape> shape;
@@ -976,7 +977,7 @@ int32_t addWeapon(lua_State* state)
 
 
 /**
- * @brief fireWeapon fire a weapon
+ * @brief useGun fire a weapon
  * @param state lua state
  *    param 1: index of the weapon
  *    param 2: x position where the shot comes from
@@ -985,7 +986,7 @@ int32_t addWeapon(lua_State* state)
  *    param 5: y direction
  * @return error code
  */
-int32_t fireWeapon(lua_State* state)
+int32_t useGun(lua_State* state)
 {
    auto argc = lua_gettop(state);
 
@@ -1006,7 +1007,7 @@ int32_t fireWeapon(lua_State* state)
          return 0;
       }
 
-      node->fireWeapon(index, {pos_x, pos_y}, {dir_x, dir_y});
+      node->useGun(index, {pos_x, pos_y}, {dir_x, dir_y});
    }
 
    return 0;
@@ -1061,8 +1062,9 @@ int32_t updateProjectileTexture(lua_State* state)
       {
          return 0;
       }
+
       const auto& texture = TexturePool::getInstance().get(path);
-      node->_weapons[index]->setProjectileAnimation(texture, rect);
+      dynamic_cast<Gun&>(*node->_weapons[index]).setProjectileAnimation(texture, rect);
    }
 
    return 0;
@@ -1130,7 +1132,7 @@ int32_t updateProjectileAnimation(lua_State* state)
          start_frame
       );
 
-      node->_weapons[weapon_index]->setProjectileAnimation(frame_data);
+      dynamic_cast<Gun&>(*node->_weapons[weapon_index]).setProjectileAnimation(frame_data);
    }
 
    return 0;
@@ -1284,7 +1286,7 @@ int32_t registerHitAnimation(lua_State* state)
          return 0;
       }
 
-      node->_weapons[weapon_index]->setProjectileIdentifier(path.string());
+      dynamic_cast<Gun&>(*node->_weapons[weapon_index]).setProjectileIdentifier(path.string());
    }
 
    return 0;
@@ -1461,7 +1463,6 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "damageRadius", ::damageRadius);
    lua_register(_lua_state, "debug", ::debug);
    lua_register(_lua_state, "die", ::die);
-   lua_register(_lua_state, "fireWeapon", ::fireWeapon);
    lua_register(_lua_state, "getLinearVelocity", ::getLinearVelocity);
    lua_register(_lua_state, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(_lua_state, "makeDynamic", ::makeDynamic);
@@ -1486,6 +1487,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "updateProjectileTexture", ::updateProjectileTexture);
    lua_register(_lua_state, "updateProperties", ::updateProperties);
    lua_register(_lua_state, "updateSpriteRect", ::updateSpriteRect);
+   lua_register(_lua_state, "useGun", ::useGun);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -2101,9 +2103,9 @@ void LuaNode::addWeapon(std::unique_ptr<Weapon> weapon)
 }
 
 
-void LuaNode::fireWeapon(size_t index, b2Vec2 from, b2Vec2 to)
+void LuaNode::useGun(size_t index, b2Vec2 from, b2Vec2 to)
 {
-   _weapons[index]->fireInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
+   dynamic_cast<Gun&>(*_weapons[index]).useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
 }
 
 

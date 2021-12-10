@@ -238,8 +238,10 @@ enum class MessageBoxLocation
 
 enum class WeaponType
 {
-   Default = 0,
-   Bow = 1,
+   Invalid = 0,
+   Bow     = 1,
+   Gun     = 2,
+   Sword   = 3,
 };
 
 
