@@ -560,7 +560,7 @@ void PlayerAnimation::update(
       }
    }
 
-   // swimming - no animation provided yet.
+   // swimming
    if (data._in_water)
    {
       next_cycle = data._points_right ? _swim_r_2 : _swim_l_2;

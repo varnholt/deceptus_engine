@@ -31,7 +31,7 @@ public:
    virtual ~Game();
 
    void initialize();
-   int loop();
+   int32_t loop();
    void processEvents();
    void draw();
 
@@ -91,7 +91,7 @@ private:
    std::unique_ptr<InventoryLayer> _inventory_layer;
    std::unique_ptr<ControllerOverlay> _controller_overlay;
 
-   // temporary here for debugging only
+   // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
 
    sf::Clock _delta_clock;

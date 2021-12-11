@@ -177,76 +177,38 @@
    },
     "player_appear_l_2": {
         "frame_durations": [
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20
-        ],
-        "frame_offset": [
-            0,
-            1248
-        ],
-        "frame_size": [
-            96,
-            72
-        ],
-        "origin": [
-            96.0,
-            72.0
-        ],
-        "sprite_count": 20,
-        "texture": "data/sprites/player_unarmed.png"
-    },
-    "player_appear_r_2": {
-        "frame_durations": [
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20,
-            20
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
         ],
         "frame_offset": [
             0,
             1344
         ],
         "frame_size": [
-            96,
-            72
+            72,
+            96
         ],
         "origin": [
-            96.0,
-            72.0
+            36.0,
+            96.0
+        ],
+        "sprite_count": 20,
+        "texture": "data/sprites/player_unarmed.png"
+    },
+    "player_appear_r_2": {
+        "frame_durations": [
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
+        ],
+        "frame_offset": [
+            0,
+            1248
+        ],
+        "frame_size": [
+            72,
+            96
+        ],
+        "origin": [
+            36.0,
+            96.0
         ],
         "sprite_count": 20,
         "texture": "data/sprites/player_unarmed.png"

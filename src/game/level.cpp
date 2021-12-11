@@ -716,18 +716,28 @@ BoomEffect& Level::getBoomEffect()
 
 
 //-----------------------------------------------------------------------------
-void Level::load()
+bool Level::load()
 {
-   auto path = std::filesystem::path(_description->_filename).parent_path();
+   const auto level_json_path = std::filesystem::path(_description->_filename);
+
+   if (!std::filesystem::exists(level_json_path))
+   {
+      return false;
+   }
 
    // load tmx
    loadTmx();
 
    // loading ao
    Log::Info() << "loading ao... ";
-   _ambient_occlusion.load(path, std::filesystem::path(_description->_filename).stem().string());
+   _ambient_occlusion.load(
+      level_json_path.parent_path(),
+      std::filesystem::path(_description->_filename).stem().string()
+   );
 
    Log::Info() << "level loading complete";
+
+   return true;
 }
 
 
@@ -738,7 +748,17 @@ void Level::initialize()
 
    _description = LevelDescription::load(_description_filename);
 
-   load();
+   if (!_description)
+   {
+      Log::Error() << "level configuration is bad";
+      return;
+   }
+
+   if (!load())
+   {
+      Log::Error() << "level loading failed";
+      return;
+   }
 
    _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
    _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);

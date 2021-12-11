@@ -2,6 +2,7 @@
 
 #include "framework/tools/log.h"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -33,8 +34,13 @@ void from_json(const json &j, LevelDescription &d)
 }
 
 
-std::shared_ptr<LevelDescription> LevelDescription::load(const std::string &path)
+std::shared_ptr<LevelDescription> LevelDescription::load(const std::string& path)
 {
+   if (!std::filesystem::exists(path))
+   {
+      return nullptr;
+   }
+
    std::ifstream ifs (path, std::ifstream::in);
 
    auto c = ifs.get();
@@ -42,23 +48,22 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string &path
 
    while (ifs.good())
    {
-     data.push_back(static_cast<char>(c));
-     c = ifs.get();
+      data.push_back(static_cast<char>(c));
+      c = ifs.get();
    }
 
    ifs.close();
 
    std::shared_ptr<LevelDescription> description;
-
    try
    {
-     const json config = json::parse(data);
-     description = std::make_shared<LevelDescription>();
-     *description = config;
+      const json config = json::parse(data);
+      description = std::make_shared<LevelDescription>();
+      *description = config;
    }
    catch (const std::exception& e)
    {
-     Log::Error() << e.what();
+      Log::Error() << e.what();
    }
 
    return description;
