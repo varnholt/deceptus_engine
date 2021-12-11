@@ -112,8 +112,20 @@ void Player::initialize()
 
    _weapon_system->initialize();
 
-   _jump._dust_animation_callback = std::bind(&Player::playDustAnimation, this);
-   _jump._remove_climb_joint_callback = std::bind(&PlayerClimb::removeClimbJoint, _climb);
+   _jump._dust_animation_callback = [this](){
+      AnimationPool::getInstance().add(
+         _points_to_left
+          ? "player_jump_dust_l"
+          : "player_jump_dust_r",
+         _pixel_position_f.x,
+         _pixel_position_f.y
+      );
+   };
+
+   _jump._remove_climb_joint_callback = [this](){
+         _climb.removeClimbJoint();
+      };
+
    _controls->addKeypressedCallback([this](sf::Keyboard::Key key){keyPressed(key);});
 
    initializeController();
@@ -264,7 +276,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    AnimationPool::getInstance().drawAnimations(
       color,
       normal,
-      {"player_jump_dust_l", "player_jump_dust_r"}
+      {
+         "player_jump_dust_l",
+         "player_jump_dust_r",
+         "player_water_splash"
+      }
    );
 }
 
@@ -741,19 +757,6 @@ float Player::getAcceleration() const
          : PhysicsConfiguration::getInstance()._player_acceleration_ground;
 
    return acceleration;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::playDustAnimation()
-{
-   AnimationPool::getInstance().add(
-      _points_to_left
-       ? "player_jump_dust_l"
-       : "player_jump_dust_r",
-      _pixel_position_f.x,
-      _pixel_position_f.y
-   );
 }
 
 
@@ -1631,7 +1634,7 @@ void Player::updateAtmosphere()
    bool wasInwater = isInWater();
 
    b2Vec2 pos = _body->GetPosition();
-   AtmosphereTile tile = Level::getCurrentLevel()->getPhysics().getTileForPosition(pos);
+   AtmosphereTile tile = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(pos);
 
    bool inWater = tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft;
    setInWater(inWater);
@@ -1656,6 +1659,12 @@ void Player::updateAtmosphere()
    {
       Audio::getInstance()->playSample("splash.wav");
       // https://freesound.org/people/Rocktopus/packs/14347/
+
+      AnimationPool::getInstance().add(
+          "player_water_splash",
+         _pixel_position_f.x,
+         _pixel_position_f.y
+      );
    }
 
    // not sure if this is just another ugly hack

@@ -89,7 +89,7 @@ public:
    std::string getDescriptionFilename() const;
    void setDescriptionFilename(const std::string &description_filename);
 
-   const Atmosphere& getPhysics() const;
+   const Atmosphere& getAtmosphere() const;
 
    bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
 
