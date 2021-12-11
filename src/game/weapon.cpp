@@ -11,12 +11,12 @@
 
 
 
-void Weapon::draw(sf::RenderTarget& target)
+void Weapon::draw(sf::RenderTarget& /*target*/)
 {
 }
 
 
-void Weapon::update(const sf::Time& time)
+void Weapon::update(const sf::Time& /*time*/)
 {
 }
 

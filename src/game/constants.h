@@ -248,25 +248,15 @@ enum class WeaponType
 // this enum should be removed
 enum AtmosphereTile // 16 cols per row
 {
-   // PhysicsTileDeadlyFull = 32,
-   // PhysicsTileDeadlyTop,
-   // PhysicsTileDeadlyBottom,
-   // PhysicsTileDeadlyLeft,
-   // PhysicsTileDeadlyRight,
-   // PhysicsTileDeadlyCornerTopRight,
-   // PhysicsTileDeadlyCornerBottomRight,
-   // PhysicsTileDeadlyCornerBottomLeft,
-   // PhysicsTileDeadlyCornerTopLeft,
-
    AtmosphereTileWaterFull = 48,
    AtmosphereTileWaterTop,
    AtmosphereTileWaterBottom,
    AtmosphereTileWaterLeft,
    AtmosphereTileWaterRight,
-   AtmosphereTileWaterCornerTopRight,     // not used
-   AtmosphereTileWaterCornerBottomRight,  // not used
-   AtmosphereTileWaterCornerBottomLeft,   // not used
-   AtmosphereTileWaterCornerTopLeft,      // not used
+   AtmosphereTileWaterCornerTopRight,
+   AtmosphereTileWaterCornerBottomRight,
+   AtmosphereTileWaterCornerBottomLeft,
+   AtmosphereTileWaterCornerTopLeft,
 
    AtmosphereTileInvalid = 1024,
 };

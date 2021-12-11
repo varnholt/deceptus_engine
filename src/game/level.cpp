@@ -100,7 +100,7 @@ void Level::setDescriptionFilename(const std::string &description_filename)
 
 
 //-----------------------------------------------------------------------------
-const Atmosphere& Level::getPhysics() const
+const Atmosphere& Level::getAtmosphere() const
 {
    return _atmosphere;
 }
@@ -1653,7 +1653,7 @@ void Level::parsePhysicsTiles(
       return;
    }
 
-   static const float scale = 1.0f / 3.0f;
+   static constexpr float scale = 1.0f / 3.0f;
 
    auto path_solid_optimized = base_path / std::filesystem::path(pd->filename_obj_optimized);
 
