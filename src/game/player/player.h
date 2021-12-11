@@ -199,7 +199,6 @@ private:
    float getDeceleration() const;
    float getAcceleration() const;
 
-   void playDustAnimation();
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
 

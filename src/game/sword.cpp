@@ -22,7 +22,7 @@ void Sword::initialize()
 }
 
 
-void Sword::useNow(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2Vec2& dir)
+void Sword::useNow(const std::shared_ptr<b2World>& /*world*/, const b2Vec2& /*pos*/, const b2Vec2& /*dir*/)
 {
 
 }
