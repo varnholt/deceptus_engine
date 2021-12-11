@@ -18,6 +18,7 @@ std::vector<std::shared_ptr<Fan::FanTile>> Fan::__tile_instances;
 std::vector<TmxObject*> Fan::__object_instances;
 std::vector<sf::Vector2f> Fan::__weight_instances;
 
+
 void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
    auto possf = tile->mPosition;
@@ -55,15 +56,6 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
       b2Vec2{w - e, 0    }, // g
       b2Vec2{e,     0    }, // h
    };
-
-   // auto width = PIXELS_PER_TILE * MPP * 0.5f;
-   // auto height = PIXELS_PER_TILE * MPP * 0.5f;
-   //
-   //   shape.SetAsBox(
-   //     width, height,
-   //     b2Vec2(width, height),
-   //     0.0f
-   //   );
 
    shape.Set(rounded_box.data(), static_cast<int32_t>(rounded_box.size()));
 
@@ -211,8 +203,6 @@ void Fan::load(
 
          if (tile_number != 0)
          {
-            // Log::Info() << tileNumber - firstId;
-
             const auto direction = static_cast<TileDirection>(tile_number - firstId);
             sf::Vector2f direction_vector;
 
@@ -255,10 +245,10 @@ void Fan::load(
 
 void Fan::resetAll()
 {
-    __fan_instances.clear();
-    __tile_instances.clear();
-    __object_instances.clear();
-    __weight_instances.clear();
+   __fan_instances.clear();
+   __tile_instances.clear();
+   __object_instances.clear();
+   __weight_instances.clear();
 }
 
 
@@ -310,7 +300,6 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& player_rect)
 
    if (valid)
    {
-      // Log::Info() << "dir: " << dir.x << ", " << dir.y;
       return dir;
    }
    else
@@ -360,13 +349,4 @@ void Fan::merge()
 
    __tile_instances.clear();
 }
-
-
-// destroying a world will also delete all its bodies
-//
-//Fan::FanTile::~FanTile()
-//{
-//   _body->GetWorld()->DestroyBody(mBody);
-//}
-
 
