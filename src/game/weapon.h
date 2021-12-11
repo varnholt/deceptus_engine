@@ -11,6 +11,7 @@ class Weapon
 public:
 
    Weapon() = default;
+   WeaponType getWeaponType() const;
 
    virtual void draw(sf::RenderTarget& target);
    virtual void update(const sf::Time& time);

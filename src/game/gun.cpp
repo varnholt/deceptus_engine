@@ -28,6 +28,9 @@ Gun::Gun()
 
    // start it so the elapsed timer is exceeded on first use
    _fire_clock.restart();
+
+   // a default
+   setProjectileAnimation(TexturePool::getInstance().get(_projectile_reference_animation._texture_path));
 }
 
 
@@ -38,6 +41,8 @@ Gun::Gun(std::unique_ptr<b2Shape> shape, int32_t user_interval_ms, int32_t damag
 {
    // start it so the elapsed timer is exceeded on first use
    _fire_clock.restart();
+
+   setProjectileAnimation(TexturePool::getInstance().get(_projectile_reference_animation._texture_path));
 }
 
 
@@ -52,7 +57,7 @@ void Gun::copyReferenceAnimation(Projectile* projectile)
 }
 
 
-void Gun::useNow(
+void Gun::use(
    const std::shared_ptr<b2World>& world,
    const b2Vec2& pos,
    const b2Vec2& dir
@@ -74,17 +79,10 @@ void Gun::useNow(
    fixture_definition.filter.maskBits     = mask_bits_standing;
    fixture_definition.filter.categoryBits = category_bits;
 
-   auto fixture = bullet_body->CreateFixture(&fixture_definition);
-
-   bullet_body->ApplyLinearImpulse(
-      dir,
-      pos,
-      true
-   );
-
-   auto projectile = new Projectile();
+   bullet_body->ApplyLinearImpulse(dir, pos, true);
 
    // create a projectile animation copy from the reference animation
+   auto projectile = new Projectile();
    copyReferenceAnimation(projectile);
 
    projectile->setProperty("damage", _damage);
@@ -99,6 +97,7 @@ void Gun::useNow(
       projectile->setProjectileIdentifier(_projectile_reference_animation._identifier.value());
    }
 
+   auto fixture = bullet_body->CreateFixture(&fixture_definition);
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
@@ -114,7 +113,7 @@ void Gun::useInIntervals(
 {
    if (_fire_clock.getElapsedTime().asMilliseconds() > _use_interval_ms)
    {
-      useNow(world, pos, dir);
+      use(world, pos, dir);
 
       _fire_clock.restart();
    }
@@ -208,13 +207,20 @@ void Gun::update(const sf::Time& time)
 // create a reference animation from a single frame
 void Gun::setProjectileAnimation(
    const std::shared_ptr<sf::Texture>& texture,
-   const sf::Rect<int32_t>& textureRect
+   const sf::Rect<int32_t>& texture_rect_px
 )
 {
-   _projectile_reference_animation._animation.setTextureRect(textureRect);
+   sf::Rect<int32_t> tmp_rect_px = texture_rect_px;
+   if (tmp_rect_px.width == 0)
+   {
+      tmp_rect_px.width = texture->getSize().x;
+      tmp_rect_px.height = texture->getSize().y;
+   }
+
+   _projectile_reference_animation._animation.setTextureRect(tmp_rect_px);
    _projectile_reference_animation._animation._color_texture = texture;
    _projectile_reference_animation._animation._frames.clear();
-   _projectile_reference_animation._animation._frames.push_back(textureRect);
+   _projectile_reference_animation._animation._frames.push_back(tmp_rect_px);
    _projectile_reference_animation._animation.setFrameTimes({sf::seconds(0.1f)});
 
    // auto-generate origin from shape
@@ -225,28 +231,16 @@ void Gun::setProjectileAnimation(
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
-      if (textureRect.width > 0)
-      {
-         _projectile_reference_animation._animation.setOrigin(
-            static_cast<float_t>(textureRect.width / 2),
-            static_cast<float_t>(textureRect.height / 2)
-         );
-      }
-      else
-      {
-         _projectile_reference_animation._animation.setOrigin(
-            static_cast<float_t>(texture->getSize().x / 2),
-            static_cast<float_t>(texture->getSize().y / 2)
-         );
-      }
+      _projectile_reference_animation._animation.setOrigin(
+         static_cast<float_t>(tmp_rect_px.width / 2),
+         static_cast<float_t>(tmp_rect_px.height / 2)
+      );
    }
 }
 
 
 // create a reference animation from multiple frames
-void Gun::setProjectileAnimation(
-   const AnimationFrameData& frame_data
-)
+void Gun::setProjectileAnimation(const AnimationFrameData& frame_data)
 {
    _projectile_reference_animation._animation._color_texture = frame_data._texture;
    _projectile_reference_animation._animation.setOrigin(frame_data._origin);

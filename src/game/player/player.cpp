@@ -2,6 +2,7 @@
 
 #include "animationpool.h"
 #include "audio.h"
+#include "bow.h"
 #include "camerapane.h"
 #include "displaymode.h"
 #include "gamecontactlistener.h"
@@ -21,6 +22,7 @@
 #include "playerinfo.h"
 #include "savestate.h"
 #include "screentransition.h"
+#include "sword.h"
 #include "texturepool.h"
 #include "tweaks.h"
 #include "weapon.h"
@@ -1741,22 +1743,53 @@ void Player::fire()
       return;
    }
 
+   b2Vec2 pos;
    b2Vec2 dir;
-   dir.x = _points_to_left ? - 1.0f : 1.0f;
+   dir.x = _points_to_left ? -1.0f : 1.0f;
    dir.y = 0.0f;
 
-   auto x_offset = dir.x * 0.5f;
-   auto y_offset = -0.1f;
+   switch (_weapon_system->_selected->getWeaponType())
+   {
+      case WeaponType::Bow:
+      {
+         dir.y = -0.1f;
 
-   // the force applied really depends on the weapon
-   // it might make sense to have a `virtual float forceFactor() const`
-   constexpr auto force = 1.5f;
+         constexpr auto force = 1.5f;
+         const auto x_offset = dir.x * 0.5f;
+         const auto y_offset = -0.25f;
 
-   b2Vec2 pos;
-   pos.x = x_offset + _pixel_position_f.x * MPP;
-   pos.y = y_offset + _pixel_position_f.y * MPP;
+         pos.x = x_offset + _pixel_position_f.x * MPP;
+         pos.y = y_offset + _pixel_position_f.y * MPP;
 
-   dynamic_pointer_cast<Gun>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
+         dynamic_pointer_cast<Bow>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
+         break;
+      }
+      case WeaponType::Gun:
+      {
+         constexpr auto force = 10.0f;
+         const auto x_offset = dir.x * 1.0f;
+         const auto y_offset = -0.1f;
+
+         pos.x = x_offset + _pixel_position_f.x * MPP;
+         pos.y = y_offset + _pixel_position_f.y * MPP;
+
+         dynamic_pointer_cast<Gun>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
+         break;
+      }
+      case WeaponType::Sword:
+      {
+         const auto x_offset = dir.x * 0.5f;
+         const auto y_offset = 0.0f;
+
+         const auto player_width_px = _pixel_rect.width / 2;
+
+         pos.x = x_offset + _pixel_position_f.x * MPP  - player_width_px * MPP;
+         pos.y = y_offset + _pixel_position_f.y * MPP;
+
+         dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, pos, dir);
+         break;
+      }
+   }
 }
 
 

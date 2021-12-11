@@ -156,9 +156,9 @@ void Fan::update(const sf::Time& dt)
       }
    }
 
-   for (auto& xOffset : _x_offsets_px)
+   for (auto& x_offset : _x_offsets_px)
    {
-      xOffset += dt.asSeconds() * 25.0f * _speed * _lever_lag;
+      x_offset += dt.asSeconds() * 25.0f * _speed * _lever_lag;
    }
 
    updateSprite();
