@@ -11,6 +11,12 @@
 
 
 
+WeaponType Weapon::getWeaponType() const
+{
+   return _type;
+}
+
+
 void Weapon::draw(sf::RenderTarget& /*target*/)
 {
 }

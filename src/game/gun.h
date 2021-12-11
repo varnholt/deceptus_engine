@@ -38,7 +38,7 @@ public:
       const b2Vec2& dir
    );
 
-   virtual void useNow(
+   virtual void use(
       const std::shared_ptr<b2World>& world,
       const b2Vec2& pos,
       const b2Vec2& dir

@@ -121,7 +121,7 @@ void Bow::load(b2World* world)
 }
 
 
-void Bow::useNow(
+void Bow::use(
    const std::shared_ptr<b2World>& world,
    const b2Vec2& pos,
    const b2Vec2& dir

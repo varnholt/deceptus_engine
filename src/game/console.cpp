@@ -135,7 +135,7 @@ void Console::execute()
       {
          giveWeaponGun();
       }
-      else if (results.at(1) == "gun")
+      else if (results.at(1) == "bow")
       {
          giveWeaponBow();
       }
