@@ -20,7 +20,7 @@ public:
 
    void load(b2World* world);
 
-   void useNow(
+   void use(
       const std::shared_ptr<b2World>& world,
       const b2Vec2& pos,
       const b2Vec2& dir
