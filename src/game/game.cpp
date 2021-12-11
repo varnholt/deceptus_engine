@@ -335,8 +335,6 @@ void Game::initialize()
    _player = std::make_shared<Player>();
    _player->initialize();
 
-   // loadLevel();
-
    _info_layer = std::make_unique<InfoLayer>();
    _inventory_layer = std::make_unique<InventoryLayer>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
@@ -748,7 +746,7 @@ void Game::update()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-int Game::loop()
+int32_t Game::loop()
 {
    while (_window->isOpen())
    {
