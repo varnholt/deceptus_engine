@@ -129,7 +129,7 @@ protected:
       const std::filesystem::path& path
    );
 
-   void load();
+   bool load();
    void loadTmx();
    void loadCheckpoint();
 
