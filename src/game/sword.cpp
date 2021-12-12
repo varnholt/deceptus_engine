@@ -5,6 +5,8 @@
 #include "constants.h"
 #include "debugdraw.h"
 #include "framework/tools/stopwatch.h"
+#include "player/player.h"
+#include "worldquery.h"
 
 
 Sword::Sword()
@@ -22,13 +24,29 @@ void Sword::draw(sf::RenderTarget& target)
       return;
    }
 
-   sf::FloatRect rect_px;
-   rect_px.left = _pos_m.x * PPM ;
-   rect_px.top = _pos_m.y * PPM - 32;
-   rect_px.width = 24;
-   rect_px.height = 48;
+   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
 
-   DebugDraw::drawRect(target, rect_px, sf::Color{255, 0, 0});
+   sf::FloatRect attack_rect_px(player_rect);
+   attack_rect_px.left += (24 * _dir_m.x);
+
+   // DebugDraw::drawRect(target, rect_px, sf::Color{255, 0, 0});
+   DebugDraw::drawCircle(
+      target,
+      {
+         Player::getCurrent()->getPixelPositionf().x * MPP + 0.5f * _dir_m.x,
+         Player::getCurrent()->getPixelPositionf().y * MPP - 0.6f ,
+      },
+      0.75f,
+      {1.0f, 0.0f, 0.0f}
+   );
+
+   auto hit_nodes = WorldQuery::findNodes(attack_rect_px);
+
+   // this ought to go to a separate class for hit/damage management
+   for (auto& node : hit_nodes)
+   {
+      std::cout << "hit: " << node->_script_name << " " << node->_id << std::endl;
+   }
 }
 
 
