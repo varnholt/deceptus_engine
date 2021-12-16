@@ -307,7 +307,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    // )
    //
 
-   std::vector<b2Body*> bodies = retrieveBodiesOnScreen(level->getWorld(), screen);
+   auto bodies = retrieveBodiesOnScreen(level->getWorld(), screen);
 
    for (auto body : bodies)
    {
