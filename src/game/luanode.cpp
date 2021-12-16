@@ -1822,10 +1822,10 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 
 void LuaNode::damagePlayerInRadius(int32_t damage, float x, float y, float radius)
 {
-   sf::Vector2f nodePosition{x, y};
-   const auto playerPosition =  Player::getCurrent()->getPixelPositionf();
+   sf::Vector2f node_position{x, y};
+   const auto player_position =  Player::getCurrent()->getPixelPositionf();
 
-   auto dist = (playerPosition - nodePosition);
+   auto dist = (player_position - node_position);
    auto len = SfmlMath::length(dist);
 
    if (len <= radius)
@@ -1918,17 +1918,17 @@ void LuaNode::setActive(bool active)
 
 void LuaNode::setDamage(int32_t damage)
 {
-   for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+   for (auto fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
-      auto userData = fixture->GetUserData();
+      auto user_data = fixture->GetUserData();
 
-      if (!userData)
+      if (!user_data)
       {
          continue;
       }
 
-      auto fixtureNode = static_cast<FixtureNode*>(fixture->GetUserData());
-      fixtureNode->setProperty("damage", damage);
+      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData());
+      fixture_node->setProperty("damage", damage);
    }
 }
 
@@ -1963,11 +1963,11 @@ class LuaQueryCallback : public b2QueryCallback
 
 int32_t LuaNode::queryAABB(const b2AABB& aabb)
 {
-   LuaQueryCallback queryCallback;
-   Level::getCurrentLevel()->getWorld()->QueryAABB(&queryCallback, aabb);
+   LuaQueryCallback query_callback;
+   Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
 
    // Log::Info() << queryCallback.mBodies.size();
-   return static_cast<int32_t>(queryCallback._bodies.size());
+   return static_cast<int32_t>(query_callback._bodies.size());
 }
 
 
@@ -2032,13 +2032,13 @@ int64_t LuaNode::getPropertyInt64(const std::string &key)
 
 void LuaNode::setupBody()
 {
-   auto staticBody = getPropertyBool("staticBody");
+   auto static_body = getPropertyBool("staticBody");
    auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
    auto sensor = static_cast<bool>(getPropertyBool("sensor"));
 
    _body->SetTransform(b2Vec2{_start_position_px.x * MPP, _start_position_px.y * MPP}, 0.0f);
    _body->SetFixedRotation(true);
-   _body->SetType(staticBody ? b2_staticBody : b2_dynamicBody);
+   _body->SetType(static_body ? b2_staticBody : b2_dynamicBody);
 
    for (auto shape : _shapes_m)
    {
@@ -2054,12 +2054,12 @@ void LuaNode::setupBody()
       fd.filter.maskBits = mask_bits_standing;
       fd.filter.categoryBits = category_bits;
 
-      b2Fixture* fixture = _body->CreateFixture(&fd);
-      FixtureNode* fixtureNode = new FixtureNode(this);
-      fixtureNode->setType(ObjectTypeEnemy);
-      fixtureNode->setProperty("damage", damage);
-      fixtureNode->setCollisionCallback([this](){luaCollisionWithPlayer();});
-      fixture->SetUserData(static_cast<void*>(fixtureNode));
+      auto fixture = _body->CreateFixture(&fd);
+      auto fixture_node = new FixtureNode(this);
+      fixture_node->setType(ObjectTypeEnemy);
+      fixture_node->setProperty("damage", damage);
+      fixture_node->setCollisionCallback([this](){luaCollisionWithPlayer();});
+      fixture->SetUserData(static_cast<void*>(fixture_node));
 
       if (sensor)
       {
@@ -2073,7 +2073,7 @@ void LuaNode::setupBody()
 
 void LuaNode::addShapeCircle(float radius, float x, float y)
 {
-   b2CircleShape* shape = new b2CircleShape();
+   auto shape = new b2CircleShape();
    shape->m_p.Set(x, y);
    shape->m_radius = radius;
    _shapes_m.push_back(shape);
@@ -2082,7 +2082,7 @@ void LuaNode::addShapeCircle(float radius, float x, float y)
 
 void LuaNode::addShapeRect(float width, float height, float x, float y)
 {
-   b2PolygonShape* shape = new b2PolygonShape();
+   auto shape = new b2PolygonShape();
    shape->SetAsBox(width, height, b2Vec2(x, y), 0.0f);
    _shapes_m.push_back(shape);
 }
@@ -2090,7 +2090,7 @@ void LuaNode::addShapeRect(float width, float height, float x, float y)
 
 void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 {
-   b2PolygonShape* shape = new b2PolygonShape();
+   auto shape = new b2PolygonShape();
    shape->Set(points, size);
    _shapes_m.push_back(shape);
 }
@@ -2126,37 +2126,37 @@ void LuaNode::updateVelocity()
       return;
    }
 
-   auto velocityMax = 0.0;
+   auto velocity_max = 0.0;
    auto acceleration = 0.0;
 
-   auto velIt = _properties.find("velocity_walk_max");
-   if (velIt != _properties.end())
+   auto velocity_it = _properties.find("velocity_walk_max");
+   if (velocity_it != _properties.end())
    {
-      velocityMax = *std::get_if<double>(&(velIt->second));
+      velocity_max = *std::get_if<double>(&(velocity_it->second));
    }
 
-   auto accIt = _properties.find("acceleration_ground");
-   if (accIt != _properties.end())
+   auto acceleration_it = _properties.find("acceleration_ground");
+   if (acceleration_it != _properties.end())
    {
-      acceleration = *std::get_if<double>(&(accIt->second));
+      acceleration = *std::get_if<double>(&(acceleration_it->second));
    }
 
-   auto desiredVel = 0.0f;
+   auto desired_velocity = 0.0f;
    auto velocity = _body->GetLinearVelocity();
 
    if (_keys_pressed & KeyPressedLeft)
    {
-      desiredVel = static_cast<float>(b2Max(velocity.x - acceleration, -velocityMax));
+      desired_velocity = static_cast<float>(b2Max(velocity.x - acceleration, -velocity_max));
    }
 
    if (_keys_pressed & KeyPressedRight)
    {
-      desiredVel = static_cast<float>(b2Min(velocity.x + acceleration, velocityMax));
+      desired_velocity = static_cast<float>(b2Min(velocity.x + acceleration, velocity_max));
    }
 
    // calc impulse, disregard time factor
-   auto velChange = desiredVel - velocity.x;
-   auto impulse = _body->GetMass() * velChange;
+   auto velocity_change = desired_velocity - velocity.x;
+   auto impulse = _body->GetMass() * velocity_change;
 
    _body->ApplyLinearImpulse(
       b2Vec2(impulse, 0.0f),
