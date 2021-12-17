@@ -2209,13 +2209,14 @@ void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_
 
 void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)
 {
-   _hit_boxes_px.push_back({
-         static_cast<float>(left_px),
-         static_cast<float>(top_px),
-         static_cast<float>(width_px),
-         static_cast<float>(height_px)
-      }
-   );
+   sf::FloatRect rect{
+      static_cast<float>(left_px),
+      static_cast<float>(top_px),
+      static_cast<float>(width_px),
+      static_cast<float>(height_px)
+   };
+
+   _hit_boxes_px.push_back(rect);
 }
 
 

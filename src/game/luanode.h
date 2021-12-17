@@ -13,6 +13,7 @@
 #include "SFML/Graphics.hpp"
 
 // game
+#include "hitbox.h"
 #include "leveldescription.h"
 #include "gamenode.h"
 #include "weapon.h"
@@ -155,7 +156,7 @@ struct LuaNode : public GameNode
    b2BodyDef* _body_def = nullptr;
    std::vector<b2Shape*> _shapes_m;
    std::vector<std::unique_ptr<Weapon>> _weapons;
-   std::vector<sf::FloatRect> _hit_boxes_px;
+   std::vector<Hitbox> _hit_boxes_px;
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 

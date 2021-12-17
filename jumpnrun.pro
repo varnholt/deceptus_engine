@@ -94,6 +94,7 @@ INCLUDEPATH += src/game
 INCLUDEPATH += src/thirdparty
 
 SOURCES += \
+   hitbox.cpp \
    src/framework/tools/log.cpp \
    src/framework/tools/stopwatch.cpp \
    src/game/ambientocclusion.cpp \
@@ -267,6 +268,7 @@ SOURCES += \
 
 
 HEADERS += \
+   hitbox.h \
    src/framework/image/image.h \
    src/framework/image/layer.h \
    src/framework/image/psd.h \
