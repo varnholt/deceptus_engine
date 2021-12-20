@@ -73,7 +73,7 @@ std::shared_ptr<LuaNode> LuaInterface::getObject(lua_State* state)
 }
 
 
-const std::vector<std::shared_ptr<LuaNode> >& LuaInterface::getObjectList()
+const std::vector<std::shared_ptr<LuaNode>>& LuaInterface::getObjectList()
 {
    return _object_list;
 }

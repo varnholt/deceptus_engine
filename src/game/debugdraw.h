@@ -36,7 +36,9 @@ void drawTransform(sf::RenderTarget& target, const b2Transform& xf);
 
 void debugBodies(sf::RenderTarget& target, Level* level);
 void debugCameraSystem(sf::RenderTarget& target);
+void debugHitboxes(sf::RenderTarget& target);
 
+sf::FloatRect getScreenRect(sf::RenderTarget& target);
 std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen);
 
 }

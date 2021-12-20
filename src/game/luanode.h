@@ -156,7 +156,7 @@ struct LuaNode : public GameNode
    b2BodyDef* _body_def = nullptr;
    std::vector<b2Shape*> _shapes_m;
    std::vector<std::unique_ptr<Weapon>> _weapons;
-   std::vector<Hitbox> _hit_boxes_px;
+   std::vector<Hitbox> _hitboxes;
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 

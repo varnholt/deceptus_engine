@@ -7,12 +7,6 @@ Hitbox::Hitbox(const sf::FloatRect& rect)
 }
 
 
-const sf::FloatRect& Hitbox::getRect() const
-{
-   return _rect_px;
-}
-
-
 sf::FloatRect Hitbox::getRectTranslated() const
 {
    sf::FloatRect rect = _rect_px;
