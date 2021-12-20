@@ -272,6 +272,22 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, co
 
 
 //----------------------------------------------------------------------------------------------------------------------
+sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
+{
+   const auto& screen_view = target.getView();
+
+   sf::FloatRect screen = {
+      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
+      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
+      screen_view.getSize().x,
+      screen_view.getSize().y
+   };
+
+   return screen;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 {
    for (auto joint = level->getWorld()->GetJointList(); joint != nullptr; joint = joint->GetNext())
@@ -288,14 +304,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       }
    }
 
-   const auto& screen_view = target.getView();
-
-   sf::FloatRect screen = {
-      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
-      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
-      screen_view.getSize().x,
-      screen_view.getSize().y
-   };
+   sf::FloatRect screen = getScreenRect(target);
 
    // optimization is to only use bodies on screen by doing some world querying.
    // that reduces the amount of bodies to about 1/5, depending on the level complexity.
@@ -457,5 +466,20 @@ std::vector<b2Body*> DebugDraw::retrieveBodiesOnScreen(const std::shared_ptr<b2W
    aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
 
    return WorldQuery::queryBodies(world, aabb);
+}
+
+
+void DebugDraw::debugHitboxes(sf::RenderTarget& target)
+{
+   sf::FloatRect screen = getScreenRect(target);
+   const auto nodes = WorldQuery::findNodes(screen);
+
+   for (auto& node : nodes)
+   {
+      for (auto& hitbox : node->_hitboxes)
+      {
+         drawRect(target, hitbox.getRectTranslated());
+      }
+   }
 }
 

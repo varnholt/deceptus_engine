@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<LuaNode> > WorldQuery::findNodes(const sf::FloatRect
 
    std::vector<std::shared_ptr<LuaNode>> hit_nodes;
    std::copy_if(nodes.begin(), nodes.end(), std::back_inserter(hit_nodes), [attack_rect](const auto& node){
-            const auto& hit_boxes = node->_hit_boxes_px;
+            const auto& hit_boxes = node->_hitboxes;
             return std::any_of(hit_boxes.begin(), hit_boxes.end(), [attack_rect](const auto& hit_box){
                return hit_box.getRectTranslated().intersects(attack_rect);
             }
@@ -63,7 +63,7 @@ std::vector<std::shared_ptr<LuaNode> > WorldQuery::findNodes(const std::vector<s
 
    std::vector<std::shared_ptr<LuaNode>> hit_nodes;
    std::copy_if(nodes.begin(), nodes.end(), std::back_inserter(hit_nodes), [attack_rects](const auto& node){
-      const auto& hit_boxes = node->_hit_boxes_px;
+      const auto& hit_boxes = node->_hitboxes;
       return std::any_of(hit_boxes.begin(), hit_boxes.end(), [attack_rects](const auto& hit_box){
                   return std::any_of(attack_rects.begin(), attack_rects.end(), [hit_box](const auto& attack_rect){
                      return hit_box.getRectTranslated().intersects(attack_rect);

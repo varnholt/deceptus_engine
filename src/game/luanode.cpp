@@ -2182,11 +2182,18 @@ void LuaNode::updatePosition()
       return;
    }
 
-   auto x = _body->GetPosition().x * PPM;
-   auto y = _body->GetPosition().y * PPM;
+   auto x_px = _body->GetPosition().x * PPM;
+   auto y_px = _body->GetPosition().y * PPM;
 
-   _position_px.x = x;
-   _position_px.y = y;
+   _position_px.x = x_px;
+   _position_px.y = y_px;
+
+   // update hitbox positions
+   for (auto& hitbox : _hitboxes)
+   {
+      hitbox._rect_px.left = x_px;
+      hitbox._rect_px.top = y_px;
+   }
 }
 
 
@@ -2216,7 +2223,7 @@ void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32
       static_cast<float>(height_px)
    };
 
-   _hit_boxes_px.push_back(rect);
+   _hitboxes.push_back(rect);
 }
 
 
