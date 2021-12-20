@@ -316,7 +316,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    // )
    //
 
-   auto bodies = retrieveBodiesOnScreen(level->getWorld(), screen);
+   auto bodies = WorldQuery::retrieveBodiesOnScreen(level->getWorld(), screen);
 
    for (auto body : bodies)
    {
@@ -450,22 +450,6 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
    target.draw(f1, 2, sf::Lines);
    target.draw(p0, 2, sf::Lines);
    target.draw(p1, 2, sf::Lines);
-}
-
-
-std::vector<b2Body*> DebugDraw::retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
-{
-   b2AABB aabb;
-
-   const auto l = screen.left;
-   const auto r = screen.left + screen.width;
-   const auto t = screen.top;
-   const auto b = screen.top + screen.height;
-
-   aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
-   aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
-
-   return WorldQuery::queryBodies(world, aabb);
 }
 
 
