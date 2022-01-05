@@ -18,8 +18,11 @@ AnimationPool AnimationPool::_player_animation;
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::initialize()
 {
-   deserializeFromFile();
-   _initialized = true;
+   if (!_initialized)
+   {
+      deserializeFromFile();
+      _initialized = true;
+   }
 }
 
 
