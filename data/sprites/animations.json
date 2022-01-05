@@ -15,6 +15,166 @@
       "origin": [12.0, 12.0],
       "texture": "data/sprites/player_unarmed.png"
    },
+   "player_swim_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 480],
+      "sprite_count": 1,
+      "frame_durations": [100],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_swim_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 528],
+      "sprite_count": 1,
+      "frame_durations": [100],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_idle_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 0],
+      "sprite_count": 12,
+      "frame_durations": [100,100,100,100,100,200,100,100,100,100,100,200],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_idle_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 48],
+      "sprite_count": 12,
+      "frame_durations": [100,100,100,100,100,200,100,100,100,100,100,200],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_run_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 96],
+      "sprite_count": 11,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_run_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 144],
+      "sprite_count": 11,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_dash_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 288],
+      "sprite_count": 4,
+      "frame_durations": [100],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_dash_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 336],
+      "sprite_count": 4,
+      "frame_durations": [100],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_crouch_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 384],
+      "sprite_count": 7,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_crouch_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 432],
+      "sprite_count": 7,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_init_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 192],
+      "sprite_count": 4,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_up_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 192],
+      "sprite_count": 3,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_midair_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [216, 192],
+      "sprite_count": 3,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_down_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [432, 192],
+      "sprite_count": 3,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_landing_r": {
+      "frame_size": [72, 48],
+      "frame_offset": [936, 192],
+      "sprite_count": 6,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_init_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 192],
+      "sprite_count": 4,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_up_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [0, 240],
+      "sprite_count": 3,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_midair_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [216, 240],
+      "sprite_count": 3,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_down_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [432, 240],
+      "sprite_count": 3,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
+   "player_jump_landing_l": {
+      "frame_size": [72, 48],
+      "frame_offset": [936, 240],
+      "sprite_count": 6,
+      "frame_durations": [75],
+      "origin": [36.0, 48.0],
+      "texture": "data/sprites/player_spriteset.png"
+   },
     "player_appear_l_2": {
         "frame_durations": [
             20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
@@ -51,25 +211,6 @@
             96.0
         ],
         "sprite_count": 20,
-        "texture": "data/sprites/player_unarmed.png"
-    },
-    "player_water_splash" : {
-        "frame_durations": [
-            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
-        ],
-        "frame_offset": [
-            0,
-            1440
-        ],
-        "frame_size": [
-            72,
-            48
-        ],
-        "origin": [
-            36.0,
-            24.0
-        ],
-        "sprite_count": 15,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_bend_down_idle_blink_l_2": {
@@ -286,18 +427,7 @@
     },
     "player_double_jump_l_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            70,70,70,70,70,70,70,70,70
         ],
         "frame_offset": [
             0,
@@ -311,23 +441,12 @@
             36.0,
             48.0
         ],
-        "sprite_count": 12,
+        "sprite_count": 8,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_double_jump_r_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            70,70,70,70,70,70,70,70,70
         ],
         "frame_offset": [
             0,
@@ -341,7 +460,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 12,
+        "sprite_count": 8,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_idle_blink_l_2": {
@@ -694,12 +813,12 @@
         "frame_durations": [
             60,
             60,
+            80,
             60,
             60,
             60,
             60,
-            60,
-            60,
+            80,
             60,
             60,
             60,
@@ -724,12 +843,12 @@
         "frame_durations": [
             60,
             60,
+            80,
             60,
             60,
             60,
             60,
-            60,
-            60,
+            80,
             60,
             60,
             60,
@@ -888,22 +1007,11 @@
     },
     "player_wall_jump_l_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            80,80
         ],
         "frame_offset": [
-            0,
-            1200
+            432,
+            1056
         ],
         "frame_size": [
             72,
@@ -913,27 +1021,16 @@
             36.0,
             48.0
         ],
-        "sprite_count": 12,
+        "sprite_count": 2,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_wall_jump_r_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            80,80
         ],
         "frame_offset": [
-            0,
-            1152
+            432,
+            1104
         ],
         "frame_size": [
             72,
@@ -943,17 +1040,12 @@
             36.0,
             48.0
         ],
-        "sprite_count": 12,
+        "sprite_count": 2,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_wallslide_impact_l_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            50,50,50,50,50
         ],
         "frame_offset": [
             0,
@@ -967,17 +1059,12 @@
             36.0,
             48.0
         ],
-        "sprite_count": 6,
+        "sprite_count": 5,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_wallslide_impact_r_2": {
         "frame_durations": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
+            50,50,50,50,50
         ],
         "frame_offset": [
             0,
@@ -991,7 +1078,7 @@
             36.0,
             48.0
         ],
-        "sprite_count": 6,
+        "sprite_count": 5,
         "texture": "data/sprites/player_unarmed.png"
     },
     "player_wallslide_l_2": {
@@ -1000,7 +1087,7 @@
             75
         ],
         "frame_offset": [
-            432,
+            288,
             1104
         ],
         "frame_size": [
@@ -1020,7 +1107,7 @@
             75
         ],
         "frame_offset": [
-            432,
+            288,
             1056
         ],
         "frame_size": [

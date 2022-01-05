@@ -628,7 +628,7 @@ void PlayerAnimation::update(
       next_cycle = _death;
    }
 
-   if (next_cycle)
+   if (!next_cycle)
    {
       Log::Error() << "invalid animation cycle chosen";
       return;
