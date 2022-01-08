@@ -196,9 +196,9 @@ void PlayerJump::doubleJump()
    }
 
    const auto skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
-   const auto canDoubleJump = (skills & static_cast<int32_t>(ExtraSkill::Skill::DoubleJump));
+   const auto can_double_jump = (skills & static_cast<int32_t>(ExtraSkill::Skill::DoubleJump));
 
-   if (!canDoubleJump)
+   if (!can_double_jump)
    {
       return;
    }
