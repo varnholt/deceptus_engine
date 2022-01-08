@@ -108,6 +108,8 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    _player_wall_jump_multiplier                     = config["PhysicsConfiguration"]["player_wall_jump_multiplier"].get<float>();
    _player_wall_jump_multiplier_increment_per_frame = config["PhysicsConfiguration"]["player_wall_jump_multiplier_increment_per_frame"].get<float>();
    _player_wall_jump_multiplier_scale_per_frame     = config["PhysicsConfiguration"]["player_wall_jump_multiplier_scale_per_frame"].get<float>();
+
+   _player_double_jump_factor                       = config["PhysicsConfiguration"]["player_double_jump_factor"].get<float>();
 }
 
 
