@@ -55,6 +55,7 @@ void ScreenTransition::startEffect2()
    }
 }
 
+
 void ScreenTransition::effect1Done()
 {
    // tell everyone that effect 1 is done
@@ -92,6 +93,69 @@ void ScreenTransition::effect2Done()
    {
       cb();
    }
+}
+
+
+void ScreenTransitionHandler::push(std::unique_ptr<ScreenTransition> transition)
+{
+   _transitions.push_back(std::move(transition));
+}
+
+
+void ScreenTransitionHandler::pop()
+{
+   if (!active())
+   {
+      return;
+   }
+
+   _transitions.pop_front();
+}
+
+
+void ScreenTransitionHandler::clear()
+{
+   _transitions.clear();
+}
+
+
+void ScreenTransitionHandler::startEffect2()
+{
+   if (!active())
+   {
+      return;
+   }
+
+   _transitions.front()->startEffect2();
+}
+
+
+
+bool ScreenTransitionHandler::active() const
+{
+   return !_transitions.empty();
+}
+
+
+void ScreenTransitionHandler::draw(const std::shared_ptr<sf::RenderTexture>& window)
+{
+   if (!active())
+   {
+      return;
+   }
+
+   _transitions.front()->draw(window);
+}
+
+
+void ScreenTransitionHandler::update(const sf::Time& dt)
+{
+   if (!active())
+   {
+      return;
+   }
+
+   _transitions.front()->update(dt);
 }
 
 

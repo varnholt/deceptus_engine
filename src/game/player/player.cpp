@@ -932,7 +932,7 @@ void Player::updateVelocity()
       return;
    }
 
-   if (ScreenTransitionHandler::getInstance()._transition)
+   if (ScreenTransitionHandler::getInstance().active())
    {
       const auto velocity = _body->GetLinearVelocity();
       _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
@@ -1040,6 +1040,42 @@ void Player::updateVelocity()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   auto fade_out = std::make_shared<FadeTransitionEffect>();
+   auto fade_in = std::make_shared<FadeTransitionEffect>();
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = 2.0f;
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = 2.0f;
+   screen_transition->_effect_1 = fade_out;
+   screen_transition->_effect_2 = fade_in;
+   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+   screen_transition->startEffect1();
+
+   return std::move(screen_transition);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::goToPortal(auto portal)
+{
+   auto dst_position_px =  portal->getDestination()->getPortalPosition();
+
+   setBodyViaPixelPosition(
+      dst_position_px.x + PLAYER_ACTUAL_WIDTH / 2,
+      dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
+   );
+
+   // update the camera system to point to the player position immediately
+   CameraSystem::getCameraSystem().syncNow();
+   Portal::unlock();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePortal()
 {
    if (CameraPane::getInstance().isLookActive())
@@ -1076,40 +1112,10 @@ void Player::updatePortal()
             Portal::lock();
             _portal_clock.restart();
 
-            auto screen_transition = std::make_unique<ScreenTransition>();
-            auto fade_out = std::make_shared<FadeTransitionEffect>();
-            auto fade_in = std::make_shared<FadeTransitionEffect>();
-            fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
-            fade_out->_speed = 2.0f;
-            fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
-            fade_in->_value = 1.0f;
-            fade_in->_speed = 2.0f;
-            screen_transition->_effect_1 = fade_out;
-            screen_transition->_effect_2 = fade_in;
-            screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
-            screen_transition->startEffect1();
-
-            screen_transition->_callbacks_effect_1_ended.push_back(
-               [this, portal](){
-                  auto dstPos =  portal->getDestination()->getPortalPosition();
-                  setBodyViaPixelPosition(
-                     dstPos.x + PLAYER_ACTUAL_WIDTH / 2,
-                     dstPos.y + DIFF_PLAYER_TILE_TO_PHYSICS
-                  );
-
-                  // update the camera system to point to the player position immediately
-                  CameraSystem::getCameraSystem().syncNow();
-                  Portal::unlock();
-               }
-            );
-
-            screen_transition->_callbacks_effect_2_ended.push_back(
-               [](){
-                  ScreenTransitionHandler::getInstance()._transition.reset();
-               }
-            );
-
-            ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
+            auto screen_transition = makeFadeTransition();
+            screen_transition->_callbacks_effect_1_ended.push_back([this, portal](){goToPortal(portal);});
+            screen_transition->_callbacks_effect_2_ended.push_back([](){ScreenTransitionHandler::getInstance().pop();});
+            ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          }
       }
    }

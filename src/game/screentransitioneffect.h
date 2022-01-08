@@ -13,6 +13,7 @@ struct ScreenTransitionEffect
    virtual void start();
    virtual void update(const sf::Time& /*dt*/);
    virtual void draw(const std::shared_ptr<sf::RenderTexture>& /*window*/);
+   virtual ~ScreenTransitionEffect();
 
    using TransitionCallback = std::function<void()>;
    TransitionCallback _effect_ended;

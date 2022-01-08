@@ -11,6 +11,10 @@
 
 #include "framework/tmxparser/tmxobject.h"
 
+
+struct ScreenTransition;
+
+
 struct Room : std::enable_shared_from_this<Room>
 {
    std::shared_ptr<Room> getptr() {
@@ -45,6 +49,8 @@ struct Room : std::enable_shared_from_this<Room>
 
    std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
    bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
+   std::unique_ptr<ScreenTransition> makeFadeTransition();
+
 
    std::vector<sf::FloatRect> _rects;
    std::string _name;
@@ -68,5 +74,9 @@ struct Room : std::enable_shared_from_this<Room>
    std::optional<sf::Vector2i> _start_position_b;
    std::optional<sf::Vector2i> _start_offset_l;
    std::optional<sf::Vector2i> _start_offset_r;
+
+   private:
+   void movePlayerToRoomStartPosition();
+   void syncCamera();
 };
 

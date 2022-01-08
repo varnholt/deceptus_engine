@@ -117,7 +117,7 @@ void Game::initializeWindow()
    sf::ContextSettings context_settings;
    context_settings.stencilBits = 8;
 
-   if (_window != nullptr)
+   if (_window)
    {
       _window->close();
       _window.reset();
@@ -140,7 +140,7 @@ void Game::initializeWindow()
    _window->setMouseCursorVisible(!gameConfig._fullscreen);
 
    // reset render textures if needed
-   if (_window_render_texture != nullptr)
+   if (_window_render_texture)
    {
       _window_render_texture.reset();
    }
@@ -193,34 +193,10 @@ void Game::initializeController()
    if (GameControllerIntegration::initializeAll() > 0)
    {
       auto gji = GameControllerIntegration::getInstance(0);
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_Y,
-         [this](){
-            openInventory();
-         }
-      );
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_A,
-         [this](){
-            checkCloseInventory();
-         }
-      );
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_B,
-         [this](){
-            checkCloseInventory();
-         }
-      );
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_START,
-         [this](){
-            showPauseMenu();
-         }
-      );
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this](){openInventory();});
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this](){checkCloseInventory();});
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this](){checkCloseInventory();});
+      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this](){showPauseMenu();});
    }
 }
 
@@ -283,11 +259,11 @@ void Game::loadLevel()
          _player->setWorld(_level->getWorld());
          _player->initializeLevel();
 
-         // jump back to stored position
-         if (_stored_position_valid)
+         // jump back to stored position, that's only for debugging purposes, not for checkpoints
+         if (_restore_previous_position)
          {
+            _restore_previous_position = false;
             _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
-            _stored_position_valid = false;
          }
 
          _player->updatePlayerPixelRect();
@@ -295,6 +271,10 @@ void Game::loadLevel()
          Log::Info() << "level loading finished";
 
          _level_loading_finished = true;
+
+         // before synchronizing the camera with the player position, the camera needs to know its room limitations
+         _level->syncRoom();
+         CameraSystem::getCameraSystem().syncNow();
 
          GameClock::getInstance().reset();
       }
@@ -432,11 +412,7 @@ void Game::draw()
 
    _screenshot = false;
 
-   // draw screen transitions here
-   if (ScreenTransitionHandler::getInstance()._transition)
-   {
-      ScreenTransitionHandler::getInstance()._transition->draw(_window_render_texture);
-   }
+   ScreenTransitionHandler::getInstance().draw(_window_render_texture);
 
    const auto map_enabled = DisplayMode::getInstance().isSet(Display::Map);
    if (!map_enabled)
@@ -569,56 +545,68 @@ void Game::updateWindowTitle()
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::goToLastCheckpoint()
+{
+   SaveState::deserializeFromFile();
+   _player->reset();
+   loadLevel();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Game::menuLoadRequest()
+{
+   // the code below is mostly identical to 'goToLastCheckpoint'
+   // however, this does not deserialize the last game state; anyhow - duplication should be removed
+   ScreenTransitionHandler::getInstance().clear();
+   _player->reset();
+   loadLevel();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   sf::Color fade_color{60, 0, 0};
+   auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
+   auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = 1.0f;
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = 2.0f;
+   screen_transition->_effect_1 = fade_out;
+   screen_transition->_effect_2 = fade_in;
+   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+   screen_transition->_autostart_effect_2 = false;
+   screen_transition->startEffect1();
+
+   return std::move(screen_transition);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::resetAfterDeath(const sf::Time& dt)
 {
    // not 100% if the screen transitions should actually drive the
    // level loading and game workflow. it should rather be the other
    // way round. on the other hand this approach allows very simple
    // timing and the fading is very unlikely to fail anyway.
-
    if (_player->isDead())
    {
       _death_wait_time_ms += dt.asMilliseconds();
 
       if (_death_wait_time_ms > 1000)
       {
-         if (!ScreenTransitionHandler::getInstance()._transition)
+         if (!ScreenTransitionHandler::getInstance().active())
          {
             // fade out/in
-            auto screen_transition = std::make_unique<ScreenTransition>();
-            sf::Color fade_color{60, 0, 0};
-            auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
-            auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
-            fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
-            fade_out->_speed = 1.0f;
-            fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
-            fade_in->_value = 1.0f;
-            fade_in->_speed = 2.0f;
-            screen_transition->_effect_1 = fade_out;
-            screen_transition->_effect_2 = fade_in;
-            screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
-            screen_transition->_autostart_effect_2 = false;
-            screen_transition->startEffect1();
-
             // do the actual level reset once the fade out has happened
-            screen_transition->_callbacks_effect_1_ended.push_back(
-               [this](){
-                  SaveState::deserializeFromFile();
-                  _player->reset();
-                  loadLevel();
-
-                  // update the camera system to point to the player position immediately
-                  CameraSystem::getCameraSystem().syncNow();
-               }
-            );
-
-            screen_transition->_callbacks_effect_2_ended.push_back(
-               [](){
-                  ScreenTransitionHandler::getInstance()._transition.reset();
-               }
-            );
-
-            ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
+            auto screen_transition = makeFadeOutFadeIn();
+            screen_transition->_callbacks_effect_1_ended.push_back([this](){goToLastCheckpoint();});
+            screen_transition->_callbacks_effect_2_ended.push_back([](){ScreenTransitionHandler::getInstance().pop();});
+            ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          }
       }
    }
@@ -626,15 +614,12 @@ void Game::resetAfterDeath(const sf::Time& dt)
    if (_level_loading_finished && !_level_loading_finished_previous)
    {
       _level_loading_finished_previous = true;
-
-      if (ScreenTransitionHandler::getInstance()._transition)
-      {
-         ScreenTransitionHandler::getInstance()._transition->startEffect2();
-      }
+      ScreenTransitionHandler::getInstance().startEffect2();
    }
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameState(const sf::Time& dt)
 {
    // check if just died
@@ -689,20 +674,13 @@ void Game::update()
    Audio::getInstance()->updateMusic();
 
    // update screen transitions here
-   if (ScreenTransitionHandler::getInstance()._transition)
-   {
-      ScreenTransitionHandler::getInstance()._transition->update(dt);
-   }
+   ScreenTransitionHandler::getInstance().update(dt);
 
-   // reload the level when the save state has been invalidated
+   // reload the level when the save state has been invalidated, that means when a state is selected from the menu
    if (SaveState::getCurrent()._load_level_requested)
    {
-      // reset active screen transitions, also make player alive to avoid starting a death animation
-      _player->reset();
-      ScreenTransitionHandler::getInstance()._transition.reset();
-
       SaveState::getCurrent()._load_level_requested = false;
-      loadLevel();
+      menuLoadRequest();
    }
 
    if (GameState::getInstance().getMode() == ExecutionMode::Paused)
@@ -987,7 +965,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          if (_level_loading_finished)
          {
-            _stored_position_valid = true;
+            _restore_previous_position = true;
             _stored_position = _player->getPixelPositionf();
             loadLevel();
          }
