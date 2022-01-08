@@ -41,6 +41,12 @@ std::shared_ptr<Animation> AnimationPool::add(
    }
 
    const auto& settings = _settings[name];
+
+   if (!settings)
+   {
+      Log::Error() << "animation '" << name << "' is not defined in json";
+   }
+
    auto animation = std::make_shared<Animation>();
 
    animation->setOrigin(settings->_origin[0], settings->_origin[1]);
