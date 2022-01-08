@@ -99,6 +99,7 @@ public:
    const std::shared_ptr<sf::View>& getLevelView() const;
 
    static Level* getCurrentLevel();
+   void syncRoom();
 
 
 protected:
@@ -137,6 +138,7 @@ protected:
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
    void updatePlayerLight();
+   void updateRoom();
 
    void drawDebugInformation();
    void displayTextures();
@@ -147,6 +149,7 @@ protected:
    std::vector<std::shared_ptr<Room>> _rooms;
    std::shared_ptr<Room> _room_current;
    std::shared_ptr<Room> _room_previous;
+   bool _room_synced = false;
 
    std::shared_ptr<sf::RenderTexture> _render_texture_level;
    std::shared_ptr<sf::RenderTexture> _render_texture_level_background;

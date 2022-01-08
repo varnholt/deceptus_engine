@@ -22,6 +22,7 @@
 
 class Animation;
 class GameContactListener;
+struct ScreenTransition;
 class Weapon;
 struct WeaponSystem;
 
@@ -201,6 +202,8 @@ private:
 
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
+   std::unique_ptr<ScreenTransition> makeFadeTransition();
+
 
    std::shared_ptr<WeaponSystem> _weapon_system;
    std::shared_ptr<ExtraManager> _extra_manager;
@@ -256,5 +259,6 @@ private:
    std::deque<PositionedAnimation> _last_animations;
 
    static Player* __current;
+   void goToPortal(auto portal);
 };
 

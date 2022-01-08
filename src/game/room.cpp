@@ -70,37 +70,32 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
 }
 
 
-bool Room::correctedCamera(float& x, float& y, float focusOffset, float view_ratio_y) const
+bool Room::correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const
 {
-
-/*
-
-      +--------------->----+-----<--------------------------------+
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      +--------------->----+-----<--------------------------------+--- y = player y + screen height / 1.5
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      |               |    |     |                                |
-      +--------------->----+-----<--------------------------------+
-                      |    |     |
-                      |    |     |
-                   focus   |   focus
-                   zone 0  |   zone 1
-                           |
-                           |
-                         player x
-*/
-
+   //       +--------------->----+-----<--------------------------------+
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       +--------------->----+-----<--------------------------------+--- y = player y + screen height / 1.5
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       |               |    |     |                                |
+   //       +--------------->----+-----<--------------------------------+
+   //                       |    |     |
+   //                       |    |     |
+   //                    focus   |   focus
+   //                    zone 0  |   zone 1
+   //                            |
+   //                            |
+   //                          player x
 
    if (_rects.empty())
    {
@@ -135,8 +130,8 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float view_rat
    const auto half_width  = static_cast<float>(config._view_width / 2.0f);
    const auto height = static_cast<float>(config._view_height);
 
-   const auto l = pos + sf::Vector2f{- half_width - focusOffset, 0.0f};
-   const auto r = pos + sf::Vector2f{  half_width - focusOffset, 0.0f};
+   const auto l = pos + sf::Vector2f{- half_width - focus_offset, 0.0f};
+   const auto r = pos + sf::Vector2f{  half_width - focus_offset, 0.0f};
 
    const auto height_top = height * (1.0f - 1.0f / view_ratio_y);
    const auto height_bottom = height / view_ratio_y;
@@ -149,13 +144,13 @@ bool Room::correctedCamera(float& x, float& y, float focusOffset, float view_rat
    if (!rect.contains(l))
    {
       // camera center is out of left boundary
-      x = rect.left + half_width + focusOffset;
+      x = rect.left + half_width + focus_offset;
       corrected = true;
    }
    else if (!rect.contains(r))
    {
       // camera center is out of right boundary
-      x = rect.left + rect.width - half_width + focusOffset;
+      x = rect.left + rect.width - half_width + focus_offset;
       corrected = true;
    }
 
@@ -370,6 +365,97 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
 }
 
 
+std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   auto fade_out = std::make_shared<FadeTransitionEffect>();
+   auto fade_in = std::make_shared<FadeTransitionEffect>();
+
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = _fade_out_speed;
+
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = _fade_in_speed;
+
+   screen_transition->_effect_1 = fade_out;
+   screen_transition->_effect_2 = fade_in;
+
+   screen_transition->_delay_between_effects_ms = _delay_between_effects_ms;
+
+   return std::move(screen_transition);
+}
+
+
+void Room::movePlayerToRoomStartPosition()
+{
+   const auto entered_direction = enteredDirection(Player::getCurrent()->getPixelPositionf());
+
+   if (_start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(_start_position_l.value().x),
+         static_cast<float>(_start_position_l.value().y)
+      );
+   }
+   else if (_start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(_start_position_r.value().x),
+         static_cast<float>(_start_position_r.value().y)
+      );
+   }
+   else if (_start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(_start_position_t.value().x),
+         static_cast<float>(_start_position_t.value().y)
+      );
+   }
+   else if (_start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(_start_position_b.value().x),
+         static_cast<float>(_start_position_b.value().y)
+      );
+   }
+
+   if (_start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
+   {
+      auto player_pos = Player::getCurrent()->getPixelPositioni();
+      player_pos += _start_offset_l.value();
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(player_pos.x),
+         static_cast<float>(player_pos.y)
+      );
+   }
+   else if (_start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
+   {
+      auto player_pos = Player::getCurrent()->getPixelPositioni();
+      player_pos += _start_offset_r.value();
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(player_pos.x),
+         static_cast<float>(player_pos.y)
+      );
+   }
+}
+
+
+void Room::syncCamera()
+{
+   if (_camera_sync_after_fade_out)
+   {
+      _camera_locked = false;
+      auto& camera = CameraSystem::getCameraSystem();
+      camera.setRoom(getptr());
+      camera.syncNow();
+
+      // apply room start position if available
+      movePlayerToRoomStartPosition();
+   }
+}
+
+
 void Room::startTransition()
 {
    if (!_transition_effect.has_value())
@@ -381,94 +467,11 @@ void Room::startTransition()
    {
       case TransitionEffect::FadeOutFadeIn:
       {
-         auto screen_transition = std::make_unique<ScreenTransition>();
-         auto fade_out = std::make_shared<FadeTransitionEffect>();
-         auto fade_in = std::make_shared<FadeTransitionEffect>();
-
-         fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
-         fade_out->_speed = _fade_out_speed;
-
-         fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
-         fade_in->_value = 1.0f;
-         fade_in->_speed = _fade_in_speed;
-
-         screen_transition->_effect_1 = fade_out;
-         screen_transition->_effect_2 = fade_in;
-
-         screen_transition->_delay_between_effects_ms = _delay_between_effects_ms;
+         auto screen_transition = makeFadeTransition();
+         screen_transition->_callbacks_effect_1_ended.push_back([this](){syncCamera();});
+         screen_transition->_callbacks_effect_2_ended.push_back([](){ScreenTransitionHandler::getInstance().pop();});
          screen_transition->startEffect1();
-
-         screen_transition->_callbacks_effect_1_ended.push_back(
-            [this](){
-               if (_camera_sync_after_fade_out)
-               {
-                  _camera_locked = false;
-                  auto& camera = CameraSystem::getCameraSystem();
-                  camera.setRoom(getptr());
-                  camera.syncNow();
-
-                  // apply room start position if available
-                  const auto entered_direction = enteredDirection(Player::getCurrent()->getPixelPositionf());
-
-                  if (_start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
-                  {
-                     Player::getCurrent()->setBodyViaPixelPosition(
-                        static_cast<float>(_start_position_l.value().x),
-                        static_cast<float>(_start_position_l.value().y)
-                     );
-                  }
-                  else if (_start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
-                  {
-                     Player::getCurrent()->setBodyViaPixelPosition(
-                        static_cast<float>(_start_position_r.value().x),
-                        static_cast<float>(_start_position_r.value().y)
-                     );
-                  }
-                  else if (_start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
-                  {
-                     Player::getCurrent()->setBodyViaPixelPosition(
-                        static_cast<float>(_start_position_t.value().x),
-                        static_cast<float>(_start_position_t.value().y)
-                     );
-                  }
-                  else if (_start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
-                  {
-                     Player::getCurrent()->setBodyViaPixelPosition(
-                        static_cast<float>(_start_position_b.value().x),
-                        static_cast<float>(_start_position_b.value().y)
-                     );
-                  }
-
-                  if (_start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
-                  {
-                     auto player_pos = Player::getCurrent()->getPixelPositioni();
-                     player_pos += _start_offset_l.value();
-                     Player::getCurrent()->setBodyViaPixelPosition(
-                        static_cast<float>(player_pos.x),
-                        static_cast<float>(player_pos.y)
-                     );
-                  }
-                  else if (_start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
-                  {
-                     auto player_pos = Player::getCurrent()->getPixelPositioni();
-                     player_pos += _start_offset_r.value();
-                     Player::getCurrent()->setBodyViaPixelPosition(
-                        static_cast<float>(player_pos.x),
-                        static_cast<float>(player_pos.y)
-                     );
-                  }
-               }
-            }
-         );
-
-         screen_transition->_callbacks_effect_2_ended.push_back(
-            [](){
-               ScreenTransitionHandler::getInstance()._transition.reset();
-            }
-         );
-
-         ScreenTransitionHandler::getInstance()._transition = std::move(screen_transition);
-
+         ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          break;
       }
    }

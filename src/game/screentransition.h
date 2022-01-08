@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <chrono>
+#include <deque>
 #include <functional>
 #include <memory>
 
@@ -41,7 +42,16 @@ private:
 
 struct ScreenTransitionHandler
 {
-   std::unique_ptr<ScreenTransition> _transition;
+   void push(std::unique_ptr<ScreenTransition>);
+   void pop();
+   void clear();
+   void startEffect2();
+   bool active() const;
+
+   std::deque<std::unique_ptr<ScreenTransition>> _transitions;
+
+   void draw(const std::shared_ptr<sf::RenderTexture>& window);
+   void update(const sf::Time& dt);
 
    static ScreenTransitionHandler& getInstance();
 };
