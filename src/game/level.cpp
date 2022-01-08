@@ -764,7 +764,6 @@ void Level::initialize()
    _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 
    loadCheckpoint();
-
    spawnEnemies();
 }
 
@@ -961,13 +960,29 @@ void Level::updateViews()
 
 
 //-----------------------------------------------------------------------------
+void Level::updateRoom()
+{
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::syncRoom()
+{
+   auto& camera_system = CameraSystem::getCameraSystem();
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+   camera_system.setRoom(_room_current);
+}
+
+
+//-----------------------------------------------------------------------------
 void Level::updateCameraSystem(const sf::Time& dt)
 {
    auto& camera_system = CameraSystem::getCameraSystem();
 
    // update room
    const auto prev_room = _room_current;
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+   updateRoom();
 
    // room changed
    if (prev_room != _room_current)
@@ -989,8 +1004,9 @@ void Level::updateCameraSystem(const sf::Time& dt)
          camera_system.setRoom(_room_current);
       }
 
-      // trigger transition effect here if configured
-      if (_room_current && _room_current->_transition_effect.has_value())
+      // trigger transition effect
+      // when level has been loaded, room changes certainly do not require a transition
+      if (_room_synced && _room_current)
       {
          _room_current->startTransition();
       }
@@ -1001,6 +1017,8 @@ void Level::updateCameraSystem(const sf::Time& dt)
    {
       camera_system.update(dt, _view_width, _view_height);
    }
+
+   _room_synced = true;
 }
 
 
@@ -1748,7 +1766,7 @@ void Level::parsePhysicsTiles(
 
 
 //-----------------------------------------------------------------------------
-const sf::Vector2f &Level::getStartPosition() const
+const sf::Vector2f& Level::getStartPosition() const
 {
    return _start_position;
 }

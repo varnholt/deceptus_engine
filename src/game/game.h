@@ -21,6 +21,7 @@
 
 class Level;
 class Player;
+struct ScreenTransition;
 
 
 class Game
@@ -79,9 +80,10 @@ private:
    void toggleFullScreen();
    void togglePause();
    void changeResolution(int32_t w, int32_t h);
+   void goToLastCheckpoint();
+   void menuLoadRequest();
+   std::unique_ptr<ScreenTransition> makeFadeOutFadeIn();
 
-
-private:
 
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
@@ -98,7 +100,7 @@ private:
    std::atomic<bool> _level_loading_finished = false;
    std::atomic<bool> _level_loading_finished_previous = false; // keep track of level loading in an async manner
    std::future<void> _level_loading_thread;
-   bool _stored_position_valid = false;
+   bool _restore_previous_position = false;
    sf::Vector2f _stored_position;
 
    int32_t _fps = 0;
