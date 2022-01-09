@@ -1535,13 +1535,10 @@ void Level::addChainToWorld(
    body_def.position.Set(0, 0);
    body_def.type = b2_staticBody;
 
-   b2Body* body = _world->CreateBody(&body_def);
-
+   auto body = _world->CreateBody(&body_def);
    auto fixture = body->CreateFixture(&fixture_def);
-
    auto object_data = new FixtureNode(this);
    object_data->setType(object_type);
-
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
