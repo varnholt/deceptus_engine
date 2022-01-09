@@ -1190,7 +1190,7 @@ int32_t addSample(lua_State* state)
    if (argc == 1)
    {
       auto sample = lua_tostring(state, 1);
-      Audio::getInstance()->addSample(sample);
+      Audio::getInstance().addSample(sample);
    }
 
    return 0;
@@ -1214,7 +1214,7 @@ int32_t playSample(lua_State* state)
       auto sample = lua_tostring(state, 1);
       auto volume = static_cast<float>(lua_tonumber(state, 2));
 
-      Audio::getInstance()->playSample(sample, volume);
+      Audio::getInstance().playSample(sample, volume);
    }
 
    return 0;
