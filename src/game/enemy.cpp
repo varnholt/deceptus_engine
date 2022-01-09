@@ -144,22 +144,23 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
       }
    }
 
-   if (!_has_path)
+   if (_has_path)
    {
-      // not an error, enemy might just have a fixed position
-      // Log::Warning << "object " << mId << " (" << mName << ") has invalid chain";
-   }
-   else
-   {
-      //      for (const auto& v :  std::ranges::views::reverse(_path)) {
-      //         _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
-      //         _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
-      //      }
-
-      for (const auto& v : _path)
+      if (_inverse_path)
       {
-         _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
-         _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
+         for (const auto& v :  std::ranges::views::reverse(_path))
+         {
+            _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
+            _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
+         }
+      }
+      else
+      {
+         for (const auto& v : _path)
+         {
+            _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
+            _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
+         }
       }
    }
 }

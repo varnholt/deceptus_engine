@@ -859,8 +859,10 @@ void Level::spawnEnemies()
          json_description._start_position.push_back(it.second._pixel_position.y);
 
          const auto& generate_path_property = it.second.findProperty("generate_path");
+         const auto& inverse_path_property = it.second.findProperty("inverse_path");
          if (generate_path_property.has_value() && generate_path_property.value()._value == "1")
          {
+            it.second._inverse_path = (inverse_path_property.has_value() && inverse_path_property.value()._value == "1");
             it.second.addPaths(_world_chains);
          }
 

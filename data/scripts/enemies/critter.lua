@@ -48,7 +48,7 @@ properties = {
 mPosition = v2d.Vector2D(0, 0)
 mElapsed = math.random(0, 100)
 mSpriteIndex = 0
-mPointsLeft = math.random() < 0.5
+mPointsLeft = true
 mSpeed = 1.0
 
 EPSILON = 0.0001
@@ -136,18 +136,9 @@ function update(dt)
    mElapsed = mElapsed + dt
 
    val = math.fmod(mSpeed * mElapsed * 0.2, 1.0)
-   if (mPointsLeft) then
-      p = getValueLinear(mPatrolPath, val);
-   else
-      p = getValueLinear(mPatrolPath, 1.0 - val);
-   end
+   p = getValueLinear(mPatrolPath, val);
 
-   setTransform(
-      p:getX(),
-      p:getY(),
-      0.0
-   )
-
+   setTransform(p:getX(), p:getY(), 0.0)
    updateSprite(p)
 
    mPosition = p
@@ -259,5 +250,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function writeProperty(key, value)
+   if (key == "inverse_path") then
+      mPointsLeft = not (value == "1")
+   end
 end
 
