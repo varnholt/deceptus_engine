@@ -7,8 +7,6 @@
 #include <filesystem>
 
 
-Audio* Audio::__instance = nullptr;
-
 namespace
 {
 const std::string sfx_root = "data/sounds/";
@@ -22,7 +20,6 @@ const std::string path = "data/music";
  */
 Audio::Audio()
 {
-   __instance = this;
    initializeMusicVolume();
    initializeSamples();
    initializeTracks();
@@ -34,13 +31,9 @@ Audio::Audio()
  * \brief Audio::getInstance
  * \return
  */
-Audio* Audio::getInstance()
+Audio& Audio::getInstance()
 {
-   if (__instance == nullptr)
-   {
-      new Audio();
-   }
-
+   static Audio __instance;
    return __instance;
 }
 
@@ -89,7 +82,7 @@ void Audio::initializeTracks()
          if (path.find(".ogg") != std::string::npos)
          {
             Track track;
-            track.mFilename = path;
+            track._filename = path;
             _tracks.push_back(track);
          }
 
@@ -161,7 +154,7 @@ void Audio::updateMusic()
         _current_index = 0;
     }
 
-    _music.openFromFile(_tracks[_current_index].mFilename);
+    _music.openFromFile(_tracks[_current_index]._filename);
     _music.play();
 }
 
