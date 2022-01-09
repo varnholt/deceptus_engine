@@ -16,7 +16,7 @@ struct Enemy
    Enemy() = default;
 
    void parse(TmxObject* object);
-   void addPaths(const std::vector<std::vector<b2Vec2> >& paths);
+   void addPaths(const std::vector<std::vector<b2Vec2>>& paths);
 
    std::optional<ScriptProperty> findProperty(const std::string& key);
 

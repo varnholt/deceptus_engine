@@ -7,7 +7,9 @@
 #include "framework/tmxparser/tmxproperty.h"
 
 #include <iostream>
+#include <ranges>
 #include <sstream>
+
 
 void Enemy::parse(TmxObject* object)
 {
@@ -87,7 +89,7 @@ void Enemy::parse(TmxObject* object)
 
 void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
 {
-   // do destroy existing paths
+   // do not destroy existing paths
    if (!_path.empty())
    {
       return;
@@ -149,6 +151,11 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
    }
    else
    {
+      //      for (const auto& v :  std::ranges::views::reverse(_path)) {
+      //         _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
+      //         _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
+      //      }
+
       for (const auto& v : _path)
       {
          _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
