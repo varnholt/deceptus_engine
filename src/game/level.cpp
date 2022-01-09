@@ -806,6 +806,7 @@ void Level::spawnEnemies()
    // iterate through all enemies in the json
    for (auto& json_description : _description->_enemies)
    {
+      Log::Warning() << "deprecated: define enemies inside your TMX instead of JSON";
       auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + json_description._script);
 
       // find matching enemy data from the tmx layer and retrieve the patrol path from there
@@ -857,7 +858,8 @@ void Level::spawnEnemies()
          json_description._start_position.push_back(it.second._pixel_position.x);
          json_description._start_position.push_back(it.second._pixel_position.y);
 
-         if (json_description._generate_path)
+         const auto& generate_path_property = it.second.findProperty("generate_path");
+         if (generate_path_property.has_value() && generate_path_property.value()._value == "1")
          {
             it.second.addPaths(_world_chains);
          }
@@ -877,6 +879,10 @@ void Level::spawnEnemies()
          lua_node->_enemy_description = json_description;
          lua_node->initialize();
          _enemies.push_back(lua_node);
+      }
+      else
+      {
+         Log::Error() << "missing script definition";
       }
    }
 }
