@@ -43,6 +43,14 @@ class LevelMap;
 class TmxParser;
 
 
+/*! \brief Implements all level-related logic
+ *         That includes deserialization of all level-data, updating mechanisms and rendering them.
+ *         Level physics information is transformed into a Box2D representation that handles collision detection.
+ *
+ *  The Level implementation loads all information from TMX in the load() function, all tile maps and animations,
+ *  mechanisms, the Box2D world and LUA-based enemies are updated inside update(). Drawing of all effects and tile maps
+ *  happens inside draw().
+ */
 class Level : public GameNode
 {
 

@@ -5,20 +5,6 @@
 #include <iostream>
 
 
-// the concept is simple:
-//    when the player moves upwards into a one way wall, the contact is disabled
-//    when the player moves downwards into a one way wall, the contact is NOT disabled
-//
-// to make this work, box2d code has been modified so that contacts that have been
-// disabled once will remain disabled. see code change below:
-//
-// void b2Contact::Update(b2ContactListener* listener)
-// {
-//    b2Manifold oldManifold = m_manifold;
-//
-//    // Re-enable this contact.
-//    // m_flags |= e_enabledFlag;
-
 
 OneWayWall& OneWayWall::instance()
 {

@@ -7,6 +7,12 @@
 
 #include "player/playerinfo.h"
 
+
+/*! \brief SaveState is the data written to disk when needed.
+ *         That includes for instance reached checkpoints and collected extras.
+ *
+ * SaveStates are written to disk each time the player reaches a checkpoint.
+ */
 struct SaveState
 {
    SaveState() = default;
