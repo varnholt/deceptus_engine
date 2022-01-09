@@ -28,6 +28,7 @@ struct Enemy
    std::vector<b2Vec2> _path;
    std::vector<int32_t> _pixel_path;
    bool _has_path = false;
+   bool _inverse_path = false;
    std::vector<ScriptProperty> _properties;
 };
 
