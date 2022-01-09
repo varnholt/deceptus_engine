@@ -100,7 +100,7 @@ void MenuScreenAudio::set(int32_t x)
     }
 
     GameConfiguration::getInstance().serializeToFile();
-    Audio::getInstance()->initializeMusicVolume();
+    Audio::getInstance().initializeMusicVolume();
 
     updateLayers();
 }

@@ -671,7 +671,7 @@ void Game::update()
    _delta_clock.restart();
 
    Timer::update(Timer::Scope::UpdateAlways);
-   Audio::getInstance()->updateMusic();
+   Audio::getInstance().updateMusic();
 
    // update screen transitions here
    ScreenTransitionHandler::getInstance().update(dt);
@@ -903,7 +903,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    {
       case sf::Keyboard::Num0:
       {
-         Audio::getInstance()->playSample("powerup.wav");
+         Audio::getInstance().playSample("powerup.wav");
 
          if (SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
          {

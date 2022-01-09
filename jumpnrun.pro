@@ -189,7 +189,6 @@ SOURCES += \
    src/game/player/playerjump.cpp \
    src/game/sword.cpp \
    src/game/preloader.cpp \
-   src/game/progresssettings.cpp \
    src/game/overlays/rainoverlay.cpp \
    src/game/projectile.cpp \
    src/game/projectilehitanimation.cpp \
@@ -417,7 +416,6 @@ HEADERS += \
    src/game/player/playercontrols.h \
    src/game/player/playerinfo.h \
    src/game/player/playerjump.h \
-   src/game/progresssettings.h \
    src/game/overlays/rainoverlay.h \
    src/game/room.h \
    src/game/savestate.h \
