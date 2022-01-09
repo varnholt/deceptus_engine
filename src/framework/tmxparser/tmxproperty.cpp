@@ -30,7 +30,7 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element)
    {
       _value_float = element->FloatAttribute("value");
    }
-   else if (_value_type == "string" )
+   else if (_value_type == "string")
    {
       _value_string = element->Attribute("value");
    }
@@ -43,23 +43,23 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element)
 
 std::string TmxProperty::toString() const
 {
-   if (_value_string.has_value())
+   if (_value_type == "string" )
    {
       return _value_string.value();
    }
-   else if (_value_float.has_value())
+   else if (_value_type == "float")
    {
       std::ostringstream stream;
       stream << _value_float.value();
       return stream.str();
    }
-   else if (_value_int.has_value())
+   else if (_value_type == "int")
    {
       std::ostringstream stream;
       stream << _value_int.value();
       return stream.str();
    }
-   else if (_value_bool.has_value())
+   else if (_value_type == "bool")
    {
       std::ostringstream stream;
       stream << _value_bool.value();
