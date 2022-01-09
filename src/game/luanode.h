@@ -20,6 +20,13 @@
 
 struct lua_State;
 
+
+/*! \brief LuaNode is the class that implements scripted enemies.
+ *         Enemy behavior is implemented in lua scripts, one instance is created for each enemy in the game.
+ *
+ * The LuaNode behavior is driven from two directions; the scripts can call each callback registered in setupLua.
+ * From the C++ end, the scripts can be driven by calling lua* functions such as luaHit, luaDie, etc.
+ */
 struct LuaNode : public GameNode
 {
    LuaNode(const std::string &filename);

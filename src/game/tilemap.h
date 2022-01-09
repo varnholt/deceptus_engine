@@ -16,6 +16,12 @@ struct TmxTile;
 struct TmxTileSet;
 
 
+/*! \brief A tile map implementation that loads its data from TMX structures.
+ *         A tile map is an array of tiles.
+ *
+ *  For each tile loaded from a TMX tile layer, an OpenGL quad is created using the UV and texture
+ *  from the TMX tile set that's provided. TileMap also supports tile animations, implemented in AnimatedTile.
+ */
 class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:

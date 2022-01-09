@@ -9,6 +9,13 @@
 #include "framework/image/layer.h"
 
 
+/*! \brief Implements a simple message box
+ *         The MessageBox class is implemented in a way that only a single messagebox is shown at a time (modal).
+ *
+ *  To show a messagebox, the functions 'info' and 'question' can be called; the message box output
+ *  is retrieved by passing in a MessageBoxCallback. The message box design is configured by passing in
+ *  an instance of LayoutProperties.
+ */
 class MessageBox
 {
    public:
