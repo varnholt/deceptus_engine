@@ -15,6 +15,12 @@
 struct ScreenTransition;
 
 
+/*! \brief Room representation used by the camera system
+ *         The room class limits the camera system to a defined area.
+ *
+ *  A room can be defined as one or more rectangles. When configured accordingly,
+ *  there can be animated transitions between rooms.
+ */
 struct Room : std::enable_shared_from_this<Room>
 {
    std::shared_ptr<Room> getptr() {
@@ -43,6 +49,8 @@ struct Room : std::enable_shared_from_this<Room>
 
    void startTransition();
    void lockCamera();
+   void movePlayerToRoomStartPosition();
+   void syncCamera();
 
    EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
    std::optional<sf::FloatRect> activeRect(const sf::Vector2f& player_pos_px) const;
@@ -74,9 +82,5 @@ struct Room : std::enable_shared_from_this<Room>
    std::optional<sf::Vector2i> _start_position_b;
    std::optional<sf::Vector2i> _start_offset_l;
    std::optional<sf::Vector2i> _start_offset_r;
-
-   private:
-   void movePlayerToRoomStartPosition();
-   void syncCamera();
 };
 

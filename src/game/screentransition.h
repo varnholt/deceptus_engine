@@ -10,7 +10,12 @@
 
 struct ScreenTransitionEffect;
 
-
+/*! \brief A ScreenTransition is an animated effect transitioning from one screen to aother.
+ *         This could be something as simple as 'fade out', 'fade in'.
+ *
+ *  Each transition can either have one or two defined effects that may have a delay between them.
+ *  The transitions are linked using a simple callback, TransitionCallback.
+ */
 struct ScreenTransition
 {
    ScreenTransition() = default;

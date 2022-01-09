@@ -8,6 +8,11 @@
 #include <SFML/Graphics.hpp>
 
 
+/*! \brief A texture cache implementation
+ *         It holds weak pointers to textures so they get deleted once no longer needed.
+ *
+ *  A shared_ptr is retrieved by just passing in a path to the texture.
+ */
 class TexturePool
 {
 
