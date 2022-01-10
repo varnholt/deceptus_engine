@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
+#include "tinyxml2/tinyxml2.h"
+
+struct TmxElement;
 struct TmxLayer;
 struct TmxObjectGroup;
 struct TmxTileSet;
-
-// forward declarations
-struct TmxElement;
 
 class TmxParser
 {
@@ -24,5 +24,8 @@ class TmxParser
    protected:
 
       std::vector<TmxElement*> _elements;
+      void parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z);
+
+      std::string _filename;
 };
 
