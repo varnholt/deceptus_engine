@@ -27,10 +27,10 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
 {
    TmxElement::deserialize(xml_element);
 
-   tinyxml2::XMLNode* node = xml_element->FirstChild();
+   auto node = xml_element->FirstChild();
    while(node != nullptr)
    {
-      tinyxml2::XMLElement* sub_element = node->ToElement();
+      auto sub_element = node->ToElement();
       if (sub_element != nullptr)
       {
          TmxElement* element = nullptr;

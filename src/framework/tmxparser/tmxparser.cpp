@@ -1,7 +1,7 @@
 #include "tmxparser.h"
 
 #include "framework/tools/log.h"
-#include "tinyxml2/tinyxml2.h"
+
 #include "tmximagelayer.h"
 #include "tmxobjectgroup.h"
 #include "tmxlayer.h"
@@ -12,71 +12,93 @@
 #include <iostream>
 
 
-void TmxParser::parse(const std::string &filename)
+void TmxParser::parse(const std::string& filename)
 {
+   _filename = filename;
    auto z = 0;
 
    tinyxml2::XMLDocument doc;
    if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
    {
-      tinyxml2::XMLElement* doc_element = doc.FirstChildElement();
-      tinyxml2::XMLNode* n = doc_element->FirstChild();
+      auto doc_element = doc.FirstChildElement();
+      auto n = doc_element->FirstChild();
 
-      while(n != nullptr)
+      while (n)
       {
-         tinyxml2::XMLElement* subElement = n->ToElement();
-         if (subElement != nullptr)
+         auto sub_element = n->ToElement();
+         if (!sub_element)
          {
-            TmxElement* element = nullptr;
-            TmxLayer* layer = nullptr;
+            continue;
+         }
 
-            if (subElement->Name() == std::string("tileset"))
+         // groups are just flattened
+         if (sub_element->Name() == std::string("group"))
+         {
+            auto nested_child = sub_element->FirstChild();
+            while (nested_child)
             {
-               element = new TmxTileSet();
-               dynamic_cast<TmxTileSet*>(element)->_path = std::filesystem::path(filename).parent_path();
-            }
-            else if (subElement->Name() == std::string("layer"))
-            {
-               element = new TmxLayer();
-               layer = dynamic_cast<TmxLayer*>(element);
-            }
-            else if (subElement->Name() == std::string("imagelayer"))
-            {
-               element = new TmxImageLayer();
-               dynamic_cast<TmxImageLayer*>(element)->_z = z;
-            }
-            else if (subElement->Name() == std::string("objectgroup"))
-            {
-               element = new TmxObjectGroup();
-               dynamic_cast<TmxObjectGroup*>(element)->_z_index = z;
-            }
-
-            if (element != nullptr)
-            {
-               element->deserialize(subElement);
-
-               if (layer && layer->_properties)
-               {
-                  auto& map = layer->_properties->_map;
-                  auto it = map.find("z");
-                  if (it != map.end())
-                  {
-                     z = it->second->_value_int.value();
-                  }
-                  dynamic_cast<TmxLayer*>(element)->_z = z;
-               }
-
-               _elements.push_back(element);
-            }
-            else
-            {
-               Log::Error() << subElement->Name() << " is not supported";
-            }
+               // std::cout << "parse " << nested_child->ToElement()->Name() << std::endl;
+               parseSubElement(nested_child->ToElement(), z);
+               nested_child = nested_child->NextSibling();
+            };
+         }
+         else
+         {
+            parseSubElement(sub_element, z);
          }
 
          n = n->NextSibling();
       }
    }
+}
+
+
+void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
+{
+   TmxElement* sub_element_parsed = nullptr;
+   TmxLayer* layer = nullptr;
+
+   if (sub_element->Name() == std::string("tileset"))
+   {
+      sub_element_parsed = new TmxTileSet();
+      dynamic_cast<TmxTileSet*>(sub_element_parsed)->_path = std::filesystem::path(_filename).parent_path();
+   }
+   else if (sub_element->Name() == std::string("layer"))
+   {
+      sub_element_parsed = new TmxLayer();
+      layer = dynamic_cast<TmxLayer*>(sub_element_parsed);
+   }
+   else if (sub_element->Name() == std::string("imagelayer"))
+   {
+      sub_element_parsed = new TmxImageLayer();
+      dynamic_cast<TmxImageLayer*>(sub_element_parsed)->_z = z;
+   }
+   else if (sub_element->Name() == std::string("objectgroup"))
+   {
+      sub_element_parsed = new TmxObjectGroup();
+      dynamic_cast<TmxObjectGroup*>(sub_element_parsed)->_z_index = z;
+   }
+
+   if (!sub_element_parsed)
+   {
+      Log::Error() << sub_element->Name() << " is not supported";
+      return;
+   }
+
+   sub_element_parsed->deserialize(sub_element);
+
+   if (layer && layer->_properties)
+   {
+      auto& map = layer->_properties->_map;
+      auto it = map.find("z");
+      if (it != map.end())
+      {
+         z = it->second->_value_int.value();
+      }
+      dynamic_cast<TmxLayer*>(sub_element_parsed)->_z = z;
+   }
+
+   _elements.push_back(sub_element_parsed);
 }
 
 
@@ -86,9 +108,9 @@ std::vector<TmxElement*> TmxParser::getElements() const
 }
 
 
-std::vector<TmxObjectGroup *> TmxParser::retrieveObjectGroups() const
+std::vector<TmxObjectGroup*> TmxParser::retrieveObjectGroups() const
 {
-   std::vector<TmxObjectGroup *> object_groups;
+   std::vector<TmxObjectGroup*> object_groups;
    for (auto element : _elements)
    {
       if (element->_type == TmxElement::TypeObjectGroup)
@@ -101,7 +123,7 @@ std::vector<TmxObjectGroup *> TmxParser::retrieveObjectGroups() const
 }
 
 
-TmxTileSet *TmxParser::getTileSet(TmxLayer* layer)
+TmxTileSet* TmxParser::getTileSet(TmxLayer* layer)
 {
    // get maximum tile id per layer
    int32_t tile_id = 0;
