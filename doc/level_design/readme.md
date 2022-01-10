@@ -515,6 +515,9 @@ In order to insert an enemy in your level using the Tiled editor, create an obje
 
 ### Adding Enemies with Tiled and level.json
 
+#### Deprecation note
+The approach below is not going to be supported for much longer since you can (and should) define all your objects inside your TMX file.
+
 In order to make things a bit more confusing, there's even a third way to place enemies inside your level. And the choice is really up to you, there's no 'wrong' way to do it. In this method, you just place a rectangle object inside your `enemies` object group and remember its _Object ID_.
 
 ![](images/enemies_ref.png)
@@ -613,6 +616,7 @@ Small spiky enemy that can crawl up walls and simply goes its way round and roun
 |-|-|-|
 |script|string|`critter.lua`|
 |generate_path|bool|If `true`, the Deceptus Engine will automatically trace the edge the Critter has been placed on and turn it into a path. Then the Critter will follow this path. This only works for closed loops.|
+|inverse_path|bool|If `true`, the inverse path will be generated, i.e. the critter will move the opposite way.|
 
 <br>
 
