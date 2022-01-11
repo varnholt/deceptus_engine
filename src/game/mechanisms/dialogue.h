@@ -2,9 +2,10 @@
 
 #include "gamemechanism.h"
 
-#include <vector>
-#include <string>
+#include <optional>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
@@ -48,7 +49,7 @@ private:
    bool _played = false;
    bool _active = false;
    bool _button_required = true;
-   bool _consumed = false;
+   std::optional<int32_t> _consumed_counter;
 };
 
 
