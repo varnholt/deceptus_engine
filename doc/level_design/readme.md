@@ -412,6 +412,7 @@ Each message box has the custom properties below:
 |03|string|The third message to show|
 |nn|string|The nth message to show, you get the idea...|
 |color|color|The color of the message box|
+|open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed.|
 
 
 <br><br>
