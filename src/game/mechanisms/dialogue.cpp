@@ -42,6 +42,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmx_object)
    if (open_automatically_it != properties->_map.end())
    {
       dialogue->_button_required = !((*open_automatically_it).second->_value_bool.value());
+      dialogue->_consumed_counter = 1;
    }
 
    dialogue->_pixel_rect = sf::IntRect{
@@ -75,7 +76,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
       return;
    }
 
-   if (_consumed)
+   if (_consumed_counter.has_value() && _consumed_counter == 0)
    {
       return;
    }
@@ -94,15 +95,9 @@ void Dialogue::update(const sf::Time& /*dt*/)
          showNext();
       }
 
-      // if no button press is required, the dialog should no longer be shown after
-      // displaying it once. however, it might make more sense to have different display
-      // types, such as
-      // - ShowAlways
-      // - ShowOnce
-      // - ShowNTimes
-      if (!_button_required)
+      if (_consumed_counter.has_value())
       {
-         _consumed = true;
+         (*_consumed_counter)--;
       }
    }
    else
