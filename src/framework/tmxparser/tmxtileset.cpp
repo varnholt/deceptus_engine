@@ -29,40 +29,44 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
    _columns    = element->IntAttribute("columns");
    _rows       = _columns > 0 ? (_tile_count / _columns) : 0;
 
-   tinyxml2::XMLNode* node = element->FirstChild();
-   while(node != nullptr)
+   auto node = element->FirstChild();
+   while (node)
    {
-      tinyxml2::XMLElement* childElement = node->ToElement();
-      if (childElement != nullptr)
+      auto child_element = node->ToElement();
+
+      if (!child_element)
       {
-         TmxElement* tmp = nullptr;
-         TmxTile* tile = nullptr;
+         node = node->NextSibling();
+         continue;
+      }
 
-         if (childElement->Name() == std::string("image"))
-         {
-            _image = new TmxImage();
-            tmp = _image;
-         }
-         else if (childElement->Name() == std::string("tile"))
-         {
-            tile = new TmxTile();
-            tmp = tile;
-         }
+      TmxElement* tmp = nullptr;
+      TmxTile* tile = nullptr;
 
-         // deserialize detected elements
-         if (tmp != nullptr)
-         {
-            tmp->deserialize(childElement);
-         }
-         else
-         {
-            Log::Error() << childElement->Name() << " is not supported for TmxTileSet";
-         }
+      if (child_element->Name() == std::string("image"))
+      {
+         _image = new TmxImage();
+         tmp = _image;
+      }
+      else if (child_element->Name() == std::string("tile"))
+      {
+         tile = new TmxTile();
+         tmp = tile;
+      }
 
-         if (tile != nullptr)
-         {
-            _tile_map[tile->_id] = tile;
-         }
+      // deserialize detected elements
+      if (tmp != nullptr)
+      {
+         tmp->deserialize(child_element);
+      }
+      else
+      {
+         Log::Error() << child_element->Name() << " is not supported for TmxTileSet";
+      }
+
+      if (tile != nullptr)
+      {
+         _tile_map[tile->_id] = tile;
       }
 
       node = node->NextSibling();

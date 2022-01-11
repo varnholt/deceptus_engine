@@ -11,18 +11,21 @@ TmxAnimation::~TmxAnimation()
 
 void TmxAnimation::deserialize(tinyxml2::XMLElement *element)
 {
-   tinyxml2::XMLNode* node = element->FirstChild();
-   while(node != nullptr)
+   auto node = element->FirstChild();
+   while (node)
    {
-      tinyxml2::XMLElement* sub_element = node->ToElement();
-      if (sub_element != nullptr)
+      auto sub_element = node->ToElement();
+      if (!sub_element)
       {
-         if (sub_element->Name() == std::string("frame"))
-         {
-            TmxFrame* frame = new TmxFrame();
-            _frames.push_back(frame);
-            frame->deserialize(sub_element);
-         }
+         node = node->NextSibling();
+         continue;
+      }
+
+      if (sub_element->Name() == std::string("frame"))
+      {
+         auto frame = new TmxFrame();
+         _frames.push_back(frame);
+         frame->deserialize(sub_element);
       }
 
       node = node->NextSibling();

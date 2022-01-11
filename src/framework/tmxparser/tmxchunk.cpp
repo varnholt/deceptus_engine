@@ -39,9 +39,9 @@ void TmxChunk::deserialize(tinyxml2::XMLElement *element)
       auto x = 0;
       const auto row_content = TmxTools::split(line, ',');
 
-      for (const auto& valStr : row_content)
+      for (const auto& val_string : row_content)
       {
-         auto val = std::stoi(valStr);
+         auto val = std::stoi(val_string);
          _data[y * _width_px + x] = val;
          x++;
       }

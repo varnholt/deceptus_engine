@@ -33,73 +33,74 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 
    std::vector<TmxChunk*> chunks;
 
-   tinyxml2::XMLNode* node = element->FirstChild();
-   while (node != nullptr)
+   auto node = element->FirstChild();
+   while (node)
    {
-      tinyxml2::XMLElement* sub_element = node->ToElement();
-
-      if (sub_element != nullptr)
+      auto sub_element = node->ToElement();
+      if (!sub_element)
       {
-         if (sub_element->Name() == std::string("data"))
+         node = node->NextSibling();
+         continue;
+      }
+
+      if (sub_element->Name() == std::string("data"))
+      {
+         auto data_node = sub_element->FirstChild();
+         while (data_node)
          {
-            tinyxml2::XMLNode* data_node = sub_element->FirstChild();
+           auto chunk_element = data_node->ToElement();
 
-            while (data_node != nullptr)
-            {
-              tinyxml2::XMLElement* chunk_element = data_node->ToElement();
+           TmxElement* inner_element = nullptr;
 
-              TmxElement* inner_element = nullptr;
-
-              // process chunk data
-              if (chunk_element)
+           // process chunk data
+           if (chunk_element)
+           {
+              if (chunk_element->Name() == std::string("chunk"))
               {
-                 if (chunk_element->Name() == std::string("chunk"))
-                 {
-                    auto chunk = new TmxChunk();
-                    chunk->deserialize(chunk_element);
-                    inner_element = chunk;
-                    chunks.push_back(chunk);
-                 }
+                 auto chunk = new TmxChunk();
+                 chunk->deserialize(chunk_element);
+                 inner_element = chunk;
+                 chunks.push_back(chunk);
               }
+           }
 
-              // there are no chunks, the layer data is raw
-              if (!inner_element && data_node != nullptr)
+           // there are no chunks, the layer data is raw
+           if (!inner_element && data_node != nullptr)
+           {
+              _data = new int32_t[_width_px * _height_px];
+              std::string data = sub_element->FirstChild()->Value();
+
+              // parse csv data and store it in mData array
+              std::stringstream stream(data);
+              std::string line;
+              int32_t y = 0;
+
+              while(std::getline(stream, line, '\n'))
               {
-                 _data = new int32_t[_width_px * _height_px];
-                 std::string data = sub_element->FirstChild()->Value();
+                 TmxTools::trim(line);
+                 if (line.empty())
+                    continue;
 
-                 // parse csv data and store it in mData array
-                 std::stringstream stream(data);
-                 std::string line;
-                 int32_t y = 0;
-
-                 while(std::getline(stream, line, '\n'))
+                 int32_t x = 0;
+                 std::vector<std::string> rowContent = TmxTools::split(line, ',');
+                 for (const std::string& valStr : rowContent)
                  {
-                    TmxTools::trim(line);
-                    if (line.empty())
-                       continue;
-
-                    int32_t x = 0;
-                    std::vector<std::string> rowContent = TmxTools::split(line, ',');
-                    for (const std::string& valStr : rowContent)
-                    {
-                       int val = std::stoi(valStr);
-                       _data[y * _width_px + x] = val;
-                       x++;
-                    }
-
-                    y++;
+                    int val = std::stoi(valStr);
+                    _data[y * _width_px + x] = val;
+                    x++;
                  }
-              }
 
-              data_node = data_node->NextSibling();
-            }
+                 y++;
+              }
+           }
+
+           data_node = data_node->NextSibling();
          }
-         else if (sub_element->Name() == std::string("properties"))
-         {
-            _properties = new TmxProperties();
-            _properties->deserialize(sub_element);
-         }
+      }
+      else if (sub_element->Name() == std::string("properties"))
+      {
+         _properties = new TmxProperties();
+         _properties->deserialize(sub_element);
       }
 
       node = node->NextSibling();
