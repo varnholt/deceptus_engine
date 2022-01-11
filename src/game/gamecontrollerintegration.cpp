@@ -95,7 +95,9 @@ GameControllerIntegration* GameControllerIntegration::getInstance(int32_t id)
    GameControllerIntegration* gji = nullptr;
 
    if (id >= 0 && id < 10)
+   {
       gji = __instances[id];
+   }
 
    return gji;
 }
