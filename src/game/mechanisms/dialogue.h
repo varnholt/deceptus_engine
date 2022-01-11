@@ -47,6 +47,8 @@ private:
    bool _repeated = false;
    bool _played = false;
    bool _active = false;
+   bool _button_required = true;
+   bool _consumed = false;
 };
 
 

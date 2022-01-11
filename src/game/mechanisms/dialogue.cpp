@@ -17,16 +17,17 @@
 #include <string>
 
 
-std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmxObject)
+std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmx_object)
 {
    auto dialogue = std::make_shared<Dialogue>();
 
-   auto properties = tmxObject->_properties;
+   auto properties = tmx_object->_properties;
+
+   // parse dialogue items
    for (auto i = 0u; i < 99; i++)
    {
       std::ostringstream oss;
       oss << std::setw(2) << std::setfill('0') << i;
-
       const auto& it_dialogue_items = properties->_map.find(oss.str());
       if (it_dialogue_items != properties->_map.end())
       {
@@ -36,11 +37,18 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmxObject)
       }
    }
 
+   // parse other properties
+   const auto open_automatically_it = properties->_map.find("open_automatically");
+   if (open_automatically_it != properties->_map.end())
+   {
+      dialogue->_button_required = !((*open_automatically_it).second->_value_bool.value());
+   }
+
    dialogue->_pixel_rect = sf::IntRect{
-      static_cast<int32_t>(tmxObject->_x_px),
-      static_cast<int32_t>(tmxObject->_y_px),
-      static_cast<int32_t>(tmxObject->_width_px),
-      static_cast<int32_t>(tmxObject->_height_px)
+      static_cast<int32_t>(tmx_object->_x_px),
+      static_cast<int32_t>(tmx_object->_y_px),
+      static_cast<int32_t>(tmx_object->_width_px),
+      static_cast<int32_t>(tmx_object->_height_px)
    };
 
    return dialogue;
@@ -62,14 +70,18 @@ void Dialogue::update(const sf::Time& /*dt*/)
    // check whether up button is pressed
    // actually there could be a number of 'message box activation buttons' here but for
    // now it might be sufficient to just check for the up button
-   if (!Player::getCurrent()->getControls()->isUpButtonPressed())
+   if (_button_required && !Player::getCurrent()->getControls()->isUpButtonPressed())
    {
       return;
    }
 
-   auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+   if (_consumed)
+   {
+      return;
+   }
 
-   if (playerRect.intersects(_pixel_rect))
+   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   if (player_rect.intersects(_pixel_rect))
    {
       // message boxes might already be marked as inactive, however
       // they might still be fading out. the display mode 'modal', however
@@ -80,6 +92,17 @@ void Dialogue::update(const sf::Time& /*dt*/)
       {
          setActive(true);
          showNext();
+      }
+
+      // if no button press is required, the dialog should no longer be shown after
+      // displaying it once. however, it might make more sense to have different display
+      // types, such as
+      // - ShowAlways
+      // - ShowOnce
+      // - ShowNTimes
+      if (!_button_required)
+      {
+         _consumed = true;
       }
    }
    else
@@ -136,13 +159,12 @@ void Dialogue::showNext()
    }
 
    const auto item = _dialogue_items.at(_index);
+   auto messag_text = item.mMessage;
 
-   auto str = item.mMessage;
-
-   replaceTags(str);
+   replaceTags(messag_text);
 
    MessageBox::info(
-      str,
+      messag_text,
       [this](MessageBox::Button /*b*/) {showNext();},
       MessageBox::LayoutProperties{
          item.mLocation,
