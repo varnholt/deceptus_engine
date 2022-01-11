@@ -49,28 +49,31 @@ class GameController
       // joystick management
 
       //! get number of joysticks
-      virtual int getJoystickCount() const;
+      virtual int32_t getJoystickCount() const;
 
       //! setter for active joystick
-      virtual void setActiveJoystick(int id);
+      virtual void setActiveJoystick(int32_t id);
 
       //! getter for active joystick
-      virtual int getActiveJoystick();
+      virtual int32_t getActiveJoystick();
 
 
       // information about the current joystick
 
+      //! check if given joystick id is valid
+      bool validId(int32_t id) const;
+
       //! getter for the joystick's name
-      virtual std::string getName(int id) const;
+      virtual std::string getName(int32_t id) const;
 
       //! getter for the axis count
-      virtual int getAxisCount(int id);
+      virtual int32_t getAxisCount(int32_t id);
 
       //! getter for the ball count
-      virtual int getBallCount(int id);
+      virtual int32_t getBallCount(int32_t id);
 
       //! getter for the hat count
-      virtual int getHatCount(int id);
+      virtual int32_t getHatCount(int32_t id);
 
       //! update axis and button infos
       virtual void update();
@@ -80,11 +83,11 @@ class GameController
       virtual void rumbleTest();
 
       //! start rumble effect
-      virtual void rumble(float intensity, int ms);
+      virtual void rumble(float intensity, int32_t ms);
 
 
       //! get button type by button id
-      SDL_GameControllerButton getButtonType(int buttonId) const;
+      SDL_GameControllerButton getButtonType(int32_t buttonId) const;
 
       //! get button id by button type
       int32_t getButtonId(SDL_GameControllerButton) const;

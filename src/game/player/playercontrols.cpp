@@ -439,9 +439,9 @@ const GameControllerInfo& PlayerControls::getJoystickInfo() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerControls::setJoystickInfo(const GameControllerInfo &joystickInfo)
+void PlayerControls::setJoystickInfo(const GameControllerInfo& joystick_info)
 {
-   _joystick_info = joystickInfo;
+   _joystick_info = joystick_info;
 }
 
 

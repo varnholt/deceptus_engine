@@ -477,9 +477,7 @@ void Game::draw()
    }
 
    _window->draw(windowTextureSprite);
-
    _window->popGLStates();
-
    _window->display();
 
    if (_recording)
@@ -502,10 +500,12 @@ void Game::draw()
 void Game::updateGameController()
 {
    auto gji = GameControllerIntegration::getInstance(0);
-   if (gji != nullptr)
+
+   if (gji)
    {
       gji->getController()->update();
-      _player->getControls()->setJoystickInfo(gji->getController()->getInfo());
+      const auto& info = gji->getController()->getInfo();
+      _player->getControls()->setJoystickInfo(info);
    }
 }
 
@@ -513,24 +513,27 @@ void Game::updateGameController()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForGame()
 {
-  auto gji = GameControllerIntegration::getInstance(0);
-  if (gji != nullptr)
-  {
-     auto info = gji->getController()->getInfo();
-     _player->getControls()->setJoystickInfo(info);
-     GameControllerData::getInstance().setJoystickInfo(info);
-  }
+   auto gji = GameControllerIntegration::getInstance(0);
+
+   if (gji)
+   {
+      const auto& info = gji->getController()->getInfo();
+      _player->getControls()->setJoystickInfo(info);
+      GameControllerData::getInstance().setJoystickInfo(info);
+   }
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForInventory()
 {
-  auto gji = GameControllerIntegration::getInstance(0);
-  if (gji != nullptr)
-  {
-     _inventory_layer->setJoystickInfo(gji->getController()->getInfo());
-  }
+   auto gji = GameControllerIntegration::getInstance(0);
+
+   if (gji)
+   {
+      const auto& info = gji->getController()->getInfo();
+      _inventory_layer->setJoystickInfo(info);
+   }
 }
 
 
