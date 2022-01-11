@@ -28,33 +28,36 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
    TmxElement::deserialize(xml_element);
 
    auto node = xml_element->FirstChild();
-   while(node != nullptr)
+   while (node)
    {
       auto sub_element = node->ToElement();
-      if (sub_element != nullptr)
+      if (!sub_element)
       {
-         TmxElement* element = nullptr;
-         TmxObject* object = nullptr;
+         node = node->NextSibling();
+         continue;
+      }
 
-         if (sub_element->Name() == std::string("object"))
-         {
-            object = new TmxObject();
-            element = object;
-         }
+      TmxElement* element = nullptr;
+      TmxObject* object = nullptr;
 
-         if (element != nullptr)
-         {
-            element->deserialize(sub_element);
-         }
-         else
-         {
-            Log::Error() << sub_element->Name() << " is not supported for TmxObjectGroup";
-         }
+      if (sub_element->Name() == std::string("object"))
+      {
+         object = new TmxObject();
+         element = object;
+      }
 
-         if (object != nullptr)
-         {
-            _objects[object->_id] = object;
-         }
+      if (element )
+      {
+         element->deserialize(sub_element);
+      }
+      else
+      {
+         Log::Error() << sub_element->Name() << " is not supported for TmxObjectGroup";
+      }
+
+      if (object)
+      {
+         _objects[object->_id] = object;
       }
 
       node = node->NextSibling();
