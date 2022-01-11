@@ -29,35 +29,38 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
    _offset_x_px = element->FloatAttribute("offsetx", 0.0f);
    _offset_y_px = element->FloatAttribute("offsety", 0.0f);
 
-   tinyxml2::XMLNode* node = element->FirstChild();
-   while(node != nullptr)
+   auto node = element->FirstChild();
+   while (node)
    {
-      tinyxml2::XMLElement* sub_element = node->ToElement();
-      if (sub_element != nullptr)
+      auto sub_element = node->ToElement();
+      if (!sub_element)
       {
-         TmxElement* element = nullptr;
-         auto parsed = false;
+         node = node->NextSibling();
+         continue;
+      }
 
-         if (sub_element->Name() == std::string("image"))
-         {
-            _image = new TmxImage();
-            element = _image;
-         }
-         else if (sub_element->Name() == std::string("properties"))
-         {
-            _properties = new TmxProperties();
-            _properties->deserialize(sub_element);
-            parsed = true;
-         }
+      TmxElement* element = nullptr;
+      auto parsed = false;
 
-         if (element != nullptr)
-         {
-            element->deserialize(sub_element);
-         }
-         else if (!parsed)
-         {
-            Log::Error() << sub_element->Name() << " is not supported for TmxElement";
-         }
+      if (sub_element->Name() == std::string("image"))
+      {
+         _image = new TmxImage();
+         element = _image;
+      }
+      else if (sub_element->Name() == std::string("properties"))
+      {
+         _properties = new TmxProperties();
+         _properties->deserialize(sub_element);
+         parsed = true;
+      }
+
+      if (element)
+      {
+         element->deserialize(sub_element);
+      }
+      else if (!parsed)
+      {
+         Log::Error() << sub_element->Name() << " is not supported for TmxElement";
       }
 
       node = node->NextSibling();

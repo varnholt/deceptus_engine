@@ -24,6 +24,7 @@ class TmxParser
    protected:
 
       std::vector<TmxElement*> _elements;
+      void parseGroup(tinyxml2::XMLElement* sub_element, int32_t& z);
       void parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z);
 
       std::string _filename;

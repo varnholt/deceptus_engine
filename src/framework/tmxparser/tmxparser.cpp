@@ -21,35 +21,42 @@ void TmxParser::parse(const std::string& filename)
    if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
    {
       auto doc_element = doc.FirstChildElement();
-      auto n = doc_element->FirstChild();
+      auto node = doc_element->FirstChild();
 
-      while (n)
+      while (node)
       {
-         auto sub_element = n->ToElement();
+         auto sub_element = node->ToElement();
          if (!sub_element)
          {
+            node = node->NextSibling();
             continue;
          }
 
          // groups are just flattened
          if (sub_element->Name() == std::string("group"))
          {
-            auto nested_child = sub_element->FirstChild();
-            while (nested_child)
-            {
-               // std::cout << "parse " << nested_child->ToElement()->Name() << std::endl;
-               parseSubElement(nested_child->ToElement(), z);
-               nested_child = nested_child->NextSibling();
-            };
+            parseGroup(sub_element, z);
          }
          else
          {
             parseSubElement(sub_element, z);
          }
 
-         n = n->NextSibling();
+         node = node->NextSibling();
       }
    }
+}
+
+
+void TmxParser::parseGroup(tinyxml2::XMLElement* sub_element, int32_t& z)
+{
+   auto nested_child = sub_element->FirstChild();
+   while (nested_child)
+   {
+      // std::cout << "parse " << nested_child->ToElement()->Name() << std::endl;
+      parseSubElement(nested_child->ToElement(), z);
+      nested_child = nested_child->NextSibling();
+   };
 }
 
 
@@ -77,6 +84,10 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
    {
       sub_element_parsed = new TmxObjectGroup();
       dynamic_cast<TmxObjectGroup*>(sub_element_parsed)->_z_index = z;
+   }
+   else if (sub_element->Name() == std::string("group"))
+   {
+      parseGroup(sub_element, z);
    }
 
    if (!sub_element_parsed)

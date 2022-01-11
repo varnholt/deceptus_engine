@@ -28,39 +28,42 @@ void TmxObject::deserialize(tinyxml2::XMLElement *element)
    _height_px = element->FloatAttribute("height");
 
    auto node = element->FirstChild();
-   while(node != nullptr)
+   while (node)
    {
       auto sub_element = node->ToElement();
-      if (sub_element != nullptr)
+      if (!sub_element)
       {
-         TmxElement* element = nullptr;
-         auto parsed = false;
+         node = node->NextSibling();
+         continue;
+      }
 
-         if (sub_element->Name() == std::string("polyline"))
-         {
-            _polyline = new TmxPolyLine();
-            element = _polyline;
-         }
-         else if (sub_element->Name() == std::string("polygon"))
-         {
-            _polygon = new TmxPolygon();
-            element = _polygon;
-         }
-         else if (sub_element->Name() == std::string("properties"))
-         {
-            _properties = new TmxProperties();
-            _properties->deserialize(sub_element);
-            parsed = true;
-         }
+      TmxElement* element = nullptr;
+      auto parsed = false;
 
-         if (element != nullptr)
-         {
-            element->deserialize(sub_element);
-         }
-         else if (!parsed)
-         {
-            Log::Error() << sub_element->Name() << " is not supported for TmxObject";
-         }
+      if (sub_element->Name() == std::string("polyline"))
+      {
+         _polyline = new TmxPolyLine();
+         element = _polyline;
+      }
+      else if (sub_element->Name() == std::string("polygon"))
+      {
+         _polygon = new TmxPolygon();
+         element = _polygon;
+      }
+      else if (sub_element->Name() == std::string("properties"))
+      {
+         _properties = new TmxProperties();
+         _properties->deserialize(sub_element);
+         parsed = true;
+      }
+
+      if (element)
+      {
+         element->deserialize(sub_element);
+      }
+      else if (!parsed)
+      {
+         Log::Error() << sub_element->Name() << " is not supported for TmxObject";
       }
 
       node = node->NextSibling();
