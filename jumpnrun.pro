@@ -115,6 +115,7 @@ SOURCES += \
    src/framework/tools/elapsedtimer.cpp \
    src/game/cutscene.cpp \
    src/game/effects/dust.cpp \
+   src/game/gamecontrollerdetection.cpp \
    src/game/gun.cpp \
    src/game/mechanisms/bubblecube.cpp \
    src/game/mechanisms/checkpoint.cpp \
@@ -310,6 +311,7 @@ HEADERS += \
    src/game/eventserializer.h \
    src/game/fadetransitioneffect.h \
    src/game/gameclock.h \
+   src/game/gamecontrollerdetection.h \
    src/game/gun.h \
    src/game/mechanisms/bubblecube.h \
    src/game/mechanisms/controllerhelp.h \

@@ -1,5 +1,6 @@
 // header
 #include "gamecontroller.h"
+#include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 
 #include <algorithm>
@@ -14,17 +15,11 @@ GameController::GameController()
 {
    SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 
-   // SDL_GameControllerAddMapping();
-   [[maybe_unused]] auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
-
-   // if (res == -1)
-   // {
-   //    printf("error loading gamecontrollerdb\n");
-   // }
-   // else
-   // {
-   //    printf("%d game controller mappings loaded\n", res);
-   // }
+   auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
+   if (res == -1)
+   {
+      Log::Error() << "error loading game controller database";
+   }
 }
 
 
