@@ -2,6 +2,7 @@
 #include "gamecontrollerintegration.h"
 
 // game
+#include "gamecontrollerdetection.h"
 #include "gamejoystickmapping.h"
 
 // joystick
@@ -14,8 +15,15 @@
 #include "../framework/joystick/gamecontroller.h"
 
 
-GameControllerIntegration* GameControllerIntegration::__instances[10];
-int32_t GameControllerIntegration::__count = 0;
+static constexpr auto instance_count = 10;
+static GameControllerIntegration* __instances[instance_count];
+std::unique_ptr<GameControllerDetection> GameControllerIntegration::_device_detection;
+
+
+namespace
+{
+int32_t count = 0;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -28,30 +36,33 @@ GameControllerIntegration::GameControllerIntegration()
 //-----------------------------------------------------------------------------
 int32_t GameControllerIntegration::initializeAll()
 {
-   for (auto i = 0; i < 10; i++)
+   for (auto i = 0; i < instance_count; i++)
    {
       __instances[i] = nullptr;
    }
 
    // used for obtaining some information from sdl
    auto tmp = new GameController();
-   __count = tmp->getJoystickCount();
+   count = tmp->getJoystickCount();
    delete tmp;
 
-   for (auto i = 0; i < __count; i++)
+   for (auto i = 0; i < count; i++)
    {
-      auto gji = createInstance();
+      auto gji = new GameControllerIntegration();
       gji->initialize(i);
 
       __instances[i] = gji;
    }
 
-   return __count;
+   _device_detection = std::make_unique<GameControllerDetection>();
+   _device_detection->setup();
+
+   return count;
 }
 
 
 //-----------------------------------------------------------------------------
-void GameControllerIntegration::initialize(int id)
+void GameControllerIntegration::initialize(int32_t id)
 {
    // automatically select first in list
    if (_controller->getJoystickCount() > id)
@@ -78,12 +89,12 @@ void GameControllerIntegration::rumble(float intensity, int32_t ms)
 //-----------------------------------------------------------------------------
 int32_t GameControllerIntegration::getCount()
 {
-   return __count;
+   return count;
 }
 
 
 //-----------------------------------------------------------------------------
-bool GameControllerIntegration::controllerConnected()
+bool GameControllerIntegration::isControllerConnected()
 {
    return getCount() > 0;
 }
@@ -94,18 +105,11 @@ GameControllerIntegration* GameControllerIntegration::getInstance(int32_t id)
 {
    GameControllerIntegration* gji = nullptr;
 
-   if (id >= 0 && id < 10)
+   if (id >= 0 && id < instance_count)
    {
       gji = __instances[id];
    }
 
    return gji;
-}
-
-
-//-----------------------------------------------------------------------------
-GameControllerIntegration *GameControllerIntegration::createInstance()
-{
-   return new GameControllerIntegration();
 }
 
