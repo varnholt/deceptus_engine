@@ -24,7 +24,7 @@ void CameraPane::update()
 {
   constexpr auto speed = 3.0f;
 
-  if (GameControllerData::getInstance().isControllerUsed())
+  if (GameControllerIntegration::getInstance().isControllerConnected())
   {
       auto axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
 

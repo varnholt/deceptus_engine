@@ -191,12 +191,17 @@ void Game::initializeWindow()
 void Game::initializeController()
 {
    auto& gji = GameControllerIntegration::getInstance();
-   gji.initialize();
 
-   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this](){openInventory();});
-   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this](){checkCloseInventory();});
-   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this](){checkCloseInventory();});
-   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this](){showPauseMenu();});
+   gji.addDeviceAddedCallback([this](int32_t /*id*/){
+         auto& gji = GameControllerIntegration::getInstance();
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this](){openInventory();});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this](){checkCloseInventory();});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this](){checkCloseInventory();});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this](){showPauseMenu();});
+      }
+   );
+
+   gji.initialize();
 }
 
 
@@ -499,6 +504,8 @@ void Game::draw()
 void Game::updateGameController()
 {
    auto& gji = GameControllerIntegration::getInstance();
+
+   gji.update();
 
    if (gji.isControllerConnected())
    {
