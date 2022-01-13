@@ -143,24 +143,25 @@ bool InventoryLayer::isControllerActionSkipped() const
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::updateControllerActions()
 {
-  auto gji = GameControllerIntegration::getInstance(0);
+  auto& gci = GameControllerIntegration::getInstance();
 
-  if (gji == nullptr)
+  if (!gci.isControllerConnected())
   {
     return;
   }
 
-  auto axisValues = _joystick_info.getAxisValues();
-  auto axisLeftX = gji->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-  auto xl = axisValues[axisLeftX] / 32767.0f;
-  auto hatValue = _joystick_info.getHatValues().at(0);
-  auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
-  auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
-  if (dpadLeftPressed)
+  auto axis_values = _joystick_info.getAxisValues();
+  auto axis_left_x = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+  auto xl = axis_values[axis_left_x] / 32767.0f;
+  auto hat_values = _joystick_info.getHatValues().at(0);
+  auto dpad_left_pressed = hat_values & SDL_HAT_LEFT;
+  auto dpad_right_pressed = hat_values & SDL_HAT_RIGHT;
+
+  if (dpad_left_pressed)
   {
      xl = -1.0f;
   }
-  else if (dpadRightPressed)
+  else if (dpad_right_pressed)
   {
      xl = 1.0f;
   }
