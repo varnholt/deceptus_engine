@@ -1,9 +1,4 @@
-// header
 #include "gamecontrollerintegration.h"
-
-// game
-#include "gamecontrollerdetection.h"
-#include "gamejoystickmapping.h"
 
 // joystick
 #ifdef TARGET_OS_MAC
@@ -12,104 +7,136 @@
 #endif
 #define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_9
 #endif
-#include "../framework/joystick/gamecontroller.h"
+
+#include "framework/joystick/gamecontroller.h"
+#include "framework/tools/log.h"
+#include "gamecontrollerdetection.h"
+#include "gamejoystickmapping.h"
 
 
-static constexpr auto instance_count = 10;
-static GameControllerIntegration* __instances[instance_count];
-std::unique_ptr<GameControllerDetection> GameControllerIntegration::_device_detection;
-
-
-namespace
-{
-int32_t count = 0;
-}
+int32_t GameControllerIntegration::_selected_controller_id = 0;
 
 
 //-----------------------------------------------------------------------------
-GameControllerIntegration::GameControllerIntegration()
+void GameControllerIntegration::initialize()
 {
-   _controller = new GameController();
-}
+   SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 
-
-//-----------------------------------------------------------------------------
-int32_t GameControllerIntegration::initializeAll()
-{
-   for (auto i = 0; i < instance_count; i++)
+   auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
+   if (res == -1)
    {
-      __instances[i] = nullptr;
-   }
-
-   // used for obtaining some information from sdl
-   auto tmp = new GameController();
-   count = tmp->getJoystickCount();
-   delete tmp;
-
-   for (auto i = 0; i < count; i++)
-   {
-      auto gji = new GameControllerIntegration();
-      gji->initialize(i);
-
-      __instances[i] = gji;
+      Log::Error() << "error loading game controller database";
    }
 
    _device_detection = std::make_unique<GameControllerDetection>();
-   _device_detection->setup();
-
-   return count;
+   _device_detection->setCallbackAdded([this](int32_t id){add(id);});
+   _device_detection->setCallbackRemoved([this](int32_t id){remove(id);});
+   _device_detection->start();
 }
 
 
 //-----------------------------------------------------------------------------
-void GameControllerIntegration::initialize(int32_t id)
+GameControllerIntegration::~GameControllerIntegration()
 {
-   // automatically select first in list
-   if (_controller->getJoystickCount() > id)
+   _device_detection.release();
+   SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
+}
+
+
+//-----------------------------------------------------------------------------
+void GameControllerIntegration::update()
+{
+   const std::lock_guard<std::mutex> lock(_device_changed_mutex);
+   for (auto& cb : _device_changed_callbacks)
    {
-      _controller->setActiveJoystick(id);
+      cb();
+   }
+
+   _device_changed_callbacks.clear();
+}
+
+
+//-----------------------------------------------------------------------------
+void GameControllerIntegration::add(int32_t id)
+{
+   const std::lock_guard<std::mutex> lock(_device_changed_mutex);
+   _device_changed_callbacks.push_back(
+      [this, id](){
+         auto controller = std::make_shared<GameController>();
+         controller->setActiveJoystick(id);
+         _controllers[id] = controller;
+
+         for (auto& cb : _device_added_callbacks)
+         {
+            cb(id);
+         }
+      }
+   );
+}
+
+
+//-----------------------------------------------------------------------------
+void GameControllerIntegration::remove(int32_t id)
+{
+   const std::lock_guard<std::mutex> lock(_device_changed_mutex);
+   _device_changed_callbacks.push_back(
+      [this, id](){
+         _controllers.erase(id);
+
+         for (auto& cb : _device_removed_callbacks)
+         {
+            cb(id);
+         }
+      }
+   );
+}
+
+
+//-----------------------------------------------------------------------------
+std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id)
+{
+   return _controllers[controller_id];
+}
+
+
+//-----------------------------------------------------------------------------
+void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback& callback)
+{
+   _device_added_callbacks.push_back(callback);
+
+   // call added for all devices we already have
+   for (auto& [k, v] : _controllers)
+   {
+      callback(k);
    }
 }
 
 
 //-----------------------------------------------------------------------------
-GameController* GameControllerIntegration::getController()
+void GameControllerIntegration::addDeviceRemovedCallback(const DeviceAddedCallback& callback)
 {
-   return _controller;
+   _device_removed_callbacks.push_back(callback);
 }
 
 
 //-----------------------------------------------------------------------------
-void GameControllerIntegration::rumble(float intensity, int32_t ms)
+size_t GameControllerIntegration::getCount() const
 {
-   _controller->rumble(intensity, ms);
+   return _controllers.size();
 }
 
 
 //-----------------------------------------------------------------------------
-int32_t GameControllerIntegration::getCount()
+bool GameControllerIntegration::isControllerConnected() const
 {
-   return count;
+   return !_controllers.empty();
 }
 
 
 //-----------------------------------------------------------------------------
-bool GameControllerIntegration::isControllerConnected()
+GameControllerIntegration& GameControllerIntegration::getInstance()
 {
-   return getCount() > 0;
-}
-
-
-//-----------------------------------------------------------------------------
-GameControllerIntegration* GameControllerIntegration::getInstance(int32_t id)
-{
-   GameControllerIntegration* gji = nullptr;
-
-   if (id >= 0 && id < instance_count)
-   {
-      gji = __instances[id];
-   }
-
-   return gji;
+   static GameControllerIntegration __gci;
+   return __gci;
 }
 

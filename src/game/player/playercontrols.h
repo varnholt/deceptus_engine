@@ -25,7 +25,6 @@ public:
    void setKeysPressed(int keys);
 
    bool isLookingAround() const;
-   bool isControllerUsed() const;
    bool isControllerButtonPressed(int32_t button_enum) const;
    bool isFireButtonPressed() const;
    bool isJumpButtonPressed() const;

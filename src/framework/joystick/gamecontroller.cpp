@@ -8,28 +8,9 @@
 
 
 //-----------------------------------------------------------------------------
-/*!
-   \param parent parent widget
-*/
-GameController::GameController()
-{
-   SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
-
-   auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
-   if (res == -1)
-   {
-      Log::Error() << "error loading game controller database";
-   }
-}
-
-
-//-----------------------------------------------------------------------------
-/*!
-*/
 GameController::~GameController()
 {
    SDL_GameControllerClose(_controller);
-   SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 }
 
 
@@ -90,6 +71,7 @@ int32_t GameController::getBallCount(int32_t id)
 
    return count;
 }
+
 
 //-----------------------------------------------------------------------------
 /*!
@@ -238,7 +220,7 @@ void GameController::update()
       }
       else
       {
-         bool pressed = SDL_GameControllerGetButton(_controller, static_cast<SDL_GameControllerButton>(i));
+         const auto pressed = SDL_GameControllerGetButton(_controller, static_cast<SDL_GameControllerButton>(i));
          info.addButtonState(pressed);
       }
    }
@@ -306,10 +288,10 @@ void GameController::update()
    {
       for (auto button = 0u; button < SDL_CONTROLLER_BUTTON_MAX; button++)
       {
-         auto pre = _info.getButtonValues().at(button);
-         auto cur = info.getButtonValues().at(button);
+         const auto previous = _info.getButtonValues().at(button);
+         const auto current = info.getButtonValues().at(button);
 
-         if (!pre && cur)
+         if (!previous && current)
          {
             auto it = _button_pressed_callbacks.find(static_cast<SDL_GameControllerButton>(button));
             if (it != _button_pressed_callbacks.end())
@@ -321,7 +303,7 @@ void GameController::update()
             }
          }
 
-         if (pre && !cur)
+         if (previous && !current)
          {
             auto it = _button_released_callbacks.find(static_cast<SDL_GameControllerButton>(button));
             if (it != _button_released_callbacks.end())
