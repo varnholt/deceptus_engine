@@ -20,6 +20,7 @@ void GameControllerIntegration::initialize()
 {
    _device_detection = std::make_unique<GameControllerDetection>();
    _device_detection->setCallbackAdded([this](int32_t id){add(id);});
+   _device_detection->setCallbackRemoved([this](int32_t id){remove(id);});
    _device_detection->start();
 }
 
