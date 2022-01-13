@@ -28,8 +28,8 @@ void CameraPane::update()
   {
       auto axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
 
-      auto x_axis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
-      auto y_axis = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
+      auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
+      auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
 
       auto x = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
       auto y = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
