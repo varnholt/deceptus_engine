@@ -167,24 +167,17 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isLookingAround() const
 {
-  if (_keys_pressed & KeyPressedLook)
-  {
-    return true;
-  }
+   if (_keys_pressed & KeyPressedLook)
+   {
+      return true;
+   }
 
-  if (isControllerUsed())
-  {
-    return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-  }
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+   }
 
-  return false;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isControllerUsed() const
-{
-  return !_joystick_info.getAxisValues().empty();
+   return false;
 }
 
 
@@ -215,7 +208,7 @@ bool PlayerControls::isFireButtonPressed() const
     return true;
   }
 
-  if (isControllerUsed())
+  if (GameControllerIntegration::getInstance().isControllerConnected())
   {
     return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_X);
   }
@@ -232,7 +225,7 @@ bool PlayerControls::isJumpButtonPressed() const
     return true;
   }
 
-  if (isControllerUsed())
+  if (GameControllerIntegration::getInstance().isControllerConnected())
   {
      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_A);
   }
@@ -249,7 +242,7 @@ bool PlayerControls::isUpButtonPressed() const
      return true;
    }
 
-   if (isControllerUsed())
+   if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_UP);
    }
@@ -266,7 +259,7 @@ bool PlayerControls::isDownButtonPressed() const
       return true;
    }
 
-   if (isControllerUsed())
+   if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
    }
@@ -286,7 +279,7 @@ bool PlayerControls::isDroppingDown() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
 {
-  if (isControllerUsed())
+  if (GameControllerIntegration::getInstance().isControllerConnected())
   {
      const auto& axisValues = _joystick_info.getAxisValues();
 
@@ -329,7 +322,7 @@ bool PlayerControls::isMovingLeft() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingDown() const
 {
-   if (isControllerUsed())
+   if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& axis_values = _joystick_info.getAxisValues();
       const auto axis_left_y = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
@@ -370,7 +363,7 @@ bool PlayerControls::isMovingDown() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingRight() const
 {
-   if (isControllerUsed())
+   if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& axis_values = _joystick_info.getAxisValues();
       const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
