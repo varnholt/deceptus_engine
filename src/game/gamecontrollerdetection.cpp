@@ -51,6 +51,15 @@ int32_t GameControllerDetection::processEvent(const SDL_Event& event)
          Log::Info() << "controller device removed: " << event.cdevice.which;
          break;
       }
+      case SDL_CONTROLLERDEVICEREMAPPED:
+      {
+         Log::Info() << "controller device remapped: " << event.cdevice.which;
+         break;
+      }
+      default:
+      {
+         break;
+      }
    }
    return 0;
 }
