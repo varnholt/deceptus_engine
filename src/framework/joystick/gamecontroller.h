@@ -51,11 +51,11 @@ class GameController
       //! get number of joysticks
       virtual int32_t getJoystickCount() const;
 
-      //! setter for active joystick
-      virtual void setActiveJoystick(int32_t id);
+      //! active joystick
+      virtual void activate(int32_t id);
 
       //! getter for active joystick
-      virtual int32_t getActiveJoystick();
+      virtual int32_t getActiveJoystickId();
 
 
       // information about the current joystick
@@ -67,13 +67,13 @@ class GameController
       virtual std::string getName(int32_t id) const;
 
       //! getter for the axis count
-      virtual int32_t getAxisCount(int32_t id);
+      virtual int32_t getAxisCount();
 
       //! getter for the ball count
-      virtual int32_t getBallCount(int32_t id);
+      virtual int32_t getBallCount();
 
       //! getter for the hat count
-      virtual int32_t getHatCount(int32_t id);
+      virtual int32_t getHatCount();
 
       //! update axis and button infos
       virtual void update();
@@ -98,21 +98,9 @@ class GameController
       //! getter for joystick info object
       const GameControllerInfo& getInfo() const;
 
-      void addButtonPressedCallback(
-         SDL_GameControllerButton,
-         const ControllerCallback&
-      );
-
-      void removeButtonPressedCallback(
-         SDL_GameControllerButton,
-         const ControllerCallback&
-      );
-
-      void addButtonReleasedCallback(
-         SDL_GameControllerButton,
-         const ControllerCallback&
-      );
-
+      void addButtonPressedCallback(SDL_GameControllerButton, const ControllerCallback&);
+      void removeButtonPressedCallback(SDL_GameControllerButton, const ControllerCallback&);
+      void addButtonReleasedCallback(SDL_GameControllerButton, const ControllerCallback&);
       void addAxisThresholdExceedCallback(const ThresholdCallback& threshold);
 
 
@@ -132,17 +120,14 @@ class GameController
 
       GameControllerInfo _info;
 
-      //! active joystick
-      SDL_Joystick* _active_joystick = nullptr;
-
+      SDL_Joystick* _joystick = nullptr;
       SDL_GameController* _controller = nullptr;
+      SDL_Haptic* _haptic = nullptr;
+
       SDL_GameControllerButtonBind _dpad_bind_up;
       SDL_GameControllerButtonBind _dpad_bind_down;
       SDL_GameControllerButtonBind _dpad_bind_left;
       SDL_GameControllerButtonBind _dpad_bind_right;
-
-      //! running haptic effect
-      SDL_Haptic* _haptic = nullptr;
 
       std::map<SDL_GameControllerAxis, std::vector<ThresholdCallback>> _threshold_callbacks;
       std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> _button_pressed_callbacks;

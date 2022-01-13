@@ -43,16 +43,9 @@ std::string GameController::getName(int32_t id) const
 /*!
    \return axis count for joystick with given axis
 */
-int32_t GameController::getAxisCount(int32_t id)
+int32_t GameController::getAxisCount()
 {
-   auto count = 0;
-
-   if (validId(id))
-   {
-      count = SDL_JoystickNumAxes(_active_joystick);
-   }
-
-   return count;
+   return SDL_JoystickNumAxes(_joystick);
 }
 
 
@@ -60,16 +53,9 @@ int32_t GameController::getAxisCount(int32_t id)
 /*!
    \return ball count for joystick with given id
 */
-int32_t GameController::getBallCount(int32_t id)
+int32_t GameController::getBallCount()
 {
-   auto count = 0;
-
-   if (validId(id))
-   {
-      count = SDL_JoystickNumBalls(_active_joystick);
-   }
-
-   return count;
+   return SDL_JoystickNumBalls(_joystick);
 }
 
 
@@ -77,16 +63,9 @@ int32_t GameController::getBallCount(int32_t id)
 /*!
    \return hat count for joystick with given id
 */
-int32_t GameController::getHatCount(int32_t id)
+int32_t GameController::getHatCount()
 {
-   auto count = 0;
-
-   if (validId(id))
-   {
-      count = SDL_JoystickNumHats(_active_joystick);
-   }
-
-   return count;
+   return SDL_JoystickNumHats(_joystick);
 }
 
 
@@ -94,23 +73,25 @@ int32_t GameController::getHatCount(int32_t id)
 /*!
    \param id of active joystick
 */
-void GameController::setActiveJoystick(int32_t id)
+void GameController::activate(int32_t id)
 {
-   if (validId(id))
+   if (!validId(id))
    {
-      if (SDL_IsGameController(id))
-      {
-         // store controller data
-         _controller = SDL_GameControllerOpen(id);
-         _active_joystick = SDL_GameControllerGetJoystick(_controller);
+      return;
+   }
 
-         // create dpad bindings
-         bindDpadButtons();
-      }
-      else
-      {
-         _active_joystick = SDL_JoystickOpen(id);
-      }
+   if (SDL_IsGameController(id))
+   {
+      // store controller data
+      _controller = SDL_GameControllerOpen(id);
+      _joystick = SDL_GameControllerGetJoystick(_controller);
+
+      // create dpad bindings
+      bindDpadButtons();
+   }
+   else
+   {
+      _joystick = SDL_JoystickOpen(id);
    }
 }
 
@@ -119,9 +100,9 @@ void GameController::setActiveJoystick(int32_t id)
 /*!
    \return id of active joystick
 */
-int32_t GameController::getActiveJoystick()
+int32_t GameController::getActiveJoystickId()
 {
-   return SDL_JoystickInstanceID(_active_joystick);
+   return SDL_JoystickInstanceID(_joystick);
 }
 
 
@@ -146,9 +127,9 @@ void GameController::update()
    SDL_JoystickUpdate();
 
    // read axis values
-   for (auto axis = 0; axis < SDL_JoystickNumAxes(_active_joystick); axis++)
+   for (auto axis = 0; axis < SDL_JoystickNumAxes(_joystick); axis++)
    {
-      auto value = SDL_JoystickGetAxis(_active_joystick, axis);
+      auto value = SDL_JoystickGetAxis(_joystick, axis);
       info.addAxisValue(value);
    }
 
@@ -228,7 +209,7 @@ void GameController::update()
    // emulate hat by evaluating the dpad buttons. some drivers do not register
    // the controller's dpad as hat so they just show up as ordinary buttons.
    // we don't want that.
-   auto hat_count = SDL_JoystickNumHats(_active_joystick);
+   auto hat_count = SDL_JoystickNumHats(_joystick);
    if (hat_count == 0)
    {
       auto hat = SDL_HAT_CENTERED;
@@ -277,7 +258,7 @@ void GameController::update()
    // read hat values
    for (auto i = 0; i < hat_count; i++)
    {
-      auto hat_value = SDL_JoystickGetHat(_active_joystick, i);
+      auto hat_value = SDL_JoystickGetHat(_joystick, i);
       info.addHatValue(hat_value);
    }
 
@@ -336,13 +317,13 @@ void GameController::rumble(float intensity, int32_t ms)
       return;
    }
 
-   if (!_active_joystick)
+   if (!_joystick)
    {
       return;
    }
 
    // open the device
-   _haptic = SDL_HapticOpenFromJoystick(_active_joystick);
+   _haptic = SDL_HapticOpenFromJoystick(_joystick);
 
    if (!_haptic)
    {

@@ -13,6 +13,8 @@
 #include "gamecontrollerdetection.h"
 #include "gamejoystickmapping.h"
 
+#include <iostream>
+
 
 int32_t GameControllerIntegration::_selected_controller_id = 0;
 
@@ -63,12 +65,14 @@ void GameControllerIntegration::add(int32_t id)
    _device_changed_callbacks.push_back(
       [this, id](){
          auto controller = std::make_shared<GameController>();
-         controller->setActiveJoystick(id);
-         _controllers[id] = controller;
+         controller->activate(id);
+         const auto controller_id = SDL_JoystickGetDeviceInstanceID(id);
+         _controllers[controller_id] = controller;
+         _selected_controller_id = controller_id;
 
          for (auto& cb : _device_added_callbacks)
          {
-            cb(id);
+            cb(controller_id);
          }
       }
    );
