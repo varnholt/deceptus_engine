@@ -76,25 +76,25 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (GameControllerData::getInstance().isControllerUsed())
    {
-      auto controller = GameControllerIntegration::getInstance(0)->getController();
-      auto joystickInfo = GameControllerData::getInstance().getJoystickInfo();
+      auto controller = GameControllerIntegration::getInstance().getController();
+      auto joystick_info = GameControllerData::getInstance().getJoystickInfo();
 
       auto pressed = [&](SDL_GameControllerButton button) -> bool {
-         auto buttonValues = joystickInfo.getButtonValues();
-         auto buttonPressed = buttonValues[static_cast<size_t>(button /*Id*/)];
-         return buttonPressed;
+         auto button_values = joystick_info.getButtonValues();
+         auto button_pressed = button_values[static_cast<size_t>(button /*Id*/)];
+         return button_pressed;
       };
 
       auto axis = [&](SDL_GameControllerAxis axis) -> float {
-         auto axisValues = joystickInfo.getAxisValues();
-         auto axisId= controller->getAxisIndex(axis);
-         return axisValues[static_cast<uint32_t>(axisId)] / 32767.0f;
+         auto axis_values = joystick_info.getAxisValues();
+         auto axis_id= controller->getAxisIndex(axis);
+         return axis_values[static_cast<uint32_t>(axis_id)] / 32767.0f;
       };
 
       auto hat = [&](int32_t hat) -> bool {
-         auto buttonValues = joystickInfo.getHatValues();
-         auto dpadPressed = buttonValues.empty() ? false : buttonValues.at(0) & hat;
-         return dpadPressed;
+         auto button_values = joystick_info.getHatValues();
+         auto dpad_pressed = button_values.empty() ? false : button_values.at(0) & hat;
+         return dpad_pressed;
       };
 
       // draw analog axes

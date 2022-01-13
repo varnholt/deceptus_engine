@@ -112,12 +112,6 @@ void MenuScreen::controllerButtonY()
 
 bool MenuScreen::isControllerUsed() const
 {
-   auto gji = GameControllerIntegration::getInstance(0);
-   if (gji == nullptr)
-   {
-      return false;
-   }
-
-   return true;
+   return GameControllerIntegration::getInstance().isControllerConnected();
 }
 

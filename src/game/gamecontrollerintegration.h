@@ -12,25 +12,25 @@ class GameControllerIntegration
 {
    public:
 
-      GameControllerIntegration();
-      virtual ~GameControllerIntegration() = default;
+      GameControllerIntegration() = default;
+      void initialize();
 
-      static int32_t initializeAll();
+      static GameControllerIntegration& getInstance();
 
-      static GameControllerIntegration* getInstance(int32_t id);
+      int32_t getCount() const;
+      bool isControllerConnected() const;
 
-      static int32_t getCount();
-      static bool isControllerConnected();
-
-      void initialize(int32_t id = 0);
-      GameController* getController();
-      void rumble(float intensity, int32_t ms);
+      void initializeController(int32_t id = 0);
+      std::shared_ptr<GameController>& getController(int32_t controller_id = 0);
+      void rumble(float intensity, int32_t ms, int32_t controller_id = 0);
 
 
 private:
 
-      GameController* _controller = nullptr;
-      static std::unique_ptr<GameControllerDetection> _device_detection;
+      void add(int32_t id);
+      void remove(int32_t id);
+
+      std::unique_ptr<GameControllerDetection> _device_detection;
       std::map<int32_t, std::shared_ptr<GameController>> _controllers;
 };
 

@@ -86,11 +86,11 @@ MessageBox::MessageBox(
 
 MessageBox::~MessageBox()
 {
-   auto gci = GameControllerIntegration::getInstance(0);
-   if (gci)
+   auto& gci = GameControllerIntegration::getInstance();
+   if (gci.isControllerConnected())
    {
-      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
-      gci->getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
+      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
+      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::Modal);
@@ -309,13 +309,13 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
 
 void MessageBox::initializeControllerCallbacks()
 {
-   auto gci = GameControllerIntegration::getInstance(0);
-   if (gci)
+   auto& gci = GameControllerIntegration::getInstance();
+   if (gci.isControllerConnected())
    {
       _button_callback_a = [](){keyboardKeyPressed(sf::Keyboard::Return);};
       _button_callback_b = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
-      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
-      gci->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
+      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
+      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 }
 
@@ -408,7 +408,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    __active->_drawn = true;
 
-   const auto xbox = (GameControllerIntegration::getInstance(0) != nullptr);
+   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
    const auto buttons = __active->_buttons;
 
    // background layer is unused for now

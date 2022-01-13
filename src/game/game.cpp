@@ -190,14 +190,13 @@ void Game::initializeWindow()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::initializeController()
 {
-   if (GameControllerIntegration::initializeAll() > 0)
-   {
-      auto gji = GameControllerIntegration::getInstance(0);
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this](){openInventory();});
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this](){checkCloseInventory();});
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this](){checkCloseInventory();});
-      gji->getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this](){showPauseMenu();});
-   }
+   auto& gji = GameControllerIntegration::getInstance();
+   gji.initialize();
+
+   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this](){openInventory();});
+   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this](){checkCloseInventory();});
+   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this](){checkCloseInventory();});
+   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this](){showPauseMenu();});
 }
 
 
@@ -499,12 +498,12 @@ void Game::draw()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameController()
 {
-   auto gji = GameControllerIntegration::getInstance(0);
+   auto& gji = GameControllerIntegration::getInstance();
 
-   if (gji)
+   if (gji.isControllerConnected())
    {
-      gji->getController()->update();
-      const auto& info = gji->getController()->getInfo();
+      gji.getController()->update();
+      const auto& info = gji.getController()->getInfo();
       _player->getControls()->setJoystickInfo(info);
    }
 }
@@ -513,11 +512,11 @@ void Game::updateGameController()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForGame()
 {
-   auto gji = GameControllerIntegration::getInstance(0);
+   auto& gji = GameControllerIntegration::getInstance();
 
-   if (gji)
+   if (gji.isControllerConnected())
    {
-      const auto& info = gji->getController()->getInfo();
+      const auto& info = gji.getController()->getInfo();
       _player->getControls()->setJoystickInfo(info);
       GameControllerData::getInstance().setJoystickInfo(info);
    }
@@ -527,11 +526,11 @@ void Game::updateGameControllerForGame()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForInventory()
 {
-   auto gji = GameControllerIntegration::getInstance(0);
+   auto& gji = GameControllerIntegration::getInstance();
 
-   if (gji)
+   if (gji.isControllerConnected())
    {
-      const auto& info = gji->getController()->getInfo();
+      const auto& info = gji.getController()->getInfo();
       _inventory_layer->setJoystickInfo(info);
    }
 }

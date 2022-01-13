@@ -15,101 +15,63 @@
 #include "../framework/joystick/gamecontroller.h"
 
 
-static constexpr auto instance_count = 10;
-static GameControllerIntegration* __instances[instance_count];
-std::unique_ptr<GameControllerDetection> GameControllerIntegration::_device_detection;
-
-
-namespace
-{
-int32_t count = 0;
-}
-
-
 //-----------------------------------------------------------------------------
-GameControllerIntegration::GameControllerIntegration()
+void GameControllerIntegration::initialize()
 {
-   _controller = new GameController();
-}
-
-
-//-----------------------------------------------------------------------------
-int32_t GameControllerIntegration::initializeAll()
-{
-   for (auto i = 0; i < instance_count; i++)
-   {
-      __instances[i] = nullptr;
-   }
-
-   // used for obtaining some information from sdl
-   auto tmp = new GameController();
-   count = tmp->getJoystickCount();
-   delete tmp;
-
-   for (auto i = 0; i < count; i++)
-   {
-      auto gji = new GameControllerIntegration();
-      gji->initialize(i);
-
-      __instances[i] = gji;
-   }
-
    _device_detection = std::make_unique<GameControllerDetection>();
-   _device_detection->setup();
-
-   return count;
+   _device_detection->setCallbackAdded([this](int32_t id){add(id);});
+   _device_detection->start();
 }
 
 
 //-----------------------------------------------------------------------------
-void GameControllerIntegration::initialize(int32_t id)
+void GameControllerIntegration::add(int32_t id)
 {
-   // automatically select first in list
-   if (_controller->getJoystickCount() > id)
-   {
-      _controller->setActiveJoystick(id);
-   }
+   auto controller = std::make_shared<GameController>();
+   controller->setActiveJoystick(id);
+   _controllers[id] = controller;
 }
 
 
 //-----------------------------------------------------------------------------
-GameController* GameControllerIntegration::getController()
+void GameControllerIntegration::remove(int32_t id)
 {
-   return _controller;
+
 }
 
 
 //-----------------------------------------------------------------------------
-void GameControllerIntegration::rumble(float intensity, int32_t ms)
+std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id)
 {
-   _controller->rumble(intensity, ms);
+   return _controllers[controller_id];
 }
 
 
 //-----------------------------------------------------------------------------
-int32_t GameControllerIntegration::getCount()
+void GameControllerIntegration::rumble(float intensity, int32_t ms, int32_t controller_id)
 {
-   return count;
+   _controllers[controller_id]->rumble(intensity, ms);
 }
 
 
 //-----------------------------------------------------------------------------
-bool GameControllerIntegration::isControllerConnected()
+int32_t GameControllerIntegration::getCount() const
 {
-   return getCount() > 0;
+   return _controllers.size();
 }
 
 
 //-----------------------------------------------------------------------------
-GameControllerIntegration* GameControllerIntegration::getInstance(int32_t id)
+bool GameControllerIntegration::isControllerConnected() const
 {
-   GameControllerIntegration* gji = nullptr;
+   return !_controllers.empty();
+}
 
-   if (id >= 0 && id < instance_count)
-   {
-      gji = __instances[id];
-   }
 
-   return gji;
+//-----------------------------------------------------------------------------
+GameControllerIntegration& GameControllerIntegration::getInstance()
+{
+   static GameControllerIntegration __gci;
+   return __gci;
 }
 
