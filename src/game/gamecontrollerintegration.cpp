@@ -103,6 +103,12 @@ std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_
 void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback& callback)
 {
    _device_added_callbacks.push_back(callback);
+
+   // call added for all devices we already have
+   for (auto& [k, v] : _controllers)
+   {
+      callback(k);
+   }
 }
 
 
