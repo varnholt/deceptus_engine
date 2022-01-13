@@ -129,7 +129,7 @@ void ControllerHelp::deserialize(TmxObject* tmx_object)
       while (getline(f, key, ';'))
       {
          // if the game controller is used, try to find a mapping
-         if (GameControllerIntegration::isControllerConnected())
+         if (GameControllerIntegration::getInstance().isControllerConnected())
          {
             auto mapped_it = key_controller_map.find(key);
             if (mapped_it != key_controller_map.end())
