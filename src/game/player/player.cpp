@@ -149,54 +149,55 @@ void Player::initializeLevel()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::initializeController()
 {
-   if (GameControllerIntegration::getCount() > 0)
+   auto& gji = GameControllerIntegration::getInstance();
+   if (!gji.isControllerConnected())
    {
-      auto gji = GameControllerIntegration::getInstance(0);
-
-      gji->getController()->addButtonPressedCallback(
-        SDL_CONTROLLER_BUTTON_A,
-        [this](){
-            if (GameState::getInstance().getMode() != ExecutionMode::Running)
-            {
-               return;
-            }
-            _jump.jump();
-         }
-      );
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_X,
-         [](){
-            if (GameState::getInstance().getMode() != ExecutionMode::Running)
-            {
-               return;
-            }
-            Level::getCurrentLevel()->toggleMechanisms();
-         }
-      );
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
-         [this](){
-            if (GameState::getInstance().getMode() != ExecutionMode::Running)
-            {
-               return;
-            }
-            updateDash(Dash::Left);
-         }
-      );
-
-      gji->getController()->addButtonPressedCallback(
-         SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
-         [this](){
-            if (GameState::getInstance().getMode() != ExecutionMode::Running)
-            {
-               return;
-            }
-            updateDash(Dash::Right);
-         }
-      );
+      return;
    }
+
+   gji.getController()->addButtonPressedCallback(
+     SDL_CONTROLLER_BUTTON_A,
+     [this](){
+         if (GameState::getInstance().getMode() != ExecutionMode::Running)
+         {
+            return;
+         }
+         _jump.jump();
+      }
+   );
+
+   gji.getController()->addButtonPressedCallback(
+      SDL_CONTROLLER_BUTTON_X,
+      [](){
+         if (GameState::getInstance().getMode() != ExecutionMode::Running)
+         {
+            return;
+         }
+         Level::getCurrentLevel()->toggleMechanisms();
+      }
+   );
+
+   gji.getController()->addButtonPressedCallback(
+      SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+      [this](){
+         if (GameState::getInstance().getMode() != ExecutionMode::Running)
+         {
+            return;
+         }
+         updateDash(Dash::Left);
+      }
+   );
+
+   gji.getController()->addButtonPressedCallback(
+      SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+      [this](){
+         if (GameState::getInstance().getMode() != ExecutionMode::Running)
+         {
+            return;
+         }
+         updateDash(Dash::Right);
+      }
+   );
 }
 
 
@@ -569,7 +570,7 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    }
 
    // analogue input normalized to -1..1
-   const auto axis_value = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   const auto axis_value = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
    auto axis_value_normalized = axis_values[static_cast<size_t>(axis_value)] / 32767.0f;
 
    // digital input
@@ -648,7 +649,7 @@ void Player::updatePlayerOrientation()
    if (_controls->isControllerUsed())
    {
       auto axisValues = _controls->getJoystickInfo().getAxisValues();
-      int axisLeftX = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+      int axisLeftX = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
       auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
       auto hatValue = _controls->getJoystickInfo().getHatValues().at(0);
       auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
@@ -1351,7 +1352,7 @@ void Player::updateBendDown()
       const auto& joystick_info = _controls->getJoystickInfo();
       const auto& axis_values = joystick_info.getAxisValues();
 
-      const auto axis_lefy_y = GameControllerIntegration::getInstance(0)->getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+      const auto axis_lefy_y = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
       auto yl = axis_values[static_cast<size_t>(axis_lefy_y)] / 32767.0f;
       const auto& hat_value = joystick_info.getHatValues().at(0);
       auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;

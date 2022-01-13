@@ -5,7 +5,7 @@
 #include <iostream>
 
 
-void GameControllerDetection::setup()
+void GameControllerDetection::start()
 {
    _thread = std::make_unique<std::thread>(
       [this](){
@@ -32,11 +32,13 @@ int32_t GameControllerDetection::processEvent(const SDL_Event& event)
       case SDL_JOYDEVICEADDED:
       {
          Log::Info() << "joystick added: " << event.jdevice.which;
+         _callback_added(event.jdevice.which);
          break;
       }
       case SDL_JOYDEVICEREMOVED:
       {
          Log::Info() << "joystick removed: " << event.jdevice.which;
+         _callback_removed(event.jdevice.which);
          break;
       }
       case SDL_CONTROLLERDEVICEADDED:
@@ -52,3 +54,17 @@ int32_t GameControllerDetection::processEvent(const SDL_Event& event)
    }
    return 0;
 }
+
+void GameControllerDetection::setCallbackRemoved(const RemovedCallback& callback_added)
+{
+   _callback_removed = callback_added;
+}
+
+
+void GameControllerDetection::setCallbackAdded(const AddedCallback& callback_removed)
+{
+   _callback_added = callback_removed;
+}
+
+
+

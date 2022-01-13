@@ -4,8 +4,8 @@
 //-----------------------------------------------------------------------------
 GameControllerData& GameControllerData::getInstance()
 {
-   static GameControllerData sInstance;
-   return sInstance;
+   static GameControllerData __instance;
+   return __instance;
 }
 
 
