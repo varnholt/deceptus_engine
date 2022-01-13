@@ -5,6 +5,12 @@
 #include <iostream>
 
 
+// SDL treats added and removed events differently and gives different identifiers for the added and removed events.
+// See the SDL documentation below:
+//
+// Sint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
+
+
 void GameControllerDetection::start()
 {
    _thread = std::make_unique<std::thread>(
@@ -31,13 +37,13 @@ int32_t GameControllerDetection::processEvent(const SDL_Event& event)
    {
       case SDL_JOYDEVICEADDED:
       {
-         Log::Info() << "joystick added: " << event.jdevice.which;
+         Log::Info() << "joystick added, device index: " << event.jdevice.which;
          _callback_added(event.jdevice.which);
          break;
       }
       case SDL_JOYDEVICEREMOVED:
       {
-         Log::Info() << "joystick removed: " << event.jdevice.which;
+         Log::Info() << "joystick removed, device instance id: " << event.jdevice.which;
          _callback_removed(event.jdevice.which);
          break;
       }
