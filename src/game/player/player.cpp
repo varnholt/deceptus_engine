@@ -150,52 +150,20 @@ void Player::initializeLevel()
 void Player::initializeController()
 {
    auto& gji = GameControllerIntegration::getInstance();
-   if (!gji.isControllerConnected())
-   {
-      return;
-   }
 
-   gji.getController()->addButtonPressedCallback(
-     SDL_CONTROLLER_BUTTON_A,
-     [this](){
-         if (GameState::getInstance().getMode() != ExecutionMode::Running)
-         {
-            return;
-         }
-         _jump.jump();
-      }
-   );
+   gji.addDeviceAddedCallback([&](int32_t /*id*/){
+         auto is_running = []() -> bool {
+            return (GameState::getInstance().getMode() == ExecutionMode::Running);
+         };
 
-   gji.getController()->addButtonPressedCallback(
-      SDL_CONTROLLER_BUTTON_X,
-      [](){
-         if (GameState::getInstance().getMode() != ExecutionMode::Running)
-         {
-            return;
-         }
-         Level::getCurrentLevel()->toggleMechanisms();
-      }
-   );
+         auto toggle_mechanism = [](){
+            Level::getCurrentLevel()->toggleMechanisms();
+         };
 
-   gji.getController()->addButtonPressedCallback(
-      SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
-      [this](){
-         if (GameState::getInstance().getMode() != ExecutionMode::Running)
-         {
-            return;
-         }
-         updateDash(Dash::Left);
-      }
-   );
-
-   gji.getController()->addButtonPressedCallback(
-      SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
-      [this](){
-         if (GameState::getInstance().getMode() != ExecutionMode::Running)
-         {
-            return;
-         }
-         updateDash(Dash::Right);
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [&](){if (is_running()){_jump.jump();}});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, [&](){if (is_running()){toggle_mechanism();}});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_LEFTSHOULDER, [&](){if (is_running()){updateDash(Dash::Left);}});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [&](){if (is_running()){updateDash(Dash::Right);}});
       }
    );
 }
