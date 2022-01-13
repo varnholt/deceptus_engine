@@ -41,7 +41,7 @@ class GameController
 
 
       //! constructor
-      GameController();
+      GameController() = default;
 
       //! destructor
       virtual ~GameController();

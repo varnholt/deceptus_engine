@@ -646,19 +646,20 @@ void Player::updatePlayerOrientation()
       return;
    }
 
-   if (_controls->isControllerUsed())
+   if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      auto axisValues = _controls->getJoystickInfo().getAxisValues();
-      int axisLeftX = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-      auto xl = axisValues[static_cast<size_t>(axisLeftX)] / 32767.0f;
-      auto hatValue = _controls->getJoystickInfo().getHatValues().at(0);
-      auto dpadLeftPressed = hatValue & SDL_HAT_LEFT;
-      auto dpadRightPressed = hatValue & SDL_HAT_RIGHT;
-      if (dpadLeftPressed)
+      auto axis_values = _controls->getJoystickInfo().getAxisValues();
+      const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+      auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
+      const auto hat_value = _controls->getJoystickInfo().getHatValues().at(0);
+      const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+      const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+
+      if (dpad_left_pressed)
       {
          xl = -1.0f;
       }
-      else if (dpadRightPressed)
+      else if (dpad_right_pressed)
       {
          xl = 1.0f;
       }
@@ -850,20 +851,20 @@ float Player::getDesiredVelocity() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 {
-  auto desiredVel = 0.0f;
+  auto desired_velocity = 0.0f;
 
-  if (_controls->isControllerUsed())
+  if (GameControllerIntegration::getInstance().isControllerConnected())
   {
      // controller
-     desiredVel = getVelocityFromController(speed);
+     desired_velocity = getVelocityFromController(speed);
   }
   else
   {
      // keyboard
-     desiredVel = getVelocityFromKeyboard(speed);
+     desired_velocity = getVelocityFromKeyboard(speed);
   }
 
-  return desiredVel;
+  return desired_velocity;
 }
 
 
@@ -1347,7 +1348,7 @@ void Player::updateBendDown()
       return;
    }
 
-   if (_controls->isControllerUsed())
+   if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& joystick_info = _controls->getJoystickInfo();
       const auto& axis_values = joystick_info.getAxisValues();
