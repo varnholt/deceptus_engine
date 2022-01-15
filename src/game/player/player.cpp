@@ -5,6 +5,7 @@
 #include "bow.h"
 #include "camerapane.h"
 #include "displaymode.h"
+#include "gameclock.h"
 #include "gamecontactlistener.h"
 #include "gamecontrollerintegration.h"
 #include "gamestate.h"
@@ -888,6 +889,8 @@ void Player::applyBeltVelocity(float& desired_velocity)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
 {
+   using namespace std::chrono_literals;
+
    if (isDead())
    {
       _body->SetLinearVelocity(b2Vec2{0.0, 0.0});
@@ -909,6 +912,12 @@ void Player::updateVelocity()
 
    // if we just landed hard on the ground, we need a break :)
    if (_hard_landing)
+   {
+      _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
+
+   if (GameClock::getInstance().duration() < _player_animation.getRevealDuration())
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;
