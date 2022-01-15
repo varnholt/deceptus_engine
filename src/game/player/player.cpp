@@ -823,12 +823,10 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 
   if (GameControllerIntegration::getInstance().isControllerConnected())
   {
-     // controller
      desired_velocity = getVelocityFromController(speed);
   }
   else
   {
-     // keyboard
      desired_velocity = getVelocityFromKeyboard(speed);
   }
 
@@ -909,6 +907,13 @@ void Player::updateVelocity()
       return;
    }
 
+   // if we just landed hard on the ground, we need a break :)
+   if (_hard_landing)
+   {
+      _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
+
    if (_bend._bending_down)
    {
       if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
@@ -935,13 +940,6 @@ void Player::updateVelocity()
    {
       _bend._was_crouching = _bend._crouching;
       _bend._crouching = false;
-   }
-
-   // if we just landed hard on the ground, we need a break :)
-   if (_hard_landing)
-   {
-      _body->SetLinearVelocity({0.0, 0.0});
-      return;
    }
 
    // we need friction to walk up diagonales
@@ -1148,7 +1146,10 @@ void Player::updateImpulse()
       _hard_landing = true;
       _hard_landing_cycles = 0;
 
-      damage(static_cast<int32_t>((impulse - 1.0f) * 20.0f));
+      if (PhysicsConfiguration::getInstance()._player_hard_landing_damage_enabled)
+      {
+         damage(static_cast<int32_t>((impulse - 1.0f) * PhysicsConfiguration::getInstance()._player_hard_landing_damage_factor));
+      }
    }
 }
 

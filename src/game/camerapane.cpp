@@ -22,10 +22,10 @@ CameraPane& CameraPane::getInstance()
 //-----------------------------------------------------------------------------
 void CameraPane::update()
 {
-  constexpr auto speed = 3.0f;
+   constexpr auto speed = 3.0f;
 
-  if (GameControllerIntegration::getInstance().isControllerConnected())
-  {
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
       auto axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
 
       auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
