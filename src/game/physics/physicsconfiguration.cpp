@@ -59,6 +59,9 @@ std::string PhysicsConfiguration::serialize()
             {"player_wall_jump_multiplier_scale_per_frame",       _player_wall_jump_multiplier_scale_per_frame},
 
             {"player_double_jump_factor",                         _player_double_jump_factor},
+
+            {"player_hard_landing_damage_enabled",                _player_hard_landing_damage_enabled},
+            {"player_hard_landing_damage_factor",                 _player_hard_landing_damage_factor},
          }
       }
    };
@@ -71,7 +74,14 @@ std::string PhysicsConfiguration::serialize()
 
 void PhysicsConfiguration::deserialize(const std::string& data)
 {
-   json config = json::parse(data);
+   json config;
+   try {
+      config = json::parse(data);
+   }
+   catch (const std::exception& e)
+   {
+      std::cerr << e.what() << std::endl;
+   }
 
    _time_step                                       = config["PhysicsConfiguration"]["timestep"].get<float>();
    _gravity                                         = config["PhysicsConfiguration"]["gravity"].get<float>();
@@ -110,6 +120,9 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    _player_wall_jump_multiplier_scale_per_frame     = config["PhysicsConfiguration"]["player_wall_jump_multiplier_scale_per_frame"].get<float>();
 
    _player_double_jump_factor                       = config["PhysicsConfiguration"]["player_double_jump_factor"].get<float>();
+
+   _player_hard_landing_damage_enabled              = config["PhysicsConfiguration"]["player_hard_landing_damage_enabled"].get<bool>();
+   _player_hard_landing_damage_factor               = config["PhysicsConfiguration"]["player_hard_landing_damage_factor"].get<float>();
 }
 
 

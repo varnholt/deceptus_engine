@@ -50,6 +50,10 @@ struct PhysicsConfiguration
    // double jump
    float _player_double_jump_factor = 6.0f;
 
+   // hard landing
+   bool _player_hard_landing_damage_enabled = false;
+   float _player_hard_landing_damage_factor = 20.0f;
+
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
 
