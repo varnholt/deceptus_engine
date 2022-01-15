@@ -384,6 +384,13 @@ void PlayerAnimation::generateJson()
 }
 
 
+PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
+{
+   using namespace std::chrono_literals;
+   return 1000ms + _appear_l_2->_overall_time_chrono + 20ms;
+}
+
+
 void PlayerAnimation::update(
    const sf::Time& dt,
    const PlayerAnimationData& data
@@ -600,7 +607,7 @@ void PlayerAnimation::update(
    }
 
    // appear animation
-   if (GameClock::getInstance().duration() < 1.0s + _appear_l_2->_overall_time_chrono + 20ms)
+   if (GameClock::getInstance().duration() < getRevealDuration())
    {
       next_cycle = data._points_right ? _appear_r_2 : _appear_l_2;
 

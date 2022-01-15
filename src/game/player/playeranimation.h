@@ -17,11 +17,11 @@ public:
 
    PlayerAnimation();
 
+   using HighResDuration = std::chrono::high_resolution_clock::duration;
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
    struct PlayerAnimationData
    {
-      using HighResDuration = std::chrono::high_resolution_clock::duration;
-      using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
-
       bool _dead = false;
       bool _in_air = false;
       bool _in_water = false;
@@ -55,6 +55,7 @@ public:
    int32_t getJumpAnimationReference() const;
 
    std::shared_ptr<Animation> getCurrentCycle() const;
+   HighResDuration getRevealDuration() const;
 
    void resetAlpha();
 
