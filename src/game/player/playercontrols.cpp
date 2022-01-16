@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
+#include "tweaks.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -203,34 +204,34 @@ bool PlayerControls::isControllerButtonPressed(int button_enum) const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isFireButtonPressed() const
 {
-  if (_keys_pressed & KeyPressedFire)
-  {
-    return true;
-  }
+   if (_keys_pressed & KeyPressedFire)
+   {
+      return true;
+   }
 
-  if (GameControllerIntegration::getInstance().isControllerConnected())
-  {
-    return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_X);
-  }
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_X);
+   }
 
-  return false;
+   return false;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isJumpButtonPressed() const
 {
-  if (_keys_pressed & KeyPressedJump)
-  {
-    return true;
-  }
+   if (_keys_pressed & KeyPressedJump)
+   {
+      return true;
+   }
 
-  if (GameControllerIntegration::getInstance().isControllerConnected())
-  {
-     return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_A);
-  }
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_A);
+   }
 
-  return false;
+   return false;
 }
 
 
@@ -490,3 +491,93 @@ bool PlayerControls::changedToMoving() const
 {
    return !wasMoving() && isMovingHorizontally();
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+PlayerControls::Orientation PlayerControls::getActiveOrientation() const
+{
+   Orientation orientation = Orientation::Undefined;
+
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      auto axis_values = getJoystickInfo().getAxisValues();
+      const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+      auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
+      const auto hat_value = getJoystickInfo().getHatValues().at(0);
+      const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+      const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+
+      if (dpad_left_pressed)
+      {
+         xl = -1.0f;
+      }
+      else if (dpad_right_pressed)
+      {
+         xl = 1.0f;
+      }
+
+      if (fabs(xl)> 0.3f)
+      {
+         if (xl < 0.0f)
+         {
+            orientation = Orientation::Left;
+         }
+         else
+         {
+            orientation = Orientation::Right;
+         }
+      }
+   }
+   else
+   {
+      if (hasFlag(KeyPressedLeft))
+      {
+         orientation = Orientation::Left;
+      }
+
+      if (hasFlag(KeyPressedRight))
+      {
+         orientation = Orientation::Right;
+      }
+   }
+
+   return orientation;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isBendDownActive() const
+{
+   auto down_pressed = false;
+
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      const auto& joystick_info = getJoystickInfo();
+      const auto& axis_values = joystick_info.getAxisValues();
+
+      const auto axis_lefy_y = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+      auto yl = axis_values[static_cast<size_t>(axis_lefy_y)] / 32767.0f;
+      const auto& hat_value = joystick_info.getHatValues().at(0);
+      auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
+
+      if (dpad_down_pressed)
+      {
+         yl = 1.0f;
+      }
+
+      if (fabs(yl) >  Tweaks::instance()._bend_down_threshold)
+      {
+         if (yl > 0.0f)
+         {
+            down_pressed = true;
+         }
+      }
+   }
+   else
+   {
+      down_pressed = hasFlag(KeyPressedDown);
+   }
+
+   return down_pressed;
+}
+

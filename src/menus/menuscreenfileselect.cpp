@@ -168,49 +168,49 @@ void MenuScreenFileSelect::updateLayers()
 {
    auto index = 0;
 
-   const auto& saveStates = SaveState::getSaveStates();
-   for (const auto& saveState : saveStates)
+   const auto& save_states = SaveState::getSaveStates();
+   for (const auto& save_state : save_states)
    {
       std::ostringstream out;
       out << (index + 1);
 
-      const auto empty = saveState.isEmpty();
-      const auto slotName = out.str();
+      const auto empty = save_state.isEmpty();
+      const auto slot_name = out.str();
       const auto selected = index == static_cast<int32_t>(_slot);
 
       // no data
-      _layers["slot_" + slotName + "_new_game"]->_visible = empty;
-      _layers["slot_" + slotName + "_new_game_background"]->_visible = empty;
-      _layers["slot_" + slotName + "_new_game_highlight"]->_visible = empty;
-      _layers["slot_" + slotName + "_new_game_deselected"]->_visible = empty && !selected;
-      _layers["slot_" + slotName + "_new_game_selected"]->_visible = empty && selected;
-      _layers["slot_" + slotName + "_shadow"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game_background"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game_highlight"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game_deselected"]->_visible = empty && !selected;
+      _layers["slot_" + slot_name + "_new_game_selected"]->_visible = empty && selected;
+      _layers["slot_" + slot_name + "_shadow"]->_visible = empty;
 
       // have data
-      _layers["slot_" + slotName + "_selected"]->_visible = !empty && selected;
-      _layers["slot_" + slotName + "_deselected"]->_visible = !empty && !selected;
-      _layers["slot_" + slotName + "_background"]->_visible = !empty;
-      _layers["slot_" + slotName + "_bar_1"]->_visible = !empty;
-      _layers["slot_" + slotName + "_bar_2"]->_visible = !empty;
-      _layers["slot_" + slotName + "_energy"]->_visible = !empty;
-      _layers["slot_" + slotName + "_heart"]->_visible = !empty;
-      _layers["slot_" + slotName + "_highlight"]->_visible = !empty;
-      _layers["slot_" + slotName + "_letter_deselected"]->_visible = !selected;
-      _layers["slot_" + slotName + "_letter_selected"]->_visible = selected;
-      _layers["slot_" + slotName + "_lines"]->_visible = !empty;
-      _layers["slot_" + slotName + "_name"]->_visible = false;
-      _layers["slot_" + slotName + "_progress"]->_visible = false;
-      _layers["slot_" + slotName + "_time"]->_visible = false;
+      _layers["slot_" + slot_name + "_selected"]->_visible = !empty && selected;
+      _layers["slot_" + slot_name + "_deselected"]->_visible = !empty && !selected;
+      _layers["slot_" + slot_name + "_background"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_bar_1"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_bar_2"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_energy"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_heart"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_highlight"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_letter_deselected"]->_visible = !selected;
+      _layers["slot_" + slot_name + "_letter_selected"]->_visible = selected;
+      _layers["slot_" + slot_name + "_lines"]->_visible = !empty;
+      _layers["slot_" + slot_name + "_name"]->_visible = false;
+      _layers["slot_" + slot_name + "_progress"]->_visible = false;
+      _layers["slot_" + slot_name + "_time"]->_visible = false;
 
       // both
-      _layers["slot_" + slotName + "_arrow"]->_visible = selected;
+      _layers["slot_" + slot_name + "_arrow"]->_visible = selected;
 
       // update names
-      auto nameLayer = _layers["slot_" + slotName + "_name"];
-      _names[index].setString(saveState._player_info.mName);
+      auto layer_name = _layers["slot_" + slot_name + "_name"];
+      _names[index].setString(save_state._player_info._name);
       _names[index].setPosition(
-         nameLayer->_sprite->getPosition().x,
-         nameLayer->_sprite->getPosition().y + nameOffsetY
+         layer_name->_sprite->getPosition().x,
+         layer_name->_sprite->getPosition().y + nameOffsetY
       );
 
       index++;

@@ -510,8 +510,7 @@ void Game::updateGameController()
    if (gji.isControllerConnected())
    {
       gji.getController()->update();
-      const auto& info = gji.getController()->getInfo();
-      _player->getControls()->setJoystickInfo(info);
+      _player->getControls()->setJoystickInfo(gji.getController()->getInfo());
    }
 }
 
@@ -537,8 +536,7 @@ void Game::updateGameControllerForInventory()
 
    if (gji.isControllerConnected())
    {
-      const auto& info = gji.getController()->getInfo();
-      _inventory_layer->setJoystickInfo(info);
+      _inventory_layer->setJoystickInfo(gji.getController()->getInfo());
    }
 }
 
@@ -914,13 +912,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Audio::getInstance().playSample("powerup.wav");
 
-         if (SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
+         if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
          {
-            SaveState::getPlayerInfo().mExtraTable._skills._skills &= ~ static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
+            SaveState::getPlayerInfo()._extra_table._skills._skills &= ~ static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
          }
          else
          {
-            SaveState::getPlayerInfo().mExtraTable._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
+            SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
          }
          break;
       }

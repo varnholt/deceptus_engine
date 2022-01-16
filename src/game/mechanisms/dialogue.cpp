@@ -131,7 +131,7 @@ void Dialogue::replace(std::string& str, const std::string& what, const std::str
 
 void Dialogue::replaceTags(std::string& str)
 {
-   replace(str, "<player>", SaveState::getPlayerInfo().mName);
+   replace(str, "<player>", SaveState::getPlayerInfo()._name);
    replace(str, "<br>", "\n");
 }
 

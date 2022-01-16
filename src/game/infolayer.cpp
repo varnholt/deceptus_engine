@@ -153,8 +153,8 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (!_loading)
    {
-      int32_t heart_quarters = SaveState::getPlayerInfo().mExtraTable._health._health;
-      int32_t heart_count = SaveState::getPlayerInfo().mExtraTable._health._health_max / 4;
+      int32_t heart_quarters = SaveState::getPlayerInfo()._extra_table._health._health;
+      int32_t heart_count = SaveState::getPlayerInfo()._extra_table._health._health_max / 4;
 
       for (auto i = 0; i < heart_count; i++)
       {

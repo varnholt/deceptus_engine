@@ -12,9 +12,9 @@
 
 struct PlayerInfo
 {
-   Inventory mInventory;
-   ExtraTable mExtraTable;
-   std::string mName;
+   Inventory _inventory;
+   ExtraTable _extra_table;
+   std::string _name;
 };
 
 
