@@ -39,6 +39,7 @@ class MessageBox
          sf::Color _background_color = sf::Color{47, 12, 75};
          sf::Color _text_color = sf::Color{232, 219, 243};
          bool _animate_text = false;
+         float _animate_text_speed = 10.0f;
          bool _centered = true;
          bool _animate_show_event = true;
          bool _animate_hide_event = true;

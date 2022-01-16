@@ -32,7 +32,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(TmxObject* tmx_object)
       if (it_dialogue_items != properties->_map.end())
       {
          DialogueItem item;
-         item.mMessage = (*it_dialogue_items).second->_value_string.value();
+         item._message = (*it_dialogue_items).second->_value_string.value();
          dialogue->_dialogue_items.push_back(item);
       }
    }
@@ -154,7 +154,7 @@ void Dialogue::showNext()
    }
 
    const auto item = _dialogue_items.at(_index);
-   auto messag_text = item.mMessage;
+   auto messag_text = item._message;
 
    replaceTags(messag_text);
 
@@ -162,10 +162,11 @@ void Dialogue::showNext()
       messag_text,
       [this](MessageBox::Button /*b*/) {showNext();},
       MessageBox::LayoutProperties{
-         item.mLocation,
-         item.mBackgroundColor,
-         item.mTextColor,
-         true,
+         item._location,
+         item._background_color,
+         item._text_color,
+         item._animate_text,
+         item._animate_text_speed,
          false,
          (_index == 0),                         // the first item has a show animation
          (_index == _dialogue_items.size() - 1) // the last item has a hide animation

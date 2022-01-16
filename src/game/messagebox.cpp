@@ -460,7 +460,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
            GlobalClock::getInstance().getElapsedTime().asSeconds()
          - __active->_show_time.asSeconds()
          - (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f)
-      ) * 10.0f;
+      ) * __active->_properties._animate_text_speed;
 
       // if the thing is animated we want to wait for the animation_scale_time to pass
       // so x might go into negative for that duration.
