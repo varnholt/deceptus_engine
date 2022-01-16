@@ -180,7 +180,7 @@ bool Door::checkPlayerAtDoor() const
 //-----------------------------------------------------------------------------
 void Door::toggle()
 {
-   if (!SaveState::getPlayerInfo().mInventory.hasInventoryItem(_required_item))
+   if (!SaveState::getPlayerInfo()._inventory.hasInventoryItem(_required_item))
    {
       // Log::Info() << "player doesn't have key";
       return;

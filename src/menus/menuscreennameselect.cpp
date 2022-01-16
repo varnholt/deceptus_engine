@@ -77,7 +77,7 @@ void MenuScreenNameSelect::select()
    Menu::getInstance()->hide();
    GameState::getInstance().enqueueResume();
 
-   SaveState::getCurrent()._player_info.mName = _name;
+   SaveState::getCurrent()._player_info._name = _name;
 
    // request level-reloading since we updated the save state
    SaveState::getCurrent()._load_level_requested = true;

@@ -615,47 +615,14 @@ void Player::updatePlayerOrientation()
       return;
    }
 
-   if (GameControllerIntegration::getInstance().isControllerConnected())
+   const auto orientation = _controls->getActiveOrientation();
+   if (orientation == PlayerControls::Orientation::Left)
    {
-      auto axis_values = _controls->getJoystickInfo().getAxisValues();
-      const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-      auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
-      const auto hat_value = _controls->getJoystickInfo().getHatValues().at(0);
-      const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
-      const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
-
-      if (dpad_left_pressed)
-      {
-         xl = -1.0f;
-      }
-      else if (dpad_right_pressed)
-      {
-         xl = 1.0f;
-      }
-
-      if (fabs(xl)> 0.3f)
-      {
-         if (xl < 0.0f)
-         {
-            _points_to_left = true;
-         }
-         else
-         {
-            _points_to_left = false;
-         }
-      }
+      _points_to_left = true;
    }
-   else
+   else if (orientation == PlayerControls::Orientation::Right)
    {
-      if (_controls->hasFlag(KeyPressedLeft))
-      {
-         _points_to_left = true;
-      }
-
-      if (_controls->hasFlag(KeyPressedRight))
-      {
-         _points_to_left = false;
-      }
+      _points_to_left = false;
    }
 }
 
@@ -925,7 +892,7 @@ void Player::updateVelocity()
 
    if (_bend._bending_down)
    {
-      if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
+      if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
       {
          if (getControls()->isDroppingDown() && OneWayWall::instance().hasContacts())
          {
@@ -1176,7 +1143,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
       return;
    }
 
-   if (SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Invulnerable))
+   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Invulnerable))
    {
       return;
    }
@@ -1191,10 +1158,10 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
       auto body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-      SaveState::getPlayerInfo().mExtraTable._health._health -= damage;
+      SaveState::getPlayerInfo()._extra_table._health._health -= damage;
       _damage_clock.restart();
 
-      if (SaveState::getPlayerInfo().mExtraTable._health._health < 0)
+      if (SaveState::getPlayerInfo()._extra_table._health._health < 0)
       {
          // the function below is not called since 'damage(...)' is evaluated
          // within the box2d step function; no further box2d related adjustments
@@ -1316,8 +1283,6 @@ void Player::setZIndex(int32_t z)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateBendDown()
 {
-   auto down_pressed = false;
-
    // disable bend down states when player hit dash button
    if (_dash.isDashActive())
    {
@@ -1326,33 +1291,7 @@ void Player::updateBendDown()
       return;
    }
 
-   if (GameControllerIntegration::getInstance().isControllerConnected())
-   {
-      const auto& joystick_info = _controls->getJoystickInfo();
-      const auto& axis_values = joystick_info.getAxisValues();
-
-      const auto axis_lefy_y = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
-      auto yl = axis_values[static_cast<size_t>(axis_lefy_y)] / 32767.0f;
-      const auto& hat_value = joystick_info.getHatValues().at(0);
-      auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
-
-      if (dpad_down_pressed)
-      {
-         yl = 1.0f;
-      }
-
-      if (fabs(yl) >  Tweaks::instance()._bend_down_threshold)
-      {
-         if (yl > 0.0f)
-         {
-            down_pressed = true;
-         }
-      }
-   }
-   else
-   {
-      down_pressed = _controls->hasFlag(KeyPressedDown);
-   }
+   auto down_pressed = _controls->isBendDownActive();
 
    // if the head touches something while crouches, keep crouching
    if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCount() > 0))
@@ -1539,7 +1478,7 @@ void Player::resetDash()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
-   if (!(SaveState::getPlayerInfo().mExtraTable._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Dash)))
+   if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Dash)))
    {
       return;
    }
@@ -1846,7 +1785,7 @@ void Player::reset()
       );
    }
 
-   SaveState::getPlayerInfo().mExtraTable._health.reset();
+   SaveState::getPlayerInfo()._extra_table._health.reset();
 
    // resetting any player info apart form the health doesn't make sense
    // since it's loaded from disk when the player dies
@@ -1873,7 +1812,7 @@ DeathReason Player::checkDead() const
 
    const auto touches_something_deadly = (GameContactListener::getInstance().getDeadlyContactCount() > 0);
    const auto too_fast = fabs(_body->GetLinearVelocity().y) > 40;
-   const auto out_of_health = SaveState::getPlayerInfo().mExtraTable._health._health <= 0;
+   const auto out_of_health = SaveState::getPlayerInfo()._extra_table._health._health <= 0;
    const auto smashed = GameContactListener::getInstance().isPlayerSmashed();
 
    if (touches_something_deadly)

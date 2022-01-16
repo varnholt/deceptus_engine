@@ -146,7 +146,7 @@ void Console::execute()
    }
    else if (results.at(0) == "/extra" && results.size() == 2)
    {
-      auto& skills = SaveState::getPlayerInfo().mExtraTable._skills._skills;
+      auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
       if (results.at(1) == "climb")
       {
          skills |= static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
@@ -258,12 +258,12 @@ void Console::execute()
    }
    else if (results.at(0) == "/iddqd")
    {
-      SaveState::getPlayerInfo().mExtraTable._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Invulnerable);
+      SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Invulnerable);
       _log.push_back("invulnerable");
    }
    else if (results.at(0) == "/idkfa")
    {
-      SaveState::getPlayerInfo().mInventory.giveAllKeys();
+      SaveState::getPlayerInfo()._inventory.giveAllKeys();
       _log.push_back("all keys");
    }
    else if (results.at(0) == "/damage" && results.size() == 2)

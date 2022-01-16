@@ -1,11 +1,25 @@
-#ifndef PLAYERINPUT_H
-#define PLAYERINPUT_H
-
+#pragma once
 
 class PlayerInput
 {
    public:
-      PlayerInput();
+
+      enum class InputType
+      {
+         Keyboard,
+         Controller
+      };
+
+      PlayerInput() = default;
+
+      void update();
+
+      bool isKeyboardUsed() const;
+      bool isControllerUsed() const;
+
+
+   private:
+
+      InputType _input_type = InputType::Keyboard;
 };
 
-#endif // PLAYERINPUT_H
