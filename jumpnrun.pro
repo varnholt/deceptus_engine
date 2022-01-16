@@ -24,6 +24,7 @@ DEFINES_RELEASE += RELEASE_BUILD
 
 debug {
    CONFIG += console
+   DEFINES += DEBUG
 }
 
 win32-msvc {
