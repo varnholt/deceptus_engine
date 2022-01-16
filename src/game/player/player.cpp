@@ -232,9 +232,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       for (auto i = 0u; i < _last_animations.size(); i++)
       {
          auto& anim = _last_animations[i];
-         anim.mAnimation->setPosition(anim.mPosition);
-         anim.mAnimation->setAlpha(static_cast<uint8_t>(255/(2*(_last_animations.size()-i))));
-         anim.mAnimation->draw(color);
+         anim._animation->setPosition(anim._position);
+         anim._animation->setAlpha(static_cast<uint8_t>(255/(2*(_last_animations.size()-i))));
+         anim._animation->draw(color);
       }
 
       if (_dash.isDashActive())
@@ -283,7 +283,7 @@ void Player::setPixelPosition(float x, float y)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePlayerPixelRect()
+void Player::updatePixelRect()
 {
    sf::IntRect rect;
 
@@ -559,37 +559,32 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    // controller is not used, so slow down
    if (fabs(axis_value_normalized) <= 0.3f)
    {
-      return speed.currentVelocity.x * speed.deceleration;
+      return speed.current_velocity.x * speed._deceleration;
    }
 
-   axis_value_normalized *= speed.acceleration;
+   axis_value_normalized *= speed._acceleration;
 
    // checking for the current speed here because even if the player pushes a controller axis
    // to the left side, it might still dash to the other side with quite a strong impulse.
    // that would confuse the speed capping and would accelerate to infinity. true story.
-   auto desiredVel = 0.0f;
-   if (speed.currentVelocity.x < 0.0f)
+   auto desired_velocity = 0.0f;
+   if (speed.current_velocity.x < 0.0f)
    {
-      desiredVel = b2Max(speed.currentVelocity.x + axis_value_normalized, -speed.velocityMax);
+      desired_velocity = b2Max(speed.current_velocity.x + axis_value_normalized, -speed._velocity_max);
 
-      // Log::Info()
-      //    << "desired: " << desiredVel << " "
-      //    << "current: " << speed.currentVelocity.x << " "
-      //    << "axis value: " << axisValueNormalized << " "
-      //    << "max: " << -speed.velocityMax;
    }
    else
    {
-      desiredVel = b2Min(speed.currentVelocity.x + axis_value_normalized, speed.velocityMax);
-
-      // Log::Info()
-      //    << "desired: " << desiredVel << " "
-      //    << "current: " << speed.currentVelocity.x << " "
-      //    << "axis value: " << axisValueNormalized << " "
-      //    << "max: " << speed.velocityMax;
+      desired_velocity = b2Min(speed.current_velocity.x + axis_value_normalized, speed._velocity_max);
    }
 
-   return desiredVel;
+   // Log::Info()
+   //    << "desired: " << desiredVel << " "
+   //    << "current: " << speed.currentVelocity.x << " "
+   //    << "axis value: " << axisValueNormalized << " "
+   //    << "max: " << speed.velocityMax;
+
+   return desired_velocity;
 }
 
 
@@ -608,7 +603,7 @@ bool Player::isPointingLeft() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePlayerOrientation()
+void Player::updateOrientation()
 {
    if (isDead())
    {
@@ -645,12 +640,12 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 
    if (_controls->hasFlag(KeyPressedLeft))
    {
-      desiredVel = b2Max(speed.currentVelocity.x - speed.acceleration, -speed.velocityMax);
+      desiredVel = b2Max(speed.current_velocity.x - speed._acceleration, -speed._velocity_max);
    }
 
    if (_controls->hasFlag(KeyPressedRight))
    {
-      desiredVel = b2Min(speed.currentVelocity.x + speed.acceleration, speed.velocityMax);
+      desiredVel = b2Min(speed.current_velocity.x + speed._acceleration, speed._velocity_max);
    }
 
    // slowdown as soon as
@@ -662,14 +657,14 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
       && (!(_controls->hasFlag(KeyPressedRight)));
 
    const auto velocityOppositeToGivenDir =
-         (speed.currentVelocity.x < -0.01f && _controls->hasFlag(KeyPressedRight))
-      || (speed.currentVelocity.x >  0.01f && _controls->hasFlag(KeyPressedLeft));
+         (speed.current_velocity.x < -0.01f && _controls->hasFlag(KeyPressedRight))
+      || (speed.current_velocity.x >  0.01f && _controls->hasFlag(KeyPressedLeft));
 
    const auto noMovement = (fabs(desiredVel) < 0.0001f);
 
    if (noMovementToLeftOrRight || velocityOppositeToGivenDir || noMovement)
    {
-      desiredVel = speed.currentVelocity.x * speed.deceleration;
+      desiredVel = speed.current_velocity.x * speed._deceleration;
    }
 
    return desiredVel;
@@ -791,7 +786,14 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 
   if (GameControllerIntegration::getInstance().isControllerConnected())
   {
-     desired_velocity = getVelocityFromController(speed);
+     if (_controls->isControllerUsedLast())
+     {
+        desired_velocity = getVelocityFromController(speed);
+     }
+     else
+     {
+        desired_velocity = getVelocityFromKeyboard(speed);
+     }
   }
   else
   {
@@ -950,7 +952,6 @@ void Player::updateVelocity()
    // limit velocity
    if (isInWater())
    {
-      // const float32 speed = velocity.Length();
       auto linearVelocity = _body->GetLinearVelocity();
 
       if (linearVelocity.y > 0.0f)
@@ -1430,14 +1431,14 @@ void Player::update(const sf::Time& dt)
    updateImpulse();
    updateGroundAngle();
    updateHardLanding();
-   updatePlayerPixelRect();
+   updatePixelRect();
    updateBendDown();
    updateAnimation(dt);
    updatePixelCollisions();
    updateAtmosphere();
    updateFire();
    updateVelocity();
-   updatePlayerOrientation();
+   updateOrientation();
    updateOneWayWallDrop();
 
    PlayerJump::PlayerJumpInfo info;
@@ -1848,30 +1849,30 @@ void Player::traceJumpCurve()
 {
    if (_controls->isJumpButtonPressed())
    {
-      if (!_jump_trace.jumpStarted)
+      if (!_jump_trace._jump_started)
       {
-         _jump_trace.jumpStartTime = _time;
-         _jump_trace.jumpStartY = _body->GetPosition().y;
-         _jump_trace.jumpStarted = true;
+         _jump_trace._jump_start_time = _time;
+         _jump_trace._jump_start_y = _body->GetPosition().y;
+         _jump_trace._jump_started = true;
 
          std::cout << std::endl << "time; y" << std::endl;
       }
 
-      const auto jumpNextY = -(_body->GetPosition().y - _jump_trace.jumpStartY);
-      if (fabs(jumpNextY - _jump_trace.jumpPrevY) > _jump_trace.jumpEpsilon)
+      const auto jumpNextY = -(_body->GetPosition().y - _jump_trace._jump_start_y);
+      if (fabs(jumpNextY - _jump_trace._jump_prev_y) > _jump_trace._jump_epsilon)
       {
          std::cout
-            << _time.asSeconds() - _jump_trace.jumpStartTime.asSeconds()
+            << _time.asSeconds() - _jump_trace._jump_start_time.asSeconds()
             << "; "
             << jumpNextY
             << std::endl;
       }
 
-      _jump_trace.jumpPrevY = jumpNextY;
+      _jump_trace._jump_prev_y = jumpNextY;
    }
    else
    {
-      _jump_trace.jumpStarted = false;
+      _jump_trace._jump_started = false;
    }
 }
 

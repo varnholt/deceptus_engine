@@ -1,8 +1,9 @@
 #include "playerinput.h"
 
 
-void PlayerInput::update()
+void PlayerInput::update(InputType input_type)
 {
+   _input_type = input_type;
 }
 
 

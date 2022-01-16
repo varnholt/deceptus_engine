@@ -1,8 +1,12 @@
 #pragma once
 
 #include "framework/joystick/gamecontrollerinfo.h"
+#include "playerinput.h"
+
 #include <functional>
+
 #include <SFML/Graphics.hpp>
+
 
 class PlayerControls
 {
@@ -61,9 +65,12 @@ public:
 
    Orientation getActiveOrientation() const;
    bool isBendDownActive() const;
+   bool isControllerUsedLast() const;
 
 
 private:
+
+   void updatePlayerInput();
 
    GameControllerInfo _joystick_info;
 
@@ -74,6 +81,7 @@ private:
    bool _was_moving_right = false;
 
    std::vector<KeypressedCallback> _keypressed_callbacks;
+   PlayerInput _player_input;
 };
 
 
