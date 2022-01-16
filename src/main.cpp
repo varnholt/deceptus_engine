@@ -31,6 +31,7 @@ void debugAuthors()
 
 int main(int /*argc*/, char** /*argv*/)
 {
+#ifndef DEBUG
    // setup logging to file
    LogThread log_thread;
    Log::registerListenerCallback(
@@ -43,6 +44,7 @@ int main(int /*argc*/, char** /*argv*/)
          std::placeholders::_4
       )
    );
+#endif
 
    debugAuthors();
    Test test;
