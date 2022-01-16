@@ -83,11 +83,11 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
                break;
             case ExtraItem::ExtraSpriteIndex::Cherry:
                Audio::getInstance().playSample("healthup.wav");
-               SaveState::getPlayerInfo().mExtraTable._health.addHealth(4);
+               SaveState::getPlayerInfo()._extra_table._health.addHealth(4);
                break;
             case ExtraItem::ExtraSpriteIndex::Banana:
                Audio::getInstance().playSample("healthup.wav");
-               SaveState::getPlayerInfo().mExtraTable._health.addHealth(1);
+               SaveState::getPlayerInfo()._extra_table._health.addHealth(1);
                break;
             case ExtraItem::ExtraSpriteIndex::Apple:
                Audio::getInstance().playSample("powerup.wav");
@@ -95,37 +95,37 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
             case ExtraItem::ExtraSpriteIndex::KeyRed:
             {
                Audio::getInstance().playSample("powerup.wav");
-               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyRed);
+               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyRed);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyOrange:
             {
                Audio::getInstance().playSample("powerup.wav");
-               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyOrange);
+               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyOrange);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyBlue:
             {
                Audio::getInstance().playSample("powerup.wav");
-               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyBlue);
+               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyBlue);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyGreen:
             {
                Audio::getInstance().playSample("powerup.wav");
-               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyGreen);
+               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyGreen);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::KeyYellow:
             {
                Audio::getInstance().playSample("powerup.wav");
-               SaveState::getPlayerInfo().mInventory.add(ItemType::KeyYellow);
+               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::Dash:
             {
                Audio::getInstance().playSample("powerup.wav");
-               SaveState::getPlayerInfo().mExtraTable._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Dash);
+               SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Dash);
                break;
             }
          }

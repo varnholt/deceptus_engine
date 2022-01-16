@@ -29,7 +29,7 @@ bool SaveState::allEmpty()
 
 bool SaveState::isEmpty() const
 {
-   return _player_info.mName.empty();
+   return _player_info._name.empty();
 }
 
 

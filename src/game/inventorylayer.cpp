@@ -51,7 +51,7 @@ InventoryLayer::InventoryLayer()
 //---------------------------------------------------------------------------------------------------------------------
 Inventory& InventoryLayer::getInventory()
 {
-   return SaveState::getPlayerInfo().mInventory;
+   return SaveState::getPlayerInfo()._inventory;
 }
 
 
@@ -110,7 +110,7 @@ void InventoryLayer::draw(sf::RenderTarget &window)
    y = y_offset  + 15.0f;
    x = dist;
 
-   for (auto item : SaveState::getPlayerInfo().mInventory.getItems())
+   for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
    {
       auto visualization = _sprites[item._type];
 

@@ -52,6 +52,16 @@ public:
    bool changedToIdle() const;
    bool changedToMoving() const;
 
+   enum class Orientation
+   {
+      Undefined,
+      Left,
+      Right
+   };
+
+   Orientation getActiveOrientation() const;
+   bool isBendDownActive() const;
+
 
 private:
 
