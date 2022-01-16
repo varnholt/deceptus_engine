@@ -1030,25 +1030,25 @@ void Player::updatePortal()
 
    if (_portal_clock.getElapsedTime().asSeconds() > 1.0f)
    {
-      const auto& joystickInfo = _controls->getJoystickInfo();
-      const auto& axisValues = joystickInfo.getAxisValues();
-      auto joystickPointsUp = false;
+      const auto& joystick_info = _controls->getJoystickInfo();
+      const auto& axis_values = joystick_info.getAxisValues();
+      auto joystick_points_up = false;
 
-      if (!axisValues.empty())
+      if (!axis_values.empty())
       {
-         auto dpadUpPressed = false;
-         if (!joystickInfo.getHatValues().empty())
+         auto dpad_up_pressed = false;
+         if (!joystick_info.getHatValues().empty())
          {
-            dpadUpPressed = joystickInfo.getHatValues().at(0) & SDL_HAT_UP;
+            dpad_up_pressed = joystick_info.getHatValues().at(0) & SDL_HAT_UP;
          }
 
-         auto y1 = axisValues[1] / 32767.0f;
-         joystickPointsUp = (y1 < -0.4f) || dpadUpPressed;
+         auto y1 = axis_values[1] / 32767.0f;
+         joystick_points_up = (y1 < -0.4f) || dpad_up_pressed;
       }
 
       if (
             _controls->hasFlag(KeyPressedUp)
-         || joystickPointsUp
+         || joystick_points_up
       )
       {
          auto portal = Level::getCurrentLevel()->getNearbyPortal();
