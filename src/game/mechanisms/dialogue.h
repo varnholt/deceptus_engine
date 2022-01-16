@@ -20,11 +20,13 @@ public:
 
    struct DialogueItem
    {
-      std::string mTitle;
-      std::string mMessage;
-      sf::Color mTextColor = sf::Color{232, 219, 243};
-      sf::Color mBackgroundColor = sf::Color{47, 12, 75};
-      MessageBoxLocation mLocation = MessageBoxLocation::MiddleCenter;
+      std::string _title;
+      std::string _message;
+      sf::Color _text_color = sf::Color{232, 219, 243};
+      sf::Color _background_color = sf::Color{47, 12, 75};
+      MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
+      bool _animate_text = true;
+      float _animate_text_speed = 10.0f;
    };
 
    Dialogue() = default;
