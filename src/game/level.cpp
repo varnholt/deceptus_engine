@@ -1826,38 +1826,38 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
 //-----------------------------------------------------------------------------
 std::shared_ptr<Portal> Level::getNearbyPortal()
 {
-   std::shared_ptr<Portal> nearbyPortal;
+   std::shared_ptr<Portal> nearby_portal;
 
    for (auto& p : _mechanism_portals)
    {
       auto portal = std::dynamic_pointer_cast<Portal>(p);
       if (portal->isPlayerAtPortal())
       {
-         nearbyPortal = portal;
+         nearby_portal = portal;
          break;
       }
    }
 
-   return nearbyPortal;
+   return nearby_portal;
 }
 
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 {
-   std::shared_ptr<Bouncer> nearbyBouncer;
+   std::shared_ptr<Bouncer> nearby_bouncer;
 
    for (auto& tmp : _mechanism_bouncers)
    {
       auto bouncer = std::dynamic_pointer_cast<Bouncer>(tmp);
       if (bouncer->isPlayerAtBouncer())
       {
-         nearbyBouncer = bouncer;
+         nearby_bouncer = bouncer;
          break;
       }
    }
 
-   return nearbyBouncer;
+   return nearby_bouncer;
 }
 
 
