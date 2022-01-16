@@ -270,7 +270,7 @@ void Game::loadLevel()
             _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
          }
 
-         _player->updatePlayerPixelRect();
+         _player->updatePixelRect();
 
          Log::Info() << "level loading finished";
 

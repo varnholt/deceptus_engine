@@ -32,27 +32,27 @@ class Player : public GameNode
 
    struct JumpTrace
    {
-      bool jumpStarted = false;
-      sf::Time jumpStartTime;
-      float jumpStartY = 0.0f;
-      float jumpEpsilon = 0.00001f;
-      float jumpPrevY = 0.0f;
+      bool _jump_started = false;
+      sf::Time _jump_start_time;
+      float _jump_start_y = 0.0f;
+      float _jump_epsilon = 0.00001f;
+      float _jump_prev_y = 0.0f;
    };
 
 
    struct PositionedAnimation
    {
-      sf::Vector2f mPosition;
-      std::shared_ptr<Animation> mAnimation;
+      sf::Vector2f _position;
+      std::shared_ptr<Animation> _animation;
    };
 
 
    struct PlayerSpeed
    {
-      b2Vec2 currentVelocity;
-      float velocityMax = 0.0f;
-      float acceleration = 0.0f;
-      float deceleration = 0.0f;
+      b2Vec2 current_velocity;
+      float _velocity_max = 0.0f;
+      float _acceleration = 0.0f;
+      float _deceleration = 0.0f;
    };
 
    struct PlayerDash
@@ -125,7 +125,7 @@ public:
    void resetWorld();
    void updatePixelPosition();
    void updatePreviousBodyState();
-   void updatePlayerPixelRect();
+   void updatePixelRect();
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
 
@@ -181,7 +181,7 @@ private:
    void updateOneWayWallDrop();
    void updatePixelCollisions();
    void updatePlatformMovement(const sf::Time& dt);
-   void updatePlayerOrientation();
+   void updateOrientation();
    void updatePortal();
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);

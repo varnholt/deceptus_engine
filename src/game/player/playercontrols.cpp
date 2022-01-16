@@ -9,6 +9,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::update(const sf::Time& /*dt*/)
 {
+   // store where the player has received input from last time
+   updatePlayerInput();
+
    setWasMoving(isMovingHorizontally());
    setWasMovingLeft(isMovingLeft());
    setWasMovingRight(isMovingRight());
@@ -77,10 +80,12 @@ void PlayerControls::forceSync()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (GameControllerIntegration::getInstance().isControllerConnected())
-   {
-      return;
-   }
+   _player_input.update(PlayerInput::InputType::Keyboard);
+
+   // if (GameControllerIntegration::getInstance().isControllerConnected())
+   // {
+   //    return;
+   // }
 
    if (key == sf::Keyboard::Space)
    {
@@ -125,10 +130,12 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
-   if (GameControllerIntegration::getInstance().isControllerConnected())
-   {
-      return;
-   }
+   _player_input.update(PlayerInput::InputType::Keyboard);
+
+   // if (GameControllerIntegration::getInstance().isControllerConnected())
+   // {
+   //    return;
+   // }
 
    if (key == sf::Keyboard::LShift)
    {
@@ -280,49 +287,50 @@ bool PlayerControls::isDroppingDown() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
 {
-  if (GameControllerIntegration::getInstance().isControllerConnected())
-  {
-     const auto& axisValues = _joystick_info.getAxisValues();
+   // controller input
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      const auto& axisValues = _joystick_info.getAxisValues();
 
-     const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-     auto xl = axisValues[static_cast<size_t>(axis_left_x)] / 32767.0f;
-     const auto hat_value = _joystick_info.getHatValues().at(0);
+      const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+      auto xl = axisValues[static_cast<size_t>(axis_left_x)] / 32767.0f;
+      const auto hat_value = _joystick_info.getHatValues().at(0);
 
-     const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
-     const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+      const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+      const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
 
-     if (dpad_left_pressed)
-     {
-        xl = -1.0f;
-     }
-     else if (dpad_right_pressed)
-     {
-        xl = 1.0f;
-     }
+      if (dpad_left_pressed)
+      {
+         xl = -1.0f;
+      }
+      else if (dpad_right_pressed)
+      {
+         xl = 1.0f;
+      }
 
-     if (fabs(xl) >  0.3f)
-     {
-        if (xl < 0.0f)
-        {
-           return true;
-        }
-     }
-  }
-  else
-  {
-     if (_keys_pressed & KeyPressedLeft)
-     {
-        return true;
-     }
-  }
+      if (fabs(xl) >  0.3f)
+      {
+         if (xl < 0.0f)
+         {
+            return true;
+         }
+      }
+   }
 
-  return false;
+   // keyboard input
+   if (_keys_pressed & KeyPressedLeft)
+   {
+      return true;
+   }
+
+   return false;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingDown() const
 {
+   // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& axis_values = _joystick_info.getAxisValues();
@@ -349,12 +357,11 @@ bool PlayerControls::isMovingDown() const
          }
       }
    }
-   else
+
+   // keyboard input
+   if (_keys_pressed & KeyPressedDown)
    {
-      if (_keys_pressed & KeyPressedDown)
-      {
-         return true;
-      }
+      return true;
    }
 
    return false;
@@ -364,6 +371,7 @@ bool PlayerControls::isMovingDown() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingRight() const
 {
+   // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& axis_values = _joystick_info.getAxisValues();
@@ -390,12 +398,11 @@ bool PlayerControls::isMovingRight() const
          }
       }
    }
-   else
+
+   // keyboard input
+   if (_keys_pressed & KeyPressedRight)
    {
-      if (_keys_pressed & KeyPressedRight)
-      {
-         return true;
-      }
+      return true;
    }
 
    return false;
@@ -498,6 +505,7 @@ PlayerControls::Orientation PlayerControls::getActiveOrientation() const
 {
    Orientation orientation = Orientation::Undefined;
 
+   // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       auto axis_values = getJoystickInfo().getAxisValues();
@@ -528,17 +536,16 @@ PlayerControls::Orientation PlayerControls::getActiveOrientation() const
          }
       }
    }
-   else
-   {
-      if (hasFlag(KeyPressedLeft))
-      {
-         orientation = Orientation::Left;
-      }
 
-      if (hasFlag(KeyPressedRight))
-      {
-         orientation = Orientation::Right;
-      }
+   // keyboard input
+   if (hasFlag(KeyPressedLeft))
+   {
+      orientation = Orientation::Left;
+   }
+
+   if (hasFlag(KeyPressedRight))
+   {
+      orientation = Orientation::Right;
    }
 
    return orientation;
@@ -573,11 +580,54 @@ bool PlayerControls::isBendDownActive() const
          }
       }
    }
-   else
+
+   // keyboard input
+   if (hasFlag(KeyPressedDown))
    {
-      down_pressed = hasFlag(KeyPressedDown);
+      down_pressed = true;
    }
 
    return down_pressed;
+}
+
+
+bool PlayerControls::isControllerUsedLast() const
+{
+   return _player_input.isControllerUsed();
+}
+
+
+void PlayerControls::updatePlayerInput()
+{
+   // keyboard input is already evaluated from keyboard events
+
+   // evaluate controller input
+   if (!GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      _player_input.update(PlayerInput::InputType::Keyboard);
+   }
+
+   const auto& axis_values = _joystick_info.getAxisValues();
+   const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
+   const auto hat_value = _joystick_info.getHatValues().at(0);
+
+   const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+   const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+
+   if (dpad_left_pressed)
+   {
+      _player_input.update(PlayerInput::InputType::Controller);
+   }
+
+   if (dpad_right_pressed)
+   {
+      _player_input.update(PlayerInput::InputType::Controller);
+   }
+
+   if (fabs(xl) >  0.3f)
+   {
+      _player_input.update(PlayerInput::InputType::Controller);
+   }
 }
 
