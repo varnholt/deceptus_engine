@@ -42,21 +42,13 @@ linux|win32-g++ {
    QMAKE_CXXFLAGS += -Wall
 }
 
-# openmp support
-# msvc:QMAKE_CXXFLAGS_RELEASE += /openmp
-# QMAKE_CXXFLAGS += -openmp
-
-
 win32 {
    LIBS += -Llib64
-
    LIBS += -LSDL\lib\x64
    LIBS += -lSDL2
    LIBS += -lglu32
    LIBS += -lopengl32
    LIBS += -llua53
-
-   # LIBS += -lvcomp
 
    # sfml
    LIBS += -Lsfml\lib
@@ -95,146 +87,6 @@ INCLUDEPATH += src/game
 INCLUDEPATH += src/thirdparty
 
 SOURCES += \
-   hitbox.cpp \
-   src/framework/tools/log.cpp \
-   src/framework/tools/logthread.cpp \
-   src/framework/tools/stopwatch.cpp \
-   src/game/ambientocclusion.cpp \
-   src/game/animation.cpp \
-   src/game/animationframedata.cpp \
-   src/game/animationplayer.cpp \
-   src/game/animationpool.cpp \
-   src/game/animationsettings.cpp \
-   src/game/arrow.cpp \
-   src/game/atmosphere.cpp \
-   src/game/audio.cpp \
-   src/game/bitmapfont.cpp \
-   src/game/boomeffect.cpp \
-   src/game/bow.cpp \
-   src/game/camerapane.cpp \
-   src/game/camerasystem.cpp \
-   src/game/camerasystemconfiguration.cpp \
-   src/framework/tools/elapsedtimer.cpp \
-   src/game/cutscene.cpp \
-   src/game/effects/dust.cpp \
-   src/game/gamecontrollerdetection.cpp \
-   src/game/gun.cpp \
-   src/game/mechanisms/bubblecube.cpp \
-   src/game/mechanisms/checkpoint.cpp \
-   src/game/console.cpp \
-   src/game/detonationanimation.cpp \
-   src/game/effects/lightsystem.cpp \
-   src/game/eventserializer.cpp \
-   src/game/fadetransitioneffect.cpp \
-   src/game/gameclock.cpp \
-   src/game/mechanisms/controllerhelp.cpp \
-   src/game/mechanisms/rope.cpp \
-   src/game/mechanisms/ropewithlight.cpp \
-   src/game/mechanisms/spikeblock.cpp \
-   src/game/overlays/thunderstormoverlay.cpp \
-   src/game/onewaywall.cpp \
-   src/game/overlays/controlleroverlay.cpp \
-   src/game/debugdraw.cpp \
-   src/game/mechanisms/dialogue.cpp \
-   src/game/displaymode.cpp \
-   src/game/effects/smokeeffect.cpp \
-   src/game/effects/staticlight.cpp \
-   src/game/enemy.cpp \
-   src/game/enemydescription.cpp \
-   src/game/extrahealth.cpp \
-   src/game/extraitem.cpp \
-   src/game/extramanager.cpp \
-   src/game/extraskill.cpp \
-   src/game/extratable.cpp \
-   src/game/fixturenode.cpp \
-   src/game/forestscene.cpp \
-   src/game/game.cpp \
-   src/game/gameconfiguration.cpp \
-   src/game/gamecontactlistener.cpp \
-   src/game/gamecontrollerdata.cpp \
-   src/game/gamecontrollerintegration.cpp \
-   src/game/gamemechanism.cpp \
-   src/game/gamenode.cpp \
-   src/game/gamestate.cpp \
-   src/game/imagelayer.cpp \
-   src/game/infolayer.cpp \
-   src/game/inventory.cpp \
-   src/game/inventoryitem.cpp \
-   src/game/inventorylayer.cpp \
-   src/game/level.cpp \
-   src/game/leveldescription.cpp \
-   src/game/levelmap.cpp \
-   src/game/levels.cpp \
-   src/game/luainterface.cpp \
-   src/game/luanode.cpp \
-   src/game/mechanisms/bouncer.cpp \
-   src/game/mechanisms/conveyorbelt.cpp \
-   src/game/mechanisms/crusher.cpp \
-   src/game/mechanisms/deathblock.cpp \
-   src/game/mechanisms/door.cpp \
-   src/game/mechanisms/fan.cpp \
-   src/game/mechanisms/laser.cpp \
-   src/game/mechanisms/lever.cpp \
-   src/game/mechanisms/moveablebox.cpp \
-   src/game/mechanisms/movingplatform.cpp \
-   src/game/mechanisms/portal.cpp \
-   src/game/mechanisms/spikeball.cpp \
-   src/game/mechanisms/spikes.cpp \
-   src/game/meshtools.cpp \
-   src/game/messagebox.cpp \
-   src/game/physics/physics.cpp \
-   src/game/physics/physicsconfiguration.cpp \
-   src/game/player/player.cpp \
-   src/game/player/playeranimation.cpp \
-   src/game/player/playerclimb.cpp \
-   src/game/player/playercontrols.cpp \
-   src/game/player/playerinfo.cpp \
-   src/game/player/playerjump.cpp \
-   src/game/sword.cpp \
-   src/game/preloader.cpp \
-   src/game/overlays/rainoverlay.cpp \
-   src/game/projectile.cpp \
-   src/game/projectilehitanimation.cpp \
-   src/game/room.cpp \
-   src/game/savestate.cpp \
-   src/game/screentransition.cpp \
-   src/game/screentransitioneffect.cpp \
-   src/game/scriptproperty.cpp \
-   src/game/shaderlayer.cpp \
-   src/game/shaders/atmosphereshader.cpp \
-   src/game/shaders/blurshader.cpp \
-   src/game/shaders/deathshader.cpp \
-   src/game/shaders/gammashader.cpp \
-   src/game/squaremarcher.cpp \
-   src/game/test.cpp \
-   src/game/texturepool.cpp \
-   src/game/tilemap.cpp \
-   src/game/tweaks.cpp \
-   src/game/weapon.cpp \
-   src/game/weaponfactory.cpp \
-   src/game/weaponsystem.cpp \
-   src/game/weather.cpp \
-   src/game/overlays/weatheroverlay.cpp \
-   src/game/worldquery.cpp \
-   src/main.cpp \
-   src/menus/menu.cpp \
-   src/menus/menuscreen.cpp \
-   src/menus/menuscreenachievements.cpp \
-   src/menus/menuscreenaudio.cpp \
-   src/menus/menuscreencontrols.cpp \
-   src/menus/menuscreencredits.cpp \
-   src/menus/menuscreenfileselect.cpp \
-   src/menus/menuscreengame.cpp \
-   src/menus/menuscreenmain.cpp \
-   src/menus/menuscreennameselect.cpp \
-   src/menus/menuscreenoptions.cpp \
-   src/menus/menuscreenpause.cpp \
-   src/menus/menuscreenvideo.cpp \
-
-
-# framework
-
-SOURCES += \
    src/framework/image/image.cpp \
    src/framework/image/layer.cpp \
    src/framework/image/psd.cpp \
@@ -265,12 +117,148 @@ SOURCES += \
    src/framework/tmxparser/tmxtools.cpp \
    src/framework/tools/callbackmap.cpp \
    src/framework/tools/checksum.cpp \
+   src/framework/tools/elapsedtimer.cpp \
    src/framework/tools/globalclock.cpp \
+   src/framework/tools/log.cpp \
+   src/framework/tools/logthread.cpp \
+   src/framework/tools/stopwatch.cpp \
    src/framework/tools/timer.cpp \
+   src/game/ambientocclusion.cpp \
+   src/game/animation.cpp \
+   src/game/animationframedata.cpp \
+   src/game/animationplayer.cpp \
+   src/game/animationpool.cpp \
+   src/game/animationsettings.cpp \
+   src/game/arrow.cpp \
+   src/game/atmosphere.cpp \
+   src/game/audio.cpp \
+   src/game/bitmapfont.cpp \
+   src/game/boomeffect.cpp \
+   src/game/bow.cpp \
+   src/game/camerapane.cpp \
+   src/game/camerasystem.cpp \
+   src/game/camerasystemconfiguration.cpp \
+   src/game/console.cpp \
+   src/game/cutscene.cpp \
+   src/game/debugdraw.cpp \
+   src/game/detonationanimation.cpp \
+   src/game/displaymode.cpp \
+   src/game/effects/dust.cpp \
+   src/game/effects/lightsystem.cpp \
+   src/game/effects/smokeeffect.cpp \
+   src/game/effects/staticlight.cpp \
+   src/game/enemy.cpp \
+   src/game/enemydescription.cpp \
+   src/game/eventserializer.cpp \
+   src/game/extrahealth.cpp \
+   src/game/extraitem.cpp \
+   src/game/extramanager.cpp \
+   src/game/extraskill.cpp \
+   src/game/extratable.cpp \
+   src/game/fadetransitioneffect.cpp \
+   src/game/fixturenode.cpp \
+   src/game/forestscene.cpp \
+   src/game/game.cpp \
+   src/game/gameclock.cpp \
+   src/game/gameconfiguration.cpp \
+   src/game/gamecontactlistener.cpp \
+   src/game/gamecontrollerdata.cpp \
+   src/game/gamecontrollerdetection.cpp \
+   src/game/gamecontrollerintegration.cpp \
+   src/game/gamemechanism.cpp \
+   src/game/gamenode.cpp \
+   src/game/gamestate.cpp \
+   src/game/gun.cpp \
+   src/game/hitbox.cpp \
+   src/game/imagelayer.cpp \
+   src/game/infolayer.cpp \
+   src/game/inventory.cpp \
+   src/game/inventoryitem.cpp \
+   src/game/inventorylayer.cpp \
+   src/game/level.cpp \
+   src/game/leveldescription.cpp \
+   src/game/levelmap.cpp \
+   src/game/levels.cpp \
+   src/game/luainterface.cpp \
+   src/game/luanode.cpp \
+   src/game/mechanisms/bouncer.cpp \
+   src/game/mechanisms/bubblecube.cpp \
+   src/game/mechanisms/checkpoint.cpp \
+   src/game/mechanisms/controllerhelp.cpp \
+   src/game/mechanisms/conveyorbelt.cpp \
+   src/game/mechanisms/crusher.cpp \
+   src/game/mechanisms/deathblock.cpp \
+   src/game/mechanisms/dialogue.cpp \
+   src/game/mechanisms/door.cpp \
+   src/game/mechanisms/fan.cpp \
+   src/game/mechanisms/laser.cpp \
+   src/game/mechanisms/lever.cpp \
+   src/game/mechanisms/moveablebox.cpp \
+   src/game/mechanisms/movingplatform.cpp \
+   src/game/mechanisms/portal.cpp \
+   src/game/mechanisms/rope.cpp \
+   src/game/mechanisms/ropewithlight.cpp \
+   src/game/mechanisms/spikeball.cpp \
+   src/game/mechanisms/spikeblock.cpp \
+   src/game/mechanisms/spikes.cpp \
+   src/game/meshtools.cpp \
+   src/game/messagebox.cpp \
+   src/game/onewaywall.cpp \
+   src/game/overlays/controlleroverlay.cpp \
+   src/game/overlays/rainoverlay.cpp \
+   src/game/overlays/thunderstormoverlay.cpp \
+   src/game/overlays/weatheroverlay.cpp \
+   src/game/physics/physics.cpp \
+   src/game/physics/physicsconfiguration.cpp \
+   src/game/player/player.cpp \
+   src/game/player/playeranimation.cpp \
+   src/game/player/playerclimb.cpp \
+   src/game/player/playercontrols.cpp \
+   src/game/player/playerinfo.cpp \
+   src/game/player/playerinput.cpp \
+   src/game/player/playerjump.cpp \
+   src/game/preloader.cpp \
+   src/game/projectile.cpp \
+   src/game/projectilehitanimation.cpp \
+   src/game/room.cpp \
+   src/game/savestate.cpp \
+   src/game/screentransition.cpp \
+   src/game/screentransitioneffect.cpp \
+   src/game/scriptproperty.cpp \
+   src/game/shaderlayer.cpp \
+   src/game/shaders/atmosphereshader.cpp \
+   src/game/shaders/blurshader.cpp \
+   src/game/shaders/deathshader.cpp \
+   src/game/shaders/gammashader.cpp \
+   src/game/squaremarcher.cpp \
+   src/game/sword.cpp \
+   src/game/test.cpp \
+   src/game/texturepool.cpp \
+   src/game/tilemap.cpp \
+   src/game/tweaks.cpp \
+   src/game/weapon.cpp \
+   src/game/weaponfactory.cpp \
+   src/game/weaponsystem.cpp \
+   src/game/weather.cpp \
+   src/game/worldquery.cpp \
+   src/main.cpp \
+   src/menus/menu.cpp \
+   src/menus/menuscreen.cpp \
+   src/menus/menuscreenachievements.cpp \
+   src/menus/menuscreenaudio.cpp \
+   src/menus/menuscreencontrols.cpp \
+   src/menus/menuscreencredits.cpp \
+   src/menus/menuscreenfileselect.cpp \
+   src/menus/menuscreengame.cpp \
+   src/menus/menuscreenmain.cpp \
+   src/menus/menuscreennameselect.cpp \
+   src/menus/menuscreenoptions.cpp \
+   src/menus/menuscreenpause.cpp \
+   src/menus/menuscreenvideo.cpp \
+
 
 
 HEADERS += \
-   hitbox.h \
    src/framework/image/image.h \
    src/framework/image/layer.h \
    src/framework/image/psd.h \
@@ -301,52 +289,17 @@ HEADERS += \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
+   src/framework/tools/elapsedtimer.h \
    src/framework/tools/log.h \
    src/framework/tools/logthread.h \
    src/framework/tools/stopwatch.h \
-   src/game/animationframedata.h \
-   src/game/animationplayer.h \
-   src/game/arrow.h \
-   src/game/cutscene.h \
-   src/game/detonationanimation.h \
-   src/framework/tools/elapsedtimer.h \
-   src/game/effects/dust.h \
-   src/game/eventserializer.h \
-   src/game/fadetransitioneffect.h \
-   src/game/gameclock.h \
-   src/game/gamecontrollerdetection.h \
-   src/game/gun.h \
-   src/game/mechanisms/bubblecube.h \
-   src/game/mechanisms/controllerhelp.h \
-   src/game/mechanisms/rope.h \
-   src/game/mechanisms/ropewithlight.h \
-   src/game/mechanisms/spikeblock.h \
-   src/game/overlays/thunderstormoverlay.h \
-   src/game/onewaywall.h \
-   src/game/player/playeranimation.h \
-   src/game/sword.h \
-   src/game/preloader.h \
-   src/game/screentransition.h \
-   src/game/screentransitioneffect.h \
-   src/game/shaderlayer.h \
-   src/game/tweaks.h \
-   src/game/weaponfactory.h \
-   src/game/worldquery.h
-
-
-# add box2d
-
-HEADERS += \
-   src/easings/easings.h \
-   src/effects/effect.h \
-   src/effects/pixelate.h \
-   src/effects/lightsystem.h \
-   src/effects/smokeeffect.h \
-   src/effects/staticlight.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \
+   src/game/animationframedata.h \
+   src/game/animationplayer.h \
    src/game/animationpool.h \
    src/game/animationsettings.h \
+   src/game/arrow.h \
    src/game/atmosphere.h \
    src/game/audio.h \
    src/game/bitmapfont.h \
@@ -356,37 +309,37 @@ HEADERS += \
    src/game/camerapane.h \
    src/game/camerasystem.h \
    src/game/camerasystemconfiguration.h \
-   src/game/mechanisms/checkpoint.h \
    src/game/console.h \
    src/game/constants.h \
-   src/game/overlays/controlleroverlay.h \
+   src/game/cutscene.h \
    src/game/debugdraw.h \
-   src/game/mechanisms/dialogue.h \
+   src/game/detonationanimation.h \
    src/game/displaymode.h \
+   src/game/effects/dust.h \
    src/game/enemy.h \
    src/game/enemydescription.h \
+   src/game/eventserializer.h \
    src/game/extra.h \
    src/game/extrahealth.h \
    src/game/extraitem.h \
    src/game/extramanager.h \
    src/game/extraskill.h \
    src/game/extratable.h \
+   src/game/fadetransitioneffect.h \
    src/game/fixturenode.h \
    src/game/forestscene.h \
-   src/game/projectile.h \
-   src/game/projectilehitanimation.h \
-   src/game/tools/callbackmap.h \
-   src/game/tools/checksum.h \
-   src/game/tools/globalclock.h \
-   src/game/tools/timer.h \
    src/game/game.h \
+   src/game/gameclock.h \
    src/game/gameconfiguration.h \
    src/game/gamecontactlistener.h \
    src/game/gamecontrollerdata.h \
+   src/game/gamecontrollerdetection.h \
    src/game/gamecontrollerintegration.h \
    src/game/gamemechanism.h \
    src/game/gamenode.h \
    src/game/gamestate.h \
+   src/game/gun.h \
+   src/game/hitbox.h \
    src/game/imagelayer.h \
    src/game/infolayer.h \
    src/game/inventory.h \
@@ -401,42 +354,64 @@ HEADERS += \
    src/game/luainterface.h \
    src/game/luanode.h \
    src/game/mechanisms/bouncer.h \
+   src/game/mechanisms/bubblecube.h \
+   src/game/mechanisms/checkpoint.h \
+   src/game/mechanisms/controllerhelp.h \
    src/game/mechanisms/conveyorbelt.h \
    src/game/mechanisms/crusher.h \
    src/game/mechanisms/deathblock.h \
+   src/game/mechanisms/dialogue.h \
    src/game/mechanisms/door.h \
    src/game/mechanisms/fan.h \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/moveablebox.h \
    src/game/mechanisms/movingplatform.h \
    src/game/mechanisms/portal.h \
+   src/game/mechanisms/rope.h \
+   src/game/mechanisms/ropewithlight.h \
    src/game/mechanisms/spikeball.h \
+   src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
+   src/game/onewaywall.h \
+   src/game/overlays/controlleroverlay.h \
+   src/game/overlays/rainoverlay.h \
+   src/game/overlays/thunderstormoverlay.h \
+   src/game/overlays/weatheroverlay.h \
    src/game/physics/physics.h \
    src/game/physics/physicsconfiguration.h \
    src/game/player/player.h \
+   src/game/player/playeranimation.h \
    src/game/player/playerclimb.h \
    src/game/player/playercontrols.h \
    src/game/player/playerinfo.h \
+   src/game/player/playerinput.h \
    src/game/player/playerjump.h \
-   src/game/overlays/rainoverlay.h \
+   src/game/preloader.h \
+   src/game/projectile.h \
+   src/game/projectilehitanimation.h \
    src/game/room.h \
    src/game/savestate.h \
+   src/game/screentransition.h \
+   src/game/screentransitioneffect.h \
    src/game/scriptproperty.h \
+   src/game/shaderlayer.h \
    src/game/shaders/atmosphereshader.h \
    src/game/shaders/blurshader.h \
    src/game/shaders/deathshader.h \
    src/game/shaders/gammashader.h \
    src/game/squaremarcher.h \
+   src/game/sword.h \
    src/game/test.h \
    src/game/texturepool.h \
    src/game/tilemap.h \
+   src/game/tweaks.h \
    src/game/weapon.h \
+   src/game/weaponfactory.h \
    src/game/weaponsystem.h \
    src/game/weather.h \
-   src/game/overlays/weatheroverlay.h \
+   src/game/worldquery.h \
    src/menus/menu.h \
    src/menus/menuscreen.h \
    src/menus/menuscreenachievements.h \
@@ -462,6 +437,9 @@ HEADERS += \
    src/thirdparty/tinyxml2/tinyxml2.h \
    src/thirdparty/json/json.hpp \
 
+
+
+# add box2d
 
 SOURCES += \
     src/thirdparty/Box2D/Collision/Shapes/b2ChainShape.cpp \
