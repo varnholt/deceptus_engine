@@ -7,6 +7,7 @@
 #include "game/constants.h"
 #include "game/preloader.h"
 #include "game/test.h"
+#include "framework/tools/logthread.h"
 
 
 void debugAuthors()
@@ -30,6 +31,19 @@ void debugAuthors()
 
 int main(int /*argc*/, char** /*argv*/)
 {
+   // setup logging to file
+   LogThread log_thread;
+   Log::registerListenerCallback(
+      std::bind(
+         &LogThread::log,
+         &log_thread,
+         std::placeholders::_1,
+         std::placeholders::_2,
+         std::placeholders::_3,
+         std::placeholders::_4
+      )
+   );
+
    debugAuthors();
    Test test;
    Game game;

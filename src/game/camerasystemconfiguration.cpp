@@ -96,7 +96,7 @@ void CameraSystemConfiguration::deserializeFromFile(const std::string &filename)
 }
 
 
-void CameraSystemConfiguration::serializeToFile(const std::string &filename)
+void CameraSystemConfiguration::serializeToFile(const std::string& filename)
 {
   std::string data = serialize();
   std::ofstream file(filename);

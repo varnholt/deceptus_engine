@@ -1,6 +1,5 @@
 #include "log.h"
 
-#include <chrono>
 #include <filesystem>
 #include <iostream>
 
@@ -18,17 +17,10 @@ namespace fmt = std;
 
 namespace
 {
-
-enum class Level : char
-{
-   Info    = 'i',
-   Warning = 'w',
-   Error   = 'e'
-};
-
+Log::ListenerCallback _log_callback;
 
 void log(
-   Level level,
+   Log::Level level,
    const std::string_view& message,
    const std::source_location& source_location
 )
@@ -63,9 +55,19 @@ void log(
             source_tag,
             message
          )
-   << std::endl;
+      << std::endl;
+
+   if (_log_callback)
+   {
+      _log_callback(now, level, std::string{message}, source_location);
+   }
 }
 
+}
+
+void Log::registerListenerCallback(const ListenerCallback& cb)
+{
+   _log_callback = cb;
 }
 
 
@@ -116,6 +118,4 @@ Log::Error::Error(const std::source_location& source_location)
  : Message(source_location, error)
 {
 }
-
-
 
