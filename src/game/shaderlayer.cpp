@@ -10,7 +10,7 @@
 #include <iostream>
 
 
-void ShaderLayer::draw(sf::RenderTarget& target)
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    float x = _position.x;
    float y = _position.y;
@@ -19,7 +19,7 @@ void ShaderLayer::draw(sf::RenderTarget& target)
 
    _shader.setUniform("u_uv_height", _uv_height);
    _shader.setUniform("u_texture", *_texture.get());
-   _shader.setUniform("u_time", GlobalClock::getInstance().getElapsedTimeInS() + _time_offset);
+   _shader.setUniform("u_time", _elapsed.asSeconds() + _time_offset);
    _shader.setUniform("u_resolution", sf::Vector2f(w, h));
 
    sf::Vertex quad[] = {
@@ -37,6 +37,12 @@ void ShaderLayer::draw(sf::RenderTarget& target)
 }
 
 
+void ShaderLayer::update(const sf::Time& dt)
+{
+   _elapsed += dt;
+}
+
+
 std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
 {
    std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>();
@@ -51,7 +57,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
       auto z = object->_properties->_map.find("z");
       if (z != object->_properties->_map.end())
       {
-         instance->_z = z->second->_value_int.value();
+         instance->_z_index = z->second->_value_int.value();
       }
 
       auto uv_width_it = object->_properties->_map.find("uv_width");
