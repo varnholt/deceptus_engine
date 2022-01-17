@@ -236,6 +236,7 @@ Level::Level()
       &_mechanism_platforms,
       &_mechanism_portals,
       &_mechanism_ropes,
+      &_mechanism_shader_layers,
       &_mechanism_spike_balls,
       &_mechanism_spike_blocks,
       &_mechanism_spikes,
@@ -654,7 +655,7 @@ void Level::loadTmx()
             else if (object_group->_name.rfind("shader_quads", 0) == 0)
             {
                auto quad = ShaderLayer::deserialize(tmx_object);
-               _shader_layers.push_back(quad);
+               _mechanism_shader_layers.push_back(quad);
             }
             else if (object_group->_name == "dust")
             {
@@ -1164,14 +1165,6 @@ void Level::drawLayers(
          if (layer->_z_index == z_index)
          {
             target.draw(layer->_sprite, {layer->_blend_mode});
-         }
-      }
-
-      for (auto& layer : _shader_layers)
-      {
-         if (layer->_z == z_index)
-         {
-            layer->draw(target);
          }
       }
    }

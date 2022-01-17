@@ -228,6 +228,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_shader_layers;
 
    // graphic effects
    BoomEffect _boom_effect;
@@ -238,7 +239,6 @@ protected:
 
    AmbientOcclusion _ambient_occlusion;
    std::vector<std::shared_ptr<ImageLayer>> _image_layers;
-   std::vector<std::shared_ptr<ShaderLayer>> _shader_layers;
 
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
