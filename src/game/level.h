@@ -17,7 +17,6 @@
 #include "shaders/atmosphereshader.h"
 #include "shaders/blurshader.h"
 #include "shaders/gammashader.h"
-#include "shaderlayer.h"
 #include "squaremarcher.h"
 
 // effects
