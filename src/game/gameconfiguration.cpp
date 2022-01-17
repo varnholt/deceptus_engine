@@ -23,17 +23,19 @@ std::string GameConfiguration::serialize()
       {
          "GameConfiguration",
          {
-            {"video_mode_width",  _video_mode_width},
-            {"video_mode_height", _video_mode_height},
-            {"view_width",        _view_width},
-            {"view_height",       _view_height},
-            {"fullscreen",        _fullscreen},
-            {"brightness",        _brightness},
-            {"vsync",             _vsync_enabled},
+            {"video_mode_width",    _video_mode_width},
+            {"video_mode_height",   _video_mode_height},
+            {"view_width",          _view_width},
+            {"view_height",         _view_height},
+            {"fullscreen",          _fullscreen},
+            {"brightness",          _brightness},
+            {"vsync",               _vsync_enabled},
 
             {"audio_volume_master", _audio_volume_master},
             {"audio_volume_sfx",    _audio_volume_sfx},
             {"audio_volume_music",  _audio_volume_music},
+
+            {"text_speed",          _text_speed},
          }
       }
    };
@@ -63,6 +65,8 @@ void GameConfiguration::deserialize(const std::string& data)
        _audio_volume_master = config["GameConfiguration"]["audio_volume_master"].get<int32_t>();
        _audio_volume_sfx    = config["GameConfiguration"]["audio_volume_sfx"].get<int32_t>();
        _audio_volume_music  = config["GameConfiguration"]["audio_volume_music"].get<int32_t>();
+
+       _text_speed          = config["GameConfiguration"]["text_speed"].get<int32_t>();
    }
    catch (const std::exception& e)
    {

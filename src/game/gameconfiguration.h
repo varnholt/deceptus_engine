@@ -19,6 +19,8 @@ struct GameConfiguration
    int32_t _audio_volume_sfx = 50;
    int32_t _audio_volume_music = 50;
 
+   int32_t _text_speed = 2;
+
    void deserializeFromFile(const std::string& filename = "data/config/game.json");
    void serializeToFile(const std::string& filename = "data/config/game.json");
 
