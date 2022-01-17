@@ -605,6 +605,7 @@ void PlayerControls::updatePlayerInput()
    if (!GameControllerIntegration::getInstance().isControllerConnected())
    {
       _player_input.update(PlayerInput::InputType::Keyboard);
+      return;
    }
 
    const auto& axis_values = _joystick_info.getAxisValues();

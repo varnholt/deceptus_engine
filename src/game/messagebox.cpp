@@ -399,6 +399,39 @@ void MessageBox::hideAnimation()
 }
 
 
+void MessageBox::animateText()
+{
+   static std::array<float, 5> text_speeds = {
+      0.5f,
+      0.75f,
+      1.0f,
+      1.5f,
+      2.0f
+   };
+
+   auto x = (
+        GlobalClock::getInstance().getElapsedTime().asSeconds()
+      - __active->_show_time.asSeconds()
+      - (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f)
+   );
+
+   x *= __active->_properties._animate_text_speed;
+   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
+
+   // if the thing is animated we want to wait for the animation_scale_time to pass
+   // so x might go into negative for that duration.
+   x = std::max(0.0f, x);
+
+   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
+
+   if (__active->_chars_shown != to)
+   {
+      __active->_chars_shown = to;
+      __text.setString(__active->_message.substr(0, to));
+   }
+}
+
+
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (!__active)
@@ -456,22 +489,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (__active->_properties._animate_text)
    {
-      auto x = (
-           GlobalClock::getInstance().getElapsedTime().asSeconds()
-         - __active->_show_time.asSeconds()
-         - (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f)
-      ) * __active->_properties._animate_text_speed;
-
-      // if the thing is animated we want to wait for the animation_scale_time to pass
-      // so x might go into negative for that duration.
-      x = std::max(0.0f, x);
-
-      auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
-      if (__active->_chars_shown != to)
-      {
-         __active->_chars_shown = to;
-         __text.setString(__active->_message.substr(0, to));
-      }
+      animateText();
    }
    else
    {
