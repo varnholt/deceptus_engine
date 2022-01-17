@@ -14,15 +14,23 @@ public:
 
    MenuScreenGame();
 
-   void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
+protected:
+
+   void keyboardKeyPressed(sf::Keyboard::Key key) override;
    void loadingFinished() override;
+
+
+private:
+
    void updateLayers();
 
    void up();
    void down();
    void select();
    void back();
+
+   void set(int32_t x);
 
    Selection _selection = Selection::TextSpeed;
 };

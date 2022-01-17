@@ -77,6 +77,7 @@ class MessageBox
       static void showAnimation();
       static void hideAnimation();
 
+
    private:
 
       static void messageBox(
@@ -90,6 +91,7 @@ class MessageBox
       static void initializeLayers();
       static sf::Vector2i pixelLocation(MessageBoxLocation);
       static void close(Button button);
+      static void animateText();
 
       void initializeControllerCallbacks();
 
