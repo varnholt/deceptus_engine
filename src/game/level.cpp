@@ -38,6 +38,7 @@
 #include "mechanisms/movingplatform.h"
 #include "mechanisms/rope.h"
 #include "mechanisms/ropewithlight.h"
+#include "mechanisms/shaderlayer.h"
 #include "mechanisms/spikeblock.h"
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikes.h"
