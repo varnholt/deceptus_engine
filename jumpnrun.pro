@@ -199,6 +199,7 @@ SOURCES += \
    src/game/mechanisms/portal.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
+   src/game/mechanisms/shaderlayer.cpp \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
@@ -226,7 +227,6 @@ SOURCES += \
    src/game/screentransition.cpp \
    src/game/screentransitioneffect.cpp \
    src/game/scriptproperty.cpp \
-   src/game/shaderlayer.cpp \
    src/game/shaders/atmosphereshader.cpp \
    src/game/shaders/blurshader.cpp \
    src/game/shaders/deathshader.cpp \
@@ -371,6 +371,7 @@ HEADERS += \
    src/game/mechanisms/portal.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
+   src/game/mechanisms/shaderlayer.h \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
@@ -398,7 +399,6 @@ HEADERS += \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \
    src/game/scriptproperty.h \
-   src/game/shaderlayer.h \
    src/game/shaders/atmosphereshader.h \
    src/game/shaders/blurshader.h \
    src/game/shaders/deathshader.h \
