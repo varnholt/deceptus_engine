@@ -1043,7 +1043,7 @@ void Player::updatePortal()
          }
 
          auto y1 = axis_values[1] / 32767.0f;
-         joystick_points_up = (y1 < -0.4f) || dpad_up_pressed;
+         joystick_points_up = (y1 < Tweaks::instance()._enter_portal_threshold) || dpad_up_pressed;
       }
 
       if (

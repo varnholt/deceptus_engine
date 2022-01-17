@@ -119,6 +119,7 @@ SOURCES += \
    src/framework/tools/checksum.cpp \
    src/framework/tools/elapsedtimer.cpp \
    src/framework/tools/globalclock.cpp \
+   src/framework/tools/jsonconfiguration.cpp \
    src/framework/tools/log.cpp \
    src/framework/tools/logthread.cpp \
    src/framework/tools/stopwatch.cpp \
@@ -290,6 +291,7 @@ HEADERS += \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
    src/framework/tools/elapsedtimer.h \
+   src/framework/tools/jsonconfiguration.h \
    src/framework/tools/log.h \
    src/framework/tools/logthread.h \
    src/framework/tools/stopwatch.h \
