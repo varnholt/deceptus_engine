@@ -13,6 +13,10 @@ public:
    static CameraPane& getInstance();
 
    void update();
+
+   void processKeyPressedEvents(const sf::Event& event);
+   void processKeyReleasedEvents(const sf::Event& event);
+
    void updateLookState(Look look, bool enable);
 
    bool isLookActive() const;
