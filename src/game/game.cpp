@@ -906,6 +906,8 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       return;
    }
 
+   CameraPane::getInstance().processKeyPressedEvents(event);
+
    switch (event.key.code)
    {
       case sf::Keyboard::Num0:
@@ -1019,36 +1021,19 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          _player->setVisible(!_player->getVisible());
          break;
       }
-      case sf::Keyboard::LShift:
-      {
-         CameraPane::getInstance().updateLookState(Look::Active, true);
-         break;
-      }
       case sf::Keyboard::Left:
       {
          _inventory_layer->left();
-         CameraPane::getInstance().updateLookState(Look::Left, true);
          break;
       }
       case sf::Keyboard::Right:
       {
          _inventory_layer->right();
-         CameraPane::getInstance().updateLookState(Look::Right, true);
          break;
       }
       case sf::Keyboard::Return:
       {
          checkCloseInventory();
-         break;
-      }
-      case sf::Keyboard::Up:
-      {
-         CameraPane::getInstance().updateLookState(Look::Up, true);
-         break;
-      }
-      case sf::Keyboard::Down:
-      {
-         CameraPane::getInstance().updateLookState(Look::Down, true);
          break;
       }
       case sf::Keyboard::Tab:
@@ -1078,39 +1063,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyReleasedEvents(const sf::Event& event)
 {
-   switch (event.key.code)
-   {
-      case sf::Keyboard::LShift:
-      {
-         CameraPane::getInstance().updateLookState(Look::Active, false);
-         break;
-      }
-      case sf::Keyboard::Left:
-      {
-         CameraPane::getInstance().updateLookState(Look::Left, false);
-         break;
-      }
-      case sf::Keyboard::Right:
-      {
-         CameraPane::getInstance().updateLookState(Look::Right, false);
-         break;
-      }
-      case sf::Keyboard::Up:
-      {
-         CameraPane::getInstance().updateLookState(Look::Up, false);
-         break;
-      }
-      case sf::Keyboard::Down:
-      {
-         CameraPane::getInstance().updateLookState(Look::Down, false);
-         break;
-      }
-
-      default:
-      {
-         break;
-      }
-   }
+   CameraPane::getInstance().processKeyReleasedEvents(event);
 }
 
 
