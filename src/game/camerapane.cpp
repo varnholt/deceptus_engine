@@ -24,6 +24,18 @@ void CameraPane::update()
 {
    constexpr auto speed = 3.0f;
 
+   auto limit_look_vector = [&](){
+      if (!DisplayMode::getInstance().isSet(Display::Map))
+      {
+         const auto len = SfmlMath::length(_look_vector);
+         if (len > _max_length)
+         {
+            _look_vector = SfmlMath::normalize(_look_vector);
+            _look_vector *= _max_length;
+         }
+      }
+   };
+
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
       if (_look_state & static_cast<int32_t>(Look::Up))
@@ -43,15 +55,7 @@ void CameraPane::update()
          _look_vector += sf::Vector2f(speed, 0.0f);
       }
 
-      if (!DisplayMode::getInstance().isSet(Display::Map))
-      {
-         auto len = SfmlMath::length(_look_vector);
-         if (len > _max_length)
-         {
-            _look_vector = SfmlMath::normalize(_look_vector);
-            _look_vector *= _max_length;
-         }
-      }
+      limit_look_vector();
    }
    else if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -60,25 +64,57 @@ void CameraPane::update()
       auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
       auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
 
-      auto x = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
-      auto y = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
-      const auto tx = Tweaks::instance()._cpan_tolerance_x;
-      const auto ty = Tweaks::instance()._cpan_tolerance_y;
+      auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
+      auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
+      const auto tolerance_x = Tweaks::instance()._cpan_tolerance_x;
+      const auto tolerance_y = Tweaks::instance()._cpan_tolerance_y;
 
-      if (fabs(x) > tx || fabs(y) > ty)
+      if (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y)
       {
-         auto w = GameConfiguration::getInstance()._view_width * 0.5f;
-         auto h = GameConfiguration::getInstance()._view_height * 0.5f;
+         const auto x_direction = std::signbit(x_normalized) ? -1.0f : 1.0f;
+         const auto y_direction = std::signbit(y_normalized) ? -1.0f : 1.0f;
+         const auto x_relative = x_direction * (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
+         const auto y_relative = y_direction * (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
 
-         _look_vector.x = x * w;
-         _look_vector.y = y * h;
+         constexpr auto look_speed_x = 5.0f;
+         constexpr auto look_speed_y = 5.0f;
+
+         _look_vector.x += x_relative * look_speed_x;
+         _look_vector.y += y_relative * look_speed_y;
+
+         limit_look_vector();
       }
       else
       {
-         _look_vector.x = 0.0f;
-         _look_vector.y = 0.0f;
+         _look_vector *= 0.85f;
       }
    }
+   // else if (GameControllerIntegration::getInstance().isControllerConnected())
+   // {
+   //    auto axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
+   //
+   //    auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
+   //    auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
+   //
+   //    auto x = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
+   //    auto y = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
+   //    const auto tx = Tweaks::instance()._cpan_tolerance_x;
+   //    const auto ty = Tweaks::instance()._cpan_tolerance_y;
+   //
+   //    if (fabs(x) > tx || fabs(y) > ty)
+   //    {
+   //       auto w = GameConfiguration::getInstance()._view_width * 0.5f;
+   //       auto h = GameConfiguration::getInstance()._view_height * 0.5f;
+   //
+   //       _look_vector.x = x * w;
+   //       _look_vector.y = y * h;
+   //    }
+   //    else
+   //    {
+   //       _look_vector.x = 0.0f;
+   //       _look_vector.y = 0.0f;
+   //    }
+   // }
    else
    {
       _look_vector *= 0.85f;
