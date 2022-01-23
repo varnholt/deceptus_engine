@@ -22,14 +22,16 @@ CameraPane& CameraPane::getInstance()
 //-----------------------------------------------------------------------------
 void CameraPane::update()
 {
+   const auto& tweaks = Tweaks::instance();
+
    auto limit_look_vector = [&](){
       if (!DisplayMode::getInstance().isSet(Display::Map))
       {
          const auto len = SfmlMath::length(_look_vector);
-         if (len > _max_length)
+         if (len > tweaks._cpan_max_distance_px)
          {
             _look_vector = SfmlMath::normalize(_look_vector);
-            _look_vector *= _max_length;
+            _look_vector *= tweaks._cpan_max_distance_px;
          }
       }
    };
@@ -59,15 +61,13 @@ void CameraPane::update()
    }
    else if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      auto axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
-
-      auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
-      auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
-
-      auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
-      auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
-      const auto tolerance_x = Tweaks::instance()._cpan_tolerance_x;
-      const auto tolerance_y = Tweaks::instance()._cpan_tolerance_y;
+      const auto& axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
+      const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
+      const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
+      const auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
+      const auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
+      const auto tolerance_x = tweaks._cpan_tolerance_x;
+      const auto tolerance_y = tweaks._cpan_tolerance_y;
 
       if (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y)
       {
@@ -75,23 +75,19 @@ void CameraPane::update()
          const auto y_direction = std::signbit(y_normalized) ? -1.0f : 1.0f;
          const auto x_relative = x_direction * (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
          const auto y_relative = y_direction * (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
-
-         constexpr auto look_speed_x = 4.0f;
-         constexpr auto look_speed_y = 3.0f;
-
-         _look_vector.x += x_relative * look_speed_x;
-         _look_vector.y += y_relative * look_speed_y;
+         _look_vector.x += x_relative * tweaks._cpan_look_speed_x;
+         _look_vector.y += y_relative * tweaks._cpan_look_speed_y;
 
          limit_look_vector();
       }
       else
       {
-         _look_vector *= 0.85f;
+         _look_vector *= tweaks._cpan_snap_back_factor;
       }
    }
    else
    {
-      _look_vector *= 0.85f;
+      _look_vector *= tweaks._cpan_snap_back_factor;
    }
 }
 
