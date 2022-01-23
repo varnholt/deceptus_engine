@@ -4,15 +4,15 @@
 #include "constants.h"
 #include "extraitem.h"
 #include "extratable.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxtile.h"
+#include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
 #include "inventoryitem.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "tilemap.h"
 #include "savestate.h"
-
-#include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxtile.h"
-#include "framework/tmxparser/tmxtileset.h"
 
 #include "SFML/Graphics.hpp"
 
@@ -20,30 +20,41 @@
 //-----------------------------------------------------------------------------
 void ExtraManager::load(
    TmxLayer* layer,
-   TmxTileSet* tileSet
+   TmxTileSet* tileset
 )
 {
    resetExtras();
 
+   if (!layer)
+   {
+      Log::Error() << "tmx layer is empty, please fix your level design";
+      return;
+   }
+
+   if (!tileset)
+   {
+      Log::Error() << "tmx tileset is empty, please fix your level design";
+      return;
+   }
+
    auto tiles = layer->_data;
    auto width = layer->_width_px;
    auto height = layer->_height_px;
-   auto firstId = tileSet->_first_gid;
-   auto tileMap = tileSet->_tile_map;
+   auto first_id = tileset->_first_gid;
 
    for (auto i = 0u; i < width; ++i)
    {
       for (auto j = 0u; j < height; ++j)
       {
-         int tileNumber = tiles[i + j * width];
-         if (tileNumber != 0)
+         const auto tile_number = tiles[i + j * width];
+         if (tile_number != 0)
          {
             std::shared_ptr<ExtraItem> item = std::make_shared<ExtraItem>();
             item->_sprite_offset.x = i;
             item->_sprite_offset.y = j;
             item->_position.x = static_cast<float>(i * PIXELS_PER_TILE);
             item->_position.y = static_cast<float>(j * PIXELS_PER_TILE);
-            item->_type = static_cast<ExtraItem::ExtraSpriteIndex>(tileNumber - firstId);
+            item->_type = static_cast<ExtraItem::ExtraSpriteIndex>(tile_number - first_id);
             _extras.push_back(item);
          }
       }
@@ -52,7 +63,7 @@ void ExtraManager::load(
 
 
 //-----------------------------------------------------------------------------
-void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
+void ExtraManager::collide(const sf::Rect<int32_t>& player_rect)
 {
    for (auto& extra : _extras)
    {
@@ -61,13 +72,13 @@ void ExtraManager::collide(const sf::Rect<int32_t>& playerRect)
          continue;
       }
 
-      sf::Rect<int32_t> itemRect;
-      itemRect.left = static_cast<int32_t>(extra->_position.x);
-      itemRect.top = static_cast<int32_t>(extra->_position.y);
-      itemRect.width = PIXELS_PER_TILE;
-      itemRect.height = PIXELS_PER_TILE;
+      sf::Rect<int32_t> item_rect;
+      item_rect.left = static_cast<int32_t>(extra->_position.x);
+      item_rect.top = static_cast<int32_t>(extra->_position.y);
+      item_rect.width = PIXELS_PER_TILE;
+      item_rect.height = PIXELS_PER_TILE;
 
-      if (playerRect.intersects(itemRect))
+      if (player_rect.intersects(item_rect))
       {
          extra->_active = false;
 

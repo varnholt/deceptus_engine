@@ -19,13 +19,13 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileset)
 {
    if (!layer)
    {
-      Log::Error() << "atmosphere tmx layer is empty, please fix your level design";
+      Log::Error() << "tmx layer is empty, please fix your level design";
       return;
    }
 
    if (!tileset)
    {
-      Log::Error() << "atmosphere tmx tileset is empty, please fix your level design";
+      Log::Error() << "tmx tileset is empty, please fix your level design";
       return;
    }
 

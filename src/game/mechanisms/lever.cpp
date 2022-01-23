@@ -4,17 +4,17 @@
 #include "conveyorbelt.h"
 #include "gamemechanism.h"
 #include "fan.h"
-#include "laser.h"
-#include "movingplatform.h"
-#include "player/player.h"
-#include "spikes.h"
-#include "texturepool.h"
-
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
+#include "laser.h"
+#include "movingplatform.h"
+#include "player/player.h"
+#include "spikes.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -32,19 +32,31 @@ static const auto ROW_CENTER = 6;
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Lever::load(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::filesystem::path& basePath,
+   TmxTileSet* tileset,
+   const std::filesystem::path& base_path,
    const std::shared_ptr<b2World>&
 )
 {
    __rectangles.clear();
+
+   if (!layer)
+   {
+      Log::Error() << "tmx layer is empty, please fix your level design";
+      return {};
+   }
+
+   if (!tileset)
+   {
+      Log::Error() << "tmx tileset is empty, please fix your level design";
+      return {};
+   }
 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
    auto tiles    = layer->_data;
    auto width    = layer->_width_px;
    auto height   = layer->_height_px;
-   auto firstId  = tileSet->_first_gid;
+   auto first_id = tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto j = 0; j < static_cast<int32_t>(height); j++)
@@ -52,20 +64,17 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
       for (auto i = 0; i < static_cast<int32_t>(width); i++)
       {
          // get the current tile number
-         auto tileNumber = tiles[i + j * width];
+         auto tile_number = tiles[i + j * width];
 
-         if (tileNumber != 0)
+         if (tile_number != 0)
          {
-            auto tileId = tileNumber - firstId;
+            auto tileId = tile_number - first_id;
 
             if (tileId == 33)
             {
-               // Log::Info() << "lever at " << i << ", " << j;
-
                auto lever = std::make_shared<Lever>();
 
                // sprite is two tiles high
-
                const auto x = PIXELS_PER_TILE * i;
                const auto y = PIXELS_PER_TILE * (j - 1);
 
@@ -75,7 +84,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
                lever->_rect.height = PIXELS_PER_TILE * 2;
 
                lever->_sprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-               lever->_texture = TexturePool::getInstance().get(basePath / "tilesets" / "levers.png");
+               lever->_texture = TexturePool::getInstance().get(base_path / "tilesets" / "levers.png");
                lever->_sprite.setTexture(*lever->_texture);
                lever->updateSprite();
 
@@ -270,11 +279,11 @@ void Lever::merge(
 {
    for (auto rect : __rectangles)
    {
-      sf::Rect<int32_t> searchRect;
-      searchRect.left = static_cast<int32_t>(rect->_x_px);
-      searchRect.top = static_cast<int32_t>(rect->_y_px);
-      searchRect.width = static_cast<int32_t>(rect->_width_px);
-      searchRect.height = static_cast<int32_t>(rect->_height_px);
+      sf::Rect<int32_t> search_rect;
+      search_rect.left = static_cast<int32_t>(rect->_x_px);
+      search_rect.top = static_cast<int32_t>(rect->_y_px);
+      search_rect.width = static_cast<int32_t>(rect->_width_px);
+      search_rect.height = static_cast<int32_t>(rect->_height_px);
 
       bool enabled = true;
       if (rect->_properties)
@@ -296,7 +305,7 @@ void Lever::merge(
       {
          auto lever = std::dynamic_pointer_cast<Lever>(tmp);
 
-         if (lever->_rect.intersects(searchRect))
+         if (lever->_rect.intersects(search_rect))
          {
             std::vector<Callback> callbacks;
 
@@ -304,7 +313,7 @@ void Lever::merge(
             {
                auto laser = std::dynamic_pointer_cast<Laser>(l);
 
-               if (laser->getPixelRect().intersects(searchRect))
+               if (laser->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([laser](int32_t state) {
                         laser->setEnabled(state == -1 ? false : true);
@@ -317,7 +326,7 @@ void Lever::merge(
             {
                auto belt = std::dynamic_pointer_cast<ConveyorBelt>(b);
 
-               if (belt->getPixelRect().intersects(searchRect))
+               if (belt->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([belt](int32_t state) {
                         belt->setEnabled(state == -1 ? false : true);
@@ -330,7 +339,7 @@ void Lever::merge(
             {
                auto fan = std::dynamic_pointer_cast<Fan>(f);
 
-               if (fan->getPixelRect().intersects(searchRect))
+               if (fan->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([fan](int32_t state) {
                         fan->setEnabled(state == -1 ? false : true);
@@ -347,7 +356,7 @@ void Lever::merge(
 
                for (const auto& pixel : pixel_path)
                {
-                  if (searchRect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
+                  if (search_rect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
                   {
                      callbacks.push_back([platform](int32_t state) {
                            platform->setEnabled(state == -1 ? false : true);
@@ -363,7 +372,7 @@ void Lever::merge(
             {
                auto spikes = std::dynamic_pointer_cast<Spikes>(s);
 
-               if (spikes->getPixelRect().intersects(searchRect))
+               if (spikes->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([spikes](int32_t state) {
                         spikes->setEnabled(state == -1 ? false : true);

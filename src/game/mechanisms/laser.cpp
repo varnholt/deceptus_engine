@@ -2,11 +2,9 @@
 
 // game
 #include "constants.h"
-#include "player/player.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
-#include "texturepool.h"
-
+#include "framework/tools/log.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -14,19 +12,21 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "player/player.h"
+#include "texturepool.h"
 
 #include <iostream>
 
 
 namespace
 {
-   static constexpr std::pair<int32_t, int32_t> range_disabled{0, 1};
-   static constexpr std::pair<int32_t, int32_t> range_enabling{2, 9};
-   static constexpr std::pair<int32_t, int32_t> range_enabled{10, 16};
-   static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
+static constexpr std::pair<int32_t, int32_t> range_disabled{0, 1};
+static constexpr std::pair<int32_t, int32_t> range_enabling{2, 9};
+static constexpr std::pair<int32_t, int32_t> range_enabled{10, 16};
+static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
 
-   static constexpr auto range_diabled_delta  = range_disabled.second  - range_disabled.first;
-   static constexpr auto range_enabled_delta  = range_enabled.second   - range_enabled.first;
+static constexpr auto range_diabled_delta  = range_disabled.second  - range_disabled.first;
+static constexpr auto range_enabled_delta  = range_enabled.second   - range_enabled.first;
 }
 
 
@@ -103,8 +103,6 @@ void Laser::update(const sf::Time& dt)
       _on = false;
    }
 
-   // const auto previousTileIndex = mTileIndex;
-
    if (_version == MechanismVersion::Version1)
    {
       // shift tile index in right direction depending on the on/off state
@@ -141,7 +139,7 @@ void Laser::update(const sf::Time& dt)
       //   | 17 - 21 | disabling |
       //   +---------+-----------+
 
-      // disabled (!mOn and mTileIndex inside 0..1)
+      // disabled (!_on and _tile_index inside 0..1)
       // loop 0..1
       if (!_on && _tile_index >= range_disabled.first && _tile_index <= range_disabled.second)
       {
@@ -149,7 +147,7 @@ void Laser::update(const sf::Time& dt)
          _tile_index = range_disabled.first + static_cast<int32_t>(_tile_animation + _animation_offset) % (range_diabled_delta + 1);
       }
 
-      // enabled (mOn and mTileIndex inside 10..16)
+      // enabled (_on and _tile_index inside 10..16)
       // loop 10..16
       else if (_on && _tile_index >= range_enabled.first && _tile_index <= range_enabled.second)
       {
@@ -157,8 +155,8 @@ void Laser::update(const sf::Time& dt)
          _tile_index = range_enabled.first + static_cast<int32_t>(_tile_animation + _animation_offset) % (range_enabled_delta + 1);
       }
 
-      // enabling (mOn and mTileIndex outside 10..16)
-      // go from 2..9, when 10 go to rangeEnabled
+      // enabling (_on and _tile_index outside 10..16)
+      // go from 2..9, when 10 go to range_enabled
       else if (_on)
       {
          _tile_animation += dt.asSeconds() * 10.0f;
@@ -171,8 +169,8 @@ void Laser::update(const sf::Time& dt)
          _tile_index = range_enabling.first + static_cast<int32_t>(_tile_animation);
       }
 
-      // disabling (!mOn and mTileIndex outside 0..1)
-      // go from 17..21, when 22 to to rangeDisabled
+      // disabling (!_on and _tile_index outside 0..1)
+      // go from 17..21, when 22 to to range_disabled
       else if (!_on)
       {
          _tile_animation += dt.asSeconds() * 10.0f;
@@ -191,17 +189,6 @@ void Laser::update(const sf::Time& dt)
          }
       }
    }
-
-   // if (mVersion == MechanismVersion::Version2)
-   // {
-   //    if (mGroupId == 2)
-   //    {
-   //       if (previousTileIndex != mTileIndex)
-   //       {
-   //          Log::Info() << mGroupId << ": " << mTileIndex;
-   //       }
-   //    }
-   // }
 }
 
 
@@ -251,6 +238,18 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
    const auto version = (layer->_name == "lasers") ? MechanismVersion::Version1 : MechanismVersion::Version2;
 
    resetAll();
+
+   if (!layer)
+   {
+      Log::Error() << "tmx layer is empty, please fix your level design";
+      return {};
+   }
+
+   if (!tileset)
+   {
+      Log::Error() << "tmx tileset is empty, please fix your level design";
+      return {};
+   }
 
    if (version == MechanismVersion::Version1)
    {
@@ -385,12 +384,12 @@ void Laser::addTilesVersion2()
 }
 
 
-void Laser::collide(const sf::Rect<int32_t>& playerRect)
+void Laser::collide(const sf::Rect<int32_t>& player_rect)
 {
    const auto it =
-      std::find_if(std::begin(__lasers), std::end(__lasers), [playerRect](auto laser) {
+      std::find_if(std::begin(__lasers), std::end(__lasers), [player_rect](auto laser) {
 
-            const auto roughIntersection = playerRect.intersects(laser->_pixel_rect);
+            const auto roughIntersection = player_rect.intersects(laser->_pixel_rect);
 
             auto active = false;
 
@@ -428,7 +427,7 @@ void Laser::collide(const sf::Rect<int32_t>& playerRect)
                      rect.width  = PIXELS_PER_PHYSICS_TILE;
                      rect.height = PIXELS_PER_PHYSICS_TILE;
 
-                     const auto fineIntersection = playerRect.intersects(rect);
+                     const auto fineIntersection = player_rect.intersects(rect);
 
                      if (fineIntersection)
                      {
