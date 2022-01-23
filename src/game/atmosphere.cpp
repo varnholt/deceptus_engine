@@ -15,18 +15,18 @@ Atmosphere::~Atmosphere()
 
 
 //-----------------------------------------------------------------------------
-void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
+void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileset)
 {
-   if (layer == nullptr)
+   if (!layer)
    {
-     Log::Error() << "physics tmx layer is a nullptr";
-     exit(-1);
+      Log::Error() << "atmosphere tmx layer is empty, please fix your level design";
+      return;
    }
 
-   if (tileSet == nullptr)
+   if (!tileset)
    {
-     Log::Error() << "physics tmx tileset is a nullptr";
-     exit(-1);
+      Log::Error() << "atmosphere tmx tileset is empty, please fix your level design";
+      return;
    }
 
    auto tiles  = layer->_data;
@@ -50,7 +50,7 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileSet)
          auto tileRelative = static_cast<int32_t>(AtmosphereTileInvalid);
          if (tileNumber != 0)
          {
-            tileRelative = tileNumber - tileSet->_first_gid;
+            tileRelative = tileNumber - tileset->_first_gid;
             _map[y * width + x] = tileRelative;
          }
 
