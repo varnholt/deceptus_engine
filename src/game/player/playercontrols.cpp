@@ -508,7 +508,7 @@ PlayerControls::Orientation PlayerControls::getActiveOrientation() const
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      auto axis_values = getJoystickInfo().getAxisValues();
+      const auto& axis_values = getJoystickInfo().getAxisValues();
       const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
       auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
       const auto hat_value = getJoystickInfo().getHatValues().at(0);

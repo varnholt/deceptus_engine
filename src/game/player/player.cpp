@@ -531,7 +531,7 @@ float Player::getMaxVelocity() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
-   auto axis_values = _controls->getJoystickInfo().getAxisValues();
+   const auto& axis_values = _controls->getJoystickInfo().getAxisValues();
 
    if (_controls->isLookingAround())
    {
