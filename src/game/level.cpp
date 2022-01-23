@@ -431,7 +431,7 @@ void Level::loadTmx()
          else if (layer->_name == "toggle_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
-            for (const auto &s : spikes)
+            for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
             }
@@ -439,7 +439,7 @@ void Level::loadTmx()
          else if (layer->_name == "trap_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
-            for (const auto &s : spikes)
+            for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
             }
@@ -447,7 +447,7 @@ void Level::loadTmx()
          else if (layer->_name == "interval_spikes")
          {
             auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
-            for (const auto &s : spikes)
+            for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
             }

@@ -4,6 +4,7 @@
 #include "player/player.h"
 #include "texturepool.h"
 
+#include "framework/tools/log.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -262,6 +263,18 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    Mode mode
 )
 {
+   if (!layer)
+   {
+      Log::Error() << "spikes tmx layer is empty, please fix your level design";
+      return {};
+   }
+
+   if (!tileset)
+   {
+      Log::Error() << "spikes tmx tileset is empty, please fix your level design";
+      return {};
+   }
+
    auto texture = TexturePool::getInstance().get(base_path / "tilesets" / "spikes.png");
 
    std::vector<std::shared_ptr<Spikes>> all_spikes;
@@ -269,19 +282,19 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
    const auto tiles    = layer->_data;
    const auto width    = layer->_width_px;
    const auto height   = layer->_height_px;
-   const auto firstId  = tileset->_first_gid;
+   const auto first_id = tileset->_first_gid;
 
-   const int32_t tilesPerRow = texture->getSize().x / PIXELS_PER_TILE;
+   const int32_t tiles_per_row = texture->getSize().x / PIXELS_PER_TILE;
 
    for (auto i = 0u; i < width; ++i)
    {
       for (auto j = 0u; j < height; ++j)
       {
-         auto tileNumber = tiles[i + j * width];
+         auto tile_number = tiles[i + j * width];
 
-         if (tileNumber != 0)
+         if (tile_number != 0)
          {
-            auto id = (tileNumber - firstId);
+            auto id = (tile_number - first_id);
             auto spikes = std::make_shared<Spikes>();
             spikes->_texture = texture;
 
@@ -290,8 +303,8 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
             spikes->_tile_position.x = static_cast<float>(i);
             spikes->_tile_position.y = static_cast<float>(j);
 
-            spikes->_tu = static_cast<int32_t>(id % tilesPerRow);
-            spikes->_tv = static_cast<int32_t>(id / tilesPerRow);
+            spikes->_tu = static_cast<int32_t>(id % tiles_per_row);
+            spikes->_tv = static_cast<int32_t>(id / tiles_per_row);
 
             spikes->_mode = mode;
 
