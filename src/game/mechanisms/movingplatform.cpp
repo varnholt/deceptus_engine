@@ -12,6 +12,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/log.h"
 #include "level.h"
 #include "player/player.h"
 #include "physics/physicsconfiguration.h"
@@ -150,17 +151,29 @@ void MovingPlatform::addSprite(const sf::Sprite& sprite)
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::filesystem::path& basePath,
+   TmxTileSet* tileset,
+   const std::filesystem::path& base_path,
    const std::shared_ptr<b2World>& world
 )
 {
+   if (!layer)
+   {
+      Log::Error() << "tmx layer is empty, please fix your level design";
+      return {};
+   }
+
+   if (!tileset)
+   {
+      Log::Error() << "tmx tileset is empty, please fix your level design";
+      return {};
+   }
+
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
-   const auto tilesize = sf::Vector2u(tileSet->_tile_width_px, tileSet->_tile_height_px);
+   const auto tilesize = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
    const auto tiles    = layer->_data;
    const auto width    = layer->_width_px;
    const auto height   = layer->_height_px;
-   const auto firstId  = tileSet->_first_gid;
+   const auto first_id = tileset->_first_gid;
 
    for (auto y = 0u; y < height; y++)
    {
@@ -174,7 +187,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             // find matching platform
             auto moving_platform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
 
-            const auto texture_path = basePath / tileSet->_image->_source;
+            const auto texture_path = base_path / tileset->_image->_source;
             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
             const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
 
@@ -196,7 +209,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
 
             while (tile_number != 0)
             {
-               auto tileId = tile_number - firstId;
+               auto tileId = tile_number - first_id;
                auto tu = (tileId) % (moving_platform->_texture_map->getSize().x / tilesize.x);
                auto tv = (tileId) / (moving_platform->_texture_map->getSize().x / tilesize.x);
 

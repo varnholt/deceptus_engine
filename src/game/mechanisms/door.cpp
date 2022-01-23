@@ -3,11 +3,6 @@
 // game
 #include "constants.h"
 #include "fixturenode.h"
-#include "level.h"
-#include "player/player.h"
-#include "savestate.h"
-#include "texturepool.h"
-
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/timer.h"
 #include "framework/tmxparser/tmximage.h"
@@ -15,6 +10,11 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
+#include "level.h"
+#include "player/player.h"
+#include "savestate.h"
+#include "texturepool.h"
 
 #include <iostream>
 
@@ -94,7 +94,6 @@ void Door::update(const sf::Time& dt)
       case Type::Bars:
       {
          updateBars(dt);
-         // updateBars(dt);
          break;
       }
    }
@@ -243,26 +242,38 @@ bool Door::isPlayerAtDoor() const
 
 
 //-----------------------------------------------------------------------------
-void Door::setPlayerAtDoor(bool playerAtDoor)
+void Door::setPlayerAtDoor(bool player_at_door)
 {
-   _player_at_door = playerAtDoor;
+   _player_at_door = player_at_door;
 }
 
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Door::load(
    TmxLayer* layer,
-   TmxTileSet* tileSet,
-   const std::filesystem::path& basePath,
+   TmxTileSet* tileset,
+   const std::filesystem::path& base_path,
    const std::shared_ptr<b2World>& world
 )
 {
+   if (!layer)
+   {
+      Log::Error() << "tmx layer is empty, please fix your level design";
+      return {};
+   }
+
+   if (!tileset)
+   {
+      Log::Error() << "tmx tileset is empty, please fix your level design";
+      return {};
+   }
+
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
-   const auto tiles      = layer->_data;
+   const auto tiles    = layer->_data;
    const auto width    = layer->_width_px;
-   const auto height    = layer->_height_px;
-   const auto first_id  = tileSet->_first_gid;
+   const auto height   = layer->_height_px;
+   const auto first_id = tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto j = 0u; j < height; j++)
@@ -329,7 +340,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                auto door = std::make_shared<Door>(Level::getCurrentLevel());
                doors.push_back(door);
 
-               door->_texture = TexturePool::getInstance().get((basePath / tileSet->_image->_source).string());
+               door->_texture = TexturePool::getInstance().get((base_path / tileset->_image->_source).string());
                door->_door_quad[0].position.x = position_x;
                door->_door_quad[0].position.y = position_y;
                door->_door_quad[1].position.x = position_x;

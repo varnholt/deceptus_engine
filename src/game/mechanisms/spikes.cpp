@@ -265,13 +265,13 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
 {
    if (!layer)
    {
-      Log::Error() << "spikes tmx layer is empty, please fix your level design";
+      Log::Error() << "tmx layer is empty, please fix your level design";
       return {};
    }
 
    if (!tileset)
    {
-      Log::Error() << "spikes tmx tileset is empty, please fix your level design";
+      Log::Error() << "tmx tileset is empty, please fix your level design";
       return {};
    }
 
