@@ -58,7 +58,6 @@ class CameraSystem
       bool _focus_y_triggered = false;
 
       std::shared_ptr<Room> _room;
-      float _room_interpolation = 0.0f;
       float _room_x = 0.0f;
       float _room_y = 0.0f;
 

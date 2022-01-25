@@ -936,8 +936,7 @@ void Level::createViews()
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
-   const auto look_vector = CameraPane::getInstance().getLookVector();
-
+   const auto& look_vector = CameraPane::getInstance().getLookVector();
    const auto& camera_system = CameraSystem::getCameraSystem();
 
    const auto level_view_x = camera_system.getX() + look_vector.x;
