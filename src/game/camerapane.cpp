@@ -182,8 +182,6 @@ void CameraPane::updateLookState(Look look, bool enable)
 }
 
 
-
-
 //-----------------------------------------------------------------------------
 bool CameraPane::isLookActive() const
 {
@@ -191,6 +189,7 @@ bool CameraPane::isLookActive() const
 }
 
 
+//-----------------------------------------------------------------------------
 const sf::Vector2f& CameraPane::getLookVector() const
 {
     return _look_vector;

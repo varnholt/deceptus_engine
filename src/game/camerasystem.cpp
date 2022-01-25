@@ -220,7 +220,6 @@ void CameraSystem::setRoom(const std::shared_ptr<Room>& room)
    if (_room != room)
    {
       // Log::Info() << "reset room interpolation";
-      _room_interpolation = 0.0f;
       _room = room;
    }
 }
