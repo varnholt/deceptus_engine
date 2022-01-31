@@ -2,7 +2,7 @@
 
 // game
 #include "animationplayer.h"
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -936,11 +936,11 @@ void Level::createViews()
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
-   const auto& look_vector = CameraPane::getInstance().getLookVector();
+   const auto& look_vector = CameraPanorama::getInstance().getLookVector();
    const auto& camera_system = CameraSystem::getCameraSystem();
 
-   const auto level_view_x = camera_system.getX() + look_vector.x;
-   const auto level_view_y = camera_system.getY() + look_vector.y;
+   auto level_view_x = camera_system.getX() + look_vector.x;
+   auto level_view_y = camera_system.getY() + look_vector.y;
 
    _level_view->reset(
       sf::FloatRect(
@@ -1470,7 +1470,7 @@ void Level::update(const sf::Time& dt)
 
    _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
 
-   CameraPane::getInstance().update();
+   CameraPanorama::getInstance().update();
    _boom_effect.update(dt);
 
    AnimationPlayer::getInstance().update(dt);

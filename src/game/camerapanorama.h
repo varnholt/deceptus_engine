@@ -6,11 +6,11 @@
 #include "constants.h"
 
 
-class CameraPane
+class CameraPanorama
 {
 public:
 
-   static CameraPane& getInstance();
+   static CameraPanorama& getInstance();
 
    void update();
 
@@ -25,11 +25,11 @@ public:
 
 private:
 
-   CameraPane() = default;
+   CameraPanorama() = default;
 
    int32_t _look_state = static_cast<int32_t>(Look::Inactive);
    sf::Vector2f _look_vector;
 
-   static CameraPane __instance;
+   static CameraPanorama __instance;
 };
 

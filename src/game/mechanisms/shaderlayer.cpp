@@ -1,6 +1,6 @@
 #include "shaderlayer.h"
 
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"

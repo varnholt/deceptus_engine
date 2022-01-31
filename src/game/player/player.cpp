@@ -3,7 +3,7 @@
 #include "animationpool.h"
 #include "audio.h"
 #include "bow.h"
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "displaymode.h"
 #include "gameclock.h"
 #include "gamecontactlistener.h"
@@ -1023,7 +1023,7 @@ void Player::goToPortal(auto portal)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePortal()
 {
-   if (CameraPane::getInstance().isLookActive())
+   if (CameraPanorama::getInstance().isLookActive())
    {
       return;
    }
@@ -1300,7 +1300,7 @@ void Player::updateBendDown()
       return;
    }
 
-   if (!_bend._bending_down && CameraPane::getInstance().isLookActive())
+   if (!_bend._bending_down && CameraPanorama::getInstance().isLookActive())
    {
       return;
    }
