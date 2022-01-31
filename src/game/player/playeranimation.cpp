@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include "animationpool.h"
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "displaymode.h"
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
@@ -409,7 +409,7 @@ void PlayerAnimation::update(
 
    auto velocity = data._linear_velocity;
 
-   const auto look_active = CameraPane::getInstance().isLookActive();
+   const auto look_active = CameraPanorama::getInstance().isLookActive();
    const auto passes_sanity_check = !(data._moving_right && data._moving_left);
 
    // dash

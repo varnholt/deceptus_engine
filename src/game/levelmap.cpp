@@ -1,6 +1,6 @@
 #include "levelmap.h"
 
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "console.h"
 #include "extratable.h"
 #include "framework/image/psd.h"
@@ -83,7 +83,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    sf::Vector2f center;
    center += Player::getCurrent()->getPixelPositionf() * 0.125f;
-   center += CameraPane::getInstance().getLookVector();
+   center += CameraPanorama::getInstance().getLookVector();
    center.x += _level_grid_sprite.getTexture()->getSize().x / 2.0f;
    center.y += _level_grid_sprite.getTexture()->getSize().y / 2.0f;
    center.x -= 220.0f;
@@ -101,8 +101,6 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    drawLevelItems(_level_render_texture);
    _level_render_texture.setView(level_view);
    _level_render_texture.display();
-
-   // Log::Info() << "dx/dy: " << CameraPane::getInstance().getLookVector().x << " " << CameraPane::getInstance().getLookVector().y;
 
    auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
    level_texture_sprite.move(10.0f, 48.0f);
@@ -129,7 +127,7 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       layer_text_zoom->draw(window, states);
    }
 
-   if (CameraPane::getInstance().isLookActive())
+   if (CameraPanorama::getInstance().isLookActive())
    {
       layer_text_pan->draw(window, states);
    }

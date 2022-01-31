@@ -1,4 +1,4 @@
-#include "camerapane.h"
+#include "camerapanorama.h"
 
 #include "displaymode.h"
 #include "gameconfiguration.h"
@@ -9,18 +9,18 @@
 #include "tweaks.h"
 
 
-CameraPane CameraPane::__instance;
+CameraPanorama CameraPanorama::__instance;
 
 
 //-----------------------------------------------------------------------------
-CameraPane& CameraPane::getInstance()
+CameraPanorama& CameraPanorama::getInstance()
 {
    return __instance;
 }
 
 
 //-----------------------------------------------------------------------------
-void CameraPane::update()
+void CameraPanorama::update()
 {
    const auto& tweaks = Tweaks::instance();
 
@@ -93,7 +93,7 @@ void CameraPane::update()
 
 
 //-----------------------------------------------------------------------------
-void CameraPane::processKeyPressedEvents(const sf::Event& event)
+void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
 {
    switch (event.key.code)
    {
@@ -131,7 +131,7 @@ void CameraPane::processKeyPressedEvents(const sf::Event& event)
 
 
 //-----------------------------------------------------------------------------
-void CameraPane::processKeyReleasedEvents(const sf::Event& event)
+void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
 {
    switch (event.key.code)
    {
@@ -169,7 +169,7 @@ void CameraPane::processKeyReleasedEvents(const sf::Event& event)
 
 
 //-----------------------------------------------------------------------------
-void CameraPane::updateLookState(Look look, bool enable)
+void CameraPanorama::updateLookState(Look look, bool enable)
 {
    if (enable)
    {
@@ -183,14 +183,14 @@ void CameraPane::updateLookState(Look look, bool enable)
 
 
 //-----------------------------------------------------------------------------
-bool CameraPane::isLookActive() const
+bool CameraPanorama::isLookActive() const
 {
    return (_look_state & static_cast<int32_t>(Look::Active));
 }
 
 
 //-----------------------------------------------------------------------------
-const sf::Vector2f& CameraPane::getLookVector() const
+const sf::Vector2f& CameraPanorama::getLookVector() const
 {
     return _look_vector;
 }

@@ -2,7 +2,7 @@
 
 #include "animationpool.h"
 #include "audio.h"
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/stopwatch.h"
 #include "gamecontactlistener.h"
@@ -261,7 +261,7 @@ void PlayerJump::jump()
       return;
    }
 
-   if (CameraPane::getInstance().isLookActive())
+   if (CameraPanorama::getInstance().isLookActive())
    {
       return;
    }
