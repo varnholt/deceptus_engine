@@ -1,7 +1,7 @@
 #include "infolayer.h"
 
 #include "animationframedata.h"
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "console.h"
 #include "extratable.h"
 #include "gameconfiguration.h"
@@ -138,7 +138,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // support cpan
-   if (CameraPane::getInstance().isLookActive())
+   if (CameraPanorama::getInstance().isLookActive())
    {
        auto layer_cpan_up = _layers["cpan_up"];
        auto layer_cpan_down = _layers["cpan_down"];

@@ -120,27 +120,23 @@ bool Room::correctedCamera(float& x, float& y, float focus_offset, float view_ra
    //    c) screen's top is within room bounds, assign if necessary
    //    d) screen's bottom is within room bounds, assign if necessary
 
-   const auto rect = *rect_it;
-
-   const auto config = GameConfiguration::getInstance();
-
    // need to incorporate the focus offset here because the player is not
    // necessarily in the middle of the screen but maybe a little more to the
    // left or to the right depending on its orientation
-   const auto half_width  = static_cast<float>(config._view_width / 2.0f);
-   const auto height = static_cast<float>(config._view_height);
-
-   const auto l = pos + sf::Vector2f{- half_width - focus_offset, 0.0f};
-   const auto r = pos + sf::Vector2f{  half_width - focus_offset, 0.0f};
-
-   const auto height_top = height * (1.0f - 1.0f / view_ratio_y);
+   const auto& config = GameConfiguration::getInstance();
+   const auto half_width    = static_cast<float>(config._view_width / 2.0f);
+   const auto height        = static_cast<float>(config._view_height);
+   const auto height_top    = height * (1.0f - 1.0f / view_ratio_y);
    const auto height_bottom = height / view_ratio_y;
 
    const auto u = pos + sf::Vector2f{0.0f, -height_bottom};
-   const auto d = pos + sf::Vector2f{0.0f, height_top};
+   const auto d = pos + sf::Vector2f{0.0f,  height_top};
+   const auto l = pos + sf::Vector2f{-half_width - focus_offset, 0.0f};
+   const auto r = pos + sf::Vector2f{ half_width - focus_offset, 0.0f};
 
    auto corrected = false;
 
+   const auto rect = *rect_it;
    if (!rect.contains(l))
    {
       // camera center is out of left boundary

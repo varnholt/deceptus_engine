@@ -136,7 +136,7 @@ SOURCES += \
    src/game/bitmapfont.cpp \
    src/game/boomeffect.cpp \
    src/game/bow.cpp \
-   src/game/camerapane.cpp \
+   src/game/camerapanorama.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/game/console.cpp \
@@ -308,7 +308,7 @@ HEADERS += \
    src/game/boomeffect.h \
    src/game/bow.h \
    src/game/bulletplayer.h \
-   src/game/camerapane.h \
+   src/game/camerapanorama.h \
    src/game/camerasystem.h \
    src/game/camerasystemconfiguration.h \
    src/game/console.h \

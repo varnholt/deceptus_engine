@@ -3,7 +3,7 @@
 #include "animationpool.h"
 #include "audio.h"
 #include "projectilehitanimation.h"
-#include "camerapane.h"
+#include "camerapanorama.h"
 #include "debugdraw.h"
 #include "displaymode.h"
 #include "eventserializer.h"
@@ -368,7 +368,7 @@ void Game::initialize()
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
             _player->getControls()->setKeysPressed(0);
-            CameraPane::getInstance().updateLookState(Look::Active, false);
+            CameraPanorama::getInstance().updateLookState(Look::Active, false);
          }
       }
    );
@@ -699,7 +699,7 @@ void Game::update()
       // this is not beautiful. simplify!
       if (DisplayMode::getInstance().isSet(Display::Map))
       {
-         CameraPane::getInstance().update();
+         CameraPanorama::getInstance().update();
       }
    }
    else if (GameState::getInstance().getMode() == ExecutionMode::Running)
@@ -906,7 +906,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       return;
    }
 
-   CameraPane::getInstance().processKeyPressedEvents(event);
+   CameraPanorama::getInstance().processKeyPressedEvents(event);
 
    switch (event.key.code)
    {
@@ -1063,7 +1063,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyReleasedEvents(const sf::Event& event)
 {
-   CameraPane::getInstance().processKeyReleasedEvents(event);
+   CameraPanorama::getInstance().processKeyReleasedEvents(event);
 }
 
 
