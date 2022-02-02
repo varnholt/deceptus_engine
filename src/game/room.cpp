@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "cameraroomlock.h"
 #include "camerasystem.h"
 #include "gameconfiguration.h"
 #include "screentransition.h"
@@ -67,103 +68,6 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
       );
 
    return it;
-}
-
-
-bool Room::correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const
-{
-   //       +--------------->----+-----<--------------------------------+
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       +--------------->----+-----<--------------------------------+--- y = player y + screen height / 1.5
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       |               |    |     |                                |
-   //       +--------------->----+-----<--------------------------------+
-   //                       |    |     |
-   //                       |    |     |
-   //                    focus   |   focus
-   //                    zone 0  |   zone 1
-   //                            |
-   //                            |
-   //                          player x
-
-   if (_rects.empty())
-   {
-      return false;
-   }
-
-   // workflow (only for 'current' room)
-   //
-   // 1) check which in which rectangle the current camera center lies
-   //    -> find the right FloatRect
-   auto pos = sf::Vector2f{x, y};
-   const auto rect_it =  findRect(pos);
-   if (rect_it == _rects.end())
-   {
-      // that's an error.
-      return false;
-   }
-
-   // 2) check if
-   //    a) screen's right is within room bounds, assign if necessary
-   //    b) screen's left is within room bounds, assign if necessary
-   //    c) screen's top is within room bounds, assign if necessary
-   //    d) screen's bottom is within room bounds, assign if necessary
-
-   // need to incorporate the focus offset here because the player is not
-   // necessarily in the middle of the screen but maybe a little more to the
-   // left or to the right depending on its orientation
-   const auto& config = GameConfiguration::getInstance();
-   const auto half_width    = static_cast<float>(config._view_width / 2.0f);
-   const auto height        = static_cast<float>(config._view_height);
-   const auto height_top    = height * (1.0f - 1.0f / view_ratio_y);
-   const auto height_bottom = height / view_ratio_y;
-
-   const auto u = pos + sf::Vector2f{0.0f, -height_bottom};
-   const auto d = pos + sf::Vector2f{0.0f,  height_top};
-   const auto l = pos + sf::Vector2f{-half_width - focus_offset, 0.0f};
-   const auto r = pos + sf::Vector2f{ half_width - focus_offset, 0.0f};
-
-   auto corrected = false;
-
-   const auto rect = *rect_it;
-   if (!rect.contains(l))
-   {
-      // camera center is out of left boundary
-      x = rect.left + half_width + focus_offset;
-      corrected = true;
-   }
-   else if (!rect.contains(r))
-   {
-      // camera center is out of right boundary
-      x = rect.left + rect.width - half_width + focus_offset;
-      corrected = true;
-   }
-
-   if (!rect.contains(u))
-   {
-      // camera center is out of upper boundary
-      y = rect.top + height_bottom;
-      corrected = true;
-   }
-   else if (!rect.contains(d))
-   {
-      // camera center is out of lower boundary
-      y = rect.top + rect.height - height_top;
-      corrected = true;
-   }
-
-   return corrected;
 }
 
 
@@ -442,9 +346,8 @@ void Room::syncCamera()
    if (_camera_sync_after_fade_out)
    {
       _camera_locked = false;
-      auto& camera = CameraSystem::getCameraSystem();
-      camera.setRoom(getptr());
-      camera.syncNow();
+      CameraRoomLock::instance().setRoom(getptr());
+      CameraSystem::getCameraSystem().syncNow();
 
       // apply room start position if available
       movePlayerToRoomStartPosition();
@@ -484,8 +387,7 @@ void Room::lockCamera()
          // could be that the camera has been unlocked in the meantime
          if (_camera_locked)
          {
-            auto& cameraSystem = CameraSystem::getCameraSystem();
-            cameraSystem.setRoom(getptr());
+            CameraRoomLock::instance().setRoom(getptr());
             _camera_locked = false;
          }
       },
