@@ -1,5 +1,6 @@
 #include "camerasystem.h"
 
+#include "cameraroomlock.h"
 #include "framework/easings/easings.h"
 #include "gameconfiguration.h"
 #include "player/player.h"
@@ -68,7 +69,7 @@ void CameraSystem::updateX(const sf::Time& dt)
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y;
 
-   const auto room_corrected = _room ? _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY()) : false;
+   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
 
    const auto dx = (player_x - _x) * dt.asSeconds() * config.getCameraVelocityFactorX();
 
@@ -142,7 +143,7 @@ void CameraSystem::updateY(const sf::Time& dt)
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y + config.getPlayerOffsetY();
 
-   const auto room_corrected = _room ? _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY()) : false;
+   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
 
    const auto test = player_y - view_center;
 
@@ -215,16 +216,6 @@ void CameraSystem::updatePlayerFocused()
 }
 
 
-void CameraSystem::setRoom(const std::shared_ptr<Room>& room)
-{
-   if (_room != room)
-   {
-      // Log::Info() << "reset room interpolation";
-      _room = room;
-   }
-}
-
-
 void CameraSystem::syncNow()
 {
    auto player = Player::getCurrent();
@@ -232,11 +223,8 @@ void CameraSystem::syncNow()
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y;
 
-   if (_room)
-   {
-      auto& config = CameraSystemConfiguration::getInstance();
-      _room->correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
-   }
+   auto& config = CameraSystemConfiguration::getInstance();
+   CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
 
    _x = player_x;
    _y = player_y;

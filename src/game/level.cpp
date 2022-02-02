@@ -3,6 +3,7 @@
 // game
 #include "animationplayer.h"
 #include "camerapanorama.h"
+#include "cameraroomlock.h"
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -978,9 +979,8 @@ void Level::updateRoom()
 //-----------------------------------------------------------------------------
 void Level::syncRoom()
 {
-   auto& camera_system = CameraSystem::getCameraSystem();
    _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
-   camera_system.setRoom(_room_current);
+   CameraRoomLock::instance().setRoom(_room_current);
 }
 
 
@@ -1010,7 +1010,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
       }
       else
       {
-         camera_system.setRoom(_room_current);
+         CameraRoomLock::instance().setRoom(_room_current);
       }
 
       // trigger transition effect
