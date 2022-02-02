@@ -59,7 +59,6 @@ struct Room : std::enable_shared_from_this<Room>
    bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
    std::unique_ptr<ScreenTransition> makeFadeTransition();
 
-
    std::vector<sf::FloatRect> _rects;
    std::string _name;
    int32_t _id = 0;
