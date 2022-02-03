@@ -63,33 +63,30 @@ void CameraSystem::update(const sf::Time& dt, float viewWidth, float viewHeight)
 
 void CameraSystem::updateX(const sf::Time& dt)
 {
-   auto player = Player::getCurrent();
-   auto& config = CameraSystemConfiguration::getInstance();
+   auto& camera_config = CameraSystemConfiguration::getInstance();
 
+   auto player = Player::getCurrent();
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y;
-
    const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
-
-   const auto dx = (player_x - _x) * dt.asSeconds() * config.getCameraVelocityFactorX();
-
+   const auto dx = (player_x - _x) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
    const auto f_center = _view_width / 2.0f;
-   const auto f_range  = _view_width / config.getFocusZoneDivider();
+   const auto f_range  = _view_width / camera_config.getFocusZoneDivider();
 
    _focus_zone_x0 = f_center - f_range;
    _focus_zone_x1 = f_center + f_range;
 
    // shift focus zone based on player orientation
    auto target_offset = 0.0f;
-   if (config.isFollowingPlayerOrientation())
+   if (camera_config.isFollowingPlayerOrientation())
    {
       target_offset = player->isPointingLeft()
-         ? ( f_range * config.getTargetShiftFactor())
-         : (-f_range * config.getTargetShiftFactor());
+         ? ( f_range * camera_config.getTargetShiftFactor())
+         : (-f_range * camera_config.getTargetShiftFactor());
    }
 
-   const auto fcd = (target_offset - _focus_offset) * dt.asSeconds() * config.getCameraVelocityFactorX();
-   if (fabs(_focus_offset) < fabs(f_range * config.getTargetShiftFactor()))
+   const auto fcd = (target_offset - _focus_offset) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
+   if (fabs(_focus_offset) < fabs(f_range * camera_config.getTargetShiftFactor()))
    {
       _focus_offset += fcd;
    }
@@ -100,7 +97,6 @@ void CameraSystem::updateX(const sf::Time& dt)
 
    // test if out of focus zone boundaries
    const auto test = player_x - _focus_zone_center;
-
    const auto f0 = _x - _focus_zone_x1;
    const auto f1 = _x - _focus_zone_x0;
 
@@ -111,8 +107,8 @@ void CameraSystem::updateX(const sf::Time& dt)
 
    // test if back within close boundaries
    else if (
-         (test > _x - _focus_zone_center - config.getBackInBoundsToleranceX())
-      && (test < _x - _focus_zone_center + config.getBackInBoundsToleranceX())
+         (test > _x - _focus_zone_center - camera_config.getBackInBoundsToleranceX())
+      && (test < _x - _focus_zone_center + camera_config.getBackInBoundsToleranceX())
    )
    {
       _focus_x_triggered = false;
@@ -127,9 +123,9 @@ void CameraSystem::updateX(const sf::Time& dt)
 
 void CameraSystem::updateY(const sf::Time& dt)
 {
-   auto& config = CameraSystemConfiguration::getInstance();
+   auto& camera_config = CameraSystemConfiguration::getInstance();
 
-   const auto p_range  = _view_height / config.getPanicLineDivider();
+   const auto p_range  = _view_height / camera_config.getPanicLineDivider();
    const auto p_center = _view_height / 2.0f;
 
    _panic_line_y0 = p_center - p_range;
@@ -139,14 +135,10 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    // test if out of panic line boundaries
    auto player = Player::getCurrent();
-
    auto player_x = player->getPixelPositionf().x;
-   auto player_y = player->getPixelPositionf().y + config.getPlayerOffsetY();
-
+   auto player_y = player->getPixelPositionf().y + camera_config.getPlayerOffsetY();
    const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
-
    const auto test = player_y - view_center;
-
    const auto p0 = _y - _panic_line_y1;
    const auto p1 = _y - _panic_line_y0;
 
@@ -167,8 +159,8 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    // test if back within close boundaries
    if (
-         (test > _y - view_center - config.getBackInBoundsToleranceY())
-      && (test < _y - view_center + config.getBackInBoundsToleranceY())
+         (test > _y - view_center - camera_config.getBackInBoundsToleranceY())
+      && (test < _y - view_center + camera_config.getBackInBoundsToleranceY())
    )
    {
       _focus_y_triggered = false;
@@ -196,7 +188,7 @@ void CameraSystem::updateY(const sf::Time& dt)
          ? 2.0f
          : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
 
-   const auto dy = (player_y - _y) * dt.asSeconds() * config.getCameraVelocityFactorY() * y_update_acceleration;
+   const auto dy = (player_y - _y) * dt.asSeconds() * camera_config.getCameraVelocityFactorY() * y_update_acceleration;
 
    _y += dy;
 }
