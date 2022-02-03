@@ -190,6 +190,12 @@ void CameraPanorama::updateLookState(Look look, bool enable)
 //-----------------------------------------------------------------------------
 void CameraPanorama::updateLookVector(const sf::Vector2f& desired)
 {
+   // need focus offset from camera system
+   //
+   //   auto player_x = player->getPixelPositionf().x;
+   //   auto player_y = player->getPixelPositionf().y;
+   //   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
+
    _look_vector = desired;
 }
 
