@@ -85,10 +85,10 @@ void CameraSystem::updateX(const sf::Time& dt)
          : (-f_range * camera_config.getTargetShiftFactor());
    }
 
-   const auto fcd = (target_offset - _focus_offset) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
+   const auto focus_delta = (target_offset - _focus_offset) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
    if (fabs(_focus_offset) < fabs(f_range * camera_config.getTargetShiftFactor()))
    {
-      _focus_offset += fcd;
+      _focus_offset += focus_delta;
    }
 
    _focus_zone_x0 += _focus_offset;
