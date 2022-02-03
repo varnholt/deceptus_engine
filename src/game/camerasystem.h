@@ -23,6 +23,9 @@ class CameraSystem
       float getPanicLineY0() const;
       float getPanicLineY1() const;
 
+      float getFocusOffset() const;
+      float getFocusZoneCenter() const;
+
       void syncNow();
 
       static CameraSystem& getCameraSystem();
@@ -54,9 +57,6 @@ class CameraSystem
 
       bool _focus_x_triggered = false;
       bool _focus_y_triggered = false;
-
-      float _room_x = 0.0f;
-      float _room_y = 0.0f;
 
       bool _no_y_update_triggered = false;
       sf::Time _y_update_start_time;

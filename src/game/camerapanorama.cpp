@@ -24,14 +24,14 @@ void CameraPanorama::update()
 {
    const auto& tweaks = Tweaks::instance();
 
-   auto limit_look_vector = [&](){
+   auto limit_look_vector = [&](sf::Vector2f& look_vector){
       if (!DisplayMode::getInstance().isSet(Display::Map))
       {
-         const auto len = SfmlMath::length(_look_vector);
+         const auto len = SfmlMath::length(look_vector);
          if (len > tweaks._cpan_max_distance_px)
          {
-            _look_vector = SfmlMath::normalize(_look_vector);
-            _look_vector *= tweaks._cpan_max_distance_px;
+            look_vector = SfmlMath::normalize(look_vector);
+            look_vector *= tweaks._cpan_max_distance_px;
          }
       }
    };
@@ -40,24 +40,26 @@ void CameraPanorama::update()
    {
       constexpr auto speed = 3.0f;
 
+      sf::Vector2f desired_look_vector = _look_vector;
       if (_look_state & static_cast<int32_t>(Look::Up))
       {
-         _look_vector += sf::Vector2f(0.0f, -speed);
+         desired_look_vector += sf::Vector2f(0.0f, -speed);
       }
       if (_look_state & static_cast<int32_t>(Look::Down))
       {
-         _look_vector += sf::Vector2f(0.0f, speed);
+         desired_look_vector += sf::Vector2f(0.0f, speed);
       }
       if (_look_state & static_cast<int32_t>(Look::Left))
       {
-         _look_vector += sf::Vector2f(-speed, 0.0f);
+         desired_look_vector += sf::Vector2f(-speed, 0.0f);
       }
       if (_look_state & static_cast<int32_t>(Look::Right))
       {
-         _look_vector += sf::Vector2f(speed, 0.0f);
+         desired_look_vector += sf::Vector2f(speed, 0.0f);
       }
 
-      limit_look_vector();
+      limit_look_vector(desired_look_vector);
+      updateLookVector(desired_look_vector);
    }
    else if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -75,10 +77,13 @@ void CameraPanorama::update()
          const auto y_direction = std::signbit(y_normalized) ? -1.0f : 1.0f;
          const auto x_relative = x_direction * (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
          const auto y_relative = y_direction * (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
-         _look_vector.x += x_relative * tweaks._cpan_look_speed_x;
-         _look_vector.y += y_relative * tweaks._cpan_look_speed_y;
 
-         limit_look_vector();
+         sf::Vector2f desired_look_vector = _look_vector;
+         desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
+         desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
+
+         limit_look_vector(desired_look_vector);
+         updateLookVector(desired_look_vector);
       }
       else
       {
@@ -179,6 +184,13 @@ void CameraPanorama::updateLookState(Look look, bool enable)
    {
       _look_state &= ~static_cast<int32_t>(look);
    }
+}
+
+
+//-----------------------------------------------------------------------------
+void CameraPanorama::updateLookVector(const sf::Vector2f& desired)
+{
+   _look_vector = desired;
 }
 
 

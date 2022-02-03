@@ -1,9 +1,10 @@
 #include "cameraroomlock.h"
 
+#include "camerasystemconfiguration.h"
 #include "gameconfiguration.h"
 
 
-bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const
+bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset) const
 {
    if (!_room)
    {
@@ -52,6 +53,8 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset, flo
       return false;
    }
 
+   const auto rect = *rect_it;
+
    // 2) check if
    //    a) screen's right is within room bounds, assign if necessary
    //    b) screen's left is within room bounds, assign if necessary
@@ -61,11 +64,12 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset, flo
    // need to incorporate the focus offset here because the player is not
    // necessarily in the middle of the screen but maybe a little more to the
    // left or to the right depending on its orientation
-   const auto& config = GameConfiguration::getInstance();
-   const auto half_width    = static_cast<float>(config._view_width / 2.0f);
-   const auto height        = static_cast<float>(config._view_height);
-   const auto height_top    = height * (1.0f - 1.0f / view_ratio_y);
-   const auto height_bottom = height / view_ratio_y;
+   const auto& game_config = GameConfiguration::getInstance();
+   const auto& camera_config = CameraSystemConfiguration::getInstance();;
+   const auto half_width    = static_cast<float>(game_config._view_width / 2.0f);
+   const auto height        = static_cast<float>(game_config._view_height);
+   const auto height_top    = height * (1.0f - 1.0f / camera_config.getViewRatioY());
+   const auto height_bottom = height / camera_config.getViewRatioY();
 
    const auto u = pos + sf::Vector2f{0.0f, -height_bottom};
    const auto d = pos + sf::Vector2f{0.0f,  height_top};
@@ -73,13 +77,6 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset, flo
    const auto r = pos + sf::Vector2f{ half_width - focus_offset, 0.0f};
 
    auto corrected = false;
-
-
-   // optimization could be to remember the last rect that was used
-
-   // also to remember the rect created from the boundaries around the camera position
-
-   const auto rect = *rect_it;
    if (!rect.contains(l))
    {
       // camera center is out of left boundary

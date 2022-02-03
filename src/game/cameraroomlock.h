@@ -7,7 +7,7 @@ class CameraRoomLock
 {
 
 public:
-   bool correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const;
+   bool correctedCamera(float& x, float& y, float focus_offset) const;
    void setRoom(const std::shared_ptr<Room>& room);
    static CameraRoomLock& instance();
 
