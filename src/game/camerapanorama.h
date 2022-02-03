@@ -18,6 +18,7 @@ public:
    void processKeyReleasedEvents(const sf::Event& event);
 
    void updateLookState(Look look, bool enable);
+   void updateLookVector(const sf::Vector2f& desired);
 
    bool isLookActive() const;
    const sf::Vector2f& getLookVector() const;

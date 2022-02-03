@@ -69,7 +69,7 @@ void CameraSystem::updateX(const sf::Time& dt)
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y;
 
-   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
+   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
 
    const auto dx = (player_x - _x) * dt.asSeconds() * config.getCameraVelocityFactorX();
 
@@ -143,7 +143,7 @@ void CameraSystem::updateY(const sf::Time& dt)
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y + config.getPlayerOffsetY();
 
-   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
+   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
 
    const auto test = player_y - view_center;
 
@@ -216,6 +216,18 @@ void CameraSystem::updatePlayerFocused()
 }
 
 
+float CameraSystem::getFocusZoneCenter() const
+{
+   return _focus_zone_center;
+}
+
+
+float CameraSystem::getFocusOffset() const
+{
+   return _focus_offset;
+}
+
+
 void CameraSystem::syncNow()
 {
    auto player = Player::getCurrent();
@@ -223,8 +235,7 @@ void CameraSystem::syncNow()
    auto player_x = player->getPixelPositionf().x;
    auto player_y = player->getPixelPositionf().y;
 
-   auto& config = CameraSystemConfiguration::getInstance();
-   CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset, config.getViewRatioY());
+   CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
 
    _x = player_x;
    _y = player_y;
