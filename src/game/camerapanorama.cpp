@@ -186,15 +186,23 @@ void CameraPanorama::updateLookState(Look look, bool enable)
    }
 }
 
+//#include "cameraroomlock.h"
+//#include "camerasystem.h"
+//#include "player/player.h"
+
 
 //-----------------------------------------------------------------------------
 void CameraPanorama::updateLookVector(const sf::Vector2f& desired)
 {
    // need focus offset from camera system
+   // auto player = Player::getCurrent();
+   // auto player_x = player->getPixelPositionf().x + desired.x;
+   // auto player_y = player->getPixelPositionf().y + desired.y;
+   // auto focus_offset = CameraSystem::getCameraSystem().getFocusOffset();
+   // CameraRoomLock::instance().correctedCamera(player_x, player_y, focus_offset);
    //
-   //   auto player_x = player->getPixelPositionf().x;
-   //   auto player_y = player->getPixelPositionf().y;
-   //   const auto room_corrected = CameraRoomLock::instance().correctedCamera(player_x, player_y, _focus_offset);
+   // _look_vector.x = player_x - player->getPixelPositionf().x;
+   // _look_vector.y = player_y - player->getPixelPositionf().y;
 
    _look_vector = desired;
 }
