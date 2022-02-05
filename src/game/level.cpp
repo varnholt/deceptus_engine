@@ -49,6 +49,7 @@
 #include "savestate.h"
 #include "screentransition.h"
 #include "squaremarcher.h"
+#include "stenciltilemap.h"
 #include "texturepool.h"
 #include "tilemap.h"
 #include "weather.h"
@@ -455,9 +456,18 @@ void Level::loadTmx()
          }
          else // tile map
          {
-            std::shared_ptr<TileMap> tile_map = std::make_shared<TileMap>();
-            tile_map->load(layer, tileset, path);
+            std::shared_ptr<TileMap> tile_map;
 
+            if (layer->_name.rfind("stencil", 0) == 0)
+            {
+               tile_map = std::make_shared<StencilTileMap>();
+            }
+            else
+            {
+               tile_map = std::make_shared<TileMap>();
+            }
+
+            tile_map->load(layer, tileset, path);
             auto push_tile_map = true;
 
             if (layer->_name == "atmosphere")
@@ -489,11 +499,11 @@ void Level::loadTmx()
 
       else if (element->_type == TmxElement::TypeObjectGroup)
       {
-         TmxObjectGroup* object_group = dynamic_cast<TmxObjectGroup*>(element);
+         auto object_group = dynamic_cast<TmxObjectGroup*>(element);
 
          for (const auto& object : object_group->_objects)
          {
-            TmxObject* tmx_object = object.second;
+            auto tmx_object = object.second;
 
             if (object_group->_name == "bubble_cubes")
             {
@@ -1123,11 +1133,11 @@ void Level::drawLayers(
 
       drawParallaxMaps(*_render_texture_level_background.get(), z_index);
 
-      for (auto& tileMap : _tile_maps)
+      for (auto& tile_map : _tile_maps)
       {
-         if (tileMap->getZ() == z_index)
+         if (tile_map->getZ() == z_index)
          {
-            tileMap->draw(target, normal, {});
+            tile_map->draw(target, normal, {});
          }
       }
 
@@ -1475,9 +1485,9 @@ void Level::update(const sf::Time& dt)
 
    AnimationPlayer::getInstance().update(dt);
 
-   for (auto& tileMap : _tile_maps)
+   for (auto& tile_map : _tile_maps)
    {
-      tileMap->update(dt);
+      tile_map->update(dt);
    }
 
    for (const auto& mechanism_vector : _mechanisms)
