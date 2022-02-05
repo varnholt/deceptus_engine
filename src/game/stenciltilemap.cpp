@@ -2,11 +2,23 @@
 
 #include <SFML/OpenGL.hpp>
 
+#include "framework/tools/log.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 
 
 bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::filesystem::path& base_path)
 {
    TileMap::load(layer, tileset, base_path);
+
+   if (!layer->_properties)
+   {
+      Log::Error() << "stencil layer does not have any properties";
+      return false;
+   }
+
+
 
    // todo:
    // find and deserialize stencil layer
