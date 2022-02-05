@@ -21,6 +21,7 @@ class StencilTileMap : public TileMap
       void prepareWriteColor() const;
       void disableStencilTest() const;
 
+      std::string _stencil_reference;
       TileMap* _stencil_tilemap = nullptr;
 };
 
