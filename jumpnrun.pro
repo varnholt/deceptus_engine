@@ -233,6 +233,7 @@ SOURCES += \
    src/game/shaders/deathshader.cpp \
    src/game/shaders/gammashader.cpp \
    src/game/squaremarcher.cpp \
+   src/game/stenciltilemap.cpp \
    src/game/sword.cpp \
    src/game/test.cpp \
    src/game/texturepool.cpp \
@@ -406,6 +407,7 @@ HEADERS += \
    src/game/shaders/deathshader.h \
    src/game/shaders/gammashader.h \
    src/game/squaremarcher.h \
+   src/game/stenciltilemap.h \
    src/game/sword.h \
    src/game/test.h \
    src/game/texturepool.h \
