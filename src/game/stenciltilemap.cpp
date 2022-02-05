@@ -1,0 +1,51 @@
+#include "stenciltilemap.h"
+
+#include <SFML/OpenGL.hpp>
+
+
+
+bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::filesystem::path& base_path)
+{
+   TileMap::load(layer, tileset, base_path);
+
+   // todo:
+   // find and deserialize stencil layer
+
+   return true;
+}
+
+
+void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
+{
+   prepareWriteToStencilBuffer();
+   _stencil_tilemap->draw(color, normal, states);
+
+   prepareWriteColor();
+   TileMap::draw(color, normal, states);
+
+   disableStencilTest();
+}
+
+
+void StencilTileMap::prepareWriteToStencilBuffer() const
+{
+   glClear(GL_STENCIL_BUFFER_BIT);
+   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+   glEnable(GL_STENCIL_TEST);
+   glStencilFunc(GL_ALWAYS, 1, 1);
+   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+}
+
+
+void StencilTileMap::prepareWriteColor() const
+{
+   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+   glStencilFunc(GL_EQUAL, 0, 1);
+   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+}
+
+
+void StencilTileMap::disableStencilTest() const
+{
+   glDisable(GL_STENCIL_TEST);
+}

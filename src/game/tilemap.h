@@ -29,24 +29,17 @@ public:
    TileMap() = default;
    ~TileMap() override;
 
-   bool load(
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
-      const std::filesystem::path& basePath
-   );
-
-
-   void update(const sf::Time& dt);
+   virtual bool load(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
+   virtual void update(const sf::Time& dt);
+   virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
 
    int getZ() const;
    void setZ(int getZ);
 
-   void hideTile(int x, int y);
-
    bool isVisible() const;
    void setVisible(bool visible);
 
-   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
+   void hideTile(int x, int y);
 
 
 protected:
