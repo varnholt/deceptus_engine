@@ -75,17 +75,17 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
               std::string line;
               int32_t y = 0;
 
-              while(std::getline(stream, line, '\n'))
+              while (std::getline(stream, line, '\n'))
               {
                  TmxTools::trim(line);
                  if (line.empty())
                     continue;
 
                  int32_t x = 0;
-                 std::vector<std::string> rowContent = TmxTools::split(line, ',');
-                 for (const std::string& valStr : rowContent)
+                 auto row_content = TmxTools::split(line, ',');
+                 for (const std::string& val_str : row_content)
                  {
-                    int val = std::stoi(valStr);
+                    int val = std::stoi(val_str);
                     _data[y * _width_px + x] = val;
                     x++;
                  }
