@@ -18,10 +18,14 @@ bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::files
       return false;
    }
 
+   const auto it = layer->_properties->_map.find("stencil_reference");
+   if (it == layer->_properties->_map.end())
+   {
+      Log::Error() << "stencil layer does not have 'stencil_reference' property";
+      return false;
+   }
 
-
-   // todo:
-   // find and deserialize stencil layer
+   _stencil_reference = (*it).second->_value_string.value();
 
    return true;
 }
