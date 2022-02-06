@@ -63,6 +63,9 @@ bool TileMap::load(
       return false;
    }
 
+   _layer_name = layer->_name;
+   _tileset_name = tileset->_name;
+
    auto path = (base_path / tileset->_image->_source);
 
    _texture_map = TexturePool::getInstance().get(path);
@@ -280,6 +283,12 @@ void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) co
    }
 
    target.draw(_vertices_animated, states);
+}
+
+
+const std::string& TileMap::getLayerName() const
+{
+   return _layer_name;
 }
 
 
