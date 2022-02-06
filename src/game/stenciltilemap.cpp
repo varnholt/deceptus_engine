@@ -40,9 +40,10 @@ bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::files
 void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
    prepareWriteToStencilBuffer();
+   const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
    _stencil_tilemap->draw(color, normal, states);
-   _stencil_tilemap->setVisible(false);
+   _stencil_tilemap->setVisible(visible);
 
    prepareWriteColor();
    TileMap::draw(color, normal, states);
