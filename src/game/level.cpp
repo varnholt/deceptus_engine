@@ -52,6 +52,7 @@
 #include "stenciltilemap.h"
 #include "texturepool.h"
 #include "tilemap.h"
+#include "tilemapfactory.h"
 #include "weather.h"
 
 // sfml
@@ -456,17 +457,7 @@ void Level::loadTmx()
          }
          else // tile map
          {
-            std::shared_ptr<TileMap> tile_map;
-
-            if (layer->_name.rfind("stencil", 0) == 0)
-            {
-               tile_map = std::make_shared<StencilTileMap>();
-            }
-            else
-            {
-               tile_map = std::make_shared<TileMap>();
-            }
-
+            auto tile_map = TileMapFactory::makeTileMap(layer);
             tile_map->load(layer, tileset, path);
             auto push_tile_map = true;
 
@@ -700,6 +691,7 @@ void Level::loadTmx()
 
    Laser::merge();
    Fan::merge();
+   TileMapFactory::merge(_tile_maps);
    _mechanism_fans = Fan::getFans();
    Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes);
    _mechanism_platforms = MovingPlatform::merge(path, _world);

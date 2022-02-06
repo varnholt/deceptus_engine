@@ -14,6 +14,8 @@ class StencilTileMap : public TileMap
       bool load(TmxLayer* layer, TmxTileSet* tileset, const std::filesystem::path& base_path) override;
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const override;
 
+      const std::string& getStencilReference() const;
+      void setStencilTilemap(const std::shared_ptr<TileMap>& stencil_tilemap);
 
    private:
 
@@ -22,6 +24,6 @@ class StencilTileMap : public TileMap
       void disableStencilTest() const;
 
       std::string _stencil_reference;
-      TileMap* _stencil_tilemap = nullptr;
+      std::shared_ptr<TileMap> _stencil_tilemap = nullptr;
 };
 

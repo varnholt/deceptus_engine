@@ -41,6 +41,8 @@ public:
 
    void hideTile(int x, int y);
 
+   const std::string& getLayerName() const;
+
 
 protected:
 
@@ -85,5 +87,7 @@ private:
 
    int _z_index = 0;
    bool _visible = true;
+   std::string _layer_name;
+   std::string _tileset_name;
 };
 

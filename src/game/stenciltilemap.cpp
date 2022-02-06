@@ -27,6 +27,12 @@ bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::files
 
    _stencil_reference = (*it).second->_value_string.value();
 
+   if (_stencil_reference == getLayerName())
+   {
+      Log::Error() << "no, no, no, dude, you cannot set the 'stencil_reference' to itself";
+      return false;
+   }
+
    return true;
 }
 
@@ -34,7 +40,9 @@ bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::files
 void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
    prepareWriteToStencilBuffer();
+   _stencil_tilemap->setVisible(true);
    _stencil_tilemap->draw(color, normal, states);
+   _stencil_tilemap->setVisible(false);
 
    prepareWriteColor();
    TileMap::draw(color, normal, states);
@@ -64,4 +72,16 @@ void StencilTileMap::prepareWriteColor() const
 void StencilTileMap::disableStencilTest() const
 {
    glDisable(GL_STENCIL_TEST);
+}
+
+
+void StencilTileMap::setStencilTilemap(const std::shared_ptr<TileMap>& stencil_tilemap)
+{
+   _stencil_tilemap = stencil_tilemap;
+}
+
+
+const std::string& StencilTileMap::getStencilReference() const
+{
+   return _stencil_reference;
 }
