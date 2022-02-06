@@ -238,6 +238,7 @@ SOURCES += \
    src/game/test.cpp \
    src/game/texturepool.cpp \
    src/game/tilemap.cpp \
+   src/game/tilemapfactory.cpp \
    src/game/tweaks.cpp \
    src/game/weapon.cpp \
    src/game/weaponfactory.cpp \
@@ -412,6 +413,7 @@ HEADERS += \
    src/game/test.h \
    src/game/texturepool.h \
    src/game/tilemap.h \
+   src/game/tilemapfactory.h \
    src/game/tweaks.h \
    src/game/weapon.h \
    src/game/weaponfactory.h \
