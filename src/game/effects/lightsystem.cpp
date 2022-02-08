@@ -52,25 +52,25 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
    auto light_pos_m = light->_pos_m + light->_center_offset_m;
 
-   for (b2Body* b = Level::getCurrentLevel()->getWorld()->GetBodyList(); b; b = b->GetNext())
+   for (auto body = Level::getCurrentLevel()->getWorld()->GetBodyList(); body; body = body->GetNext())
    {
-      if (b == player_body)
+      if (body == player_body)
          continue;
 
-      if (!b->IsActive())
+      if (!body->IsActive())
       {
          continue;
       }
 
-      for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
+      for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
       {
          // if something doesn't collide, it probably shouldn't have any impact on lighting, too
-         if (f->IsSensor())
+         if (fixture->IsSensor())
          {
             continue;
          }
 
-         auto shape = f->GetShape();
+         auto shape = fixture->GetShape();
 
          auto shape_polygon = dynamic_cast<b2PolygonShape*>(shape);
          auto shape_chain = dynamic_cast<b2ChainShape*>(shape);
@@ -78,7 +78,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
          if (shape_circle)
          {
-            auto center = shape_circle->GetVertex(0) + b->GetTransform().p;
+            auto center = shape_circle->GetVertex(0) + body->GetTransform().p;
             if ((light_pos_m - center).LengthSquared() > max_distance_m2)
                continue;
 
@@ -166,14 +166,14 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   pos_next = 0;
                }
 
-               auto v0 = shape_polygon->GetVertex(pos_current) + b->GetTransform().p;
+               auto v0 = shape_polygon->GetVertex(pos_current) + body->GetTransform().p;
 
                // printf("%f\n", (lightPos - v0).LengthSquared());
 
                if ((light_pos_m - v0).LengthSquared() > max_distance_m2)
                   continue;
 
-               auto v1 = shape_polygon->GetVertex(pos_next) + b->GetTransform().p;
+               auto v1 = shape_polygon->GetVertex(pos_next) + body->GetTransform().p;
                auto v0far = 10000.0f * (v0 - light_pos_m);
                auto v1far = 10000.0f * (v1 - light_pos_m);
 

@@ -42,7 +42,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    prepareWriteToStencilBuffer();
    const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
-   _stencil_tilemap->draw(color, normal, states);
+   _stencil_tilemap->draw(color, states);
    _stencil_tilemap->setVisible(visible);
 
    prepareWriteColor();
@@ -55,18 +55,25 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 void StencilTileMap::prepareWriteToStencilBuffer() const
 {
    glClear(GL_STENCIL_BUFFER_BIT);
-   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
    glEnable(GL_STENCIL_TEST);
-   glStencilFunc(GL_ALWAYS, 1, 1);
-   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+
+   glAlphaFunc(GL_GREATER, 0.5f);                       // SFML renders every alpha value by default
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);   // so we configure alpha testing to kick out
+   glEnable(GL_ALPHA_TEST);                             // all lower alpha values
+
+   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // don't render to the color buffers
+   glStencilFunc(GL_ALWAYS, 1, 0xFF);                   // place a 1 wherever we render stuff
+   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);     // replace where rendered
 }
 
 
 void StencilTileMap::prepareWriteColor() const
 {
-   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-   glStencilFunc(GL_EQUAL, 0, 1);
-   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+   glAlphaFunc(GL_ALWAYS, 0.0f);
+
+   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);      // write to the color buffers
+   glStencilFunc(GL_EQUAL, 1, 0xFF);                     // where a 1 was put into the buffer
+   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);               // keep the contents
 }
 
 

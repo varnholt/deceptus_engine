@@ -111,12 +111,12 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    auto layer_layout = _layers["layout"];
    auto layer_hide_borders = _layers["hide_borders"];
-   auto layer_grid = _layers["grid"];
-   auto layeber_blue = _layers["blue"];
+   // auto layer_grid = _layers["grid"];
+   auto layer_blue = _layers["blue"];
    auto layer_text_zoom = _layers["text_zoom"];
    auto layer_text_pan = _layers["text_pan"];
 
-   layeber_blue->draw(window, states);
+   layer_blue->draw(window, states);
 
    window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
 

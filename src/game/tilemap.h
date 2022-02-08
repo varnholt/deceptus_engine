@@ -5,6 +5,7 @@
 
 // std
 #include <array>
+#include <cstdint>
 #include <filesystem>
 #include <vector>
 
@@ -32,42 +33,41 @@ public:
    virtual bool load(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
    virtual void update(const sf::Time& dt);
    virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
+   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-   int getZ() const;
-   void setZ(int getZ);
+   int32_t getZ() const;
+   void setZ(int32_t getZ);
 
    bool isVisible() const;
    void setVisible(bool visible);
 
-   void hideTile(int x, int y);
+   void hideTile(int32_t x, int32_t y);
 
    const std::string& getLayerName() const;
 
 
 protected:
 
-   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+   void drawVertices(sf::RenderTarget& target, sf::RenderStates states) const;
 
 
 private:
 
-   void drawVertices(sf::RenderTarget &target, sf::RenderStates states) const;
-
    struct AnimatedTileFrame
    {
-      int _x_px = 0;
-      int _y_px = 0;
-      int _duration_ms = 0;
+      int32_t _x_px = 0;
+      int32_t _y_px = 0;
+      int32_t _duration_ms = 0;
    };
 
    struct AnimatedTile
    {
       virtual ~AnimatedTile();
 
-      int _tile_x = 0;
-      int _tile_y = 0;
+      int32_t _tile_x = 0;
+      int32_t _tile_y = 0;
       std::vector<AnimatedTileFrame*> _frames;
-      int _current_frame = 0;
+      int32_t _current_frame = 0;
       float _elapsed_ms = 0.0f;
       float _duration = 0.0f;
       sf::Vertex _vertices[4];
@@ -85,7 +85,7 @@ private:
 
    std::vector<AnimatedTile*> _animations;
 
-   int _z_index = 0;
+   int32_t _z_index = 0;
    bool _visible = true;
    std::string _layer_name;
    std::string _tileset_name;
