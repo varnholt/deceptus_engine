@@ -292,7 +292,7 @@ const std::string& TileMap::getLayerName() const
 }
 
 
-void TileMap::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    if (!_visible)
    {
@@ -328,13 +328,13 @@ int TileMap::getZ() const
 }
 
 
-void TileMap::setZ(int z)
+void TileMap::setZ(int32_t z)
 {
    _z_index = z;
 }
 
 
-void TileMap::hideTile(int x, int y)
+void TileMap::hideTile(int32_t x, int32_t y)
 {
    const auto& it =
       std::find_if(std::begin(_animations), std::end(_animations), [x, y](AnimatedTile* tile) {

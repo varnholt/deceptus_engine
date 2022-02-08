@@ -1367,7 +1367,7 @@ void Level::draw(
    _atmosphere_shader->getRenderTexture()->clear();
    drawAtmosphereLayer(*_atmosphere_shader->getRenderTexture().get());
    _atmosphere_shader->getRenderTexture()->display();
-   takeScreenshot("screenshot_atmosphere", *_atmosphere_shader->getRenderTexture().get());
+   takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
 
    // render glowing elements
    drawGlowLayer();
@@ -1383,7 +1383,7 @@ void Level::draw(
       static_cast<int32_t>(ZDepth::BackgroundMax)
    );
    _render_texture_level_background->display();
-   takeScreenshot("screenshot_level_background", *_render_texture_level_background.get());
+   takeScreenshot("texture_level_background", *_render_texture_level_background.get());
 
    // draw the atmospheric parts into the level texture
    sf::Sprite background_sprite(_render_texture_level_background->getTexture());
@@ -1418,10 +1418,10 @@ void Level::draw(
 
    _render_texture_deferred->display();
 
-   takeScreenshot("map_color",    *_render_texture_level.get());
-   takeScreenshot("map_light",    *_render_texture_lighting.get());
-   takeScreenshot("map_normal",   *_render_texture_normal.get());
-   takeScreenshot("map_deferred", *_render_texture_deferred.get());
+   takeScreenshot("texture_map_color",    *_render_texture_level.get());
+   takeScreenshot("texture_map_light",    *_render_texture_lighting.get());
+   takeScreenshot("texture_map_normal",   *_render_texture_normal.get());
+   takeScreenshot("texture_map_deferred", *_render_texture_deferred.get());
 
    auto level_texture_sprite = sf::Sprite(_render_texture_deferred->getTexture());
    _gamma_shader->setTexture(_render_texture_deferred->getTexture());
