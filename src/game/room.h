@@ -56,7 +56,7 @@ struct Room : std::enable_shared_from_this<Room>
    std::optional<sf::FloatRect> activeRect(const sf::Vector2f& player_pos_px) const;
 
    std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
-   bool correctedCamera(float& x, float& y, float focusOffset, float viewRatioY) const;
+   bool correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const;
    std::unique_ptr<ScreenTransition> makeFadeTransition();
 
    std::vector<sf::FloatRect> _rects;

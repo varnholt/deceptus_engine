@@ -4,7 +4,17 @@
 #include "gameconfiguration.h"
 
 
-bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset) const
+namespace
+{
+std::shared_ptr<Room> _room;
+auto locked_left   = false;
+auto locked_right  = false;
+auto locked_top    = false;
+auto locked_bottom = false;
+}
+
+
+bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
 {
    if (!_room)
    {
@@ -76,34 +86,38 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset) con
    const auto l = pos + sf::Vector2f{-half_width - focus_offset, 0.0f};
    const auto r = pos + sf::Vector2f{ half_width - focus_offset, 0.0f};
 
-   auto corrected = false;
+   locked_left   = false;
+   locked_right  = false;
+   locked_top    = false;
+   locked_bottom = false;
+
    if (!rect.contains(l))
    {
       // camera center is out of left boundary
       x = rect.left + half_width + focus_offset;
-      corrected = true;
+      locked_left = true;
    }
    else if (!rect.contains(r))
    {
       // camera center is out of right boundary
       x = rect.left + rect.width - half_width + focus_offset;
-      corrected = true;
+      locked_right = true;
    }
 
    if (!rect.contains(u))
    {
       // camera center is out of upper boundary
       y = rect.top + height_bottom;
-      corrected = true;
+      locked_top = true;
    }
    else if (!rect.contains(d))
    {
       // camera center is out of lower boundary
       y = rect.top + rect.height - height_top;
-      corrected = true;
+      locked_bottom = true;
    }
 
-   return corrected;
+   return locked_left || locked_right || locked_top || locked_bottom;
 }
 
 
@@ -117,8 +131,10 @@ void CameraRoomLock::setRoom(const std::shared_ptr<Room>& room)
 }
 
 
-CameraRoomLock& CameraRoomLock::instance()
+void CameraRoomLock::readLockedSides(bool& left, bool& right, bool& top, bool& bottom)
 {
-   static CameraRoomLock _instance;
-   return _instance;
+   left   = locked_left;
+   right  = locked_right;
+   top    = locked_top;
+   bottom = locked_bottom;
 }
