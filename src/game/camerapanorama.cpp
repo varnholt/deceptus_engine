@@ -1,12 +1,14 @@
 #include "camerapanorama.h"
 
 #include "cameraroomlock.h"
+#include "camerasystem.h"
 #include "displaymode.h"
 #include "gameconfiguration.h"
 #include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/math/sfmlmath.h"
+#include "player/player.h"
 #include "tweaks.h"
 
 
@@ -37,24 +39,35 @@ void CameraPanorama::update()
       }
    };
 
+   auto locked_up    = false;
+   auto locked_down  = false;
+   auto locked_left  = false;
+   auto locked_right = false;
+   auto player = Player::getCurrent();
+   auto player_x = player->getPixelPositionf().x + _look_vector.x;
+   auto player_y = player->getPixelPositionf().y + _look_vector.y;
+   auto focus_offset = CameraSystem::getCameraSystem().getFocusOffset();
+   CameraRoomLock::correctedCamera(player_x, player_y, focus_offset);
+   // CameraRoomLock::readLockedSides(locked_left, locked_right, locked_up, locked_down);
+
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
       constexpr auto speed = 3.0f;
 
       sf::Vector2f desired_look_vector = _look_vector;
-      if (_look_state & static_cast<int32_t>(Look::Up))
+      if (_look_state & static_cast<int32_t>(Look::Up) &&! locked_up)
       {
          desired_look_vector += sf::Vector2f(0.0f, -speed);
       }
-      if (_look_state & static_cast<int32_t>(Look::Down))
+      if (_look_state & static_cast<int32_t>(Look::Down) &&! locked_down)
       {
          desired_look_vector += sf::Vector2f(0.0f, speed);
       }
-      if (_look_state & static_cast<int32_t>(Look::Left))
+      if (_look_state & static_cast<int32_t>(Look::Left) &&! locked_left)
       {
          desired_look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      if (_look_state & static_cast<int32_t>(Look::Right))
+      if (_look_state & static_cast<int32_t>(Look::Right) &&! locked_right)
       {
          desired_look_vector += sf::Vector2f(speed, 0.0f);
       }
