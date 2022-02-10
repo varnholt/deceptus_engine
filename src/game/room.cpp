@@ -346,7 +346,7 @@ void Room::syncCamera()
    if (_camera_sync_after_fade_out)
    {
       _camera_locked = false;
-      CameraRoomLock::instance().setRoom(getptr());
+      CameraRoomLock::setRoom(getptr());
       CameraSystem::getCameraSystem().syncNow();
 
       // apply room start position if available
@@ -387,7 +387,7 @@ void Room::lockCamera()
          // could be that the camera has been unlocked in the meantime
          if (_camera_locked)
          {
-            CameraRoomLock::instance().setRoom(getptr());
+            CameraRoomLock::setRoom(getptr());
             _camera_locked = false;
          }
       },

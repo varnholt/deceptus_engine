@@ -982,7 +982,7 @@ void Level::updateRoom()
 void Level::syncRoom()
 {
    _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
-   CameraRoomLock::instance().setRoom(_room_current);
+   CameraRoomLock::setRoom(_room_current);
 }
 
 
@@ -1012,7 +1012,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
       }
       else
       {
-         CameraRoomLock::instance().setRoom(_room_current);
+         CameraRoomLock::setRoom(_room_current);
       }
 
       // trigger transition effect
