@@ -3,17 +3,10 @@
 #include <memory>
 #include "room.h"
 
-class CameraRoomLock
+namespace CameraRoomLock
 {
-
-public:
-   bool correctedCamera(float& x, float& y, float focus_offset) const;
-   void setRoom(const std::shared_ptr<Room>& room);
-   static CameraRoomLock& instance();
-
-private:
-   CameraRoomLock() = default;
-   std::shared_ptr<Room> _room;
-
-};
+bool correctedCamera(float& x, float& y, float focus_offset);
+void setRoom(const std::shared_ptr<Room>& room);
+void readLockedSides(bool& left, bool& right, bool& top, bool& bottom);
+}
 
