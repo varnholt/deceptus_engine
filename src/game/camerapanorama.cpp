@@ -48,26 +48,28 @@ void CameraPanorama::update()
    auto player_y = player->getPixelPositionf().y + _look_vector.y;
    auto focus_offset = CameraSystem::getCameraSystem().getFocusOffset();
    CameraRoomLock::correctedCamera(player_x, player_y, focus_offset);
-   // CameraRoomLock::readLockedSides(locked_left, locked_right, locked_up, locked_down);
+   CameraRoomLock::readLockedSides(locked_left, locked_right, locked_up, locked_down);
 
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
       constexpr auto speed = 3.0f;
 
       sf::Vector2f desired_look_vector = _look_vector;
-      if (_look_state & static_cast<int32_t>(Look::Up) &&! locked_up)
+
+      // only update the desired look vector when boundaries are not exceeded
+      if (_look_state & static_cast<int32_t>(Look::Up) &&! (locked_up && desired_look_vector.y < 0.0f))
       {
          desired_look_vector += sf::Vector2f(0.0f, -speed);
       }
-      if (_look_state & static_cast<int32_t>(Look::Down) &&! locked_down)
+      if (_look_state & static_cast<int32_t>(Look::Down) &&! (locked_down && desired_look_vector.y > 0.0f))
       {
          desired_look_vector += sf::Vector2f(0.0f, speed);
       }
-      if (_look_state & static_cast<int32_t>(Look::Left) &&! locked_left)
+      if (_look_state & static_cast<int32_t>(Look::Left) &&! (locked_left && desired_look_vector.x < 0.0f))
       {
          desired_look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      if (_look_state & static_cast<int32_t>(Look::Right) &&! locked_right)
+      if (_look_state & static_cast<int32_t>(Look::Right) &&! (locked_right && desired_look_vector.x > 0.0f))
       {
          desired_look_vector += sf::Vector2f(speed, 0.0f);
       }
@@ -93,8 +95,25 @@ void CameraPanorama::update()
          const auto y_relative = y_direction * (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
 
          sf::Vector2f desired_look_vector = _look_vector;
-         desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
-         desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
+
+         // only update the desired look vector when boundaries are not exceeded
+         if (x_relative < 0.0f &&! (locked_left && desired_look_vector.x < 0.0f))
+         {
+            desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
+         }
+         else if (x_relative > 0.0f &&! (locked_right && desired_look_vector.x > 0.0f))
+         {
+            desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
+         }
+
+         if (y_relative < 0.0f &&! (locked_up && desired_look_vector.y < 0.0f))
+         {
+            desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
+         }
+         else if (y_relative > 0.0f &&! (locked_down && desired_look_vector.y > 0.0f))
+         {
+            desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
+         }
 
          limit_look_vector(desired_look_vector);
          updateLookVector(desired_look_vector);
