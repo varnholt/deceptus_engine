@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <iostream>
 #include <sstream>
 
 #include "game/constants.h"
@@ -20,12 +21,13 @@ void debugAuthors()
    text << " (c) ";
    text << static_cast<int32_t>(ymd.year());
    text << " dstar/mueslee";
-   printf("%s\n", text.str().c_str());
+
+   std::cout << text.str() << std::endl;
    for (auto i = 0u; i < text.str().length(); i++)
    {
-      printf("-");
+      std::cout << "-";
    }
-   printf("\n");
+   std::cout << std::endl;
 }
 
 
