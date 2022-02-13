@@ -588,7 +588,7 @@ DISTFILES += \
     data/scripts/enemies/deprecated_klonk.lua \
     data/scripts/enemies/klonk_2.lua \
     data/scripts/enemies/deprecated_skeleton.lua \
-    data/scripts/enemies/spikeball.lua \
+    data/scripts/enemies/rat.lua \
     data/scripts/enemies/vector2.lua \
     data/scripts/enemies/watermine.lua \
     data/shaders/death.frag \
