@@ -4,31 +4,62 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 -- enemy configuration
 properties = {
+   damage = 0,
    sprite = "data/sprites/rat.png",
+   staticBody = false
 }
 
 
+-- row 0-1: run
+-- row 2-3: tail move (idle)
+-- row 4-5: nose move (idle)
+-- row 6-7: blink (idle)
+-- row 8-9: stand up / sit down (from run to idle and idle to run)
+--
+-- run -> stand up -> idle 1/2/3
+-- idle 1/2/3 -> sit -> run
+--
+-- even: rat points left
+--
+-- 0: 7 RUN
+-- 2: 7 IDLE 1
+-- 4: 4 IDLE 2
+-- 6: 7 IDLE 3
+-- 8: 2 UP/DOWN
+
+SPRITE_SIZE = 24
+CYCLE_RUN = 0
+CYCLE_IDLE_1 = 1
+CYCLE_IDLE_2 = 2
+CYCLE_IDLE_3 = 3
+CYCLE_STAND_UP = 4
+CYCLE_LENGTHS =  {7, 7, 4, 7, 2}
+
+
 ------------------------------------------------------------------------------------------------------------------------
-mPatrolTimer = 1
-mPosition = v2d.Vector2D(0, 0)
-mPlayerPosition = v2d.Vector2D(0, 0)
-mPointsToLeft = false
+_start_position = v2d.Vector2D(0, 0)
+_position = v2d.Vector2D(0, 0)
+_player_position = v2d.Vector2D(0, 0)
+_points_left = false
+_current_cycle = CYCLE_IDLE_1
+_current_sprite = 0
+_current_sprite_elapsed = 0.0
+_patrol_path = {}
+_patrol_index = 1
+_patrol_epsilon = 1.0
+_elapsed = 0.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   patrolPath = {}
-   patrolIndex = 1
-   patrolEpsilon = 1.0
-   wait = false
-   updateSpriteRect(0, 0, 0, 64, 64)
+   addShapeCircle(0.05, 0.0, 0.0)
+   updateSprite(0.0)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function timeout(id)
-   if (id == mPatrolTimer) then
-      wait = false
+   if (id == _patrol_timer) then
    end
 end
 
@@ -41,21 +72,19 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   mPointsToLeft = true
-   updateSpriteRect(0, 0, 64, 64, 64)
+   _points_left = true
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   mPointsToLeft = false
-   updateSpriteRect(0, 0, 0, 64, 64)
+   _points_left = false
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   mPlayerPosition = v2d.Vector2D(x, y)
+   _player_position = v2d.Vector2D(x, y)
 end
 
 
@@ -64,45 +93,76 @@ end
 -- |          p      o          | x
 function followPlayer()
    local epsilon = 5
-   if (mPlayerPosition:getX() > mPosition:getX() + epsilon) then
+   if (_player_position:getX() > _position:getX() + epsilon) then
       goRight()
-   elseif (mPlayerPosition:getX() < mPosition:getX() - epsilon) then
+   elseif (_player_position:getX() < _position:getX() - epsilon) then
       goLeft()
    else
-      mKeyPressed = 0
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function patrol()
+
    if (wait == true) then
       return
    end
 
-   local key = patrolPath[patrolIndex]
-   local keyVec = v2d.Vector2D(key:getX(), key:getY())
-   local count = #patrolPath
+   local key = _patrol_path[_patrol_index]
+   local key_vec = v2d.Vector2D(key:getX(), key:getY())
+   local count = #_patrol_path
 
-   if (mPosition:getX() > keyVec:getX() + patrolEpsilon) then
+   if (_position:getX() > key_vec:getX() + _patrol_epsilon) then
       goLeft()
-   elseif (mPosition:getX() < keyVec:getX() - patrolEpsilon) then
+   elseif (_position:getX() < key_vec:getX() - _patrol_epsilon) then
       goRight()
    else
-      wait = true
-      mKeyPressed = 0
-      timer(5000, mPatrolTimer)
-      patrolIndex = patrolIndex + 1
-      if (patrolIndex > count) then
-         patrolIndex = 0
-      end
+--      timer(5000, _patrol_timer)
+--      _patrol_index = _patrol_index + 1
+--      if (_patrol_index > count) then
+--         _patrol_index = 0
+--      end
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function decide()
+   -- if (_current_sprite  == CYCLE_LENGTHS[_current_cycle + 1])
+   -- end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   patrol()
+   -- patrol()
+   -- setTransform(_start_position:getX(), _start_position:getY(), 0.0)
+   _elapsed = _elapsed + dt
+   decide()
+   updateSprite(dt)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateSprite(dt)
+   _current_sprite_elapsed = _current_sprite_elapsed + dt
+
+   max_cycle = CYCLE_LENGTHS[_current_cycle + 1]
+   sprite_index = math.floor(math.fmod(_current_sprite_elapsed, max_cycle))
+
+   if (_current_sprite ~= sprite_index) then
+      print(sprite_index)
+      _current_sprite = sprite_index
+      updateSpriteRect(0, _current_sprite * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function movedTo(x, y)
+   _position = v2d.Vector2D(x, y)
+   -- print(string.format("rat position: %f, %f", x, y))
 end
 
 
@@ -127,7 +187,13 @@ function setPath(name, table)
    end
 
    if (name == "path") then
-      patrolPath = v
+      _patrol_path = v
    end
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+function setStartPosition(x, y)
+   print(string.format("rat start position: %f, %f", x, y))
+   _start_position = v2d.Vector2D(x, y)
+end
