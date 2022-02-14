@@ -6,7 +6,9 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    damage = 0,
    sprite = "data/sprites/rat.png",
-   staticBody = false
+   staticBody = false,
+   velocity_walk_max = 0.75,
+   acceleration_ground = 0.1
 }
 
 
@@ -32,35 +34,32 @@ CYCLE_RUN = 0
 CYCLE_IDLE_1 = 1
 CYCLE_IDLE_2 = 2
 CYCLE_IDLE_3 = 3
-CYCLE_STAND_UP = 4
+CYCLE_UPDOWN = 4
 CYCLE_LENGTHS =  {7, 7, 4, 7, 2}
+ANIMATION_SPEED = 5.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
-_start_position = v2d.Vector2D(0, 0)
 _position = v2d.Vector2D(0, 0)
 _player_position = v2d.Vector2D(0, 0)
 _points_left = false
 _current_cycle = CYCLE_IDLE_1
 _current_sprite = 0
-_current_sprite_elapsed = 0.0
+_current_sprite_elapsed = 99.0 -- force a sprite update
 _patrol_path = {}
 _patrol_index = 1
 _patrol_epsilon = 1.0
+_patrol_path_arrived = false
 _elapsed = 0.0
+_animation_flag_inverse = false
+_key_pressed = 0
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeCircle(0.05, 0.0, 0.0)
+   addShapeCircle(0.15, 0.0, 0.15)
    updateSprite(0.0)
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function timeout(id)
-   if (id == _patrol_timer) then
-   end
+   setZ(26)
 end
 
 
@@ -71,41 +70,27 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function goLeft()
-   _points_left = true
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function goRight()
-   _points_left = false
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
    _player_position = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
--- |          o      p          | x
--- |          p      o          | x
-function followPlayer()
-   local epsilon = 5
-   if (_player_position:getX() > _position:getX() + epsilon) then
-      goRight()
-   elseif (_player_position:getX() < _position:getX() - epsilon) then
-      goLeft()
-   else
-   end
+function keyPressed(key)
+   _key_pressed = (_key_pressed | key)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function keyReleased(key)
+   _key_pressed = _key_pressed & (~key)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function patrol()
 
-   if (wait == true) then
+   if (_current_cycle ~= CYCLE_RUN) then
       return
    end
 
@@ -114,47 +99,129 @@ function patrol()
    local count = #_patrol_path
 
    if (_position:getX() > key_vec:getX() + _patrol_epsilon) then
-      goLeft()
+      _points_left = true
+      _patrol_path_arrived = false
+      keyReleased(Key["KeyRight"])
+      keyPressed(Key["KeyLeft"])
    elseif (_position:getX() < key_vec:getX() - _patrol_epsilon) then
-      goRight()
+      _points_left = false
+      _patrol_path_arrived = false
+      keyReleased(Key["KeyLeft"])
+      keyPressed(Key["KeyRight"])
    else
---      timer(5000, _patrol_timer)
---      _patrol_index = _patrol_index + 1
---      if (_patrol_index > count) then
---         _patrol_index = 0
---      end
+      keyReleased(Key["KeyLeft"])
+      keyReleased(Key["KeyRight"])
+
+      _patrol_path_arrived = true
+
+      _patrol_index = _patrol_index + 1
+      if (_patrol_index > count) then
+         _patrol_index = 0
+      end
+
+      -- update to new alignment after reaching a position
+      if (_position:getX() > key_vec:getX() + _patrol_epsilon) then
+         _points_left = true
+      elseif (_position:getX() < key_vec:getX() - _patrol_epsilon) then
+         _points_left = false
+      end
+
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function decide()
-   -- if (_current_sprite  == CYCLE_LENGTHS[_current_cycle + 1])
-   -- end
+function decide(dt)
+   elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEED
+
+   -- it's time for a new cycle
+   if (math.floor(elapsed) > getMaxCycle() - 1) then
+
+      -- possible decisions
+      --    run -> stand up
+      --    idle 1,2,3 -> random idle or sit down
+      --    stand up -> idle 1,2,3
+      --    sit down -> run
+
+      next_cycle = _current_cycle
+      next_animation_flag_inverse = false
+
+      if (_current_cycle == CYCLE_RUN) then
+         if (_patrol_path_arrived) then
+            next_cycle = CYCLE_UPDOWN
+         else
+            next_cycle = CYCLE_RUN
+         end
+      elseif (_current_cycle == CYCLE_IDLE_1 or _current_cycle == CYCLE_IDLE_2 or _current_cycle == CYCLE_IDLE_3) then
+         rand = math.random(4)
+         if (rand == 1) then
+            next_cycle = CYCLE_IDLE_1
+         elseif (rand == 2) then
+            next_cycle = CYCLE_IDLE_2
+         elseif (rand == 3) then
+            next_cycle = CYCLE_IDLE_3
+         elseif (rand == 4) then
+            next_cycle = CYCLE_UPDOWN
+            next_animation_flag_inverse = true
+         end
+      elseif (_current_cycle == CYCLE_UPDOWN and not _animation_flag_inverse) then -- handle what comes after standing up
+         rand = math.random(3)
+         if (rand == 1) then
+            next_cycle = CYCLE_IDLE_1
+         elseif (rand == 2) then
+            next_cycle = CYCLE_IDLE_2
+         elseif (rand == 3) then
+            next_cycle = CYCLE_IDLE_3
+         end
+      elseif (_current_cycle == CYCLE_UPDOWN and _animation_flag_inverse) then -- handle what comes after sitting down
+         next_cycle = CYCLE_RUN
+      end
+
+      if (next_cycle ~= _current_cycle) then
+         _current_cycle = next_cycle
+         _animation_flag_inverse = next_animation_flag_inverse
+         _current_sprite_elapsed = 0.0
+      end
+   end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   -- patrol()
-   -- setTransform(_start_position:getX(), _start_position:getY(), 0.0)
    _elapsed = _elapsed + dt
-   decide()
+   decide(dt)
+   patrol()
    updateSprite(dt)
+   updateKeysPressed(_key_pressed)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function getMaxCycle()
+   return CYCLE_LENGTHS[_current_cycle + 1]
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function getSpriteOffsetY()
+   return (_current_cycle * 2 + (_points_left and 0 or 1)) * SPRITE_SIZE
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function updateSprite(dt)
-   _current_sprite_elapsed = _current_sprite_elapsed + dt
-
-   max_cycle = CYCLE_LENGTHS[_current_cycle + 1]
-   sprite_index = math.floor(math.fmod(_current_sprite_elapsed, max_cycle))
+   _current_sprite_elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEED
+   sprite_index = math.floor(math.fmod(_current_sprite_elapsed, getMaxCycle()))
 
    if (_current_sprite ~= sprite_index) then
-      print(sprite_index)
       _current_sprite = sprite_index
-      updateSpriteRect(0, _current_sprite * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)
+
+      -- sit down is just an inverse stand up cycle
+      if (next_animation_flag_inverse) then
+         sprite_index = getMaxCycle() - sprite_index - 1
+      end
+
+      updateSpriteRect(0, sprite_index * SPRITE_SIZE, getSpriteOffsetY(), SPRITE_SIZE, SPRITE_SIZE)
    end
 end
 
@@ -162,7 +229,6 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
    _position = v2d.Vector2D(x, y)
-   -- print(string.format("rat position: %f, %f", x, y))
 end
 
 
@@ -192,8 +258,3 @@ function setPath(name, table)
 end
 
 
-------------------------------------------------------------------------------------------------------------------------
-function setStartPosition(x, y)
-   print(string.format("rat start position: %f, %f", x, y))
-   _start_position = v2d.Vector2D(x, y)
-end
