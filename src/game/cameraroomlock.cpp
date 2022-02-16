@@ -7,10 +7,10 @@
 namespace
 {
 std::shared_ptr<Room> _room;
-auto locked_left   = false;
-auto locked_right  = false;
-auto locked_top    = false;
-auto locked_bottom = false;
+auto _locked_left   = false;
+auto _locked_right  = false;
+auto _locked_top    = false;
+auto _locked_bottom = false;
 }
 
 
@@ -86,38 +86,34 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    const auto l = pos + sf::Vector2f{-half_width - focus_offset, 0.0f};
    const auto r = pos + sf::Vector2f{ half_width - focus_offset, 0.0f};
 
-   locked_left   = false;
-   locked_right  = false;
-   locked_top    = false;
-   locked_bottom = false;
+   _locked_left   = !rect.contains(l);
+   _locked_right  = !rect.contains(r);
+   _locked_top    = !rect.contains(u);
+   _locked_bottom = !rect.contains(d);
 
-   if (!rect.contains(l))
+   if (_locked_left)
    {
       // camera center is out of left boundary
       x = rect.left + half_width + focus_offset;
-      locked_left = true;
    }
-   else if (!rect.contains(r))
+   else if (_locked_right)
    {
       // camera center is out of right boundary
       x = rect.left + rect.width - half_width + focus_offset;
-      locked_right = true;
    }
 
-   if (!rect.contains(u))
+   if (_locked_top)
    {
       // camera center is out of upper boundary
       y = rect.top + height_bottom;
-      locked_top = true;
    }
-   else if (!rect.contains(d))
+   else if (_locked_bottom)
    {
       // camera center is out of lower boundary
       y = rect.top + rect.height - height_top;
-      locked_bottom = true;
    }
 
-   return locked_left || locked_right || locked_top || locked_bottom;
+   return _locked_left || _locked_right || _locked_top || _locked_bottom;
 }
 
 
@@ -133,8 +129,8 @@ void CameraRoomLock::setRoom(const std::shared_ptr<Room>& room)
 
 void CameraRoomLock::readLockedSides(bool& left, bool& right, bool& top, bool& bottom)
 {
-   left   = locked_left;
-   right  = locked_right;
-   top    = locked_top;
-   bottom = locked_bottom;
+   left   = _locked_left;
+   right  = _locked_right;
+   top    = _locked_top;
+   bottom = _locked_bottom;
 }
