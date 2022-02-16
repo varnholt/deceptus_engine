@@ -48,16 +48,13 @@
 */
 
 
-void CameraSystem::update(const sf::Time& dt, float viewWidth, float viewHeight)
+void CameraSystem::update(const sf::Time& dt, float view_width, float view_height)
 {
-   _view_width = viewWidth;
-   _view_height = viewHeight;
+   _view_width = view_width;
+   _view_height = view_height;
 
    updateX(dt);
    updateY(dt);
-
-   // this call can be removed if it turns out it's not needed
-   updatePlayerFocused();
 }
 
 
@@ -104,13 +101,12 @@ void CameraSystem::updateX(const sf::Time& dt)
    {
       _focus_x_triggered = true;
    }
-
-   // test if back within close boundaries
    else if (
          (test > _x - _focus_zone_center - camera_config.getBackInBoundsToleranceX())
       && (test < _x - _focus_zone_center + camera_config.getBackInBoundsToleranceX())
    )
    {
+      // back within close boundaries
       _focus_x_triggered = false;
    }
 
@@ -191,20 +187,6 @@ void CameraSystem::updateY(const sf::Time& dt)
    const auto dy = (player_y - _y) * dt.asSeconds() * camera_config.getCameraVelocityFactorY() * y_update_acceleration;
 
    _y += dy;
-}
-
-
-void CameraSystem::updatePlayerFocused()
-{
-   const auto player_pixel_pos = Player::getCurrent()->getPixelPositionf();
-
-   const auto dx = fabs(_x - player_pixel_pos.x);
-   const auto dy = fabs(_y - player_pixel_pos.y);
-
-   const auto view_width_half = GameConfiguration::getInstance()._view_width / 2;
-   const auto view_height_half = GameConfiguration::getInstance()._view_height / 2;
-
-   _player_focused = (dx < view_width_half && dy < view_height_half);
 }
 
 

@@ -168,11 +168,11 @@ enum class InvetoryAction
 
 enum class Look
 {
-   Inactive = 0x0,
-   Active   = 0x1,
-   Up       = 0x2,
-   Down     = 0x4,
-   Left     = 0x8,
+   Inactive = 0x00,
+   Active   = 0x01,
+   Up       = 0x02,
+   Down     = 0x04,
+   Left     = 0x08,
    Right    = 0x10,
 };
 
