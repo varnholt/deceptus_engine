@@ -1015,7 +1015,7 @@ void Player::goToPortal(auto portal)
    );
 
    // update the camera system to point to the player position immediately
-   CameraSystem::getCameraSystem().syncNow();
+   CameraSystem::getInstance().syncNow();
    Portal::unlock();
 }
 

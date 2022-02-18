@@ -278,7 +278,7 @@ void Game::loadLevel()
 
          // before synchronizing the camera with the player position, the camera needs to know its room limitations
          _level->syncRoom();
-         CameraSystem::getCameraSystem().syncNow();
+         CameraSystem::getInstance().syncNow();
 
          GameClock::getInstance().reset();
       }

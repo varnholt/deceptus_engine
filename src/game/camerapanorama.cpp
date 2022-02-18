@@ -1,5 +1,7 @@
 #include "camerapanorama.h"
 
+#include <iostream>
+
 #include "cameraroomlock.h"
 #include "camerasystem.h"
 #include "displaymode.h"
@@ -44,15 +46,15 @@ void CameraPanorama::update()
       }
    };
 
+   // this should work on actual screen boundaries instead of creating a screen rectangle around the player
+   // 1) get screen rectangle
+   // 2) have 4 points on each side to check if they are outside the room rectangle
+   // 3) if those points are outside the room boundaries, do not allow further movement
+
    auto locked_up    = false;
    auto locked_down  = false;
    auto locked_left  = false;
    auto locked_right = false;
-   auto player = Player::getCurrent();
-   auto player_x = player->getPixelPositionf().x + _look_vector.x;
-   auto player_y = player->getPixelPositionf().y + _look_vector.y;
-   auto focus_offset = CameraSystem::getCameraSystem().getFocusOffset();
-   CameraRoomLock::correctedCamera(player_x, player_y, focus_offset);
    CameraRoomLock::readLockedSides(locked_left, locked_right, locked_up, locked_down);
 
    if (_look_state & static_cast<int32_t>(Look::Active))
@@ -63,15 +65,16 @@ void CameraPanorama::update()
       {
          desired_look_vector += sf::Vector2f(0.0f, -speed);
       }
-      if (_look_state & static_cast<int32_t>(Look::Down) &&! (locked_down && desired_look_vector.y > 0.0f))
+      else if (_look_state & static_cast<int32_t>(Look::Down) &&! (locked_down && desired_look_vector.y > 0.0f))
       {
          desired_look_vector += sf::Vector2f(0.0f, speed);
       }
+
       if (_look_state & static_cast<int32_t>(Look::Left) &&! (locked_left && desired_look_vector.x < 0.0f))
       {
          desired_look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      if (_look_state & static_cast<int32_t>(Look::Right) &&! (locked_right && desired_look_vector.x > 0.0f))
+      else if (_look_state & static_cast<int32_t>(Look::Right) &&! (locked_right && desired_look_vector.x > 0.0f))
       {
          desired_look_vector += sf::Vector2f(speed, 0.0f);
       }
@@ -242,3 +245,61 @@ const sf::Vector2f& CameraPanorama::getLookVector() const
     return _look_vector;
 }
 
+
+// so far not resolved issue, could be considered if needed:
+//
+// the player is allowed to move 'freely' within the camera system's focus zone (f0..f1).
+// that's usually a horizontal range within the center of the screen. that range can be
+// shifted around a bit depending on the player movement (if enabled in the camera system).
+// however, when the player is more on the left or right side of the focus zone, then the
+// range of the camera panorama should be adjusted.
+//
+//
+// default use case A
+// +-------------+-------------+
+// |       :     |     :       |
+// |       :     |     :       |
+// |       :     |     :       |
+// |       :     |     :       |
+// +-------:-----p-----:-------+
+// |       :     |     :       |
+// |       :     |     :       |
+// +-------------+-------------+
+//         f0          f1
+//
+// outside of center use case B                        outside of center use case C
+// +-----------------+---------+                       +---------+-----------------+
+// |       :         | :       |                       |       : |         :       |
+// |       :         | :       |                       |       : |         :       |
+// |       :         | :       |                       |       : |         :       |
+// |       :         | :       |                       |       : |         :       |
+// +-------:-----|---p-:-------+                       +-------:-p---|-----:-------+
+// |       :         | :       |                       |       : |         :       |
+// |       :         | :       |                       |       : |         :       |
+// +-----------------+---------+                       +---------+-----------------+
+//         f0          f1                                      f0          f1
+//
+//                    player is on the right side              player is on the left side
+//                    of the focus zone                        of the focus zone
+//                    camera system dx = 90px                  camera system dx = -90
+//
+//
+// in use case B, already a large portion of the left-facing side of the screen is visible (90px).
+// by using the camera panorama these 90px should be subtracted from the cpan range when the user
+// wants to navigate the cpan to the left.
+//
+// player is standing in the center of the focus zone (A)
+//    dx = 0
+//    -> cpan should go from -100; 100
+//
+// player standing on the right of the focus zone (B)
+//    dx = 90
+//    -> cpan should go from -10 .. 190
+//
+// player standing on the left of the focus zone (C)
+//    dx = -90
+//    -> cpan should go from -10
+//
+//    -> should go from -100 to 100
+//
+// std::cout << CameraSystem::getInstance().getDx() << " " << CameraSystem::getInstance().getDy() << std::endl;
