@@ -11,6 +11,11 @@
 #include "player/player.h"
 #include "tweaks.h"
 
+namespace
+{
+constexpr auto speed = 3.0f;
+}
+
 
 CameraPanorama CameraPanorama::__instance;
 
@@ -52,11 +57,8 @@ void CameraPanorama::update()
 
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
-      constexpr auto speed = 3.0f;
-
-      sf::Vector2f desired_look_vector = _look_vector;
-
       // only update the desired look vector when boundaries are not exceeded
+      sf::Vector2f desired_look_vector = _look_vector;
       if (_look_state & static_cast<int32_t>(Look::Up) &&! (locked_up && desired_look_vector.y < 0.0f))
       {
          desired_look_vector += sf::Vector2f(0.0f, -speed);
