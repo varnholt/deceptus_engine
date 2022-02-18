@@ -940,7 +940,7 @@ void Level::createViews()
 void Level::updateViews()
 {
    const auto& look_vector = CameraPanorama::getInstance().getLookVector();
-   const auto& camera_system = CameraSystem::getCameraSystem();
+   const auto& camera_system = CameraSystem::getInstance();
 
    auto level_view_x = camera_system.getX() + look_vector.x;
    auto level_view_y = camera_system.getY() + look_vector.y;
@@ -989,7 +989,7 @@ void Level::syncRoom()
 //-----------------------------------------------------------------------------
 void Level::updateCameraSystem(const sf::Time& dt)
 {
-   auto& camera_system = CameraSystem::getCameraSystem();
+   auto& camera_system = CameraSystem::getInstance();
 
    // update room
    const auto prev_room = _room_current;
