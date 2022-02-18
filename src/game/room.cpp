@@ -347,7 +347,7 @@ void Room::syncCamera()
    {
       _camera_locked = false;
       CameraRoomLock::setRoom(getptr());
-      CameraSystem::getCameraSystem().syncNow();
+      CameraSystem::getInstance().syncNow();
 
       // apply room start position if available
       movePlayerToRoomStartPosition();

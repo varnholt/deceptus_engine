@@ -420,7 +420,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
 {
-   auto& camera_system = CameraSystem::getCameraSystem();
+   auto& camera_system = CameraSystem::getInstance();
 
    sf::Vertex f0[] =
    {
