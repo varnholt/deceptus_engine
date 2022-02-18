@@ -75,7 +75,7 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    // necessarily in the middle of the screen but maybe a little more to the
    // left or to the right depending on its orientation
    const auto& game_config = GameConfiguration::getInstance();
-   const auto& camera_config = CameraSystemConfiguration::getInstance();;
+   const auto& camera_config = CameraSystemConfiguration::getInstance();
    const auto half_width    = static_cast<float>(game_config._view_width / 2.0f);
    const auto height        = static_cast<float>(game_config._view_height);
    const auto height_top    = height * (1.0f - 1.0f / camera_config.getViewRatioY());
