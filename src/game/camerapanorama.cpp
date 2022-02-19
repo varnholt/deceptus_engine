@@ -50,12 +50,12 @@ void CameraPanorama::update()
    // 1) get screen rectangle
    // 2) have 4 points on each side to check if they are outside the room rectangle
    // 3) if those points are outside the room boundaries, do not allow further movement
+   auto result = CameraRoomLock::checkRoomBoundaries();
 
-   auto locked_up    = false;
-   auto locked_down  = false;
-   auto locked_left  = false;
-   auto locked_right = false;
-   CameraRoomLock::readLockedSides(locked_left, locked_right, locked_up, locked_down);
+   auto locked_up    = result[0];
+   auto locked_down  = result[1];
+   auto locked_left  = result[2];
+   auto locked_right = result[3];
 
    if (_look_state & static_cast<int32_t>(Look::Active))
    {

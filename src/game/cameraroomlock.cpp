@@ -3,6 +3,8 @@
 #include "camerasystemconfiguration.h"
 #include "gameconfiguration.h"
 
+// #include <iostream>
+
 
 namespace
 {
@@ -11,6 +13,40 @@ auto _locked_left   = false;
 auto _locked_right  = false;
 auto _locked_top    = false;
 auto _locked_bottom = false;
+sf::FloatRect _view_rect;
+}
+
+
+std::array<bool, 4> CameraRoomLock::checkRoomBoundaries()
+{
+   if (!_room)
+   {
+      return {};
+   }
+
+   // fetch current room rectangle from view rectangle's center
+   const auto view_center = sf::Vector2f{_view_rect.left + _view_rect.width / 2, _view_rect.top + _view_rect.height / 2};
+   const auto rect_it =  _room->findRect(view_center);
+   if (rect_it == _room->_rects.end())
+   {
+      return {};
+   }
+
+   const auto test_dist_px = 3.0f;
+   const auto rect = *rect_it;
+   const auto point_l = sf::Vector2f(_view_rect.left - test_dist_px, _view_rect.top + _view_rect.height / 2);
+   const auto point_r = sf::Vector2f(_view_rect.left + _view_rect.width + test_dist_px, _view_rect.top + _view_rect.height / 2);
+   const auto point_u = sf::Vector2f(_view_rect.left + _view_rect.width / 2, _view_rect.top - test_dist_px);
+   const auto point_d = sf::Vector2f(_view_rect.left + _view_rect.width / 2, _view_rect.top + _view_rect.height + test_dist_px);
+
+   const auto out_l = !rect.contains(point_l);
+   const auto out_r = !rect.contains(point_r);
+   const auto out_u = !rect.contains(point_u);
+   const auto out_d = !rect.contains(point_d);
+
+   // std::cout << "u: " << out_u << " d: " << out_d << " l: " << out_l << " r: " << out_r << std::endl;
+
+   return {out_u, out_d, out_l, out_r};
 }
 
 
@@ -134,3 +170,10 @@ void CameraRoomLock::readLockedSides(bool& left, bool& right, bool& top, bool& b
    top    = _locked_top;
    bottom = _locked_bottom;
 }
+
+
+void CameraRoomLock::setViewRect(const sf::FloatRect& rect)
+{
+   _view_rect = rect;
+}
+
