@@ -942,17 +942,13 @@ void Level::updateViews()
    const auto& look_vector = CameraPanorama::getInstance().getLookVector();
    const auto& camera_system = CameraSystem::getInstance();
 
-   auto level_view_x = camera_system.getX() + look_vector.x;
-   auto level_view_y = camera_system.getY() + look_vector.y;
+   const auto level_view_x = camera_system.getX() + look_vector.x;
+   const auto level_view_y = camera_system.getY() + look_vector.y;
+   const auto view_rect = sf::FloatRect{level_view_x, level_view_y, _view_width, _view_height};
 
-   _level_view->reset(
-      sf::FloatRect(
-         level_view_x,
-         level_view_y,
-         _view_width,
-         _view_height
-      )
-   );
+   CameraRoomLock::setViewRect(view_rect);
+
+   _level_view->reset(view_rect);
 
    for (const auto& parallax:  _parallax_layers)
    {
