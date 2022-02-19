@@ -414,6 +414,12 @@ Each message box has the custom properties below:
 |color|color|The color of the message box|
 |open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed.|
 
+Moreover, you can use the tags below inside your dialogue strings:
+
+|Keyword|Description|
+|-|-|
+|`<br>`|Add a line break|
+|`<player>`|Insert the name of the player|
 
 <br><br>
 
