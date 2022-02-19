@@ -958,7 +958,7 @@ void Player::updateVelocity()
       {
          linearVelocity.Set(
             linearVelocity.x,
-            std::min(linearVelocity.y, PhysicsConfiguration::getInstance()._player_speed_max_water)
+            std::min(linearVelocity.y, PhysicsConfiguration::getInstance()._player_speed_max_water * 0.5f)
          );
       }
       else if (linearVelocity.y < 0.0f)
@@ -1232,9 +1232,9 @@ bool Player::isInWater() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setInWater(bool inWater)
+void Player::setInWater(bool in_water)
 {
-   _in_water = inWater;
+   _in_water = in_water;
 }
 
 
@@ -1444,6 +1444,7 @@ void Player::update(const sf::Time& dt)
    PlayerJump::PlayerJumpInfo info;
    info._in_air = isInAir();
    info._in_water = isInWater();
+   info._water_entered_timepoint = _water_entered_time;
    info._crouching = _bend.isCrouching();
    info._climbing = _climb.isClimbing();
    _jump.update(info);
@@ -1559,34 +1560,35 @@ void Player::updatePixelCollisions()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAtmosphere()
 {
-   bool wasInwater = isInWater();
+   const auto was_inside_water = isInWater();
 
-   b2Vec2 pos = _body->GetPosition();
-   AtmosphereTile tile = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(pos);
+   const auto& pos = _body->GetPosition();
+   auto tile = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(pos);
 
-   bool inWater = tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft;
-   setInWater(inWater);
+   const auto inside_water = (tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft);
+   setInWater(inside_water);
 
 #ifdef JUMP_GRAVITY_SCALING
    // entering water
-   if (inWater && !wasInwater)
+   if (inside_water && !was_inside_water)
    {
       _body->SetGravityScale(0.5f);
+      _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
+      _water_entered_time = StopWatch::getInstance().now();
    }
 
    // leaving water
-   if (!inWater && wasInwater)
+   if (!inside_water && was_inside_water)
    {
       _body->SetGravityScale(1.0f);
    }
 #else
-   _body->SetGravityScale(inWater ? 0.5f : 1.0f);
+   _body->SetGravityScale(inside_water ? 0.5f : 1.0f);
 #endif
 
-   if (!wasInwater && isInWater())
+   if (!was_inside_water && isInWater())
    {
       Audio::getInstance().playSample("splash.wav");
-      // https://freesound.org/people/Rocktopus/packs/14347/
 
       AnimationPool::getInstance().add(
           "player_water_splash",
@@ -1597,7 +1599,7 @@ void Player::updateAtmosphere()
 
    // not sure if this is just another ugly hack
    // when we leave the water we want to take out the current swimming velocity
-   if (wasInwater && !isInWater())
+   if (was_inside_water && !isInWater())
    {
       _body->SetLinearVelocity(b2Vec2(0,0));
    }

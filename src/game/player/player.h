@@ -233,8 +233,10 @@ private:
 
    bool _points_to_left = false;
    bool _visible = true;
-   bool _in_water = false;
    bool _dead = false;
+
+   bool _in_water = false;
+   HighResTimePoint _water_entered_time;
 
    float _next_footstep_time = 0.0f;
 
