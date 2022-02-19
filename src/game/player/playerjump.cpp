@@ -77,7 +77,14 @@ void PlayerJump::updateJump()
 {
    if (_jump_info._in_water && _controls->isJumpButtonPressed())
    {
-      _body->ApplyForce(b2Vec2(0, -1.0f), _body->GetWorldCenter(), true);
+      // only allow jumping out of the water / water movement if the player stayed inside the water for a bit
+      using namespace std::chrono_literals;
+      if ((StopWatch::getInstance().now() - _jump_info._water_entered_timepoint) > 500ms)
+      {
+         _body->ApplyForce(b2Vec2(0, -1.0f), _body->GetWorldCenter(), true);
+      }
+
+      // std::cout << (StopWatch::getInstance().now() - _jump_info._water_entered_timepoint).count() << std::endl;
    }
    else if (
          (_jump_frame_count > 0 && _controls->isJumpButtonPressed())

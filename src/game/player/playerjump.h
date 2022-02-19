@@ -24,6 +24,7 @@ struct PlayerJump
    {
       bool _in_air = false;
       bool _in_water = false;
+      HighResTimePoint _water_entered_timepoint;
       bool _crouching = false;
       bool _climbing = false;
    };
