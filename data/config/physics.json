@@ -32,6 +32,11 @@
         "player_double_jump_factor" : 6.0,
         "player_hard_landing_damage_enabled" : false,
         "player_hard_landing_damage_factor" : 20.0,
+        "player_in_water_force_jump_button" : -1.0,          
+        "player_in_water_time_to_allow_jump_button_ms" : 500,
+        "player_in_water_linear_velocity_y_clamp_min" : -1.5,
+        "player_in_water_linear_velocity_y_clamp_max" : 0.75,
+        "in_water_buoyancy_force" : 0.03,                    
         "timestep": 0.0285714287310839
     }
 }

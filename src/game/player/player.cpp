@@ -948,28 +948,24 @@ void Player::updateVelocity()
       true
    );
 
-   // TODO: port this to box2d buoyancy: http://www.iforce2d.net/b2dtut/buoyancy
-   // limit velocity
+   // simulate some friction when moving underwater, also apply some buoyancy
    if (isInWater())
    {
-      auto linearVelocity = _body->GetLinearVelocity();
+      const b2Vec2 buoyancy_force = PhysicsConfiguration::getInstance()._in_water_buoyancy_force * -_world->GetGravity();
+      _body->ApplyForce(buoyancy_force, _body->GetWorldCenter(), true);
 
-      if (linearVelocity.y > 0.0f)
-      {
-         linearVelocity.Set(
-            linearVelocity.x,
-            std::min(linearVelocity.y, PhysicsConfiguration::getInstance()._player_speed_max_water * 0.5f)
-         );
-      }
-      else if (linearVelocity.y < 0.0f)
-      {
-         linearVelocity.Set(
-            linearVelocity.x,
-            std::max(linearVelocity.y, -PhysicsConfiguration::getInstance()._player_speed_max_water)
-         );
-      }
+      auto linear_velocity = _body->GetLinearVelocity();
 
-      _body->SetLinearVelocity(linearVelocity);
+      linear_velocity.Set(
+         linear_velocity.x,
+         std::clamp(
+            linear_velocity.y,
+            PhysicsConfiguration::getInstance()._player_in_water_linear_velocity_y_clamp_min,
+            PhysicsConfiguration::getInstance()._player_in_water_linear_velocity_y_clamp_max
+         )
+      );
+
+      _body->SetLinearVelocity(linear_velocity);
    }
 
    // cap speed
