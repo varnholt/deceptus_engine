@@ -54,11 +54,17 @@ struct PhysicsConfiguration
    bool _player_hard_landing_damage_enabled = false;
    float _player_hard_landing_damage_factor = 20.0f;
 
+   // swimming
+   float _player_in_water_force_jump_button = -1.0f;
+   int32_t _player_in_water_time_to_allow_jump_button_ms = 500;
+   float _player_in_water_linear_velocity_y_clamp_min = -1.5f;
+   float _player_in_water_linear_velocity_y_clamp_max = 0.75f;
+   float _in_water_buoyancy_force = 0.03f;
+
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
 
    static PhysicsConfiguration& getInstance();
-   static bool __initialized;
 
 
 private:

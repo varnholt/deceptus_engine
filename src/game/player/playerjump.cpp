@@ -79,9 +79,13 @@ void PlayerJump::updateJump()
    {
       // only allow jumping out of the water / water movement if the player stayed inside the water for a bit
       using namespace std::chrono_literals;
-      if ((StopWatch::getInstance().now() - _jump_info._water_entered_timepoint) > 500ms)
+      if ((StopWatch::getInstance().now() - _jump_info._water_entered_timepoint) > std::chrono::milliseconds(PhysicsConfiguration::getInstance()._player_in_water_time_to_allow_jump_button_ms))
       {
-         _body->ApplyForce(b2Vec2(0, -1.0f), _body->GetWorldCenter(), true);
+         _body->ApplyForce(
+            b2Vec2{0, PhysicsConfiguration::getInstance()._player_in_water_force_jump_button},
+            _body->GetWorldCenter(),
+            true
+         );
       }
 
       // std::cout << (StopWatch::getInstance().now() - _jump_info._water_entered_timepoint).count() << std::endl;
@@ -100,10 +104,7 @@ void PlayerJump::updateJump()
       {
          // probably dead code
          auto max_run = PhysicsConfiguration::getInstance()._player_speed_max_run;
-
-         factor =
-              1.0f
-            + PhysicsConfiguration::getInstance()._player_jump_speed_factor * (vel / (max_run - max_walk));
+         factor = 1.0f + PhysicsConfiguration::getInstance()._player_jump_speed_factor * (vel / (max_run - max_walk));
       }
 
       /*
