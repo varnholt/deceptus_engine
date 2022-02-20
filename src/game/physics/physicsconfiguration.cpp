@@ -11,9 +11,6 @@
 using json = nlohmann::json;
 
 
-bool PhysicsConfiguration::__initialized = false;
-
-
 std::string PhysicsConfiguration::serialize()
 {
    // create a JSON value with different types
@@ -62,6 +59,12 @@ std::string PhysicsConfiguration::serialize()
 
             {"player_hard_landing_damage_enabled",                _player_hard_landing_damage_enabled},
             {"player_hard_landing_damage_factor",                 _player_hard_landing_damage_factor},
+
+            {"player_in_water_force_jump_button",                _player_in_water_force_jump_button},
+            {"player_in_water_time_to_allow_jump_button_ms",     _player_in_water_time_to_allow_jump_button_ms},
+            {"player_in_water_linear_velocity_y_clamp_min",      _player_in_water_linear_velocity_y_clamp_min},
+            {"player_in_water_linear_velocity_y_clamp_max",      _player_in_water_linear_velocity_y_clamp_max},
+            {"in_water_buoyancy_force",                          _in_water_buoyancy_force},
          }
       }
    };
@@ -123,6 +126,12 @@ void PhysicsConfiguration::deserialize(const std::string& data)
 
    _player_hard_landing_damage_enabled              = config["PhysicsConfiguration"]["player_hard_landing_damage_enabled"].get<bool>();
    _player_hard_landing_damage_factor               = config["PhysicsConfiguration"]["player_hard_landing_damage_factor"].get<float>();
+
+   _player_in_water_force_jump_button               = config["PhysicsConfiguration"]["player_in_water_force_jump_button"].get<float>();
+   _player_in_water_time_to_allow_jump_button_ms    = config["PhysicsConfiguration"]["player_in_water_time_to_allow_jump_button_ms"].get<int32_t>();
+   _player_in_water_linear_velocity_y_clamp_min     = config["PhysicsConfiguration"]["player_in_water_linear_velocity_y_clamp_min"].get<float>();
+   _player_in_water_linear_velocity_y_clamp_max     = config["PhysicsConfiguration"]["player_in_water_linear_velocity_y_clamp_max"].get<float>();
+   _in_water_buoyancy_force                         = config["PhysicsConfiguration"]["in_water_buoyancy_force"].get<float>();
 }
 
 
@@ -155,6 +164,7 @@ void PhysicsConfiguration::serializeToFile(const std::string &filename)
 
 PhysicsConfiguration& PhysicsConfiguration::getInstance()
 {
+   static bool __initialized = false;
    static PhysicsConfiguration __instance;
 
    if (!__initialized)
