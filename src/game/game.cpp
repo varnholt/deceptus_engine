@@ -993,8 +993,8 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::P:
       case sf::Keyboard::Escape:
       {
-         const auto mapEnabled = DisplayMode::getInstance().isSet(Display::Map);
-         if (!mapEnabled)
+         const auto map_enabled = DisplayMode::getInstance().isSet(Display::Map);
+         if (!map_enabled)
          {
             showPauseMenu();
          }
@@ -1074,7 +1074,6 @@ void Game::processEvents()
    while (_window->pollEvent(event))
    {
       processEvent(event);
-
       EventSerializer::getInstance().add(event);
    }
 }

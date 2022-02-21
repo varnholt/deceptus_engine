@@ -15,7 +15,7 @@
 
 namespace
 {
-constexpr auto minimum_jump_interval_ms = 150;
+constexpr auto fixed_timestep = (1.0f / 60.0f);
 }
 
 
@@ -26,18 +26,15 @@ void PlayerJump::update(const PlayerJumpInfo& info)
 
    _jump_info = info;
 
-#ifdef JUMP_GRAVITY_SCALING
    if (was_in_air && !_jump_info._in_air)
    {
-      // player touched ground
-      _body->SetGravityScale(1.0f);
+      _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
    }
 
    if (_jump_info._in_water)
    {
-      _body->SetGravityScale(0.5f);
+      _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
    }
-#endif
 
    if (!_jump_info._in_air)
    {
@@ -75,78 +72,64 @@ void PlayerJump::updateJumpBuffer()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJump()
 {
+   auto& physics = PhysicsConfiguration::getInstance();
+
    if (_jump_info._in_water && _controls->isJumpButtonPressed())
    {
       // only allow jumping out of the water / water movement if the player stayed inside the water for a bit
       using namespace std::chrono_literals;
-      if ((StopWatch::getInstance().now() - _jump_info._water_entered_timepoint) > std::chrono::milliseconds(PhysicsConfiguration::getInstance()._player_in_water_time_to_allow_jump_button_ms))
+      const auto time_in_water = StopWatch::getInstance().now() - _jump_info._water_entered_timepoint;
+      const auto time_to_allow_up = std::chrono::milliseconds(physics._player_in_water_time_to_allow_jump_button_ms);
+      if (time_in_water > time_to_allow_up)
       {
          _body->ApplyForce(
-            b2Vec2{0, PhysicsConfiguration::getInstance()._player_in_water_force_jump_button},
+            b2Vec2{0, physics._player_in_water_force_jump_button},
             _body->GetWorldCenter(),
             true
          );
-      }
 
-      // std::cout << (StopWatch::getInstance().now() - _jump_info._water_entered_timepoint).count() << std::endl;
+         // to transition to a regular jump after leaving the water, the jump frame count and jump clock should be reset
+         _jump_frame_count = physics._player_jump_frame_count;
+         _jump_clock.restart();
+      }
    }
    else if (
-         (_jump_frame_count > 0 && _controls->isJumpButtonPressed())
-      || _jump_clock.getElapsedTime().asMilliseconds() < PhysicsConfiguration::getInstance()._player_jump_minimal_duration_ms
+         (_jump_frame_count > 0 && _controls->isJumpButtonPressed()) // still jumping
+      || _jump_clock.getElapsedTime().asMilliseconds() < physics._player_jump_minimal_duration_ms // fresh jump
    )
    {
       // jump higher if faster than regular walk speed
-      auto max_walk = PhysicsConfiguration::getInstance()._player_speed_max_walk;
-      auto vel = fabs(_body->GetLinearVelocity().x) - max_walk;
+      const auto max_walk = physics._player_speed_max_walk;
+      const auto linear_velocity = fabs(_body->GetLinearVelocity().x) - max_walk;
       auto factor = 1.0f;
 
-      if (vel > 0.0f)
+      if (linear_velocity > 0.0f)
       {
          // probably dead code
-         auto max_run = PhysicsConfiguration::getInstance()._player_speed_max_run;
-         factor = 1.0f + PhysicsConfiguration::getInstance()._player_jump_speed_factor * (vel / (max_run - max_walk));
+         const auto max_run = physics._player_speed_max_run;
+         factor = 1.0f + physics._player_jump_speed_factor * (linear_velocity / (max_run - max_walk));
       }
 
-      /*
-       * +---+
-         |###|
-         |###| <- current speed => factor
-         |###|
-         +###+
-         |   |
-         |   |
-         |   |
-       * +---+
-      */
-
-      // to change velocity by 5 in one time step
-      constexpr auto fixed_timestep = (1.0f / 60.0f);
-
       // f = mv / t
-      auto force = factor * _body->GetMass() * PhysicsConfiguration::getInstance()._player_jump_strength / fixed_timestep;
+      // spread the force over the configured number of time steps
+      auto force = factor * _body->GetMass() * physics._player_jump_strength / fixed_timestep;
+      force /= physics._player_jump_falloff;
 
-      // spread the force over 6.5 time steps
-      force /= PhysicsConfiguration::getInstance()._player_jump_falloff;
-
-      // more force is required to compensate falling velocity for scenarios
-      // - wall jump
-      // - double jump
+      // more force is required to compensate falling velocity for scenarios 'wall jump', 'double jump'
       if (_compensate_velocity)
       {
-         const auto bodyVelocity = _body->GetLinearVelocity();
-         force *= 1.75f * bodyVelocity.y;
-
+         const auto body_velocity = _body->GetLinearVelocity();
+         force *= physics._player_wall_jump_extra_force * body_velocity.y;
          _compensate_velocity = false;
       }
 
       _body->ApplyForceToCenter(b2Vec2(0.0f, -force), true);
 
       _jump_frame_count--;
-
       if (_jump_frame_count == 0)
       {
          // out of 'push upward'-frames, now it goes down quickly until player hits ground
-         _body->SetGravityScale(1.35f);
+         _body->SetGravityScale(physics._gravity_scale_jump_downward);
       }
    }
    else
@@ -157,18 +140,12 @@ void PlayerJump::updateJump()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// not used by the game
 void PlayerJump::jumpImpulse()
 {
+   const auto impulse = _body->GetMass() * PhysicsConfiguration::getInstance()._player_jump_impulse_factor;
+
    _jump_clock.restart();
-
-   float impulse = _body->GetMass() * 6.0f;
-
-   _body->ApplyLinearImpulse(
-      b2Vec2(0.0f, -impulse),
-      _body->GetWorldCenter(),
-      true
-   );
+   _body->ApplyLinearImpulse(b2Vec2(0.0f, -impulse), _body->GetWorldCenter(), true);
 }
 
 
@@ -176,20 +153,15 @@ void PlayerJump::jumpImpulse()
 void PlayerJump::jumpImpulse(const b2Vec2& impulse)
 {
    _jump_clock.restart();
-
-   _body->ApplyLinearImpulse(
-      impulse,
-      _body->GetWorldCenter(),
-      true
-   );
+   _body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// apply individual forces for a given number of frames
-// that's the approach this game is currently using
 void PlayerJump::jumpForce()
 {
+   // apply individual forces for a given number of frames
+   // that's the approach this game is currently using
    _jump_clock.restart();
    _jump_frame_count = PhysicsConfiguration::getInstance()._player_jump_frame_count;
 }
@@ -232,9 +204,9 @@ void PlayerJump::doubleJump()
 void PlayerJump::wallJump()
 {
    const auto skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-   const auto canWallJump = (skills & static_cast<int32_t>(ExtraSkill::Skill::WallJump));
+   const auto can_wall_jump = (skills & static_cast<int32_t>(ExtraSkill::Skill::WallJump));
 
-   if (!canWallJump)
+   if (!can_wall_jump)
    {
       return;
    }
@@ -249,11 +221,13 @@ void PlayerJump::wallJump()
    // double jump should happen with a constant impulse, no adjusting through button press duration
    _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
 
-   const auto impulse_x =   _body->GetMass() * PhysicsConfiguration::getInstance()._player_wall_jump_vector_x;
-   const auto impulse_y = -(_body->GetMass() * PhysicsConfiguration::getInstance()._player_wall_jump_vector_y);
+   auto& physics = PhysicsConfiguration::getInstance();
 
-   _walljump_frame_count = PhysicsConfiguration::getInstance()._player_wall_jump_frame_count;
-   _walljump_multiplier = PhysicsConfiguration::getInstance()._player_wall_jump_multiplier;
+   const auto impulse_x =   _body->GetMass() * physics._player_wall_jump_vector_x;
+   const auto impulse_y = -(_body->GetMass() * physics._player_wall_jump_vector_y);
+
+   _walljump_frame_count = physics._player_wall_jump_frame_count;
+   _walljump_multiplier = physics._player_wall_jump_multiplier;
    _walljump_direction = b2Vec2(_walljump_points_right ? impulse_x : -impulse_x, impulse_y);
    _timepoint_walljump = StopWatch::now();
 }
@@ -277,7 +251,7 @@ void PlayerJump::jump()
    sf::Time elapsed = _jump_clock.getElapsedTime();
 
    // only allow a new jump after a a couple of milliseconds
-   if (elapsed.asMilliseconds() > minimum_jump_interval_ms)
+   if (elapsed.asMilliseconds() > PhysicsConfiguration::getInstance()._player_minimum_jump_interval_ms)
    {
       // handle regular jump
       if (!_jump_info._in_air || _ground_contact_just_lost || _jump_info._climbing)
@@ -305,11 +279,8 @@ void PlayerJump::jump()
          {
             _last_jump_press_time = GlobalClock::getInstance().getElapsedTime();
 
-            // handle wall jump
-            wallJump();
-
-            // handle double jump
-            doubleJump();
+            wallJump();   // handle wall jump
+            doubleJump(); // handle double jump
          }
       }
    }
@@ -337,11 +308,6 @@ void PlayerJump::updateLostGroundContact()
       auto now = GlobalClock::getInstance().getElapsedTime();
       auto timeDiff = (now - _ground_contact_lost_time).asMilliseconds();
       _ground_contact_just_lost = (timeDiff < PhysicsConfiguration::getInstance()._player_jump_after_contact_lost_ms);
-
-      // if (mGroundContactJustLost)
-      // {
-      //    Log::Info() << "allowed to jump for another " << timeDiff << "ms";
-      // }
    }
    else
    {
@@ -368,28 +334,28 @@ void PlayerJump::updateWallSlide()
    }
 
    const auto skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-   const auto canWallSlide = (skills & static_cast<int32_t>(ExtraSkill::Skill::WallSlide));
+   const auto can_wallslide = (skills & static_cast<int32_t>(ExtraSkill::Skill::WallSlide));
 
-   if (!canWallSlide)
+   if (!can_wallslide)
    {
       _wallsliding = false;
       return;
    }
 
-   const auto leftTouching = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
-   const auto rightTouching = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
+   const auto touching_left = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
+   const auto touching_right = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
 
    if (
-         !(leftTouching  && _controls->isMovingLeft())
-      && !(rightTouching && _controls->isMovingRight())
+         !(touching_left  && _controls->isMovingLeft())
+      && !(touching_right && _controls->isMovingRight())
    )
    {
       _wallsliding = false;
       return;
    }
 
-   b2Vec2 vel = _body->GetLinearVelocity();
-   _body->ApplyForce(PhysicsConfiguration::getInstance()._player_wall_slide_friction * -vel, _body->GetWorldCenter(), false);
+   const auto& linear_velocity = _body->GetLinearVelocity();
+   _body->ApplyForce(PhysicsConfiguration::getInstance()._player_wall_slide_friction * -linear_velocity, _body->GetWorldCenter(), false);
 
    if (!_wallsliding)
    {
@@ -407,12 +373,12 @@ void PlayerJump::updateWallJump()
       return;
    }
 
-   _walljump_multiplier *= PhysicsConfiguration::getInstance()._player_wall_jump_multiplier_scale_per_frame;
-   _walljump_multiplier += PhysicsConfiguration::getInstance()._player_wall_jump_multiplier_increment_per_frame;
+   auto& physics = PhysicsConfiguration::getInstance();
+
+   _walljump_multiplier *= physics._player_wall_jump_multiplier_scale_per_frame;
+   _walljump_multiplier += physics._player_wall_jump_multiplier_increment_per_frame;
 
    _body->ApplyForceToCenter(_walljump_multiplier * _walljump_direction, true);
-
-   // Log::Info() << "step: " << _walljump_steps << " " << _walljump_direction.x << " " << _walljump_direction.y;
 
    _walljump_frame_count--;
 }
@@ -426,7 +392,7 @@ bool PlayerJump::isJumping() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& newControls)
+void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& controls)
 {
-   _controls = newControls;
+   _controls = controls;
 }
