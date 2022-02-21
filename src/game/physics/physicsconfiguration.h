@@ -28,6 +28,8 @@ struct PhysicsConfiguration
    int32_t _player_jump_minimal_duration_ms = 80;
    float _player_jump_falloff = 6.5f;
    float _player_jump_speed_factor = 0.1f;
+   float _player_jump_impulse_factor = 6.0f;     // not in json
+   float _player_minimum_jump_interval_ms = 150; // not in json
 
    // dash
    int32_t _player_dash_frame_count = 20;
@@ -46,6 +48,7 @@ struct PhysicsConfiguration
    float _player_wall_jump_multiplier = 20.0f;
    float _player_wall_jump_multiplier_increment_per_frame = -1.0f;
    float _player_wall_jump_multiplier_scale_per_frame = 1.0f;
+   float _player_wall_jump_extra_force = 1.75f; // not in json
 
    // double jump
    float _player_double_jump_factor = 6.0f;
@@ -60,6 +63,11 @@ struct PhysicsConfiguration
    float _player_in_water_linear_velocity_y_clamp_min = -1.5f;
    float _player_in_water_linear_velocity_y_clamp_max = 0.75f;
    float _in_water_buoyancy_force = 0.03f;
+
+   // gravity
+   float _gravity_scale_default = 1.0f;          // not in json
+   float _gravity_scale_water = 0.5f;            // not in json
+   float _gravity_scale_jump_downward = 1.35f;   // not in json
 
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
