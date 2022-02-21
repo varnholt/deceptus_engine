@@ -39,8 +39,6 @@ static constexpr auto PLAYER_1_COLLISION_ID = 3;
 #define RADTODEG 57.295779513082320876f
 #endif
 
-#define JUMP_GRAVITY_SCALING 1
-
 // configured timestep is 1/35
 // frame update timestep is 1/60
 // causes an error

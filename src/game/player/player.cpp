@@ -1509,13 +1509,6 @@ void Player::updateDash(Dash dir)
       _dash._dash_frame_count = PhysicsConfiguration::getInstance()._player_dash_frame_count;
       _dash._dash_multiplier = PhysicsConfiguration::getInstance()._player_dash_multiplier;
       _dash._dash_dir = dir;
-
-#ifndef JUMP_GRAVITY_SCALING
-      // disable gravity for player while dash is active
-      // but only do this if gravity scaling is not used
-      _body->SetGravityScale(0.0f);
-      _dashSteps = 30; // hardcoded to keep it working
-#endif
    }
 
    if (!_dash.isDashActive() || _dash._dash_dir == Dash::None)
@@ -1564,11 +1557,10 @@ void Player::updateAtmosphere()
    const auto inside_water = (tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft);
    setInWater(inside_water);
 
-#ifdef JUMP_GRAVITY_SCALING
    // entering water
    if (inside_water && !was_inside_water)
    {
-      _body->SetGravityScale(0.5f);
+      _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
       _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
       _water_entered_time = StopWatch::getInstance().now();
    }
@@ -1576,11 +1568,8 @@ void Player::updateAtmosphere()
    // leaving water
    if (!inside_water && was_inside_water)
    {
-      _body->SetGravityScale(1.0f);
+      _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
    }
-#else
-   _body->SetGravityScale(inside_water ? 0.5f : 1.0f);
-#endif
 
    if (!was_inside_water && isInWater())
    {
