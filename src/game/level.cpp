@@ -596,13 +596,13 @@ void Level::loadTmx()
 
                _mechanism_bouncers.push_back(bouncer);
 
-               addDebugRect(
-                  bouncer->getBody(),
-                  tmx_object->_x_px,
-                  tmx_object->_y_px,
-                  tmx_object->_width_px,
-                  tmx_object->_height_px
-               );
+               // addDebugRect(
+               //    bouncer->getBody(),
+               //    tmx_object->_x_px,
+               //    tmx_object->_y_px,
+               //    tmx_object->_width_px,
+               //    tmx_object->_height_px
+               // );
             }
             else if (object_group->_name == "controller_help")
             {
@@ -621,13 +621,13 @@ void Level::loadTmx()
 
                _mechanism_conveyor_belts.push_back(belt);
 
-               addDebugRect(
-                  belt->getBody(),
-                  tmx_object->_x_px,
-                  tmx_object->_y_px,
-                  tmx_object->_width_px,
-                  tmx_object->_height_px
-               );
+               // addDebugRect(
+               //    belt->getBody(),
+               //    tmx_object->_x_px,
+               //    tmx_object->_y_px,
+               //    tmx_object->_width_px,
+               //    tmx_object->_height_px
+               // );
             }
             else if (object_group->_name == "crushers")
             {
