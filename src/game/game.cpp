@@ -459,34 +459,34 @@ void Game::draw()
    MessageBox::draw(*_window_render_texture.get());
 
    _window_render_texture->display();
-   auto windowTextureSprite = sf::Sprite(_window_render_texture->getTexture());
+   auto window_texture_sprite = sf::Sprite(_window_render_texture->getTexture());
 
    if (GameConfiguration::getInstance()._fullscreen)
    {
       // scale window texture up to available window size
-      const auto scaleX = _window->getSize().x / static_cast<float>(_window_render_texture->getSize().x);
-      const auto scaleY = _window->getSize().y / static_cast<float>(_window_render_texture->getSize().y);
-      const auto scaleMin = std::min(static_cast<int32_t>(scaleX), static_cast<int32_t>(scaleY));
-      const auto dx = (scaleX - scaleMin) * 0.5f;
-      const auto dy = (scaleY - scaleMin) * 0.5f;
-      windowTextureSprite.setPosition(_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy);
-      windowTextureSprite.scale(static_cast<float>(scaleMin), static_cast<float>(scaleMin));
+      const auto scale_x = _window->getSize().x / static_cast<float>(_window_render_texture->getSize().x);
+      const auto scale_y = _window->getSize().y / static_cast<float>(_window_render_texture->getSize().y);
+      const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
+      const auto dx = (scale_x - scale_minimum) * 0.5f;
+      const auto dy = (scale_y - scale_minimum) * 0.5f;
+      window_texture_sprite.setPosition(_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy);
+      window_texture_sprite.scale(static_cast<float>(scale_minimum), static_cast<float>(scale_minimum));
    }
    else
    {
-      windowTextureSprite.setPosition(
+      window_texture_sprite.setPosition(
          static_cast<float>(_render_texture_offset.x),
          static_cast<float>(_render_texture_offset.y)
       );
    }
 
-   _window->draw(windowTextureSprite);
+   _window->draw(window_texture_sprite);
    _window->popGLStates();
    _window->display();
 
    if (_recording)
    {
-      const auto image = windowTextureSprite.getTexture()->copyToImage();
+      const auto image = window_texture_sprite.getTexture()->copyToImage();
 
       std::thread record([this, image](){
             std::ostringstream num;
@@ -575,7 +575,7 @@ void Game::menuLoadRequest()
 std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
 {
    auto screen_transition = std::make_unique<ScreenTransition>();
-   sf::Color fade_color{60, 0, 0};
+   const sf::Color fade_color{60, 0, 0};
    auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
    auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
    fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
@@ -819,7 +819,14 @@ void Game::processEvent(const sf::Event& event)
    {
       _window->close();
    }
-
+   else if (event.type == sf::Event::LostFocus)
+   {
+      // the map is save to leave open when losing the window focus
+      if (!DisplayMode::getInstance().isSet(Display::Map))
+      {
+         showPauseMenu();
+      }
+   }
    else if (event.type == sf::Event::KeyPressed)
    {
       if (MessageBox::keyboardKeyPressed(event.key.code))
@@ -844,7 +851,6 @@ void Game::processEvent(const sf::Event& event)
 
       processKeyPressedEvents(event);
    }
-
    else if (event.type == sf::Event::KeyReleased)
    {
       if (Menu::getInstance()->isVisible())
@@ -859,19 +865,26 @@ void Game::processEvent(const sf::Event& event)
 
       processKeyReleasedEvents(event);
    }
-
    else if (event.type == sf::Event::TextEntered)
    {
       if (Console::getInstance().isActive())
       {
-         auto unicode = event.text.unicode;
-
+         const auto unicode = event.text.unicode;
          if (unicode > 0x1F && unicode < 0x80)
          {
             Console::getInstance().append(static_cast<char>(unicode));
          }
       }
    }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Game::hideMap()
+{
+   // do the same as if the player had pressed tab again
+   GameState::getInstance().enqueueTogglePauseResume();
+   DisplayMode::getInstance().enqueueToggle(Display::Map);
 }
 
 
@@ -916,7 +929,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
          {
-            SaveState::getPlayerInfo()._extra_table._skills._skills &= ~ static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
+            SaveState::getPlayerInfo()._extra_table._skills._skills &= ~static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
          }
          else
          {
@@ -993,16 +1006,13 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::P:
       case sf::Keyboard::Escape:
       {
-         const auto map_enabled = DisplayMode::getInstance().isSet(Display::Map);
-         if (!map_enabled)
+         if (DisplayMode::getInstance().isSet(Display::Map))
          {
-            showPauseMenu();
+            hideMap();
          }
          else
          {
-            // do the same as if the player had pressed tab again
-            GameState::getInstance().enqueueTogglePauseResume();
-            DisplayMode::getInstance().enqueueToggle(Display::Map);
+            showPauseMenu();
          }
          break;
       }
