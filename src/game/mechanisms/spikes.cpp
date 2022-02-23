@@ -21,11 +21,11 @@
 
 namespace
 {
-static const auto update_time_up_ms = 5;
-static const auto update_time_down_ms = 30;
-static const auto down_time_ms = 2000;
-static const auto up_tims_ms = 2000;
-static const auto trap_time_ms = 250;
+constexpr auto update_time_up_ms = 5;
+constexpr auto update_time_down_ms = 30;
+constexpr auto down_time_ms = 2000;
+constexpr auto up_tims_ms = 2000;
+constexpr auto trap_time_ms = 250;
 }
 
 
@@ -66,10 +66,10 @@ void Spikes::updateInterval()
       }
    }
 
-   const auto updateTime = (_triggered ? update_time_up_ms : update_time_down_ms);
-   if (!wait && _elapsed_ms > updateTime)
+   const auto update_time_ms = (_triggered ? update_time_up_ms : update_time_down_ms);
+   if (!wait && _elapsed_ms > update_time_ms)
    {
-      _elapsed_ms = (_elapsed_ms % updateTime);
+      _elapsed_ms = (_elapsed_ms % update_time_ms);
 
       if (_triggered)
       {
@@ -136,10 +136,10 @@ void Spikes::updateTrap()
       }
    }
 
-   const auto updateTime = (_triggered ? update_time_up_ms : update_time_down_ms);
-   if (_elapsed_ms > updateTime)
+   const auto udate_time_ms = (_triggered ? update_time_up_ms : update_time_down_ms);
+   if (_elapsed_ms > udate_time_ms)
    {
-      _elapsed_ms = (_elapsed_ms % updateTime);
+      _elapsed_ms = (_elapsed_ms % udate_time_ms);
 
       if (_triggered)
       {
@@ -211,7 +211,12 @@ const sf::IntRect& Spikes::getPixelRect() const
 
 void Spikes::updateSpriteRect()
 {
-   _sprite.setTextureRect({_tu * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+   _sprite.setTextureRect({
+      _tu * PIXELS_PER_TILE,
+      _tv * PIXELS_PER_TILE,
+      PIXELS_PER_TILE,
+      PIXELS_PER_TILE}
+   );
 }
 
 
@@ -247,8 +252,8 @@ void Spikes::update(const sf::Time& dt)
    if (_deadly)
    {
       // check for intersection with player
-      auto playerRect = Player::getCurrent()->getPlayerPixelRect();
-      if (playerRect.intersects(_pixel_rect))
+      const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+      if (player_rect.intersects(_pixel_rect))
       {
          Player::getCurrent()->damage(100);
       }
@@ -256,7 +261,7 @@ void Spikes::update(const sf::Time& dt)
 }
 
 
-std::vector<std::shared_ptr<Spikes> > Spikes::load(
+std::vector<std::shared_ptr<Spikes>> Spikes::load(
    TmxLayer* layer,
    TmxTileSet* tileset,
    const std::filesystem::path& base_path,
@@ -294,19 +299,17 @@ std::vector<std::shared_ptr<Spikes> > Spikes::load(
 
          if (tile_number != 0)
          {
-            auto id = (tile_number - first_id);
+            const auto id = (tile_number - first_id);
+
             auto spikes = std::make_shared<Spikes>();
             spikes->_texture = texture;
-
-            all_spikes.push_back(spikes);
-
             spikes->_tile_position.x = static_cast<float>(i);
             spikes->_tile_position.y = static_cast<float>(j);
-
             spikes->_tu = static_cast<int32_t>(id % tiles_per_row);
             spikes->_tv = static_cast<int32_t>(id / tiles_per_row);
-
             spikes->_mode = mode;
+
+            all_spikes.push_back(spikes);
 
             if (mode == Mode::Trap)
             {
