@@ -26,7 +26,7 @@ public:
    void forceSync();
 
    int getKeysPressed() const;
-   void setKeysPressed(int keys);
+   void setKeysPressed(int32_t keys);
 
    bool isLookingAround() const;
    bool isControllerButtonPressed(int32_t button_enum) const;
