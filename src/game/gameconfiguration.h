@@ -19,7 +19,14 @@ struct GameConfiguration
    int32_t _audio_volume_sfx = 50;
    int32_t _audio_volume_music = 50;
 
+   enum class PauseMode
+   {
+      AutomaticPause = 0,
+      ManualPause = 1
+   };
+
    int32_t _text_speed = 2;
+   PauseMode _pause_mode = PauseMode::AutomaticPause;
 
    void deserializeFromFile(const std::string& filename = "data/config/game.json");
    void serializeToFile(const std::string& filename = "data/config/game.json");
