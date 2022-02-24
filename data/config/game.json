@@ -10,7 +10,8 @@
         "view_height": 360,
         "brightness": 0.5,
         "vsync": true,
-        "text_speed":2
+        "text_speed":2,
+        "pause_mode":0
     }
 }
 

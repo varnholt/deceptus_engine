@@ -36,6 +36,7 @@ std::string GameConfiguration::serialize()
             {"audio_volume_music",  _audio_volume_music},
 
             {"text_speed",          _text_speed},
+            {"pause_mode",          _pause_mode},
          }
       }
    };
@@ -67,6 +68,7 @@ void GameConfiguration::deserialize(const std::string& data)
        _audio_volume_music  = config["GameConfiguration"]["audio_volume_music"].get<int32_t>();
 
        _text_speed          = config["GameConfiguration"]["text_speed"].get<int32_t>();
+       _pause_mode          = static_cast<PauseMode>(config["GameConfiguration"]["pause_mode"].get<int32_t>());
    }
    catch (const std::exception& e)
    {

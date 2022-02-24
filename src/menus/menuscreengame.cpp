@@ -64,6 +64,7 @@ void MenuScreenGame::set(int32_t x)
       }
       case Selection::AutomaticPause:
       {
+         config._pause_mode = static_cast<GameConfiguration::PauseMode>(std::clamp(static_cast<int32_t>(config._pause_mode) + x, 0, 1));
          break;
       }
       default:
@@ -117,7 +118,7 @@ void MenuScreenGame::updateLayers()
    auto auto_pause = _selection == Selection::AutomaticPause;
    auto text_speed = _selection == Selection::TextSpeed;
 
-   auto auto_pause_selection = 0;
+   auto auto_pause_selection = GameConfiguration::getInstance()._pause_mode;
    auto text_speed_selection = GameConfiguration::getInstance()._text_speed;
 
    _layers["defaults_xbox_0"]->_visible = isControllerUsed();
@@ -135,8 +136,8 @@ void MenuScreenGame::updateLayers()
    _layers["autoPause_highlight"]->_visible = auto_pause;
    _layers["autoPause_help"]->_visible = auto_pause;
    _layers["autoPause_arrows"]->_visible = auto_pause;
-   _layers["autoPause_value_no"]->_visible = auto_pause_selection == 0;
-   _layers["autoPause_value_yes"]->_visible = auto_pause_selection == 1;
+   _layers["autoPause_value_no"]->_visible = (auto_pause_selection == GameConfiguration::PauseMode::ManualPause);
+   _layers["autoPause_value_yes"]->_visible = (auto_pause_selection == GameConfiguration::PauseMode::AutomaticPause);
 
    _layers["textSpeed_text_0"]->_visible = !text_speed;
    _layers["textSpeed_text_1"]->_visible = text_speed;
