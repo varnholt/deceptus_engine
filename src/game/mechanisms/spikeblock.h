@@ -22,6 +22,13 @@ struct TmxObject;
 class SpikeBlock : public GameMechanism, public GameNode
 {
    public:
+
+      enum class Mode
+      {
+         Lever,
+         Interval
+      };
+
       SpikeBlock(GameNode* parent = nullptr);
 
       void deserialize(TmxObject* tmx_object);
@@ -30,10 +37,17 @@ class SpikeBlock : public GameMechanism, public GameNode
       void update(const sf::Time& dt);
 
    private:
+
+      void updateSpriteRect();
+
       std::shared_ptr<sf::Texture> _texture_map;
       std::shared_ptr<sf::Texture> _normal_map;
       sf::Sprite _sprite;
       sf::IntRect _rectangle;
 
+      int32_t _tu_px = 0;
+      int32_t _tv_px = 2;
+
+      Mode _mode = Mode::Lever;
 };
 
