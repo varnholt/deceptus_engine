@@ -821,10 +821,28 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (event.type == sf::Event::LostFocus)
    {
-      // the map is save to leave open when losing the window focus
-      if (!DisplayMode::getInstance().isSet(Display::Map))
+      if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
       {
-         showPauseMenu();
+         // the map is save to leave open when losing the window focus
+         if (!DisplayMode::getInstance().isSet(Display::Map))
+         {
+            showPauseMenu();
+         }
+      }
+      else
+      {
+         if (_player)
+         {
+            CameraPanorama::getInstance().updateLookState(Look::Active, false);
+            _player->getControls()->setKeysPressed(0);
+         }
+      }
+   }
+   else if (event.type == sf::Event::GainedFocus)
+   {
+      if (_player)
+      {
+         _player->getControls()->forceSync();
       }
    }
    else if (event.type == sf::Event::KeyPressed)

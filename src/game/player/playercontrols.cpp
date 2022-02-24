@@ -424,7 +424,7 @@ int PlayerControls::getKeysPressed() const
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerControls::setKeysPressed(int keysPressed)
+void PlayerControls::setKeysPressed(int32_t keysPressed)
 {
    _keys_pressed = keysPressed;
 }
