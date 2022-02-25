@@ -25,8 +25,9 @@ std::vector<TmxObject*> Lever::__rectangles;
 
 namespace
 {
-static const auto SPRITES_PER_ROW = 11;
-static const auto ROW_CENTER = 6;
+constexpr auto sprites_per_row = 11;
+constexpr auto row_center = 6;
+constexpr auto left_offset = (sprites_per_row - 1) * 3 * PIXELS_PER_TILE;
 }
 
 
@@ -69,9 +70,9 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
          if (tile_number != 0)
          {
-            auto tileId = tile_number - first_id;
+            auto tile_id = tile_number - first_id;
 
-            if (tileId == 33)
+            if (tile_id == 33)
             {
                auto lever = std::make_shared<Lever>();
 
@@ -100,24 +101,9 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
 
 //-----------------------------------------------------------------------------
-bool Lever::getPlayerAtLever() const
-{
-   return _player_at_lever;
-}
-
-
-//-----------------------------------------------------------------------------
-void Lever::setPlayerAtLever(bool player_at_lever)
-{
-   _player_at_lever = player_at_lever;
-}
-
-
-//-----------------------------------------------------------------------------
 void Lever::updateSprite()
 {
    const auto left = _dir == -1;
-   static const auto left_offset = (SPRITES_PER_ROW - 1) * 3 * PIXELS_PER_TILE;
 
    _sprite.setTextureRect({
       left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE),
@@ -129,10 +115,17 @@ void Lever::updateSprite()
 
 
 //-----------------------------------------------------------------------------
+const sf::Rect<int32_t>& Lever::getPixelRect() const
+{
+   return _rect;
+}
+
+
+//-----------------------------------------------------------------------------
 void Lever::update(const sf::Time& /*dt*/)
 {
-   auto player_rect = Player::getCurrent()->getPlayerPixelRect();
-   setPlayerAtLever(_rect.intersects(player_rect));
+   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   _player_at_lever = _rect.intersects(player_rect);
 
    bool reached = false;
 
@@ -144,12 +137,12 @@ void Lever::update(const sf::Time& /*dt*/)
    else if (_target_state == State::Right)
    {
       _dir = 1;
-      reached = (_offset == SPRITES_PER_ROW - 1);
+      reached = (_offset == sprites_per_row - 1);
    }
    else if (_target_state == State::Middle)
    {
       _dir = (_state_previous == State::Left) ? 1 : -1;
-      reached = (_offset == ROW_CENTER);
+      reached = (_offset == row_center);
    };
 
    if (reached)

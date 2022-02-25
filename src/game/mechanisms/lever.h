@@ -40,6 +40,7 @@ public:
 
    void toggle();
    void setCallbacks(const std::vector<Callback>& callbacks);
+   const sf::Rect<int32_t>& getPixelRect() const;
 
    static void addSearchRect(TmxObject* rect);
 
@@ -61,11 +62,8 @@ public:
       const std::shared_ptr<b2World>&
    );
 
-   bool getPlayerAtLever() const;
-   void setPlayerAtLever(bool player_at_lever);
-
-
    void updateReceivers();
+
 
 private:
 

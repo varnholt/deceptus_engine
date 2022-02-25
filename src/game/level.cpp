@@ -422,6 +422,17 @@ void Level::loadTmx()
          else if (layer->_name == "levers")
          {
             _mechanism_levers = Lever::load(layer, tileset, path, _world);
+
+            // auto lever = std::dynamic_pointer_cast<Lever>(_mechanism_levers[0]);
+            // const auto rect = lever->getPixelRect();
+            //
+            // addDebugRect(
+            //    lever.get(),
+            //    static_cast<float>(rect.left),
+            //    static_cast<float>(rect.top),
+            //    static_cast<float>(rect.width),
+            //    static_cast<float>(rect.height)
+            // );
          }
          else if (layer->_name == "platforms")
          {
@@ -1776,7 +1787,7 @@ Level* Level::getCurrentLevel()
 
 
 //-----------------------------------------------------------------------------
-void Level::addDebugRect(b2Body* body,  float x, float y, float w, float h)
+void Level::addDebugRect(void* body,  float x, float y, float w, float h)
 {
    auto points = new b2Vec2[4];
 
@@ -1875,14 +1886,14 @@ void Level::toggleMechanisms()
 
 
 //-----------------------------------------------------------------------------
-const std::map<b2Body*, size_t>& Level::getPointSizeMap()
+const std::map<void*, size_t>& Level::getPointSizeMap()
 {
    return _point_count_map;
 }
 
 
 //-----------------------------------------------------------------------------
-const std::map<b2Body*, b2Vec2*>& Level::getPointMap()
+const std::map<void*, b2Vec2*>& Level::getPointMap()
 {
    return _point_map;
 }
