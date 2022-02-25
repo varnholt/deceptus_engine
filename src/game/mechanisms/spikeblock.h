@@ -33,10 +33,13 @@ class SpikeBlock : public GameMechanism, public GameNode
 
       void deserialize(TmxObject* tmx_object);
 
-      void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
-      void update(const sf::Time& dt);
+      void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+      void update(const sf::Time& dt) override;
+      void setEnabled(bool enabled) override;
 
-   private:
+      const sf::IntRect& getPixelRect() const;
+
+private:
 
       void updateSpriteRect();
 
@@ -45,8 +48,14 @@ class SpikeBlock : public GameMechanism, public GameNode
       sf::Sprite _sprite;
       sf::IntRect _rectangle;
 
-      int32_t _tu_px = 0;
-      int32_t _tv_px = 2;
+      static constexpr int32_t _sprite_index_enabled = 16;
+      static constexpr int32_t _sprite_index_disabled = 39;
+
+      float _sprite_value = 0.0f;
+      int32_t _sprite_index_current = _sprite_index_enabled;
+      int32_t _sprite_index_target = _sprite_index_enabled;
+      int32_t _tu_tl = 0;
+      int32_t _tv_tl = 0;
 
       Mode _mode = Mode::Lever;
 };
