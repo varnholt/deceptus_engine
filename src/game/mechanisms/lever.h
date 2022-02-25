@@ -42,13 +42,16 @@ public:
    void setCallbacks(const std::vector<Callback>& callbacks);
 
    static void addSearchRect(TmxObject* rect);
+
+   // requires a unified datastructure/mechanism in the future!
    static void merge(
       const std::vector<std::shared_ptr<GameMechanism>>& levers,
       const std::vector<std::shared_ptr<GameMechanism>>& lasers,
       const std::vector<std::shared_ptr<GameMechanism>>& platforms,
       const std::vector<std::shared_ptr<GameMechanism>>& fans,
       const std::vector<std::shared_ptr<GameMechanism>>& belts,
-      const std::vector<std::shared_ptr<GameMechanism>>& spikes
+      const std::vector<std::shared_ptr<GameMechanism>>& spikes,
+      const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks
    );
 
    static std::vector<std::shared_ptr<GameMechanism>> load(
