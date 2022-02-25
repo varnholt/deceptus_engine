@@ -14,6 +14,7 @@
 #include "movingplatform.h"
 #include "player/player.h"
 #include "spikes.h"
+#include "spikeblock.h"
 #include "texturepool.h"
 
 #include <iostream>
@@ -274,7 +275,8 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& platforms,
    const std::vector<std::shared_ptr<GameMechanism>>& fans,
    const std::vector<std::shared_ptr<GameMechanism>>& belts,
-   const std::vector<std::shared_ptr<GameMechanism>>& spikes
+   const std::vector<std::shared_ptr<GameMechanism>>& spikes,
+   const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks
 )
 {
    for (auto rect : __rectangles)
@@ -376,6 +378,19 @@ void Lever::merge(
                {
                   callbacks.push_back([spikes](int32_t state) {
                         spikes->setEnabled(state == -1 ? false : true);
+                     }
+                  );
+               }
+            }
+
+            for (auto& s : spike_blocks)
+            {
+               auto spike_block = std::dynamic_pointer_cast<SpikeBlock>(s);
+
+               if (spike_block->getPixelRect().intersects(search_rect))
+               {
+                  callbacks.push_back([spike_block](int32_t state) {
+                        spike_block->setEnabled(state == -1 ? false : true);
                      }
                   );
                }

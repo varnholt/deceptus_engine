@@ -545,7 +545,7 @@ void Level::loadTmx()
                spike_ball->setup(tmx_object, _world);
                _mechanism_spike_balls.push_back(spike_ball);
             }
-            else if (object_group->_name == "spike_block")
+            else if (object_group->_name == "spike_blocks")
             {
                auto spike_block = std::make_shared<SpikeBlock>(dynamic_cast<GameNode*>(this));
                spike_block->deserialize(tmx_object);
@@ -693,7 +693,7 @@ void Level::loadTmx()
    Fan::merge();
    TileMapFactory::merge(_tile_maps);
    _mechanism_fans = Fan::getFans();
-   Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes);
+   Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes, _mechanism_spike_blocks);
    _mechanism_platforms = MovingPlatform::merge(path, _world);
 
    _map->loadLevelTextures(
