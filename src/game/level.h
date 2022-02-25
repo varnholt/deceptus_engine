@@ -84,8 +84,8 @@ public:
    const std::shared_ptr<b2World>& getWorld() const;
    const sf::Vector2f& getStartPosition() const;
 
-   const std::map<b2Body*, b2Vec2*>& getPointMap();
-   const std::map<b2Body*, size_t>& getPointSizeMap();
+   const std::map<void*, b2Vec2*>& getPointMap();
+   const std::map<void*, size_t>& getPointSizeMap();
 
    std::shared_ptr<Portal> getNearbyPortal();
    std::shared_ptr<Bouncer> getNearbyBouncer();
@@ -111,7 +111,7 @@ public:
 
 protected:
 
-   void addDebugRect(b2Body* body, float x, float y, float w, float h);
+   void addDebugRect(void* body, float x, float y, float w, float h);
 
    void parsePhysicsTiles(
          TmxLayer* layer,
@@ -245,8 +245,8 @@ protected:
    bool _screenshot = false;
 
    // box2d
-   std::map<b2Body*, b2Vec2*> _point_map;
-   std::map<b2Body*, size_t> _point_count_map;
+   std::map<void*, b2Vec2*> _point_map;
+   std::map<void*, size_t> _point_count_map;
 
    std::shared_ptr<b2World> _world = nullptr;
    std::vector<std::vector<b2Vec2>> _world_chains;
