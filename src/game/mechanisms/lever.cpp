@@ -76,6 +76,16 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
             {
                auto lever = std::make_shared<Lever>();
 
+               if (layer->_properties)
+               {
+                  auto z_it = layer->_properties->_map.find("z");
+                  if (z_it != layer->_properties->_map.end())
+                  {
+                     auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+                     lever->setZ(z_index);
+                  }
+               }
+
                // sprite is two tiles high
                const auto x = PIXELS_PER_TILE * i;
                const auto y = PIXELS_PER_TILE * (j - 1);

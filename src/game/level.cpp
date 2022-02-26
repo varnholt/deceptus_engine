@@ -422,17 +422,6 @@ void Level::loadTmx()
          else if (layer->_name == "levers")
          {
             _mechanism_levers = Lever::load(layer, tileset, path, _world);
-
-            // auto lever = std::dynamic_pointer_cast<Lever>(_mechanism_levers[0]);
-            // const auto rect = lever->getPixelRect();
-            //
-            // addDebugRect(
-            //    lever.get(),
-            //    static_cast<float>(rect.left),
-            //    static_cast<float>(rect.top),
-            //    static_cast<float>(rect.width),
-            //    static_cast<float>(rect.height)
-            // );
          }
          else if (layer->_name == "platforms")
          {
