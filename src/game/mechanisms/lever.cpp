@@ -39,8 +39,6 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
    const std::shared_ptr<b2World>&
 )
 {
-   __rectangles.clear();
-
    if (!layer)
    {
       Log::Error() << "tmx layer is empty, please fix your level design";
@@ -407,6 +405,8 @@ void Lever::merge(
          }
       }
    }
+
+   __rectangles.clear();
 }
 
 
