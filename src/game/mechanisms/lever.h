@@ -84,7 +84,6 @@ private:
    std::shared_ptr<sf::Texture> _texture;
 
    static std::vector<TmxObject*> __rectangles;
-   //static std::vector<std::shared_ptr<Lever>> sLevers;
 };
 
 
