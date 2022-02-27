@@ -53,6 +53,8 @@ void SpikeBlock::deserialize(TmxObject* tmx_object)
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
    updateSpriteRect();
+
+   // _mode = Mode::Interval;
 }
 
 
@@ -84,6 +86,22 @@ void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
 void SpikeBlock::update(const sf::Time& dt)
 {
+   if (_mode == Mode::Interval)
+   {
+      _elapsed += dt;
+
+      if (!isEnabled() && _elapsed.asMilliseconds() >= _time_off_ms)
+      {
+         setEnabled(true);
+         _elapsed = {};
+      }
+      else if (isEnabled() && _elapsed.asMilliseconds() >= _time_on_ms)
+      {
+         setEnabled(false);
+         _elapsed = {};
+      }
+   }
+
    if (Player::getCurrent()->getPlayerPixelRect().intersects(_rectangle))
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
