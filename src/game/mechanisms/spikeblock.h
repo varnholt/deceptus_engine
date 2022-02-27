@@ -48,10 +48,12 @@ private:
       sf::Sprite _sprite;
       sf::IntRect _rectangle;
 
-      static constexpr int32_t _sprite_index_enabled = 16;
+      static constexpr int32_t _sprite_index_enabled = 32;
       static constexpr int32_t _sprite_index_disabled = 39;
+      static constexpr int32_t _sprite_index_deadly_min = _sprite_index_enabled - 3;
+      static constexpr int32_t _sprite_index_deadly_max = _sprite_index_enabled + 3;
 
-      float _sprite_value = 0.0f;
+      float _sprite_value = _sprite_index_enabled;
       int32_t _sprite_index_current = _sprite_index_enabled;
       int32_t _sprite_index_target = _sprite_index_enabled;
       int32_t _tu_tl = 0;
