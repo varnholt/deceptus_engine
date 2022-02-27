@@ -60,5 +60,8 @@ private:
       int32_t _tv_tl = 0;
 
       Mode _mode = Mode::Lever;
+      sf::Time _elapsed;
+      int32_t _time_on_ms = 4000;
+      int32_t _time_off_ms = 3000;
 };
 
