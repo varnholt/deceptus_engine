@@ -12,9 +12,9 @@
   +---+---+---+---+---+---+---+---+
   | * | * | * | O | O |( )|( )|(#)|
   +---+---+---+---+---+---+---+---+
-  |(A)|(#)|(#)|(#)|(#)|(#)|(#)|(#)| A = active sprite (16)
+  |(#)|(#)|(#)|(#)|(#)|(#)|(#)|(#)|
   +---+---+---+---+---+---+---+---+
-  |(#)|(#)|(=)|(=)|(=)|(=)|(=)|(=)|
+  |(#)|(#)|(=)|(=)|(=)|(=)|(=)|(=)| active
   +---+---+---+---+---+---+---+---+
   |( )| O | O | * | * | o | . |   | disabled
   +---+---+---+---+---+---+---+---+
@@ -25,8 +25,8 @@
 namespace
 {
 constexpr auto count_columns = 8;
-constexpr auto count_rows = 5;
-constexpr auto animation_speed = 1.0f;
+constexpr auto animation_speed = 40.0f;
+constexpr auto damage = 100;
 }
 
 
@@ -58,8 +58,8 @@ void SpikeBlock::deserialize(TmxObject* tmx_object)
 
 void SpikeBlock::updateSpriteRect()
 {
-   _tu_tl = _sprite_index_current % 8;
-   _tv_tl = _sprite_index_current / 8;
+   _tu_tl = _sprite_index_current % count_columns;
+   _tv_tl = _sprite_index_current / count_columns;
 
    _sprite.setTextureRect({
       _tu_tl * PIXELS_PER_TILE,
@@ -86,7 +86,10 @@ void SpikeBlock::update(const sf::Time& dt)
 {
    if (Player::getCurrent()->getPlayerPixelRect().intersects(_rectangle))
    {
-      Player::getCurrent()->damage(100);
+      if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
+      {
+         Player::getCurrent()->damage(damage);
+      }
    }
 
    if (_sprite_index_current != _sprite_index_target)
@@ -97,7 +100,18 @@ void SpikeBlock::update(const sf::Time& dt)
 
       if (sprite_index != _sprite_index_current)
       {
-         _sprite_index_current = sprite_index;
+         // reset after completing animation cycle
+         if (sprite_index >= _sprite_index_disabled)
+         {
+            _sprite_value = 0.0f;
+            _sprite_index_current = 0;
+            _sprite_index_target = 0;
+         }
+         else
+         {
+            _sprite_index_current = sprite_index;
+         }
+
          updateSpriteRect();
       }
    }
@@ -107,7 +121,7 @@ void SpikeBlock::update(const sf::Time& dt)
 void SpikeBlock::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
-   _sprite_index_target = (enabled ? 16 : 39);
+   _sprite_index_target = (enabled ? _sprite_index_enabled : _sprite_index_disabled);
 }
 
 
