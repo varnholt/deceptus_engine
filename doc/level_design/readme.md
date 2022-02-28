@@ -264,6 +264,7 @@ Levers! One of the most important mechanisms. In short, they do what levers do: 
 - Lasers
 - Platforms
 - Spikes
+- Spike Blocks
 
 While you draw your levers just into a tile layer called `levers`, a connection between another mechanism and the lever is created by adding an object group `switchable_objects`; in there you draw a rectangle that covers both the object(s) that should be switched on and off as well as the lever.
 
@@ -324,6 +325,27 @@ If you do not know how levers work, you can read more about that in the descript
 As a side-note. If you want spikes that are extended, just put them into your `toggle_spikes` layer and don't create a connection to any lever.
 
 ![](images/mechanism_spikes.png)
+
+<br><br>
+
+## Spike Blocks
+
+![](images/mechanism_spike_blocks.png)
+
+Spike Blocks are small, nasty barriers that  - once extracted - the player cannot easily get past. Usually they are placed in groups, such as rows or columns, but they can be positioned in arbitray shapes. They come in two different modes: Either their state is controlled via the lever mechanism, or they extract and retract in given intervals. That's the interval mode.
+
+While they are in lever mode without actually being connected to a lever, they are always extracted.
+
+If you need to know how to connect Spike Blocks to a lever, please check the documentation about the Lever Mechanism.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|enabled|bool|The default enabled state (default is `true`)|
+|mode|string|The Spike Block's mode, either '`interval`' or '`lever`' (default is '`lever`')|
+|time_on_ms|int|When mode is '`interval`', the time the Spike Block is extracted, given in ms (default is 4000ms)|
+|time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
+
 
 <br><br>
 
