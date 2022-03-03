@@ -12,17 +12,13 @@ namespace
 {
 static constexpr auto width_m  = 36 * MPP;
 static constexpr auto height_m = 36 * MPP;
-static constexpr auto bevel_m = 6 * MPP;
+static constexpr auto bevel_m = 0 * MPP;
 
 static constexpr auto columns = 12;
 static constexpr auto tiles_per_box_width = 4;
 static constexpr auto tiles_per_box_height = 3;
 
 static constexpr auto animation_speed = 8.0f;
-static constexpr auto move_amplitude = 0.08f;
-static constexpr auto move_frequency = 4.19f;
-
-static constexpr auto pop_frequency = 15.0f;
 
 static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
@@ -47,25 +43,21 @@ CollapsingPlatform::CollapsingPlatform(
 
    // set up shape
    //
-   //       0        7
+   //       0        5
    //       +--------+
    //      /          \
-   //   1 +            + 6
+   //   1 +            + 4
    //     |            |
-   //   2 +            + 5
-   //      \          /
-   //       +--------+
-   //       3        4
+   //   2 +------------+ 3
 
-   std::array<b2Vec2, 8> vertices {
-      b2Vec2{bevel_m,             0.0f              },
-      b2Vec2{0.0f,                bevel_m           },
-      b2Vec2{0.0f,                height_m - bevel_m},
-      b2Vec2{bevel_m,             height_m          },
-      b2Vec2{width_m - bevel_m,   height_m          },
-      b2Vec2{width_m,             height_m - bevel_m},
-      b2Vec2{width_m,             bevel_m           },
-      b2Vec2{width_m - bevel_m,   0.0f              },
+
+   std::array<b2Vec2, 6> vertices {
+      b2Vec2{bevel_m,             0.0f    },
+      b2Vec2{0.0f,                bevel_m },
+      b2Vec2{0.0f,                height_m},
+      b2Vec2{width_m,             height_m},
+      b2Vec2{width_m,             bevel_m },
+      b2Vec2{width_m - bevel_m,   0.0f    },
    };
 
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
@@ -99,18 +91,18 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 {
    auto sprite_index = 0;
 
-   if (_popped)
+   if (_collapsed)
    {
-      sprite_index = std::min(static_cast<int32_t>(_pop_elapsed_s * pop_frequency), columns - 1);
+      sprite_index = std::min(static_cast<int32_t>(_collapse_elapsed_s * animation_speed), columns - 1);
    }
    else
    {
-      sprite_index = static_cast<int32_t>(_mapped_value_normalized * columns + 6) % columns;
+      sprite_index = 0;
    }
 
    _sprite.setTextureRect({
          sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
-         (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
+         (_collapsed ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
          PIXELS_PER_TILE * tiles_per_box_width,
          PIXELS_PER_TILE * tiles_per_box_height
       }
@@ -123,16 +115,9 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 void CollapsingPlatform::update(const sf::Time& dt)
 {
    _elapsed_s += dt.asSeconds();
-   _pop_elapsed_s += dt.asSeconds();
+   _collapse_elapsed_s += dt.asSeconds();
 
-   const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
-   _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
-
-   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f};
-
-   _body->SetTransform(_position_m + move_offset, 0.0f);
-
-   if (_popped)
+   if (_collapsed)
    {
       _body->SetActive(false);
    }
@@ -141,7 +126,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
 
 void CollapsingPlatform::beginContact()
 {
-   if (_popped)
+   if (_collapsed)
    {
       return;
    }
@@ -152,19 +137,21 @@ void CollapsingPlatform::beginContact()
 
 void CollapsingPlatform::endContact()
 {
-   if (_popped)
+   if (_collapsed)
    {
       return;
    }
 
    _contact_count--;
 
-   if (_contact_count == 0)
-   {
-      _popped = true;
-      _pop_time = GlobalClock::getInstance().getElapsedTime();
-      _pop_elapsed_s = 0.0f;
-   }
+   // measure the time elapsed on the platform instead
+
+//   if (_contact_count == 0)
+//   {
+//      _collapsed = true;
+//      _collapse_time = GlobalClock::getInstance().getElapsedTime();
+//      _pop_elapsed_s = 0.0f;
+//   }
 }
 
 

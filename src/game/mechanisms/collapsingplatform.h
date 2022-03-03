@@ -28,11 +28,10 @@ public:
 private:
    float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
-   float _pop_elapsed_s = 0.0f;
-   bool _popped = false;
+   float _collapse_elapsed_s = 0.0f;
+   bool _collapsed = false;
    int32_t _contact_count = 0;
-   float _mapped_value_normalized = 0.0f;
-   sf::Time _pop_time;
+   sf::Time _collapse_time;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;
