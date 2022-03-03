@@ -332,7 +332,7 @@ As a side-note. If you want spikes that are extended, just put them into your `t
 
 ![](images/mechanism_spike_blocks.png)
 
-Spike Blocks are small, nasty barriers that  - once extracted - the player cannot easily get past. Usually they are placed in groups, such as rows or columns, but they can be positioned in arbitray shapes. They come in two different modes: Either their state is controlled via the lever mechanism, or they extract and retract in given intervals. That's the interval mode.
+Spike Blocks are small, nasty barriers that  - once extracted - the player cannot easily get past. Usually they are placed in groups, such as rows or columns, but they can be positioned in arbitray shapes. They come in two different modes: Either their state is controlled via the Lever Mechanism, or they extract and retract in given intervals. That's the interval mode.
 
 While they are in lever mode without actually being connected to a lever, they are always extracted.
 
