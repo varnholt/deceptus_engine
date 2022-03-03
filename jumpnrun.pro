@@ -186,6 +186,7 @@ SOURCES += \
    src/game/mechanisms/bouncer.cpp \
    src/game/mechanisms/bubblecube.cpp \
    src/game/mechanisms/checkpoint.cpp \
+   src/game/mechanisms/collapsingplatform.cpp \
    src/game/mechanisms/controllerhelp.cpp \
    src/game/mechanisms/conveyorbelt.cpp \
    src/game/mechanisms/crusher.cpp \
@@ -362,6 +363,7 @@ HEADERS += \
    src/game/mechanisms/bouncer.h \
    src/game/mechanisms/bubblecube.h \
    src/game/mechanisms/checkpoint.h \
+   src/game/mechanisms/collapsingplatform.h \
    src/game/mechanisms/controllerhelp.h \
    src/game/mechanisms/conveyorbelt.h \
    src/game/mechanisms/crusher.h \
