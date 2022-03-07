@@ -208,6 +208,7 @@ enum ObjectType
    ObjectTypeSolid,
    ObjectTypeSolidOneWay,
    ObjectTypeBubbleCube,
+   ObjectTypeCollapsingPlatform,
 };
 
 
