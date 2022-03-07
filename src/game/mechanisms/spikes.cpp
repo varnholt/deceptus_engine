@@ -32,7 +32,7 @@ constexpr auto trap_time_ms = 250;
 Spikes::Spikes(GameNode* parent)
  : GameNode(parent)
 {
-   setName(typeid(Spikes).name());
+   setClassName(typeid(Spikes).name());
 }
 
 

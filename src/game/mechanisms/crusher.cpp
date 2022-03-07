@@ -34,7 +34,7 @@ static constexpr auto BLADE_TOLERANCE = 0.06f;
 Crusher::Crusher(GameNode* parent)
    : GameNode(parent)
 {
-   setName("DeathBlock");
+   setClassName(typeid(Crusher).name());
 
    _texture = TexturePool::getInstance().get("data/level-crypt/tilesets/crushers.png");
 

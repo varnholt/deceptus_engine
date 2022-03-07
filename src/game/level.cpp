@@ -195,7 +195,7 @@ void Level::initializeTextures()
 Level::Level()
   : GameNode(nullptr)
 {
-   setName(typeid(Level).name());
+   setClassName(typeid(Level).name());
 
    // init world for this level
    b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -421,7 +421,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "levers")
          {
-            _mechanism_levers = Lever::load(layer, tileset, path, _world);
+            _mechanism_levers = Lever::load(this, layer, tileset, path, _world);
          }
          else if (layer->_name == "platforms")
          {
@@ -498,7 +498,7 @@ void Level::loadTmx()
 
             if (object_group->_name == "bubble_cubes")
             {
-               auto cube = std::make_shared<BubbleCube>(dynamic_cast<GameNode*>(this), _world, tmx_object, path);
+               auto cube = std::make_shared<BubbleCube>(this, _world, tmx_object, path);
                _mechanism_bubble_cubes.push_back(cube);
             }
             else if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
@@ -517,55 +517,52 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "portals")
             {
-               if (tmx_object->_polyline)
-               {
-                  Portal::link(_mechanism_portals, tmx_object);
-               }
+               Portal::link(_mechanism_portals, tmx_object);
             }
             else if (object_group->_name == "ropes")
             {
-               auto rope = std::make_shared<Rope>(dynamic_cast<GameNode*>(this));
+               auto rope = std::make_shared<Rope>(this);
                rope->setup(tmx_object, _world);
                _mechanism_ropes.push_back(rope);
             }
             else if (object_group->_name == "ropes_with_light")
             {
-               auto rope = std::make_shared<RopeWithLight>(dynamic_cast<GameNode*>(this));
+               auto rope = std::make_shared<RopeWithLight>(this);
                rope->setup(tmx_object, _world);
                _mechanism_ropes.push_back(rope);
             }
             else if (object_group->_name == "smoke")
             {
-               auto smoke = SmokeEffect::deserialize(tmx_object, object_group);
+               auto smoke = SmokeEffect::deserialize(this, tmx_object, object_group);
                _smoke_effect.push_back(smoke);
             }
             else if (object_group->_name == "spike_balls")
             {
-               auto spike_ball = std::make_shared<SpikeBall>(dynamic_cast<GameNode*>(this));
+               auto spike_ball = std::make_shared<SpikeBall>(this);
                spike_ball->setup(tmx_object, _world);
                _mechanism_spike_balls.push_back(spike_ball);
             }
             else if (object_group->_name == "spike_blocks")
             {
-               auto spike_block = std::make_shared<SpikeBlock>(dynamic_cast<GameNode*>(this));
-               spike_block->deserialize(tmx_object);
+               auto spike_block = std::make_shared<SpikeBlock>(this);
+               spike_block->setup(tmx_object);
                _mechanism_spike_blocks.push_back(spike_block);
             }
             else if (object_group->_name == "moveable_objects")
             {
-               auto box = std::make_shared<MoveableBox>(dynamic_cast<GameNode*>(this));
+               auto box = std::make_shared<MoveableBox>(this);
                box->setup(tmx_object, _world);
                _mechanism_moveable_boxes.push_back(box);
             }
             else if (object_group->_name == "death_blocks")
             {
-               auto deathBlock = std::make_shared<DeathBlock>(dynamic_cast<GameNode*>(this));
+               auto deathBlock = std::make_shared<DeathBlock>(this);
                deathBlock->setup(tmx_object, _world);
                _mechanism_death_blocks.push_back(deathBlock);
             }
             else if (object_group->_name == "checkpoints")
             {
-               const auto cp = Checkpoint::deserialize(tmx_object);
+               const auto cp = Checkpoint::deserialize(this, tmx_object);
                const auto cp_index = cp->getIndex();
 
                _mechanism_checkpoints.push_back(cp);
@@ -584,7 +581,7 @@ void Level::loadTmx()
             else if (object_group->_name == "bouncers")
             {
                auto bouncer = std::make_shared<Bouncer>(
-                  dynamic_cast<GameNode*>(this),
+                  this,
                   _world,
                   tmx_object->_x_px,
                   tmx_object->_y_px,
@@ -595,14 +592,6 @@ void Level::loadTmx()
                bouncer->setZ(object_group->_z_index);
 
                _mechanism_bouncers.push_back(bouncer);
-
-               // addDebugRect(
-               //    bouncer->getBody(),
-               //    tmx_object->_x_px,
-               //    tmx_object->_y_px,
-               //    tmx_object->_width_px,
-               //    tmx_object->_height_px
-               // );
             }
             else if (object_group->_name == "controller_help")
             {
@@ -612,39 +601,22 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "conveyorbelts")
             {
-               auto belt = std::make_shared<ConveyorBelt>(
-                  dynamic_cast<GameNode*>(this),
-                  _world,
-                  tmx_object,
-                  path
-               );
-
+               auto belt = std::make_shared<ConveyorBelt>(this, _world, tmx_object, path);
                _mechanism_conveyor_belts.push_back(belt);
-
-               // addDebugRect(
-               //    belt->getBody(),
-               //    tmx_object->_x_px,
-               //    tmx_object->_y_px,
-               //    tmx_object->_width_px,
-               //    tmx_object->_height_px
-               // );
             }
             else if (object_group->_name == "crushers")
             {
-               auto crusher = std::make_shared<Crusher>(dynamic_cast<GameNode*>(this));
+               auto crusher = std::make_shared<Crusher>(this);
                crusher->setup(tmx_object, _world);
                _mechanism_crushers.push_back(crusher);
             }
             else if (object_group->_name == "rooms")
             {
-               Room::deserialize(tmx_object, _rooms);
+               Room::deserialize(this, tmx_object, _rooms);
             }
             else if (object_group->_name == "platform_paths")
             {
-               if (tmx_object->_polyline)
-               {
-                  MovingPlatform::link(_mechanism_platforms, tmx_object);
-               }
+               MovingPlatform::link(_mechanism_platforms, tmx_object);
             }
             else if (object_group->_name == "platforms")
             {
@@ -662,7 +634,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "dust")
             {
-               auto dust = Dust::deserialize(tmx_object);
+               auto dust = Dust::deserialize(this, tmx_object);
                _mechanism_dust.push_back(dust);
             }
             else if (object_group->_name == "lights")
@@ -710,6 +682,8 @@ void Level::loadTmx()
    }
 
    Log::Info() << "loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
+
+   dump();
 }
 
 
@@ -812,7 +786,7 @@ void Level::spawnEnemies()
    for (auto& json_description : _description->_enemies)
    {
       Log::Warning() << "deprecated: define enemies inside your TMX instead of JSON";
-      auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + json_description._script);
+      auto lua_node = LuaInterface::instance().addObject(this, std::string("data/scripts/enemies/") + json_description._script);
 
       // find matching enemy data from the tmx layer and retrieve the patrol path from there
       const auto& it = _enemy_data_from_tmx_layer.find(json_description._id);
@@ -856,7 +830,7 @@ void Level::spawnEnemies()
 
       if (script.has_value())
       {
-         auto lua_node = LuaInterface::instance().addObject(std::string("data/scripts/enemies/") + script.value()._value);
+         auto lua_node = LuaInterface::instance().addObject(this, std::string("data/scripts/enemies/") + script.value()._value);
 
          EnemyDescription json_description;
          json_description._position_in_tiles = false;

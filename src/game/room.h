@@ -10,6 +10,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "framework/tmxparser/tmxobject.h"
+#include "gamenode.h"
 
 
 struct ScreenTransition;
@@ -21,7 +22,7 @@ struct ScreenTransition;
  *  A room can be defined as one or more rectangles. When configured accordingly,
  *  there can be animated transitions between rooms.
  */
-struct Room : std::enable_shared_from_this<Room>
+struct Room : std::enable_shared_from_this<Room>, public GameNode
 {
    std::shared_ptr<Room> getptr() {
        return shared_from_this();
@@ -42,9 +43,9 @@ struct Room : std::enable_shared_from_this<Room>
       Bottom   = 'b'
    };
 
-   Room(const sf::FloatRect& rect);
+   Room(GameNode* parent, const sf::FloatRect& rect);
 
-   static void deserialize(TmxObject* tmxObject, std::vector<std::shared_ptr<Room>>& rooms);
+   static void deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
 
    void startTransition();

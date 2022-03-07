@@ -39,7 +39,7 @@ Bouncer::Bouncer(
 )
  : FixtureNode(parent)
 {
-   setName(typeid(Bouncer).name());
+   setClassName(typeid(Bouncer).name());
 
    _rect.left = static_cast<int32_t>(x);
    _rect.top = static_cast<int32_t>(y);

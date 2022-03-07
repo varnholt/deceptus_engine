@@ -23,7 +23,7 @@
 Door::Door(GameNode* parent)
  : GameNode(parent)
 {
-   setName(typeid(Door).name());
+   setClassName(typeid(Door).name());
 }
 
 

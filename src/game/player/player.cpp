@@ -87,7 +87,7 @@ void Player::setOnBelt(bool on_belt)
 Player::Player(GameNode* parent)
   : GameNode(parent)
 {
-   setName(typeid(Player).name());
+   setClassName(typeid(Player).name());
 
    __current = this;
 

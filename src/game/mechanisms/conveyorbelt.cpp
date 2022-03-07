@@ -123,7 +123,7 @@ ConveyorBelt::ConveyorBelt(
 )
  : FixtureNode(parent)
 {
-   setName(typeid(ConveyorBelt).name());
+   setClassName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 
    _texture = TexturePool::getInstance().get(base_path / "tilesets" / "cbelt.png");

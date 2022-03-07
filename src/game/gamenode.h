@@ -14,11 +14,15 @@ public:
    GameNode* getParent() const;
    void dump(int32_t depth = 0);
 
-protected:
-   void setName(const std::string& name);
+   const std::string& getObjectName() const;
+   void setObjectName(const std::string& newObject_name);
+
+   protected:
+   void setClassName(const std::string& name);
 
 private:
-   std::string _name;
+   std::string _class_name;
+   std::string _object_name;
    std::vector<GameNode*> _children;
    GameNode* _parent = nullptr;
 };
