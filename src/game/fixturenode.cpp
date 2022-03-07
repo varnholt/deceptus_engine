@@ -6,7 +6,7 @@
 FixtureNode::FixtureNode(GameNode* parent)
  : GameNode(parent)
 {
-    setName(typeid(FixtureNode).name());
+    setClassName(typeid(FixtureNode).name());
 }
 
 

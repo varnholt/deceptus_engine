@@ -21,7 +21,7 @@ public:
    void update(const sf::Time& dt);
    void reset();
 
-   std::shared_ptr<LuaNode> addObject(const std::string &filename);
+   std::shared_ptr<LuaNode> addObject(GameNode* parent, const std::string &filename);
    void removeObject(const std::shared_ptr<LuaNode>& node);
    std::shared_ptr<LuaNode> getObject(lua_State*);
    const std::vector<std::shared_ptr<LuaNode>>& getObjectList();

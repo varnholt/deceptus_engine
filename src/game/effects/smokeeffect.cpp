@@ -15,9 +15,11 @@
 
 
 
-SmokeEffect::SmokeEffect()
- : _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
+SmokeEffect::SmokeEffect(GameNode* parent)
+ : GameNode(parent),
+   _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
 {
+   setClassName(typeid(SmokeEffect).name());
    _texture->setSmooth(true);
 }
 
@@ -98,9 +100,10 @@ void SmokeEffect::update(const sf::Time& time)
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(TmxObject* tmx_object, TmxObjectGroup* /*objectGroup*/)
+std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* /*objectGroup*/)
 {
-   auto smoke_effect = std::make_shared<SmokeEffect>();
+   auto smoke_effect = std::make_shared<SmokeEffect>(parent);
+   smoke_effect->setObjectName(tmx_object->_name);
 
    auto particle_count = 50;
    auto sprite_scale = 1.0f;

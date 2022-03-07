@@ -33,11 +33,11 @@ constexpr auto damage = 100;
 SpikeBlock::SpikeBlock(GameNode* parent)
  : GameNode(parent)
 {
-   setName(typeid(SpikeBlock).name());
+   setClassName(typeid(SpikeBlock).name());
 }
 
 
-void SpikeBlock::deserialize(TmxObject* tmx_object)
+void SpikeBlock::setup(TmxObject* tmx_object)
 {
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_spikeblock.png");
    _sprite.setTexture(*_texture_map);

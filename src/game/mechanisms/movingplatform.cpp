@@ -34,7 +34,7 @@ constexpr auto element_height_m = 0.5f * PIXELS_PER_TILE / PPM;
 MovingPlatform::MovingPlatform(GameNode *parent)
  : GameNode(parent)
 {
-   setName(typeid(MovingPlatform).name());
+   setClassName(typeid(MovingPlatform).name());
 }
 
 
@@ -186,6 +186,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
          {
             // find matching platform
             auto moving_platform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
+            moving_platform->setObjectName(layer->_name);
 
             const auto texture_path = base_path / tileset->_image->_source;
             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
@@ -468,6 +469,11 @@ void MovingPlatform::link(
    TmxObject* tmx_object
 )
 {
+   if (!tmx_object->_polyline)
+   {
+      return;
+   }
+
    std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
 
    auto pos = pixel_path.at(0);

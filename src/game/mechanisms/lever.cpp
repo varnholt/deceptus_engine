@@ -33,6 +33,7 @@ constexpr auto left_offset = (sprites_per_row - 1) * 3 * PIXELS_PER_TILE;
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Lever::load(
+   GameNode* parent,
    TmxLayer* layer,
    TmxTileSet* tileset,
    const std::filesystem::path& base_path,
@@ -72,7 +73,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(
 
             if (tile_id == 33)
             {
-               auto lever = std::make_shared<Lever>();
+               auto lever = std::make_shared<Lever>(parent);
 
                if (layer->_properties)
                {
@@ -126,6 +127,14 @@ void Lever::updateSprite()
 const sf::Rect<int32_t>& Lever::getPixelRect() const
 {
    return _rect;
+}
+
+
+//-----------------------------------------------------------------------------
+Lever::Lever(GameNode* parent)
+ : GameNode(parent)
+{
+   setClassName(typeid(Lever).name());
 }
 
 

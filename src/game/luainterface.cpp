@@ -14,9 +14,9 @@ LuaInterface& LuaInterface::instance()
 }
 
 
-std::shared_ptr<LuaNode> LuaInterface::addObject(const std::string &filename)
+std::shared_ptr<LuaNode> LuaInterface::addObject(GameNode* parent, const std::string &filename)
 {
-   std::shared_ptr<LuaNode> object = std::make_shared<LuaNode>(filename);
+   std::shared_ptr<LuaNode> object = std::make_shared<LuaNode>(parent, filename);
    _object_list.push_back(object);
    return object;
 }

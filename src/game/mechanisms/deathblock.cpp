@@ -14,7 +14,7 @@
 DeathBlock::DeathBlock(GameNode* parent)
  : GameNode(parent)
 {
-   setName("DeathBlock");
+   setClassName(typeid(DeathBlock).name());
 }
 
 

@@ -47,8 +47,11 @@
 */
 
 
-Room::Room(const sf::FloatRect& rect)
+Room::Room(GameNode* parent, const sf::FloatRect& rect)
+ : GameNode(parent)
 {
+   setClassName(typeid(Room).name());
+
    static int32_t __id = 0;
 
    _rects.push_back(rect);
@@ -83,7 +86,7 @@ std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::s
 }
 
 
-void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>& rooms)
+void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>& rooms)
 {
    // ignore invalid rects
    const auto config = GameConfiguration::getInstance();
@@ -129,8 +132,9 @@ void Room::deserialize(TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>
    if (it == rooms.end())
    {
       // create new room
-      auto room = std::make_shared<Room>(rect);
+      auto room = std::make_shared<Room>(parent, rect);
       room->_name = key;
+      room->setObjectName(key);
 
       // deserialize room properties
       if (tmx_object->_properties)

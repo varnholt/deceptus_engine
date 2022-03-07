@@ -15,7 +15,7 @@ std::set<Projectile*> Projectile::_projectiles;
 Projectile::Projectile()
  : FixtureNode(this)
 {
-   setName(typeid(Projectile).name());
+   setClassName(typeid(Projectile).name());
    _type = ObjectTypeProjectile;
    _projectiles.insert(this);
 

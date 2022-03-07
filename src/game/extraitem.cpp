@@ -5,6 +5,6 @@
 ExtraItem::ExtraItem(GameNode *parent)
  : GameNode(parent)
 {
-    setName(typeid(ExtraItem).name());
+    setClassName(typeid(ExtraItem).name());
 }
 

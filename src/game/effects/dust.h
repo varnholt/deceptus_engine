@@ -2,6 +2,7 @@
 
 
 #include "game/gamemechanism.h"
+#include "game/gamenode.h"
 
 #include <SFML/Graphics.hpp>
 #include <array>
@@ -11,7 +12,7 @@
 
 struct TmxObject;
 
-class Dust : public GameMechanism
+class Dust : public GameMechanism, public GameNode
 {
    struct Particle
    {
@@ -26,12 +27,12 @@ class Dust : public GameMechanism
 
    public:
 
-      Dust() = default;
+      Dust(GameNode* parent = nullptr);
 
       void update(const sf::Time& dt) override;
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-      static std::shared_ptr<Dust> deserialize(TmxObject* tmx_object);
+      static std::shared_ptr<Dust> deserialize(GameNode* parent, TmxObject* tmx_object);
 
 
    private:

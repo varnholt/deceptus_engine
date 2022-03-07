@@ -7,6 +7,13 @@
 #include "framework/tmxparser/tmxtools.h"
 
 
+Dust::Dust(GameNode* parent)
+ : GameNode(parent)
+{
+   setClassName(typeid(Dust).name());
+}
+
+
 void Dust::update(const sf::Time& dt)
 {
    const auto dt_s = dt.asSeconds();
@@ -79,9 +86,10 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 }
 
 
-std::shared_ptr<Dust> Dust::deserialize(TmxObject* tmx_object)
+std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, TmxObject* tmx_object)
 {
-   auto dust = std::make_shared<Dust>();
+   auto dust = std::make_shared<Dust>(parent);
+   dust->setObjectName(tmx_object->_name);
 
    std::string flowfield_texture = "data/effects/flowfield_3.png";
 
