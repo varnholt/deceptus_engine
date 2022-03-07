@@ -33,7 +33,7 @@ CollapsingPlatform::CollapsingPlatform(
 )
  : FixtureNode(parent)
 {
-   setName(typeid(CollapsingPlatform).name());
+   setClassName(typeid(CollapsingPlatform).name());
    setType(ObjectTypeCollapsingPlatform);
 
    // read properties
