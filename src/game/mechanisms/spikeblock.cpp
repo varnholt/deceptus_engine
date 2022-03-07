@@ -1,6 +1,8 @@
 #include "spikeblock.h"
 
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 #include "player/player.h"
 
@@ -52,9 +54,46 @@ void SpikeBlock::setup(TmxObject* tmx_object)
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
-   updateSpriteRect();
+   if (tmx_object->_properties)
+   {
+      const auto z_it = tmx_object->_properties->_map.find("z");
+      if (z_it != tmx_object->_properties->_map.end())
+      {
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
 
-   // _mode = Mode::Interval;
+      const auto enabled_it = tmx_object->_properties->_map.find("enabled");
+      if (enabled_it != tmx_object->_properties->_map.end())
+      {
+         const auto enabled = static_cast<bool>(enabled_it->second->_value_bool.value());
+         setEnabled(enabled);
+      }
+
+      const auto mode_it = tmx_object->_properties->_map.find("mode");
+      if (mode_it != tmx_object->_properties->_map.end())
+      {
+         auto mode_str = static_cast<std::string>(mode_it->second->_value_string.value());
+         if (mode_str == "interval")
+         {
+            _mode = Mode::Interval;
+         }
+      }
+
+      const auto time_on_it = tmx_object->_properties->_map.find("time_on_ms");
+      if (time_on_it != tmx_object->_properties->_map.end())
+      {
+         _time_on_ms = static_cast<int32_t>(time_on_it->second->_value_int.value());
+      }
+
+      const auto time_off_it = tmx_object->_properties->_map.find("time_off_ms");
+      if (time_on_it != tmx_object->_properties->_map.end())
+      {
+         _time_off_ms = static_cast<int32_t>(time_off_it->second->_value_int.value());
+      }
+   }
+
+   updateSpriteRect();
 }
 
 
