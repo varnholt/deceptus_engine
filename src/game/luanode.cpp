@@ -1371,11 +1371,11 @@ void LuaNode::setupTexture()
 }
 
 
-LuaNode::LuaNode(const std::string &filename)
- : GameNode(Level::getCurrentLevel()),
+LuaNode::LuaNode(GameNode* parent, const std::string &filename)
+ : GameNode(parent),
    _script_name(filename)
 {
-   setName(typeid(LuaNode).name());
+   setClassName(typeid(LuaNode).name());
 
    // create instances
    _body_def = new b2BodyDef();

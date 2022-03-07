@@ -11,6 +11,12 @@
 #include <iostream>
 
 
+Checkpoint::Checkpoint(GameNode* parent)
+ : GameNode(parent)
+{
+}
+
+
 std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
    uint32_t index,
    const std::vector<std::shared_ptr<GameMechanism>>& checkpoints
@@ -34,9 +40,9 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 }
 
 
-std::shared_ptr<Checkpoint> Checkpoint::deserialize(TmxObject* tmx_object)
+std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, TmxObject* tmx_object)
 {
-   auto cp = std::make_shared<Checkpoint>();
+   auto cp = std::make_shared<Checkpoint>(parent);
 
    cp->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
    cp->_sprite.setTexture(*cp->_texture);

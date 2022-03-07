@@ -37,7 +37,7 @@ BubbleCube::BubbleCube(
 )
  : FixtureNode(parent)
 {
-   setName(typeid(BubbleCube).name());
+   setClassName(typeid(BubbleCube).name());
    setType(ObjectTypeBubbleCube);
 
    // read properties

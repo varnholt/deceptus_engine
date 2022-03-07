@@ -27,7 +27,7 @@ std::atomic<bool> Portal::_portal_lock = false;
 Portal::Portal(GameNode* parent)
  : GameNode(parent)
 {
-   setName(typeid(Portal).name());
+   setClassName(typeid(Portal).name());
 }
 
 
@@ -139,6 +139,11 @@ void Portal::link(
    TmxObject* tmx_object
 )
 {
+   if (!tmx_object->_polyline)
+   {
+      return;
+   }
+
    auto src_dst = tmx_object->_polyline->_polyline;
 
    sf::Vector2f src_f = src_dst.at(0);

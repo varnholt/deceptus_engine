@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gamemechanism.h"
+#include "gamenode.h"
 
 #include "SFML/Graphics.hpp"
 
@@ -12,21 +13,21 @@
 struct TmxObject;
 
 
-class Checkpoint : public GameMechanism
+class Checkpoint : public GameMechanism, public GameNode
 {
 
 public:
 
    using CheckpointCallback = std::function<void(void)>;
 
-   Checkpoint() = default;
+   Checkpoint(GameNode* parent = nullptr);
 
    static std::shared_ptr<Checkpoint> getCheckpoint(
       uint32_t index,
       const std::vector<std::shared_ptr<GameMechanism>>& checkpoints
    );
 
-   static std::shared_ptr<Checkpoint> deserialize(TmxObject*);
+   static std::shared_ptr<Checkpoint> deserialize(GameNode* parent, TmxObject*);
 
    void draw(sf::RenderTarget &target, sf::RenderTarget &normal) override;
    void update(const sf::Time& dt) override;

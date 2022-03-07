@@ -8,13 +8,14 @@
 #include <SFML/Graphics.hpp>
 
 #include "gamemechanism.h"
+#include "gamenode.h"
 
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
 
-class Lever : public GameMechanism
+class Lever : public GameMechanism, public GameNode
 {
 
 public:
@@ -32,7 +33,7 @@ public:
       Right  = 1,
    };
 
-   Lever() = default;
+   Lever(GameNode* parent = nullptr);
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
@@ -56,6 +57,7 @@ public:
    );
 
    static std::vector<std::shared_ptr<GameMechanism>> load(
+      GameNode* parent,
       TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path& basePath,

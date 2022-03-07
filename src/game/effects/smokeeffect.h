@@ -5,11 +5,13 @@
 #include <memory>
 #include <vector>
 
+#include "gamenode.h"
+
 
 struct TmxObject;
 struct TmxObjectGroup;
 
-class SmokeEffect
+class SmokeEffect : public GameNode
 {
 
 public:
@@ -19,12 +21,12 @@ public:
       Fog,
    };
 
-   SmokeEffect();
+   SmokeEffect(GameNode* parent = nullptr);
 
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z);
    void update(const sf::Time& time);
 
-   static std::shared_ptr<SmokeEffect> deserialize(TmxObject* tmx_object, TmxObjectGroup* object_group);
+   static std::shared_ptr<SmokeEffect> deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* object_group);
 
 private:
 
