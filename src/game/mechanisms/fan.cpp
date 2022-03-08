@@ -172,33 +172,29 @@ void Fan::update(const sf::Time& dt)
 }
 
 
-void Fan::load(
-   TmxLayer* layer,
-   TmxTileSet* tileset,
-   const std::shared_ptr<b2World>& world
-)
+void Fan::load(const GameDeserializeData& data)
 {
    static const sf::Vector2f vector_up{0.0f, 1.0f};
    static const sf::Vector2f vector_down{0.0f, -1.0f};
    static const sf::Vector2f vector_left{-1.0f, 0.0f};
    static const sf::Vector2f vector_right{1.0f, 0.0f};
 
-   if (layer == nullptr)
+   if (data._tmx_layer == nullptr)
    {
       return;
    }
 
-   if (tileset == nullptr)
+   if (data._tmx_tileset == nullptr)
    {
       return;
    }
 
    resetAll();
 
-   const auto tiles    = layer->_data;
-   const auto width    = layer->_width_px;
-   const auto height   = layer->_height_px;
-   const auto firstId  = tileset->_first_gid;
+   const auto tiles    = data._tmx_layer->_data;
+   const auto width    = data._tmx_layer->_width_px;
+   const auto height   = data._tmx_layer->_height_px;
+   const auto firstId  = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -243,7 +239,7 @@ void Fan::load(
             tile->mDirection   = direction_vector;
             __tile_instances.push_back(tile);
 
-            createPhysics(world, tile);
+            createPhysics(data._world, tile);
          }
       }
    }
@@ -259,25 +255,25 @@ void Fan::resetAll()
 }
 
 
-void Fan::addObject(GameNode* parent, TmxObject* object, const std::filesystem::path& basePath)
+void Fan::addObject(GameNode* parent, const GameDeserializeData& data)
 {
-   __object_instances.push_back(object);
+   __object_instances.push_back(data._tmx_object);
 
    auto fan = std::make_shared<Fan>(parent);
    __fan_instances.push_back(fan);
 
-   const auto w = static_cast<int32_t>(object->_width_px);
-   const auto h = static_cast<int32_t>(object->_height_px);
+   const auto w = static_cast<int32_t>(data._tmx_object->_width_px);
+   const auto h = static_cast<int32_t>(data._tmx_object->_height_px);
 
-   fan->_texture = TexturePool::getInstance().get(basePath / "tilesets" / "fan.png");
-   fan->_pixel_rect.left = static_cast<int32_t>(object->_x_px);
-   fan->_pixel_rect.top = static_cast<int32_t>(object->_y_px);
+   fan->_texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "fan.png");
+   fan->_pixel_rect.left = static_cast<int32_t>(data._tmx_object->_x_px);
+   fan->_pixel_rect.top = static_cast<int32_t>(data._tmx_object->_y_px);
    fan->_pixel_rect.width = w;
    fan->_pixel_rect.height = h;
 
-   if (object->_properties)
+   if (data._tmx_object->_properties)
    {
-       auto speed_property = object->_properties->_map["speed"];
+       auto speed_property = data._tmx_object->_properties->_map["speed"];
        fan->_speed = speed_property ? speed_property->_value_float.value() : 1.0f;
    }
 }
