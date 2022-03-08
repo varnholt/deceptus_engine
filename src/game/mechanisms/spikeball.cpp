@@ -32,6 +32,7 @@
 SpikeBall::SpikeBall(GameNode* node)
  : GameNode(node)
 {
+   setClassName(typeid(SpikeBall).name());
    setZ(16);
 
    // chain element setup

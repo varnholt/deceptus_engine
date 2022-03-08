@@ -32,11 +32,14 @@ b2Body* Bouncer::getBody() const
 Bouncer::Bouncer(
    GameNode* parent,
    const std::shared_ptr<b2World>& world,
-   TmxObject* tmx_object
+   TmxObject* tmx_object,
+   TmxObjectGroup* tmx_object_group
 )
  : FixtureNode(parent)
 {
    setClassName(typeid(Bouncer).name());
+   setObjectName(tmx_object->_name);
+   setZ(tmx_object_group->_z_index);
 
    const auto x = tmx_object->_x_px;
    const auto y = tmx_object->_y_px;

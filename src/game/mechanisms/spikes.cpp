@@ -262,6 +262,7 @@ void Spikes::update(const sf::Time& dt)
 
 
 std::vector<std::shared_ptr<Spikes>> Spikes::load(
+   GameNode* parent,
    TmxLayer* layer,
    TmxTileSet* tileset,
    const std::filesystem::path& base_path,
@@ -301,7 +302,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(
          {
             const auto id = (tile_number - first_id);
 
-            auto spikes = std::make_shared<Spikes>();
+            auto spikes = std::make_shared<Spikes>(parent);
             spikes->_texture = texture;
             spikes->_tile_position.x = static_cast<float>(i);
             spikes->_tile_position.y = static_cast<float>(j);

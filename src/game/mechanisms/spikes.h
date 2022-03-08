@@ -38,8 +38,9 @@ public:
    void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<Spikes>> load(
-      TmxLayer *layer,
-      TmxTileSet *tileSet,
+      GameNode* parent,
+      TmxLayer* layer,
+      TmxTileSet* tileSet,
       const std::filesystem::path& basePath,
       Mode mode
    );
