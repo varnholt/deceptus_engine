@@ -66,12 +66,12 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 
 
 //--------------------------------------------------------------------------------------------------
-void MoveableBox::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
+void MoveableBox::setup(const GameDeserializeData& data)
 {
-   _size.x = tmx_object->_width_px;
-   _size.y = tmx_object->_height_px;
+   _size.x = data._tmx_object->_width_px;
+   _size.y = data._tmx_object->_height_px;
 
-   _sprite.setPosition(tmx_object->_x_px, tmx_object->_y_px - 24);
+   _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px - 24);
 
    switch (static_cast<int32_t>(_size.x))
    {
@@ -93,7 +93,7 @@ void MoveableBox::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& w
       }
    }
 
-   setupBody(world);
+   setupBody(data._world);
    setupTransform();
 }
 

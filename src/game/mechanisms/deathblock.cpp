@@ -169,10 +169,7 @@ void DeathBlock::update(const sf::Time& dt)
 }
 
 
-void DeathBlock::setup(
-   TmxObject* tmx_object,
-   const std::shared_ptr<b2World>& world
-)
+void DeathBlock::setup(const GameDeserializeData& data)
 {
    _texture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
 
@@ -183,12 +180,12 @@ void DeathBlock::setup(
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
-   _pixel_positions.x = tmx_object->_x_px;
-   _pixel_positions.y = tmx_object->_y_px;
+   _pixel_positions.x = data._tmx_object->_x_px;
+   _pixel_positions.y = data._tmx_object->_y_px;
 
-   setupBody(world);
+   setupBody(data._world);
 
-   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
+   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
    auto pos = pixel_path.at(0);
 
    auto i = 0;
@@ -197,14 +194,14 @@ void DeathBlock::setup(
       b2Vec2 world_pos;
       auto time = i / static_cast<float>(pixel_path.size() - 1);
 
-      auto x = (tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
-      auto y = (tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto x = (data._tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
       world_pos.x = x;
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.push_back({(pos.x + tmx_object->_x_px), (pos.y + tmx_object->_y_px)});
+      _pixel_paths.push_back({(pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px)});
 
       // Log::Info() << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY;
 

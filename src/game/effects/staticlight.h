@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "gamedeserializedata.h"
 #include "gamenode.h"
 
 struct TmxObject;
@@ -38,7 +39,7 @@ public:
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
 
-   static std::shared_ptr<StaticLight::LightInstance> deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* object_group);
+   static std::shared_ptr<StaticLight::LightInstance> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 
 public:
