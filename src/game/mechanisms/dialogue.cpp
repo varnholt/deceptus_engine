@@ -24,12 +24,12 @@ Dialogue::Dialogue(GameNode* parent)
 }
 
 
-std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, TmxObject* tmx_object)
+std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto dialogue = std::make_shared<Dialogue>(parent);
-   dialogue->setObjectName(tmx_object->_name);
+   dialogue->setObjectName(data._tmx_object->_name);
 
-   auto properties = tmx_object->_properties;
+   auto properties = data._tmx_object->_properties;
 
    // parse dialogue items
    for (auto i = 0u; i < 99; i++)
@@ -54,10 +54,10 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, TmxObject* tmx
    }
 
    dialogue->_pixel_rect = sf::IntRect{
-      static_cast<int32_t>(tmx_object->_x_px),
-      static_cast<int32_t>(tmx_object->_y_px),
-      static_cast<int32_t>(tmx_object->_width_px),
-      static_cast<int32_t>(tmx_object->_height_px)
+      static_cast<int32_t>(data._tmx_object->_x_px),
+      static_cast<int32_t>(data._tmx_object->_y_px),
+      static_cast<int32_t>(data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_height_px)
    };
 
    return dialogue;
