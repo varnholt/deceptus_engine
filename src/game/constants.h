@@ -34,10 +34,8 @@ static constexpr auto PLAYER_ACTUAL_HEIGHT = 32; // the actual height can be sma
 
 static constexpr auto PLAYER_1_COLLISION_ID = 3;
 
-#ifndef DEGTORAD
-#define DEGTORAD 0.0174532925199432957f
-#define RADTODEG 57.295779513082320876f
-#endif
+static constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
+static constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
 
 // configured timestep is 1/35
 // frame update timestep is 1/60

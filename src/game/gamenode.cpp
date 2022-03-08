@@ -13,6 +13,22 @@ GameNode::GameNode(GameNode* parent)
 }
 
 
+GameNode::~GameNode()
+{
+   // unlink children
+   for (auto& c : _children)
+   {
+      c->_parent = nullptr;
+   }
+
+   // unlink from parent
+   if (_parent)
+   {
+      std::erase_if(_parent->_children, [this](auto ptr){return ptr == this;});
+   }
+}
+
+
 GameNode* GameNode::getParent() const
 {
     return _parent;
@@ -27,6 +43,16 @@ void GameNode::dump(int32_t depth)
     {
         std::cout << "--";
     }
+
+    // if (_class_name.empty())
+    // {
+    //    std::cerr << "empty class name" << std::endl;
+    // }
+    //
+    // if (_object_name.empty())
+    // {
+    //    std::cerr << "empty object name" << std::endl;
+    // }
 
     std::cout << " " << this << " " << _class_name << ", object: '" << _object_name << "' [" << _children.size() << "]" << std::endl;
 

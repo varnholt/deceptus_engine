@@ -30,6 +30,7 @@
 ControllerHelp::ControllerHelp(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(ControllerHelp).name());
 }
 
 
@@ -84,6 +85,7 @@ void ControllerHelp::update(const sf::Time& dt)
 
 void ControllerHelp::deserialize(TmxObject* tmx_object)
 {
+   setObjectName(tmx_object->_name);
    setZ(static_cast<int32_t>(ZDepth::Player) - 1);
 
    static const std::array<std::string, 16 * 9> key_map{

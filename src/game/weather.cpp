@@ -9,6 +9,7 @@
 Weather::Weather(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(Weather).name());
 }
 
 
@@ -34,9 +35,10 @@ void Weather::update(const sf::Time& dt)
 }
 
 
-std::shared_ptr<Weather> Weather::deserialize(TmxObject* tmx_object)
+std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, TmxObject* tmx_object)
 {
-   auto weather = std::make_shared<Weather>();
+   auto weather = std::make_shared<Weather>(parent);
+   weather->setObjectName(tmx_object->_name);
 
    weather->_rect = sf::IntRect {
       static_cast<int32_t>(tmx_object->_x_px),

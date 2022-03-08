@@ -25,7 +25,7 @@ class Weather : public GameMechanism, public GameNode
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
 
-      static std::shared_ptr<Weather> deserialize(TmxObject* tmx_object);
+      static std::shared_ptr<Weather> deserialize(GameNode* parent, TmxObject* tmx_object);
 
 
    private:
