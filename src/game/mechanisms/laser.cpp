@@ -41,6 +41,7 @@ std::vector<std::array<int32_t, 9>> Laser::__tiles_version_2;
 Laser::Laser(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(Laser).name());
 }
 
 

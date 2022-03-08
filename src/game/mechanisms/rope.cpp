@@ -16,6 +16,8 @@ int32_t Rope::_instance_counter = 0;
 Rope::Rope(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(Rope).name());
+
    _joint_def.collideConnected = false;
 
    setZ(16);

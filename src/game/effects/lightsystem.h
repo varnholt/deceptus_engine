@@ -7,6 +7,8 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
+#include "gamenode.h"
+
 
 struct TmxObject;
 
@@ -15,8 +17,14 @@ class LightSystem : public sf::Drawable
 
 public:
 
-   struct LightInstance
+   struct LightInstance : public GameNode
    {
+      LightInstance(GameNode* parent)
+       : GameNode(parent)
+      {
+         setClassName(typeid(LightInstance).name());
+      }
+
       b2Vec2 _pos_m = b2Vec2{0.0f, 0.0f};
       b2Vec2 _center_offset_m = b2Vec2{0.0f, 0.0f};
       sf::Vector2i _center_offset_px;
@@ -43,7 +51,7 @@ public:
 
    LightSystem();
 
-   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(TmxObject* tmxObject = nullptr);
+   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, TmxObject* tmxObject = nullptr);
 
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 

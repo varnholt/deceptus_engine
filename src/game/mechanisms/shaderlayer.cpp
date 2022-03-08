@@ -13,6 +13,7 @@
 ShaderLayer::ShaderLayer(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(ShaderLayer).name());
 }
 
 
@@ -57,6 +58,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, TmxObjec
    instance->_position.y = object->_y_px;
    instance->_size.x = object->_width_px;
    instance->_size.y = object->_height_px;
+   instance->setObjectName(object->_name);
 
    if (object->_properties != nullptr)
    {

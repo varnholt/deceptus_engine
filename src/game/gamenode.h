@@ -9,7 +9,7 @@ class GameNode
 public:
 
    GameNode(GameNode* parent = nullptr);
-   virtual ~GameNode() = default;
+   virtual ~GameNode();
 
    GameNode* getParent() const;
    void dump(int32_t depth = 0);

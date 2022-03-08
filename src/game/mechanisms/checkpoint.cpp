@@ -14,6 +14,7 @@
 Checkpoint::Checkpoint(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(Checkpoint).name());
 }
 
 
@@ -43,6 +44,7 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, TmxObject* tmx_object)
 {
    auto cp = std::make_shared<Checkpoint>(parent);
+   cp->setObjectName(tmx_object->_name);
 
    cp->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
    cp->_sprite.setTexture(*cp->_texture);

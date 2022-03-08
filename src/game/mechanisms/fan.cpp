@@ -22,6 +22,7 @@ std::vector<sf::Vector2f> Fan::__weight_instances;
 Fan::Fan(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(Fan).name());
 }
 
 

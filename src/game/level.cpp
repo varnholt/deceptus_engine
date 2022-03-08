@@ -216,7 +216,7 @@ Level::Level()
    _static_light = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   _player_light = LightSystem::createLightInstance();
+   _player_light = LightSystem::createLightInstance(Player::getCurrent());
    _player_light->_color = sf::Color(255, 255, 255, 10);
    _light_system->_lights.push_back(_player_light);
 
@@ -616,7 +616,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "weather")
             {
-               auto weather = Weather::deserialize(tmx_object);
+               auto weather = Weather::deserialize(this, tmx_object);
                _mechanism_weather.push_back(weather);
             }
             else if (object_group->_name.rfind("shader_quads", 0) == 0)
@@ -631,7 +631,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "lights")
             {
-               auto light = LightSystem::createLightInstance(tmx_object);
+               auto light = LightSystem::createLightInstance(this, tmx_object);
                _light_system->_lights.push_back(light);
             }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
@@ -673,8 +673,6 @@ void Level::loadTmx()
    }
 
    Log::Info() << "loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
-
-   dump();
 }
 
 
@@ -689,6 +687,7 @@ BoomEffect& Level::getBoomEffect()
 bool Level::load()
 {
    const auto level_json_path = std::filesystem::path(_description->_filename);
+   setObjectName(_description->_filename);
 
    if (!std::filesystem::exists(level_json_path))
    {
@@ -735,6 +734,8 @@ void Level::initialize()
 
    loadCheckpoint();
    spawnEnemies();
+
+   dump();
 }
 
 
@@ -1496,6 +1497,7 @@ void Level::addChainToWorld(
    auto body = _world->CreateBody(&body_def);
    auto fixture = body->CreateFixture(&fixture_def);
    auto object_data = new FixtureNode(this);
+   object_data->setObjectName(std::format("world_chain_{}", _world_chains.size() - 1));
    object_data->setType(object_type);
    fixture->SetUserData(static_cast<void*>(object_data));
 }

@@ -146,7 +146,7 @@ void SpikeBall::update(const sf::Time& dt)
       _angle = -_angle;
    }
 
-   _spike_sprite.setRotation(_angle * RADTODEG);
+   _spike_sprite.setRotation(_angle * FACTOR_RAD_TO_DEG);
 
    // slightly push the ball all the way while it's moving from the right to the left
    auto f = dt.asSeconds() * _config._push_factor;

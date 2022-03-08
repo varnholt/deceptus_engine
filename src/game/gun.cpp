@@ -140,7 +140,7 @@ void Gun::updateProjectiles(const sf::Time& time)
 
       if (projectile->isRotating())
       {
-         projectile_animation.setRotation(RADTODEG * projectile->getRotation());
+         projectile_animation.setRotation(FACTOR_RAD_TO_DEG * projectile->getRotation());
       }
 
       projectile_animation.setPosition(

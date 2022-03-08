@@ -1371,7 +1371,7 @@ void LuaNode::setupTexture()
 }
 
 
-LuaNode::LuaNode(GameNode* parent, const std::string &filename)
+LuaNode::LuaNode(GameNode* parent, const std::string& filename)
  : GameNode(parent),
    _script_name(filename)
 {
@@ -1394,7 +1394,7 @@ void LuaNode::deserializeEnemyDescription()
    // set up patrol path
    if (!_enemy_description._path.empty())
    {
-      std::vector<sf::Vector2f> patrolPath;
+      std::vector<sf::Vector2f> patrol_path;
 
       for (auto i = 0u; i < _enemy_description._path.size(); i += 2)
       {
@@ -1413,10 +1413,10 @@ void LuaNode::deserializeEnemyDescription()
             pos.y += PIXELS_PER_TILE / 2;
          }
 
-         patrolPath.push_back(pos);
+         patrol_path.push_back(pos);
       }
 
-      _movement_path_px = patrolPath;
+      _movement_path_px = patrol_path;
    }
 
    // set up start position
@@ -1437,6 +1437,8 @@ void LuaNode::deserializeEnemyDescription()
 
       _position_px = _start_position_px;
    }
+
+   setObjectName(_enemy_description._id);
 }
 
 
