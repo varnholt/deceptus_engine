@@ -2,6 +2,7 @@
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "framework/tmxparser/tmxobject.h"
 #include "gamemechanism.h"
 #include "Box2D/Box2D.h"
 #include "SFML/Graphics.hpp"
@@ -15,10 +16,7 @@ public:
    Bouncer(
       GameNode* parent,
       const std::shared_ptr<b2World>& world,
-      float x,
-      float y,
-      float width,
-      float height
+      TmxObject* tmx_object
    );
 
    // ~Bouncer() override;

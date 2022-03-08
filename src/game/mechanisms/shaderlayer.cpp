@@ -10,6 +10,12 @@
 #include <iostream>
 
 
+ShaderLayer::ShaderLayer(GameNode* parent)
+ : GameNode(parent)
+{
+}
+
+
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    float x = _position.x;
@@ -43,9 +49,9 @@ void ShaderLayer::update(const sf::Time& dt)
 }
 
 
-std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(TmxObject* object)
+std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, TmxObject* object)
 {
-   std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>();
+   std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>(parent);
 
    instance->_position.x = object->_x_px;
    instance->_position.y = object->_y_px;

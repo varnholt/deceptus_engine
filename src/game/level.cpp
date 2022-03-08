@@ -411,12 +411,12 @@ void Level::loadTmx()
          }
          else if (layer->_name == "lasers")
          {
-            const auto lasers = Laser::load(layer, tileset, path, _world);
+            const auto lasers = Laser::load(this, layer, tileset, path, _world);
             _mechanism_lasers.insert(_mechanism_lasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->_name == "lasers_2") // support for dstar's new laser tileset
          {
-            const auto lasers = Laser::load(layer, tileset, path, _world);
+            const auto lasers = Laser::load(this, layer, tileset, path, _world);
             _mechanism_lasers.insert(_mechanism_lasers.end(), lasers.begin(), lasers.end());
          }
          else if (layer->_name == "levers")
@@ -425,11 +425,11 @@ void Level::loadTmx()
          }
          else if (layer->_name == "platforms")
          {
-            _mechanism_platforms = MovingPlatform::load(layer, tileset, path, _world);
+            _mechanism_platforms = MovingPlatform::load(this, layer, tileset, path, _world);
          }
          else if (layer->_name == "portals")
          {
-            _mechanism_portals = Portal::load(layer, tileset, path, _world);
+            _mechanism_portals = Portal::load(this, layer, tileset, path, _world);
          }
          else if (layer->_name == "toggle_spikes")
          {
@@ -513,7 +513,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "fans")
             {
-               Fan::addObject(tmx_object, path);
+               Fan::addObject(this, tmx_object, path);
             }
             else if (object_group->_name == "portals")
             {
@@ -575,27 +575,19 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "dialogues")
             {
-               auto dialogue = Dialogue::deserialize(tmx_object);
+               auto dialogue = Dialogue::deserialize(this, tmx_object);
                _mechanism_dialogues.push_back(dialogue);
             }
             else if (object_group->_name == "bouncers")
             {
-               auto bouncer = std::make_shared<Bouncer>(
-                  this,
-                  _world,
-                  tmx_object->_x_px,
-                  tmx_object->_y_px,
-                  tmx_object->_width_px,
-                  tmx_object->_height_px
-               );
-
+               auto bouncer = std::make_shared<Bouncer>(this, _world, tmx_object);
                bouncer->setZ(object_group->_z_index);
 
                _mechanism_bouncers.push_back(bouncer);
             }
             else if (object_group->_name == "controller_help")
             {
-               auto controller_help = std::make_shared<ControllerHelp>();
+               auto controller_help = std::make_shared<ControllerHelp>(this);
                controller_help->deserialize(tmx_object);
                _mechanism_controller_help.push_back(controller_help);
             }
@@ -629,7 +621,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name.rfind("shader_quads", 0) == 0)
             {
-               auto quad = ShaderLayer::deserialize(tmx_object);
+               auto quad = ShaderLayer::deserialize(this, tmx_object);
                _mechanism_shader_layers.push_back(quad);
             }
             else if (object_group->_name == "dust")
@@ -653,7 +645,6 @@ void Level::loadTmx()
             }
          }
       }
-
       else if (element->_type == TmxElement::TypeImageLayer)
       {
          auto image = ImageLayer::deserialize(element, path);
@@ -666,7 +657,7 @@ void Level::loadTmx()
    TileMapFactory::merge(_tile_maps);
    _mechanism_fans = Fan::getFans();
    Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes, _mechanism_spike_blocks);
-   _mechanism_platforms = MovingPlatform::merge(path, _world);
+   _mechanism_platforms = MovingPlatform::merge(this, path, _world);
 
    _map->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),

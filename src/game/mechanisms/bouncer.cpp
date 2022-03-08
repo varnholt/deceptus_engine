@@ -23,7 +23,7 @@ const auto SPRITE_HEIGHT = 24;
 //
 
 
-b2Body *Bouncer::getBody() const
+b2Body* Bouncer::getBody() const
 {
   return _body;
 }
@@ -32,14 +32,16 @@ b2Body *Bouncer::getBody() const
 Bouncer::Bouncer(
    GameNode* parent,
    const std::shared_ptr<b2World>& world,
-   float x,
-   float y,
-   float width,
-   float height
+   TmxObject* tmx_object
 )
  : FixtureNode(parent)
 {
    setClassName(typeid(Bouncer).name());
+
+   const auto x = tmx_object->_x_px;
+   const auto y = tmx_object->_y_px;
+   const auto width = tmx_object->_width_px;
+   const auto height = tmx_object->_height_px;
 
    _rect.left = static_cast<int32_t>(x);
    _rect.top = static_cast<int32_t>(y);
@@ -110,22 +112,6 @@ void Bouncer::updatePlayerAtBouncer()
    rect.height *= 3;
 
    _player_at_bouncer = rect.intersects(_rect);
-
-   // // yeah, this is super dirty.
-   // // should have a static function to determine whether the player will collide
-   // // with one of the bouncers within the next few frames
-   //
-   // const auto a = sf::Vector2i{
-   //    static_cast<int32_t>(mPositionSf.x / TILE_WIDTH) + 1,
-   //    static_cast<int32_t>(mPositionSf.y / TILE_HEIGHT) - 1
-   // };
-   //
-   // const auto b = sf::Vector2i{
-   //    static_cast<int32_t>(player->getPixelPosition().x / TILE_WIDTH),
-   //    static_cast<int32_t>(player->getPixelPosition().y / TILE_HEIGHT)
-   // };
-   //
-   // mPlayerAtBouncer = (a == b);
 }
 
 
@@ -157,14 +143,6 @@ bool Bouncer::isPlayerAtBouncer()
 {
    return _player_at_bouncer;
 }
-
-
-// destroying a world will also delete all its bodies
-//
-//Bouncer::~Bouncer()
-//{
-//   _body->GetWorld()->DestroyBody(mBody);
-//}
 
 
 void Bouncer::activate()

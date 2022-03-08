@@ -8,13 +8,14 @@
 #include <memory>
 
 #include "gamemechanism.h"
+#include "gamenode.h"
 
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
 
-class Fan : public GameMechanism
+class Fan : public GameMechanism, public GameNode
 {
    public:
 
@@ -37,7 +38,7 @@ class Fan : public GameMechanism
          ~FanTile() = default;
       };
 
-      Fan() = default;
+      Fan(GameNode* parent = nullptr);
 
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
@@ -51,7 +52,7 @@ class Fan : public GameMechanism
       );
 
       static void resetAll();
-      static void addObject(TmxObject* object, const std::filesystem::path& base_path);
+      static void addObject(GameNode* parent, TmxObject* object, const std::filesystem::path& base_path);
       static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& player_rect);
       static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
       static void merge();

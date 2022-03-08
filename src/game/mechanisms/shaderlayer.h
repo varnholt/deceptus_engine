@@ -1,14 +1,16 @@
 #pragma once
 
 #include "gamemechanism.h"
+#include "gamenode.h"
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 
 struct TmxObject;
 
-struct ShaderLayer : public GameMechanism
+struct ShaderLayer : public GameMechanism, public GameNode
 {
+   ShaderLayer(GameNode* parent = nullptr);
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
@@ -22,6 +24,6 @@ struct ShaderLayer : public GameMechanism
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
-   static std::shared_ptr<ShaderLayer> deserialize(TmxObject* element);
+   static std::shared_ptr<ShaderLayer> deserialize(GameNode* parent, TmxObject* element);
 };
 
