@@ -19,6 +19,7 @@
 #include "effects/dust.h"
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
+#include "gamedeserializedata.h"
 #include "gun.h"
 #include "leveldescription.h"
 #include "levelmap.h"
@@ -396,18 +397,25 @@ void Level::loadTmx()
 
    for (auto element : _tmx_elements)
    {
+      GameDeserializeData data;
+      data._world = _world;
+      data._base_path = path;
+
       if (element->_type == TmxElement::TypeLayer)
       {
          auto layer = dynamic_cast<TmxLayer*>(element);
          auto tileset = _tmx_parser->getTileSet(layer);
 
+         data._tmx_layer = layer;
+         data._tmx_tileset = tileset;
+
          if (layer->_name.rfind("doors", 0) == 0)
          {
-            _mechanism_doors = Door::load(layer, tileset, path, _world);
+            _mechanism_doors = Door::load(data);
          }
          else if (layer->_name == "fans")
          {
-            Fan::load(layer, tileset, _world);
+            Fan::load(data);
          }
          else if (layer->_name == "lasers")
          {
@@ -433,7 +441,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "toggle_spikes")
          {
-            auto spikes = Spikes::load(this, layer, tileset, path, Spikes::Mode::Toggled);
+            auto spikes = Spikes::load(this, data, Spikes::Mode::Toggled);
             for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
@@ -441,7 +449,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "trap_spikes")
          {
-            auto spikes = Spikes::load(this, layer, tileset, path, Spikes::Mode::Trap);
+            auto spikes = Spikes::load(this, data, Spikes::Mode::Trap);
             for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
@@ -449,7 +457,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "interval_spikes")
          {
-            auto spikes = Spikes::load(this, layer, tileset, path, Spikes::Mode::Interval);
+            auto spikes = Spikes::load(this, data, Spikes::Mode::Interval);
             for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
@@ -496,6 +504,9 @@ void Level::loadTmx()
          {
             auto tmx_object = object.second;
 
+            data._tmx_object = tmx_object;
+            data._tmx_object_group = object_group;
+
             if (object_group->_name == "bubble_cubes")
             {
                auto cube = std::make_shared<BubbleCube>(this, _world, tmx_object, path);
@@ -513,7 +524,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "fans")
             {
-               Fan::addObject(this, tmx_object, path);
+               Fan::addObject(this, data);
             }
             else if (object_group->_name == "portals")
             {
@@ -589,18 +600,18 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "conveyorbelts")
             {
-               auto belt = std::make_shared<ConveyorBelt>(this, _world, tmx_object, path);
+               auto belt = std::make_shared<ConveyorBelt>(this, data);
                _mechanism_conveyor_belts.push_back(belt);
             }
             else if (object_group->_name == "crushers")
             {
                auto crusher = std::make_shared<Crusher>(this);
-               crusher->setup(tmx_object, _world);
+               crusher->setup(data);
                _mechanism_crushers.push_back(crusher);
             }
             else if (object_group->_name == "rooms")
             {
-               Room::deserialize(this, tmx_object, _rooms);
+               Room::deserialize(this, data, _rooms);
             }
             else if (object_group->_name == "platform_paths")
             {

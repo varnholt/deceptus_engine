@@ -86,28 +86,28 @@ std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::s
 }
 
 
-void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>& rooms)
+void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms)
 {
    // ignore invalid rects
    const auto config = GameConfiguration::getInstance();
-   if (tmx_object->_width_px < config._view_width)
+   if (data._tmx_object->_width_px < config._view_width)
    {
       Log::Error() << "ignoring rect, room width smaller than screen width";
       return;
    }
 
-   if (tmx_object->_height_px < config._view_height)
+   if (data._tmx_object->_height_px < config._view_height)
    {
       Log::Error() << "ignoring rect, room height smaller than screen height";
       return;
    }
 
    // read key from tmx object
-   std::istringstream f(tmx_object->_name);
+   std::istringstream f(data._tmx_object->_name);
    std::string key;
    if (!getline(f, key, '_'))
    {
-      key = tmx_object->_name;
+      key = data._tmx_object->_name;
    }
 
    if (key.empty())
@@ -117,10 +117,10 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
    }
 
    auto rect = sf::FloatRect{
-      tmx_object->_x_px,
-      tmx_object->_y_px,
-      tmx_object->_width_px,
-      tmx_object->_height_px
+      data._tmx_object->_x_px,
+      data._tmx_object->_y_px,
+      data._tmx_object->_width_px,
+      data._tmx_object->_height_px
    };
 
    // check if room already exists
@@ -137,10 +137,10 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
       room->setObjectName(key);
 
       // deserialize room properties
-      if (tmx_object->_properties)
+      if (data._tmx_object->_properties)
       {
-         const auto transition_it = tmx_object->_properties->_map.find("transition");
-         if (transition_it != tmx_object->_properties->_map.end())
+         const auto transition_it = data._tmx_object->_properties->_map.find("transition");
+         if (transition_it != data._tmx_object->_properties->_map.end())
          {
             if (transition_it->second->_value_string == "fade_out_fade_in")
             {
@@ -148,40 +148,40 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
             }
          }
 
-         const auto fade_in_speed_it = tmx_object->_properties->_map.find("fade_in_speed");
-         if (fade_in_speed_it != tmx_object->_properties->_map.end())
+         const auto fade_in_speed_it = data._tmx_object->_properties->_map.find("fade_in_speed");
+         if (fade_in_speed_it != data._tmx_object->_properties->_map.end())
          {
             room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
          }
 
-         const auto fade_out_speed_it = tmx_object->_properties->_map.find("fade_out_speed");
-         if (fade_out_speed_it != tmx_object->_properties->_map.end())
+         const auto fade_out_speed_it = data._tmx_object->_properties->_map.find("fade_out_speed");
+         if (fade_out_speed_it != data._tmx_object->_properties->_map.end())
          {
             room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
-         const auto delay_between_effects_it = tmx_object->_properties->_map.find("delay_between_effects_ms");
-         if (delay_between_effects_it != tmx_object->_properties->_map.end())
+         const auto delay_between_effects_it = data._tmx_object->_properties->_map.find("delay_between_effects_ms");
+         if (delay_between_effects_it != data._tmx_object->_properties->_map.end())
          {
             room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
          }
 
-         const auto camera_sync_after_fade_out_it = tmx_object->_properties->_map.find("camera_sync_after_fade_out");
-         if (camera_sync_after_fade_out_it != tmx_object->_properties->_map.end())
+         const auto camera_sync_after_fade_out_it = data._tmx_object->_properties->_map.find("camera_sync_after_fade_out");
+         if (camera_sync_after_fade_out_it != data._tmx_object->_properties->_map.end())
          {
             room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
          }
 
-         const auto delay_it = tmx_object->_properties->_map.find("camera_lock_delay_ms");
-         if (delay_it != tmx_object->_properties->_map.end())
+         const auto delay_it = data._tmx_object->_properties->_map.find("camera_lock_delay_ms");
+         if (delay_it != data._tmx_object->_properties->_map.end())
          {
             room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
          }
 
          // read start positions if available
-         const auto start_position_l_x_it = tmx_object->_properties->_map.find("start_position_left_x_px");
-         const auto start_position_l_y_it = tmx_object->_properties->_map.find("start_position_left_y_px");
-         if (start_position_l_x_it != tmx_object->_properties->_map.end())
+         const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
+         const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
+         if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
          {
             room->_start_position_l = {
                start_position_l_x_it->second->_value_int.value(),
@@ -189,9 +189,9 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
             };
          }
 
-         const auto start_position_r_x_it = tmx_object->_properties->_map.find("start_position_right_x_px");
-         const auto start_position_r_y_it = tmx_object->_properties->_map.find("start_position_right_y_px");
-         if (start_position_r_x_it != tmx_object->_properties->_map.end())
+         const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
+         const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
+         if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
          {
             room->_start_position_r = {
                start_position_r_x_it->second->_value_int.value(),
@@ -199,9 +199,9 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
             };
          }
 
-         const auto start_position_t_x_it = tmx_object->_properties->_map.find("start_position_top_x_px");
-         const auto start_position_t_y_it = tmx_object->_properties->_map.find("start_position_top_y_px");
-         if (start_position_t_x_it != tmx_object->_properties->_map.end())
+         const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
+         const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
+         if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
          {
             room->_start_position_t = {
                start_position_t_x_it->second->_value_int.value(),
@@ -209,9 +209,9 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
             };
          }
 
-         const auto start_position_b_x_it = tmx_object->_properties->_map.find("start_position_bottom_x_px");
-         const auto start_position_b_y_it = tmx_object->_properties->_map.find("start_position_bottom_y_px");
-         if (start_position_b_x_it != tmx_object->_properties->_map.end())
+         const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
+         const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
+         if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
          {
             room->_start_position_b = {
                start_position_b_x_it->second->_value_int.value(),
@@ -219,12 +219,12 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
             };
          }
 
-         const auto start_offset_l_x_it = tmx_object->_properties->_map.find("start_offset_left_x_px");
-         const auto start_offset_l_y_it = tmx_object->_properties->_map.find("start_offset_left_y_px");
-         if (start_offset_l_x_it != tmx_object->_properties->_map.end())
+         const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
+         const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
+         if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
          {
             auto offset_y = 0;
-            if (start_offset_l_y_it != tmx_object->_properties->_map.end())
+            if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
             {
                offset_y = start_offset_l_y_it->second->_value_int.value();
             }
@@ -232,12 +232,12 @@ void Room::deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std:
             room->_start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
          }
 
-         const auto start_offset_r_x_it = tmx_object->_properties->_map.find("start_offset_right_x_px");
-         const auto start_offset_r_y_it = tmx_object->_properties->_map.find("start_offset_right_y_px");
-         if (start_offset_r_x_it != tmx_object->_properties->_map.end())
+         const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
+         const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
+         if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
          {
             auto offset_y = 0;
-            if (start_offset_r_y_it != tmx_object->_properties->_map.end())
+            if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
             {
                offset_y = start_offset_r_y_it->second->_value_int.value();
             }

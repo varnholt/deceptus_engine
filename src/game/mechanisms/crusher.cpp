@@ -192,13 +192,13 @@ void Crusher::updateState()
 
 
 //-----------------------------------------------------------------------------
-void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
+void Crusher::setup(const GameDeserializeData& data)
 {
-   if (tmxObject->_properties)
+   if (data._tmx_object->_properties)
    {
-      const auto it = tmxObject->_properties->_map.find("alignment");
+      const auto it = data._tmx_object->_properties->_map.find("alignment");
 
-      if (it != tmxObject->_properties->_map.end())
+      if (it != data._tmx_object->_properties->_map.end())
       {
          const auto alignment = it->second->_value_string;
          if (alignment == "up")
@@ -236,8 +236,8 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
    //   +-------------+
    //    0123456789012
 
-   _pixel_position.x = tmxObject->_x_px;
-   _pixel_position.y = tmxObject->_y_px;
+   _pixel_position.x = data._tmx_object->_x_px;
+   _pixel_position.y = data._tmx_object->_y_px;
 
    _sprite_mount.setTexture(*_texture);
    _sprite_pusher.setTexture(*_texture);
@@ -385,7 +385,7 @@ void Crusher::setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world)
          break;
    }
 
-   setupBody(world);
+   setupBody(data._world);
 }
 
 

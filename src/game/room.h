@@ -10,6 +10,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "framework/tmxparser/tmxobject.h"
+#include "gamedeserializedata.h"
 #include "gamenode.h"
 
 
@@ -45,7 +46,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
 
    Room(GameNode* parent, const sf::FloatRect& rect);
 
-   static void deserialize(GameNode* parent, TmxObject* tmx_object, std::vector<std::shared_ptr<Room>>& rooms);
+   static void deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
 
    void startTransition();

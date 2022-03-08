@@ -115,30 +115,25 @@ void ConveyorBelt::updateSprite()
 }
 
 
-ConveyorBelt::ConveyorBelt(
-   GameNode* parent,
-   const std::shared_ptr<b2World>& world,
-   TmxObject* tmx_object,
-   const std::filesystem::path& base_path
-)
+ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data)
  : FixtureNode(parent)
 {
    setClassName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 
-   _texture = TexturePool::getInstance().get(base_path / "tilesets" / "cbelt.png");
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "cbelt.png");
 
-   const auto x         = tmx_object->_x_px;
-   const auto y         = tmx_object->_y_px;
-   const auto width_px  = tmx_object->_width_px;
-   const auto height_px = tmx_object->_height_px;
+   const auto x         = data._tmx_object->_x_px;
+   const auto y         = data._tmx_object->_y_px;
+   const auto width_px  = data._tmx_object->_width_px;
+   const auto height_px = data._tmx_object->_height_px;
 
    auto velocity = _velocity;
 
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
-      auto velocity_it = tmx_object->_properties->_map.find("velocity");
-      if (velocity_it != tmx_object->_properties->_map.end())
+      auto velocity_it = data._tmx_object->_properties->_map.find("velocity");
+      if (velocity_it != data._tmx_object->_properties->_map.end())
       {
          velocity = velocity_it->second->_value_float.value();
       }
@@ -153,17 +148,7 @@ ConveyorBelt::ConveyorBelt(
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    body_def.position = _position_b2d;
-   _body = world->CreateBody(&body_def);
-
-   // auto halfPhysicsWidth = width * MPP * 0.5f;
-   // auto halfPhysicsHeight = height * MPP * 0.5f;
-   //
-   // create fixture for physical boundaries of the belt object
-   // mShapeBounds.SetAsBox(
-   //    halfPhysicsWidth, halfPhysicsHeight,
-   //    b2Vec2(halfPhysicsWidth, halfPhysicsHeight),
-   //    0.0f
-   // );
+   _body = data._world->CreateBody(&body_def);
 
    const auto width_m  = width_px * MPP;
    const auto height_m = height_px * MPP;
@@ -171,9 +156,9 @@ ConveyorBelt::ConveyorBelt(
    constexpr auto dx = 0.002f;
    constexpr auto dy = 0.001f;
    std::array<b2Vec2, 6> vertices {
-      b2Vec2{dx,                0.0},
-      b2Vec2{0.0,               height_m - dy},
-      b2Vec2{0.0,               height_m},
+      b2Vec2{dx,            0.0},
+      b2Vec2{0.0,           height_m - dy},
+      b2Vec2{0.0,           height_m},
       b2Vec2{width_m,       height_m},
       b2Vec2{width_m,       height_m - dy},
       b2Vec2{width_m - dx,  0.0}
@@ -272,7 +257,7 @@ void ConveyorBelt::processFixtureNode(
          return;
       }
 
-      auto belt_velocity = belt->getVelocity();
+      const auto belt_velocity = belt->getVelocity();
 
       // only process a body once since bodies can have multiple fixtures
       if (std::find(__bodies_on_belt.begin(), __bodies_on_belt.end(), colliding_body) == __bodies_on_belt.end())
