@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "constants.h"
+#include "gamedeserializedata.h"
 
 struct TmxObject;
 
@@ -31,7 +32,7 @@ public:
    };
 
    Dialogue(GameNode* parent = nullptr);
-   static std::shared_ptr<Dialogue> deserialize(GameNode* parent, TmxObject* tmx_object);
+   static std::shared_ptr<Dialogue> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    void update(const sf::Time& dt) override;
 

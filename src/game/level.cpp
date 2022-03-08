@@ -584,7 +584,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "dialogues")
             {
-               auto dialogue = Dialogue::deserialize(this, tmx_object);
+               auto dialogue = Dialogue::deserialize(this, data);
                _mechanism_dialogues.push_back(dialogue);
             }
             else if (object_group->_name == "bouncers")
@@ -615,7 +615,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "platform_paths")
             {
-               MovingPlatform::link(_mechanism_platforms, tmx_object);
+               MovingPlatform::link(_mechanism_platforms, data);
             }
             else if (object_group->_name == "platforms")
             {
