@@ -13,7 +13,6 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "level.h"
 #include "player/player.h"
 #include "physics/physicsconfiguration.h"
 #include "texturepool.h"
@@ -150,6 +149,7 @@ void MovingPlatform::addSprite(const sf::Sprite& sprite)
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
+   GameNode* parent,
    TmxLayer* layer,
    TmxTileSet* tileset,
    const std::filesystem::path& base_path,
@@ -185,7 +185,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
          if (tile_number != 0)
          {
             // find matching platform
-            auto moving_platform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
+            auto moving_platform = std::make_shared<MovingPlatform>(parent);
             moving_platform->setObjectName(layer->_name);
 
             const auto texture_path = base_path / tileset->_image->_source;
@@ -275,6 +275,7 @@ void MovingPlatform::deserialize(TmxObject* tmx_object)
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
+   GameNode* parent,
    const std::filesystem::path& base_path,
    const std::shared_ptr<b2World>& world
 )
@@ -339,7 +340,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
       auto box = pair.first;
       auto path = pair.second;
 
-      auto moving_platform = std::make_shared<MovingPlatform>(Level::getCurrentLevel());
+      auto moving_platform = std::make_shared<MovingPlatform>(parent);
       moving_platforms.push_back(moving_platform);
 
       moving_platform->_element_count = static_cast<int32_t>(box->_width_px / PIXELS_PER_TILE);
