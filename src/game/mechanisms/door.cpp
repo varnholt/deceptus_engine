@@ -257,20 +257,15 @@ void Door::setPlayerAtDoor(bool player_at_door)
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<GameMechanism>> Door::load(
-   TmxLayer* layer,
-   TmxTileSet* tileset,
-   const std::filesystem::path& base_path,
-   const std::shared_ptr<b2World>& world
-)
+std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData& data)
 {
-   if (!layer)
+   if (!data._tmx_layer)
    {
       Log::Error() << "tmx layer is empty, please fix your level design";
       return {};
    }
 
-   if (!tileset)
+   if (!data._tmx_tileset)
    {
       Log::Error() << "tmx tileset is empty, please fix your level design";
       return {};
@@ -278,10 +273,10 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
-   const auto tiles    = layer->_data;
-   const auto width    = layer->_width_px;
-   const auto height   = layer->_height_px;
-   const auto first_id = tileset->_first_gid;
+   const auto tiles    = data._tmx_layer->_data;
+   const auto width    = data._tmx_layer->_width_px;
+   const auto height   = data._tmx_layer->_height_px;
+   const auto first_id = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto j = 0u; j < height; j++)
@@ -348,7 +343,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                auto door = std::make_shared<Door>(Level::getCurrentLevel());
                doors.push_back(door);
 
-               door->_texture = TexturePool::getInstance().get((base_path / tileset->_image->_source).string());
+               door->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
                door->_door_quad[0].position.x = position_x;
                door->_door_quad[0].position.y = position_y;
                door->_door_quad[1].position.x = position_x;
@@ -374,9 +369,9 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
                   );
                }
 
-               if (layer->_properties != nullptr)
+               if (data._tmx_layer->_properties != nullptr)
                {
-                  door->setZ(layer->_properties->_map["z"]->_value_int.value());
+                  door->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
                }
             }
          }
@@ -385,7 +380,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(
 
    for (auto& tmp : doors)
    {
-      std::dynamic_pointer_cast<Door>(tmp)->setupBody(world);
+      std::dynamic_pointer_cast<Door>(tmp)->setupBody(data._world);
    }
 
    return doors;

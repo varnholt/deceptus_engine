@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -39,9 +40,7 @@ public:
 
    static std::vector<std::shared_ptr<Spikes>> load(
       GameNode* parent,
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
-      const std::filesystem::path& basePath,
+      const GameDeserializeData& data,
       Mode mode
    );
 

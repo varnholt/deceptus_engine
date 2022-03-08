@@ -7,6 +7,7 @@
 #include <optional>
 #include <memory>
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -45,14 +46,10 @@ class Fan : public GameMechanism, public GameNode
       const sf::Rect<int32_t>& getPixelRect() const;
       void setEnabled(bool enabled) override;
 
-      static void load(
-         TmxLayer* layer,
-         TmxTileSet* tileSet,
-         const std::shared_ptr<b2World>& world
-      );
+      static void load(const GameDeserializeData& data);
 
       static void resetAll();
-      static void addObject(GameNode* parent, TmxObject* object, const std::filesystem::path& base_path);
+      static void addObject(GameNode* parent, const GameDeserializeData& data);
       static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& player_rect);
       static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
       static void merge();

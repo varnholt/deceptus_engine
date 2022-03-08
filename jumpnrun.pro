@@ -30,7 +30,7 @@ debug {
 win32-msvc {
    # link debug symbols
    message("configured for msvc")
-   QMAKE_CXXFLAGS_RELEASE += /Zi
+   QMAKE_CXXFLAGS_RELEASE += /Zi /Wall
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
 }
 
@@ -167,6 +167,7 @@ SOURCES += \
    src/game/gamecontrollerdata.cpp \
    src/game/gamecontrollerdetection.cpp \
    src/game/gamecontrollerintegration.cpp \
+   src/game/gamedeserializedata.cpp \
    src/game/gamemechanism.cpp \
    src/game/gamenode.cpp \
    src/game/gamestate.cpp \
@@ -342,6 +343,7 @@ HEADERS += \
    src/game/gamecontrollerdata.h \
    src/game/gamecontrollerdetection.h \
    src/game/gamecontrollerintegration.h \
+   src/game/gamedeserializedata.h \
    src/game/gamemechanism.h \
    src/game/gamenode.h \
    src/game/gamestate.h \

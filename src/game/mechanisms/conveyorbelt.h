@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "constants.h"
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "fixturenode.h"
 #include "Box2D/Box2D.h"
@@ -15,12 +16,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
 
    public:
 
-      ConveyorBelt(
-         GameNode* parent,
-         const std::shared_ptr<b2World>& world,
-         TmxObject* tmxObject,
-         const std::filesystem::path& basePath
-      );
+      ConveyorBelt(GameNode* parent, const GameDeserializeData& data);
 
       b2Body *getBody() const;
       float getVelocity() const;

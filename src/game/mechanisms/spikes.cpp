@@ -263,32 +263,30 @@ void Spikes::update(const sf::Time& dt)
 
 std::vector<std::shared_ptr<Spikes>> Spikes::load(
    GameNode* parent,
-   TmxLayer* layer,
-   TmxTileSet* tileset,
-   const std::filesystem::path& base_path,
+   const GameDeserializeData& data,
    Mode mode
 )
 {
-   if (!layer)
+   if (!data._tmx_layer)
    {
       Log::Error() << "tmx layer is empty, please fix your level design";
       return {};
    }
 
-   if (!tileset)
+   if (!data._tmx_tileset)
    {
       Log::Error() << "tmx tileset is empty, please fix your level design";
       return {};
    }
 
-   auto texture = TexturePool::getInstance().get(base_path / "tilesets" / "spikes.png");
+   auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
 
    std::vector<std::shared_ptr<Spikes>> all_spikes;
 
-   const auto tiles    = layer->_data;
-   const auto width    = layer->_width_px;
-   const auto height   = layer->_height_px;
-   const auto first_id = tileset->_first_gid;
+   const auto tiles    = data._tmx_layer->_data;
+   const auto width    = data._tmx_layer->_width_px;
+   const auto height   = data._tmx_layer->_height_px;
+   const auto first_id = data._tmx_tileset->_first_gid;
 
    const int32_t tiles_per_row = texture->getSize().x / PIXELS_PER_TILE;
 
@@ -317,9 +315,9 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(
                spikes->_tu = TRAP_START_TILE;
             }
 
-            if (layer->_properties != nullptr)
+            if (data._tmx_layer->_properties != nullptr)
             {
-               spikes->setZ(layer->_properties->_map["z"]->_value_int.value());
+               spikes->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }
 
             spikes->_pixel_rect = {

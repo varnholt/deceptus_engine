@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -40,12 +41,7 @@ public:
 
    void toggle();
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(
-      TmxLayer *layer,
-      TmxTileSet *tileSet,
-      const std::filesystem::path& basePath,
-      const std::shared_ptr<b2World>&
-   );
+   static std::vector<std::shared_ptr<GameMechanism>> load(const GameDeserializeData& data);
 
    bool isPlayerAtDoor() const;
    void setPlayerAtDoor(bool isPlayerAtDoor);
