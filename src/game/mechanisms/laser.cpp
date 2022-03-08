@@ -38,6 +38,13 @@ std::vector<std::array<int32_t, 9>> Laser::__tiles_version_2;
 
 
 //-----------------------------------------------------------------------------
+Laser::Laser(GameNode* parent)
+ : GameNode(parent)
+{
+}
+
+
+//-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _sprite.setTextureRect(
@@ -229,6 +236,7 @@ const sf::Vector2f& Laser::getPixelPosition() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Laser::load(
+   GameNode* parent,
    TmxLayer* layer,
    TmxTileSet* tileset,
    const std::filesystem::path& base_path,
@@ -278,7 +286,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
          if (tileNumber != 0)
          {
-            auto laser = std::make_shared<Laser>();
+            auto laser = std::make_shared<Laser>(parent);
             lasers.push_back(laser);
 
             laser->_version = version;

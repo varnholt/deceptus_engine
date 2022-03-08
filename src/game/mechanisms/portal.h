@@ -29,6 +29,7 @@ public:
    void update(const sf::Time& dt) override;
 
    static std::vector<std::shared_ptr<GameMechanism>> load(
+      GameNode* parent,
       TmxLayer *layer,
       TmxTileSet *tileSet,
       const std::filesystem::path& basePath,

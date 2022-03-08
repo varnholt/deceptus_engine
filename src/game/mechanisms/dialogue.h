@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gamemechanism.h"
+#include "gamenode.h"
 
 #include <optional>
 #include <memory>
@@ -13,7 +14,7 @@
 
 struct TmxObject;
 
-class Dialogue : public GameMechanism
+class Dialogue : public GameMechanism, public GameNode
 {
 
 public:
@@ -29,8 +30,8 @@ public:
       float _animate_text_speed = 10.0f;
    };
 
-   Dialogue() = default;
-   static std::shared_ptr<Dialogue> deserialize(TmxObject* tmxObject);
+   Dialogue(GameNode* parent = nullptr);
+   static std::shared_ptr<Dialogue> deserialize(GameNode* parent, TmxObject* tmx_object);
 
    void update(const sf::Time& dt) override;
 

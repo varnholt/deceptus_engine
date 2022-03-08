@@ -228,6 +228,7 @@ void Portal::setPlayerAtPortal(bool playerAtPortal)
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Portal::load(
+   GameNode* parent,
    TmxLayer* layer,
    TmxTileSet* tileSet,
    const std::filesystem::path& basePath,
@@ -275,7 +276,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(
 
             if (portal == nullptr)
             {
-               portal = std::make_shared<Portal>();
+               portal = std::make_shared<Portal>(parent);
                portals.push_back(portal);
                portal->_tile_positions.x = static_cast<float>(i);
                portal->_tile_positions.y = static_cast<float>(j);

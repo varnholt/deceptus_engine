@@ -19,6 +19,12 @@ std::vector<TmxObject*> Fan::__object_instances;
 std::vector<sf::Vector2f> Fan::__weight_instances;
 
 
+Fan::Fan(GameNode* parent)
+ : GameNode(parent)
+{
+}
+
+
 void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
    auto possf = tile->mPosition;
@@ -252,11 +258,11 @@ void Fan::resetAll()
 }
 
 
-void Fan::addObject(TmxObject* object, const std::filesystem::path& basePath)
+void Fan::addObject(GameNode* parent, TmxObject* object, const std::filesystem::path& basePath)
 {
    __object_instances.push_back(object);
 
-   auto fan = std::make_shared<Fan>();
+   auto fan = std::make_shared<Fan>(parent);
    __fan_instances.push_back(fan);
 
    const auto w = static_cast<int32_t>(object->_width_px);
