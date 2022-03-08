@@ -20,6 +20,7 @@
 Dialogue::Dialogue(GameNode* parent)
  : GameNode(parent)
 {
+   setClassName(typeid(Dialogue).name());
 }
 
 

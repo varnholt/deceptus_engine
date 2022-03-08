@@ -9,6 +9,8 @@
 RopeWithLight::RopeWithLight(GameNode* parent)
  : Rope(parent)
 {
+   setClassName(typeid(RopeWithLight).name());
+
    _lamp_sprite.setTexture(*_texture.get());
 
    // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
@@ -46,7 +48,7 @@ void RopeWithLight::update(const sf::Time& dt)
 
    const auto angle_rad = static_cast<float>(atan2(c_m.y, c_m.x));
 
-   _lamp_sprite.setRotation(90 + RADTODEG * angle_rad);
+   _lamp_sprite.setRotation(90 + FACTOR_RAD_TO_DEG * angle_rad);
    _lamp_sprite.setPosition(
       _light->_pos_m.x * PPM, // - _lamp_sprite_rect.width / 2,
       _light->_pos_m.y * PPM  // - _lamp_sprite_rect.height / 2
@@ -91,8 +93,7 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
    }
 
    // add raycast light
-   _light = LightSystem::createLightInstance();
-   // _light->_sprite.setColor(sf::Color(_color[0], _color[1], _color[2], _color[3]));
+   _light = LightSystem::createLightInstance(this);
    _light->_color = sf::Color(color[0], color[1], color[2], color[3]);
    Level::getCurrentLevel()->getLightSystem()->_lights.push_back(_light);
 }

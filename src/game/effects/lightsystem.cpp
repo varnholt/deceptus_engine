@@ -386,9 +386,9 @@ void LightSystem::LightInstance::updateSpritePosition()
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(TmxObject* tmx_object)
+std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, TmxObject* tmx_object)
 {
-   auto light = std::make_shared<LightSystem::LightInstance>();
+   auto light = std::make_shared<LightSystem::LightInstance>(parent);
 
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
@@ -482,6 +482,8 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Tmx
          tmx_object->_x_px * MPP + (tmx_object->_width_px  * 0.5f) * MPP,
          tmx_object->_y_px * MPP + (tmx_object->_height_px * 0.5f) * MPP
       );
+
+      light->setObjectName(tmx_object->_name);
    }
 
    light->_color.r = rgba[0];

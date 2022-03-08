@@ -28,6 +28,14 @@ Door::Door(GameNode* parent)
 
 
 //-----------------------------------------------------------------------------
+Door::~Door()
+{
+   // destructor for debugging purposes only
+   // std::cout << "door destroyed" << std::endl;
+}
+
+
+//-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite_icon);
