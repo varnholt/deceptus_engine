@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "gamedeserializedata.h"
 #include "gamenode.h"
 
 
@@ -26,7 +27,7 @@ public:
    void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z);
    void update(const sf::Time& time);
 
-   static std::shared_ptr<SmokeEffect> deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* object_group);
+   static std::shared_ptr<SmokeEffect> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
 

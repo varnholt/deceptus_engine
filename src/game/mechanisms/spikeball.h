@@ -4,6 +4,7 @@
 
 #include "Box2D/Box2D.h"
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -29,12 +30,12 @@ class SpikeBall : public GameMechanism, public GameNode
          float _chain_element_height = 0.0125f;
       };
 
-      SpikeBall(GameNode* parent);
+      SpikeBall(GameNode* parent = nullptr);
 
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
 
-      void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
+      void setup(const GameDeserializeData& data);
 
       sf::Vector2i getPixelPosition() const;
       void setPixelPosition(const sf::Vector2i& pixelPosition);

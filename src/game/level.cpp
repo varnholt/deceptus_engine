@@ -544,13 +544,13 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "smoke")
             {
-               auto smoke = SmokeEffect::deserialize(this, tmx_object, object_group);
+               auto smoke = SmokeEffect::deserialize(this, data);
                _smoke_effect.push_back(smoke);
             }
             else if (object_group->_name == "spike_balls")
             {
                auto spike_ball = std::make_shared<SpikeBall>(this);
-               spike_ball->setup(tmx_object, _world);
+               spike_ball->setup(data);
                _mechanism_spike_balls.push_back(spike_ball);
             }
             else if (object_group->_name == "spike_blocks")
@@ -562,14 +562,14 @@ void Level::loadTmx()
             else if (object_group->_name == "moveable_objects")
             {
                auto box = std::make_shared<MoveableBox>(this);
-               box->setup(tmx_object, _world);
+               box->setup(data);
                _mechanism_moveable_boxes.push_back(box);
             }
             else if (object_group->_name == "death_blocks")
             {
-               auto deathBlock = std::make_shared<DeathBlock>(this);
-               deathBlock->setup(tmx_object, _world);
-               _mechanism_death_blocks.push_back(deathBlock);
+               auto death_block = std::make_shared<DeathBlock>(this);
+               death_block->setup(data);
+               _mechanism_death_blocks.push_back(death_block);
             }
             else if (object_group->_name == "checkpoints")
             {
@@ -589,7 +589,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "bouncers")
             {
-               auto bouncer = std::make_shared<Bouncer>(this, _world, tmx_object, object_group);
+               auto bouncer = std::make_shared<Bouncer>(this, data);
                _mechanism_bouncers.push_back(bouncer);
             }
             else if (object_group->_name == "controller_help")
@@ -643,7 +643,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
             {
-               auto light = StaticLight::deserialize(this, tmx_object, object_group);
+               auto light = StaticLight::deserialize(this, data);
                _static_light->_lights.push_back(light);
             }
             if (object_group->_name == "switchable_objects")

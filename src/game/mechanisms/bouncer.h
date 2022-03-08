@@ -4,6 +4,7 @@
 #include "fixturenode.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "Box2D/Box2D.h"
 #include "SFML/Graphics.hpp"
@@ -14,12 +15,7 @@ class Bouncer : public FixtureNode, public GameMechanism
 
 public:
 
-   Bouncer(
-      GameNode* parent,
-      const std::shared_ptr<b2World>& world,
-      TmxObject* tmx_object,
-      TmxObjectGroup* tmx_object_group
-   );
+   Bouncer(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;

@@ -100,10 +100,10 @@ void SmokeEffect::update(const sf::Time& time)
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* /*objectGroup*/)
+std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto smoke_effect = std::make_shared<SmokeEffect>(parent);
-   smoke_effect->setObjectName(tmx_object->_name);
+   smoke_effect->setObjectName(data._tmx_object->_name);
 
    auto particle_count = 50;
    auto sprite_scale = 1.0f;
@@ -111,72 +111,72 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, TmxObjec
    auto center_offset_x_px = 0;
    auto center_offset_y_px = 0;
 
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
-      auto z_it = tmx_object->_properties->_map.find("z");
-      if (z_it != tmx_object->_properties->_map.end())
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
       {
          smoke_effect->_z = z_it->second->_value_int.value();
       }
 
-      auto particle_count_it = tmx_object->_properties->_map.find("particle_count");
-      if (particle_count_it != tmx_object->_properties->_map.end())
+      auto particle_count_it = data._tmx_object->_properties->_map.find("particle_count");
+      if (particle_count_it != data._tmx_object->_properties->_map.end())
       {
          particle_count = particle_count_it->second->_value_int.value();
       }
 
-      auto spread_factor_it = tmx_object->_properties->_map.find("spread_factor");
-      if (spread_factor_it != tmx_object->_properties->_map.end())
+      auto spread_factor_it = data._tmx_object->_properties->_map.find("spread_factor");
+      if (spread_factor_it != data._tmx_object->_properties->_map.end())
       {
          spread_factor = spread_factor_it->second->_value_float.value();
       }
 
-      auto velocity_it = tmx_object->_properties->_map.find("velocity");
-      if (velocity_it != tmx_object->_properties->_map.end())
+      auto velocity_it = data._tmx_object->_properties->_map.find("velocity");
+      if (velocity_it != data._tmx_object->_properties->_map.end())
       {
          smoke_effect->_velocity = velocity_it->second->_value_float.value();
       }
 
-      auto sprite_scale_it = tmx_object->_properties->_map.find("sprite_scale");
-      if (sprite_scale_it != tmx_object->_properties->_map.end())
+      auto sprite_scale_it = data._tmx_object->_properties->_map.find("sprite_scale");
+      if (sprite_scale_it != data._tmx_object->_properties->_map.end())
       {
          sprite_scale = sprite_scale_it->second->_value_float.value();
       }
 
-      auto pixel_ratio_it = tmx_object->_properties->_map.find("pixel_ratio");
-      if (pixel_ratio_it != tmx_object->_properties->_map.end())
+      auto pixel_ratio_it = data._tmx_object->_properties->_map.find("pixel_ratio");
+      if (pixel_ratio_it != data._tmx_object->_properties->_map.end())
       {
          smoke_effect->_pixel_ratio = pixel_ratio_it->second->_value_float.value();
       }
 
-      auto particle_color_it = tmx_object->_properties->_map.find("particle_color");
-      if (particle_color_it != tmx_object->_properties->_map.end())
+      auto particle_color_it = data._tmx_object->_properties->_map.find("particle_color");
+      if (particle_color_it != data._tmx_object->_properties->_map.end())
       {
          const auto rgba = TmxTools::color(particle_color_it->second->_value_string.value());
          smoke_effect->_particle_color = {rgba[0], rgba[1], rgba[2], rgba[3]};
       }
 
-      auto layer_color_it = tmx_object->_properties->_map.find("layer_color");
-      if (layer_color_it != tmx_object->_properties->_map.end())
+      auto layer_color_it = data._tmx_object->_properties->_map.find("layer_color");
+      if (layer_color_it != data._tmx_object->_properties->_map.end())
       {
          const auto rgba = TmxTools::color(layer_color_it->second->_value_string.value());
          smoke_effect->_layer_color = {rgba[0], rgba[1], rgba[2], rgba[3]};
       }
 
-      auto center_offset_x_it = tmx_object->_properties->_map.find("center_offset_x_px");
-      if (center_offset_x_it != tmx_object->_properties->_map.end())
+      auto center_offset_x_it = data._tmx_object->_properties->_map.find("center_offset_x_px");
+      if (center_offset_x_it != data._tmx_object->_properties->_map.end())
       {
          center_offset_x_px = center_offset_x_it->second->_value_int.value();
       }
 
-      auto center_offset_y_it = tmx_object->_properties->_map.find("center_offset_y_px");
-      if (center_offset_y_it != tmx_object->_properties->_map.end())
+      auto center_offset_y_it = data._tmx_object->_properties->_map.find("center_offset_y_px");
+      if (center_offset_y_it != data._tmx_object->_properties->_map.end())
       {
          center_offset_y_px = center_offset_y_it->second->_value_int.value();
       }
 
-      auto mode_it = tmx_object->_properties->_map.find("mode");
-      if (mode_it != tmx_object->_properties->_map.end())
+      auto mode_it = data._tmx_object->_properties->_map.find("mode");
+      if (mode_it != data._tmx_object->_properties->_map.end())
       {
          const auto mode = mode_it->second->_value_string.value();
          if (mode == "smoke")
@@ -189,8 +189,8 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, TmxObjec
          }
       }
 
-      auto blend_mode_it = tmx_object->_properties->_map.find("blend_mode");
-      if (blend_mode_it != tmx_object->_properties->_map.end())
+      auto blend_mode_it = data._tmx_object->_properties->_map.find("blend_mode");
+      if (blend_mode_it != data._tmx_object->_properties->_map.end())
       {
          const auto blend_mode = blend_mode_it->second->_value_string.value();
          if (blend_mode == "add")
@@ -208,11 +208,11 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, TmxObjec
       }
    }
 
-   const auto rect_width_px = static_cast<int32_t>(tmx_object->_width_px);
-   const auto rect_height_px = static_cast<int32_t>(tmx_object->_height_px);
+   const auto rect_width_px = static_cast<int32_t>(data._tmx_object->_width_px);
+   const auto rect_height_px = static_cast<int32_t>(data._tmx_object->_height_px);
 
-   smoke_effect->_offset_px.x = tmx_object->_x_px;
-   smoke_effect->_offset_px.y = tmx_object->_y_px;
+   smoke_effect->_offset_px.x = data._tmx_object->_x_px;
+   smoke_effect->_offset_px.y = data._tmx_object->_y_px;
 
    smoke_effect->_size_px.x = rect_width_px;
    smoke_effect->_size_px.y = rect_height_px;
@@ -221,8 +221,8 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, TmxObjec
    const auto range_x = static_cast<int32_t>((rect_width_px / smoke_effect->_pixel_ratio) * spread_factor);
    const auto range_y = static_cast<int32_t>((rect_height_px / smoke_effect->_pixel_ratio) * spread_factor);
 
-   const auto center_x_px = center_offset_x_px + (tmx_object->_width_px / 2) / smoke_effect->_pixel_ratio;
-   const auto center_y_px = center_offset_y_px + (tmx_object->_height_px / 2) / smoke_effect->_pixel_ratio;
+   const auto center_x_px = center_offset_x_px + (data._tmx_object->_width_px / 2) / smoke_effect->_pixel_ratio;
+   const auto center_y_px = center_offset_y_px + (data._tmx_object->_height_px / 2) / smoke_effect->_pixel_ratio;
 
    for (auto i = 0; i < particle_count; i++)
    {

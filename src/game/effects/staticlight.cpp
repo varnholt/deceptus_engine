@@ -64,10 +64,10 @@ void StaticLight::update(const sf::Time& time)
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* object_group)
+std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto light = std::make_shared<StaticLight::LightInstance>(parent);
-   light->setObjectName(tmx_object->_name);
+   light->setObjectName(data._tmx_object->_name);
 
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
@@ -75,34 +75,34 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* p
    auto flicker_alpha_amount = 1.0f;
    auto flicker_speed = 0.0f;
 
-   if (tmx_object->_properties != nullptr)
+   if (data._tmx_object->_properties != nullptr)
    {
-      auto it = tmx_object->_properties->_map.find("color");
-      if (it != tmx_object->_properties->_map.end())
+      auto it = data._tmx_object->_properties->_map.find("color");
+      if (it != data._tmx_object->_properties->_map.end())
       {
          rgba = TmxTools::color(it->second->_value_string.value());
       }
 
-      it = tmx_object->_properties->_map.find("texture");
-      if (it != tmx_object->_properties->_map.end())
+      it = data._tmx_object->_properties->_map.find("texture");
+      if (it != data._tmx_object->_properties->_map.end())
       {
          texture = (std::filesystem::path("data/light/") / it->second->_value_string.value()).string();
       }
 
-      it = tmx_object->_properties->_map.find("flicker_intensity");
-      if (it != tmx_object->_properties->_map.end())
+      it = data._tmx_object->_properties->_map.find("flicker_intensity");
+      if (it != data._tmx_object->_properties->_map.end())
       {
          flicker_intensity = it->second->_value_float.value();
       }
 
-      it = tmx_object->_properties->_map.find("flicker_alpha_amount");
-      if (it != tmx_object->_properties->_map.end())
+      it = data._tmx_object->_properties->_map.find("flicker_alpha_amount");
+      if (it != data._tmx_object->_properties->_map.end())
       {
          flicker_alpha_amount = it->second->_value_float.value();
       }
 
-      it = tmx_object->_properties->_map.find("flicker_speed");
-      if (it != tmx_object->_properties->_map.end())
+      it = data._tmx_object->_properties->_map.find("flicker_speed");
+      if (it != data._tmx_object->_properties->_map.end())
       {
          flicker_speed = it->second->_value_float.value();
       }
@@ -118,16 +118,16 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* p
    light->_sprite.setColor(light->_color);
    light->_texture = TexturePool::getInstance().get(texture);
    light->_sprite.setTexture(*light->_texture);
-   light->_sprite.setPosition(tmx_object->_x_px, tmx_object->_y_px);
-   light->_z = object_group->_z_index;
+   light->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+   light->_z = data._tmx_object_group->_z_index;
 
-   auto scale_x_px = tmx_object->_width_px / light->_texture->getSize().x;
-   auto scale_y_px = tmx_object->_height_px / light->_texture->getSize().y;
+   auto scale_x_px = data._tmx_object->_width_px / light->_texture->getSize().x;
+   auto scale_y_px = data._tmx_object->_height_px / light->_texture->getSize().y;
    light->_sprite.scale(scale_x_px, scale_y_px);
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough
-   std::srand(static_cast<uint32_t>(tmx_object->_x_px * tmx_object->_y_px));
+   std::srand(static_cast<uint32_t>(data._tmx_object->_x_px * data._tmx_object->_y_px));
    light->_time_offset = (std::rand() % 100) * 0.01f;
 
    return light;
