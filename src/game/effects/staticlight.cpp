@@ -64,9 +64,11 @@ void StaticLight::update(const sf::Time& time)
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(TmxObject* tmx_object, TmxObjectGroup* object_group)
+std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* object_group)
 {
-   auto light = std::make_shared<StaticLight::LightInstance>();
+   auto light = std::make_shared<StaticLight::LightInstance>(parent);
+   light->setObjectName(tmx_object->_name);
+
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
    auto flicker_intensity = 0.0f;

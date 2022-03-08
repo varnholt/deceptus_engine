@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobjectgroup.h"
 #include "gamemechanism.h"
 #include "Box2D/Box2D.h"
 #include "SFML/Graphics.hpp"
@@ -16,10 +17,9 @@ public:
    Bouncer(
       GameNode* parent,
       const std::shared_ptr<b2World>& world,
-      TmxObject* tmx_object
+      TmxObject* tmx_object,
+      TmxObjectGroup* tmx_object_group
    );
-
-   // ~Bouncer() override;
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
