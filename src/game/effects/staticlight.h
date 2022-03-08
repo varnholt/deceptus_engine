@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include "gamenode.h"
+
 struct TmxObject;
 struct TmxObjectGroup;
 
@@ -14,8 +16,14 @@ public:
 
    static const std::string __layer_name;
 
-   struct LightInstance
+   struct LightInstance : public GameNode
    {
+      LightInstance(GameNode* parent)
+       : GameNode(parent)
+      {
+         setClassName(typeid(LightInstance).name());
+      }
+
       std::shared_ptr<sf::Texture> _texture;
       sf::Sprite _sprite;
       sf::BlendMode _blend_mode = sf::BlendAdd;
@@ -30,7 +38,7 @@ public:
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
 
-   static std::shared_ptr<StaticLight::LightInstance> deserialize(TmxObject* tmx_object, TmxObjectGroup* object_group);
+   static std::shared_ptr<StaticLight::LightInstance> deserialize(GameNode* parent, TmxObject* tmx_object, TmxObjectGroup* object_group);
 
 
 public:

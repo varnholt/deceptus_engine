@@ -387,7 +387,7 @@ void Level::loadTmx()
    _tmx_parser = std::make_unique<TmxParser>();
    _tmx_parser->parse(_description->_filename);
 
-   Log::Info() <<  "parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
+   Log::Info() << "parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
    elapsed.restart();
 
    Log::info("loading tmx... ");
@@ -433,7 +433,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "toggle_spikes")
          {
-            auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Toggled);
+            auto spikes = Spikes::load(this, layer, tileset, path, Spikes::Mode::Toggled);
             for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
@@ -441,7 +441,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "trap_spikes")
          {
-            auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Trap);
+            auto spikes = Spikes::load(this, layer, tileset, path, Spikes::Mode::Trap);
             for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
@@ -449,7 +449,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "interval_spikes")
          {
-            auto spikes = Spikes::load(layer, tileset, path, Spikes::Mode::Interval);
+            auto spikes = Spikes::load(this, layer, tileset, path, Spikes::Mode::Interval);
             for (const auto& s : spikes)
             {
                _mechanism_spikes.push_back(s);
@@ -509,7 +509,7 @@ void Level::loadTmx()
             {
                Enemy enemy;
                enemy.parse(tmx_object);
-               _enemy_data_from_tmx_layer[enemy._id]=enemy;
+               _enemy_data_from_tmx_layer[enemy._id] = enemy;
             }
             else if (object_group->_name == "fans")
             {
@@ -563,14 +563,12 @@ void Level::loadTmx()
             else if (object_group->_name == "checkpoints")
             {
                const auto cp = Checkpoint::deserialize(this, tmx_object);
-               const auto cp_index = cp->getIndex();
-
                _mechanism_checkpoints.push_back(cp);
 
                // whenever we reach a checkpoint, update the checkpoint index in the save state
+               // and serialize the save state
+               const auto cp_index = cp->getIndex();
                cp->addCallback([cp_index](){SaveState::getCurrent()._checkpoint = cp_index;});
-
-               // whenever we reach a checkpoint, serialize the save state
                cp->addCallback([](){SaveState::serializeToFile();});
             }
             else if (object_group->_name == "dialogues")
@@ -580,9 +578,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "bouncers")
             {
-               auto bouncer = std::make_shared<Bouncer>(this, _world, tmx_object);
-               bouncer->setZ(object_group->_z_index);
-
+               auto bouncer = std::make_shared<Bouncer>(this, _world, tmx_object, object_group);
                _mechanism_bouncers.push_back(bouncer);
             }
             else if (object_group->_name == "controller_help")
@@ -636,7 +632,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
             {
-               auto light = StaticLight::deserialize(tmx_object, object_group);
+               auto light = StaticLight::deserialize(this, tmx_object, object_group);
                _static_light->_lights.push_back(light);
             }
             if (object_group->_name == "switchable_objects")
