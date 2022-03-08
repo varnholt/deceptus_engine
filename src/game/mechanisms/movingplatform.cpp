@@ -467,20 +467,20 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
 //-----------------------------------------------------------------------------
 void MovingPlatform::link(
    const std::vector<std::shared_ptr<GameMechanism>>& platforms,
-   TmxObject* tmx_object
+   const GameDeserializeData& data
 )
 {
-   if (!tmx_object->_polyline)
+   if (!data._tmx_object->_polyline)
    {
       return;
    }
 
-   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
+   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
 
    auto pos = pixel_path.at(0);
 
-   auto x = static_cast<int>((pos.x + tmx_object->_x_px) / PIXELS_PER_TILE);
-   auto y = static_cast<int>((pos.y + tmx_object->_y_px) / PIXELS_PER_TILE);
+   auto x = static_cast<int>((pos.x + data._tmx_object->_x_px) / PIXELS_PER_TILE);
+   auto y = static_cast<int>((pos.y + data._tmx_object->_y_px) / PIXELS_PER_TILE);
 
    std::shared_ptr<MovingPlatform> platform;
 
@@ -516,14 +516,14 @@ void MovingPlatform::link(
          auto time = i / static_cast<float>(pixel_path.size() - 1);
 
          // where do those 4px error come from?!
-         auto x = (tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count  * PIXELS_PER_TILE) / 2.0f) * MPP;
-         auto y = (tmx_object->_y_px + poly_pos.y -                                 (PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count  * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto y = (data._tmx_object->_y_px + poly_pos.y -                                 (PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos.x = x;
          platform_pos.y = y;
 
          platform->_interpolation.addKey(platform_pos, time);
-         platform->_pixel_path.push_back({(pos.x + tmx_object->_x_px), (pos.y + tmx_object->_y_px)});
+         platform->_pixel_path.push_back({(pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px)});
 
          i++;
       }

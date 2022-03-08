@@ -1,8 +1,10 @@
 #pragma once
 
-#include "framework/math/pathinterpolation.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
+
+#include "gamedeserializedata.h"
+#include "framework/math/pathinterpolation.h"
 
 #include "Box2D/Box2D.h"
 #include <filesystem>
@@ -37,7 +39,7 @@ public:
       const std::shared_ptr<b2World>& world
    );
 
-   static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, TmxObject* tmx_object);
+   static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
