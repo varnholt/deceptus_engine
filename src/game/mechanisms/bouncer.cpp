@@ -29,22 +29,17 @@ b2Body* Bouncer::getBody() const
 }
 
 
-Bouncer::Bouncer(
-   GameNode* parent,
-   const std::shared_ptr<b2World>& world,
-   TmxObject* tmx_object,
-   TmxObjectGroup* tmx_object_group
-)
+Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
  : FixtureNode(parent)
 {
    setClassName(typeid(Bouncer).name());
-   setObjectName(tmx_object->_name);
-   setZ(tmx_object_group->_z_index);
+   setObjectName(data._tmx_object->_name);
+   setZ(data._tmx_object_group->_z_index);
 
-   const auto x = tmx_object->_x_px;
-   const auto y = tmx_object->_y_px;
-   const auto width = tmx_object->_width_px;
-   const auto height = tmx_object->_height_px;
+   const auto x = data._tmx_object->_x_px;
+   const auto y = data._tmx_object->_y_px;
+   const auto width = data._tmx_object->_width_px;
+   const auto height = data._tmx_object->_height_px;
 
    _rect.left = static_cast<int32_t>(x);
    _rect.top = static_cast<int32_t>(y);
@@ -62,7 +57,7 @@ Bouncer::Bouncer(
    bodyDef.type = b2_staticBody;
    bodyDef.position = _position_b2d;
 
-   _body = world->CreateBody(&bodyDef);
+   _body = data._world->CreateBody(&bodyDef);
 
    auto half_physics_width = width * MPP * 0.5f;
    auto half_physics_height = height * MPP * 0.5f;
