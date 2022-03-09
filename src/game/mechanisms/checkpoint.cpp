@@ -7,6 +7,7 @@
 #include "framework/tools/log.h"
 #include "player/player.h"
 #include "texturepool.h"
+#include "savestate.h"
 
 #include <iostream>
 
@@ -43,35 +44,35 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 
 std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, TmxObject* tmx_object)
 {
-   auto cp = std::make_shared<Checkpoint>(parent);
-   cp->setObjectName(tmx_object->_name);
+   auto checkpoint = std::make_shared<Checkpoint>(parent);
+   checkpoint->setObjectName(tmx_object->_name);
 
-   cp->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
-   cp->_sprite.setTexture(*cp->_texture);
-   cp->updateSpriteRect();
+   checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
+   checkpoint->_sprite.setTexture(*checkpoint->_texture);
+   checkpoint->updateSpriteRect();
 
-   cp->_rect = sf::IntRect{
+   checkpoint->_rect = sf::IntRect{
       static_cast<int32_t>(tmx_object->_x_px),
       static_cast<int32_t>(tmx_object->_y_px),
       static_cast<int32_t>(tmx_object->_width_px),
       static_cast<int32_t>(tmx_object->_height_px)
    };
 
-   cp->_name = tmx_object->_name;
+   checkpoint->_name = tmx_object->_name;
 
    if (tmx_object->_properties)
    {
       auto it = tmx_object->_properties->_map.find("index");
       if (it != tmx_object->_properties->_map.end())
       {
-         cp->_index = static_cast<uint32_t>(it->second->_value_int.value());
+         checkpoint->_index = static_cast<uint32_t>(it->second->_value_int.value());
       }
 
       auto z_it = tmx_object->_properties->_map.find("z");
       if (z_it != tmx_object->_properties->_map.end())
       {
          auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-         cp->setZ(z_index);
+         checkpoint->setZ(z_index);
       }
 
       // update sprite position
@@ -90,10 +91,16 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, TmxObject*
          pos.y = static_cast<float>(sprite_pos_y_it->second->_value_int.value());
       }
 
-      cp->_sprite.setPosition(pos);
+      checkpoint->_sprite.setPosition(pos);
    }
 
-   return cp;
+   // whenever we reach a checkpoint, update the checkpoint index in the save state
+   // and serialize the save state
+   const auto cp_index = checkpoint->getIndex();
+   checkpoint->addCallback([cp_index](){SaveState::getCurrent()._checkpoint = cp_index;});
+   checkpoint->addCallback([](){SaveState::serializeToFile();});
+
+   return checkpoint;
 }
 
 

@@ -3,6 +3,8 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
+#include "gamedeserializedata.h"
+
 #include <memory>
 
 // Spikeblock
@@ -31,7 +33,7 @@ class SpikeBlock : public GameMechanism, public GameNode
 
       SpikeBlock(GameNode* parent = nullptr);
 
-      void setup(TmxObject* tmx_object);
+      void setup(const GameDeserializeData& data);
 
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;

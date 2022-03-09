@@ -166,8 +166,5 @@ struct LuaNode : public GameNode
    std::vector<Hitbox> _hitboxes;
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
-
-   // static
-   static std::atomic<int32_t> __next_id;
 };
 
