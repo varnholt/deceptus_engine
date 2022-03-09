@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -24,6 +25,6 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
-   static std::shared_ptr<ShaderLayer> deserialize(GameNode* parent, TmxObject* element);
+   static std::shared_ptr<ShaderLayer> deserialize(GameNode* parent, const GameDeserializeData& data);
 };
 

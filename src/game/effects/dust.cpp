@@ -86,42 +86,42 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 }
 
 
-std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, TmxObject* tmx_object)
+std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto dust = std::make_shared<Dust>(parent);
-   dust->setObjectName(tmx_object->_name);
+   dust->setObjectName(data._tmx_object->_name);
 
    std::string flowfield_texture = "data/effects/flowfield_3.png";
 
    dust->_clip_rect = sf::FloatRect {
-      tmx_object->_x_px,
-      tmx_object->_y_px,
-      tmx_object->_width_px,
-      tmx_object->_height_px
+      data._tmx_object->_x_px,
+      data._tmx_object->_y_px,
+      data._tmx_object->_width_px,
+      data._tmx_object->_height_px
    };
 
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
-      const auto z_it                 = tmx_object->_properties->_map.find("z");
-      const auto particle_size_it     = tmx_object->_properties->_map.find("particle_size_px");
-      const auto particle_count_it    = tmx_object->_properties->_map.find("particle_count");
-      const auto color_it             = tmx_object->_properties->_map.find("particle_color");
-      const auto velocity_it          = tmx_object->_properties->_map.find("particle_velocity");
-      const auto wind_dir_x_it        = tmx_object->_properties->_map.find("wind_dir_x");
-      const auto wind_dir_y_it        = tmx_object->_properties->_map.find("wind_dir_y");
-      const auto flowfield_texture_it = tmx_object->_properties->_map.find("flowfield_texture");
+      const auto z_it                 = data._tmx_object->_properties->_map.find("z");
+      const auto particle_size_it     = data._tmx_object->_properties->_map.find("particle_size_px");
+      const auto particle_count_it    = data._tmx_object->_properties->_map.find("particle_count");
+      const auto color_it             = data._tmx_object->_properties->_map.find("particle_color");
+      const auto velocity_it          = data._tmx_object->_properties->_map.find("particle_velocity");
+      const auto wind_dir_x_it        = data._tmx_object->_properties->_map.find("wind_dir_x");
+      const auto wind_dir_y_it        = data._tmx_object->_properties->_map.find("wind_dir_y");
+      const auto flowfield_texture_it = data._tmx_object->_properties->_map.find("flowfield_texture");
 
-      if (z_it != tmx_object->_properties->_map.end())
+      if (z_it != data._tmx_object->_properties->_map.end())
       {
          dust->setZ(z_it->second->_value_int.value());
       }
 
-      if (particle_size_it != tmx_object->_properties->_map.end())
+      if (particle_size_it != data._tmx_object->_properties->_map.end())
       {
          dust->_particle_size_px = particle_size_it->second->_value_int.value();
       }
 
-      if (particle_count_it != tmx_object->_properties->_map.end())
+      if (particle_count_it != data._tmx_object->_properties->_map.end())
       {
          const auto particle_count = particle_count_it->second->_value_int.value();
          for (auto i = 0; i < particle_count; i++)
@@ -132,28 +132,28 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, TmxObject* tmx_object)
          }
       }
 
-      if (wind_dir_x_it != tmx_object->_properties->_map.end())
+      if (wind_dir_x_it != data._tmx_object->_properties->_map.end())
       {
          dust->_wind_direction.x = wind_dir_x_it->second->_value_float.value();
       }
 
-      if (wind_dir_y_it != tmx_object->_properties->_map.end())
+      if (wind_dir_y_it != data._tmx_object->_properties->_map.end())
       {
          dust->_wind_direction.y = wind_dir_y_it->second->_value_float.value();
       }
 
-      if (color_it != tmx_object->_properties->_map.end())
+      if (color_it != data._tmx_object->_properties->_map.end())
       {
          const auto rgba = TmxTools::color(color_it->second->_value_string.value());;
          dust->_particle_color = {rgba[0], rgba[1], rgba[2]};
       }
 
-      if (velocity_it != tmx_object->_properties->_map.end())
+      if (velocity_it != data._tmx_object->_properties->_map.end())
       {
          dust->_particle_velocity = velocity_it->second->_value_float.value();
       }
 
-      if (flowfield_texture_it != tmx_object->_properties->_map.end())
+      if (flowfield_texture_it != data._tmx_object->_properties->_map.end())
       {
          flowfield_texture = flowfield_texture_it->second->_value_string.value();
       }

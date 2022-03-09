@@ -236,25 +236,19 @@ const sf::Vector2f& Laser::getPixelPosition() const
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<GameMechanism>> Laser::load(
-   GameNode* parent,
-   TmxLayer* layer,
-   TmxTileSet* tileset,
-   const std::filesystem::path& base_path,
-   const std::shared_ptr<b2World>&
-)
+std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const GameDeserializeData& data)
 {
-   const auto version = (layer->_name == "lasers") ? MechanismVersion::Version1 : MechanismVersion::Version2;
+   const auto version = (data._tmx_layer->_name == "lasers") ? MechanismVersion::Version1 : MechanismVersion::Version2;
 
    resetAll();
 
-   if (!layer)
+   if (!data._tmx_layer)
    {
       Log::Error() << "tmx layer is empty, please fix your level design";
       return {};
    }
 
-   if (!tileset)
+   if (!data._tmx_tileset)
    {
       Log::Error() << "tmx tileset is empty, please fix your level design";
       return {};
@@ -271,11 +265,11 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
 
    std::vector<std::shared_ptr<GameMechanism>> lasers;
 
-   sf::Vector2u tilesize = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
-   const auto tiles    = layer->_data;
-   const auto width    = layer->_width_px;
-   const auto height   = layer->_height_px;
-   const auto firstId  = tileset->_first_gid;
+   sf::Vector2u tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
+   const auto tiles    = data._tmx_layer->_data;
+   const auto width    = data._tmx_layer->_width_px;
+   const auto height   = data._tmx_layer->_height_px;
+   const auto firstId  = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -304,7 +298,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
             laser->_pixel_rect.width  = PIXELS_PER_TILE;
             laser->_pixel_rect.height = PIXELS_PER_TILE;
 
-            laser->_texture = TexturePool::getInstance().get(base_path / tileset->_image->_source);
+            laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
 
             laser->_tu = (tileNumber - firstId) % (laser->_texture->getSize().x / tilesize.x);
             laser->_tv = (tileNumber - firstId) / (laser->_texture->getSize().x / tilesize.x);
@@ -314,9 +308,9 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(
                laser->_tu = 0;
             }
 
-            if (layer->_properties != nullptr)
+            if (data._tmx_layer->_properties != nullptr)
             {
-               laser->setZ(layer->_properties->_map["z"]->_value_int.value());
+               laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }
 
             sf::Sprite sprite;

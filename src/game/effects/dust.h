@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "gamedeserializedata.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
 
@@ -32,7 +32,7 @@ class Dust : public GameMechanism, public GameNode
       void update(const sf::Time& dt) override;
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-      static std::shared_ptr<Dust> deserialize(GameNode* parent, TmxObject* tmx_object);
+      static std::shared_ptr<Dust> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 
    private:

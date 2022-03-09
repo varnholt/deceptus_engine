@@ -24,20 +24,9 @@ class MovingPlatform : public GameMechanism, public GameNode
 public:
    MovingPlatform(GameNode* parent);
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(
-      GameNode* parent,
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
-      const std::filesystem::path &basePath,
-      const std::shared_ptr<b2World>& world
-   );
-
+   static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
    static void deserialize(TmxObject* tmx_object);
-   static std::vector<std::shared_ptr<GameMechanism> > merge(
-      GameNode* parent,
-      const std::filesystem::path &base_path,
-      const std::shared_ptr<b2World>& world
-   );
+   static std::vector<std::shared_ptr<GameMechanism> > merge(GameNode* parent, const GameDeserializeData& data);
 
    static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
 

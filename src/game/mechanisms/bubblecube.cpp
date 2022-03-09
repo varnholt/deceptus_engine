@@ -29,28 +29,23 @@ static constexpr auto sprite_offset_y_px = -14;
 }
 
 
-BubbleCube::BubbleCube(
-   GameNode* parent,
-   const std::shared_ptr<b2World>& world,
-   TmxObject* tmx_object,
-   const std::filesystem::path& base_path
-)
+BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
  : FixtureNode(parent)
 {
    setClassName(typeid(BubbleCube).name());
    setType(ObjectTypeBubbleCube);
 
    // read properties
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
-      auto animation_offset_it = tmx_object->_properties->_map.find("animation_offset_s");
-      if (animation_offset_it != tmx_object->_properties->_map.end())
+      auto animation_offset_it = data._tmx_object->_properties->_map.find("animation_offset_s");
+      if (animation_offset_it != data._tmx_object->_properties->_map.end())
       {
          _animation_offset_s = animation_offset_it->second->_value_float.value();
       }
 
-      auto pop_time_respawn_it = tmx_object->_properties->_map.find("pop_time_respawn_s");
-      if (pop_time_respawn_it != tmx_object->_properties->_map.end())
+      auto pop_time_respawn_it = data._tmx_object->_properties->_map.find("pop_time_respawn_s");
+      if (pop_time_respawn_it != data._tmx_object->_properties->_map.end())
       {
          _pop_time_respawn_s = pop_time_respawn_it->second->_value_float.value();
       }
@@ -82,14 +77,14 @@ BubbleCube::BubbleCube(
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    // create body
-   const auto x = tmx_object->_x_px;
-   const auto y = tmx_object->_y_px;
+   const auto x = data._tmx_object->_x_px;
+   const auto y = data._tmx_object->_y_px;
    _position_m = MPP * b2Vec2{x, y};
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    body_def.position = _position_m;
-   _body = world->CreateBody(&body_def);
+   _body = data._world->CreateBody(&body_def);
 
    // set up body fixture
    b2FixtureDef fixture_def;
@@ -100,7 +95,7 @@ BubbleCube::BubbleCube(
    _fixture->SetUserData(static_cast<void*>(this));
 
    // set up visualization
-   _texture = TexturePool::getInstance().get(base_path / "tilesets" / "bubble_cube.png");
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
    _sprite.setTexture(*_texture);
    _sprite.setPosition(x + sprite_offset_x_px, y + sprite_offset_y_px);
 }

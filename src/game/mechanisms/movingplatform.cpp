@@ -148,32 +148,26 @@ void MovingPlatform::addSprite(const sf::Sprite& sprite)
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
-   GameNode* parent,
-   TmxLayer* layer,
-   TmxTileSet* tileset,
-   const std::filesystem::path& base_path,
-   const std::shared_ptr<b2World>& world
-)
+std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* parent, const GameDeserializeData& data)
 {
-   if (!layer)
+   if (!data._tmx_layer)
    {
       Log::Error() << "tmx layer is empty, please fix your level design";
       return {};
    }
 
-   if (!tileset)
+   if (!data._tmx_tileset)
    {
       Log::Error() << "tmx tileset is empty, please fix your level design";
       return {};
    }
 
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
-   const auto tilesize = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
-   const auto tiles    = layer->_data;
-   const auto width    = layer->_width_px;
-   const auto height   = layer->_height_px;
-   const auto first_id = tileset->_first_gid;
+   const auto tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
+   const auto tiles    = data._tmx_layer->_data;
+   const auto width    = data._tmx_layer->_width_px;
+   const auto height   = data._tmx_layer->_height_px;
+   const auto first_id = data._tmx_tileset->_first_gid;
 
    for (auto y = 0u; y < height; y++)
    {
@@ -186,9 +180,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
          {
             // find matching platform
             auto moving_platform = std::make_shared<MovingPlatform>(parent);
-            moving_platform->setObjectName(layer->_name);
+            moving_platform->setObjectName(data._tmx_layer->_name);
 
-            const auto texture_path = base_path / tileset->_image->_source;
+            const auto texture_path = data._base_path / data._tmx_tileset->_image->_source;
             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
             const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
 
@@ -201,9 +195,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
             moving_platform->_tile_positions.x = x;
             moving_platform->_tile_positions.y = y;
 
-            if (layer->_properties != nullptr)
+            if (data._tmx_layer->_properties != nullptr)
             {
-               moving_platform->setZ(layer->_properties->_map["z"]->_value_int.value());
+               moving_platform->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }
 
             moving_platforms.push_back(moving_platform);
@@ -240,7 +234,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(
                tile_number = tiles[x + y * width];
             }
 
-            moving_platform->setupBody(world);
+            moving_platform->setupBody(data._world);
             moving_platform->setupTransformDeprecated();
          }
       }
@@ -274,11 +268,7 @@ void MovingPlatform::deserialize(TmxObject* tmx_object)
 
 
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
-   GameNode* parent,
-   const std::filesystem::path& base_path,
-   const std::shared_ptr<b2World>& world
-)
+std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent,const GameDeserializeData& data)
 {
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
 
@@ -331,7 +321,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
    }
 
    // set up platforms
-   const auto texture_path = base_path / "tilesets" / "platforms.png";
+   const auto texture_path = data._base_path / "tilesets" / "platforms.png";
    const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
    const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
 
@@ -452,7 +442,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(
          i++;
       }
 
-      moving_platform->setupBody(world);
+      moving_platform->setupBody(data._world);
       moving_platform->_body->SetTransform(platform_pos_m, 0.0f);
    }
 

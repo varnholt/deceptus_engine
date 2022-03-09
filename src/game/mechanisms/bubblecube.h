@@ -11,6 +11,7 @@ class GameNode;
 struct TmxObject;
 
 #include "fixturenode.h"
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 
 #include "Box2D/Box2D.h"
@@ -23,12 +24,7 @@ class BubbleCube : public FixtureNode, public GameMechanism
 
 public:
 
-   BubbleCube(
-      GameNode* parent,
-      const std::shared_ptr<b2World>& world,
-      TmxObject* tmx_object,
-      const std::filesystem::path& base_path
-   );
+   BubbleCube(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;

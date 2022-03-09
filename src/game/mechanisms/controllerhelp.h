@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 
+#include "gamedeserializedata.h"
 #include "gamenode.h"
 #include "gamemechanism.h"
 
@@ -15,7 +16,7 @@ class ControllerHelp : public GameMechanism, public GameNode
       ControllerHelp(GameNode* parent = nullptr);
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
-      void deserialize(TmxObject* tmx_object);
+      void deserialize(const GameDeserializeData& data);
 
    private:
 
