@@ -8,6 +8,52 @@ namespace
 const std::string FUNCTION_INITIALIZE = "initialize";
 const std::string FUNCTION_UPDATE = "update";
 
+
+/**
+ * @brief isMechanismEnabled check if a given mechanism is enabled
+ * @param state lua state
+ *    param 1: mechanism ID
+ *    return \c true if mechanism is enabled
+ * @return error code
+ */
+int32_t isMechanismEnabled(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   // const auto id = lua_tostring(state, 1);
+   // find mechanism with given id
+
+   return 1;
+}
+
+
+/**
+ * @brief setMechanismEnabled set a mechanism node to enabled/disabled
+ * @param state lua state
+ *    param 1: enabled flag
+ * @return error code
+ */
+int32_t setMechanismEnabled(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   // const auto id = lua_tostring(state, 1);
+   // const auto active = static_cast<bool>(lua_toboolean(state, 2));
+   // node->setActive(active);
+
+   return 0;
+}
+
+
+
 [[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
   // the error message is on top of the stack.
@@ -100,3 +146,6 @@ void LevelScript::luaUpdate(const sf::Time& dt)
       error(_lua_state, FUNCTION_UPDATE.c_str());
    }
 }
+
+
+
