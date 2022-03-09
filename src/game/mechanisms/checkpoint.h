@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -27,7 +28,7 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& checkpoints
    );
 
-   static std::shared_ptr<Checkpoint> deserialize(GameNode* parent, TmxObject*);
+   static std::shared_ptr<Checkpoint> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget &target, sf::RenderTarget &normal) override;
    void update(const sf::Time& dt) override;

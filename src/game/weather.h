@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamedeserializedata.h"
 #include "gamenode.h"
 #include "game/gamemechanism.h"
 #include "overlays/rainoverlay.h"
@@ -25,7 +26,7 @@ class Weather : public GameMechanism, public GameNode
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
 
-      static std::shared_ptr<Weather> deserialize(GameNode* parent, TmxObject* tmx_object);
+      static std::shared_ptr<Weather> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 
    private:

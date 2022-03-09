@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -20,7 +21,7 @@ class Rope : public GameMechanism, public GameNode
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
 
-      virtual void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world);
+      virtual void setup(const GameDeserializeData& data);
 
       sf::Vector2i getPixelPosition() const;
       void setPixelPosition(const sf::Vector2i& pixelPosition);

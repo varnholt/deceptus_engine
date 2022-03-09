@@ -217,7 +217,7 @@ Level::Level()
    _static_light = std::make_shared<StaticLight>();
 
    // add raycast light for player
-   _player_light = LightSystem::createLightInstance(Player::getCurrent());
+   _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
    _player_light->_color = sf::Color(255, 255, 255, 10);
    _light_system->_lights.push_back(_player_light);
 
@@ -393,13 +393,18 @@ void Level::loadTmx()
 
    Log::info("loading tmx... ");
 
+   GameDeserializeData data;
+   data._world = _world;
+   data._base_path = path;
+
    _tmx_elements = _tmx_parser->getElements();
 
    for (auto element : _tmx_elements)
    {
-      GameDeserializeData data;
-      data._world = _world;
-      data._base_path = path;
+      data._tmx_layer = nullptr;
+      data._tmx_tileset = nullptr;
+      data._tmx_object = nullptr;
+      data._tmx_object_group = nullptr;
 
       if (element->_type == TmxElement::TypeLayer)
       {
@@ -419,25 +424,25 @@ void Level::loadTmx()
          }
          else if (layer->_name == "lasers")
          {
-            const auto mechanism = Laser::load(this, layer, tileset, path, _world);
+            const auto mechanism = Laser::load(this, data);
             _mechanism_lasers.insert(_mechanism_lasers.end(), mechanism.begin(), mechanism.end());
          }
          else if (layer->_name == "lasers_2") // support for dstar's new laser tileset
          {
-            const auto mechanism = Laser::load(this, layer, tileset, path, _world);
+            const auto mechanism = Laser::load(this, data);
             _mechanism_lasers.insert(_mechanism_lasers.end(), mechanism.begin(), mechanism.end());
          }
          else if (layer->_name == "levers")
          {
-            _mechanism_levers = Lever::load(this, layer, tileset, path, _world);
+            _mechanism_levers = Lever::load(this, data);
          }
          else if (layer->_name == "platforms")
          {
-            _mechanism_platforms = MovingPlatform::load(this, layer, tileset, path, _world);
+            _mechanism_platforms = MovingPlatform::load(this, data);
          }
          else if (layer->_name == "portals")
          {
-            _mechanism_portals = Portal::load(this, layer, tileset, path, _world);
+            _mechanism_portals = Portal::load(this, data);
          }
          else if (layer->_name == "toggle_spikes")
          {
@@ -500,7 +505,7 @@ void Level::loadTmx()
 
             if (object_group->_name == "bubble_cubes")
             {
-               auto mechanism = std::make_shared<BubbleCube>(this, _world, tmx_object, path);
+               auto mechanism = std::make_shared<BubbleCube>(this, data);
                _mechanism_bubble_cubes.push_back(mechanism);
             }
             else if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
@@ -519,18 +524,18 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "portals")
             {
-               Portal::link(_mechanism_portals, tmx_object);
+               Portal::link(_mechanism_portals, data);
             }
             else if (object_group->_name == "ropes")
             {
                auto mechanism = std::make_shared<Rope>(this);
-               mechanism->setup(tmx_object, _world);
+               mechanism->setup(data);
                _mechanism_ropes.push_back(mechanism);
             }
             else if (object_group->_name == "ropes_with_light")
             {
                auto mechanism = std::make_shared<RopeWithLight>(this);
-               mechanism->setup(tmx_object, _world);
+               mechanism->setup(data);
                _mechanism_ropes.push_back(mechanism);
             }
             else if (object_group->_name == "smoke")
@@ -564,7 +569,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "checkpoints")
             {
-               const auto mechanism = Checkpoint::deserialize(this, tmx_object);
+               const auto mechanism = Checkpoint::deserialize(this, data);
                _mechanism_checkpoints.push_back(mechanism);
             }
             else if (object_group->_name == "dialogues")
@@ -580,7 +585,7 @@ void Level::loadTmx()
             else if (object_group->_name == "controller_help")
             {
                auto mechanism = std::make_shared<ControllerHelp>(this);
-               mechanism->deserialize(tmx_object);
+               mechanism->deserialize(data);
                _mechanism_controller_help.push_back(mechanism);
             }
             else if (object_group->_name == "conveyorbelts")
@@ -608,22 +613,22 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "weather")
             {
-               auto mechanism = Weather::deserialize(this, tmx_object);
+               auto mechanism = Weather::deserialize(this, data);
                _mechanism_weather.push_back(mechanism);
             }
             else if (object_group->_name.rfind("shader_quads", 0) == 0)
             {
-               auto quad = ShaderLayer::deserialize(this, tmx_object);
+               auto quad = ShaderLayer::deserialize(this, data);
                _mechanism_shader_layers.push_back(quad);
             }
             else if (object_group->_name == "dust")
             {
-               auto mechanism = Dust::deserialize(this, tmx_object);
+               auto mechanism = Dust::deserialize(this, data);
                _mechanism_dust.push_back(mechanism);
             }
             else if (object_group->_name == "lights")
             {
-               auto light = LightSystem::createLightInstance(this, tmx_object);
+               auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
             }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
@@ -649,7 +654,7 @@ void Level::loadTmx()
    TileMapFactory::merge(_tile_maps);
    _mechanism_fans = Fan::getFans();
    Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes, _mechanism_spike_blocks);
-   _mechanism_platforms = MovingPlatform::merge(this, path, _world);
+   _mechanism_platforms = MovingPlatform::merge(this, data);
 
    _map->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),

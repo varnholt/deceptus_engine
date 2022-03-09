@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -34,13 +35,7 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(
-      GameNode* parent,
-      TmxLayer *layer,
-      TmxTileSet *tileSet,
-      const std::filesystem::path& basePath,
-      const std::shared_ptr<b2World>& world
-   );
+   static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
 
    static void addObject(TmxObject* object);
    static void addTilesVersion1();

@@ -161,35 +161,35 @@ void Rope::update(const sf::Time& dt)
 }
 
 
-void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
+void Rope::setup(const GameDeserializeData& data)
 {
    // read properties
-   const auto push_interval_it = tmx_object->_properties->_map.find("push_interval_s");
-   if (push_interval_it != tmx_object->_properties->_map.end())
+   const auto push_interval_it = data._tmx_object->_properties->_map.find("push_interval_s");
+   if (push_interval_it != data._tmx_object->_properties->_map.end())
    {
       _push_interval_s = push_interval_it->second->_value_float.value();
    }
 
-   const auto push_duration_it = tmx_object->_properties->_map.find("push_duration_s");
-   if (push_duration_it != tmx_object->_properties->_map.end())
+   const auto push_duration_it = data._tmx_object->_properties->_map.find("push_duration_s");
+   if (push_duration_it != data._tmx_object->_properties->_map.end())
    {
       _push_duration_s = push_duration_it->second->_value_float.value();
    }
 
-   const auto push_strength_it = tmx_object->_properties->_map.find("push_strength");
-   if (push_strength_it != tmx_object->_properties->_map.end())
+   const auto push_strength_it = data._tmx_object->_properties->_map.find("push_strength");
+   if (push_strength_it != data._tmx_object->_properties->_map.end())
    {
       _push_strength = push_strength_it->second->_value_float.value();
    }
 
-   const auto segment_it = tmx_object->_properties->_map.find("segments");
-   if (segment_it != tmx_object->_properties->_map.end())
+   const auto segment_it = data._tmx_object->_properties->_map.find("segments");
+   if (segment_it != data._tmx_object->_properties->_map.end())
    {
       _segment_count = segment_it->second->_value_int.value();
    }
 
    // init segment length
-   std::vector<sf::Vector2f> pixel_path = tmx_object->_polyline->_polyline;
+   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
    auto path_0_px = pixel_path.at(0);
    auto path_1_px = pixel_path.at(1);
    _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);
@@ -197,14 +197,14 @@ void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
    // init start position
    setPixelPosition(
       sf::Vector2i{
-         static_cast<int32_t>(tmx_object->_x_px),
-         static_cast<int32_t>(tmx_object->_y_px)
+         static_cast<int32_t>(data._tmx_object->_x_px),
+         static_cast<int32_t>(data._tmx_object->_y_px)
       }
    );
 
    // pin the rope to the starting point (anchor)
    auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
-   _anchor_a_body = world->CreateBody(&_anchor_a_def);
+   _anchor_a_body = data._world->CreateBody(&_anchor_a_def);
    _anchor_a_shape.Set(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
    auto anchor_fixture =_anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
    anchor_fixture->SetSensor(true);
@@ -217,14 +217,14 @@ void Rope::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
       b2BodyDef chain_body_def;
       chain_body_def.type = b2_dynamicBody;
       chain_body_def.position.Set(pos_m.x, pos_m.y + 0.01f + i * _segment_length_m);
-      auto chain_body = world->CreateBody(&chain_body_def);
+      auto chain_body = data._world->CreateBody(&chain_body_def);
       auto chain_fixture = chain_body->CreateFixture(&_rope_element_fixture_def);
       chain_fixture->SetSensor(true);
 
       // attach chain element to the previous one
       b2Vec2 anchor(pos_m.x, pos_m.y + i * _segment_length_m);
       _joint_def.Initialize(previous_body, chain_body, anchor);
-      world->CreateJoint(&_joint_def);
+      data._world->CreateJoint(&_joint_def);
 
       // store chain elements
       previous_body = chain_body;

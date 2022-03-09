@@ -7,6 +7,7 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
+#include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 
@@ -56,13 +57,7 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks
    );
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(
-      GameNode* parent,
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
-      const std::filesystem::path& basePath,
-      const std::shared_ptr<b2World>&
-   );
+   static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
 
    void updateReceivers();
 
