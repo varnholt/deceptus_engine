@@ -26,15 +26,12 @@
 #include "texturepool.h"
 #include "weaponfactory.h"
 
-// static
-std::atomic<int32_t> LuaNode::__next_id = 0;
 
-namespace  {
-   uint16_t category_bits = CategoryEnemyWalkThrough;                 // I am a ...
-   uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
-   int16_t group_index = 0;                                           // 0 is default
-}
-
+namespace
+{
+uint16_t category_bits = CategoryEnemyWalkThrough;                 // I am a ...
+uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
+int16_t group_index = 0;                                           // 0 is default
 
 #define OBJINSTANCE LuaInterface::instance().getObject(state)
 
@@ -107,25 +104,23 @@ int32_t updateProperties(lua_State* state)
  */
 int32_t addHitBox(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
    {
-      auto x_px = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto y_px = static_cast<int32_t>(lua_tointeger(state, 2));
-      auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->addHitbox(x_px, y_px, w_px, h_px);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x_px = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto y_px = static_cast<int32_t>(lua_tointeger(state, 2));
+   const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
+   const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
+   node->addHitbox(x_px, y_px, w_px, h_px);
 
    return 0;
 }
@@ -143,26 +138,25 @@ int32_t addHitBox(lua_State* state)
  */
 int32_t updateSpriteRect(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
+   const auto argc = lua_gettop(state);
 
-   if (argc == 5)
+   if (argc != 5)
    {
-      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto x_px = static_cast<int32_t>(lua_tointeger(state, 2));
-      auto y_px = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto w_px = static_cast<int32_t>(lua_tointeger(state, 4));
-      auto h_px = static_cast<int32_t>(lua_tointeger(state, 5));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->updateSpriteRect(id, x_px, y_px, w_px, h_px);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto x_px = static_cast<int32_t>(lua_tointeger(state, 2));
+   const auto y_px = static_cast<int32_t>(lua_tointeger(state, 3));
+   const auto w_px = static_cast<int32_t>(lua_tointeger(state, 4));
+   const auto h_px = static_cast<int32_t>(lua_tointeger(state, 5));
+   node->updateSpriteRect(id, x_px, y_px, w_px, h_px);
 
    return 0;
 }
@@ -181,25 +175,24 @@ int32_t updateSpriteRect(lua_State* state)
  */
 int32_t setSpriteColor(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 5)
+   const auto argc = lua_gettop(state);
+   if (argc != 5)
    {
-      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto r = static_cast<uint8_t>(lua_tointeger(state, 2));
-      auto g = static_cast<uint8_t>(lua_tointeger(state, 3));
-      auto b = static_cast<uint8_t>(lua_tointeger(state, 4));
-      auto a = static_cast<uint8_t>(lua_tointeger(state, 5));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setSpriteColor(id, r, g, b, a);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto r = static_cast<uint8_t>(lua_tointeger(state, 2));
+   const auto g = static_cast<uint8_t>(lua_tointeger(state, 3));
+   const auto b = static_cast<uint8_t>(lua_tointeger(state, 4));
+   const auto a = static_cast<uint8_t>(lua_tointeger(state, 5));
+   node->setSpriteColor(id, r, g, b, a);
 
    return 0;
 }
@@ -217,42 +210,35 @@ int32_t setSpriteColor(lua_State* state)
  */
 int32_t queryAABB(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
    {
-      b2AABB aabb;
-
-      b2Vec2 lower;
-      b2Vec2 upper;
-
-      auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
-      auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
-      auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
-      auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
-
-      lower.Set(x1, y1);
-      upper.Set(x2, y2);
-
-      aabb.lowerBound = lower;
-      aabb.upperBound = upper;
-
-      // Log::Info() << "x: " << aabb.GetCenter().x << " y: " << aabb.GetCenter().y;
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      const auto hitCount = node->queryAABB(aabb);
-      lua_pushinteger(state, hitCount);
-      return 1;
+      return 0;
    }
 
-   return 0;
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
+   const auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
+   const auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
+   const auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
+
+   b2AABB aabb;
+   b2Vec2 lower;
+   b2Vec2 upper;
+   lower.Set(x1, y1);
+   upper.Set(x2, y2);
+   aabb.lowerBound = lower;
+   aabb.upperBound = upper;
+
+   const auto hit_count = node->queryAABB(aabb);
+   lua_pushinteger(state, hit_count);
+
+   return 1;
 }
 
 
@@ -268,35 +254,32 @@ int32_t queryAABB(lua_State* state)
  */
 int32_t queryRayCast(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
+   const auto argc = lua_gettop(state);
 
-   if (argc == 4)
+   if (argc != 4)
    {
-      b2Vec2 p1;
-      b2Vec2 p2;
-
-      auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
-      auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
-      auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
-      auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
-
-      p1.Set(x1, y1);
-      p2.Set(x2, y2);
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      const auto hit_count = node->queryRaycast(p1, p2);
-      lua_pushinteger(state, hit_count);
-      return 1;
+      return 0;
    }
 
-   return 0;
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x1 = static_cast<float>(lua_tointeger(state, 1) * MPP);
+   const auto y1 = static_cast<float>(lua_tointeger(state, 2) * MPP);
+   const auto x2 = static_cast<float>(lua_tointeger(state, 3) * MPP);
+   const auto y2 = static_cast<float>(lua_tointeger(state, 4) * MPP);
+
+   b2Vec2 p1;
+   b2Vec2 p2;
+   p1.Set(x1, y1);
+   p2.Set(x2, y2);
+
+   const auto hit_count = node->queryRaycast(p1, p2);
+   lua_pushinteger(state, hit_count);
+   return 1;
 }
 
 
@@ -308,20 +291,20 @@ int32_t queryRayCast(lua_State* state)
  */
 int32_t setDamage(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
    {
-      auto damage = static_cast<int32_t>(lua_tointeger(state, 1));
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setDamage(damage);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto damage = static_cast<int32_t>(lua_tointeger(state, 1));
+   node->setDamage(damage);
 
    return 0;
 }
@@ -336,20 +319,20 @@ int32_t setDamage(lua_State* state)
  */
 int32_t setZ(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
    {
-      auto z = static_cast<int32_t>(lua_tointeger(state, 1));
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->_z_index = z;
+      return 0;
    }
+\
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto z = static_cast<int32_t>(lua_tointeger(state, 1));
+   node->_z_index = z;
 
    return 0;
 }
@@ -363,7 +346,6 @@ int32_t setZ(lua_State* state)
 int32_t makeDynamic(lua_State* state)
 {
    auto node = OBJINSTANCE;
-
    if (!node)
    {
       return 0;
@@ -382,7 +364,6 @@ int32_t makeDynamic(lua_State* state)
 int32_t makeStatic(lua_State* state)
 {
    auto node = OBJINSTANCE;
-
    if (!node)
    {
       return 0;
@@ -401,23 +382,20 @@ int32_t makeStatic(lua_State* state)
  */
 int32_t setGravityScale(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
    {
-
-      auto scale = static_cast<float>(lua_tonumber(state, 1));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setGravityScale(scale);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto scale = static_cast<float>(lua_tonumber(state, 1));
+   node->setGravityScale(scale);
 
    return 0;
 }
@@ -431,23 +409,20 @@ int32_t setGravityScale(lua_State* state)
  */
 int32_t setActive(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
+   const auto argc = lua_gettop(state);
    if (argc == 1)
    {
-
-      auto active = static_cast<bool>(lua_toboolean(state, 1));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setActive(active);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto active = static_cast<bool>(lua_toboolean(state, 1));
+   node->setActive(active);
 
    return 0;
 }
@@ -465,25 +440,23 @@ int32_t setActive(lua_State* state)
  */
 int32_t isPhsyicsPathClear(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
    {
-      // the lua scripts think in pixels; the physics grid has a resolution of 8x8 for each tile.
-      // so that needs to be scaled first.
-      auto x0 = static_cast<int32_t>(lua_tonumber(state, 1) / PIXELS_PER_PHYSICS_TILE);
-      auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PIXELS_PER_PHYSICS_TILE);
-      auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PIXELS_PER_PHYSICS_TILE);
-      auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PIXELS_PER_PHYSICS_TILE);
-
-      // check map for collision
-      auto collides = Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
-
-      lua_pushboolean(state, !collides);
+      return 0;
    }
 
-   // 1 return value
+   // the lua scripts think in pixels; the physics grid has a resolution of 8x8 for each tile.
+   // so that needs to be scaled first.
+   const auto x0 = static_cast<int32_t>(lua_tonumber(state, 1) / PIXELS_PER_PHYSICS_TILE);
+   const auto y0 = static_cast<int32_t>(lua_tonumber(state, 2) / PIXELS_PER_PHYSICS_TILE);
+   const auto x1 = static_cast<int32_t>(lua_tonumber(state, 3) / PIXELS_PER_PHYSICS_TILE);
+   const auto y1 = static_cast<int32_t>(lua_tonumber(state, 4) / PIXELS_PER_PHYSICS_TILE);
+
+   // check map for collision
+   const auto collides = Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
+   lua_pushboolean(state, !collides);
+
    return 1;
 }
 
@@ -499,7 +472,12 @@ int32_t isPhsyicsPathClear(lua_State* state)
 int32_t getLinearVelocity(lua_State* state)
 {
    auto node = OBJINSTANCE;
-   auto velocity = node->getLinearVelocity();
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto velocity = node->getLinearVelocity();
 
    lua_createtable(state, 2, 0);
 
@@ -524,23 +502,21 @@ int32_t getLinearVelocity(lua_State* state)
  */
 int32_t setLinearVelocity(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 2)
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
    {
-      auto vx = static_cast<float>(lua_tonumber(state, 1));
-      auto vy = static_cast<float>(lua_tonumber(state, 2));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setLinearVelocity(b2Vec2{vx, vy});
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto vx = static_cast<float>(lua_tonumber(state, 1));
+   const auto vy = static_cast<float>(lua_tonumber(state, 2));
+   node->setLinearVelocity(b2Vec2{vx, vy});
 
    return 0;
 }
@@ -556,26 +532,24 @@ int32_t setLinearVelocity(lua_State* state)
  */
 int32_t damage(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
    {
-      auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
-      auto dx = static_cast<float>(lua_tonumber(state, 2));
-      auto dy = static_cast<float>(lua_tonumber(state, 3));
-
-      Log::Info() << "damage: " << damage << " dx: " << dx << " dy: " << dy;
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->damagePlayer(damage, dx, dy);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
+   const auto dx = static_cast<float>(lua_tonumber(state, 2));
+   const auto dy = static_cast<float>(lua_tonumber(state, 3));
+   node->damagePlayer(damage, dx, dy);
+
+   Log::Info() << "damage: " << damage << " dx: " << dx << " dy: " << dy;
 
    return 0;
 }
@@ -592,25 +566,23 @@ int32_t damage(lua_State* state)
  */
 int32_t damageRadius(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
    {
-      auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
-      auto x = static_cast<float>(lua_tonumber(state, 2));
-      auto y = static_cast<float>(lua_tonumber(state, 3));
-      auto radius = static_cast<float>(lua_tonumber(state, 4));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->damagePlayerInRadius(damage, x, y, radius);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
+   const auto x = static_cast<float>(lua_tonumber(state, 2));
+   const auto y = static_cast<float>(lua_tonumber(state, 3));
+   const auto radius = static_cast<float>(lua_tonumber(state, 4));
+   node->damagePlayerInRadius(damage, x, y, radius);
 
    return 0;
 }
@@ -626,25 +598,23 @@ int32_t damageRadius(lua_State* state)
  */
 int32_t setTransform(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
    {
-      auto x = static_cast<float>(lua_tonumber(state, 1));
-      auto y = static_cast<float>(lua_tonumber(state, 2));
-      auto angle = static_cast<float>(lua_tonumber(state, 3));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      b2Vec2 pos{x / PPM, y / PPM};
-      node->setTransform(pos, angle);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x = static_cast<float>(lua_tonumber(state, 1));
+   const auto y = static_cast<float>(lua_tonumber(state, 2));
+   const auto angle = static_cast<float>(lua_tonumber(state, 3));
+   b2Vec2 pos{x / PPM, y / PPM};
+   node->setTransform(pos, angle);
 
    return 0;
 }
@@ -657,8 +627,7 @@ int32_t setTransform(lua_State* state)
  */
 int32_t addSprite(lua_State* state)
 {
-   std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
+   auto node = OBJINSTANCE;
    if (!node)
    {
       return 0;
@@ -680,24 +649,22 @@ int32_t addSprite(lua_State* state)
  */
 int32_t setSpriteOrigin(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
    {
-      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto x = static_cast<float>(lua_tonumber(state, 2));
-      auto y = static_cast<float>(lua_tonumber(state, 3));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setSpriteOrigin(id, x, y);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto x = static_cast<float>(lua_tonumber(state, 2));
+   const auto y = static_cast<float>(lua_tonumber(state, 3));
+   node->setSpriteOrigin(id, x, y);
 
    return 0;
 }
@@ -713,24 +680,22 @@ int32_t setSpriteOrigin(lua_State* state)
  */
 int32_t setSpriteOffset(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
    {
-      auto id = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto x = static_cast<float>(lua_tonumber(state, 2));
-      auto y = static_cast<float>(lua_tonumber(state, 3));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->setSpriteOffset(id, x, y);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto x = static_cast<float>(lua_tonumber(state, 2));
+   const auto y = static_cast<float>(lua_tonumber(state, 3));
+   node->setSpriteOffset(id, x, y);
 
    return 0;
 }
@@ -746,24 +711,22 @@ int32_t setSpriteOffset(lua_State* state)
  */
 int32_t boom(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
    {
-      auto x = static_cast<float>(lua_tonumber(state, 1));
-      auto y = static_cast<float>(lua_tonumber(state, 2));
-      auto intensity = static_cast<float>(lua_tonumber(state, 3));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->boom(x, y, intensity);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x = static_cast<float>(lua_tonumber(state, 1));
+   const auto y = static_cast<float>(lua_tonumber(state, 2));
+   const auto intensity = static_cast<float>(lua_tonumber(state, 3));
+   node->boom(x, y, intensity);
 
    return 0;
 }
@@ -778,24 +741,22 @@ int32_t boom(lua_State* state)
  */
 int32_t playDetonationAnimation(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
+   const auto argc = lua_gettop(state);
 
-   if (argc == 2)
+   if (argc != 2)
    {
-      auto x = static_cast<float>(lua_tonumber(state, 1));
-      auto y = static_cast<float>(lua_tonumber(state, 2));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->playDetonationAnimation(x, y);
+      return 0;
    }
 
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x = static_cast<float>(lua_tonumber(state, 1));
+   const auto y = static_cast<float>(lua_tonumber(state, 2));
+   node->playDetonationAnimation(x, y);
    return 0;
 }
 
@@ -810,23 +771,22 @@ int32_t playDetonationAnimation(lua_State* state)
  */
 int32_t addShapeCircle(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 3)
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
    {
-      auto r = static_cast<float>(lua_tonumber(state, 1));
-      auto x = static_cast<float>(lua_tonumber(state, 2));
-      auto y = static_cast<float>(lua_tonumber(state, 3));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->addShapeCircle(r, x, y);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto r = static_cast<float>(lua_tonumber(state, 1));
+   const auto x = static_cast<float>(lua_tonumber(state, 2));
+   const auto y = static_cast<float>(lua_tonumber(state, 3));
+   node->addShapeCircle(r, x, y);
 
    return 0;
 }
@@ -843,24 +803,23 @@ int32_t addShapeCircle(lua_State* state)
  */
 int32_t addShapeRect(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 4)
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
    {
-      auto width = static_cast<float>(lua_tonumber(state, 1));
-      auto height = static_cast<float>(lua_tonumber(state, 2));
-      auto x = static_cast<float>(lua_tonumber(state, 3));
-      auto y = static_cast<float>(lua_tonumber(state, 4));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->addShapeRect(width, height, x, y);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto width = static_cast<float>(lua_tonumber(state, 1));
+   const auto height = static_cast<float>(lua_tonumber(state, 2));
+   const auto x = static_cast<float>(lua_tonumber(state, 3));
+   const auto y = static_cast<float>(lua_tonumber(state, 4));
+   node->addShapeRect(width, height, x, y);
 
    return 0;
 }
@@ -875,27 +834,24 @@ int32_t addShapeRect(lua_State* state)
  */
 int32_t addShapePoly(lua_State* state)
 {
-   auto argc = lua_gettop(state);
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
 
+   const auto argc = lua_gettop(state);
    if (argc >= 2 && (argc % 2 == 0))
    {
-      auto size = argc / 2;
-      b2Vec2* poly = new b2Vec2[static_cast<uint32_t>(size)];
+      const auto size = argc / 2;
+      auto poly = new b2Vec2[static_cast<uint32_t>(size)];
       auto poly_index = 0;
       for (auto i = 0; i < argc; i += 2)
       {
-         auto x = static_cast<float>(lua_tonumber(state, i));
-         auto y = static_cast<float>(lua_tonumber(state, i + 1));
+         const auto x = static_cast<float>(lua_tonumber(state, i));
+         const auto y = static_cast<float>(lua_tonumber(state, i + 1));
          poly[poly_index].Set(x, y);
          poly_index++;
-      }
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         delete[] poly;
-         return 0;
       }
 
       node->addShapePoly(poly, size);
@@ -917,56 +873,52 @@ int32_t addShapePoly(lua_State* state)
  */
 int32_t addWeapon(lua_State* state)
 {
-   auto argc = static_cast<size_t>(lua_gettop(state));
-
+   const auto argc = static_cast<size_t>(lua_gettop(state));
    if (argc < 3)
    {
-      printf("bad parameters for addWeapon");
+      Log::Error() << "bad parameters for addWeapon";
       exit(1);
    }
 
-   auto weapon_type = WeaponType::Invalid;
-   auto fire_interval = 0;
-   auto damage = 0;
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
    std::unique_ptr<b2Shape> shape;
 
-   weapon_type = static_cast<WeaponType>(lua_tointeger(state, 1));
-   fire_interval = static_cast<int>(lua_tointeger(state, 2));
-   damage = static_cast<int>(lua_tointeger(state, 3));
+   const auto weapon_type = static_cast<WeaponType>(lua_tointeger(state, 1));
+   const auto fire_interval = static_cast<int>(lua_tointeger(state, 2));
+   const auto damage = static_cast<int>(lua_tointeger(state, 3));
 
    // add weapon with projectile radius only
    if (argc == 4)
    {
-      auto radius = static_cast<float>(lua_tonumber(state, 4));
       shape = std::make_unique<b2CircleShape>();
+
+      const auto radius = static_cast<float>(lua_tonumber(state, 4));
       dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
    }
 
    // add weapon with polygon projectile shape
    if (argc >= 5 && ((argc - 5) % 2 == 0))
    {
-      auto constexpr parameter_count = 2u;
       shape = std::make_unique<b2PolygonShape>();
 
+      constexpr auto parameter_count = 2u;
       auto poly = new b2Vec2[(argc - parameter_count) / 2];
       auto poly_index = 0;
 
       for (auto i = parameter_count + 1; i < argc - parameter_count; i += 2u)
       {
-         auto x = static_cast<float>(lua_tonumber(state, i));
-         auto y = static_cast<float>(lua_tonumber(state, i + 1));
+         const auto x = static_cast<float>(lua_tonumber(state, i));
+         const auto y = static_cast<float>(lua_tonumber(state, i + 1));
          poly[poly_index].Set(x, y);
          poly_index++;
       }
 
       dynamic_cast<b2PolygonShape*>(shape.get())->Set(poly, poly_index);
-   }
-
-   std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-   if (!node)
-   {
-      return 0;
    }
 
    auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fire_interval, damage);
@@ -988,27 +940,24 @@ int32_t addWeapon(lua_State* state)
  */
 int32_t useGun(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 5)
+   const auto argc = lua_gettop(state);
+   if (argc != 5)
    {
-      auto index = static_cast<size_t>(lua_tointeger(state, 1));
-
-      auto pos_x = static_cast<float>(lua_tonumber(state, 2)) * MPP;
-      auto pos_y = static_cast<float>(lua_tonumber(state, 3)) * MPP;
-
-      auto dir_x = static_cast<float>(lua_tonumber(state, 4));
-      auto dir_y = static_cast<float>(lua_tonumber(state, 5));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->useGun(index, {pos_x, pos_y}, {dir_x, dir_y});
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto index = static_cast<size_t>(lua_tointeger(state, 1));
+   const auto pos_x = static_cast<float>(lua_tonumber(state, 2)) * MPP;
+   const auto pos_y = static_cast<float>(lua_tonumber(state, 3)) * MPP;
+   const auto dir_x = static_cast<float>(lua_tonumber(state, 4));
+   const auto dir_y = static_cast<float>(lua_tonumber(state, 5));
+   node->useGun(index, {pos_x, pos_y}, {dir_x, dir_y});
 
    return 0;
 }
@@ -1027,8 +976,14 @@ int32_t useGun(lua_State* state)
  */
 int32_t updateProjectileTexture(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-   auto valid = (argc >= 2);
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto argc = lua_gettop(state);
+   const auto valid = (argc >= 2);
 
    auto index = 0u;
    std::string path;
@@ -1042,11 +997,10 @@ int32_t updateProjectileTexture(lua_State* state)
    sf::Rect<int32_t> rect;
    if (argc == 6)
    {
-      auto x1 = static_cast<int32_t>(lua_tointeger(state, 3));
-      auto y1 = static_cast<int32_t>(lua_tointeger(state, 4));
-
-      auto width = static_cast<int32_t>(lua_tointeger(state, 5));
-      auto height = static_cast<int32_t>(lua_tointeger(state, 6));
+      const auto x1 = static_cast<int32_t>(lua_tointeger(state, 3));
+      const auto y1 = static_cast<int32_t>(lua_tointeger(state, 4));
+      const auto width = static_cast<int32_t>(lua_tointeger(state, 5));
+      const auto height = static_cast<int32_t>(lua_tointeger(state, 6));
 
       rect.left = x1;
       rect.top = y1;
@@ -1056,13 +1010,6 @@ int32_t updateProjectileTexture(lua_State* state)
 
    if (valid)
    {
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
       const auto& texture = TexturePool::getInstance().get(path);
       dynamic_cast<Gun&>(*node->_weapons[index]).setProjectileAnimation(texture, rect);
    }
@@ -1088,52 +1035,50 @@ int32_t updateProjectileTexture(lua_State* state)
  */
 int32_t updateProjectileAnimation(lua_State* state)
 {
-   int32_t argc = lua_gettop(state);
-
-   if (argc == 10)
+   const auto argc = lua_gettop(state);
+   if (argc != 10)
    {
-      auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
-      std::filesystem::path path = lua_tostring(state, 2);
-      auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
-      auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
-      auto frame_origin_x        = static_cast<float>(lua_tointeger(state, 5));
-      auto frame_origin_y        = static_cast<float>(lua_tointeger(state, 6));
-      auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 7));
-      auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 8));
-      auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 9));
-      auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 10));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      auto texture = TexturePool::getInstance().get(path);
-
-      sf::Vector2f frame_origin{frame_origin_x, frame_origin_y};
-
-      // assume identical frame times for now
-      std::vector<sf::Time> frame_times;
-      for (auto i = 0u; i < frame_count; i++)
-      {
-         frame_times.push_back(sf::seconds(time_per_frame_s));
-      }
-
-      AnimationFrameData frame_data(
-         texture,
-         frame_origin,
-         frame_width,
-         frame_height,
-         frame_count,
-         frames_per_row,
-         frame_times,
-         start_frame
-      );
-
-      dynamic_cast<Gun&>(*node->_weapons[weapon_index]).setProjectileAnimation(frame_data);
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
+   const std::filesystem::path path = lua_tostring(state, 2);
+   const auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
+   const auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
+   const auto frame_origin_x        = static_cast<float>(lua_tointeger(state, 5));
+   const auto frame_origin_y        = static_cast<float>(lua_tointeger(state, 6));
+   const auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 7));
+   const auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 8));
+   const auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 9));
+   const auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 10));
+   const auto texture = TexturePool::getInstance().get(path);
+   const sf::Vector2f frame_origin{frame_origin_x, frame_origin_y};
+
+   // assume identical frame times for now
+   std::vector<sf::Time> frame_times_s;
+   for (auto i = 0u; i < frame_count; i++)
+   {
+      frame_times_s.push_back(sf::seconds(time_per_frame_s));
+   }
+
+   AnimationFrameData frame_data(
+      texture,
+      frame_origin,
+      frame_width,
+      frame_height,
+      frame_count,
+      frames_per_row,
+      frame_times_s,
+      start_frame
+   );
+
+   dynamic_cast<Gun&>(*node->_weapons[weapon_index]).setProjectileAnimation(frame_data);
 
    return 0;
 }
@@ -1148,29 +1093,29 @@ int32_t updateProjectileAnimation(lua_State* state)
  */
 int32_t timer(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   auto argc = lua_gettop(state);
-
-   if (argc == 2)
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
    {
-      auto delay = static_cast<int32_t>(lua_tointeger(state, 1));
-      auto timerId = static_cast<int32_t>(lua_tointeger(state, 2));
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      Timer::add(
-         std::chrono::milliseconds(delay),
-         [node, timerId](){node->luaTimeout(timerId);},
-         Timer::Type::Singleshot,
-         Timer::Scope::UpdateIngame,
-         nullptr,
-         node
-      );
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto delay = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto timer_id = static_cast<int32_t>(lua_tointeger(state, 2));
+
+   Timer::add(
+      std::chrono::milliseconds(delay),
+      [node, timer_id](){node->luaTimeout(timer_id);},
+      Timer::Type::Singleshot,
+      Timer::Scope::UpdateIngame,
+      nullptr,
+      node
+   );
 
    return 0;
 }
@@ -1184,14 +1129,14 @@ int32_t timer(lua_State* state)
  */
 int32_t addSample(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   int32_t argc = lua_gettop(state);
-
-   if (argc == 1)
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
    {
-      auto sample = lua_tostring(state, 1);
-      Audio::getInstance().addSample(sample);
+      return 0;
    }
+
+   const auto sample = lua_tostring(state, 1);
+   Audio::getInstance().addSample(sample);
 
    return 0;
 }
@@ -1206,16 +1151,15 @@ int32_t addSample(lua_State* state)
  */
 int32_t playSample(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   int32_t argc = lua_gettop(state);
-
-   if (argc == 2)
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
    {
-      auto sample = lua_tostring(state, 1);
-      auto volume = static_cast<float>(lua_tonumber(state, 2));
-
-      Audio::getInstance().playSample(sample, volume);
+      return 0;
    }
+
+   const auto sample = lua_tostring(state, 1);
+   const auto volume = static_cast<float>(lua_tonumber(state, 2));
+   Audio::getInstance().playSample(sample, volume);
 
    return 0;
 }
@@ -1229,14 +1173,14 @@ int32_t playSample(lua_State* state)
  */
 int32_t debug(lua_State* state)
 {
-   // number of function arguments are on top of the stack.
-   int32_t argc = lua_gettop(state);
-
-   if (argc == 1)
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
    {
-      const char* message = lua_tostring(state, 1);
-      puts(message);
+      return 0;
    }
+
+   const auto message = lua_tostring(state, 1);
+   puts(message);
 
    return 0;
 }
@@ -1256,38 +1200,38 @@ int32_t debug(lua_State* state)
  */
 int32_t registerHitAnimation(lua_State* state)
 {
-   int32_t argc = lua_gettop(state);
-
-   if (argc == 8)
+   const auto argc = lua_gettop(state);
+   if (argc != 8)
    {
-      auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
-      std::filesystem::path path = lua_tostring(state, 2);
-      auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
-      auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
-      auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 5));
-      auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 6));
-      auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 7));
-      auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 8));
-
-      ProjectileHitAnimation::addReferenceAnimation(
-         path,
-         frame_width,
-         frame_height,
-         std::chrono::duration<float, std::chrono::seconds::period>{time_per_frame_s},
-         frame_count,
-         frames_per_row,
-         start_frame
-      );
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      dynamic_cast<Gun&>(*node->_weapons[weapon_index]).setProjectileIdentifier(path.string());
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto weapon_index          = static_cast<uint32_t>(lua_tointeger(state, 1));
+   const std::filesystem::path path = lua_tostring(state, 2);
+   const auto frame_width           = static_cast<uint32_t>(lua_tointeger(state, 3));
+   const auto frame_height          = static_cast<uint32_t>(lua_tointeger(state, 4));
+   const auto time_per_frame_s      = static_cast<float>(lua_tonumber(state, 5));
+   const auto frame_count           = static_cast<uint32_t>(lua_tointeger(state, 6));
+   const auto frames_per_row        = static_cast<uint32_t>(lua_tointeger(state, 7));
+   const auto start_frame           = static_cast<uint32_t>(lua_tointeger(state, 8));
+
+   ProjectileHitAnimation::addReferenceAnimation(
+      path,
+      frame_width,
+      frame_height,
+      std::chrono::duration<float, std::chrono::seconds::period>{time_per_frame_s},
+      frame_count,
+      frames_per_row,
+      start_frame
+   );
+
+   dynamic_cast<Gun&>(*node->_weapons[weapon_index]).setProjectileIdentifier(path.string());
 
    return 0;
 }
@@ -1301,21 +1245,20 @@ int32_t registerHitAnimation(lua_State* state)
  */
 int32_t updateKeysPressed(lua_State* state)
 {
-   auto argc = lua_gettop(state);
-
-   if (argc == 1)
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
    {
-      auto keyes_pressed = static_cast<int32_t>(lua_tointeger(state, 1));
-
-      std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
-      if (!node)
-      {
-         return 0;
-      }
-
-      node->_keys_pressed = keyes_pressed;
+      return 0;
    }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto keys_pressed = static_cast<int32_t>(lua_tointeger(state, 1));
+   node->_keys_pressed = keys_pressed;
 
    return 0;
 }
@@ -1328,8 +1271,7 @@ int32_t updateKeysPressed(lua_State* state)
  */
 int32_t die(lua_State* state)
 {
-   std::shared_ptr<LuaNode> node = OBJINSTANCE;
-
+   auto node = OBJINSTANCE;
    if (!node)
    {
       return 0;
@@ -1353,6 +1295,9 @@ int32_t die(lua_State* state)
 
    exit(1);
 }
+
+
+} // namespace end
 
 
 

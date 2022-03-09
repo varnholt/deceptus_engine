@@ -39,41 +39,41 @@ SpikeBlock::SpikeBlock(GameNode* parent)
 }
 
 
-void SpikeBlock::setup(TmxObject* tmx_object)
+void SpikeBlock::setup(const GameDeserializeData& data)
 {
-   setObjectName(tmx_object->_name);
+   setObjectName(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_spikeblock.png");
    _sprite.setTexture(*_texture_map);
-   _sprite.setPosition(tmx_object->_x_px, tmx_object->_y_px);
+   _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
 
    _rectangle = {
-      static_cast<int32_t>(tmx_object->_x_px),
-      static_cast<int32_t>(tmx_object->_y_px),
-      static_cast<int32_t>(tmx_object->_width_px),
-      static_cast<int32_t>(tmx_object->_height_px)
+      static_cast<int32_t>(data._tmx_object->_x_px),
+      static_cast<int32_t>(data._tmx_object->_y_px),
+      static_cast<int32_t>(data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_height_px)
    };
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
-      const auto z_it = tmx_object->_properties->_map.find("z");
-      if (z_it != tmx_object->_properties->_map.end())
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
       {
          const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
       }
 
-      const auto enabled_it = tmx_object->_properties->_map.find("enabled");
-      if (enabled_it != tmx_object->_properties->_map.end())
+      const auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
+      if (enabled_it != data._tmx_object->_properties->_map.end())
       {
          const auto enabled = static_cast<bool>(enabled_it->second->_value_bool.value());
          setEnabled(enabled);
       }
 
-      const auto mode_it = tmx_object->_properties->_map.find("mode");
-      if (mode_it != tmx_object->_properties->_map.end())
+      const auto mode_it = data._tmx_object->_properties->_map.find("mode");
+      if (mode_it != data._tmx_object->_properties->_map.end())
       {
          auto mode_str = static_cast<std::string>(mode_it->second->_value_string.value());
          if (mode_str == "interval")
@@ -82,14 +82,14 @@ void SpikeBlock::setup(TmxObject* tmx_object)
          }
       }
 
-      const auto time_on_it = tmx_object->_properties->_map.find("time_on_ms");
-      if (time_on_it != tmx_object->_properties->_map.end())
+      const auto time_on_it = data._tmx_object->_properties->_map.find("time_on_ms");
+      if (time_on_it != data._tmx_object->_properties->_map.end())
       {
          _time_on_ms = static_cast<int32_t>(time_on_it->second->_value_int.value());
       }
 
-      const auto time_off_it = tmx_object->_properties->_map.find("time_off_ms");
-      if (time_on_it != tmx_object->_properties->_map.end())
+      const auto time_off_it = data._tmx_object->_properties->_map.find("time_off_ms");
+      if (time_on_it != data._tmx_object->_properties->_map.end())
       {
          _time_off_ms = static_cast<int32_t>(time_off_it->second->_value_int.value());
       }
