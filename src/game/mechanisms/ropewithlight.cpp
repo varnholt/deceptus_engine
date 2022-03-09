@@ -56,21 +56,21 @@ void RopeWithLight::update(const sf::Time& dt)
 }
 
 
-void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>& world)
+void RopeWithLight::setup(const GameDeserializeData& data)
 {
-   Rope::setup(tmx_object, world);
+   Rope::setup(data);
 
    std::array<uint8_t, 4> color = {255, 255, 255, 100};
 
-   const auto color_it = tmx_object->_properties->_map.find("color");
-   if (color_it != tmx_object->_properties->_map.end())
+   const auto color_it = data._tmx_object->_properties->_map.find("color");
+   if (color_it != data._tmx_object->_properties->_map.end())
    {
       color = TmxTools::color(color_it->second->_value_string.value());
    }
 
    auto sprite = 1;
-   const auto sprite_it = tmx_object->_properties->_map.find("sprite");
-   if (sprite_it != tmx_object->_properties->_map.end())
+   const auto sprite_it = data._tmx_object->_properties->_map.find("sprite");
+   if (sprite_it != data._tmx_object->_properties->_map.end())
    {
       sprite = sprite_it->second->_value_int.value();
    }
@@ -93,7 +93,7 @@ void RopeWithLight::setup(TmxObject* tmx_object, const std::shared_ptr<b2World>&
    }
 
    // add raycast light
-   _light = LightSystem::createLightInstance(this);
+   _light = LightSystem::createLightInstance(this, {});
    _light->_color = sf::Color(color[0], color[1], color[2], color[3]);
    Level::getCurrentLevel()->getLightSystem()->_lights.push_back(_light);
 }

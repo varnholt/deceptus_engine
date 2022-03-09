@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "gamedeserializedata.h"
 #include "rope.h"
 #include "effects/lightsystem.h"
 
@@ -13,8 +14,7 @@ class RopeWithLight : public Rope
 
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
-
-      void setup(TmxObject* tmxObject, const std::shared_ptr<b2World>& world) override;
+      void setup(const GameDeserializeData& data) override;
 
    private:
 

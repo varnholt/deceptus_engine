@@ -42,34 +42,34 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 }
 
 
-std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, TmxObject* tmx_object)
+std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto checkpoint = std::make_shared<Checkpoint>(parent);
-   checkpoint->setObjectName(tmx_object->_name);
+   checkpoint->setObjectName(data._tmx_object->_name);
 
    checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
    checkpoint->_sprite.setTexture(*checkpoint->_texture);
    checkpoint->updateSpriteRect();
 
    checkpoint->_rect = sf::IntRect{
-      static_cast<int32_t>(tmx_object->_x_px),
-      static_cast<int32_t>(tmx_object->_y_px),
-      static_cast<int32_t>(tmx_object->_width_px),
-      static_cast<int32_t>(tmx_object->_height_px)
+      static_cast<int32_t>(data._tmx_object->_x_px),
+      static_cast<int32_t>(data._tmx_object->_y_px),
+      static_cast<int32_t>(data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_height_px)
    };
 
-   checkpoint->_name = tmx_object->_name;
+   checkpoint->_name = data._tmx_object->_name;
 
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
-      auto it = tmx_object->_properties->_map.find("index");
-      if (it != tmx_object->_properties->_map.end())
+      auto it = data._tmx_object->_properties->_map.find("index");
+      if (it != data._tmx_object->_properties->_map.end())
       {
          checkpoint->_index = static_cast<uint32_t>(it->second->_value_int.value());
       }
 
-      auto z_it = tmx_object->_properties->_map.find("z");
-      if (z_it != tmx_object->_properties->_map.end())
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
       {
          auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          checkpoint->setZ(z_index);
@@ -78,15 +78,15 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, TmxObject*
       // update sprite position
       sf::Vector2f pos;
 
-      auto sprite_pos_x_it = tmx_object->_properties->_map.find("sprite_pos_x_px");
-      auto sprite_pos_y_it = tmx_object->_properties->_map.find("sprite_pos_y_px");
+      auto sprite_pos_x_it = data._tmx_object->_properties->_map.find("sprite_pos_x_px");
+      auto sprite_pos_y_it = data._tmx_object->_properties->_map.find("sprite_pos_y_px");
 
-      if (sprite_pos_x_it != tmx_object->_properties->_map.end())
+      if (sprite_pos_x_it != data._tmx_object->_properties->_map.end())
       {
          pos.x = static_cast<float>(sprite_pos_x_it->second->_value_int.value());
       }
 
-      if (sprite_pos_y_it != tmx_object->_properties->_map.end())
+      if (sprite_pos_y_it != data._tmx_object->_properties->_map.end())
       {
          pos.y = static_cast<float>(sprite_pos_y_it->second->_value_int.value());
       }

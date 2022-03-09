@@ -7,6 +7,7 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
+#include "gamedeserializedata.h"
 #include "gamenode.h"
 
 
@@ -51,7 +52,7 @@ public:
 
    LightSystem();
 
-   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, TmxObject* tmxObject = nullptr);
+   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 

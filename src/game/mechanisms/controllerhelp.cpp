@@ -83,9 +83,9 @@ void ControllerHelp::update(const sf::Time& dt)
 }
 
 
-void ControllerHelp::deserialize(TmxObject* tmx_object)
+void ControllerHelp::deserialize(const GameDeserializeData& data)
 {
-   setObjectName(tmx_object->_name);
+   setObjectName(data._tmx_object->_name);
    setZ(static_cast<int32_t>(ZDepth::Player) - 1);
 
    static const std::array<std::string, 16 * 9> key_map{
@@ -109,20 +109,20 @@ void ControllerHelp::deserialize(TmxObject* tmx_object)
    key_controller_map["key_escape"] = "bt_b";
 
    _rect_px = sf::IntRect{
-      static_cast<int32_t>(tmx_object->_x_px),
-      static_cast<int32_t>(tmx_object->_y_px),
-      static_cast<int32_t>(tmx_object->_width_px),
-      static_cast<int32_t>(tmx_object->_height_px)
+      static_cast<int32_t>(data._tmx_object->_x_px),
+      static_cast<int32_t>(data._tmx_object->_y_px),
+      static_cast<int32_t>(data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_height_px)
    };
 
    _rect_center = sf::Vector2f{
-      tmx_object->_x_px + tmx_object->_width_px / 2.0f,
-      tmx_object->_y_px + tmx_object->_height_px / 2.0f,
+      data._tmx_object->_x_px + data._tmx_object->_width_px / 2.0f,
+      data._tmx_object->_y_px + data._tmx_object->_height_px / 2.0f,
    };
 
    std::vector<std::string> keys;
-   auto keys_it = tmx_object->_properties->_map.find("keys");
-   if (keys_it != tmx_object->_properties->_map.end())
+   auto keys_it = data._tmx_object->_properties->_map.find("keys");
+   if (keys_it != data._tmx_object->_properties->_map.end())
    {
       _texture = TexturePool::getInstance().get("data/game/ui_icons.png");
 
