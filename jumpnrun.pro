@@ -169,6 +169,7 @@ SOURCES += \
    src/game/gamecontrollerintegration.cpp \
    src/game/gamedeserializedata.cpp \
    src/game/gamemechanism.cpp \
+   src/game/gamemechanismdeserializer.cpp \
    src/game/gamenode.cpp \
    src/game/gamestate.cpp \
    src/game/gun.cpp \
@@ -346,6 +347,7 @@ HEADERS += \
    src/game/gamecontrollerintegration.h \
    src/game/gamedeserializedata.h \
    src/game/gamemechanism.h \
+   src/game/gamemechanismdeserializer.h \
    src/game/gamenode.h \
    src/game/gamestate.h \
    src/game/gun.h \

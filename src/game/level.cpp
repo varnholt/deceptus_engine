@@ -365,7 +365,7 @@ void Level::loadTmx()
 {
    static const std::string parallax_identifier = "parallax_";
 
-   auto path = std::filesystem::path(_description->_filename).parent_path();
+   const auto path = std::filesystem::path(_description->_filename).parent_path();
 
    const auto checksum_old = Checksum::readChecksum(_description->_filename + ".crc");
    const auto checksum_new = Checksum::calcChecksum(_description->_filename);
