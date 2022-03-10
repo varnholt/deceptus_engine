@@ -84,8 +84,8 @@ public:
    const std::shared_ptr<b2World>& getWorld() const;
    const sf::Vector2f& getStartPosition() const;
 
-   const std::map<void*, b2Vec2*>& getPointMap();
-   const std::map<void*, size_t>& getPointSizeMap();
+   const std::unordered_map<void*, b2Vec2*>& getPointMap();
+   const std::unordered_map<void*, size_t>& getPointSizeMap();
 
    std::shared_ptr<Portal> getNearbyPortal();
    std::shared_ptr<Bouncer> getNearbyBouncer();
@@ -178,7 +178,7 @@ protected:
    std::vector<std::shared_ptr<TileMap>> _tile_maps;
 
    std::vector<std::shared_ptr<LuaNode>> _enemies;
-   std::map<std::string, Enemy> _enemy_data_from_tmx_layer;
+   std::unordered_map<std::string, Enemy> _enemy_data_from_tmx_layer;
 
    Atmosphere _atmosphere;
    Physics _physics;
@@ -205,6 +205,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bubble_cubes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_collapsing_platforms;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_controller_help;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_conveyor_belts;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_crushers;
@@ -241,8 +242,8 @@ protected:
    bool _screenshot = false;
 
    // box2d
-   std::map<void*, b2Vec2*> _point_map;
-   std::map<void*, size_t> _point_count_map;
+   std::unordered_map<void*, b2Vec2*> _point_map;
+   std::unordered_map<void*, size_t> _point_count_map;
 
    std::shared_ptr<b2World> _world = nullptr;
    std::vector<std::vector<b2Vec2>> _world_chains;
