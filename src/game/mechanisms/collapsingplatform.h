@@ -3,6 +3,7 @@
 class GameNode;
 struct TmxObject;
 
+#include "gamedeserializedata.h"
 #include "fixturenode.h"
 #include "gamemechanism.h"
 
@@ -12,11 +13,10 @@ struct TmxObject;
 class CollapsingPlatform : public FixtureNode, public GameMechanism
 {
 public:
+
    CollapsingPlatform(
       GameNode* parent,
-      const std::shared_ptr<b2World>& world,
-      TmxObject* tmx_object,
-      const std::filesystem::path& base_path
+      const GameDeserializeData& data
    );
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;

@@ -1673,14 +1673,14 @@ void Level::toggleMechanisms()
 
 
 //-----------------------------------------------------------------------------
-const std::map<void*, size_t>& Level::getPointSizeMap()
+const std::unordered_map<void*, size_t>& Level::getPointSizeMap()
 {
    return _point_count_map;
 }
 
 
 //-----------------------------------------------------------------------------
-const std::map<void*, b2Vec2*>& Level::getPointMap()
+const std::unordered_map<void*, b2Vec2*>& Level::getPointMap()
 {
    return _point_map;
 }
