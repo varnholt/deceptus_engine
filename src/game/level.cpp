@@ -223,7 +223,7 @@ Level::Level()
 
    _map = std::make_unique<LevelMap>();
 
-   _mechanisms = {
+   _mechanisms_list = {
       &_mechanism_bouncers,
       &_mechanism_bubble_cubes,
       &_mechanism_checkpoints,
@@ -247,6 +247,29 @@ Level::Level()
       &_mechanism_spikes,
       &_mechanism_weather,
    };
+
+   _mechanisms_map["bouncers"]         = &_mechanism_bouncers;
+   _mechanisms_map["bubble_cubes"]     = &_mechanism_bubble_cubes;
+   _mechanisms_map["checkpoints"]      = &_mechanism_checkpoints;
+   _mechanisms_map["controller_help"]  = &_mechanism_controller_help;
+   _mechanisms_map["conveyorbelts"]    = &_mechanism_conveyor_belts;
+   _mechanisms_map["crushers"]         = &_mechanism_crushers;
+   _mechanisms_map["death_blocks"]     = &_mechanism_death_blocks;
+   _mechanisms_map["dialogues"]        = &_mechanism_dialogues;
+   _mechanisms_map["doors"]            = &_mechanism_doors;
+   _mechanisms_map["dust"]             = &_mechanism_dust;
+   _mechanisms_map["fans"]             = &_mechanism_fans;
+   _mechanisms_map["lasers"]           = &_mechanism_lasers;
+   _mechanisms_map["levers"]           = &_mechanism_levers;
+   _mechanisms_map["moveable_objects"] = &_mechanism_moveable_boxes;
+   _mechanisms_map["platforms"]        = &_mechanism_platforms;
+   _mechanisms_map["portals"]          = &_mechanism_portals;
+   _mechanisms_map["ropes"]            = &_mechanism_ropes;
+   _mechanisms_map["shader_quads"]     = &_mechanism_shader_layers;
+   _mechanisms_map["spike_balls"]      = &_mechanism_spike_balls;
+   _mechanisms_map["spike_blocks"]     = &_mechanism_spike_blocks;
+   _mechanisms_map["spikes"]           = &_mechanism_spikes;
+   _mechanisms_map["weather"]          = &_mechanism_weather;
 }
 
 
@@ -266,14 +289,6 @@ Level::~Level()
    {
       delete kv.second;
    }
-
-   // clear tmx elements
-   for (auto tmx_element : _tmx_elements)
-   {
-      delete tmx_element;
-   }
-
-   _tmx_elements.clear();
 }
 
 
@@ -385,8 +400,8 @@ void Level::loadTmx()
    // parse tmx
    Log::Info() << "parsing tmx: " << _description->_filename;
 
-   _tmx_parser = std::make_unique<TmxParser>();
-   _tmx_parser->parse(_description->_filename);
+   TmxParser tmx_parser;
+   tmx_parser.parse(_description->_filename);
 
    Log::Info() << "parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
    elapsed.restart();
@@ -397,9 +412,9 @@ void Level::loadTmx()
    data._world = _world;
    data._base_path = path;
 
-   _tmx_elements = _tmx_parser->getElements();
+   const auto& tmx_elements = tmx_parser.getElements();
 
-   for (auto element : _tmx_elements)
+   for (auto element : tmx_elements)
    {
       data._tmx_layer = nullptr;
       data._tmx_tileset = nullptr;
@@ -409,7 +424,7 @@ void Level::loadTmx()
       if (element->_type == TmxElement::TypeLayer)
       {
          auto layer = dynamic_cast<TmxLayer*>(element);
-         auto tileset = _tmx_parser->getTileSet(layer);
+         auto tileset = tmx_parser.getTileSet(layer);
 
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
@@ -1092,7 +1107,7 @@ void Level::drawLayers(
          }
       }
 
-      for (const auto& mechanism_vector : _mechanisms)
+      for (const auto& mechanism_vector : _mechanisms_list)
       {
          for (const auto& mechanism : *mechanism_vector)
          {
@@ -1441,7 +1456,7 @@ void Level::update(const sf::Time& dt)
       tile_map->update(dt);
    }
 
-   for (const auto& mechanism_vector : _mechanisms)
+   for (const auto& mechanism_vector : _mechanisms_list)
    {
       for (const auto& mechanism : *mechanism_vector)
       {

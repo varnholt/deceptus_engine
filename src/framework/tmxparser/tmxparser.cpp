@@ -12,6 +12,17 @@
 #include <iostream>
 
 
+TmxParser::~TmxParser()
+{
+   for (auto tmx_element : _elements)
+   {
+      delete tmx_element;
+   }
+
+   _elements.clear();
+}
+
+
 void TmxParser::parse(const std::string& filename)
 {
    _filename = filename;
@@ -113,7 +124,7 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
 }
 
 
-std::vector<TmxElement*> TmxParser::getElements() const
+const std::vector<TmxElement*>& TmxParser::getElements() const
 {
    return _elements;
 }
@@ -134,7 +145,7 @@ std::vector<TmxObjectGroup*> TmxParser::retrieveObjectGroups() const
 }
 
 
-TmxTileSet* TmxParser::getTileSet(TmxLayer* layer)
+TmxTileSet* TmxParser::getTileSet(TmxLayer* layer) const
 {
    // get maximum tile id per layer
    int32_t tile_id = 0;
