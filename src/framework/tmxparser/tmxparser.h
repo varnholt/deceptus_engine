@@ -15,11 +15,12 @@ class TmxParser
    public:
 
       TmxParser() = default;
+      virtual ~TmxParser();
 
       void parse(const std::string& filename);
-      std::vector<TmxElement *> getElements() const;
+      const std::vector<TmxElement*>& getElements() const;
       std::vector<TmxObjectGroup*> retrieveObjectGroups() const;
-      TmxTileSet* getTileSet(TmxLayer *layer);
+      TmxTileSet* getTileSet(TmxLayer *layer) const;
 
    protected:
 

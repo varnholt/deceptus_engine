@@ -182,12 +182,7 @@ protected:
 
    Atmosphere _atmosphere;
    Physics _physics;
-
    sf::Vector2f _start_position;
-
-   std::unique_ptr<TmxParser> _tmx_parser;
-   std::vector<TmxElement*> _tmx_elements;
-
    std::unique_ptr<LevelMap> _map;
 
    // parallax (move to separate mechanism!)
@@ -205,7 +200,8 @@ protected:
    std::array<ParallaxLayer, 3> _parallax_layers;
 
    // mechanisms
-   std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms;
+   std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_map;
+   std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_list;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bubble_cubes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;

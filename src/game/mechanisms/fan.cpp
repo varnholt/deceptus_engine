@@ -87,7 +87,7 @@ void Fan::setEnabled(bool enabled)
 }
 
 
-std::vector<std::shared_ptr<GameMechanism> >& Fan::getFans()
+std::vector<std::shared_ptr<GameMechanism>>& Fan::getFans()
 {
    return __fan_instances;
 }
