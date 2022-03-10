@@ -20,30 +20,16 @@
 #include "gameconfiguration.h"
 #include "gamecontactlistener.h"
 #include "gamedeserializedata.h"
+#include "gamemechanismdeserializer.h"
 #include "gun.h"
 #include "leveldescription.h"
 #include "levelmap.h"
 #include "luainterface.h"
 #include "mechanisms/bouncer.h"
-#include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
-#include "mechanisms/controllerhelp.h"
 #include "mechanisms/conveyorbelt.h"
-#include "mechanisms/crusher.h"
-#include "mechanisms/deathblock.h"
-#include "mechanisms/dialogue.h"
 #include "mechanisms/door.h"
-#include "mechanisms/fan.h"
-#include "mechanisms/laser.h"
 #include "mechanisms/lever.h"
-#include "mechanisms/moveablebox.h"
-#include "mechanisms/movingplatform.h"
-#include "mechanisms/rope.h"
-#include "mechanisms/ropewithlight.h"
-#include "mechanisms/shaderlayer.h"
-#include "mechanisms/spikeblock.h"
-#include "mechanisms/spikeball.h"
-#include "mechanisms/spikes.h"
 #include "meshtools.h"
 #include "physics/physicsconfiguration.h"
 #include "player/player.h"
@@ -412,8 +398,9 @@ void Level::loadTmx()
    data._world = _world;
    data._base_path = path;
 
-   const auto& tmx_elements = tmx_parser.getElements();
+   GameMechanismDeserializer::deserialize(tmx_parser, this, data, _mechanisms_map);
 
+   const auto& tmx_elements = tmx_parser.getElements();
    for (auto element : tmx_elements)
    {
       data._tmx_layer = nullptr;
@@ -429,52 +416,7 @@ void Level::loadTmx()
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
-         if (layer->_name.rfind("doors", 0) == 0)
-         {
-            _mechanism_doors = Door::load(data);
-         }
-         else if (layer->_name == "fans")
-         {
-            Fan::load(data);
-         }
-         else if (layer->_name == "lasers")
-         {
-            const auto mechanism = Laser::load(this, data);
-            _mechanism_lasers.insert(_mechanism_lasers.end(), mechanism.begin(), mechanism.end());
-         }
-         else if (layer->_name == "lasers_2") // support for dstar's new laser tileset
-         {
-            const auto mechanism = Laser::load(this, data);
-            _mechanism_lasers.insert(_mechanism_lasers.end(), mechanism.begin(), mechanism.end());
-         }
-         else if (layer->_name == "levers")
-         {
-            _mechanism_levers = Lever::load(this, data);
-         }
-         else if (layer->_name == "platforms")
-         {
-            _mechanism_platforms = MovingPlatform::load(this, data);
-         }
-         else if (layer->_name == "portals")
-         {
-            _mechanism_portals = Portal::load(this, data);
-         }
-         else if (layer->_name == "toggle_spikes")
-         {
-            auto mechanism = Spikes::load(this, data, Spikes::Mode::Toggled);
-            _mechanism_spikes.insert(_mechanism_spikes.end(), mechanism.begin(), mechanism.end());
-         }
-         else if (layer->_name == "trap_spikes")
-         {
-            auto mechanism = Spikes::load(this, data, Spikes::Mode::Trap);
-            _mechanism_spikes.insert(_mechanism_spikes.end(), mechanism.begin(), mechanism.end());
-         }
-         else if (layer->_name == "interval_spikes")
-         {
-            auto mechanism = Spikes::load(this, data, Spikes::Mode::Interval);
-            _mechanism_spikes.insert(_mechanism_spikes.end(), mechanism.begin(), mechanism.end());
-         }
-         else // tile map
+         if (!GameMechanismDeserializer::isLayerNameReserved(layer->_name))
          {
             auto tile_map = TileMapFactory::makeTileMap(layer);
             tile_map->load(layer, tileset, path);
@@ -506,7 +448,6 @@ void Level::loadTmx()
             }
          }
       }
-
       else if (element->_type == TmxElement::TypeObjectGroup)
       {
          auto object_group = dynamic_cast<TmxObjectGroup*>(element);
@@ -518,128 +459,15 @@ void Level::loadTmx()
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
 
-            if (object_group->_name == "bubble_cubes")
-            {
-               auto mechanism = std::make_shared<BubbleCube>(this, data);
-               _mechanism_bubble_cubes.push_back(mechanism);
-            }
-            else if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
-            {
-               Laser::addObject(tmx_object);
-            }
-            else if (object_group->_name == "enemies")
+            if (object_group->_name == "enemies")
             {
                Enemy enemy;
                enemy.parse(tmx_object);
                _enemy_data_from_tmx_layer[enemy._id] = enemy;
             }
-            else if (object_group->_name == "fans")
-            {
-               Fan::addObject(this, data);
-            }
-            else if (object_group->_name == "portals")
-            {
-               Portal::link(_mechanism_portals, data);
-            }
-            else if (object_group->_name == "ropes")
-            {
-               auto mechanism = std::make_shared<Rope>(this);
-               mechanism->setup(data);
-               _mechanism_ropes.push_back(mechanism);
-            }
-            else if (object_group->_name == "ropes_with_light")
-            {
-               auto mechanism = std::make_shared<RopeWithLight>(this);
-               mechanism->setup(data);
-               _mechanism_ropes.push_back(mechanism);
-            }
-            else if (object_group->_name == "smoke")
-            {
-               auto smoke = SmokeEffect::deserialize(this, data);
-               _smoke_effect.push_back(smoke);
-            }
-            else if (object_group->_name == "spike_balls")
-            {
-               auto mechanism = std::make_shared<SpikeBall>(this);
-               mechanism->setup(data);
-               _mechanism_spike_balls.push_back(mechanism);
-            }
-            else if (object_group->_name == "spike_blocks")
-            {
-               auto mechanism = std::make_shared<SpikeBlock>(this);
-               mechanism->setup(data);
-               _mechanism_spike_blocks.push_back(mechanism);
-            }
-            else if (object_group->_name == "moveable_objects")
-            {
-               auto mechanism = std::make_shared<MoveableBox>(this);
-               mechanism->setup(data);
-               _mechanism_moveable_boxes.push_back(mechanism);
-            }
-            else if (object_group->_name == "death_blocks")
-            {
-               auto death_block = std::make_shared<DeathBlock>(this);
-               death_block->setup(data);
-               _mechanism_death_blocks.push_back(death_block);
-            }
-            else if (object_group->_name == "checkpoints")
-            {
-               const auto mechanism = Checkpoint::deserialize(this, data);
-               _mechanism_checkpoints.push_back(mechanism);
-            }
-            else if (object_group->_name == "dialogues")
-            {
-               auto mechanism = Dialogue::deserialize(this, data);
-               _mechanism_dialogues.push_back(mechanism);
-            }
-            else if (object_group->_name == "bouncers")
-            {
-               auto mechanism = std::make_shared<Bouncer>(this, data);
-               _mechanism_bouncers.push_back(mechanism);
-            }
-            else if (object_group->_name == "controller_help")
-            {
-               auto mechanism = std::make_shared<ControllerHelp>(this);
-               mechanism->deserialize(data);
-               _mechanism_controller_help.push_back(mechanism);
-            }
-            else if (object_group->_name == "conveyorbelts")
-            {
-               auto mechanism = std::make_shared<ConveyorBelt>(this, data);
-               _mechanism_conveyor_belts.push_back(mechanism);
-            }
-            else if (object_group->_name == "crushers")
-            {
-               auto mechanism = std::make_shared<Crusher>(this);
-               mechanism->setup(data);
-               _mechanism_crushers.push_back(mechanism);
-            }
             else if (object_group->_name == "rooms")
             {
                Room::deserialize(this, data, _rooms);
-            }
-            else if (object_group->_name == "platform_paths")
-            {
-               MovingPlatform::link(_mechanism_platforms, data);
-            }
-            else if (object_group->_name == "platforms")
-            {
-               MovingPlatform::deserialize(tmx_object);
-            }
-            else if (object_group->_name == "weather")
-            {
-               auto mechanism = Weather::deserialize(this, data);
-               _mechanism_weather.push_back(mechanism);
-            }
-            else if (object_group->_name.rfind("shader_quads", 0) == 0)
-            {
-               auto quad = ShaderLayer::deserialize(this, data);
-               _mechanism_shader_layers.push_back(quad);
-            }
-            else if (object_group->_name == "dust")
-            {
-               auto mechanism = Dust::deserialize(this, data);
-               _mechanism_dust.push_back(mechanism);
             }
             else if (object_group->_name == "lights")
             {
@@ -651,10 +479,6 @@ void Level::loadTmx()
                auto light = StaticLight::deserialize(this, data);
                _static_light->_lights.push_back(light);
             }
-            if (object_group->_name == "switchable_objects")
-            {
-               Lever::addSearchRect(tmx_object);
-            }
          }
       }
       else if (element->_type == TmxElement::TypeImageLayer)
@@ -664,12 +488,7 @@ void Level::loadTmx()
       }
    }
 
-   Laser::merge();
-   Fan::merge();
    TileMapFactory::merge(_tile_maps);
-   _mechanism_fans = Fan::getFans();
-   Lever::merge(_mechanism_levers, _mechanism_lasers, _mechanism_platforms, _mechanism_fans, _mechanism_conveyor_belts, _mechanism_spikes, _mechanism_spike_blocks);
-   _mechanism_platforms = MovingPlatform::merge(this, data);
 
    _map->loadLevelTextures(
       path / std::filesystem::path("physics_grid_solid.png"),

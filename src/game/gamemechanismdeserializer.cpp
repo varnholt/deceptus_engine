@@ -261,15 +261,15 @@ bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_nam
 {
    if (
          (layer_name.rfind("doors", 0) == 0)
-      && (layer_name == "fans")
-      && (layer_name == "lasers")
-      && (layer_name == "lasers_2")
-      && (layer_name == "levers")
-      && (layer_name == "platforms")
-      && (layer_name == "portals")
-      && (layer_name == "toggle_spikes")
-      && (layer_name == "trap_spikes")
-      && (layer_name == "interval_spikes")
+      || (layer_name == "fans")
+      || (layer_name == "lasers")
+      || (layer_name == "lasers_2")
+      || (layer_name == "levers")
+      || (layer_name == "platforms")
+      || (layer_name == "portals")
+      || (layer_name == "toggle_spikes")
+      || (layer_name == "trap_spikes")
+      || (layer_name == "interval_spikes")
    )
    {
       return true;
