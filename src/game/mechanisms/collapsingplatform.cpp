@@ -27,9 +27,7 @@ static constexpr auto sprite_offset_y_px = -14;
 
 CollapsingPlatform::CollapsingPlatform(
    GameNode* parent,
-   const std::shared_ptr<b2World>& world,
-   TmxObject* tmx_object,
-   const std::filesystem::path& base_path
+   const GameDeserializeData& data
 )
  : FixtureNode(parent)
 {
@@ -37,7 +35,7 @@ CollapsingPlatform::CollapsingPlatform(
    setType(ObjectTypeCollapsingPlatform);
 
    // read properties
-   if (tmx_object->_properties)
+   if (data._tmx_object->_properties)
    {
    }
 
@@ -63,14 +61,14 @@ CollapsingPlatform::CollapsingPlatform(
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    // create body
-   const auto x = tmx_object->_x_px;
-   const auto y = tmx_object->_y_px;
+   const auto x = data._tmx_object->_x_px;
+   const auto y = data._tmx_object->_y_px;
    _position_m = MPP * b2Vec2{x, y};
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    body_def.position = _position_m;
-   _body = world->CreateBody(&body_def);
+   _body = data._world->CreateBody(&body_def);
 
    // set up body fixture
    b2FixtureDef fixture_def;
@@ -81,7 +79,7 @@ CollapsingPlatform::CollapsingPlatform(
    _fixture->SetUserData(static_cast<void*>(this));
 
    // set up visualization
-   _texture = TexturePool::getInstance().get(base_path / "tilesets" / "collapsing_platform.png");
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "collapsing_platform.png");
    _sprite.setTexture(*_texture);
    _sprite.setPosition(x + sprite_offset_x_px, y + sprite_offset_y_px);
 }
