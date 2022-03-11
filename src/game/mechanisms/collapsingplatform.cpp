@@ -10,9 +10,7 @@
 
 namespace
 {
-static constexpr auto width_m  = 36 * MPP;
-static constexpr auto height_m = 36 * MPP;
-static constexpr auto bevel_m = 0 * MPP;
+static constexpr auto bevel_m = 4 * MPP;
 
 static constexpr auto columns = 12;
 static constexpr auto tiles_per_box_width = 4;
@@ -20,8 +18,8 @@ static constexpr auto tiles_per_box_height = 3;
 
 static constexpr auto animation_speed = 8.0f;
 
-static constexpr auto sprite_offset_x_px = -30;
-static constexpr auto sprite_offset_y_px = -14;
+static constexpr auto sprite_offset_x_px = 0;
+static constexpr auto sprite_offset_y_px = 0;
 }
 
 
@@ -48,6 +46,8 @@ CollapsingPlatform::CollapsingPlatform(
    //     |            |
    //   2 +------------+ 3
 
+   const auto width_m  = data._tmx_object->_width_px * MPP;
+   const auto height_m = data._tmx_object->_height_px * MPP;
 
    std::array<b2Vec2, 6> vertices {
       b2Vec2{bevel_m,             0.0f    },
@@ -82,6 +82,14 @@ CollapsingPlatform::CollapsingPlatform(
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "collapsing_platform.png");
    _sprite.setTexture(*_texture);
    _sprite.setPosition(x + sprite_offset_x_px, y + sprite_offset_y_px);
+
+   _sprite.setTextureRect({
+         0,
+         0,
+         static_cast<int32_t>(data._tmx_object->_width_px),
+         static_cast<int32_t>(data._tmx_object->_height_px)
+      }
+   );
 }
 
 
@@ -98,13 +106,13 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
       sprite_index = 0;
    }
 
-   _sprite.setTextureRect({
-         sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
-         (_collapsed ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
-         PIXELS_PER_TILE * tiles_per_box_width,
-         PIXELS_PER_TILE * tiles_per_box_height
-      }
-   );
+//   _sprite.setTextureRect({
+//         sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
+//         (_collapsed ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
+//         PIXELS_PER_TILE * tiles_per_box_width,
+//         PIXELS_PER_TILE * tiles_per_box_height
+//      }
+//   );
 
    color.draw(_sprite);
 }

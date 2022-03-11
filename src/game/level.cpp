@@ -213,6 +213,7 @@ Level::Level()
       &_mechanism_bouncers,
       &_mechanism_bubble_cubes,
       &_mechanism_checkpoints,
+      &_mechanism_collapsing_platforms,
       &_mechanism_controller_help,
       &_mechanism_conveyor_belts,
       &_mechanism_crushers,
@@ -234,28 +235,29 @@ Level::Level()
       &_mechanism_weather,
    };
 
-   _mechanisms_map["bouncers"]         = &_mechanism_bouncers;
-   _mechanisms_map["bubble_cubes"]     = &_mechanism_bubble_cubes;
-   _mechanisms_map["checkpoints"]      = &_mechanism_checkpoints;
-   _mechanisms_map["controller_help"]  = &_mechanism_controller_help;
-   _mechanisms_map["conveyorbelts"]    = &_mechanism_conveyor_belts;
-   _mechanisms_map["crushers"]         = &_mechanism_crushers;
-   _mechanisms_map["death_blocks"]     = &_mechanism_death_blocks;
-   _mechanisms_map["dialogues"]        = &_mechanism_dialogues;
-   _mechanisms_map["doors"]            = &_mechanism_doors;
-   _mechanisms_map["dust"]             = &_mechanism_dust;
-   _mechanisms_map["fans"]             = &_mechanism_fans;
-   _mechanisms_map["lasers"]           = &_mechanism_lasers;
-   _mechanisms_map["levers"]           = &_mechanism_levers;
-   _mechanisms_map["moveable_objects"] = &_mechanism_moveable_boxes;
-   _mechanisms_map["platforms"]        = &_mechanism_platforms;
-   _mechanisms_map["portals"]          = &_mechanism_portals;
-   _mechanisms_map["ropes"]            = &_mechanism_ropes;
-   _mechanisms_map["shader_quads"]     = &_mechanism_shader_layers;
-   _mechanisms_map["spike_balls"]      = &_mechanism_spike_balls;
-   _mechanisms_map["spike_blocks"]     = &_mechanism_spike_blocks;
-   _mechanisms_map["spikes"]           = &_mechanism_spikes;
-   _mechanisms_map["weather"]          = &_mechanism_weather;
+   _mechanisms_map["bouncers"]             = &_mechanism_bouncers;
+   _mechanisms_map["bubble_cubes"]         = &_mechanism_bubble_cubes;
+   _mechanisms_map["checkpoints"]          = &_mechanism_checkpoints;
+   _mechanisms_map["collapsing_platforms"] = &_mechanism_collapsing_platforms;
+   _mechanisms_map["controller_help"]      = &_mechanism_controller_help;
+   _mechanisms_map["conveyorbelts"]        = &_mechanism_conveyor_belts;
+   _mechanisms_map["crushers"]             = &_mechanism_crushers;
+   _mechanisms_map["death_blocks"]         = &_mechanism_death_blocks;
+   _mechanisms_map["dialogues"]            = &_mechanism_dialogues;
+   _mechanisms_map["doors"]                = &_mechanism_doors;
+   _mechanisms_map["dust"]                 = &_mechanism_dust;
+   _mechanisms_map["fans"]                 = &_mechanism_fans;
+   _mechanisms_map["lasers"]               = &_mechanism_lasers;
+   _mechanisms_map["levers"]               = &_mechanism_levers;
+   _mechanisms_map["moveable_objects"]     = &_mechanism_moveable_boxes;
+   _mechanisms_map["platforms"]            = &_mechanism_platforms;
+   _mechanisms_map["portals"]              = &_mechanism_portals;
+   _mechanisms_map["ropes"]                = &_mechanism_ropes;
+   _mechanisms_map["shader_quads"]         = &_mechanism_shader_layers;
+   _mechanisms_map["spike_balls"]          = &_mechanism_spike_balls;
+   _mechanisms_map["spike_blocks"]         = &_mechanism_spike_blocks;
+   _mechanisms_map["spikes"]               = &_mechanism_spikes;
+   _mechanisms_map["weather"]              = &_mechanism_weather;
 }
 
 
