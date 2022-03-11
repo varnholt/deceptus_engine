@@ -5,6 +5,7 @@
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
+#include "mechanisms/collapsingplatform.h"
 #include "mechanisms/controllerhelp.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/crusher.h"
@@ -38,28 +39,29 @@ void GameMechanismDeserializer::deserialize(
 {
    GameDeserializeData data(data_ref);
 
-   auto mechanism_bouncers         = mechanisms["bouncers"];
-   auto mechanism_bubble_cubes     = mechanisms["bubble_cubes"];
-   auto mechanism_checkpoints      = mechanisms["checkpoints"];
-   auto mechanism_controller_help  = mechanisms["controller_help"];
-   auto mechanism_conveyor_belts   = mechanisms["conveyorbelts"];
-   auto mechanism_crushers         = mechanisms["crushers"];
-   auto mechanism_death_blocks     = mechanisms["death_blocks"];
-   auto mechanism_dialogues        = mechanisms["dialogues"];
-   auto mechanism_doors            = mechanisms["doors"];
-   auto mechanism_dust             = mechanisms["dust"];
-   auto mechanism_fans             = mechanisms["fans"];
-   auto mechanism_lasers           = mechanisms["lasers"];
-   auto mechanism_levers           = mechanisms["levers"];
-   auto mechanism_moveable_objects = mechanisms["moveable_objects"];
-   auto mechanism_platforms        = mechanisms["platforms"];
-   auto mechanism_portals          = mechanisms["portals"];
-   auto mechanism_ropes            = mechanisms["ropes"];
-   auto mechanism_shader_quads     = mechanisms["shader_quads"];
-   auto mechanism_spike_balls      = mechanisms["spike_balls"];
-   auto mechanism_spike_blocks     = mechanisms["spike_blocks"];
-   auto mechanism_spikes           = mechanisms["spikes"];
-   auto mechanism_weather          = mechanisms["weather"];
+   auto mechanism_bouncers             = mechanisms["bouncers"];
+   auto mechanism_bubble_cubes         = mechanisms["bubble_cubes"];
+   auto mechanism_checkpoints          = mechanisms["checkpoints"];
+   auto mechanism_collapsing_platforms = mechanisms["collapsing_platforms"];
+   auto mechanism_controller_help      = mechanisms["controller_help"];
+   auto mechanism_conveyor_belts       = mechanisms["conveyorbelts"];
+   auto mechanism_crushers             = mechanisms["crushers"];
+   auto mechanism_death_blocks         = mechanisms["death_blocks"];
+   auto mechanism_dialogues            = mechanisms["dialogues"];
+   auto mechanism_doors                = mechanisms["doors"];
+   auto mechanism_dust                 = mechanisms["dust"];
+   auto mechanism_fans                 = mechanisms["fans"];
+   auto mechanism_lasers               = mechanisms["lasers"];
+   auto mechanism_levers               = mechanisms["levers"];
+   auto mechanism_moveable_objects     = mechanisms["moveable_objects"];
+   auto mechanism_platforms            = mechanisms["platforms"];
+   auto mechanism_portals              = mechanisms["portals"];
+   auto mechanism_ropes                = mechanisms["ropes"];
+   auto mechanism_shader_quads         = mechanisms["shader_quads"];
+   auto mechanism_spike_balls          = mechanisms["spike_balls"];
+   auto mechanism_spike_blocks         = mechanisms["spike_blocks"];
+   auto mechanism_spikes               = mechanisms["spikes"];
+   auto mechanism_weather              = mechanisms["weather"];
 
    for (auto element : tmx_parser.getElements())
    {
@@ -200,6 +202,11 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = std::make_shared<Bouncer>(parent, data);
                mechanism_bouncers->push_back(mechanism);
+            }
+            else if (object_group->_name == "collapsing_platforms")
+            {
+               auto mechanism = std::make_shared<CollapsingPlatform>(parent, data);
+               mechanism_collapsing_platforms->push_back(mechanism);
             }
             else if (object_group->_name == "controller_help")
             {
