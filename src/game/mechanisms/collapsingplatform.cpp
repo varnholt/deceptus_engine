@@ -10,16 +10,18 @@
 
 namespace
 {
-static constexpr auto bevel_m = 4 * MPP;
+constexpr auto bevel_m = 4 * MPP;
 
-static constexpr auto columns = 12;
-static constexpr auto tiles_per_box_width = 4;
-static constexpr auto tiles_per_box_height = 3;
+constexpr auto columns = 12;
+constexpr auto tiles_per_box_width = 4;
+constexpr auto tiles_per_box_height = 3;
 
-static constexpr auto animation_speed = 8.0f;
+constexpr auto animation_speed = 8.0f;
 
-static constexpr auto sprite_offset_x_px = 0;
-static constexpr auto sprite_offset_y_px = 0;
+constexpr auto sprite_offset_x_px = 0;
+constexpr auto sprite_offset_y_px = 0;
+
+constexpr auto collapse_time_s = 0.5f;
 }
 
 
@@ -95,6 +97,11 @@ CollapsingPlatform::CollapsingPlatform(
 
 void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
+   if (_collapsed)
+   {
+      return;
+   }
+
    auto sprite_index = 0;
 
    if (_collapsed)
@@ -121,11 +128,28 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 void CollapsingPlatform::update(const sf::Time& dt)
 {
    _elapsed_s += dt.asSeconds();
-   _collapse_elapsed_s += dt.asSeconds();
 
-   if (_collapsed)
+   // measure the time elapsed on the platform instead
+   if (_contact_count > 0)
    {
-      _body->SetActive(false);
+      _collapse_elapsed_s += dt.asSeconds();
+
+      if (_collapse_elapsed_s > collapse_time_s)
+      {
+         if (!_collapsed)
+         {
+            _collapsed = true;
+            _body->SetActive(false);
+         }
+      }
+   }
+   else
+   {
+      if (!_collapsed)
+      {
+         _body->SetActive(true);
+         _collapse_elapsed_s = 0.0f;
+      }
    }
 }
 
@@ -149,15 +173,6 @@ void CollapsingPlatform::endContact()
    }
 
    _contact_count--;
-
-   // measure the time elapsed on the platform instead
-
-//   if (_contact_count == 0)
-//   {
-//      _collapsed = true;
-//      _collapse_time = GlobalClock::getInstance().getElapsedTime();
-//      _pop_elapsed_s = 0.0f;
-//   }
 }
 
 
