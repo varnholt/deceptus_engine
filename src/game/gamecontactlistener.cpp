@@ -10,6 +10,7 @@
 #include "luanode.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
+#include "mechanisms/collapsingplatform.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/movingplatform.h"
 #include "onewaywall.h"
@@ -212,6 +213,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
             dynamic_cast<BubbleCube*>(fixture_node_a)->beginContact();
             break;
          }
+         case ObjectTypeCollapsingPlatform:
+         {
+            dynamic_cast<CollapsingPlatform*>(fixture_node_a)->beginContact();
+            break;
+         }
          case ObjectTypeDoor:
          case ObjectTypeConveyorBelt:
          case ObjectTypeMoveableBox:
@@ -363,6 +369,11 @@ void GameContactListener::BeginContact(b2Contact* contact)
             dynamic_cast<BubbleCube*>(fixture_node_b)->beginContact();
             break;
          }
+         case ObjectTypeCollapsingPlatform:
+         {
+            dynamic_cast<CollapsingPlatform*>(fixture_node_b)->beginContact();
+            break;
+         }
          case ObjectTypeDoor:
          case ObjectTypeConveyorBelt:
          case ObjectTypeMoveableBox:
@@ -474,6 +485,11 @@ void GameContactListener::EndContact(b2Contact* contact)
             dynamic_cast<BubbleCube*>(fixture_node_a)->endContact();
             break;
          }
+         case ObjectTypeCollapsingPlatform:
+         {
+            dynamic_cast<CollapsingPlatform*>(fixture_node_a)->endContact();
+            break;
+         }
          default:
          {
             break;
@@ -554,6 +570,11 @@ void GameContactListener::EndContact(b2Contact* contact)
          case ObjectTypeBubbleCube:
          {
             dynamic_cast<BubbleCube*>(fixture_node_b)->endContact();
+            break;
+         }
+         case ObjectTypeCollapsingPlatform:
+         {
+            dynamic_cast<CollapsingPlatform*>(fixture_node_b)->endContact();
             break;
          }
          default:
