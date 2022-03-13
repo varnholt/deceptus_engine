@@ -64,6 +64,25 @@ enum class MechanismVersion
 };
 
 
+// [50]
+// [  ]
+// [..] foreground layers in front of the player
+// [  ]
+// [21]
+//
+// [20] player
+//
+// [19]
+// [..] foreground layers behind the player
+// [16]
+//
+// [15]
+// [..] background layers
+// [03]
+//
+// [02]
+// [..] parallax layers
+// [00]
 enum class ZDepth
 {
    BackgroundMin = 0,
