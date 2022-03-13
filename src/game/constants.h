@@ -73,7 +73,7 @@ enum class ZDepth
    ForegroundMax = 50,
 
    Doors = 40,
-   Player = 16
+   Player = 20
 };
 
 
