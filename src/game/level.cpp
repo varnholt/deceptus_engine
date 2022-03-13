@@ -920,6 +920,7 @@ void Level::drawLayers(
 
       drawParallaxMaps(*_render_texture_level_background.get(), z_index);
 
+      // draw all tile maps
       for (auto& tile_map : _tile_maps)
       {
          if (tile_map->getZ() == z_index)
@@ -928,6 +929,7 @@ void Level::drawLayers(
          }
       }
 
+      // draw mechanisms
       for (const auto& mechanism_vector : _mechanisms_list)
       {
          for (const auto& mechanism : *mechanism_vector)
@@ -939,7 +941,7 @@ void Level::drawLayers(
          }
       }
 
-      // enemies
+      // draw enemies
       for (auto& enemy : _enemies)
       {
          if (enemy->_z_index == z_index)
@@ -957,6 +959,7 @@ void Level::drawLayers(
          drawPlayer(target, *_render_texture_normal.get());
       }
 
+      // draw image layers
       for (auto& layer : _image_layers)
       {
          if (layer->_z_index == z_index)
@@ -1180,7 +1183,7 @@ void Level::draw(
    _render_texture_level_background->display();
    takeScreenshot("texture_level_background", *_render_texture_level_background.get());
 
-   // draw the atmospheric parts into the level texture
+   // draw the atmospheric parts into the level texture using the atmosphere shader
    sf::Sprite background_sprite(_render_texture_level_background->getTexture());
    _atmosphere_shader->update();
    _render_texture_level->draw(background_sprite, &_atmosphere_shader->getShader());
