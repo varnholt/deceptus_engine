@@ -23,6 +23,8 @@ class GameMechanism
       virtual int32_t getZ() const;
       virtual void setZ(const int32_t& z);
 
+      virtual void serializeState(){}
+
 
    protected:
 

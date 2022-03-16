@@ -89,7 +89,7 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto dust = std::make_shared<Dust>(parent);
-   dust->setObjectName(data._tmx_object->_name);
+   dust->setObjectId(data._tmx_object->_name);
 
    std::string flowfield_texture = "data/effects/flowfield_3.png";
 

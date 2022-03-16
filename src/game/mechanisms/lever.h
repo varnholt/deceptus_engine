@@ -61,6 +61,8 @@ public:
 
    void updateReceivers();
 
+   void serializeState() override;
+
 
 private:
 

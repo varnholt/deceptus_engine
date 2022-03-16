@@ -61,6 +61,7 @@ public:
    virtual void initialize();
    void initializeTextures();
    void reset();
+   void save();
 
    void createViews();
 

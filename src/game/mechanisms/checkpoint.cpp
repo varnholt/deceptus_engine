@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
+#include "level.h"
 #include "player/player.h"
 #include "texturepool.h"
 #include "savestate.h"
@@ -45,7 +46,7 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto checkpoint = std::make_shared<Checkpoint>(parent);
-   checkpoint->setObjectName(data._tmx_object->_name);
+   checkpoint->setObjectId(data._tmx_object->_name);
 
    checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
    checkpoint->_sprite.setTexture(*checkpoint->_texture);
@@ -97,6 +98,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // whenever we reach a checkpoint, update the checkpoint index in the save state
    // and serialize the save state
    const auto cp_index = checkpoint->getIndex();
+   checkpoint->addCallback([](){Level::getCurrentLevel()->save();});
    checkpoint->addCallback([cp_index](){SaveState::getCurrent()._checkpoint = cp_index;});
    checkpoint->addCallback([](){SaveState::serializeToFile();});
 

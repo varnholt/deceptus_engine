@@ -33,7 +33,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
  : FixtureNode(parent)
 {
    setClassName(typeid(Bouncer).name());
-   setObjectName(data._tmx_object->_name);
+   setObjectId(data._tmx_object->_name);
    setZ(data._tmx_object_group->_z_index);
 
    const auto x = data._tmx_object->_x_px;

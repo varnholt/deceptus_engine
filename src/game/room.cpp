@@ -134,7 +134,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       // create new room
       auto room = std::make_shared<Room>(parent, rect);
       room->_name = key;
-      room->setObjectName(key);
+      room->setObjectId(key);
 
       // deserialize room properties
       if (data._tmx_object->_properties)

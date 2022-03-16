@@ -58,7 +58,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->_position.y = data._tmx_object->_y_px;
    instance->_size.x = data._tmx_object->_width_px;
    instance->_size.y = data._tmx_object->_height_px;
-   instance->setObjectName(data._tmx_object->_name);
+   instance->setObjectId(data._tmx_object->_name);
 
    if (data._tmx_object->_properties != nullptr)
    {
