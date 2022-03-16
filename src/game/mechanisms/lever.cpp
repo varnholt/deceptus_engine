@@ -413,3 +413,15 @@ void Lever::merge(
 }
 
 
+//-----------------------------------------------------------------------------
+void Lever::serializeState()
+{
+   if (!_serialized)
+   {
+      return;
+   }
+
+   std::cout << "serialize lever:" << std::endl;
+   std::cout << _object_id << std::endl;
+   std::cout << static_cast<int32_t>(_target_state) << std::endl;
+}

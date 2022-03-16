@@ -483,7 +483,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
          data._tmx_object->_y_px * MPP + (data._tmx_object->_height_px * 0.5f) * MPP
       );
 
-      light->setObjectName(data._tmx_object->_name);
+      light->setObjectId(data._tmx_object->_name);
    }
 
    light->_color.r = rgba[0];

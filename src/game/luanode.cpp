@@ -1383,7 +1383,7 @@ void LuaNode::deserializeEnemyDescription()
       _position_px = _start_position_px;
    }
 
-   setObjectName(_enemy_description._id);
+   setObjectId(_enemy_description._id);
 }
 
 

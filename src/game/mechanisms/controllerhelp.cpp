@@ -85,7 +85,7 @@ void ControllerHelp::update(const sf::Time& dt)
 
 void ControllerHelp::deserialize(const GameDeserializeData& data)
 {
-   setObjectName(data._tmx_object->_name);
+   setObjectId(data._tmx_object->_name);
    setZ(static_cast<int32_t>(ZDepth::Player) - 1);
 
    static const std::array<std::string, 16 * 9> key_map{

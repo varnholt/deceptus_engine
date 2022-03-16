@@ -38,7 +38,7 @@ void Weather::update(const sf::Time& dt)
 std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto weather = std::make_shared<Weather>(parent);
-   weather->setObjectName(data._tmx_object->_name);
+   weather->setObjectId(data._tmx_object->_name);
 
    weather->_rect = sf::IntRect {
       static_cast<int32_t>(data._tmx_object->_x_px),
