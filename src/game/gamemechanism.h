@@ -30,6 +30,7 @@ class GameMechanism
 
       int32_t _z_index = 0;
       bool _enabled = true;
+      bool _serialized = false;
       MechanismVersion _version = MechanismVersion::Version1;
 };
 
