@@ -58,6 +58,7 @@ public:
    );
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
+   void setup(const GameDeserializeData& data);
 
    void updateReceivers();
 

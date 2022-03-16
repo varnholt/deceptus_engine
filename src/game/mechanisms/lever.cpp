@@ -53,12 +53,10 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(GameNode* parent, const 
    auto height   = data._tmx_layer->_height_px;
    auto first_id = data._tmx_tileset->_first_gid;
 
-   // populate the vertex array, with one quad per tile
    for (auto j = 0; j < static_cast<int32_t>(height); j++)
    {
       for (auto i = 0; i < static_cast<int32_t>(width); i++)
       {
-         // get the current tile number
          auto tile_number = tiles[i + j * width];
 
          if (tile_number != 0)
@@ -100,6 +98,36 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(GameNode* parent, const 
    }
 
    return levers;
+}
+
+
+//-----------------------------------------------------------------------------
+void Lever::setup(const GameDeserializeData& data)
+{
+   if (data._tmx_layer->_properties)
+   {
+      auto z_it = data._tmx_layer->_properties->_map.find("z");
+      if (z_it != data._tmx_layer->_properties->_map.end())
+      {
+         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
+   }
+
+   const auto x = data._tmx_object->_x_px;
+   const auto y = data._tmx_object->_y_px;
+
+   _rect.left = static_cast<int32_t>(x);
+   _rect.top = static_cast<int32_t>(y);
+   _rect.width = PIXELS_PER_TILE * 3;
+   _rect.height = PIXELS_PER_TILE * 2;
+
+   _sprite.setPosition(x, y);
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
+   _sprite.setTexture(*_texture);
+
+   updateSprite();
+
 }
 
 
