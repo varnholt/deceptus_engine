@@ -104,10 +104,10 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(GameNode* parent, const 
 //-----------------------------------------------------------------------------
 void Lever::setup(const GameDeserializeData& data)
 {
-   if (data._tmx_layer->_properties)
+   if (data._tmx_object->_properties)
    {
-      auto z_it = data._tmx_layer->_properties->_map.find("z");
-      if (z_it != data._tmx_layer->_properties->_map.end())
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
       {
          auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
@@ -127,7 +127,6 @@ void Lever::setup(const GameDeserializeData& data)
    _sprite.setTexture(*_texture);
 
    updateSprite();
-
 }
 
 
@@ -140,7 +139,7 @@ void Lever::updateSprite()
       left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE),
       left ? (3 * PIXELS_PER_TILE) : 0,
       PIXELS_PER_TILE * 3,
-      PIXELS_PER_TILE * 2
+      PIXELS_PER_TILE * 3
    });
 }
 

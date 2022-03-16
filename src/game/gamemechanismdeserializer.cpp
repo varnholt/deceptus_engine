@@ -98,7 +98,8 @@ void GameMechanismDeserializer::deserialize(
          }
          else if (layer->_name == "levers")
          {
-            *mechanism_levers = Lever::load(parent, data);
+            auto mechanism = Lever::load(parent, data);
+            mechanism_levers->insert(mechanism_levers->end(), mechanism.begin(), mechanism.end());
          }
          else if (layer->_name == "platforms")
          {
@@ -143,6 +144,12 @@ void GameMechanismDeserializer::deserialize(
             else if (object_group->_name == "lasers" || object_group->_name == "lasers_2")
             {
                Laser::addObject(tmx_object);
+            }
+            else if (object_group->_name == "levers" )
+            {
+               auto mechanism = std::make_shared<Lever>(parent);
+               mechanism->setup(data);
+               mechanism_levers->push_back(mechanism);
             }
             else if (object_group->_name == "fans")
             {
