@@ -27,7 +27,7 @@ Dialogue::Dialogue(GameNode* parent)
 std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto dialogue = std::make_shared<Dialogue>(parent);
-   dialogue->setObjectName(data._tmx_object->_name);
+   dialogue->setObjectId(data._tmx_object->_name);
 
    auto properties = data._tmx_object->_properties;
 

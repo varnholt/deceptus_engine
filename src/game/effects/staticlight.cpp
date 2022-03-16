@@ -67,7 +67,7 @@ void StaticLight::update(const sf::Time& time)
 std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto light = std::make_shared<StaticLight::LightInstance>(parent);
-   light->setObjectName(data._tmx_object->_name);
+   light->setObjectId(data._tmx_object->_name);
 
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";

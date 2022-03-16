@@ -41,7 +41,7 @@ SpikeBlock::SpikeBlock(GameNode* parent)
 
 void SpikeBlock::setup(const GameDeserializeData& data)
 {
-   setObjectName(data._tmx_object->_name);
+   setObjectId(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_spikeblock.png");
    _sprite.setTexture(*_texture_map);

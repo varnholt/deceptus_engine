@@ -520,7 +520,7 @@ BoomEffect& Level::getBoomEffect()
 bool Level::load()
 {
    const auto level_json_path = std::filesystem::path(_description->_filename);
-   setObjectName(_description->_filename);
+   setObjectId(_description->_filename);
 
    if (!std::filesystem::exists(level_json_path))
    {
@@ -588,6 +588,20 @@ void Level::loadCheckpoint()
    else
    {
       Log::Error() << "level doesn't have a start check point set up";
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void Level::save()
+{
+   // the code below is here for prototyping; it should be moved into gamestate/checkpoint later
+   for (auto& mechanisms : _mechanisms_list)
+   {
+      for (auto& mechanism : *mechanisms)
+      {
+         mechanism->serializeState();
+      }
    }
 }
 
@@ -1333,7 +1347,7 @@ void Level::addChainToWorld(
    auto body = _world->CreateBody(&body_def);
    auto fixture = body->CreateFixture(&fixture_def);
    auto object_data = new FixtureNode(this);
-   object_data->setObjectName(std::format("world_chain_{}", _world_chains.size() - 1));
+   object_data->setObjectId(std::format("world_chain_{}", _world_chains.size() - 1));
    object_data->setType(object_type);
    fixture->SetUserData(static_cast<void*>(object_data));
 }

@@ -103,7 +103,7 @@ void SmokeEffect::update(const sf::Time& time)
 std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto smoke_effect = std::make_shared<SmokeEffect>(parent);
-   smoke_effect->setObjectName(data._tmx_object->_name);
+   smoke_effect->setObjectId(data._tmx_object->_name);
 
    auto particle_count = 50;
    auto sprite_scale = 1.0f;

@@ -54,7 +54,7 @@ void GameNode::dump(int32_t depth)
     //    std::cerr << "empty object name" << std::endl;
     // }
 
-    std::cout << " " << this << " " << _class_name << ", object: '" << _object_name << "' [" << _children.size() << "]" << std::endl;
+    std::cout << " " << this << " " << _class_name << ", object: '" << _object_id << "' [" << _children.size() << "]" << std::endl;
 
     for (auto& c : _children)
     {
@@ -69,14 +69,14 @@ void GameNode::setClassName(const std::string& name)
 }
 
 
-const std::string& GameNode::getObjectName() const
+const std::string& GameNode::getObjectId() const
 {
-   return _object_name;
+   return _object_id;
 }
 
 
-void GameNode::setObjectName(const std::string& newObject_name)
+void GameNode::setObjectId(const std::string& newObject_name)
 {
-   _object_name = newObject_name;
+   _object_id = newObject_name;
 }
 

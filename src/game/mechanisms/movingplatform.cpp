@@ -180,7 +180,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
          {
             // find matching platform
             auto moving_platform = std::make_shared<MovingPlatform>(parent);
-            moving_platform->setObjectName(data._tmx_layer->_name);
+            moving_platform->setObjectId(data._tmx_layer->_name);
 
             const auto texture_path = data._base_path / data._tmx_tileset->_image->_source;
             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
