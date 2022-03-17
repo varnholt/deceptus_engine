@@ -5,6 +5,7 @@
 
 #include "json/json.hpp"
 
+#include "levelstate.h"
 #include "player/playerinfo.h"
 
 
@@ -20,6 +21,7 @@ struct SaveState
    bool isEmpty() const;
    void invalidate();
 
+   LevelState _level_state;
    PlayerInfo _player_info;
 
    uint32_t _level_index = 0;

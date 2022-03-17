@@ -184,6 +184,7 @@ SOURCES += \
    src/game/levelmap.cpp \
    src/game/levels.cpp \
    src/game/levelscript.cpp \
+   src/game/levelstate.cpp \
    src/game/luainterface.cpp \
    src/game/luanode.cpp \
    src/game/mechanisms/bouncer.cpp \
@@ -363,6 +364,7 @@ HEADERS += \
    src/game/levelmap.h \
    src/game/levels.h \
    src/game/levelscript.h \
+   src/game/levelstate.h \
    src/game/luaconstants.h \
    src/game/luainterface.h \
    src/game/luanode.h \
