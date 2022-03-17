@@ -112,6 +112,18 @@ void Lever::setup(const GameDeserializeData& data)
          auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
       }
+
+      auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
+      if (enabled_it != data._tmx_object->_properties->_map.end())
+      {
+         _enabled = enabled_it->second->_value_bool.value();
+      }
+
+      auto serialized_it = data._tmx_object->_properties->_map.find("serialized");
+      if (serialized_it != data._tmx_object->_properties->_map.end())
+      {
+         _serialized = serialized_it->second->_value_bool.value();
+      }
    }
 
    const auto x = data._tmx_object->_x_px;
@@ -318,13 +330,14 @@ void Lever::merge(
       search_rect.width = static_cast<int32_t>(rect->_width_px);
       search_rect.height = static_cast<int32_t>(rect->_height_px);
 
-      bool enabled = true;
+      auto enabled = true;
       if (rect->_properties)
       {
-         auto enabledIt = rect->_properties->_map.find("enabled");
-         if (enabledIt != rect->_properties->_map.end())
+         // TODO: this has to move to the tmx object!
+         auto enabled_it = rect->_properties->_map.find("enabled");
+         if (enabled_it != rect->_properties->_map.end())
          {
-            enabled = enabledIt->second->_value_bool.value();
+            enabled = enabled_it->second->_value_bool.value();
          }
       }
 
@@ -444,6 +457,11 @@ void Lever::merge(
 void Lever::serializeState()
 {
    if (!_serialized)
+   {
+      return;
+   }
+
+   if (_object_id.empty())
    {
       return;
    }

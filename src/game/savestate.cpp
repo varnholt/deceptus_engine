@@ -79,11 +79,11 @@ void SaveState::deserialize(const std::string& data)
       return;
    }
 
-   json saveStates = json::parse(data);
+   json save_states = json::parse(data);
 
    try
    {
-      __save_states = saveStates.get<std::array<SaveState, 3>>();
+      __save_states = save_states.get<std::array<SaveState, 3>>();
    }
    catch (const std::exception& e)
    {
