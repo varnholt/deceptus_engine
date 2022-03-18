@@ -52,5 +52,5 @@ Levels& Levels::getInstance()
 
 void from_json(const json &j, LevelItem &item)
 {
-   item.mLevelName = j.at("levelname").get<std::string>();
+   item._level_name = j.at("levelname").get<std::string>();
 }

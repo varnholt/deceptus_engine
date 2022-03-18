@@ -138,6 +138,8 @@ void Lever::setup(const GameDeserializeData& data)
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
    _sprite.setTexture(*_texture);
 
+   setObjectId(data._tmx_object->_name);
+
    updateSprite();
 }
 
@@ -473,8 +475,5 @@ void Lever::serializeState(nlohmann::json&j)
    j[object_name] = {
       {"state", static_cast<int32_t>(_target_state)}
    };
-
-   std::cout << "serialize lever:" << std::endl;
-   std::cout << _object_id << std::endl;
-   std::cout << static_cast<int32_t>(_target_state) << std::endl;
 }
+

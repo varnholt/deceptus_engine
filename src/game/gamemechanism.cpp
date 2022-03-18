@@ -13,6 +13,12 @@ void GameMechanism::setZ(const int32_t& z)
 }
 
 
+bool GameMechanism::isSerialized() const
+{
+   return _serialized;
+}
+
+
 void GameMechanism::draw(sf::RenderTarget& /*target*/, sf::RenderTarget& /*normal*/)
 {
 }

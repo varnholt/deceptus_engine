@@ -255,7 +255,7 @@ void Game::loadLevel()
 
          // load it
          _level = std::make_shared<Level>();
-         _level->setDescriptionFilename(level_item.mLevelName);
+         _level->setDescriptionFilename(level_item._level_name);
          _level->initialize();
          _level->initializeTextures();
 
