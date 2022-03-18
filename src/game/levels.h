@@ -8,7 +8,7 @@
 
 struct LevelItem
 {
-  std::string mLevelName;
+  std::string _level_name;
 };
 
 
