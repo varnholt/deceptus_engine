@@ -64,6 +64,7 @@ public:
    void updateReceivers();
 
    void serializeState(nlohmann::json& j) override;
+   void deserializeState(nlohmann::json& j) override;
 
 
 private:

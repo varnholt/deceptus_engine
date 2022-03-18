@@ -565,7 +565,7 @@ void Level::initialize()
    _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE  + PLAYER_ACTUAL_WIDTH / 2);
    _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 
-   loadCheckpoint();
+   loadState();
    spawnEnemies();
 
    dump();
@@ -573,9 +573,10 @@ void Level::initialize()
 
 
 //-----------------------------------------------------------------------------
-void Level::loadCheckpoint()
+void Level::loadState()
 {
-   auto checkpoint_index = SaveState::getCurrent()._checkpoint;
+   const auto& save_state = SaveState::getCurrent();
+   auto checkpoint_index = save_state._checkpoint;
    auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, _mechanism_checkpoints);
 
    if (checkpoint)
@@ -589,11 +590,24 @@ void Level::loadCheckpoint()
    {
       Log::Error() << "level doesn't have a start check point set up";
    }
+
+   if (!save_state._level_state.is_null())
+   {
+      // deserialize mechanisms
+      //
+      //      "levelstate": {
+      //          "data/catacombs/catacombs.tmx": {
+      //              "lever_lever_spike_01": {
+      //                  "state": -1
+      //              }
+      //          }
+      //      },
+   }
 }
 
 
 //-----------------------------------------------------------------------------
-void Level::save()
+void Level::saveState()
 {
    auto& j = SaveState::getCurrent()._level_state;
 

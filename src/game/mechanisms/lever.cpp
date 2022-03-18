@@ -477,3 +477,11 @@ void Lever::serializeState(nlohmann::json&j)
    };
 }
 
+
+//-----------------------------------------------------------------------------
+void Lever::deserializeState(nlohmann::json& j)
+{
+   _target_state = static_cast<State>(j.at("state").get<int32_t>());
+   _enabled = (_target_state == State::Right);
+}
+

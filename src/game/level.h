@@ -61,7 +61,8 @@ public:
    virtual void initialize();
    void initializeTextures();
    void reset();
-   void save();
+
+   void saveState();
 
    void createViews();
 
@@ -140,7 +141,7 @@ protected:
 
    bool load();
    void loadTmx();
-   void loadCheckpoint();
+   void loadState();
 
    void deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMap>& tile_map);
 
