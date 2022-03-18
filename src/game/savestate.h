@@ -5,7 +5,6 @@
 
 #include "json/json.hpp"
 
-#include "levelstate.h"
 #include "player/playerinfo.h"
 
 
@@ -21,8 +20,8 @@ struct SaveState
    bool isEmpty() const;
    void invalidate();
 
-   LevelState _level_state;
    PlayerInfo _player_info;
+   nlohmann::json _level_state;
 
    uint32_t _level_index = 0;
    uint32_t _checkpoint = 0;
@@ -33,6 +32,7 @@ struct SaveState
 
    static SaveState& getSaveState(uint32_t);
    static std::array<SaveState, 3>& getSaveStates();
+
    static bool allEmpty();
    static PlayerInfo& getPlayerInfo();
 

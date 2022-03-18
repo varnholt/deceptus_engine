@@ -595,16 +595,20 @@ void Level::loadCheckpoint()
 //-----------------------------------------------------------------------------
 void Level::save()
 {
-   nlohmann::json j;
+   auto& j = SaveState::getCurrent()._level_state;
+
+   nlohmann::json serialized_mechanisms;
 
    // the code below is here for prototyping; it should be moved into gamestate/checkpoint later
    for (auto& mechanisms : _mechanisms_list)
    {
       for (auto& mechanism : *mechanisms)
       {
-         mechanism->serializeState(j);
+         mechanism->serializeState(serialized_mechanisms);
       }
    }
+
+   j[_description->_filename] = serialized_mechanisms;
 }
 
 
