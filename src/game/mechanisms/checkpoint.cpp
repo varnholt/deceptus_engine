@@ -98,7 +98,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // whenever we reach a checkpoint, update the checkpoint index in the save state
    // and serialize the save state
    const auto cp_index = checkpoint->getIndex();
-   checkpoint->addCallback([](){Level::getCurrentLevel()->save();});
+   checkpoint->addCallback([](){Level::getCurrentLevel()->saveState();});
    checkpoint->addCallback([cp_index](){SaveState::getCurrent()._checkpoint = cp_index;});
    checkpoint->addCallback([](){SaveState::serializeToFile();});
 
