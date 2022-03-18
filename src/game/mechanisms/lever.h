@@ -11,6 +11,7 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
+
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
@@ -62,7 +63,7 @@ public:
 
    void updateReceivers();
 
-   void serializeState() override;
+   void serializeState(nlohmann::json& j) override;
 
 
 private:
