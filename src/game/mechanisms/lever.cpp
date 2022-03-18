@@ -330,17 +330,6 @@ void Lever::merge(
       search_rect.width = static_cast<int32_t>(rect->_width_px);
       search_rect.height = static_cast<int32_t>(rect->_height_px);
 
-      auto enabled = true;
-      if (rect->_properties)
-      {
-         // TODO: this has to move to the tmx object!
-         auto enabled_it = rect->_properties->_map.find("enabled");
-         if (enabled_it != rect->_properties->_map.end())
-         {
-            enabled = enabled_it->second->_value_bool.value();
-         }
-      }
-
       // Log::Info()
       //    << "x: " << searchRect.left << " "
       //    << "y: " << searchRect.top << " "
@@ -440,7 +429,20 @@ void Lever::merge(
                }
             }
 
-            lever->setEnabled(enabled);
+            // the rect can be configured to enable a lever, too
+            // this approach could be deprecated at a later point in time because
+            // the standard way should be to configure everything via the lever
+            // tmxobject properties
+            if (rect->_properties)
+            {
+               auto enabled_it = rect->_properties->_map.find("enabled");
+               if (enabled_it != rect->_properties->_map.end())
+               {
+                  const auto enabled = enabled_it->second->_value_bool.value();
+                  lever->setEnabled(enabled);
+               }
+            }
+
             lever->setCallbacks(callbacks);
             lever->updateReceivers();
 
@@ -454,7 +456,7 @@ void Lever::merge(
 
 
 //-----------------------------------------------------------------------------
-void Lever::serializeState()
+void Lever::serializeState(nlohmann::json&j)
 {
    if (!_serialized)
    {
@@ -465,6 +467,12 @@ void Lever::serializeState()
    {
       return;
    }
+
+   const auto object_name = std::format("lever_{}", _object_id);
+
+   j[object_name] = {
+      {"state", static_cast<int32_t>(_target_state)}
+   };
 
    std::cout << "serialize lever:" << std::endl;
    std::cout << _object_id << std::endl;

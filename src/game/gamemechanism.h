@@ -2,6 +2,7 @@
 
 #include "constants.h"
 
+#include "json/json.hpp"
 #include "SFML/Graphics.hpp"
 
 #include <cstdint>
@@ -23,7 +24,7 @@ class GameMechanism
       virtual int32_t getZ() const;
       virtual void setZ(const int32_t& z);
 
-      virtual void serializeState(){}
+      virtual void serializeState(nlohmann::json&){}
 
 
    protected:
