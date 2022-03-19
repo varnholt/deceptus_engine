@@ -25,7 +25,7 @@ class GameMechanism
       virtual void setZ(const int32_t& z);
 
       virtual void serializeState(nlohmann::json&){}
-      virtual void deserializeState(nlohmann::json&){}
+      virtual void deserializeState(const nlohmann::json&){}
       virtual bool isSerialized() const;
 
 

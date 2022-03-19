@@ -467,21 +467,21 @@ void Lever::serializeState(nlohmann::json&j)
 
    if (_object_id.empty())
    {
+      Log::Warning() << "a lever has been configured to be serialized but it doesn't have any id";
       return;
    }
 
-   const auto object_name = std::format("lever_{}", _object_id);
-
-   j[object_name] = {
+   j[_object_id] = {
       {"state", static_cast<int32_t>(_target_state)}
    };
 }
 
 
 //-----------------------------------------------------------------------------
-void Lever::deserializeState(nlohmann::json& j)
+void Lever::deserializeState(const nlohmann::json& j)
 {
    _target_state = static_cast<State>(j.at("state").get<int32_t>());
    _enabled = (_target_state == State::Right);
+   updateReceivers();
 }
 
