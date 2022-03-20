@@ -170,10 +170,16 @@ void Bow::setLauncherBody(b2Body* launcher_body)
 
 void Bow::updateRotation(Arrow* arrow)
 {
+   static constexpr auto minimum_velocity = 0.1f;
+
    auto arrow_body = arrow->getBody();
    auto arrow_velocity = arrow_body->GetLinearVelocity();
-   arrow_velocity.Normalize();
-   arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
+
+   if (arrow_velocity.Length() > minimum_velocity)
+   {
+      arrow_velocity.Normalize();
+      arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
+   }
 }
 
 
