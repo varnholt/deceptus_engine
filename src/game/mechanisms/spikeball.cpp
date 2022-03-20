@@ -171,7 +171,13 @@ void SpikeBall::setup(const GameDeserializeData& data)
 
    _anchor_body = data._world->CreateBody(&_anchor_def);
    _anchor_shape.Set(b2Vec2(pos.x - 0.1f, pos.y), b2Vec2(pos.x + 0.1f, pos.y));
-   _anchor_body->CreateFixture(&_anchor_shape, 0.0f);
+
+   b2FixtureDef fd;
+   fd.shape = &_anchor_shape;
+   fd.filter.groupIndex = 0;
+   fd.filter.maskBits = CategoryBoundary;
+   fd.filter.categoryBits = CategoryEnemyWalkThrough;
+   _anchor_body->CreateFixture(&fd);
 
    _joint_def.collideConnected = false;
 
