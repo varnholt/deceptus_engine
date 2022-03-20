@@ -3,6 +3,8 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 
 #include <iostream>
@@ -68,10 +70,22 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setup(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
+
    _size.x = data._tmx_object->_width_px;
    _size.y = data._tmx_object->_height_px;
 
    _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px - 24);
+
+   if (data._tmx_object->_properties)
+   {
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
+      {
+         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
+   }
 
    switch (static_cast<int32_t>(_size.x))
    {

@@ -13,6 +13,7 @@ struct TmxObject;
 class MoveableBox : public GameMechanism, public GameNode
 {
    public:
+
       MoveableBox(GameNode* node);
 
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
