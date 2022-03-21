@@ -202,6 +202,8 @@ function writeProperty(key, value)
       end
 
       updateAlignment(alignment)
+   elseif (key == "time_offset_s") then
+      _elapsed = _elapsed + value
    end
 end
 

@@ -317,7 +317,7 @@ int32_t setDamage(lua_State* state)
  *    param 1: z layer
  * @return exit code
  */
-int32_t setZ(lua_State* state)
+int32_t setZIndex(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc != 1)
@@ -1427,7 +1427,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);
    lua_register(_lua_state, "setSpriteColor", ::setSpriteColor);
    lua_register(_lua_state, "setTransform", ::setTransform);
-   lua_register(_lua_state, "setZ", ::setZ);
+   lua_register(_lua_state, "setZ", ::setZIndex);
    lua_register(_lua_state, "timer", ::timer);
    lua_register(_lua_state, "updateKeysPressed", ::updateKeysPressed);
    lua_register(_lua_state, "updateProjectileAnimation", ::updateProjectileAnimation);
