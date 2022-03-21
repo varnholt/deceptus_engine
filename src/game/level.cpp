@@ -744,6 +744,13 @@ void Level::spawnEnemies()
             json_description._path = it.second._pixel_path;
          }
 
+         // z index
+         const auto& z_index_property = it.second.findProperty("z");
+         if (z_index_property.has_value())
+         {
+            lua_node->_z_index = std::stoi(z_index_property.value()._value);
+         }
+
          // merge properties from tmx with those loaded from json
          for (auto& property : it.second._properties)
          {

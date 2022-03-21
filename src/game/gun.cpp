@@ -252,10 +252,10 @@ void Gun::setProjectileAnimation(const AnimationFrameData& frame_data)
 void Gun::drawProjectileHitAnimations(sf::RenderTarget& target)
 {
    // draw projectile hits
-   auto hits = ProjectileHitAnimation::getHitAnimations();
-   for (auto it = hits.begin(); it != hits.end(); ++it)
+   const auto& hit_animations = ProjectileHitAnimation::getHitAnimations();
+   for (auto hit_animation : hit_animations)
    {
-      target.draw(*(*it));
+      target.draw(*hit_animation);
    }
 }
 
