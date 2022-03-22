@@ -266,11 +266,13 @@ Levers! One of the most important mechanisms. In short, they do what levers do: 
 - Spikes
 - Spike Blocks
 
-While you draw your levers just into a tile layer called `levers`, a connection between another mechanism and the lever is created by adding an object group `switchable_objects`; in there you draw a rectangle that covers both the object(s) that should be switched on and off as well as the lever.
+While you draw your lever objects as 3x2 tile rectangles into an object group called `levers`, a connection between another mechanism and the lever is created by adding an object group `switchable_objects`; in there you draw a rectangle that covers both the object(s) that should be switched on and off as well as the lever.
 
 ![](images/mechanism_levers.png)
 
 In the screenshot above the fans will go off once the lever is activated.
+
+The properties below apply for the object inside the `levers` object group.
 
 |Custom Property|Type|Description|
 |-|-|-|
@@ -567,6 +569,15 @@ Below you will find a description of all enemies including a table of their prop
 
 ## Enemy Design and Properties
 
+<br>
+
+### Generic properties
+|Property|Type|Description|
+|-|-|-|
+|z|int|Layer z index where the enemy is located in. This includes projectiles fired by the enemy.|
+
+<br>
+
 ### Arrow Trap
 
 ![](images/enemy_arrowtrap.png)
@@ -577,6 +588,7 @@ Arrow Traps shoot arrows in a particular direction.
 |-|-|-|
 |script|string|`arrowtrap.lua`|
 |alignment|string|Arrow direction: '`up`', '`down`', '`left`', '`right`'|
+|time_offset_s|float|An offset for the time when the arrows are fired, given in seconds|
 
 <br>
 
