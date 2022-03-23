@@ -28,6 +28,7 @@ namespace
 constexpr auto sprites_per_row = 11;
 constexpr auto row_center = 6;
 constexpr auto left_offset = (sprites_per_row - 1) * 3 * PIXELS_PER_TILE;
+constexpr auto idle_animation_speed = 10.0f;
 }
 
 
@@ -147,14 +148,26 @@ void Lever::setup(const GameDeserializeData& data)
 //-----------------------------------------------------------------------------
 void Lever::updateSprite()
 {
-   const auto left = _dir == -1;
+   if (_reached && (_target_state == State::Right))
+   {
+      _sprite.setTextureRect({
+         (static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3,
+         PIXELS_PER_TILE * 3 * 2,
+         PIXELS_PER_TILE * 3,
+         PIXELS_PER_TILE * 3
+      });
+   }
+   else
+   {
+      const auto left = _dir == -1;
 
-   _sprite.setTextureRect({
-      left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE),
-      left ? (3 * PIXELS_PER_TILE) : 0,
-      PIXELS_PER_TILE * 3,
-      PIXELS_PER_TILE * 3
-   });
+      _sprite.setTextureRect({
+         left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE),
+         left ? (3 * PIXELS_PER_TILE) : 0,
+         PIXELS_PER_TILE * 3,
+         PIXELS_PER_TILE * 3
+      });
+   }
 }
 
 
@@ -174,37 +187,69 @@ Lever::Lever(GameNode* parent)
 
 
 //-----------------------------------------------------------------------------
-void Lever::update(const sf::Time& /*dt*/)
+void Lever::updateDirection()
 {
-   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
-   _player_at_lever = _rect.intersects(player_rect);
-
-   bool reached = false;
-
    if (_target_state == State::Left)
    {
       _dir = -1;
-      reached = (_offset == 0);
    }
    else if (_target_state == State::Right)
    {
       _dir = 1;
-      reached = (_offset == sprites_per_row - 1);
    }
    else if (_target_state == State::Middle)
    {
       _dir = (_state_previous == State::Left) ? 1 : -1;
-      reached = (_offset == row_center);
    };
+}
 
-   if (reached)
+
+//-----------------------------------------------------------------------------
+void Lever::updateTargetPositionReached()
+{
+   if (_target_state == State::Left)
    {
-      return;
+      _reached = (_offset == 0);
+   }
+   else if (_target_state == State::Right)
+   {
+      _reached = (_offset == sprites_per_row - 1);
+   }
+   else if (_target_state == State::Middle)
+   {
+      _reached = (_offset == row_center);
+   };
+}
+
+
+//-----------------------------------------------------------------------------
+void Lever::update(const sf::Time& dt)
+{
+   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   _player_at_lever = _rect.intersects(player_rect);
+
+   updateTargetPositionReached();
+   updateDirection();
+
+   if (!_reached)
+   {
+      _offset += _dir;
+   }
+   else
+   {
+      if (_reached_previous)
+      {
+         _idle_time_s += dt.asSeconds();
+      }
+      else
+      {
+         _idle_time_s = 0.0f;
+      }
    }
 
-   _offset += _dir;
-
    updateSprite();
+
+   _reached_previous = _reached;
 }
 
 
