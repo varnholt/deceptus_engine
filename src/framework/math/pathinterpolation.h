@@ -3,6 +3,7 @@
 #include <vector>
 #include <Box2D/Box2D.h>
 
+template <typename T>
 class PathInterpolation
 {
 
@@ -15,30 +16,215 @@ public:
 
    struct Key
    {
-      b2Vec2 _pos;
+      T _pos;
       float _time_value = 0.0f;
    };
 
    PathInterpolation() = default;
-   void addKey(const b2Vec2 &pos, float time_value);
 
-   b2Vec2 computeVelocity(const b2Vec2 &current, float time_value);
-   b2Vec2 computePosition(float time_value);
 
-   float updateZeroOneZeroOne(float delta);
+   void addKey(const T &pos, float time_value)
+   {
+      Key key;
+      key._pos = pos;
+      key._time_value = time_value;
 
-   bool update(const b2Vec2 &currentPos);
-   const b2Vec2 getVelocity();
+      _track.push_back(key);
+   }
 
-   const std::vector<Key>& getTrack() const;
+   T computeVelocity(const T& current, float time_value)
+   {
+      // clamp time
+      if (time_value > 1.0f)
+      {
+         time_value = 1.0f;
+      }
+      else if (time_value < 0.0f)
+      {
+         time_value = 0.0f;
+      }
+
+      T velocity;
+
+      switch (_mode)
+      {
+         case Mode::Linear:
+         {
+            for (auto index_current = 0u; index_current < _track.size(); index_current++)
+            {
+               size_t index_next = index_current + 1;
+               if (index_next == _track.size())
+               {
+                  index_next = _track.size() - 1;
+               }
+
+               const auto& key_a = _track.at(index_current);
+               const auto& key_b = _track.at(index_next);
+
+               if (time_value >= key_a._time_value && time_value < key_b._time_value)
+               {
+                  auto a = 1.0f - (time_value - key_a._time_value);
+                  auto b = 1.0f - (key_b._time_value - time_value);
+
+                  velocity = (a * key_a._pos + b * key_b._pos) - current;
+                  // printf("a: %f, b: %f, current: %f, %f, velocity: %f, %f\n", a, b, current.x, current.y, velocity.x, velocity.y);
+                  break;
+               }
+            }
+            break;
+         }
+      }
+
+      return velocity;
+   }
+
+   T computePosition(float time_value)
+   {
+      // clamp time
+      if (time_value > 1.0f)
+      {
+         time_value = 1.0f;
+      }
+      else if (time_value < 0.0f)
+      {
+         time_value = 0.0f;
+      }
+
+      T position;
+
+      switch (_mode)
+      {
+         case Mode::Linear:
+         {
+            for (auto index_current = 0u; index_current < _track.size(); index_current++)
+            {
+               size_t index_next = index_current + 1;
+               if (index_next == _track.size())
+               {
+                  index_next = _track.size() - 1;
+               }
+
+               const auto& key_a = _track.at(index_current);
+               const auto& key_b = _track.at(index_next);
+
+               if (time_value >= key_a._time_value && time_value < key_b._time_value)
+               {
+                  auto a = 1.0f - (time_value - key_a._time_value);
+                  auto b = 1.0f - (key_b._time_value - time_value);
+
+                  position = (a * key_a._pos + b * key_b._pos);
+                  break;
+               }
+            }
+
+            break;
+         }
+      }
+
+      return position;
+   }
+
+   float updateZeroOneZeroOne(float delta)
+   {
+      if (_time >= 1.0f)
+      {
+         _time = 1.0f;
+         _up = false;
+      }
+      else if (_time <= 0.0f)
+      {
+         _time = 0.0f;
+         _up = true;
+      }
+
+      if (_up)
+      {
+         _time += delta;
+      }
+      else
+      {
+         _time -= delta;
+      }
+
+      return _time;
+   }
+
+
+   bool update(const T& current_pos)
+   {
+      if (_track.empty())
+      {
+          return false;
+      }
+
+      auto reached = false;
+
+      // just check whether the speed needs to be updated (i.e. if one of the keys has been reached)
+      if (checkKeyReached(current_pos) || !_initialized)
+      {
+         _initialized = true;
+         _current_key_index = nextKeyIndex();
+         computeVelocity();
+         reached = true;
+      }
+
+      return reached;
+   }
+
+
+   const T getVelocity()
+   {
+      return _velocity;
+   }
+
+
+   const std::vector<PathInterpolation::Key>& getTrack() const
+   {
+      return _track;
+   }
+
 
 
 private:
 
-   void computeVelocity();
+   void computeVelocity()
+   {
+      const T& a = _track[_current_key_index]._pos;
+      const T& b = _track[nextKeyIndex()]._pos;
 
-   size_t nextKeyIndex();
-   bool checkKeyReached(const b2Vec2& currentPos);
+      _velocity = (a - b);
+      _velocity.Normalize();
+   }
+
+   size_t nextKeyIndex()
+   {
+      auto next_index = _current_key_index + 1;
+      if (next_index == _track.size())
+      {
+        next_index = 0;
+      }
+
+      return next_index;
+   }
+
+
+
+   bool checkKeyReached(const T& current_pos)
+   {
+     if (_track.empty())
+     {
+        return false;
+     }
+
+     auto reached = false;
+
+     if ((current_pos - _track[_current_key_index]._pos).LengthSquared() < 0.1f)
+     {
+        reached = true;
+     }
+
+     return reached;
+   }
 
    Mode _mode = Mode::Linear;
    std::vector<Key> _track;
@@ -46,7 +232,7 @@ private:
    bool _up = true;
    bool _initialized = false;
 
-   b2Vec2 _velocity;
+   T _velocity;
    size_t _current_key_index = 0;
 };
 

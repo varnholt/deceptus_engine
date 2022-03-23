@@ -89,7 +89,7 @@ class DeathBlock : public GameMechanism, public GameNode
 
       b2Body* _body = nullptr;
       std::vector<b2Vec2> _path;
-      PathInterpolation _interpolation;
+      PathInterpolation<b2Vec2> _interpolation;
       float _lever_lag = 1.0f; // maybe make them switchable as well?
 
       std::shared_ptr<sf::Texture> _texture;
