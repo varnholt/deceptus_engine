@@ -70,6 +70,8 @@ public:
 private:
 
    void updateSprite();
+   void updateDirection();
+   void updateTargetPositionReached();
 
    Type _type = Type::TwoState;
 
@@ -82,6 +84,9 @@ private:
    sf::Sprite _sprite;
    int32_t _offset = 0;
    int32_t _dir = 0;
+   bool _reached = false;
+   bool _reached_previous = false;
+   float _idle_time_s = 0.0f;
 
    std::shared_ptr<sf::Texture> _texture;
 
