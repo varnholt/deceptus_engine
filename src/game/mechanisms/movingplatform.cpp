@@ -78,13 +78,6 @@ const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 
 
 //-----------------------------------------------------------------------------
-const PathInterpolation& MovingPlatform::getInterpolation() const
-{
-   return _interpolation;
-}
-
-
-//-----------------------------------------------------------------------------
 b2Body* MovingPlatform::getBody()
 {
    return _body;

@@ -38,7 +38,6 @@ public:
    b2Body* getBody();
    void setEnabled(bool enabled) override;
 
-   const PathInterpolation& getInterpolation() const;
    const std::vector<sf::Vector2f>& getPixelPath() const;
 
 
@@ -70,7 +69,7 @@ private:
    bool _move_up = true;
    float _lever_lag = 0.0f;
    bool _initialized = false;
-   PathInterpolation _interpolation;
+   PathInterpolation<b2Vec2> _interpolation;
    b2Vec2 _velocity;
    std::vector<sf::Vector2f> _pixel_path;
 };
