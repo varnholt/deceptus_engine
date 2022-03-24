@@ -55,6 +55,55 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
 }
 
 
+void GameContactListener::processProjectile(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
+{
+   auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
+
+   if (isPlayer(fixture_node_b))
+   {
+      Player::getCurrent()->damage(damage);
+   }
+   else if (fixture_node_b && fixture_node_b->getType() == ObjectTypeEnemy)
+   {
+      auto p = dynamic_cast<LuaNode*>(fixture_node_b->getParent());
+      if (p != nullptr)
+      {
+         p->luaHit(damage);
+      }
+   }
+
+   auto projectile = dynamic_cast<Projectile*>(fixture_node_a);
+
+   // if it's an arrow, let postsolve handle it. if the impulse is not
+   // hard enough, the arrow should just fall on the ground
+   if (!projectile->isSticky())
+   {
+      projectile->setScheduledForRemoval(true);
+   }
+}
+
+
+void GameContactListener::processMovingPlatform(b2Fixture* fixture_a, auto fixture_user_data_b)
+{
+   // check if platform smashes the player
+   auto fixture_node_b = static_cast<FixtureNode*>(fixture_user_data_b);
+   if (fixture_node_b && fixture_node_b->getType() == ObjectType::ObjectTypePlayerHeadSensor)
+   {
+      if (Player::getCurrent()->isOnGround())
+      {
+         _smashed = true;
+      }
+   }
+
+   auto platform_body = fixture_a->GetBody();
+   Player::getCurrent()->setPlatformBody(platform_body);
+
+   _count_moving_platform_contacts++;
+}
+
+
+
+
 void GameContactListener::BeginContact(b2Contact* contact)
 {
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
@@ -129,30 +178,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeProjectile:
          {
-            auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
-
-            if (isPlayer(fixture_node_b))
-            {
-               Player::getCurrent()->damage(damage);
-            }
-            else if (fixture_node_b && fixture_node_b->getType() == ObjectTypeEnemy)
-            {
-               auto p = dynamic_cast<LuaNode*>(fixture_node_b->getParent());
-               if (p != nullptr)
-               {
-                  p->luaHit(damage);
-               }
-            }
-
-            auto projectile = dynamic_cast<Projectile*>(fixture_node_a);
-
-            // if it's an arrow, let postsolve handle it. if the impulse is not
-            // hard enough, the arrow should just fall on the ground
-            if (!projectile->isSticky())
-            {
-               projectile->setScheduledForRemoval(true);
-            }
-
+            processProjectile(fixture_node_a, fixture_node_b);
             break;
          }
          case ObjectTypeSolidOneWay:
@@ -175,20 +201,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeMovingPlatform:
          {
-            // check if platform smashes the player
-            auto fixture_node_b = static_cast<FixtureNode*>(fixture_user_data_b);
-            if (fixture_node_b && fixture_node_b->getType() == ObjectType::ObjectTypePlayerHeadSensor)
-            {
-               if (Player::getCurrent()->isOnGround())
-               {
-                  _smashed = true;
-               }
-            }
-
-            auto platform_body = contact->GetFixtureA()->GetBody();
-            Player::getCurrent()->setPlatformBody(platform_body);
-
-            _count_moving_platform_contacts++;
+            processMovingPlatform(contact->GetFixtureA(), fixture_user_data_b);
             break;
          }
          case ObjectTypeBouncer:
@@ -285,29 +298,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeProjectile:
          {
-            auto damage = std::get<int32_t>(fixture_node_b->getProperty("damage"));
-
-            if (isPlayer(fixture_node_a))
-            {
-               Player::getCurrent()->damage(damage);
-            }
-            else if (fixture_node_a && fixture_node_a->getType() == ObjectTypeEnemy)
-            {
-               auto p = dynamic_cast<LuaNode*>(fixture_node_a->getParent());
-               if (p != nullptr)
-               {
-                  p->luaHit(damage);
-               }
-            }
-
-            auto projectile = dynamic_cast<Projectile*>(fixture_node_b);
-
-            // if it's an arrow, let postsolve handle it. if the impulse is not
-            // hard enough, the arrow should just fall on the ground
-            if (!projectile->isSticky())
-            {
-               projectile->setScheduledForRemoval(true);
-            }
+            processProjectile(fixture_node_b, fixture_node_a);
 
             break;
          }
@@ -331,20 +322,7 @@ void GameContactListener::BeginContact(b2Contact* contact)
          }
          case ObjectTypeMovingPlatform:
          {
-            // check if platform smashes the player
-            auto fixtureNodeA = static_cast<FixtureNode*>(fixture_user_data_a);
-            if (fixtureNodeA && fixtureNodeA->getType() == ObjectType::ObjectTypePlayerHeadSensor)
-            {
-               if (Player::getCurrent()->isOnGround())
-               {
-                  _smashed = true;
-               }
-            }
-
-            auto platformBody = contact->GetFixtureB()->GetBody();
-            Player::getCurrent()->setPlatformBody(platformBody);
-
-            _count_moving_platform_contacts++;
+            processMovingPlatform(contact->GetFixtureB(), fixture_user_data_a);
             break;
          }
          case ObjectTypeBouncer:
@@ -595,7 +573,7 @@ void GameContactListener::PreSolve(b2Contact* contact, const b2Manifold* /*oldMa
 }
 
 
-void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *contactImpulse)
+void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* contact_impulse)
 {
    // normal impulse
    //
@@ -630,7 +608,7 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
    auto user_data_a = contact->GetFixtureA()->GetUserData();
    auto user_data_b = contact->GetFixtureB()->GetUserData();
 
-   auto impulse = contactImpulse->normalImpulses[0];
+   const auto impulse = contact_impulse->normalImpulses[0];
 
    if (user_data_a)
    {
@@ -638,35 +616,11 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
       if (node_a->getType() == ObjectTypePlayer)
       {
-         processImpulse(impulse);
+         postSolveImpulse(impulse);
       }
       else if (node_a->getType() == ObjectTypeProjectile)
       {
-         auto projectile = dynamic_cast<Projectile*>(node_a);
-
-         if (projectile->isSticky())
-         {
-            if (projectile->hitSomething())
-            {
-               return;
-            }
-
-            projectile->setHitSomething(true);
-
-            // this is only needed for arrows, so could be generalised
-            Timer::add(
-               std::chrono::milliseconds(1000),
-               [projectile](){projectile->setScheduledForRemoval(true);},
-               Timer::Type::Singleshot,
-               Timer::Scope::UpdateIngame
-            );
-
-            if (impulse > 0.0003f)
-            {
-               // Log::Info() << "arrow hit with " << impulse;
-               projectile->setScheduledForInactivity(true);
-            }
-         }
+         postSolveProjectile(node_a, impulse);
       }
    }
 
@@ -676,35 +630,11 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse *
 
       if (node_b->getType() == ObjectTypePlayer)
       {
-         processImpulse(impulse);
+         postSolveImpulse(impulse);
       }
       else if (node_b->getType() == ObjectTypeProjectile)
       {
-         auto projectile = dynamic_cast<Projectile*>(node_b);
-
-         if (projectile->isSticky())
-         {
-            if (projectile->hitSomething())
-            {
-               return;
-            }
-
-            projectile->setHitSomething(true);
-
-            // this is only needed for arrows, so could be generalised
-            Timer::add(
-               std::chrono::milliseconds(1000),
-               [projectile](){projectile->setScheduledForRemoval(true);},
-               Timer::Type::Singleshot,
-               Timer::Scope::UpdateIngame
-            );
-
-            if (impulse > 0.0003f)
-            {
-               // Log::Info() << "arrow hit with " << impulse;
-               projectile->setScheduledForInactivity(true);
-            }
-         }
+         postSolveProjectile(node_b, impulse);
       }
    }
 }
@@ -722,7 +652,7 @@ void GameContactListener::debug()
 }
 
 
-void GameContactListener::processImpulse(float impulse)
+void GameContactListener::postSolveImpulse(float impulse)
 {
    // filter just ordinary ground contact
    if (impulse < 0.03f)
@@ -731,6 +661,36 @@ void GameContactListener::processImpulse(float impulse)
    }
 
    Player::getCurrent()->impulse(impulse);
+}
+
+
+void GameContactListener::postSolveProjectile(FixtureNode* node, float impulse)
+{
+   auto projectile = dynamic_cast<Projectile*>(node);
+
+   if (projectile->isSticky())
+   {
+      if (projectile->hitSomething())
+      {
+         return;
+      }
+
+      projectile->setHitSomething(true);
+
+      // this is only needed for arrows, so could be generalised
+      Timer::add(
+         std::chrono::milliseconds(1000),
+         [projectile](){projectile->setScheduledForRemoval(true);},
+         Timer::Type::Singleshot,
+         Timer::Scope::UpdateIngame
+      );
+
+      if (impulse > 0.0003f)
+      {
+         // Log::Info() << "arrow hit with " << impulse;
+         projectile->setScheduledForInactivity(true);
+      }
+   }
 }
 
 
