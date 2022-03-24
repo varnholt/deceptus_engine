@@ -45,7 +45,11 @@ private:
 
    GameContactListener() = default;
 
-   void processImpulse(float impulse);
+   void processProjectile(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
+   void processMovingPlatform(b2Fixture* fixture_a, auto fixture_user_data_b);
+
+   void postSolveImpulse(float impulse);
+   void postSolveProjectile(FixtureNode* node, float impulse);
 
    int32_t _count_foot_contacts = 0;
    int32_t _count_head_contacts = 0;
