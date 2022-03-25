@@ -1,9 +1,6 @@
 #pragma once
 
-
-// box2d
 #include "Box2D/Box2D.h"
-
 #include <vector>
 
 class FixtureNode;
@@ -18,7 +15,6 @@ public:
    int32_t getPlayerArmLeftContactCount() const;
    int32_t getPlayerArmRightContactCount() const;
    int32_t getPlayerContactCount() const;
-
    int32_t getDeadlyContactCount() const;
    int32_t getMovingPlatformContactCount() const;
 
@@ -26,7 +22,6 @@ public:
 
    void BeginContact(b2Contact *contact) override;
    void EndContact(b2Contact *contact) override;
-
    void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) override;
    void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override;
 
@@ -35,6 +30,8 @@ public:
 
    static GameContactListener& getInstance();
 
+
+   void processPlayerHeadSensorContactEnd(auto contact_fixture_b);
 
 protected:
 
@@ -45,8 +42,31 @@ private:
 
    GameContactListener() = default;
 
-   void processProjectile(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
-   void processMovingPlatform(b2Fixture* fixture_a, auto fixture_user_data_b);
+   void processBouncerContactBegin(FixtureNode* fixture_node);
+   void processBubbleCubeContactBegin(FixtureNode* fixture_node);
+   void processCollapsingPlatformContactBegin(FixtureNode* fixture_node);
+   void processCrusherContactBegin(FixtureNode* fixture_node);
+   void processDeadlyContactBegin(FixtureNode* fixture_node);
+   void processEnemyContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
+   void processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data);
+   void processOneWayWallContactBegin(b2Contact* contact, b2Fixture* fixture);
+   void processPlayerContactBegin();
+   void processPlayerFootSensorContactBegin(b2Fixture* fixture);
+   void processPlayerHeadSensorContactBegin(b2Fixture* fixture);
+   void processPlayerLeftArmSensorContactBegin(b2Fixture* fixture);
+   void processPlayerRightArmSensorContactBegin(b2Fixture* fixture);
+   void processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
+
+   void processBubbleCubeContactEnd(FixtureNode* fixture_node);
+   void processCollapsingPlatformContactEnd(FixtureNode* fixture_node);
+   void processCrusherContactEnd(FixtureNode* fixture_node);
+   void processDeadlyContactEnd(FixtureNode* fixture_node);
+   void processMovingPlatformContactEnd();
+   void processOneWayWallContactEnd(b2Contact* contact);
+   void processPlayerContactEnd();
+   void processPlayerFootSensorContactEnd(b2Fixture* fixture);
+   void processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture);
+   void processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture);
 
    void postSolveImpulse(float impulse);
    void postSolveProjectile(FixtureNode* node, float impulse);
