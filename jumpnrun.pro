@@ -30,7 +30,7 @@ debug {
 win32-msvc {
    # link debug symbols
    message("configured for msvc")
-   QMAKE_CXXFLAGS_RELEASE += /Zi /Wall
+   QMAKE_CXXFLAGS_RELEASE += /Zi
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
 }
 
@@ -39,7 +39,6 @@ linux|win32-g++ {
    QMAKE_CXXFLAGS += -std=c++20
    QMAKE_CXXFLAGS += -lc++fs
    QMAKE_CXXFLAGS += -lfmt
-   QMAKE_CXXFLAGS += -Wall
 }
 
 win32 {
