@@ -42,6 +42,24 @@ private:
 
    GameContactListener() = default;
 
+   void processBeginContact(
+      b2Contact* contact,
+      b2Fixture* contact_fixture_a,
+      b2Fixture* contact_fixture_b,
+      FixtureNode* fixture_node_a,
+      FixtureNode* fixture_node_b,
+      void* fixture_user_data_b
+   );
+
+   void processEndContact(
+      b2Contact* contact,
+      FixtureNode* fixture_node_a,
+      FixtureNode* fixture_node_b,
+      b2Fixture* contact_fixture_b
+   );
+
+   void processPostSolve(FixtureNode* node, float impulse);
+
    void processBouncerContactBegin(FixtureNode* fixture_node);
    void processBubbleCubeContactBegin(FixtureNode* fixture_node);
    void processCollapsingPlatformContactBegin(FixtureNode* fixture_node);
@@ -68,8 +86,8 @@ private:
    void processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture);
    void processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture);
 
-   void postSolveImpulse(float impulse);
-   void postSolveProjectile(FixtureNode* node, float impulse);
+   void processPostSolveImpulse(float impulse);
+   void processPostSolveProjectile(FixtureNode* node, float impulse);
 
    int32_t _count_foot_contacts = 0;
    int32_t _count_head_contacts = 0;
