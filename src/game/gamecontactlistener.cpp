@@ -44,14 +44,7 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
       return false;
    }
 
-   auto p = dynamic_cast<Player*>(obj->getParent());
-
-   if (!p)
-   {
-      return false;
-   }
-
-   return true;
+   return dynamic_cast<Player*>(obj->getParent());
 }
 
 
@@ -65,10 +58,10 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
    }
    else if (fixture_node_b && fixture_node_b->getType() == ObjectTypeEnemy)
    {
-      auto p = dynamic_cast<LuaNode*>(fixture_node_b->getParent());
-      if (p != nullptr)
+      auto lua_node = dynamic_cast<LuaNode*>(fixture_node_b->getParent());
+      if (lua_node != nullptr)
       {
-         p->luaHit(damage);
+         lua_node->luaHit(damage);
       }
    }
 
@@ -104,52 +97,62 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
 
 void GameContactListener::processCrusherContactBegin(FixtureNode* fixture_node)
 {
-   if (isPlayer(fixture_node))
+   if (!isPlayer(fixture_node))
    {
-      _count_deadly_contacts++;
+      return;
    }
+
+   _count_deadly_contacts++;
 }
 
 
 void GameContactListener::processPlayerFootSensorContactBegin(b2Fixture* fixture)
 {
-   if (!fixture->IsSensor())
+   if (fixture->IsSensor())
    {
-      // store ground body in player
-      if (fixture->GetType() == b2Shape::e_chain)
-      {
-         Player::getCurrent()->setGroundBody(fixture->GetBody());
-      }
-
-      _count_foot_contacts++;
+      return;
    }
+
+   // store ground body in player
+   if (fixture->GetType() == b2Shape::e_chain)
+   {
+      Player::getCurrent()->setGroundBody(fixture->GetBody());
+   }
+
+   _count_foot_contacts++;
 }
 
 
 void GameContactListener::processPlayerHeadSensorContactBegin(b2Fixture* fixture)
 {
-   if (!fixture->IsSensor())
+   if (fixture->IsSensor())
    {
-      _count_head_contacts++;
+      return;
    }
+
+   _count_head_contacts++;
 }
 
 
 void GameContactListener::processPlayerLeftArmSensorContactBegin(b2Fixture* fixture)
 {
-   if (!fixture->IsSensor())
+   if (fixture->IsSensor())
    {
-      _count_arm_left_contacts++;
+      return;
    }
+
+   _count_arm_left_contacts++;
 }
 
 
 void GameContactListener::processPlayerRightArmSensorContactBegin(b2Fixture* fixture)
 {
-   if (!fixture->IsSensor())
+   if (fixture->IsSensor())
    {
-      _count_arm_right_contacts++;
+      return;
    }
+
+   _count_arm_right_contacts++;
 }
 
 
@@ -167,10 +170,12 @@ void GameContactListener::processPlayerContactBegin()
 
 void GameContactListener::processDeadlyContactBegin(FixtureNode* fixture_node)
 {
-   if (isPlayer(fixture_node))
+   if (!isPlayer(fixture_node))
    {
-      _count_deadly_contacts++;
+      return;
    }
+
+   _count_deadly_contacts++;
 }
 
 
@@ -347,45 +352,55 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
 void GameContactListener::processCrusherContactEnd(FixtureNode* fixture_node)
 {
-   if (isPlayer(fixture_node))
+   if (!isPlayer(fixture_node))
    {
-      _count_deadly_contacts--;
+      return;
    }
+
+   _count_deadly_contacts--;
 }
 
 
 void GameContactListener::processPlayerFootSensorContactEnd(b2Fixture* fixture)
 {
-   if (!fixture->IsSensor())
+   if (fixture->IsSensor())
    {
-      _count_foot_contacts--;
+      return;
    }
+
+   _count_foot_contacts--;
 }
 
 
 void GameContactListener::processPlayerHeadSensorContactEnd(auto contact_fixture_b)
 {
-   if (!contact_fixture_b->IsSensor())
+   if (contact_fixture_b->IsSensor())
    {
-      _count_head_contacts--;
+      return;
    }
+
+   _count_head_contacts--;
 }
 
 void GameContactListener::processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture)
 {
-   if (!contact_fixture->IsSensor())
+   if (contact_fixture->IsSensor())
    {
-      _count_arm_left_contacts--;
+      return;
    }
+
+   _count_arm_left_contacts--;
 }
 
 
 void GameContactListener::processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture)
 {
-   if (!contact_fixture->IsSensor())
+   if (contact_fixture->IsSensor())
    {
-      _count_arm_right_contacts--;
+      return;
    }
+
+   _count_arm_right_contacts--;
 }
 
 
@@ -403,10 +418,12 @@ void GameContactListener::processOneWayWallContactEnd(b2Contact* contact)
 
 void GameContactListener::processDeadlyContactEnd(FixtureNode* fixture_node)
 {
-   if (isPlayer(fixture_node))
+   if (!isPlayer(fixture_node))
    {
-      _count_deadly_contacts--;
+      return;
    }
+
+   _count_deadly_contacts--;
 }
 
 
@@ -641,28 +658,30 @@ void GameContactListener::processPostSolveProjectile(FixtureNode* node, float im
 {
    auto projectile = dynamic_cast<Projectile*>(node);
 
-   if (projectile->isSticky())
+   if (!projectile->isSticky())
    {
-      if (projectile->hitSomething())
-      {
-         return;
-      }
+      return;
+   }
 
-      projectile->setHitSomething(true);
+   if (projectile->hitSomething())
+   {
+      return;
+   }
 
-      // this is only needed for arrows, so could be generalised
-      Timer::add(
-         std::chrono::milliseconds(1000),
-         [projectile](){projectile->setScheduledForRemoval(true);},
-         Timer::Type::Singleshot,
-         Timer::Scope::UpdateIngame
-      );
+   projectile->setHitSomething(true);
 
-      if (impulse > 0.0003f)
-      {
-         // Log::Info() << "arrow hit with " << impulse;
-         projectile->setScheduledForInactivity(true);
-      }
+   // this is only needed for arrows, so could be generalised
+   Timer::add(
+      std::chrono::milliseconds(1000),
+      [projectile](){projectile->setScheduledForRemoval(true);},
+      Timer::Type::Singleshot,
+      Timer::Scope::UpdateIngame
+   );
+
+   if (impulse > 0.0003f)
+   {
+      // Log::Info() << "arrow hit with " << impulse;
+      projectile->setScheduledForInactivity(true);
    }
 }
 
