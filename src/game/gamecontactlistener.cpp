@@ -205,6 +205,100 @@ void GameContactListener::processCollapsingPlatformContactBegin(FixtureNode* fix
 }
 
 
+void GameContactListener::processBeginContact(
+   b2Contact* contact,
+   b2Fixture* contact_fixture_a,
+   b2Fixture* contact_fixture_b,
+   FixtureNode* fixture_node_a,
+   FixtureNode* fixture_node_b,
+   void* fixture_user_data_b
+)
+{
+   switch (fixture_node_a->getType())
+   {
+      case ObjectTypeCrusher:
+      {
+         processCrusherContactBegin(fixture_node_b);
+         break;
+      }
+      case ObjectTypePlayerFootSensor:
+      {
+         processPlayerFootSensorContactBegin(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayerHeadSensor:
+      {
+         processPlayerHeadSensorContactBegin(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayerLeftArmSensor:
+      {
+         processPlayerLeftArmSensorContactBegin(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayerRightArmSensor:
+      {
+         processPlayerRightArmSensorContactBegin(contact_fixture_b);
+         break;
+      }
+      case ObjectTypeProjectile:
+      {
+         processProjectileContactBegin(fixture_node_a, fixture_node_b);
+         break;
+      }
+      case ObjectTypeSolidOneWay:
+      {
+         processOneWayWallContactBegin(contact, contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayer:
+      {
+         processPlayerContactBegin();
+         break;
+      }
+      case ObjectTypeDeadly:
+      {
+         processDeadlyContactBegin(fixture_node_b);
+         break;
+      }
+      case ObjectTypeMovingPlatform:
+      {
+         processMovingPlatformContactBegin(contact_fixture_a, fixture_user_data_b);
+         break;
+      }
+      case ObjectTypeBouncer:
+      {
+         processBouncerContactBegin(fixture_node_a);
+         break;
+      }
+      case ObjectTypeEnemy:
+      {
+         processEnemyContactBegin(fixture_node_a, fixture_node_b);
+         break;
+      }
+      case ObjectTypeBubbleCube:
+      {
+         processBubbleCubeContactBegin(fixture_node_a);
+         break;
+      }
+      case ObjectTypeCollapsingPlatform:
+      {
+         processCollapsingPlatformContactBegin(fixture_node_a);
+         break;
+      }
+      case ObjectTypeDoor:
+      case ObjectTypeConveyorBelt:
+      case ObjectTypeMoveableBox:
+      case ObjectTypeDeathBlock:
+      case ObjectTypeSolid:
+      case ObjectTypeInvalid:
+      {
+         break;
+      }
+   }
+}
+
+
 void GameContactListener::BeginContact(b2Contact* contact)
 {
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
@@ -227,174 +321,26 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
    if (fixture_user_data_a)
    {
-      switch (fixture_node_a->getType())
-      {
-         case ObjectTypeCrusher:
-         {
-            processCrusherContactBegin(fixture_node_b);
-            break;
-         }
-         case ObjectTypePlayerFootSensor:
-         {
-            processPlayerFootSensorContactBegin(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayerHeadSensor:
-         {
-            processPlayerHeadSensorContactBegin(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayerLeftArmSensor:
-         {
-            processPlayerLeftArmSensorContactBegin(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayerRightArmSensor:
-         {
-            processPlayerRightArmSensorContactBegin(contact_fixture_b);
-            break;
-         }
-         case ObjectTypeProjectile:
-         {
-            processProjectileContactBegin(fixture_node_a, fixture_node_b);
-            break;
-         }
-         case ObjectTypeSolidOneWay:
-         {
-            processOneWayWallContactBegin(contact, contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayer:
-         {
-            processPlayerContactBegin();
-            break;
-         }
-         case ObjectTypeDeadly:
-         {
-            processDeadlyContactBegin(fixture_node_b);
-            break;
-         }
-         case ObjectTypeMovingPlatform:
-         {
-            processMovingPlatformContactBegin(contact_fixture_a, fixture_user_data_b);
-            break;
-         }
-         case ObjectTypeBouncer:
-         {
-            processBouncerContactBegin(fixture_node_a);
-            break;
-         }
-         case ObjectTypeEnemy:
-         {
-            processEnemyContactBegin(fixture_node_a, fixture_node_b);
-            break;
-         }
-         case ObjectTypeBubbleCube:
-         {
-            processBubbleCubeContactBegin(fixture_node_a);
-            break;
-         }
-         case ObjectTypeCollapsingPlatform:
-         {
-            processCollapsingPlatformContactBegin(fixture_node_a);
-            break;
-         }
-         case ObjectTypeDoor:
-         case ObjectTypeConveyorBelt:
-         case ObjectTypeMoveableBox:
-         case ObjectTypeDeathBlock:
-         case ObjectTypeSolid:
-         case ObjectTypeInvalid:
-         {
-            break;
-         }
-      }
+      processBeginContact(
+         contact,
+         contact_fixture_a,
+         contact_fixture_b,
+         fixture_node_a,
+         fixture_node_b,
+         fixture_user_data_b
+      );
    }
 
    if (fixture_user_data_b)
    {
-      switch (fixture_node_b->getType())
-      {
-         case ObjectTypeCrusher:
-         {
-            processCrusherContactBegin(fixture_node_a);
-            break;
-         }
-         case ObjectTypePlayerFootSensor:
-         {
-            processPlayerFootSensorContactBegin(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayerHeadSensor:
-         {
-            processPlayerHeadSensorContactBegin(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayerLeftArmSensor:
-         {
-            processPlayerLeftArmSensorContactBegin(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayerRightArmSensor:
-         {
-            processPlayerRightArmSensorContactBegin(contact_fixture_a);
-            break;
-         }
-         case ObjectTypeProjectile:
-         {
-            processProjectileContactBegin(fixture_node_b, fixture_node_a);
-            break;
-         }
-         case ObjectTypeSolidOneWay:
-         {
-            processOneWayWallContactBegin(contact, contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayer:
-         {
-            processPlayerContactBegin();
-            break;
-         }
-         case ObjectTypeDeadly:
-         {
-            processDeadlyContactBegin(fixture_node_a);
-            break;
-         }
-         case ObjectTypeMovingPlatform:
-         {
-            processMovingPlatformContactBegin(contact_fixture_b, fixture_user_data_a);
-            break;
-         }
-         case ObjectTypeBouncer:
-         {
-            processBouncerContactBegin(fixture_node_b);
-            break;
-         }
-         case ObjectTypeEnemy:
-         {
-            processEnemyContactBegin(fixture_node_b, fixture_node_a);
-            break;
-         }
-         case ObjectTypeBubbleCube:
-         {
-            processBubbleCubeContactBegin(fixture_node_b);
-            break;
-         }
-         case ObjectTypeCollapsingPlatform:
-         {
-            processCollapsingPlatformContactBegin(fixture_node_b);
-            break;
-         }
-         case ObjectTypeDoor:
-         case ObjectTypeConveyorBelt:
-         case ObjectTypeMoveableBox:
-         case ObjectTypeDeathBlock:
-         case ObjectTypeSolid:
-         case ObjectTypeInvalid:
-         {
-            break;
-         }
-      }
+      processBeginContact(
+         contact,
+         contact_fixture_b,
+         contact_fixture_a,
+         fixture_node_b,
+         fixture_node_a,
+         fixture_user_data_a
+      );
    }
 }
 
@@ -482,6 +428,78 @@ void GameContactListener::processCollapsingPlatformContactEnd(FixtureNode* fixtu
 }
 
 
+void GameContactListener::processEndContact(
+   b2Contact* contact,
+   FixtureNode* fixture_node_a,
+   FixtureNode* fixture_node_b,
+   b2Fixture* contact_fixture_b
+)
+{
+   switch (fixture_node_a->getType())
+   {
+      case ObjectTypeCrusher:
+      {
+         processCrusherContactEnd(fixture_node_b);
+         break;
+      }
+      case ObjectTypePlayerFootSensor:
+      {
+         processPlayerFootSensorContactEnd(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayerHeadSensor:
+      {
+         processPlayerHeadSensorContactEnd(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayerLeftArmSensor:
+      {
+         processPlayerLeftArmSensorContactEnd(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayerRightArmSensor:
+      {
+         processPlayerRightArmSensorContactEnd(contact_fixture_b);
+         break;
+      }
+      case ObjectTypePlayer:
+      {
+         processPlayerContactEnd();
+         break;
+      }
+      case ObjectTypeSolidOneWay:
+      {
+         processOneWayWallContactEnd(contact);
+         break;
+      }
+      case ObjectTypeDeadly:
+      {
+         processDeadlyContactEnd(fixture_node_b);
+         break;
+      }
+      case ObjectTypeMovingPlatform:
+      {
+         processMovingPlatformContactEnd();
+         break;
+      }
+      case ObjectTypeBubbleCube:
+      {
+         processBubbleCubeContactEnd(fixture_node_a);
+         break;
+      }
+      case ObjectTypeCollapsingPlatform:
+      {
+         processCollapsingPlatformContactEnd(fixture_node_a);
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }
+}
+
+
 void GameContactListener::EndContact(b2Contact* contact)
 {
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
@@ -505,134 +523,22 @@ void GameContactListener::EndContact(b2Contact* contact)
 
    if (fixture_user_data_a)
    {
-      switch (fixture_node_a->getType())
-      {
-         case ObjectTypeCrusher:
-         {
-            processCrusherContactEnd(fixture_node_b);
-            break;
-         }
-         case ObjectTypePlayerFootSensor:
-         {
-            processPlayerFootSensorContactEnd(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayerHeadSensor:
-         {
-            processPlayerHeadSensorContactEnd(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayerLeftArmSensor:
-         {
-            processPlayerLeftArmSensorContactEnd(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayerRightArmSensor:
-         {
-            processPlayerRightArmSensorContactEnd(contact_fixture_b);
-            break;
-         }
-         case ObjectTypePlayer:
-         {
-            processPlayerContactEnd();
-            break;
-         }
-         case ObjectTypeSolidOneWay:
-         {
-            processOneWayWallContactEnd(contact);
-            break;
-         }
-         case ObjectTypeDeadly:
-         {
-            processDeadlyContactEnd(fixture_node_b);
-            break;
-         }
-         case ObjectTypeMovingPlatform:
-         {
-            processMovingPlatformContactEnd();
-            break;
-         }
-         case ObjectTypeBubbleCube:
-         {
-            processBubbleCubeContactEnd(fixture_node_a);
-            break;
-         }
-         case ObjectTypeCollapsingPlatform:
-         {
-            processCollapsingPlatformContactEnd(fixture_node_a);
-            break;
-         }
-         default:
-         {
-            break;
-         }
-      }
+      processEndContact(
+         contact,
+         fixture_node_a,
+         fixture_node_b,
+         contact_fixture_b
+      );
    }
 
    if (fixture_user_data_b)
    {
-      switch (fixture_node_b->getType())
-      {
-         case ObjectTypeCrusher:
-         {
-            processCrusherContactEnd(fixture_node_a);
-            break;
-         }
-         case ObjectTypePlayerFootSensor:
-         {
-            processPlayerFootSensorContactEnd(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayerHeadSensor:
-         {
-            processPlayerHeadSensorContactEnd(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayerLeftArmSensor:
-         {
-            processPlayerLeftArmSensorContactEnd(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayerRightArmSensor:
-         {
-            processPlayerRightArmSensorContactEnd(contact_fixture_a);
-            break;
-         }
-         case ObjectTypePlayer:
-         {
-            processPlayerContactEnd();
-            break;
-         }
-         case ObjectTypeSolidOneWay:
-         {
-            processOneWayWallContactEnd(contact);
-            break;
-         }
-         case ObjectTypeDeadly:
-         {
-            processDeadlyContactEnd(fixture_node_a);
-            break;
-         }
-         case ObjectTypeMovingPlatform:
-         {
-            processMovingPlatformContactEnd();
-            break;
-         }
-         case ObjectTypeBubbleCube:
-         {
-            processBubbleCubeContactEnd(fixture_node_b);
-            break;
-         }
-         case ObjectTypeCollapsingPlatform:
-         {
-            processCollapsingPlatformContactEnd(fixture_node_b);
-            break;
-         }
-         default:
-         {
-            break;
-         }
-      }
+      processEndContact(
+         contact,
+         fixture_node_b,
+         fixture_node_a,
+         contact_fixture_a
+      );
    }
 }
 
@@ -640,6 +546,19 @@ void GameContactListener::EndContact(b2Contact* contact)
 void GameContactListener::PreSolve(b2Contact* contact, const b2Manifold* /*oldManifold*/)
 {
    ConveyorBelt::processContact(contact);
+}
+
+
+void GameContactListener::processPostSolve(FixtureNode* node, float impulse)
+{
+   if (node->getType() == ObjectTypePlayer)
+   {
+      processPostSolveImpulse(impulse);
+   }
+   else if (node->getType() == ObjectTypeProjectile)
+   {
+      processPostSolveProjectile(node, impulse);
+   }
 }
 
 
@@ -683,29 +602,13 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
    if (user_data_a)
    {
       auto node_a = static_cast<FixtureNode*>(user_data_a);
-
-      if (node_a->getType() == ObjectTypePlayer)
-      {
-         postSolveImpulse(impulse);
-      }
-      else if (node_a->getType() == ObjectTypeProjectile)
-      {
-         postSolveProjectile(node_a, impulse);
-      }
+      processPostSolve(node_a, impulse);
    }
 
    if (user_data_b)
    {
       auto node_b = static_cast<FixtureNode*>(user_data_b);
-
-      if (node_b->getType() == ObjectTypePlayer)
-      {
-         postSolveImpulse(impulse);
-      }
-      else if (node_b->getType() == ObjectTypeProjectile)
-      {
-         postSolveProjectile(node_b, impulse);
-      }
+      processPostSolve(node_b, impulse);
    }
 }
 
@@ -722,7 +625,7 @@ void GameContactListener::debug()
 }
 
 
-void GameContactListener::postSolveImpulse(float impulse)
+void GameContactListener::processPostSolveImpulse(float impulse)
 {
    // filter just ordinary ground contact
    if (impulse < 0.03f)
@@ -734,7 +637,7 @@ void GameContactListener::postSolveImpulse(float impulse)
 }
 
 
-void GameContactListener::postSolveProjectile(FixtureNode* node, float impulse)
+void GameContactListener::processPostSolveProjectile(FixtureNode* node, float impulse)
 {
    auto projectile = dynamic_cast<Projectile*>(node);
 
