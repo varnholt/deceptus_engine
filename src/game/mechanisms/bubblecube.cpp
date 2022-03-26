@@ -55,6 +55,12 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
       {
          _pop_only_on_foot_contact = pop_only_on_foot_contact_it->second->_value_bool.value();
       }
+
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
+      {
+         setZ(static_cast<uint32_t>(z_it->second->_value_int.value()));
+      }
    }
 
    // set up shape
