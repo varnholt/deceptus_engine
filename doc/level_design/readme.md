@@ -213,6 +213,7 @@ Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust y
 |-|-|-|
 |animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
 |pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`)|
+|pop_only_on_foot_contact|bool|The bubble only pops after they've been in contact with the player's feet (default is `false`).|
 
 <br><br>
 
