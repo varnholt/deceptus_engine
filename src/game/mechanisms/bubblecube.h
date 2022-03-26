@@ -29,8 +29,8 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
-   void beginContact();
-   void endContact();
+   void beginContact(FixtureNode* other);
+   void endContact(FixtureNode* other);
 
 
 private:
@@ -43,6 +43,7 @@ private:
    int32_t _contact_count = 0;
    float _mapped_value_normalized = 0.0f;
    sf::Time _pop_time;
+   bool _pop_only_on_foot_contact = false;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;

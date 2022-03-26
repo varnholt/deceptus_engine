@@ -61,7 +61,7 @@ private:
    void processPostSolve(FixtureNode* node, float impulse);
 
    void processBouncerContactBegin(FixtureNode* fixture_node);
-   void processBubbleCubeContactBegin(FixtureNode* fixture_node);
+   void processBubbleCubeContactBegin(FixtureNode* bubble, FixtureNode* other);
    void processCollapsingPlatformContactBegin(FixtureNode* fixture_node);
    void processCrusherContactBegin(FixtureNode* fixture_node);
    void processDeadlyContactBegin(FixtureNode* fixture_node);
@@ -75,7 +75,7 @@ private:
    void processPlayerRightArmSensorContactBegin(b2Fixture* fixture);
    void processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
 
-   void processBubbleCubeContactEnd(FixtureNode* fixture_node);
+   void processBubbleCubeContactEnd(FixtureNode* bubble, FixtureNode* other);
    void processCollapsingPlatformContactEnd(FixtureNode* fixture_node);
    void processCrusherContactEnd(FixtureNode* fixture_node);
    void processDeadlyContactEnd(FixtureNode* fixture_node);

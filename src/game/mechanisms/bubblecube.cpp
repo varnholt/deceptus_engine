@@ -38,16 +38,22 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
    // read properties
    if (data._tmx_object->_properties)
    {
-      auto animation_offset_it = data._tmx_object->_properties->_map.find("animation_offset_s");
+      const auto animation_offset_it = data._tmx_object->_properties->_map.find("animation_offset_s");
       if (animation_offset_it != data._tmx_object->_properties->_map.end())
       {
          _animation_offset_s = animation_offset_it->second->_value_float.value();
       }
 
-      auto pop_time_respawn_it = data._tmx_object->_properties->_map.find("pop_time_respawn_s");
+      const auto pop_time_respawn_it = data._tmx_object->_properties->_map.find("pop_time_respawn_s");
       if (pop_time_respawn_it != data._tmx_object->_properties->_map.end())
       {
          _pop_time_respawn_s = pop_time_respawn_it->second->_value_float.value();
+      }
+
+      const auto pop_only_on_foot_contact_it = data._tmx_object->_properties->_map.find("pop_only_on_foot_contact");
+      if (pop_only_on_foot_contact_it != data._tmx_object->_properties->_map.end())
+      {
+         _pop_only_on_foot_contact = pop_only_on_foot_contact_it->second->_value_bool.value();
       }
    }
 
@@ -165,8 +171,13 @@ void BubbleCube::update(const sf::Time& dt)
 }
 
 
-void BubbleCube::beginContact()
+void BubbleCube::beginContact(FixtureNode* other)
 {
+   if (_pop_only_on_foot_contact && other->getType() != ObjectTypePlayerFootSensor)
+   {
+      return;
+   }
+
    if (_popped)
    {
       return;
@@ -176,8 +187,13 @@ void BubbleCube::beginContact()
 }
 
 
-void BubbleCube::endContact()
+void BubbleCube::endContact(FixtureNode* other)
 {
+   if (_pop_only_on_foot_contact && other->getType() != ObjectTypePlayerFootSensor)
+   {
+      return;
+   }
+
    if (_popped)
    {
       return;
