@@ -44,7 +44,11 @@ private:
    float _mapped_value_normalized = 0.0f;
    sf::Time _pop_time;
    bool _pop_only_on_foot_contact = false;
+   bool _moves_down_on_contact = false;
    sf::IntRect _rect_px;
+   float _push_down_offset_m = 0.0f;
+   float _x_px;
+   float _y_px;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;
