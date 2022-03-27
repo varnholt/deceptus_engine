@@ -317,7 +317,7 @@ void Console::nextCommand()
    }
 
    _history_index++;
-   if (_history_index == static_cast<int32_t>(_history.size()))
+   if (_history_index >= static_cast<int32_t>(_history.size()))
    {
       _history_index = static_cast<int32_t>(_history.size() - 1);
    }
