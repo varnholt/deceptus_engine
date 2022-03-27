@@ -1,11 +1,11 @@
 #include "bubblecube.h"
 
+#include "framework/tools/globalclock.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "player/player.h"
 #include "texturepool.h"
-
-#include "framework/tools/globalclock.h"
 
 
 namespace
@@ -110,6 +110,13 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
    _sprite.setTexture(*_texture);
    _sprite.setPosition(x + sprite_offset_x_px, y + sprite_offset_y_px);
+
+   _rect_px = {
+      static_cast<int32_t>(data._tmx_object->_x_px),
+      static_cast<int32_t>(data._tmx_object->_y_px),
+      static_cast<int32_t>(data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_height_px)
+   };
 }
 
 
@@ -171,8 +178,12 @@ void BubbleCube::update(const sf::Time& dt)
    // respawn when the time has come
    if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
-      _popped = false;
-      _body->SetActive(true);
+      // don't respawn while player blocks the area
+      if (!Player::getCurrent()->getPlayerPixelRect().intersects(_rect_px))
+      {
+         _popped = false;
+         _body->SetActive(true);
+      }
    }
 }
 
