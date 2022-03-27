@@ -918,7 +918,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          Console::getInstance().execute();
       }
-      if (event.key.code == sf::Keyboard::F12)
+      if (event.key.code == sf::Keyboard::F11)
       {
          _draw_states._draw_console = !_draw_states._draw_console;
          Console::getInstance().setActive(_draw_states._draw_console);
@@ -987,7 +987,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          // free to use
          break;
       }
-      case sf::Keyboard::F12:
+      case sf::Keyboard::F11:
       {
          _draw_states._draw_console = !_draw_states._draw_console;
          Console::getInstance().setActive(_draw_states._draw_console);
