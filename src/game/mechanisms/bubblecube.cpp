@@ -26,6 +26,27 @@ static constexpr auto pop_frequency = 15.0f;
 
 static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
+
+static constexpr auto move_down_velocity = 0.5f;
+
+
+bool isPlayerType(ObjectType type)
+{
+   switch (type)
+   {
+      case ObjectTypePlayer:
+      case ObjectTypePlayerFootSensor:
+      case ObjectTypePlayerHeadSensor:
+      case ObjectTypePlayerLeftArmSensor:
+      case ObjectTypePlayerRightArmSensor:
+      {
+         return true;
+      }
+   }
+
+   return false;
+}
+
 }
 
 
@@ -54,6 +75,12 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
       if (pop_only_on_foot_contact_it != data._tmx_object->_properties->_map.end())
       {
          _pop_only_on_foot_contact = pop_only_on_foot_contact_it->second->_value_bool.value();
+      }
+
+      const auto moves_down_on_contact_it = data._tmx_object->_properties->_map.find("moves_down_on_contact");
+      if (moves_down_on_contact_it != data._tmx_object->_properties->_map.end())
+      {
+         _moves_down_on_contact = moves_down_on_contact_it->second->_value_bool.value();
       }
 
       auto z_it = data._tmx_object->_properties->_map.find("z");
@@ -89,9 +116,9 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    // create body
-   const auto x = data._tmx_object->_x_px;
-   const auto y = data._tmx_object->_y_px;
-   _position_m = MPP * b2Vec2{x, y};
+   _x_px = data._tmx_object->_x_px;
+   _y_px = data._tmx_object->_y_px;
+   _position_m = MPP * b2Vec2{_x_px, _y_px};
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
@@ -109,7 +136,6 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
    _sprite.setTexture(*_texture);
-   _sprite.setPosition(x + sprite_offset_x_px, y + sprite_offset_y_px);
 
    _rect_px = {
       static_cast<int32_t>(data._tmx_object->_x_px),
@@ -163,10 +189,23 @@ void BubbleCube::update(const sf::Time& dt)
    _elapsed_s += dt.asSeconds();
    _pop_elapsed_s += dt.asSeconds();
 
+   // if configured, bubble moves down when the player stands on top of it
+   if (_moves_down_on_contact)
+   {
+      if (_contact_count > 0)
+      {
+         _push_down_offset_m += dt.asSeconds() * move_down_velocity;
+      }
+      else
+      {
+         _push_down_offset_m *= 0.95f;
+      }
+   }
+
    const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
    _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
 
-   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f};
+   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f} + b2Vec2{0.0f, _push_down_offset_m};
 
    _body->SetTransform(_position_m + move_offset, 0.0f);
 
@@ -185,6 +224,8 @@ void BubbleCube::update(const sf::Time& dt)
          _body->SetActive(true);
       }
    }
+
+   _sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_m * PPM);
 }
 
 
