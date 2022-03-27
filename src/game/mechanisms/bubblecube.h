@@ -65,5 +65,8 @@ private:
    b2Vec2 _position_m;
    b2PolygonShape _shape;
    void pop();
+   void updatePosition();
+   void updateRespawnCondition();
+   void updatePoppedCondition();
 };
 
