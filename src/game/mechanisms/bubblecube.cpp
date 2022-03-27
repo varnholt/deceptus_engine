@@ -220,6 +220,42 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
 }
 
 
+void BubbleCube::updatePosition()
+{
+   const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
+   _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
+
+   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f} + b2Vec2{0.0f, _push_down_offset_m};
+
+   _body->SetTransform(_position_m + move_offset, 0.0f);
+
+   _sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_m * PPM);
+}
+
+
+void BubbleCube::updateRespawnCondition()
+{
+   // respawn when the time has come
+   if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
+   {
+      // don't respawn while player blocks the area
+      if (!Player::getCurrent()->getPlayerPixelRect().intersects(_rect_px))
+      {
+         _popped = false;
+         _body->SetActive(true);
+      }
+   }
+}
+
+
+void BubbleCube::updatePoppedCondition()
+{
+   if (_popped)
+   {
+      _body->SetActive(false);
+   }
+}
+
 
 // 12 x 4 boxes per row
 //
@@ -240,31 +276,9 @@ void BubbleCube::update(const sf::Time& dt)
 
    updatePushDownOffset(dt);
    updateMaxDurationCondition(dt);
-
-   const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
-   _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
-
-   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f} + b2Vec2{0.0f, _push_down_offset_m};
-
-   _body->SetTransform(_position_m + move_offset, 0.0f);
-
-   if (_popped)
-   {
-      _body->SetActive(false);
-   }
-
-   // respawn when the time has come
-   if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
-   {
-      // don't respawn while player blocks the area
-      if (!Player::getCurrent()->getPlayerPixelRect().intersects(_rect_px))
-      {
-         _popped = false;
-         _body->SetActive(true);
-      }
-   }
-
-   _sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_m * PPM);
+   updatePosition();
+   updatePoppedCondition();
+   updateRespawnCondition();
 }
 
 
