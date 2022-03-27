@@ -823,8 +823,10 @@ void Game::processEvent(const sf::Event& event)
    {
       if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
       {
-         // the map is save to leave open when losing the window focus
-         if (!DisplayMode::getInstance().isSet(Display::Map))
+         if (
+               !DisplayMode::getInstance().isSet(Display::Map) // the map is save to leave open when losing the window focus
+            && !Console::getInstance().isActive()              // while the console is open, don't disturb
+         )
          {
             showPauseMenu();
          }
