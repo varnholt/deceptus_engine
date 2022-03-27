@@ -35,6 +35,9 @@ public:
 
 private:
 
+   void updatePushDownOffset(const sf::Time& dt);
+   void updateMaxDurationCondition(const sf::Time& dt);
+
    float _pop_time_respawn_s = 3.0f;
    float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
@@ -47,6 +50,8 @@ private:
    bool _moves_down_on_contact = false;
    sf::IntRect _rect_px;
    float _push_down_offset_m = 0.0f;
+   float _contact_duration_s = 0.0f;
+   std::optional<float> _maximum_contact_duration_s;
    float _x_px;
    float _y_px;
 
@@ -59,5 +64,6 @@ private:
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2PolygonShape _shape;
+   void pop();
 };
 

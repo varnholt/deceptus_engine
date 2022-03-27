@@ -83,6 +83,12 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
          _moves_down_on_contact = moves_down_on_contact_it->second->_value_bool.value();
       }
 
+      const auto maximum_contact_duration_s_it = data._tmx_object->_properties->_map.find("maximum_contact_duration_s");
+      if (maximum_contact_duration_s_it != data._tmx_object->_properties->_map.end())
+      {
+         _maximum_contact_duration_s = maximum_contact_duration_s_it->second->_value_float.value();
+      }
+
       auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
@@ -171,24 +177,8 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 }
 
 
-// 12 x 4 boxes per row
-//
-// regular animation is in row 0
-// pop animation is in row 1
-// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
-// |   | __|__ |   |   | __|__ |   |   | __|__ |   |   | __|__ |   |
-// +---+/#####\+---+---+/#####\+---+---+/#####\+---+---+/#####\+---+ . . .
-// |   |#######|   |   |#######|   |   |#######|   |   |#######|   |
-// +---+\#####/+---+---+\#####/+---+---+\#####/+---+---+\#####/+---+ . . .
-// |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |
-// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
-//
-
-void BubbleCube::update(const sf::Time& dt)
+void BubbleCube::updatePushDownOffset(const sf::Time& dt)
 {
-   _elapsed_s += dt.asSeconds();
-   _pop_elapsed_s += dt.asSeconds();
-
    // if configured, bubble moves down when the player stands on top of it
    if (_moves_down_on_contact)
    {
@@ -201,6 +191,55 @@ void BubbleCube::update(const sf::Time& dt)
          _push_down_offset_m *= 0.95f;
       }
    }
+}
+
+
+void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
+{
+   if (_popped)
+   {
+      return;
+   }
+
+   if (_contact_count == 0)
+   {
+      return;
+   }
+
+   // pop if player exceeds maximum contact duration
+   if (_maximum_contact_duration_s.has_value())
+   {
+      _contact_duration_s += dt.asSeconds();
+
+      if (_contact_duration_s > _maximum_contact_duration_s)
+      {
+         _contact_duration_s = 0.0f;
+         pop();
+      }
+   }
+}
+
+
+
+// 12 x 4 boxes per row
+//
+// regular animation is in row 0
+// pop animation is in row 1
+// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
+// |   | __|__ |   |   | __|__ |   |   | __|__ |   |   | __|__ |   |
+// +---+/#####\+---+---+/#####\+---+---+/#####\+---+---+/#####\+---+ . . .
+// |   |#######|   |   |#######|   |   |#######|   |   |#######|   |
+// +---+\#####/+---+---+\#####/+---+---+\#####/+---+---+\#####/+---+ . . .
+// |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |
+// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
+//
+void BubbleCube::update(const sf::Time& dt)
+{
+   _elapsed_s += dt.asSeconds();
+   _pop_elapsed_s += dt.asSeconds();
+
+   updatePushDownOffset(dt);
+   updateMaxDurationCondition(dt);
 
    const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
    _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
@@ -245,6 +284,14 @@ void BubbleCube::beginContact(FixtureNode* other)
 }
 
 
+void BubbleCube::pop()
+{
+   _popped = true;
+   _pop_time = GlobalClock::getInstance().getElapsedTime();
+   _pop_elapsed_s = 0.0f;
+}
+
+
 void BubbleCube::endContact(FixtureNode* other)
 {
    if (_pop_only_on_foot_contact && other->getType() != ObjectTypePlayerFootSensor)
@@ -261,9 +308,7 @@ void BubbleCube::endContact(FixtureNode* other)
 
    if (_contact_count == 0)
    {
-      _popped = true;
-      _pop_time = GlobalClock::getInstance().getElapsedTime();
-      _pop_elapsed_s = 0.0f;
+      pop();
    }
 }
 
