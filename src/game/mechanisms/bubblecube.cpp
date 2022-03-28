@@ -4,8 +4,11 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "level.h"
 #include "player/player.h"
 #include "texturepool.h"
+
+#include <iostream>
 
 
 namespace
@@ -28,25 +31,6 @@ static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
 
 static constexpr auto move_down_velocity = 0.5f;
-
-
-bool isPlayerType(ObjectType type)
-{
-   switch (type)
-   {
-      case ObjectTypePlayer:
-      case ObjectTypePlayerFootSensor:
-      case ObjectTypePlayerHeadSensor:
-      case ObjectTypePlayerLeftArmSensor:
-      case ObjectTypePlayerRightArmSensor:
-      {
-         return true;
-      }
-   }
-
-   return false;
-}
-
 }
 
 
@@ -152,6 +136,17 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
 }
 
 
+// 12 x 4 boxes per row
+//
+// regular animation is in row 0
+// pop animation is in row 1
+// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
+// |   | __|__ |   |   | __|__ |   |   | __|__ |   |   | __|__ |   |
+// +---+/#####\+---+---+/#####\+---+---+/#####\+---+---+/#####\+---+ . . .
+// |   |#######|   |   |#######|   |   |#######|   |   |#######|   |
+// +---+\#####/+---+---+\#####/+---+---+\#####/+---+---+\#####/+---+ . . .
+// |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |
+// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
 void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    auto sprite_index = 0;
@@ -257,22 +252,44 @@ void BubbleCube::updatePoppedCondition()
 }
 
 
-// 12 x 4 boxes per row
-//
-// regular animation is in row 0
-// pop animation is in row 1
-// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
-// |   | __|__ |   |   | __|__ |   |   | __|__ |   |   | __|__ |   |
-// +---+/#####\+---+---+/#####\+---+---+/#####\+---+---+/#####\+---+ . . .
-// |   |#######|   |   |#######|   |   |#######|   |   |#######|   |
-// +---+\#####/+---+---+\#####/+---+---+\#####/+---+---+\#####/+---+ . . .
-// |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |
-// +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
-//
+struct BubbleQueryCallback : public b2QueryCallback
+{
+   std::vector<b2Body*> _bodies;
+   bool _pop_requested = false;
+
+   bool ReportFixture(b2Fixture* fixture)
+   {
+      _bodies.push_back(fixture->GetBody());
+      if (_bodies.size() >= 8)
+      {
+         _pop_requested = true;
+         return false; // abort query
+      }
+
+      return true;
+   }
+};
+
+
 void BubbleCube::update(const sf::Time& dt)
 {
    _elapsed_s += dt.asSeconds();
    _pop_elapsed_s += dt.asSeconds();
+
+   // check for collisions with surrounding areas
+   if (!_popped && _moves_down_on_contact && _contact_count > 0)
+   {
+      BubbleQueryCallback query_callback;
+
+      b2AABB aabb;
+      _fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+      Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
+
+      if (query_callback._pop_requested)
+      {
+         pop();
+      }
+   }
 
    updatePushDownOffset(dt);
    updateMaxDurationCondition(dt);
@@ -303,6 +320,7 @@ void BubbleCube::pop()
    _popped = true;
    _pop_time = GlobalClock::getInstance().getElapsedTime();
    _pop_elapsed_s = 0.0f;
+   _contact_count = 0;
 }
 
 
@@ -318,7 +336,7 @@ void BubbleCube::endContact(FixtureNode* other)
       return;
    }
 
-   _contact_count--;
+   _contact_count = std::max(0, _contact_count - 1);
 
    if (_contact_count == 0)
    {
