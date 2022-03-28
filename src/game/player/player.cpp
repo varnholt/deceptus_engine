@@ -41,6 +41,10 @@ static constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyC
 static constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
 static constexpr int16_t group_index = 0;
 static constexpr auto impulse_epsilon = 0.0000001f;
+
+static constexpr auto wall_slide_sensor_width = 8.0f;
+static constexpr auto wall_slide_sensor_height = 0.75f;
+static constexpr auto wall_slide_sensor_distance = 0.21f;
 }
 
 
@@ -287,10 +291,10 @@ void Player::updatePixelRect()
 {
    sf::IntRect rect;
 
-   const auto dh = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+   const auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
    rect.left = static_cast<int>(_pixel_position_f.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(_pixel_position_f.y) - dh - (dh / 2);
+   rect.top = static_cast<int>(_pixel_position_f.y) - height_diff_px - (height_diff_px / 2);
 
    rect.width = PLAYER_ACTUAL_WIDTH;
    rect.height = PLAYER_ACTUAL_HEIGHT;
@@ -327,28 +331,28 @@ void Player::createFeet()
    //  ^                        ^
    //  count * (dist + radius)
 
-   const auto width  = PLAYER_ACTUAL_WIDTH;
-   const auto height = PLAYER_ACTUAL_HEIGHT;
-   const auto feetRadius = 0.16f / static_cast<float>(__foot_count);
-   const auto feetDist = 0.0f;
-   const auto feetOffset = static_cast<float>(__foot_count) * (feetRadius * 2.0f + feetDist) * 0.5f - feetRadius;
+   const auto width_px  = PLAYER_ACTUAL_WIDTH;
+   const auto height_px = PLAYER_ACTUAL_HEIGHT;
+   const auto feet_radius_m = 0.16f / static_cast<float>(__foot_count);
+   const auto feet_distance_m = 0.0f;
+   const auto feet_offset_m = static_cast<float>(__foot_count) * (feet_radius_m * 2.0f + feet_distance_m) * 0.5f - feet_radius_m;
 
    for (auto i = 0u; i < __foot_count; i++)
    {
-      b2FixtureDef fixtureDefFeet;
-      fixtureDefFeet.density = 1.f;
-      fixtureDefFeet.friction = PhysicsConfiguration::getInstance()._player_friction;
-      fixtureDefFeet.restitution = 0.0f;
-      fixtureDefFeet.filter.categoryBits = category_bits;
-      fixtureDefFeet.filter.maskBits = mask_bits_standing;
-      fixtureDefFeet.filter.groupIndex = group_index;
+      b2FixtureDef fixture_def_feet;
+      fixture_def_feet.density = 1.f;
+      fixture_def_feet.friction = PhysicsConfiguration::getInstance()._player_friction;
+      fixture_def_feet.restitution = 0.0f;
+      fixture_def_feet.filter.categoryBits = category_bits;
+      fixture_def_feet.filter.maskBits = mask_bits_standing;
+      fixture_def_feet.filter.groupIndex = group_index;
 
       b2CircleShape feetShape;
-      feetShape.m_p.Set(i * (feetRadius * 2.0f + feetDist) - feetOffset, 0.12f);
-      feetShape.m_radius = feetRadius;
-      fixtureDefFeet.shape = &feetShape;
+      feetShape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
+      feetShape.m_radius = feet_radius_m;
+      fixture_def_feet.shape = &feetShape;
 
-      auto foot = _body->CreateFixture(&fixtureDefFeet);
+      auto foot = _body->CreateFixture(&fixture_def_feet);
       _foot_fixture[i] = foot;
 
       auto objectDataFeet = new FixtureNode(this);
@@ -360,81 +364,73 @@ void Player::createFeet()
    // attach foot sensor shape
    b2PolygonShape footPolygonShape;
    footPolygonShape.SetAsBox(
-      (width / 2.0f) / (PPM * 2.0f),
-      (height / 4.0f) / (PPM * 2.0f),
-      b2Vec2(0.0f, (height * 0.5f) / (PPM * 2.0f)),
+      (width_px / 2.0f) / (PPM * 2.0f),
+      (height_px / 4.0f) / (PPM * 2.0f),
+      b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)),
       0.0f
    );
 
-   b2FixtureDef footSensorFixtureDef;
-   footSensorFixtureDef.isSensor = true;
-   footSensorFixtureDef.shape = &footPolygonShape;
+   b2FixtureDef foot_sensor_fixture_def;
+   foot_sensor_fixture_def.isSensor = true;
+   foot_sensor_fixture_def.shape = &footPolygonShape;
 
-   auto footSensorFixture = _body->CreateFixture(&footSensorFixtureDef);
-
-   auto footObjectData = new FixtureNode(this);
-   footObjectData->setType(ObjectTypePlayerFootSensor);
-   footSensorFixture->SetUserData(static_cast<void*>(footObjectData));
+   auto foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
+   auto foot_object_data = new FixtureNode(this);
+   foot_object_data->setType(ObjectTypePlayerFootSensor);
+   foot_sensor_fixture->SetUserData(static_cast<void*>(foot_object_data));
 
    // attach head sensor shape
-   b2PolygonShape headPolygonShape;
-   headPolygonShape.SetAsBox(
-      (width / 2.0f) / (PPM * 2.0f),
-      (height / 4.0f) / (PPM * 2.0f),
-      b2Vec2(0.0f, -height / (PPM * 2.0f)),
+   b2PolygonShape head_polygon_shape;
+   head_polygon_shape.SetAsBox(
+      (width_px / 2.0f) / (PPM * 2.0f),
+      (height_px / 4.0f) / (PPM * 2.0f),
+      b2Vec2(0.0f, -height_px / (PPM * 2.0f)),
       0.0f
    );
 
-   b2FixtureDef headSensorFixtureDef;
-   headSensorFixtureDef.isSensor = true;
-   headSensorFixtureDef.shape = &headPolygonShape;
+   b2FixtureDef head_sensor_fixture_def;
+   head_sensor_fixture_def.isSensor = true;
+   head_sensor_fixture_def.shape = &head_polygon_shape;
 
-   auto headSensorFixture = _body->CreateFixture(&headSensorFixtureDef);
-
-   auto headObjectData = new FixtureNode(this);
-   headObjectData->setType(ObjectTypePlayerHeadSensor);
-   headSensorFixture->SetUserData(static_cast<void*>(headObjectData));
+   auto head_sensor_fixture = _body->CreateFixture(&head_sensor_fixture_def);
+   auto head_object_data = new FixtureNode(this);
+   head_object_data->setType(ObjectTypePlayerHeadSensor);
+   head_sensor_fixture->SetUserData(static_cast<void*>(head_object_data));
 
    // wallslide sensors
-   const auto wallSlideSensorWidth = 8.0f;
-   const auto wallSlideSensorHeight = 0.75f;
-   const auto wallSlideSensorDistance = 0.21f;
-
-   b2PolygonShape leftArmPolygonShape;
-   leftArmPolygonShape.SetAsBox(
-      wallSlideSensorWidth / (PPM * 2.0f),
-      wallSlideSensorHeight / (PPM * 2.0f),
-      b2Vec2(-wallSlideSensorDistance, -height / (PPM * 2.0f)),
+   b2PolygonShape left_arm_polygon_shape;
+   left_arm_polygon_shape.SetAsBox(
+      wall_slide_sensor_width / (PPM * 2.0f),
+      wall_slide_sensor_height / (PPM * 2.0f),
+      b2Vec2(-wall_slide_sensor_distance, -height_px / (PPM * 2.0f)),
       0.0f
    );
 
-   b2FixtureDef leftArmSensorFixtureDef;
-   leftArmSensorFixtureDef.isSensor = true;
-   leftArmSensorFixtureDef.shape = &leftArmPolygonShape;
+   b2FixtureDef left_arm_sensor_fixture_def;
+   left_arm_sensor_fixture_def.isSensor = true;
+   left_arm_sensor_fixture_def.shape = &left_arm_polygon_shape;
 
-   auto leftArmSensorFixture = _body->CreateFixture(&leftArmSensorFixtureDef);
+   auto left_arm_sensor_fixture = _body->CreateFixture(&left_arm_sensor_fixture_def);
+   auto left_arm_object_data = new FixtureNode(this);
+   left_arm_object_data->setType(ObjectTypePlayerLeftArmSensor);
+   left_arm_sensor_fixture->SetUserData(static_cast<void*>(left_arm_object_data));
 
-   auto leftArmObjectData = new FixtureNode(this);
-   leftArmObjectData->setType(ObjectTypePlayerLeftArmSensor);
-   leftArmSensorFixture->SetUserData(static_cast<void*>(leftArmObjectData));
-
-   b2PolygonShape rightArmPolygonShape;
-   rightArmPolygonShape.SetAsBox(
-      wallSlideSensorWidth / (PPM * 2.0f),
-      wallSlideSensorHeight / (PPM * 2.0f),
-      b2Vec2(wallSlideSensorDistance, -height / (PPM * 2.0f)),
+   b2PolygonShape right_arm_polygon_shape;
+   right_arm_polygon_shape.SetAsBox(
+      wall_slide_sensor_width / (PPM * 2.0f),
+      wall_slide_sensor_height / (PPM * 2.0f),
+      b2Vec2(wall_slide_sensor_distance, -height_px / (PPM * 2.0f)),
       0.0f
    );
 
-   b2FixtureDef rightArmSensorFixtureDef;
-   rightArmSensorFixtureDef.isSensor = true;
-   rightArmSensorFixtureDef.shape = &rightArmPolygonShape;
+   b2FixtureDef right_arm_sensor_fixture_def;
+   right_arm_sensor_fixture_def.isSensor = true;
+   right_arm_sensor_fixture_def.shape = &right_arm_polygon_shape;
 
-   auto rightArmSensorFixture = _body->CreateFixture(&rightArmSensorFixtureDef);
-
-   auto rightArmObjectData = new FixtureNode(this);
-   rightArmObjectData->setType(ObjectTypePlayerRightArmSensor);
-   rightArmSensorFixture->SetUserData(static_cast<void*>(rightArmObjectData));
+   auto right_arm_sensor_fixture = _body->CreateFixture(&right_arm_sensor_fixture_def);
+   auto right_arm_object_data = new FixtureNode(this);
+   right_arm_object_data->setType(ObjectTypePlayerRightArmSensor);
+   right_arm_sensor_fixture->SetUserData(static_cast<void*>(right_arm_object_data));
 }
 
 
@@ -442,37 +438,37 @@ void Player::createFeet()
 void Player::createBody()
 {
    // create player body
-   auto bodyDef = new b2BodyDef();
-   bodyDef->position.Set(
+   auto body_def = new b2BodyDef();
+   body_def->position.Set(
       getPixelPositionf().x * MPP,
       getPixelPositionf().y * MPP
    );
 
-   bodyDef->type = b2_dynamicBody;
+   body_def->type = b2_dynamicBody;
 
-   _body = _world->CreateBody(bodyDef);
+   _body = _world->CreateBody(body_def);
    _body->SetFixedRotation(true);
 
    // add body shape
-   b2FixtureDef fixtureBodyDef;
-   fixtureBodyDef.density = 0.45f;
-   fixtureBodyDef.friction = PhysicsConfiguration::getInstance()._player_friction;
-   fixtureBodyDef.restitution = 0.0f;
+   b2FixtureDef body_fixture_def;
+   body_fixture_def.density = 0.45f;
+   body_fixture_def.friction = PhysicsConfiguration::getInstance()._player_friction;
+   body_fixture_def.restitution = 0.0f;
 
-   fixtureBodyDef.filter.categoryBits = category_bits;
-   fixtureBodyDef.filter.maskBits = mask_bits_standing;
-   fixtureBodyDef.filter.groupIndex = group_index;
+   body_fixture_def.filter.categoryBits = category_bits;
+   body_fixture_def.filter.maskBits = mask_bits_standing;
+   body_fixture_def.filter.groupIndex = group_index;
 
-   b2PolygonShape bodyShape;
-   bodyShape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
-   fixtureBodyDef.shape = &bodyShape;
+   b2PolygonShape body_shape;
+   body_shape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
+   body_fixture_def.shape = &body_shape;
 
-   _body_fixture = _body->CreateFixture(&fixtureBodyDef);
+   _body_fixture = _body->CreateFixture(&body_fixture_def);
 
-   FixtureNode* objectDataHead = new FixtureNode(this);
-   objectDataHead->setType(ObjectTypePlayer);
-   objectDataHead->setFlag("head", true);
-   _body_fixture->SetUserData(static_cast<void*>(objectDataHead));
+   auto object_data_head = new FixtureNode(this);
+   object_data_head->setType(ObjectTypePlayer);
+   object_data_head->setFlag("head", true);
+   _body_fixture->SetUserData(static_cast<void*>(object_data_head));
 
    // mBody->Dump();
 
@@ -636,38 +632,38 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
       return 0.0f;
    }
 
-   float desiredVel = 0.0f;
+   float desired_velocity = 0.0f;
 
    if (_controls->hasFlag(KeyPressedLeft))
    {
-      desiredVel = b2Max(speed.current_velocity.x - speed._acceleration, -speed._velocity_max);
+      desired_velocity = b2Max(speed.current_velocity.x - speed._acceleration, -speed._velocity_max);
    }
 
    if (_controls->hasFlag(KeyPressedRight))
    {
-      desiredVel = b2Min(speed.current_velocity.x + speed._acceleration, speed._velocity_max);
+      desired_velocity = b2Min(speed.current_velocity.x + speed._acceleration, speed._velocity_max);
    }
 
    // slowdown as soon as
    // a) no movement to left or right
    // b) movement is opposite to given direction
    // c) no movement at all
-   const auto noMovementToLeftOrRight =
+   const auto no_movement_to_left_or_right =
          (!(_controls->hasFlag(KeyPressedLeft)))
       && (!(_controls->hasFlag(KeyPressedRight)));
 
-   const auto velocityOppositeToGivenDir =
+   const auto velocity_opposite_to_given_dir =
          (speed.current_velocity.x < -0.01f && _controls->hasFlag(KeyPressedRight))
       || (speed.current_velocity.x >  0.01f && _controls->hasFlag(KeyPressedLeft));
 
-   const auto noMovement = (fabs(desiredVel) < 0.0001f);
+   const auto no_movement = (fabs(desired_velocity) < 0.0001f);
 
-   if (noMovementToLeftOrRight || velocityOppositeToGivenDir || noMovement)
+   if (no_movement_to_left_or_right || velocity_opposite_to_given_dir || no_movement)
    {
-      desiredVel = speed.current_velocity.x * speed._deceleration;
+      desired_velocity = speed.current_velocity.x * speed._deceleration;
    }
 
-   return desiredVel;
+   return desired_velocity;
 }
 
 
