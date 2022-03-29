@@ -2,9 +2,10 @@
 #include <iostream>
 #include <math.h>
 
-// https://thebookofshaders.com/13/
-// Author @patriciogv - 2015
-// http://patriciogonzalezvivo.com
+// code is based on
+// - https://thebookofshaders.com/13/
+// - https://www.shadertoy.com/view/4dS3Wd
+
 
 //-----------------------------------------------------------------------------
 constexpr auto OCTAVES = 6;
@@ -33,11 +34,17 @@ float fbm::mix(float a, float b, float x)
 
 
 //-----------------------------------------------------------------------------
-float fbm::hash(float n) { return fract(sin(n) * 1e4f); }
+float fbm::hash(float n)
+{
+   return fract(sin(n) * 1e4f);
+}
 
 
 //-----------------------------------------------------------------------------
-float fbm::hash(const vec2& p) { return fract(1e4f * sin(17.0f * p.x + p.y * 0.1f) * (0.1f + abs(sin(p.y * 13.0f + p.x)))); }
+float fbm::hash(const vec2& p)
+{
+   return fract(1e4f * sin(17.0f * p.x + p.y * 0.1f) * (0.1f + abs(sin(p.y * 13.0f + p.x))));
+}
 
 
 //-----------------------------------------------------------------------------
@@ -69,7 +76,6 @@ float fbm::random1(const vec2& st)
 
 
 //-----------------------------------------------------------------------------
-// Based on Morgan McGuire @morgan3d, https://www.shadertoy.com/view/4dS3Wd
 float fbm::noise1(const vec2& st)
 {
    vec2 i{floor(st.x), floor(st.y)};
