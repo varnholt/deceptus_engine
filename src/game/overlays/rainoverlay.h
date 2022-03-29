@@ -51,12 +51,12 @@ public:
 
    RainOverlay();
 
-   void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
+   void update(const sf::Time& dt) override;
 
    void setSettings(const RainSettings& newSettings);
 
-   private:
+private:
 
    void determineRainSurfaces();
 

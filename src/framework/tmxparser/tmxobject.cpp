@@ -17,7 +17,7 @@ TmxObject::~TmxObject()
 }
 
 
-void TmxObject::deserialize(tinyxml2::XMLElement *element)
+void TmxObject::deserialize(tinyxml2::XMLElement* element)
 {
   TmxElement::deserialize(element);
 
@@ -37,18 +37,18 @@ void TmxObject::deserialize(tinyxml2::XMLElement *element)
          continue;
       }
 
-      TmxElement* element = nullptr;
+      TmxElement* next_element = nullptr;
       auto parsed = false;
 
       if (sub_element->Name() == std::string("polyline"))
       {
          _polyline = new TmxPolyLine();
-         element = _polyline;
+         next_element = _polyline;
       }
       else if (sub_element->Name() == std::string("polygon"))
       {
          _polygon = new TmxPolygon();
-         element = _polygon;
+         next_element = _polygon;
       }
       else if (sub_element->Name() == std::string("properties"))
       {
@@ -57,9 +57,9 @@ void TmxObject::deserialize(tinyxml2::XMLElement *element)
          parsed = true;
       }
 
-      if (element)
+      if (next_element)
       {
-         element->deserialize(sub_element);
+         next_element->deserialize(sub_element);
       }
       else if (!parsed)
       {

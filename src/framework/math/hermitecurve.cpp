@@ -148,7 +148,6 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
       tangents = _orientation_tangents;
    }
 
-   // init sf::Vector2fs
    sf::Vector2f p;
    auto h1 = 0.0f;
    auto h2 = 0.0f;
@@ -202,7 +201,6 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    h3 =         s3 - 2.0f * s2 + s;
    h4 =         s3 -        s2;
 
-   // p = p1 * h1 + p2 * h2 + t3 * h3 + t4 * h4
    p.x = p1.x * h1 + p2.x * h2 + t1.x * h3 + t2.x * h4;
    p.y = p1.y * h1 + p2.y * h2 + t1.y * h3 + t2.y * h4;
 
