@@ -38,8 +38,8 @@ void ExtraManager::load(
    }
 
    auto tiles = layer->_data;
-   auto width = layer->_width_px;
-   auto height = layer->_height_px;
+   auto width = layer->_width_tl;
+   auto height = layer->_height_tl;
    auto first_id = tileset->_first_gid;
 
    for (auto i = 0u; i < width; ++i)

@@ -102,12 +102,12 @@ bool TileMap::load(
    auto& tile_map = tileset->_tile_map;
 
    // populate the vertex array, with one quad per tile
-   for (auto pos_x = 0u; pos_x < layer->_width_px; ++pos_x)
+   for (auto pos_x = 0u; pos_x < layer->_width_tl; ++pos_x)
    {
-      for (auto pos_y = 0u; pos_y < layer->_height_px; ++pos_y)
+      for (auto pos_y = 0u; pos_y < layer->_height_tl; ++pos_y)
       {
          // get the current tile number
-         auto tile_number = layer->_data[pos_x + pos_y * layer->_width_px];
+         auto tile_number = layer->_data[pos_x + pos_y * layer->_width_tl];
 
          if (tile_number != 0)
          {
