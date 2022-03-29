@@ -347,11 +347,11 @@ uint32_t calcNormal(int32_t z, uint32_t x0, uint32_t x1, uint32_t y0, uint32_t y
    y0 = (y0 >> 16 & 255) + (y0 >> 8 & 255) + (y0 & 255);
    y1 = (y1 >> 16 & 255) + (y1 >> 8 & 255) + (y1 & 255);
 
-   auto x = (x0 - x1);
-   auto y = (y0 - y1);
+   int32_t x = static_cast<int32_t>(x0 - x1);
+   int32_t y = static_cast<int32_t>(y0 - y1);
 
-   const auto mag = x * x + y * y + z * z;
-   const auto t = static_cast<float>(128.0 / sqrt(static_cast<double>(mag)));
+   const auto magnitude = x * x + y * y + z * z;
+   const auto t = static_cast<float>(128.0 / sqrt(static_cast<double>(magnitude)));
 
    x = static_cast<int32_t>(128 + x * t); if (x < 0) x = 0; if (x > 255) x = 255;
    y = static_cast<int32_t>(128 - y * t); if (y < 0) y = 0; if (y > 255) y = 255;
