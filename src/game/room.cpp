@@ -89,7 +89,7 @@ std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::s
 void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms)
 {
    // ignore invalid rects
-   const auto config = GameConfiguration::getInstance();
+   const auto& config = GameConfiguration::getInstance();
    if (data._tmx_object->_width_px < config._view_width)
    {
       Log::Error() << "ignoring rect, room width smaller than screen width";

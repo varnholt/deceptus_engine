@@ -60,7 +60,7 @@ void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_he
 
 void CameraSystem::updateX(const sf::Time& dt)
 {
-   auto& camera_config = CameraSystemConfiguration::getInstance();
+   const auto& camera_config = CameraSystemConfiguration::getInstance();
 
    auto player = Player::getCurrent();
    auto player_x_px = player->getPixelPositionf().x;
@@ -120,7 +120,7 @@ void CameraSystem::updateX(const sf::Time& dt)
 
 void CameraSystem::updateY(const sf::Time& dt)
 {
-   auto& camera_config = CameraSystemConfiguration::getInstance();
+   const auto& camera_config = CameraSystemConfiguration::getInstance();
 
    const auto p_range  = _view_height_px / camera_config.getPanicLineDivider();
    const auto p_center = _view_height_px / 2.0f;

@@ -35,7 +35,7 @@ void BoomEffect::update(const sf::Time& /*dt*/)
 
    if (x > 0.0f)
    {
-      GameConfiguration& game_config = GameConfiguration::getInstance();
+      const auto& game_config = GameConfiguration::getInstance();
 
       x = (_boom_duration - x);
       x *= _effect_velocity;

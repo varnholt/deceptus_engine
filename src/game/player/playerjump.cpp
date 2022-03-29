@@ -72,7 +72,7 @@ void PlayerJump::updateJumpBuffer()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJump()
 {
-   auto& physics = PhysicsConfiguration::getInstance();
+   const auto& physics = PhysicsConfiguration::getInstance();
 
    if (_jump_info._in_water && _controls->isJumpButtonPressed())
    {
@@ -221,7 +221,7 @@ void PlayerJump::wallJump()
    // double jump should happen with a constant impulse, no adjusting through button press duration
    _body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
 
-   auto& physics = PhysicsConfiguration::getInstance();
+   const auto& physics = PhysicsConfiguration::getInstance();
 
    const auto impulse_x =   _body->GetMass() * physics._player_wall_jump_vector_x;
    const auto impulse_y = -(_body->GetMass() * physics._player_wall_jump_vector_y);
@@ -373,7 +373,7 @@ void PlayerJump::updateWallJump()
       return;
    }
 
-   auto& physics = PhysicsConfiguration::getInstance();
+   const auto& physics = PhysicsConfiguration::getInstance();
 
    _walljump_multiplier *= physics._player_wall_jump_multiplier_scale_per_frame;
    _walljump_multiplier += physics._player_wall_jump_multiplier_increment_per_frame;
