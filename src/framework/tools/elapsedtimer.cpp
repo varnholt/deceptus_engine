@@ -6,8 +6,8 @@
 
 
 ElapsedTimer::ElapsedTimer()
+  : _start_time{std::chrono::high_resolution_clock::now()}
 {
-   _start_time = std::chrono::high_resolution_clock::now();
 }
 
 

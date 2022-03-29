@@ -21,7 +21,7 @@ TmxImageLayer::~TmxImageLayer()
 }
 
 
-void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
+void TmxImageLayer::deserialize(tinyxml2::XMLElement* element)
 {
    TmxElement::deserialize(element);
 
@@ -39,13 +39,13 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
          continue;
       }
 
-      TmxElement* element = nullptr;
+      TmxElement* next_element = nullptr;
       auto parsed = false;
 
       if (sub_element->Name() == std::string("image"))
       {
          _image = new TmxImage();
-         element = _image;
+         next_element = _image;
       }
       else if (sub_element->Name() == std::string("properties"))
       {
@@ -54,9 +54,9 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement *element)
          parsed = true;
       }
 
-      if (element)
+      if (next_element)
       {
-         element->deserialize(sub_element);
+         next_element->deserialize(sub_element);
       }
       else if (!parsed)
       {
