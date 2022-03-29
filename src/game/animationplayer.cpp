@@ -25,7 +25,7 @@ void AnimationPlayer::update(const sf::Time& dt)
       std::remove_if(
          _animations.begin(),
          _animations.end(),
-         [](auto& animation){return animation->_paused;}
+         [](const auto& animation){return animation->_paused;}
       ),
       _animations.end()
    );

@@ -155,11 +155,7 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
 
 void CameraRoomLock::setRoom(const std::shared_ptr<Room>& room)
 {
-   if (_room != room)
-   {
-      // Log::Info() << "reset room interpolation";
-      _room = room;
-   }
+   _room = room;
 }
 
 

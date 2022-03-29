@@ -47,7 +47,6 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileset)
          if (tile_number != 0)
          {
             tile_relative = tile_number - tileset->_first_gid;
-            _map[y_tl * width_tl + x_tl] = tile_relative;
          }
 
           _map[y_tl * width_tl + x_tl] = tile_relative;

@@ -303,8 +303,8 @@ int32_t setDamage(lua_State* state)
       return 0;
    }
 
-   const auto damage = static_cast<int32_t>(lua_tointeger(state, 1));
-   node->setDamage(damage);
+   const auto damage_amount = static_cast<int32_t>(lua_tointeger(state, 1));
+   node->setDamage(damage_amount);
 
    return 0;
 }
@@ -544,12 +544,12 @@ int32_t damage(lua_State* state)
       return 0;
    }
 
-   const auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
+   const auto damage_amount = static_cast<int32_t>(lua_tonumber(state, 1));
    const auto dx = static_cast<float>(lua_tonumber(state, 2));
    const auto dy = static_cast<float>(lua_tonumber(state, 3));
-   node->damagePlayer(damage, dx, dy);
+   node->damagePlayer(damage_amount, dx, dy);
 
-   Log::Info() << "damage: " << damage << " dx: " << dx << " dy: " << dy;
+   Log::Info() << "damage: " << damage_amount << " dx: " << dx << " dy: " << dy;
 
    return 0;
 }
@@ -578,11 +578,11 @@ int32_t damageRadius(lua_State* state)
       return 0;
    }
 
-   const auto damage = static_cast<int32_t>(lua_tonumber(state, 1));
+   const auto damage_amount = static_cast<int32_t>(lua_tonumber(state, 1));
    const auto x = static_cast<float>(lua_tonumber(state, 2));
    const auto y = static_cast<float>(lua_tonumber(state, 3));
    const auto radius = static_cast<float>(lua_tonumber(state, 4));
-   node->damagePlayerInRadius(damage, x, y, radius);
+   node->damagePlayerInRadius(damage_amount, x, y, radius);
 
    return 0;
 }
@@ -890,7 +890,7 @@ int32_t addWeapon(lua_State* state)
 
    const auto weapon_type = static_cast<WeaponType>(lua_tointeger(state, 1));
    const auto fire_interval = static_cast<int>(lua_tointeger(state, 2));
-   const auto damage = static_cast<int>(lua_tointeger(state, 3));
+   const auto damage_value = static_cast<int>(lua_tointeger(state, 3));
 
    // add weapon with projectile radius only
    if (argc == 4)
@@ -921,7 +921,7 @@ int32_t addWeapon(lua_State* state)
       dynamic_cast<b2PolygonShape*>(shape.get())->Set(poly, poly_index);
    }
 
-   auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fire_interval, damage);
+   auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fire_interval, damage_value);
    node->addWeapon(std::move(weapon));
 
    return 0;

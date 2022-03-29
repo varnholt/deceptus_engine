@@ -123,10 +123,10 @@ bool Physics::dumpObj(
 )
 {
    const auto tiles  = layer->_data;
-   const auto width  = layer->_width_tl;
-   const auto height = layer->_height_tl;
-   const auto offset_x = layer->_offset_x_px;
-   const auto offset_y = layer->_offset_y_px;
+   const auto width_tl  = layer->_width_tl;
+   const auto height_tl = layer->_height_tl;
+   const auto offset_x_px = layer->_offset_x_px;
+   const auto offset_y_px = layer->_offset_y_px;
 
    if (tileset == nullptr)
    {
@@ -139,11 +139,11 @@ bool Physics::dumpObj(
    std::vector<b2Vec2> vertices;
    std::vector<std::vector<uint32_t>> faces;
 
-   for (auto y = 0u; y < height; y++)
+   for (auto y_tl = 0u; y_tl < height_tl; y_tl++)
    {
-      for (auto x = 0u; x < width; x++)
+      for (auto x_tl = 0u; x_tl < width_tl; x_tl++)
       {
-         const auto tile_number = tiles[y * width + x];
+         const auto tile_number = tiles[y_tl * width_tl + x_tl];
          auto tile_relative = -1;
 
          if (tile_number != 0)
@@ -158,10 +158,9 @@ bool Physics::dumpObj(
 
                if (objects)
                {
-                  for (auto& it : objects->_objects)
+                  for (auto& object_it : objects->_objects)
                   {
-                     auto object = it.second;
-
+                     auto object = object_it.second;
                      auto poly = object->_polygon;
                      auto line = object->_polyline;
 
@@ -177,16 +176,16 @@ bool Physics::dumpObj(
                      }
                      else
                      {
-                        auto x = object->_x_px;
-                        auto y = object->_y_px;
-                        auto w = object->_width_px;
-                        auto h = object->_height_px;
+                        const auto x_px = object->_x_px;
+                        const auto y_px = object->_y_px;
+                        const auto w_px = object->_width_px;
+                        const auto h_px = object->_height_px;
 
                         points = {
-                           {x,     y    },
-                           {x,     y + h},
-                           {x + w, y + h},
-                           {x + w, y    },
+                           {x_px,        y_px       },
+                           {x_px,        y_px + h_px},
+                           {x_px + w_px, y_px + h_px},
+                           {x_px + w_px, y_px       },
                         };
                      }
 
@@ -195,11 +194,11 @@ bool Physics::dumpObj(
                         std::vector<uint32_t> face;
                         for (const auto& p : points)
                         {
-                           const auto px = (offset_x + static_cast<int32_t>(x)) * PIXELS_PER_TILE + p.x;
-                           const auto py = (offset_y + static_cast<int32_t>(y)) * PIXELS_PER_TILE + p.y;
+                           const auto px = (offset_x_px + static_cast<int32_t>(x_tl)) * PIXELS_PER_TILE + p.x;
+                           const auto py = (offset_y_px + static_cast<int32_t>(y_tl)) * PIXELS_PER_TILE + p.y;
                            const auto v = b2Vec2(px, py);
 
-                           const auto& it = std::find_if(vertices.begin(), vertices.end(), [v](const b2Vec2& other){
+                           const auto& vertex_it = std::find_if(vertices.begin(), vertices.end(), [v](const b2Vec2& other){
                               return (
                                     fabs(v.x - other.x) < 0.001f
                                  && fabs(v.y - other.y) < 0.001f
@@ -207,14 +206,14 @@ bool Physics::dumpObj(
                            });
 
                            auto vertex_id = 0u;
-                           if (it == vertices.end())
+                           if (vertex_it == vertices.end())
                            {
                               vertex_id = static_cast<uint32_t>(vertices.size());
                               vertices.push_back(v);
                            }
                            else
                            {
-                              vertex_id = static_cast<uint32_t>(it - vertices.begin());
+                              vertex_id = static_cast<uint32_t>(vertex_it - vertices.begin());
                            }
 
                            face.push_back(vertex_id + 1); // wavefront obj starts indexing at 1

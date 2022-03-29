@@ -70,10 +70,10 @@ std::shared_ptr<Menu>& Menu::getInstance()
 
 void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto game_config = GameConfiguration::getInstance();
+   const auto& game_config = GameConfiguration::getInstance();
 
-   auto w = game_config._view_width;
-   auto h = game_config._view_height;
+   const auto w = game_config._view_width;
+   const auto h = game_config._view_height;
 
    // set up an ortho view with screen dimensions
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
