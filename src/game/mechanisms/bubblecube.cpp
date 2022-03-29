@@ -30,7 +30,7 @@ static constexpr auto pop_frequency = 15.0f;
 static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
 
-static constexpr auto move_down_velocity = 0.5f;
+std::optional<size_t> _colliding_body_count;
 }
 
 
@@ -61,10 +61,16 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
          _pop_only_on_foot_contact = pop_only_on_foot_contact_it->second->_value_bool.value();
       }
 
-      const auto moves_down_on_contact_it = data._tmx_object->_properties->_map.find("moves_down_on_contact");
-      if (moves_down_on_contact_it != data._tmx_object->_properties->_map.end())
+      const auto move_down_on_contact_it = data._tmx_object->_properties->_map.find("move_down_on_contact");
+      if (move_down_on_contact_it != data._tmx_object->_properties->_map.end())
       {
-         _moves_down_on_contact = moves_down_on_contact_it->second->_value_bool.value();
+         _move_down_on_contact = move_down_on_contact_it->second->_value_bool.value();
+      }
+
+      const auto move_down_velocity_it = data._tmx_object->_properties->_map.find("move_down_velocity");
+      if (move_down_velocity_it != data._tmx_object->_properties->_map.end())
+      {
+         _move_down_velocity = move_down_velocity_it->second->_value_float.value();
       }
 
       const auto maximum_contact_duration_s_it = data._tmx_object->_properties->_map.find("maximum_contact_duration_s");
@@ -175,15 +181,15 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 void BubbleCube::updatePushDownOffset(const sf::Time& dt)
 {
    // if configured, bubble moves down when the player stands on top of it
-   if (_moves_down_on_contact)
+   if (_move_down_on_contact)
    {
       if (_contact_count > 0)
       {
-         _push_down_offset_m += dt.asSeconds() * move_down_velocity;
+         _push_down_offset_m += dt.asSeconds() * _move_down_velocity;
       }
       else
       {
-         _push_down_offset_m *= 0.95f;
+         _push_down_offset_m *= (1.0f - std::max(0.01f, dt.asSeconds() * 10.0f));
       }
    }
 }
@@ -256,14 +262,33 @@ struct BubbleQueryCallback : public b2QueryCallback
 {
    std::vector<b2Body*> _bodies;
    bool _pop_requested = false;
+   std::optional<size_t> _max_count;
+
+   bool isPlayer(b2Fixture* fixture) const
+   {
+      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData());
+      if (!fixture_node)
+      {
+         return false;
+      }
+
+      return dynamic_cast<Player*>(fixture_node->getParent());
+   }
 
    bool ReportFixture(b2Fixture* fixture)
    {
-      _bodies.push_back(fixture->GetBody());
-      if (_bodies.size() >= 8)
+      // filter out player fixtures
+      if (isPlayer(fixture))
       {
-         _pop_requested = true;
-         return false; // abort query
+         return true;
+      }
+
+      _bodies.push_back(fixture->GetBody());
+
+      if (_max_count.has_value() && _bodies.size() > _max_count)
+      {
+         // abort query
+         return false;
       }
 
       return true;
@@ -271,31 +296,55 @@ struct BubbleQueryCallback : public b2QueryCallback
 };
 
 
+void BubbleCube::updatePopOnCollisionCondition()
+{
+   // make the bubble pop when it's moved into another body
+   auto countBodies = [this]() -> size_t {
+      BubbleQueryCallback query_callback;
+      query_callback._max_count = _colliding_body_count;
+      b2AABB aabb;
+      _fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+      Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
+      return query_callback._bodies.size();
+   };
+
+   // this is going to be the reference count of bodies for future checks
+   if (!_colliding_body_count.has_value())
+   {
+      _colliding_body_count = countBodies();
+   }
+
+   // check for collisions with surrounding areas
+   if (!_popped && _move_down_on_contact && _contact_count > 0)
+   {
+      if (countBodies() > _colliding_body_count)
+      {
+         pop();
+      }
+   }
+}
+
+
 void BubbleCube::update(const sf::Time& dt)
 {
    _elapsed_s += dt.asSeconds();
    _pop_elapsed_s += dt.asSeconds();
 
-   // check for collisions with surrounding areas
-   if (!_popped && _moves_down_on_contact && _contact_count > 0)
-   {
-      BubbleQueryCallback query_callback;
-
-      b2AABB aabb;
-      _fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
-      Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
-
-      if (query_callback._pop_requested)
-      {
-         pop();
-      }
-   }
-
+   updatePopOnCollisionCondition();
    updatePushDownOffset(dt);
    updateMaxDurationCondition(dt);
    updatePosition();
    updatePoppedCondition();
    updateRespawnCondition();
+}
+
+
+void BubbleCube::pop()
+{
+   _popped = true;
+   _pop_time = GlobalClock::getInstance().getElapsedTime();
+   _pop_elapsed_s = 0.0f;
+   _contact_count = 0;
 }
 
 
@@ -312,15 +361,6 @@ void BubbleCube::beginContact(FixtureNode* other)
    }
 
    _contact_count++;
-}
-
-
-void BubbleCube::pop()
-{
-   _popped = true;
-   _pop_time = GlobalClock::getInstance().getElapsedTime();
-   _pop_elapsed_s = 0.0f;
-   _contact_count = 0;
 }
 
 
