@@ -30,31 +30,27 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileset)
    }
 
    const auto tiles = layer->_data;
-   const auto width = layer->_width_px;
-   const auto height = layer->_height_px;
-   const auto offset_x = layer->_offset_x_px;
-   const auto offset_y = layer->_offset_y_px;
+   const auto width_tl = layer->_width_tl;
+   const auto height_tl = layer->_height_tl;
 
-   _map.resize(width * height);
-   _map_width = width;
-   _map_height = height;
-   _map_offset_x_m = offset_x;
-   _map_offset_y_m = offset_y;
+   _map.resize(width_tl * height_tl);
+   _map_width_tl = width_tl;
+   _map_height_tl = height_tl;
 
-   for (auto y = 0u; y < height; y++)
+   for (auto y_tl = 0u; y_tl < height_tl; y_tl++)
    {
-      for (auto x = 0u; x < width; x++)
+      for (auto x_tl = 0u; x_tl < width_tl; x_tl++)
       {
          // get the current tile number
-         const auto tile_number = tiles[y * width + x];
+         const auto tile_number = tiles[y_tl * width_tl + x_tl];
          auto tile_relative = static_cast<int32_t>(AtmosphereTileInvalid);
          if (tile_number != 0)
          {
             tile_relative = tile_number - tileset->_first_gid;
-            _map[y * width + x] = tile_relative;
+            _map[y_tl * width_tl + x_tl] = tile_relative;
          }
 
-          _map[y * width + x] = tile_relative;
+          _map[y_tl * width_tl + x_tl] = tile_relative;
       }
    }
 }

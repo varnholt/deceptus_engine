@@ -50,8 +50,8 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(GameNode* parent, const 
    std::vector<std::shared_ptr<GameMechanism>> levers;
 
    auto tiles    = data._tmx_layer->_data;
-   auto width    = data._tmx_layer->_width_px;
-   auto height   = data._tmx_layer->_height_px;
+   auto width    = data._tmx_layer->_width_tl;
+   auto height   = data._tmx_layer->_height_tl;
    auto first_id = data._tmx_tileset->_first_gid;
 
    for (auto j = 0; j < static_cast<int32_t>(height); j++)

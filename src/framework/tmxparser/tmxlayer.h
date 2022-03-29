@@ -12,8 +12,8 @@ struct TmxLayer : TmxElement
 
    void deserialize(tinyxml2::XMLElement*) override;
 
-   uint32_t _width_px = 0;
-   uint32_t _height_px = 0;
+   uint32_t _width_tl = 0;
+   uint32_t _height_tl = 0;
    float _opacity = 1.0f;
    bool _visible = true;
    TmxProperties* _properties = nullptr;
