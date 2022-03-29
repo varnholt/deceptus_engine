@@ -38,8 +38,8 @@ void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileset)
    _map.resize(width * height);
    _map_width = width;
    _map_height = height;
-   _map_offset_x = offset_x;
-   _map_offset_y = offset_y;
+   _map_offset_x_m = offset_x;
+   _map_offset_y_m = offset_y;
 
    for (auto y = 0u; y < height; y++)
    {
