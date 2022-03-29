@@ -38,13 +38,13 @@ class PSD
 
          private:
             std::array<uint8_t, 4> _signature;
-            uint16_t _version;
+            uint16_t _version = 0u;
             std::array<uint8_t, 6> _reserved;
-            uint16_t _channels;
-            int32_t _height;
-            int32_t _width;
-            uint16_t _depth;
-            uint16_t _mode;
+            uint16_t _channels = 0u;
+            int32_t _height = 0;
+            int32_t _width = 0;
+            uint16_t _depth = 0u;
+            uint16_t _mode = 0u;
       };
 
       class Layer
