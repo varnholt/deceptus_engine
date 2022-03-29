@@ -75,10 +75,7 @@ AnimationSettings::AnimationSettings(const AnimationSettings& other)
 void to_json(nlohmann::json& j, const AnimationSettings& settings)
 {
    std::vector<int32_t> durations;
-   for (auto& d : settings._frame_durations)
-   {
-      durations.push_back(d.asMilliseconds());
-   }
+   std::transform(settings._frame_durations.begin(), settings._frame_durations.end(), std::back_inserter(durations), [](auto& duration) {return duration.asMilliseconds();});
 
    j = nlohmann::json{
       {"sprite_count", durations.size()},

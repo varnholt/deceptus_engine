@@ -102,17 +102,8 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
       return;
    }
 
-   auto sprite_index = 0;
-
-   if (_collapsed)
-   {
-      sprite_index = std::min(static_cast<int32_t>(_collapse_elapsed_s * animation_speed), columns - 1);
-   }
-   else
-   {
-      sprite_index = 0;
-   }
-
+//   auto sprite_index = std::min(static_cast<int32_t>(_collapse_elapsed_s * animation_speed), columns - 1);
+//
 //   _sprite.setTextureRect({
 //         sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
 //         (_collapsed ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,

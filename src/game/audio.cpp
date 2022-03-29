@@ -98,7 +98,7 @@ void Audio::initializeTracks()
 //-----------------------------------------------------------------------------
 void Audio::initializeMusicVolume()
 {
-   auto& config = GameConfiguration::getInstance();
+   const auto& config = GameConfiguration::getInstance();
    const auto master = config._audio_volume_master * 0.01f;
    const auto music = config._audio_volume_music;
    _music.setVolume(master * music);

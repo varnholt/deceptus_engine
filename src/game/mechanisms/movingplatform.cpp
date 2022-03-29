@@ -460,21 +460,20 @@ void MovingPlatform::link(
 
    std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
 
-   auto pos = pixel_path.at(0);
-
-   auto x = static_cast<int>((pos.x + data._tmx_object->_x_px) / PIXELS_PER_TILE);
-   auto y = static_cast<int>((pos.y + data._tmx_object->_y_px) / PIXELS_PER_TILE);
+   const auto pos = pixel_path.at(0);
+   const auto x_tl = static_cast<int>((pos.x + data._tmx_object->_x_px) / PIXELS_PER_TILE);
+   const auto y_tl = static_cast<int>((pos.y + data._tmx_object->_y_px) / PIXELS_PER_TILE);
 
    std::shared_ptr<MovingPlatform> platform;
 
    for (auto& p : platforms)
    {
       auto tmp = std::dynamic_pointer_cast<MovingPlatform>(p);
-      if (tmp->_tile_positions.y == y)
+      if (tmp->_tile_positions.y == y_tl)
       {
          for (auto xi = 0; xi < tmp->_element_count; xi++)
          {
-            if (tmp->_tile_positions.x + xi == x)
+            if (tmp->_tile_positions.x + xi == x_tl)
             {
                platform = tmp;
                // printf("linking tmx poly to platform at %d, %d\n", x, y);
@@ -484,13 +483,13 @@ void MovingPlatform::link(
       }
 
       // we're done when we found a matching platform
-      if (platform != nullptr)
+      if (platform)
       {
          break;
       }
    }
 
-   if (platform != nullptr)
+   if (platform)
    {
       auto i = 0;
       for (const auto& poly_pos : pixel_path)

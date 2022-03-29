@@ -24,8 +24,8 @@ struct Atmosphere
 
    int32_t _map_offset_x_px = 0;
    int32_t _map_offset_y_py = 0;
-   uint32_t _map_width_tl = 0;
-   uint32_t _map_height_tl = 0;
+   int32_t _map_width_tl = 0;
+   int32_t _map_height_tl = 0;
 
    std::vector<std::vector<sf::Vertex>> _outlines;
    std::shared_ptr<TileMap> _tile_map;

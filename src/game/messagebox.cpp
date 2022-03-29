@@ -401,13 +401,7 @@ void MessageBox::hideAnimation()
 
 void MessageBox::animateText()
 {
-   static std::array<float, 5> text_speeds = {
-      0.5f,
-      0.75f,
-      1.0f,
-      1.5f,
-      2.0f
-   };
+   static const std::array<float, 5> text_speeds = {0.5f,  0.75f, 1.0f, 1.5f, 2.0f};
 
    auto x = (
         GlobalClock::getInstance().getElapsedTime().asSeconds()

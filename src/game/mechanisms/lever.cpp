@@ -452,12 +452,12 @@ void Lever::merge(
 
             for (auto& s : spikes)
             {
-               auto spikes = std::dynamic_pointer_cast<Spikes>(s);
+               auto spikes_instance = std::dynamic_pointer_cast<Spikes>(s);
 
-               if (spikes->getPixelRect().intersects(search_rect))
+               if (spikes_instance->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([spikes](int32_t state) {
-                        spikes->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([spikes_instance](int32_t state) {
+                        spikes_instance->setEnabled(state == -1 ? false : true);
                      }
                   );
                }

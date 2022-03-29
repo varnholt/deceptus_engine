@@ -179,7 +179,7 @@ void Laser::update(const sf::Time& dt)
 
       // disabling (!_on and _tile_index outside 0..1)
       // go from 17..21, when 22 to to range_disabled
-      else if (!_on)
+      else
       {
          _tile_animation += dt.asSeconds() * 10.0f;
 

@@ -110,7 +110,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 void Game::initializeWindow()
 {
-   GameConfiguration& gameConfig = GameConfiguration::getInstance();
+   const auto& game_config = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings context_settings;
@@ -125,18 +125,18 @@ void Game::initializeWindow()
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
       sf::VideoMode(
-         static_cast<uint32_t>(gameConfig._video_mode_width),
-         static_cast<uint32_t>(gameConfig._video_mode_height)
+         static_cast<uint32_t>(game_config._video_mode_width),
+         static_cast<uint32_t>(game_config._video_mode_height)
       ),
       GAME_NAME,
-      gameConfig._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
+      game_config._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
       context_settings
     );
 
-   _window->setVerticalSyncEnabled(gameConfig._vsync_enabled);
+   _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);
-   _window->setMouseCursorVisible(!gameConfig._fullscreen);
+   _window->setMouseCursorVisible(!game_config._fullscreen);
 
    // reset render textures if needed
    if (_window_render_texture)
@@ -146,24 +146,24 @@ void Game::initializeWindow()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratio_width = gameConfig._video_mode_width / gameConfig._view_width;
-   const auto ratio_height = gameConfig._video_mode_height / gameConfig._view_height;
+   const auto ratio_width = game_config._video_mode_width / game_config._view_width;
+   const auto ratio_height = game_config._video_mode_height / game_config._view_height;
 
    const auto size_ratio = std::min(ratio_width, ratio_height);
 
-   int32_t texture_width = size_ratio * gameConfig._view_width;
-   int32_t texture_height = size_ratio * gameConfig._view_height;
+   int32_t texture_width = size_ratio * game_config._view_width;
+   int32_t texture_height = size_ratio * game_config._view_height;
 
    Log::Info()
       << "video mode: "
-      << gameConfig._video_mode_width << " x " << gameConfig._video_mode_height
+      << game_config._video_mode_width << " x " << game_config._video_mode_height
       << ", view size: "
-      << gameConfig._view_width << " x " << gameConfig._view_height
+      << game_config._view_width << " x " << game_config._view_height
       << ", ratio: "
       << size_ratio;
 
-   _render_texture_offset.x = static_cast<uint32_t>((gameConfig._video_mode_width - texture_width) / 2);
-   _render_texture_offset.y = static_cast<uint32_t>((gameConfig._video_mode_height - texture_height) / 2);
+   _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
+   _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
    _window_render_texture = std::make_shared<sf::RenderTexture>();
    _window_render_texture->create(

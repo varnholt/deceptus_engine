@@ -100,7 +100,7 @@ const Atmosphere& Level::getAtmosphere() const
 //-----------------------------------------------------------------------------
 void Level::initializeTextures()
 {
-   GameConfiguration& gameConfig = GameConfiguration::getInstance();
+   const auto& game_config = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings stencil_context_settings;
@@ -115,13 +115,13 @@ void Level::initializeTextures()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratio_width = gameConfig._video_mode_width / gameConfig._view_width;
-   const auto ratio_height = gameConfig._video_mode_height / gameConfig._view_height;
+   const auto ratio_width = game_config._video_mode_width / game_config._view_width;
+   const auto ratio_height = game_config._video_mode_height / game_config._view_height;
    const auto size_ratio = std::min(ratio_width, ratio_height);
    _view_to_texture_scale = 1.0f / size_ratio;
 
-   const auto texture_width = static_cast<int32_t>(size_ratio * gameConfig._view_width);
-   const auto texture_height = static_cast<int32_t>(size_ratio * gameConfig._view_height);
+   const auto texture_width = static_cast<int32_t>(size_ratio * game_config._view_width);
+   const auto texture_height = static_cast<int32_t>(size_ratio * game_config._view_height);
 
    _render_texture_level_background = std::make_shared<sf::RenderTexture>();
    _render_texture_level_background->create(
@@ -328,15 +328,15 @@ void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMa
       {
          const auto slot = it_parallax_view->second->_value_int.value();
 
-         auto& layer = _parallax_layers[slot];
+         auto& parallax_layer = _parallax_layers[slot];
 
-         layer._used = true;
-         layer._z_index = z_index;
-         layer._factor.x = parallax_factor_x;
-         layer._factor.y = parallax_factor_y;
-         layer._offset.x = parallax_offset_x;
-         layer._offset.y = parallax_offset_y;
-         layer._tile_map = tile_map;
+         parallax_layer._used = true;
+         parallax_layer._z_index = z_index;
+         parallax_layer._factor.x = parallax_factor_x;
+         parallax_layer._factor.y = parallax_factor_y;
+         parallax_layer._offset.x = parallax_offset_x;
+         parallax_layer._offset.y = parallax_offset_y;
+         parallax_layer._tile_map = tile_map;
 
          // determine placement error
          //
@@ -353,11 +353,11 @@ void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMa
          //  800px   -   720px   = 80px error
          //  offset      actual  = error
 
-         const auto& parallax_factor = layer._factor;
-         auto parallax_offset_with_error = layer._offset;
+         const auto& parallax_factor = parallax_layer._factor;
+         auto parallax_offset_with_error = parallax_layer._offset;
          parallax_offset_with_error.x *= parallax_factor.x;
          parallax_offset_with_error.y *= parallax_factor.y;
-         layer._error = layer._offset - parallax_offset_with_error;
+         parallax_layer._error = parallax_layer._offset - parallax_offset_with_error;
       }
    }
 }
@@ -790,11 +790,11 @@ const std::shared_ptr<sf::View>& Level::getLevelView() const
 //-----------------------------------------------------------------------------
 void Level::createViews()
 {
-   auto& gameConfig = GameConfiguration::getInstance();
+   auto& game_config = GameConfiguration::getInstance();
 
    // the view dimensions never change
-   _view_width = static_cast<float>(gameConfig._view_width);
-   _view_height = static_cast<float>(gameConfig._view_height);
+   _view_width = static_cast<float>(game_config._view_width);
+   _view_height = static_cast<float>(game_config._view_height);
 
    _level_view.reset();
    _level_view = std::make_shared<sf::View>();
@@ -895,7 +895,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
    }
 
    // update camera system
-   if (!_room_current || (_room_current && !_room_current->_camera_locked))
+   if (!_room_current || !_room_current->_camera_locked)
    {
       camera_system.update(dt, _view_width, _view_height);
    }
@@ -1672,8 +1672,8 @@ void Level::addDebugRect(void* body,  float x, float y, float w, float h)
 //-----------------------------------------------------------------------------
 AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
 {
-   const auto x_tl = static_cast<uint32_t>((pos_m.x * PPM) / PIXELS_PER_TILE);
-   const auto y_tl = static_cast<uint32_t>((pos_m.y * PPM) / PIXELS_PER_TILE);
+   const auto x_tl = static_cast<int32_t>((pos_m.x * PPM) / PIXELS_PER_TILE);
+   const auto y_tl = static_cast<int32_t>((pos_m.y * PPM) / PIXELS_PER_TILE);
 
    if (x_tl < 0 || x_tl >= _map_width_tl)
    {

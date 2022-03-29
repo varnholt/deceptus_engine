@@ -60,7 +60,7 @@ void HermiteCurve::compute()
    // calculate the tangents (catmull-rom splines)
    // Ti = 0.5 * (Pi + 1 - Pi - 1)
 
-   auto comp = [](std::vector<HermiteCurveKey>& source, std::vector<sf::Vector2f>& destination)
+   auto comp = [](const std::vector<HermiteCurveKey>& source, std::vector<sf::Vector2f>& destination)
    {
       if (source.empty())
       {
@@ -108,14 +108,7 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
 {
    if (clamp)
    {
-      if (time > 1.0f)
-      {
-         time = 1.0f;
-      }
-      else if (time < 0.0f)
-      {
-         time = 0.0f;
-      }
+      time = std::clamp(time, 0.0f, 1.0f);
    }
    else
    {
@@ -166,7 +159,9 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    }
 
    if (index < 0)
+   {
       index = 0;
+   }
 
    // init points
    sf::Vector2f p1;
@@ -176,8 +171,7 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
 
    if (index >= static_cast<int32_t>(keys.size()))
    {
-      sf::Vector2f p = keys[keys.size() - 1]._position;
-      return p;
+      return keys[keys.size() - 1]._position;
    }
 
    p1 = keys[index]._position;
@@ -192,8 +186,8 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    const auto s3 = s2 * s;
 
    // init tangents
-   auto t1 = tangents[index];
-   auto t2 = tangents[index + 1];
+   const auto t1 = tangents[index];
+   const auto t2 = tangents[index + 1];
 
    // calculate base functions 1-4
    h1 =  2.0f * s3 - 3.0f * s2 + 1.0f;
