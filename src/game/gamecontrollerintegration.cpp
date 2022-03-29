@@ -11,7 +11,6 @@
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
 #include "gamecontrollerdetection.h"
-#include "gamejoystickmapping.h"
 
 #include <iostream>
 

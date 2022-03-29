@@ -18,7 +18,6 @@
 #include "gamecontactlistener.h"
 #include "gamecontrollerdata.h"
 #include "gamecontrollerintegration.h"
-#include "gamejoystickmapping.h"
 #include "gamestate.h"
 #include "level.h"
 #include "levels.h"
@@ -522,9 +521,9 @@ void Game::updateGameControllerForGame()
 
    if (gji.isControllerConnected())
    {
-      const auto& info = gji.getController()->getInfo();
-      _player->getControls()->setJoystickInfo(info);
-      GameControllerData::getInstance().setJoystickInfo(info);
+      const auto& controller_info = gji.getController()->getInfo();
+      _player->getControls()->setJoystickInfo(controller_info);
+      GameControllerData::getInstance().setJoystickInfo(controller_info);
    }
 }
 

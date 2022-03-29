@@ -73,25 +73,16 @@ public:
    void spawnEnemies();
 
    void draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot);
-   void drawLightAndShadows(sf::RenderTarget& target);
-   void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
-   void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
-   void drawAtmosphereLayer(sf::RenderTarget& target);
-   void drawBlurLayer(sf::RenderTarget& target);
-   void drawNormalMap();
-   void drawLightMap();
-   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
-   void drawStaticChains(sf::RenderTarget& target);
 
    const std::shared_ptr<b2World>& getWorld() const;
    const sf::Vector2f& getStartPosition() const;
 
-   const std::unordered_map<void*, b2Vec2*>& getPointMap();
-   const std::unordered_map<void*, size_t>& getPointSizeMap();
+   const std::unordered_map<void*, b2Vec2*>& getPointMap() const;
+   const std::unordered_map<void*, size_t>& getPointSizeMap() const;
 
-   std::shared_ptr<Portal> getNearbyPortal();
-   std::shared_ptr<Bouncer> getNearbyBouncer();
-   const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints();
+   std::shared_ptr<Portal> getNearbyPortal() const;
+   std::shared_ptr<Bouncer> getNearbyBouncer() const;
+   const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints() const;
 
    void toggleMechanisms();
 
@@ -100,7 +91,7 @@ public:
 
    const Atmosphere& getAtmosphere() const;
 
-   bool isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const;
+   bool isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const;
 
    BoomEffect& getBoomEffect();
 
@@ -116,7 +107,7 @@ protected:
    void addDebugRect(void* body, float x, float y, float w, float h);
 
    void parsePhysicsTiles(
-         TmxLayer* layer,
+      TmxLayer* layer,
       TmxTileSet* tileSet,
       const std::filesystem::path& basePath
    );
@@ -149,6 +140,15 @@ protected:
    void updatePlayerLight();
    void updateRoom();
 
+   void drawLightAndShadows(sf::RenderTarget& target);
+   void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
+   void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
+   void drawAtmosphereLayer(sf::RenderTarget& target);
+   void drawBlurLayer(sf::RenderTarget& target);
+   void drawNormalMap();
+   void drawLightMap();
+   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void drawStaticChains(sf::RenderTarget& target);
    void drawDebugInformation();
    void displayTextures();
    void drawGlowLayer();

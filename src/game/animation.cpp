@@ -1,6 +1,7 @@
 #include "animation.h"
 
 #include <iostream>
+#include <numeric>
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -59,12 +60,7 @@ sf::FloatRect Animation::getGlobalBounds() const
 void Animation::setFrameTimes(const std::vector<sf::Time>& frame_times)
 {
    _frame_times = frame_times;
-
-   for (const auto& t : frame_times)
-   {
-      _overall_time += t;
-   }
-
+   _overall_time = std::accumulate(frame_times.begin(), frame_times.end(), sf::Time{});
    _overall_time_chrono = std::chrono::milliseconds(_overall_time.asMilliseconds());
 }
 

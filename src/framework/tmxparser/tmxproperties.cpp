@@ -20,18 +20,18 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
          continue;
       }
 
-      TmxElement* element = nullptr;
+      TmxElement* next_element = nullptr;
       TmxProperty* property = nullptr;
 
       if (sub_element->Name() == std::string("property"))
       {
          property = new TmxProperty();
-         element = property;
+         next_element = property;
       }
 
-      if (element)
+      if (next_element)
       {
-         element->deserialize(sub_element);
+         next_element->deserialize(sub_element);
       }
       else
       {

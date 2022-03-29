@@ -1092,13 +1092,13 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-bool Level::isPhysicsPathClear(const sf::Vector2i& a, const sf::Vector2i& b) const
+bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const
 {
    auto blocks = [this](uint32_t x, uint32_t y) -> bool {
       return _physics._physics_map[(_physics._grid_width * y) + x] == 1;
    };
 
-   return MapTools::lineCollide(a.x, a.y, b.x, b.y, blocks);
+   return MapTools::lineCollide(a_tl.x, a_tl.y, b_tl.x, b_tl.y, blocks);
 }
 
 
@@ -1691,7 +1691,7 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<Portal> Level::getNearbyPortal()
+std::shared_ptr<Portal> Level::getNearbyPortal() const
 {
    std::shared_ptr<Portal> nearby_portal;
 
@@ -1710,7 +1710,7 @@ std::shared_ptr<Portal> Level::getNearbyPortal()
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<Bouncer> Level::getNearbyBouncer()
+std::shared_ptr<Bouncer> Level::getNearbyBouncer() const
 {
    std::shared_ptr<Bouncer> nearby_bouncer;
 
@@ -1729,7 +1729,7 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer()
 
 
 //-----------------------------------------------------------------------------
-const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints()
+const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints() const
 {
    return _mechanism_checkpoints;
 }
@@ -1751,14 +1751,14 @@ void Level::toggleMechanisms()
 
 
 //-----------------------------------------------------------------------------
-const std::unordered_map<void*, size_t>& Level::getPointSizeMap()
+const std::unordered_map<void*, size_t>& Level::getPointSizeMap() const
 {
    return _point_count_map;
 }
 
 
 //-----------------------------------------------------------------------------
-const std::unordered_map<void*, b2Vec2*>& Level::getPointMap()
+const std::unordered_map<void*, b2Vec2*>& Level::getPointMap() const
 {
    return _point_map;
 }
