@@ -170,7 +170,7 @@ std::optional<ScriptProperty> Enemy::findProperty(const std::string& key)
 {
    std::optional<ScriptProperty> property;
 
-   auto prop_it = std::find_if(_properties.begin(), _properties.end(), [key](auto& property){
+   auto prop_it = std::find_if(_properties.begin(), _properties.end(), [key](const auto& property){
       return property._name == key;}
    );
 
