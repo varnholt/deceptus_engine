@@ -1670,10 +1670,10 @@ void Level::addDebugRect(void* body,  float x, float y, float w, float h)
 
 
 //-----------------------------------------------------------------------------
-AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
+AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
 {
-   auto x = pos.x - _map_offset_x;
-   auto y = pos.y - _map_offset_y;
+   const auto x = pos_m.x - _map_offset_x_m;
+   const auto y = pos_m.y - _map_offset_y_m;
 
    if (x < 0 || x >= _map_width)
    {
@@ -1685,8 +1685,8 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos) const
       return AtmosphereTileInvalid;
    }
 
-   auto tx = static_cast<uint32_t>(x * PPM / PIXELS_PER_TILE);
-   auto ty = static_cast<uint32_t>(y * PPM / PIXELS_PER_TILE);
+   const auto tx = static_cast<uint32_t>(x * PPM / PIXELS_PER_TILE);
+   const auto ty = static_cast<uint32_t>(y * PPM / PIXELS_PER_TILE);
 
    AtmosphereTile tile = static_cast<AtmosphereTile>(_map[ty * _map_width + tx]);
    return tile;
