@@ -77,19 +77,19 @@ void Physics::parse(
       }
    }
 
-   _grid_width  = layer->_width_px  * 3;
-   _grid_height = layer->_height_px * 3;
+   _grid_width  = layer->_width_tl  * 3;
+   _grid_height = layer->_height_tl * 3;
    _grid_size   = _grid_width * _grid_height;
 
    // a larger grid and copy tile contents in there
    _physics_map.resize(_grid_size);
 
    auto yi = 0u;
-   for (auto y = 0u; y < layer->_height_px; y++)
+   for (auto y = 0u; y < layer->_height_tl; y++)
    {
-      for (auto x = 0u; x < layer->_width_px; x++)
+      for (auto x = 0u; x < layer->_width_tl; x++)
       {
-         const auto key = layer->_data[y * layer->_width_px + x];
+         const auto key = layer->_data[y * layer->_width_tl + x];
 
          if (key != 0)
          {
@@ -123,8 +123,8 @@ bool Physics::dumpObj(
 )
 {
    const auto tiles  = layer->_data;
-   const auto width  = layer->_width_px;
-   const auto height = layer->_height_px;
+   const auto width  = layer->_width_tl;
+   const auto height = layer->_height_tl;
    const auto offset_x = layer->_offset_x_px;
    const auto offset_y = layer->_offset_y_px;
 

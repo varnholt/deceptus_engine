@@ -192,8 +192,8 @@ void Fan::load(const GameDeserializeData& data)
    resetAll();
 
    const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_px;
-   const auto height   = data._tmx_layer->_height_px;
+   const auto width    = data._tmx_layer->_width_tl;
+   const auto height   = data._tmx_layer->_height_tl;
    const auto firstId  = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile

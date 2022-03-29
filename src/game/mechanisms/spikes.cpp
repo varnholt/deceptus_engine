@@ -284,8 +284,8 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(
    std::vector<std::shared_ptr<Spikes>> all_spikes;
 
    const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_px;
-   const auto height   = data._tmx_layer->_height_px;
+   const auto width    = data._tmx_layer->_width_tl;
+   const auto height   = data._tmx_layer->_height_tl;
    const auto first_id = data._tmx_tileset->_first_gid;
 
    const int32_t tiles_per_row = texture->getSize().x / PIXELS_PER_TILE;

@@ -151,7 +151,7 @@ TmxTileSet* TmxParser::getTileSet(TmxLayer* layer) const
    int32_t tile_id = 0;
    int32_t tmp_id = 0;
 
-   for (auto i = 0u; i < (layer->_height_px * layer->_width_px); i++)
+   for (auto i = 0u; i < (layer->_height_tl * layer->_width_tl); i++)
    {
       tmp_id = layer->_data[i];
 

@@ -158,8 +158,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
    const auto tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
    const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_px;
-   const auto height   = data._tmx_layer->_height_px;
+   const auto width    = data._tmx_layer->_width_tl;
+   const auto height   = data._tmx_layer->_height_tl;
    const auto first_id = data._tmx_tileset->_first_gid;
 
    for (auto y = 0u; y < height; y++)

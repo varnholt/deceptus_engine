@@ -26,8 +26,8 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
 {
    TmxElement::deserialize(element);
 
-   _width_px  = element->IntAttribute("width");
-   _height_px = element->IntAttribute("height");
+   _width_tl  = element->IntAttribute("width");
+   _height_tl = element->IntAttribute("height");
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _visible = element->BoolAttribute("visible", true);
 
@@ -67,7 +67,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
            // there are no chunks, the layer data is raw
            if (!inner_element && data_node != nullptr)
            {
-              _data = new int32_t[_width_px * _height_px];
+              _data = new int32_t[_width_tl * _height_tl];
               std::string data = sub_element->FirstChild()->Value();
 
               // parse csv data and store it in mData array
@@ -86,7 +86,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
                  for (const std::string& val_str : row_content)
                  {
                     int val = std::stoi(val_str);
-                    _data[y * _width_px + x] = val;
+                    _data[y * _width_tl + x] = val;
                     x++;
                  }
 
@@ -150,13 +150,13 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
       const auto chunk_width  = chunks.at(0)->_width_px;
       const auto chunk_height = chunks.at(0)->_height_px;
 
-      _width_px  = (x_max - x_min) + chunk_width;
-      _height_px = (y_max - y_min) + chunk_height;
+      _width_tl  = (x_max - x_min) + chunk_width;
+      _height_tl = (y_max - y_min) + chunk_height;
 
-      _data = new int32_t[_width_px * _height_px];
+      _data = new int32_t[_width_tl * _height_tl];
 
       // since we're dealing with patches of chunks there might be 'holes' in the map
-      memset(_data, 0, _width_px * _height_px * sizeof (int32_t));
+      memset(_data, 0, _width_tl * _height_tl * sizeof (int32_t));
 
       for (const auto c : chunks)
       {
@@ -168,7 +168,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement * element)
                auto xl = c->_x_px + x -x_min;
                auto yl = c->_y_px + y -y_min;
 
-               _data[yl * _width_px + xl] = c->_data[y * chunk_width + x];
+               _data[yl * _width_tl + xl] = c->_data[y * chunk_width + x];
             }
          }
       }
