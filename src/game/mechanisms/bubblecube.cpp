@@ -29,8 +29,6 @@ static constexpr auto pop_frequency = 15.0f;
 
 static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
-
-std::optional<size_t> _colliding_body_count;
 }
 
 
@@ -39,6 +37,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
 {
    setClassName(typeid(BubbleCube).name());
    setType(ObjectTypeBubbleCube);
+   setObjectId(data._tmx_object->_name);
 
    // read properties
    if (data._tmx_object->_properties)
@@ -261,6 +260,7 @@ void BubbleCube::updatePoppedCondition()
 struct BubbleQueryCallback : public b2QueryCallback
 {
    std::vector<b2Body*> _bodies;
+   b2Body* _body = nullptr;
    bool _pop_requested = false;
    std::optional<size_t> _max_count;
 
@@ -277,8 +277,12 @@ struct BubbleQueryCallback : public b2QueryCallback
 
    bool ReportFixture(b2Fixture* fixture)
    {
-      // filter out player fixtures
+      // filter out player fixtures and the bubble body
       if (isPlayer(fixture))
+      {
+         return true;
+      }
+      else if (fixture->GetBody() == _body)
       {
          return true;
       }
@@ -302,11 +306,17 @@ void BubbleCube::updatePopOnCollisionCondition()
    auto countBodies = [this]() -> size_t {
       BubbleQueryCallback query_callback;
       query_callback._max_count = _colliding_body_count;
+      query_callback._body = _body;
       b2AABB aabb;
       _fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
       Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
       return query_callback._bodies.size();
    };
+
+   // if (getObjectId() == "spike_bubble")
+   // {
+   //    std::cout << countBodies() << std::endl;
+   // }
 
    // this is going to be the reference count of bodies for future checks
    if (!_colliding_body_count.has_value())

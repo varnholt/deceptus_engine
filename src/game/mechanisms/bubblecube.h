@@ -53,6 +53,7 @@ private:
    sf::Time _pop_time;
    bool _popped = false;
    int32_t _contact_count = 0;
+   std::optional<size_t> _colliding_body_count;
 
    // settings
    float _pop_time_respawn_s = 3.0f;
