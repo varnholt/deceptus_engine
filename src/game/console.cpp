@@ -197,7 +197,10 @@ void Console::execute()
       os << "teleport to " << x << ", " <<  y << std::endl;
       _log.push_back(os.str());
 
-      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>(x * PIXELS_PER_TILE),
+         static_cast<float>(y * PIXELS_PER_TILE)
+      );
    }
    else if (results.at(0) == "/cp" && results.size() == 2)
    {

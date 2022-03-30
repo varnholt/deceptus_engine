@@ -13,9 +13,12 @@
 
 namespace
 {
-static constexpr auto width_m  = 36 * MPP;
-static constexpr auto height_m = 36 * MPP;
-static constexpr auto bevel_m = 6 * MPP;
+static constexpr auto width_px = 36;
+static constexpr auto height_px = 36;
+static constexpr auto bevel_px = 6;
+static constexpr auto width_m  = width_px * MPP;
+static constexpr auto height_m = height_px * MPP;
+static constexpr auto bevel_m = bevel_px * MPP;
 
 static constexpr auto columns = 12;
 static constexpr auto tiles_per_box_width = 4;
@@ -214,7 +217,7 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
       if (_contact_duration_s > _maximum_contact_duration_s)
       {
          _contact_duration_s = 0.0f;
-         pop();
+         _pop_requested = true;
       }
    }
 }
@@ -229,7 +232,12 @@ void BubbleCube::updatePosition()
 
    _body->SetTransform(_position_m + move_offset, 0.0f);
 
-   _sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_m * PPM);
+   const auto push_down_offset_px = _push_down_offset_m * PPM;
+
+   _sprite.setPosition(
+      _x_px + sprite_offset_x_px,
+      _y_px + sprite_offset_y_px + push_down_offset_px
+   );
 }
 
 
@@ -250,6 +258,27 @@ void BubbleCube::updateRespawnCondition()
 
 void BubbleCube::updatePoppedCondition()
 {
+   if (_pop_requested)
+   {
+      // a reasonable check could be:
+      // am i supposed only to pop when the foot collision is enabled
+      // was i inside the foot collision rect in the last frame?
+      // am i no more inside the foot collision rect?
+      // if so, then pop
+      //
+      //    constexpr auto collision_rect_height = 10;
+      //    _foot_collision_rect_px = {
+      //       static_cast<int32_t>(_x_px + bevel_px),
+      //       static_cast<int32_t>(_y_px - 5),
+      //       width_px - bevel_px,
+      //       collision_rect_height
+      //    };
+      //
+      //    Player::getCurrent()->getPlayerPixelRect().intersects(_foot_collision_rect_px)
+
+      pop();
+   }
+
    if (_popped)
    {
       _body->SetActive(false);
@@ -264,7 +293,7 @@ struct BubbleQueryCallback : public b2QueryCallback
    bool _pop_requested = false;
    std::optional<size_t> _max_count;
 
-   bool isPlayer(b2Fixture* fixture) const
+   bool checkBelongsToPlayer(b2Fixture* fixture) const
    {
       auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData());
       if (!fixture_node)
@@ -278,7 +307,7 @@ struct BubbleQueryCallback : public b2QueryCallback
    bool ReportFixture(b2Fixture* fixture)
    {
       // filter out player fixtures and the bubble body
-      if (isPlayer(fixture))
+      if (checkBelongsToPlayer(fixture))
       {
          return true;
       }
@@ -329,7 +358,7 @@ void BubbleCube::updatePopOnCollisionCondition()
    {
       if (countBodies() > _colliding_body_count)
       {
-         pop();
+         _pop_requested = true;
       }
    }
 }
@@ -340,10 +369,10 @@ void BubbleCube::update(const sf::Time& dt)
    _elapsed_s += dt.asSeconds();
    _pop_elapsed_s += dt.asSeconds();
 
-   updatePopOnCollisionCondition();
    updatePushDownOffset(dt);
-   updateMaxDurationCondition(dt);
    updatePosition();
+   updateMaxDurationCondition(dt);
+   updatePopOnCollisionCondition();
    updatePoppedCondition();
    updateRespawnCondition();
 }
@@ -355,6 +384,7 @@ void BubbleCube::pop()
    _pop_time = GlobalClock::getInstance().getElapsedTime();
    _pop_elapsed_s = 0.0f;
    _contact_count = 0;
+   _pop_requested = false;
 }
 
 
@@ -390,7 +420,7 @@ void BubbleCube::endContact(FixtureNode* other)
 
    if (_contact_count == 0)
    {
-      pop();
+      _pop_requested = true;
    }
 }
 
