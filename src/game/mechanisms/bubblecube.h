@@ -48,9 +48,12 @@ private:
    float _x_px = 0.0f;
    float _y_px = 0.0f;
    sf::IntRect _rect_px;
+   sf::IntRect _foot_collision_rect_px;
+   bool _player_intersected_with_foot_collision_rect = false;
    float _elapsed_s = 0.0f;
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
+   bool _pop_requested = false;
    bool _popped = false;
    int32_t _contact_count = 0;
    std::optional<size_t> _colliding_body_count;
