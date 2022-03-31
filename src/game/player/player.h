@@ -121,6 +121,9 @@ public:
    const sf::IntRect& getPlayerPixelRect() const;
 
    b2Body* getBody() const;
+   b2Fixture* getFootSensorFixture() const;
+   sf::IntRect computeFootSensorPixelIntRect() const;
+
    void setWorld(const std::shared_ptr<b2World>& world);
    void resetWorld();
    void updatePixelPosition();
@@ -214,6 +217,7 @@ private:
    static constexpr int32_t __foot_count = 4u;
    b2Fixture* _body_fixture = nullptr;
    b2Fixture* _foot_fixture[__foot_count];
+   b2Fixture* _foot_sensor_fixture = nullptr;
    b2Body* _platform_body = nullptr;
    b2Body* _ground_body = nullptr;
    b2Vec2 _ground_normal;
