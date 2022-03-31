@@ -58,6 +58,36 @@ b2Body* Player::getBody() const
     return _body;
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+b2Fixture* Player::getFootSensorFixture() const
+{
+   return _foot_sensor_fixture;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+sf::IntRect Player::computeFootSensorPixelIntRect() const
+{
+   sf::IntRect rect_px;
+   b2AABB aabb;
+
+   _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+
+   rect_px.left   = static_cast<int32_t>(aabb.lowerBound.x * PPM);
+   rect_px.top    = static_cast<int32_t>(aabb.lowerBound.y * PPM);
+   rect_px.width  = static_cast<int32_t>(abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM);
+   rect_px.height = static_cast<int32_t>(abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM);
+
+   // std::cout
+   //    << "ux: " << aabb.upperBound.x << " "
+   //    << "uy: " << aabb.upperBound.y << " "
+   //    << "lx: " << aabb.lowerBound.x << " "
+   //    << "ly: " << aabb.lowerBound.y << " "
+   //    << std::endl;
+
+   return rect_px;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getBeltVelocity() const
@@ -374,10 +404,10 @@ void Player::createFeet()
    foot_sensor_fixture_def.isSensor = true;
    foot_sensor_fixture_def.shape = &footPolygonShape;
 
-   auto foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
+   _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
    auto foot_object_data = new FixtureNode(this);
    foot_object_data->setType(ObjectTypePlayerFootSensor);
-   foot_sensor_fixture->SetUserData(static_cast<void*>(foot_object_data));
+   _foot_sensor_fixture->SetUserData(static_cast<void*>(foot_object_data));
 
    // attach head sensor shape
    b2PolygonShape head_polygon_shape;
