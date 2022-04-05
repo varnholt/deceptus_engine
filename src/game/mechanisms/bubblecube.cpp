@@ -65,12 +65,6 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
          _pop_time_respawn_s = pop_time_respawn_it->second->_value_float.value();
       }
 
-      const auto pop_only_on_foot_contact_it = data._tmx_object->_properties->_map.find("pop_only_on_foot_contact");
-      if (pop_only_on_foot_contact_it != data._tmx_object->_properties->_map.end())
-      {
-         _pop_only_on_foot_contact = pop_only_on_foot_contact_it->second->_value_bool.value();
-      }
-
       const auto move_down_on_contact_it = data._tmx_object->_properties->_map.find("move_down_on_contact");
       if (move_down_on_contact_it != data._tmx_object->_properties->_map.end())
       {
@@ -198,7 +192,7 @@ void BubbleCube::updatePushDownOffset(const sf::Time& dt)
    // if configured, bubble moves down when the player stands on top of it
    if (_move_down_on_contact)
    {
-      if (_contact_count > 0 || _player_intersects_with_foot_sensor)
+      if (_foot_sensor_contact)
       {
          _push_down_offset_m += dt.asSeconds() * _move_down_velocity;
       }
@@ -219,7 +213,7 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
       return;
    }
 
-   if (_contact_count == 0)
+   if (!_foot_sensor_contact)
    {
       return;
    }
@@ -271,13 +265,10 @@ void BubbleCube::updateRespawnCondition()
 
 void BubbleCube::updateFootSensorContact()
 {
-   if (!_pop_only_on_foot_contact)
+   if (_popped)
    {
       return;
    }
-
-
-   _lost_foot_sensor_contact = false;
 
    //     +-------------+
    //    /|             |\
@@ -289,26 +280,21 @@ void BubbleCube::updateFootSensorContact()
    // +---------------------+
    //          width
 
-   // when the bubble is only supposed to pop on foot contact, the workflow is as below:
-   // - was i inside the foot collision rect in the last frame?
-   // - am i no more inside the foot collision rect for this frame?
-   // -> if so, then pop
    constexpr auto bevel_range_increase_px = 1;
    _foot_collision_rect_px = {
       static_cast<int32_t>(_x_px + bevel_px - bevel_range_increase_px),
-      static_cast<int32_t>(_y_px - 5 + _push_down_offset_px),
+      static_cast<int32_t>(_y_px + _push_down_offset_px),
       width_px - (2 * bevel_px) + bevel_range_increase_px,
       collision_rect_height
    };
 
    const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelIntRect();
    auto player_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
-   if (!player_intersects && _player_intersects_with_foot_sensor)
-   {
-      _lost_foot_sensor_contact = true;
-   }
 
-   _player_intersects_with_foot_sensor = player_intersects;
+   if (player_intersects)
+   {
+      _foot_sensor_triggered_counter++;
+   }
 }
 
 
@@ -320,18 +306,12 @@ void BubbleCube::updatePoppedCondition()
    }
 
    if (
-         _lost_foot_sensor_contact
-      || _all_contacts_lost
+         (_foot_sensor_triggered_counter > 2 && _foot_sensor_contact == 0) // at least intersect for 2 frames with the rect to pop
       || _exceeded_max_contact_duration
       || _collided_with_surrounding_areas
    )
    {
-      pop();
-   }
-
-   if (_popped)
-   {
-      _body->SetActive(false);
+       pop();
    }
 }
 
@@ -391,11 +371,6 @@ void BubbleCube::updatePopOnCollisionCondition()
       return query_callback._bodies.size();
    };
 
-   // if (getObjectId() == "spike_bubble")
-   // {
-   //    std::cout << countBodies() << std::endl;
-   // }
-
    // this is going to be the reference count of bodies for future checks
    if (!_colliding_body_count.has_value())
    {
@@ -403,7 +378,7 @@ void BubbleCube::updatePopOnCollisionCondition()
    }
 
    // check for collisions with surrounding areas
-   if (!_popped && _move_down_on_contact && (_player_intersects_with_foot_sensor || _contact_count > 0))
+   if (!_popped && _move_down_on_contact && _foot_sensor_contact)
    {
       if (countBodies() > _colliding_body_count)
       {
@@ -433,61 +408,45 @@ void BubbleCube::pop()
    _popped = true;
    _pop_time = GlobalClock::getInstance().getElapsedTime();
    _pop_elapsed_s = 0.0f;
-   _contact_count = 0;
 
-   _all_contacts_lost = false;
-   _lost_foot_sensor_contact = false;
+   _foot_sensor_contact = false;
+   _foot_sensor_triggered_counter = 0;
    _exceeded_max_contact_duration = false;
    _collided_with_surrounding_areas = false;
+
+   _body->SetActive(false);
 }
 
 
-void BubbleCube::beginContact(FixtureNode* /*other*/)
+void BubbleCube::beginContact(FixtureNode* other)
 {
-   // if foot contact property is set, disregard contact listener
-   if (_pop_only_on_foot_contact)
+   if (other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
-
-   // if (_pop_only_on_foot_contact && other->getType() != ObjectTypePlayerFootSensor)
-   // {
-   //    return;
-   // }
 
    if (_popped)
    {
       return;
    }
 
-   _contact_count++;
+   _foot_sensor_contact = true;
 }
 
 
-void BubbleCube::endContact(FixtureNode* /*other*/)
+void BubbleCube::endContact(FixtureNode* other)
 {
-   // if foot contact property is set, disregard contact listener
-   if (_pop_only_on_foot_contact)
+   if (other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
-
-   // if (_pop_only_on_foot_contact && other->getType() != ObjectTypePlayerFootSensor)
-   // {
-   //    return;
-   // }
 
    if (_popped)
    {
       return;
    }
 
-   _contact_count = std::max(0, _contact_count - 1);
-
-   if (_contact_count == 0)
-   {
-      _all_contacts_lost = true;
-   }
+   _foot_sensor_contact = false;
 }
 
 
