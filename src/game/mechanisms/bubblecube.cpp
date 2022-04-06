@@ -306,12 +306,12 @@ void BubbleCube::updatePoppedCondition()
    }
 
    if (
-         (_foot_sensor_triggered_counter > 2 && _foot_sensor_contact == 0) // at least intersect for 2 frames with the rect to pop
+         (_foot_sensor_triggered_counter > 1 && _foot_sensor_contact == 0) // at least intersect for 2 frames with the rect to pop
       || _exceeded_max_contact_duration
       || _collided_with_surrounding_areas
    )
    {
-       pop();
+      pop();
    }
 }
 
@@ -418,7 +418,7 @@ void BubbleCube::pop()
 }
 
 
-void BubbleCube::beginContact(FixtureNode* other)
+void BubbleCube::beginContact(b2Contact* /*contact*/, FixtureNode* other)
 {
    if (other->getType() != ObjectTypePlayerFootSensor)
    {

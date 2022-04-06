@@ -198,9 +198,9 @@ void GameContactListener::processBouncerContactBegin(FixtureNode* fixture_node)
 }
 
 
-void GameContactListener::processBubbleCubeContactBegin(FixtureNode* bubble, FixtureNode* other)
+void GameContactListener::processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* bubble, FixtureNode* other)
 {
-   dynamic_cast<BubbleCube*>(bubble)->beginContact(other);
+   dynamic_cast<BubbleCube*>(bubble)->beginContact(contact, other);
 }
 
 
@@ -283,7 +283,7 @@ void GameContactListener::processBeginContact(
       }
       case ObjectTypeBubbleCube:
       {
-         processBubbleCubeContactBegin(fixture_node_a, fixture_node_b);
+         processBubbleCubeContactBegin(contact, fixture_node_a, fixture_node_b);
          break;
       }
       case ObjectTypeCollapsingPlatform:
@@ -600,8 +600,8 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
    // auto tangent_max = 0.0f;
    // for (auto i = 0; i < contactImpulse->count; i++)
    // {
-   //    normal_max = std::max(normal_max, contactImpulse->normalImpulses[i]);
-   //    tangent_max = std::max(tangent_max, contactImpulse->tangentImpulses[i]);
+   //    normal_max = std::max(normal_max, contact_impulse->normalImpulses[i]);
+   //    tangent_max = std::max(tangent_max, contact_impulse->tangentImpulses[i]);
    // }
    //
    // if (normal_max > 0.025f || tangent_max > 0.01f)

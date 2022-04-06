@@ -61,7 +61,7 @@ private:
    void processPostSolve(FixtureNode* node, float impulse);
 
    void processBouncerContactBegin(FixtureNode* fixture_node);
-   void processBubbleCubeContactBegin(FixtureNode* bubble, FixtureNode* other);
+   void processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* bubble, FixtureNode* other);
    void processCollapsingPlatformContactBegin(FixtureNode* fixture_node);
    void processCrusherContactBegin(FixtureNode* fixture_node);
    void processDeadlyContactBegin(FixtureNode* fixture_node);
