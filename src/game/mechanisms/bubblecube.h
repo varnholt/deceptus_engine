@@ -56,18 +56,16 @@ private:
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
    bool _popped = false;
-   int32_t _contact_count = 0;
+   bool _foot_sensor_contact = false;
    std::optional<size_t> _colliding_body_count;
-   bool _all_contacts_lost = false;
    bool _exceeded_max_contact_duration = false;
    bool _collided_with_surrounding_areas = false;
-   bool _lost_foot_sensor_contact = false;
+   int32_t _foot_sensor_triggered_counter = 0;
 
    // settings
    float _pop_time_respawn_s = 3.0f;
    float _animation_offset_s = 0.0f;
    float _mapped_value_normalized = 0.0f;
-   bool _pop_only_on_foot_contact = false;
    bool _move_down_on_contact = false;
    float _move_down_velocity = 0.5f;
    float _push_down_offset_m = 0.0f;
