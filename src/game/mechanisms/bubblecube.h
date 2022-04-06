@@ -30,7 +30,7 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
-   void beginContact(FixtureNode* other);
+   void beginContact(b2Contact* contact, FixtureNode* other);
    void endContact(FixtureNode* other);
 
 
