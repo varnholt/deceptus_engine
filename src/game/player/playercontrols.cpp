@@ -82,11 +82,6 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   // if (GameControllerIntegration::getInstance().isControllerConnected())
-   // {
-   //    return;
-   // }
-
    if (key == sf::Keyboard::Space)
    {
       _keys_pressed |= KeyPressedJump;
@@ -131,11 +126,6 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
-
-   // if (GameControllerIntegration::getInstance().isControllerConnected())
-   // {
-   //    return;
-   // }
 
    if (key == sf::Keyboard::LShift)
    {
@@ -610,7 +600,7 @@ void PlayerControls::updatePlayerInput()
 
    const auto& axis_values = _joystick_info.getAxisValues();
    const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-   auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
+   const auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
    const auto hat_value = _joystick_info.getHatValues().at(0);
 
    const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
