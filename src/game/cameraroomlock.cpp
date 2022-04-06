@@ -3,8 +3,6 @@
 #include "camerasystemconfiguration.h"
 #include "gameconfiguration.h"
 
-// #include <iostream>
-
 
 namespace
 {
