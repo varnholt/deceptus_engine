@@ -205,7 +205,7 @@ void Player::initializeController()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<ExtraManager> Player::getExtraManager() const
+const std::shared_ptr<ExtraManager>& Player::getExtraManager() const
 {
   return _extra_manager;
 }
@@ -1023,6 +1023,13 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
    screen_transition->startEffect1();
 
    return std::move(screen_transition);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+const PlayerJump& Player::getJump() const
+{
+   return _jump;
 }
 
 
@@ -1916,21 +1923,21 @@ void Player::keyPressed(sf::Keyboard::Key key)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-PlayerAnimation& Player::getPlayerAnimation()
+const PlayerAnimation& Player::getPlayerAnimation() const
 {
    return _player_animation;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<WeaponSystem> Player::getWeaponSystem() const
+const std::shared_ptr<WeaponSystem>& Player::getWeaponSystem() const
 {
    return _weapon_system;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-const std::shared_ptr<PlayerControls>& Player::getControls()
+const std::shared_ptr<PlayerControls>& Player::getControls() const
 {
    return _controls;
 }

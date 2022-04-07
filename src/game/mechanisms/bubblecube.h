@@ -51,7 +51,6 @@ private:
    float _push_down_offset_px = 0.0f;
    sf::IntRect _rect_px;
    sf::IntRect _foot_collision_rect_px;
-   bool _player_intersects_with_foot_sensor = false;
    float _elapsed_s = 0.0f;
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
@@ -60,7 +59,9 @@ private:
    std::optional<size_t> _colliding_body_count;
    bool _exceeded_max_contact_duration = false;
    bool _collided_with_surrounding_areas = false;
+
    int32_t _foot_sensor_triggered_counter = 0;
+   bool _lost_foot_contact = false;
 
    // settings
    float _pop_time_respawn_s = 3.0f;
