@@ -132,10 +132,8 @@ public:
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
 
-
    bool getVisible() const;
    void setVisible(bool visible);
-
 
    b2Body* getPlatformBody() const;
    void setPlatformBody(b2Body* body);
@@ -157,14 +155,13 @@ public:
 
    void impulse(float intensity);
    void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
+   void goToPortal(auto portal);
 
-   std::shared_ptr<ExtraManager> getExtraManager() const;
-
-   const std::shared_ptr<PlayerControls>& getControls();
-
-   std::shared_ptr<WeaponSystem> getWeaponSystem() const;
-
-   PlayerAnimation& getPlayerAnimation();
+   const std::shared_ptr<ExtraManager>& getExtraManager() const;
+   const std::shared_ptr<WeaponSystem>& getWeaponSystem() const;
+   const std::shared_ptr<PlayerControls>& getControls() const;
+   const PlayerAnimation& getPlayerAnimation() const;
+   const PlayerJump& getJump() const;
 
 
 private:
@@ -265,6 +262,5 @@ private:
    std::deque<PositionedAnimation> _last_animations;
 
    static Player* __current;
-   void goToPortal(auto portal);
 };
 
