@@ -183,9 +183,14 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 #ifdef DEBUG_COLLISION_RECTS
    auto fixed_rect_moved_down_px = _fixed_rect_px;
    fixed_rect_moved_down_px.top += static_cast<int32_t>(_push_down_offset_px);
+   auto moved_box_rect = _fixed_rect_px;
+   moved_box_rect.top = moved_box_rect.top - 12;
+   moved_box_rect.left -= 8;
+   moved_box_rect.width += 8 * 2;
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);
    DebugDraw::drawRect(color, _fixed_rect_px, sf::Color::Green);
    DebugDraw::drawRect(color, fixed_rect_moved_down_px, sf::Color::Green);
+   DebugDraw::drawRect(color, moved_box_rect, sf::Color::Blue);
    DebugDraw::drawRect(color, Player::getCurrent()->computeFootSensorPixelIntRect(), sf::Color::Cyan);
    DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionf() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));   
 #endif
@@ -326,7 +331,9 @@ void BubbleCube::updateFootSensorContact()
 void BubbleCube::updateJumpedOffPlatformCondition()
 {
     auto moved_box_rect = _fixed_rect_px;
-    moved_box_rect.top = moved_box_rect.top - 10;
+    moved_box_rect.top = moved_box_rect.top - 12;
+    moved_box_rect.left -= 8;
+    moved_box_rect.width += 8 * 2;
 
     const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
     const auto intersects_box = moved_box_rect.intersects(Player::getCurrent()->computeFootSensorPixelIntRect());
