@@ -18,6 +18,7 @@ class SpikeBall : public GameMechanism, public GameNode
       struct SpikeConfig
       {
          // factor to control the push force when ball moves from right to left
+         float _ball_radius = 0.45f;
          float _push_factor = 0.625f;
 
          // number of points retrieved from the given spline
@@ -38,7 +39,7 @@ class SpikeBall : public GameMechanism, public GameNode
       void setup(const GameDeserializeData& data);
 
       sf::Vector2i getPixelPosition() const;
-      void setPixelPosition(const sf::Vector2i& pixelPosition);
+      void setPixelPosition(const sf::Vector2i& pixel_position);
 
 
    private:

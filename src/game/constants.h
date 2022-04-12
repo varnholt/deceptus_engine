@@ -22,6 +22,7 @@ static constexpr auto TPM = 2.0f;         // tiles per meter
 static constexpr auto MPT = 0.5f;         // meters per tile
 
 static constexpr auto PIXELS_PER_TILE = 24;
+static constexpr auto PIXELS_PER_HALF_TILE = PIXELS_PER_TILE / 2;
 static constexpr auto PIXELS_PER_PHYSICS_TILE = 8; // each tile is 8x8 px
 
 static constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15; // 20
