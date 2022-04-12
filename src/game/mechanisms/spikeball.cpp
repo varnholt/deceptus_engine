@@ -5,6 +5,8 @@
 #include "framework/math/hermitecurve.h"
 #include "player/player.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 
 /*
@@ -160,17 +162,27 @@ void SpikeBall::update(const sf::Time& dt)
 
 void SpikeBall::setup(const GameDeserializeData& data)
 {
-    setPixelPosition(
+   if (data._tmx_object->_properties)
+   {
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
+      {
+         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
+   }
+
+   setPixelPosition(
        sf::Vector2i{
-          static_cast<int32_t>(data._tmx_object->_x_px),
-          static_cast<int32_t>(data._tmx_object->_y_px)
+          static_cast<int32_t>(data._tmx_object->_x_px) + PIXELS_PER_HALF_TILE,
+          static_cast<int32_t>(data._tmx_object->_y_px) + PIXELS_PER_HALF_TILE
        }
     );
 
-   auto pos = b2Vec2{static_cast<float>(_pixel_position.x * MPP), static_cast<float>(_pixel_position.y * MPP)};
+   const auto pos_m = b2Vec2{static_cast<float>(_pixel_position.x * MPP), static_cast<float>(_pixel_position.y * MPP)};
 
    _anchor_body = data._world->CreateBody(&_anchor_def);
-   _anchor_shape.Set(b2Vec2(pos.x - 0.1f, pos.y), b2Vec2(pos.x + 0.1f, pos.y));
+   _anchor_shape.Set(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
 
    b2FixtureDef fd;
    fd.shape = &_anchor_shape;
@@ -186,13 +198,13 @@ void SpikeBall::setup(const GameDeserializeData& data)
    {
       b2BodyDef bd;
       bd.type = b2_dynamicBody;
-      bd.position.Set(pos.x + 0.01f + i * _config._chain_element_distance, pos.y);
+      bd.position.Set(pos_m.x + 0.01f + i * _config._chain_element_distance, pos_m.y);
       auto chain_body = data._world->CreateBody(&bd);
       auto chain_fixture = chain_body->CreateFixture(&_chain_element_fixture_def);
       chain_fixture->SetSensor(true);
       _chain_elements.push_back(chain_body);
 
-      b2Vec2 anchor(pos.x + i * _config._chain_element_distance, pos.y);
+      const b2Vec2 anchor(pos_m.x + i * _config._chain_element_distance, pos_m.y);
 
       _joint_def.Initialize(prev_body, chain_body, anchor);
       data._world->CreateJoint(&_joint_def);
@@ -203,12 +215,12 @@ void SpikeBall::setup(const GameDeserializeData& data)
    // attach the spiky ball to the last chain element
    _ball_body_def.type = b2_dynamicBody;
    _ball_fixture_def.density = 1;
-   _ball_shape.m_radius = 0.45f;
-   _ball_body_def.position.Set(pos.x + 0.01f + _config._chain_element_count * _config._chain_element_distance, pos.y);
+   _ball_shape.m_radius = _config._ball_radius;
+   _ball_body_def.position.Set(pos_m.x + 0.01f + _config._chain_element_count * _config._chain_element_distance, pos_m.y);
    _ball_fixture_def.shape = &_ball_shape;
    _ball_body = data._world->CreateBody( &_ball_body_def );
    auto ball_fixture = _ball_body->CreateFixture( &_ball_fixture_def );
-   b2Vec2 anchor(pos.x + _config._chain_element_count * _config._chain_element_distance, pos.y);
+   b2Vec2 anchor(pos_m.x + _config._chain_element_count * _config._chain_element_distance, pos_m.y);
    _joint_def.Initialize(prev_body, _ball_body, anchor);
    data._world->CreateJoint(&_joint_def);
 
@@ -230,9 +242,9 @@ sf::Vector2i SpikeBall::getPixelPosition() const
 }
 
 
-void SpikeBall::setPixelPosition(const sf::Vector2i& pixelPosition)
+void SpikeBall::setPixelPosition(const sf::Vector2i& pixel_position)
 {
-   _pixel_position = pixelPosition;
+   _pixel_position = pixel_position;
 }
 
 
