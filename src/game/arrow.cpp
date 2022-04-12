@@ -6,10 +6,10 @@
 
 const auto sprite_width = PIXELS_PER_TILE;
 const auto sprite_height = PIXELS_PER_TILE;
-const auto sprite_count = 5;
+const auto sprite_count = 10;
 const auto sprites_per_row = 15;
 const auto sprite_frame_time_s = 0.075f;
-const auto sprite_start_frame = 25;
+const auto sprite_start_frame = 20;
 
 static constexpr auto default_bow_projectile_identifier = "data/weapons/arrow.png";
 
