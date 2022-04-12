@@ -63,7 +63,7 @@ void Console::showHelp()
     _log.push_back("   example: /damage 100");
     _log.push_back("");
     _log.push_back("/extra <name>: give extra");
-    _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all");
+    _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
     _log.push_back("");
     _log.push_back("/playback <command>: game playback");
     _log.push_back("   commands: enable, disable, load, save, replay, reset");
@@ -186,6 +186,11 @@ void Console::execute()
       {
          skills = 0xffffffff;
          _log.push_back("given all extras to player");
+      }
+      else if (results.at(1) == "none")
+      {
+         skills = 0;
+         _log.push_back("reset all player extras");
       }
    }
    else if (results.at(0) == "/tp" && results.size() == 3)
