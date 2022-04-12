@@ -670,13 +670,17 @@ void GameContactListener::processPostSolveProjectile(FixtureNode* node, float im
 
    projectile->setHitSomething(true);
 
+   // have a delay between hit and sprite removal
+   //
    // this is only needed for arrows, so could be generalised
-   Timer::add(
-      std::chrono::milliseconds(1000),
-      [projectile](){projectile->setScheduledForRemoval(true);},
-      Timer::Type::Singleshot,
-      Timer::Scope::UpdateIngame
-   );
+   // Timer::add(
+   //    std::chrono::milliseconds(1000),
+   //    [projectile](){projectile->setScheduledForRemoval(true);},
+   //    Timer::Type::Singleshot,
+   //    Timer::Scope::UpdateIngame
+   // );
+
+   projectile->setScheduledForRemoval(true);
 
    if (impulse > 0.0003f)
    {
