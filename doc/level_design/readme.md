@@ -312,6 +312,11 @@ In order to add Spike Balls to your level, you have to create an object layer ca
 
 It is very important to place that mount high enough, otherwise the ball will crash into the physics representation of your level and the physics engine will go a bit crazy.
 
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+
+
 <br><br>
 
 ## Spikes
