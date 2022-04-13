@@ -17,7 +17,7 @@ init:
 before_build:
 
 build_script:
-- C:\Qt\5.14.2\msvc2017_64\bin\qmake jumpnrun.pro
+- C:\Qt\5.15.2\msvc2017_64\bin\qmake jumpnrun.pro
 - nmake
 - call "deploy_appveyor.bat"
 
