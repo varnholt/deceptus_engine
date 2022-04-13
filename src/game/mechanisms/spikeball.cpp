@@ -167,8 +167,43 @@ void SpikeBall::setup(const GameDeserializeData& data)
       auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
-         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-         setZ(z_index);
+         setZ(static_cast<uint32_t>(z_it->second->_value_int.value()));
+      }
+
+      auto push_factor_it = data._tmx_object->_properties->_map.find("push_factor");
+      if (push_factor_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._push_factor = push_factor_it->second->_value_float.value();
+      }
+
+      auto spline_point_count_it = data._tmx_object->_properties->_map.find("spline_point_count");
+      if (spline_point_count_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._spline_point_count = spline_point_count_it->second->_value_int.value();
+      }
+
+      auto chain_element_count_it = data._tmx_object->_properties->_map.find("chain_element_count");
+      if (chain_element_count_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._chain_element_count = chain_element_count_it->second->_value_int.value();
+      }
+
+      auto chain_element_distance_it = data._tmx_object->_properties->_map.find("chain_element_distance");
+      if (chain_element_distance_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._chain_element_distance = chain_element_distance_it->second->_value_float.value();
+      }
+
+      auto chain_element_width_it = data._tmx_object->_properties->_map.find("chain_element_width");
+      if (chain_element_width_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._chain_element_width = chain_element_width_it->second->_value_float.value();
+      }
+
+      auto chain_element_height_it = data._tmx_object->_properties->_map.find("chain_element_height");
+      if (chain_element_height_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._chain_element_height = chain_element_height_it->second->_value_float.value();
       }
    }
 
