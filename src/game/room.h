@@ -44,7 +44,22 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
       Bottom   = 'b'
    };
 
-   Room(GameNode* parent, const sf::FloatRect& rect);
+   struct SubRoom
+   {
+      sf::FloatRect _rect;
+
+      //! start positions when room was entered
+      std::optional<sf::Vector2i> _start_position_l;
+      std::optional<sf::Vector2i> _start_position_r;
+      std::optional<sf::Vector2i> _start_position_t;
+      std::optional<sf::Vector2i> _start_position_b;
+      std::optional<sf::Vector2i> _start_offset_l;
+      std::optional<sf::Vector2i> _start_offset_r;
+
+      Room::EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
+   };
+
+   Room(GameNode* parent);
 
    static void deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
@@ -54,15 +69,15 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    void movePlayerToRoomStartPosition();
    void syncCamera();
 
-   EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
-   std::optional<sf::FloatRect> activeRect(const sf::Vector2f& player_pos_px) const;
+   std::optional<SubRoom> activeSubRoom(const sf::Vector2f& player_pos_px) const;
+   Room::EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
 
-   std::vector<sf::FloatRect>::const_iterator findRect(const sf::Vector2f& p) const;
+   std::vector<SubRoom>::const_iterator findSubRoom(const sf::Vector2f& p) const;
    bool correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const;
    std::unique_ptr<ScreenTransition> makeFadeTransition();
 
-   std::vector<sf::FloatRect> _rects;
-   std::string _name;
+   std::vector<SubRoom> _sub_rooms;
+   std::optional<std::string> _group_name;
    int32_t _id = 0;
 
    //! specify how long the camera position should not be updated after entering the room
@@ -75,13 +90,5 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    std::chrono::milliseconds _delay_between_effects_ms{250};
    bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
-
-   //! start positions when room was entered
-   std::optional<sf::Vector2i> _start_position_l;
-   std::optional<sf::Vector2i> _start_position_r;
-   std::optional<sf::Vector2i> _start_position_t;
-   std::optional<sf::Vector2i> _start_position_b;
-   std::optional<sf::Vector2i> _start_offset_l;
-   std::optional<sf::Vector2i> _start_offset_r;
 };
 
