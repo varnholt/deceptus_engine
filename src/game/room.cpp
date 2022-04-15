@@ -47,26 +47,25 @@
 */
 
 
-Room::Room(GameNode* parent, const sf::FloatRect& rect)
+Room::Room(GameNode* parent)
  : GameNode(parent)
 {
    setClassName(typeid(Room).name());
 
    static int32_t __id = 0;
 
-   _rects.push_back(rect);
    _id = __id;
    __id++;
 }
 
 
-std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p) const
+std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::Vector2f& p) const
 {
    const auto it = std::find_if(
-         _rects.begin(),
-         _rects.end(),
-         [p](const sf::FloatRect& rect){
-            return rect.contains(p);
+         _sub_rooms.begin(),
+         _sub_rooms.end(),
+         [p](const auto& sub_room){
+            return sub_room._rect.contains(p);
          }
       );
 
@@ -77,8 +76,8 @@ std::vector<sf::FloatRect>::const_iterator Room::findRect(const sf::Vector2f& p)
 std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms)
 {
    const auto room_it = std::find_if(rooms.begin(), rooms.end(), [p, rooms](const std::shared_ptr<Room>& r){
-         const auto& it = r->findRect(p);
-         return (it != r->_rects.end());
+         const auto& it = r->findSubRoom(p);
+         return (it != r->_sub_rooms.end());
       }
    );
 
@@ -102,39 +101,31 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       return;
    }
 
-   // read key from tmx object
-   std::istringstream f(data._tmx_object->_name);
-   std::string key;
-   if (!getline(f, key, '_'))
+   // deserialize room group
+   std::optional<std::string> group_name;
+   if (data._tmx_object->_properties)
    {
-      key = data._tmx_object->_name;
+       const auto transition_it = data._tmx_object->_properties->_map.find("group");
+       if (transition_it != data._tmx_object->_properties->_map.end())
+       {
+           group_name = *transition_it->second->_value_string;
+       }
    }
 
-   if (key.empty())
-   {
-      Log::Error() << "ignoring unnamed room";
-      return;
-   }
-
-   auto rect = sf::FloatRect{
-      data._tmx_object->_x_px,
-      data._tmx_object->_y_px,
-      data._tmx_object->_width_px,
-      data._tmx_object->_height_px
-   };
-
-   // check if room already exists
-   const auto it = std::find_if(rooms.begin(), rooms.end(), [key](const std::shared_ptr<Room>& r){
-         return (r->_name == key);
+   // check if room belongs to a group of rooms
+   const auto group_it = std::find_if(rooms.begin(), rooms.end(), [group_name](const std::shared_ptr<Room>& r){
+         return (r->_group_name == group_name);
       }
    );
 
-   if (it == rooms.end())
+   // create new room if room has no group associated or room with a group assigned has not been created yet
+   std::shared_ptr<Room> room;
+   if (!group_name.has_value() || group_it == rooms.end())
    {
-      // create new room
-      auto room = std::make_shared<Room>(parent, rect);
-      room->_name = key;
-      room->setObjectId(key);
+      room = std::make_shared<Room>(parent);
+      room->_group_name = group_name;
+      room->setObjectId(data._tmx_object->_name);
+      rooms.push_back(room);
 
       // deserialize room properties
       if (data._tmx_object->_properties)
@@ -142,130 +133,137 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
          const auto transition_it = data._tmx_object->_properties->_map.find("transition");
          if (transition_it != data._tmx_object->_properties->_map.end())
          {
-            if (transition_it->second->_value_string == "fade_out_fade_in")
-            {
-               room->_transition_effect = TransitionEffect::FadeOutFadeIn;
-            }
+             if (transition_it->second->_value_string == "fade_out_fade_in")
+             {
+                 room->_transition_effect = TransitionEffect::FadeOutFadeIn;
+             }
          }
 
          const auto fade_in_speed_it = data._tmx_object->_properties->_map.find("fade_in_speed");
          if (fade_in_speed_it != data._tmx_object->_properties->_map.end())
          {
-            room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
+             room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
          }
 
          const auto fade_out_speed_it = data._tmx_object->_properties->_map.find("fade_out_speed");
          if (fade_out_speed_it != data._tmx_object->_properties->_map.end())
          {
-            room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
+             room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
          const auto delay_between_effects_it = data._tmx_object->_properties->_map.find("delay_between_effects_ms");
          if (delay_between_effects_it != data._tmx_object->_properties->_map.end())
          {
-            room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
+             room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
          }
 
          const auto camera_sync_after_fade_out_it = data._tmx_object->_properties->_map.find("camera_sync_after_fade_out");
          if (camera_sync_after_fade_out_it != data._tmx_object->_properties->_map.end())
          {
-            room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
+             room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
          }
 
          const auto delay_it = data._tmx_object->_properties->_map.find("camera_lock_delay_ms");
          if (delay_it != data._tmx_object->_properties->_map.end())
          {
-            room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
-         }
-
-         // read start positions if available
-         const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
-         const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
-         if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
-         {
-            room->_start_position_l = {
-               start_position_l_x_it->second->_value_int.value(),
-               start_position_l_y_it->second->_value_int.value()
-            };
-         }
-
-         const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
-         const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
-         if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
-         {
-            room->_start_position_r = {
-               start_position_r_x_it->second->_value_int.value(),
-               start_position_r_y_it->second->_value_int.value()
-            };
-         }
-
-         const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
-         const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
-         if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
-         {
-            room->_start_position_t = {
-               start_position_t_x_it->second->_value_int.value(),
-               start_position_t_y_it->second->_value_int.value()
-            };
-         }
-
-         const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
-         const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
-         if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
-         {
-            room->_start_position_b = {
-               start_position_b_x_it->second->_value_int.value(),
-               start_position_b_y_it->second->_value_int.value()
-            };
-         }
-
-         const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
-         const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
-         if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
-         {
-            auto offset_y = 0;
-            if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
-            {
-               offset_y = start_offset_l_y_it->second->_value_int.value();
-            }
-
-            room->_start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
-         }
-
-         const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
-         const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
-         if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
-         {
-            auto offset_y = 0;
-            if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
-            {
-               offset_y = start_offset_r_y_it->second->_value_int.value();
-            }
-
-            room->_start_offset_r = {start_offset_r_x_it->second->_value_int.value(), offset_y};
+             room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
          }
       }
-
-      rooms.push_back(room);
-      // Log::Info() << "adding room: " << key;
    }
    else
    {
-      // merge room
-      auto& room = *it;
+       // merge room
+       room = *group_it;
+   }
 
-      // test for overlaps
-      if (std::any_of(room->_rects.begin(), room->_rects.end(), [rect](const sf::FloatRect& r){
-               return r.intersects(rect);
-            }
-         )
-      )
+   Room::SubRoom sub_room;
+   sub_room._rect = sf::FloatRect{
+       data._tmx_object->_x_px,
+       data._tmx_object->_y_px,
+       data._tmx_object->_width_px,
+       data._tmx_object->_height_px
+   };
+
+   // read start positions if available
+   const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
+   const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
+   if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
+   {
+      sub_room._start_position_l = {
+         start_position_l_x_it->second->_value_int.value(),
+         start_position_l_y_it->second->_value_int.value()
+      };
+   }
+
+   const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
+   const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
+   if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
+   {
+      sub_room._start_position_r = {
+         start_position_r_x_it->second->_value_int.value(),
+         start_position_r_y_it->second->_value_int.value()
+      };
+   }
+
+   const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
+   const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
+   if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
+   {
+      sub_room._start_position_t = {
+         start_position_t_x_it->second->_value_int.value(),
+         start_position_t_y_it->second->_value_int.value()
+      };
+   }
+
+   const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
+   const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
+   if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
+   {
+      sub_room._start_position_b = {
+         start_position_b_x_it->second->_value_int.value(),
+         start_position_b_y_it->second->_value_int.value()
+      };
+   }
+
+   const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
+   const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
+   if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
+   {
+      auto offset_y = 0;
+      if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
       {
-         Log::Error() << "bad rect intersection for room " << key;
+         offset_y = start_offset_l_y_it->second->_value_int.value();
       }
 
-      room->_rects.push_back(rect);
+      sub_room._start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
    }
+
+   const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
+   const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
+   if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
+   {
+      auto offset_y = 0;
+      if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
+      {
+         offset_y = start_offset_r_y_it->second->_value_int.value();
+      }
+
+      sub_room._start_offset_r = {start_offset_r_x_it->second->_value_int.value(), offset_y};
+   }
+
+   room->_sub_rooms.push_back(sub_room);
+
+   // test for overlaps
+   if (std::any_of(room->_sub_rooms.begin(), room->_sub_rooms.end(), [sub_room](const auto& room){
+            return room._rect.intersects(sub_room._rect);
+         }
+      )
+   )
+   {
+      Log::Error() << "bad rect intersection for room " << data._tmx_object->_name;
+   }
+
+   // Log::Info() << "adding room: " << key;
 }
 
 
@@ -293,50 +291,58 @@ std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
 
 void Room::movePlayerToRoomStartPosition()
 {
-   const auto entered_direction = enteredDirection(Player::getCurrent()->getPixelPositionf());
+   const auto player_pos_px = Player::getCurrent()->getPixelPositionf();
 
-   if (_start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
+   const auto active_sub_room = activeSubRoom(player_pos_px);
+   if (!active_sub_room.has_value())
    {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(_start_position_l.value().x),
-         static_cast<float>(_start_position_l.value().y)
-      );
-   }
-   else if (_start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
-   {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(_start_position_r.value().x),
-         static_cast<float>(_start_position_r.value().y)
-      );
-   }
-   else if (_start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
-   {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(_start_position_t.value().x),
-         static_cast<float>(_start_position_t.value().y)
-      );
-   }
-   else if (_start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
-   {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(_start_position_b.value().x),
-         static_cast<float>(_start_position_b.value().y)
-      );
+      return;
    }
 
-   if (_start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
+   const auto entered_direction = (*active_sub_room).enteredDirection(player_pos_px);
+
+   if ((*active_sub_room)._start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>((*active_sub_room)._start_position_l.value().x),
+         static_cast<float>((*active_sub_room)._start_position_l.value().y)
+      );
+   }
+   else if ((*active_sub_room)._start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>((*active_sub_room)._start_position_r.value().x),
+         static_cast<float>((*active_sub_room)._start_position_r.value().y)
+      );
+   }
+   else if ((*active_sub_room)._start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>((*active_sub_room)._start_position_t.value().x),
+         static_cast<float>((*active_sub_room)._start_position_t.value().y)
+      );
+   }
+   else if ((*active_sub_room)._start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
+   {
+      Player::getCurrent()->setBodyViaPixelPosition(
+         static_cast<float>((*active_sub_room)._start_position_b.value().x),
+         static_cast<float>((*active_sub_room)._start_position_b.value().y)
+      );
+   }
+
+   if ((*active_sub_room)._start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
    {
       auto player_pos = Player::getCurrent()->getPixelPositioni();
-      player_pos += _start_offset_l.value();
+      player_pos += (*active_sub_room)._start_offset_l.value();
       Player::getCurrent()->setBodyViaPixelPosition(
          static_cast<float>(player_pos.x),
          static_cast<float>(player_pos.y)
       );
    }
-   else if (_start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
+   else if ((*active_sub_room)._start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
    {
       auto player_pos = Player::getCurrent()->getPixelPositioni();
-      player_pos += _start_offset_r.value();
+      player_pos += (*active_sub_room)._start_offset_r.value();
       Player::getCurrent()->setBodyViaPixelPosition(
          static_cast<float>(player_pos.x),
          static_cast<float>(player_pos.y)
@@ -400,56 +406,63 @@ void Room::lockCamera()
 }
 
 
-Room::EnteredDirection Room::enteredDirection(const sf::Vector2f& player_pos_px) const
+Room::EnteredDirection Room::SubRoom::enteredDirection(const sf::Vector2f& player_pos_px) const
 {
    static constexpr auto eps_px = 100;
 
-   if (activeRect(player_pos_px).has_value())
+   sf::FloatRect rect_l{_rect.left,                        _rect.top,                         eps_px,      _rect.height};
+   sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top,                         eps_px,      _rect.height};
+   sf::FloatRect rect_t{_rect.left,                        _rect.top,                         _rect.width, eps_px};
+   sf::FloatRect rect_b{_rect.left,                        _rect.top + _rect.height - eps_px, _rect.width, eps_px};
+
+   if (rect_l.contains(player_pos_px))
    {
-      const auto r = activeRect(player_pos_px).value();
+      return Room::EnteredDirection::Left;
+   }
 
-      sf::FloatRect rect_l{r.left,                    r.top,                     eps_px,  r.height};
-      sf::FloatRect rect_r{r.left + r.width - eps_px, r.top,                     eps_px,  r.height};
-      sf::FloatRect rect_t{r.left,                    r.top,                     r.width, eps_px};
-      sf::FloatRect rect_b{r.left,                    r.top + r.height - eps_px, r.width, eps_px};
+   if (rect_r.contains(player_pos_px))
+   {
+      return Room::EnteredDirection::Right;
+   }
 
-      if (rect_l.contains(player_pos_px))
-      {
-         return Room::EnteredDirection::Left;
-      }
+   if (rect_t.contains(player_pos_px))
+   {
+      return Room::EnteredDirection::Top;
+   }
 
-      if (rect_r.contains(player_pos_px))
-      {
-         return Room::EnteredDirection::Right;
-      }
-
-      if (rect_t.contains(player_pos_px))
-      {
-         return Room::EnteredDirection::Top;
-      }
-
-      if (rect_b.contains(player_pos_px))
-      {
-         return Room::EnteredDirection::Bottom;
-      }
+   if (rect_b.contains(player_pos_px))
+   {
+      return Room::EnteredDirection::Bottom;
    }
 
    return EnteredDirection::Invalid;
 }
 
 
-std::optional<sf::FloatRect> Room::activeRect(const sf::Vector2f& player_pos_px) const
+std::optional<Room::SubRoom> Room::activeSubRoom(const sf::Vector2f& player_pos_px) const
 {
-   std::optional<sf::FloatRect> rect;
+   std::optional<Room::SubRoom> rect;
 
-   const auto& it = std::find_if(_rects.begin(), _rects.end(), [player_pos_px](const auto& rect){
-         return rect.contains(player_pos_px);}
+   const auto& it = std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [player_pos_px](const auto& sub_room){
+         return sub_room._rect.contains(player_pos_px);}
       );
 
-   if (it != _rects.end())
+   if (it != _sub_rooms.end())
    {
       rect = *it;
    }
 
    return rect;
+}
+
+
+Room::EnteredDirection Room::enteredDirection(const sf::Vector2f& player_pos_px) const
+{
+    const auto active_sub_room = activeSubRoom(player_pos_px);
+    if (!active_sub_room.has_value())
+    {
+        return EnteredDirection::Invalid;
+    }
+
+    return (*active_sub_room).enteredDirection(player_pos_px);
 }

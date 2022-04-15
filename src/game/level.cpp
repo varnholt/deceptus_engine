@@ -871,7 +871,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
    {
       Log::Info()
          << "player moved to room: "
-         << (_room_current ? _room_current->_name : "undefined")
+         << (_room_current ? _room_current->getObjectId() : "undefined")
          << " on side '"
          << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionf())) : '?')
          << "'";
@@ -1128,9 +1128,9 @@ void Level::drawDebugInformation()
 
       for (const auto& room : _rooms)
       {
-         for (const auto& rect : room->_rects)
+         for (const auto& sub_room : room->_sub_rooms)
          {
-            DebugDraw::drawRect(*_render_texture_level.get(), rect, sf::Color::Yellow);
+            DebugDraw::drawRect(*_render_texture_level.get(), sub_room._rect, sf::Color::Yellow);
          }
       }
    }
