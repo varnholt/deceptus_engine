@@ -68,7 +68,7 @@ private:
    float _pop_time_respawn_s = 3.0f;
    float _animation_offset_s = 0.0f;
    float _mapped_value_normalized = 0.0f;
-   bool _move_down_on_contact = false;
+   bool _move_down_on_contact = true;
    float _move_down_velocity = 0.5f;
    float _push_down_offset_m = 0.0f;
    float _contact_duration_s = 0.0f;

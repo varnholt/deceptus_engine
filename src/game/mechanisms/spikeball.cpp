@@ -188,19 +188,19 @@ void SpikeBall::setup(const GameDeserializeData& data)
          _config._chain_element_count = chain_element_count_it->second->_value_int.value();
       }
 
-      auto chain_element_distance_it = data._tmx_object->_properties->_map.find("chain_element_distance");
+      auto chain_element_distance_it = data._tmx_object->_properties->_map.find("chain_element_distance_m");
       if (chain_element_distance_it != data._tmx_object->_properties->_map.end())
       {
          _config._chain_element_distance = chain_element_distance_it->second->_value_float.value();
       }
 
-      auto chain_element_width_it = data._tmx_object->_properties->_map.find("chain_element_width");
+      auto chain_element_width_it = data._tmx_object->_properties->_map.find("chain_element_width_m");
       if (chain_element_width_it != data._tmx_object->_properties->_map.end())
       {
          _config._chain_element_width = chain_element_width_it->second->_value_float.value();
       }
 
-      auto chain_element_height_it = data._tmx_object->_properties->_map.find("chain_element_height");
+      auto chain_element_height_it = data._tmx_object->_properties->_map.find("chain_element_height_m");
       if (chain_element_height_it != data._tmx_object->_properties->_map.end())
       {
          _config._chain_element_height = chain_element_height_it->second->_value_float.value();
