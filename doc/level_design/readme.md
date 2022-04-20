@@ -212,8 +212,10 @@ Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust y
 |Custom Property|Type|Description|
 |-|-|-|
 |animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
-|pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`)|
-|pop_only_on_foot_contact|bool|The bubble only pops after they've been in contact with the player's feet (default is `false`).|
+|pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`).|
+|move_down_on_contact|bool|The bubble moves down on foot contact (the default is `true`).|
+|move_down_velocity|float|A factor to control the movement velocity when `move_down_on_contact` is enabled (the default is `0.5`).|
+|maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
 
 <br><br>
 
@@ -315,6 +317,12 @@ It is very important to place that mount high enough, otherwise the ball will cr
 |Custom Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
+|push_factor|float|Each time when the spike ball changes direction, it gets a little push. This is the factor for the force that's applied (default is `0.625`).|
+|spline_point_count|int|Chain elements are drawn as a spline so they don't look like a bunch of concatenated edges. This defines the number of elements (default is `25`).|
+|chain_element_count|int|The amount of chain elements used for the chain. The default is `10` elements.|
+|chain_element_distance_m|float|The distance between chain elements, given in metres. The default is `0.3m`.|
+|chain_element_width_m|float|The height of a chain element in metres, the default is `0.06m`.|
+|chain_element_height_m|float|The width of a chain element in metres, the default is `0.0125m`.|
 
 
 <br><br>
@@ -1055,20 +1063,36 @@ If you are using rooms, it is important to make them at least as large as your s
 
 If you define 2 rooms, the camera would limit the viewer's perspective to that room until the player has left that room. Then the camera would either move over to the next room or just focussing Adam if he entered a region where no room is defined.
 
-Rooms are rectangles, or combinations of rectangles. In order to define a room, create an object group '`rooms`' first, then draw rectangles around those area that are supposed to be your rooms. Rooms should be given descriptive labels such as '`kitchen`' or '`bathroom`'. If you want to merge multiple rects together to one larger room, you can also do that. Just append '`_0`', '`_1`' etc. to your room labels such as '`bedroom_0`', '`bedroom_1`' even though no sane person would ever voluntarily merge their bedrooms.
+Rooms are rectangles, or combinations of rectangles. In order to define a room, create an object group '`rooms`' first, then draw rectangles around those area that are supposed to be your rooms. Rooms should be given descriptive labels such as '`kitchen`' or '`bathroom`'. 
+
+### Room Groups
+
+If you want to merge multiple rects together to one larger room, you can also do that. Just insert a property named '`group`' with a group label such as '`bedrooms`' to each of your rectangles (even though no sane person would ever voluntarily merge their bedrooms).
 
 ![](images/rooms.png)
 
 There can be screen transitions between rooms. For example, you may define a 'fade transition' for a room. That will fade the camera out, when the player just entered the room and the camera still focusses the 'old' room and then fade it when the new room is in focus. There are quite a few settings to give the user all liberty to set this up right. Once you've come up with a good set of settings, it makes sense to keep them consistent across all rooms.
 
+### Properties per room group
+
+The values below should be identical for all rectangles of one room group.
+
 |Custom Property|Type|Description|
 |-|-|-|
+|group|string|The group identifier which can be used to group multiple rectangles to a larger room group. The default is an empty string.|
 |transition|string|The type of the transition. At the moment only the type `fade_out_fade_in` is supported (optional).|
 |fade_out_speed|float|An factor used to adjust the speed when fading out (optional). `1.0` is slow fading, `2.0` is rather fast. The default is `2.0`.|
 |fade_in_speed|float|A factor used to adjust the speed when fading in (optional). `1.0` is slow fading, `2.0` is rather fast. The default is `2.0`.|
 |delay_between_effects_ms|int|The delay in ms to be elapsed between both parts (e.g. 'fade out', 'fade in') of the transition (optional). The default value is `250`.|
 |camera_sync_after_fade_out|bool|Move the camera focus to the new room immediately after fading out; the new room is then focussed when fading back in (optional). The default value is `true`.|
 |camera_lock_delay_ms|int|This value will 'hold' the camera focus in the old room, even though a new room has been entered already. Once the defined time in milliseconds is elapsed, the new room is focussed. The default value is `0`. <br> If `camera_sync_after_fade_out` is set to `true`, it'll override this setting and synchronize the camera position as promised. Actually these two settings work very well together. If you are uncertain what value to put here, you can just choose a rather long duration (1000ms) and enable `camera_sync_after_fade_out`. <br>This will lock the camera in the old room once the player entered a new room. Then, when the screen is black, the camera focus will be moved to the new room (the camera lock is released) and the new room is shown when fading in. It all sounds more complicated than it is. Just try a configuration like this and play around with it:<br>![](images/rooms_settings.png)|
+
+### Properties for each room rectangle
+
+The properties below may differ for each rectangle within one room group.
+
+|Custom Property|Type|Description|
+|-|-|-|
 |start_position_left_x_px|int|When player entering from the left of the room, position him to the absolute x position, given in pixels. Also need to provide `start_position_left_y_px`|
 |start_position_left_y_px|int|When player entering from the left of the room, position him to the absolute y position, given in pixels. Also need to provide `start_position_left_x_px`|
 |start_position_right_x_px|int|When player entering from the right of the room, position him to the absolute x position, given in pixels. Also need to provide `start_position_right_y_px`|
