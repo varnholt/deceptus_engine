@@ -14,10 +14,10 @@
 
 # How to Build
 
-Requires a recent compiler, i.e.
+As the engine uses some C++20 code, you need a recent compiler, i.e.
 - gcc >= 8
 - clang >= 7 
-- vs2017, vs2019
+- vs >= 2019
 
 ## Linux
 ```
