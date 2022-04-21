@@ -1,29 +1,130 @@
-# Deceptus
+# Deceptus Engine
 
-## credits
+![](doc/screenshots/screenshot_section.png)
 
-- artwork: dstar
-- code: mueslee
+<br>
 
+# Credits
+|What|Who|
+|-|-|
+|Artwork|dstar|
+|Code|mueslee (Matthias Varnholt)|
 
-## build instructions
+<br>
+
+# How to Build
 
 Requires a recent compiler, i.e.
 - gcc >= 8
 - clang >= 7 
 - vs2017, vs2019
 
-### Linux
+## Linux
 ```
 qmake && make 
 ```
 
-### Windows
+## Windows
 ```
 qmake && nmake 
 ```
 
-## Contribute
-If you're a musician, graphic artist, level designer or programmer - [join us on Discord!](https://discord.gg/U6z4Nm)
+<br>
+
+# Contribute and Talk to Us!
+If you're a musician, graphic artist, level designer or programmer, or just want to hang out and chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
+
+<br>
+
+# Designing a Level
+[Introduction](doc/level_design/designing_a_level.md#designing-a-level)<br>
+[Some Terms](doc/level_design/designing_a_level.md#some-terms)<br>
+[Your Tileset](doc/level_design/designing_a_level.md#your-tileset)<br>
+[Your Tiles](doc/level_design/designing_a_level.md#your-tiles)<br>
+[Level Layers](doc/level_design/designing_a_level.md#level-layers)<br>
+
+<br>
+
+## Mechanisms
+
+[Introduction](doc/level_design/mechanisms.md#mechanisms)<br>
+[Bouncers](doc/level_design/mechanisms.md#bouncers)<br>
+[Conveyor Belts](doc/level_design/mechanisms.md#conveyor-belts)<br>
+[Doors](doc/level_design/mechanisms.md#doors)<br>
+[Fans](doc/level_design/mechanisms.md#fans)<br>
+[Lasers](doc/level_design/mechanisms.md#lasers)<br>
+[Bubble Cubes](doc/level_design/mechanisms.md#bubble-cubes)<br>
+[Portals](doc/level_design/mechanisms.md#portals)<br>
+[Crushers](doc/level_design/mechanisms.md#crushers)<br>
+[Death Blocks](doc/level_design/mechanisms.md#death-blocks)<br>
+[Levers](doc/level_design/mechanisms.md#levers)<br>
+[Ropes](doc/level_design/mechanisms.md#ropes)<br>
+[Spike Balls](doc/level_design/mechanisms.md#spike-balls)<br>
+[Spikes](doc/level_design/mechanisms.md#spikes)<br>
+[Spike Blocks](doc/level_design/mechanisms.md#spike-blocks)<br>
+[Moving Platform](doc/level_design/mechanisms.md#moving-platform)<br>
+[One-Way Walls](doc/level_design/mechanisms.md#one-way-walls)<br>
+[Moveable Objects](doc/level_design/mechanisms.md#moveable-objects)<br>
+[Extras](doc/level_design/mechanisms.md#extras)<br>
+[Dialogues](doc/level_design/mechanisms.md#dialogues)<br>
+[Controller Help](doc/level_design/mechanisms.md#controller-help)<br>
+
+<br>
 
 
+## Enemies
+
+[Introduction](doc/level_design/enemies.md#enemies)<br>
+[Adding Enemies](doc/level_design/enemies.md#adding-enemies)<br>
+[Enemy Design and Properties](doc/level_design/enemies.md#enemy-design-and-properties)<br>
+[Generic properties](doc/level_design/enemies.md#generic-properties)<br>
+[Arrow Trap](doc/level_design/enemies.md#arrow-trap)<br>
+[Bat](doc/level_design/designing_a_level.enemies#bat)<br>
+[Blob](doc/level_design/enemies.md#blob)<br>
+[Bonefish](doc/level_design/enemies.md#bonefish)<br>
+[Cannon](doc/level_design/enemies.md#cannon)<br>
+[Critter](doc/level_design/enemies.md#critter)<br>
+[Ghost](doc/level_design/enemies.md#ghost)<br>
+[Klonk](doc/level_design/enemies.md#klonk)<br>
+[Landmine](doc/level_design/enemies.md#landmine)<br>
+[Watermine](doc/level_design/enemies.md#watermine)<br>
+
+<br>
+
+## Visual Effects
+
+[Introduction](doc/level_design/visual_effects.md#visualization)<br>
+[Adding Parallax Layers](doc/level_design/visual_effects.md#adding-parallax-layers)<br>
+[Adding Image Layers](doc/level_design/visual_effects.md#adding-image-layers)<br>
+[Static Lights](doc/level_design/visual_effects.md#static-lights)<br>
+[Dynamic Lights](doc/level_design/visual_effects.md#dynamic-lights)<br>
+[Playing with Dynamic Lights / Ropes with Lights](doc/level_design/visual_effects.md#playing-with-dynamic-lights--ropes-with-lights)<br>
+[Atmosphere Layers](doc/level_design/visual_effects.md#atmosphere-layers)<br>
+[Shader Quads](doc/level_design/visual_effects.md#shader-quads)<br>
+[Weather](doc/level_design/visual_effects.md#weather)<br>
+[Smoke / Fog](doc/level_design/visual_effects.md#smoke-fog)<br>
+[Dust](doc/level_design/visual_effects.md#dust)<br>
+[Ambient Occlusion](doc/level_design/visual_effects.md#ambient-occlusion)<br>
+
+<br>
+
+## Advanced Topics
+
+[Introduction](doc/level_design/advanced_topics.md#advanced-topics)<br>
+[Checkpoints](doc/level_design/advanced_topics.md#checkpoints)<br>
+[Rooms](doc/level_design/advanced_topics.md#rooms)<br>
+[Addendum](doc/level_design/advanced_topics.md#addendum)<br>
+[Folder Structure](doc/level_design/advanced_topics.md#folder-structure)<br>
+
+<br>
+
+
+## Creating Your Own Enemies
+
+[Deceptus Engine Lua Interface](doc/lua_interface/readme.md#deceptus-engine-lua-interface)<br>
+[Creating Your First Own Enemy](doc/lua_interface/readme.md#creating-your-first-own-enemy)<br>
+[Setting Up Your Enemy](doc/lua_interface/readme.md#setting-up-your-enemy)<br>
+[Using the API](doc/lua_interface/readme.md#using-the-api)<br>
+[The Lua API](doc/lua_interface/readme.md#the-lua-api)<br>
+
+<br>
