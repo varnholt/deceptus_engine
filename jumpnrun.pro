@@ -200,9 +200,11 @@ SOURCES += \
    src/game/mechanisms/lever.cpp \
    src/game/mechanisms/moveablebox.cpp \
    src/game/mechanisms/movingplatform.cpp \
+    src/game/mechanisms/onoffblock.cpp \
    src/game/mechanisms/portal.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
+    src/game/mechanisms/rotatingblade.cpp \
    src/game/mechanisms/shaderlayer.cpp \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
@@ -379,9 +381,11 @@ HEADERS += \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/moveablebox.h \
    src/game/mechanisms/movingplatform.h \
+    src/game/mechanisms/onoffblock.h \
    src/game/mechanisms/portal.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
+    src/game/mechanisms/rotatingblade.h \
    src/game/mechanisms/shaderlayer.h \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikeblock.h \
