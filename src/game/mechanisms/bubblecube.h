@@ -43,6 +43,7 @@ private:
    void updatePushDownOffset(const sf::Time& dt);
    void updateMaxDurationCondition(const sf::Time& dt);
    void updateFootSensorContact();
+   void updateJumpedOffPlatformCondition();
 
    void pop();
 
@@ -83,6 +84,5 @@ private:
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2PolygonShape _shape;
-   void updateJumpedOffPlatformCondition();
 };
 
