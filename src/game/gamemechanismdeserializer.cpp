@@ -17,6 +17,7 @@
 #include "mechanisms/lever.h"
 #include "mechanisms/moveablebox.h"
 #include "mechanisms/movingplatform.h"
+#include "mechanisms/onoffblock.h"
 #include "mechanisms/portal.h"
 #include "mechanisms/rope.h"
 #include "mechanisms/ropewithlight.h"
@@ -54,6 +55,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_lasers               = mechanisms["lasers"];
    auto mechanism_levers               = mechanisms["levers"];
    auto mechanism_moveable_objects     = mechanisms["moveable_objects"];
+   auto mechanism_on_off_blocks        = mechanisms["on_off_blocks"];
    auto mechanism_platforms            = mechanisms["platforms"];
    auto mechanism_portals              = mechanisms["portals"];
    auto mechanism_ropes                = mechanisms["ropes"];
@@ -182,6 +184,12 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<SpikeBlock>(parent);
                mechanism->setup(data);
                mechanism_spike_blocks->push_back(mechanism);
+            }
+            else if (object_group->_name == "on_off_blocks")
+            {
+                auto mechanism = std::make_shared<OnOffBlock>(parent);
+                mechanism->setup(data);
+                mechanism_on_off_blocks->push_back(mechanism);
             }
             else if (object_group->_name == "moveable_objects")
             {
