@@ -225,6 +225,7 @@ Level::Level()
       &_mechanism_lasers,
       &_mechanism_levers,
       &_mechanism_moveable_boxes,
+      &_mechanism_on_off_blocks,
       &_mechanism_platforms,
       &_mechanism_portals,
       &_mechanism_ropes,
@@ -250,6 +251,7 @@ Level::Level()
    _mechanisms_map["lasers"]               = &_mechanism_lasers;
    _mechanisms_map["levers"]               = &_mechanism_levers;
    _mechanisms_map["moveable_objects"]     = &_mechanism_moveable_boxes;
+   _mechanisms_map["on_off_blocks"]        = &_mechanism_on_off_blocks;
    _mechanisms_map["platforms"]            = &_mechanism_platforms;
    _mechanisms_map["portals"]              = &_mechanism_portals;
    _mechanisms_map["ropes"]                = &_mechanism_ropes;

@@ -219,6 +219,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_on_off_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_platforms;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_portals;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
