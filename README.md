@@ -1,5 +1,8 @@
 # Deceptus Engine
 
+A C++20/lua-based platformer game engine<br> 
+It utilizes Box2D for game physics, SFML for rendering, and SDL for game controller support.
+
 ![](doc/screenshots/screenshot_section.png)
 
 <br>
