@@ -21,9 +21,9 @@
 
 namespace
 {
-static constexpr auto width_px = 36;
-static constexpr auto height_px = 36;
-static constexpr auto bevel_px = 6;
+static constexpr auto width_px = 24;
+static constexpr auto height_px = 24;
+static constexpr auto bevel_px = 0;
 static constexpr auto width_m  = width_px * MPP;
 static constexpr auto height_m = height_px * MPP;
 static constexpr auto bevel_m = bevel_px * MPP;
