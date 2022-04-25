@@ -274,7 +274,18 @@ void GameMechanismDeserializer::deserialize(
    Laser::merge();
    Fan::merge();
    *mechanism_fans = Fan::getFans();
-   Lever::merge(*mechanism_levers, *mechanism_lasers, *mechanism_platforms, *mechanism_fans, *mechanism_conveyor_belts, *mechanism_spikes, *mechanism_spike_blocks);
+
+   Lever::merge(
+      *mechanism_levers,
+      *mechanism_lasers,
+      *mechanism_platforms,
+      *mechanism_fans,
+      *mechanism_conveyor_belts,
+      *mechanism_spikes,
+      *mechanism_spike_blocks,
+      *mechanism_on_off_blocks
+   );
+
    *mechanism_platforms = MovingPlatform::merge(parent, data);
 }
 
