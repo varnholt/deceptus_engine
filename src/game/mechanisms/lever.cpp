@@ -12,6 +12,7 @@
 #include "framework/tools/log.h"
 #include "laser.h"
 #include "movingplatform.h"
+#include "onoffblock.h"
 #include "player/player.h"
 #include "spikes.h"
 #include "spikeblock.h"
@@ -366,7 +367,8 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& fans,
    const std::vector<std::shared_ptr<GameMechanism>>& belts,
    const std::vector<std::shared_ptr<GameMechanism>>& spikes,
-   const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks
+   const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks,
+   const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks
 )
 {
    for (auto rect : __rectangles)
@@ -471,6 +473,19 @@ void Lever::merge(
                {
                   callbacks.push_back([spike_block](int32_t state) {
                         spike_block->setEnabled(state == -1 ? false : true);
+                     }
+                  );
+               }
+            }
+
+            for (auto& s : on_off_blocks)
+            {
+               auto on_off_block = std::dynamic_pointer_cast<OnOffBlock>(s);
+
+               if (on_off_block->getPixelRect().intersects(search_rect))
+               {
+                  callbacks.push_back([on_off_block](int32_t state) {
+                        on_off_block->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
