@@ -21,6 +21,7 @@
 #include "mechanisms/portal.h"
 #include "mechanisms/rope.h"
 #include "mechanisms/ropewithlight.h"
+#include "mechanisms/rotatingblade.h"
 #include "mechanisms/shaderlayer.h"
 #include "mechanisms/spikeblock.h"
 #include "mechanisms/spikeball.h"
@@ -59,6 +60,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_platforms            = mechanisms["platforms"];
    auto mechanism_portals              = mechanisms["portals"];
    auto mechanism_ropes                = mechanisms["ropes"];
+   auto mechanism_rotating_blades      = mechanisms["rotating_blades"];
    auto mechanism_shader_quads         = mechanisms["shader_quads"];
    auto mechanism_spike_balls          = mechanisms["spike_balls"];
    auto mechanism_spike_blocks         = mechanisms["spike_blocks"];
@@ -172,6 +174,12 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<RopeWithLight>(parent);
                mechanism->setup(data);
                mechanism_ropes->push_back(mechanism);
+            }
+            else if (object_group->_name == "rotating_blades")
+            {
+               auto mechanism = std::make_shared<RotatingBlade>(parent);
+               mechanism->setup(data);
+               mechanism_rotating_blades->push_back(mechanism);
             }
             else if (object_group->_name == "spike_balls")
             {
