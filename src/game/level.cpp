@@ -229,6 +229,7 @@ Level::Level()
       &_mechanism_platforms,
       &_mechanism_portals,
       &_mechanism_ropes,
+      &_mechanism_rotating_blades,
       &_mechanism_shader_layers,
       &_mechanism_spike_balls,
       &_mechanism_spike_blocks,
@@ -255,6 +256,7 @@ Level::Level()
    _mechanisms_map["platforms"]            = &_mechanism_platforms;
    _mechanisms_map["portals"]              = &_mechanism_portals;
    _mechanisms_map["ropes"]                = &_mechanism_ropes;
+   _mechanisms_map["rotating_blades"]      = &_mechanism_rotating_blades;
    _mechanisms_map["shader_quads"]         = &_mechanism_shader_layers;
    _mechanisms_map["spike_balls"]          = &_mechanism_spike_balls;
    _mechanisms_map["spike_blocks"]         = &_mechanism_spike_blocks;
