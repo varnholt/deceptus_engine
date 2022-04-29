@@ -22,6 +22,16 @@ public:
 
    PathInterpolation() = default;
 
+   void addKeys(const std::vector<T>& positions)
+   {
+      auto time = 0.0f;
+      const auto time_increment = 1.0f / static_cast<float>(positions.size());
+      for (auto& pos : positions)
+      {
+         addKey(pos, time);
+         time += time_increment;
+      }
+   }
 
    void addKey(const T &pos, float time_value)
    {
@@ -34,15 +44,7 @@ public:
 
    T computeVelocity(const T& current, float time_value)
    {
-      // clamp time
-      if (time_value > 1.0f)
-      {
-         time_value = 1.0f;
-      }
-      else if (time_value < 0.0f)
-      {
-         time_value = 0.0f;
-      }
+      time_value = std::clamp(time_value, 0.0f, 1.0f);
 
       T velocity;
 
@@ -80,15 +82,7 @@ public:
 
    T computePosition(float time_value)
    {
-      // clamp time
-      if (time_value > 1.0f)
-      {
-         time_value = 1.0f;
-      }
-      else if (time_value < 0.0f)
-      {
-         time_value = 0.0f;
-      }
+      time_value = std::clamp(time_value, 0.0f, 1.0f);
 
       T position;
 
@@ -124,7 +118,7 @@ public:
       return position;
    }
 
-   float updateZeroOneZeroOne(float delta)
+   float updateTime(float delta)
    {
       if (_time >= 1.0f)
       {
@@ -149,6 +143,17 @@ public:
       return _time;
    }
 
+   float updateTimeLooped(float delta)
+   {
+      if (_time >= 1.0f)
+      {
+          _time = 0.0f;
+      }
+
+      _time += delta;
+
+      return _time;
+   }
 
    bool update(const T& current_pos)
    {
@@ -171,18 +176,20 @@ public:
       return reached;
    }
 
-
    const T getVelocity()
    {
       return _velocity;
    }
-
 
    const std::vector<PathInterpolation::Key>& getTrack() const
    {
       return _track;
    }
 
+   float getTime() const
+   {
+       return _time;
+   }
 
 
 private:
@@ -206,8 +213,6 @@ private:
 
       return next_index;
    }
-
-
 
    bool checkKeyReached(const T& current_pos)
    {
