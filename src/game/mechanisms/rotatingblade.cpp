@@ -27,6 +27,7 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    }
 
    _path = data._tmx_object->_polyline->_polyline;
+   _path_interpolation.addKeys(_path);
 }
 
 
@@ -44,6 +45,10 @@ void RotatingBlade::update(const sf::Time& dt)
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
 
    _sprite.setRotation(_angle);
+
+   _path_interpolation.updateTime(dt.asSeconds());
+   const auto pos = _path_interpolation.computePosition(_path_interpolation.getTime());
+   _sprite.setPosition(pos);
 }
 
 
