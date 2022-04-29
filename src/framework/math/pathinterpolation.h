@@ -65,8 +65,8 @@ public:
 
                if (time_value >= key_a._time_value && time_value < key_b._time_value)
                {
-                  auto a = 1.0f - (time_value - key_a._time_value);
-                  auto b = 1.0f - (key_b._time_value - time_value);
+                  const auto a = 1.0f - (time_value - key_a._time_value);
+                  const auto b = 1.0f - (key_b._time_value - time_value);
 
                   velocity = (a * key_a._pos + b * key_b._pos) - current;
                   // printf("a: %f, b: %f, current: %f, %f, velocity: %f, %f\n", a, b, current.x, current.y, velocity.x, velocity.y);
@@ -103,8 +103,8 @@ public:
 
                if (time_value >= key_a._time_value && time_value < key_b._time_value)
                {
-                  auto a = 1.0f - (time_value - key_a._time_value);
-                  auto b = 1.0f - (key_b._time_value - time_value);
+                  const auto a = 1.0f - (time_value - key_a._time_value);
+                  const auto b = 1.0f - a;
 
                   position = (a * key_a._pos + b * key_b._pos);
                   break;
@@ -147,7 +147,7 @@ public:
    {
       if (_time >= 1.0f)
       {
-          _time = 0.0f;
+          _time = _time - 1.0f;
       }
 
       _time += delta;

@@ -21,6 +21,12 @@ public:
       float _blade_rotation_speed = 0.1f;
    };
 
+   enum class PathType
+   {
+      Polyline,
+      Polygon
+   };
+
    RotatingBlade(GameNode* parent = nullptr);
 
    void setup(const GameDeserializeData& data);
@@ -40,5 +46,6 @@ private:
    sf::IntRect _rectangle;
    std::vector<sf::Vector2f> _path;
    PathInterpolation<sf::Vector2f> _path_interpolation;
+   PathType _path_type = PathType::Polygon;
    Settings _settings;
 };
