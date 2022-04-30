@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <Box2D/Box2D.h>
+#include "framework/math/sfmlmath.h"
 
 template <typename T>
 class PathInterpolation
@@ -23,13 +24,38 @@ public:
    PathInterpolation() = default;
 
    void addKeys(const std::vector<T>& positions)
-   {
-      auto time = 0.0f;
-      const auto time_increment = 1.0f / static_cast<float>(positions.size());
-      for (auto& pos : positions)
+   {      
+      // determine length of each edge
+      auto length_sum = 0.0f;
+      for (auto index = 0; index < positions.size(); index++)
       {
-         addKey(pos, time);
-         time += time_increment;
+         auto next_index = (index + 1);
+         if (next_index == positions.size())
+         {
+            next_index = 0;
+         }
+
+         auto length = SfmlMath::length(positions[next_index] - positions[index]);
+         length_sum += length;
+      }
+
+      auto length_to_this_point = 0.0f;
+      for (auto index = 0; index < positions.size(); index++)
+      {
+          auto next_index = (index + 1);
+          if (next_index == positions.size())
+          {
+              next_index = 0;
+          }
+
+          auto length = SfmlMath::length(positions[next_index] - positions[index]);
+
+          for (auto& pos : positions)
+          {
+              addKey(pos, length_to_this_point / length_sum);
+          }
+
+          length_to_this_point += length;
       }
    }
 
@@ -103,8 +129,12 @@ public:
 
                if (time_value >= key_a._time_value && time_value < key_b._time_value)
                {
-                  const auto a = 1.0f - (time_value - key_a._time_value);
-                  const auto b = 1.0f - a;
+                  const auto time_value_offset = time_value - key_a._time_value;
+                  const auto distance = key_b._time_value - key_a._time_value;
+                  const auto time_value_relative = time_value_offset / distance;
+
+                  const auto a = 1.0f - time_value_relative;
+                  const auto b = time_value_relative;
 
                   position = (a * key_a._pos + b * key_b._pos);
                   break;

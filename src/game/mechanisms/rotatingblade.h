@@ -18,7 +18,8 @@ public:
    {
       float _blade_acceleration = 0.003f;
       float _blade_deceleration = 0.003f;
-      float _blade_rotation_speed = 0.1f;
+      float _blade_rotation_speed = 100.0f;
+      float _movement_speed = 0.2f;
    };
 
    enum class PathType
