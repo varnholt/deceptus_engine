@@ -6,11 +6,6 @@
 #include "game/texturepool.h"
 
 
-namespace
-{
-}
-
-
 RotatingBlade::RotatingBlade(GameNode* parent)
  : GameNode(parent)
 {
@@ -54,14 +49,14 @@ void RotatingBlade::update(const sf::Time& dt)
    }
 
    // exit early if velocity is under a certain threshold
-
+   const auto movement_delta = dt.asSeconds() * _velocity * _settings._movement_speed;
    if (_path_type == PathType::Polyline)
    {
-      _path_interpolation.updateTime(dt.asSeconds() * _velocity);
+      _path_interpolation.updateTime(movement_delta);
    }
    else
    {
-      _path_interpolation.updateTimeLooped(dt.asSeconds() * _velocity);
+      _path_interpolation.updateTimeLooped(movement_delta);
    }
 
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
@@ -69,8 +64,6 @@ void RotatingBlade::update(const sf::Time& dt)
 
    _sprite.setRotation(_angle);
    _sprite.setPosition(pos);
-
-   // _sprite.setPosition(_path.at(0));
 }
 
 
