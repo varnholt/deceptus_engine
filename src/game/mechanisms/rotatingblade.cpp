@@ -1,8 +1,10 @@
 #include "rotatingblade.h"
 
+#include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tools/log.h"
+#include "game/player/player.h"
 #include "game/texturepool.h"
 
 
@@ -59,6 +61,12 @@ void RotatingBlade::update(const sf::Time& dt)
 
    _sprite.setRotation(_angle);
    _sprite.setPosition(pos);
+
+   // kill player if he wants into the blade's radius
+   if (SfmlMath::length(_sprite.getPosition() - Player::getCurrent()->getPixelPositionf()) < _sprite.getTexture()->getSize().x * 0.5f)
+   {
+       Player::getCurrent()->damage(100);
+   }
 }
 
 
