@@ -1,7 +1,8 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
-#include <Box2D/Box2D.h>
+#include "Box2D/Box2D.h"
 #include "framework/math/sfmlmath.h"
 
 template <typename T>
@@ -29,33 +30,20 @@ public:
       auto length_sum = 0.0f;
       for (auto index = 0; index < positions.size(); index++)
       {
-         auto next_index = (index + 1);
-         if (next_index == positions.size())
-         {
-            next_index = 0;
-         }
-
-         auto length = SfmlMath::length(positions[next_index] - positions[index]);
+         const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
          length_sum += length;
       }
 
       auto length_to_this_point = 0.0f;
       for (auto index = 0; index < positions.size(); index++)
       {
-          auto next_index = (index + 1);
-          if (next_index == positions.size())
-          {
-              next_index = 0;
-          }
+         auto& pos = positions.at(index);
+         const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
+         length_to_this_point += length;
 
-          auto length = SfmlMath::length(positions[next_index] - positions[index]);
+         addKey(pos, length_to_this_point / length_sum);
 
-          for (auto& pos : positions)
-          {
-              addKey(pos, length_to_this_point / length_sum);
-          }
-
-          length_to_this_point += length;
+         // std::cout << length_to_this_point / length_sum << std::endl;
       }
    }
 
@@ -72,117 +60,62 @@ public:
    {
       time_value = std::clamp(time_value, 0.0f, 1.0f);
 
-      T velocity;
-
-      switch (_mode)
+      for (auto index_current = 0u; index_current < _track.size(); index_current++)
       {
-         case Mode::Linear:
+         size_t index_next = index_current + 1;
+         if (index_next == _track.size())
          {
-            for (auto index_current = 0u; index_current < _track.size(); index_current++)
-            {
-               size_t index_next = index_current + 1;
-               if (index_next == _track.size())
-               {
-                  index_next = _track.size() - 1;
-               }
+            index_next = _track.size() - 1;
+         }
 
-               const auto& key_a = _track.at(index_current);
-               const auto& key_b = _track.at(index_next);
+         const auto& key_a = _track.at(index_current);
+         const auto& key_b = _track.at(index_next);
 
-               if (time_value >= key_a._time_value && time_value < key_b._time_value)
-               {
-                  const auto a = 1.0f - (time_value - key_a._time_value);
-                  const auto b = 1.0f - (key_b._time_value - time_value);
+         if (time_value >= key_a._time_value && time_value < key_b._time_value)
+         {
+            const auto a = 1.0f - (time_value - key_a._time_value);
+            const auto b = 1.0f - (key_b._time_value - time_value);
 
-                  velocity = (a * key_a._pos + b * key_b._pos) - current;
-                  // printf("a: %f, b: %f, current: %f, %f, velocity: %f, %f\n", a, b, current.x, current.y, velocity.x, velocity.y);
-                  break;
-               }
-            }
-            break;
+            return (a * key_a._pos + b * key_b._pos) - current;
          }
       }
 
-      return velocity;
+      return T{};
    }
 
    T computePosition(float time_value)
    {
-      time_value = std::clamp(time_value, 0.0f, 1.0f);
+      // time_value = std::clamp(time_value, 0.0f, 1.0f);
 
-      T position;
+      time_value = fmod(time_value, 1.0f);
 
-      switch (_mode)
+      for (auto index_current = 0u; index_current < _track.size(); index_current++)
       {
-         case Mode::Linear:
+         auto index_next = index_current + 1;
+         if (index_next == _track.size())
          {
-            for (auto index_current = 0u; index_current < _track.size(); index_current++)
-            {
-               size_t index_next = index_current + 1;
-               if (index_next == _track.size())
-               {
-                  index_next = _track.size() - 1;
-               }
+            index_next = _track.size() - 1;
+         }
 
-               const auto& key_a = _track.at(index_current);
-               const auto& key_b = _track.at(index_next);
+         const auto& key_a = _track.at(index_current);
+         const auto& key_b = _track.at(index_next);
 
-               if (time_value >= key_a._time_value && time_value < key_b._time_value)
-               {
-                  const auto time_value_offset = time_value - key_a._time_value;
-                  const auto distance = key_b._time_value - key_a._time_value;
-                  const auto time_value_relative = time_value_offset / distance;
+         if (time_value >= key_a._time_value && time_value <= key_b._time_value)
+         {
+            const auto time_value_offset = time_value - key_a._time_value;
+            const auto distance = key_b._time_value - key_a._time_value;
+            const auto time_value_relative = time_value_offset / distance;
 
-                  const auto a = 1.0f - time_value_relative;
-                  const auto b = time_value_relative;
-
-                  position = (a * key_a._pos + b * key_b._pos);
-                  break;
-               }
-            }
-
-            break;
+            return key_a._pos + time_value_relative * (key_b._pos - key_a._pos);
          }
       }
 
-      return position;
+      return T{};
    }
 
-   float updateTime(float delta)
+   void updateTime(float delta)
    {
-      if (_time >= 1.0f)
-      {
-         _time = 1.0f;
-         _up = false;
-      }
-      else if (_time <= 0.0f)
-      {
-         _time = 0.0f;
-         _up = true;
-      }
-
-      if (_up)
-      {
-         _time += delta;
-      }
-      else
-      {
-         _time -= delta;
-      }
-
-      return _time;
-   }
-
-   float updateTimeLooped(float delta)
-   {
-      if (_time >= 1.0f)
-      {
-          _time = _time - 1.0f;
-      }
-
-      _time += delta;
-
-      return _time;
+       _time += delta;
    }
 
    bool update(const T& current_pos)
@@ -261,10 +194,8 @@ private:
      return reached;
    }
 
-   Mode _mode = Mode::Linear;
    std::vector<Key> _track;
    float _time = 0.0f;
-   bool _up = true;
    bool _initialized = false;
 
    T _velocity;

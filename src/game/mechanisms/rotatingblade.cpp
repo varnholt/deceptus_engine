@@ -15,6 +15,7 @@ RotatingBlade::RotatingBlade(GameNode* parent)
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
    _sprite.setTexture(*_texture_map.get());
+   _sprite.setOrigin(_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f);
 }
 
 
@@ -27,6 +28,7 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    }
 
    _path = data._tmx_object->_polygon ? data._tmx_object->_polygon->_polyline : data._tmx_object->_polyline->_polyline;
+   _path.push_back(_path.at(0)); // close path
    _path_type = data._tmx_object->_polygon ? PathType::Polygon : PathType::Polyline;
 
    std::transform(_path.begin(), _path.end(), _path.begin(), [data](auto& vec){
@@ -50,14 +52,7 @@ void RotatingBlade::update(const sf::Time& dt)
 
    // exit early if velocity is under a certain threshold
    const auto movement_delta = dt.asSeconds() * _velocity * _settings._movement_speed;
-   if (_path_type == PathType::Polyline)
-   {
-      _path_interpolation.updateTime(movement_delta);
-   }
-   else
-   {
-      _path_interpolation.updateTimeLooped(movement_delta);
-   }
+  _path_interpolation.updateTime(movement_delta);
 
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    const auto pos = _path_interpolation.computePosition(_path_interpolation.getTime());
