@@ -47,8 +47,8 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    _rectangle = {
       static_cast<int32_t>(data._tmx_object->_x_px),
       static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
+      64,
+      64
    };
 }
 
