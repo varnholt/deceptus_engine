@@ -25,7 +25,7 @@ public:
    PathInterpolation() = default;
 
    void addKeys(const std::vector<T>& positions)
-   {      
+   {
       // determine length of each edge
       auto length_sum = 0.0f;
       for (auto index = 0; index < positions.size(); index++)
@@ -94,7 +94,7 @@ public:
          auto index_next = index_current + 1;
          if (index_next == _track.size())
          {
-            index_next = _track.size() - 1;
+            index_next = static_cast<uint32_t>(_track.size() - 1);
          }
 
          const auto& key_a = _track.at(index_current);

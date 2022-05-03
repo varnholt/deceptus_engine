@@ -56,7 +56,8 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& belts,
       const std::vector<std::shared_ptr<GameMechanism>>& spikes,
       const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks,
-      const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks
+      const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
+      const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades
    );
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);

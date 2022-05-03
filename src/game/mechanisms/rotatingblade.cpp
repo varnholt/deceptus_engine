@@ -4,8 +4,12 @@
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tools/log.h"
+#include "game/debugdraw.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
+
+
+// #define DEBUG_INTERSECTION
 
 
 RotatingBlade::RotatingBlade(GameNode* parent)
@@ -38,6 +42,14 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    });
 
    _path_interpolation.addKeys(_path);
+
+   // collsion rect for lever
+   _rectangle = {
+      static_cast<int32_t>(data._tmx_object->_x_px),
+      static_cast<int32_t>(data._tmx_object->_y_px),
+      static_cast<int32_t>(data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_height_px)
+   };
 }
 
 
@@ -54,7 +66,7 @@ void RotatingBlade::update(const sf::Time& dt)
 
    // exit early if velocity is under a certain threshold
    const auto movement_delta = dt.asSeconds() * _velocity * _settings._movement_speed;
-  _path_interpolation.updateTime(movement_delta);
+   _path_interpolation.updateTime(movement_delta);
 
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    const auto pos = _path_interpolation.computePosition(_path_interpolation.getTime());
@@ -62,10 +74,15 @@ void RotatingBlade::update(const sf::Time& dt)
    _sprite.setRotation(_angle);
    _sprite.setPosition(pos);
 
-   // kill player if he wants into the blade's radius
-   if (SfmlMath::length(_sprite.getPosition() - Player::getCurrent()->getPixelPositionf()) < _sprite.getTexture()->getSize().x * 0.5f)
+   // kill player if he moves into the blade's radius
+   sf::Vector2i blade_position{_sprite.getPosition()};
+   const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
+   if (SfmlMath::intersectCircleRect(blade_position, blade_radius, Player::getCurrent()->getPlayerPixelRect()))
    {
-       Player::getCurrent()->damage(100);
+      if (_velocity > 0.3f)
+      {
+         Player::getCurrent()->damage(100);
+      }
    }
 }
 
@@ -73,10 +90,29 @@ void RotatingBlade::update(const sf::Time& dt)
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(_sprite);
+
+#ifdef DEBUG_INTERSECTION
+   sf::Vector2i sprite_center{_sprite.getPosition()};
+   const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
+
+   b2Color color{1.0f, 1.0f, 1.0f};
+   if (SfmlMath::intersectCircleRect(sprite_center, blade_radius, Player::getCurrent()->getPlayerPixelRect()))
+   {
+      color = b2Color{1.0f, 0.0f, 0.0f};
+   }
+
+   DebugDraw::drawCircle(target, _sprite.getPosition(), _sprite.getOrigin().x, color);
+#endif
 }
 
 
-void RotatingBlade::setEnabled(bool /*enabled*/)
+void RotatingBlade::setEnabled(bool enabled)
 {
+   GameMechanism::setEnabled(enabled);
+}
 
+
+const sf::IntRect& RotatingBlade::getPixelRect() const
+{
+   return _rectangle;
 }

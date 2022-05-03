@@ -27,3 +27,4 @@ sf::Vector2f SfmlMath::normalize(const sf::Vector2f& v)
       return {};
    }
 }
+
