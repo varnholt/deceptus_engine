@@ -14,6 +14,7 @@
 #include "movingplatform.h"
 #include "onoffblock.h"
 #include "player/player.h"
+#include "rotatingblade.h"
 #include "spikes.h"
 #include "spikeblock.h"
 #include "texturepool.h"
@@ -368,7 +369,8 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& belts,
    const std::vector<std::shared_ptr<GameMechanism>>& spikes,
    const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks,
-   const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks
+   const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
+   const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades
 )
 {
    for (auto rect : __rectangles)
@@ -395,12 +397,12 @@ void Lever::merge(
 
             for (auto& l : lasers)
             {
-               auto laser = std::dynamic_pointer_cast<Laser>(l);
+               auto mechanism = std::dynamic_pointer_cast<Laser>(l);
 
-               if (laser->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([laser](int32_t state) {
-                        laser->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -408,12 +410,12 @@ void Lever::merge(
 
             for (auto& b : belts)
             {
-               auto belt = std::dynamic_pointer_cast<ConveyorBelt>(b);
+               auto mechanism = std::dynamic_pointer_cast<ConveyorBelt>(b);
 
-               if (belt->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([belt](int32_t state) {
-                        belt->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -421,12 +423,12 @@ void Lever::merge(
 
             for (auto& f : fans)
             {
-               auto fan = std::dynamic_pointer_cast<Fan>(f);
+               auto mechanism = std::dynamic_pointer_cast<Fan>(f);
 
-               if (fan->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([fan](int32_t state) {
-                        fan->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -434,16 +436,16 @@ void Lever::merge(
 
             for (auto& p : platforms)
             {
-               auto platform = std::dynamic_pointer_cast<MovingPlatform>(p);
+               auto mechanism = std::dynamic_pointer_cast<MovingPlatform>(p);
 
-               const auto& pixel_path = platform->getPixelPath();
+               const auto& pixel_path = mechanism->getPixelPath();
 
                for (const auto& pixel : pixel_path)
                {
                   if (search_rect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
                   {
-                     callbacks.push_back([platform](int32_t state) {
-                           platform->setEnabled(state == -1 ? false : true);
+                     callbacks.push_back([mechanism](int32_t state) {
+                           mechanism->setEnabled(state == -1 ? false : true);
                         }
                      );
 
@@ -454,12 +456,12 @@ void Lever::merge(
 
             for (auto& s : spikes)
             {
-               auto spikes_instance = std::dynamic_pointer_cast<Spikes>(s);
+               auto mechanism = std::dynamic_pointer_cast<Spikes>(s);
 
-               if (spikes_instance->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([spikes_instance](int32_t state) {
-                        spikes_instance->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -467,12 +469,12 @@ void Lever::merge(
 
             for (auto& s : spike_blocks)
             {
-               auto spike_block = std::dynamic_pointer_cast<SpikeBlock>(s);
+               auto mechanism = std::dynamic_pointer_cast<SpikeBlock>(s);
 
-               if (spike_block->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([spike_block](int32_t state) {
-                        spike_block->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
                      }
                   );
                }
@@ -480,12 +482,25 @@ void Lever::merge(
 
             for (auto& s : on_off_blocks)
             {
-               auto on_off_block = std::dynamic_pointer_cast<OnOffBlock>(s);
+               auto mechanism = std::dynamic_pointer_cast<OnOffBlock>(s);
 
-               if (on_off_block->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([on_off_block](int32_t state) {
-                        on_off_block->setEnabled(state == -1 ? false : true);
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
+                     }
+                  );
+               }
+            }
+
+            for (auto& s : rotating_blades)
+            {
+               auto mechanism = std::dynamic_pointer_cast<RotatingBlade>(s);
+
+               if (mechanism->getPixelRect().intersects(search_rect))
+               {
+                  callbacks.push_back([mechanism](int32_t state) {
+                        mechanism->setEnabled(state == -1 ? false : true);
                      }
                   );
                }

@@ -35,6 +35,8 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void setEnabled(bool enabled) override;
 
+   const sf::IntRect& getPixelRect() const;
+
 private:
    float _angle = 0.0f;
    float _velocity = 0.0f;

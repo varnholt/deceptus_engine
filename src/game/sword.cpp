@@ -32,7 +32,7 @@ void Sword::draw(sf::RenderTarget& target)
    // DebugDraw::drawRect(target, rect_px, sf::Color{255, 0, 0});
    DebugDraw::drawCircle(
       target,
-      {
+      sf::Vector2f{
          Player::getCurrent()->getPixelPositionf().x * MPP + 0.5f * _dir_m.x,
          Player::getCurrent()->getPixelPositionf().y * MPP - 0.6f ,
       },

@@ -291,7 +291,8 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_conveyor_belts,
       *mechanism_spikes,
       *mechanism_spike_blocks,
-      *mechanism_on_off_blocks
+      *mechanism_on_off_blocks,
+      *mechanism_rotating_blades
    );
 
    *mechanism_platforms = MovingPlatform::merge(parent, data);
