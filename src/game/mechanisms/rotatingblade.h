@@ -16,8 +16,8 @@ public:
 
    struct Settings
    {
-      float _blade_acceleration = 0.003f;
-      float _blade_deceleration = 0.003f;
+      float _blade_acceleration = 0.006f;
+      float _blade_deceleration = 0.009f;
       float _blade_rotation_speed = 400.0f;
       float _movement_speed = 0.2f;
    };
