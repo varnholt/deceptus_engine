@@ -185,70 +185,73 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
    };
 
    // read start positions if available
-   const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
-   const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
-   if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
+   if (data._tmx_object->_properties)
    {
-      sub_room._start_position_l = {
-         start_position_l_x_it->second->_value_int.value(),
-         start_position_l_y_it->second->_value_int.value()
-      };
-   }
-
-   const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
-   const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
-   if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
-   {
-      sub_room._start_position_r = {
-         start_position_r_x_it->second->_value_int.value(),
-         start_position_r_y_it->second->_value_int.value()
-      };
-   }
-
-   const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
-   const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
-   if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
-   {
-      sub_room._start_position_t = {
-         start_position_t_x_it->second->_value_int.value(),
-         start_position_t_y_it->second->_value_int.value()
-      };
-   }
-
-   const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
-   const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
-   if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
-   {
-      sub_room._start_position_b = {
-         start_position_b_x_it->second->_value_int.value(),
-         start_position_b_y_it->second->_value_int.value()
-      };
-   }
-
-   const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
-   const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
-   if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
-   {
-      auto offset_y = 0;
-      if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
+      const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
+      const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
+      if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
       {
-         offset_y = start_offset_l_y_it->second->_value_int.value();
+         sub_room._start_position_l = {
+            start_position_l_x_it->second->_value_int.value(),
+            start_position_l_y_it->second->_value_int.value()
+         };
       }
 
-      sub_room._start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
-   }
-
-   const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
-   const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
-   if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
-   {
-      auto offset_y = 0;
-      if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
+      const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
+      const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
+      if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
       {
-         offset_y = start_offset_r_y_it->second->_value_int.value();
+         sub_room._start_position_r = {
+            start_position_r_x_it->second->_value_int.value(),
+            start_position_r_y_it->second->_value_int.value()
+         };
       }
 
-      sub_room._start_offset_r = {start_offset_r_x_it->second->_value_int.value(), offset_y};
+      const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
+      const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
+      if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
+      {
+         sub_room._start_position_t = {
+            start_position_t_x_it->second->_value_int.value(),
+            start_position_t_y_it->second->_value_int.value()
+         };
+      }
+
+      const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
+      const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
+      if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
+      {
+         sub_room._start_position_b = {
+            start_position_b_x_it->second->_value_int.value(),
+            start_position_b_y_it->second->_value_int.value()
+         };
+      }
+
+      const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
+      const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
+      if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
+      {
+         auto offset_y = 0;
+         if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
+         {
+            offset_y = start_offset_l_y_it->second->_value_int.value();
+         }
+
+         sub_room._start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
+      }
+
+      const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
+      const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
+      if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
+      {
+         auto offset_y = 0;
+         if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
+         {
+            offset_y = start_offset_r_y_it->second->_value_int.value();
+         }
+
+         sub_room._start_offset_r = {start_offset_r_x_it->second->_value_int.value(), offset_y};
+      }
    }
 
    room->_sub_rooms.push_back(sub_room);
