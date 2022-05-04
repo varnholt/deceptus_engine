@@ -5,15 +5,14 @@ It utilizes Box2D for game physics, SFML for rendering, and SDL for game control
 
 ![](doc/screenshots/screenshot_section.png)
 
-<br>
 
 # Credits
+
 |What|Who|
 |-|-|
 |Artwork|dstar|
 |Code|mueslee (Matthias Varnholt)|
 
-<br>
 
 # How to Build
 
@@ -32,12 +31,9 @@ qmake && make
 qmake && nmake 
 ```
 
-<br>
-
 # Contribute and Talk to Us!
 If you're a musician, graphic artist, level designer or programmer, or just want to hang out and chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
 
-<br>
 
 # Designing a Level
 [Introduction](doc/level_design/designing_a_level.md#designing-a-level)<br>
@@ -46,10 +42,8 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Your Tiles](doc/level_design/designing_a_level.md#your-tiles)<br>
 [Level Layers](doc/level_design/designing_a_level.md#level-layers)<br>
 
-<br>
 
 ## Mechanisms
-
 [Introduction](doc/level_design/mechanisms.md#mechanisms)<br>
 [Bouncers](doc/level_design/mechanisms.md#bouncers)<br>
 [Conveyor Belts](doc/level_design/mechanisms.md#conveyor-belts)<br>
@@ -72,11 +66,8 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Dialogues](doc/level_design/mechanisms.md#dialogues)<br>
 [Controller Help](doc/level_design/mechanisms.md#controller-help)<br>
 
-<br>
-
 
 ## Enemies
-
 [Introduction](doc/level_design/enemies.md#enemies)<br>
 [Adding Enemies](doc/level_design/enemies.md#adding-enemies)<br>
 [Enemy Design and Properties](doc/level_design/enemies.md#enemy-design-and-properties)<br>
@@ -92,10 +83,8 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Landmine](doc/level_design/enemies.md#landmine)<br>
 [Watermine](doc/level_design/enemies.md#watermine)<br>
 
-<br>
 
 ## Visual Effects
-
 [Introduction](doc/level_design/visual_effects.md#visualization)<br>
 [Adding Parallax Layers](doc/level_design/visual_effects.md#adding-parallax-layers)<br>
 [Adding Image Layers](doc/level_design/visual_effects.md#adding-image-layers)<br>
@@ -109,25 +98,20 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Dust](doc/level_design/visual_effects.md#dust)<br>
 [Ambient Occlusion](doc/level_design/visual_effects.md#ambient-occlusion)<br>
 
-<br>
 
 ## Advanced Topics
-
 [Introduction](doc/level_design/advanced_topics.md#advanced-topics)<br>
 [Checkpoints](doc/level_design/advanced_topics.md#checkpoints)<br>
 [Rooms](doc/level_design/advanced_topics.md#rooms)<br>
 [Addendum](doc/level_design/advanced_topics.md#addendum)<br>
 [Folder Structure](doc/level_design/advanced_topics.md#folder-structure)<br>
 
-<br>
-
 
 ## Creating Your Own Enemies
-
 [Deceptus Engine Lua Interface](doc/lua_interface/readme.md#deceptus-engine-lua-interface)<br>
 [Creating Your First Own Enemy](doc/lua_interface/readme.md#creating-your-first-own-enemy)<br>
 [Setting Up Your Enemy](doc/lua_interface/readme.md#setting-up-your-enemy)<br>
 [Using the API](doc/lua_interface/readme.md#using-the-api)<br>
 [The Lua API](doc/lua_interface/readme.md#the-lua-api)<br>
 
-<br>
+
