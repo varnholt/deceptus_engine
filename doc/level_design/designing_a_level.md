@@ -4,7 +4,6 @@ Levels in Deceptus use the Tiled Editor file format _tmx_.
 In order to make your first level you will need two things:
 Tiled and a solid sprite sheet, also called tileset.
 
-<br>
 
 ## Some Terms
 A _sprite sheet_ is a big texture (an image) that contains all the elements that you want to use in your level. Those are called _sprites_.<br>
@@ -13,14 +12,12 @@ A layer is something like a transparent sheet where you can draw things on. And 
 Likewise, your level can consist of many layers put on top of each other.
 So you can have a layer for things that should always be in the foreground, another layer for all the stuff that's directly located around our game character and another layer for the background. While writing this, our hero does not have a name yet, so let's just call him Adam for now.
 
-<br>
 
 ## Your Tileset
 
 Each game defines a particular tile size (the width and height) of a tile in the sprite sheet. Deceptus went for `24x24px`. If you want to go for a different tile size, you'd have to change the code of the game (`constants.h`).<br>
 Furthermore, we have decided that 2 tiles should represent 1m in the 'real world'. This is relevant for the physics behavior of the game. So it's good to keep in mind that 48 pixels are equivalent to 1 meter. This constant can also be altered in the game code if needed.
 
-<br>
 
 ## Your Tiles
 
@@ -85,7 +82,6 @@ Now you're all set! Go and try out your first level!
 
 Check out the addendum for more info about the overall folder structure of the Deceptus Engine.
 
-<br>
 
 ### Adding More Layers
 
@@ -100,7 +96,4 @@ Deceptus could just use the layer order that you define inside your tmx file by 
 |z|int|The z depth of your layer from 0 (far far away) to 50 (frontmost)|
 
 Wait, there's more! The Deceptus Engine supports a bunch of 'custom' layers such as _Parallax_ or _Image Layers_ You won't need any of that during your early design steps but once your gameplay is solid, feel free to move on to the chapter 'Visualization'.
-
-<br>
-<br>
 
