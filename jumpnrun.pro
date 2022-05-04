@@ -622,5 +622,11 @@ DISTFILES += \
     data/shaders/wave.vert \
     doc/lasers/lasers.md \
     doc/level_design.md \
+    doc/level_design/advanced_topics.md \
+    doc/level_design/designing_a_level.md \
+    doc/level_design/enemies.md \
+    doc/level_design/mechanisms.md \
     doc/level_design/readme.md \
+    doc/level_design/visual_effects.md \
+    doc/lua_interface/readme.md \
     doc/physics/readme.md

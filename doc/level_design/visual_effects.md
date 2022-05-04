@@ -19,7 +19,6 @@ They have the properties below:
 |z|int|As you might want to place something _behind_ your parallax layers, configuring the z index might be useful, too. The default value is `0`.|
 
 
-<br><br>
 
 ## Adding Image Layers
 
@@ -32,7 +31,6 @@ They have the properties below:
 |-|-|-|
 |blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
 
-<br><br>
 
 ## Static lights
 
@@ -51,7 +49,6 @@ The individual lights are created as rectangle objects with the parameters below
 |flicker_alpha_amount|float|The opacity of your light source (optional, from `0..1`, a good value is `0.7`)|
 |flicker_speed|float|How fast to step through the flicker noise function (optional, from `0..100`, a good value is `5`|
 
-<br><br>
 
 ## Dynamic Lights
 
@@ -74,8 +71,6 @@ In order to create a dynamic light source, have an object layer called `lights` 
 |texture|string|You can use a texture to give your light source a specific look (optional), <br>Some examples:<br><br>![](images/light_scalemap.png) ![](images/light_star.png) ![](images/light_topdown.png)|
 
 
-<br><br>
-
 ## Playing with Dynamic Lights / Ropes with Lights
 
 Since bump maps are a lot more convincing when light is in motion, the 'Ropes with Lights' mechanism has been implemented. It is not listed under the mechanisms as it does not have any impact on the gameplay; it is just a cosmetic addition.
@@ -95,7 +90,6 @@ So on top of the Rope properties, there are a few additional ones:
 |_color_|color|The color of the dynamic light (the default is white)|
 |_sprite_|int|At the moment the mechanism just supports two different light types, so it's either just `1` or `2`|
 
-<br><br>
 
 ## Atmosphere layers
 
@@ -112,7 +106,6 @@ All layers underneath the level z depth will then be drawn with a little distort
 ![](images/atmosphere.png)
 
 
-<br><br>
 
 ## Shader Quads
 
@@ -134,7 +127,6 @@ Here's an example of a fragment shader implementing a waterfall:
 
 ![](images/shader_quad_example.png)
 
-<br><br>
 
 ## Weather
 
@@ -155,7 +147,6 @@ Rain layers have the custom properties below:
 
 ![](images/weather_rain.png)
 
-<br><br>
 
 ### Thunderstorm
 Usually you want to have your thunderstorm effect in the very back of your layer stack or somewhere in between your parallax layers.
@@ -173,7 +164,6 @@ Thunderstorms have the custom properties below:
 
 ![](images/weather_thunderstorm_1.png) &nbsp;&nbsp; ![](images/weather_thunderstorm_2.png)
 
-<br><br>
 
 
 ## Smoke / Fog
@@ -198,7 +188,6 @@ Smoke has been added to the Engine to be able to create foggy / smoky atmosphere
 |mode|string|This effect supports two different modes: `smoke` and `fog`. In both modes particles will move around the center. In `smoke` mode particles will appear more transparent the further they are away from the center. That's due to the additive or alpha blending combined with the particle sprite's transparency. In `fog` mode, this effect will be compensated by increasing the sprite opacity the further it is away from the center. This will result in a rather even distribution of particles.|
 |blend_mode|string|This allows you to choose between additive, alpha or multiplied blending. Therefore you can choose between the values `add`, `alpha`, or `multiply`. The default value is `add`.|
 
-<br><br>
 
 
 ## Dust
@@ -225,8 +214,6 @@ The Dust mechanism supports the custom properties below:
 |wind_dir_y|float|Wind direction y vector (`-1.0 .. 1.0`); default is `0.0f`|
 |flowfield_texture|string|A relative path to a flowfield texture, the default is `data/effects/flowfield_3.png`|
 
-
-<br><br>
 
 ## Ambient Occlusion
 
@@ -298,4 +285,3 @@ Place the script below inside your level directory and run it from there.
 ```
 
 
-<br><br><br>
