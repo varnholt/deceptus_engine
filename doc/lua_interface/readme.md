@@ -3,7 +3,6 @@
 The Deceptus Engine comes with an interface written in Lua that lets you define the visuals and behavior of enemies inside the game.
 The decision to go for Lua has been made as non-C++ programmers should be able to create their own enemies. Also creating or changing the behavior of enemies should be possible without making any change in the game engine.
 
-<br><br>
 
 # Creating Your First Own Enemy
 
@@ -41,7 +40,6 @@ end
 Now, when you start the game and load your level, you should see the output 'tutorial.lua initialized' in the game's debug output.
 That means the script has been loaded correctly. The next thing to do is to start implementing the actual 'business logic'.
 
-<br><br>
 
 ### Initializing Your Script
 
@@ -133,7 +131,6 @@ end
 
 Those are the basics. Of course the details are still missing so the next chapter will cover a bit about how to use the API.
 
-<br>
 
 ## Using the API
 
@@ -156,7 +153,7 @@ function movedTo(x, y)
    mPosition = v2d.Vector2D(x, y)
 end
 ```
-<br>
+
 
 ### Moving the Enemy
 So if the player is on your left (`player.x` is smaller than `enemy.x`), you might want to walk to the left. If the distance to the player is below a certain threshold, you might want to attack... or hand him flowers. Who knows.
@@ -188,7 +185,6 @@ Alternatively, you can set the linear velocity directly by calling `setLinearVel
 
 You can even go full hard core, totally ignore the concept of velocity and acceleration and set the enemy's position directly using `setTransform`.
 
-<br>
 
 ### Paths
 
@@ -229,7 +225,6 @@ end
 
 There's a `interpolation.lua` inside the `scripts/enemies` directory. Use that to interpolate between your path positions if needed. There are also a bunch of examples inside `scripts/enemies` that should serve as a good reference.
 
-<br><br>
 
 # The Lua API
 
@@ -241,7 +236,6 @@ Preload a sample to be played later
 |-|-|-|
 |1|string|Filename of the sample|
 
-<br>
 
 ## `addShapeCircle`
 
@@ -252,8 +246,6 @@ Add a circle shape to the node
 |1|float|Circle radius (meters)|
 |2|float|Circle x-position (meters)|
 |3|float|Circle y-position (meters)|
-
-<br>
 
 
 ## `addShapeRect`
@@ -267,8 +259,6 @@ Add a rectangular shape to the node.
 |3|float|Rect position x (in meters)|
 |4|float|Rect position y (in meters)|
 
-<br>
-
 
 ## `addShapePoly`
 
@@ -279,14 +269,10 @@ Add a polygonal shape to the node.
 |n|float|x-coordinate (in meters)|
 |n+1|float|y-coordinate (in meters)|
 
-<br>
-
 
 ## `addSprite`
 
 Add another (empty) sprite to this node
-
-<br>
 
 
 ## `addWeapon`
@@ -309,8 +295,6 @@ enum class WeaponType
 |4|float|Bullet radius (in meters)|
 |4..n|float|Polygon x and y parameters (in meters) if not a radial bullet|
 
-<br>
-
 
 ## `boom`
 
@@ -321,8 +305,6 @@ Let's the game's camera shake.
 |1|int32_t|Detonation center x (in px)|
 |2|int32_t|Detonation center y (in px)|
 |3|float|Boom intensity (0..1)|
-
-<br>
 
 
 ## `damage`
@@ -335,7 +317,6 @@ The node passes a certain amount of damage to the player.
 |2|float|damage direction-x (in meters)|
 |3|float|damage direction-y (in meters)|
 
-<br>
 
 ## `damageRadius`
 
@@ -348,7 +329,6 @@ The node damages the palyer if he's within a given radius.
 |3|float|damage direction-y (in meters)|
 |4|float|radius damage radius|
 
-<br>
 
 ## `debug`
 
@@ -357,8 +337,6 @@ Output a debug message to stdout
 |Parameter Position|Type|Description|
 |-|-|-|
 |1|string|Debug message|
-
-<br>
 
 
 ## `die`
@@ -378,7 +356,6 @@ This will fire a weapon from a given position into a given direction.
 |4|float|x-direction (in meters)|
 |5|float|y-direction (in meters)|
 
-<br>
 
 ## `getLinearVelocity`
 
@@ -388,7 +365,6 @@ Reads the linear velocity of this object.
 |-|-|-|
 |Returns|lua table|1 is the linear velocity in x (in meters)<br>2 is the linear velocity in y (in meters)|
 
-<br>
 
 ## `isPhsyicsPathClear` [deprecated]
 
@@ -404,7 +380,6 @@ Use `queryRayCast` instead.
 |4|int32_t|Ray stop y-position (in px)|
 |Return|bool|Returns `true` on collision|
 
-<br>
 
 ## `makeDynamic`
 
@@ -412,7 +387,6 @@ Makes the object 'dynamic'
 
 A dynamic body is fully simulated. They can be moved manually by the user, but normally they move according to forces. A dynamic body can collide with all body types. A dynamic body always has finite, non-zero mass. If you try to set the mass of a dynamic body to zero, it will automatically acquire a mass of one kilogram and it won't rotate.
 
-<br>
 
 ## `makeStatic`
 
@@ -420,7 +394,6 @@ Makes the object 'static'.
 
 A static body does not move under simulation and behaves as if it has infinite mass. Internally, Box2D stores zero for the mass and the inverse mass. Static bodies can be moved manually by the user. A static body has zero velocity. Static bodies do not collide with other static or kinematic bodies.
 
-<br>
 
 ## `playDetonationAnimation`
 
@@ -431,7 +404,6 @@ Play a detonation animation
 |1|int32_t|Detonation center x (in px)|
 |2|int32_t|Detonation center y (in px)|
 
-<br>
 
 ## `playSample`
 
@@ -442,7 +414,6 @@ Plays a given sample
 |1|string|Filename of the sample to play|
 |2|float|Volume (0..1)|
 
-<br>
 
 ## `queryAABB`
 
@@ -470,7 +441,6 @@ The ray-cast ignores shapes that contain the starting point.
 |4|int32_t|end y-position of your ray (in px)|
 |return|int32_t|number of objects hit by the ray|
 
-<br>
 
 ## `registerHitAnimation`
 
@@ -486,7 +456,6 @@ Register a hit animation for a given weapon
 |6|int32_t|Frames per row|
 |7|int32_t|Start frame|
 
-<br>
 
 ## `setActive`
 
@@ -497,7 +466,6 @@ An inactive body is not simulated and cannot be collided with or woken up.
 |-|-|-|
 |1|bool|Active flag|
 
-<br>
 
 ## `setDamage`
 
@@ -508,7 +476,6 @@ This will let the game's collision management know how much damage the player sh
 |-|-|-|
 |1|int32_t|Amount of damage (0..100)|
 
-<br>
 
 ## `setGravityScale`
 
@@ -518,7 +485,6 @@ Set the gravity scale of this node.
 |-|-|-|
 |1|float|Gravity scale (-1..1), -1 is inverted, 0 is 'no gravity', 1 is normal|
 
-<br>
 
 ## `setLinearVelocity`
 
@@ -528,8 +494,6 @@ Sets the for linear velocity of this node
 |-|-|-|
 |1|float|Velocity x (in meters)|
 |2|float|Velocity y (in meters)|
-
-<br>
 
 
 ## `setSpriteOffset`
@@ -542,8 +506,6 @@ Sets the offset for a given sprite
 |2|int32_t|x-position (in px)|
 |3|int32_t|y-position (in px)|
 
-<br>
-
 
 ## `setSpriteOrigin`
 
@@ -554,8 +516,6 @@ Set the origin of a given sprite
 |1|int32_t|Sprite id|
 |2|int32_t|x-position (in px)|
 |3|int32_t|y-position (in px)|
-
-<br>
 
 
 ## `setTransform`
@@ -568,7 +528,6 @@ Set the object's transform
 |2|int32_t|y-translation (in px)|
 |3|float|z-rotation (in radians)|
 
-<br>
 
 ## `setZ`
 
@@ -578,7 +537,6 @@ Set the z layer of this node.
 |-|-|-|
 |1|int32_t|z layer|
 
-<br>
 
 ## `timer`
 
@@ -595,7 +553,6 @@ end
 |1|int32_t|Delay of the timer|
 |2|int32_t|Id of the timer in milliseconds|
 
-<br>
 
 ## `updateKeysPressed`
 
@@ -604,8 +561,6 @@ Send keypressed events to the node instance which will then be processed by the 
 |Parameter Position|Type|Description|
 |-|-|-|
 |1|int32_t|Keypressed bitmask|
-
-<br>
 
 
 ## `updateProjectileAnimation`
@@ -625,7 +580,6 @@ Configure the projectile animation for a given weapon
 |9|int32_t|Frames per row|
 |10|int32_t|Start frame|
 
-<br>
 
 ## `updateProjectileTexture`
 
@@ -640,7 +594,6 @@ Change the texture of a projectile
 |param 5|int32_t|Width of the texture rect (in px)|
 |param 6|int32_t|Height of the texture rect (in px)|
 
-<br>
 
 ## `updateProperties`
 
@@ -653,7 +606,6 @@ Update a number of properties by providing a key and value.
 |n|string|key|
 |n + 1|variant|value|
 
-<br>
 
 ## `updateSpriteRect`
 
@@ -667,4 +619,3 @@ Update the sprite rectangle for a particular sprite.
 |4|int32_t|Rectangle width (in px)|
 |5|int32_t|Rectangle height (in px)|
 
-<br>

@@ -35,7 +35,6 @@ Next, you have to have one section for each enemy instance inside this array. Fo
 
 All properties that are applicable for each enemy type are listed below.
 
-<br>
 
 ### Adding Enemies with Tiled
 
@@ -51,7 +50,6 @@ In order to insert an enemy in your level using the Tiled editor, create an obje
 
 ![](images/enemies.png)
 
-<br>
 
 ### Adding Enemies with Tiled and level.json
 
@@ -74,18 +72,15 @@ Then, you open up the `level.json` description and add a reference to that objec
 
 Below you will find a description of all enemies including a table of their properties.
 
-<br><br>
 
 ## Enemy Design and Properties
 
-<br>
 
 ### Generic properties
 |Property|Type|Description|
 |-|-|-|
 |z|int|Layer z index where the enemy is located in. This includes projectiles fired by the enemy.|
 
-<br>
 
 ### Arrow Trap
 
@@ -99,7 +94,6 @@ Arrow Traps shoot arrows in a particular direction.
 |alignment|string|Arrow direction: '`up`', '`down`', '`left`', '`right`'|
 |time_offset_s|float|An offset for the time when the arrows are fired, given in seconds|
 
-<br>
 
 ### Bat
 
@@ -112,7 +106,6 @@ A bat usually sleeps somewhere at the ceiling of a room. When woken up by Adam, 
 |script|string|`bat_2.lua`|
 |script|string|Name of the enemy's lua script|
 
-<br>
 
 ### Blob
 
@@ -128,7 +121,6 @@ A Blob can either move left and right on the floor or ceiling of a room, jump up
 |jump_interval_ms|int|If the Blob should jump, you have to define its jump interval (in `ms`).|
 |path|string|Usually you would only define a 2nd x,y-position here which will make the Blob go back and forth between its start position and the other position. You can also enter more than one position if needed. Format: `x0, y0, x1, y1, etc.`|
 
-<br>
 
 ### Bonefish
 
@@ -139,7 +131,6 @@ A Blob can either move left and right on the floor or ceiling of a room, jump up
 |script|string|`bonefish.lua`|
 |path|string|Usually you would only define a 2nd x,y-position here which will make the Bonefish go back and forth between its start position and the other position. Format: `x0, y0, x1, y1, etc.`|
 
-<br>
 
 ### Cannon
 
@@ -154,8 +145,6 @@ Well... it's a cannon. It fires... cannon balls.
 
 
 
-<br>
-
 ### Critter
 
 ![](images/enemy_critter.png)
@@ -168,7 +157,6 @@ Small spiky enemy that can crawl up walls and simply goes its way round and roun
 |generate_path|bool|If `true`, the Deceptus Engine will automatically trace the edge the Critter has been placed on and turn it into a path. Then the Critter will follow this path. This only works for closed loops.|
 |inverse_path|bool|If `true`, the inverse path will be generated, i.e. the critter will move the opposite way.|
 
-<br>
 
 
 ### Ghost
@@ -182,7 +170,6 @@ Ghosts fly around following a given path. When Adam gets close by, they try to s
 |script|string|`critter.lua`|
 |path|string|The ghosts path given as a list of x,y-positions; format: `x0, y0, x1, y1, etc.`|
 
-<br>
 
 ### Klonk
 
@@ -195,7 +182,6 @@ A heavy solid piece of stone that gets angry when Adam is underneath and tries t
 |script|string|`klonk_2.lua`|
 
 
-<br>
 
 ### Landmine
 
@@ -207,7 +193,6 @@ Ugly piece of technology. When Adam steps onto one of these, it's time to run re
 |-|-|-|
 |script|string|`landmine.lua`|
 
-<br>
 
 
 ### Watermine
@@ -221,4 +206,3 @@ Another ugly piece of technology. Same concept as landmine but underwater.
 |script|string|`watermine.lua`|
 
 
-<br><br><br>

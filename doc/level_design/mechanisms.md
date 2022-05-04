@@ -4,7 +4,6 @@ The next thing you might want to do is to either add mechanisms to your level or
 
 All mechanisms in the game are hard-coded. That means that the only way to change their basic design or behavior by altering the C++ code of the game. Mechanisms use different approaches for their setup. While some might be based on tile layers, others are based on object layers and some use a combination of both.
 
-<br>
 
 ## Bouncers
 
@@ -20,7 +19,6 @@ Now change the object's default properties below:
 
 Bouncers use the `tilesets/bumper.png` texture inside your level directory.
 
-<br>
 
 ## Conveyor Belts
 
@@ -44,7 +42,6 @@ Next add a custom property for the velocity:
 
 Conveyor belts use the `tilesets/cbelt.png` texture inside your level directory.
 
-<br>
 
 ## Doors
 
@@ -91,8 +88,6 @@ Apart from the `z` depth, lasers have the custom properties below:
 
 ![](images/mechanism_lasers.png)
 
-<br><br>
-
 
 ## Bubble Cubes
 
@@ -111,7 +106,6 @@ Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust y
 |move_down_velocity|float|A factor to control the movement velocity when `move_down_on_contact` is enabled (the default is `0.5`).|
 |maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
 
-<br><br>
 
 ## Portals
 
@@ -125,7 +119,6 @@ In order to create portals, first create a tile layer called `portals` where you
 
 In the screenshot above, Adam enters at the top left, exits at the bottom right, and when he enters again, teleports to the top right.
 
-<br><br>
 
 ## Crushers
 
@@ -139,8 +132,6 @@ Crushers can be added to your level by adding an object layer called `crushers`.
 |-|-|-|
 |alignment|string|Direction of the Crusher (valid values are '`up`', '`down`', '`left`', '`right`')|
 
-<br><br>
-
 
 ## Death Blocks
 
@@ -149,8 +140,6 @@ Death Blocks are spiky boxes that move back and forth along a given line. Depend
 ![](images/mechanism_death_block.png)
 
 Since you draw the 'rails' of the Death Blocks just to a background layer, this mechanism only requires a polyline object added to the object group `death_blocks`
-
-<br><br>
 
 
 ## Levers
@@ -175,8 +164,6 @@ The properties below apply for the object inside the `levers` object group.
 |-|-|-|
 |enabled|bool|Defines the initial state of the lever which is either enabled or disabled|
 
-<br><br>
-
 
 ## Ropes
 
@@ -194,8 +181,6 @@ So far you can create ropes in your level by creating an object group called `ro
 |segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
 
 Read more about Ropes in the paragraph 'Ropes with Lights'.
-
-<br><br>
 
 
 ## Spike Balls
@@ -219,8 +204,6 @@ It is very important to place that mount high enough, otherwise the ball will cr
 |chain_element_height_m|float|The width of a chain element in metres, the default is `0.0125m`.|
 
 
-<br><br>
-
 ## Spikes
 
 Sharp spikes moving out of the ground are making Adam's life even harder. There are three types of spikes:
@@ -236,7 +219,6 @@ As a side-note. If you want spikes that are extended, just put them into your `t
 
 ![](images/mechanism_spikes.png)
 
-<br><br>
 
 ## Spike Blocks
 
@@ -257,9 +239,6 @@ If you need to know how to connect Spike Blocks to a lever, please check the doc
 |time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
 
 
-<br><br>
-
-
 ## Moving Platform
 
 Moving Platforms are platforms that follow a certain path inside your level. They can be used just like an elevator or for any other purpose, like moving over a couple of deadly spikes, etc.
@@ -270,8 +249,6 @@ To create moving platforms, the first thing to do is to draw your platform rail 
 
 ![](images/mechanism_moving_platforms_settings.png)
 
-
-<br><br>
 
 ## One-Way Walls
 
@@ -290,9 +267,6 @@ So once all the tile shapes are set up, they can be drawn into the tile layer. W
 While the player moves through the one-way walls by pressing the jump key / button, it is possible to drop from a one-way wall by pressing jump together with the down key / button.
 
 
-
-<br><br>
-
 ## Moveable Objects
 
 At the moment this object type should rather be called 'Moveable Box' since their (rectangular) shape and texture is hardcoded. However, that might change in the future.
@@ -302,9 +276,6 @@ Anyhow, Moveable Objects are objects the player can push from one position to an
 The way to create a moveable object, create a rectangle object inside the object group `moveable_objects`. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
 
 ![](images/mechanism_movable_objects.png)
-
-
-<br><br>
 
 
 ## Extras
@@ -319,7 +290,6 @@ Extras are currently hardcoded, i.e. the ID of each extra in the extra tileset i
 
 Apart from that, placing extras in your level is easy. Just create a tile layer called `extras` where you place your extra tiles.
 
-<br><br>
 
 ## Dialogues
 
@@ -353,7 +323,6 @@ Moreover, you can use the tags below inside your dialogue strings:
 |`<br>`|Add a line break|
 |`<player>`|Insert the name of the player|
 
-<br><br>
 
 ## Controller Help
 
@@ -394,5 +363,3 @@ Depending on whether a keyboard or a game controller is connected, the buttons b
 |`key_return`|`bt_a`|
 |`key_escape`|`bt_b`|
 
-
-<br><br><br>

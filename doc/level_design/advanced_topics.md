@@ -20,8 +20,6 @@ Checkpoints have the custom properties below:
 ![](images/checkpoints.png)
 
 
-<br>
-
 ## Rooms
 
 Usually the game's camera system keeps on following Adam so he always stays in focus. However, in Metroid-like games it's quite common to limit the camera range to one room, open a door, go to the next room and then move the camera's focus over to the other room.
