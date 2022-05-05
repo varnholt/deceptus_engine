@@ -148,7 +148,9 @@ Levers! One of the most important mechanisms. In short, they do what levers do: 
 - Conveyor Belts
 - Fans
 - Lasers
+- On/Off Blocks
 - Platforms
+- Rotating Blades
 - Spikes
 - Spike Blocks
 
@@ -237,6 +239,39 @@ If you need to know how to connect Spike Blocks to a lever, please check the doc
 |mode|string|The Spike Block's mode, either '`interval`' or '`lever`' (default is '`lever`')|
 |time_on_ms|int|When mode is '`interval`', the time the Spike Block is extracted, given in ms (default is 4000ms)|
 |time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
+
+
+## On/Off Blocks
+
+On/Off Blocks are basically the friendly version of the Spike Block. When you switch it on, it's just a solid block that could be placed as a barrier, ladder, etc.
+When you switch it off, it just disappears and the player does no longer collide with them.
+
+![bla](images/mechanism_on_off_block_1.png) 
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|enabled|bool|The default enabled state (default is `true`)|
+|mode|string|The Spike Block's mode, either '`interval`' or '`lever`' (default is '`lever`')|
+|time_on_ms|int|When mode is '`interval`', the time the Spike Block is extracted, given in ms (default is 4000ms)|
+|time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
+
+
+## Rotating Blades
+
+Rotating Blades are pretty nasty. They're pretty much the same as an angle grinder with a very sharp blade attached to it. So don't run into it while it's rotating - collision means instant death.
+
+![](images/mechanism_rotating_blade.png)
+
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|enabled|bool|The default enabled state (default is `true`)|
+|blade_acceleration|float|The acceleration used for the blade to gain speed (both in rotation and vertical/horizontal movement) when enabled (the default is `0.006`).|
+|blade_deceleration|float|The deceleration used for the blade to drop speed (both in rotation and vertical/horizontal movement) when disabled (the default is `0.009`).|
+|blade_rotation_speed|float|The value that is applied to the rotation of the blade sprite. The higher, the faster the rotational movement (the default is `400.0`).|
+|movement_speed|float|A factor applied to the horizontal/vertical movement of the blade. The higher, the faster the blade moves around (the default is `0.2`). |
 
 
 ## Moving Platform
