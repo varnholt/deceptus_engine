@@ -59,6 +59,8 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Spike Balls](doc/level_design/mechanisms.md#spike-balls)<br>
 [Spikes](doc/level_design/mechanisms.md#spikes)<br>
 [Spike Blocks](doc/level_design/mechanisms.md#spike-blocks)<br>
+[On/Off Blocks](doc/level_design/mechanisms.md#onoff-blocks)<br>
+[Rotating Blades](doc/level_design/mechanisms.md#rotating-blades)<br>
 [Moving Platform](doc/level_design/mechanisms.md#moving-platform)<br>
 [One-Way Walls](doc/level_design/mechanisms.md#one-way-walls)<br>
 [Moveable Objects](doc/level_design/mechanisms.md#moveable-objects)<br>
