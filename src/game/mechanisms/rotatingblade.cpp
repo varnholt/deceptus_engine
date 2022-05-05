@@ -3,6 +3,8 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "game/debugdraw.h"
 #include "game/player/player.h"
@@ -50,6 +52,46 @@ void RotatingBlade::setup(const GameDeserializeData& data)
       64,
       64
    };
+
+   if (data._tmx_object->_properties)
+   {
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
+
+      const auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
+      if (enabled_it != data._tmx_object->_properties->_map.end())
+      {
+         setEnabled(enabled_it->second->_value_bool.value());
+      }
+
+      const auto blade_acceleration_it = data._tmx_object->_properties->_map.find("blade_acceleration");
+      if (enabled_it != data._tmx_object->_properties->_map.end())
+      {
+         _settings._blade_acceleration = blade_acceleration_it->second->_value_float.value();
+      }
+
+      const auto blade_deceleration_it = data._tmx_object->_properties->_map.find("blade_deceleration");
+      if (blade_deceleration_it != data._tmx_object->_properties->_map.end())
+      {
+         _settings._blade_deceleration = blade_deceleration_it->second->_value_float.value();
+      }
+
+      const auto _blade_rotation_speed_it = data._tmx_object->_properties->_map.find("blade_rotation_speed");
+      if (_blade_rotation_speed_it != data._tmx_object->_properties->_map.end())
+      {
+         _settings._blade_rotation_speed = _blade_rotation_speed_it->second->_value_float.value();
+      }
+
+      const auto movement_speed_it = data._tmx_object->_properties->_map.find("movement_speed");
+      if (movement_speed_it != data._tmx_object->_properties->_map.end())
+      {
+         _settings._movement_speed = movement_speed_it->second->_value_float.value();
+      }
+   }
 }
 
 
