@@ -55,11 +55,6 @@ public:
 
 protected:
 
-   static std::vector<TmxObject*> __objects;
-   static std::vector<std::shared_ptr<Laser>> __lasers;
-   static std::vector<std::array<int32_t, 9>> __tiles_version_1;
-   static std::vector<std::array<int32_t, 9>> __tiles_version_2;
-
    std::vector<Signal> _signal_plot;
 
    int32_t _tu = 0;
@@ -69,7 +64,8 @@ protected:
    sf::Sprite _sprite;
 
    sf::Vector2f _tile_position;
-   sf::Vector2f _pixel_position;
+   sf::Vector2f _position_px;
+   sf::Vector2f _move_offset_px;
    sf::Rect<int32_t> _pixel_rect;
 
    bool _on = true;
