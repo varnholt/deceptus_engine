@@ -833,49 +833,51 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::applyBeltVelocity(float& desired_velocity)
 {
-   if (isOnBelt())
+   if (!isOnBelt())
    {
-      if (getBeltVelocity() < 0.0f)
-      {
-         if (_controls->isMovingRight())
-         {
-            desired_velocity *= 0.5f;
-         }
-         else if (_controls->isMovingLeft())
-         {
-            if (desired_velocity > 0.0f)
-            {
-               desired_velocity = 0.0f;
-            }
+      return;
+   }
 
-            desired_velocity *= 2.0f;
-            desired_velocity = std::min(desired_velocity, getMaxVelocity());
-         }
-         else
-         {
-            desired_velocity += getBeltVelocity();
-         }
+   if (getBeltVelocity() < 0.0f)
+   {
+      if (_controls->isMovingRight())
+      {
+         desired_velocity *= 0.5f;
       }
-      else if (getBeltVelocity() > 0.0f)
+      else if (_controls->isMovingLeft())
       {
-         if (_controls->isMovingLeft())
+         if (desired_velocity > 0.0f)
          {
-            desired_velocity *= 0.5f;
+            desired_velocity = 0.0f;
          }
-         else if (_controls->isMovingRight())
-         {
-            if (desired_velocity < 0.0f)
-            {
-               desired_velocity = 0.0f;
-            }
 
-            desired_velocity *= 2.0f;
-            desired_velocity = std::max(desired_velocity, -getMaxVelocity());
-         }
-         else
+         desired_velocity *= 2.0f;
+         desired_velocity = std::min(desired_velocity, getMaxVelocity());
+      }
+      else
+      {
+         desired_velocity += getBeltVelocity();
+      }
+   }
+   else if (getBeltVelocity() > 0.0f)
+   {
+      if (_controls->isMovingLeft())
+      {
+         desired_velocity *= 0.5f;
+      }
+      else if (_controls->isMovingRight())
+      {
+         if (desired_velocity < 0.0f)
          {
-            desired_velocity += getBeltVelocity();
+            desired_velocity = 0.0f;
          }
+
+         desired_velocity *= 2.0f;
+         desired_velocity = std::max(desired_velocity, -getMaxVelocity());
+      }
+      else
+      {
+         desired_velocity += getBeltVelocity();
       }
    }
 }
