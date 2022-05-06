@@ -27,14 +27,12 @@ static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
 
 static constexpr auto range_diabled_delta  = range_disabled.second  - range_disabled.first;
 static constexpr auto range_enabled_delta  = range_enabled.second   - range_enabled.first;
+
+std::vector<TmxObject*> __objects;
+std::vector<std::shared_ptr<Laser>> __lasers;
+std::vector<std::array<int32_t, 9>> __tiles_version_1;
+std::vector<std::array<int32_t, 9>> __tiles_version_2;
 }
-
-
-//-----------------------------------------------------------------------------
-std::vector<TmxObject*> Laser::__objects;
-std::vector<std::shared_ptr<Laser>> Laser::__lasers;
-std::vector<std::array<int32_t, 9>> Laser::__tiles_version_1;
-std::vector<std::array<int32_t, 9>> Laser::__tiles_version_2;
 
 
 //-----------------------------------------------------------------------------
@@ -59,7 +57,6 @@ void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    color.draw(_sprite);
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -231,7 +228,7 @@ const sf::Vector2f& Laser::getTilePosition() const
 //-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getPixelPosition() const
 {
-   return _pixel_position;
+   return _position_px;
 }
 
 
@@ -269,7 +266,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
    const auto tiles    = data._tmx_layer->_data;
    const auto width    = data._tmx_layer->_width_tl;
    const auto height   = data._tmx_layer->_height_tl;
-   const auto firstId  = data._tmx_tileset->_first_gid;
+   const auto first_id  = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -277,54 +274,49 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
       for (auto j = 0u; j < height; ++j)
       {
          // get the current tile number
-         int tileNumber = tiles[i + j * width];
+         const auto tile_number = tiles[i + j * width];
 
-         if (tileNumber != 0)
+         if (tile_number == 0)
          {
-            auto laser = std::make_shared<Laser>(parent);
-            lasers.push_back(laser);
-
-            laser->_version = version;
-
-            laser->_tile_position.x = static_cast<float>(i);
-            laser->_tile_position.y = static_cast<float>(j);
-
-            laser->_pixel_position.x = laser->_tile_position.x * PIXELS_PER_TILE;
-            laser->_pixel_position.y = laser->_tile_position.y * PIXELS_PER_TILE;
-
-            laser->_pixel_rect.left = static_cast<int32_t>(laser->_pixel_position.x);
-            laser->_pixel_rect.top  = static_cast<int32_t>(laser->_pixel_position.y);
-
-            laser->_pixel_rect.width  = PIXELS_PER_TILE;
-            laser->_pixel_rect.height = PIXELS_PER_TILE;
-
-            laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
-
-            laser->_tu = (tileNumber - firstId) % (laser->_texture->getSize().x / tilesize.x);
-            laser->_tv = (tileNumber - firstId) / (laser->_texture->getSize().x / tilesize.x);
-
-            if (version == MechanismVersion::Version2)
-            {
-               laser->_tu = 0;
-            }
-
-            if (data._tmx_layer->_properties != nullptr)
-            {
-               laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
-            }
-
-            sf::Sprite sprite;
-            sprite.setTexture(*laser->_texture);
-            sprite.setPosition(
-               sf::Vector2f(
-                  static_cast<float>(i * PIXELS_PER_TILE),
-                  static_cast<float>(j * PIXELS_PER_TILE)
-               )
-            );
-
-            laser->_sprite = sprite;
-            __lasers.push_back(laser);
+            continue;
          }
+
+         auto laser = std::make_shared<Laser>(parent);
+         lasers.push_back(laser);
+
+         laser->_version = version;
+
+         laser->_tile_position.x = static_cast<float>(i);
+         laser->_tile_position.y = static_cast<float>(j);
+
+         laser->_position_px.x = laser->_tile_position.x * PIXELS_PER_TILE;
+         laser->_position_px.y = laser->_tile_position.y * PIXELS_PER_TILE;
+
+         laser->_pixel_rect.left = static_cast<int32_t>(laser->_position_px.x);
+         laser->_pixel_rect.top  = static_cast<int32_t>(laser->_position_px.y);
+
+         laser->_pixel_rect.width  = PIXELS_PER_TILE;
+         laser->_pixel_rect.height = PIXELS_PER_TILE;
+
+         laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
+
+         laser->_tu = (tile_number - first_id) % (laser->_texture->getSize().x / tilesize.x);
+         laser->_tv = (tile_number - first_id) / (laser->_texture->getSize().x / tilesize.x);
+
+         if (version == MechanismVersion::Version2)
+         {
+            laser->_tu = 0;
+         }
+
+         if (data._tmx_layer->_properties)
+         {
+            laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
+         }
+
+         laser->_sprite.setTexture(*laser->_texture);
+         laser->_sprite.setPosition(laser->_position_px);
+
+         __lasers.push_back(laser);
       }
    }
 
@@ -424,8 +416,8 @@ void Laser::collide(const sf::Rect<int32_t>& player_rect)
                   {
                      sf::Rect<int32_t> rect;
 
-                     rect.left = static_cast<int32_t>(laser->_pixel_position.x + (x * PIXELS_PER_PHYSICS_TILE));
-                     rect.top  = static_cast<int32_t>(laser->_pixel_position.y + (y * PIXELS_PER_PHYSICS_TILE));
+                     rect.left = static_cast<int32_t>(laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE));
+                     rect.top  = static_cast<int32_t>(laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE));
 
                      rect.width  = PIXELS_PER_PHYSICS_TILE;
                      rect.height = PIXELS_PER_PHYSICS_TILE;
