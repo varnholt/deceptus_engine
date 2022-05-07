@@ -1,8 +1,9 @@
 #pragma once
 
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "framework/math/pathinterpolation.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/gamenode.h"
 
 // sfml
 #include "SFML/Graphics.hpp"
@@ -13,6 +14,7 @@
 // std
 #include <array>
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 
@@ -26,8 +28,8 @@ public:
 
    struct Signal
    {
-      uint32_t mDurationMs = 0u;
-      bool mOn = false;
+      uint32_t _duration_ms = 0u;
+      bool _on = false;
    };
 
    Laser(GameNode* parent = nullptr);
@@ -65,8 +67,11 @@ protected:
 
    sf::Vector2f _tile_position;
    sf::Vector2f _position_px;
-   sf::Vector2f _move_offset_px;
    sf::Rect<int32_t> _pixel_rect;
+
+   std::optional<std::vector<sf::Vector2f>> _path;
+   sf::Vector2f _move_offset_px;
+   PathInterpolation<sf::Vector2f> _path_interpolation;
 
    bool _on = true;
    int32_t _tile_index = 0;
