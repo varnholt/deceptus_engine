@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -89,7 +90,7 @@ void Laser::update(const sf::Time& dt)
          const auto& sig = _signal_plot.at(_signal_index);
 
          // elapsed time exceeded signal duration
-         if (_time > sig.mDurationMs)
+         if (_time > sig._duration_ms)
          {
             _on = !_on;
             _time = 0;
@@ -193,6 +194,13 @@ void Laser::update(const sf::Time& dt)
             _tile_index = range_disabled.first;
          }
       }
+   }
+
+   // move laser
+   if (_path.has_value())
+   {
+      _path_interpolation.updateTime(dt.asSeconds());
+      _sprite.setPosition(_position_px + _move_offset_px);
    }
 }
 
@@ -384,7 +392,15 @@ void Laser::collide(const sf::Rect<int32_t>& player_rect)
    const auto it =
       std::find_if(std::begin(__lasers), std::end(__lasers), [player_rect](auto laser) {
 
-            const auto roughIntersection = player_rect.intersects(laser->_pixel_rect);
+            auto pixel_rect = laser->_pixel_rect;
+
+            if (laser->_path.has_value())
+            {
+               pixel_rect.left += static_cast<int32_t>(laser->_move_offset_px.x);
+               pixel_rect.top  += static_cast<int32_t>(laser->_move_offset_px.y);
+            }
+
+            const auto rough_intersection = player_rect.intersects(pixel_rect);
 
             auto active = false;
 
@@ -397,8 +413,8 @@ void Laser::collide(const sf::Rect<int32_t>& player_rect)
                active = (laser->_tile_index >= range_enabled.first) && (laser->_tile_index <= range_enabled.second);
             }
 
-            // tileindex at 0 is an active laser
-            if (active && roughIntersection)
+            // tile index at 0 is an active laser
+            if (active && rough_intersection)
             {
                const auto tile_id = static_cast<uint32_t>(laser->_tv);
 
@@ -419,12 +435,18 @@ void Laser::collide(const sf::Rect<int32_t>& player_rect)
                      rect.left = static_cast<int32_t>(laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE));
                      rect.top  = static_cast<int32_t>(laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE));
 
+                     if (laser->_path.has_value())
+                     {
+                        rect.left += static_cast<int32_t>(laser->_move_offset_px.x);
+                        rect.top  += static_cast<int32_t>(laser->_move_offset_px.y);
+                     }
+
                      rect.width  = PIXELS_PER_PHYSICS_TILE;
                      rect.height = PIXELS_PER_PHYSICS_TILE;
 
-                     const auto fineIntersection = player_rect.intersects(rect);
+                     const auto fine_intersection = player_rect.intersects(rect);
 
-                     if (fineIntersection)
+                     if (fine_intersection)
                      {
                         return true;
                      }
@@ -458,48 +480,107 @@ void Laser::merge()
 {
    int32_t group_id = 0;
 
+   std::vector<TmxObject*> laser_movement_paths;
+   std::map<std::string, std::vector<std::shared_ptr<Laser>>> laser_groups;
+
    for (auto object : __objects)
    {
-      const auto x = static_cast<int32_t>(object->_x_px      / PIXELS_PER_TILE );
-      const auto y = static_cast<int32_t>(object->_y_px      / PIXELS_PER_TILE);
-      const auto w = static_cast<int32_t>(object->_width_px  / PIXELS_PER_TILE );
-      const auto h = static_cast<int32_t>(object->_height_px / PIXELS_PER_TILE);
-
-      const auto animation_offset = std::rand() % 100;
-
-      group_id++;
-
-      for (auto yi = y; yi < y + h; yi++)
+      // either we have a polygon or polyline that defines the movement path of a
+      // laser group or we have a rectangle that defines a new group of lasers
+      if (object->_polygon || object->_polyline)
       {
-         for (auto xi = x; xi < x + w; xi++)
+         laser_movement_paths.push_back(object);
+      }
+      else
+      {
+         const auto x = static_cast<int32_t>(object->_x_px      / PIXELS_PER_TILE );
+         const auto y = static_cast<int32_t>(object->_y_px      / PIXELS_PER_TILE);
+         const auto w = static_cast<int32_t>(object->_width_px  / PIXELS_PER_TILE );
+         const auto h = static_cast<int32_t>(object->_height_px / PIXELS_PER_TILE);
+
+         const auto animation_offset = std::rand() % 100;
+
+         group_id++;
+
+         std::optional<Signal> on_signal;
+         std::optional<Signal> off_signal;
+
+         if (object->_properties)
          {
-            for (auto& laser : __lasers)
+             const auto it_on = object->_properties->_map.find("on_time");
+             if (it_on != object->_properties->_map.end())
+             {
+                 on_signal = Signal{static_cast<uint32_t>(it_on->second->_value_int.value()), true};
+             }
+
+             const auto it_off = object->_properties->_map.find("off_time");
+             if (it_off != object->_properties->_map.end())
+             {
+                 off_signal = Signal{static_cast<uint32_t>(it_off->second->_value_int.value()), false};
+             }
+         }
+
+         for (auto yi = y; yi < y + h; yi++)
+         {
+            for (auto xi = x; xi < x + w; xi++)
             {
-               if (
-                     static_cast<int32_t>(laser->_tile_position.x) == xi
-                  && static_cast<int32_t>(laser->_tile_position.y) == yi
-               )
+               for (auto& laser : __lasers)
                {
-                  if (object->_properties != nullptr)
+                  if (
+                        static_cast<int32_t>(laser->_tile_position.x) == xi
+                     && static_cast<int32_t>(laser->_tile_position.y) == yi
+                  )
                   {
-                     auto it = object->_properties->_map.find("on_time");
-                     if (it != object->_properties->_map.end())
+                     if (on_signal.has_value())
                      {
-                         laser->_signal_plot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), true});
+                        laser->_signal_plot.push_back(*on_signal);
                      }
 
-                     it = object->_properties->_map.find("off_time");
-                     if (it != object->_properties->_map.end())
+                     if (off_signal.has_value())
                      {
-                         laser->_signal_plot.push_back(Signal{static_cast<uint32_t>(it->second->_value_int.value()), false});
+                        laser->_signal_plot.push_back(*off_signal);
                      }
+
+                     laser->_animation_offset = animation_offset;
+                     laser->_group_id = group_id;
+
+                     // store laser for being merged later with movement path data
+                     laser_groups[object->_name].push_back(laser);
                   }
-
-                  laser->_animation_offset = animation_offset;
-                  laser->_group_id = group_id;
                }
             }
          }
+      }
+   }
+
+   // support moving lasers
+   // for those merge in the path data retrieved from a polyline or polygon
+   for (auto& tmx_object : laser_movement_paths)
+   {
+      if (!tmx_object->_properties)
+      {
+         continue;
+      }
+
+      std::optional<std::string> reference_id;
+      auto it = tmx_object->_properties->_map.find("reference_id");
+      if (it != tmx_object->_properties->_map.end())
+      {
+          reference_id = it->second->_value_string.value();
+      }
+      else
+      {
+          continue;
+      }
+
+      // fetch path from object and close it
+      auto path = tmx_object->_polygon ? tmx_object->_polygon->_polyline : tmx_object->_polyline->_polyline;
+      path.push_back(path.at(0));
+
+      const auto& lasers = laser_groups[*reference_id];
+      for (auto& laser : lasers)
+      {
+          laser->_path_interpolation.addKeys(path);
       }
    }
 }
