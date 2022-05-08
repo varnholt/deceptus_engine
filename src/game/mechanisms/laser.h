@@ -32,6 +32,11 @@ public:
       bool _on = false;
    };
 
+   struct Settings
+   {
+      float _movement_speed = 0.2f;
+   };
+
    Laser(GameNode* parent = nullptr);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
@@ -80,5 +85,7 @@ protected:
    uint32_t _signal_index = 0;
    uint32_t _time = 0u;
    int32_t _group_id = 0; // only for debugging purposes
+
+   Settings _settings;
 };
 
