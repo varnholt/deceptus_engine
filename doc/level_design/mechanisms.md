@@ -88,6 +88,16 @@ Apart from the `z` depth, lasers have the custom properties below:
 
 ![](images/mechanism_lasers.png)
 
+### Moving Lasers
+
+To make lasers a little more interesting, there's also the option to make them movable. For that purpose, you can define a polygon inside your lasers layer that defines the movement path.
+All you need to do is to give your laser object a name, and then reference that object in your polygon's properties.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|reference_id|string|The object name of the rectangle that groups your laser tiles|
+|movement_speed|float|A velocity factor for the laser movement, the default is `0.2`.|
+
 
 ## Bubble Cubes
 
