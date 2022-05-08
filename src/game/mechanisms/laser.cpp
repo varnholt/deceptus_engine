@@ -199,7 +199,8 @@ void Laser::update(const sf::Time& dt)
    // move laser
    if (_path.has_value())
    {
-      _path_interpolation.updateTime(dt.asSeconds());
+      _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
+      _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
       _sprite.setPosition(_position_px + _move_offset_px);
    }
 }
@@ -580,7 +581,8 @@ void Laser::merge()
       const auto& lasers = laser_groups[*reference_id];
       for (auto& laser : lasers)
       {
-          laser->_path_interpolation.addKeys(path);
+         laser->_path = path;
+         laser->_path_interpolation.addKeys(path);
       }
    }
 }
