@@ -574,6 +574,13 @@ void Laser::merge()
           continue;
       }
 
+      std::optional<float> movement_speed;
+      const auto movement_speed_it = tmx_object->_properties->_map.find("movement_speed");
+      if (movement_speed_it != tmx_object->_properties->_map.end())
+      {
+          movement_speed = movement_speed_it->second->_value_float.value();
+      }
+
       // fetch path from object and close it
       auto path = tmx_object->_polygon ? tmx_object->_polygon->_polyline : tmx_object->_polyline->_polyline;
       path.push_back(path.at(0));
@@ -583,6 +590,11 @@ void Laser::merge()
       {
          laser->_path = path;
          laser->_path_interpolation.addKeys(path);
+
+         if (movement_speed.has_value())
+         {
+             laser->_settings._movement_speed = *movement_speed;
+         }
       }
    }
 }
