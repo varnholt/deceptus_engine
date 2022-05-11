@@ -68,7 +68,7 @@ SPRITE_HEIGHT = 3 * 24
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
 
-   _fire_delays = {0.0, 0.25, 0.5}
+   _fire_delays = {1.0, 1.25, 1.5}
    _sprite_indices = {0, 0, 0}
    _fire_delay_elapsed = {false, false, false}
 
@@ -178,7 +178,6 @@ function updateAlignment(alignment)
       )
 
    end
-
 end
 
 
@@ -278,10 +277,9 @@ function update(dt)
    for i = 1, 3, 1
    do
       if (_fire_delay_elapsed[i]) then
-
          index = math.floor((_elapsed - _fire_delays[i]) * 20.0)
 
-            -- fire actual arrow when the animation has been fully played
+         -- fire actual arrow when the animation has been fully played
          if (index > 8) then
             if (not _fired[i]) then
                _fired[i]=true
@@ -296,7 +294,15 @@ function update(dt)
          end
 
          sprite_indices_current[i] = index
-
+      else
+         -- load arrow in arrow trap
+         index = math.floor(_elapsed * 20.0)
+         -- clamp sprite index at 5
+         if (index > 5) then
+            index = 5
+         end
+         sprite_indices_current[i] = index
+         -- print(string.format("update: %d: %d", i, index))
       end
    end
 
