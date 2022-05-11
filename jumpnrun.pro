@@ -583,6 +583,7 @@ DISTFILES += \
     data/menus/titlescreen.psd \
     data/menus/video.psd \
     data/scripts/enemies/arrowtrap.lua \
+    data/scripts/enemies/arrowtrap_2.lua \
     data/scripts/enemies/deprecated_bat.lua \
     data/scripts/enemies/bat_2.lua \
     data/scripts/enemies/blob_2.lua \
