@@ -262,6 +262,7 @@ function update(dt)
       _fired = {false, false, false}
    end
 
+   -- update 'fire delay elapsed' flags
    for i = 1, 3, 1
    do
       if (not _fire_delay_elapsed[i]) then
@@ -277,7 +278,7 @@ function update(dt)
    for i = 1, 3, 1
    do
       if (_fire_delay_elapsed[i]) then
-         index = math.floor((_elapsed - _fire_delays[i]) * 20.0)
+         index = 5 + math.floor((_elapsed - _fire_delays[i]) * 20.0)
 
          -- fire actual arrow when the animation has been fully played
          if (index > 8) then
@@ -297,10 +298,12 @@ function update(dt)
       else
          -- load arrow in arrow trap
          index = math.floor(_elapsed * 20.0)
+
          -- clamp sprite index at 5
          if (index > 5) then
             index = 5
          end
+
          sprite_indices_current[i] = index
          -- print(string.format("update: %d: %d", i, index))
       end

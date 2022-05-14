@@ -277,7 +277,7 @@ function update(dt)
    for i = 1, 3, 1
    do
       if (_fire_delay_elapsed[i]) then
-         index = math.floor((_elapsed - _fire_delays[i]) * 20.0)
+         index = 5 + math.floor((_elapsed - _fire_delays[i]) * 20.0)
 
          -- fire actual arrow when the animation has been fully played
          if (index > 8) then
