@@ -1,5 +1,6 @@
 #include "CollapsingPlatform.h"
 
+#include "constants.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -11,18 +12,15 @@
 namespace
 {
 constexpr auto bevel_m = 4 * MPP;
-
-constexpr auto columns = 12;
-constexpr auto tiles_per_box_width = 4;
-constexpr auto tiles_per_box_height = 3;
-
 constexpr auto animation_speed = 8.0f;
-
-constexpr auto sprite_offset_x_px = 0;
-constexpr auto sprite_offset_y_px = 0;
-
 constexpr auto collapse_time_s = 0.5f;
 }
+
+// animation info
+//
+// row 0:    trigger state
+// row 1:    appear state
+// row 2-6:  collapse state
 
 
 CollapsingPlatform::CollapsingPlatform(
@@ -48,24 +46,30 @@ CollapsingPlatform::CollapsingPlatform(
    //     |            |
    //   2 +------------+ 3
 
-   const auto width_m  = data._tmx_object->_width_px * MPP;
-   const auto height_m = data._tmx_object->_height_px * MPP;
+   const auto _width_m  = data._tmx_object->_width_px * MPP;
+   const auto _height_m = data._tmx_object->_height_px * MPP;
+
+   _width_tl = static_cast<int32_t>(data._tmx_object->_width_px / PIXELS_PER_TILE);
+
+   _blocks.resize(_width_tl);
+   _sprites.resize(_width_tl);
 
    std::array<b2Vec2, 6> vertices {
-      b2Vec2{bevel_m,             0.0f    },
-      b2Vec2{0.0f,                bevel_m },
-      b2Vec2{0.0f,                height_m},
-      b2Vec2{width_m,             height_m},
-      b2Vec2{width_m,             bevel_m },
-      b2Vec2{width_m - bevel_m,   0.0f    },
+      b2Vec2{bevel_m,              0.0f    },
+      b2Vec2{0.0f,                 bevel_m },
+      b2Vec2{0.0f,                 _height_m},
+      b2Vec2{_width_m,             _height_m},
+      b2Vec2{_width_m,             bevel_m },
+      b2Vec2{_width_m - bevel_m,   0.0f    },
    };
 
-   _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
+   _shape.CreateLoop(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    // create body
    const auto x = data._tmx_object->_x_px;
    const auto y = data._tmx_object->_y_px;
    _position_m = MPP * b2Vec2{x, y};
+   _position_px = sf::Vector2f(x, y);
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
@@ -81,17 +85,29 @@ CollapsingPlatform::CollapsingPlatform(
    _fixture->SetUserData(static_cast<void*>(this));
 
    // set up visualization
-   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "collapsing_platform.png");
-   _sprite.setTexture(*_texture);
-   _sprite.setPosition(x + sprite_offset_x_px, y + sprite_offset_y_px);
+   _texture = TexturePool::getInstance().get("data/sprites/collapsing_platform.png");
 
-   _sprite.setTextureRect({
-         0,
-         0,
-         static_cast<int32_t>(data._tmx_object->_width_px),
-         static_cast<int32_t>(data._tmx_object->_height_px)
-      }
-   );
+   auto sprite_offset_x_px = 0;
+   for (auto& sprite : _sprites)
+   {
+      sprite.setTexture(*_texture);
+      sprite.setPosition(x + sprite_offset_x_px, y);
+      sprite.setTextureRect({
+            0,
+            0,
+            static_cast<int32_t>(data._tmx_object->_width_px),
+            static_cast<int32_t>(data._tmx_object->_height_px)
+         }
+      );
+
+      sprite_offset_x_px += PIXELS_PER_TILE;
+   }
+
+   // initialize all blocks
+   for (auto& block : _blocks)
+   {
+      block._sprite_index = 0;
+   }
 }
 
 
@@ -112,7 +128,10 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 //      }
 //   );
 
-   color.draw(_sprite);
+   for (auto& sprite : _sprites)
+   {
+      color.draw(sprite);
+   }
 }
 
 
