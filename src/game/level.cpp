@@ -572,7 +572,7 @@ void Level::initialize()
    loadState();
    spawnEnemies();
 
-   dump();
+   // dump();
 }
 
 
