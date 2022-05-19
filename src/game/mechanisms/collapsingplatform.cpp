@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "texturepool.h"
 
 #include "framework/tools/globalclock.h"
@@ -11,9 +12,13 @@
 
 namespace
 {
+constexpr auto sprite_column_count = 38;
 constexpr auto bevel_m = 4 * MPP;
 constexpr auto animation_speed = 8.0f;
-constexpr auto collapse_time_s = 0.5f;
+constexpr auto collapse_time_s = 3.0f;
+constexpr auto sprite_offset_y_px = -24;
+constexpr auto destruction_speed = 30.0f;
+constexpr auto fall_speed = 6.0f;
 }
 
 // animation info
@@ -49,10 +54,15 @@ CollapsingPlatform::CollapsingPlatform(
    const auto _width_m  = data._tmx_object->_width_px * MPP;
    const auto _height_m = data._tmx_object->_height_px * MPP;
 
+   if (_width_m < 0.01f || _height_m < 0.01f)
+   {
+      Log::Error() << "collapsing platform has invalid dimensions, object id: " << data._tmx_object->_id;
+      return;
+   }
+
    _width_tl = static_cast<int32_t>(data._tmx_object->_width_px / PIXELS_PER_TILE);
 
    _blocks.resize(_width_tl);
-   _sprites.resize(_width_tl);
 
    std::array<b2Vec2, 6> vertices {
       b2Vec2{bevel_m,              0.0f    },
@@ -87,56 +97,47 @@ CollapsingPlatform::CollapsingPlatform(
    // set up visualization
    _texture = TexturePool::getInstance().get("data/sprites/collapsing_platform.png");
 
-   auto sprite_offset_x_px = 0;
-   for (auto& sprite : _sprites)
-   {
-      sprite.setTexture(*_texture);
-      sprite.setPosition(x + sprite_offset_x_px, y);
-      sprite.setTextureRect({
-            0,
-            0,
-            static_cast<int32_t>(data._tmx_object->_width_px),
-            static_cast<int32_t>(data._tmx_object->_height_px)
-         }
-      );
-
-      sprite_offset_x_px += PIXELS_PER_TILE;
-   }
-
    // initialize all blocks
+   auto sprite_offset_x_px = 0;
+   auto row_index = 0;
    for (auto& block : _blocks)
    {
-      block._sprite_index = 0;
+      block._sprite.setTexture(*_texture);
+      block._x_px = x + sprite_offset_x_px;
+      block._y_px = y + sprite_offset_y_px;
+      block._sprite_row = row_index % 4;
+      block._fall_speed = 1.0f + (std::rand() % 256) / 256.0f;
+      block._destruction_speed = 1.0f + (std::rand() % 256) / 256.0f;
+
+      sprite_offset_x_px += PIXELS_PER_TILE;
+      row_index++;
    }
 }
 
 
 void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   if (_collapsed)
+   updateBlock();
+
+   if (_blocks.empty() || _blocks[0]._sprite_column == sprite_column_count)
    {
       return;
    }
 
-//   auto sprite_index = std::min(static_cast<int32_t>(_collapse_elapsed_s * animation_speed), columns - 1);
-//
-//   _sprite.setTextureRect({
-//         sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
-//         (_collapsed ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
-//         PIXELS_PER_TILE * tiles_per_box_width,
-//         PIXELS_PER_TILE * tiles_per_box_height
-//      }
-//   );
-
-   for (auto& sprite : _sprites)
+   for (auto& block: _blocks)
    {
-      color.draw(sprite);
+      color.draw(block._sprite);
    }
 }
 
 
 void CollapsingPlatform::update(const sf::Time& dt)
 {
+   if (!_body)
+   {
+      return;
+   }
+
    _elapsed_s += dt.asSeconds();
 
    // measure the time elapsed on the platform instead
@@ -161,6 +162,17 @@ void CollapsingPlatform::update(const sf::Time& dt)
          _collapse_elapsed_s = 0.0f;
       }
    }
+
+   if (_collapsed)
+   {
+      const auto dt_s = dt.asSeconds();;
+      for (auto& block : _blocks)
+      {
+         block._elapsed_s += dt_s;
+         block._sprite_column = std::min(static_cast<int32_t>(block._elapsed_s * destruction_speed * block._destruction_speed), sprite_column_count);
+         block._fall_offset_y_px = block._elapsed_s * block._fall_speed * fall_speed;
+      }
+   }
 }
 
 
@@ -183,6 +195,22 @@ void CollapsingPlatform::endContact()
    }
 
    _contact_count--;
+}
+
+
+void CollapsingPlatform::updateBlock()
+{
+   for (auto& block : _blocks)
+   {
+      block._sprite.setPosition(block._x_px, block._y_px + block._fall_offset_y_px);
+      block._sprite.setTextureRect({
+            block._sprite_column * PIXELS_PER_TILE,
+            block._sprite_row * PIXELS_PER_TILE * 3,
+            PIXELS_PER_TILE,
+            PIXELS_PER_TILE * 3
+         }
+      );
+   }
 }
 
 

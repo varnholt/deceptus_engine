@@ -18,7 +18,15 @@ public:
 
    struct Block
    {
-      int32_t _sprite_index = 0;
+      float _x_px = 0.0f;
+      float _y_px = 0.0f;
+      float _fall_offset_y_px = 0.0f;
+      float _elapsed_s = 0.0f;
+      float _fall_speed = 0.0f;
+      float _destruction_speed = 0.0f;
+      int32_t _sprite_row = 0;
+      int32_t _sprite_column = 0;
+      sf::Sprite _sprite;
    };
 
    CollapsingPlatform(
@@ -33,6 +41,9 @@ public:
    void endContact();
 
 private:
+
+   void updateBlock();
+
    float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
    float _collapse_elapsed_s = 0.0f;
@@ -47,7 +58,6 @@ private:
 
    // sf
    std::shared_ptr<sf::Texture> _texture;
-   std::vector<sf::Sprite> _sprites;
 
    // b2d
    b2Body* _body = nullptr;
