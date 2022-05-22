@@ -1,24 +1,27 @@
 #include "CollapsingPlatform.h"
 
+#include <iostream>
+
 #include "constants.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "texturepool.h"
-
-#include "framework/tools/globalclock.h"
-
 
 namespace
 {
 constexpr auto sprite_column_count = 38;
 constexpr auto bevel_m = 4 * MPP;
-constexpr auto animation_speed = 8.0f;
-constexpr auto collapse_time_s = 3.0f;
 constexpr auto sprite_offset_y_px = -24;
+
+constexpr auto time_to_collapse_s = 1.0f;
+constexpr auto animation_speed = 8.0f;
 constexpr auto destruction_speed = 30.0f;
 constexpr auto fall_speed = 6.0f;
+constexpr auto time_to_respawn_s = 4.0f;
+constexpr auto fade_in_duration_s = 1.0f;
 }
 
 // animation info
@@ -117,8 +120,6 @@ CollapsingPlatform::CollapsingPlatform(
 
 void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   updateBlock();
-
    if (_blocks.empty() || _blocks[0]._sprite_column == sprite_column_count)
    {
       return;
@@ -131,6 +132,111 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 }
 
 
+void CollapsingPlatform::updateRespawnAnimation()
+{
+   if (!_respawning)
+   {
+       return;
+   }
+
+   if (_time_since_collapse.asSeconds() > time_to_respawn_s + fade_in_duration_s)
+   {
+      for (auto& block : _blocks)
+      {
+         block._sprite.setColor(sf::Color{255, 255, 255, 255});
+      }
+
+      _respawning = false;
+      _collapsed = false;
+      _body->SetActive(true);
+   }
+   else
+   {
+      auto alpha_normalized = std::min(_time_since_collapse.asSeconds() - time_to_respawn_s, fade_in_duration_s) / fade_in_duration_s;
+
+      // std::cout << alpha_normalized << std::endl;
+
+      for (auto& block : _blocks)
+      {
+         block._alpha = static_cast<uint8_t>(255.0f * alpha_normalized);
+         block._sprite.setColor(sf::Color{255, 255, 255, block._alpha});
+      }
+   }
+}
+
+
+void CollapsingPlatform::updateRespawn(const sf::Time& dt)
+{
+   _time_since_collapse += dt;
+
+   // bring collapsed blocks back after some time
+   if (!_respawning && _time_since_collapse.asSeconds() > time_to_respawn_s)
+   {
+      _respawning = true;
+       resetAllBlocks();
+   }
+}
+
+
+void CollapsingPlatform::updateShakeBlocks()
+{
+   constexpr auto frequency = 40.0f;
+   constexpr auto amplitude = 2.0f;
+   auto offset = 0.0f;
+   for (auto& block : _blocks)
+   {
+      block._shake_y_px = amplitude * sin(offset + frequency * _elapsed_s);
+      offset += 1.0f;
+   }
+}
+
+
+void CollapsingPlatform::collapse()
+{
+   if (_collapsed)
+   {
+      return;
+   }
+
+   _foot_sensor_contact = false;
+   _collapsed = true;
+   _time_since_collapse = {};
+
+   // disable the body so the player falls through
+   _body->SetActive(false);
+}
+
+
+void CollapsingPlatform::updateBlockDestruction(const sf::Time& dt)
+{
+   if (_respawning)
+   {
+      return;
+   }
+
+   if (!_collapsed)
+   {
+      return;
+   }
+
+   const auto dt_s = dt.asSeconds();
+   for (auto& block : _blocks)
+   {
+      block._elapsed_s += dt_s;
+      block._sprite_column = std::min(static_cast<int32_t>(block._elapsed_s * destruction_speed * block._destruction_speed), sprite_column_count);
+      block._fall_offset_y_px = block._elapsed_s * block._fall_speed * fall_speed;
+   }
+}
+
+
+void CollapsingPlatform::resetAllBlocks()
+{
+    for (auto& block : _blocks)
+    {
+        block.reset();
+    }
+}
+
 void CollapsingPlatform::update(const sf::Time& dt)
 {
    if (!_body)
@@ -140,69 +246,71 @@ void CollapsingPlatform::update(const sf::Time& dt)
 
    _elapsed_s += dt.asSeconds();
 
-   // measure the time elapsed on the platform instead
-   if (_contact_count > 0)
+   if (_foot_sensor_contact)
    {
       _collapse_elapsed_s += dt.asSeconds();
-
-      if (_collapse_elapsed_s > collapse_time_s)
+      if (_collapse_elapsed_s > time_to_collapse_s)
       {
-         if (!_collapsed)
-         {
-            _collapsed = true;
-            _body->SetActive(false);
-         }
+         collapse();
+      }
+      else
+      {
+         // tiles should be shaking a bit
+         updateShakeBlocks();
       }
    }
    else
    {
       if (!_collapsed)
       {
-         _body->SetActive(true);
+         // player left the platform before it collapsed
          _collapse_elapsed_s = 0.0f;
+         resetAllBlocks();
       }
-   }
-
-   if (_collapsed)
-   {
-      const auto dt_s = dt.asSeconds();;
-      for (auto& block : _blocks)
+      else
       {
-         block._elapsed_s += dt_s;
-         block._sprite_column = std::min(static_cast<int32_t>(block._elapsed_s * destruction_speed * block._destruction_speed), sprite_column_count);
-         block._fall_offset_y_px = block._elapsed_s * block._fall_speed * fall_speed;
+         // measure time since collapse
+         updateRespawn(dt);
+         updateRespawnAnimation();
       }
    }
+
+   updateBlockDestruction(dt);
+   updateBlockSprites();
 }
 
 
-void CollapsingPlatform::beginContact()
+void CollapsingPlatform::beginContact(b2Contact* /*contact*/, FixtureNode* other)
 {
-   if (_collapsed)
+   if (other->getType() != ObjectTypePlayerFootSensor)
+   {
+       return;
+   }
+
+   _foot_sensor_contact = true;
+}
+
+
+void CollapsingPlatform::endContact(FixtureNode* other)
+{
+   if (other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
 
-   _contact_count++;
+   _foot_sensor_contact = false;
 }
 
 
-void CollapsingPlatform::endContact()
-{
-   if (_collapsed)
-   {
-      return;
-   }
-
-   _contact_count--;
-}
-
-
-void CollapsingPlatform::updateBlock()
+void CollapsingPlatform::updateBlockSprites()
 {
    for (auto& block : _blocks)
    {
-      block._sprite.setPosition(block._x_px, block._y_px + block._fall_offset_y_px);
+      block._sprite.setPosition(
+          block._x_px + block._shake_x_px,
+          block._y_px + block._shake_y_px + block._fall_offset_y_px
+      );
+
       block._sprite.setTextureRect({
             block._sprite_column * PIXELS_PER_TILE,
             block._sprite_row * PIXELS_PER_TILE * 3,

@@ -62,7 +62,7 @@ private:
 
    void processBouncerContactBegin(FixtureNode* fixture_node);
    void processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* bubble, FixtureNode* other);
-   void processCollapsingPlatformContactBegin(FixtureNode* fixture_node);
+   void processCollapsingPlatformContactBegin(b2Contact* contact, FixtureNode* fixture_node, FixtureNode* other);
    void processCrusherContactBegin(FixtureNode* fixture_node);
    void processDeadlyContactBegin(FixtureNode* fixture_node);
    void processEnemyContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
@@ -76,7 +76,7 @@ private:
    void processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
 
    void processBubbleCubeContactEnd(FixtureNode* bubble, FixtureNode* other);
-   void processCollapsingPlatformContactEnd(FixtureNode* fixture_node);
+   void processCollapsingPlatformContactEnd(FixtureNode* fixture_node_platform, FixtureNode* fixture_node_other);
    void processCrusherContactEnd(FixtureNode* fixture_node);
    void processDeadlyContactEnd(FixtureNode* fixture_node);
    void processMovingPlatformContactEnd();

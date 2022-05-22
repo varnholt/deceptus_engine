@@ -204,9 +204,9 @@ void GameContactListener::processBubbleCubeContactBegin(b2Contact* contact, Fixt
 }
 
 
-void GameContactListener::processCollapsingPlatformContactBegin(FixtureNode* fixture_node)
+void GameContactListener::processCollapsingPlatformContactBegin(b2Contact* contact, FixtureNode* platform, FixtureNode* other)
 {
-   dynamic_cast<CollapsingPlatform*>(fixture_node)->beginContact();
+   dynamic_cast<CollapsingPlatform*>(platform)->beginContact(contact, other);
 }
 
 
@@ -288,7 +288,7 @@ void GameContactListener::processBeginContact(
       }
       case ObjectTypeCollapsingPlatform:
       {
-         processCollapsingPlatformContactBegin(fixture_node_a);
+         processCollapsingPlatformContactBegin(contact, fixture_node_a, fixture_node_b);
          break;
       }
       case ObjectTypeDoor:
@@ -439,9 +439,9 @@ void GameContactListener::processBubbleCubeContactEnd(FixtureNode* fixture_node_
 }
 
 
-void GameContactListener::processCollapsingPlatformContactEnd(FixtureNode* fixture_node)
+void GameContactListener::processCollapsingPlatformContactEnd(FixtureNode* fixture_node_platform, FixtureNode* fixture_node_other)
 {
-   dynamic_cast<CollapsingPlatform*>(fixture_node)->endContact();
+   dynamic_cast<CollapsingPlatform*>(fixture_node_platform)->endContact(fixture_node_other);
 }
 
 
@@ -506,7 +506,7 @@ void GameContactListener::processEndContact(
       }
       case ObjectTypeCollapsingPlatform:
       {
-         processCollapsingPlatformContactEnd(fixture_node_a);
+         processCollapsingPlatformContactEnd(fixture_node_a, fixture_node_b);
          break;
       }
       default:
