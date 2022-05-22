@@ -20,6 +20,8 @@ public:
    {
       float _x_px = 0.0f;
       float _y_px = 0.0f;
+      float _shake_x_px = 0.0f;
+      float _shake_y_px = 0.0f;
       float _fall_offset_y_px = 0.0f;
       float _elapsed_s = 0.0f;
       float _fall_speed = 0.0f;
@@ -27,6 +29,16 @@ public:
       int32_t _sprite_row = 0;
       int32_t _sprite_column = 0;
       sf::Sprite _sprite;
+      uint8_t _alpha = 255;
+
+      void reset()
+      {
+         _shake_x_px = 0.0f;
+         _shake_y_px = 0.0f;
+         _fall_offset_y_px = 0.0f;
+         _elapsed_s = 0.0f;
+         _sprite_column = 0;
+      }
    };
 
    CollapsingPlatform(
@@ -37,19 +49,27 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
-   void beginContact();
-   void endContact();
+   void beginContact(b2Contact* /*contact*/, FixtureNode* other);
+   void endContact(FixtureNode* other);
+
+   void updateRespawnAnimation();
 
 private:
 
-   void updateBlock();
+   void updateBlockSprites();
+   void updateBlockDestruction(const sf::Time& dt);
+   void updateRespawn(const sf::Time& dt);
+   void updateShakeBlocks();
+   void collapse();
 
    float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
    float _collapse_elapsed_s = 0.0f;
    bool _collapsed = false;
-   int32_t _contact_count = 0;
+   bool _respawning = false;
+   bool _foot_sensor_contact = false;
    sf::Time _collapse_time;
+   sf::Time _time_since_collapse;
    int32_t _width_tl = 0;
    float _width_m = 0.0f;
    float _height_m = 0.0f;
@@ -64,5 +84,6 @@ private:
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2ChainShape _shape;
+   void resetAllBlocks();
 };
 
