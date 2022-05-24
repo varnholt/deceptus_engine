@@ -1,6 +1,6 @@
 # Deceptus Engine
 
-A C++20/lua-based platformer game engine<br> 
+A C++20/lua-based platformer game engine<br>
 It utilizes Box2D for game physics, SFML for rendering, and SDL for game controller support.
 
 ![](doc/screenshots/screenshot_section.png)
@@ -18,17 +18,17 @@ It utilizes Box2D for game physics, SFML for rendering, and SDL for game control
 
 As the engine uses some C++20 code, you need a recent compiler, i.e.
 - gcc >= 8
-- clang >= 7 
+- clang >= 7
 - vs >= 2019
 
 ## Linux
 ```
-qmake && make 
+qmake && make
 ```
 
 ## Windows
 ```
-qmake && nmake 
+qmake && nmake
 ```
 
 # Contribute and Talk to Us!
@@ -51,6 +51,7 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Fans](doc/level_design/mechanisms.md#fans)<br>
 [Lasers](doc/level_design/mechanisms.md#lasers)<br>
 [Bubble Cubes](doc/level_design/mechanisms.md#bubble-cubes)<br>
+[Collapsing Platforms](doc/level_design/mechanisms.md#collapsing-platforms)<br>
 [Portals](doc/level_design/mechanisms.md#portals)<br>
 [Crushers](doc/level_design/mechanisms.md#crushers)<br>
 [Death Blocks](doc/level_design/mechanisms.md#death-blocks)<br>
@@ -115,5 +116,3 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Setting Up Your Enemy](doc/lua_interface/readme.md#setting-up-your-enemy)<br>
 [Using the API](doc/lua_interface/readme.md#using-the-api)<br>
 [The Lua API](doc/lua_interface/readme.md#the-lua-api)<br>
-
-
