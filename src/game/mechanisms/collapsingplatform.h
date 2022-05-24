@@ -16,6 +16,15 @@ class CollapsingPlatform : public FixtureNode, public GameMechanism
 {
 public:
 
+   struct Settings
+   {
+      float time_to_collapse_s = 1.0f;
+      float destruction_speed = 30.0f;
+      float fall_speed = 6.0f;
+      float time_to_respawn_s = 4.0f;
+      float fade_in_duration_s = 1.0f;
+   };
+
    struct Block
    {
       float _x_px = 0.0f;
@@ -62,6 +71,7 @@ private:
    void updateShakeBlocks();
    void collapse();
 
+   Settings _settings;
    float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
    float _collapse_elapsed_s = 0.0f;
@@ -75,6 +85,7 @@ private:
    float _height_m = 0.0f;
    std::vector<Block> _blocks;
    sf::Vector2f _position_px;
+   sf::IntRect _rect_px;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;
@@ -83,7 +94,7 @@ private:
    b2Body* _body = nullptr;
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
-   b2ChainShape _shape;
+   b2PolygonShape _shape;
    void resetAllBlocks();
 };
 
