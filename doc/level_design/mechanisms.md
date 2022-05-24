@@ -117,6 +117,26 @@ Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust y
 |maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
 
 
+## Collapsing Platforms
+
+Collapsing Platforms behave similar to Bubble Cubes. As soon as the player steps onto them, they start shaking for a while, then they collapse.
+A little later, they respawn.
+
+In order to place Collapsing Platforms in your level, create an object layer called `collapsing_platforms`.
+In there, just place a rectangle where you'd like to position your Collapsing Platform. Make sure that the rectangle height is one tile and its width a multiple of n tiles.
+
+![](images/mechanism_collapsing_platforms_1.png)
+![](images/mechanism_collapsing_platforms_2.png)
+
+|Custom Property|Type|Description|
+|-|-|-|
+|time_to_collapse_s|float|The time in seconds it takes for a platform to collapse (the default is 1.0s).|
+|destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
+|fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
+|time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
+|fade_in_duration_s|float|The time in seconds it takes for a respawning platform to fade in (the default is 1.0s).|
+
+
 ## Portals
 
 Portals can teleport Adam from one location to another. For that reason, they give you a lot of freedom in your level design possibilities since you can have a coherent level, even though your individual rooms are distributed all over the map.
@@ -256,7 +276,7 @@ If you need to know how to connect Spike Blocks to a lever, please check the doc
 On/Off Blocks are basically the friendly version of the Spike Block. When you switch it on, it's just a solid block that could be placed as a barrier, ladder, etc.
 When you switch it off, it just disappears and the player does no longer collide with them.
 
-![bla](images/mechanism_on_off_block_1.png) 
+![bla](images/mechanism_on_off_block_1.png)
 
 |Custom Property|Type|Description|
 |-|-|-|
@@ -407,4 +427,3 @@ Depending on whether a keyboard or a game controller is connected, the buttons b
 |`key_cursor_r`|`dpad_r`|
 |`key_return`|`bt_a`|
 |`key_escape`|`bt_b`|
-
