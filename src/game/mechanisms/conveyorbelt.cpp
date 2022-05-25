@@ -34,12 +34,6 @@ void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    {
       color.draw(sprite);
    }
-
-// disable for now
-//    for (auto& sprite : mArrowSprites)
-//    {
-//       target.draw(sprite);
-//    }
 }
 
 
