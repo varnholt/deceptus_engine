@@ -6,6 +6,7 @@
 #include "projectile.h"
 #include "constants.h"
 #include "fixturenode.h"
+#include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "luanode.h"
 #include "mechanisms/bouncer.h"
@@ -593,21 +594,22 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
    //    The tangent force is generated at a contact point to simulate friction. For convenience,
    //    this is stored as an impulse.
    //
-   //
-   // for debugging
-   //
-   // auto normal_max = 0.0f;
-   // auto tangent_max = 0.0f;
-   // for (auto i = 0; i < contactImpulse->count; i++)
-   // {
-   //    normal_max = std::max(normal_max, contact_impulse->normalImpulses[i]);
-   //    tangent_max = std::max(tangent_max, contact_impulse->tangentImpulses[i]);
-   // }
-   //
-   // if (normal_max > 0.025f || tangent_max > 0.01f)
-   // {
-   //    Log::Info() << "normal max: " << normal_max << " tangent max: " << tangent_max;
-   // }
+
+// #define DEBUG_IMPULSES
+#ifdef DEBUG_IMPULSES
+   auto normal_max = 0.0f;
+   auto tangent_max = 0.0f;
+   for (auto i = 0; i < contact_impulse->count; i++)
+   {
+      normal_max = std::max(normal_max, contact_impulse->normalImpulses[i]);
+      tangent_max = std::max(tangent_max, contact_impulse->tangentImpulses[i]);
+   }
+
+   if (normal_max > 0.025f || tangent_max > 0.01f)
+   {
+      Log::Info() << "normal max: " << normal_max << " tangent max: " << tangent_max;
+   }
+#endif
 
    // check if the player hits something at a heigh speed or
    // if something hits the player at a nigh speed
