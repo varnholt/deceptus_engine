@@ -430,22 +430,19 @@ void Door::setup(const GameDeserializeData& data)
 
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "doors.png");
 
-   _door_quad[0].position.x = x_px;
+   _door_quad[0].position.x = x_px - PIXELS_PER_TILE;
    _door_quad[0].position.y = y_px;
-
-   _door_quad[1].position.x = x_px;
+   _door_quad[1].position.x = x_px - PIXELS_PER_TILE;
    _door_quad[1].position.y = y_px + 3 * PIXELS_PER_TILE;
-
-   _door_quad[2].position.x = x_px + 2 * PIXELS_PER_TILE;
+   _door_quad[2].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
    _door_quad[2].position.y = y_px + 3 * PIXELS_PER_TILE;
-
-   _door_quad[3].position.x = x_px + 2 * PIXELS_PER_TILE;
+   _door_quad[3].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
    _door_quad[3].position.y = y_px;
 
    _type = Type::Bars;
 
-   _tile_position.x = static_cast<int32_t>(x_px * PIXELS_PER_TILE);
-   _tile_position.y = static_cast<int32_t>(y_px * PIXELS_PER_TILE);
+   _tile_position.x = static_cast<int32_t>(x_px / PIXELS_PER_TILE);
+   _tile_position.y = static_cast<int32_t>(y_px / PIXELS_PER_TILE);
 
    _pixel_rect = sf::IntRect{
       static_cast<int32_t>(x_px),
