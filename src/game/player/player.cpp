@@ -191,8 +191,8 @@ void Player::initializeController()
             return (GameState::getInstance().getMode() == ExecutionMode::Running);
          };
 
-         auto toggle_mechanism = [](){
-            Level::getCurrentLevel()->toggleMechanisms();
+         auto toggle_mechanism = [this](){
+            _toggle_callback();
          };
 
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [&](){if (is_running()){_jump.jump();}});
@@ -1025,6 +1025,13 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
    screen_transition->startEffect1();
 
    return std::move(screen_transition);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::setToggleCallback(const ToggleCallback& callback)
+{
+    _toggle_callback = callback;
 }
 
 
@@ -1909,7 +1916,7 @@ void Player::keyPressed(sf::Keyboard::Key key)
 
    if (key == sf::Keyboard::Return)
    {
-      Level::getCurrentLevel()->toggleMechanisms();
+      _toggle_callback();
    }
 
    if (key == sf::Keyboard::Z)
