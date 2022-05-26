@@ -19,6 +19,11 @@
 #include <iostream>
 
 
+namespace
+{
+constexpr auto door_height_tl = 3;
+}
+
 //-----------------------------------------------------------------------------
 Door::Door(GameNode* parent)
  : GameNode(parent)
@@ -64,10 +69,10 @@ void Door::updateBars(const sf::Time& dt)
       case State::Opening:
       {
          _offset -= open_speed * dt.asSeconds();
-         if (fabs(_offset) >= PIXELS_PER_TILE * _height)
+         if (fabs(_offset) >= PIXELS_PER_TILE * door_height_tl)
          {
             _state = State::Open;
-            _offset = static_cast<float_t>(-PIXELS_PER_TILE * _height);
+            _offset = static_cast<float_t>(-PIXELS_PER_TILE * door_height_tl);
          }
          break;
       }
@@ -150,8 +155,8 @@ void Door::setupBody(
 
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(x_offset,          0);
-   vertices[1] = b2Vec2(x_offset,          _height * size_y);
-   vertices[2] = b2Vec2(x_offset + size_x, _height * size_y);
+   vertices[1] = b2Vec2(x_offset,          door_height_tl * size_y);
+   vertices[2] = b2Vec2(x_offset + size_x, door_height_tl * size_y);
    vertices[3] = b2Vec2(x_offset + size_x, 0);
    polygon_shape.Set(vertices, 4);
 
@@ -185,7 +190,14 @@ bool Door::checkPlayerAtDoor() const
 
 
 //-----------------------------------------------------------------------------
-void Door::toggle()
+const sf::IntRect& Door::getPixelRect() const
+{
+   return _pixel_rect;
+}
+
+
+//-----------------------------------------------------------------------------
+void Door::toggleWithPlayerChecks()
 {
    if (!SaveState::getPlayerInfo()._inventory.hasInventoryItem(_required_item))
    {
@@ -199,24 +211,18 @@ void Door::toggle()
       return;
    }
 
-   switch (_state)
-   {
-      case State::Open:
-         close();
-         break;
-      case State::Closed:
-         open();
-         break;
-      case State::Opening:
-      case State::Closing:
-         break;
-   }
+   toggle();
 }
 
 
 //-----------------------------------------------------------------------------
 void Door::open()
 {
+   if (_state == State::Opening)
+   {
+      return;
+   }
+
    _state = State::Opening;
    Timer::add(
       std::chrono::milliseconds(10000),
@@ -230,7 +236,30 @@ void Door::open()
 //-----------------------------------------------------------------------------
 void Door::close()
 {
+   if (_state == State::Closing)
+   {
+       return;
+   }
+
    _state = State::Closing;
+}
+
+
+//-----------------------------------------------------------------------------
+void Door::toggle()
+{
+   switch (_state)
+   {
+      case State::Open:
+         close();
+         break;
+      case State::Closed:
+         open();
+         break;
+      case State::Opening:
+      case State::Closing:
+         break;
+   }
 }
 
 
@@ -286,93 +315,100 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
          // get the current tile number
          auto tile_number = tiles[i + j * width];
 
-         if (tile_number != 0)
+         if (tile_number == 0)
          {
-            auto tile_id = tile_number - first_id;
+            continue;
+         }
+         auto tile_id = tile_number - first_id;
 
-            // 21: red
-            // 24: green
-            // 27: blue
-            // ...
+         // 21: red
+         // 24: green
+         // 27: blue
+         // ...
 
-            auto required_item = ItemType::Invalid;
-            auto icon_offset = 0;
-            auto create_door = false;
+         auto required_item = ItemType::Invalid;
+         auto icon_offset = 0;
+         auto create_door = false;
 
-            switch (tile_id)
+         switch (tile_id)
+         {
+            case 21:
+               required_item = ItemType::KeyRed;
+               icon_offset = 1;
+               create_door = true;
+               break;
+            case 24:
+               required_item = ItemType::KeyGreen;
+               icon_offset = 4;
+               create_door = true;
+               break;
+            case 27:
+               required_item = ItemType::KeyBlue;
+               icon_offset = 7;
+               create_door = true;
+               break;
+            case 30:
+               required_item = ItemType::KeyYellow;
+               icon_offset = 10;
+               create_door = true;
+               break;
+            case 33:
+               required_item = ItemType::KeyOrange;
+               icon_offset = 13;
+               create_door = true;
+               break;
+            case 36:
+               required_item = ItemType::Invalid;
+               create_door = true;
+               break;
+
+            default:
+               break;
+         }
+
+         if (create_door)
+         {
+            const auto position_x = static_cast<float>(i * PIXELS_PER_TILE - PIXELS_PER_TILE);
+            const auto position_y = static_cast<float>(j * PIXELS_PER_TILE + PIXELS_PER_TILE);
+
+            auto door = std::make_shared<Door>(Level::getCurrentLevel());
+            doors.push_back(door);
+
+            door->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
+            door->_door_quad[0].position.x = position_x;
+            door->_door_quad[0].position.y = position_y;
+            door->_door_quad[1].position.x = position_x;
+            door->_door_quad[1].position.y = position_y + 3 * PIXELS_PER_TILE;
+            door->_door_quad[2].position.x = position_x + 3 * PIXELS_PER_TILE;
+            door->_door_quad[2].position.y = position_y + 3 * PIXELS_PER_TILE;
+            door->_door_quad[3].position.x = position_x + 3 * PIXELS_PER_TILE;
+            door->_door_quad[3].position.y = position_y;
+            door->_type = Type::Bars;
+            door->_tile_id = tile_id;
+            door->_tile_position.x = static_cast<int32_t>(i);
+            door->_tile_position.y = static_cast<int32_t>(j) + 1; // the actual door is a tile lower
+            door->_required_item = required_item;
+            door->_pixel_rect = sf::IntRect{
+               static_cast<int32_t>(position_x + PIXELS_PER_TILE),
+               static_cast<int32_t>(position_y),
+               PIXELS_PER_TILE,
+               PIXELS_PER_TILE * 3
+            };
+
+            // draw required door open icon
+            if (required_item != ItemType::Invalid)
             {
-               case 21:
-                  required_item = ItemType::KeyRed;
-                  icon_offset = 1;
-                  create_door = true;
-                  break;
-               case 24:
-                  required_item = ItemType::KeyGreen;
-                  icon_offset = 4;
-                  create_door = true;
-                  break;
-               case 27:
-                  required_item = ItemType::KeyBlue;
-                  icon_offset = 7;
-                  create_door = true;
-                  break;
-               case 30:
-                  required_item = ItemType::KeyYellow;
-                  icon_offset = 10;
-                  create_door = true;
-                  break;
-               case 33:
-                  required_item = ItemType::KeyOrange;
-                  icon_offset = 13;
-                  create_door = true;
-                  break;
-               case 36:
-                  required_item = ItemType::Invalid;
-                  create_door = true;
-                  break;
-
-               default:
-                  break;
+               door->_sprite_icon.setTexture(*door->_texture);
+               door->_sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * icon_offset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
+               door->_sprite_icon.setPosition(
+                  static_cast<float>(i * PIXELS_PER_TILE),
+                  static_cast<float>(j * PIXELS_PER_TILE)
+               );
             }
 
-            if (create_door)
+            if (data._tmx_layer->_properties)
             {
-               const auto position_x = static_cast<float>(i * PIXELS_PER_TILE - PIXELS_PER_TILE);
-               const auto position_y = static_cast<float>(j * PIXELS_PER_TILE + PIXELS_PER_TILE);
-
-               auto door = std::make_shared<Door>(Level::getCurrentLevel());
-               doors.push_back(door);
-
-               door->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
-               door->_door_quad[0].position.x = position_x;
-               door->_door_quad[0].position.y = position_y;
-               door->_door_quad[1].position.x = position_x;
-               door->_door_quad[1].position.y = position_y + 3 * PIXELS_PER_TILE;
-               door->_door_quad[2].position.x = position_x + 3 * PIXELS_PER_TILE;
-               door->_door_quad[2].position.y = position_y + 3 * PIXELS_PER_TILE;
-               door->_door_quad[3].position.x = position_x + 3 * PIXELS_PER_TILE;
-               door->_door_quad[3].position.y = position_y;
-               door->_type = Type::Bars;
-               door->_tile_id = tile_id;
-               door->_tile_position.x = static_cast<int32_t>(i);
-               door->_tile_position.y = static_cast<int32_t>(j) + 1; // the actual door is a tile lower
-               door->_required_item = required_item;
-               door->_height = 3; // hardcoded 3 tiles
-
-               if (required_item != ItemType::Invalid)
-               {
-                  door->_sprite_icon.setTexture(*door->_texture);
-                  door->_sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * icon_offset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
-                  door->_sprite_icon.setPosition(
-                     static_cast<float>(i * PIXELS_PER_TILE),
-                     static_cast<float>(j * PIXELS_PER_TILE)
-                  );
-               }
-
-               if (data._tmx_layer->_properties != nullptr)
-               {
-                  door->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
-               }
+               door->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }
          }
       }
@@ -384,4 +420,44 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
    }
 
    return doors;
+}
+
+
+void Door::setup(const GameDeserializeData& data)
+{
+   const auto x_px = data._tmx_object->_x_px;
+   const auto y_px = data._tmx_object->_y_px;
+
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "doors.png");
+
+   _door_quad[0].position.x = x_px;
+   _door_quad[0].position.y = y_px;
+
+   _door_quad[1].position.x = x_px;
+   _door_quad[1].position.y = y_px + 3 * PIXELS_PER_TILE;
+
+   _door_quad[2].position.x = x_px + 2 * PIXELS_PER_TILE;
+   _door_quad[2].position.y = y_px + 3 * PIXELS_PER_TILE;
+
+   _door_quad[3].position.x = x_px + 2 * PIXELS_PER_TILE;
+   _door_quad[3].position.y = y_px;
+
+   _type = Type::Bars;
+
+   _tile_position.x = static_cast<int32_t>(x_px * PIXELS_PER_TILE);
+   _tile_position.y = static_cast<int32_t>(y_px * PIXELS_PER_TILE);
+
+   _pixel_rect = sf::IntRect{
+      static_cast<int32_t>(x_px),
+      static_cast<int32_t>(y_px),
+      PIXELS_PER_TILE,
+      PIXELS_PER_TILE * 3
+   };
+
+   if (data._tmx_object->_properties)
+   {
+      setZ(data._tmx_object->_properties->_map["z"]->_value_int.value());
+   }
+
+   setupBody(data._world);
 }

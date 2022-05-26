@@ -2,6 +2,7 @@
 
 #include "constants.h"
 #include "conveyorbelt.h"
+#include "door.h"
 #include "gamemechanism.h"
 #include "fan.h"
 #include "framework/tmxparser/tmxlayer.h"
@@ -370,7 +371,8 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& spikes,
    const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks,
    const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
-   const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades
+   const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades,
+   const std::vector<std::shared_ptr<GameMechanism>>& doors
 )
 {
    for (auto rect : __rectangles)
@@ -480,9 +482,9 @@ void Lever::merge(
                }
             }
 
-            for (auto& s : on_off_blocks)
+            for (auto& instance : on_off_blocks)
             {
-               auto mechanism = std::dynamic_pointer_cast<OnOffBlock>(s);
+               auto mechanism = std::dynamic_pointer_cast<OnOffBlock>(instance);
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
@@ -493,14 +495,34 @@ void Lever::merge(
                }
             }
 
-            for (auto& s : rotating_blades)
+            for (auto& instance : rotating_blades)
             {
-               auto mechanism = std::dynamic_pointer_cast<RotatingBlade>(s);
+               auto mechanism = std::dynamic_pointer_cast<RotatingBlade>(instance);
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
                         mechanism->setEnabled(state == -1 ? false : true);
+                     }
+                  );
+               }
+            }
+
+            for (auto& instance : doors)
+            {
+               auto mechanism = std::dynamic_pointer_cast<Door>(instance);
+
+               if (mechanism->getPixelRect().intersects(search_rect))
+               {
+                  callbacks.push_back([mechanism](int32_t state) {
+                        if (state == -1)
+                        {
+                           mechanism->close();
+                        }
+                        else
+                        {
+                            mechanism->open();
+                        }
                      }
                   );
                }

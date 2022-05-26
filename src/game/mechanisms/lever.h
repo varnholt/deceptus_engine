@@ -57,10 +57,11 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& spikes,
       const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks,
       const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
-      const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades
+      const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades,
+      const std::vector<std::shared_ptr<GameMechanism>>& doors
    );
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
+   [[deprecated]] static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
    void setup(const GameDeserializeData& data);
 
    void updateReceivers();

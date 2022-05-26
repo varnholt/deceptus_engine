@@ -149,6 +149,12 @@ void GameMechanismDeserializer::deserialize(
             {
                Laser::addObject(tmx_object);
             }
+            else if (object_group->_name == "doors" )
+            {
+               auto mechanism = std::make_shared<Door>(parent);
+               mechanism->setup(data);
+               mechanism_doors->push_back(mechanism);
+            }
             else if (object_group->_name == "levers" )
             {
                auto mechanism = std::make_shared<Lever>(parent);
@@ -292,7 +298,8 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_spikes,
       *mechanism_spike_blocks,
       *mechanism_on_off_blocks,
-      *mechanism_rotating_blades
+      *mechanism_rotating_blades,
+      *mechanism_doors
    );
 
    *mechanism_platforms = MovingPlatform::merge(parent, data);
