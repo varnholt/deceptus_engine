@@ -39,9 +39,13 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
 
+   void open();
+   void close();
    void toggle();
+   void toggleWithPlayerChecks();
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(const GameDeserializeData& data);
+   [[deprecated]] static std::vector<std::shared_ptr<GameMechanism>> load(const GameDeserializeData& data);
+   void setup(const GameDeserializeData& data);
 
    bool isPlayerAtDoor() const;
    void setPlayerAtDoor(bool isPlayerAtDoor);
@@ -49,6 +53,7 @@ public:
    void reset();
 
    const sf::Vector2i& getTilePosition() const;
+   const sf::IntRect& getPixelRect() const;
 
 
 private:
@@ -63,11 +68,8 @@ private:
 
    void updateBars(const sf::Time& dt);
 
-   void open();
-   void close();
    bool checkPlayerAtDoor() const;
 
-   sf::Vector2u _tile_size;
    std::shared_ptr<sf::Texture> _texture;
 
    sf::VertexArray _door_quad{sf::Quads, 4};
@@ -79,11 +81,11 @@ private:
    State _state = State::Closed;
 
    sf::Vector2i _tile_position;
+   sf::IntRect _pixel_rect;
 
    ItemType _required_item = ItemType::Invalid;
 
    float _offset = 0.0f;
-   int32_t _height = 0;
    int32_t _tile_id = 0;
    bool _player_at_door = false;
    b2Body* _body = nullptr;

@@ -6,7 +6,7 @@ struct TmxImage : TmxElement
 {
    TmxImage() = default;
 
-   void deserialize(tinyxml2::XMLElement *e) override;
+   void deserialize(tinyxml2::XMLElement* e) override;
 
    std::string _source;
    int _width_px = 0;

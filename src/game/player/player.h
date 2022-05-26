@@ -29,6 +29,7 @@ struct WeaponSystem;
 class Player : public GameNode
 {
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+   using ToggleCallback = std::function<void()>;
 
    struct JumpTrace
    {
@@ -164,7 +165,9 @@ public:
    const PlayerJump& getJump() const;
 
 
-private:
+   void setToggleCallback(const ToggleCallback& callback);
+
+   private:
 
    void createPlayerBody();
 
@@ -204,7 +207,7 @@ private:
    void keyPressed(sf::Keyboard::Key key);
    std::unique_ptr<ScreenTransition> makeFadeTransition();
 
-
+   ToggleCallback _toggle_callback;
    std::shared_ptr<WeaponSystem> _weapon_system;
    std::shared_ptr<ExtraManager> _extra_manager;
 

@@ -262,6 +262,22 @@ Level::Level()
    _mechanisms_map["spike_blocks"]         = &_mechanism_spike_blocks;
    _mechanisms_map["spikes"]               = &_mechanism_spikes;
    _mechanisms_map["weather"]              = &_mechanism_weather;
+
+   // called whenever the player toggles a mechanism in the game
+   Player::getCurrent()->setToggleCallback(
+      [this]()
+      {
+         for (auto& door : _mechanism_doors)
+         {
+            std::dynamic_pointer_cast<Door>(door)->toggleWithPlayerChecks();
+         }
+
+         for (auto& lever : _mechanism_levers)
+         {
+            std::dynamic_pointer_cast<Lever>(lever)->toggle();
+         }
+      }
+   );
 }
 
 
@@ -1736,21 +1752,6 @@ std::shared_ptr<Bouncer> Level::getNearbyBouncer() const
 const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints() const
 {
    return _mechanism_checkpoints;
-}
-
-
-//-----------------------------------------------------------------------------
-void Level::toggleMechanisms()
-{
-   for (auto& door : _mechanism_doors)
-   {
-      std::dynamic_pointer_cast<Door>(door)->toggle();
-   }
-
-   for (auto& lever : _mechanism_levers)
-   {
-      std::dynamic_pointer_cast<Lever>(lever)->toggle();
-   }
 }
 
 
