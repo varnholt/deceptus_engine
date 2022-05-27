@@ -205,6 +205,7 @@ SOURCES += \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
     src/game/mechanisms/rotatingblade.cpp \
+   src/game/mechanisms/sensorrect.cpp \
    src/game/mechanisms/shaderlayer.cpp \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
@@ -386,6 +387,7 @@ HEADERS += \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
     src/game/mechanisms/rotatingblade.h \
+   src/game/mechanisms/sensorrect.h \
    src/game/mechanisms/shaderlayer.h \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikeblock.h \

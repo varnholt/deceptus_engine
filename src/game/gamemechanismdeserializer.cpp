@@ -1,3 +1,4 @@
+
 #include "gamemechanismdeserializer.h"
 
 #include "framework/tmxparser/tmxparser.h"
@@ -22,6 +23,7 @@
 #include "mechanisms/rope.h"
 #include "mechanisms/ropewithlight.h"
 #include "mechanisms/rotatingblade.h"
+#include "mechanisms/sensorrect.h"
 #include "mechanisms/shaderlayer.h"
 #include "mechanisms/spikeblock.h"
 #include "mechanisms/spikeball.h"
@@ -30,6 +32,8 @@
 // move to mechanisms
 #include "effects/dust.h"
 #include "weather.h"
+
+#include <ranges>
 
 
 void GameMechanismDeserializer::deserialize(
@@ -61,6 +65,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_portals              = mechanisms["portals"];
    auto mechanism_ropes                = mechanisms["ropes"];
    auto mechanism_rotating_blades      = mechanisms["rotating_blades"];
+   auto mechanism_sensor_rects         = mechanisms["sensor_rects"];
    auto mechanism_shader_quads         = mechanisms["shader_quads"];
    auto mechanism_spike_balls          = mechanisms["spike_balls"];
    auto mechanism_spike_blocks         = mechanisms["spike_blocks"];
@@ -277,11 +282,27 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = Dust::deserialize(parent, data);
                mechanism_dust->push_back(mechanism);
             }
-            if (object_group->_name == "switchable_objects")
+            else if (object_group->_name == "switchable_objects")
             {
                Lever::addSearchRect(tmx_object);
             }
+            else if (object_group->_name == "sensor_rects")
+            {
+               auto mechanism = std::make_shared<SensorRect>(parent);
+               mechanism->setup(data);
+               mechanism_sensor_rects->push_back(mechanism);
+            }
          }
+      }
+   }
+
+   // get a flat vector of all values
+   std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
+   for (auto& [keys, values] : mechanisms)
+   {
+      for (auto& mechanism : *values)
+      {
+         all_mechanisms.push_back(mechanism);
       }
    }
 
