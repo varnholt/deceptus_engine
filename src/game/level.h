@@ -224,6 +224,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_portals;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_rotating_blades;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_sensor_rects;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
