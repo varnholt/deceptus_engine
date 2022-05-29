@@ -114,6 +114,22 @@ void Door::update(const sf::Time& dt)
 
 
 //-----------------------------------------------------------------------------
+void Door::setEnabled(bool enabled)
+{
+   GameMechanism::setEnabled(enabled);
+
+   if (enabled)
+   {
+      open();
+   }
+   else
+   {
+      close();
+   }
+}
+
+
+//-----------------------------------------------------------------------------
 void Door::updateTransform()
 {
    auto x =            _tile_position.x * PIXELS_PER_TILE / PPM;
@@ -224,12 +240,16 @@ void Door::open()
    }
 
    _state = State::Opening;
-   Timer::add(
-      std::chrono::milliseconds(10000),
-      [this](){close();},
-      Timer::Type::Singleshot,
-      Timer::Scope::UpdateIngame
-   );
+
+   if (_automatic_close)
+   {
+      Timer::add(
+         std::chrono::milliseconds(10000),
+         [this](){close();},
+         Timer::Type::Singleshot,
+         Timer::Scope::UpdateIngame
+      );
+   }
 }
 
 
@@ -425,6 +445,8 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
 
 void Door::setup(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
+
    const auto x_px = data._tmx_object->_x_px;
    const auto y_px = data._tmx_object->_y_px;
 

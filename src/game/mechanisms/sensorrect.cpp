@@ -1,6 +1,7 @@
 #include "sensorrect.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "player/player.h"
 
 
@@ -53,7 +54,6 @@ void SensorRect::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-
       auto reference_it = data._tmx_object->_properties->_map.find("reference_id");
       if (reference_it != data._tmx_object->_properties->_map.end())
       {
@@ -79,7 +79,7 @@ void SensorRect::setup(const GameDeserializeData& data)
          }
       }
 
-      auto event_it = data._tmx_object->_properties->_map.find("evet");
+      auto event_it = data._tmx_object->_properties->_map.find("event");
       if (event_it != data._tmx_object->_properties->_map.end())
       {
          const auto event = event_it->second->_value_string.value();
@@ -108,6 +108,10 @@ void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>
    if (result != mechanisms.end())
    {
       _reference = *result;
+   }
+   else
+   {
+      Log::Error() << "the configured reference " << _reference_id << " could not be found. this will crash.";
    }
 }
 

@@ -306,6 +306,11 @@ void GameMechanismDeserializer::deserialize(
       }
    }
 
+   for (auto& sensor_rect : *mechanism_sensor_rects)
+   {
+      std::dynamic_pointer_cast<SensorRect>(sensor_rect)->findReference(all_mechanisms);
+   }
+
    Laser::merge();
    Fan::merge();
    *mechanism_fans = Fan::getFans();
