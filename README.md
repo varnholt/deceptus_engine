@@ -56,6 +56,7 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Crushers](doc/level_design/mechanisms.md#crushers)<br>
 [Death Blocks](doc/level_design/mechanisms.md#death-blocks)<br>
 [Levers](doc/level_design/mechanisms.md#levers)<br>
+[Sensor Rects](doc/level_design/mechanisms.md#sensor-rects)<br>
 [Ropes](doc/level_design/mechanisms.md#ropes)<br>
 [Spike Balls](doc/level_design/mechanisms.md#spike-balls)<br>
 [Spikes](doc/level_design/mechanisms.md#spikes)<br>
