@@ -38,6 +38,7 @@ public:
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   void setEnabled(bool enabled) override;
 
    void open();
    void close();
@@ -84,6 +85,8 @@ private:
    sf::IntRect _pixel_rect;
 
    ItemType _required_item = ItemType::Invalid;
+
+   bool _automatic_close = true;
 
    float _offset = 0.0f;
    int32_t _tile_id = 0;

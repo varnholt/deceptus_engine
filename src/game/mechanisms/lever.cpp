@@ -276,6 +276,9 @@ void Lever::setEnabled(bool enabled)
       _target_state = State::Left;
       _state_previous = State::Right;
    }
+
+   // during setup the callbacks are not connected yet, so it's safe to call setEnabled during setup
+   updateReceivers();
 }
 
 
