@@ -176,6 +176,7 @@ Since you draw the 'rails' of the Death Blocks just to a background layer, this 
 
 Levers! One of the most important mechanisms. In short, they do what levers do: They switch things on and off. Levers can be used to enable and disable the functionality of these mechanisms:
 - Conveyor Belts
+- Doors
 - Fans
 - Lasers
 - On/Off Blocks
@@ -195,6 +196,22 @@ The properties below apply for the object inside the `levers` object group.
 |Custom Property|Type|Description|
 |-|-|-|
 |enabled|bool|Defines the initial state of the lever which is either enabled or disabled|
+
+
+## Sensor Rects
+
+Sensor Rectangles work pretty much like a photo sensor. They have no visualization. All they do is enable, disable or toggle another mechanism when the player is either entering or leaving a pre-defined area. 
+
+This can come handy when you want to always trigger a switch when the player enters a room or always close a door when the player just walked through it.
+So you can build quite complex mechanisms with this while the mechanism itself is very easy to use.
+
+To use Sensor Rects, create an object layer `sensor_rects`. In there, you create one rectangle for each sensor.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|reference_id|string|The object identifier that the sensor is connected to.|
+|event|string|The event that triggers the action. This can either be `on_enter` (default) or `on_leave`. |
+|action|string|Whether to `enable`, `disable`, or `toggle` the other reference mechanism. Valid values are `enable` (default), `disable`, `toggle`.|
 
 
 ## Ropes
@@ -262,6 +279,8 @@ While they are in lever mode without actually being connected to a lever, they a
 
 If you need to know how to connect Spike Blocks to a lever, please check the documentation about the Lever Mechanism.
 
+To create a Spike Block, just create an object layer named `spike_blocks`. In there create a rectangle of 1x1 tiles for each block.
+
 |Custom Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
@@ -276,7 +295,9 @@ If you need to know how to connect Spike Blocks to a lever, please check the doc
 On/Off Blocks are basically the friendly version of the Spike Block. When you switch it on, it's just a solid block that could be placed as a barrier, ladder, etc.
 When you switch it off, it just disappears and the player does no longer collide with them.
 
-![bla](images/mechanism_on_off_block_1.png)
+To create an On/Off Block, just create an object layer named `on_off_blocks`. In there create a rectangle of 1x1 tiles for each block.
+
+![](images/mechanism_on_off_block_1.png)
 
 |Custom Property|Type|Description|
 |-|-|-|
