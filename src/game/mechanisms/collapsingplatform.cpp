@@ -34,7 +34,7 @@ CollapsingPlatform::CollapsingPlatform(
    setType(ObjectTypeCollapsingPlatform);
 
    // read properties
-   auto readFloatProperty = [data](float& value, std::string id){
+   auto readFloatProperty = [data](float& value, const std::string& id){
       if (!data._tmx_object->_properties)
       {
          return;
