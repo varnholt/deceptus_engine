@@ -296,6 +296,11 @@ void GameMechanismDeserializer::deserialize(
       }
    }
 
+   Laser::merge();
+   Fan::merge();
+   *mechanism_fans = Fan::getFans();
+   *mechanism_platforms = MovingPlatform::merge(parent, data);
+
    // get a flat vector of all values
    std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
    for (auto& [keys, values] : mechanisms)
@@ -311,10 +316,6 @@ void GameMechanismDeserializer::deserialize(
       std::dynamic_pointer_cast<SensorRect>(sensor_rect)->findReference(all_mechanisms);
    }
 
-   Laser::merge();
-   Fan::merge();
-   *mechanism_fans = Fan::getFans();
-
    Lever::merge(
       *mechanism_levers,
       *mechanism_lasers,
@@ -327,8 +328,6 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_rotating_blades,
       *mechanism_doors
    );
-
-   *mechanism_platforms = MovingPlatform::merge(parent, data);
 }
 
 

@@ -40,6 +40,6 @@ private:
    Event _event = Event::OnEnter;
    Action _action = Action::Enable;
    std::string _reference_id;
-   std::shared_ptr<GameMechanism> _reference;
+   std::vector<std::shared_ptr<GameMechanism>> _references;
 };
 

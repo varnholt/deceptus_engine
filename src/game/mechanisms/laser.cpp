@@ -197,11 +197,14 @@ void Laser::update(const sf::Time& dt)
    }
 
    // move laser
-   if (_path.has_value())
+   if (_on)
    {
-      _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
-      _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
-      _sprite.setPosition(_position_px + _move_offset_px);
+      if (_path.has_value())
+      {
+         _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
+         _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
+         _sprite.setPosition(_position_px + _move_offset_px);
+      }
    }
 }
 
@@ -505,20 +508,27 @@ void Laser::merge()
 
          std::optional<Signal> on_signal;
          std::optional<Signal> off_signal;
+         std::optional<bool> enabled;
 
          if (object->_properties)
          {
-             const auto it_on = object->_properties->_map.find("on_time");
-             if (it_on != object->_properties->_map.end())
-             {
-                 on_signal = Signal{static_cast<uint32_t>(it_on->second->_value_int.value()), true};
-             }
+            const auto it_on = object->_properties->_map.find("on_time");
+            if (it_on != object->_properties->_map.end())
+            {
+                on_signal = Signal{static_cast<uint32_t>(it_on->second->_value_int.value()), true};
+            }
 
-             const auto it_off = object->_properties->_map.find("off_time");
-             if (it_off != object->_properties->_map.end())
-             {
-                 off_signal = Signal{static_cast<uint32_t>(it_off->second->_value_int.value()), false};
-             }
+            const auto it_off = object->_properties->_map.find("off_time");
+            if (it_off != object->_properties->_map.end())
+            {
+               off_signal = Signal{static_cast<uint32_t>(it_off->second->_value_int.value()), false};
+            }
+
+            const auto it_enabled = object->_properties->_map.find("enabled");
+            if (it_enabled != object->_properties->_map.end())
+            {
+               enabled = it_enabled->second->_value_bool.value();
+            }
          }
 
          for (auto yi = y; yi < y + h; yi++)
@@ -542,6 +552,12 @@ void Laser::merge()
                         laser->_signal_plot.push_back(*off_signal);
                      }
 
+                     if (enabled.has_value())
+                     {
+                        laser->setEnabled(*enabled);
+                     }
+
+                     laser->setObjectId(object->_name);
                      laser->_animation_offset = animation_offset;
                      laser->_group_id = group_id;
 
