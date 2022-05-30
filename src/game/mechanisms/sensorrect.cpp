@@ -99,20 +99,11 @@ void SensorRect::setup(const GameDeserializeData& data)
 
 void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms)
 {
-   auto result = std::find_if(mechanisms.begin(), mechanisms.end(), [this](const auto& object){
-            auto game_node = dynamic_cast<GameNode*>(object.get());
-            return (game_node && game_node->getObjectId() == _reference_id);
-         }
-      );
-
-   if (result != mechanisms.end())
-   {
-      _reference = *result;
-   }
-   else
-   {
-      Log::Error() << "the configured reference " << _reference_id << " could not be found. this will crash.";
-   }
+   std::copy_if(mechanisms.begin(), mechanisms.end(), std::back_inserter(_references), [this](const auto& object){
+         auto game_node = dynamic_cast<GameNode*>(object.get());
+         return (game_node && game_node->getObjectId() == _reference_id);
+      }
+   );
 }
 
 
@@ -122,17 +113,26 @@ void SensorRect::action()
    {
       case Action::Disable:
       {
-         _reference->setEnabled(false);
+         for (auto& ref: _references)
+         {
+            ref->setEnabled(false);
+         }
          break;
       }
       case Action::Enable:
       {
-         _reference->setEnabled(true);
+         for (auto& ref: _references)
+         {
+            ref->setEnabled(true);
+         }
          break;
       }
       case Action::Toggle:
       {
-         _reference->setEnabled(!_reference->isEnabled());
+         for (auto& ref: _references)
+         {
+            ref->setEnabled(!ref->isEnabled());
+         }
          break;
       }
    }
