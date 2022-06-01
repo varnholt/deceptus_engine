@@ -597,6 +597,13 @@ void Laser::merge()
           movement_speed = movement_speed_it->second->_value_float.value();
       }
 
+      std::optional<float> move_offset_s;
+      const auto it_move_offset_time = tmx_object->_properties->_map.find("move_offset_s");
+      if (it_move_offset_time != tmx_object->_properties->_map.end())
+      {
+         move_offset_s = it_move_offset_time->second->_value_float.value();
+      }
+
       // fetch path from object and close it
       auto path = tmx_object->_polygon ? tmx_object->_polygon->_polyline : tmx_object->_polyline->_polyline;
       path.push_back(path.at(0));
@@ -610,6 +617,11 @@ void Laser::merge()
          if (movement_speed.has_value())
          {
              laser->_settings._movement_speed = *movement_speed;
+         }
+
+         if (move_offset_s.has_value())
+         {
+            laser->_path_interpolation.setTime(*move_offset_s);
          }
       }
    }
