@@ -154,6 +154,11 @@ public:
        return _time;
    }
 
+   void setTime(float time)
+   {
+      _time = time;
+   }
+
 
 private:
 
