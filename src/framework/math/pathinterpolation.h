@@ -1,8 +1,10 @@
 #pragma once
 
+#include <functional>
 #include <iostream>
 #include <vector>
 #include "Box2D/Box2D.h"
+#include "framework/easings/easings.h"
 #include "framework/math/sfmlmath.h"
 
 template <typename T>
@@ -205,5 +207,9 @@ private:
 
    T _velocity;
    size_t _current_key_index = 0;
+
+   using EasingFunction = std::function<float(float)>;
+   EasingFunction _easing_function;
+   Easings::Type _easing_type = Easings::Type::None;
 };
 
