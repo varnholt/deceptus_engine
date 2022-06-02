@@ -10,6 +10,28 @@
 namespace Easings
 {
 
+enum class Type {
+   None,
+
+   EaseInSine,
+   EaseInCubic,
+   EaseInQuint,
+   EaseInCirc,
+   EaseInElastic,
+
+   EaseOutSine,
+   EaseOutCubic,
+   EaseOutQuint,
+   EaseOutCirc,
+   EaseOutElastic,
+
+   EaseInOutSine,
+   EaseInOutCubic,
+   EaseInOutQuint,
+   EaseInOutCirc,
+   EaseInOutElastic,
+};
+
 // ease in
 template<class T>
 constexpr auto easeInSine(T x)
