@@ -49,6 +49,52 @@ public:
       }
    }
 
+
+   T lerp(const T& pos1, const T& pos2, float weight_pos_2)
+   {
+       return pos1 + weight_pos_2 * (pos2 - pos1);
+   };
+
+
+   // adds interpolation for each single edge
+   void addKeys(const std::vector<T>& positions, int32_t subdivision_count, Easings::Type easing_type)
+   {
+       auto func = Easings::getFunction<float>(easing_type);
+
+       // determine length of each edge
+       auto length_sum = 0.0f;
+       for (auto index = 0; index < positions.size(); index++)
+       {
+           const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
+           length_sum += length;
+       }
+
+       auto length_to_this_point = 0.0f;
+       for (auto index = 0; index < positions.size() - 1; index++)
+       {
+           auto& pos_1 = positions.at(index);
+           auto& pos_2 = positions.at(index + 1);
+
+           const auto length = SfmlMath::length(positions[index + 1] - positions[index]);
+
+           auto subdiv_dist = length_to_this_point;
+           const auto subdiv_step = length / subdivision_count;
+
+           for (auto subdivision = 0; subdivision < subdivision_count; subdivision++)
+           {
+               const auto weight = static_cast<float>(subdivision) / static_cast<float>(subdivision_count);
+               const auto pos_lerp = lerp(pos_1, pos_2, func(weight));
+               addKey(pos_lerp, subdiv_dist / length_sum);
+
+               subdiv_dist += subdiv_step;
+           }
+
+           length_to_this_point += length;
+       }
+
+       addKey(positions.at(positions.size()-1), 1.0f);
+   }
+
    void addKey(const T &pos, float time_value)
    {
       Key key;
@@ -208,8 +254,6 @@ private:
    T _velocity;
    size_t _current_key_index = 0;
 
-   using EasingFunction = std::function<float(float)>;
-   EasingFunction _easing_function;
    Easings::Type _easing_type = Easings::Type::None;
 };
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <math.h>
 #include <type_traits>
@@ -32,33 +33,40 @@ enum class Type {
    EaseInOutElastic,
 };
 
+// linear
+template<class T>
+constexpr T linear(T x)
+{
+    return x;
+}
+
 // ease in
 template<class T>
-constexpr auto easeInSine(T x)
+constexpr T easeInSine(T x)
 {
    return static_cast<T>(1 - std::cos((x * M_PI) * 0.5));
 }
 
 template<class T>
-constexpr auto easeInCubic(T x)
+constexpr T easeInCubic(T x)
 {
    return x * x * x;
 }
 
 template<class T>
-constexpr auto easeInQuint(T x)
+constexpr T easeInQuint(T x)
 {
    return x * x * x * x * x;
 }
 
 template<class T>
-constexpr auto easeInCirc(T x)
+constexpr T easeInCirc(T x)
 {
    return static_cast<T>(1 - sqrt(1 - (x * x)));
 }
 
 template<class T>
-constexpr auto easeInElastic(T x)
+constexpr T easeInElastic(T x)
 {
    constexpr auto c4 = (2 * M_PI) / 3;
    return static_cast<T>((-std::pow(2, 10 * x - 10) * std::sin((x * 10 - 10.75) * c4)));
@@ -67,13 +75,13 @@ constexpr auto easeInElastic(T x)
 
 // ease out
 template<class T>
-constexpr auto easeOutSine(T x)
+constexpr T easeOutSine(T x)
 {
    return static_cast<T>(std::sin((x * M_PI) * 0.5));
 }
 
 template<class T>
-constexpr auto easeOutCubic(T x)
+constexpr T easeOutCubic(T x)
 {
    const auto c1 = 1 - x;
    const auto c2 = c1 * c1 * c1;
@@ -81,7 +89,7 @@ constexpr auto easeOutCubic(T x)
 }
 
 template<class T>
-constexpr auto easeOutQuint(T x)
+constexpr T easeOutQuint(T x)
 {
    const auto c1 = 1 - x;
    const auto c2 = c1 * c1 * c1 * c1 * c1;
@@ -89,7 +97,7 @@ constexpr auto easeOutQuint(T x)
 }
 
 template<class T>
-constexpr auto easeOutCirc(T x)
+constexpr T easeOutCirc(T x)
 {
    const auto c1 = x - 1;
    const auto c2 = c1 * c1;
@@ -97,7 +105,7 @@ constexpr auto easeOutCirc(T x)
 }
 
 template<class T>
-constexpr auto easeOutElastic(T x)
+constexpr T easeOutElastic(T x)
 {
    constexpr auto c4 = (2 * M_PI) / 3;
    return static_cast<T>(std::pow(2, -10 * x) * std::sin((x * 10 - 0.75) * c4) + 1);
@@ -106,13 +114,13 @@ constexpr auto easeOutElastic(T x)
 
 // ease in/out
 template<class T>
-constexpr auto easeInOutSine(T x)
+constexpr T easeInOutSine(T x)
 {
    return static_cast<T>(-(std::cos(M_PI * x) - 1) * 0.5);
 }
 
 template<class T>
-constexpr auto easeInOutCubic(T x)
+constexpr T easeInOutCubic(T x)
 {
    if (x < 0.5)
    {
@@ -124,7 +132,7 @@ constexpr auto easeInOutCubic(T x)
 }
 
 template<class T>
-constexpr auto easeInOutQuint(T x)
+constexpr T easeInOutQuint(T x)
 {
    if (x < 0.5)
    {
@@ -136,7 +144,7 @@ constexpr auto easeInOutQuint(T x)
 }
 
 template<class T>
-constexpr auto easeInOutCirc(T x)
+constexpr T easeInOutCirc(T x)
 {
    if (x < 0.5)
    {
@@ -149,7 +157,7 @@ constexpr auto easeInOutCirc(T x)
 }
 
 template<class T>
-constexpr auto easeInOutElastic(T x)
+constexpr T easeInOutElastic(T x)
 {
    constexpr auto c5 = (2 * M_PI) / 4.5;
 
@@ -164,25 +172,25 @@ constexpr auto easeInOutElastic(T x)
 
 // ease in
 template<class T>
-constexpr auto easeInQuad(T x)
+constexpr T easeInQuad(T x)
 {
    return x * x;
 }
 
 template<class T>
-constexpr auto easeInQuart(T x)
+constexpr T easeInQuart(T x)
 {
    return x * x * x * x;
 }
 
 template<class T>
-constexpr auto easeInExpo(T x)
+constexpr T easeInExpo(T x)
 {
    return static_cast<T>(std::pow(2, 10 * x - 10));
 }
 
 template<class T>
-constexpr auto easeInBack(T x)
+constexpr T easeInBack(T x)
 {
    constexpr auto c1 = 1.70158;
    constexpr auto c3 = c1 + 1;
@@ -190,7 +198,7 @@ constexpr auto easeInBack(T x)
 }
 
 template<class T>
-constexpr auto easeInBounce(T x)
+constexpr T easeInBounce(T x)
 {
    return 1 - easeOutBounce(1 - x);
 }
@@ -199,7 +207,7 @@ constexpr auto easeInBounce(T x)
 // ease out
 
 template<class T>
-constexpr auto easeOutBack(T x)
+constexpr T easeOutBack(T x)
 {
    constexpr auto c1 = 1.70158;
    constexpr auto c3 = c1 + 1;
@@ -209,26 +217,26 @@ constexpr auto easeOutBack(T x)
 }
 
 template<class T>
-constexpr auto easeOutQuad(T x)
+constexpr T easeOutQuad(T x)
 {
    return 1 - (1 - x) * (1 - x);
 }
 
 template<class T>
-constexpr auto easeOutQuart(T x)
+constexpr T easeOutQuart(T x)
 {
    const auto c1 = 1 - x;
    return 1 - c1 * c1 * c1 * c1;
 }
 
 template<class T>
-constexpr auto easeOutExpo(T x)
+constexpr T easeOutExpo(T x)
 {
    return static_cast<T>(1 - std::pow(2, -10 * x));
 }
 
 template<class T>
-constexpr auto easeOutBounce(T x)
+constexpr T easeOutBounce(T x)
 {
    constexpr T n1 = 7.5625;
    constexpr T d1 = 2.75;
@@ -255,7 +263,7 @@ constexpr auto easeOutBounce(T x)
 // ease in/out
 
 template<class T>
-constexpr auto easeInOutQuad(T x)
+constexpr T easeInOutQuad(T x)
 {
    if (x < 0.5)
    {
@@ -267,7 +275,7 @@ constexpr auto easeInOutQuad(T x)
 }
 
 template<class T>
-constexpr auto easeInOutQuart(T x)
+constexpr T easeInOutQuart(T x)
 {
    if (x < 0.5)
    {
@@ -279,7 +287,7 @@ constexpr auto easeInOutQuart(T x)
 }
 
 template<class T>
-constexpr auto easeInOutExpo(T x)
+constexpr T easeInOutExpo(T x)
 {
    if (x < 0.5)
    {
@@ -290,7 +298,7 @@ constexpr auto easeInOutExpo(T x)
 }
 
 template<class T>
-constexpr auto easeInOutBack(T x)
+constexpr T easeInOutBack(T x)
 {
    constexpr auto c1 = 1.70158;
    constexpr auto c2 = c1 * 1.525;
@@ -306,7 +314,7 @@ constexpr auto easeInOutBack(T x)
 }
 
 template<class T>
-constexpr auto easeInOutBounce(T x)
+constexpr T easeInOutBounce(T x)
 {
    if (x < 0.5)
    {
@@ -314,6 +322,48 @@ constexpr auto easeInOutBounce(T x)
    }
 
    return static_cast<T>((1 + easeOutBounce(2 * x - 1)) * 0.5);
+}
+
+template<class T>
+std::function<T(T)> getFunction(Type type)
+{
+   switch (type)
+   {
+      case Type::EaseInSine:
+         return [](T x){return Easings::easeInSine(x);};
+      case Type::EaseInCubic:
+         return [](T x){return Easings::easeInCubic(x);};
+      case Type::EaseInQuint:
+         return [](T x){return Easings::easeInQuint(x);};
+      case Type::EaseInCirc:
+         return [](T x){return Easings::easeInCirc(x);};
+      case Type::EaseInElastic:
+         return [](T x){return Easings::easeInElastic(x);};
+      case Type::EaseOutSine:
+         return [](T x){return Easings::easeOutSine(x);};
+      case Type::EaseOutCubic:
+         return [](T x){return Easings::easeOutCubic(x);};
+      case Type::EaseOutQuint:
+         return [](T x){return Easings::easeOutQuint(x);};
+      case Type::EaseOutCirc:
+         return [](T x){return Easings::easeOutCirc(x);};
+      case Type::EaseOutElastic:
+         return [](T x){return Easings::easeOutElastic(x);};
+      case Type::EaseInOutSine:
+         return [](T x){return Easings::easeInOutSine(x);};
+      case Type::EaseInOutCubic:
+         return [](T x){return Easings::easeInOutCubic(x);};
+      case Type::EaseInOutQuint:
+         return [](T x){return Easings::easeInOutQuint(x);};
+      case Type::EaseInOutCirc:
+         return [](T x){return Easings::easeInOutCirc(x);};
+      case Type::EaseInOutElastic:
+         return [](T x){return Easings::easeInOutElastic(x);};
+      case Type::None:
+         return [](T x){return Easings::linear(x);};
+   }
+
+   return [](T x){return Easings::linear(x);};
 }
 
 }

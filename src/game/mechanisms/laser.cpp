@@ -612,7 +612,7 @@ void Laser::merge()
       for (auto& laser : lasers)
       {
          laser->_path = path;
-         laser->_path_interpolation.addKeys(path);
+         laser->_path_interpolation.addKeys(path); // , 10, Easings::Type::EaseInCubic);
 
          if (movement_speed.has_value())
          {
