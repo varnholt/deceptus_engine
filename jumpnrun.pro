@@ -95,7 +95,6 @@ SOURCES += \
    src/framework/math/fbm.cpp \
    src/framework/math/hermitecurve.cpp \
    src/framework/math/maptools.cpp \
-   src/framework/math/pathinterpolation.cpp \
    src/framework/math/sfmlmath.cpp \
    src/framework/tmxparser/tmxanimation.cpp \
    src/framework/tmxparser/tmxchunk.cpp \
