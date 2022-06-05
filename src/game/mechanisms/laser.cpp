@@ -604,6 +604,20 @@ void Laser::merge()
          move_offset_s = it_move_offset_time->second->_value_float.value();
       }
 
+      std::optional<std::string> easing_function_name;
+      const auto it_easing_function_name = tmx_object->_properties->_map.find("easing_function");
+      if (it_easing_function_name != tmx_object->_properties->_map.end())
+      {
+          easing_function_name = it_easing_function_name->second->_value_string.value();
+      }
+
+      std::optional<int32_t> easing_subdivision_count;
+      const auto it_easing_subdivision_count = tmx_object->_properties->_map.find("easing_subdivision_count");
+      if (it_easing_subdivision_count != tmx_object->_properties->_map.end())
+      {
+          easing_subdivision_count = it_easing_subdivision_count->second->_value_int.value();
+      }
+
       // fetch path from object and close it
       auto path = tmx_object->_polygon ? tmx_object->_polygon->_polyline : tmx_object->_polyline->_polyline;
       path.push_back(path.at(0));
@@ -612,7 +626,17 @@ void Laser::merge()
       for (auto& laser : lasers)
       {
          laser->_path = path;
-         laser->_path_interpolation.addKeys(path); // , 10, Easings::Type::EaseInCubic);
+
+         if (easing_function_name.has_value())
+         {
+             const auto subdivision_count = easing_function_name.has_value() ? easing_subdivision_count.value() : 10;
+             const auto easings_type = Easings::getEnumFromName<float>(easing_function_name.value());
+             laser->_path_interpolation.addKeys(path, subdivision_count, easings_type);
+         }
+         else
+         {
+            laser->_path_interpolation.addKeys(path);
+         }
 
          if (movement_speed.has_value())
          {

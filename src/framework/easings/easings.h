@@ -4,34 +4,13 @@
 #include <functional>
 #include <limits>
 #include <math.h>
+#include <string>
 #include <type_traits>
 #include <utility>
 
 
 namespace Easings
 {
-
-enum class Type {
-   None,
-
-   EaseInSine,
-   EaseInCubic,
-   EaseInQuint,
-   EaseInCirc,
-   EaseInElastic,
-
-   EaseOutSine,
-   EaseOutCubic,
-   EaseOutQuint,
-   EaseOutCirc,
-   EaseOutElastic,
-
-   EaseInOutSine,
-   EaseInOutCubic,
-   EaseInOutQuint,
-   EaseInOutCirc,
-   EaseInOutElastic,
-};
 
 // linear
 template<class T>
@@ -324,8 +303,30 @@ constexpr T easeInOutBounce(T x)
    return static_cast<T>((1 + easeOutBounce(2 * x - 1)) * 0.5);
 }
 
+enum class Type {
+   None,
+
+   EaseInSine,
+   EaseInCubic,
+   EaseInQuint,
+   EaseInCirc,
+   EaseInElastic,
+
+   EaseOutSine,
+   EaseOutCubic,
+   EaseOutQuint,
+   EaseOutCirc,
+   EaseOutElastic,
+
+   EaseInOutSine,
+   EaseInOutCubic,
+   EaseInOutQuint,
+   EaseInOutCirc,
+   EaseInOutElastic,
+};
+
 template<class T>
-std::function<T(T)> getFunction(Type type)
+constexpr std::function<T(T)> getFunction(Type type)
 {
    switch (type)
    {
@@ -364,6 +365,103 @@ std::function<T(T)> getFunction(Type type)
    }
 
    return [](T x){return Easings::linear(x);};
+}
+
+constexpr const char* name_ease_in_sine        = "ease_in_sine";
+constexpr const char* name_ease_in_cubic       = "ease_in_cubic";
+constexpr const char* name_ease_in_quint       = "ease_in_quint";
+constexpr const char* name_ease_in_circ        = "ease_in_circ";
+constexpr const char* name_ease_in_elastic     = "ease_in_elastic";
+constexpr const char* name_ease_out_sine       = "ease_out_sine";
+constexpr const char* name_ease_out_cubic      = "ease_out_cubic";
+constexpr const char* name_ease_out_quint      = "ease_out_quint";
+constexpr const char* name_ease_out_circ       = "ease_out_circ";
+constexpr const char* name_ease_out_elastic    = "ease_out_elastic";
+constexpr const char* name_ease_in_out_sine    = "ease_in_out_sine";
+constexpr const char* name_ease_in_out_cubic   = "ease_in_out_cubic";
+constexpr const char* name_ease_in_out_quint   = "ease_in_out_quint";
+constexpr const char* name_ease_in_out_circ    = "ease_in_out_circ";
+constexpr const char* name_ease_in_out_elastic = "ease_in_out_elastic";
+constexpr const char* name_ease_none           = "ease_none";
+
+
+template<class T>
+constexpr std::string getNameFromEnum(Easings::Type type)
+{
+   switch (type)
+   {
+      case Type::EaseInSine:
+         return name_ease_in_sine;
+      case Type::EaseInCubic:
+         return name_ease_in_cubic;
+      case Type::EaseInQuint:
+         return name_ease_in_quint;
+      case Type::EaseInCirc:
+         return name_ease_in_circ;
+      case Type::EaseInElastic:
+         return name_ease_in_elastic;
+      case Type::EaseOutSine:
+         return name_ease_out_sine;
+      case Type::EaseOutCubic:
+         return name_ease_out_cubic;
+      case Type::EaseOutQuint:
+         return name_ease_out_quint;
+      case Type::EaseOutCirc:
+         return name_ease_out_circ;
+      case Type::EaseOutElastic:
+         return name_ease_out_elastic;
+      case Type::EaseInOutSine:
+         return name_ease_in_out_sine;
+      case Type::EaseInOutCubic:
+         return name_ease_in_out_cubic;
+      case Type::EaseInOutQuint:
+         return name_ease_in_out_quint;
+      case Type::EaseInOutCirc:
+         return name_ease_in_out_circ;
+      case Type::EaseInOutElastic:
+         return name_ease_in_out_elastic;
+      case Type::None:
+         return name_ease_none;
+   }
+
+    return name_ease_none;
+}
+
+template<class T>
+constexpr Easings::Type getEnumFromName(const std::string& name)
+{
+   if (name == name_ease_in_sine)
+      return Type::EaseInSine;
+   if (name ==  name_ease_in_cubic)
+      return Type::EaseInCubic;
+   if (name ==  name_ease_in_quint)
+      return Type::EaseInQuint;
+   if (name ==  name_ease_in_circ)
+      return Type::EaseInCirc;
+   if (name ==  name_ease_in_elastic)
+      return Type::EaseInElastic;
+   if (name ==  name_ease_out_sine)
+      return Type::EaseOutSine;
+   if (name ==  name_ease_out_cubic)
+      return Type::EaseOutCubic;
+   if (name ==  name_ease_out_quint)
+      return Type::EaseOutQuint;
+   if (name ==  name_ease_out_circ)
+      return Type::EaseOutCirc;
+   if (name ==  name_ease_out_elastic)
+      return Type::EaseOutElastic;
+   if (name ==  name_ease_in_out_sine)
+      return Type::EaseInOutSine;
+   if (name ==  name_ease_in_out_cubic)
+      return Type::EaseInOutCubic;
+   if (name ==  name_ease_in_out_quint)
+      return Type::EaseInOutQuint;
+   if (name ==  name_ease_in_out_circ)
+      return Type::EaseInOutCirc;
+   if (name ==  name_ease_in_out_elastic)
+      return Type::EaseInOutElastic;
+   if (name ==  name_ease_none)
+      return Type::None;
 }
 
 }

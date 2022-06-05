@@ -39,6 +39,8 @@ void Test::testInterpolation()
     {
         std::cout << k._time_value << ": " << k._pos.x << ", " << k._pos.y << std::endl;
     }
+
+    std::cout << Easings::getNameFromEnum<float>(Easings::Type::EaseInCirc) << std::endl;
 }
 
 Test::Test()
