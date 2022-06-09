@@ -166,11 +166,13 @@ PlayerAnimation::PlayerAnimation()
    // _looped_animations.push_back(_sword_idle_l);
    // _looped_animations.push_back(_sword_idle_r);
 
-
    for (auto& i : _looped_animations)
    {
       i->_looped = true;
    }
+
+   _sword_lut[_idle_l] = _sword_idle_l;
+   _sword_lut[_idle_r] = _sword_idle_r;
 }
 
 
@@ -424,21 +426,8 @@ void PlayerAnimation::update(
    const auto look_active = CameraPanorama::getInstance().isLookActive();
    const auto passes_sanity_check = !(data._moving_right && data._moving_left);
 
-   // attack
-   if (data._holding_sword)
-   {
-      if (data._attacking)
-      {
-         next_cycle = data._points_right ? _sword_attack_r : _sword_attack_l;
-      }
-      else
-      {
-         next_cycle = data._points_right ? _sword_idle_r : _sword_idle_l;
-      }
-   }
-
    // dash
-   else if (data._dash_dir.has_value())
+   if (data._dash_dir.has_value())
    {
       // init  regular            stop
       // |     |                  |
@@ -658,6 +647,26 @@ void PlayerAnimation::update(
    if (data._dead)
    {
       next_cycle = _death;
+   }
+
+   // attack
+   if (data._holding_sword)
+   {
+      // regular ground attack
+      if (data._attacking)
+      {
+         next_cycle = data._points_right ? _sword_attack_r : _sword_attack_l;
+      }
+      else
+      {
+         // otherwise check lut
+         auto sword_cycle_it = _sword_lut.find(next_cycle);
+         if (sword_cycle_it != _sword_lut.end())
+         {
+            // not working yet
+            // next_cycle = sword_cycle_it->second;
+         }
+      }
    }
 
    if (!next_cycle)
