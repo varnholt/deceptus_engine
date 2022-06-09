@@ -773,6 +773,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_walljump = _jump._timepoint_walljump;
    data._timepoint_bend_down_start = _bend._timepoint_bend_down_start;
    data._timepoint_bend_down_end = _bend._timepoint_bend_down_end;
+   data._attacking = _controls->isFireButtonPressed();
+   data._holding_sword = _weapon_system->_selected && _weapon_system->_selected->getWeaponType() == WeaponType::Sword;
 
    if (_dash.isDashActive())
    {
