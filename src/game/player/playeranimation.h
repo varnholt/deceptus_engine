@@ -141,5 +141,6 @@ private:
 
    std::vector<std::shared_ptr<Animation>> _looped_animations;
    std::shared_ptr<Animation> _current_cycle;
+   std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
 };
 
