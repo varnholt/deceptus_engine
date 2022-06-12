@@ -462,6 +462,8 @@ constexpr Easings::Type getEnumFromName(const std::string& name)
       return Type::EaseInOutElastic;
    if (name ==  name_ease_none)
       return Type::None;
+
+   return Type::None;
 }
 
 }

@@ -12,7 +12,7 @@ struct TmxTile : TmxElement
 
    void deserialize(tinyxml2::XMLElement* e) override;
 
-   int _id = 0;
+   int32_t _id = 0;
 
    TmxAnimation* _animation = nullptr;
    TmxObjectGroup* _object_group = nullptr;

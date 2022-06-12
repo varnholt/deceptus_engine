@@ -4,7 +4,7 @@
 #include "tmxpolygon.h"
 #include "tmxpolyline.h"
 #include "tmxproperties.h"
-
+#include "tmxtemplate.h"
 
 #include <iostream>
 
@@ -26,6 +26,15 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element)
    _y_px = static_cast<float>(element->IntAttribute("y"));
    _width_px  = element->FloatAttribute("width");
    _height_px = element->FloatAttribute("height");
+
+   // inherit object type from template
+   auto template_name = element->Attribute("template");
+   if (template_name)
+   {
+       _template_name = template_name;
+       TmxTemplate t(template_name);
+       _type = t._object->_type;
+   }
 
    auto node = element->FirstChild();
    while (node)
