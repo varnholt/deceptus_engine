@@ -2,6 +2,8 @@
 
 #include "tmxelement.h"
 
+#include <optional>
+
 struct TmxPolygon;
 struct TmxPolyLine;
 struct TmxProperties;
@@ -18,6 +20,8 @@ struct TmxObject : TmxElement
    float _y_px = 0.0f;
    float _width_px = 0.0f;
    float _height_px = 0.0f;
+   std::optional<std::string> _template_name;
+   std::optional<std::string> _type;
 
    TmxPolygon* _polygon = nullptr;
    TmxPolyLine* _polyline = nullptr;
