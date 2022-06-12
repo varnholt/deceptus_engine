@@ -46,7 +46,7 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
          element = object;
       }
 
-      if (element )
+      if (element)
       {
          element->deserialize(sub_element);
       }

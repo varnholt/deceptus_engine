@@ -110,6 +110,7 @@ SOURCES += \
    src/framework/tmxparser/tmxpolyline.cpp \
    src/framework/tmxparser/tmxproperties.cpp \
    src/framework/tmxparser/tmxproperty.cpp \
+   src/framework/tmxparser/tmxtemplate.cpp \
    src/framework/tmxparser/tmxtile.cpp \
    src/framework/tmxparser/tmxtileset.cpp \
    src/framework/tmxparser/tmxtools.cpp \
@@ -295,6 +296,7 @@ HEADERS += \
    src/framework/tmxparser/tmxpolyline.h \
    src/framework/tmxparser/tmxproperties.h \
    src/framework/tmxparser/tmxproperty.h \
+   src/framework/tmxparser/tmxtemplate.h \
    src/framework/tmxparser/tmxtile.h \
    src/framework/tmxparser/tmxtileset.h \
    src/framework/tmxparser/tmxtools.h \
