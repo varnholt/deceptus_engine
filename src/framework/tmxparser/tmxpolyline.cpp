@@ -7,7 +7,7 @@
 #include <sstream>
 
 
-void TmxPolyLine::deserialize(tinyxml2::XMLElement *element)
+void TmxPolyLine::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>&)
 {
    const auto points = element->Attribute("points");
    const auto pairs = TmxTools::split(points, ' ');

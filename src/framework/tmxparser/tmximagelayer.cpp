@@ -21,9 +21,9 @@ TmxImageLayer::~TmxImageLayer()
 }
 
 
-void TmxImageLayer::deserialize(tinyxml2::XMLElement* element)
+void TmxImageLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   TmxElement::deserialize(element);
+   TmxElement::deserialize(element, parse_data);
 
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _offset_x_px = element->FloatAttribute("offsetx", 0.0f);
@@ -50,13 +50,13 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement* element)
       else if (sub_element->Name() == std::string("properties"))
       {
          _properties = new TmxProperties();
-         _properties->deserialize(sub_element);
+         _properties->deserialize(sub_element, parse_data);
          parsed = true;
       }
 
       if (next_element)
       {
-         next_element->deserialize(sub_element);
+         next_element->deserialize(sub_element, parse_data);
       }
       else if (!parsed)
       {

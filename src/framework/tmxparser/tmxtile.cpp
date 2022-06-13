@@ -13,9 +13,9 @@ TmxTile::~TmxTile()
    delete _object_group;
 }
 
-void TmxTile::deserialize(tinyxml2::XMLElement* element)
+void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   TmxElement::deserialize(element);
+   TmxElement::deserialize(element, parse_data);
 
    _id = element->IntAttribute("id");
 
@@ -40,7 +40,7 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element)
 
          if (tmp != nullptr)
          {
-            tmp->deserialize(child_element);
+            tmp->deserialize(child_element, parse_data);
          }
          else
          {

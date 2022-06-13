@@ -16,8 +16,8 @@ struct TmxTileSet : TmxElement
    TmxTileSet();
    ~TmxTileSet() override;
 
-   void deserialize(tinyxml2::XMLElement* e) override;
-   void parseTileSet(tinyxml2::XMLElement* element);
+   void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
+   void parseTileSet(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>&);
 
    std::string _source;
    int32_t _first_gid = 0;

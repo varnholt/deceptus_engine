@@ -17,6 +17,6 @@ struct TmxImageLayer : public TmxElement
   TmxProperties* _properties = nullptr;
   int32_t _z = 0;
 
-  void deserialize(tinyxml2::XMLElement *e) override;
+  void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
 };
 

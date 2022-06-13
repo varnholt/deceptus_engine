@@ -17,9 +17,9 @@ TmxObject::~TmxObject()
 }
 
 
-void TmxObject::deserialize(tinyxml2::XMLElement* element)
+void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-  TmxElement::deserialize(element);
+  TmxElement::deserialize(element, parse_data);
 
    _id = element->Attribute("id");
    _x_px = static_cast<float>(element->IntAttribute("x"));
@@ -32,7 +32,7 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element)
    if (template_name)
    {
        _template_name = template_name;
-       TmxTemplate t(template_name);
+       TmxTemplate t(template_name, parse_data);
        _type = t._object->_type;
    }
 
@@ -62,13 +62,13 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element)
       else if (sub_element->Name() == std::string("properties"))
       {
          _properties = new TmxProperties();
-         _properties->deserialize(sub_element);
+         _properties->deserialize(sub_element, parse_data);
          parsed = true;
       }
 
       if (next_element)
       {
-         next_element->deserialize(sub_element);
+         next_element->deserialize(sub_element, parse_data);
       }
       else if (!parsed)
       {

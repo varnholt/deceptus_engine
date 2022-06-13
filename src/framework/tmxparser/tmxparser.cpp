@@ -6,6 +6,7 @@
 #include "tmxobjectgroup.h"
 #include "tmxlayer.h"
 #include "tmxtileset.h"
+#include "tmxparsedata.h"
 #include "tmxproperty.h"
 #include "tmxproperties.h"
 
@@ -25,7 +26,9 @@ TmxParser::~TmxParser()
 
 void TmxParser::parse(const std::string& filename)
 {
-   _filename = filename;
+   _parse_data = std::make_shared<TmxParseData>();
+   _parse_data->_filename = filename;
+
    auto z = 0;
 
    tinyxml2::XMLDocument doc;
@@ -79,7 +82,7 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
    if (sub_element->Name() == std::string("tileset"))
    {
       sub_element_parsed = new TmxTileSet();
-      dynamic_cast<TmxTileSet*>(sub_element_parsed)->_path = std::filesystem::path(_filename).parent_path();
+      dynamic_cast<TmxTileSet*>(sub_element_parsed)->_path = std::filesystem::path(_parse_data->_filename).parent_path();
    }
    else if (sub_element->Name() == std::string("layer"))
    {
@@ -107,7 +110,7 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
       return;
    }
 
-   sub_element_parsed->deserialize(sub_element);
+   sub_element_parsed->deserialize(sub_element, _parse_data);
 
    if (layer && layer->_properties)
    {
