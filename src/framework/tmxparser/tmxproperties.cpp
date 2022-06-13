@@ -6,9 +6,9 @@
 #include <iostream>
 
 
-void TmxProperties::deserialize(tinyxml2::XMLElement *element)
+void TmxProperties::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   TmxElement::deserialize(element);
+   TmxElement::deserialize(element, parse_data);
 
    auto node = element->FirstChild();
    while (node)
@@ -31,7 +31,7 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element)
 
       if (next_element)
       {
-         next_element->deserialize(sub_element);
+         next_element->deserialize(sub_element, parse_data);
       }
       else
       {

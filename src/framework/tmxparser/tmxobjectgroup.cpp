@@ -23,9 +23,9 @@ TmxObjectGroup::~TmxObjectGroup()
 }
 
 
-void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
+void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   TmxElement::deserialize(xml_element);
+   TmxElement::deserialize(xml_element, parse_data);
 
    auto node = xml_element->FirstChild();
    while (node)
@@ -48,7 +48,7 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
 
       if (element)
       {
-         element->deserialize(sub_element);
+         element->deserialize(sub_element, parse_data);
       }
       else
       {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -8,6 +9,7 @@
 struct TmxElement;
 struct TmxLayer;
 struct TmxObjectGroup;
+struct TmxParseData;
 struct TmxTileSet;
 
 class TmxParser
@@ -28,6 +30,6 @@ class TmxParser
       void parseGroup(tinyxml2::XMLElement* sub_element, int32_t& z);
       void parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z);
 
-      std::string _filename;
+      std::shared_ptr<TmxParseData> _parse_data;
 };
 

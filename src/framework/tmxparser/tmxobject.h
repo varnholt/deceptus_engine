@@ -13,7 +13,7 @@ struct TmxObject : TmxElement
    TmxObject() = default;
    ~TmxObject() override;
 
-   void deserialize(tinyxml2::XMLElement* e) override;
+   void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
 
    std::string _id;
    float _x_px = 0.0f;

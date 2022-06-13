@@ -6,7 +6,7 @@
 #include "tmxobject.h"
 
 
-TmxTemplate::TmxTemplate(const std::string& filename)
+TmxTemplate::TmxTemplate(const std::string& filename, const std::shared_ptr<TmxParseData>& parse_data)
 {
     tinyxml2::XMLDocument doc;
     if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
@@ -26,7 +26,7 @@ TmxTemplate::TmxTemplate(const std::string& filename)
             if (sub_element->Name() == std::string("object"))
             {
                 _object = new TmxObject();
-                _object->deserialize(sub_element);
+                _object->deserialize(sub_element, parse_data);
             }
 
             node = node->NextSibling();

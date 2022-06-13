@@ -11,9 +11,9 @@ TmxChunk::~TmxChunk()
 }
 
 
-void TmxChunk::deserialize(tinyxml2::XMLElement *element)
+void TmxChunk::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   TmxElement::deserialize(element);
+   TmxElement::deserialize(element, parse_data);
 
    _x_px = element->IntAttribute("x");
    _y_px = element->IntAttribute("y");

@@ -10,7 +10,7 @@ struct TmxLayer : TmxElement
    TmxLayer();
    ~TmxLayer() override;
 
-   void deserialize(tinyxml2::XMLElement*) override;
+   void deserialize(tinyxml2::XMLElement*, const std::shared_ptr<TmxParseData>&) override;
 
    uint32_t _width_tl = 0;
    uint32_t _height_tl = 0;
