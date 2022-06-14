@@ -10,14 +10,7 @@
 
 TmxImageLayer::TmxImageLayer()
 {
-   _type = TypeImageLayer;
-}
-
-
-TmxImageLayer::~TmxImageLayer()
-{
-   delete _image;
-   delete _properties;
+   _type = Type::TypeImageLayer;
 }
 
 
@@ -39,17 +32,17 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement* element, const std::shared
          continue;
       }
 
-      TmxElement* next_element = nullptr;
+      std::shared_ptr<TmxElement> next_element;
       auto parsed = false;
 
       if (sub_element->Name() == std::string("image"))
       {
-         _image = new TmxImage();
+         _image = std::make_shared<TmxImage>();
          next_element = _image;
       }
       else if (sub_element->Name() == std::string("properties"))
       {
-         _properties = new TmxProperties();
+         _properties = std::make_shared<TmxProperties>();
          _properties->deserialize(sub_element, parse_data);
          parsed = true;
       }

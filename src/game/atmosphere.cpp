@@ -15,7 +15,7 @@ Atmosphere::~Atmosphere()
 
 
 //-----------------------------------------------------------------------------
-void Atmosphere::parse(TmxLayer* layer, TmxTileSet* tileset)
+void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
 {
    if (!layer)
    {

@@ -9,13 +9,7 @@
 
 TmxTileSet::TmxTileSet()
 {
-   _type = TmxElement::TypeTileSet;
-}
-
-
-TmxTileSet::~TmxTileSet()
-{
-   delete _image;
+   _type = TmxElement::Type::TypeTileSet;
 }
 
 
@@ -40,17 +34,17 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element, const std::shared_p
          continue;
       }
 
-      TmxElement* tmp = nullptr;
-      TmxTile* tile = nullptr;
+      std::shared_ptr<TmxElement> tmp;
+      std::shared_ptr<TmxTile> tile;
 
       if (child_element->Name() == std::string("image"))
       {
-         _image = new TmxImage();
+         _image = std::make_shared<TmxImage>();
          tmp = _image;
       }
       else if (child_element->Name() == std::string("tile"))
       {
-         tile = new TmxTile();
+         tile = std::make_shared<TmxTile>();
          tmp = tile;
       }
 

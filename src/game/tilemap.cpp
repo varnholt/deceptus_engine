@@ -53,8 +53,8 @@ void TileMap::setVisible(bool visible)
 
 
 bool TileMap::load(
-   TmxLayer* layer,
-   TmxTileSet* tileset,
+   const std::shared_ptr<TmxLayer>& layer,
+   const std::shared_ptr<TmxTileSet>& tileset,
    const std::filesystem::path& base_path
 )
 {
@@ -381,6 +381,5 @@ void TileMap::hideTile(int32_t x, int32_t y)
 TileMap::AnimatedTile::~AnimatedTile()
 {
    _frames.clear();
-   delete _animation;
 }
 

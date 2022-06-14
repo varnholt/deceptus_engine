@@ -11,14 +11,7 @@
 
 TmxLayer::TmxLayer()
 {
-   _type = TmxElement::TypeLayer;
-}
-
-
-TmxLayer::~TmxLayer()
-{
-   delete[] _data;
-   delete _properties;
+   _type = TmxElement::Type::TypeLayer;
 }
 
 
@@ -67,7 +60,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
            // there are no chunks, the layer data is raw
            if (!inner_element && data_node != nullptr)
            {
-              _data = new int32_t[_width_tl * _height_tl];
+              _data.resize(_width_tl * _height_tl);
               std::string data = sub_element->FirstChild()->Value();
 
               // parse csv data and store it in mData array
@@ -85,7 +78,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
                  auto row_content = TmxTools::split(line, ',');
                  for (const std::string& val_str : row_content)
                  {
-                    int val = std::stoi(val_str);
+                    int32_t val = std::stoi(val_str);
                     _data[y * _width_tl + x] = val;
                     x++;
                  }
@@ -99,7 +92,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
       }
       else if (sub_element->Name() == std::string("properties"))
       {
-         _properties = new TmxProperties();
+         _properties = std::make_shared<TmxProperties>();
          _properties->deserialize(sub_element, parse_data);
       }
 
@@ -153,10 +146,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
       _width_tl  = (x_max - x_min) + chunk_width;
       _height_tl = (y_max - y_min) + chunk_height;
 
-      _data = new int32_t[_width_tl * _height_tl];
-
-      // since we're dealing with patches of chunks there might be 'holes' in the map
-      memset(_data, 0, _width_tl * _height_tl * sizeof (int32_t));
+      _data.resize(_width_tl * _height_tl);
 
       for (const auto c : chunks)
       {

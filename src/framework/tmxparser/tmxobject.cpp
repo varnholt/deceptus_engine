@@ -9,31 +9,45 @@
 #include <iostream>
 
 
-TmxObject::~TmxObject()
-{
-   delete _polygon;
-   delete _polyline;
-   delete _properties;
-}
-
-
 void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
   TmxElement::deserialize(element, parse_data);
 
-   _id = element->Attribute("id");
+   const auto id_attribute = element->Attribute("id");
+   if (id_attribute)
+   {
+      _id = id_attribute;
+   }
+
+   const auto gid_attribute = element->Attribute("gid");
+   if (gid_attribute)
+   {
+      _gid = gid_attribute;
+   }
+
    _x_px = static_cast<float>(element->IntAttribute("x"));
    _y_px = static_cast<float>(element->IntAttribute("y"));
    _width_px  = element->FloatAttribute("width");
    _height_px = element->FloatAttribute("height");
+
+   const auto type_attribute = element->Attribute("type");
+   if (type_attribute)
+   {
+      _type = type_attribute;
+   }
 
    // inherit object type from template
    auto template_name = element->Attribute("template");
    if (template_name)
    {
        _template_name = template_name;
-       TmxTemplate t(template_name, parse_data);
-       _type = t._object->_type;
+
+       // if we don't have an object type yet, try to derive it from the template
+       if (!_type.has_value())
+       {
+          TmxTemplate t(template_name, parse_data);
+          _type = t._object->_type;
+       }
    }
 
    auto node = element->FirstChild();
@@ -46,22 +60,22 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
          continue;
       }
 
-      TmxElement* next_element = nullptr;
+      std::shared_ptr<TmxElement> next_element;
       auto parsed = false;
 
       if (sub_element->Name() == std::string("polyline"))
       {
-         _polyline = new TmxPolyLine();
+         _polyline = std::make_shared<TmxPolyLine>();
          next_element = _polyline;
       }
       else if (sub_element->Name() == std::string("polygon"))
       {
-         _polygon = new TmxPolygon();
+         _polygon = std::make_shared<TmxPolygon>();
          next_element = _polygon;
       }
       else if (sub_element->Name() == std::string("properties"))
       {
-         _properties = new TmxProperties();
+         _properties = std::make_shared<TmxProperties>();
          _properties->deserialize(sub_element, parse_data);
          parsed = true;
       }
