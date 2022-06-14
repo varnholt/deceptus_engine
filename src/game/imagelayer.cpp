@@ -10,10 +10,10 @@
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<ImageLayer> ImageLayer::deserialize(TmxElement* element, const std::filesystem::path& level_path)
+std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxElement>& element, const std::filesystem::path& level_path)
 {
   std::shared_ptr<ImageLayer> image = std::make_shared<ImageLayer>();
-  auto image_layer = dynamic_cast<TmxImageLayer*>(element);
+  auto image_layer = std::dynamic_pointer_cast<TmxImageLayer>(element);
 
   image->_z_index = image_layer->_z;
   image->_texture = TexturePool::getInstance().get((level_path / image_layer->_image->_source).string());

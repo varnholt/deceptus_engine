@@ -291,6 +291,7 @@ HEADERS += \
    src/framework/tmxparser/tmxlayer.h \
    src/framework/tmxparser/tmxobject.h \
    src/framework/tmxparser/tmxobjectgroup.h \
+   src/framework/tmxparser/tmxparsedata.h \
    src/framework/tmxparser/tmxparser.h \
    src/framework/tmxparser/tmxpolygon.h \
    src/framework/tmxparser/tmxpolyline.h \
