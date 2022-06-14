@@ -6,26 +6,18 @@
 #include "tmxobjectgroup.h"
 #include "tmxlayer.h"
 #include "tmxtileset.h"
+#include "tmxparsedata.h"
 #include "tmxproperty.h"
 #include "tmxproperties.h"
 
 #include <iostream>
 
 
-TmxParser::~TmxParser()
-{
-   for (auto tmx_element : _elements)
-   {
-      delete tmx_element;
-   }
-
-   _elements.clear();
-}
-
-
 void TmxParser::parse(const std::string& filename)
 {
-   _filename = filename;
+   _parse_data = std::make_shared<TmxParseData>();
+   _parse_data->_filename = filename;
+
    auto z = 0;
 
    tinyxml2::XMLDocument doc;
@@ -73,28 +65,28 @@ void TmxParser::parseGroup(tinyxml2::XMLElement* sub_element, int32_t& z)
 
 void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
 {
-   TmxElement* sub_element_parsed = nullptr;
-   TmxLayer* layer = nullptr;
+   std::shared_ptr<TmxElement> sub_element_parsed;
+   std::shared_ptr<TmxLayer> layer;
 
    if (sub_element->Name() == std::string("tileset"))
    {
-      sub_element_parsed = new TmxTileSet();
-      dynamic_cast<TmxTileSet*>(sub_element_parsed)->_path = std::filesystem::path(_filename).parent_path();
+      sub_element_parsed = std::make_shared<TmxTileSet>();
+      std::dynamic_pointer_cast<TmxTileSet>(sub_element_parsed)->_path = std::filesystem::path(_parse_data->_filename).parent_path();
    }
    else if (sub_element->Name() == std::string("layer"))
    {
-      sub_element_parsed = new TmxLayer();
-      layer = dynamic_cast<TmxLayer*>(sub_element_parsed);
+      sub_element_parsed = std::make_shared<TmxLayer>();
+      layer = std::dynamic_pointer_cast<TmxLayer>(sub_element_parsed);
    }
    else if (sub_element->Name() == std::string("imagelayer"))
    {
-      sub_element_parsed = new TmxImageLayer();
-      dynamic_cast<TmxImageLayer*>(sub_element_parsed)->_z = z;
+      sub_element_parsed = std::make_shared<TmxImageLayer>();
+      std::dynamic_pointer_cast<TmxImageLayer>(sub_element_parsed)->_z = z;
    }
    else if (sub_element->Name() == std::string("objectgroup"))
    {
-      sub_element_parsed = new TmxObjectGroup();
-      dynamic_cast<TmxObjectGroup*>(sub_element_parsed)->_z_index = z;
+      sub_element_parsed = std::make_shared<TmxObjectGroup>();
+      std::dynamic_pointer_cast<TmxObjectGroup>(sub_element_parsed)->_z_index = z;
    }
    else if (sub_element->Name() == std::string("group"))
    {
@@ -107,7 +99,7 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
       return;
    }
 
-   sub_element_parsed->deserialize(sub_element);
+   sub_element_parsed->deserialize(sub_element, _parse_data);
 
    if (layer && layer->_properties)
    {
@@ -117,27 +109,27 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
       {
          z = it->second->_value_int.value();
       }
-      dynamic_cast<TmxLayer*>(sub_element_parsed)->_z = z;
+      std::dynamic_pointer_cast<TmxLayer>(sub_element_parsed)->_z = z;
    }
 
    _elements.push_back(sub_element_parsed);
 }
 
 
-const std::vector<TmxElement*>& TmxParser::getElements() const
+const std::vector<std::shared_ptr<TmxElement>>& TmxParser::getElements() const
 {
    return _elements;
 }
 
 
-std::vector<TmxObjectGroup*> TmxParser::retrieveObjectGroups() const
+std::vector<std::shared_ptr<TmxObjectGroup>> TmxParser::retrieveObjectGroups() const
 {
-   std::vector<TmxObjectGroup*> object_groups;
+   std::vector<std::shared_ptr<TmxObjectGroup>> object_groups;
    for (auto element : _elements)
    {
-      if (element->_type == TmxElement::TypeObjectGroup)
+      if (element->_type == TmxElement::Type::TypeObjectGroup)
       {
-         object_groups.push_back(dynamic_cast<TmxObjectGroup*>(element));
+         object_groups.push_back(std::dynamic_pointer_cast<TmxObjectGroup>(element));
       }
    }
 
@@ -145,7 +137,7 @@ std::vector<TmxObjectGroup*> TmxParser::retrieveObjectGroups() const
 }
 
 
-TmxTileSet* TmxParser::getTileSet(TmxLayer* layer) const
+std::shared_ptr<TmxTileSet> TmxParser::getTileSet(const std::shared_ptr<TmxLayer>& layer) const
 {
    // get maximum tile id per layer
    int32_t tile_id = 0;
@@ -161,12 +153,12 @@ TmxTileSet* TmxParser::getTileSet(TmxLayer* layer) const
       }
    }
 
-   TmxTileSet* tileset = nullptr;
+   std::shared_ptr<TmxTileSet> tileset;
    for (auto element : _elements)
    {
-      if (element->_type == TmxElement::TypeTileSet)
+      if (element->_type == TmxElement::Type::TypeTileSet)
       {
-         auto tmp = dynamic_cast<TmxTileSet*>(element);
+         auto tmp = std::dynamic_pointer_cast<TmxTileSet>(element);
 
          if (tmp)
          {

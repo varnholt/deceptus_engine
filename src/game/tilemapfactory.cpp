@@ -7,7 +7,7 @@
 #include "framework/tools/log.h"
 
 
-std::shared_ptr<TileMap> TileMapFactory::makeTileMap(TmxLayer* layer)
+std::shared_ptr<TileMap> TileMapFactory::makeTileMap(const std::shared_ptr<TmxLayer>& layer)
 {
    std::shared_ptr<TileMap> tile_map;
 

@@ -15,7 +15,7 @@
 
 std::vector<std::shared_ptr<GameMechanism>> Fan::__fan_instances;
 std::vector<std::shared_ptr<Fan::FanTile>> Fan::__tile_instances;
-std::vector<TmxObject*> Fan::__object_instances;
+std::vector<std::shared_ptr<TmxObject>> Fan::__object_instances;
 std::vector<sf::Vector2f> Fan::__weight_instances;
 
 

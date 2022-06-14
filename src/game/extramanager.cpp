@@ -19,8 +19,8 @@
 
 //-----------------------------------------------------------------------------
 void ExtraManager::load(
-   TmxLayer* layer,
-   TmxTileSet* tileset
+   const std::shared_ptr<TmxLayer>& layer,
+   const std::shared_ptr<TmxTileSet>& tileset
 )
 {
    resetExtras();

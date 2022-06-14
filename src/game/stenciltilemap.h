@@ -11,7 +11,7 @@ class StencilTileMap : public TileMap
 
       StencilTileMap() = default;
 
-      bool load(TmxLayer* layer, TmxTileSet* tileset, const std::filesystem::path& base_path) override;
+      bool load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset, const std::filesystem::path& base_path) override;
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const override;
 
       const std::string& getStencilReference() const;

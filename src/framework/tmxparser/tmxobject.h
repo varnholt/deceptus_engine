@@ -2,6 +2,7 @@
 
 #include "tmxelement.h"
 
+#include <memory>
 #include <optional>
 
 struct TmxPolygon;
@@ -11,20 +12,21 @@ struct TmxProperties;
 struct TmxObject : TmxElement
 {
    TmxObject() = default;
-   ~TmxObject() override;
 
-   void deserialize(tinyxml2::XMLElement* e) override;
+   void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
 
    std::string _id;
    float _x_px = 0.0f;
    float _y_px = 0.0f;
    float _width_px = 0.0f;
    float _height_px = 0.0f;
+
    std::optional<std::string> _template_name;
    std::optional<std::string> _type;
+   std::optional<std::string> _gid;
 
-   TmxPolygon* _polygon = nullptr;
-   TmxPolyLine* _polyline = nullptr;
-   TmxProperties* _properties = nullptr;
+   std::shared_ptr<TmxPolygon> _polygon;
+   std::shared_ptr<TmxPolyLine> _polyline ;
+   std::shared_ptr<TmxProperties> _properties;
 };
 

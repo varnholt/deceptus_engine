@@ -10,20 +10,13 @@
 
 TmxImageLayer::TmxImageLayer()
 {
-   _type = TypeImageLayer;
+   _type = Type::TypeImageLayer;
 }
 
 
-TmxImageLayer::~TmxImageLayer()
+void TmxImageLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   delete _image;
-   delete _properties;
-}
-
-
-void TmxImageLayer::deserialize(tinyxml2::XMLElement* element)
-{
-   TmxElement::deserialize(element);
+   TmxElement::deserialize(element, parse_data);
 
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _offset_x_px = element->FloatAttribute("offsetx", 0.0f);
@@ -39,24 +32,24 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement* element)
          continue;
       }
 
-      TmxElement* next_element = nullptr;
+      std::shared_ptr<TmxElement> next_element;
       auto parsed = false;
 
       if (sub_element->Name() == std::string("image"))
       {
-         _image = new TmxImage();
+         _image = std::make_shared<TmxImage>();
          next_element = _image;
       }
       else if (sub_element->Name() == std::string("properties"))
       {
-         _properties = new TmxProperties();
-         _properties->deserialize(sub_element);
+         _properties = std::make_shared<TmxProperties>();
+         _properties->deserialize(sub_element, parse_data);
          parsed = true;
       }
 
       if (next_element)
       {
-         next_element->deserialize(sub_element);
+         next_element->deserialize(sub_element, parse_data);
       }
       else if (!parsed)
       {
