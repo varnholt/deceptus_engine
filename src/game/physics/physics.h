@@ -11,14 +11,14 @@ struct TmxTileSet;
 struct Physics
 {
    void parse(
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
+      const std::shared_ptr<TmxLayer>& layer,
+      const std::shared_ptr<TmxTileSet>& tileSet,
       const std::filesystem::path& basePath
    );
 
    bool dumpObj(
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
+      const std::shared_ptr<TmxLayer>& layer,
+      const std::shared_ptr<TmxTileSet>& tileSet,
       const std::filesystem::path& path
    );
 

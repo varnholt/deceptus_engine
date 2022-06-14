@@ -29,7 +29,7 @@ static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
 static constexpr auto range_diabled_delta  = range_disabled.second  - range_disabled.first;
 static constexpr auto range_enabled_delta  = range_enabled.second   - range_enabled.first;
 
-std::vector<TmxObject*> __objects;
+std::vector<std::shared_ptr<TmxObject>> __objects;
 std::vector<std::shared_ptr<Laser>> __lasers;
 std::vector<std::array<int32_t, 9>> __tiles_version_1;
 std::vector<std::array<int32_t, 9>> __tiles_version_2;
@@ -336,7 +336,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
 }
 
 
-void Laser::addObject(TmxObject* object)
+void Laser::addObject(const std::shared_ptr<TmxObject>& object)
 {
    __objects.push_back(object);
 }
@@ -484,7 +484,7 @@ void Laser::merge()
 {
    int32_t group_id = 0;
 
-   std::vector<TmxObject*> laser_movement_paths;
+   std::vector<std::shared_ptr<TmxObject>> laser_movement_paths;
    std::map<std::string, std::vector<std::shared_ptr<Laser>>> laser_groups;
 
    for (auto object : __objects)

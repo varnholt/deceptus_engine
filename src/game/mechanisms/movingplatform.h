@@ -25,7 +25,7 @@ public:
    MovingPlatform(GameNode* parent);
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
-   static void deserialize(TmxObject* tmx_object);
+   static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);
    static std::vector<std::shared_ptr<GameMechanism> > merge(GameNode* parent, const GameDeserializeData& data);
 
    static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
