@@ -14,7 +14,7 @@ struct ImageLayer
    int32_t _z_index = 0;
 
    static std::shared_ptr<ImageLayer> deserialize(
-      TmxElement* element,
+      const std::shared_ptr<TmxElement>& element,
       const std::filesystem::path& level_path
    );
 };

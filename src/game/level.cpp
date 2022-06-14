@@ -303,7 +303,7 @@ Level::~Level()
 
 
 //-----------------------------------------------------------------------------
-void Level::deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMap>& tile_map)
+void Level::deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map)
 {
    if (layer->_properties)
    {
@@ -432,9 +432,9 @@ void Level::loadTmx()
       data._tmx_object = nullptr;
       data._tmx_object_group = nullptr;
 
-      if (element->_type == TmxElement::TypeLayer)
+      if (element->_type == TmxElement::Type::TypeLayer)
       {
-         auto layer = dynamic_cast<TmxLayer*>(element);
+         auto layer = std::dynamic_pointer_cast<TmxLayer>(element);
          auto tileset = tmx_parser.getTileSet(layer);
 
          data._tmx_layer = layer;
@@ -472,9 +472,9 @@ void Level::loadTmx()
             }
          }
       }
-      else if (element->_type == TmxElement::TypeObjectGroup)
+      else if (element->_type == TmxElement::Type::TypeObjectGroup)
       {
-         auto object_group = dynamic_cast<TmxObjectGroup*>(element);
+         auto object_group = std::dynamic_pointer_cast<TmxObjectGroup>(element);
 
          for (const auto& object : object_group->_objects)
          {
@@ -505,7 +505,7 @@ void Level::loadTmx()
             }
          }
       }
-      else if (element->_type == TmxElement::TypeImageLayer)
+      else if (element->_type == TmxElement::Type::TypeImageLayer)
       {
          auto image = ImageLayer::deserialize(element, path);
          _image_layers.push_back(image);
@@ -1465,7 +1465,7 @@ void Level::addPathsToWorld(
 
 //-----------------------------------------------------------------------------
 void Level::parseObj(
-   TmxLayer* layer,
+   const std::shared_ptr<TmxLayer>& layer,
    ObjectType behavior,
    const std::filesystem::path& path
 )
@@ -1505,8 +1505,8 @@ void Level::parseObj(
 
 //-----------------------------------------------------------------------------
 void Level::parsePhysicsTiles(
-   TmxLayer* layer,
-   TmxTileSet* tileset,
+   const std::shared_ptr<TmxLayer>& layer,
+   const std::shared_ptr<TmxTileSet>& tileset,
    const std::filesystem::path& base_path
 )
 {

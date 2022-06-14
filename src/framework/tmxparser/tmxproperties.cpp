@@ -20,12 +20,12 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element, const std::shared
          continue;
       }
 
-      TmxElement* next_element = nullptr;
-      TmxProperty* property = nullptr;
+      std::shared_ptr<TmxElement> next_element;
+      std::shared_ptr<TmxProperty> property;
 
       if (sub_element->Name() == std::string("property"))
       {
-         property = new TmxProperty();
+         property = std::make_shared<TmxProperty>();
          next_element = property;
       }
 

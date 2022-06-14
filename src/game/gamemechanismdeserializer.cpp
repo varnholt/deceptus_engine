@@ -79,9 +79,9 @@ void GameMechanismDeserializer::deserialize(
       data._tmx_object = nullptr;
       data._tmx_object_group = nullptr;
 
-      if (element->_type == TmxElement::TypeLayer)
+      if (element->_type == TmxElement::Type::TypeLayer)
       {
-         auto layer = dynamic_cast<TmxLayer*>(element);
+         auto layer = std::dynamic_pointer_cast<TmxLayer>(element);
          auto tileset = tmx_parser.getTileSet(layer);
 
          data._tmx_layer = layer;
@@ -134,9 +134,9 @@ void GameMechanismDeserializer::deserialize(
             mechanism_spikes->insert(mechanism_spikes->end(), mechanism.begin(), mechanism.end());
          }
       }
-      else if (element->_type == TmxElement::TypeObjectGroup)
+      else if (element->_type == TmxElement::Type::TypeObjectGroup)
       {
-         auto object_group = dynamic_cast<TmxObjectGroup*>(element);
+         auto object_group = std::dynamic_pointer_cast<TmxObjectGroup>(element);
 
          for (const auto& object : object_group->_objects)
          {

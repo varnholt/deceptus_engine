@@ -8,7 +8,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 
 
-bool StencilTileMap::load(TmxLayer* layer, TmxTileSet* tileset, const std::filesystem::path& base_path)
+bool StencilTileMap::load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset, const std::filesystem::path& base_path)
 {
    TileMap::load(layer, tileset, base_path);
 

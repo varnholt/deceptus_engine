@@ -9,7 +9,7 @@ struct TmxParseData;
 
 struct TmxElement
 {
-   enum Type {
+   enum class Type {
       TypeInvalid = 0,
       TypeTileSet = 1,
       TypeLayer = 2,
@@ -26,6 +26,6 @@ struct TmxElement
 
    std::string _name;
 
-   Type _type;
+   Type _type = Type::TypeInvalid;
    std::shared_ptr<TmxParseData> _parse_data;
 };

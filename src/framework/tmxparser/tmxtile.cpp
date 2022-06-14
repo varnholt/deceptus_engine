@@ -7,12 +7,6 @@
 #include <iostream>
 
 
-TmxTile::~TmxTile()
-{
-   delete _animation;
-   delete _object_group;
-}
-
 void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
@@ -25,16 +19,16 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<T
       auto child_element = node->ToElement();
       if (child_element != nullptr)
       {
-         TmxElement* tmp = nullptr;
+         std::shared_ptr<TmxElement> tmp;
 
          if (child_element->Name() == std::string("animation"))
          {
-            _animation = new TmxAnimation();
+            _animation = std::make_shared<TmxAnimation>();
             tmp = _animation;
          }
          else if (child_element->Name() == std::string("objectgroup"))
          {
-           _object_group = new TmxObjectGroup();
+           _object_group = std::make_shared<TmxObjectGroup>();
            tmp = _object_group;
          }
 

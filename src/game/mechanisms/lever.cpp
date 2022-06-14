@@ -23,7 +23,7 @@
 #include <iostream>
 
 
-std::vector<TmxObject*> Lever::__rectangles;
+std::vector<std::shared_ptr<TmxObject>> Lever::__rectangles;
 
 
 namespace
@@ -358,7 +358,7 @@ void Lever::setCallbacks(const std::vector<Callback>& callbacks)
 
 
 //-----------------------------------------------------------------------------
-void Lever::addSearchRect(TmxObject* rect)
+void Lever::addSearchRect(const std::shared_ptr<TmxObject>& rect)
 {
    __rectangles.push_back(rect);
 }

@@ -239,14 +239,14 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
 
 namespace
 {
-std::vector<TmxObject*> boxes;
-std::vector<TmxObject*> paths;
+std::vector<std::shared_ptr<TmxObject>> boxes;
+std::vector<std::shared_ptr<TmxObject>> paths;
 }
 
 
 
 //-----------------------------------------------------------------------------
-void MovingPlatform::deserialize(TmxObject* tmx_object)
+void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
 {
    // just collect all the tmx objects
    if (tmx_object->_polyline)
@@ -271,7 +271,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
    }
 
    // generate pairs of matching box and poly tmx objects
-   std::vector<std::pair<TmxObject*, TmxObject*>> box_path_pairs;
+   std::vector<std::pair<std::shared_ptr<TmxObject>, std::shared_ptr<TmxObject>>> box_path_pairs;
 
    for (auto box : boxes)
    {

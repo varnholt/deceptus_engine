@@ -12,9 +12,9 @@ struct GameDeserializeData
 {
    std::filesystem::path _base_path;
    std::shared_ptr<b2World> _world;
-   TmxObject* _tmx_object = nullptr;
-   TmxObjectGroup* _tmx_object_group = nullptr;
-   TmxLayer* _tmx_layer = nullptr;
-   TmxTileSet* _tmx_tileset = nullptr;
+   std::shared_ptr<TmxObject> _tmx_object;
+   std::shared_ptr<TmxObjectGroup> _tmx_object_group;
+   std::shared_ptr<TmxLayer> _tmx_layer;
+   std::shared_ptr<TmxTileSet> _tmx_tileset;
 };
 
