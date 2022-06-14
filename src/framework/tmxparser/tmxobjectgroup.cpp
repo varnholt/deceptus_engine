@@ -8,24 +8,13 @@
 
 TmxObjectGroup::TmxObjectGroup()
 {
-   _type = TmxElement::TypeObjectGroup;
+   _type = TmxElement::Type::TypeObjectGroup;
 }
 
 
-TmxObjectGroup::~TmxObjectGroup()
+void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   for (auto& [k, v] : _objects)
-   {
-      delete v;
-   }
-
-   _objects.clear();
-}
-
-
-void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
-{
-   TmxElement::deserialize(xml_element);
+   TmxElement::deserialize(xml_element, parse_data);
 
    auto node = xml_element->FirstChild();
    while (node)
@@ -37,18 +26,18 @@ void TmxObjectGroup::deserialize(tinyxml2::XMLElement* xml_element)
          continue;
       }
 
-      TmxElement* element = nullptr;
-      TmxObject* object = nullptr;
+      std::shared_ptr<TmxElement> element;
+      std::shared_ptr<TmxObject> object;
 
       if (sub_element->Name() == std::string("object"))
       {
-         object = new TmxObject();
+         object = std::make_shared<TmxObject>();
          element = object;
       }
 
       if (element)
       {
-         element->deserialize(sub_element);
+         element->deserialize(sub_element, parse_data);
       }
       else
       {

@@ -9,19 +9,13 @@
 
 TmxTileSet::TmxTileSet()
 {
-   _type = TmxElement::TypeTileSet;
+   _type = TmxElement::Type::TypeTileSet;
 }
 
 
-TmxTileSet::~TmxTileSet()
+void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   delete _image;
-}
-
-
-void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
-{
-   TmxElement::deserialize(element);
+   TmxElement::deserialize(element, parse_data);
 
    _tile_width_px  = element->IntAttribute("tilewidth");
    _tile_height_px = element->IntAttribute("tileheight");
@@ -40,24 +34,24 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
          continue;
       }
 
-      TmxElement* tmp = nullptr;
-      TmxTile* tile = nullptr;
+      std::shared_ptr<TmxElement> tmp;
+      std::shared_ptr<TmxTile> tile;
 
       if (child_element->Name() == std::string("image"))
       {
-         _image = new TmxImage();
+         _image = std::make_shared<TmxImage>();
          tmp = _image;
       }
       else if (child_element->Name() == std::string("tile"))
       {
-         tile = new TmxTile();
+         tile = std::make_shared<TmxTile>();
          tmp = tile;
       }
 
       // deserialize detected elements
       if (tmp != nullptr)
       {
-         tmp->deserialize(child_element);
+         tmp->deserialize(child_element, parse_data);
       }
       else
       {
@@ -74,7 +68,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element)
 }
 
 
-void TmxTileSet::deserialize(tinyxml2::XMLElement *element)
+void TmxTileSet::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    _first_gid   = element->IntAttribute("firstgid");
    _source      = element->Attribute("source") ? element->Attribute("source") : "";
@@ -88,7 +82,7 @@ void TmxTileSet::deserialize(tinyxml2::XMLElement *element)
       if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
       {
          tinyxml2::XMLElement* docElem = doc.FirstChildElement();
-         parseTileSet(docElem);
+         parseTileSet(docElem, parse_data);
       }
       else
       {
@@ -98,7 +92,7 @@ void TmxTileSet::deserialize(tinyxml2::XMLElement *element)
    }
    else
    {
-      parseTileSet(element);
+      parseTileSet(element, parse_data);
    }
 }
 

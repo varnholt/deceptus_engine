@@ -18,7 +18,7 @@ class ExtraManager
 {
 public:
 
-   void load(TmxLayer *layer, TmxTileSet *tileSet);
+   void load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet);
    void collide(const sf::Rect<int32_t>& playerRect);
 
    void resetExtras();

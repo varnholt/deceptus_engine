@@ -65,7 +65,7 @@ class Fan : public GameMechanism, public GameNode
 
       static std::vector<std::shared_ptr<GameMechanism>> __fan_instances;
       static std::vector<std::shared_ptr<FanTile>> __tile_instances;
-      static std::vector<TmxObject*> __object_instances;
+      static std::vector<std::shared_ptr<TmxObject>> __object_instances;
       static std::vector<sf::Vector2f> __weight_instances;
 
       std::vector<std::shared_ptr<FanTile>> _tiles;

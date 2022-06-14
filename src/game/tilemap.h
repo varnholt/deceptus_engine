@@ -30,7 +30,7 @@ public:
    TileMap() = default;
    ~TileMap() override;
 
-   virtual bool load(TmxLayer* layer, TmxTileSet* tileSet, const std::filesystem::path& basePath);
+   virtual bool load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet, const std::filesystem::path& basePath);
    virtual void update(const sf::Time& dt);
    virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -72,7 +72,7 @@ private:
       float _duration = 0.0f;
       sf::Vertex _vertices[4];
       bool _visible = true;
-      TmxAnimation* _animation = nullptr;
+      std::shared_ptr<TmxAnimation> _animation;
    };
 
    sf::Vector2u _tile_size;

@@ -11,7 +11,7 @@
 #include <sstream>
 
 
-void Enemy::parse(TmxObject* object)
+void Enemy::parse(const std::shared_ptr<TmxObject>& object)
 {
    _id = object->_id;
    _name = object->_name;

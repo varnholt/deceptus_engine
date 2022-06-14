@@ -45,7 +45,7 @@ public:
    void setCallbacks(const std::vector<Callback>& callbacks);
    const sf::Rect<int32_t>& getPixelRect() const;
 
-   static void addSearchRect(TmxObject* rect);
+   static void addSearchRect(const std::shared_ptr<TmxObject>& rect);
 
    // requires a unified datastructure/mechanism in the future!
    static void merge(
@@ -93,7 +93,7 @@ private:
 
    std::shared_ptr<sf::Texture> _texture;
 
-   static std::vector<TmxObject*> __rectangles;
+   static std::vector<std::shared_ptr<TmxObject>> __rectangles;
 };
 
 

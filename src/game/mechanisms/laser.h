@@ -44,7 +44,7 @@ public:
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
 
-   static void addObject(TmxObject* object);
+   static void addObject(const std::shared_ptr<TmxObject>& object);
    static void addTilesVersion1();
    static void addTilesVersion2();
    static void merge();

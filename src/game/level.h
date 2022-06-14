@@ -107,8 +107,8 @@ protected:
    void addDebugRect(void* body, float x, float y, float w, float h);
 
    void parsePhysicsTiles(
-      TmxLayer* layer,
-      TmxTileSet* tileSet,
+      const std::shared_ptr<TmxLayer>& layer,
+      const std::shared_ptr<TmxTileSet>& tileSet,
       const std::filesystem::path& basePath
    );
 
@@ -125,7 +125,7 @@ protected:
    );
 
    void parseObj(
-      TmxLayer* layer,
+      const std::shared_ptr<TmxLayer>& layer,
       ObjectType behavior,
       const std::filesystem::path& path
    );
@@ -134,7 +134,7 @@ protected:
    void loadTmx();
    void loadState();
 
-   void deserializeParallaxMap(TmxLayer* layer, const std::shared_ptr<TileMap>& tile_map);
+   void deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
    void updatePlayerLight();
