@@ -30,7 +30,7 @@ TmxTemplate::TmxTemplate(const std::string& filename, const std::shared_ptr<TmxP
 
             if (sub_element->Name() == std::string("object"))
             {
-                _object = new TmxObject();
+                _object = std::make_shared<TmxObject>();
                 _object->deserialize(sub_element, parse_data);
             }
 

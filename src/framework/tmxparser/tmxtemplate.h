@@ -10,5 +10,5 @@ struct TmxTemplate
 {
     TmxTemplate(const std::string& filename, const std::shared_ptr<TmxParseData>&);
 
-    TmxObject* _object = nullptr;
+    std::shared_ptr<TmxObject> _object;
 };
