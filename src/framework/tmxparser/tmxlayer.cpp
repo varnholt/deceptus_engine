@@ -24,7 +24,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _visible = element->BoolAttribute("visible", true);
 
-   std::vector<TmxChunk*> chunks;
+   std::vector<std::shared_ptr<TmxChunk>> chunks;
 
    auto node = element->FirstChild();
    while (node)
@@ -43,14 +43,14 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
          {
            auto chunk_element = data_node->ToElement();
 
-           TmxElement* inner_element = nullptr;
+           std::shared_ptr<TmxElement> inner_element;
 
            // process chunk data
            if (chunk_element)
            {
               if (chunk_element->Name() == std::string("chunk"))
               {
-                 auto chunk = new TmxChunk();
+                 auto chunk = std::make_shared<TmxChunk>();
                  chunk->deserialize(chunk_element, parse_data);
                  inner_element = chunk;
                  chunks.push_back(chunk);
