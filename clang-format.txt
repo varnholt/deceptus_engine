@@ -1,0 +1,13 @@
+﻿---
+BasedOnStyle: Chromium
+AlignAfterOpenBracket: Align
+AllowShortLoopsOnASingleLine: 'false'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakBeforeBraces: Allman
+ColumnLimit: '120'
+IndentWidth: '3'
+PenaltyBreakAssignment: '0'
+TabWidth: '3'
+
+...
