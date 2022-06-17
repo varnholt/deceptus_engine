@@ -3,8 +3,8 @@
 #include "constants.h"
 #include "extramanager.h"
 #include "extratable.h"
-#include "gamenode.h"
 #include "framework/joystick/gamecontrollerinfo.h"
+#include "gamenode.h"
 #include "playeranimation.h"
 #include "playerclimb.h"
 #include "playercontrols.h"
@@ -40,13 +40,11 @@ class Player : public GameNode
       float _jump_prev_y = 0.0f;
    };
 
-
    struct PositionedAnimation
    {
       sf::Vector2f _position;
       std::shared_ptr<Animation> _animation;
    };
-
 
    struct PlayerSpeed
    {
@@ -84,9 +82,7 @@ class Player : public GameNode
       }
    };
 
-
 public:
-
    Player(GameNode* parent = nullptr);
    virtual ~Player() = default;
 
@@ -117,7 +113,7 @@ public:
    void setBeltVelocity(float beltVelocity);
    bool isOnBelt() const;
    void setOnBelt(bool onBelt);
-   void applyBeltVelocity(float &desiredVel);
+   void applyBeltVelocity(float& desiredVel);
 
    const sf::IntRect& getPlayerPixelRect() const;
 
@@ -164,11 +160,9 @@ public:
    const PlayerAnimation& getPlayerAnimation() const;
    const PlayerJump& getJump() const;
 
-
    void setToggleCallback(const ToggleCallback& callback);
 
-   private:
-
+private:
    void createPlayerBody();
 
    void updateAnimation(const sf::Time& dt);
@@ -266,4 +260,3 @@ public:
 
    static Player* __current;
 };
-

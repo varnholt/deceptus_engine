@@ -8,12 +8,10 @@
 #include <ostream>
 #include <sstream>
 
-
 namespace
 {
 static const auto triangulate = false;
 }
-
 
 void Mesh::weldVertices(b2Vec2* verts, int32_t count, float threshold)
 {
@@ -34,12 +32,7 @@ void Mesh::weldVertices(b2Vec2* verts, int32_t count, float threshold)
    }
 }
 
-
-void Mesh::writeObj(
-   const std::string& filename,
-   const std::vector<b2Vec2>& vertices,
-   const std::vector<std::vector<uint32_t>>& faces
-)
+void Mesh::writeObj(const std::string& filename, const std::vector<b2Vec2>& vertices, const std::vector<std::vector<uint32_t>>& faces)
 {
    std::ofstream out(filename);
 
@@ -62,21 +55,16 @@ void Mesh::writeObj(
    }
 
    out.close();
-
 }
 
-
-void Mesh::readObj(
-   const std::string& filename,
-   std::vector<b2Vec2>& points,
-   std::vector<std::vector<uint32_t>>& faces
-)
+void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std::vector<std::vector<uint32_t>>& faces)
 {
    std::vector<Mesh::Vertex> vertices;
    std::vector<b2Vec2> normals;
    std::vector<b2Vec2> uvs;
 
-   auto trimString = [](std::string& str) {
+   auto trimString = [](std::string& str)
+   {
       const char* whitespace = " \t\n\r";
       size_t location = str.find_first_not_of(whitespace);
       str.erase(0, location);
@@ -100,32 +88,32 @@ void Mesh::readObj(
 
    while (!obj_stream.eof())
    {
-     trimString(line);
+      trimString(line);
 
-     if (line.length( ) > 0 && line.at(0) != '#')
-     {
+      if (line.length() > 0 && line.at(0) != '#')
+      {
          std::istringstream line_stream(line);
 
          line_stream >> token;
 
          if (token == "v")
          {
-             float x = 0.0f;
-             float y = 0.0f;
-             float z = 0.0f;
+            float x = 0.0f;
+            float y = 0.0f;
+            float z = 0.0f;
 
-             line_stream >> x >> y >> z;
-             points.push_back(b2Vec2(x, y));
+            line_stream >> x >> y >> z;
+            points.push_back(b2Vec2(x, y));
          }
          else if (token == "vt")
          {
-             float s = 0.0f;
-             float t = 0.0f;
+            float s = 0.0f;
+            float t = 0.0f;
 
-             line_stream >> s >> t;
-             uvs.push_back(b2Vec2(s, t));
-
-         } else if (token == "vn")
+            line_stream >> s >> t;
+            uvs.push_back(b2Vec2(s, t));
+         }
+         else if (token == "vn")
          {
             float x = 0.0f;
             float y = 0.0f;
@@ -161,14 +149,14 @@ void Mesh::readObj(
                else
                {
                   slash_2 = vert_string.find("/", slash_1 + 1);
-                  p_index = static_cast<uint32_t>(atoi( vert_string.substr(0,slash_1).c_str() ) - 1);
+                  p_index = static_cast<uint32_t>(atoi(vert_string.substr(0, slash_1).c_str()) - 1);
 
-                  if( slash_2 > slash_1 + 1 )
+                  if (slash_2 > slash_1 + 1)
                   {
-                     tcIndex = static_cast<uint32_t>(atoi(vert_string.substr(slash_1 + 1, slash_2).c_str() ) - 1);
+                     tcIndex = static_cast<uint32_t>(atoi(vert_string.substr(slash_1 + 1, slash_2).c_str()) - 1);
                   }
 
-                  nIndex = static_cast<uint32_t>(atoi( vert_string.substr(slash_2 + 1,vert_string.length()).c_str() ) - 1);
+                  nIndex = static_cast<uint32_t>(atoi(vert_string.substr(slash_2 + 1, vert_string.length()).c_str()) - 1);
                }
 
                Mesh::Vertex vertex;
@@ -247,7 +235,6 @@ void Mesh::readObj(
    // std::cout << " " << uvs.size()        << " uvs"         << std::endl;
 }
 
-
 void Mesh::writeVerticesToImage(
    const std::vector<b2Vec2>& points,
    const std::vector<std::vector<uint32_t>>& faces,
@@ -257,14 +244,10 @@ void Mesh::writeVerticesToImage(
 {
    float scale = 1.0f;
    sf::RenderTexture render_texture;
-   if (!render_texture.create(
-         static_cast<uint32_t>(textureSize.x * scale),
-         static_cast<uint32_t>(textureSize.y * scale)
-      )
-   )
+   if (!render_texture.create(static_cast<uint32_t>(textureSize.x * scale), static_cast<uint32_t>(textureSize.y * scale)))
    {
-       std::cout << "failed to create render texture" << std::endl;
-       return;
+      std::cout << "failed to create render texture" << std::endl;
+      return;
    }
 
    render_texture.clear();
