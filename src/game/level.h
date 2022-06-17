@@ -41,7 +41,6 @@ class Bouncer;
 class LevelMap;
 class TmxParser;
 
-
 /*! \brief Implements all level-related logic
  *         That includes deserialization of all level-data, updating mechanisms and rendering them.
  *         Level physics information is transformed into a Box2D representation that handles collision detection.
@@ -52,9 +51,7 @@ class TmxParser;
  */
 class Level : public GameNode
 {
-
 public:
-
    Level();
    virtual ~Level();
 
@@ -87,7 +84,7 @@ public:
    void toggleMechanisms();
 
    std::string getDescriptionFilename() const;
-   void setDescriptionFilename(const std::string &description_filename);
+   void setDescriptionFilename(const std::string& description_filename);
 
    const Atmosphere& getAtmosphere() const;
 
@@ -101,9 +98,7 @@ public:
    static Level* getCurrentLevel();
    void syncRoom();
 
-
 protected:
-
    void addDebugRect(void* body, float x, float y, float w, float h);
 
    void parsePhysicsTiles(
@@ -112,23 +107,11 @@ protected:
       const std::filesystem::path& basePath
    );
 
-   void addPathsToWorld(
-      int32_t offsetX,
-      int32_t offsetY,
-      const std::vector<SquareMarcher::Path>& paths,
-      ObjectType behavior
-   );
+   void addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths, ObjectType behavior);
 
-   void addChainToWorld(
-      const std::vector<b2Vec2>& chain,
-      ObjectType behavior
-   );
+   void addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType behavior);
 
-   void parseObj(
-      const std::shared_ptr<TmxLayer>& layer,
-      ObjectType behavior,
-      const std::filesystem::path& path
-   );
+   void parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior, const std::filesystem::path& path);
 
    bool load();
    void loadTmx();
@@ -136,7 +119,7 @@ protected:
 
    void deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
 
-   void takeScreenshot(const std::string& basename, sf::RenderTexture &texture);
+   void takeScreenshot(const std::string& basename, sf::RenderTexture& texture);
    void updatePlayerLight();
    void updateRoom();
 
@@ -153,7 +136,6 @@ protected:
    void displayTextures();
    void drawGlowLayer();
    void drawGlowSprite();
-
 
    std::vector<std::shared_ptr<Room>> _rooms;
    std::shared_ptr<Room> _room_current;
@@ -255,4 +237,3 @@ protected:
 
    static Level* __current_level;
 };
-

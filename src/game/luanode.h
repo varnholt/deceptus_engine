@@ -13,13 +13,12 @@
 #include "SFML/Graphics.hpp"
 
 // game
+#include "gamenode.h"
 #include "hitbox.h"
 #include "leveldescription.h"
-#include "gamenode.h"
 #include "weapon.h"
 
 struct lua_State;
-
 
 /*! \brief LuaNode is the class that implements scripted enemies.
  *         Enemy behavior is implemented in lua scripts, one instance is created for each enemy in the game.
@@ -29,7 +28,7 @@ struct lua_State;
  */
 struct LuaNode : public GameNode
 {
-   LuaNode(GameNode* parent, const std::string &filename);
+   LuaNode(GameNode* parent, const std::string& filename);
    ~LuaNode();
 
    void draw(sf::RenderTarget& window);
@@ -117,7 +116,6 @@ struct LuaNode : public GameNode
    //! add a hitbox
    void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
 
-
    void luaHit(int32_t damage);
    void luaDie();
    void luaInitialize();
@@ -125,7 +123,7 @@ struct LuaNode : public GameNode
    void luaSetStartPosition();
    void luaPlayerMovedTo();
    void luaRetrieveProperties();
-   void luaSendPath(const std::vector<sf::Vector2f> &vec);
+   void luaSendPath(const std::vector<sf::Vector2f>& vec);
    void luaSendPatrolPath();
    void luaTimeout(int32_t timerId);
    void luaUpdate(const sf::Time& dt);
@@ -152,8 +150,8 @@ struct LuaNode : public GameNode
    // visualization
    sf::Vector2f _start_position_px;
    std::shared_ptr<sf::Texture> _texture;
-   std::vector<sf::Sprite> _sprites = {{}};              // have 1 base sprite
-   std::vector<sf::Vector2f> _sprite_offsets_px = {{0, 0}};   // have 1 base sprite offset
+   std::vector<sf::Sprite> _sprites = {{}};                  // have 1 base sprite
+   std::vector<sf::Vector2f> _sprite_offsets_px = {{0, 0}};  // have 1 base sprite offset
    sf::Vector2f _position_px;
    int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
    std::vector<sf::Vector2f> _movement_path_px;
@@ -167,4 +165,3 @@ struct LuaNode : public GameNode
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 };
-
