@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
+#include <SFML/Graphics.hpp>
 
 #include <optional>
 
@@ -12,9 +12,7 @@
 
 class PlayerAnimation
 {
-
 public:
-
    PlayerAnimation();
 
    using HighResDuration = std::chrono::high_resolution_clock::duration;
@@ -49,10 +47,7 @@ public:
       HighResTimePoint _timepoint_bend_down_end;
    };
 
-   void update(
-      const sf::Time& dt,
-      const PlayerAnimationData& data
-   );
+   void update(const sf::Time& dt, const PlayerAnimationData& data);
 
    int32_t getJumpAnimationReference() const;
 
@@ -63,9 +58,7 @@ public:
 
    static void generateJson();
 
-
 private:
-
    std::shared_ptr<Animation> _idle_r;
    std::shared_ptr<Animation> _idle_l;
    std::shared_ptr<Animation> _idle_blink_r;
@@ -143,4 +136,3 @@ private:
    std::shared_ptr<Animation> _current_cycle;
    std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
 };
-
