@@ -23,5 +23,5 @@ public:
 
 protected:
 
-   WeaponType _type = WeaponType::Invalid;
+   WeaponType _type = WeaponType::None;
 };

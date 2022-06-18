@@ -23,7 +23,7 @@ public:
    {
       b2Vec2 _pos = b2Vec2{0.0f, 0.0};
       float _angle = 0.0f;
-      WeaponType _weapon_type = WeaponType::Invalid;
+      WeaponType _weapon_type = WeaponType::None;
       std::string _projectile_animation_identifier;
    };
 
@@ -79,7 +79,7 @@ protected:
    bool _rotating = false;
    float _rotation = 0.0f;
    b2Body* _body = nullptr;
-   WeaponType _weapon_type = WeaponType::Invalid;
+   WeaponType _weapon_type = WeaponType::None;
    std::string _projectile_identifier = default_projectile_identifier;
    std::vector<DestroyedCallback> _destroyed_callbacks;
 
