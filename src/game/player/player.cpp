@@ -733,7 +733,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_walljump = _jump._timepoint_walljump;
    data._timepoint_bend_down_start = _bend._timepoint_bend_down_start;
    data._timepoint_bend_down_end = _bend._timepoint_bend_down_end;
-   data._attacking = _controls->isFireButtonPressed();
+   data._timepoint_attack_start = _attack._timepoint_attack_start;
+   data._attacking = _attack.isAttacking();
    data._weapon_type = (!_weapon_system->_selected) ? WeaponType::None : _weapon_system->_selected->getWeaponType();
 
    if (_dash.isDashActive())
@@ -1181,11 +1182,19 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateFire()
+void Player::updateAttack()
 {
-   if (_controls->isFireButtonPressed())
+   _attack._was_attacking = _attack._attacking;
+   _attack._attacking = _controls->isFireButtonPressed();
+
+   if (_attack._attacking && !_attack._was_attacking)
    {
-      fire();
+      _attack._timepoint_attack_start = StopWatch::getInstance().now();
+   }
+
+   if (_attack._attacking)
+   {
+      attack();
    }
 }
 
@@ -1391,7 +1400,7 @@ void Player::update(const sf::Time& dt)
    updateAnimation(dt);
    updatePixelCollisions();
    updateAtmosphere();
-   updateFire();
+   updateAttack();
    updateVelocity();
    updateOrientation();
    updateOneWayWallDrop();
@@ -1592,7 +1601,7 @@ bool Player::isInAir() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::fire()
+void Player::attack()
 {
    if (!_weapon_system->_selected)
    {
@@ -1634,6 +1643,12 @@ void Player::fire()
       }
       case WeaponType::Sword:
       {
+         // no 2nd strike without new button press
+         if (_attack._attacking && _attack._was_attacking)
+         {
+            return;
+         }
+
          const auto x_offset = dir.x * 0.5f;
          const auto y_offset = 0.0f;
 
