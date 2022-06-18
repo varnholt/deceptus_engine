@@ -34,8 +34,8 @@ public:
       bool _wall_sliding = false;
       bool _wall_jump_points_right = false;
       bool _jumping_through_one_way_wall = false;
-      bool _holding_sword = false;
       bool _attacking = false;
+      WeaponType _weapon_type = WeaponType::None;
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
       int32_t _jump_frame_count = 0;
@@ -59,6 +59,9 @@ public:
    static void generateJson();
 
 private:
+
+   const std::shared_ptr<Animation>& getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data);
+
    std::shared_ptr<Animation> _idle_r;
    std::shared_ptr<Animation> _idle_l;
    std::shared_ptr<Animation> _idle_blink_r;
@@ -123,10 +126,14 @@ private:
    std::shared_ptr<Animation> _appear_r;
    std::shared_ptr<Animation> _appear_l;
 
-   std::shared_ptr<Animation> _sword_idle_r;
    std::shared_ptr<Animation> _sword_idle_l;
-   std::shared_ptr<Animation> _sword_attack_r;
-   std::shared_ptr<Animation> _sword_attack_l;
+   std::shared_ptr<Animation> _sword_idle_r;
+   std::shared_ptr<Animation> _sword_bend_down_l;
+   std::shared_ptr<Animation> _sword_bend_down_r;
+   std::shared_ptr<Animation> _sword_bend_down_attack_1_l;
+   std::shared_ptr<Animation> _sword_bend_down_attack_1_r;
+   std::shared_ptr<Animation> _sword_bend_down_attack_2_l;
+   std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
 
    std::shared_ptr<Animation> _death;
 
@@ -134,5 +141,6 @@ private:
 
    std::vector<std::shared_ptr<Animation>> _looped_animations;
    std::shared_ptr<Animation> _current_cycle;
+
    std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
 };
