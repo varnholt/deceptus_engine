@@ -82,6 +82,19 @@ class Player : public GameNode
       }
    };
 
+   struct PlayerAttack
+   {
+      bool _was_attacking = false;
+      bool _attacking = false;
+
+      HighResTimePoint _timepoint_attack_start;
+
+      bool isAttacking() const
+      {
+         return _attacking;
+      }
+   };
+
 public:
    Player(GameNode* parent = nullptr);
    virtual ~Player() = default;
@@ -95,7 +108,7 @@ public:
 
    void update(const sf::Time& dt);
 
-   void fire();
+   void attack();
    void die();
    void reset();
    DeathReason checkDead() const;
@@ -170,7 +183,7 @@ private:
    void updateBendDown();
    void updateDash(Dash dir = Dash::None);
    void updateDeadFixtures();
-   void updateFire();
+   void updateAttack();
    void updateFootsteps();
    void updateGroundAngle();
    void updateHardLanding();
@@ -253,6 +266,7 @@ private:
    PlayerClimb _climb;
    PlayerJump _jump;
    PlayerDash _dash;
+   PlayerAttack _attack;
    JumpTrace _jump_trace;
 
    PlayerAnimation _player_animation;

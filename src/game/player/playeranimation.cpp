@@ -105,6 +105,8 @@ PlayerAnimation::PlayerAnimation()
    _bend_down_l->_reset_to_first_frame = false;
    _bend_up_r->_reset_to_first_frame = false;
    _bend_up_l->_reset_to_first_frame = false;
+   _sword_bend_down_r->_reset_to_first_frame = false;
+   _sword_bend_down_l->_reset_to_first_frame = false;
    _dash_init_r->_reset_to_first_frame = false;
    _dash_init_l->_reset_to_first_frame = false;
    _dash_stop_r->_reset_to_first_frame = false;
@@ -301,12 +303,14 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       // next_cycle = _crouch_l;
    }
 
-   // bend down state
+   // bending down state
    else if (data._bending_down)
    {
       next_cycle = data._points_left ? _bend_down_l : _bend_down_r;
+      const auto& mapped_animation = getMappedArmedAnimation(next_cycle, data);
 
-      if (StopWatch::duration(data._timepoint_bend_down_start, now) > _bend_down_l->_overall_time_chrono)
+      // going from bending down to bending down idle
+      if (StopWatch::duration(data._timepoint_bend_down_start, now) > mapped_animation->_overall_time_chrono)
       {
          next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
 
@@ -326,8 +330,10 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    // idle or bend back up
    else if (data._points_left)
    {
+      const auto& mapped_animation = getMappedArmedAnimation(_bend_up_l, data);
+
       // bend up if player is releasing the crouch
-      if (StopWatch::duration(data._timepoint_bend_down_end, now) < _bend_up_l->_overall_time_chrono)
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < mapped_animation->_overall_time_chrono)
       {
          next_cycle = _bend_up_l;
       }
@@ -344,8 +350,10 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    }
    else
    {
+      const auto& mapped_animation = getMappedArmedAnimation(_bend_up_r, data);
+
       // bend up if player is releasing the crouch
-      if (StopWatch::duration(data._timepoint_bend_down_end, now) < _bend_up_r->_overall_time_chrono)
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < mapped_animation->_overall_time_chrono)
       {
          next_cycle = _bend_up_r;
       }
@@ -369,6 +377,7 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
          _jump_animation_reference = 0;
          next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
       }
+
       // jump is active when either
       // - in the air
       // - jumping through a one-sided wall (in that case player may have ground contacts)
@@ -422,7 +431,9 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
 
    if (data._wall_sliding)
    {
-      if (StopWatch::duration(data._timepoint_wallslide, now) < _wallslide_impact_l->_overall_time_chrono)
+      const auto& mapped_animation = getMappedArmedAnimation(_wallslide_impact_l, data);
+
+      if (StopWatch::duration(data._timepoint_wallslide, now) < mapped_animation->_overall_time_chrono)
       {
          next_cycle = data._points_right ? _wallslide_impact_l : _wallslide_impact_r;
       }
@@ -432,12 +443,12 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       }
    }
 
-   if (StopWatch::duration(data._timepoint_doublejump, now) < _double_jump_r->_overall_time_chrono)
+   if (StopWatch::duration(data._timepoint_doublejump, now) < getMappedArmedAnimation(_double_jump_r, data)->_overall_time_chrono)
    {
       next_cycle = data._points_right ? _double_jump_r : _double_jump_l;
    }
 
-   if (StopWatch::duration(data._timepoint_walljump, now) < _wall_jump_r->_overall_time_chrono)
+   if (StopWatch::duration(data._timepoint_walljump, now) < getMappedArmedAnimation(_wall_jump_r, data)->_overall_time_chrono)
    {
       next_cycle = data._wall_jump_points_right ? _wall_jump_r : _wall_jump_l;
    }
@@ -478,9 +489,13 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    }
 
    // attack
-   if (data._attacking)
+   if (data._bending_down)
    {
-      // next_cycle = data._points_right ? _sword_attack_r : _sword_attack_l;
+      // also must be mapped for different weapons
+      if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_bend_down_attack_1_l->_overall_time_chrono)
+      {
+         next_cycle = data._points_left ? _sword_bend_down_attack_1_l : _sword_bend_down_attack_1_r;
+      }
    }
 
    next_cycle = getMappedArmedAnimation(next_cycle, data);
