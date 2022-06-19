@@ -306,6 +306,30 @@ void Door::setPlayerAtDoor(bool player_at_door)
 
 
 //-----------------------------------------------------------------------------
+void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
+{
+   static const std::unordered_map<ItemType, int32_t> map{
+      std::make_pair(ItemType::KeyRed, 1),
+      std::make_pair(ItemType::KeyGreen, 4),
+      std::make_pair(ItemType::KeyBlue, 7),
+      std::make_pair(ItemType::KeyYellow, 10),
+      std::make_pair(ItemType::KeyOrange, 13),
+   };
+
+   const auto offset_it = map.find(item_type);
+
+   if (offset_it == map.end())
+   {
+      return;
+   }
+
+   _sprite_icon.setTexture(*_texture);
+   _sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * offset_it->second, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
+   _sprite_icon.setPosition(pos);
+}
+
+
+//-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData& data)
 {
    if (!data._tmx_layer)
@@ -347,34 +371,28 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
          // ...
 
          auto required_item = ItemType::Invalid;
-         auto icon_offset = 0;
          auto create_door = false;
 
          switch (tile_id)
          {
             case 21:
                required_item = ItemType::KeyRed;
-               icon_offset = 1;
                create_door = true;
                break;
             case 24:
                required_item = ItemType::KeyGreen;
-               icon_offset = 4;
                create_door = true;
                break;
             case 27:
                required_item = ItemType::KeyBlue;
-               icon_offset = 7;
                create_door = true;
                break;
             case 30:
                required_item = ItemType::KeyYellow;
-               icon_offset = 10;
                create_door = true;
                break;
             case 33:
                required_item = ItemType::KeyOrange;
-               icon_offset = 13;
                create_door = true;
                break;
             case 36:
@@ -418,12 +436,12 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
             // draw required door open icon
             if (required_item != ItemType::Invalid)
             {
-               door->_sprite_icon.setTexture(*door->_texture);
-               door->_sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * icon_offset, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
-               door->_sprite_icon.setPosition(
+               auto key_sprite_pos = sf::Vector2f{
                   static_cast<float>(i * PIXELS_PER_TILE),
                   static_cast<float>(j * PIXELS_PER_TILE)
-               );
+               };
+
+               door->setupKeySprite(required_item, key_sprite_pos);
             }
 
             if (data._tmx_layer->_properties)
@@ -473,9 +491,32 @@ void Door::setup(const GameDeserializeData& data)
       PIXELS_PER_TILE * 3
    };
 
-   if (data._tmx_object->_properties)
+   const auto z_it = data._tmx_object->_properties->_map.find("z");
+   if (z_it != data._tmx_object->_properties->_map.end())
    {
-      setZ(data._tmx_object->_properties->_map["z"]->_value_int.value());
+      const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+      setZ(z_index);
+   }
+
+   const auto key_it = data._tmx_object->_properties->_map.find("key");
+   if (key_it != data._tmx_object->_properties->_map.end())
+   {
+      const auto key = key_it->second->_value_string.value();
+
+      static const std::unordered_map<std::string, ItemType> map{
+         std::make_pair("key_red", ItemType::KeyRed),
+         std::make_pair("key_green", ItemType::KeyGreen),
+         std::make_pair("key_blue", ItemType::KeyBlue),
+         std::make_pair("key_yellow", ItemType::KeyYellow),
+         std::make_pair("key_orange", ItemType::KeyOrange),
+      };
+
+      const auto key_type_it = map.find(key);
+      if (key_type_it != map.end())
+      {
+         _required_item = key_type_it->second;
+         setupKeySprite(key_type_it->second, sf::Vector2f{x_px, y_px});
+      }
    }
 
    setupBody(data._world);

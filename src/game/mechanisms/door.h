@@ -65,6 +65,8 @@ private:
       float x_scale = 1.0f
    );
 
+   void setupKeySprite(ItemType item_type, const sf::Vector2f& pos);
+
    void updateTransform();
 
    void updateBars(const sf::Time& dt);
