@@ -107,6 +107,10 @@ void GameMechanismDeserializer::deserialize(
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms
 )
 {
+   // clear all previously created internal data it's not cleaned up, even if all instances are deleted
+   Laser::resetAll();
+   Fan::resetAll();
+
    GameDeserializeData data(data_ref);
 
    auto mechanism_bouncers             = mechanisms["bouncers"];
