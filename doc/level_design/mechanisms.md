@@ -30,9 +30,9 @@ Bouncers use the `tilesets/bumper.png` texture inside your level directory.
 
 |Property|Type|Description|
 |-|-|-|
-|z|int|The object's z index|
 |width|float|The width of the bouncer should be set to `24.0` for horizontally aligned bouncers.|
 |height|float|The height of the bouncer should be set to `5.0` for horizontally aligned bouncers.|
+|z|int|The object's z index|
 ---
 
 
@@ -65,9 +65,6 @@ Now change the object's default properties below:
 |-|-|-|
 |Width|float|The width of the belt should be a multiple of `24.0`.|
 |Height|float|The height of the belt should be set to `12.0`.|
-
-|Custom Property|Type|Description|
-|-|-|-|
 |z|int|The object's z index|
 |velocity|float|Negative values make the player move to the left, positive values move him to the right. Good values are probably something like `-0.6` and `0.6`.|
 ---
@@ -94,7 +91,7 @@ Doors can have keys assigned which the player has to find inside your level in f
 
 ### Object Properties
 
-|Custom Property|Type|Description|
+|Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
 |key|string|An optional parameter to define a key that is required to open the door. So far, this value can be `key_red`, `key_green`, `key_blue`, `key_yellow`, and `key_orange`.|
@@ -121,7 +118,7 @@ This mechanism uses a mix of layers and objects. While the fans inside the tile 
 
 ### Object Properties
 
-|Custom Property|Type|Description|
+|Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
 |speed|float|The speed value typically ranges from [`0..1`], `0.9` turned out to be a suitable value.|
@@ -138,18 +135,18 @@ This mechanism uses a mix of layers and objects. While the fans inside the tile 
 
 Lasers follow the same concept as fans and are based on a combination of tiles and objects. Since the tileset allows rather complex laser shapes including mirror tiles, the object layer is used so you can group your laser tiles to one coherent 'unit'.
 
-So the first thing you do is to place all your laser tiles inside a tile layer called `lasers_2` and then create an object layer `lasers_2` where you draw a rectangle that covers all the laser tiles that belong together (`_2` because we want to use the 2nd version of the laser implementation).
+So the first thing you do is to place all your laser tiles inside a tile layer called `lasers` and then create a rectangle object that covers all the laser tiles that belong together (to one laser group).
 
 ### Object Type / Object Group
 
 |Method|Value|
 |-|-|
 |Object Type|`Laser`|
-|Object Group|`lasers_2`|
+|Object Group|`lasers`|
 
 ### Object Properties
 
-|Custom Property|Type|Description|
+|Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
 |off_time|int|The duration the laser is in 'off' state (in ms)|
@@ -162,10 +159,12 @@ So the first thing you do is to place all your laser tiles inside a tile layer c
 To make lasers a little more interesting, there's also the option to make them movable. For that purpose, you can define a polygon inside your lasers layer that defines the movement path.
 All you need to do is to give your laser object a name, and then reference that object in your polygon's properties.
 
-|Custom Property|Type|Description|
+|Property|Type|Description|
 |-|-|-|
 |reference_id|string|The object name of the rectangle that groups your laser tiles|
 |movement_speed|float|A velocity factor for the laser movement, the default is `0.2`.|
+|z|int|The object's z index|
+
 ---
 
 &nbsp;
@@ -177,18 +176,27 @@ All you need to do is to give your laser object a name, and then reference that 
 
 Bubble Cubes serve as a solid platform the player can land on and jump off again. However, once the player contact to the Bubble Cube ends, it pops and only respawns after a couple of seconds.
 
-In order to place Bubble Cubes in your level, create an object layer called `bubble_cubes`. In there, just place a rectangle where you'd like to position your Bubble Cube.
-Their dimensions (including margin) is 3 x 2 tiles so it makes sense to adjust your rectangle accordingly.
+The rectangle object's dimensions (including margin) are 3 x 2 tiles so it makes sense to adjust your rectangle accordingly.
 
 ![](images/bubble_cubes.png)
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`BubbleCube`|
+|Object Group|`bubble_cubes`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
 |pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`).|
 |move_down_on_contact|bool|The bubble moves down on foot contact (the default is `true`).|
 |move_down_velocity|float|A factor to control the movement velocity when `move_down_on_contact` is enabled (the default is `0.5`).|
 |maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
+|z|int|The object's z index|
 
 ---
 
@@ -209,13 +217,23 @@ In there, just place a rectangle where you'd like to position your Collapsing Pl
 ![](images/mechanism_collapsing_platforms_1.png)
 ![](images/mechanism_collapsing_platforms_2.png)
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`CollapsingPlatform`|
+|Object Group|`collapsing_platforms`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |time_to_collapse_s|float|The time in seconds it takes for a platform to collapse (the default is 1.0s).|
 |destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
 |fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
 |time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
 |fade_in_duration_s|float|The time in seconds it takes for a respawning platform to fade in (the default is 1.0s).|
+|z|int|The object's z index|
 
 ---
 
@@ -251,11 +269,20 @@ As the name promises, Crushers can crush Adam. They consist of a bunch of spikes
 
 ![](images/mechanism_crushers.png)
 
-Crushers can be added to your level by adding an object layer called `crushers`. To change the Crushers' alignment, please refer to the Custom Properties below:
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Crusher`|
+|Object Group|`crushers`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |alignment|string|Direction of the Crusher (valid values are '`up`', '`down`', '`left`', '`right`')|
+|z|int|The object's z index|
 
 ---
 
@@ -271,7 +298,20 @@ Death Blocks are spiky boxes that move back and forth along a given line. Depend
 
 ![](images/mechanism_death_block.png)
 
-Since you draw the 'rails' of the Death Blocks just to a background layer, this mechanism only requires a polyline object added to the object group `death_blocks`
+Since you draw the 'rails' of the Death Blocks just to a background layer, this mechanism only requires you to create a polyline object.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`DeathBlock`|
+|Object Group|`death_blocks`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index|
 
 ---
 
@@ -295,7 +335,7 @@ Levers! One of the most important mechanisms. In short, they do what levers do: 
 - Spikes
 - Spike Blocks
 
-While you draw your lever objects as 3x2 tile rectangles into an object group called `levers`, a connection between another mechanism and the lever is created by adding an object group `switchable_objects`; in there you draw a rectangle that covers both the object(s) that should be switched on and off as well as the lever.
+While you draw your lever objects as 3x2 tile rectangles, a connection between another mechanism and the lever is created by adding an object group `switchable_objects`; in there you draw a rectangle that covers both the object(s) that should be switched on and off as well as the lever.
 
 ![](images/mechanism_levers.png)
 
@@ -303,9 +343,19 @@ In the screenshot above the fans will go off once the lever is activated.
 
 The properties below apply for the object inside the `levers` object group.
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Lever`|
+|Object Group|`levers`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |enabled|bool|Defines the initial state of the lever which is either enabled or disabled|
+|z|int|The object's z index|
 
 ---
 
@@ -323,13 +373,21 @@ Sensor Rectangles work pretty much like a photo sensor. They have no visualizati
 This can come handy when you want to always trigger a switch when the player enters a room or always close a door when the player just walked through it.
 So you can build quite complex mechanisms with this while the mechanism itself is very easy to use.
 
-To use Sensor Rects, create an object layer `sensor_rects`. In there, you create one rectangle for each sensor.
+### Object Type / Object Group
 
-|Custom Property|Type|Description|
+|Method|Value|
+|-|-|
+|Object Type|`SensorRect`|
+|Object Group|`sensor_rects`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |reference_id|string|The object identifier that the sensor is connected to.|
 |event|string|The event that triggers the action. This can either be `on_enter` (default) or `on_leave`. |
 |action|string|Whether to `enable`, `disable`, or `toggle` the other reference mechanism. Valid values are `enable` (default), `disable`, `toggle`.|
+|z|int|The object's z index|
 
 ---
 
@@ -346,14 +404,22 @@ The Deceptus Engine is able to connect other objects to ropes attached to mounts
 
 Moreover, ropes have a number of properties to simulate 'wind behavior'. So you can also place them next to open windows out outside areas.
 
-So far you can create ropes in your level by creating an object group called `ropes`.
+### Object Type / Object Group
 
-|Custom Property|Type|Description|
+|Method|Value|
+|-|-|
+|Object Type|`Rope`|
+|Object Group|`ropes`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |push_interval_s|float|The interval how often the rope is pushed (in seconds, a good value is `5.0`)|
 |push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
 |push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
 |segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
+|z|int|The object's z index|
 
 Read more about Ropes in the paragraph 'Ropes with Lights'.
 
@@ -372,11 +438,20 @@ Spike Balls are nasty. They're heavy balls with spikes connected to a chain whic
 
 ![](images/mechanism_spike_balls.png)
 
-In order to add Spike Balls to your level, you have to create an object layer called `spike_balls`. In there, you place a rectangle at the location where the Spike Ball's chain shall be mounted.
+In order to add Spike Balls to your level, you have to create a rectangle object at the location where the Spike Ball's chain shall be mounted.
 
 It is very important to place that mount high enough, otherwise the ball will crash into the physics representation of your level and the physics engine will go a bit crazy.
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`SpikeBall`|
+|Object Group|`spike_balls`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
 |push_factor|float|Each time when the spike ball changes direction, it gets a little push. This is the factor for the force that's applied (default is `0.625`).|
@@ -410,6 +485,12 @@ As a side-note. If you want spikes that are extended, just put them into your `t
 
 ![](images/mechanism_spikes.png)
 
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+
 ---
 
 &nbsp;
@@ -429,9 +510,18 @@ While they are in lever mode without actually being connected to a lever, they a
 
 If you need to know how to connect Spike Blocks to a lever, please check the documentation about the Lever Mechanism.
 
-To create a Spike Block, just create an object layer named `spike_blocks`. In there create a rectangle of 1x1 tiles for each block.
+To create a Spike Block, just create a rectangle object of 1x1 tiles for each block.
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`SpikeBlock`|
+|Object Group|`spike_blocks`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
 |enabled|bool|The default enabled state (default is `true`)|
@@ -453,11 +543,20 @@ To create a Spike Block, just create an object layer named `spike_blocks`. In th
 On/Off Blocks are basically the friendly version of the Spike Block. When you switch it on, it's just a solid block that could be placed as a barrier, ladder, etc.
 When you switch it off, it just disappears and the player does no longer collide with them.
 
-To create an On/Off Block, just create an object layer named `on_off_blocks`. In there create a rectangle of 1x1 tiles for each block.
+To create an On/Off Block, just create a rectangle object of 1x1 tiles for each block.
 
 ![](images/mechanism_on_off_block_1.png)
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`OnOffBlock`|
+|Object Group|`on_off_blocks`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
 |enabled|bool|The default enabled state (default is `true`)|
@@ -480,8 +579,18 @@ Rotating Blades are pretty nasty. They're pretty much the same as an angle grind
 
 ![](images/mechanism_rotating_blade.png)
 
+To create a rotating blade object, just create a polyline for its path.
 
-|Custom Property|Type|Description|
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`RotatingBlade`|
+|Object Group|`rotating_blades`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
 |enabled|bool|The default enabled state (default is `true`)|
@@ -509,6 +618,19 @@ To create moving platforms, the first thing to do is to draw your platform rail 
 
 ![](images/mechanism_moving_platforms_settings.png)
 
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Platform`|
+|Object Group|`platforms`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index|
+
 ---
 
 &nbsp;
@@ -533,6 +655,19 @@ So once all the tile shapes are set up, they can be drawn into the tile layer. W
 
 While the player moves through the one-way walls by pressing the jump key / button, it is possible to drop from a one-way wall by pressing jump together with the down key / button.
 
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`n/a`|
+|Object Group|`level_solid_onesided`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+
 ---
 
 &nbsp;
@@ -547,9 +682,23 @@ At the moment this object type should rather be called 'Moveable Box' since thei
 
 Anyhow, Moveable Objects are objects the player can push from one position to another just by walking against it. This way Adam might be able to climb obstacles, block enemies, etc.
 
-The way to create a moveable object, create a rectangle object inside the object group `moveable_objects`. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
+The way to create a moveable object, create a rectangle as usual. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
 
 ![](images/mechanism_movable_objects.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`MoveableObject`|
+|Object Group|`moveable_objects`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+
 
 ---
 
@@ -589,13 +738,20 @@ This is usually the `up` button of your keyboard or dpad.
 The message boxes can vary in color and can contain multiple messages.
 In the future they might be extended so they can alter in location, color and animation.
 
-In order to introduce a message box, you create an object layer 'dialogues' where you define a rectangle that defines the area where a message box is shown when activated.
+In order to introduce a message box, you create a rectangle object that defines the area where a message box is shown when activated.
 
 ![](images/mechanism_dialogs_tiled.png)
 
-Each message box has the custom properties below:
+### Object Type / Object Group
 
-|Custom Property|Type|Description|
+|Method|Value|
+|-|-|
+|Object Type|`Dialogue`|
+|Object Group|`dialogues`|
+
+### Object Properties
+
+|Property|Type|Description|
 |-|-|-|
 |01|string|The first message to show|
 |02|string|The second message to show|
@@ -611,6 +767,14 @@ Moreover, you can use the tags below inside your dialogue strings:
 |`<br>`|Add a line break|
 |`<player>`|Insert the name of the player|
 
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
 
 ## Controller Help
 
@@ -621,10 +785,20 @@ You do so by creating a layer called `controller_help` and inserting rectangles 
 
 ![](images/mechanism_controller_help_settings.png)
 
+### Object Type / Object Group
 
-|Custom Property|Type|Description|
+|Method|Value|
+|-|-|
+|Object Type|`ControllerHelp`|
+|Object Group|`controller_help`|
+
+### Object Properties
+
+
+|Property|Type|Description|
 |-|-|-|
 |keys|string|A semicolon delimited string that lists the key/button combinations to be shown|
+|z|int|The object's z index|
 
 ### Available Keys
 
@@ -650,3 +824,7 @@ Depending on whether a keyboard or a game controller is connected, the buttons b
 |`key_cursor_r`|`dpad_r`|
 |`key_return`|`bt_a`|
 |`key_escape`|`bt_b`|
+
+---
+
+&nbsp;
