@@ -50,7 +50,8 @@ static constexpr auto layer_name_doors                = "doors";
 static constexpr auto layer_name_dust                 = "dust";
 static constexpr auto layer_name_fans                 = "fans";
 static constexpr auto layer_name_interval_spikes      = "interval_spikes";
-static constexpr auto layer_name_lasers_v1            = "lasers";
+static constexpr auto layer_name_lasers               = "lasers";
+static constexpr auto layer_name_lasers_v1            = "lasers_1";
 static constexpr auto layer_name_lasers_v2            = "lasers_2";
 static constexpr auto layer_name_levers               = "levers";
 static constexpr auto layer_name_moveable_objects     = "moveable_objects";
@@ -105,7 +106,7 @@ void GameMechanismDeserializer::deserialize(
    GameNode* parent,
    const GameDeserializeData& data_ref,
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms
-)
+   )
 {
    // clear all previously created internal data it's not cleaned up, even if all instances are deleted
    Laser::resetAll();
@@ -168,7 +169,7 @@ void GameMechanismDeserializer::deserialize(
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
          }
-         else if (layer->_name == layer_name_lasers_v2) // support for dstar's new laser tileset
+         else if (layer->_name == layer_name_lasers_v2 || layer->_name == layer_name_lasers) // support for dstar's new laser tileset
          {
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
@@ -218,7 +219,7 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<BubbleCube>(parent, data);
                mechanism_bubble_cubes->push_back(mechanism);
             }
-            else if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers_v2 || tmx_object->_type == type_name_laser)
+            else if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers ||object_group->_name == layer_name_lasers_v2 || tmx_object->_type == type_name_laser)
             {
                Laser::addObject(tmx_object);
             }
@@ -274,9 +275,9 @@ void GameMechanismDeserializer::deserialize(
             }
             else if (object_group->_name == layer_name_on_off_blocks || tmx_object->_type == type_name_on_off_block)
             {
-                auto mechanism = std::make_shared<OnOffBlock>(parent);
-                mechanism->setup(data);
-                mechanism_on_off_blocks->push_back(mechanism);
+               auto mechanism = std::make_shared<OnOffBlock>(parent);
+               mechanism->setup(data);
+               mechanism_on_off_blocks->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_moveable_objects || tmx_object->_type == type_name_moveable_object)
             {
@@ -369,7 +370,7 @@ void GameMechanismDeserializer::deserialize(
    *mechanism_fans = Fan::getFans();
    *mechanism_platforms = MovingPlatform::merge(parent, data);
 
-   // get a flat vector of all values
+         // get a flat vector of all values
    std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
    for (auto& [keys, values] : mechanisms)
    {
@@ -395,15 +396,16 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_on_off_blocks,
       *mechanism_rotating_blades,
       *mechanism_doors
-   );
+      );
 }
 
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)
 {
    if (
-         (layer_name.rfind(layer_name_doors, 0) == 0)
+      (layer_name.rfind(layer_name_doors, 0) == 0)
       || (layer_name == layer_name_fans)
+      || (layer_name == layer_name_lasers)
       || (layer_name == layer_name_lasers_v1)
       || (layer_name == layer_name_lasers_v2)
       || (layer_name == layer_name_levers)
@@ -412,7 +414,7 @@ bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_nam
       || (layer_name == layer_name_toggle_spikes)
       || (layer_name == layer_name_trap_spikes)
       || (layer_name == layer_name_interval_spikes)
-   )
+      )
    {
       return true;
    }
