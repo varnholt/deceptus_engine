@@ -139,10 +139,10 @@ AnimationPool& AnimationPool::getInstance()
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::deserialize(const std::string& data)
 {
-   json config = json::parse(data);
-
    try
    {
+      json config = json::parse(data);
+
       for (auto& item : config.get<json::object_t>())
       {
          auto name = item.first;
