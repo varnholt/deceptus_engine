@@ -68,5 +68,5 @@ void Sword::use(const std::shared_ptr<b2World>& /*world*/, const b2Vec2& pos, co
    _pos_m = pos;
    _dir_m = dir;
 
-   std::cout << "sword attack" << std::endl;
+   // std::cout << "sword attack" << std::endl;
 }

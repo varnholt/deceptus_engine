@@ -129,12 +129,22 @@ private:
 
    std::shared_ptr<Animation> _sword_idle_l;
    std::shared_ptr<Animation> _sword_idle_r;
+   std::shared_ptr<Animation> _sword_run_l;
+   std::shared_ptr<Animation> _sword_run_r;
    std::shared_ptr<Animation> _sword_bend_down_l;
    std::shared_ptr<Animation> _sword_bend_down_r;
    std::shared_ptr<Animation> _sword_bend_down_attack_1_l;
    std::shared_ptr<Animation> _sword_bend_down_attack_1_r;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_l;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
+   std::shared_ptr<Animation> _sword_standing_attack_1_l;
+   std::shared_ptr<Animation> _sword_standing_attack_1_r;
+   std::shared_ptr<Animation> _sword_standing_attack_2_l;
+   std::shared_ptr<Animation> _sword_standing_attack_2_r;
+   std::shared_ptr<Animation> _sword_standing_attack_3_l;
+   std::shared_ptr<Animation> _sword_standing_attack_3_r;
+   std::shared_ptr<Animation> _sword_standing_attack_4_l;
+   std::shared_ptr<Animation> _sword_standing_attack_4_r;
 
    std::shared_ptr<Animation> _death;
 
