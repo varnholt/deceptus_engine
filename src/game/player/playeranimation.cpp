@@ -90,6 +90,10 @@ PlayerAnimation::PlayerAnimation()
    _sword_bend_down_attack_1_r = AnimationPool::getInstance().add("player_bend_down_attack_sword_1_r", 0.0f, 0.0f, true, false);
    _sword_bend_down_attack_2_l = AnimationPool::getInstance().add("player_bend_down_attack_sword_2_l", 0.0f, 0.0f, true, false);
    _sword_bend_down_attack_2_r = AnimationPool::getInstance().add("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
+   _sword_run_l = AnimationPool::getInstance().add("player_run_sword_l", 0.0f, 0.0f, true, false);
+   _sword_run_r = AnimationPool::getInstance().add("player_run_sword_r", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_1_l = AnimationPool::getInstance().add("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_1_r = AnimationPool::getInstance().add("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
 
    // we will replace those later as we go
    _idle_r_tmp = _idle_r;
@@ -167,6 +171,8 @@ PlayerAnimation::PlayerAnimation()
 
    _looped_animations.push_back(_sword_idle_l);
    _looped_animations.push_back(_sword_idle_r);
+   _looped_animations.push_back(_sword_run_r);
+   _looped_animations.push_back(_sword_run_l);
 
    for (auto& i : _looped_animations)
    {
@@ -175,6 +181,8 @@ PlayerAnimation::PlayerAnimation()
 
    _sword_lut[_idle_l] = _sword_idle_l;
    _sword_lut[_idle_r] = _sword_idle_r;
+   _sword_lut[_run_l] = _sword_run_l;
+   _sword_lut[_run_r] = _sword_run_r;
    _sword_lut[_bend_down_l] = _sword_bend_down_l;
    _sword_lut[_bend_down_r] = _sword_bend_down_r;
 }
@@ -491,10 +499,23 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    // attack
    if (data._bending_down)
    {
-      // also must be mapped for different weapons
-      if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_bend_down_attack_1_l->_overall_time_chrono)
+      if (data._weapon_type == WeaponType::Sword)
       {
-         next_cycle = data._points_left ? _sword_bend_down_attack_1_l : _sword_bend_down_attack_1_r;
+         // also must be mapped for different weapons
+         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_bend_down_attack_1_l->_overall_time_chrono)
+         {
+            next_cycle = data._points_left ? _sword_bend_down_attack_1_l : _sword_bend_down_attack_1_r;
+         }
+      }
+   }
+   else
+   {
+      if (data._weapon_type == WeaponType::Sword)
+      {
+         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_standing_attack_1_l->_overall_time_chrono)
+         {
+            next_cycle = data._points_left ? _sword_standing_attack_1_l : _sword_standing_attack_1_r;
+         }
       }
    }
 
