@@ -92,14 +92,22 @@ PlayerAnimation::PlayerAnimation()
    _sword_bend_down_attack_2_r = AnimationPool::getInstance().add("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
    _sword_run_l = AnimationPool::getInstance().add("player_run_sword_l", 0.0f, 0.0f, true, false);
    _sword_run_r = AnimationPool::getInstance().add("player_run_sword_r", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_1_l = AnimationPool::getInstance().add("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_1_r = AnimationPool::getInstance().add("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_l[0] = AnimationPool::getInstance().add("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_r[0] = AnimationPool::getInstance().add("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_l[3] = AnimationPool::getInstance().add("player_standing_attack_sword_4_l", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_r[3] = AnimationPool::getInstance().add("player_standing_attack_sword_4_r", 0.0f, 0.0f, true, false);
 
    // we will replace those later as we go
    _idle_r_tmp = _idle_r;
    _idle_l_tmp = _idle_l;
    _bend_down_idle_r_tmp = _bend_down_idle_r;
    _bend_down_idle_l_tmp = _bend_down_idle_l;
+   _sword_standing_attack_tmp_l = _sword_standing_attack_l[0];
+   _sword_standing_attack_tmp_r = _sword_standing_attack_r[0];
 
    // we don't want these to jump back to the first frame
    _appear_r->_reset_to_first_frame = false;
@@ -206,18 +214,14 @@ void PlayerAnimation::resetAlpha()
    }
 }
 
-
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 {
    using namespace std::chrono_literals;
    return 1000ms + _appear_l->_overall_time_chrono + 20ms;
 }
 
-
-const std::shared_ptr<Animation>& PlayerAnimation::getMappedArmedAnimation(
-   const std::shared_ptr<Animation>& animation,
-   const PlayerAnimationData& animation_data
-)
+const std::shared_ptr<Animation>&
+PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data)
 {
    switch (animation_data._weapon_type)
    {
@@ -244,7 +248,6 @@ const std::shared_ptr<Animation>& PlayerAnimation::getMappedArmedAnimation(
 
    return animation;
 }
-
 
 void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data)
 {
@@ -512,9 +515,19 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    {
       if (data._weapon_type == WeaponType::Sword)
       {
-         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_standing_attack_1_l->_overall_time_chrono)
+         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_standing_attack_tmp_l->_overall_time_chrono)
          {
-            next_cycle = data._points_left ? _sword_standing_attack_1_l : _sword_standing_attack_1_r;
+            if (_sword_standing_attack_tmp_l->_finished)
+            {
+               _sword_standing_attack_tmp_l = _sword_standing_attack_l[(std::rand() % _sword_standing_attack_l.size())];
+            }
+
+            if (_sword_standing_attack_tmp_r->_finished)
+            {
+               _sword_standing_attack_tmp_r = _sword_standing_attack_r[(std::rand() % _sword_standing_attack_r.size())];
+            }
+
+            next_cycle = data._points_left ? _sword_standing_attack_tmp_l : _sword_standing_attack_tmp_r;
          }
       }
    }
@@ -539,7 +552,6 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    _current_cycle = next_cycle;
    _current_cycle->update(dt);
 }
-
 
 void PlayerAnimation::generateJson()
 {
