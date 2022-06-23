@@ -3,6 +3,7 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
+#include <array>
 #include <optional>
 
 #include "animation.h"
@@ -137,14 +138,10 @@ private:
    std::shared_ptr<Animation> _sword_bend_down_attack_1_r;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_l;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
-   std::shared_ptr<Animation> _sword_standing_attack_1_l;
-   std::shared_ptr<Animation> _sword_standing_attack_1_r;
-   std::shared_ptr<Animation> _sword_standing_attack_2_l;
-   std::shared_ptr<Animation> _sword_standing_attack_2_r;
-   std::shared_ptr<Animation> _sword_standing_attack_3_l;
-   std::shared_ptr<Animation> _sword_standing_attack_3_r;
-   std::shared_ptr<Animation> _sword_standing_attack_4_l;
-   std::shared_ptr<Animation> _sword_standing_attack_4_r;
+   std::shared_ptr<Animation> _sword_standing_attack_tmp_l;
+   std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
+   std::array<std::shared_ptr<Animation>, 4> _sword_standing_attack_l;
+   std::array<std::shared_ptr<Animation>, 4> _sword_standing_attack_r;
 
    std::shared_ptr<Animation> _death;
 
