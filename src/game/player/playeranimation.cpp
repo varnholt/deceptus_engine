@@ -517,17 +517,33 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       {
          if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_standing_attack_tmp_l->_overall_time_chrono)
          {
-            if (_sword_standing_attack_tmp_l->_finished)
+            if (data._points_left)
             {
-               _sword_standing_attack_tmp_l = _sword_standing_attack_l[(std::rand() % _sword_standing_attack_l.size())];
+               next_cycle = _sword_standing_attack_tmp_l;
+               _sword_standing_attack_l_reset = true;
             }
-
-            if (_sword_standing_attack_tmp_r->_finished)
+            else
             {
-               _sword_standing_attack_tmp_r = _sword_standing_attack_r[(std::rand() % _sword_standing_attack_r.size())];
+               next_cycle = _sword_standing_attack_tmp_r;
+               _sword_standing_attack_r_reset = true;
             }
+         }
+         else
+         {
+            _sword_standing_attack_tmp_l->_finished = true;
+            _sword_standing_attack_tmp_r->_finished = true;
+         }
 
-            next_cycle = data._points_left ? _sword_standing_attack_tmp_l : _sword_standing_attack_tmp_r;
+         if (_sword_standing_attack_l_reset && _sword_standing_attack_tmp_l->_finished)
+         {
+            _sword_standing_attack_tmp_l = _sword_standing_attack_l[(std::rand() % _sword_standing_attack_l.size())];
+            _sword_standing_attack_l_reset = false;
+         }
+
+         if (_sword_standing_attack_r_reset && _sword_standing_attack_tmp_r->_finished)
+         {
+            _sword_standing_attack_tmp_r = _sword_standing_attack_r[(std::rand() % _sword_standing_attack_r.size())];
+            _sword_standing_attack_r_reset = false;
          }
       }
    }
