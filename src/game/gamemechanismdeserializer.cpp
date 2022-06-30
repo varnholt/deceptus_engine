@@ -1,5 +1,5 @@
-
 #include "gamemechanismdeserializer.h"
+#include "gamemechanismdeserializerconstants.h"
 
 #include "framework/tmxparser/tmxparser.h"
 
@@ -25,8 +25,8 @@
 #include "mechanisms/rotatingblade.h"
 #include "mechanisms/sensorrect.h"
 #include "mechanisms/shaderlayer.h"
-#include "mechanisms/spikeblock.h"
 #include "mechanisms/spikeball.h"
+#include "mechanisms/spikeblock.h"
 #include "mechanisms/spikes.h"
 
 // move to mechanisms
@@ -35,78 +35,12 @@
 
 #include <ranges>
 
-namespace
-{
-static constexpr auto layer_name_bouncers             = "bouncers";
-static constexpr auto layer_name_bubble_cube          = "bubble_cubes";
-static constexpr auto layer_name_checkpoints          = "checkpoints";
-static constexpr auto layer_name_collapsing_platforms = "collapsing_platforms";
-static constexpr auto layer_name_controller_help      = "controller_help";
-static constexpr auto layer_name_conveyorbelts        = "conveyorbelts";
-static constexpr auto layer_name_crushers             = "crushers";
-static constexpr auto layer_name_death_blocks         = "death_blocks";
-static constexpr auto layer_name_dialogues            = "dialogues";
-static constexpr auto layer_name_doors                = "doors";
-static constexpr auto layer_name_dust                 = "dust";
-static constexpr auto layer_name_fans                 = "fans";
-static constexpr auto layer_name_interval_spikes      = "interval_spikes";
-static constexpr auto layer_name_lasers               = "lasers";
-static constexpr auto layer_name_lasers_v1            = "lasers_1";
-static constexpr auto layer_name_lasers_v2            = "lasers_2";
-static constexpr auto layer_name_levers               = "levers";
-static constexpr auto layer_name_moveable_objects     = "moveable_objects";
-static constexpr auto layer_name_on_off_blocks        = "on_off_blocks";
-static constexpr auto layer_name_platform_paths       = "platform_paths";
-static constexpr auto layer_name_platforms            = "platforms";
-static constexpr auto layer_name_portals              = "portals";
-static constexpr auto layer_name_ropes                = "ropes";
-static constexpr auto layer_name_ropes_with_light     = "ropes_with_light";
-static constexpr auto layer_name_rotating_blades      = "rotating_blades";
-static constexpr auto layer_name_sensor_rects         = "sensor_rects";
-static constexpr auto layer_name_shader_quads         = "shader_quads";
-static constexpr auto layer_name_spike_balls          = "spike_balls";
-static constexpr auto layer_name_spike_blocks         = "spike_blocks";
-static constexpr auto layer_name_switchable_objects   = "switchable_objects";
-static constexpr auto layer_name_toggle_spikes        = "toggle_spikes";
-static constexpr auto layer_name_trap_spikes          = "trap_spikes";
-static constexpr auto layer_name_weather              = "weather";
-
-static constexpr auto type_name_bouncer               = "Bouncer";
-static constexpr auto type_name_bubble_cube           = "BubbleCube";
-static constexpr auto type_name_checkpoint            = "CheckPoint";
-static constexpr auto type_name_collapsing_platform   = "CollapsingPlatform";
-static constexpr auto type_name_controller_help       = "ControllerHelp";
-static constexpr auto type_name_conveyor_belt         = "ConveyorBelt";
-static constexpr auto type_name_crusher               = "Crusher";
-static constexpr auto type_name_death_block           = "DeathBlock";
-static constexpr auto type_name_dialogue              = "Dialogue";
-static constexpr auto type_name_door                  = "Door";
-static constexpr auto type_name_dust                  = "Dust";
-static constexpr auto type_name_fan                   = "Fan";
-static constexpr auto type_name_laser                 = "Laser";
-static constexpr auto type_name_lever                 = "Lever";
-static constexpr auto type_name_moveable_object       = "MoveableObject";
-static constexpr auto type_name_on_off_block          = "OnOffBlock";
-static constexpr auto type_name_platform              = "Platform";
-static constexpr auto type_name_platform_path         = "PlatformPath";
-static constexpr auto type_name_portal                = "Portal";
-static constexpr auto type_name_rope                  = "Rope";
-static constexpr auto type_name_rope_with_light       = "RopeWithLight";
-static constexpr auto type_name_rotating_blade        = "RotatingBlade";
-static constexpr auto type_name_sensor_rect           = "SensorRect";
-static constexpr auto type_name_shader_quad           = "ShaderQuad";
-static constexpr auto type_name_spike_ball            = "SpikeBall";
-static constexpr auto type_name_spike_block           = "SpikeBlock";
-static constexpr auto type_name_switchable_object     = "SwitchableObject";
-static constexpr auto type_name_weather               = "Weather";
-}
-
 void GameMechanismDeserializer::deserialize(
    const TmxParser& tmx_parser,
    GameNode* parent,
    const GameDeserializeData& data_ref,
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms
-   )
+)
 {
    // clear all previously created internal data it's not cleaned up, even if all instances are deleted
    Laser::resetAll();
@@ -114,32 +48,32 @@ void GameMechanismDeserializer::deserialize(
 
    GameDeserializeData data(data_ref);
 
-   auto mechanism_bouncers             = mechanisms["bouncers"];
-   auto mechanism_bubble_cubes         = mechanisms["bubble_cubes"];
-   auto mechanism_checkpoints          = mechanisms["checkpoints"];
+   auto mechanism_bouncers = mechanisms["bouncers"];
+   auto mechanism_bubble_cubes = mechanisms["bubble_cubes"];
+   auto mechanism_checkpoints = mechanisms["checkpoints"];
    auto mechanism_collapsing_platforms = mechanisms["collapsing_platforms"];
-   auto mechanism_controller_help      = mechanisms["controller_help"];
-   auto mechanism_conveyor_belts       = mechanisms["conveyorbelts"];
-   auto mechanism_crushers             = mechanisms["crushers"];
-   auto mechanism_death_blocks         = mechanisms["death_blocks"];
-   auto mechanism_dialogues            = mechanisms["dialogues"];
-   auto mechanism_doors                = mechanisms["doors"];
-   auto mechanism_dust                 = mechanisms["dust"];
-   auto mechanism_fans                 = mechanisms["fans"];
-   auto mechanism_lasers               = mechanisms["lasers"];
-   auto mechanism_levers               = mechanisms["levers"];
-   auto mechanism_moveable_objects     = mechanisms["moveable_objects"];
-   auto mechanism_on_off_blocks        = mechanisms["on_off_blocks"];
-   auto mechanism_platforms            = mechanisms["platforms"];
-   auto mechanism_portals              = mechanisms["portals"];
-   auto mechanism_ropes                = mechanisms["ropes"];
-   auto mechanism_rotating_blades      = mechanisms["rotating_blades"];
-   auto mechanism_sensor_rects         = mechanisms["sensor_rects"];
-   auto mechanism_shader_quads         = mechanisms["shader_quads"];
-   auto mechanism_spike_balls          = mechanisms["spike_balls"];
-   auto mechanism_spike_blocks         = mechanisms["spike_blocks"];
-   auto mechanism_spikes               = mechanisms["spikes"];
-   auto mechanism_weather              = mechanisms["weather"];
+   auto mechanism_controller_help = mechanisms["controller_help"];
+   auto mechanism_conveyor_belts = mechanisms["conveyorbelts"];
+   auto mechanism_crushers = mechanisms["crushers"];
+   auto mechanism_death_blocks = mechanisms["death_blocks"];
+   auto mechanism_dialogues = mechanisms["dialogues"];
+   auto mechanism_doors = mechanisms["doors"];
+   auto mechanism_dust = mechanisms["dust"];
+   auto mechanism_fans = mechanisms["fans"];
+   auto mechanism_lasers = mechanisms["lasers"];
+   auto mechanism_levers = mechanisms["levers"];
+   auto mechanism_moveable_objects = mechanisms["moveable_objects"];
+   auto mechanism_on_off_blocks = mechanisms["on_off_blocks"];
+   auto mechanism_platforms = mechanisms["platforms"];
+   auto mechanism_portals = mechanisms["portals"];
+   auto mechanism_ropes = mechanisms["ropes"];
+   auto mechanism_rotating_blades = mechanisms["rotating_blades"];
+   auto mechanism_sensor_rects = mechanisms["sensor_rects"];
+   auto mechanism_shader_quads = mechanisms["shader_quads"];
+   auto mechanism_spike_balls = mechanisms["spike_balls"];
+   auto mechanism_spike_blocks = mechanisms["spike_blocks"];
+   auto mechanism_spikes = mechanisms["spikes"];
+   auto mechanism_weather = mechanisms["weather"];
 
    for (auto element : tmx_parser.getElements())
    {
@@ -169,7 +103,7 @@ void GameMechanismDeserializer::deserialize(
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
          }
-         else if (layer->_name == layer_name_lasers_v2 || layer->_name == layer_name_lasers) // support for dstar's new laser tileset
+         else if (layer->_name == layer_name_lasers_v2 || layer->_name == layer_name_lasers)  // support for dstar's new laser tileset
          {
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
@@ -219,7 +153,8 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<BubbleCube>(parent, data);
                mechanism_bubble_cubes->push_back(mechanism);
             }
-            else if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers ||object_group->_name == layer_name_lasers_v2 || tmx_object->_type == type_name_laser)
+            else if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers ||
+                     object_group->_name == layer_name_lasers_v2 || tmx_object->_type == type_name_laser)
             {
                Laser::addObject(tmx_object);
             }
@@ -370,7 +305,7 @@ void GameMechanismDeserializer::deserialize(
    *mechanism_fans = Fan::getFans();
    *mechanism_platforms = MovingPlatform::merge(parent, data);
 
-         // get a flat vector of all values
+   // get a flat vector of all values
    std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
    for (auto& [keys, values] : mechanisms)
    {
@@ -396,29 +331,15 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_on_off_blocks,
       *mechanism_rotating_blades,
       *mechanism_doors
-      );
+   );
 }
-
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)
 {
-   if (
-      (layer_name.rfind(layer_name_doors, 0) == 0)
-      || (layer_name == layer_name_fans)
-      || (layer_name == layer_name_lasers)
-      || (layer_name == layer_name_lasers_v1)
-      || (layer_name == layer_name_lasers_v2)
-      || (layer_name == layer_name_levers)
-      || (layer_name == layer_name_platforms)
-      || (layer_name == layer_name_portals)
-      || (layer_name == layer_name_toggle_spikes)
-      || (layer_name == layer_name_trap_spikes)
-      || (layer_name == layer_name_interval_spikes)
-      )
+   if ((layer_name.rfind(layer_name_doors, 0) == 0) || (layer_name == layer_name_fans) || (layer_name == layer_name_lasers) || (layer_name == layer_name_lasers_v1) || (layer_name == layer_name_lasers_v2) || (layer_name == layer_name_levers) || (layer_name == layer_name_platforms) || (layer_name == layer_name_portals) || (layer_name == layer_name_toggle_spikes) || (layer_name == layer_name_trap_spikes) || (layer_name == layer_name_interval_spikes))
    {
       return true;
    }
 
    return false;
 }
-
