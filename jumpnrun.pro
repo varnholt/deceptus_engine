@@ -306,6 +306,7 @@ HEADERS += \
    src/framework/tools/log.h \
    src/framework/tools/logthread.h \
    src/framework/tools/stopwatch.h \
+   src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \
    src/game/animationframedata.h \
