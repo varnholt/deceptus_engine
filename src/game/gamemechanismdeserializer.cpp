@@ -48,32 +48,32 @@ void GameMechanismDeserializer::deserialize(
 
    GameDeserializeData data(data_ref);
 
-   auto mechanism_bouncers = mechanisms["bouncers"];
-   auto mechanism_bubble_cubes = mechanisms["bubble_cubes"];
-   auto mechanism_checkpoints = mechanisms["checkpoints"];
-   auto mechanism_collapsing_platforms = mechanisms["collapsing_platforms"];
-   auto mechanism_controller_help = mechanisms["controller_help"];
-   auto mechanism_conveyor_belts = mechanisms["conveyorbelts"];
-   auto mechanism_crushers = mechanisms["crushers"];
-   auto mechanism_death_blocks = mechanisms["death_blocks"];
-   auto mechanism_dialogues = mechanisms["dialogues"];
-   auto mechanism_doors = mechanisms["doors"];
-   auto mechanism_dust = mechanisms["dust"];
-   auto mechanism_fans = mechanisms["fans"];
-   auto mechanism_lasers = mechanisms["lasers"];
-   auto mechanism_levers = mechanisms["levers"];
-   auto mechanism_moveable_objects = mechanisms["moveable_objects"];
-   auto mechanism_on_off_blocks = mechanisms["on_off_blocks"];
-   auto mechanism_platforms = mechanisms["platforms"];
-   auto mechanism_portals = mechanisms["portals"];
-   auto mechanism_ropes = mechanisms["ropes"];
-   auto mechanism_rotating_blades = mechanisms["rotating_blades"];
-   auto mechanism_sensor_rects = mechanisms["sensor_rects"];
-   auto mechanism_shader_quads = mechanisms["shader_quads"];
-   auto mechanism_spike_balls = mechanisms["spike_balls"];
-   auto mechanism_spike_blocks = mechanisms["spike_blocks"];
-   auto mechanism_spikes = mechanisms["spikes"];
-   auto mechanism_weather = mechanisms["weather"];
+   auto mechanism_bouncers = mechanisms[std::string{layer_name_bouncers}];
+   auto mechanism_bubble_cubes = mechanisms[std::string{layer_name_bubble_cube}];
+   auto mechanism_checkpoints = mechanisms[std::string{layer_name_checkpoints}];
+   auto mechanism_collapsing_platforms = mechanisms[std::string{layer_name_collapsing_platforms}];
+   auto mechanism_controller_help = mechanisms[std::string{layer_name_controller_help}];
+   auto mechanism_conveyor_belts = mechanisms[std::string{layer_name_conveyorbelts}];
+   auto mechanism_crushers = mechanisms[std::string{layer_name_crushers}];
+   auto mechanism_death_blocks = mechanisms[std::string{layer_name_death_blocks}];
+   auto mechanism_dialogues = mechanisms[std::string{layer_name_dialogues}];
+   auto mechanism_doors = mechanisms[std::string{layer_name_doors}];
+   auto mechanism_dust = mechanisms[std::string{layer_name_dust}];
+   auto mechanism_fans = mechanisms[std::string{layer_name_fans}];
+   auto mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
+   auto mechanism_levers = mechanisms[std::string{layer_name_levers}];
+   auto mechanism_moveable_objects = mechanisms[std::string{layer_name_moveable_objects}];
+   auto mechanism_on_off_blocks = mechanisms[std::string{layer_name_on_off_blocks}];
+   auto mechanism_platforms = mechanisms[std::string{layer_name_platforms}];
+   auto mechanism_portals = mechanisms[std::string{layer_name_portals}];
+   auto mechanism_ropes = mechanisms[std::string{layer_name_ropes}];
+   auto mechanism_rotating_blades = mechanisms[std::string{layer_name_rotating_blades}];
+   auto mechanism_sensor_rects = mechanisms[std::string{layer_name_sensor_rects}];
+   auto mechanism_shader_quads = mechanisms[std::string{layer_name_shader_quads}];
+   auto mechanism_spike_balls = mechanisms[std::string{layer_name_spike_balls}];
+   auto mechanism_spike_blocks = mechanisms[std::string{layer_name_spike_blocks}];
+   auto mechanism_spikes = mechanisms[std::string{layer_name_interval_spikes}];
+   auto mechanism_weather = mechanisms[std::string{layer_name_weather}];
 
    for (auto element : tmx_parser.getElements())
    {
