@@ -21,6 +21,7 @@
 #include "gamecontactlistener.h"
 #include "gamedeserializedata.h"
 #include "gamemechanismdeserializer.h"
+#include "gamemechanismdeserializerconstants.h"
 #include "gun.h"
 #include "leveldescription.h"
 #include "levelmap.h"
@@ -203,32 +204,32 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_spikes,          &_mechanism_weather,
    };
 
-   _mechanisms_map["bouncers"] = &_mechanism_bouncers;
-   _mechanisms_map["bubble_cubes"] = &_mechanism_bubble_cubes;
-   _mechanisms_map["checkpoints"] = &_mechanism_checkpoints;
-   _mechanisms_map["collapsing_platforms"] = &_mechanism_collapsing_platforms;
-   _mechanisms_map["controller_help"] = &_mechanism_controller_help;
-   _mechanisms_map["conveyorbelts"] = &_mechanism_conveyor_belts;
-   _mechanisms_map["crushers"] = &_mechanism_crushers;
-   _mechanisms_map["death_blocks"] = &_mechanism_death_blocks;
-   _mechanisms_map["dialogues"] = &_mechanism_dialogues;
-   _mechanisms_map["doors"] = &_mechanism_doors;
-   _mechanisms_map["dust"] = &_mechanism_dust;
-   _mechanisms_map["fans"] = &_mechanism_fans;
-   _mechanisms_map["lasers"] = &_mechanism_lasers;
-   _mechanisms_map["levers"] = &_mechanism_levers;
-   _mechanisms_map["moveable_objects"] = &_mechanism_moveable_boxes;
-   _mechanisms_map["on_off_blocks"] = &_mechanism_on_off_blocks;
-   _mechanisms_map["platforms"] = &_mechanism_platforms;
-   _mechanisms_map["portals"] = &_mechanism_portals;
-   _mechanisms_map["ropes"] = &_mechanism_ropes;
-   _mechanisms_map["rotating_blades"] = &_mechanism_rotating_blades;
-   _mechanisms_map["sensor_rects"] = &_mechanism_sensor_rects;
-   _mechanisms_map["shader_quads"] = &_mechanism_shader_layers;
-   _mechanisms_map["spike_balls"] = &_mechanism_spike_balls;
-   _mechanisms_map["spike_blocks"] = &_mechanism_spike_blocks;
-   _mechanisms_map["spikes"] = &_mechanism_spikes;
-   _mechanisms_map["weather"] = &_mechanism_weather;
+   _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
+   _mechanisms_map[std::string{layer_name_bubble_cube}] = &_mechanism_bubble_cubes;
+   _mechanisms_map[std::string{layer_name_checkpoints}] = &_mechanism_checkpoints;
+   _mechanisms_map[std::string{layer_name_collapsing_platforms}] = &_mechanism_collapsing_platforms;
+   _mechanisms_map[std::string{layer_name_controller_help}] = &_mechanism_controller_help;
+   _mechanisms_map[std::string{layer_name_conveyorbelts}] = &_mechanism_conveyor_belts;
+   _mechanisms_map[std::string{layer_name_crushers}] = &_mechanism_crushers;
+   _mechanisms_map[std::string{layer_name_death_blocks}] = &_mechanism_death_blocks;
+   _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
+   _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;
+   _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
+   _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
+   _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
+   _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
+   _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
+   _mechanisms_map[std::string{layer_name_on_off_blocks}] = &_mechanism_on_off_blocks;
+   _mechanisms_map[std::string{layer_name_platforms}] = &_mechanism_platforms;
+   _mechanisms_map[std::string{layer_name_portals}] = &_mechanism_portals;
+   _mechanisms_map[std::string{layer_name_ropes}] = &_mechanism_ropes;
+   _mechanisms_map[std::string{layer_name_rotating_blades}] = &_mechanism_rotating_blades;
+   _mechanisms_map[std::string{layer_name_sensor_rects}] = &_mechanism_sensor_rects;
+   _mechanisms_map[std::string{layer_name_shader_quads}] = &_mechanism_shader_layers;
+   _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
+   _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
+   _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
+   _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
 
    // called whenever the player toggles a mechanism in the game
    Player::getCurrent()->setToggleCallback(
