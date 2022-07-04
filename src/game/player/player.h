@@ -95,6 +95,83 @@ class Player : public GameNode
       }
    };
 
+   struct PlayerOnBelt
+   {
+      void applyBeltVelocity(float& desired_velocity, float max_velocity, const std::shared_ptr<PlayerControls>& controls)
+      {
+         if (!isOnBelt())
+         {
+            return;
+         }
+
+         if (getBeltVelocity() < 0.0f)
+         {
+            if (controls->isMovingRight())
+            {
+               desired_velocity *= 0.5f;
+            }
+            else if (controls->isMovingLeft())
+            {
+               if (desired_velocity > 0.0f)
+               {
+                  desired_velocity = 0.0f;
+               }
+
+               desired_velocity *= 2.0f;
+               desired_velocity = std::min(desired_velocity, max_velocity);
+            }
+            else
+            {
+               desired_velocity += getBeltVelocity();
+            }
+         }
+         else if (getBeltVelocity() > 0.0f)
+         {
+            if (controls->isMovingLeft())
+            {
+               desired_velocity *= 0.5f;
+            }
+            else if (controls->isMovingRight())
+            {
+               if (desired_velocity < 0.0f)
+               {
+                  desired_velocity = 0.0f;
+               }
+
+               desired_velocity *= 2.0f;
+               desired_velocity = std::max(desired_velocity, -max_velocity);
+            }
+            else
+            {
+               desired_velocity += getBeltVelocity();
+            }
+         }
+      }
+
+      float getBeltVelocity() const
+      {
+         return _belt_velocity;
+      }
+
+      void setBeltVelocity(float belt_velocity)
+      {
+         _belt_velocity = belt_velocity;
+      }
+
+      bool isOnBelt() const
+      {
+         return _is_on_belt;
+      }
+
+      void setOnBelt(bool on_belt)
+      {
+         _is_on_belt = on_belt;
+      }
+
+      float _belt_velocity = 0.0f;
+      bool _is_on_belt = false;
+   };
+
 public:
    Player(GameNode* parent = nullptr);
    virtual ~Player() = default;
@@ -121,12 +198,6 @@ public:
    const sf::Vector2f& getPixelPositionf() const;
    const sf::Vector2i& getPixelPositioni() const;
    void setPixelPosition(float x, float y);
-
-   float getBeltVelocity() const;
-   void setBeltVelocity(float beltVelocity);
-   bool isOnBelt() const;
-   void setOnBelt(bool onBelt);
-   void applyBeltVelocity(float& desiredVel);
 
    const sf::IntRect& getPlayerPixelRect() const;
 
@@ -172,6 +243,7 @@ public:
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerAnimation& getPlayerAnimation() const;
    const PlayerJump& getJump() const;
+   PlayerOnBelt& getBelt();
 
    void setToggleCallback(const ToggleCallback& callback);
 
@@ -258,15 +330,13 @@ private:
    int32_t _hard_landing_cycles = 0;
    HighResTimePoint _timepoint_hard_landing;
 
-   float _belt_velocity = 0.0f;
-   bool _is_on_belt = false;
-
    std::shared_ptr<PlayerControls> _controls;
    PlayerBend _bend;
    PlayerClimb _climb;
    PlayerJump _jump;
    PlayerDash _dash;
    PlayerAttack _attack;
+   PlayerOnBelt _belt;
    JumpTrace _jump_trace;
 
    PlayerAnimation _player_animation;
