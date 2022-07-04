@@ -85,29 +85,6 @@ sf::IntRect Player::computeFootSensorPixelIntRect() const
    return rect_px;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-float Player::getBeltVelocity() const
-{
-   return _belt_velocity;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::setBeltVelocity(float belt_velocity)
-{
-   _belt_velocity = belt_velocity;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-bool Player::isOnBelt() const
-{
-   return _is_on_belt;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void Player::setOnBelt(bool on_belt)
-{
-   _is_on_belt = on_belt;
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 Player::Player(GameNode* parent) : GameNode(parent)
@@ -784,57 +761,6 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
    return desired_velocity;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-void Player::applyBeltVelocity(float& desired_velocity)
-{
-   if (!isOnBelt())
-   {
-      return;
-   }
-
-   if (getBeltVelocity() < 0.0f)
-   {
-      if (_controls->isMovingRight())
-      {
-         desired_velocity *= 0.5f;
-      }
-      else if (_controls->isMovingLeft())
-      {
-         if (desired_velocity > 0.0f)
-         {
-            desired_velocity = 0.0f;
-         }
-
-         desired_velocity *= 2.0f;
-         desired_velocity = std::min(desired_velocity, getMaxVelocity());
-      }
-      else
-      {
-         desired_velocity += getBeltVelocity();
-      }
-   }
-   else if (getBeltVelocity() > 0.0f)
-   {
-      if (_controls->isMovingLeft())
-      {
-         desired_velocity *= 0.5f;
-      }
-      else if (_controls->isMovingRight())
-      {
-         if (desired_velocity < 0.0f)
-         {
-            desired_velocity = 0.0f;
-         }
-
-         desired_velocity *= 2.0f;
-         desired_velocity = std::max(desired_velocity, -getMaxVelocity());
-      }
-      else
-      {
-         desired_velocity += getBeltVelocity();
-      }
-   }
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
@@ -917,7 +843,7 @@ void Player::updateVelocity()
    auto current_velocity = _body->GetLinearVelocity();
 
    // physically so wrong but gameplay-wise the best choice :)
-   applyBeltVelocity(desired_velocity);
+   _belt.applyBeltVelocity(desired_velocity, getMaxVelocity(), _controls);
 
    // calc impulse, disregard time factor
    auto velocity_change_x = desired_velocity - current_velocity.x;
@@ -985,6 +911,12 @@ void Player::setToggleCallback(const ToggleCallback& callback)
 const PlayerJump& Player::getJump() const
 {
    return _jump;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+Player::PlayerOnBelt& Player::getBelt()
+{
+   return _belt;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1867,3 +1799,5 @@ void Player::updatePreviousBodyState()
    _position_previous = _body->GetPosition();
    _velocity_previous = _body->GetLinearVelocity();
 }
+
+

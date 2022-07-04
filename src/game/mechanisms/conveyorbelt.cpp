@@ -230,8 +230,8 @@ void ConveyorBelt::resetBeltState()
 {
    __bodies_on_belt.clear();
    auto player = Player::getCurrent();
-   player->setBeltVelocity(0.0f);
-   player->setOnBelt(false);
+   player->getBelt().setBeltVelocity(0.0f);
+   player->getBelt().setOnBelt(false);
 }
 
 
@@ -268,8 +268,8 @@ void ConveyorBelt::processFixtureNode(
         {
            // handle player differently because multiple linear velocities are applied to the player
            auto player = Player::getCurrent();
-           player->setOnBelt(true);
-           player->setBeltVelocity(belt_velocity);
+           player->getBelt().setOnBelt(true);
+           player->getBelt().setBeltVelocity(belt_velocity);
 
            // std::cout << belt_velocity << std::endl;
         }
