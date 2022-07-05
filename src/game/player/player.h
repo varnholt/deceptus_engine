@@ -6,9 +6,15 @@
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "gamenode.h"
 #include "playeranimation.h"
+#include "playerattack.h"
+#include "playerbelt.h"
+#include "playerbend.h"
 #include "playerclimb.h"
 #include "playercontrols.h"
+#include "playerdash.h"
 #include "playerjump.h"
+#include "playerjumptrace.h"
+#include "playerspeed.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -31,145 +37,10 @@ class Player : public GameNode
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using ToggleCallback = std::function<void()>;
 
-   struct JumpTrace
-   {
-      bool _jump_started = false;
-      sf::Time _jump_start_time;
-      float _jump_start_y = 0.0f;
-      float _jump_epsilon = 0.00001f;
-      float _jump_prev_y = 0.0f;
-   };
-
    struct PositionedAnimation
    {
       sf::Vector2f _position;
       std::shared_ptr<Animation> _animation;
-   };
-
-   struct PlayerSpeed
-   {
-      b2Vec2 current_velocity;
-      float _velocity_max = 0.0f;
-      float _acceleration = 0.0f;
-      float _deceleration = 0.0f;
-   };
-
-   struct PlayerDash
-   {
-      int32_t _dash_frame_count = 0;
-      float _dash_multiplier = 0.0f;
-      Dash _dash_dir = Dash::None;
-
-      bool isDashActive() const
-      {
-         return (_dash_frame_count > 0);
-      }
-   };
-
-   struct PlayerBend
-   {
-      bool _bending_down = false;
-      bool _was_bending_down = false;
-      bool _crouching = false;
-      bool _was_crouching = false;
-
-      HighResTimePoint _timepoint_bend_down_start;
-      HighResTimePoint _timepoint_bend_down_end;
-
-      bool isCrouching() const
-      {
-         return _bending_down;
-      }
-   };
-
-   struct PlayerAttack
-   {
-      bool _was_attacking = false;
-      bool _attacking = false;
-
-      HighResTimePoint _timepoint_attack_start;
-
-      bool isAttacking() const
-      {
-         return _attacking;
-      }
-   };
-
-   struct PlayerOnBelt
-   {
-      void applyBeltVelocity(float& desired_velocity, float max_velocity, const std::shared_ptr<PlayerControls>& controls)
-      {
-         if (!isOnBelt())
-         {
-            return;
-         }
-
-         if (getBeltVelocity() < 0.0f)
-         {
-            if (controls->isMovingRight())
-            {
-               desired_velocity *= 0.5f;
-            }
-            else if (controls->isMovingLeft())
-            {
-               if (desired_velocity > 0.0f)
-               {
-                  desired_velocity = 0.0f;
-               }
-
-               desired_velocity *= 2.0f;
-               desired_velocity = std::min(desired_velocity, max_velocity);
-            }
-            else
-            {
-               desired_velocity += getBeltVelocity();
-            }
-         }
-         else if (getBeltVelocity() > 0.0f)
-         {
-            if (controls->isMovingLeft())
-            {
-               desired_velocity *= 0.5f;
-            }
-            else if (controls->isMovingRight())
-            {
-               if (desired_velocity < 0.0f)
-               {
-                  desired_velocity = 0.0f;
-               }
-
-               desired_velocity *= 2.0f;
-               desired_velocity = std::max(desired_velocity, -max_velocity);
-            }
-            else
-            {
-               desired_velocity += getBeltVelocity();
-            }
-         }
-      }
-
-      float getBeltVelocity() const
-      {
-         return _belt_velocity;
-      }
-
-      void setBeltVelocity(float belt_velocity)
-      {
-         _belt_velocity = belt_velocity;
-      }
-
-      bool isOnBelt() const
-      {
-         return _is_on_belt;
-      }
-
-      void setOnBelt(bool on_belt)
-      {
-         _is_on_belt = on_belt;
-      }
-
-      float _belt_velocity = 0.0f;
-      bool _is_on_belt = false;
    };
 
 public:
@@ -243,7 +114,7 @@ public:
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerAnimation& getPlayerAnimation() const;
    const PlayerJump& getJump() const;
-   PlayerOnBelt& getBelt();
+   PlayerBelt& getBelt();
 
    void setToggleCallback(const ToggleCallback& callback);
 
@@ -336,8 +207,8 @@ private:
    PlayerJump _jump;
    PlayerDash _dash;
    PlayerAttack _attack;
-   PlayerOnBelt _belt;
-   JumpTrace _jump_trace;
+   PlayerBelt _belt;
+   PlayerJumpTrace _jump_trace;
 
    PlayerAnimation _player_animation;
    std::deque<PositionedAnimation> _last_animations;

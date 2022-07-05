@@ -221,6 +221,7 @@ SOURCES += \
    src/game/physics/physicsconfiguration.cpp \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
+   src/game/player/playerbelt.cpp \
    src/game/player/playerclimb.cpp \
    src/game/player/playercontrols.cpp \
    src/game/player/playerinfo.cpp \
@@ -406,11 +407,17 @@ HEADERS += \
    src/game/physics/physicsconfiguration.h \
    src/game/player/player.h \
    src/game/player/playeranimation.h \
+   src/game/player/playerattack.h \
+   src/game/player/playerbelt.h \
+   src/game/player/playerbend.h \
    src/game/player/playerclimb.h \
    src/game/player/playercontrols.h \
+   src/game/player/playerdash.h \
    src/game/player/playerinfo.h \
    src/game/player/playerinput.h \
    src/game/player/playerjump.h \
+   src/game/player/playerjumptrace.h \
+   src/game/player/playerspeed.h \
    src/game/preloader.h \
    src/game/projectile.h \
    src/game/projectilehitanimation.h \
