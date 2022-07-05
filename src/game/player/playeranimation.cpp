@@ -100,6 +100,16 @@ PlayerAnimation::PlayerAnimation()
    _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
    _sword_standing_attack_l[3] = AnimationPool::getInstance().add("player_standing_attack_sword_4_l", 0.0f, 0.0f, true, false);
    _sword_standing_attack_r[3] = AnimationPool::getInstance().add("player_standing_attack_sword_4_r", 0.0f, 0.0f, true, false);
+   _sword_dash_init_r = AnimationPool::getInstance().add("player_dash_init_sword_r", 0.0f, 0.0f, true, false);
+   _sword_dash_init_l = AnimationPool::getInstance().add("player_dash_init_sword_l", 0.0f, 0.0f, true, false);
+   _sword_dash_r = AnimationPool::getInstance().add("player_dash_sword_r", 0.0f, 0.0f, true, false);
+   _sword_dash_l = AnimationPool::getInstance().add("player_dash_sword_l", 0.0f, 0.0f, true, false);
+   _sword_dash_stop_r = AnimationPool::getInstance().add("player_dash_init_sword_r", 0.0f, 0.0f, true, false);
+   _sword_dash_stop_l = AnimationPool::getInstance().add("player_dash_init_sword_l", 0.0f, 0.0f, true, false);
+   _sword_swim_idle_r = AnimationPool::getInstance().add("player_swim_idle_sword_r", 0.0f, 0.0f, true, false);
+   _sword_swim_idle_l = AnimationPool::getInstance().add("player_swim_idle_sword_l", 0.0f, 0.0f, true, false);
+   _sword_swim_r = AnimationPool::getInstance().add("player_swim_sword_r", 0.0f, 0.0f, true, false);
+   _sword_swim_l = AnimationPool::getInstance().add("player_swim_sword_l", 0.0f, 0.0f, true, false);
 
    // we will replace those later as we go
    _idle_r_tmp = _idle_r;
@@ -123,6 +133,10 @@ PlayerAnimation::PlayerAnimation()
    _dash_init_l->_reset_to_first_frame = false;
    _dash_stop_r->_reset_to_first_frame = false;
    _dash_stop_l->_reset_to_first_frame = false;
+   _sword_dash_init_r->_reset_to_first_frame = false;
+   _sword_dash_init_l->_reset_to_first_frame = false;
+   _sword_dash_stop_r->_reset_to_first_frame = false;
+   _sword_dash_stop_l->_reset_to_first_frame = false;
 
    // we just reverse the bend down animation
    _bend_up_r->reverse();
@@ -145,9 +159,9 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_run_r);
    _looped_animations.push_back(_run_l);
    _looped_animations.push_back(_dash_r);
+   _looped_animations.push_back(_dash_l);
    _looped_animations.push_back(_dash_init_l);
    _looped_animations.push_back(_dash_init_r);
-   _looped_animations.push_back(_dash_l);
    _looped_animations.push_back(_dash_stop_r);
    _looped_animations.push_back(_dash_stop_l);
 
@@ -181,6 +195,16 @@ PlayerAnimation::PlayerAnimation()
    _looped_animations.push_back(_sword_idle_r);
    _looped_animations.push_back(_sword_run_r);
    _looped_animations.push_back(_sword_run_l);
+   _looped_animations.push_back(_sword_dash_r);
+   _looped_animations.push_back(_sword_dash_l);
+   _looped_animations.push_back(_sword_dash_init_l);
+   _looped_animations.push_back(_sword_dash_init_r);
+   _looped_animations.push_back(_sword_dash_stop_r);
+   _looped_animations.push_back(_sword_dash_stop_l);
+   _looped_animations.push_back(_sword_swim_idle_r);
+   _looped_animations.push_back(_sword_swim_idle_l);
+   _looped_animations.push_back(_sword_swim_r);
+   _looped_animations.push_back(_sword_swim_l);
 
    for (auto& i : _looped_animations)
    {
@@ -193,6 +217,16 @@ PlayerAnimation::PlayerAnimation()
    _sword_lut[_run_r] = _sword_run_r;
    _sword_lut[_bend_down_l] = _sword_bend_down_l;
    _sword_lut[_bend_down_r] = _sword_bend_down_r;
+   _sword_lut[_dash_init_r] = _sword_dash_init_r;
+   _sword_lut[_dash_init_l] = _sword_bend_down_l;
+   _sword_lut[_dash_r] = _sword_dash_r;
+   _sword_lut[_dash_l] = _sword_dash_l;
+   _sword_lut[_dash_stop_r] = _sword_dash_stop_r;
+   _sword_lut[_dash_stop_l] = _sword_dash_stop_l;
+   _sword_lut[_swim_idle_r] = _sword_swim_idle_r;
+   _sword_lut[_swim_idle_l] = _sword_swim_idle_l;
+   _sword_lut[_swim_r] = _sword_swim_r;
+   _sword_lut[_swim_l] = _sword_swim_l;
 }
 
 int32_t PlayerAnimation::getJumpAnimationReference() const

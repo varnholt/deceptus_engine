@@ -53,6 +53,28 @@
         "sprite_count": 20,
         "texture": "data/sprites/player_unarmed.png"
     },
+   "player_bend_down_idle_blink_r": {
+        "frame_durations": [
+            40,
+            40,
+            40,
+            40
+        ],
+        "frame_offset": [
+            432,
+            96
+        ],
+        "frame_size": [
+            72,
+            48
+        ],
+        "origin": [
+            36.0,
+            48.0
+        ],
+        "sprite_count": 4,
+        "texture": "data/sprites/player_unarmed.png"
+    },
     "player_bend_down_idle_blink_l": {
         "frame_durations": [
             40,
@@ -75,7 +97,7 @@
         "sprite_count": 4,
         "texture": "data/sprites/player_unarmed.png"
     },
-    "player_bend_down_idle_blink_r": {
+    "player_bend_down_idle_r": {
         "frame_durations": [
             40,
             40,
@@ -1153,7 +1175,7 @@
     },
     "player_run_sword_r" : {
          "frame_durations": [
-             40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 80, 80, 80, 80, 80, 80, 80, 80
          ],
          "frame_offset": [
              1440,
@@ -1172,7 +1194,7 @@
     },
     "player_run_sword_l" : {
          "frame_durations": [
-             40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 80, 80, 80, 80, 80, 80, 80, 80
          ],
          "frame_offset": [
              1440,
@@ -1191,121 +1213,121 @@
     },
     "player_standing_attack_sword_1_r" : {
          "frame_durations": [
-             40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80
          ],
          "frame_offset": [
-             1440,
+             1320,
              480
          ],
          "frame_size": [
-             96,
-             48
+             120,
+             72
          ],
          "origin": [
              48.0,
              48.0
          ],
-         "sprite_count": 14,
+         "sprite_count": 13,
          "texture": "data/sprites/player_unarmed.png"
     },
     "player_standing_attack_sword_1_l" : {
          "frame_durations": [
-             40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80
          ],
          "frame_offset": [
-             1440,
-             528
+             1320,
+             552
          ],
          "frame_size": [
-             96,
-             48
+             120,
+             72
          ],
          "origin": [
              48.0,
              48.0
          ],
-         "sprite_count": 14,
+         "sprite_count": 13,
          "texture": "data/sprites/player_unarmed.png"
     },
    "player_standing_attack_sword_2_r" : {
         "frame_durations": [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80
         ],
         "frame_offset": [
-            1440,
-            576
+            1320,
+            624
         ],
         "frame_size": [
-            96,
+            120,
             48
         ],
         "origin": [
             48.0,
             48.0
         ],
-        "sprite_count": 14,
+        "sprite_count": 13,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_2_l" : {
         "frame_durations": [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80
         ],
         "frame_offset": [
-            1440,
-            624
+            1320,
+            672
         ],
         "frame_size": [
-            96,
+            120,
             48
         ],
         "origin": [
             48.0,
             48.0
         ],
-        "sprite_count": 14,
+        "sprite_count": 13,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_3_r" : {
         "frame_durations": [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80
         ],
         "frame_offset": [
-            1440,
-            672
+            1320,
+            720
         ],
         "frame_size": [
-            96,
+            120,
             48
         ],
         "origin": [
             48.0,
             48.0
         ],
-        "sprite_count": 14,
+        "sprite_count": 10 ,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_3_l" : {
         "frame_durations": [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80
         ],
         "frame_offset": [
-            1440,
-            720
+            1320,
+            768
         ],
         "frame_size": [
-            96,
+            120,
             48
         ],
         "origin": [
             48.0,
             48.0
         ],
-        "sprite_count": 14,
+        "sprite_count": 10,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_4_r" : {
         "frame_durations": [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80
         ],
         "frame_offset": [
             1440,
@@ -1340,5 +1362,183 @@
         ],
         "sprite_count": 14,
         "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_swim_sword_l": {
+       "frame_durations": [
+           140,
+           140,
+           140,
+           140,
+           140,
+           140,
+           140,
+           140
+       ],
+       "frame_offset": [
+           1440,
+           1008
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 8,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_swim_sword_r": {
+       "frame_durations": [
+           140,
+           140,
+           140,
+           140,
+           140,
+           140,
+           140,
+           140
+       ],
+       "frame_offset": [
+           1440,
+           960
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 8,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_swim_idle_sword_l": {
+       "frame_durations": [
+           75,
+           75,
+           75,
+           75,
+           75
+       ],
+       "frame_offset": [
+           1440,
+           912
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 5,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_swim_idle_sword_r": {
+       "frame_durations": [
+           75,
+           75,
+           75,
+           75,
+           75
+       ],
+       "frame_offset": [
+           1440,
+           864
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 5,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_dash_init_sword_l": {
+       "frame_durations": [
+           75,
+           75
+       ],
+       "frame_offset": [
+           288,
+           528
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 2,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_dash_init_sword_r": {
+       "frame_durations": [
+           75,
+           75
+       ],
+       "frame_offset": [
+           288,
+           480
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 2,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_dash_sword_l": {
+       "frame_durations": [
+           75,
+           75
+       ],
+       "frame_offset": [
+           432,
+           528
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 2,
+       "texture": "data/sprites/player_unarmed.png"
+   },
+   "player_dash_sword_r": {
+       "frame_durations": [
+           75,
+           75
+       ],
+       "frame_offset": [
+           432,
+           480
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 2,
+       "texture": "data/sprites/player_unarmed.png"
    }
 }
