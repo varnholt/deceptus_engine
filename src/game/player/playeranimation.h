@@ -142,6 +142,16 @@ private:
    std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
    std::array<std::shared_ptr<Animation>, 4> _sword_standing_attack_l;
    std::array<std::shared_ptr<Animation>, 4> _sword_standing_attack_r;
+   std::shared_ptr<Animation> _sword_dash_init_r;
+   std::shared_ptr<Animation> _sword_dash_init_l;
+   std::shared_ptr<Animation> _sword_dash_r;
+   std::shared_ptr<Animation> _sword_dash_l;
+   std::shared_ptr<Animation> _sword_dash_stop_r;
+   std::shared_ptr<Animation> _sword_dash_stop_l;
+   std::shared_ptr<Animation> _sword_swim_idle_r;
+   std::shared_ptr<Animation> _sword_swim_idle_l;
+   std::shared_ptr<Animation> _sword_swim_r;
+   std::shared_ptr<Animation> _sword_swim_l;
    bool _sword_standing_attack_l_reset = false;
    bool _sword_standing_attack_r_reset = false;
 
