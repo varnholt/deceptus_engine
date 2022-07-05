@@ -539,7 +539,7 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    // controller is not used, so slow down
    if (fabs(axis_value_normalized) <= 0.3f)
    {
-      return speed.current_velocity.x * speed._deceleration;
+      return speed._current_velocity.x * speed._deceleration;
    }
 
    axis_value_normalized *= speed._acceleration;
@@ -548,13 +548,13 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    // to the left side, it might still dash to the other side with quite a strong impulse.
    // that would confuse the speed capping and would accelerate to infinity. true story.
    auto desired_velocity = 0.0f;
-   if (speed.current_velocity.x < 0.0f)
+   if (speed._current_velocity.x < 0.0f)
    {
-      desired_velocity = b2Max(speed.current_velocity.x + axis_value_normalized, -speed._velocity_max);
+      desired_velocity = b2Max(speed._current_velocity.x + axis_value_normalized, -speed._velocity_max);
    }
    else
    {
-      desired_velocity = b2Min(speed.current_velocity.x + axis_value_normalized, speed._velocity_max);
+      desired_velocity = b2Min(speed._current_velocity.x + axis_value_normalized, speed._velocity_max);
    }
 
    // Log::Info()
@@ -615,12 +615,12 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 
    if (_controls->hasFlag(KeyPressedLeft))
    {
-      desired_velocity = b2Max(speed.current_velocity.x - speed._acceleration, -speed._velocity_max);
+      desired_velocity = b2Max(speed._current_velocity.x - speed._acceleration, -speed._velocity_max);
    }
 
    if (_controls->hasFlag(KeyPressedRight))
    {
-      desired_velocity = b2Min(speed.current_velocity.x + speed._acceleration, speed._velocity_max);
+      desired_velocity = b2Min(speed._current_velocity.x + speed._acceleration, speed._velocity_max);
    }
 
    // slowdown as soon as
@@ -629,14 +629,14 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
    // c) no movement at all
    const auto no_movement_to_left_or_right = (!(_controls->hasFlag(KeyPressedLeft))) && (!(_controls->hasFlag(KeyPressedRight)));
 
-   const auto velocity_opposite_to_given_dir = (speed.current_velocity.x < -0.01f && _controls->hasFlag(KeyPressedRight)) ||
-                                               (speed.current_velocity.x > 0.01f && _controls->hasFlag(KeyPressedLeft));
+   const auto velocity_opposite_to_given_dir = (speed._current_velocity.x < -0.01f && _controls->hasFlag(KeyPressedRight)) ||
+                                               (speed._current_velocity.x > 0.01f && _controls->hasFlag(KeyPressedLeft));
 
    const auto no_movement = (fabs(desired_velocity) < 0.0001f);
 
    if (no_movement_to_left_or_right || velocity_opposite_to_given_dir || no_movement)
    {
-      desired_velocity = speed.current_velocity.x * speed._deceleration;
+      desired_velocity = speed._current_velocity.x * speed._deceleration;
    }
 
    return desired_velocity;
@@ -914,7 +914,7 @@ const PlayerJump& Player::getJump() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-Player::PlayerOnBelt& Player::getBelt()
+PlayerBelt& Player::getBelt()
 {
    return _belt;
 }
