@@ -252,7 +252,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          auto& anim = _last_animations[i];
          anim._animation->setPosition(anim._position);
          anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
-         anim._animation->draw(color);
+         anim._animation->drawTree(color);
       }
 
       if (_dash.isDashActive())
@@ -260,7 +260,8 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          _last_animations.push_back({pos, current_cycle});
       }
 
-      current_cycle->draw(color, normal);
+      // player animations might be combined of multiple animations, hence the recursive calls
+      current_cycle->drawTree(color, normal);
    }
 
    AnimationPool::getInstance().drawAnimations(color, normal, {"player_jump_dust_l", "player_jump_dust_r", "player_water_splash"});
@@ -1590,6 +1591,10 @@ void Player::attack()
          pos.y = y_offset + _pixel_position_f.y * MPP;
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, pos, dir);
+         break;
+      }
+      case WeaponType::None:
+      {
          break;
       }
    }
