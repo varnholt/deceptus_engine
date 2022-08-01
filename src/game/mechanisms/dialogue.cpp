@@ -89,7 +89,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
       return;
    }
 
-   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
    if (player_rect.intersects(_pixel_rect))
    {
       // message boxes might already be marked as inactive, however

@@ -16,8 +16,7 @@ class Sword : public Weapon
       void update(const sf::Time& time) override;
       void initialize() override;
 
-      void use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2Vec2& dir);
-
+      void use(const std::shared_ptr<b2World>& world, const b2Vec2& dir);
 
    private:
 
@@ -26,5 +25,7 @@ class Sword : public Weapon
 
       using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
       HighResTimePoint _timepoint_used;
+
+      bool _cleared_to_attack{true};
 };
 

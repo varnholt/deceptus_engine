@@ -7,14 +7,14 @@ struct PlayerAttack
 {
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 
-   bool _was_attacking = false;
-   bool _attacking = false;
+   bool _fire_button_was_pressed = false;
+   bool _fire_button_pressed = false;
 
    HighResTimePoint _timepoint_attack_start;
 
    bool isAttacking() const
    {
-      return _attacking;
+      return _fire_button_pressed;
    }
 };
 

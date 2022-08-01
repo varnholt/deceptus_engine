@@ -814,13 +814,13 @@ void Level::updateViews()
 //-----------------------------------------------------------------------------
 void Level::updateRoom()
 {
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
 }
 
 //-----------------------------------------------------------------------------
 void Level::syncRoom()
 {
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
    CameraRoomLock::setRoom(_room_current);
 }
 
@@ -837,7 +837,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
    if (prev_room != _room_current)
    {
       Log::Info() << "player moved to room: " << (_room_current ? _room_current->getObjectId() : "undefined") << " on side '"
-                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionf())) : '?')
+                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat())) : '?')
                   << "'";
 
       // will update the current room in both cases, either after the camera lock delay or instantly
@@ -1066,7 +1066,7 @@ void Level::drawDebugInformation()
    {
       drawStaticChains(*_render_texture_level.get());
       DebugDraw::debugBodies(*_render_texture_level.get(), this);
-      DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPlayerPixelRect());
+      DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPixelRectInt());
 
       for (const auto& room : _rooms)
       {

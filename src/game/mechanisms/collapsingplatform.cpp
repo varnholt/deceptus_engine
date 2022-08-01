@@ -186,7 +186,7 @@ void CollapsingPlatform::updateRespawn(const sf::Time& dt)
    // bring collapsed blocks back after some time
    if (!_respawning && _time_since_collapse.asSeconds() > _settings.time_to_respawn_s)
    {
-      if (Player::getCurrent()->getPlayerPixelRect().intersects(_rect_px))
+      if (Player::getCurrent()->getPixelRectInt().intersects(_rect_px))
       {
          // shift respawn time while player intersects
          _time_since_collapse = sf::seconds(_settings.time_to_respawn_s);

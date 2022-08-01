@@ -143,7 +143,7 @@ void SpikeBlock::update(const sf::Time& dt)
       }
    }
 
-   if (Player::getCurrent()->getPlayerPixelRect().intersects(_rectangle))
+   if (Player::getCurrent()->getPixelRectInt().intersects(_rectangle))
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
       {

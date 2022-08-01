@@ -192,7 +192,7 @@ void Door::setupBody(
 //-----------------------------------------------------------------------------
 bool Door::checkPlayerAtDoor() const
 {
-   const auto player_pos = Player::getCurrent()->getPixelPositionf();
+   const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
    const auto door_pos = _sprite_icon.getPosition();
 
    sf::Vector2f a(player_pos.x, player_pos.y);
