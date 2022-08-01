@@ -185,7 +185,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
    std::stringstream stream_tl;
    std::stringstream stream_px;
-   auto pos = Player::getCurrent()->getPixelPositionf();
+   auto pos = Player::getCurrent()->getPixelPositionFloat();
 
    stream_tl << "player tl: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
    stream_px << "player px: " << static_cast<int>(pos.x) << ", " << static_cast<int>(pos.y);

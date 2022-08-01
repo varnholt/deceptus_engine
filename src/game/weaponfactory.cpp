@@ -26,6 +26,10 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
          weapon = std::make_unique<Sword>();
          break;
       }
+      case WeaponType::None:
+      {
+         break;
+      }
    }
 
    return std::move(weapon);
@@ -61,6 +65,10 @@ std::unique_ptr<Weapon> WeaponFactory::create(
       {
          auto sword = std::make_unique<Sword>();
          weapon = std::move(sword);
+         break;
+      }
+      case WeaponType::None:
+      {
          break;
       }
    }

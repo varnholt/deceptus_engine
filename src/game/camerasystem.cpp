@@ -63,8 +63,8 @@ void CameraSystem::updateX(const sf::Time& dt)
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
    auto player = Player::getCurrent();
-   auto player_x_px = player->getPixelPositionf().x;
-   auto player_y_px = player->getPixelPositionf().y;
+   auto player_x_px = player->getPixelPositionFloat().x;
+   auto player_y_px = player->getPixelPositionFloat().y;
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x_px, player_y_px, _focus_offset_px);
    _dx_px = (player_x_px - _x_px);
    const auto dx_px = (_dx_px) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
@@ -132,8 +132,8 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    // test if out of panic line boundaries
    auto player = Player::getCurrent();
-   auto player_x = player->getPixelPositionf().x;
-   auto player_y = player->getPixelPositionf().y + camera_config.getPlayerOffsetY();
+   auto player_x = player->getPixelPositionFloat().x;
+   auto player_y = player->getPixelPositionFloat().y + camera_config.getPlayerOffsetY();
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x, player_y, _focus_offset_px);
    const auto test = player_y - view_center;
    const auto p0 = _y_px - _panic_line_y1_px;
@@ -151,7 +151,7 @@ void CameraSystem::updateY(const sf::Time& dt)
    }
    else
    {
-      _panic = (test < p0 || test + player->getPlayerPixelRect().height > p1);
+      _panic = (test < p0 || test + player->getPixelRectInt().height > p1);
    }
 
    // test if back within close boundaries
@@ -220,8 +220,8 @@ void CameraSystem::syncNow()
 {
    auto player = Player::getCurrent();
 
-   auto player_x = player->getPixelPositionf().x;
-   auto player_y = player->getPixelPositionf().y;
+   auto player_x = player->getPixelPositionFloat().x;
+   auto player_y = player->getPixelPositionFloat().y;
 
    CameraRoomLock::correctedCamera(player_x, player_y, _focus_offset_px);
 

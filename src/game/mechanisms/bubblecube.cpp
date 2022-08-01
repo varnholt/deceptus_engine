@@ -268,7 +268,7 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-      if (!Player::getCurrent()->getPlayerPixelRect().intersects(_fixed_rect_px))
+      if (!Player::getCurrent()->getPixelRectInt().intersects(_fixed_rect_px))
       {
          _popped = false;
          _body->SetActive(true);

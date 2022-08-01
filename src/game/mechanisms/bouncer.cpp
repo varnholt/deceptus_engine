@@ -106,7 +106,7 @@ void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 void Bouncer::updatePlayerAtBouncer()
 {
    auto player = Player::getCurrent();
-   auto rect = player->getPlayerPixelRect();
+   auto rect = player->getPixelRectInt();
    rect.height *= 3;
 
    _player_at_bouncer = rect.intersects(_rect);

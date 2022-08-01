@@ -71,7 +71,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 
 void ControllerHelp::update(const sf::Time& dt)
 {
-   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
    _visible = (player_rect.intersects(_rect_px));
 
    if (!_visible)

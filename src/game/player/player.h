@@ -66,11 +66,12 @@ public:
 
    void setStartPixelPosition(float x, float y);
 
-   const sf::Vector2f& getPixelPositionf() const;
-   const sf::Vector2i& getPixelPositioni() const;
+   const sf::Vector2f& getPixelPositionFloat() const;
+   const sf::Vector2i& getPixelPositionInt() const;
    void setPixelPosition(float x, float y);
 
-   const sf::IntRect& getPlayerPixelRect() const;
+   const sf::FloatRect& getPixelRectFloat() const;
+   const sf::IntRect& getPixelRectInt() const;
 
    b2Body* getBody() const;
    b2Fixture* getFootSensorFixture() const;
@@ -177,7 +178,8 @@ private:
 
    sf::Vector2f _pixel_position_f;
    sf::Vector2i _pixel_position_i;
-   sf::IntRect _pixel_rect;
+   sf::FloatRect _pixel_rect_f;
+   sf::IntRect _pixel_rect_i;
 
    sf::Time _time;
    sf::Clock _clock;
