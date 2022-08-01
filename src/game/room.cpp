@@ -294,7 +294,7 @@ std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
 
 void Room::movePlayerToRoomStartPosition()
 {
-   const auto player_pos_px = Player::getCurrent()->getPixelPositionf();
+   const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat();
 
    const auto active_sub_room = activeSubRoom(player_pos_px);
    if (!active_sub_room.has_value())
@@ -335,7 +335,7 @@ void Room::movePlayerToRoomStartPosition()
 
    if ((*active_sub_room)._start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
    {
-      auto player_pos = Player::getCurrent()->getPixelPositioni();
+      auto player_pos = Player::getCurrent()->getPixelPositionInt();
       player_pos += (*active_sub_room)._start_offset_l.value();
       Player::getCurrent()->setBodyViaPixelPosition(
          static_cast<float>(player_pos.x),
@@ -344,7 +344,7 @@ void Room::movePlayerToRoomStartPosition()
    }
    else if ((*active_sub_room)._start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
    {
-      auto player_pos = Player::getCurrent()->getPixelPositioni();
+      auto player_pos = Player::getCurrent()->getPixelPositionInt();
       player_pos += (*active_sub_room)._start_offset_r.value();
       Player::getCurrent()->setBodyViaPixelPosition(
          static_cast<float>(player_pos.x),

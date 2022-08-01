@@ -261,7 +261,7 @@ void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) co
    states.transform *= getTransform();
 
    // draw the vertex arrays
-   const auto& pos = Player::getCurrent()->getPixelPositioni();
+   const auto& pos = Player::getCurrent()->getPixelPositionInt();
 
    int32_t bx = (pos.x / PIXELS_PER_TILE) / block_size;
    int32_t by = (pos.y / PIXELS_PER_TILE) / block_size;

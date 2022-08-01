@@ -76,7 +76,7 @@ void AmbientOcclusion::load(
 
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-   const auto& pos_i = Player::getCurrent()->getPixelPositioni();
+   const auto& pos_i = Player::getCurrent()->getPixelPositionInt();
    const int32_t bx = pos_i.x >> 8;
    const int32_t by = pos_i.y >> 8;
 

@@ -119,7 +119,7 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
 void DeathBlock::updateCollision()
 {
     // check for intersection with player
-    auto player_rect = Player::getCurrent()->getPlayerPixelRect();
+    auto player_rect = Player::getCurrent()->getPixelRectInt();
 
     auto x = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
     auto y = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);

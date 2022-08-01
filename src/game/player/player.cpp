@@ -85,7 +85,6 @@ sf::IntRect Player::computeFootSensorPixelIntRect() const
    return rect_px;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 Player::Player(GameNode* parent) : GameNode(parent)
 {
@@ -213,11 +212,6 @@ void Player::setBodyViaPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   if (_weapon_system->_selected)
-   {
-      _weapon_system->_selected->draw(color);
-   }
-
    if (!_visible)
    {
       return;
@@ -236,6 +230,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
             return;
          }
       }
+   }
+
+   if (_weapon_system->_selected)
+   {
+      _weapon_system->_selected->draw(color);
    }
 
    auto current_cycle = _player_animation.getCurrentCycle();
@@ -268,13 +267,13 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const sf::Vector2f& Player::getPixelPositionf() const
+const sf::Vector2f& Player::getPixelPositionFloat() const
 {
    return _pixel_position_f;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const sf::Vector2i& Player::getPixelPositioni() const
+const sf::Vector2i& Player::getPixelPositionInt() const
 {
    return _pixel_position_i;
 }
@@ -290,25 +289,31 @@ void Player::setPixelPosition(float x, float y)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePixelRect()
+const sf::FloatRect& Player::getPixelRectFloat() const
 {
-   sf::IntRect rect;
-
-   const auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
-
-   rect.left = static_cast<int>(_pixel_position_f.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(_pixel_position_f.y) - height_diff_px - (height_diff_px / 2);
-
-   rect.width = PLAYER_ACTUAL_WIDTH;
-   rect.height = PLAYER_ACTUAL_HEIGHT;
-
-   _pixel_rect = rect;
+   return _pixel_rect_f;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const sf::IntRect& Player::getPlayerPixelRect() const
+void Player::updatePixelRect()
 {
-   return _pixel_rect;
+   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+
+   _pixel_rect_f.left = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
+   _pixel_rect_f.top = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
+   _pixel_rect_f.width = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_f.height = PLAYER_ACTUAL_HEIGHT;
+
+   _pixel_rect_i.left = static_cast<int32_t>(_pixel_rect_f.left);
+   _pixel_rect_i.top = static_cast<int32_t>(_pixel_rect_f.top);
+   _pixel_rect_i.width = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_i.height = PLAYER_ACTUAL_HEIGHT;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+const sf::IntRect& Player::getPixelRectInt() const
+{
+   return _pixel_rect_i;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -432,7 +437,7 @@ void Player::createBody()
 {
    // create player body
    auto body_def = new b2BodyDef();
-   body_def->position.Set(getPixelPositionf().x * MPP, getPixelPositionf().y * MPP);
+   body_def->position.Set(getPixelPositionFloat().x * MPP, getPixelPositionFloat().y * MPP);
 
    body_def->type = b2_dynamicBody;
 
@@ -761,7 +766,6 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 
    return desired_velocity;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
@@ -1117,15 +1121,17 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAttack()
 {
-   _attack._was_attacking = _attack._attacking;
-   _attack._attacking = _controls->isFireButtonPressed();
+   _attack._fire_button_was_pressed = _attack._fire_button_pressed;
+   _attack._fire_button_pressed = _controls->isFireButtonPressed();
 
-   if (_attack._attacking && !_attack._was_attacking)
+   if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
    {
       _attack._timepoint_attack_start = StopWatch::getInstance().now();
    }
 
-   if (_attack._attacking)
+   // there are weapons that support continous attacks while the button is down, others like the sword
+   // require a fresh button press each time the sword should be swung
+   if (_attack._fire_button_pressed)
    {
       attack();
    }
@@ -1437,7 +1443,7 @@ void Player::updateDash(Dash dir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelCollisions()
 {
-   const auto rect = getPlayerPixelRect();
+   const auto rect = getPixelRectInt();
    _extra_manager->collide(rect);
    Laser::collide(rect);
    Fan::collide(rect, _body);
@@ -1577,20 +1583,12 @@ void Player::attack()
       case WeaponType::Sword:
       {
          // no 2nd strike without new button press
-         if (_attack._attacking && _attack._was_attacking)
+         if (_attack._fire_button_pressed && _attack._fire_button_was_pressed)
          {
             return;
          }
 
-         const auto x_offset = dir.x * 0.5f;
-         const auto y_offset = 0.0f;
-
-         const auto player_width_px = _pixel_rect.width / 2;
-
-         pos.x = x_offset + _pixel_position_f.x * MPP - player_width_px * MPP;
-         pos.y = y_offset + _pixel_position_f.y * MPP;
-
-         dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, pos, dir);
+         dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
          break;
       }
       case WeaponType::None:
@@ -1804,5 +1802,3 @@ void Player::updatePreviousBodyState()
    _position_previous = _body->GetPosition();
    _velocity_previous = _body->GetLinearVelocity();
 }
-
-
