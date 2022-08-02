@@ -98,6 +98,7 @@ function initialize()
    addShapeCircle(0.12, 0.0, 0.12)                        -- radius, x, y
    addShapeRect(0.2, 0.07, 0.0, 0.1)                      -- width, height, x, y
    updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
+   addHitbox(0, 0, 48, 48)                                -- x offset, y offset, width, height
 
    -- generate jump path
    k1 = SplineKey:create{x = 0.0, y =  0.0,   time = -1.0}

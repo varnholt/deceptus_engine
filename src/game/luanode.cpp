@@ -99,7 +99,7 @@ int32_t updateProperties(lua_State* state)
  *    param 4: sprite height
  * @return error code
  */
-int32_t addHitBox(lua_State* state)
+int32_t addHitbox(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc != 4)
@@ -1337,6 +1337,7 @@ void LuaNode::setupLua()
    _lua_state = luaL_newstate();
 
    // register callbacks
+   lua_register(_lua_state, "addHitbox", ::addHitbox);
    lua_register(_lua_state, "addSample", ::addSample);
    lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
    lua_register(_lua_state, "addShapeRect", ::addShapeRect);
@@ -2019,8 +2020,8 @@ void LuaNode::updatePosition()
    // update hitbox positions
    for (auto& hitbox : _hitboxes)
    {
-      hitbox._rect_px.left = x_px;
-      hitbox._rect_px.top = y_px;
+      hitbox._rect_px.left = x_px + hitbox._offset_px.x;
+      hitbox._rect_px.top = y_px + hitbox._offset_px.y;
    }
 }
 
@@ -2041,9 +2042,10 @@ void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_
 
 void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)
 {
-   sf::FloatRect rect{static_cast<float>(left_px), static_cast<float>(top_px), static_cast<float>(width_px), static_cast<float>(height_px)};
-
-   _hitboxes.push_back(rect);
+   sf::FloatRect rect{0.0f, 0.0f, static_cast<float>(width_px), static_cast<float>(height_px)};
+   sf::Vector2f offset{static_cast<float>(left_px), static_cast<float>(top_px)};
+   Hitbox box{rect, offset};
+   _hitboxes.push_back(box);
 }
 
 void LuaNode::draw(sf::RenderTarget& target)
