@@ -469,12 +469,12 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
 
 void DebugDraw::debugHitboxes(sf::RenderTarget& target)
 {
-   sf::FloatRect screen = getScreenRect(target);
+   const auto screen = getScreenRect(target);
    const auto nodes = WorldQuery::findNodes(screen);
 
-   for (auto& node : nodes)
+   for (const auto& node : nodes)
    {
-      for (auto& hitbox : node->_hitboxes)
+      for (const auto& hitbox : node->_hitboxes)
       {
          drawRect(target, hitbox.getRectTranslated());
       }
