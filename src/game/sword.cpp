@@ -13,32 +13,21 @@ namespace
 constexpr auto sword_damage = 10;
 }
 
-Sword::Sword()
+using namespace std::chrono_literals;
+
+Sword::Sword() : _duration_from_swing_start_to_hit(200ms), _duration_from_hit_start_to_end(120ms)
 {
    _type = WeaponType::Sword;
 }
 
 void Sword::draw(sf::RenderTarget& target)
 {
-   using namespace std::chrono_literals;
-
-   if (StopWatch::getInstance().now() - _timepoint_used > 2s)
+   if (!checkHitWindowActive())
    {
       return;
    }
 
-   // TODO: hit must only be carried out at button press timepoint plus frame time offset
-
-   // TODO: must be refactored to separate function and recycled in draw call
-   const auto center = sf::Vector2f{
-      Player::getCurrent()->getPixelPositionFloat().x + 0.5f * _dir_m.x * PPM,
-      Player::getCurrent()->getPixelPositionFloat().y - 0.6f * PPM,
-   };
-
-   const auto hit_rect = sf::FloatRect(center, sf::Vector2f(20.0f, 20.0f));
-
-   DebugDraw::drawRect(target, hit_rect, sf::Color{255, 0, 0});
-   // DebugDraw::drawCircle(target, circle_center, 0.75f, {1.0f, 0.0f, 0.0f});
+   DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
 }
 
 void Sword::update(const sf::Time& /*time*/)
@@ -48,20 +37,14 @@ void Sword::update(const sf::Time& /*time*/)
       return;
    }
 
-   const auto attack_frame_has_been_reached = true;
-
-   if (attack_frame_has_been_reached)
+   if (checkHitWindowActive())
    {
       _cleared_to_attack = false;
 
-      // TODO: must be refactored to separate function and recycled in draw call
-      const auto& player_rect = Player::getCurrent()->getPixelRectInt();
-      sf::FloatRect attack_rect_px(player_rect);
-      attack_rect_px.left += (48 * _dir_m.x);
-
-      auto hit_nodes = WorldQuery::findNodes(attack_rect_px);
+      updateHitbox();
 
       // this ought to go to a separate class for hit/damage management
+      auto hit_nodes = WorldQuery::findNodes(_hit_rect_px);
       for (auto& node : hit_nodes)
       {
          std::cout << "hit: " << node->_script_name << " " << node->_id << std::endl;
@@ -70,15 +53,28 @@ void Sword::update(const sf::Time& /*time*/)
    }
 }
 
-void Sword::initialize()
-{
-}
-
 void Sword::use(const std::shared_ptr<b2World>& /*world*/, const b2Vec2& dir)
 {
    _cleared_to_attack = true;
-
-   _timepoint_used = StopWatch::getInstance().now();
-
+   _timepoint_swing_start = StopWatch::getInstance().now();
    _dir_m = dir;
+}
+
+bool Sword::checkHitWindowActive() const
+{
+   const auto now = StopWatch::getInstance().now();
+   const auto start = _timepoint_swing_start + _duration_from_swing_start_to_hit;
+   const auto end = _timepoint_swing_start + _duration_from_swing_start_to_hit + _duration_from_hit_start_to_end;
+   const auto within_active_time_window = (now >= start && now <= end);
+   return within_active_time_window;
+}
+
+void Sword::updateHitbox()
+{
+   const auto center = sf::Vector2f{
+      Player::getCurrent()->getPixelPositionFloat().x + 0.5f * PPM * _dir_m.x,
+      Player::getCurrent()->getPixelPositionFloat().y - 0.6f * PPM,
+   };
+
+   _hit_rect_px = sf::FloatRect(center, sf::Vector2f(20.0f, 20.0f));
 }
