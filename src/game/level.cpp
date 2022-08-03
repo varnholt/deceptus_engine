@@ -1067,6 +1067,7 @@ void Level::drawDebugInformation()
       drawStaticChains(*_render_texture_level.get());
       DebugDraw::debugBodies(*_render_texture_level.get(), this);
       DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPixelRectInt());
+      DebugDraw::debugHitboxes(*_render_texture_level.get());
 
       for (const auto& room : _rooms)
       {
