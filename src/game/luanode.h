@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <map>
 #include <memory>
 #include <string>
@@ -28,6 +29,8 @@ struct lua_State;
  */
 struct LuaNode : public GameNode
 {
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
    LuaNode(GameNode* parent, const std::string& filename);
    ~LuaNode();
 
@@ -90,7 +93,7 @@ struct LuaNode : public GameNode
    void setActive(bool active);
 
    //! set the node's damage for collisions with the player
-   void setDamage(int32_t damage);
+   void setDamageToPlayer(int32_t damage);
 
    //! set the object's gravity scale
    void setGravityScale(float scale);
@@ -115,6 +118,10 @@ struct LuaNode : public GameNode
 
    //! add a hitbox
    void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
+
+   const HighResTimePoint& getHitTime() const;
+
+   int32_t getDamageFromPlayer() const;
 
    void luaHit(int32_t damage);
    void luaDie();
@@ -161,7 +168,11 @@ struct LuaNode : public GameNode
    b2BodyDef* _body_def = nullptr;
    std::vector<b2Shape*> _shapes_m;
    std::vector<std::unique_ptr<Weapon>> _weapons;
+
+   // damage
    std::vector<Hitbox> _hitboxes;
+   HighResTimePoint _hit_time;
+   int32_t _damage_from_player{0};
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 };

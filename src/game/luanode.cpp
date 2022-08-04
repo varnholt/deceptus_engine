@@ -275,12 +275,12 @@ int32_t queryRayCast(lua_State* state)
 }
 
 /**
- * @brief setDamage set the damage of this lua node
+ * @brief setDamageToPlayer set the damage of this lua node
  * @param state lua state
  *    param damage amount of damage (0..100)
  * @return error code
  */
-int32_t setDamage(lua_State* state)
+int32_t setDamageToPlayer(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc != 1)
@@ -295,7 +295,7 @@ int32_t setDamage(lua_State* state)
    }
 
    const auto damage_amount = static_cast<int32_t>(lua_tointeger(state, 1));
-   node->setDamage(damage_amount);
+   node->setDamageToPlayer(damage_amount);
 
    return 0;
 }
@@ -1358,7 +1358,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "queryRayCast", ::queryRayCast);
    lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
    lua_register(_lua_state, "setActive", ::setActive);
-   lua_register(_lua_state, "setDamage", ::setDamage);
+   lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
    lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
@@ -1428,7 +1428,7 @@ void LuaNode::synchronizeProperties()
 void LuaNode::luaInitialize()
 {
    lua_getglobal(_lua_state, FUNCTION_INITIALIZE);
-   auto result = lua_pcall(_lua_state, 0, 0, 0);
+   const auto result = lua_pcall(_lua_state, 0, 0, 0);
 
    if (result != LUA_OK)
    {
@@ -1446,7 +1446,7 @@ void LuaNode::luaUpdate(const sf::Time& dt)
    lua_getglobal(_lua_state, FUNCTION_UPDATE);
    lua_pushnumber(_lua_state, dt.asSeconds());
 
-   auto result = lua_pcall(_lua_state, 1, 0, 0);
+   const auto result = lua_pcall(_lua_state, 1, 0, 0);
 
    if (result != LUA_OK)
    {
@@ -1468,7 +1468,7 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
       lua_pushstring(_lua_state, key.c_str());
       lua_pushstring(_lua_state, value.c_str());
 
-      auto result = lua_pcall(_lua_state, 2, 0, 0);
+      const auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
@@ -1485,13 +1485,15 @@ void LuaNode::luaWriteProperty(const std::string& key, const std::string& value)
 void LuaNode::luaHit(int32_t damage)
 {
    // Log::Info() << "thing was hit: " << damage;
+   _hit_time = std::chrono::high_resolution_clock::now();
+   _damage_from_player = damage;
 
    lua_getglobal(_lua_state, FUNCTION_HIT);
    if (lua_isfunction(_lua_state, -1))
    {
       lua_pushinteger(_lua_state, damage);
 
-      auto result = lua_pcall(_lua_state, 1, 0, 0);
+      const auto result = lua_pcall(_lua_state, 1, 0, 0);
       if (result != LUA_OK)
       {
          error(_lua_state, FUNCTION_HIT);
@@ -1508,7 +1510,7 @@ void LuaNode::luaCollisionWithPlayer()
    lua_getglobal(_lua_state, FUNCTION_COLLISION_WITH_PLAYER);
    if (lua_isfunction(_lua_state, -1))
    {
-      auto result = lua_pcall(_lua_state, 0, 0, 0);
+      const auto result = lua_pcall(_lua_state, 0, 0, 0);
       if (result != LUA_OK)
       {
          error(_lua_state, FUNCTION_COLLISION_WITH_PLAYER);
@@ -1533,7 +1535,7 @@ void LuaNode::luaSendPatrolPath()
    luaSendPath(_movement_path_px);
 
    // vec.size + 1 args, 0 result
-   auto result = lua_pcall(_lua_state, 2, 0, 0);
+   const auto result = lua_pcall(_lua_state, 2, 0, 0);
 
    if (result != LUA_OK)
    {
@@ -1570,7 +1572,7 @@ void LuaNode::luaMovedTo()
       lua_pushnumber(_lua_state, static_cast<double>(x));
       lua_pushnumber(_lua_state, static_cast<double>(y));
 
-      auto result = lua_pcall(_lua_state, 2, 0, 0);
+      const auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
@@ -1597,7 +1599,7 @@ void LuaNode::luaSetStartPosition()
       lua_pushnumber(_lua_state, static_cast<double>(x));
       lua_pushnumber(_lua_state, static_cast<double>(y));
 
-      auto result = lua_pcall(_lua_state, 2, 0, 0);
+      const auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
@@ -1623,7 +1625,7 @@ void LuaNode::luaPlayerMovedTo()
       lua_pushnumber(_lua_state, pos.x);
       lua_pushnumber(_lua_state, pos.y);
 
-      auto result = lua_pcall(_lua_state, 2, 0, 0);
+      const auto result = lua_pcall(_lua_state, 2, 0, 0);
 
       if (result != LUA_OK)
       {
@@ -1641,7 +1643,7 @@ void LuaNode::luaRetrieveProperties()
    lua_getglobal(_lua_state, FUNCTION_RETRIEVE_PROPERTIES);
 
    // 0 args, 0 result
-   auto result = lua_pcall(_lua_state, 0, 0, 0);
+   const auto result = lua_pcall(_lua_state, 0, 0, 0);
 
    if (result != LUA_OK)
    {
@@ -1660,7 +1662,7 @@ void LuaNode::luaTimeout(int32_t timerId)
    lua_getglobal(_lua_state, FUNCTION_TIMEOUT);
    lua_pushinteger(_lua_state, timerId);
 
-   auto result = lua_pcall(_lua_state, 1, 0, 0);
+   const auto result = lua_pcall(_lua_state, 1, 0, 0);
 
    if (result != LUA_OK)
    {
@@ -1770,7 +1772,7 @@ void LuaNode::setActive(bool active)
    _body->SetActive(active);
 }
 
-void LuaNode::setDamage(int32_t damage)
+void LuaNode::setDamageToPlayer(int32_t damage)
 {
    for (auto fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
@@ -1952,6 +1954,16 @@ void LuaNode::stopScript()
       lua_close(_lua_state);
       _lua_state = nullptr;
    }
+}
+
+int32_t LuaNode::getDamageFromPlayer() const
+{
+   return _damage_from_player;
+}
+
+const LuaNode::HighResTimePoint& LuaNode::getHitTime() const
+{
+   return _hit_time;
 }
 
 void LuaNode::updateVelocity()

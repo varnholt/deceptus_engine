@@ -149,6 +149,12 @@ void AnimationPool::deserialize(const std::string& data)
          auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
          _settings[name] = settings;
 
+         if (!settings->_valid)
+         {
+            Log::Error() << name << " frame durations vs. sprite count mismatch (" << settings->_frame_durations.size()
+                         << " != " << settings->_sprite_count << ")";
+         }
+
          auto texture = TexturePool::getInstance().get(settings->_texture_path);
          settings->_texture = texture;
 
