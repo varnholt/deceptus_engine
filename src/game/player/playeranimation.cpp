@@ -98,8 +98,10 @@ PlayerAnimation::PlayerAnimation()
    _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
    _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
    _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_l[3] = AnimationPool::getInstance().add("player_standing_attack_sword_4_l", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_r[3] = AnimationPool::getInstance().add("player_standing_attack_sword_4_r", 0.0f, 0.0f, true, false);
+
+   // sword animation 4 is not ready yet
+   _sword_standing_attack_l[3] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
+   _sword_standing_attack_r[3] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
    _sword_dash_init_r = AnimationPool::getInstance().add("player_dash_init_sword_r", 0.0f, 0.0f, true, false);
    _sword_dash_init_l = AnimationPool::getInstance().add("player_dash_init_sword_l", 0.0f, 0.0f, true, false);
    _sword_dash_r = AnimationPool::getInstance().add("player_dash_sword_r", 0.0f, 0.0f, true, false);
