@@ -4,6 +4,7 @@
 #include "animationplayer.h"
 #include "camerapanorama.h"
 #include "cameraroomlock.h"
+#include "chainshapeanalyzer.h"
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -837,7 +838,8 @@ void Level::updateCameraSystem(const sf::Time& dt)
    if (prev_room != _room_current)
    {
       Log::Info() << "player moved to room: " << (_room_current ? _room_current->getObjectId() : "undefined") << " on side '"
-                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat())) : '?')
+                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat()))
+                                    : '?')
                   << "'";
 
       // will update the current room in both cases, either after the camera lock delay or instantly
@@ -1333,15 +1335,15 @@ void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_
 }
 
 //-----------------------------------------------------------------------------
-void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths, ObjectType behavior)
+void Level::addPathsToWorld(int32_t offset_x, int32_t offset_y, const std::vector<SquareMarcher::Path>& paths, ObjectType behavior)
 {
    // create the physical chain with 1 body per chain
-   for (auto& path : paths)
+   for (const auto& path : paths)
    {
       std::vector<b2Vec2> chain;
-      for (auto& pos : path._scaled)
+      for (const auto& pos : path._scaled)
       {
-         chain.push_back({(pos.x + offsetX) * PIXELS_PER_TILE / PPM, (pos.y + offsetY) * PIXELS_PER_TILE / PPM});
+         chain.push_back({(pos.x + offset_x) * PIXELS_PER_TILE / PPM, (pos.y + offset_y) * PIXELS_PER_TILE / PPM});
       }
 
       addChainToWorld(chain, behavior);
@@ -1529,6 +1531,8 @@ void Level::parsePhysicsTiles(
    //
    //      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectTypeDeadly);
    //   }
+
+   ChainShapeAnalyzer::analyze(_world_chains);
 }
 
 //-----------------------------------------------------------------------------
