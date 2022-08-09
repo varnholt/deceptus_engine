@@ -289,7 +289,7 @@
     },
     "player_double_jump_l": {
         "frame_durations": [
-            70,70,70,70,70,70,70,70,70
+            70,70,70,70,70,70,70,70
         ],
         "frame_offset": [
             0,
@@ -308,7 +308,7 @@
     },
     "player_double_jump_r": {
         "frame_durations": [
-            70,70,70,70,70,70,70,70,70
+            70,70,70,70,70,70,70,70
         ],
         "frame_offset": [
             0,
@@ -1303,12 +1303,12 @@
             48.0,
             48.0
         ],
-        "sprite_count": 10 ,
+        "sprite_count": 13 ,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_3_l" : {
         "frame_durations": [
-             80, 80, 60, 60, 60, 60, 60, 60, 60, 80
+             80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80
         ],
         "frame_offset": [
             1320,
@@ -1322,7 +1322,7 @@
             48.0,
             48.0
         ],
-        "sprite_count": 10,
+        "sprite_count": 13,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_4_r" : {
@@ -1330,37 +1330,37 @@
              80, 80, 60, 60, 60, 60, 60, 60, 60, 80
         ],
         "frame_offset": [
-            1440,
-            768
+            1320,
+            816
         ],
         "frame_size": [
-            96,
+            120,
             48
         ],
         "origin": [
             48.0,
             48.0
         ],
-        "sprite_count": 14,
+        "sprite_count": 10,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_standing_attack_sword_4_l" : {
         "frame_durations": [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+            80, 80, 60, 60, 60, 60, 60, 60, 60, 80
         ],
         "frame_offset": [
-            1440,
-            816
+            1320,
+            864
         ],
         "frame_size": [
-            96,
+            120,
             48
         ],
         "origin": [
             48.0,
             48.0
         ],
-        "sprite_count": 14,
+        "sprite_count": 10,
         "texture": "data/sprites/player_unarmed.png"
    },
    "player_swim_sword_l": {
