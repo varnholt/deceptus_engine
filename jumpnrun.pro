@@ -139,6 +139,7 @@ SOURCES += \
    src/game/cameraroomlock.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
+   src/game/chainshapeanalyzer.cpp \
    src/game/console.cpp \
    src/game/cutscene.cpp \
    src/game/debugdraw.cpp \
@@ -307,6 +308,7 @@ HEADERS += \
    src/framework/tools/log.h \
    src/framework/tools/logthread.h \
    src/framework/tools/stopwatch.h \
+   src/game/chainshapeanalyzer.h \
    src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \
