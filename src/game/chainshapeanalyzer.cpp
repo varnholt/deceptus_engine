@@ -55,8 +55,9 @@ void ChainShapeAnalyzer::analyze(std::vector<std::vector<b2Vec2>>& chains)
             }
             else
             {
-               std::cout << "chain " << chain_index << "vector: " << vector_index << ", pos(" << iv._pos.x << ", " << iv._pos.y
-                         << ") collides with chain: " << it->_chain_index << ", vector: " << it->_vector_index << std::endl;
+               std::cout << "chain " << chain_index << ", vector: " << vector_index << ", pos(" << iv._pos.x << ", " << iv._pos.y
+                         << ") collides with chain: " << it->_chain_index << ", vector: " << it->_vector_index << ", pos(" << it->_pos.x
+                         << ", " << it->_pos.y << ")" << std::endl;
             }
             vector_index++;
          }
