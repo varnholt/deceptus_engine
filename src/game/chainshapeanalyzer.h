@@ -7,6 +7,7 @@
 namespace ChainShapeAnalyzer
 {
 void analyze(std::vector<std::vector<b2Vec2>>& chains);
+void analyze(const std::shared_ptr<b2World>& world);
 };
 
 #endif // CHAINSHAPEANALYZER_H
