@@ -1532,7 +1532,7 @@ void Level::parsePhysicsTiles(
    //      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectTypeDeadly);
    //   }
 
-   ChainShapeAnalyzer::analyze(_world_chains);
+   ChainShapeAnalyzer::analyze(_world);
 }
 
 //-----------------------------------------------------------------------------
