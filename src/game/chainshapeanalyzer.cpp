@@ -16,6 +16,7 @@ struct IndexedVector
    int32_t _vector_index{0};
    std::pair<float, float> _pos;
    ObjectType _object_type{ObjectType::ObjectTypeInvalid};
+   b2ChainShape* _chain{nullptr};
 
    bool operator<(const IndexedVector& v) const
    {
@@ -102,7 +103,7 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
          {
             auto pos = chain->m_vertices[i];
 
-            const auto iv = IndexedVector{chain_index, vector_index, {pos.x, pos.y}, object_type};
+            const auto iv = IndexedVector{chain_index, vector_index, {pos.x, pos.y}, object_type, chain};
             const auto it = _indexed_vectors.find(iv);
 
             if (it == _indexed_vectors.end())
@@ -199,3 +200,35 @@ chain 53, vector: 47, pos(10584, 1968) collides with chain: 22, vector: 0, pos(1
           |
 ----------+
 */
+
+
+void ChainShapeAnalyzer::fix(b2ChainShape* chain, int32_t vertex_index)
+{
+//   auto vertex = chain->m_vertices[vertex_index];
+//
+// 1) find the right edge
+//   void GetChildEdge(b2EdgeShape* edge, int32 index) const;
+//
+// 2) inject edge shape
+// ground made of edges with ghost vertices set
+//
+//   myFixtureDef.shape = &edgeShape;
+//   for (int i = 0; i < 21; i++) {
+//      float left = -20+i*2 - 1;
+//      float right = -20+i*2 + 1;
+//      edgeShape.Set( b2Vec2(left,20+getHeight(left)), b2Vec2(right,20+getHeight(right)) );
+//      edgeShape.m_vertex0.Set( left-1,20+getHeight(left) );
+//      edgeShape.m_vertex3.Set( right+1,20+getHeight(right) );
+//      edgeShape.m_hasVertex0 = true;
+//      edgeShape.m_hasVertex3 = true;
+//      fakeGroundBody->CreateFixture(&myFixtureDef);
+//   }
+//
+//   b2EdgeShape edgeShape;
+//   edgeShape.Set( v1, v2 );
+//   edgeShape.m_vertex0.Set( v0 );
+//   edgeShape.m_vertex3.Set( v3 );
+//   edgeShape.m_hasVertex0 = true;
+//   edgeShape.m_hasVertex3 = true;
+}
+
