@@ -13,7 +13,7 @@ namespace
 struct IndexedVector
 {
    int32_t _chain_index{0};
-   int32_t _vector_index{0};
+   int32_t _vertex_index{0};
    std::pair<float, float> _pos;
    ObjectType _object_type{ObjectType::ObjectTypeInvalid};
    b2ChainShape* _chain{nullptr};
@@ -50,7 +50,7 @@ void ChainShapeAnalyzer::analyze(std::vector<std::vector<b2Vec2>>& chains)
             else if (chain_index != it->_chain_index)
             {
                std::cout << "chain " << chain_index << ", vector: " << vector_index << ", pos(" << iv._pos.first * PPM << ", "
-                         << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index << ", vector: " << it->_vector_index
+                         << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index << ", vector: " << it->_vertex_index
                          << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")" << std::endl;
             }
             vector_index++;
@@ -77,7 +77,7 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
       auto fixture = body->GetFixtureList();
       while (fixture)
       {
-         int32_t vector_index = 0;
+         int32_t vertex_index = 0;
 
          auto next = fixture->GetNext();
          auto shape = fixture->GetShape();
@@ -99,11 +99,11 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
             object_type = user_data->getType();
          }
 
-         for (auto i = 0; i < chain->GetChildCount(); i++)
+         for (auto i = 0; i < chain->m_count; i++)
          {
             auto pos = chain->m_vertices[i];
 
-            const auto iv = IndexedVector{chain_index, vector_index, {pos.x, pos.y}, object_type, chain};
+            const auto iv = IndexedVector{chain_index, vertex_index, {pos.x, pos.y}, object_type, chain};
             const auto it = _indexed_vectors.find(iv);
 
             if (it == _indexed_vectors.end())
@@ -127,25 +127,98 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
                };
 
                const auto chain_is_on_the_right_of_the_collision =
-                  isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->GetChildCount());
+                  isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->m_count);
 
                // std::cout << chain_is_on_the_right_of_the_collision << std::endl;
 
                const auto collision_is_on_the_right_of_the_one_way_wall =
                   (object_type == ObjectTypeSolid && chain_is_on_the_right_of_the_collision);
 
-               std::cout << "chain " << chain_index << ", vector: " << vector_index << ", pos(" << iv._pos.first * PPM << ", "
-                         << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index << ", vector: " << it->_vector_index
+               std::cout << "chain " << chain_index << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1) << "], pos(" << iv._pos.first * PPM << ", "
+                         << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
                          << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
                          << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side" << std::endl;
+
+               // the first and the last vertex are the same in a loop
+               // if (vertex_index == 0 || vertex_index == chain->m_count - 1)
+               {
+                  // fix(chain, vertex_index, object_type, collision_is_on_the_right_of_the_one_way_wall);
+               }
+
+               // if (iv._vertex_index == 0 || iv._vertex_index == iv._chain->m_count - 1)
+               {
+                  // fix(iv._chain, iv._vertex_index, iv._object_type, collision_is_on_the_right_of_the_one_way_wall);
+               }
             }
-            vector_index++;
+            vertex_index++;
          }
 
          fixture = next;
       }
    }
 }
+
+// idea: i know the positions where the player 'jumps' even though he shouldn't
+// i could as well check the presolve code in box2d and mute impulses coming from there
+
+// tile pos: 252, 115
+
+void ChainShapeAnalyzer::fix(b2ChainShape* chain, int32_t vertex_index, ObjectType object_type, bool right)
+{
+//   auto conflicting_vertex = chain->m_vertices[vertex_index];
+//   chain->m_nextVertex.y = conflicting_vertex.y;
+//   chain->m_prevVertex.y = conflicting_vertex.y;
+
+   if (vertex_index != 0 && vertex_index != chain->m_count -1)
+   {
+      // can't fix
+      return;
+   }
+
+   const auto vertex = chain->m_vertices[vertex_index];
+   b2Vec2 fixed_vertex{vertex};
+
+   if (object_type == ObjectTypeSolidOneWay)
+   {
+      fixed_vertex.x += right ? 1.0f : -1.0f;
+   }
+
+   else if (object_type == ObjectTypeSolid)
+   {
+      // right is always seen from the perspective of the one way wall
+      fixed_vertex.x += right ? -1.0f : 1.0f;
+   }
+
+   auto outputVertices = [](b2ChainShape* chain){
+      std::cout
+         << "pref: (" << chain->m_prevVertex.x << ", " << chain->m_prevVertex.y << "), ";
+      for (auto i = 0; i < chain->m_count; i++)
+      {
+         std::cout
+            << " (" << chain->m_vertices[i].x << ", " << chain->m_vertices[i].y << "), ";
+      }
+      std::cout
+         << "next: (" << chain->m_nextVertex.x << ", " << chain->m_nextVertex.y << ") "
+         << std::endl;
+   };
+
+   std::cout << "before: ";
+   outputVertices(chain);
+
+   if (vertex_index == 0)
+   {
+      chain->m_prevVertex = fixed_vertex;
+   }
+   else if (vertex_index == chain->m_count -1)
+   {
+      chain->m_nextVertex = fixed_vertex;
+   }
+
+   std::cout << "after:  ";
+   outputVertices(chain);
+}
+
+
 
 /*
 
@@ -200,35 +273,4 @@ chain 53, vector: 47, pos(10584, 1968) collides with chain: 22, vector: 0, pos(1
           |
 ----------+
 */
-
-
-void ChainShapeAnalyzer::fix(b2ChainShape* chain, int32_t vertex_index)
-{
-//   auto vertex = chain->m_vertices[vertex_index];
-//
-// 1) find the right edge
-//   void GetChildEdge(b2EdgeShape* edge, int32 index) const;
-//
-// 2) inject edge shape
-// ground made of edges with ghost vertices set
-//
-//   myFixtureDef.shape = &edgeShape;
-//   for (int i = 0; i < 21; i++) {
-//      float left = -20+i*2 - 1;
-//      float right = -20+i*2 + 1;
-//      edgeShape.Set( b2Vec2(left,20+getHeight(left)), b2Vec2(right,20+getHeight(right)) );
-//      edgeShape.m_vertex0.Set( left-1,20+getHeight(left) );
-//      edgeShape.m_vertex3.Set( right+1,20+getHeight(right) );
-//      edgeShape.m_hasVertex0 = true;
-//      edgeShape.m_hasVertex3 = true;
-//      fakeGroundBody->CreateFixture(&myFixtureDef);
-//   }
-//
-//   b2EdgeShape edgeShape;
-//   edgeShape.Set( v1, v2 );
-//   edgeShape.m_vertex0.Set( v0 );
-//   edgeShape.m_vertex3.Set( v3 );
-//   edgeShape.m_hasVertex0 = true;
-//   edgeShape.m_hasVertex3 = true;
-}
 
