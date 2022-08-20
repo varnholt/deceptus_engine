@@ -1310,6 +1310,15 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 //-----------------------------------------------------------------------------
 void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_type)
 {
+   if (
+         fabs(chain[0].x - chain[chain.size() - 1].x) < 0.001f
+      && fabs(chain[0].y - chain[chain.size() - 1].y) < 0.001f
+   )
+   {
+      Log::Error() << "chain has equal start and end position" << std::endl;
+      exit(0);
+   }
+
    // it's easier to store all the physics chains in a separate data structure
    // than to parse the box2d world every time we want those loops.
    _world_chains.push_back(chain);
