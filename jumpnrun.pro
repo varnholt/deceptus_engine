@@ -72,6 +72,7 @@ linux {
    LIBS += $$system(pkg-config sdl2 --libs)
    LIBS += -lGL
    LIBS += $$system(pkg-config sfml-all --libs)
+   LIBS += -lX11
 }
 
 
