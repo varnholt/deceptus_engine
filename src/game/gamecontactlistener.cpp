@@ -2,18 +2,15 @@
 #include "gamecontactlistener.h"
 
 // game
-#include "audio.h"
 #include "projectile.h"
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/tools/log.h"
-#include "framework/tools/timer.h"
 #include "luanode.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/collapsingplatform.h"
 #include "mechanisms/conveyorbelt.h"
-#include "mechanisms/movingplatform.h"
 #include "onewaywall.h"
 #include "player/player.h"
 
