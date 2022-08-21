@@ -133,6 +133,7 @@ private:
    void updateHardLanding();
    void updateImpulse();
    void updateOneWayWallDrop();
+   void updateChainShapeCollisions();
    void updatePixelCollisions();
    void updatePlatformMovement(const sf::Time& dt);
    void updateOrientation();

@@ -3,12 +3,18 @@
 #include <algorithm>
 #include <iostream>
 #include <set>
+#include <SFML/Graphics.hpp>
 
 #include "constants.h"
 #include "fixturenode.h"
+#include "player/player.h"
 
 namespace
 {
+
+std::set<std::pair<float, float>> _conflicting_pos_set_m;
+std::vector<b2Vec2> _conflicting_positions_m;
+std::vector<sf::Vector2f> _conflicting_positions_px;
 
 struct IndexedVector
 {
@@ -26,40 +32,6 @@ struct IndexedVector
 
 }  // namespace
 
-void ChainShapeAnalyzer::analyze(std::vector<std::vector<b2Vec2>>& chains)
-{
-   static std::set<IndexedVector> _indexed_vectors;
-   _indexed_vectors.clear();
-
-   int32_t chain_index = 0;
-   for (const auto& chain : chains)
-   {
-      int32_t vector_index = 0;
-      std::for_each(
-         chain.begin(),
-         chain.end(),
-         [chain_index, &vector_index](const auto& v)
-         {
-            const auto iv = IndexedVector{chain_index, vector_index, {v.x, v.y}, ObjectType::ObjectTypeInvalid};
-            const auto it = _indexed_vectors.find(iv);
-
-            if (it == _indexed_vectors.end())
-            {
-               _indexed_vectors.insert(iv);
-            }
-            else if (chain_index != it->_chain_index)
-            {
-               std::cout << "chain " << chain_index << ", vector: " << vector_index << ", pos(" << iv._pos.first * PPM << ", "
-                         << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index << ", vector: " << it->_vertex_index
-                         << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")" << std::endl;
-            }
-            vector_index++;
-         }
-      );
-
-      chain_index++;
-   }
-}
 
 void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
 {
@@ -134,21 +106,19 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
                const auto collision_is_on_the_right_of_the_one_way_wall =
                   (object_type == ObjectTypeSolid && chain_is_on_the_right_of_the_collision);
 
-               std::cout << "chain " << chain_index << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1) << "], pos(" << iv._pos.first * PPM << ", "
-                         << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
-                         << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
-                         << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side" << std::endl;
+               // clang-format off
+               std::cout
+                  << "chain " << chain_index
+                  << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1)
+                  << "], pos(" << iv._pos.first * PPM << ", " << iv._pos.second * PPM
+                  << ") collides with chain: " << it->_chain_index
+                  << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
+                  << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
+                  << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side"
+                  << std::endl;
+               // clang-format on
 
-               // the first and the last vertex are the same in a loop
-               // if (vertex_index == 0 || vertex_index == chain->m_count - 1)
-               {
-                  // fix(chain, vertex_index, object_type, collision_is_on_the_right_of_the_one_way_wall);
-               }
-
-               // if (iv._vertex_index == 0 || iv._vertex_index == iv._chain->m_count - 1)
-               {
-                  // fix(iv._chain, iv._vertex_index, iv._object_type, collision_is_on_the_right_of_the_one_way_wall);
-               }
+               _conflicting_pos_set_m.insert({pos.x, pos.y});
             }
             vertex_index++;
          }
@@ -156,67 +126,35 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
          fixture = next;
       }
    }
+
+   for (const auto& pos_m : _conflicting_pos_set_m)
+   {
+      _conflicting_positions_m.push_back({pos_m.first, pos_m.second});
+      _conflicting_positions_px.push_back({pos_m.first * PPM, pos_m.second * PPM});
+   }
 }
 
-// idea: i know the positions where the player 'jumps' even though he shouldn't
-// i could as well check the presolve code in box2d and mute impulses coming from there
+
+bool ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
+{
+   auto player = Player::getCurrent();
+   auto foot_sensor_fixture = player->getFootSensorFixture();
+   const auto& world_transform = player->getBody()->GetTransform();
+
+   for (const auto& bad_pos_m : _conflicting_positions_m)
+   {
+      const auto point_inside_rect = foot_sensor_fixture->GetShape()->TestPoint(world_transform, bad_pos_m);
+      if (point_inside_rect)
+      {
+         return true;
+      }
+   }
+
+   return false;
+}
+
 
 // tile pos: 252, 115
-
-void ChainShapeAnalyzer::fix(b2ChainShape* chain, int32_t vertex_index, ObjectType object_type, bool right)
-{
-//   auto conflicting_vertex = chain->m_vertices[vertex_index];
-//   chain->m_nextVertex.y = conflicting_vertex.y;
-//   chain->m_prevVertex.y = conflicting_vertex.y;
-
-   if (vertex_index != 0 && vertex_index != chain->m_count -1)
-   {
-      // can't fix
-      return;
-   }
-
-   const auto vertex = chain->m_vertices[vertex_index];
-   b2Vec2 fixed_vertex{vertex};
-
-   if (object_type == ObjectTypeSolidOneWay)
-   {
-      fixed_vertex.x += right ? 1.0f : -1.0f;
-   }
-
-   else if (object_type == ObjectTypeSolid)
-   {
-      // right is always seen from the perspective of the one way wall
-      fixed_vertex.x += right ? -1.0f : 1.0f;
-   }
-
-   auto outputVertices = [](b2ChainShape* chain){
-      std::cout
-         << "pref: (" << chain->m_prevVertex.x << ", " << chain->m_prevVertex.y << "), ";
-      for (auto i = 0; i < chain->m_count; i++)
-      {
-         std::cout
-            << " (" << chain->m_vertices[i].x << ", " << chain->m_vertices[i].y << "), ";
-      }
-      std::cout
-         << "next: (" << chain->m_nextVertex.x << ", " << chain->m_nextVertex.y << ") "
-         << std::endl;
-   };
-
-   std::cout << "before: ";
-   outputVertices(chain);
-
-   if (vertex_index == 0)
-   {
-      chain->m_prevVertex = fixed_vertex;
-   }
-   else if (vertex_index == chain->m_count -1)
-   {
-      chain->m_nextVertex = fixed_vertex;
-   }
-
-   std::cout << "after:  ";
-   outputVertices(chain);
-}
 
 
 
@@ -273,4 +211,5 @@ chain 53, vector: 47, pos(10584, 1968) collides with chain: 22, vector: 0, pos(1
           |
 ----------+
 */
+
 
