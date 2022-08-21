@@ -5,6 +5,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef __linux__
+extern "C" int XInitThreads();
+#endif
+
 #include "game/constants.h"
 #include "game/preloader.h"
 #include "game/test.h"
@@ -46,6 +50,10 @@ int main(int /*argc*/, char** /*argv*/)
          std::placeholders::_4
       )
    );
+#endif
+
+#ifdef __linux__
+   XInitThreads();
 #endif
 
    debugAuthors();
