@@ -4,6 +4,7 @@
 #include "audio.h"
 #include "bow.h"
 #include "camerapanorama.h"
+#include "chainshapeanalyzer.h"
 #include "displaymode.h"
 #include "fadetransitioneffect.h"
 #include "fixturenode.h"
@@ -352,29 +353,32 @@ void Player::createFeet()
       fixture_def_feet.filter.maskBits = mask_bits_standing;
       fixture_def_feet.filter.groupIndex = group_index;
 
-      b2CircleShape feetShape;
-      feetShape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
-      feetShape.m_radius = feet_radius_m;
-      fixture_def_feet.shape = &feetShape;
+      b2CircleShape feet_shape;
+      feet_shape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
+      feet_shape.m_radius = feet_radius_m;
+      fixture_def_feet.shape = &feet_shape;
 
       auto foot = _body->CreateFixture(&fixture_def_feet);
       _foot_fixture[i] = foot;
 
-      auto objectDataFeet = new FixtureNode(this);
-      objectDataFeet->setType(ObjectTypePlayer);
-      objectDataFeet->setFlag("foot", true);
-      foot->SetUserData(static_cast<void*>(objectDataFeet));
+      auto object_data_feet = new FixtureNode(this);
+      object_data_feet->setType(ObjectTypePlayer);
+      object_data_feet->setFlag("foot", true);
+      foot->SetUserData(static_cast<void*>(object_data_feet));
    }
 
    // attach foot sensor shape
-   b2PolygonShape footPolygonShape;
-   footPolygonShape.SetAsBox(
-      (width_px / 2.0f) / (PPM * 2.0f), (height_px / 4.0f) / (PPM * 2.0f), b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)), 0.0f
+   b2PolygonShape foot_sensor_shape;
+   foot_sensor_shape.SetAsBox(
+      (width_px / 2.0f) / (PPM * 2.0f),
+      (height_px / 4.0f) / (PPM * 2.0f),
+      b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)),
+      0.0f
    );
 
    b2FixtureDef foot_sensor_fixture_def;
    foot_sensor_fixture_def.isSensor = true;
-   foot_sensor_fixture_def.shape = &footPolygonShape;
+   foot_sensor_fixture_def.shape = &foot_sensor_shape;
 
    _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
    auto foot_object_data = new FixtureNode(this);
@@ -1327,10 +1331,20 @@ void Player::updateOneWayWallDrop()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateChainShapeCollisions()
+{
+   if (ChainShapeAnalyzer::checkPlayerAtCollisionPosition())
+   {
+      std::cout << "player collides with chain shape intersection" << std::endl;
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
 
+   updateChainShapeCollisions();
    updateImpulse();
    updateGroundAngle();
    updateHardLanding();
