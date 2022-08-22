@@ -5,14 +5,14 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef __linux__
-extern "C" int XInitThreads();
-#endif
-
 #include "game/constants.h"
 #include "game/preloader.h"
 #include "game/test.h"
 #include "framework/tools/logthread.h"
+
+#ifdef __linux__
+extern "C" int XInitThreads();
+#endif
 
 
 void debugAuthors()
