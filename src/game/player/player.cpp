@@ -1333,10 +1333,21 @@ void Player::updateOneWayWallDrop()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateChainShapeCollisions()
 {
+   return;
+
    if (ChainShapeAnalyzer::checkPlayerAtCollisionPosition())
    {
-      std::cout << "player collides with chain shape intersection" << std::endl;
+      if (ChainShapeAnalyzer::checkPlayerHiccup())
+      {
+         const auto velocity = _body->GetLinearVelocity();
+         const auto pos = _body->GetPosition();
+         _body->SetLinearVelocity({velocity.x, 0.0f});
+         _body->SetTransform({pos.x, 57.8558f /*ChainShapeAnalyzer::lastGoodPosition().y*/}, 0.0f);
+         // std::cout << "player got a chain shape collision hiccup: " << _body->GetPosition().y << std::endl;
+      }
    }
+
+   // std::cout << _body->GetPosition().y << std::endl;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
