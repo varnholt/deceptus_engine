@@ -10,6 +10,10 @@
 #include "game/test.h"
 #include "framework/tools/logthread.h"
 
+#ifdef __linux__
+extern "C" int XInitThreads();
+#endif
+
 
 void debugAuthors()
 {
@@ -46,6 +50,10 @@ int main(int /*argc*/, char** /*argv*/)
          std::placeholders::_4
       )
    );
+#endif
+
+#ifdef __linux__
+   XInitThreads();
 #endif
 
    debugAuthors();
