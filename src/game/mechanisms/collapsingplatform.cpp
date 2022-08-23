@@ -1,4 +1,4 @@
-#include "CollapsingPlatform.h"
+#include "collapsingplatform.h"
 
 #include <iostream>
 
