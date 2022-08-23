@@ -1347,7 +1347,7 @@ void Player::updateChainShapeCollisions()
    const auto velocity = _body->GetLinearVelocity();
    const auto pos = _body->GetPosition();
    _body->SetLinearVelocity({velocity.x, 0.0f});
-   _body->SetTransform({pos.x, hiccup_pos->y - 0.2f}, 0.0f);
+   _body->SetTransform({pos.x, hiccup_pos->y - 0.18f}, 0.0f);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

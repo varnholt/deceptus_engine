@@ -152,17 +152,6 @@ std::optional<b2Vec2> ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
    return std::nullopt;
 }
 
-bool ChainShapeAnalyzer::checkPlayerHiccup()
-{
-   auto player = Player::getCurrent();
-   const auto player_position_m = player->getBody()->GetPosition();
-
-   const auto hiccup_happened = (fabs(player_position_m.y - player_position_last_m.y) > 0.001);
-   player_position_last_m = player_position_m;
-
-   return hiccup_happened;
-}
-
 b2Vec2 ChainShapeAnalyzer::lastGoodPosition()
 {
    return player_position_last_m;
