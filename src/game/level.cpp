@@ -1373,16 +1373,24 @@ void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior
       {
          const auto& p = points[index];
          chain.push_back({(p.x + layer->_offset_x_px) / PPM, (p.y + layer->_offset_y_px) / PPM});
-
          debug_path.push_back({p.x / PIXELS_PER_TILE, p.y / PIXELS_PER_TILE});
       }
 
-      // creating a box2d chain is automatically closing the path
+      // creating a box2d loop is automatically closing the path
       chain.pop_back();
-
       addChainToWorld(chain, behavior);
 
-      // Mesh::writeVerticesToImage(points, faces, {1200, 1200}, "yo_yo.png");
+      // this should become a function callable from the console
+      if (false)
+      {
+         Mesh::writeVerticesToImage(
+            points,
+            faces,
+            {static_cast<int32_t>(layer->_width_tl * PIXELS_PER_TILE) / 4, static_cast<int32_t>(layer->_height_tl * PIXELS_PER_TILE) / 4},
+            path.filename().string() + "_dump.png",
+            0.25f
+         );
+      }
    }
 }
 
