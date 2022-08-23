@@ -28,7 +28,8 @@ void writeVerticesToImage(
    const std::vector<b2Vec2>& points,
    const std::vector<std::vector<uint32_t>>& faces,
    const sf::Vector2i& textureSize,
-   const std::filesystem::path& imagePath
+   const std::filesystem::path& imagePath,
+   float scale = 1.0f
 );
 
 }  // namespace Mesh
