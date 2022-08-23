@@ -140,6 +140,7 @@ private:
    void updatePortal();
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
+   void updateJump();
 
    void resetDash();
 
