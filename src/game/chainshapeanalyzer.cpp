@@ -134,7 +134,7 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
    }
 }
 
-bool ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
+std::optional<b2Vec2> ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
 {
    auto player = Player::getCurrent();
    auto foot_sensor_fixture = player->getFootSensorFixture();
@@ -145,11 +145,11 @@ bool ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
       const auto point_inside_rect = foot_sensor_fixture->GetShape()->TestPoint(world_transform, bad_pos_m);
       if (point_inside_rect)
       {
-         return true;
+         return bad_pos_m;
       }
    }
 
-   return false;
+   return std::nullopt;
 }
 
 bool ChainShapeAnalyzer::checkPlayerHiccup()

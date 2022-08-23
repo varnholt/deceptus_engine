@@ -222,11 +222,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    if (!isDead())
    {
       // damaged player flashes
-      auto time = GlobalClock::getInstance().getElapsedTimeInMs();
-      auto damageTime = _damage_clock.getElapsedTime().asMilliseconds();
-      if (_damage_initialized && time > 3000 && damageTime < 3000)
+      const auto time = GlobalClock::getInstance().getElapsedTimeInMs();
+      const auto damage_time = _damage_clock.getElapsedTime().asMilliseconds();
+      if (_damage_initialized && time > 3000 && damage_time < 3000)
       {
-         if ((damageTime / 100) % 2 == 0)
+         if ((damage_time / 100) % 2 == 0)
          {
             return;
          }
@@ -242,9 +242,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    if (current_cycle)
    {
       // that y offset is to compensate the wonky box2d origin
-      const auto pos = _pixel_position_f + sf::Vector2f(0, 8);
+      const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-      current_cycle->setPosition(pos);
+      current_cycle->setPosition(draw_position_px);
 
       // draw dash with motion blur
       for (auto i = 0u; i < _last_animations.size(); i++)
@@ -257,7 +257,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
       if (_dash.isDashActive())
       {
-         _last_animations.push_back({pos, current_cycle});
+         _last_animations.push_back({draw_position_px, current_cycle});
       }
 
       // player animations might be combined of multiple animations, hence the recursive calls
@@ -1333,21 +1333,33 @@ void Player::updateOneWayWallDrop()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateChainShapeCollisions()
 {
-   return;
-
-   if (ChainShapeAnalyzer::checkPlayerAtCollisionPosition())
+   if (_jump.isJumping())
    {
-      if (ChainShapeAnalyzer::checkPlayerHiccup())
-      {
-         const auto velocity = _body->GetLinearVelocity();
-         const auto pos = _body->GetPosition();
-         _body->SetLinearVelocity({velocity.x, 0.0f});
-         _body->SetTransform({pos.x, 57.8558f /*ChainShapeAnalyzer::lastGoodPosition().y*/}, 0.0f);
-         // std::cout << "player got a chain shape collision hiccup: " << _body->GetPosition().y << std::endl;
-      }
+      return;
    }
 
-   // std::cout << _body->GetPosition().y << std::endl;
+   const auto hiccup_pos = ChainShapeAnalyzer::checkPlayerAtCollisionPosition();
+   if (!hiccup_pos.has_value())
+   {
+      return;
+   }
+
+   const auto velocity = _body->GetLinearVelocity();
+   const auto pos = _body->GetPosition();
+   _body->SetLinearVelocity({velocity.x, 0.0f});
+   _body->SetTransform({pos.x, hiccup_pos->y - 0.2f}, 0.0f);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updateJump()
+{
+   PlayerJump::PlayerJumpInfo info;
+   info._in_air = isInAir();
+   info._in_water = isInWater();
+   info._water_entered_timepoint = _water_entered_time;
+   info._crouching = _bend.isCrouching();
+   info._climbing = _climb.isClimbing();
+   _jump.update(info);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1368,15 +1380,7 @@ void Player::update(const sf::Time& dt)
    updateVelocity();
    updateOrientation();
    updateOneWayWallDrop();
-
-   PlayerJump::PlayerJumpInfo info;
-   info._in_air = isInAir();
-   info._in_water = isInWater();
-   info._water_entered_timepoint = _water_entered_time;
-   info._crouching = _bend.isCrouching();
-   info._climbing = _climb.isClimbing();
-   _jump.update(info);
-
+   updateJump();
    updateDash();
    _climb.update(_body, isInAir());
    updatePlatformMovement(dt);
