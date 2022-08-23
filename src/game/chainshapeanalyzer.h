@@ -9,6 +9,8 @@ namespace ChainShapeAnalyzer
 {
 void analyze(const std::shared_ptr<b2World>& world);
 bool checkPlayerAtCollisionPosition();
+bool checkPlayerHiccup();
+b2Vec2 lastGoodPosition();
 };
 
 #endif // CHAINSHAPEANALYZER_H

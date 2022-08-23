@@ -12,10 +12,6 @@
 namespace
 {
 
-std::set<std::pair<float, float>> _conflicting_pos_set_m;
-std::vector<b2Vec2> _conflicting_positions_m;
-std::vector<sf::Vector2f> _conflicting_positions_px;
-
 struct IndexedVector
 {
    int32_t _chain_index{0};
@@ -30,12 +26,16 @@ struct IndexedVector
    }
 };
 
-}  // namespace
+b2Vec2 player_position_last_m;
+std::set<std::pair<float, float>> _conflicting_pos_set_m;
+std::vector<b2Vec2> _conflicting_positions_m;
+std::vector<sf::Vector2f> _conflicting_positions_px;
+std::set<IndexedVector> _indexed_vectors;
 
+}  // namespace
 
 void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
 {
-   static std::set<IndexedVector> _indexed_vectors;
    _indexed_vectors.clear();
 
    int32_t chain_index = 0;
@@ -134,7 +134,6 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
    }
 }
 
-
 bool ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
 {
    auto player = Player::getCurrent();
@@ -153,10 +152,23 @@ bool ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
    return false;
 }
 
+bool ChainShapeAnalyzer::checkPlayerHiccup()
+{
+   auto player = Player::getCurrent();
+   const auto player_position_m = player->getBody()->GetPosition();
+
+   const auto hiccup_happened = (fabs(player_position_m.y - player_position_last_m.y) > 0.001);
+   player_position_last_m = player_position_m;
+
+   return hiccup_happened;
+}
+
+b2Vec2 ChainShapeAnalyzer::lastGoodPosition()
+{
+   return player_position_last_m;
+}
 
 // tile pos: 252, 115
-
-
 
 /*
 
@@ -211,5 +223,3 @@ chain 53, vector: 47, pos(10584, 1968) collides with chain: 22, vector: 0, pos(1
           |
 ----------+
 */
-
-
