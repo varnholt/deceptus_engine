@@ -1216,7 +1216,7 @@ void Player::updateBendDown()
       return;
    }
 
-   const auto bending_down = down_pressed && !isInAir();
+   const auto bending_down = down_pressed && !isInAir() && !isInWater();
 
    _bend._was_bending_down = _bend._bending_down;
    _bend._bending_down = bending_down;
