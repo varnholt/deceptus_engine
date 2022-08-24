@@ -820,9 +820,20 @@ void Player::updateVelocity()
          }
          else
          {
-            const auto velocity = _body->GetLinearVelocity();
-            _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
-            return;
+            // while the player is standing on a platform, he is allowed to be to bend down
+            // however, he is not capable of changing his velocity by pressing left or right
+            if (!_belt.isOnBelt())
+            {
+               const auto velocity = _body->GetLinearVelocity();
+               _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
+               return;
+            }
+            else
+            {
+               const auto velocity = _body->GetLinearVelocity();
+               _body->SetLinearVelocity({_belt.getBeltVelocity(), velocity.y});
+               return;
+            }
          }
       }
 
