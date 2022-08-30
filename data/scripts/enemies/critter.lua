@@ -16,7 +16,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
-   staticBody = true,
+   static_body = true,
    sprite = "data/sprites/enemy_critter.png",
    damage = 30
 }

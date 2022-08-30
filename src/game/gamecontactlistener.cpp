@@ -34,7 +34,6 @@ int32_t GameContactListener::getDeadlyContactCount() const
    return _count_deadly_contacts;
 }
 
-
 bool GameContactListener::isPlayer(FixtureNode* obj) const
 {
    if (!obj)
@@ -43,6 +42,16 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
    }
 
    return dynamic_cast<Player*>(obj->getParent());
+}
+
+bool GameContactListener::isEnemy(FixtureNode* obj) const
+{
+   if (!obj)
+   {
+      return false;
+   }
+
+   return dynamic_cast<LuaNode*>(obj->getParent());
 }
 
 
@@ -103,10 +112,14 @@ void GameContactListener::processCrusherContactBegin(FixtureNode* fixture_node)
    _count_deadly_contacts++;
 }
 
-
-void GameContactListener::processPlayerFootSensorContactBegin(b2Fixture* fixture)
+void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixture_node, b2Fixture* fixture)
 {
    if (fixture->IsSensor())
+   {
+      return;
+   }
+
+   if (isEnemy(fixture_node))
    {
       return;
    }
@@ -226,7 +239,7 @@ void GameContactListener::processBeginContact(
       }
       case ObjectTypePlayerFootSensor:
       {
-         processPlayerFootSensorContactBegin(contact_fixture_b);
+         processPlayerFootSensorContactBegin(fixture_node_b, contact_fixture_b);
          break;
       }
       case ObjectTypePlayerHeadSensor:
@@ -358,10 +371,15 @@ void GameContactListener::processCrusherContactEnd(FixtureNode* fixture_node)
    _count_deadly_contacts--;
 }
 
-
-void GameContactListener::processPlayerFootSensorContactEnd(b2Fixture* fixture)
+void GameContactListener::processPlayerFootSensorContactEnd(FixtureNode* fixture_node, b2Fixture* fixture)
 {
    if (fixture->IsSensor())
+   {
+      return;
+   }
+
+   // contact with enemies is not taken into regard for foot sensor because that'd enable him to jump off enemies
+   if (isEnemy(fixture_node))
    {
       return;
    }
@@ -459,7 +477,7 @@ void GameContactListener::processEndContact(
       }
       case ObjectTypePlayerFootSensor:
       {
-         processPlayerFootSensorContactEnd(contact_fixture_b);
+         processPlayerFootSensorContactEnd(fixture_node_b, contact_fixture_b);
          break;
       }
       case ObjectTypePlayerHeadSensor:

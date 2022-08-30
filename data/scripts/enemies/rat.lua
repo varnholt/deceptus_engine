@@ -6,9 +6,10 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    damage = 0,
    sprite = "data/sprites/rat.png",
-   staticBody = false,
+   static_body = false,
    velocity_walk_max = 0.75,
-   acceleration_ground = 0.1
+   acceleration_ground = 0.1,
+   collides_with_player = false
 }
 
 
