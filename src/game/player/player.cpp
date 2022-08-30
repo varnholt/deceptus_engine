@@ -1295,10 +1295,8 @@ void Player::updateGroundAngle()
    input.p2 = _body->GetPosition() + b2Vec2(0.0f, 1.0f);
    input.maxFraction = 1.0f;
 
-   float closestFraction = 1.0f;
-   b2Vec2 intersectionNormal(0.0f, -1.0f);
-
-   // for (b2Body* b = mWorld->GetBodyList(); b; b = b->GetNext())
+   float closest_fraction = 1.0f;
+   b2Vec2 intersection_normal(0.0f, -1.0f);
 
    if (!_ground_body)
    {
@@ -1315,21 +1313,22 @@ void Player::updateGroundAngle()
       }
 
       b2RayCastOutput output;
-
       for (auto child_index = 0; child_index < f->GetShape()->GetChildCount(); child_index++)
       {
          if (!f->RayCast(&output, input, child_index))
-            continue;
-
-         if (output.fraction < closestFraction)
          {
-            closestFraction = output.fraction;
-            intersectionNormal = output.normal;
+            continue;
+         }
+
+         if (output.fraction < closest_fraction)
+         {
+            closest_fraction = output.fraction;
+            intersection_normal = output.normal;
          }
       }
    }
 
-   _ground_normal = intersectionNormal;
+   _ground_normal = intersection_normal;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

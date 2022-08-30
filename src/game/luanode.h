@@ -139,9 +139,9 @@ struct LuaNode : public GameNode
 
    // property accessors
    void synchronizeProperties();
-   bool getPropertyBool(const std::string& key);
-   double getPropertyDouble(const std::string& key);
-   int64_t getPropertyInt64(const std::string& key);
+   bool getPropertyBool(const std::string& key, bool default_value = false);
+   double getPropertyDouble(const std::string& key, double default_value = 0.0);
+   int64_t getPropertyInt64(const std::string& key, int64_t default_value = 0);
 
    // box2d related
    void setupBody();
