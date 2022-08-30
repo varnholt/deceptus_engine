@@ -28,9 +28,10 @@
 
 namespace
 {
-uint16_t category_bits = CategoryEnemyWalkThrough;                  // I am a ...
-uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly;  // I collide with ...
-int16_t group_index = 0;                                            // 0 is default
+uint16_t category_bits = CategoryEnemyWalkThrough;                              // I am a ...
+uint16_t mask_bits_collides_with_player = CategoryBoundary | CategoryFriendly;  // I collide with ...
+uint16_t mask_bits_collides_with_walls_only = CategoryBoundary;                 // I collide with ...
+int16_t group_index = 0;                                                        // 0 is default
 
 #define OBJINSTANCE LuaInterface::instance().getObject(state)
 
@@ -1847,38 +1848,45 @@ int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
    return static_cast<int32_t>(query_callback._bodies.size());
 }
 
-bool LuaNode::getPropertyBool(const std::string& key)
+bool LuaNode::getPropertyBool(const std::string& key, bool default_value)
 {
-   auto value = false;
+   auto value = default_value;
    auto it = _properties.find(key);
    if (it != _properties.end())
+   {
       value = std::get<bool>(it->second);
+   }
    return value;
 }
 
-double LuaNode::getPropertyDouble(const std::string& key)
+double LuaNode::getPropertyDouble(const std::string& key, double default_value)
 {
-   auto value = 0.0;
+   auto value = default_value;
    auto it = _properties.find(key);
    if (it != _properties.end())
+   {
       value = std::get<double>(it->second);
+   }
    return value;
 }
 
-int64_t LuaNode::getPropertyInt64(const std::string& key)
+int64_t LuaNode::getPropertyInt64(const std::string& key, int64_t default_value)
 {
    auto value = 0LL;
    auto it = _properties.find(key);
    if (it != _properties.end())
+   {
       value = std::get<int64_t>(it->second);
+   }
    return value;
 }
 
 void LuaNode::setupBody()
 {
-   auto static_body = getPropertyBool("staticBody");
-   auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
-   auto sensor = static_cast<bool>(getPropertyBool("sensor"));
+   const auto static_body = getPropertyBool("static_body");
+   const auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
+   const auto sensor = static_cast<bool>(getPropertyBool("sensor"));
+   const auto collides_with_player = static_cast<bool>(getPropertyBool("collides_with_player", true));
 
    _body->SetTransform(b2Vec2{_start_position_px.x * MPP, _start_position_px.y * MPP}, 0.0f);
    _body->SetFixedRotation(true);
@@ -1895,7 +1903,7 @@ void LuaNode::setupBody()
       // apply default filter
       // http://www.iforce2d.net/b2dtut/collision-filtering
       fd.filter.groupIndex = group_index;
-      fd.filter.maskBits = mask_bits_standing;
+      fd.filter.maskBits = (collides_with_player ? mask_bits_collides_with_player : mask_bits_collides_with_walls_only);
       fd.filter.categoryBits = category_bits;
 
       auto fixture = _body->CreateFixture(&fd);
