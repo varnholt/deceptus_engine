@@ -13,25 +13,24 @@
 // your moving objects in the range 0.1 - 10 meters, with 1 meter being the
 // spot.
 
-
 #define GAME_NAME "deceptus"
 
-static constexpr auto PPM = 48.0f;        // pixels per meter
-static constexpr auto MPP = (1.0f / PPM); // meters per pixel
-static constexpr auto TPM = 2.0f;         // tiles per meter
-static constexpr auto MPT = 0.5f;         // meters per tile
+static constexpr auto PPM = 48.0f;         // pixels per meter
+static constexpr auto MPP = (1.0f / PPM);  // meters per pixel
+static constexpr auto TPM = 2.0f;          // tiles per meter
+static constexpr auto MPT = 0.5f;          // meters per tile
 
 static constexpr auto PIXELS_PER_TILE = 24;
 static constexpr auto PIXELS_PER_HALF_TILE = PIXELS_PER_TILE / 2;
-static constexpr auto PIXELS_PER_PHYSICS_TILE = 8; // each tile is 8x8 px
+static constexpr auto PIXELS_PER_PHYSICS_TILE = 8;  // each tile is 8x8 px
 
-static constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15; // 20
+static constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15;  // 20
 
 static constexpr auto PLAYER_ANIMATION_CYCLES = 8;
-static constexpr auto PLAYER_TILES_WIDTH  = 24;
+static constexpr auto PLAYER_TILES_WIDTH = 24;
 static constexpr auto PLAYER_TILES_HEIGHT = 48;
-static constexpr auto PLAYER_ACTUAL_WIDTH  = 20; // the actual width can be smaller than the tile width
-static constexpr auto PLAYER_ACTUAL_HEIGHT = 32; // the actual height can be smaller than the tile height
+static constexpr auto PLAYER_ACTUAL_WIDTH = 20;   // the actual width can be smaller than the tile width
+static constexpr auto PLAYER_ACTUAL_HEIGHT = 32;  // the actual height can be smaller than the tile height
 
 static constexpr auto PLAYER_1_COLLISION_ID = 3;
 
@@ -47,23 +46,21 @@ static constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
 // 1 / 1.097656 => 0.91103223596463737272879663574016
 static constexpr auto TIMESTEP_ERROR = 0.91192227210220912883854305376065f;
 
-
 enum class DeathReason
 {
-   None,
+   Invalid,
+   Laser,
    OutOfHealth,
+   Smashed,
    TooFast,
    TouchesDeadly,
-   Smashed,
 };
-
 
 enum class MechanismVersion
 {
    Version1,
    Version2
 };
-
 
 // [50]
 // [  ]
@@ -96,29 +93,29 @@ enum class ZDepth
    Player = 20
 };
 
-
-enum class Alignment {
+enum class Alignment
+{
    PointsNowhere = 0x00,
-   PointsDown    = 0x01,
-   PointsUp      = 0x02,
-   PointsRight   = 0x04,
-   PointsLeft    = 0x08,
+   PointsDown = 0x01,
+   PointsUp = 0x02,
+   PointsRight = 0x04,
+   PointsLeft = 0x08,
 };
 
-
-enum class Display {
-   Invalid          = 0x00,
-   Game             = 0x01,
-   MainMenu         = 0x02,
-   Map              = 0x04,
-   Inventory        = 0x08,
-   Debug            = 0x10,
-   Modal            = 0x20,
+enum class Display
+{
+   Invalid = 0x00,
+   Game = 0x01,
+   MainMenu = 0x02,
+   Map = 0x04,
+   Inventory = 0x08,
+   Debug = 0x10,
+   Modal = 0x20,
    ScreenTransition = 0x40,
 };
 
-
-enum class ItemType {
+enum class ItemType
+{
    Invalid,
    KeyBlue,
    KeyOrange,
@@ -127,13 +124,12 @@ enum class ItemType {
    KeyYellow,
 };
 
-
-enum class ExecutionMode {
+enum class ExecutionMode
+{
    None,
    Running,
    Paused,
 };
-
 
 enum class MenuAction
 {
@@ -144,7 +140,6 @@ enum class MenuAction
    Decrease,
    Increase,
 };
-
 
 enum class PlayerAction
 {
@@ -166,7 +161,6 @@ enum class PlayerAction
    WallJump,
 };
 
-
 enum class InvetoryAction
 {
    ShowMap,
@@ -181,29 +175,27 @@ enum class InvetoryAction
    MoveLeft,
 };
 
-
 enum class Look
 {
    Inactive = 0x00,
-   Active   = 0x01,
-   Up       = 0x02,
-   Down     = 0x04,
-   Left     = 0x08,
-   Right    = 0x10,
+   Active = 0x01,
+   Up = 0x02,
+   Down = 0x04,
+   Left = 0x08,
+   Right = 0x10,
 };
 
-
-enum KeyPressed {
-   KeyPressedUp    = 0x01,
-   KeyPressedDown  = 0x02,
-   KeyPressedLeft  = 0x04,
+enum KeyPressed
+{
+   KeyPressedUp = 0x01,
+   KeyPressedDown = 0x02,
+   KeyPressedLeft = 0x04,
    KeyPressedRight = 0x08,
-   KeyPressedJump  = 0x10,
-   KeyPressedFire  = 0x20,
-   KeyPressedRun   = 0x40,
-   KeyPressedLook  = 0x80,
+   KeyPressedJump = 0x10,
+   KeyPressedFire = 0x20,
+   KeyPressedRun = 0x40,
+   KeyPressedLook = 0x80,
 };
-
 
 enum ObjectType
 {
@@ -229,14 +221,13 @@ enum ObjectType
    ObjectTypeCollapsingPlatform,
 };
 
-
-enum EntityCategory {
-   CategoryBoundary         = 0x01,
-   CategoryFriendly         = 0x02,
+enum EntityCategory
+{
+   CategoryBoundary = 0x01,
+   CategoryFriendly = 0x02,
    CategoryEnemyWalkThrough = 0x04,
    CategoryEnemyCollideWith = 0x08,
 };
-
 
 enum class MessageBoxLocation
 {
@@ -252,18 +243,16 @@ enum class MessageBoxLocation
    BottomRight,
 };
 
-
 enum class WeaponType
 {
    None = 0,
-   Bow     = 1,
-   Gun     = 2,
-   Sword   = 3,
+   Bow = 1,
+   Gun = 2,
+   Sword = 3,
 };
 
-
 // this enum should be removed
-enum AtmosphereTile // 16 cols per row
+enum AtmosphereTile  // 16 cols per row
 {
    AtmosphereTileWaterFull = 48,
    AtmosphereTileWaterTop,
@@ -278,13 +267,11 @@ enum AtmosphereTile // 16 cols per row
    AtmosphereTileInvalid = 1024,
 };
 
-
 enum class DrawMode
 {
    ColorMap,
    NormalMap
 };
-
 
 enum class Edge
 {
@@ -293,7 +280,6 @@ enum class Edge
    Right
 };
 
-
 enum class Dash
 {
    None,
@@ -301,10 +287,9 @@ enum class Dash
    Right
 };
 
-
 // it might make more sense to remove game related stuff here and use a simple uint32_t _id
-enum class CallbackType {
+enum class CallbackType
+{
    EndGame,
    NextLevel
 };
-

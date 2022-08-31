@@ -1099,6 +1099,17 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::kill(std::optional<DeathReason> death_reason)
+{
+   damage(1000);
+
+   if (death_reason.has_value())
+   {
+      _death_reason = death_reason;
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnPlatform() const
 {
    const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
@@ -1700,8 +1711,7 @@ void Player::reset()
 
    SaveState::getPlayerInfo()._extra_table._health.reset();
 
-   // resetting any player info apart form the health doesn't make sense
-   // since it's loaded from disk when the player dies
+   // resetting any player info apart from the health doesn't make sense since it's loaded from disk when the player dies
    // SaveState::getPlayerInfo().mInventory.resetKeys();
 
    // reset bodies passed from the contact listener
@@ -1712,6 +1722,7 @@ void Player::reset()
    _dash._dash_frame_count = 0;
    resetDash();
    _dead = false;
+   _death_reason.reset();
 
    // fixtures are no longer dead
    updateDeadFixtures();
@@ -1720,7 +1731,7 @@ void Player::reset()
 //----------------------------------------------------------------------------------------------------------------------
 DeathReason Player::checkDead() const
 {
-   DeathReason reason = DeathReason::None;
+   DeathReason reason = DeathReason::Invalid;
 
    const auto touches_something_deadly = (GameContactListener::getInstance().getDeadlyContactCount() > 0);
    const auto too_fast = fabs(_body->GetLinearVelocity().y) > 40;
@@ -1742,6 +1753,12 @@ DeathReason Player::checkDead() const
    else if (out_of_health)
    {
       reason = DeathReason::OutOfHealth;
+   }
+
+   // death reason can also be set externally, and then should overrule the internal detection
+   if (_death_reason.has_value())
+   {
+      reason = _death_reason.value();
    }
 
    return reason;
