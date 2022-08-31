@@ -639,7 +639,7 @@ void PlayerAnimation::generateJson()
    const auto d_75 = sf::seconds(0.075f);
    const auto d_120 = sf::seconds(0.120f);
 
-   const auto sprite_name = "data/sprites/player_unarmed.png";
+   const auto sprite_name = "data/sprites/player.png";
    auto row = 0;
 
    const auto next_row = [&]() { return (row++) * PIXELS_PER_TILE * 2; };
@@ -809,7 +809,7 @@ void PlayerAnimation::generateJson()
    sstream << std::setw(4) << j << "\n\n";
    const auto data = sstream.str();
 
-   constexpr auto json_filename = "player_unarmed.json";
+   constexpr auto json_filename = "player.json";
    std::ofstream file(json_filename);
    file << data;
 
