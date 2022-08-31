@@ -108,6 +108,7 @@ public:
 
    void impulse(float intensity);
    void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
+   void kill(std::optional<DeathReason> death_reason = std::nullopt);
    void goToPortal(auto portal);
 
    const std::shared_ptr<ExtraManager>& getExtraManager() const;
@@ -192,6 +193,7 @@ private:
    bool _points_to_left = false;
    bool _visible = true;
    bool _dead = false;
+   std::optional<DeathReason> _death_reason;
 
    bool _in_water = false;
    HighResTimePoint _water_entered_time;
