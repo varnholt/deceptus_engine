@@ -5,11 +5,10 @@
 
 #include <array>
 #include <optional>
+#include <unordered_map>
 
 #include "animation.h"
 #include "constants.h"
-#include "playercontrols.h"
-#include "playerjump.h"
 
 class PlayerAnimation
 {
@@ -36,6 +35,7 @@ public:
       bool _wall_jump_points_right = false;
       bool _jumping_through_one_way_wall = false;
       bool _attacking = false;
+      DeathReason _death_reason = DeathReason::Invalid;
       WeaponType _weapon_type = WeaponType::None;
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
@@ -155,7 +155,9 @@ private:
    bool _sword_standing_attack_l_reset = false;
    bool _sword_standing_attack_r_reset = false;
 
-   std::shared_ptr<Animation> _death;
+   std::shared_ptr<Animation> _death_default;
+   std::shared_ptr<Animation> _death_electrocuted_l;
+   std::shared_ptr<Animation> _death_electrocuted_r;
 
    int32_t _jump_animation_reference = 0;
 
