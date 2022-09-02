@@ -122,6 +122,7 @@ SOURCES += \
    src/framework/tools/jsonconfiguration.cpp \
    src/framework/tools/log.cpp \
    src/framework/tools/logthread.cpp \
+   src/framework/tools/scopeexit.cpp \
    src/framework/tools/stopwatch.cpp \
    src/framework/tools/timer.cpp \
    src/game/ambientocclusion.cpp \
@@ -308,6 +309,7 @@ HEADERS += \
    src/framework/tools/jsonconfiguration.h \
    src/framework/tools/log.h \
    src/framework/tools/logthread.h \
+   src/framework/tools/scopeexit.h \
    src/framework/tools/stopwatch.h \
    src/game/chainshapeanalyzer.h \
    src/game/gamemechanismdeserializerconstants.h \

@@ -255,7 +255,7 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
 void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
 {
    shape.setOutlineThickness(outline_thickness);
-   shape.setFillColor(sf::Color::Transparent);
+   shape.setFillColor(fill_color);
    shape.setOutlineColor(color);
    target.draw(shape);
 }
