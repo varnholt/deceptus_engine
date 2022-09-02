@@ -114,6 +114,10 @@ PlayerAnimation::PlayerAnimation()
    _sword_swim_idle_l = AnimationPool::getInstance().add("player_swim_idle_sword_l", 0.0f, 0.0f, true, false);
    _sword_swim_r = AnimationPool::getInstance().add("player_swim_sword_r", 0.0f, 0.0f, true, false);
    _sword_swim_l = AnimationPool::getInstance().add("player_swim_sword_l", 0.0f, 0.0f, true, false);
+   _sword_appear_r = AnimationPool::getInstance().add("player_appear_sword_r", 0.0f, 0.0f, true, false);
+   _sword_appear_l = AnimationPool::getInstance().add("player_appear_sword_l", 0.0f, 0.0f, true, false);
+
+   _appear_animations = {_appear_l, _appear_r, _sword_appear_l, _sword_appear_r};
 
    // we will replace those later as we go
    _idle_r_tmp = _idle_r;
@@ -126,6 +130,8 @@ PlayerAnimation::PlayerAnimation()
    // we don't want these to jump back to the first frame
    _appear_r->_reset_to_first_frame = false;
    _appear_l->_reset_to_first_frame = false;
+   _sword_appear_r->_reset_to_first_frame = false;
+   _sword_appear_l->_reset_to_first_frame = false;
    _death_default->_reset_to_first_frame = false;
    _death_electrocuted_l->_reset_to_first_frame = false;
    _death_electrocuted_r->_reset_to_first_frame = false;
@@ -233,6 +239,8 @@ PlayerAnimation::PlayerAnimation()
    _sword_lut[_swim_idle_l] = _sword_swim_idle_l;
    _sword_lut[_swim_r] = _sword_swim_r;
    _sword_lut[_swim_l] = _sword_swim_l;
+   _sword_lut[_appear_r] = _sword_appear_r;
+   _sword_lut[_appear_l] = _sword_appear_l;
 }
 
 int32_t PlayerAnimation::getJumpAnimationReference() const
@@ -518,18 +526,20 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       if (GameClock::getInstance().duration() < 1.0s)
       {
          // invisibility: 0 .. 1.0s (wait until player is focused)
-         _appear_r->seekToStart();
-         _appear_l->seekToStart();
-         _appear_r->setAlpha(0);
-         _appear_l->setAlpha(0);
+         for (auto& appear_animation : _appear_animations)
+         {
+            appear_animation->seekToStart();
+            appear_animation->setAlpha(0);
+         }
       }
       else
       {
          // player appear animation for 20 x 20ms, plus an extra frame - just to be sure :)
-         _appear_r->play();
-         _appear_l->play();
-         _appear_r->setAlpha(255);
-         _appear_l->setAlpha(255);
+         for (auto& appear_animation : _appear_animations)
+         {
+            appear_animation->play();
+            appear_animation->setAlpha(255);
+         }
       }
    }
 
