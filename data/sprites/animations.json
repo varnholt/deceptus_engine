@@ -1540,5 +1540,43 @@
        ],
        "sprite_count": 2,
        "texture": "data/sprites/player.png"
+   },
+   "player_death_electrocuted_r": {
+       "frame_durations": [
+           75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75
+       ],
+       "frame_offset": [
+           0,
+           1440
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 20,
+       "texture": "data/sprites/player.png"
+   },
+   "player_death_electrocuted_l": {
+       "frame_durations": [
+           75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75
+       ],
+       "frame_offset": [
+           0,
+           1488
+       ],
+       "frame_size": [
+           72,
+           48
+       ],
+       "origin": [
+           36.0,
+           48.0
+       ],
+       "sprite_count": 20,
+       "texture": "data/sprites/player.png"
    }
 }
