@@ -152,6 +152,8 @@ private:
    std::shared_ptr<Animation> _sword_swim_idle_l;
    std::shared_ptr<Animation> _sword_swim_r;
    std::shared_ptr<Animation> _sword_swim_l;
+   std::shared_ptr<Animation> _sword_appear_r;
+   std::shared_ptr<Animation> _sword_appear_l;
    bool _sword_standing_attack_l_reset = false;
    bool _sword_standing_attack_r_reset = false;
 
@@ -165,4 +167,5 @@ private:
    std::shared_ptr<Animation> _current_cycle;
 
    std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
+   std::vector<std::shared_ptr<Animation>> _appear_animations;
 };

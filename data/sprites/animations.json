@@ -1578,5 +1578,43 @@
        ],
        "sprite_count": 20,
        "texture": "data/sprites/player.png"
-   }
+   },
+    "player_appear_sword_l": {
+        "frame_durations": [
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
+        ],
+        "frame_offset": [
+            1440,
+            1344
+        ],
+        "frame_size": [
+            72,
+            96
+        ],
+        "origin": [
+            36.0,
+            96.0
+        ],
+        "sprite_count": 20,
+        "texture": "data/sprites/player.png"
+    },
+    "player_appear_sword_r": {
+        "frame_durations": [
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20
+        ],
+        "frame_offset": [
+            1440,
+            1248
+        ],
+        "frame_size": [
+            72,
+            96
+        ],
+        "origin": [
+            36.0,
+            96.0
+        ],
+        "sprite_count": 20,
+        "texture": "data/sprites/player.png"
+    }
 }
