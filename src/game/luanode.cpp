@@ -1872,7 +1872,7 @@ double LuaNode::getPropertyDouble(const std::string& key, double default_value)
 
 int64_t LuaNode::getPropertyInt64(const std::string& key, int64_t default_value)
 {
-   auto value = 0LL;
+   auto value = default_value;
    auto it = _properties.find(key);
    if (it != _properties.end())
    {

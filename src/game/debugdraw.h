@@ -7,7 +7,6 @@
 #include <cmath>
 #include <memory>
 
-#include "game/constants.h"
 #include "game/level.h"
 
 namespace DebugDraw
