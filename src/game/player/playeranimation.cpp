@@ -75,7 +75,9 @@ PlayerAnimation::PlayerAnimation()
    _wall_jump_l = AnimationPool::getInstance().add("player_wall_jump_l", 0.0f, 0.0f, true, false);
    _appear_r = AnimationPool::getInstance().add("player_appear_r", 0.0f, 0.0f, true, false);
    _appear_l = AnimationPool::getInstance().add("player_appear_l", 0.0f, 0.0f, true, false);
-   _death = AnimationPool::getInstance().add("player_death", 0.0f, 0.0f, true, false);
+   _death_default = AnimationPool::getInstance().add("player_death", 0.0f, 0.0f, true, false);
+   _death_electrocuted_r = AnimationPool::getInstance().add("player_death_electrocuted_r", 0.0f, 0.0f, true, false);
+   _death_electrocuted_l = AnimationPool::getInstance().add("player_death_electrocuted_l", 0.0f, 0.0f, true, false);
 
    _bend_down_idle_r = AnimationPool::getInstance().add("player_bend_down_idle_r", 0.0f, 0.0f, true, false);
    _bend_down_idle_l = AnimationPool::getInstance().add("player_bend_down_idle_l", 0.0f, 0.0f, true, false);
@@ -124,7 +126,9 @@ PlayerAnimation::PlayerAnimation()
    // we don't want these to jump back to the first frame
    _appear_r->_reset_to_first_frame = false;
    _appear_l->_reset_to_first_frame = false;
-   _death->_reset_to_first_frame = false;
+   _death_default->_reset_to_first_frame = false;
+   _death_electrocuted_l->_reset_to_first_frame = false;
+   _death_electrocuted_r->_reset_to_first_frame = false;
    _bend_down_r->_reset_to_first_frame = false;
    _bend_down_l->_reset_to_first_frame = false;
    _bend_up_r->_reset_to_first_frame = false;
@@ -532,7 +536,14 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    // death animation
    if (data._dead)
    {
-      next_cycle = _death;
+      if (data._death_reason == DeathReason::Laser)
+      {
+         next_cycle = data._points_right ? _death_electrocuted_r : _death_electrocuted_l;
+      }
+      else
+      {
+         next_cycle = _death_default;
+      }
    }
 
    // attack
