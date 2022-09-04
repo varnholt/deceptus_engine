@@ -71,10 +71,16 @@ bool Sword::checkHitWindowActive() const
 
 void Sword::updateHitbox()
 {
-   const auto center = sf::Vector2f{
-      Player::getCurrent()->getPixelPositionFloat().x + 0.5f * PPM * _dir_m.x,
-      Player::getCurrent()->getPixelPositionFloat().y - 0.6f * PPM,
+   constexpr auto hitbox_width_px = 20.0f;
+   constexpr auto hitbox_height_px = 20.0f;
+   auto player = Player::getCurrent();
+   const auto center = player->getPixelPositionFloat();
+   const auto crouching = player->getBend().isCrouching();
+
+   const auto hitbox_pos = sf::Vector2f{
+      center.x + 0.5f * PPM * _dir_m.x + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
+      center.y + (crouching ? -0.1f * PPM : -0.6f * PPM),
    };
 
-   _hit_rect_px = sf::FloatRect(center, sf::Vector2f(20.0f, 20.0f));
+   _hit_rect_px = sf::FloatRect(hitbox_pos, sf::Vector2f(hitbox_width_px, hitbox_height_px));
 }

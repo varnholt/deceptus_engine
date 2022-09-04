@@ -922,6 +922,12 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+const PlayerBend& Player::getBend() const
+{
+   return _bend;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::setToggleCallback(const ToggleCallback& callback)
 {
    _toggle_callback = callback;
