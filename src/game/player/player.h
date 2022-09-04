@@ -116,6 +116,7 @@ public:
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerAnimation& getPlayerAnimation() const;
    const PlayerJump& getJump() const;
+   const PlayerBend& getBend() const;
    PlayerBelt& getBelt();
 
    void setToggleCallback(const ToggleCallback& callback);
@@ -170,7 +171,7 @@ private:
    b2Body* _body = nullptr;
    static constexpr int32_t __foot_count = 4u;
    b2Fixture* _body_fixture = nullptr;
-   b2Fixture* _foot_fixture[__foot_count];
+   b2Fixture* _foot_fixture[__foot_count]{nullptr, nullptr, nullptr, nullptr};
    b2Fixture* _foot_sensor_fixture = nullptr;
    b2Body* _platform_body = nullptr;
    b2Body* _ground_body = nullptr;
