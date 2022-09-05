@@ -264,11 +264,13 @@ void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
-   sf::RectangleShape rs;
    const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
    const auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+
+   sf::RectangleShape rs;
    rs.setSize(size);
    rs.setPosition(pos);
+
    drawShape(target, rs, color, fill_color);
 }
 
@@ -276,11 +278,13 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, cons
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
-   sf::RectangleShape rs;
    const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
    const auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+
+   sf::RectangleShape rs;
    rs.setSize(size);
    rs.setPosition(pos);
+
    drawShape(target, rs, color, fill_color);
 }
 

@@ -2040,8 +2040,8 @@ void LuaNode::updatePosition()
    // update hitbox positions
    for (auto& hitbox : _hitboxes)
    {
-      hitbox._rect_px.left = x_px + hitbox._offset_px.x;
-      hitbox._rect_px.top = y_px + hitbox._offset_px.y;
+      hitbox._rect_px.left = x_px;
+      hitbox._rect_px.top = y_px;
    }
 }
 
