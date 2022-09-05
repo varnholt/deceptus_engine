@@ -60,6 +60,7 @@ _key_pressed = 0
 function initialize()
    addShapeCircle(0.15, 0.0, 0.15)
    updateSprite(0.0)
+   addHitbox(-8, 0, 16, 12)
 end
 
 
