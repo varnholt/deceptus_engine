@@ -1338,7 +1338,7 @@ void LuaNode::initialize()
    }
 
    _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
-   _flash_shader.setUniform("flash", 0.0f);
+   _flash_shader.setUniform("flash", _hit_flash);
 }
 
 void LuaNode::setupLua()
@@ -1977,7 +1977,7 @@ int32_t LuaNode::getDamageFromPlayer() const
    return _damage_from_player;
 }
 
-const LuaNode::HighResTimePoint& LuaNode::getHitTime() const
+const std::optional<LuaNode::HighResTimePoint> LuaNode::getHitTime() const
 {
    return _hit_time;
 }
@@ -2078,6 +2078,24 @@ void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32
 
 void LuaNode::draw(sf::RenderTarget& target)
 {
+   if (_hit_time.has_value())
+   {
+      // using namespace std::chrono_literals;
+      std::chrono::duration<float> hit_duration_s = (std::chrono::high_resolution_clock::now() - _hit_time.value());
+      constexpr auto hit_duration_max_s = 0.3f;
+      if (hit_duration_s.count() > hit_duration_max_s)
+      {
+         _hit_time.reset();
+         _hit_flash = 0.0f;
+      }
+      else
+      {
+         _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
+      }
+
+      _flash_shader.setUniform("flash", _hit_flash);
+   }
+
    // draw sprite on top of projectiles
    for (auto& w : _weapons)
    {
@@ -2088,11 +2106,8 @@ void LuaNode::draw(sf::RenderTarget& target)
    {
       auto& sprite = _sprites[i];
       const auto& offset = _sprite_offsets_px[i];
-
       const auto center = sf::Vector2f(sprite.getTextureRect().width / 2.0f, sprite.getTextureRect().height / 2.0f);
-
       sprite.setPosition(_position_px - center + offset);
-
       target.draw(sprite, &_flash_shader);
    }
 }

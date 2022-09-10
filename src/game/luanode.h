@@ -119,7 +119,7 @@ struct LuaNode : public GameNode
    //! add a hitbox
    void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
 
-   const HighResTimePoint& getHitTime() const;
+   const std::optional<HighResTimePoint> getHitTime() const;
 
    int32_t getDamageFromPlayer() const;
 
@@ -164,6 +164,7 @@ struct LuaNode : public GameNode
    int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
    std::vector<sf::Vector2f> _movement_path_px;
    sf::Shader _flash_shader;
+   float _hit_flash{0.0f};
 
    // physics
    b2Body* _body = nullptr;
@@ -173,7 +174,7 @@ struct LuaNode : public GameNode
 
    // damage
    std::vector<Hitbox> _hitboxes;
-   HighResTimePoint _hit_time;
+   std::optional<HighResTimePoint> _hit_time;
    int32_t _damage_from_player{0};
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
