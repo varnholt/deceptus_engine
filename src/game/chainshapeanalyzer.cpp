@@ -98,25 +98,17 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
                   );
                };
 
-               const auto chain_is_on_the_right_of_the_collision =
-                  isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->m_count);
-
-               // std::cout << chain_is_on_the_right_of_the_collision << std::endl;
-
-               const auto collision_is_on_the_right_of_the_one_way_wall =
-                  (object_type == ObjectTypeSolid && chain_is_on_the_right_of_the_collision);
-
-               // clang-format off
-               std::cout
-                  << "chain " << chain_index
-                  << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1)
-                  << "], pos(" << iv._pos.first * PPM << ", " << iv._pos.second * PPM
-                  << ") collides with chain: " << it->_chain_index
-                  << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
-                  << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
-                  << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side"
-                  << std::endl;
-               // clang-format on
+               // const auto chain_is_on_the_right_of_the_collision =
+               //   isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->m_count);
+               //
+               // const auto collision_is_on_the_right_of_the_one_way_wall =
+               //   (object_type == ObjectTypeSolid && chain_is_on_the_right_of_the_collision);
+               //
+               // std::cout << "chain " << chain_index << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1) << "], pos("
+               //           << iv._pos.first * PPM << ", " << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index
+               //           << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
+               //           << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
+               //           << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side" << std::endl;
 
                _conflicting_pos_set_m.insert({pos.x, pos.y});
             }
