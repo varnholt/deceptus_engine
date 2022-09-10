@@ -123,6 +123,7 @@ struct LuaNode : public GameNode
 
    int32_t getDamageFromPlayer() const;
 
+   // all functions that 'speak' directly to the lua scripts
    void luaHit(int32_t damage);
    void luaDie();
    void luaInitialize();
@@ -162,6 +163,7 @@ struct LuaNode : public GameNode
    sf::Vector2f _position_px;
    int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
    std::vector<sf::Vector2f> _movement_path_px;
+   sf::Shader _flash_shader;
 
    // physics
    b2Body* _body = nullptr;
