@@ -1331,6 +1331,14 @@ void LuaNode::initialize()
    deserializeEnemyDescription();
    setupLua();
    setupBody();
+
+   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Fragment))
+   {
+      Log::Error() << "error loading flash shader";
+   }
+
+   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("flash", 0.0f);
 }
 
 void LuaNode::setupLua()
@@ -2085,6 +2093,6 @@ void LuaNode::draw(sf::RenderTarget& target)
 
       sprite.setPosition(_position_px - center + offset);
 
-      target.draw(sprite);
+      target.draw(sprite, &_flash_shader);
    }
 }
