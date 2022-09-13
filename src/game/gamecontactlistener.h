@@ -1,15 +1,13 @@
 #pragma once
 
-#include "Box2D/Box2D.h"
 #include <vector>
+#include "Box2D/Box2D.h"
 
 class FixtureNode;
 
 class GameContactListener : public b2ContactListener
 {
-
 public:
-
    int32_t getPlayerHeadContactCount() const;
    int32_t getPlayerFootContactCount() const;
    int32_t getPlayerArmLeftContactCount() const;
@@ -20,9 +18,9 @@ public:
 
    bool isPlayerSmashed() const;
 
-   void BeginContact(b2Contact *contact) override;
-   void EndContact(b2Contact *contact) override;
-   void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) override;
+   void BeginContact(b2Contact* contact) override;
+   void EndContact(b2Contact* contact) override;
+   void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override;
    void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override;
 
    void debug();
@@ -30,16 +28,13 @@ public:
 
    static GameContactListener& getInstance();
 
-
    void processPlayerHeadSensorContactEnd(auto contact_fixture_b);
 
 protected:
-
    bool isPlayer(FixtureNode* obj) const;
-
+   bool isEnemy(FixtureNode* obj) const;
 
 private:
-
    GameContactListener() = default;
 
    void processBeginContact(
@@ -51,15 +46,8 @@ private:
       void* fixture_user_data_b
    );
 
-   void processEndContact(
-      b2Contact* contact,
-      FixtureNode* fixture_node_a,
-      FixtureNode* fixture_node_b,
-      b2Fixture* contact_fixture_b
-   );
-
+   void processEndContact(b2Contact* contact, FixtureNode* fixture_node_a, FixtureNode* fixture_node_b, b2Fixture* contact_fixture_b);
    void processPostSolve(FixtureNode* node, float impulse);
-
    void processBouncerContactBegin(FixtureNode* fixture_node);
    void processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* bubble, FixtureNode* other);
    void processCollapsingPlatformContactBegin(b2Contact* contact, FixtureNode* fixture_node, FixtureNode* other);
@@ -69,7 +57,7 @@ private:
    void processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data);
    void processOneWayWallContactBegin(b2Contact* contact, b2Fixture* fixture);
    void processPlayerContactBegin();
-   void processPlayerFootSensorContactBegin(b2Fixture* fixture);
+   void processPlayerFootSensorContactBegin(FixtureNode* fixture_node, b2Fixture* fixture);
    void processPlayerHeadSensorContactBegin(b2Fixture* fixture);
    void processPlayerLeftArmSensorContactBegin(b2Fixture* fixture);
    void processPlayerRightArmSensorContactBegin(b2Fixture* fixture);
@@ -82,7 +70,7 @@ private:
    void processMovingPlatformContactEnd();
    void processOneWayWallContactEnd(b2Contact* contact);
    void processPlayerContactEnd();
-   void processPlayerFootSensorContactEnd(b2Fixture* fixture);
+   void processPlayerFootSensorContactEnd(FixtureNode* fixture_node, b2Fixture* fixture);
    void processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture);
    void processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture);
 
@@ -99,4 +87,3 @@ private:
    int32_t _count_bouncer_cycles = 5;
    bool _smashed = false;
 };
-

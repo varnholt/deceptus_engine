@@ -5,11 +5,10 @@
 
 #include <array>
 #include <optional>
+#include <unordered_map>
 
 #include "animation.h"
 #include "constants.h"
-#include "playercontrols.h"
-#include "playerjump.h"
 
 class PlayerAnimation
 {
@@ -36,6 +35,7 @@ public:
       bool _wall_jump_points_right = false;
       bool _jumping_through_one_way_wall = false;
       bool _attacking = false;
+      DeathReason _death_reason = DeathReason::Invalid;
       WeaponType _weapon_type = WeaponType::None;
       std::optional<Dash> _dash_dir;
       b2Vec2 _linear_velocity = b2Vec2{0.0f, 0.0f};
@@ -66,8 +66,14 @@ private:
 
    std::shared_ptr<Animation> _idle_r;
    std::shared_ptr<Animation> _idle_l;
+
    std::shared_ptr<Animation> _idle_blink_r;
    std::shared_ptr<Animation> _idle_blink_l;
+   std::shared_ptr<Animation> _sword_idle_blink_r;
+   std::shared_ptr<Animation> _sword_idle_blink_l;
+
+   std::shared_ptr<Animation> _sword_idle_l;
+   std::shared_ptr<Animation> _sword_idle_r;
    std::shared_ptr<Animation> _idle_r_tmp;
    std::shared_ptr<Animation> _idle_l_tmp;
 
@@ -75,13 +81,21 @@ private:
    std::shared_ptr<Animation> _bend_down_idle_r;
    std::shared_ptr<Animation> _bend_down_idle_blink_l;
    std::shared_ptr<Animation> _bend_down_idle_blink_r;
+   std::shared_ptr<Animation> _sword_bend_down_idle_l;
+   std::shared_ptr<Animation> _sword_bend_down_idle_r;
+   std::shared_ptr<Animation> _sword_bend_down_idle_blink_l;
+   std::shared_ptr<Animation> _sword_bend_down_idle_blink_r;
    std::shared_ptr<Animation> _bend_down_idle_l_tmp;
    std::shared_ptr<Animation> _bend_down_idle_r_tmp;
 
    std::shared_ptr<Animation> _bend_down_r;
    std::shared_ptr<Animation> _bend_down_l;
+   std::shared_ptr<Animation> _sword_bend_down_l;
+   std::shared_ptr<Animation> _sword_bend_down_r;
    std::shared_ptr<Animation> _bend_up_r;
    std::shared_ptr<Animation> _bend_up_l;
+   std::shared_ptr<Animation> _sword_bend_up_l;
+   std::shared_ptr<Animation> _sword_bend_up_r;
 
    std::shared_ptr<Animation> _idle_to_run_r;
    std::shared_ptr<Animation> _idle_to_run_l;
@@ -89,6 +103,8 @@ private:
    std::shared_ptr<Animation> _runstop_l;
    std::shared_ptr<Animation> _run_r;
    std::shared_ptr<Animation> _run_l;
+   std::shared_ptr<Animation> _sword_run_l;
+   std::shared_ptr<Animation> _sword_run_r;
 
    std::shared_ptr<Animation> _dash_init_r;
    std::shared_ptr<Animation> _dash_init_l;
@@ -96,6 +112,12 @@ private:
    std::shared_ptr<Animation> _dash_l;
    std::shared_ptr<Animation> _dash_stop_r;
    std::shared_ptr<Animation> _dash_stop_l;
+   std::shared_ptr<Animation> _sword_dash_init_r;
+   std::shared_ptr<Animation> _sword_dash_init_l;
+   std::shared_ptr<Animation> _sword_dash_r;
+   std::shared_ptr<Animation> _sword_dash_l;
+   std::shared_ptr<Animation> _sword_dash_stop_r;
+   std::shared_ptr<Animation> _sword_dash_stop_l;
 
    std::shared_ptr<Animation> _crouch_r;
    std::shared_ptr<Animation> _crouch_l;
@@ -114,48 +136,43 @@ private:
 
    std::shared_ptr<Animation> _double_jump_r;
    std::shared_ptr<Animation> _double_jump_l;
+
    std::shared_ptr<Animation> _swim_idle_r;
    std::shared_ptr<Animation> _swim_idle_l;
    std::shared_ptr<Animation> _swim_r;
    std::shared_ptr<Animation> _swim_l;
+   std::shared_ptr<Animation> _sword_swim_idle_r;
+   std::shared_ptr<Animation> _sword_swim_idle_l;
+   std::shared_ptr<Animation> _sword_swim_r;
+   std::shared_ptr<Animation> _sword_swim_l;
 
    std::shared_ptr<Animation> _wallslide_impact_r;
    std::shared_ptr<Animation> _wallslide_impact_l;
    std::shared_ptr<Animation> _wallslide_r;
    std::shared_ptr<Animation> _wallslide_l;
+
    std::shared_ptr<Animation> _wall_jump_r;
    std::shared_ptr<Animation> _wall_jump_l;
+
    std::shared_ptr<Animation> _appear_r;
    std::shared_ptr<Animation> _appear_l;
+   std::shared_ptr<Animation> _sword_appear_r;
+   std::shared_ptr<Animation> _sword_appear_l;
 
-   std::shared_ptr<Animation> _sword_idle_l;
-   std::shared_ptr<Animation> _sword_idle_r;
-   std::shared_ptr<Animation> _sword_run_l;
-   std::shared_ptr<Animation> _sword_run_r;
-   std::shared_ptr<Animation> _sword_bend_down_l;
-   std::shared_ptr<Animation> _sword_bend_down_r;
    std::shared_ptr<Animation> _sword_bend_down_attack_1_l;
    std::shared_ptr<Animation> _sword_bend_down_attack_1_r;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_l;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
    std::shared_ptr<Animation> _sword_standing_attack_tmp_l;
    std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
-   std::array<std::shared_ptr<Animation>, 4> _sword_standing_attack_l;
-   std::array<std::shared_ptr<Animation>, 4> _sword_standing_attack_r;
-   std::shared_ptr<Animation> _sword_dash_init_r;
-   std::shared_ptr<Animation> _sword_dash_init_l;
-   std::shared_ptr<Animation> _sword_dash_r;
-   std::shared_ptr<Animation> _sword_dash_l;
-   std::shared_ptr<Animation> _sword_dash_stop_r;
-   std::shared_ptr<Animation> _sword_dash_stop_l;
-   std::shared_ptr<Animation> _sword_swim_idle_r;
-   std::shared_ptr<Animation> _sword_swim_idle_l;
-   std::shared_ptr<Animation> _sword_swim_r;
-   std::shared_ptr<Animation> _sword_swim_l;
+   std::array<std::shared_ptr<Animation>, 3> _sword_standing_attack_l;
+   std::array<std::shared_ptr<Animation>, 3> _sword_standing_attack_r;
    bool _sword_standing_attack_l_reset = false;
    bool _sword_standing_attack_r_reset = false;
 
-   std::shared_ptr<Animation> _death;
+   std::shared_ptr<Animation> _death_default;
+   std::shared_ptr<Animation> _death_electrocuted_l;
+   std::shared_ptr<Animation> _death_electrocuted_r;
 
    int32_t _jump_animation_reference = 0;
 
@@ -163,4 +180,5 @@ private:
    std::shared_ptr<Animation> _current_cycle;
 
    std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
+   std::vector<std::shared_ptr<Animation>> _appear_animations;
 };

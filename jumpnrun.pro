@@ -72,6 +72,7 @@ linux {
    LIBS += $$system(pkg-config sdl2 --libs)
    LIBS += -lGL
    LIBS += $$system(pkg-config sfml-all --libs)
+   LIBS += -lX11
 }
 
 
@@ -121,6 +122,7 @@ SOURCES += \
    src/framework/tools/jsonconfiguration.cpp \
    src/framework/tools/log.cpp \
    src/framework/tools/logthread.cpp \
+   src/framework/tools/scopeexit.cpp \
    src/framework/tools/stopwatch.cpp \
    src/framework/tools/timer.cpp \
    src/game/ambientocclusion.cpp \
@@ -139,6 +141,7 @@ SOURCES += \
    src/game/cameraroomlock.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
+   src/game/chainshapeanalyzer.cpp \
    src/game/console.cpp \
    src/game/cutscene.cpp \
    src/game/debugdraw.cpp \
@@ -306,7 +309,9 @@ HEADERS += \
    src/framework/tools/jsonconfiguration.h \
    src/framework/tools/log.h \
    src/framework/tools/logthread.h \
+   src/framework/tools/scopeexit.h \
    src/framework/tools/stopwatch.h \
+   src/game/chainshapeanalyzer.h \
    src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \

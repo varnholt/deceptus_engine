@@ -228,7 +228,7 @@ void Lever::updateTargetPositionReached()
 //-----------------------------------------------------------------------------
 void Lever::update(const sf::Time& dt)
 {
-   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
    _player_at_lever = _rect.intersects(player_rect);
 
    updateTargetPositionReached();

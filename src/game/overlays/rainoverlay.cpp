@@ -168,7 +168,7 @@ void RainOverlay::update(const sf::Time& dt)
    //   :        :                      :        :
    //   :        :                      :        :
    //   +- - - - +----------------------+- - - - +
-   auto player_position = Player::getCurrent()->getPixelPositionf();
+   auto player_position = Player::getCurrent()->getPixelPositionFloat();
    _clip_rect.left   = player_position.x - _screen.width;
    _clip_rect.top    = player_position.y - _screen.height;
    _clip_rect.height = _screen.height * 2;

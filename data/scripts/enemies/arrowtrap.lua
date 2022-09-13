@@ -22,7 +22,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
-   staticBody = true,
+   static_body = true,
    sprite = "data/sprites/enemy_arrowtrap.png",
    damage = 0
 }

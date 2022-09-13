@@ -4,6 +4,7 @@
 #include "animationplayer.h"
 #include "camerapanorama.h"
 #include "cameraroomlock.h"
+#include "chainshapeanalyzer.h"
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -69,6 +70,14 @@
 #include <sstream>
 #include <string>
 #include <thread>
+
+#ifdef __GNUC__
+#define FMT_HEADER_ONLY
+#  include <fmt/core.h>
+#else
+#include <format>
+namespace fmt = std;
+#endif
 
 // things that should be optimised
 // - the tilemaps are unsorted, sort them by z once after deserializing a level
@@ -814,13 +823,13 @@ void Level::updateViews()
 //-----------------------------------------------------------------------------
 void Level::updateRoom()
 {
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
 }
 
 //-----------------------------------------------------------------------------
 void Level::syncRoom()
 {
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionf(), _rooms);
+   _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
    CameraRoomLock::setRoom(_room_current);
 }
 
@@ -837,7 +846,8 @@ void Level::updateCameraSystem(const sf::Time& dt)
    if (prev_room != _room_current)
    {
       Log::Info() << "player moved to room: " << (_room_current ? _room_current->getObjectId() : "undefined") << " on side '"
-                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionf())) : '?')
+                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat()))
+                                    : '?')
                   << "'";
 
       // will update the current room in both cases, either after the camera lock delay or instantly
@@ -1066,7 +1076,8 @@ void Level::drawDebugInformation()
    {
       drawStaticChains(*_render_texture_level.get());
       DebugDraw::debugBodies(*_render_texture_level.get(), this);
-      DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPlayerPixelRect());
+      DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPixelRectInt());
+      DebugDraw::debugHitboxes(*_render_texture_level.get());
 
       for (const auto& room : _rooms)
       {
@@ -1307,6 +1318,15 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 //-----------------------------------------------------------------------------
 void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_type)
 {
+   if (
+         fabs(chain[0].x - chain[chain.size() - 1].x) < 0.001f
+      && fabs(chain[0].y - chain[chain.size() - 1].y) < 0.001f
+   )
+   {
+      Log::Error() << "chain has equal start and end position" << std::endl;
+      exit(0);
+   }
+
    // it's easier to store all the physics chains in a separate data structure
    // than to parse the box2d world every time we want those loops.
    _world_chains.push_back(chain);
@@ -1326,21 +1346,21 @@ void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_
    auto body = _world->CreateBody(&body_def);
    auto fixture = body->CreateFixture(&fixture_def);
    auto object_data = new FixtureNode(this);
-   object_data->setObjectId(std::format("world_chain_{}", _world_chains.size() - 1));
+   object_data->setObjectId(fmt::format("world_chain_{}", _world_chains.size() - 1));
    object_data->setType(object_type);
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
 //-----------------------------------------------------------------------------
-void Level::addPathsToWorld(int32_t offsetX, int32_t offsetY, const std::vector<SquareMarcher::Path>& paths, ObjectType behavior)
+void Level::addPathsToWorld(int32_t offset_x, int32_t offset_y, const std::vector<SquareMarcher::Path>& paths, ObjectType behavior)
 {
    // create the physical chain with 1 body per chain
-   for (auto& path : paths)
+   for (const auto& path : paths)
    {
       std::vector<b2Vec2> chain;
-      for (auto& pos : path._scaled)
+      for (const auto& pos : path._scaled)
       {
-         chain.push_back({(pos.x + offsetX) * PIXELS_PER_TILE / PPM, (pos.y + offsetY) * PIXELS_PER_TILE / PPM});
+         chain.push_back({(pos.x + offset_x) * PIXELS_PER_TILE / PPM, (pos.y + offset_y) * PIXELS_PER_TILE / PPM});
       }
 
       addChainToWorld(chain, behavior);
@@ -1361,16 +1381,24 @@ void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior
       {
          const auto& p = points[index];
          chain.push_back({(p.x + layer->_offset_x_px) / PPM, (p.y + layer->_offset_y_px) / PPM});
-
          debug_path.push_back({p.x / PIXELS_PER_TILE, p.y / PIXELS_PER_TILE});
       }
 
-      // creating a box2d chain is automatically closing the path
+      // creating a box2d loop is automatically closing the path
       chain.pop_back();
-
       addChainToWorld(chain, behavior);
 
-      // Mesh::writeVerticesToImage(points, faces, {1200, 1200}, "yo_yo.png");
+      // this should become a function callable from the console
+      if (false)
+      {
+         Mesh::writeVerticesToImage(
+            points,
+            faces,
+            {static_cast<int32_t>(layer->_width_tl * PIXELS_PER_TILE) / 4, static_cast<int32_t>(layer->_height_tl * PIXELS_PER_TILE) / 4},
+            path.filename().string() + "_dump.png",
+            0.25f
+         );
+      }
    }
 }
 
@@ -1528,6 +1556,8 @@ void Level::parsePhysicsTiles(
    //
    //      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectTypeDeadly);
    //   }
+
+   ChainShapeAnalyzer::analyze(_world);
 }
 
 //-----------------------------------------------------------------------------

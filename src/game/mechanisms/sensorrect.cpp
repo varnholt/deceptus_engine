@@ -14,7 +14,7 @@ SensorRect::SensorRect(GameNode* parent)
 
 void SensorRect::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = Player::getCurrent()->getPlayerPixelRect().intersects(_rect);
+   const auto player_intersects = Player::getCurrent()->getPixelRectInt().intersects(_rect);
 
    if (player_intersects)
    {

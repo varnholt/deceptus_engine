@@ -66,11 +66,12 @@ public:
 
    void setStartPixelPosition(float x, float y);
 
-   const sf::Vector2f& getPixelPositionf() const;
-   const sf::Vector2i& getPixelPositioni() const;
+   const sf::Vector2f& getPixelPositionFloat() const;
+   const sf::Vector2i& getPixelPositionInt() const;
    void setPixelPosition(float x, float y);
 
-   const sf::IntRect& getPlayerPixelRect() const;
+   const sf::FloatRect& getPixelRectFloat() const;
+   const sf::IntRect& getPixelRectInt() const;
 
    b2Body* getBody() const;
    b2Fixture* getFootSensorFixture() const;
@@ -107,6 +108,7 @@ public:
 
    void impulse(float intensity);
    void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
+   void kill(std::optional<DeathReason> death_reason = std::nullopt);
    void goToPortal(auto portal);
 
    const std::shared_ptr<ExtraManager>& getExtraManager() const;
@@ -114,6 +116,7 @@ public:
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerAnimation& getPlayerAnimation() const;
    const PlayerJump& getJump() const;
+   const PlayerBend& getBend() const;
    PlayerBelt& getBelt();
 
    void setToggleCallback(const ToggleCallback& callback);
@@ -132,12 +135,14 @@ private:
    void updateHardLanding();
    void updateImpulse();
    void updateOneWayWallDrop();
+   void updateChainShapeCollisions();
    void updatePixelCollisions();
    void updatePlatformMovement(const sf::Time& dt);
    void updateOrientation();
    void updatePortal();
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
+   void updateJump();
 
    void resetDash();
 
@@ -166,7 +171,7 @@ private:
    b2Body* _body = nullptr;
    static constexpr int32_t __foot_count = 4u;
    b2Fixture* _body_fixture = nullptr;
-   b2Fixture* _foot_fixture[__foot_count];
+   b2Fixture* _foot_fixture[__foot_count]{nullptr, nullptr, nullptr, nullptr};
    b2Fixture* _foot_sensor_fixture = nullptr;
    b2Body* _platform_body = nullptr;
    b2Body* _ground_body = nullptr;
@@ -177,7 +182,8 @@ private:
 
    sf::Vector2f _pixel_position_f;
    sf::Vector2i _pixel_position_i;
-   sf::IntRect _pixel_rect;
+   sf::FloatRect _pixel_rect_f;
+   sf::IntRect _pixel_rect_i;
 
    sf::Time _time;
    sf::Clock _clock;
@@ -188,6 +194,7 @@ private:
    bool _points_to_left = false;
    bool _visible = true;
    bool _dead = false;
+   std::optional<DeathReason> _death_reason;
 
    bool _in_water = false;
    HighResTimePoint _water_entered_time;

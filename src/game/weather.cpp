@@ -15,7 +15,7 @@ Weather::Weather(GameNode* parent)
 
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   auto player_rect = Player::getCurrent()->getPlayerPixelRect();
+   auto player_rect = Player::getCurrent()->getPixelRectInt();
 
    if (_rect.intersects(player_rect))
    {
@@ -26,7 +26,7 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void Weather::update(const sf::Time& dt)
 {
-   auto player_rect = Player::getCurrent()->getPlayerPixelRect();
+   auto player_rect = Player::getCurrent()->getPixelRectInt();
 
    if (_rect.intersects(player_rect))
    {

@@ -119,7 +119,7 @@ void RotatingBlade::update(const sf::Time& dt)
    // kill player if he moves into the blade's radius
    sf::Vector2i blade_position{_sprite.getPosition()};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
-   if (SfmlMath::intersectCircleRect(blade_position, blade_radius, Player::getCurrent()->getPlayerPixelRect()))
+   if (SfmlMath::intersectCircleRect(blade_position, blade_radius, Player::getCurrent()->getPixelRectInt()))
    {
       if (_velocity > 0.3f)
       {

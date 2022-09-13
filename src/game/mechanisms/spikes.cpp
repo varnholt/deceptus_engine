@@ -110,7 +110,7 @@ void Spikes::updateTrap()
    // trap trigger is done via intersection
    if (_tu == TRAP_START_TILE)
    {
-      auto playerRect = Player::getCurrent()->getPlayerPixelRect();
+      auto playerRect = Player::getCurrent()->getPixelRectInt();
       if (playerRect.intersects(_pixel_rect))
       {
          // start counting from first intersection
@@ -252,7 +252,7 @@ void Spikes::update(const sf::Time& dt)
    if (_deadly)
    {
       // check for intersection with player
-      const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+      const auto& player_rect = Player::getCurrent()->getPixelRectInt();
       if (player_rect.intersects(_pixel_rect))
       {
          Player::getCurrent()->damage(100);

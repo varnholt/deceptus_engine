@@ -2,12 +2,10 @@
 
 #include "luainterface.h"
 
-
 b2Vec2 vecS2B(const sf::Vector2f& vector)
 {
-   return{vector.x * MPP, vector.y * MPP};
+   return {vector.x * MPP, vector.y * MPP};
 }
-
 
 std::vector<b2Fixture*> WorldQuery::queryFixtures(const std::shared_ptr<b2World>& world, const b2AABB& aabb)
 {
@@ -16,13 +14,11 @@ std::vector<b2Fixture*> WorldQuery::queryFixtures(const std::shared_ptr<b2World>
    return query_callback._fixtures;
 }
 
-
 bool WorldQuery::FixtureQueryCallback::ReportFixture(b2Fixture* fixture)
 {
    _fixtures.push_back(fixture);
    return true;
 }
-
 
 std::vector<b2Body*> WorldQuery::queryBodies(const std::shared_ptr<b2World>& world, const b2AABB& aabb)
 {
@@ -31,24 +27,28 @@ std::vector<b2Body*> WorldQuery::queryBodies(const std::shared_ptr<b2World>& wor
    return query_callback._bodies;
 }
 
-
 bool WorldQuery::BodyQueryCallback::ReportFixture(b2Fixture* fixture)
 {
    _bodies.push_back(fixture->GetBody());
    return true;
 }
 
-
-std::vector<std::shared_ptr<LuaNode> > WorldQuery::findNodes(const sf::FloatRect& attack_rect)
+std::vector<std::shared_ptr<LuaNode>> WorldQuery::findNodes(const sf::FloatRect& search_rect)
 {
    const auto& nodes = LuaInterface::instance().getObjectList();
 
    std::vector<std::shared_ptr<LuaNode>> hit_nodes;
-   std::copy_if(nodes.begin(), nodes.end(), std::back_inserter(hit_nodes), [attack_rect](const auto& node){
-            const auto& hit_boxes = node->_hitboxes;
-            return std::any_of(hit_boxes.begin(), hit_boxes.end(), [attack_rect](const auto& hit_box){
-               return hit_box.getRectTranslated().intersects(attack_rect);
-            }
+   std::copy_if(
+      nodes.begin(),
+      nodes.end(),
+      std::back_inserter(hit_nodes),
+      [search_rect](const auto& node)
+      {
+         const auto& hit_boxes = node->_hitboxes;
+         return std::any_of(
+            hit_boxes.begin(),
+            hit_boxes.end(),
+            [search_rect](const auto& hit_box) { return hit_box.getRectTranslated().intersects(search_rect); }
          );
       }
    );
@@ -56,18 +56,27 @@ std::vector<std::shared_ptr<LuaNode> > WorldQuery::findNodes(const sf::FloatRect
    return hit_nodes;
 }
 
-
-std::vector<std::shared_ptr<LuaNode> > WorldQuery::findNodes(const std::vector<sf::FloatRect>& attack_rects)
+std::vector<std::shared_ptr<LuaNode>> WorldQuery::findNodes(const std::vector<sf::FloatRect>& attack_rects)
 {
    const auto& nodes = LuaInterface::instance().getObjectList();
 
    std::vector<std::shared_ptr<LuaNode>> hit_nodes;
-   std::copy_if(nodes.begin(), nodes.end(), std::back_inserter(hit_nodes), [attack_rects](const auto& node){
-      const auto& hit_boxes = node->_hitboxes;
-      return std::any_of(hit_boxes.begin(), hit_boxes.end(), [attack_rects](const auto& hit_box){
-                  return std::any_of(attack_rects.begin(), attack_rects.end(), [hit_box](const auto& attack_rect){
-                     return hit_box.getRectTranslated().intersects(attack_rect);
-                  }
+   std::copy_if(
+      nodes.begin(),
+      nodes.end(),
+      std::back_inserter(hit_nodes),
+      [attack_rects](const auto& node)
+      {
+         const auto& hit_boxes = node->_hitboxes;
+         return std::any_of(
+            hit_boxes.begin(),
+            hit_boxes.end(),
+            [attack_rects](const auto& hit_box)
+            {
+               return std::any_of(
+                  attack_rects.begin(),
+                  attack_rects.end(),
+                  [hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().intersects(attack_rect); }
                );
             }
          );
@@ -76,7 +85,6 @@ std::vector<std::shared_ptr<LuaNode> > WorldQuery::findNodes(const std::vector<s
 
    return hit_nodes;
 }
-
 
 std::vector<b2Body*> WorldQuery::retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
 {
@@ -92,4 +100,3 @@ std::vector<b2Body*> WorldQuery::retrieveBodiesOnScreen(const std::shared_ptr<b2
 
    return WorldQuery::queryBodies(world, aabb);
 }
-
