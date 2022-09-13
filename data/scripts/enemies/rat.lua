@@ -6,9 +6,10 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    damage = 0,
    sprite = "data/sprites/rat.png",
-   staticBody = false,
+   static_body = false,
    velocity_walk_max = 0.75,
-   acceleration_ground = 0.1
+   acceleration_ground = 0.1,
+   collides_with_player = false
 }
 
 
@@ -59,6 +60,7 @@ _key_pressed = 0
 function initialize()
    addShapeCircle(0.15, 0.0, 0.15)
    updateSprite(0.0)
+   addHitbox(-8, 0, 16, 12)
 end
 
 

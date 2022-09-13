@@ -4,6 +4,7 @@
 #include "audio.h"
 #include "bow.h"
 #include "camerapanorama.h"
+#include "chainshapeanalyzer.h"
 #include "displaymode.h"
 #include "fadetransitioneffect.h"
 #include "fixturenode.h"
@@ -84,7 +85,6 @@ sf::IntRect Player::computeFootSensorPixelIntRect() const
 
    return rect_px;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 Player::Player(GameNode* parent) : GameNode(parent)
@@ -213,11 +213,6 @@ void Player::setBodyViaPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   if (_weapon_system->_selected)
-   {
-      _weapon_system->_selected->draw(color);
-   }
-
    if (!_visible)
    {
       return;
@@ -227,24 +222,29 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    if (!isDead())
    {
       // damaged player flashes
-      auto time = GlobalClock::getInstance().getElapsedTimeInMs();
-      auto damageTime = _damage_clock.getElapsedTime().asMilliseconds();
-      if (_damage_initialized && time > 3000 && damageTime < 3000)
+      const auto time = GlobalClock::getInstance().getElapsedTimeInMs();
+      const auto damage_time = _damage_clock.getElapsedTime().asMilliseconds();
+      if (_damage_initialized && time > 3000 && damage_time < 3000)
       {
-         if ((damageTime / 100) % 2 == 0)
+         if ((damage_time / 100) % 2 == 0)
          {
             return;
          }
       }
    }
 
+   if (_weapon_system->_selected)
+   {
+      _weapon_system->_selected->draw(color);
+   }
+
    auto current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
       // that y offset is to compensate the wonky box2d origin
-      const auto pos = _pixel_position_f + sf::Vector2f(0, 8);
+      const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-      current_cycle->setPosition(pos);
+      current_cycle->setPosition(draw_position_px);
 
       // draw dash with motion blur
       for (auto i = 0u; i < _last_animations.size(); i++)
@@ -257,7 +257,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
       if (_dash.isDashActive())
       {
-         _last_animations.push_back({pos, current_cycle});
+         _last_animations.push_back({draw_position_px, current_cycle});
       }
 
       // player animations might be combined of multiple animations, hence the recursive calls
@@ -268,13 +268,13 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const sf::Vector2f& Player::getPixelPositionf() const
+const sf::Vector2f& Player::getPixelPositionFloat() const
 {
    return _pixel_position_f;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const sf::Vector2i& Player::getPixelPositioni() const
+const sf::Vector2i& Player::getPixelPositionInt() const
 {
    return _pixel_position_i;
 }
@@ -290,25 +290,31 @@ void Player::setPixelPosition(float x, float y)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePixelRect()
+const sf::FloatRect& Player::getPixelRectFloat() const
 {
-   sf::IntRect rect;
-
-   const auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
-
-   rect.left = static_cast<int>(_pixel_position_f.x) - PLAYER_ACTUAL_WIDTH / 2;
-   rect.top = static_cast<int>(_pixel_position_f.y) - height_diff_px - (height_diff_px / 2);
-
-   rect.width = PLAYER_ACTUAL_WIDTH;
-   rect.height = PLAYER_ACTUAL_HEIGHT;
-
-   _pixel_rect = rect;
+   return _pixel_rect_f;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const sf::IntRect& Player::getPlayerPixelRect() const
+void Player::updatePixelRect()
 {
-   return _pixel_rect;
+   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+
+   _pixel_rect_f.left = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
+   _pixel_rect_f.top = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
+   _pixel_rect_f.width = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_f.height = PLAYER_ACTUAL_HEIGHT;
+
+   _pixel_rect_i.left = static_cast<int32_t>(_pixel_rect_f.left);
+   _pixel_rect_i.top = static_cast<int32_t>(_pixel_rect_f.top);
+   _pixel_rect_i.width = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_i.height = PLAYER_ACTUAL_HEIGHT;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+const sf::IntRect& Player::getPixelRectInt() const
+{
+   return _pixel_rect_i;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -347,29 +353,32 @@ void Player::createFeet()
       fixture_def_feet.filter.maskBits = mask_bits_standing;
       fixture_def_feet.filter.groupIndex = group_index;
 
-      b2CircleShape feetShape;
-      feetShape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
-      feetShape.m_radius = feet_radius_m;
-      fixture_def_feet.shape = &feetShape;
+      b2CircleShape feet_shape;
+      feet_shape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
+      feet_shape.m_radius = feet_radius_m;
+      fixture_def_feet.shape = &feet_shape;
 
       auto foot = _body->CreateFixture(&fixture_def_feet);
       _foot_fixture[i] = foot;
 
-      auto objectDataFeet = new FixtureNode(this);
-      objectDataFeet->setType(ObjectTypePlayer);
-      objectDataFeet->setFlag("foot", true);
-      foot->SetUserData(static_cast<void*>(objectDataFeet));
+      auto object_data_feet = new FixtureNode(this);
+      object_data_feet->setType(ObjectTypePlayer);
+      object_data_feet->setFlag("foot", true);
+      foot->SetUserData(static_cast<void*>(object_data_feet));
    }
 
    // attach foot sensor shape
-   b2PolygonShape footPolygonShape;
-   footPolygonShape.SetAsBox(
-      (width_px / 2.0f) / (PPM * 2.0f), (height_px / 4.0f) / (PPM * 2.0f), b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)), 0.0f
+   b2PolygonShape foot_sensor_shape;
+   foot_sensor_shape.SetAsBox(
+      (width_px / 2.0f) / (PPM * 2.0f),
+      (height_px / 4.0f) / (PPM * 2.0f),
+      b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)),
+      0.0f
    );
 
    b2FixtureDef foot_sensor_fixture_def;
    foot_sensor_fixture_def.isSensor = true;
-   foot_sensor_fixture_def.shape = &footPolygonShape;
+   foot_sensor_fixture_def.shape = &foot_sensor_shape;
 
    _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
    auto foot_object_data = new FixtureNode(this);
@@ -432,7 +441,7 @@ void Player::createBody()
 {
    // create player body
    auto body_def = new b2BodyDef();
-   body_def->position.Set(getPixelPositionf().x * MPP, getPixelPositionf().y * MPP);
+   body_def->position.Set(getPixelPositionFloat().x * MPP, getPixelPositionFloat().y * MPP);
 
    body_def->type = b2_dynamicBody;
 
@@ -762,7 +771,6 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
    return desired_velocity;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
 {
@@ -812,9 +820,20 @@ void Player::updateVelocity()
          }
          else
          {
-            const auto velocity = _body->GetLinearVelocity();
-            _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
-            return;
+            // while the player is standing on a platform, he is allowed to be to bend down
+            // however, he is not capable of changing his velocity by pressing left or right
+            if (!_belt.isOnBelt())
+            {
+               const auto velocity = _body->GetLinearVelocity();
+               _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
+               return;
+            }
+            else
+            {
+               const auto velocity = _body->GetLinearVelocity();
+               _body->SetLinearVelocity({_belt.getBeltVelocity(), velocity.y});
+               return;
+            }
          }
       }
 
@@ -900,6 +919,12 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
    screen_transition->startEffect1();
 
    return std::move(screen_transition);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+const PlayerBend& Player::getBend() const
+{
+   return _bend;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1080,6 +1105,17 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::kill(std::optional<DeathReason> death_reason)
+{
+   damage(1000);
+
+   if (death_reason.has_value())
+   {
+      _death_reason = death_reason;
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnPlatform() const
 {
    const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
@@ -1117,15 +1153,17 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAttack()
 {
-   _attack._was_attacking = _attack._attacking;
-   _attack._attacking = _controls->isFireButtonPressed();
+   _attack._fire_button_was_pressed = _attack._fire_button_pressed;
+   _attack._fire_button_pressed = _controls->isFireButtonPressed();
 
-   if (_attack._attacking && !_attack._was_attacking)
+   if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
    {
       _attack._timepoint_attack_start = StopWatch::getInstance().now();
    }
 
-   if (_attack._attacking)
+   // there are weapons that support continous attacks while the button is down, others like the sword
+   // require a fresh button press each time the sword should be swung
+   if (_attack._fire_button_pressed)
    {
       attack();
    }
@@ -1206,7 +1244,7 @@ void Player::updateBendDown()
       return;
    }
 
-   const auto bending_down = down_pressed && !isInAir();
+   const auto bending_down = down_pressed && !isInAir() && !isInWater();
 
    _bend._was_bending_down = _bend._bending_down;
    _bend._bending_down = bending_down;
@@ -1274,10 +1312,8 @@ void Player::updateGroundAngle()
    input.p2 = _body->GetPosition() + b2Vec2(0.0f, 1.0f);
    input.maxFraction = 1.0f;
 
-   float closestFraction = 1.0f;
-   b2Vec2 intersectionNormal(0.0f, -1.0f);
-
-   // for (b2Body* b = mWorld->GetBodyList(); b; b = b->GetNext())
+   float closest_fraction = 1.0f;
+   b2Vec2 intersection_normal(0.0f, -1.0f);
 
    if (!_ground_body)
    {
@@ -1294,21 +1330,22 @@ void Player::updateGroundAngle()
       }
 
       b2RayCastOutput output;
-
       for (auto child_index = 0; child_index < f->GetShape()->GetChildCount(); child_index++)
       {
          if (!f->RayCast(&output, input, child_index))
-            continue;
-
-         if (output.fraction < closestFraction)
          {
-            closestFraction = output.fraction;
-            intersectionNormal = output.normal;
+            continue;
+         }
+
+         if (output.fraction < closest_fraction)
+         {
+            closest_fraction = output.fraction;
+            intersection_normal = output.normal;
          }
       }
    }
 
-   _ground_normal = intersectionNormal;
+   _ground_normal = intersection_normal;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1321,10 +1358,43 @@ void Player::updateOneWayWallDrop()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateChainShapeCollisions()
+{
+   if (_jump.isJumping())
+   {
+      return;
+   }
+
+   const auto hiccup_pos = ChainShapeAnalyzer::checkPlayerAtCollisionPosition();
+   if (!hiccup_pos.has_value())
+   {
+      return;
+   }
+
+   const auto velocity = _body->GetLinearVelocity();
+   const auto pos = _body->GetPosition();
+   _body->SetLinearVelocity({velocity.x, 0.0f});
+   _body->SetTransform({pos.x, hiccup_pos->y - 0.18f}, 0.0f);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updateJump()
+{
+   PlayerJump::PlayerJumpInfo info;
+   info._in_air = isInAir();
+   info._in_water = isInWater();
+   info._water_entered_timepoint = _water_entered_time;
+   info._crouching = _bend.isCrouching();
+   info._climbing = _climb.isClimbing();
+   _jump.update(info);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
 
+   updateChainShapeCollisions();
    updateImpulse();
    updateGroundAngle();
    updateHardLanding();
@@ -1337,15 +1407,7 @@ void Player::update(const sf::Time& dt)
    updateVelocity();
    updateOrientation();
    updateOneWayWallDrop();
-
-   PlayerJump::PlayerJumpInfo info;
-   info._in_air = isInAir();
-   info._in_water = isInWater();
-   info._water_entered_timepoint = _water_entered_time;
-   info._crouching = _bend.isCrouching();
-   info._climbing = _climb.isClimbing();
-   _jump.update(info);
-
+   updateJump();
    updateDash();
    _climb.update(_body, isInAir());
    updatePlatformMovement(dt);
@@ -1437,7 +1499,7 @@ void Player::updateDash(Dash dir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelCollisions()
 {
-   const auto rect = getPlayerPixelRect();
+   const auto rect = getPixelRectInt();
    _extra_manager->collide(rect);
    Laser::collide(rect);
    Fan::collide(rect, _body);
@@ -1577,20 +1639,12 @@ void Player::attack()
       case WeaponType::Sword:
       {
          // no 2nd strike without new button press
-         if (_attack._attacking && _attack._was_attacking)
+         if (_attack._fire_button_pressed && _attack._fire_button_was_pressed)
          {
             return;
          }
 
-         const auto x_offset = dir.x * 0.5f;
-         const auto y_offset = 0.0f;
-
-         const auto player_width_px = _pixel_rect.width / 2;
-
-         pos.x = x_offset + _pixel_position_f.x * MPP - player_width_px * MPP;
-         pos.y = y_offset + _pixel_position_f.y * MPP;
-
-         dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, pos, dir);
+         dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
          break;
       }
       case WeaponType::None:
@@ -1663,8 +1717,7 @@ void Player::reset()
 
    SaveState::getPlayerInfo()._extra_table._health.reset();
 
-   // resetting any player info apart form the health doesn't make sense
-   // since it's loaded from disk when the player dies
+   // resetting any player info apart from the health doesn't make sense since it's loaded from disk when the player dies
    // SaveState::getPlayerInfo().mInventory.resetKeys();
 
    // reset bodies passed from the contact listener
@@ -1675,6 +1728,7 @@ void Player::reset()
    _dash._dash_frame_count = 0;
    resetDash();
    _dead = false;
+   _death_reason.reset();
 
    // fixtures are no longer dead
    updateDeadFixtures();
@@ -1683,7 +1737,7 @@ void Player::reset()
 //----------------------------------------------------------------------------------------------------------------------
 DeathReason Player::checkDead() const
 {
-   DeathReason reason = DeathReason::None;
+   DeathReason reason = DeathReason::Invalid;
 
    const auto touches_something_deadly = (GameContactListener::getInstance().getDeadlyContactCount() > 0);
    const auto too_fast = fabs(_body->GetLinearVelocity().y) > 40;
@@ -1705,6 +1759,12 @@ DeathReason Player::checkDead() const
    else if (out_of_health)
    {
       reason = DeathReason::OutOfHealth;
+   }
+
+   // death reason can also be set externally, and then should overrule the internal detection
+   if (_death_reason.has_value())
+   {
+      reason = _death_reason.value();
    }
 
    return reason;
@@ -1804,5 +1864,3 @@ void Player::updatePreviousBodyState()
    _position_previous = _body->GetPosition();
    _velocity_previous = _body->GetLinearVelocity();
 }
-
-

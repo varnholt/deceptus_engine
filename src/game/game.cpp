@@ -630,11 +630,16 @@ void Game::updateGameState(const sf::Time& dt)
 {
    // check if just died
    auto death_reason = _player->checkDead();
-   if (!_player->isDead() && death_reason != DeathReason::None)
+   if (!_player->isDead() && death_reason != DeathReason::Invalid)
    {
       _death_wait_time_ms = 0;
       switch (death_reason)
       {
+         case DeathReason::Laser:
+         {
+            Log::Info() << "dead: player got lasered";
+            break;
+         }
          case DeathReason::TouchesDeadly:
          {
             Log::Info() << "dead: touched something deadly";
@@ -655,7 +660,7 @@ void Game::updateGameState(const sf::Time& dt)
             Log::Info() << "dead: player got smashed";
             break;
          }
-         case DeathReason::None:
+         case DeathReason::Invalid:
          {
             break;
          }
@@ -1007,7 +1012,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          if (_level_loading_finished)
          {
             _restore_previous_position = true;
-            _stored_position = _player->getPixelPositionf();
+            _stored_position = _player->getPixelPositionFloat();
             loadLevel();
          }
          break;

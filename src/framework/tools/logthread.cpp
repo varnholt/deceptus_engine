@@ -100,6 +100,7 @@ void LogThread::flush()
       );
 
 #ifdef __GNUC__
+      const auto now = std::chrono::system_clock::now();
       const auto now_time = std::chrono::system_clock::to_time_t(now);
 
       std::stringstream ss;
