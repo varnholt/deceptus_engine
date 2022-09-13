@@ -117,7 +117,7 @@ void Player::initialize()
 
    _jump._dust_animation_callback = [this]()
    {
-      AnimationPool::getInstance().add(
+      AnimationPool::getInstance().create(
          _points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y
       );
    };
@@ -1534,7 +1534,7 @@ void Player::updateAtmosphere()
    {
       Audio::getInstance().playSample("splash.wav");
 
-      AnimationPool::getInstance().add("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      AnimationPool::getInstance().create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
    }
 
    // not sure if this is just another ugly hack

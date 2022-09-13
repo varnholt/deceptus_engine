@@ -10,41 +10,39 @@
 
 class AnimationPool
 {
-   public:
+public:
 
-      void initialize();
+   void initialize();
 
-      std::shared_ptr<Animation> add(
-         const std::string& animationName,
-         float x = 0.0f,
-         float y = 0.0f,
-         bool autoPlay = true,
-         bool managedByPool = true
+   std::shared_ptr<Animation> create(
+      const std::string& animationName,
+      float x = 0.0f,
+      float y = 0.0f,
+      bool autoPlay = true,
+      bool managedByPool = true
       );
 
-      void drawAnimations(
-         sf::RenderTarget& target,
-         sf::RenderTarget& normal,
-         const std::vector<std::string>& animations
+   void drawAnimations(
+      sf::RenderTarget& target,
+      sf::RenderTarget& normal,
+      const std::vector<std::string>& animations
       );
 
-      void updateAnimations(const sf::Time& dt);
-      const std::map<std::string, std::shared_ptr<Animation> >& getAnimations();
+   void updateAnimations(const sf::Time& dt);
+   const std::map<std::string, std::shared_ptr<Animation> >& getAnimations();
 
-      static AnimationPool& getInstance();
+   static AnimationPool& getInstance();
 
-   private:
 
-      AnimationPool() = default;
+private:
 
-      void deserialize(const std::string& data);
-      void deserializeFromFile(const std::string& filename = "data/sprites/animations.json");
+   AnimationPool() = default;
 
-      bool _initialized = false;
+   void deserialize(const std::string& data);
+   void deserializeFromFile(const std::string& filename = "data/sprites/animations.json");
 
-      std::map<std::string, std::shared_ptr<AnimationSettings>> _settings;
-      std::map<std::string, std::shared_ptr<Animation>> _animations;
+   bool _initialized = false;
 
-      static AnimationPool _player_animation;
-
+   std::map<std::string, std::shared_ptr<AnimationSettings>> _settings;
+   std::map<std::string, std::shared_ptr<Animation>> _animations;
 };
