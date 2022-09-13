@@ -12,8 +12,6 @@
 using json = nlohmann::json;
 
 
-AnimationPool AnimationPool::_player_animation;
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::initialize()
@@ -27,13 +25,13 @@ void AnimationPool::initialize()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<Animation> AnimationPool::add(
+std::shared_ptr<Animation> AnimationPool::create(
    const std::string& name,
    float x,
    float y,
    bool auto_play,
    bool managed_by_pool
-)
+   )
 {
    if (!_initialized)
    {
@@ -81,7 +79,7 @@ void AnimationPool::drawAnimations(
    sf::RenderTarget& color,
    sf::RenderTarget& normal,
    const std::vector<std::string>& animations
-)
+   )
 {
    for (const auto& key : animations)
    {
@@ -132,6 +130,7 @@ const std::map<std::string, std::shared_ptr<Animation>>& AnimationPool::getAnima
 //----------------------------------------------------------------------------------------------------------------------
 AnimationPool& AnimationPool::getInstance()
 {
+   static AnimationPool _player_animation;
    return _player_animation;
 }
 
