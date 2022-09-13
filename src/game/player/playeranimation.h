@@ -165,8 +165,8 @@ private:
    std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
    std::shared_ptr<Animation> _sword_standing_attack_tmp_l;
    std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
-   std::array<std::shared_ptr<Animation>, 3> _sword_standing_attack_l;
-   std::array<std::shared_ptr<Animation>, 3> _sword_standing_attack_r;
+   std::array<std::shared_ptr<Animation>, 1> _sword_standing_attack_l;
+   std::array<std::shared_ptr<Animation>, 1> _sword_standing_attack_r;
    bool _sword_standing_attack_l_reset = false;
    bool _sword_standing_attack_r_reset = false;
 

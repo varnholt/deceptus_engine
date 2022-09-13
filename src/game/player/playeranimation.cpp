@@ -123,10 +123,10 @@ PlayerAnimation::PlayerAnimation()
    _sword_bend_down_attack_2_r = AnimationPool::getInstance().add("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
    _sword_standing_attack_l[0] = AnimationPool::getInstance().add("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
    _sword_standing_attack_r[0] = AnimationPool::getInstance().add("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
+//   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
+//   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
+//   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
+//   _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
 
    // _crouch_r           = AnimationPool::getInstance().add("player_crouch_r",           0.0f, 0.0f, true, false);
    // _crouch_l           = AnimationPool::getInstance().add("player_crouch_l",           0.0f, 0.0f, true, false);
