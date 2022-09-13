@@ -239,12 +239,12 @@ void Mesh::writeVerticesToImage(
    const std::vector<b2Vec2>& points,
    const std::vector<std::vector<uint32_t>>& faces,
    const sf::Vector2i& textureSize,
-   const std::filesystem::path& imagePath
+   const std::filesystem::path& imagePath,
+   float scale
 )
 {
-   float scale = 1.0f;
    sf::RenderTexture render_texture;
-   if (!render_texture.create(static_cast<uint32_t>(textureSize.x * scale), static_cast<uint32_t>(textureSize.y * scale)))
+   if (!render_texture.create(static_cast<uint32_t>(textureSize.x), static_cast<uint32_t>(textureSize.y)))
    {
       std::cout << "failed to create render texture" << std::endl;
       return;
@@ -267,7 +267,7 @@ void Mesh::writeVerticesToImage(
       }
 
       // close poly
-      const auto& pos = points[0];
+      const auto& pos = points[face[0]];
       poly[face.size()].color = sf::Color::Red;
       poly[face.size()].position = sf::Vector2f{pos.x * scale, pos.y * scale};
 

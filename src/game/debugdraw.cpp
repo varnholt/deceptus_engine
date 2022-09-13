@@ -252,36 +252,40 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color)
+void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
 {
    shape.setOutlineThickness(outline_thickness);
-   shape.setFillColor(sf::Color::Transparent);
+   shape.setFillColor(fill_color);
    shape.setOutlineColor(color);
    target.draw(shape);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, const sf::Color& color)
+void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
-   sf::RectangleShape rs;
    const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
    const auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+
+   sf::RectangleShape rs;
    rs.setSize(size);
    rs.setPosition(pos);
-   drawShape(target, rs, color);
+
+   drawShape(target, rs, color, fill_color);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, const sf::Color& color)
+void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
-   sf::RectangleShape rs;
    const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
    const auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+
+   sf::RectangleShape rs;
    rs.setSize(size);
    rs.setPosition(pos);
-   drawShape(target, rs, color);
+
+   drawShape(target, rs, color, fill_color);
 }
 
 
@@ -469,14 +473,27 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
 
 void DebugDraw::debugHitboxes(sf::RenderTarget& target)
 {
-   sf::FloatRect screen = getScreenRect(target);
+   using namespace std::chrono_literals;
+
+   const auto screen = getScreenRect(target);
    const auto nodes = WorldQuery::findNodes(screen);
 
-   for (auto& node : nodes)
+   const auto now = std::chrono::high_resolution_clock::now();
+
+   for (const auto& node : nodes)
    {
-      for (auto& hitbox : node->_hitboxes)
+      const auto hit_time = node->getHitTime();
+      if (!hit_time.has_value())
       {
-         drawRect(target, hitbox.getRectTranslated());
+         continue;
+      }
+
+      const auto just_hit = (now - hit_time.value() < 500ms);
+      const auto fill_color = just_hit ? sf::Color::Red : sf::Color::Transparent;
+
+      for (const auto& hitbox : node->_hitboxes)
+      {
+         drawRect(target, hitbox.getRectTranslated(), sf::Color::Magenta, fill_color);
       }
    }
 }

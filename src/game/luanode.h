@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <map>
 #include <memory>
 #include <string>
@@ -28,6 +29,8 @@ struct lua_State;
  */
 struct LuaNode : public GameNode
 {
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
    LuaNode(GameNode* parent, const std::string& filename);
    ~LuaNode();
 
@@ -90,7 +93,7 @@ struct LuaNode : public GameNode
    void setActive(bool active);
 
    //! set the node's damage for collisions with the player
-   void setDamage(int32_t damage);
+   void setDamageToPlayer(int32_t damage);
 
    //! set the object's gravity scale
    void setGravityScale(float scale);
@@ -116,6 +119,11 @@ struct LuaNode : public GameNode
    //! add a hitbox
    void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
 
+   const std::optional<HighResTimePoint> getHitTime() const;
+
+   int32_t getDamageFromPlayer() const;
+
+   // all functions that 'speak' directly to the lua scripts
    void luaHit(int32_t damage);
    void luaDie();
    void luaInitialize();
@@ -132,9 +140,9 @@ struct LuaNode : public GameNode
 
    // property accessors
    void synchronizeProperties();
-   bool getPropertyBool(const std::string& key);
-   double getPropertyDouble(const std::string& key);
-   int64_t getPropertyInt64(const std::string& key);
+   bool getPropertyBool(const std::string& key, bool default_value = false);
+   double getPropertyDouble(const std::string& key, double default_value = 0.0);
+   int64_t getPropertyInt64(const std::string& key, int64_t default_value = 0);
 
    // box2d related
    void setupBody();
@@ -155,13 +163,19 @@ struct LuaNode : public GameNode
    sf::Vector2f _position_px;
    int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
    std::vector<sf::Vector2f> _movement_path_px;
+   sf::Shader _flash_shader;
+   float _hit_flash{0.0f};
 
    // physics
    b2Body* _body = nullptr;
    b2BodyDef* _body_def = nullptr;
    std::vector<b2Shape*> _shapes_m;
    std::vector<std::unique_ptr<Weapon>> _weapons;
+
+   // damage
    std::vector<Hitbox> _hitboxes;
+   std::optional<HighResTimePoint> _hit_time;
+   int32_t _damage_from_player{0};
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 };

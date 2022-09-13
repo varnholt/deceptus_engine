@@ -114,7 +114,7 @@ void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
 void Checkpoint::update(const sf::Time& /*dt*/)
 {
-   const auto& player_rect = Player::getCurrent()->getPlayerPixelRect();
+   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
 
    if (player_rect.intersects(_rect))
    {

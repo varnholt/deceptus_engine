@@ -475,7 +475,7 @@ void Laser::collide(const sf::Rect<int32_t>& player_rect)
    if (it != __lasers.end())
    {
       // player is dead
-      Player::getCurrent()->damage(100);
+      Player::getCurrent()->kill(DeathReason::Laser);
    }
 }
 
