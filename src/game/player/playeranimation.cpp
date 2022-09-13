@@ -600,7 +600,7 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    }
 
    _current_cycle = next_cycle;
-   _current_cycle->update(dt);
+   _current_cycle->updateTree(dt);
 }
 
 void PlayerAnimation::generateJson()
