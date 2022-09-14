@@ -2,7 +2,6 @@
 
 #include "animationpool.h"
 #include "audio.h"
-#include "projectilehitanimation.h"
 #include "camerapanorama.h"
 #include "debugdraw.h"
 #include "displaymode.h"
@@ -21,11 +20,12 @@
 #include "gamestate.h"
 #include "level.h"
 #include "levels.h"
-#include "messagebox.h"
 #include "luainterface.h"
+#include "messagebox.h"
+#include "physics/physicsconfiguration.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
-#include "physics/physicsconfiguration.h"
+#include "projectilehitanimation.h"
 #include "savestate.h"
 #include "screentransition.h"
 #include "weapon.h"
@@ -37,11 +37,11 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include <time.h>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <time.h>
 
 // override WinUser.h
 #ifdef MessageBox
@@ -124,14 +124,11 @@ void Game::initializeWindow()
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
-      sf::VideoMode(
-         static_cast<uint32_t>(game_config._video_mode_width),
-         static_cast<uint32_t>(game_config._video_mode_height)
-      ),
+      sf::VideoMode(static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)),
       GAME_NAME,
       game_config._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
       context_settings
-    );
+   );
 
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
@@ -154,22 +151,14 @@ void Game::initializeWindow()
    int32_t texture_width = size_ratio * game_config._view_width;
    int32_t texture_height = size_ratio * game_config._view_height;
 
-   Log::Info()
-      << "video mode: "
-      << game_config._video_mode_width << " x " << game_config._video_mode_height
-      << ", view size: "
-      << game_config._view_width << " x " << game_config._view_height
-      << ", ratio: "
-      << size_ratio;
+   Log::Info() << "video mode: " << game_config._video_mode_width << " x " << game_config._video_mode_height
+               << ", view size: " << game_config._view_width << " x " << game_config._view_height << ", ratio: " << size_ratio;
 
    _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
    _window_render_texture = std::make_shared<sf::RenderTexture>();
-   _window_render_texture->create(
-      static_cast<uint32_t>(texture_width),
-      static_cast<uint32_t>(texture_height)
-   );
+   _window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
@@ -182,27 +171,27 @@ void Game::initializeWindow()
       _level->initializeTextures();
    }
 
-   EventSerializer::getInstance().setCallback([this](const sf::Event& event){processEvent(event);});
+   EventSerializer::getInstance().setCallback([this](const sf::Event& event) { processEvent(event); });
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::initializeController()
 {
    auto& gji = GameControllerIntegration::getInstance();
 
-   gji.addDeviceAddedCallback([this](int32_t /*id*/){
+   gji.addDeviceAddedCallback(
+      [this](int32_t /*id*/)
+      {
          auto& gji = GameControllerIntegration::getInstance();
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this](){openInventory();});
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this](){checkCloseInventory();});
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this](){checkCloseInventory();});
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this](){showPauseMenu();});
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { openInventory(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { checkCloseInventory(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { checkCloseInventory(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this]() { showPauseMenu(); });
       }
    );
 
    gji.initialize();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::showMainMenu()
@@ -210,7 +199,6 @@ void Game::showMainMenu()
    Menu::getInstance()->show(Menu::MenuType::Main);
    GameState::getInstance().enqueuePause();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::showPauseMenu()
@@ -234,7 +222,6 @@ void Game::showPauseMenu()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::loadLevel()
 {
@@ -242,14 +229,15 @@ void Game::loadLevel()
    _level_loading_finished_previous = false;
 
    _level_loading_thread = std::async(
-      std::launch::async, [this](){
-
+      std::launch::async,
+      [this]()
+      {
          // pick a level
          auto levels = Levels::getInstance();
          levels.deserializeFromFile();
          auto level_item = levels._levels.at(SaveState::getCurrent()._level_index);
 
-         _player->resetWorld(); // free the pointer that's shared with the player
+         _player->resetWorld();  // free the pointer that's shared with the player
          _level.reset();
 
          // load it
@@ -284,7 +272,6 @@ void Game::loadLevel()
    );
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::nextLevel()
 {
@@ -302,13 +289,11 @@ void Game::nextLevel()
    loadLevel();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 Game::~Game()
 {
    // _event_serializer.serialize();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
@@ -323,47 +308,44 @@ void Game::initialize()
    _controller_overlay = std::make_unique<ControllerOverlay>();
    _test_scene = std::make_unique<ForestScene>();
 
-   CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this](){nextLevel();});
+   CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
    Audio::getInstance();
 
    // initially the game should be in main menu and paused
-   std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))->setExitCallback(
-      [this](){_window->close();}
-   );
+   std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))
+      ->setExitCallback([this]() { _window->close(); });
 
-   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setFullscreenCallback(
-      [this](){toggleFullScreen();}
-   );
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
+      ->setFullscreenCallback([this]() { toggleFullScreen(); });
 
-   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setResolutionCallback(
-      [this](int32_t w, int32_t h){changeResolution(w, h);}
-   );
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
+      ->setResolutionCallback([this](int32_t w, int32_t h) { changeResolution(w, h); });
 
-   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))->setVSyncCallback(
-      [this](){
-         initializeWindow();
-         if (!_level)
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
+      ->setVSyncCallback(
+         [this]()
          {
-            return;
+            initializeWindow();
+            if (!_level)
+            {
+               return;
+            }
+            _level->createViews();
          }
-         _level->createViews();
-      }
-   );
+      );
 
    initializeWindow();
 
    showMainMenu();
 
    Timer::add(
-      std::chrono::milliseconds(1000),
-      [this](){updateWindowTitle();},
-      Timer::Type::Repeated,
-      Timer::Scope::UpdateAlways
+      std::chrono::milliseconds(1000), [this]() { updateWindowTitle(); }, Timer::Type::Repeated, Timer::Scope::UpdateAlways
    );
 
    GameState::getInstance().addCallback(
-      [this](ExecutionMode current, ExecutionMode previous){
+      [this](ExecutionMode current, ExecutionMode previous)
+      {
          if (current == ExecutionMode::Paused && previous == ExecutionMode::Running)
          {
             _player->getControls()->setKeysPressed(0);
@@ -377,15 +359,26 @@ void Game::initialize()
    // in unpredictable player behavior, such as running into a 'random' direction.
    // this is why, after going into pause and back, the keyboard needs to be synced
    GameState::getInstance().addCallback(
-      [this](ExecutionMode current, ExecutionMode previous){
+      [this](ExecutionMode current, ExecutionMode previous)
+      {
          if (current == ExecutionMode::Running && previous == ExecutionMode::Paused)
          {
             _player->getControls()->forceSync();
          }
       }
    );
-}
 
+   // registering generic callback functions for the game console
+   Console::getInstance().registerCallback(
+      "/ra",
+      "reload animations",
+      []
+      {
+         AnimationPool::getInstance().reload();
+         Player::getCurrent()->getPlayerAnimationMutable().loadAnimations();
+      }
+   );
+}
 
 // frambuffers
 // - the window render texture
@@ -395,7 +388,6 @@ void Game::initialize()
 //    - menus
 //    - inventory
 //    - message boxes
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::draw()
@@ -473,10 +465,7 @@ void Game::draw()
    }
    else
    {
-      window_texture_sprite.setPosition(
-         static_cast<float>(_render_texture_offset.x),
-         static_cast<float>(_render_texture_offset.y)
-      );
+      window_texture_sprite.setPosition(static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y));
    }
 
    _window->draw(window_texture_sprite);
@@ -487,7 +476,9 @@ void Game::draw()
    {
       const auto image = window_texture_sprite.getTexture()->copyToImage();
 
-      std::thread record([this, image](){
+      std::thread record(
+         [this, image]()
+         {
             std::ostringstream num;
             num << std::setfill('0') << std::setw(5) << _recording_counter++;
             image.saveToFile(num.str() + ".bmp");
@@ -497,7 +488,6 @@ void Game::draw()
       record.detach();
    }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameController()
@@ -513,7 +503,6 @@ void Game::updateGameController()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForGame()
 {
@@ -527,7 +516,6 @@ void Game::updateGameControllerForGame()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForInventory()
 {
@@ -539,7 +527,6 @@ void Game::updateGameControllerForInventory()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateWindowTitle()
 {
@@ -549,7 +536,6 @@ void Game::updateWindowTitle()
    _fps = 0;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::goToLastCheckpoint()
 {
@@ -557,7 +543,6 @@ void Game::goToLastCheckpoint()
    _player->reset();
    loadLevel();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::menuLoadRequest()
@@ -568,7 +553,6 @@ void Game::menuLoadRequest()
    _player->reset();
    loadLevel();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
@@ -591,7 +575,6 @@ std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
    return std::move(screen_transition);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::resetAfterDeath(const sf::Time& dt)
 {
@@ -610,8 +593,8 @@ void Game::resetAfterDeath(const sf::Time& dt)
             // fade out/in
             // do the actual level reset once the fade out has happened
             auto screen_transition = makeFadeOutFadeIn();
-            screen_transition->_callbacks_effect_1_ended.push_back([this](){goToLastCheckpoint();});
-            screen_transition->_callbacks_effect_2_ended.push_back([](){ScreenTransitionHandler::getInstance().pop();});
+            screen_transition->_callbacks_effect_1_ended.push_back([this]() { goToLastCheckpoint(); });
+            screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
             ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          }
       }
@@ -623,7 +606,6 @@ void Game::resetAfterDeath(const sf::Time& dt)
       ScreenTransitionHandler::getInstance().startEffect2();
    }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameState(const sf::Time& dt)
@@ -673,7 +655,6 @@ void Game::updateGameState(const sf::Time& dt)
    // when the level is faded out, then start reloading
    resetAfterDeath(dt);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::update()
@@ -733,7 +714,6 @@ void Game::update()
    DisplayMode::getInstance().sync();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 int32_t Game::loop()
 {
@@ -747,24 +727,21 @@ int32_t Game::loop()
    return 0;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::reset()
 {
    _player->reset();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::checkCloseInventory()
 {
-  if (DisplayMode::getInstance().isSet(Display::Inventory))
-  {
-     GameState::getInstance().enqueueResume();
-     DisplayMode::getInstance().enqueueUnset(Display::Inventory);
-  }
+   if (DisplayMode::getInstance().isSet(Display::Inventory))
+   {
+      GameState::getInstance().enqueueResume();
+      DisplayMode::getInstance().enqueueUnset(Display::Inventory);
+   }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::openInventory()
@@ -783,38 +760,34 @@ void Game::openInventory()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::toggleFullScreen()
 {
-    GameConfiguration::getInstance()._fullscreen = !GameConfiguration::getInstance()._fullscreen;
-    initializeWindow();
-    _level->createViews();
+   GameConfiguration::getInstance()._fullscreen = !GameConfiguration::getInstance()._fullscreen;
+   initializeWindow();
+   _level->createViews();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::changeResolution(int32_t w, int32_t h)
 {
-    GameConfiguration::getInstance()._video_mode_width = w;
-    GameConfiguration::getInstance()._video_mode_height = h;
-    GameConfiguration::getInstance().serializeToFile();
+   GameConfiguration::getInstance()._video_mode_width = w;
+   GameConfiguration::getInstance()._video_mode_height = h;
+   GameConfiguration::getInstance().serializeToFile();
 
-    initializeWindow();
+   initializeWindow();
 
-    if (_level)
-    {
-       _level->createViews();
-    }
+   if (_level)
+   {
+      _level->createViews();
+   }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::takeScreenshot()
 {
    _screenshot = true;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processEvent(const sf::Event& event)
@@ -828,8 +801,8 @@ void Game::processEvent(const sf::Event& event)
       if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
       {
          if (
-               !DisplayMode::getInstance().isSet(Display::Map) // the map is save to leave open when losing the window focus
-            && !Console::getInstance().isActive()              // while the console is open, don't disturb
+            !DisplayMode::getInstance().isSet(Display::Map)  // the map is save to leave open when losing the window focus
+            && !Console::getInstance().isActive()            // while the console is open, don't disturb
          )
          {
             showPauseMenu();
@@ -902,7 +875,6 @@ void Game::processEvent(const sf::Event& event)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::hideMap()
 {
@@ -910,7 +882,6 @@ void Game::hideMap()
    GameState::getInstance().enqueueTogglePauseResume();
    DisplayMode::getInstance().enqueueToggle(Display::Map);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
@@ -1093,13 +1064,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyReleasedEvents(const sf::Event& event)
 {
    CameraPanorama::getInstance().processKeyReleasedEvents(event);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processEvents()
@@ -1111,5 +1080,3 @@ void Game::processEvents()
       EventSerializer::getInstance().add(event);
    }
 }
-
-

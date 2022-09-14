@@ -13,6 +13,7 @@ class AnimationPool
 public:
 
    void initialize();
+   void reload();
 
    std::shared_ptr<Animation> create(
       const std::string& animationName,
