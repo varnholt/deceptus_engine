@@ -285,9 +285,18 @@ void Console::execute()
    }
    else
    {
-      std::ostringstream os;
-      os << "unknown command: " << _command << std::endl;
-      _log.push_back(os.str());
+      const auto command_it = _registered_commands.find(results.at(0));
+      if (command_it != _registered_commands.end())
+      {
+         command_it->second();
+         _log.push_back(command_it->first + " executed");
+      }
+      else
+      {
+         std::ostringstream os;
+         os << "unknown command: " << _command << std::endl;
+         _log.push_back(os.str());
+      }
    }
 
    while (_log.size() > 20)
@@ -332,6 +341,11 @@ void Console::nextCommand()
    _command = _history[static_cast<size_t>(_history_index)];
 }
 
+void Console::registerCallback(const std::string& command, const std::string& description, CommandFunction callback)
+{
+   _registered_commands[command] = callback;
+   _registered_command_help.push_back(std::make_pair(command, description));
+}
 
 Console& Console::getInstance()
 {
