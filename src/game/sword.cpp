@@ -20,14 +20,14 @@ Sword::Sword() : _duration_from_swing_start_to_hit(200ms), _duration_from_hit_st
    _type = WeaponType::Sword;
 }
 
-void Sword::draw(sf::RenderTarget& target)
+void Sword::draw(sf::RenderTarget& target [[maybe_unused]])
 {
    if (!checkHitWindowActive())
    {
       return;
    }
 
-   DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
+   // DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
 }
 
 void Sword::update(const sf::Time& /*time*/)

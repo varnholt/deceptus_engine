@@ -1835,6 +1835,12 @@ const PlayerAnimation& Player::getPlayerAnimation() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+PlayerAnimation& Player::getPlayerAnimationMutable()
+{
+   return _player_animation;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<WeaponSystem>& Player::getWeaponSystem() const
 {
    return _weapon_system;

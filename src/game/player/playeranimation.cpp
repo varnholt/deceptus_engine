@@ -23,6 +23,16 @@ constexpr auto JUMP_DOWN_VELOCITY_THRESHOLD = 1.2f;
 
 PlayerAnimation::PlayerAnimation()
 {
+   loadAnimations();
+}
+
+void PlayerAnimation::loadAnimations()
+{
+   _current_cycle.reset();
+   _looped_animations.clear();
+   _sword_lut.clear();
+   _appear_animations.clear();
+
    _idle_r = AnimationPool::getInstance().create("player_idle_r", 0.0f, 0.0f, true, false);
    _idle_l = AnimationPool::getInstance().create("player_idle_l", 0.0f, 0.0f, true, false);
    _sword_idle_r = AnimationPool::getInstance().create("player_idle_sword_r", 0.0f, 0.0f, true, false);
@@ -123,10 +133,10 @@ PlayerAnimation::PlayerAnimation()
    _sword_bend_down_attack_2_r = AnimationPool::getInstance().create("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
    _sword_standing_attack_l[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
    _sword_standing_attack_r[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
-//   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
-//   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
-//   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
-//   _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
+   //   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
+   //   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
+   //   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
+   //   _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
 
    // _crouch_r           = AnimationPool::getInstance().add("player_crouch_r",           0.0f, 0.0f, true, false);
    // _crouch_l           = AnimationPool::getInstance().add("player_crouch_l",           0.0f, 0.0f, true, false);

@@ -115,6 +115,7 @@ public:
    const std::shared_ptr<WeaponSystem>& getWeaponSystem() const;
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerAnimation& getPlayerAnimation() const;
+   PlayerAnimation& getPlayerAnimationMutable();
    const PlayerJump& getJump() const;
    const PlayerBend& getBend() const;
    PlayerBelt& getBelt();
