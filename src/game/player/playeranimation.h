@@ -56,6 +56,8 @@ public:
 
    std::shared_ptr<Animation> getCurrentCycle() const;
    HighResDuration getRevealDuration() const;
+   HighResDuration getSwordAttackDurationStanding() const;
+   HighResDuration getSwordAttackDurationBendingDown() const;
 
    void resetAlpha();
 

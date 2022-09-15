@@ -1156,11 +1156,6 @@ void Player::updateAttack()
    _attack._fire_button_was_pressed = _attack._fire_button_pressed;
    _attack._fire_button_pressed = _controls->isFireButtonPressed();
 
-   if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
-   {
-      _attack._timepoint_attack_start = StopWatch::getInstance().now();
-   }
-
    // there are weapons that support continous attacks while the button is down, others like the sword
    // require a fresh button press each time the sword should be swung
    if (_attack._fire_button_pressed)
@@ -1621,6 +1616,11 @@ void Player::attack()
          pos.x = x_offset + _pixel_position_f.x * MPP;
          pos.y = y_offset + _pixel_position_f.y * MPP;
 
+         if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
+         {
+            _attack._timepoint_attack_start = StopWatch::getInstance().now();
+         }
+
          dynamic_pointer_cast<Bow>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
          break;
       }
@@ -1633,6 +1633,11 @@ void Player::attack()
          pos.x = x_offset + _pixel_position_f.x * MPP;
          pos.y = y_offset + _pixel_position_f.y * MPP;
 
+         if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
+         {
+            _attack._timepoint_attack_start = StopWatch::getInstance().now();
+         }
+
          dynamic_pointer_cast<Gun>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
          break;
       }
@@ -1643,6 +1648,20 @@ void Player::attack()
          {
             return;
          }
+
+         // no 2nd strike when previous animation is not elapsed
+         const auto attack_crouching_elapsed = _bend.isCrouching() && (StopWatch::getInstance().now() - _attack._timepoint_attack_start >
+                                                                       _player_animation.getSwordAttackDurationBendingDown());
+
+         const auto attack_standing_elapsed = !_bend.isCrouching() && (StopWatch::getInstance().now() - _attack._timepoint_attack_start >
+                                                                       _player_animation.getSwordAttackDurationStanding());
+
+         if (!attack_crouching_elapsed && !attack_standing_elapsed)
+         {
+            return;
+         }
+
+         _attack._timepoint_attack_start = StopWatch::getInstance().now();
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
          break;

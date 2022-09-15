@@ -312,6 +312,16 @@ PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
    return 1000ms + _appear_l->_overall_time_chrono + 20ms;
 }
 
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding() const
+{
+   return _sword_bend_down_attack_1_l->_overall_time_chrono;
+}
+
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown() const
+{
+   return _sword_standing_attack_l[0]->_overall_time_chrono;
+}
+
 const std::shared_ptr<Animation>&
 PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data)
 {
