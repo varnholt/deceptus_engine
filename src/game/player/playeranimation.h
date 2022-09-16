@@ -58,6 +58,7 @@ public:
    HighResDuration getRevealDuration() const;
    HighResDuration getSwordAttackDurationStanding() const;
    HighResDuration getSwordAttackDurationBendingDown() const;
+   std::optional<HighResDuration> getActiveAttackCycleDuration();
 
    void resetAlpha();
 
@@ -166,10 +167,10 @@ private:
    std::shared_ptr<Animation> _sword_bend_down_attack_1_r;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_l;
    std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
-   std::shared_ptr<Animation> _sword_standing_attack_tmp_l;
-   std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
    std::array<std::shared_ptr<Animation>, 1> _sword_standing_attack_l;
    std::array<std::shared_ptr<Animation>, 1> _sword_standing_attack_r;
+   std::shared_ptr<Animation> _sword_standing_attack_tmp_l;
+   std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
    bool _sword_standing_attack_l_reset = false;
    bool _sword_standing_attack_r_reset = false;
 
