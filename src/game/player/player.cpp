@@ -1650,15 +1650,16 @@ void Player::attack()
          }
 
          // no 2nd strike when previous animation is not elapsed
-         const auto attack_crouching_elapsed = _bend.isCrouching() && (StopWatch::getInstance().now() - _attack._timepoint_attack_start >
-                                                                       _player_animation.getSwordAttackDurationBendingDown());
-
-         const auto attack_standing_elapsed = !_bend.isCrouching() && (StopWatch::getInstance().now() - _attack._timepoint_attack_start >
-                                                                       _player_animation.getSwordAttackDurationStanding());
-
-         if (!attack_crouching_elapsed && !attack_standing_elapsed)
+         const auto attack_duration = _player_animation.getActiveAttackCycleDuration();
+         if (attack_duration.has_value())
          {
-            return;
+            const auto duration_since_attack = StopWatch::getInstance().now() - _attack._timepoint_attack_start;
+            const auto attack_elapsed = (duration_since_attack > attack_duration.value());
+
+            if (!attack_elapsed)
+            {
+               return;
+            }
          }
 
          _attack._timepoint_attack_start = StopWatch::getInstance().now();
