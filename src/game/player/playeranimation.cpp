@@ -322,6 +322,24 @@ PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingD
    return _sword_standing_attack_l[0]->_overall_time_chrono;
 }
 
+std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttackCycleDuration()
+{
+   if (_current_cycle == _sword_bend_down_attack_1_l || _current_cycle == _sword_bend_down_attack_1_r)
+   {
+      return _sword_bend_down_attack_1_l->_overall_time_chrono;
+   }
+   else if (_current_cycle == _sword_bend_down_attack_2_l || _current_cycle == _sword_bend_down_attack_2_r)
+   {
+      return _sword_bend_down_attack_2_l->_overall_time_chrono;
+   }
+   else if (_current_cycle == _sword_standing_attack_l[0] || _current_cycle == _sword_standing_attack_r[0])
+   {
+      return _sword_standing_attack_l[0]->_overall_time_chrono;
+   }
+
+   return std::nullopt;
+}
+
 const std::shared_ptr<Animation>&
 PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data)
 {
