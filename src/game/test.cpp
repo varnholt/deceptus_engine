@@ -4,15 +4,8 @@
 #include "framework/math/maptools.h"
 #include "framework/math/pathinterpolation.h"
 #include "detonationanimation.h"
-#include "game/player/playeranimation.h"
 
 #include <iostream>
-
-
-void dumpAnimations()
-{
-   PlayerAnimation::generateJson();
-}
 
 
 void testBresenham()
@@ -46,7 +39,6 @@ void Test::testInterpolation()
 Test::Test()
 {
    // testBresenham();
-   // dumpAnimations();
    // testInterpolation();
    // exit(0);
 }

@@ -62,8 +62,6 @@ public:
 
    void resetAlpha();
 
-   static void generateJson();
-
 private:
 
    const std::shared_ptr<Animation>& getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data);
@@ -137,6 +135,18 @@ private:
    std::shared_ptr<Animation> _jump_midair_l;
    std::shared_ptr<Animation> _jump_down_l;
    std::shared_ptr<Animation> _jump_landing_l;
+
+   std::shared_ptr<Animation> _sword_jump_init_r;
+   std::shared_ptr<Animation> _sword_jump_up_r;
+   std::shared_ptr<Animation> _sword_jump_midair_r;
+   std::shared_ptr<Animation> _sword_jump_down_r;
+   std::shared_ptr<Animation> _sword_jump_landing_r;
+
+   std::shared_ptr<Animation> _sword_jump_init_l;
+   std::shared_ptr<Animation> _sword_jump_up_l;
+   std::shared_ptr<Animation> _sword_jump_midair_l;
+   std::shared_ptr<Animation> _sword_jump_down_l;
+   std::shared_ptr<Animation> _sword_jump_landing_l;
 
    std::shared_ptr<Animation> _double_jump_r;
    std::shared_ptr<Animation> _double_jump_l;
