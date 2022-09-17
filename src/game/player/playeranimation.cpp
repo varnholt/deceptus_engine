@@ -97,16 +97,16 @@ void PlayerAnimation::loadAnimations()
    _jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_r", 0.0f, 0.0f, true, false);
    _jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
-   _sword_jump_init_r = AnimationPool::getInstance().create("player_jump_init_r", 0.0f, 0.0f, true, false);
-   _sword_jump_init_l = AnimationPool::getInstance().create("player_jump_init_l", 0.0f, 0.0f, true, false);
-   _sword_jump_up_r = AnimationPool::getInstance().create("player_jump_up_r", 0.0f, 0.0f, true, false);
-   _sword_jump_up_l = AnimationPool::getInstance().create("player_jump_up_l", 0.0f, 0.0f, true, false);
-   _sword_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_r", 0.0f, 0.0f, true, false);
-   _sword_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_l", 0.0f, 0.0f, true, false);
-   _sword_jump_down_r = AnimationPool::getInstance().create("player_jump_down_r", 0.0f, 0.0f, true, false);
-   _sword_jump_down_l = AnimationPool::getInstance().create("player_jump_down_l", 0.0f, 0.0f, true, false);
-   _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_r", 0.0f, 0.0f, true, false);
-   _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_l", 0.0f, 0.0f, true, false);
+   _sword_jump_init_r = AnimationPool::getInstance().create("player_jump_init_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_init_l = AnimationPool::getInstance().create("player_jump_init_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_up_r = AnimationPool::getInstance().create("player_jump_up_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_up_l = AnimationPool::getInstance().create("player_jump_up_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_down_r = AnimationPool::getInstance().create("player_jump_down_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_down_l = AnimationPool::getInstance().create("player_jump_down_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_sword_l", 0.0f, 0.0f, true, false);
 
    _double_jump_r = AnimationPool::getInstance().create("player_double_jump_r", 0.0f, 0.0f, true, false);
    _double_jump_l = AnimationPool::getInstance().create("player_double_jump_l", 0.0f, 0.0f, true, false);
