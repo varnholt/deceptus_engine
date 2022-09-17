@@ -97,6 +97,17 @@ void PlayerAnimation::loadAnimations()
    _jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_r", 0.0f, 0.0f, true, false);
    _jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
+   _sword_jump_init_r = AnimationPool::getInstance().create("player_jump_init_r", 0.0f, 0.0f, true, false);
+   _sword_jump_init_l = AnimationPool::getInstance().create("player_jump_init_l", 0.0f, 0.0f, true, false);
+   _sword_jump_up_r = AnimationPool::getInstance().create("player_jump_up_r", 0.0f, 0.0f, true, false);
+   _sword_jump_up_l = AnimationPool::getInstance().create("player_jump_up_l", 0.0f, 0.0f, true, false);
+   _sword_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_r", 0.0f, 0.0f, true, false);
+   _sword_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_l", 0.0f, 0.0f, true, false);
+   _sword_jump_down_r = AnimationPool::getInstance().create("player_jump_down_r", 0.0f, 0.0f, true, false);
+   _sword_jump_down_l = AnimationPool::getInstance().create("player_jump_down_l", 0.0f, 0.0f, true, false);
+   _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_r", 0.0f, 0.0f, true, false);
+   _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_l", 0.0f, 0.0f, true, false);
+
    _double_jump_r = AnimationPool::getInstance().create("player_double_jump_r", 0.0f, 0.0f, true, false);
    _double_jump_l = AnimationPool::getInstance().create("player_double_jump_l", 0.0f, 0.0f, true, false);
 
@@ -285,6 +296,18 @@ void PlayerAnimation::loadAnimations()
    _sword_lut[_swim_idle_r] = _sword_swim_idle_r;
    _sword_lut[_swim_l] = _sword_swim_l;
    _sword_lut[_swim_r] = _sword_swim_r;
+
+   _sword_lut[_jump_init_r] = _sword_jump_init_r;
+   _sword_lut[_jump_init_l] = _sword_jump_init_l;
+   _sword_lut[_jump_up_r] =  _sword_jump_up_r;
+   _sword_lut[_jump_up_l] = _sword_jump_up_l;
+   _sword_lut[_jump_midair_r] = _sword_jump_midair_r;
+   _sword_lut[_jump_midair_l] = _sword_jump_midair_l;
+   _sword_lut[_jump_down_r] = _sword_jump_down_r;
+   _sword_lut[_jump_down_l] = _sword_jump_down_l;
+   _sword_lut[_jump_landing_r] = _sword_jump_landing_r;
+   _sword_lut[_jump_landing_l] = _sword_jump_landing_l;
+
 }
 
 int32_t PlayerAnimation::getJumpAnimationReference() const
@@ -698,213 +721,3 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    _current_cycle->updateTree(dt);
 }
 
-void PlayerAnimation::generateJson()
-{
-   // 00 - player_idle_r, 8
-   // 01 - player_idle_l, 8
-   // 02 - player_bend_down_r, 8
-   // 03 - player_bend_down_l, 8
-   // 04 - player_idle_to_run_r, 2
-   // 05 - player_idle_to_run_l, 2
-   // 06 - player_runstop_r, 0
-   // 07 - player_runstop_l, 0
-   // 08 - player_run_r, 12
-   // 09 - player_run_l, 12
-   // 10 - player_dash_r, 5
-   // 11 - player_dash_l, 5
-   // 12 - player_jump_r, 0
-   // 13 - player_jump_l, 0
-   // 14 - player_double_jump_r, 0
-   // 15 - player_double_jump_l, 0
-   // 16 - player_swim_idle_r, 12
-   // 17 - player_swim_idle_l, 12
-   // 18 - player_swim_r, 0
-   // 19 - player_swim_l, 0
-   // 20 - player_wallslide_r, 6
-   // 21 - player_wallslide_l, 6
-   // 22 - player_wall_jump_r, 0
-   // 23 - player_wall_jump_l, 0
-   // 24 - player_appear_r, 12
-   // 25 - player_appear_l, 12
-
-   const auto d_40 = sf::seconds(0.040f);
-   const auto d_60 = sf::seconds(0.060f);
-   const auto d_75 = sf::seconds(0.075f);
-   const auto d_120 = sf::seconds(0.120f);
-
-   const auto sprite_name = "data/sprites/player.png";
-   auto row = 0;
-
-   const auto next_row = [&]() { return (row++) * PIXELS_PER_TILE * 2; };
-   const auto col = [](int32_t x) { return PIXELS_PER_TILE * 3 * x; };
-   const auto v = [d_75](int32_t size)
-   {
-      std::vector<sf::Time> arr;
-      for (auto i = 0; i < size; i++)
-         arr.push_back(d_75);
-      return arr;
-   };
-   const auto vx = [](int32_t size, const sf::Time& t)
-   {
-      std::vector<sf::Time> arr;
-      for (auto i = 0; i < size; i++)
-         arr.push_back(t);
-      return arr;
-   };
-
-   const auto idle_row_r = next_row();
-   const auto idle_row_l = next_row();
-   AnimationSettings player_idle_r({72, 48}, {0, idle_row_r}, {36.0, 48.0}, vx(8, d_120), sprite_name);
-   AnimationSettings player_idle_l({72, 48}, {0, idle_row_l}, {36.0, 48.0}, vx(8, d_120), sprite_name);
-   AnimationSettings player_idle_blink_r({72, 48}, {col(8), idle_row_r}, {36.0, 48.0}, vx(8, d_120), sprite_name);
-   AnimationSettings player_idle_blink_l({72, 48}, {col(8), idle_row_l}, {36.0, 48.0}, vx(8, d_120), sprite_name);
-
-   const auto bend_down_row_r = next_row();
-   const auto bend_down_row_l = next_row();
-   AnimationSettings player_bend_down_r({72, 48}, {0, bend_down_row_r}, {36.0, 48.0}, vx(7, d_40), sprite_name);
-   AnimationSettings player_bend_down_l({72, 48}, {0, bend_down_row_l}, {36.0, 48.0}, vx(7, d_40), sprite_name);
-   AnimationSettings player_bend_down_idle_r({72, 48}, {col(6), bend_down_row_r}, {36.0, 48.0}, vx(1, d_40), sprite_name);
-   AnimationSettings player_bend_down_idle_l({72, 48}, {col(6), bend_down_row_l}, {36.0, 48.0}, vx(1, d_40), sprite_name);
-   AnimationSettings player_bend_down_idle_blink_r({72, 48}, {col(6), bend_down_row_r}, {36.0, 48.0}, vx(4, d_40), sprite_name);
-   AnimationSettings player_bend_down_idle_blink_l({72, 48}, {col(6), bend_down_row_l}, {36.0, 48.0}, vx(4, d_40), sprite_name);
-
-   AnimationSettings player_idle_to_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
-   AnimationSettings player_idle_to_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75, d_75}, sprite_name);
-
-   AnimationSettings player_runstop_r({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75}, sprite_name);
-   AnimationSettings player_runstop_l({72, 48}, {0, next_row()}, {36.0, 48.0}, {d_75}, sprite_name);
-
-   AnimationSettings player_run_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
-   AnimationSettings player_run_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_60), sprite_name);
-
-   // frames 1,2 = dash start
-   // frames 3,4 = dash loop
-   // frames 2,1 = dash stop
-   const auto dash_r_row = next_row();
-   const auto dash_l_row = next_row();
-   AnimationSettings player_dash_init_r({72, 48}, {0, dash_r_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
-   AnimationSettings player_dash_init_l({72, 48}, {0, dash_l_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
-   AnimationSettings player_dash_r({72, 48}, {col(2), dash_r_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
-   AnimationSettings player_dash_l({72, 48}, {col(2), dash_l_row}, {36.0, 48.0}, vx(2, d_75), sprite_name);
-
-   // init:    3 frames
-   // up:      2 frames
-   // midair:  8 frames
-   // down:    2 frames
-   // landing: 4 frames
-   const auto jump_r_row = next_row();
-   const auto jump_l_row = next_row();
-   AnimationSettings player_jump_init_r({72, 48}, {0, jump_r_row}, {36.0, 48.0}, v(3), sprite_name);
-   AnimationSettings player_jump_up_r({72, 48}, {col(3), jump_r_row}, {36.0, 48.0}, v(2), sprite_name);
-   AnimationSettings player_jump_midair_r({72, 48}, {col(5), jump_r_row}, {36.0, 48.0}, v(8), sprite_name);
-   AnimationSettings player_jump_down_r({72, 48}, {col(13), jump_r_row}, {36.0, 48.0}, v(2), sprite_name);
-   AnimationSettings player_jump_landing_r({72, 48}, {col(15), jump_r_row}, {36.0, 48.0}, v(4), sprite_name);
-
-   AnimationSettings player_jump_init_l({72, 48}, {0, jump_l_row}, {36.0, 48.0}, v(3), sprite_name);
-   AnimationSettings player_jump_up_l({72, 48}, {col(3), jump_l_row}, {36.0, 48.0}, v(2), sprite_name);
-   AnimationSettings player_jump_midair_l({72, 48}, {col(5), jump_l_row}, {36.0, 48.0}, v(8), sprite_name);
-   AnimationSettings player_jump_down_l({72, 48}, {col(13), jump_l_row}, {36.0, 48.0}, v(2), sprite_name);
-   AnimationSettings player_jump_landing_l({72, 48}, {col(15), jump_l_row}, {36.0, 48.0}, v(4), sprite_name);
-
-   next_row();  // reserved
-   next_row();  // reserved
-
-   AnimationSettings player_double_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
-   AnimationSettings player_double_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
-
-   AnimationSettings player_swim_idle_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_swim_idle_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-
-   AnimationSettings player_swim_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-   AnimationSettings player_swim_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(5, d_75), sprite_name);
-
-   const auto wallslide_row_r = next_row();
-   const auto wallslide_row_l = next_row();
-
-   AnimationSettings player_wallslide_impact_r({72, 48}, {0, wallslide_row_r}, {36.0, 48.0}, vx(6, d_75), sprite_name);
-   AnimationSettings player_wallslide_impact_l({72, 48}, {0, wallslide_row_l}, {36.0, 48.0}, vx(6, d_75), sprite_name);
-
-   AnimationSettings player_wallslide_r({72, 48}, {6 * 72, wallslide_row_r}, {36.0, 48.0}, vx(2, d_75), sprite_name);
-   AnimationSettings player_wallslide_l({72, 48}, {6 * 72, wallslide_row_l}, {36.0, 48.0}, vx(2, d_75), sprite_name);
-
-   AnimationSettings player_wall_jump_r({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
-   AnimationSettings player_wall_jump_l({72, 48}, {0, next_row()}, {36.0, 48.0}, vx(12, d_75), sprite_name);
-
-   next_row();  // reserved
-   next_row();  // reserved
-   next_row();  // reserved
-   next_row();  // reserved
-   next_row();  // reserved
-
-   next_row();  // reserved
-   next_row();  // reserved
-   next_row();  // reserved
-
-   next_row();  // reserved
-   next_row();  // reserved
-
-   AnimationSettings player_death({72, 72}, {0, next_row()}, {36.0, 36.0}, vx(18, sf::seconds(0.02f)), sprite_name);
-   AnimationSettings player_appear_r({72, 72}, {0, next_row()}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
-   AnimationSettings player_appear_l({72, 72}, {0, next_row() + PIXELS_PER_TILE}, {36.0, 72.0}, vx(12, sf::seconds(0.02f)), sprite_name);
-
-   nlohmann::json j;
-   j["player_idle_r"] = player_idle_r;
-   j["player_idle_l"] = player_idle_l;
-   j["player_idle_blink_r"] = player_idle_blink_r;
-   j["player_idle_blink_l"] = player_idle_blink_l;
-   j["player_bend_down_r"] = player_bend_down_r;
-   j["player_bend_down_l"] = player_bend_down_l;
-   j["player_bend_down_idle_r"] = player_bend_down_idle_r;
-   j["player_bend_down_idle_l"] = player_bend_down_idle_l;
-   j["player_bend_down_idle_blink_r"] = player_bend_down_idle_blink_r;
-   j["player_bend_down_idle_blink_l"] = player_bend_down_idle_blink_l;
-   j["player_idle_to_run_r"] = player_idle_to_run_r;
-   j["player_idle_to_run_l"] = player_idle_to_run_l;
-   j["player_runstop_r"] = player_runstop_r;
-   j["player_runstop_l"] = player_runstop_l;
-   j["player_run_r"] = player_run_r;
-   j["player_run_l"] = player_run_l;
-   j["player_dash_init_r"] = player_dash_init_r;
-   j["player_dash_init_l"] = player_dash_init_l;
-   j["player_dash_r"] = player_dash_r;
-   j["player_dash_l"] = player_dash_l;
-
-   j["player_jump_init_r"] = player_jump_init_r;
-   j["player_jump_up_r"] = player_jump_up_r;
-   j["player_jump_midair_r"] = player_jump_midair_r;
-   j["player_jump_down_r"] = player_jump_down_r;
-   j["player_jump_landing_r"] = player_jump_landing_r;
-
-   j["player_jump_init_l"] = player_jump_init_l;
-   j["player_jump_up_l"] = player_jump_up_l;
-   j["player_jump_midair_l"] = player_jump_midair_l;
-   j["player_jump_down_l"] = player_jump_down_l;
-   j["player_jump_landing_l"] = player_jump_landing_l;
-
-   j["player_double_jump_r"] = player_double_jump_r;
-   j["player_double_jump_l"] = player_double_jump_l;
-   j["player_swim_idle_r"] = player_swim_idle_r;
-   j["player_swim_idle_l"] = player_swim_idle_l;
-   j["player_swim_r"] = player_swim_r;
-   j["player_swim_l"] = player_swim_l;
-
-   j["player_wallslide_r"] = player_wallslide_r;
-   j["player_wallslide_l"] = player_wallslide_l;
-   j["player_wallslide_impact_r"] = player_wallslide_impact_r;
-   j["player_wallslide_impact_l"] = player_wallslide_impact_l;
-   j["player_wall_jump_r"] = player_wall_jump_r;
-   j["player_wall_jump_l"] = player_wall_jump_l;
-   j["player_appear_r"] = player_appear_r;
-   j["player_appear_l"] = player_appear_l;
-   j["player_death"] = player_death;
-
-   std::stringstream sstream;
-   sstream << std::setw(4) << j << "\n\n";
-   const auto data = sstream.str();
-
-   constexpr auto json_filename = "player.json";
-   std::ofstream file(json_filename);
-   file << data;
-
-   Log::Info() << "written updated animations to:  " << json_filename;
-}
