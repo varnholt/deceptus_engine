@@ -129,7 +129,6 @@ private:
    std::shared_ptr<Animation> _jump_midair_r;
    std::shared_ptr<Animation> _jump_down_r;
    std::shared_ptr<Animation> _jump_landing_r;
-
    std::shared_ptr<Animation> _jump_init_l;
    std::shared_ptr<Animation> _jump_up_l;
    std::shared_ptr<Animation> _jump_midair_l;
@@ -141,12 +140,22 @@ private:
    std::shared_ptr<Animation> _sword_jump_midair_r;
    std::shared_ptr<Animation> _sword_jump_down_r;
    std::shared_ptr<Animation> _sword_jump_landing_r;
-
    std::shared_ptr<Animation> _sword_jump_init_l;
    std::shared_ptr<Animation> _sword_jump_up_l;
    std::shared_ptr<Animation> _sword_jump_midair_l;
    std::shared_ptr<Animation> _sword_jump_down_l;
    std::shared_ptr<Animation> _sword_jump_landing_l;
+
+   std::shared_ptr<Animation> _sword_attack_jump_init_r;
+   std::shared_ptr<Animation> _sword_attack_jump_up_r;
+   std::shared_ptr<Animation> _sword_attack_jump_midair_r;
+   std::shared_ptr<Animation> _sword_attack_jump_down_r;
+   std::shared_ptr<Animation> _sword_attack_jump_landing_r;
+   std::shared_ptr<Animation> _sword_attack_jump_init_l;
+   std::shared_ptr<Animation> _sword_attack_jump_up_l;
+   std::shared_ptr<Animation> _sword_attack_jump_midair_l;
+   std::shared_ptr<Animation> _sword_attack_jump_down_l;
+   std::shared_ptr<Animation> _sword_attack_jump_landing_l;
 
    std::shared_ptr<Animation> _double_jump_r;
    std::shared_ptr<Animation> _double_jump_l;
@@ -173,16 +182,16 @@ private:
    std::shared_ptr<Animation> _sword_appear_r;
    std::shared_ptr<Animation> _sword_appear_l;
 
-   std::shared_ptr<Animation> _sword_bend_down_attack_1_l;
-   std::shared_ptr<Animation> _sword_bend_down_attack_1_r;
-   std::shared_ptr<Animation> _sword_bend_down_attack_2_l;
-   std::shared_ptr<Animation> _sword_bend_down_attack_2_r;
-   std::array<std::shared_ptr<Animation>, 1> _sword_standing_attack_l;
-   std::array<std::shared_ptr<Animation>, 1> _sword_standing_attack_r;
-   std::shared_ptr<Animation> _sword_standing_attack_tmp_l;
-   std::shared_ptr<Animation> _sword_standing_attack_tmp_r;
-   bool _sword_standing_attack_l_reset = false;
-   bool _sword_standing_attack_r_reset = false;
+   std::shared_ptr<Animation> _sword_attack_bend_down_1_l;
+   std::shared_ptr<Animation> _sword_attack_bend_down_1_r;
+   std::shared_ptr<Animation> _sword_attack_bend_down_2_l;
+   std::shared_ptr<Animation> _sword_attack_bend_down_2_r;
+   std::array<std::shared_ptr<Animation>, 1> _sword_attack_standing_l;
+   std::array<std::shared_ptr<Animation>, 1> _sword_attack_standing_r;
+   std::shared_ptr<Animation> _sword_attack_standing_tmp_l;
+   std::shared_ptr<Animation> _sword_attack_standing_tmp_r;
+   bool _sword_attack_standing_l_reset = false;
+   bool _sword_attack_standing_r_reset = false;
 
    std::shared_ptr<Animation> _death_default;
    std::shared_ptr<Animation> _death_electrocuted_l;
