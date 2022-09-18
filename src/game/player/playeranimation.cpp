@@ -97,16 +97,27 @@ void PlayerAnimation::loadAnimations()
    _jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_r", 0.0f, 0.0f, true, false);
    _jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_l", 0.0f, 0.0f, true, false);
 
-   _sword_jump_init_r = AnimationPool::getInstance().create("player_jump_init_r", 0.0f, 0.0f, true, false);
-   _sword_jump_init_l = AnimationPool::getInstance().create("player_jump_init_l", 0.0f, 0.0f, true, false);
-   _sword_jump_up_r = AnimationPool::getInstance().create("player_jump_up_r", 0.0f, 0.0f, true, false);
-   _sword_jump_up_l = AnimationPool::getInstance().create("player_jump_up_l", 0.0f, 0.0f, true, false);
-   _sword_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_r", 0.0f, 0.0f, true, false);
-   _sword_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_l", 0.0f, 0.0f, true, false);
-   _sword_jump_down_r = AnimationPool::getInstance().create("player_jump_down_r", 0.0f, 0.0f, true, false);
-   _sword_jump_down_l = AnimationPool::getInstance().create("player_jump_down_l", 0.0f, 0.0f, true, false);
-   _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_r", 0.0f, 0.0f, true, false);
-   _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_l", 0.0f, 0.0f, true, false);
+   _sword_jump_init_r = AnimationPool::getInstance().create("player_jump_init_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_init_l = AnimationPool::getInstance().create("player_jump_init_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_up_r = AnimationPool::getInstance().create("player_jump_up_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_up_l = AnimationPool::getInstance().create("player_jump_up_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_down_r = AnimationPool::getInstance().create("player_jump_down_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_down_l = AnimationPool::getInstance().create("player_jump_down_sword_l", 0.0f, 0.0f, true, false);
+   _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_sword_r", 0.0f, 0.0f, true, false);
+   _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_sword_l", 0.0f, 0.0f, true, false);
+
+   _sword_attack_jump_init_r = AnimationPool::getInstance().create("player_jump_init_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_init_l = AnimationPool::getInstance().create("player_jump_init_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_up_r = AnimationPool::getInstance().create("player_jump_up_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_up_l = AnimationPool::getInstance().create("player_jump_up_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_down_r = AnimationPool::getInstance().create("player_jump_down_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_down_l = AnimationPool::getInstance().create("player_jump_down_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_sword_l", 0.0f, 0.0f, true, false);
 
    _double_jump_r = AnimationPool::getInstance().create("player_double_jump_r", 0.0f, 0.0f, true, false);
    _double_jump_l = AnimationPool::getInstance().create("player_double_jump_l", 0.0f, 0.0f, true, false);
@@ -138,12 +149,12 @@ void PlayerAnimation::loadAnimations()
    _death_electrocuted_r = AnimationPool::getInstance().create("player_death_electrocuted_r", 0.0f, 0.0f, true, false);
    _death_electrocuted_l = AnimationPool::getInstance().create("player_death_electrocuted_l", 0.0f, 0.0f, true, false);
 
-   _sword_bend_down_attack_1_l = AnimationPool::getInstance().create("player_bend_down_attack_sword_1_l", 0.0f, 0.0f, true, false);
-   _sword_bend_down_attack_1_r = AnimationPool::getInstance().create("player_bend_down_attack_sword_1_r", 0.0f, 0.0f, true, false);
-   _sword_bend_down_attack_2_l = AnimationPool::getInstance().create("player_bend_down_attack_sword_2_l", 0.0f, 0.0f, true, false);
-   _sword_bend_down_attack_2_r = AnimationPool::getInstance().create("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_l[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
-   _sword_standing_attack_r[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
+   _sword_attack_bend_down_1_l = AnimationPool::getInstance().create("player_bend_down_attack_sword_1_l", 0.0f, 0.0f, true, false);
+   _sword_attack_bend_down_1_r = AnimationPool::getInstance().create("player_bend_down_attack_sword_1_r", 0.0f, 0.0f, true, false);
+   _sword_attack_bend_down_2_l = AnimationPool::getInstance().create("player_bend_down_attack_sword_2_l", 0.0f, 0.0f, true, false);
+   _sword_attack_bend_down_2_r = AnimationPool::getInstance().create("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
+   _sword_attack_standing_l[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
+   _sword_attack_standing_r[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
    //   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
    //   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
    //   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
@@ -159,8 +170,8 @@ void PlayerAnimation::loadAnimations()
    _idle_l_tmp = _idle_l;
    _bend_down_idle_r_tmp = _bend_down_idle_r;
    _bend_down_idle_l_tmp = _bend_down_idle_l;
-   _sword_standing_attack_tmp_l = _sword_standing_attack_l[0];
-   _sword_standing_attack_tmp_r = _sword_standing_attack_r[0];
+   _sword_attack_standing_tmp_l = _sword_attack_standing_l[0];
+   _sword_attack_standing_tmp_r = _sword_attack_standing_r[0];
 
    // we don't want these to jump back to the first frame
    _appear_r->_reset_to_first_frame = false;
@@ -337,27 +348,27 @@ PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 
 PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding() const
 {
-   return _sword_bend_down_attack_1_l->_overall_time_chrono;
+   return _sword_attack_bend_down_1_l->_overall_time_chrono;
 }
 
 PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown() const
 {
-   return _sword_standing_attack_l[0]->_overall_time_chrono;
+   return _sword_attack_standing_l[0]->_overall_time_chrono;
 }
 
 std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttackCycleDuration()
 {
-   if (_current_cycle == _sword_bend_down_attack_1_l || _current_cycle == _sword_bend_down_attack_1_r)
+   if (_current_cycle == _sword_attack_bend_down_1_l || _current_cycle == _sword_attack_bend_down_1_r)
    {
-      return _sword_bend_down_attack_1_l->_overall_time_chrono;
+      return _sword_attack_bend_down_1_l->_overall_time_chrono;
    }
-   else if (_current_cycle == _sword_bend_down_attack_2_l || _current_cycle == _sword_bend_down_attack_2_r)
+   else if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
    {
-      return _sword_bend_down_attack_2_l->_overall_time_chrono;
+      return _sword_attack_bend_down_2_l->_overall_time_chrono;
    }
-   else if (_current_cycle == _sword_standing_attack_l[0] || _current_cycle == _sword_standing_attack_r[0])
+   else if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
    {
-      return _sword_standing_attack_l[0]->_overall_time_chrono;
+      return _sword_attack_standing_l[0]->_overall_time_chrono;
    }
 
    return std::nullopt;
@@ -657,9 +668,9 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       if (data._weapon_type == WeaponType::Sword)
       {
          // also must be mapped for different weapons
-         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_bend_down_attack_1_l->_overall_time_chrono)
+         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
          {
-            next_cycle = data._points_left ? _sword_bend_down_attack_1_l : _sword_bend_down_attack_1_r;
+            next_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
          }
       }
    }
@@ -667,35 +678,35 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    {
       if (data._weapon_type == WeaponType::Sword)
       {
-         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_standing_attack_tmp_l->_overall_time_chrono)
+         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
          {
             if (data._points_left)
             {
-               next_cycle = _sword_standing_attack_tmp_l;
-               _sword_standing_attack_l_reset = true;
+               next_cycle = _sword_attack_standing_tmp_l;
+               _sword_attack_standing_l_reset = true;
             }
             else
             {
-               next_cycle = _sword_standing_attack_tmp_r;
-               _sword_standing_attack_r_reset = true;
+               next_cycle = _sword_attack_standing_tmp_r;
+               _sword_attack_standing_r_reset = true;
             }
          }
          else
          {
-            _sword_standing_attack_tmp_l->_finished = true;
-            _sword_standing_attack_tmp_r->_finished = true;
+            _sword_attack_standing_tmp_l->_finished = true;
+            _sword_attack_standing_tmp_r->_finished = true;
          }
 
-         if (_sword_standing_attack_l_reset && _sword_standing_attack_tmp_l->_finished)
+         if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
          {
-            _sword_standing_attack_tmp_l = _sword_standing_attack_l[(std::rand() % _sword_standing_attack_l.size())];
-            _sword_standing_attack_l_reset = false;
+            _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
+            _sword_attack_standing_l_reset = false;
          }
 
-         if (_sword_standing_attack_r_reset && _sword_standing_attack_tmp_r->_finished)
+         if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
          {
-            _sword_standing_attack_tmp_r = _sword_standing_attack_r[(std::rand() % _sword_standing_attack_r.size())];
-            _sword_standing_attack_r_reset = false;
+            _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
+            _sword_attack_standing_r_reset = false;
          }
       }
    }
