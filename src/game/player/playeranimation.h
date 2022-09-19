@@ -48,6 +48,8 @@ public:
       HighResTimePoint _timepoint_bend_down_start;
       HighResTimePoint _timepoint_bend_down_end;
       HighResTimePoint _timepoint_attack_start;
+      HighResTimePoint _timepoint_attack_bend_down_start;
+      HighResTimePoint _timepoint_attack_standing_start;
    };
 
    void update(const sf::Time& dt, const PlayerAnimationData& data);
