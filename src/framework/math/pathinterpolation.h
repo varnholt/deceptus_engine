@@ -30,14 +30,14 @@ public:
    {
       // determine length of each edge
       auto length_sum = 0.0f;
-      for (auto index = 0; index < positions.size(); index++)
+      for (auto index = 0; index < static_cast<int32_t>(positions.size()); index++)
       {
          const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
          length_sum += length;
       }
 
       auto length_to_this_point = 0.0f;
-      for (auto index = 0; index < positions.size(); index++)
+      for (auto index = 0; index < static_cast<int32_t>(positions.size()); index++)
       {
          auto& pos = positions.at(index);
          const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
@@ -63,14 +63,14 @@ public:
 
        // determine length of each edge
        auto length_sum = 0.0f;
-       for (auto index = 0; index < positions.size(); index++)
+       for (auto index = 0; index < static_cast<int32_t>(positions.size()); index++)
        {
            const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
            length_sum += length;
        }
 
        auto length_to_this_point = 0.0f;
-       for (auto index = 0; index < positions.size() - 1; index++)
+       for (auto index = 0; index < static_cast<int32_t>(positions.size()) - 1; index++)
        {
            auto& pos_1 = positions.at(index);
            auto& pos_2 = positions.at(index + 1);

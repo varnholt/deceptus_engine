@@ -148,7 +148,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 
       _data.resize(_width_tl * _height_tl);
 
-      for (const auto c : chunks)
+      for (const auto& c : chunks)
       {
          for (auto y = 0; y < chunk_height; y++)
          {

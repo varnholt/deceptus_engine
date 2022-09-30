@@ -26,7 +26,7 @@ void from_json(const nlohmann::json& j, AnimationSettings& settings)
          settings._frame_durations.push_back(sf::milliseconds(duration));
       }
 
-      if (frame_durations.size() != settings._sprite_count)
+      if (static_cast<int32_t>(frame_durations.size()) != settings._sprite_count)
       {
          settings._valid = false;
       }

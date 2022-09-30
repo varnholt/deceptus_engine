@@ -139,6 +139,10 @@ void ExtraManager::collide(const sf::Rect<int32_t>& player_rect)
                SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Dash);
                break;
             }
+            case ExtraItem::ExtraSpriteIndex::Invalid:
+            {
+               break;
+            }
          }
       }
    }
