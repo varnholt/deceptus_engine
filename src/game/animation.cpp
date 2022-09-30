@@ -7,7 +7,8 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 Animation::Animation(const Animation& anim)
-    : _name(anim._name),
+    : sf::Sprite(anim),
+      _name(anim._name),
       _frames(anim._frames),
       _color_texture(anim._color_texture),
       _normal_texture(anim._normal_texture),
