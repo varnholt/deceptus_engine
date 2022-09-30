@@ -668,7 +668,7 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       if (data._weapon_type == WeaponType::Sword)
       {
          // also must be mapped for different weapons
-         if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
+         if (StopWatch::duration(data._timepoint_attack_bend_down_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
          {
             next_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
          }
@@ -678,53 +678,35 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    {
       if (data._weapon_type == WeaponType::Sword)
       {
-         // coming from bend down, but button is released
-         // if (
-         //       _current_cycle == _sword_attack_bend_down_1_l
-         //    || _current_cycle == _sword_attack_bend_down_1_r
-         //    || _current_cycle == _sword_attack_bend_down_2_l
-         //    || _current_cycle == _sword_attack_bend_down_2_r
-         // )
-         // {
-         //    if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
-         //    {
-         //       next_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
-         //    }
-         // }
-         //
-         // // regular standing attack
-         // else
+         if (StopWatch::duration(data._timepoint_attack_standing_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
          {
-            if (StopWatch::duration(data._timepoint_attack_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
+            if (data._points_left)
             {
-               if (data._points_left)
-               {
-                  next_cycle = _sword_attack_standing_tmp_l;
-                  _sword_attack_standing_l_reset = true;
-               }
-               else
-               {
-                  next_cycle = _sword_attack_standing_tmp_r;
-                  _sword_attack_standing_r_reset = true;
-               }
+               next_cycle = _sword_attack_standing_tmp_l;
+               _sword_attack_standing_l_reset = true;
             }
             else
             {
-               _sword_attack_standing_tmp_l->_finished = true;
-               _sword_attack_standing_tmp_r->_finished = true;
+               next_cycle = _sword_attack_standing_tmp_r;
+               _sword_attack_standing_r_reset = true;
             }
+         }
+         else
+         {
+            _sword_attack_standing_tmp_l->_finished = true;
+            _sword_attack_standing_tmp_r->_finished = true;
+         }
 
-            if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
-            {
-               _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
-               _sword_attack_standing_l_reset = false;
-            }
+         if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
+         {
+            _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
+            _sword_attack_standing_l_reset = false;
+         }
 
-            if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
-            {
-               _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
-               _sword_attack_standing_r_reset = false;
-            }
+         if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
+         {
+            _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
+            _sword_attack_standing_r_reset = false;
          }
       }
    }

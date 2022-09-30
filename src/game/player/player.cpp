@@ -721,6 +721,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_bend_down_start = _bend._timepoint_bend_down_start;
    data._timepoint_bend_down_end = _bend._timepoint_bend_down_end;
    data._timepoint_attack_start = _attack._timepoint_attack_start;
+   data._timepoint_attack_standing_start = _attack._timepoint_attack_standing_start;
+   data._timepoint_attack_bend_down_start = _attack._timepoint_attack_bend_down_start;
    data._attacking = _attack.isAttacking();
    data._weapon_type = (!_weapon_system->_selected) ? WeaponType::None : _weapon_system->_selected->getWeaponType();
 
@@ -1660,6 +1662,19 @@ void Player::attack()
             {
                return;
             }
+         }
+
+         // for the sword weapon we also have to store the times when the player attacks while
+         // bending down or while standing; they need to be distinguished so the player animation
+         // knows which animation to play (even if bend down is no longer pressed)
+         _attack._player_was_standing_during_attack = !_controls->isBendDownActive();
+         if (_attack._player_was_standing_during_attack)
+         {
+            _attack._timepoint_attack_standing_start = StopWatch::getInstance().now();
+         }
+         else
+         {
+            _attack._timepoint_attack_bend_down_start = StopWatch::getInstance().now();
          }
 
          _attack._timepoint_attack_start = StopWatch::getInstance().now();
