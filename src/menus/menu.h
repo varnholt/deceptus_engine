@@ -67,8 +67,8 @@ private:
    std::shared_ptr<MenuScreen> _menu_name_select;
    std::shared_ptr<MenuScreen> _menu_options;
    std::shared_ptr<MenuScreen> _menu_audio;
-   std::shared_ptr<MenuScreen> _menu_controls;
    std::shared_ptr<MenuScreen> _menu_video;
+   std::shared_ptr<MenuScreen> _menu_controls;
    std::shared_ptr<MenuScreen> _menu_game;
    std::shared_ptr<MenuScreen> _menu_achievements;
    std::shared_ptr<MenuScreen> _menu_credits;

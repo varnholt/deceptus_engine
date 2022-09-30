@@ -85,19 +85,19 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
             else if (chain_index != it->_chain_index && object_type != it->_object_type)
             {
                // check if the vertex needs a ghost vertex on the left or on the right
-               auto isOnTheRightOfCollisionPos = [](const b2Vec2& colliding_vertex, b2Vec2* vertices, int32_t count)
-               {
-                  return std::any_of(
-                     vertices,
-                     vertices + count,
-                     [colliding_vertex](auto pos)
-                     {
-                        // std::cout << pos.x * PPM << " vs " << colliding_vertex.x * PPM << std::endl;
-                        return (pos.x - 0.001f > colliding_vertex.x) && (fabs(pos.y - colliding_vertex.y) < 0.001f);
-                     }
-                  );
-               };
-
+               // auto isOnTheRightOfCollisionPos = [](const b2Vec2& colliding_vertex, b2Vec2* vertices, int32_t count)
+               // {
+               //    return std::any_of(
+               //       vertices,
+               //       vertices + count,
+               //       [colliding_vertex](auto pos)
+               //       {
+               //          // std::cout << pos.x * PPM << " vs " << colliding_vertex.x * PPM << std::endl;
+               //          return (pos.x - 0.001f > colliding_vertex.x) && (fabs(pos.y - colliding_vertex.y) < 0.001f);
+               //       }
+               //    );
+               // };
+               //
                // const auto chain_is_on_the_right_of_the_collision =
                //   isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->m_count);
                //
