@@ -1011,6 +1011,16 @@ void Player::impulse(float intensity)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::startHardLanding()
+{
+   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f);
+
+   _timepoint_hard_landing = StopWatch::getInstance().now();
+   _hard_landing = true;
+   _hard_landing_cycles = 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updateImpulse()
 {
    if (_impulse < impulse_epsilon)
@@ -1051,11 +1061,7 @@ void Player::updateImpulse()
          return;
       }
 
-      Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f);
-
-      _timepoint_hard_landing = StopWatch::getInstance().now();
-      _hard_landing = true;
-      _hard_landing_cycles = 0;
+      startHardLanding();
 
       if (PhysicsConfiguration::getInstance()._player_hard_landing_damage_enabled)
       {
