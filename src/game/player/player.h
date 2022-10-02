@@ -145,6 +145,7 @@ private:
    void updateWeapons(const sf::Time& dt);
    void updateJump();
 
+   void startHardLanding();
    void resetDash();
 
    void createBody();
