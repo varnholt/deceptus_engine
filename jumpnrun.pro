@@ -136,6 +136,9 @@ SOURCES += \
    src/game/audio.cpp \
    src/game/bitmapfont.cpp \
    src/game/boomeffect.cpp \
+   src/game/boomeffectenvelope.cpp \
+   src/game/boomeffectenveloperandom.cpp \
+   src/game/boomeffectenvelopesine.cpp \
    src/game/bow.cpp \
    src/game/camerapanorama.cpp \
    src/game/cameraroomlock.cpp \
@@ -311,6 +314,9 @@ HEADERS += \
    src/framework/tools/logthread.h \
    src/framework/tools/scopeexit.h \
    src/framework/tools/stopwatch.h \
+   src/game/boomeffectenvelope.h \
+   src/game/boomeffectenveloperandom.h \
+   src/game/boomeffectenvelopesine.h \
    src/game/chainshapeanalyzer.h \
    src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
