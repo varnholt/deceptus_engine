@@ -1,12 +1,17 @@
 #include "test.h"
 
 // things under test
+#include "detonationanimation.h"
+#include "framework/math/fbm.h"
 #include "framework/math/maptools.h"
 #include "framework/math/pathinterpolation.h"
-#include "detonationanimation.h"
 
 #include <iostream>
 
+void testFbm()
+{
+   fbm::test();
+}
 
 void testBresenham()
 {
@@ -40,5 +45,6 @@ Test::Test()
 {
    // testBresenham();
    // testInterpolation();
+   // testFbm();
    // exit(0);
 }
