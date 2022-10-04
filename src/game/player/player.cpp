@@ -1013,7 +1013,7 @@ void Player::impulse(float intensity)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::startHardLanding()
 {
-   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f);
+   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, 1.0, 0.5f);
 
    _timepoint_hard_landing = StopWatch::getInstance().now();
    _hard_landing = true;
