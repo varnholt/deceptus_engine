@@ -10,7 +10,7 @@
 #include "boomeffectenvelopesine.h"
 
 //-----------------------------------------------------------------------------
-void BoomEffect::boom(float x, float y, float amplitude, ShakeType shake_type)
+void BoomEffect::boom(float x, float y, float amplitude, float boom_duration, ShakeType shake_type)
 {
    if (getRemainingTime() > 0.005f)
    {
@@ -37,6 +37,7 @@ void BoomEffect::boom(float x, float y, float amplitude, ShakeType shake_type)
    _factor_x = x;
    _factor_y = y;
 
+   _boom_duration = boom_duration;
    _boom_time_end = GlobalClock::getInstance().getElapsedTime() + sf::seconds(_boom_duration);
 }
 

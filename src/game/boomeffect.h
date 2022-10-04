@@ -15,7 +15,7 @@ struct BoomEffect
       Random
    };
 
-   void boom(float x, float y, float amplitude = 1.0f, ShakeType shake_type = ShakeType::Sine);
+   void boom(float x, float y, float amplitude = 1.0f, float boom_duration = 1.0f, ShakeType shake_type = ShakeType::Random);
    void update(const sf::Time& dt);
 
    float getRemainingTime() const;
