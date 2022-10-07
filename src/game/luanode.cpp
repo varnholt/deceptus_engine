@@ -1740,7 +1740,7 @@ void LuaNode::setLinearVelocity(const b2Vec2& vel)
 
 void LuaNode::boom(float x, float y, float intensity)
 {
-   Level::getCurrentLevel()->getBoomEffect().boom(x, y, intensity);
+   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 1.0f});
 }
 
 void LuaNode::playDetonationAnimation(float x, float y)

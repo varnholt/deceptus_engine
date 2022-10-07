@@ -1,17 +1,17 @@
 #include "boomeffectenvelopesine.h"
 
-BoomEffectEnvelopeSine::BoomEffectEnvelopeSine()
+namespace
 {
-   _effect_frequency = 32.0f;
-   _effect_amplitude = 0.1f;
-}
+constexpr float frequency = 32.0f;
+constexpr float internal_amplitude = 0.1f;
+constexpr float internal_amplitude_2 = internal_amplitude * internal_amplitude;
+}  // namespace
 
 float BoomEffectEnvelopeSine::shakeFunction(float t)
 {
-   const auto time_with_velocity = t * _effect_frequency;
-   const auto time_with_velocity_square = time_with_velocity * time_with_velocity;
-   const auto y =
-      _effect_amplitude * _effect_amplitude * 2.0f * sin(time_with_velocity_square) * (1.0f / (1.0f + time_with_velocity_square));
+   const auto time_with_freq = t * frequency;
+   const auto time_with_freq_2 = time_with_freq * time_with_freq;
+   const auto y = _settings._amplitude * internal_amplitude_2 * 2.0f * sin(time_with_freq_2) * (1.0f / (1.0f + time_with_freq_2));
 
    return y;
 }

@@ -1013,7 +1013,7 @@ void Player::impulse(float intensity)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::startHardLanding()
 {
-   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, 1.0, 0.5f);
+   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{1.0, 0.5f});
 
    _timepoint_hard_landing = StopWatch::getInstance().now();
    _hard_landing = true;
@@ -1274,8 +1274,10 @@ void Player::updateHardLanding()
    {
       _hard_landing_cycles++;
 
-      // this should be longer and player should go into bend down position after a hard landing
-      if (StopWatch::getInstance().now() - _timepoint_hard_landing > 0.2s)
+      const auto hard_landing_time_elapsed_s =
+         std::chrono::duration<double>(StopWatch::getInstance().now() - _timepoint_hard_landing).count();
+
+      if (hard_landing_time_elapsed_s > PhysicsConfiguration::getInstance()._player_hard_landing_delay_s)
       {
          _hard_landing = false;
          _hard_landing_cycles = 0;
