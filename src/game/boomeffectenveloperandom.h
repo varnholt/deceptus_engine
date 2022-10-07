@@ -8,7 +8,7 @@
 class BoomEffectEnvelopeRandom : public BoomEffectEnvelope
 {
 public:
-   BoomEffectEnvelopeRandom();
+   BoomEffectEnvelopeRandom() = default;
 
    float shakeFunction(float t);
 

@@ -56,6 +56,7 @@ struct PhysicsConfiguration
    // hard landing
    bool _player_hard_landing_damage_enabled = false;
    float _player_hard_landing_damage_factor = 20.0f;
+   float _player_hard_landing_delay_s = 1.0f;
 
    // swimming
    float _player_in_water_force_jump_button = -1.0f;
