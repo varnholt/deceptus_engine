@@ -9,22 +9,24 @@
 #include "boomeffectenveloperandom.h"
 #include "boomeffectenvelopesine.h"
 
+BoomSettings BoomEffect::_default_boom_settings = BoomSettings{1.0f, 1.0f};
+
 //-----------------------------------------------------------------------------
-void BoomEffect::boom(float x, float y, float amplitude, float boom_duration, ShakeType shake_type)
+void BoomEffect::boom(float x, float y, const BoomSettings& boom_settings)
 {
    if (getRemainingTime() > 0.005f)
    {
       return;
    }
 
-   switch (shake_type)
+   switch (boom_settings._shake_type)
    {
-      case ShakeType::Sine:
+      case BoomSettings::ShakeType::Sine:
       {
          _envelope = std::make_shared<BoomEffectEnvelopeSine>();
          break;
       }
-      case ShakeType::Random:
+      case BoomSettings::ShakeType::Random:
       {
          _envelope = std::make_shared<BoomEffectEnvelopeRandom>();
          break;
@@ -32,13 +34,13 @@ void BoomEffect::boom(float x, float y, float amplitude, float boom_duration, Sh
    }
 
    _shake_function = [this](float x) -> float { return _envelope->shakeFunction(x); };
-   _envelope->_effect_amplitude = amplitude;
+   _envelope->_settings = boom_settings;
 
    _factor_x = x;
    _factor_y = y;
 
-   _boom_duration = boom_duration;
-   _boom_time_end = GlobalClock::getInstance().getElapsedTime() + sf::seconds(_boom_duration);
+   _boom_duration_s = boom_settings._boom_duration_s;
+   _boom_time_end = GlobalClock::getInstance().getElapsedTime() + sf::seconds(_boom_duration_s);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -51,7 +53,7 @@ float BoomEffect::getRemainingTime() const
 float BoomEffect::getRemainingTimeNormalized() const
 {
    const auto remaining_time = getRemainingTime();
-   const auto time_normalized = (_boom_duration - remaining_time) / _boom_duration;
+   const auto time_normalized = (_boom_duration_s - remaining_time) / _boom_duration_s;
    return time_normalized;
 }
 

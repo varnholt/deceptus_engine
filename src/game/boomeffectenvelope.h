@@ -2,6 +2,7 @@
 #define BOOMEFFECTENVELOPE_H
 
 #include <functional>
+#include "boomsettings.h"
 
 class BoomEffectEnvelope
 {
@@ -11,8 +12,7 @@ public:
 
    virtual float shakeFunction(float t) = 0;
 
-   float _effect_frequency = 1.0f;
-   float _effect_amplitude = 1.0f;
+   BoomSettings _settings;
 };
 
 #endif // BOOMEFFECTENVELOPE_H
