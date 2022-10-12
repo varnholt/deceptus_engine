@@ -750,5 +750,85 @@
       "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png"
+   },
+   "player_jump_init_attack_sword_l": {
+      "frame_durations": [75],
+      "frame_offset": [1440, 960],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_init_attack_sword_r": {
+      "frame_durations": [75],
+      "frame_offset": [1440, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_up_attack_sword_l": {
+      "frame_durations": [75, 75],
+      "frame_offset": [1584, 960],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_up_attack_sword_r": {
+      "frame_durations": [75, 75],
+      "frame_offset": [1584, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_midair_attack_sword_l": {
+      "frame_durations": [75],
+      "frame_offset": [1728, 960],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 1,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_midair_attack_sword_r": {
+      "frame_durations": [75],
+      "frame_offset": [1728, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 1,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_down_attack_sword_l": {
+      "frame_durations": [75, 75],
+      "frame_offset": [1800, 960],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_down_attack_sword_r": {
+      "frame_durations": [75, 75],
+      "frame_offset": [1800, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_landing_attack_sword_l": {
+      "frame_durations": [800, 100, 100],
+      "frame_offset": [1944, 960],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 3,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_landing_attack_sword_r": {
+      "frame_durations": [800, 100, 100],
+      "frame_offset": [1944, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 3,
+      "texture": "data/sprites/player.png"
    }
 }
