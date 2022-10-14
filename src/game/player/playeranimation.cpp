@@ -19,6 +19,8 @@ namespace
 constexpr auto FRAMES_COUNT_JUMP_INIT = 5;
 constexpr auto JUMP_UP_VELOCITY_THRESHOLD = -1.2f;
 constexpr auto JUMP_DOWN_VELOCITY_THRESHOLD = 1.2f;
+
+std::chrono::high_resolution_clock::time_point now;
 }  // namespace
 
 PlayerAnimation::PlayerAnimation()
@@ -108,16 +110,20 @@ void PlayerAnimation::loadAnimations()
    _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_sword_r", 0.0f, 0.0f, true, false);
    _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_sword_l", 0.0f, 0.0f, true, false);
 
-   _sword_attack_jump_init_r = AnimationPool::getInstance().create("player_jump_init_attack_sword_r", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_init_l = AnimationPool::getInstance().create("player_jump_init_attack_sword_l", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_up_r = AnimationPool::getInstance().create("player_jump_up_attack_sword_r", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_up_l = AnimationPool::getInstance().create("player_jump_up_attack_sword_l", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_midair_r = AnimationPool::getInstance().create("player_jump_midair_attack_sword_r", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_midair_l = AnimationPool::getInstance().create("player_jump_midair_attack_sword_l", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_down_r = AnimationPool::getInstance().create("player_jump_down_attack_sword_r", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_down_l = AnimationPool::getInstance().create("player_jump_down_attack_sword_l", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_attack_sword_r", 0.0f, 0.0f, true, false);
-   _sword_attack_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_attack_sword_l", 0.0f, 0.0f, true, false);
+   // todo
+   // put leg animation in another mapping
+   // _sword_attack_jump_r = AnimationPool::getInstance().create("xxx", 0.0f, 0.0f, true, false);
+   // _sword_attack_jump_l = AnimationPool::getInstance().create("xxx", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_init_r = AnimationPool::getInstance().create("player_jump_init_attack_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_init_l = AnimationPool::getInstance().create("player_jump_init_attack_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_up_r = AnimationPool::getInstance().create("player_jump_up_attack_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_up_l = AnimationPool::getInstance().create("player_jump_up_attack_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_midair_r = AnimationPool::getInstance().create("player_jump_midair_attack_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_midair_l = AnimationPool::getInstance().create("player_jump_midair_attack_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_down_r = AnimationPool::getInstance().create("player_jump_down_attack_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_down_l = AnimationPool::getInstance().create("player_jump_down_attack_sword_l", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_landing_r = AnimationPool::getInstance().create("player_jump_landing_attack_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_legs_landing_l = AnimationPool::getInstance().create("player_jump_landing_attack_sword_l", 0.0f, 0.0f, true, false);
 
    _double_jump_r = AnimationPool::getInstance().create("player_double_jump_r", 0.0f, 0.0f, true, false);
    _double_jump_l = AnimationPool::getInstance().create("player_double_jump_l", 0.0f, 0.0f, true, false);
@@ -339,6 +345,90 @@ void PlayerAnimation::resetAlpha()
    }
 }
 
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDeathAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+   // death animation
+   if (data._dead)
+   {
+      if (data._death_reason == DeathReason::Laser)
+      {
+         next_cycle = next_cycle = data._points_right ? _death_electrocuted_r : _death_electrocuted_l;
+      }
+      else
+      {
+         next_cycle = next_cycle = _death_default;
+      }
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAttackAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> attack_cycle;
+
+   // attack
+   if (data._bending_down)
+   {
+      if (data._weapon_type == WeaponType::Sword)
+      {
+         // also must be mapped for different weapons
+         if (StopWatch::duration(data._timepoint_attack_bend_down_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
+         {
+            attack_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
+         }
+      }
+   }
+   else if (data._in_air)
+   {
+      if (data._weapon_type == WeaponType::Sword)
+      {
+         // if (StopWatch::duration(data._timepoint_attack_jumping_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
+         {
+         }
+      }
+   }
+   else
+   {
+      if (data._weapon_type == WeaponType::Sword)
+      {
+         if (StopWatch::duration(data._timepoint_attack_standing_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
+         {
+            if (data._points_left)
+            {
+               attack_cycle = _sword_attack_standing_tmp_l;
+               _sword_attack_standing_l_reset = true;
+            }
+            else
+            {
+               attack_cycle = _sword_attack_standing_tmp_r;
+               _sword_attack_standing_r_reset = true;
+            }
+         }
+         else
+         {
+            _sword_attack_standing_tmp_l->_finished = true;
+            _sword_attack_standing_tmp_r->_finished = true;
+         }
+
+         if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
+         {
+            _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
+            _sword_attack_standing_l_reset = false;
+         }
+
+         if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
+         {
+            _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
+            _sword_attack_standing_r_reset = false;
+         }
+      }
+   }
+
+   return attack_cycle;
+}
+
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 {
    using namespace std::chrono_literals;
@@ -402,6 +492,170 @@ PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& anima
    return animation;
 }
 
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processSwimAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   // swimming
+   if (data._in_water)
+   {
+      next_cycle = data._points_right ? _swim_r : _swim_l;
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallSlideAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   if (data._wall_sliding)
+   {
+      const auto& mapped_animation = getMappedArmedAnimation(_wallslide_impact_l, data);
+
+      if (StopWatch::duration(data._timepoint_wallslide, now) < mapped_animation->_overall_time_chrono)
+      {
+         next_cycle = data._points_right ? _wallslide_impact_l : _wallslide_impact_r;
+      }
+      else
+      {
+         next_cycle = data._points_right ? _wallslide_l : _wallslide_r;
+      }
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallJumpAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   if (StopWatch::duration(data._timepoint_walljump, now) < getMappedArmedAnimation(_wall_jump_r, data)->_overall_time_chrono)
+   {
+      next_cycle = data._wall_jump_points_right ? _wall_jump_r : _wall_jump_l;
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDoubleJumpAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   if (StopWatch::duration(data._timepoint_doublejump, now) < getMappedArmedAnimation(_double_jump_r, data)->_overall_time_chrono)
+   {
+      next_cycle = data._points_right ? _double_jump_r : _double_jump_l;
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processScreenTransitionIdleAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   // force idle for screen transitions
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+   {
+      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(const PlayerAnimationData& data)
+{
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   const auto velocity = data._linear_velocity;
+
+   // jump init
+   if (!data._dash_dir.has_value())
+   {
+      if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
+      {
+         // jump ignition
+         _jump_animation_reference = 0;
+         next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
+      }
+
+      // jump is active when either
+      // - in the air
+      // - jumping through a one-sided wall (in that case player may have ground contacts)
+      else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
+      {
+         // jump movement goes up
+         if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
+         {
+            next_cycle = data._points_right ? _jump_up_r : _jump_up_l;
+            _jump_animation_reference = 1;
+         }
+         // jump movement goes down
+         else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
+         {
+            next_cycle = data._points_right ? _jump_down_r : _jump_down_l;
+            _jump_animation_reference = 2;
+         }
+         else
+         {
+            // jump midair
+            if (_jump_animation_reference == 1)
+            {
+               next_cycle = data._points_right ? _jump_midair_r : _jump_midair_l;
+            }
+         }
+      }
+
+      // hard landing
+      else if (_jump_animation_reference == 2 && data._hard_landing)
+      {
+         next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
+
+         if (next_cycle.value()->_current_frame == static_cast<int32_t>(next_cycle.value()->_frames.size()) - 1)
+         {
+            _jump_animation_reference = 3;
+            next_cycle.value()->seekToStart();
+         }
+      }
+   }
+
+   return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimation(const PlayerAnimationData& data)
+{
+   using namespace std::chrono_literals;
+
+   std::optional<std::shared_ptr<Animation>> next_cycle;
+
+   // appear animation
+   if (GameClock::getInstance().duration() < getRevealDuration())
+   {
+      next_cycle = data._points_right ? _appear_r : _appear_l;
+
+      if (GameClock::getInstance().duration() < 1.0s)
+      {
+         // invisibility: 0 .. 1.0s (wait until player is focused)
+         for (auto& appear_animation : _appear_animations)
+         {
+            appear_animation->seekToStart();
+            appear_animation->setAlpha(0);
+         }
+      }
+      else
+      {
+         // player appear animation for 20 x 20ms, plus an extra frame - just to be sure :)
+         for (auto& appear_animation : _appear_animations)
+         {
+            appear_animation->play();
+            appear_animation->setAlpha(255);
+         }
+      }
+   }
+
+   return next_cycle;
+}
+
 void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data)
 {
    using namespace std::chrono_literals;
@@ -411,11 +665,9 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       return;
    }
 
-   const auto now = StopWatch::now();
+   now = StopWatch::now();
 
    std::shared_ptr<Animation> next_cycle = nullptr;
-
-   auto velocity = data._linear_velocity;
 
    const auto look_active = CameraPanorama::getInstance().isLookActive();
    const auto passes_sanity_check = !(data._moving_right && data._moving_left);
@@ -532,184 +784,15 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       }
    }
 
-   // jump init
-   if (!data._dash_dir.has_value())
-   {
-      if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
-      {
-         // jump ignition
-         _jump_animation_reference = 0;
-         next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
-      }
-
-      // jump is active when either
-      // - in the air
-      // - jumping through a one-sided wall (in that case player may have ground contacts)
-      else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
-      {
-         // jump movement goes up
-         if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
-         {
-            next_cycle = data._points_right ? _jump_up_r : _jump_up_l;
-            _jump_animation_reference = 1;
-         }
-         // jump movement goes down
-         else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
-         {
-            next_cycle = data._points_right ? _jump_down_r : _jump_down_l;
-            _jump_animation_reference = 2;
-         }
-         else
-         {
-            // jump midair
-            if (_jump_animation_reference == 1)
-            {
-               next_cycle = data._points_right ? _jump_midair_r : _jump_midair_l;
-            }
-         }
-      }
-
-      // hard landing
-      else if (_jump_animation_reference == 2 && data._hard_landing)
-      {
-         next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
-
-         if (next_cycle->_current_frame == static_cast<int32_t>(next_cycle->_frames.size()) - 1)
-         {
-            _jump_animation_reference = 3;
-            next_cycle->seekToStart();
-         }
-      }
-   }
-
-   // swimming
-   if (data._in_water)
-   {
-      next_cycle = data._points_right ? _swim_r : _swim_l;
-   }
-
-   if (data._climb_joint_present)
-   {
-      // need to support climb animation
-   }
-
-   if (data._wall_sliding)
-   {
-      const auto& mapped_animation = getMappedArmedAnimation(_wallslide_impact_l, data);
-
-      if (StopWatch::duration(data._timepoint_wallslide, now) < mapped_animation->_overall_time_chrono)
-      {
-         next_cycle = data._points_right ? _wallslide_impact_l : _wallslide_impact_r;
-      }
-      else
-      {
-         next_cycle = data._points_right ? _wallslide_l : _wallslide_r;
-      }
-   }
-
-   if (StopWatch::duration(data._timepoint_doublejump, now) < getMappedArmedAnimation(_double_jump_r, data)->_overall_time_chrono)
-   {
-      next_cycle = data._points_right ? _double_jump_r : _double_jump_l;
-   }
-
-   if (StopWatch::duration(data._timepoint_walljump, now) < getMappedArmedAnimation(_wall_jump_r, data)->_overall_time_chrono)
-   {
-      next_cycle = data._wall_jump_points_right ? _wall_jump_r : _wall_jump_l;
-   }
-
-   // force idle for screen transitions
-   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
-   {
-      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
-   }
-
-   // appear animation
-   if (GameClock::getInstance().duration() < getRevealDuration())
-   {
-      next_cycle = data._points_right ? _appear_r : _appear_l;
-
-      if (GameClock::getInstance().duration() < 1.0s)
-      {
-         // invisibility: 0 .. 1.0s (wait until player is focused)
-         for (auto& appear_animation : _appear_animations)
-         {
-            appear_animation->seekToStart();
-            appear_animation->setAlpha(0);
-         }
-      }
-      else
-      {
-         // player appear animation for 20 x 20ms, plus an extra frame - just to be sure :)
-         for (auto& appear_animation : _appear_animations)
-         {
-            appear_animation->play();
-            appear_animation->setAlpha(255);
-         }
-      }
-   }
-
-   // death animation
-   if (data._dead)
-   {
-      if (data._death_reason == DeathReason::Laser)
-      {
-         next_cycle = data._points_right ? _death_electrocuted_r : _death_electrocuted_l;
-      }
-      else
-      {
-         next_cycle = _death_default;
-      }
-   }
-
-   // attack
-   if (data._bending_down)
-   {
-      if (data._weapon_type == WeaponType::Sword)
-      {
-         // also must be mapped for different weapons
-         if (StopWatch::duration(data._timepoint_attack_bend_down_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
-         {
-            next_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
-         }
-      }
-   }
-   else
-   {
-      if (data._weapon_type == WeaponType::Sword)
-      {
-         if (StopWatch::duration(data._timepoint_attack_standing_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
-         {
-            if (data._points_left)
-            {
-               next_cycle = _sword_attack_standing_tmp_l;
-               _sword_attack_standing_l_reset = true;
-            }
-            else
-            {
-               next_cycle = _sword_attack_standing_tmp_r;
-               _sword_attack_standing_r_reset = true;
-            }
-         }
-         else
-         {
-            _sword_attack_standing_tmp_l->_finished = true;
-            _sword_attack_standing_tmp_r->_finished = true;
-         }
-
-         if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
-         {
-            _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
-            _sword_attack_standing_l_reset = false;
-         }
-
-         if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
-         {
-            _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
-            _sword_attack_standing_r_reset = false;
-         }
-      }
-   }
-
+   next_cycle = processJumpAnimation(data).value_or(next_cycle);
+   next_cycle = processSwimAnimation(data).value_or(next_cycle);
+   next_cycle = processWallSlideAnimation(data).value_or(next_cycle);
+   next_cycle = processDoubleJumpAnimation(data).value_or(next_cycle);
+   next_cycle = processWallJumpAnimation(data).value_or(next_cycle);
+   next_cycle = processScreenTransitionIdleAnimation(data).value_or(next_cycle);
+   next_cycle = processAppearAnimation(data).value_or(next_cycle);
+   next_cycle = processDeathAnimation(data).value_or(next_cycle);
+   next_cycle = processAttackAnimation(data).value_or(next_cycle);
    next_cycle = getMappedArmedAnimation(next_cycle, data);
 
    if (!next_cycle)

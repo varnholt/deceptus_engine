@@ -10,11 +10,10 @@ struct PlayerAttack
    bool _fire_button_was_pressed = false;
    bool _fire_button_pressed = false;
 
-   bool _player_was_standing_during_attack = false;
-
    HighResTimePoint _timepoint_attack_start;
    HighResTimePoint _timepoint_attack_bend_down_start;
    HighResTimePoint _timepoint_attack_standing_start;
+   HighResTimePoint _timepoint_attack_jumping_start;
 
    bool isAttacking() const
    {
