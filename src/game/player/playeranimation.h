@@ -49,6 +49,7 @@ public:
       HighResTimePoint _timepoint_bend_down_end;
       HighResTimePoint _timepoint_attack_start;
       HighResTimePoint _timepoint_attack_bend_down_start;
+      HighResTimePoint _timepoint_attack_jumping_start;
       HighResTimePoint _timepoint_attack_standing_start;
    };
 
@@ -65,8 +66,18 @@ public:
    void resetAlpha();
 
 private:
+   const std::shared_ptr<Animation>&
+   getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data);
 
-   const std::shared_ptr<Animation>& getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data);
+   std::optional<std::shared_ptr<Animation>> processSwimAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processWallSlideAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processWallJumpAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processDoubleJumpAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processScreenTransitionIdleAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processJumpAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processAppearAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processDeathAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processAttackAnimation(const PlayerAnimationData& data);
 
    std::shared_ptr<Animation> _idle_r;
    std::shared_ptr<Animation> _idle_l;
@@ -148,16 +159,21 @@ private:
    std::shared_ptr<Animation> _sword_jump_down_l;
    std::shared_ptr<Animation> _sword_jump_landing_l;
 
-   std::shared_ptr<Animation> _sword_attack_jump_init_r;
-   std::shared_ptr<Animation> _sword_attack_jump_up_r;
-   std::shared_ptr<Animation> _sword_attack_jump_midair_r;
-   std::shared_ptr<Animation> _sword_attack_jump_down_r;
-   std::shared_ptr<Animation> _sword_attack_jump_landing_r;
-   std::shared_ptr<Animation> _sword_attack_jump_init_l;
-   std::shared_ptr<Animation> _sword_attack_jump_up_l;
-   std::shared_ptr<Animation> _sword_attack_jump_midair_l;
-   std::shared_ptr<Animation> _sword_attack_jump_down_l;
-   std::shared_ptr<Animation> _sword_attack_jump_landing_l;
+   // body for jump attack with sword
+   std::shared_ptr<Animation> _sword_attack_jump_r;
+   std::shared_ptr<Animation> _sword_attack_jump_l;
+
+   // legs for jump attack with sword
+   std::shared_ptr<Animation> _sword_attack_jump_legs_init_r;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_up_r;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_midair_r;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_down_r;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_landing_r;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_init_l;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_up_l;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_midair_l;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_down_l;
+   std::shared_ptr<Animation> _sword_attack_jump_legs_landing_l;
 
    std::shared_ptr<Animation> _double_jump_r;
    std::shared_ptr<Animation> _double_jump_l;

@@ -723,6 +723,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_attack_start = _attack._timepoint_attack_start;
    data._timepoint_attack_standing_start = _attack._timepoint_attack_standing_start;
    data._timepoint_attack_bend_down_start = _attack._timepoint_attack_bend_down_start;
+   data._timepoint_attack_jumping_start = _attack._timepoint_attack_jumping_start;
    data._attacking = _attack.isAttacking();
    data._weapon_type = (!_weapon_system->_selected) ? WeaponType::None : _weapon_system->_selected->getWeaponType();
 
@@ -1673,19 +1674,23 @@ void Player::attack()
          }
 
          // for the sword weapon we also have to store the times when the player attacks while
-         // bending down or while standing; they need to be distinguished so the player animation
-         // knows which animation to play (even if bend down is no longer pressed)
-         _attack._player_was_standing_during_attack = !_controls->isBendDownActive();
-         if (_attack._player_was_standing_during_attack)
+         // bending down, in-air or while standing; they need to be distinguished so the player animation
+         // knows which animation to play (even if bend down or jump is no longer pressed)
+         const auto now = StopWatch::getInstance().now();
+         _attack._timepoint_attack_start = now;
+
+         if (isInAir())
          {
-            _attack._timepoint_attack_standing_start = StopWatch::getInstance().now();
+            _attack._timepoint_attack_jumping_start = now;
+         }
+         else if (_controls->isBendDownActive())
+         {
+            _attack._timepoint_attack_bend_down_start = now;
          }
          else
          {
-            _attack._timepoint_attack_bend_down_start = StopWatch::getInstance().now();
+            _attack._timepoint_attack_standing_start = now;
          }
-
-         _attack._timepoint_attack_start = StopWatch::getInstance().now();
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
          break;
