@@ -464,7 +464,7 @@ std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttack
 }
 
 const std::shared_ptr<Animation>&
-PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data)
+PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data) const
 {
    switch (animation_data._weapon_type)
    {
@@ -492,134 +492,284 @@ PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& anima
    return animation;
 }
 
-std::optional<std::shared_ptr<Animation>> PlayerAnimation::processSwimAnimation(const PlayerAnimationData& data)
+bool PlayerAnimation::isBendingUp(const PlayerAnimationData& data) const
 {
-   std::optional<std::shared_ptr<Animation>> next_cycle;
+   const auto& mapped_animation = getMappedArmedAnimation(_bend_up_l, data);
+   return (StopWatch::duration(data._timepoint_bend_down_end, now) < mapped_animation->_overall_time_chrono);
+}
 
-   // swimming
-   if (data._in_water)
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(const PlayerAnimationData& data)
+{
+   if (data._in_water || data._dash_dir.has_value() || data._bending_down || data._moving_left || data._moving_right)
    {
-      next_cycle = data._points_right ? _swim_r : _swim_l;
+      return std::nullopt;
+   }
+
+   if (isBendingUp(data))
+   {
+      return std::nullopt;
+   }
+
+   if (data._points_left)
+   {
+      auto next_cycle = _idle_l_tmp;
+
+      if (_idle_l_tmp->_finished)
+      {
+         _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l : _idle_l;
+      }
+
+      return next_cycle;
+   }
+   else
+   {
+      auto next_cycle = _idle_r_tmp;
+
+      if (_idle_r_tmp->_finished)
+      {
+         _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r : _idle_r;
+      }
+
+      return next_cycle;
+   }
+
+   return std::nullopt;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processBendUpAnimation(const PlayerAnimationData& data)
+{
+   if (!data._bending_down)
+   {
+      const auto next_cycle = data._points_left ? _bend_up_l : _bend_up_r;
+      const auto& mapped_animation = getMappedArmedAnimation(next_cycle, data);
+
+      // bend up if player is releasing the crouch
+      if (StopWatch::duration(data._timepoint_bend_down_end, now) < mapped_animation->_overall_time_chrono)
+      {
+         return next_cycle;
+      }
+   }
+
+   return std::nullopt;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processBendDownAnimation(const PlayerAnimationData& data)
+{
+   // bending down state
+   if (!data._bending_down)
+   {
+      return std::nullopt;
+   }
+
+   auto next_cycle = data._points_left ? _bend_down_l : _bend_down_r;
+   const auto& mapped_animation = getMappedArmedAnimation(next_cycle, data);
+
+   // going from bending down to bending down idle
+   if (StopWatch::duration(data._timepoint_bend_down_start, now) > mapped_animation->_overall_time_chrono)
+   {
+      next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
+
+      // blink every now and then
+      if (_bend_down_idle_l_tmp->_finished)
+      {
+         _bend_down_idle_l_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_l : _bend_down_idle_l;
+      }
+
+      if (_bend_down_idle_r_tmp->_finished)
+      {
+         _bend_down_idle_r_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_r : _bend_down_idle_r;
+      }
    }
 
    return next_cycle;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processCrouchAnimation(const PlayerAnimationData& data)
+{
+   const auto passes_sanity_check = !(data._moving_right && data._moving_left);
+   const auto look_active = CameraPanorama::getInstance().isLookActive();
+
+   // crouch
+   if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
+   {
+      // unsupported
+      // next_cycle = _crouch_r;
+   }
+   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
+   {
+      // unsupported
+      // next_cycle = _crouch_l;
+   }
+
+   return std::nullopt;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processRunAnimation(const PlayerAnimationData& data)
+{
+   const auto passes_sanity_check = !(data._moving_right && data._moving_left);
+   const auto look_active = CameraPanorama::getInstance().isLookActive();
+
+   // run
+   if (!data._dash_dir.has_value() && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching && !data._bending_down)
+   {
+      return data._moving_right ? _run_r : _run_l;
+   }
+
+   return std::nullopt;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDashAnimation(const PlayerAnimationData& data)
+{
+   // dash
+   if (!data._dash_dir.has_value())
+   {
+      return std::nullopt;
+   }
+
+   // init  regular            stop
+   // |     |                  |
+   // +-----+------------------+----->
+   // t
+   const auto dash_count_max = PhysicsConfiguration::getInstance()._player_dash_frame_count;
+   const auto dash_count_regular = dash_count_max - (dash_count_max / 5);
+   const auto dash_count_stop = dash_count_max / 5;
+
+   if (data._dash_frame_count > dash_count_regular)
+   {
+      return (data._dash_dir == Dash::Left) ? _dash_init_l : _dash_init_r;
+   }
+   else if (data._dash_frame_count < dash_count_stop)
+   {
+      return (data._dash_dir == Dash::Left) ? _dash_stop_l : _dash_stop_r;
+   }
+   else
+   {
+      return (data._dash_dir == Dash::Left) ? _dash_l : _dash_r;
+   }
+
+   return std::nullopt;
+}
+
+std::optional<std::shared_ptr<Animation>> PlayerAnimation::processSwimAnimation(const PlayerAnimationData& data)
+{
+   if (!data._in_water)
+   {
+      return std::nullopt;
+   }
+
+   return data._points_right ? _swim_r : _swim_l;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallSlideAnimation(const PlayerAnimationData& data)
 {
-   std::optional<std::shared_ptr<Animation>> next_cycle;
-
-   if (data._wall_sliding)
+   if (!data._wall_sliding)
    {
-      const auto& mapped_animation = getMappedArmedAnimation(_wallslide_impact_l, data);
-
-      if (StopWatch::duration(data._timepoint_wallslide, now) < mapped_animation->_overall_time_chrono)
-      {
-         next_cycle = data._points_right ? _wallslide_impact_l : _wallslide_impact_r;
-      }
-      else
-      {
-         next_cycle = data._points_right ? _wallslide_l : _wallslide_r;
-      }
+      return std::nullopt;
    }
 
-   return next_cycle;
+   const auto& mapped_animation = getMappedArmedAnimation(_wallslide_impact_l, data);
+
+   if (StopWatch::duration(data._timepoint_wallslide, now) < mapped_animation->_overall_time_chrono)
+   {
+      return data._points_right ? _wallslide_impact_l : _wallslide_impact_r;
+   }
+   else
+   {
+      return data._points_right ? _wallslide_l : _wallslide_r;
+   }
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallJumpAnimation(const PlayerAnimationData& data)
 {
-   std::optional<std::shared_ptr<Animation>> next_cycle;
-
    if (StopWatch::duration(data._timepoint_walljump, now) < getMappedArmedAnimation(_wall_jump_r, data)->_overall_time_chrono)
    {
-      next_cycle = data._wall_jump_points_right ? _wall_jump_r : _wall_jump_l;
+      return data._wall_jump_points_right ? _wall_jump_r : _wall_jump_l;
    }
 
-   return next_cycle;
+   return std::nullopt;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDoubleJumpAnimation(const PlayerAnimationData& data)
 {
-   std::optional<std::shared_ptr<Animation>> next_cycle;
-
    if (StopWatch::duration(data._timepoint_doublejump, now) < getMappedArmedAnimation(_double_jump_r, data)->_overall_time_chrono)
    {
-      next_cycle = data._points_right ? _double_jump_r : _double_jump_l;
+      return data._points_right ? _double_jump_r : _double_jump_l;
    }
 
-   return next_cycle;
+   return std::nullopt;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processScreenTransitionIdleAnimation(const PlayerAnimationData& data)
 {
-   std::optional<std::shared_ptr<Animation>> next_cycle;
-
    // force idle for screen transitions
    if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
    {
-      next_cycle = data._points_left ? _idle_l_tmp : _idle_r_tmp;
+      return data._points_left ? _idle_l_tmp : _idle_r_tmp;
    }
 
-   return next_cycle;
+   return std::nullopt;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(const PlayerAnimationData& data)
 {
-   std::optional<std::shared_ptr<Animation>> next_cycle;
-
-   const auto velocity = data._linear_velocity;
-
    // jump init
-   if (!data._dash_dir.has_value())
+   if (data._dash_dir.has_value())
    {
-      if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
+      return std::nullopt;
+   }
+
+   if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
+   {
+      // jump ignition
+      _jump_animation_reference = 0;
+      return data._points_right ? _jump_init_r : _jump_init_l;
+   }
+
+   // jump is active when either
+   // - in the air
+   // - jumping through a one-sided wall (in that case player may have ground contacts)
+   else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
+   {
+      const auto velocity = data._linear_velocity;
+
+      // jump movement goes up
+      if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
       {
-         // jump ignition
-         _jump_animation_reference = 0;
-         next_cycle = data._points_right ? _jump_init_r : _jump_init_l;
+         _jump_animation_reference = 1;
+         return data._points_right ? _jump_up_r : _jump_up_l;
       }
-
-      // jump is active when either
-      // - in the air
-      // - jumping through a one-sided wall (in that case player may have ground contacts)
-      else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
+      // jump movement goes down
+      else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
       {
-         // jump movement goes up
-         if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
-         {
-            next_cycle = data._points_right ? _jump_up_r : _jump_up_l;
-            _jump_animation_reference = 1;
-         }
-         // jump movement goes down
-         else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
-         {
-            next_cycle = data._points_right ? _jump_down_r : _jump_down_l;
-            _jump_animation_reference = 2;
-         }
-         else
-         {
-            // jump midair
-            if (_jump_animation_reference == 1)
-            {
-               next_cycle = data._points_right ? _jump_midair_r : _jump_midair_l;
-            }
-         }
+         _jump_animation_reference = 2;
+         return data._points_right ? _jump_down_r : _jump_down_l;
       }
-
-      // hard landing
-      else if (_jump_animation_reference == 2 && data._hard_landing)
+      else
       {
-         next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
-
-         if (next_cycle.value()->_current_frame == static_cast<int32_t>(next_cycle.value()->_frames.size()) - 1)
+         // jump midair
+         if (_jump_animation_reference == 1)
          {
-            _jump_animation_reference = 3;
-            next_cycle.value()->seekToStart();
+            return data._points_right ? _jump_midair_r : _jump_midair_l;
          }
       }
    }
 
-   return next_cycle;
+   // hard landing
+   else if (_jump_animation_reference == 2 && data._hard_landing)
+   {
+      std::optional<std::shared_ptr<Animation>> next_cycle;
+      next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
+
+      if (next_cycle.value()->_current_frame == static_cast<int32_t>(next_cycle.value()->_frames.size()) - 1)
+      {
+         _jump_animation_reference = 3;
+         next_cycle.value()->seekToStart();
+      }
+
+      return next_cycle;
+   }
+
+   return std::nullopt;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimation(const PlayerAnimationData& data)
@@ -667,123 +817,13 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
 
    now = StopWatch::now();
 
-   std::shared_ptr<Animation> next_cycle = nullptr;
-
-   const auto look_active = CameraPanorama::getInstance().isLookActive();
-   const auto passes_sanity_check = !(data._moving_right && data._moving_left);
-
-   // dash
-   if (data._dash_dir.has_value())
-   {
-      // init  regular            stop
-      // |     |                  |
-      // +-----+------------------+----->
-      // t
-      const auto dash_count_max = PhysicsConfiguration::getInstance()._player_dash_frame_count;
-      const auto dash_count_regular = dash_count_max - (dash_count_max / 5);
-      const auto dash_count_stop = dash_count_max / 5;
-
-      if (data._dash_frame_count > dash_count_regular)
-      {
-         next_cycle = (data._dash_dir == Dash::Left) ? _dash_init_l : _dash_init_r;
-      }
-      else if (data._dash_frame_count < dash_count_stop)
-      {
-         next_cycle = (data._dash_dir == Dash::Left) ? _dash_stop_l : _dash_stop_r;
-      }
-      else
-      {
-         next_cycle = (data._dash_dir == Dash::Left) ? _dash_l : _dash_r;
-      }
-   }
-
-   // run
-   else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching && !data._bending_down)
-   {
-      next_cycle = _run_r;
-   }
-   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching && !data._bending_down)
-   {
-      next_cycle = _run_l;
-   }
-
-   // crouch
-   else if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
-   {
-      // unsupported
-      // next_cycle = _crouch_r;
-   }
-   else if (data._moving_left && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
-   {
-      // unsupported
-      // next_cycle = _crouch_l;
-   }
-
-   // bending down state
-   else if (data._bending_down)
-   {
-      next_cycle = data._points_left ? _bend_down_l : _bend_down_r;
-      const auto& mapped_animation = getMappedArmedAnimation(next_cycle, data);
-
-      // going from bending down to bending down idle
-      if (StopWatch::duration(data._timepoint_bend_down_start, now) > mapped_animation->_overall_time_chrono)
-      {
-         next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
-
-         // blink every now and then
-         if (_bend_down_idle_l_tmp->_finished)
-         {
-            _bend_down_idle_l_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_l : _bend_down_idle_l;
-         }
-
-         if (_bend_down_idle_r_tmp->_finished)
-         {
-            _bend_down_idle_r_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_r : _bend_down_idle_r;
-         }
-      }
-   }
-
-   // idle or bend back up
-   else if (data._points_left)
-   {
-      const auto& mapped_animation = getMappedArmedAnimation(_bend_up_l, data);
-
-      // bend up if player is releasing the crouch
-      if (StopWatch::duration(data._timepoint_bend_down_end, now) < mapped_animation->_overall_time_chrono)
-      {
-         next_cycle = _bend_up_l;
-      }
-      else
-      {
-         // otherwise randomly blink or idle
-         next_cycle = _idle_l_tmp;
-
-         if (_idle_l_tmp->_finished)
-         {
-            _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l : _idle_l;
-         }
-      }
-   }
-   else
-   {
-      const auto& mapped_animation = getMappedArmedAnimation(_bend_up_r, data);
-
-      // bend up if player is releasing the crouch
-      if (StopWatch::duration(data._timepoint_bend_down_end, now) < mapped_animation->_overall_time_chrono)
-      {
-         next_cycle = _bend_up_r;
-      }
-      else
-      {
-         next_cycle = _idle_r_tmp;
-
-         if (_idle_r_tmp->_finished)
-         {
-            _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r : _idle_r;
-         }
-      }
-   }
-
+   std::shared_ptr<Animation> next_cycle;
+   next_cycle = processDashAnimation(data).value_or(next_cycle);
+   next_cycle = processRunAnimation(data).value_or(next_cycle);
+   next_cycle = processCrouchAnimation(data).value_or(next_cycle);
+   next_cycle = processBendDownAnimation(data).value_or(next_cycle);
+   next_cycle = processBendUpAnimation(data).value_or(next_cycle);
+   next_cycle = processIdleAnimation(data).value_or(next_cycle);
    next_cycle = processJumpAnimation(data).value_or(next_cycle);
    next_cycle = processSwimAnimation(data).value_or(next_cycle);
    next_cycle = processWallSlideAnimation(data).value_or(next_cycle);
@@ -793,6 +833,7 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    next_cycle = processAppearAnimation(data).value_or(next_cycle);
    next_cycle = processDeathAnimation(data).value_or(next_cycle);
    next_cycle = processAttackAnimation(data).value_or(next_cycle);
+
    next_cycle = getMappedArmedAnimation(next_cycle, data);
 
    if (!next_cycle)
