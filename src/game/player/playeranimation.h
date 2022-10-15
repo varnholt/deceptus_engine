@@ -67,8 +67,16 @@ public:
 
 private:
    const std::shared_ptr<Animation>&
-   getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data);
+   getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data) const;
 
+   bool isBendingUp(const PlayerAnimationData& data) const;
+
+   std::optional<std::shared_ptr<Animation>> processIdleAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processBendUpAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processBendDownAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processCrouchAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processRunAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>> processDashAnimation(const PlayerAnimationData& data);
    std::optional<std::shared_ptr<Animation>> processSwimAnimation(const PlayerAnimationData& data);
    std::optional<std::shared_ptr<Animation>> processWallSlideAnimation(const PlayerAnimationData& data);
    std::optional<std::shared_ptr<Animation>> processWallJumpAnimation(const PlayerAnimationData& data);
