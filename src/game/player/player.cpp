@@ -238,12 +238,12 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       _weapon_system->_selected->draw(color);
    }
 
+   // that y offset is to compensate the wonky box2d origin
+   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+
    auto current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
-      // that y offset is to compensate the wonky box2d origin
-      const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
-
       current_cycle->setPosition(draw_position_px);
 
       // draw dash with motion blur
@@ -261,7 +261,14 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       }
 
       // player animations might be combined of multiple animations, hence the recursive calls
-      current_cycle->drawTree(color, normal);
+      current_cycle->draw(color, normal);
+   }
+
+   auto auxiliary_cycle = _player_animation.getAuxiliaryCycle();
+   if (auxiliary_cycle)
+   {
+      auxiliary_cycle->setPosition(draw_position_px);
+      auxiliary_cycle->draw(color, normal);
    }
 
    AnimationPool::getInstance().drawAnimations(color, normal, {"player_jump_dust_l", "player_jump_dust_r", "player_water_splash"});

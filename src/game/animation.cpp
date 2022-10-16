@@ -64,6 +64,7 @@ void Animation::updateTree(const sf::Time& dt)
    }
 
    update(dt);
+
    for (const auto& child : _children)
    {
       child->update(dt);

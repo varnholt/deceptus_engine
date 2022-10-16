@@ -33,6 +33,7 @@ void PlayerAnimation::loadAnimations()
    _current_cycle.reset();
    _looped_animations.clear();
    _sword_lut.clear();
+   _sword_attack_lut.clear();
    _appear_animations.clear();
 
    _idle_r = AnimationPool::getInstance().create("player_idle_r", 0.0f, 0.0f, true, false);
@@ -110,10 +111,8 @@ void PlayerAnimation::loadAnimations()
    _sword_jump_landing_r = AnimationPool::getInstance().create("player_jump_landing_sword_r", 0.0f, 0.0f, true, false);
    _sword_jump_landing_l = AnimationPool::getInstance().create("player_jump_landing_sword_l", 0.0f, 0.0f, true, false);
 
-   // todo
-   // put leg animation in another mapping
-   // _sword_attack_jump_r = AnimationPool::getInstance().create("xxx", 0.0f, 0.0f, true, false);
-   // _sword_attack_jump_l = AnimationPool::getInstance().create("xxx", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_r = AnimationPool::getInstance().create("player_jump_attack_sword_r", 0.0f, 0.0f, true, false);
+   _sword_attack_jump_l = AnimationPool::getInstance().create("player_jump_attack_sword_l", 0.0f, 0.0f, true, false);
    _sword_attack_jump_legs_init_r = AnimationPool::getInstance().create("player_jump_init_attack_sword_legs_r", 0.0f, 0.0f, true, false);
    _sword_attack_jump_legs_init_l = AnimationPool::getInstance().create("player_jump_init_attack_sword_legs_l", 0.0f, 0.0f, true, false);
    _sword_attack_jump_legs_up_r = AnimationPool::getInstance().create("player_jump_up_attack_sword_legs_r", 0.0f, 0.0f, true, false);
@@ -165,13 +164,13 @@ void PlayerAnimation::loadAnimations()
    _sword_attack_bend_down_2_r = AnimationPool::getInstance().create("player_bend_down_attack_sword_2_r", 0.0f, 0.0f, true, false);
    _sword_attack_standing_l[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_l", 0.0f, 0.0f, true, false);
    _sword_attack_standing_r[0] = AnimationPool::getInstance().create("player_standing_attack_sword_1_r", 0.0f, 0.0f, true, false);
-   //   _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
-   //   _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
-   //   _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
-   //   _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
+   // _sword_standing_attack_l[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_l", 0.0f, 0.0f, true, false);
+   // _sword_standing_attack_r[1] = AnimationPool::getInstance().add("player_standing_attack_sword_2_r", 0.0f, 0.0f, true, false);
+   // _sword_standing_attack_l[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_l", 0.0f, 0.0f, true, false);
+   // _sword_standing_attack_r[2] = AnimationPool::getInstance().add("player_standing_attack_sword_3_r", 0.0f, 0.0f, true, false);
 
-   // _crouch_r           = AnimationPool::getInstance().add("player_crouch_r",           0.0f, 0.0f, true, false);
-   // _crouch_l           = AnimationPool::getInstance().add("player_crouch_l",           0.0f, 0.0f, true, false);
+   // _crouch_r = AnimationPool::getInstance().add("player_crouch_r", 0.0f, 0.0f, true, false);
+   // _crouch_l = AnimationPool::getInstance().add("player_crouch_l", 0.0f, 0.0f, true, false);
 
    _appear_animations = {_appear_l, _appear_r, _sword_appear_l, _sword_appear_r};
 
@@ -347,7 +346,7 @@ int32_t PlayerAnimation::getJumpAnimationReference() const
    return _jump_animation_reference;
 }
 
-std::shared_ptr<Animation> PlayerAnimation::getCurrentCycle() const
+const std::shared_ptr<Animation>& PlayerAnimation::getCurrentCycle() const
 {
    return _current_cycle;
 }
@@ -383,37 +382,68 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDeathAnimation
 std::optional<std::shared_ptr<Animation>>
 PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data)
 {
-   if (!data._attacking)
-   {
-      return std::nullopt;
-   }
-
    std::optional<std::shared_ptr<Animation>> attack_cycle;
 
    switch (data._weapon_type)
    {
       case WeaponType::Sword:
       {
-         if (data._bending_down)
+         const auto in_air_attack_elapsed =
+            StopWatch::duration(data._timepoint_attack_jumping_start, now) >= _sword_attack_jump_r->_overall_time_chrono;
+
+         const auto bend_down_attack_elapsed =
+            StopWatch::duration(data._timepoint_attack_bend_down_start, now) >= _sword_attack_bend_down_1_l->_overall_time_chrono;
+
+         if (!bend_down_attack_elapsed)
          {
-            // also must be mapped for different weapons
-            if (StopWatch::duration(data._timepoint_attack_bend_down_start, now) < _sword_attack_bend_down_1_l->_overall_time_chrono)
-            {
-               attack_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
-            }
+            attack_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
          }
-         else if (data._in_air)
+         else if (!in_air_attack_elapsed)
          {
+            // scenario 1: jump ends before attack ends
+            //
+            // |
+            // |                [ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]
+            // |[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]
+            // +------------------------------------------------------------->
+            // |                |                  |
+            // jump start       |                  |
+            //                  attack start       |
+            //                                     abort attack
+            //
+            // scenario 2: jump ends after attack ends
+            //
+            // |
+            // |            [ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][x]
+            // |         [ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]
+            // +------------------------------------------------------------->
+            //           |                |               |
+            //           jump start       |               |
+            //                            attack start    |
+            //                                            play regular jump animation again
+
             // for in-air, just replace the jump cycles with the cycles that just have pants :)
             const auto sword_attack_cycle_it = _sword_attack_lut.find(next_cycle);
             if (sword_attack_cycle_it != _sword_attack_lut.end())
             {
+               _auxiliary_cycle = data._points_left ? _sword_attack_jump_l : _sword_attack_jump_r;
                return sword_attack_cycle_it->second;
+            }
+            else
+            {
+               // jump animation is over, clear auxiliary cycle
+               //
+               // this is not a solid implementation since the attack cycle should be played until it's
+               // actually over... but for that, more jump/idle cycles, just showing the pants are needed.
+               _auxiliary_cycle = nullptr;
             }
          }
          else
          {
-            if (StopWatch::duration(data._timepoint_attack_standing_start, now) < _sword_attack_standing_tmp_l->_overall_time_chrono)
+            const auto standing_attack_elapsed =
+               StopWatch::duration(data._timepoint_attack_standing_start, now) >= _sword_attack_standing_tmp_l->_overall_time_chrono;
+
+            if (!standing_attack_elapsed)
             {
                if (data._points_left)
                {
@@ -446,6 +476,20 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
             }
          }
 
+         // to be checked if the reset code below is really needed
+         //
+         // in-air attack cycle is elapsed, clear auxiliary cycle
+         if (in_air_attack_elapsed)
+         {
+            _auxiliary_cycle = nullptr;
+
+            // reset sword attack animation once it's elapsed
+            _sword_attack_jump_l->pause();
+            _sword_attack_jump_r->pause();
+            _sword_attack_jump_l->seekToStart();
+            _sword_attack_jump_r->seekToStart();
+         }
+
          break;
       }
       case WeaponType::Bow:
@@ -457,6 +501,11 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
    }
 
    return attack_cycle;
+}
+
+const std::shared_ptr<Animation>& PlayerAnimation::getAuxiliaryCycle() const
+{
+   return _auxiliary_cycle;
 }
 
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
@@ -882,5 +931,11 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    }
 
    _current_cycle = next_cycle;
-   _current_cycle->updateTree(dt);
+   _current_cycle->update(dt);
+
+   if (_auxiliary_cycle)
+   {
+      _auxiliary_cycle->play();
+      _auxiliary_cycle->update(dt);
+   }
 }

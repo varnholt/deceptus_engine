@@ -57,7 +57,9 @@ public:
 
    int32_t getJumpAnimationReference() const;
 
-   std::shared_ptr<Animation> getCurrentCycle() const;
+   const std::shared_ptr<Animation>& getCurrentCycle() const;
+   const std::shared_ptr<Animation>& getAuxiliaryCycle() const;
+
    HighResDuration getRevealDuration() const;
    HighResDuration getSwordAttackDurationStanding() const;
    HighResDuration getSwordAttackDurationBendingDown() const;
@@ -227,6 +229,7 @@ private:
    int32_t _jump_animation_reference = 0;
 
    std::shared_ptr<Animation> _current_cycle;
+   std::shared_ptr<Animation> _auxiliary_cycle;
 
    std::vector<std::shared_ptr<Animation>> _looped_animations;
    std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
