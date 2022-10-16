@@ -85,7 +85,8 @@ private:
    std::optional<std::shared_ptr<Animation>> processJumpAnimation(const PlayerAnimationData& data);
    std::optional<std::shared_ptr<Animation>> processAppearAnimation(const PlayerAnimationData& data);
    std::optional<std::shared_ptr<Animation>> processDeathAnimation(const PlayerAnimationData& data);
-   std::optional<std::shared_ptr<Animation>> processAttackAnimation(const PlayerAnimationData& data);
+   std::optional<std::shared_ptr<Animation>>
+   processAttackAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data);
 
    std::shared_ptr<Animation> _idle_r;
    std::shared_ptr<Animation> _idle_l;
@@ -229,5 +230,6 @@ private:
 
    std::vector<std::shared_ptr<Animation>> _looped_animations;
    std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_lut;
+   std::unordered_map<std::shared_ptr<Animation>, std::shared_ptr<Animation>> _sword_attack_lut;
    std::vector<std::shared_ptr<Animation>> _appear_animations;
 };
