@@ -1,5 +1,7 @@
 #include "boomeffectenvelopesine.h"
 
+#include <math.h>
+
 namespace
 {
 constexpr float frequency = 32.0f;
