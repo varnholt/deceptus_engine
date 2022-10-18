@@ -858,11 +858,11 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimatio
    std::optional<std::shared_ptr<Animation>> next_cycle;
 
    // appear animation
-   if (GameClock::getInstance().duration() < getRevealDuration())
+   if (GameClock::getInstance().durationSinceSpawn() < getRevealDuration())
    {
       next_cycle = data._points_right ? _appear_r : _appear_l;
 
-      if (GameClock::getInstance().duration() < 1.0s)
+      if (GameClock::getInstance().durationSinceSpawn() < 1.0s)
       {
          // invisibility: 0 .. 1.0s (wait until player is focused)
          for (auto& appear_animation : _appear_animations)

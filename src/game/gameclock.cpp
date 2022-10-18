@@ -13,8 +13,7 @@ void GameClock::reset()
    _start_time = std::chrono::high_resolution_clock::now();
 }
 
-
-GameClock::HighResDuration GameClock::duration() const
+GameClock::HighResDuration GameClock::durationSinceSpawn() const
 {
    const auto now = std::chrono::high_resolution_clock::now();
    return now - _start_time;

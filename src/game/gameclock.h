@@ -11,7 +11,7 @@ public:
    static GameClock& getInstance();
 
    void reset();
-   HighResDuration duration() const;
+   HighResDuration durationSinceSpawn() const;
 
 
 private:
