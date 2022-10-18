@@ -601,7 +601,7 @@
    },
    "player_swim_sword_l": {
       "frame_durations": [140, 140, 140, 140, 140, 140, 140, 140],
-      "frame_offset": [1464, 1008],
+      "frame_offset": [576, 1008],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
       "sprite_count": 8,
@@ -609,7 +609,7 @@
    },
    "player_swim_sword_r": {
       "frame_durations": [140, 140, 140, 140, 140, 140, 140, 140],
-      "frame_offset": [1464, 960],
+      "frame_offset": [576, 960],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
       "sprite_count": 8,
