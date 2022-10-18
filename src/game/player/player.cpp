@@ -788,33 +788,38 @@ void Player::updateVelocity()
 
    if (isDead())
    {
-      _body->SetLinearVelocity(b2Vec2{0.0, 0.0});
+      _body->SetLinearVelocity({0.0, 0.0});
       return;
    }
 
    if (Portal::isLocked())
    {
-      _body->SetLinearVelocity(b2Vec2{0.0, 0.0});
+      _body->SetLinearVelocity({0.0, 0.0});
       return;
    }
 
-   if (ScreenTransitionHandler::getInstance().active())
-   {
-      const auto velocity = _body->GetLinearVelocity();
-      _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
-      return;
-   }
-
-   // if we just landed hard on the ground, we need a break :)
    if (_hard_landing)
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;
    }
 
-   if (GameClock::getInstance().duration() < _player_animation.getRevealDuration())
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation.getRevealDuration())
    {
       _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
+
+   if (StopWatch::getInstance().now() < _attack._timepoint_attack_standing_start + _player_animation.getSwordAttackDurationStanding())
+   {
+      _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
+
+   if (ScreenTransitionHandler::getInstance().active())
+   {
+      const auto velocity = _body->GetLinearVelocity();
+      _body->SetLinearVelocity({0.0, velocity.y});
       return;
    }
 
