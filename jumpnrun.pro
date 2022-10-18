@@ -254,6 +254,7 @@ SOURCES += \
    src/game/tilemap.cpp \
    src/game/tilemapfactory.cpp \
    src/game/tweaks.cpp \
+   src/game/waterbubbles.cpp \
    src/game/weapon.cpp \
    src/game/weaponfactory.cpp \
    src/game/weaponsystem.cpp \
@@ -451,6 +452,7 @@ HEADERS += \
    src/game/tilemap.h \
    src/game/tilemapfactory.h \
    src/game/tweaks.h \
+   src/game/waterbubbles.h \
    src/game/weapon.h \
    src/game/weaponfactory.h \
    src/game/weaponsystem.h \
