@@ -1587,26 +1587,6 @@ void Level::addDebugRect(void* body, float x, float y, float w, float h)
 }
 
 //-----------------------------------------------------------------------------
-AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
-{
-   const auto x_tl = static_cast<int32_t>((pos_m.x * PPM) / PIXELS_PER_TILE);
-   const auto y_tl = static_cast<int32_t>((pos_m.y * PPM) / PIXELS_PER_TILE);
-
-   if (x_tl < 0 || x_tl >= _map_width_tl)
-   {
-      return AtmosphereTileInvalid;
-   }
-
-   if (y_tl < 0 || y_tl >= _map_height_tl)
-   {
-      return AtmosphereTileInvalid;
-   }
-
-   AtmosphereTile tile = static_cast<AtmosphereTile>(_map[y_tl * _map_width_tl + x_tl]);
-   return tile;
-}
-
-//-----------------------------------------------------------------------------
 std::shared_ptr<Portal> Level::getNearbyPortal() const
 {
    std::shared_ptr<Portal> nearby_portal;

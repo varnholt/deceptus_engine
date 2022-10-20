@@ -18,7 +18,8 @@ struct Atmosphere
    ~Atmosphere();
 
    void parse(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet);
-   AtmosphereTile getTileForPosition(const b2Vec2& playerPos) const;
+   AtmosphereTile getTileForPosition(const b2Vec2& pos_m) const;
+   AtmosphereTile getTileForPosition(const sf::Vector2f& pos_px) const;
 
    std::vector<int32_t> _map;
 
