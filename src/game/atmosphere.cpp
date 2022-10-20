@@ -53,3 +53,32 @@ void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared
       }
    }
 }
+
+//-----------------------------------------------------------------------------
+AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
+{
+   const auto x_px = pos_m.x * PPM;
+   const auto y_px = pos_m.y * PPM;
+
+   return getTileForPosition(sf::Vector2f{x_px, y_px});
+}
+
+//-----------------------------------------------------------------------------
+AtmosphereTile Atmosphere::getTileForPosition(const sf::Vector2f& pos_px) const
+{
+   const auto x_tl = static_cast<int32_t>(pos_px.x / PIXELS_PER_TILE);
+   const auto y_tl = static_cast<int32_t>(pos_px.y / PIXELS_PER_TILE);
+
+   if (x_tl < 0 || x_tl >= _map_width_tl)
+   {
+      return AtmosphereTileInvalid;
+   }
+
+   if (y_tl < 0 || y_tl >= _map_height_tl)
+   {
+      return AtmosphereTileInvalid;
+   }
+
+   AtmosphereTile tile = static_cast<AtmosphereTile>(_map[y_tl * _map_width_tl + x_tl]);
+   return tile;
+}
