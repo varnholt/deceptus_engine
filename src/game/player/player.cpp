@@ -213,6 +213,8 @@ void Player::setBodyViaPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   _water_bubbles.draw(color, normal);
+
    if (!_visible)
    {
       return;
@@ -1408,6 +1410,16 @@ void Player::updateJump()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateWaterBubbles(const sf::Time& dt)
+{
+   WaterBubbles::WaterBubbleInput input;
+   input._player_in_water = isInWater();
+   input._player_rect = getPixelRectFloat();
+   input._player_pointing_right = isPointingRight();
+   _water_bubbles.update(dt, input);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
@@ -1434,6 +1446,7 @@ void Player::update(const sf::Time& dt)
    updatePortal();
    updatePreviousBodyState();
    updateWeapons(dt);
+   updateWaterBubbles(dt);
    _controls->update(dt);  // called at last just to backup previous controls
 }
 
