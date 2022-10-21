@@ -79,6 +79,6 @@ AtmosphereTile Atmosphere::getTileForPosition(const sf::Vector2f& pos_px) const
       return AtmosphereTileInvalid;
    }
 
-   AtmosphereTile tile = static_cast<AtmosphereTile>(_map[y_tl * _map_width_tl + x_tl]);
+   const auto tile = static_cast<AtmosphereTile>(_map[y_tl * _map_width_tl + x_tl]);
    return tile;
 }
