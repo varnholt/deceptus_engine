@@ -15,6 +15,7 @@
 #include "playerjump.h"
 #include "playerjumptrace.h"
 #include "playerspeed.h"
+#include "waterbubbles.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -144,6 +145,7 @@ private:
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
    void updateJump();
+   void updateWaterBubbles(const sf::Time& dt);
 
    void startHardLanding();
    void resetDash();
@@ -218,6 +220,7 @@ private:
    PlayerAttack _attack;
    PlayerBelt _belt;
    PlayerJumpTrace _jump_trace;
+   WaterBubbles _water_bubbles;
 
    PlayerAnimation _player_animation;
    std::deque<PositionedAnimation> _last_animations;
