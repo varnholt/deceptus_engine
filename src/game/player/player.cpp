@@ -115,7 +115,7 @@ void Player::initialize()
 
    _weapon_system->initialize();
 
-   _jump._dust_animation_callback = [this]()
+   _jump._jump_dust_animation_callback = [this]()
    {
       AnimationPool::getInstance().create(
          _points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y
@@ -254,7 +254,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          auto& anim = _last_animations[i];
          anim._animation->setPosition(anim._position);
          anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
-         anim._animation->drawTree(color);
+         anim._animation->draw(color);
       }
 
       if (_dash.isDashActive())
@@ -274,6 +274,13 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 
    AnimationPool::getInstance().drawAnimations(color, normal, {"player_jump_dust_l", "player_jump_dust_r", "player_water_splash"});
+
+   if (_jump._wallsliding)
+   {
+      const auto wallslide_animation = _player_animation.getWallslideAnimation();
+      wallslide_animation->setPosition(_pixel_position_f.x - 20.0f, _pixel_position_f.y);
+      wallslide_animation->draw(color);
+   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1410,6 +1417,20 @@ void Player::updateJump()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateWallslide(const sf::Time& dt)
+{
+   if (!_jump._wallsliding)
+   {
+      return;
+   }
+
+
+   const auto wallside_animation = _player_animation.getWallslideAnimation();
+   wallside_animation->play();
+   wallside_animation->update(dt);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::updateWaterBubbles(const sf::Time& dt)
 {
    WaterBubbles::WaterBubbleInput input;
@@ -1446,6 +1467,7 @@ void Player::update(const sf::Time& dt)
    updatePortal();
    updatePreviousBodyState();
    updateWeapons(dt);
+   updateWallslide(dt);
    updateWaterBubbles(dt);
    _controls->update(dt);  // called at last just to backup previous controls
 }

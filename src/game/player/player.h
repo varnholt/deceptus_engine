@@ -145,6 +145,7 @@ private:
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
    void updateJump();
+   void updateWallslide(const sf::Time& dt);
    void updateWaterBubbles(const sf::Time& dt);
 
    void startHardLanding();
@@ -205,8 +206,8 @@ private:
 
    float _next_footstep_time = 0.0f;
 
-   int _z_index = 0;
-   int _id = 0;
+   int32_t _z_index = 0;
+   int32_t _id = 0;
 
    bool _hard_landing = false;
    int32_t _hard_landing_cycles = 0;
