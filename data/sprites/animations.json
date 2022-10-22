@@ -248,19 +248,19 @@
       "texture": "data/sprites/player.png"
    },
    "player_double_jump_l": {
-      "frame_durations": [70, 70, 70, 70, 70, 70, 70, 70],
+      "frame_durations": [30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
       "frame_offset": [0, 816],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
-      "sprite_count": 8,
+      "sprite_count": 16,
       "texture": "data/sprites/player.png"
    },
    "player_double_jump_r": {
-      "frame_durations": [70, 70, 70, 70, 70, 70, 70, 70],
+      "frame_durations": [30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
       "frame_offset": [0, 768],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
-      "sprite_count": 8,
+      "sprite_count": 16,
       "texture": "data/sprites/player.png"
    },
    "player_idle_blink_l": {
