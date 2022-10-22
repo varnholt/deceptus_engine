@@ -70,7 +70,7 @@ struct PlayerJump
    bool _compensate_velocity = false;
    bool _double_jump_consumed = false;
 
-   std::function<void(void)> _dust_animation_callback;
+   std::function<void(void)> _jump_dust_animation_callback;
    std::function<void(void)> _remove_climb_joint_callback;
 };
 

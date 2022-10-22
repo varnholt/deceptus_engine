@@ -172,6 +172,8 @@ void PlayerAnimation::loadAnimations()
    // _crouch_r = AnimationPool::getInstance().add("player_crouch_r", 0.0f, 0.0f, true, false);
    // _crouch_l = AnimationPool::getInstance().add("player_crouch_l", 0.0f, 0.0f, true, false);
 
+   _wallslide_animation = AnimationPool::getInstance().create("player_wallslide_dust", 0.0f, 0.0f, true, false);
+
    _appear_animations = {_appear_l, _appear_r, _sword_appear_l, _sword_appear_r};
 
    // we will replace those later as we go
@@ -286,6 +288,8 @@ void PlayerAnimation::loadAnimations()
    _looped_animations.push_back(_wallslide_l);
    _looped_animations.push_back(_wall_jump_r);
    _looped_animations.push_back(_wall_jump_l);
+
+   _looped_animations.push_back(_wallslide_animation);
 
    for (auto& i : _looped_animations)
    {
@@ -506,6 +510,11 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
 const std::shared_ptr<Animation>& PlayerAnimation::getAuxiliaryCycle() const
 {
    return _auxiliary_cycle;
+}
+
+const std::shared_ptr<Animation>& PlayerAnimation::getWallslideAnimation() const
+{
+   return _wallslide_animation;
 }
 
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const

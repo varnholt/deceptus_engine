@@ -267,7 +267,7 @@ void PlayerJump::jump()
          }
          else
          {
-            _dust_animation_callback();
+            _jump_dust_animation_callback();
             Audio::getInstance().playSample("jump.wav");
          }
       }
