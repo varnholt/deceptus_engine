@@ -275,11 +275,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    AnimationPool::getInstance().drawAnimations(color, normal, {"player_jump_dust_l", "player_jump_dust_r", "player_water_splash"});
 
-   if (_jump._wallsliding)
+   if (_jump._wallsliding && _jump._walljump_frame_count == 0)
    {
-      const auto wallslide_animation = _player_animation.getWallslideAnimation();
-      wallslide_animation->setPosition(_pixel_position_f.x - 20.0f, _pixel_position_f.y);
-      wallslide_animation->draw(color);
+      _player_animation.getWallslideAnimation()->draw(color);
    }
 }
 
@@ -1424,10 +1422,11 @@ void Player::updateWallslide(const sf::Time& dt)
       return;
    }
 
-
-   const auto wallside_animation = _player_animation.getWallslideAnimation();
-   wallside_animation->play();
-   wallside_animation->update(dt);
+   const auto wallslide_animation = _player_animation.getWallslideAnimation();
+   const auto offset_x_px = isPointingLeft() ? - 5.0f : 5.0f;
+   wallslide_animation->setPosition(_pixel_position_f.x + offset_x_px, _pixel_position_f.y);
+   wallslide_animation->play();
+   wallslide_animation->update(dt);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
