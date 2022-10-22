@@ -59,6 +59,7 @@ public:
 
    const std::shared_ptr<Animation>& getCurrentCycle() const;
    const std::shared_ptr<Animation>& getAuxiliaryCycle() const;
+   const std::shared_ptr<Animation>& getWallslideAnimation() const;
 
    HighResDuration getRevealDuration() const;
    HighResDuration getSwordAttackDurationStanding() const;
@@ -225,6 +226,8 @@ private:
    std::shared_ptr<Animation> _death_default;
    std::shared_ptr<Animation> _death_electrocuted_l;
    std::shared_ptr<Animation> _death_electrocuted_r;
+
+   std::shared_ptr<Animation> _wallslide_animation;
 
    int32_t _jump_animation_reference = 0;
 

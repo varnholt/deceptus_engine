@@ -846,5 +846,13 @@
       "origin": [36.0, 48.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png"
+   },
+   "player_wallslide_dust": {
+      "frame_durations": [75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75],
+      "frame_offset": [0, 1536],
+      "frame_size": [24, 48],
+      "origin": [12, 24],
+      "sprite_count": 60,
+      "texture": "data/sprites/player.png"
    }
 }
