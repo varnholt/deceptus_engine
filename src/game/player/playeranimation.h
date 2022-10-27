@@ -189,6 +189,8 @@ private:
 
    std::shared_ptr<Animation> _double_jump_r;
    std::shared_ptr<Animation> _double_jump_l;
+   std::shared_ptr<Animation> _sword_double_jump_r;
+   std::shared_ptr<Animation> _sword_double_jump_l;
 
    std::shared_ptr<Animation> _swim_idle_r;
    std::shared_ptr<Animation> _swim_idle_l;
