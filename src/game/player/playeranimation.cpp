@@ -130,6 +130,8 @@ void PlayerAnimation::loadAnimations()
 
    _double_jump_r = AnimationPool::getInstance().create("player_double_jump_r", 0.0f, 0.0f, true, false);
    _double_jump_l = AnimationPool::getInstance().create("player_double_jump_l", 0.0f, 0.0f, true, false);
+   _sword_double_jump_r = AnimationPool::getInstance().create("player_double_jump_sword_r", 0.0f, 0.0f, true, false);
+   _sword_double_jump_l = AnimationPool::getInstance().create("player_double_jump_sword_l", 0.0f, 0.0f, true, false);
 
    _swim_idle_r = AnimationPool::getInstance().create("player_swim_idle_r", 0.0f, 0.0f, true, false);
    _swim_idle_l = AnimationPool::getInstance().create("player_swim_idle_l", 0.0f, 0.0f, true, false);
@@ -276,6 +278,8 @@ void PlayerAnimation::loadAnimations()
 
    _looped_animations.push_back(_double_jump_r);
    _looped_animations.push_back(_double_jump_l);
+   _looped_animations.push_back(_sword_double_jump_r);
+   _looped_animations.push_back(_sword_double_jump_l);
 
    _looped_animations.push_back(_swim_idle_r);
    _looped_animations.push_back(_swim_idle_l);
@@ -313,6 +317,8 @@ void PlayerAnimation::loadAnimations()
    _sword_lut[_dash_r] = _sword_dash_r;
    _sword_lut[_dash_stop_l] = _sword_dash_stop_l;
    _sword_lut[_dash_stop_r] = _sword_dash_stop_r;
+   _sword_lut[_double_jump_l] = _sword_double_jump_l;
+   _sword_lut[_double_jump_r] = _sword_double_jump_r;
    _sword_lut[_idle_l] = _sword_idle_l;
    _sword_lut[_idle_r] = _sword_idle_r;
    _sword_lut[_run_l] = _sword_run_l;
