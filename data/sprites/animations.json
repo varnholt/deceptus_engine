@@ -263,6 +263,22 @@
       "sprite_count": 16,
       "texture": "data/sprites/player.png"
    },
+   "player_double_jump_sword_l": {
+      "frame_durations": [30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+      "frame_offset": [0, 720],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 16,
+      "texture": "data/sprites/player.png"
+   },
+   "player_double_jump_sword_r": {
+      "frame_durations": [30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+      "frame_offset": [0, 672],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 16,
+      "texture": "data/sprites/player.png"
+   },
    "player_idle_blink_l": {
       "frame_durations": [120, 120, 120, 120, 120, 120, 120, 120],
       "frame_offset": [576, 48],
