@@ -235,6 +235,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       }
    }
 
+   if (_jump._wallsliding && _jump._walljump_frame_count == 0)
+   {
+      _player_animation.getWallslideAnimation()->draw(color);
+   }
+
    if (_weapon_system->_selected)
    {
       _weapon_system->_selected->draw(color);
@@ -274,11 +279,6 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 
    AnimationPool::getInstance().drawAnimations(color, normal, {"player_jump_dust_l", "player_jump_dust_r", "player_water_splash"});
-
-   if (_jump._wallsliding && _jump._walljump_frame_count == 0)
-   {
-      _player_animation.getWallslideAnimation()->draw(color);
-   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
