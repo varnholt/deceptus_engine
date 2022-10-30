@@ -507,7 +507,7 @@
       "frame_durations": [80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80],
       "frame_offset": [1320, 528],
       "frame_size": [120, 48],
-      "origin": [72.0, 48.0],
+      "origin": [72.0, 45.0],
       "sprite_count": 13,
       "texture": "data/sprites/player.png"
    },
@@ -515,7 +515,7 @@
       "frame_durations": [80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80],
       "frame_offset": [1320, 480],
       "frame_size": [120, 48],
-      "origin": [48.0, 48.0],
+      "origin": [48.0, 45.0],
       "sprite_count": 13,
       "texture": "data/sprites/player.png"
    },
