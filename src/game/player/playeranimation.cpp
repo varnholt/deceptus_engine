@@ -845,6 +845,12 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
          {
             return data._points_right ? _jump_midair_r : _jump_midair_l;
          }
+
+         // still in-air but linear velocity is ~0 for whatever reason
+         else if (_jump_animation_reference == 2)
+         {
+            return data._points_right ? _jump_down_r : _jump_down_l;
+         }
       }
    }
 

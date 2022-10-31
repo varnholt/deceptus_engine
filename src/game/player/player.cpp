@@ -746,6 +746,20 @@ void Player::updateAnimation(const sf::Time& dt)
       data._dash_dir = _dash._dash_dir;
    }
 
+   // pick latest left/right input to avoid conflicts
+   if (data._moving_right && data._moving_left)
+   {
+      if (_controls->wasMovingLeft())
+      {
+         data._moving_left = false;
+      }
+
+      if (_controls->wasMovingRight())
+      {
+         data._moving_right = false;
+      }
+   }
+
    _player_animation.update(dt, data);
 }
 
