@@ -6,7 +6,6 @@
 #include "boomeffect.h"
 #include "camerasystem.h"
 #include "constants.h"
-#include "tmxenemy.h"
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "gamenode.h"
 #include "imagelayer.h"
@@ -18,6 +17,7 @@
 #include "shaders/blurshader.h"
 #include "shaders/gammashader.h"
 #include "squaremarcher.h"
+#include "tmxenemy.h"
 
 // effects
 #include "effects/lightsystem.h"
