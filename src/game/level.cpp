@@ -73,7 +73,7 @@
 
 #ifdef __GNUC__
 #define FMT_HEADER_ONLY
-#  include <fmt/core.h>
+#include <fmt/core.h>
 #else
 #include <format>
 namespace fmt = std;
@@ -405,46 +405,52 @@ void Level::loadTmx()
       data._tmx_object = nullptr;
       data._tmx_object_group = nullptr;
 
+      // parse sprites
       if (element->_type == TmxElement::Type::TypeLayer)
       {
          auto layer = std::dynamic_pointer_cast<TmxLayer>(element);
-         auto tileset = tmx_parser.getTileSet(layer);
+
+         if (GameMechanismDeserializer::isLayerNameReserved(layer->_name))
+         {
+            continue;
+         }
+
+         const auto tileset = tmx_parser.getTileSet(layer);
 
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
-         if (!GameMechanismDeserializer::isLayerNameReserved(layer->_name))
+         const auto tile_map = TileMapFactory::makeTileMap(layer);
+         tile_map->load(layer, tileset, path);
+         auto push_tile_map = true;
+
+         if (layer->_name == "atmosphere")
          {
-            const auto tile_map = TileMapFactory::makeTileMap(layer);
-            tile_map->load(layer, tileset, path);
-            auto push_tile_map = true;
+            _atmosphere._tile_map = tile_map;
+            _atmosphere.parse(layer, tileset);
+         }
+         else if (layer->_name == "extras")
+         {
+            Player::getCurrent()->getExtraManager()->_tilemap = tile_map;
+            Player::getCurrent()->getExtraManager()->load(layer, tileset);
+         }
+         else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
+         {
+            deserializeParallaxMap(layer, tile_map);
+            push_tile_map = false;
+         }
+         else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
+         {
+            parsePhysicsTiles(layer, tileset, path);
+         }
 
-            if (layer->_name == "atmosphere")
-            {
-               _atmosphere._tile_map = tile_map;
-               _atmosphere.parse(layer, tileset);
-            }
-            else if (layer->_name == "extras")
-            {
-               Player::getCurrent()->getExtraManager()->_tilemap = tile_map;
-               Player::getCurrent()->getExtraManager()->load(layer, tileset);
-            }
-            else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
-            {
-               deserializeParallaxMap(layer, tile_map);
-               push_tile_map = false;
-            }
-            else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
-            {
-               parsePhysicsTiles(layer, tileset, path);
-            }
-
-            if (push_tile_map)
-            {
-               _tile_maps.push_back(tile_map);
-            }
+         if (push_tile_map)
+         {
+            _tile_maps.push_back(tile_map);
          }
       }
+
+      // parse objects
       else if (element->_type == TmxElement::Type::TypeObjectGroup)
       {
          const auto object_group = std::dynamic_pointer_cast<TmxObjectGroup>(element);
@@ -452,7 +458,6 @@ void Level::loadTmx()
          for (const auto& object : object_group->_objects)
          {
             const auto tmx_object = object.second;
-
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
 
@@ -478,9 +483,11 @@ void Level::loadTmx()
             }
          }
       }
+
+      // parse images
       else if (element->_type == TmxElement::Type::TypeImageLayer)
       {
-         auto image = ImageLayer::deserialize(element, path);
+         const auto image = ImageLayer::deserialize(element, path);
          _image_layers.push_back(image);
       }
    }
@@ -488,7 +495,6 @@ void Level::loadTmx()
    TileMapFactory::merge(_tile_maps);
 
    _map->loadLevelTextures(path / std::filesystem::path("physics_grid_solid.png"), path / std::filesystem::path("physics_path_solid.png"));
-
    _map->setDoors(_mechanism_doors);
    _map->setPortals(_mechanism_portals);
 
@@ -1319,10 +1325,7 @@ const std::shared_ptr<b2World>& Level::getWorld() const
 //-----------------------------------------------------------------------------
 void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_type)
 {
-   if (
-         fabs(chain[0].x - chain[chain.size() - 1].x) < 0.001f
-      && fabs(chain[0].y - chain[chain.size() - 1].y) < 0.001f
-   )
+   if (fabs(chain[0].x - chain[chain.size() - 1].x) < 0.001f && fabs(chain[0].y - chain[chain.size() - 1].y) < 0.001f)
    {
       Log::Error() << "chain has equal start and end position" << std::endl;
       exit(0);
