@@ -1,4 +1,4 @@
-#include "enemy.h"
+#include "tmxenemy.h"
 
 #include "constants.h"
 #include "framework/math/sfmlmath.h"
@@ -10,8 +10,7 @@
 #include <ranges>
 #include <sstream>
 
-
-void Enemy::parse(const std::shared_ptr<TmxObject>& object)
+void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
 {
    _id = object->_id;
    _name = object->_name;
@@ -86,8 +85,7 @@ void Enemy::parse(const std::shared_ptr<TmxObject>& object)
    _vertices[3].y = top;
 }
 
-
-void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
+void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
 {
    // do not destroy existing paths
    if (!_path.empty())
@@ -165,8 +163,7 @@ void Enemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
    }
 }
 
-
-std::optional<ScriptProperty> Enemy::findProperty(const std::string& key)
+std::optional<ScriptProperty> TmxEnemy::findProperty(const std::string& key)
 {
    std::optional<ScriptProperty> property;
 

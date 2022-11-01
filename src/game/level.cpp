@@ -396,6 +396,7 @@ void Level::loadTmx()
 
    GameMechanismDeserializer::deserialize(tmx_parser, this, data, _mechanisms_map);
 
+   // process everything that's not considered a mechanism
    const auto& tmx_elements = tmx_parser.getElements();
    for (auto element : tmx_elements)
    {
@@ -414,7 +415,7 @@ void Level::loadTmx()
 
          if (!GameMechanismDeserializer::isLayerNameReserved(layer->_name))
          {
-            auto tile_map = TileMapFactory::makeTileMap(layer);
+            const auto tile_map = TileMapFactory::makeTileMap(layer);
             tile_map->load(layer, tileset, path);
             auto push_tile_map = true;
 
@@ -446,18 +447,18 @@ void Level::loadTmx()
       }
       else if (element->_type == TmxElement::Type::TypeObjectGroup)
       {
-         auto object_group = std::dynamic_pointer_cast<TmxObjectGroup>(element);
+         const auto object_group = std::dynamic_pointer_cast<TmxObjectGroup>(element);
 
          for (const auto& object : object_group->_objects)
          {
-            auto tmx_object = object.second;
+            const auto tmx_object = object.second;
 
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
 
             if (object_group->_name == "enemies")
             {
-               Enemy enemy;
+               TmxEnemy enemy;
                enemy.parse(tmx_object);
                _enemy_data_from_tmx_layer[enemy._id] = enemy;
             }
@@ -467,12 +468,12 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "lights")
             {
-               auto light = LightSystem::createLightInstance(this, data);
+               const auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
             }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
             {
-               auto light = StaticLight::deserialize(this, data);
+               const auto light = StaticLight::deserialize(this, data);
                _static_light->_lights.push_back(light);
             }
          }
