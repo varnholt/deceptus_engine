@@ -11,9 +11,9 @@
 
 struct TmxObject;
 
-struct Enemy
+struct TmxEnemy
 {
-   Enemy() = default;
+   TmxEnemy() = default;
 
    void parse(const std::shared_ptr<TmxObject>& object);
    void addPaths(const std::vector<std::vector<b2Vec2>>& paths);

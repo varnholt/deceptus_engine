@@ -6,7 +6,7 @@
 #include "boomeffect.h"
 #include "camerasystem.h"
 #include "constants.h"
-#include "enemy.h"
+#include "tmxenemy.h"
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "gamenode.h"
 #include "imagelayer.h"
@@ -162,7 +162,7 @@ protected:
    std::vector<std::shared_ptr<TileMap>> _tile_maps;
 
    std::vector<std::shared_ptr<LuaNode>> _enemies;
-   std::unordered_map<std::string, Enemy> _enemy_data_from_tmx_layer;
+   std::unordered_map<std::string, TmxEnemy> _enemy_data_from_tmx_layer;
 
    Atmosphere _atmosphere;
    Physics _physics;

@@ -146,6 +146,7 @@ SOURCES += \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
    src/game/chainshapeanalyzer.cpp \
+   src/game/chunk.cpp \
    src/game/console.cpp \
    src/game/cutscene.cpp \
    src/game/debugdraw.cpp \
@@ -155,7 +156,6 @@ SOURCES += \
    src/game/effects/lightsystem.cpp \
    src/game/effects/smokeeffect.cpp \
    src/game/effects/staticlight.cpp \
-   src/game/enemy.cpp \
    src/game/enemydescription.cpp \
    src/game/eventserializer.cpp \
    src/game/extrahealth.cpp \
@@ -253,6 +253,7 @@ SOURCES += \
    src/game/texturepool.cpp \
    src/game/tilemap.cpp \
    src/game/tilemapfactory.cpp \
+   src/game/tmxenemy.cpp \
    src/game/tweaks.cpp \
    src/game/waterbubbles.cpp \
    src/game/weapon.cpp \
@@ -321,6 +322,7 @@ HEADERS += \
    src/game/boomeffectenvelopesine.h \
    src/game/boomsettings.h \
    src/game/chainshapeanalyzer.h \
+   src/game/chunk.h \
    src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \
@@ -346,7 +348,6 @@ HEADERS += \
    src/game/detonationanimation.h \
    src/game/displaymode.h \
    src/game/effects/dust.h \
-   src/game/enemy.h \
    src/game/enemydescription.h \
    src/game/eventserializer.h \
    src/game/extra.h \
@@ -451,6 +452,7 @@ HEADERS += \
    src/game/texturepool.h \
    src/game/tilemap.h \
    src/game/tilemapfactory.h \
+   src/game/tmxenemy.h \
    src/game/tweaks.h \
    src/game/waterbubbles.h \
    src/game/weapon.h \
