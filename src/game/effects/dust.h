@@ -25,24 +25,24 @@ class Dust : public GameMechanism, public GameNode
    };
 
 
-   public:
+public:
 
-      Dust(GameNode* parent = nullptr);
+   Dust(GameNode* parent = nullptr);
 
-      void update(const sf::Time& dt) override;
-      void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+   void update(const sf::Time& dt) override;
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-      static std::shared_ptr<Dust> deserialize(GameNode* parent, const GameDeserializeData& data);
+   static std::shared_ptr<Dust> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 
-   private:
+private:
 
-      std::vector<Particle> _particles;
-      sf::FloatRect _clip_rect;
-      sf::Image _flow_field_image;
-      sf::Vector3f _wind_direction;
-      sf::Color _particle_color = {255, 255, 255, 255};
-      float _particle_velocity = 100.0f;
-      uint8_t _particle_size_px = 2;
+   std::vector<Particle> _particles;
+   sf::FloatRect _clip_rect;
+   sf::Image _flow_field_image;
+   sf::Vector3f _wind_direction;
+   sf::Color _particle_color = {255, 255, 255, 255};
+   float _particle_velocity = 100.0f;
+   uint8_t _particle_size_px = 2;
 };
 

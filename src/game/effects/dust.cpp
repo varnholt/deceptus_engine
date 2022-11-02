@@ -8,7 +8,7 @@
 
 
 Dust::Dust(GameNode* parent)
- : GameNode(parent)
+    : GameNode(parent)
 {
    setClassName(typeid(Dust).name());
 }
