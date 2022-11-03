@@ -192,7 +192,7 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    DebugDraw::drawRect(color, fixed_rect_moved_down_px, sf::Color::Green);
    DebugDraw::drawRect(color, moved_box_rect, sf::Color::Blue);
    DebugDraw::drawRect(color, Player::getCurrent()->computeFootSensorPixelIntRect(), sf::Color::Cyan);
-   DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionf() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));   
+   DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionf() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
 #endif
 }
 
@@ -451,6 +451,10 @@ void BubbleCube::update(const sf::Time& dt)
    updateJumpedOffPlatformCondition();
 }
 
+std::optional<sf::FloatRect> BubbleCube::getBoundingBoxPx()
+{
+   return sf::FloatRect(_fixed_rect_px.left, _fixed_rect_px.top, _fixed_rect_px.width, _fixed_rect_px.height);
+}
 
 void BubbleCube::pop()
 {

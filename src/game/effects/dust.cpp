@@ -85,6 +85,11 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    }
 }
 
+std::optional<sf::FloatRect> Dust::getBoundingBoxPx()
+{
+   return _clip_rect;
+}
+
 
 std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeData& data)
 {

@@ -31,6 +31,7 @@ public:
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    static std::shared_ptr<Dust> deserialize(GameNode* parent, const GameDeserializeData& data);
 

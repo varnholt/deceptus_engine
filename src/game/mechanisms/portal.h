@@ -28,6 +28,7 @@ public:
 
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
 
@@ -51,6 +52,7 @@ public:
 
 protected:
 
+   sf::FloatRect _bounding_box;
    sf::Vector2u _tile_size;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<sf::Sprite> _sprites;

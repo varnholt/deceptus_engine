@@ -171,6 +171,11 @@ void Fan::update(const sf::Time& dt)
    updateSprite();
 }
 
+std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
+{
+   return sf::FloatRect(_pixel_rect.left, _pixel_rect.top, _pixel_rect.width, _pixel_rect.height);
+}
+
 
 void Fan::load(const GameDeserializeData& data)
 {

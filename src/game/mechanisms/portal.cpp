@@ -25,7 +25,7 @@ std::atomic<bool> Portal::_portal_lock = false;
 
 //-----------------------------------------------------------------------------
 Portal::Portal(GameNode* parent)
- : GameNode(parent)
+    : GameNode(parent)
 {
    setClassName(typeid(Portal).name());
 }
@@ -115,8 +115,8 @@ void Portal::update(const sf::Time& /*dt*/)
             255,
             255, // atPortal ? 150 : 255,
             255  // atPortal ? 150 : 255
-         )
-      );
+            )
+         );
 
       const auto x = static_cast<int>(_tile_positions.x);
       const auto y = static_cast<int>(_tile_positions.y);
@@ -125,11 +125,16 @@ void Portal::update(const sf::Time& /*dt*/)
          sf::Vector2f(
             static_cast<float>(x * PIXELS_PER_TILE),
             static_cast<float>((i + y) * PIXELS_PER_TILE)
-         )
-      );
+            )
+         );
 
       i++;
    }
+}
+
+std::optional<sf::FloatRect> Portal::getBoundingBoxPx()
+{
+   return _bounding_box;
 }
 
 
@@ -137,7 +142,7 @@ void Portal::update(const sf::Time& /*dt*/)
 void Portal::link(
    std::vector<std::shared_ptr<GameMechanism>>& portals,
    const GameDeserializeData& data
-)
+   )
 {
    if (!data._tmx_object->_polyline)
    {
@@ -167,7 +172,7 @@ void Portal::link(
       const auto px = static_cast<int32_t>(portal_pos.x / PIXELS_PER_TILE);
       const auto py = static_cast<int32_t>(portal_pos.y / PIXELS_PER_TILE);
 
-      // todo: go to py..(py + mHeight)
+            // todo: go to py..(py + mHeight)
       if (px == src_x && (py == src_y || py + 1 == src_y))
       {
          src_portal = portal;
@@ -185,9 +190,9 @@ void Portal::link(
       }
    }
 
-   // set the destination's destination to where we came from.
-   // not sure if this is desired behavior. but for development purposes
-   // it'll help :)
+         // set the destination's destination to where we came from.
+         // not sure if this is desired behavior. but for development purposes
+         // it'll help :)
    if (!dst_portal)
    {
       Log::Error() << "please mark your dst portal correctly for id: " << data._tmx_object->_id;
@@ -200,7 +205,7 @@ void Portal::link(
 
    dst_portal->_destination = src_portal;
 
-   // Log::Info() << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")";
+         // Log::Info() << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")";
 }
 
 
@@ -244,7 +249,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
    const auto height   = data._tmx_layer->_height_tl;
    const auto firstId  = data._tmx_tileset->_first_gid;
 
-   // populate the vertex array, with one quad per tile
+         // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
    {
       for (auto j = 0u; j < height; ++j)
@@ -260,7 +265,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             {
                auto tmp = std::dynamic_pointer_cast<Portal>(p);
                if (
-                     static_cast<uint32_t>(tmp->_tile_positions.x) == i
+                  static_cast<uint32_t>(tmp->_tile_positions.x) == i
                   && static_cast<uint32_t>(tmp->_tile_positions.y) + 1 == j )
                {
                   portal = tmp;
@@ -268,15 +273,21 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
                }
             }
 
-            if (portal == nullptr)
+            if (!portal)
             {
                portal = std::make_shared<Portal>(parent);
                portals.push_back(portal);
                portal->_tile_positions.x = static_cast<float>(i);
                portal->_tile_positions.y = static_cast<float>(j);
                portal->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
+               portal->_bounding_box = sf::FloatRect {
+                  data._tmx_object->_x_px,
+                  data._tmx_object->_y_px,
+                  data._tmx_object->_width_px,
+                  data._tmx_object->_height_px
+               };
 
-               if (data._tmx_layer->_properties != nullptr)
+               if (data._tmx_layer->_properties)
                {
                   portal->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
                }
@@ -295,15 +306,15 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
                   tv * PIXELS_PER_TILE,
                   PIXELS_PER_TILE,
                   PIXELS_PER_TILE
-               )
-            );
+                  )
+               );
 
             sprite.setPosition(
                sf::Vector2f(
                   static_cast<float>(i * PIXELS_PER_TILE),
                   static_cast<float>(j * PIXELS_PER_TILE)
-               )
-            );
+                  )
+               );
 
             portal->addSprite(sprite);
          }

@@ -26,7 +26,7 @@ constexpr auto door_height_tl = 3;
 
 //-----------------------------------------------------------------------------
 Door::Door(GameNode* parent)
- : GameNode(parent)
+    : GameNode(parent)
 {
    setClassName(typeid(Door).name());
 }
@@ -128,6 +128,11 @@ void Door::setEnabled(bool enabled)
    }
 }
 
+std::optional<sf::FloatRect> Door::getBoundingBoxPx()
+{
+   return sf::FloatRect(_pixel_rect.left, _pixel_rect.top, _pixel_rect.width, _pixel_rect.height);
+}
+
 
 //-----------------------------------------------------------------------------
 void Door::updateTransform()
@@ -163,7 +168,7 @@ void Door::setupBody(
    const std::shared_ptr<b2World>& world,
    float x_offset,
    float x_scale
-)
+   )
 {
    b2PolygonShape polygon_shape;
    auto size_x = (PIXELS_PER_TILE / PPM) * x_scale;
@@ -248,7 +253,7 @@ void Door::open()
          [this](){close();},
          Timer::Type::Singleshot,
          Timer::Scope::UpdateIngame
-      );
+         );
    }
 }
 
@@ -258,7 +263,7 @@ void Door::close()
 {
    if (_state == State::Closing)
    {
-       return;
+      return;
    }
 
    _state = State::Closing;
@@ -305,16 +310,16 @@ void Door::setPlayerAtDoor(bool player_at_door)
 }
 
 
-//-----------------------------------------------------------------------------
-void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
+   //-----------------------------------------------------------------------------
+   void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
 {
    static const std::unordered_map<ItemType, int32_t> map{
-      std::make_pair(ItemType::KeyRed, 1),
-      std::make_pair(ItemType::KeyGreen, 4),
-      std::make_pair(ItemType::KeyBlue, 7),
-      std::make_pair(ItemType::KeyYellow, 10),
-      std::make_pair(ItemType::KeyOrange, 13),
-   };
+                                                          std::make_pair(ItemType::KeyRed, 1),
+                                                          std::make_pair(ItemType::KeyGreen, 4),
+                                                          std::make_pair(ItemType::KeyBlue, 7),
+                                                          std::make_pair(ItemType::KeyYellow, 10),
+                                                          std::make_pair(ItemType::KeyOrange, 13),
+                                                          };
 
    const auto offset_it = map.find(item_type);
 
@@ -351,7 +356,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
    const auto height   = data._tmx_layer->_height_tl;
    const auto first_id = data._tmx_tileset->_first_gid;
 
-   // populate the vertex array, with one quad per tile
+         // populate the vertex array, with one quad per tile
    for (auto j = 0u; j < height; j++)
    {
       for (auto i = 0u; i < width; i++)
@@ -365,10 +370,10 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
          }
          auto tile_id = tile_number - first_id;
 
-         // 21: red
-         // 24: green
-         // 27: blue
-         // ...
+               // 21: red
+               // 24: green
+               // 27: blue
+               // ...
 
          auto required_item = ItemType::Invalid;
          auto create_door = false;
@@ -433,7 +438,7 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
                PIXELS_PER_TILE * 3
             };
 
-            // draw required door open icon
+                  // draw required door open icon
             if (required_item != ItemType::Invalid)
             {
                auto key_sprite_pos = sf::Vector2f{
@@ -498,18 +503,18 @@ void Door::setup(const GameDeserializeData& data)
       setZ(z_index);
    }
 
-   const auto key_it = data._tmx_object->_properties->_map.find("key");
+      const auto key_it = data._tmx_object->_properties->_map.find("key");
    if (key_it != data._tmx_object->_properties->_map.end())
    {
       const auto key = key_it->second->_value_string.value();
 
-      static const std::unordered_map<std::string, ItemType> map{
-         std::make_pair("key_red", ItemType::KeyRed),
-         std::make_pair("key_green", ItemType::KeyGreen),
-         std::make_pair("key_blue", ItemType::KeyBlue),
-         std::make_pair("key_yellow", ItemType::KeyYellow),
-         std::make_pair("key_orange", ItemType::KeyOrange),
-      };
+         static const std::unordered_map<std::string, ItemType> map{
+                                                                    std::make_pair("key_red", ItemType::KeyRed),
+                                                                    std::make_pair("key_green", ItemType::KeyGreen),
+                                                                    std::make_pair("key_blue", ItemType::KeyBlue),
+                                                                    std::make_pair("key_yellow", ItemType::KeyYellow),
+                                                                    std::make_pair("key_orange", ItemType::KeyOrange),
+                                                                    };
 
       const auto key_type_it = map.find(key);
       if (key_type_it != map.end())
