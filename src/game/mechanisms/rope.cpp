@@ -14,7 +14,7 @@ int32_t Rope::_instance_counter = 0;
 
 
 Rope::Rope(GameNode* parent)
- : GameNode(parent)
+    : GameNode(parent)
 {
    setClassName(typeid(Rope).name());
 
@@ -22,7 +22,7 @@ Rope::Rope(GameNode* parent)
 
    setZ(16);
 
-   // chain element setup
+         // chain element setup
    _rope_element_shape.SetAsBox(0.0125f, 0.0125f);
    _rope_element_fixture_def.shape = &_rope_element_shape;
    _rope_element_fixture_def.density = 20.0f;
@@ -30,22 +30,22 @@ Rope::Rope(GameNode* parent)
 
    _texture = TexturePool::getInstance().get("data/level-demo/tilesheets/catacombs-level-diffuse.png");
 
-   // rope 1
-   // 971,  73 .. 973,  73
-   // 971, 211 .. 973, 211
+         // rope 1
+         // 971,  73 .. 973,  73
+         // 971, 211 .. 973, 211
    _texture_rect_px.left = 971;
    _texture_rect_px.top = 73;
    _texture_rect_px.width = 3;
    _texture_rect_px.height = 138;
 
-   // rope 2
-   // 1019,  72 .. 1021,  72
-   // 1019, 153 .. 1021, 153
-   //
-   // _texture_rect_px.left = 1019;
-   // _texture_rect_px.top = 72;
-   // _texture_rect_px.width = 3;
-   // _texture_rect_px.height = 81;
+         // rope 2
+         // 1019,  72 .. 1021,  72
+         // 1019, 153 .. 1021, 153
+         //
+         // _texture_rect_px.left = 1019;
+         // _texture_rect_px.top = 72;
+         // _texture_rect_px.width = 3;
+         // _texture_rect_px.height = 81;
 
    _instance_counter++;
    _push_time_s = static_cast<float>(_instance_counter);
@@ -89,29 +89,29 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
          sf::Vector2f(
             static_cast<float>(_texture_rect_px.left),
             static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height)
-         )
-      );
+            )
+         );
       const auto v2 = sf::Vertex(
          sf::Vector2f(q2.x * PPM, q2.y * PPM),
          sf::Vector2f(
             static_cast<float>(_texture_rect_px.left),
             static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height)
-         )
-      );
+            )
+         );
       const auto v3 = sf::Vertex(
          sf::Vector2f(q3.x * PPM, q3.y * PPM),
          sf::Vector2f(
             static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
             static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height)
-         )
-      );
+            )
+         );
       const auto v4 = sf::Vertex(
          sf::Vector2f(q4.x * PPM, q4.y * PPM),
          sf::Vector2f(
             static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
             static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height)
-         )
-      );
+            )
+         );
 
       quads.push_back(v1);
       quads.push_back(v2);
@@ -119,7 +119,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       quads.push_back(v4);
    }
 
-   // render out those quads
+         // render out those quads
    sf::RenderStates states;
    states.texture = _texture.get();
    color.draw(quads.data(), quads.size(), sf::Quads, states);
@@ -140,7 +140,7 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-   // slightly push the rope all the way while it's moving from the right to the left
+         // slightly push the rope all the way while it's moving from the right to the left
    _push_time_s += dt.asSeconds();
 
    if (_push_time_s > _push_interval_s)
@@ -158,6 +158,11 @@ void Rope::update(const sf::Time& dt)
    {
       _push_time_s = 0.0f;
    }
+}
+
+std::optional<sf::FloatRect> Rope::getBoundingBoxPx()
+{
+   return _bounding_box;
 }
 
 
@@ -188,21 +193,28 @@ void Rope::setup(const GameDeserializeData& data)
       _segment_count = segment_it->second->_value_int.value();
    }
 
-   // init segment length
+         // init segment length
    std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
    auto path_0_px = pixel_path.at(0);
    auto path_1_px = pixel_path.at(1);
    _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);
 
-   // init start position
+         // init start position
    setPixelPosition(
       sf::Vector2i{
          static_cast<int32_t>(data._tmx_object->_x_px),
          static_cast<int32_t>(data._tmx_object->_y_px)
       }
-   );
+      );
 
-   // pin the rope to the starting point (anchor)
+   _bounding_box = sf::FloatRect {
+      data._tmx_object->_x_px,
+      data._tmx_object->_y_px,
+      data._tmx_object->_width_px,
+      data._tmx_object->_height_px
+   };
+
+         // pin the rope to the starting point (anchor)
    auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
    _anchor_a_body = data._world->CreateBody(&_anchor_a_def);
    _anchor_a_shape.Set(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
@@ -221,12 +233,12 @@ void Rope::setup(const GameDeserializeData& data)
       auto chain_fixture = chain_body->CreateFixture(&_rope_element_fixture_def);
       chain_fixture->SetSensor(true);
 
-      // attach chain element to the previous one
+            // attach chain element to the previous one
       b2Vec2 anchor(pos_m.x, pos_m.y + i * _segment_length_m);
       _joint_def.Initialize(previous_body, chain_body, anchor);
       data._world->CreateJoint(&_joint_def);
 
-      // store chain elements
+            // store chain elements
       previous_body = chain_body;
       _chain_elements.push_back(chain_body);
    }

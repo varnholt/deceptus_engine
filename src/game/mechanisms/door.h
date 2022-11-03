@@ -12,26 +12,26 @@
 #include "Box2D/Box2D.h"
 
 
-struct TmxLayer;
+   struct TmxLayer;
 struct TmxTileSet;
 
-class Door : public GameMechanism, public GameNode
+   class Door : public GameMechanism, public GameNode
 {
 public:
 
-   enum class Type
+      enum class Type
    {
       Bars,
       Conventional,
-   };
+      };
 
-   enum class State
+      enum class State
    {
       Open,
       Opening,
       Closing,
       Closed,
-   };
+      };
 
    Door(GameNode* parent);
    virtual ~Door();
@@ -39,6 +39,7 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    void setEnabled(bool enabled) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    void open();
    void close();
@@ -63,14 +64,11 @@ private:
       const std::shared_ptr<b2World>& world,
       float x_offset = 0.0f,
       float x_scale = 1.0f
-   );
+      );
 
    void setupKeySprite(ItemType item_type, const sf::Vector2f& pos);
-
    void updateTransform();
-
    void updateBars(const sf::Time& dt);
-
    bool checkPlayerAtDoor() const;
 
    std::shared_ptr<sf::Texture> _texture;
