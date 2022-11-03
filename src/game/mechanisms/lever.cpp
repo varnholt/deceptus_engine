@@ -81,7 +81,7 @@ std::vector<std::shared_ptr<GameMechanism>> Lever::load(GameNode* parent, const 
                   }
                }
 
-               // sprite is two tiles high
+                     // sprite is two tiles high
                const auto x = PIXELS_PER_TILE * i;
                const auto y = PIXELS_PER_TILE * (j - 1);
 
@@ -183,7 +183,7 @@ const sf::Rect<int32_t>& Lever::getPixelRect() const
 
 //-----------------------------------------------------------------------------
 Lever::Lever(GameNode* parent)
- : GameNode(parent)
+    : GameNode(parent)
 {
    setClassName(typeid(Lever).name());
 }
@@ -262,6 +262,12 @@ void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_sprite);
 }
 
+//-----------------------------------------------------------------------------
+std::optional<sf::FloatRect> Lever::getBoundingBoxPx()
+{
+   return sf::FloatRect(_rect.left, _rect.top, _rect.width, _rect.height);
+}
+
 
 //-----------------------------------------------------------------------------
 void Lever::setEnabled(bool enabled)
@@ -277,7 +283,7 @@ void Lever::setEnabled(bool enabled)
       _state_previous = State::Right;
    }
 
-   // during setup the callbacks are not connected yet, so it's safe to call setEnabled during setup
+         // during setup the callbacks are not connected yet, so it's safe to call setEnabled during setup
    updateReceivers();
 }
 
@@ -376,7 +382,7 @@ void Lever::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
    const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades,
    const std::vector<std::shared_ptr<GameMechanism>>& doors
-)
+   )
 {
    for (auto rect : __rectangles)
    {
@@ -386,11 +392,11 @@ void Lever::merge(
       search_rect.width = static_cast<int32_t>(rect->_width_px);
       search_rect.height = static_cast<int32_t>(rect->_height_px);
 
-      // Log::Info()
-      //    << "x: " << searchRect.left << " "
-      //    << "y: " << searchRect.top << " "
-      //    << "w: " << searchRect.width << " "
-      //    << "h: " << searchRect.height << " ";
+            // Log::Info()
+            //    << "x: " << searchRect.left << " "
+            //    << "y: " << searchRect.top << " "
+            //    << "w: " << searchRect.width << " "
+            //    << "h: " << searchRect.height << " ";
 
       for (auto& tmp : levers)
       {
@@ -407,9 +413,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -420,9 +426,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -433,9 +439,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -450,9 +456,9 @@ void Lever::merge(
                   if (search_rect.contains(static_cast<int32_t>(pixel.x), static_cast<int32_t>(pixel.y)))
                   {
                      callbacks.push_back([mechanism](int32_t state) {
-                           mechanism->setEnabled(state == -1 ? false : true);
-                        }
-                     );
+                        mechanism->setEnabled(state == -1 ? false : true);
+                     }
+                                         );
 
                      break;
                   }
@@ -466,9 +472,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -479,9 +485,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -492,9 +498,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -505,9 +511,9 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        mechanism->setEnabled(state == -1 ? false : true);
-                     }
-                  );
+                     mechanism->setEnabled(state == -1 ? false : true);
+                  }
+                                      );
                }
             }
 
@@ -518,23 +524,23 @@ void Lever::merge(
                if (mechanism->getPixelRect().intersects(search_rect))
                {
                   callbacks.push_back([mechanism](int32_t state) {
-                        if (state == -1)
-                        {
-                           mechanism->close();
-                        }
-                        else
-                        {
-                            mechanism->open();
-                        }
+                     if (state == -1)
+                     {
+                        mechanism->close();
                      }
-                  );
+                     else
+                     {
+                        mechanism->open();
+                     }
+                  }
+                                      );
                }
             }
 
-            // the rect can be configured to enable a lever, too
-            // this approach could be deprecated at a later point in time because
-            // the standard way should be to configure everything via the lever
-            // tmxobject properties
+                  // the rect can be configured to enable a lever, too
+                  // this approach could be deprecated at a later point in time because
+                  // the standard way should be to configure everything via the lever
+                  // tmxobject properties
             if (rect->_properties)
             {
                auto enabled_it = rect->_properties->_map.find("enabled");
