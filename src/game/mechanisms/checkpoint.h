@@ -32,10 +32,11 @@ public:
 
    void draw(sf::RenderTarget &target, sf::RenderTarget &normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    void reached();
    void addCallback(CheckpointCallback);
-   sf::Vector2i calcCenter() const;
+   sf::Vector2f calcCenter() const;
    uint32_t getIndex() const;
    void updateSpriteRect();
 
@@ -43,7 +44,7 @@ private:
 
    uint32_t _index = 0;
    std::string _name;
-   sf::IntRect _rect;
+   sf::FloatRect _rect;
    bool _reached = false;
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;

@@ -3,8 +3,8 @@
 #include "constants.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 
 #include "texturepool.h"
@@ -12,29 +12,25 @@
 #include <array>
 #include <iostream>
 
-
 std::vector<std::shared_ptr<GameMechanism>> Fan::__fan_instances;
 std::vector<std::shared_ptr<Fan::FanTile>> Fan::__tile_instances;
 std::vector<std::shared_ptr<TmxObject>> Fan::__object_instances;
 std::vector<sf::Vector2f> Fan::__weight_instances;
 
-
-Fan::Fan(GameNode* parent)
- : GameNode(parent)
+Fan::Fan(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Fan).name());
 }
 
-
 void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
-   auto possf = tile->mPosition;
+   auto possf = tile->_position;
    auto posb2d = b2Vec2(possf.x * MPP, possf.y * MPP);
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    body_def.position = posb2d;
-   tile->mBody = world->CreateBody(&body_def);
+   tile->_body = world->CreateBody(&body_def);
 
    // create fixture for physical boundaries of the fan object
    b2PolygonShape shape;
@@ -52,16 +48,16 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    //      c      d
 
    static constexpr float w = 0.5f;
-   static constexpr float e = 0.1f; // 219, 194
+   static constexpr float e = 0.1f;  // 219, 194
    std::array<b2Vec2, 8> rounded_box{
-      b2Vec2{0,     e    }, // a
-      b2Vec2{0,     w - e}, // b
-      b2Vec2{e,     w    }, // c
-      b2Vec2{w - e, w    }, // d
-      b2Vec2{w,     w - e}, // e
-      b2Vec2{w,     e    }, // f
-      b2Vec2{w - e, 0    }, // g
-      b2Vec2{e,     0    }, // h
+      b2Vec2{0, e},      // a
+      b2Vec2{0, w - e},  // b
+      b2Vec2{e, w},      // c
+      b2Vec2{w - e, w},  // d
+      b2Vec2{w, w - e},  // e
+      b2Vec2{w, e},      // f
+      b2Vec2{w - e, 0},  // g
+      b2Vec2{e, 0},      // h
    };
 
    shape.Set(rounded_box.data(), static_cast<int32_t>(rounded_box.size()));
@@ -70,15 +66,13 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    boundary_fixture_def.shape = &shape;
    boundary_fixture_def.density = 1.0f;
    boundary_fixture_def.isSensor = false;
-   tile->mBody->CreateFixture(&boundary_fixture_def);
+   tile->_body->CreateFixture(&boundary_fixture_def);
 }
 
-
-const sf::Rect<int32_t>& Fan::getPixelRect() const
+const sf::FloatRect& Fan::getPixelRect() const
 {
    return _pixel_rect;
 }
-
 
 void Fan::setEnabled(bool enabled)
 {
@@ -86,17 +80,15 @@ void Fan::setEnabled(bool enabled)
    _lever_lag = enabled ? 0.0f : 1.0f;
 }
 
-
 std::vector<std::shared_ptr<GameMechanism>>& Fan::getFans()
 {
    return __fan_instances;
 }
 
-
 void Fan::updateSprite()
 {
    auto y_offset_tl = 0;
-   const auto dir = _tiles.at(0)->mDir;
+   const auto dir = _tiles.at(0)->_tile_dir;
    switch (dir)
    {
       case TileDirection::Up:
@@ -117,17 +109,11 @@ void Fan::updateSprite()
    for (auto& sprite : _sprites)
    {
       auto x_offset_tl = static_cast<int32_t>(_x_offsets_px[index]) % 8;
-      sprite.setTextureRect({
-         x_offset_tl * PIXELS_PER_TILE,
-         y_offset_tl * PIXELS_PER_TILE,
-         PIXELS_PER_TILE,
-         PIXELS_PER_TILE
-      });
+      sprite.setTextureRect({x_offset_tl * PIXELS_PER_TILE, y_offset_tl * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
 
       index++;
    }
 }
-
 
 void Fan::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
@@ -136,7 +122,6 @@ void Fan::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(sprite);
    }
 }
-
 
 void Fan::update(const sf::Time& dt)
 {
@@ -176,7 +161,6 @@ std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
    return sf::FloatRect(_pixel_rect.left, _pixel_rect.top, _pixel_rect.width, _pixel_rect.height);
 }
 
-
 void Fan::load(const GameDeserializeData& data)
 {
    static const sf::Vector2f vector_up{0.0f, 1.0f};
@@ -196,10 +180,10 @@ void Fan::load(const GameDeserializeData& data)
 
    resetAll();
 
-   const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_tl;
-   const auto height   = data._tmx_layer->_height_tl;
-   const auto firstId  = data._tmx_tileset->_first_gid;
+   const auto tiles = data._tmx_layer->_data;
+   const auto width = data._tmx_layer->_width_tl;
+   const auto height = data._tmx_layer->_height_tl;
+   const auto firstId = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -235,13 +219,13 @@ void Fan::load(const GameDeserializeData& data)
             const auto x = i * PIXELS_PER_TILE;
             const auto y = j * PIXELS_PER_TILE;
 
-            tile->mPosition    = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
-            tile->mRect.left   = x;
-            tile->mRect.top    = y;
-            tile->mRect.width  = PIXELS_PER_TILE;
-            tile->mRect.height = PIXELS_PER_TILE;
-            tile->mDir         = direction;
-            tile->mDirection   = direction_vector;
+            tile->_position = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
+            tile->_rect.left = x;
+            tile->_rect.top = y;
+            tile->_rect.width = PIXELS_PER_TILE;
+            tile->_rect.height = PIXELS_PER_TILE;
+            tile->_tile_dir = direction;
+            tile->_direction = direction_vector;
             __tile_instances.push_back(tile);
 
             createPhysics(data._world, tile);
@@ -249,7 +233,6 @@ void Fan::load(const GameDeserializeData& data)
       }
    }
 }
-
 
 void Fan::resetAll()
 {
@@ -259,7 +242,6 @@ void Fan::resetAll()
    __weight_instances.clear();
 }
 
-
 void Fan::addObject(GameNode* parent, const GameDeserializeData& data)
 {
    __object_instances.push_back(data._tmx_object);
@@ -267,24 +249,23 @@ void Fan::addObject(GameNode* parent, const GameDeserializeData& data)
    auto fan = std::make_shared<Fan>(parent);
    __fan_instances.push_back(fan);
 
-   const auto w = static_cast<int32_t>(data._tmx_object->_width_px);
-   const auto h = static_cast<int32_t>(data._tmx_object->_height_px);
+   const auto w = data._tmx_object->_width_px;
+   const auto h = data._tmx_object->_height_px;
 
    fan->_texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "fan.png");
-   fan->_pixel_rect.left = static_cast<int32_t>(data._tmx_object->_x_px);
-   fan->_pixel_rect.top = static_cast<int32_t>(data._tmx_object->_y_px);
+   fan->_pixel_rect.left = data._tmx_object->_x_px;
+   fan->_pixel_rect.top = data._tmx_object->_y_px;
    fan->_pixel_rect.width = w;
    fan->_pixel_rect.height = h;
 
    if (data._tmx_object->_properties)
    {
-       auto speed_property = data._tmx_object->_properties->_map["speed"];
-       fan->_speed = speed_property ? speed_property->_value_float.value() : 1.0f;
+      auto speed_property = data._tmx_object->_properties->_map["speed"];
+      fan->_speed = speed_property ? speed_property->_value_float.value() : 1.0f;
    }
 }
 
-
-std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& player_rect)
+std::optional<sf::Vector2f> Fan::collide(const sf::FloatRect& player_rect)
 {
    // need to find all intersections since there can be more than one
    auto valid = false;
@@ -316,19 +297,14 @@ std::optional<sf::Vector2f> Fan::collide(const sf::Rect<int32_t>& player_rect)
    }
 }
 
-
-void Fan::collide(const sf::Rect<int32_t>& player_rect, b2Body* body)
+void Fan::collide(const sf::FloatRect& player_rect, b2Body* body)
 {
    auto dir = collide(player_rect);
    if (dir.has_value())
    {
-      body->ApplyForceToCenter(
-         b2Vec2(2.0f * dir->x, -dir->y),
-         true
-      );
+      body->ApplyForceToCenter(b2Vec2(2.0f * dir->x, -dir->y), true);
    }
 }
-
 
 void Fan::merge()
 {
@@ -338,14 +314,14 @@ void Fan::merge()
       for (auto& f : __fan_instances)
       {
          auto fan = std::dynamic_pointer_cast<Fan>(f);
-         if (tile->mRect.intersects(fan->_pixel_rect))
+         if (tile->_rect.intersects(fan->_pixel_rect))
          {
             sf::Sprite sprite;
             sprite.setTexture(*fan->_texture);
-            sprite.setPosition(static_cast<float>(tile->mPosition.x), static_cast<float>(tile->mPosition.y));
+            sprite.setPosition(static_cast<float>(tile->_position.x), static_cast<float>(tile->_position.y));
 
             fan->_tiles.push_back(tile);
-            fan->_direction = tile->mDirection * fan->_speed;
+            fan->_direction = tile->_direction * fan->_speed;
             fan->_sprites.push_back(sprite);
             fan->_x_offsets_px.push_back(x_offset_px);
             fan->updateSprite();
@@ -357,4 +333,3 @@ void Fan::merge()
 
    __tile_instances.clear();
 }
-

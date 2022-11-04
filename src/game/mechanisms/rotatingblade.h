@@ -6,14 +6,12 @@
 #include "framework/math/pathinterpolation.h"
 #include "gamedeserializedata.h"
 
-#include "SFML/Graphics.hpp"
 #include <vector>
-
+#include "SFML/Graphics.hpp"
 
 class RotatingBlade : public GameMechanism, public GameNode
 {
 public:
-
    struct Settings
    {
       float _blade_acceleration = 0.006f;
@@ -34,8 +32,9 @@ public:
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void setEnabled(bool enabled) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   const sf::IntRect& getPixelRect() const;
+   const sf::FloatRect& getPixelRect() const;
 
 private:
    float _angle = 0.0f;
@@ -46,7 +45,7 @@ private:
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
    sf::Sprite _sprite;
-   sf::IntRect _rectangle;
+   sf::FloatRect _rectangle;
    std::vector<sf::Vector2f> _path;
    PathInterpolation<sf::Vector2f> _path_interpolation;
    PathType _path_type = PathType::Polygon;

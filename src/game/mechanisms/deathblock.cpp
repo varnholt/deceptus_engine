@@ -165,9 +165,19 @@ void DeathBlock::update(const sf::Time& dt)
       _sprites[i].setPosition(x, y);
    }
 
+   // update bounding box
+   _rect.left = _body->GetPosition().x * PPM + _offsets[1].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
+   _rect.top = _body->GetPosition().x * PPM + _offsets[0].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
+   _rect.width = 3 * PIXELS_PER_TILE;
+   _rect.height = 3 * PIXELS_PER_TILE;
+
    updateCollision();
 }
 
+std::optional<sf::FloatRect> DeathBlock::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 void DeathBlock::setup(const GameDeserializeData& data)
 {

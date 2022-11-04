@@ -34,6 +34,7 @@ class Crusher : public GameMechanism, public GameNode
 
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
+      std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
       void setup(const GameDeserializeData& data);
 
@@ -55,6 +56,7 @@ class Crusher : public GameMechanism, public GameNode
       b2Body* _body = nullptr;
       sf::Vector2f _pixel_position;
       sf::Vector2f _blade_offset;
+      sf::FloatRect _rect;
 
       sf::Time _idle_time;
       sf::Time _extraction_time;

@@ -35,6 +35,7 @@ public:
    static std::shared_ptr<Dialogue> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    bool isActive() const;
    void setActive(bool active);
@@ -48,7 +49,7 @@ private:
    std::vector<DialogueItem> _dialogue_items;
    uint32_t _index = 0;
 
-   sf::IntRect _pixel_rect;
+   sf::FloatRect _pixel_rect;
    bool _repeated = false;
    bool _played = false;
    bool _active = false;

@@ -3,35 +3,33 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
-#include "gamedeserializedata.h"
 #include "framework/math/pathinterpolation.h"
+#include "gamedeserializedata.h"
 
-#include "Box2D/Box2D.h"
-#include <filesystem>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
-
+#include <filesystem>
+#include "Box2D/Box2D.h"
 
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
-
 class MovingPlatform : public GameMechanism, public GameNode
 {
-
 public:
    MovingPlatform(GameNode* parent);
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
    static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);
-   static std::vector<std::shared_ptr<GameMechanism> > merge(GameNode* parent, const GameDeserializeData& data);
+   static std::vector<std::shared_ptr<GameMechanism>> merge(GameNode* parent, const GameDeserializeData& data);
 
    static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    void setupBody(const std::shared_ptr<b2World>& world);
    void addSprite(const sf::Sprite&);
@@ -40,16 +38,11 @@ public:
 
    const std::vector<sf::Vector2f>& getPixelPath() const;
 
-
 private:
-
    void setupTransformDeprecated();
    void updateLeverLag(const sf::Time& dt);
 
-   double CosineInterpolate(
-      double y1,double y2,
-      double mu
-   );
+   double CosineInterpolate(double y1, double y2, double mu);
 
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
@@ -72,5 +65,5 @@ private:
    PathInterpolation<b2Vec2> _interpolation;
    b2Vec2 _velocity;
    std::vector<sf::Vector2f> _pixel_path;
+   sf::FloatRect _rect;
 };
-

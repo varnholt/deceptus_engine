@@ -55,8 +55,7 @@ public:
    void reset();
 
    const sf::Vector2i& getTilePosition() const;
-   const sf::IntRect& getPixelRect() const;
-
+   const sf::FloatRect& getPixelRect() const;
 
 private:
 
@@ -82,7 +81,7 @@ private:
    State _state = State::Closed;
 
    sf::Vector2i _tile_position;
-   sf::IntRect _pixel_rect;
+   sf::FloatRect _pixel_rect;
 
    ItemType _required_item = ItemType::Invalid;
 

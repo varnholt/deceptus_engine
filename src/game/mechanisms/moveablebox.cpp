@@ -9,10 +9,8 @@
 
 #include <iostream>
 
-
 //--------------------------------------------------------------------------------------------------
-MoveableBox::MoveableBox(GameNode* node)
- : GameNode(node)
+MoveableBox::MoveableBox(GameNode* node) : GameNode(node)
 {
    setClassName(typeid(MoveableBox).name());
 
@@ -20,13 +18,11 @@ MoveableBox::MoveableBox(GameNode* node)
    _sprite.setTexture(*_texture.get());
 }
 
-
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::update(const sf::Time& /*dt*/)
@@ -36,11 +32,14 @@ void MoveableBox::update(const sf::Time& /*dt*/)
    _sprite.setPosition(x, y - 24);
 }
 
+//--------------------------------------------------------------------------------------------------
+std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
+{
+   return _sprite.getGlobalBounds();
+}
 
 // box: pos: 5160 x 1056 size: 48 x 48
 // box: pos: 5376 x 1080 size: 24 x 24
-
-
 
 /*
 
@@ -65,7 +64,6 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 
 
 */
-
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setup(const GameDeserializeData& data)
@@ -111,7 +109,6 @@ void MoveableBox::setup(const GameDeserializeData& data)
    setupTransform();
 }
 
-
 //-----------------------------------------------------------------------------
 void MoveableBox::setupTransform()
 {
@@ -119,7 +116,6 @@ void MoveableBox::setupTransform()
    auto y = _sprite.getPosition().y / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
-
 
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
@@ -129,8 +125,8 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    auto size_y = _size.y / PPM;
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0,     0);
-   vertices[1] = b2Vec2(0,     size_y);
+   vertices[0] = b2Vec2(0, 0);
+   vertices[1] = b2Vec2(0, size_y);
    vertices[2] = b2Vec2(size_x, size_y);
    vertices[3] = b2Vec2(size_x, 0);
 
@@ -148,4 +144,3 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    object_data->setType(ObjectTypeMoveableBox);
    fixture->SetUserData(static_cast<void*>(object_data));
 }
-
