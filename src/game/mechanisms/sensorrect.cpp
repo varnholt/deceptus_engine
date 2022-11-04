@@ -4,17 +4,14 @@
 #include "framework/tools/log.h"
 #include "player/player.h"
 
-
-SensorRect::SensorRect(GameNode* parent)
- : GameNode(parent)
+SensorRect::SensorRect(GameNode* parent) : GameNode(parent)
 {
-    setClassName(typeid(GameNode).name());
+   setClassName(typeid(GameNode).name());
 }
-
 
 void SensorRect::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = Player::getCurrent()->getPixelRectInt().intersects(_rect);
+   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().intersects(_rect);
 
    if (player_intersects)
    {
@@ -42,15 +39,14 @@ void SensorRect::update(const sf::Time& /*dt*/)
    _player_intersects = player_intersects;
 }
 
+std::optional<sf::FloatRect> SensorRect::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 void SensorRect::setup(const GameDeserializeData& data)
 {
-   _rect = sf::IntRect{
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    if (data._tmx_object->_properties)
    {
@@ -96,16 +92,19 @@ void SensorRect::setup(const GameDeserializeData& data)
    }
 }
 
-
 void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms)
 {
-   std::copy_if(mechanisms.begin(), mechanisms.end(), std::back_inserter(_references), [this](const auto& object){
+   std::copy_if(
+      mechanisms.begin(),
+      mechanisms.end(),
+      std::back_inserter(_references),
+      [this](const auto& object)
+      {
          auto game_node = dynamic_cast<GameNode*>(object.get());
          return (game_node && game_node->getObjectId() == _reference_id);
       }
    );
 }
-
 
 void SensorRect::action()
 {
@@ -113,7 +112,7 @@ void SensorRect::action()
    {
       case Action::Disable:
       {
-         for (auto& ref: _references)
+         for (auto& ref : _references)
          {
             ref->setEnabled(false);
          }
@@ -121,7 +120,7 @@ void SensorRect::action()
       }
       case Action::Enable:
       {
-         for (auto& ref: _references)
+         for (auto& ref : _references)
          {
             ref->setEnabled(true);
          }
@@ -129,7 +128,7 @@ void SensorRect::action()
       }
       case Action::Toggle:
       {
-         for (auto& ref: _references)
+         for (auto& ref : _references)
          {
             ref->setEnabled(!ref->isEnabled());
          }
@@ -137,5 +136,3 @@ void SensorRect::action()
       }
    }
 }
-
-

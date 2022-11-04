@@ -41,6 +41,7 @@ public:
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
 
@@ -48,14 +49,14 @@ public:
    static void addTilesVersion1();
    static void addTilesVersion2();
    static void merge();
-   static void collide(const sf::Rect<int32_t>& playerRect);
+   static void collide(const sf::FloatRect& playerRect);
 
    void reset();
    static void resetAll();
 
    const sf::Vector2f& getTilePosition() const;
    const sf::Vector2f& getPixelPosition() const;
-   const sf::Rect<int32_t>& getPixelRect() const;
+   const sf::FloatRect& getPixelRect() const;
 
    void setEnabled(bool enabled) override;
 
@@ -72,7 +73,7 @@ protected:
 
    sf::Vector2f _tile_position;
    sf::Vector2f _position_px;
-   sf::Rect<int32_t> _pixel_rect;
+   sf::FloatRect _pixel_rect;
 
    std::optional<std::vector<sf::Vector2f>> _path;
    sf::Vector2f _move_offset_px;

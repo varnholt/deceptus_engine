@@ -22,15 +22,12 @@ const auto SPRITE_HEIGHT = 24;
 //        +--------------------------------------------------+
 //
 
-
 b2Body* Bouncer::getBody() const
 {
-  return _body;
+   return _body;
 }
 
-
-Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
- : FixtureNode(parent)
+Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
    setClassName(typeid(Bouncer).name());
    setObjectId(data._tmx_object->_name);
@@ -41,10 +38,10 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
    const auto width = data._tmx_object->_width_px;
    const auto height = data._tmx_object->_height_px;
 
-   _rect.left = static_cast<int32_t>(x);
-   _rect.top = static_cast<int32_t>(y);
-   _rect.width = static_cast<int32_t>(width);
-   _rect.height = static_cast<int32_t>(height);
+   _rect.left = x;
+   _rect.top = y;
+   _rect.width = width;
+   _rect.height = height;
 
    setType(ObjectTypeBouncer);
    _activation_time = GlobalClock::getInstance().getElapsedTime();
@@ -62,12 +59,8 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
    auto half_physics_width = width * MPP * 0.5f;
    auto half_physics_height = height * MPP * 0.5f;
 
-  // create fixture for physical boundaries of the bouncer object
-  _shape_bounds.SetAsBox(
-      half_physics_width, half_physics_height,
-      b2Vec2(half_physics_width, half_physics_height),
-      0.0f
-  );
+   // create fixture for physical boundaries of the bouncer object
+   _shape_bounds.SetAsBox(half_physics_width, half_physics_height, b2Vec2(half_physics_width, half_physics_height), 0.0f);
 
    b2FixtureDef boundaryFixtureDef;
    boundaryFixtureDef.shape = &_shape_bounds;
@@ -77,11 +70,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
    _body->CreateFixture(&boundaryFixtureDef);
 
    // create fixture for the sensor behavior, collision notification
-   _shape_bounds.SetAsBox(
-      half_physics_width, half_physics_height,
-      b2Vec2(half_physics_width, half_physics_height),
-      0.0f
-   );
+   _shape_bounds.SetAsBox(half_physics_width, half_physics_height, b2Vec2(half_physics_width, half_physics_height), 0.0f);
 
    b2FixtureDef sensor_fixture_def;
    sensor_fixture_def.shape = &_shape_bounds;
@@ -96,22 +85,19 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data)
    _sprite.setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
 
-
 void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
 }
 
-
 void Bouncer::updatePlayerAtBouncer()
 {
    auto player = Player::getCurrent();
-   auto rect = player->getPixelRectInt();
+   auto rect = player->getPixelRectFloat();
    rect.height *= 3;
 
    _player_at_bouncer = rect.intersects(_rect);
 }
-
 
 void Bouncer::update(const sf::Time& /*dt*/)
 {
@@ -126,29 +112,25 @@ void Bouncer::update(const sf::Time& /*dt*/)
       step = 0;
    }
 
-  _sprite.setTextureRect(
-      sf::IntRect(
-         step * SPRITE_WIDTH,
-         0,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
-      )
-   );
+   _sprite.setTextureRect(sf::IntRect(step * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
 }
 
+std::optional<sf::FloatRect> Bouncer::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 bool Bouncer::isPlayerAtBouncer()
 {
    return _player_at_bouncer;
 }
 
-
 void Bouncer::activate()
 {
    auto now = GlobalClock::getInstance().getElapsedTime();
    auto delta = (now - _activation_time).asSeconds();
 
-   if (delta < 0.3f) // set to 0.5?
+   if (delta < 0.3f)  // set to 0.5?
    {
       return;
    }
@@ -168,12 +150,12 @@ void Bouncer::activate()
          break;
       case Alignment::PointsLeft:
          force = b2Vec2{-forceValue, 0};
-          break;
+         break;
       case Alignment::PointsRight:
          force = b2Vec2{forceValue, 0};
          break;
       case Alignment::PointsNowhere:
-          break;
+         break;
    }
 
    auto body = Player::getCurrent()->getBody();
@@ -186,5 +168,3 @@ void Bouncer::activate()
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
 }
-
-

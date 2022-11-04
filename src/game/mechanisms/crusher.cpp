@@ -8,8 +8,8 @@
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolyline.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "texturepool.h"
 
@@ -27,12 +27,10 @@ static constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / 
 
 static constexpr auto BLADE_SHARPNESS = 0.1f;
 static constexpr auto BLADE_TOLERANCE = 0.06f;
-}
-
+}  // namespace
 
 //-----------------------------------------------------------------------------
-Crusher::Crusher(GameNode* parent)
-   : GameNode(parent)
+Crusher::Crusher(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Crusher).name());
 
@@ -42,7 +40,6 @@ Crusher::Crusher(GameNode* parent)
    __instance_counter++;
 }
 
-
 //-----------------------------------------------------------------------------
 void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
@@ -50,7 +47,6 @@ void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_sprite_pusher);
    color.draw(_sprite_mount);
 }
-
 
 //-----------------------------------------------------------------------------
 void Crusher::step(const sf::Time& dt)
@@ -86,7 +82,6 @@ void Crusher::step(const sf::Time& dt)
                break;
          }
 
-
          _extraction_time += dt * 1.0f;
 
          break;
@@ -120,7 +115,6 @@ void Crusher::step(const sf::Time& dt)
    }
 }
 
-
 void Crusher::update(const sf::Time& dt)
 {
    updateState();
@@ -129,6 +123,10 @@ void Crusher::update(const sf::Time& dt)
    updateTransform();
 }
 
+std::optional<sf::FloatRect> Crusher::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 //-----------------------------------------------------------------------------
 void Crusher::updateState()
@@ -190,10 +188,14 @@ void Crusher::updateState()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void Crusher::setup(const GameDeserializeData& data)
 {
+   _rect.left = data._tmx_object->_x_px;
+   _rect.top = data._tmx_object->_y_px;
+   _rect.width = data._tmx_object->_width_px;
+   _rect.top = data._tmx_object->_height_px;
+
    if (data._tmx_object->_properties)
    {
       const auto it = data._tmx_object->_properties->_map.find("alignment");
@@ -247,29 +249,16 @@ void Crusher::setup(const GameDeserializeData& data)
    {
       case Alignment::PointsDown:
       {
-         _sprite_mount.setTextureRect({
-               7 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               2 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_mount.setTextureRect({7 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE});
 
          _sprite_pusher.setTextureRect({
-               7 * PIXELS_PER_TILE,
-               7 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               1 // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
-            }
-         );
+            7 * PIXELS_PER_TILE,
+            7 * PIXELS_PER_TILE,
+            5 * PIXELS_PER_TILE,
+            1  // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
+         });
 
-         _sprite_spike.setTextureRect({
-               7 * PIXELS_PER_TILE,
-               8 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               3 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_spike.setTextureRect({7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = 2 * PIXELS_PER_TILE;
          _pixel_offset_spike.y = 2 * PIXELS_PER_TILE;
@@ -279,29 +268,11 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsUp:
       {
-         _sprite_mount.setTextureRect({
-               0 * PIXELS_PER_TILE,
-               9 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               2 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_mount.setTextureRect({0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE});
 
-         _sprite_pusher.setTextureRect({
-               0 * PIXELS_PER_TILE,
-               8 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               1
-            }
-         );
+         _sprite_pusher.setTextureRect({0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 1});
 
-         _sprite_spike.setTextureRect({
-               0 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE,
-               3 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_spike.setTextureRect({0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = 6 * PIXELS_PER_TILE;
          _pixel_offset_spike.y = 3 * PIXELS_PER_TILE;
@@ -312,29 +283,11 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsLeft:
       {
-         _sprite_pusher.setTextureRect({
-               3 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               1,
-               5 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_pusher.setTextureRect({3 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
 
-         _sprite_mount.setTextureRect({
-               4 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               2 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_mount.setTextureRect({4 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
-         _sprite_spike.setTextureRect({
-               0 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               3 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_spike.setTextureRect({0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
          _pixel_offset_pusher.x = 3 * PIXELS_PER_TILE;
@@ -347,29 +300,11 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsRight:
       {
-         _sprite_mount.setTextureRect({
-               7 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               2 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_mount.setTextureRect({7 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
-         _sprite_pusher.setTextureRect({
-               9 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               1,
-               5 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_pusher.setTextureRect({9 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
 
-         _sprite_spike.setTextureRect({
-              10 * PIXELS_PER_TILE,
-               0 * PIXELS_PER_TILE,
-               3 * PIXELS_PER_TILE,
-               5 * PIXELS_PER_TILE
-            }
-         );
+         _sprite_spike.setTextureRect({10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
          _pixel_offset_pusher.x = -1 * PIXELS_PER_TILE;
@@ -388,7 +323,6 @@ void Crusher::setup(const GameDeserializeData& data)
    setupBody(data._world);
 }
 
-
 //-----------------------------------------------------------------------------
 void Crusher::updateTransform()
 {
@@ -396,7 +330,6 @@ void Crusher::updateTransform()
    auto y = (_blade_offset.y + _pixel_position.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    _body->SetTransform(b2Vec2(x, y), 0.0f);
 }
-
 
 //-----------------------------------------------------------------------------
 void Crusher::setupBody(const std::shared_ptr<b2World>& world)
@@ -416,35 +349,34 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    {
       case Alignment::PointsLeft:
       {
-
-         blade_vertices[0] = b2Vec2(0           ,                BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[1] = b2Vec2(0           , BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y,                                  BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_Y, BLADE_SIZE_X                   - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[0] = b2Vec2(0, BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[1] = b2Vec2(0, BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y, BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_Y, BLADE_SIZE_X - BLADE_TOLERANCE - BLADE_SIZE_X);
          break;
       }
       case Alignment::PointsRight:
       {
-         blade_vertices[0] = b2Vec2(0            + PIXELS_PER_TILE / PPM,                                  BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[1] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM,                BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[0] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[1] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM, BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
          blade_vertices[2] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM, BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[3] = b2Vec2(0            + PIXELS_PER_TILE / PPM, BLADE_SIZE_X                   - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[3] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_SIZE_X - BLADE_TOLERANCE - BLADE_SIZE_X);
          break;
       }
       case Alignment::PointsDown:
       {
-         blade_vertices[0] = b2Vec2(                                 BLADE_TOLERANCE, 0           );
-         blade_vertices[1] = b2Vec2(               BLADE_SHARPNESS + BLADE_TOLERANCE, BLADE_SIZE_Y);
+         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE, 0);
+         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS + BLADE_TOLERANCE, BLADE_SIZE_Y);
          blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, BLADE_SIZE_Y);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_X                   - BLADE_TOLERANCE, 0           );
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_X - BLADE_TOLERANCE, 0);
          break;
       }
       case Alignment::PointsUp:
       {
-         blade_vertices[0] = b2Vec2(                                 BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
-         blade_vertices[1] = b2Vec2(               BLADE_SHARPNESS + BLADE_TOLERANCE, 0            - PIXELS_PER_TILE / PPM);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, 0            - PIXELS_PER_TILE / PPM);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_X                   - BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
+         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
+         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS + BLADE_TOLERANCE, 0 - PIXELS_PER_TILE / PPM);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, 0 - PIXELS_PER_TILE / PPM);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_X - BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
          break;
       }
       case Alignment::PointsNowhere:
@@ -510,16 +442,10 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    }
 
    b2PolygonShape box_shape;
-   box_shape.SetAsBox(
-      box_width,
-      box_height,
-      box_center,
-      0.0f
-   );
+   box_shape.SetAsBox(box_width, box_height, box_center, 0.0f);
 
    _body->CreateFixture(&box_shape, 0);
 }
-
 
 void Crusher::updateSpritePositions()
 {
@@ -555,4 +481,3 @@ void Crusher::updateSpritePositions()
    _sprite_pusher.setPosition(_pixel_position + _pixel_offset_pusher);
    _sprite_spike.setPosition(_pixel_position + _pixel_offset_spike + _blade_offset);
 }
-

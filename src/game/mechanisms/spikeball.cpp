@@ -3,10 +3,10 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/math/hermitecurve.h"
-#include "player/player.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "player/player.h"
 #include "texturepool.h"
 
 /*
@@ -30,9 +30,7 @@
    https://www.iforce2d.net/b2dtut/joints-revolute
 */
 
-
-SpikeBall::SpikeBall(GameNode* parent)
- : GameNode(parent)
+SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(SpikeBall).name());
    setZ(16);
@@ -60,7 +58,6 @@ SpikeBall::SpikeBall(GameNode* parent)
    _chain_element_b.setTextureRect(sf::IntRect(34, 64, 8, 8));
    _chain_element_b.setOrigin(4, 4);
 }
-
 
 void SpikeBall::drawChain(sf::RenderTarget& window)
 {
@@ -93,7 +90,6 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
    }
 }
 
-
 void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    static const auto vertex_color = sf::Color(200, 200, 240);
@@ -108,8 +104,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
          const auto c1_pos_m = c1->GetPosition();
          const auto c2_pos_m = c2->GetPosition();
 
-         sf::Vertex line[] =
-         {
+         sf::Vertex line[] = {
             sf::Vertex(sf::Vector2f(c1_pos_m.x * PPM, c1_pos_m.y * PPM), vertex_color),
             sf::Vertex(sf::Vector2f(c2_pos_m.x * PPM, c2_pos_m.y * PPM), vertex_color),
          };
@@ -125,13 +120,9 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_spike_sprite);
 }
 
-
 void SpikeBall::update(const sf::Time& dt)
 {
-   _spike_sprite.setPosition(
-      _ball_body->GetPosition().x * PPM,
-      _ball_body->GetPosition().y * PPM
-   );
+   _spike_sprite.setPosition(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
 
    static const b2Vec2 up{0.0, 1.0};
 
@@ -159,11 +150,17 @@ void SpikeBall::update(const sf::Time& dt)
    }
 }
 
+std::optional<sf::FloatRect> SpikeBall::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 void SpikeBall::setup(const GameDeserializeData& data)
 {
    if (data._tmx_object->_properties)
    {
+      _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
       auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
@@ -207,12 +204,9 @@ void SpikeBall::setup(const GameDeserializeData& data)
       }
    }
 
-   setPixelPosition(
-       sf::Vector2i{
-          static_cast<int32_t>(data._tmx_object->_x_px) + PIXELS_PER_HALF_TILE,
-          static_cast<int32_t>(data._tmx_object->_y_px) + PIXELS_PER_HALF_TILE
-       }
-    );
+   setPixelPosition(sf::Vector2i{
+      static_cast<int32_t>(data._tmx_object->_x_px) + PIXELS_PER_HALF_TILE,
+      static_cast<int32_t>(data._tmx_object->_y_px) + PIXELS_PER_HALF_TILE});
 
    const auto pos_m = b2Vec2{static_cast<float>(_pixel_position.x * MPP), static_cast<float>(_pixel_position.y * MPP)};
 
@@ -253,8 +247,8 @@ void SpikeBall::setup(const GameDeserializeData& data)
    _ball_shape.m_radius = _config._ball_radius;
    _ball_body_def.position.Set(pos_m.x + 0.01f + _config._chain_element_count * _config._chain_element_distance, pos_m.y);
    _ball_fixture_def.shape = &_ball_shape;
-   _ball_body = data._world->CreateBody( &_ball_body_def );
-   auto ball_fixture = _ball_body->CreateFixture( &_ball_fixture_def );
+   _ball_body = data._world->CreateBody(&_ball_body_def);
+   auto ball_fixture = _ball_body->CreateFixture(&_ball_fixture_def);
    b2Vec2 anchor(pos_m.x + _config._chain_element_count * _config._chain_element_distance, pos_m.y);
    _joint_def.Initialize(prev_body, _ball_body, anchor);
    data._world->CreateJoint(&_joint_def);
@@ -264,22 +258,15 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
-   _box_sprite.setPosition(
-      _chain_elements[0]->GetPosition().x * PPM,
-      _chain_elements[0]->GetPosition().y * PPM
-   );
+   _box_sprite.setPosition(_chain_elements[0]->GetPosition().x * PPM, _chain_elements[0]->GetPosition().y * PPM);
 }
-
 
 sf::Vector2i SpikeBall::getPixelPosition() const
 {
    return _pixel_position;
 }
 
-
 void SpikeBall::setPixelPosition(const sf::Vector2i& pixel_position)
 {
    _pixel_position = pixel_position;
 }
-
-
