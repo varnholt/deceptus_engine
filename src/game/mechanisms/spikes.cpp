@@ -4,19 +4,18 @@
 #include "player/player.h"
 #include "texturepool.h"
 
-#include "framework/tools/log.h"
 #include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxtileset.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
 
 #include <iostream>
 
-
-#define SPIKES_PER_ROW 18
-#define TOLERANCE_PIXELS 5
-#define TRAP_START_TILE (SPIKES_PER_ROW - 4)
-#define SPIKES_TILE_INDEX_UP 6
+constexpr auto SPIKES_PER_ROW = 18;
+constexpr auto TOLERANCE_PIXELS = 5;
+constexpr auto TRAP_START_TILE = (SPIKES_PER_ROW - 4);
+constexpr auto SPIKES_TILE_INDEX_UP = 6;
 // -> 24 - 2 * 4 = 16px rect
 
 namespace
@@ -26,21 +25,17 @@ constexpr auto update_time_down_ms = 30;
 constexpr auto down_time_ms = 2000;
 constexpr auto up_tims_ms = 2000;
 constexpr auto trap_time_ms = 250;
-}
+}  // namespace
 
-
-Spikes::Spikes(GameNode* parent)
- : GameNode(parent)
+Spikes::Spikes(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Spikes).name());
 }
-
 
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
 }
-
 
 void Spikes::updateInterval()
 {
@@ -94,7 +89,6 @@ void Spikes::updateInterval()
    _deadly = (_tu < 10);
 }
 
-
 void Spikes::updateTrap()
 {
    if (_tu == SPIKES_TILE_INDEX_UP)
@@ -110,7 +104,7 @@ void Spikes::updateTrap()
    // trap trigger is done via intersection
    if (_tu == TRAP_START_TILE)
    {
-      auto playerRect = Player::getCurrent()->getPixelRectInt();
+      auto playerRect = Player::getCurrent()->getPixelRectFloat();
       if (playerRect.intersects(_pixel_rect))
       {
          // start counting from first intersection
@@ -144,7 +138,7 @@ void Spikes::updateTrap()
       if (_triggered)
       {
          // extract
-         _tu-=2;
+         _tu -= 2;
          if (_tu <= SPIKES_TILE_INDEX_UP)
          {
             _tu = SPIKES_TILE_INDEX_UP;
@@ -163,7 +157,6 @@ void Spikes::updateTrap()
 
    _deadly = (_tu < 10);
 }
-
 
 void Spikes::updateToggled()
 {
@@ -190,35 +183,25 @@ void Spikes::updateToggled()
    _deadly = (_tu < 10);
 }
 
-
 Spikes::Mode Spikes::getMode() const
 {
    return _mode;
 }
-
 
 void Spikes::setMode(Mode mode)
 {
    _mode = mode;
 }
 
-
-const sf::IntRect& Spikes::getPixelRect() const
+const sf::FloatRect& Spikes::getPixelRect() const
 {
    return _pixel_rect;
 }
 
-
 void Spikes::updateSpriteRect()
 {
-   _sprite.setTextureRect({
-      _tu * PIXELS_PER_TILE,
-      _tv * PIXELS_PER_TILE,
-      PIXELS_PER_TILE,
-      PIXELS_PER_TILE}
-   );
+   _sprite.setTextureRect({_tu * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
 }
-
 
 void Spikes::update(const sf::Time& dt)
 {
@@ -252,7 +235,7 @@ void Spikes::update(const sf::Time& dt)
    if (_deadly)
    {
       // check for intersection with player
-      const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+      const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
       if (player_rect.intersects(_pixel_rect))
       {
          Player::getCurrent()->damage(100);
@@ -260,12 +243,12 @@ void Spikes::update(const sf::Time& dt)
    }
 }
 
+std::optional<sf::FloatRect> Spikes::getBoundingBoxPx()
+{
+   return _pixel_rect;
+}
 
-std::vector<std::shared_ptr<Spikes>> Spikes::load(
-   GameNode* parent,
-   const GameDeserializeData& data,
-   Mode mode
-)
+std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDeserializeData& data, Mode mode)
 {
    if (!data._tmx_layer)
    {
@@ -283,9 +266,9 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(
 
    std::vector<std::shared_ptr<Spikes>> all_spikes;
 
-   const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_tl;
-   const auto height   = data._tmx_layer->_height_tl;
+   const auto tiles = data._tmx_layer->_data;
+   const auto width = data._tmx_layer->_width_tl;
+   const auto height = data._tmx_layer->_height_tl;
    const auto first_id = data._tmx_tileset->_first_gid;
 
    const int32_t tiles_per_row = texture->getSize().x / PIXELS_PER_TILE;
@@ -321,20 +304,14 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(
             }
 
             spikes->_pixel_rect = {
-               static_cast<int32_t>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
-               static_cast<int32_t>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
+               static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
+               static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
-               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)
-            };
+               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)};
 
             sf::Sprite sprite;
             sprite.setTexture(*spikes->_texture);
-            sprite.setPosition(
-               sf::Vector2f(
-                  static_cast<float>(i * PIXELS_PER_TILE),
-                  static_cast<float>(j * PIXELS_PER_TILE)
-               )
-            );
+            sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
 
             spikes->_sprite = sprite;
             spikes->updateSpriteRect();
@@ -344,4 +321,3 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(
 
    return all_spikes;
 }
-

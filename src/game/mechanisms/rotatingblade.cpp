@@ -10,12 +10,9 @@
 #include "game/player/player.h"
 #include "game/texturepool.h"
 
-
 // #define DEBUG_INTERSECTION
 
-
-RotatingBlade::RotatingBlade(GameNode* parent)
- : GameNode(parent)
+RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(RotatingBlade).name());
 
@@ -26,7 +23,6 @@ RotatingBlade::RotatingBlade(GameNode* parent)
    _sprite.setOrigin(_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f);
 }
 
-
 void RotatingBlade::setup(const GameDeserializeData& data)
 {
    if (!data._tmx_object->_polygon && !data._tmx_object->_polyline)
@@ -36,22 +32,22 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    }
 
    _path = data._tmx_object->_polygon ? data._tmx_object->_polygon->_polyline : data._tmx_object->_polyline->_polyline;
-   _path.push_back(_path.at(0)); // close path
+   _path.push_back(_path.at(0));  // close path
    _path_type = data._tmx_object->_polygon ? PathType::Polygon : PathType::Polyline;
 
-   std::transform(_path.begin(), _path.end(), _path.begin(), [data](auto& vec){
-       return vec + sf::Vector2f{data._tmx_object->_x_px, data._tmx_object->_y_px};
-   });
+   std::transform(
+      _path.begin(),
+      _path.end(),
+      _path.begin(),
+      [data](auto& vec) {
+         return vec + sf::Vector2f{data._tmx_object->_x_px, data._tmx_object->_y_px};
+      }
+   );
 
    _path_interpolation.addKeys(_path);
 
-   // collsion rect for lever
-   _rectangle = {
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      64,
-      64
-   };
+   // collision rect for lever
+   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, 64, 64};
 
    if (data._tmx_object->_properties)
    {
@@ -94,7 +90,6 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    }
 }
 
-
 void RotatingBlade::update(const sf::Time& dt)
 {
    if (_enabled)
@@ -128,7 +123,6 @@ void RotatingBlade::update(const sf::Time& dt)
    }
 }
 
-
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(_sprite);
@@ -147,14 +141,17 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 #endif
 }
 
-
 void RotatingBlade::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
 }
 
+std::optional<sf::FloatRect> RotatingBlade::getBoundingBoxPx()
+{
+   return _rectangle;
+}
 
-const sf::IntRect& RotatingBlade::getPixelRect() const
+const sf::FloatRect& RotatingBlade::getPixelRect() const
 {
    return _rectangle;
 }

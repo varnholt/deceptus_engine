@@ -7,8 +7,8 @@
 #include "savestate.h"
 
 #include "framework/tmxparser/tmxobject.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -16,13 +16,10 @@
 #include <sstream>
 #include <string>
 
-
-Dialogue::Dialogue(GameNode* parent)
- : GameNode(parent)
+Dialogue::Dialogue(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Dialogue).name());
 }
-
 
 std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
@@ -53,25 +50,17 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       dialogue->_consumed_counter = 1;
    }
 
-   dialogue->_pixel_rect = sf::IntRect{
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   dialogue->_pixel_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    return dialogue;
 }
-
 
 void Dialogue::update(const sf::Time& /*dt*/)
 {
    // prevent 'pause visible' vs. 'dialogue visible' if both
    // are activated in the same frame.
-   if (
-         GameState::getInstance().getMode() == ExecutionMode::Paused
-      || GameState::getInstance().getQueuedMode() == ExecutionMode::Paused
-   )
+   if (GameState::getInstance().getMode() == ExecutionMode::Paused || GameState::getInstance().getQueuedMode() == ExecutionMode::Paused)
    {
       return;
    }
@@ -89,7 +78,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
       return;
    }
 
-   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    if (player_rect.intersects(_pixel_rect))
    {
       // message boxes might already be marked as inactive, however
@@ -114,18 +103,20 @@ void Dialogue::update(const sf::Time& /*dt*/)
    }
 }
 
+std::optional<sf::FloatRect> Dialogue::getBoundingBoxPx()
+{
+   return _pixel_rect;
+}
 
 bool Dialogue::isActive() const
 {
    return _active;
 }
 
-
 void Dialogue::setActive(bool active)
 {
    _active = active;
 }
-
 
 void Dialogue::replace(std::string& str, const std::string& what, const std::string& with)
 {
@@ -136,13 +127,11 @@ void Dialogue::replace(std::string& str, const std::string& what, const std::str
    }
 }
 
-
 void Dialogue::replaceTags(std::string& str)
 {
    replace(str, "<player>", SaveState::getPlayerInfo()._name);
    replace(str, "<br>", "\n");
 }
-
 
 void Dialogue::showNext()
 {
@@ -168,7 +157,7 @@ void Dialogue::showNext()
 
    MessageBox::info(
       messag_text,
-      [this](MessageBox::Button /*b*/) {showNext();},
+      [this](MessageBox::Button /*b*/) { showNext(); },
       MessageBox::LayoutProperties{
          item._location,
          item._background_color,
@@ -176,13 +165,10 @@ void Dialogue::showNext()
          item._animate_text,
          item._animate_text_speed,
          false,
-         (_index == 0),                         // the first item has a show animation
-         (_index == _dialogue_items.size() - 1) // the last item has a hide animation
+         (_index == 0),                          // the first item has a show animation
+         (_index == _dialogue_items.size() - 1)  // the last item has a hide animation
       }
    );
 
    _index++;
 }
-
-
-

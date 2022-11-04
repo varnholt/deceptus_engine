@@ -44,7 +44,7 @@ public:
 
    void toggle();
    void setCallbacks(const std::vector<Callback>& callbacks);
-   const sf::Rect<int32_t>& getPixelRect() const;
+   const sf::FloatRect& getPixelRect() const;
 
    static void addSearchRect(const std::shared_ptr<TmxObject>& rect);
 
@@ -83,7 +83,7 @@ private:
    State _state_previous = State::Left;
 
    std::vector<Callback> _callbacks;
-   sf::Rect<int32_t> _rect;
+   sf::FloatRect _rect;
    bool _player_at_lever = false;
    sf::Sprite _sprite;
    int32_t _offset = 0;

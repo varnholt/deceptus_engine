@@ -5,17 +5,14 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "player/player.h"
 
-
-Weather::Weather(GameNode* parent)
- : GameNode(parent)
+Weather::Weather(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Weather).name());
 }
 
-
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   auto player_rect = Player::getCurrent()->getPixelRectInt();
+   auto player_rect = Player::getCurrent()->getPixelRectFloat();
 
    if (_rect.intersects(player_rect))
    {
@@ -23,10 +20,9 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    }
 }
 
-
 void Weather::update(const sf::Time& dt)
 {
-   auto player_rect = Player::getCurrent()->getPixelRectInt();
+   auto player_rect = Player::getCurrent()->getPixelRectFloat();
 
    if (_rect.intersects(player_rect))
    {
@@ -34,18 +30,18 @@ void Weather::update(const sf::Time& dt)
    }
 }
 
+std::optional<sf::FloatRect> Weather::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto weather = std::make_shared<Weather>(parent);
    weather->setObjectId(data._tmx_object->_name);
 
-   weather->_rect = sf::IntRect {
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   weather->_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    weather->setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 
@@ -55,9 +51,9 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
       if (data._tmx_object->_properties)
       {
-         const auto z_it                 = data._tmx_object->_properties->_map.find("z");
-         const auto collide_it           = data._tmx_object->_properties->_map.find("collide");
-         const auto drop_count_it        = data._tmx_object->_properties->_map.find("drop_count");
+         const auto z_it = data._tmx_object->_properties->_map.find("z");
+         const auto collide_it = data._tmx_object->_properties->_map.find("collide");
+         const auto drop_count_it = data._tmx_object->_properties->_map.find("drop_count");
          const auto fall_through_rate_it = data._tmx_object->_properties->_map.find("fall_through_rate");
 
          if (z_it != data._tmx_object->_properties->_map.end())
@@ -93,9 +89,9 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
       if (data._tmx_object->_properties)
       {
-         const auto z_it                     = data._tmx_object->_properties->_map.find("z");
+         const auto z_it = data._tmx_object->_properties->_map.find("z");
          const auto thunderstorm_time_min_it = data._tmx_object->_properties->_map.find("thunderstorm_time_s");
-         const auto silence_time_it          = data._tmx_object->_properties->_map.find("silence_time_s");
+         const auto silence_time_it = data._tmx_object->_properties->_map.find("silence_time_s");
 
          if (z_it != data._tmx_object->_properties->_map.end())
          {
@@ -113,12 +109,8 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
          }
       }
 
-      const auto rect = sf::FloatRect{
-         data._tmx_object->_x_px,
-         data._tmx_object->_y_px,
-         data._tmx_object->_width_px,
-         data._tmx_object->_height_px
-      };
+      const auto rect =
+         sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
       auto thunderstorm = std::dynamic_pointer_cast<ThunderstormOverlay>(weather->_overlay);
       thunderstorm->setRect(rect);
@@ -127,4 +119,3 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
    return weather;
 }
-

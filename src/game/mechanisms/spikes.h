@@ -6,8 +6,8 @@
 
 #include "SFML/Graphics.hpp"
 
-#include <filesystem>
 #include <Box2D/Box2D.h>
+#include <filesystem>
 
 struct TmxLayer;
 struct TmxTileSet;
@@ -15,7 +15,6 @@ struct TmxTileSet;
 class Spikes : public GameMechanism, public GameNode
 {
 public:
-
    enum class Mode
    {
       Invalid,
@@ -37,21 +36,16 @@ public:
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   static std::vector<std::shared_ptr<Spikes>> load(
-      GameNode* parent,
-      const GameDeserializeData& data,
-      Mode mode
-   );
+   static std::vector<std::shared_ptr<Spikes>> load(GameNode* parent, const GameDeserializeData& data, Mode mode);
 
-   const sf::IntRect& getPixelRect() const;
+   const sf::FloatRect& getPixelRect() const;
 
    Mode getMode() const;
    void setMode(Mode mode);
 
-
 private:
-
    void updateInterval();
    void updateTrap();
    void updateToggled();
@@ -69,7 +63,7 @@ private:
 
    sf::Vector2f _tile_position;
    sf::Vector2f _pixel_position;
-   sf::IntRect _pixel_rect;
+   sf::FloatRect _pixel_rect;
 
    bool _triggered = false;
    bool _deadly = false;
@@ -77,4 +71,3 @@ private:
    Mode _mode = Mode::Invalid;
    Orientation _orientation = Orientation::Invalid;
 };
-

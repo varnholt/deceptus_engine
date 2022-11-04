@@ -71,7 +71,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 
 void ControllerHelp::update(const sf::Time& dt)
 {
-   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    _visible = (player_rect.intersects(_rect_px));
 
    if (!_visible)
@@ -108,12 +108,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    key_controller_map["key_return"] = "bt_a";
    key_controller_map["key_escape"] = "bt_b";
 
-   _rect_px = sf::IntRect{
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   _rect_px = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    _rect_center = sf::Vector2f{
       data._tmx_object->_x_px + data._tmx_object->_width_px / 2.0f,
@@ -189,4 +184,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    }
 }
 
-
+std::optional<sf::FloatRect> ControllerHelp::getBoundingBoxPx()
+{
+   return _rect_px;
+}

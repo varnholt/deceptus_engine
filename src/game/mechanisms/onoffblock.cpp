@@ -3,8 +3,8 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "texturepool.h"
 #include "player/player.h"
+#include "texturepool.h"
 
 /*
 
@@ -24,21 +24,18 @@ namespace
 static constexpr auto width_px = 24;
 static constexpr auto height_px = 24;
 static constexpr auto bevel_px = 0;
-static constexpr auto width_m  = width_px * MPP;
+static constexpr auto width_m = width_px * MPP;
 static constexpr auto height_m = height_px * MPP;
 static constexpr auto bevel_m = bevel_px * MPP;
 
 static constexpr auto count_columns = 8;
 static constexpr auto animation_speed = 40.0f;
-}
+}  // namespace
 
-
-OnOffBlock::OnOffBlock(GameNode* parent)
-   : GameNode(parent)
+OnOffBlock::OnOffBlock(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(OnOffBlock).name());
 }
-
 
 void OnOffBlock::setup(const GameDeserializeData& data)
 {
@@ -48,12 +45,7 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    _sprite.setTexture(*_texture_map);
    _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
 
-   _rectangle = {
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
@@ -108,15 +100,15 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    //       +--------+
    //       3        4
 
-   std::array<b2Vec2, 8> vertices {
-      b2Vec2{bevel_m,             0.0f              },
-      b2Vec2{0.0f,                bevel_m           },
-      b2Vec2{0.0f,                height_m - bevel_m},
-      b2Vec2{bevel_m,             height_m          },
-      b2Vec2{width_m - bevel_m,   height_m          },
-      b2Vec2{width_m,             height_m - bevel_m},
-      b2Vec2{width_m,             bevel_m           },
-      b2Vec2{width_m - bevel_m,   0.0f              },
+   std::array<b2Vec2, 8> vertices{
+      b2Vec2{bevel_m, 0.0f},
+      b2Vec2{0.0f, bevel_m},
+      b2Vec2{0.0f, height_m - bevel_m},
+      b2Vec2{bevel_m, height_m},
+      b2Vec2{width_m - bevel_m, height_m},
+      b2Vec2{width_m, height_m - bevel_m},
+      b2Vec2{width_m, bevel_m},
+      b2Vec2{width_m - bevel_m, 0.0f},
    };
 
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
@@ -140,32 +132,23 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    updateSpriteRect();
 }
 
-
 void OnOffBlock::updateSpriteRect()
 {
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
-   _sprite.setTextureRect({
-       _tu_tl * PIXELS_PER_TILE,
-       _tv_tl * PIXELS_PER_TILE,
-       PIXELS_PER_TILE,
-       PIXELS_PER_TILE}
-   );
+   _sprite.setTextureRect({_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
 }
 
-
-const sf::IntRect& OnOffBlock::getPixelRect() const
+const sf::FloatRect& OnOffBlock::getPixelRect() const
 {
    return _rectangle;
 }
-
 
 void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(_sprite);
 }
-
 
 void OnOffBlock::update(const sf::Time& dt)
 {
@@ -210,7 +193,6 @@ void OnOffBlock::update(const sf::Time& dt)
    }
 }
 
-
 void OnOffBlock::setEnabled(bool enabled)
 {
    _body->SetActive(enabled);
@@ -218,4 +200,7 @@ void OnOffBlock::setEnabled(bool enabled)
    _sprite_index_target = (enabled ? _sprite_index_enabled : _sprite_index_disabled);
 }
 
-
+std::optional<sf::FloatRect> OnOffBlock::getBoundingBoxPx()
+{
+   return _rectangle;
+}
