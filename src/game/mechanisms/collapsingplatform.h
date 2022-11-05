@@ -57,6 +57,7 @@ public:
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    void beginContact(b2Contact* /*contact*/, FixtureNode* other);
    void endContact(FixtureNode* other);
@@ -85,7 +86,7 @@ private:
    float _height_m = 0.0f;
    std::vector<Block> _blocks;
    sf::Vector2f _position_px;
-   sf::IntRect _rect_px;
+   sf::FloatRect _rect_px;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;

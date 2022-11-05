@@ -38,17 +38,18 @@ class SpikeBlock : public GameMechanism, public GameNode
       void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
       void setEnabled(bool enabled) override;
+      std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-      const sf::IntRect& getPixelRect() const;
+      const sf::FloatRect& getPixelRect() const;
 
-private:
+   private:
 
       void updateSpriteRect();
 
       std::shared_ptr<sf::Texture> _texture_map;
       std::shared_ptr<sf::Texture> _normal_map;
       sf::Sprite _sprite;
-      sf::IntRect _rectangle;
+      sf::FloatRect _rectangle;
 
       static constexpr int32_t _sprite_index_enabled = 32;
       static constexpr int32_t _sprite_index_disabled = 39;

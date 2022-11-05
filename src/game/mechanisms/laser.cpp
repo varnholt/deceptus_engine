@@ -4,20 +4,19 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
-#include "framework/tools/log.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/log.h"
 #include "player/player.h"
 #include "texturepool.h"
 
 #include <iostream>
-
 
 namespace
 {
@@ -26,39 +25,30 @@ static constexpr std::pair<int32_t, int32_t> range_enabling{2, 9};
 static constexpr std::pair<int32_t, int32_t> range_enabled{10, 16};
 static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
 
-static constexpr auto range_diabled_delta  = range_disabled.second  - range_disabled.first;
-static constexpr auto range_enabled_delta  = range_enabled.second   - range_enabled.first;
+static constexpr auto range_diabled_delta = range_disabled.second - range_disabled.first;
+static constexpr auto range_enabled_delta = range_enabled.second - range_enabled.first;
 
 std::vector<std::shared_ptr<TmxObject>> __objects;
 std::vector<std::shared_ptr<Laser>> __lasers;
 std::vector<std::array<int32_t, 9>> __tiles_version_1;
 std::vector<std::array<int32_t, 9>> __tiles_version_2;
-}
-
+}  // namespace
 
 //-----------------------------------------------------------------------------
-Laser::Laser(GameNode* parent)
- : GameNode(parent)
+Laser::Laser(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Laser).name());
 }
-
 
 //-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _sprite.setTextureRect(
-      sf::IntRect(
-         _tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE,
-         _tv * PIXELS_PER_TILE,
-         PIXELS_PER_TILE,
-         PIXELS_PER_TILE
-      )
+      sf::IntRect(_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE)
    );
 
    color.draw(_sprite);
 }
-
 
 //-----------------------------------------------------------------------------
 void Laser::setEnabled(bool enabled)
@@ -66,13 +56,11 @@ void Laser::setEnabled(bool enabled)
    GameMechanism::setEnabled(enabled);
 }
 
-
 //-----------------------------------------------------------------------------
-const sf::Rect<int32_t>& Laser::getPixelRect() const
+const sf::FloatRect& Laser::getPixelRect() const
 {
    return _pixel_rect;
 }
-
 
 //-----------------------------------------------------------------------------
 void Laser::update(const sf::Time& dt)
@@ -115,7 +103,7 @@ void Laser::update(const sf::Time& dt)
       //
       // if the laser is switched on, move the tile index to the left
       // if the laser is switched off, move the tile index to the right
-      if ( (_on && _tile_index > 0) || (!_on && _tile_index < 6) )
+      if ((_on && _tile_index > 0) || (!_on && _tile_index < 6))
       {
          // off sprite is rightmost, on sprite is leftmost
          auto dir = _on ? -1 : 1;
@@ -208,6 +196,10 @@ void Laser::update(const sf::Time& dt)
    }
 }
 
+std::optional<sf::FloatRect> Laser::getBoundingBoxPx()
+{
+   return _pixel_rect;
+}
 
 //-----------------------------------------------------------------------------
 void Laser::reset()
@@ -219,7 +211,6 @@ void Laser::reset()
    _time = 0u;
 }
 
-
 //-----------------------------------------------------------------------------
 void Laser::resetAll()
 {
@@ -229,20 +220,17 @@ void Laser::resetAll()
    __tiles_version_2.clear();
 }
 
-
 //-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getTilePosition() const
 {
    return _tile_position;
 }
 
-
 //-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getPixelPosition() const
 {
    return _position_px;
 }
-
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const GameDeserializeData& data)
@@ -275,10 +263,10 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
    std::vector<std::shared_ptr<GameMechanism>> lasers;
 
    sf::Vector2u tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
-   const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_tl;
-   const auto height   = data._tmx_layer->_height_tl;
-   const auto first_id  = data._tmx_tileset->_first_gid;
+   const auto tiles = data._tmx_layer->_data;
+   const auto width = data._tmx_layer->_width_tl;
+   const auto height = data._tmx_layer->_height_tl;
+   const auto first_id = data._tmx_tileset->_first_gid;
 
    // populate the vertex array, with one quad per tile
    for (auto i = 0u; i < width; ++i)
@@ -304,10 +292,10 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
          laser->_position_px.x = laser->_tile_position.x * PIXELS_PER_TILE;
          laser->_position_px.y = laser->_tile_position.y * PIXELS_PER_TILE;
 
-         laser->_pixel_rect.left = static_cast<int32_t>(laser->_position_px.x);
-         laser->_pixel_rect.top  = static_cast<int32_t>(laser->_position_px.y);
+         laser->_pixel_rect.left = laser->_position_px.x;
+         laser->_pixel_rect.top = laser->_position_px.y;
 
-         laser->_pixel_rect.width  = PIXELS_PER_TILE;
+         laser->_pixel_rect.width = PIXELS_PER_TILE;
          laser->_pixel_rect.height = PIXELS_PER_TILE;
 
          laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
@@ -335,142 +323,133 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
    return lasers;
 }
 
-
 void Laser::addObject(const std::shared_ptr<TmxObject>& object)
 {
    __objects.push_back(object);
 }
 
-
 void Laser::addTilesVersion1()
 {
    // each tile is split up into 3 rows x 3 columns (3 x 8 pixels)
-   __tiles_version_1.push_back(
-      {0,0,0,
-       1,1,1,
-       0,0,0}
-   );
+   __tiles_version_1.push_back({0, 0, 0, 1, 1, 1, 0, 0, 0});
 
-   __tiles_version_1.push_back({0,1,0,0,1,0,0,1,0});
-   __tiles_version_1.push_back({0,1,0,0,1,0,0,1,0});
-   __tiles_version_1.push_back({0,1,0,0,1,0,0,1,0});
-   __tiles_version_1.push_back({0,0,0,1,1,1,0,0,0});
-   __tiles_version_1.push_back({0,0,0,1,1,1,0,0,0});
-   __tiles_version_1.push_back({0,1,0,1,1,1,0,1,0});
-   __tiles_version_1.push_back({0,0,0,1,1,1,0,1,0});
-   __tiles_version_1.push_back({0,1,0,1,1,0,0,1,0});
-   __tiles_version_1.push_back({0,1,0,1,1,1,0,0,0});
-   __tiles_version_1.push_back({0,1,0,0,1,1,0,1,0});
-   __tiles_version_1.push_back({0,0,0,0,1,1,0,1,0});
-   __tiles_version_1.push_back({0,0,0,1,1,0,0,1,0});
-   __tiles_version_1.push_back({0,1,0,0,1,1,0,0,0});
-   __tiles_version_1.push_back({0,1,0,1,1,0,0,0,0});
-   __tiles_version_1.push_back({0,1,0,0,1,0,0,0,0});
-   __tiles_version_1.push_back({0,0,0,0,1,0,0,1,0});
-   __tiles_version_1.push_back({0,0,0,0,1,1,0,0,0});
-   __tiles_version_1.push_back({0,0,0,1,1,0,0,0,0});
+   __tiles_version_1.push_back({0, 1, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_1.push_back({0, 1, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_1.push_back({0, 1, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_1.push_back({0, 0, 0, 1, 1, 1, 0, 0, 0});
+   __tiles_version_1.push_back({0, 0, 0, 1, 1, 1, 0, 0, 0});
+   __tiles_version_1.push_back({0, 1, 0, 1, 1, 1, 0, 1, 0});
+   __tiles_version_1.push_back({0, 0, 0, 1, 1, 1, 0, 1, 0});
+   __tiles_version_1.push_back({0, 1, 0, 1, 1, 0, 0, 1, 0});
+   __tiles_version_1.push_back({0, 1, 0, 1, 1, 1, 0, 0, 0});
+   __tiles_version_1.push_back({0, 1, 0, 0, 1, 1, 0, 1, 0});
+   __tiles_version_1.push_back({0, 0, 0, 0, 1, 1, 0, 1, 0});
+   __tiles_version_1.push_back({0, 0, 0, 1, 1, 0, 0, 1, 0});
+   __tiles_version_1.push_back({0, 1, 0, 0, 1, 1, 0, 0, 0});
+   __tiles_version_1.push_back({0, 1, 0, 1, 1, 0, 0, 0, 0});
+   __tiles_version_1.push_back({0, 1, 0, 0, 1, 0, 0, 0, 0});
+   __tiles_version_1.push_back({0, 0, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_1.push_back({0, 0, 0, 0, 1, 1, 0, 0, 0});
+   __tiles_version_1.push_back({0, 0, 0, 1, 1, 0, 0, 0, 0});
 }
-
 
 void Laser::addTilesVersion2()
 {
-   __tiles_version_2.push_back({0,1,0,0,1,0,0,0,0});
-   __tiles_version_2.push_back({0,0,0,0,1,0,0,1,0});
-   __tiles_version_2.push_back({0,0,0,0,1,1,0,0,0});
-   __tiles_version_2.push_back({0,0,0,1,1,0,0,0,0});
-   __tiles_version_2.push_back({0,1,0,0,1,0,0,1,0});
-   __tiles_version_2.push_back({0,0,0,1,1,1,0,0,0});
-   __tiles_version_2.push_back({0,0,0,0,1,1,0,1,0});
-   __tiles_version_2.push_back({0,0,0,1,1,0,0,1,0});
-   __tiles_version_2.push_back({0,1,0,0,1,1,0,0,0});
-   __tiles_version_2.push_back({0,1,0,1,1,0,0,0,0});
-   __tiles_version_2.push_back({0,1,0,0,1,0,0,0,0});
-   __tiles_version_2.push_back({0,0,0,0,1,0,0,1,0});
-   __tiles_version_2.push_back({0,0,0,0,1,1,0,0,0});
-   __tiles_version_2.push_back({0,0,0,1,1,0,0,0,0});
+   __tiles_version_2.push_back({0, 1, 0, 0, 1, 0, 0, 0, 0});
+   __tiles_version_2.push_back({0, 0, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_2.push_back({0, 0, 0, 0, 1, 1, 0, 0, 0});
+   __tiles_version_2.push_back({0, 0, 0, 1, 1, 0, 0, 0, 0});
+   __tiles_version_2.push_back({0, 1, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_2.push_back({0, 0, 0, 1, 1, 1, 0, 0, 0});
+   __tiles_version_2.push_back({0, 0, 0, 0, 1, 1, 0, 1, 0});
+   __tiles_version_2.push_back({0, 0, 0, 1, 1, 0, 0, 1, 0});
+   __tiles_version_2.push_back({0, 1, 0, 0, 1, 1, 0, 0, 0});
+   __tiles_version_2.push_back({0, 1, 0, 1, 1, 0, 0, 0, 0});
+   __tiles_version_2.push_back({0, 1, 0, 0, 1, 0, 0, 0, 0});
+   __tiles_version_2.push_back({0, 0, 0, 0, 1, 0, 0, 1, 0});
+   __tiles_version_2.push_back({0, 0, 0, 0, 1, 1, 0, 0, 0});
+   __tiles_version_2.push_back({0, 0, 0, 1, 1, 0, 0, 0, 0});
 }
 
-
-void Laser::collide(const sf::Rect<int32_t>& player_rect)
+void Laser::collide(const sf::FloatRect& player_rect)
 {
-   const auto it =
-      std::find_if(std::begin(__lasers), std::end(__lasers), [player_rect](auto laser) {
+   const auto it = std::find_if(
+      std::begin(__lasers),
+      std::end(__lasers),
+      [player_rect](auto laser)
+      {
+         auto pixel_rect = laser->_pixel_rect;
 
-            auto pixel_rect = laser->_pixel_rect;
+         if (laser->_path.has_value())
+         {
+            pixel_rect.left += static_cast<int32_t>(laser->_move_offset_px.x);
+            pixel_rect.top += static_cast<int32_t>(laser->_move_offset_px.y);
+         }
 
-            if (laser->_path.has_value())
+         const auto rough_intersection = player_rect.intersects(pixel_rect);
+
+         auto active = false;
+
+         if (laser->_version == MechanismVersion::Version1)
+         {
+            active = (laser->_tile_index == 0);
+         }
+         else if (laser->_version == MechanismVersion::Version2)
+         {
+            active = (laser->_tile_index >= range_enabled.first) && (laser->_tile_index <= range_enabled.second);
+         }
+
+         // tile index at 0 is an active laser
+         if (active && rough_intersection)
+         {
+            const auto tile_id = static_cast<uint32_t>(laser->_tv);
+
+            const auto tile = (laser->_version == MechanismVersion::Version1) ? __tiles_version_1[tile_id] : __tiles_version_2[tile_id];
+
+            auto x = 0u;
+            auto y = 0u;
+
+            for (auto i = 0u; i < 9; i++)
             {
-               pixel_rect.left += static_cast<int32_t>(laser->_move_offset_px.x);
-               pixel_rect.top  += static_cast<int32_t>(laser->_move_offset_px.y);
-            }
-
-            const auto rough_intersection = player_rect.intersects(pixel_rect);
-
-            auto active = false;
-
-            if (laser->_version == MechanismVersion::Version1)
-            {
-               active = (laser->_tile_index == 0);
-            }
-            else if (laser->_version == MechanismVersion::Version2)
-            {
-               active = (laser->_tile_index >= range_enabled.first) && (laser->_tile_index <= range_enabled.second);
-            }
-
-            // tile index at 0 is an active laser
-            if (active && rough_intersection)
-            {
-               const auto tile_id = static_cast<uint32_t>(laser->_tv);
-
-               const auto tile =
-                  (laser->_version == MechanismVersion::Version1)
-                     ? __tiles_version_1[tile_id]
-                     : __tiles_version_2[tile_id];
-
-               auto x = 0u;
-               auto y = 0u;
-
-               for (auto i = 0u; i < 9; i++)
+               if (tile[i] == 1)
                {
-                  if (tile[i] == 1)
+                  sf::FloatRect rect;
+
+                  rect.left = laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE);
+                  rect.top = laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE);
+
+                  if (laser->_path.has_value())
                   {
-                     sf::Rect<int32_t> rect;
-
-                     rect.left = static_cast<int32_t>(laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE));
-                     rect.top  = static_cast<int32_t>(laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE));
-
-                     if (laser->_path.has_value())
-                     {
-                        rect.left += static_cast<int32_t>(laser->_move_offset_px.x);
-                        rect.top  += static_cast<int32_t>(laser->_move_offset_px.y);
-                     }
-
-                     rect.width  = PIXELS_PER_PHYSICS_TILE;
-                     rect.height = PIXELS_PER_PHYSICS_TILE;
-
-                     const auto fine_intersection = player_rect.intersects(rect);
-
-                     if (fine_intersection)
-                     {
-                        return true;
-                     }
+                     rect.left += laser->_move_offset_px.x;
+                     rect.top += laser->_move_offset_px.y;
                   }
 
-                  x++;
+                  rect.width = PIXELS_PER_PHYSICS_TILE;
+                  rect.height = PIXELS_PER_PHYSICS_TILE;
 
-                  if (i > 0 && ( (i + 1) % 3 == 0))
+                  const auto fine_intersection = player_rect.intersects(rect);
+
+                  if (fine_intersection)
                   {
-                     x = 0;
-                     y++;
+                     return true;
                   }
                }
 
-               return false;
+               x++;
+
+               if (i > 0 && ((i + 1) % 3 == 0))
+               {
+                  x = 0;
+                  y++;
+               }
             }
 
             return false;
          }
-      );
+
+         return false;
+      }
+   );
 
    if (it != __lasers.end())
    {
@@ -478,7 +457,6 @@ void Laser::collide(const sf::Rect<int32_t>& player_rect)
       Player::getCurrent()->kill(DeathReason::Laser);
    }
 }
-
 
 void Laser::merge()
 {
@@ -497,9 +475,9 @@ void Laser::merge()
       }
       else
       {
-         const auto x = static_cast<int32_t>(object->_x_px      / PIXELS_PER_TILE );
-         const auto y = static_cast<int32_t>(object->_y_px      / PIXELS_PER_TILE);
-         const auto w = static_cast<int32_t>(object->_width_px  / PIXELS_PER_TILE );
+         const auto x = static_cast<int32_t>(object->_x_px / PIXELS_PER_TILE);
+         const auto y = static_cast<int32_t>(object->_y_px / PIXELS_PER_TILE);
+         const auto w = static_cast<int32_t>(object->_width_px / PIXELS_PER_TILE);
          const auto h = static_cast<int32_t>(object->_height_px / PIXELS_PER_TILE);
 
          const auto animation_offset = std::rand() % 100;
@@ -515,7 +493,7 @@ void Laser::merge()
             const auto it_on = object->_properties->_map.find("on_time");
             if (it_on != object->_properties->_map.end())
             {
-                on_signal = Signal{static_cast<uint32_t>(it_on->second->_value_int.value()), true};
+               on_signal = Signal{static_cast<uint32_t>(it_on->second->_value_int.value()), true};
             }
 
             const auto it_off = object->_properties->_map.find("off_time");
@@ -537,10 +515,7 @@ void Laser::merge()
             {
                for (auto& laser : __lasers)
                {
-                  if (
-                        static_cast<int32_t>(laser->_tile_position.x) == xi
-                     && static_cast<int32_t>(laser->_tile_position.y) == yi
-                  )
+                  if (static_cast<int32_t>(laser->_tile_position.x) == xi && static_cast<int32_t>(laser->_tile_position.y) == yi)
                   {
                      if (on_signal.has_value())
                      {
@@ -583,18 +558,18 @@ void Laser::merge()
       auto it = tmx_object->_properties->_map.find("reference_id");
       if (it != tmx_object->_properties->_map.end())
       {
-          reference_id = it->second->_value_string.value();
+         reference_id = it->second->_value_string.value();
       }
       else
       {
-          continue;
+         continue;
       }
 
       std::optional<float> movement_speed;
       const auto movement_speed_it = tmx_object->_properties->_map.find("movement_speed");
       if (movement_speed_it != tmx_object->_properties->_map.end())
       {
-          movement_speed = movement_speed_it->second->_value_float.value();
+         movement_speed = movement_speed_it->second->_value_float.value();
       }
 
       std::optional<float> move_offset_s;
@@ -608,14 +583,14 @@ void Laser::merge()
       const auto it_easing_function_name = tmx_object->_properties->_map.find("easing_function");
       if (it_easing_function_name != tmx_object->_properties->_map.end())
       {
-          easing_function_name = it_easing_function_name->second->_value_string.value();
+         easing_function_name = it_easing_function_name->second->_value_string.value();
       }
 
       std::optional<int32_t> easing_subdivision_count;
       const auto it_easing_subdivision_count = tmx_object->_properties->_map.find("easing_subdivision_count");
       if (it_easing_subdivision_count != tmx_object->_properties->_map.end())
       {
-          easing_subdivision_count = it_easing_subdivision_count->second->_value_int.value();
+         easing_subdivision_count = it_easing_subdivision_count->second->_value_int.value();
       }
 
       // fetch path from object and close it
@@ -629,9 +604,9 @@ void Laser::merge()
 
          if (easing_function_name.has_value())
          {
-             const auto subdivision_count = easing_function_name.has_value() ? easing_subdivision_count.value() : 10;
-             const auto easings_type = Easings::getEnumFromName<float>(easing_function_name.value());
-             laser->_path_interpolation.addKeys(path, subdivision_count, easings_type);
+            const auto subdivision_count = easing_function_name.has_value() ? easing_subdivision_count.value() : 10;
+            const auto easings_type = Easings::getEnumFromName<float>(easing_function_name.value());
+            laser->_path_interpolation.addKeys(path, subdivision_count, easings_type);
          }
          else
          {
@@ -640,7 +615,7 @@ void Laser::merge()
 
          if (movement_speed.has_value())
          {
-             laser->_settings._movement_speed = *movement_speed;
+            laser->_settings._movement_speed = *movement_speed;
          }
 
          if (move_offset_s.has_value())
@@ -650,5 +625,3 @@ void Laser::merge()
       }
    }
 }
-
-

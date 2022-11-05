@@ -19,6 +19,7 @@ public:
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    bool isPlayerAtBouncer();
 
@@ -39,7 +40,7 @@ private:
 
    std::shared_ptr<sf::Texture> _texture;
    sf::Sprite _sprite;
-   sf::IntRect _rect;
+   sf::FloatRect _rect;
    sf::Time _activation_time;
    bool _player_at_bouncer = false;
 };
