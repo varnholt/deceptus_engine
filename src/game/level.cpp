@@ -712,52 +712,51 @@ void Level::spawnEnemies()
    // this should probably be the future and only approach how to handle enemy spawning.
    for (auto& it : _enemy_data_from_tmx_layer)
    {
-      auto script = it.second.findProperty("script");
+      const auto script = it.second.findProperty("script");
 
-      if (script.has_value())
-      {
-         auto lua_node = LuaInterface::instance().addObject(this, std::string("data/scripts/enemies/") + script.value()._value);
-
-         EnemyDescription json_description;
-         json_description._position_in_tiles = false;
-         json_description._start_position.push_back(it.second._pixel_position.x);
-         json_description._start_position.push_back(it.second._pixel_position.y);
-
-         const auto& generate_path_property = it.second.findProperty("generate_path");
-         const auto& inverse_path_property = it.second.findProperty("inverse_path");
-         if (generate_path_property.has_value() && generate_path_property.value()._value == "1")
-         {
-            it.second._inverse_path = (inverse_path_property.has_value() && inverse_path_property.value()._value == "1");
-            it.second.addPaths(_world_chains);
-         }
-
-         if (!it.second._pixel_path.empty())
-         {
-            json_description._path = it.second._pixel_path;
-         }
-
-         // z index
-         const auto& z_index_property = it.second.findProperty("z");
-         if (z_index_property.has_value())
-         {
-            lua_node->_z_index = std::stoi(z_index_property.value()._value);
-         }
-
-         // merge properties from tmx with those loaded from json
-         for (auto& property : it.second._properties)
-         {
-            json_description._properties.push_back(property);
-         }
-
-         // initialize lua node and store enemy
-         lua_node->_enemy_description = json_description;
-         lua_node->initialize();
-         _enemies.push_back(lua_node);
-      }
-      else
+      if (!script.has_value())
       {
          Log::Error() << "missing script definition";
+         continue;
       }
+
+      auto lua_node = LuaInterface::instance().addObject(this, std::string("data/scripts/enemies/") + script.value()._value);
+
+      EnemyDescription json_description;
+      json_description._position_in_tiles = false;
+      json_description._start_position.push_back(it.second._pixel_position.x);
+      json_description._start_position.push_back(it.second._pixel_position.y);
+
+      const auto& generate_path_property = it.second.findProperty("generate_path");
+      const auto& inverse_path_property = it.second.findProperty("inverse_path");
+      if (generate_path_property.has_value() && generate_path_property.value()._value == "1")
+      {
+         it.second._inverse_path = (inverse_path_property.has_value() && inverse_path_property.value()._value == "1");
+         it.second.addPaths(_world_chains);
+      }
+
+      if (!it.second._pixel_path.empty())
+      {
+         json_description._path = it.second._pixel_path;
+      }
+
+      // z index
+      const auto& z_index_property = it.second.findProperty("z");
+      if (z_index_property.has_value())
+      {
+         lua_node->_z_index = std::stoi(z_index_property.value()._value);
+      }
+
+      // merge properties from tmx with those loaded from json
+      for (auto& property : it.second._properties)
+      {
+         json_description._properties.push_back(property);
+      }
+
+      // initialize lua node and store enemy
+      lua_node->_enemy_description = json_description;
+      lua_node->initialize();
+      _enemies.push_back(lua_node);
    }
 }
 
