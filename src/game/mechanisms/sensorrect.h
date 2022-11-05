@@ -26,7 +26,9 @@ public:
       OnLeave,
    };
 
-   virtual void update(const sf::Time& dt);
+   void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
    void setup(const GameDeserializeData& data);
    void findReference(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms);
 
@@ -35,7 +37,7 @@ private:
 
    void action();
 
-   sf::IntRect _rect;
+   sf::FloatRect _rect;
    bool _player_intersects = false;
    Event _event = Event::OnEnter;
    Action _action = Action::Enable;

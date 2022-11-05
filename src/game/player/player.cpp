@@ -86,6 +86,28 @@ sf::IntRect Player::computeFootSensorPixelIntRect() const
    return rect_px;
 }
 
+sf::FloatRect Player::computeFootSensorPixelFloatRect() const
+{
+   sf::FloatRect rect_px;
+   b2AABB aabb;
+
+   _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+
+   rect_px.left = aabb.lowerBound.x * PPM;
+   rect_px.top = aabb.lowerBound.y * PPM;
+   rect_px.width = abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM;
+   rect_px.height = abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM;
+
+   // std::cout
+   //    << "ux: " << aabb.upperBound.x << " "
+   //    << "uy: " << aabb.upperBound.y << " "
+   //    << "lx: " << aabb.lowerBound.x << " "
+   //    << "ly: " << aabb.lowerBound.y << " "
+   //    << std::endl;
+
+   return rect_px;
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 Player::Player(GameNode* parent) : GameNode(parent)
 {
@@ -1565,7 +1587,7 @@ void Player::updateDash(Dash dir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelCollisions()
 {
-   const auto rect = getPixelRectInt();
+   const auto rect = getPixelRectFloat();
    _extra_manager->collide(rect);
    Laser::collide(rect);
    Fan::collide(rect, _body);

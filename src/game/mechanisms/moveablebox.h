@@ -9,26 +9,23 @@
 
 struct TmxObject;
 
-
 class MoveableBox : public GameMechanism, public GameNode
 {
-   public:
+public:
+   MoveableBox(GameNode* node);
 
-      MoveableBox(GameNode* node);
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+   void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-      void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
-      void update(const sf::Time& dt) override;
+   void setup(const GameDeserializeData& data);
 
-      void setup(const GameDeserializeData& data);
+private:
+   void setupBody(const std::shared_ptr<b2World>& world);
+   void setupTransform();
 
-   private:
-
-      void setupBody(const std::shared_ptr<b2World>& world);
-      void setupTransform();
-
-      std::shared_ptr<sf::Texture> _texture;
-      sf::Sprite _sprite;
-      sf::Vector2f _size;
-      b2Body* _body = nullptr;
+   std::shared_ptr<sf::Texture> _texture;
+   sf::Sprite _sprite;
+   sf::Vector2f _size;
+   b2Body* _body = nullptr;
 };
-

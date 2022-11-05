@@ -1,10 +1,10 @@
 
 #include "bubblecube.h"
 
-#include "framework/tools/globalclock.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/globalclock.h"
 #include "level.h"
 #include "player/player.h"
 #include "texturepool.h"
@@ -17,13 +17,12 @@
 #include "debugdraw.h"
 #endif
 
-
 namespace
 {
 static constexpr auto width_px = 36;
 static constexpr auto height_px = 36;
 static constexpr auto bevel_px = 6;
-static constexpr auto width_m  = width_px * MPP;
+static constexpr auto width_m = width_px * MPP;
 static constexpr auto height_m = height_px * MPP;
 static constexpr auto bevel_m = bevel_px * MPP;
 
@@ -40,11 +39,9 @@ static constexpr auto sprite_offset_x_px = -30;
 static constexpr auto sprite_offset_y_px = -14;
 
 static constexpr auto collision_rect_height = 10;
-}
+}  // namespace
 
-
-BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
- : FixtureNode(parent)
+BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
    setClassName(typeid(BubbleCube).name());
    setType(ObjectTypeBubbleCube);
@@ -102,15 +99,15 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
    //       +--------+
    //       3        4
 
-   std::array<b2Vec2, 8> vertices {
-      b2Vec2{bevel_m,             0.0f              },
-      b2Vec2{0.0f,                bevel_m           },
-      b2Vec2{0.0f,                height_m - bevel_m},
-      b2Vec2{bevel_m,             height_m          },
-      b2Vec2{width_m - bevel_m,   height_m          },
-      b2Vec2{width_m,             height_m - bevel_m},
-      b2Vec2{width_m,             bevel_m           },
-      b2Vec2{width_m - bevel_m,   0.0f              },
+   std::array<b2Vec2, 8> vertices{
+      b2Vec2{bevel_m, 0.0f},
+      b2Vec2{0.0f, bevel_m},
+      b2Vec2{0.0f, height_m - bevel_m},
+      b2Vec2{bevel_m, height_m},
+      b2Vec2{width_m - bevel_m, height_m},
+      b2Vec2{width_m, height_m - bevel_m},
+      b2Vec2{width_m, bevel_m},
+      b2Vec2{width_m - bevel_m, 0.0f},
    };
 
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
@@ -137,14 +134,8 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data)
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
    _sprite.setTexture(*_texture);
 
-   _fixed_rect_px = {
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(width_px),
-      static_cast<int32_t>(height_px)
-   };
+   _fixed_rect_px = {data._tmx_object->_x_px, data._tmx_object->_y_px, width_px, height_px};
 }
-
 
 // 12 x 4 boxes per row
 //
@@ -170,12 +161,11 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       sprite_index = static_cast<int32_t>(_mapped_value_normalized * columns + 6) % columns;
    }
 
-   _sprite.setTextureRect({
-         sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
-         (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
-         PIXELS_PER_TILE * tiles_per_box_width,
-         PIXELS_PER_TILE * tiles_per_box_height
-      }
+   _sprite.setTextureRect(
+      {sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
+       (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
+       PIXELS_PER_TILE * tiles_per_box_width,
+       PIXELS_PER_TILE * tiles_per_box_height}
    );
 
    color.draw(_sprite);
@@ -196,13 +186,12 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 #endif
 }
 
-
 void BubbleCube::updatePushDownOffset(const sf::Time& dt)
 {
    // if configured, bubble moves down when the player stands on top of it
    if (!_move_down_on_contact)
    {
-       return;
+      return;
    }
 
    const auto dt_s = std::max(dt.asSeconds(), 0.0166666666f);
@@ -218,7 +207,6 @@ void BubbleCube::updatePushDownOffset(const sf::Time& dt)
 
    _push_down_offset_px = _push_down_offset_m * PPM;
 }
-
 
 void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
 {
@@ -245,7 +233,6 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
    }
 }
 
-
 void BubbleCube::updatePosition()
 {
    const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
@@ -255,12 +242,8 @@ void BubbleCube::updatePosition()
 
    _body->SetTransform(_position_m + move_offset, 0.0f);
 
-   _sprite.setPosition(
-      _x_px + sprite_offset_x_px,
-      _y_px + sprite_offset_y_px + _push_down_offset_px
-   );
+   _sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_px);
 }
-
 
 void BubbleCube::updateRespawnCondition()
 {
@@ -268,14 +251,13 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-      if (!Player::getCurrent()->getPixelRectInt().intersects(_fixed_rect_px))
+      if (!Player::getCurrent()->getPixelRectFloat().intersects(_fixed_rect_px))
       {
          _popped = false;
          _body->SetActive(true);
       }
    }
 }
-
 
 void BubbleCube::updateFootSensorContact()
 {
@@ -296,13 +278,12 @@ void BubbleCube::updateFootSensorContact()
 
    constexpr auto bevel_range_increase_px = 2;
    _foot_collision_rect_px = {
-      static_cast<int32_t>(_x_px + bevel_px - bevel_range_increase_px),
-      static_cast<int32_t>(_y_px + _push_down_offset_px),
+      _x_px + bevel_px - bevel_range_increase_px,
+      _y_px + _push_down_offset_px,
       width_px - (2 * bevel_px) + (2 * bevel_range_increase_px),
-      collision_rect_height
-   };
+      collision_rect_height};
 
-   auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelIntRect();
+   auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
    auto player_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
 
    if (player_intersects)
@@ -318,7 +299,7 @@ void BubbleCube::updateFootSensorContact()
    {
       constexpr auto move_down_y_tolerance_px = 3;
       auto rect = _fixed_rect_px;
-      rect.top += static_cast<int32_t>(_push_down_offset_px - move_down_y_tolerance_px);
+      rect.top += _push_down_offset_px - move_down_y_tolerance_px;
 
       if (!foot_sensor_rect.intersects(rect))
       {
@@ -327,23 +308,21 @@ void BubbleCube::updateFootSensorContact()
    }
 }
 
-
 void BubbleCube::updateJumpedOffPlatformCondition()
 {
-    auto moved_box_rect = _fixed_rect_px;
-    moved_box_rect.top = moved_box_rect.top - 12;
-    moved_box_rect.left -= 8;
-    moved_box_rect.width += 8 * 2;
+   auto moved_box_rect = _fixed_rect_px;
+   moved_box_rect.top = moved_box_rect.top - 12;
+   moved_box_rect.left -= 8;
+   moved_box_rect.width += 8 * 2;
 
-    const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
-    const auto intersects_box = moved_box_rect.intersects(Player::getCurrent()->computeFootSensorPixelIntRect());
+   const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
+   const auto intersects_box = moved_box_rect.intersects(Player::getCurrent()->computeFootSensorPixelFloatRect());
 
-    if  (first_jump_frame && intersects_box)
-    {
-        _jumped_off_this_platform = true;
-    }
+   if (first_jump_frame && intersects_box)
+   {
+      _jumped_off_this_platform = true;
+   }
 }
-
 
 void BubbleCube::updatePoppedCondition()
 {
@@ -352,17 +331,11 @@ void BubbleCube::updatePoppedCondition()
       return;
    }
 
-   if (
-         _jumped_off_this_platform
-      || _lost_foot_contact
-      || _exceeded_max_contact_duration
-      || _collided_with_surrounding_areas
-   )
+   if (_jumped_off_this_platform || _lost_foot_contact || _exceeded_max_contact_duration || _collided_with_surrounding_areas)
    {
       pop();
    }
 }
-
 
 struct BubbleQueryCallback : public b2QueryCallback
 {
@@ -405,11 +378,11 @@ struct BubbleQueryCallback : public b2QueryCallback
    }
 };
 
-
 void BubbleCube::updatePopOnCollisionCondition()
 {
    // make the bubble pop when it's moved into another body
-   auto countBodies = [this]() -> size_t {
+   auto countBodies = [this]() -> size_t
+   {
       BubbleQueryCallback query_callback;
       query_callback._max_count = _colliding_body_count;
       query_callback._body = _body;
@@ -435,7 +408,6 @@ void BubbleCube::updatePopOnCollisionCondition()
    }
 }
 
-
 void BubbleCube::update(const sf::Time& dt)
 {
    _elapsed_s += dt.asSeconds();
@@ -453,7 +425,7 @@ void BubbleCube::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> BubbleCube::getBoundingBoxPx()
 {
-   return sf::FloatRect(_fixed_rect_px.left, _fixed_rect_px.top, _fixed_rect_px.width, _fixed_rect_px.height);
+   return _fixed_rect_px;
 }
 
 void BubbleCube::pop()
@@ -470,7 +442,6 @@ void BubbleCube::pop()
 
    _body->SetActive(false);
 }
-
 
 // the box2d code path is no longer required and only kept for debugging purposes
 
@@ -489,7 +460,6 @@ void BubbleCube::beginContact(b2Contact* /*contact*/, FixtureNode* other)
    _foot_sensor_contact = true;
 }
 
-
 void BubbleCube::endContact(FixtureNode* other)
 {
    if (other->getType() != ObjectTypePlayerFootSensor)
@@ -504,5 +474,3 @@ void BubbleCube::endContact(FixtureNode* other)
 
    _foot_sensor_contact = false;
 }
-
-

@@ -77,6 +77,7 @@ public:
    b2Body* getBody() const;
    b2Fixture* getFootSensorFixture() const;
    sf::IntRect computeFootSensorPixelIntRect() const;
+   sf::FloatRect computeFootSensorPixelFloatRect() const;
 
    void setWorld(const std::shared_ptr<b2World>& world);
    void resetWorld();

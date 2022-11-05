@@ -3,9 +3,8 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "texturepool.h"
 #include "player/player.h"
-
+#include "texturepool.h"
 
 /*
    000
@@ -29,15 +28,12 @@ namespace
 constexpr auto count_columns = 8;
 constexpr auto animation_speed = 40.0f;
 constexpr auto damage = 100;
-}
+}  // namespace
 
-
-SpikeBlock::SpikeBlock(GameNode* parent)
- : GameNode(parent)
+SpikeBlock::SpikeBlock(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(SpikeBlock).name());
 }
-
 
 void SpikeBlock::setup(const GameDeserializeData& data)
 {
@@ -47,12 +43,7 @@ void SpikeBlock::setup(const GameDeserializeData& data)
    _sprite.setTexture(*_texture_map);
    _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
 
-   _rectangle = {
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
@@ -98,32 +89,23 @@ void SpikeBlock::setup(const GameDeserializeData& data)
    updateSpriteRect();
 }
 
-
 void SpikeBlock::updateSpriteRect()
 {
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
-   _sprite.setTextureRect({
-      _tu_tl * PIXELS_PER_TILE,
-      _tv_tl * PIXELS_PER_TILE,
-      PIXELS_PER_TILE,
-      PIXELS_PER_TILE}
-   );
+   _sprite.setTextureRect({_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
 }
 
-
-const sf::IntRect& SpikeBlock::getPixelRect() const
+const sf::FloatRect& SpikeBlock::getPixelRect() const
 {
    return _rectangle;
 }
-
 
 void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(_sprite);
 }
-
 
 void SpikeBlock::update(const sf::Time& dt)
 {
@@ -143,7 +125,7 @@ void SpikeBlock::update(const sf::Time& dt)
       }
    }
 
-   if (Player::getCurrent()->getPixelRectInt().intersects(_rectangle))
+   if (Player::getCurrent()->getPixelRectFloat().intersects(_rectangle))
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
       {
@@ -176,11 +158,13 @@ void SpikeBlock::update(const sf::Time& dt)
    }
 }
 
-
 void SpikeBlock::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
    _sprite_index_target = (enabled ? _sprite_index_enabled : _sprite_index_disabled);
 }
 
-
+std::optional<sf::FloatRect> SpikeBlock::getBoundingBoxPx()
+{
+   return _rectangle;
+}

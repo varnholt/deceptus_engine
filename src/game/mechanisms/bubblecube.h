@@ -51,8 +51,8 @@ private:
    float _x_px = 0.0f;
    float _y_px = 0.0f;
    float _push_down_offset_px = 0.0f;
-   sf::IntRect _fixed_rect_px;
-   sf::IntRect _foot_collision_rect_px;
+   sf::FloatRect _fixed_rect_px;
+   sf::FloatRect _foot_collision_rect_px;
    float _elapsed_s = 0.0f;
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
