@@ -30,11 +30,11 @@ public:
 
    struct FanTile
    {
-      sf::Vector2i mPosition;
-      sf::Vector2f mDirection;
-      sf::Rect<int32_t> mRect;
-      b2Body* mBody = nullptr;
-      TileDirection mDir;
+      sf::Vector2i _position;
+      sf::Vector2f _direction;
+      sf::FloatRect _rect;
+      b2Body* _body = nullptr;
+      TileDirection _tile_dir;
 
       ~FanTile() = default;
    };
@@ -46,14 +46,14 @@ public:
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
    void setEnabled(bool enabled) override;
 
-   const sf::Rect<int32_t>& getPixelRect() const;
+   const sf::FloatRect& getPixelRect() const;
 
    static void load(const GameDeserializeData& data);
 
    static void resetAll();
    static void addObject(GameNode* parent, const GameDeserializeData& data);
-   static std::optional<sf::Vector2f> collide(const sf::Rect<int32_t>& player_rect);
-   static void collide(const sf::Rect<int32_t>& playerRect, b2Body* body);
+   static std::optional<sf::Vector2f> collide(const sf::FloatRect& player_rect);
+   static void collide(const sf::FloatRect& playerRect, b2Body* body);
    static void merge();
 
    static std::vector<std::shared_ptr<GameMechanism>>& getFans();
@@ -73,7 +73,7 @@ private:
    std::vector<std::shared_ptr<FanTile>> _tiles;
 
    sf::Vector2f _direction;
-   sf::Rect<int32_t> _pixel_rect;
+   sf::FloatRect _pixel_rect;
    float _speed = 1.0f;
    float _lever_lag = 1.0f;
 

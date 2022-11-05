@@ -4,13 +4,13 @@
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
-#include "framework/tools/timer.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/timer.h"
 #include "level.h"
 #include "player/player.h"
 #include "savestate.h"
@@ -18,19 +18,16 @@
 
 #include <iostream>
 
-
 namespace
 {
 constexpr auto door_height_tl = 3;
 }
 
 //-----------------------------------------------------------------------------
-Door::Door(GameNode* parent)
-    : GameNode(parent)
+Door::Door(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Door).name());
 }
-
 
 //-----------------------------------------------------------------------------
 Door::~Door()
@@ -39,7 +36,6 @@ Door::~Door()
    // std::cout << "door destroyed" << std::endl;
 }
 
-
 //-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
@@ -47,13 +43,12 @@ void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_door_quad, _texture.get());
 }
 
-
 //-----------------------------------------------------------------------------
 void Door::updateBars(const sf::Time& dt)
 {
-   const float left   = 0.0f;
-   const float right  = left + 3.0f * PIXELS_PER_TILE;
-   const float top    = 3.0f * PIXELS_PER_TILE - _offset;
+   const float left = 0.0f;
+   const float right = left + 3.0f * PIXELS_PER_TILE;
+   const float top = 3.0f * PIXELS_PER_TILE - _offset;
    const float bottom = top + 3.0f * PIXELS_PER_TILE;
 
    _door_quad[0].texCoords = sf::Vector2f(left, top);
@@ -94,7 +89,6 @@ void Door::updateBars(const sf::Time& dt)
    updateTransform();
 }
 
-
 //-----------------------------------------------------------------------------
 void Door::update(const sf::Time& dt)
 {
@@ -111,7 +105,6 @@ void Door::update(const sf::Time& dt)
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 void Door::setEnabled(bool enabled)
@@ -130,18 +123,16 @@ void Door::setEnabled(bool enabled)
 
 std::optional<sf::FloatRect> Door::getBoundingBoxPx()
 {
-   return sf::FloatRect(_pixel_rect.left, _pixel_rect.top, _pixel_rect.width, _pixel_rect.height);
+   return _pixel_rect;
 }
-
 
 //-----------------------------------------------------------------------------
 void Door::updateTransform()
 {
-   auto x =            _tile_position.x * PIXELS_PER_TILE / PPM;
+   auto x = _tile_position.x * PIXELS_PER_TILE / PPM;
    auto y = (_offset + _tile_position.y * PIXELS_PER_TILE) / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
-
 
 //-----------------------------------------------------------------------------
 void Door::reset()
@@ -162,21 +153,16 @@ void Door::reset()
    }
 }
 
-
 //-----------------------------------------------------------------------------
-void Door::setupBody(
-   const std::shared_ptr<b2World>& world,
-   float x_offset,
-   float x_scale
-   )
+void Door::setupBody(const std::shared_ptr<b2World>& world, float x_offset, float x_scale)
 {
    b2PolygonShape polygon_shape;
    auto size_x = (PIXELS_PER_TILE / PPM) * x_scale;
    auto size_y = (PIXELS_PER_TILE / PPM);
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(x_offset,          0);
-   vertices[1] = b2Vec2(x_offset,          door_height_tl * size_y);
+   vertices[0] = b2Vec2(x_offset, 0);
+   vertices[1] = b2Vec2(x_offset, door_height_tl * size_y);
    vertices[2] = b2Vec2(x_offset + size_x, door_height_tl * size_y);
    vertices[3] = b2Vec2(x_offset + size_x, 0);
    polygon_shape.Set(vertices, 4);
@@ -193,7 +179,6 @@ void Door::setupBody(
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
-
 //-----------------------------------------------------------------------------
 bool Door::checkPlayerAtDoor() const
 {
@@ -209,13 +194,11 @@ bool Door::checkPlayerAtDoor() const
    return at_door;
 }
 
-
 //-----------------------------------------------------------------------------
-const sf::IntRect& Door::getPixelRect() const
+const sf::FloatRect& Door::getPixelRect() const
 {
    return _pixel_rect;
 }
-
 
 //-----------------------------------------------------------------------------
 void Door::toggleWithPlayerChecks()
@@ -235,7 +218,6 @@ void Door::toggleWithPlayerChecks()
    toggle();
 }
 
-
 //-----------------------------------------------------------------------------
 void Door::open()
 {
@@ -249,14 +231,10 @@ void Door::open()
    if (_automatic_close)
    {
       Timer::add(
-         std::chrono::milliseconds(10000),
-         [this](){close();},
-         Timer::Type::Singleshot,
-         Timer::Scope::UpdateIngame
-         );
+         std::chrono::milliseconds(10000), [this]() { close(); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame
+      );
    }
 }
-
 
 //-----------------------------------------------------------------------------
 void Door::close()
@@ -268,7 +246,6 @@ void Door::close()
 
    _state = State::Closing;
 }
-
 
 //-----------------------------------------------------------------------------
 void Door::toggle()
@@ -287,13 +264,11 @@ void Door::toggle()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 const sf::Vector2i& Door::getTilePosition() const
 {
    return _tile_position;
 }
-
 
 //-----------------------------------------------------------------------------
 bool Door::isPlayerAtDoor() const
@@ -301,25 +276,22 @@ bool Door::isPlayerAtDoor() const
    return _player_at_door;
 }
 
-
-
 //-----------------------------------------------------------------------------
 void Door::setPlayerAtDoor(bool player_at_door)
 {
    _player_at_door = player_at_door;
 }
 
-
-   //-----------------------------------------------------------------------------
-   void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
+//-----------------------------------------------------------------------------
+void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
 {
    static const std::unordered_map<ItemType, int32_t> map{
-                                                          std::make_pair(ItemType::KeyRed, 1),
-                                                          std::make_pair(ItemType::KeyGreen, 4),
-                                                          std::make_pair(ItemType::KeyBlue, 7),
-                                                          std::make_pair(ItemType::KeyYellow, 10),
-                                                          std::make_pair(ItemType::KeyOrange, 13),
-                                                          };
+      std::make_pair(ItemType::KeyRed, 1),
+      std::make_pair(ItemType::KeyGreen, 4),
+      std::make_pair(ItemType::KeyBlue, 7),
+      std::make_pair(ItemType::KeyYellow, 10),
+      std::make_pair(ItemType::KeyOrange, 13),
+   };
 
    const auto offset_it = map.find(item_type);
 
@@ -332,7 +304,6 @@ void Door::setPlayerAtDoor(bool player_at_door)
    _sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * offset_it->second, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
    _sprite_icon.setPosition(pos);
 }
-
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData& data)
@@ -351,12 +322,12 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
 
    std::vector<std::shared_ptr<GameMechanism>> doors;
 
-   const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_tl;
-   const auto height   = data._tmx_layer->_height_tl;
+   const auto tiles = data._tmx_layer->_data;
+   const auto width = data._tmx_layer->_width_tl;
+   const auto height = data._tmx_layer->_height_tl;
    const auto first_id = data._tmx_tileset->_first_gid;
 
-         // populate the vertex array, with one quad per tile
+   // populate the vertex array, with one quad per tile
    for (auto j = 0u; j < height; j++)
    {
       for (auto i = 0u; i < width; i++)
@@ -370,10 +341,10 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
          }
          auto tile_id = tile_number - first_id;
 
-               // 21: red
-               // 24: green
-               // 27: blue
-               // ...
+         // 21: red
+         // 24: green
+         // 27: blue
+         // ...
 
          auto required_item = ItemType::Invalid;
          auto create_door = false;
@@ -429,22 +400,14 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
             door->_type = Type::Bars;
             door->_tile_id = tile_id;
             door->_tile_position.x = static_cast<int32_t>(i);
-            door->_tile_position.y = static_cast<int32_t>(j) + 1; // the actual door is a tile lower
+            door->_tile_position.y = static_cast<int32_t>(j) + 1;  // the actual door is a tile lower
             door->_required_item = required_item;
-            door->_pixel_rect = sf::IntRect{
-               static_cast<int32_t>(position_x + PIXELS_PER_TILE),
-               static_cast<int32_t>(position_y),
-               PIXELS_PER_TILE,
-               PIXELS_PER_TILE * 3
-            };
+            door->_pixel_rect = sf::FloatRect{position_x + PIXELS_PER_TILE, position_y, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
 
-                  // draw required door open icon
+            // draw required door open icon
             if (required_item != ItemType::Invalid)
             {
-               auto key_sprite_pos = sf::Vector2f{
-                  static_cast<float>(i * PIXELS_PER_TILE),
-                  static_cast<float>(j * PIXELS_PER_TILE)
-               };
+               auto key_sprite_pos = sf::Vector2f{static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)};
 
                door->setupKeySprite(required_item, key_sprite_pos);
             }
@@ -464,7 +427,6 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
 
    return doors;
 }
-
 
 void Door::setup(const GameDeserializeData& data)
 {
@@ -489,12 +451,7 @@ void Door::setup(const GameDeserializeData& data)
    _tile_position.x = static_cast<int32_t>(x_px / PIXELS_PER_TILE);
    _tile_position.y = static_cast<int32_t>(y_px / PIXELS_PER_TILE);
 
-   _pixel_rect = sf::IntRect{
-      static_cast<int32_t>(x_px),
-      static_cast<int32_t>(y_px),
-      PIXELS_PER_TILE,
-      PIXELS_PER_TILE * 3
-   };
+   _pixel_rect = sf::FloatRect{x_px, y_px, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
 
    const auto z_it = data._tmx_object->_properties->_map.find("z");
    if (z_it != data._tmx_object->_properties->_map.end())
@@ -503,18 +460,18 @@ void Door::setup(const GameDeserializeData& data)
       setZ(z_index);
    }
 
-      const auto key_it = data._tmx_object->_properties->_map.find("key");
+   const auto key_it = data._tmx_object->_properties->_map.find("key");
    if (key_it != data._tmx_object->_properties->_map.end())
    {
       const auto key = key_it->second->_value_string.value();
 
-         static const std::unordered_map<std::string, ItemType> map{
-                                                                    std::make_pair("key_red", ItemType::KeyRed),
-                                                                    std::make_pair("key_green", ItemType::KeyGreen),
-                                                                    std::make_pair("key_blue", ItemType::KeyBlue),
-                                                                    std::make_pair("key_yellow", ItemType::KeyYellow),
-                                                                    std::make_pair("key_orange", ItemType::KeyOrange),
-                                                                    };
+      static const std::unordered_map<std::string, ItemType> map{
+         std::make_pair("key_red", ItemType::KeyRed),
+         std::make_pair("key_green", ItemType::KeyGreen),
+         std::make_pair("key_blue", ItemType::KeyBlue),
+         std::make_pair("key_yellow", ItemType::KeyYellow),
+         std::make_pair("key_orange", ItemType::KeyOrange),
+      };
 
       const auto key_type_it = map.find(key);
       if (key_type_it != map.end())

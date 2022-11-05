@@ -23,7 +23,10 @@ public:
    virtual int32_t getZ() const;
    virtual void setZ(const int32_t& z);
 
-   virtual std::optional<sf::FloatRect> getBoundingBoxPx() {return std::nullopt;};
+   virtual std::optional<sf::FloatRect> getBoundingBoxPx() = 0;
+   //   {
+   //      return std::nullopt;
+   //   };
 
    virtual void serializeState(nlohmann::json&);
    virtual void deserializeState(const nlohmann::json&);

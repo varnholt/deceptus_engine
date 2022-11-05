@@ -25,9 +25,9 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
       void update(const sf::Time& dt) override;
       void setEnabled(bool enabled) override;
+      std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-      sf::IntRect getPixelRect() const;
-
+      sf::FloatRect getPixelRect() const;
 
       static void resetBeltState();
       static void processContact(b2Contact *contact);
@@ -42,8 +42,8 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
       b2Vec2 _position_b2d;
       sf::Vector2f _position_sfml;
       b2PolygonShape _shape;
-      sf::IntRect _belt_pixel_rect;
-      sf::IntRect _arrow_pixel_rect;
+      sf::FloatRect _belt_pixel_rect;
+      sf::FloatRect _arrow_pixel_rect;
       float _elapsed = 0.0f;
       bool _points_right = true;
       float _lever_lag = 1.0f;

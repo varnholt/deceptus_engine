@@ -13,13 +13,11 @@ class TileMap;
 struct TmxLayer;
 struct TmxTileSet;
 
-
 class ExtraManager
 {
 public:
-
-   void load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet);
-   void collide(const sf::Rect<int32_t>& playerRect);
+   void load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset);
+   void collide(const sf::FloatRect& player_rect);
 
    void resetExtras();
 
@@ -29,4 +27,3 @@ public:
 
    std::shared_ptr<TileMap> _tilemap;
 };
-

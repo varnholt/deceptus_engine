@@ -1,21 +1,18 @@
 #include "shaderlayer.h"
 
 #include "camerapanorama.h"
-#include "framework/tools/globalclock.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/globalclock.h"
 #include "texturepool.h"
 
 #include <iostream>
 
-
-ShaderLayer::ShaderLayer(GameNode* parent)
- : GameNode(parent)
+ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(ShaderLayer).name());
 }
-
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
@@ -30,11 +27,10 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    _shader.setUniform("u_resolution", sf::Vector2f(w, h));
 
    sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(x,     y    ), sf::Vector2f(0.0f,     _uv_height)),
-      sf::Vertex(sf::Vector2f(x,     y + h), sf::Vector2f(0.0f,     0.0f)),
+      sf::Vertex(sf::Vector2f(x, y), sf::Vector2f(0.0f, _uv_height)),
+      sf::Vertex(sf::Vector2f(x, y + h), sf::Vector2f(0.0f, 0.0f)),
       sf::Vertex(sf::Vector2f(x + w, y + h), sf::Vector2f(_uv_width, 0.0f)),
-      sf::Vertex(sf::Vector2f(x + w, y    ), sf::Vector2f(_uv_width, _uv_height))
-   };
+      sf::Vertex(sf::Vector2f(x + w, y), sf::Vector2f(_uv_width, _uv_height))};
 
    sf::RenderStates states;
    states.shader = &_shader;
@@ -43,12 +39,15 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    target.draw(quad, 4, sf::Quads, states);
 }
 
-
 void ShaderLayer::update(const sf::Time& dt)
 {
    _elapsed += dt;
 }
 
+std::optional<sf::FloatRect> ShaderLayer::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
@@ -59,6 +58,8 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->_size.x = data._tmx_object->_width_px;
    instance->_size.y = data._tmx_object->_height_px;
    instance->setObjectId(data._tmx_object->_name);
+   instance->_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    if (data._tmx_object->_properties != nullptr)
    {

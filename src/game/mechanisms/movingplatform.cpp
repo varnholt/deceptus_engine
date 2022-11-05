@@ -8,34 +8,31 @@
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolyline.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "player/player.h"
 #include "physics/physicsconfiguration.h"
+#include "player/player.h"
 #include "texturepool.h"
 
-#include <iostream>
 #include <math.h>
+#include <iostream>
 
 #include "Box2D/Box2D.h"
 
 namespace
 {
-constexpr auto element_width_m  =        PIXELS_PER_TILE / PPM;
+constexpr auto element_width_m = PIXELS_PER_TILE / PPM;
 constexpr auto element_height_m = 0.5f * PIXELS_PER_TILE / PPM;
-}
-
+}  // namespace
 
 //-----------------------------------------------------------------------------
-MovingPlatform::MovingPlatform(GameNode *parent)
- : GameNode(parent)
+MovingPlatform::MovingPlatform(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(MovingPlatform).name());
 }
-
 
 //-----------------------------------------------------------------------------
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
@@ -61,7 +58,6 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
 {
@@ -69,20 +65,17 @@ double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
    return (y1 * (1.0 - mu2) + y2 * mu2);
 }
 
-
 //-----------------------------------------------------------------------------
 const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 {
    return _pixel_path;
 }
 
-
 //-----------------------------------------------------------------------------
 b2Body* MovingPlatform::getBody()
 {
    return _body;
 }
-
 
 //-----------------------------------------------------------------------------
 void MovingPlatform::setEnabled(bool enabled)
@@ -99,7 +92,6 @@ void MovingPlatform::setEnabled(bool enabled)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void MovingPlatform::setupTransformDeprecated()
 {
@@ -108,17 +100,16 @@ void MovingPlatform::setupTransformDeprecated()
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
-
 //-----------------------------------------------------------------------------
 void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0,                                0               );
-   vertices[1] = b2Vec2(0,                                element_height_m);
+   vertices[0] = b2Vec2(0, 0);
+   vertices[1] = b2Vec2(0, element_height_m);
    vertices[2] = b2Vec2(element_width_m * _element_count, element_height_m);
-   vertices[3] = b2Vec2(element_width_m * _element_count, 0               );
+   vertices[3] = b2Vec2(element_width_m * _element_count, 0);
 
    polygon_shape.Set(vertices, 4);
 
@@ -132,13 +123,11 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
-
 //-----------------------------------------------------------------------------
 void MovingPlatform::addSprite(const sf::Sprite& sprite)
 {
    _sprites.push_back(sprite);
 }
-
 
 //-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* parent, const GameDeserializeData& data)
@@ -157,9 +146,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
 
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
    const auto tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
-   const auto tiles    = data._tmx_layer->_data;
-   const auto width    = data._tmx_layer->_width_tl;
-   const auto height   = data._tmx_layer->_height_tl;
+   const auto tiles = data._tmx_layer->_data;
+   const auto width = data._tmx_layer->_width_tl;
+   const auto height = data._tmx_layer->_height_tl;
    const auto first_id = data._tmx_tileset->_first_gid;
 
    for (auto y = 0u; y < height; y++)
@@ -203,21 +192,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
 
                sf::Sprite sprite;
                sprite.setTexture(*moving_platform->_texture_map);
-               sprite.setTextureRect(
-                  sf::IntRect(
-                     tu * PIXELS_PER_TILE,
-                     tv * PIXELS_PER_TILE,
-                     PIXELS_PER_TILE,
-                     PIXELS_PER_TILE
-                  )
-               );
+               sprite.setTextureRect(sf::IntRect(tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
 
-               sprite.setPosition(
-                  sf::Vector2f(
-                     static_cast<float_t>(x * PIXELS_PER_TILE),
-                     static_cast<float_t>(y * PIXELS_PER_TILE)
-                  )
-               );
+               sprite.setPosition(sf::Vector2f(static_cast<float_t>(x * PIXELS_PER_TILE), static_cast<float_t>(y * PIXELS_PER_TILE)));
 
                moving_platform->addSprite(sprite);
                moving_platform->_element_count++;
@@ -236,14 +213,11 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
    return moving_platforms;
 }
 
-
 namespace
 {
 std::vector<std::shared_ptr<TmxObject>> boxes;
 std::vector<std::shared_ptr<TmxObject>> paths;
-}
-
-
+}  // namespace
 
 //-----------------------------------------------------------------------------
 void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
@@ -259,9 +233,8 @@ void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
    }
 }
 
-
 //-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent,const GameDeserializeData& data)
+std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent, const GameDeserializeData& data)
 {
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
 
@@ -275,7 +248,6 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
    for (auto box : boxes)
    {
-
       //      platform path
       //
       //           q1
@@ -291,8 +263,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       //           |
       //           q0
 
-
-      auto p0 = sf::Vector2f{box->_x_px,                  box->_y_px};
+      auto p0 = sf::Vector2f{box->_x_px, box->_y_px};
       auto p1 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px};
 
       for (auto path : paths)
@@ -376,17 +347,17 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
          if (width_tl > 2)
          {
-            if (i == 0) // first tile
+            if (i == 0)  // first tile
             {
                tu_tl = 4;
             }
-            else if (i == width_tl - 1) // last tile
+            else if (i == width_tl - 1)  // last tile
             {
                tu_tl = 7;
             }
-            else // other tiles
+            else  // other tiles
             {
-               tu_tl = 5 + std::rand() % 1; // or 6
+               tu_tl = 5 + std::rand() % 1;  // or 6
             }
          }
          else if (width_tl == 2)
@@ -403,20 +374,24 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
          sf::Sprite sprite;
          sprite.setTexture(*moving_platform->_texture_map);
-         sprite.setTextureRect(
-            sf::IntRect(
-               tu_tl * PIXELS_PER_TILE,
-               tv_tl * PIXELS_PER_TILE,
-               PIXELS_PER_TILE,
-               PIXELS_PER_TILE * 2  // 1 platform tile and one background tile for perspective
-            )
-         );
+         sprite.setTextureRect(sf::IntRect(
+            tu_tl * PIXELS_PER_TILE,
+            tv_tl * PIXELS_PER_TILE,
+            PIXELS_PER_TILE,
+            PIXELS_PER_TILE * 2  // 1 platform tile and one background tile for perspective
+         ));
 
          moving_platform->addSprite(sprite);
       }
 
       b2Vec2 platform_pos_m;
       auto i = 0;
+
+      auto platform_x_min = std::numeric_limits<float>::max();
+      auto platform_y_min = std::numeric_limits<float>::max();
+      auto platform_x_max = std::numeric_limits<float>::min();
+      auto platform_y_max = std::numeric_limits<float>::min();
+
       for (const auto& poly_pos_px : path->_polyline->_polyline)
       {
          auto time = i / static_cast<float>(path->_polyline->_polyline.size() - 1);
@@ -424,7 +399,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
          // we don't want to position the platform right on the path, we only
          // want to move its center there
          auto x_px = (path->_x_px + poly_pos_px.x) - (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
-         auto y_px = (path->_y_px + poly_pos_px.y); // -     (moving_platform->_height_tl * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto y_px = (path->_y_px + poly_pos_px.y);  // -     (moving_platform->_height_tl * PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos_m.x = x_px * MPP;
          platform_pos_m.y = y_px * MPP;
@@ -432,11 +407,22 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
          moving_platform->_interpolation.addKey(platform_pos_m, time);
          moving_platform->_pixel_path.push_back({(path->_x_px + poly_pos_px.x), (path->_y_px + poly_pos_px.y)});
 
+         platform_x_min = std::min(platform_pos_m.x, platform_x_min);
+         platform_y_min = std::min(platform_pos_m.y, platform_y_min);
+         platform_x_max = std::max(platform_pos_m.x, platform_x_min);
+         platform_y_max = std::max(platform_pos_m.y, platform_y_min);
+
          i++;
       }
 
       moving_platform->setupBody(data._world);
       moving_platform->_body->SetTransform(platform_pos_m, 0.0f);
+
+      // set up bounding rect
+      moving_platform->_rect.left = platform_x_min;
+      moving_platform->_rect.top = platform_y_min;
+      moving_platform->_rect.width = platform_x_max - platform_x_min;
+      moving_platform->_rect.height = platform_y_max - platform_y_min;
    }
 
    // clean up
@@ -446,12 +432,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
    return moving_platforms;
 }
 
-
 //-----------------------------------------------------------------------------
-void MovingPlatform::link(
-   const std::vector<std::shared_ptr<GameMechanism>>& platforms,
-   const GameDeserializeData& data
-)
+void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data)
 {
    if (!data._tmx_object->_polyline)
    {
@@ -498,8 +480,8 @@ void MovingPlatform::link(
          auto time = i / static_cast<float>(pixel_path.size() - 1);
 
          // where do those 4px error come from?!
-         auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count  * PIXELS_PER_TILE) / 2.0f) * MPP;
-         auto y = (data._tmx_object->_y_px + poly_pos.y -                                 (PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count * PIXELS_PER_TILE) / 2.0f) * MPP;
+         auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos.x = x;
          platform_pos.y = y;
@@ -512,17 +494,15 @@ void MovingPlatform::link(
    }
 }
 
-
-   //  |                 |
-   //  |              ____
-   //  |        __----
-   //  _____----         |
-   //                    |
-   //  +-----------------+
-   //  0                 1
-   //
-   //  p0                pn
-
+//  |                 |
+//  |              ____
+//  |        __----
+//  _____----         |
+//                    |
+//  +-----------------+
+//  0                 1
+//
+//  p0                pn
 
 //-----------------------------------------------------------------------------
 void MovingPlatform::updateLeverLag(const sf::Time& dt)
@@ -551,7 +531,6 @@ void MovingPlatform::updateLeverLag(const sf::Time& dt)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void MovingPlatform::update(const sf::Time& dt)
 {
@@ -570,7 +549,7 @@ void MovingPlatform::update(const sf::Time& dt)
       }
    }
 
-    _body->SetLinearVelocity(_velocity);
+   _body->SetLinearVelocity(_velocity);
 
    // update sprite animation
    //
@@ -582,7 +561,7 @@ void MovingPlatform::update(const sf::Time& dt)
    // 4 aaaa aaaa    wheel animation for 2 pair tile count
    // 5
    auto sprite_index = 0;
-   auto horizontal = (_element_count  > 1) ? 1 : 0;
+   auto horizontal = (_element_count > 1) ? 1 : 0;
 
    static constexpr auto animation_tile_count = 4;
    static constexpr auto animation_speed_factor = 10.0f;
@@ -592,7 +571,7 @@ void MovingPlatform::update(const sf::Time& dt)
    for (auto& sprite : _sprites)
    {
       auto x = _body->GetPosition().x * PPM + horizontal * sprite_index * PIXELS_PER_TILE;
-      auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE; // there's one tile offset for the perspective tile
+      auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
       sprite.setPosition(x, y);
       bool update_sprite_rect = false;
@@ -607,7 +586,7 @@ void MovingPlatform::update(const sf::Time& dt)
       }
       else if (_sprites.size() > 2)
       {
-         if (_sprites.size() % 2 == 0) // handle even tile counts
+         if (_sprites.size() % 2 == 0)  // handle even tile counts
          {
             if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
             {
@@ -618,11 +597,11 @@ void MovingPlatform::update(const sf::Time& dt)
             else if (sprite_index == ((_sprites.size() + 1) / 2))
             {
                update_sprite_rect = true;
-               u = (animation_tile_index * 2 + 1)* PIXELS_PER_TILE;
+               u = (animation_tile_index * 2 + 1) * PIXELS_PER_TILE;
                v = PIXELS_PER_TILE * 2;
             }
          }
-         else // handle uneven tile counts
+         else  // handle uneven tile counts
          {
             if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
             {
@@ -635,16 +614,14 @@ void MovingPlatform::update(const sf::Time& dt)
 
       if (update_sprite_rect)
       {
-         sprite.setTextureRect({
-               u,
-               v,
-               PIXELS_PER_TILE,
-               PIXELS_PER_TILE * 2
-            }
-         );
+         sprite.setTextureRect({u, v, PIXELS_PER_TILE, PIXELS_PER_TILE * 2});
       }
 
       sprite_index++;
    }
 }
 
+std::optional<sf::FloatRect> MovingPlatform::getBoundingBoxPx()
+{
+   return _rect;
+}

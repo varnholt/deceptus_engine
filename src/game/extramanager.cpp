@@ -11,17 +11,13 @@
 #include "inventoryitem.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
-#include "tilemap.h"
 #include "savestate.h"
+#include "tilemap.h"
 
 #include "SFML/Graphics.hpp"
 
-
 //-----------------------------------------------------------------------------
-void ExtraManager::load(
-   const std::shared_ptr<TmxLayer>& layer,
-   const std::shared_ptr<TmxTileSet>& tileset
-)
+void ExtraManager::load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
 {
    resetExtras();
 
@@ -61,9 +57,8 @@ void ExtraManager::load(
    }
 }
 
-
 //-----------------------------------------------------------------------------
-void ExtraManager::collide(const sf::Rect<int32_t>& player_rect)
+void ExtraManager::collide(const sf::FloatRect& player_rect)
 {
    for (auto& extra : _extras)
    {
@@ -72,9 +67,9 @@ void ExtraManager::collide(const sf::Rect<int32_t>& player_rect)
          continue;
       }
 
-      sf::Rect<int32_t> item_rect;
-      item_rect.left = static_cast<int32_t>(extra->_position.x);
-      item_rect.top = static_cast<int32_t>(extra->_position.y);
+      sf::FloatRect item_rect;
+      item_rect.left = extra->_position.x;
+      item_rect.top = extra->_position.y;
       item_rect.width = PIXELS_PER_TILE;
       item_rect.height = PIXELS_PER_TILE;
 
@@ -82,10 +77,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& player_rect)
       {
          extra->_active = false;
 
-         _tilemap->hideTile(
-            extra->_sprite_offset.x,
-            extra->_sprite_offset.y
-         );
+         _tilemap->hideTile(extra->_sprite_offset.x, extra->_sprite_offset.y);
 
          switch (extra->_type)
          {
@@ -148,12 +140,7 @@ void ExtraManager::collide(const sf::Rect<int32_t>& player_rect)
    }
 }
 
-
 void ExtraManager::resetExtras()
 {
    _extras.clear();
 }
-
-
-
-

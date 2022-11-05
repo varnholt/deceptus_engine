@@ -7,32 +7,23 @@
 #include "framework/tools/log.h"
 #include "level.h"
 #include "player/player.h"
-#include "texturepool.h"
 #include "savestate.h"
+#include "texturepool.h"
 
 #include <iostream>
 
-
-Checkpoint::Checkpoint(GameNode* parent)
- : GameNode(parent)
+Checkpoint::Checkpoint(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Checkpoint).name());
 }
 
-
-std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
-   uint32_t index,
-   const std::vector<std::shared_ptr<GameMechanism>>& checkpoints
-)
+std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(uint32_t index, const std::vector<std::shared_ptr<GameMechanism>>& checkpoints)
 {
-   const auto& it =
-      std::find_if(
-         checkpoints.begin(),
-         checkpoints.end(),
-         [index](const auto& tmp) {
-            return std::dynamic_pointer_cast<Checkpoint>(tmp)->getIndex() == index;
-         }
-      );
+   const auto& it = std::find_if(
+      checkpoints.begin(),
+      checkpoints.end(),
+      [index](const auto& tmp) { return std::dynamic_pointer_cast<Checkpoint>(tmp)->getIndex() == index; }
+   );
 
    if (it != checkpoints.end())
    {
@@ -41,7 +32,6 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(
 
    return nullptr;
 }
-
 
 std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
@@ -52,12 +42,8 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    checkpoint->_sprite.setTexture(*checkpoint->_texture);
    checkpoint->updateSpriteRect();
 
-   checkpoint->_rect = sf::IntRect{
-      static_cast<int32_t>(data._tmx_object->_x_px),
-      static_cast<int32_t>(data._tmx_object->_y_px),
-      static_cast<int32_t>(data._tmx_object->_width_px),
-      static_cast<int32_t>(data._tmx_object->_height_px)
-   };
+   checkpoint->_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    checkpoint->_name = data._tmx_object->_name;
 
@@ -98,23 +84,21 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // whenever we reach a checkpoint, update the checkpoint index in the save state
    // and serialize the save state
    const auto cp_index = checkpoint->getIndex();
-   checkpoint->addCallback([](){Level::getCurrentLevel()->saveState();});
-   checkpoint->addCallback([cp_index](){SaveState::getCurrent()._checkpoint = cp_index;});
-   checkpoint->addCallback([](){SaveState::serializeToFile();});
+   checkpoint->addCallback([]() { Level::getCurrentLevel()->saveState(); });
+   checkpoint->addCallback([cp_index]() { SaveState::getCurrent()._checkpoint = cp_index; });
+   checkpoint->addCallback([]() { SaveState::serializeToFile(); });
 
    return checkpoint;
 }
-
 
 void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(_sprite);
 }
 
-
 void Checkpoint::update(const sf::Time& /*dt*/)
 {
-   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
 
    if (player_rect.intersects(_rect))
    {
@@ -122,6 +106,10 @@ void Checkpoint::update(const sf::Time& /*dt*/)
    }
 }
 
+std::optional<sf::FloatRect> Checkpoint::getBoundingBoxPx()
+{
+   return _rect;
+}
 
 void Checkpoint::reached()
 {
@@ -148,36 +136,24 @@ void Checkpoint::reached()
    }
 }
 
-
 void Checkpoint::addCallback(Checkpoint::CheckpointCallback cb)
 {
    _callbacks.push_back(cb);
 }
 
-
-sf::Vector2i Checkpoint::calcCenter() const
+sf::Vector2f Checkpoint::calcCenter() const
 {
    // that y offset is a litte dodgy, could have something cleaner in the future
-   sf::Vector2i pos{_rect.left + _rect.width / 2, _rect.top + _rect.height - 10};
+   sf::Vector2f pos{_rect.left + _rect.width / 2, _rect.top + _rect.height - 10};
    return pos;
 }
-
 
 uint32_t Checkpoint::getIndex() const
 {
    return _index;
 }
 
-
 void Checkpoint::updateSpriteRect()
 {
-   _sprite.setTextureRect({
-         _reached ? 48 : 0,
-         0,
-         48,
-         48
-      }
-   );
+   _sprite.setTextureRect({_reached ? 48 : 0, 0, 48, 48});
 }
-
-
