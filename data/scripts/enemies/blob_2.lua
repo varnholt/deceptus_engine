@@ -56,6 +56,8 @@ _animation_row = 0
 _idle_cycles = 0
 _gravity_scale = 1.0
 _alignment_offset = 0
+_patrol_epsilon = 1.0
+_tick = 0
 
 -- jump related
 _jump = false
@@ -92,7 +94,6 @@ end
 function initialize()
    _patrol_path = {}
    _patrol_index = 1
-   _patrol_epsilon = 1.0
    _wait = false
 
    addShapeCircle(0.12, 0.0, 0.12)                        -- radius, x, y
@@ -161,11 +162,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   _sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_LEFT))
+   sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_LEFT))
 
-   if (_sprite_index ~= _sprite_index) then
+   if (_sprite_index ~= sprite_index) then
 
-      _sprite_index = _sprite_index
+      _sprite_index = sprite_index
       _animation_row = ROW_LEFT
 
       updateSpriteRect(
@@ -185,11 +186,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   _sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_RIGHT))
+   sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_RIGHT))
 
-   if (_sprite_index ~= _sprite_index) then
+   if (_sprite_index ~= sprite_index) then
 
-      _sprite_index = _sprite_index
+      _sprite_index = sprite_index
       _animation_row = ROW_RIGHT
 
       updateSpriteRect(
@@ -238,10 +239,10 @@ end
 function wait()
    -- finish left/right movement animation
    if (_animation_row == ROW_LEFT or _animation_row == ROW_RIGHT) then
-      _sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_LEFT))
-      if (_sprite_index ~= 0) then
-         if (_sprite_index ~= _sprite_index) then
-            _sprite_index = _sprite_index
+      sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_LEFT))
+      if (sprite_index ~= 0) then
+         if (_sprite_index ~= sprite_index) then
+            _sprite_index = sprite_index
             updateSpriteRect(
                0,
                _sprite_index * SPRITE_WIDTH,
@@ -256,10 +257,10 @@ function wait()
       end
    else
       -- play idle animation for one cycle
-      _sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_IDLE))
+      sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_IDLE))
 
-      if (_sprite_index ~= _sprite_index) then
-         _sprite_index = _sprite_index
+      if (_sprite_index ~= sprite_index) then
+         _sprite_index = sprite_index
          updateSpriteRect(
             0,
             _sprite_index * SPRITE_WIDTH,
@@ -286,7 +287,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function updatePatrol()
+
+   _tick = _tick + 1
+
    if (_wait == true) then
+      -- print(string.format("waiting %d", _tick))
       wait()
       return
    end
@@ -294,6 +299,7 @@ function updatePatrol()
    local key = _patrol_path[_patrol_index]
 
    if (key == nil) then
+      print("patrol path is invalid")
       return
    end
 
@@ -305,13 +311,15 @@ function updatePatrol()
    local count = #_patrol_path
 
    if     (_position:getX() > keyVec:getX() + _patrol_epsilon) then
+      -- print(string.format("go left %d", _tick))
       goLeft()
    elseif (_position:getX() < keyVec:getX() - _patrol_epsilon) then
+      -- print(string.format("go right %d", _tick))
       goRight()
    else
+      -- print(string.format("wait %d", _tick))
       _wait = true
       _key_pressed = 0
-
       _patrol_index = _patrol_index + 1
       if (_patrol_index > count) then
          _patrol_index = 0

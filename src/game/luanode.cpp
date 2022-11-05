@@ -1533,7 +1533,7 @@ void LuaNode::luaCollisionWithPlayer()
  */
 void LuaNode::luaSendPatrolPath()
 {
-   if (_movement_path_px.size() == 0)
+   if (_movement_path_px.empty())
    {
       return;
    }

@@ -41,6 +41,8 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
          }
       }
 
+      // if the path just consists of a single position, add another position which is the
+      // pixel position of the tmx object
       if (_pixel_path.size() == 2)
       {
          _pixel_path.insert(_pixel_path.begin(), _pixel_position.y);
