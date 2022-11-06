@@ -50,9 +50,9 @@ struct PlayerJump
    std::shared_ptr<PlayerControls> _controls;
    b2Body* _body = nullptr;
 
-   sf::Clock _jump_clock;                 // replace by chrono
-   sf::Time _last_jump_press_time;        // replace by chrono
-   sf::Time _ground_contact_lost_time;    // replace by chrono
+   sf::Clock _jump_clock;               // replace by chrono
+   sf::Time _last_jump_press_time;      // replace by chrono
+   sf::Time _ground_contact_lost_time;  // replace by chrono
 
    HighResTimePoint _timepoint_wallslide;
    HighResTimePoint _timepoint_walljump;
@@ -73,4 +73,3 @@ struct PlayerJump
    std::function<void(void)> _jump_dust_animation_callback;
    std::function<void(void)> _remove_climb_joint_callback;
 };
-
