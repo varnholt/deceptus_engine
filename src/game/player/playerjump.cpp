@@ -12,12 +12,10 @@
 #include <Box2D/Box2D.h>
 #include <iostream>
 
-
 namespace
 {
 constexpr auto fixed_timestep = (1.0f / 60.0f);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::update(const PlayerJumpInfo& info)
@@ -48,7 +46,6 @@ void PlayerJump::update(const PlayerJumpInfo& info)
    updateWallJump();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJumpBuffer()
 {
@@ -68,7 +65,6 @@ void PlayerJump::updateJumpBuffer()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJump()
 {
@@ -82,11 +78,7 @@ void PlayerJump::updateJump()
       const auto time_to_allow_up = std::chrono::milliseconds(physics._player_in_water_time_to_allow_jump_button_ms);
       if (time_in_water > time_to_allow_up)
       {
-         _body->ApplyForce(
-            b2Vec2{0, physics._player_in_water_force_jump_button},
-            _body->GetWorldCenter(),
-            true
-         );
+         _body->ApplyForce(b2Vec2{0, physics._player_in_water_force_jump_button}, _body->GetWorldCenter(), true);
 
          // to transition to a regular jump after leaving the water, the jump frame count and jump clock should be reset
          _jump_frame_count = physics._player_jump_frame_count;
@@ -94,8 +86,8 @@ void PlayerJump::updateJump()
       }
    }
    else if (
-         (_jump_frame_count > 0 && _controls->isJumpButtonPressed()) // still jumping
-      || _jump_clock.getElapsedTime().asMilliseconds() < physics._player_jump_minimal_duration_ms // fresh jump
+      (_jump_frame_count > 0 && _controls->isJumpButtonPressed())                                  // still jumping
+      || _jump_clock.getElapsedTime().asMilliseconds() < physics._player_jump_minimal_duration_ms  // fresh jump
    )
    {
       // jump higher if faster than regular walk speed
@@ -138,7 +130,6 @@ void PlayerJump::updateJump()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jumpImpulse()
 {
@@ -148,14 +139,12 @@ void PlayerJump::jumpImpulse()
    _body->ApplyLinearImpulse(b2Vec2(0.0f, -impulse), _body->GetWorldCenter(), true);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jumpImpulse(const b2Vec2& impulse)
 {
    _jump_clock.restart();
    _body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jumpForce()
@@ -165,7 +154,6 @@ void PlayerJump::jumpForce()
    _jump_clock.restart();
    _jump_frame_count = PhysicsConfiguration::getInstance()._player_jump_frame_count;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::doubleJump()
@@ -199,7 +187,6 @@ void PlayerJump::doubleJump()
    _timepoint_doublejump = StopWatch::now();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::wallJump()
 {
@@ -223,7 +210,7 @@ void PlayerJump::wallJump()
 
    const auto& physics = PhysicsConfiguration::getInstance();
 
-   const auto impulse_x =   _body->GetMass() * physics._player_wall_jump_vector_x;
+   const auto impulse_x = _body->GetMass() * physics._player_wall_jump_vector_x;
    const auto impulse_y = -(_body->GetMass() * physics._player_wall_jump_vector_y);
 
    _walljump_frame_count = physics._player_wall_jump_frame_count;
@@ -231,7 +218,6 @@ void PlayerJump::wallJump()
    _walljump_direction = b2Vec2(_walljump_points_right ? impulse_x : -impulse_x, impulse_y);
    _timepoint_walljump = StopWatch::now();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jump()
@@ -251,42 +237,42 @@ void PlayerJump::jump()
    sf::Time elapsed = _jump_clock.getElapsedTime();
 
    // only allow a new jump after a a couple of milliseconds
-   if (elapsed.asMilliseconds() > PhysicsConfiguration::getInstance()._player_minimum_jump_interval_ms)
+   if (elapsed.asMilliseconds() <= PhysicsConfiguration::getInstance()._player_minimum_jump_interval_ms)
    {
-      // handle regular jump
-      if (!_jump_info._in_air || _ground_contact_just_lost || _jump_info._climbing)
+      return;
+   }
+
+   // handle regular jump
+   if (!_jump_info._in_air || _ground_contact_just_lost || _jump_info._climbing)
+   {
+      _remove_climb_joint_callback();
+      _jump_info._climbing = false;  // only set for correctness until next frame
+
+      jumpForce();
+
+      if (_jump_info._in_water)
       {
-         _remove_climb_joint_callback();
-         _jump_info._climbing = false; // only set for correctness until next frame
-
-         jumpForce();
-
-         if (_jump_info._in_water)
-         {
-            // play some waterish sample?
-         }
-         else
-         {
-            _jump_dust_animation_callback();
-            Audio::getInstance().playSample("jump.wav");
-         }
+         // play some waterish sample?
       }
       else
       {
-         // player pressed jump but is still in air.
-         // buffer that information to trigger the jump a few millis later.
-         if (_jump_info._in_air)
-         {
-            _last_jump_press_time = GlobalClock::getInstance().getElapsedTime();
+         _jump_dust_animation_callback();
+         Audio::getInstance().playSample("jump.wav");
+      }
+   }
+   else
+   {
+      // player pressed jump but is still in air.
+      // buffer that information to trigger the jump a few millis later.
+      if (_jump_info._in_air)
+      {
+         _last_jump_press_time = GlobalClock::getInstance().getElapsedTime();
 
-            wallJump();   // handle wall jump
-            doubleJump(); // handle double jump
-         }
+         wallJump();    // handle wall jump
+         doubleJump();  // handle double jump
       }
    }
 }
-
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateLostGroundContact()
@@ -297,7 +283,7 @@ void PlayerJump::updateLostGroundContact()
    // contact then start counting to 200ms
    if (_had_ground_contact && _jump_info._in_air && !isJumping())
    {
-      auto now = GlobalClock::getInstance().getElapsedTime();
+      const auto now = GlobalClock::getInstance().getElapsedTime();
       _ground_contact_lost_time = now;
       _ground_contact_just_lost = true;
    }
@@ -305,9 +291,9 @@ void PlayerJump::updateLostGroundContact()
    // flying now, probably allow jump
    else if (_jump_info._in_air)
    {
-      auto now = GlobalClock::getInstance().getElapsedTime();
-      auto timeDiff = (now - _ground_contact_lost_time).asMilliseconds();
-      _ground_contact_just_lost = (timeDiff < PhysicsConfiguration::getInstance()._player_jump_after_contact_lost_ms);
+      const auto now = GlobalClock::getInstance().getElapsedTime();
+      const auto time_diff = (now - _ground_contact_lost_time).asMilliseconds();
+      _ground_contact_just_lost = (time_diff < PhysicsConfiguration::getInstance()._player_jump_after_contact_lost_ms);
    }
    else
    {
@@ -316,7 +302,6 @@ void PlayerJump::updateLostGroundContact()
 
    _had_ground_contact = !_jump_info._in_air;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallSlide()
@@ -345,10 +330,7 @@ void PlayerJump::updateWallSlide()
    const auto touching_left = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
    const auto touching_right = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
 
-   if (
-         !(touching_left  && _controls->isMovingLeft())
-      && !(touching_right && _controls->isMovingRight())
-   )
+   if (!(touching_left && _controls->isMovingLeft()) && !(touching_right && _controls->isMovingRight()))
    {
       _wallsliding = false;
       return;
@@ -363,7 +345,6 @@ void PlayerJump::updateWallSlide()
       _wallsliding = true;
    }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallJump()
@@ -383,13 +364,11 @@ void PlayerJump::updateWallJump()
    _walljump_frame_count--;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerJump::isJumping() const
 {
    return (_jump_frame_count > 0);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& controls)
