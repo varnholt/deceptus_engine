@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "framework/image/layer.h"
 
 #include <SFML/Graphics.hpp>
@@ -8,20 +7,18 @@
 
 #include <memory>
 
-
 class ForestScene
 {
-   public:
-      ForestScene();
+public:
+   ForestScene();
 
-      void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-      void update(const sf::Time& time);
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   void update(const sf::Time& time);
 
-   private:
-      std::vector<std::shared_ptr<Layer>> _layer_stack;
-      std::map<std::string, std::shared_ptr<Layer>> _layers;
+private:
+   std::vector<std::shared_ptr<Layer>> _layer_stack;
+   std::map<std::string, std::shared_ptr<Layer>> _layers;
 
-      sf::Font _font;
-      sf::Text _text;
+   sf::Font _font;
+   sf::Text _text;
 };
-
