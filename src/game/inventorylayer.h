@@ -1,21 +1,21 @@
 #pragma once
 
 #include "constants.h"
-#include "inventory.h"
+#include "framework/image/layer.h"
 #include "framework/joystick/gamecontrollerinfo.h"
+#include "inventory.h"
 
+#include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 struct InventoryItem;
 
 class InventoryLayer
 {
-
 public:
-
-   struct ItemSprite {
+   struct ItemSprite
+   {
       sf::Sprite mSprite;
    };
 
@@ -23,7 +23,7 @@ public:
 
    void addDemoInventory();
 
-   void draw(sf::RenderTarget& window);
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void update(const sf::Time& dt);
 
    void left();
@@ -35,15 +35,19 @@ public:
    void cancel();
 
    GameControllerInfo getJoystickInfo() const;
-   void setJoystickInfo(const GameControllerInfo &joystickInfo);
-
+   void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
 private:
-
    void addItem(int32_t x, int32_t y, ItemType type);
    Inventory& getInventory();
    void updateControllerActions();
    bool isControllerActionSkipped() const;
+
+   std::vector<std::shared_ptr<Layer>> _layer_stack;
+   std::map<std::string, std::shared_ptr<Layer>> _layers;
+
+   sf::Font _font;
+   sf::Text _text;
 
    sf::Sprite _cursor_sprite;
    sf::Vector2f _cursor_position;
@@ -55,4 +59,3 @@ private:
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
 };
-

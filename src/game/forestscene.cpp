@@ -1,12 +1,11 @@
 #include "forestscene.h"
 
-#include "gameconfiguration.h"
 #include "framework/image/psd.h"
 #include "framework/tools/log.h"
+#include "gameconfiguration.h"
 
 #include <math.h>
 #include <iostream>
-
 
 ForestScene::ForestScene()
 {
@@ -38,8 +37,7 @@ ForestScene::ForestScene()
       }
 
       auto tmp = std::make_shared<Layer>();
-      tmp->_visible = true; // layer.isVisible();
-
+      tmp->_visible = true;  // layer.isVisible();
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -58,7 +56,6 @@ ForestScene::ForestScene()
       _layer_stack.push_back(tmp);
    }
 }
-
 
 void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
@@ -94,7 +91,6 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
                       |                   |
                       rect.width = 200px
 */
-
 
 /*
    c6
