@@ -226,6 +226,7 @@ SOURCES += \
    src/game/overlays/weatheroverlay.cpp \
    src/game/physics/physics.cpp \
    src/game/physics/physicsconfiguration.cpp \
+   src/game/player/movelock.cpp \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
    src/game/player/playerbelt.cpp \
@@ -420,6 +421,7 @@ HEADERS += \
    src/game/overlays/weatheroverlay.h \
    src/game/physics/physics.h \
    src/game/physics/physicsconfiguration.h \
+   src/game/player/movelock.h \
    src/game/player/player.h \
    src/game/player/playeranimation.h \
    src/game/player/playerattack.h \
