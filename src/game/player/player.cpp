@@ -1530,6 +1530,11 @@ void Player::updateDash(Dash dir)
       return;
    }
 
+   if (_jump._wallsliding)
+   {
+      return;
+   }
+
    // don't allow a new dash move inside water
    if (isInWater())
    {
