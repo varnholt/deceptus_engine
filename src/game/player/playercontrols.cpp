@@ -1,10 +1,10 @@
 #include "playercontrols.h"
 
 #include "constants.h"
-#include "gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
+#include "gamecontrollerintegration.h"
+#include "timerlock.h"
 #include "tweaks.h"
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::update(const sf::Time& /*dt*/)
@@ -17,20 +17,17 @@ void PlayerControls::update(const sf::Time& /*dt*/)
    setWasMovingRight(isMovingRight());
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::addKeypressedCallback(const KeypressedCallback& callback)
 {
    _keypressed_callbacks.push_back(callback);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::hasFlag(int32_t flag) const
 {
    return _keys_pressed & flag;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::forceSync()
@@ -76,7 +73,6 @@ void PlayerControls::forceSync()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -121,7 +117,6 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
@@ -161,7 +156,6 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isLookingAround() const
 {
@@ -177,7 +171,6 @@ bool PlayerControls::isLookingAround() const
 
    return false;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isControllerButtonPressed(int button_enum) const
@@ -197,7 +190,6 @@ bool PlayerControls::isControllerButtonPressed(int button_enum) const
    return pressed;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isFireButtonPressed() const
 {
@@ -213,7 +205,6 @@ bool PlayerControls::isFireButtonPressed() const
 
    return false;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isJumpButtonPressed() const
@@ -231,13 +222,12 @@ bool PlayerControls::isJumpButtonPressed() const
    return false;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isUpButtonPressed() const
 {
    if (_keys_pressed & KeyPressedUp)
    {
-     return true;
+      return true;
    }
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -247,7 +237,6 @@ bool PlayerControls::isUpButtonPressed() const
 
    return false;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDownButtonPressed() const
@@ -265,14 +254,11 @@ bool PlayerControls::isDownButtonPressed() const
    return false;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDroppingDown() const
 {
-
    return isJumpButtonPressed() && isMovingDown();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
@@ -298,7 +284,7 @@ bool PlayerControls::isMovingLeft() const
          xl = 1.0f;
       }
 
-      if (fabs(xl) >  0.3f)
+      if (fabs(xl) > 0.3f)
       {
          if (xl < 0.0f)
          {
@@ -315,7 +301,6 @@ bool PlayerControls::isMovingLeft() const
 
    return false;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingDown() const
@@ -357,7 +342,6 @@ bool PlayerControls::isMovingDown() const
    return false;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingRight() const
 {
@@ -398,13 +382,11 @@ bool PlayerControls::isMovingRight() const
    return false;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingHorizontally() const
 {
    return isMovingLeft() || isMovingRight();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 int PlayerControls::getKeysPressed() const
@@ -412,13 +394,11 @@ int PlayerControls::getKeysPressed() const
    return _keys_pressed;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setKeysPressed(int32_t keysPressed)
 {
    _keys_pressed = keysPressed;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 const GameControllerInfo& PlayerControls::getJoystickInfo() const
@@ -426,13 +406,11 @@ const GameControllerInfo& PlayerControls::getJoystickInfo() const
    return _joystick_info;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setJoystickInfo(const GameControllerInfo& joystick_info)
 {
    _joystick_info = joystick_info;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::wasMoving() const
@@ -440,13 +418,11 @@ bool PlayerControls::wasMoving() const
    return _was_moving;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setWasMoving(bool was_moving)
 {
    _was_moving = was_moving;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::wasMovingLeft() const
@@ -454,13 +430,11 @@ bool PlayerControls::wasMovingLeft() const
    return _was_moving_left;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setWasMovingLeft(bool was_moving_left)
 {
    _was_moving_left = was_moving_left;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::wasMovingRight() const
@@ -468,13 +442,11 @@ bool PlayerControls::wasMovingRight() const
    return _was_moving_right;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setWasMovingRight(bool was_moving_right)
 {
    _was_moving_right = was_moving_right;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::changedToIdle() const
@@ -482,18 +454,22 @@ bool PlayerControls::changedToIdle() const
    return wasMoving() && !isMovingHorizontally();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::changedToMoving() const
 {
    return !wasMoving() && isMovingHorizontally();
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 PlayerControls::Orientation PlayerControls::getActiveOrientation() const
 {
    Orientation orientation = Orientation::Undefined;
+
+   // check orentation lock
+   if (TimerLock::isLocked())
+   {
+      return _locked_orientation;
+   }
 
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -514,7 +490,7 @@ PlayerControls::Orientation PlayerControls::getActiveOrientation() const
          xl = 1.0f;
       }
 
-      if (fabs(xl)> 0.3f)
+      if (fabs(xl) > 0.3f)
       {
          if (xl < 0.0f)
          {
@@ -541,7 +517,6 @@ PlayerControls::Orientation PlayerControls::getActiveOrientation() const
    return orientation;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isBendDownActive() const
 {
@@ -562,7 +537,7 @@ bool PlayerControls::isBendDownActive() const
          yl = 1.0f;
       }
 
-      if (fabs(yl) >  Tweaks::instance()._bend_down_threshold)
+      if (fabs(yl) > Tweaks::instance()._bend_down_threshold)
       {
          if (yl > 0.0f)
          {
@@ -580,12 +555,16 @@ bool PlayerControls::isBendDownActive() const
    return down_pressed;
 }
 
-
 bool PlayerControls::isControllerUsedLast() const
 {
    return _player_input.isControllerUsed();
 }
 
+void PlayerControls::lockOrientation(std::chrono::milliseconds interval)
+{
+   _locked_orientation = getActiveOrientation();
+   TimerLock::lockFor(interval);
+}
 
 void PlayerControls::updatePlayerInput()
 {
@@ -616,9 +595,8 @@ void PlayerControls::updatePlayerInput()
       _player_input.update(PlayerInput::InputType::Controller);
    }
 
-   if (fabs(xl) >  0.3f)
+   if (fabs(xl) > 0.3f)
    {
       _player_input.update(PlayerInput::InputType::Controller);
    }
 }
-

@@ -3,6 +3,7 @@
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "playerinput.h"
 
+#include <chrono>
 #include <functional>
 
 #include <SFML/Graphics.hpp>
@@ -66,7 +67,7 @@ public:
    Orientation getActiveOrientation() const;
    bool isBendDownActive() const;
    bool isControllerUsedLast() const;
-
+   void lockOrientation(std::chrono::milliseconds interval);
 
 private:
 
@@ -82,6 +83,7 @@ private:
 
    std::vector<KeypressedCallback> _keypressed_callbacks;
    PlayerInput _player_input;
+   Orientation _locked_orientation = Orientation::Undefined;
 };
 
 
