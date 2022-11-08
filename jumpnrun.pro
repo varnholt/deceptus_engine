@@ -226,7 +226,6 @@ SOURCES += \
    src/game/overlays/weatheroverlay.cpp \
    src/game/physics/physics.cpp \
    src/game/physics/physicsconfiguration.cpp \
-   src/game/player/movelock.cpp \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
    src/game/player/playerbelt.cpp \
@@ -235,6 +234,7 @@ SOURCES += \
    src/game/player/playerinfo.cpp \
    src/game/player/playerinput.cpp \
    src/game/player/playerjump.cpp \
+   src/game/player/timerlock.cpp \
    src/game/preloader.cpp \
    src/game/projectile.cpp \
    src/game/projectilehitanimation.cpp \
@@ -421,7 +421,6 @@ HEADERS += \
    src/game/overlays/weatheroverlay.h \
    src/game/physics/physics.h \
    src/game/physics/physicsconfiguration.h \
-   src/game/player/movelock.h \
    src/game/player/player.h \
    src/game/player/playeranimation.h \
    src/game/player/playerattack.h \
@@ -435,6 +434,7 @@ HEADERS += \
    src/game/player/playerjump.h \
    src/game/player/playerjumptrace.h \
    src/game/player/playerspeed.h \
+   src/game/player/timerlock.h \
    src/game/preloader.h \
    src/game/projectile.h \
    src/game/projectilehitanimation.h \

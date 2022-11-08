@@ -26,6 +26,7 @@
 #include "screentransition.h"
 #include "sword.h"
 #include "texturepool.h"
+#include "timerlock.h"
 #include "tweaks.h"
 #include "weapon.h"
 #include "weaponsystem.h"
@@ -406,10 +407,7 @@ void Player::createFeet()
    // attach foot sensor shape
    b2PolygonShape foot_sensor_shape;
    foot_sensor_shape.SetAsBox(
-      (width_px / 2.0f) / (PPM * 2.0f),
-      (height_px / 4.0f) / (PPM * 2.0f),
-      b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)),
-      0.0f
+      (width_px / 2.0f) / (PPM * 2.0f), (height_px / 4.0f) / (PPM * 2.0f), b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)), 0.0f
    );
 
    b2FixtureDef foot_sensor_fixture_def;
@@ -790,7 +788,6 @@ float Player::getDesiredVelocity() const
 {
    const auto acceleration = getAcceleration();
    const auto deceleration = getDeceleration();
-
    const auto current_velocity = _body->GetLinearVelocity();
    const auto velocity_max = getMaxVelocity();
 
@@ -1069,6 +1066,7 @@ void Player::impulse(float intensity)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::startHardLanding()
 {
+   _controls->lockOrientation(std::chrono::milliseconds(1000));
    Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{1.0, 0.5f});
 
    _timepoint_hard_landing = StopWatch::getInstance().now();
@@ -1459,7 +1457,7 @@ void Player::updateWallslide(const sf::Time& dt)
    }
 
    const auto wallslide_animation = _player_animation.getWallslideAnimation();
-   const auto offset_x_px = isPointingLeft() ? - 5.0f : 5.0f;
+   const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
    wallslide_animation->setPosition(_pixel_position_f.x + offset_x_px, _pixel_position_f.y);
    wallslide_animation->play();
    wallslide_animation->update(dt);
