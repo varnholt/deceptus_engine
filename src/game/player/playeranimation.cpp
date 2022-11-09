@@ -531,27 +531,32 @@ PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 
 PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding() const
 {
+   return _sword_attack_standing_l[0]->_overall_time_chrono;
+}
+
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown1() const
+{
    return _sword_attack_bend_down_1_l->_overall_time_chrono;
 }
 
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown() const
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown2() const
 {
-   return _sword_attack_standing_l[0]->_overall_time_chrono;
+   return _sword_attack_bend_down_2_l->_overall_time_chrono;
 }
 
 std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttackCycleDuration()
 {
    if (_current_cycle == _sword_attack_bend_down_1_l || _current_cycle == _sword_attack_bend_down_1_r)
    {
-      return _sword_attack_bend_down_1_l->_overall_time_chrono;
+      return getSwordAttackDurationBendingDown1();
    }
    else if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
    {
-      return _sword_attack_bend_down_2_l->_overall_time_chrono;
+      return getSwordAttackDurationBendingDown2();
    }
    else if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
    {
-      return _sword_attack_standing_l[0]->_overall_time_chrono;
+      return getSwordAttackDurationStanding();
    }
 
    return std::nullopt;
