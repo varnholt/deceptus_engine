@@ -3,7 +3,6 @@
 #include "constants.h"
 #include "framework/joystick/gamecontroller.h"
 #include "gamecontrollerintegration.h"
-#include "timerlock.h"
 #include "tweaks.h"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -461,15 +460,9 @@ bool PlayerControls::changedToMoving() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-PlayerControls::Orientation PlayerControls::getActiveOrientation() const
+PlayerControls::Orientation PlayerControls::updateOrientation()
 {
    Orientation orientation = Orientation::Undefined;
-
-   // check orentation lock
-   if (TimerLock::isLocked())
-   {
-      return _locked_orientation;
-   }
 
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -512,6 +505,27 @@ PlayerControls::Orientation PlayerControls::getActiveOrientation() const
    if (hasFlag(KeyPressedRight))
    {
       orientation = Orientation::Right;
+   }
+
+   // while the orientation is locked, just return the last orientation the player had
+   if (std::chrono::high_resolution_clock::now() < _unlock_orientation_time_point)
+   {
+      if (orientation != Orientation::Undefined)
+      {
+         _last_requested_orientation = orientation;
+      }
+
+      orientation = _locked_orientation;
+   }
+   else
+   {
+      // if the user presses a key or button while the orientation is locked, we want to apply that
+      // button as soon as the orientation is unlocked again.
+      if (_last_requested_orientation != Orientation::Undefined)
+      {
+         orientation = _last_requested_orientation;
+         _last_requested_orientation = Orientation::Undefined;
+      }
    }
 
    return orientation;
@@ -562,8 +576,10 @@ bool PlayerControls::isControllerUsedLast() const
 
 void PlayerControls::lockOrientation(std::chrono::milliseconds interval)
 {
-   _locked_orientation = getActiveOrientation();
-   TimerLock::lockFor(interval);
+   _locked_orientation = updateOrientation();
+
+   const auto now = std::chrono::high_resolution_clock::now();
+   _unlock_orientation_time_point = now + interval;
 }
 
 void PlayerControls::updatePlayerInput()
