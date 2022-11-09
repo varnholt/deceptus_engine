@@ -1,14 +1,8 @@
-#include "framework/tools/timer.h"
 #include "timerlock.h"
+#include "framework/tools/timer.h"
 
 #include <iostream>
 #include <mutex>
-
-namespace
-{
-bool _locked = false;
-TimerLock::HighResTimePoint _unlock_time_point;
-}  // namespace
 
 void TimerLock::lock()
 {
@@ -34,7 +28,7 @@ void TimerLock::lockFor(std::chrono::milliseconds interval)
 
    Timer::add(
       interval,
-      []()
+      [this]()
       {
          const auto now = std::chrono::high_resolution_clock::now();
          if (now >= _unlock_time_point)

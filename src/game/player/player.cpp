@@ -26,7 +26,6 @@
 #include "screentransition.h"
 #include "sword.h"
 #include "texturepool.h"
-#include "timerlock.h"
 #include "tweaks.h"
 #include "weapon.h"
 #include "weaponsystem.h"
@@ -630,7 +629,7 @@ void Player::updateOrientation()
       return;
    }
 
-   const auto orientation = _controls->getActiveOrientation();
+   const auto orientation = _controls->updateOrientation();
    if (orientation == PlayerControls::Orientation::Left)
    {
       _points_to_left = true;
@@ -1775,6 +1774,9 @@ void Player::attack()
          else
          {
             _attack._timepoint_attack_standing_start = now;
+            _controls->lockOrientation(
+               std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getSwordAttackDurationStanding())
+            );
          }
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);

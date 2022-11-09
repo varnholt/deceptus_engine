@@ -64,7 +64,7 @@ public:
       Right
    };
 
-   Orientation getActiveOrientation() const;
+   Orientation updateOrientation();
    bool isBendDownActive() const;
    bool isControllerUsedLast() const;
    void lockOrientation(std::chrono::milliseconds interval);
@@ -83,7 +83,10 @@ private:
 
    std::vector<KeypressedCallback> _keypressed_callbacks;
    PlayerInput _player_input;
+
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
+   HighResTimePoint _unlock_orientation_time_point;
    Orientation _locked_orientation = Orientation::Undefined;
+   Orientation _last_requested_orientation = Orientation::Undefined;
 };
-
-
