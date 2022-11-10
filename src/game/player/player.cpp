@@ -1532,6 +1532,11 @@ void Player::updateDash(Dash dir)
       return;
    }
 
+   if (_hard_landing)
+   {
+      return;
+   }
+
    // don't allow a new dash move inside water
    if (isInWater())
    {
