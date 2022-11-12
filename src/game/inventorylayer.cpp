@@ -50,20 +50,31 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/inventory.psd");
 
-   // add layer: background
-   // add layer: profile_panel
-   // add layer: inventory_panel
-   // add layer: inventory_next_page_0
-   // add layer: inventory_next_page_1
-   // add layer: inventory_previous_page_0
-   // add layer: inventory_previous_page_1
-   // add layer: item_description_panel
-   // add layer: page_navigator
-   // add layer: R_0
-   // add layer: R_1
-   // add layer: L_0
-   // add layer: L_1
-   // add layer: separator
+   //   add layer: background
+   //   add layer: profile_panel
+   //   add layer: heart_upgrade_1
+   //   add layer: heart_upgrade_2
+   //   add layer: heart_upgrade_3
+   //   add layer: heart_upgrade_4
+   //   add layer: inventory_panel
+   //   add layer: item_filter_next_0
+   //   add layer: item_filter_next_1
+   //   add layer: item_filter_previous_0
+   //   add layer: item_filter_previous_1
+   //   add layer: scrollbar_body
+   //   add layer: scrollbar_head
+   //   add layer: item_filter_various
+   //   add layer: item_filter_items
+   //   add layer: item_filter_consumables
+   //   add layer: item_filter_weapons
+   //   add layer: item_filter_all
+   //   add layer: item_description_panel
+   //   add layer: navigator
+   //   add layer: next_menu_0
+   //   add layer: next_menu_1
+   //   add layer: previous_menu_0
+   //   add layer: previous_menu_1
+   //   add layer: separator
 
    for (const auto& layer : psd.getLayers())
    {
@@ -75,8 +86,9 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
 
       // std::cout << "add layer: " << layer.getName() << std::endl;
 
+      // make all layers visible per default, don't trust the PSD :)
       auto tmp = std::make_shared<Layer>();
-      tmp->_visible = true;  // layer.isVisible();
+      tmp->_visible = true;
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -94,6 +106,16 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
       _layers[layer.getName()] = tmp;
       _layer_stack.push_back(tmp);
    }
+
+   _filter_map[Filter::Weapons] = _layers["item_filter_weapons"];
+   _filter_map[Filter::Consumables] = _layers["item_filter_consumables"];
+   _filter_map[Filter::Items] = _layers["item_filter_items"];
+   _filter_map[Filter::Various] = _layers["item_filter_various"];
+   _filter_map[Filter::All] = _layers["item_filter_all"];
+
+   _filters = {Filter::All, Filter::Weapons, Filter::Consumables, Filter::Items, Filter::Various};
+
+   updateFilterLayers();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -134,45 +156,30 @@ void InventoryLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    for (auto& layer : _layer_stack)
    {
-      layer->draw(window, states);
+      if (layer->_visible)
+      {
+         layer->draw(window, states);
+      }
    }
 
    /*
-   const sf::Color color = {50, 70, 100, 150};
+      const sf::Color color = {50, 70, 100, 150};
 
-   auto x = dist;
-   auto y = y_offset + 5.0f;
+      y = y_offset  + 15.0f;
+      x = dist;
 
-   for (int i = 0; i < item_count; i++)
-   {
-      sf::Vertex quad[] =
+      for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
       {
-         sf::Vertex(sf::Vector2f(static_cast<float>(x), static_cast<float>(y) ), color),
-         sf::Vertex(sf::Vector2f(static_cast<float>(x), static_cast<float>(y) +
-   static_cast<float>(quad_height)), color), sf::Vertex(sf::Vector2f(static_cast<float>(x) + static_cast<float>(quad_width),
-   static_cast<float>(y) + static_cast<float>(quad_height)), color), sf::Vertex(sf::Vector2f(static_cast<float>(x) +
-   static_cast<float>(quad_width), static_cast<float>(y)), color)
-      };
+         auto visualization = _sprites[item._type];
 
-      window.draw(quad, 4, sf::Quads);
-      x += quad_width + dist;
-   }
+         visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
+         window.draw(visualization.mSprite);
+         x += icon_width + dist - icon_quad_dist;
+      }
 
-   y = y_offset  + 15.0f;
-   x = dist;
-
-   for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
-   {
-      auto visualization = _sprites[item._type];
-
-      visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-      window.draw(visualization.mSprite);
-      x += icon_width + dist - icon_quad_dist;
-   }
-
-   _cursor_position.y = y_offset;
-   _cursor_sprite.setPosition(_cursor_position);
-   window.draw(_cursor_sprite);
+      _cursor_position.y = y_offset;
+      _cursor_sprite.setPosition(_cursor_position);
+      window.draw(_cursor_sprite);
    */
 }
 
@@ -191,6 +198,31 @@ bool InventoryLayer::isControllerActionSkipped() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+std::shared_ptr<Layer> InventoryLayer::getFilterLayer(Filter filter) const
+{
+   return _filter_map.at(filter);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InventoryLayer::selectNextFilter()
+{
+   std::rotate(_filters.begin(), _filters.begin() + 1, _filters.end());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InventoryLayer::selectPreviousFilter()
+{
+   std::rotate(_filters.rbegin(), _filters.rbegin() + 1, _filters.rend());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InventoryLayer::updateFilterLayers()
+{
+   std::for_each(_filters.begin() + 1, _filters.end(), [this](auto filter) { getFilterLayer(filter)->hide(); });
+   getFilterLayer(_filters.front())->show();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::updateControllerActions()
 {
    auto& gci = GameControllerIntegration::getInstance();
@@ -200,12 +232,12 @@ void InventoryLayer::updateControllerActions()
       return;
    }
 
-   auto axis_values = _joystick_info.getAxisValues();
-   auto axis_left_x = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   const auto axis_values = _joystick_info.getAxisValues();
+   const auto axis_left_x = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   const auto hat_values = _joystick_info.getHatValues().at(0);
+   const auto dpad_left_pressed = hat_values & SDL_HAT_LEFT;
+   const auto dpad_right_pressed = hat_values & SDL_HAT_RIGHT;
    auto xl = axis_values[axis_left_x] / 32767.0f;
-   auto hat_values = _joystick_info.getHatValues().at(0);
-   auto dpad_left_pressed = hat_values & SDL_HAT_LEFT;
-   auto dpad_right_pressed = hat_values & SDL_HAT_RIGHT;
 
    if (dpad_left_pressed)
    {

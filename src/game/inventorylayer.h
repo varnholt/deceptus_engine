@@ -19,6 +19,15 @@ public:
       sf::Sprite mSprite;
    };
 
+   enum class Filter
+   {
+      All = 0x0f,
+      Weapons = 0x01,
+      Consumables = 0x02,
+      Items = 0x04,
+      Various = 0x08
+   };
+
    InventoryLayer();
 
    void addDemoInventory();
@@ -43,8 +52,15 @@ private:
    void updateControllerActions();
    bool isControllerActionSkipped() const;
 
+   std::shared_ptr<Layer> getFilterLayer(Filter filter) const;
+   void selectNextFilter();
+   void selectPreviousFilter();
+   void updateFilterLayers();
+
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
+   std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
+   std::array<Filter, 5> _filters;
 
    sf::Font _font;
    sf::Text _text;
