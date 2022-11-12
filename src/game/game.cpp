@@ -281,7 +281,7 @@ void Game::nextLevel()
    if (SaveState::getCurrent()._level_index == levels._levels.size())
    {
       // this could show the end sequence or similar
-      // _draw_states._draw_test_scene = true;
+      // DrawStates::_draw_test_scene = true;
 
       SaveState::getCurrent()._level_index = 0;
    }
@@ -416,22 +416,22 @@ void Game::draw()
       _info_layer->draw(*_window_render_texture.get());
    }
 
-   if (_draw_states._draw_debug_info)
+   if (DrawStates::_draw_debug_info)
    {
       _info_layer->drawDebugInfo(*_window_render_texture.get());
    }
 
-   if (_draw_states._draw_console)
+   if (DrawStates::_draw_console)
    {
       _info_layer->drawConsole(*_window_render_texture.get());
    }
 
-   if (_draw_states._draw_camera_system)
+   if (DrawStates::_draw_camera_system)
    {
       DebugDraw::debugCameraSystem(*_window_render_texture.get());
    }
 
-   if (_draw_states._draw_controller_overlay)
+   if (DrawStates::_draw_controller_overlay)
    {
       _controller_overlay->draw(*_window_render_texture.get());
    }
@@ -441,7 +441,7 @@ void Game::draw()
       _inventory_layer->draw(*_window_render_texture.get());
    }
 
-   if (_draw_states._draw_test_scene)
+   if (DrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
    }
@@ -700,7 +700,7 @@ void Game::update()
          _level->update(dt);
          _player->update(dt);
 
-         if (_draw_states._draw_test_scene)
+         if (DrawStates::_draw_test_scene)
          {
             _test_scene->update(dt);
          }
@@ -895,8 +895,8 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       if (event.key.code == sf::Keyboard::F11)
       {
-         _draw_states._draw_console = !_draw_states._draw_console;
-         Console::getInstance().setActive(_draw_states._draw_console);
+         DrawStates::_draw_console = !DrawStates::_draw_console;
+         Console::getInstance().setActive(DrawStates::_draw_console);
       }
       else if (event.key.code == sf::Keyboard::Backspace)
       {
@@ -939,22 +939,22 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F2:
       {
-         _draw_states._draw_controller_overlay = !_draw_states._draw_controller_overlay;
+         DrawStates::_draw_controller_overlay = !DrawStates::_draw_controller_overlay;
          break;
       }
       case sf::Keyboard::F3:
       {
-         _draw_states._draw_camera_system = !_draw_states._draw_camera_system;
+         DrawStates::_draw_camera_system = !DrawStates::_draw_camera_system;
          break;
       }
       case sf::Keyboard::F4:
       {
-         _draw_states._draw_debug_info = !_draw_states._draw_debug_info;
+         DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
          break;
       }
       case sf::Keyboard::F6:
       {
-         _draw_states._draw_test_scene = !_draw_states._draw_test_scene;
+         DrawStates::_draw_test_scene = !DrawStates::_draw_test_scene;
          break;
       }
       case sf::Keyboard::F7:
@@ -964,8 +964,8 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F11:
       {
-         _draw_states._draw_console = !_draw_states._draw_console;
-         Console::getInstance().setActive(_draw_states._draw_console);
+         DrawStates::_draw_console = !DrawStates::_draw_console;
+         Console::getInstance().setActive(DrawStates::_draw_console);
          break;
       }
       case sf::Keyboard::F:

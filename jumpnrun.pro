@@ -152,6 +152,7 @@ SOURCES += \
    src/game/debugdraw.cpp \
    src/game/detonationanimation.cpp \
    src/game/displaymode.cpp \
+   src/game/drawstates.cpp \
    src/game/effects/dust.cpp \
    src/game/effects/lightsystem.cpp \
    src/game/effects/smokeeffect.cpp \
@@ -324,6 +325,7 @@ HEADERS += \
    src/game/boomsettings.h \
    src/game/chainshapeanalyzer.h \
    src/game/chunk.h \
+   src/game/drawstates.h \
    src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \

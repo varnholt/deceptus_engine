@@ -65,6 +65,7 @@ public:
    HighResDuration getSwordAttackDurationStanding() const;
    HighResDuration getSwordAttackDurationBendingDown1() const;
    HighResDuration getSwordAttackDurationBendingDown2() const;
+   HighResDuration getSwordAttackDurationJumping() const;
    std::optional<HighResDuration> getActiveAttackCycleDuration();
 
    void resetAlpha();

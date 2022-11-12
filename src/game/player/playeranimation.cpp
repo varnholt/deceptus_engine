@@ -546,6 +546,11 @@ PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingD
    return _sword_attack_bend_down_2_l->_overall_time_chrono;
 }
 
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationJumping() const
+{
+   return _sword_attack_jump_l->_overall_time_chrono;
+}
+
 std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttackCycleDuration()
 {
    if (_current_cycle == _sword_attack_bend_down_1_l || _current_cycle == _sword_attack_bend_down_1_r)
