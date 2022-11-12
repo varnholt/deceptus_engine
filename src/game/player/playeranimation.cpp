@@ -321,6 +321,8 @@ void PlayerAnimation::loadAnimations()
    _sword_lut[_double_jump_r] = _sword_double_jump_r;
    _sword_lut[_idle_l] = _sword_idle_l;
    _sword_lut[_idle_r] = _sword_idle_r;
+   _sword_lut[_idle_blink_l] = _sword_idle_blink_l;
+   _sword_lut[_idle_blink_r] = _sword_idle_blink_r;
    _sword_lut[_run_l] = _sword_run_l;
    _sword_lut[_run_r] = _sword_run_r;
    _sword_lut[_swim_idle_l] = _sword_swim_idle_l;
@@ -574,7 +576,7 @@ PlayerAnimation::getMappedArmedAnimation(const std::shared_ptr<Animation>& anima
 
       case WeaponType::Sword:
       {
-         auto sword_cycle_it = _sword_lut.find(animation);
+         const auto sword_cycle_it = _sword_lut.find(animation);
          if (sword_cycle_it != _sword_lut.end())
          {
             return sword_cycle_it->second;
@@ -613,7 +615,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(
    {
       auto next_cycle = _idle_l_tmp;
 
-      if (_idle_l_tmp->_finished)
+      if (getMappedArmedAnimation(_idle_l_tmp, data)->_finished)
       {
          _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l : _idle_l;
       }
@@ -624,7 +626,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(
    {
       auto next_cycle = _idle_r_tmp;
 
-      if (_idle_r_tmp->_finished)
+      if (getMappedArmedAnimation(_idle_r_tmp, data)->_finished)
       {
          _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r : _idle_r;
       }
@@ -669,12 +671,13 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processBendDownAnimat
       next_cycle = data._points_left ? _bend_down_idle_l_tmp : _bend_down_idle_r_tmp;
 
       // blink every now and then
-      if (_bend_down_idle_l_tmp->_finished)
+      // it's important to check whether either the normal or the armed cycle is finished
+      if (getMappedArmedAnimation(_bend_down_idle_l_tmp, data)->_finished)
       {
          _bend_down_idle_l_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_l : _bend_down_idle_l;
       }
 
-      if (_bend_down_idle_r_tmp->_finished)
+      if (getMappedArmedAnimation(_bend_down_idle_r_tmp, data)->_finished)
       {
          _bend_down_idle_r_tmp = (std::rand() % 100 == 0) ? _bend_down_idle_blink_r : _bend_down_idle_r;
       }
