@@ -410,7 +410,11 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
          {
             attack_cycle = data._points_left ? _sword_attack_bend_down_1_l : _sword_attack_bend_down_1_r;
          }
-         else if (!in_air_attack_elapsed)
+
+         // only handle in-air attack when the player is actually in the air, otherwise just
+         // cancel the animation entirely; this allows to play a standing attack animation
+         // right after landing
+         else if (!in_air_attack_elapsed && data._in_air)
          {
             // scenario 1: jump ends before attack ends
             //
@@ -488,10 +492,8 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
             }
          }
 
-         // to be checked if the reset code below is really needed
-         //
-         // in-air attack cycle is elapsed, clear auxiliary cycle
-         if (in_air_attack_elapsed)
+         // if the in-air attack is cycle is elapsed or the player landed on the ground, clear auxiliary cycle
+         if (in_air_attack_elapsed || !data._in_air)
          {
             _auxiliary_cycle = nullptr;
 
