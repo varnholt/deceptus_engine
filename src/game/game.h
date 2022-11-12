@@ -2,32 +2,29 @@
 
 #include "console.h"
 #include "constants.h"
+#include "drawstates.h"
 #include "eventserializer.h"
 #include "forestscene.h"
 #include "infolayer.h"
 #include "inventorylayer.h"
+#include "menus/menu.h"
 #include "overlays/controlleroverlay.h"
 #include "overlays/rainoverlay.h"
 
-#include "menus/menu.h"
-
-#include "Box2D/Box2D.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+#include "Box2D/Box2D.h"
 
-#include <thread>
 #include <future>
-
+#include <thread>
 
 class Level;
 class Player;
 struct ScreenTransition;
 
-
 class Game
 {
 public:
-
    Game() = default;
    virtual ~Game();
 
@@ -39,16 +36,6 @@ public:
    void takeScreenshot();
 
 private:
-
-   struct DrawStates
-   {
-      bool _draw_test_scene = false;
-      bool _draw_console = false;
-      bool _draw_debug_info = false;
-      bool _draw_controller_overlay = false;
-      bool _draw_camera_system = false;
-   };
-
    void processEvent(const sf::Event& event);
 
    void initializeWindow();
@@ -85,7 +72,6 @@ private:
    void menuLoadRequest();
    std::unique_ptr<ScreenTransition> makeFadeOutFadeIn();
 
-
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
    std::shared_ptr<Player> _player;
@@ -99,14 +85,13 @@ private:
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;
-   std::atomic<bool> _level_loading_finished_previous = false; // keep track of level loading in an async manner
+   std::atomic<bool> _level_loading_finished_previous = false;  // keep track of level loading in an async manner
    std::future<void> _level_loading_thread;
    bool _restore_previous_position = false;
    sf::Vector2f _stored_position;
 
    int32_t _fps = 0;
    bool _screenshot = false;
-   DrawStates _draw_states;
    sf::Vector2u _render_texture_offset;
    int32_t _death_wait_time_ms = 0;
 
@@ -114,4 +99,3 @@ private:
    int32_t _recording_counter = 0;
    std::vector<sf::Image> _recording_images;
 };
-

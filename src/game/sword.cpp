@@ -4,6 +4,7 @@
 
 #include "constants.h"
 #include "debugdraw.h"
+#include "drawstates.h"
 #include "framework/tools/stopwatch.h"
 #include "player/player.h"
 #include "worldquery.h"
@@ -27,7 +28,10 @@ void Sword::draw(sf::RenderTarget& target [[maybe_unused]])
       return;
    }
 
-   // DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
+   if (DrawStates::_draw_debug_info)
+   {
+      DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
+   }
 }
 
 void Sword::update(const sf::Time& /*time*/)
