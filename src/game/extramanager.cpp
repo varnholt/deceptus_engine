@@ -8,15 +8,17 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "gamedeserializedata.h"
 #include "inventoryitem.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
 #include "tilemap.h"
 
+#include <iostream>
 #include "SFML/Graphics.hpp"
 
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 void ExtraManager::load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
 {
    resetExtras();
@@ -57,7 +59,18 @@ void ExtraManager::load(const std::shared_ptr<TmxLayer>& layer, const std::share
    }
 }
 
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+void ExtraManager::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
+{
+   const auto pos_x_px = data._tmx_object->_x_px;
+   const auto pos_y_px = data._tmx_object->_y_px;
+   const auto width_px = data._tmx_object->_width_px;
+   const auto height_px = data._tmx_object->_height_px;
+
+   std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void ExtraManager::collide(const sf::FloatRect& player_rect)
 {
    for (auto& extra : _extras)
@@ -140,6 +153,7 @@ void ExtraManager::collide(const sf::FloatRect& player_rect)
    }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void ExtraManager::resetExtras()
 {
    _extras.clear();

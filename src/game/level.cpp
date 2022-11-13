@@ -431,8 +431,9 @@ void Level::loadTmx()
          }
          else if (layer->_name == "extras")
          {
-            Player::getCurrent()->getExtraManager()->_tilemap = tile_map;
-            Player::getCurrent()->getExtraManager()->load(layer, tileset);
+            const auto& extra_manager = Player::getCurrent()->getExtraManager();
+            extra_manager->_tilemap = tile_map;
+            extra_manager->load(layer, tileset);
          }
          else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
          {
@@ -466,6 +467,11 @@ void Level::loadTmx()
                TmxEnemy enemy;
                enemy.parse(tmx_object);
                _enemy_data_from_tmx_layer[enemy._id] = enemy;
+            }
+            else if (object_group->_name == "extras")
+            {
+               const auto& extra_manager = Player::getCurrent()->getExtraManager();
+               extra_manager->deserialize(this, data);
             }
             else if (object_group->_name == "rooms")
             {
