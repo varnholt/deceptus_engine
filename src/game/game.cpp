@@ -210,7 +210,8 @@ void Game::showPauseMenu()
    }
 
    // don't allow to pause during screen transitions
-   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+   // don't allow to pause when the inventory is open (game is already paused)
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition) || DisplayMode::getInstance().isSet(Display::Inventory))
    {
       return;
    }
