@@ -8,6 +8,8 @@
 #include "constants.h"
 
 struct ExtraItem;
+class GameNode;
+struct GameDeserializeData;
 struct InventoryItem;
 class TileMap;
 struct TmxLayer;
@@ -16,7 +18,9 @@ struct TmxTileSet;
 class ExtraManager
 {
 public:
-   void load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset);
+   [[deprecated]] void load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset);
+   void deserialize(GameNode* parent, const GameDeserializeData& data);
+
    void collide(const sf::FloatRect& player_rect);
 
    void resetExtras();
