@@ -6,6 +6,7 @@
 #include "inventory.h"
 
 #include <SFML/Graphics.hpp>
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -14,6 +15,9 @@ struct InventoryItem;
 class InventoryLayer
 {
 public:
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+   using FloatSeconds = std::chrono::duration<float>;
+
    struct ItemSprite
    {
       sf::Sprite mSprite;
@@ -74,4 +78,11 @@ private:
    bool _active = false;
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
+
+   // animation
+   HighResTimePoint _time_show;
+   HighResTimePoint _time_hide;
+   float _profile_panel_x_px = 0.0f;
+   float _item_description_panel_x_px = 0.0f;
+   float _inventory_panel_y_px = 0.0f;
 };

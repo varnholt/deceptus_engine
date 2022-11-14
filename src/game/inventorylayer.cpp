@@ -50,6 +50,21 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/inventory.psd");
 
+   // ---------------------------------------------------------------
+   //               <LT>   MAP   INVENTORY   VAULT   <RT>
+   // ---------------------------------------------------------------
+   // +-------------+ +----+-----+---+---+---+---+---+ +-------------+
+   // |             | |<LB>|#####|all|wpn|con|itm|var| |             |
+   // |             | +----+-----+---+---+---+---+---+ |             |
+   // |             | |                              | |             |
+   // |             | |                              | |    item     |
+   // |   profile   | |                              | | description |
+   // |    panel    | |       inventory_panel        | |   panel     |
+   // |             | |                              | |             |
+   // |             | |                              | |             |
+   // |             | |                              | |             |
+   // +-------------+ +------------------------------+ +-------------+
+
    //   add layer: background
    //   add layer: profile_panel
    //   add layer: heart_upgrade_1
@@ -116,6 +131,11 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    _filters = {Filter::All, Filter::Weapons, Filter::Consumables, Filter::Items, Filter::Various};
 
    updateFilterLayers();
+
+   // store original panel positions
+   _profile_panel_x_px = _layers["profile_panel"]->_sprite->getPosition().x;
+   _item_description_panel_x_px = _layers["inventory_panel"]->_sprite->getPosition().x;
+   _inventory_panel_y_px = _layers["item_description_panel"]->_sprite->getPosition().y;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -278,7 +298,48 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
 {
    _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
    updateControllerActions();
+
+   const auto now = std::chrono::high_resolution_clock::now();
+
+   const FloatSeconds duration_since_show_s = now - _time_show;
+   const FloatSeconds duration_since_hide_s = now - _time_hide;
+
+   constexpr auto duration_show_s = 1.0f;
+   constexpr auto duration_hide_s = 1.0f;
+
+   // animate show event
+   if (duration_since_show_s.count() < duration_show_s)
+   {
+      // move profile_panel in from the left
+      // move item description panel in from the right
+      // move inventory_panel in from the bottom
+      // fade in the top in the meantime
+
+      //                0s                      1s
+      // profile_panel: -profile_panel.width .. _profile_panel_x_px + profile_panel.width
+      //                -120                 .. 40 + 120 (160)
+   }
+
+   // animate hide event
+   if (duration_since_hide_s.count() < duration_hide_s)
+   {
+   }
 }
+
+// ---------------------------------------------------------------
+//               <LT>   MAP   INVENTORY   VAULT   <RT>
+// ---------------------------------------------------------------
+// +-------------+ +----+-----+---+---+---+---+---+ +-------------+
+// |             | |<LB>|#####|all|wpn|con|itm|var| |             |
+// |             | +----+-----+---+---+---+---+---+ |             |
+// |             | |                              | |             |
+// |             | |                              | |    item     |
+// |   profile   | |                              | | description |
+// |    panel    | |       inventory_panel        | |   panel     |
+// |             | |                              | |             |
+// |             | |                              | |             |
+// |             | |                              | |             |
+// +-------------+ +------------------------------+ +-------------+
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::left()
@@ -311,11 +372,13 @@ void InventoryLayer::right()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::show()
 {
+   _time_show = std::chrono::high_resolution_clock::now();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::hide()
 {
+   _time_hide = std::chrono::high_resolution_clock::now();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
