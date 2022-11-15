@@ -757,7 +757,7 @@ void Game::openInventory()
 
       GameState::getInstance().enqueuePause();
       DisplayMode::getInstance().enqueueSet(Display::Inventory);
-      _inventory_layer->setActive(true);
+      _inventory_layer->show();
    }
 }
 

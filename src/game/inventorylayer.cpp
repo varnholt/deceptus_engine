@@ -301,6 +301,11 @@ void InventoryLayer::updateControllerActions()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::update(const sf::Time& /*dt*/)
 {
+   if (!_active)
+   {
+      return;
+   }
+
    // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
    updateControllerActions();
 
@@ -311,6 +316,8 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
 
    constexpr auto duration_show_s = 1.0f;
    constexpr auto duration_hide_s = 1.0f;
+
+   sf::Vector2f inventory_panel_offset_px;
 
    // animate show event
    if (duration_since_show_s.count() < duration_show_s)
@@ -329,9 +336,10 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
       // item_description_panel: 479, 119 (112 x 198)
 
       const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
-      _inventory_panel_offset_px.y = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+      inventory_panel_offset_px.y = 500 * val;
 
-      std::cout << elapsed_s_normalized << std::endl;
+      // std::cout << elapsed_s_normalized << " " << val << " " << inventory_panel_offset_px.y << std::endl;
    }
 
    // animate hide event
@@ -339,7 +347,7 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
    {
    }
 
-   const auto inventory_panel_pos_y_px = _inventory_panel_px.y + _inventory_panel_offset_px.y;
+   const auto inventory_panel_pos_y_px = _inventory_panel_px.y + inventory_panel_offset_px.y;
    _layer_inventory_panel->_sprite->setPosition(_inventory_panel_px.x, inventory_panel_pos_y_px);
 }
 
@@ -389,21 +397,15 @@ void InventoryLayer::right()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::show()
 {
+   _active = true;
    _time_show = std::chrono::high_resolution_clock::now();
-
-   _inventory_panel_offset_px.y = 500.0f;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::hide()
 {
    _time_hide = std::chrono::high_resolution_clock::now();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::setActive(bool active)
-{
-   _active = active;
+   _active = false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
