@@ -18,12 +18,12 @@ namespace
 {
 static const auto icon_width = 40;
 static const auto icon_height = 24;
-static const auto quad_width = 38;
-static const auto quad_height = 38;
-static const auto dist = 10.2f;
-static const auto icon_quad_dist = (icon_width - quad_width);
-static const auto y_offset = 300.0f;
-static const auto item_count = 13;
+// static const auto quad_width = 38;
+// static const auto quad_height = 38;
+// static const auto dist = 10.2f;
+// static const auto icon_quad_dist = (icon_width - quad_width);
+// static const auto y_offset = 300.0f;
+// static const auto item_count = 13;
 }  // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -65,31 +65,31 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    // |             | |                              | |             |
    // +-------------+ +------------------------------+ +-------------+
 
-   //   add layer: background
-   //   add layer: profile_panel
-   //   add layer: heart_upgrade_1
-   //   add layer: heart_upgrade_2
-   //   add layer: heart_upgrade_3
-   //   add layer: heart_upgrade_4
-   //   add layer: inventory_panel
-   //   add layer: item_filter_next_0
-   //   add layer: item_filter_next_1
-   //   add layer: item_filter_previous_0
-   //   add layer: item_filter_previous_1
-   //   add layer: scrollbar_body
-   //   add layer: scrollbar_head
-   //   add layer: item_filter_various
-   //   add layer: item_filter_items
-   //   add layer: item_filter_consumables
-   //   add layer: item_filter_weapons
-   //   add layer: item_filter_all
-   //   add layer: item_description_panel
-   //   add layer: navigator
-   //   add layer: next_menu_0
-   //   add layer: next_menu_1
-   //   add layer: previous_menu_0
-   //   add layer: previous_menu_1
-   //   add layer: separator
+   // add layer: background: 0, 0 (640 x 360)
+   // add layer: profile_panel: 44, 125 (119 x 188)
+   // add layer: heart_upgrade_1: 82, 247 (21 x 18)
+   // add layer: heart_upgrade_2: 103, 247 (21 x 18)
+   // add layer: heart_upgrade_3: 84, 265 (19 x 16)
+   // add layer: heart_upgrade_4: 103, 265 (19 x 16)
+   // add layer: inventory_panel: 160, 105 (316 x 231)
+   // add layer: item_filter_next_0: 387, 124 (19 x 13)
+   // add layer: item_filter_next_1: 387, 124 (19 x 13)
+   // add layer: item_filter_previous_0: 235, 124 (19 x 13)
+   // add layer: item_filter_previous_1: 235, 124 (19 x 13)
+   // add layer: scrollbar_body: 453, 148 (8 x 140)
+   // add layer: scrollbar_head: 451, 142 (9 x 152)
+   // add layer: item_filter_various: 364, 123 (19 x 15)
+   // add layer: item_filter_items: 340, 123 (19 x 15)
+   // add layer: item_filter_consumables: 317, 123 (18 x 15)
+   // add layer: item_filter_weapons: 293, 123 (19 x 15)
+   // add layer: item_filter_all: 258, 123 (30 x 15)
+   // add layer: item_description_panel: 479, 119 (112 x 198)
+   // add layer: navigator: 181, 81 (278 x 17)
+   // add layer: next_menu_0: 465, 83 (24 x 13)
+   // add layer: next_menu_1: 465, 83 (24 x 13)
+   // add layer: previous_menu_0: 151, 83 (24 x 13)
+   // add layer: previous_menu_1: 151, 83 (24 x 13)
+   // add layer: separator: 18, 57 (611 x 15)
 
    for (const auto& layer : psd.getLayers())
    {
@@ -99,7 +99,8 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
          continue;
       }
 
-      // std::cout << "add layer: " << layer.getName() << std::endl;
+      //      std::cout << "add layer: " << layer.getName() << ": " << layer.getLeft() << ", " << layer.getTop() << " (" << layer.getWidth()
+      //                << " x " << layer.getHeight() << ")" << std::endl;
 
       // make all layers visible per default, don't trust the PSD :)
       auto tmp = std::make_shared<Layer>();
@@ -133,9 +134,13 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    updateFilterLayers();
 
    // store original panel positions
-   _profile_panel_x_px = _layers["profile_panel"]->_sprite->getPosition().x;
-   _item_description_panel_x_px = _layers["inventory_panel"]->_sprite->getPosition().x;
-   _inventory_panel_y_px = _layers["item_description_panel"]->_sprite->getPosition().y;
+   _layer_profile_panel = _layers["profile_panel"];
+   _layer_inventory_panel = _layers["inventory_panel"];
+   _layer_item_description_panel = _layers["item_description_panel"];
+
+   _profile_panel_px = _layer_profile_panel->_sprite->getPosition();
+   _inventory_panel_px = _layer_inventory_panel->_sprite->getPosition();
+   _item_description_panel_px = _layer_item_description_panel->_sprite->getPosition();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -296,7 +301,7 @@ void InventoryLayer::updateControllerActions()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::update(const sf::Time& /*dt*/)
 {
-   _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
+   // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
    updateControllerActions();
 
    const auto now = std::chrono::high_resolution_clock::now();
@@ -318,12 +323,24 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
       //                0s                      1s
       // profile_panel: -profile_panel.width .. _profile_panel_x_px + profile_panel.width
       //                -120                 .. 40 + 120 (160)
+      //
+      // profile_panel:           44, 125 (119 x 188)
+      // inventory_panel:        160, 105 (316 x 231)
+      // item_description_panel: 479, 119 (112 x 198)
+
+      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
+      _inventory_panel_offset_px.y = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+
+      std::cout << elapsed_s_normalized << std::endl;
    }
 
    // animate hide event
    if (duration_since_hide_s.count() < duration_hide_s)
    {
    }
+
+   const auto inventory_panel_pos_y_px = _inventory_panel_px.y + _inventory_panel_offset_px.y;
+   _layer_inventory_panel->_sprite->setPosition(_inventory_panel_px.x, inventory_panel_pos_y_px);
 }
 
 // ---------------------------------------------------------------
@@ -373,6 +390,8 @@ void InventoryLayer::right()
 void InventoryLayer::show()
 {
    _time_show = std::chrono::high_resolution_clock::now();
+
+   _inventory_panel_offset_px.y = 500.0f;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
