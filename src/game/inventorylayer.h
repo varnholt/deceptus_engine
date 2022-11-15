@@ -43,7 +43,6 @@ public:
    void right();
    void show();
    void hide();
-   void setActive(bool active);
    void confirm();
    void cancel();
 
@@ -83,11 +82,8 @@ private:
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
    sf::Vector2f _profile_panel_px;
-   sf::Vector2f _profile_panel_offset_px;
    sf::Vector2f _item_description_panel_px;
-   sf::Vector2f _item_description_panel_offset_px;
    sf::Vector2f _inventory_panel_px;
-   sf::Vector2f _inventory_panel_offset_px;
    std::shared_ptr<Layer> _layer_profile_panel;
    std::shared_ptr<Layer> _layer_inventory_panel;
    std::shared_ptr<Layer> _layer_item_description_panel;
