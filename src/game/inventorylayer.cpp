@@ -1,6 +1,7 @@
 #include "inventorylayer.h"
 
 #include "extramanager.h"
+#include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
@@ -105,6 +106,7 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
       // make all layers visible per default, don't trust the PSD :)
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = true;
+      tmp->_name = layer.getName();
 
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
@@ -141,6 +143,19 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    _profile_panel_px = _layer_profile_panel->_sprite->getPosition();
    _inventory_panel_px = _layer_inventory_panel->_sprite->getPosition();
    _item_description_panel_px = _layer_item_description_panel->_sprite->getPosition();
+
+   // store all layers that are not panels
+   std::copy_if(
+      _layer_stack.begin(),
+      _layer_stack.end(),
+      std::back_inserter(_non_panel_layers),
+      [](const auto& layer) { return !layer->_name.contains("_panel"); }
+   );
+
+   for (const auto& layer : _non_panel_layers)
+   {
+      _non_panel_layer_alphas[layer] = layer->_sprite->getColor().a / 255.0f;
+   }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -247,6 +262,62 @@ void InventoryLayer::updateFilterLayers()
    getFilterLayer(_filters.front())->show();
 }
 
+void InventoryLayer::updateAnimation()
+{
+   const auto now = std::chrono::high_resolution_clock::now();
+
+   const FloatSeconds duration_since_show_s = now - _time_show;
+   const FloatSeconds duration_since_hide_s = now - _time_hide;
+
+   constexpr auto duration_show_s = 0.5f;
+   constexpr auto duration_hide_s = 1.0f;
+
+   sf::Vector2f profile_panel_offset_px;
+   sf::Vector2f inventory_panel_offset_px;
+   sf::Vector2f item_description_panel_offset_px;
+
+   auto alpha = 1.0f;
+
+   // animate show event
+   if (duration_since_show_s.count() < duration_show_s)
+   {
+      // move profile_panel in from the left
+      // move item description panel in from the right
+      // move inventory_panel in from the bottom
+      // fade in the top in the meantime
+      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
+      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+
+      profile_panel_offset_px.x = -200 * val;
+      inventory_panel_offset_px.y = 250 * val;
+      item_description_panel_offset_px.x = 200 * val;
+
+      // std::cout << elapsed_s_normalized << " " << val << " " << inventory_panel_offset_px.y << std::endl;
+
+      // alpha = elapsed_s_normalized * elapsed_s_normalized;
+      alpha = Easings::easeInQuint(elapsed_s_normalized);
+   }
+
+   // animate hide event
+   if (duration_since_hide_s.count() < duration_hide_s)
+   {
+   }
+
+   const auto profile_panel_pos_x_px = _profile_panel_px.x + profile_panel_offset_px.x;
+   const auto inventory_panel_pos_y_px = _inventory_panel_px.y + inventory_panel_offset_px.y;
+   const auto item_description_panel_pos_x_px = _item_description_panel_px.x + item_description_panel_offset_px.x;
+
+   _layer_profile_panel->_sprite->setPosition(profile_panel_pos_x_px, _profile_panel_px.y);
+   _layer_inventory_panel->_sprite->setPosition(_inventory_panel_px.x, inventory_panel_pos_y_px);
+   _layer_item_description_panel->_sprite->setPosition(item_description_panel_pos_x_px, _item_description_panel_px.y);
+
+   for (auto& layer : _non_panel_layers)
+   {
+      const auto original_alpha = _non_panel_layer_alphas[layer];
+      layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(original_alpha * alpha * 255)));
+   }
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::updateControllerActions()
 {
@@ -308,47 +379,7 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
 
    // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
    updateControllerActions();
-
-   const auto now = std::chrono::high_resolution_clock::now();
-
-   const FloatSeconds duration_since_show_s = now - _time_show;
-   const FloatSeconds duration_since_hide_s = now - _time_hide;
-
-   constexpr auto duration_show_s = 1.0f;
-   constexpr auto duration_hide_s = 1.0f;
-
-   sf::Vector2f inventory_panel_offset_px;
-
-   // animate show event
-   if (duration_since_show_s.count() < duration_show_s)
-   {
-      // move profile_panel in from the left
-      // move item description panel in from the right
-      // move inventory_panel in from the bottom
-      // fade in the top in the meantime
-
-      //                0s                      1s
-      // profile_panel: -profile_panel.width .. _profile_panel_x_px + profile_panel.width
-      //                -120                 .. 40 + 120 (160)
-      //
-      // profile_panel:           44, 125 (119 x 188)
-      // inventory_panel:        160, 105 (316 x 231)
-      // item_description_panel: 479, 119 (112 x 198)
-
-      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
-      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
-      inventory_panel_offset_px.y = 500 * val;
-
-      // std::cout << elapsed_s_normalized << " " << val << " " << inventory_panel_offset_px.y << std::endl;
-   }
-
-   // animate hide event
-   if (duration_since_hide_s.count() < duration_hide_s)
-   {
-   }
-
-   const auto inventory_panel_pos_y_px = _inventory_panel_px.y + inventory_panel_offset_px.y;
-   _layer_inventory_panel->_sprite->setPosition(_inventory_panel_px.x, inventory_panel_pos_y_px);
+   updateAnimation();
 }
 
 // ---------------------------------------------------------------
@@ -399,6 +430,7 @@ void InventoryLayer::show()
 {
    _active = true;
    _time_show = std::chrono::high_resolution_clock::now();
+   updateAnimation();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
