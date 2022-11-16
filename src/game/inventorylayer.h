@@ -59,6 +59,7 @@ private:
    void selectNextFilter();
    void selectPreviousFilter();
    void updateFilterLayers();
+   void updateAnimation();
 
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
@@ -82,9 +83,11 @@ private:
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
    sf::Vector2f _profile_panel_px;
-   sf::Vector2f _item_description_panel_px;
    sf::Vector2f _inventory_panel_px;
+   sf::Vector2f _item_description_panel_px;
    std::shared_ptr<Layer> _layer_profile_panel;
    std::shared_ptr<Layer> _layer_inventory_panel;
    std::shared_ptr<Layer> _layer_item_description_panel;
+   std::vector<std::shared_ptr<Layer>> _non_panel_layers;
+   std::map<std::shared_ptr<Layer>, float> _non_panel_layer_alphas;
 };
