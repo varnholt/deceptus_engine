@@ -66,31 +66,49 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    // |             | |                              | |             |
    // +-------------+ +------------------------------+ +-------------+
 
+   //
+   // LayerData
+   // {
+   //    sf::Vector2f _pos;
+   //    float _alpha{1.0f};
+   //    std::shared_ptr<Layer> _layer;
+   // }
+   //
+   // std::vector<LayerData> _inventory_panel
+
    // add layer: background: 0, 0 (640 x 360)
+
+   // profile panel:
    // add layer: profile_panel: 44, 125 (119 x 188)
    // add layer: heart_upgrade_1: 82, 247 (21 x 18)
    // add layer: heart_upgrade_2: 103, 247 (21 x 18)
    // add layer: heart_upgrade_3: 84, 265 (19 x 16)
    // add layer: heart_upgrade_4: 103, 265 (19 x 16)
+
+   // inventory panel
    // add layer: inventory_panel: 160, 105 (316 x 231)
    // add layer: item_filter_next_0: 387, 124 (19 x 13)
    // add layer: item_filter_next_1: 387, 124 (19 x 13)
    // add layer: item_filter_previous_0: 235, 124 (19 x 13)
    // add layer: item_filter_previous_1: 235, 124 (19 x 13)
-   // add layer: scrollbar_body: 453, 148 (8 x 140)
-   // add layer: scrollbar_head: 451, 142 (9 x 152)
    // add layer: item_filter_various: 364, 123 (19 x 15)
    // add layer: item_filter_items: 340, 123 (19 x 15)
    // add layer: item_filter_consumables: 317, 123 (18 x 15)
    // add layer: item_filter_weapons: 293, 123 (19 x 15)
    // add layer: item_filter_all: 258, 123 (30 x 15)
+   // add layer: scrollbar_body: 453, 148 (8 x 140)
+   // add layer: scrollbar_head: 451, 142 (9 x 152)
+
+   // item description panel:
    // add layer: item_description_panel: 479, 119 (112 x 198)
+
+   // top
+   // add layer: separator: 18, 57 (611 x 15)
    // add layer: navigator: 181, 81 (278 x 17)
-   // add layer: next_menu_0: 465, 83 (24 x 13)
-   // add layer: next_menu_1: 465, 83 (24 x 13)
    // add layer: previous_menu_0: 151, 83 (24 x 13)
    // add layer: previous_menu_1: 151, 83 (24 x 13)
-   // add layer: separator: 18, 57 (611 x 15)
+   // add layer: next_menu_0: 465, 83 (24 x 13)
+   // add layer: next_menu_1: 465, 83 (24 x 13)
 
    for (const auto& layer : psd.getLayers())
    {
