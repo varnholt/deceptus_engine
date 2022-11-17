@@ -149,7 +149,7 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
       _layer_stack.begin(),
       _layer_stack.end(),
       std::back_inserter(_non_panel_layers),
-      [](const auto& layer) { return !layer->_name.contains("_panel"); }
+      [](const auto& layer) { return layer->_name.find("_panel") == std::string::npos; }
    );
 
    for (const auto& layer : _non_panel_layers)
