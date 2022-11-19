@@ -66,49 +66,7 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    // |             | |                              | |             |
    // +-------------+ +------------------------------+ +-------------+
 
-   //
-   // LayerData
-   // {
-   //    sf::Vector2f _pos;
-   //    float _alpha{1.0f};
-   //    std::shared_ptr<Layer> _layer;
-   // }
-   //
-   // std::vector<LayerData> _inventory_panel
-
    // add layer: background: 0, 0 (640 x 360)
-
-   // profile panel:
-   // add layer: profile_panel: 44, 125 (119 x 188)
-   // add layer: heart_upgrade_1: 82, 247 (21 x 18)
-   // add layer: heart_upgrade_2: 103, 247 (21 x 18)
-   // add layer: heart_upgrade_3: 84, 265 (19 x 16)
-   // add layer: heart_upgrade_4: 103, 265 (19 x 16)
-
-   // inventory panel
-   // add layer: inventory_panel: 160, 105 (316 x 231)
-   // add layer: item_filter_next_0: 387, 124 (19 x 13)
-   // add layer: item_filter_next_1: 387, 124 (19 x 13)
-   // add layer: item_filter_previous_0: 235, 124 (19 x 13)
-   // add layer: item_filter_previous_1: 235, 124 (19 x 13)
-   // add layer: item_filter_various: 364, 123 (19 x 15)
-   // add layer: item_filter_items: 340, 123 (19 x 15)
-   // add layer: item_filter_consumables: 317, 123 (18 x 15)
-   // add layer: item_filter_weapons: 293, 123 (19 x 15)
-   // add layer: item_filter_all: 258, 123 (30 x 15)
-   // add layer: scrollbar_body: 453, 148 (8 x 140)
-   // add layer: scrollbar_head: 451, 142 (9 x 152)
-
-   // item description panel:
-   // add layer: item_description_panel: 479, 119 (112 x 198)
-
-   // top
-   // add layer: separator: 18, 57 (611 x 15)
-   // add layer: navigator: 181, 81 (278 x 17)
-   // add layer: previous_menu_0: 151, 83 (24 x 13)
-   // add layer: previous_menu_1: 151, 83 (24 x 13)
-   // add layer: next_menu_0: 465, 83 (24 x 13)
-   // add layer: next_menu_1: 465, 83 (24 x 13)
 
    for (const auto& layer : psd.getLayers())
    {
@@ -153,27 +111,73 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
 
    updateFilterLayers();
 
-   // store original panel positions
-   _layer_profile_panel = _layers["profile_panel"];
-   _layer_inventory_panel = _layers["inventory_panel"];
-   _layer_item_description_panel = _layers["item_description_panel"];
+   _profile_panel = {
+      _layers["profile_panel"],
+      _layers["heart_upgrade_1"],
+      _layers["heart_upgrade_2"],
+      _layers["heart_upgrade_3"],
+      _layers["heart_upgrade_4"],
+   };
 
-   _profile_panel_px = _layer_profile_panel->_sprite->getPosition();
-   _inventory_panel_px = _layer_inventory_panel->_sprite->getPosition();
-   _item_description_panel_px = _layer_item_description_panel->_sprite->getPosition();
+   _inventory_panel = {
+      _layers["inventory_panel"],
+      _layers["item_filter_next_0"],
+      _layers["item_filter_next_1"],
+      _layers["item_filter_previous_0"],
+      _layers["item_filter_previous_1"],
+      _layers["item_filter_various"],
+      _layers["item_filter_items"],
+      _layers["item_filter_consumables"],
+      _layers["item_filter_weapons"],
+      _layers["item_filter_all"],
+      _layers["scrollbar_body"],
+      _layers["scrollbar_head"],
+   };
 
-   // store all layers that are not panels
-   std::copy_if(
-      _layer_stack.begin(),
-      _layer_stack.end(),
-      std::back_inserter(_non_panel_layers),
-      [](const auto& layer) { return layer->_name.find("_panel") == std::string::npos; }
-   );
+   _item_description_panel = {
+      _layers["item_description_panel"],
+   };
 
-   for (const auto& layer : _non_panel_layers)
-   {
-      _non_panel_layer_alphas[layer] = layer->_sprite->getColor().a / 255.0f;
-   }
+   _top_area = {
+      _layers["separator"],
+      _layers["navigator"],
+      _layers["previous_menu_0"],
+      _layers["previous_menu_1"],
+      _layers["next_menu_0"],
+      _layers["next_menu_1"],
+   };
+
+   // profile panel:
+   // add layer: profile_panel: 44, 125 (119 x 188)
+   // add layer: heart_upgrade_1: 82, 247 (21 x 18)
+   // add layer: heart_upgrade_2: 103, 247 (21 x 18)
+   // add layer: heart_upgrade_3: 84, 265 (19 x 16)
+   // add layer: heart_upgrade_4: 103, 265 (19 x 16)
+
+   // inventory panel
+   // add layer: inventory_panel: 160, 105 (316 x 231)
+   // add layer: item_filter_next_0: 387, 124 (19 x 13)
+   // add layer: item_filter_next_1: 387, 124 (19 x 13)
+   // add layer: item_filter_previous_0: 235, 124 (19 x 13)
+   // add layer: item_filter_previous_1: 235, 124 (19 x 13)
+   // add layer: item_filter_various: 364, 123 (19 x 15)
+   // add layer: item_filter_items: 340, 123 (19 x 15)
+   // add layer: item_filter_consumables: 317, 123 (18 x 15)
+   // add layer: item_filter_weapons: 293, 123 (19 x 15)
+   // add layer: item_filter_all: 258, 123 (30 x 15)
+   // add layer: scrollbar_body: 453, 148 (8 x 140)
+   // add layer: scrollbar_head: 451, 142 (9 x 152)
+
+   // item description panel:
+   // add layer: item_description_panel: 479, 119 (112 x 198)
+
+   // top
+   // add layer: separator: 18, 57 (611 x 15)
+   // add layer: navigator: 181, 81 (278 x 17)
+   // add layer: previous_menu_0: 151, 83 (24 x 13)
+   // add layer: previous_menu_1: 151, 83 (24 x 13)
+   // add layer: next_menu_0: 465, 83 (24 x 13)
+   // add layer: next_menu_1: 465, 83 (24 x 13)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -321,18 +325,31 @@ void InventoryLayer::updateAnimation()
    {
    }
 
-   const auto profile_panel_pos_x_px = _profile_panel_px.x + profile_panel_offset_px.x;
-   const auto inventory_panel_pos_y_px = _inventory_panel_px.y + inventory_panel_offset_px.y;
-   const auto item_description_panel_pos_x_px = _item_description_panel_px.x + item_description_panel_offset_px.x;
-
-   _layer_profile_panel->_sprite->setPosition(profile_panel_pos_x_px, _profile_panel_px.y);
-   _layer_inventory_panel->_sprite->setPosition(_inventory_panel_px.x, inventory_panel_pos_y_px);
-   _layer_item_description_panel->_sprite->setPosition(item_description_panel_pos_x_px, _item_description_panel_px.y);
-
-   for (auto& layer : _non_panel_layers)
+   // move in x
+   for (const auto& layer : _profile_panel)
    {
-      const auto original_alpha = _non_panel_layer_alphas[layer];
-      layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(original_alpha * alpha * 255)));
+      const auto x = layer._pos.x + profile_panel_offset_px.x;
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   // move in y
+   for (const auto& layer : _inventory_panel)
+   {
+      const auto y = layer._pos.y + inventory_panel_offset_px.y;
+      layer._layer->_sprite->setPosition(layer._pos.x, y);
+   }
+
+   // move in x
+   for (const auto& layer : _item_description_panel)
+   {
+      const auto x = layer._pos.x + item_description_panel_offset_px.x;
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   // top
+   for (const auto& layer : _top_area)
+   {
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
 }
 
