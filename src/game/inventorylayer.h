@@ -23,6 +23,18 @@ public:
       sf::Sprite mSprite;
    };
 
+   struct LayerData
+   {
+      LayerData(const std::shared_ptr<Layer>& layer)
+          : _layer(layer), _pos(layer->_sprite->getPosition()), _alpha(layer->_sprite->getColor().a / 255.0f)
+      {
+      }
+
+      std::shared_ptr<Layer> _layer;
+      sf::Vector2f _pos;
+      float _alpha{1.0f};
+   };
+
    enum class Filter
    {
       All = 0x0f,
@@ -82,12 +94,9 @@ private:
    // animation
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
-   sf::Vector2f _profile_panel_px;
-   sf::Vector2f _inventory_panel_px;
-   sf::Vector2f _item_description_panel_px;
-   std::shared_ptr<Layer> _layer_profile_panel;
-   std::shared_ptr<Layer> _layer_inventory_panel;
-   std::shared_ptr<Layer> _layer_item_description_panel;
-   std::vector<std::shared_ptr<Layer>> _non_panel_layers;
-   std::map<std::shared_ptr<Layer>, float> _non_panel_layer_alphas;
+
+   std::vector<LayerData> _top_area;
+   std::vector<LayerData> _profile_panel;
+   std::vector<LayerData> _inventory_panel;
+   std::vector<LayerData> _item_description_panel;
 };
