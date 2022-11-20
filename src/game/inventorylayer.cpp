@@ -1,5 +1,6 @@
 #include "inventorylayer.h"
 
+#include "displaymode.h"
 #include "extramanager.h"
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
@@ -7,6 +8,7 @@
 #include "framework/tools/globalclock.h"
 #include "gameconfiguration.h"
 #include "gamecontrollerintegration.h"
+#include "gamestate.h"
 #include "inventoryitem.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
@@ -145,39 +147,8 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
       _layers["previous_menu_1"],
       _layers["next_menu_0"],
       _layers["next_menu_1"],
+      _layers["background"],  // background is faded in/out, too
    };
-
-   // profile panel:
-   // add layer: profile_panel: 44, 125 (119 x 188)
-   // add layer: heart_upgrade_1: 82, 247 (21 x 18)
-   // add layer: heart_upgrade_2: 103, 247 (21 x 18)
-   // add layer: heart_upgrade_3: 84, 265 (19 x 16)
-   // add layer: heart_upgrade_4: 103, 265 (19 x 16)
-
-   // inventory panel
-   // add layer: inventory_panel: 160, 105 (316 x 231)
-   // add layer: item_filter_next_0: 387, 124 (19 x 13)
-   // add layer: item_filter_next_1: 387, 124 (19 x 13)
-   // add layer: item_filter_previous_0: 235, 124 (19 x 13)
-   // add layer: item_filter_previous_1: 235, 124 (19 x 13)
-   // add layer: item_filter_various: 364, 123 (19 x 15)
-   // add layer: item_filter_items: 340, 123 (19 x 15)
-   // add layer: item_filter_consumables: 317, 123 (18 x 15)
-   // add layer: item_filter_weapons: 293, 123 (19 x 15)
-   // add layer: item_filter_all: 258, 123 (30 x 15)
-   // add layer: scrollbar_body: 453, 148 (8 x 140)
-   // add layer: scrollbar_head: 451, 142 (9 x 152)
-
-   // item description panel:
-   // add layer: item_description_panel: 479, 119 (112 x 198)
-
-   // top
-   // add layer: separator: 18, 57 (611 x 15)
-   // add layer: navigator: 181, 81 (278 x 17)
-   // add layer: previous_menu_0: 151, 83 (24 x 13)
-   // add layer: previous_menu_1: 151, 83 (24 x 13)
-   // add layer: next_menu_0: 465, 83 (24 x 13)
-   // add layer: next_menu_1: 465, 83 (24 x 13)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -301,12 +272,8 @@ void InventoryLayer::updateAnimation()
    auto alpha = 1.0f;
 
    // animate show event
-   if (duration_since_show_s.count() < duration_show_s)
+   if (_show_requested && duration_since_show_s.count() < duration_show_s)
    {
-      // move profile_panel in from the left
-      // move item description panel in from the right
-      // move inventory_panel in from the bottom
-      // fade in the top in the meantime
       const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
 
@@ -314,15 +281,41 @@ void InventoryLayer::updateAnimation()
       inventory_panel_offset_px.y = 250 * val;
       item_description_panel_offset_px.x = 200 * val;
 
-      // std::cout << elapsed_s_normalized << " " << val << " " << inventory_panel_offset_px.y << std::endl;
-
-      // alpha = elapsed_s_normalized * elapsed_s_normalized;
       alpha = Easings::easeInQuint(elapsed_s_normalized);
+   }
+   else
+   {
+      profile_panel_offset_px.x = 0;
+      inventory_panel_offset_px.y = 0;
+      item_description_panel_offset_px.x = 0;
+      alpha = 1.0f;
+
+      if (_show_requested)
+      {
+         _show_requested = false;
+      }
    }
 
    // animate hide event
-   if (duration_since_hide_s.count() < duration_hide_s)
+   if (_hide_requested && duration_since_hide_s.count() < duration_hide_s)
    {
+      const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
+      const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
+
+      profile_panel_offset_px.x = -200 * val;
+      inventory_panel_offset_px.y = 250 * val;
+      item_description_panel_offset_px.x = 200 * val;
+
+      alpha = 1.0f - Easings::easeInQuint(elapsed_s_normalized);
+   }
+   else
+   {
+      if (_hide_requested)
+      {
+         GameState::getInstance().enqueueResume();
+         DisplayMode::getInstance().enqueueUnset(Display::Inventory);
+         _hide_requested = false;
+      }
    }
 
    // move in x
@@ -407,11 +400,6 @@ void InventoryLayer::updateControllerActions()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::update(const sf::Time& /*dt*/)
 {
-   if (!_active)
-   {
-      return;
-   }
-
    // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
    updateControllerActions();
    updateAnimation();
@@ -435,11 +423,6 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::left()
 {
-   if (!_active)
-   {
-      return;
-   }
-
    if (_selected_item > 0)
    {
       _selected_item--;
@@ -449,11 +432,6 @@ void InventoryLayer::left()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::right()
 {
-   if (!_active)
-   {
-      return;
-   }
-
    if (_selected_item < static_cast<int32_t>(getInventory().getItems().size()) - 1)
    {
       _selected_item++;
@@ -463,7 +441,7 @@ void InventoryLayer::right()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::show()
 {
-   _active = true;
+   _show_requested = true;
    _time_show = std::chrono::high_resolution_clock::now();
    updateAnimation();
 }
@@ -471,28 +449,23 @@ void InventoryLayer::show()
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::hide()
 {
+   if (_hide_requested)
+   {
+      return;
+   }
+
+   _hide_requested = true;
    _time_hide = std::chrono::high_resolution_clock::now();
-   _active = false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::confirm()
 {
-   if (!_active)
-   {
-      return;
-   }
-
    hide();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InventoryLayer::cancel()
 {
-   if (!_active)
-   {
-      return;
-   }
-
    hide();
 }
