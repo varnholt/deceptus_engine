@@ -87,13 +87,14 @@ private:
 
    std::map<ItemType, ItemSprite> _sprites;
    int32_t _selected_item = 0;
-   bool _active = false;
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
 
    // animation
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
+   bool _show_requested = false;
+   bool _hide_requested = false;
 
    std::vector<LayerData> _top_area;
    std::vector<LayerData> _profile_panel;
