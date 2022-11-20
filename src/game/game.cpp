@@ -680,9 +680,12 @@ void Game::update()
    {
       updateGameController();
       updateGameControllerForInventory();
-      _inventory_layer->update(dt);
 
-      // this is not beautiful. simplify!
+      if (DisplayMode::getInstance().isSet(Display::Inventory))
+      {
+         _inventory_layer->update(dt);
+      }
+
       if (DisplayMode::getInstance().isSet(Display::Map))
       {
          CameraPanorama::getInstance().update();
@@ -737,28 +740,31 @@ void Game::reset()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::checkCloseInventory()
 {
-   if (DisplayMode::getInstance().isSet(Display::Inventory))
+   if (!DisplayMode::getInstance().isSet(Display::Inventory))
    {
-      GameState::getInstance().enqueueResume();
-      DisplayMode::getInstance().enqueueUnset(Display::Inventory);
+      return;
    }
+
+   _inventory_layer->hide();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::openInventory()
 {
-   if (GameState::getInstance().getMode() == ExecutionMode::Running)
+   if (GameState::getInstance().getMode() != ExecutionMode::Running)
    {
-      // disallow inventory during screen transitions
-      if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
-      {
-         return;
-      }
-
-      GameState::getInstance().enqueuePause();
-      DisplayMode::getInstance().enqueueSet(Display::Inventory);
-      _inventory_layer->show();
+      return;
    }
+
+   // disallow inventory during screen transitions
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+   {
+      return;
+   }
+
+   GameState::getInstance().enqueuePause();
+   DisplayMode::getInstance().enqueueSet(Display::Inventory);
+   _inventory_layer->show();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
