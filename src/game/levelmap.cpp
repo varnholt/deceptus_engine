@@ -109,31 +109,32 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   auto layer_layout = _layers["layout"];
-   auto layer_hide_borders = _layers["hide_borders"];
-   // auto layer_grid = _layers["grid"];
-   auto layer_blue = _layers["blue"];
-   auto layer_text_zoom = _layers["text_zoom"];
-   auto layer_text_pan = _layers["text_pan"];
+   // all removed by dstar
 
-   layer_blue->draw(window, states);
+   //   auto layer_layout = _layers["layout"];
+   //   auto layer_hide_borders = _layers["hide_borders"];
+   //   // auto layer_grid = _layers["grid"];
+   //   auto layer_blue = _layers["blue"];
+   //   auto layer_text_zoom = _layers["text_zoom"];
+   //   auto layer_text_pan = _layers["text_pan"];
 
-   window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
+   //   layer_blue->draw(window, states);
 
-   layer_hide_borders->draw(window, states);
+   //   window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
 
-   if (_zoom_enabled)
-   {
-      layer_text_zoom->draw(window, states);
-   }
+   //   layer_hide_borders->draw(window, states);
 
-   if (CameraPanorama::getInstance().isLookActive())
-   {
-      layer_text_pan->draw(window, states);
-   }
+   //   if (_zoom_enabled)
+   //   {
+   //      layer_text_zoom->draw(window, states);
+   //   }
 
-   layer_layout->draw(window, states);
+   //   if (CameraPanorama::getInstance().isLookActive())
+   //   {
+   //      layer_text_pan->draw(window, states);
+   //   }
 
+   //   layer_layout->draw(window, states);
 
    // std::stringstream stream;
    // auto pos = Player::getPlayer(0)->getPixelPosition();
