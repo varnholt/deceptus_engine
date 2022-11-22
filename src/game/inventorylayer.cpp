@@ -141,14 +141,22 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
    };
 
    _top_area = {
-      _layers["separator"],
-      _layers["navigator"],
+      _layers["header"],
+      _layers["header_bg"],
       _layers["previous_menu_0"],
       _layers["previous_menu_1"],
       _layers["next_menu_0"],
       _layers["next_menu_1"],
+      _layers["footer"],
+      _layers["close_pc_0"],
+      _layers["close_pc_1"],
+      _layers["close_xbox_0"],
+      _layers["close_xbox_1"],
       _layers["background"],  // background is faded in/out, too
    };
+
+   // update button visibility
+   updateButtons();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -344,6 +352,19 @@ void InventoryLayer::updateAnimation()
    {
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InventoryLayer::updateButtons()
+{
+   _layers["previous_menu_1"]->_visible = false;
+   _layers["next_menu_1"]->_visible = false;
+   _layers["item_filter_previous_1"]->_visible = false;
+   _layers["item_filter_next_1"]->_visible = false;
+   _layers["close_pc_1"]->_visible = false;
+   _layers["close_pc_0"]->_visible = false;
+   _layers["close_xbox_1"]->_visible = false;
+   _layers["close_xbox_0"]->_visible = true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
