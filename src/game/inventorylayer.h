@@ -72,6 +72,7 @@ private:
    void selectPreviousFilter();
    void updateFilterLayers();
    void updateAnimation();
+   void updateButtons();
 
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
