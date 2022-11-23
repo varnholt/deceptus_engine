@@ -5,6 +5,7 @@
 #include "extratable.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/log.h"
 #include "gameconfiguration.h"
 #include "mechanisms/door.h"
 #include "mechanisms/portal.h"
@@ -26,8 +27,6 @@ LevelMap::LevelMap()
    PSD psd;
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/map.psd");
-
-   // Log::Info() << mFilename;
 
    for (const auto& layer : psd.getLayers())
    {
@@ -57,13 +56,11 @@ LevelMap::LevelMap()
 
       _layers[layer.getName()] = tmp;
    }
+
+   updateButtons();
 }
 
-
-void LevelMap::loadLevelTextures(
-   const std::filesystem::path& grid,
-   const std::filesystem::path& outlines
-)
+void LevelMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
 {
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
    _level_grid_sprite.setTexture(*_level_grid_texture);
@@ -78,8 +75,9 @@ void LevelMap::loadLevelTextures(
 
 void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w = GameConfiguration::getInstance()._view_width;
-   auto h = GameConfiguration::getInstance()._view_height;
+   // draw map
+   const auto w = GameConfiguration::getInstance()._view_width;
+   const auto h = GameConfiguration::getInstance()._view_height;
 
    sf::Vector2f center;
    center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
@@ -109,33 +107,25 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
-   // all removed by dstar
+   for (auto [k, v] : _layers)
+   {
+      if (!v->_visible)
+      {
+         continue;
+      }
+      v->draw(window, states);
+   }
 
-   //   auto layer_layout = _layers["layout"];
-   //   auto layer_hide_borders = _layers["hide_borders"];
-   //   // auto layer_grid = _layers["grid"];
-   //   auto layer_blue = _layers["blue"];
-   //   auto layer_text_zoom = _layers["text_zoom"];
-   //   auto layer_text_pan = _layers["text_pan"];
-
-   //   layer_blue->draw(window, states);
-
-   //   window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
-
-   //   layer_hide_borders->draw(window, states);
-
-   //   if (_zoom_enabled)
-   //   {
-   //      layer_text_zoom->draw(window, states);
-   //   }
-
-   //   if (CameraPanorama::getInstance().isLookActive())
-   //   {
-   //      layer_text_pan->draw(window, states);
-   //   }
-
-   //   layer_layout->draw(window, states);
-
+   // window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
+   //
+   // if (_zoom_enabled)
+   // {
+   // }
+   //
+   // if (CameraPanorama::getInstance().isLookActive())
+   // {
+   // }
+   //
    // std::stringstream stream;
    // auto pos = Player::getPlayer(0)->getPixelPosition();
    // stream << "player pos: " << static_cast<int>(pos.x / TILE_WIDTH) << ", " << static_cast<int>(pos.y / TILE_HEIGHT);
@@ -242,5 +232,62 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    target.draw(square);
 }
 
+void LevelMap::updateButtons()
+{
+   bool xbox = true;
+   bool close_enabled = false;
+   bool legend_enabled = false;
+   bool world_enabled = false;
+   bool zoom_enabled = false;
+   bool navigate_enabled = false;
 
+   _layers["close_xbox_0"]->_visible = xbox;
+   _layers["close_xbox_1"]->_visible = xbox && close_enabled;
+   _layers["close_pc_0"]->_visible = !xbox;
+   _layers["close_pc_1"]->_visible = !xbox && close_enabled;
 
+   _layers["legend_xbox_0"]->_visible = xbox;
+   _layers["legend_xbox_1"]->_visible = xbox && legend_enabled;
+   _layers["legend_pc_0"]->_visible = !xbox;
+   _layers["legend_pc_1"]->_visible = !xbox && legend_enabled;
+
+   _layers["world_xbox_0"]->_visible = xbox;
+   _layers["world_xbox_1"]->_visible = xbox && world_enabled;
+   _layers["world_pc_0"]->_visible = !xbox;
+   _layers["world_pc_1"]->_visible = !xbox && world_enabled;
+
+   _layers["zoom_xbox_0"]->_visible = xbox;
+   _layers["zoom_xbox_1"]->_visible = xbox && zoom_enabled;
+   _layers["zoom_pc_0"]->_visible = !xbox;
+   _layers["zoom_pc_1"]->_visible = !xbox && zoom_enabled;
+
+   _layers["navigate_xbox_0"]->_visible = xbox;
+   _layers["navigate_xbox_1"]->_visible = xbox && navigate_enabled;
+   _layers["navigate_pc_0"]->_visible = !xbox;
+   _layers["navigate_pc_1"]->_visible = !xbox && navigate_enabled;
+
+   _layers["zoom_level_1"]->_visible = true;
+   _layers["zoom_level_2"]->_visible = false;
+   _layers["zoom_level_3"]->_visible = false;
+   _layers["zoom_level_4"]->_visible = false;
+
+   // cpan_bg
+   // cpan_right
+   // cpan_left
+   // cpan_down
+   // cpan_up
+   //
+   // bg
+   //
+   // footer_bg
+   // header_bg
+   //
+   // map_keys
+   // zone_name_label_crypts
+   // header
+   //
+   // next_menu_0
+   // next_menu_1
+   // previous_menu_0
+   // previous_menu_1
+}
