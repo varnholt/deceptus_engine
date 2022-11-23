@@ -32,6 +32,7 @@ class LevelMap
    private:
 
       void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+      void updateButtons();
 
       BitmapFont _font;
       std::map<std::string, std::shared_ptr<Layer>> _layers;
