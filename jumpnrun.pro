@@ -184,6 +184,7 @@ SOURCES += \
    src/game/imagelayer.cpp \
    src/game/infolayer.cpp \
    src/game/ingamemenu.cpp \
+   src/game/ingamemenuinventory.cpp \
    src/game/inventory.cpp \
    src/game/inventoryitem.cpp \
    src/game/level.cpp \
@@ -379,6 +380,7 @@ HEADERS += \
    src/game/imagelayer.h \
    src/game/infolayer.h \
    src/game/ingamemenu.h \
+   src/game/ingamemenuinventory.h \
    src/game/inventory.h \
    src/game/inventoryitem.h \
    src/game/laser.h \
