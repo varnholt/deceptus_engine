@@ -1,4 +1,4 @@
-#include "levelmap.h"
+#include "ingamemenumap.h"
 
 #include "camerapanorama.h"
 #include "console.h"
@@ -15,8 +15,18 @@
 #include <iostream>
 #include <sstream>
 
+// missing: map now has to get these on its own.
+//
+// _map->loadLevelTextures(path / std::filesystem::path("physics_grid_solid.png"), path / std::filesystem::path("physics_path_solid.png"));
+// _map->setDoors(_mechanism_doors);
+// _map->setPortals(_mechanism_portals);
 
-LevelMap::LevelMap()
+// if (DisplayMode::getInstance().isSet(Display::Map))
+// {
+//    _map->draw(*window.get());
+// }
+
+IngameMenuMap::IngameMenuMap()
 {
    _font.load(
       "data/game/font.png",
@@ -60,7 +70,7 @@ LevelMap::LevelMap()
    updateButtons();
 }
 
-void LevelMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
+void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
 {
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
    _level_grid_sprite.setTexture(*_level_grid_texture);
@@ -72,36 +82,45 @@ void LevelMap::loadLevelTextures(const std::filesystem::path& grid, const std::f
    _level_render_texture.create(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
 }
 
-
-void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
+void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    // draw map
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
 
-   sf::Vector2f center;
-   center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
-   center += CameraPanorama::getInstance().getLookVector();
-   center.x += _level_grid_sprite.getTexture()->getSize().x / 2.0f;
-   center.y += _level_grid_sprite.getTexture()->getSize().y / 2.0f;
-   center.x -= 220.0f;
-   center.y -= 80.0f;
+   if (_level_grid_texture)
+   {
+      sf::Vector2f center;
+      center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
+      center += CameraPanorama::getInstance().getLookVector();
+      center.x += _level_grid_sprite.getTexture()->getSize().x / 2.0f;
+      center.y += _level_grid_sprite.getTexture()->getSize().y / 2.0f;
+      center.x -= 220.0f;
+      center.y -= 80.0f;
 
-   sf::View level_view;
-   level_view.setSize(static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y));
-   level_view.setCenter(center);
-   level_view.zoom(_zoom); // 1.5f works well, too
-   _level_grid_sprite.setColor(sf::Color{70, 70, 140, 255});
-   _level_outline_sprite.setColor(sf::Color{255, 255, 255, 80});
-   _level_render_texture.clear();
-   _level_render_texture.draw(_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
-   _level_render_texture.draw(_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
-   drawLevelItems(_level_render_texture);
-   _level_render_texture.setView(level_view);
-   _level_render_texture.display();
+      sf::View level_view;
+      level_view.setSize(
+         static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y)
+      );
 
-   auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
-   level_texture_sprite.move(10.0f, 48.0f);
+      level_view.setCenter(center);
+      level_view.zoom(_zoom);  // 1.5f works well, too
+
+      _level_grid_sprite.setColor(sf::Color{70, 70, 140, 255});
+      _level_outline_sprite.setColor(sf::Color{255, 255, 255, 80});
+
+      _level_render_texture.clear();
+      _level_render_texture.draw(_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
+      _level_render_texture.draw(_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
+
+      drawLevelItems(_level_render_texture);
+
+      _level_render_texture.setView(level_view);
+      _level_render_texture.display();
+
+      auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
+      level_texture_sprite.move(10.0f, 48.0f);
+   }
 
    // draw layers
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
@@ -134,20 +153,22 @@ void LevelMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    // mFont.draw(window, mFont.getCoords(Console::getInstance().getCommand()), 5, 100);
 }
 
+void IngameMenuMap::update(const sf::Time& /*dt*/)
+{
+   CameraPanorama::getInstance().update();
+}
 
-void LevelMap::setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors)
+void IngameMenuMap::setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors)
 {
    _doors = doors;
 }
 
-
-void LevelMap::setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals)
+void IngameMenuMap::setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals)
 {
    _portals = portals;
 }
 
-
-void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
+void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 {
    float scale = 3.0f;
 
@@ -232,7 +253,7 @@ void LevelMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    target.draw(square);
 }
 
-void LevelMap::updateButtons()
+void IngameMenuMap::updateButtons()
 {
    bool xbox = true;
    bool close_enabled = false;

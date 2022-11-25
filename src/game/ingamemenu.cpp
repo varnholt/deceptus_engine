@@ -19,13 +19,6 @@ void InGameMenu::setJoystickInfo(const GameControllerInfo& joystickInfo)
    _joystick_info = joystickInfo;
 }
 
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
-{
-   _inventory.draw(window, states);
-}
-
 //---------------------------------------------------------------------------------------------------------------------
 bool InGameMenu::isControllerActionSkipped() const
 {
@@ -93,11 +86,19 @@ void InGameMenu::updateControllerActions()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   _inventory.draw(window, states);
+   // _map.draw(window, states);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::update(const sf::Time& dt)
 {
    updateControllerActions();
 
    _inventory.update(dt);
+   // _map.update(dt);
 }
 
 

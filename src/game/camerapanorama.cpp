@@ -34,15 +34,17 @@ void CameraPanorama::update()
 {
    const auto& tweaks = Tweaks::instance();
 
-   auto limit_look_vector = [&](sf::Vector2f& look_vector){
-      if (!DisplayMode::getInstance().isSet(Display::Map))
+   auto limit_look_vector = [&](sf::Vector2f& look_vector)
+   {
+      if (DisplayMode::getInstance().isSet(Display::IngameMenu))
       {
-         const auto len = SfmlMath::length(look_vector);
-         if (len > tweaks._cpan_max_distance_px)
-         {
-            look_vector = SfmlMath::normalize(look_vector);
-            look_vector *= tweaks._cpan_max_distance_px;
-         }
+         return;
+      }
+      const auto len = SfmlMath::length(look_vector);
+      if (len > tweaks._cpan_max_distance_px)
+      {
+         look_vector = SfmlMath::normalize(look_vector);
+         look_vector *= tweaks._cpan_max_distance_px;
       }
    };
 

@@ -56,11 +56,10 @@ private:
    void updateAtmosphereShader();
    void updateWindowTitle();
 
-   void checkCloseInventory();
-   void openInventory();
+   void checkCloseInGameMenu();
+   void openInGameMenu();
    void showMainMenu();
    void showPauseMenu();
-   void hideMap();
 
    void processKeyPressedEvents(const sf::Event& event);
    void processKeyReleasedEvents(const sf::Event& event);
