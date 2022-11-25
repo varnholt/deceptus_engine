@@ -1,4 +1,4 @@
-#include "inventorylayer.h"
+#include "ingamemenu.h"
 
 #include "displaymode.h"
 #include "extramanager.h"
@@ -30,19 +30,19 @@ static const auto icon_height = 24;
 }  // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
-GameControllerInfo InventoryLayer::getJoystickInfo() const
+GameControllerInfo InGameMenu::getJoystickInfo() const
 {
    return _joystick_info;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::setJoystickInfo(const GameControllerInfo& joystickInfo)
+void InGameMenu::setJoystickInfo(const GameControllerInfo& joystickInfo)
 {
    _joystick_info = joystickInfo;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
+InGameMenu::InGameMenu() : _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
 {
    _cursor_sprite.setTexture(*_inventory_texture);
    _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
@@ -160,13 +160,13 @@ InventoryLayer::InventoryLayer() : _inventory_texture(TexturePool::getInstance()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-Inventory& InventoryLayer::getInventory()
+Inventory& InGameMenu::getInventory()
 {
    return SaveState::getPlayerInfo()._inventory;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
+void InGameMenu::addItem(int32_t x, int32_t y, ItemType type)
 {
    sf::Sprite sprite;
    sprite.setTexture(*_inventory_texture);
@@ -177,7 +177,7 @@ void InventoryLayer::addItem(int32_t x, int32_t y, ItemType type)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::addDemoInventory()
+void InGameMenu::addDemoInventory()
 {
    addItem(0, 0, ItemType::KeyRed);
    addItem(1, 0, ItemType::KeyOrange);
@@ -187,7 +187,7 @@ void InventoryLayer::addDemoInventory()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
+void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
@@ -225,7 +225,7 @@ void InventoryLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool InventoryLayer::isControllerActionSkipped() const
+bool InGameMenu::isControllerActionSkipped() const
 {
    auto skipped = false;
    auto now = GlobalClock::getInstance().getElapsedTimeInS();
@@ -239,31 +239,31 @@ bool InventoryLayer::isControllerActionSkipped() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<Layer> InventoryLayer::getFilterLayer(Filter filter) const
+std::shared_ptr<Layer> InGameMenu::getFilterLayer(Filter filter) const
 {
    return _filter_map.at(filter);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::selectNextFilter()
+void InGameMenu::selectNextFilter()
 {
    std::rotate(_filters.begin(), _filters.begin() + 1, _filters.end());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::selectPreviousFilter()
+void InGameMenu::selectPreviousFilter()
 {
    std::rotate(_filters.rbegin(), _filters.rbegin() + 1, _filters.rend());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::updateFilterLayers()
+void InGameMenu::updateFilterLayers()
 {
    std::for_each(_filters.begin() + 1, _filters.end(), [this](auto filter) { getFilterLayer(filter)->hide(); });
    getFilterLayer(_filters.front())->show();
 }
 
-void InventoryLayer::updateAnimation()
+void InGameMenu::updateAnimation()
 {
    const auto now = std::chrono::high_resolution_clock::now();
 
@@ -321,7 +321,7 @@ void InventoryLayer::updateAnimation()
       if (_hide_requested)
       {
          GameState::getInstance().enqueueResume();
-         DisplayMode::getInstance().enqueueUnset(Display::Inventory);
+         DisplayMode::getInstance().enqueueUnset(Display::IngameMenu);
          _hide_requested = false;
       }
    }
@@ -355,7 +355,7 @@ void InventoryLayer::updateAnimation()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::updateButtons()
+void InGameMenu::updateButtons()
 {
    _layers["previous_menu_1"]->_visible = false;
    _layers["next_menu_1"]->_visible = false;
@@ -368,7 +368,7 @@ void InventoryLayer::updateButtons()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::updateControllerActions()
+void InGameMenu::updateControllerActions()
 {
    auto& gci = GameControllerIntegration::getInstance();
 
@@ -419,7 +419,7 @@ void InventoryLayer::updateControllerActions()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::update(const sf::Time& /*dt*/)
+void InGameMenu::update(const sf::Time& /*dt*/)
 {
    // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
    updateControllerActions();
@@ -442,7 +442,7 @@ void InventoryLayer::update(const sf::Time& /*dt*/)
 // +-------------+ +------------------------------+ +-------------+
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::left()
+void InGameMenu::left()
 {
    if (_selected_item > 0)
    {
@@ -451,7 +451,7 @@ void InventoryLayer::left()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::right()
+void InGameMenu::right()
 {
    if (_selected_item < static_cast<int32_t>(getInventory().getItems().size()) - 1)
    {
@@ -460,7 +460,7 @@ void InventoryLayer::right()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::show()
+void InGameMenu::show()
 {
    _show_requested = true;
    _time_show = std::chrono::high_resolution_clock::now();
@@ -468,7 +468,7 @@ void InventoryLayer::show()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::hide()
+void InGameMenu::hide()
 {
    if (_hide_requested)
    {
@@ -480,13 +480,13 @@ void InventoryLayer::hide()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::confirm()
+void InGameMenu::confirm()
 {
    hide();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InventoryLayer::cancel()
+void InGameMenu::cancel()
 {
    hide();
 }

@@ -6,7 +6,7 @@
 #include "eventserializer.h"
 #include "forestscene.h"
 #include "infolayer.h"
-#include "inventorylayer.h"
+#include "ingamemenu.h"
 #include "menus/menu.h"
 #include "overlays/controlleroverlay.h"
 #include "overlays/rainoverlay.h"
@@ -77,7 +77,7 @@ private:
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
    std::unique_ptr<InfoLayer> _info_layer;
-   std::unique_ptr<InventoryLayer> _inventory_layer;
+   std::unique_ptr<InGameMenu> _ingame_menu;
    std::unique_ptr<ControllerOverlay> _controller_overlay;
 
    // temporarily here for debugging only

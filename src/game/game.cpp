@@ -211,7 +211,7 @@ void Game::showPauseMenu()
 
    // don't allow to pause during screen transitions
    // don't allow to pause when the inventory is open (game is already paused)
-   if (DisplayMode::getInstance().isSet(Display::ScreenTransition) || DisplayMode::getInstance().isSet(Display::Inventory))
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition) || DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
       return;
    }
@@ -305,7 +305,7 @@ void Game::initialize()
    _player->initialize();
 
    _info_layer = std::make_unique<InfoLayer>();
-   _inventory_layer = std::make_unique<InventoryLayer>();
+   _ingame_menu = std::make_unique<InGameMenu>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
    _test_scene = std::make_unique<ForestScene>();
 
@@ -437,9 +437,9 @@ void Game::draw()
       _controller_overlay->draw(*_window_render_texture.get());
    }
 
-   if (DisplayMode::getInstance().isSet(Display::Inventory))
+   if (DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
-      _inventory_layer->draw(*_window_render_texture.get());
+      _ingame_menu->draw(*_window_render_texture.get());
    }
 
    if (DrawStates::_draw_test_scene)
@@ -524,7 +524,7 @@ void Game::updateGameControllerForInventory()
 
    if (gji.isControllerConnected())
    {
-      _inventory_layer->setJoystickInfo(gji.getController()->getInfo());
+      _ingame_menu->setJoystickInfo(gji.getController()->getInfo());
    }
 }
 
@@ -681,9 +681,9 @@ void Game::update()
       updateGameController();
       updateGameControllerForInventory();
 
-      if (DisplayMode::getInstance().isSet(Display::Inventory))
+      if (DisplayMode::getInstance().isSet(Display::IngameMenu))
       {
-         _inventory_layer->update(dt);
+         _ingame_menu->update(dt);
       }
 
       if (DisplayMode::getInstance().isSet(Display::Map))
@@ -740,12 +740,12 @@ void Game::reset()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::checkCloseInventory()
 {
-   if (!DisplayMode::getInstance().isSet(Display::Inventory))
+   if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
       return;
    }
 
-   _inventory_layer->hide();
+   _ingame_menu->hide();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -763,8 +763,8 @@ void Game::openInventory()
    }
 
    GameState::getInstance().enqueuePause();
-   DisplayMode::getInstance().enqueueSet(Display::Inventory);
-   _inventory_layer->show();
+   DisplayMode::getInstance().enqueueSet(Display::IngameMenu);
+   _ingame_menu->show();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1035,12 +1035,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Left:
       {
-         _inventory_layer->left();
+         _ingame_menu->left();
          break;
       }
       case sf::Keyboard::Right:
       {
-         _inventory_layer->right();
+         _ingame_menu->right();
          break;
       }
       case sf::Keyboard::Return:
