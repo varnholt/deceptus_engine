@@ -108,7 +108,7 @@ enum class Display
    Game = 0x01,
    MainMenu = 0x02,
    Map = 0x04,
-   Inventory = 0x08,
+   IngameMenu = 0x08,
    Debug = 0x10,
    Modal = 0x20,
    ScreenTransition = 0x40,

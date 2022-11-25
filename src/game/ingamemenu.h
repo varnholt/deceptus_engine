@@ -12,7 +12,7 @@
 
 struct InventoryItem;
 
-class InventoryLayer
+class InGameMenu
 {
 public:
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
@@ -44,7 +44,7 @@ public:
       Various = 0x08
    };
 
-   InventoryLayer();
+   InGameMenu();
 
    void addDemoInventory();
 
