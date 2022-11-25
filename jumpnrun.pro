@@ -183,9 +183,9 @@ SOURCES += \
    src/game/hitbox.cpp \
    src/game/imagelayer.cpp \
    src/game/infolayer.cpp \
+   src/game/ingamemenu.cpp \
    src/game/inventory.cpp \
    src/game/inventoryitem.cpp \
-   src/game/inventorylayer.cpp \
    src/game/level.cpp \
    src/game/leveldescription.cpp \
    src/game/levelmap.cpp \
@@ -378,9 +378,9 @@ HEADERS += \
    src/game/hitbox.h \
    src/game/imagelayer.h \
    src/game/infolayer.h \
+   src/game/ingamemenu.h \
    src/game/inventory.h \
    src/game/inventoryitem.h \
-   src/game/inventorylayer.h \
    src/game/laser.h \
    src/game/level.h \
    src/game/leveldescription.h \
