@@ -183,9 +183,9 @@ void Game::initializeController()
       [this](int32_t /*id*/)
       {
          auto& gji = GameControllerIntegration::getInstance();
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { openInventory(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { checkCloseInventory(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { checkCloseInventory(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { openInGameMenu(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { checkCloseInGameMenu(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { checkCloseInGameMenu(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this]() { showPauseMenu(); });
       }
    );
@@ -410,8 +410,7 @@ void Game::draw()
 
    ScreenTransitionHandler::getInstance().draw(_window_render_texture);
 
-   const auto map_enabled = DisplayMode::getInstance().isSet(Display::Map);
-   if (!map_enabled)
+   if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
       _info_layer->setLoading(!_level_loading_finished);
       _info_layer->draw(*_window_render_texture.get());
@@ -685,11 +684,6 @@ void Game::update()
       {
          _ingame_menu->update(dt);
       }
-
-      if (DisplayMode::getInstance().isSet(Display::Map))
-      {
-         CameraPanorama::getInstance().update();
-      }
    }
    else if (GameState::getInstance().getMode() == ExecutionMode::Running)
    {
@@ -738,7 +732,7 @@ void Game::reset()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::checkCloseInventory()
+void Game::checkCloseInGameMenu()
 {
    if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
@@ -749,7 +743,7 @@ void Game::checkCloseInventory()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::openInventory()
+void Game::openInGameMenu()
 {
    if (GameState::getInstance().getMode() != ExecutionMode::Running)
    {
@@ -808,8 +802,8 @@ void Game::processEvent(const sf::Event& event)
       if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
       {
          if (
-            !DisplayMode::getInstance().isSet(Display::Map)  // the map is save to leave open when losing the window focus
-            && !Console::getInstance().isActive()            // while the console is open, don't disturb
+            !DisplayMode::getInstance().isSet(Display::IngameMenu)  // the in-game menu is save to leave open when losing the window focus
+            && !Console::getInstance().isActive()                   // while the console is open, don't disturb
          )
          {
             showPauseMenu();
@@ -882,13 +876,6 @@ void Game::processEvent(const sf::Event& event)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-void Game::hideMap()
-{
-   // do the same as if the player had pressed tab again
-   GameState::getInstance().enqueueTogglePauseResume();
-   DisplayMode::getInstance().enqueueToggle(Display::Map);
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
@@ -982,7 +969,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::I:
       {
-         openInventory();
+         openInGameMenu();
          break;
       }
       case sf::Keyboard::L:
@@ -1008,14 +995,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::P:
       case sf::Keyboard::Escape:
       {
-         if (DisplayMode::getInstance().isSet(Display::Map))
-         {
-            hideMap();
-         }
-         else
-         {
-            showPauseMenu();
-         }
+         showPauseMenu();
          break;
       }
       case sf::Keyboard::R:
@@ -1045,13 +1025,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Return:
       {
-         checkCloseInventory();
+         checkCloseInGameMenu();
          break;
       }
       case sf::Keyboard::Tab:
       {
-         GameState::getInstance().enqueueTogglePauseResume();
-         DisplayMode::getInstance().enqueueToggle(Display::Map);
+         openInGameMenu();
          break;
       }
       case sf::Keyboard::PageUp:

@@ -25,7 +25,7 @@
 #include "gamemechanismdeserializerconstants.h"
 #include "gun.h"
 #include "leveldescription.h"
-#include "levelmap.h"
+#include "ingamemenumap.h"
 #include "luainterface.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/checkpoint.h"
@@ -200,8 +200,6 @@ Level::Level() : GameNode(nullptr)
    _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
    _player_light->_color = sf::Color(255, 255, 255, 10);
    _light_system->_lights.push_back(_player_light);
-
-   _map = std::make_unique<LevelMap>();
 
    _mechanisms_list = {
       &_mechanism_bouncers,        &_mechanism_bubble_cubes,   &_mechanism_checkpoints,    &_mechanism_collapsing_platforms,
@@ -499,10 +497,6 @@ void Level::loadTmx()
    }
 
    TileMapFactory::merge(_tile_maps);
-
-   _map->loadLevelTextures(path / std::filesystem::path("physics_grid_solid.png"), path / std::filesystem::path("physics_path_solid.png"));
-   _map->setDoors(_mechanism_doors);
-   _map->setPortals(_mechanism_portals);
 
    if (!_atmosphere._tile_map)
    {
@@ -1253,11 +1247,6 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
-
-   if (DisplayMode::getInstance().isSet(Display::Map))
-   {
-      _map->draw(*window.get());
-   }
 }
 
 //-----------------------------------------------------------------------------

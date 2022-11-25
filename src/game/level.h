@@ -38,7 +38,7 @@
 #include <memory>
 
 class Bouncer;
-class LevelMap;
+class IngameMenuMap;
 class TmxParser;
 
 /*! \brief Implements all level-related logic
@@ -167,7 +167,6 @@ protected:
    Atmosphere _atmosphere;
    Physics _physics;
    sf::Vector2f _start_position;
-   std::unique_ptr<LevelMap> _map;
 
    // parallax (move to separate mechanism!)
    struct ParallaxLayer
