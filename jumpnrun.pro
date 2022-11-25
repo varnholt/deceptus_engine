@@ -185,11 +185,11 @@ SOURCES += \
    src/game/infolayer.cpp \
    src/game/ingamemenu.cpp \
    src/game/ingamemenuinventory.cpp \
+   src/game/ingamemenumap.cpp \
    src/game/inventory.cpp \
    src/game/inventoryitem.cpp \
    src/game/level.cpp \
    src/game/leveldescription.cpp \
-   src/game/levelmap.cpp \
    src/game/levels.cpp \
    src/game/levelscript.cpp \
    src/game/luainterface.cpp \
@@ -381,12 +381,12 @@ HEADERS += \
    src/game/infolayer.h \
    src/game/ingamemenu.h \
    src/game/ingamemenuinventory.h \
+   src/game/ingamemenumap.h \
    src/game/inventory.h \
    src/game/inventoryitem.h \
    src/game/laser.h \
    src/game/level.h \
    src/game/leveldescription.h \
-   src/game/levelmap.h \
    src/game/levels.h \
    src/game/levelscript.h \
    src/game/luaconstants.h \

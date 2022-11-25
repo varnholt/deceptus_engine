@@ -1,7 +1,9 @@
 #pragma once
 
 #include "framework/joystick/gamecontrollerinfo.h"
+
 #include "ingamemenuinventory.h"
+#include "ingamemenumap.h"
 
 #include <SFML/Graphics.hpp>
 #include <chrono>
@@ -34,4 +36,5 @@ private:
    float _joystick_update_time = 0.0f;
 
    InGameMenuInventory _inventory;
+   IngameMenuMap _map;
 };
