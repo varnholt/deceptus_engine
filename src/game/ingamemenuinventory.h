@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "framework/image/layer.h"
 #include "framework/joystick/gamecontrollerinfo.h"
+#include "ingamemenupage.h"
 #include "inventory.h"
 
 #include <SFML/Graphics.hpp>
@@ -11,7 +12,7 @@
 #include <memory>
 #include <vector>
 
-class InGameMenuInventory
+class InGameMenuInventory : public InGameMenuPage
 {
 public:
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
@@ -47,8 +48,8 @@ public:
 
    void addDemoInventory();
 
-   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+   void update(const sf::Time& dt) override;
 
    void left();
    void right();
