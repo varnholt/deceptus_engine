@@ -2,6 +2,7 @@
 
 #include "bitmapfont.h"
 #include "framework/image/layer.h"
+#include "ingamemenupage.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -12,15 +13,15 @@
 
 class GameMechanism;
 
-class IngameMenuMap
+class IngameMenuMap : public InGameMenuPage
 {
 public:
    IngameMenuMap();
 
    void loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines);
 
-   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-   void update(const sf::Time& dt);
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+   void update(const sf::Time& dt) override;
 
    void setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors);
    void setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals);

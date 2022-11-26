@@ -410,11 +410,8 @@ void Game::draw()
 
    ScreenTransitionHandler::getInstance().draw(_window_render_texture);
 
-   if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
-   {
-      _info_layer->setLoading(!_level_loading_finished);
-      _info_layer->draw(*_window_render_texture.get());
-   }
+   _info_layer->setLoading(!_level_loading_finished);
+   _info_layer->draw(*_window_render_texture.get());
 
    if (DrawStates::_draw_debug_info)
    {
