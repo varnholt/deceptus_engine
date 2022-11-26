@@ -2,11 +2,13 @@
 
 #include "framework/joystick/gamecontrollerinfo.h"
 
+#include "ingamemenuarchives.h"
 #include "ingamemenuinventory.h"
 #include "ingamemenumap.h"
 
 #include <SFML/Graphics.hpp>
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -15,6 +17,15 @@ struct InventoryItem;
 class InGameMenu
 {
 public:
+   enum class SubMenu
+   {
+      Inventory = 0,
+      Map = 1,
+      Archives = 2,
+   };
+
+   InGameMenu();
+
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void update(const sf::Time& dt);
 
@@ -22,19 +33,31 @@ public:
    void right();
    void show();
    void hide();
+
    void confirm();
    void cancel();
 
-   GameControllerInfo getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
 private:
+   void nextSubMenu();
+   void prevSubMenu();
+   void debug();
+
    void updateControllerActions();
    bool isControllerActionSkipped() const;
 
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
 
-   InGameMenuInventory _inventory;
-   IngameMenuMap _map;
+   std::shared_ptr<InGameMenuArchives> _menu_archives;
+   std::shared_ptr<InGameMenuInventory> _menu_inventory;
+   std::shared_ptr<IngameMenuMap> _menu_map;
+
+   SubMenu _selected_submenu{SubMenu::Inventory};
+   std::optional<SubMenu> _previous_submenu;
+
+   std::array<SubMenu, 3> _submenu_selection;
+   std::array<std::shared_ptr<InGameMenuPage>, 3> _submenu_type_map;
+   std::array<std::string, 3> _submenu_type_names;
 };
