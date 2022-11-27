@@ -6,6 +6,7 @@
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "ingamemenupage.h"
 #include "inventory.h"
+#include "layerdata.h"
 
 #include <SFML/Graphics.hpp>
 #include <chrono>
@@ -15,24 +16,10 @@
 class InGameMenuInventory : public InGameMenuPage
 {
 public:
-   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
-   using FloatSeconds = std::chrono::duration<float>;
 
    struct ItemSprite
    {
       sf::Sprite mSprite;
-   };
-
-   struct LayerData
-   {
-      LayerData(const std::shared_ptr<Layer>& layer)
-          : _layer(layer), _pos(layer->_sprite->getPosition()), _alpha(layer->_sprite->getColor().a / 255.0f)
-      {
-      }
-
-      std::shared_ptr<Layer> _layer;
-      sf::Vector2f _pos;
-      float _alpha{1.0f};
    };
 
    enum class Filter
@@ -50,13 +37,11 @@ public:
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
    void update(const sf::Time& dt) override;
+   void show() override;
+   void hide() override;
 
    void left();
    void right();
-   void show();
-   void hide();
-   void confirm();
-   void cancel();
 
    GameControllerInfo getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
@@ -89,16 +74,11 @@ private:
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
 
-   // animation
-   HighResTimePoint _time_show;
-   HighResTimePoint _time_hide;
-   bool _show_requested = false;
-   bool _hide_requested = false;
-
    std::vector<LayerData> _top_area;
    std::vector<LayerData> _profile_panel;
    std::vector<LayerData> _inventory_panel;
    std::vector<LayerData> _item_description_panel;
+   void fullyHidden();
 };
 
 #endif  // INGAMEMENUINVENTORY_H

@@ -26,6 +26,7 @@
 //    _map->draw(*window.get());
 // }
 
+//---------------------------------------------------------------------------------------------------------------------
 IngameMenuMap::IngameMenuMap()
 {
    _font.load(
@@ -70,6 +71,7 @@ IngameMenuMap::IngameMenuMap()
    updateButtons();
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
 {
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
@@ -82,8 +84,15 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
    _level_render_texture.create(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
+   // TODO: change later
+   if (_hide_requested)
+   {
+      return;
+   }
+
    // draw map
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
@@ -132,6 +141,7 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       {
          continue;
       }
+
       v->draw(window, states);
    }
 
@@ -153,21 +163,51 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    // mFont.draw(window, mFont.getCoords(Console::getInstance().getCommand()), 5, 100);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::update(const sf::Time& /*dt*/)
 {
    CameraPanorama::getInstance().update();
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+void IngameMenuMap::show()
+{
+   _show_requested = true;
+   _time_show = std::chrono::high_resolution_clock::now();
+
+   // TODO: change later
+   _hide_requested = false;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void IngameMenuMap::hide()
+{
+   if (_hide_requested)
+   {
+      return;
+   }
+
+   _hide_requested = true;
+   _time_hide = std::chrono::high_resolution_clock::now();
+
+
+   // TODO: change later
+   _show_requested = false;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors)
 {
    _doors = doors;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals)
 {
    _portals = portals;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 {
    float scale = 3.0f;
@@ -253,6 +293,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    target.draw(square);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::updateButtons()
 {
    bool xbox = true;

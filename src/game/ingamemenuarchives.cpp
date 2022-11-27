@@ -7,3 +7,11 @@ void InGameMenuArchives::draw(sf::RenderTarget& /*window*/, sf::RenderStates)
 void InGameMenuArchives::update(const sf::Time& /*dt*/)
 {
 }
+
+void InGameMenuArchives::show()
+{
+}
+
+void InGameMenuArchives::hide()
+{
+}

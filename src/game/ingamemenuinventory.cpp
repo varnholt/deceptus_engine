@@ -246,6 +246,15 @@ void InGameMenuInventory::updateFilterLayers()
    getFilterLayer(_filters.front())->show();
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::fullyHidden()
+{
+   GameState::getInstance().enqueueResume();
+   DisplayMode::getInstance().enqueueUnset(Display::IngameMenu);
+   _hide_requested = false;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateAnimation()
 {
    const auto now = std::chrono::high_resolution_clock::now();
@@ -303,9 +312,7 @@ void InGameMenuInventory::updateAnimation()
    {
       if (_hide_requested)
       {
-         GameState::getInstance().enqueueResume();
-         DisplayMode::getInstance().enqueueUnset(Display::IngameMenu);
-         _hide_requested = false;
+         fullyHidden();
       }
    }
 
@@ -410,14 +417,3 @@ void InGameMenuInventory::hide()
    _time_hide = std::chrono::high_resolution_clock::now();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::confirm()
-{
-   hide();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::cancel()
-{
-   hide();
-}
