@@ -52,12 +52,9 @@ private:
    void updateGameState(const sf::Time& dt);
    void updateGameController();
    void updateGameControllerForGame();
-   void updateGameControllerForInventory();
    void updateAtmosphereShader();
    void updateWindowTitle();
 
-   void checkCloseInGameMenu();
-   void openInGameMenu();
    void showMainMenu();
    void showPauseMenu();
 

@@ -26,7 +26,7 @@ class GameControllerIntegration
       size_t getCount() const;
       bool isControllerConnected() const;
 
-      std::shared_ptr<GameController>& getController(int32_t controller_id = _selected_controller_id);
+      const std::shared_ptr<GameController>& getController(int32_t controller_id = _selected_controller_id) const;
 
       using DeviceAddedCallback = std::function<void(int32_t)>;
       using DeviceRemovedCallback = std::function<void(int32_t)>;

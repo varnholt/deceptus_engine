@@ -183,9 +183,6 @@ void Game::initializeController()
       [this](int32_t /*id*/)
       {
          auto& gji = GameControllerIntegration::getInstance();
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { openInGameMenu(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { checkCloseInGameMenu(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { checkCloseInGameMenu(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this]() { showPauseMenu(); });
       }
    );
@@ -514,17 +511,6 @@ void Game::updateGameControllerForGame()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::updateGameControllerForInventory()
-{
-   auto& gji = GameControllerIntegration::getInstance();
-
-   if (gji.isControllerConnected())
-   {
-      _ingame_menu->setJoystickInfo(gji.getController()->getInfo());
-   }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 void Game::updateWindowTitle()
 {
    std::ostringstream out_stream;
@@ -675,7 +661,6 @@ void Game::update()
    if (GameState::getInstance().getMode() == ExecutionMode::Paused)
    {
       updateGameController();
-      updateGameControllerForInventory();
 
       if (DisplayMode::getInstance().isSet(Display::IngameMenu))
       {
@@ -726,36 +711,6 @@ int32_t Game::loop()
 void Game::reset()
 {
    _player->reset();
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void Game::checkCloseInGameMenu()
-{
-   if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
-   {
-      return;
-   }
-
-   _ingame_menu->hide();
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void Game::openInGameMenu()
-{
-   if (GameState::getInstance().getMode() != ExecutionMode::Running)
-   {
-      return;
-   }
-
-   // disallow inventory during screen transitions
-   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
-   {
-      return;
-   }
-
-   GameState::getInstance().enqueuePause();
-   DisplayMode::getInstance().enqueueSet(Display::IngameMenu);
-   _ingame_menu->show();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -905,6 +860,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       return;
    }
 
+   if (DisplayMode::getInstance().isSet(Display::IngameMenu))
+   {
+      _ingame_menu->processEvent(event);
+      return;
+   }
+
    CameraPanorama::getInstance().processKeyPressedEvents(event);
 
    switch (event.key.code)
@@ -966,7 +927,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::I:
       {
-         openInGameMenu();
+         _ingame_menu->open();
          break;
       }
       case sf::Keyboard::L:
@@ -1010,24 +971,9 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          _player->setVisible(!_player->getVisible());
          break;
       }
-      case sf::Keyboard::Left:
-      {
-         _ingame_menu->left();
-         break;
-      }
-      case sf::Keyboard::Right:
-      {
-         _ingame_menu->right();
-         break;
-      }
-      case sf::Keyboard::Return:
-      {
-         checkCloseInGameMenu();
-         break;
-      }
       case sf::Keyboard::Tab:
       {
-         openInGameMenu();
+         _ingame_menu->open();
          break;
       }
       case sf::Keyboard::PageUp:
