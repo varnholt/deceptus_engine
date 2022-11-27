@@ -96,9 +96,9 @@ void GameControllerIntegration::remove(int32_t id)
 
 
 //-----------------------------------------------------------------------------
-std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id)
+const std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id) const
 {
-   return _controllers[controller_id];
+   return _controllers.at(controller_id);
 }
 
 

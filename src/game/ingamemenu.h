@@ -29,6 +29,11 @@ public:
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void update(const sf::Time& dt);
 
+   void processEvent(const sf::Event& event);
+
+   void open();
+   void close();
+
    void left();
    void right();
    void show();
@@ -40,6 +45,10 @@ public:
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
 private:
+
+   void initializeController();
+   void updateController();
+
    void nextSubMenu();
    void prevSubMenu();
    void debug();

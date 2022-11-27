@@ -12,6 +12,9 @@ public:
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
    void update(const sf::Time& dt) override;
+
+   void show() override;
+   void hide() override;
 };
 
 #endif // INGAMEMENUARCHIVES_H

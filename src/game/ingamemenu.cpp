@@ -1,8 +1,10 @@
 #include "ingamemenu.h"
 
+#include "displaymode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
 #include "gamecontrollerintegration.h"
+#include "gamestate.h"
 
 #include <iostream>
 
@@ -10,6 +12,21 @@
 void InGameMenu::setJoystickInfo(const GameControllerInfo& joystickInfo)
 {
    _joystick_info = joystickInfo;
+}
+
+void InGameMenu::initializeController()
+{
+   auto& gji = GameControllerIntegration::getInstance();
+
+   gji.addDeviceAddedCallback(
+      [this](int32_t /*id*/)
+      {
+         auto& gji = GameControllerIntegration::getInstance();
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { open(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { close(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { close(); });
+      }
+   );
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -30,7 +47,7 @@ bool InGameMenu::isControllerActionSkipped() const
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::updateControllerActions()
 {
-   auto& gci = GameControllerIntegration::getInstance();
+   const auto& gci = GameControllerIntegration::getInstance();
 
    if (!gci.isControllerConnected())
    {
@@ -108,9 +125,20 @@ void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+void InGameMenu::updateController()
+{
+   auto& gji = GameControllerIntegration::getInstance();
+   if (gji.isControllerConnected())
+   {
+      setJoystickInfo(gji.getController()->getInfo());
+   }
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::update(const sf::Time& dt)
 {
+   updateController();
    updateControllerActions();
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->update(dt);
@@ -119,6 +147,75 @@ void InGameMenu::update(const sf::Time& dt)
    {
       _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->update(dt);
    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::processEvent(const sf::Event& event)
+{
+   switch (event.key.code)
+   {
+      case sf::Keyboard::Left:
+      {
+         left();
+         break;
+      }
+      case sf::Keyboard::Right:
+      {
+         right();
+         break;
+      }
+      case sf::Keyboard::LShift:
+      case sf::Keyboard::Q:
+      {
+         prevSubMenu();
+         break;
+      }
+      case sf::Keyboard::RShift:
+      case sf::Keyboard::W:
+      {
+         nextSubMenu();
+         break;
+      }
+      case sf::Keyboard::Return:
+      {
+         close();
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::open()
+{
+   if (GameState::getInstance().getMode() != ExecutionMode::Running)
+   {
+      return;
+   }
+
+   // disallow inventory during screen transitions
+   if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
+   {
+      return;
+   }
+
+   GameState::getInstance().enqueuePause();
+   DisplayMode::getInstance().enqueueSet(Display::IngameMenu);
+   show();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::close()
+{
+   if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
+   {
+      return;
+   }
+
+   hide();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -183,6 +280,8 @@ void InGameMenu::prevSubMenu()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::debug()
 {
-   std::cout << "selected: " << _submenu_type_names[static_cast<uint8_t>(_selected_submenu)] << " previous: "
-             << (_previous_submenu.has_value() ? _submenu_type_names[static_cast<uint8_t>(_previous_submenu.value())] : "n/a");
+   const auto selected = _submenu_type_names[static_cast<uint8_t>(_selected_submenu)];
+   const auto previous = (_previous_submenu.has_value() ? _submenu_type_names[static_cast<uint8_t>(_previous_submenu.value())] : "n/a");
+
+   std::cout << "selected: " << selected << " previous: " << previous << std::endl;
 }
