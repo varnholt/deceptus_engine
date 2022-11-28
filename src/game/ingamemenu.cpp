@@ -261,7 +261,7 @@ void InGameMenu::nextSubMenu()
    std::rotate(_submenu_selection.begin(), _submenu_selection.begin() + 1, _submenu_selection.end());
 
    _selected_submenu = _submenu_selection[0];
-   _previous_submenu = _submenu_selection[1];
+   _previous_submenu = _submenu_selection[2];
 
    debug();
 }
@@ -272,7 +272,7 @@ void InGameMenu::prevSubMenu()
    std::rotate(_submenu_selection.rbegin(), _submenu_selection.rbegin() + 1, _submenu_selection.rend());
 
    _selected_submenu = _submenu_selection[0];
-   _previous_submenu = _submenu_selection[2];
+   _previous_submenu = _submenu_selection[1];
 
    debug();
 }
@@ -283,5 +283,5 @@ void InGameMenu::debug()
    const auto selected = _submenu_type_names[static_cast<uint8_t>(_selected_submenu)];
    const auto previous = (_previous_submenu.has_value() ? _submenu_type_names[static_cast<uint8_t>(_previous_submenu.value())] : "n/a");
 
-   std::cout << "selected: " << selected << " previous: " << previous << std::endl;
+   std::cout << "selected: " << selected << ", previous: " << previous << std::endl;
 }
