@@ -15,59 +15,15 @@
 #include <iostream>
 #include <sstream>
 
-// missing: map now has to get these on its own.
-//
-// _map->loadLevelTextures(path / std::filesystem::path("physics_grid_solid.png"), path / std::filesystem::path("physics_path_solid.png"));
-// _map->setDoors(_mechanism_doors);
-// _map->setPortals(_mechanism_portals);
-
-// if (DisplayMode::getInstance().isSet(Display::Map))
-// {
-//    _map->draw(*window.get());
-// }
 
 //---------------------------------------------------------------------------------------------------------------------
 IngameMenuMap::IngameMenuMap()
 {
-   _font.load(
-      "data/game/font.png",
-      "data/game/font.map"
-   );
+   _font.load("data/game/font.png", "data/game/font.map");
 
-   // load ingame psd
-   PSD psd;
-   psd.setColorFormat(PSD::ColorFormat::ABGR);
-   psd.load("data/game/map.psd");
+   _filename = "data/game/map.psd";
 
-   for (const auto& layer : psd.getLayers())
-   {
-      // skip groups
-      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
-      {
-         continue;
-      }
-
-      // Log::Info() << layer.getName();
-
-      auto tmp = std::make_shared<Layer>();
-      tmp->_visible = layer.isVisible();
-
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
-
-      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
-      sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
-
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
-
-      _layers[layer.getName()] = tmp;
-   }
-
+   load();
    updateButtons();
 }
 
@@ -92,10 +48,6 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       return;
    }
-
-   // draw map
-   const auto w = GameConfiguration::getInstance()._view_width;
-   const auto h = GameConfiguration::getInstance()._view_height;
 
    if (_level_grid_texture)
    {
@@ -131,36 +83,7 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       level_texture_sprite.move(10.0f, 48.0f);
    }
 
-   // draw layers
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   window.setView(view);
-
-   for (auto [k, v] : _layers)
-   {
-      if (!v->_visible)
-      {
-         continue;
-      }
-
-      v->draw(window, states);
-   }
-
-   // window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
-   //
-   // if (_zoom_enabled)
-   // {
-   // }
-   //
-   // if (CameraPanorama::getInstance().isLookActive())
-   // {
-   // }
-   //
-   // std::stringstream stream;
-   // auto pos = Player::getPlayer(0)->getPixelPosition();
-   // stream << "player pos: " << static_cast<int>(pos.x / TILE_WIDTH) << ", " << static_cast<int>(pos.y / TILE_HEIGHT);
-   //
-   // mFont.draw(window, mFont.getCoords(stream.str()), 5, 50);
-   // mFont.draw(window, mFont.getCoords(Console::getInstance().getCommand()), 5, 100);
+   InGameMenuPage::draw(window, states);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -353,3 +276,31 @@ void IngameMenuMap::updateButtons()
    // previous_menu_0
    // previous_menu_1
 }
+
+// window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
+//
+// if (_zoom_enabled)
+// {
+// }
+//
+// if (CameraPanorama::getInstance().isLookActive())
+// {
+// }
+//
+// std::stringstream stream;
+// auto pos = Player::getPlayer(0)->getPixelPosition();
+// stream << "player pos: " << static_cast<int>(pos.x / TILE_WIDTH) << ", " << static_cast<int>(pos.y / TILE_HEIGHT);
+//
+// mFont.draw(window, mFont.getCoords(stream.str()), 5, 50);
+// mFont.draw(window, mFont.getCoords(Console::getInstance().getCommand()), 5, 100);
+
+// missing: map now has to get these on its own.
+//
+// _map->loadLevelTextures(path / std::filesystem::path("physics_grid_solid.png"), path / std::filesystem::path("physics_path_solid.png"));
+// _map->setDoors(_mechanism_doors);
+// _map->setPortals(_mechanism_portals);
+
+// if (DisplayMode::getInstance().isSet(Display::Map))
+// {
+//    _map->draw(*window.get());
+// }

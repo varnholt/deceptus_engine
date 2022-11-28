@@ -2,7 +2,6 @@
 #define INGAMEMENUINVENTORY_H
 
 #include "constants.h"
-#include "framework/image/layer.h"
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "ingamemenupage.h"
 #include "inventory.h"
@@ -56,14 +55,10 @@ private:
    void updateFilterLayers();
    void updateAnimation();
    void updateButtons();
+   void fullyHidden();
 
-   std::vector<std::shared_ptr<Layer>> _layer_stack;
-   std::map<std::string, std::shared_ptr<Layer>> _layers;
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
-
-   sf::Font _font;
-   sf::Text _text;
 
    sf::Sprite _cursor_sprite;
    sf::Vector2f _cursor_position;
@@ -78,7 +73,6 @@ private:
    std::vector<LayerData> _profile_panel;
    std::vector<LayerData> _inventory_panel;
    std::vector<LayerData> _item_description_panel;
-   void fullyHidden();
 };
 
 #endif  // INGAMEMENUINVENTORY_H

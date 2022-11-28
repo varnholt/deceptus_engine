@@ -34,7 +34,6 @@ private:
    void updateButtons();
 
    BitmapFont _font;
-   std::map<std::string, std::shared_ptr<Layer>> _layers;
 
    sf::RenderTexture _level_render_texture;
 

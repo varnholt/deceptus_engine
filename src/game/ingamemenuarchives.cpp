@@ -1,5 +1,11 @@
 #include "ingamemenuarchives.h"
 
+InGameMenuArchives::InGameMenuArchives()
+{
+   _filename = "data/game/archives.psd";
+   load();
+}
+
 void InGameMenuArchives::draw(sf::RenderTarget& /*window*/, sf::RenderStates)
 {
 }
