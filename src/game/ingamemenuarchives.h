@@ -8,7 +8,7 @@
 class InGameMenuArchives : public InGameMenuPage
 {
 public:
-   InGameMenuArchives() = default;
+   InGameMenuArchives();
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
    void update(const sf::Time& dt) override;

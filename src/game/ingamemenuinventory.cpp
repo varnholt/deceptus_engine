@@ -3,7 +3,6 @@
 #include "displaymode.h"
 #include "extramanager.h"
 #include "framework/easings/easings.h"
-#include "framework/image/psd.h"
 #include "gameconfiguration.h"
 #include "gamestate.h"
 #include "inventoryitem.h"
@@ -18,13 +17,15 @@ namespace
 {
 static const auto icon_width = 40;
 static const auto icon_height = 24;
+}  // namespace
+
+//: _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
 // static const auto quad_width = 38;
 // static const auto quad_height = 38;
 // static const auto dist = 10.2f;
 // static const auto icon_quad_dist = (icon_width - quad_width);
 // static const auto y_offset = 300.0f;
 // static const auto item_count = 13;
-}  // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InGameMenuInventory::getJoystickInfo() const
@@ -39,16 +40,11 @@ void InGameMenuInventory::setJoystickInfo(const GameControllerInfo& joystickInfo
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-InGameMenuInventory::InGameMenuInventory() : _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
+InGameMenuInventory::InGameMenuInventory()
 {
-   _cursor_sprite.setTexture(*_inventory_texture);
-   _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
-   // addDemoInventory();
+   _filename = "data/game/inventory.psd";
 
-   // load ingame psd
-   PSD psd;
-   psd.setColorFormat(PSD::ColorFormat::ABGR);
-   psd.load("data/game/inventory.psd");
+   load();
 
    // ---------------------------------------------------------------
    //               <LT>   MAP   INVENTORY   VAULT   <RT>
@@ -66,39 +62,6 @@ InGameMenuInventory::InGameMenuInventory() : _inventory_texture(TexturePool::get
    // +-------------+ +------------------------------+ +-------------+
 
    // add layer: background: 0, 0 (640 x 360)
-
-   for (const auto& layer : psd.getLayers())
-   {
-      // skip groups
-      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
-      {
-         continue;
-      }
-
-      //      std::cout << "add layer: " << layer.getName() << ": " << layer.getLeft() << ", " << layer.getTop() << " (" << layer.getWidth()
-      //                << " x " << layer.getHeight() << ")" << std::endl;
-
-      // make all layers visible per default, don't trust the PSD :)
-      auto tmp = std::make_shared<Layer>();
-      tmp->_visible = true;
-      tmp->_name = layer.getName();
-
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
-
-      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
-      sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
-
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
-
-      _layers[layer.getName()] = tmp;
-      _layer_stack.push_back(tmp);
-   }
 
    _filter_map[Filter::Weapons] = _layers["item_filter_weapons"];
    _filter_map[Filter::Consumables] = _layers["item_filter_consumables"];
@@ -186,39 +149,7 @@ void InGameMenuInventory::addDemoInventory()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w = GameConfiguration::getInstance()._view_width;
-   auto h = GameConfiguration::getInstance()._view_height;
-
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   window.setView(view);
-
-   for (auto& layer : _layer_stack)
-   {
-      if (layer->_visible)
-      {
-         layer->draw(window, states);
-      }
-   }
-
-   /*
-      const sf::Color color = {50, 70, 100, 150};
-
-       y = y_offset  + 15.0f;
-       x = dist;
-
-      for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
-      {
-         auto visualization = _sprites[item._type];
-
-          visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-          window.draw(visualization.mSprite);
-          x += icon_width + dist - icon_quad_dist;
-       }
-
-      _cursor_position.y = y_offset;
-      _cursor_sprite.setPosition(_cursor_position);
-      window.draw(_cursor_sprite);
-   */
+   InGameMenuPage::draw(window, states);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -417,3 +348,25 @@ void InGameMenuInventory::hide()
    _time_hide = std::chrono::high_resolution_clock::now();
 }
 
+// _cursor_sprite.setTexture(*_inventory_texture);
+// _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
+
+/*
+   const sf::Color color = {50, 70, 100, 150};
+
+    y = y_offset  + 15.0f;
+    x = dist;
+
+   for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
+   {
+      auto visualization = _sprites[item._type];
+
+       visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
+       window.draw(visualization.mSprite);
+       x += icon_width + dist - icon_quad_dist;
+    }
+
+   _cursor_position.y = y_offset;
+   _cursor_sprite.setPosition(_cursor_position);
+   window.draw(_cursor_sprite);
+*/
