@@ -19,8 +19,8 @@ class InGameMenu
 public:
    enum class SubMenu
    {
-      Inventory = 0,
-      Map = 1,
+      Map = 0,
+      Inventory = 1,
       Archives = 2,
    };
 

@@ -6,8 +6,9 @@ InGameMenuArchives::InGameMenuArchives()
    load();
 }
 
-void InGameMenuArchives::draw(sf::RenderTarget& /*window*/, sf::RenderStates)
+void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
+   InGameMenuPage::draw(window, states);
 }
 
 void InGameMenuArchives::update(const sf::Time& /*dt*/)

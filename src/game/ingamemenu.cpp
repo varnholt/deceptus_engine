@@ -103,26 +103,32 @@ InGameMenu::InGameMenu()
    _menu_inventory = std::make_shared<InGameMenuInventory>();
    _menu_map = std::make_shared<IngameMenuMap>();
 
-   _submenu_type_map[static_cast<uint8_t>(SubMenu::Archives)] = _menu_archives;
-   _submenu_type_map[static_cast<uint8_t>(SubMenu::Inventory)] = _menu_inventory;
    _submenu_type_map[static_cast<uint8_t>(SubMenu::Map)] = _menu_map;
+   _submenu_type_map[static_cast<uint8_t>(SubMenu::Inventory)] = _menu_inventory;
+   _submenu_type_map[static_cast<uint8_t>(SubMenu::Archives)] = _menu_archives;
 
-   _submenu_selection = {SubMenu::Inventory, SubMenu::Map, SubMenu::Archives};
-
-   _submenu_type_names[static_cast<uint8_t>(SubMenu::Archives)] = "archives";
-   _submenu_type_names[static_cast<uint8_t>(SubMenu::Inventory)] = "inventory";
    _submenu_type_names[static_cast<uint8_t>(SubMenu::Map)] = "map";
+   _submenu_type_names[static_cast<uint8_t>(SubMenu::Inventory)] = "inventory";
+   _submenu_type_names[static_cast<uint8_t>(SubMenu::Archives)] = "archives";
+
+   _submenu_selection = {SubMenu::Map, SubMenu::Inventory, SubMenu::Archives};
+
+   // rotate until we have selected the default
+   while (_selected_submenu != SubMenu::Inventory)
+   {
+      nextSubMenu();
+   }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->draw(window, states);
-
    if (_previous_submenu.has_value())
    {
       _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->draw(window, states);
    }
+
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->draw(window, states);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
