@@ -53,7 +53,8 @@ private:
    void selectNextFilter();
    void selectPreviousFilter();
    void updateFilterLayers();
-   void updateAnimation();
+   void updateShowHide();
+   void updateMove();
    void updateButtons();
    void fullyHidden();
 

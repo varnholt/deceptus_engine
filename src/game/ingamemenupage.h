@@ -28,6 +28,11 @@ public:
    virtual void show() = 0;
    virtual void hide() = 0;
 
+   void moveOutLeft();
+   void moveInLeft();
+   void moveOutRight();
+   void moveInRight();
+
 protected:
    void load();
 
@@ -42,7 +47,9 @@ protected:
    // animation
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
+   HighResTimePoint _time_move;
    std::optional<Animation> _animation;
+   float _move_offset = 0.0f;
 };
 
 #endif // INGAMEMENUPAGE_H
