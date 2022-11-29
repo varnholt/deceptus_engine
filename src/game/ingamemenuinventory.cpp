@@ -182,7 +182,7 @@ void InGameMenuInventory::fullyHidden()
 {
    GameState::getInstance().enqueueResume();
    DisplayMode::getInstance().enqueueUnset(Display::IngameMenu);
-   _hide_requested = false;
+   _animation.reset();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ void InGameMenuInventory::updateAnimation()
    auto alpha = 1.0f;
 
    // animate show event
-   if (_show_requested && duration_since_show_s.count() < duration_show_s)
+   if (_animation == Animation::Show && duration_since_show_s.count() < duration_show_s)
    {
       const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
@@ -221,14 +221,14 @@ void InGameMenuInventory::updateAnimation()
       item_description_panel_offset_px.x = 0;
       alpha = 1.0f;
 
-      if (_show_requested)
+      if (_animation == Animation::Show)
       {
-         _show_requested = false;
+         _animation.reset();
       }
    }
 
    // animate hide event
-   if (_hide_requested && duration_since_hide_s.count() < duration_hide_s)
+   if (_animation == Animation::Hide && duration_since_hide_s.count() < duration_hide_s)
    {
       const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
@@ -241,7 +241,7 @@ void InGameMenuInventory::updateAnimation()
    }
    else
    {
-      if (_hide_requested)
+      if (_animation == Animation::Hide)
       {
          fullyHidden();
       }
@@ -331,7 +331,7 @@ void InGameMenuInventory::right()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::show()
 {
-   _show_requested = true;
+   _animation = Animation::Show;
    _time_show = std::chrono::high_resolution_clock::now();
    updateAnimation();
 }
@@ -339,12 +339,12 @@ void InGameMenuInventory::show()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::hide()
 {
-   if (_hide_requested)
+   if (_animation.has_value())
    {
       return;
    }
 
-   _hide_requested = true;
+   _animation = Animation::Hide;
    _time_hide = std::chrono::high_resolution_clock::now();
 }
 

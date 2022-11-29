@@ -44,7 +44,7 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    // TODO: change later
-   if (_hide_requested)
+   if (_animation == Animation::Hide)
    {
       return;
    }
@@ -95,27 +95,20 @@ void IngameMenuMap::update(const sf::Time& /*dt*/)
 //---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::show()
 {
-   _show_requested = true;
+   _animation = Animation::Show;
    _time_show = std::chrono::high_resolution_clock::now();
-
-   // TODO: change later
-   _hide_requested = false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::hide()
 {
-   if (_hide_requested)
+   if (_animation)
    {
       return;
    }
 
-   _hide_requested = true;
+   _animation = Animation::Hide;
    _time_hide = std::chrono::high_resolution_clock::now();
-
-
-   // TODO: change later
-   _show_requested = false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
