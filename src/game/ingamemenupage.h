@@ -9,6 +9,13 @@
 class InGameMenuPage
 {
 public:
+   enum class Animation
+   {
+      Show,
+      Hide,
+      MoveLeft,
+      MoveRight,
+   };
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using FloatSeconds = std::chrono::duration<float>;
@@ -35,9 +42,7 @@ protected:
    // animation
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
-   bool _show_requested = false;
-   bool _hide_requested = false;
-
+   std::optional<Animation> _animation;
 };
 
 #endif // INGAMEMENUPAGE_H
