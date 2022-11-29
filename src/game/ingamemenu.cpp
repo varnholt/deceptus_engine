@@ -270,6 +270,9 @@ void InGameMenu::nextSubMenu()
    _previous_submenu = _submenu_selection[2];
 
    debug();
+
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInLeft();
+   _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutLeft();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -281,6 +284,9 @@ void InGameMenu::prevSubMenu()
    _previous_submenu = _submenu_selection[1];
 
    debug();
+
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInRight();
+   _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutRight();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

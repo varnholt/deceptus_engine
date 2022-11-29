@@ -186,7 +186,7 @@ void InGameMenuInventory::fullyHidden()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::updateAnimation()
+void InGameMenuInventory::updateShowHide()
 {
    const auto now = std::chrono::high_resolution_clock::now();
 
@@ -276,6 +276,28 @@ void InGameMenuInventory::updateAnimation()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::updateMove()
+{
+   const auto now = std::chrono::high_resolution_clock::now();
+   const FloatSeconds duration_since_move_start_s = now - _time_show;
+   constexpr auto duration_move_s = 0.5f;
+
+   if (duration_since_move_start_s.count() < duration_move_s)
+   {
+      const auto dir = (_animation == Animation::MoveLeft) ? -1.0f : 1.0f;
+      const auto elapsed_s_normalized = duration_since_move_start_s.count() / duration_move_s;
+      const auto val_eased = Easings::easeInCubic(elapsed_s_normalized);
+      const auto val = dir * val_eased;
+
+      std::cout << "val: " << val << std::endl;
+   }
+   else
+   {
+      _animation.reset();
+   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateButtons()
 {
    _layers["previous_menu_1"]->_visible = false;
@@ -292,7 +314,15 @@ void InGameMenuInventory::updateButtons()
 void InGameMenuInventory::update(const sf::Time& /*dt*/)
 {
    // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
-   updateAnimation();
+
+   if (_animation == Animation::Show || _animation == Animation::Hide)
+   {
+      updateShowHide();
+   }
+   else if (_animation == Animation::MoveLeft || _animation == Animation::MoveRight)
+   {
+      updateMove();
+   }
 }
 
 // ---------------------------------------------------------------
@@ -333,7 +363,7 @@ void InGameMenuInventory::show()
 {
    _animation = Animation::Show;
    _time_show = std::chrono::high_resolution_clock::now();
-   updateAnimation();
+   updateShowHide();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
