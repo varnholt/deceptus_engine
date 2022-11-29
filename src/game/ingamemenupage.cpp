@@ -20,6 +20,30 @@ void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
+void InGameMenuPage::moveOutLeft()
+{
+   _move_offset = 0.0f;
+   _animation = Animation::MoveLeft;
+}
+
+void InGameMenuPage::moveInLeft()
+{
+   _move_offset = -1.0f;
+   _animation = Animation::MoveLeft;
+}
+
+void InGameMenuPage::moveOutRight()
+{
+   _move_offset = 0.0f;
+   _animation = Animation::MoveRight;
+}
+
+void InGameMenuPage::moveInRight()
+{
+   _move_offset = 1.0f;
+   _animation = Animation::MoveRight;
+}
+
 void InGameMenuPage::load()
 {
    if (_filename.empty())
