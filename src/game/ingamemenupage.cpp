@@ -1,7 +1,9 @@
 #include "ingamemenupage.h"
-
+#include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "gameconfiguration.h"
+
+#include <iostream>
 
 void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
@@ -20,27 +22,53 @@ void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
+std::optional<float> InGameMenuPage::getMoveOffset() const
+{
+   const auto now = std::chrono::high_resolution_clock::now();
+   const FloatSeconds duration_since_move_start_s = now - _time_move;
+   constexpr auto duration_move_s = 0.5f;
+
+   if (duration_since_move_start_s.count() < duration_move_s)
+   {
+      const auto dir = (_animation == Animation::MoveLeft) ? 1.0f : -1.0f;
+      const auto elapsed_s_normalized = duration_since_move_start_s.count() / duration_move_s;
+      const auto val_eased = Easings::easeInCubic(elapsed_s_normalized);
+      const auto screen_width = GameConfiguration::getInstance()._view_width;
+      const auto val = (screen_width * _move_offset) + (dir * val_eased * screen_width);
+
+      // std::cout << "val: " << val << std::endl;
+
+      return val;
+   }
+
+   return std::nullopt;
+}
+
 void InGameMenuPage::moveOutLeft()
 {
    _move_offset = 0.0f;
+   _time_move = std::chrono::high_resolution_clock::now();
    _animation = Animation::MoveLeft;
 }
 
 void InGameMenuPage::moveInLeft()
 {
    _move_offset = -1.0f;
+   _time_move = std::chrono::high_resolution_clock::now();
    _animation = Animation::MoveLeft;
 }
 
 void InGameMenuPage::moveOutRight()
 {
    _move_offset = 0.0f;
+   _time_move = std::chrono::high_resolution_clock::now();
    _animation = Animation::MoveRight;
 }
 
 void InGameMenuPage::moveInRight()
 {
    _move_offset = 1.0f;
+   _time_move = std::chrono::high_resolution_clock::now();
    _animation = Animation::MoveRight;
 }
 
@@ -56,6 +84,8 @@ void InGameMenuPage::load()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load(_filename);
 
+   // std::cout << _filename << std::endl;
+
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
@@ -64,8 +94,8 @@ void InGameMenuPage::load()
          continue;
       }
 
-      //      std::cout << "add layer: " << layer.getName() << ": " << layer.getLeft() << ", " << layer.getTop() << " (" << layer.getWidth()
-      //                << " x " << layer.getHeight() << ")" << std::endl;
+      // std::cout << "add layer: " << layer.getName() << ": " << layer.getLeft() << ", " << layer.getTop() << " (" << layer.getWidth()
+      //           << " x " << layer.getHeight() << ")" << std::endl;
 
       // make all layers visible per default, don't trust the PSD :)
       auto tmp = std::make_shared<Layer>();

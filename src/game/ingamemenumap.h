@@ -3,6 +3,7 @@
 #include "bitmapfont.h"
 #include "framework/image/layer.h"
 #include "ingamemenupage.h"
+#include "layerdata.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -32,6 +33,7 @@ public:
 private:
    void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void updateButtons();
+   void updateMove();
 
    BitmapFont _font;
 
@@ -45,6 +47,8 @@ private:
 
    std::vector<std::shared_ptr<GameMechanism>> _doors;
    std::vector<std::shared_ptr<GameMechanism>> _portals;
+
+   std::vector<LayerData> _main_panel;
 
    bool _zoom_enabled = false;
    float _zoom = 1.0f;
