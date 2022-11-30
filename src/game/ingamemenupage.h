@@ -35,6 +35,7 @@ public:
 
 protected:
    void load();
+   std::optional<float> getMoveOffset() const;
 
    std::string _filename;
 

@@ -278,20 +278,27 @@ void InGameMenuInventory::updateShowHide()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateMove()
 {
-   const auto now = std::chrono::high_resolution_clock::now();
-   const FloatSeconds duration_since_move_start_s = now - _time_show;
-   constexpr auto duration_move_s = 0.5f;
+   const auto move_offset = getMoveOffset();
 
-   if (duration_since_move_start_s.count() < duration_move_s)
+   for (const auto& layer : _profile_panel)
    {
-      const auto dir = (_animation == Animation::MoveLeft) ? -1.0f : 1.0f;
-      const auto elapsed_s_normalized = duration_since_move_start_s.count() / duration_move_s;
-      const auto val_eased = Easings::easeInCubic(elapsed_s_normalized);
-      const auto val = dir * val_eased;
-
-      std::cout << "val: " << val << std::endl;
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
-   else
+
+   for (const auto& layer : _inventory_panel)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   for (const auto& layer : _item_description_panel)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   if (!move_offset.has_value())
    {
       _animation.reset();
    }
