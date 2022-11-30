@@ -2,6 +2,7 @@
 #define INGAMEMENUARCHIVES_H
 
 #include "ingamemenupage.h"
+#include "layerdata.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -15,6 +16,11 @@ public:
 
    void show() override;
    void hide() override;
+
+private:
+   void updateMove();
+
+   std::vector<LayerData> _main_panel;
 };
 
 #endif // INGAMEMENUARCHIVES_H

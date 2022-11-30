@@ -15,16 +15,60 @@
 #include <iostream>
 #include <sstream>
 
+// data/game/map.psd
+// add layer: bg: -1, 0 (641 x 360)
+// add layer: footer_bg: 0, 336 (640 x 24)
+// add layer: header_bg: 0, -4 (640 x 35)
+// add layer: close_xbox_0: 490, 342 (40 x 13)
+// add layer: close_xbox_1: 490, 342 (40 x 13)
+// add layer: close_pc_0: 488, 340 (42 x 16)
+// add layer: close_pc_1: 488, 340 (42 x 16)
+// add layer: header: 207, 6 (208 x 18)
+// add layer: next_menu_0: 463, 8 (34 x 14)
+// add layer: next_menu_1: 463, 8 (34 x 14)
+// add layer: previous_menu_0: 142, 8 (34 x 14)
+// add layer: previous_menu_1: 142, 8 (34 x 14)
 
 //---------------------------------------------------------------------------------------------------------------------
 IngameMenuMap::IngameMenuMap()
 {
    _font.load("data/game/font.png", "data/game/font.map");
-
    _filename = "data/game/map.psd";
 
    load();
    updateButtons();
+
+   // clang-format off
+   _main_panel = {
+      _layers["cpan_bg"],
+      _layers["cpan_right"],
+      _layers["cpan_left"],
+      _layers["cpan_down"],
+      _layers["cpan_up"],
+      _layers["legend_xbox_0"],
+      _layers["legend_xbox_1"],
+      _layers["legend_pc_0"],
+      _layers["legend_pc_1"],
+      _layers["world_xbox_0"],
+      _layers["world_xbox_1"],
+      _layers["world_pc_0"],
+      _layers["world_pc_1"],
+      _layers["zoom_xbox_0"],
+      _layers["zoom_xbox_1"],
+      _layers["zoom_pc_0"],
+      _layers["zoom_pc_1"],
+      _layers["navigate_xbox_0"],
+      _layers["navigate_xbox_1"],
+      _layers["navigate_pc_0"],
+      _layers["navigate_pc_1"],
+      _layers["zoom_level_1"],
+      _layers["zoom_level_2"],
+      _layers["zoom_level_3"],
+      _layers["zoom_level_4"],
+      _layers["map_keys"],
+      _layers["zone_name_label_crypts"],
+   };
+   // clang-format on
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -90,6 +134,32 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 void IngameMenuMap::update(const sf::Time& /*dt*/)
 {
    CameraPanorama::getInstance().update();
+
+   if (_animation == Animation::Show || _animation == Animation::Hide)
+   {
+      // updateShowHide();
+   }
+   else if (_animation == Animation::MoveLeft || _animation == Animation::MoveRight)
+   {
+      updateMove();
+   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void IngameMenuMap::updateMove()
+{
+   const auto move_offset = getMoveOffset();
+
+   for (const auto& layer : _main_panel)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   if (!move_offset.has_value())
+   {
+      _animation.reset();
+   }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -292,8 +362,3 @@ void IngameMenuMap::updateButtons()
 // _map->loadLevelTextures(path / std::filesystem::path("physics_grid_solid.png"), path / std::filesystem::path("physics_path_solid.png"));
 // _map->setDoors(_mechanism_doors);
 // _map->setPortals(_mechanism_portals);
-
-// if (DisplayMode::getInstance().isSet(Display::Map))
-// {
-//    _map->draw(*window.get());
-// }
