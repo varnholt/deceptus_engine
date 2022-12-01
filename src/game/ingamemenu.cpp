@@ -151,7 +151,14 @@ void InGameMenu::update(const sf::Time& dt)
 
    if (_previous_submenu.has_value())
    {
-      _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->update(dt);
+      auto previous_menu = _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())];
+      previous_menu->update(dt);
+
+      // if the previous menu no longer has an animation, no longer draw it
+      if (!previous_menu->getAnimation().has_value())
+      {
+         _previous_submenu.reset();
+      }
    }
 }
 
@@ -269,7 +276,7 @@ void InGameMenu::nextSubMenu()
    _selected_submenu = _submenu_selection[0];
    _previous_submenu = _submenu_selection[2];
 
-   debug();
+   // debug();
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInLeft();
    _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutLeft();
@@ -283,7 +290,7 @@ void InGameMenu::prevSubMenu()
    _selected_submenu = _submenu_selection[0];
    _previous_submenu = _submenu_selection[1];
 
-   debug();
+   // debug();
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInRight();
    _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutRight();

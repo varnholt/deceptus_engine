@@ -44,6 +44,11 @@ std::optional<float> InGameMenuPage::getMoveOffset() const
    return std::nullopt;
 }
 
+std::optional<InGameMenuPage::Animation> InGameMenuPage::getAnimation() const
+{
+   return _animation;
+}
+
 void InGameMenuPage::moveOutLeft()
 {
    _move_offset = 0.0f;
