@@ -33,6 +33,8 @@ public:
    void moveOutRight();
    void moveInRight();
 
+   std::optional<Animation> getAnimation() const;
+
 protected:
    void load();
    std::optional<float> getMoveOffset() const;
