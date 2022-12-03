@@ -1,17 +1,9 @@
 #include "ingamemenuarchives.h"
 
 // data/game/archives.psd
-// add layer: footer: 0, 336 (640 x 24)
-// add layer: close_xbox_0: 299, 342 (40 x 13)
-// add layer: close_xbox_1: 299, 342 (40 x 13)
-// add layer: close_pc_0: 297, 340 (42 x 16)
-// add layer: close_pc_1: 297, 340 (42 x 16)
 // add layer: header_bg: 0, -4 (640 x 35)
 // add layer: header: 235, 6 (197 x 18)
-// add layer: next_menu_0: 463, 8 (34 x 14)
-// add layer: next_menu_1: 463, 8 (34 x 14)
-// add layer: previous_menu_0: 142, 8 (34 x 14)
-// add layer: previous_menu_1: 142, 8 (34 x 14)
+// add layer: footer: 0, 336 (640 x 24)
 
 InGameMenuArchives::InGameMenuArchives()
 {
@@ -71,6 +63,10 @@ void InGameMenuArchives::updateButtons()
    const auto show_powers = _selected_index == 1;
    const auto show_treasures = _selected_index == 2;
    const auto show_achievements = _selected_index == 3;
+   const auto next_menu = false;
+   const auto prev_menu = false;
+   const auto xbox = false;
+   const auto close_enabled = false;
 
    _layers["menu_statistics"]->_visible = show_statiastics;
    _layers["menu_powers"]->_visible = show_powers;
@@ -85,6 +81,16 @@ void InGameMenuArchives::updateButtons()
    _layers["power_walljump_0"]->_visible = show_powers;
    _layers["power_dash_0"]->_visible = show_powers;
    _layers["power_doublejump_0"]->_visible = show_powers;
+
+   _layers["next_menu_0"]->_visible = !next_menu;
+   _layers["next_menu_1"]->_visible = next_menu;
+   _layers["previous_menu_0"]->_visible = !prev_menu;
+   _layers["previous_menu_1"]->_visible = prev_menu;
+
+   _layers["close_xbox_0"]->_visible = xbox;
+   _layers["close_xbox_1"]->_visible = xbox && close_enabled;
+   _layers["close_pc_0"]->_visible = !xbox;
+   _layers["close_pc_1"]->_visible = !xbox && close_enabled;
 }
 
 void InGameMenuArchives::show()
