@@ -49,27 +49,6 @@ IngameMenuMap::IngameMenuMap()
       _layers["zone_name_label_crypts"],
    };
    // clang-format on
-
-   //      _layers["legend_xbox_0"],
-   //      _layers["legend_xbox_1"],
-   //      _layers["legend_pc_0"],
-   //      _layers["legend_pc_1"],
-   //      _layers["navigate_xbox_0"],
-   //      _layers["navigate_xbox_1"],
-   //      _layers["navigate_pc_0"],
-   //      _layers["navigate_pc_1"],
-   //      _layers["world_xbox_0"],
-   //      _layers["world_xbox_1"],
-   //      _layers["world_pc_0"],
-   //      _layers["world_pc_1"],
-   //      _layers["zoom_xbox_0"],
-   //      _layers["zoom_xbox_1"],
-   //      _layers["zoom_pc_0"],
-   //      _layers["zoom_pc_1"],
-   //      _layers["zoom_level_1"],
-   //      _layers["zoom_level_2"],
-   //      _layers["zoom_level_3"],
-   //      _layers["zoom_level_4"],
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -319,6 +298,14 @@ void IngameMenuMap::updateButtons()
    _layers["zoom_level_2"]->_visible = false;
    _layers["zoom_level_3"]->_visible = false;
    _layers["zoom_level_4"]->_visible = false;
+
+   const auto next_menu = false;
+   const auto prev_menu = false;
+
+   _layers["next_menu_0"]->_visible = !next_menu;
+   _layers["next_menu_1"]->_visible = next_menu;
+   _layers["previous_menu_0"]->_visible = !prev_menu;
+   _layers["previous_menu_1"]->_visible = prev_menu;
 
    // cpan_bg
    // cpan_right
