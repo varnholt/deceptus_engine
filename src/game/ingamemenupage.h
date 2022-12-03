@@ -32,6 +32,11 @@ public:
    virtual void show() = 0;
    virtual void hide() = 0;
 
+   virtual void left(){};
+   virtual void right(){};
+   virtual void up(){};
+   virtual void down(){};
+
    void moveOutToLeft();
    void moveInFromLeft();
    void moveOutToRight();

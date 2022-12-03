@@ -17,14 +17,16 @@ public:
    void show() override;
    void hide() override;
 
-   void up();
-   void down();
+   void up() override;
+   void down() override;
 
 private:
    void updateMove();
    void updateButtons();
 
    std::vector<LayerData> _main_panel;
+
+   int32_t _selected_index = 0;
 };
 
 #endif // INGAMEMENUARCHIVES_H

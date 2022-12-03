@@ -365,6 +365,14 @@ void InGameMenuInventory::right()
    }
 }
 
+void InGameMenuInventory::up()
+{
+}
+
+void InGameMenuInventory::down()
+{
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::show()
 {

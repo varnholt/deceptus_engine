@@ -175,6 +175,16 @@ void InGameMenu::processEvent(const sf::Event& event)
          right();
          break;
       }
+      case sf::Keyboard::Up:
+      {
+         up();
+         break;
+      }
+      case sf::Keyboard::Down:
+      {
+         down();
+         break;
+      }
       case sf::Keyboard::LShift:
       case sf::Keyboard::Q:
       {
@@ -232,14 +242,25 @@ void InGameMenu::close()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::left()
 {
-   // _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->left();
-   _menu_inventory->left();
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->left();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::right()
 {
-   _menu_inventory->right();
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->right();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::up()
+{
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->up();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::down()
+{
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->down();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
