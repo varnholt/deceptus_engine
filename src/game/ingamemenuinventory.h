@@ -39,8 +39,10 @@ public:
    void show() override;
    void hide() override;
 
-   void left();
-   void right();
+   void left() override;
+   void right() override;
+   void up() override;
+   void down() override;
 
    GameControllerInfo getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);

@@ -67,19 +67,24 @@ void InGameMenuArchives::updateMove()
 
 void InGameMenuArchives::updateButtons()
 {
-   _layers["menu_achievements"]->_visible = false;
-   _layers["menu_treasures"]->_visible = false;
-   _layers["menu_powers"]->_visible = false;
-   _layers["menu_statistics"]->_visible = true;
+   const auto show_statiastics = _selected_index == 0;
+   const auto show_powers = _selected_index == 1;
+   const auto show_treasures = _selected_index == 2;
+   const auto show_achievements = _selected_index == 3;
 
-   _layers["statistics_window"]->_visible = true;
+   _layers["menu_statistics"]->_visible = show_statiastics;
+   _layers["menu_powers"]->_visible = show_powers;
+   _layers["menu_treasures"]->_visible = show_treasures;
+   _layers["menu_achievements"]->_visible = show_achievements;
 
-   _layers["power_x_0"]->_visible = false;
-   _layers["power_y_0"]->_visible = false;
-   _layers["power_z_0"]->_visible = false;
-   _layers["power_walljump_0"]->_visible = false;
-   _layers["power_dash_0"]->_visible = false;
-   _layers["power_doublejump_0"]->_visible = false;
+   _layers["statistics_window"]->_visible = show_statiastics;
+
+   _layers["power_x_0"]->_visible = show_powers;
+   _layers["power_y_0"]->_visible = show_powers;
+   _layers["power_z_0"]->_visible = show_powers;
+   _layers["power_walljump_0"]->_visible = show_powers;
+   _layers["power_dash_0"]->_visible = show_powers;
+   _layers["power_doublejump_0"]->_visible = show_powers;
 }
 
 void InGameMenuArchives::show()
@@ -92,8 +97,16 @@ void InGameMenuArchives::hide()
 
 void InGameMenuArchives::up()
 {
+   _selected_index--;
+   _selected_index = std::max(_selected_index, 0);
+
+   updateButtons();
 }
 
 void InGameMenuArchives::down()
 {
+   _selected_index++;
+   _selected_index = std::min(_selected_index, 3);
+
+   updateButtons();
 }
