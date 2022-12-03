@@ -17,8 +17,12 @@ public:
    void show() override;
    void hide() override;
 
+   void up();
+   void down();
+
 private:
    void updateMove();
+   void updateButtons();
 
    std::vector<LayerData> _main_panel;
 };

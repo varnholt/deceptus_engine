@@ -49,8 +49,8 @@ private:
    void initializeController();
    void updateController();
 
-   void nextSubMenu();
-   void prevSubMenu();
+   void goToRightSubMenu();
+   void goToLeftSubMenu();
    void debug();
 
    void updateControllerActions();
