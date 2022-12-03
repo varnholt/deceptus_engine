@@ -326,7 +326,7 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
    {
       updateShowHide();
    }
-   else if (_animation == Animation::MoveLeft || _animation == Animation::MoveRight)
+   else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft || _animation == Animation::MoveOutToRight)
    {
       updateMove();
    }

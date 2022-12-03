@@ -1,7 +1,6 @@
 #include "ingamemenuarchives.h"
 
 // data/game/archives.psd
-// add layer: bg: 0, 0 (641 x 360)
 // add layer: footer: 0, 336 (640 x 24)
 // add layer: close_xbox_0: 299, 342 (40 x 13)
 // add layer: close_xbox_1: 299, 342 (40 x 13)
@@ -20,6 +19,7 @@ InGameMenuArchives::InGameMenuArchives()
    load();
 
    _main_panel = {
+      _layers["bg"],
       _layers["power_x_0"],
       _layers["power_y_0"],
       _layers["power_z_0"],
@@ -32,6 +32,8 @@ InGameMenuArchives::InGameMenuArchives()
       _layers["menu_powers"],
       _layers["menu_statistics"],
    };
+
+   updateButtons();
 }
 
 void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -41,7 +43,7 @@ void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void InGameMenuArchives::update(const sf::Time& /*dt*/)
 {
-   if (_animation == Animation::MoveLeft || _animation == Animation::MoveRight)
+   if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft || _animation == Animation::MoveOutToRight)
    {
       updateMove();
    }
@@ -63,10 +65,35 @@ void InGameMenuArchives::updateMove()
    }
 }
 
+void InGameMenuArchives::updateButtons()
+{
+   _layers["menu_achievements"]->_visible = false;
+   _layers["menu_treasures"]->_visible = false;
+   _layers["menu_powers"]->_visible = false;
+   _layers["menu_statistics"]->_visible = true;
+
+   _layers["statistics_window"]->_visible = true;
+
+   _layers["power_x_0"]->_visible = false;
+   _layers["power_y_0"]->_visible = false;
+   _layers["power_z_0"]->_visible = false;
+   _layers["power_walljump_0"]->_visible = false;
+   _layers["power_dash_0"]->_visible = false;
+   _layers["power_doublejump_0"]->_visible = false;
+}
+
 void InGameMenuArchives::show()
 {
 }
 
 void InGameMenuArchives::hide()
+{
+}
+
+void InGameMenuArchives::up()
+{
+}
+
+void InGameMenuArchives::down()
 {
 }

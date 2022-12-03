@@ -16,7 +16,6 @@
 #include <sstream>
 
 // data/game/map.psd
-// add layer: bg: -1, 0 (641 x 360)
 // add layer: footer_bg: 0, 336 (640 x 24)
 // add layer: header_bg: 0, -4 (640 x 35)
 // add layer: close_xbox_0: 490, 342 (40 x 13)
@@ -40,35 +39,37 @@ IngameMenuMap::IngameMenuMap()
 
    // clang-format off
    _main_panel = {
+      _layers["bg"],
       _layers["cpan_bg"],
       _layers["cpan_right"],
       _layers["cpan_left"],
       _layers["cpan_down"],
       _layers["cpan_up"],
-      _layers["legend_xbox_0"],
-      _layers["legend_xbox_1"],
-      _layers["legend_pc_0"],
-      _layers["legend_pc_1"],
-      _layers["world_xbox_0"],
-      _layers["world_xbox_1"],
-      _layers["world_pc_0"],
-      _layers["world_pc_1"],
-      _layers["zoom_xbox_0"],
-      _layers["zoom_xbox_1"],
-      _layers["zoom_pc_0"],
-      _layers["zoom_pc_1"],
-      _layers["navigate_xbox_0"],
-      _layers["navigate_xbox_1"],
-      _layers["navigate_pc_0"],
-      _layers["navigate_pc_1"],
-      _layers["zoom_level_1"],
-      _layers["zoom_level_2"],
-      _layers["zoom_level_3"],
-      _layers["zoom_level_4"],
       _layers["map_keys"],
       _layers["zone_name_label_crypts"],
    };
    // clang-format on
+
+   //      _layers["legend_xbox_0"],
+   //      _layers["legend_xbox_1"],
+   //      _layers["legend_pc_0"],
+   //      _layers["legend_pc_1"],
+   //      _layers["navigate_xbox_0"],
+   //      _layers["navigate_xbox_1"],
+   //      _layers["navigate_pc_0"],
+   //      _layers["navigate_pc_1"],
+   //      _layers["world_xbox_0"],
+   //      _layers["world_xbox_1"],
+   //      _layers["world_pc_0"],
+   //      _layers["world_pc_1"],
+   //      _layers["zoom_xbox_0"],
+   //      _layers["zoom_xbox_1"],
+   //      _layers["zoom_pc_0"],
+   //      _layers["zoom_pc_1"],
+   //      _layers["zoom_level_1"],
+   //      _layers["zoom_level_2"],
+   //      _layers["zoom_level_3"],
+   //      _layers["zoom_level_4"],
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -139,7 +140,7 @@ void IngameMenuMap::update(const sf::Time& /*dt*/)
    {
       // updateShowHide();
    }
-   else if (_animation == Animation::MoveLeft || _animation == Animation::MoveRight)
+   else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft || _animation == Animation::MoveOutToRight)
    {
       updateMove();
    }

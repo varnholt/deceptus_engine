@@ -116,7 +116,7 @@ InGameMenu::InGameMenu()
    // rotate until we have selected the default
    while (_selected_submenu != SubMenu::Inventory)
    {
-      nextSubMenu();
+      goToRightSubMenu();
    }
 }
 
@@ -125,7 +125,12 @@ void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (_previous_submenu.has_value())
    {
-      _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->draw(window, states);
+      // draw previous menu only if it is animated
+      auto menu = _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())];
+      if (menu->getAnimation().has_value())
+      {
+         menu->draw(window, states);
+      }
    }
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->draw(window, states);
@@ -151,14 +156,7 @@ void InGameMenu::update(const sf::Time& dt)
 
    if (_previous_submenu.has_value())
    {
-      auto previous_menu = _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())];
-      previous_menu->update(dt);
-
-      // if the previous menu no longer has an animation, no longer draw it
-      if (!previous_menu->getAnimation().has_value())
-      {
-         _previous_submenu.reset();
-      }
+      _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->update(dt);
    }
 }
 
@@ -180,13 +178,13 @@ void InGameMenu::processEvent(const sf::Event& event)
       case sf::Keyboard::LShift:
       case sf::Keyboard::Q:
       {
-         prevSubMenu();
+         goToLeftSubMenu();
          break;
       }
       case sf::Keyboard::RShift:
       case sf::Keyboard::W:
       {
-         nextSubMenu();
+         goToRightSubMenu();
          break;
       }
       case sf::Keyboard::Return:
@@ -269,31 +267,31 @@ void InGameMenu::cancel()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::nextSubMenu()
+void InGameMenu::goToRightSubMenu()
 {
    std::rotate(_submenu_selection.begin(), _submenu_selection.begin() + 1, _submenu_selection.end());
 
    _selected_submenu = _submenu_selection[0];
    _previous_submenu = _submenu_selection[2];
 
-   // debug();
+   debug();
 
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInLeft();
-   _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutLeft();
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInFromRight();
+   _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutToLeft();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::prevSubMenu()
+void InGameMenu::goToLeftSubMenu()
 {
    std::rotate(_submenu_selection.rbegin(), _submenu_selection.rbegin() + 1, _submenu_selection.rend());
 
    _selected_submenu = _submenu_selection[0];
    _previous_submenu = _submenu_selection[1];
 
-   // debug();
+   debug();
 
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInRight();
-   _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutRight();
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInFromLeft();
+   _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutToRight();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

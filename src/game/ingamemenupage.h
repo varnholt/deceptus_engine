@@ -3,8 +3,10 @@
 
 #include "framework/image/layer.h"
 
-#include <chrono>
 #include <SFML/Graphics.hpp>
+#include <chrono>
+#include <ostream>
+#include <sstream>
 
 class InGameMenuPage
 {
@@ -13,8 +15,10 @@ public:
    {
       Show,
       Hide,
-      MoveLeft,
-      MoveRight,
+      MoveInFromLeft,
+      MoveOutToLeft,
+      MoveInFromRight,
+      MoveOutToRight,
    };
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
@@ -28,16 +32,18 @@ public:
    virtual void show() = 0;
    virtual void hide() = 0;
 
-   void moveOutLeft();
-   void moveInLeft();
-   void moveOutRight();
-   void moveInRight();
+   void moveOutToLeft();
+   void moveInFromLeft();
+   void moveOutToRight();
+   void moveInFromRight();
 
    std::optional<Animation> getAnimation() const;
 
 protected:
    void load();
    std::optional<float> getMoveOffset() const;
+
+   void debug();
 
    std::string _filename;
 
@@ -53,6 +59,10 @@ protected:
    HighResTimePoint _time_move;
    std::optional<Animation> _animation;
    float _move_offset = 0.0f;
+
+   friend std::ostream& operator<<(std::ostream& os, Animation dt);
 };
+
+std::ostream& operator<<(std::ostream& os, InGameMenuPage::Animation animation);
 
 #endif // INGAMEMENUPAGE_H

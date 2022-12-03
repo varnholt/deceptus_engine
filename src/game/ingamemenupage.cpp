@@ -5,6 +5,45 @@
 
 #include <iostream>
 
+std::ostream& operator<<(std::ostream& os, InGameMenuPage::Animation animation)
+{
+   switch (animation)
+   {
+      case InGameMenuPage::Animation::Show:
+      {
+         os << "Show";
+         break;
+      }
+      case InGameMenuPage::Animation::Hide:
+      {
+         os << "Hide";
+         break;
+      }
+      case InGameMenuPage::Animation::MoveInFromLeft:
+      {
+         os << "MoveInFromLeft";
+         break;
+      }
+      case InGameMenuPage::Animation::MoveOutToLeft:
+      {
+         os << "MoveOutToLeft";
+         break;
+      }
+      case InGameMenuPage::Animation::MoveInFromRight:
+      {
+         os << "MoveInFromRight";
+         break;
+      }
+      case InGameMenuPage::Animation::MoveOutToRight:
+      {
+         os << "MoveOutToRight";
+         break;
+      }
+   }
+
+   return os;
+}
+
 void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto w = GameConfiguration::getInstance()._view_width;
@@ -24,19 +63,26 @@ void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 std::optional<float> InGameMenuPage::getMoveOffset() const
 {
+   // move in from left:    -width .. 0
+   // move in from right:    width .. 0
+   // move out to left:     0 .. -width
+   // move out to right:    0 ..  width
+
    const auto now = std::chrono::high_resolution_clock::now();
    const FloatSeconds duration_since_move_start_s = now - _time_move;
    constexpr auto duration_move_s = 0.5f;
 
    if (duration_since_move_start_s.count() < duration_move_s)
    {
-      const auto dir = (_animation == Animation::MoveLeft) ? 1.0f : -1.0f;
+      const auto move_in = _animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight;
       const auto elapsed_s_normalized = duration_since_move_start_s.count() / duration_move_s;
-      const auto val_eased = Easings::easeInCubic(elapsed_s_normalized);
+      const auto val_normalized = (move_in) ? (1.0f - elapsed_s_normalized) : elapsed_s_normalized;
+      const auto sign = (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveOutToLeft) ? -1.0f : 1.0f;
+      const auto val_eased = Easings::easeInOutCubic(val_normalized);
       const auto screen_width = GameConfiguration::getInstance()._view_width;
-      const auto val = (screen_width * _move_offset) + (dir * val_eased * screen_width);
+      const auto val = sign * val_eased * screen_width;
 
-      // std::cout << "val: " << val << std::endl;
+      // std::cout << _animation.value() << " val: " << val << std::endl;
 
       return val;
    }
@@ -44,37 +90,37 @@ std::optional<float> InGameMenuPage::getMoveOffset() const
    return std::nullopt;
 }
 
+void InGameMenuPage::debug()
+{
+}
+
 std::optional<InGameMenuPage::Animation> InGameMenuPage::getAnimation() const
 {
    return _animation;
 }
 
-void InGameMenuPage::moveOutLeft()
+void InGameMenuPage::moveOutToLeft()
 {
-   _move_offset = 0.0f;
    _time_move = std::chrono::high_resolution_clock::now();
-   _animation = Animation::MoveLeft;
+   _animation = Animation::MoveOutToLeft;
 }
 
-void InGameMenuPage::moveInLeft()
+void InGameMenuPage::moveInFromLeft()
 {
-   _move_offset = -1.0f;
    _time_move = std::chrono::high_resolution_clock::now();
-   _animation = Animation::MoveLeft;
+   _animation = Animation::MoveInFromLeft;
 }
 
-void InGameMenuPage::moveOutRight()
+void InGameMenuPage::moveOutToRight()
 {
-   _move_offset = 0.0f;
    _time_move = std::chrono::high_resolution_clock::now();
-   _animation = Animation::MoveRight;
+   _animation = Animation::MoveOutToRight;
 }
 
-void InGameMenuPage::moveInRight()
+void InGameMenuPage::moveInFromRight()
 {
-   _move_offset = 1.0f;
    _time_move = std::chrono::high_resolution_clock::now();
-   _animation = Animation::MoveRight;
+   _animation = Animation::MoveInFromRight;
 }
 
 void InGameMenuPage::load()
