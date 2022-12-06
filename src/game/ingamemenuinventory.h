@@ -36,8 +36,6 @@ public:
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
    void update(const sf::Time& dt) override;
-   void show() override;
-   void hide() override;
 
    void left() override;
    void right() override;
@@ -58,7 +56,6 @@ private:
    void updateShowHide();
    void updateMove();
    void updateButtons();
-   void fullyHidden();
 
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
@@ -72,10 +69,10 @@ private:
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
 
-   std::vector<LayerData> _top_area;
-   std::vector<LayerData> _profile_panel;
-   std::vector<LayerData> _inventory_panel;
-   std::vector<LayerData> _item_description_panel;
+   std::vector<LayerData> _panel_header;
+   std::vector<LayerData> _panel_left;
+   std::vector<LayerData> _panel_center;
+   std::vector<LayerData> _panel_right;
 };
 
 #endif  // INGAMEMENUINVENTORY_H

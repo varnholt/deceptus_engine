@@ -1,10 +1,8 @@
 #include "ingamemenuinventory.h"
 
-#include "displaymode.h"
 #include "extramanager.h"
 #include "framework/easings/easings.h"
 #include "gameconfiguration.h"
-#include "gamestate.h"
 #include "inventoryitem.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
@@ -73,7 +71,7 @@ InGameMenuInventory::InGameMenuInventory()
 
    updateFilterLayers();
 
-   _profile_panel = {
+   _panel_left = {
       _layers["profile_panel"],
       _layers["heart_upgrade_1"],
       _layers["heart_upgrade_2"],
@@ -81,7 +79,7 @@ InGameMenuInventory::InGameMenuInventory()
       _layers["heart_upgrade_4"],
    };
 
-   _inventory_panel = {
+   _panel_center = {
       _layers["inventory_panel"],
       _layers["item_filter_next_0"],
       _layers["item_filter_next_1"],
@@ -96,11 +94,11 @@ InGameMenuInventory::InGameMenuInventory()
       _layers["scrollbar_head"],
    };
 
-   _item_description_panel = {
+   _panel_right = {
       _layers["item_description_panel"],
    };
 
-   _top_area = {
+   _panel_header = {
       _layers["header"],
       _layers["header_bg"],
       _layers["previous_menu_0"],
@@ -178,14 +176,6 @@ void InGameMenuInventory::updateFilterLayers()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::fullyHidden()
-{
-   GameState::getInstance().enqueueResume();
-   DisplayMode::getInstance().enqueueUnset(Display::IngameMenu);
-   _animation.reset();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateShowHide()
 {
    const auto now = std::chrono::high_resolution_clock::now();
@@ -196,9 +186,9 @@ void InGameMenuInventory::updateShowHide()
    constexpr auto duration_show_s = 0.5f;
    constexpr auto duration_hide_s = 1.0f;
 
-   sf::Vector2f profile_panel_offset_px;
-   sf::Vector2f inventory_panel_offset_px;
-   sf::Vector2f item_description_panel_offset_px;
+   sf::Vector2f panel_left_offset_px;
+   sf::Vector2f panel_center_offset_px;
+   sf::Vector2f panel_right_offset_px;
 
    auto alpha = 1.0f;
 
@@ -208,17 +198,17 @@ void InGameMenuInventory::updateShowHide()
       const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
 
-      profile_panel_offset_px.x = -200 * val;
-      inventory_panel_offset_px.y = 250 * val;
-      item_description_panel_offset_px.x = 200 * val;
+      panel_left_offset_px.x = -200 * val;
+      panel_center_offset_px.y = 250 * val;
+      panel_right_offset_px.x = 200 * val;
 
       alpha = Easings::easeInQuint(elapsed_s_normalized);
    }
    else
    {
-      profile_panel_offset_px.x = 0;
-      inventory_panel_offset_px.y = 0;
-      item_description_panel_offset_px.x = 0;
+      panel_left_offset_px.x = 0;
+      panel_center_offset_px.y = 0;
+      panel_right_offset_px.x = 0;
       alpha = 1.0f;
 
       if (_animation == Animation::Show)
@@ -233,9 +223,9 @@ void InGameMenuInventory::updateShowHide()
       const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
 
-      profile_panel_offset_px.x = -200 * val;
-      inventory_panel_offset_px.y = 250 * val;
-      item_description_panel_offset_px.x = 200 * val;
+      panel_left_offset_px.x = -200 * val;
+      panel_center_offset_px.y = 250 * val;
+      panel_right_offset_px.x = 200 * val;
 
       alpha = 1.0f - Easings::easeInQuint(elapsed_s_normalized);
    }
@@ -248,28 +238,28 @@ void InGameMenuInventory::updateShowHide()
    }
 
    // move in x
-   for (const auto& layer : _profile_panel)
+   for (const auto& layer : _panel_left)
    {
-      const auto x = layer._pos.x + profile_panel_offset_px.x;
+      const auto x = layer._pos.x + panel_left_offset_px.x;
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
    // move in y
-   for (const auto& layer : _inventory_panel)
+   for (const auto& layer : _panel_center)
    {
-      const auto y = layer._pos.y + inventory_panel_offset_px.y;
+      const auto y = layer._pos.y + panel_center_offset_px.y;
       layer._layer->_sprite->setPosition(layer._pos.x, y);
    }
 
    // move in x
-   for (const auto& layer : _item_description_panel)
+   for (const auto& layer : _panel_right)
    {
-      const auto x = layer._pos.x + item_description_panel_offset_px.x;
+      const auto x = layer._pos.x + panel_right_offset_px.x;
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
    // top
-   for (const auto& layer : _top_area)
+   for (const auto& layer : _panel_header)
    {
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
@@ -280,19 +270,19 @@ void InGameMenuInventory::updateMove()
 {
    const auto move_offset = getMoveOffset();
 
-   for (const auto& layer : _profile_panel)
+   for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
-   for (const auto& layer : _inventory_panel)
+   for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
-   for (const auto& layer : _item_description_panel)
+   for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
@@ -371,26 +361,6 @@ void InGameMenuInventory::up()
 
 void InGameMenuInventory::down()
 {
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::show()
-{
-   _animation = Animation::Show;
-   _time_show = std::chrono::high_resolution_clock::now();
-   updateShowHide();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::hide()
-{
-   if (_animation.has_value())
-   {
-      return;
-   }
-
-   _animation = Animation::Hide;
-   _time_hide = std::chrono::high_resolution_clock::now();
 }
 
 // _cursor_sprite.setTexture(*_inventory_texture);

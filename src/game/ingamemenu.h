@@ -42,9 +42,6 @@ public:
    void show();
    void hide();
 
-   void confirm();
-   void cancel();
-
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
 private:

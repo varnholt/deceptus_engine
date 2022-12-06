@@ -29,8 +29,10 @@ public:
    virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    virtual void update(const sf::Time& dt) = 0;
 
-   virtual void show() = 0;
-   virtual void hide() = 0;
+   virtual void show();
+   virtual void hide();
+
+   virtual void fullyHidden();
 
    virtual void left(){};
    virtual void right(){};

@@ -3,6 +3,7 @@
 #include "camerapanorama.h"
 #include "console.h"
 #include "extratable.h"
+#include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
@@ -15,18 +16,6 @@
 #include <iostream>
 #include <sstream>
 
-// data/game/map.psd
-// add layer: footer_bg: 0, 336 (640 x 24)
-// add layer: header_bg: 0, -4 (640 x 35)
-// add layer: close_xbox_0: 490, 342 (40 x 13)
-// add layer: close_xbox_1: 490, 342 (40 x 13)
-// add layer: close_pc_0: 488, 340 (42 x 16)
-// add layer: close_pc_1: 488, 340 (42 x 16)
-// add layer: header: 207, 6 (208 x 18)
-// add layer: next_menu_0: 463, 8 (34 x 14)
-// add layer: next_menu_1: 463, 8 (34 x 14)
-// add layer: previous_menu_0: 142, 8 (34 x 14)
-// add layer: previous_menu_1: 142, 8 (34 x 14)
 
 //---------------------------------------------------------------------------------------------------------------------
 IngameMenuMap::IngameMenuMap()
@@ -37,18 +26,33 @@ IngameMenuMap::IngameMenuMap()
    load();
    updateButtons();
 
-   // clang-format off
-   _main_panel = {
-      _layers["bg"],
+   _panel_left = {
       _layers["cpan_bg"],
       _layers["cpan_right"],
       _layers["cpan_left"],
       _layers["cpan_down"],
       _layers["cpan_up"],
       _layers["map_keys"],
+   };
+
+   _panel_center = {
       _layers["zone_name_label_crypts"],
    };
-   // clang-format on
+
+   _panel_header = {
+      _layers["bg"],
+      _layers["close_pc_0"],
+      _layers["close_pc_1"],
+      _layers["close_xbox_0"],
+      _layers["close_xbox_1"],
+      _layers["footer_bg"],
+      _layers["header"],
+      _layers["header_bg"],
+      _layers["next_menu_0"],
+      _layers["next_menu_1"],
+      _layers["previous_menu_0"],
+      _layers["previous_menu_1"],
+   };
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -67,12 +71,6 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
 //---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   // TODO: change later
-   if (_animation == Animation::Hide)
-   {
-      return;
-   }
-
    if (_level_grid_texture)
    {
       sf::Vector2f center;
@@ -117,7 +115,7 @@ void IngameMenuMap::update(const sf::Time& /*dt*/)
 
    if (_animation == Animation::Show || _animation == Animation::Hide)
    {
-      // updateShowHide();
+      updateShowHide();
    }
    else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft || _animation == Animation::MoveOutToRight)
    {
@@ -130,7 +128,13 @@ void IngameMenuMap::updateMove()
 {
    const auto move_offset = getMoveOffset();
 
-   for (const auto& layer : _main_panel)
+   for (const auto& layer : _panel_left)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
@@ -140,25 +144,6 @@ void IngameMenuMap::updateMove()
    {
       _animation.reset();
    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void IngameMenuMap::show()
-{
-   _animation = Animation::Show;
-   _time_show = std::chrono::high_resolution_clock::now();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void IngameMenuMap::hide()
-{
-   if (_animation)
-   {
-      return;
-   }
-
-   _animation = Animation::Hide;
-   _time_hide = std::chrono::high_resolution_clock::now();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -306,26 +291,89 @@ void IngameMenuMap::updateButtons()
    _layers["next_menu_1"]->_visible = next_menu;
    _layers["previous_menu_0"]->_visible = !prev_menu;
    _layers["previous_menu_1"]->_visible = prev_menu;
+}
 
-   // cpan_bg
-   // cpan_right
-   // cpan_left
-   // cpan_down
-   // cpan_up
-   //
-   // bg
-   //
-   // footer_bg
-   // header_bg
-   //
-   // map_keys
-   // zone_name_label_crypts
-   // header
-   //
-   // next_menu_0
-   // next_menu_1
-   // previous_menu_0
-   // previous_menu_1
+void IngameMenuMap::updateShowHide()
+{
+   const auto now = std::chrono::high_resolution_clock::now();
+
+   const FloatSeconds duration_since_show_s = now - _time_show;
+   const FloatSeconds duration_since_hide_s = now - _time_hide;
+
+   constexpr auto duration_show_s = 0.5f;
+   constexpr auto duration_hide_s = 1.0f;
+
+   sf::Vector2f panel_left_offset_px;
+   sf::Vector2f panel_center_offset_px;
+   sf::Vector2f panel_right_offset_px;
+
+   auto alpha = 1.0f;
+
+   // animate show event
+   if (_animation == Animation::Show && duration_since_show_s.count() < duration_show_s)
+   {
+      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
+      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+
+      panel_left_offset_px.x = -200 * val;
+      panel_center_offset_px.y = -150 * val;
+      panel_right_offset_px.x = 200 * val;
+
+      alpha = Easings::easeInQuint(elapsed_s_normalized);
+   }
+   else
+   {
+      panel_left_offset_px.x = 0;
+      panel_center_offset_px.y = 0;
+      panel_right_offset_px.x = 0;
+
+      alpha = 1.0f;
+
+      if (_animation == Animation::Show)
+      {
+         _animation.reset();
+      }
+   }
+
+   // animate hide event
+   if (_animation == Animation::Hide && duration_since_hide_s.count() < duration_hide_s)
+   {
+      const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
+      const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
+
+      panel_left_offset_px.x = -200 * val;
+      panel_center_offset_px.y = -150 * val;
+      panel_right_offset_px.x = 200 * val;
+
+      alpha = 1.0f - Easings::easeInQuint(elapsed_s_normalized);
+   }
+   else
+   {
+      if (_animation == Animation::Hide)
+      {
+         fullyHidden();
+      }
+   }
+
+   // move in x
+   for (const auto& layer : _panel_left)
+   {
+      const auto x = layer._pos.x + panel_left_offset_px.x;
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   // move in y
+   for (const auto& layer : _panel_center)
+   {
+      const auto y = layer._pos.y + panel_center_offset_px.y;
+      layer._layer->_sprite->setPosition(layer._pos.x, y);
+   }
+
+   // top
+   for (const auto& layer : _panel_header)
+   {
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+   }
 }
 
 // window.draw(level_texture_sprite, sf::BlendMode{sf::BlendAdd});
