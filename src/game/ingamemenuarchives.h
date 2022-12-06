@@ -25,6 +25,7 @@ private:
    std::vector<LayerData> _panel_header;
    std::vector<LayerData> _panel_left;
    std::vector<LayerData> _panel_right;
+   std::vector<LayerData> _panel_background;
 
    int32_t _selected_index = 0;
 };

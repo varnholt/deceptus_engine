@@ -114,9 +114,9 @@ InGameMenu::InGameMenu()
    _submenu_selection = {SubMenu::Map, SubMenu::Inventory, SubMenu::Archives};
 
    // rotate until we have selected the default
-   while (_selected_submenu != SubMenu::Inventory)
+   while (_submenu_selection[0] != SubMenu::Inventory)
    {
-      goToRightSubMenu();
+      rotateRight();
    }
 }
 
@@ -276,12 +276,18 @@ void InGameMenu::hide()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::goToRightSubMenu()
+void InGameMenu::rotateRight()
 {
    std::rotate(_submenu_selection.begin(), _submenu_selection.begin() + 1, _submenu_selection.end());
 
    _selected_submenu = _submenu_selection[0];
    _previous_submenu = _submenu_selection[2];
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::goToRightSubMenu()
+{
+   rotateRight();
 
    debug();
 
@@ -290,12 +296,18 @@ void InGameMenu::goToRightSubMenu()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::goToLeftSubMenu()
+void InGameMenu::rotateLeft()
 {
    std::rotate(_submenu_selection.rbegin(), _submenu_selection.rbegin() + 1, _submenu_selection.rend());
 
    _selected_submenu = _submenu_selection[0];
    _previous_submenu = _submenu_selection[1];
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenu::goToLeftSubMenu()
+{
+   rotateLeft();
 
    debug();
 
