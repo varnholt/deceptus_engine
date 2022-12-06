@@ -217,7 +217,7 @@ void InGameMenu::open()
       return;
    }
 
-   // disallow inventory during screen transitions
+   // disallow in-game menu during screen transitions
    if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
    {
       return;
@@ -266,25 +266,13 @@ void InGameMenu::down()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::show()
 {
-   _menu_inventory->show();
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->show();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::hide()
 {
-   _menu_inventory->hide();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::confirm()
-{
-   hide();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenu::cancel()
-{
-   hide();
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->hide();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
