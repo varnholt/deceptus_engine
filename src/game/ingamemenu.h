@@ -69,4 +69,6 @@ private:
    std::array<SubMenu, 3> _submenu_selection;
    std::array<std::shared_ptr<InGameMenuPage>, 3> _submenu_type_map;
    std::array<std::string, 3> _submenu_type_names;
+   void rotateRight();
+   void rotateLeft();
 };
