@@ -901,6 +901,10 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F4:
       {
+         if (event.key.alt)
+         {
+            std::exit(0);
+         }
          DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
          break;
       }
@@ -955,6 +959,10 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          showPauseMenu();
          break;
+      }
+      case sf::Keyboard::Q:
+      {
+         std::exit(0);
       }
       case sf::Keyboard::R:
       {

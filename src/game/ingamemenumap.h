@@ -49,6 +49,7 @@ private:
    std::vector<LayerData> _panel_header;
    std::vector<LayerData> _panel_left;
    std::vector<LayerData> _panel_center;
+   std::vector<LayerData> _panel_background;
 
    bool _zoom_enabled = false;
    float _zoom = 1.0f;

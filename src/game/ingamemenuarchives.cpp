@@ -26,7 +26,6 @@ InGameMenuArchives::InGameMenuArchives()
    };
 
    _panel_header = {
-      _layers["bg"],
       _layers["close_pc_0"],
       _layers["close_pc_1"],
       _layers["close_xbox_0"],
@@ -38,6 +37,10 @@ InGameMenuArchives::InGameMenuArchives()
       _layers["next_menu_1"],
       _layers["previous_menu_0"],
       _layers["previous_menu_1"],
+   };
+
+   _panel_background = {
+      _layers["bg"],
    };
 
    updateButtons();
@@ -71,6 +74,12 @@ void InGameMenuArchives::updateMove()
    }
 
    for (const auto& layer : _panel_right)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
@@ -158,8 +167,13 @@ void InGameMenuArchives::updateShowHide()
       layer._layer->_sprite->setPosition(layer._pos.x, y);
    }
 
-   // top
+   // fade in/out
    for (const auto& layer : _panel_header)
+   {
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+   }
+
+   for (const auto& layer : _panel_background)
    {
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
