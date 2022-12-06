@@ -24,15 +24,13 @@ public:
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
    void update(const sf::Time& dt) override;
 
-   void show() override;
-   void hide() override;
-
    void setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors);
    void setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals);
 
 private:
    void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void updateButtons();
+   void updateShowHide();
    void updateMove();
 
    BitmapFont _font;
@@ -48,7 +46,9 @@ private:
    std::vector<std::shared_ptr<GameMechanism>> _doors;
    std::vector<std::shared_ptr<GameMechanism>> _portals;
 
-   std::vector<LayerData> _main_panel;
+   std::vector<LayerData> _panel_header;
+   std::vector<LayerData> _panel_left;
+   std::vector<LayerData> _panel_center;
 
    bool _zoom_enabled = false;
    float _zoom = 1.0f;

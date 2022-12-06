@@ -1,7 +1,9 @@
 #include "ingamemenupage.h"
+#include "displaymode.h"
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "gameconfiguration.h"
+#include "gamestate.h"
 
 #include <iostream>
 
@@ -59,6 +61,31 @@ void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
          layer->draw(window, states);
       }
    }
+}
+
+void InGameMenuPage::show()
+{
+   _animation = Animation::Show;
+   _time_show = std::chrono::high_resolution_clock::now();
+   update({});
+}
+
+void InGameMenuPage::hide()
+{
+   if (_animation.has_value())
+   {
+      return;
+   }
+
+   _animation = Animation::Hide;
+   _time_hide = std::chrono::high_resolution_clock::now();
+}
+
+void InGameMenuPage::fullyHidden()
+{
+   GameState::getInstance().enqueueResume();
+   DisplayMode::getInstance().enqueueUnset(Display::IngameMenu);
+   _animation.reset();
 }
 
 std::optional<float> InGameMenuPage::getMoveOffset() const
