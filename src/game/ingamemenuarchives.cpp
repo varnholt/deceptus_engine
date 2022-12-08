@@ -8,6 +8,8 @@ InGameMenuArchives::InGameMenuArchives()
 
    load();
 
+   updateButtons();
+
    _panel_left = {
       _layers["menu_achievements"],
       _layers["menu_powers"],
@@ -181,13 +183,13 @@ void InGameMenuArchives::updateShowHide()
 
 void InGameMenuArchives::updateButtons()
 {
+   const auto xbox = true;
    const auto show_statiastics = _selected_index == 0;
    const auto show_powers = _selected_index == 1;
    const auto show_treasures = _selected_index == 2;
    const auto show_achievements = _selected_index == 3;
    const auto next_menu = false;
    const auto prev_menu = false;
-   const auto xbox = false;
    const auto close_enabled = false;
 
    _layers["menu_statistics"]->_visible = show_statiastics;

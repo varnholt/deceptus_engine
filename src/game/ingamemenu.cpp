@@ -289,7 +289,7 @@ void InGameMenu::goToRightSubMenu()
 {
    rotateRight();
 
-   debug();
+   // debug();
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInFromRight();
    _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutToLeft();
@@ -309,7 +309,7 @@ void InGameMenu::goToLeftSubMenu()
 {
    rotateLeft();
 
-   debug();
+   // debug();
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInFromLeft();
    _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutToRight();
