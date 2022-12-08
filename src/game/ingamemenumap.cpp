@@ -39,6 +39,14 @@ IngameMenuMap::IngameMenuMap()
       _layers["zone_name_label_crypts"],
    };
 
+   _panel_right = {
+      _layers["zoom_level_1"],
+      _layers["zoom_level_2"],
+      _layers["zoom_level_3"],
+      _layers["zoom_level_4"],
+   };
+
+   // clang-format off
    _panel_header = {
       _layers["close_pc_0"],
       _layers["close_pc_1"],
@@ -51,7 +59,28 @@ IngameMenuMap::IngameMenuMap()
       _layers["next_menu_1"],
       _layers["previous_menu_0"],
       _layers["previous_menu_1"],
+      _layers["close_xbox_0"],
+      _layers["close_xbox_1"],
+      _layers["close_pc_0"],
+      _layers["close_pc_1"],
+      _layers["legend_xbox_0"],
+      _layers["legend_xbox_1"],
+      _layers["legend_pc_0"],
+      _layers["legend_pc_1"],
+      _layers["world_xbox_0"],
+      _layers["world_xbox_1"],
+      _layers["world_pc_0"],
+      _layers["world_pc_1"],
+      _layers["zoom_xbox_0"],
+      _layers["zoom_xbox_1"],
+      _layers["zoom_pc_0"],
+      _layers["zoom_pc_1"],
+      _layers["navigate_xbox_0"],
+      _layers["navigate_xbox_1"],
+      _layers["navigate_pc_0"],
+      _layers["navigate_pc_1"],
    };
+   // clang-format on
 
    _panel_background = {
       _layers["bg"],
@@ -144,6 +173,12 @@ void IngameMenuMap::updateMove()
    }
 
    for (const auto& layer : _panel_background)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
@@ -368,6 +403,12 @@ void IngameMenuMap::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + panel_left_offset_px.x;
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   for (const auto& layer : _panel_right)
+   {
+      const auto x = layer._pos.x + panel_right_offset_px.x;
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
