@@ -14,6 +14,10 @@ void InGameMenu::setJoystickInfo(const GameControllerInfo& joystickInfo)
    _joystick_info = joystickInfo;
 }
 
+void InGameMenu::setAudioCallback(const AudioCallback&)
+{
+}
+
 void InGameMenu::initializeController()
 {
    auto& gji = GameControllerIntegration::getInstance();

@@ -16,8 +16,8 @@ struct GameConfiguration
    bool _vsync_enabled = false;
 
    int32_t _audio_volume_master = 50;
-   int32_t _audio_volume_sfx = 50;
-   int32_t _audio_volume_music = 50;
+   int32_t _audio_volume_sfx = 100;
+   int32_t _audio_volume_music = 100;
 
    enum class PauseMode
    {

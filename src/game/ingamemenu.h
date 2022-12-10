@@ -3,12 +3,14 @@
 #include "framework/joystick/gamecontrollerinfo.h"
 
 #include "ingamemenuarchives.h"
+#include "ingamemenuaudio.h"
 #include "ingamemenuinventory.h"
 #include "ingamemenumap.h"
 
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -23,6 +25,8 @@ public:
       Inventory = 1,
       Archives = 2,
    };
+
+   using AudioCallback = std::function<void(InGameMenuAudio::SoundEffect)>;
 
    InGameMenu();
 
@@ -43,6 +47,7 @@ public:
    void hide();
 
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
+   void setAudioCallback(const AudioCallback&);
 
 private:
 
@@ -55,6 +60,9 @@ private:
 
    void updateControllerActions();
    bool isControllerActionSkipped() const;
+
+   void rotateRight();
+   void rotateLeft();
 
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
@@ -69,6 +77,6 @@ private:
    std::array<SubMenu, 3> _submenu_selection;
    std::array<std::shared_ptr<InGameMenuPage>, 3> _submenu_type_map;
    std::array<std::string, 3> _submenu_type_names;
-   void rotateRight();
-   void rotateLeft();
+
+   AudioCallback _audio_callback;
 };

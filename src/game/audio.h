@@ -27,7 +27,7 @@ public:
    void initializeMusicVolume();
 
    void addSample(const std::string& sample);
-   void playSample(const std::string& name, float volume = 30.0f);
+   void playSample(const std::string& name, float volume = 1.0f);
    void updateMusic();
 
    sf::Music& getMusic() const;
