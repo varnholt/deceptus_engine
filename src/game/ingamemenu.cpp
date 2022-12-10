@@ -103,6 +103,8 @@ void InGameMenu::updateControllerActions()
 //---------------------------------------------------------------------------------------------------------------------
 InGameMenu::InGameMenu()
 {
+   _audio_callback = [this](InGameMenuAudio::SoundEffect effect) { _audio.play(effect); };
+
    _menu_archives = std::make_shared<InGameMenuArchives>();
    _menu_inventory = std::make_shared<InGameMenuInventory>();
    _menu_map = std::make_shared<IngameMenuMap>();
@@ -229,6 +231,8 @@ void InGameMenu::open()
 
    GameState::getInstance().enqueuePause();
    DisplayMode::getInstance().enqueueSet(Display::IngameMenu);
+
+   _audio_callback(InGameMenuAudio::SoundEffect::MenuOpen);
    show();
 }
 
@@ -240,6 +244,7 @@ void InGameMenu::close()
       return;
    }
 
+   _audio_callback(InGameMenuAudio::SoundEffect::MenuClose);
    hide();
 }
 
@@ -297,6 +302,8 @@ void InGameMenu::goToRightSubMenu()
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInFromRight();
    _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutToLeft();
+
+   _audio_callback(InGameMenuAudio::SoundEffect::MenuNext);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -317,6 +324,8 @@ void InGameMenu::goToLeftSubMenu()
 
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->moveInFromLeft();
    _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->moveOutToRight();
+
+   _audio_callback(InGameMenuAudio::SoundEffect::MenuNext);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

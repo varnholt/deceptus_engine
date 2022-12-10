@@ -78,5 +78,6 @@ private:
    std::array<std::shared_ptr<InGameMenuPage>, 3> _submenu_type_map;
    std::array<std::string, 3> _submenu_type_names;
 
+   InGameMenuAudio _audio;
    AudioCallback _audio_callback;
 };
