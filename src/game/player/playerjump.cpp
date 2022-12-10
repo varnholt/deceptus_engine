@@ -27,6 +27,7 @@ void PlayerJump::update(const PlayerJumpInfo& info)
    if (was_in_air && !_jump_info._in_air)
    {
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
+      Audio::getInstance().playSample("player_jump_land.wav", 0.5f);
    }
 
    if (_jump_info._in_water)
@@ -257,7 +258,7 @@ void PlayerJump::jump()
       else
       {
          _jump_dust_animation_callback();
-         Audio::getInstance().playSample("jump.wav");
+         Audio::getInstance().playSample("player_jump_liftoff.wav");
       }
    }
    else

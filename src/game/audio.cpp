@@ -13,6 +13,22 @@ const std::string sfx_root = "data/sounds/";
 const std::string path = "data/music";
 }
 
+/*
+
+ui_back_cancel
+ui_menu_open
+ui_menu_close
+ui_menu_select
+ui_menu_accept
+ui_menu_item_navigation
+ui_letter_sound
+ui_message_box_close
+ui_message_box_open
+ui_state_pause
+ui_state_resume
+
+ */
+
 //-----------------------------------------------------------------------------
 /*!
  * \brief Audio::Audio
@@ -63,7 +79,9 @@ void Audio::initializeSamples()
    addSample("footstep.wav");
    addSample("healthup.wav");
    addSample("hurt.wav");
-   addSample("jump.wav");
+   addSample("player_jump_land.wav");
+   addSample("player_jump_liftoff.wav");
+   addSample("player_footstep_stone_01.ogg");
    addSample("powerup.wav");
    addSample("splash.wav");
    addSample("impact.wav");
@@ -126,9 +144,9 @@ void Audio::playSample(const std::string& sample, float volume)
       thread_it->setBuffer(it->second);
 
       const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
-      const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx);
+      const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
 
-      thread_it->setVolume(master * sfx * volume);
+      thread_it->setVolume(master * sfx * volume * 100.0f);
       thread_it->play();
    }
 }

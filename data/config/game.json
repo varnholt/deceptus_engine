@@ -1,8 +1,8 @@
 {
     "GameConfiguration": {
-        "audio_volume_master": 0,
-        "audio_volume_music": 50,
-        "audio_volume_sfx": 50,
+        "audio_volume_master": 50,
+        "audio_volume_music": 0,
+        "audio_volume_sfx": 100,
         "fullscreen": false,
         "video_mode_width": 1280,
         "video_mode_height": 720,

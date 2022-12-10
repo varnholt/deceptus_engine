@@ -185,6 +185,7 @@ SOURCES += \
    src/game/infolayer.cpp \
    src/game/ingamemenu.cpp \
    src/game/ingamemenuarchives.cpp \
+   src/game/ingamemenuaudio.cpp \
    src/game/ingamemenuinventory.cpp \
    src/game/ingamemenumap.cpp \
    src/game/ingamemenupage.cpp \
@@ -384,6 +385,7 @@ HEADERS += \
    src/game/infolayer.h \
    src/game/ingamemenu.h \
    src/game/ingamemenuarchives.h \
+   src/game/ingamemenuaudio.h \
    src/game/ingamemenuinventory.h \
    src/game/ingamemenumap.h \
    src/game/ingamemenupage.h \
