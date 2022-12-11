@@ -1,4 +1,5 @@
 #include "gamemechanismdeserializer.h"
+#include "gamemechanismaudio.h"
 #include "gamemechanismdeserializerconstants.h"
 
 #include "framework/tmxparser/tmxparser.h"
@@ -332,6 +333,8 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_rotating_blades,
       *mechanism_doors
    );
+
+   GameMechanismAudio::getInstance().initialize();
 }
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)

@@ -1,6 +1,7 @@
 #include "bouncer.h"
 #include "fixturenode.h"
 #include "framework/tools/globalclock.h"
+#include "gamemechanismaudio.h"
 #include "player/player.h"
 #include "texturepool.h"
 
@@ -167,4 +168,5 @@ void Bouncer::activate()
    // aaaaand.. up!
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
+   GameMechanismAudio::getInstance().play(GameMechanismAudio::Effect::BouncerJump);
 }
