@@ -186,6 +186,7 @@ void PlayerJump::doubleJump()
    jumpImpulse(b2Vec2(0.0f, _body->GetMass() * PhysicsConfiguration::getInstance()._player_double_jump_factor));
 
    _timepoint_doublejump = StopWatch::now();
+   Audio::getInstance().playSample("player_doublejump_01.mp3");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
