@@ -217,6 +217,7 @@ void Game::showPauseMenu()
    {
       Menu::getInstance()->show(Menu::MenuType::Pause);
       GameState::getInstance().enqueuePause();
+      _audio_callback(GameAudio::SoundEffect::GameStatePause);
    }
 }
 
@@ -376,6 +377,9 @@ void Game::initialize()
          Player::getCurrent()->getPlayerAnimationMutable().loadAnimations();
       }
    );
+
+   GameAudio::getInstance().initialize();
+   _audio_callback = [](GameAudio::SoundEffect effect) { GameAudio::getInstance().play(effect); };
 }
 
 // frambuffers

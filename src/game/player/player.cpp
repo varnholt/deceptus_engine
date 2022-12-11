@@ -1071,6 +1071,8 @@ void Player::startHardLanding()
    _timepoint_hard_landing = StopWatch::getInstance().now();
    _hard_landing = true;
    _hard_landing_cycles = 0;
+
+   Audio::getInstance().playSample("player_grunt_01.wav");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
