@@ -81,11 +81,14 @@ void Audio::initializeSamples()
    addSample("healthup.wav");
    addSample("hurt.wav");
 
+   addSample("player_doublejump_01.mp3");
+   addSample("player_doublejump_02.mp3");
    addSample("player_grunt_01.wav");
    addSample("player_grunt_02.wav");
    addSample("player_jump_land.wav");
    addSample("player_jump_liftoff.wav");
    addSample("player_footstep_stone_01.ogg");
+   addSample("player_spawn_01.wav");
 
    addSample("powerup.wav");
    addSample("splash.wav");

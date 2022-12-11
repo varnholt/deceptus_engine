@@ -1475,6 +1475,25 @@ void Player::updateWaterBubbles(const sf::Time& dt)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateSpawn()
+{
+   using namespace std::chrono_literals;
+
+   if (GameClock::getInstance().durationSinceSpawn() < 1.0s)
+   {
+      return;
+   }
+
+   if (_spawn_complete)
+   {
+      return;
+   }
+
+   _spawn_complete = true;
+   Audio::getInstance().playSample("player_spawn_01.wav");
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
@@ -1504,6 +1523,7 @@ void Player::update(const sf::Time& dt)
    updateWallslide(dt);
    updateWaterBubbles(dt);
    _controls->update(dt);  // called at last just to backup previous controls
+   updateSpawn();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1871,6 +1891,7 @@ void Player::reset()
    resetDash();
    _dead = false;
    _death_reason.reset();
+   _spawn_complete = false;
 
    // fixtures are no longer dead
    updateDeadFixtures();

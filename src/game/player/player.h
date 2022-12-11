@@ -148,6 +148,7 @@ private:
    void updateJump();
    void updateWallslide(const sf::Time& dt);
    void updateWaterBubbles(const sf::Time& dt);
+   void updateSpawn();
 
    void startHardLanding();
    void resetDash();
@@ -200,6 +201,7 @@ private:
    bool _points_to_left = false;
    bool _visible = true;
    bool _dead = false;
+   bool _spawn_complete = false;
    std::optional<DeathReason> _death_reason;
 
    bool _in_water = false;
