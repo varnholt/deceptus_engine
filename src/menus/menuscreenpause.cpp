@@ -1,9 +1,9 @@
 #include "menuscreenpause.h"
 
-#include "game/messagebox.h"
+#include "game/gameaudio.h"
 #include "game/gamestate.h"
+#include "game/messagebox.h"
 #include "menu.h"
-
 
 MenuScreenPause::MenuScreenPause()
 {
@@ -86,6 +86,7 @@ void MenuScreenPause::resume()
 {
    Menu::getInstance()->hide();
    GameState::getInstance().enqueueResume();
+   GameAudio::getInstance().play(GameAudio::SoundEffect::GameStateResume);
 }
 
 

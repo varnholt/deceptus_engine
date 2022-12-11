@@ -5,6 +5,7 @@
 #include "drawstates.h"
 #include "eventserializer.h"
 #include "forestscene.h"
+#include "gameaudio.h"
 #include "infolayer.h"
 #include "ingamemenu.h"
 #include "menus/menu.h"
@@ -62,7 +63,6 @@ private:
    void processKeyReleasedEvents(const sf::Event& event);
 
    void toggleFullScreen();
-   void togglePause();
    void changeResolution(int32_t w, int32_t h);
    void goToLastCheckpoint();
    void menuLoadRequest();
@@ -94,4 +94,6 @@ private:
    bool _recording = false;
    int32_t _recording_counter = 0;
    std::vector<sf::Image> _recording_images;
+   using GameAudioCallback = std::function<void(GameAudio::SoundEffect)>;
+   GameAudioCallback _audio_callback;
 };

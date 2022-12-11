@@ -57,14 +57,15 @@ Audio& Audio::getInstance()
 //-----------------------------------------------------------------------------
 void Audio::addSample(const std::string& sample)
 {
-   auto loader = [](const std::string& fileName) -> sf::SoundBuffer {
-      sf::SoundBuffer buf;
-      buf.loadFromFile(sfx_root + fileName);
-      return buf;
-   };
-
    if (_sounds.find(sample) == _sounds.end())
    {
+      auto loader = [](const std::string& fileName) -> sf::SoundBuffer
+      {
+         sf::SoundBuffer buf;
+         buf.loadFromFile(sfx_root + fileName);
+         return buf;
+      };
+
       _sounds[sample] = loader(sample);
    }
 }
@@ -79,9 +80,13 @@ void Audio::initializeSamples()
    addSample("footstep.wav");
    addSample("healthup.wav");
    addSample("hurt.wav");
+
+   addSample("player_grunt_01.wav");
+   addSample("player_grunt_02.wav");
    addSample("player_jump_land.wav");
    addSample("player_jump_liftoff.wav");
    addSample("player_footstep_stone_01.ogg");
+
    addSample("powerup.wav");
    addSample("splash.wav");
    addSample("impact.wav");
