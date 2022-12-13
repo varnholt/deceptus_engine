@@ -1,17 +1,16 @@
 #include "menuscreenaudio.h"
 
-#include "menu.h"
 #include "game/audio.h"
 #include "game/gameconfiguration.h"
+#include "menu.h"
+#include "menuaudio.h"
 
 #define STEP_SIZE 10
-
 
 MenuScreenAudio::MenuScreenAudio()
 {
    setFilename("data/menus/audio.psd");
 }
-
 
 void MenuScreenAudio::up()
 {
@@ -24,8 +23,9 @@ void MenuScreenAudio::up()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenAudio::down()
 {
@@ -38,80 +38,91 @@ void MenuScreenAudio::down()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenAudio::select()
 {
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
-
 
 void MenuScreenAudio::back()
 {
-    Menu::getInstance()->show(Menu::MenuType::Options);
+   Menu::getInstance()->show(Menu::MenuType::Options);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
-
 
 void MenuScreenAudio::set(int32_t x)
 {
-    switch (_selection)
-    {
-        case Selection::Master:
-            GameConfiguration::getInstance()._audio_volume_master += x;
-            break;
-        case Selection::Music:
-            GameConfiguration::getInstance()._audio_volume_music += x;
-            break;
-        case Selection::SFX:
-            GameConfiguration::getInstance()._audio_volume_sfx += x;
-            break;
-        case Selection::Count:
-            break;
-    }
+   switch (_selection)
+   {
+      case Selection::Master:
+      {
+         GameConfiguration::getInstance()._audio_volume_master += x;
+         break;
+      }
+      case Selection::Music:
+      {
+         GameConfiguration::getInstance()._audio_volume_music += x;
+         break;
+      }
+      case Selection::SFX:
+      {
+         GameConfiguration::getInstance()._audio_volume_sfx += x;
+         break;
+      }
+      case Selection::Count:
+      {
+         break;
+      }
+   }
 
-    if (GameConfiguration::getInstance()._audio_volume_master > 100)
-    {
-        GameConfiguration::getInstance()._audio_volume_master = 100;
-    }
+   if (GameConfiguration::getInstance()._audio_volume_master > 100)
+   {
+      GameConfiguration::getInstance()._audio_volume_master = 100;
+   }
 
-    if (GameConfiguration::getInstance()._audio_volume_master < 0)
-    {
-        GameConfiguration::getInstance()._audio_volume_master = 0;
-    }
+   if (GameConfiguration::getInstance()._audio_volume_master < 0)
+   {
+      GameConfiguration::getInstance()._audio_volume_master = 0;
+   }
 
-    if (GameConfiguration::getInstance()._audio_volume_music > 100)
-    {
-        GameConfiguration::getInstance()._audio_volume_music = 100;
-    }
+   if (GameConfiguration::getInstance()._audio_volume_music > 100)
+   {
+      GameConfiguration::getInstance()._audio_volume_music = 100;
+   }
 
-    if (GameConfiguration::getInstance()._audio_volume_music < 0)
-    {
-        GameConfiguration::getInstance()._audio_volume_music = 0;
-    }
+   if (GameConfiguration::getInstance()._audio_volume_music < 0)
+   {
+      GameConfiguration::getInstance()._audio_volume_music = 0;
+   }
 
-    if (GameConfiguration::getInstance()._audio_volume_sfx > 100)
-    {
-        GameConfiguration::getInstance()._audio_volume_sfx = 100;
-    }
+   if (GameConfiguration::getInstance()._audio_volume_sfx > 100)
+   {
+      GameConfiguration::getInstance()._audio_volume_sfx = 100;
+   }
 
-    if (GameConfiguration::getInstance()._audio_volume_sfx < 0)
-    {
-        GameConfiguration::getInstance()._audio_volume_sfx = 0;
-    }
+   if (GameConfiguration::getInstance()._audio_volume_sfx < 0)
+   {
+      GameConfiguration::getInstance()._audio_volume_sfx = 0;
+   }
 
-    GameConfiguration::getInstance().serializeToFile();
-    Audio::getInstance().initializeMusicVolume();
+   GameConfiguration::getInstance().serializeToFile();
+   Audio::getInstance().initializeMusicVolume();
 
-    updateLayers();
+   updateLayers();
+
+   MenuAudio::play(MenuAudio::SoundEffect::ItemTick);
 }
-
 
 void MenuScreenAudio::setDefaults()
 {
-    GameConfiguration::resetAudioDefaults();
-    updateLayers();
-}
+   GameConfiguration::resetAudioDefaults();
+   updateLayers();
 
+   MenuAudio::play(MenuAudio::SoundEffect::Apply);
+}
 
 void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -132,12 +143,12 @@ void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 
    else if (key == sf::Keyboard::Left)
    {
-       set(-STEP_SIZE);
+      set(-STEP_SIZE);
    }
 
    else if (key == sf::Keyboard::Right)
    {
-       set(STEP_SIZE);
+      set(STEP_SIZE);
    }
 
    else if (key == sf::Keyboard::Escape)
@@ -147,22 +158,19 @@ void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 
    else if (key == sf::Keyboard::D)
    {
-       setDefaults();
+      setDefaults();
    }
 }
-
 
 void MenuScreenAudio::loadingFinished()
 {
    updateLayers();
 }
 
-
 void MenuScreenAudio::showEvent()
 {
    updateLayers();
 }
-
 
 void MenuScreenAudio::updateLayers()
 {
@@ -225,7 +233,6 @@ void MenuScreenAudio::updateLayers()
    _layers["mscVolume_h_1"]->_sprite->setOrigin(50.0f - music_volume, 0.0f);
 }
 
-
 /*
 data/menus/audio.psd
     bg_temp
@@ -234,4 +241,3 @@ data/menus/audio.psd
     main_body_0
     header
 */
-

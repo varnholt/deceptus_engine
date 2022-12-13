@@ -3,6 +3,7 @@
 #include "game/displaymode.h"
 #include "game/gameconfiguration.h"
 
+#include "menuaudio.h"
 #include "menuscreenachievements.h"
 #include "menuscreenaudio.h"
 #include "menuscreencontrols.h"
@@ -53,6 +54,8 @@ Menu::Menu()
    {
       screen->load();
    }
+
+   MenuAudio::initialize();
 }
 
 
