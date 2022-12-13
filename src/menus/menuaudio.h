@@ -6,10 +6,10 @@ namespace MenuAudio
 enum class SoundEffect
 {
    Apply,
-   MenuBack,
    ItemTick,
    ItemNavigate,
    ItemSelect,
+   MenuBack,
 };
 
 void initialize();
