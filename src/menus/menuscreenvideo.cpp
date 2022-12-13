@@ -1,6 +1,7 @@
 #include "menuscreenvideo.h"
 
 #include "menu.h"
+#include "menuaudio.h"
 
 #include "game/gameconfiguration.h"
 
@@ -29,6 +30,8 @@ void MenuScreenVideo::up()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
+
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
 
 
@@ -43,8 +46,9 @@ void MenuScreenVideo::down()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenVideo::select(int32_t step)
 {
@@ -120,14 +124,15 @@ void MenuScreenVideo::select(int32_t step)
 
    GameConfiguration::getInstance().serializeToFile();
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemTick);
+}
 
 void MenuScreenVideo::back()
 {
     Menu::getInstance()->show(Menu::MenuType::Options);
+    MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
-
 
 void MenuScreenVideo::setFullscreenCallback(MenuScreenVideo::FullscreenCallback callback)
 {

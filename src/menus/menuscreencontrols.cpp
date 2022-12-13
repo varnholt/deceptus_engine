@@ -1,37 +1,33 @@
 #include "menuscreencontrols.h"
 
 #include "menu.h"
-
+#include "menuaudio.h"
 
 MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 }
 
-
 void MenuScreenControls::up()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenControls::down()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenControls::select()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
-
 
 void MenuScreenControls::back()
 {
    Menu::getInstance()->show(Menu::MenuType::Options);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
-
 
 void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -56,12 +52,10 @@ void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenControls::loadingFinished()
 {
    updateLayers();
 }
-
 
 void MenuScreenControls::updateLayers()
 {
@@ -86,7 +80,6 @@ void MenuScreenControls::updateLayers()
    _layers["back_pc_1"]->_visible = false;
 }
 
-
 /*
 data/menus/controls.psd
     bg_temp
@@ -100,4 +93,3 @@ data/menus/controls.psd
     body_header
     header
 */
-
