@@ -272,6 +272,7 @@ SOURCES += \
    src/game/worldquery.cpp \
    src/main.cpp \
    src/menus/menu.cpp \
+   src/menus/menuaudio.cpp \
    src/menus/menuscreen.cpp \
    src/menus/menuscreenachievements.cpp \
    src/menus/menuscreenaudio.cpp \
@@ -479,6 +480,7 @@ HEADERS += \
    src/game/weather.h \
    src/game/worldquery.h \
    src/menus/menu.h \
+   src/menus/menuaudio.h \
    src/menus/menuscreen.h \
    src/menus/menuscreenachievements.h \
    src/menus/menuscreenaudio.h \
