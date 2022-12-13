@@ -119,6 +119,8 @@ void MenuScreenMain::select()
          break;
       }
    }
+
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
 
 void MenuScreenMain::setExitCallback(MenuScreenMain::ExitCallback callback)

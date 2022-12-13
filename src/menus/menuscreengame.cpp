@@ -2,15 +2,14 @@
 
 #include "gameconfiguration.h"
 #include "menu.h"
+#include "menuaudio.h"
 
 #include <algorithm>
-
 
 MenuScreenGame::MenuScreenGame()
 {
    setFilename("data/menus/game.psd");
 }
-
 
 void MenuScreenGame::up()
 {
@@ -23,8 +22,9 @@ void MenuScreenGame::up()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenGame::down()
 {
@@ -37,20 +37,20 @@ void MenuScreenGame::down()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenGame::select()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::Apply);
 }
-
 
 void MenuScreenGame::back()
 {
    Menu::getInstance()->show(Menu::MenuType::Options);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
-
 
 void MenuScreenGame::set(int32_t x)
 {
@@ -75,8 +75,9 @@ void MenuScreenGame::set(int32_t x)
 
    GameConfiguration::getInstance().serializeToFile();
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemTick);
+}
 
 void MenuScreenGame::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -90,11 +91,11 @@ void MenuScreenGame::keyboardKeyPressed(sf::Keyboard::Key key)
    }
    else if (key == sf::Keyboard::Left)
    {
-       set(-1);
+      set(-1);
    }
    else if (key == sf::Keyboard::Right)
    {
-       set(1);
+      set(1);
    }
    else if (key == sf::Keyboard::Return)
    {
@@ -106,12 +107,10 @@ void MenuScreenGame::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenGame::loadingFinished()
 {
    updateLayers();
 }
-
 
 void MenuScreenGame::updateLayers()
 {
@@ -150,7 +149,6 @@ void MenuScreenGame::updateLayers()
    _layers["textSpeed_4"]->_visible = (text_speed_selection == 3);
    _layers["textSpeed_5"]->_visible = (text_speed_selection == 4);
 }
-
 
 /*
 data/menus/game.psd

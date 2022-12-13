@@ -1,5 +1,6 @@
 #include "messagebox.h"
 
+#include "audio.h"
 #include "displaymode.h"
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
@@ -11,16 +12,16 @@
 #include "gamestate.h"
 #include "player/player.h"
 
+#include <math.h>
 #include <algorithm>
 #include <iostream>
-#include <math.h>
 
 namespace
 {
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
 {
    size_t start_pos = 0;
-   while((start_pos = str.find(from, start_pos)) != std::string::npos)
+   while ((start_pos = str.find(from, start_pos)) != std::string::npos)
    {
       str.replace(start_pos, from.length(), to);
       start_pos += to.length();
@@ -28,21 +29,19 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
    return str;
 }
 
-static constexpr auto x_offset_left_px   = 110;
+static constexpr auto x_offset_left_px = 110;
 static constexpr auto x_offset_center_px = 160;
-static constexpr auto x_offset_right_px  = 270;
-static constexpr auto y_offset_top_px    =  82;
+static constexpr auto x_offset_right_px = 270;
+static constexpr auto y_offset_top_px = 82;
 static constexpr auto y_offset_middle_px = 149;
 static constexpr auto y_offset_bottom_px = 216;
-static constexpr auto text_margin_x_px   =   8;
-static constexpr auto textbox_width_px   = 324;
+static constexpr auto text_margin_x_px = 8;
+static constexpr auto textbox_width_px = 324;
 
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_hide = sf::seconds(0.5f);
-}
-
-
+}  // namespace
 
 std::unique_ptr<MessageBox> MessageBox::__active;
 MessageBox::LayoutProperties MessageBox::__default_properties;
@@ -55,7 +54,6 @@ sf::Font MessageBox::__font;
 sf::Text MessageBox::__text;
 sf::Vector2f MessageBox::__window_position;
 
-
 MessageBox::MessageBox(
    MessageBox::Type type,
    const std::string& message,
@@ -63,11 +61,7 @@ MessageBox::MessageBox(
    const LayoutProperties& properties,
    int32_t buttons
 )
- : _type(type),
-   _message(message),
-   _callback(cb),
-   _properties(properties),
-   _buttons(buttons)
+    : _type(type), _message(message), _callback(cb), _properties(properties), _buttons(buttons)
 {
    initializeLayers();
    initializeControllerCallbacks();
@@ -82,7 +76,6 @@ MessageBox::MessageBox(
    __text.setFillColor(_properties._text_color);
    __text.setString("");
 }
-
 
 MessageBox::~MessageBox()
 {
@@ -100,7 +93,6 @@ MessageBox::~MessageBox()
    //      GameState::getInstance().enqueueResume();
    //   }
 }
-
 
 void MessageBox::close(MessageBox::Button button)
 {
@@ -122,7 +114,6 @@ void MessageBox::close(MessageBox::Button button)
    }
 }
 
-
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (!__active)
@@ -142,6 +133,8 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // yay
       if (key == sf::Keyboard::Return)
       {
+         Audio::getInstance().playSample("messagebox_confirm.wav");
+
          if (__active->_buttons & static_cast<int32_t>(Button::Yes))
          {
             button = Button::Yes;
@@ -164,6 +157,8 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // nay
       if (key == sf::Keyboard::Escape)
       {
+         Audio::getInstance().playSample("messagebox_cancel.wav");
+
          if (__active->_buttons & static_cast<int32_t>(Button::No))
          {
             button = Button::No;
@@ -183,7 +178,6 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
    return true;
 }
-
 
 void MessageBox::initializeLayers()
 {
@@ -237,7 +231,6 @@ void MessageBox::initializeLayers()
       __initialized = true;
    }
 }
-
 
 sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
 {
@@ -306,19 +299,17 @@ sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
    return pos;
 }
 
-
 void MessageBox::initializeControllerCallbacks()
 {
    auto& gci = GameControllerIntegration::getInstance();
    if (gci.isControllerConnected())
    {
-      _button_callback_a = [](){keyboardKeyPressed(sf::Keyboard::Return);};
-      _button_callback_b = [](){keyboardKeyPressed(sf::Keyboard::Escape);};
+      _button_callback_a = []() { keyboardKeyPressed(sf::Keyboard::Return); };
+      _button_callback_b = []() { keyboardKeyPressed(sf::Keyboard::Escape); };
       gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
       gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 }
-
 
 void MessageBox::showAnimation()
 {
@@ -352,7 +343,8 @@ void MessageBox::showAnimation()
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
-         const auto t_normalized = (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
+         const auto t_normalized =
+            (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
          contents_alpha = t_normalized;
       }
    }
@@ -366,7 +358,6 @@ void MessageBox::showAnimation()
 
    __text.setFillColor(color);
 }
-
 
 void MessageBox::hideAnimation()
 {
@@ -398,16 +389,13 @@ void MessageBox::hideAnimation()
    }
 }
 
-
 void MessageBox::animateText()
 {
-   static const std::array<float, 5> text_speeds = {0.5f,  0.75f, 1.0f, 1.5f, 2.0f};
+   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
 
-   auto x = (
-        GlobalClock::getInstance().getElapsedTime().asSeconds()
-      - __active->_show_time.asSeconds()
-      - (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f)
-   );
+   auto x =
+      (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds() -
+       (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
 
    x *= __active->_properties._animate_text_speed;
    x *= text_speeds[GameConfiguration::getInstance()._text_speed];
@@ -424,7 +412,6 @@ void MessageBox::animateText()
       __text.setString(__active->_message.substr(0, to));
    }
 }
-
 
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
@@ -460,14 +447,12 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // set up an ortho view with screen dimensions
-   sf::View pixelOrtho(
-      sf::FloatRect(
-         0.0f,
-         0.0f,
-         static_cast<float>(GameConfiguration::getInstance()._view_width),
-         static_cast<float>(GameConfiguration::getInstance()._view_height)
-      )
-   );
+   sf::View pixelOrtho(sf::FloatRect(
+      0.0f,
+      0.0f,
+      static_cast<float>(GameConfiguration::getInstance()._view_width),
+      static_cast<float>(GameConfiguration::getInstance()._view_height)
+   ));
 
    window.setView(pixelOrtho);
 
@@ -504,10 +489,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       x = pos.x + text_margin_x_px;
    }
 
-   __text.setPosition(
-      static_cast<float>(x),
-      static_cast<float>(pos.y)
-   );
+   __text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
 
    window.draw(__text, states);
 
@@ -518,7 +500,6 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-
 void MessageBox::messageBox(
    Type type,
    const std::string& message,
@@ -527,16 +508,11 @@ void MessageBox::messageBox(
    int32_t buttons
 )
 {
+   Audio::getInstance().playSample("messagebox_open_01.wav");
    __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
 }
 
-
-void MessageBox::info(
-   const std::string& message,
-   const MessageBoxCallback& callback,
-   const LayoutProperties& properties,
-   int32_t buttons
-)
+void MessageBox::info(const std::string& message, const MessageBoxCallback& callback, const LayoutProperties& properties, int32_t buttons)
 {
    if (__active)
    {
@@ -545,7 +521,6 @@ void MessageBox::info(
 
    messageBox(MessageBox::Type::Info, message, callback, properties, buttons);
 }
-
 
 void MessageBox::question(
    const std::string& message,
@@ -561,5 +536,3 @@ void MessageBox::question(
 
    messageBox(MessageBox::Type::Info, message, callback, properties, buttons);
 }
-
-

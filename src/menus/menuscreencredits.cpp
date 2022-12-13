@@ -1,19 +1,17 @@
 #include "menuscreencredits.h"
 
 #include "menu.h"
-
+#include "menuaudio.h"
 
 MenuScreenCredits::MenuScreenCredits()
 {
    setFilename("data/menus/credits.psd");
 }
 
-
 void MenuScreenCredits::loadingFinished()
 {
    updateLayers();
 }
-
 
 void MenuScreenCredits::updateLayers()
 {
@@ -24,30 +22,26 @@ void MenuScreenCredits::updateLayers()
    _layers["back_pc_1"]->_visible = false;
 }
 
-
 void MenuScreenCredits::up()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenCredits::down()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenCredits::select()
 {
-
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
-
 
 void MenuScreenCredits::back()
 {
    Menu::getInstance()->show(Menu::MenuType::Options);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
-
 
 void MenuScreenCredits::keyboardKeyPressed(sf::Keyboard::Key key)
 {
