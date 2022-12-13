@@ -1,14 +1,12 @@
 #include "menuscreenoptions.h"
 
 #include "menu.h"
-
+#include "menuaudio.h"
 
 MenuScreenOptions::MenuScreenOptions()
 {
    setFilename("data/menus/options.psd");
 }
-
-
 
 void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -33,7 +31,6 @@ void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenOptions::back()
 {
    const auto& history = Menu::getInstance()->getHistory();
@@ -55,14 +52,14 @@ void MenuScreenOptions::back()
    }
 
    Menu::getInstance()->show(menu);
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
+}
 
 void MenuScreenOptions::loadingFinished()
 {
    updateLayers();
 }
-
 
 void MenuScreenOptions::up()
 {
@@ -75,8 +72,9 @@ void MenuScreenOptions::up()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenOptions::down()
 {
@@ -89,8 +87,9 @@ void MenuScreenOptions::down()
 
    _selection = static_cast<Selection>(next);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenOptions::select()
 {
@@ -117,8 +116,9 @@ void MenuScreenOptions::select()
       case Selection::Count:
          break;
    }
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
+}
 
 void MenuScreenOptions::updateLayers()
 {
@@ -148,7 +148,6 @@ void MenuScreenOptions::updateLayers()
    _layers["controls_1"]->_visible = (_selection == Selection::Controls);
 }
 
-
 /*
 data/menus/options.psd
     bg_temp
@@ -174,4 +173,3 @@ data/menus/options.psd
     controls_1
     header
 */
-

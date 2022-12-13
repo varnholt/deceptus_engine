@@ -1,5 +1,6 @@
 #include "audio.h"
 
+#include "framework/tools/log.h"
 #include "gameconfiguration.h"
 
 #include <string>
@@ -62,7 +63,10 @@ void Audio::addSample(const std::string& sample)
       auto loader = [](const std::string& fileName) -> sf::SoundBuffer
       {
          sf::SoundBuffer buf;
-         buf.loadFromFile(sfx_root + fileName);
+         if (!buf.loadFromFile(sfx_root + fileName))
+         {
+            Log::Error() << "unable to load file: " << fileName;
+         }
          return buf;
       };
 
@@ -80,6 +84,10 @@ void Audio::initializeSamples()
    addSample("footstep.wav");
    addSample("healthup.wav");
    addSample("hurt.wav");
+
+   addSample("messagebox_open_01.wav");
+   addSample("messagebox_confirm.wav");
+   addSample("messagebox_cancel.wav");
 
    addSample("player_doublejump_01.mp3");
    addSample("player_doublejump_02.mp3");
