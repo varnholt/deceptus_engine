@@ -1,25 +1,21 @@
 #include "menuscreenmain.h"
 
-#include "game/messagebox.h"
 #include "game/gamestate.h"
+#include "game/messagebox.h"
 #include "game/savestate.h"
 #include "menu.h"
-
+#include "menuaudio.h"
 
 #define DEV_SAVE_STATE 1
-
 
 MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/titlescreen.psd");
 }
 
-
 void MenuScreenMain::update(const sf::Time& /*dt*/)
 {
-
 }
-
 
 void MenuScreenMain::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -39,32 +35,37 @@ void MenuScreenMain::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenMain::loadingFinished()
 {
    SaveState::deserializeFromFile();
    updateLayers();
 }
 
-
 void MenuScreenMain::up()
 {
    switch (_selection)
    {
       case Selection::Start:
+      {
          _selection = Selection::Quit;
          break;
+      }
       case Selection::Options:
+      {
          _selection = Selection::Start;
          break;
+      }
       case Selection::Quit:
+      {
          _selection = Selection::Options;
          break;
+      }
    }
 
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenMain::down()
 {
@@ -82,39 +83,48 @@ void MenuScreenMain::down()
    }
 
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenMain::select()
 {
    switch (_selection)
    {
       case Selection::Start:
+      {
 #ifdef DEV_SAVE_STATE
-      Menu::getInstance()->show(Menu::MenuType::FileSelect);
+         Menu::getInstance()->show(Menu::MenuType::FileSelect);
 #else
-      Menu::getInstance()->hide();
-      GameState::getInstance().enqueueResume();
+         Menu::getInstance()->hide();
+         GameState::getInstance().enqueueResume();
 #endif
          break;
+      }
       case Selection::Options:
+      {
          Menu::getInstance()->show(Menu::MenuType::Options);
          break;
+      }
       case Selection::Quit:
+      {
          MessageBox::question(
             "Are you sure you want to quit?",
-            [this](MessageBox::Button button) {if (button == MessageBox::Button::Yes) _exit_callback();}
+            [this](MessageBox::Button button)
+            {
+               if (button == MessageBox::Button::Yes)
+                  _exit_callback();
+            }
          );
          break;
+      }
    }
 }
 
-
 void MenuScreenMain::setExitCallback(MenuScreenMain::ExitCallback callback)
 {
-    _exit_callback = callback;
+   _exit_callback = callback;
 }
-
 
 void MenuScreenMain::updateLayers()
 {
@@ -132,8 +142,6 @@ void MenuScreenMain::updateLayers()
    _layers["quit_0"]->_visible = (_selection != Selection::Quit);
    _layers["quit_1"]->_visible = (_selection == Selection::Quit);
 }
-
-
 
 /*
 data/menus/titlescreen.psd

@@ -1,6 +1,7 @@
 #include "menuscreenfileselect.h"
 
 #include "menu.h"
+#include "menuaudio.h"
 
 #include "game/gamestate.h"
 #include "game/messagebox.h"
@@ -53,6 +54,8 @@ void MenuScreenFileSelect::up()
    }
    _slot = static_cast<Slot>(idx);
    updateLayers();
+
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
 
 
@@ -66,8 +69,9 @@ void MenuScreenFileSelect::down()
    }
    _slot = static_cast<Slot>(idx);
    updateLayers();
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
 
 void MenuScreenFileSelect::select()
 {
@@ -88,14 +92,15 @@ void MenuScreenFileSelect::select()
       // request level-reloading since we updated the save state
       SaveState::getCurrent()._load_level_requested = true;
    }
-}
 
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
+}
 
 void MenuScreenFileSelect::back()
 {
    Menu::getInstance()->show(Menu::MenuType::Main);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
-
 
 void MenuScreenFileSelect::remove()
 {
