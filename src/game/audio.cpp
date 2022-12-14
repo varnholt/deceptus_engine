@@ -95,8 +95,22 @@ void Audio::initializeSamples()
    addSample("player_grunt_02.wav");
    addSample("player_jump_land.wav");
    addSample("player_jump_liftoff.wav");
+   addSample("player_kneel_01.wav");
    addSample("player_footstep_stone_01.ogg");
    addSample("player_spawn_01.wav");
+   addSample("player_sword_kneeling_01.wav");
+   addSample("player_sword_kneeling_02.wav");
+   addSample("player_sword_kneeling_03.wav");
+   addSample("player_sword_kneeling_04.wav");
+   addSample("player_sword_standing_01.wav");
+   addSample("player_sword_standing_02.wav");
+   addSample("player_sword_standing_03.wav");
+   addSample("player_sword_standing_04.wav");
+   addSample("player_sword_standing_05.wav");
+   addSample("player_sword_standing_06.wav");
+   addSample("player_sword_standing_07.wav");
+   addSample("player_sword_standing_08.wav");
+   addSample("player_sword_standing_09.wav");
 
    addSample("powerup.wav");
    addSample("splash.wav");
