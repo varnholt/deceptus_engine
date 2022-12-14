@@ -1310,6 +1310,7 @@ void Player::updateBendDown()
    if (!_bend._was_bending_down && _bend._bending_down)
    {
       _bend._timepoint_bend_down_start = StopWatch::getInstance().now();
+      Audio::getInstance().playSample("player_kneel_01.wav");
    }
 
    if (_bend._was_bending_down && !_bend._bending_down)
@@ -1793,10 +1794,12 @@ void Player::attack()
          if (isInAir())
          {
             _attack._timepoint_attack_jumping_start = now;
+            Audio::getInstance().playSample(std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1));
          }
          else if (_controls->isBendDownActive())
          {
             _attack._timepoint_attack_bend_down_start = now;
+            Audio::getInstance().playSample(std::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1));
          }
          else
          {
@@ -1804,6 +1807,7 @@ void Player::attack()
             _controls->lockOrientation(
                std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getSwordAttackDurationStanding())
             );
+            Audio::getInstance().playSample(std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1));
          }
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
