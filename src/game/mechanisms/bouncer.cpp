@@ -168,5 +168,5 @@ void Bouncer::activate()
    // aaaaand.. up!
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
-   GameMechanismAudio::getInstance().play(GameMechanismAudio::Effect::BouncerJump);
+   GameMechanismAudio::play(GameMechanismAudio::Effect::BouncerJump);
 }

@@ -11,6 +11,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "gamemechanism.h"
+#include "gamemechanismaudio.h"
 #include "laser.h"
 #include "movingplatform.h"
 #include "onoffblock.h"
@@ -337,6 +338,7 @@ void Lever::toggle()
       _state_previous = _target_state;
    }
 
+   GameMechanismAudio::play(_target_state == State::Left ? GameMechanismAudio::Effect::LeverOff : GameMechanismAudio::Effect::LeverOn);
    updateReceivers();
 }
 

@@ -1,22 +1,18 @@
 #ifndef GAMEMECHANISMAUDIO_H
 #define GAMEMECHANISMAUDIO_H
 
-
-class GameMechanismAudio
+namespace GameMechanismAudio
 {
-public:
-   enum class Effect
-   {
-      BouncerJump
-   };
-
-   void initialize();
-   void play(Effect effect);
-
-   static GameMechanismAudio& getInstance();
-
-private:
-   GameMechanismAudio() = default;
+enum class Effect
+{
+   BouncerJump,
+   CollapsingPlatformCrumble,
+   LeverOn,
+   LeverOff,
 };
+
+void initialize();
+void play(Effect effect);
+};  // namespace GameMechanismAudio
 
 #endif // GAMEMECHANISMAUDIO_H
