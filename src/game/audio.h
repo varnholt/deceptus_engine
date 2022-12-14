@@ -28,6 +28,7 @@ public:
 
    void addSample(const std::string& sample);
    void playSample(const std::string& name, float volume = 1.0f);
+   void pauseSample(const std::string& name);
    void updateMusic();
 
    sf::Music& getMusic() const;

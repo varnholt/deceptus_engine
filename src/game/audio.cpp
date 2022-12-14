@@ -162,14 +162,14 @@ void Audio::playSample(const std::string& sample, float volume)
       [](const auto& thread){return thread.getStatus() == sf::Sound::Stopped;}
    );
 
-   if (thread_it == _threads.end())
+   if (thread_it == _threads.cend())
    {
       return;
    }
 
-   auto it = _sounds.find(sample);
+   const auto it = _sounds.find(sample);
 
-   if (it != _sounds.end())
+   if (it != _sounds.cend())
    {
       thread_it->setBuffer(it->second);
 
@@ -181,6 +181,11 @@ void Audio::playSample(const std::string& sample, float volume)
    }
 }
 
+//-----------------------------------------------------------------------------
+void Audio::pauseSample(const std::string& /*name*/)
+{
+   // ...
+}
 
 //-----------------------------------------------------------------------------
 void Audio::updateMusic()

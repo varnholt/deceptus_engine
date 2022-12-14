@@ -334,7 +334,7 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_doors
    );
 
-   GameMechanismAudio::getInstance().initialize();
+   GameMechanismAudio::initialize();
 }
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)

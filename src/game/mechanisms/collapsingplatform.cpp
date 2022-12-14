@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
+#include "gamemechanismaudio.h"
 #include "player/player.h"
 #include "texturepool.h"
 
@@ -257,6 +258,12 @@ void CollapsingPlatform::update(const sf::Time& dt)
 
    if (_foot_sensor_contact)
    {
+      if (!_played_shake_sample)
+      {
+         GameMechanismAudio::play(GameMechanismAudio::Effect::CollapsingPlatformCrumble);
+         _played_shake_sample = true;
+      }
+
       _collapse_elapsed_s += dt.asSeconds();
       if (_collapse_elapsed_s > _settings.time_to_collapse_s)
       {
@@ -270,6 +277,8 @@ void CollapsingPlatform::update(const sf::Time& dt)
    }
    else
    {
+      _played_shake_sample = false;
+
       if (!_collapsed)
       {
          // player left the platform before it collapsed

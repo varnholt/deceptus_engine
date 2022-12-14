@@ -87,6 +87,7 @@ private:
    std::vector<Block> _blocks;
    sf::Vector2f _position_px;
    sf::FloatRect _rect_px;
+   bool _played_shake_sample = false;
 
    // sf
    std::shared_ptr<sf::Texture> _texture;
