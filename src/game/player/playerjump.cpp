@@ -27,7 +27,14 @@ void PlayerJump::update(const PlayerJumpInfo& info)
    if (was_in_air && !_jump_info._in_air)
    {
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
-      Audio::getInstance().playSample("player_jump_land.wav", 0.5f);
+
+      // we don't want to play the landing sample when just trespassing one-way-walls
+      // value below found just by measurent the player speed and setting something suitable
+      // std::cout << _body->GetLinearVelocity().y << std::endl;
+      if (_body->GetLinearVelocity().y > -2.0f)
+      {
+         Audio::getInstance().playSample("player_jump_land.wav", 0.5f);
+      }
    }
 
    if (_jump_info._in_water)

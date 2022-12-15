@@ -2,7 +2,6 @@
 #include "gamecontactlistener.h"
 
 // game
-#include "projectile.h"
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/tools/log.h"
@@ -13,21 +12,19 @@
 #include "mechanisms/conveyorbelt.h"
 #include "onewaywall.h"
 #include "player/player.h"
+#include "projectile.h"
 
 #include <iostream>
-
 
 // http://www.iforce2d.net/b2dtut/collision-anatomy
 //
 // TODO: pass collision normal to projectile detonation
 //       so animation can be aligned to detonation angle.
 
-
 int32_t GameContactListener::getPlayerFootContactCount() const
 {
    return _count_foot_contacts;
 }
-
 
 int32_t GameContactListener::getDeadlyContactCount() const
 {
@@ -53,7 +50,6 @@ bool GameContactListener::isEnemy(FixtureNode* obj) const
 
    return dynamic_cast<LuaNode*>(obj->getParent());
 }
-
 
 void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
 {
@@ -82,7 +78,6 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
    }
 }
 
-
 void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data)
 {
    // check if platform smashes the player
@@ -100,7 +95,6 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
 
    _count_moving_platform_contacts++;
 }
-
 
 void GameContactListener::processCrusherContactBegin(FixtureNode* fixture_node)
 {
@@ -133,7 +127,6 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
    _count_foot_contacts++;
 }
 
-
 void GameContactListener::processPlayerHeadSensorContactBegin(b2Fixture* fixture)
 {
    if (fixture->IsSensor())
@@ -143,7 +136,6 @@ void GameContactListener::processPlayerHeadSensorContactBegin(b2Fixture* fixture
 
    _count_head_contacts++;
 }
-
 
 void GameContactListener::processPlayerLeftArmSensorContactBegin(b2Fixture* fixture)
 {
@@ -155,7 +147,6 @@ void GameContactListener::processPlayerLeftArmSensorContactBegin(b2Fixture* fixt
    _count_arm_left_contacts++;
 }
 
-
 void GameContactListener::processPlayerRightArmSensorContactBegin(b2Fixture* fixture)
 {
    if (fixture->IsSensor())
@@ -166,18 +157,15 @@ void GameContactListener::processPlayerRightArmSensorContactBegin(b2Fixture* fix
    _count_arm_right_contacts++;
 }
 
-
 void GameContactListener::processOneWayWallContactBegin(b2Contact* contact, b2Fixture* fixture)
 {
    OneWayWall::instance().beginContact(contact, fixture);
 }
 
-
 void GameContactListener::processPlayerContactBegin()
 {
    _count_player_contacts++;
 }
-
 
 void GameContactListener::processDeadlyContactBegin(FixtureNode* fixture_node)
 {
@@ -188,7 +176,6 @@ void GameContactListener::processDeadlyContactBegin(FixtureNode* fixture_node)
 
    _count_deadly_contacts++;
 }
-
 
 void GameContactListener::processEnemyContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
 {
@@ -202,24 +189,20 @@ void GameContactListener::processEnemyContactBegin(FixtureNode* fixture_node_a, 
    Player::getCurrent()->damage(damage);
 }
 
-
 void GameContactListener::processBouncerContactBegin(FixtureNode* fixture_node)
 {
    dynamic_cast<Bouncer*>(fixture_node)->activate();
 }
-
 
 void GameContactListener::processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* bubble, FixtureNode* other)
 {
    dynamic_cast<BubbleCube*>(bubble)->beginContact(contact, other);
 }
 
-
 void GameContactListener::processCollapsingPlatformContactBegin(b2Contact* contact, FixtureNode* platform, FixtureNode* other)
 {
    dynamic_cast<CollapsingPlatform*>(platform)->beginContact(contact, other);
 }
-
 
 void GameContactListener::processBeginContact(
    b2Contact* contact,
@@ -314,7 +297,6 @@ void GameContactListener::processBeginContact(
    }
 }
 
-
 void GameContactListener::BeginContact(b2Contact* contact)
 {
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
@@ -337,29 +319,14 @@ void GameContactListener::BeginContact(b2Contact* contact)
 
    if (fixture_user_data_a)
    {
-      processBeginContact(
-         contact,
-         contact_fixture_a,
-         contact_fixture_b,
-         fixture_node_a,
-         fixture_node_b,
-         fixture_user_data_b
-      );
+      processBeginContact(contact, contact_fixture_a, contact_fixture_b, fixture_node_a, fixture_node_b, fixture_user_data_b);
    }
 
    if (fixture_user_data_b)
    {
-      processBeginContact(
-         contact,
-         contact_fixture_b,
-         contact_fixture_a,
-         fixture_node_b,
-         fixture_node_a,
-         fixture_user_data_a
-      );
+      processBeginContact(contact, contact_fixture_b, contact_fixture_a, fixture_node_b, fixture_node_a, fixture_user_data_a);
    }
 }
-
 
 void GameContactListener::processCrusherContactEnd(FixtureNode* fixture_node)
 {
@@ -387,7 +354,6 @@ void GameContactListener::processPlayerFootSensorContactEnd(FixtureNode* fixture
    _count_foot_contacts--;
 }
 
-
 void GameContactListener::processPlayerHeadSensorContactEnd(auto contact_fixture_b)
 {
    if (contact_fixture_b->IsSensor())
@@ -408,7 +374,6 @@ void GameContactListener::processPlayerLeftArmSensorContactEnd(b2Fixture* contac
    _count_arm_left_contacts--;
 }
 
-
 void GameContactListener::processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture)
 {
    if (contact_fixture->IsSensor())
@@ -419,18 +384,15 @@ void GameContactListener::processPlayerRightArmSensorContactEnd(b2Fixture* conta
    _count_arm_right_contacts--;
 }
 
-
 void GameContactListener::processPlayerContactEnd()
 {
    _count_player_contacts--;
 }
 
-
 void GameContactListener::processOneWayWallContactEnd(b2Contact* contact)
 {
    OneWayWall::instance().endContact(contact);
 }
-
 
 void GameContactListener::processDeadlyContactEnd(FixtureNode* fixture_node)
 {
@@ -442,24 +404,20 @@ void GameContactListener::processDeadlyContactEnd(FixtureNode* fixture_node)
    _count_deadly_contacts--;
 }
 
-
 void GameContactListener::processMovingPlatformContactEnd()
 {
    _count_moving_platform_contacts--;
 }
-
 
 void GameContactListener::processBubbleCubeContactEnd(FixtureNode* fixture_node_bubble, FixtureNode* fixture_node_other)
 {
    dynamic_cast<BubbleCube*>(fixture_node_bubble)->endContact(fixture_node_other);
 }
 
-
 void GameContactListener::processCollapsingPlatformContactEnd(FixtureNode* fixture_node_platform, FixtureNode* fixture_node_other)
 {
    dynamic_cast<CollapsingPlatform*>(fixture_node_platform)->endContact(fixture_node_other);
 }
-
 
 void GameContactListener::processEndContact(
    b2Contact* contact,
@@ -532,7 +490,6 @@ void GameContactListener::processEndContact(
    }
 }
 
-
 void GameContactListener::EndContact(b2Contact* contact)
 {
    auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
@@ -556,31 +513,19 @@ void GameContactListener::EndContact(b2Contact* contact)
 
    if (fixture_user_data_a)
    {
-      processEndContact(
-         contact,
-         fixture_node_a,
-         fixture_node_b,
-         contact_fixture_b
-      );
+      processEndContact(contact, fixture_node_a, fixture_node_b, contact_fixture_b);
    }
 
    if (fixture_user_data_b)
    {
-      processEndContact(
-         contact,
-         fixture_node_b,
-         fixture_node_a,
-         contact_fixture_a
-      );
+      processEndContact(contact, fixture_node_b, fixture_node_a, contact_fixture_a);
    }
 }
-
 
 void GameContactListener::PreSolve(b2Contact* contact, const b2Manifold* /*oldManifold*/)
 {
    ConveyorBelt::processContact(contact);
 }
-
 
 void GameContactListener::processPostSolve(FixtureNode* node, float impulse)
 {
@@ -593,7 +538,6 @@ void GameContactListener::processPostSolve(FixtureNode* node, float impulse)
       processPostSolveProjectile(node, impulse);
    }
 }
-
 
 void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* contact_impulse)
 {
@@ -646,18 +590,14 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
    }
 }
 
-
 void GameContactListener::debug()
 {
-   std::cout
-      << "head contacts: " << getPlayerHeadContactCount() << std::endl
-      << "foot contacts: " << getPlayerFootContactCount() << std::endl
-      << "deadly contacts: " << getDeadlyContactCount() << std::endl
-      << "moving platform contacts: " << getMovingPlatformContactCount() << std::endl
-      << "player contacts: " << getPlayerContactCount() << std::endl
-   ;
+   std::cout << "head contacts: " << getPlayerHeadContactCount() << std::endl
+             << "foot contacts: " << getPlayerFootContactCount() << std::endl
+             << "deadly contacts: " << getDeadlyContactCount() << std::endl
+             << "moving platform contacts: " << getMovingPlatformContactCount() << std::endl
+             << "player contacts: " << getPlayerContactCount() << std::endl;
 }
-
 
 void GameContactListener::processPostSolveImpulse(float impulse)
 {
@@ -669,7 +609,6 @@ void GameContactListener::processPostSolveImpulse(float impulse)
 
    Player::getCurrent()->impulse(impulse);
 }
-
 
 void GameContactListener::processPostSolveProjectile(FixtureNode* node, float impulse)
 {
@@ -706,30 +645,25 @@ void GameContactListener::processPostSolveProjectile(FixtureNode* node, float im
    }
 }
 
-
 int32_t GameContactListener::getPlayerArmRightContactCount() const
 {
    return _count_arm_right_contacts;
 }
-
 
 bool GameContactListener::isPlayerSmashed() const
 {
    return _smashed;
 }
 
-
 int32_t GameContactListener::getPlayerArmLeftContactCount() const
 {
    return _count_arm_left_contacts;
 }
 
-
 int32_t GameContactListener::getPlayerHeadContactCount() const
 {
    return _count_head_contacts;
 }
-
 
 void GameContactListener::reset()
 {
@@ -744,23 +678,18 @@ void GameContactListener::reset()
    OneWayWall::instance().clear();
 }
 
-
 GameContactListener& GameContactListener::getInstance()
 {
    static GameContactListener __instance;
    return __instance;
 }
 
-
 int32_t GameContactListener::getPlayerContactCount() const
 {
    return _count_player_contacts;
 }
 
-
 int32_t GameContactListener::getMovingPlatformContactCount() const
 {
    return _count_moving_platform_contacts;
 }
-
-
