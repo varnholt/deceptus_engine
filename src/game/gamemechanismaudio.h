@@ -13,6 +13,7 @@ enum class Effect
 
 void initialize();
 void play(Effect effect);
+void stop(Effect effect);
 };  // namespace GameMechanismAudio
 
 #endif // GAMEMECHANISMAUDIO_H
