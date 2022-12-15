@@ -3,16 +3,16 @@
 #include "framework/tools/log.h"
 #include "gameconfiguration.h"
 
-#include <string>
-#include <iostream>
 #include <filesystem>
-
+#include <iostream>
+#include <ranges>
+#include <string>
 
 namespace
 {
 const std::string sfx_root = "data/sounds/";
 const std::string path = "data/music";
-}
+}  // namespace
 
 /*
 
@@ -42,7 +42,6 @@ Audio::Audio()
    initializeTracks();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
  * \brief Audio::getInstance
@@ -53,7 +52,6 @@ Audio& Audio::getInstance()
    static Audio __instance;
    return __instance;
 }
-
 
 //-----------------------------------------------------------------------------
 void Audio::addSample(const std::string& sample)
@@ -74,8 +72,6 @@ void Audio::addSample(const std::string& sample)
    }
 }
 
-
-
 //-----------------------------------------------------------------------------
 void Audio::initializeSamples()
 {
@@ -89,6 +85,7 @@ void Audio::initializeSamples()
    addSample("messagebox_confirm.wav");
    addSample("messagebox_cancel.wav");
 
+   // make separate audio interface for player
    addSample("player_doublejump_01.mp3");
    addSample("player_doublejump_02.mp3");
    addSample("player_grunt_01.wav");
@@ -117,7 +114,6 @@ void Audio::initializeSamples()
    addSample("impact.wav");
 }
 
-
 //-----------------------------------------------------------------------------
 void Audio::initializeTracks()
 {
@@ -142,7 +138,6 @@ void Audio::initializeTracks()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void Audio::initializeMusicVolume()
 {
@@ -152,69 +147,72 @@ void Audio::initializeMusicVolume()
    _music.setVolume(master * music);
 }
 
-
 //-----------------------------------------------------------------------------
 void Audio::playSample(const std::string& sample, float volume)
 {
-   const auto& thread_it = std::find_if(
-      _threads.begin(),
-      _threads.end(),
-      [](const auto& thread){return thread.getStatus() == sf::Sound::Stopped;}
-   );
+   // find a free sample thread
+   const auto& thread_it =
+      std::find_if(_threads.begin(), _threads.end(), [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Stopped; });
 
    if (thread_it == _threads.cend())
    {
       return;
    }
 
+   // check if we have the sample
    const auto it = _sounds.find(sample);
 
-   if (it != _sounds.cend())
+   if (it == _sounds.cend())
    {
-      thread_it->setBuffer(it->second);
-
-      const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
-      const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
-
-      thread_it->setVolume(master * sfx * volume * 100.0f);
-      thread_it->play();
+      return;
    }
+
+   thread_it->_sound.setBuffer(it->second);
+
+   const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
+   const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
+
+   thread_it->_filename = sample;
+   thread_it->_sound.setVolume(master * sfx * volume * 100.0f);
+   thread_it->_sound.play();
 }
 
 //-----------------------------------------------------------------------------
-void Audio::pauseSample(const std::string& /*name*/)
+void Audio::stopSample(const std::string& name)
 {
-   // ...
+   auto threads = _threads | std::views::filter([name](auto& thread) { return thread._filename == name; });
+   for (auto& thread : threads)
+   {
+      thread._sound.stop();
+   }
 }
 
 //-----------------------------------------------------------------------------
 void Audio::updateMusic()
 {
-    if (_tracks.empty())
-    {
-        return;
-    }
+   if (_tracks.empty())
+   {
+      return;
+   }
 
-    if (_music.getStatus() == sf::Music::Playing)
-    {
-        return;
-    }
+   if (_music.getStatus() == sf::Music::Playing)
+   {
+      return;
+   }
 
-    _current_index++;
+   _current_index++;
 
-    if (_current_index >= _tracks.size())
-    {
-        _current_index = 0;
-    }
+   if (_current_index >= _tracks.size())
+   {
+      _current_index = 0;
+   }
 
-    _music.openFromFile(_tracks[_current_index]._filename);
-    _music.play();
+   _music.openFromFile(_tracks[_current_index]._filename);
+   _music.play();
 }
-
 
 //-----------------------------------------------------------------------------
 sf::Music& Audio::getMusic() const
 {
    return _music;
 }
-

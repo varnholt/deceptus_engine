@@ -277,7 +277,11 @@ void CollapsingPlatform::update(const sf::Time& dt)
    }
    else
    {
-      _played_shake_sample = false;
+      if (_played_shake_sample)
+      {
+         GameMechanismAudio::stop(GameMechanismAudio::Effect::CollapsingPlatformCrumble);
+         _played_shake_sample = false;
+      }
 
       if (!_collapsed)
       {

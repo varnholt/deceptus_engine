@@ -22,13 +22,19 @@ public:
       std::string _filename;
    };
 
+   struct SampleThread
+   {
+      std::string _filename;
+      sf::Sound _sound;
+   };
+
    static Audio& getInstance();
 
    void initializeMusicVolume();
 
    void addSample(const std::string& sample);
    void playSample(const std::string& name, float volume = 1.0f);
-   void pauseSample(const std::string& name);
+   void stopSample(const std::string& name);
    void updateMusic();
 
    sf::Music& getMusic() const;
@@ -42,7 +48,7 @@ private:
    void initializeTracks();
 
    std::map<std::string, sf::SoundBuffer> _sounds;
-   std::array<sf::Sound, 10> _threads;
+   std::array<SampleThread, 10> _threads;
 
    mutable sf::Music _music;
    std::vector<Track> _tracks;
