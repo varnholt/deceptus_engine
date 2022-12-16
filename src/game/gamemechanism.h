@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audiorange.h"
 #include "constants.h"
 
 #include "SFML/Graphics.hpp"
@@ -20,13 +21,13 @@ public:
    virtual bool isEnabled() const;
    virtual void setEnabled(bool enabled);
 
+   virtual bool hasAudio() const;
+   virtual std::optional<AudioRange> getAudioRange() const;
+
    virtual int32_t getZ() const;
    virtual void setZ(const int32_t& z);
 
    virtual std::optional<sf::FloatRect> getBoundingBoxPx() = 0;
-   //   {
-   //      return std::nullopt;
-   //   };
 
    virtual void serializeState(nlohmann::json&);
    virtual void deserializeState(const nlohmann::json&);
