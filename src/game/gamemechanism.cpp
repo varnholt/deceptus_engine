@@ -40,3 +40,13 @@ void GameMechanism::setEnabled(bool enabled)
 {
    _enabled = enabled;
 }
+
+bool GameMechanism::hasAudio() const
+{
+   return false;
+}
+
+std::optional<AudioRange> GameMechanism::getAudioRange() const
+{
+   return std::nullopt;
+}

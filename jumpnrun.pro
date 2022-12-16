@@ -134,6 +134,7 @@ SOURCES += \
    src/game/arrow.cpp \
    src/game/atmosphere.cpp \
    src/game/audio.cpp \
+   src/game/audiorange.cpp \
    src/game/bitmapfont.cpp \
    src/game/boomeffect.cpp \
    src/game/boomeffectenvelope.cpp \
@@ -227,6 +228,7 @@ SOURCES += \
    src/game/mechanisms/spikes.cpp \
    src/game/meshtools.cpp \
    src/game/messagebox.cpp \
+   src/game/objectupdater.cpp \
    src/game/onewaywall.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/overlays/rainoverlay.cpp \
@@ -327,6 +329,7 @@ HEADERS += \
    src/framework/tools/logthread.h \
    src/framework/tools/scopeexit.h \
    src/framework/tools/stopwatch.h \
+   src/game/audiorange.h \
    src/game/boomeffectenvelope.h \
    src/game/boomeffectenveloperandom.h \
    src/game/boomeffectenvelopesine.h \
@@ -431,6 +434,7 @@ HEADERS += \
    src/game/mechanisms/spikes.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
+   src/game/objectupdater.h \
    src/game/onewaywall.h \
    src/game/overlays/controlleroverlay.h \
    src/game/overlays/rainoverlay.h \
