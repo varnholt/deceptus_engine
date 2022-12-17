@@ -322,7 +322,7 @@ int32_t setZIndex(lua_State* state)
    }
 
    const auto z = static_cast<int32_t>(lua_tointeger(state, 1));
-   node->_z_index = z;
+   node->setZ(z);
 
    return 0;
 }
@@ -1249,8 +1249,6 @@ int32_t die(lua_State* state)
 
 }  // namespace
 
-//-----------------------------------------------------------------------------
-
 void LuaNode::setupTexture()
 {
    std::string spriteName = std::get<std::string>(_properties["sprite"]);
@@ -1265,6 +1263,8 @@ void LuaNode::setupTexture()
 
 LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(parent), _script_name(filename)
 {
+   _z_index = static_cast<int32_t>(ZDepth::Player);
+
    setClassName(typeid(LuaNode).name());
 
    // create instances
@@ -2074,9 +2074,31 @@ void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32
    sf::Vector2f offset{static_cast<float>(left_px), static_cast<float>(top_px)};
    Hitbox box{rect, offset};
    _hitboxes.push_back(box);
+
+   // re-calculate bounding box
+   auto left = box.getRectTranslated().left;
+   auto right = box.getRectTranslated().left + box.getRectTranslated().width;
+   auto top = box.getRectTranslated().top;
+   auto bottom = box.getRectTranslated().top + box.getRectTranslated().height;
+   for (const auto& hitbox : _hitboxes)
+   {
+      const auto other = hitbox.getRectTranslated();
+      left = std::min(left, other.left);
+      top = std::min(top, other.top);
+      right = std::max(right, other.left + other.width);
+      bottom = std::max(bottom, other.top + other.height);
+   }
+
+   sf::FloatRect bounding_box;
+   bounding_box.left = left;
+   bounding_box.top = top;
+   bounding_box.width = right - left;
+   bounding_box.height = bottom - top;
+
+   _bounding_box = bounding_box;
 }
 
-void LuaNode::draw(sf::RenderTarget& target)
+void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (_hit_time.has_value())
    {
@@ -2110,4 +2132,9 @@ void LuaNode::draw(sf::RenderTarget& target)
       sprite.setPosition(_position_px - center + offset);
       target.draw(sprite, &_flash_shader);
    }
+}
+
+std::optional<sf::FloatRect> LuaNode::getBoundingBoxPx()
+{
+   return _bounding_box;
 }

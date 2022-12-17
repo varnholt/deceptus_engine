@@ -15,6 +15,7 @@
 #include "SFML/Graphics.hpp"
 
 // game
+#include "gamemechanism.h"
 #include "gamenode.h"
 #include "hitbox.h"
 #include "leveldescription.h"
@@ -28,14 +29,16 @@ struct lua_State;
  * The LuaNode behavior is driven from two directions; the scripts can call each callback registered in setupLua.
  * From the C++ end, the scripts can be driven by calling lua* functions such as luaHit, luaDie, etc.
  */
-struct LuaNode : public GameNode
+struct LuaNode : public GameMechanism, public GameNode
 {
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 
    LuaNode(GameNode* parent, const std::string& filename);
    ~LuaNode();
 
-   void draw(sf::RenderTarget& window);
+   void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
    void initialize();
    void deserializeEnemyDescription();
 
@@ -162,7 +165,6 @@ struct LuaNode : public GameNode
    std::vector<sf::Sprite> _sprites = {{}};                  // have 1 base sprite
    std::vector<sf::Vector2f> _sprite_offsets_px = {{0, 0}};  // have 1 base sprite offset
    sf::Vector2f _position_px;
-   int32_t _z_index = static_cast<int32_t>(ZDepth::Player);
    std::vector<sf::Vector2f> _movement_path_px;
    sf::Shader _flash_shader;
    float _hit_flash{0.0f};
@@ -175,6 +177,7 @@ struct LuaNode : public GameNode
 
    // damage
    std::vector<Hitbox> _hitboxes;
+   std::optional<sf::FloatRect> _bounding_box;
    std::optional<HighResTimePoint> _hit_time;
    int32_t _damage_from_player{0};
 
