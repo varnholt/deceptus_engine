@@ -15,7 +15,7 @@ public:
    void dump(int32_t depth = 0);
 
    const std::string& getObjectId() const;
-   void setObjectId(const std::string& newObject_name);
+   void setObjectId(const std::string& object_id);
 
 protected:
 

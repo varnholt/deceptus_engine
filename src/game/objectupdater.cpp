@@ -47,10 +47,12 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
    if (distance < range._radius_far_px)
    {
       // calculate volume
+      std::cout << "update volume" << std::endl;
    }
    else
    {
       // disable sounds for the object
+      std::cout << "disable sounds" << std::endl;
    }
 }
 

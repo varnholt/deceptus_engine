@@ -74,9 +74,8 @@ const std::string& GameNode::getObjectId() const
    return _object_id;
 }
 
-
-void GameNode::setObjectId(const std::string& newObject_name)
+void GameNode::setObjectId(const std::string& object_id)
 {
-   _object_id = newObject_name;
+   _object_id = object_id;
 }
 

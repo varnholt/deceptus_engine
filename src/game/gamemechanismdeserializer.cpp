@@ -26,6 +26,7 @@
 #include "mechanisms/rotatingblade.h"
 #include "mechanisms/sensorrect.h"
 #include "mechanisms/shaderlayer.h"
+#include "mechanisms/soundemitter.h"
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikeblock.h"
 #include "mechanisms/spikes.h"
@@ -71,6 +72,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_rotating_blades = mechanisms[std::string{layer_name_rotating_blades}];
    auto mechanism_sensor_rects = mechanisms[std::string{layer_name_sensor_rects}];
    auto mechanism_shader_quads = mechanisms[std::string{layer_name_shader_quads}];
+   auto mechanism_sound_emitters = mechanisms[std::string{layer_name_sound_emitters}];
    auto mechanism_spike_balls = mechanisms[std::string{layer_name_spike_balls}];
    auto mechanism_spike_blocks = mechanisms[std::string{layer_name_spike_blocks}];
    auto mechanism_spikes = mechanisms[std::string{layer_name_interval_spikes}];
@@ -296,6 +298,11 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<SensorRect>(parent);
                mechanism->setup(data);
                mechanism_sensor_rects->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_sound_emitters || tmx_object->_type == type_name_sound_emitter)
+            {
+               auto mechanism = SoundEmitter::deserialize(parent, data);
+               mechanism_sound_emitters->push_back(mechanism);
             }
          }
       }
