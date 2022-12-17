@@ -11,6 +11,7 @@
 #include "imagelayer.h"
 #include "luanode.h"
 #include "mechanisms/portal.h"
+#include "objectupdater.h"
 #include "physics/physics.h"
 #include "room.h"
 #include "shaders/atmosphereshader.h"
@@ -183,6 +184,7 @@ protected:
    std::array<ParallaxLayer, 3> _parallax_layers;
 
    // mechanisms
+   std::unique_ptr<ObjectUpdater> _object_updater;
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_map;
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_list;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
