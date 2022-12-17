@@ -66,6 +66,7 @@ public:
 
    void update(const sf::Time& dt);
    void updateViews();
+   void updateObjectUpdater();
    void updateCameraSystem(const sf::Time& dt);
 
    void spawnEnemies();
@@ -208,6 +209,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_rotating_blades;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_sensor_rects;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_sound_emitters;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;

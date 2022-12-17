@@ -1,0 +1,72 @@
+#include "soundemitter.h"
+
+#include "audio.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
+
+SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
+{
+   setClassName(typeid(SoundEmitter).name());
+   _has_audio = true;
+}
+
+std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const GameDeserializeData& data)
+{
+   auto instance = std::make_shared<SoundEmitter>(parent);
+
+   instance->_position.x = data._tmx_object->_x_px;
+   instance->_position.y = data._tmx_object->_y_px;
+   instance->_size.x = data._tmx_object->_width_px;
+   instance->_size.y = data._tmx_object->_height_px;
+   instance->setObjectId(data._tmx_object->_name);
+   instance->_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   // deserialize range data
+   if (data._tmx_object->_properties)
+   {
+      // read audio range properties
+      AudioRange audio_range;
+      const auto radius_far_px = data._tmx_object->_properties->_map.find("radius_far_px");
+      if (radius_far_px != data._tmx_object->_properties->_map.cend())
+      {
+         audio_range._radius_far_px = radius_far_px->second->_value_float.value();
+      }
+
+      const auto volume_far = data._tmx_object->_properties->_map.find("volume_far");
+      if (volume_far != data._tmx_object->_properties->_map.cend())
+      {
+         audio_range._volume_far = volume_far->second->_value_float.value();
+      }
+
+      const auto volume_close = data._tmx_object->_properties->_map.find("volume_close");
+      if (volume_close != data._tmx_object->_properties->_map.cend())
+      {
+         audio_range._volume_close = volume_close->second->_value_float.value();
+      }
+
+      instance->_audio_range = audio_range;
+
+      // read sample properties
+      const auto looped = data._tmx_object->_properties->_map.find("looped");
+      if (looped != data._tmx_object->_properties->_map.cend())
+      {
+         instance->_looped = looped->second->_value_bool.value();
+      }
+
+      const auto filename = data._tmx_object->_properties->_map.find("filename");
+      if (filename != data._tmx_object->_properties->_map.cend())
+      {
+         instance->_filename = filename->second->_value_string.value();
+      }
+
+      Audio::getInstance().addSample(instance->_filename);
+   }
+
+   return instance;
+}
+
+std::optional<sf::FloatRect> SoundEmitter::getBoundingBoxPx()
+{
+   return _rect;
+}

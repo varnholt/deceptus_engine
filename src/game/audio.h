@@ -48,7 +48,7 @@ private:
    void initializeTracks();
 
    std::map<std::string, sf::SoundBuffer> _sounds;
-   std::array<SampleThread, 10> _threads;
+   std::array<SampleThread, 50> _threads;
 
    mutable sf::Music _music;
    std::vector<Track> _tracks;
