@@ -744,7 +744,7 @@ void Level::spawnEnemies()
       const auto& z_index_property = it.second.findProperty("z");
       if (z_index_property.has_value())
       {
-         lua_node->_z_index = std::stoi(z_index_property.value()._value);
+         lua_node->setZ(std::stoi(z_index_property.value()._value));
       }
 
       // merge properties from tmx with those loaded from json
@@ -985,9 +985,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw enemies
       for (auto& enemy : _enemies)
       {
-         if (enemy->_z_index == z_index)
+         if (enemy->getZ() == z_index)
          {
-            enemy->draw(target);
+            enemy->draw(target, *_render_texture_normal.get());
          }
       }
 
