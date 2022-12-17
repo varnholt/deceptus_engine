@@ -207,8 +207,8 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_dialogues,       &_mechanism_doors,          &_mechanism_dust,           &_mechanism_fans,
       &_mechanism_lasers,          &_mechanism_levers,         &_mechanism_moveable_boxes, &_mechanism_on_off_blocks,
       &_mechanism_platforms,       &_mechanism_portals,        &_mechanism_ropes,          &_mechanism_rotating_blades,
-      &_mechanism_sensor_rects,    &_mechanism_shader_layers,  &_mechanism_spike_balls,    &_mechanism_spike_blocks,
-      &_mechanism_spikes,          &_mechanism_weather,
+      &_mechanism_sensor_rects,    &_mechanism_shader_layers,  &_mechanism_sound_emitters, &_mechanism_spike_balls,
+      &_mechanism_spike_blocks,    &_mechanism_spikes,         &_mechanism_weather,
    };
 
    _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
@@ -233,6 +233,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_rotating_blades}] = &_mechanism_rotating_blades;
    _mechanisms_map[std::string{layer_name_sensor_rects}] = &_mechanism_sensor_rects;
    _mechanisms_map[std::string{layer_name_shader_quads}] = &_mechanism_shader_layers;
+   _mechanisms_map[std::string{layer_name_sound_emitters}] = &_mechanism_sound_emitters;
    _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
    _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
    _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
@@ -831,6 +832,12 @@ void Level::updateViews()
 }
 
 //-----------------------------------------------------------------------------
+void Level::updateObjectUpdater()
+{
+   _object_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
+}
+
+//-----------------------------------------------------------------------------
 void Level::updateRoom()
 {
    _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
@@ -1275,6 +1282,7 @@ void Level::update(const sf::Time& dt)
 {
    Projectile::update(dt);
 
+   updateObjectUpdater();
    updateCameraSystem(dt);
    updateViews();
 

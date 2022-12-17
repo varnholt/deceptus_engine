@@ -37,5 +37,7 @@ protected:
    int32_t _z_index = 0;
    bool _enabled = true;
    bool _serialized = false;
+   bool _has_audio = false;
+   std::optional<AudioRange> _audio_range;
    MechanismVersion _version = MechanismVersion::Version1;
 };

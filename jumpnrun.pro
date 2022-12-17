@@ -223,6 +223,7 @@ SOURCES += \
     src/game/mechanisms/rotatingblade.cpp \
    src/game/mechanisms/sensorrect.cpp \
    src/game/mechanisms/shaderlayer.cpp \
+   src/game/mechanisms/soundemitter.cpp \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
@@ -429,6 +430,7 @@ HEADERS += \
     src/game/mechanisms/rotatingblade.h \
    src/game/mechanisms/sensorrect.h \
    src/game/mechanisms/shaderlayer.h \
+   src/game/mechanisms/soundemitter.h \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
