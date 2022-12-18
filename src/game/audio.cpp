@@ -39,7 +39,7 @@ Audio::Audio()
 {
    initializeMusicVolume();
    initializeSamples();
-   initializeTracks();
+   initializeMusic();
 }
 
 //-----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ void Audio::initializeSamples()
 }
 
 //-----------------------------------------------------------------------------
-void Audio::initializeTracks()
+void Audio::initializeMusic()
 {
    try
    {
@@ -148,7 +148,7 @@ void Audio::initializeMusicVolume()
 }
 
 //-----------------------------------------------------------------------------
-void Audio::playSample(const std::string& sample, float volume)
+std::optional<int32_t> Audio::playSample(const std::string& sample, float volume, bool looped)
 {
    // find a free sample thread
    const auto& thread_it =
@@ -156,7 +156,7 @@ void Audio::playSample(const std::string& sample, float volume)
 
    if (thread_it == _threads.cend())
    {
-      return;
+      return std::nullopt;
    }
 
    // check if we have the sample
@@ -164,7 +164,7 @@ void Audio::playSample(const std::string& sample, float volume)
 
    if (it == _sounds.cend())
    {
-      return;
+      return std::nullopt;
    }
 
    thread_it->_sound.setBuffer(it->second);
@@ -174,7 +174,10 @@ void Audio::playSample(const std::string& sample, float volume)
 
    thread_it->_filename = sample;
    thread_it->_sound.setVolume(master * sfx * volume * 100.0f);
+   thread_it->_sound.setLoop(looped);
    thread_it->_sound.play();
+
+   return std::distance(_sounds.begin(), it);
 }
 
 //-----------------------------------------------------------------------------
@@ -185,6 +188,12 @@ void Audio::stopSample(const std::string& name)
    {
       thread._sound.stop();
    }
+}
+
+//-----------------------------------------------------------------------------
+void Audio::setVolume(int32_t thread, float volume)
+{
+   _threads[thread]._sound.setVolume(volume);
 }
 
 //-----------------------------------------------------------------------------
