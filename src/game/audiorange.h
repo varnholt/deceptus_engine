@@ -7,7 +7,9 @@ struct AudioRange
 {
    float _radius_far_px{0.0f};
    float _volume_far{0.0f};
-   float _volume_close{1.0f};
+
+   float _radius_near_px{0.0f};
+   float _volume_near{1.0f};
 };
 
 #endif // AUDIORANGE_H
