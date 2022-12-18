@@ -39,10 +39,16 @@ std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const 
          audio_range._volume_far = volume_far->second->_value_float.value();
       }
 
-      const auto volume_close = data._tmx_object->_properties->_map.find("volume_close");
-      if (volume_close != data._tmx_object->_properties->_map.cend())
+      const auto radius_near_px = data._tmx_object->_properties->_map.find("radius_near_px");
+      if (radius_near_px != data._tmx_object->_properties->_map.cend())
       {
-         audio_range._volume_close = volume_close->second->_value_float.value();
+         audio_range._radius_near_px = radius_near_px->second->_value_float.value();
+      }
+
+      const auto volume_near = data._tmx_object->_properties->_map.find("volume_near");
+      if (volume_near != data._tmx_object->_properties->_map.cend())
+      {
+         audio_range._volume_near = volume_near->second->_value_float.value();
       }
 
       instance->_audio_range = audio_range;

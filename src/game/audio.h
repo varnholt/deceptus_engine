@@ -3,7 +3,7 @@
 #include <SFML/Audio.hpp>
 #include <array>
 #include <map>
-
+#include <optional>
 
 /*! \brief The class Audio implements audio support
  *         It supports audio samples and music.
@@ -33,8 +33,10 @@ public:
    void initializeMusicVolume();
 
    void addSample(const std::string& sample);
-   void playSample(const std::string& name, float volume = 1.0f);
+   std::optional<int32_t> playSample(const std::string& name, float volume = 1.0f, bool looped = false);
    void stopSample(const std::string& name);
+   void setVolume(int32_t thread, float volume);
+
    void updateMusic();
 
    sf::Music& getMusic() const;
@@ -45,7 +47,7 @@ private:
    Audio();
 
    void initializeSamples();
-   void initializeTracks();
+   void initializeMusic();
 
    std::map<std::string, sf::SoundBuffer> _sounds;
    std::array<SampleThread, 50> _threads;
