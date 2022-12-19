@@ -26,6 +26,8 @@ public:
    {
       std::string _filename;
       sf::Sound _sound;
+
+      void setVolume(float volume);
    };
 
    static Audio& getInstance();
@@ -35,6 +37,7 @@ public:
    void addSample(const std::string& sample);
    std::optional<int32_t> playSample(const std::string& name, float volume = 1.0f, bool looped = false);
    void stopSample(const std::string& name);
+   void stopSample(int32_t thread);
    void setVolume(int32_t thread, float volume);
 
    void updateMusic();

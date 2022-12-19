@@ -56,20 +56,22 @@ Audio& Audio::getInstance()
 //-----------------------------------------------------------------------------
 void Audio::addSample(const std::string& sample)
 {
-   if (_sounds.find(sample) == _sounds.end())
+   if (_sounds.find(sample) != _sounds.end())
    {
-      auto loader = [](const std::string& fileName) -> sf::SoundBuffer
-      {
-         sf::SoundBuffer buf;
-         if (!buf.loadFromFile(sfx_root + fileName))
-         {
-            Log::Error() << "unable to load file: " << fileName;
-         }
-         return buf;
-      };
-
-      _sounds[sample] = loader(sample);
+      return;
    }
+
+   auto loader = [](const std::string& fileName) -> sf::SoundBuffer
+   {
+      sf::SoundBuffer buf;
+      if (!buf.loadFromFile(sfx_root + fileName))
+      {
+         Log::Error() << "unable to load file: " << fileName;
+      }
+      return buf;
+   };
+
+   _sounds[sample] = loader(sample);
 }
 
 //-----------------------------------------------------------------------------
@@ -168,16 +170,12 @@ std::optional<int32_t> Audio::playSample(const std::string& sample, float volume
    }
 
    thread_it->_sound.setBuffer(it->second);
-
-   const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
-   const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
-
    thread_it->_filename = sample;
-   thread_it->_sound.setVolume(master * sfx * volume * 100.0f);
+   thread_it->setVolume(volume);
    thread_it->_sound.setLoop(looped);
    thread_it->_sound.play();
 
-   return std::distance(_sounds.begin(), it);
+   return std::distance(_threads.begin(), thread_it);
 }
 
 //-----------------------------------------------------------------------------
@@ -191,9 +189,15 @@ void Audio::stopSample(const std::string& name)
 }
 
 //-----------------------------------------------------------------------------
+void Audio::stopSample(int32_t thread)
+{
+   _threads[thread]._sound.stop();
+}
+
+//-----------------------------------------------------------------------------
 void Audio::setVolume(int32_t thread, float volume)
 {
-   _threads[thread]._sound.setVolume(volume);
+   _threads[thread].setVolume(volume);
 }
 
 //-----------------------------------------------------------------------------
@@ -224,4 +228,12 @@ void Audio::updateMusic()
 sf::Music& Audio::getMusic() const
 {
    return _music;
+}
+
+//-----------------------------------------------------------------------------
+void Audio::SampleThread::setVolume(float volume)
+{
+   const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
+   const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
+   _sound.setVolume(master * sfx * volume * 100.0f);
 }
