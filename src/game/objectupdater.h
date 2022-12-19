@@ -6,6 +6,8 @@
 #include "gamemechanism.h"
 #include "luanode.h"
 
+#include <thread>
+
 class ObjectUpdater
 {
 public:
