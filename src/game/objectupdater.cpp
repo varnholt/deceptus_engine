@@ -41,15 +41,13 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
    const auto mechanism_height_px = rect.height;
    const auto mechanism_width_px = rect.width;
    const auto pos = sf::Vector2f{mechanism_left_px + mechanism_width_px / 2, mechanism_top_px + mechanism_height_px / 2};
-
    const auto distance = SfmlMath::length(_player_position - pos);
    const auto range = mechanism->getAudioRange().value();
-
-   std::optional<float> volume;
 
    if (distance < range._radius_far_px)
    {
       // calculate volume
+      float volume = 0.0f;
       if (distance < range._radius_near_px)
       {
          volume = range._volume_near;
@@ -74,11 +72,14 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
       }
 
       // std::cout << "update volume: " << volume.value() << std::endl;
+      mechanism->setAudioEnabled(true);
+      mechanism->setVolume(volume);
    }
    else
    {
       // disable sounds for the object
       // std::cout << "disable sounds" << std::endl;
+      mechanism->setAudioEnabled(false);
    }
 }
 
