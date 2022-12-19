@@ -10,6 +10,43 @@ SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
    _has_audio = true;
 }
 
+void SoundEmitter::setAudioEnabled(bool audio_enabled)
+{
+   if (audio_enabled == _audio_enabled)
+   {
+      return;
+   }
+
+   GameMechanism::setAudioEnabled(audio_enabled);
+
+   if (audio_enabled)
+   {
+      // start playing
+      _thread_id = Audio::getInstance().playSample(_filename, _volume, _looped);
+   }
+   else
+   {
+      // stop playing
+      if (_thread_id.has_value())
+      {
+         Audio::getInstance().stopSample(_thread_id.value());
+         _thread_id.reset();
+      }
+   }
+}
+
+void SoundEmitter::setVolume(float volume)
+{
+   GameMechanism::setVolume(volume);
+
+   if (!_thread_id.has_value())
+   {
+      return;
+   }
+
+   Audio::getInstance().setVolume(_thread_id.value(), volume);
+}
+
 std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto instance = std::make_shared<SoundEmitter>(parent);

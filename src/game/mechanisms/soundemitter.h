@@ -10,6 +10,9 @@ class SoundEmitter : public GameMechanism, public GameNode
 public:
    SoundEmitter(GameNode* parent);
 
+   void setAudioEnabled(bool enabled) override;
+   void setVolume(float volume) override;
+
    static std::shared_ptr<SoundEmitter> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -17,10 +20,10 @@ public:
    sf::Vector2f _position;
    sf::FloatRect _rect;
    sf::Vector2f _size;
-   float _volume{0.0f};
 
    bool _looped{true};
    std::string _filename;
+   std::optional<int32_t> _thread_id;
 };
 
 #endif // SOUNDEMITTER_H

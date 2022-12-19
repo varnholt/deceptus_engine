@@ -23,6 +23,21 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+void GameMechanism::setVolume(float volume)
+{
+   _volume = volume;
+}
+
+bool GameMechanism::isAudioEnabled() const
+{
+   return _audio_enabled;
+}
+
+void GameMechanism::setAudioEnabled(bool audio_enabled)
+{
+   _audio_enabled = audio_enabled;
+}
+
 void GameMechanism::draw(sf::RenderTarget& /*target*/, sf::RenderTarget& /*normal*/)
 {
 }

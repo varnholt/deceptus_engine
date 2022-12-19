@@ -21,8 +21,12 @@ public:
    virtual bool isEnabled() const;
    virtual void setEnabled(bool enabled);
 
+   // audio related
    virtual bool hasAudio() const;
    virtual std::optional<AudioRange> getAudioRange() const;
+   virtual bool isAudioEnabled() const;
+   virtual void setAudioEnabled(bool newAudio_enabled);
+   virtual void setVolume(float volume);
 
    virtual int32_t getZ() const;
    virtual void setZ(const int32_t& z);
@@ -34,10 +38,12 @@ public:
    virtual bool isSerialized() const;
 
 protected:
-   int32_t _z_index = 0;
-   bool _enabled = true;
-   bool _serialized = false;
-   bool _has_audio = false;
+   int32_t _z_index{0};
+   bool _enabled{true};
+   bool _serialized{false};
+   bool _has_audio{false};
+   bool _audio_enabled{false};
+   float _volume{0.0f};
    std::optional<AudioRange> _audio_range;
    MechanismVersion _version = MechanismVersion::Version1;
 };
