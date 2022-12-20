@@ -208,6 +208,7 @@ private:
    HighResTimePoint _water_entered_time;
 
    float _next_footstep_time = 0.0f;
+   int32_t _step_counter = 0;
 
    int32_t _z_index = 0;
    int32_t _id = 0;
