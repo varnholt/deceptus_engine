@@ -1253,7 +1253,7 @@ void Player::updateFootsteps()
          if (_time.asSeconds() > _next_footstep_time)
          {
             // play footstep
-            Audio::getInstance().playSample("player_footstep_stone_01.ogg");
+            Audio::getInstance().playSample((_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav");
             _next_footstep_time = _time.asSeconds() + 1.0f / vel;
          }
       }

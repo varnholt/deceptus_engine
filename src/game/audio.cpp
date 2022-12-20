@@ -95,7 +95,8 @@ void Audio::initializeSamples()
    addSample("player_jump_land.wav");
    addSample("player_jump_liftoff.wav");
    addSample("player_kneel_01.wav");
-   addSample("player_footstep_stone_01.ogg");
+   addSample("player_footstep_stone_l.wav");
+   addSample("player_footstep_stone_r.wav");
    addSample("player_spawn_01.wav");
    addSample("player_sword_kneeling_01.wav");
    addSample("player_sword_kneeling_02.wav");
