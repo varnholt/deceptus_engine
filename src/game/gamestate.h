@@ -3,13 +3,11 @@
 #include "constants.h"
 
 #include <functional>
-
+#include <mutex>
 
 class GameState
 {
-
 public:
-
    using StateChangeCallback = std::function<void(ExecutionMode current, ExecutionMode previous)>;
 
    GameState() = default;
@@ -29,12 +27,10 @@ public:
 
    void addCallback(const StateChangeCallback& cb);
 
-
 private:
-
+   mutable std::mutex _mutex;
    ExecutionMode _mode = ExecutionMode::Running;
    ExecutionMode _queued_mode = ExecutionMode::Running;
 
    std::vector<StateChangeCallback> _callbacks;
 };
-
