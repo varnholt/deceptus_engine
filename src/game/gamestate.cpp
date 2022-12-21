@@ -4,13 +4,14 @@
 //-----------------------------------------------------------------------------
 void GameState::enqueue(ExecutionMode mode)
 {
+   std::lock_guard<std::mutex> guard(_mutex);
    _queued_mode = mode;
 }
 
 //-----------------------------------------------------------------------------
 void GameState::sync()
 {
-   setMode(_queued_mode);
+   setMode(getQueuedMode());
 }
 
 
@@ -25,6 +26,7 @@ GameState& GameState::getInstance()
 //-----------------------------------------------------------------------------
 ExecutionMode GameState::getMode() const
 {
+   std::lock_guard<std::mutex> guard(_mutex);
    return _mode;
 }
 
@@ -32,6 +34,7 @@ ExecutionMode GameState::getMode() const
 //-----------------------------------------------------------------------------
 void GameState::setMode(const ExecutionMode& current)
 {
+   std::lock_guard<std::mutex> guard(_mutex);
    if (current == _mode)
    {
       return;
@@ -57,6 +60,7 @@ void GameState::addCallback(const GameState::StateChangeCallback& cb)
 //-----------------------------------------------------------------------------
 ExecutionMode GameState::getQueuedMode() const
 {
+   std::lock_guard<std::mutex> guard(_mutex);
    return _queued_mode;
 }
 
@@ -78,7 +82,7 @@ void GameState::enqueueResume()
 //-----------------------------------------------------------------------------
 void GameState::enqueueTogglePauseResume()
 {
-   if (_mode == ExecutionMode::Running)
+   if (getMode() == ExecutionMode::Running)
    {
       enqueue(ExecutionMode::Paused);
    }
