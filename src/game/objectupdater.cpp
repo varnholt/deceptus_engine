@@ -1,6 +1,7 @@
 #include "objectupdater.h"
 
 #include "framework/math/sfmlmath.h"
+#include "gamestate.h"
 
 #include <iostream>
 
@@ -72,8 +73,9 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
       }
 
       // std::cout << "update volume: " << volume.value() << std::endl;
+      const auto paused_factor = (GameState::getInstance().getMode() == ExecutionMode::Paused) ? 0.5f : 1.0f;
       mechanism->setAudioEnabled(true);
-      mechanism->setVolume(volume);
+      mechanism->setVolume(volume * paused_factor);
    }
    else
    {
