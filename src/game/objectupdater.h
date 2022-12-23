@@ -24,6 +24,7 @@ public:
 
 private:
    void updateVolume(const std::shared_ptr<GameMechanism>& mechanism);
+   float computeDistanceToPlayerPx(const std::shared_ptr<GameMechanism>& mechanism);
 
    std::mutex _mutex;
 

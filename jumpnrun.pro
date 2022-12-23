@@ -239,6 +239,7 @@ SOURCES += \
    src/game/physics/physicsconfiguration.cpp \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
+   src/game/player/playeraudio.cpp \
    src/game/player/playerbelt.cpp \
    src/game/player/playerclimb.cpp \
    src/game/player/playercontrols.cpp \
@@ -249,6 +250,7 @@ SOURCES += \
    src/game/preloader.cpp \
    src/game/projectile.cpp \
    src/game/projectilehitanimation.cpp \
+   src/game/projectilehitaudio.cpp \
    src/game/room.cpp \
    src/game/savestate.cpp \
    src/game/screentransition.cpp \
@@ -447,6 +449,7 @@ HEADERS += \
    src/game/player/player.h \
    src/game/player/playeranimation.h \
    src/game/player/playerattack.h \
+   src/game/player/playeraudio.h \
    src/game/player/playerbelt.h \
    src/game/player/playerbend.h \
    src/game/player/playerclimb.h \
@@ -461,6 +464,7 @@ HEADERS += \
    src/game/preloader.h \
    src/game/projectile.h \
    src/game/projectilehitanimation.h \
+   src/game/projectilehitaudio.h \
    src/game/room.h \
    src/game/savestate.h \
    src/game/screentransition.h \

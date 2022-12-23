@@ -124,6 +124,38 @@ int32_t addHitbox(lua_State* state)
 }
 
 /**
+ * @brief addAudioRange add an audio range to the enemy
+ * @param state lua state
+ *    param 1: far distance in px
+ *    param 2: far volume from 0..1
+ *    param 3: near distance in px
+ *    param 4: near volume from 0..1
+ * @return error code
+ */
+int32_t addAudioRange(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto far_distance = static_cast<float>(lua_tonumber(state, 1));
+   const auto far_volume = static_cast<float>(lua_tonumber(state, 2));
+   const auto near_distance = static_cast<float>(lua_tonumber(state, 3));
+   const auto near_volume = static_cast<float>(lua_tonumber(state, 4));
+   node->addAudioRange(far_distance, far_volume, near_distance, near_volume);
+
+   return 0;
+}
+
+/**
  * @brief updateSpriteRect update node's sprite rect
  * @param state lua state
  *    param 1: id of sprite
@@ -1093,8 +1125,13 @@ int32_t addSample(lua_State* state)
    }
 
    const auto sample = lua_tostring(state, 1);
-   Audio::getInstance().addSample(sample);
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
 
+   node->addSample(sample);
    return 0;
 }
 
@@ -1115,7 +1152,14 @@ int32_t playSample(lua_State* state)
 
    const auto sample = lua_tostring(state, 1);
    const auto volume = static_cast<float>(lua_tonumber(state, 2));
-   Audio::getInstance().playSample(sample, volume);
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   node->playSample(sample, volume);
 
    return 0;
 }
@@ -1346,6 +1390,7 @@ void LuaNode::setupLua()
    _lua_state = luaL_newstate();
 
    // register callbacks
+   lua_register(_lua_state, "addAudioRange", ::addAudioRange);
    lua_register(_lua_state, "addHitbox", ::addHitbox);
    lua_register(_lua_state, "addSample", ::addSample);
    lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
@@ -1370,9 +1415,9 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
+   lua_register(_lua_state, "setSpriteColor", ::setSpriteColor);
    lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
    lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);
-   lua_register(_lua_state, "setSpriteColor", ::setSpriteColor);
    lua_register(_lua_state, "setTransform", ::setTransform);
    lua_register(_lua_state, "setZ", ::setZIndex);
    lua_register(_lua_state, "timer", ::timer);
@@ -2032,6 +2077,15 @@ void LuaNode::updateWeapons(const sf::Time& dt)
    }
 }
 
+void LuaNode::updateHitboxOffsets()
+{
+   for (auto& hitbox : _hitboxes)
+   {
+      hitbox._rect_px.left = _position_px.x;
+      hitbox._rect_px.top = _position_px.y;
+   }
+}
+
 void LuaNode::updatePosition()
 {
    if (!_body)
@@ -2045,12 +2099,7 @@ void LuaNode::updatePosition()
    _position_px.x = x_px;
    _position_px.y = y_px;
 
-   // update hitbox positions
-   for (auto& hitbox : _hitboxes)
-   {
-      hitbox._rect_px.left = x_px;
-      hitbox._rect_px.top = y_px;
-   }
+   updateHitboxOffsets();
 }
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
@@ -2070,7 +2119,7 @@ void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_
 
 void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)
 {
-   sf::FloatRect rect{0.0f, 0.0f, static_cast<float>(width_px), static_cast<float>(height_px)};
+   sf::FloatRect rect{_position_px.x, _position_px.y, static_cast<float>(width_px), static_cast<float>(height_px)};
    sf::Vector2f offset{static_cast<float>(left_px), static_cast<float>(top_px)};
    Hitbox box{rect, offset};
    _hitboxes.push_back(box);
@@ -2096,6 +2145,37 @@ void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32
    bounding_box.height = bottom - top;
 
    _bounding_box = bounding_box;
+}
+
+void LuaNode::addAudioRange(float far_distance, float far_volume, float near_distance, float near_volume)
+{
+   AudioRange audio_range;
+   audio_range._radius_far_px = far_distance;
+   audio_range._volume_far = far_volume;
+   audio_range._radius_near_px = near_distance;
+   audio_range._volume_near = near_volume;
+   _audio_range = audio_range;
+
+   if (_hitboxes.empty())
+   {
+      Log::Warning() << "no hitboxes defined for " << _script_name;
+   }
+}
+
+void LuaNode::addSample(const std::string& sample)
+{
+   Audio::getInstance().addSample(sample);
+   _has_audio = true;
+}
+
+void LuaNode::playSample(const std::string& sample, float volume)
+{
+   if (!_audio_enabled)
+   {
+      return;
+   }
+
+   Audio::getInstance().playSample(sample, volume * _volume);
 }
 
 void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
