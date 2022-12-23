@@ -533,10 +533,6 @@ bool Level::load()
 
    Log::Info() << "level loading complete";
 
-   _object_updater = std::make_unique<ObjectUpdater>();
-   _object_updater->setEnemies(_enemies);
-   _object_updater->setMechanisms(_mechanisms_list);
-
    return true;
 }
 
@@ -564,6 +560,10 @@ void Level::initialize()
 
    loadState();
    spawnEnemies();
+
+   _object_updater = std::make_unique<ObjectUpdater>();
+   _object_updater->setEnemies(_enemies);
+   _object_updater->setMechanisms(_mechanisms_list);
 
    // dump();
 }

@@ -36,6 +36,7 @@ _fire_delays = {}
 _fire_delay_elapsed = {}
 _sprite_indices = {}
 _fired = {false, false, false}
+_load_played = false
 
 _position = v2d.Vector2D(0, 0)
 _player_position = v2d.Vector2D(0, 0)
@@ -78,11 +79,14 @@ function initialize()
    addSprite()
 
    addShapeRect(0.25, 0.25, 0.25, 0.25)
-   addSample("boom.wav")
+   addHitbox(-12, -12, 24, 24)
+   addAudioRange(700.0, 0.0, 250.0, 1.0)
+   addSample("arrow_load.wav")
+   addSample("arrow_release_1.wav")
+   addSample("arrow_release_2.wav")
    addWeapon(WeaponType["Bow"], 50, 60, 0.1) -- interval, damage, radius
    updateAlignment(Alignment["AlignmentRight"])
    setSpriteOffset(0, 12, 12)
-
 end
 
 
@@ -220,6 +224,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire(muzzle_index)
+   playSample("arrow_release_1.wav", 1.0)
    useGun(
       0,
       _position:getX() + _fire_offset[muzzle_index]:getX(),
@@ -260,6 +265,7 @@ function update(dt)
       _fire_delay_elapsed = {false, false, false}
       _sprite_indices = {0, 0, 0}
       _fired = {false, false, false}
+      _load_played = false
    end
 
    -- update 'fire delay elapsed' flags
@@ -268,6 +274,9 @@ function update(dt)
       if (not _fire_delay_elapsed[i]) then
          if (_elapsed > _fire_delays[i]) then
             _fire_delay_elapsed[i]=true
+         elseif (not _load_played) then
+            _load_played = true
+            playSample("arrow_load.wav", 1.0)
          end
       end
    end

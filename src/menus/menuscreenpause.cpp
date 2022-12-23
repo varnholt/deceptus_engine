@@ -4,6 +4,7 @@
 #include "game/gamestate.h"
 #include "game/messagebox.h"
 #include "menu.h"
+#include "menuaudio.h"
 
 MenuScreenPause::MenuScreenPause()
 {
@@ -60,8 +61,8 @@ void MenuScreenPause::up()
    }
 
    updateLayers();
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenPause::down()
 {
@@ -79,8 +80,8 @@ void MenuScreenPause::down()
    }
 
    updateLayers();
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenPause::resume()
 {
@@ -99,6 +100,7 @@ void MenuScreenPause::select()
          break;
       case Selection::Options:
          Menu::getInstance()->show(Menu::MenuType::Options);
+         MenuAudio::play(MenuAudio::SoundEffect::Apply);
          break;
       case Selection::Quit:
          MessageBox::question(

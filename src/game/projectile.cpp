@@ -1,6 +1,8 @@
 #include "projectile.h"
 
+#include "audio.h"
 #include "projectilehitanimation.h"
+#include "projectilehitaudio.h"
 
 #include "Box2D/Box2D.h"
 
@@ -105,21 +107,29 @@ void Projectile::collectHitInformation()
    }
 }
 
-
-void Projectile::addHitAnimations()
+void Projectile::processHitInformation()
 {
    std::vector<HitInformation>::iterator it;
    for (it = _hit_information.begin(); it != _hit_information.end(); ++it)
    {
       const auto& hit_info = *it;
-      const b2Vec2& vec = hit_info._pos;
-
-      float gx = vec.x * PPM;
-      float gy = vec.y * PPM;
+      const auto& vec = hit_info._pos;
+      const auto gx = vec.x * PPM;
+      const auto gy = vec.y * PPM;
 
       // Log::Info() << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle;
 
-      auto reference_animation = ProjectileHitAnimation::getReferenceAnimation(hit_info._projectile_animation_identifier);
+      // play sample
+      const auto reference_samples = ProjectileHitAudio::getReferenceSamples(hit_info._projectile_animation_identifier);
+      if (!reference_samples.empty())
+      {
+         // overlaps with other sounds?
+         // ProjectileHitAudio::ProjectileHitSample sample = reference_samples[std::rand() % reference_samples.size()];
+         // Audio::getInstance().playSample(sample._sample, sample._volume);
+      }
+
+      // play animation
+      const auto reference_animation = ProjectileHitAnimation::getReferenceAnimation(hit_info._projectile_animation_identifier);
       ProjectileHitAnimation::playHitAnimation(gx, gy, it->_angle, reference_animation->second);
    }
 }
@@ -176,7 +186,7 @@ void Projectile::setRotating(bool rotating)
 void Projectile::update(const sf::Time& dt)
 {
    collectHitInformation();
-   addHitAnimations();
+   processHitInformation();
    ProjectileHitAnimation::updateHitAnimations(dt);
 }
 

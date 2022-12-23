@@ -266,7 +266,7 @@ void PlayerJump::jump()
       else
       {
          _jump_dust_animation_callback();
-         Audio::getInstance().playSample("player_jump_liftoff.wav");
+         Audio::getInstance().playSample("player_jump_liftoff.wav", 0.3f);
       }
    }
    else
