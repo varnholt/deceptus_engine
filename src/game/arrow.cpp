@@ -1,6 +1,7 @@
 #include "arrow.h"
 
 #include "framework/tools/globalclock.h"
+#include "projectilehitaudio.h"
 #include "texturepool.h"
 
 
@@ -26,6 +27,12 @@ Arrow::Arrow()
    if (!_animation_initialised)
    {
       _animation_initialised = true;
+
+      ProjectileHitAudio::addReferenceSamples(
+         default_bow_projectile_identifier,
+         {ProjectileHitAudio::ProjectileHitSample{"arrow_hit_1.wav", 1.0f},
+          ProjectileHitAudio::ProjectileHitSample{"arrow_hit_2.wav", 1.0f}}
+      );
 
       ProjectileHitAnimation::addReferenceAnimation(
          default_bow_projectile_identifier,

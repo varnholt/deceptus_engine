@@ -21,6 +21,7 @@
 #include "mechanisms/laser.h"
 #include "onewaywall.h"
 #include "physics/physicsconfiguration.h"
+#include "playeraudio.h"
 #include "playerinfo.h"
 #include "savestate.h"
 #include "screentransition.h"
@@ -30,6 +31,7 @@
 #include "weapon.h"
 #include "weaponsystem.h"
 
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
@@ -1253,7 +1255,7 @@ void Player::updateFootsteps()
          if (_time.asSeconds() > _next_footstep_time)
          {
             // play footstep
-            Audio::getInstance().playSample((_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav");
+            Audio::getInstance().playSample((_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f);
             _next_footstep_time = _time.asSeconds() + 1.0f / vel;
          }
       }
@@ -1517,6 +1519,7 @@ void Player::update(const sf::Time& dt)
    _climb.update(_body, isInAir());
    updatePlatformMovement(dt);
    updatePixelPosition();
+   PlayerAudio::updateListenerPosition(_pixel_position_f);
    updateFootsteps();
    updatePortal();
    updatePreviousBodyState();

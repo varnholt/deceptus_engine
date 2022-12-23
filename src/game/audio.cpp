@@ -87,6 +87,9 @@ void Audio::initializeSamples()
    addSample("messagebox_confirm.wav");
    addSample("messagebox_cancel.wav");
 
+   addSample("arrow_hit_1.wav");
+   addSample("arrow_hit_2.wav");
+
    // make separate audio interface for player
    addSample("player_doublejump_01.mp3");
    addSample("player_doublejump_02.mp3");

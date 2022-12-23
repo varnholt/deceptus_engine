@@ -47,6 +47,7 @@ struct LuaNode : public GameMechanism, public GameNode
    void updatePosition();
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
+   void updateHitboxOffsets();
 
    //! add a circle shape to the body of the object
    void addShapeCircle(float radius, float x, float y);
@@ -122,6 +123,15 @@ struct LuaNode : public GameMechanism, public GameNode
 
    //! add a hitbox
    void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
+
+   //! add an audio range
+   void addAudioRange(float far_distance, float far_volume, float near_distance, float near_volume);
+
+   //! add a sample
+   void addSample(const std::string& sample);
+
+   //! play a sample
+   void playSample(const std::string& sample, float volume);
 
    const std::optional<HighResTimePoint> getHitTime() const;
 

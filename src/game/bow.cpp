@@ -8,7 +8,6 @@
 
 // http://www.iforce2d.net/b2dtut/sticky-projectiles
 
-
 // |         |         |         |         |
 // |         |         |         |         |
 // |         |   ######x         |         |
@@ -18,7 +17,6 @@
 // |         |   ######x         |         |
 // |         |         |         |         |
 //                   x = 0
-
 
 namespace
 {
@@ -36,11 +34,10 @@ static constexpr auto start_frame = 15;
 static constexpr auto frames_per_row = 15;
 static constexpr auto animation_frame_count = 4;
 
-uint16_t category_bits = CategoryEnemyCollideWith;                 // I am a ...
-uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly; // I collide with ...
-int16_t group_index = 0;                                           // 0 is default
-}
-
+uint16_t category_bits = CategoryEnemyCollideWith;                  // I am a ...
+uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly;  // I collide with ...
+int16_t group_index = 0;                                            // 0 is default
+}  // namespace
 
 Bow::Bow()
 {
@@ -49,10 +46,7 @@ Bow::Bow()
 
    // the shape is only defined here to align the texture on it
    _shape = std::make_unique<b2PolygonShape>();
-   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox(
-      (fabs(arrow_tail) + fabs(arrow_tip)) * scale,
-      arrow_width * scale
-   );
+   dynamic_cast<b2PolygonShape*>(_shape.get())->SetAsBox((fabs(arrow_tail) + fabs(arrow_tip)) * scale, arrow_width * scale);
 
    // create reference animation from frame data
    AnimationFrameData frame_data(
@@ -69,13 +63,11 @@ Bow::Bow()
    setProjectileAnimation(frame_data);
 }
 
-
 Bow::~Bow()
 {
-   std::for_each(begin(_arrows), end(_arrows), [](auto ptr) {delete ptr;});
+   std::for_each(begin(_arrows), end(_arrows), [](auto ptr) { delete ptr; });
    _arrows.clear();
 }
-
 
 void Bow::load(b2World* world)
 {
@@ -84,13 +76,12 @@ void Bow::load(b2World* world)
    arrow->setAnimation(_projectile_reference_animation._animation);
    arrow->_start_time = GlobalClock::getInstance().getElapsedTimeInMs();
 
-   _loaded_arrow->addDestroyedCallback([this, arrow](){
-      _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end());
-   });
+   _loaded_arrow->addDestroyedCallback([this, arrow]() { _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end()); }
+   );
 
-   _loaded_arrow->addDestroyedCallback([this, arrow](){
-      _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), arrow), _projectiles.end());
-   });
+   _loaded_arrow->addDestroyedCallback(
+      [this, arrow]() { _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), arrow), _projectiles.end()); }
+   );
 
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
@@ -98,17 +89,17 @@ void Bow::load(b2World* world)
 
    b2PolygonShape polygon_shape;
    b2Vec2 vertices[4];
-   vertices[0].Set(arrow_tail * scale,  0.0f               );
-   vertices[1].Set( 0.0,               -arrow_width * scale);
-   vertices[2].Set(arrow_tip * scale,   0.0f               );
-   vertices[3].Set( 0.0,                arrow_width * scale);
+   vertices[0].Set(arrow_tail * scale, 0.0f);
+   vertices[1].Set(0.0, -arrow_width * scale);
+   vertices[2].Set(arrow_tip * scale, 0.0f);
+   vertices[3].Set(0.0, arrow_width * scale);
    polygon_shape.Set(vertices, 4);
 
    b2FixtureDef fixture_def;
    fixture_def.shape = &polygon_shape;
    fixture_def.density = 1.0f;
-   fixture_def.filter.groupIndex   = group_index;
-   fixture_def.filter.maskBits     = mask_bits_standing;
+   fixture_def.filter.groupIndex = group_index;
+   fixture_def.filter.maskBits = mask_bits_standing;
    fixture_def.filter.categoryBits = category_bits;
 
    auto loaded_arrow_body = world->CreateBody(&body_def);
@@ -120,12 +111,7 @@ void Bow::load(b2World* world)
    _loaded_arrow->setBody(loaded_arrow_body);
 }
 
-
-void Bow::use(
-   const std::shared_ptr<b2World>& world,
-   const b2Vec2& pos,
-   const b2Vec2& dir
-)
+void Bow::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2Vec2& dir)
 {
    // the bow workflow could be split up into
    // 1) aim
@@ -155,18 +141,15 @@ void Bow::use(
    _loaded_arrow = nullptr;
 }
 
-
 b2Body* Bow::getLauncherBody() const
 {
    return _launcher_body;
 }
 
-
 void Bow::setLauncherBody(b2Body* launcher_body)
 {
    _launcher_body = launcher_body;
 }
-
 
 void Bow::updateRotation(Arrow* arrow)
 {
@@ -181,7 +164,6 @@ void Bow::updateRotation(Arrow* arrow)
       arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
    }
 }
-
 
 void Bow::update(const sf::Time& time)
 {
@@ -206,5 +188,3 @@ void Bow::update(const sf::Time& time)
       updateRotation(arrow);
    }
 }
-
-

@@ -25,6 +25,7 @@ public:
       float _angle = 0.0f;
       WeaponType _weapon_type = WeaponType::None;
       std::string _projectile_animation_identifier;
+      std::string _hit_sample;
    };
 
    using DestroyedCallback = std::function<void(void)>;
@@ -68,7 +69,7 @@ public:
 protected:
 
    static void collectHitInformation();
-   static void addHitAnimations();
+   static void processHitInformation();
 
    static constexpr auto default_projectile_identifier = "default";
 

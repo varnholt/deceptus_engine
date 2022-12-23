@@ -53,7 +53,7 @@ bool GameContactListener::isEnemy(FixtureNode* obj) const
 
 void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
 {
-   auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
+   const auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
 
    if (isPlayer(fixture_node_b))
    {
