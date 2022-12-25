@@ -14,21 +14,6 @@ const std::string sfx_root = "data/sounds/";
 const std::string path = "data/music";
 }  // namespace
 
-/*
-
-ui_back_cancel
-ui_menu_open
-ui_menu_close
-ui_menu_select
-ui_menu_accept
-ui_menu_item_navigation
-ui_letter_sound
-ui_message_box_close
-ui_message_box_open
-ui_state_pause
-ui_state_resume
-
- */
 
 //-----------------------------------------------------------------------------
 /*!
@@ -43,6 +28,15 @@ Audio::Audio()
 }
 
 //-----------------------------------------------------------------------------
+Audio::~Audio()
+{
+   for (auto& cb : _shutdown_callbacks)
+   {
+      cb();
+   }
+}
+
+//-----------------------------------------------------------------------------
 /*!
  * \brief Audio::getInstance
  * \return
@@ -54,24 +48,25 @@ Audio& Audio::getInstance()
 }
 
 //-----------------------------------------------------------------------------
+std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
+{
+   auto buf = std::make_shared<sf::SoundBuffer>();
+   if (!buf->loadFromFile(sfx_root + filename))
+   {
+      Log::Error() << "unable to load file: " << filename;
+   }
+   return buf;
+};
+
+//-----------------------------------------------------------------------------
 void Audio::addSample(const std::string& sample)
 {
-   if (_sounds.find(sample) != _sounds.end())
+   if (_sound_buffers.find(sample) != _sound_buffers.end())
    {
       return;
    }
 
-   auto loader = [](const std::string& fileName) -> sf::SoundBuffer
-   {
-      sf::SoundBuffer buf;
-      if (!buf.loadFromFile(sfx_root + fileName))
-      {
-         Log::Error() << "unable to load file: " << fileName;
-      }
-      return buf;
-   };
-
-   _sounds[sample] = loader(sample);
+   _sound_buffers[sample] = loadFile(sample);
 }
 
 //-----------------------------------------------------------------------------
@@ -79,7 +74,6 @@ void Audio::initializeSamples()
 {
    addSample("coin.wav");
    addSample("death.wav");
-   addSample("footstep.wav");
    addSample("healthup.wav");
    addSample("hurt.wav");
 
@@ -92,7 +86,6 @@ void Audio::initializeSamples()
 
    // make separate audio interface for player
    addSample("player_doublejump_01.mp3");
-   addSample("player_doublejump_02.mp3");
    addSample("player_grunt_01.wav");
    addSample("player_grunt_02.wav");
    addSample("player_jump_land.wav");
@@ -145,6 +138,16 @@ void Audio::initializeMusic()
 }
 
 //-----------------------------------------------------------------------------
+void Audio::debug()
+{
+   const auto stopped_thread_count = std::count_if(
+      _sound_threads.begin(), _sound_threads.end(), [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Stopped; }
+   );
+
+   std::cout << stopped_thread_count << "/" << _sound_threads.size() << " are free" << std::endl;
+}
+
+//-----------------------------------------------------------------------------
 void Audio::initializeMusicVolume()
 {
    const auto& config = GameConfiguration::getInstance();
@@ -154,38 +157,52 @@ void Audio::initializeMusicVolume()
 }
 
 //-----------------------------------------------------------------------------
-std::optional<int32_t> Audio::playSample(const std::string& sample, float volume, bool looped)
+std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 {
-   // find a free sample thread
-   const auto& thread_it =
-      std::find_if(_threads.begin(), _threads.end(), [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Stopped; });
+   std::lock_guard<std::mutex> guard(_mutex);
 
-   if (thread_it == _threads.cend())
+   // debug();
+
+   // find a free sample thread
+   const auto& thread_it = std::find_if(
+      _sound_threads.begin(), _sound_threads.end(), [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Stopped; }
+   );
+
+   if (thread_it == _sound_threads.cend())
    {
+      Log::Error() << "no free thread to play: " << play_info._sample_name;
       return std::nullopt;
    }
 
    // check if we have the sample
-   const auto it = _sounds.find(sample);
-
-   if (it == _sounds.cend())
+   const auto it = _sound_buffers.find(play_info._sample_name);
+   if (it == _sound_buffers.cend())
    {
+      Log::Error() << "sample not found: " << play_info._sample_name;
       return std::nullopt;
    }
 
-   thread_it->_sound.setBuffer(it->second);
-   thread_it->_filename = sample;
-   thread_it->setVolume(volume);
-   thread_it->_sound.setLoop(looped);
+   thread_it->_sound.setBuffer(*it->second);
+   thread_it->_filename = play_info._sample_name;
+   thread_it->setVolume(play_info._volume);
+   thread_it->_sound.setLoop(play_info._looped);
+
+   if (play_info._pos.has_value())
+   {
+      thread_it->_sound.setPosition(play_info._pos->x, play_info._pos->y, 0.0f);
+   }
+
    thread_it->_sound.play();
 
-   return std::distance(_threads.begin(), thread_it);
+   return std::distance(_sound_threads.begin(), thread_it);
 }
 
 //-----------------------------------------------------------------------------
 void Audio::stopSample(const std::string& name)
 {
-   auto threads = _threads | std::views::filter([name](auto& thread) { return thread._filename == name; });
+   std::lock_guard<std::mutex> guard(_mutex);
+
+   auto threads = _sound_threads | std::views::filter([name](auto& thread) { return thread._filename == name; });
    for (auto& thread : threads)
    {
       thread._sound.stop();
@@ -195,13 +212,17 @@ void Audio::stopSample(const std::string& name)
 //-----------------------------------------------------------------------------
 void Audio::stopSample(int32_t thread)
 {
-   _threads[thread]._sound.stop();
+   std::lock_guard<std::mutex> guard(_mutex);
+
+   _sound_threads[thread]._sound.stop();
 }
 
 //-----------------------------------------------------------------------------
 void Audio::setVolume(int32_t thread, float volume)
 {
-   _threads[thread].setVolume(volume);
+   std::lock_guard<std::mutex> guard(_mutex);
+
+   _sound_threads[thread].setVolume(volume);
 }
 
 //-----------------------------------------------------------------------------
@@ -235,7 +256,13 @@ sf::Music& Audio::getMusic() const
 }
 
 //-----------------------------------------------------------------------------
-void Audio::SampleThread::setVolume(float volume)
+void Audio::addShutdownCallback(const ShutdownCallback& shutdown_callback)
+{
+   _shutdown_callbacks.push_back(shutdown_callback);
+}
+
+//-----------------------------------------------------------------------------
+void Audio::SoundThread::setVolume(float volume)
 {
    const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
    const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;

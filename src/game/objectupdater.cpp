@@ -1,5 +1,6 @@
 #include "objectupdater.h"
 
+#include "audio.h"
 #include "framework/math/sfmlmath.h"
 #include "gamestate.h"
 
@@ -8,13 +9,13 @@
 ObjectUpdater::ObjectUpdater()
 {
    _thread = std::make_unique<std::thread>(&ObjectUpdater::run, this);
+   Audio::getInstance().addShutdownCallback([this]() { stop(); });
 }
 
 ObjectUpdater::~ObjectUpdater()
 {
    _stopped = true;
    _thread->join();
-
    std::cout << "object updater destroyed" << std::endl;
 }
 
