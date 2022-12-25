@@ -16,22 +16,22 @@ void GameMechanismAudio::play(Effect effect)
    {
       case GameMechanismAudio::Effect::BouncerJump:
       {
-         Audio::getInstance().playSample("mechanism_bouncer.wav");
+         Audio::getInstance().playSample({"mechanism_bouncer.wav"});
          break;
       }
       case GameMechanismAudio::Effect::CollapsingPlatformCrumble:
       {
-         Audio::getInstance().playSample("mechanism_collapsing_platform_crumble.wav");
+         Audio::getInstance().playSample({"mechanism_collapsing_platform_crumble.wav"});
          break;
       }
       case GameMechanismAudio::Effect::LeverOn:
       {
-         Audio::getInstance().playSample("mechanism_switch_on.wav");
+         Audio::getInstance().playSample({"mechanism_switch_on.wav"});
          break;
       }
       case GameMechanismAudio::Effect::LeverOff:
       {
-         Audio::getInstance().playSample("mechanism_switch_off.wav");
+         Audio::getInstance().playSample({"mechanism_switch_off.wav"});
          break;
       }
    }

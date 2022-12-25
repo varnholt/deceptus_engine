@@ -133,7 +133,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // yay
       if (key == sf::Keyboard::Return)
       {
-         Audio::getInstance().playSample("messagebox_confirm.wav");
+         Audio::getInstance().playSample({"messagebox_confirm.wav"});
 
          if (__active->_buttons & static_cast<int32_t>(Button::Yes))
          {
@@ -157,7 +157,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       // nay
       if (key == sf::Keyboard::Escape)
       {
-         Audio::getInstance().playSample("messagebox_cancel.wav");
+         Audio::getInstance().playSample({"messagebox_cancel.wav"});
 
          if (__active->_buttons & static_cast<int32_t>(Button::No))
          {
@@ -508,7 +508,7 @@ void MessageBox::messageBox(
    int32_t buttons
 )
 {
-   Audio::getInstance().playSample("messagebox_open_01.wav");
+   Audio::getInstance().playSample({"messagebox_open_01.wav"});
    __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
 }
 

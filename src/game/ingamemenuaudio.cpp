@@ -17,27 +17,27 @@ void InGameMenuAudio::play(SoundEffect effect)
    {
       case InGameMenuAudio::SoundEffect::MenuNext:
       {
-         Audio::getInstance().playSample("ingame_menu_menu_next.wav");
+         Audio::getInstance().playSample({"ingame_menu_menu_next.wav"});
          break;
       }
       case InGameMenuAudio::SoundEffect::MenuOpen:
       {
-         Audio::getInstance().playSample("ingame_menu_menu_open.wav");
+         Audio::getInstance().playSample({"ingame_menu_menu_open.wav"});
          break;
       }
       case InGameMenuAudio::SoundEffect::MenuClose:
       {
-         Audio::getInstance().playSample("ingame_menu_menu_close.wav");
+         Audio::getInstance().playSample({"ingame_menu_menu_close.wav"});
          break;
       }
       case InGameMenuAudio::SoundEffect::ItemSelect:
       {
-         Audio::getInstance().playSample("ingame_menu_item_select.wav");
+         Audio::getInstance().playSample({"ingame_menu_item_select.wav"});
          break;
       }
       case InGameMenuAudio::SoundEffect::ItemNavigate:
       {
-         Audio::getInstance().playSample("ingame_menu_item_navigate.wav");
+         Audio::getInstance().playSample({"ingame_menu_item_navigate.wav"});
          break;
       }
    }
