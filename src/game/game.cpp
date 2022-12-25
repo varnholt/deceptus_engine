@@ -834,6 +834,17 @@ void Game::processEvent(const sf::Event& event)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void Game::shutdown()
+{
+   std::exit(0);
+
+   if (_level)
+   {
+      _level->shutdown();
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
    if (Console::getInstance().isActive())
@@ -876,7 +887,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    {
       case sf::Keyboard::Num0:
       {
-         Audio::getInstance().playSample("powerup.wav");
+         Audio::getInstance().playSample({"powerup.wav"});
 
          if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
          {
@@ -907,7 +918,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          if (event.key.alt)
          {
-            std::exit(0);
+            shutdown();
          }
          DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
          break;
@@ -966,7 +977,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Q:
       {
-         std::exit(0);
+         shutdown();
       }
       case sf::Keyboard::R:
       {

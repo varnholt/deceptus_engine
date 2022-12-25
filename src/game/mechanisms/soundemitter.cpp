@@ -22,7 +22,7 @@ void SoundEmitter::setAudioEnabled(bool audio_enabled)
    if (audio_enabled)
    {
       // start playing
-      _thread_id = Audio::getInstance().playSample(_filename, _volume, _looped);
+      _thread_id = Audio::getInstance().playSample({_filename, _volume, _looped});
    }
    else
    {

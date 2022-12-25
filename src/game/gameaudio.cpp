@@ -14,12 +14,12 @@ void GameAudio::play(SoundEffect effect)
    {
       case GameAudio::SoundEffect::GameStatePause:
       {
-         Audio::getInstance().playSample("gamestate_pause.ogg");
+         Audio::getInstance().playSample({"gamestate_pause.ogg"});
          break;
       }
       case GameAudio::SoundEffect::GameStateResume:
       {
-         Audio::getInstance().playSample("gamestate_resume.ogg");
+         Audio::getInstance().playSample({"gamestate_resume.ogg"});
          break;
       }
    }

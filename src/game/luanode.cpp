@@ -2175,7 +2175,7 @@ void LuaNode::playSample(const std::string& sample, float volume)
       return;
    }
 
-   Audio::getInstance().playSample(sample, volume * _volume);
+   Audio::getInstance().playSample({sample, volume * _volume});
 }
 
 void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)

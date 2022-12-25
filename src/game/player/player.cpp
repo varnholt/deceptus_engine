@@ -1074,7 +1074,7 @@ void Player::startHardLanding()
    _hard_landing = true;
    _hard_landing_cycles = 0;
 
-   Audio::getInstance().playSample("player_grunt_01.wav");
+   Audio::getInstance().playSample({"player_grunt_01.wav"});
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1149,7 +1149,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
    {
       _damage_initialized = true;
 
-      Audio::getInstance().playSample("hurt.wav");
+      Audio::getInstance().playSample({"hurt.wav"});
 
       // not converting this to PPM to make the effect of the applied force more visible
       auto body = getBody();
@@ -1255,7 +1255,7 @@ void Player::updateFootsteps()
          if (_time.asSeconds() > _next_footstep_time)
          {
             // play footstep
-            Audio::getInstance().playSample((_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f);
+            Audio::getInstance().playSample({(_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f});
             _next_footstep_time = _time.asSeconds() + 1.0f / vel;
          }
       }
@@ -1312,7 +1312,7 @@ void Player::updateBendDown()
    if (!_bend._was_bending_down && _bend._bending_down)
    {
       _bend._timepoint_bend_down_start = StopWatch::getInstance().now();
-      Audio::getInstance().playSample("player_kneel_01.wav");
+      Audio::getInstance().playSample({"player_kneel_01.wav"});
    }
 
    if (_bend._was_bending_down && !_bend._bending_down)
@@ -1493,7 +1493,7 @@ void Player::updateSpawn()
    }
 
    _spawn_complete = true;
-   Audio::getInstance().playSample("player_spawn_01.wav");
+   Audio::getInstance().playSample({"player_spawn_01.wav"});
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1653,7 +1653,7 @@ void Player::updateAtmosphere()
 
    if (!was_inside_water && isInWater())
    {
-      Audio::getInstance().playSample("splash.wav");
+      Audio::getInstance().playSample({"splash.wav"});
 
       AnimationPool::getInstance().create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
    }
@@ -1797,12 +1797,12 @@ void Player::attack()
          if (isInAir())
          {
             _attack._timepoint_attack_jumping_start = now;
-            Audio::getInstance().playSample(std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1));
+            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
          else if (_controls->isBendDownActive())
          {
             _attack._timepoint_attack_bend_down_start = now;
-            Audio::getInstance().playSample(std::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1));
+            Audio::getInstance().playSample({std::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
          }
          else
          {
@@ -1810,7 +1810,7 @@ void Player::attack()
             _controls->lockOrientation(
                std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getSwordAttackDurationStanding())
             );
-            Audio::getInstance().playSample(std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1));
+            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
@@ -1860,7 +1860,7 @@ void Player::die()
 
    updateDeadFixtures();
 
-   Audio::getInstance().playSample("death.wav");
+   Audio::getInstance().playSample({"death.wav"});
 }
 
 //----------------------------------------------------------------------------------------------------------------------

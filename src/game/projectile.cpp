@@ -123,9 +123,8 @@ void Projectile::processHitInformation()
       const auto reference_samples = ProjectileHitAudio::getReferenceSamples(hit_info._projectile_animation_identifier);
       if (!reference_samples.empty())
       {
-         // overlaps with other sounds?
-         // ProjectileHitAudio::ProjectileHitSample sample = reference_samples[std::rand() % reference_samples.size()];
-         // Audio::getInstance().playSample(sample._sample, sample._volume);
+         ProjectileHitAudio::ProjectileHitSample sample = reference_samples[std::rand() % reference_samples.size()];
+         Audio::getInstance().playSample({sample._sample, sample._volume});
       }
 
       // play animation

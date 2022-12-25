@@ -59,6 +59,7 @@ public:
    virtual void initialize();
    void initializeTextures();
    void reset();
+   void shutdown();
 
    void saveState();
 

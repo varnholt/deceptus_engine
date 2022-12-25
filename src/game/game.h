@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audio.h"
 #include "console.h"
 #include "constants.h"
 #include "drawstates.h"
@@ -37,6 +38,7 @@ public:
    void takeScreenshot();
 
 private:
+   void shutdown();
    void processEvent(const sf::Event& event);
 
    void initializeWindow();
@@ -95,5 +97,6 @@ private:
    int32_t _recording_counter = 0;
    std::vector<sf::Image> _recording_images;
    using GameAudioCallback = std::function<void(GameAudio::SoundEffect)>;
+   Audio _audio;
    GameAudioCallback _audio_callback;
 };
