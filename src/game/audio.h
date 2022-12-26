@@ -66,7 +66,7 @@ private:
    void debug();
 
    std::mutex _mutex;
-   std::map<std::string, std::shared_ptr<sf::SoundBuffer>> _sound_buffers;
+   std::unordered_map<std::string, std::shared_ptr<sf::SoundBuffer>> _sound_buffers;
    std::array<SoundThread, 50> _sound_threads;
 
    mutable sf::Music _music;
