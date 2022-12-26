@@ -55,6 +55,11 @@ std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
    {
       Log::Error() << "unable to load file: " << filename;
    }
+
+   if (buf->getChannelCount() < 2)
+   {
+      Log::Warning() << filename << " seems to be mono :(";
+   }
    return buf;
 };
 

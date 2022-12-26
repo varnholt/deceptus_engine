@@ -1074,7 +1074,7 @@ void Player::startHardLanding()
    _hard_landing = true;
    _hard_landing_cycles = 0;
 
-   Audio::getInstance().playSample({"player_grunt_01.wav"});
+   Audio::getInstance().playSample({"player_grunt_02.wav"});
 }
 
 //----------------------------------------------------------------------------------------------------------------------
