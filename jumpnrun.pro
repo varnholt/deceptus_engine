@@ -247,6 +247,7 @@ SOURCES += \
    src/game/player/playerinput.cpp \
    src/game/player/playerjump.cpp \
    src/game/player/timerlock.cpp \
+   src/game/playerutils.cpp \
    src/game/preloader.cpp \
    src/game/projectile.cpp \
    src/game/projectilehitanimation.cpp \
@@ -461,6 +462,7 @@ HEADERS += \
    src/game/player/playerjumptrace.h \
    src/game/player/playerspeed.h \
    src/game/player/timerlock.h \
+   src/game/playerutils.h \
    src/game/preloader.h \
    src/game/projectile.h \
    src/game/projectilehitanimation.h \
