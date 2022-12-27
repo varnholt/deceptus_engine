@@ -16,6 +16,7 @@ public:
 
    void run();
    void stop();
+   bool stopped() const;
 
    void setPlayerPosition(const sf::Vector2f& position);
 
@@ -26,7 +27,7 @@ private:
    void updateVolume(const std::shared_ptr<GameMechanism>& mechanism);
    float computeDistanceToPlayerPx(const std::shared_ptr<GameMechanism>& mechanism);
 
-   std::mutex _mutex;
+   mutable std::mutex _mutex;
 
    std::vector<std::shared_ptr<LuaNode>> _enemies;
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms;
