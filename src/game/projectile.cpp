@@ -1,6 +1,8 @@
 #include "projectile.h"
 
 #include "audio.h"
+#include "framework/math/sfmlmath.h"
+#include "playerutils.h"
 #include "projectilehitanimation.h"
 #include "projectilehitaudio.h"
 
@@ -109,6 +111,8 @@ void Projectile::collectHitInformation()
 
 void Projectile::processHitInformation()
 {
+   const auto player_position = PlayerUtils::getPixelPositionFloat();
+
    std::vector<HitInformation>::iterator it;
    for (it = _hit_information.begin(); it != _hit_information.end(); ++it)
    {
@@ -119,12 +123,19 @@ void Projectile::processHitInformation()
 
       // Log::Info() << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle;
 
-      // play sample
-      const auto reference_samples = ProjectileHitAudio::getReferenceSamples(hit_info._projectile_animation_identifier);
-      if (!reference_samples.empty())
+      // at the moment the distance to the player is calculated and if the player is close enough, he'll hear the sound.
+      // in the future this should be replaced by just doing the 'are you in the same chunk' check.
+      const auto distance_px = SfmlMath::length(player_position - sf::Vector2f{gx, gy});
+
+      if (distance_px < 600.0f)
       {
-         ProjectileHitAudio::ProjectileHitSample sample = reference_samples[std::rand() % reference_samples.size()];
-         Audio::getInstance().playSample({sample._sample, sample._volume});
+         // play sample
+         const auto reference_samples = ProjectileHitAudio::getReferenceSamples(hit_info._projectile_animation_identifier);
+         if (!reference_samples.empty())
+         {
+            ProjectileHitAudio::ProjectileHitSample sample = reference_samples[std::rand() % reference_samples.size()];
+            Audio::getInstance().playSample({sample._sample, sample._volume});
+         }
       }
 
       // play animation

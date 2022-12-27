@@ -98,7 +98,7 @@ void ObjectUpdater::run()
    using namespace std::chrono_literals;
 
    // virtual std::optional<sf::FloatRect> getBoundingBoxPx() = 0;
-   while (!_stopped)
+   while (!stopped())
    {
       // update volume of all mechanisms and enemies
       {
@@ -123,7 +123,14 @@ void ObjectUpdater::run()
 
 void ObjectUpdater::stop()
 {
+   std::lock_guard<std::mutex> guard(_mutex);
    _stopped = true;
+}
+
+bool ObjectUpdater::stopped() const
+{
+   std::lock_guard<std::mutex> guard(_mutex);
+   return _stopped;
 }
 
 void ObjectUpdater::setPlayerPosition(const sf::Vector2f& position)
