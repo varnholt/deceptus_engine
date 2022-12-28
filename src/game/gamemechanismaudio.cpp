@@ -8,6 +8,8 @@ void GameMechanismAudio::initialize()
    Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
    Audio::getInstance().addSample("mechanism_switch_off.wav");
    Audio::getInstance().addSample("mechanism_switch_on.wav");
+   Audio::getInstance().addSample("mechanism_spikeball_01.wav");
+   Audio::getInstance().addSample("mechanism_spikeball_02.wav");
 }
 
 void GameMechanismAudio::play(Effect effect)
