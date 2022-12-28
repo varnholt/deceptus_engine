@@ -67,5 +67,8 @@ private:
    b2FixtureDef _ball_fixture_def;
 
    float _angle = 0.0f;
+   float _last_ball_x_velocity = 0.0f;
+   int32_t _swing_counter = 0;
    SpikeConfig _config;
+   int32_t _instance_id{0};
 };

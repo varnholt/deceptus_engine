@@ -1,5 +1,8 @@
 #include "spikeball.h"
 
+#include <iostream>
+
+#include "audio.h"
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/math/hermitecurve.h"
@@ -8,6 +11,11 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "player/player.h"
 #include "texturepool.h"
+
+namespace
+{
+auto instance_counter = 0;
+}
 
 /*
    spike ball concept
@@ -30,8 +38,11 @@
    https://www.iforce2d.net/b2dtut/joints-revolute
 */
 
-SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent)
+SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance_counter++)
 {
+   _audio_range = AudioRange{800.0f, 0.0f, 100.0f, 1.0f};
+   _has_audio = true;
+
    setClassName(typeid(SpikeBall).name());
    setZ(16);
 
@@ -126,13 +137,12 @@ void SpikeBall::update(const sf::Time& dt)
 
    static const b2Vec2 up{0.0, 1.0};
 
-   auto c1_pos_m = _chain_elements[0]->GetPosition();
-   auto c2_pos_m = _chain_elements[static_cast<size_t>(_config._chain_element_count - 1)]->GetPosition();
+   const auto c1_pos_m = _chain_elements[0]->GetPosition();
+   const auto c2_pos_m = _chain_elements[static_cast<size_t>(_config._chain_element_count - 1)]->GetPosition();
 
    auto c_dist_m = (c2_pos_m - c1_pos_m);
    c_dist_m.Normalize();
 
-   // _angle = acos(b2Dot(up, c_dist_m) / (c_dist_m.Length() * up.Length()));
    _angle = acos(b2Dot(up, c_dist_m) / (c_dist_m.LengthSquared() * up.LengthSquared()));
 
    if (c_dist_m.x > 0.0f)
@@ -140,12 +150,27 @@ void SpikeBall::update(const sf::Time& dt)
       _angle = -_angle;
    }
 
-   _spike_sprite.setRotation(_angle * FACTOR_RAD_TO_DEG);
+   const auto angle_deg = _angle * FACTOR_RAD_TO_DEG;
+   _spike_sprite.setRotation(angle_deg);
+
+   // play swoosh sound on every direction change
+   if (_audio_enabled)
+   {
+      const auto changed_direction = std::signbit(_last_ball_x_velocity) != std::signbit(_ball_body->GetLinearVelocity().x);
+      if (changed_direction)
+      {
+         const auto sample = (_swing_counter++ & 1) ? Audio::PlayInfo{"mechanism_spikeball_01.wav", _volume}
+                                                    : Audio::PlayInfo{"mechanism_spikeball_02.wav", _volume};
+         Audio::getInstance().playSample(sample);
+      }
+
+      _last_ball_x_velocity = _ball_body->GetLinearVelocity().x;
+   }
 
    // slightly push the ball all the way while it's moving from the right to the left
-   auto f = dt.asSeconds() * _config._push_factor;
    if (_ball_body->GetLinearVelocity().x < 0.0f)
    {
+      const auto f = dt.asSeconds() * _config._push_factor;
       _ball_body->ApplyLinearImpulse(b2Vec2{-f, f}, _ball_body->GetWorldCenter(), true);
    }
 }
@@ -157,10 +182,10 @@ std::optional<sf::FloatRect> SpikeBall::getBoundingBoxPx()
 
 void SpikeBall::setup(const GameDeserializeData& data)
 {
+   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
    if (data._tmx_object->_properties)
    {
-      _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
-
       auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
