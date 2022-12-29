@@ -1,5 +1,6 @@
 #include "moveablebox.h"
 
+#include "audio.h"
 #include "constants.h"
 #include "fixturenode.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -30,6 +31,23 @@ void MoveableBox::update(const sf::Time& /*dt*/)
    const auto x = _body->GetPosition().x * PPM;
    const auto y = _body->GetPosition().y * PPM;
    _sprite.setPosition(x, y - 24);
+
+   // if the thing is moving, start playing a scratching sound
+   if (fabs(_body->GetLinearVelocity().x) > 0.01)
+   {
+      if (!_pushing_sample.has_value())
+      {
+         _pushing_sample = Audio::getInstance().playSample({"mechanism_moveable_object_01.wav", 1.0, true});
+      }
+   }
+   else
+   {
+      if (_pushing_sample.has_value())
+      {
+         Audio::getInstance().stopSample(_pushing_sample.value());
+         _pushing_sample.reset();
+      }
+   }
 }
 
 //--------------------------------------------------------------------------------------------------
