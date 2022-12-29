@@ -6,6 +6,7 @@ void GameMechanismAudio::initialize()
 {
    Audio::getInstance().addSample("mechanism_bouncer.wav");
    Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
+   Audio::getInstance().addSample("mechanism_moveable_object_01.wav");
    Audio::getInstance().addSample("mechanism_switch_off.wav");
    Audio::getInstance().addSample("mechanism_switch_on.wav");
    Audio::getInstance().addSample("mechanism_spikeball_01.wav");

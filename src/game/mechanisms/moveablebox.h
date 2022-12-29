@@ -2,6 +2,7 @@
 
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
+#include <optional>
 
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
@@ -28,4 +29,5 @@ private:
    sf::Sprite _sprite;
    sf::Vector2f _size;
    b2Body* _body = nullptr;
+   std::optional<int32_t> _pushing_sample;
 };
