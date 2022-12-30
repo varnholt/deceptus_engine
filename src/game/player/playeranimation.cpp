@@ -776,6 +776,11 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallSlideAnima
       return std::nullopt;
    }
 
+   if (data._dash_dir.has_value())
+   {
+      return std::nullopt;
+   }
+
    const auto& mapped_animation = getMappedArmedAnimation(_wallslide_impact_l, data);
 
    if (StopWatch::duration(data._timepoint_wallslide, now) < mapped_animation->_overall_time_chrono)
