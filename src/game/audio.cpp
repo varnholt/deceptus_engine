@@ -90,6 +90,7 @@ void Audio::initializeSamples()
    addSample("arrow_hit_2.wav");
 
    // make separate audio interface for player
+   addSample("player_dash_01.wav");
    addSample("player_doublejump_01.mp3");
    addSample("player_grunt_01.wav");
    addSample("player_grunt_02.wav");
@@ -112,6 +113,7 @@ void Audio::initializeSamples()
    addSample("player_sword_standing_07.wav");
    addSample("player_sword_standing_08.wav");
    addSample("player_sword_standing_09.wav");
+   addSample("player_wallslide_01.wav");
 
    addSample("powerup.wav");
    addSample("splash.wav");
