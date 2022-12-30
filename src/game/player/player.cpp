@@ -1093,23 +1093,23 @@ void Player::updateImpulse()
       return;
    }
 
-   const auto dx = _velocity_previous.x - _body->GetLinearVelocity().x;
-   const auto dy = _velocity_previous.y - _body->GetLinearVelocity().y;
-   const auto horizontal = (fabs(dx) > fabs(dy));
-
+   // const auto dx = _velocity_previous.x - _body->GetLinearVelocity().x;
+   // const auto dy = _velocity_previous.y - _body->GetLinearVelocity().y;
+   //
    // Log::Info()
    //    << "intensity: " << intensity
    //    << " dx: " << dx
    //    << " dy: " << dy
    //    << " dir: " << (horizontal ? "x" : "y");
-
-   if (horizontal)
-   {
-      if (impulse > 0.4f)
-      {
-         Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
-      }
-   }
+   //
+   // const auto horizontal = (fabs(dx) > fabs(dy));
+   // if (horizontal)
+   // {
+   //    if (impulse > 0.4f)
+   //    {
+   //       Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
+   //    }
+   // }
 
    if (impulse > 1.0f)
    {
