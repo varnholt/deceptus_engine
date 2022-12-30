@@ -230,5 +230,7 @@ private:
    PlayerAnimation _player_animation;
    std::deque<PositionedAnimation> _last_animations;
 
+   std::optional<int32_t> _wallslide_sample;
+
    static Player* __current;
 };

@@ -1457,7 +1457,20 @@ void Player::updateWallslide(const sf::Time& dt)
 {
    if (!_jump._wallsliding)
    {
+      // stop wallslide audio
+      if (_wallslide_sample.has_value())
+      {
+         Audio::getInstance().stopSample(_wallslide_sample.value());
+         _wallslide_sample.reset();
+      }
+
       return;
+   }
+
+   // start wallslide audio as loop
+   if (!_wallslide_sample.has_value())
+   {
+      _wallslide_sample = Audio::getInstance().playSample({"player_wallslide_01.wav", 1.0f, true});
    }
 
    const auto wallslide_animation = _player_animation.getWallslideAnimation();
@@ -1588,9 +1601,13 @@ void Player::updateDash(Dash dir)
          return;
       }
 
+      // first dash iteration
       _dash._dash_frame_count = PhysicsConfiguration::getInstance()._player_dash_frame_count;
       _dash._dash_multiplier = PhysicsConfiguration::getInstance()._player_dash_multiplier;
       _dash._dash_dir = dir;
+
+      // play dash sound
+      Audio::getInstance().playSample({"player_dash_01.wav"});
    }
 
    if (!_dash.isDashActive() || _dash._dash_dir == Dash::None)
@@ -1604,8 +1621,8 @@ void Player::updateDash(Dash dir)
    _dash._dash_multiplier += PhysicsConfiguration::getInstance()._player_dash_multiplier_increment_per_frame;
    _dash._dash_multiplier *= PhysicsConfiguration::getInstance()._player_dash_multiplier_scale_per_frame;
 
-   auto dashVector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
-   auto impulse = (left) ? -dashVector : dashVector;
+   auto dash_vector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
+   auto impulse = (left) ? -dash_vector : dash_vector;
 
    _body->ApplyForceToCenter(b2Vec2(impulse, 0.0f), false);
 
