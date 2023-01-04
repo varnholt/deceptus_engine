@@ -8,26 +8,28 @@ namespace
 
 class PlayerAABBQueryCallback : public b2QueryCallback
 {
-   public:
-      std::set<b2Body*> _bodies;
+public:
+   std::set<b2Body*> _bodies;
 
-   public:
-      bool ReportFixture(b2Fixture* fixture)
-      {
-         // foundBodies.push_back(fixture->GetBody());
-         _bodies.insert(fixture->GetBody());
+public:
+   bool ReportFixture(b2Fixture* fixture)
+   {
+      // foundBodies.push_back(fixture->GetBody());
+      _bodies.insert(fixture->GetBody());
 
-         // keep going to find all fixtures in the query area
-         return true;
-      }
+      // keep going to find all fixtures in the query area
+      return true;
+   }
 };
 
-}
-
+}  // namespace
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::update(b2Body* player_body, bool in_air)
 {
+   // disable wallclimb entirely for now - nobody seems to want it.
+   return;
+
    if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb)))
    {
       return;
@@ -96,7 +98,6 @@ void PlayerClimb::update(b2Body* player_body, bool in_air)
    // query nearby region
    PlayerAABBQueryCallback queryCallback;
 
-
    // player aabb is: 19.504843, 158.254532 to 19.824877 158.966980
    // x: 0.320034 * 0.5 -> 0.1600171
    // y: 0.712448 * 0.5 -> 0.356224
@@ -107,15 +108,15 @@ void PlayerClimb::update(b2Body* player_body, bool in_air)
    aabb.lowerBound = b2Vec2(center.x - w, center.y - h);
    aabb.upperBound = b2Vec2(center.x + w, center.y + h);
 
-//   b2AABB aabb;
-//   aabb.lowerBound = b2Vec2(FLT_MAX,FLT_MAX);
-//   aabb.upperBound = b2Vec2(-FLT_MAX,-FLT_MAX);
-//   auto fixture = mBody->GetFixtureList();
-//   while (fixture != nullptr)
-//   {
-//       aabb.Combine(aabb, fixture->GetAABB(0));
-//       fixture = fixture->GetNext();
-//   }
+   //   b2AABB aabb;
+   //   aabb.lowerBound = b2Vec2(FLT_MAX,FLT_MAX);
+   //   aabb.upperBound = b2Vec2(-FLT_MAX,-FLT_MAX);
+   //   auto fixture = mBody->GetFixtureList();
+   //   while (fixture != nullptr)
+   //   {
+   //       aabb.Combine(aabb, fixture->GetAABB(0));
+   //       fixture = fixture->GetNext();
+   //   }
 
    // printf("player aabb is: %f, %f to %f %f\n", aabb.lowerBound.x, aabb.lowerBound.y, aabb.upperBound.x, aabb.upperBound.y);
 
@@ -162,7 +163,7 @@ void PlayerClimb::update(b2Body* player_body, bool in_air)
 
                   // joint in spe needs to point up, since we're holding somewhere4
                   auto joint_dir = (aabb.GetCenter() - curr);
-                  if  (joint_dir.y <= 0.0f)
+                  if (joint_dir.y <= 0.0f)
                   {
                      continue;
                   }
@@ -237,7 +238,6 @@ void PlayerClimb::update(b2Body* player_body, bool in_air)
    // mDistanceJoint->SetLength(distanceJoint.GetLength() * 0.99f);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::removeClimbJoint()
 {
@@ -249,8 +249,6 @@ void PlayerClimb::removeClimbJoint()
    _climb_joint->GetBodyA()->GetWorld()->DestroyJoint(_climb_joint);
    _climb_joint = nullptr;
 }
-
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
@@ -317,7 +315,8 @@ bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
    // probably needs some more investigation. for now it's just not taken into regard
    shape->m_count--;
 
-   auto index = [shape](int i) -> int {
+   auto index = [shape](int i) -> int
+   {
       if (i >= shape->m_count)
       {
          return i - shape->m_count;
@@ -337,27 +336,24 @@ bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
 
    shape->m_count++;
 
-   auto climbable =
-         (p.y > c.y && (fabs(n.x - c.x) > 0.001f) && pp.y > p.y)
-      || (n.y > c.y && (fabs(p.x - c.x) > 0.001f) && nn.y > n.y)
-      || (p.y > c.y && (fabs(n.x - c.x) > 0.001f) && (fabs(pp.x - n.x) < 0.0001f))
-      || (n.y > c.y && (fabs(p.x - c.x) > 0.001f) && (fabs(p.x - nn.x) < 0.0001f));
+   auto climbable = (p.y > c.y && (fabs(n.x - c.x) > 0.001f) && pp.y > p.y) || (n.y > c.y && (fabs(p.x - c.x) > 0.001f) && nn.y > n.y) ||
+                    (p.y > c.y && (fabs(n.x - c.x) > 0.001f) && (fabs(pp.x - n.x) < 0.0001f)) ||
+                    (n.y > c.y && (fabs(p.x - c.x) > 0.001f) && (fabs(p.x - nn.x) < 0.0001f));
 
-//   if (!climbable)
-//   {
-//      if (shape->m_count < 100)
-//      {
-//         for (int i = 0; i < shape->m_count; i++)
-//         {
-//            printf("shape v(%d): %f, %f\n", i, shape->m_vertices[i].x, shape->m_vertices[i].y);
-//         }
-//      }
-//      printf("boo\n");
-//   }
+   //   if (!climbable)
+   //   {
+   //      if (shape->m_count < 100)
+   //      {
+   //         for (int i = 0; i < shape->m_count; i++)
+   //         {
+   //            printf("shape v(%d): %f, %f\n", i, shape->m_vertices[i].x, shape->m_vertices[i].y);
+   //         }
+   //      }
+   //      printf("boo\n");
+   //   }
 
    return climbable;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
@@ -382,13 +378,11 @@ bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
    return matches_movement;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbing() const
 {
    return _climb_joint != nullptr;
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::setControls(const std::shared_ptr<PlayerControls>& newControls)
