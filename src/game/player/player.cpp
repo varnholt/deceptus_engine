@@ -10,6 +10,7 @@
 #include "fixturenode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "gameclock.h"
 #include "gamecontactlistener.h"
@@ -1497,6 +1498,18 @@ void Player::updateSpawn()
 
    if (GameClock::getInstance().durationSinceSpawn() < 1.0s)
    {
+      if (!_spawn_orientation_locked)
+      {
+         _spawn_orientation_locked = true;
+         const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getRevealDuration());
+
+         Log::Info() << "sleeping for " << lock_duration;
+
+         // appear animation is shown after spawn is complete
+         // for that duration of time, lock the player orientation
+         _controls->lockOrientation(lock_duration);
+      }
+
       return;
    }
 
@@ -1506,6 +1519,8 @@ void Player::updateSpawn()
    }
 
    _spawn_complete = true;
+
+   // play reveal sound
    Audio::getInstance().playSample({"player_spawn_01.wav"});
 }
 
@@ -1916,6 +1931,7 @@ void Player::reset()
    _dead = false;
    _death_reason.reset();
    _spawn_complete = false;
+   _spawn_orientation_locked = false;
 
    // fixtures are no longer dead
    updateDeadFixtures();

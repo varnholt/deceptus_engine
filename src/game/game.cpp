@@ -955,6 +955,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          {
             _restore_previous_position = true;
             _stored_position = _player->getPixelPositionFloat();
+            _player->reset();
             loadLevel();
          }
          break;
