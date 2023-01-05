@@ -1219,6 +1219,12 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAttack()
 {
+   // at the moment the game doesn't have any in-water attacks
+   if (isInWater())
+   {
+      return;
+   }
+
    _attack._fire_button_was_pressed = _attack._fire_button_pressed;
    _attack._fire_button_pressed = _controls->isFireButtonPressed();
 
