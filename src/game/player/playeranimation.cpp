@@ -898,7 +898,9 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimatio
 
    std::optional<std::shared_ptr<Animation>> next_cycle;
 
-   // appear animation
+   // appear animation is split into two stages
+   // 1) just waiting for a second until all camera focusing has been completed
+   // 2) playing the appear animation
    if (GameClock::getInstance().durationSinceSpawn() < getRevealDuration())
    {
       next_cycle = data._points_right ? _appear_r : _appear_l;

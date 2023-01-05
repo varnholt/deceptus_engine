@@ -202,6 +202,7 @@ private:
    bool _visible = true;
    bool _dead = false;
    bool _spawn_complete = false;
+   bool _spawn_orientation_locked = false;
    std::optional<DeathReason> _death_reason;
 
    bool _in_water = false;
