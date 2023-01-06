@@ -1862,27 +1862,6 @@ void Player::attack()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updateDeadFixtures()
-{
-   return;
-
-   // disable all collision control for the player. this has been useful before
-   // but now can be removed permanently.
-   //
-   // if (!_body_fixture)
-   // {
-   //    return;
-   // }
-   //
-   // for (int32_t i = 0; i < __foot_count; i++)
-   // {
-   //    _foot_fixture[i]->SetSensor(_dead);
-   // }
-   //
-   // _body_fixture->SetSensor(_dead);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateWeapons(const sf::Time& dt)
 {
    for (auto& w : _weapon_system->_weapons)
@@ -1895,9 +1874,6 @@ void Player::updateWeapons(const sf::Time& dt)
 void Player::die()
 {
    _dead = true;
-
-   updateDeadFixtures();
-
    Audio::getInstance().playSample({"death.wav"});
 }
 
@@ -1938,9 +1914,6 @@ void Player::reset()
    _death_reason.reset();
    _spawn_complete = false;
    _spawn_orientation_locked = false;
-
-   // fixtures are no longer dead
-   updateDeadFixtures();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2064,11 +2037,14 @@ const std::shared_ptr<PlayerControls>& Player::getControls() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelPosition()
 {
-   // sync player sprite with with box2d data
-   float x = _body->GetPosition().x * PPM;
-   float y = _body->GetPosition().y * PPM;
+   if (isDead())
+   {
+      return;
+   }
 
-   // traceJumpCurve();
+   // sync player sprite with with box2d data
+   const auto x = _body->GetPosition().x * PPM;
+   const auto y = _body->GetPosition().y * PPM;
 
    setPixelPosition(x, y);
 }
