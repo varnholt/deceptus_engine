@@ -1609,7 +1609,6 @@ void Player::updateDash(Dash dir)
 
    // dir is the initial dir passed in on button press
    // Dash::None is passed in on regular updates after the initial press
-
    if (dir == Dash::None)
    {
       dir = _dash._dash_dir;
@@ -1629,6 +1628,11 @@ void Player::updateDash(Dash dir)
 
       // play dash sound
       Audio::getInstance().playSample({"player_dash_01.wav"});
+
+      auto velocity = _body->GetLinearVelocity();
+      velocity.y = 0.0f;
+      _body->SetLinearVelocity(velocity);
+      _body->SetGravityScale(0.0);
    }
 
    if (!_dash.isDashActive() || _dash._dash_dir == Dash::None)
@@ -1636,14 +1640,14 @@ void Player::updateDash(Dash dir)
       return;
    }
 
-   auto left = (dir == Dash::Left);
-   _points_to_left = (left);
+   const auto left = (dir == Dash::Left);
+   _points_to_left = left;
 
    _dash._dash_multiplier += PhysicsConfiguration::getInstance()._player_dash_multiplier_increment_per_frame;
    _dash._dash_multiplier *= PhysicsConfiguration::getInstance()._player_dash_multiplier_scale_per_frame;
 
-   auto dash_vector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
-   auto impulse = (left) ? -dash_vector : dash_vector;
+   const auto dash_vector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
+   const auto impulse = (left) ? -dash_vector : dash_vector;
 
    _body->ApplyForceToCenter(b2Vec2(impulse, 0.0f), false);
 
