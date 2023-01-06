@@ -131,7 +131,6 @@ private:
    void updateAtmosphere();
    void updateBendDown();
    void updateDash(Dash dir = Dash::None);
-   void updateDeadFixtures();
    void updateAttack();
    void updateFootsteps();
    void updateGroundAngle();
