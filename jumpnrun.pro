@@ -237,6 +237,7 @@ SOURCES += \
    src/game/overlays/weatheroverlay.cpp \
    src/game/physics/physics.cpp \
    src/game/physics/physicsconfiguration.cpp \
+   src/game/physics/physicsconfigurationui.cpp \
    src/game/player/player.cpp \
    src/game/player/playeranimation.cpp \
    src/game/player/playeraudio.cpp \
@@ -447,6 +448,7 @@ HEADERS += \
    src/game/overlays/weatheroverlay.h \
    src/game/physics/physics.h \
    src/game/physics/physicsconfiguration.h \
+   src/game/physics/physicsconfigurationui.h \
    src/game/player/player.h \
    src/game/player/playeranimation.h \
    src/game/player/playerattack.h \
@@ -617,6 +619,25 @@ HEADERS += \
     src/thirdparty/Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.h \
     src/thirdparty/Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.h \
     src/thirdparty/Box2D/Dynamics/Contacts/b2PolygonContact.h
+
+SOURCES += \
+   src/thirdparty/imgui/imgui-SFML.cpp \
+   src/thirdparty/imgui/imgui.cpp \
+   src/thirdparty/imgui/imgui_demo.cpp \
+   src/thirdparty/imgui/imgui_draw.cpp \
+   src/thirdparty/imgui/imgui_tables.cpp \
+   src/thirdparty/imgui/imgui_widgets.cpp
+
+HEADERS += \
+   src/thirdparty/imgui/imconfig-SFML.h \
+   src/thirdparty/imgui/imconfig.h \
+   src/thirdparty/imgui/imgui-SFML.h \
+   src/thirdparty/imgui/imgui-SFML_export.h \
+   src/thirdparty/imgui/imgui.h \
+   src/thirdparty/imgui/imgui_internal.h \
+   src/thirdparty/imgui/imstb_rectpack.h \
+   src/thirdparty/imgui/imstb_textedit.h \
+   src/thirdparty/imgui/imstb_truetype.h
 
 OTHER_FILES += \
     data/shaders/parallax_frag.glsl \
