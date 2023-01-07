@@ -179,7 +179,7 @@ Level::Level() : GameNode(nullptr)
    setClassName(typeid(Level).name());
 
    // init world for this level
-   b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
+   const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
 
    LuaInterface::instance().reset();
 
