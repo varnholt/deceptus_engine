@@ -23,6 +23,7 @@
 #include "luainterface.h"
 #include "messagebox.h"
 #include "physics/physicsconfiguration.h"
+#include "physics/physicsconfigurationui.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "projectilehitanimation.h"
@@ -701,12 +702,19 @@ void Game::update()
 //----------------------------------------------------------------------------------------------------------------------
 int32_t Game::loop()
 {
+   PhysicsConfigurationUi physics_ui;
+
    while (_window->isOpen())
    {
       processEvents();
       update();
       draw();
+
+      physics_ui.processEvents();
+      physics_ui.draw();
    }
+
+   physics_ui.close();
 
    return 0;
 }
