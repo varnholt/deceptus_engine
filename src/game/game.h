@@ -12,6 +12,7 @@
 #include "menus/menu.h"
 #include "overlays/controlleroverlay.h"
 #include "overlays/rainoverlay.h"
+#include "physics/physicsconfigurationui.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -77,6 +78,7 @@ private:
    std::unique_ptr<InfoLayer> _info_layer;
    std::unique_ptr<InGameMenu> _ingame_menu;
    std::unique_ptr<ControllerOverlay> _controller_overlay;
+   std::unique_ptr<PhysicsConfigurationUi> _physics_ui;
 
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
