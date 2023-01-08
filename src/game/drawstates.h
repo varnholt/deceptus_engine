@@ -8,6 +8,7 @@ struct DrawStates
    static bool _draw_debug_info;
    static bool _draw_controller_overlay;
    static bool _draw_camera_system;
+   static bool _draw_physics_config;
 };  // namespace DrawStates
 
 #endif  // DRAWSTATES_H

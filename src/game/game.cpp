@@ -23,7 +23,6 @@
 #include "luainterface.h"
 #include "messagebox.h"
 #include "physics/physicsconfiguration.h"
-#include "physics/physicsconfigurationui.h"
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "projectilehitanimation.h"
@@ -486,6 +485,11 @@ void Game::draw()
 
       record.detach();
    }
+
+   if (DrawStates::_draw_physics_config)
+   {
+      _physics_ui->draw();
+   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -702,19 +706,12 @@ void Game::update()
 //----------------------------------------------------------------------------------------------------------------------
 int32_t Game::loop()
 {
-   PhysicsConfigurationUi physics_ui;
-
    while (_window->isOpen())
    {
       processEvents();
       update();
       draw();
-
-      physics_ui.processEvents();
-      physics_ui.draw();
    }
-
-   physics_ui.close();
 
    return 0;
 }
@@ -844,12 +841,17 @@ void Game::processEvent(const sf::Event& event)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::shutdown()
 {
-   std::exit(0);
-
    if (_level)
    {
       _level->shutdown();
    }
+
+   if (_physics_ui)
+   {
+      _physics_ui->close();
+   }
+
+   std::exit(0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -938,7 +940,18 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::F7:
       {
-         // free to use
+         DrawStates::_draw_physics_config = !DrawStates::_draw_physics_config;
+
+         if (DrawStates::_draw_physics_config && !_physics_ui)
+         {
+            _physics_ui = std::make_unique<PhysicsConfigurationUi>();
+         }
+         else if (_physics_ui)
+         {
+            _physics_ui->close();
+            _physics_ui.reset();
+         }
+
          break;
       }
       case sf::Keyboard::F11:
@@ -1039,5 +1052,10 @@ void Game::processEvents()
    {
       processEvent(event);
       EventSerializer::getInstance().add(event);
+   }
+
+   if (DrawStates::_draw_physics_config)
+   {
+      _physics_ui->processEvents();
    }
 }
