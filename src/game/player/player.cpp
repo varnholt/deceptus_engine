@@ -37,6 +37,14 @@
 
 #include <iostream>
 
+#ifdef __GNUC__
+#define FMT_HEADER_ONLY
+#  include <ctime>
+#  include <fmt/core.h>
+#else
+namespace fmt = std;
+#endif
+
 //----------------------------------------------------------------------------------------------------------------------
 namespace
 {
@@ -1509,8 +1517,6 @@ void Player::updateSpawn()
          _spawn_orientation_locked = true;
          const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getRevealDuration());
 
-         Log::Info() << "sleeping for " << lock_duration;
-
          // appear animation is shown after spawn is complete
          // for that duration of time, lock the player orientation
          _controls->lockOrientation(lock_duration);
@@ -1839,12 +1845,12 @@ void Player::attack()
          if (isInAir())
          {
             _attack._timepoint_attack_jumping_start = now;
-            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
+            Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
          else if (_controls->isBendDownActive())
          {
             _attack._timepoint_attack_bend_down_start = now;
-            Audio::getInstance().playSample({std::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
+            Audio::getInstance().playSample({fmt::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
          }
          else
          {
@@ -1852,7 +1858,7 @@ void Player::attack()
             _controls->lockOrientation(
                std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getSwordAttackDurationStanding())
             );
-            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
+            Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
 
          dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
