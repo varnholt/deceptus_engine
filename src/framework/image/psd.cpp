@@ -564,7 +564,7 @@ void PSD::Layer::Channel::unpackBits(std::vector<uint8_t>& dest, int32_t offset,
             read(single_value, stream);
             bytes_read++;
 
-            if (offset < dest.size())
+            if (offset < static_cast<int32_t>(dest.size()))
             {
                dest[offset] = single_value;
             }
@@ -580,7 +580,7 @@ void PSD::Layer::Channel::unpackBits(std::vector<uint8_t>& dest, int32_t offset,
          auto count = (256 - control_byte) + 1;
          for (auto j = 0; j < count; j++)
          {
-            if (offset < dest.size())
+            if (offset < static_cast<int32_t>(dest.size()))
             {
                dest[offset] = span_value;
             }

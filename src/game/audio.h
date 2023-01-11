@@ -4,6 +4,7 @@
 #include <array>
 #include <functional>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
 
@@ -35,6 +36,21 @@ public:
 
    struct PlayInfo
    {
+      PlayInfo(const std::string& sample_name)
+        : _sample_name(sample_name)
+      {
+      }
+
+      PlayInfo(const std::string& sample_name, float volume)
+       : _sample_name(sample_name), _volume(volume)
+      {
+      }
+
+      PlayInfo(const std::string& sample_name, float volume, bool looped)
+       : _sample_name(sample_name), _volume(volume), _looped(looped)
+      {
+      }
+
       std::string _sample_name;
       float _volume = 1.0f;
       bool _looped = false;
