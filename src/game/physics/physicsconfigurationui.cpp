@@ -5,6 +5,7 @@
 #include "imgui/imgui.h"
 
 #include <iostream>
+#include <sstream>
 
 PhysicsConfigurationUi::PhysicsConfigurationUi()
     : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 800), "deceptus config tool"))
@@ -31,6 +32,48 @@ void PhysicsConfigurationUi::processEvents()
 
 void PhysicsConfigurationUi::draw()
 {
+   auto drawFloatElement = [](const std::string& name, auto* value, auto min, auto max)
+   {
+      std::stringstream stream_input;
+      std::stringstream stream_slider;
+      stream_input << "##" << name << "_input";
+      stream_slider << "##" << name << "_slider";
+
+      ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+
+      if (ImGui::InputFloat(stream_input.str().c_str(), value, 0.1f, 1.0f, "%.3f"))
+      {
+         *value = std::clamp(*value, min, max);
+      }
+
+      ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.35f);
+      ImGui::SameLine();
+      ImGui::SliderFloat(stream_slider.str().c_str(), value, min, max);
+      ImGui::SameLine();
+      ImGui::Text("%s", name.c_str());
+   };
+
+   auto drawIntElement = [](const std::string& name, auto* value, auto min, auto max)
+   {
+      std::stringstream stream_input;
+      std::stringstream stream_slider;
+      stream_input << "##" << name << "input";
+      stream_slider << "##" << name << "slider";
+
+      ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+
+      if (ImGui::InputInt(stream_input.str().c_str(), value))
+      {
+         *value = std::clamp(*value, min, max);
+      }
+
+      ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.35f);
+      ImGui::SameLine();
+      ImGui::SliderInt(stream_slider.str().c_str(), value, min, max);
+      ImGui::SameLine();
+      ImGui::Text("%s", name.c_str());
+   };
+
    auto& config = PhysicsConfiguration::getInstance();
 
    ImGui::SFML::Update(*_render_window.get(), _clock.restart());
@@ -62,82 +105,82 @@ void PhysicsConfigurationUi::draw()
 
    if (ImGui::CollapsingHeader("gravity", header_flags))
    {
-      ImGui::SliderFloat("global gravity (requires level reload)", &config._gravity, -50.0f, 50.0f);
-      ImGui::SliderFloat("gravity scale default", &config._gravity_scale_default, 0.1f, 3.0f);
-      ImGui::SliderFloat("gravity scale water", &config._gravity_scale_water, 0.1f, 1.0f);
-      ImGui::SliderFloat("gravity scale jump downward", &config._gravity_scale_jump_downward, 0.5f, 3.0f);
+      drawFloatElement("global gravity (requires level reload)", &config._gravity, -50.0f, 50.0f);
+      drawFloatElement("gravity scale default", &config._gravity_scale_default, 0.1f, 3.0f);
+      drawFloatElement("gravity scale water", &config._gravity_scale_water, 0.1f, 1.0f);
+      drawFloatElement("gravity scale jump downward", &config._gravity_scale_jump_downward, 0.5f, 3.0f);
    }
 
    if (ImGui::CollapsingHeader("player velocity", header_flags))
    {
-      ImGui::SliderFloat("speed max walk", &config._player_speed_max_walk, 0.1f, 20.0f);
-      ImGui::SliderFloat("speed max run", &config._player_speed_max_run, 0.1f, 20.0f);
-      ImGui::SliderFloat("speed max water", &config._player_speed_max_water, 0.1f, 20.0f);
-      ImGui::SliderFloat("speed max air", &config._player_speed_max_air, 0.1f, 20.0f);
-      ImGui::SliderFloat("friction", &config._player_friction, 0.0f, 1.0f);
-      ImGui::SliderFloat("jump strength", &config._player_jump_strength, 0.1f, 20.0f);
-      ImGui::SliderFloat("acceleration ground", &config._player_acceleration_ground, 0.01f, 2.0f);
-      ImGui::SliderFloat("acceleration air", &config._player_acceleration_air, 0.01f, 2.0f);
-      ImGui::SliderFloat("deceleration ground", &config._player_deceleration_ground, 0.01f, 2.0f);
-      ImGui::SliderFloat("deceleration air", &config._player_deceleration_air, 0.01f, 2.0f);
+      drawFloatElement("speed max walk", &config._player_speed_max_walk, 0.1f, 20.0f);
+      drawFloatElement("speed max run", &config._player_speed_max_run, 0.1f, 20.0f);
+      drawFloatElement("speed max water", &config._player_speed_max_water, 0.1f, 20.0f);
+      drawFloatElement("speed max air", &config._player_speed_max_air, 0.1f, 20.0f);
+      drawFloatElement("friction", &config._player_friction, 0.0f, 1.0f);
+      drawFloatElement("jump strength", &config._player_jump_strength, 0.1f, 20.0f);
+      drawFloatElement("acceleration ground", &config._player_acceleration_ground, 0.01f, 2.0f);
+      drawFloatElement("acceleration air", &config._player_acceleration_air, 0.01f, 2.0f);
+      drawFloatElement("deceleration ground", &config._player_deceleration_ground, 0.01f, 2.0f);
+      drawFloatElement("deceleration air", &config._player_deceleration_air, 0.01f, 2.0f);
    }
 
    if (ImGui::CollapsingHeader("player jump", header_flags))
    {
-      ImGui::SliderInt("jump frame count", &config._player_jump_frame_count, 1, 50);
-      ImGui::SliderInt("jump after contact lost [ms]", &config._player_jump_after_contact_lost_ms, 50, 200);
-      ImGui::SliderInt("jump buffer [ms]", &config._player_jump_buffer_ms, 10, 200);
-      ImGui::SliderInt("jump minimal duration [ms]", &config._player_jump_minimal_duration_ms, 20, 200);
-      ImGui::SliderFloat("jump falloff", &config._player_jump_falloff, 1.0f, 20.0f);
-      ImGui::SliderFloat("jump speed factor", &config._player_jump_speed_factor, 0.0f, 0.5f);
-      ImGui::SliderFloat("jump impulse factor", &config._player_jump_impulse_factor, 1.0f, 20.0f);
-      ImGui::SliderFloat("minimum jump interval [ms]", &config._player_minimum_jump_interval_ms, 100.0f, 200.0f);
+      drawIntElement("jump frame count", &config._player_jump_frame_count, 1, 50);
+      drawIntElement("jump after contact lost [ms]", &config._player_jump_after_contact_lost_ms, 50, 200);
+      drawIntElement("jump buffer [ms]", &config._player_jump_buffer_ms, 10, 200);
+      drawIntElement("jump minimal duration [ms]", &config._player_jump_minimal_duration_ms, 20, 200);
+      drawFloatElement("jump falloff", &config._player_jump_falloff, 1.0f, 20.0f);
+      drawFloatElement("jump speed factor", &config._player_jump_speed_factor, 0.0f, 0.5f);
+      drawFloatElement("jump impulse factor", &config._player_jump_impulse_factor, 1.0f, 20.0f);
+      drawFloatElement("minimum jump interval [ms]", &config._player_minimum_jump_interval_ms, 100.0f, 200.0f);
    }
 
    if (ImGui::CollapsingHeader("player dash", header_flags))
    {
-      ImGui::SliderInt("dash frame count", &config._player_dash_frame_count, 1, 100);
-      ImGui::SliderFloat("dash multiplier", &config._player_dash_multiplier, 1.0f, 100.0f);
-      ImGui::SliderFloat("dash multiplier inc. per frame", &config._player_dash_multiplier_increment_per_frame, -10.0f, -0.1f);
-      ImGui::SliderFloat("dash multiplier scale per frame", &config._player_dash_multiplier_scale_per_frame, 0.1f, 5.0f);
-      ImGui::SliderFloat("dash vector", &config._player_dash_vector, 0.1f, 50.0f);
+      drawIntElement("dash frame count", &config._player_dash_frame_count, 1, 100);
+      drawFloatElement("dash multiplier", &config._player_dash_multiplier, 1.0f, 100.0f);
+      drawFloatElement("dash multiplier inc. per frame", &config._player_dash_multiplier_increment_per_frame, -10.0f, -0.1f);
+      drawFloatElement("dash multiplier scale per frame", &config._player_dash_multiplier_scale_per_frame, 0.1f, 5.0f);
+      drawFloatElement("dash vector", &config._player_dash_vector, 0.1f, 50.0f);
    }
 
    if (ImGui::CollapsingHeader("wall slide", header_flags))
    {
-      ImGui::SliderFloat("wall slide friction", &config._player_wall_slide_friction, 0.0f, 1.0f);
+      drawFloatElement("wall slide friction", &config._player_wall_slide_friction, 0.0f, 1.0f);
    }
 
    if (ImGui::CollapsingHeader("wall jump", header_flags))
    {
-      ImGui::SliderInt("wall jump frame count", &config._player_wall_jump_frame_count, 1, 50);
-      ImGui::SliderFloat("wall jump vector x", &config._player_wall_jump_vector_x, 0.0f, 20.0f);
-      ImGui::SliderFloat("wall jump vector y", &config._player_wall_jump_vector_y, 0.0f, 20.0f);
-      ImGui::SliderFloat("wall jump multiplier", &config._player_wall_jump_multiplier, 1.0f, 50.0f);
-      ImGui::SliderFloat("wall jump multiplier inc. per frame", &config._player_wall_jump_multiplier_increment_per_frame, -10.0f, -0.1f);
-      ImGui::SliderFloat("wall jump multiplier scale per frame", &config._player_wall_jump_multiplier_scale_per_frame, 0.1f, 5.0f);
-      ImGui::SliderFloat("wall jump extra force", &config._player_wall_jump_extra_force, 0.0f, 5.0f);
+      drawIntElement("wall jump frame count", &config._player_wall_jump_frame_count, 1, 50);
+      drawFloatElement("wall jump vector x", &config._player_wall_jump_vector_x, 0.0f, 20.0f);
+      drawFloatElement("wall jump vector y", &config._player_wall_jump_vector_y, 0.0f, 20.0f);
+      drawFloatElement("wall jump multiplier", &config._player_wall_jump_multiplier, 1.0f, 50.0f);
+      drawFloatElement("wall jump multiplier inc. per frame", &config._player_wall_jump_multiplier_increment_per_frame, -10.0f, -0.1f);
+      drawFloatElement("wall jump multiplier scale per frame", &config._player_wall_jump_multiplier_scale_per_frame, 0.1f, 5.0f);
+      drawFloatElement("wall jump extra force", &config._player_wall_jump_extra_force, 0.0f, 5.0f);
    }
 
    if (ImGui::CollapsingHeader("double jump", header_flags))
    {
-      ImGui::SliderFloat("double jump factor", &config._player_double_jump_factor, 1.0f, 20.0f);
+      drawFloatElement("double jump factor", &config._player_double_jump_factor, 1.0f, 20.0f);
    }
 
    if (ImGui::CollapsingHeader("hard landing", header_flags))
    {
       ImGui::Checkbox("hard landing damage enabled", &config._player_hard_landing_damage_enabled);
-      ImGui::SliderFloat("hard landing damage factor", &config._player_hard_landing_damage_factor, 0.0f, 50.0f);
-      ImGui::SliderFloat("hard landing delay [s]", &config._player_hard_landing_delay_s, 0.0f, 5.0f);
+      drawFloatElement("hard landing damage factor", &config._player_hard_landing_damage_factor, 0.0f, 50.0f);
+      drawFloatElement("hard landing delay [s]", &config._player_hard_landing_delay_s, 0.0f, 5.0f);
    }
 
    if (ImGui::CollapsingHeader("swimming", header_flags))
    {
-      ImGui::SliderFloat("in water force jump button", &config._player_in_water_force_jump_button, -10.0f, 0.0f);
-      ImGui::SliderInt("in water time to allow jump button [ms]", &config._player_in_water_time_to_allow_jump_button_ms, 0, 2000);
-      ImGui::SliderFloat("in water linear velocity y clamp min", &config._player_in_water_linear_velocity_y_clamp_min, -5.0f, 0.0f);
-      ImGui::SliderFloat("in water linear velocity y clamp max", &config._player_in_water_linear_velocity_y_clamp_max, 0.0f, 5.0f);
-      ImGui::SliderFloat("in water buoyancy force", &config._in_water_buoyancy_force, 0.0f, 0.2f);
+      drawFloatElement("in water force jump button", &config._player_in_water_force_jump_button, -10.0f, 0.0f);
+      drawIntElement("in water time to allow jump button [ms]", &config._player_in_water_time_to_allow_jump_button_ms, 0, 2000);
+      drawFloatElement("in water linear velocity y clamp min", &config._player_in_water_linear_velocity_y_clamp_min, -5.0f, 0.0f);
+      drawFloatElement("in water linear velocity y clamp max", &config._player_in_water_linear_velocity_y_clamp_max, 0.0f, 5.0f);
+      drawFloatElement("in water buoyancy force", &config._in_water_buoyancy_force, 0.0f, 0.2f);
    }
 
    ImGui::End();
