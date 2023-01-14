@@ -187,6 +187,9 @@ void PlayerJump::doubleJump()
    _double_jump_consumed = true;
    _compensate_velocity = true;
 
+   // double jump also has dust
+   _jump_dust_animation_callback(DustAnimationType::InAir);
+
    // double jump should happen with a constant impulse, no adjusting through button press duration
    const auto current_velocity = _body->GetLinearVelocity();
    _body->SetLinearVelocity(b2Vec2(current_velocity.x, 0.0f));
@@ -265,7 +268,7 @@ void PlayerJump::jump()
       }
       else
       {
-         _jump_dust_animation_callback();
+         _jump_dust_animation_callback(DustAnimationType::Ground);
          Audio::getInstance().playSample({"player_jump_liftoff.wav", 0.3f});
       }
    }
