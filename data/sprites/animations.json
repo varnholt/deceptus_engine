@@ -455,6 +455,22 @@
       "sprite_count": 6,
       "texture": "data/sprites/player.png"
    },
+   "player_jump_dust_inair_l": {
+      "frame_durations": [50],
+      "frame_offset": [768, 144],
+      "frame_size": [24, 24],
+      "origin": [9.0, 12.0],
+      "sprite_count": 14,
+      "texture": "data/sprites/player.png"
+   },
+   "player_jump_dust_inair_r": {
+      "frame_durations": [50],
+      "frame_offset": [768, 144],
+      "frame_size": [24, 24],
+      "origin": [12.0, 12.0],
+      "sprite_count": 14,
+      "texture": "data/sprites/player.png"
+   },
    "player_run_l": {
       "frame_durations": [60, 60, 80, 60, 60, 60, 60, 80, 60, 60, 60, 60],
       "frame_offset": [0, 432],

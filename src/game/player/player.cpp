@@ -148,11 +148,25 @@ void Player::initialize()
 
    _weapon_system->initialize();
 
-   _jump._jump_dust_animation_callback = [this]()
+   _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type)
    {
-      AnimationPool::getInstance().create(
-         _points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y
-      );
+      switch (animation_type)
+      {
+         case PlayerJump::DustAnimationType::Ground:
+         {
+            AnimationPool::getInstance().create(
+               _points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y
+            );
+            break;
+         }
+         case PlayerJump::DustAnimationType::InAir:
+         {
+            AnimationPool::getInstance().create(
+               _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _pixel_position_f.x, _pixel_position_f.y
+            );
+            break;
+         }
+      }
    };
 
    _jump._remove_climb_joint_callback = [this]() { _climb.removeClimbJoint(); };
@@ -311,7 +325,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       auxiliary_cycle->draw(color, normal);
    }
 
-   AnimationPool::getInstance().drawAnimations(color, normal, {"player_jump_dust_l", "player_jump_dust_r", "player_water_splash"});
+   AnimationPool::getInstance().drawAnimations(
+      color,
+      normal,
+      {"player_jump_dust_l", "player_jump_dust_r", "player_jump_dust_inair_l", "player_jump_dust_inair_r", "player_water_splash"}
+   );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
