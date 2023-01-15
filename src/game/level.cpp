@@ -521,6 +521,7 @@ bool Level::load()
 
    if (!std::filesystem::exists(level_json_path))
    {
+      Log::Error() << "path " << level_json_path << " does not exist";
       return false;
    }
 
@@ -840,6 +841,11 @@ void Level::updateViews()
 //-----------------------------------------------------------------------------
 void Level::updateObjectUpdater()
 {
+   if (!_object_updater)
+   {
+      return;
+   }
+
    _object_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
 }
 

@@ -453,31 +453,36 @@ void Door::setup(const GameDeserializeData& data)
 
    _pixel_rect = sf::FloatRect{x_px, y_px, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
 
-   const auto z_it = data._tmx_object->_properties->_map.find("z");
-   if (z_it != data._tmx_object->_properties->_map.end())
+   if (data._tmx_object->_properties)
    {
-      const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-      setZ(z_index);
-   }
-
-   const auto key_it = data._tmx_object->_properties->_map.find("key");
-   if (key_it != data._tmx_object->_properties->_map.end())
-   {
-      const auto key = key_it->second->_value_string.value();
-
-      static const std::unordered_map<std::string, ItemType> map{
-         std::make_pair("key_red", ItemType::KeyRed),
-         std::make_pair("key_green", ItemType::KeyGreen),
-         std::make_pair("key_blue", ItemType::KeyBlue),
-         std::make_pair("key_yellow", ItemType::KeyYellow),
-         std::make_pair("key_orange", ItemType::KeyOrange),
-      };
-
-      const auto key_type_it = map.find(key);
-      if (key_type_it != map.end())
+      // read z index
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
       {
-         _required_item = key_type_it->second;
-         setupKeySprite(key_type_it->second, sf::Vector2f{x_px, y_px});
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
+
+      // read required key to open door
+      const auto key_it = data._tmx_object->_properties->_map.find("key");
+      if (key_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = key_it->second->_value_string.value();
+
+         static const std::unordered_map<std::string, ItemType> map{
+            std::make_pair("key_red", ItemType::KeyRed),
+            std::make_pair("key_green", ItemType::KeyGreen),
+            std::make_pair("key_blue", ItemType::KeyBlue),
+            std::make_pair("key_yellow", ItemType::KeyYellow),
+            std::make_pair("key_orange", ItemType::KeyOrange),
+         };
+
+         const auto key_type_it = map.find(key);
+         if (key_type_it != map.end())
+         {
+            _required_item = key_type_it->second;
+            setupKeySprite(key_type_it->second, sf::Vector2f{x_px, y_px});
+         }
       }
    }
 
