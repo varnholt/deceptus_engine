@@ -77,7 +77,7 @@ void MenuScreenFileSelect::select()
 {
    SaveState::setCurrent(static_cast<uint32_t>(_slot));
 
-   auto& saveState = SaveState::getCurrent();
+   const auto& saveState = SaveState::getCurrent();
    if (saveState.isEmpty())
    {
       // if current slot is empty, create a new slot and go to name select
