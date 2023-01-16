@@ -1,5 +1,6 @@
 #include "rotatingblade.h"
 
+#include "audio.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
@@ -21,6 +22,9 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
    _sprite.setTexture(*_texture_map.get());
    _sprite.setOrigin(_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f);
+
+   _audio_range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
+   _has_audio = true;
 }
 
 void RotatingBlade::setup(const GameDeserializeData& data)
@@ -90,6 +94,94 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    }
 }
 
+void RotatingBlade::updateAudio()
+{
+   if (!isAudioEnabled())
+   {
+      // stop whatever is playing if audio is disabled
+      if (_sample_enabled.has_value())
+      {
+         Audio::getInstance().stopSample(_sample_enabled.value());
+      }
+
+      if (_sample_accelerate.has_value())
+      {
+         Audio::getInstance().stopSample(_sample_accelerate.value());
+      }
+
+      if (_sample_decelerate.has_value())
+      {
+         Audio::getInstance().stopSample(_sample_decelerate.value());
+      }
+
+      return;
+   }
+
+   static constexpr auto eps = 0.05f;
+
+   // blades are accelerating until rotating at regular speed
+   if (_enabled)
+   {
+      if (_velocity > 1.0f - eps)
+      {
+         // play regular sample
+         if (!_sample_enabled.has_value())
+         {
+            _sample_enabled = Audio::getInstance().playSample({"mechanism_rotating_blade_enabled.wav", 1.0f, true});
+            _sample_accelerate.reset();
+         }
+         else
+         {
+            Audio::getInstance().setPosition(_sample_enabled.value(), _pos);
+         }
+      }
+      else
+      {
+         // play acceleration sample
+         if (!_sample_accelerate.has_value())
+         {
+            _sample_accelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_accelerate.wav"});
+         }
+         else
+         {
+            Audio::getInstance().setPosition(_sample_accelerate.value(), _pos);
+         }
+      }
+   }
+
+   // blades are slowing down until they're fully stopped
+   else
+   {
+      if (_velocity < 0.0 + eps)
+      {
+         // stop decelerate sample
+         if (_sample_decelerate.has_value())
+         {
+            Audio::getInstance().stopSample(_sample_decelerate.value());
+            _sample_decelerate.reset();
+         }
+      }
+      else
+      {
+         // play deceleration sample
+         if (!_sample_decelerate.has_value())
+         {
+            _sample_decelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_decelerate.wav"});
+         }
+         else
+         {
+            Audio::getInstance().setPosition(_sample_decelerate.value(), _pos);
+         }
+
+         // stop playing enabled sample if it's been playing before
+         if (_sample_enabled.has_value())
+         {
+            Audio::getInstance().stopSample(_sample_enabled.value());
+         }
+      }
+   }
+}
+
 void RotatingBlade::update(const sf::Time& dt)
 {
    if (_enabled)
@@ -101,15 +193,15 @@ void RotatingBlade::update(const sf::Time& dt)
       _velocity = std::max<float>(0.0f, _velocity - _settings._blade_deceleration);
    }
 
-   // exit early if velocity is under a certain threshold
+   // update position and rotation along path
    const auto movement_delta = dt.asSeconds() * _velocity * _settings._movement_speed;
    _path_interpolation.updateTime(movement_delta);
-
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
-   const auto pos = _path_interpolation.computePosition(_path_interpolation.getTime());
-
+   _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
    _sprite.setRotation(_angle);
-   _sprite.setPosition(pos);
+   _sprite.setPosition(_pos);
+
+   updateAudio();
 
    // kill player if he moves into the blade's radius
    sf::Vector2i blade_position{_sprite.getPosition()};
@@ -144,6 +236,31 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 void RotatingBlade::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
+}
+
+void RotatingBlade::setAudioEnabled(bool enabled)
+{
+   GameMechanism::setAudioEnabled(enabled);
+}
+
+void RotatingBlade::setVolume(float volume)
+{
+   GameMechanism::setVolume(volume);
+
+   if (_sample_enabled.has_value())
+   {
+      Audio::getInstance().setVolume(_sample_enabled.value(), volume);
+   }
+
+   if (_sample_accelerate.has_value())
+   {
+      Audio::getInstance().setVolume(_sample_accelerate.value(), volume);
+   }
+
+   if (_sample_decelerate.has_value())
+   {
+      Audio::getInstance().setVolume(_sample_decelerate.value(), volume);
+   }
 }
 
 std::optional<sf::FloatRect> RotatingBlade::getBoundingBoxPx()
