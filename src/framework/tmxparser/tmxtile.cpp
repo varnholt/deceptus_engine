@@ -14,10 +14,10 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<T
    _id = element->IntAttribute("id");
 
    auto node = element->FirstChild();
-   while (node != nullptr)
+   while (node)
    {
       auto child_element = node->ToElement();
-      if (child_element != nullptr)
+      if (child_element)
       {
          std::shared_ptr<TmxElement> tmp;
 
@@ -32,7 +32,7 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<T
            tmp = _object_group;
          }
 
-         if (tmp != nullptr)
+         if (tmp)
          {
             tmp->deserialize(child_element, parse_data);
          }

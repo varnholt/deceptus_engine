@@ -62,7 +62,7 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
    else if (fixture_node_b && fixture_node_b->getType() == ObjectTypeEnemy)
    {
       auto lua_node = dynamic_cast<LuaNode*>(fixture_node_b->getParent());
-      if (lua_node != nullptr)
+      if (lua_node)
       {
          lua_node->luaHit(damage);
       }

@@ -61,7 +61,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->_rect =
       sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
-   if (data._tmx_object->_properties != nullptr)
+   if (data._tmx_object->_properties)
    {
       auto z = data._tmx_object->_properties->_map.find("z");
       if (z != data._tmx_object->_properties->_map.end())

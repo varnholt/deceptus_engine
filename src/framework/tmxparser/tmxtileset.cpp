@@ -49,7 +49,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element, const std::shared_p
       }
 
       // deserialize detected elements
-      if (tmp != nullptr)
+      if (tmp)
       {
          tmp->deserialize(child_element, parse_data);
       }
@@ -58,7 +58,7 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element, const std::shared_p
          Log::Error() << child_element->Name() << " is not supported for TmxTileSet";
       }
 
-      if (tile != nullptr)
+      if (tile)
       {
          _tile_map[tile->_id] = tile;
       }

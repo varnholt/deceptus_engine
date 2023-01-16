@@ -177,7 +177,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
             moving_platform->_tile_positions.x = x;
             moving_platform->_tile_positions.y = y;
 
-            if (data._tmx_layer->_properties != nullptr)
+            if (data._tmx_layer->_properties)
             {
                moving_platform->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }

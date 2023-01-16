@@ -22,7 +22,7 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
   image->_sprite.setTexture(*image->_texture);
 
   sf::BlendMode blend_mode = sf::BlendAdd;
-  if (image_layer->_properties != nullptr)
+  if (image_layer->_properties)
   {
      auto z = image_layer->_properties->_map.find("z");
      if (z != image_layer->_properties->_map.end())
