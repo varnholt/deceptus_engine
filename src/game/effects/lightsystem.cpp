@@ -393,7 +393,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
 
-   if (data._tmx_object && data._tmx_object->_properties != nullptr)
+   if (data._tmx_object && data._tmx_object->_properties)
    {
       auto it = data._tmx_object->_properties->_map.find("color");
       if (it != data._tmx_object->_properties->_map.end())

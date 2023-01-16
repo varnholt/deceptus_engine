@@ -159,7 +159,7 @@ void Portal::link(std::vector<std::shared_ptr<GameMechanism>>& portals, const Ga
          dst_portal = portal;
       }
 
-      if (src_portal != nullptr && dst_portal != nullptr)
+      if (src_portal && dst_portal)
       {
          src_portal->_destination = dst_portal;
          break;

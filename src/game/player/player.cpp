@@ -1069,7 +1069,7 @@ void Player::updatePortal()
       if (_controls->hasFlag(KeyPressedUp) || joystick_points_up)
       {
          auto portal = Level::getCurrentLevel()->getNearbyPortal();
-         if (portal != nullptr && portal->getDestination() != nullptr)
+         if (portal && portal->getDestination())
          {
             Portal::lock();
             _portal_clock.restart();

@@ -298,7 +298,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
                spikes->_tu = TRAP_START_TILE;
             }
 
-            if (data._tmx_layer->_properties != nullptr)
+            if (data._tmx_layer->_properties)
             {
                spikes->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }
