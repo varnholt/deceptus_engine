@@ -58,7 +58,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
            }
 
            // there are no chunks, the layer data is raw
-           if (!inner_element && data_node != nullptr)
+           if (!inner_element && data_node)
            {
               _data.resize(_width_tl * _height_tl);
               std::string data = sub_element->FirstChild()->Value();

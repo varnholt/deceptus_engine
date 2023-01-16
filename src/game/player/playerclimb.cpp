@@ -112,7 +112,7 @@ void PlayerClimb::update(b2Body* player_body, bool in_air)
    //   aabb.lowerBound = b2Vec2(FLT_MAX,FLT_MAX);
    //   aabb.upperBound = b2Vec2(-FLT_MAX,-FLT_MAX);
    //   auto fixture = mBody->GetFixtureList();
-   //   while (fixture != nullptr)
+   //   while (fixture)
    //   {
    //       aabb.Combine(aabb, fixture->GetAABB(0));
    //       fixture = fixture->GetNext();
@@ -381,7 +381,7 @@ bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbing() const
 {
-   return _climb_joint != nullptr;
+   return _climb_joint;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -75,7 +75,7 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* p
    auto flicker_alpha_amount = 1.0f;
    auto flicker_speed = 0.0f;
 
-   if (data._tmx_object->_properties != nullptr)
+   if (data._tmx_object->_properties)
    {
       auto it = data._tmx_object->_properties->_map.find("color");
       if (it != data._tmx_object->_properties->_map.end())

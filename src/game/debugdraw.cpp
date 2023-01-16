@@ -311,7 +311,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    for (auto joint = level->getWorld()->GetJointList(); joint != nullptr; joint = joint->GetNext())
    {
       auto distance_joint = dynamic_cast<b2DistanceJoint*>(joint);
-      if (distance_joint != nullptr)
+      if (distance_joint)
       {
          drawLine(
             target,
@@ -381,7 +381,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                   b2Vec2 offset{0.0f, 0.0f};
                   auto circle_shape = dynamic_cast<b2CircleShape*>(shape);
 
-                  if (circle_shape != nullptr)
+                  if (circle_shape)
                   {
                      offset = circle_shape->m_p;
                   }
