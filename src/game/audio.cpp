@@ -228,8 +228,14 @@ void Audio::stopSample(int32_t thread)
 void Audio::setVolume(int32_t thread, float volume)
 {
    std::lock_guard<std::mutex> guard(_mutex);
-
    _sound_threads[thread].setVolume(volume);
+}
+
+//-----------------------------------------------------------------------------
+void Audio::setPosition(int32_t thread, const sf::Vector2f pos)
+{
+   std::lock_guard<std::mutex> guard(_mutex);
+   _sound_threads[thread].setPosition(pos);
 }
 
 //-----------------------------------------------------------------------------
@@ -274,4 +280,10 @@ void Audio::SoundThread::setVolume(float volume)
    const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
    const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
    _sound.setVolume(master * sfx * volume * 100.0f);
+}
+
+//-----------------------------------------------------------------------------
+void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
+{
+   _sound.setPosition(pos.x, pos.y, 0.0f);
 }

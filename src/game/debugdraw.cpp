@@ -308,7 +308,7 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 {
-   for (auto joint = level->getWorld()->GetJointList(); joint != nullptr; joint = joint->GetNext())
+   for (auto joint = level->getWorld()->GetJointList(); joint; joint = joint->GetNext())
    {
       auto distance_joint = dynamic_cast<b2DistanceJoint*>(joint);
       if (distance_joint)

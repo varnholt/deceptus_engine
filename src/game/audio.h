@@ -32,6 +32,7 @@ public:
       sf::Sound _sound;
 
       void setVolume(float volume);
+      void setPosition(const sf::Vector2f& pos);
    };
 
    struct PlayInfo
@@ -66,6 +67,7 @@ public:
    void stopSample(const std::string& name);
    void stopSample(int32_t thread);
    void setVolume(int32_t thread, float volume);
+   void setPosition(int32_t thread, const sf::Vector2f pos);
 
    void updateMusic();
 
