@@ -39,7 +39,7 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
    _indexed_vectors.clear();
 
    int32_t chain_index = 0;
-   for (auto body = world->GetBodyList(); body != nullptr; body = body->GetNext())
+   for (auto body = world->GetBodyList(); body; body = body->GetNext())
    {
       if (body->GetType() != b2_staticBody)
       {

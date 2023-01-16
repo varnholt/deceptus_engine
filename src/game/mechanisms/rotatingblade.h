@@ -32,11 +32,15 @@ public:
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void setEnabled(bool enabled) override;
+   void setAudioEnabled(bool enabled) override;
+   void setVolume(float volume) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    const sf::FloatRect& getPixelRect() const;
 
 private:
+   void updateAudio();
+
    float _angle = 0.0f;
    float _velocity = 0.0f;
    float _direction = 1.0f;
@@ -47,7 +51,11 @@ private:
    sf::Sprite _sprite;
    sf::FloatRect _rectangle;
    std::vector<sf::Vector2f> _path;
+   sf::Vector2f _pos;
    PathInterpolation<sf::Vector2f> _path_interpolation;
    PathType _path_type = PathType::Polygon;
    Settings _settings;
+   std::optional<int32_t> _sample_enabled;
+   std::optional<int32_t> _sample_accelerate;
+   std::optional<int32_t> _sample_decelerate;
 };
