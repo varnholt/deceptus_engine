@@ -141,7 +141,7 @@ void SpikeBlock::update(const sf::Time& dt)
 
       if (sprite_index != _sprite_index_current)
       {
-         // reset after completing animation cycle
+         // reset after completing a full animation cycle
          if (sprite_index >= _sprite_index_disabled)
          {
             _sprite_value = 0.0f;
@@ -150,18 +150,28 @@ void SpikeBlock::update(const sf::Time& dt)
          }
          else
          {
+            // otherwise just increase the index to either the enabled or disabled index
             _sprite_index_current = sprite_index;
          }
 
          updateSpriteRect();
       }
    }
+
+   // pop from the queue to set up the next target state
+   else if (!_target_states.empty())
+   {
+      const auto enabled = _target_states.front();
+      GameMechanism::setEnabled(enabled);
+      _sprite_index_target = enabled ? _sprite_index_enabled : _sprite_index_disabled;
+      _target_states.pop_front();
+   }
 }
 
 void SpikeBlock::setEnabled(bool enabled)
 {
-   GameMechanism::setEnabled(enabled);
-   _sprite_index_target = (enabled ? _sprite_index_enabled : _sprite_index_disabled);
+   // a queue is used here because the player might be hammering the lever
+   _target_states.push_back(enabled);
 }
 
 std::optional<sf::FloatRect> SpikeBlock::getBoundingBoxPx()
