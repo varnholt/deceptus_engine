@@ -1,10 +1,11 @@
+------------------------------------------------------------------------------------------------------------------------
+-- place cannons with a 48x48 rectangle in your level
 
+
+------------------------------------------------------------------------------------------------------------------------
 require "data/scripts/enemies/constants"
 v2d = require "data/scripts/enemies/vectorial2"
 
--- place cannons here
--- 64,311
--- 78,311
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
@@ -66,7 +67,7 @@ function initialize()
       0
    )
 
-   setSpriteOffset(0, 0, -24);
+   setSpriteOffset(0, 24, 12);
 end
 
 
@@ -97,8 +98,8 @@ end
 function fire()
    useGun(
       0,
-      mPosition:getX() + mX * 16,
-      mPosition:getY() - 12,
+      mPosition:getX() + mX * 32,
+      mPosition:getY() + 24,
       mX * mSpeed,
       0.0
    );
