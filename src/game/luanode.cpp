@@ -23,6 +23,7 @@
 #include "luaconstants.h"
 #include "luainterface.h"
 #include "player/player.h"
+#include "projectilehitaudio.h"
 #include "texturepool.h"
 #include "weaponfactory.h"
 
@@ -1235,6 +1236,52 @@ int32_t registerHitAnimation(lua_State* state)
 }
 
 /**
+ * @brief registerHitSamples register a hit animation for a given weapon
+ * @param state lua state
+ *    param 1: animation path / identifier
+ *    param 2: sample 1
+ *    param n: sample n
+ * @return error code
+ */
+int32_t registerHitSamples(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 3)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto path = lua_tostring(state, 1);
+
+   std::vector<ProjectileHitAudio::ProjectileHitSample> samples;
+   for (auto index = 2; index <= argc; index++)
+   {
+      const auto sample_path = lua_tostring(state, index);
+
+      auto volume = 1.0f;
+      if (index + 1 <= argc)
+      {
+         if (lua_isnumber(state, index + 1))
+         {
+            volume = static_cast<float>(lua_tonumber(state, index + 1));
+            index++;
+         }
+      }
+
+      samples.push_back({sample_path, volume});
+   }
+
+   ProjectileHitAudio::addReferenceSamples(path, samples);
+   return 0;
+}
+
+/**
  * @brief updateKeysPressed fire keypressed events to the node instance
  * @param state lua state
  *    param 1: keypressed bitmask
@@ -1411,6 +1458,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "queryAABB", ::queryAABB);
    lua_register(_lua_state, "queryRayCast", ::queryRayCast);
    lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
+   lua_register(_lua_state, "registerHitSamples", ::registerHitSamples);
    lua_register(_lua_state, "setActive", ::setActive);
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
