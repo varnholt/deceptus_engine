@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------------------------------------
--- place cannons with a 48x48 rectangle in your level
+-- place cannons with a 48x24 rectangle in your level
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -16,14 +16,14 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-mStartFireTimer = 1
-mFireInterval = 3000
+mFireInterval = 3.0
 mReadytoFire = true
 mPosition = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mSpriteIndex = 0
 mElapsed = 0.0
-mFireElapsed = 0.0
+mElapsedSinceFired = 0.0
+mElapsedUntilFired = 0.0
 mX = -1.0
 mAlignmentOffset = 0
 mSpeed = 1.5
@@ -38,8 +38,15 @@ SPRITE_HEIGHT = 3 * 24
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeRect(0.4, 0.2, 0.0, 0.0) -- width, height, x, y
-   addSample("boom.wav")
+   addShapeRect(0.5, 0.25, 0.5, 0.25) -- width, height, x, y
+
+   -- set up boom and audio distance
+   addHitbox(0, 0, 48, 48)
+   addAudioRange(400.0, 0.0, 200.0, 1.0)
+   addSample("mechanism_cannon_1.wav")
+   addSample("mechanism_cannon_2.wav")
+   addSample("mechanism_cannon_3.wav")
+   addSample("mechanism_cannon_4.wav")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.2) -- interval, damage, radius
 
@@ -79,23 +86,23 @@ function writeProperty(key, value)
          mX = 1.0
          mAlignmentOffset = 5 * SPRITE_HEIGHT
       end
+   elseif (key == "time_offset_s") then
+      mElapsedUntilFired = mElapsedUntilFired + value
+   elseif (key == "fire_interval_s") then
+      mFireInterval = value
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function timeout(id)
-   -- print(string.format("timeout: %d", id))
-
-   if (id == mStartFireTimer) then
-      mReadytoFire = true
-   end
-
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
+   playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 1.0)
+
    useGun(
       0,
       mPosition:getX() + mX * 32,
@@ -129,10 +136,15 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
 
+   mElapsedUntilFired = mElapsedUntilFired + dt
+   if (mElapsedUntilFired > mFireInterval) then
+      mElapsedUntilFired = 0
+      mReadytoFire = true
+   end
+
    -- if timer elapsed, go from idle animation to fire animation
    if (mReadytoFire) then
       mReadytoFire = false
-      timer(mFireInterval, mStartFireTimer)
       mIdle = false
       mElapsed = 0
    end
@@ -145,8 +157,8 @@ function update(dt)
    -- update projectile index
    projectileIndex = 0
    if (mFired) then
-      mFireElapsed = mFireElapsed + dt
-      projectileIndex = math.floor(mFireElapsed * 5.0)
+      mElapsedSinceFired = mElapsedSinceFired + dt
+      projectileIndex = math.floor(mElapsedSinceFired * 5.0)
       projectileIndex = math.min(3, projectileIndex)
    end
 
@@ -193,7 +205,7 @@ function update(dt)
       if (col == 3 and row == 4) then
          mIdle = true
          mFired = false
-         mFireElapsed = 0
+         mElapsedSinceFired = 0
       end
    end
 

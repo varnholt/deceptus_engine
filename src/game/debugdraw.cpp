@@ -482,14 +482,14 @@ void DebugDraw::debugHitboxes(sf::RenderTarget& target)
 
    for (const auto& node : nodes)
    {
+      auto just_hit = false;
       const auto hit_time = node->getHitTime();
-      if (!hit_time.has_value())
+      if (hit_time.has_value())
       {
-         continue;
+         just_hit = (now - hit_time.value() < 500ms);
       }
 
-      const auto just_hit = (now - hit_time.value() < 500ms);
-      const auto fill_color = just_hit ? sf::Color::Red : sf::Color::Transparent;
+      const auto fill_color = just_hit ? sf::Color{255, 0, 0, 50} : sf::Color{255, 255, 255, 50};
 
       for (const auto& hitbox : node->_hitboxes)
       {

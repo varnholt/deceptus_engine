@@ -142,7 +142,8 @@ Well... it's a cannon. It fires... cannon balls.
 |-|-|-|
 |script|string|`cannon_2.lua`|
 |alignment|string|Cannons either point to the '`left`' or to the '`right`'.|
-
+|time_offset_s||float|Timing offset (in seconds) to avoid firing all cannons at the same time|
+|fire_interval_s|float|The interval used for firing the cannon (in seconds)|
 
 
 ### Critter
