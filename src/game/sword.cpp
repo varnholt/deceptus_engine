@@ -51,7 +51,7 @@ void Sword::update(const sf::Time& /*time*/)
       auto hit_nodes = WorldQuery::findNodes(_hit_rect_px);
       for (auto& node : hit_nodes)
       {
-         std::cout << "hit: " << node->_script_name << " " << node->_id << std::endl;
+         // std::cout << "hit: " << node->_script_name << " " << node->_id << std::endl;
          node->luaHit(sword_damage);
       }
    }

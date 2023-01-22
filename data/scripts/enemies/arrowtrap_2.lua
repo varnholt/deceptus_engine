@@ -80,7 +80,7 @@ function initialize()
 
    addShapeRect(0.25, 0.25, 0.25, 0.25)
    addHitbox(-12, -12, 24, 24)
-   addAudioRange(700.0, 0.0, 250.0, 1.0)
+   addAudioRange(400.0, 0.0, 250.0, 1.0)
    addSample("arrow_load.wav")
    addSample("arrow_release_1.wav")
    addSample("arrow_release_2.wav")
