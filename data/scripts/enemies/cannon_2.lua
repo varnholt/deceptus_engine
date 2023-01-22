@@ -47,6 +47,8 @@ function initialize()
    addSample("mechanism_cannon_2.wav")
    addSample("mechanism_cannon_3.wav")
    addSample("mechanism_cannon_4.wav")
+   addSample("mechanism_cannon_boom_1.wav")
+   addSample("mechanism_cannon_boom_2.wav")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.2) -- interval, damage, radius
 
@@ -55,10 +57,18 @@ function initialize()
       "data/sprites/enemy_pirate_cannon_cannonball.png",
       3 * 24,
       3 * 24,
-      0.1,
+      0.05,
       20,
       24,
       4
+   )
+
+   registerHitSamples(
+      "data/sprites/enemy_pirate_cannon_cannonball.png",
+      "mechanism_cannon_boom_1.wav",
+      0.5,
+      "mechanism_cannon_boom_2.wav",
+      0.5
    )
 
    updateProjectileAnimation(
@@ -68,7 +78,7 @@ function initialize()
       3 * 24,
       (3 * 24) / 2,
       (3 * 24) / 2,
-      0.1,
+      0.05,
       4,
       15,
       0
@@ -101,7 +111,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 1.0)
+   playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
 
    useGun(
       0,
