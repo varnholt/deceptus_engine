@@ -29,10 +29,9 @@
 
 namespace
 {
-uint16_t category_bits = CategoryEnemyWalkThrough;                              // I am a ...
-uint16_t mask_bits_collides_with_player = CategoryBoundary | CategoryFriendly;  // I collide with ...
-uint16_t mask_bits_collides_with_walls_only = CategoryBoundary;                 // I collide with ...
-int16_t group_index = 0;                                                        // 0 is default
+uint16_t category_bits_default = CategoryEnemyWalkThrough;                      // I am a ...
+uint16_t mask_bits_default = CategoryBoundary | CategoryFriendly;               // I collide with ...
+int16_t group_index_default = 0;                                                // 0 is default
 
 #define OBJINSTANCE LuaInterface::instance().getObject(state)
 
@@ -831,6 +830,40 @@ int32_t addShapeRect(lua_State* state)
 }
 
 /**
+ * @brief addShapeRect add a rectangular shape to the node
+ * @param state lua state
+ *    param 1: rect width
+ *    param 2: rect height
+ *    param 3: rect position x
+ *    param 4: rect position y
+ * @return error code
+ */
+int32_t addShapeRectBevel(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 5)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto width = static_cast<float>(lua_tonumber(state, 1));
+   const auto height = static_cast<float>(lua_tonumber(state, 2));
+   const auto bevel = static_cast<float>(lua_tonumber(state, 3));
+   const auto offset_x = static_cast<float>(lua_tonumber(state, 4));
+   const auto offset_y = static_cast<float>(lua_tonumber(state, 5));
+
+   node->addShapeRectBevel(width, height, bevel, offset_x, offset_y);
+
+   return 0;
+}
+
+/**
  * @brief addShapePoly add a polygonal shape to the node
  * @param state lua state
  *    param n x coordinate
@@ -1442,6 +1475,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "addSample", ::addSample);
    lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
    lua_register(_lua_state, "addShapeRect", ::addShapeRect);
+   lua_register(_lua_state, "addShapeRectBevel", ::addShapeRectBevel);
    lua_register(_lua_state, "addSprite", ::addSprite);
    lua_register(_lua_state, "addWeapon", ::addWeapon);
    lua_register(_lua_state, "boom", ::boom);
@@ -1988,6 +2022,7 @@ void LuaNode::setupBody()
    const auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
    const auto sensor = static_cast<bool>(getPropertyBool("sensor"));
    const auto collides_with_player = static_cast<bool>(getPropertyBool("collides_with_player", true));
+   const auto mask_bits = getPropertyBool("walk_through", true);
 
    _body->SetTransform(b2Vec2{_start_position_px.x * MPP, _start_position_px.y * MPP}, 0.0f);
    _body->SetFixedRotation(true);
@@ -2003,9 +2038,9 @@ void LuaNode::setupBody()
 
       // apply default filter
       // http://www.iforce2d.net/b2dtut/collision-filtering
-      fd.filter.groupIndex = group_index;
-      fd.filter.maskBits = (collides_with_player ? mask_bits_collides_with_player : mask_bits_collides_with_walls_only);
-      fd.filter.categoryBits = category_bits;
+      fd.filter.categoryBits = (mask_bits ? category_bits_default : CategoryEnemyCollideWith);
+      fd.filter.maskBits = (collides_with_player ? mask_bits_default : CategoryBoundary);
+      fd.filter.groupIndex = group_index_default;
 
       auto fixture = _body->CreateFixture(&fd);
       auto fixture_node = new FixtureNode(this);
@@ -2035,6 +2070,25 @@ void LuaNode::addShapeRect(float width, float height, float x, float y)
 {
    auto shape = new b2PolygonShape();
    shape->SetAsBox(width, height, b2Vec2(x, y), 0.0f);
+   _shapes_m.push_back(shape);
+}
+
+void LuaNode::addShapeRectBevel(float width, float height, float bevel, float offset_x, float offset_y)
+{
+   auto shape = new b2PolygonShape();
+
+   std::array<b2Vec2, 8> vertices{
+      b2Vec2{bevel + offset_x, 0.0f + offset_y},
+      b2Vec2{0.0f + offset_x, bevel + offset_y},
+      b2Vec2{0.0f + offset_x, height - bevel + offset_y},
+      b2Vec2{bevel + offset_x, height + offset_y},
+      b2Vec2{width - bevel + offset_x, height + offset_y},
+      b2Vec2{width + offset_x, height - bevel + offset_y},
+      b2Vec2{width + offset_x, bevel + offset_y},
+      b2Vec2{width - bevel + offset_x, 0.0f + offset_y},
+   };
+
+   shape->Set(vertices.data(), static_cast<int32_t>(vertices.size()));
    _shapes_m.push_back(shape);
 }
 
