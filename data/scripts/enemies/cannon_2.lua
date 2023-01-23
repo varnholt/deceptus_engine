@@ -9,9 +9,11 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
+   collides_with_player = true,
    static_body = true,
    sprite = "data/sprites/enemy_pirate_cannon.png",
-   damage = 0
+   damage = 0,
+   walk_through = false
 }
 
 
@@ -38,7 +40,8 @@ SPRITE_HEIGHT = 3 * 24
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeRect(0.5, 0.25, 0.5, 0.25) -- width, height, x, y
+   -- addShapeRect(0.5, 0.25, 0.5, 0.25) -- width, height, x, y
+   addShapeRectBevel(1.0, 0.5, 0.05, 0.0, 0.5)
 
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 48)
