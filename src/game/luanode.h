@@ -58,6 +58,9 @@ struct LuaNode : public GameMechanism, public GameNode
    //! add a rectangular shape to the body of the object (given in metres)
    void addShapeRect(float width, float height, float center_x, float center_y);
 
+   //! add a beveled rect
+   void addShapeRectBevel(float width, float height, float bevel, float offset_x = 0.0f, float offset_y = 0.0f);
+
    //! add a weapon to the node
    void addWeapon(std::unique_ptr<Weapon> weapon);
 
