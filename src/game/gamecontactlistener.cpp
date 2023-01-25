@@ -113,9 +113,14 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
       return;
    }
 
+   // in general, don't allow jumping off enemies
    if (isEnemy(fixture_node))
    {
-      return;
+      // this only goes for enemies the player is supposed to walk through
+      if (!(fixture->GetFilterData().categoryBits & CategoryEnemyCollideWith))
+      {
+         return;
+      }
    }
 
    // store ground body in player
@@ -348,7 +353,11 @@ void GameContactListener::processPlayerFootSensorContactEnd(FixtureNode* fixture
    // contact with enemies is not taken into regard for foot sensor because that'd enable him to jump off enemies
    if (isEnemy(fixture_node))
    {
-      return;
+      // this only goes for enemies the player is supposed to walk through
+      if (!(fixture->GetFilterData().categoryBits & CategoryEnemyCollideWith))
+      {
+         return;
+      }
    }
 
    _count_foot_contacts--;
