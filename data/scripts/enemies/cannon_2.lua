@@ -41,7 +41,7 @@ SPRITE_HEIGHT = 3 * 24
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    -- addShapeRect(0.5, 0.25, 0.5, 0.25) -- width, height, x, y
-   addShapeRectBevel(1.0, 0.5, 0.05, 0.0, 0.5)
+   addShapeRectBevel(1.0, 0.75, 0.05, 0.0, 0.25)
 
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 48)
