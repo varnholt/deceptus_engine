@@ -1477,11 +1477,14 @@ void Player::updateChainShapeCollisions()
 void Player::updateJump()
 {
    PlayerJump::PlayerJumpInfo info;
+
    info._in_air = isInAir();
    info._in_water = isInWater();
    info._water_entered_timepoint = _water_entered_time;
    info._crouching = _bend.isCrouching();
    info._climbing = _climb.isClimbing();
+   info._dashing = _dash.isDashActive();
+
    _jump.update(info);
 }
 
