@@ -5,6 +5,7 @@
 
 #include "gamedeserializedata.h"
 
+#include <deque>
 #include <memory>
 
 struct TmxObject;
@@ -43,6 +44,7 @@ private:
    float _sprite_value = _sprite_index_enabled;
    int32_t _sprite_index_current = _sprite_index_enabled;
    int32_t _sprite_index_target = _sprite_index_enabled;
+   std::deque<bool> _target_states;
    int32_t _tu_tl = 0;
    int32_t _tv_tl = 0;
 
