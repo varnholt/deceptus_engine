@@ -185,19 +185,29 @@ void OnOffBlock::update(const sf::Time& dt)
          }
          else
          {
+            // otherwise just increase the index to either the enabled or disabled index
             _sprite_index_current = sprite_index;
          }
 
          updateSpriteRect();
       }
    }
+
+   // pop from the queue to set up the next target state
+   else if (!_target_states.empty())
+   {
+      const auto enabled = _target_states.front();
+      GameMechanism::setEnabled(enabled);
+      _body->SetActive(enabled);
+      _sprite_index_target = enabled ? _sprite_index_enabled : _sprite_index_disabled;
+      _target_states.pop_front();
+   }
 }
 
 void OnOffBlock::setEnabled(bool enabled)
 {
-   _body->SetActive(enabled);
-   GameMechanism::setEnabled(enabled);
-   _sprite_index_target = (enabled ? _sprite_index_enabled : _sprite_index_disabled);
+   // a queue is used here because the player might be hammering the lever
+   _target_states.push_back(enabled);
 }
 
 std::optional<sf::FloatRect> OnOffBlock::getBoundingBoxPx()
