@@ -10,6 +10,11 @@ struct PlayerDash
    float _dash_multiplier = 0.0f;
    Dash _dash_dir = Dash::None;
 
+   void abort()
+   {
+      _dash_frame_count = 0;
+   }
+
    bool isDashActive() const
    {
       return (_dash_frame_count > 0);
