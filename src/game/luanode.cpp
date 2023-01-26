@@ -94,10 +94,10 @@ int32_t updateProperties(lua_State* state)
 /**
  * @brief addHitBox add a hitbox to the enemy
  * @param state lua state
- *    param 1: x position of sprite
- *    param 2: y position of sprite
- *    param 3: sprite width
- *    param 4: sprite height
+ *    param 1: x position relative to where the object has been placed
+ *    param 2: y position relative to where the object has been placed
+ *    param 3: hitbox width
+ *    param 4: hitbox height
  * @return error code
  */
 int32_t addHitbox(lua_State* state)

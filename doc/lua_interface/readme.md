@@ -228,6 +228,34 @@ There's a `interpolation.lua` inside the `scripts/enemies` directory. Use that t
 
 # The Lua API
 
+## `addAudioRange`
+
+The function defines two radii of around an object: A far distance which is the distance in px from where audio can be heard first, and the near distance where the object's sound is the loudest.
+Two volumes (far and near) are defined. The object's volume is interpolated between the two.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|far distance in px|
+|2|float|far volume from 0..1|
+|3|float|near distance in px|
+|4|float|near volume from 0..1|
+
+
+## `addHitbox`
+
+The function is used to set up the node's hitbox.
+Only if the hitbox is defined, a luanode can be hit by the player.
+Also, the hitbox is used to determine the object's center for audio computation.
+No hitbox therefore also means no audio.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|x position relative to where the object has been placed|
+|2|float|y position relative to where the object has been placed|
+|3|float|hitbox width|
+|4|float|hitbox height|
+
+
 ## `addSample`
 
 Preload a sample to be played later
