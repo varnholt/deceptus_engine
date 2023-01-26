@@ -234,6 +234,13 @@ void PlayerJump::wallJump()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jump()
 {
+   if (_jump_info._dashing)
+   {
+      // don't allow jump when dash is active.
+      // with gravity scale set to 0, the player would do super jumps.
+      return;
+   }
+
    if (_controls->isDownButtonPressed())
    {
       // equivalent to check for bending down, but jump can be called via lamda

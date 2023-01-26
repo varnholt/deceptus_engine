@@ -27,6 +27,7 @@ struct PlayerJump
       HighResTimePoint _water_entered_timepoint;
       bool _crouching = false;
       bool _climbing = false;
+      bool _dashing = false;
    };
 
    enum class DustAnimationType
