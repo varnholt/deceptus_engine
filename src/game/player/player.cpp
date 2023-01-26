@@ -1609,6 +1609,9 @@ void Player::resetDash()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
+   // TODO
+   // move code to dash struct
+
    if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Dash)))
    {
       return;
@@ -1616,6 +1619,17 @@ void Player::updateDash(Dash dir)
 
    if (_jump._wallsliding)
    {
+      // abort dash when wallslide becomes active
+      if (_dash.isDashActive())
+      {
+         // abort dash
+         _dash.abort();
+
+         // reset dash
+         resetDash();
+         return;
+      }
+
       return;
    }
 
