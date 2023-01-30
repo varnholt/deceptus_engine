@@ -27,6 +27,7 @@ public:
    };
 
    RotatingBlade(GameNode* parent = nullptr);
+   ~RotatingBlade();
 
    void setup(const GameDeserializeData& data);
    void update(const sf::Time& dt) override;

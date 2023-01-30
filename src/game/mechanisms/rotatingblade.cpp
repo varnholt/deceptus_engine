@@ -27,6 +27,24 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
    _has_audio = true;
 }
 
+RotatingBlade::~RotatingBlade()
+{
+   if (_sample_enabled.has_value())
+   {
+      Audio::getInstance().stopSample(_sample_enabled.value());
+   }
+
+   if (_sample_accelerate.has_value())
+   {
+      Audio::getInstance().stopSample(_sample_accelerate.value());
+   }
+
+   if (_sample_decelerate.has_value())
+   {
+      Audio::getInstance().stopSample(_sample_decelerate.value());
+   }
+}
+
 void RotatingBlade::setup(const GameDeserializeData& data)
 {
    if (!data._tmx_object->_polygon && !data._tmx_object->_polyline)
@@ -117,21 +135,27 @@ void RotatingBlade::updateAudio()
       return;
    }
 
-   static constexpr auto eps = 0.05f;
+   static constexpr auto eps_enabled_on = 0.5f;
+   static constexpr auto eps_enabled_off = 0.05f;
+   static constexpr auto eps_accelerate_off = 0.05f;
 
    // blades are accelerating until rotating at regular speed
    if (_enabled)
    {
-      if (_velocity > 1.0f - eps)
+      if (_velocity > 1.0f - eps_enabled_on)
       {
          // play regular sample
          if (!_sample_enabled.has_value())
          {
             _sample_enabled = Audio::getInstance().playSample({"mechanism_rotating_blade_enabled.wav", 1.0f, true});
-            _sample_accelerate.reset();
          }
          else
          {
+            if (_velocity > 1.0f - eps_accelerate_off)
+            {
+               _sample_accelerate.reset();
+            }
+
             Audio::getInstance().setPosition(_sample_enabled.value(), _pos);
          }
       }
@@ -152,7 +176,7 @@ void RotatingBlade::updateAudio()
    // blades are slowing down until they're fully stopped
    else
    {
-      if (_velocity < 0.0 + eps)
+      if (_velocity < 0.0 + eps_enabled_off)
       {
          // stop decelerate sample
          if (_sample_decelerate.has_value())
