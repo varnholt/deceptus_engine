@@ -9,6 +9,7 @@ class SoundEmitter : public GameMechanism, public GameNode
 {
 public:
    SoundEmitter(GameNode* parent);
+   ~SoundEmitter();
 
    void setAudioEnabled(bool enabled) override;
    void setVolume(float volume) override;
@@ -24,6 +25,8 @@ public:
    bool _looped{true};
    std::string _filename;
    std::optional<int32_t> _thread_id;
+private:
+   void stopPlaying();
 };
 
 #endif // SOUNDEMITTER_H
