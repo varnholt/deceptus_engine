@@ -10,6 +10,19 @@ SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
    _has_audio = true;
 }
 
+SoundEmitter::~SoundEmitter()
+{
+   stopPlaying();
+}
+
+void SoundEmitter::stopPlaying()
+{
+   if (_thread_id.has_value())
+   {
+      Audio::getInstance().stopSample(_thread_id.value());
+   }
+}
+
 void SoundEmitter::setAudioEnabled(bool audio_enabled)
 {
    if (audio_enabled == _audio_enabled)
@@ -27,11 +40,7 @@ void SoundEmitter::setAudioEnabled(bool audio_enabled)
    else
    {
       // stop playing
-      if (_thread_id.has_value())
-      {
-         Audio::getInstance().stopSample(_thread_id.value());
-         _thread_id.reset();
-      }
+      stopPlaying();
    }
 }
 
