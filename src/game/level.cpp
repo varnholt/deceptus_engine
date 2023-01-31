@@ -395,6 +395,15 @@ void Level::loadTmx()
 
    GameMechanismDeserializer::deserialize(tmx_parser, this, data, _mechanisms_map);
 
+   // preload mechanism data
+   for (auto& [vec_key, vec_values] : _mechanisms_map)
+   {
+      for (auto& val : *vec_values)
+      {
+         val->preload();
+      }
+   }
+
    // process everything that's not considered a mechanism
    const auto& tmx_elements = tmx_parser.getElements();
    for (auto element : tmx_elements)
