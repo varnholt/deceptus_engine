@@ -21,6 +21,8 @@ public:
    virtual bool isEnabled() const;
    virtual void setEnabled(bool enabled);
 
+   virtual void preload();
+
    // audio related
    virtual bool hasAudio() const;
    virtual std::optional<AudioRange> getAudioRange() const;

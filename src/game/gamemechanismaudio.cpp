@@ -2,6 +2,9 @@
 
 #include "audio.h"
 
+// this class should go away
+// mechanisms have a preload function that should be used instead
+
 void GameMechanismAudio::initialize()
 {
    Audio::getInstance().addSample("mechanism_bouncer.wav");
@@ -11,10 +14,6 @@ void GameMechanismAudio::initialize()
    Audio::getInstance().addSample("mechanism_switch_on.wav");
    Audio::getInstance().addSample("mechanism_spikeball_01.wav");
    Audio::getInstance().addSample("mechanism_spikeball_02.wav");
-
-   Audio::getInstance().addSample("mechanism_rotating_blade_accelerate.wav");
-   Audio::getInstance().addSample("mechanism_rotating_blade_decelerate.wav");
-   Audio::getInstance().addSample("mechanism_rotating_blade_enabled.wav");
 }
 
 void GameMechanismAudio::play(Effect effect)
