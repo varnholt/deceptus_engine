@@ -112,6 +112,13 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    }
 }
 
+void RotatingBlade::preload()
+{
+   Audio::getInstance().addSample("mechanism_rotating_blade_accelerate.wav");
+   Audio::getInstance().addSample("mechanism_rotating_blade_decelerate.wav");
+   Audio::getInstance().addSample("mechanism_rotating_blade_enabled.wav");
+}
+
 void RotatingBlade::updateAudio()
 {
    if (!isAudioEnabled())
@@ -120,16 +127,19 @@ void RotatingBlade::updateAudio()
       if (_sample_enabled.has_value())
       {
          Audio::getInstance().stopSample(_sample_enabled.value());
+         _sample_enabled.reset();
       }
 
       if (_sample_accelerate.has_value())
       {
          Audio::getInstance().stopSample(_sample_accelerate.value());
+         _sample_accelerate.reset();
       }
 
       if (_sample_decelerate.has_value())
       {
          Audio::getInstance().stopSample(_sample_decelerate.value());
+         _sample_decelerate.reset();
       }
 
       return;
@@ -255,11 +265,6 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    DebugDraw::drawCircle(target, _sprite.getPosition(), _sprite.getOrigin().x, color);
 #endif
-}
-
-void RotatingBlade::setEnabled(bool enabled)
-{
-   GameMechanism::setEnabled(enabled);
 }
 
 void RotatingBlade::setAudioEnabled(bool enabled)

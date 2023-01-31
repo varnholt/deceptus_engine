@@ -30,9 +30,9 @@ public:
    ~RotatingBlade();
 
    void setup(const GameDeserializeData& data);
+   void preload() override;
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
-   void setEnabled(bool enabled) override;
    void setAudioEnabled(bool enabled) override;
    void setVolume(float volume) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

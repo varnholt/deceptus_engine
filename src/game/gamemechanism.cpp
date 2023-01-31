@@ -56,6 +56,10 @@ void GameMechanism::setEnabled(bool enabled)
    _enabled = enabled;
 }
 
+void GameMechanism::preload()
+{
+}
+
 bool GameMechanism::hasAudio() const
 {
    return _has_audio;
