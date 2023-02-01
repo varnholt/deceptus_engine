@@ -178,7 +178,6 @@ SOURCES += \
    src/game/gamecontrollerintegration.cpp \
    src/game/gamedeserializedata.cpp \
    src/game/gamemechanism.cpp \
-   src/game/gamemechanismaudio.cpp \
    src/game/gamemechanismdeserializer.cpp \
    src/game/gamenode.cpp \
    src/game/gamestate.cpp \
@@ -343,7 +342,6 @@ HEADERS += \
    src/game/chunk.h \
    src/game/drawstates.h \
    src/game/gameaudio.h \
-   src/game/gamemechanismaudio.h \
    src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \

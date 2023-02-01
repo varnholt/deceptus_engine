@@ -2,13 +2,13 @@
 
 #include <iostream>
 
+#include "audio.h"
 #include "constants.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "gamemechanismaudio.h"
 #include "player/player.h"
 #include "texturepool.h"
 
@@ -122,6 +122,11 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
       sprite_offset_x_px += PIXELS_PER_TILE;
       row_index++;
    }
+}
+
+void CollapsingPlatform::preload()
+{
+   Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
 }
 
 void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
@@ -260,7 +265,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
    {
       if (!_played_shake_sample)
       {
-         GameMechanismAudio::play(GameMechanismAudio::Effect::CollapsingPlatformCrumble);
+         Audio::getInstance().playSample({"mechanism_collapsing_platform_crumble.wav"});
          _played_shake_sample = true;
       }
 
@@ -279,7 +284,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
    {
       if (_played_shake_sample)
       {
-         GameMechanismAudio::stop(GameMechanismAudio::Effect::CollapsingPlatformCrumble);
+         Audio::getInstance().stopSample("mechanism_collapsing_platform_crumble.wav");
          _played_shake_sample = false;
       }
 

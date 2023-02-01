@@ -1,8 +1,8 @@
 #pragma once
 
+#include <stdint.h>
 #include <filesystem>
 #include <functional>
-#include <stdint.h>
 
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
@@ -11,32 +11,31 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
-
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
-
 class Lever : public GameMechanism, public GameNode
 {
-
 public:
-
    using Callback = std::function<void(int32_t)>;
 
-   enum class Type {
+   enum class Type
+   {
       TwoState,
       TriState
    };
 
-      enum class State {
-         Left   = -1,
-         Middle = 0,
-         Right  = 1,
-         };
+   enum class State
+   {
+      Left = -1,
+      Middle = 0,
+      Right = 1,
+   };
 
    Lever(GameNode* parent = nullptr);
 
+   void preload() override;
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -48,7 +47,7 @@ public:
 
    static void addSearchRect(const std::shared_ptr<TmxObject>& rect);
 
-         // requires a unified datastructure/mechanism in the future!
+   // requires a unified datastructure/mechanism in the future!
    static void merge(
       const std::vector<std::shared_ptr<GameMechanism>>& levers,
       const std::vector<std::shared_ptr<GameMechanism>>& lasers,
@@ -60,7 +59,7 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
       const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades,
       const std::vector<std::shared_ptr<GameMechanism>>& doors
-      );
+   );
 
    [[deprecated]] static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
    void setup(const GameDeserializeData& data);
@@ -70,9 +69,7 @@ public:
    void serializeState(nlohmann::json& j) override;
    void deserializeState(const nlohmann::json& j) override;
 
-
 private:
-
    void updateSprite();
    void updateDirection();
    void updateTargetPositionReached();
@@ -96,5 +93,3 @@ private:
 
    static std::vector<std::shared_ptr<TmxObject>> __rectangles;
 };
-
-

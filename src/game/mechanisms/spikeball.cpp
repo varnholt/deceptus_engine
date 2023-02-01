@@ -70,6 +70,12 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
    _chain_element_b.setOrigin(4, 4);
 }
 
+void SpikeBall::preload()
+{
+   Audio::getInstance().addSample("mechanism_spikeball_01.wav");
+   Audio::getInstance().addSample("mechanism_spikeball_02.wav");
+}
+
 void SpikeBall::drawChain(sf::RenderTarget& window)
 {
    std::vector<HermiteCurveKey> keys;
