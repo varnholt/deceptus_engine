@@ -1,7 +1,8 @@
 #include "bouncer.h"
+
+#include "audio.h"
 #include "fixturenode.h"
 #include "framework/tools/globalclock.h"
-#include "gamemechanismaudio.h"
 #include "player/player.h"
 #include "texturepool.h"
 
@@ -86,6 +87,11 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    _sprite.setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
 
+void Bouncer::preload()
+{
+   Audio::getInstance().addSample("mechanism_bouncer.wav");
+}
+
 void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
@@ -168,5 +174,5 @@ void Bouncer::activate()
    // aaaaand.. up!
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
-   GameMechanismAudio::play(GameMechanismAudio::Effect::BouncerJump);
+   Audio::getInstance().playSample({"mechanism_bouncer.wav"});
 }

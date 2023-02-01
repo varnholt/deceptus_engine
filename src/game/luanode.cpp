@@ -802,8 +802,8 @@ int32_t addShapeCircle(lua_State* state)
  * @param state lua state
  *    param 1: rect width
  *    param 2: rect height
- *    param 3: rect position x
- *    param 4: rect position y
+ *    param 3: x offset
+ *    param 4: y offset
  * @return error code
  */
 int32_t addShapeRect(lua_State* state)
@@ -834,8 +834,9 @@ int32_t addShapeRect(lua_State* state)
  * @param state lua state
  *    param 1: rect width
  *    param 2: rect height
- *    param 3: rect position x
- *    param 4: rect position y
+ *    param 3: amount of bevel
+ *    param 4: x offset
+ *    param 5: y offset
  * @return error code
  */
 int32_t addShapeRectBevel(lua_State* state)

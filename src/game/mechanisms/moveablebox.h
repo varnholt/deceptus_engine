@@ -15,6 +15,7 @@ class MoveableBox : public GameMechanism, public GameNode
 public:
    MoveableBox(GameNode* node);
 
+   void preload() override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
