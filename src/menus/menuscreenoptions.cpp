@@ -37,9 +37,9 @@ void MenuScreenOptions::back()
 
    // choose whatever has been used the last time to open up the options menu
    auto menu = Menu::MenuType::Main;
-   for (auto it = history.cbegin(); it != history.cend(); ++it)
+   for (auto it = history.crbegin(); it != history.crend(); ++it)
    {
-      if ((*it) == Menu::MenuType::Game)
+      if ((*it) == Menu::MenuType::Main)
       {
          menu = Menu::MenuType::Main;
          break;
