@@ -284,8 +284,21 @@ Add a rectangular shape to the node.
 |-|-|-|
 |1|float|Rect width (in meters)|
 |2|float|Rect height (in meters)|
-|3|float|Rect position x (in meters)|
-|4|float|Rect position y (in meters)|
+|3|float|Rect offset x relative to placement position (in meters)|
+|4|float|Rect offset y relative to placement position (in meters)|
+
+
+## `addShapeRectBevel`
+
+Add a beveled rectangular shape to the node.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Rect width (in meters)|
+|2|float|Rect height (in meters)|
+|3|float|Bevel side length (in meters)|
+|4|float|Rect offset x relative to placement position (in meters)|
+|5|float|Rect offset y relative to placement position (in meters)|
 
 
 ## `addShapePoly`

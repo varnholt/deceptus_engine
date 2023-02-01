@@ -1,5 +1,6 @@
 #include "lever.h"
 
+#include "audio.h"
 #include "constants.h"
 #include "conveyorbelt.h"
 #include "door.h"
@@ -11,7 +12,6 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "gamemechanism.h"
-#include "gamemechanismaudio.h"
 #include "laser.h"
 #include "movingplatform.h"
 #include "onoffblock.h"
@@ -182,6 +182,13 @@ Lever::Lever(GameNode* parent) : GameNode(parent)
 }
 
 //-----------------------------------------------------------------------------
+void Lever::preload()
+{
+   Audio::getInstance().addSample("mechanism_switch_off.wav");
+   Audio::getInstance().addSample("mechanism_switch_on.wav");
+}
+
+//-----------------------------------------------------------------------------
 void Lever::updateDirection()
 {
    if (_target_state == State::Left)
@@ -338,7 +345,10 @@ void Lever::toggle()
       _state_previous = _target_state;
    }
 
-   GameMechanismAudio::play(_target_state == State::Left ? GameMechanismAudio::Effect::LeverOff : GameMechanismAudio::Effect::LeverOn);
+   Audio::getInstance().playSample(
+      _target_state == State::Left ? Audio::PlayInfo{"mechanism_switch_off.wav"} : Audio::PlayInfo{"mechanism_switch_on.wav"}
+   );
+
    updateReceivers();
 }
 

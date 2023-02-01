@@ -20,6 +20,12 @@ MoveableBox::MoveableBox(GameNode* node) : GameNode(node)
 }
 
 //--------------------------------------------------------------------------------------------------
+void MoveableBox::preload()
+{
+   Audio::getInstance().addSample("mechanism_moveable_object_01.wav");
+}
+
+//--------------------------------------------------------------------------------------------------
 void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
