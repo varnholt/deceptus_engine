@@ -54,17 +54,22 @@ void PlayerDash::update(const DashInput& input)
 
    // dir is the initial dir passed in on button press
    // Dash::None is passed in on regular updates after the initial press
-   if (dir == Dash::None)
-   {
-      dir = _direction;
-   }
-   else
+   if (dir != Dash::None)
    {
       // prevent dash spam
       if (hasMoreFrames())
       {
          return;
       }
+
+      using namespace std::chrono_literals;
+      const auto now = std::chrono::high_resolution_clock::now();
+      if (now - _last_dash_time_point < 1s)
+      {
+         return;
+      }
+
+      _last_dash_time_point = now;
 
       // first dash iteration
       _frame_count = PhysicsConfiguration::getInstance()._player_dash_frame_count;
