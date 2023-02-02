@@ -1,6 +1,7 @@
 #ifndef PLAYERDASH_H
 #define PLAYERDASH_H
 
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include "game/constants.h"
@@ -9,6 +10,8 @@ class b2Body;
 
 struct PlayerDash
 {
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
    struct DashInput
    {
       Dash _dir;
@@ -28,6 +31,7 @@ struct PlayerDash
    float _multiplier = 0.0f;
    Dash _direction = Dash::None;
    std::function<void(void)> _reset_dash_callback;
+   HighResTimePoint _last_dash_time_point;
 };
 
 #endif // PLAYERDASH_H
