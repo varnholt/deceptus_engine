@@ -243,6 +243,7 @@ SOURCES += \
    src/game/player/playerbelt.cpp \
    src/game/player/playerclimb.cpp \
    src/game/player/playercontrols.cpp \
+   src/game/player/playerdash.cpp \
    src/game/player/playerinfo.cpp \
    src/game/player/playerinput.cpp \
    src/game/player/playerjump.cpp \

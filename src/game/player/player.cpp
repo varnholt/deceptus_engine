@@ -132,6 +132,8 @@ Player::Player(GameNode* parent) : GameNode(parent)
 
    _climb.setControls(_controls);
    _jump.setControls(_controls);
+
+   _dash._reset_dash_callback = [this]() { resetMotionBlur(); };
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -309,7 +311,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          anim._animation->draw(color);
       }
 
-      if (_dash.isDashActive())
+      if (_dash.hasMoreFrames())
       {
          _last_animations.push_back({draw_position_px, current_cycle});
       }
@@ -771,7 +773,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._points_right = !_points_to_left;
    data._climb_joint_present = _climb._climb_joint;
    data._jump_frame_count = _jump._jump_frame_count;
-   data._dash_frame_count = _dash._dash_frame_count;
+   data._dash_frame_count = _dash._frame_count;
    data._moving_left = _controls->isMovingLeft();
    data._moving_right = _controls->isMovingRight();
    data._wall_sliding = _jump._wallsliding;
@@ -789,9 +791,9 @@ void Player::updateAnimation(const sf::Time& dt)
    data._attacking = _attack.isAttacking();
    data._weapon_type = (!_weapon_system->_selected) ? WeaponType::None : _weapon_system->_selected->getWeaponType();
 
-   if (_dash.isDashActive())
+   if (_dash.hasMoreFrames())
    {
-      data._dash_dir = _dash._dash_dir;
+      data._dash_dir = _dash._direction;
    }
 
    // pick latest left/right input to avoid conflicts
@@ -1317,7 +1319,7 @@ void Player::setZIndex(int32_t z)
 void Player::updateBendDown()
 {
    // disable bend down states when player hit dash button
-   if (_dash.isDashActive())
+   if (_dash.hasMoreFrames())
    {
       _bend._was_bending_down = false;
       _bend._bending_down = false;
@@ -1483,7 +1485,7 @@ void Player::updateJump()
    info._water_entered_timepoint = _water_entered_time;
    info._crouching = _bend.isCrouching();
    info._climbing = _climb.isClimbing();
-   info._dashing = _dash.isDashActive();
+   info._dashing = _dash.hasMoreFrames();
 
    _jump.update(info);
 }
@@ -1592,112 +1594,17 @@ void Player::update(const sf::Time& dt)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::resetDash()
+void Player::resetMotionBlur()
 {
-   // clear motion blur buffer
    _last_animations.clear();
-
    _player_animation.resetAlpha();
-
-   // re-enabled gravity for player
-   if (_body)
-   {
-      _body->SetGravityScale(1.0f);
-   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
-   // TODO
-   // move code to dash struct
-
-   if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Dash)))
-   {
-      return;
-   }
-
-   if (_jump._wallsliding)
-   {
-      // abort dash when wallslide becomes active
-      if (_dash.isDashActive())
-      {
-         // abort dash
-         _dash.abort();
-
-         // reset dash
-         resetDash();
-         return;
-      }
-
-      return;
-   }
-
-   if (_hard_landing)
-   {
-      return;
-   }
-
-   // don't allow a new dash move inside water
-   if (isInWater())
-   {
-      if (!_dash.isDashActive())
-      {
-         resetDash();
-         return;
-      }
-   }
-
-   // dir is the initial dir passed in on button press
-   // Dash::None is passed in on regular updates after the initial press
-   if (dir == Dash::None)
-   {
-      dir = _dash._dash_dir;
-   }
-   else
-   {
-      // prevent dash spam
-      if (_dash.isDashActive())
-      {
-         return;
-      }
-
-      // first dash iteration
-      _dash._dash_frame_count = PhysicsConfiguration::getInstance()._player_dash_frame_count;
-      _dash._dash_multiplier = PhysicsConfiguration::getInstance()._player_dash_multiplier;
-      _dash._dash_dir = dir;
-
-      // play dash sound
-      Audio::getInstance().playSample({"player_dash_01.wav"});
-
-      auto velocity = _body->GetLinearVelocity();
-      velocity.y = 0.0f;
-      _body->SetLinearVelocity(velocity);
-      _body->SetGravityScale(0.0);
-   }
-
-   if (!_dash.isDashActive() || _dash._dash_dir == Dash::None)
-   {
-      return;
-   }
-
-   const auto left = (dir == Dash::Left);
-   _points_to_left = left;
-
-   _dash._dash_multiplier += PhysicsConfiguration::getInstance()._player_dash_multiplier_increment_per_frame;
-   _dash._dash_multiplier *= PhysicsConfiguration::getInstance()._player_dash_multiplier_scale_per_frame;
-
-   const auto dash_vector = _dash._dash_multiplier * _body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
-   const auto impulse = (left) ? -dash_vector : dash_vector;
-
-   _body->ApplyForceToCenter(b2Vec2(impulse, 0.0f), false);
-
-   _dash._dash_frame_count--;
-
-   if (!_dash.isDashActive())
-   {
-      resetDash();
-   }
+   PlayerDash::DashInput input{dir, _jump._wallsliding, _hard_landing, isInWater(), _points_to_left, _body};
+   _dash.update(input);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1953,8 +1860,8 @@ void Player::reset()
    _ground_body = nullptr;
 
    // reset dash
-   _dash._dash_frame_count = 0;
-   resetDash();
+   _dash._frame_count = 0;
+   resetMotionBlur();
    _dead = false;
    _death_reason.reset();
    _spawn_complete = false;
