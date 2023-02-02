@@ -2,23 +2,32 @@
 #define PLAYERDASH_H
 
 #include <cstdint>
+#include <functional>
 #include "game/constants.h"
+
+class b2Body;
 
 struct PlayerDash
 {
-   int32_t _dash_frame_count = 0;
-   float _dash_multiplier = 0.0f;
-   Dash _dash_dir = Dash::None;
-
-   void abort()
+   struct DashInput
    {
-      _dash_frame_count = 0;
-   }
+      Dash _dir;
+      bool _wallsliding{false};
+      bool _hard_landing{false};
+      bool _is_in_water{false};
+      bool& _points_to_left;
+      b2Body* player_body{nullptr};
+   };
 
-   bool isDashActive() const
-   {
-      return (_dash_frame_count > 0);
-   }
+   void update(const DashInput& input);
+   void abort();
+   bool hasMoreFrames() const;
+   void reset(b2Body* player_body);
+
+   int32_t _frame_count = 0;
+   float _multiplier = 0.0f;
+   Dash _direction = Dash::None;
+   std::function<void(void)> _reset_dash_callback;
 };
 
 #endif // PLAYERDASH_H
