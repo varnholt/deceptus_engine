@@ -150,7 +150,7 @@ private:
    void updateSpawn();
 
    void startHardLanding();
-   void resetDash();
+   void resetMotionBlur();
 
    void createBody();
    void createFeet();
