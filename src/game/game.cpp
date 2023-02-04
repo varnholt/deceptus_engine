@@ -490,6 +490,11 @@ void Game::draw()
    {
       _physics_ui->draw();
    }
+
+   if (DrawStates::_draw_camera_system)
+   {
+      _camera_ui->draw();
+   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -851,6 +856,11 @@ void Game::shutdown()
       _physics_ui->close();
    }
 
+   if (_camera_ui)
+   {
+      _camera_ui->close();
+   }
+
    std::exit(0);
 }
 
@@ -922,6 +932,17 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::F3:
       {
          DrawStates::_draw_camera_system = !DrawStates::_draw_camera_system;
+
+         if (DrawStates::_draw_camera_system && !_camera_ui)
+         {
+            _camera_ui = std::make_unique<CameraSystemConfigurationUi>();
+         }
+         else if (_camera_ui)
+         {
+            _camera_ui->close();
+            _camera_ui.reset();
+         }
+
          break;
       }
       case sf::Keyboard::F4:
@@ -1057,5 +1078,10 @@ void Game::processEvents()
    if (DrawStates::_draw_physics_config)
    {
       _physics_ui->processEvents();
+   }
+
+   if (DrawStates::_draw_camera_system)
+   {
+      _camera_ui->processEvents();
    }
 }
