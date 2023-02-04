@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio.h"
+#include "camerasystemconfigurationui.h"
 #include "console.h"
 #include "constants.h"
 #include "drawstates.h"
@@ -78,6 +79,7 @@ private:
    std::unique_ptr<InfoLayer> _info_layer;
    std::unique_ptr<InGameMenu> _ingame_menu;
    std::unique_ptr<ControllerOverlay> _controller_overlay;
+   std::unique_ptr<CameraSystemConfigurationUi> _camera_ui;
    std::unique_ptr<PhysicsConfigurationUi> _physics_ui;
 
    // temporarily here for debugging only

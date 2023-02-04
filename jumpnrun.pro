@@ -32,6 +32,8 @@ win32-msvc {
    message("configured for msvc")
    QMAKE_CXXFLAGS_RELEASE += /Zi
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
+   QMAKE_CFLAGS_WARN_ON = -W3
+   QMAKE_CXXFLAGS_WARN_ON = -W3
 }
 
 linux|win32-g++ {
@@ -146,6 +148,7 @@ SOURCES += \
    src/game/cameraroomlock.cpp \
    src/game/camerasystem.cpp \
    src/game/camerasystemconfiguration.cpp \
+   src/game/camerasystemconfigurationui.cpp \
    src/game/chainshapeanalyzer.cpp \
    src/game/chunk.cpp \
    src/game/console.cpp \
@@ -339,6 +342,7 @@ HEADERS += \
    src/game/boomeffectenveloperandom.h \
    src/game/boomeffectenvelopesine.h \
    src/game/boomsettings.h \
+   src/game/camerasystemconfigurationui.h \
    src/game/chainshapeanalyzer.h \
    src/game/chunk.h \
    src/game/drawstates.h \
