@@ -81,7 +81,6 @@ public:
    const std::unordered_map<void*, size_t>& getPointSizeMap() const;
 
    std::shared_ptr<Portal> getNearbyPortal() const;
-   std::shared_ptr<Bouncer> getNearbyBouncer() const;
    const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints() const;
 
    void toggleMechanisms();
@@ -100,6 +99,8 @@ public:
 
    static Level* getCurrentLevel();
    void syncRoom();
+
+   const std::vector<std::shared_ptr<GameMechanism>>& getBouncers() const;
 
 protected:
    void addDebugRect(void* body, float x, float y, float w, float h);

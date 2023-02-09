@@ -204,6 +204,7 @@ SOURCES += \
    src/game/luainterface.cpp \
    src/game/luanode.cpp \
    src/game/mechanisms/bouncer.cpp \
+   src/game/mechanisms/bouncerwrapper.cpp \
    src/game/mechanisms/bubblecube.cpp \
    src/game/mechanisms/checkpoint.cpp \
    src/game/mechanisms/collapsingplatform.cpp \
@@ -417,6 +418,7 @@ HEADERS += \
    src/game/luainterface.h \
    src/game/luanode.h \
    src/game/mechanisms/bouncer.h \
+   src/game/mechanisms/bouncerwrapper.h \
    src/game/mechanisms/bubblecube.h \
    src/game/mechanisms/checkpoint.h \
    src/game/mechanisms/collapsingplatform.h \

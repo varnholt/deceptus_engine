@@ -18,6 +18,7 @@
 #include "gamestate.h"
 #include "gun.h"
 #include "level.h"
+#include "mechanisms/bouncerwrapper.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
 #include "onewaywall.h"
@@ -1142,7 +1143,7 @@ void Player::updateImpulse()
 
    if (impulse > 1.0f)
    {
-      if (Level::getCurrentLevel()->getNearbyBouncer())
+      if (BouncerWrapper::getNearbyBouncer())
       {
          return;
       }
