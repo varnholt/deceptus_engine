@@ -1184,6 +1184,11 @@ void Level::drawGlowSprite()
 #endif
 }
 
+const std::vector<std::shared_ptr<GameMechanism>>& Level::getBouncers() const
+{
+   return _mechanism_bouncers;
+}
+
 //-----------------------------------------------------------------------------
 // Level Rendering Flow
 //
@@ -1633,24 +1638,6 @@ std::shared_ptr<Portal> Level::getNearbyPortal() const
    }
 
    return nearby_portal;
-}
-
-//-----------------------------------------------------------------------------
-std::shared_ptr<Bouncer> Level::getNearbyBouncer() const
-{
-   std::shared_ptr<Bouncer> nearby_bouncer;
-
-   for (auto& tmp : _mechanism_bouncers)
-   {
-      auto bouncer = std::dynamic_pointer_cast<Bouncer>(tmp);
-      if (bouncer->isPlayerAtBouncer())
-      {
-         nearby_bouncer = bouncer;
-         break;
-      }
-   }
-
-   return nearby_bouncer;
 }
 
 //-----------------------------------------------------------------------------
