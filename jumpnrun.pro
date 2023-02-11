@@ -221,6 +221,7 @@ SOURCES += \
    src/game/mechanisms/movingplatform.cpp \
     src/game/mechanisms/onoffblock.cpp \
    src/game/mechanisms/portal.cpp \
+   src/game/mechanisms/portalwrapper.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
     src/game/mechanisms/rotatingblade.cpp \
@@ -434,6 +435,7 @@ HEADERS += \
    src/game/mechanisms/movingplatform.h \
     src/game/mechanisms/onoffblock.h \
    src/game/mechanisms/portal.h \
+   src/game/mechanisms/portalwrapper.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
     src/game/mechanisms/rotatingblade.h \

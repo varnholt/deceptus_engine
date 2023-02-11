@@ -21,6 +21,7 @@
 #include "mechanisms/bouncerwrapper.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
+#include "mechanisms/portalwrapper.h"
 #include "onewaywall.h"
 #include "physics/physicsconfiguration.h"
 #include "playeraudio.h"
@@ -1071,7 +1072,7 @@ void Player::updatePortal()
 
       if (_controls->hasFlag(KeyPressedUp) || joystick_points_up)
       {
-         auto portal = Level::getCurrentLevel()->getNearbyPortal();
+         auto portal = PortalWrapper::getNearbyPortal();
          if (portal && portal->getDestination())
          {
             Portal::lock();

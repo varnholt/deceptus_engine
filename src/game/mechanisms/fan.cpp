@@ -220,8 +220,8 @@ void Fan::load(const GameDeserializeData& data)
             const auto y = j * PIXELS_PER_TILE;
 
             tile->_position = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
-            tile->_rect.left = x;
-            tile->_rect.top = y;
+            tile->_rect.left = static_cast<float>(x);
+            tile->_rect.top = static_cast<float>(y);
             tile->_rect.width = PIXELS_PER_TILE;
             tile->_rect.height = PIXELS_PER_TILE;
             tile->_tile_dir = direction;

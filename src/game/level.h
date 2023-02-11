@@ -80,7 +80,6 @@ public:
    const std::unordered_map<void*, b2Vec2*>& getPointMap() const;
    const std::unordered_map<void*, size_t>& getPointSizeMap() const;
 
-   std::shared_ptr<Portal> getNearbyPortal() const;
    const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints() const;
 
    void toggleMechanisms();
@@ -101,6 +100,7 @@ public:
    void syncRoom();
 
    const std::vector<std::shared_ptr<GameMechanism>>& getBouncers() const;
+   const std::vector<std::shared_ptr<GameMechanism>>& getPortals() const;
 
 protected:
    void addDebugRect(void* body, float x, float y, float w, float h);
