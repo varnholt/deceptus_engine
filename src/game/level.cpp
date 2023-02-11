@@ -490,6 +490,11 @@ void Level::loadTmx()
                const auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
             }
+            else if (object_group->_name == "smoke")
+            {
+               auto smoke = SmokeEffect::deserialize(this, data);
+               _smoke_effect.push_back(smoke);
+            }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
             {
                const auto light = StaticLight::deserialize(this, data);
@@ -1189,6 +1194,11 @@ const std::vector<std::shared_ptr<GameMechanism>>& Level::getBouncers() const
    return _mechanism_bouncers;
 }
 
+const std::vector<std::shared_ptr<GameMechanism>>& Level::getPortals() const
+{
+   return _mechanism_bouncers;
+}
+
 //-----------------------------------------------------------------------------
 // Level Rendering Flow
 //
@@ -1620,24 +1630,6 @@ void Level::addDebugRect(void* body, float x, float y, float w, float h)
 
    _point_map[body] = points;
    _point_count_map[body] = 4;
-}
-
-//-----------------------------------------------------------------------------
-std::shared_ptr<Portal> Level::getNearbyPortal() const
-{
-   std::shared_ptr<Portal> nearby_portal;
-
-   for (auto& p : _mechanism_portals)
-   {
-      auto portal = std::dynamic_pointer_cast<Portal>(p);
-      if (portal->isPlayerAtPortal())
-      {
-         nearby_portal = portal;
-         break;
-      }
-   }
-
-   return nearby_portal;
 }
 
 //-----------------------------------------------------------------------------
