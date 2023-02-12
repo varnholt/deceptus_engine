@@ -1,27 +1,26 @@
 #include "lightsystem.h"
 
 #include "framework/tmxparser/tmxobject.h"
-#include "framework/tmxparser/tmxtools.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "game/debugdraw.h"
 #include "game/level.h"
 #include "game/player/player.h"
 #include "texturepool.h"
 
-#include <iostream>
 #include <math.h>
+#include <algorithm>
+#include <iostream>
 
 #include <SFML/OpenGL.hpp>
-
 
 //-----------------------------------------------------------------------------
 namespace
 {
-static constexpr auto max_distance_m2 = 100.0f; // depends on the view dimensions
+static constexpr auto max_distance_m2 = 100.0f;  // depends on the view dimensions
 }
-
 
 //-----------------------------------------------------------------------------
 LightSystem::LightSystem()
@@ -42,7 +41,6 @@ LightSystem::LightSystem()
       Log::Error() << "error loading bump mapping shader";
    }
 }
-
 
 //-----------------------------------------------------------------------------
 void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightSystem::LightInstance> light) const
@@ -87,8 +85,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
             {
                circle_positions[i] = b2Vec2{
                   center.x + _unit_circle[i].x * shape_circle->m_radius * 1.2f,
-                  center.y + _unit_circle[i].y * shape_circle->m_radius * 1.2f
-               };
+                  center.y + _unit_circle[i].y * shape_circle->m_radius * 1.2f};
             }
 
             for (auto pos_current = 0u; pos_current < circle_positions.size(); pos_current++)
@@ -105,13 +102,11 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                auto v0far = 10000.0f * (v0 - light_pos_m);
                auto v1far = 10000.0f * (v1 - light_pos_m);
 
-               sf::Vertex quad[] =
-               {
+               sf::Vertex quad[] = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
-               };
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)};
 
                target.draw(quad, 4, sf::Quads);
             }
@@ -134,10 +129,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
                // printf("%f\n", (lightPos - v0).LengthSquared());
 
-               if (
-                     (light_pos_m - v0).LengthSquared() > max_distance_m2
-                  && (light_pos_m - v1).LengthSquared() > max_distance_m2
-               )
+               if ((light_pos_m - v0).LengthSquared() > max_distance_m2 && (light_pos_m - v1).LengthSquared() > max_distance_m2)
                {
                   continue;
                }
@@ -145,13 +137,11 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                auto v0_far = 10000.0f * (v0 - light_pos_m);
                auto v1_far = 10000.0f * (v1 - light_pos_m);
 
-               sf::Vertex quad[] =
-               {
+               sf::Vertex quad[] = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0_far.x, v0_far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
-               };
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)};
 
                target.draw(quad, 4, sf::Quads);
             }
@@ -177,13 +167,11 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                auto v0far = 10000.0f * (v0 - light_pos_m);
                auto v1far = 10000.0f * (v1 - light_pos_m);
 
-               sf::Vertex quad[] =
-               {
+               sf::Vertex quad[] = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
-               };
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)};
 
                target.draw(quad, 4, sf::Quads);
             }
@@ -192,66 +180,46 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
    }
 }
 
-
 //-----------------------------------------------------------------------------
 sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)
 {
-    // first, transform the point by the view matrix
-    sf::Vector2f normalized = view.getTransform().transformPoint(point);
+   // first, transform the point by the view matrix
+   sf::Vector2f normalized = view.getTransform().transformPoint(point);
 
-    // then convert to viewport coordinates
-    sf::Vector2f pixel;
+   // then convert to viewport coordinates
+   sf::Vector2f pixel;
 
-    pixel.x = ( normalized.x + 1.0f) / 2.0f;
-    pixel.y = (-normalized.y + 1.0f) / 2.0f;
+   pixel.x = (normalized.x + 1.0f) / 2.0f;
+   pixel.y = (-normalized.y + 1.0f) / 2.0f;
 
-    return pixel;
+   return pixel;
 }
-
 
 //-----------------------------------------------------------------------------
 sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf::Vector2f& point, const sf::View& view)
 {
-    // first, transform the point by the view matrix
-    sf::Vector2f normalized = view.getTransform().transformPoint(point);
+   // first, transform the point by the view matrix
+   sf::Vector2f normalized = view.getTransform().transformPoint(point);
 
-    // then convert to viewport coordinates
-    sf::Vector2f pixel;
-    const auto viewport = target.getViewport(view);
-    pixel.x = ( normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.width) + static_cast<float>(viewport.left);
-    pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.height) + static_cast<float>(viewport.top);
+   // then convert to viewport coordinates
+   sf::Vector2f pixel;
+   const auto viewport = target.getViewport(view);
+   pixel.x = (normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.width) + static_cast<float>(viewport.left);
+   pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.height) + static_cast<float>(viewport.top);
 
-    return pixel;
+   return pixel;
 }
-
 
 //-----------------------------------------------------------------------------
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
 
-   _light_shader.setUniform(
-      "u_light_count",
-      static_cast<int32_t>(_active_lights.size())
-   );
+   _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
 
-   _light_shader.setUniform(
-      "u_resolution",
-      sf::Glsl::Vec2(
-         static_cast<float>(target.getSize().x),
-         static_cast<float>(target.getSize().y)
-      )
-   );
+   _light_shader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
 
-   _light_shader.setUniform(
-      "u_ambient",
-      sf::Glsl::Vec4(
-         _ambient_color[0],
-         _ambient_color[1],
-         _ambient_color[2],
-         _ambient_color[3]
-      )
-   );
+   _light_shader.setUniform("u_ambient", sf::Glsl::Vec4(_ambient_color[0], _ambient_color[1], _ambient_color[2], _ambient_color[3]));
 
    for (auto& light : _active_lights)
    {
@@ -259,10 +227,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 
       // transform light coordinates from box2d to normalized screen coordinates
       sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
-         {
-            light->_pos_m.x * PPM + light->_center_offset_px.x,
-            light->_pos_m.y * PPM + light->_center_offset_px.y
-         },
+         {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
          *Level::getCurrentLevel()->getLevelView().get()
       );
 
@@ -271,7 +236,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          sf::Glsl::Vec3(
             static_cast<float>(light_screen_pos.x),
             static_cast<float>(1.0f - light_screen_pos.y),
-            0.075f // default z
+            0.075f  // default z
          )
       );
 
@@ -285,14 +250,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          )
       );
 
-      _light_shader.setUniform(
-         id + "._falloff",
-         sf::Glsl::Vec3(
-            light->_falloff[0],
-            light->_falloff[1],
-            light->_falloff[2]
-         )
-      );
+      _light_shader.setUniform(id + "._falloff", sf::Glsl::Vec3(light->_falloff[0], light->_falloff[1], light->_falloff[2]));
 
       // Log::Info()
       //    << "light position on screen "
@@ -306,7 +264,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       light_id++;
    }
 }
-
 
 //-----------------------------------------------------------------------------
 void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
@@ -350,7 +307,6 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) co
    // Log::Info() << _active_lights.size() << " active light sources";
 }
 
-
 //-----------------------------------------------------------------------------
 void LightSystem::draw(
    sf::RenderTarget& target,
@@ -372,18 +328,11 @@ void LightSystem::draw(
    target.draw(sprite, &_light_shader);
 }
 
-
 //-----------------------------------------------------------------------------
 void LightSystem::LightInstance::updateSpritePosition()
 {
-   _sprite.setPosition(
-      sf::Vector2f(
-         _pos_m.x * PPM - _width_px  * 0.5f,
-         _pos_m.y * PPM - _height_px * 0.5f
-      )
-   );
+   _sprite.setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
 }
-
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
@@ -474,12 +423,12 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
    if (data._tmx_object)
    {
-      light->_width_px  = static_cast<int>(data._tmx_object->_width_px);
+      light->_width_px = static_cast<int>(data._tmx_object->_width_px);
       light->_height_px = static_cast<int>(data._tmx_object->_height_px);
 
       // set up the box2d position of the light
       light->_pos_m = b2Vec2(
-         data._tmx_object->_x_px * MPP + (data._tmx_object->_width_px  * 0.5f) * MPP,
+         data._tmx_object->_x_px * MPP + (data._tmx_object->_width_px * 0.5f) * MPP,
          data._tmx_object->_y_px * MPP + (data._tmx_object->_height_px * 0.5f) * MPP
       );
 
@@ -498,12 +447,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    light->_texture = TexturePool::getInstance().get(texture);
    light->_sprite.setTexture(*light->_texture);
    light->_sprite.setTextureRect(
-      sf::IntRect(
-         0,
-         0,
-         static_cast<int32_t>(light->_texture->getSize().x),
-         static_cast<int32_t>(light->_texture->getSize().y)
-      )
+      sf::IntRect(0, 0, static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y))
    );
 
    light->updateSpritePosition();
@@ -514,22 +458,12 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    return light;
 }
 
-
 void LightSystem::increaseAmbient(float amount)
 {
-   for (auto& val : _ambient_color)
-   {
-      val += amount;
-   }
+   std::transform(_ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value + amount; });
 }
-
 
 void LightSystem::decreaseAmbient(float amount)
 {
-   for (auto& val : _ambient_color)
-   {
-      val -= amount;
-   }
+   std::transform(_ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value - amount; });
 }
-
-
