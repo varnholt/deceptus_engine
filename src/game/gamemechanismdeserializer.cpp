@@ -316,10 +316,7 @@ void GameMechanismDeserializer::deserialize(
    std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
    for (auto& [keys, values] : mechanisms)
    {
-      for (auto& mechanism : *values)
-      {
-         all_mechanisms.push_back(mechanism);
-      }
+      std::copy(values->begin(), values->end(), std::back_inserter(all_mechanisms));
    }
 
    for (auto& sensor_rect : *mechanism_sensor_rects)

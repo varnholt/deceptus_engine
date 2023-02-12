@@ -1,9 +1,10 @@
 #include "detonationanimation.h"
 
+#include <math.h>
+#include <algorithm>
 #include <cassert>
 #include <ctime>
 #include <iostream>
-#include <math.h>
 
 #include "texturepool.h"
 
@@ -121,10 +122,13 @@ DetonationAnimation::DetonationAnimation(
          // bend the play time a bit so they don't all end at exactly the same time
          const auto rand_normalized = std::rand() / static_cast<float>(RAND_MAX);
          const auto time_stretch_factor = (2.0f * rand_normalized - 1.0f) * ring._variance_animation_speed;
-         for (auto& frame_time : frame_data._frame_times)
-         {
-            frame_time += sf::seconds(time_stretch_factor);
-         }
+
+         std::transform(
+            frame_data._frame_times.begin(),
+            frame_data._frame_times.end(),
+            frame_data._frame_times.begin(),
+            [time_stretch_factor](const auto& time) { return time + sf::seconds(time_stretch_factor); }
+         );
 
          // add offset, the further out, the bigger, 0 in the middle
          frame_data._frame_times[0] = sf::seconds(ring_index * rand_normalized * ring._variance_animation_speed);

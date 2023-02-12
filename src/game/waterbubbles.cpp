@@ -14,7 +14,6 @@ const auto head_offset_percent = 0.66f;
 constexpr auto velocity_scale = 100.0f;
 constexpr auto bubble_count_spawn_max = 10;
 
-
 float frand(float min = 0.0f, float max = 1.0f)
 {
    const auto val = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
@@ -23,9 +22,8 @@ float frand(float min = 0.0f, float max = 1.0f)
 
 }  // namespace
 
-WaterBubbles::WaterBubbles()
+WaterBubbles::WaterBubbles() : _texture(TexturePool::getInstance().get("data/sprites/player.png"))
 {
-   _texture = TexturePool::getInstance().get("data/sprites/player.png");
 }
 
 void WaterBubbles::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -75,7 +73,8 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
             sf::IntRect{648, 936, 24, 24},
          };
 
-         const auto range_right_px = head_offset_percent * input._player_rect.width + frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) + center_offset_px;
+         const auto range_right_px = head_offset_percent * input._player_rect.width +
+                                     frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) + center_offset_px;
          const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) - center_offset_px;
          const auto bubble_pos_x_px = input._player_rect.left + (input._player_pointing_right ? range_right_px : range_left_px);
 
