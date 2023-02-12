@@ -13,15 +13,15 @@
 namespace
 {
 
-struct Level
+struct LevelInfo
 {
    std::filesystem::path _dir;
    std::filesystem::path _json_file_path;
 };
 
-std::vector<Level> findLevelPaths()
+std::vector<std::shared_ptr<LevelInfo>> findLevelPaths()
 {
-   std::vector<Level> results;
+   std::vector<std::shared_ptr<LevelInfo>> results;
    std::vector<std::string> filter = {"config", "sprites"};
    std::string path = "data";
 
@@ -40,14 +40,12 @@ std::vector<Level> findLevelPaths()
             const auto path = file.path().string();
             if (path.find(".json") != std::string::npos)
             {
-               Level level;
-               level._dir = potential_dir;
-               level._json_file_path = path;
+               auto level = std::make_shared<LevelInfo>();
+               level->_dir = potential_dir;
+               level->_json_file_path = path;
                results.push_back(level);
-               // std::cout << file.path() << std::endl;
             }
          }
-         // std::cout << entry.path() << std::endl;
       };
    }
 
@@ -119,7 +117,6 @@ int WinMain(int, char**)
    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
    ImGui_ImplSDLRenderer_Init(renderer);
    // Our state
-   bool show_demo_window = true;
    bool show_another_window = false;
    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -148,39 +145,40 @@ int WinMain(int, char**)
       }
 
       {
-         static float f = 0.0f;
-         static int counter = 0;
+         //         static float f = 0.0f;
+         //         static int counter = 0;
 
-         ImGui::Begin("Hello, world!");  // Create a window called "Hello, world!" and append into it.
+         ImGui::Begin("levels");  // Create a window called "Hello, world!" and append into it.
 
          const auto results = findLevelPaths();
          std::vector<std::string> names;
+         std::transform(
+            results.cbegin(),
+            results.cend(),
+            std::back_insert_iterator(names),
+            [](auto& result)
+            {
+               std::string dir = result->_dir.filename().string();
+               // std::cout << dir;
+               return dir;
+            }
+         );
 
-         names = {"bla", "blub", "blib"};
-
-         if (drawComboBox("levels", names[2], names))
+         if (drawComboBox("levels", names[0], names))
          {
          }
-         // std::transform(results.begin(), results.back(), names.begin(), [](const Level& result) { return result._dir.string(); });
-         // drawComboBox()
-         //         const char* items[] = {
-         //            "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM",
-         //            "OOOOOOO"};
-         //         static int item_current = 0;
-         //         ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
+
+         //         ImGui::Text("This is some useful text.");           // Display some text (you can use a format strings too)
+         //         ImGui::Checkbox("Demo Window", &show_demo_window);  // Edit bools storing our window open/close state
+         //         ImGui::Checkbox("Another Window", &show_another_window);
+
+         //         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
+         //         ImGui::ColorEdit3("clear color", (float*)&clear_color);  // Edit 3 floats representing a color
+
+         //         if (ImGui::Button("Button"))  // Buttons return true when clicked (most widgets return true when edited/activated)
+         //            counter++;
          //         ImGui::SameLine();
-
-         ImGui::Text("This is some useful text.");           // Display some text (you can use a format strings too)
-         ImGui::Checkbox("Demo Window", &show_demo_window);  // Edit bools storing our window open/close state
-         ImGui::Checkbox("Another Window", &show_another_window);
-
-         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-         ImGui::ColorEdit3("clear color", (float*)&clear_color);  // Edit 3 floats representing a color
-
-         if (ImGui::Button("Button"))  // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-         ImGui::SameLine();
-         ImGui::Text("counter = %d", counter);
+         //         ImGui::Text("counter = %d", counter);
 
          ImGui::End();
       }
