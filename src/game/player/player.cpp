@@ -1005,7 +1005,7 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
    screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
    screen_transition->startEffect1();
 
-   return std::move(screen_transition);
+   return screen_transition;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

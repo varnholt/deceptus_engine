@@ -59,8 +59,8 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    //     |            |
    //   2 +------------+ 3
 
-   const auto _width_m = data._tmx_object->_width_px * MPP;
-   const auto _height_m = data._tmx_object->_height_px * MPP;
+   _width_m = data._tmx_object->_width_px * MPP;
+   _height_m = data._tmx_object->_height_px * MPP;
 
    if (_width_m < 0.01f || _height_m < 0.01f)
    {

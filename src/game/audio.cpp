@@ -209,7 +209,7 @@ void Audio::stopSample(const std::string& name)
 {
    std::lock_guard<std::mutex> guard(_mutex);
 
-   auto threads = _sound_threads | std::views::filter([name](auto& thread) { return thread._filename == name; });
+   auto threads = _sound_threads | std::views::filter([name](const auto& thread) { return thread._filename == name; });
    for (auto& thread : threads)
    {
       thread._sound.stop();

@@ -380,11 +380,11 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDeathAnimation
    {
       if (data._death_reason == DeathReason::Laser)
       {
-         next_cycle = next_cycle = data._points_right ? _death_electrocuted_r : _death_electrocuted_l;
+         next_cycle = data._points_right ? _death_electrocuted_r : _death_electrocuted_l;
       }
       else
       {
-         next_cycle = next_cycle = _death_default;
+         next_cycle = _death_default;
       }
    }
 

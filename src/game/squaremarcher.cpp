@@ -289,7 +289,7 @@ void SquareMarcher::optimize()
          }
       }
 
-      optimized_paths.push_back(path);
+      optimized_paths.push_back(optimized);
    }
 
    _paths = optimized_paths;
