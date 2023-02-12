@@ -10,7 +10,7 @@ class BoomEffectEnvelopeRandom : public BoomEffectEnvelope
 public:
    BoomEffectEnvelopeRandom() = default;
 
-   float shakeFunction(float t);
+   float shakeFunction(float t) override;
 
    fbm::vec2 _st;
 };

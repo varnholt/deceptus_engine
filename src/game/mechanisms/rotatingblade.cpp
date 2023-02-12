@@ -61,7 +61,7 @@ void RotatingBlade::setup(const GameDeserializeData& data)
       _path.begin(),
       _path.end(),
       _path.begin(),
-      [data](auto& vec) {
+      [data](const auto& vec) {
          return vec + sf::Vector2f{data._tmx_object->_x_px, data._tmx_object->_y_px};
       }
    );
