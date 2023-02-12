@@ -194,7 +194,7 @@ void Crusher::setup(const GameDeserializeData& data)
    _rect.left = data._tmx_object->_x_px;
    _rect.top = data._tmx_object->_y_px;
    _rect.width = data._tmx_object->_width_px;
-   _rect.top = data._tmx_object->_height_px;
+   _rect.height = data._tmx_object->_height_px;
 
    if (data._tmx_object->_properties)
    {

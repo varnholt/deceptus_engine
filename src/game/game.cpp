@@ -182,7 +182,7 @@ void Game::initializeController()
    gji.addDeviceAddedCallback(
       [this](int32_t /*id*/)
       {
-         auto& gji = GameControllerIntegration::getInstance();
+         const auto& gji = GameControllerIntegration::getInstance();
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this]() { showPauseMenu(); });
       }
    );
@@ -514,7 +514,7 @@ void Game::updateGameController()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForGame()
 {
-   auto& gji = GameControllerIntegration::getInstance();
+   const auto& gji = GameControllerIntegration::getInstance();
 
    if (gji.isControllerConnected())
    {
@@ -569,7 +569,7 @@ std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
    screen_transition->_autostart_effect_2 = false;
    screen_transition->startEffect1();
 
-   return std::move(screen_transition);
+   return screen_transition;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

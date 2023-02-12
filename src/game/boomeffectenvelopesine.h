@@ -7,7 +7,7 @@ class BoomEffectEnvelopeSine : public BoomEffectEnvelope
 {
 public:
    BoomEffectEnvelopeSine() = default;
-   float shakeFunction(float t);
+   float shakeFunction(float t) override;
 };
 
 #endif // BOOMEFFECTENVELOPESINE_H

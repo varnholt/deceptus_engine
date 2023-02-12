@@ -30,7 +30,7 @@ void Inventory::resetKeys()
       std::remove_if(
          _items.begin(),
          _items.end(),
-         [](auto& item) -> bool
+         [](const auto& item) -> bool
          {
             if (
                   item._type == ItemType::KeyBlue

@@ -32,7 +32,7 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
       }
    }
 
-   return std::move(weapon);
+   return weapon;
 }
 
 
@@ -73,6 +73,6 @@ std::unique_ptr<Weapon> WeaponFactory::create(
       }
    }
 
-   return std::move(weapon);
+   return weapon;
 }
 
