@@ -8,10 +8,9 @@
 
 class SensorRect : public GameMechanism, public GameNode
 {
-
 public:
-
-   SensorRect(GameNode* parent = nullptr);;
+   SensorRect(GameNode* parent = nullptr);
+   ;
 
    enum class Action
    {
@@ -32,10 +31,8 @@ public:
    void setup(const GameDeserializeData& data);
    void findReference(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms);
 
-
 private:
-
-   void action();
+   void processAction();
 
    sf::FloatRect _rect;
    bool _player_intersects = false;
@@ -44,4 +41,3 @@ private:
    std::string _reference_id;
    std::vector<std::shared_ptr<GameMechanism>> _references;
 };
-

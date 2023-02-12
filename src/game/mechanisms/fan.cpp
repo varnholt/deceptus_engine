@@ -6,9 +6,9 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
-
 #include "texturepool.h"
 
+#include <algorithm>
 #include <array>
 #include <iostream>
 
@@ -148,10 +148,12 @@ void Fan::update(const sf::Time& dt)
       }
    }
 
-   for (auto& x_offset : _x_offsets_px)
-   {
-      x_offset += dt.asSeconds() * 25.0f * _speed * _lever_lag;
-   }
+   std::transform(
+      _x_offsets_px.begin(),
+      _x_offsets_px.end(),
+      _x_offsets_px.begin(),
+      [this, &dt](auto val) { return val + dt.asSeconds() * 25.0f * _speed * _lever_lag; }
+   );
 
    updateSprite();
 }

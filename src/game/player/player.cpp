@@ -1116,7 +1116,7 @@ void Player::updateImpulse()
       return;
    }
 
-   auto impulse = _impulse;
+   auto impulse_value = _impulse;
    _impulse = 0.0f;
 
    if (GameContactListener::getInstance().isPlayerSmashed())
@@ -1142,7 +1142,7 @@ void Player::updateImpulse()
    //    }
    // }
 
-   if (impulse > 1.0f)
+   if (impulse_value > 1.0f)
    {
       if (BouncerWrapper::getNearbyBouncer())
       {
@@ -1153,7 +1153,7 @@ void Player::updateImpulse()
 
       if (PhysicsConfiguration::getInstance()._player_hard_landing_damage_enabled)
       {
-         damage(static_cast<int32_t>((impulse - 1.0f) * PhysicsConfiguration::getInstance()._player_hard_landing_damage_factor));
+         damage(static_cast<int32_t>((impulse_value - 1.0f) * PhysicsConfiguration::getInstance()._player_hard_landing_damage_factor));
       }
    }
 }

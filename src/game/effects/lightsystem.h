@@ -10,18 +10,14 @@
 #include "gamedeserializedata.h"
 #include "gamenode.h"
 
-
 struct TmxObject;
 
 class LightSystem : public sf::Drawable
 {
-
 public:
-
    struct LightInstance : public GameNode
    {
-      LightInstance(GameNode* parent)
-       : GameNode(parent)
+      LightInstance(GameNode* parent) : GameNode(parent)
       {
          setClassName(typeid(LightInstance).name());
       }
@@ -63,10 +59,8 @@ public:
       const std::shared_ptr<sf::RenderTexture>& normal_map
    );
 
-
 private:
-
-   void drawShadowQuads(sf::RenderTarget &target, std::shared_ptr<LightInstance> light) const;
+   void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light) const;
    void updateLightShader(sf::RenderTarget& target);
 
    mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
@@ -75,4 +69,3 @@ private:
    static constexpr auto segments = 20;
    std::array<b2Vec2, segments> _unit_circle;
 };
-

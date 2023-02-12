@@ -20,7 +20,7 @@ void SensorRect::update(const sf::Time& /*dt*/)
          // trigger mechanism when player enters the rect
          if (_event == Event::OnEnter)
          {
-            action();
+            processAction();
          }
       }
    }
@@ -31,7 +31,7 @@ void SensorRect::update(const sf::Time& /*dt*/)
          // trigger mechanism when player leaves the rect
          if (_event == Event::OnLeave)
          {
-            action();
+            processAction();
          }
       }
    }
@@ -106,7 +106,7 @@ void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>
    );
 }
 
-void SensorRect::action()
+void SensorRect::processAction()
 {
    switch (_action)
    {

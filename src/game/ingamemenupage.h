@@ -58,9 +58,6 @@ protected:
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 
-   sf::Font _font;
-   sf::Text _text;
-
    // animation
    HighResTimePoint _time_show;
    HighResTimePoint _time_hide;
