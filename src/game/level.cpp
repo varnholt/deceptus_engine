@@ -612,39 +612,41 @@ void Level::loadState()
    //          }
    //      },
 
-   if (!save_state._level_state.is_null())
+   if (save_state._level_state.is_null())
    {
-      const auto& level_json = save_state._level_state[_description->_filename];
+      return;
+   }
 
-      if (!level_json.is_null())
+   const auto& level_json = save_state._level_state[_description->_filename];
+   if (level_json.is_null())
+   {
+      return;
+   }
+
+   for (auto& [mechanism_key, mechanism_values] : level_json.items())
+   {
+      const auto& mechanism_it = _mechanisms_map.find(mechanism_key);
+      if (mechanism_it == _mechanisms_map.end())
       {
-         for (auto& [mechanism_key, mechanism_values] : level_json.items())
+         continue;
+      }
+
+      const auto& mechanism_vector = mechanism_it->second;
+      for (auto& [object_key, object_value] : mechanism_values.items())
+      {
+         auto result = std::find_if(
+            mechanism_vector->begin(),
+            mechanism_vector->end(),
+            [object_key](const auto& object)
+            {
+               auto game_node = dynamic_cast<GameNode*>(object.get());
+               return (game_node && game_node->getObjectId() == object_key);
+            }
+         );
+
+         if (result != mechanism_vector->end())
          {
-            const auto& mechanism_it = _mechanisms_map.find(mechanism_key);
-            if (mechanism_it == _mechanisms_map.end())
-            {
-               continue;
-            }
-
-            const auto& mechanism_vector = mechanism_it->second;
-
-            for (auto& [object_key, object_value] : mechanism_values.items())
-            {
-               auto result = std::find_if(
-                  mechanism_vector->begin(),
-                  mechanism_vector->end(),
-                  [object_key](const auto& object)
-                  {
-                     auto game_node = dynamic_cast<GameNode*>(object.get());
-                     return (game_node && game_node->getObjectId() == object_key);
-                  }
-               );
-
-               if (result != mechanism_vector->end())
-               {
-                  (*result)->deserializeState(object_value);
-               }
-            }
+            (*result)->deserializeState(object_value);
          }
       }
    }
