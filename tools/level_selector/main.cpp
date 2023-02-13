@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <SDL.h>
@@ -17,6 +18,8 @@ struct LevelInfo
 {
    std::filesystem::path _dir;
    std::filesystem::path _json_file_path;
+   std::string _selected;
+   int32_t _index = 0;
 };
 
 std::vector<std::shared_ptr<LevelInfo>> findLevelPaths()
@@ -40,10 +43,11 @@ std::vector<std::shared_ptr<LevelInfo>> findLevelPaths()
             const auto path = file.path().string();
             if (path.find(".json") != std::string::npos)
             {
-               auto level = std::make_shared<LevelInfo>();
-               level->_dir = potential_dir;
-               level->_json_file_path = path;
-               results.push_back(level);
+               auto result = std::make_shared<LevelInfo>();
+               result->_dir = potential_dir;
+               result->_json_file_path = path;
+               result->_index = results.size();
+               results.push_back(result);
             }
          }
       };
@@ -79,6 +83,81 @@ bool drawComboBox(const std::string& caption, std::string& current_item, const s
 
    return changed;
 }
+
+void writeLevelConfiguration(const std::vector<std::shared_ptr<LevelInfo>>& results)
+{
+   std::stringstream level_json;
+   auto serialize_level = [&level_json, results](const auto& result)
+   {
+      level_json << "   {\"levelname\" : " << result->_json_file_path.string() << "}";
+      if (result != results.at(results.size() - 1))
+      {
+         level_json << ",";
+      }
+      level_json << "\n";
+   };
+
+   level_json << "[\n";
+   std::for_each(results.begin(), results.end(), serialize_level);
+   level_json << "]";
+
+   std::cout << level_json.str() << std::endl;
+}
+
+void writeSaveState(const std::vector<std::shared_ptr<LevelInfo>>& results)
+{
+   auto valid_count = 0;
+   for (auto& result : results)
+   {
+      try
+      {
+         std::stoi(result->_selected);
+         valid_count++;
+      }
+      catch (const std::exception&)
+      {
+      }
+   }
+
+   std::stringstream state_json;
+   auto serialize_level = [&state_json, valid_count](const auto& result, int32_t index)
+   {
+      const auto level_name = result->_dir.filename().string();
+
+      state_json << "{\n";
+      state_json << "   \"checkpoint\" : 0,\n";
+      state_json << "   \"levelindex\" : " << result->_index << ",\n";
+      state_json << "   \"playerinfo\" : {\"name\" : \"" << level_name << "\"}\n";
+      state_json << "}";
+
+      if (index < valid_count - 1)
+      {
+         state_json << ",";
+      }
+      state_json << "\n";
+   };
+
+   for (auto slot = 0; slot < 3; slot++)
+   {
+      for (auto& result : results)
+      {
+         try
+         {
+            // std::cout << result->_selected << std::endl;
+            if (std::stoi(result->_selected) - 1 == slot)
+            {
+               serialize_level(result, slot);
+            }
+         }
+         catch (const std::exception&)
+         {
+         }
+      }
+   }
+
+   std::cout << state_json.str() << std::endl;
+}
+
 }  // namespace
 
 int WinMain(int, char**)
@@ -89,14 +168,8 @@ int WinMain(int, char**)
       return -1;
    }
 
-   // From 2.0.18: Enable native IME.
-#ifdef SDL_HINT_IME_SHOW_UI
-   SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-#endif
-
-   // Create window with SDL_Renderer graphics context
    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-   auto window = SDL_CreateWindow("Deceptus Level Selector", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 360, 720, window_flags);
+   auto window = SDL_CreateWindow("Deceptus Level Selector", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 360, 360, window_flags);
    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
    if (!renderer)
    {
@@ -104,24 +177,37 @@ int WinMain(int, char**)
       return 0;
    }
 
-   // Setup Dear ImGui context
    IMGUI_CHECKVERSION();
    ImGui::CreateContext();
    ImGuiIO& io = ImGui::GetIO();
    (void)io;
 
-   // Setup Dear ImGui style
    ImGui::StyleColorsDark();
 
-   // Setup Platform/Renderer backends
    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
    ImGui_ImplSDLRenderer_Init(renderer);
-   // Our state
-   bool show_another_window = false;
-   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-   // Main loop
-   bool done = false;
+   const auto results = findLevelPaths();
+   std::vector<std::string> names;
+   std::transform(
+      results.cbegin(),
+      results.cend(),
+      std::back_insert_iterator(names),
+      [](auto& result)
+      {
+         std::string dir = result->_dir.filename().string();
+         return dir;
+      }
+   );
+
+   std::vector<std::string> slots = {"n/a", "1", "2", "3"};
+
+   for (const auto& result : results)
+   {
+      result->_selected = slots[0];
+   }
+
+   auto done = false;
    while (!done)
    {
       SDL_Event event;
@@ -134,79 +220,55 @@ int WinMain(int, char**)
             done = true;
       }
 
-      // Start the Dear ImGui frame
       ImGui_ImplSDLRenderer_NewFrame();
       ImGui_ImplSDL2_NewFrame();
       ImGui::NewFrame();
 
       {
-         // Using the _simplified_ one-liner Combo() api here
-         // See "Combo" section for examples of how to use the more complete BeginCombo()/EndCombo() api.
-      }
+         ImGui::Begin("assign level to slot");
 
-      {
-         //         static float f = 0.0f;
-         //         static int counter = 0;
-
-         ImGui::Begin("levels");  // Create a window called "Hello, world!" and append into it.
-
-         const auto results = findLevelPaths();
-         std::vector<std::string> names;
-         std::transform(
-            results.cbegin(),
-            results.cend(),
-            std::back_insert_iterator(names),
-            [](auto& result)
-            {
-               std::string dir = result->_dir.filename().string();
-               // std::cout << dir;
-               return dir;
-            }
-         );
-
-         if (drawComboBox("levels", names[0], names))
+         for (const auto& result : results)
          {
+            const auto level_name = result->_dir.filename().string();
+            std::stringstream stream_slot;
+            stream_slot << "##" << level_name;
+
+            ImGui::Text("%s", level_name.c_str());
+            ImGui::SameLine(200);
+            ImGui::PushItemWidth(100);
+            if (drawComboBox(stream_slot.str(), result->_selected, slots))
+            {
+               std::cout << "set " << level_name << " to " << result->_selected << std::endl;
+            }
          }
 
-         //         ImGui::Text("This is some useful text.");           // Display some text (you can use a format strings too)
-         //         ImGui::Checkbox("Demo Window", &show_demo_window);  // Edit bools storing our window open/close state
-         //         ImGui::Checkbox("Another Window", &show_another_window);
-
-         //         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-         //         ImGui::ColorEdit3("clear color", (float*)&clear_color);  // Edit 3 floats representing a color
-
-         //         if (ImGui::Button("Button"))  // Buttons return true when clicked (most widgets return true when edited/activated)
-         //            counter++;
-         //         ImGui::SameLine();
-         //         ImGui::Text("counter = %d", counter);
-
          ImGui::End();
       }
 
-      // 3. Show another simple window.
-      if (show_another_window)
+      if (ImGui::BeginMainMenuBar())
       {
-         ImGui::Begin(
-            "Another Window", &show_another_window
-         );  // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-         ImGui::Text("Hello from another window!");
-         if (ImGui::Button("Close Me"))
-            show_another_window = false;
-         ImGui::End();
+         if (ImGui::BeginMenu("File", true))
+         {
+            if (ImGui::MenuItem("Save Configuration"))
+            {
+               std::cout << "level configuration" << std::endl;
+               writeLevelConfiguration(results);
+               writeSaveState(results);
+            }
+
+            ImGui::EndMenu();
+         }
+         ImGui::EndMainMenuBar();
       }
 
-      // Rendering
       ImGui::Render();
       SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-      SDL_SetRenderDrawColor(
-         renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255)
-      );
+
       SDL_RenderClear(renderer);
       ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
       SDL_RenderPresent(renderer);
    }
 
-   // Cleanup
    ImGui_ImplSDLRenderer_Shutdown();
    ImGui_ImplSDL2_Shutdown();
    ImGui::DestroyContext();
