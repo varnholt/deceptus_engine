@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -89,7 +90,9 @@ void writeLevelConfiguration(const std::vector<std::shared_ptr<LevelInfo>>& resu
    std::stringstream level_json;
    auto serialize_level = [&level_json, results](const auto& result)
    {
-      level_json << "   {\"levelname\" : " << result->_json_file_path.string() << "}";
+      auto path = result->_json_file_path.string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+      level_json << "   {\"levelname\" : \"" << path << "\"}";
       if (result != results.at(results.size() - 1))
       {
          level_json << ",";
@@ -101,7 +104,10 @@ void writeLevelConfiguration(const std::vector<std::shared_ptr<LevelInfo>>& resu
    std::for_each(results.begin(), results.end(), serialize_level);
    level_json << "]";
 
-   std::cout << level_json.str() << std::endl;
+   // std::cout << level_json.str() << std::endl;
+
+   std::ofstream file("data/config/levels.json", std::ios::out);
+   file << level_json.str();
 }
 
 void writeSaveState(const std::vector<std::shared_ptr<LevelInfo>>& results)
@@ -120,6 +126,7 @@ void writeSaveState(const std::vector<std::shared_ptr<LevelInfo>>& results)
    }
 
    std::stringstream state_json;
+   state_json << "[\n";
    auto serialize_level = [&state_json, valid_count](const auto& result, int32_t index)
    {
       const auto level_name = result->_dir.filename().string();
@@ -155,7 +162,11 @@ void writeSaveState(const std::vector<std::shared_ptr<LevelInfo>>& results)
       }
    }
 
-   std::cout << state_json.str() << std::endl;
+   state_json << "]\n";
+
+   // std::cout << state_json.str() << std::endl;
+   std::ofstream file("data/config/savestate.json", std::ios::out);
+   file << state_json.str();
 }
 
 }  // namespace
