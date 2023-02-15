@@ -16,8 +16,16 @@ void to_json(nlohmann::json& j, const PlayerInfo& data)
 void from_json(const nlohmann::json& j, PlayerInfo& data)
 {
    data._name = j.at("name").get<std::string>();
-   data._inventory = j.at("inventory").get<Inventory>();
-   data._extra_table = j.at("extras").get<ExtraTable>();
+
+   if (j.find("inventory") != j.end())
+   {
+      data._inventory = j.at("inventory").get<Inventory>();
+   }
+
+   if (j.find("extras") != j.end())
+   {
+      data._extra_table = j.at("extras").get<ExtraTable>();
+   }
 }
 
 

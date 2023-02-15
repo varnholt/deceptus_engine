@@ -1,7 +1,9 @@
 #ifndef PORTALWRAPPER_H
 #define PORTALWRAPPER_H
 
-#include "portal.h"
+#include <memory>
+
+class Portal;
 
 namespace PortalWrapper
 {
