@@ -262,7 +262,7 @@ int WinMain(int, char**)
          {
             if (ImGui::MenuItem("Save Configuration"))
             {
-               std::cout << "level configuration" << std::endl;
+               std::cout << "save configuration" << std::endl;
                writeLevelConfiguration(results);
                writeSaveState(results);
             }
