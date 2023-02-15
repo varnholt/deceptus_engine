@@ -1198,7 +1198,7 @@ const std::vector<std::shared_ptr<GameMechanism>>& Level::getBouncers() const
 
 const std::vector<std::shared_ptr<GameMechanism>>& Level::getPortals() const
 {
-   return _mechanism_bouncers;
+   return _mechanism_portals;
 }
 
 //-----------------------------------------------------------------------------
