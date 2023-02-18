@@ -846,11 +846,6 @@ void Game::processEvent(const sf::Event& event)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::shutdown()
 {
-   if (_level)
-   {
-      _level->shutdown();
-   }
-
    if (_physics_ui)
    {
       _physics_ui->close();

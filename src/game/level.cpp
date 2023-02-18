@@ -262,7 +262,7 @@ Level::~Level()
    Log::Info() << "deleting current level";
 
    // stop active timers because their callbacks being called after destruction of the level/world can be nasty
-   for (auto& enemy : _enemies)
+   for (auto& enemy : LuaInterface::instance().getObjectList())
    {
       Timer::removeByCaller(enemy);
    }
@@ -577,7 +577,6 @@ void Level::initialize()
    spawnEnemies();
 
    _object_updater = std::make_unique<ObjectUpdater>();
-   _object_updater->setEnemies(_enemies);
    _object_updater->setMechanisms(_mechanisms_list);
 
    // dump();
@@ -686,12 +685,6 @@ void Level::reset()
 }
 
 //-----------------------------------------------------------------------------
-void Level::shutdown()
-{
-   _object_updater->stop();
-}
-
-//-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
    // deprecated approach:
@@ -732,7 +725,6 @@ void Level::spawnEnemies()
       // initialize lua node and store enemy
       lua_node->_enemy_description = json_description;
       lua_node->initialize();
-      _enemies.push_back(lua_node);
    }
 
    // those enemies that have a lua script associated inside the tmx layer don't need
@@ -784,7 +776,6 @@ void Level::spawnEnemies()
       // initialize lua node and store enemy
       lua_node->_enemy_description = json_description;
       lua_node->initialize();
-      _enemies.push_back(lua_node);
    }
 }
 
@@ -1022,7 +1013,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw enemies
-      for (auto& enemy : _enemies)
+      for (auto& enemy : LuaInterface::instance().getObjectList())
       {
          if (enemy->getZ() == z_index)
          {
@@ -1358,6 +1349,8 @@ void Level::update(const sf::Time& dt)
    {
       smoke->update(GlobalClock::getInstance().getElapsedTime());
    }
+
+   _object_updater->update();
 }
 
 //-----------------------------------------------------------------------------
