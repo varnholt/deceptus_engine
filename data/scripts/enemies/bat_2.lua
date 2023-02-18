@@ -59,6 +59,7 @@ mDone = false
 mTransformY = 0
 mAttack = false
 mPath = {}
+mEnergy = 3
 ANIMATION_SPEED = 40.0
 HIT_RADIUS = 0.3
 ATTACK_DURATION = 1.0
@@ -67,6 +68,7 @@ ATTACK_SPRITE_COUNT = 9
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
+   addHitbox(-18, -12, 36, 24)
    addShapeCircle(HIT_RADIUS, 0.0, 0.0)
    updateSpriteRect(
       0,
@@ -110,6 +112,9 @@ end
 function update(dt)
 
    updateSprite = false
+
+   -- check if dead
+   mDone = (mEnergy == 0)
 
    -- get sprite index
    mElapsed = mElapsed + dt
@@ -205,3 +210,7 @@ function playerMovedTo(x, y)
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
+function hit(damage_value)
+  mEnergy = mEnergy - 1
+end
