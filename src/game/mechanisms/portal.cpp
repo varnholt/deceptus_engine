@@ -40,7 +40,8 @@ void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
 //-----------------------------------------------------------------------------
 sf::Vector2f Portal::getPortalPosition()
 {
-   const auto portal_pos = _sprites.at(_sprites.size() - 1).getPosition();
+   auto portal_pos = _sprites.at(_sprites.size() - 1).getPosition();
+   portal_pos.y--;
    return portal_pos;
 }
 
