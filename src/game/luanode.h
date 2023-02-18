@@ -136,13 +136,15 @@ struct LuaNode : public GameMechanism, public GameNode
    //! play a sample
    void playSample(const std::string& sample, float volume);
 
+   //! node is dead, reset its body, set dead flag
+   void die();
+
    const std::optional<HighResTimePoint> getHitTime() const;
 
    int32_t getDamageFromPlayer() const;
 
    // all functions that 'speak' directly to the lua scripts
    void luaHit(int32_t damage);
-   void luaDie();
    void luaInitialize();
    void luaMovedTo();
    void luaSetStartPosition();
@@ -166,10 +168,10 @@ struct LuaNode : public GameMechanism, public GameNode
    void stopScript();
 
    // members
-   int32_t _id = -1;
-   int32_t _keys_pressed = 0;
+   int32_t _id{-1};
+   int32_t _keys_pressed{0};
    std::string _script_name;
-   lua_State* _lua_state = nullptr;
+   lua_State* _lua_state{nullptr};
    EnemyDescription _enemy_description;
 
    // visualization
@@ -183,8 +185,8 @@ struct LuaNode : public GameMechanism, public GameNode
    float _hit_flash{0.0f};
 
    // physics
-   b2Body* _body = nullptr;
-   b2BodyDef* _body_def = nullptr;
+   b2Body* _body{nullptr};
+   b2BodyDef* _body_def{nullptr};
    std::vector<b2Shape*> _shapes_m;
    std::vector<std::unique_ptr<Weapon>> _weapons;
 
@@ -193,6 +195,7 @@ struct LuaNode : public GameMechanism, public GameNode
    std::optional<sf::FloatRect> _bounding_box;
    std::optional<HighResTimePoint> _hit_time;
    int32_t _damage_from_player{0};
+   bool _dead{false};
 
    std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 };

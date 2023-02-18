@@ -1354,7 +1354,7 @@ int32_t die(lua_State* state)
       return 0;
    }
 
-   node->luaDie();
+   node->die();
    return 0;
 }
 
@@ -1399,6 +1399,7 @@ LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(paren
 
 LuaNode::~LuaNode()
 {
+   Log::Info() << "stopping script: " << _script_name;
    stopScript();
 }
 
@@ -1683,11 +1684,12 @@ void LuaNode::luaSendPatrolPath()
 /**
  * @brief LuaNode::luaDie lua script is told to die
  */
-void LuaNode::luaDie()
+void LuaNode::die()
 {
-   Level::getCurrentLevel()->getWorld()->DestroyBody(_body);
+   _dead = true;
 
    // resetting the body will get it removed from the luainterface class
+   Level::getCurrentLevel()->getWorld()->DestroyBody(_body);
    _body = nullptr;
 }
 

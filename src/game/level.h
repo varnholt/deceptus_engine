@@ -59,7 +59,6 @@ public:
    virtual void initialize();
    void initializeTextures();
    void reset();
-   void shutdown();
 
    void saveState();
 
@@ -165,7 +164,6 @@ protected:
 
    std::vector<std::shared_ptr<TileMap>> _tile_maps;
 
-   std::vector<std::shared_ptr<LuaNode>> _enemies;
    std::unordered_map<std::string, TmxEnemy> _enemy_data_from_tmx_layer;
 
    Atmosphere _atmosphere;
