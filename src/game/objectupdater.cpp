@@ -3,19 +3,13 @@
 #include "audio.h"
 #include "framework/math/sfmlmath.h"
 #include "gamestate.h"
+#include "luainterface.h"
 
 #include <iostream>
 
-ObjectUpdater::ObjectUpdater()
-{
-   _thread = std::make_unique<std::thread>(&ObjectUpdater::run, this);
-   Audio::getInstance().addShutdownCallback([this]() { stop(); });
-}
 
 ObjectUpdater::~ObjectUpdater()
 {
-   _stopped = true;
-   _thread->join();
    std::cout << "object updater destroyed" << std::endl;
 }
 
@@ -93,60 +87,29 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
    }
 }
 
-void ObjectUpdater::run()
+void ObjectUpdater::update()
 {
-   using namespace std::chrono_literals;
-
-   // virtual std::optional<sf::FloatRect> getBoundingBoxPx() = 0;
-   while (!stopped())
+   // update volume of all mechanisms and enemies
+   for (const auto& mechanism_vector : _mechanisms)
    {
-      // update volume of all mechanisms and enemies
+      for (const auto& mechanism : *mechanism_vector)
       {
-         std::lock_guard<std::mutex> guard(_mutex);
-         for (const auto& mechanism_vector : _mechanisms)
-         {
-            for (const auto& mechanism : *mechanism_vector)
-            {
-               updateVolume(mechanism);
-            }
-         }
-
-         for (const auto& enemy : _enemies)
-         {
-            updateVolume(enemy);
-         }
+         updateVolume(mechanism);
       }
-
-      std::this_thread::sleep_for(100ms);
    }
-}
 
-void ObjectUpdater::stop()
-{
-   std::lock_guard<std::mutex> guard(_mutex);
-   _stopped = true;
-}
-
-bool ObjectUpdater::stopped() const
-{
-   std::lock_guard<std::mutex> guard(_mutex);
-   return _stopped;
+   for (const auto& enemy : LuaInterface::instance().getObjectList())
+   {
+      updateVolume(enemy);
+   }
 }
 
 void ObjectUpdater::setPlayerPosition(const sf::Vector2f& position)
 {
-   std::lock_guard<std::mutex> guard(_mutex);
    _player_position = position;
-}
-
-void ObjectUpdater::setEnemies(const std::vector<std::shared_ptr<LuaNode>>& enemies)
-{
-   std::lock_guard<std::mutex> guard(_mutex);
-   _enemies = enemies;
 }
 
 void ObjectUpdater::setMechanisms(const std::vector<std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms)
 {
-   std::lock_guard<std::mutex> guard(_mutex);
    _mechanisms = mechanisms;
 }
