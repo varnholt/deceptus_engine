@@ -28,15 +28,6 @@ Audio::Audio()
 }
 
 //-----------------------------------------------------------------------------
-Audio::~Audio()
-{
-   for (auto& cb : _shutdown_callbacks)
-   {
-      cb();
-   }
-}
-
-//-----------------------------------------------------------------------------
 /*!
  * \brief Audio::getInstance
  * \return
@@ -266,12 +257,6 @@ void Audio::updateMusic()
 sf::Music& Audio::getMusic() const
 {
    return _music;
-}
-
-//-----------------------------------------------------------------------------
-void Audio::addShutdownCallback(const ShutdownCallback& shutdown_callback)
-{
-   _shutdown_callbacks.push_back(shutdown_callback);
 }
 
 //-----------------------------------------------------------------------------

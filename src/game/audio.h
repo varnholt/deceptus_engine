@@ -19,7 +19,6 @@ class Audio
 {
 public:
    Audio();
-   virtual ~Audio();
 
    struct Track
    {
@@ -37,18 +36,15 @@ public:
 
    struct PlayInfo
    {
-      PlayInfo(const std::string& sample_name)
-        : _sample_name(sample_name)
+      PlayInfo(const std::string& sample_name) : _sample_name(sample_name)
       {
       }
 
-      PlayInfo(const std::string& sample_name, float volume)
-       : _sample_name(sample_name), _volume(volume)
+      PlayInfo(const std::string& sample_name, float volume) : _sample_name(sample_name), _volume(volume)
       {
       }
 
-      PlayInfo(const std::string& sample_name, float volume, bool looped)
-       : _sample_name(sample_name), _volume(volume), _looped(looped)
+      PlayInfo(const std::string& sample_name, float volume, bool looped) : _sample_name(sample_name), _volume(volume), _looped(looped)
       {
       }
 
@@ -73,11 +69,7 @@ public:
 
    sf::Music& getMusic() const;
 
-   using ShutdownCallback = std::function<void()>;
-   void addShutdownCallback(const ShutdownCallback& shutdown_callback);
-
 private:
-
    void initializeSamples();
    void initializeMusic();
    std::shared_ptr<sf::SoundBuffer> loadFile(const std::string& filename);
@@ -90,6 +82,4 @@ private:
    mutable sf::Music _music;
    std::vector<Track> _tracks;
    uint32_t _current_index = 999;
-
-   std::vector<ShutdownCallback> _shutdown_callbacks;
 };
