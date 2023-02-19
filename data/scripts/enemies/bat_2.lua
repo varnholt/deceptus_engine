@@ -55,7 +55,9 @@ mSpriteOffsetY = 0 -- 9 * 24
 mSpriteWidth = 72
 mSpriteHeight = 72
 mStartPosition = v2d.Vector2D(0, 0)
-mDone = false
+mDying = false
+mDead = false
+mDeathTime = 0
 mTransformY = 0
 mAttack = false
 mPath = {}
@@ -112,46 +114,64 @@ end
 function update(dt)
 
    updateSprite = false
-
-   -- check if dead
-   mDone = (mEnergy == 0)
-
-   -- get sprite index
    mElapsed = mElapsed + dt
 
-   idle = mElapsed < mIdleTime
-
-   -- make sure block is on same x as player
-   if (not mAttack or idle) then
-      xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
-      if (math.abs(xDiff) < 6) then
-
-         -- make sure stone is not too far away (10 tiles) and above player
-         yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
-
-         if (yDiff < 0 and yDiff > -7 and not idle) then
-            attack()
-         end
-      end
-
-      -- update transform
-      -- mTransformY = 0.25 * math.sin(mElapsed) * mMoveRangeY
-      mTransformY = 0
-      setTransform(mStartPosition:getX(), mStartPosition:getY() + mTransformY, 0.0)
-   else
-      time = (mElapsed - mAttackTime) / ATTACK_DURATION
-      p = getValueCubic(mPath, time)
-
-      -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
-      setTransform(p:getX(), p:getY(), 0.0)
-
-      if (time > 1.0) then
-         mAttack = false
-         mIdleTime = mElapsed + 1.0
+   -- check if dead
+   if (not mDying) then
+      if (mEnergy == 0) then
+         mDying = true
+         mDeathTime = mElapsed
       end
    end
 
-   if (idle or not mAttack) then
+   if (mDying) then
+      -- 12 sprites per row
+      mSpriteOffsetY = 4
+   else
+      -- consider attacking
+      idle = mElapsed < mIdleTime
+      if (not mAttack or idle) then
+
+         -- make sure bat is not too far away from player in x
+         xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
+         if (math.abs(xDiff) < 6) then
+
+            -- make sure bat is not too far away from player in y
+            yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+            if (yDiff < 0 and yDiff > -7 and not idle) then
+
+               attack()
+            end
+         end
+
+         -- update transform
+         -- mTransformY = 0.25 * math.sin(mElapsed) * mMoveRangeY
+         mTransformY = 0
+         setTransform(mStartPosition:getX(), mStartPosition:getY() + mTransformY, 0.0)
+
+      -- carry out attack
+      else
+         time = (mElapsed - mAttackTime) / ATTACK_DURATION
+         p = getValueCubic(mPath, time)
+
+         -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
+         setTransform(p:getX(), p:getY(), 0.0)
+
+         if (time > 1.0) then
+            mAttack = false
+            mIdleTime = mElapsed + 1.0
+         end
+      end
+   end
+
+   if (mDead) then
+      die()
+   end
+
+   -- get sprite offset
+   if (mDying) then
+      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
+   elseif (idle or not mAttack) then
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED / 2, ATTACK_SPRITE_COUNT))
    else
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
@@ -171,10 +191,6 @@ function update(dt)
          mSpriteWidth,
          mSpriteHeight
       ) -- x, y, width, height
-   end
-
-   if (mDone) then
-      die()
    end
 
 end
