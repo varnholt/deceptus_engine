@@ -121,13 +121,16 @@ function update(dt)
       if (mEnergy == 0) then
          mDying = true
          mDeathTime = mElapsed
+         mSpriteOffsetX = 0
+         mSpriteOffsetY = 2 * mSpriteHeight
+         
+         -- TODO: 
+         -- need to disable the body here, so it doesn't fall from the sky
+         -- add a function to do this
       end
    end
 
-   if (mDying) then
-      -- 12 sprites per row
-      mSpriteOffsetY = 4
-   else
+   if (not mDying) then
       -- consider attacking
       idle = mElapsed < mIdleTime
       if (not mAttack or idle) then
@@ -168,9 +171,15 @@ function update(dt)
       die()
    end
 
-   -- get sprite offset
+   -- update sprite offset
    if (mDying) then
-      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
+      -- 12 sprites per row
+      spriteIndex = math.min(math.floor((mElapsed - mDeathTime) * ANIMATION_SPEED * 0.05), 21)
+      if (spriteIndex == 21) then
+         spriteIndex = 20
+         mDead = true
+         print(spriteIndex)
+      end
    elseif (idle or not mAttack) then
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED / 2, ATTACK_SPRITE_COUNT))
    else
@@ -209,7 +218,6 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setStartPosition(x, y)
-   -- print(string.format("object position: %f, %f", x, y))
    mStartPosition = v2d.Vector2D(x, y)
 end
 
