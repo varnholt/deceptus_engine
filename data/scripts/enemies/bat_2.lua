@@ -43,6 +43,7 @@ properties = {
 
 ------------------------------------------------------------------------------------------------------------------------
 mPosition = v2d.Vector2D(0, 0)
+mPositionAtDeath = v2d.Vector2D(0, 0)
 mPlayerPosition = v2d.Vector2D(0, 0)
 mPlayerPositionPrevious = v2d.Vector2D(0, 0)
 mElapsed = math.random(0, 3)
@@ -63,6 +64,8 @@ mAttack = false
 mPath = {}
 mEnergy = 3
 ANIMATION_SPEED = 40.0
+ANIMATION_SPEED_IDLE = 20.0
+ANIMATION_SPEED_DEATH = 20.0
 HIT_RADIUS = 0.3
 ATTACK_DURATION = 1.0
 ATTACK_SPRITE_COUNT = 9
@@ -89,8 +92,6 @@ function attack()
 
    mAttackTime = mElapsed
 
-   -- print("attack")
-
    bx = mPosition:getX()
    by = mPosition:getY()
 
@@ -109,6 +110,8 @@ function attack()
    mPath = {k1, k2, k3, k4, k5, k6}
 end
 
+function moveTo(x, y)
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
@@ -123,14 +126,15 @@ function update(dt)
          mDeathTime = mElapsed
          mSpriteOffsetX = 0
          mSpriteOffsetY = 2 * mSpriteHeight
-         
-         -- TODO: 
-         -- need to disable the body here, so it doesn't fall from the sky
-         -- add a function to do this
+         setActive(false)
+         mPositionAtDeath = mPosition
       end
    end
 
-   if (not mDying) then
+   if (mDying) then
+      -- stickytape the bat to its death location
+      setTransform(mPositionAtDeath:getX(), mPositionAtDeath:getY(), 0.0)
+   else
       -- consider attacking
       idle = mElapsed < mIdleTime
       if (not mAttack or idle) then
@@ -174,14 +178,13 @@ function update(dt)
    -- update sprite offset
    if (mDying) then
       -- 12 sprites per row
-      spriteIndex = math.min(math.floor((mElapsed - mDeathTime) * ANIMATION_SPEED * 0.05), 21)
+      spriteIndex = math.min(math.floor((mElapsed - mDeathTime) * ANIMATION_SPEED_DEATH), 21)
       if (spriteIndex == 21) then
          spriteIndex = 20
          mDead = true
-         print(spriteIndex)
       end
    elseif (idle or not mAttack) then
-      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED / 2, ATTACK_SPRITE_COUNT))
+      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED_IDLE, ATTACK_SPRITE_COUNT))
    else
       spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
    end
