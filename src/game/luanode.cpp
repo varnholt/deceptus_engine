@@ -13,7 +13,6 @@
 #include "animationplayer.h"
 #include "audio.h"
 #include "constants.h"
-#include "detonationanimation.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
@@ -750,20 +749,58 @@ int32_t playDetonationAnimation(lua_State* state)
 {
    const auto argc = lua_gettop(state);
 
-   if (argc != 2)
-   {
-      return 0;
-   }
-
    auto node = OBJINSTANCE;
    if (!node)
    {
       return 0;
    }
 
-   const auto x = static_cast<float>(lua_tonumber(state, 1));
-   const auto y = static_cast<float>(lua_tonumber(state, 2));
-   node->playDetonationAnimation(x, y);
+   if (argc == 2)
+   {
+      const auto x = static_cast<float>(lua_tonumber(state, 1));
+      const auto y = static_cast<float>(lua_tonumber(state, 2));
+      node->playDetonationAnimationHuge(x, y);
+   }
+
+   static constexpr auto detonation_ring_param_count = 7;
+   if (argc % detonation_ring_param_count == 0)
+   {
+      // 1: detonation_count (int)
+      // 2: center_x (float)
+      // 3: center_y (float)
+      // 4: radius (float)
+      // 5: speed_variance (float)
+      // 6: variance_pos_x (float)
+      // 7: variance_pos_y (float)
+
+      std::vector<DetonationAnimation::DetonationRing> rings;
+      for (auto i = 0; i < argc / detonation_ring_param_count; i++)
+      {
+         DetonationAnimation::DetonationRing ring;
+         int32_t index = i * detonation_ring_param_count;
+
+         const auto detonation_count = static_cast<int32_t>(lua_tointeger(state, index + 1));
+         const auto center_x = static_cast<float>(lua_tonumber(state, index + 2));
+         const auto center_y = static_cast<float>(lua_tonumber(state, index + 3));
+         const auto radius = static_cast<float>(lua_tonumber(state, index + 4));
+         const auto variance_animation_speed = static_cast<float>(lua_tonumber(state, index + 5));
+         const auto variance_pos_x = static_cast<float>(lua_tonumber(state, index + 6));
+         const auto variance_pos_y = static_cast<float>(lua_tonumber(state, index + 7));
+
+         ring._detonation_count = detonation_count;
+         ring._center.x = center_x;
+         ring._center.y = center_y;
+         ring._radius = radius;
+         ring._variance_animation_speed = variance_animation_speed;
+         ring._variance_position.x = variance_pos_x;
+         ring._variance_position.y = variance_pos_y;
+
+         rings.push_back(ring);
+      }
+
+      node->playDetonationAnimation(rings);
+   }
+
    return 0;
 }
 
@@ -1873,9 +1910,15 @@ void LuaNode::boom(float x, float y, float intensity)
    Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 1.0f});
 }
 
-void LuaNode::playDetonationAnimation(float x, float y)
+void LuaNode::playDetonationAnimationHuge(float x, float y)
 {
    auto detonation = DetonationAnimation::makeHugeExplosion(sf::Vector2f{x, y});
+   AnimationPlayer::getInstance().add(detonation.getAnimations());
+}
+
+void LuaNode::playDetonationAnimation(const std::vector<DetonationAnimation::DetonationRing>& rings)
+{
+   DetonationAnimation detonation{rings};
    AnimationPlayer::getInstance().add(detonation.getAnimations());
 }
 

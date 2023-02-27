@@ -15,6 +15,7 @@
 #include "SFML/Graphics.hpp"
 
 // game
+#include "detonationanimation.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
 #include "hitbox.h"
@@ -67,8 +68,11 @@ struct LuaNode : public GameMechanism, public GameNode
    //! trigger boom effect
    void boom(float x, float y, float intensity);
 
+   //! player huge detonation animation
+   void playDetonationAnimationHuge(float x, float y);
+
    //! player detonation animation
-   void playDetonationAnimation(float x, float y);
+   void playDetonationAnimation(const std::vector<DetonationAnimation::DetonationRing>& rings);
 
    //! cause damage to the player
    void damagePlayer(int32_t damage, float forceX, float forceY);
