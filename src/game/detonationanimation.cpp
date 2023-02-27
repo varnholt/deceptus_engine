@@ -63,7 +63,7 @@ AnimationFrameData& DetonationAnimation::getFrameData(DetonationAnimation::Deton
             16,
             32,
             frame_times,
-            16 * 32 + i * 32 // we wanna skip the first 16 rows since those are the big detonations
+            16 * 32 + i * 32  // we wanna skip the first 16 rows since those are the big detonations
          );
 
          // prepend empty frame for time offsetting
@@ -89,10 +89,7 @@ AnimationFrameData& DetonationAnimation::getFrameData(DetonationAnimation::Deton
    return _frame_data_small[0];
 }
 
-
-DetonationAnimation::DetonationAnimation(
-   const std::vector<DetonationAnimation::DetonationRing>& rings
-)
+DetonationAnimation::DetonationAnimation(const std::vector<DetonationAnimation::DetonationRing>& rings)
 {
    // compute all positions
    // have one detonation per position
@@ -152,7 +149,6 @@ DetonationAnimation::DetonationAnimation(
    }
 }
 
-
 DetonationAnimation DetonationAnimation::makeHugeExplosion(const sf::Vector2f& center)
 {
    DetonationRing ring_a;
@@ -175,14 +171,11 @@ DetonationAnimation DetonationAnimation::makeHugeExplosion(const sf::Vector2f& c
    ring_c._variance_position = sf::Vector2f(15.0f, 30.0f);
    ring_c._variance_animation_speed = 0.005f;
 
-   DetonationAnimation animation({ring_a, ring_b, ring_c});
-   return animation;
+   DetonationAnimation detonation({ring_a, ring_b, ring_c});
+   return detonation;
 }
-
 
 const std::vector<std::shared_ptr<Animation>>& DetonationAnimation::getAnimations() const
 {
    return _animations;
 }
-
-
