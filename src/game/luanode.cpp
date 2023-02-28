@@ -13,6 +13,7 @@
 #include "animationplayer.h"
 #include "audio.h"
 #include "constants.h"
+#include "debugdraw.h"
 #include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
@@ -118,6 +119,59 @@ int32_t addHitbox(lua_State* state)
    const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
    const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
    node->addHitbox(x_px, y_px, w_px, h_px);
+
+   return 0;
+}
+
+int32_t addDebugRect(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 0)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   node->addDebugRect();
+
+   return 0;
+}
+
+/**
+ * @brief updateDebugRect add a debug rect to the enemy
+ * @param state lua state
+ *    param 1: index of the debug rect
+ *    param 2: rect x position
+ *    param 3: rect y position
+ *    param 4: rect width
+ *    param 5: rect height
+ * @return error code
+ */
+int32_t updateDebugRect(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 5)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto index = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto x_px = static_cast<float>(lua_tonumber(state, 2));
+   const auto y_px = static_cast<float>(lua_tonumber(state, 3));
+   const auto w_px = static_cast<float>(lua_tonumber(state, 4));
+   const auto h_px = static_cast<float>(lua_tonumber(state, 5));
+   node->updateDebugRect(index, x_px, y_px, w_px, h_px);
 
    return 0;
 }
@@ -1548,6 +1602,7 @@ void LuaNode::setupLua()
 
    // register callbacks
    lua_register(_lua_state, "addAudioRange", ::addAudioRange);
+   lua_register(_lua_state, "addDebugRect", ::addDebugRect);
    lua_register(_lua_state, "addHitbox", ::addHitbox);
    lua_register(_lua_state, "addSample", ::addSample);
    lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
@@ -1581,6 +1636,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setTransform", ::setTransform);
    lua_register(_lua_state, "setZ", ::setZIndex);
    lua_register(_lua_state, "timer", ::timer);
+   lua_register(_lua_state, "updateDebugRect", ::updateDebugRect);
    lua_register(_lua_state, "updateKeysPressed", ::updateKeysPressed);
    lua_register(_lua_state, "updateProjectileAnimation", ::updateProjectileAnimation);
    lua_register(_lua_state, "updateProjectileTexture", ::updateProjectileTexture);
@@ -2304,6 +2360,20 @@ void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_
    _sprites[id].setColor({r, g, b, a});
 }
 
+void LuaNode::updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px)
+{
+   auto& rect = _debug_rects[index];
+   rect.left = left_px;
+   rect.top = top_px;
+   rect.width = width_px;
+   rect.height = height_px;
+}
+
+void LuaNode::addDebugRect()
+{
+   _debug_rects.push_back({});
+}
+
 void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)
 {
    sf::FloatRect rect{_position_px.x, _position_px.y, static_cast<float>(width_px), static_cast<float>(height_px)};
@@ -2398,6 +2468,12 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       const auto center = sf::Vector2f(sprite.getTextureRect().width / 2.0f, sprite.getTextureRect().height / 2.0f);
       sprite.setPosition(_position_px - center + offset);
       target.draw(sprite, &_flash_shader);
+   }
+
+   // draw debug rectangles if they were added
+   for (const auto& debug_rect : _debug_rects)
+   {
+      DebugDraw::drawRect(target, debug_rect);
    }
 }
 
