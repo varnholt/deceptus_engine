@@ -224,6 +224,44 @@ int32_t setSpriteColor(lua_State* state)
 }
 
 /**
+ * @brief intersectsWithPlayer check if a rectangle intersects with the player's bounding rect
+ * @param state lua state
+ *    param 1: rect x
+ *    param 2: rect y
+ *    param 3: rect width
+ *    param 4: rect height
+ *    return hit count
+ * @return 1 if there is an intersection, 0 if no intersection
+ */
+int32_t intersectsWithPlayer(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto x = static_cast<float>(lua_tointeger(state, 1));
+   const auto y = static_cast<float>(lua_tointeger(state, 2));
+   const auto width = static_cast<float>(lua_tointeger(state, 3));
+   const auto height = static_cast<float>(lua_tointeger(state, 4));
+
+   sf::FloatRect rect{x, y, width, height};
+   const auto player_rect = Player::getCurrent()->getPixelRectFloat();
+
+   const auto intersects = player_rect.intersects(rect);
+   lua_pushboolean(state, intersects);
+
+   return 1;
+}
+
+/**
  * @brief queryAABB do an aabb query
  * @param state lua state
  *    param 1: aabb x1
@@ -1523,6 +1561,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "debug", ::debug);
    lua_register(_lua_state, "die", ::die);
    lua_register(_lua_state, "getLinearVelocity", ::getLinearVelocity);
+   lua_register(_lua_state, "intersectsWithPlayer", ::intersectsWithPlayer);
    lua_register(_lua_state, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(_lua_state, "makeDynamic", ::makeDynamic);
    lua_register(_lua_state, "makeStatic", ::makeStatic);
