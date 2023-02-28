@@ -37,7 +37,7 @@ end
 properties = {
    static_body = false,
    sprite = "data/sprites/enemy_bat_2.png",
-   damage = 20
+   damage = 1
 }
 
 
@@ -61,6 +61,7 @@ mDead = false
 mDeathTime = 0
 mTransformY = 0
 mAttack = false
+mExploding = false
 mPath = {}
 mEnergy = 3
 ANIMATION_SPEED = 40.0
@@ -195,6 +196,14 @@ function update(dt)
       updateSprite = true
    end
 
+   -- mExploding
+   if (true) then
+      intersects = intersectsWithPlayer(mPosition:getX(), mPosition:getY(), 24, 24)
+      if (intersects) then
+         print("intersects")
+      end
+   end
+
    if (updateSprite) then
       updateSpriteRect(
          0,
@@ -240,4 +249,15 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage_value)
   mEnergy = mEnergy - 1
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function writeProperty(key, value)
+
+   -- print(string.format("write property: %s %s", key, value))
+
+   if (key == "exploding") then
+      mExploding = true
+   end
 end
