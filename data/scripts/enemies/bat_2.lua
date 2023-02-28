@@ -62,6 +62,7 @@ mDeathTime = 0
 mTransformY = 0
 mAttack = false
 mExploding = false
+mExploded = false
 mPath = {}
 mEnergy = 3
 ANIMATION_SPEED = 40.0
@@ -84,6 +85,8 @@ function initialize()
       mSpriteHeight
    )
    setZ(30) -- somewhere in the foreground
+
+   addDebugRect()
 end
 
 
@@ -111,8 +114,11 @@ function attack()
    mPath = {k1, k2, k3, k4, k5, k6}
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
 function moveTo(x, y)
 end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
@@ -196,11 +202,26 @@ function update(dt)
       updateSprite = true
    end
 
-   -- mExploding
-   if (true) then
-      intersects = intersectsWithPlayer(mPosition:getX(), mPosition:getY(), 24, 24)
+   updateDebugRect(0, mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
+
+   if (mExploding and not mExploded and not mDead) then
+
+      -- mExploded = true
+      -- mDead = true
+
+      -- |24px|
+      -- +----+----+----+ - - -
+      -- |    |    |    | 24px
+      -- +----+----+----+ - - -
+      -- |    |    |    |
+      -- +----+----+----+
+      -- |    |(XX)|    |
+      -- +----+----+----+
+
+      intersects = intersectsWithPlayer(mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
+
       if (intersects) then
-         print("intersects")
+         playDetonationAnimation(mPosition:getX(), mPosition:getY())
       end
    end
 
