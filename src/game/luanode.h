@@ -128,6 +128,12 @@ struct LuaNode : public GameMechanism, public GameNode
    //! set a sprite's color
    void setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
+   //! update a debug rect
+   void updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px);
+
+   //! add a debug rect
+   void addDebugRect();
+
    //! add a hitbox
    void addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px);
 
@@ -187,6 +193,7 @@ struct LuaNode : public GameMechanism, public GameNode
    std::vector<sf::Vector2f> _movement_path_px;
    sf::Shader _flash_shader;
    float _hit_flash{0.0f};
+   std::vector<sf::FloatRect> _debug_rects;
 
    // physics
    b2Body* _body{nullptr};
