@@ -301,10 +301,10 @@ int32_t intersectsWithPlayer(lua_State* state)
       return 0;
    }
 
-   const auto x = static_cast<float>(lua_tointeger(state, 1));
-   const auto y = static_cast<float>(lua_tointeger(state, 2));
-   const auto width = static_cast<float>(lua_tointeger(state, 3));
-   const auto height = static_cast<float>(lua_tointeger(state, 4));
+   const auto x = static_cast<float>(lua_tonumber(state, 1));
+   const auto y = static_cast<float>(lua_tonumber(state, 2));
+   const auto width = static_cast<float>(lua_tonumber(state, 3));
+   const auto height = static_cast<float>(lua_tonumber(state, 4));
 
    sf::FloatRect rect{x, y, width, height};
    const auto player_rect = Player::getCurrent()->getPixelRectFloat();
