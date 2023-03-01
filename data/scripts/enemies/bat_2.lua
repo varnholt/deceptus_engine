@@ -61,7 +61,7 @@ mDead = false
 mDeathTime = 0
 mTransformY = 0
 mAttack = false
-mExploding = false
+mCanExplode = false
 mExploded = false
 mPath = {}
 mEnergy = 3
@@ -75,6 +75,7 @@ ATTACK_SPRITE_COUNT = 9
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
+   addSample("boom.wav")
    addHitbox(-18, -12, 36, 24)
    addShapeCircle(HIT_RADIUS, 0.0, 0.0)
    updateSpriteRect(
@@ -86,7 +87,7 @@ function initialize()
    )
    setZ(30) -- somewhere in the foreground
 
-   addDebugRect()
+   -- addDebugRect()
 end
 
 
@@ -102,7 +103,11 @@ function attack()
    px = mPlayerPosition:getX()
    py = mPlayerPosition:getY()
 
-   mSpriteOffsetY = (px > bx) and 0 * 24 or 3 * 24
+   if (mCanExplode) then
+      mSpriteOffsetY = (px > bx) and (4 * mSpriteHeight) or (5 * mSpriteHeight)
+   else
+      mSpriteOffsetY = (px > bx) and 0 or mSpriteHeight
+   end
 
    sx = mStartPosition:getX()
    sy = mStartPosition:getY()
@@ -202,12 +207,9 @@ function update(dt)
       updateSprite = true
    end
 
-   updateDebugRect(0, mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
+   -- updateDebugRect(0, mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
 
-   if (mExploding and not mExploded and not mDead) then
-
-      -- mExploded = true
-      -- mDead = true
+   if (mCanExplode and not mExploded and not mDead) then
 
       -- |24px|
       -- +----+----+----+ - - -
@@ -221,7 +223,13 @@ function update(dt)
       intersects = intersectsWithPlayer(mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
 
       if (intersects) then
+
+         mExploded = true
+         mDead = true
+
+         playSample("boom.wav")
          playDetonationAnimation(mPosition:getX(), mPosition:getY())
+         damage(10, 0.0, 0.0)
       end
    end
 
@@ -279,6 +287,7 @@ function writeProperty(key, value)
    -- print(string.format("write property: %s %s", key, value))
 
    if (key == "exploding") then
-      mExploding = true
+      mCanExplode = true
+      mSpriteOffsetY = 4 * 3 * 24
    end
 end
