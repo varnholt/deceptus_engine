@@ -116,7 +116,7 @@ function attack()
    k2 = Key:create{x = px, y = py, time = 0.5} -- player pos
    k3 = Key:create{x = sx, y = sy, time = 1.0} -- go back
 
-   mPath = {k1, k2, k3, k4, k5, k6}
+   mPath = {k1, k2, k3}
 end
 
 
@@ -227,6 +227,7 @@ function update(dt)
          mExploded = true
          mDead = true
 
+         boom(0.0, 1.0, 0.5)
          playSample("boom.wav")
          playDetonationAnimation(mPosition:getX(), mPosition:getY())
          damage(10, 0.0, 0.0)
