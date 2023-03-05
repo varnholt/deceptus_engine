@@ -1,0 +1,34 @@
+-- row 0: idle left
+-- row 1: idle right
+-- row 2: walk left
+-- row 3: walk right
+-- row 4: throw left
+-- row 5: throw right
+-- row 6: spawn bomb left
+-- row 7: spawn bomb right
+-- row 8: bomb cycle left
+-- row 9: bomb cycle right
+--
+-- sprite is 4 x 24, 2 x 24
+--
+--  +---+---+---+---+
+--  |  /|///|///|/  |
+--  +---+---+---+---+
+--  |  /|///|///|/  |
+--  +---+---+---+---+
+--
+-- origin is in the bottom center
+--
+-- 8 sprites per row
+--
+--
+-- bomb is 2 x 24, 2 x 24
+-- 16 per row
+--
+-- origin is in the vertical/horizontal center
+-- +---+---+
+-- | ##|## |
+-- +---+---+
+-- | ##|## |
+-- +---+---+
+
