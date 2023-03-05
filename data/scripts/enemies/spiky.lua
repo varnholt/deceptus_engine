@@ -1,0 +1,23 @@
+-- row 0: idle left
+-- row 1: idle right
+-- row 2: walk left
+-- row 3: walk right
+-- row 4: hide left
+-- row 5: hide right
+-- row 6, 7: idle left
+-- row 8, 9: idle right
+--
+-- hide left: 48-59
+-- hide right: 60-71
+-- reveal left: 51-48
+-- reveal right: 63-60
+
+-- 12 sprites per row
+
+-- size is 2 x 24, 2 x 24
+-- origin is in the bottom center
+-- +---+---+
+-- | ##|## |
+-- +---+---+
+-- | ##|## |
+-- +---+---+
