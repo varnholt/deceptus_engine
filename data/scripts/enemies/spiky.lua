@@ -29,18 +29,19 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- enemy configuration
 properties = {
    sprite = "data/sprites/enemy_spiky.png",
-   velocity_walk_max = 1.0,
+   velocity_walk_max = 0.6,
    acceleration_ground = 0.1,
    damage = 3
 }
 
-CYCLE_IDLE = 1
-CYCLE_WALK = 2
-CYCLE_HIDE = 3
-CYCLE_HIDE_IDLE = 4
-CYCLE_APPEAR = 5
+CYCLE_IDLE = 0
+CYCLE_WALK = 1
+CYCLE_HIDE = 2
+CYCLE_HIDE_IDLE = 3
+CYCLE_APPEAR = 4
+
 CYCLE_LENGTHS =  {12, 12, 12, 15, 4}
-ANIMATION_SPEEDS = {5.0, 5.0, 5.0, 5.0, 5.0}
+ANIMATION_SPEEDS = {10.0, 20.0, 10.0, 10.0, 10.0}
 SPRITE_SIZE = 48
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -56,6 +57,8 @@ _patrol_index = 1
 _patrol_epsilon = 1.0
 _patrol_path_arrived = false
 _current_cycle = CYCLE_WALK
+_cycle_change_requested = false
+_requested_cycle = 0
 _elapsed = 0.0
 _idle = false
 
@@ -63,6 +66,7 @@ _idle = false
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeCircle(0.24, 0.0, 0.24)
+   addHitbox(-15, -5, 30, 26)
    updateSpriteRect(0, 0, 0, 48, 48)
 end
 
@@ -96,7 +100,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   _points_left = false
+   _points_to_left = false
    _patrol_path_arrived = false
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
@@ -132,7 +136,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function updateSprite(dt)
-   _current_sprite_elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEEDS[_current_cycle]
+   _current_sprite_elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEEDS[_current_cycle + 1]
    sprite_index = math.floor(math.fmod(_current_sprite_elapsed, getMaxCycle()))
 
    if (_current_sprite ~= sprite_index) then
@@ -156,7 +160,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getSpriteOffsetY()
-   return (_current_cycle * 2 + (_points_left and 0 or 1)) * SPRITE_SIZE
+   return (_current_cycle * 2 + (_points_to_left and 0 or 1)) * SPRITE_SIZE
 end
 
 
@@ -170,6 +174,8 @@ end
 function patrol(dt)
 
    if (_current_cycle ~= CYCLE_WALK) then
+      keyReleased(Key["KeyLeft"])
+      keyReleased(Key["KeyRight"])
       return
    end
 
@@ -243,7 +249,6 @@ function setPath(name, table)
    end
 
    if (name == "path") then
-      print("assign patrol path")
       _patrol_path = v
    end
 end
@@ -251,19 +256,25 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function decide(dt)
-   elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEEDS[_current_cycle]
+   elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEEDS[_current_cycle + 1]
+   cycle_complete = math.floor(elapsed) > getMaxCycle() - 1
 
    -- it's time for a new cycle
-   if (math.floor(elapsed) > getMaxCycle() - 1) then
+   if (cycle_complete or _cycle_change_requested) then
 
       next_cycle = _current_cycle
       next_animation_flag_inverse = false
 
-      if (_current_cycle == CYCLE_WALK) then
-         next_cycle = CYCLE_WALK
-      elseif (_current_cycle == CYCLE_IDLE) then
-      elseif (_current_cycle == CYCLE_HIDE) then
-      elseif (_current_cycle == CYCLE_HIDE_IDLE) then
+      if (_cycle_change_requested) then
+         next_cycle = _requested_cycle
+      end
+
+      if (_current_cycle == CYCLE_HIDE) then
+         next_cycle = CYCLE_HIDE_IDLE
+      end
+
+      if (_current_cycle == CYCLE_HIDE_IDLE) then
+         -- wait a bit
       end
 
       if (next_cycle ~= _current_cycle) then
@@ -274,3 +285,9 @@ function decide(dt)
    end
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+function hit(damage_value)
+   _cycle_change_requested = true
+   _requested_cycle = CYCLE_HIDE
+end
