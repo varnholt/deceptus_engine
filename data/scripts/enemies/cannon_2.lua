@@ -196,21 +196,8 @@ function update(dt)
 
       -- update projectile index after the cannon has been fired
       if (mFired) then
-
          if (projectileIndex ~= mProjectileIndex) then
-
             mProjectileIndex = projectileIndex
-
-            -- this is the wrong function to call since we want to alter the fired projectile
-            -- updateProjectileTexture(
-            --    0,
-            --    "data/sprites/enemy_pirate_cannon_cannonball.png",
-            --    mProjectileIndex * 72,
-            --    0,
-            --    72,
-            --    72
-            -- )
-
          end
       end
 
