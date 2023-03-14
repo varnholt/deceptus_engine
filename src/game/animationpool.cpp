@@ -114,7 +114,7 @@ void AnimationPool::updateAnimations(const sf::Time& dt)
 
    for (auto it = _animations.begin(); it != _animations.end();)
    {
-      if (it->second->_paused == true && !it->second->_looped)
+      if (it->second->_paused && !it->second->_looped)
       {
          it = _animations.erase(it);
       }
