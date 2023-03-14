@@ -82,7 +82,6 @@ _sprite_index = 0
 
 _elapsed_s = 0.0
 _elapsed_current_sprite_s = 0.0
-_elapsed_after_throw_s = 0.0
 
 _projectile_speed = 1.5
 _projectile_index = 0
@@ -93,7 +92,6 @@ _points_to_left = true
 
 _current_cycle = CYCLE_IDLE
 _can_throw = false
-_ready_to_reload = false
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -113,16 +111,16 @@ function initialize()
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.2) -- interval, damage, radius
 
-   -- registerHitAnimation(
-   --    0,
-   --    "data/sprites/enemy_pirate_cannon_cannonball.png",
-   --    3 * 24,
-   --    3 * 24,
-   --    0.05,
-   --    20,
-   --    24,
-   --    4
-   -- )
+   registerHitAnimation(
+      0,
+      "data/sprites/enemy_pirate_cannon_cannonball.png",
+      3 * 24,
+      3 * 24,
+      0.05,
+      20,
+      24,
+      4
+   )
 
    -- registerHitSamples(
    --    "data/sprites/enemy_pirate_cannon_cannonball.png",
@@ -132,18 +130,18 @@ function initialize()
    --    0.5
    -- )
 
-   -- updateProjectileAnimation(
-   --    0,
-   --    "data/sprites/enemy_pirate_cannon_cannonball.png",
-   --    3 * 24,
-   --    3 * 24,
-   --    (3 * 24) / 2,
-   --    (3 * 24) / 2,
-   --    0.05,
-   --    4,
-   --    15,
-   --    0
-   -- )
+   updateProjectileAnimation(
+      0,
+      "data/sprites/enemy_pirate_cannon_cannonball.png",
+      3 * 24,
+      3 * 24,
+      (3 * 24) / 2,
+      (3 * 24) / 2,
+      0.05,
+      4,
+      15,
+      0
+   )
 
 end
 
@@ -172,8 +170,8 @@ function fire()
 
    useGun(
       0,
-      _pos:getX() + _throw_dir_x * 32,
-      _pos:getY() + 24,
+      _pos:getX() + _throw_dir_x * 64,
+      _pos:getY(),
       _throw_dir_x * _projectile_speed,
       0.0
    );
@@ -209,23 +207,14 @@ function decide(dt)
       next_cycle = _current_cycle
 
       if (_can_throw and (_current_cycle == CYCLE_IDLE or _current_cycle == CYCLE_IDLE_BLINK)) then
-         print("idle done, prepare throw")
          next_cycle = CYCLE_PREPARE_THROW
       end
 
       if (_current_cycle == CYCLE_PREPARE_THROW) then
-         print("throw bomb")
-         _elapsed_after_throw_s = 0.0
-         _ready_to_reload = false
          next_cycle = CYCLE_THROW
       end
 
       if (_current_cycle == CYCLE_THROW) then
-         -- print("bomb thrown")
-      end
-
-      if (_ready_to_reload) then
-         _ready_to_reload = false
          next_cycle = CYCLE_RELOAD
       end
 
@@ -240,41 +229,27 @@ function decide(dt)
 
    end
 
---   -- update projectile index
---   projectile_index = 0
---   if (_fired) then
---      projectile_index = math.floor(_elapsed_since_fired_s * 5.0)
---      projectile_index = math.min(3, projectile_index)
---   end
-
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateElapsedAfterThrow(dt)
-   if (_current_cycle == CYCLE_THROW and not _ready_to_reload) then
-
-      _elapsed_after_throw_s = _elapsed_after_throw_s + dt
-
-      -- don't need to wait for reload
-      -- if (_elapsed_after_throw_s > 1.0) then
-         _ready_to_reload = true
-      -- end
-   end
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function updateSprite(dt)
+function getCurrentCycle(dt)
    _elapsed_current_sprite_s = _elapsed_current_sprite_s + dt * ANIMATION_SPEEDS[_current_cycle + 1]
    looped = CYCLE_LOOPED[_current_cycle + 1]
 
    cycle = 0
    if (looped) then
-      cycle = math.fmod(_elapsed_current_sprite_s, getMaxCycle())
-   else
-      cycle = math.min(_elapsed_current_sprite_s, getMaxCycle() - 1)
+      return math.fmod(_elapsed_current_sprite_s, getMaxCycle())
    end
+
+   return math.min(_elapsed_current_sprite_s, getMaxCycle() - 1)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateSprite(dt)
+
+   cycle = getCurrentCycle(dt)
 
    sprite_index = math.floor(cycle)
 
@@ -308,8 +283,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
    _elapsed_s = _elapsed_s + dt
-   updateThrowCondition()
-   updateElapsedAfterThrow(dt)
+   updateThrowCondition(dt)
    decide(dt)
    updateSprite(dt)
 end
@@ -321,37 +295,46 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateThrowCondition()
+function updateThrowCondition(dt)
 
-   _can_throw = false
+   if (_current_cycle == CYCLE_IDLE or _current_cycle == CYCLE_IDLE_BLINK) then
+      _can_throw = false
 
-   if (math.abs(_pos:getY() - _pos_player:getY()) < 24) then
-      if (math.abs(_pos:getX() - _pos_player:getX()) < THROW_DISTANCE_PX) then
+      if (math.abs(_pos:getY() - _pos_player:getY()) < 24) then
+         if (math.abs(_pos:getX() - _pos_player:getX()) < THROW_DISTANCE_PX) then
 
-         player_is_left = (_pos:getX() > _pos_player:getX())
+            player_is_left = (_pos:getX() > _pos_player:getX())
 
-         within_THROW_DISTANCE_PX = false
-         if (player_is_left and _points_to_left) then
-            within_THROW_DISTANCE_PX = true
-         elseif (not player_is_left and not _points_to_left) then
-            within_THROW_DISTANCE_PX = true
+            within_THROW_DISTANCE_PX = false
+            if (player_is_left and _points_to_left) then
+               within_THROW_DISTANCE_PX = true
+            elseif (not player_is_left and not _points_to_left) then
+               within_THROW_DISTANCE_PX = true
+            end
+
+            -- print(
+            --    string.format("pos player: %f %f, pos self: %f, %f",
+            --       _pos_player:getX(),
+            --       _pos_player:getY(),
+            --       _pos:getX(),
+            --       _pos:getY()
+            --    )
+            -- )
+
+            _can_throw = isPhsyicsPathClear(
+                  _pos:getX(),
+                  _pos:getY(),
+                  _pos_player:getX(),
+                  _pos_player:getY()
+               )
          end
+      end
+   elseif (_current_cycle == CYCLE_THROW) then
 
---         print(
---            string.format("pos player: %f %f, pos self: %f, %f",
---               _pos_player:getX(),
---               _pos_player:getY(),
---               _pos:getX(),
---               _pos:getY()
---            )
---         )
-
-         _can_throw = isPhsyicsPathClear(
-               _pos:getX(),
-               _pos:getY(),
-               _pos_player:getX(),
-               _pos_player:getY()
-            )
+      -- update projectile index
+      cycle = getCurrentCycle(dt)
+      if (cycle == 3) then
+         fire()
       end
    end
 end
