@@ -83,7 +83,7 @@ _sprite_index = 0
 _elapsed_s = 0.0
 _elapsed_current_sprite_s = 0.0
 
-_projectile_speed = 1.5
+_projectile_speed = 2.5
 _projectile_index = 0
 
 _throw_dir_x = -1.0
@@ -109,7 +109,7 @@ function initialize()
    -- addSample("mechanism_cannon_boom_1.wav")
    -- addSample("mechanism_cannon_boom_2.wav")
 
-   addWeapon(WeaponType["Gun"], 1000, 60, 0.2) -- interval, damage, radius
+   addWeapon(WeaponType["Gun"], 1000, 60, 0.5, 0.2) -- interval, damage, gravity_scale, radius
 
    registerHitAnimation(
       0,
@@ -173,7 +173,7 @@ function fire()
       _pos:getX() + _throw_dir_x * 64,
       _pos:getY(),
       _throw_dir_x * _projectile_speed,
-      0.0
+      -0.8
    );
 end
 

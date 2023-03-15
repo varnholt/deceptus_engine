@@ -30,8 +30,11 @@ Gun::Gun() : _shape(std::make_unique<b2CircleShape>())
    setProjectileAnimation(TexturePool::getInstance().get(_projectile_reference_animation._texture_path));
 }
 
-Gun::Gun(std::unique_ptr<b2Shape> shape, int32_t user_interval_ms, int32_t damage)
-    : _shape(std::move(shape)), _use_interval_ms(user_interval_ms), _damage(damage)
+Gun::Gun(const WeaponProperties& properties)
+    : _shape(std::move(properties._shape)),
+      _use_interval_ms(properties._fire_interval_ms),
+      _damage(properties._damage),
+      _gravity_scale(properties._gravity_scale)
 {
    // start it so the elapsed timer is exceeded on first use
    _fire_clock.restart();
@@ -57,7 +60,7 @@ void Gun::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
 
    auto bullet_body = world->CreateBody(&body_definition);
    bullet_body->SetBullet(true);
-   bullet_body->SetGravityScale(0.0f);
+   bullet_body->SetGravityScale(_gravity_scale);
 
    b2FixtureDef fixture_definition;
    fixture_definition.shape = _shape.get();
