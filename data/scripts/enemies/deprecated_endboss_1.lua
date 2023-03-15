@@ -28,7 +28,8 @@ function initialize()
    addShapeRect(0.6, 1.05, 0.25, 0.0)
    updateSpriteRect(0, 0, 0, 80, 104)
 
-   addWeapon(WeaponType["Gun"], 250, 80, 0,0, 0,0.1666, 1.0,0.1666, 1.0,0, 0,0) -- interval, damage, radius/shape
+   -- interval, damage, gravity_scale, radius/shape
+   addWeapon(WeaponType["Gun"], 250, 80, 0.0, 0,0, 0,0.1666, 1.0,0.1666, 1.0,0, 0,0)
    updateProjectileTexture(0, "data/sprites/deprecated_enemy_endboss_1.png", 0, 112, 49, 8) -- index, path, x, y, width, height
 end
 

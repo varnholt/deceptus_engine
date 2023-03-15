@@ -35,14 +35,7 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
    return weapon;
 }
 
-
-std::unique_ptr<Weapon> WeaponFactory::create(
-   b2Body* parent_body,
-   WeaponType type,
-   std::unique_ptr<b2Shape> shape,
-   int32_t fire_interval,
-   int32_t damage
-)
+std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponProperties& properties)
 {
    std::unique_ptr<Weapon> weapon;
 
@@ -51,14 +44,16 @@ std::unique_ptr<Weapon> WeaponFactory::create(
       case WeaponType::Bow:
       {
          auto bow = std::make_unique<Bow>();
-         bow->setUseIntervalMs(fire_interval);
-         bow->setLauncherBody(parent_body);
+
+         // todo: move weaponproperties into constructor
+         bow->setUseIntervalMs(properties._fire_interval_ms);
+         bow->setLauncherBody(properties._parent_body);
          weapon = std::move(bow);
          break;
       }
       case WeaponType::Gun:
       {
-         weapon = std::make_unique<Gun>(std::move(shape), fire_interval, damage);
+         weapon = std::make_unique<Gun>(properties);
          break;
       }
       case WeaponType::Sword:

@@ -53,7 +53,7 @@ function initialize()
    addSample("mechanism_cannon_boom_1.wav")
    addSample("mechanism_cannon_boom_2.wav")
 
-   addWeapon(WeaponType["Gun"], 1000, 60, 0.2) -- interval, damage, radius
+   addWeapon(WeaponType["Gun"], 1000, 60, 0.0, 0.2) -- interval, damage, gravity_scale, radius
 
    registerHitAnimation(
       0,

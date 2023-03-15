@@ -323,8 +323,10 @@ Add a weapon instance to the player
 ```cpp
 enum class WeaponType
 {
-   Default = 0,
+   None = 0,
    Bow = 1,
+   Gun = 2,
+   Sword = 3,
 };
 ```
 
