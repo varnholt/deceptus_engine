@@ -1,0 +1,1 @@
+#include "weaponproperties.h"

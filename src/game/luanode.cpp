@@ -1041,7 +1041,7 @@ int32_t addShapePoly(lua_State* state)
 int32_t addWeapon(lua_State* state)
 {
    const auto argc = static_cast<size_t>(lua_gettop(state));
-   if (argc < 3)
+   if (argc < 4)
    {
       Log::Error() << "bad parameters for addWeapon";
       exit(1);
@@ -1058,18 +1058,19 @@ int32_t addWeapon(lua_State* state)
    const auto weapon_type = static_cast<WeaponType>(lua_tointeger(state, 1));
    const auto fire_interval = static_cast<int>(lua_tointeger(state, 2));
    const auto damage_value = static_cast<int>(lua_tointeger(state, 3));
+   const auto gravity_scale = static_cast<float>(lua_tonumber(state, 4));
 
    // add weapon with projectile radius only
-   if (argc == 4)
+   if (argc == 5)
    {
       shape = std::make_unique<b2CircleShape>();
 
-      const auto radius = static_cast<float>(lua_tonumber(state, 4));
+      const auto radius = static_cast<float>(lua_tonumber(state, 5));
       dynamic_cast<b2CircleShape*>(shape.get())->m_radius = radius;
    }
 
    // add weapon with polygon projectile shape
-   if (argc >= 5 && ((argc - 5) % 2 == 0))
+   if (argc >= 6 && ((argc - 6) % 2 == 0))
    {
       shape = std::make_unique<b2PolygonShape>();
 
@@ -1088,7 +1089,14 @@ int32_t addWeapon(lua_State* state)
       dynamic_cast<b2PolygonShape*>(shape.get())->Set(poly, poly_index);
    }
 
-   auto weapon = WeaponFactory::create(node->_body, weapon_type, std::move(shape), fire_interval, damage_value);
+   WeaponProperties properties;
+   properties._parent_body = node->_body;
+   properties._damage = damage_value;
+   properties._fire_interval_ms = fire_interval;
+   properties._shape = std::move(shape);
+   properties._gravity_scale = gravity_scale;
+
+   auto weapon = WeaponFactory::create(weapon_type, properties);
    node->addWeapon(std::move(weapon));
 
    return 0;

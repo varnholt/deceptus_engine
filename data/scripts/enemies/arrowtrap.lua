@@ -79,7 +79,7 @@ function initialize()
 
    addShapeRect(0.25, 0.25, 0.25, 0.25)
    addSample("boom.wav")
-   addWeapon(WeaponType["Bow"], 50, 60, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Bow"], 50, 60, 0.0, 0.1) -- interval, damage, gravity_scale, radius
    updateAlignment(Alignment["AlignmentRight"])
    setSpriteOffset(0, 12, 12)
 

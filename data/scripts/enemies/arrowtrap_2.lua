@@ -84,7 +84,7 @@ function initialize()
    addSample("arrow_load.wav")
    addSample("arrow_release_1.wav")
    addSample("arrow_release_2.wav")
-   addWeapon(WeaponType["Bow"], 50, 60, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Bow"], 50, 60, 0.0, 0.1) -- interval, damage, gravity_scale, radius
    updateAlignment(Alignment["AlignmentRight"])
    setSpriteOffset(0, 12, 12)
 end

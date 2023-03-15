@@ -39,7 +39,7 @@ function initialize()
    ) -- x, y, width, height
 
    addSample("boom.wav")
-   addWeapon(WeaponType["Gun"], 1000, 60, 0.1) -- interval, damage, radius
+   addWeapon(WeaponType["Gun"], 1000, 60, 0.0, 0.1) -- interval, damage, gravity_scale, radius
    updateProjectileTexture(0, "data/sprites/enemy_blob.png", 4, 52, 16, 16) -- index, path, x, y, width, height
 end
 

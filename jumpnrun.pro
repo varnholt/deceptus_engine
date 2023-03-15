@@ -279,6 +279,7 @@ SOURCES += \
    src/game/waterbubbles.cpp \
    src/game/weapon.cpp \
    src/game/weaponfactory.cpp \
+   src/game/weaponproperties.cpp \
    src/game/weaponsystem.cpp \
    src/game/weather.cpp \
    src/game/worldquery.cpp \
@@ -497,6 +498,7 @@ HEADERS += \
    src/game/waterbubbles.h \
    src/game/weapon.h \
    src/game/weaponfactory.h \
+   src/game/weaponproperties.h \
    src/game/weaponsystem.h \
    src/game/weather.h \
    src/game/worldquery.h \

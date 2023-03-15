@@ -10,7 +10,6 @@
 #include "player/playerinfo.h"
 #include "savestate.h"
 #include "sword.h"
-#include "weaponfactory.h"
 #include "weaponsystem.h"
 
 #include <iostream>
