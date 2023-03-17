@@ -83,7 +83,6 @@ _sprite_index = 0
 _elapsed_s = 0.0
 _elapsed_current_sprite_s = 0.0
 
-_projectile_speed = 2.5
 _projectile_index = 0
 
 _throw_dir_x = -1.0
@@ -122,25 +121,26 @@ function initialize()
       4
    )
 
-   -- registerHitSamples(
-   --    "data/sprites/enemy_pirate_cannon_cannonball.png",
-   --    "mechanism_cannon_boom_1.wav",
-   --    0.5,
-   --    "mechanism_cannon_boom_2.wav",
-   --    0.5
-   -- )
+   --    registerHitSamples(
+   --       "data/sprites/enemy_pirate_cannon_cannonball.png",
+   --       "mechanism_cannon_boom_1.wav",
+   --       0.5,
+   --       "mechanism_cannon_boom_2.wav",
+   --       0.5
+   --    )
 
+   -- https://github.com/varnholt/deceptus_engine/tree/master/doc/lua_interface#updateprojectileanimation
    updateProjectileAnimation(
       0,
-      "data/sprites/enemy_pirate_cannon_cannonball.png",
-      3 * 24,
-      3 * 24,
-      (3 * 24) / 2,
-      (3 * 24) / 2,
+      "data/sprites/enemy_minik_bomber.png",
+      2 * 24,
+      2 * 24,
+      (2 * 24) / 2,
+      (2 * 24) / 2,
       0.05,
-      4,
-      15,
-      0
+      8,
+      16,
+      9 * 16 -- start frame is in row 8/9
    )
 
 end
@@ -170,10 +170,10 @@ function fire()
 
    useGun(
       0,
-      _pos:getX() + _throw_dir_x * 64,
+      _pos:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
       _pos:getY(),
-      _throw_dir_x * _projectile_speed,
-      -0.8
+      _throw_dir_x * 2.5,
+      -3.0
    );
 end
 
@@ -305,11 +305,11 @@ function updateThrowCondition(dt)
 
             player_is_left = (_pos:getX() > _pos_player:getX())
 
-            within_THROW_DISTANCE_PX = false
+            within_throw_distance = false
             if (player_is_left and _points_to_left) then
-               within_THROW_DISTANCE_PX = true
+               within_throw_distance = true
             elseif (not player_is_left and not _points_to_left) then
-               within_THROW_DISTANCE_PX = true
+               within_throw_distance = true
             end
 
             -- print(
@@ -321,12 +321,14 @@ function updateThrowCondition(dt)
             --    )
             -- )
 
-            _can_throw = isPhsyicsPathClear(
-                  _pos:getX(),
-                  _pos:getY(),
-                  _pos_player:getX(),
-                  _pos_player:getY()
-               )
+            if (within_throw_distance) then
+               _can_throw = isPhsyicsPathClear(
+                     _pos:getX(),
+                     _pos:getY(),
+                     _pos_player:getX(),
+                     _pos_player:getY()
+                  )
+            end
          end
       end
    elseif (_current_cycle == CYCLE_THROW) then
