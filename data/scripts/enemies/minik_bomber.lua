@@ -165,16 +165,25 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function fire()
+function throw()
    -- playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
+
+   velocity = calculateVelocity(
+      math.abs(_pos:getX() - _pos_player:getX()),
+      60.0,
+      0.09
+   )
+
+   -- print(string.format("throw velocity: %f %f", velocity:getX(), velocity:getY()))
 
    useGun(
       0,
       _pos:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
       _pos:getY(),
-      _throw_dir_x * 2.5,
-      -3.0
+      _throw_dir_x * (velocity:getX() / 48.0),
+      -velocity:getY() / 48.0
    );
+
 end
 
 
@@ -336,8 +345,25 @@ function updateThrowCondition(dt)
       -- update projectile index
       cycle = getCurrentCycle(dt)
       if (cycle == 3) then
-         fire()
+         throw()
       end
    end
 end
 
+
+function calculateVelocity(distance, angle, mass)
+
+   gravity = 8.0
+   radian_angle = math.rad(angle)
+
+   -- calculate the magnitude of the velocity required to achieve the desired distance and angle
+   -- this equation comes from solving for the initial velocity of a projectile given its range,
+   -- angle of launch, and gravitational acceleration
+   velocity_magnitude = math.sqrt((mass * gravity * distance * distance) / (2.0 * (1.0 - math.cos(radian_angle))))
+
+   -- calculate the x and y components of the velocity vector using the magnitude and angle
+   velocity_x = velocity_magnitude * math.cos(radian_angle)
+   velocity_y = velocity_magnitude * math.sin(radian_angle)
+
+   return v2d.Vector2D(velocity_x, velocity_y)
+end
