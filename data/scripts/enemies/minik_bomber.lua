@@ -121,13 +121,13 @@ function initialize()
       4
    )
 
-   --    registerHitSamples(
-   --       "data/sprites/enemy_pirate_cannon_cannonball.png",
-   --       "mechanism_cannon_boom_1.wav",
-   --       0.5,
-   --       "mechanism_cannon_boom_2.wav",
-   --       0.5
-   --    )
+   -- registerHitSamples(
+   --    "data/sprites/enemy_minik_bomber.png",
+   --    "mechanism_cannon_boom_1.wav",
+   --    0.5,
+   --    "mechanism_cannon_boom_2.wav",
+   --    0.5
+   -- )
 
    -- https://github.com/varnholt/deceptus_engine/tree/master/doc/lua_interface#updateprojectileanimation
    updateProjectileAnimation(
@@ -173,6 +173,9 @@ function throw()
       60.0,
       0.09
    )
+
+   velocity:setX(velocity:getX() * math.random(90, 110) * 0.01)
+   velocity:setY(velocity:getY() * math.random(90, 110) * 0.01)
 
    -- print(string.format("throw velocity: %f %f", velocity:getX(), velocity:getY()))
 
@@ -248,10 +251,10 @@ function getCurrentCycle(dt)
 
    cycle = 0
    if (looped) then
-      return math.fmod(_elapsed_current_sprite_s, getMaxCycle())
+      return math.floor(math.fmod(_elapsed_current_sprite_s, getMaxCycle()))
    end
 
-   return math.min(_elapsed_current_sprite_s, getMaxCycle() - 1)
+   return math.floor(math.min(_elapsed_current_sprite_s, getMaxCycle() - 1))
 end
 
 
@@ -344,7 +347,7 @@ function updateThrowCondition(dt)
 
       -- update projectile index
       cycle = getCurrentCycle(dt)
-      if (cycle == 3) then
+      if (cycle == 0) then
          throw()
       end
    end
