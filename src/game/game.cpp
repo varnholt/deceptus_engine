@@ -1016,6 +1016,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::Q:
       {
          shutdown();
+         break;
       }
       case sf::Keyboard::R:
       {
