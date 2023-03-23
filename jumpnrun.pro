@@ -692,6 +692,7 @@ DISTFILES += \
     data/scripts/enemies/klonk_2.lua \
     data/scripts/enemies/deprecated_skeleton.lua \
     data/scripts/enemies/minik_bomber.lua \
+    data/scripts/enemies/nukumaru.lua \
     data/scripts/enemies/rat.lua \
     data/scripts/enemies/spiky.lua \
     data/scripts/enemies/vector2.lua \
