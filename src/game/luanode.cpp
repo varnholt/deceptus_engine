@@ -628,6 +628,63 @@ int32_t setLinearVelocity(lua_State* state)
 }
 
 /**
+ * @brief applyLinearImpulse apply an impulse on the object
+ * @param state lua state
+ *    param 1: impulse x
+ *    param 2: impulse y
+ * @return error code
+ */
+int32_t applyLinearImpulse(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto vx = static_cast<float>(lua_tonumber(state, 1));
+   const auto vy = static_cast<float>(lua_tonumber(state, 2));
+   node->applyLinearImpulse(b2Vec2{vx, vy});
+
+   return 0;
+}
+
+/**
+ * @brief applyForce apply a force on the object
+ * @param state lua state
+ *    param 1: force x
+ *    param 2: force y
+ * @return error code
+ */
+int32_t applyForce(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto vx = static_cast<float>(lua_tonumber(state, 1));
+   const auto vy = static_cast<float>(lua_tonumber(state, 2));
+
+   node->applyForce(b2Vec2{vx, vy});
+
+   return 0;
+}
+
+/**
  * @brief damage the node sets some damage to the player
  * @param state lua state
  *    param 1: amount of damage from 0..100
@@ -1618,6 +1675,8 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "addShapeRectBevel", ::addShapeRectBevel);
    lua_register(_lua_state, "addSprite", ::addSprite);
    lua_register(_lua_state, "addWeapon", ::addWeapon);
+   lua_register(_lua_state, "applyForce", ::applyForce);
+   lua_register(_lua_state, "applyLinearImpulse", ::applyLinearImpulse);
    lua_register(_lua_state, "boom", ::boom);
    lua_register(_lua_state, "damage", ::damage);
    lua_register(_lua_state, "damageRadius", ::damageRadius);
@@ -2002,10 +2061,32 @@ b2Vec2 LuaNode::getLinearVelocity() const
 
 void LuaNode::setLinearVelocity(const b2Vec2& vel)
 {
-   if (_body)
+   if (!_body)
    {
-      _body->SetLinearVelocity(vel);
+      return;
    }
+
+   _body->SetLinearVelocity(vel);
+}
+
+void LuaNode::applyLinearImpulse(const b2Vec2& vel)
+{
+   if (!_body)
+   {
+      return;
+   }
+
+   _body->ApplyLinearImpulse(vel, _body->GetWorldCenter(), true);
+}
+
+void LuaNode::applyForce(const b2Vec2& force)
+{
+   if (!_body)
+   {
+      return;
+   }
+
+   _body->ApplyForceToCenter(force, true);
 }
 
 void LuaNode::boom(float x, float y, float intensity)
@@ -2168,6 +2249,9 @@ int64_t LuaNode::getPropertyInt64(const std::string& key, int64_t default_value)
 void LuaNode::setupBody()
 {
    const auto static_body = getPropertyBool("static_body");
+   const auto restitution = static_cast<float>(getPropertyDouble("restitution", 0.0f));
+   const auto density = static_cast<float>(getPropertyDouble("density", 1.0f));
+   const auto friction = static_cast<float>(getPropertyDouble("friction", 0.0f));
    const auto damage = static_cast<int32_t>(getPropertyInt64("damage"));
    const auto sensor = static_cast<bool>(getPropertyBool("sensor"));
    const auto collides_with_player = static_cast<bool>(getPropertyBool("collides_with_player", true));
@@ -2180,9 +2264,9 @@ void LuaNode::setupBody()
    for (auto shape : _shapes_m)
    {
       b2FixtureDef fd;
-      fd.density = 1.f;
-      fd.friction = 0.0f;
-      fd.restitution = 0.0f;
+      fd.density = density;
+      fd.friction = friction;
+      fd.restitution = restitution;
       fd.shape = shape;
 
       // apply default filter

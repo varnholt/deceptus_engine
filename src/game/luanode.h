@@ -86,6 +86,12 @@ struct LuaNode : public GameMechanism, public GameNode
    //! set the body's linear velocity
    void setLinearVelocity(const b2Vec2& vel);
 
+   //! apply linear impulse to body
+   void applyLinearImpulse(const b2Vec2& vel);
+
+   //! apply a force to the body
+   void applyForce(const b2Vec2& force);
+
    //! fire a gun
    void useGun(size_t index, b2Vec2 from, b2Vec2 to);
 
