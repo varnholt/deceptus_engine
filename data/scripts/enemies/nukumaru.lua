@@ -1,11 +1,20 @@
 require "data/scripts/enemies/constants"
 
+-- from http://www.iforce2d.net/b2dtut/gotchas#slownorebound
+--
+-- Why do very slow collisions cause no rebound?
+-- To help keep the simulation stable very small bounces are treated as inelastic, regardless of the restitution
+-- settings you have given the fixtures. The most common case where this becomes a problem is snooker/billiards games,
+-- where even a slow collision with the side walls or the other balls should be calculated accurately. In b2Settings.h
+-- you can change the default value (b2_velocityThreshold) for the minimum velocity to consider inelastic.
+-- Changing this to a much smaller value should not usually cause any problems.
+
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    sprite = "data/sprites/enemy_nukumaru.png",
    damage = 40,
    restitution = 1.0, -- maximum bounce
-   density = 0.01
+   density = 0.1
 }
 
 SPRITE_WIDTH = 128
@@ -16,8 +25,8 @@ ANIMATION_SPEED = 100.0
 _elapsed = 0.0
 _tick_count = 0
 _sprite_index = -1
-_impulse_x = 0.03
-_impulse_y = 0.03
+_impulse_x = 0.1
+_impulse_y = 0.1
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
