@@ -2369,37 +2369,47 @@ void LuaNode::updateVelocity()
       return;
    }
 
-   auto velocity_max = 0.0;
-   auto acceleration = 0.0;
+   std::optional<double> velocity_max;
+   std::optional<double> acceleration;
 
-   auto velocity_it = _properties.find("velocity_walk_max");
+   const auto velocity_it = _properties.find("velocity_walk_max");
    if (velocity_it != _properties.end())
    {
       velocity_max = *std::get_if<double>(&(velocity_it->second));
    }
 
-   auto acceleration_it = _properties.find("acceleration_ground");
+   const auto acceleration_it = _properties.find("acceleration_ground");
    if (acceleration_it != _properties.end())
    {
       acceleration = *std::get_if<double>(&(acceleration_it->second));
    }
 
+   if (!velocity_max.has_value())
+   {
+      return;
+   }
+
+   if (!acceleration.has_value())
+   {
+      return;
+   }
+
    auto desired_velocity = 0.0f;
-   auto velocity = _body->GetLinearVelocity();
+   const auto velocity = _body->GetLinearVelocity();
 
    if (_keys_pressed & KeyPressedLeft)
    {
-      desired_velocity = static_cast<float>(b2Max(velocity.x - acceleration, -velocity_max));
+      desired_velocity = static_cast<float>(b2Max(velocity.x - acceleration.value(), -velocity_max.value()));
    }
 
    if (_keys_pressed & KeyPressedRight)
    {
-      desired_velocity = static_cast<float>(b2Min(velocity.x + acceleration, velocity_max));
+      desired_velocity = static_cast<float>(b2Min(velocity.x + acceleration.value(), velocity_max.value()));
    }
 
    // calc impulse, disregard time factor
-   auto velocity_change = desired_velocity - velocity.x;
-   auto impulse = _body->GetMass() * velocity_change;
+   const auto velocity_change = desired_velocity - velocity.x;
+   const auto impulse = _body->GetMass() * velocity_change;
 
    _body->ApplyLinearImpulse(b2Vec2(impulse, 0.0f), _body->GetWorldCenter(), true);
 }
