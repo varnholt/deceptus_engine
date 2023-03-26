@@ -22,6 +22,7 @@
 #include "level.h"
 #include "luaconstants.h"
 #include "luainterface.h"
+#include "physics/physicsconfiguration.h"
 #include "player/player.h"
 #include "projectilehitaudio.h"
 #include "texturepool.h"
@@ -595,6 +596,28 @@ int32_t getLinearVelocity(lua_State* state)
    lua_rawseti(state, table, index++);
    lua_pushnumber(state, static_cast<double>(velocity.y));
    lua_rawseti(state, table, index++);
+
+   return 1;
+}
+
+/**
+ * @brief getGravity reads the world's gravity
+ * @param state lua state
+ *    return table
+ *       1: velocity x
+ *       2: velocity y
+ * @return error code
+ */
+int32_t getGravity(lua_State* state)
+{
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto gravity = PhysicsConfiguration::getInstance()._gravity;
+   lua_pushnumber(state, gravity);
 
    return 1;
 }
@@ -1683,6 +1706,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "debug", ::debug);
    lua_register(_lua_state, "die", ::die);
    lua_register(_lua_state, "getLinearVelocity", ::getLinearVelocity);
+   lua_register(_lua_state, "getGravity", ::getGravity);
    lua_register(_lua_state, "intersectsWithPlayer", ::intersectsWithPlayer);
    lua_register(_lua_state, "isPhsyicsPathClear", ::isPhsyicsPathClear);
    lua_register(_lua_state, "makeDynamic", ::makeDynamic);
