@@ -91,43 +91,47 @@ _points_to_left = true
 
 _current_cycle = CYCLE_IDLE
 _can_throw = false
-
+_gravity = 0.0
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
+
+   _gravity = getGravity()
+
    addShapeCircle(0.32, 0.48, 0.24) -- drag that box2d circle to where we want it to be
    setSpriteOffset(0, 21, 4); -- now align that circle with our texture
 
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 24)
-   -- addAudioRange(400.0, 0.0, 200.0, 1.0)
-   -- addSample("mechanism_cannon_1.wav")
-   -- addSample("mechanism_cannon_2.wav")
-   -- addSample("mechanism_cannon_3.wav")
-   -- addSample("mechanism_cannon_4.wav")
-   -- addSample("mechanism_cannon_boom_1.wav")
-   -- addSample("mechanism_cannon_boom_2.wav")
+   addAudioRange(400.0, 0.0, 200.0, 1.0)
+   addSample("throw_01.wav")
+   addSample("throw_02.wav")
+   addSample("throw_03.wav")
+   addSample("throw_04.wav")
+   addSample("throw_05.wav")
+   addSample("mechanism_cannon_boom_1.wav")
+   addSample("mechanism_cannon_boom_2.wav")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.5, 0.2) -- interval, damage, gravity_scale, radius
 
    registerHitAnimation(
       0,
-      "data/sprites/enemy_pirate_cannon_cannonball.png",
+      "data/sprites/enemy_minik_bomber.png",
       3 * 24,
       3 * 24,
       0.05,
       20,
-      24,
-      4
+      20,
+      8 * 20 -- start at row 12
    )
 
-   -- registerHitSamples(
-   --    "data/sprites/enemy_minik_bomber.png",
-   --    "mechanism_cannon_boom_1.wav",
-   --    0.5,
-   --    "mechanism_cannon_boom_2.wav",
-   --    0.5
-   -- )
+    registerHitSamples(
+       "data/sprites/enemy_minik_bomber.png",
+       "mechanism_cannon_boom_1.wav",
+       0.5,
+       "mechanism_cannon_boom_2.wav",
+       0.5
+    )
 
    -- https://github.com/varnholt/deceptus_engine/tree/master/doc/lua_interface#updateprojectileanimation
    updateProjectileAnimation(
@@ -348,6 +352,7 @@ function updateThrowCondition(dt)
       -- update projectile index
       cycle = getCurrentCycle(dt)
       if (cycle == 0) then
+         playSample(string.format("throw_%02d.wav", math.random(1, 5)), 0.5)
          throw()
       end
    end
@@ -356,13 +361,12 @@ end
 
 function calculateVelocity(distance, angle, mass)
 
-   gravity = 8.0
    radian_angle = math.rad(angle)
 
    -- calculate the magnitude of the velocity required to achieve the desired distance and angle
    -- this equation comes from solving for the initial velocity of a projectile given its range,
    -- angle of launch, and gravitational acceleration
-   velocity_magnitude = math.sqrt((mass * gravity * distance * distance) / (2.0 * (1.0 - math.cos(radian_angle))))
+   velocity_magnitude = math.sqrt((mass * _gravity * distance * distance) / (2.0 * (1.0 - math.cos(radian_angle))))
 
    -- calculate the x and y components of the velocity vector using the magnitude and angle
    velocity_x = velocity_magnitude * math.cos(radian_angle)
