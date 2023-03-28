@@ -16,12 +16,10 @@
 #include <ostream>
 #include <sstream>
 
-
 bool Console::isActive() const
 {
    return _active;
 }
-
 
 void Console::setActive(bool active)
 {
@@ -33,12 +31,10 @@ void Console::setActive(bool active)
    }
 }
 
-
 void Console::append(char c)
 {
    _command.push_back(c);
 }
-
 
 void Console::chop()
 {
@@ -50,30 +46,30 @@ void Console::chop()
    _command.pop_back();
 }
 
-
 void Console::showHelp()
 {
-    _log.push_back("help:");
-    _log.push_back("");
-    _log.push_back("/cp <n>: jump to checkpoint");
-    _log.push_back("   example: /cp 0");
-    _log.push_back("");
-    _log.push_back("/damage <n>: cause damage to player");
-    _log.push_back("   example: /damage 100");
-    _log.push_back("");
-    _log.push_back("/extra <name>: give extra");
-    _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
-    _log.push_back("");
-    _log.push_back("/playback <command>: game playback");
-    _log.push_back("   commands: enable, disable, load, save, replay, reset");
-    _log.push_back("");
-    _log.push_back("/tp <x>,<y>: teleport to position");
-    _log.push_back("   example: /tp 100, 330");
-    _log.push_back("");
-    _log.push_back("/weapon <weapon>: give weapon to player");
-    _log.push_back("   available weapons: bow, gun, sword");
+   _log.push_back("help:");
+   _log.push_back("");
+   _log.push_back("/cp <n>: jump to checkpoint");
+   _log.push_back("   example: /cp 0");
+   _log.push_back("");
+   _log.push_back("/damage <n>: cause damage to player");
+   _log.push_back("   example: /damage 100");
+   _log.push_back("");
+   _log.push_back("/extra <name>: give extra");
+   _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
+   _log.push_back("");
+   _log.push_back("/playback <command>: game playback");
+   _log.push_back("   commands: enable, disable, load, save, replay, reset");
+   _log.push_back("");
+   _log.push_back("/tp <x>,<y>: teleport to position");
+   _log.push_back("   example: /tp 100, 330");
+   _log.push_back("");
+   _log.push_back("/start: go to start position");
+   _log.push_back("");
+   _log.push_back("/weapon <weapon>: give weapon to player");
+   _log.push_back("   available weapons: bow, gun, sword");
 }
-
 
 void Console::giveWeaponBow()
 {
@@ -85,7 +81,6 @@ void Console::giveWeaponBow()
    _log.push_back("given bow to player");
 }
 
-
 void Console::giveWeaponGun()
 {
    auto gun = std::make_shared<Gun>();
@@ -95,7 +90,6 @@ void Console::giveWeaponGun()
    _log.push_back("given gun to player");
 }
 
-
 void Console::giveWeaponSword()
 {
    auto sword = std::make_shared<Sword>();
@@ -104,7 +98,6 @@ void Console::giveWeaponSword()
    Player::getCurrent()->getWeaponSystem()->_selected = sword;
    _log.push_back("given sword to player");
 }
-
 
 void Console::execute()
 {
@@ -198,13 +191,10 @@ void Console::execute()
       auto y = std::atoi(results.at(2).c_str());
 
       std::ostringstream os;
-      os << "teleport to " << x << ", " <<  y << std::endl;
+      os << "teleport to " << x << ", " << y << std::endl;
       _log.push_back(os.str());
 
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(x * PIXELS_PER_TILE),
-         static_cast<float>(y * PIXELS_PER_TILE)
-      );
+      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
    }
    else if (results.at(0) == "/cp" && results.size() == 2)
    {
@@ -215,13 +205,10 @@ void Console::execute()
       auto checkpoint = Checkpoint::getCheckpoint(n, Level::getCurrentLevel()->getCheckpoints());
       if (checkpoint)
       {
-         auto pos = checkpoint->calcCenter();
+         const auto pos = checkpoint->calcCenter();
          os << "jumped to checkpoint " << n << std::endl;
 
-         Player::getCurrent()->setBodyViaPixelPosition(
-            static_cast<float>(pos.x),
-            static_cast<float>(pos.y)
-         );
+         Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
       }
       else
       {
@@ -282,6 +269,11 @@ void Console::execute()
       os << "damage player " << damage << std::endl;
       _log.push_back(os.str());
    }
+   else if (results[0] == "/start")
+   {
+      const auto pos = Level::getCurrentLevel()->getStartPosition();
+      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
+   }
    else
    {
       const auto command_it = _registered_commands.find(results.at(0));
@@ -304,10 +296,9 @@ void Console::execute()
    }
 
    _history.push_back(_command);
-   _history_index = static_cast<int32_t>(_history.size()); // n + 1 is intentional
+   _history_index = static_cast<int32_t>(_history.size());  // n + 1 is intentional
    _command.clear();
 }
-
 
 void Console::previousCommand()
 {
@@ -323,7 +314,6 @@ void Console::previousCommand()
    }
    _command = _history[static_cast<size_t>(_history_index)];
 }
-
 
 void Console::nextCommand()
 {
@@ -352,15 +342,12 @@ Console& Console::getInstance()
    return __instance;
 }
 
-
 const std::string& Console::getCommand() const
 {
    return _command;
 }
 
-
 const std::deque<std::string>& Console::getLog() const
 {
    return _log;
 }
-
