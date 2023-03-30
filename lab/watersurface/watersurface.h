@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "fakesfml.h"
 #include "segment.h"
 #include "splashparticle.h"
 
@@ -12,8 +11,10 @@ class WaterSurface
 public:
    WaterSurface();
 
-   void splash(float pos_x, float velocity);
-   void update();
+   void splash(int32_t index, float velocity);
+   void update(float dt);
+
+   const std::vector<Segment>& getSegments();
 
 private:
    float getSegmentHeight(float x);

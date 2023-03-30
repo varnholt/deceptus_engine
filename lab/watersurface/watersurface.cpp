@@ -3,6 +3,9 @@
 #include <math.h>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+
+#include "fakesfml.h"
 
 namespace
 {
@@ -25,16 +28,17 @@ float frand(float min, float max)
 
 sf::Vector2f getRandomVector(float max_length)
 {
-   return fromPolar(frand(-M_PI, M_PI), frand(0, max_length));
+   return fromPolar(frand(static_cast<float>(-M_PI), static_cast<float>(M_PI)), frand(0.0f, max_length));
 }
 
 }  // namespace
 
 WaterSurface::WaterSurface()
 {
-   for (auto i = 0; i < 200; i++)
+   for (auto i = 0; i < 100; i++)
    {
-      _segments.push_back({48.0f});
+      // the height can be refactored out
+      _segments.push_back({0.0f});
    }
 }
 
@@ -47,15 +51,15 @@ float WaterSurface::getSegmentHeight(float x)
 
    const auto scale = 1.0f;
 
-   return _segments[(int)(x * scale)]._height;
+   return _segments[(int32_t)(x * scale)]._height;
 }
 
-void WaterSurface::splash(float pos_x, float velocity)
+void WaterSurface::splash(int32_t index, float velocity)
 {
-   const auto scale = 1.0f;
-   const auto index = std::clamp<int32_t>(pos_x * scale, 0, _segments.size() - 1);
+   const auto start_index = std::max(0, index);
+   const auto stop_index = std::min<size_t>(_segments.size() - 1, index + 1);
 
-   for (auto i = std::max(0, index - 0); i < std::min<size_t>(_segments.size() - 1, index + 1); i++)
+   for (auto i = start_index; i < stop_index; i++)
    {
       _segments[index]._velocity = velocity;
    }
@@ -80,38 +84,52 @@ void WaterSurface::createSplashParticles(float pos_x, float velocity)
    }
 }
 
-void WaterSurface::update()
+void WaterSurface::update(float /*dt*/)
 {
-   for (auto i = 0; i < _segments.size(); i++)
+   for (auto& segment : _segments)
    {
-      _segments[i].Update(dampening, tension);
+      segment.update(dampening, tension);
+      segment.resetDeltas();
    }
 
-   for (auto j = 0; j < 8; j++)
+   // todo, incorporate dt
+
+   static constexpr auto integration_steps = 8;
+
+   // integrate a few times
+   for (auto j = 0; j < integration_steps; j++)
    {
-      for (auto i = 0; i < _segments.size(); i++)
+      for (auto segment_index = 0; segment_index < _segments.size(); segment_index++)
       {
-         if (i > 0)
+         if (segment_index > 0)
          {
-            const auto delta_left = spread * (_segments[i]._height - _segments[i - 1]._height);
-            _segments[i].delta_left = delta_left;
-            _segments[i - 1]._velocity += delta_left;
+            const auto delta_left = spread * (_segments[segment_index]._height - _segments[segment_index - 1]._height);
+
+            _segments[segment_index]._delta_left = delta_left;
+            _segments[segment_index - 1]._velocity += delta_left;
          }
 
-         if (i < _segments.size() - 1)
+         if (segment_index < _segments.size() - 1)
          {
-            const auto delta_right = spread * (_segments[i]._height - _segments[i + 1]._height);
-            _segments[i].delta_right = delta_right;
-            _segments[i + 1]._velocity += delta_right;
+            const auto delta_right = spread * (_segments[segment_index]._height - _segments[segment_index + 1]._height);
+
+            _segments[segment_index]._delta_right = delta_right;
+            _segments[segment_index + 1]._velocity += delta_right;
          }
       }
 
-      for (auto i = 0; i < _segments.size(); i++)
+      // update heights based on deltas
+      for (auto segment_index = 0; segment_index < _segments.size(); segment_index++)
       {
-         if (i > 0)
-            _segments[i - 1]._height += _segments[i].delta_left;
-         if (i < _segments.size() - 1)
-            _segments[i + 1]._height += _segments[i].delta_right;
+         if (segment_index > 0)
+         {
+            _segments[segment_index - 1]._height += _segments[segment_index]._delta_left;
+         }
+
+         if (segment_index < _segments.size() - 1)
+         {
+            _segments[segment_index + 1]._height += _segments[segment_index]._delta_right;
+         }
       }
    }
 
@@ -119,4 +137,15 @@ void WaterSurface::update()
    {
       particle.update();
    }
+
+   //   for (const auto& segment : _segments)
+   //   {
+   //      std::cout << " " << segment._height;
+   //   }
+   //   std::cout << std::endl;
+}
+
+const std::vector<Segment>& WaterSurface::getSegments()
+{
+   return _segments;
 }
