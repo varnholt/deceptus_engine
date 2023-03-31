@@ -84,8 +84,10 @@ void WaterSurface::createSplashParticles(float pos_x, float velocity)
    }
 }
 
-void WaterSurface::update(float /*dt*/)
+void WaterSurface::update(float dt)
 {
+   constexpr auto animation_speed = 10.0f;
+
    for (auto& segment : _segments)
    {
       segment.update(dampening, tension);
@@ -103,7 +105,8 @@ void WaterSurface::update(float /*dt*/)
       {
          if (segment_index > 0)
          {
-            const auto delta_left = spread * (_segments[segment_index]._height - _segments[segment_index - 1]._height);
+            const auto delta_left =
+               spread * (_segments[segment_index]._height - _segments[segment_index - 1]._height) * dt * animation_speed;
 
             _segments[segment_index]._delta_left = delta_left;
             _segments[segment_index - 1]._velocity += delta_left;
@@ -111,7 +114,8 @@ void WaterSurface::update(float /*dt*/)
 
          if (segment_index < _segments.size() - 1)
          {
-            const auto delta_right = spread * (_segments[segment_index]._height - _segments[segment_index + 1]._height);
+            const auto delta_right =
+               spread * (_segments[segment_index]._height - _segments[segment_index + 1]._height) * dt * animation_speed;
 
             _segments[segment_index]._delta_right = delta_right;
             _segments[segment_index + 1]._velocity += delta_right;
@@ -133,10 +137,10 @@ void WaterSurface::update(float /*dt*/)
       }
    }
 
-   for (auto& particle : _particles)
-   {
-      particle.update();
-   }
+   // for (auto& particle : _particles)
+   // {
+   //    particle.update();
+   // }
 
    //   for (const auto& segment : _segments)
    //   {

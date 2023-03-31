@@ -3,7 +3,7 @@
 
 struct Segment
 {
-   Segment(float height);
+   Segment() = default;
 
    void update(float dampening, float tension);
    void resetDeltas();
