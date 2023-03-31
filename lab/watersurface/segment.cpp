@@ -1,9 +1,5 @@
 #include "segment.h"
 
-Segment::Segment(float height) : _height(height), _target_height(height)
-{
-}
-
 void Segment::update(float dampening, float tension)
 {
    const auto x = _target_height - _height;

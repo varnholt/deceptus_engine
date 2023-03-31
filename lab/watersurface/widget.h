@@ -3,6 +3,7 @@
 
 #include <QElapsedTimer>
 #include <QWidget>
+#include <deque>
 
 #include "watersurface.h"
 
@@ -26,5 +27,7 @@ private:
    Ui::Widget *ui;
    WaterSurface _surface;
    QElapsedTimer _elapsed;
+
+   std::deque<QPolygonF> _polygons;
 };
 #endif // WIDGET_H
