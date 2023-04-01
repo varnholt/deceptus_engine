@@ -231,6 +231,7 @@ SOURCES += \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
+   src/game/mechanisms/watersurface.cpp \
    src/game/meshtools.cpp \
    src/game/messagebox.cpp \
    src/game/objectupdater.cpp \
@@ -446,6 +447,7 @@ HEADERS += \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
+   src/game/mechanisms/watersurface.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
    src/game/objectupdater.h \
