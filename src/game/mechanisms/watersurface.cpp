@@ -14,10 +14,13 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    auto index = 0;
    const auto segment_width = _bounding_box.width / _segments.size();
    std::vector<sf::Vertex> sf_lines;
+   const auto x_offset = _bounding_box.left;
+   const auto y_offset = _bounding_box.top;
+
    for (const auto& segment : _segments)
    {
-      const auto x = static_cast<float>(index * segment_width);
-      const auto y = segment._height;
+      const auto x = x_offset + static_cast<float>(index * segment_width);
+      const auto y = y_offset + segment._height;
       sf_lines.push_back(sf::Vertex{sf::Vector2f{x, y}, sf::Color::White});
       index++;
    }
@@ -82,10 +85,6 @@ std::optional<sf::FloatRect> WaterSurface::getBoundingBoxPx()
    return _bounding_box;
 }
 
-void WaterSurface::setup(const GameDeserializeData& data)
-{
-}
-
 void WaterSurface::Segment::update(float dampening, float tension)
 {
    const auto x = _target_height - _height;
@@ -97,4 +96,32 @@ void WaterSurface::Segment::resetDeltas()
 {
    _delta_left = 0.0f;
    _delta_right = 0.0f;
+}
+
+void WaterSurface::splash(int32_t index, float velocity)
+{
+   const auto start_index = std::max(0, index);
+   const auto stop_index = std::min<size_t>(_segments.size() - 1, index + 1);
+
+   for (auto i = start_index; i < stop_index; i++)
+   {
+      _segments[index]._velocity = velocity;
+   }
+}
+
+std::shared_ptr<WaterSurface> WaterSurface::deserialize(GameNode* parent, const GameDeserializeData& data)
+{
+   auto surface = std::make_shared<WaterSurface>();
+
+   surface->_bounding_box.left = data._tmx_object->_x_px;
+   surface->_bounding_box.top = data._tmx_object->_y_px;
+   surface->_bounding_box.width = data._tmx_object->_width_px;
+   surface->_bounding_box.height = data._tmx_object->_height_px;
+
+   for (auto i = 0; i < 100; i++)
+   {
+      surface->_segments.push_back({});
+   }
+
+   return surface;
 }

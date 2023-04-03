@@ -25,11 +25,13 @@ public:
 
    WaterSurface() = default;
 
+   static std::shared_ptr<WaterSurface> deserialize(GameNode* parent, const GameDeserializeData& data);
+
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   virtual void setup(const GameDeserializeData& data);
+   void splash(int32_t index, float velocity);
 
 private:
    sf::FloatRect _bounding_box;

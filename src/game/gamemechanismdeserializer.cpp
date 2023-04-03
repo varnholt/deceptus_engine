@@ -29,6 +29,7 @@
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikeblock.h"
 #include "mechanisms/spikes.h"
+#include "mechanisms/watersurface.h"
 
 // move to mechanisms
 #include "effects/dust.h"
@@ -76,6 +77,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_spike_blocks = mechanisms[std::string{layer_name_spike_blocks}];
    auto mechanism_spikes = mechanisms[std::string{layer_name_interval_spikes}];
    auto mechanism_weather = mechanisms[std::string{layer_name_weather}];
+   auto mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
 
    for (auto element : tmx_parser.getElements())
    {
@@ -302,6 +304,11 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = SoundEmitter::deserialize(parent, data);
                mechanism_sound_emitters->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_water_surface || tmx_object->_type == type_name_water_surface)
+            {
+               auto mechanism = WaterSurface::deserialize(parent, data);
+               mechanism_water_surface->push_back(mechanism);
             }
          }
       }
