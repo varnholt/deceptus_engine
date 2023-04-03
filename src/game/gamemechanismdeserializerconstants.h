@@ -36,6 +36,7 @@ static constexpr std::string_view layer_name_spike_blocks{"spike_blocks"};
 static constexpr std::string_view layer_name_switchable_objects{"switchable_objects"};
 static constexpr std::string_view layer_name_toggle_spikes{"toggle_spikes"};
 static constexpr std::string_view layer_name_trap_spikes{"trap_spikes"};
+static constexpr std::string_view layer_name_water_surface{"water_surface"};
 static constexpr std::string_view layer_name_weather{"weather"};
 
 static constexpr std::string_view type_name_bouncer{"Bouncer"};
@@ -66,6 +67,7 @@ static constexpr std::string_view type_name_sound_emitter{"SoundEmitter"};
 static constexpr std::string_view type_name_spike_ball{"SpikeBall"};
 static constexpr std::string_view type_name_spike_block{"SpikeBlock"};
 static constexpr std::string_view type_name_switchable_object{"SwitchableObject"};
+static constexpr std::string_view type_name_water_surface{"WaterSurface"};
 static constexpr std::string_view type_name_weather{"Weather"};
 
 #endif  // GAMEMECHANISMDESERIALIZERCONSTANTS_H

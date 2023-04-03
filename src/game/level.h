@@ -209,12 +209,13 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_rotating_blades;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_sensor_rects;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_shader_layers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_sound_emitters;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_shader_layers;
 
    // graphic effects
    BoomEffect _boom_effect;
