@@ -208,7 +208,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_lasers,          &_mechanism_levers,         &_mechanism_moveable_boxes, &_mechanism_on_off_blocks,
       &_mechanism_platforms,       &_mechanism_portals,        &_mechanism_ropes,          &_mechanism_rotating_blades,
       &_mechanism_sensor_rects,    &_mechanism_shader_layers,  &_mechanism_sound_emitters, &_mechanism_spike_balls,
-      &_mechanism_spike_blocks,    &_mechanism_spikes,         &_mechanism_weather,
+      &_mechanism_spike_blocks,    &_mechanism_spikes,         &_mechanism_water_surface,  &_mechanism_weather,
    };
 
    _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
@@ -237,6 +237,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
    _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
    _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
+   _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
    _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
 
    // called whenever the player toggles a mechanism in the game
