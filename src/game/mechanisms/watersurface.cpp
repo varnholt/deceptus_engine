@@ -1,5 +1,13 @@
 #include "watersurface.h"
 
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
+#include "player/player.h"
+
+#include <iostream>
+
 namespace
 {
 
@@ -11,6 +19,54 @@ float spread = 0.25f;
 
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   // draw bg
+   const auto pos = sf::Vector2{static_cast<float>(_bounding_box.left), static_cast<float>(_bounding_box.top)};
+   const auto size = sf::Vector2f{static_cast<float>(_bounding_box.width), static_cast<float>(_bounding_box.height)};
+
+   auto fill_color = sf::Color::Red;
+   fill_color.a = 60;
+   sf::RectangleShape rs;
+   rs.setSize(size);
+   rs.setPosition(pos);
+   rs.setFillColor(fill_color);
+   color.draw(rs);
+
+   //
+   //         __--4
+   //   __- 2-    |
+   // 0-    |\    |
+   // | \   | \   |
+   // |  \  |  \  |
+   // |   \ |   \ |
+   // +-----+-----+
+   // 1     3     5
+   //
+
+   // https://www.sfml-dev.org/tutorials/2.5/graphics-vertex-array.php
+
+   // draw water color
+   // const auto vertex_count = _segments.size() + 2;
+   // sf::ConvexShape polygon(vertex_count);
+   // auto index = 0;
+   // const auto x_offset = _bounding_box.left;
+   // const auto y_offset = _bounding_box.top;
+   // const auto segment_width = _bounding_box.width / _segments.size();
+   // for (const auto& segment : _segments)
+   // {
+   //    const auto x = x_offset + static_cast<float>(index * segment_width);
+   //    const auto y = y_offset + segment._height;
+   //    polygon.setPoint(index + 1, sf::Vector2f{x, y});
+   //    index++;
+   // }
+   // const auto y = _bounding_box.top + _bounding_box.height;
+   // polygon.setPoint(0, sf::Vector2f{polygon.getPoint(1).x, y});
+   // polygon.setPoint(vertex_count - 1, sf::Vector2f{polygon.getPoint(vertex_count - 2).x, y});
+
+   // polygon.setFillColor(fill_color);
+
+   // color.draw(polygon);
+
+   // draw lines
    auto index = 0;
    const auto segment_width = _bounding_box.width / _segments.size();
    std::vector<sf::Vertex> sf_lines;
@@ -25,12 +81,37 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       index++;
    }
 
-   color.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+   // _shader.setUniform("pixel_threshold", 2.0f);
+
+   color.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip /*, &_shader*/);
 }
+
+constexpr auto animation_speed = 10.0f;
+constexpr auto splash_factor = 50.0f;
 
 void WaterSurface::update(const sf::Time& dt)
 {
-   constexpr auto animation_speed = 10.0f;
+   auto player = Player::getCurrent();
+
+   bool splash_needed = false;
+   if (_player_was_in_water != player->isInWater())
+   {
+      _player_was_in_water = player->isInWater();
+      splash_needed = true;
+   }
+
+   if (splash_needed)
+   {
+      sf::FloatRect intersection;
+      if (player->getPixelRectFloat().intersects(_bounding_box, intersection))
+      {
+         const auto velocity = player->getBody()->GetLinearVelocity().y * splash_factor;
+         const auto normalized_intersection = (intersection.left - _bounding_box.left) / _bounding_box.width;
+         const auto index = normalized_intersection * _segments.size();
+
+         splash(index, velocity);
+      }
+   }
 
    for (auto& segment : _segments)
    {
@@ -109,19 +190,37 @@ void WaterSurface::splash(int32_t index, float velocity)
    }
 }
 
-std::shared_ptr<WaterSurface> WaterSurface::deserialize(GameNode* parent, const GameDeserializeData& data)
+WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
 {
-   auto surface = std::make_shared<WaterSurface>();
-
-   surface->_bounding_box.left = data._tmx_object->_x_px;
-   surface->_bounding_box.top = data._tmx_object->_y_px;
-   surface->_bounding_box.width = data._tmx_object->_width_px;
-   surface->_bounding_box.height = data._tmx_object->_height_px;
-
-   for (auto i = 0; i < 100; i++)
+   if (!_shader.loadFromFile("data/shaders/pixelate.frag", sf::Shader::Fragment))
    {
-      surface->_segments.push_back({});
+      Log::Error() << "error loading pixelate shader";
+      return;
    }
 
-   return surface;
+   setClassName(typeid(WaterSurface).name());
+   setObjectId(data._tmx_object->_name);
+
+   // read properties
+   if (data._tmx_object->_properties)
+   {
+      auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
+      {
+         setZ(static_cast<uint32_t>(z_it->second->_value_int.value()));
+      }
+   }
+
+   _bounding_box.left = data._tmx_object->_x_px;
+   _bounding_box.top = data._tmx_object->_y_px;
+   _bounding_box.width = data._tmx_object->_width_px;
+   _bounding_box.height = data._tmx_object->_height_px;
+
+   for (auto i = 0; i < 40; i++)
+   {
+      _segments.push_back({});
+   }
+
+   Log::Info() << "deserialize water surface at: " << _bounding_box.left << ", " << _bounding_box.top << " w: " << _bounding_box.width
+               << ", h:" << _bounding_box.height << std::endl;
 }
