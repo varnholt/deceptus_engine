@@ -23,9 +23,7 @@ public:
       float _delta_right{0.0f};
    };
 
-   WaterSurface() = default;
-
-   static std::shared_ptr<WaterSurface> deserialize(GameNode* parent, const GameDeserializeData& data);
+   WaterSurface(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
@@ -36,6 +34,8 @@ public:
 private:
    sf::FloatRect _bounding_box;
    std::vector<Segment> _segments;
+   sf::Shader _shader;
+   bool _player_was_in_water = false;
 };
 
 #endif // WATERSURFACE_H

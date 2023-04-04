@@ -198,26 +198,26 @@ enum KeyPressed
 
 enum ObjectType
 {
-   ObjectTypeInvalid,
-   ObjectTypePlayer,
-   ObjectTypePlayerFootSensor,
-   ObjectTypePlayerHeadSensor,
-   ObjectTypePlayerLeftArmSensor,
-   ObjectTypePlayerRightArmSensor,
-   ObjectTypeProjectile,
    ObjectTypeBouncer,
+   ObjectTypeBubbleCube,
+   ObjectTypeCollapsingPlatform,
    ObjectTypeConveyorBelt,
    ObjectTypeCrusher,
    ObjectTypeDeadly,
    ObjectTypeDeathBlock,
    ObjectTypeDoor,
    ObjectTypeEnemy,
+   ObjectTypeInvalid,
    ObjectTypeMoveableBox,
    ObjectTypeMovingPlatform,
+   ObjectTypePlayer,
+   ObjectTypePlayerFootSensor,
+   ObjectTypePlayerHeadSensor,
+   ObjectTypePlayerLeftArmSensor,
+   ObjectTypePlayerRightArmSensor,
+   ObjectTypeProjectile,
    ObjectTypeSolid,
    ObjectTypeSolidOneWay,
-   ObjectTypeBubbleCube,
-   ObjectTypeCollapsingPlatform,
 };
 
 enum EntityCategory
