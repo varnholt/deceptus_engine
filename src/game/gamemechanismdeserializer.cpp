@@ -307,7 +307,7 @@ void GameMechanismDeserializer::deserialize(
             }
             else if (object_group->_name == layer_name_water_surface || tmx_object->_type == type_name_water_surface)
             {
-               auto mechanism = WaterSurface::deserialize(parent, data);
+               auto mechanism = std::make_shared<WaterSurface>(parent, data);
                mechanism_water_surface->push_back(mechanism);
             }
          }
