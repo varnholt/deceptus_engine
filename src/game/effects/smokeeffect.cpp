@@ -8,36 +8,27 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "texturepool.h"
 
+#include <math.h>
 #include <array>
 #include <filesystem>
 #include <iostream>
-#include <math.h>
 
-
-
-SmokeEffect::SmokeEffect(GameNode* parent)
- : GameNode(parent),
-   _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
+SmokeEffect::SmokeEffect(GameNode* parent) : GameNode(parent), _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
 {
    setClassName(typeid(SmokeEffect).name());
    _texture->setSmooth(true);
 }
 
-
-void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates states, int z)
+void SmokeEffect::drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z)
 {
    if (z != _z)
    {
-       return;
+      return;
    }
 
    sf::RenderTexture render_texture;
 
-   if (!render_texture.create(
-         static_cast<int32_t>(_size_px.x / _pixel_ratio),
-         static_cast<int32_t>(_size_px.y / _pixel_ratio)
-      )
-   )
+   if (!render_texture.create(static_cast<int32_t>(_size_px.x / _pixel_ratio), static_cast<int32_t>(_size_px.y / _pixel_ratio)))
    {
       return;
    }
@@ -58,7 +49,6 @@ void SmokeEffect::drawToZ(sf::RenderTarget &target, sf::RenderStates states, int
    target.draw(rt_sprite, states);
 }
 
-
 void SmokeEffect::update(const sf::Time& time)
 {
    const auto dt = (time.asSeconds() - _last_update_time.asSeconds()) * _velocity;
@@ -75,19 +65,12 @@ void SmokeEffect::update(const sf::Time& time)
       const auto x = x_normalized * particle._offset.x;
       const auto y = y_normalized * particle._offset.y;
 
-      particle._sprite.setPosition(
-         particle._center.x + x,
-         particle._center.y + y
-      );
+      particle._sprite.setPosition(particle._center.x + x, particle._center.y + y);
 
       if (_mode == Mode::Fog)
       {
-         particle._sprite.setColor({
-               _particle_color.r,
-               _particle_color.g,
-               _particle_color.b,
-               static_cast<uint8_t>(_particle_color.a * fabs(x_normalized))
-            }
+         particle._sprite.setColor(
+            {_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(_particle_color.a * fabs(x_normalized))}
          );
       }
 
@@ -97,7 +80,6 @@ void SmokeEffect::update(const sf::Time& time)
       particle._sprite.setOrigin(bounds.width / 2, bounds.height / 2);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const GameDeserializeData& data)
@@ -228,16 +210,16 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
    {
       SmokeParticle particle;
 
-      const auto offset_x_px = static_cast<float>((std::rand() % range_x) - range_x / 2); // normalize from (-range / 2) to (range / 2)
+      const auto offset_x_px = static_cast<float>((std::rand() % range_x) - range_x / 2);  // normalize from (-range / 2) to (range / 2)
       const auto offset_y_px = static_cast<float>((std::rand() % range_y) - range_y / 2);
 
-      const auto sprite_scale_x = ( (std::rand() % 50) + 50) * 0.004f * sprite_scale;
-      const auto sprite_scale_y = ( (std::rand() % 50) + 50) * 0.004f * sprite_scale;
+      const auto sprite_scale_x = ((std::rand() % 50) + 50) * 0.004f * sprite_scale;
+      const auto sprite_scale_y = ((std::rand() % 50) + 50) * 0.004f * sprite_scale;
 
-      particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f; // -1.0 .. 1.0
+      particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f;  // -1.0 .. 1.0
       particle._center = sf::Vector2f{center_x_px, center_y_px};
       particle._offset = sf::Vector2f{offset_x_px, offset_y_px};
-      particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * static_cast<float>(M_PI); // 0 .. 2_PI
+      particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * static_cast<float>(M_PI);  // 0 .. 2_PI
 
       particle._sprite.setScale(sprite_scale_x, sprite_scale_y);
       particle._sprite.setRotation(static_cast<float>(std::rand() % 360));
@@ -249,4 +231,3 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
 
    return smoke_effect;
 }
-
