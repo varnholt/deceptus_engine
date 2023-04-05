@@ -32,10 +32,14 @@ public:
    void splash(int32_t index, float velocity);
 
 private:
+   void updateVertices(int32_t start_index = 0);
    sf::FloatRect _bounding_box;
    std::vector<Segment> _segments;
    sf::Shader _shader;
-   bool _player_was_in_water = false;
+   bool _player_was_in_water{false};
+   sf::VertexArray _vertices;
+   float _segment_width{0.0f};
+   sf::Texture _gradient;
 };
 
 #endif // WATERSURFACE_H

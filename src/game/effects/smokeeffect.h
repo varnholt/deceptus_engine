@@ -8,16 +8,14 @@
 #include "gamedeserializedata.h"
 #include "gamenode.h"
 
-
 struct TmxObject;
 struct TmxObjectGroup;
 
 class SmokeEffect : public GameNode
 {
-
 public:
-
-   enum class Mode{
+   enum class Mode
+   {
       Smoke,
       Fog,
    };
@@ -30,7 +28,6 @@ public:
    static std::shared_ptr<SmokeEffect> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
-
    std::shared_ptr<sf::Texture> _texture;
 
    struct SmokeParticle
@@ -57,4 +54,3 @@ private:
    sf::Color _particle_color = {255, 255, 255, 25};
    Mode _mode = Mode::Smoke;
 };
-
