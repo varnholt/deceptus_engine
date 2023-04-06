@@ -35,7 +35,6 @@ private:
    void updateVertices(int32_t start_index = 0);
    sf::FloatRect _bounding_box;
    std::vector<Segment> _segments;
-   sf::Shader _shader;
    std::optional<bool> _player_was_in_water;
    sf::VertexArray _vertices;
    float _segment_width{0.0f};

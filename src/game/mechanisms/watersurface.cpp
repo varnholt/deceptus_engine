@@ -34,10 +34,8 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    //
 
    // draw water color
-   _shader.setUniform("pixel_threshold", 0.03f);
    sf::RenderStates states;
    states.texture = &_gradient;
-   states.shader = &_shader;
 
    if (_pixel_ratio.has_value())
    {
@@ -225,12 +223,6 @@ void WaterSurface::updateVertices(int32_t start_index)
 
 WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
 {
-   if (!_shader.loadFromFile("data/shaders/pixelate.frag", sf::Shader::Fragment))
-   {
-      Log::Error() << "error loading pixelate shader";
-      return;
-   }
-
    setClassName(typeid(WaterSurface).name());
    setObjectId(data._tmx_object->_name);
 
