@@ -36,10 +36,14 @@ private:
    sf::FloatRect _bounding_box;
    std::vector<Segment> _segments;
    sf::Shader _shader;
-   bool _player_was_in_water{false};
+   std::optional<bool> _player_was_in_water;
    sf::VertexArray _vertices;
    float _segment_width{0.0f};
    sf::Texture _gradient;
+
+   sf::RenderTexture _render_texture;
+   sf::Sprite render_texture_sprite;
+   std::optional<float> _pixel_ratio;
 };
 
 #endif // WATERSURFACE_H
