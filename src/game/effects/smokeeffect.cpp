@@ -27,7 +27,6 @@ void SmokeEffect::drawToZ(sf::RenderTarget& target, sf::RenderStates states, int
    }
 
    sf::RenderTexture render_texture;
-
    if (!render_texture.create(static_cast<int32_t>(_size_px.x / _pixel_ratio), static_cast<int32_t>(_size_px.y / _pixel_ratio)))
    {
       return;
