@@ -103,7 +103,8 @@ void WaterSurface::update(const sf::Time& dt)
       if (player->getPixelRectFloat().intersects(_bounding_box, intersection))
       {
          const auto velocity = player->getBody()->GetLinearVelocity().y * splash_factor;
-         const auto normalized_intersection = (intersection.left - _bounding_box.left) / _bounding_box.width;
+         const auto normalized_intersection =
+            (intersection.left + (player->getPixelRectFloat().width / 2.0f) - _bounding_box.left) / _bounding_box.width;
          const auto index = static_cast<int32_t>(normalized_intersection * _segments.size());
 
          splash(index, velocity);
@@ -203,6 +204,10 @@ void WaterSurface::updateVertices(int32_t start_index)
       x_offset = _bounding_box.left;
       y_offset = _bounding_box.top;
    }
+   else
+   {
+      y_offset = _bounding_box.height / _pixel_ratio.value();
+   }
 
    for (const auto& segment : _segments)
    {
@@ -251,7 +256,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       auto pixel_ratio_it = data._tmx_object->_properties->_map.find("pixel_ratio");
       if (pixel_ratio_it != data._tmx_object->_properties->_map.end())
       {
-         _pixel_ratio = static_cast<int32_t>(pixel_ratio_it->second->_value_int.value());
+         _pixel_ratio = static_cast<int32_t>(pixel_ratio_it->second->_value_float.value());
       }
    }
 
@@ -292,7 +297,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
 
       _render_texture.setSmooth(false);
       render_texture_sprite.setTexture(_render_texture.getTexture());
-      render_texture_sprite.setPosition({_bounding_box.left, _bounding_box.top});
+      render_texture_sprite.setPosition({_bounding_box.left, _bounding_box.top - _bounding_box.height});
       render_texture_sprite.scale(_pixel_ratio.value(), _pixel_ratio.value());
    }
 }
