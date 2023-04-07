@@ -111,9 +111,8 @@ void WaterSurface::update(const sf::Time& dt)
       segment.resetDeltas();
    }
 
-   static constexpr auto integration_steps = 8;
-
    // integrate a few times
+   static constexpr auto integration_steps = 8;
    for (auto j = 0; j < integration_steps; j++)
    {
       for (auto segment_index = 0; segment_index < _segments.size(); segment_index++)
@@ -213,7 +212,7 @@ void WaterSurface::updateVertices(int32_t start_index)
 
       // should be done just upon init
       _vertices[index].texCoords.x = (index & 1) ? 255.0f : 0.0f;
-      _vertices[index].color.a = 200;
+      _vertices[index].color.a = _opacity;
 
       index += increment;
       width_index++;
@@ -246,6 +245,11 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       if (segment_it != data._tmx_object->_properties->_map.end())
       {
          segment_count = static_cast<int32_t>(segment_it->second->_value_int.value());
+
+         if (segment_count > _bounding_box.width)
+         {
+            Log::Error() << "segment_count " << segment_count << " exceeds bounding box width " << _bounding_box.width << std::endl;
+         }
       }
 
       auto pixel_ratio_it = data._tmx_object->_properties->_map.find("pixel_ratio");
@@ -259,6 +263,12 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       if (clamp_segment_count_it != data._tmx_object->_properties->_map.end())
       {
          clamp_segment_count = static_cast<int32_t>(clamp_segment_count_it->second->_value_int.value());
+      }
+
+      auto opacity_it = data._tmx_object->_properties->_map.find("opacity");
+      if (opacity_it != data._tmx_object->_properties->_map.end())
+      {
+         _opacity = static_cast<int32_t>(opacity_it->second->_value_int.value());
       }
    }
 

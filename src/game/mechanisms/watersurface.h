@@ -41,6 +41,7 @@ private:
    sf::VertexArray _vertices;
    float _segment_width{0.0f};
    sf::Texture _gradient;
+   uint8_t _opacity{200};
 
    sf::RenderTexture _render_texture;
    sf::Sprite render_texture_sprite;
