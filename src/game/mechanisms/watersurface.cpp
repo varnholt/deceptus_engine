@@ -77,12 +77,6 @@ void WaterSurface::update(const sf::Time& dt)
 {
    auto player = Player::getCurrent();
 
-   //   // just to save some performance
-   //   if (!player->isInWater())
-   //   {
-   //      return;
-   //   }
-
    bool splash_needed = false;
 
    // initialize 'player is in water' so it triggers only when the player crosses the surface
@@ -212,7 +206,7 @@ void WaterSurface::updateVertices(int32_t start_index)
    for (const auto& segment : _segments)
    {
       const auto x = x_offset + static_cast<float>(width_index * _segment_width);
-      const auto y = (index & 1) ? (y_offset + _bounding_box.height) : (y_offset + segment._height);
+      const auto y = (index & 1) ? (y_offset + _bounding_box.height) : (y_offset + segment._height * segment._clamp_scale);
 
       _vertices[index].position.x = x;
       _vertices[index].position.y = y;
@@ -237,6 +231,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    _bounding_box.height = data._tmx_object->_height_px;
 
    auto segment_count = static_cast<int32_t>(_bounding_box.width / 2);
+   std::optional<int32_t> clamp_segment_count;
 
    // read properties
    if (data._tmx_object->_properties)
@@ -256,7 +251,14 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       auto pixel_ratio_it = data._tmx_object->_properties->_map.find("pixel_ratio");
       if (pixel_ratio_it != data._tmx_object->_properties->_map.end())
       {
-         _pixel_ratio = static_cast<int32_t>(pixel_ratio_it->second->_value_float.value());
+         _pixel_ratio = pixel_ratio_it->second->_value_float.value();
+         segment_count = static_cast<int32_t>(static_cast<float>(segment_count) / _pixel_ratio.value());
+      }
+
+      auto clamp_segment_count_it = data._tmx_object->_properties->_map.find("clamp_segment_count");
+      if (clamp_segment_count_it != data._tmx_object->_properties->_map.end())
+      {
+         clamp_segment_count = static_cast<int32_t>(clamp_segment_count_it->second->_value_int.value());
       }
    }
 
@@ -265,10 +267,30 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       _segments.push_back({});
    }
 
+   // clamp corner edges if configured
+   if (clamp_segment_count.has_value())
+   {
+      if (clamp_segment_count.value() * 2 < _segments.size())
+      {
+         const auto clamp_scale_increment = 1.0f / clamp_segment_count.value();
+         auto scale = 0.0f;
+         for (auto i = 0; i < clamp_segment_count; i++)
+         {
+            _segments[i]._clamp_scale = scale;
+            _segments[_segments.size() - 1 - i]._clamp_scale = scale;
+            scale += clamp_scale_increment;
+         }
+      }
+      else
+      {
+         Log::Error() << "clamp_segment_count must be smaller than half of the segment_count";
+      }
+   }
+
    _vertices.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
    _vertices.resize(segment_count * 2);
 
-   _segment_width = _bounding_box.width / _segments.size();
+   _segment_width = (_bounding_box.width / _segments.size()) / _pixel_ratio.value_or(1.0f);
 
    updateVertices(0);
    updateVertices(1);

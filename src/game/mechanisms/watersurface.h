@@ -21,6 +21,8 @@ public:
 
       float _delta_left{0.0f};
       float _delta_right{0.0f};
+
+      float _clamp_scale{1.0f};
    };
 
    WaterSurface(GameNode* parent, const GameDeserializeData& data);
