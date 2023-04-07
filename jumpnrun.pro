@@ -658,6 +658,8 @@ OTHER_FILES += \
 
 DISTFILES += \
     data/config/camera.json \
+    data/config/savestate.json \
+    data/config/tweaks.json \
     data/level-crypt/metroid.json \
     data/level-crypt/metroid.tmx \
     data/level-demo/demolevel.tmx \
