@@ -25,6 +25,16 @@ public:
       float _clamp_scale{1.0f};
    };
 
+   struct Config
+   {
+      float _tension = 0.025f;
+      float _dampening = 0.025f;
+      float _spread = 0.25f;
+
+      float _animation_speed = 10.0f;
+      float _splash_factor = 50.0f;
+   };
+
    WaterSurface(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
@@ -46,6 +56,7 @@ private:
    sf::RenderTexture _render_texture;
    sf::Sprite render_texture_sprite;
    std::optional<float> _pixel_ratio;
+   Config _config;
 };
 
 #endif // WATERSURFACE_H

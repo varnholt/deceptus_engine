@@ -8,18 +8,6 @@
 
 #include <iostream>
 
-namespace
-{
-
-float tension = 0.025f;
-float dampening = 0.025f;
-float spread = 0.25f;
-
-constexpr auto animation_speed = 10.0f;
-constexpr auto splash_factor = 50.0f;
-
-}  // namespace
-
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    //
@@ -96,7 +84,7 @@ void WaterSurface::update(const sf::Time& dt)
       sf::FloatRect intersection;
       if (player->getPixelRectFloat().intersects(_bounding_box, intersection))
       {
-         const auto velocity = player->getBody()->GetLinearVelocity().y * splash_factor;
+         const auto velocity = player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =
             (intersection.left + (player->getPixelRectFloat().width / 2.0f) - _bounding_box.left) / _bounding_box.width;
          const auto index = static_cast<int32_t>(normalized_intersection * _segments.size());
@@ -107,7 +95,7 @@ void WaterSurface::update(const sf::Time& dt)
 
    for (auto& segment : _segments)
    {
-      segment.update(dampening, tension);
+      segment.update(_config._dampening, _config._tension);
       segment.resetDeltas();
    }
 
@@ -119,8 +107,8 @@ void WaterSurface::update(const sf::Time& dt)
       {
          if (segment_index > 0)
          {
-            const auto delta_left =
-               spread * (_segments[segment_index]._height - _segments[segment_index - 1]._height) * dt.asSeconds() * animation_speed;
+            const auto delta_left = _config._spread * (_segments[segment_index]._height - _segments[segment_index - 1]._height) *
+                                    dt.asSeconds() * _config._animation_speed;
 
             _segments[segment_index]._delta_left = delta_left;
             _segments[segment_index - 1]._velocity += delta_left;
@@ -128,8 +116,8 @@ void WaterSurface::update(const sf::Time& dt)
 
          if (segment_index < _segments.size() - 1)
          {
-            const auto delta_right =
-               spread * (_segments[segment_index]._height - _segments[segment_index + 1]._height) * dt.asSeconds() * animation_speed;
+            const auto delta_right = _config._spread * (_segments[segment_index]._height - _segments[segment_index + 1]._height) *
+                                     dt.asSeconds() * _config._animation_speed;
 
             _segments[segment_index]._delta_right = delta_right;
             _segments[segment_index + 1]._velocity += delta_right;
@@ -269,6 +257,36 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       if (opacity_it != data._tmx_object->_properties->_map.end())
       {
          _opacity = static_cast<int32_t>(opacity_it->second->_value_int.value());
+      }
+
+      auto tension_it = data._tmx_object->_properties->_map.find("tension");
+      if (tension_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._tension = tension_it->second->_value_float.value();
+      }
+
+      auto dampening_it = data._tmx_object->_properties->_map.find("dampening");
+      if (dampening_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._dampening = dampening_it->second->_value_float.value();
+      }
+
+      auto spread_it = data._tmx_object->_properties->_map.find("spread");
+      if (spread_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._spread = spread_it->second->_value_float.value();
+      }
+
+      auto animation_speed_it = data._tmx_object->_properties->_map.find("animation_speed");
+      if (animation_speed_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._animation_speed = animation_speed_it->second->_value_float.value();
+      }
+
+      auto splash_factor_it = data._tmx_object->_properties->_map.find("splash_factor");
+      if (splash_factor_it != data._tmx_object->_properties->_map.end())
+      {
+         _config._splash_factor = splash_factor_it->second->_value_float.value();
       }
    }
 
