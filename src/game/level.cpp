@@ -659,6 +659,7 @@ void Level::saveState()
 
    nlohmann::json mechanisms_json;
 
+   // serialize the states of all mechanisms
    for (auto& [key, mechanisms] : _mechanisms_map)
    {
       nlohmann::json mechanism_json;
