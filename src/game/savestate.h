@@ -23,8 +23,8 @@ struct SaveState
    PlayerInfo _player_info;
    nlohmann::json _level_state;
 
-   uint32_t _level_index = 0;
-   uint32_t _checkpoint = 0;
+   int32_t _level_index = 0;
+   int32_t _checkpoint = -1;
 
    bool _load_level_requested = false;
 
