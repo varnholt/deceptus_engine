@@ -37,12 +37,11 @@ public:
    void reached();
    void addCallback(CheckpointCallback);
    sf::Vector2f calcCenter() const;
-   uint32_t getIndex() const;
+   int32_t getIndex() const;
    void updateSpriteRect();
 
 private:
-
-   uint32_t _index = 0;
+   int32_t _index = 0;
    std::string _name;
    sf::FloatRect _rect;
    bool _reached = false;
