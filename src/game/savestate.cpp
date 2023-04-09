@@ -143,9 +143,20 @@ void to_json(nlohmann::json& j, const SaveState& data)
 
 void from_json(const nlohmann::json& j, SaveState& data)
 {
-   data._level_index = j.at("levelindex").get<uint32_t>();
-   data._checkpoint = j.at("checkpoint").get<uint32_t>();
-   data._player_info = j.at("playerinfo").get<PlayerInfo>();
+   if (j.find("levelindex") != j.end())
+   {
+      data._level_index = j.at("levelindex").get<int32_t>();
+   }
+
+   if (j.find("checkpoint") != j.end())
+   {
+      data._checkpoint = j.at("checkpoint").get<int32_t>();
+   }
+
+   if (j.find("playerinfo") != j.end())
+   {
+      data._player_info = j.at("playerinfo").get<PlayerInfo>();
+   }
 
    if (j.find("levelstate") != j.end())
    {
