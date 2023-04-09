@@ -52,13 +52,17 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
       auto it = data._tmx_object->_properties->_map.find("index");
       if (it != data._tmx_object->_properties->_map.end())
       {
-         checkpoint->_index = static_cast<uint32_t>(it->second->_value_int.value());
+         checkpoint->_index = static_cast<int32_t>(it->second->_value_int.value());
+      }
+      else
+      {
+         Log::Error() << "checkpoint " << checkpoint->_name << " does not have an index, please fix your level";
       }
 
       auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
-         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         auto z_index = static_cast<int32_t>(z_it->second->_value_int.value());
          checkpoint->setZ(z_index);
       }
 
@@ -148,7 +152,7 @@ sf::Vector2f Checkpoint::calcCenter() const
    return pos;
 }
 
-uint32_t Checkpoint::getIndex() const
+int32_t Checkpoint::getIndex() const
 {
    return _index;
 }
