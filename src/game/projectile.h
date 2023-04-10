@@ -79,10 +79,8 @@ protected:
    WeaponType _weapon_type = WeaponType::None;
    std::string _projectile_identifier = default_projectile_identifier;
    std::vector<DestroyedCallback> _destroyed_callbacks;
+   sf::Time _time_alive;
 
    Animation _animation;
    sf::Rect<int32_t> _animation_texture_rect;
-
-   static std::set<Projectile*> _projectiles;
-   static std::vector<HitInformation> _hit_information;
 };

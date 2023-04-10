@@ -11,8 +11,11 @@
 #include <iostream>
 #include <memory>
 
-std::vector<Projectile::HitInformation> Projectile::_hit_information;
-std::set<Projectile*> Projectile::_projectiles;
+namespace
+{
+std::vector<Projectile::HitInformation> _hit_information;
+std::set<Projectile*> _projectiles;
+}  // namespace
 
 Projectile::Projectile() : FixtureNode(this)
 {
@@ -191,6 +194,16 @@ void Projectile::setRotating(bool rotating)
 
 void Projectile::update(const sf::Time& dt)
 {
+   // this is for projectiles that are just not hitting anything
+   for (auto& projectile : _projectiles)
+   {
+      projectile->_time_alive += dt;
+      if (projectile->_time_alive.asSeconds() > 30.0)
+      {
+         projectile->setScheduledForRemoval(true);
+      }
+   }
+
    collectHitInformation();
    processHitInformation();
    ProjectileHitAnimation::updateHitAnimations(dt);
