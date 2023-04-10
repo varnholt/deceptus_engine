@@ -1,5 +1,7 @@
 #include "arrow.h"
 
+#include <iostream>
+
 #include "framework/tools/globalclock.h"
 #include "projectilehitaudio.h"
 #include "texturepool.h"
@@ -16,6 +18,11 @@ static constexpr auto default_bow_projectile_identifier = "data/weapons/arrow.pn
 
 bool Arrow::_animation_initialised = false;
 
+namespace
+{
+int32_t created_count = 0;
+int32_t deleted_count = 0;
+}  // namespace
 
 Arrow::Arrow()
 {
@@ -44,5 +51,13 @@ Arrow::Arrow()
          sprite_start_frame
       );
    }
+
+   created_count++;
 }
 
+Arrow::~Arrow()
+{
+   deleted_count++;
+
+   // std::cout << "created: " << created_count << " deleted: " << deleted_count << std::endl;
+}
