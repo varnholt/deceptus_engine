@@ -11,13 +11,10 @@
 #include <iostream>
 #include <memory>
 
-
 std::vector<Projectile::HitInformation> Projectile::_hit_information;
 std::set<Projectile*> Projectile::_projectiles;
 
-
-Projectile::Projectile()
- : FixtureNode(this)
+Projectile::Projectile() : FixtureNode(this)
 {
    setClassName(typeid(Projectile).name());
    _type = ObjectTypeProjectile;
@@ -26,7 +23,6 @@ Projectile::Projectile()
    ProjectileHitAnimation::setupDefaultAnimation();
 }
 
-
 Projectile::~Projectile()
 {
    for (auto& cb : _destroyed_callbacks)
@@ -34,71 +30,80 @@ Projectile::~Projectile()
       cb();
    }
 
-   _body->GetWorld()->DestroyBody(_body);
+   if (_body)
+   {
+      _body->GetWorld()->DestroyBody(_body);
+   }
 }
-
 
 bool Projectile::isScheduledForRemoval() const
 {
    return _scheduled_for_removal;
 }
 
-
 void Projectile::setScheduledForRemoval(bool remove)
 {
    _scheduled_for_removal = remove;
 }
-
 
 bool Projectile::isScheduledForInactivity() const
 {
    return _scheduled_for_inactivity;
 }
 
-
 void Projectile::setScheduledForInactivity(bool scheduled_for_inactivity)
 {
    _scheduled_for_inactivity = scheduled_for_inactivity;
 }
 
-
-b2Body *Projectile::getBody() const
+b2Body* Projectile::getBody() const
 {
    return _body;
 }
 
-
-void Projectile::setBody(b2Body *body)
+void Projectile::setBody(b2Body* body)
 {
    _body = body;
 }
 
-
 void Projectile::clear()
 {
    _hit_information.clear();
+
+   // delete all projectiles that have not been scheduled for removal until just now
+   std::for_each(
+      _projectiles.begin(),
+      _projectiles.end(),
+      [](auto projectile)
+      {
+         // there's no more need to notify the parent weapons since they're probably also already deleted;
+         // also, we should not care about the box2d representation of the object, just avoid the memory
+         // leak here. all box2d instances are deleted right after calling Projectile::clear().
+         projectile->_destroyed_callbacks.clear();
+         projectile->_body = nullptr;
+         delete projectile;
+      }
+   );
    _projectiles.clear();
 }
-
 
 void Projectile::collectHitInformation()
 {
    _hit_information.clear();
 
-   for (auto it = _projectiles.begin(); it != _projectiles.end(); )
+   for (auto it = _projectiles.begin(); it != _projectiles.end();)
    {
       auto projectile = *it;
       if (projectile->isScheduledForRemoval())
       {
-         _hit_information.push_back({
-               b2Vec2(projectile->getBody()->GetPosition()),
-               projectile->_rotation,
-               projectile->_weapon_type,
-               projectile->_projectile_identifier
-            }
+         _hit_information.push_back(
+            {b2Vec2(projectile->getBody()->GetPosition()),
+             projectile->_rotation,
+             projectile->_weapon_type,
+             projectile->_projectile_identifier}
          );
 
-         delete *it;
+         delete projectile;
 
          _projectiles.erase(it++);
       }
@@ -144,54 +149,45 @@ void Projectile::processHitInformation()
    }
 }
 
-
 std::string Projectile::getProjectileIdentifier() const
 {
    return _projectile_identifier;
 }
-
 
 void Projectile::setProjectileIdentifier(const std::string& projectile_identifier)
 {
    _projectile_identifier = projectile_identifier;
 }
 
-
 Animation& Projectile::getAnimation()
 {
    return _animation;
 }
-
 
 void Projectile::setAnimation(const Animation& sprite)
 {
    _animation = sprite;
 }
 
-
 float Projectile::getRotation() const
 {
    return _rotation;
 }
-
 
 void Projectile::setRotation(float rotation)
 {
    _rotation = rotation;
 }
 
-
 bool Projectile::isRotating() const
 {
    return _rotating;
 }
 
-
 void Projectile::setRotating(bool rotating)
 {
    _rotating = rotating;
 }
-
 
 void Projectile::update(const sf::Time& dt)
 {
@@ -200,33 +196,27 @@ void Projectile::update(const sf::Time& dt)
    ProjectileHitAnimation::updateHitAnimations(dt);
 }
 
-
 void Projectile::addDestroyedCallback(const DestroyedCallback& destroyed_callback)
 {
    _destroyed_callbacks.push_back(destroyed_callback);
 }
-
 
 bool Projectile::isSticky() const
 {
    return _sticky;
 }
 
-
 void Projectile::setSticky(bool sticky)
 {
    _sticky = sticky;
 }
-
 
 bool Projectile::hitSomething() const
 {
    return _hit_something;
 }
 
-
 void Projectile::setHitSomething(bool hit_something)
 {
    _hit_something = hit_something;
 }
-
