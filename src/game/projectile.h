@@ -16,9 +16,7 @@ class b2Body;
 
 class Projectile : public FixtureNode
 {
-
 public:
-
    struct HitInformation
    {
       b2Vec2 _pos = b2Vec2{0.0f, 0.0};
@@ -33,8 +31,8 @@ public:
    Projectile();
    virtual ~Projectile();
 
-   b2Body *getBody() const;
-   void setBody(b2Body *body);
+   b2Body* getBody() const;
+   void setBody(b2Body* body);
 
    static void clear();
    static void update(const sf::Time& dt);
@@ -65,9 +63,7 @@ public:
    std::string getProjectileIdentifier() const;
    void setProjectileIdentifier(const std::string& projectile_identifier);
 
-
 protected:
-
    static void collectHitInformation();
    static void processHitInformation();
 
@@ -90,5 +86,3 @@ protected:
    static std::set<Projectile*> _projectiles;
    static std::vector<HitInformation> _hit_information;
 };
-
-

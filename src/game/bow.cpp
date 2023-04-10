@@ -63,24 +63,20 @@ Bow::Bow()
    setProjectileAnimation(frame_data);
 }
 
-Bow::~Bow()
-{
-   std::for_each(begin(_arrows), end(_arrows), [](auto ptr) { delete ptr; });
-   _arrows.clear();
-}
-
 void Bow::load(b2World* world)
 {
-   auto arrow = _loaded_arrow = new Arrow();
-
+   auto arrow = new Arrow();
    arrow->setAnimation(_projectile_reference_animation._animation);
    arrow->_start_time = GlobalClock::getInstance().getElapsedTimeInMs();
 
-   _loaded_arrow->addDestroyedCallback([this, arrow]() { _arrows.erase(std::remove(_arrows.begin(), _arrows.end(), arrow), _arrows.end()); }
-   );
+   _loaded_arrow = arrow;
 
    _loaded_arrow->addDestroyedCallback(
-      [this, arrow]() { _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), arrow), _projectiles.end()); }
+      [this, arrow]()
+      {
+         // std::cout << "remove " << arrow << " from _projectiles" << std::endl;
+         _projectiles.erase(std::remove(_projectiles.begin(), _projectiles.end(), arrow), _projectiles.end());
+      }
    );
 
    b2BodyDef body_def;
@@ -119,8 +115,6 @@ void Bow::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
    // 3) release
    // Right now it's just firing into walking direction.
    load(world.get());
-
-   _arrows.push_back(_loaded_arrow);
 
    // store projectile so it gets drawn
    _projectiles.push_back(_loaded_arrow);
@@ -178,13 +172,13 @@ void Bow::update(const sf::Time& time)
    }
 
    // apply drag force to arrows
-   for (auto& arrow : _arrows)
+   for (auto& arrow : _projectiles)
    {
       if (!arrow->getBody()->IsActive())
       {
          continue;
       }
 
-      updateRotation(arrow);
+      updateRotation(dynamic_cast<Arrow*>(arrow));
    }
 }
