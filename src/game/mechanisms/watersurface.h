@@ -35,6 +35,17 @@ public:
       float _splash_factor = 50.0f;
    };
 
+   struct SplashEmitter
+   {
+      float _x_from{0.0f};
+      float _x_to{0.0f};
+      float _interval_min_s{0.0f};
+      float _interval_max_s{0.0f};
+      float _strength{0.0f};
+      float _interval_s{0.0f};
+      float _elapsed_s{0.0f};
+   };
+
    WaterSurface(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
@@ -45,6 +56,7 @@ public:
 
 private:
    void updateVertices(int32_t start_index = 0);
+   void updateEmitters(const sf::Time& dt);
    sf::FloatRect _bounding_box;
    std::vector<Segment> _segments;
    std::optional<bool> _player_was_in_water;
@@ -57,6 +69,7 @@ private:
    sf::Sprite render_texture_sprite;
    std::optional<float> _pixel_ratio;
    Config _config;
+   std::vector<SplashEmitter> _emitters;
 };
 
 #endif // WATERSURFACE_H
