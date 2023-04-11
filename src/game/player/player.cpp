@@ -1571,11 +1571,14 @@ void Player::update(const sf::Time& dt)
 {
    _time += dt;
 
+   // a lot depends on an up-to-date pixel position and the hitbox that's generated out of it
+   updatePixelPosition();
+   updatePixelRect();
+
    updateChainShapeCollisions();
    updateImpulse();
    updateGroundAngle();
    updateHardLanding();
-   updatePixelRect();
    updateBendDown();
    updateAnimation(dt);
    updatePixelCollisions();
@@ -1588,7 +1591,6 @@ void Player::update(const sf::Time& dt)
    updateDash();
    _climb.update(_body, isInAir());
    updatePlatformMovement(dt);
-   updatePixelPosition();
    PlayerAudio::updateListenerPosition(_pixel_position_f);
    updateFootsteps();
    updatePortal();
