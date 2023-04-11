@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "game/debugdraw.h"
 #include "player/player.h"
 
 #include <iostream>
@@ -21,7 +22,7 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    // 1     3     5
    //
 
-   // draw water color
+   // draw water gradient
    sf::RenderStates states;
    states.texture = &_gradient;
 
@@ -199,7 +200,7 @@ void WaterSurface::updateVertices(int32_t start_index)
       _vertices[index].position.y = y;
 
       // should be done just upon init
-      _vertices[index].texCoords.x = (index & 1) ? 255.0f : 0.0f;
+      _vertices[index].texCoords.x = (index & 1) ? 48.0f : 0.0f;
       _vertices[index].color.a = _opacity;
 
       index += increment;
