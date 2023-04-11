@@ -1,4 +1,4 @@
-#include "watersurface.h"
+﻿#include "watersurface.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -8,6 +8,8 @@
 #include "player/player.h"
 
 #include <iostream>
+
+// #define DEBUG_WATERSURFACE 1
 
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
@@ -30,6 +32,9 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    {
       states.blendMode = sf::BlendAlpha;
       _render_texture.clear({0, 0, 0, 0});
+#ifdef DEBUG_WATERSURFACE
+      _render_texture.clear({255, 0, 0, 200});
+#endif
       _render_texture.draw(_vertices, states);
       _render_texture.display();
       color.draw(render_texture_sprite, states);
@@ -39,28 +44,28 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       color.draw(_vertices, states);
    }
 
-   // draw lines
-   constexpr auto draw_lines = false;
-   if (draw_lines)
+#ifdef DEBUG_WATERSURFACE
+   DebugDraw::drawRect(color, _bounding_box);
+#endif
+
+#ifdef DEBUG_WATERSURFACE
+   auto index = 0;
+   const auto segment_width = _bounding_box.width / (_segments.size() - 1);
+   std::vector<sf::Vertex> sf_lines;
+   const auto x_offset = _bounding_box.left;
+   const auto y_offset = _bounding_box.top;
+
+   for (const auto& segment : _segments)
    {
-      auto index = 0;
-      const auto segment_width = _bounding_box.width / _segments.size();
-      std::vector<sf::Vertex> sf_lines;
-      const auto x_offset = _bounding_box.left;
-      const auto y_offset = _bounding_box.top;
-
-      for (const auto& segment : _segments)
-      {
-         const auto x = x_offset + static_cast<float>(index * segment_width);
-         const auto y = y_offset + segment._height;
-         sf_lines.push_back(sf::Vertex{sf::Vector2f{x, y}, sf::Color::White});
-         index++;
-      }
-
-      color.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+      const auto x = x_offset + static_cast<float>(index * segment_width);
+      const auto y = y_offset + segment._height;
+      sf_lines.push_back(sf::Vertex{sf::Vector2f{x, y}, sf::Color::White});
+      index++;
    }
-}
 
+   color.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+#endif
+}
 
 void WaterSurface::update(const sf::Time& dt)
 {
@@ -175,7 +180,7 @@ void WaterSurface::splash(int32_t index, float velocity)
 
 void WaterSurface::updateVertices(int32_t start_index)
 {
-   constexpr auto increment = 2;
+   constexpr auto increment = 2;  // we either update all upper or all lower vertices
    auto index = start_index;
    auto width_index = 0;
 
@@ -319,8 +324,8 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    _vertices.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
    _vertices.resize(segment_count * 2);
 
-   _segment_width = (_bounding_box.width / _segments.size()) / _pixel_ratio.value_or(1.0f);
-
+   // segment size - 1 has been chosen here to cover the entire range of the bounding box
+   _segment_width = (_bounding_box.width / (_segments.size() - 1)) / _pixel_ratio.value_or(1.0f);
    updateVertices(0);
    updateVertices(1);
 
@@ -340,7 +345,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    {
       if (!_render_texture.create(
              static_cast<int32_t>(_bounding_box.width / _pixel_ratio.value()),
-             static_cast<int32_t>((_bounding_box.height * 2) / _pixel_ratio.value())
+             static_cast<int32_t>((_bounding_box.height * 2.0f) / _pixel_ratio.value())
           ))
       {
          Log::Error() << "could not create render texture";
