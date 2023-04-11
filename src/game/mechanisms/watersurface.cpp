@@ -213,6 +213,19 @@ void WaterSurface::updateVertices(int32_t start_index)
    }
 }
 
+void WaterSurface::updateEmitters(const sf::Time& dt)
+{
+   const auto elapsed_s = dt.asSeconds();
+   for (auto& emitter : _emitters)
+   {
+      emitter._elapsed_s += elapsed_s;
+
+      if (emitter._elapsed_s > emitter._interval_s)
+      {
+      }
+   }
+}
+
 WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
 {
    setClassName(typeid(WaterSurface).name());
