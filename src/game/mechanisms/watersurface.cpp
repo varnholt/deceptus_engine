@@ -9,6 +9,20 @@
 
 #include <iostream>
 
+namespace
+{
+
+float frand(float min = 0.0f, float max = 1.0f)
+{
+   const auto val = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+   return min + val * (max - min);
+}
+
+std::vector<WaterSurface*> surfaces;
+std::vector<WaterSurface::SplashEmitter> emitters;
+
+}  // namespace
+
 // #define DEBUG_WATERSURFACE 1
 
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
@@ -69,6 +83,14 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void WaterSurface::update(const sf::Time& dt)
 {
+   // safeguard against me debugging this :)
+   if (dt.asMilliseconds() > 16 * 2)
+   {
+      return;
+   }
+
+   updateEmitters(dt);
+
    auto player = Player::getCurrent();
 
    bool splash_needed = false;
@@ -178,6 +200,76 @@ void WaterSurface::splash(int32_t index, float velocity)
    }
 }
 
+void WaterSurface::addEmitter(GameNode* parent, const GameDeserializeData& data)
+{
+   SplashEmitter emitter;
+
+   emitter._bounding_box.left = data._tmx_object->_x_px;
+   emitter._bounding_box.top = data._tmx_object->_y_px;
+   emitter._bounding_box.width = data._tmx_object->_width_px;
+   emitter._bounding_box.height = data._tmx_object->_height_px;
+
+   if (data._tmx_object->_properties)
+   {
+      // figure out the emitter's parent
+      auto ref_it = data._tmx_object->_properties->_map.find("reference");
+      if (ref_it != data._tmx_object->_properties->_map.end())
+      {
+         emitter._parent_reference = ref_it->second->_value_string.value();
+      }
+
+      // read emitter properties
+      auto readFloatValue = [&](const std::string& key) -> std::optional<float>
+      {
+         auto it = data._tmx_object->_properties->_map.find(key);
+         if (it != data._tmx_object->_properties->_map.end())
+         {
+            return it->second->_value_float.value();
+         }
+         return std::nullopt;
+      };
+
+      emitter._x_from_px = readFloatValue("x_from_px").value_or(0.0f);
+      emitter._x_to_px = readFloatValue("x_to_px").value_or(data._tmx_object->_width_px);
+      emitter._interval_min_s = readFloatValue("interval_min_s").value_or(0.3f);
+      emitter._interval_max_s = readFloatValue("interval_max_s").value_or(0.6f);
+      emitter._velocity = readFloatValue("velocity").value_or(2.0f);
+      emitter._width_px = readFloatValue("width_px").value_or(data._tmx_object->_width_px);
+
+      auto count_it = data._tmx_object->_properties->_map.find("count");
+      if (count_it != data._tmx_object->_properties->_map.end())
+      {
+         emitter._count = count_it->second->_value_int.value();
+      }
+   }
+
+   emitters.push_back(emitter);
+}
+
+void WaterSurface::merge()
+{
+   for (auto& emitter : emitters)
+   {
+      const auto it = std::find_if(
+         surfaces.begin(), surfaces.end(), [emitter](const auto& surface) { return emitter._parent_reference == surface->getObjectId(); }
+      );
+
+      if (it != surfaces.end())
+      {
+         auto surface = *it;
+         emitter._x_offset_to_parent_px = emitter._bounding_box.left - surface->_bounding_box.left;
+         surface->_emitters.push_back(emitter);
+      }
+      else
+      {
+         Log::Error() << "water surface emitter with reference '" << emitter._parent_reference << "' is orphaned";
+      }
+   }
+
+   emitters.clear();
+   surfaces.clear();
+}
+
 void WaterSurface::updateVertices(int32_t start_index)
 {
    constexpr auto increment = 2;  // we either update all upper or all lower vertices
@@ -213,23 +305,12 @@ void WaterSurface::updateVertices(int32_t start_index)
    }
 }
 
-void WaterSurface::updateEmitters(const sf::Time& dt)
-{
-   const auto elapsed_s = dt.asSeconds();
-   for (auto& emitter : _emitters)
-   {
-      emitter._elapsed_s += elapsed_s;
-
-      if (emitter._elapsed_s > emitter._interval_s)
-      {
-      }
-   }
-}
-
 WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
 {
    setClassName(typeid(WaterSurface).name());
    setObjectId(data._tmx_object->_name);
+
+   surfaces.push_back(this);
 
    _bounding_box.left = data._tmx_object->_x_px;
    _bounding_box.top = data._tmx_object->_y_px;
@@ -368,5 +449,41 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       render_texture_sprite.setTexture(_render_texture.getTexture());
       render_texture_sprite.setPosition({_bounding_box.left, _bounding_box.top - _bounding_box.height});
       render_texture_sprite.scale(_pixel_ratio.value(), _pixel_ratio.value());
+   }
+}
+
+void WaterSurface::updateEmitters(const sf::Time& dt)
+{
+   const auto elapsed_s = dt.asSeconds();
+
+   for (auto& emitter : _emitters)
+   {
+      emitter._elapsed_s += elapsed_s;
+
+      if (emitter._elapsed_s > emitter._interval_s)
+      {
+         // reset emitter time
+         emitter._elapsed_s = 0.0f;
+         emitter._interval_s = frand(emitter._interval_min_s, emitter._interval_max_s);
+
+         // generate splashes
+         for (auto emitter_index = 0; emitter_index < emitter._count; emitter_index++)
+         {
+            const auto left_px = frand(emitter._x_from_px, emitter._x_to_px - emitter._width_px);
+            const auto left_with_offset_px = emitter._x_offset_to_parent_px + left_px;
+            const auto right_with_offset_px = emitter._x_offset_to_parent_px + left_px + emitter._width_px;
+
+            const auto left_normalized = left_with_offset_px / _bounding_box.width;
+            const auto right_normalized = right_with_offset_px / _bounding_box.width;
+
+            const auto left_index = static_cast<int32_t>(left_normalized * _segments.size());
+            const auto right_index = static_cast<int32_t>(right_normalized * _segments.size());
+
+            for (auto index = left_index; index < right_index; index++)
+            {
+               splash(index, emitter._velocity);
+            }
+         }
+      }
    }
 }
