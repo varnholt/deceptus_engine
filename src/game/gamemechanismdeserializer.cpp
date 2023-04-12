@@ -310,12 +310,17 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<WaterSurface>(parent, data);
                mechanism_water_surface->push_back(mechanism);
             }
+            else if (object_group->_name == layer_name_water_surface_emitter || tmx_object->_type == type_name_water_surface_emitter)
+            {
+               WaterSurface::addEmitter(parent, data);
+            }
          }
       }
    }
 
    Laser::merge();
    Fan::merge();
+   WaterSurface::merge();
    *mechanism_fans = Fan::getFans();
    *mechanism_platforms = MovingPlatform::merge(parent, data);
 
