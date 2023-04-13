@@ -25,11 +25,15 @@
 
 struct Chunk
 {
-   int32_t _x = 0;
-   int32_t _y = 0;
+   Chunk() = default;
+   Chunk(int32_t x_px, int32_t y_px);
+   Chunk(float x_px, float y_px);
 
-   static constexpr int32_t _width = 512;
-   static constexpr int32_t _height = 512;
+   void update(int32_t x_px, int32_t y_px);
+   bool operator==(const Chunk& other);
+
+   int32_t _x{0};
+   int32_t _y{0};
 };
 
 #endif // CHUNK_H

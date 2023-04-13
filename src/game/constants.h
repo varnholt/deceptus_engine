@@ -37,6 +37,9 @@ static constexpr auto PLAYER_1_COLLISION_ID = 3;
 static constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
 static constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
 
+static constexpr auto CHUNK_SHIFT_X{11};  // for px position to chunk position division
+static constexpr auto CHUNK_SHIFT_Y{11};
+
 // configured timestep is 1/35
 // frame update timestep is 1/60
 // causes an error

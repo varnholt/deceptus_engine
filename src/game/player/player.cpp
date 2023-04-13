@@ -381,6 +381,12 @@ void Player::updatePixelRect()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateChunk()
+{
+   _chunk.update(_pixel_position_i.x, _pixel_position_i.y);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 const sf::IntRect& Player::getPixelRectInt() const
 {
    return _pixel_rect_i;
@@ -1009,6 +1015,12 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+const Chunk& Player::getChunk() const
+{
+   return _chunk;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 const PlayerBend& Player::getBend() const
 {
    return _bend;
@@ -1574,6 +1586,7 @@ void Player::update(const sf::Time& dt)
    // a lot depends on an up-to-date pixel position and the hitbox that's generated out of it
    updatePixelPosition();
    updatePixelRect();
+   updateChunk();
 
    updateChainShapeCollisions();
    updateImpulse();

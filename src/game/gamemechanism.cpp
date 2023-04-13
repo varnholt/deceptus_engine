@@ -28,6 +28,16 @@ void GameMechanism::setVolume(float volume)
    _volume = volume;
 }
 
+bool GameMechanism::hasChunk() const
+{
+   return _chunk.has_value();
+}
+
+std::optional<Chunk> GameMechanism::getChunk() const
+{
+   return _chunk;
+}
+
 bool GameMechanism::isAudioEnabled() const
 {
    return _audio_enabled;

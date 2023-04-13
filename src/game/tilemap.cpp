@@ -1,30 +1,28 @@
 #include "tilemap.h"
 
-#include <map>
 #include <math.h>
 #include <iostream>
+#include <map>
 
 // tmx
 #include "framework/tmxparser/tmxanimation.h"
 #include "framework/tmxparser/tmxframe.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxtile.h"
-#include "framework/tmxparser/tmxtileset.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtile.h"
+#include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "player/player.h"
 #include "texturepool.h"
-
 
 namespace
 {
 static constexpr auto block_size = 16;
 static constexpr auto y_range = 2;
 static constexpr auto x_range = 3;
-}
-
+}  // namespace
 
 TileMap::~TileMap()
 {
@@ -39,18 +37,15 @@ TileMap::~TileMap()
    }
 }
 
-
 bool TileMap::isVisible() const
 {
    return _visible;
 }
 
-
 void TileMap::setVisible(bool visible)
 {
    _visible = visible;
 }
-
 
 bool TileMap::load(
    const std::shared_ptr<TmxLayer>& layer,
@@ -107,7 +102,7 @@ bool TileMap::load(
       for (auto pos_y = 0u; pos_y < layer->_height_tl; ++pos_y)
       {
          // get the current tile number
-         auto tile_number = layer->_data[pos_x + pos_y * layer->_width_tl];
+         const auto tile_number = layer->_data[pos_x + pos_y * layer->_width_tl];
 
          if (tile_number != 0)
          {
@@ -127,16 +122,21 @@ bool TileMap::load(
             const auto tile_eps_x = 0.5f * (1.0f / static_cast<float>(_tile_size.x));
             const auto tile_eps_y = 0.5f * (1.0f / static_cast<float>(_tile_size.y));
 
-            quad[0].position = sf::Vector2f(static_cast<float>( tx         * _tile_size.x), static_cast<float>( ty         * _tile_size.y));
-            quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>( ty         * _tile_size.y));
+            quad[0].position = sf::Vector2f(static_cast<float>(tx * _tile_size.x), static_cast<float>(ty * _tile_size.y));
+            quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>(ty * _tile_size.y));
             quad[2].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
-            quad[3].position = sf::Vector2f(static_cast<float>( tx         * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
+            quad[3].position = sf::Vector2f(static_cast<float>(tx * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
 
             // define its 4 texture coordinates
-            quad[0].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tile_eps_x, static_cast<float>( tv      * _tile_size.y) + tile_eps_y);
-            quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>( tv      * _tile_size.y) + tile_eps_y);
-            quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
-            quad[3].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
+            quad[0].texCoords =
+               sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
+            quad[1].texCoords =
+               sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
+            quad[2].texCoords = sf::Vector2f(
+               static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y
+            );
+            quad[3].texCoords =
+               sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
 
             quad[0].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
             quad[1].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
@@ -208,7 +208,6 @@ bool TileMap::load(
    return true;
 }
 
-
 void TileMap::update(const sf::Time& dt)
 {
    _vertices_animated.clear();
@@ -243,10 +242,10 @@ void TileMap::update(const sf::Time& dt)
       const auto tv = static_cast<uint32_t>(frame->_y_px);
 
       // re-define its 4 texture coordinates
-      anim->_vertices[0].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x), static_cast<float>( tv      * _tile_size.y));
-      anim->_vertices[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x), static_cast<float>( tv      * _tile_size.y));
+      anim->_vertices[0].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x), static_cast<float>(tv * _tile_size.y));
+      anim->_vertices[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x), static_cast<float>(tv * _tile_size.y));
       anim->_vertices[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x), static_cast<float>((tv + 1) * _tile_size.y));
-      anim->_vertices[3].texCoords = sf::Vector2f(static_cast<float>( tu      * _tile_size.x), static_cast<float>((tv + 1) * _tile_size.y));
+      anim->_vertices[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x), static_cast<float>((tv + 1) * _tile_size.y));
 
       _vertices_animated.append(anim->_vertices[0]);
       _vertices_animated.append(anim->_vertices[1]);
@@ -255,8 +254,7 @@ void TileMap::update(const sf::Time& dt)
    }
 }
 
-
-void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) const
+void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) const
 {
    states.transform *= getTransform();
 
@@ -285,12 +283,10 @@ void TileMap::drawVertices(sf::RenderTarget &target, sf::RenderStates states) co
    target.draw(_vertices_animated, states);
 }
 
-
 const std::string& TileMap::getLayerName() const
 {
    return _layer_name;
 }
-
 
 void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
@@ -302,7 +298,6 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.texture = _texture_map.get();
    drawVertices(target, states);
 }
-
 
 void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
@@ -321,26 +316,21 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
    }
 }
 
-
 int TileMap::getZ() const
 {
    return _z_index;
 }
-
 
 void TileMap::setZ(int32_t z)
 {
    _z_index = z;
 }
 
-
 void TileMap::hideTile(int32_t x, int32_t y)
 {
-   const auto& it =
-      std::find_if(std::begin(_animations), std::end(_animations), [x, y](AnimatedTile* tile) {
-            return (tile->_tile_x == x && tile->_tile_y == y);
-         }
-      );
+   const auto& it = std::find_if(
+      std::begin(_animations), std::end(_animations), [x, y](AnimatedTile* tile) { return (tile->_tile_x == x && tile->_tile_y == y); }
+   );
 
    if (it != _animations.end())
    {
@@ -361,12 +351,9 @@ void TileMap::hideTile(int32_t x, int32_t y)
             auto& vertices = x_it->second;
             for (auto i = 0u; i < vertices.getVertexCount(); i += 4)
             {
-               if (
-                     static_cast<int32_t>(vertices[i].position.x) / PIXELS_PER_TILE == x
-                  && static_cast<int32_t>(vertices[i].position.y) / PIXELS_PER_TILE == y
-               )
+               if (static_cast<int32_t>(vertices[i].position.x) / PIXELS_PER_TILE == x && static_cast<int32_t>(vertices[i].position.y) / PIXELS_PER_TILE == y)
                {
-                  vertices[i    ].color.a = 0;
+                  vertices[i].color.a = 0;
                   vertices[i + 1].color.a = 0;
                   vertices[i + 2].color.a = 0;
                   vertices[i + 3].color.a = 0;
@@ -377,9 +364,7 @@ void TileMap::hideTile(int32_t x, int32_t y)
    }
 }
 
-
 TileMap::AnimatedTile::~AnimatedTile()
 {
    _frames.clear();
 }
-
