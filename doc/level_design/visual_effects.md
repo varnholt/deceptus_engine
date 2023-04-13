@@ -106,6 +106,47 @@ All layers underneath the level z depth will then be drawn with a little distort
 ![](images/atmosphere.png)
 
 
+## Water Surfaces
+
+When it comes to creating convincing visual effects for water, just relying on animated tiles might not be ideal as a static animation won't not provide any physical properties. 
+For example, when the player jumps into water, the surface of the water should reflect that and show ripples around the spot the player entered the water.
+
+The mechanism 'water surface' addresses this shortcoming. It draws a dynamic water surface which is updated based on collision with the player.
+
+To use the water surface mechanism, a layer 'water_surface' needs to be added to your level.
+In there, a rectangle of of around 48px height must be added covering the surface area of the water.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|z|int||
+|segment_count|int||
+|pixel_ratio|float||
+|clamp_segment_count|int||
+|opacity|int||
+|tension|float||
+|dampening|float||
+|spread|float||
+|animation_speed|float||
+|splash_factor|float||
+
+### Water Splash Emitters
+
+Further, when there's a waterfall, drain, or similar that touches the water surface, a constant wave emitter is required.
+
+It is added, by creating a new layer called 'water_surface_emitter'.
+For each emitter a rectangle is added to that layer. To link water surface and emitter, the water surface `Name` needs to be set and referenced in the emitter properties.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|reference|string||
+|x_from_px|float||
+|x_to_px|float||
+|interval_min_s|float||
+|interval_max_s|float||
+|velocity|float||
+|width_px|float||
+|count|int||
+
 
 ## Shader Quads
 
@@ -283,5 +324,3 @@ Place the script below inside your level directory and run it from there.
 ..\..\tools\generate_ao\generate_ao.exe my_level.png
 ..\..\tools\pack_texture\packtexture.exe --input=my_level_ao.png --size=64
 ```
-
-
