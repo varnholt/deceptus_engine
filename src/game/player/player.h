@@ -1,5 +1,6 @@
 #pragma once
 
+#include "chunk.h"
 #include "constants.h"
 #include "extramanager.h"
 #include "extratable.h"
@@ -84,6 +85,7 @@ public:
    void updatePixelPosition();
    void updatePreviousBodyState();
    void updatePixelRect();
+   void updateChunk();
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
 
@@ -121,6 +123,7 @@ public:
    const PlayerJump& getJump() const;
    const PlayerBend& getBend() const;
    PlayerBelt& getBelt();
+   const Chunk& getChunk() const;
 
    void setToggleCallback(const ToggleCallback& callback);
 
@@ -231,6 +234,7 @@ private:
    std::deque<PositionedAnimation> _last_animations;
 
    std::optional<int32_t> _wallslide_sample;
+   Chunk _chunk;
 
    static Player* __current;
 };

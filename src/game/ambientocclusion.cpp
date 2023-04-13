@@ -1,8 +1,8 @@
 #include "ambientocclusion.h"
 
 #include <cstdio>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 #include "framework/math/sfmlmath.h"
@@ -10,11 +10,7 @@
 #include "player/player.h"
 #include "texturepool.h"
 
-
-void AmbientOcclusion::load(
-  const std::filesystem::path& path,
-  const std::string& base_filename
-)
+void AmbientOcclusion::load(const std::filesystem::path& path, const std::string& base_filename)
 {
    const auto ao_base_filename = base_filename + "_ao_tiles.png";
    const auto texture = (path / ao_base_filename).string();
@@ -73,12 +69,12 @@ void AmbientOcclusion::load(
    }
 }
 
-
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-   const auto& pos_i = Player::getCurrent()->getPixelPositionInt();
-   const int32_t bx = pos_i.x >> 8;
-   const int32_t by = pos_i.y >> 8;
+   const auto& player_pos_px = Player::getCurrent()->getPixelPositionInt();
+
+   const int32_t player_chunk_x = player_pos_px.x >> 8;
+   const int32_t player_chunk_y = player_pos_px.y >> 8;
 
    // increase the range if you have smaller AO block sizes
    constexpr int32_t rxl = 4;
@@ -87,7 +83,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
    constexpr int32_t ryl = 3;
    constexpr int32_t ryr = 3;
 
-   for (auto y = by - ryl; y < by + ryr; y++)
+   for (auto y = player_chunk_y - ryl; y < player_chunk_y + ryr; y++)
    {
       const auto& y_it = _sprite_map.find(y);
       if (y_it == _sprite_map.end())
@@ -95,7 +91,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
          continue;
       }
 
-      for (auto x = bx - rxl; x < bx + rxr; x++)
+      for (auto x = player_chunk_x - rxl; x < player_chunk_x + rxr; x++)
       {
          const auto& x_it = y_it->second.find(x);
          if (x_it == y_it->second.end())
