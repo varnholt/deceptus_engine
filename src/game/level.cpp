@@ -24,8 +24,8 @@
 #include "gamemechanismdeserializer.h"
 #include "gamemechanismdeserializerconstants.h"
 #include "gun.h"
-#include "leveldescription.h"
 #include "ingamemenumap.h"
+#include "leveldescription.h"
 #include "luainterface.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/checkpoint.h"
@@ -979,6 +979,8 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 //-----------------------------------------------------------------------------
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
+   const auto& player_chunk = Player::getCurrent()->getChunk();
+
    target.setView(*_level_view);
    normal.setView(*_level_view);
 
@@ -1007,9 +1009,19 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          for (const auto& mechanism : *mechanism_vector)
          {
-            if (mechanism->getZ() == z_index)
+            // if (mechanism->hasChunk())
+            // {
+            //    auto chunk = mechanism->getChunk().value();
+            //    std::cout << "mechanism chunk: " << chunk._x << ", " << chunk._y << " -- player chunk: " << player_chunk._x << ", "
+            //              << player_chunk._y << std::endl;
+            // }
+
+            // if (!mechanism->hasChunk() || (mechanism->hasChunk() && player_chunk == mechanism->getChunk().value()))
             {
-               mechanism->draw(target, *_render_texture_normal.get());
+               if (mechanism->getZ() == z_index)
+               {
+                  mechanism->draw(target, *_render_texture_normal.get());
+               }
             }
          }
       }
