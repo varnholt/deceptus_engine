@@ -108,34 +108,37 @@ All layers underneath the level z depth will then be drawn with a little distort
 
 ## Water Surfaces
 
-When it comes to creating convincing visual effects for water, just relying on animated tiles might not be ideal as a static animation won't not provide any physical properties.
-For example, when the player jumps into water, the surface of the water should reflect that and show ripples around the spot the player entered the water.
+When it comes to creating convincing visual effects for water, just relying on animated tiles might not be sufficient as static animations won't not provide any physically credible feedback. What you would expect instead is that there are waves on the water surface where an object hits the water. For instance, you'd want to see ripples around the spot the player entered the water.
 
-The mechanism 'water surface' addresses this shortcoming. It draws a dynamic water surface which is updated based on collision with the player.
+The mechanism 'water surface' addresses this. It draws a dynamic water surface which is updated based on collision with the player.
+
+![](images/water_surface_01.png)
 
 To use the water surface mechanism, a layer 'water_surface' needs to be added to your level.
 In there, a rectangle of of around 48px height must be added covering the surface area of the water.
 
 |Custom Property|Type|Description|
 |-|-|-|
-|Name|string|A unique identifier for the water surface, set this if you want to use splash emitters (see below).|
+|Name|string|A unique identifier for the water surface; set this if you want to use splash emitters (see paragraph below).|
 |z|int|The z index of the mechanism|
 |segment_count|int|The number of segments used for the water surface (default is `pixel width / 2`)|
-|pixel_ratio|float|If the water surface shall be pixelated, this value should be > 1.0 (default is 1.0)|
-|clamp_segment_count|int|This clamps the edges of the water surface and 'fades out' the ripple effect towards the left and right side of the rectangle (default is 0).|
+|pixel_ratio|float|If the water surface shall be pixelated, this value should be `> 1.0` (default is `1.0`)|
+|clamp_segment_count|int|This clamps the edges of the water surface and 'fades out' the ripple effect towards the left and right side of the rectangle (default is `0`, i.e. no fading out).|
 |opacity|int|The opacity of the water surface (ranges from `0..255`, default is `200`).|
-|tension|float|Controls the tension of each individual water surface segment (ranges from `0..255`, default is `200`).|
+|tension|float|Controls the tension of each individual water surface segment (ranges from `0..1`, default is `0.125`).|
 |dampening|float|Configures how quickly the ripples shall balance out (ranges from `0..1`, default is `0.125`).|
 |spread|float|Configures how much the ripples are spread across the entire water surface (ranges from `0..1`, default is `0.125`).|
-|animation_speed|float|Controls the speed of the entire water surface animation (must be `> 0.0`, default is 10.0f).|
-|splash_factor|float|Scales the height of the waves (default is 50.0). If your waves exceed the size of the render texture, you'll know the value you chose was too high.|
+|animation_speed|float|Controls the speed of the entire water surface animation (must be `> 0.0`, default is `10.0`).|
+|splash_factor|float|Scales the height of the waves (default is `50.0`). If your waves exceed the size of the render texture, you'll know the value you've picked was slightly too big.|
 
 ### Water Splash Emitters
 
-Further, when there's a waterfall, drain, or similar that touches the water surface, a constant wave emitter is required.
+Further, when there's a waterfall, drain, or similar that emits water and thus influences the water surface, a constant wave emitter is required.
 
-It is added, by creating a new layer called 'water_surface_emitter'.
-For each emitter a rectangle is added to that layer. To link water surface and emitter, the water surface `Name` needs to be set and referenced in the emitter properties.
+![](images/water_surface_02.png)
+
+An emitter is added by creating a new layer called 'water_surface_emitter'.
+For each emitter a rectangle is added to that layer. To link water surface and emitter, the water surface `Name` needs to be set in the parent water surface rectangle and referenced in the `reference` property of the emitter.
 
 |Custom Property|Type|Description|
 |-|-|-|
