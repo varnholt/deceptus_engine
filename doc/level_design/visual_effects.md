@@ -108,7 +108,7 @@ All layers underneath the level z depth will then be drawn with a little distort
 
 ## Water Surfaces
 
-When it comes to creating convincing visual effects for water, just relying on animated tiles might not be ideal as a static animation won't not provide any physical properties. 
+When it comes to creating convincing visual effects for water, just relying on animated tiles might not be ideal as a static animation won't not provide any physical properties.
 For example, when the player jumps into water, the surface of the water should reflect that and show ripples around the spot the player entered the water.
 
 The mechanism 'water surface' addresses this shortcoming. It draws a dynamic water surface which is updated based on collision with the player.
@@ -118,16 +118,17 @@ In there, a rectangle of of around 48px height must be added covering the surfac
 
 |Custom Property|Type|Description|
 |-|-|-|
-|z|int||
-|segment_count|int||
-|pixel_ratio|float||
-|clamp_segment_count|int||
-|opacity|int||
-|tension|float||
-|dampening|float||
-|spread|float||
-|animation_speed|float||
-|splash_factor|float||
+|Name|string|A unique identifier for the water surface, set this if you want to use splash emitters (see below).|
+|z|int|The z index of the mechanism|
+|segment_count|int|The number of segments used for the water surface (default is `pixel width / 2`)|
+|pixel_ratio|float|If the water surface shall be pixelated, this value should be > 1.0 (default is 1.0)|
+|clamp_segment_count|int|This clamps the edges of the water surface and 'fades out' the ripple effect towards the left and right side of the rectangle (default is 0).|
+|opacity|int|The opacity of the water surface (ranges from `0..255`, default is `200`).|
+|tension|float|Controls the tension of each individual water surface segment (ranges from `0..255`, default is `200`).|
+|dampening|float|Configures how quickly the ripples shall balance out (ranges from `0..1`, default is `0.125`).|
+|spread|float|Configures how much the ripples are spread across the entire water surface (ranges from `0..1`, default is `0.125`).|
+|animation_speed|float|Controls the speed of the entire water surface animation (must be `> 0.0`, default is 10.0f).|
+|splash_factor|float|Scales the height of the waves (default is 50.0). If your waves exceed the size of the render texture, you'll know the value you chose was too high.|
 
 ### Water Splash Emitters
 
@@ -138,14 +139,14 @@ For each emitter a rectangle is added to that layer. To link water surface and e
 
 |Custom Property|Type|Description|
 |-|-|-|
-|reference|string||
-|x_from_px|float||
-|x_to_px|float||
-|interval_min_s|float||
-|interval_max_s|float||
-|velocity|float||
-|width_px|float||
-|count|int||
+|reference|string|This must contain a the reference name of the parent water surface.|
+|x_from_px|float|Defines the relative start offset of the splash emitter (default is `0.0`).|
+|x_to_px|float|Defines the relative end offset of the splash emitter (default is the width of the rectangle).|
+|interval_min_s|float|Defines the minimum emitter interval in seconds (must be `> 0.0` and `< interval_max_s`, default is `0.3s`).|
+|interval_max_s|float|Defines the maximum emitter interval in seconds (must be `> 0.0` and `> interval_min_s`, default is `0.6s`).|
+|velocity|float|Controls the velocity, i.e. the intensity, of the splash effect (must be `> 0.0`, the default is `2.0`).|
+|width_px|float|The width of an individual 'splash' of the emitter (the default is the entire width of the rectangle).|
+|count|int|The number of splashes to generate each time the interval is reached (the default is `1`).|
 
 
 ## Shader Quads
