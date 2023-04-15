@@ -3,6 +3,7 @@
 
 #include "framework/tmxparser/tmxparser.h"
 
+#include "effects/smokeeffect.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
@@ -72,6 +73,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_rotating_blades = mechanisms[std::string{layer_name_rotating_blades}];
    auto mechanism_sensor_rects = mechanisms[std::string{layer_name_sensor_rects}];
    auto mechanism_shader_quads = mechanisms[std::string{layer_name_shader_quads}];
+   auto mechanism_smoke_effect = mechanisms[std::string{layer_name_smoke_effect}];
    auto mechanism_sound_emitters = mechanisms[std::string{layer_name_sound_emitters}];
    auto mechanism_spike_balls = mechanisms[std::string{layer_name_spike_balls}];
    auto mechanism_spike_blocks = mechanisms[std::string{layer_name_spike_blocks}];
@@ -304,6 +306,11 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = SoundEmitter::deserialize(parent, data);
                mechanism_sound_emitters->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_smoke_effect || tmx_object->_type == type_name_smoke_effect)
+            {
+               auto smoke = SmokeEffect::deserialize(parent, data);
+               mechanism_smoke_effect->push_back(smoke);
             }
             else if (object_group->_name == layer_name_water_surface || tmx_object->_type == type_name_water_surface)
             {
