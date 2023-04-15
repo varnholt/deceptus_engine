@@ -207,8 +207,9 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_dialogues,       &_mechanism_doors,          &_mechanism_dust,           &_mechanism_fans,
       &_mechanism_lasers,          &_mechanism_levers,         &_mechanism_moveable_boxes, &_mechanism_on_off_blocks,
       &_mechanism_platforms,       &_mechanism_portals,        &_mechanism_ropes,          &_mechanism_rotating_blades,
-      &_mechanism_sensor_rects,    &_mechanism_shader_layers,  &_mechanism_sound_emitters, &_mechanism_spike_balls,
-      &_mechanism_spike_blocks,    &_mechanism_spikes,         &_mechanism_water_surface,  &_mechanism_weather,
+      &_mechanism_sensor_rects,    &_mechanism_shader_layers,  &_mechanism_sound_emitters, &_mechanism_smoke_effect,
+      &_mechanism_spike_balls,     &_mechanism_spike_blocks,   &_mechanism_spikes,         &_mechanism_water_surface,
+      &_mechanism_weather,
    };
 
    _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
@@ -233,6 +234,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_rotating_blades}] = &_mechanism_rotating_blades;
    _mechanisms_map[std::string{layer_name_sensor_rects}] = &_mechanism_sensor_rects;
    _mechanisms_map[std::string{layer_name_shader_quads}] = &_mechanism_shader_layers;
+   _mechanisms_map[std::string{layer_name_smoke_effect}] = &_mechanism_smoke_effect;
    _mechanisms_map[std::string{layer_name_sound_emitters}] = &_mechanism_sound_emitters;
    _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
    _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
@@ -490,11 +492,6 @@ void Level::loadTmx()
             {
                const auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
-            }
-            else if (object_group->_name == "smoke")
-            {
-               auto smoke = SmokeEffect::deserialize(this, data);
-               _smoke_effect.push_back(smoke);
             }
             else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
             {
@@ -988,11 +985,6 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    {
       _static_light->drawToZ(target, {}, z_index);
 
-      for (const auto& smoke : _smoke_effect)
-      {
-         smoke->drawToZ(target, {}, z_index);
-      }
-
       drawParallaxMaps(*_render_texture_level_background.get(), z_index);
 
       // draw all tile maps
@@ -1224,7 +1216,6 @@ const std::vector<std::shared_ptr<GameMechanism>>& Level::getPortals() const
 //    05) draw level foreground                                   -> level texture
 //        - layers z=16..50
 //        - additive lights
-//        - smoke (z=20)
 //        - mechanisms
 //        - ambient occlusion
 //        - images with varying blend modes
@@ -1359,11 +1350,6 @@ void Level::update(const sf::Time& dt)
    updatePlayerLight();
 
    _static_light->update(GlobalClock::getInstance().getElapsedTime());
-
-   for (const auto& smoke : _smoke_effect)
-   {
-      smoke->update(GlobalClock::getInstance().getElapsedTime());
-   }
 
    _object_updater->update();
 }
