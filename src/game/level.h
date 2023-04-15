@@ -22,7 +22,6 @@
 
 // effects
 #include "effects/lightsystem.h"
-#include "effects/smokeeffect.h"
 #include "effects/staticlight.h"
 
 // sfml
@@ -211,6 +210,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_sensor_rects;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_shader_layers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_sound_emitters;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_smoke_effect;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
@@ -222,7 +222,6 @@ protected:
    std::shared_ptr<LightSystem> _light_system;
    std::shared_ptr<StaticLight> _static_light;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
-   std::vector<std::shared_ptr<SmokeEffect>> _smoke_effect;
 
    AmbientOcclusion _ambient_occlusion;
    std::vector<std::shared_ptr<ImageLayer>> _image_layers;

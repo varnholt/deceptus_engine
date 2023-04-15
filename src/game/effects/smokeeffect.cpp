@@ -17,15 +17,11 @@ SmokeEffect::SmokeEffect(GameNode* parent) : GameNode(parent), _texture(TextureP
 {
    setClassName(typeid(SmokeEffect).name());
    _texture->setSmooth(true);
+   _z_index = 20;
 }
 
-void SmokeEffect::drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z)
+void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   if (z != _z)
-   {
-      return;
-   }
-
    sf::RenderTexture render_texture;
    if (!render_texture.create(static_cast<int32_t>(_size_px.x / _pixel_ratio), static_cast<int32_t>(_size_px.y / _pixel_ratio)))
    {
@@ -45,22 +41,22 @@ void SmokeEffect::drawToZ(sf::RenderTarget& target, sf::RenderStates states, int
    rt_sprite.scale(_pixel_ratio, _pixel_ratio);
    rt_sprite.setColor(_layer_color);
 
-   target.draw(rt_sprite, states);
+   color.draw(rt_sprite);
 }
 
-void SmokeEffect::update(const sf::Time& time)
+void SmokeEffect::update(const sf::Time& dt)
 {
-   const auto dt = (time.asSeconds() - _last_update_time.asSeconds()) * _velocity;
-   _last_update_time = time;
+   _elapsed += dt;
+   const auto dt_scaled = dt.asSeconds() * _velocity;
 
    for (auto& particle : _particles)
    {
-      particle._rot += dt * 10.0f * particle._rot_dir;
+      particle._rot += dt_scaled * 10.0f * particle._rot_dir;
       particle._sprite.setRotation(particle._rot);
 
       // fake z rotation
-      const auto x_normalized = 0.5f * (1.0f + sin(particle._time_offset + time.asSeconds() * _velocity));
-      const auto y_normalized = 0.5f * (1.0f + cos(particle._time_offset + time.asSeconds() * _velocity));
+      const auto x_normalized = 0.5f * (1.0f + sin(particle._time_offset + _elapsed.asSeconds() * _velocity));
+      const auto y_normalized = 0.5f * (1.0f + cos(particle._time_offset + _elapsed.asSeconds() * _velocity));
       const auto x = x_normalized * particle._offset.x;
       const auto y = y_normalized * particle._offset.y;
 
@@ -81,6 +77,12 @@ void SmokeEffect::update(const sf::Time& time)
 }
 
 //-----------------------------------------------------------------------------
+std::optional<sf::FloatRect> SmokeEffect::getBoundingBoxPx()
+{
+   return _bounding_box_px;
+}
+
+//-----------------------------------------------------------------------------
 std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto smoke_effect = std::make_shared<SmokeEffect>(parent);
@@ -97,7 +99,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
-         smoke_effect->_z = z_it->second->_value_int.value();
+         smoke_effect->_z_index = z_it->second->_value_int.value();
       }
 
       auto particle_count_it = data._tmx_object->_properties->_map.find("particle_count");
@@ -194,9 +196,13 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
 
    smoke_effect->_offset_px.x = data._tmx_object->_x_px;
    smoke_effect->_offset_px.y = data._tmx_object->_y_px;
-
    smoke_effect->_size_px.x = rect_width_px;
    smoke_effect->_size_px.y = rect_height_px;
+
+   smoke_effect->_bounding_box_px.left = data._tmx_object->_x_px;
+   smoke_effect->_bounding_box_px.top = data._tmx_object->_y_px;
+   smoke_effect->_bounding_box_px.width = rect_width_px;
+   smoke_effect->_bounding_box_px.height = rect_height_px;
 
    // define the range within the defined rectangle where particles will spawn
    const auto range_x = static_cast<int32_t>((rect_width_px / smoke_effect->_pixel_ratio) * spread_factor);
