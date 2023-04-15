@@ -3,7 +3,6 @@
 
 #include "framework/tmxparser/tmxparser.h"
 
-#include "effects/smokeeffect.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
@@ -14,6 +13,7 @@
 #include "mechanisms/deathblock.h"
 #include "mechanisms/dialogue.h"
 #include "mechanisms/door.h"
+#include "mechanisms/dust.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
 #include "mechanisms/lever.h"
@@ -26,15 +26,13 @@
 #include "mechanisms/rotatingblade.h"
 #include "mechanisms/sensorrect.h"
 #include "mechanisms/shaderlayer.h"
+#include "mechanisms/smokeeffect.h"
 #include "mechanisms/soundemitter.h"
 #include "mechanisms/spikeball.h"
 #include "mechanisms/spikeblock.h"
 #include "mechanisms/spikes.h"
 #include "mechanisms/watersurface.h"
-
-// move to mechanisms
-#include "effects/dust.h"
-#include "weather.h"
+#include "mechanisms/weather.h"
 
 #include <ranges>
 

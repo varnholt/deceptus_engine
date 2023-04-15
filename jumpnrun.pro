@@ -157,9 +157,7 @@ SOURCES += \
    src/game/detonationanimation.cpp \
    src/game/displaymode.cpp \
    src/game/drawstates.cpp \
-   src/game/effects/dust.cpp \
    src/game/effects/lightsystem.cpp \
-   src/game/effects/smokeeffect.cpp \
    src/game/effects/staticlight.cpp \
    src/game/enemydescription.cpp \
    src/game/eventserializer.cpp \
@@ -214,24 +212,27 @@ SOURCES += \
    src/game/mechanisms/deathblock.cpp \
    src/game/mechanisms/dialogue.cpp \
    src/game/mechanisms/door.cpp \
+   src/game/mechanisms/dust.cpp \
    src/game/mechanisms/fan.cpp \
    src/game/mechanisms/laser.cpp \
    src/game/mechanisms/lever.cpp \
    src/game/mechanisms/moveablebox.cpp \
    src/game/mechanisms/movingplatform.cpp \
-    src/game/mechanisms/onoffblock.cpp \
+   src/game/mechanisms/onoffblock.cpp \
    src/game/mechanisms/portal.cpp \
    src/game/mechanisms/portalwrapper.cpp \
    src/game/mechanisms/rope.cpp \
    src/game/mechanisms/ropewithlight.cpp \
-    src/game/mechanisms/rotatingblade.cpp \
+   src/game/mechanisms/rotatingblade.cpp \
    src/game/mechanisms/sensorrect.cpp \
    src/game/mechanisms/shaderlayer.cpp \
+   src/game/mechanisms/smokeeffect.cpp \
    src/game/mechanisms/soundemitter.cpp \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
    src/game/mechanisms/watersurface.cpp \
+   src/game/mechanisms/weather.cpp \
    src/game/meshtools.cpp \
    src/game/messagebox.cpp \
    src/game/objectupdater.cpp \
@@ -282,7 +283,6 @@ SOURCES += \
    src/game/weaponfactory.cpp \
    src/game/weaponproperties.cpp \
    src/game/weaponsystem.cpp \
-   src/game/weather.cpp \
    src/game/worldquery.cpp \
    src/main.cpp \
    src/menus/menu.cpp \
@@ -341,17 +341,6 @@ HEADERS += \
    src/framework/tools/logthread.h \
    src/framework/tools/scopeexit.h \
    src/framework/tools/stopwatch.h \
-   src/game/audiorange.h \
-   src/game/boomeffectenvelope.h \
-   src/game/boomeffectenveloperandom.h \
-   src/game/boomeffectenvelopesine.h \
-   src/game/boomsettings.h \
-   src/game/camerasystemconfigurationui.h \
-   src/game/chainshapeanalyzer.h \
-   src/game/chunk.h \
-   src/game/drawstates.h \
-   src/game/gameaudio.h \
-   src/game/gamemechanismdeserializerconstants.h \
    src/game/ambientocclusion.h \
    src/game/animation.h \
    src/game/animationframedata.h \
@@ -361,21 +350,29 @@ HEADERS += \
    src/game/arrow.h \
    src/game/atmosphere.h \
    src/game/audio.h \
+   src/game/audiorange.h \
    src/game/bitmapfont.h \
    src/game/boomeffect.h \
+   src/game/boomeffectenvelope.h \
+   src/game/boomeffectenveloperandom.h \
+   src/game/boomeffectenvelopesine.h \
+   src/game/boomsettings.h \
    src/game/bow.h \
    src/game/bulletplayer.h \
    src/game/camerapanorama.h \
    src/game/cameraroomlock.h \
    src/game/camerasystem.h \
    src/game/camerasystemconfiguration.h \
+   src/game/camerasystemconfigurationui.h \
+   src/game/chainshapeanalyzer.h \
+   src/game/chunk.h \
    src/game/console.h \
    src/game/constants.h \
    src/game/cutscene.h \
    src/game/debugdraw.h \
    src/game/detonationanimation.h \
    src/game/displaymode.h \
-   src/game/effects/dust.h \
+   src/game/drawstates.h \
    src/game/enemydescription.h \
    src/game/eventserializer.h \
    src/game/extra.h \
@@ -388,6 +385,7 @@ HEADERS += \
    src/game/fixturenode.h \
    src/game/forestscene.h \
    src/game/game.h \
+   src/game/gameaudio.h \
    src/game/gameclock.h \
    src/game/gameconfiguration.h \
    src/game/gamecontactlistener.h \
@@ -397,6 +395,7 @@ HEADERS += \
    src/game/gamedeserializedata.h \
    src/game/gamemechanism.h \
    src/game/gamemechanismdeserializer.h \
+   src/game/gamemechanismdeserializerconstants.h \
    src/game/gamenode.h \
    src/game/gamestate.h \
    src/game/gun.h \
@@ -431,16 +430,17 @@ HEADERS += \
    src/game/mechanisms/deathblock.h \
    src/game/mechanisms/dialogue.h \
    src/game/mechanisms/door.h \
+   src/game/mechanisms/dust.h \
    src/game/mechanisms/fan.h \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/moveablebox.h \
    src/game/mechanisms/movingplatform.h \
-    src/game/mechanisms/onoffblock.h \
+   src/game/mechanisms/onoffblock.h \
    src/game/mechanisms/portal.h \
    src/game/mechanisms/portalwrapper.h \
    src/game/mechanisms/rope.h \
    src/game/mechanisms/ropewithlight.h \
-    src/game/mechanisms/rotatingblade.h \
+   src/game/mechanisms/rotatingblade.h \
    src/game/mechanisms/sensorrect.h \
    src/game/mechanisms/shaderlayer.h \
    src/game/mechanisms/soundemitter.h \
@@ -448,6 +448,7 @@ HEADERS += \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
    src/game/mechanisms/watersurface.h \
+   src/game/mechanisms/weather.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
    src/game/objectupdater.h \
@@ -502,7 +503,6 @@ HEADERS += \
    src/game/weaponfactory.h \
    src/game/weaponproperties.h \
    src/game/weaponsystem.h \
-   src/game/weather.h \
    src/game/worldquery.h \
    src/menus/menu.h \
    src/menus/menuaudio.h \
