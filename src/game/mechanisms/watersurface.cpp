@@ -317,7 +317,10 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    _bounding_box.width = data._tmx_object->_width_px;
    _bounding_box.height = data._tmx_object->_height_px;
 
-   _chunk = Chunk{_bounding_box.left, _bounding_box.top};
+   _chunks.push_back({_bounding_box.left, _bounding_box.top});
+   _chunks.push_back({_bounding_box.left, _bounding_box.top + _bounding_box.height});
+   _chunks.push_back({_bounding_box.left + _bounding_box.width, _bounding_box.top + _bounding_box.height});
+   _chunks.push_back({_bounding_box.left + _bounding_box.width, _bounding_box.top});
 
    auto segment_count = static_cast<int32_t>(_bounding_box.width / 2);
    std::optional<int32_t> clamp_segment_count;
