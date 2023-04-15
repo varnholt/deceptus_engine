@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "framework/tools/log.h"
 #include "texturepool.h"
 
 #include <math.h>
@@ -22,21 +23,17 @@ SmokeEffect::SmokeEffect(GameNode* parent) : GameNode(parent), _texture(TextureP
 
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   sf::RenderTexture render_texture;
-   if (!render_texture.create(static_cast<int32_t>(_size_px.x / _pixel_ratio), static_cast<int32_t>(_size_px.y / _pixel_ratio)))
-   {
-      return;
-   }
+   _render_texture.clear();
 
    for (auto& particle : _particles)
    {
-      render_texture.draw(particle._sprite, _blend_mode);
+      _render_texture.draw(particle._sprite, _blend_mode);
    }
 
-   render_texture.setSmooth(false);
-   render_texture.display();
+   _render_texture.setSmooth(false);
+   _render_texture.display();
 
-   sf::Sprite rt_sprite(render_texture.getTexture());
+   sf::Sprite rt_sprite(_render_texture.getTexture());
    rt_sprite.setPosition(_offset_px);
    rt_sprite.scale(_pixel_ratio, _pixel_ratio);
    rt_sprite.setColor(_layer_color);
@@ -232,6 +229,15 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       particle._sprite.setColor(smoke_effect->_particle_color);
 
       smoke_effect->_particles.push_back(particle);
+   }
+
+   if (!smoke_effect->_render_texture.create(
+          static_cast<int32_t>(rect_width_px / smoke_effect->_pixel_ratio),
+          static_cast<int32_t>(rect_height_px / smoke_effect->_pixel_ratio)
+       ))
+   {
+      Log::Error() << "could not create render texture for smoke effect";
+      return nullptr;
    }
 
    return smoke_effect;
