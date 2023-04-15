@@ -1009,14 +1009,15 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          for (const auto& mechanism : *mechanism_vector)
          {
-            // if (mechanism->hasChunk())
-            // {
-            //    auto chunk = mechanism->getChunk().value();
-            //    std::cout << "mechanism chunk: " << chunk._x << ", " << chunk._y << " -- player chunk: " << player_chunk._x << ", "
-            //              << player_chunk._y << std::endl;
-            // }
+            auto draw_mechanism = true;
+            if (mechanism->hasChunks())
+            {
+               const auto& chunks = mechanism->getChunks();
+               draw_mechanism =
+                  std::any_of(chunks.cbegin(), chunks.cend(), [player_chunk](const Chunk& other) { return player_chunk == other; });
+            }
 
-            // if (!mechanism->hasChunk() || (mechanism->hasChunk() && player_chunk == mechanism->getChunk().value()))
+            if (draw_mechanism)
             {
                if (mechanism->getZ() == z_index)
                {

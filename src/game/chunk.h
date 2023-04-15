@@ -30,7 +30,7 @@ struct Chunk
    Chunk(float x_px, float y_px);
 
    void update(int32_t x_px, int32_t y_px);
-   bool operator==(const Chunk& other);
+   bool operator==(const Chunk& other) const;
 
    int32_t _x{0};
    int32_t _y{0};

@@ -31,8 +31,8 @@ public:
    virtual void setAudioEnabled(bool newAudio_enabled);
    virtual void setVolume(float volume);
 
-   virtual bool hasChunk() const;
-   virtual std::optional<Chunk> getChunk() const;
+   virtual bool hasChunks() const;
+   virtual const std::vector<Chunk>& getChunks() const;
 
    virtual int32_t getZ() const;
    virtual void setZ(const int32_t& z);
@@ -51,6 +51,6 @@ protected:
    bool _audio_enabled{false};
    float _volume{0.0f};
    std::optional<AudioRange> _audio_range;
-   std::optional<Chunk> _chunk;
+   std::vector<Chunk> _chunks;
    MechanismVersion _version = MechanismVersion::Version1;
 };

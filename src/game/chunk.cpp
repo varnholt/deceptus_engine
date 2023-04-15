@@ -16,7 +16,7 @@ void Chunk::update(int32_t x_px, int32_t y_px)
    _y = y_px >> CHUNK_SHIFT_Y;
 }
 
-bool Chunk::operator==(const Chunk& other)
+bool Chunk::operator==(const Chunk& other) const
 {
    return _x == other._x && _y == other._y;
 }
