@@ -198,46 +198,59 @@ void Player::initializeController()
       {
          auto is_running = []() -> bool { return (GameState::getInstance().getMode() == ExecutionMode::Running); };
 
-         auto toggle_mechanism = [this]() { _toggle_callback(); };
-
          gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_A,
             [&]()
             {
-               if (is_running())
+               if (!is_running())
                {
-                  _jump.jump();
+                  return;
                }
+
+               _jump.jump();
             }
          );
+
          gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_X,
             [&]()
             {
-               if (is_running())
+               if (!is_running())
                {
-                  toggle_mechanism();
+                  return;
                }
+
+               if (!_toggle_callback)
+               {
+                  return;
+               }
+
+               _toggle_callback();
             }
          );
+
          gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
             [&]()
             {
-               if (is_running())
+               if (!is_running())
                {
-                  updateDash(Dash::Left);
+                  return;
                }
+
+               updateDash(Dash::Left);
             }
          );
          gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
             [&]()
             {
-               if (is_running())
+               if (!is_running())
                {
-                  updateDash(Dash::Right);
+                  return;
                }
+
+               updateDash(Dash::Right);
             }
          );
       }
