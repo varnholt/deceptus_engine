@@ -55,4 +55,5 @@ private:
    sf::Color _layer_color = {255, 255, 255, 255};
    sf::Color _particle_color = {255, 255, 255, 25};
    Mode _mode = Mode::Smoke;
+   sf::RenderTexture _render_texture;
 };
