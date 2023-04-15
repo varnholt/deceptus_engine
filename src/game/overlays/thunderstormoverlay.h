@@ -1,16 +1,14 @@
 #pragma once
 
-#include "weather.h"
-
+#include "game/mechanisms/weather.h"
 
 struct TmxObject;
 
 class ThunderstormOverlay : public WeatherOverlay
 {
-
 public:
-
-   struct ThunderstormSettings{
+   struct ThunderstormSettings
+   {
       float _thunderstorm_time_s = 3.0;
       float _silence_time_s = 5.0f;
    };
@@ -22,11 +20,9 @@ public:
 
    void setRect(const sf::FloatRect& newRect);
 
-
    void setSettings(const ThunderstormSettings& newSettings);
 
-   private:
-
+private:
    enum class State
    {
       Lightning,
@@ -44,4 +40,3 @@ public:
 
    ThunderstormSettings _settings;
 };
-
