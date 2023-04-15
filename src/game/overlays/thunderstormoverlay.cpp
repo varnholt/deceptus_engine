@@ -5,24 +5,21 @@
 
 #include <iostream>
 
-
 void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    const auto val = static_cast<uint8_t>(_value * 255);
    const auto col = sf::Color{val, val, val, val};
 
    sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(_rect.left,               _rect.top               ), col),
-      sf::Vertex(sf::Vector2f(_rect.left,               _rect.top + _rect.height), col),
+      sf::Vertex(sf::Vector2f(_rect.left, _rect.top), col),
+      sf::Vertex(sf::Vector2f(_rect.left, _rect.top + _rect.height), col),
       sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top + _rect.height), col),
-      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top               ), col)
-   };
+      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top), col)};
 
    sf::RenderStates states;
    states.blendMode = sf::BlendAlpha;
    target.draw(quad, 4, sf::Quads, states);
 }
-
 
 void ThunderstormOverlay::update(const sf::Time& dt)
 {
@@ -34,7 +31,8 @@ void ThunderstormOverlay::update(const sf::Time& dt)
    {
       _thunderstorm_time_elapsed_s += dt.asSeconds();
 
-      _factor += dt.asSeconds() * 5.0f;;
+      _factor += dt.asSeconds() * 5.0f;
+      ;
       _factor = std::min(_factor, 1.0f);
       _value *= _factor;
 
@@ -50,7 +48,8 @@ void ThunderstormOverlay::update(const sf::Time& dt)
    {
       _silence_time_elapsed_s += dt.asSeconds();
 
-      _factor -= dt.asSeconds() * 5.0f;;
+      _factor -= dt.asSeconds() * 5.0f;
+      ;
       _factor = std::max(_factor, 0.0f);
       _value *= _factor;
 
@@ -63,12 +62,10 @@ void ThunderstormOverlay::update(const sf::Time& dt)
    }
 }
 
-
 void ThunderstormOverlay::setRect(const sf::FloatRect& rect)
 {
    _rect = rect;
 }
-
 
 void ThunderstormOverlay::setSettings(const ThunderstormSettings& settings)
 {

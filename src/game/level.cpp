@@ -8,7 +8,6 @@
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
-#include "effects/dust.h"
 #include "extraitem.h"
 #include "extramanager.h"
 #include "fixturenode.h"
@@ -42,7 +41,6 @@
 #include "texturepool.h"
 #include "tilemap.h"
 #include "tilemapfactory.h"
-#include "weather.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
