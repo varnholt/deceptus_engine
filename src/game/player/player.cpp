@@ -1668,18 +1668,14 @@ void Player::updateAtmosphere()
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
       _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
       _water_entered_time = StopWatch::getInstance().now();
+      Audio::getInstance().playSample({"splash.wav"});
+      AnimationPool::getInstance().create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
    }
 
    // leaving water
    if (!inside_water && was_inside_water)
    {
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
-   }
-
-   if (!was_inside_water && isInWater())
-   {
-      Audio::getInstance().playSample({"splash.wav"});
-
       AnimationPool::getInstance().create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
    }
 
