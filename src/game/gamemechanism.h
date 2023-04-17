@@ -33,6 +33,7 @@ public:
 
    virtual bool hasChunks() const;
    virtual const std::vector<Chunk>& getChunks() const;
+   virtual void addChunks(const sf::FloatRect& bounding_box);
 
    virtual int32_t getZ() const;
    virtual void setZ(const int32_t& z);
