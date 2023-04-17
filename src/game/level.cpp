@@ -999,17 +999,17 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          for (const auto& mechanism : *mechanism_vector)
          {
-            auto draw_mechanism = true;
-            if (mechanism->hasChunks())
+            if (mechanism->getZ() == z_index)
             {
-               const auto& chunks = mechanism->getChunks();
-               draw_mechanism =
-                  std::any_of(chunks.cbegin(), chunks.cend(), [player_chunk](const Chunk& other) { return player_chunk == other; });
-            }
+               auto draw_mechanism = true;
+               if (mechanism->hasChunks())
+               {
+                  const auto& chunks = mechanism->getChunks();
+                  draw_mechanism =
+                     std::any_of(chunks.cbegin(), chunks.cend(), [player_chunk](const Chunk& other) { return player_chunk == other; });
+               }
 
-            if (draw_mechanism)
-            {
-               if (mechanism->getZ() == z_index)
+               if (draw_mechanism)
                {
                   mechanism->draw(target, *_render_texture_normal.get());
                }
