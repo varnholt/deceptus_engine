@@ -22,7 +22,7 @@ struct TmxObject : TmxElement
    float _height_px = 0.0f;
 
    std::optional<std::string> _template_name;
-   std::optional<std::string> _type;
+   std::optional<std::string> _template_type;
    std::optional<std::string> _gid;
 
    std::shared_ptr<TmxPolygon> _polygon;

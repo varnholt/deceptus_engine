@@ -33,7 +33,7 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
    const auto type_attribute = element->Attribute("type");
    if (type_attribute)
    {
-      _type = type_attribute;
+      _template_type = type_attribute;
    }
 
    // inherit object type from template
@@ -43,10 +43,10 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
        _template_name = template_name;
 
        // if we don't have an object type yet, try to derive it from the template
-       if (!_type.has_value())
+       if (!_template_type.has_value())
        {
           TmxTemplate t(template_name, parse_data);
-          _type = t._object->_type;
+          _template_type = t._object->_template_type;
        }
    }
 
