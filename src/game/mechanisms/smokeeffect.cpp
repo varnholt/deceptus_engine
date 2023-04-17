@@ -201,6 +201,9 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
    smoke_effect->_bounding_box_px.width = rect_width_px;
    smoke_effect->_bounding_box_px.height = rect_height_px;
 
+   // also use the bounding box to compute the effect's chunks
+   smoke_effect->addChunks(smoke_effect->_bounding_box_px);
+
    // define the range within the defined rectangle where particles will spawn
    const auto range_x = static_cast<int32_t>((rect_width_px / smoke_effect->_pixel_ratio) * spread_factor);
    const auto range_y = static_cast<int32_t>((rect_height_px / smoke_effect->_pixel_ratio) * spread_factor);
