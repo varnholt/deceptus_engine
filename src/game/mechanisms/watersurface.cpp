@@ -89,7 +89,8 @@ void WaterSurface::update(const sf::Time& dt)
       return;
    }
 
-   updateEmitters(dt);
+   const auto elapsed_s = dt.asSeconds();
+   updateEmitters(elapsed_s);
 
    auto player = Player::getCurrent();
 
@@ -136,7 +137,7 @@ void WaterSurface::update(const sf::Time& dt)
          if (segment_index > 0)
          {
             const auto delta_left = _config._spread * (_segments[segment_index]._height - _segments[segment_index - 1]._height) *
-                                    dt.asSeconds() * _config._animation_speed;
+                                    elapsed_s * _config._animation_speed;
 
             _segments[segment_index]._delta_left = delta_left;
             _segments[segment_index - 1]._velocity += delta_left;
@@ -145,7 +146,7 @@ void WaterSurface::update(const sf::Time& dt)
          if (segment_index < _segments.size() - 1)
          {
             const auto delta_right = _config._spread * (_segments[segment_index]._height - _segments[segment_index + 1]._height) *
-                                     dt.asSeconds() * _config._animation_speed;
+                                     elapsed_s * _config._animation_speed;
 
             _segments[segment_index]._delta_right = delta_right;
             _segments[segment_index + 1]._velocity += delta_right;
@@ -457,10 +458,8 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    }
 }
 
-void WaterSurface::updateEmitters(const sf::Time& dt)
+void WaterSurface::updateEmitters(float elapsed_s)
 {
-   const auto elapsed_s = dt.asSeconds();
-
    for (auto& emitter : _emitters)
    {
       emitter._elapsed_s += elapsed_s;
