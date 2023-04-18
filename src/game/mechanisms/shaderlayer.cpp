@@ -53,13 +53,16 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
 {
    std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>(parent);
 
+   const auto bounding_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
    instance->_position.x = data._tmx_object->_x_px;
    instance->_position.y = data._tmx_object->_y_px;
    instance->_size.x = data._tmx_object->_width_px;
    instance->_size.y = data._tmx_object->_height_px;
    instance->setObjectId(data._tmx_object->_name);
-   instance->_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   instance->_rect = bounding_rect;
+   instance->addChunks(bounding_rect);
 
    if (data._tmx_object->_properties)
    {
