@@ -1005,9 +1005,22 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
                if (mechanism->hasChunks())
                {
                   const auto& chunks = mechanism->getChunks();
-                  draw_mechanism =
-                     std::any_of(chunks.cbegin(), chunks.cend(), [player_chunk](const Chunk& other) { return player_chunk == other; });
+                  draw_mechanism = std::any_of(
+                     chunks.cbegin(),
+                     chunks.cend(),
+                     [player_chunk](const Chunk& other) {
+                        return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X &&
+                               abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y;
+                     }
+                  );
                }
+
+               // static auto chunk_debug_counter = 0;
+               // if (chunk_debug_counter % 600 == 0)
+               // {
+               //    std::cout << "player chunk: " << player_chunk._x << " " << player_chunk._y << std::endl;
+               // }
+               // chunk_debug_counter++;
 
                if (draw_mechanism)
                {

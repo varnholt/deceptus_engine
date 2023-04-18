@@ -1978,7 +1978,7 @@ void LuaNode::luaSetStartPosition()
  */
 void LuaNode::luaPlayerMovedTo()
 {
-   const auto pos = Player::getCurrent()->getPixelPositionFloat();
+   const auto& pos = Player::getCurrent()->getPixelPositionFloat();
 
    lua_getglobal(_lua_state, FUNCTION_PLAYER_MOVED_TO);
 
