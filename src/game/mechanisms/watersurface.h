@@ -65,7 +65,7 @@ public:
 
 private:
    void updateVertices(int32_t start_index = 0);
-   void updateEmitters(const sf::Time& dt);
+   void updateEmitters(float elapsed_s);
    sf::FloatRect _bounding_box;
    std::vector<Segment> _segments;
    std::optional<bool> _player_was_in_water;

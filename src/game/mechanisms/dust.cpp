@@ -52,6 +52,7 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    static const auto alpha_default = 50;
 
+   sf::Vertex quad[4];
    for (const auto& p : _particles)
    {
       const auto pos = p._position;
@@ -72,12 +73,18 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
       const auto col = sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(alpha)};
 
-      sf::Vertex quad[] = {
-         sf::Vertex(sf::Vector2f(pos.x,                     pos.y                    ), col),
-         sf::Vertex(sf::Vector2f(pos.x,                     pos.y + _particle_size_px), col),
-         sf::Vertex(sf::Vector2f(pos.x + _particle_size_px, pos.y + _particle_size_px), col),
-         sf::Vertex(sf::Vector2f(pos.x + _particle_size_px, pos.y                    ), col)
-      };
+      quad[0].position.x = pos.x;
+      quad[0].position.y = pos.y;
+      quad[1].position.x = pos.x;
+      quad[1].position.y = pos.y + _particle_size_px;
+      quad[2].position.x = pos.x + _particle_size_px;
+      quad[2].position.y = pos.y + _particle_size_px;
+      quad[3].position.x = pos.x + _particle_size_px;
+      quad[3].position.y = pos.y;
+      quad[0].color = col;
+      quad[1].color = col;
+      quad[2].color = col;
+      quad[3].color = col;
 
       sf::RenderStates states;
       states.blendMode = sf::BlendAlpha;
