@@ -30,7 +30,6 @@ public:
       std::array<float, 3> _falloff = {0.4f, 3.0f, 20.0f};
 
       bool _enabled = true;
-      float max_dist_m2 = 40.0f;
 
       std::shared_ptr<sf::Texture> _texture;
       sf::Sprite _sprite;
