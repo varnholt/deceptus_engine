@@ -95,6 +95,7 @@ void WaterSurface::update(const sf::Time& dt)
    auto player = Player::getCurrent();
 
    bool splash_needed = false;
+   auto splash_velocity_factor = 1.0f;
 
    // initialize 'player is in water' so it triggers only when the player crosses the surface
    if (!_player_was_in_water.has_value())
@@ -104,6 +105,12 @@ void WaterSurface::update(const sf::Time& dt)
 
    if (_player_was_in_water != player->isInWater())
    {
+      if (_player_was_in_water.value())
+      {
+         // the wave amplitude should be smaller when leaving the water
+         splash_velocity_factor = 0.6f;
+      }
+
       _player_was_in_water = player->isInWater();
       splash_needed = true;
    }
@@ -113,7 +120,7 @@ void WaterSurface::update(const sf::Time& dt)
       sf::FloatRect intersection;
       if (player->getPixelRectFloat().intersects(_bounding_box, intersection))
       {
-         const auto velocity = player->getBody()->GetLinearVelocity().y * _config._splash_factor;
+         const auto velocity = splash_velocity_factor * player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =
             (intersection.left + (player->getPixelRectFloat().width / 2.0f) - _bounding_box.left) / _bounding_box.width;
          const auto index = static_cast<int32_t>(normalized_intersection * _segments.size());
