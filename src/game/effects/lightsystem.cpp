@@ -48,12 +48,14 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
    // do not draw lights that are too far away
    auto player_body = Player::getCurrent()->getBody();
 
-   auto light_pos_m = light->_pos_m + light->_center_offset_m;
+   const auto light_pos_m = light->_pos_m + light->_center_offset_m;
 
    for (auto body = Level::getCurrentLevel()->getWorld()->GetBodyList(); body; body = body->GetNext())
    {
       if (body == player_body)
+      {
          continue;
+      }
 
       if (!body->IsActive())
       {
@@ -76,7 +78,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
          if (shape_circle)
          {
-            auto center = shape_circle->GetVertex(0) + body->GetTransform().p;
+            const auto center = shape_circle->GetVertex(0) + body->GetTransform().p;
             if ((light_pos_m - center).LengthSquared() > max_distance_m2)
                continue;
 
@@ -96,11 +98,11 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   pos_next = 0;
                }
 
-               auto v0 = circle_positions[pos_current];
-               auto v1 = circle_positions[pos_next];
+               const auto& v0 = circle_positions[pos_current];
+               const auto& v1 = circle_positions[pos_next];
 
-               auto v0far = 10000.0f * (v0 - light_pos_m);
-               auto v1far = 10000.0f * (v1 - light_pos_m);
+               const auto v0far = 10000.0f * (v0 - light_pos_m);
+               const auto v1far = 10000.0f * (v1 - light_pos_m);
 
                sf::Vertex quad[] = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
@@ -124,18 +126,16 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   pos_next = 0;
                }
 
-               auto v0 = shape_chain->m_vertices[pos_current];
-               auto v1 = shape_chain->m_vertices[pos_next];
-
-               // printf("%f\n", (lightPos - v0).LengthSquared());
+               const auto& v0 = shape_chain->m_vertices[pos_current];
+               const auto& v1 = shape_chain->m_vertices[pos_next];
 
                if ((light_pos_m - v0).LengthSquared() > max_distance_m2 && (light_pos_m - v1).LengthSquared() > max_distance_m2)
                {
                   continue;
                }
 
-               auto v0_far = 10000.0f * (v0 - light_pos_m);
-               auto v1_far = 10000.0f * (v1 - light_pos_m);
+               const auto v0_far = 10000.0f * (v0 - light_pos_m);
+               const auto v1_far = 10000.0f * (v1 - light_pos_m);
 
                sf::Vertex quad[] = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
@@ -158,14 +158,14 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
                auto v0 = shape_polygon->GetVertex(pos_current) + body->GetTransform().p;
 
-               // printf("%f\n", (lightPos - v0).LengthSquared());
-
                if ((light_pos_m - v0).LengthSquared() > max_distance_m2)
+               {
                   continue;
+               }
 
-               auto v1 = shape_polygon->GetVertex(pos_next) + body->GetTransform().p;
-               auto v0far = 10000.0f * (v0 - light_pos_m);
-               auto v1far = 10000.0f * (v1 - light_pos_m);
+               const auto v1 = shape_polygon->GetVertex(pos_next) + body->GetTransform().p;
+               const auto v0far = 10000.0f * (v0 - light_pos_m);
+               const auto v1far = 10000.0f * (v1 - light_pos_m);
 
                sf::Vertex quad[] = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
@@ -216,9 +216,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    int32_t light_id = 0;
 
    _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
-
    _light_shader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
-
    _light_shader.setUniform("u_ambient", sf::Glsl::Vec4(_ambient_color[0], _ambient_color[1], _ambient_color[2], _ambient_color[3]));
 
    for (auto& light : _active_lights)
