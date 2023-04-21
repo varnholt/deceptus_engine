@@ -44,13 +44,14 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    if (_pixel_ratio.has_value())
    {
-      states.blendMode = sf::BlendAlpha;
+      states.blendMode = sf::BlendMode{sf::BlendMode::One, sf::BlendMode::OneMinusSrcAlpha};
       _render_texture.clear({0, 0, 0, 0});
 #ifdef DEBUG_WATERSURFACE
       _render_texture.clear({255, 0, 0, 200});
 #endif
       _render_texture.draw(_vertices, states);
       _render_texture.display();
+      states.blendMode = sf::BlendAlpha;
       color.draw(render_texture_sprite, states);
    }
    else

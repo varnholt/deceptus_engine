@@ -5,15 +5,14 @@
 #include <iostream>
 #include <sstream>
 
+#include "framework/tools/logthread.h"
 #include "game/constants.h"
 #include "game/preloader.h"
 #include "game/test.h"
-#include "framework/tools/logthread.h"
 
 #ifdef __linux__
 extern "C" int XInitThreads();
 #endif
-
 
 void debugAuthors()
 {
@@ -34,21 +33,13 @@ void debugAuthors()
    std::cout << std::endl;
 }
 
-
 int main(int /*argc*/, char** /*argv*/)
 {
 #ifndef DEBUG
    // setup logging to file
    LogThread log_thread;
    Log::registerListenerCallback(
-      std::bind(
-         &LogThread::log,
-         &log_thread,
-         std::placeholders::_1,
-         std::placeholders::_2,
-         std::placeholders::_3,
-         std::placeholders::_4
-      )
+      std::bind(&LogThread::log, &log_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)
    );
 #endif
 
@@ -63,5 +54,3 @@ int main(int /*argc*/, char** /*argv*/)
    Preloader::preload();
    return game.loop();
 }
-
-
