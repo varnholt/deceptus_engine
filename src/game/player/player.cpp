@@ -129,7 +129,7 @@ Player::Player(GameNode* parent) : GameNode(parent)
    __current = this;
 
    _weapon_system = std::make_shared<WeaponSystem>();
-   _extra_manager = std::make_shared<ExtraManager>();
+   _extra_manager = std::make_shared<Extra>();
    _controls = std::make_shared<PlayerControls>();
 
    _climb.setControls(_controls);
@@ -258,7 +258,7 @@ void Player::initializeController()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-const std::shared_ptr<ExtraManager>& Player::getExtraManager() const
+const std::shared_ptr<Extra>& Player::getExtraManager() const
 {
    return _extra_manager;
 }

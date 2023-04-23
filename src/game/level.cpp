@@ -8,7 +8,7 @@
 #include "constants.h"
 #include "debugdraw.h"
 #include "displaymode.h"
-#include "extramanager.h"
+#include "extra.h"
 #include "fixturenode.h"
 #include "framework/math/maptools.h"
 #include "framework/math/sfmlmath.h"

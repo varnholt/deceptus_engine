@@ -1,6 +1,6 @@
 #include "ingamemenuinventory.h"
 
-#include "extramanager.h"
+#include "extra.h"
 #include "framework/easings/easings.h"
 #include "gameconfiguration.h"
 #include "inventoryitem.h"
