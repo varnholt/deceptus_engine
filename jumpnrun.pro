@@ -161,10 +161,8 @@ SOURCES += \
    src/game/effects/staticlight.cpp \
    src/game/enemydescription.cpp \
    src/game/eventserializer.cpp \
-   src/game/extrahealth.cpp \
    src/game/extraitem.cpp \
    src/game/extramanager.cpp \
-   src/game/extraskill.cpp \
    src/game/extratable.cpp \
    src/game/fadetransitioneffect.cpp \
    src/game/fixturenode.cpp \
@@ -183,6 +181,7 @@ SOURCES += \
    src/game/gamenode.cpp \
    src/game/gamestate.cpp \
    src/game/gun.cpp \
+   src/game/health.cpp \
    src/game/hitbox.cpp \
    src/game/imagelayer.cpp \
    src/game/infolayer.cpp \
@@ -269,6 +268,7 @@ SOURCES += \
    src/game/shaders/blurshader.cpp \
    src/game/shaders/deathshader.cpp \
    src/game/shaders/gammashader.cpp \
+   src/game/skill.cpp \
    src/game/squaremarcher.cpp \
    src/game/stenciltilemap.cpp \
    src/game/sword.cpp \
@@ -376,10 +376,8 @@ HEADERS += \
    src/game/enemydescription.h \
    src/game/eventserializer.h \
    src/game/extra.h \
-   src/game/extrahealth.h \
    src/game/extraitem.h \
    src/game/extramanager.h \
-   src/game/extraskill.h \
    src/game/extratable.h \
    src/game/fadetransitioneffect.h \
    src/game/fixturenode.h \
@@ -399,6 +397,7 @@ HEADERS += \
    src/game/gamenode.h \
    src/game/gamestate.h \
    src/game/gun.h \
+   src/game/health.h \
    src/game/hitbox.h \
    src/game/imagelayer.h \
    src/game/infolayer.h \
@@ -489,6 +488,7 @@ HEADERS += \
    src/game/shaders/blurshader.h \
    src/game/shaders/deathshader.h \
    src/game/shaders/gammashader.h \
+   src/game/skill.h \
    src/game/squaremarcher.h \
    src/game/stenciltilemap.h \
    src/game/sword.h \

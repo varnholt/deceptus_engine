@@ -916,7 +916,7 @@ void Player::updateVelocity()
 
    if (_bend._bending_down)
    {
-      if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Crouch)))
+      if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Crouch)))
       {
          if (getControls()->isDroppingDown() && OneWayWall::instance().hasContacts())
          {
@@ -1195,8 +1195,8 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
    {
       return;
    }
-
-   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Invulnerable))
+   
+   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
    {
       return;
    }
@@ -1228,7 +1228,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::kill(std::optional<DeathReason> death_reason)
 {
-   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Invulnerable))
+   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
    {
       return;
    }
