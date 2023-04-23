@@ -439,7 +439,7 @@ void Level::loadTmx()
          }
          else if (layer->_name == "extras")
          {
-            const auto& extra_manager = Player::getCurrent()->getExtraManager();
+            const auto& extra_manager = Player::getCurrent()->getExtra();
             extra_manager->_tilemap = tile_map;
             extra_manager->load(layer, tileset);
          }
@@ -478,7 +478,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "extras")
             {
-               const auto& extra_manager = Player::getCurrent()->getExtraManager();
+               const auto& extra_manager = Player::getCurrent()->getExtra();
                extra_manager->deserialize(this, data);
             }
             else if (object_group->_name == "rooms")
