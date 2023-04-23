@@ -12,7 +12,7 @@
 
 struct TmxObject;
 
-class LightSystem : public sf::Drawable
+class LightSystem
 {
 public:
    struct LightInstance : public GameNode
@@ -49,7 +49,7 @@ public:
 
    static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, const GameDeserializeData& data);
 
-   void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+   void draw(sf::RenderTarget& target, sf::RenderStates states);
 
    void draw(
       sf::RenderTarget& target,

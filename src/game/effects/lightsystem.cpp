@@ -264,7 +264,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 }
 
 //-----------------------------------------------------------------------------
-void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
+void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
 {
    _active_lights.clear();
 
