@@ -1,15 +1,12 @@
 #pragma once
 
-#include "extra.h"
-
 #include <cstdint>
 
 #include "json/json.hpp"
 
-
-struct ExtraHealth : Extra
+struct Health
 {
-   ExtraHealth();
+   Health() = default;
 
    void reset();
 
@@ -21,7 +18,5 @@ struct ExtraHealth : Extra
    int32_t _health_max = 12;
 };
 
-
-void to_json(nlohmann::json& j, const ExtraHealth& d);
-void from_json(const nlohmann::json& j, ExtraHealth& d);
-
+void to_json(nlohmann::json& j, const Health& d);
+void from_json(const nlohmann::json& j, Health& d);

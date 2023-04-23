@@ -141,7 +141,7 @@ void ExtraManager::collide(const sf::FloatRect& player_rect)
             case ExtraItem::ExtraSpriteIndex::Dash:
             {
                Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::Dash);
+               SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
                break;
             }
             case ExtraItem::ExtraSpriteIndex::Invalid:
