@@ -2,7 +2,7 @@
 
 #include "bow.h"
 #include "eventserializer.h"
-#include "extramanager.h"
+#include "extra.h"
 #include "framework/tools/log.h"
 #include "level.h"
 #include "mechanisms/checkpoint.h"
