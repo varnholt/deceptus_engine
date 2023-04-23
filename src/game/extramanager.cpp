@@ -2,7 +2,6 @@
 
 #include "audio.h"
 #include "constants.h"
-#include "extraitem.h"
 #include "extratable.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxtile.h"
@@ -157,4 +156,9 @@ void ExtraManager::collide(const sf::FloatRect& player_rect)
 void ExtraManager::resetExtras()
 {
    _extras.clear();
+}
+
+ExtraManager::ExtraItem::ExtraItem(GameNode* parent)
+{
+   setClassName(typeid(ExtraItem).name());
 }
