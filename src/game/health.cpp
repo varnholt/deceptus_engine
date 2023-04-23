@@ -1,21 +1,13 @@
-#include "extrahealth.h"
+#include "health.h"
 
 using json = nlohmann::json;
 
-
-ExtraHealth::ExtraHealth()
-{
-   _extra_type = ExtraType::Health;
-}
-
-
-void ExtraHealth::reset()
+void Health::reset()
 {
    _health = 12;
 }
 
-
-void ExtraHealth::addHealth(int32_t health)
+void Health::addHealth(int32_t health)
 {
    _health += health;
 
@@ -25,8 +17,7 @@ void ExtraHealth::addHealth(int32_t health)
    }
 }
 
-
-void to_json(nlohmann::json& j, const ExtraHealth& d)
+void to_json(nlohmann::json& j, const Health& d)
 {
    j = json{
       {"lives", d._life_count},
@@ -35,8 +26,7 @@ void to_json(nlohmann::json& j, const ExtraHealth& d)
    };
 }
 
-
-void from_json(const nlohmann::json& j, ExtraHealth& d)
+void from_json(const nlohmann::json& j, Health& d)
 {
    d._life_count = j.at("lives").get<int32_t>();
    d._health = j.at("health").get<int32_t>();

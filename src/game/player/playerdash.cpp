@@ -7,7 +7,7 @@
 
 void PlayerDash::update(const DashInput& input)
 {
-   if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::Dash)))
+   if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Dash)))
    {
       return;
    }

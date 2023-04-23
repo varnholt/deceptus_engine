@@ -1,7 +1,7 @@
 #pragma once
 
-#include "extrahealth.h"
-#include "extraskill.h"
+#include "health.h"
+#include "skill.h"
 
 #include <memory>
 #include <vector>
@@ -14,8 +14,8 @@ class ExtraTable
 public:
    ExtraTable() = default;
 
-   ExtraHealth _health;
-   ExtraSkill _skills;
+   Health _health;
+   Skill _skills;
 };
 
 void to_json(nlohmann::json& j, const ExtraTable& d);

@@ -172,7 +172,7 @@ void PlayerJump::doubleJump()
    }
 
    const auto skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-   const auto can_double_jump = (skills & static_cast<int32_t>(ExtraSkill::Skill::DoubleJump));
+   const auto can_double_jump = (skills & static_cast<int32_t>(Skill::SkillType::DoubleJump));
 
    if (!can_double_jump)
    {
@@ -203,7 +203,7 @@ void PlayerJump::doubleJump()
 void PlayerJump::wallJump()
 {
    const auto skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-   const auto can_wall_jump = (skills & static_cast<int32_t>(ExtraSkill::Skill::WallJump));
+   const auto can_wall_jump = (skills & static_cast<int32_t>(Skill::SkillType::WallJump));
 
    if (!can_wall_jump)
    {
@@ -338,7 +338,7 @@ void PlayerJump::updateWallSlide()
    }
 
    const auto skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-   const auto can_wallslide = (skills & static_cast<int32_t>(ExtraSkill::Skill::WallSlide));
+   const auto can_wallslide = (skills & static_cast<int32_t>(Skill::SkillType::WallSlide));
 
    if (!can_wallslide)
    {

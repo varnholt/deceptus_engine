@@ -903,14 +903,14 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::Num0:
       {
          Audio::getInstance().playSample({"powerup.wav"});
-
-         if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(ExtraSkill::Skill::WallClimb))
+         
+         if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::WallClimb))
          {
-            SaveState::getPlayerInfo()._extra_table._skills._skills &= ~static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
+            SaveState::getPlayerInfo()._extra_table._skills._skills &= ~static_cast<int32_t>(Skill::SkillType::WallClimb);
          }
          else
          {
-            SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(ExtraSkill::Skill::WallClimb);
+            SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::WallClimb);
          }
          break;
       }
