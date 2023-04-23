@@ -2,7 +2,7 @@
 
 #include "chunk.h"
 #include "constants.h"
-#include "extramanager.h"
+#include "extra.h"
 #include "extratable.h"
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "gamenode.h"
@@ -114,8 +114,8 @@ public:
    void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
    void kill(std::optional<DeathReason> death_reason = std::nullopt);
    void goToPortal(auto portal);
-
-   const std::shared_ptr<ExtraManager>& getExtraManager() const;
+   
+   const std::shared_ptr<Extra>& getExtraManager() const;
    const std::shared_ptr<WeaponSystem>& getWeaponSystem() const;
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerAnimation& getPlayerAnimation() const;
@@ -173,7 +173,7 @@ private:
 
    ToggleCallback _toggle_callback;
    std::shared_ptr<WeaponSystem> _weapon_system;
-   std::shared_ptr<ExtraManager> _extra_manager;
+   std::shared_ptr<Extra> _extra_manager;
 
    // all related to player physics and box2d
    std::shared_ptr<b2World> _world;

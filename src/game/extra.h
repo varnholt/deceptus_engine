@@ -16,7 +16,7 @@ class TileMap;
 struct TmxLayer;
 struct TmxTileSet;
 
-class ExtraManager
+class Extra
 {
 public:
    struct ExtraItem : public GameNode
@@ -49,8 +49,8 @@ public:
    void collide(const sf::FloatRect& player_rect);
    void resetExtras();
 
-   ExtraManager() = default;
+   Extra() = default;
 
-   std::vector<std::shared_ptr<ExtraItem>> _extras;
+   std::vector<std::shared_ptr<ExtraItem>> _extra_items;
    std::shared_ptr<TileMap> _tilemap;
 };

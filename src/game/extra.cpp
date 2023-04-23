@@ -1,4 +1,4 @@
-#include "extramanager.h"
+#include "extra.h"
 
 #include "audio.h"
 #include "constants.h"
@@ -18,7 +18,7 @@
 #include "SFML/Graphics.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
-void ExtraManager::load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
+void Extra::load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
 {
    resetExtras();
 
@@ -52,14 +52,14 @@ void ExtraManager::load(const std::shared_ptr<TmxLayer>& layer, const std::share
             item->_position.x = static_cast<float>(i * PIXELS_PER_TILE);
             item->_position.y = static_cast<float>(j * PIXELS_PER_TILE);
             item->_type = static_cast<ExtraItem::ExtraSpriteIndex>(tile_number - first_id);
-            _extras.push_back(item);
+            _extra_items.push_back(item);
          }
       }
    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ExtraManager::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
+void Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
 {
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
@@ -70,9 +70,9 @@ void ExtraManager::deserialize(GameNode* /*parent*/, const GameDeserializeData& 
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ExtraManager::collide(const sf::FloatRect& player_rect)
+void Extra::collide(const sf::FloatRect& player_rect)
 {
-   for (auto& extra : _extras)
+   for (auto& extra : _extra_items)
    {
       if (!extra->_active)
       {
@@ -153,12 +153,12 @@ void ExtraManager::collide(const sf::FloatRect& player_rect)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ExtraManager::resetExtras()
+void Extra::resetExtras()
 {
-   _extras.clear();
+   _extra_items.clear();
 }
 
-ExtraManager::ExtraItem::ExtraItem(GameNode* parent)
+Extra::ExtraItem::ExtraItem(GameNode* parent)
 {
    setClassName(typeid(ExtraItem).name());
 }
