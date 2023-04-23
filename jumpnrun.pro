@@ -161,7 +161,6 @@ SOURCES += \
    src/game/effects/staticlight.cpp \
    src/game/enemydescription.cpp \
    src/game/eventserializer.cpp \
-   src/game/extraitem.cpp \
    src/game/extramanager.cpp \
    src/game/extratable.cpp \
    src/game/fadetransitioneffect.cpp \
@@ -375,8 +374,6 @@ HEADERS += \
    src/game/drawstates.h \
    src/game/enemydescription.h \
    src/game/eventserializer.h \
-   src/game/extra.h \
-   src/game/extraitem.h \
    src/game/extramanager.h \
    src/game/extratable.h \
    src/game/fadetransitioneffect.h \
