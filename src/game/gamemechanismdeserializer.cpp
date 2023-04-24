@@ -290,8 +290,8 @@ void GameMechanismDeserializer::deserialize(
             }
             else if (object_group->_name.rfind(layer_name_shader_quads, 0) == 0 || tmx_object->_template_type == type_name_shader_quad)
             {
-               auto quad = ShaderLayer::deserialize(parent, data);
-               mechanism_shader_quads->push_back(quad);
+               auto mechanism = ShaderLayer::deserialize(parent, data);
+               mechanism_shader_quads->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_dust || tmx_object->_template_type == type_name_dust)
             {
@@ -315,8 +315,13 @@ void GameMechanismDeserializer::deserialize(
             }
             else if (object_group->_name == layer_name_smoke_effect || tmx_object->_template_type == type_name_smoke_effect)
             {
-               auto smoke = SmokeEffect::deserialize(parent, data);
-               mechanism_smoke_effect->push_back(smoke);
+               auto mechanism = SmokeEffect::deserialize(parent, data);
+               mechanism_smoke_effect->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_spikes || tmx_object->_template_type == type_name_spikes)
+            {
+               auto mechanism = Spikes::deserialize(parent, data);
+               mechanism_smoke_effect->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_water_surface || tmx_object->_template_type == type_name_water_surface)
             {
