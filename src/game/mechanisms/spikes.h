@@ -26,10 +26,19 @@ public:
    enum class Orientation
    {
       Invalid,
-      PointsTop,
-      PointsLeft,
       PointsUp,
-      PointsDown
+      PointsDown,
+      PointsRight,
+      PointsLeft,
+   };
+
+   struct Config
+   {
+      int32_t _update_time_up_ms = 5;
+      int32_t _update_time_down_ms = 30;
+      int32_t _down_time_ms = 2000;
+      int32_t _up_tims_ms = 2000;
+      int32_t _trap_time_ms = 250;
    };
 
    Spikes(GameNode* parent = nullptr);
@@ -39,6 +48,7 @@ public:
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    static std::vector<std::shared_ptr<Spikes>> load(GameNode* parent, const GameDeserializeData& data, Mode mode);
+   static std::shared_ptr<Spikes> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    const sf::FloatRect& getPixelRect() const;
 
@@ -51,17 +61,14 @@ private:
    void updateToggled();
    void updateSpriteRect();
 
-   sf::Vector2u _tile_size;
-
    std::shared_ptr<sf::Texture> _texture;
 
    int32_t _tu = 0;
    int32_t _tv = 0;
 
-   sf::Sprite _sprite;
+   std::vector<sf::Sprite> _sprite;
    int32_t _elapsed_ms = 0;
 
-   sf::Vector2f _tile_position;
    sf::Vector2f _pixel_position;
    sf::FloatRect _pixel_rect;
 
@@ -70,4 +77,5 @@ private:
 
    Mode _mode = Mode::Invalid;
    Orientation _orientation = Orientation::Invalid;
+   Config _config;
 };
