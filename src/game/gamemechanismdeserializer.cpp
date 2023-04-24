@@ -10,6 +10,7 @@
 #include "mechanisms/controllerhelp.h"
 #include "mechanisms/conveyorbelt.h"
 #include "mechanisms/crusher.h"
+#include "mechanisms/damagerect.h"
 #include "mechanisms/deathblock.h"
 #include "mechanisms/dialogue.h"
 #include "mechanisms/door.h"
@@ -56,6 +57,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_controller_help = mechanisms[std::string{layer_name_controller_help}];
    auto mechanism_conveyor_belts = mechanisms[std::string{layer_name_conveyorbelts}];
    auto mechanism_crushers = mechanisms[std::string{layer_name_crushers}];
+   auto mechanism_damage_rects = mechanisms[std::string{layer_name_damage_rects}];
    auto mechanism_death_blocks = mechanisms[std::string{layer_name_death_blocks}];
    auto mechanism_dialogues = mechanisms[std::string{layer_name_dialogues}];
    auto mechanism_doors = mechanisms[std::string{layer_name_doors}];
@@ -161,6 +163,12 @@ void GameMechanismDeserializer::deserialize(
                      object_group->_name == layer_name_lasers_v2 || tmx_object->_template_type == type_name_laser)
             {
                Laser::addObject(tmx_object);
+            }
+            else if (object_group->_name == layer_name_damage_rects || tmx_object->_template_type == type_name_damage_rect)
+            {
+               auto mechanism = std::make_shared<DamageRect>(parent);
+               mechanism->setup(data);
+               mechanism_damage_rects->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_doors || tmx_object->_template_type == type_name_door)
             {

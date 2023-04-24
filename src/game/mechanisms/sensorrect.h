@@ -10,7 +10,6 @@ class SensorRect : public GameMechanism, public GameNode
 {
 public:
    SensorRect(GameNode* parent = nullptr);
-   ;
 
    enum class Action
    {
