@@ -74,6 +74,34 @@ Now change the object's default properties below:
 &nbsp;
 
 ---
+
+## Damage Rects
+
+Damage rects will give the player a configured amount of damage on intersection.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`DamageRect`|
+|Object Group|`damage_rect`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|damage|int|The amount of damage to be given to the player (the default is 100).|
+
+---
+
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 ## Doors
 
 Doors are not to be confused with 'Portals'. While the latter teleport you from one place to another, doors serve the purpose of a gate that allows you to move from one room to another.

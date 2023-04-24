@@ -199,13 +199,35 @@ Level::Level() : GameNode(nullptr)
    _light_system->_lights.push_back(_player_light);
 
    _mechanisms_list = {
-      &_mechanism_bouncers,        &_mechanism_bubble_cubes,   &_mechanism_checkpoints,    &_mechanism_collapsing_platforms,
-      &_mechanism_controller_help, &_mechanism_conveyor_belts, &_mechanism_crushers,       &_mechanism_death_blocks,
-      &_mechanism_dialogues,       &_mechanism_doors,          &_mechanism_dust,           &_mechanism_fans,
-      &_mechanism_lasers,          &_mechanism_levers,         &_mechanism_moveable_boxes, &_mechanism_on_off_blocks,
-      &_mechanism_platforms,       &_mechanism_portals,        &_mechanism_ropes,          &_mechanism_rotating_blades,
-      &_mechanism_sensor_rects,    &_mechanism_shader_layers,  &_mechanism_sound_emitters, &_mechanism_smoke_effect,
-      &_mechanism_spike_balls,     &_mechanism_spike_blocks,   &_mechanism_spikes,         &_mechanism_water_surface,
+      &_mechanism_bouncers,
+      &_mechanism_bubble_cubes,
+      &_mechanism_checkpoints,
+      &_mechanism_collapsing_platforms,
+      &_mechanism_controller_help,
+      &_mechanism_conveyor_belts,
+      &_mechanism_crushers,
+      &_mechanism_damage_rects,
+      &_mechanism_death_blocks,
+      &_mechanism_dialogues,
+      &_mechanism_doors,
+      &_mechanism_dust,
+      &_mechanism_fans,
+      &_mechanism_lasers,
+      &_mechanism_levers,
+      &_mechanism_moveable_boxes,
+      &_mechanism_on_off_blocks,
+      &_mechanism_platforms,
+      &_mechanism_portals,
+      &_mechanism_ropes,
+      &_mechanism_rotating_blades,
+      &_mechanism_sensor_rects,
+      &_mechanism_shader_layers,
+      &_mechanism_sound_emitters,
+      &_mechanism_smoke_effect,
+      &_mechanism_spike_balls,
+      &_mechanism_spike_blocks,
+      &_mechanism_spikes,
+      &_mechanism_water_surface,
       &_mechanism_weather,
    };
 
@@ -216,6 +238,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_controller_help}] = &_mechanism_controller_help;
    _mechanisms_map[std::string{layer_name_conveyorbelts}] = &_mechanism_conveyor_belts;
    _mechanisms_map[std::string{layer_name_crushers}] = &_mechanism_crushers;
+   _mechanisms_map[std::string{layer_name_damage_rects}] = &_mechanism_damage_rects;
    _mechanisms_map[std::string{layer_name_death_blocks}] = &_mechanism_death_blocks;
    _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
    _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;

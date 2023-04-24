@@ -10,6 +10,7 @@ static constexpr std::string_view layer_name_collapsing_platforms{"collapsing_pl
 static constexpr std::string_view layer_name_controller_help{"controller_help"};
 static constexpr std::string_view layer_name_conveyorbelts{"conveyorbelts"};
 static constexpr std::string_view layer_name_crushers{"crushers"};
+static constexpr std::string_view layer_name_damage_rects{"damage_rects"};
 static constexpr std::string_view layer_name_death_blocks{"death_blocks"};
 static constexpr std::string_view layer_name_dialogues{"dialogues"};
 static constexpr std::string_view layer_name_doors{"doors"};
@@ -48,6 +49,7 @@ static constexpr std::string_view type_name_collapsing_platform{"CollapsingPlatf
 static constexpr std::string_view type_name_controller_help{"ControllerHelp"};
 static constexpr std::string_view type_name_conveyor_belt{"ConveyorBelt"};
 static constexpr std::string_view type_name_crusher{"Crusher"};
+static constexpr std::string_view type_name_damage_rect{"DamageRect"};
 static constexpr std::string_view type_name_death_block{"DeathBlock"};
 static constexpr std::string_view type_name_dialogue{"Dialogue"};
 static constexpr std::string_view type_name_door{"Door"};
