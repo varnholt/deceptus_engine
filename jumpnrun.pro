@@ -207,6 +207,7 @@ SOURCES += \
    src/game/mechanisms/controllerhelp.cpp \
    src/game/mechanisms/conveyorbelt.cpp \
    src/game/mechanisms/crusher.cpp \
+   src/game/mechanisms/damagerect.cpp \
    src/game/mechanisms/deathblock.cpp \
    src/game/mechanisms/dialogue.cpp \
    src/game/mechanisms/door.cpp \
@@ -423,6 +424,7 @@ HEADERS += \
    src/game/mechanisms/controllerhelp.h \
    src/game/mechanisms/conveyorbelt.h \
    src/game/mechanisms/crusher.h \
+   src/game/mechanisms/damagerect.h \
    src/game/mechanisms/deathblock.h \
    src/game/mechanisms/dialogue.h \
    src/game/mechanisms/door.h \
