@@ -60,20 +60,23 @@ private:
    void updateTrap();
    void updateToggled();
    void updateSpriteRect();
+   void updateDeadly();
 
    std::shared_ptr<sf::Texture> _texture;
 
-   int32_t _tu = 0;
+   float _tu = 0.0f;
    int32_t _tv = 0;
 
    std::vector<sf::Sprite> _sprite;
    int32_t _elapsed_ms = 0;
+   float _dt_s = 0.0f;
 
    sf::Vector2f _pixel_position;
    sf::FloatRect _pixel_rect;
 
    bool _triggered = false;
    bool _deadly = false;
+   bool _under_water = false;
 
    Mode _mode = Mode::Invalid;
    Orientation _orientation = Orientation::Invalid;

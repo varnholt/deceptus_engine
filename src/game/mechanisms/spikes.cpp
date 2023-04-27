@@ -12,10 +12,10 @@
 
 #include <iostream>
 
-constexpr auto SPIKES_PER_ROW = 18;
+constexpr auto SPRITES_PER_CYCLE = 15;
 constexpr auto TOLERANCE_PIXELS = 5;
-constexpr auto TRAP_START_TILE = (SPIKES_PER_ROW - 4);
-constexpr auto SPIKES_TILE_INDEX_UP = 6;
+constexpr auto TRAP_START_TILE = (SPRITES_PER_CYCLE - 4);
+constexpr auto SPIKES_TILE_INDEX_UP = 0;
 // -> 24 - 2 * 4 = 16px rect
 
 Spikes::Spikes(GameNode* parent) : GameNode(parent)
@@ -31,11 +31,24 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
 }
 
+// 289, 104
+
+namespace
+{
+auto interval_speed_up = 35.0f;
+auto interval_speed_down = 35.0f;
+auto trigger_speed_up = 35.0f;
+auto trigger_speed_down = 35.0f;
+}  // namespace
+
 void Spikes::updateInterval()
 {
    auto wait = false;
 
-   if (_tu == SPIKES_TILE_INDEX_UP)
+   const auto tu_index = static_cast<int32_t>(std::floor(_tu));
+
+   // completely extracted
+   if (tu_index == SPIKES_TILE_INDEX_UP)
    {
       _triggered = false;
 
@@ -45,7 +58,8 @@ void Spikes::updateInterval()
       }
    }
 
-   if (_tu == SPIKES_PER_ROW - 1)
+   // completely retracted
+   if (tu_index == SPRITES_PER_CYCLE - 1)
    {
       _triggered = true;
 
@@ -58,34 +72,29 @@ void Spikes::updateInterval()
    const auto update_time_ms = (_triggered ? _config._update_time_up_ms : _config._update_time_down_ms);
    if (!wait && _elapsed_ms > update_time_ms)
    {
+      // reset elapsed
       _elapsed_ms = (_elapsed_ms % update_time_ms);
 
       if (_triggered)
       {
          // extract
-         _tu -= 2;
-         if (_tu < SPIKES_TILE_INDEX_UP)
-         {
-            _tu = SPIKES_TILE_INDEX_UP;
-         }
+         _tu -= interval_speed_up * _dt_s;
+         _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_UP));
       }
       else
       {
          // retract
-         _tu++;
-         if (_tu >= SPIKES_PER_ROW)
-         {
-            _tu = SPIKES_PER_ROW - 1;
-         }
+         _tu += interval_speed_down * _dt_s;
+         _tu = std::min(_tu, static_cast<float>(SPRITES_PER_CYCLE - 1));
       }
    }
-
-   _deadly = (_tu < 10);
 }
 
 void Spikes::updateTrap()
 {
-   if (_tu == SPIKES_TILE_INDEX_UP)
+   const auto tu_index = static_cast<int32_t>(std::floor(_tu));
+
+   if (tu_index == SPIKES_TILE_INDEX_UP)
    {
       _triggered = false;
 
@@ -96,7 +105,7 @@ void Spikes::updateTrap()
    }
 
    // trap trigger is done via intersection
-   if (_tu == TRAP_START_TILE)
+   if (tu_index == TRAP_START_TILE)
    {
       const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
       if (player_rect.intersects(_pixel_rect))
@@ -132,49 +141,36 @@ void Spikes::updateTrap()
       if (_triggered)
       {
          // extract
-         _tu -= 2;
-         if (_tu <= SPIKES_TILE_INDEX_UP)
-         {
-            _tu = SPIKES_TILE_INDEX_UP;
-         }
+         _tu -= trigger_speed_up * _dt_s;
+         _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_UP));
       }
       else
       {
          // retract
-         _tu++;
-         if (_tu >= SPIKES_PER_ROW)
-         {
-            _tu = SPIKES_PER_ROW - 1;
-         }
+         _tu += trigger_speed_down * _dt_s;
+         _tu = std::min(_tu, static_cast<float>(SPRITES_PER_CYCLE - 1));
       }
    }
-
-   _deadly = (_tu < 10);
 }
 
 void Spikes::updateToggled()
 {
+   auto tu_index = [&]() { return static_cast<int32_t>(std::floor(_tu)); };
+
    if (isEnabled())
    {
-      // initially mTu is in some wonky state due to that weird sprite set
-      if (_tu > SPIKES_TILE_INDEX_UP)
+      if (tu_index() > SPIKES_TILE_INDEX_UP)
       {
-         _tu--;
-      }
-      else if (_tu < SPIKES_TILE_INDEX_UP)
-      {
-         _tu++;
+         _tu -= 0.1f;
       }
    }
    else
    {
-      if (_tu < SPIKES_PER_ROW)
+      if (tu_index() < SPRITES_PER_CYCLE)
       {
-         _tu++;
+         _tu += 0.1f;
       }
    }
-
-   _deadly = (_tu < 10);
 }
 
 Spikes::Mode Spikes::getMode() const
@@ -194,15 +190,22 @@ const sf::FloatRect& Spikes::getPixelRect() const
 
 void Spikes::updateSpriteRect()
 {
+   const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
-      sprite.setTextureRect({_tu * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+      sprite.setTextureRect({tu * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
    }
+}
+
+void Spikes::updateDeadly()
+{
+   _deadly = (_tu < SPRITES_PER_CYCLE - 5);
 }
 
 void Spikes::update(const sf::Time& dt)
 {
    _elapsed_ms += dt.asMilliseconds();
+   _dt_s = dt.asSeconds();
 
    switch (_mode)
    {
@@ -227,6 +230,7 @@ void Spikes::update(const sf::Time& dt)
       }
    }
 
+   updateDeadly();
    updateSpriteRect();
 
    if (_deadly)
@@ -302,19 +306,26 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          }
       }
 
-      // read config
-      //
-      //      struct Config
-      //      {
-      //         int32_t _update_time_up_ms = 5;
-      //         int32_t _update_time_down_ms = 30;
-      //         int32_t _down_time_ms = 2000;
-      //         int32_t _up_tims_ms = 2000;
-      //         int32_t _trap_time_ms = 250;
-      //      };
+      auto readIntProperty = [data](int& value, const std::string& id)
+      {
+         const auto it = data._tmx_object->_properties->_map.find(id);
+         if (it != data._tmx_object->_properties->_map.end())
+         {
+            value = it->second->_value_int.value();
+         }
+      };
 
-      // https://raw.githubusercontent.com/varnholt/deceptus_game/140684052862b27e08d60b7544aa5fef25118a23/levels/catacombs/tilesets/spikes.png?token=ALC6KPM4SDAPJ6LKYCSJMMLEI3MUI
-      // https://raw.githubusercontent.com/varnholt/deceptus_game/acff4323e100464e325f5f33f2e74d7a9684989c/levels/catacombs/tilesets/spikes.png?token=ALC6KPN5647PW72TDMSUK53EI3MUI
+      readIntProperty(instance->_config._update_time_up_ms, "update_time_up_ms");
+      readIntProperty(instance->_config._update_time_down_ms, "update_time_down_ms");
+      readIntProperty(instance->_config._down_time_ms, "down_time_ms");
+      readIntProperty(instance->_config._up_tims_ms, "up_tims_ms");
+      readIntProperty(instance->_config._trap_time_ms, "trap_time_ms");
+
+      const auto under_water_it = data._tmx_object->_properties->_map.find("under_water");
+      if (under_water_it != data._tmx_object->_properties->_map.end())
+      {
+         instance->_under_water = under_water_it->second->_value_bool.value();
+      }
    }
 
    return instance;
@@ -357,7 +368,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
 
             auto spikes = std::make_shared<Spikes>(parent);
             spikes->_texture = texture;
-            spikes->_tu = static_cast<int32_t>(id % tiles_per_row);
+            spikes->_tu = static_cast<float>(id % tiles_per_row);
             spikes->_tv = static_cast<int32_t>(id / tiles_per_row);
             spikes->_mode = mode;
 
