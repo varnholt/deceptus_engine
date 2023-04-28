@@ -39,6 +39,8 @@ public:
       int32_t _down_time_ms = 2000;
       int32_t _up_time_ms = 2000;
       int32_t _trap_time_ms = 250;
+      float _speed_up = 35.0f;
+      float _speed_down = 35.0f;
    };
 
    Spikes(GameNode* parent = nullptr);
