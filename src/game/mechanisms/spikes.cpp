@@ -30,7 +30,7 @@ Spikes::Spikes(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Spikes).name());
    _instance_id = instance_counter++;
 
-   std::cout << "add instance " << _instance_id << std::endl;
+   // std::cout << "add instance " << _instance_id << std::endl;
 }
 
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
@@ -40,16 +40,6 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(sprite);
    }
 }
-
-// 289, 104
-
-namespace
-{
-auto interval_speed_up = 35.0f;
-auto interval_speed_down = 35.0f;
-auto trigger_speed_up = 35.0f;
-auto trigger_speed_down = 35.0f;
-}  // namespace
 
 void Spikes::updateInterval()
 {
@@ -85,10 +75,10 @@ void Spikes::updateInterval()
 
       _idle_time_ms.reset();
 
-      if (_instance_id == 0)
-      {
-         std::cout << std::endl << std::endl;
-      }
+      //      if (_instance_id == 0)
+      //      {
+      //         std::cout << std::endl << std::endl;
+      //      }
 
       // when starting to retract, jump to the corresponding sprite
       if (tu_index == SPIKES_TILE_INDEX_FULLY_EXTRACTED)
@@ -97,20 +87,21 @@ void Spikes::updateInterval()
       }
    }
 
-   if (_instance_id == 0)
-   {
-      std::cout << "tu: " << _tu << ", index: " << tu_index << ", elapsed: " << _elapsed_ms << ", extracting: " << _extracting << std::endl;
-   }
+   //   if (_instance_id == 0)
+   //   {
+   //      std::cout << "tu: " << _tu << ", index: " << tu_index << ", elapsed: " << _elapsed_ms << ", extracting: " << _extracting <<
+   //      std::endl;
+   //   }
 
    // regular update
    if (_extracting)
    {
-      _tu -= interval_speed_up * _dt_s;
+      _tu -= _config._speed_up * _dt_s;
       _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
    }
    else
    {
-      _tu += interval_speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s;
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
    }
 }
@@ -165,12 +156,12 @@ void Spikes::updateTrap()
 
       if (_extracting)
       {
-         _tu -= trigger_speed_up * _dt_s;
+         _tu -= _config._speed_up * _dt_s;
          _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
       }
       else
       {
-         _tu += trigger_speed_down * _dt_s;
+         _tu += _config._speed_down * _dt_s;
          _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
       }
    }
@@ -338,16 +329,38 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          }
       };
 
+      auto readFloatProperty = [data](float& value, const std::string& id)
+      {
+         const auto it = data._tmx_object->_properties->_map.find(id);
+         if (it != data._tmx_object->_properties->_map.end())
+         {
+            value = it->second->_value_float.value();
+         }
+      };
+
       readIntProperty(instance->_config._update_time_up_ms, "update_time_up_ms");
       readIntProperty(instance->_config._update_time_down_ms, "update_time_down_ms");
       readIntProperty(instance->_config._down_time_ms, "down_time_ms");
-      readIntProperty(instance->_config._up_time_ms, "up_tims_ms");
+      readIntProperty(instance->_config._up_time_ms, "up_time_ms");
       readIntProperty(instance->_config._trap_time_ms, "trap_time_ms");
+      readFloatProperty(instance->_config._speed_up, "speed_up");
+      readFloatProperty(instance->_config._speed_down, "speed_down");
 
       const auto under_water_it = data._tmx_object->_properties->_map.find("under_water");
       if (under_water_it != data._tmx_object->_properties->_map.end())
       {
          instance->_under_water = under_water_it->second->_value_bool.value();
+      }
+
+      auto sprite_count = static_cast<int32_t>(instance->_pixel_rect.width) / 24;
+
+      auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
+      for (auto i = 0; i < sprite_count; i++)
+      {
+         sf::Sprite sprite;
+         sprite.setTexture(*texture);
+         sprite.setPosition(sf::Vector2f(data._tmx_object->_x_px + static_cast<float>(i * PIXELS_PER_TILE), data._tmx_object->_y_px));
+         instance->_sprite.push_back(sprite);
       }
    }
 
