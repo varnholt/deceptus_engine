@@ -37,7 +37,7 @@ public:
       int32_t _update_time_up_ms = 5;
       int32_t _update_time_down_ms = 30;
       int32_t _down_time_ms = 2000;
-      int32_t _up_tims_ms = 2000;
+      int32_t _up_time_ms = 2000;
       int32_t _trap_time_ms = 250;
    };
 
@@ -74,11 +74,13 @@ private:
    sf::Vector2f _pixel_position;
    sf::FloatRect _pixel_rect;
 
-   bool _triggered = false;
+   bool _extracting = false;
    bool _deadly = false;
    bool _under_water = false;
+   std::optional<int32_t> _idle_time_ms;
 
    Mode _mode = Mode::Invalid;
    Orientation _orientation = Orientation::Invalid;
    Config _config;
+   int32_t _instance_id{0};
 };
