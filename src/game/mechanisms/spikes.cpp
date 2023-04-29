@@ -264,9 +264,9 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
 {
    auto instance = std::make_shared<Spikes>(parent);
 
+   instance->setObjectId(data._tmx_object->_name);
    instance->_pixel_position.x = data._tmx_object->_x_px;
    instance->_pixel_position.y = data._tmx_object->_y_px;
-   instance->setObjectId(data._tmx_object->_name);
    instance->_pixel_rect =
       sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 

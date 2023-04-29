@@ -321,7 +321,7 @@ void GameMechanismDeserializer::deserialize(
             else if (object_group->_name == layer_name_spikes || tmx_object->_template_type == type_name_spikes)
             {
                auto mechanism = Spikes::deserialize(parent, data);
-               mechanism_smoke_effect->push_back(mechanism);
+               mechanism_spikes->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_water_surface || tmx_object->_template_type == type_name_water_surface)
             {
