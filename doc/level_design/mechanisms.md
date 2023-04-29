@@ -384,6 +384,7 @@ The properties below apply for the object inside the `levers` object group.
 |-|-|-|
 |enabled|bool|Defines the initial state of the lever which is either enabled or disabled|
 |z|int|The object's z index|
+|target_id|string|An optional name of the object controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
 
 ---
 

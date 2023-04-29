@@ -395,6 +395,34 @@ void Lever::merge(
    std::copy(rotating_blades.begin(), rotating_blades.end(), std::back_inserter(all_mechanism));
    std::copy(doors.begin(), doors.end(), std::back_inserter(all_mechanism));
 
+   for (auto& tmp : levers)
+   {
+      auto lever = std::dynamic_pointer_cast<Lever>(tmp);
+
+      // don't go by search rectangle, go by target id
+      if (lever->_target_id.has_value())
+      {
+         const auto target_id = lever->_target_id.value();
+         const auto target_it = std::find_if(
+            all_mechanism.begin(),
+            all_mechanism.end(),
+            [target_id](const auto& mechanism)
+            {
+               auto node = std::dynamic_pointer_cast<GameNode>(mechanism);
+               return node->getObjectId() == target_id;
+            }
+         );
+
+         if (target_it != all_mechanism.end())
+         {
+            auto mechanism = (*target_it);
+            auto callback = [mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); };
+            lever->setCallbacks({callback});
+            lever->updateReceivers();
+         }
+      }
+   }
+
    for (auto rect : __rectangles)
    {
       sf::FloatRect search_rect;
@@ -412,29 +440,6 @@ void Lever::merge(
       for (auto& tmp : levers)
       {
          auto lever = std::dynamic_pointer_cast<Lever>(tmp);
-
-         // don't go by search rectangle, go by target id
-         if (lever->_target_id.has_value())
-         {
-            const auto target_id = lever->_target_id.value();
-            const auto target_it = std::find_if(
-               all_mechanism.begin(),
-               all_mechanism.end(),
-               [target_id](const auto& mechanism)
-               {
-                  auto node = std::dynamic_pointer_cast<GameNode>(mechanism);
-                  return node->getObjectId() == target_id;
-               }
-            );
-
-            if (target_it != all_mechanism.end())
-            {
-               auto mechanism = (*target_it);
-               auto callback = [mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); };
-               lever->setCallbacks({callback});
-               lever->updateReceivers();
-            }
-         }
 
          if (lever->_rect.intersects(search_rect))
          {
