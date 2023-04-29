@@ -88,6 +88,7 @@ private:
    bool _reached = false;
    bool _reached_previous = false;
    float _idle_time_s = 0.0f;
+   std::optional<std::string> _target_id;
 
    std::shared_ptr<sf::Texture> _texture;
 
