@@ -29,8 +29,6 @@ Spikes::Spikes(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Spikes).name());
    _instance_id = instance_counter++;
-
-   // std::cout << "add instance " << _instance_id << std::endl;
 }
 
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
@@ -75,23 +73,12 @@ void Spikes::updateInterval()
 
       _idle_time_ms.reset();
 
-      //      if (_instance_id == 0)
-      //      {
-      //         std::cout << std::endl << std::endl;
-      //      }
-
       // when starting to retract, jump to the corresponding sprite
       if (tu_index == SPIKES_TILE_INDEX_FULLY_EXTRACTED)
       {
          _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
       }
    }
-
-   //   if (_instance_id == 0)
-   //   {
-   //      std::cout << "tu: " << _tu << ", index: " << tu_index << ", elapsed: " << _elapsed_ms << ", extracting: " << _extracting <<
-   //      std::endl;
-   //   }
 
    // regular update
    if (_extracting)
@@ -175,14 +162,14 @@ void Spikes::updateToggled()
    {
       if (tu_index() > SPIKES_TILE_INDEX_FULLY_EXTRACTED)
       {
-         _tu -= 0.1f;
+         _tu -= _config._speed_up * _dt_s;
       }
    }
    else
    {
       if (tu_index() < SPRITES_PER_CYCLE)
       {
-         _tu += 0.1f;
+         _tu += _config._speed_down * _dt_s;
       }
    }
 }
@@ -207,7 +194,7 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
-      sprite.setTextureRect({tu * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+      sprite.setTextureRect({(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
    }
 }
 
@@ -263,6 +250,16 @@ std::optional<sf::FloatRect> Spikes::getBoundingBoxPx()
    return _pixel_rect;
 }
 
+void Spikes::setEnabled(bool enabled)
+{
+   if (_mode == Spikes::Mode::Toggled)
+   {
+      _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
+   }
+
+   GameMechanism::setEnabled(enabled);
+}
+
 std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto instance = std::make_shared<Spikes>(parent);
@@ -305,18 +302,22 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          if (orientation == "up")
          {
             instance->_orientation = Orientation::PointsUp;
+            instance->_tv = 0;
          }
          else if (orientation == "down")
          {
             instance->_orientation = Orientation::PointsDown;
+            instance->_tv = 1;
          }
          else if (orientation == "right")
          {
             instance->_orientation = Orientation::PointsRight;
+            instance->_tv = 2;
          }
          else if (orientation == "left")
          {
             instance->_orientation = Orientation::PointsLeft;
+            instance->_tv = 3;
          }
       }
 
@@ -349,17 +350,41 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       const auto under_water_it = data._tmx_object->_properties->_map.find("under_water");
       if (under_water_it != data._tmx_object->_properties->_map.end())
       {
-         instance->_under_water = under_water_it->second->_value_bool.value();
+         if (under_water_it->second->_value_bool.value())
+         {
+            instance->_tu_offset = 15 * PIXELS_PER_TILE;
+         }
       }
 
       auto sprite_count = static_cast<int32_t>(instance->_pixel_rect.width) / 24;
+
+      auto x_increment_px = 0;
+      auto y_increment_px = 0;
+      switch (instance->_orientation)
+      {
+         case Spikes::Orientation::PointsUp:
+         case Spikes::Orientation::PointsDown:
+            x_increment_px = PIXELS_PER_TILE;
+            break;
+         case Spikes::Orientation::PointsLeft:
+         case Spikes::Orientation::PointsRight:
+            y_increment_px = PIXELS_PER_TILE;
+            break;
+         case Spikes::Orientation::Invalid:
+            break;
+      }
 
       auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
       for (auto i = 0; i < sprite_count; i++)
       {
          sf::Sprite sprite;
          sprite.setTexture(*texture);
-         sprite.setPosition(sf::Vector2f(data._tmx_object->_x_px + static_cast<float>(i * PIXELS_PER_TILE), data._tmx_object->_y_px));
+
+         sprite.setPosition(sf::Vector2f(
+            data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
+            data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
+         ));
+
          instance->_sprite.push_back(sprite);
       }
    }

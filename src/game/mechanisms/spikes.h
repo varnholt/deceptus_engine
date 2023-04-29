@@ -48,6 +48,7 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   void setEnabled(bool enabled) override;
 
    static std::vector<std::shared_ptr<Spikes>> load(GameNode* parent, const GameDeserializeData& data, Mode mode);
    static std::shared_ptr<Spikes> deserialize(GameNode* parent, const GameDeserializeData& data);
@@ -66,19 +67,19 @@ private:
 
    std::shared_ptr<sf::Texture> _texture;
 
-   float _tu = 0.0f;
-   int32_t _tv = 0;
+   float _tu{0.0f};
+   int32_t _tv{0};
+   int32_t _tu_offset{0};
 
    std::vector<sf::Sprite> _sprite;
-   int32_t _elapsed_ms = 0;
-   float _dt_s = 0.0f;
+   int32_t _elapsed_ms{0};
+   float _dt_s{0.0f};
 
    sf::Vector2f _pixel_position;
    sf::FloatRect _pixel_rect;
 
-   bool _extracting = false;
-   bool _deadly = false;
-   bool _under_water = false;
+   bool _extracting{false};
+   bool _deadly{false};
    std::optional<int32_t> _idle_time_ms;
 
    Mode _mode = Mode::Invalid;
