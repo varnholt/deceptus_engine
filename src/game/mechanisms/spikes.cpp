@@ -156,21 +156,15 @@ void Spikes::updateTrap()
 
 void Spikes::updateToggled()
 {
-   auto tu_index = [&]() { return static_cast<int32_t>(std::floor(_tu)); };
-
    if (isEnabled())
    {
-      if (tu_index() > SPIKES_TILE_INDEX_FULLY_EXTRACTED)
-      {
-         _tu -= _config._speed_up * _dt_s;
-      }
+      _tu -= _config._speed_up * _dt_s;
+      _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
    }
    else
    {
-      if (tu_index() < SPRITES_PER_CYCLE)
-      {
-         _tu += _config._speed_down * _dt_s;
-      }
+      _tu += _config._speed_down * _dt_s;
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
    }
 }
 
@@ -254,7 +248,10 @@ void Spikes::setEnabled(bool enabled)
 {
    if (_mode == Spikes::Mode::Toggled)
    {
-      _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
+      if (!enabled)
+      {
+         _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
+      }
    }
 
    GameMechanism::setEnabled(enabled);
@@ -356,7 +353,7 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          }
       }
 
-      auto sprite_count = static_cast<int32_t>(instance->_pixel_rect.width) / 24;
+      auto sprite_count = 0;
 
       auto x_increment_px = 0;
       auto y_increment_px = 0;
@@ -365,10 +362,12 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          case Spikes::Orientation::PointsUp:
          case Spikes::Orientation::PointsDown:
             x_increment_px = PIXELS_PER_TILE;
+            sprite_count = static_cast<int32_t>(instance->_pixel_rect.width) / PIXELS_PER_TILE;
             break;
          case Spikes::Orientation::PointsLeft:
          case Spikes::Orientation::PointsRight:
             y_increment_px = PIXELS_PER_TILE;
+            sprite_count = static_cast<int32_t>(instance->_pixel_rect.height) / PIXELS_PER_TILE;
             break;
          case Spikes::Orientation::Invalid:
             break;
