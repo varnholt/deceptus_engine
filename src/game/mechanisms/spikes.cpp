@@ -99,7 +99,12 @@ void Spikes::updateTrap()
 
    if (tu_index == SPIKES_TILE_INDEX_FULLY_EXTRACTED)
    {
-      _extracting = false;
+      if (_extracting)
+      {
+         _extracting = false;
+      }
+
+      // _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
 
       if (_elapsed_ms < _config._up_time_ms)
       {
@@ -136,21 +141,15 @@ void Spikes::updateTrap()
       }
    }
 
-   const auto update_time_ms = (_extracting ? _config._update_time_up_ms : _config._update_time_down_ms);
-   if (_elapsed_ms > update_time_ms)
+   if (_extracting)
    {
-      _elapsed_ms = (_elapsed_ms % update_time_ms);
-
-      if (_extracting)
-      {
-         _tu -= _config._speed_up * _dt_s;
-         _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
-      }
-      else
-      {
-         _tu += _config._speed_down * _dt_s;
-         _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
-      }
+      _tu -= _config._speed_up * _dt_s;
+      _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
+   }
+   else
+   {
+      _tu += _config._speed_down * _dt_s;
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
    }
 }
 
@@ -336,13 +335,12 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          }
       };
 
-      readIntProperty(instance->_config._update_time_up_ms, "update_time_up_ms");
-      readIntProperty(instance->_config._update_time_down_ms, "update_time_down_ms");
       readIntProperty(instance->_config._down_time_ms, "down_time_ms");
       readIntProperty(instance->_config._up_time_ms, "up_time_ms");
       readIntProperty(instance->_config._trap_time_ms, "trap_time_ms");
       readFloatProperty(instance->_config._speed_up, "speed_up");
       readFloatProperty(instance->_config._speed_down, "speed_down");
+      readIntProperty(instance->_elapsed_ms, "time_offset_ms");
 
       const auto under_water_it = data._tmx_object->_properties->_map.find("under_water");
       if (under_water_it != data._tmx_object->_properties->_map.end())
