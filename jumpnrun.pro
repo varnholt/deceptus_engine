@@ -166,6 +166,7 @@ SOURCES += \
    src/game/fadetransitioneffect.cpp \
    src/game/fixturenode.cpp \
    src/game/forestscene.cpp \
+   src/game/framemapper.cpp \
    src/game/game.cpp \
    src/game/gameaudio.cpp \
    src/game/gameclock.cpp \
@@ -380,6 +381,7 @@ HEADERS += \
    src/game/fadetransitioneffect.h \
    src/game/fixturenode.h \
    src/game/forestscene.h \
+   src/game/framemapper.h \
    src/game/game.h \
    src/game/gameaudio.h \
    src/game/gameclock.h \

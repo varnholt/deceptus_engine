@@ -34,8 +34,6 @@ public:
 
    struct Config
    {
-      int32_t _update_time_up_ms = 5;
-      int32_t _update_time_down_ms = 30;
       int32_t _down_time_ms = 2000;
       int32_t _up_time_ms = 2000;
       int32_t _trap_time_ms = 250;
