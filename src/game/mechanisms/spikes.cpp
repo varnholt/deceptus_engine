@@ -116,7 +116,7 @@ void Spikes::updateTrap()
    if (tu_index == TRAP_START_TILE)
    {
       const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-      if (player_rect.intersects(_pixel_rect))
+      if (player_rect.intersects(_player_collision_rect_px))
       {
          // start counting from first intersection
          if (!_extracting)
@@ -179,7 +179,7 @@ void Spikes::setMode(Mode mode)
 
 const sf::FloatRect& Spikes::getPixelRect() const
 {
-   return _pixel_rect;
+   return _player_collision_rect_px;
 }
 
 void Spikes::updateSpriteRect()
@@ -231,7 +231,7 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-      if (player_rect.intersects(_pixel_rect))
+      if (player_rect.intersects(_player_collision_rect_px))
       {
          Player::getCurrent()->damage(100);
       }
@@ -240,7 +240,7 @@ void Spikes::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> Spikes::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _player_collision_rect_px;
 }
 
 void Spikes::setEnabled(bool enabled)
@@ -263,8 +263,13 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
    instance->setObjectId(data._tmx_object->_name);
    instance->_pixel_position.x = data._tmx_object->_x_px;
    instance->_pixel_position.y = data._tmx_object->_y_px;
-   instance->_pixel_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   // make the collision rectangle a bit smaller so it's a little more lax
+   instance->_player_collision_rect_px = {
+      data._tmx_object->_x_px + TOLERANCE_PIXELS,
+      data._tmx_object->_y_px + TOLERANCE_PIXELS,
+      data._tmx_object->_width_px - (2 * TOLERANCE_PIXELS),
+      data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)};
 
    // deserialize range data
    if (data._tmx_object->_properties)
@@ -360,12 +365,12 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
          case Spikes::Orientation::PointsUp:
          case Spikes::Orientation::PointsDown:
             x_increment_px = PIXELS_PER_TILE;
-            sprite_count = static_cast<int32_t>(instance->_pixel_rect.width) / PIXELS_PER_TILE;
+            sprite_count = static_cast<int32_t>(data._tmx_object->_width_px) / PIXELS_PER_TILE;
             break;
          case Spikes::Orientation::PointsLeft:
          case Spikes::Orientation::PointsRight:
             y_increment_px = PIXELS_PER_TILE;
-            sprite_count = static_cast<int32_t>(instance->_pixel_rect.height) / PIXELS_PER_TILE;
+            sprite_count = static_cast<int32_t>(data._tmx_object->_height_px) / PIXELS_PER_TILE;
             break;
          case Spikes::Orientation::Invalid:
             break;
@@ -442,7 +447,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
                spikes->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
             }
 
-            spikes->_pixel_rect = {
+            spikes->_player_collision_rect_px = {
                static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),

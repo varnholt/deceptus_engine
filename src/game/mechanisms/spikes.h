@@ -74,7 +74,7 @@ private:
    float _dt_s{0.0f};
 
    sf::Vector2f _pixel_position;
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _player_collision_rect_px;
 
    bool _extracting{false};
    bool _deadly{false};
