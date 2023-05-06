@@ -12,13 +12,22 @@
 
 #include <iostream>
 
+// -> 24 - 2 * 4 = 16px rect
+
+//    #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
+//    00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
+//     | |         |  |                          |
+//     | +---------+  +--------------------------+
+//     | < extract >  <          retract         >
+//     |
+//     + unused
 constexpr auto SPRITES_PER_CYCLE = 15;
 constexpr auto TOLERANCE_PIXELS = 5;
-constexpr auto TRAP_START_TILE = (SPRITES_PER_CYCLE - 4);
-constexpr auto SPIKES_TILE_INDEX_FULLY_EXTRACTED = 0;
-constexpr auto SPIKES_TILE_INDEX_FULLY_RETRACTED = SPRITES_PER_CYCLE - 1;
-constexpr auto SPIKES_TILE_INDEX_MOVE_DOWN_START = 5;
-// -> 24 - 2 * 4 = 16px rect
+constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 4);
+constexpr auto SPIKES_TILE_INDEX_EXTRACT_START = 1;
+constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 4;
+constexpr auto SPIKES_TILE_INDEX_RETRACT_START = 6;
+constexpr auto SPIKES_TILE_INDEX_RETRACT_END = SPRITES_PER_CYCLE - 1;
 
 namespace
 {
@@ -43,24 +52,20 @@ void Spikes::updateInterval()
 {
    const auto tu_index = static_cast<int32_t>(std::floor(_tu));
 
-   if (tu_index == SPIKES_TILE_INDEX_FULLY_EXTRACTED)
+   if (tu_index == SPIKES_TILE_INDEX_EXTRACT_END && _extracting)
    {
-      if (_extracting)
-      {
-         _extracting = false;
-         _elapsed_ms = 0;
-         _idle_time_ms = _config._up_time_ms;
-      }
+      // previously extracting, now start retracting
+      _extracting = false;
+      _elapsed_ms = 0;
+      _idle_time_ms = _config._up_time_ms;
    }
 
-   if (tu_index == SPIKES_TILE_INDEX_FULLY_RETRACTED)
+   if (tu_index == SPIKES_TILE_INDEX_RETRACT_END && !_extracting)
    {
-      if (!_extracting)
-      {
-         _extracting = true;
-         _elapsed_ms = 0;
-         _idle_time_ms = _config._down_time_ms;
-      }
+      // previously retracting, now start extracting
+      _extracting = true;
+      _elapsed_ms = 0;
+      _idle_time_ms = _config._down_time_ms;
    }
 
    if (_idle_time_ms.has_value())
@@ -74,82 +79,80 @@ void Spikes::updateInterval()
       _idle_time_ms.reset();
 
       // when starting to retract, jump to the corresponding sprite
-      if (tu_index == SPIKES_TILE_INDEX_FULLY_EXTRACTED)
+      if (tu_index == SPIKES_TILE_INDEX_EXTRACT_END)
       {
-         _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
+         _tu = SPIKES_TILE_INDEX_RETRACT_START;
+      }
+
+      // when starting to extract, jump to the corresponding sprite
+      if (tu_index == SPIKES_TILE_INDEX_RETRACT_END)
+      {
+         _tu = SPIKES_TILE_INDEX_EXTRACT_START;
       }
    }
 
    // regular update
    if (_extracting)
    {
-      _tu -= _config._speed_up * _dt_s;
-      _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
+      _tu += _config._speed_up * _dt_s;
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
    }
    else
    {
       _tu += _config._speed_down * _dt_s;
-      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_RETRACT_END));
    }
 }
 
 void Spikes::updateTrap()
 {
-   const auto tu_index = static_cast<int32_t>(std::floor(_tu));
-
-   if (tu_index == SPIKES_TILE_INDEX_FULLY_EXTRACTED)
+   // if already activated, start counting time
+   if (_elapsed_since_collision_ms.has_value())
    {
-      if (_extracting)
-      {
-         _extracting = false;
-      }
-
-      // _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
-
-      if (_elapsed_ms < _config._up_time_ms)
-      {
-         return;
-      }
-   }
-
-   // trap trigger is done via intersection
-   if (tu_index == TRAP_START_TILE)
-   {
-      const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-      if (player_rect.intersects(_player_collision_rect_px))
-      {
-         // start counting from first intersection
-         if (!_extracting)
-         {
-            _elapsed_ms = 0;
-         }
-
-         _extracting = true;
-      }
-
-      // trap was activated
-      if (_extracting)
-      {
-         if (_elapsed_ms < _config._trap_time_ms)
-         {
-            return;
-         }
-      }
-      else
-      {
-         return;
-      }
-   }
-
-   if (_extracting)
-   {
-      _tu -= _config._speed_up * _dt_s;
-      _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
+      *_elapsed_since_collision_ms += _dt_ms;
    }
    else
    {
+      // trap trigger is done via intersection
+      const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+      if (player_rect.intersects(_player_collision_rect_px))
+      {
+         // start extracting once player has intersected
+         _elapsed_since_collision_ms = 0;
+      }
+   }
+
+   if (_elapsed_since_collision_ms.has_value())
+   {
+      // check if spikes should be extracting
+      const auto extracting = _elapsed_since_collision_ms > _config._trap_time_after_collision_ms;
+      if (extracting && !_extracting)
+      {
+         // when extracting starts, use the first extract sprite
+         _extracting = extracting;
+         _tu = static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_START);
+      }
+
+      if (_extracting)
+      {
+         _tu += _config._speed_up * _dt_s;
+         _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
+      }
+
+      // check if the spikes should move down again
+      const auto start_retract = _elapsed_since_collision_ms.value() - _config._trap_time_after_collision_ms > _config._up_time_ms;
+      if (start_retract)
+      {
+         _elapsed_since_collision_ms.reset();
+         _extracting = false;
+         _tu = static_cast<float>(SPIKES_TILE_INDEX_RETRACT_START);
+      }
+   }
+   else
+   {
+      // always retract to trap start position if there's no intersection
       _tu += _config._speed_down * _dt_s;
-      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_TRAP_START));
    }
 }
 
@@ -157,13 +160,13 @@ void Spikes::updateToggled()
 {
    if (isEnabled())
    {
-      _tu -= _config._speed_up * _dt_s;
-      _tu = std::max(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_EXTRACTED));
+      _tu += _config._speed_up * _dt_s;
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
    }
    else
    {
       _tu += _config._speed_down * _dt_s;
-      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_FULLY_RETRACTED));
+      _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_RETRACT_END));
    }
 }
 
@@ -200,6 +203,7 @@ void Spikes::update(const sf::Time& dt)
 {
    _elapsed_ms += dt.asMilliseconds();
    _dt_s = dt.asSeconds();
+   _dt_ms = dt.asMilliseconds();
 
    switch (_mode)
    {
@@ -247,10 +251,7 @@ void Spikes::setEnabled(bool enabled)
 {
    if (_mode == Spikes::Mode::Toggled)
    {
-      if (!enabled)
-      {
-         _tu = SPIKES_TILE_INDEX_MOVE_DOWN_START;
-      }
+      _tu = static_cast<float>(enabled ? SPIKES_TILE_INDEX_EXTRACT_START : SPIKES_TILE_INDEX_RETRACT_START);
    }
 
    GameMechanism::setEnabled(enabled);
@@ -342,7 +343,7 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
 
       readIntProperty(instance->_config._down_time_ms, "down_time_ms");
       readIntProperty(instance->_config._up_time_ms, "up_time_ms");
-      readIntProperty(instance->_config._trap_time_ms, "trap_time_ms");
+      readIntProperty(instance->_config._trap_time_after_collision_ms, "trap_time_ms");
       readFloatProperty(instance->_config._speed_up, "speed_up");
       readFloatProperty(instance->_config._speed_down, "speed_down");
       readIntProperty(instance->_elapsed_ms, "time_offset_ms");
@@ -439,7 +440,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
 
             if (mode == Mode::Trap)
             {
-               spikes->_tu = TRAP_START_TILE;
+               spikes->_tu = SPIKES_TILE_INDEX_TRAP_START;
             }
 
             if (data._tmx_layer->_properties)

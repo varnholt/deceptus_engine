@@ -36,7 +36,7 @@ public:
    {
       int32_t _down_time_ms = 2000;
       int32_t _up_time_ms = 2000;
-      int32_t _trap_time_ms = 250;
+      int32_t _trap_time_after_collision_ms = 250;
       float _speed_up = 35.0f;
       float _speed_down = 35.0f;
    };
@@ -72,6 +72,8 @@ private:
    std::vector<sf::Sprite> _sprite;
    int32_t _elapsed_ms{0};
    float _dt_s{0.0f};
+   int32_t _dt_ms{0};
+   std::optional<int32_t> _elapsed_since_collision_ms;
 
    sf::Vector2f _pixel_position;
    sf::FloatRect _player_collision_rect_px;
