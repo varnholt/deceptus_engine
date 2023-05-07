@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framemapper.h"
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
 #include "gamenode.h"
@@ -86,4 +87,7 @@ private:
    Orientation _orientation = Orientation::Invalid;
    Config _config;
    int32_t _instance_id{0};
+
+   FrameMapper<int32_t> _frame_times_open_ms{{50, 50, 50, 120, 3000}, 1};
+   FrameMapper<int32_t> _frame_times_close_ms{{80, 30, 30, 30, 30, 30, 30, 30, 3000}, 6};  // first frame (60) skipped
 };
