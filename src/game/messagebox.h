@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 
 #include <SFML/Graphics.hpp>
 
@@ -37,6 +38,7 @@ public:
    struct LayoutProperties
    {
       MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
+      std::optional<sf::Vector2i> _pos;
       sf::Color _background_color = sf::Color{47, 12, 75};
       sf::Color _text_color = sf::Color{232, 219, 243};
       bool _animate_text = false;

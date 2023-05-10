@@ -9,6 +9,8 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtools.h"
+#include "framework/tools/log.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -28,16 +30,54 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
 
    auto properties = data._tmx_object->_properties;
 
+   if (!properties)
+   {
+      Log::Error() << "dialogue object has no properties";
+   }
+
    // parse dialogue items
+   std::optional<sf::Vector2i> pos;
+   std::optional<sf::Color> text_color;
+   std::optional<sf::Color> background_color;
    for (auto i = 0u; i < 99; i++)
    {
       std::ostringstream oss;
       oss << std::setw(2) << std::setfill('0') << i;
-      const auto& it_dialogue_items = properties->_map.find(oss.str());
+      const auto item_id = oss.str();
+
+      const auto& it_dialogue_items = properties->_map.find(item_id);
+
+      // check if dialogue has an exact pixel position defined
+      auto pos_x_it = data._tmx_object->_properties->_map.find(item_id + "_x_px");
+      auto pos_y_it = data._tmx_object->_properties->_map.find(item_id + "_y_px");
+      if (pos_x_it != data._tmx_object->_properties->_map.end() && pos_y_it != data._tmx_object->_properties->_map.end())
+      {
+         pos = {pos_x_it->second->_value_int.value(), pos_y_it->second->_value_int.value()};
+      }
+
+      // read text color
+      auto text_color_it = data._tmx_object->_properties->_map.find(item_id + "_text_color");
+      if (text_color_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto rgba = TmxTools::color(text_color_it->second->_value_string.value());
+         text_color = {rgba[0], rgba[1], rgba[2]};
+      }
+
+      // read background color
+      auto background_color_it = data._tmx_object->_properties->_map.find(item_id + "_background_color");
+      if (background_color_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto rgba = TmxTools::color(background_color_it->second->_value_string.value());
+         background_color = {rgba[0], rgba[1], rgba[2]};
+      }
+
       if (it_dialogue_items != properties->_map.end())
       {
          DialogueItem item;
+         item._pos = pos;
          item._message = (*it_dialogue_items).second->_value_string.value();
+         item._text_color = text_color.value_or(item._text_color);
+         item._background_color = background_color.value_or(item._background_color);
          dialogue->_dialogue_items.push_back(item);
       }
    }
@@ -160,6 +200,7 @@ void Dialogue::showNext()
       [this](MessageBox::Button /*b*/) { showNext(); },
       MessageBox::LayoutProperties{
          item._location,
+         item._pos,
          item._background_color,
          item._text_color,
          item._animate_text,
