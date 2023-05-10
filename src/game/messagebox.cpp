@@ -350,13 +350,17 @@ void MessageBox::showAnimation()
    }
 
    // fade in text and buttons
-   const auto color = sf::Color{255, 255, 255, static_cast<uint8_t>(contents_alpha * 255)};
+   const auto alpha = static_cast<uint8_t>(contents_alpha * 255);
+   const auto color = sf::Color{255, 255, 255, alpha};
+   auto text_color = __active->_properties._text_color;
+   text_color.a = alpha;
+
    for (const auto& layer : __box_content_layers)
    {
       layer->_sprite->setColor(color);
    }
 
-   __text.setFillColor(color);
+   __text.setFillColor(text_color);
 }
 
 void MessageBox::hideAnimation()
@@ -377,7 +381,10 @@ void MessageBox::hideAnimation()
    }
    else
    {
-      const auto color = sf::Color{255, 255, 255, static_cast<uint8_t>(contents_alpha * 255)};
+      const auto alpha = static_cast<uint8_t>(contents_alpha * 255);
+      const auto color = sf::Color{255, 255, 255, alpha};
+      auto text_color = __active->_properties._text_color;
+      text_color.a = alpha;
 
       __layers["window"]->_sprite->setColor(color);
       for (const auto& layer : __box_content_layers)
@@ -385,7 +392,7 @@ void MessageBox::hideAnimation()
          layer->_sprite->setColor(color);
       }
 
-      __text.setFillColor(color);
+      __text.setFillColor(text_color);
    }
 }
 
@@ -476,7 +483,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // text alignment
-   const auto pos = pixelLocation(__active->_properties._location);
+   const auto pos = __active->_properties._pos.value_or(pixelLocation(__active->_properties._location));
    auto x = 0;
    if (__active->_properties._centered)
    {
