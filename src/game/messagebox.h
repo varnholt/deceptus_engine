@@ -39,7 +39,7 @@ public:
    {
       MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
       std::optional<sf::Vector2i> _pos;
-      sf::Color _background_color = sf::Color{47, 12, 75};
+      sf::Color _background_color = sf::Color{27, 59, 151};
       sf::Color _text_color = sf::Color{232, 219, 243};
       bool _animate_text = false;
       float _animate_text_speed = 10.0f;
@@ -114,5 +114,6 @@ private:
    static sf::Font __font;
    static sf::Text __text;
    static sf::Vector2f __window_position;
+   static sf::Vector2f __background_position;
    static bool __initialized;
 };
