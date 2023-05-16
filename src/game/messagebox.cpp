@@ -37,6 +37,7 @@ static constexpr auto y_offset_middle_px = 149;
 static constexpr auto y_offset_bottom_px = 216;
 static constexpr auto text_margin_x_px = 8;
 static constexpr auto textbox_width_px = 324;
+static constexpr auto background_width_px = 318;
 
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
@@ -53,6 +54,7 @@ std::vector<std::shared_ptr<Layer>> MessageBox::__box_content_layers;
 sf::Font MessageBox::__font;
 sf::Text MessageBox::__text;
 sf::Vector2f MessageBox::__window_position;
+sf::Vector2f MessageBox::__background_position;
 
 MessageBox::MessageBox(
    MessageBox::Type type,
@@ -87,11 +89,6 @@ MessageBox::~MessageBox()
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::Modal);
-
-   //   if (mPreviousMode == ExecutionMode::Running)
-   //   {
-   //      GameState::getInstance().enqueueResume();
-   //   }
 }
 
 void MessageBox::close(MessageBox::Button button)
@@ -222,6 +219,7 @@ void MessageBox::initializeLayers()
       }
 
       __window_position = __layers["window"]->_sprite->getPosition();
+      __background_position = __layers["background"]->_sprite->getPosition();
 
       __box_content_layers.push_back(__layers["yes_xbox_1"]);
       __box_content_layers.push_back(__layers["no_xbox_1"]);
@@ -320,6 +318,11 @@ void MessageBox::showAnimation()
 
    auto contents_alpha = 1.0f;
    const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
+
+   auto background_color = __active->_properties._background_color;
+   auto window_layer = __layers["window"];
+   auto background_layer = __layers["background"];
+
    if (visible_time < animation_scale_time_show)
    {
       contents_alpha = 0.0f;
@@ -329,22 +332,32 @@ void MessageBox::showAnimation()
       const auto scale_x = Easings::easeOutBack<float>(t_normalized);
       const auto scale_y = scale_x;
 
-      const auto scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
+      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
+      window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
+      window_layer->_sprite->setScale(scale_x, scale_y);
+      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset, __window_position.y);
 
-      __layers["window"]->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
-      __layers["window"]->_sprite->setScale(scale_x, scale_y);
-      __layers["window"]->_sprite->setPosition(__window_position.x + scale_offset, __window_position.y);
+      const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
+      background_color.a = static_cast<uint8_t>(t_normalized * 255);
+      background_layer->_sprite->setColor(background_color);
+      background_layer->_sprite->setScale(scale_x, scale_y);
+      background_layer->_sprite->setPosition(__background_position.x + background_scale_offset, __background_position.y);
    }
    else
    {
-      __layers["window"]->_sprite->setColor(sf::Color{255, 255, 255, 255});
-      __layers["window"]->_sprite->setScale(1.0f, 1.0f);
-      __layers["window"]->_sprite->setPosition(__window_position);
+      window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+      window_layer->_sprite->setScale(1.0f, 1.0f);
+      window_layer->_sprite->setPosition(__window_position);
+
+      background_layer->_sprite->setColor(background_color);
+      background_layer->_sprite->setScale(1.0f, 1.0f);
+      background_layer->_sprite->setPosition(__background_position);
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
          const auto t_normalized =
             (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
+
          contents_alpha = t_normalized;
       }
    }
@@ -382,14 +395,18 @@ void MessageBox::hideAnimation()
    else
    {
       const auto alpha = static_cast<uint8_t>(contents_alpha * 255);
-      const auto color = sf::Color{255, 255, 255, alpha};
+      const auto window_color = sf::Color{255, 255, 255, alpha};
+      auto background_color = __active->_properties._background_color;
       auto text_color = __active->_properties._text_color;
       text_color.a = alpha;
+      background_color.a = alpha;
 
-      __layers["window"]->_sprite->setColor(color);
+      __layers["window"]->_sprite->setColor(window_color);
+      __layers["background"]->_sprite->setColor(background_color);
+
       for (const auto& layer : __box_content_layers)
       {
-         layer->_sprite->setColor(color);
+         layer->_sprite->setColor(window_color);
       }
 
       __text.setFillColor(text_color);
