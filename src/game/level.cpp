@@ -609,7 +609,7 @@ void Level::loadState()
 
    if (checkpoint)
    {
-      auto pos = checkpoint->calcCenter();
+      auto pos = checkpoint->spawnPoint();
       _start_position.x = static_cast<float>(pos.x);
       _start_position.y = static_cast<float>(pos.y);
       Log::Info() << "move to checkpoint: " << checkpoint_index;
