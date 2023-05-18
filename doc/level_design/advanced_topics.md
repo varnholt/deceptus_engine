@@ -5,6 +5,7 @@
 Whenever Adam reaches a checkpoint, the current state of the game is saved. I.e. the player's current skills (such as double jump, wall slide, wall jump etc.) and the player's location within the level are serialized to disk. When the player dies later on, he would re-spawn at the last checkpoint.
 
 Checkpoints are implemented as simple rectangle objects inside your level. In order to add checkpoints to your level, define an object group '`checkpoints`' and add rectangles inside this group that have reasonable names. The last checkpoint, i.e. the end of your level, must have the name '`end`'.
+The rectangle dimensions should be `3 * 24` x `5 * 24`.
 
 Checkpoints have the custom properties below:
 
@@ -12,8 +13,8 @@ Checkpoints have the custom properties below:
 |-|-|-|
 |Object Name|string|If your Tiled 'Object Name' is called '`end`', the next level will be loaded after reaching the checkpoint.|
 |index|int|The index of your checkpoint. The player will always respawn at the last reached checkpoint with the largest index.|
-|sprite_pos_x_px|int|x position of the checkpoint sprite (given in px)|
-|sprite_pos_y_px|int|y position of the checkpoint sprite (given in px)|
+|sprite_pos_x_px|int|x position of the checkpoint sprite (given in px, optional - otherwise object position is used)|
+|sprite_pos_y_px|int|y position of the checkpoint sprite (given in px, optional - otherwise object position is used)|
 |z|int|The z index of the sprite layer|
 
 
