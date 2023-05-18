@@ -205,7 +205,7 @@ void Console::execute()
       auto checkpoint = Checkpoint::getCheckpoint(n, Level::getCurrentLevel()->getCheckpoints());
       if (checkpoint)
       {
-         const auto pos = checkpoint->calcCenter();
+         const auto pos = checkpoint->spawnPoint();
          os << "jumped to checkpoint " << n << std::endl;
 
          Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
