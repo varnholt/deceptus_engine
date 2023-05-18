@@ -130,8 +130,9 @@ void Audio::initializeMusic()
          // Log::Info() << entry.path();
       }
    }
-   catch (std::exception&)
+   catch (const std::exception& e)
    {
+      Log::Error() << e.what();
    }
 }
 

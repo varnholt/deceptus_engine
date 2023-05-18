@@ -16,8 +16,13 @@ struct TmxObject;
 
 class Checkpoint : public GameMechanism, public GameNode
 {
-
 public:
+   enum class State
+   {
+      Inactive,
+      Activating,
+      Active
+   };
 
    using CheckpointCallback = std::function<void(void)>;
 
@@ -36,9 +41,9 @@ public:
 
    void reached();
    void addCallback(CheckpointCallback);
-   sf::Vector2f calcCenter() const;
+   sf::Vector2f spawnPoint() const;
    int32_t getIndex() const;
-   void updateSpriteRect();
+   void updateSpriteRect(float dt_s = 0.0f);
 
 private:
    int32_t _index = 0;
@@ -47,7 +52,11 @@ private:
    bool _reached = false;
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
+   State _state{State::Inactive};
+   float _sprite_index{0.0f};
+   sf::Vector2f _spawn_point;
+   bool _tick_played = false;
+   bool _tock_played = false;
 
    std::vector<CheckpointCallback> _callbacks;
 };
-
