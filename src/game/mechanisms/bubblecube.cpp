@@ -41,26 +41,6 @@ static constexpr auto sprite_offset_y_px = -14;
 static constexpr auto collision_rect_height = 10;
 }  // namespace
 
-/*
-
-// make a spring distance joint
-b2DistanceJointDef jointDef;
-jointDef.bodyA = upperLegBody;
-jointDef.bodyB = lowerLegBody;
-jointDef.collideConnected = false;
-jointDef.frequencyHz = 4.0f;
-jointDef.dampingRatio = 0.5f;
-
-// create the joint
-b2DistanceJoint* joint = (b2DistanceJoint*)world->CreateJoint(&jointDef);
-
-// destroy
-world->DestroyJoint(myJoint);
-world->DestroyBody(body1);
-world->DestroyBody(body2);
-
-*/
-
 BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
    setClassName(typeid(BubbleCube).name());
@@ -149,6 +129,22 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    fixture_def.isSensor = false;
    _fixture = _body->CreateFixture(&fixture_def);
    _fixture->SetUserData(static_cast<void*>(this));
+
+   // pin the cube to its anchor
+   _anchor_def.position = b2Vec2(_position_m.x + width_m * 0.5f, _position_m.y - 0.1f);
+   _anchor_body = data._world->CreateBody(&_anchor_def);
+   auto anchor_fixture = _anchor_body->CreateFixture(&_anchor_a_shape, 0.0f);
+   anchor_fixture->SetSensor(true);
+
+   // make a spring distance joint
+   b2DistanceJointDef jointDef;
+   jointDef.Initialize(_body, _anchor_body, _body->GetWorldCenter(), _anchor_body->GetWorldCenter());
+   jointDef.collideConnected = false;
+   //   jointDef.frequencyHz = 4.0f;
+   //   jointDef.dampingRatio = 0.5f;
+
+   // create the joint
+   _spring_joint = dynamic_cast<b2DistanceJoint*>(data._world->CreateJoint(&jointDef));
 
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
@@ -258,11 +254,15 @@ void BubbleCube::updatePosition()
    const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
    _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
 
-   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f} + b2Vec2{0.0f, _push_down_offset_m};
+   //   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f} + b2Vec2{0.0f, _push_down_offset_m};
+   //   _body->SetTransform(_position_m + move_offset, 0.0f);
+   auto velocity = _body->GetLinearVelocity();
+   velocity.x = 0;
+   _body->SetLinearVelocity(velocity);
 
-   _body->SetTransform(_position_m + move_offset, 0.0f);
-
-   _sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_px);
+   //_sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_px);
+   const auto pos_px = PPM * _body->GetPosition();
+   _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px + _push_down_offset_px);
 }
 
 void BubbleCube::updateRespawnCondition()
@@ -434,7 +434,7 @@ void BubbleCube::update(const sf::Time& dt)
    _pop_elapsed_s += dt.asSeconds();
 
    updateFootSensorContact();
-   updatePushDownOffset(dt);
+   // updatePushDownOffset(dt);
    updatePosition();
    updateMaxDurationCondition(dt);
    updatePopOnCollisionCondition();
