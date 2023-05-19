@@ -41,6 +41,26 @@ static constexpr auto sprite_offset_y_px = -14;
 static constexpr auto collision_rect_height = 10;
 }  // namespace
 
+/*
+
+// make a spring distance joint
+b2DistanceJointDef jointDef;
+jointDef.bodyA = upperLegBody;
+jointDef.bodyB = lowerLegBody;
+jointDef.collideConnected = false;
+jointDef.frequencyHz = 4.0f;
+jointDef.dampingRatio = 0.5f;
+
+// create the joint
+b2DistanceJoint* joint = (b2DistanceJoint*)world->CreateJoint(&jointDef);
+
+// destroy
+world->DestroyJoint(myJoint);
+world->DestroyBody(body1);
+world->DestroyBody(body2);
+
+*/
+
 BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
    setClassName(typeid(BubbleCube).name());
@@ -118,7 +138,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    _position_m = MPP * b2Vec2{_x_px, _y_px};
 
    b2BodyDef body_def;
-   body_def.type = b2_staticBody;
+   body_def.type = b2_dynamicBody;
    body_def.position = _position_m;
    _body = data._world->CreateBody(&body_def);
 

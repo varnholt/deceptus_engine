@@ -85,5 +85,11 @@ private:
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2PolygonShape _shape;
+
+   // spring based approach
+   bool _spring_based{false};
+   b2BodyDef _anchor_a_def;
+   b2Body* _anchor_a_body{nullptr};
+   b2EdgeShape _anchor_a_shape;
 };
 
