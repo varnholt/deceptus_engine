@@ -88,8 +88,9 @@ private:
 
    // spring based approach
    bool _spring_based{false};
-   b2BodyDef _anchor_a_def;
-   b2Body* _anchor_a_body{nullptr};
+   b2BodyDef _anchor_def;
+   b2Body* _anchor_body{nullptr};
    b2EdgeShape _anchor_a_shape;
+   b2DistanceJoint* _spring_joint{nullptr};
 };
 
