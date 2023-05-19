@@ -4,7 +4,7 @@
 
 ### `b2Settings.h`
 
-Make sure that is `b2_maxPolygonVertices` set to `8`.
+Make sure that `b2_maxPolygonVertices` is set to `8`.
 
 ```cpp
 /// The maximum number of vertices on a convex polygon. You cannot increase
