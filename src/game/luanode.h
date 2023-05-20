@@ -117,7 +117,7 @@ struct LuaNode : public GameMechanism, public GameNode
    void setGravityScale(float scale);
 
    //! set the object's transform
-   void setTransform(const b2Vec2& position, float32 angle = 0.0);
+   void setTransform(const b2Vec2& position, float angle = 0.0);
 
    //! add a sprite
    void addSprite();

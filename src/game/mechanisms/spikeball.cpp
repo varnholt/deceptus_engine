@@ -242,7 +242,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
    const auto pos_m = b2Vec2{static_cast<float>(_pixel_position.x * MPP), static_cast<float>(_pixel_position.y * MPP)};
 
    _anchor_body = data._world->CreateBody(&_anchor_def);
-   _anchor_shape.Set(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
+   _anchor_shape.SetTwoSided(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
 
    b2FixtureDef fd;
    fd.shape = &_anchor_shape;
