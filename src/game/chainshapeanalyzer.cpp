@@ -65,7 +65,7 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
          auto chain = dynamic_cast<b2ChainShape*>(shape);
 
          auto object_type = ObjectType::ObjectTypeInvalid;
-         auto user_data = static_cast<FixtureNode*>(fixture->GetUserData());
+         auto user_data = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
          if (user_data)
          {
             object_type = user_data->getType();
