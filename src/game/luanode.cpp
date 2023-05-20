@@ -2135,7 +2135,7 @@ void LuaNode::setGravityScale(float scale)
    _body->SetGravityScale(scale);
 }
 
-void LuaNode::setTransform(const b2Vec2& position, float32 angle)
+void LuaNode::setTransform(const b2Vec2& position, float angle)
 {
    _body->SetTransform(position, angle);
 }
@@ -2159,21 +2159,21 @@ void LuaNode::setSpriteOffset(int32_t id, float x, float y)
 
 void LuaNode::setActive(bool active)
 {
-   _body->SetActive(active);
+   _body->SetEnabled(active);
 }
 
 void LuaNode::setDamageToPlayer(int32_t damage)
 {
    for (auto fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
-      auto user_data = fixture->GetUserData();
+      auto user_data = fixture->GetUserData().pointer;
 
       if (!user_data)
       {
          continue;
       }
 
-      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData());
+      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
       fixture_node->setProperty("damage", damage);
    }
 }
@@ -2220,7 +2220,7 @@ public:
       b2Fixture* fixture,
       const b2Vec2& /*point*/,
       const b2Vec2& /*normal*/,
-      float32 /*fraction*/
+      float /*fraction*/
    )
    {
       _bodies.push_back(fixture->GetBody());

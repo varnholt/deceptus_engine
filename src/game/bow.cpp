@@ -174,7 +174,7 @@ void Bow::update(const sf::Time& time)
    // apply drag force to arrows
    for (auto& arrow : _projectiles)
    {
-      if (!arrow->getBody()->IsActive())
+      if (!arrow->getBody()->IsEnabled())
       {
          continue;
       }

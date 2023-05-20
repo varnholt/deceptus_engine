@@ -170,9 +170,9 @@ void Gun::update(const sf::Time& time)
 
       if (projectile->isScheduledForInactivity())
       {
-         if (projectile->getBody()->IsActive())
+         if (projectile->getBody()->IsEnabled())
          {
-            projectile->getBody()->SetActive(false);
+            projectile->getBody()->SetEnabled(false);
          }
       }
    }

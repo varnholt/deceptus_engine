@@ -198,7 +198,7 @@ void OnOffBlock::update(const sf::Time& dt)
    {
       const auto enabled = _target_states.front();
       GameMechanism::setEnabled(enabled);
-      _body->SetActive(enabled);
+      _body->SetEnabled(enabled);
       _sprite_index_target = enabled ? _sprite_index_enabled : _sprite_index_disabled;
       _target_states.pop_front();
    }

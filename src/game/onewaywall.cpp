@@ -21,7 +21,7 @@ void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture)
 
    // if the head bounces against the one-sided wall, disable the contact
    // until there is no more contact with the head (EndContact), regardless of the velocity
-   if (player_fixture && player_fixture->GetUserData() && (static_cast<FixtureNode*>(player_fixture->GetUserData()))->hasFlag("head"))
+   if (player_fixture && player_fixture->GetUserData().pointer && (static_cast<FixtureNode*>(player_fixture->GetUserData().pointer))->hasFlag("head"))
    {
       contact->SetEnabled(false);
    }

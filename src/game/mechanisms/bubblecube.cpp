@@ -254,7 +254,7 @@ void BubbleCube::updateRespawnCondition()
       if (!Player::getCurrent()->getPixelRectFloat().intersects(_fixed_rect_px))
       {
          _popped = false;
-         _body->SetActive(true);
+         _body->SetEnabled(true);
       }
    }
 }
@@ -345,7 +345,7 @@ struct BubbleQueryCallback : public b2QueryCallback
 
    bool checkBelongsToPlayer(b2Fixture* fixture) const
    {
-      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData());
+      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
       if (!fixture_node)
       {
          return false;
@@ -440,7 +440,7 @@ void BubbleCube::pop()
    _collided_with_surrounding_areas = false;
    _jumped_off_this_platform = false;
 
-   _body->SetActive(false);
+   _body->SetEnabled(false);
 }
 
 // the box2d code path is no longer required and only kept for debugging purposes
