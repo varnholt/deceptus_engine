@@ -1455,7 +1455,12 @@ void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior
       for (auto index : face)
       {
          const auto& p = points[index];
-         chain.push_back({(p.x + layer->_offset_x_px) / PPM, (p.y + layer->_offset_y_px) / PPM});
+         const auto v = b2Vec2{(p.x + layer->_offset_x_px) / PPM, (p.y + layer->_offset_y_px) / PPM};
+
+         // box2D 2.4 changed the winding to clockwise, anything CCW will be fall-through
+         // chain.push_back(v);
+         chain.insert(chain.begin(), v);
+
          debug_path.push_back({p.x / PIXELS_PER_TILE, p.y / PIXELS_PER_TILE});
       }
 
