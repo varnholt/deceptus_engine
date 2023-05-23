@@ -32,10 +32,10 @@ Gun::Gun() : _shape(std::make_unique<b2CircleShape>())
 
 Gun::Gun(const WeaponProperties& properties) : _shape(std::move(properties._shape))
 {
-   _use_interval_ms = std::get<int32_t>(properties.read("use_interval_ms", 100));
-   _damage = std::get<int32_t>(properties.read("damage", 100));
-   _gravity_scale = std::get<float>(properties.read("gravity_scale", 0.0f));
-   _density = std::get<float>(properties.read("density", 1.0f));
+   _use_interval_ms = properties.read<int32_t>("use_interval_ms", 100);
+   _damage = properties.read<int32_t>("damage", 100);
+   _gravity_scale = properties.read<float>("gravity_scale", 0.0f);
+   _density = properties.read<float>("density", 1.0f);
 
    // start it so the elapsed timer is exceeded on first use
    _fire_clock.restart();

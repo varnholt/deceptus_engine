@@ -45,7 +45,7 @@ Bow::Bow(const WeaponProperties& properties)
 {
    _type = WeaponType::Bow;
 
-   const auto use_interval = std::get<int32_t>(properties.read("use_interval_ms", 1500));
+   const auto use_interval = properties.read<int32_t>("use_interval_ms", 1500);
    setUseIntervalMs(use_interval);
    setLauncherBody(properties._parent_body);
 
