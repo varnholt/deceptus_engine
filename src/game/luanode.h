@@ -214,5 +214,5 @@ struct LuaNode : public GameMechanism, public GameNode
    int32_t _damage_from_player{0};
    bool _dead{false};
 
-   std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
+   std::unordered_map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 };

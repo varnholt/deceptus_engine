@@ -1171,10 +1171,11 @@ int32_t addWeapon(lua_State* state)
 
    WeaponProperties properties;
    properties._parent_body = node->_body;
-   properties._damage = damage_value;
-   properties._fire_interval_ms = fire_interval;
    properties._shape = std::move(shape);
-   properties._gravity_scale = gravity_scale;
+
+   properties._properties["damage"] = damage_value;
+   properties._properties["use_interval_ms"] = fire_interval;
+   properties._properties["gravity_scale"] = gravity_scale;
 
    auto weapon = WeaponFactory::create(weapon_type, properties);
    node->addWeapon(std::move(weapon));
