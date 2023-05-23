@@ -3,20 +3,31 @@
 
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
+#include <variant>
 
 class b2Body;
 class b2Shape;
 
 struct WeaponProperties
 {
+   using PropertyTypes = std::variant<std::string, int32_t, float, bool>;
+
    b2Body* _parent_body{nullptr};
    mutable std::unique_ptr<b2Shape> _shape;
 
-   // todo
-   // the members below should rather be stored in a map holding variants
-   int32_t _fire_interval_ms{0};
-   int32_t _damage{0};
-   float _gravity_scale = 0.0f;
+   PropertyTypes read(const std::string& key, const PropertyTypes& default_value) const
+   {
+      const auto it = _properties.find(key);
+      if (it != _properties.end())
+      {
+         return it->second;
+      }
+
+      return default_value;
+   }
+
+   std::unordered_map<std::string, PropertyTypes> _properties;
 };
 
 #endif // WEAPONPROPERTIES_H

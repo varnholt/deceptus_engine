@@ -39,10 +39,15 @@ uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly;  // I collide
 int16_t group_index = 0;                                            // 0 is default
 }  // namespace
 
-Bow::Bow()
+WeaponProperties Bow::_default_properties;
+
+Bow::Bow(const WeaponProperties& properties)
 {
    _type = WeaponType::Bow;
-   _use_interval_ms = 1500;
+
+   const auto use_interval = std::get<int32_t>(properties.read("use_interval_ms", 1500));
+   setUseIntervalMs(use_interval);
+   setLauncherBody(properties._parent_body);
 
    // the shape is only defined here to align the texture on it
    _shape = std::make_unique<b2PolygonShape>();

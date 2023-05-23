@@ -30,12 +30,13 @@ Gun::Gun() : _shape(std::make_unique<b2CircleShape>())
    setProjectileAnimation(TexturePool::getInstance().get(_projectile_reference_animation._texture_path));
 }
 
-Gun::Gun(const WeaponProperties& properties)
-    : _shape(std::move(properties._shape)),
-      _use_interval_ms(properties._fire_interval_ms),
-      _damage(properties._damage),
-      _gravity_scale(properties._gravity_scale)
+Gun::Gun(const WeaponProperties& properties) : _shape(std::move(properties._shape))
 {
+   _use_interval_ms = std::get<int32_t>(properties.read("use_interval_ms", 100));
+   _damage = std::get<int32_t>(properties.read("damage", 100));
+   _gravity_scale = std::get<float>(properties.read("gravity_scale", 0.0f));
+   _density = std::get<float>(properties.read("density", 1.0f));
+
    // start it so the elapsed timer is exceeded on first use
    _fire_clock.restart();
 
@@ -64,7 +65,7 @@ void Gun::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
 
    b2FixtureDef fixture_definition;
    fixture_definition.shape = _shape.get();
-   fixture_definition.density = 1.0f;
+   fixture_definition.density = _density;
 
    fixture_definition.filter.groupIndex = group_index;
    fixture_definition.filter.maskBits = mask_bits_standing;
