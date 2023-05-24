@@ -66,8 +66,8 @@ struct B2_API b2FixtureDef
 		shape = nullptr;
 		friction = 0.2f;
 		restitution = 0.0f;
-		restitutionThreshold = 1.0f * b2_lengthUnitsPerMeter;
-		density = 0.0f;
+                restitutionThreshold = 0.1f * b2_lengthUnitsPerMeter;
+                density = 0.0f;
 		isSensor = false;
 	}
 
