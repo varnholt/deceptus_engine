@@ -47,6 +47,7 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Introduction](doc/level_design/mechanisms.md#mechanisms)<br>
 [Bouncers](doc/level_design/mechanisms.md#bouncers)<br>
 [Conveyor Belts](doc/level_design/mechanisms.md#conveyor-belts)<br>
+[Damage Rects](doc/level_design/mechanisms.md#damage-rects)<br>
 [Doors](doc/level_design/mechanisms.md#doors)<br>
 [Fans](doc/level_design/mechanisms.md#fans)<br>
 [Lasers](doc/level_design/mechanisms.md#lasers)<br>
@@ -98,6 +99,7 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 [Atmosphere Layers](doc/level_design/visual_effects.md#atmosphere-layers)<br>
 [Shader Quads](doc/level_design/visual_effects.md#shader-quads)<br>
 [Weather](doc/level_design/visual_effects.md#weather)<br>
+[Water Surfaces](doc/level_design/visual_effects.md#water-surfaces)<br>
 [Smoke / Fog](doc/level_design/visual_effects.md#smoke-fog)<br>
 [Dust](doc/level_design/visual_effects.md#dust)<br>
 [Ambient Occlusion](doc/level_design/visual_effects.md#ambient-occlusion)<br>
