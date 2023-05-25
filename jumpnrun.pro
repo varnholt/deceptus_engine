@@ -658,6 +658,7 @@ OTHER_FILES += \
     data/shaders/bumpmap_vert.glsl
 
 DISTFILES += \
+    README.md \
     data/config/camera.json \
     data/config/savestate.json \
     data/config/tweaks.json \
