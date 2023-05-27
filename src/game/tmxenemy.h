@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 
+#include "constants.h"
 #include "scriptproperty.h"
 
 struct TmxObject;
@@ -30,5 +31,6 @@ struct TmxEnemy
    bool _has_path = false;
    bool _inverse_path = false;
    std::vector<ScriptProperty> _properties;
+   Winding _winding = Winding::Clockwise;
 };
 

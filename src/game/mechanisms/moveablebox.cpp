@@ -159,11 +159,10 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
    _body = world->CreateBody(&body_def);
-   // mBody->SetGravityScale(0.0f);
 
    setupTransform();
 
-   auto fixture = _body->CreateFixture(&polygon_shape, 0);
+   auto fixture = _body->CreateFixture(&polygon_shape, 1.0);
    auto object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeMoveableBox);
    fixture->SetUserData(static_cast<void*>(object_data));

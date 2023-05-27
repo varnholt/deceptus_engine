@@ -82,12 +82,7 @@ void DebugDraw::drawSolidPolygon(
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawCircle(
-   sf::RenderTarget& target,
-   const b2Vec2& center,
-   float32 radius,
-   const b2Color& color
-)
+void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
@@ -101,7 +96,7 @@ void DebugDraw::drawCircle(
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center, float32 radius, const b2Color& color)
+void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center, float radius, const b2Color& color)
 {
    sf::CircleShape circle(radius);
    circle.setOrigin(radius, radius);
@@ -115,7 +110,7 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center,
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
+void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
    circle.setOrigin(radius * PPM, radius * PPM);
