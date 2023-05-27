@@ -297,3 +297,9 @@ enum class CallbackType
    EndGame,
    NextLevel
 };
+
+enum class Winding
+{
+   Clockwise,
+   CounterClockwise
+};
