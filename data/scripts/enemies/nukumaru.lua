@@ -14,6 +14,7 @@ properties = {
    sprite = "data/sprites/enemy_nukumaru.png",
    damage = 40,
    restitution = 1.0, -- maximum bounce
+   restitution_threshold = 0.1, -- bounce contact threshold
    density = 0.1
 }
 
