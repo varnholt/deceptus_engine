@@ -30,9 +30,9 @@
 
 namespace
 {
-uint16_t category_bits_default = CategoryEnemyWalkThrough;                      // I am a ...
-uint16_t mask_bits_default = CategoryBoundary | CategoryFriendly;               // I collide with ...
-int16_t group_index_default = 0;                                                // 0 is default
+uint16_t category_bits_default = CategoryEnemyWalkThrough;         // I am a ...
+uint16_t mask_bits_default = CategoryBoundary | CategoryFriendly;  // I collide with ...
+int16_t group_index_default = 0;                                   // 0 is default
 
 #define OBJINSTANCE LuaInterface::instance().getObject(state)
 
@@ -2281,6 +2281,7 @@ void LuaNode::setupBody()
    const auto sensor = static_cast<bool>(getPropertyBool("sensor"));
    const auto collides_with_player = static_cast<bool>(getPropertyBool("collides_with_player", true));
    const auto mask_bits = getPropertyBool("walk_through", true);
+   const auto restitution_threshold = static_cast<float>(getPropertyDouble("restitution_threshold", 1.0f * b2_lengthUnitsPerMeter));
 
    _body->SetTransform(b2Vec2{_start_position_px.x * MPP, _start_position_px.y * MPP}, 0.0f);
    _body->SetFixedRotation(true);
@@ -2292,6 +2293,7 @@ void LuaNode::setupBody()
       fd.density = density;
       fd.friction = friction;
       fd.restitution = restitution;
+      fd.restitutionThreshold = restitution_threshold;
       fd.shape = shape;
 
       // apply default filter
