@@ -39,10 +39,15 @@ uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly;  // I collide
 int16_t group_index = 0;                                            // 0 is default
 }  // namespace
 
-Bow::Bow()
+WeaponProperties Bow::_default_properties;
+
+Bow::Bow(const WeaponProperties& properties)
 {
    _type = WeaponType::Bow;
-   _use_interval_ms = 1500;
+
+   const auto use_interval = properties.read<int32_t>("use_interval_ms", 1500);
+   setUseIntervalMs(use_interval);
+   setLauncherBody(properties._parent_body);
 
    // the shape is only defined here to align the texture on it
    _shape = std::make_unique<b2PolygonShape>();
@@ -174,7 +179,7 @@ void Bow::update(const sf::Time& time)
    // apply drag force to arrows
    for (auto& arrow : _projectiles)
    {
-      if (!arrow->getBody()->IsActive())
+      if (!arrow->getBody()->IsEnabled())
       {
          continue;
       }

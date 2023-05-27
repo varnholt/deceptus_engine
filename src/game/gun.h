@@ -60,6 +60,7 @@ protected:
    int32_t _use_interval_ms{100};
    int32_t _damage{100};
    float _gravity_scale{0.0f};
+   float _density{1.0f};
 
    static sf::Rect<int32_t> _empty_rect;
 };

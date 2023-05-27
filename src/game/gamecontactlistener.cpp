@@ -304,8 +304,8 @@ void GameContactListener::processBeginContact(
 
 void GameContactListener::BeginContact(b2Contact* contact)
 {
-   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
-   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
+   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData().pointer;
+   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData().pointer;
    auto contact_fixture_a = contact->GetFixtureA();
    auto contact_fixture_b = contact->GetFixtureB();
 
@@ -501,8 +501,8 @@ void GameContactListener::processEndContact(
 
 void GameContactListener::EndContact(b2Contact* contact)
 {
-   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
-   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
+   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData().pointer;
+   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData().pointer;
 
    FixtureNode* fixture_node_a = nullptr;
    FixtureNode* fixture_node_b = nullptr;
@@ -581,8 +581,8 @@ void GameContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* 
 
    // check if the player hits something at a heigh speed or
    // if something hits the player at a nigh speed
-   auto user_data_a = contact->GetFixtureA()->GetUserData();
-   auto user_data_b = contact->GetFixtureB()->GetUserData();
+   auto user_data_a = contact->GetFixtureA()->GetUserData().pointer;
+   auto user_data_b = contact->GetFixtureB()->GetUserData().pointer;
 
    const auto impulse = contact_impulse->normalImpulses[0];
 
