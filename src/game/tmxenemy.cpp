@@ -146,9 +146,16 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
 
    if (_has_path)
    {
+      // path inversion depends on level winding
+      auto inverse_path = _inverse_path;
+      if (_winding == Winding::Clockwise)
+      {
+         inverse_path = !inverse_path;
+      }
+
       if (_inverse_path)
       {
-         for (const auto& v : _path)
+         for (const auto& v : std::ranges::views::reverse(_path))
          {
             _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
             _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
@@ -156,7 +163,7 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
       }
       else
       {
-         for (const auto& v : std::ranges::views::reverse(_path))
+         for (const auto& v : _path)
          {
             _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
             _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));

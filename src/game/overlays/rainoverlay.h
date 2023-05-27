@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "weatheroverlay.h"
 
 #include <cstdint>
@@ -71,6 +72,7 @@ private:
    std::vector<Edge> _edges;
 
    std::vector<DropHit> _hits;
+   Winding _winding = Winding::Clockwise;
 
    RainSettings _settings;
 };
