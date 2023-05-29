@@ -5,6 +5,7 @@ using json = nlohmann::json;
 void Health::reset()
 {
    _health = 12;
+   _stamina = 1.0f;
 }
 
 void Health::addHealth(int32_t health)
@@ -15,6 +16,14 @@ void Health::addHealth(int32_t health)
    {
       _health = _health_max;
    }
+}
+
+void Health::update(const sf::Time& dt)
+{
+   static constexpr auto stamina_reload_factor = 1.0f;
+
+   _stamina += stamina_reload_factor * dt.asSeconds();
+   _stamina = std::min(_stamina, 1.0f);
 }
 
 void to_json(nlohmann::json& j, const Health& d)
