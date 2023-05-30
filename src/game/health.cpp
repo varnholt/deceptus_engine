@@ -20,10 +20,29 @@ void Health::addHealth(int32_t health)
 
 void Health::update(const sf::Time& dt)
 {
-   static constexpr auto stamina_reload_factor = 1.0f;
+   static constexpr auto stamina_charge_factor = 1.0f;
+   static constexpr auto stamina_drain_factor = 1.0f;
 
-   _stamina += stamina_reload_factor * dt.asSeconds();
-   _stamina = std::min(_stamina, 1.0f);
+   if (_stamina_drains != 0)
+   {
+      _stamina -= stamina_drain_factor * dt.asSeconds();
+      _stamina = std::max(_stamina, 0.0f);
+   }
+   else
+   {
+      _stamina += stamina_charge_factor * dt.asSeconds();
+      _stamina = std::min(_stamina, 1.0f);
+   }
+}
+
+void Health::addStaminaDrain(StaminaDrain drain)
+{
+   _stamina_drains |= static_cast<int32_t>(drain);
+}
+
+void Health::removeStamineDrain(StaminaDrain drain)
+{
+   _stamina_drains &= ~static_cast<int32_t>(drain);
 }
 
 void to_json(nlohmann::json& j, const Health& d)

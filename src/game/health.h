@@ -10,10 +10,18 @@ struct Health
 {
    Health() = default;
 
+   enum class StaminaDrain
+   {
+      None = 0x0,
+      Dash = 0x1
+   };
+
    void reset();
 
    void addHealth(int32_t health);
    void update(const sf::Time& dt);
+   void addStaminaDrain(StaminaDrain);
+   void removeStamineDrain(StaminaDrain);
 
    int32_t _life_count = 5;
 
@@ -21,6 +29,7 @@ struct Health
    int32_t _health_max = 12;
 
    float _stamina{1.0f};
+   int32_t _stamina_drains{0};
 };
 
 void to_json(nlohmann::json& j, const Health& d);
