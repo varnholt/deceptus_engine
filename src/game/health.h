@@ -21,7 +21,8 @@ struct Health
    void addHealth(int32_t health);
    void update(const sf::Time& dt);
    void addStaminaDrain(StaminaDrain);
-   void removeStamineDrain(StaminaDrain);
+   void removeStaminaDrain(StaminaDrain);
+   bool hasFullStamina() const;
 
    int32_t _life_count = 5;
 
