@@ -64,10 +64,15 @@ void PlayerDash::update(const DashInput& input)
 
       // prevent dash spam 2: wait for dash time to elapse
       // this could be replaced by stamina part
-      // TODO stamina
       using namespace std::chrono_literals;
       const auto now = std::chrono::high_resolution_clock::now();
       if (now - _last_dash_time_point < 1s)
+      {
+         return;
+      }
+
+      // prevent dash spam 3: check player stamina
+      if (!SaveState::getPlayerInfo()._extra_table._health.hasFullStamina())
       {
          return;
       }
@@ -86,8 +91,7 @@ void PlayerDash::update(const DashInput& input)
       input.player_body->SetGravityScale(0.0);
 
       // drain stamina bar
-      // ...
-      // TODO stamina
+      SaveState::getPlayerInfo()._extra_table._health.addStaminaDrain(Health::StaminaDrain::Dash);
    }
 
    if (!hasMoreFrames() || _direction == Dash::None)
@@ -128,9 +132,7 @@ bool PlayerDash::hasMoreFrames() const
 void PlayerDash::reset(b2Body* player_body)
 {
    // stop draining stamina bar
-   // ...
-   // TODO stamina
-
+   SaveState::getPlayerInfo()._extra_table._health.removeStaminaDrain(Health::StaminaDrain::Dash);
    player_body->SetGravityScale(1.0f);
    _reset_dash_callback();
 }
