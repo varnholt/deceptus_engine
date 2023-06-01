@@ -158,7 +158,7 @@ void CollapsingPlatform::updateRespawnAnimation()
 
       _respawning = false;
       _collapsed = false;
-      _body->SetActive(true);
+      _body->SetEnabled(true);
    }
    else
    {
@@ -219,7 +219,7 @@ void CollapsingPlatform::collapse()
    _time_since_collapse = {};
 
    // disable the body so the player falls through
-   _body->SetActive(false);
+   _body->SetEnabled(false);
 }
 
 void CollapsingPlatform::updateBlockDestruction(const sf::Time& dt)

@@ -151,6 +151,7 @@ private:
    void updateWallslide(const sf::Time& dt);
    void updateWaterBubbles(const sf::Time& dt);
    void updateSpawn();
+   void updateHealth(const sf::Time& dt);
 
    void startHardLanding();
    void resetMotionBlur();

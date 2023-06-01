@@ -175,7 +175,7 @@ function throw()
    velocity = calculateVelocity(
       math.abs(_pos:getX() - _pos_player:getX()),
       60.0,
-      0.09
+      0.0015
    )
 
    velocity:setX(velocity:getX() * math.random(90, 110) * 0.01)

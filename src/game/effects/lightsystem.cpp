@@ -57,7 +57,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
          continue;
       }
 
-      if (!body->IsActive())
+      if (!body->IsEnabled())
       {
          continue;
       }
@@ -78,7 +78,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
          if (shape_circle)
          {
-            const auto center = shape_circle->GetVertex(0) + body->GetTransform().p;
+            const auto center = shape_circle->m_p + body->GetTransform().p;
             if ((light_pos_m - center).LengthSquared() > max_distance_m2)
                continue;
 
@@ -148,22 +148,22 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
          }
          else if (shape_polygon)
          {
-            for (auto pos_current = 0; pos_current < shape_polygon->GetVertexCount(); pos_current++)
+            for (auto pos_current = 0; pos_current < shape_polygon->GetChildCount(); pos_current++)
             {
                auto pos_next = pos_current + 1;
-               if (pos_next == shape_polygon->GetVertexCount())
+               if (pos_next == shape_polygon->GetChildCount())
                {
                   pos_next = 0;
                }
 
-               auto v0 = shape_polygon->GetVertex(pos_current) + body->GetTransform().p;
+               auto v0 = shape_polygon->m_vertices[pos_current] + body->GetTransform().p;
 
                if ((light_pos_m - v0).LengthSquared() > max_distance_m2)
                {
                   continue;
                }
 
-               const auto v1 = shape_polygon->GetVertex(pos_next) + body->GetTransform().p;
+               const auto v1 = shape_polygon->m_vertices[pos_next] + body->GetTransform().p;
                const auto v0far = 10000.0f * (v0 - light_pos_m);
                const auto v1far = 10000.0f * (v1 - light_pos_m);
 

@@ -197,7 +197,7 @@ void Rope::setup(const GameDeserializeData& data)
    // pin the rope to the starting point (anchor)
    auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
    _anchor_a_body = data._world->CreateBody(&_anchor_a_def);
-   _anchor_a_shape.Set(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
+   _anchor_a_shape.SetTwoSided(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
    auto anchor_fixture = _anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
    anchor_fixture->SetSensor(true);
 

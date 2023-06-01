@@ -30,12 +30,13 @@ Gun::Gun() : _shape(std::make_unique<b2CircleShape>())
    setProjectileAnimation(TexturePool::getInstance().get(_projectile_reference_animation._texture_path));
 }
 
-Gun::Gun(const WeaponProperties& properties)
-    : _shape(std::move(properties._shape)),
-      _use_interval_ms(properties._fire_interval_ms),
-      _damage(properties._damage),
-      _gravity_scale(properties._gravity_scale)
+Gun::Gun(const WeaponProperties& properties) : _shape(std::move(properties._shape))
 {
+   _use_interval_ms = properties.read<int32_t>("use_interval_ms", 100);
+   _damage = properties.read<int32_t>("damage", 100);
+   _gravity_scale = properties.read<float>("gravity_scale", 0.0f);
+   _density = properties.read<float>("density", 1.0f);
+
    // start it so the elapsed timer is exceeded on first use
    _fire_clock.restart();
 
@@ -64,11 +65,12 @@ void Gun::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
 
    b2FixtureDef fixture_definition;
    fixture_definition.shape = _shape.get();
-   fixture_definition.density = 0.0f;
+   fixture_definition.density = _density;
 
    fixture_definition.filter.groupIndex = group_index;
    fixture_definition.filter.maskBits = mask_bits_standing;
    fixture_definition.filter.categoryBits = category_bits;
+   auto fixture = bullet_body->CreateFixture(&fixture_definition);
 
    bullet_body->ApplyLinearImpulse(dir, pos, true);
 
@@ -88,7 +90,6 @@ void Gun::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
       projectile->setProjectileIdentifier(_projectile_reference_animation._identifier.value());
    }
 
-   auto fixture = bullet_body->CreateFixture(&fixture_definition);
    fixture->SetUserData(static_cast<void*>(projectile));
 
    // store projectile
@@ -170,9 +171,9 @@ void Gun::update(const sf::Time& time)
 
       if (projectile->isScheduledForInactivity())
       {
-         if (projectile->getBody()->IsActive())
+         if (projectile->getBody()->IsEnabled())
          {
-            projectile->getBody()->SetActive(false);
+            projectile->getBody()->SetEnabled(false);
          }
       }
    }
@@ -202,9 +203,9 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
-      _projectile_reference_animation._animation.setOrigin(
-         static_cast<float_t>(tmp_rect_px.width / 2), static_cast<float_t>(tmp_rect_px.height / 2)
-      );
+      const auto origin_x_px = static_cast<float>(tmp_rect_px.width / 2);
+      const auto origin_y_px = static_cast<float>(tmp_rect_px.height / 2);
+      _projectile_reference_animation._animation.setOrigin(origin_x_px, origin_y_px);
    }
 }
 

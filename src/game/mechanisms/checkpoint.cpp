@@ -138,7 +138,7 @@ void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(_sprite);
 
-   DebugDraw::drawRect(target, _rect);
+   //   DebugDraw::drawRect(target, _rect);
 }
 
 void Checkpoint::update(const sf::Time& dt)
