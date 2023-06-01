@@ -260,8 +260,8 @@ sf::FloatRect ConveyorBelt::getPixelRect() const
 
 void ConveyorBelt::processContact(b2Contact* contact)
 {
-   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData();
-   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData();
+   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData().pointer;
+   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData().pointer;
 
    if (fixture_user_data_a)
    {

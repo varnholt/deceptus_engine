@@ -30,9 +30,9 @@
 
 namespace
 {
-uint16_t category_bits_default = CategoryEnemyWalkThrough;                      // I am a ...
-uint16_t mask_bits_default = CategoryBoundary | CategoryFriendly;               // I collide with ...
-int16_t group_index_default = 0;                                                // 0 is default
+uint16_t category_bits_default = CategoryEnemyWalkThrough;         // I am a ...
+uint16_t mask_bits_default = CategoryBoundary | CategoryFriendly;  // I collide with ...
+int16_t group_index_default = 0;                                   // 0 is default
 
 #define OBJINSTANCE LuaInterface::instance().getObject(state)
 
@@ -1171,10 +1171,11 @@ int32_t addWeapon(lua_State* state)
 
    WeaponProperties properties;
    properties._parent_body = node->_body;
-   properties._damage = damage_value;
-   properties._fire_interval_ms = fire_interval;
    properties._shape = std::move(shape);
-   properties._gravity_scale = gravity_scale;
+
+   properties._properties["damage"] = damage_value;
+   properties._properties["use_interval_ms"] = fire_interval;
+   properties._properties["gravity_scale"] = gravity_scale;
 
    auto weapon = WeaponFactory::create(weapon_type, properties);
    node->addWeapon(std::move(weapon));
@@ -2135,7 +2136,7 @@ void LuaNode::setGravityScale(float scale)
    _body->SetGravityScale(scale);
 }
 
-void LuaNode::setTransform(const b2Vec2& position, float32 angle)
+void LuaNode::setTransform(const b2Vec2& position, float angle)
 {
    _body->SetTransform(position, angle);
 }
@@ -2159,21 +2160,21 @@ void LuaNode::setSpriteOffset(int32_t id, float x, float y)
 
 void LuaNode::setActive(bool active)
 {
-   _body->SetActive(active);
+   _body->SetEnabled(active);
 }
 
 void LuaNode::setDamageToPlayer(int32_t damage)
 {
    for (auto fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
-      auto user_data = fixture->GetUserData();
+      auto user_data = fixture->GetUserData().pointer;
 
       if (!user_data)
       {
          continue;
       }
 
-      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData());
+      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
       fixture_node->setProperty("damage", damage);
    }
 }
@@ -2220,7 +2221,7 @@ public:
       b2Fixture* fixture,
       const b2Vec2& /*point*/,
       const b2Vec2& /*normal*/,
-      float32 /*fraction*/
+      float /*fraction*/
    )
    {
       _bodies.push_back(fixture->GetBody());
@@ -2280,6 +2281,7 @@ void LuaNode::setupBody()
    const auto sensor = static_cast<bool>(getPropertyBool("sensor"));
    const auto collides_with_player = static_cast<bool>(getPropertyBool("collides_with_player", true));
    const auto mask_bits = getPropertyBool("walk_through", true);
+   const auto restitution_threshold = static_cast<float>(getPropertyDouble("restitution_threshold", 1.0f * b2_lengthUnitsPerMeter));
 
    _body->SetTransform(b2Vec2{_start_position_px.x * MPP, _start_position_px.y * MPP}, 0.0f);
    _body->SetFixedRotation(true);
@@ -2291,6 +2293,7 @@ void LuaNode::setupBody()
       fd.density = density;
       fd.friction = friction;
       fd.restitution = restitution;
+      fd.restitutionThreshold = restitution_threshold;
       fd.shape = shape;
 
       // apply default filter

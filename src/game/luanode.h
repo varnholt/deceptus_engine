@@ -117,7 +117,7 @@ struct LuaNode : public GameMechanism, public GameNode
    void setGravityScale(float scale);
 
    //! set the object's transform
-   void setTransform(const b2Vec2& position, float32 angle = 0.0);
+   void setTransform(const b2Vec2& position, float angle = 0.0);
 
    //! add a sprite
    void addSprite();
@@ -214,5 +214,5 @@ struct LuaNode : public GameMechanism, public GameNode
    int32_t _damage_from_player{0};
    bool _dead{false};
 
-   std::map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
+   std::unordered_map<std::string, std::variant<std::string, int64_t, double, bool>> _properties;
 };

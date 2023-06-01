@@ -162,7 +162,7 @@ function updateShootCondition()
                   0,
                   mPosition:getX() + (fireDir * 32),
                   mPosition:getY(),
-                  fireDir * 4.0,
+                  fireDir * 0.2,
                   0.0
                );
             end
