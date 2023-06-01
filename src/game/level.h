@@ -238,6 +238,7 @@ protected:
 
    std::shared_ptr<b2World> _world = nullptr;
    std::vector<std::vector<b2Vec2>> _world_chains;
+   Winding _winding = Winding::Clockwise;
 
    static Level* __current_level;
 };

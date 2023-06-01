@@ -322,8 +322,14 @@ void RainOverlay::determineRainSurfaces()
                      auto v1_m = offset + chain->m_vertices[i];
                      auto v2_m = offset + chain->m_vertices[i + 1];
 
+                     auto allow = (v2_m - v1_m).x < 0.0f;
+                     if (_winding == Winding::Clockwise)
+                     {
+                        allow = !allow;
+                     }
+
                      // filter out lines where the normal is facing down
-                     if ((v2_m - v1_m).x < 0.0f)
+                     if (allow)
                      {
                         // re-enable to debug colliding surfaces
                         // b2Color red(1,0,0);

@@ -56,15 +56,23 @@ void PlayerDash::update(const DashInput& input)
    // Dash::None is passed in on regular updates after the initial press
    if (dir != Dash::None)
    {
-      // prevent dash spam
+      // prevent dash spam 1: dash is still active
       if (hasMoreFrames())
       {
          return;
       }
 
+      // prevent dash spam 2: wait for dash time to elapse
+      // this could be replaced by stamina part
       using namespace std::chrono_literals;
       const auto now = std::chrono::high_resolution_clock::now();
       if (now - _last_dash_time_point < 1s)
+      {
+         return;
+      }
+
+      // prevent dash spam 3: check player stamina
+      if (!SaveState::getPlayerInfo()._extra_table._health.hasFullStamina())
       {
          return;
       }
@@ -81,6 +89,9 @@ void PlayerDash::update(const DashInput& input)
 
       keepLinearVelocity();
       input.player_body->SetGravityScale(0.0);
+
+      // drain stamina bar
+      SaveState::getPlayerInfo()._extra_table._health.addStaminaDrain(Health::StaminaDrain::Dash);
    }
 
    if (!hasMoreFrames() || _direction == Dash::None)
@@ -88,6 +99,7 @@ void PlayerDash::update(const DashInput& input)
       return;
    }
 
+   // apply force to player
    const auto left = (_direction == Dash::Left);
    input._points_to_left = left;
 
@@ -119,6 +131,8 @@ bool PlayerDash::hasMoreFrames() const
 
 void PlayerDash::reset(b2Body* player_body)
 {
+   // stop draining stamina bar
+   SaveState::getPlayerInfo()._extra_table._health.removeStaminaDrain(Health::StaminaDrain::Dash);
    player_body->SetGravityScale(1.0f);
    _reset_dash_callback();
 }

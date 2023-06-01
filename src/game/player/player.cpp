@@ -1592,6 +1592,12 @@ void Player::updateSpawn()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::updateHealth(const sf::Time& dt)
+{
+   SaveState::getPlayerInfo()._extra_table._health.update(dt);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
@@ -1601,6 +1607,7 @@ void Player::update(const sf::Time& dt)
    updatePixelRect();
    updateChunk();
 
+   updateHealth(dt);
    updateChainShapeCollisions();
    updateImpulse();
    updateGroundAngle();

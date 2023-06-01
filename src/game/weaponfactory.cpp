@@ -43,11 +43,7 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
    {
       case WeaponType::Bow:
       {
-         auto bow = std::make_unique<Bow>();
-
-         // todo: move weaponproperties into constructor
-         bow->setUseIntervalMs(properties._fire_interval_ms);
-         bow->setLauncherBody(properties._parent_body);
+         auto bow = std::make_unique<Bow>(properties);
          weapon = std::move(bow);
          break;
       }
