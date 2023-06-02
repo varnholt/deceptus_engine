@@ -45,6 +45,7 @@ private:
    void updateMaxDurationCondition(const sf::Time& dt);
    void updateFootSensorContact();
    void updateJumpedOffPlatformCondition();
+   void updateMotorSpeed(const sf::Time& dt);
 
    void pop();
 
@@ -91,6 +92,7 @@ private:
    b2BodyDef _anchor_def;
    b2Body* _anchor_body{nullptr};
    b2EdgeShape _anchor_a_shape;
-   b2DistanceJoint* _spring_joint{nullptr};
+   b2PrismaticJoint* _joint{nullptr};
+   float _motor_time_s{0.0f};
 };
 
