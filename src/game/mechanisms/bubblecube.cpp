@@ -35,7 +35,7 @@ static constexpr auto move_frequency = 4.19f;
 
 static constexpr auto pop_frequency = 15.0f;
 
-static constexpr auto sprite_offset_x_px = -30;
+static constexpr auto sprite_offset_x_px = -(width_px - bevel_px);
 static constexpr auto sprite_offset_y_px = -14;
 
 static constexpr auto collision_rect_height = 10;
@@ -115,12 +115,13 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    // create body
    _x_px = data._tmx_object->_x_px;
    _y_px = data._tmx_object->_y_px;
-   _position_m = MPP * b2Vec2{_x_px, _y_px};
+   _position_m = MPP* b2Vec2{_x_px - width_px / 2, _y_px};
 
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
    body_def.position = _position_m;
    _body = data._world->CreateBody(&body_def);
+   // _body->SetGravityScale(0.0f);
 
    // set up body fixture
    b2FixtureDef fixture_def;
@@ -136,15 +137,24 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    auto anchor_fixture = _anchor_body->CreateFixture(&_anchor_a_shape, 0.0f);
    anchor_fixture->SetSensor(true);
 
-   // make a spring distance joint
-   b2DistanceJointDef jointDef;
-   jointDef.Initialize(_body, _anchor_body, _body->GetWorldCenter(), _anchor_body->GetWorldCenter());
-   jointDef.collideConnected = false;
-   //   jointDef.frequencyHz = 4.0f;
-   //   jointDef.dampingRatio = 0.5f;
+   // Step 3: Define and create the prismatic joint
+   b2PrismaticJointDef prismaticJointDef;
+   prismaticJointDef.bodyA = _anchor_body;
+   prismaticJointDef.bodyB = _body;
+   prismaticJointDef.collideConnected = false;
 
-   // create the joint
-   _spring_joint = dynamic_cast<b2DistanceJoint*>(data._world->CreateJoint(&jointDef));
+   // Step 4: Set the local axis along the y-axis
+   prismaticJointDef.localAxisA.Set(0.0f, 1.0f);
+
+   // Step 5: Adjust other parameters of the prismatic joint
+   prismaticJointDef.enableLimit = true;
+   prismaticJointDef.lowerTranslation = 0.0f;  // Minimum allowed position along the y-axis
+   prismaticJointDef.upperTranslation = 2.0f;  // Maximum allowed position along the y-axis
+   prismaticJointDef.enableMotor = true;
+   prismaticJointDef.motorSpeed = 0.0f;      // Speed at which the body moves along the y-axis
+   prismaticJointDef.maxMotorForce = 10.0f;  // Maximum force applied by the motor
+
+   _joint = (b2PrismaticJoint*)data._world->CreateJoint(&prismaticJointDef);
 
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
@@ -198,7 +208,7 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    DebugDraw::drawRect(color, fixed_rect_moved_down_px, sf::Color::Green);
    DebugDraw::drawRect(color, moved_box_rect, sf::Color::Blue);
    DebugDraw::drawRect(color, Player::getCurrent()->computeFootSensorPixelIntRect(), sf::Color::Cyan);
-   DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionf() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
+   DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionFloat() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
 #endif
 }
 
@@ -254,15 +264,8 @@ void BubbleCube::updatePosition()
    const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
    _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
 
-   //   const auto move_offset = move_amplitude * sin(mapped_value) * b2Vec2{0.0f, 1.0f} + b2Vec2{0.0f, _push_down_offset_m};
-   //   _body->SetTransform(_position_m + move_offset, 0.0f);
-   auto velocity = _body->GetLinearVelocity();
-   velocity.x = 0;
-   _body->SetLinearVelocity(velocity);
-
-   //_sprite.setPosition(_x_px + sprite_offset_x_px, _y_px + sprite_offset_y_px + _push_down_offset_px);
    const auto pos_px = PPM * _body->GetPosition();
-   _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px + _push_down_offset_px);
+   _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px);
 }
 
 void BubbleCube::updateRespawnCondition()
@@ -296,6 +299,7 @@ void BubbleCube::updateFootSensorContact()
    // +---------------------+
    //          width
 
+   // disabled bevel
    constexpr auto bevel_range_increase_px = 2;
    _foot_collision_rect_px = {
       _x_px + bevel_px - bevel_range_increase_px,
@@ -306,7 +310,13 @@ void BubbleCube::updateFootSensorContact()
    auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
    auto player_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
 
-   if (player_intersects)
+   // TODO
+   // also check if player is moving down
+   // std::cout << Player::getCurrent()->getBody()->GetLinearVelocity().y << std::endl;
+
+   const auto player_moving_down = Player::getCurrent()->getBody()->GetLinearVelocity().y > 0.01f;
+
+   if (player_intersects && player_moving_down)
    {
       _foot_sensor_triggered_counter++;
    }
@@ -315,17 +325,19 @@ void BubbleCube::updateFootSensorContact()
    _sprite.setColor(sf::Color(255, _foot_sensor_triggered_counter ? 0 : 255, _foot_sensor_triggered_counter ? 0 : 255));
 #endif
 
-   if (_foot_sensor_triggered_counter > 0)
-   {
-      constexpr auto move_down_y_tolerance_px = 3;
-      auto rect = _fixed_rect_px;
-      rect.top += _push_down_offset_px - move_down_y_tolerance_px;
-
-      if (!foot_sensor_rect.intersects(rect))
-      {
-         _lost_foot_contact = true;
-      }
-   }
+   // only pop when player actually jumps off
+   //
+   //   if (_foot_sensor_triggered_counter > 0)
+   //   {
+   //      constexpr auto move_down_y_tolerance_px = 3;
+   //      auto rect = _fixed_rect_px;
+   //      rect.top += _push_down_offset_px - move_down_y_tolerance_px;
+   //
+   //      if (!foot_sensor_rect.intersects(rect))
+   //      {
+   //         _lost_foot_contact = true;
+   //      }
+   //   }
 }
 
 void BubbleCube::updateJumpedOffPlatformCondition()
@@ -341,6 +353,20 @@ void BubbleCube::updateJumpedOffPlatformCondition()
    if (first_jump_frame && intersects_box)
    {
       _jumped_off_this_platform = true;
+   }
+}
+
+void BubbleCube::updateMotorSpeed(const sf::Time& dt)
+{
+   if (_foot_sensor_triggered_counter > 0)
+   {
+      _motor_time_s += dt.asSeconds() * 10.0f;
+      _joint->SetMotorSpeed(sin(_motor_time_s));
+      _motor_time_s = std::min(_motor_time_s, static_cast<float>(2.0f * M_PI));
+   }
+   else
+   {
+      _motor_time_s *= 0.99f;
    }
 }
 
@@ -433,6 +459,7 @@ void BubbleCube::update(const sf::Time& dt)
    _elapsed_s += dt.asSeconds();
    _pop_elapsed_s += dt.asSeconds();
 
+   updateMotorSpeed(dt);
    updateFootSensorContact();
    // updatePushDownOffset(dt);
    updatePosition();
@@ -459,6 +486,7 @@ void BubbleCube::pop()
    _exceeded_max_contact_duration = false;
    _collided_with_surrounding_areas = false;
    _jumped_off_this_platform = false;
+   // _motor_time_s = 0.0f;
 
    _body->SetEnabled(false);
 }
