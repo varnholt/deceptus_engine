@@ -3,21 +3,24 @@
 // lua
 #include "lua/lua.hpp"
 
+// game
+#include "framework/tools/log.h"
+
 // stl
 #include <iostream>
 #include <sstream>
 
 namespace
 {
-std::vector<std::shared_ptr<LuaNode>>::iterator
-removeObject(const std::shared_ptr<LuaNode>& node, std::vector<std::shared_ptr<LuaNode>>& object_list)
+std::vector<std::shared_ptr<LuaNode>> _object_list;
+
+std::vector<std::shared_ptr<LuaNode>>::iterator removeObject(const std::shared_ptr<LuaNode>& node)
 {
-   const auto it = object_list.erase(std::remove(object_list.begin(), object_list.end(), node), object_list.end());
+   const auto it = _object_list.erase(std::remove(_object_list.begin(), _object_list.end(), node), _object_list.end());
 
    if (node.use_count() > 1)
    {
-      std::cout << "you fucked up. fix your code" << std::endl;
-      exit(0);
+      Log::Warning() << node->_script_name << " use count is: " << node.use_count() << " address: " << node.get();
    }
 
    return it;
@@ -54,7 +57,7 @@ void LuaInterface::update(const sf::Time& dt)
 
       if ((*it)->_dead)
       {
-         it = removeObject((*it), _object_list);
+         it = removeObject(*it);
       }
       else
       {

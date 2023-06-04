@@ -51,17 +51,18 @@ function updateSprite(dt)
       else
          col = 1
       end
+
    elseif (mTriggered and not mExploded) then
       if ((math.floor(mElapsed * 4)) % 2 == 0) then
          col = 3
       else
          col = 2
       end
-   elseif (mExploded) then
 
+   elseif (mExploded) then
       if (not mExplosionStarted) then
          mExplosionStarted = true
-         playDetonationAnimation(mPosition:getX(), mPosition:getY())
+         explode()
       end
 
       mExplosionFrame = mExplosionFrame + dt * 30.0
@@ -70,6 +71,7 @@ function updateSprite(dt)
       end
       row = 0
       col = math.floor(mExplosionFrame)
+
    elseif (mDone) then
       row = 1
       col = 4
@@ -106,15 +108,6 @@ end
 function timeout(id)
    if (id == mDetonationTimer) then
       mExploded = true
-      playSample("boom.wav", 1.0)
-      boom(0.0, 1.0, 1.0)
-
-      distanceToPlayer = mPlayerPosition - mPosition;
-      distanceToPlayerLength = (distanceToPlayer):getLength()
-      if (distanceToPlayerLength < mDamageDistance) then
-        damageVal = math.abs(mDamage * (mDamageDistance - distanceToPlayerLength) / mDamageDistance);
-        damage(damageVal, mExplosionStrength * distanceToPlayer:getX(), -mExplosionStrength * distanceToPlayer:getY())
-      end
    end
 end
 
@@ -134,6 +127,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
+
+   if (mDone) then
+      return
+   end
+
    mPlayerPosition = v2d.Vector2D(x, y)
    distanceToPlayer = (mPlayerPosition - mPosition):getLength()
 
@@ -153,5 +151,21 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setPath(name, table)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function explode()
+   playDetonationAnimation(mPosition:getX(), mPosition:getY())
+
+   playSample("boom.wav", 1.0)
+   boom(0.0, 1.0, 1.0)
+
+   distanceToPlayer = mPlayerPosition - mPosition;
+   distanceToPlayerLength = (distanceToPlayer):getLength()
+   if (distanceToPlayerLength < mDamageDistance) then
+     damageVal = math.abs(mDamage * (mDamageDistance - distanceToPlayerLength) / mDamageDistance);
+     damage(damageVal, mExplosionStrength * distanceToPlayer:getX(), -mExplosionStrength * distanceToPlayer:getY())
+   end
 end
 
