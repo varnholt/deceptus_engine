@@ -8,9 +8,7 @@
 
 class Timer
 {
-
 public:
-
    enum class Type
    {
       Singleshot,
@@ -47,8 +45,6 @@ public:
    std::shared_ptr<void> _caller;
 
 private:
-
    static std::vector<std::unique_ptr<Timer>> __timers;
    static std::mutex __mutex;
 };
-

@@ -10,8 +10,8 @@
 
 namespace
 {
-const std::string sfx_root = "data/sounds/";
-const std::string path = "data/music";
+const std::string sfx_path = "data/sounds/";
+const std::string music_path = "data/music";
 }  // namespace
 
 
@@ -42,7 +42,7 @@ Audio& Audio::getInstance()
 std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 {
    auto buf = std::make_shared<sf::SoundBuffer>();
-   if (!buf->loadFromFile(sfx_root + filename))
+   if (!buf->loadFromFile(sfx_path + filename))
    {
       Log::Error() << "unable to load file: " << filename;
    }
@@ -114,9 +114,14 @@ void Audio::initializeSamples()
 //-----------------------------------------------------------------------------
 void Audio::initializeMusic()
 {
+   if (!std::filesystem::exists(music_path))
+   {
+      return;
+   }
+
    try
    {
-      for (const auto& entry : std::filesystem::directory_iterator(path))
+      for (const auto& entry : std::filesystem::directory_iterator(music_path))
       {
          const auto path = entry.path().string();
 

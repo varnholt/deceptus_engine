@@ -2,10 +2,8 @@
 
 #include <algorithm>
 
-
 std::vector<std::unique_ptr<Timer>> Timer::__timers;
 std::mutex Timer::__mutex;
-
 
 void Timer::update(Scope scope)
 {
@@ -58,10 +56,9 @@ void Timer::update(Scope scope)
    );
 }
 
-
 void Timer::add(
    std::chrono::milliseconds interval,
-   std::function<void ()> callback,
+   std::function<void()> callback,
    Type type,
    Scope scope,
    const std::shared_ptr<void>& data,
@@ -82,18 +79,11 @@ void Timer::add(
    __timers.push_back(std::move(timer));
 }
 
-
 void Timer::removeByCaller(const std::shared_ptr<void>& caller)
 {
    std::lock_guard<std::mutex> guard(__mutex);
 
    __timers.erase(
-      std::remove_if(
-         __timers.begin(),
-         __timers.end(),
-         [caller](auto& timer) -> bool {return timer->_caller == caller;}
-      ),
-      __timers.end()
+      std::remove_if(__timers.begin(), __timers.end(), [caller](auto& timer) -> bool { return timer->_caller == caller; }), __timers.end()
    );
 }
-
