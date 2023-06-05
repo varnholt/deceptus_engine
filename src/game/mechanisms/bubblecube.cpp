@@ -121,7 +121,6 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    body_def.type = b2_dynamicBody;
    body_def.position = _position_m;
    _body = data._world->CreateBody(&body_def);
-   // _body->SetGravityScale(0.0f);
 
    // set up body fixture
    b2FixtureDef fixture_def;
@@ -149,7 +148,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    // Step 5: Adjust other parameters of the prismatic joint
    prismaticJointDef.enableLimit = true;
    prismaticJointDef.lowerTranslation = 0.0f;  // Minimum allowed position along the y-axis
-   prismaticJointDef.upperTranslation = 2.0f;  // Maximum allowed position along the y-axis
+   prismaticJointDef.upperTranslation = 100.0f;  // Maximum allowed position along the y-axis
    prismaticJointDef.enableMotor = true;
    prismaticJointDef.motorSpeed = 0.0f;      // Speed at which the body moves along the y-axis
    prismaticJointDef.maxMotorForce = 10.0f;  // Maximum force applied by the motor
@@ -210,28 +209,6 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    DebugDraw::drawRect(color, Player::getCurrent()->computeFootSensorPixelIntRect(), sf::Color::Cyan);
    DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionFloat() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
 #endif
-}
-
-void BubbleCube::updatePushDownOffset(const sf::Time& dt)
-{
-   // if configured, bubble moves down when the player stands on top of it
-   if (!_move_down_on_contact)
-   {
-      return;
-   }
-
-   const auto dt_s = std::max(dt.asSeconds(), 0.0166666666f);
-
-   if (_foot_sensor_triggered_counter > 0)
-   {
-      _push_down_offset_m += dt_s * _move_down_velocity;
-   }
-   else
-   {
-      _push_down_offset_m *= (1.0f - std::max(0.01f, dt_s * 10.0f));
-   }
-
-   _push_down_offset_px = _push_down_offset_m * PPM;
 }
 
 void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
@@ -307,16 +284,12 @@ void BubbleCube::updateFootSensorContact()
       width_px - (2 * bevel_px) + (2 * bevel_range_increase_px),
       collision_rect_height};
 
-   auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
-   auto player_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
-
-   // TODO
-   // also check if player is moving down
-   // std::cout << Player::getCurrent()->getBody()->GetLinearVelocity().y << std::endl;
+   const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
+   _foot_sensor_rect_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
 
    const auto player_moving_down = Player::getCurrent()->getBody()->GetLinearVelocity().y > 0.01f;
 
-   if (player_intersects && player_moving_down)
+   if (_foot_sensor_rect_intersects && player_moving_down)
    {
       _foot_sensor_triggered_counter++;
    }
@@ -324,20 +297,6 @@ void BubbleCube::updateFootSensorContact()
 #ifdef DEBUG_COLLISION_RECTS
    _sprite.setColor(sf::Color(255, _foot_sensor_triggered_counter ? 0 : 255, _foot_sensor_triggered_counter ? 0 : 255));
 #endif
-
-   // only pop when player actually jumps off
-   //
-   //   if (_foot_sensor_triggered_counter > 0)
-   //   {
-   //      constexpr auto move_down_y_tolerance_px = 3;
-   //      auto rect = _fixed_rect_px;
-   //      rect.top += _push_down_offset_px - move_down_y_tolerance_px;
-   //
-   //      if (!foot_sensor_rect.intersects(rect))
-   //      {
-   //         _lost_foot_contact = true;
-   //      }
-   //   }
 }
 
 void BubbleCube::updateJumpedOffPlatformCondition()
@@ -358,16 +317,26 @@ void BubbleCube::updateJumpedOffPlatformCondition()
 
 void BubbleCube::updateMotorSpeed(const sf::Time& dt)
 {
+   // TOOD
+   //
+   // when player just landed, show rotation
+   //
+   // when player is still on bubble, move down
+   //
+   // when player is off the bubble retract, even if it has been popped
+
    if (_foot_sensor_triggered_counter > 0)
    {
       _motor_time_s += dt.asSeconds() * 10.0f;
-      _joint->SetMotorSpeed(sin(_motor_time_s));
+      _motor_speed = sin(_motor_time_s);
       _motor_time_s = std::min(_motor_time_s, static_cast<float>(2.0f * M_PI));
    }
    else
    {
-      _motor_time_s *= 0.99f;
+      _motor_speed *= 0.99f;
    }
+
+   _joint->SetMotorSpeed(_motor_speed);
 }
 
 void BubbleCube::updatePoppedCondition()
@@ -461,7 +430,6 @@ void BubbleCube::update(const sf::Time& dt)
 
    updateMotorSpeed(dt);
    updateFootSensorContact();
-   // updatePushDownOffset(dt);
    updatePosition();
    updateMaxDurationCondition(dt);
    updatePopOnCollisionCondition();
@@ -486,8 +454,9 @@ void BubbleCube::pop()
    _exceeded_max_contact_duration = false;
    _collided_with_surrounding_areas = false;
    _jumped_off_this_platform = false;
-   // _motor_time_s = 0.0f;
-
+   _motor_time_s = 0.0f;
+   _motor_speed = 0.0f;
+   _foot_sensor_rect_intersects = false;
    _body->SetEnabled(false);
 }
 

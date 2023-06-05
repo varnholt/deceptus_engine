@@ -41,7 +41,6 @@ private:
    void updateRespawnCondition();
    void updatePoppedCondition();
    void updatePopOnCollisionCondition();
-   void updatePushDownOffset(const sf::Time& dt);
    void updateMaxDurationCondition(const sf::Time& dt);
    void updateFootSensorContact();
    void updateJumpedOffPlatformCondition();
@@ -66,6 +65,7 @@ private:
 
    int32_t _foot_sensor_triggered_counter = 0;
    bool _lost_foot_contact = false;
+   bool _foot_sensor_rect_intersects = false;
 
    // settings
    float _pop_time_respawn_s = 3.0f;
@@ -94,5 +94,6 @@ private:
    b2EdgeShape _anchor_a_shape;
    b2PrismaticJoint* _joint{nullptr};
    float _motor_time_s{0.0f};
+   float _motor_speed{0.0f};
 };
 
