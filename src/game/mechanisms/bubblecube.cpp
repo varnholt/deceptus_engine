@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-// #define DEBUG_COLLISION_RECTS 1
+#define DEBUG_COLLISION_RECTS 1
 
 #ifdef DEBUG_COLLISION_RECTS
 #include "debugdraw.h"
@@ -39,9 +39,11 @@ static constexpr auto sprite_offset_x_px = -(width_px - bevel_px);
 static constexpr auto sprite_offset_y_px = -14;
 
 static constexpr auto collision_rect_height = 10;
+
+auto instance_counter = 0;
 }  // namespace
 
-BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
+BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent), _instance_id(instance_counter++)
 {
    setClassName(typeid(BubbleCube).name());
    setType(ObjectTypeBubbleCube);
@@ -218,7 +220,7 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
       return;
    }
 
-   if (_foot_sensor_triggered_counter == 0)
+   if (!_foot_sensor_rect_intersects)
    {
       return;
    }
@@ -277,25 +279,20 @@ void BubbleCube::updateFootSensorContact()
    //          width
 
    // disabled bevel
+   const auto pos_px = PPM * _body->GetPosition();
    constexpr auto bevel_range_increase_px = 2;
    _foot_collision_rect_px = {
-      _x_px + bevel_px - bevel_range_increase_px,
-      _y_px + _push_down_offset_px,
+      pos_px.x + bevel_px - bevel_range_increase_px,
+      pos_px.y,
       width_px - (2 * bevel_px) + (2 * bevel_range_increase_px),
       collision_rect_height};
 
    const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
+   _foot_sensor_rect_intersects_previous = _foot_sensor_rect_intersects;
    _foot_sensor_rect_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
 
-   const auto player_moving_down = Player::getCurrent()->getBody()->GetLinearVelocity().y > 0.01f;
-
-   if (_foot_sensor_rect_intersects && player_moving_down)
-   {
-      _foot_sensor_triggered_counter++;
-   }
-
 #ifdef DEBUG_COLLISION_RECTS
-   _sprite.setColor(sf::Color(255, _foot_sensor_triggered_counter ? 0 : 255, _foot_sensor_triggered_counter ? 0 : 255));
+   _sprite.setColor(sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255));
 #endif
 }
 
@@ -317,23 +314,43 @@ void BubbleCube::updateJumpedOffPlatformCondition()
 
 void BubbleCube::updateMotorSpeed(const sf::Time& dt)
 {
-   // TOOD
-   //
-   // when player just landed, show rotation
-   //
-   // when player is still on bubble, move down
-   //
-   // when player is off the bubble retract, even if it has been popped
+   constexpr auto motor_speed_factor = 10.0f;
 
-   if (_foot_sensor_triggered_counter > 0)
+   _motor_time_s += dt.asSeconds();
+
+   if (_foot_sensor_rect_intersects)
    {
-      _motor_time_s += dt.asSeconds() * 10.0f;
-      _motor_speed = sin(_motor_time_s);
-      _motor_time_s = std::min(_motor_time_s, static_cast<float>(2.0f * M_PI));
+      // reset motor time when player just landed
+      if (!_foot_sensor_rect_intersects_previous)
+      {
+         _motor_time_s = 0;
+      }
+
+      const auto motor_time_scaled = _motor_time_s * motor_speed_factor;
+      if (motor_time_scaled < 2.0f * M_PI)
+      {
+         // when player just landed, show rotation
+         _motor_speed = sin(motor_time_scaled);
+      }
+      else
+      {
+         // when player is still on bubble, move down
+         _motor_speed = 0.3f;
+      }
    }
    else
    {
-      _motor_speed *= 0.99f;
+      // when player is off the bubble retract, even if it has been popped
+      _motor_speed = -0.3f;
+   }
+
+   if (_instance_id == 0)
+   {
+      static int32_t frameskip = 0;
+      if (++frameskip % 10 == 0)
+      {
+         std::cout << _motor_speed << std::endl;
+      }
    }
 
    _joint->SetMotorSpeed(_motor_speed);
@@ -414,7 +431,7 @@ void BubbleCube::updatePopOnCollisionCondition()
    }
 
    // check for collisions with surrounding areas
-   if (!_popped && _move_down_on_contact && (_foot_sensor_triggered_counter > 0))
+   if (!_popped && _move_down_on_contact && _foot_sensor_rect_intersects)
    {
       if (countBodies() > _colliding_body_count)
       {
@@ -450,7 +467,6 @@ void BubbleCube::pop()
    _pop_elapsed_s = 0.0f;
 
    _lost_foot_contact = false;
-   _foot_sensor_triggered_counter = 0;
    _exceeded_max_contact_duration = false;
    _collided_with_surrounding_areas = false;
    _jumped_off_this_platform = false;
@@ -464,30 +480,8 @@ void BubbleCube::pop()
 
 void BubbleCube::beginContact(b2Contact* /*contact*/, FixtureNode* other)
 {
-   if (other->getType() != ObjectTypePlayerFootSensor)
-   {
-      return;
-   }
-
-   if (_popped)
-   {
-      return;
-   }
-
-   _foot_sensor_contact = true;
 }
 
 void BubbleCube::endContact(FixtureNode* other)
 {
-   if (other->getType() != ObjectTypePlayerFootSensor)
-   {
-      return;
-   }
-
-   if (_popped)
-   {
-      return;
-   }
-
-   _foot_sensor_contact = false;
 }

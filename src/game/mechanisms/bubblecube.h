@@ -48,6 +48,7 @@ private:
 
    void pop();
 
+   int32_t _instance_id = 0;
    float _x_px = 0.0f;
    float _y_px = 0.0f;
    float _push_down_offset_px = 0.0f;
@@ -57,15 +58,14 @@ private:
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
    bool _popped = false;
-   bool _foot_sensor_contact = false;
    bool _exceeded_max_contact_duration = false;
    bool _collided_with_surrounding_areas = false;
    bool _jumped_off_this_platform = false;
    std::optional<size_t> _colliding_body_count;
 
-   int32_t _foot_sensor_triggered_counter = 0;
    bool _lost_foot_contact = false;
    bool _foot_sensor_rect_intersects = false;
+   bool _foot_sensor_rect_intersects_previous = false;
 
    // settings
    float _pop_time_respawn_s = 3.0f;
