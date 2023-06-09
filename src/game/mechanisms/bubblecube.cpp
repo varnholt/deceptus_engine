@@ -161,7 +161,8 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
    _sprite.setTexture(*_texture);
 
-   _fixed_rect_px = {data._tmx_object->_x_px, data._tmx_object->_y_px, width_px, height_px};
+   _original_rect_px = {data._tmx_object->_x_px, data._tmx_object->_y_px, width_px, height_px};
+   _translated_rect_px = _original_rect_px;
 }
 
 // 12 x 4 boxes per row
@@ -198,16 +199,9 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_sprite);
 
 #ifdef DEBUG_COLLISION_RECTS
-   auto fixed_rect_moved_down_px = _fixed_rect_px;
-   fixed_rect_moved_down_px.top += static_cast<int32_t>(_push_down_offset_px);
-   auto moved_box_rect = _fixed_rect_px;
-   moved_box_rect.top = moved_box_rect.top - 12;
-   moved_box_rect.left -= 8;
-   moved_box_rect.width += 8 * 2;
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);
-   DebugDraw::drawRect(color, _fixed_rect_px, sf::Color::Green);
-   DebugDraw::drawRect(color, fixed_rect_moved_down_px, sf::Color::Green);
-   DebugDraw::drawRect(color, moved_box_rect, sf::Color::Blue);
+   DebugDraw::drawRect(color, _original_rect_px, sf::Color::Green);
+   DebugDraw::drawRect(color, _jump_off_collision_rect_px, sf::Color::Blue);
    DebugDraw::drawRect(color, Player::getCurrent()->computeFootSensorPixelIntRect(), sf::Color::Cyan);
    DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionFloat() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
 #endif
@@ -238,13 +232,19 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
    }
 }
 
-void BubbleCube::updatePosition()
+void BubbleCube::updateSpriteIndex()
 {
    const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
    _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
+}
 
+void BubbleCube::updatePosition()
+{
    const auto pos_px = PPM * _body->GetPosition();
    _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px);
+
+   // move translated rect along body position
+   _translated_rect_px.top = _body->GetPosition().y * PPM;
 }
 
 void BubbleCube::updateRespawnCondition()
@@ -253,7 +253,7 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-      if (!Player::getCurrent()->getPixelRectFloat().intersects(_fixed_rect_px))
+      if (!Player::getCurrent()->getPixelRectFloat().intersects(_original_rect_px))
       {
          _popped = false;
          _body->SetEnabled(true);
@@ -298,15 +298,15 @@ void BubbleCube::updateFootSensorContact()
 
 void BubbleCube::updateJumpedOffPlatformCondition()
 {
-   auto moved_box_rect = _fixed_rect_px;
-   moved_box_rect.top = moved_box_rect.top - 12;
-   moved_box_rect.left -= 8;
-   moved_box_rect.width += 8 * 2;
+   _jump_off_collision_rect_px = _translated_rect_px;
+   _jump_off_collision_rect_px.top -= 12;
+   _jump_off_collision_rect_px.left -= 8;
+   _jump_off_collision_rect_px.width += 8 * 2;
 
    const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
-   const auto intersects_box = moved_box_rect.intersects(Player::getCurrent()->computeFootSensorPixelFloatRect());
+   const auto intersects = _jump_off_collision_rect_px.intersects(Player::getCurrent()->computeFootSensorPixelFloatRect());
 
-   if (first_jump_frame && intersects_box)
+   if (first_jump_frame && intersects)
    {
       _jumped_off_this_platform = true;
    }
@@ -344,14 +344,18 @@ void BubbleCube::updateMotorSpeed(const sf::Time& dt)
       _motor_speed = -0.3f;
    }
 
-   if (_instance_id == 0)
-   {
-      static int32_t frameskip = 0;
-      if (++frameskip % 10 == 0)
-      {
-         std::cout << _motor_speed << std::endl;
-      }
-   }
+   // bug: when player is out of green arrow, bubble popping does no longer work
+   // bug: after popped, bubble has to move back to original position immediately
+   // feature: when bubble respawns, it should fade in
+
+   //   if (_instance_id == 0)
+   //   {
+   //      static int32_t frameskip = 0;
+   //      if (++frameskip % 10 == 0)
+   //      {
+   //         std::cout << _motor_speed << std::endl;
+   //      }
+   //   }
 
    _joint->SetMotorSpeed(_motor_speed);
 }
@@ -445,9 +449,10 @@ void BubbleCube::update(const sf::Time& dt)
    _elapsed_s += dt.asSeconds();
    _pop_elapsed_s += dt.asSeconds();
 
+   updateSpriteIndex();
+   updatePosition();
    updateMotorSpeed(dt);
    updateFootSensorContact();
-   updatePosition();
    updateMaxDurationCondition(dt);
    updatePopOnCollisionCondition();
    updatePoppedCondition();
@@ -457,7 +462,7 @@ void BubbleCube::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> BubbleCube::getBoundingBoxPx()
 {
-   return _fixed_rect_px;
+   return _original_rect_px;
 }
 
 void BubbleCube::pop()
