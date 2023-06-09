@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#define DEBUG_COLLISION_RECTS 1
+// #define DEBUG_COLLISION_RECTS 1
 
 #ifdef DEBUG_COLLISION_RECTS
 #include "debugdraw.h"
@@ -30,7 +30,6 @@ static constexpr auto columns = 12;
 static constexpr auto tiles_per_box_width = 4;
 static constexpr auto tiles_per_box_height = 3;
 
-static constexpr auto move_amplitude = 0.08f;
 static constexpr auto move_frequency = 4.19f;
 
 static constexpr auto pop_frequency = 15.0f;
@@ -64,16 +63,16 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
          _pop_time_respawn_s = pop_time_respawn_it->second->_value_float.value();
       }
 
-      const auto move_down_on_contact_it = data._tmx_object->_properties->_map.find("move_down_on_contact");
-      if (move_down_on_contact_it != data._tmx_object->_properties->_map.end())
-      {
-         _move_down_on_contact = move_down_on_contact_it->second->_value_bool.value();
-      }
-
       const auto move_down_velocity_it = data._tmx_object->_properties->_map.find("move_down_velocity");
       if (move_down_velocity_it != data._tmx_object->_properties->_map.end())
       {
          _move_down_velocity = move_down_velocity_it->second->_value_float.value();
+      }
+
+      const auto move_up_velocity_it = data._tmx_object->_properties->_map.find("move_up_velocity");
+      if (move_up_velocity_it != data._tmx_object->_properties->_map.end())
+      {
+         _move_up_velocity = move_up_velocity_it->second->_value_float.value();
       }
 
       const auto maximum_contact_duration_s_it = data._tmx_object->_properties->_map.find("maximum_contact_duration_s");
@@ -149,7 +148,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
 
    // Step 5: Adjust other parameters of the prismatic joint
    prismaticJointDef.enableLimit = true;
-   prismaticJointDef.lowerTranslation = 0.0f;  // Minimum allowed position along the y-axis
+   prismaticJointDef.lowerTranslation = 0.0f;    // Minimum allowed position along the y-axis
    prismaticJointDef.upperTranslation = 100.0f;  // Maximum allowed position along the y-axis
    prismaticJointDef.enableMotor = true;
    prismaticJointDef.motorSpeed = 0.0f;      // Speed at which the body moves along the y-axis
@@ -250,15 +249,26 @@ void BubbleCube::updatePosition()
 void BubbleCube::updateRespawnCondition()
 {
    // respawn when the time has come
-   if (_popped && (GlobalClock::getInstance().getElapsedTime() - _pop_time).asSeconds() > _pop_time_respawn_s)
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+   if (_popped && (now - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
       if (!Player::getCurrent()->getPixelRectFloat().intersects(_original_rect_px))
       {
          _popped = false;
          _body->SetEnabled(true);
+         _body->SetTransform(_position_m, 0.0f);
+         _respawn_time = GlobalClock::getInstance().getElapsedTime();
       }
    }
+
+   constexpr auto respawn_speed = 1.0f;
+
+   // update alpha
+   _alpha = std::min((now - _respawn_time).asSeconds() * respawn_speed, 1.0f);
+   auto color = _sprite.getColor();
+   color.a = static_cast<uint8_t>(_alpha * 255);
+   _sprite.setColor(color);
 }
 
 void BubbleCube::updateFootSensorContact()
@@ -292,7 +302,7 @@ void BubbleCube::updateFootSensorContact()
    _foot_sensor_rect_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
 
 #ifdef DEBUG_COLLISION_RECTS
-   _sprite.setColor(sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255));
+   _sprite.setColor(sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255, _alpha * 255));
 #endif
 }
 
@@ -335,18 +345,14 @@ void BubbleCube::updateMotorSpeed(const sf::Time& dt)
       else
       {
          // when player is still on bubble, move down
-         _motor_speed = 0.3f;
+         _motor_speed = _move_down_velocity;
       }
    }
    else
    {
       // when player is off the bubble retract, even if it has been popped
-      _motor_speed = -0.3f;
+      _motor_speed = _move_up_velocity;
    }
-
-   // bug: when player is out of green arrow, bubble popping does no longer work
-   // bug: after popped, bubble has to move back to original position immediately
-   // feature: when bubble respawns, it should fade in
 
    //   if (_instance_id == 0)
    //   {
@@ -416,16 +422,27 @@ struct BubbleQueryCallback : public b2QueryCallback
 
 void BubbleCube::updatePopOnCollisionCondition()
 {
+   // during the first few rendering cycles the objects might not be placed correctly yet
+   // so hold yer horses for a second (literally) and then initialize the colliding body count
+   static auto _frame_counter = 0;
+   _frame_counter++;
+
+   if (_frame_counter < 60)
+   {
+      return;
+   }
+
    // make the bubble pop when it's moved into another body
    auto countBodies = [this]() -> size_t
    {
       BubbleQueryCallback query_callback;
       query_callback._max_count = _colliding_body_count;
       query_callback._body = _body;
-      b2AABB aabb;
-      _fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+
+      const auto aabb = _fixture->GetAABB(0);
       Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
-      return query_callback._bodies.size();
+      const auto bodies = query_callback._bodies;
+      return bodies.size();
    };
 
    // this is going to be the reference count of bodies for future checks
@@ -435,7 +452,7 @@ void BubbleCube::updatePopOnCollisionCondition()
    }
 
    // check for collisions with surrounding areas
-   if (!_popped && _move_down_on_contact && _foot_sensor_rect_intersects)
+   if (!_popped && _foot_sensor_rect_intersects)
    {
       if (countBodies() > _colliding_body_count)
       {

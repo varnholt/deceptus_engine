@@ -221,8 +221,8 @@ The rectangle object's dimensions (including margin) are 3 x 2 tiles so it makes
 |-|-|-|
 |animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
 |pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`).|
-|move_down_on_contact|bool|The bubble moves down on foot contact (the default is `true`).|
-|move_down_velocity|float|A factor to control the movement velocity when `move_down_on_contact` is enabled (the default is `0.5`).|
+|move_down_velocity|float|Controls the movement velocity when the player is standing on the bubble (the default is `0.5`).|
+|move_up_velocity|float|Controls the movement velocity (back up) when the player is no longer standing on the bubble (the default is `0.5`).|
 |maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
 |z|int|The object's z index|
 
