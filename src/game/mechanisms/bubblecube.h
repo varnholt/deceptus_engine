@@ -58,6 +58,8 @@ private:
    float _elapsed_s = 0.0f;
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
+   sf::Time _respawn_time;
+   float _alpha = 1.0f;
    bool _popped = false;
    bool _exceeded_max_contact_duration = false;
    bool _collided_with_surrounding_areas = false;
@@ -72,8 +74,8 @@ private:
    float _pop_time_respawn_s = 3.0f;
    float _animation_offset_s = 0.0f;
    float _mapped_value_normalized = 0.0f;
-   bool _move_down_on_contact = true;
    float _move_down_velocity = 0.5f;
+   float _move_up_velocity = -0.3f;
    float _push_down_offset_m = 0.0f;
    float _contact_duration_s = 0.0f;
    std::optional<float> _maximum_contact_duration_s;
