@@ -51,9 +51,10 @@ private:
    int32_t _instance_id = 0;
    float _x_px = 0.0f;
    float _y_px = 0.0f;
-   float _push_down_offset_px = 0.0f;
-   sf::FloatRect _fixed_rect_px;
+   sf::FloatRect _original_rect_px;
+   sf::FloatRect _translated_rect_px;
    sf::FloatRect _foot_collision_rect_px;
+   sf::FloatRect _jump_off_collision_rect_px;
    float _elapsed_s = 0.0f;
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
@@ -95,5 +96,5 @@ private:
    b2PrismaticJoint* _joint{nullptr};
    float _motor_time_s{0.0f};
    float _motor_speed{0.0f};
+   void updateSpriteIndex();
 };
-
