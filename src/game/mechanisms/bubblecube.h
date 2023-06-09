@@ -41,37 +41,41 @@ private:
    void updateRespawnCondition();
    void updatePoppedCondition();
    void updatePopOnCollisionCondition();
-   void updatePushDownOffset(const sf::Time& dt);
    void updateMaxDurationCondition(const sf::Time& dt);
    void updateFootSensorContact();
    void updateJumpedOffPlatformCondition();
+   void updateMotorSpeed(const sf::Time& dt);
 
    void pop();
 
+   int32_t _instance_id = 0;
    float _x_px = 0.0f;
    float _y_px = 0.0f;
-   float _push_down_offset_px = 0.0f;
-   sf::FloatRect _fixed_rect_px;
+   sf::FloatRect _original_rect_px;
+   sf::FloatRect _translated_rect_px;
    sf::FloatRect _foot_collision_rect_px;
+   sf::FloatRect _jump_off_collision_rect_px;
    float _elapsed_s = 0.0f;
    float _pop_elapsed_s = 0.0f;
    sf::Time _pop_time;
+   sf::Time _respawn_time;
+   float _alpha = 1.0f;
    bool _popped = false;
-   bool _foot_sensor_contact = false;
    bool _exceeded_max_contact_duration = false;
    bool _collided_with_surrounding_areas = false;
    bool _jumped_off_this_platform = false;
    std::optional<size_t> _colliding_body_count;
 
-   int32_t _foot_sensor_triggered_counter = 0;
    bool _lost_foot_contact = false;
+   bool _foot_sensor_rect_intersects = false;
+   bool _foot_sensor_rect_intersects_previous = false;
 
    // settings
    float _pop_time_respawn_s = 3.0f;
    float _animation_offset_s = 0.0f;
    float _mapped_value_normalized = 0.0f;
-   bool _move_down_on_contact = true;
    float _move_down_velocity = 0.5f;
+   float _move_up_velocity = -0.3f;
    float _push_down_offset_m = 0.0f;
    float _contact_duration_s = 0.0f;
    std::optional<float> _maximum_contact_duration_s;
@@ -85,5 +89,14 @@ private:
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2PolygonShape _shape;
-};
 
+   // spring based approach
+   bool _spring_based{false};
+   b2BodyDef _anchor_def;
+   b2Body* _anchor_body{nullptr};
+   b2EdgeShape _anchor_a_shape;
+   b2PrismaticJoint* _joint{nullptr};
+   float _motor_time_s{0.0f};
+   float _motor_speed{0.0f};
+   void updateSpriteIndex();
+};
