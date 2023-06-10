@@ -265,12 +265,10 @@ bool PlayerControls::isMovingLeft() const
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      const auto& axisValues = _joystick_info.getAxisValues();
-
+      const auto& axis_values = _joystick_info.getAxisValues();
       const auto axis_left_x = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-      auto xl = axisValues[static_cast<size_t>(axis_left_x)] / 32767.0f;
+      auto xl = axis_values[static_cast<size_t>(axis_left_x)] / 32767.0f;
       const auto hat_value = _joystick_info.getHatValues().at(0);
-
       const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
       const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
 
