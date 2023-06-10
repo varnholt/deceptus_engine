@@ -1,6 +1,6 @@
 #pragma once
 
-#include "playercontrols.h"
+#include "game/player/playercontrols.h"
 
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
