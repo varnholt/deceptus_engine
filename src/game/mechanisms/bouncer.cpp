@@ -110,10 +110,10 @@ void Bouncer::update(const sf::Time& /*dt*/)
 {
    updatePlayerAtBouncer();
 
-   auto now = GlobalClock::getInstance().getElapsedTime();
-   auto delta = (now - _activation_time).asMilliseconds();
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+   const auto delta_ms = (now - _activation_time).asMilliseconds();
 
-   auto step = static_cast<int32_t>(delta * 0.02f);
+   auto step = static_cast<int32_t>(delta_ms * 0.02f);
    if (step > 9)
    {
       step = 0;
@@ -134,32 +134,33 @@ bool Bouncer::isPlayerAtBouncer()
 
 void Bouncer::activate()
 {
-   auto now = GlobalClock::getInstance().getElapsedTime();
-   auto delta = (now - _activation_time).asSeconds();
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+   const auto delta_s = (now - _activation_time).asSeconds();
 
-   if (delta < 0.3f)  // set to 0.5?
+   // block spamming
+   if (delta_s < 0.3f)
    {
       return;
    }
 
    _activation_time = now;
 
-   constexpr auto forceValue = 0.6f;
+   constexpr auto force_value = 0.6f;
 
    b2Vec2 force(0.0f, 0.0f);
    switch (_alignment)
    {
       case Alignment::PointsUp:
-         force = b2Vec2{0.0f, -forceValue};
+         force = b2Vec2{0.0f, -force_value};
          break;
       case Alignment::PointsDown:
-         force = b2Vec2{0.0f, forceValue};
+         force = b2Vec2{0.0f, force_value};
          break;
       case Alignment::PointsLeft:
-         force = b2Vec2{-forceValue, 0};
+         force = b2Vec2{-force_value, 0};
          break;
       case Alignment::PointsRight:
-         force = b2Vec2{forceValue, 0};
+         force = b2Vec2{force_value, 0};
          break;
       case Alignment::PointsNowhere:
          break;
