@@ -1,13 +1,13 @@
-#include "playerjump.h"
+#include "game/player/playerjump.h"
 
-#include "animationpool.h"
-#include "audio.h"
-#include "camerapanorama.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/stopwatch.h"
-#include "gamecontactlistener.h"
-#include "physics/physicsconfiguration.h"
-#include "savestate.h"
+#include "game/audio.h"
+#include "game/camerapanorama.h"
+#include "game/gamecontactlistener.h"
+#include "game/mechanisms/bouncerwrapper.h"
+#include "game/physics/physicsconfiguration.h"
+#include "game/savestate.h"
 
 #include <Box2D/Box2D.h>
 #include <iostream>
