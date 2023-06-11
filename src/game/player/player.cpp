@@ -640,8 +640,8 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    axis_value_normalized *= speed._acceleration;
 
    // checking for the current speed here because even if the player pushes a controller axis
-   // to the left side, it might still dash to the other side with quite a strong impulse.
-   // that would confuse the speed capping and would accelerate to infinity. true story.
+   // to the left side, he might still dash to the other side with quite a strong impulse.
+   // that would confuse the speed capping and accelerate to infinity. true story.
    auto desired_velocity = 0.0f;
    if (speed._current_velocity.x < 0.0f)
    {
@@ -980,7 +980,7 @@ void Player::updateVelocity()
    // simulate some friction when moving underwater, also apply some buoyancy
    if (isInWater())
    {
-      const b2Vec2 buoyancy_force = PhysicsConfiguration::getInstance()._in_water_buoyancy_force * -_world->GetGravity();
+      const auto buoyancy_force = PhysicsConfiguration::getInstance()._in_water_buoyancy_force * -_world->GetGravity();
       _body->ApplyForce(buoyancy_force, _body->GetWorldCenter(), true);
 
       auto linear_velocity = _body->GetLinearVelocity();
@@ -998,8 +998,8 @@ void Player::updateVelocity()
    }
 
    // cap speed
-   static const auto max_speed = 10.0f;
-   b2Vec2 vel = _body->GetLinearVelocity();
+   static constexpr auto max_speed = 10.0f;
+   auto vel = _body->GetLinearVelocity();
    const auto speed = vel.Normalize();
    if (speed > max_speed)
    {
@@ -1129,6 +1129,12 @@ void Player::startHardLanding()
    _timepoint_hard_landing = StopWatch::getInstance().now();
    _hard_landing = true;
    _hard_landing_cycles = 0;
+
+   auto& gji = GameControllerIntegration::getInstance();
+   if (gji.isControllerConnected())
+   {
+      gji.getController()->rumble(1.0f, 1000);
+   }
 
    Audio::getInstance().playSample({"player_grunt_01.wav"});
 }
