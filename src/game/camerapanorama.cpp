@@ -2,32 +2,26 @@
 
 #include <iostream>
 
-#include "cameraroomlock.h"
-#include "camerasystem.h"
-#include "displaymode.h"
-#include "gameconfiguration.h"
-#include "gamecontrollerdata.h"
-#include "gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/math/sfmlmath.h"
-#include "player/player.h"
-#include "tweaks.h"
+#include "game/cameraroomlock.h"
+#include "game/displaymode.h"
+#include "game/gamecontrollerdata.h"
+#include "game/gamecontrollerintegration.h"
+#include "game/tweaks.h"
 
 namespace
 {
 constexpr auto speed = 3.0f;
 }
 
-
 CameraPanorama CameraPanorama::__instance;
-
 
 //-----------------------------------------------------------------------------
 CameraPanorama& CameraPanorama::getInstance()
 {
    return __instance;
 }
-
 
 //-----------------------------------------------------------------------------
 void CameraPanorama::update()
@@ -52,31 +46,31 @@ void CameraPanorama::update()
    // 1) get screen rectangle
    // 2) have 4 points on each side to check if they are outside the room rectangle
    // 3) if those points are outside the room boundaries, do not allow further movement
-   auto result = CameraRoomLock::checkRoomBoundaries();
+   const auto result = CameraRoomLock::checkRoomBoundaries();
 
-   auto locked_up    = result[0];
-   auto locked_down  = result[1];
-   auto locked_left  = result[2];
-   auto locked_right = result[3];
+   const auto locked_up = result[0];
+   const auto locked_down = result[1];
+   const auto locked_left = result[2];
+   const auto locked_right = result[3];
 
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
       // only update the desired look vector when boundaries are not exceeded
       sf::Vector2f desired_look_vector = _look_vector;
-      if (_look_state & static_cast<int32_t>(Look::Up) &&! (locked_up && desired_look_vector.y < 0.0f))
+      if (_look_state & static_cast<int32_t>(Look::Up) && !(locked_up && desired_look_vector.y < 0.0f))
       {
          desired_look_vector += sf::Vector2f(0.0f, -speed);
       }
-      else if (_look_state & static_cast<int32_t>(Look::Down) &&! (locked_down && desired_look_vector.y > 0.0f))
+      else if (_look_state & static_cast<int32_t>(Look::Down) && !(locked_down && desired_look_vector.y > 0.0f))
       {
          desired_look_vector += sf::Vector2f(0.0f, speed);
       }
 
-      if (_look_state & static_cast<int32_t>(Look::Left) &&! (locked_left && desired_look_vector.x < 0.0f))
+      if (_look_state & static_cast<int32_t>(Look::Left) && !(locked_left && desired_look_vector.x < 0.0f))
       {
          desired_look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      else if (_look_state & static_cast<int32_t>(Look::Right) &&! (locked_right && desired_look_vector.x > 0.0f))
+      else if (_look_state & static_cast<int32_t>(Look::Right) && !(locked_right && desired_look_vector.x > 0.0f))
       {
          desired_look_vector += sf::Vector2f(speed, 0.0f);
       }
@@ -104,20 +98,20 @@ void CameraPanorama::update()
          sf::Vector2f desired_look_vector = _look_vector;
 
          // only update the desired look vector when boundaries are not exceeded
-         if (x_relative < 0.0f &&! (locked_left && desired_look_vector.x < 0.0f))
+         if (x_relative < 0.0f && !(locked_left && desired_look_vector.x < 0.0f))
          {
             desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
          }
-         else if (x_relative > 0.0f &&! (locked_right && desired_look_vector.x > 0.0f))
+         else if (x_relative > 0.0f && !(locked_right && desired_look_vector.x > 0.0f))
          {
             desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
          }
 
-         if (y_relative < 0.0f &&! (locked_up && desired_look_vector.y < 0.0f))
+         if (y_relative < 0.0f && !(locked_up && desired_look_vector.y < 0.0f))
          {
             desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
          }
-         else if (y_relative > 0.0f &&! (locked_down && desired_look_vector.y > 0.0f))
+         else if (y_relative > 0.0f && !(locked_down && desired_look_vector.y > 0.0f))
          {
             desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
          }
@@ -135,7 +129,6 @@ void CameraPanorama::update()
       _look_vector *= tweaks._cpan_snap_back_factor;
    }
 }
-
 
 //-----------------------------------------------------------------------------
 void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
@@ -174,7 +167,6 @@ void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
 {
@@ -212,7 +204,6 @@ void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void CameraPanorama::updateLookState(Look look, bool enable)
 {
@@ -226,13 +217,11 @@ void CameraPanorama::updateLookState(Look look, bool enable)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 void CameraPanorama::updateLookVector(const sf::Vector2f& desired)
 {
    _look_vector = desired;
 }
-
 
 //-----------------------------------------------------------------------------
 bool CameraPanorama::isLookActive() const
@@ -240,13 +229,11 @@ bool CameraPanorama::isLookActive() const
    return (_look_state & static_cast<int32_t>(Look::Active));
 }
 
-
 //-----------------------------------------------------------------------------
 const sf::Vector2f& CameraPanorama::getLookVector() const
 {
-    return _look_vector;
+   return _look_vector;
 }
-
 
 // so far not resolved issue, could be considered if needed:
 //

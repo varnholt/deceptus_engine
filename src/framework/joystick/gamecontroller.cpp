@@ -327,17 +327,20 @@ void GameController::rumble(float intensity, int32_t ms)
 
    if (!_haptic)
    {
+      Log::Error() << SDL_GetError();
       return;
    }
 
    // initialize simple rumble
    if (SDL_HapticRumbleInit(_haptic) != 0)
    {
+      Log::Error() << SDL_GetError();
       return;
    }
 
    if (SDL_HapticRumblePlay(_haptic, intensity, ms) != 0)
    {
+      Log::Error() << SDL_GetError();
       return;
    }
 
