@@ -14,8 +14,7 @@
 #endif
 #define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_9
 #endif
-#include "../../SDL/include/SDL.h"
-
+#include "sdl/include/SDL.h"
 
 class GameController
 {

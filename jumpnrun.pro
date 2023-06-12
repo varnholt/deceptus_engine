@@ -44,8 +44,8 @@ linux|win32-g++ {
 }
 
 win32 {
-   LIBS += -Llib64
-   LIBS += -LSDL\lib\x64
+   LIBS += -Lthirdparty\lua
+   LIBS += -Lthirdparty\sdl\lib\x64
    LIBS += -lSDL2
    LIBS += -lglu32
    LIBS += -lopengl32
@@ -86,8 +86,8 @@ DEPENDPATH += sfml/include
 INCLUDEPATH += .
 INCLUDEPATH += src
 INCLUDEPATH += src/game
-INCLUDEPATH += src/thirdparty
-INCLUDEPATH += src/thirdparty/box2d/include
+INCLUDEPATH += thirdparty
+INCLUDEPATH += thirdparty/box2d/include
 
 SOURCES += \
    src/framework/image/image.cpp \
