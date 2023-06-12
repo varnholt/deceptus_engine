@@ -3,8 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <string>
-#include "lua/lua.hpp"
-
+#include "lua.hpp"
 
 class LevelScript
 {

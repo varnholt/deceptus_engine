@@ -1,7 +1,7 @@
 #include "luainterface.h"
 
 // lua
-#include "lua/lua.hpp"
+#include "lua.hpp"
 
 // game
 #include "framework/tools/log.h"
