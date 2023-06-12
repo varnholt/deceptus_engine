@@ -1133,7 +1133,7 @@ void Player::startHardLanding()
    auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
    {
-      gji.getController()->rumble(1.0f, 1000);
+      gji.getController()->rumble(0.5f, 300);
    }
 
    Audio::getInstance().playSample({"player_grunt_01.wav"});
