@@ -44,7 +44,7 @@ linux|win32-g++ {
 }
 
 win32 {
-   LIBS += -Lthirdparty\lua
+   LIBS += -Lthirdparty\lua\lib64
    LIBS += -Lthirdparty\sdl\lib\x64
    LIBS += -lSDL2
    LIBS += -lglu32
@@ -88,6 +88,7 @@ INCLUDEPATH += src
 INCLUDEPATH += src/game
 INCLUDEPATH += thirdparty
 INCLUDEPATH += thirdparty/box2d/include
+INCLUDEPATH += thirdparty/lua/include
 
 SOURCES += \
    src/framework/image/image.cpp \
@@ -525,132 +526,132 @@ HEADERS += \
 # thirdparty
 
 SOURCES += \
-   src/thirdparty/tinyxml2/tinyxml2.cpp \
+   thirdparty/tinyxml2/tinyxml2.cpp \
 
 
 HEADERS += \
-   src/thirdparty/tinyxml2/tinyxml2.h \
-   src/thirdparty/json/json.hpp \
+   thirdparty/tinyxml2/tinyxml2.h \
+   thirdparty/json/json.hpp \
 
 
 # add box2d
 
 HEADERS += \
-   src/thirdparty/box2d/include/box2d/b2_api.h \
-   src/thirdparty/box2d/include/box2d/b2_block_allocator.h \
-   src/thirdparty/box2d/include/box2d/b2_body.h \
-   src/thirdparty/box2d/include/box2d/b2_broad_phase.h \
-   src/thirdparty/box2d/include/box2d/b2_chain_shape.h \
-   src/thirdparty/box2d/include/box2d/b2_circle_shape.h \
-   src/thirdparty/box2d/include/box2d/b2_collision.h \
-   src/thirdparty/box2d/include/box2d/b2_common.h \
-   src/thirdparty/box2d/include/box2d/b2_contact.h \
-   src/thirdparty/box2d/include/box2d/b2_contact_manager.h \
-   src/thirdparty/box2d/include/box2d/b2_distance.h \
-   src/thirdparty/box2d/include/box2d/b2_distance_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_draw.h \
-   src/thirdparty/box2d/include/box2d/b2_dynamic_tree.h \
-   src/thirdparty/box2d/include/box2d/b2_edge_shape.h \
-   src/thirdparty/box2d/include/box2d/b2_fixture.h \
-   src/thirdparty/box2d/include/box2d/b2_friction_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_gear_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_growable_stack.h \
-   src/thirdparty/box2d/include/box2d/b2_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_math.h \
-   src/thirdparty/box2d/include/box2d/b2_motor_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_mouse_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_polygon_shape.h \
-   src/thirdparty/box2d/include/box2d/b2_prismatic_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_pulley_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_revolute_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_rope.h \
-   src/thirdparty/box2d/include/box2d/b2_settings.h \
-   src/thirdparty/box2d/include/box2d/b2_shape.h \
-   src/thirdparty/box2d/include/box2d/b2_stack_allocator.h \
-   src/thirdparty/box2d/include/box2d/b2_timer.h \
-   src/thirdparty/box2d/include/box2d/b2_time_of_impact.h \
-   src/thirdparty/box2d/include/box2d/b2_time_step.h \
-   src/thirdparty/box2d/include/box2d/b2_types.h \
-   src/thirdparty/box2d/include/box2d/b2_weld_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_wheel_joint.h \
-   src/thirdparty/box2d/include/box2d/b2_world.h \
-   src/thirdparty/box2d/include/box2d/b2_world_callbacks.h \
-   src/thirdparty/box2d/include/box2d/box2d.h
+   thirdparty/box2d/include/box2d/b2_api.h \
+   thirdparty/box2d/include/box2d/b2_block_allocator.h \
+   thirdparty/box2d/include/box2d/b2_body.h \
+   thirdparty/box2d/include/box2d/b2_broad_phase.h \
+   thirdparty/box2d/include/box2d/b2_chain_shape.h \
+   thirdparty/box2d/include/box2d/b2_circle_shape.h \
+   thirdparty/box2d/include/box2d/b2_collision.h \
+   thirdparty/box2d/include/box2d/b2_common.h \
+   thirdparty/box2d/include/box2d/b2_contact.h \
+   thirdparty/box2d/include/box2d/b2_contact_manager.h \
+   thirdparty/box2d/include/box2d/b2_distance.h \
+   thirdparty/box2d/include/box2d/b2_distance_joint.h \
+   thirdparty/box2d/include/box2d/b2_draw.h \
+   thirdparty/box2d/include/box2d/b2_dynamic_tree.h \
+   thirdparty/box2d/include/box2d/b2_edge_shape.h \
+   thirdparty/box2d/include/box2d/b2_fixture.h \
+   thirdparty/box2d/include/box2d/b2_friction_joint.h \
+   thirdparty/box2d/include/box2d/b2_gear_joint.h \
+   thirdparty/box2d/include/box2d/b2_growable_stack.h \
+   thirdparty/box2d/include/box2d/b2_joint.h \
+   thirdparty/box2d/include/box2d/b2_math.h \
+   thirdparty/box2d/include/box2d/b2_motor_joint.h \
+   thirdparty/box2d/include/box2d/b2_mouse_joint.h \
+   thirdparty/box2d/include/box2d/b2_polygon_shape.h \
+   thirdparty/box2d/include/box2d/b2_prismatic_joint.h \
+   thirdparty/box2d/include/box2d/b2_pulley_joint.h \
+   thirdparty/box2d/include/box2d/b2_revolute_joint.h \
+   thirdparty/box2d/include/box2d/b2_rope.h \
+   thirdparty/box2d/include/box2d/b2_settings.h \
+   thirdparty/box2d/include/box2d/b2_shape.h \
+   thirdparty/box2d/include/box2d/b2_stack_allocator.h \
+   thirdparty/box2d/include/box2d/b2_timer.h \
+   thirdparty/box2d/include/box2d/b2_time_of_impact.h \
+   thirdparty/box2d/include/box2d/b2_time_step.h \
+   thirdparty/box2d/include/box2d/b2_types.h \
+   thirdparty/box2d/include/box2d/b2_weld_joint.h \
+   thirdparty/box2d/include/box2d/b2_wheel_joint.h \
+   thirdparty/box2d/include/box2d/b2_world.h \
+   thirdparty/box2d/include/box2d/b2_world_callbacks.h \
+   thirdparty/box2d/include/box2d/box2d.h
 
 SOURCES += \
-   src/thirdparty/box2d/src/collision/b2_broad_phase.cpp \
-   src/thirdparty/box2d/src/collision/b2_chain_shape.cpp \
-   src/thirdparty/box2d/src/collision/b2_circle_shape.cpp \
-   src/thirdparty/box2d/src/collision/b2_collide_circle.cpp \
-   src/thirdparty/box2d/src/collision/b2_collide_edge.cpp \
-   src/thirdparty/box2d/src/collision/b2_collide_polygon.cpp \
-   src/thirdparty/box2d/src/collision/b2_collision.cpp \
-   src/thirdparty/box2d/src/collision/b2_distance.cpp \
-   src/thirdparty/box2d/src/collision/b2_dynamic_tree.cpp \
-   src/thirdparty/box2d/src/collision/b2_edge_shape.cpp \
-   src/thirdparty/box2d/src/collision/b2_polygon_shape.cpp \
-   src/thirdparty/box2d/src/collision/b2_time_of_impact.cpp \
-   src/thirdparty/box2d/src/common/b2_block_allocator.cpp \
-   src/thirdparty/box2d/src/common/b2_draw.cpp \
-   src/thirdparty/box2d/src/common/b2_math.cpp \
-   src/thirdparty/box2d/src/common/b2_settings.cpp \
-   src/thirdparty/box2d/src/common/b2_stack_allocator.cpp \
-   src/thirdparty/box2d/src/common/b2_timer.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_body.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_chain_circle_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_chain_circle_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_chain_polygon_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_chain_polygon_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_circle_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_circle_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_contact_manager.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_contact_solver.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_contact_solver.h \
-   src/thirdparty/box2d/src/dynamics/b2_distance_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_edge_circle_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_edge_circle_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_edge_polygon_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_edge_polygon_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_fixture.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_friction_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_gear_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_island.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_island.h \
-   src/thirdparty/box2d/src/dynamics/b2_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_motor_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_mouse_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_polygon_circle_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_polygon_circle_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_polygon_contact.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_polygon_contact.h \
-   src/thirdparty/box2d/src/dynamics/b2_prismatic_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_pulley_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_revolute_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_weld_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_wheel_joint.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_world.cpp \
-   src/thirdparty/box2d/src/dynamics/b2_world_callbacks.cpp \
-   src/thirdparty/box2d/src/rope/b2_rope.cpp
+   thirdparty/box2d/src/collision/b2_broad_phase.cpp \
+   thirdparty/box2d/src/collision/b2_chain_shape.cpp \
+   thirdparty/box2d/src/collision/b2_circle_shape.cpp \
+   thirdparty/box2d/src/collision/b2_collide_circle.cpp \
+   thirdparty/box2d/src/collision/b2_collide_edge.cpp \
+   thirdparty/box2d/src/collision/b2_collide_polygon.cpp \
+   thirdparty/box2d/src/collision/b2_collision.cpp \
+   thirdparty/box2d/src/collision/b2_distance.cpp \
+   thirdparty/box2d/src/collision/b2_dynamic_tree.cpp \
+   thirdparty/box2d/src/collision/b2_edge_shape.cpp \
+   thirdparty/box2d/src/collision/b2_polygon_shape.cpp \
+   thirdparty/box2d/src/collision/b2_time_of_impact.cpp \
+   thirdparty/box2d/src/common/b2_block_allocator.cpp \
+   thirdparty/box2d/src/common/b2_draw.cpp \
+   thirdparty/box2d/src/common/b2_math.cpp \
+   thirdparty/box2d/src/common/b2_settings.cpp \
+   thirdparty/box2d/src/common/b2_stack_allocator.cpp \
+   thirdparty/box2d/src/common/b2_timer.cpp \
+   thirdparty/box2d/src/dynamics/b2_body.cpp \
+   thirdparty/box2d/src/dynamics/b2_chain_circle_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_chain_circle_contact.h \
+   thirdparty/box2d/src/dynamics/b2_chain_polygon_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_chain_polygon_contact.h \
+   thirdparty/box2d/src/dynamics/b2_circle_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_circle_contact.h \
+   thirdparty/box2d/src/dynamics/b2_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_contact_manager.cpp \
+   thirdparty/box2d/src/dynamics/b2_contact_solver.cpp \
+   thirdparty/box2d/src/dynamics/b2_contact_solver.h \
+   thirdparty/box2d/src/dynamics/b2_distance_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_edge_circle_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_edge_circle_contact.h \
+   thirdparty/box2d/src/dynamics/b2_edge_polygon_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_edge_polygon_contact.h \
+   thirdparty/box2d/src/dynamics/b2_fixture.cpp \
+   thirdparty/box2d/src/dynamics/b2_friction_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_gear_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_island.cpp \
+   thirdparty/box2d/src/dynamics/b2_island.h \
+   thirdparty/box2d/src/dynamics/b2_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_motor_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_mouse_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_polygon_circle_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_polygon_circle_contact.h \
+   thirdparty/box2d/src/dynamics/b2_polygon_contact.cpp \
+   thirdparty/box2d/src/dynamics/b2_polygon_contact.h \
+   thirdparty/box2d/src/dynamics/b2_prismatic_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_pulley_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_revolute_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_weld_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_wheel_joint.cpp \
+   thirdparty/box2d/src/dynamics/b2_world.cpp \
+   thirdparty/box2d/src/dynamics/b2_world_callbacks.cpp \
+   thirdparty/box2d/src/rope/b2_rope.cpp
 
 SOURCES += \
-   src/thirdparty/imgui/imgui-SFML.cpp \
-   src/thirdparty/imgui/imgui.cpp \
-   src/thirdparty/imgui/imgui_demo.cpp \
-   src/thirdparty/imgui/imgui_draw.cpp \
-   src/thirdparty/imgui/imgui_tables.cpp \
-   src/thirdparty/imgui/imgui_widgets.cpp
+   thirdparty/imgui/imgui-SFML.cpp \
+   thirdparty/imgui/imgui.cpp \
+   thirdparty/imgui/imgui_demo.cpp \
+   thirdparty/imgui/imgui_draw.cpp \
+   thirdparty/imgui/imgui_tables.cpp \
+   thirdparty/imgui/imgui_widgets.cpp
 
 HEADERS += \
-   src/thirdparty/imgui/imconfig-SFML.h \
-   src/thirdparty/imgui/imconfig.h \
-   src/thirdparty/imgui/imgui-SFML.h \
-   src/thirdparty/imgui/imgui-SFML_export.h \
-   src/thirdparty/imgui/imgui.h \
-   src/thirdparty/imgui/imgui_internal.h \
-   src/thirdparty/imgui/imstb_rectpack.h \
-   src/thirdparty/imgui/imstb_textedit.h \
-   src/thirdparty/imgui/imstb_truetype.h
+   thirdparty/imgui/imconfig-SFML.h \
+   thirdparty/imgui/imconfig.h \
+   thirdparty/imgui/imgui-SFML.h \
+   thirdparty/imgui/imgui-SFML_export.h \
+   thirdparty/imgui/imgui.h \
+   thirdparty/imgui/imgui_internal.h \
+   thirdparty/imgui/imstb_rectpack.h \
+   thirdparty/imgui/imstb_textedit.h \
+   thirdparty/imgui/imstb_truetype.h
 
 OTHER_FILES += \
     data/shaders/parallax_frag.glsl \
