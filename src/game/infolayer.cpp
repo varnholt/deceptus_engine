@@ -1,20 +1,21 @@
 #include "infolayer.h"
 
-#include "animationframedata.h"
-#include "camerapanorama.h"
-#include "console.h"
-#include "extratable.h"
-#include "gameconfiguration.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
-#include "player/player.h"
-#include "player/playerinfo.h"
-#include "savestate.h"
-#include "texturepool.h"
+#include "framework/tools/log.h"
+#include "game/animationframedata.h"
+#include "game/camerapanorama.h"
+#include "game/console.h"
+#include "game/extratable.h"
+#include "game/gameconfiguration.h"
+#include "game/player/player.h"
+#include "game/player/playerinfo.h"
+#include "game/savestate.h"
+#include "game/texturepool.h"
 
 #ifdef __GNUC__
 #define FMT_HEADER_ONLY
-#  include <fmt/core.h>
+#include <fmt/core.h>
 #else
 #include <format>
 namespace fmt = std;
@@ -23,20 +24,78 @@ namespace fmt = std;
 #include <iostream>
 #include <sstream>
 
-
 namespace
 {
 static constexpr auto heart_layer_count = 10;
 static constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
-}
+}  // namespace
 
+/*
+
+Background
+
+console
+
+zone_the_sewers
+zone_graveyard
+
+item_slot_1
+
+health area
+   [x] character_window
+   [x] item_sword_ammo
+   [x] weapon_sword_icon
+   [ ] weapon_none_icon
+   [ ] weapon_sword_disabled_icon
+
+40
+...
+1
+
+health
+   keep disabled until given
+      [ ] hp_slot_13
+      [ ] hp_slot_12
+      ...
+      [ ] hp_slot_02
+      [ ] hp_slot_01
+
+stamina bars
+   energy_6
+   energy_5
+   energy_4
+   energy_3
+   energy_2
+   energy_1
+
+no_pause
+skip_0
+skip_1
+skip_2
+skip_3
+autosave
+cpan_right
+cpan_down
+cpan_left
+cpan_up
+cpan_up_enabled
+cpan_down_enabled
+cpan_left_enabled
+cpan_right_enabled
+
+weapon_slot_Y
+weapon_slot_X
+weapon_slot_B
+weapon_slot_A
+item_slot2_Y
+item_slot2_X
+item_slot2_B
+item_slot2_A
+*/
 
 InfoLayer::InfoLayer()
 {
-   _font.load(
-      "data/game/font.png",
-      "data/game/font.map"
-   );
+   _font.load("data/game/font.png", "data/game/font.map");
 
    // load ingame psd
    PSD psd;
@@ -80,17 +139,19 @@ InfoLayer::InfoLayer()
       _heart_layers.push_back(_layers[fmt::format("{}", i)]);
    }
 
-   for (auto i = 1u; i <= heart_layer_count; i++)
+   for (auto i = 1u; i <= 6; i++)
    {
-      _heart_layers_background.push_back(_layers[fmt::format("h{}", i)]);
+      _stamina_layers.push_back(_layers[fmt::format("energy_{}", i)]);
    }
 
-   _stamina_layer            = _layers["stamina"];
-   _stamina_background_layer = _layers["stamina_bg"];
-   _slot_1_item_layer        = _layers["item_slot_1"];
-   _slot_2_item_layer        = _layers["item_slot_2"];
-   _slot_1_weapon_layer      = _layers["weapon_slot_1"];
-   _slot_2_weapon_layer      = _layers["weapon_slot_2"];
+   _character_window_layer = _layers["character_window"];
+   _item_sword_ammo_layer = _layers["item_sword_ammo"];
+   _weapon_sword_icon_layer = _layers["weapon_sword_icon"];
+
+   _slot_1_item_layer = _layers["item_slot_1"];
+   _slot_2_item_layer = _layers["item_slot_2"];
+   _slot_1_weapon_layer = _layers["weapon_slot_1"];
+   _slot_2_weapon_layer = _layers["weapon_slot_2"];
 
    // load heart animation
    const auto t = sf::milliseconds(100);
@@ -101,15 +162,7 @@ InfoLayer::InfoLayer()
       ts.push_back(t);
    }
 
-   AnimationFrameData frames {
-      TexturePool::getInstance().get("data/sprites/health.png"),
-      {0, 0},
-      24, 24,
-      frame_count,
-      8,
-      ts,
-      0
-   };
+   AnimationFrameData frames{TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, ts, 0};
 
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
@@ -117,7 +170,6 @@ InfoLayer::InfoLayer()
    _heart_animation.setOrigin(frames._origin);
    _heart_animation._reset_to_first_frame = false;
 }
-
 
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
@@ -140,25 +192,26 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    // support cpan
    if (CameraPanorama::getInstance().isLookActive())
    {
-       auto layer_cpan_up = _layers["cpan_up"];
-       auto layer_cpan_down = _layers["cpan_down"];
-       auto layer_cpan_left = _layers["cpan_left"];
-       auto layer_cpan_right = _layers["cpan_right"];
+      auto layer_cpan_up = _layers["cpan_up"];
+      auto layer_cpan_down = _layers["cpan_down"];
+      auto layer_cpan_left = _layers["cpan_left"];
+      auto layer_cpan_right = _layers["cpan_right"];
 
-       layer_cpan_up->draw(window, states);
-       layer_cpan_down->draw(window, states);
-       layer_cpan_left->draw(window, states);
-       layer_cpan_right->draw(window, states);
+      layer_cpan_up->draw(window, states);
+      layer_cpan_down->draw(window, states);
+      layer_cpan_left->draw(window, states);
+      layer_cpan_right->draw(window, states);
    }
 
    if (!_loading)
    {
       int32_t heart_quarters = SaveState::getPlayerInfo()._extra_table._health._health;
-      int32_t heart_count = SaveState::getPlayerInfo()._extra_table._health._health_max / 4;
 
-      for (auto i = 0; i < heart_count; i++)
+      _character_window_layer->draw(window, states);
+
+      for (auto i = 0; i < 5; i++)
       {
-         _heart_layers_background[i]->draw(window, states);
+         _stamina_layers[i]->draw(window, states);
       }
 
       for (auto i = 0; i < heart_quarters; i++)
@@ -166,14 +219,11 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
          _heart_layers[i]->draw(window, states);
       }
 
-      _stamina_layer->draw(window, states);
-      _stamina_background_layer->draw(window, states);
-
+      _item_sword_ammo_layer->draw(window, states);
+      _weapon_sword_icon_layer->draw(window, states);
       _slot_1_item_layer->draw(window, states);
-      _slot_2_weapon_layer->draw(window, states);
    }
 }
-
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 {
@@ -193,7 +243,6 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    _font.draw(window, _font.getCoords(stream_tl.str()), 500, 5);
    _font.draw(window, _font.getCoords(stream_px.str()), 500, 20);
 }
-
 
 void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 {
@@ -222,7 +271,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
-      _font.draw(window, _font.getCoords(*it), offset_x, offset_y - ( (y + 1) * 14));
+      _font.draw(window, _font.getCoords(*it), offset_x, offset_y - ((y + 1) * 14));
       y++;
    }
 
@@ -237,19 +286,17 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-
 void InfoLayer::setLoading(bool loading)
 {
    _layers["autosave"]->_visible = loading;
 
    if (!loading && loading != _loading)
    {
-       _show_time = GlobalClock::getInstance().getElapsedTime();
+      _show_time = GlobalClock::getInstance().getElapsedTime();
    }
 
    _loading = loading;
 }
-
 
 void InfoLayer::update(const sf::Time& dt)
 {
@@ -261,7 +308,6 @@ void InfoLayer::update(const sf::Time& dt)
    _heart_animation.update(dt);
 }
 
-
 void InfoLayer::playHeartAnimation()
 {
    static const auto x = 100;
@@ -272,13 +318,10 @@ void InfoLayer::playHeartAnimation()
    _heart_animation.play();
 }
 
-
 void InfoLayer::drawHeartAnimation(sf::RenderTarget& window)
 {
    _heart_animation.draw(window);
 }
-
-
 
 // auto layer_health = _layers["health"];
 // auto layer_health_energy = _layers["health_energy"];
