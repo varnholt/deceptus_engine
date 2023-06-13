@@ -2,7 +2,7 @@
 #include "luanode.h"
 
 // lua
-#include "lua/lua.hpp"
+#include "lua.hpp"
 
 // stl
 #include <iostream>
