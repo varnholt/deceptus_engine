@@ -38,9 +38,11 @@ private:
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 
    std::vector<std::shared_ptr<Layer>> _heart_layers;
-   std::vector<std::shared_ptr<Layer>> _heart_layers_background;
-   std::shared_ptr<Layer> _stamina_layer;
-   std::shared_ptr<Layer> _stamina_background_layer;
+   std::vector<std::shared_ptr<Layer>> _stamina_layers;
+   std::shared_ptr<Layer> _character_window_layer;
+   std::shared_ptr<Layer> _item_sword_ammo_layer;
+   std::shared_ptr<Layer> _weapon_sword_icon_layer;
+
    std::shared_ptr<Layer> _slot_1_item_layer;
    std::shared_ptr<Layer> _slot_1_weapon_layer;
    std::shared_ptr<Layer> _slot_2_item_layer;
