@@ -11,39 +11,26 @@
 class AnimationPool
 {
 public:
+   AnimationPool(const std::string& file_path);
 
    void initialize();
    void reload();
 
-   std::shared_ptr<Animation> create(
-      const std::string& animationName,
-      float x = 0.0f,
-      float y = 0.0f,
-      bool autoPlay = true,
-      bool managedByPool = true
-      );
+   std::shared_ptr<Animation>
+   create(const std::string& name, float x = 0.0f, float y = 0.0f, bool auto_play = true, bool managed_by_pool = true);
 
-   void drawAnimations(
-      sf::RenderTarget& target,
-      sf::RenderTarget& normal,
-      const std::vector<std::string>& animations
-      );
+   void drawAnimations(sf::RenderTarget& target, sf::RenderTarget& normal, const std::vector<std::string>& animations);
 
    void updateAnimations(const sf::Time& dt);
-   const std::map<std::string, std::shared_ptr<Animation> >& getAnimations();
-
-   static AnimationPool& getInstance();
-
+   const std::map<std::string, std::shared_ptr<Animation>>& getAnimations();
 
 private:
-
-   AnimationPool() = default;
-
    void deserialize(const std::string& data);
-   void deserializeFromFile(const std::string& filename = "data/sprites/animations.json");
+   void deserializeFromFile(const std::string& filename);
 
    bool _initialized = false;
 
    std::map<std::string, std::shared_ptr<AnimationSettings>> _settings;
    std::map<std::string, std::shared_ptr<Animation>> _animations;
+   std::string _file_path;
 };
