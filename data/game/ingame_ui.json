@@ -1,0 +1,42 @@
+{
+   "heart": {
+      "frame_durations": [20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [5, 5],
+      "origin": [0, 0],
+      "sprite_count": 4,
+      "texture": "data/game/ingame_heart_shine.png"
+   },
+   "stamina": {
+      "frame_durations": [20, 20, 20, 20],
+      "frame_offset": [0, 5],
+      "frame_size": [5, 5],
+      "origin": [0, 0],
+      "sprite_count": 4,
+      "texture": "data/game/ingame_heart_shine.png"
+   },
+   "skull_blink": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [11, 3],
+      "origin": [0, 0],
+      "sprite_count": 8,
+      "texture": "data/game/ingame_skull_blink.png"
+   },
+   "hp_unlock_left": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [14, 64],
+      "origin": [0, 0],
+      "sprite_count": 30,
+      "texture": "data/game/ingame_hp_unlock.png"
+   },
+   "hp_unlock_left": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 64],
+      "frame_size": [14, 64],
+      "origin": [0, 0],
+      "sprite_count": 30,
+      "texture": "data/game/ingame_hp_unlock.png"
+   },
+}

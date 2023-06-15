@@ -1,9 +1,9 @@
 #pragma once
 
-#include "animation.h"
-#include "bitmapfont.h"
-
 #include "framework/image/layer.h"
+#include "game/animation.h"
+#include "game/animationpool.h"
+#include "game/bitmapfont.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -49,5 +49,5 @@ private:
    std::shared_ptr<Layer> _slot_2_weapon_layer;
 
    Animation _heart_animation;
+   AnimationPool _animation_pool{"data/game/ingame_ui.json"};
 };
-
