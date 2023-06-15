@@ -1,22 +1,21 @@
 #pragma once
 
-#include "chunk.h"
-#include "constants.h"
-#include "extra.h"
-#include "extratable.h"
-#include "framework/joystick/gamecontrollerinfo.h"
-#include "gamenode.h"
-#include "playeranimation.h"
-#include "playerattack.h"
-#include "playerbelt.h"
-#include "playerbend.h"
-#include "playerclimb.h"
-#include "playercontrols.h"
-#include "playerdash.h"
-#include "playerjump.h"
-#include "playerjumptrace.h"
-#include "playerspeed.h"
-#include "waterbubbles.h"
+#include "game/animationpool.h"
+#include "game/chunk.h"
+#include "game/constants.h"
+#include "game/extra.h"
+#include "game/gamenode.h"
+#include "game/player/playeranimation.h"
+#include "game/player/playerattack.h"
+#include "game/player/playerbelt.h"
+#include "game/player/playerbend.h"
+#include "game/player/playerclimb.h"
+#include "game/player/playercontrols.h"
+#include "game/player/playerdash.h"
+#include "game/player/playerjump.h"
+#include "game/player/playerjumptrace.h"
+#include "game/player/playerspeed.h"
+#include "game/waterbubbles.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -57,6 +56,7 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal);
 
    void update(const sf::Time& dt);
+   void reloadAnimationPool();
 
    void attack();
    void die();
@@ -118,8 +118,6 @@ public:
    const std::shared_ptr<Extra>& getExtra() const;
    const std::shared_ptr<WeaponSystem>& getWeaponSystem() const;
    const std::shared_ptr<PlayerControls>& getControls() const;
-   const PlayerAnimation& getPlayerAnimation() const;
-   PlayerAnimation& getPlayerAnimationMutable();
    const PlayerJump& getJump() const;
    const PlayerBend& getBend() const;
    PlayerBelt& getBelt();
@@ -236,6 +234,7 @@ private:
 
    std::optional<int32_t> _wallslide_sample;
    Chunk _chunk;
+   AnimationPool _animation_pool{"data/sprites/animations.json"};
 
    static Player* __current;
 };

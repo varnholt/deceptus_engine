@@ -368,15 +368,7 @@ void Game::initialize()
    );
 
    // registering generic callback functions for the game console
-   Console::getInstance().registerCallback(
-      "/ra",
-      "reload animations",
-      []
-      {
-         AnimationPool::getInstance().reload();
-         Player::getCurrent()->getPlayerAnimationMutable().loadAnimations();
-      }
-   );
+   Console::getInstance().registerCallback("/ra", "reload animations", [] { Player::getCurrent()->reloadAnimationPool(); });
 
    GameAudio::getInstance().initialize();
    _audio_callback = [](GameAudio::SoundEffect effect) { GameAudio::getInstance().play(effect); };
@@ -687,7 +679,6 @@ void Game::update()
 
       if (_level_loading_finished)
       {
-         AnimationPool::getInstance().updateAnimations(dt);
          updateGameController();
          updateGameControllerForGame();
 
@@ -842,7 +833,6 @@ void Game::processEvent(const sf::Event& event)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void Game::shutdown()
 {
@@ -903,7 +893,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::Num0:
       {
          Audio::getInstance().playSample({"powerup.wav"});
-         
+
          if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::WallClimb))
          {
             SaveState::getPlayerInfo()._extra_table._skills._skills &= ~static_cast<int32_t>(Skill::SkillType::WallClimb);

@@ -1,11 +1,9 @@
 #include "player.h"
 
-#include "animationpool.h"
 #include "audio.h"
 #include "bow.h"
 #include "camerapanorama.h"
 #include "chainshapeanalyzer.h"
-#include "displaymode.h"
 #include "fadetransitioneffect.h"
 #include "fixturenode.h"
 #include "framework/joystick/gamecontroller.h"
@@ -29,7 +27,6 @@
 #include "savestate.h"
 #include "screentransition.h"
 #include "sword.h"
-#include "texturepool.h"
 #include "tweaks.h"
 #include "weapon.h"
 #include "weaponsystem.h"
@@ -41,8 +38,8 @@
 
 #ifdef __GNUC__
 #define FMT_HEADER_ONLY
-#  include <ctime>
-#  include <fmt/core.h>
+#include <fmt/core.h>
+#include <ctime>
 #else
 namespace fmt = std;
 #endif
@@ -136,6 +133,8 @@ Player::Player(GameNode* parent) : GameNode(parent)
    _jump.setControls(_controls);
 
    _dash._reset_dash_callback = [this]() { resetMotionBlur(); };
+
+   _player_animation.loadAnimations(_animation_pool);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -158,14 +157,12 @@ void Player::initialize()
       {
          case PlayerJump::DustAnimationType::Ground:
          {
-            AnimationPool::getInstance().create(
-               _points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y
-            );
+            _animation_pool.create(_points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y);
             break;
          }
          case PlayerJump::DustAnimationType::InAir:
          {
-            AnimationPool::getInstance().create(
+            _animation_pool.create(
                _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _pixel_position_f.x, _pixel_position_f.y
             );
             break;
@@ -342,7 +339,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       auxiliary_cycle->draw(color, normal);
    }
 
-   AnimationPool::getInstance().drawAnimations(
+   _animation_pool.drawAnimations(
       color,
       normal,
       {"player_jump_dust_l", "player_jump_dust_r", "player_jump_dust_inair_l", "player_jump_dust_inair_r", "player_water_splash"}
@@ -1201,7 +1198,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
    {
       return;
    }
-   
+
    if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
    {
       return;
@@ -1612,6 +1609,7 @@ void Player::update(const sf::Time& dt)
    updatePixelPosition();
    updatePixelRect();
    updateChunk();
+   _animation_pool.updateAnimations(dt);
 
    updateHealth(dt);
    updateChainShapeCollisions();
@@ -1639,6 +1637,13 @@ void Player::update(const sf::Time& dt)
    updateWaterBubbles(dt);
    _controls->update(dt);  // called at last just to backup previous controls
    updateSpawn();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::reloadAnimationPool()
+{
+   _animation_pool.reload();
+   _player_animation.loadAnimations(_animation_pool);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1682,14 +1687,14 @@ void Player::updateAtmosphere()
       _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
       _water_entered_time = StopWatch::getInstance().now();
       Audio::getInstance().playSample({"splash.wav"});
-      AnimationPool::getInstance().create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
    }
 
    // leaving water
    if (!inside_water && was_inside_water)
    {
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
-      AnimationPool::getInstance().create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
    }
 
    // not sure if this is just another ugly hack
@@ -2004,18 +2009,6 @@ void Player::keyPressed(sf::Keyboard::Key key)
    {
       updateDash(Dash::Right);
    }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-const PlayerAnimation& Player::getPlayerAnimation() const
-{
-   return _player_animation;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-PlayerAnimation& Player::getPlayerAnimationMutable()
-{
-   return _player_animation;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
