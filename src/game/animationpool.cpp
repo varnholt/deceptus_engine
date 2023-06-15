@@ -11,14 +11,18 @@
 
 using json = nlohmann::json;
 
-
+//----------------------------------------------------------------------------------------------------------------------
+AnimationPool::AnimationPool(const std::string& file_path)
+{
+   _file_path = file_path;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::initialize()
 {
    if (!_initialized)
    {
-      deserializeFromFile();
+      deserializeFromFile(_file_path);
       _initialized = true;
    }
 }
@@ -31,13 +35,7 @@ void AnimationPool::reload()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<Animation> AnimationPool::create(
-   const std::string& name,
-   float x,
-   float y,
-   bool auto_play,
-   bool managed_by_pool
-   )
+std::shared_ptr<Animation> AnimationPool::create(const std::string& name, float x, float y, bool auto_play, bool managed_by_pool)
 {
    if (!_initialized)
    {
@@ -79,13 +77,8 @@ std::shared_ptr<Animation> AnimationPool::create(
    return animation;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
-void AnimationPool::drawAnimations(
-   sf::RenderTarget& color,
-   sf::RenderTarget& normal,
-   const std::vector<std::string>& animations
-   )
+void AnimationPool::drawAnimations(sf::RenderTarget& color, sf::RenderTarget& normal, const std::vector<std::string>& animations)
 {
    for (const auto& key : animations)
    {
@@ -97,7 +90,6 @@ void AnimationPool::drawAnimations(
       }
    }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::updateAnimations(const sf::Time& dt)
@@ -125,21 +117,11 @@ void AnimationPool::updateAnimations(const sf::Time& dt)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 const std::map<std::string, std::shared_ptr<Animation>>& AnimationPool::getAnimations()
 {
    return _animations;
 }
-
-
-//----------------------------------------------------------------------------------------------------------------------
-AnimationPool& AnimationPool::getInstance()
-{
-   static AnimationPool _player_animation;
-   return _player_animation;
-}
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::deserialize(const std::string& data)
@@ -163,7 +145,8 @@ void AnimationPool::deserialize(const std::string& data)
          auto texture = TexturePool::getInstance().get(settings->_texture_path);
          settings->_texture = texture;
 
-         const auto normal_map_filename = (settings->_texture_path.stem().string() + "_normals" + settings->_texture_path.extension().string());
+         const auto normal_map_filename =
+            (settings->_texture_path.stem().string() + "_normals" + settings->_texture_path.extension().string());
          const auto normal_map_path = (settings->_texture_path.parent_path() / normal_map_filename);
 
          if (std::filesystem::exists(normal_map_path))
@@ -179,11 +162,10 @@ void AnimationPool::deserialize(const std::string& data)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
-void AnimationPool::deserializeFromFile(const std::string &filename)
+void AnimationPool::deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs (filename, std::ifstream::in);
+   std::ifstream ifs(filename, std::ifstream::in);
 
    auto c = ifs.get();
    std::string data;
@@ -198,5 +180,3 @@ void AnimationPool::deserializeFromFile(const std::string &filename)
 
    deserialize(data);
 }
-
-

@@ -7,14 +7,15 @@
 #include <optional>
 #include <unordered_map>
 
-#include "animation.h"
-#include "constants.h"
+#include "game/animation.h"
+#include "game/animationpool.h"
+#include "game/constants.h"
 
 class PlayerAnimation
 {
 public:
-   PlayerAnimation();
-   void loadAnimations();
+   PlayerAnimation() = default;
+   void loadAnimations(AnimationPool& pool);
 
    using HighResDuration = std::chrono::high_resolution_clock::duration;
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
