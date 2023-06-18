@@ -14,10 +14,13 @@
 class InfoLayer
 {
 public:
+   using HighResDuration = std::chrono::high_resolution_clock::duration;
 
    InfoLayer();
 
    void update(const sf::Time& dt);
+   void updateAnimations(const sf::Time& dt);
+
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void drawDebugInfo(sf::RenderTarget& window);
    void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
@@ -49,5 +52,21 @@ private:
    std::shared_ptr<Layer> _slot_2_weapon_layer;
 
    Animation _heart_animation;
+
+   // small UI animations
    AnimationPool _animation_pool{"data/game/ingame_ui.json"};
+   std::shared_ptr<Animation> _animation_heart;
+   std::shared_ptr<Animation> _animation_stamina;
+   std::shared_ptr<Animation> _animation_skull_blink;
+   std::shared_ptr<Animation> _animation_hp_unlock_left;
+   std::shared_ptr<Animation> _animation_hp_unlock_right;
+   std::array<HighResDuration, 2> _animation_heart_duration_range;
+   std::array<HighResDuration, 2> _animation_stamina_duration_range;
+   std::array<HighResDuration, 2> _animation_skull_blink_duration_range;
+   std::optional<HighResDuration> _next_animation_duration_heart;
+   std::optional<HighResDuration> _next_animation_duration_stamina;
+   std::optional<HighResDuration> _next_animation_duration_skull_blink;
+   HighResDuration animation_duration_heart{};
+   HighResDuration animation_duration_stamina{};
+   HighResDuration animation_duration_skull_blink{};
 };

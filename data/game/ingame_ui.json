@@ -31,12 +31,12 @@
       "sprite_count": 30,
       "texture": "data/game/ingame_hp_unlock.png"
    },
-   "hp_unlock_left": {
+   "hp_unlock_right": {
       "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
       "frame_offset": [0, 64],
       "frame_size": [14, 64],
       "origin": [0, 0],
       "sprite_count": 30,
       "texture": "data/game/ingame_hp_unlock.png"
-   },
+   }
 }
