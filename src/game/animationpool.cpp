@@ -78,15 +78,49 @@ std::shared_ptr<Animation> AnimationPool::create(const std::string& name, float 
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void AnimationPool::drawAnimations(sf::RenderTarget& target, const std::vector<std::string>& animations)
+{
+   if (animations.empty())
+   {
+      for (auto& [k, v] : _animations)
+      {
+         v->draw(target);
+      }
+   }
+   else
+   {
+      for (const auto& key : animations)
+      {
+         const auto& animation = _animations.find(key);
+
+         if (animation != _animations.end())
+         {
+            animation->second->draw(target);
+         }
+      }
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::drawAnimations(sf::RenderTarget& color, sf::RenderTarget& normal, const std::vector<std::string>& animations)
 {
-   for (const auto& key : animations)
+   if (animations.empty())
    {
-      const auto& animation = _animations.find(key);
-
-      if (animation != _animations.end())
+      for (auto& [k, v] : _animations)
       {
-         animation->second->draw(color, normal);
+         v->draw(color, normal);
+      }
+   }
+   else
+   {
+      for (const auto& key : animations)
+      {
+         const auto& animation = _animations.find(key);
+
+         if (animation != _animations.end())
+         {
+            animation->second->draw(color, normal);
+         }
       }
    }
 }

@@ -26,6 +26,17 @@ namespace fmt = std;
 
 namespace
 {
+
+using HighResDuration = std::chrono::high_resolution_clock::duration;
+HighResDuration getRandomDuration(const HighResDuration& min_duration, const HighResDuration& max_duration)
+{
+   const auto min_duration_count = min_duration.count();
+   const auto max_duration_count = max_duration.count();
+   const auto random_duration_count = min_duration_count + (std::rand() % (max_duration_count - min_duration_count + 1));
+   HighResDuration random_duration(random_duration_count);
+   return random_duration;
+}
+
 static constexpr auto heart_layer_count = 10;
 static constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
 }  // namespace
@@ -163,20 +174,37 @@ InfoLayer::InfoLayer()
    }
 
    AnimationFrameData frames{TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, ts, 0};
-
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
    _heart_animation.setOrigin(frames._origin);
    _heart_animation._reset_to_first_frame = false;
+
+   // init min/max durations for randomized animations
+   using namespace std::chrono_literals;
+   _animation_heart_duration_range = {8s, 12s};
+   _animation_stamina_duration_range = {8s, 12s};
+   _animation_skull_blink_duration_range = {8s, 12s};
+
+   _animation_heart = _animation_pool.create("heart", 10.0f, 10.0f, false, true);
+   _animation_stamina = _animation_pool.create("stamina", 20.0f, 20.0f, false, true);
+   _animation_skull_blink = _animation_pool.create("skull_blink", 30.0f, 30.0f, false, true);
+   _animation_hp_unlock_left = _animation_pool.create("hp_unlock_left", 0.0f, 0.0f, false, true);
+   _animation_hp_unlock_right = _animation_pool.create("hp_unlock_right", 0.0f, 0.0f, false, true);
+
+   _animation_heart->_reset_to_first_frame = false;
+   _animation_stamina->_reset_to_first_frame = false;
+   _animation_skull_blink->_reset_to_first_frame = false;
+   _animation_hp_unlock_left->_reset_to_first_frame = false;
+   _animation_hp_unlock_right->_reset_to_first_frame = false;
 }
 
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance().getElapsedTime();
 
-   auto w = GameConfiguration::getInstance()._view_width;
-   auto h = GameConfiguration::getInstance()._view_height;
+   const auto w = GameConfiguration::getInstance()._view_width;
+   const auto h = GameConfiguration::getInstance()._view_height;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
@@ -205,11 +233,13 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    if (!_loading)
    {
-      int32_t heart_quarters = SaveState::getPlayerInfo()._extra_table._health._health;
+      const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
+      const auto heart_quarters = extra_table._health._health;
 
       _character_window_layer->draw(window, states);
 
-      for (auto i = 0; i < 5; i++)
+      const auto stamina = static_cast<int32_t>(extra_table._health._stamina * 6.0f);
+      for (auto i = 0; i < stamina; i++)
       {
          _stamina_layers[i]->draw(window, states);
       }
@@ -222,6 +252,8 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
       _item_sword_ammo_layer->draw(window, states);
       _weapon_sword_icon_layer->draw(window, states);
       _slot_1_item_layer->draw(window, states);
+
+      // _animation_pool.drawAnimations(window);
    }
 }
 
@@ -300,12 +332,74 @@ void InfoLayer::setLoading(bool loading)
 
 void InfoLayer::update(const sf::Time& dt)
 {
+   updateAnimations(dt);
+
    if (_heart_animation._paused)
    {
       return;
    }
 
    _heart_animation.update(dt);
+}
+
+void InfoLayer::updateAnimations(const sf::Time& dt)
+{
+   if (!_next_animation_duration_heart.has_value())
+   {
+      _next_animation_duration_heart = getRandomDuration(_animation_heart_duration_range[0], _animation_heart_duration_range[1]);
+      _animation_heart->pause();
+   }
+
+   if (!_next_animation_duration_stamina.has_value())
+   {
+      _next_animation_duration_stamina = getRandomDuration(_animation_stamina_duration_range[0], _animation_stamina_duration_range[1]);
+      _animation_stamina->pause();
+   }
+
+   if (!_next_animation_duration_skull_blink.has_value())
+   {
+      _next_animation_duration_skull_blink =
+         getRandomDuration(_animation_skull_blink_duration_range[0], _animation_skull_blink_duration_range[1]);
+      _animation_skull_blink->pause();
+   }
+
+   const auto elapsed_micros = dt.asMicroseconds();
+   HighResDuration elapsed_duration = std::chrono::microseconds(elapsed_micros);
+
+   animation_duration_heart += elapsed_duration;
+   animation_duration_stamina += elapsed_duration;
+   animation_duration_skull_blink += elapsed_duration;
+
+   if (animation_duration_heart > _next_animation_duration_heart)
+   {
+      animation_duration_heart = {};
+      _next_animation_duration_heart.reset();
+
+      _animation_heart->seekToStart();
+      _animation_heart->play();
+   }
+
+   if (animation_duration_stamina > _next_animation_duration_stamina)
+   {
+      animation_duration_stamina = {};
+      _next_animation_duration_stamina.reset();
+
+      _animation_stamina->seekToStart();
+      _animation_stamina->play();
+   }
+
+   if (animation_duration_skull_blink > _next_animation_duration_skull_blink)
+   {
+      animation_duration_skull_blink = {};
+      _next_animation_duration_skull_blink.reset();
+
+      _animation_skull_blink->seekToStart();
+      _animation_skull_blink->play();
+   }
+
+   _animation_heart->update(dt);
+   _animation_stamina->update(dt);
+   _animation_skull_blink->update(dt);
 }
 
 void InfoLayer::playHeartAnimation()

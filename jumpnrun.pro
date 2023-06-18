@@ -664,6 +664,7 @@ DISTFILES += \
     data/config/camera.json \
     data/config/savestate.json \
     data/config/tweaks.json \
+    data/game/ingame_ui.json \
     data/level-crypt/metroid.json \
     data/level-crypt/metroid.tmx \
     data/level-demo/demolevel.tmx \
