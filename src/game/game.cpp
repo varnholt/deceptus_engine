@@ -664,6 +664,8 @@ void Game::update()
       menuLoadRequest();
    }
 
+   _info_layer->update(dt);
+
    if (GameState::getInstance().getMode() == ExecutionMode::Paused)
    {
       updateGameController();
