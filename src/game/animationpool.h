@@ -25,6 +25,8 @@ public:
    void updateAnimations(const sf::Time& dt);
    const std::map<std::string, std::shared_ptr<Animation>>& getAnimations();
 
+   void setGarbageCollectorEnabled(bool newGarbage_collector_enabled);
+
 private:
    void deserialize(const std::string& data);
    void deserializeFromFile(const std::string& filename);
@@ -34,4 +36,5 @@ private:
    std::map<std::string, std::shared_ptr<AnimationSettings>> _settings;
    std::map<std::string, std::shared_ptr<Animation>> _animations;
    std::string _file_path;
+   bool _garbage_collector_enabled{true};
 };
