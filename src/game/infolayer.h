@@ -66,7 +66,7 @@ private:
    std::optional<HighResDuration> _next_animation_duration_heart;
    std::optional<HighResDuration> _next_animation_duration_stamina;
    std::optional<HighResDuration> _next_animation_duration_skull_blink;
-   HighResDuration animation_duration_heart{};
-   HighResDuration animation_duration_stamina{};
-   HighResDuration animation_duration_skull_blink{};
+   HighResDuration _animation_duration_heart{HighResDuration::zero()};
+   HighResDuration _animation_duration_stamina{HighResDuration::zero()};
+   HighResDuration _animation_duration_skull_blink{HighResDuration::zero()};
 };

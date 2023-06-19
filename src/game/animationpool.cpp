@@ -138,15 +138,18 @@ void AnimationPool::updateAnimations(const sf::Time& dt)
       animation.second->update(dt);
    }
 
-   for (auto it = _animations.begin(); it != _animations.end();)
+   if (_garbage_collector_enabled)
    {
-      if (it->second->_paused && !it->second->_looped)
+      for (auto it = _animations.begin(); it != _animations.end();)
       {
-         it = _animations.erase(it);
-      }
-      else
-      {
-         ++it;
+         if (it->second->_paused && !it->second->_looped)
+         {
+            it = _animations.erase(it);
+         }
+         else
+         {
+            ++it;
+         }
       }
    }
 }
@@ -164,10 +167,10 @@ void AnimationPool::deserialize(const std::string& data)
    {
       json config = json::parse(data);
 
-      for (auto& item : config.get<json::object_t>())
+      for (const auto& item : config.get<json::object_t>())
       {
-         auto name = item.first;
-         auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
+         const auto name = item.first;
+         const auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
          _settings[name] = settings;
 
          if (!settings->_valid)
@@ -213,4 +216,10 @@ void AnimationPool::deserializeFromFile(const std::string& filename)
    ifs.close();
 
    deserialize(data);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void AnimationPool::setGarbageCollectorEnabled(bool enabled)
+{
+   _garbage_collector_enabled = enabled;
 }
