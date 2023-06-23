@@ -1,17 +1,16 @@
 #pragma once
 
 #include "framework/joystick/gamecontrollerinfo.h"
-#include "playerinput.h"
+#include "game/constants.h"
+#include "game/player/playerinput.h"
 
 #include <chrono>
 #include <functional>
 
 #include <SFML/Graphics.hpp>
 
-
 class PlayerControls
 {
-
 public:
    PlayerControls() = default;
 
@@ -20,7 +19,7 @@ public:
    using KeypressedCallback = std::function<void(sf::Keyboard::Key)>;
    void addKeypressedCallback(const KeypressedCallback& callback);
 
-   bool hasFlag(int32_t flag) const;
+   bool hasFlag(KeyPressed flag) const;
 
    void keyboardKeyPressed(sf::Keyboard::Key key);
    void keyboardKeyReleased(sf::Keyboard::Key key);
@@ -57,6 +56,12 @@ public:
    bool changedToIdle() const;
    bool changedToMoving() const;
 
+   enum class LockedState
+   {
+      Pressed,
+      Released,
+   };
+
    enum class Orientation
    {
       Undefined,
@@ -67,11 +72,23 @@ public:
    Orientation updateOrientation();
    bool isBendDownActive() const;
    bool isControllerUsedLast() const;
-   void lockOrientation(std::chrono::milliseconds interval);
+   void lockOrientation(std::chrono::milliseconds duration, Orientation = Orientation::Undefined);
+   void lockState(KeyPressed key, LockedState state, std::chrono::milliseconds duration);
+
+   float readControllerNormalizedHorizontal() const;
 
 private:
+   struct LockedKey
+   {
+      std::chrono::milliseconds _locked_duration;
+      LockedState _state{LockedState::Pressed};
+      std::chrono::milliseconds _elapsed;
+      bool asBool() const;
+   };
 
    void updatePlayerInput();
+   void updateLockedKeys(const sf::Time& dt);
+   std::unordered_map<KeyPressed, LockedKey>::const_iterator readLockedState(KeyPressed) const;
 
    GameControllerInfo _joystick_info;
 
@@ -89,4 +106,5 @@ private:
    HighResTimePoint _unlock_orientation_time_point;
    Orientation _locked_orientation = Orientation::Undefined;
    Orientation _last_requested_orientation = Orientation::Undefined;
+   std::unordered_map<KeyPressed, LockedKey> _locked_keys;
 };

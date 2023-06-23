@@ -229,6 +229,10 @@ void PlayerJump::wallJump()
    _walljump_multiplier = physics._player_wall_jump_multiplier;
    _walljump_direction = b2Vec2(_walljump_points_right ? impulse_x : -impulse_x, impulse_y);
    _timepoint_walljump = StopWatch::now();
+
+   using namespace std::chrono_literals;
+   _controls->lockState(_walljump_points_right ? KeyPressedRight : KeyPressedLeft, PlayerControls::LockedState::Pressed, 500ms);
+   _controls->lockState(_walljump_points_right ? KeyPressedLeft : KeyPressedRight, PlayerControls::LockedState::Released, 500ms);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
