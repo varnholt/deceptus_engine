@@ -39,7 +39,7 @@ struct PhysicsConfiguration
    float _player_dash_vector = 3.0f;
 
    // wall slide
-   float _player_wall_slide_friction = 0.4f;
+   float _player_wall_slide_friction = 0.7f;
 
    // wall jump
    int32_t _player_wall_jump_frame_count = 20;
