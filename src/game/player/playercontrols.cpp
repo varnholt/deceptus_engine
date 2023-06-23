@@ -1,13 +1,15 @@
 #include "playercontrols.h"
 
-#include "constants.h"
 #include "framework/joystick/gamecontroller.h"
+#include "framework/tools/log.h"
 #include "gamecontrollerintegration.h"
 #include "tweaks.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerControls::update(const sf::Time& /*dt*/)
+void PlayerControls::update(const sf::Time& dt)
 {
+   updateLockedKeys(dt);
+
    // store where the player has received input from last time
    updatePlayerInput();
 
@@ -23,8 +25,15 @@ void PlayerControls::addKeypressedCallback(const KeypressedCallback& callback)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::hasFlag(int32_t flag) const
+bool PlayerControls::hasFlag(KeyPressed flag) const
 {
+   // check if button state is locked
+   const auto it = readLockedState(flag);
+   if (it != _locked_keys.end())
+   {
+      return it->second.asBool();
+   }
+
    return _keys_pressed & flag;
 }
 
@@ -269,6 +278,13 @@ bool PlayerControls::isDroppingDown() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
 {
+   // check if button state is locked
+   const auto it = readLockedState(KeyPressedLeft);
+   if (it != _locked_keys.end())
+   {
+      return it->second.asBool();
+   }
+
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -349,6 +365,13 @@ bool PlayerControls::isMovingDown() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingRight() const
 {
+   // check if button state is locked
+   const auto it = readLockedState(KeyPressedRight);
+   if (it != _locked_keys.end())
+   {
+      return it->second.asBool();
+   }
+
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -579,12 +602,19 @@ bool PlayerControls::isControllerUsedLast() const
    return _player_input.isControllerUsed();
 }
 
-void PlayerControls::lockOrientation(std::chrono::milliseconds interval)
+void PlayerControls::lockOrientation(std::chrono::milliseconds duration, Orientation orientation)
 {
-   _locked_orientation = updateOrientation();
+   if (orientation == Orientation::Undefined)
+   {
+      _locked_orientation = updateOrientation();
+   }
+   else
+   {
+      _locked_orientation = orientation;
+   }
 
    const auto now = std::chrono::high_resolution_clock::now();
-   _unlock_orientation_time_point = now + interval;
+   _unlock_orientation_time_point = now + duration;
 }
 
 void PlayerControls::updatePlayerInput()
@@ -620,4 +650,74 @@ void PlayerControls::updatePlayerInput()
    {
       _player_input.update(PlayerInput::InputType::Controller);
    }
+}
+
+void PlayerControls::updateLockedKeys(const sf::Time& dt)
+{
+   const auto dt_chrono = std::chrono::milliseconds(dt.asMilliseconds());
+
+   for (auto it = _locked_keys.begin(); it != _locked_keys.end();)
+   {
+      it->second._elapsed += dt_chrono;
+
+      // remove if expired
+      if (it->second._elapsed > it->second._locked_duration)
+      {
+         it = _locked_keys.erase(it);
+      }
+      else
+      {
+         ++it;
+      }
+   }
+}
+
+std::unordered_map<KeyPressed, PlayerControls::LockedKey>::const_iterator PlayerControls::readLockedState(KeyPressed key) const
+{
+   return _locked_keys.find(key);
+}
+
+void PlayerControls::lockState(KeyPressed key, LockedState state, std::chrono::milliseconds duration)
+{
+   if (key == KeyPressedLeft || key == KeyPressedRight)
+   {
+      _locked_keys[key] = {duration, state};
+   }
+   else
+   {
+      Log::Error() << "unsupported key";
+   }
+}
+
+bool PlayerControls::LockedKey::asBool() const
+{
+   if (_state == LockedState::Pressed)
+   {
+      return true;
+   }
+   return false;
+}
+
+float PlayerControls::readControllerNormalizedHorizontal() const
+{
+   // analogue input normalized to -1..1
+   const auto& axis_values = getJoystickInfo().getAxisValues();
+   const auto axis_value = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   auto axis_value_normalized = axis_values[static_cast<size_t>(axis_value)] / 32767.0f;
+
+   // digital input
+   const auto hat_value = getJoystickInfo().getHatValues().at(0);
+   const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
+   const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
+
+   if (dpad_left_pressed)
+   {
+      axis_value_normalized = -1.0f;
+   }
+   else if (dpad_right_pressed)
+   {
+      axis_value_normalized = 1.0f;
+   }
+
+   return axis_value_normalized;
 }

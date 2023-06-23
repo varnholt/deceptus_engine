@@ -603,30 +603,12 @@ float Player::getMaxVelocity() const
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
-   const auto& axis_values = _controls->getJoystickInfo().getAxisValues();
-
    if (_controls->isLookingAround())
    {
       return 0.0f;
    }
 
-   // analogue input normalized to -1..1
-   const auto axis_value = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-   auto axis_value_normalized = axis_values[static_cast<size_t>(axis_value)] / 32767.0f;
-
-   // digital input
-   const auto hat_value = _controls->getJoystickInfo().getHatValues().at(0);
-   const auto dpad_left_pressed = hat_value & SDL_HAT_LEFT;
-   const auto dpad_right_pressed = hat_value & SDL_HAT_RIGHT;
-
-   if (dpad_left_pressed)
-   {
-      axis_value_normalized = -1.0f;
-   }
-   else if (dpad_right_pressed)
-   {
-      axis_value_normalized = 1.0f;
-   }
+   auto axis_value_normalized = _controls->readControllerNormalizedHorizontal();
 
    // controller is not used, so slow down
    if (fabs(axis_value_normalized) <= 0.3f)
