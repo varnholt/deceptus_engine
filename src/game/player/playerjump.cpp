@@ -5,7 +5,6 @@
 #include "game/audio.h"
 #include "game/camerapanorama.h"
 #include "game/gamecontactlistener.h"
-#include "game/mechanisms/bouncerwrapper.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/savestate.h"
 
@@ -231,8 +230,16 @@ void PlayerJump::wallJump()
    _timepoint_walljump = StopWatch::now();
 
    using namespace std::chrono_literals;
-   _controls->lockState(_walljump_points_right ? KeyPressedRight : KeyPressedLeft, PlayerControls::LockedState::Pressed, 500ms);
-   _controls->lockState(_walljump_points_right ? KeyPressedLeft : KeyPressedRight, PlayerControls::LockedState::Released, 500ms);
+   _controls->lockState(
+      _walljump_points_right ? KeyPressedRight : KeyPressedLeft,
+      PlayerControls::LockedState::Pressed,
+      std::chrono::milliseconds(physics._player_wall_jump_lock_key_duration_ms)
+   );
+   _controls->lockState(
+      _walljump_points_right ? KeyPressedLeft : KeyPressedRight,
+      PlayerControls::LockedState::Released,
+      std::chrono::milliseconds(physics._player_wall_jump_lock_key_duration_ms)
+   );
 }
 
 //----------------------------------------------------------------------------------------------------------------------

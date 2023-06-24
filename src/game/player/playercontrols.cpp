@@ -700,6 +700,18 @@ bool PlayerControls::LockedKey::asBool() const
 
 float PlayerControls::readControllerNormalizedHorizontal() const
 {
+   // check if button state is locked
+   const auto it_left = readLockedState(KeyPressedLeft);
+   const auto it_right = readLockedState(KeyPressedRight);
+   if (it_left != _locked_keys.end() && it_left->second._state == LockedState::Pressed)
+   {
+      return -1.0f;
+   }
+   if (it_right != _locked_keys.end() && it_right->second._state == LockedState::Pressed)
+   {
+      return 1.0f;
+   }
+
    // analogue input normalized to -1..1
    const auto& axis_values = getJoystickInfo().getAxisValues();
    const auto axis_value = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
