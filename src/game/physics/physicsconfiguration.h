@@ -48,7 +48,8 @@ struct PhysicsConfiguration
    float _player_wall_jump_multiplier = 20.0f;
    float _player_wall_jump_multiplier_increment_per_frame = -1.0f;
    float _player_wall_jump_multiplier_scale_per_frame = 1.0f;
-   float _player_wall_jump_extra_force = 1.75f; // not in json
+   float _player_wall_jump_extra_force = 1.75f;
+   int32_t _player_wall_jump_lock_key_duration_ms = 500;
 
    // double jump
    float _player_double_jump_factor = 6.0f;
