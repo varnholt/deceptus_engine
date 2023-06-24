@@ -160,6 +160,7 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("wall jump multiplier inc. per frame", &config._player_wall_jump_multiplier_increment_per_frame, -10.0f, -0.1f);
       drawFloatElement("wall jump multiplier scale per frame", &config._player_wall_jump_multiplier_scale_per_frame, 0.1f, 5.0f);
       drawFloatElement("wall jump extra force", &config._player_wall_jump_extra_force, 0.0f, 5.0f);
+      drawIntElement("wall jump lock key duration [ms]", &config._player_wall_jump_lock_key_duration_ms, 0, 2000);
    }
 
    if (ImGui::CollapsingHeader("double jump", header_flags))
