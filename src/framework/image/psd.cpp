@@ -316,6 +316,11 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
    int32_t extra_data_length = 0;
    read(extra_data_length, stream);
 
+   if (extra_data_length == 0)
+   {
+      return;
+   }
+
    auto layer_start = stream.tellg();
 
    // Layer mask / adjustment layer data (ignored)
@@ -356,7 +361,7 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
 
          read(block_id, stream);
          read(block_size, stream);
-         auto blockPos = stream.tellg();
+         const auto block_pos = stream.tellg();
 
          if (block_id == 'lsct')
          {
@@ -371,7 +376,7 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
             uint32_t length = 0;
             read(length, stream);
 
-            auto name = new char[length + 1];
+            const auto name = new char[length + 1];
             name[length] = 0;
 
             for (auto i = 0u; i < length; i++)
@@ -386,7 +391,7 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
          }
 
          // skip rest of block
-         stream.ignore(block_size - (stream.tellg() - blockPos));
+         stream.ignore(block_size - (stream.tellg() - block_pos));
          block_header = 0;
       }
    }
@@ -616,6 +621,11 @@ void PSD::Layer::Channel::loadRaw(int32_t width, int32_t height, std::istream& s
 {
    _width = width;
    _data.resize(width * height);
+
+   if (width == 0 || height == 0)
+   {
+      return;
+   }
    read(_data, stream);
 }
 
