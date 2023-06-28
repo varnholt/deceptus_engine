@@ -1,6 +1,7 @@
 #include "menuscreen.h"
 
 #include "framework/image/psd.h"
+#include "framework/tools/log.h"
 #include "game/gamecontrollerintegration.h"
 
 #include <iostream>
@@ -54,7 +55,7 @@ void MenuScreen::load()
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
-      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
+      if (!layer.isImageLayer())
       {
          continue;
       }
@@ -65,7 +66,11 @@ void MenuScreen::load()
       auto sprite = std::make_shared<sf::Sprite>();
       auto opacity = layer.getOpacity();
 
-      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
+      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);

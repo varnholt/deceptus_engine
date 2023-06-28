@@ -197,7 +197,10 @@ void MenuScreenAudio::updateLayers()
    _layers["sfxVolume_arrows"]->_visible = sfx;
    _layers["sfxVolume_h_0"]->_visible = !sfx;
    _layers["sfxVolume_h_1"]->_visible = sfx;
-   _layers["sfxVolume_value"]->_visible = true;
+
+   // broken in dstar's psd
+   // new: sfxVolume_value_0 .. sfxVolume_value_10
+   // _layers["sfxVolume_value"]->_visible = true;
 
    _layers["mscVolume_body_0"]->_visible = !music;
    _layers["mscVolume_body_1"]->_visible = music;
@@ -208,7 +211,10 @@ void MenuScreenAudio::updateLayers()
    _layers["mscVolume_arrows"]->_visible = music;
    _layers["mscVolume_h_0"]->_visible = !music;
    _layers["mscVolume_h_1"]->_visible = music;
-   _layers["mscVolume_value"]->_visible = true;
+
+   // sfxVolume_value_0 .. sfxVolume_value_10
+   //
+   // _layers["mscVolume_value"]->_visible = true;
 
    _layers["master_text_0"]->_visible = !master;
    _layers["master_text_1"]->_visible = master;
@@ -218,7 +224,10 @@ void MenuScreenAudio::updateLayers()
    _layers["master_arrows"]->_visible = master;
    _layers["master_h_0"]->_visible = !master;
    _layers["master_h_1"]->_visible = master;
-   _layers["master_value"]->_visible = true;
+
+   // same issue as above
+   // _layers["master_value"]->_visible = true;
+   //
 
    const auto master_volume = GameConfiguration::getInstance()._audio_volume_master;
    const auto sfx_volume = GameConfiguration::getInstance()._audio_volume_sfx;

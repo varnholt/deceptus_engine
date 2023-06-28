@@ -126,27 +126,44 @@ void Level::initializeTextures()
    const auto texture_height = static_cast<int32_t>(size_ratio * game_config._view_height);
 
    _render_texture_level_background = std::make_shared<sf::RenderTexture>();
-   _render_texture_level_background->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+   if (!_render_texture_level_background->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   {
+      Log::Fatal() << "failed to create level background texture";
+   }
 
    _render_texture_level = std::make_shared<sf::RenderTexture>();
-   _render_texture_level->create(
-      static_cast<uint32_t>(texture_width),
-      static_cast<uint32_t>(texture_height),
-      stencil_context_settings  // the lights require stencils
-   );
+   if (!_render_texture_level->create(
+          static_cast<uint32_t>(texture_width),
+          static_cast<uint32_t>(texture_height),
+          stencil_context_settings  // the lights require stencils
+       ))
+   {
+      Log::Fatal() << "failed to create level render texture";
+   }
 
    _render_texture_lighting = std::make_shared<sf::RenderTexture>();
-   _render_texture_lighting->create(
-      static_cast<uint32_t>(texture_width),
-      static_cast<uint32_t>(texture_height),
-      stencil_context_settings  // the lights require stencils
-   );
+
+   if (!_render_texture_lighting->create(
+          static_cast<uint32_t>(texture_width),
+          static_cast<uint32_t>(texture_height),
+          stencil_context_settings  // the lights require stencils
+       ))
+   {
+      Log::Fatal() << "failed to create lighting texture";
+   }
 
    _render_texture_normal = std::make_shared<sf::RenderTexture>();
-   _render_texture_normal->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+   if (!_render_texture_normal->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   {
+      Log::Fatal() << "failed to create normal render texture";
+   }
 
    _render_texture_deferred = std::make_shared<sf::RenderTexture>();
-   _render_texture_deferred->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+
+   if (!_render_texture_deferred->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   {
+      Log::Fatal() << "failed to create deferred texture";
+   }
 
    _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
    _gamma_shader = std::make_unique<GammaShader>();

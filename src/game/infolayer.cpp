@@ -122,7 +122,7 @@ InfoLayer::InfoLayer()
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
-      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
+      if (!layer.isImageLayer())
       {
          continue;
       }
@@ -135,7 +135,11 @@ InfoLayer::InfoLayer()
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
 
-      texture->create(layer.getWidth(), layer.getHeight());
+      if (!texture->create(layer.getWidth(), layer.getHeight()))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);

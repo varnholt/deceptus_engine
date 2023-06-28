@@ -250,6 +250,16 @@ PSD::Layer::SectionDivider PSD::Layer::getSectionDivider() const
    return _section_divider;
 }
 
+bool PSD::Layer::isSectionDivider() const
+{
+   return _section_divider != PSD::Layer::SectionDivider::None;
+}
+
+bool PSD::Layer::isImageLayer() const
+{
+   return !isSectionDivider() && (getWidth() > 0) && (getHeight() > 0);
+}
+
 PSD::ColorFormat PSD::Layer::getColorFormat() const
 {
    return _color_format;

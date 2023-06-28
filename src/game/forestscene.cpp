@@ -31,7 +31,7 @@ ForestScene::ForestScene()
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
-      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
+      if (!layer.isImageLayer())
       {
          continue;
       }
@@ -42,7 +42,11 @@ ForestScene::ForestScene()
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
 
-      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
+      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);

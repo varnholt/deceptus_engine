@@ -21,15 +21,27 @@ BlurShader::BlurShader(
 #endif
 
 #ifdef SUPPORT_STENCIL_BITS
-   _render_texture->create(width, height, contextSettings);
+   if (!_render_texture->create(width, height, contextSettings))
+   {
+      Log::Fatal() << "failed to create render texture";
+   }
 #else
-   _render_texture->create(width, height);
+   if (!_render_texture->create(width, height))
+   {
+      Log::Fatal() << "failed to create render texture";
+   }
 #endif
 
 #ifdef SUPPORT_STENCIL_BITS
-   _render_texture_scaled->create(960, 540, contextSettings);
+   if (!_render_texture_scaled->create(960, 540, contextSettings))
+   {
+      Log::Fatal() << "failed to create scaled texture";
+   }
 #else
-   _render_texture->create(960, 540);
+   if (!_render_texture_scaled->create(960, 540))
+   {
+      Log::Fatal() << "failed to create texture";
+   }
 #endif
    _render_texture_scaled->setSmooth(true);
 }

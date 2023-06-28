@@ -1,9 +1,10 @@
-#include "ingamemenupage.h"
-#include "displaymode.h"
+#include "game/ingamemenupage.h"
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
-#include "gameconfiguration.h"
-#include "gamestate.h"
+#include "framework/tools/log.h"
+#include "game/displaymode.h"
+#include "game/gameconfiguration.h"
+#include "game/gamestate.h"
 
 #include <iostream>
 
@@ -167,7 +168,7 @@ void InGameMenuPage::load()
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
-      if (layer.getSectionDivider() != PSD::Layer::SectionDivider::None)
+      if (!layer.isImageLayer())
       {
          continue;
       }
@@ -183,7 +184,11 @@ void InGameMenuPage::load()
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
 
-      texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
+      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);

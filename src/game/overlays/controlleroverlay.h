@@ -11,16 +11,11 @@
 
 class ControllerOverlay
 {
-   public:
+public:
+   ControllerOverlay();
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
-      ControllerOverlay();
-      void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-
-
-   private:
-
-      std::map<std::string, std::shared_ptr<Layer>> _layers;
-      sf::Vector2i _texture_size;
-
+private:
+   std::map<std::string, std::shared_ptr<Layer>> _layers;
+   sf::Vector2i _texture_size;
 };
-
