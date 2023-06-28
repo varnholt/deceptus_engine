@@ -5,18 +5,17 @@
 #include <array>
 #include <functional>
 
-
 class MenuScreenVideo : public MenuScreen
 {
 public:
-
-   enum class Selection {
-      Monitor     = 0,
-      Resolution  = 1,
+   enum class Selection
+   {
+      Monitor = 0,
+      Resolution = 1,
       DisplayMode = 2,
-      VSync       = 3,
-      Brightness  = 4,
-      Count       = 5
+      VSync = 3,
+      Brightness = 4,
+      Count = 5
    };
 
    using FullscreenCallback = std::function<void(void)>;
@@ -40,16 +39,10 @@ public:
 
    Selection _selection = Selection::Resolution;
 
-
 private:
-
-    FullscreenCallback _fullscreen_callback;
-    ResolutionCallback _resolution_callback;
-    VSyncCallback _vsync_callback;
-    std::vector<std::array<int32_t, 2>> _video_modes;
-
+   FullscreenCallback _fullscreen_callback;
+   ResolutionCallback _resolution_callback;
+   VSyncCallback _vsync_callback;
+   std::vector<std::array<int32_t, 2>> _video_modes;
+   std::vector<std::shared_ptr<Layer>> _brightness_value_layers;
 };
-
-
-
-

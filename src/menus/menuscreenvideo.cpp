@@ -1,23 +1,19 @@
-#include "menuscreenvideo.h"
-
-#include "menu.h"
-#include "menuaudio.h"
+#include "menus/menuscreenvideo.h"
 
 #include "game/gameconfiguration.h"
+#include "menus/menu.h"
+#include "menus/menuaudio.h"
 
+#include <format>
 
 static const auto STEP_SIZE = 10;
-
-
 
 MenuScreenVideo::MenuScreenVideo()
 {
    setFilename("data/menus/video.psd");
 
-   _video_modes = { {1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080}, {3840, 2160} };
+   _video_modes = {{1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080}, {3840, 2160}};
 }
-
-
 
 void MenuScreenVideo::up()
 {
@@ -33,7 +29,6 @@ void MenuScreenVideo::up()
 
    MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenVideo::down()
 {
@@ -54,40 +49,44 @@ void MenuScreenVideo::select(int32_t step)
 {
    switch (_selection)
    {
-       case Selection::DisplayMode:
-       {
-          _fullscreen_callback();
-          break;
-       }
+      case Selection::DisplayMode:
+      {
+         _fullscreen_callback();
+         break;
+      }
 
-       case Selection::Resolution:
-       {
-          auto next = [this, step]() -> std::array<int32_t, 2> {
-              auto it = std::find_if(std::begin(_video_modes), std::end(_video_modes), [](const std::array<int32_t, 2> arr){
-                  return
-                         arr[0] == GameConfiguration::getInstance()._video_mode_width
-                      && arr[1] == GameConfiguration::getInstance()._video_mode_height;
-              });
+      case Selection::Resolution:
+      {
+         auto next = [this, step]() -> std::array<int32_t, 2>
+         {
+            auto it = std::find_if(
+               std::begin(_video_modes),
+               std::end(_video_modes),
+               [](const std::array<int32_t, 2> arr) {
+                  return arr[0] == GameConfiguration::getInstance()._video_mode_width &&
+                         arr[1] == GameConfiguration::getInstance()._video_mode_height;
+               }
+            );
 
-              auto index = it - _video_modes.begin();
-              if (step < 0)
-                  index--;
-              else
-                  index++;
+            auto index = it - _video_modes.begin();
+            if (step < 0)
+               index--;
+            else
+               index++;
 
-              if (index < 0)
-              {
-                  index = _video_modes.size() - 1;
-              }
-              else if (index > static_cast<int32_t>(_video_modes.size() - 1))
-              {
-                  index = 0;
-              }
-              return _video_modes[index];
-          }();
+            if (index < 0)
+            {
+               index = _video_modes.size() - 1;
+            }
+            else if (index > static_cast<int32_t>(_video_modes.size() - 1))
+            {
+               index = 0;
+            }
+            return _video_modes[index];
+         }();
 
-          _resolution_callback(next[0], next[1]);
-          break;
+         _resolution_callback(next[0], next[1]);
+         break;
       }
 
       case Selection::Brightness:
@@ -130,27 +129,24 @@ void MenuScreenVideo::select(int32_t step)
 
 void MenuScreenVideo::back()
 {
-    Menu::getInstance()->show(Menu::MenuType::Options);
-    MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
+   Menu::getInstance()->show(Menu::MenuType::Options);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
 
 void MenuScreenVideo::setFullscreenCallback(MenuScreenVideo::FullscreenCallback callback)
 {
-    _fullscreen_callback = callback;
+   _fullscreen_callback = callback;
 }
-
 
 void MenuScreenVideo::setResolutionCallback(MenuScreenVideo::ResolutionCallback callback)
 {
    _resolution_callback = callback;
 }
 
-
 void MenuScreenVideo::setVSyncCallback(VSyncCallback callback)
 {
    _vsync_callback = callback;
 }
-
 
 void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -166,12 +162,12 @@ void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
 
    else if (key == sf::Keyboard::Left)
    {
-       select(-STEP_SIZE);
+      select(-STEP_SIZE);
    }
 
    else if (key == sf::Keyboard::Right)
    {
-       select(STEP_SIZE);
+      select(STEP_SIZE);
    }
 
    else if (key == sf::Keyboard::Escape)
@@ -180,12 +176,16 @@ void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenVideo::loadingFinished()
 {
+   for (auto i = 0; i < 11; i++)
+   {
+      const auto brightness_value_layer_name = std::format("brightness_value_{}", i);
+      _brightness_value_layers.push_back(_layers[brightness_value_layer_name]);
+   }
+
    updateLayers();
 }
-
 
 void MenuScreenVideo::updateLayers()
 {
@@ -200,7 +200,7 @@ void MenuScreenVideo::updateLayers()
    auto fullscreen = GameConfiguration::getInstance()._fullscreen;
    if (fullscreen)
    {
-       display_mode_selection = 2;
+      display_mode_selection = 2;
    }
 
    auto resolution_width = GameConfiguration::getInstance()._video_mode_width;
@@ -208,10 +208,7 @@ void MenuScreenVideo::updateLayers()
 
    for (auto index = 0u; index < _video_modes.size(); index++)
    {
-      if (
-            _video_modes[index][0] == resolution_width
-         && _video_modes[index][1] == resolution_height
-      )
+      if (_video_modes[index][0] == resolution_width && _video_modes[index][1] == resolution_height)
       {
          resolution_selection = index;
          break;
@@ -254,9 +251,6 @@ void MenuScreenVideo::updateLayers()
    _layers["brightness_h_0"]->_visible = !brightness;
    _layers["brightness_h_1"]->_visible = brightness;
 
-   // broken in latest psd
-   // _layers["brightness_value"]->_visible = true;
-
    _layers["brightness_h_0"]->_sprite->setOrigin(50 - (brightness_value * 100.0f), 0);
    _layers["brightness_h_1"]->_sprite->setOrigin(50 - (brightness_value * 100.0f), 0);
 
@@ -277,8 +271,12 @@ void MenuScreenVideo::updateLayers()
    _layers["vSync_value_0"]->_visible = vsync_selection == 0;
    _layers["vSync_value_1"]->_visible = vsync_selection == 1;
 
+   const auto brightness_index = static_cast<int32_t>(std::ceil(brightness_value * 10));
+   for (auto i = 0; i < 11; i++)
+   {
+      _brightness_value_layers[i]->_visible = (i == brightness_index);
+   }
 }
-
 
 /*
 data/menus/video.psd
@@ -290,4 +288,3 @@ data/menus/video.psd
 
    header
 */
-
