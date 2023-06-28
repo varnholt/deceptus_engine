@@ -4,16 +4,15 @@
 
 #include <cstdint>
 
-
 class MenuScreenAudio : public MenuScreen
 {
 public:
-
-   enum class Selection {
+   enum class Selection
+   {
       Master = 0,
-      Music  = 1,
-      SFX    = 2,
-      Count  = 3,
+      Music = 1,
+      SFX = 2,
+      Count = 3,
    };
 
    MenuScreenAudio();

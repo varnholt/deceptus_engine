@@ -5,27 +5,20 @@
 
 #include <iostream>
 
-
 //----------------------------------------------------------------------------------------------------------------------
-AtmosphereShader::AtmosphereShader(
-   uint32_t texture_width,
-   uint32_t texture_height
-)
- : _render_texture(std::make_shared<sf::RenderTexture>())
+AtmosphereShader::AtmosphereShader(uint32_t texture_width, uint32_t texture_height) : _render_texture(std::make_shared<sf::RenderTexture>())
 {
-   _render_texture->create(
-      static_cast<uint32_t>(texture_width),
-      static_cast<uint32_t>(texture_height)
-   );
+   if (!_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   {
+      Log::Fatal() << "failed to create texture";
+   }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 AtmosphereShader::~AtmosphereShader()
 {
    _render_texture.reset();
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void AtmosphereShader::initialize()
@@ -50,16 +43,14 @@ void AtmosphereShader::initialize()
    _shader.setUniform("physicsTexture", _render_texture->getTexture());
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void AtmosphereShader::update()
 {
-  float distortionFactor = 0.02f;
+   float distortionFactor = 0.02f;
 
-  _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * 0.2f);
-  _shader.setUniform("distortionFactor", distortionFactor);
+   _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * 0.2f);
+   _shader.setUniform("distortionFactor", distortionFactor);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() const
@@ -67,10 +58,8 @@ const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() c
    return _render_texture;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 const sf::Shader& AtmosphereShader::getShader() const
 {
    return _shader;
 }
-

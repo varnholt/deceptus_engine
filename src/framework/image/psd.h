@@ -104,6 +104,8 @@ class PSD
             const Image& getImage() const;
             const Channel& getChannel(int32_t id) const;
             SectionDivider getSectionDivider() const;
+            bool isSectionDivider() const;
+            bool isImageLayer() const;
             ColorFormat getColorFormat() const;
             void setColorFormat(const ColorFormat& colorFormat);
 

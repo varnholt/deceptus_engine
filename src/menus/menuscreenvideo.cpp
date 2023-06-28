@@ -253,7 +253,10 @@ void MenuScreenVideo::updateLayers()
    _layers["brightness_arrows"]->_visible = brightness;
    _layers["brightness_h_0"]->_visible = !brightness;
    _layers["brightness_h_1"]->_visible = brightness;
-   _layers["brightness_value"]->_visible = true;
+
+   // broken in latest psd
+   // _layers["brightness_value"]->_visible = true;
+
    _layers["brightness_h_0"]->_sprite->setOrigin(50 - (brightness_value * 100.0f), 0);
    _layers["brightness_h_1"]->_sprite->setOrigin(50 - (brightness_value * 100.0f), 0);
 
