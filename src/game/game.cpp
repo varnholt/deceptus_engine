@@ -158,7 +158,11 @@ void Game::initializeWindow()
    _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
    _window_render_texture = std::make_shared<sf::RenderTexture>();
-   _window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+
+   if (!_window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   {
+      Log::Fatal() << "failed to create texture: window render texture";
+   }
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
