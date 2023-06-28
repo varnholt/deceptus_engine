@@ -3,6 +3,7 @@
 #include "menuscreen.h"
 
 #include <cstdint>
+#include <vector>
 
 class MenuScreenAudio : public MenuScreen
 {
@@ -32,4 +33,8 @@ public:
    void setDefaults();
 
    Selection _selection = Selection::Master;
+
+   std::vector<std::shared_ptr<Layer>> _volume_layers_master;
+   std::vector<std::shared_ptr<Layer>> _volume_layers_music;
+   std::vector<std::shared_ptr<Layer>> _volume_layers_sfx;
 };

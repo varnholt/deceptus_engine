@@ -5,6 +5,8 @@
 #include "menu.h"
 #include "menuaudio.h"
 
+#include <format>
+
 #define STEP_SIZE 10
 
 MenuScreenAudio::MenuScreenAudio()
@@ -164,6 +166,17 @@ void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenAudio::loadingFinished()
 {
+   for (auto i = 0; i < 11; i++)
+   {
+      const auto master_value_layer = std::format("master_value_{}", i);
+      const auto music_value_layer = std::format("mscVolume_value_{}", i);
+      const auto sfx_value_layer = std::format("sfxVolume_value_{}", i);
+
+      _volume_layers_master.push_back(_layers[master_value_layer]);
+      _volume_layers_music.push_back(_layers[music_value_layer]);
+      _volume_layers_sfx.push_back(_layers[sfx_value_layer]);
+   }
+
    updateLayers();
 }
 
@@ -198,10 +211,6 @@ void MenuScreenAudio::updateLayers()
    _layers["sfxVolume_h_0"]->_visible = !sfx;
    _layers["sfxVolume_h_1"]->_visible = sfx;
 
-   // broken in dstar's psd
-   // new: sfxVolume_value_0 .. sfxVolume_value_10
-   // _layers["sfxVolume_value"]->_visible = true;
-
    _layers["mscVolume_body_0"]->_visible = !music;
    _layers["mscVolume_body_1"]->_visible = music;
    _layers["mscVolume_text_0"]->_visible = !music;
@@ -212,10 +221,6 @@ void MenuScreenAudio::updateLayers()
    _layers["mscVolume_h_0"]->_visible = !music;
    _layers["mscVolume_h_1"]->_visible = music;
 
-   // sfxVolume_value_0 .. sfxVolume_value_10
-   //
-   // _layers["mscVolume_value"]->_visible = true;
-
    _layers["master_text_0"]->_visible = !master;
    _layers["master_text_1"]->_visible = master;
    _layers["master_body_1"]->_visible = master;
@@ -225,13 +230,20 @@ void MenuScreenAudio::updateLayers()
    _layers["master_h_0"]->_visible = !master;
    _layers["master_h_1"]->_visible = master;
 
-   // same issue as above
-   // _layers["master_value"]->_visible = true;
-   //
-
    const auto master_volume = GameConfiguration::getInstance()._audio_volume_master;
    const auto sfx_volume = GameConfiguration::getInstance()._audio_volume_sfx;
    const auto music_volume = GameConfiguration::getInstance()._audio_volume_music;
+
+   const auto master_volume_layer_index = static_cast<int32_t>(master_volume / 10);
+   const auto sfx_volume_layer_index = static_cast<int32_t>(sfx_volume / 10);
+   const auto music_volume_layer_index = static_cast<int32_t>(music_volume / 10);
+
+   for (auto i = 0; i < 11; i++)
+   {
+      _volume_layers_master[i]->_visible = (i == master_volume_layer_index);
+      _volume_layers_sfx[i]->_visible = (i == sfx_volume_layer_index);
+      _volume_layers_music[i]->_visible = (i == music_volume_layer_index);
+   }
 
    _layers["master_h_0"]->_sprite->setOrigin(50.0f - master_volume, 0.0f);
    _layers["sfxVolume_h_0"]->_sprite->setOrigin(50.0f - sfx_volume, 0.0f);
