@@ -1,5 +1,5 @@
-// header
-#include "gamecontroller.h"
+#include "framework/joystick/gamecontroller.h"
+
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 

@@ -5,24 +5,22 @@
 class MenuScreenGame : public MenuScreen
 {
 public:
-
-   enum class Selection {
+   enum class Selection
+   {
       TextSpeed = 0,
-      AutomaticPause = 1,
-      Count = 2,
+      Rumble = 1,
+      AutomaticPause = 2,
+      Count = 3,
    };
 
    MenuScreenGame();
 
-
 protected:
-
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
    void loadingFinished() override;
 
-
 private:
-
+   bool isRumbleEnabled() const;
    void updateLayers();
 
    void up();
@@ -34,4 +32,3 @@ private:
 
    Selection _selection = Selection::TextSpeed;
 };
-

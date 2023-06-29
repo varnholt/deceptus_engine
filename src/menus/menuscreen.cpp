@@ -6,11 +6,9 @@
 
 #include <iostream>
 
-
 void MenuScreen::update(const sf::Time& /*dt*/)
 {
 }
-
 
 void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
@@ -23,28 +21,23 @@ void MenuScreen::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-
 void MenuScreen::showEvent()
 {
 }
 
-
 void MenuScreen::hideEvent()
 {
 }
-
 
 const std::string& MenuScreen::getFilename()
 {
    return _filename;
 }
 
-
 void MenuScreen::setFilename(const std::string& filename)
 {
    _filename = filename;
 }
-
 
 void MenuScreen::load()
 {
@@ -87,21 +80,17 @@ void MenuScreen::load()
    loadingFinished();
 }
 
-
 void MenuScreen::loadingFinished()
 {
 }
-
 
 void MenuScreen::keyboardKeyPressed(sf::Keyboard::Key /*key*/)
 {
 }
 
-
 void MenuScreen::keyboardKeyReleased(sf::Keyboard::Key /*key*/)
 {
 }
-
 
 void MenuScreen::controllerButtonX()
 {
@@ -109,14 +98,11 @@ void MenuScreen::controllerButtonX()
    keyboardKeyPressed(sf::Keyboard::D);
 }
 
-
 void MenuScreen::controllerButtonY()
 {
 }
-
 
 bool MenuScreen::isControllerUsed() const
 {
    return GameControllerIntegration::getInstance().isControllerConnected();
 }
-

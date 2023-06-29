@@ -6,12 +6,9 @@
 
 #include "framework/image/layer.h"
 
-
 class MenuScreen
 {
-
 public:
-
    MenuScreen() = default;
    virtual ~MenuScreen() = default;
 
@@ -33,11 +30,8 @@ public:
 
    bool isControllerUsed() const;
 
-
 protected:
-
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 };
-
