@@ -14,6 +14,7 @@ struct GameConfiguration
    float _view_scale_height = 1.0f;
    float _brightness = 0.5f;
    bool _vsync_enabled = false;
+   bool _rumble_enabled = true;
 
    int32_t _audio_volume_master = 50;
    int32_t _audio_volume_sfx = 100;
@@ -37,7 +38,6 @@ struct GameConfiguration
    static void resetAudioDefaults();
 
 private:
-
    std::string serialize();
    void deserialize(const std::string& data);
 
@@ -46,4 +46,3 @@ private:
    static bool __initialized;
    static GameConfiguration __defaults;
 };
-

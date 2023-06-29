@@ -65,6 +65,13 @@ void MenuScreenOptions::up()
 {
    auto next = static_cast<int32_t>(_selection);
    next--;
+
+   // achievements are skipped at the moment
+   if (next == static_cast<int32_t>(Selection::Achievements))
+   {
+      next--;
+   }
+
    if (next < 0)
    {
       next = static_cast<int32_t>(Selection::Count) - 1;
@@ -80,6 +87,13 @@ void MenuScreenOptions::down()
 {
    auto next = static_cast<int32_t>(_selection);
    next++;
+
+   // achievements are skipped at the moment
+   if (next == static_cast<int32_t>(Selection::Achievements))
+   {
+      next++;
+   }
+
    if (next == static_cast<int32_t>(Selection::Count))
    {
       next = 0;

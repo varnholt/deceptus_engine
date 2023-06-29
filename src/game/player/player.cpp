@@ -10,23 +10,24 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
-#include "gameclock.h"
-#include "gamecontactlistener.h"
-#include "gamecontrollerintegration.h"
-#include "gamestate.h"
-#include "gun.h"
-#include "level.h"
+#include "game/gameclock.h"
+#include "game/gameconfiguration.h"
+#include "game/gamecontactlistener.h"
+#include "game/gamecontrollerintegration.h"
+#include "game/gamestate.h"
+#include "game/gun.h"
+#include "game/level.h"
+#include "game/player/playeraudio.h"
+#include "game/player/playerinfo.h"
+#include "game/savestate.h"
+#include "game/screentransition.h"
+#include "game/sword.h"
 #include "mechanisms/bouncerwrapper.h"
 #include "mechanisms/fan.h"
 #include "mechanisms/laser.h"
 #include "mechanisms/portalwrapper.h"
 #include "onewaywall.h"
 #include "physics/physicsconfiguration.h"
-#include "playeraudio.h"
-#include "playerinfo.h"
-#include "savestate.h"
-#include "screentransition.h"
-#include "sword.h"
 #include "tweaks.h"
 #include "weapon.h"
 #include "weaponsystem.h"
@@ -1112,7 +1113,10 @@ void Player::startHardLanding()
    auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
    {
-      gji.getController()->rumble(0.5f, 300);
+      if (GameConfiguration::getInstance()._rumble_enabled)
+      {
+         gji.getController()->rumble(0.5f, 300);
+      }
    }
 
    Audio::getInstance().playSample({"player_grunt_01.wav"});

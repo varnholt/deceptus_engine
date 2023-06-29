@@ -9,7 +9,10 @@
         "view_width": 480,
         "view_height": 270,
         "brightness": 0.5,
-        "vsync": true
+        "vsync": true,
+        "text_speed": 2,
+        "rumble": true,
+        "pause_mode": 1        
     }
 }
 
