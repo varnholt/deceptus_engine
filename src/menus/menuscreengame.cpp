@@ -62,9 +62,16 @@ void MenuScreenGame::set(int32_t x)
          config._text_speed = std::clamp(config._text_speed + x, 0, 4);
          break;
       }
+      case Selection::Rumble:
+      {
+         config._rumble_enabled = !config._rumble_enabled;
+         break;
+      }
       case Selection::AutomaticPause:
       {
-         config._pause_mode = static_cast<GameConfiguration::PauseMode>(std::clamp(static_cast<int32_t>(config._pause_mode) + x, 0, 1));
+         config._pause_mode = (config._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
+                                 ? GameConfiguration::PauseMode::ManualPause
+                                 : GameConfiguration::PauseMode::AutomaticPause;
          break;
       }
       default:
@@ -112,10 +119,16 @@ void MenuScreenGame::loadingFinished()
    updateLayers();
 }
 
+bool MenuScreenGame::isRumbleEnabled() const
+{
+   return GameConfiguration::getInstance()._rumble_enabled;
+}
+
 void MenuScreenGame::updateLayers()
 {
    auto auto_pause = _selection == Selection::AutomaticPause;
    auto text_speed = _selection == Selection::TextSpeed;
+   auto rumble = _selection == Selection::Rumble;
 
    auto auto_pause_selection = GameConfiguration::getInstance()._pause_mode;
    auto text_speed_selection = GameConfiguration::getInstance()._text_speed;
@@ -148,6 +161,11 @@ void MenuScreenGame::updateLayers()
    _layers["textSpeed_3"]->_visible = (text_speed_selection == 2);
    _layers["textSpeed_4"]->_visible = (text_speed_selection == 3);
    _layers["textSpeed_5"]->_visible = (text_speed_selection == 4);
+
+   _layers["rumble_highlight"]->_visible = rumble;
+   _layers["rumble_help"]->_visible = rumble;
+   _layers["Off"]->_visible = !isRumbleEnabled();
+   _layers["On"]->_visible = isRumbleEnabled();
 }
 
 /*
