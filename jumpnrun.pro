@@ -52,7 +52,7 @@ win32 {
    LIBS += -llua53
 
    # sfml
-   LIBS += -Lsfml\lib
+   LIBS += -Lthirdparty\sfml\lib
    CONFIG(release, debug|release) {
       LIBS += -lsfml-audio
       LIBS += -lsfml-graphics
@@ -79,8 +79,8 @@ linux {
 
 
 #sfml
-INCLUDEPATH += sfml/include
-DEPENDPATH += sfml/include
+INCLUDEPATH += thirdparty/sfml/include
+DEPENDPATH += thirdparty/sfml/include
 
 
 INCLUDEPATH += .
