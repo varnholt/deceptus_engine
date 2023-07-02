@@ -232,7 +232,6 @@ private:
    PlayerAnimation _player_animation;
    std::deque<PositionedAnimation> _last_animations;
 
-   std::optional<int32_t> _wallslide_sample;
    Chunk _chunk;
    AnimationPool _animation_pool{"data/sprites/animations.json"};
 
