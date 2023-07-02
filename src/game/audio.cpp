@@ -80,32 +80,6 @@ void Audio::initializeSamples()
    addSample("arrow_hit_1.wav");
    addSample("arrow_hit_2.wav");
 
-   // make separate audio interface for player
-   addSample("player_dash_01.wav");
-   addSample("player_doublejump_01.mp3");
-   addSample("player_grunt_01.wav");
-   addSample("player_grunt_02.wav");
-   addSample("player_jump_land.wav");
-   addSample("player_jump_liftoff.wav");
-   addSample("player_kneel_01.wav");
-   addSample("player_footstep_stone_l.wav");
-   addSample("player_footstep_stone_r.wav");
-   addSample("player_spawn_01.wav");
-   addSample("player_sword_kneeling_01.wav");
-   addSample("player_sword_kneeling_02.wav");
-   addSample("player_sword_kneeling_03.wav");
-   addSample("player_sword_kneeling_04.wav");
-   addSample("player_sword_standing_01.wav");
-   addSample("player_sword_standing_02.wav");
-   addSample("player_sword_standing_03.wav");
-   addSample("player_sword_standing_04.wav");
-   addSample("player_sword_standing_05.wav");
-   addSample("player_sword_standing_06.wav");
-   addSample("player_sword_standing_07.wav");
-   addSample("player_sword_standing_08.wav");
-   addSample("player_sword_standing_09.wav");
-   addSample("player_wallslide_01.wav");
-
    addSample("powerup.wav");
    addSample("splash.wav");
    addSample("impact.wav");

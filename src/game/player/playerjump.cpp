@@ -1,6 +1,7 @@
 #include "game/player/playerjump.h"
 
 #include "framework/tools/globalclock.h"
+#include "framework/tools/scopeexit.h"
 #include "framework/tools/stopwatch.h"
 #include "game/audio.h"
 #include "game/camerapanorama.h"
@@ -336,6 +337,28 @@ void PlayerJump::updateLostGroundContact()
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallSlide()
 {
+   // start and stop wallsliding sample
+   ScopeExit scope_exit(
+      [this]()
+      {
+         if (_wallsliding)
+         {
+            if (!_wallslide_sample.has_value())
+            {
+               _wallslide_sample = Audio::getInstance().playSample({"player_wallslide_01.wav", 1.0, true});
+            }
+         }
+         else
+         {
+            if (_wallslide_sample.has_value())
+            {
+               Audio::getInstance().stopSample(_wallslide_sample.value());
+               _wallslide_sample.reset();
+            }
+         }
+      }
+   );
+
    if (!_jump_info._in_air)
    {
       _wallsliding = false;
