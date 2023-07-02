@@ -77,7 +77,7 @@ void Sword::updateHitbox()
 {
    constexpr auto hitbox_width_px = 30.0f;
    constexpr auto hitbox_height_px = 20.0f;
-   auto player = Player::getCurrent();
+   const auto* player = Player::getCurrent();
    const auto center = player->getPixelPositionFloat();
    const auto crouching = player->getBend().isCrouching();
 

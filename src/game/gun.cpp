@@ -162,7 +162,7 @@ void Gun::update(const sf::Time& time)
    updateProjectiles(time);
 
    // can't set the bodies inactive in the postsolve step because the world is still locked
-   for (auto& projectile : _projectiles)
+   for (const auto* projectile : _projectiles)
    {
       if (projectile->isScheduledForRemoval())
       {

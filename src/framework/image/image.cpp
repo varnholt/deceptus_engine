@@ -257,8 +257,8 @@ void Image::minimum(const Image& image)
 
    for (auto y = 0; y < height; y++)
    {
-      auto dst = getScanline(y);
-      auto src = image.getScanline(y);
+      auto* dst = getScanline(y);
+      const auto* src = image.getScanline(y);
 
       for (auto x = 0; x < width; x++)
       {
@@ -311,7 +311,7 @@ void Image::copy(int32_t posX, int32_t posY, const Image& image, int32_t replica
    for (auto y = 0; y < height; y++)
    {
       auto dst = getScanline(y + posY) + posX;
-      auto src = image.getScanline(y);
+      const auto* src = image.getScanline(y);
 
       for (auto x = 0; x < width; x++)
       {

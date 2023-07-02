@@ -62,7 +62,7 @@ void CameraSystem::updateX(const sf::Time& dt)
 {
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
-   auto player = Player::getCurrent();
+   const auto* player = Player::getCurrent();
    auto player_x_px = player->getPixelPositionFloat().x;
    auto player_y_px = player->getPixelPositionFloat().y;
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x_px, player_y_px, _focus_offset_px);
@@ -131,7 +131,7 @@ void CameraSystem::updateY(const sf::Time& dt)
    const auto view_center = (_view_height_px / 2.0f);
 
    // test if out of panic line boundaries
-   auto player = Player::getCurrent();
+   const auto* player = Player::getCurrent();
    auto player_x = player->getPixelPositionFloat().x;
    auto player_y = player->getPixelPositionFloat().y + camera_config.getPlayerOffsetY();
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x, player_y, _focus_offset_px);
@@ -218,7 +218,7 @@ float CameraSystem::getFocusOffset() const
 
 void CameraSystem::syncNow()
 {
-   auto player = Player::getCurrent();
+   const auto* player = Player::getCurrent();
 
    auto player_x = player->getPixelPositionFloat().x;
    auto player_y = player->getPixelPositionFloat().y;

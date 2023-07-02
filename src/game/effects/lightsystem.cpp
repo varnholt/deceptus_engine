@@ -72,9 +72,9 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
          auto shape = fixture->GetShape();
 
-         auto shape_polygon = dynamic_cast<b2PolygonShape*>(shape);
-         auto shape_chain = dynamic_cast<b2ChainShape*>(shape);
-         auto shape_circle = dynamic_cast<b2CircleShape*>(shape);
+         const auto* shape_polygon = dynamic_cast<b2PolygonShape*>(shape);
+         const auto* shape_chain = dynamic_cast<b2ChainShape*>(shape);
+         const auto* shape_circle = dynamic_cast<b2CircleShape*>(shape);
 
          if (shape_circle)
          {

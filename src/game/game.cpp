@@ -235,15 +235,11 @@ void Game::loadLevel()
       std::launch::async,
       [this]()
       {
-         // pick a level
-         auto levels = Levels::getInstance();
-         levels.deserializeFromFile();
-         auto level_item = levels._levels.at(SaveState::getCurrent()._level_index);
-
          _player->resetWorld();  // free the pointer that's shared with the player
          _level.reset();
 
-         // load it
+         // load level
+         const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
          _level = std::make_shared<Level>();
          _level->setDescriptionFilename(level_item._level_name);
          _level->initialize();
@@ -280,8 +276,8 @@ void Game::nextLevel()
 {
    SaveState::getCurrent()._level_index++;
 
-   auto levels = Levels::getInstance();
-   if (SaveState::getCurrent()._level_index == levels._levels.size())
+   auto levels = Levels::readLevelItems();
+   if (SaveState::getCurrent()._level_index == levels.size())
    {
       // this could show the end sequence or similar
       // DrawStates::_draw_test_scene = true;

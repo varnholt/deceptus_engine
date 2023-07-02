@@ -123,9 +123,9 @@ void fbm::test()
       vec2 st = pos / resolution;
       st.x *= resolution.x / resolution.y;
 
-      auto test = fbm(st * 3.0f);
+      auto test_value = fbm(st * 3.0f);
 
-      std::cout << test << std::endl;
+      std::cout << test_value << std::endl;
    }
 }
 

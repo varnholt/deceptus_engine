@@ -90,7 +90,7 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
 void ObjectUpdater::update()
 {
    // update volume of all mechanisms and enemies
-   for (const auto& mechanism_vector : _mechanisms)
+   for (const auto* mechanism_vector : _mechanisms)
    {
       for (const auto& mechanism : *mechanism_vector)
       {

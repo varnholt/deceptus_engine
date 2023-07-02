@@ -12,7 +12,7 @@ void TmxPolyLine::deserialize(tinyxml2::XMLElement *element, const std::shared_p
    const auto points = element->Attribute("points");
    const auto pairs = TmxTools::split(points, ' ');
 
-   for (auto& pair : pairs)
+   for (const auto& pair : pairs)
    {
       const auto two_points = TmxTools::splitPair(pair, ',');
       if (two_points.size() == 2)

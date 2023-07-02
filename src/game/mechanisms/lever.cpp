@@ -481,15 +481,19 @@ void Lever::merge(
 
                const auto& pixel_path = mechanism->getPixelPath();
 
-               for (const auto& pixel : pixel_path)
-               {
-                  if (search_rect.contains(pixel.x, pixel.y))
+               std::any_of(
+                  pixel_path.begin(),
+                  pixel_path.end(),
+                  [&](const auto& pixel)
                   {
-                     callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
-
-                     break;
+                     if (search_rect.contains(pixel.x, pixel.y))
+                     {
+                        callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                        return true;
+                     }
+                     return false;
                   }
-               }
+               );
             }
 
             for (auto& s : spikes)

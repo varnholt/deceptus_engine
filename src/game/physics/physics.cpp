@@ -144,10 +144,10 @@ bool Physics::dumpObj(
       for (auto x_tl = 0u; x_tl < width_tl; x_tl++)
       {
          const auto tile_number = tiles[y_tl * width_tl + x_tl];
-         auto tile_relative = -1;
 
          if (tile_number != 0)
          {
+            auto tile_relative = -1;
             tile_relative = tile_number - tileset->_first_gid;
             auto tile_it = tile_map.find(tile_relative);
 

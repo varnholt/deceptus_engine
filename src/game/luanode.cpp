@@ -1765,7 +1765,7 @@ void LuaNode::setupLua()
    }
 
    // register properties
-   for (auto& prop : _enemy_description._properties)
+   for (const auto& prop : _enemy_description._properties)
    {
       luaWriteProperty(prop._name, prop._value);
    }

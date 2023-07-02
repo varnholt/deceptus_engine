@@ -118,8 +118,8 @@ class PSD
             uint16_t _channel_count = 0;
             Image _image;
             std::vector<Channel> _channels;
-            std::array<uint8_t, 4> _blend_mode_signature;
-            std::array<uint8_t, 4> _blend_mode_key;
+            std::array<uint8_t, 4> _blend_mode_signature{};
+            std::array<uint8_t, 4> _blend_mode_key{};
             uint8_t _opacity = 0;
             uint8_t _clipping = 0;
             uint8_t _flags = 0;

@@ -17,7 +17,7 @@ void ScreenTransition::startEffect1()
    _effect_1->start();
 
    // tell everyone that effect 1 started
-   for (auto& cb : _callbacks_effect_1_started)
+   for (const auto& cb : _callbacks_effect_1_started)
    {
       cb();
    }
@@ -49,7 +49,7 @@ void ScreenTransition::startEffect2()
    _effect_2->start();
 
    // tell everyone that effect 2 started
-   for (auto& cb : _callbacks_effect_2_started)
+   for (const auto& cb : _callbacks_effect_2_started)
    {
       cb();
    }
@@ -59,7 +59,7 @@ void ScreenTransition::startEffect2()
 void ScreenTransition::effect1Done()
 {
    // tell everyone that effect 1 is done
-   for (auto& cb : _callbacks_effect_1_ended)
+   for (const auto& cb : _callbacks_effect_1_ended)
    {
       cb();
    }
@@ -89,7 +89,7 @@ void ScreenTransition::effect2Done()
    DisplayMode::getInstance().enqueueUnset(Display::ScreenTransition);
 
    // tell everyone that effect 2 is done
-   for (auto& cb : _callbacks_effect_2_ended)
+   for (const auto& cb : _callbacks_effect_2_ended)
    {
       cb();
    }

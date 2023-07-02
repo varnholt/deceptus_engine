@@ -81,7 +81,7 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
 void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data)
 {
    // check if platform smashes the player
-   auto fixture_node = static_cast<FixtureNode*>(fixture_user_data);
+   const auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
    if (fixture_node && fixture_node->getType() == ObjectType::ObjectTypePlayerHeadSensor)
    {
       if (Player::getCurrent()->isOnGround())

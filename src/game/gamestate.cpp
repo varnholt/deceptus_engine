@@ -43,7 +43,7 @@ void GameState::setMode(const ExecutionMode& current)
    auto previous = _mode;
    _mode = current;
 
-   for (auto& f : _callbacks)
+   for (const auto& f : _callbacks)
    {
       f(current, previous);
    }
