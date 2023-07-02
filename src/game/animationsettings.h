@@ -11,9 +11,9 @@
 
 struct AnimationSettings
 {
-   std::array<int32_t, 2> _frame_size;
-   std::array<int32_t, 2> _frame_offset;
-   std::array<float, 2> _origin;
+   std::array<int32_t, 2> _frame_size{};
+   std::array<int32_t, 2> _frame_offset{};
+   std::array<float, 2> _origin{};
    std::vector<sf::Time> _frame_durations;
    std::filesystem::path _texture_path;
    std::shared_ptr<sf::Texture> _texture;

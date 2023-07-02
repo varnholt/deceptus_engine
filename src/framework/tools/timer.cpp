@@ -84,6 +84,6 @@ void Timer::removeByCaller(const std::shared_ptr<void>& caller)
    std::lock_guard<std::mutex> guard(__mutex);
 
    __timers.erase(
-      std::remove_if(__timers.begin(), __timers.end(), [caller](auto& timer) -> bool { return timer->_caller == caller; }), __timers.end()
+      std::remove_if(__timers.begin(), __timers.end(), [caller](const auto& timer) -> bool { return timer->_caller == caller; }), __timers.end()
    );
 }

@@ -147,10 +147,9 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
    if (_has_path)
    {
       // path inversion depends on level winding
-      auto inverse_path = _inverse_path;
       if (_winding == Winding::Clockwise)
       {
-         inverse_path = !inverse_path;
+         _inverse_path = !_inverse_path;
       }
 
       if (_inverse_path)

@@ -39,7 +39,7 @@ void GameControllerIntegration::initialize()
 //-----------------------------------------------------------------------------
 GameControllerIntegration::~GameControllerIntegration()
 {
-   _device_detection.release();
+   (void)_device_detection.release();
    SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 }
 
@@ -48,7 +48,7 @@ GameControllerIntegration::~GameControllerIntegration()
 void GameControllerIntegration::update()
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
-   for (auto& cb : _device_changed_callbacks)
+   for (const auto& cb : _device_changed_callbacks)
    {
       cb();
    }
@@ -69,7 +69,7 @@ void GameControllerIntegration::add(int32_t id)
          _controllers[controller_id] = controller;
          _selected_controller_id = controller_id;
 
-         for (auto& cb : _device_added_callbacks)
+         for (const auto& cb : _device_added_callbacks)
          {
             cb(controller_id);
          }
@@ -86,7 +86,7 @@ void GameControllerIntegration::remove(int32_t id)
       [this, id](){
          _controllers.erase(id);
 
-         for (auto& cb : _device_removed_callbacks)
+         for (const auto& cb : _device_removed_callbacks)
          {
             cb(id);
          }

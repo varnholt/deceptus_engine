@@ -9,8 +9,11 @@
 
 using json = nlohmann::json;
 
+namespace
+{
+std::vector<LevelItem> _levels;
 
-void Levels::deserialize(const std::string& data)
+void deserialize(const std::string& data)
 {
    try
    {
@@ -23,10 +26,9 @@ void Levels::deserialize(const std::string& data)
    }
 }
 
-
-void Levels::deserializeFromFile(const std::string &filename)
+void deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs (filename, std::ifstream::in);
+   std::ifstream ifs(filename, std::ifstream::in);
 
    auto c = ifs.get();
    std::string data;
@@ -42,15 +44,34 @@ void Levels::deserializeFromFile(const std::string &filename)
    deserialize(data);
 }
 
+}  // namespace
 
-Levels& Levels::getInstance()
+LevelItem Levels::readLevelItem(int32_t index)
 {
-   static Levels __instance;
-   return __instance;
+   if (_levels.empty())
+   {
+      deserializeFromFile("data/config/levels.json");
+   }
+
+   if (index < _levels.size())
+   {
+      return _levels[index];
+   }
+
+   return {};
 }
 
+std::vector<LevelItem> Levels::readLevelItems()
+{
+   if (_levels.empty())
+   {
+      deserializeFromFile("data/config/levels.json");
+   }
 
-void from_json(const json &j, LevelItem &item)
+   return _levels;
+}
+
+void from_json(const json& j, LevelItem& item)
 {
    item._level_name = j.at("levelname").get<std::string>();
 }

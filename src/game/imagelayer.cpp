@@ -30,10 +30,10 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
         image->_z_index = image_layer->_properties->_map["z"]->_value_int.value();
      }
 
-     std::string blend_mode_str;
      auto it = image_layer->_properties->_map.find("blendmode");
      if (it != image_layer->_properties->_map.end())
      {
+        std::string blend_mode_str;
         blend_mode_str = it->second->_value_string.value();
 
         if (blend_mode_str == "alpha")

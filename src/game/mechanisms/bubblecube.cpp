@@ -154,7 +154,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    prismaticJointDef.motorSpeed = 0.0f;      // Speed at which the body moves along the y-axis
    prismaticJointDef.maxMotorForce = 10.0f;  // Maximum force applied by the motor
 
-   _joint = (b2PrismaticJoint*)data._world->CreateJoint(&prismaticJointDef);
+   _joint = static_cast<b2PrismaticJoint*>(data._world->CreateJoint(&prismaticJointDef));
 
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");

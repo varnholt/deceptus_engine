@@ -185,7 +185,7 @@ void Checkpoint::reached()
       _state = State::Active;
    }
 
-   for (auto& callback : _callbacks)
+   for (const auto& callback : _callbacks)
    {
       callback();
    }

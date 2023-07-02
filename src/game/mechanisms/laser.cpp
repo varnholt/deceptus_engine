@@ -547,7 +547,7 @@ void Laser::merge()
 
    // support moving lasers
    // for those merge in the path data retrieved from a polyline or polygon
-   for (auto& tmx_object : laser_movement_paths)
+   for (const auto& tmx_object : laser_movement_paths)
    {
       if (!tmx_object->_properties)
       {
@@ -598,7 +598,7 @@ void Laser::merge()
       path.push_back(path.at(0));
 
       const auto& lasers = laser_groups[*reference_id];
-      for (auto& laser : lasers)
+      for (const auto& laser : lasers)
       {
          laser->_path = path;
 

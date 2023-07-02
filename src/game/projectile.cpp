@@ -28,7 +28,7 @@ Projectile::Projectile() : FixtureNode(this)
 
 Projectile::~Projectile()
 {
-   for (auto& cb : _destroyed_callbacks)
+   for (const auto& cb : _destroyed_callbacks)
    {
       cb();
    }

@@ -5,24 +5,15 @@
 
 #include "json/json.hpp"
 
-
 struct LevelItem
 {
-  std::string _level_name;
+   std::string _level_name;
 };
-
 
 void from_json(const nlohmann::json& j, LevelItem& item);
 
-
-struct Levels
+namespace Levels
 {
-   Levels() = default;
-
-   std::vector<LevelItem> _levels;
-
-   void deserialize(const std::string& data);
-   void deserializeFromFile(const std::string& filename = "data/config/levels.json");
-
-   static Levels& getInstance();
-};
+LevelItem readLevelItem(int32_t index);
+std::vector<LevelItem> readLevelItems();
+};  // namespace Levels

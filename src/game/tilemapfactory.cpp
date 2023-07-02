@@ -34,7 +34,7 @@ std::shared_ptr<TileMap> TileMapFactory::makeTileMap(const std::shared_ptr<TmxLa
 void TileMapFactory::merge(const std::vector<std::shared_ptr<TileMap>>& tile_maps)
 {
    std::map<std::string, std::shared_ptr<TileMap>> tile_maps_map;
-   for (auto& tile_map : tile_maps)
+   for (const auto& tile_map : tile_maps)
    {
       tile_maps_map[tile_map->getLayerName()] = tile_map;
    }

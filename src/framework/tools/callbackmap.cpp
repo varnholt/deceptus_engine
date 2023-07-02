@@ -16,7 +16,7 @@ void CallbackMap::addCallback(int32_t cb_id, const Callback& cb)
 
 void CallbackMap::call(int32_t cb_id)
 {
-   for (auto& cb : _map[cb_id])
+   for (const auto& cb : _map[cb_id])
    {
       cb();
    }

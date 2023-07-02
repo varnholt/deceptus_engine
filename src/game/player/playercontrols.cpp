@@ -119,7 +119,7 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
       _keys_pressed |= KeyPressedFire;
    }
 
-   for (auto& callback : _keypressed_callbacks)
+   for (const auto& callback : _keypressed_callbacks)
    {
       callback(key);
    }

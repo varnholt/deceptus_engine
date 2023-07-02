@@ -473,10 +473,10 @@ void PSD::Layer::loadChannelImageData(std::istream& stream)
    {
       uint32_t* dst = _image.getScanline(y);
 
-      uint8_t* red = getChannel(0).getScanline(y);
-      uint8_t* green = getChannel(1).getScanline(y);
-      uint8_t* blue = getChannel(2).getScanline(y);
-      uint8_t* alpha = getChannel(-1).getScanline(y);
+      const uint8_t* red = getChannel(0).getScanline(y);
+      const uint8_t* green = getChannel(1).getScanline(y);
+      const uint8_t* blue = getChannel(2).getScanline(y);
+      const uint8_t* alpha = getChannel(-1).getScanline(y);
 
       for (auto x = 0; x < width; x++)
       {
