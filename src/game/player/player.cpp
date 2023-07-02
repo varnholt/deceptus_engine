@@ -126,6 +126,8 @@ Player::Player(GameNode* parent) : GameNode(parent)
 
    __current = this;
 
+   PlayerAudio::addSamples();
+
    _weapon_system = std::make_shared<WeaponSystem>();
    _extra = std::make_shared<Extra>();
    _controls = std::make_shared<PlayerControls>();
@@ -1514,24 +1516,6 @@ void Player::updateJump()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateWallslide(const sf::Time& dt)
 {
-   if (!_jump._wallsliding)
-   {
-      // stop wallslide audio
-      if (_wallslide_sample.has_value())
-      {
-         Audio::getInstance().stopSample(_wallslide_sample.value());
-         _wallslide_sample.reset();
-      }
-
-      return;
-   }
-
-   // start wallslide audio as loop
-   if (!_wallslide_sample.has_value())
-   {
-      _wallslide_sample = Audio::getInstance().playSample({"player_wallslide_01.wav", 1.0f, true});
-   }
-
    const auto wallslide_animation = _player_animation.getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
    wallslide_animation->setPosition(_pixel_position_f.x + offset_x_px, _pixel_position_f.y);

@@ -5,6 +5,7 @@
 
 namespace PlayerAudio
 {
+void addSamples();
 void updateListenerPosition(sf::Vector2f);
 };
 

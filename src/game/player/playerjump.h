@@ -70,6 +70,7 @@ struct PlayerJump
    float _walljump_multiplier = 0.0f;
    b2Vec2 _walljump_direction;
    bool _walljump_points_right = false;
+   std::optional<int32_t> _wallslide_sample;
 
    bool _had_ground_contact = true;
    bool _ground_contact_just_lost = false;
