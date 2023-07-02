@@ -149,7 +149,7 @@ bool TileMap::load(
             {
                // only animated tiles are defined, non-animated tiles can be considered static tiles
                auto animation = it->second->_animation;
-               auto& frames = animation->_frames;
+               const auto& frames = animation->_frames;
 
                auto animated_tile = new AnimatedTile();
                animated_tile->_tile_x = tx;
@@ -157,7 +157,7 @@ bool TileMap::load(
                animated_tile->_animation = animation;
 
                auto duration = 0.0f;
-               for (auto& frame : frames)
+               for (const auto& frame : frames)
                {
                   auto offset_frame = new AnimatedTileFrame();
                   offset_frame->_x_px = frame->_tile_id % (_texture_map->getSize().x / _tile_size.x);
@@ -222,7 +222,7 @@ void TileMap::update(const sf::Time& dt)
 
       auto index = 0u;
       float frameDuration = 0.0f;
-      for (auto& frame : anim->_frames)
+      for (const auto* frame : anim->_frames)
       {
          frameDuration += frame->_duration_ms;
 
@@ -329,7 +329,7 @@ void TileMap::setZ(int32_t z)
 void TileMap::hideTile(int32_t x, int32_t y)
 {
    const auto& it = std::find_if(
-      std::begin(_animations), std::end(_animations), [x, y](AnimatedTile* tile) { return (tile->_tile_x == x && tile->_tile_y == y); }
+      std::begin(_animations), std::end(_animations), [x, y](const auto* tile) { return (tile->_tile_x == x && tile->_tile_y == y); }
    );
 
    if (it != _animations.end())

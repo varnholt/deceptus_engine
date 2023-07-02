@@ -25,7 +25,7 @@ void AnimationPlayer::update(const sf::Time& dt)
 
 void AnimationPlayer::draw(sf::RenderTarget& target)
 {
-   for (auto& anim : _animations)
+   for (const auto& anim : _animations)
    {
       target.draw(*anim);
    }

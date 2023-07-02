@@ -4,6 +4,8 @@
 #include "menuaudio.h"
 
 #include "game/gamestate.h"
+#include "game/leveldescription.h"
+#include "game/levels.h"
 #include "game/messagebox.h"
 #include "game/savestate.h"
 
@@ -85,6 +87,15 @@ void MenuScreenFileSelect::select()
    }
    else
    {
+      // do a quick sanity check if the level is actually in place, otherwise throw an error
+      const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
+      auto description = LevelDescription::load(level_item._level_name);
+      if (!description)
+      {
+         MessageBox::info("The selected level is not available.", [](MessageBox::Button) {});
+         return;
+      }
+
       // if current slot holds data, load it
       Menu::getInstance()->hide();
       GameState::getInstance().enqueueResume();

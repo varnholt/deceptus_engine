@@ -197,7 +197,7 @@ void EventSerializer::serialize()
 
    auto start_time = _events.front()._time_point;
 
-   for (auto& event : _events)
+   for (const auto& event : _events)
    {
       writeDuration(out, event._time_point - start_time);
       writeEvent(out, event._event);

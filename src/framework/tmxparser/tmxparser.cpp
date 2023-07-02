@@ -18,8 +18,6 @@ void TmxParser::parse(const std::string& filename)
    _parse_data = std::make_shared<TmxParseData>();
    _parse_data->_filename = filename;
 
-   auto z = 0;
-
    tinyxml2::XMLDocument doc;
    if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
    {
@@ -36,6 +34,8 @@ void TmxParser::parse(const std::string& filename)
          }
 
          // groups are just flattened
+         auto z = 0;
+         
          if (sub_element->Name() == std::string("group"))
          {
             parseGroup(sub_element, z);
@@ -103,7 +103,7 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
 
    if (layer && layer->_properties)
    {
-      auto& map = layer->_properties->_map;
+      const auto& map = layer->_properties->_map;
       auto it = map.find("z");
       if (it != map.end())
       {

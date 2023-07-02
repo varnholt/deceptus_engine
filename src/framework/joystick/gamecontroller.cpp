@@ -258,7 +258,7 @@ void GameController::update()
             auto it = _button_pressed_callbacks.find(static_cast<SDL_GameControllerButton>(button));
             if (it != _button_pressed_callbacks.end())
             {
-               for (auto& f : it->second)
+               for (const auto& f : it->second)
                {
                   f();
                }
@@ -270,7 +270,7 @@ void GameController::update()
             auto it = _button_released_callbacks.find(static_cast<SDL_GameControllerButton>(button));
             if (it != _button_released_callbacks.end())
             {
-               for (auto& f : it->second)
+               for (const auto& f : it->second)
                {
                   f();
                }

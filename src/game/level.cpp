@@ -192,6 +192,8 @@ Level::Level() : GameNode(nullptr)
 {
    setClassName(typeid(Level).name());
 
+   _object_updater = std::make_unique<ObjectUpdater>();
+
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
 
@@ -308,7 +310,7 @@ Level::~Level()
    }
 
    // properly delete point map
-   for (auto& kv : _point_map)
+   for (const auto& kv : _point_map)
    {
       delete kv.second;
    }
@@ -611,7 +613,6 @@ void Level::initialize()
    loadState();
    spawnEnemies();
 
-   _object_updater = std::make_unique<ObjectUpdater>();
    _object_updater->setMechanisms(_mechanisms_list);
 
    // dump();
@@ -673,7 +674,7 @@ void Level::loadState()
             mechanism_vector->end(),
             [object_key](const auto& object)
             {
-               auto game_node = dynamic_cast<GameNode*>(object.get());
+               const auto* game_node = dynamic_cast<GameNode*>(object.get());
                return (game_node && game_node->getObjectId() == object_key);
             }
          );
@@ -1025,7 +1026,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       drawParallaxMaps(*_render_texture_level_background.get(), z_index);
 
       // draw all tile maps
-      for (auto& tile_map : _tile_maps)
+      for (const auto& tile_map : _tile_maps)
       {
          if (tile_map->getZ() == z_index)
          {
@@ -1034,7 +1035,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw mechanisms
-      for (const auto& mechanism_vector : _mechanisms_list)
+      for (const auto* mechanism_vector : _mechanisms_list)
       {
          for (const auto& mechanism : *mechanism_vector)
          {
@@ -1387,7 +1388,7 @@ void Level::update(const sf::Time& dt)
       tile_map->update(dt);
    }
 
-   for (const auto& mechanism_vector : _mechanisms_list)
+   for (const auto* mechanism_vector : _mechanisms_list)
    {
       for (const auto& mechanism : *mechanism_vector)
       {
@@ -1449,11 +1450,14 @@ void Level::addPathsToWorld(int32_t offset_x, int32_t offset_y, const std::vecto
    // create the physical chain with 1 body per chain
    for (const auto& path : paths)
    {
-      std::vector<b2Vec2> chain;
-      for (const auto& pos : path._scaled)
-      {
-         chain.push_back({(pos.x + offset_x) * PIXELS_PER_TILE / PPM, (pos.y + offset_y) * PIXELS_PER_TILE / PPM});
-      }
+      std::vector<b2Vec2> chain(path._scaled.size());
+
+      std::transform(
+         path._scaled.begin(),
+         path._scaled.end(),
+         chain.begin(),
+         [&](const auto& pos) { return b2Vec2((pos.x + offset_x) * PIXELS_PER_TILE / PPM, (pos.y + offset_y) * PIXELS_PER_TILE / PPM); }
+      );
 
       addChainToWorld(chain, behavior);
    }

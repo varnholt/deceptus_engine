@@ -16,8 +16,8 @@ void StopWatch::reset()
 
 StopWatch::HighResDuration StopWatch::duration() const
 {
-   const auto now = std::chrono::high_resolution_clock::now();
-   return now - _start_time;
+   const auto timepoint_now = std::chrono::high_resolution_clock::now();
+   return timepoint_now - _start_time;
 }
 
 
