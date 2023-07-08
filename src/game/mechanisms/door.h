@@ -11,27 +11,25 @@
 
 #include "Box2D/Box2D.h"
 
-
-   struct TmxLayer;
+struct TmxLayer;
 struct TmxTileSet;
 
-   class Door : public GameMechanism, public GameNode
+class Door : public GameMechanism, public GameNode
 {
 public:
-
-      enum class Type
+   enum class Type
    {
       Bars,
       Conventional,
-      };
+   };
 
-      enum class State
+   enum class State
    {
       Open,
       Opening,
       Closing,
       Closed,
-      };
+   };
 
    Door(GameNode* parent);
    virtual ~Door();
@@ -58,12 +56,7 @@ public:
    const sf::FloatRect& getPixelRect() const;
 
 private:
-
-   void setupBody(
-      const std::shared_ptr<b2World>& world,
-      float x_offset = 0.0f,
-      float x_scale = 1.0f
-      );
+   void setupBody(const std::shared_ptr<b2World>& world, float x_offset = 0.0f, float x_scale = 1.0f);
 
    void setupKeySprite(ItemType item_type, const sf::Vector2f& pos);
    void updateTransform();
@@ -80,7 +73,7 @@ private:
    State _initial_state = State::Closed;
    State _state = State::Closed;
 
-   sf::Vector2i _tile_position;
+   sf::Vector2i _tile_position_tl;
    sf::FloatRect _pixel_rect;
 
    ItemType _required_item = ItemType::Invalid;
@@ -92,4 +85,3 @@ private:
    bool _player_at_door = false;
    b2Body* _body = nullptr;
 };
-
