@@ -37,6 +37,7 @@ public:
    void setEnabled(bool enabled) override;
 
    const std::vector<sf::Vector2f>& getPixelPath() const;
+   float getDx() const;
 
 private:
    void setupTransformDeprecated();
@@ -66,4 +67,6 @@ private:
    b2Vec2 _velocity;
    std::vector<sf::Vector2f> _pixel_path;
    sf::FloatRect _rect;
+   sf::Vector2f _pos;
+   sf::Vector2f _pos_prev;
 };
