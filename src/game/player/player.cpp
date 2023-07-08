@@ -1247,7 +1247,7 @@ bool Player::isOnGround() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::updatePlatformMovement(const sf::Time& dt)
+void Player::updatePlatformMovement(const sf::Time& /*dt*/)
 {
    if (_jump.isJumping())
    {
@@ -1256,11 +1256,8 @@ void Player::updatePlatformMovement(const sf::Time& dt)
 
    if (isOnPlatform() && _platform_body)
    {
-      const auto dx = dt.asSeconds() * getPlatformBody()->GetLinearVelocity().x;
-
-      const auto x = _body->GetPosition().x + dx * 1.65f;
+      const auto x = _body->GetPosition().x + _platform_dx;
       const auto y = _body->GetPosition().y;
-
       _body->SetTransform(b2Vec2(x, y), 0.0f);
 
       // printf("standing on platform, x: %f, y: %f, dx: %f \n", x, y, dx);
@@ -1676,15 +1673,21 @@ void Player::updateAtmosphere()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void Player::setPlatformBody(b2Body* body)
+{
+   _platform_body = body;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 b2Body* Player::getPlatformBody() const
 {
    return _platform_body;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Player::setPlatformBody(b2Body* body)
+void Player::setPlatformDx(float dx)
 {
-   _platform_body = body;
+   _platform_dx = dx;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
