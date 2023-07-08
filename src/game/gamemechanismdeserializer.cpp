@@ -2,6 +2,7 @@
 #include "gamemechanismdeserializerconstants.h"
 
 #include "framework/tmxparser/tmxparser.h"
+#include "framework/tools/log.h"
 
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
@@ -366,6 +367,17 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_rotating_blades,
       *mechanism_doors
    );
+
+   for (auto& [k, v] : mechanisms)
+   {
+      for (const auto& mechanism : (*v))
+      {
+         if (mechanism->getZ() == 0)
+         {
+            Log::Info() << k << " has a mechanism with z = 0 ";
+         }
+      }
+   }
 }
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)
