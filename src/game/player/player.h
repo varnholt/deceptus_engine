@@ -92,8 +92,9 @@ public:
    bool getVisible() const;
    void setVisible(bool visible);
 
-   b2Body* getPlatformBody() const;
    void setPlatformBody(b2Body* body);
+   b2Body* getPlatformBody() const;
+   void setPlatformDx(float dx_px);
    void setGroundBody(b2Body* body);
 
    bool isInAir() const;
@@ -182,6 +183,7 @@ private:
    b2Fixture* _foot_fixture[__foot_count]{nullptr, nullptr, nullptr, nullptr};
    b2Fixture* _foot_sensor_fixture = nullptr;
    b2Body* _platform_body = nullptr;
+   float _platform_dx{0.0f};
    b2Body* _ground_body = nullptr;
    b2Vec2 _ground_normal;
    b2Vec2 _position_previous;

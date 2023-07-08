@@ -91,6 +91,8 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
    }
 
    auto platform_body = fixture->GetBody();
+
+   // player should have a separate namespace for this stuff
    Player::getCurrent()->setPlatformBody(platform_body);
 
    _count_moving_platform_contacts++;
@@ -416,6 +418,7 @@ void GameContactListener::processDeadlyContactEnd(FixtureNode* fixture_node)
 void GameContactListener::processMovingPlatformContactEnd()
 {
    _count_moving_platform_contacts--;
+   Player::getCurrent()->setPlatformBody(nullptr);
 }
 
 void GameContactListener::processBubbleCubeContactEnd(FixtureNode* fixture_node_bubble, FixtureNode* fixture_node_other)

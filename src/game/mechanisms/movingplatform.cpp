@@ -72,6 +72,12 @@ const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 }
 
 //-----------------------------------------------------------------------------
+float MovingPlatform::getDx() const
+{
+   return _pos.x - _pos_prev.x;
+}
+
+//-----------------------------------------------------------------------------
 b2Body* MovingPlatform::getBody()
 {
    return _body;
@@ -246,36 +252,38 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
    // generate pairs of matching box and poly tmx objects
    std::vector<std::pair<std::shared_ptr<TmxObject>, std::shared_ptr<TmxObject>>> box_path_pairs;
 
-   for (auto box : boxes)
+   for (const auto& box : boxes)
    {
       //      platform path
       //
       //           q1
       //           |
-      //           |
+      // p0        |         p3
       //  +--------+--------+
       //  |        |        |
       //  |        |        | platform rect
       //  |        |        |
       //  +--------|--------+
-      // p0        |        p1
+      // p1        |        p2
       //           |
       //           |
       //           q0
 
-      auto p0 = sf::Vector2f{box->_x_px, box->_y_px};
-      auto p1 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px};
+      const auto p0 = sf::Vector2f{box->_x_px, box->_y_px};
+      const auto p1 = sf::Vector2f{box->_x_px, box->_y_px + box->_height_px};
+      const auto p2 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px + box->_height_px};
+      const auto p3 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px};
 
-      for (auto path : paths)
+      for (const auto& path : paths)
       {
-         auto poly = path->_polyline;
+         const auto& poly = path->_polyline;
 
          for (auto i = 0; i < poly->_polyline.size() - 1; i++)
          {
-            auto q0 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i];
-            auto q1 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i + 1];
+            const auto q0 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i];
+            const auto q1 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i + 1];
 
-            if (SfmlMath::intersect(p0, p1, q0, q1).has_value())
+            if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() || SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
             {
                box_path_pairs.push_back({box, path});
                break;
@@ -291,8 +299,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
    for (const auto& pair : box_path_pairs)
    {
-      auto box = pair.first;
-      auto path = pair.second;
+      const auto& box = pair.first;
+      const auto& path = pair.second;
 
       auto moving_platform = std::make_shared<MovingPlatform>(parent);
       moving_platforms.push_back(moving_platform);
@@ -308,8 +316,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
       moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
 
-      auto width_px = static_cast<int32_t>(box->_width_px);
-      auto width_tl = static_cast<int32_t>(width_px / PIXELS_PER_TILE);
+      const auto width_px = static_cast<int32_t>(box->_width_px);
+      const auto width_tl = static_cast<int32_t>(width_px / PIXELS_PER_TILE);
 
       // animation
       //
@@ -343,7 +351,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       for (auto i = 0; i < width_tl; i++)
       {
          auto tu_tl = 0;
-         auto tv_tl = 0;
+         constexpr auto tv_tl = 0;
 
          if (width_tl > 2)
          {
@@ -398,8 +406,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
          // we don't want to position the platform right on the path, we only
          // want to move its center there
-         auto x_px = (path->_x_px + poly_pos_px.x) - (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
-         auto y_px = (path->_y_px + poly_pos_px.y);  // -     (moving_platform->_height_tl * PIXELS_PER_TILE) / 2.0f) * MPP;
+         const auto x_px = (path->_x_px + poly_pos_px.x) - (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
+         const auto y_px = (path->_y_px + poly_pos_px.y);  // -     (moving_platform->_height_tl * PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos_m.x = x_px * MPP;
          platform_pos_m.y = y_px * MPP;
@@ -448,7 +456,7 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
 
    std::shared_ptr<MovingPlatform> platform;
 
-   for (auto& p : platforms)
+   for (const auto& p : platforms)
    {
       auto tmp = std::dynamic_pointer_cast<MovingPlatform>(p);
       if (tmp->_tile_positions.y == y_tl)
@@ -477,11 +485,11 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
       for (const auto& poly_pos : pixel_path)
       {
          b2Vec2 platform_pos;
-         auto time = i / static_cast<float>(pixel_path.size() - 1);
+         const auto time = i / static_cast<float>(pixel_path.size() - 1);
 
          // where do those 4px error come from?!
-         auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count * PIXELS_PER_TILE) / 2.0f) * MPP;
-         auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+         const auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count * PIXELS_PER_TILE) / 2.0f) * MPP;
+         const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
          platform_pos.x = x;
          platform_pos.y = y;
@@ -536,7 +544,7 @@ void MovingPlatform::update(const sf::Time& dt)
 {
    updateLeverLag(dt);
    _interpolation.update(_body->GetPosition());
-   auto previous_velocity = _velocity;
+   const auto previous_velocity = _velocity;
    _velocity = _lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity();
 
    // if player is standing on platform and the platform changes its direction in an instant,
@@ -550,6 +558,14 @@ void MovingPlatform::update(const sf::Time& dt)
    }
 
    _body->SetLinearVelocity(_velocity);
+   _pos_prev = _pos;
+   _pos.x = _body->GetPosition().x;
+   _pos.y = _body->GetPosition().y;
+
+   if (Player::getCurrent()->getPlatformBody() == _body)
+   {
+      Player::getCurrent()->setPlatformDx(getDx());
+   }
 
    // update sprite animation
    //
@@ -570,8 +586,8 @@ void MovingPlatform::update(const sf::Time& dt)
 
    for (auto& sprite : _sprites)
    {
-      auto x = _body->GetPosition().x * PPM + horizontal * sprite_index * PIXELS_PER_TILE;
-      auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
+      const auto x = _body->GetPosition().x * PPM + horizontal * sprite_index * PIXELS_PER_TILE;
+      const auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
       sprite.setPosition(x, y);
       bool update_sprite_rect = false;
