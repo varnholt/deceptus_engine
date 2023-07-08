@@ -350,7 +350,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
 
          if (segment_count > _bounding_box.width)
          {
-            Log::Error() << "segment_count " << segment_count << " exceeds bounding box width " << _bounding_box.width << std::endl;
+            Log::Error() << "segment_count " << segment_count << " exceeds bounding box width " << _bounding_box.width;
          }
       }
 
@@ -440,13 +440,13 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    const auto box_width = static_cast<int32_t>(_bounding_box.width);
    if (box_width % segment_count != 0)
    {
-      Log::Error() << "box with width " << box_width << "px cannot be divided into " << segment_count << " segments" << std::endl;
+      Log::Error() << "box with width " << box_width << "px cannot be divided into " << segment_count << " segments";
    }
 
    _gradient.loadFromFile("data/sprites/water_surface_gradient.png");
 
    Log::Info() << "deserialize water surface at: " << _bounding_box.left << ", " << _bounding_box.top << " w: " << _bounding_box.width
-               << ", h:" << _bounding_box.height << std::endl;
+               << ", h:" << _bounding_box.height;
 
    // if a pixel ratio is configured, we gotta render to texture
    if (_pixel_ratio.has_value())

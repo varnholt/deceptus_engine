@@ -46,10 +46,10 @@ void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 //-----------------------------------------------------------------------------
 void Door::updateBars(const sf::Time& dt)
 {
-   const float left = 0.0f;
-   const float right = left + 3.0f * PIXELS_PER_TILE;
-   const float top = 3.0f * PIXELS_PER_TILE - _offset;
-   const float bottom = top + 3.0f * PIXELS_PER_TILE;
+   const auto left = 0.0f;
+   const auto right = left + 3.0f * PIXELS_PER_TILE;
+   const auto top = 3.0f * PIXELS_PER_TILE - _offset;
+   const auto bottom = top + 3.0f * PIXELS_PER_TILE;
 
    _door_quad[0].texCoords = sf::Vector2f(left, top);
    _door_quad[1].texCoords = sf::Vector2f(left, bottom);
@@ -129,8 +129,8 @@ std::optional<sf::FloatRect> Door::getBoundingBoxPx()
 //-----------------------------------------------------------------------------
 void Door::updateTransform()
 {
-   auto x = _tile_position.x * PIXELS_PER_TILE / PPM;
-   auto y = (_offset + _tile_position.y * PIXELS_PER_TILE) / PPM;
+   const auto x = _tile_position_tl.x * PIXELS_PER_TILE / PPM;
+   const auto y = (_offset + _tile_position_tl.y * PIXELS_PER_TILE) / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -142,14 +142,20 @@ void Door::reset()
    switch (_state)
    {
       case State::Open:
+      {
          _offset = 1.0f;
          break;
+      }
       case State::Closed:
+      {
          _offset = 0.0f;
          break;
+      }
       case State::Opening:
       case State::Closing:
+      {
          break;
+      }
    }
 }
 
@@ -267,7 +273,7 @@ void Door::toggle()
 //-----------------------------------------------------------------------------
 const sf::Vector2i& Door::getTilePosition() const
 {
-   return _tile_position;
+   return _tile_position_tl;
 }
 
 //-----------------------------------------------------------------------------
@@ -295,13 +301,12 @@ void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
 
    const auto offset_it = map.find(item_type);
 
-   if (offset_it == map.end())
+   if (offset_it != map.end())
    {
-      return;
+      _sprite_icon.setTexture(*_texture);
+      _sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * offset_it->second, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
    }
 
-   _sprite_icon.setTexture(*_texture);
-   _sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * offset_it->second, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
    _sprite_icon.setPosition(pos);
 }
 
@@ -399,8 +404,8 @@ std::vector<std::shared_ptr<GameMechanism>> Door::load(const GameDeserializeData
             door->_door_quad[3].position.y = position_y;
             door->_type = Type::Bars;
             door->_tile_id = tile_id;
-            door->_tile_position.x = static_cast<int32_t>(i);
-            door->_tile_position.y = static_cast<int32_t>(j) + 1;  // the actual door is a tile lower
+            door->_tile_position_tl.x = static_cast<int32_t>(i);
+            door->_tile_position_tl.y = static_cast<int32_t>(j) + 1;  // the actual door is a tile lower
             door->_required_item = required_item;
             door->_pixel_rect = sf::FloatRect{position_x + PIXELS_PER_TILE, position_y, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
 
@@ -448,8 +453,8 @@ void Door::setup(const GameDeserializeData& data)
 
    _type = Type::Bars;
 
-   _tile_position.x = static_cast<int32_t>(x_px / PIXELS_PER_TILE);
-   _tile_position.y = static_cast<int32_t>(y_px / PIXELS_PER_TILE);
+   _tile_position_tl.x = static_cast<int32_t>(x_px / PIXELS_PER_TILE);
+   _tile_position_tl.y = static_cast<int32_t>(y_px / PIXELS_PER_TILE);
 
    _pixel_rect = sf::FloatRect{x_px, y_px, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
 
@@ -481,10 +486,10 @@ void Door::setup(const GameDeserializeData& data)
          if (key_type_it != map.end())
          {
             _required_item = key_type_it->second;
-            setupKeySprite(key_type_it->second, sf::Vector2f{x_px, y_px});
          }
       }
    }
 
+   setupKeySprite(_required_item, sf::Vector2f{x_px, y_px});
    setupBody(data._world);
 }
