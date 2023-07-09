@@ -334,6 +334,8 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
    auto segment_count = static_cast<int32_t>(_bounding_box.width / 2);
    std::optional<int32_t> clamp_segment_count;
 
+   std::string gradient_texture = "data/sprites/water_surface_gradient.png";
+
    // read properties
    if (data._tmx_object->_properties)
    {
@@ -402,6 +404,12 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       {
          _config._splash_factor = splash_factor_it->second->_value_float.value();
       }
+
+      auto gradient_texture_it = data._tmx_object->_properties->_map.find("gradient_texture");
+      if (gradient_texture_it != data._tmx_object->_properties->_map.end())
+      {
+         gradient_texture = gradient_texture_it->second->_value_string.value();
+      }
    }
 
    for (auto i = 0; i < segment_count; i++)
@@ -443,7 +451,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       Log::Error() << "box with width " << box_width << "px cannot be divided into " << segment_count << " segments";
    }
 
-   _gradient.loadFromFile("data/sprites/water_surface_gradient.png");
+   _gradient.loadFromFile(gradient_texture);
 
    Log::Info() << "deserialize water surface at: " << _bounding_box.left << ", " << _bounding_box.top << " w: " << _bounding_box.width
                << ", h:" << _bounding_box.height;
