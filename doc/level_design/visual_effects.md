@@ -130,6 +130,7 @@ In there, a rectangle of of around 48px height must be added covering the surfac
 |spread|float|Configures how much the ripples are spread across the entire water surface (ranges from `0..1`, default is `0.125`).|
 |animation_speed|float|Controls the speed of the entire water surface animation (must be `> 0.0`, default is `10.0`).|
 |splash_factor|float|Scales the height of the waves (default is `50.0`). If your waves exceed the size of the render texture, you'll know the value you've picked was slightly too big.|
+|gradient_texture|string|1D texture of the gradient (default is 'data/sprites/water_surface_gradient.png').|
 
 ### Water Splash Emitters
 
