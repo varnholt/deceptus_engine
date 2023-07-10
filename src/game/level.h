@@ -40,6 +40,7 @@
 class Bouncer;
 class IngameMenuMap;
 class TmxParser;
+struct ParseData;
 
 /*! \brief Implements all level-related logic
  *         That includes deserialization of all level-data, updating mechanisms and rendering them.
@@ -118,6 +119,15 @@ protected:
    bool load();
    void loadTmx();
    void loadState();
+
+   void regenerateLevelPaths(
+      const std::shared_ptr<TmxLayer>& layer,
+      const std::shared_ptr<TmxTileSet>& tileset,
+      const std::filesystem::path& base_path,
+      const SquareMarcher& square_marcher,
+      ParseData* parse_data,
+      auto path_solid_optimized
+   );
 
    void deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
 

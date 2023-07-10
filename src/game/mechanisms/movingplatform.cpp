@@ -579,8 +579,8 @@ void MovingPlatform::update(const sf::Time& dt)
    auto sprite_index = 0;
    auto horizontal = (_element_count > 1) ? 1 : 0;
 
-   static constexpr auto animation_tile_count = 4;
-   static constexpr auto animation_speed_factor = 10.0f;
+   constexpr auto animation_tile_count = 4;
+   constexpr auto animation_speed_factor = 10.0f;
    _animation_elapsed += _lever_lag * dt.asSeconds() * animation_speed_factor;
    const auto animation_tile_index = static_cast<int32_t>(_animation_elapsed) % animation_tile_count;
 

@@ -934,7 +934,7 @@ int32_t playDetonationAnimation(lua_State* state)
       node->playDetonationAnimationHuge(x, y);
    }
 
-   static constexpr auto detonation_ring_param_count = 7;
+   constexpr auto detonation_ring_param_count = 7;
    if (argc % detonation_ring_param_count == 0)
    {
       // 1: detonation_count (int)

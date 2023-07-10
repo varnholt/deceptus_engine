@@ -137,7 +137,7 @@ void WaterSurface::update(const sf::Time& dt)
    }
 
    // integrate a few times
-   static constexpr auto integration_steps = 8;
+   constexpr auto integration_steps = 8;
    for (auto j = 0; j < integration_steps; j++)
    {
       for (auto segment_index = 0; segment_index < _segments.size(); segment_index++)

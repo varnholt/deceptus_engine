@@ -19,25 +19,25 @@
 
 namespace
 {
-static constexpr auto width_px = 36;
-static constexpr auto height_px = 36;
-static constexpr auto bevel_px = 6;
-static constexpr auto width_m = width_px * MPP;
-static constexpr auto height_m = height_px * MPP;
-static constexpr auto bevel_m = bevel_px * MPP;
+constexpr auto width_px = 36;
+constexpr auto height_px = 36;
+constexpr auto bevel_px = 6;
+constexpr auto width_m = width_px * MPP;
+constexpr auto height_m = height_px * MPP;
+constexpr auto bevel_m = bevel_px * MPP;
 
-static constexpr auto columns = 12;
-static constexpr auto tiles_per_box_width = 4;
-static constexpr auto tiles_per_box_height = 3;
+constexpr auto columns = 12;
+constexpr auto tiles_per_box_width = 4;
+constexpr auto tiles_per_box_height = 3;
 
-static constexpr auto move_frequency = 4.19f;
+constexpr auto move_frequency = 4.19f;
 
-static constexpr auto pop_frequency = 15.0f;
+constexpr auto pop_frequency = 15.0f;
 
-static constexpr auto sprite_offset_x_px = -(width_px - bevel_px);
-static constexpr auto sprite_offset_y_px = -14;
+constexpr auto sprite_offset_x_px = -(width_px - bevel_px);
+constexpr auto sprite_offset_y_px = -14;
 
-static constexpr auto collision_rect_height = 10;
+constexpr auto collision_rect_height = 10;
 
 auto instance_counter = 0;
 }  // namespace

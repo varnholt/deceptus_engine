@@ -47,8 +47,8 @@ void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared
    //
    //      c      d
 
-   static constexpr float w = 0.5f;
-   static constexpr float e = 0.1f;  // 219, 194
+   constexpr float w = 0.5f;
+   constexpr float e = 0.1f;  // 219, 194
    std::array<b2Vec2, 8> rounded_box{
       b2Vec2{0, e},      // a
       b2Vec2{0, w - e},  // b

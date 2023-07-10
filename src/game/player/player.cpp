@@ -48,15 +48,15 @@ namespace fmt = std;
 //----------------------------------------------------------------------------------------------------------------------
 namespace
 {
-static constexpr uint16_t category_bits = CategoryFriendly;
-static constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith;
-static constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
-static constexpr int16_t group_index = 0;
-static constexpr auto impulse_epsilon = 0.0000001f;
+constexpr uint16_t category_bits = CategoryFriendly;
+constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith;
+constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
+constexpr int16_t group_index = 0;
+constexpr auto impulse_epsilon = 0.0000001f;
 
-static constexpr auto wall_slide_sensor_width = 8.0f;
-static constexpr auto wall_slide_sensor_height = 0.75f;
-static constexpr auto wall_slide_sensor_distance = 0.21f;
+constexpr auto wall_slide_sensor_width = 8.0f;
+constexpr auto wall_slide_sensor_height = 0.75f;
+constexpr auto wall_slide_sensor_distance = 0.21f;
 }  // namespace
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -980,7 +980,7 @@ void Player::updateVelocity()
    }
 
    // cap speed
-   static constexpr auto max_speed = 10.0f;
+   constexpr auto max_speed = 10.0f;
    auto vel = _body->GetLinearVelocity();
    const auto speed = vel.Normalize();
    if (speed > max_speed)
