@@ -6,14 +6,14 @@
 
 #include "cameraroomlock.h"
 #include "camerasystem.h"
-#include "gameconfiguration.h"
-#include "screentransition.h"
 #include "fadetransitioneffect.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "gameconfiguration.h"
 #include "player/player.h"
+#include "screentransition.h"
 
 /*
 
@@ -46,9 +46,7 @@
 
 */
 
-
-Room::Room(GameNode* parent)
- : GameNode(parent)
+Room::Room(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Room).name());
 
@@ -58,24 +56,20 @@ Room::Room(GameNode* parent)
    __id++;
 }
 
-
 std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::Vector2f& p) const
 {
-   const auto it = std::find_if(
-         _sub_rooms.begin(),
-         _sub_rooms.end(),
-         [p](const auto& sub_room){
-            return sub_room._rect.contains(p);
-         }
-      );
+   const auto it = std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [p](const auto& sub_room) { return sub_room._rect.contains(p); });
 
    return it;
 }
 
-
 std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms)
 {
-   const auto room_it = std::find_if(rooms.begin(), rooms.end(), [p, rooms](const std::shared_ptr<Room>& r){
+   const auto room_it = std::find_if(
+      rooms.begin(),
+      rooms.end(),
+      [p, rooms](const std::shared_ptr<Room>& r)
+      {
          const auto& it = r->findSubRoom(p);
          return (it != r->_sub_rooms.end());
       }
@@ -83,7 +77,6 @@ std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::s
 
    return (room_it != rooms.end()) ? (*room_it) : nullptr;
 }
-
 
 void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms)
 {
@@ -105,18 +98,16 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
    std::optional<std::string> group_name;
    if (data._tmx_object->_properties)
    {
-       const auto transition_it = data._tmx_object->_properties->_map.find("group");
-       if (transition_it != data._tmx_object->_properties->_map.end())
-       {
-           group_name = *transition_it->second->_value_string;
-       }
+      const auto transition_it = data._tmx_object->_properties->_map.find("group");
+      if (transition_it != data._tmx_object->_properties->_map.end())
+      {
+         group_name = *transition_it->second->_value_string;
+      }
    }
 
    // check if room belongs to a group of rooms
-   const auto group_it = std::find_if(rooms.begin(), rooms.end(), [group_name](const std::shared_ptr<Room>& r){
-         return (r->_group_name == group_name);
-      }
-   );
+   const auto group_it =
+      std::find_if(rooms.begin(), rooms.end(), [group_name](const std::shared_ptr<Room>& r) { return (r->_group_name == group_name); });
 
    // create new room if room has no group associated or room with a group assigned has not been created yet
    std::shared_ptr<Room> room;
@@ -133,56 +124,52 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
          const auto transition_it = data._tmx_object->_properties->_map.find("transition");
          if (transition_it != data._tmx_object->_properties->_map.end())
          {
-             if (transition_it->second->_value_string == "fade_out_fade_in")
-             {
-                 room->_transition_effect = TransitionEffect::FadeOutFadeIn;
-             }
+            if (transition_it->second->_value_string == "fade_out_fade_in")
+            {
+               room->_transition_effect = TransitionEffect::FadeOutFadeIn;
+            }
          }
 
          const auto fade_in_speed_it = data._tmx_object->_properties->_map.find("fade_in_speed");
          if (fade_in_speed_it != data._tmx_object->_properties->_map.end())
          {
-             room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
+            room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
          }
 
          const auto fade_out_speed_it = data._tmx_object->_properties->_map.find("fade_out_speed");
          if (fade_out_speed_it != data._tmx_object->_properties->_map.end())
          {
-             room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
+            room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
          const auto delay_between_effects_it = data._tmx_object->_properties->_map.find("delay_between_effects_ms");
          if (delay_between_effects_it != data._tmx_object->_properties->_map.end())
          {
-             room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
+            room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
          }
 
          const auto camera_sync_after_fade_out_it = data._tmx_object->_properties->_map.find("camera_sync_after_fade_out");
          if (camera_sync_after_fade_out_it != data._tmx_object->_properties->_map.end())
          {
-             room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
+            room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
          }
 
          const auto delay_it = data._tmx_object->_properties->_map.find("camera_lock_delay_ms");
          if (delay_it != data._tmx_object->_properties->_map.end())
          {
-             room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
+            room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
          }
       }
    }
    else
    {
-       // merge room
-       room = *group_it;
+      // merge room
+      room = *group_it;
    }
 
    Room::SubRoom sub_room;
-   sub_room._rect = sf::FloatRect{
-       data._tmx_object->_x_px,
-       data._tmx_object->_y_px,
-       data._tmx_object->_width_px,
-       data._tmx_object->_height_px
-   };
+   sub_room._rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    // read start positions if available
    if (data._tmx_object->_properties)
@@ -192,9 +179,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
       {
          sub_room._start_position_l = {
-            start_position_l_x_it->second->_value_int.value(),
-            start_position_l_y_it->second->_value_int.value()
-         };
+            start_position_l_x_it->second->_value_int.value(), start_position_l_y_it->second->_value_int.value()};
       }
 
       const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
@@ -202,9 +187,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
       {
          sub_room._start_position_r = {
-            start_position_r_x_it->second->_value_int.value(),
-            start_position_r_y_it->second->_value_int.value()
-         };
+            start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()};
       }
 
       const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
@@ -212,9 +195,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
       {
          sub_room._start_position_t = {
-            start_position_t_x_it->second->_value_int.value(),
-            start_position_t_y_it->second->_value_int.value()
-         };
+            start_position_t_x_it->second->_value_int.value(), start_position_t_y_it->second->_value_int.value()};
       }
 
       const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
@@ -222,9 +203,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
       {
          sub_room._start_position_b = {
-            start_position_b_x_it->second->_value_int.value(),
-            start_position_b_y_it->second->_value_int.value()
-         };
+            start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()};
       }
 
       const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
@@ -257,18 +236,15 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
    room->_sub_rooms.push_back(sub_room);
 
    // test for overlaps
-   if (std::any_of(room->_sub_rooms.begin(), room->_sub_rooms.end(), [sub_room](const auto& room){
-            return room._rect.intersects(sub_room._rect);
-         }
-      )
-   )
+   if (std::any_of(
+          room->_sub_rooms.begin(), room->_sub_rooms.end(), [sub_room](const auto& room) { return room._rect.intersects(sub_room._rect); }
+       ))
    {
       Log::Error() << "bad rect intersection for room " << data._tmx_object->_name;
    }
 
    // Log::Info() << "adding room: " << key;
 }
-
 
 std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
 {
@@ -290,7 +266,6 @@ std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
 
    return screen_transition;
 }
-
 
 void Room::movePlayerToRoomStartPosition()
 {
@@ -337,22 +312,15 @@ void Room::movePlayerToRoomStartPosition()
    {
       auto player_pos = Player::getCurrent()->getPixelPositionInt();
       player_pos += (*active_sub_room)._start_offset_l.value();
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(player_pos.x),
-         static_cast<float>(player_pos.y)
-      );
+      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(player_pos.x), static_cast<float>(player_pos.y));
    }
    else if ((*active_sub_room)._start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
    {
       auto player_pos = Player::getCurrent()->getPixelPositionInt();
       player_pos += (*active_sub_room)._start_offset_r.value();
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>(player_pos.x),
-         static_cast<float>(player_pos.y)
-      );
+      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(player_pos.x), static_cast<float>(player_pos.y));
    }
 }
-
 
 void Room::syncCamera()
 {
@@ -367,7 +335,6 @@ void Room::syncCamera()
    }
 }
 
-
 void Room::startTransition()
 {
    if (!_transition_effect.has_value())
@@ -380,8 +347,8 @@ void Room::startTransition()
       case TransitionEffect::FadeOutFadeIn:
       {
          auto screen_transition = makeFadeTransition();
-         screen_transition->_callbacks_effect_1_ended.push_back([this](){syncCamera();});
-         screen_transition->_callbacks_effect_2_ended.push_back([](){ScreenTransitionHandler::getInstance().pop();});
+         screen_transition->_callbacks_effect_1_ended.push_back([this]() { syncCamera(); });
+         screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          screen_transition->startEffect1();
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          break;
@@ -389,14 +356,15 @@ void Room::startTransition()
    }
 }
 
-
 void Room::lockCamera()
 {
    _camera_locked = true;
 
    // delay shall be retrieved from room properties
-   Timer::add(_camera_lock_delay.value(),
-      [this](){
+   Timer::add(
+      _camera_lock_delay.value(),
+      [this]()
+      {
          // could be that the camera has been unlocked in the meantime
          if (_camera_locked)
          {
@@ -408,15 +376,14 @@ void Room::lockCamera()
    );
 }
 
-
 Room::EnteredDirection Room::SubRoom::enteredDirection(const sf::Vector2f& player_pos_px) const
 {
-   static constexpr auto eps_px = 100;
+   constexpr auto eps_px = 100;
 
-   sf::FloatRect rect_l{_rect.left,                        _rect.top,                         eps_px,      _rect.height};
-   sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top,                         eps_px,      _rect.height};
-   sf::FloatRect rect_t{_rect.left,                        _rect.top,                         _rect.width, eps_px};
-   sf::FloatRect rect_b{_rect.left,                        _rect.top + _rect.height - eps_px, _rect.width, eps_px};
+   sf::FloatRect rect_l{_rect.left, _rect.top, eps_px, _rect.height};
+   sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top, eps_px, _rect.height};
+   sf::FloatRect rect_t{_rect.left, _rect.top, _rect.width, eps_px};
+   sf::FloatRect rect_b{_rect.left, _rect.top + _rect.height - eps_px, _rect.width, eps_px};
 
    if (rect_l.contains(player_pos_px))
    {
@@ -441,14 +408,13 @@ Room::EnteredDirection Room::SubRoom::enteredDirection(const sf::Vector2f& playe
    return EnteredDirection::Invalid;
 }
 
-
 std::optional<Room::SubRoom> Room::activeSubRoom(const sf::Vector2f& player_pos_px) const
 {
    std::optional<Room::SubRoom> rect;
 
-   const auto& it = std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [player_pos_px](const auto& sub_room){
-         return sub_room._rect.contains(player_pos_px);}
-      );
+   const auto& it = std::find_if(
+      _sub_rooms.begin(), _sub_rooms.end(), [player_pos_px](const auto& sub_room) { return sub_room._rect.contains(player_pos_px); }
+   );
 
    if (it != _sub_rooms.end())
    {
@@ -458,14 +424,13 @@ std::optional<Room::SubRoom> Room::activeSubRoom(const sf::Vector2f& player_pos_
    return rect;
 }
 
-
 Room::EnteredDirection Room::enteredDirection(const sf::Vector2f& player_pos_px) const
 {
-    const auto active_sub_room = activeSubRoom(player_pos_px);
-    if (!active_sub_room.has_value())
-    {
-        return EnteredDirection::Invalid;
-    }
+   const auto active_sub_room = activeSubRoom(player_pos_px);
+   if (!active_sub_room.has_value())
+   {
+      return EnteredDirection::Invalid;
+   }
 
-    return (*active_sub_room).enteredDirection(player_pos_px);
+   return (*active_sub_room).enteredDirection(player_pos_px);
 }

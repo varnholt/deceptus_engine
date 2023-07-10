@@ -15,32 +15,32 @@
 
 #define GAME_NAME "deceptus"
 
-static constexpr auto PPM = 48.0f;         // pixels per meter
-static constexpr auto MPP = (1.0f / PPM);  // meters per pixel
-static constexpr auto TPM = 2.0f;          // tiles per meter
-static constexpr auto MPT = 0.5f;          // meters per tile
+constexpr auto PPM = 48.0f;         // pixels per meter
+constexpr auto MPP = (1.0f / PPM);  // meters per pixel
+constexpr auto TPM = 2.0f;          // tiles per meter
+constexpr auto MPT = 0.5f;          // meters per tile
 
-static constexpr auto PIXELS_PER_TILE = 24;
-static constexpr auto PIXELS_PER_HALF_TILE = PIXELS_PER_TILE / 2;
-static constexpr auto PIXELS_PER_PHYSICS_TILE = 8;  // each tile is 8x8 px
+constexpr auto PIXELS_PER_TILE = 24;
+constexpr auto PIXELS_PER_HALF_TILE = PIXELS_PER_TILE / 2;
+constexpr auto PIXELS_PER_PHYSICS_TILE = 8;  // each tile is 8x8 px
 
-static constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15;  // 20
+constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15;  // 20
 
-static constexpr auto PLAYER_ANIMATION_CYCLES = 8;
-static constexpr auto PLAYER_TILES_WIDTH = 24;
-static constexpr auto PLAYER_TILES_HEIGHT = 48;
-static constexpr auto PLAYER_ACTUAL_WIDTH = 20;   // the actual width can be smaller than the tile width
-static constexpr auto PLAYER_ACTUAL_HEIGHT = 32;  // the actual height can be smaller than the tile height
+constexpr auto PLAYER_ANIMATION_CYCLES = 8;
+constexpr auto PLAYER_TILES_WIDTH = 24;
+constexpr auto PLAYER_TILES_HEIGHT = 48;
+constexpr auto PLAYER_ACTUAL_WIDTH = 20;   // the actual width can be smaller than the tile width
+constexpr auto PLAYER_ACTUAL_HEIGHT = 32;  // the actual height can be smaller than the tile height
 
-static constexpr auto PLAYER_1_COLLISION_ID = 3;
+constexpr auto PLAYER_1_COLLISION_ID = 3;
 
-static constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
-static constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
+constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
+constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
 
-static constexpr auto CHUNK_SHIFT_X{9};  // for px position to chunk position division
-static constexpr auto CHUNK_SHIFT_Y{9};
-static constexpr auto CHUNK_ALLOWED_DELTA_X{3};
-static constexpr auto CHUNK_ALLOWED_DELTA_Y{3};
+constexpr auto CHUNK_SHIFT_X{9};  // for px position to chunk position division
+constexpr auto CHUNK_SHIFT_Y{9};
+constexpr auto CHUNK_ALLOWED_DELTA_X{3};
+constexpr auto CHUNK_ALLOWED_DELTA_Y{3};
 
 // configured timestep is 1/35
 // frame update timestep is 1/60
@@ -49,7 +49,7 @@ static constexpr auto CHUNK_ALLOWED_DELTA_Y{3};
 //   pixel pos: 2808.000000, 8740.535156
 // 8739.437500 - 8740.535156 = 1.097656
 // 1 / 1.097656 => 0.91103223596463737272879663574016
-static constexpr auto TIMESTEP_ERROR = 0.91192227210220912883854305376065f;
+constexpr auto TIMESTEP_ERROR = 0.91192227210220912883854305376065f;
 
 enum class DeathReason
 {

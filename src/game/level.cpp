@@ -31,6 +31,7 @@
 #include "mechanisms/door.h"
 #include "mechanisms/lever.h"
 #include "meshtools.h"
+#include "parsedata.h"
 #include "physics/physicsconfiguration.h"
 #include "player/player.h"
 #include "savestate.h"
@@ -1510,23 +1511,63 @@ void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior
 }
 
 //-----------------------------------------------------------------------------
+void Level::regenerateLevelPaths(
+   const std::shared_ptr<TmxLayer>& layer,
+   const std::shared_ptr<TmxTileSet>& tileset,
+   const std::filesystem::path& base_path,
+   const SquareMarcher& square_marcher,
+   ParseData* parse_data,
+   auto path_solid_optimized
+)
+{
+   const auto path_solid_not_optimized = base_path / std::filesystem::path(parse_data->filename_obj_not_optimized);
+
+   // dump the tileset into an obj file, optimise that and load it
+   if (_physics.dumpObj(layer, tileset, path_solid_not_optimized))
+   {
+#ifdef __linux__
+      auto cmd = std::string("tools/path_merge/path_merge") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
+#else
+      auto cmd =
+         std::string("tools\\path_merge\\path_merge.exe") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
+#endif
+
+      Log::Info() << "running cmd: " << cmd;
+
+      if (std::system(cmd.c_str()) != 0)
+      {
+         Log::Error() << "command failed";
+      }
+      else
+      {
+         Log::Info() << "command succeeded";
+      }
+   }
+   else
+   {
+      Log::Error() << "dumping unoptimized obj (" << path_solid_not_optimized << ") failed";
+   }
+
+   // fallback to square marched level if the path generator failed
+   if (!std::filesystem::exists(path_solid_optimized))
+   {
+      Log::Warning() << "could not find " << path_solid_optimized.string() << ", obj generator failed";
+      addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher._paths, parse_data->object_type);
+   }
+   else
+   {
+      // parse the optimised obj
+      parseObj(layer, parse_data->object_type, path_solid_optimized);
+   }
+}
+
+//-----------------------------------------------------------------------------
 void Level::parsePhysicsTiles(
    const std::shared_ptr<TmxLayer>& layer,
    const std::shared_ptr<TmxTileSet>& tileset,
    const std::filesystem::path& base_path
 )
 {
-   struct ParseData
-   {
-      std::string filename_obj_optimized;
-      std::string filename_obj_not_optimized;
-      std::string filename_physics_path_csv;
-      std::string filename_grid_image;
-      std::string filename_path_image;
-      ObjectType object_type = ObjectTypeSolid;
-      std::vector<int32_t> colliding_tiles;
-   };
-
    ParseData level_pd;
    level_pd.filename_obj_optimized = "layer_" + layer->_name + "_solid.obj";
    level_pd.filename_obj_not_optimized = "layer_" + layer->_name + "_solid_not_optimised.obj";
@@ -1545,38 +1586,25 @@ void Level::parsePhysicsTiles(
    solid_onesided_pd.object_type = ObjectTypeSolidOneWay;
    solid_onesided_pd.colliding_tiles = {1};
 
-   ParseData deadly_pd;
-   deadly_pd.filename_obj_optimized = "layer_" + layer->_name + "_deadly.obj";
-   deadly_pd.filename_obj_not_optimized = "layer_" + layer->_name + "_deadly_not_optimised.obj";
-   deadly_pd.filename_physics_path_csv = "physics_path_deadly.csv";
-   deadly_pd.filename_grid_image = "physics_grid_deadly.png";
-   deadly_pd.filename_path_image = "physics_path_deadly.png";
-   deadly_pd.object_type = ObjectTypeDeadly;
-   deadly_pd.colliding_tiles = {3};
-
-   ParseData* pd = nullptr;
+   ParseData* parse_data = nullptr;
 
    if (layer->_name == "level")
    {
-      pd = &level_pd;
+      parse_data = &level_pd;
    }
    else if (layer->_name == "level_solid_onesided")
    {
-      pd = &solid_onesided_pd;
-   }
-   else if (layer->_name == "level_deadly")
-   {
-      pd = &deadly_pd;
+      parse_data = &solid_onesided_pd;
    }
 
-   if (!pd)
+   if (!parse_data)
    {
       return;
    }
 
-   static constexpr float scale = 1.0f / 3.0f;
+   constexpr float scale = 1.0f / 3.0f;
 
-   auto path_solid_optimized = base_path / std::filesystem::path(pd->filename_obj_optimized);
+   auto path_solid_optimized = base_path / std::filesystem::path(parse_data->filename_obj_optimized);
 
    Log::Info() << "loading: " << path_solid_optimized.make_preferred().generic_string();
 
@@ -1588,81 +1616,22 @@ void Level::parsePhysicsTiles(
       _physics._grid_width,
       _physics._grid_height,
       _physics._physics_map,
-      pd->colliding_tiles,
-      base_path / std::filesystem::path(pd->filename_physics_path_csv),
+      parse_data->colliding_tiles,
+      base_path / std::filesystem::path(parse_data->filename_physics_path_csv),
       scale
    );
 
-   square_marcher.writeGridToImage(base_path / std::filesystem::path(pd->filename_grid_image));  // not needed
-   square_marcher.writePathToImage(base_path / std::filesystem::path(pd->filename_path_image));  // needed from obj as well
+   square_marcher.writeGridToImage(base_path / std::filesystem::path(parse_data->filename_grid_image));  // not needed
+   square_marcher.writePathToImage(base_path / std::filesystem::path(parse_data->filename_path_image));  // needed from obj as well
 
    if (std::filesystem::exists(path_solid_optimized))
    {
-      parseObj(layer, pd->object_type, path_solid_optimized);
+      parseObj(layer, parse_data->object_type, path_solid_optimized);
    }
    else
    {
-      const auto path_solid_not_optimized = base_path / std::filesystem::path(pd->filename_obj_not_optimized);
-
-      // dump the tileset into an obj file, optimise that and load it
-      if (_physics.dumpObj(layer, tileset, path_solid_not_optimized))
-      {
-#ifdef __linux__
-         auto cmd =
-            std::string("tools/path_merge/path_merge") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#else
-         auto cmd = std::string("tools\\path_merge\\path_merge.exe") + " " + path_solid_not_optimized.string() + " " +
-                    path_solid_optimized.string();
-#endif
-
-         Log::Info() << "running cmd: " << cmd;
-
-         if (std::system(cmd.c_str()) != 0)
-         {
-            Log::Error() << "command failed";
-         }
-         else
-         {
-            Log::Info() << "command succeeded";
-         }
-      }
-      else
-      {
-         Log::Error() << "dumping unoptimized obj (" << path_solid_not_optimized << ") failed";
-      }
-
-      // fallback to square marched level
-      if (!std::filesystem::exists(path_solid_optimized))
-      {
-         Log::Warning() << "could not find " << path_solid_optimized.string() << ", obj generator failed";
-         addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher._paths, pd->object_type);
-      }
-      else
-      {
-         // parse the optimised obj
-         parseObj(layer, pd->object_type, path_solid_optimized);
-      }
+      regenerateLevelPaths(layer, tileset, base_path, square_marcher, parse_data, path_solid_optimized);
    }
-
-   //   // layer of deadly objects
-   //   const auto pathDeadly = basePath / std::filesystem::path("layer_" + layer->mName + "_deadly.obj");
-   //   if (std::filesystem::exists(pathDeadly))
-   //   {
-   //      parseObj(layer, ObjectType::ObjectTypeDeadly, pathDeadly);
-   //   }
-   //   else
-   //   {
-   //      SquareMarcher deadly(
-   //         _physics._grid_width,
-   //         _physics._grid_height,
-   //         _physics._physics_map,
-   //         std::vector<int32_t>{3},
-   //         basePath / std::filesystem::path("physics_path_deadly.csv"),
-   //         scale
-   //      );
-   //
-   //      addPathsToWorld(layer->mOffsetX, layer->mOffsetY, deadly.mPaths, ObjectTypeDeadly);
-   //   }
 
    ChainShapeAnalyzer::analyze(_world);
 }

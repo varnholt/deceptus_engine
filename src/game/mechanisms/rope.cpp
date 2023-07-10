@@ -64,7 +64,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       const auto c1_pos_m = c1->GetPosition();
       const auto c2_pos_m = c2->GetPosition();
 
-      static constexpr auto thickness_m = 0.025f;
+      constexpr auto thickness_m = 0.025f;
 
       const auto dist = (c2_pos_m - c1_pos_m);
       auto normal = b2Vec2(dist.y, -dist.x);

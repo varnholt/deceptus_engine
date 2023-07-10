@@ -19,14 +19,14 @@ int32_t Crusher::__instance_counter = 0;
 
 namespace
 {
-static constexpr auto BLADE_HORIZONTAL_TILES = 5;
-static constexpr auto BLADE_VERTICAL_TILES = 1;
+constexpr auto BLADE_HORIZONTAL_TILES = 5;
+constexpr auto BLADE_VERTICAL_TILES = 1;
 
-static constexpr auto BLADE_SIZE_X = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
-static constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
+constexpr auto BLADE_SIZE_X = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
+constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
 
-static constexpr auto BLADE_SHARPNESS = 0.1f;
-static constexpr auto BLADE_TOLERANCE = 0.06f;
+constexpr auto BLADE_SHARPNESS = 0.1f;
+constexpr auto BLADE_TOLERANCE = 0.06f;
 }  // namespace
 
 //-----------------------------------------------------------------------------

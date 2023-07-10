@@ -22,17 +22,17 @@ namespace
 {
 
 // those two need to be configurable (dynamic objects need higher launch speeds apparently)
-static constexpr auto launch_speed = 5.0f;
-static constexpr auto arrow_gravity_scale = 0.1f;
+constexpr auto launch_speed = 5.0f;
+constexpr auto arrow_gravity_scale = 0.1f;
 
-static constexpr auto arrow_tail = -1.4f;
-static constexpr auto arrow_tip = 0.6f;
-static constexpr auto arrow_width = 0.1f;
-static constexpr auto scale = 0.1f;
+constexpr auto arrow_tail = -1.4f;
+constexpr auto arrow_tip = 0.6f;
+constexpr auto arrow_width = 0.1f;
+constexpr auto scale = 0.1f;
 
-static constexpr auto start_frame = 15;
-static constexpr auto frames_per_row = 15;
-static constexpr auto animation_frame_count = 4;
+constexpr auto start_frame = 15;
+constexpr auto frames_per_row = 15;
+constexpr auto animation_frame_count = 4;
 
 uint16_t category_bits = CategoryEnemyCollideWith;                  // I am a ...
 uint16_t mask_bits_standing = CategoryBoundary | CategoryFriendly;  // I collide with ...
@@ -152,7 +152,7 @@ void Bow::setLauncherBody(b2Body* launcher_body)
 
 void Bow::updateRotation(Arrow* arrow)
 {
-   static constexpr auto minimum_velocity = 0.1f;
+   constexpr auto minimum_velocity = 0.1f;
 
    auto arrow_body = arrow->getBody();
    auto arrow_velocity = arrow_body->GetLinearVelocity();

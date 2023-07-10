@@ -20,13 +20,13 @@
 
 namespace
 {
-static constexpr std::pair<int32_t, int32_t> range_disabled{0, 1};
-static constexpr std::pair<int32_t, int32_t> range_enabling{2, 9};
-static constexpr std::pair<int32_t, int32_t> range_enabled{10, 16};
-static constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
+constexpr std::pair<int32_t, int32_t> range_disabled{0, 1};
+constexpr std::pair<int32_t, int32_t> range_enabling{2, 9};
+constexpr std::pair<int32_t, int32_t> range_enabled{10, 16};
+constexpr std::pair<int32_t, int32_t> range_disabling{17, 20};
 
-static constexpr auto range_diabled_delta = range_disabled.second - range_disabled.first;
-static constexpr auto range_enabled_delta = range_enabled.second - range_enabled.first;
+constexpr auto range_diabled_delta = range_disabled.second - range_disabled.first;
+constexpr auto range_enabled_delta = range_enabled.second - range_enabled.first;
 
 std::vector<std::shared_ptr<TmxObject>> __objects;
 std::vector<std::shared_ptr<Laser>> __lasers;

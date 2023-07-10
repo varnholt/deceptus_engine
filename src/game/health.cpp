@@ -29,8 +29,8 @@ void Health::update(const sf::Time& dt)
    //    std::cout << _stamina << std::endl;
    // }
 
-   static constexpr auto stamina_charge_factor = 1.0f;
-   static constexpr auto stamina_drain_factor = 1.0f;
+   constexpr auto stamina_charge_factor = 1.0f;
+   constexpr auto stamina_drain_factor = 1.0f;
 
    if (_stamina_drains != 0)
    {

@@ -29,15 +29,15 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
    return str;
 }
 
-static constexpr auto x_offset_left_px = 110;
-static constexpr auto x_offset_center_px = 160;
-static constexpr auto x_offset_right_px = 270;
-static constexpr auto y_offset_top_px = 82;
-static constexpr auto y_offset_middle_px = 149;
-static constexpr auto y_offset_bottom_px = 216;
-static constexpr auto text_margin_x_px = 8;
-static constexpr auto textbox_width_px = 324;
-static constexpr auto background_width_px = 318;
+constexpr auto x_offset_left_px = 110;
+constexpr auto x_offset_center_px = 160;
+constexpr auto x_offset_right_px = 270;
+constexpr auto y_offset_top_px = 82;
+constexpr auto y_offset_middle_px = 149;
+constexpr auto y_offset_bottom_px = 216;
+constexpr auto text_margin_x_px = 8;
+constexpr auto textbox_width_px = 324;
+constexpr auto background_width_px = 318;
 
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
