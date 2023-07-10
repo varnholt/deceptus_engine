@@ -315,6 +315,12 @@ Level::~Level()
    {
       delete kv.second;
    }
+
+   _file_watcher_thread_active = false;
+   if (_file_watcher_thread.joinable())
+   {
+      _file_watcher_thread.join();
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -585,6 +591,26 @@ bool Level::load()
    _ambient_occlusion.load(level_json_path.parent_path(), std::filesystem::path(_description->_filename).stem().string());
 
    Log::Info() << "level loading complete";
+
+   // set up file watcher
+   _file_watcher_thread = std::thread(
+      [this]()
+      {
+         auto first_modified_time = std::filesystem::last_write_time(_description->_filename);
+
+         while (_file_watcher_thread_active)
+         {
+            const auto current_modified_time = std::filesystem::last_write_time(_description->_filename);
+            if (current_modified_time != first_modified_time)
+            {
+               Log::Info() << "level was modified, marking as dirty";
+               first_modified_time = current_modified_time;
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+         }
+      }
+   );
 
    return true;
 }
