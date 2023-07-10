@@ -250,5 +250,9 @@ protected:
    std::vector<std::vector<b2Vec2>> _world_chains;
    Winding _winding = Winding::Clockwise;
 
+   // file watcher
+   std::thread _file_watcher_thread;
+   bool _file_watcher_thread_active{true};
+
    static Level* __current_level;
 };
