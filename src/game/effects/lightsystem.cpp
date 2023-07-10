@@ -19,7 +19,7 @@
 //-----------------------------------------------------------------------------
 namespace
 {
-static constexpr auto max_distance_m2 = 100.0f;  // depends on the view dimensions
+constexpr auto max_distance_m2 = 100.0f;  // depends on the view dimensions
 }
 
 //-----------------------------------------------------------------------------

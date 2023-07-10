@@ -21,15 +21,14 @@
 
 namespace
 {
-static constexpr auto width_px = 24;
-static constexpr auto height_px = 24;
-static constexpr auto bevel_px = 0;
-static constexpr auto width_m = width_px * MPP;
-static constexpr auto height_m = height_px * MPP;
-static constexpr auto bevel_m = bevel_px * MPP;
-
-static constexpr auto count_columns = 8;
-static constexpr auto animation_speed = 40.0f;
+constexpr auto width_px = 24;
+constexpr auto height_px = 24;
+constexpr auto bevel_px = 0;
+constexpr auto width_m = width_px * MPP;
+constexpr auto height_m = height_px * MPP;
+constexpr auto bevel_m = bevel_px * MPP;
+constexpr auto count_columns = 8;
+constexpr auto animation_speed = 40.0f;
 }  // namespace
 
 OnOffBlock::OnOffBlock(GameNode* parent) : GameNode(parent)

@@ -14,7 +14,7 @@ const auto sprites_per_row = 15;
 const auto sprite_frame_time_s = 0.075f;
 const auto sprite_start_frame = 20;
 
-static constexpr auto default_bow_projectile_identifier = "data/weapons/arrow.png";
+constexpr auto default_bow_projectile_identifier = "data/weapons/arrow.png";
 
 bool Arrow::_animation_initialised = false;
 

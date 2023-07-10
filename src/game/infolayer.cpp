@@ -41,8 +41,8 @@ HighResDuration getRandomDuration(const HighResDuration& min_duration, const Hig
    return random_duration;
 }
 
-static constexpr auto heart_layer_count = 10;
-static constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
+constexpr auto heart_layer_count = 10;
+constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
 }  // namespace
 
 /*
@@ -175,7 +175,7 @@ InfoLayer::InfoLayer()
    // load heart animation
    const auto t = sf::milliseconds(100);
    std::vector<sf::Time> ts;
-   static constexpr auto frame_count = 6 * 8 + 7;
+   constexpr auto frame_count = 6 * 8 + 7;
    for (auto i = 0; i < frame_count; i++)
    {
       ts.push_back(t);

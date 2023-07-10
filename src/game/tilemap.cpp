@@ -19,9 +19,9 @@
 
 namespace
 {
-static constexpr auto block_size = 16;
-static constexpr auto y_range = 2;
-static constexpr auto x_range = 3;
+constexpr auto block_size = 16;
+constexpr auto y_range = 2;
+constexpr auto x_range = 3;
 }  // namespace
 
 TileMap::~TileMap()
@@ -116,7 +116,7 @@ bool TileMap::load(
             // define its 4 corners
             sf::Vertex quad[4];
 
-            static constexpr auto size = 1;
+            constexpr auto size = 1;
 
             // shrink UV range a TINY bit to avoid fetching data from undefined texture space
             const auto tile_eps_x = 0.5f * (1.0f / static_cast<float>(_tile_size.x));

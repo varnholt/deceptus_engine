@@ -145,9 +145,9 @@ void RotatingBlade::updateAudio()
       return;
    }
 
-   static constexpr auto eps_enabled_on = 0.5f;
-   static constexpr auto eps_enabled_off = 0.05f;
-   static constexpr auto eps_accelerate_off = 0.05f;
+   constexpr auto eps_enabled_on = 0.5f;
+   constexpr auto eps_enabled_off = 0.05f;
+   constexpr auto eps_accelerate_off = 0.05f;
 
    // blades are accelerating until rotating at regular speed
    if (_enabled)
