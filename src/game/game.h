@@ -47,7 +47,8 @@ private:
    void initializeController();
 
    void drawLevel();
-   void loadLevel();
+   void loadLevel(LoadingMode loading_mode = LoadingMode::Standard);
+   void reloadLevel(LoadingMode loading_mode = LoadingMode::Standard);
    void nextLevel();
 
    void reset();
