@@ -12,6 +12,19 @@
 #include "fixturenode.h"
 #include "framework/math/maptools.h"
 #include "framework/math/sfmlmath.h"
+#include "framework/tmxparser/tmxelement.h"
+#include "framework/tmxparser/tmximage.h"
+#include "framework/tmxparser/tmximagelayer.h"
+#include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobjectgroup.h"
+#include "framework/tmxparser/tmxparser.h"
+#include "framework/tmxparser/tmxpolygon.h"
+#include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
+#include "framework/tmxparser/tmxtileset.h"
+#include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
@@ -24,6 +37,7 @@
 #include "gun.h"
 #include "ingamemenumap.h"
 #include "leveldescription.h"
+#include "levelfiles.h"
 #include "luainterface.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/checkpoint.h"
@@ -45,20 +59,6 @@
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
-
-#include "framework/tmxparser/tmxelement.h"
-#include "framework/tmxparser/tmximage.h"
-#include "framework/tmxparser/tmximagelayer.h"
-#include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxobject.h"
-#include "framework/tmxparser/tmxobjectgroup.h"
-#include "framework/tmxparser/tmxparser.h"
-#include "framework/tmxparser/tmxpolygon.h"
-#include "framework/tmxparser/tmxpolyline.h"
-#include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
-#include "framework/tmxparser/tmxtileset.h"
-#include "framework/tmxparser/tmxtools.h"
 
 #include <chrono>
 #include <cstdlib>
@@ -411,32 +411,26 @@ void Level::loadTmx()
    static const std::string parallax_identifier = "parallax_";
 
    const auto path = std::filesystem::path(_description->_filename).parent_path();
-
    const auto checksum_old = Checksum::readChecksum(_description->_filename + ".crc");
    const auto checksum_new = Checksum::calcChecksum(_description->_filename);
-   if (checksum_old != checksum_new)
+   const auto checksum_mismatch = checksum_old != checksum_new;
+
+   if (checksum_mismatch || _loading_mode == LoadingMode::Clean)
    {
-      Log::Warning() << "checksum mismatch, deleting cached data";
-      std::filesystem::remove(path / "physics_grid_solid.png");
-      std::filesystem::remove(path / "physics_path_deadly.csv");
-      std::filesystem::remove(path / "physics_path_solid.csv");
-      std::filesystem::remove(path / "physics_path_solid.png");
-      std::filesystem::remove(path / "layer_level_solid_not_optimised.obj");
+      LevelFiles::clean(*_description);
       Checksum::writeChecksum(_description->_filename + ".crc", checksum_new);
    }
 
    sf::Clock elapsed;
 
    // parse tmx
-   Log::Info() << "parsing tmx: " << _description->_filename;
-
    TmxParser tmx_parser;
+   Log::Info() << "parsing tmx: " << _description->_filename;
    tmx_parser.parse(_description->_filename);
-
    Log::Info() << "parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
-   elapsed.restart();
 
    Log::info("loading tmx... ");
+   elapsed.restart();
 
    GameDeserializeData data;
    data._world = _world;
@@ -605,6 +599,7 @@ bool Level::load()
             {
                Log::Info() << "level was modified, marking as dirty";
                first_modified_time = current_modified_time;
+               _dirty = true;
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -1267,6 +1262,16 @@ void Level::drawGlowSprite()
 #endif
 }
 
+void Level::setLoadingMode(LoadingMode loading_mode)
+{
+   _loading_mode = loading_mode;
+}
+
+bool Level::isDirty() const
+{
+   return _dirty;
+}
+
 const std::vector<std::shared_ptr<GameMechanism>>& Level::getBouncers() const
 {
    return _mechanism_bouncers;
@@ -1541,7 +1546,6 @@ void Level::regenerateLevelPaths(
    const std::shared_ptr<TmxLayer>& layer,
    const std::shared_ptr<TmxTileSet>& tileset,
    const std::filesystem::path& base_path,
-   const SquareMarcher& square_marcher,
    ParseData* parse_data,
    auto path_solid_optimized
 )
@@ -1574,17 +1578,7 @@ void Level::regenerateLevelPaths(
       Log::Error() << "dumping unoptimized obj (" << path_solid_not_optimized << ") failed";
    }
 
-   // fallback to square marched level if the path generator failed
-   if (!std::filesystem::exists(path_solid_optimized))
-   {
-      Log::Warning() << "could not find " << path_solid_optimized.string() << ", obj generator failed";
-      addPathsToWorld(layer->_offset_x_px, layer->_offset_y_px, square_marcher._paths, parse_data->object_type);
-   }
-   else
-   {
-      // parse the optimised obj
-      parseObj(layer, parse_data->object_type, path_solid_optimized);
-   }
+   parseObj(layer, parse_data->object_type, path_solid_optimized);
 }
 
 //-----------------------------------------------------------------------------
@@ -1638,17 +1632,17 @@ void Level::parsePhysicsTiles(
 
    // this whole block should be generated by an external tool
    // right now the squaremarcher output is still used for the in-game map visualization
-   SquareMarcher square_marcher(
-      _physics._grid_width,
-      _physics._grid_height,
-      _physics._physics_map,
-      parse_data->colliding_tiles,
-      base_path / std::filesystem::path(parse_data->filename_physics_path_csv),
-      scale
-   );
-
-   square_marcher.writeGridToImage(base_path / std::filesystem::path(parse_data->filename_grid_image));  // not needed
-   square_marcher.writePathToImage(base_path / std::filesystem::path(parse_data->filename_path_image));  // needed from obj as well
+   //
+   // SquareMarcher square_marcher(
+   //    _physics._grid_width,
+   //    _physics._grid_height,
+   //    _physics._physics_map,
+   //    parse_data->colliding_tiles,
+   //    base_path / std::filesystem::path(parse_data->filename_physics_path_csv),
+   //    scale
+   // );
+   // square_marcher.writeGridToImage(base_path / std::filesystem::path(parse_data->filename_grid_image));  // not needed
+   // square_marcher.writePathToImage(base_path / std::filesystem::path(parse_data->filename_path_image));  // needed from obj as well
 
    if (std::filesystem::exists(path_solid_optimized))
    {
@@ -1656,7 +1650,7 @@ void Level::parsePhysicsTiles(
    }
    else
    {
-      regenerateLevelPaths(layer, tileset, base_path, square_marcher, parse_data, path_solid_optimized);
+      regenerateLevelPaths(layer, tileset, base_path, parse_data, path_solid_optimized);
    }
 
    ChainShapeAnalyzer::analyze(_world);

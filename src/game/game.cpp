@@ -226,14 +226,14 @@ void Game::showPauseMenu()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Game::loadLevel()
+void Game::loadLevel(LoadingMode loading_mode)
 {
    _level_loading_finished = false;
    _level_loading_finished_previous = false;
 
    _level_loading_thread = std::async(
       std::launch::async,
-      [this]()
+      [this, loading_mode]()
       {
          _player->resetWorld();  // free the pointer that's shared with the player
          _level.reset();
@@ -242,6 +242,7 @@ void Game::loadLevel()
          const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
          _level = std::make_shared<Level>();
          _level->setDescriptionFilename(level_item._level_name);
+         _level->setLoadingMode(loading_mode);
          _level->initialize();
          _level->initializeTextures();
 
@@ -694,6 +695,11 @@ void Game::update()
 
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);
+
+         if (_level->isDirty())
+         {
+            reloadLevel(LoadingMode::Clean);
+         }
       }
    }
 
@@ -835,7 +841,7 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (event.type == sf::Event::MouseButtonPressed)
    {
-      if (event.mouseButton.button == sf::Mouse::Left)
+      if (event.mouseButton.button == sf::Mouse::Right)
       {
          const auto mouse_pos_spx = sf::Mouse::getPosition(*_window);
          const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_spx, *Level::getCurrentLevel()->getLevelView());
@@ -858,6 +864,20 @@ void Game::shutdown()
    }
 
    std::exit(0);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Game::reloadLevel(LoadingMode loading_mode)
+{
+   if (!_level_loading_finished)
+   {
+      return;
+   }
+
+   _restore_previous_position = true;
+   _stored_position = _player->getPixelPositionFloat();
+   _player->reset();
+   loadLevel(loading_mode);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -989,13 +1009,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::L:
       {
-         if (_level_loading_finished)
-         {
-            _restore_previous_position = true;
-            _stored_position = _player->getPixelPositionFloat();
-            _player->reset();
-            loadLevel();
-         }
+         reloadLevel();
          break;
       }
       case sf::Keyboard::M:

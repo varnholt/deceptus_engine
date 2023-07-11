@@ -101,6 +101,9 @@ public:
    const std::vector<std::shared_ptr<GameMechanism>>& getBouncers() const;
    const std::vector<std::shared_ptr<GameMechanism>>& getPortals() const;
 
+   bool isDirty() const;
+   void setLoadingMode(LoadingMode loading_mode);
+
 protected:
    void addDebugRect(void* body, float x, float y, float w, float h);
 
@@ -124,7 +127,6 @@ protected:
       const std::shared_ptr<TmxLayer>& layer,
       const std::shared_ptr<TmxTileSet>& tileset,
       const std::filesystem::path& base_path,
-      const SquareMarcher& square_marcher,
       ParseData* parse_data,
       auto path_solid_optimized
    );
@@ -250,9 +252,11 @@ protected:
    std::vector<std::vector<b2Vec2>> _world_chains;
    Winding _winding = Winding::Clockwise;
 
-   // file watcher
+   // file watcher and re-generation
    std::thread _file_watcher_thread;
    bool _file_watcher_thread_active{true};
+   bool _dirty{false};
+   LoadingMode _loading_mode{LoadingMode::Standard};
 
    static Level* __current_level;
 };

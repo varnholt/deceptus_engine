@@ -198,6 +198,7 @@ SOURCES += \
    src/game/layerdata.cpp \
    src/game/level.cpp \
    src/game/leveldescription.cpp \
+   src/game/levelfiles.cpp \
    src/game/levels.cpp \
    src/game/levelscript.cpp \
    src/game/luainterface.cpp \
@@ -416,6 +417,7 @@ HEADERS += \
    src/game/layerdata.h \
    src/game/level.h \
    src/game/leveldescription.h \
+   src/game/levelfiles.h \
    src/game/levels.h \
    src/game/levelscript.h \
    src/game/luaconstants.h \
