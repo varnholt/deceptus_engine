@@ -303,3 +303,9 @@ enum class Winding
    Clockwise,
    CounterClockwise
 };
+
+enum class LoadingMode
+{
+   Standard,
+   Clean,
+};
