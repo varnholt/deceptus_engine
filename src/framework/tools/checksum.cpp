@@ -18,7 +18,7 @@ uint32_t Checksum::calcChecksum(std::ifstream& file)
 
 uint32_t Checksum::calcChecksum(const std::filesystem::path& path)
 {
-   std::ifstream ifs(path, std::ifstream::in);
+   std::ifstream ifs(path, std::ifstream::binary);
    uint32_t sum = calcChecksum(ifs);
    ifs.close();
    return sum;
@@ -35,7 +35,7 @@ uint32_t Checksum::readChecksum(std::ifstream& file)
 
 uint32_t Checksum::readChecksum(const std::filesystem::path& path)
 {
-   std::ifstream ifs(path, std::ifstream::in);
+   std::ifstream ifs(path, std::ifstream::binary);
    uint32_t sum = readChecksum(ifs);
    ifs.close();
    return sum;
