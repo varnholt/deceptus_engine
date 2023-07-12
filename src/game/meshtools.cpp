@@ -180,9 +180,9 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
                auto v1 = face[1];
                auto v2 = face[2];
 
-               Mesh::Vertex vt0 = vertices[0];
-               Mesh::Vertex vt1 = vertices[1];
-               Mesh::Vertex vt2 = vertices[2];
+               auto& vt0 = vertices[0];
+               auto& vt1 = vertices[1];
+               auto& vt2 = vertices[2];
 
                face_indices.push_back(v0);
                face_indices.push_back(v1);
