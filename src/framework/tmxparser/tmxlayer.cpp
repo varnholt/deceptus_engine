@@ -68,6 +68,8 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
               std::string line;
               int32_t y = 0;
 
+              std::string previous_line;
+              std::vector<int32_t> previous_values;
               while (std::getline(stream, line, '\n'))
               {
                  TmxTools::trim(line);
@@ -75,13 +77,40 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
                     continue;
 
                  int32_t x = 0;
-                 auto row_content = TmxTools::split(line, ',');
-                 for (const std::string& val_str : row_content)
+
+                 if (previous_line == line)
                  {
-                    int32_t val = std::stoi(val_str);
-                    _data[y * _width_tl + x] = val;
-                    x++;
+                    for (auto x = 0; x < previous_values.size(); x++)
+                    {
+                       _data[y * _width_tl + x] = previous_values[x];
+                    }
                  }
+                 else
+                 {
+                    previous_values.clear();
+                    std::istringstream iss(line);
+                    int32_t val;
+                    char comma;
+                    while (iss >> val)
+                    {
+                       iss >> comma;  // read and discard the comma
+                       _data[y * _width_tl + x] = val;
+                       x++;
+                       previous_values.push_back(val);
+                    }
+                 }
+
+                 previous_line = line;
+
+                 // previous approach to split the line into values, seems slower
+                 //
+                 // auto row_content = TmxTools::split(line, ',');
+                 // for (const std::string& val_str : row_content)
+                 // {
+                 //    int32_t val = std::stoi(val_str);
+                 //    _data[y * _width_tl + x] = val;
+                 //    x++;
+                 // }
 
                  y++;
               }
