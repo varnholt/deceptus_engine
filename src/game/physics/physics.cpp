@@ -8,7 +8,6 @@
 
 #include "Box2D/Box2D.h"
 #include "constants.h"
-#include "meshtools.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
@@ -17,8 +16,23 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "meshtools.h"
 
+namespace
+{
+uint64_t computeHash(float px, float py)
+{
+   struct VectorHash
+   {
+      float x;
+      float y;
+   };
 
+   VectorHash hv(px, py);
+   return *reinterpret_cast<uint64_t*>(&hv);
+}
+
+}  // namespace
 
 void Physics::parse(
    const std::shared_ptr<TmxLayer>& layer,
@@ -62,7 +76,7 @@ void Physics::parse(
 
       std::array<int32_t, 9> data;
 
-      if (items.size() == 11) // a range: 0,12,1,1,1,1,1,1,1,1,1
+      if (items.size() == 11)  // a range: 0,12,1,1,1,1,1,1,1,1,1
       {
          std::copy_n(items.begin() + 2, 9, data.begin());
          for (auto key = items[0]; key <= items[1]; key++)
@@ -70,16 +84,16 @@ void Physics::parse(
             map[key] = data;
          }
       }
-      else if (items.size() == 10) // a single entry: 64,3,3,3,3,0,0,3,0,0
+      else if (items.size() == 10)  // a single entry: 64,3,3,3,3,0,0,3,0,0
       {
          std::copy_n(items.begin() + 1, 9, data.begin());
          map[items[0]] = data;
       }
    }
 
-   _grid_width  = layer->_width_tl  * 3;
+   _grid_width = layer->_width_tl * 3;
    _grid_height = layer->_height_tl * 3;
-   _grid_size   = _grid_width * _grid_height;
+   _grid_size = _grid_width * _grid_height;
 
    // a larger grid and copy tile contents in there
    _physics_map.resize(_grid_size);
@@ -103,9 +117,12 @@ void Physics::parse(
                const auto row2 = ((y + yi + 1) * _grid_width) + (x * 3);
                const auto row3 = ((y + yi + 2) * _grid_width) + (x * 3);
 
-               for (auto xi = 0u; xi < 3; xi++) _physics_map[row1 + xi] = arr[xi + 0];
-               for (auto xi = 0u; xi < 3; xi++) _physics_map[row2 + xi] = arr[xi + 3];
-               for (auto xi = 0u; xi < 3; xi++) _physics_map[row3 + xi] = arr[xi + 6];
+               for (auto xi = 0u; xi < 3; xi++)
+                  _physics_map[row1 + xi] = arr[xi + 0];
+               for (auto xi = 0u; xi < 3; xi++)
+                  _physics_map[row2 + xi] = arr[xi + 3];
+               for (auto xi = 0u; xi < 3; xi++)
+                  _physics_map[row3 + xi] = arr[xi + 6];
             }
          }
       }
@@ -114,115 +131,116 @@ void Physics::parse(
    }
 }
 
-
 //-----------------------------------------------------------------------------
-bool Physics::dumpObj(
-   const std::shared_ptr<TmxLayer>& layer,
-   const std::shared_ptr<TmxTileSet>& tileset,
-   const std::filesystem::path& path
-)
+bool Physics::dumpObj(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset, const std::filesystem::path& path)
 {
-   const auto tiles  = layer->_data;
-   const auto width_tl  = layer->_width_tl;
-   const auto height_tl = layer->_height_tl;
-   const auto offset_x_px = layer->_offset_x_px;
-   const auto offset_y_px = layer->_offset_y_px;
-
-   if (tileset == nullptr)
+   if (!tileset)
    {
       // Log::Error() << "tileset is a nullptr";
       return false;
    }
 
-   const auto tile_map = tileset->_tile_map;
+   std::unordered_map<uint64_t, uint32_t> face_indices;
+
+   const auto& tiles = layer->_data;
+   const auto width_tl = layer->_width_tl;
+   const auto height_tl = layer->_height_tl;
+   const auto offset_x_px = layer->_offset_x_px;
+   const auto offset_y_px = layer->_offset_y_px;
+   const auto& tile_map = tileset->_tile_map;
 
    std::vector<b2Vec2> vertices;
    std::vector<std::vector<uint32_t>> faces;
 
    for (auto y_tl = 0u; y_tl < height_tl; y_tl++)
    {
+      const auto tile_offset_y_px = (offset_y_px + static_cast<int32_t>(y_tl)) * PIXELS_PER_TILE;
+
       for (auto x_tl = 0u; x_tl < width_tl; x_tl++)
       {
+         const auto tile_offset_x_px = (offset_x_px + static_cast<int32_t>(x_tl)) * PIXELS_PER_TILE;
          const auto tile_number = tiles[y_tl * width_tl + x_tl];
 
-         if (tile_number != 0)
+         if (tile_number == 0)
          {
-            auto tile_relative = -1;
-            tile_relative = tile_number - tileset->_first_gid;
-            auto tile_it = tile_map.find(tile_relative);
+            continue;
+         }
 
-            if (tile_it != tile_map.end())
+         auto tile_relative = -1;
+         tile_relative = tile_number - tileset->_first_gid;
+         auto tile_it = tile_map.find(tile_relative);
+
+         if (tile_it != tile_map.end())
+         {
+            const auto& tile = tile_it->second;
+            const auto& objects = tile->_object_group;
+
+            if (!objects)
             {
-               auto tile = tile_it->second;
-               auto objects = tile->_object_group;
+               continue;
+            }
 
-               if (objects)
+            for (auto& object_it : objects->_objects)
+            {
+               auto object = object_it.second;
+               auto poly = object->_polygon;
+               auto line = object->_polyline;
+
+               std::vector<sf::Vector2f> points;
+
+               if (poly)
                {
-                  for (auto& object_it : objects->_objects)
-                  {
-                     auto object = object_it.second;
-                     auto poly = object->_polygon;
-                     auto line = object->_polyline;
-
-                     std::vector<sf::Vector2f> points;
-
-                     if (poly)
-                     {
-                        points = poly->_polyline;
-                     }
-                     else if (line)
-                     {
-                        points = line->_polyline;
-                     }
-                     else
-                     {
-                        const auto x_px = object->_x_px;
-                        const auto y_px = object->_y_px;
-                        const auto w_px = object->_width_px;
-                        const auto h_px = object->_height_px;
-
-                        points = {
-                           {x_px,        y_px       },
-                           {x_px,        y_px + h_px},
-                           {x_px + w_px, y_px + h_px},
-                           {x_px + w_px, y_px       },
-                        };
-                     }
-
-                     if (!points.empty())
-                     {
-                        std::vector<uint32_t> face;
-                        for (const auto& p : points)
-                        {
-                           const auto px = (offset_x_px + static_cast<int32_t>(x_tl)) * PIXELS_PER_TILE + p.x;
-                           const auto py = (offset_y_px + static_cast<int32_t>(y_tl)) * PIXELS_PER_TILE + p.y;
-                           const auto v = b2Vec2(px, py);
-
-                           const auto& vertex_it = std::find_if(vertices.begin(), vertices.end(), [v](const b2Vec2& other){
-                              return (
-                                    fabs(v.x - other.x) < 0.001f
-                                 && fabs(v.y - other.y) < 0.001f
-                              );
-                           });
-
-                           auto vertex_id = 0u;
-                           if (vertex_it == vertices.end())
-                           {
-                              vertex_id = static_cast<uint32_t>(vertices.size());
-                              vertices.push_back(v);
-                           }
-                           else
-                           {
-                              vertex_id = static_cast<uint32_t>(vertex_it - vertices.begin());
-                           }
-
-                           face.push_back(vertex_id + 1); // wavefront obj starts indexing at 1
-                        }
-
-                        faces.push_back(face);
-                     }
-                  }
+                  points = poly->_polyline;
                }
+               else if (line)
+               {
+                  points = line->_polyline;
+               }
+               else
+               {
+                  const auto x_px = object->_x_px;
+                  const auto y_px = object->_y_px;
+                  const auto w_px = object->_width_px;
+                  const auto h_px = object->_height_px;
+
+                  points = {
+                     {x_px, y_px},
+                     {x_px, y_px + h_px},
+                     {x_px + w_px, y_px + h_px},
+                     {x_px + w_px, y_px},
+                  };
+               }
+
+               if (points.empty())
+               {
+                  continue;
+               }
+
+               std::vector<uint32_t> face;
+               for (const auto& p : points)
+               {
+                  const auto px = tile_offset_x_px + p.x;
+                  const auto py = tile_offset_y_px + p.y;
+                  const auto v = b2Vec2(px, py);
+                  const auto hash = computeHash(px, py);  // assume the TMX positions are actually all int or low precision
+                  const auto face_it = face_indices.find(hash);
+                  auto vertex_id = 0u;
+
+                  if (face_it == face_indices.end())
+                  {
+                     vertex_id = static_cast<uint32_t>(vertices.size());
+                     vertices.push_back(v);
+                     face_indices[hash] = vertex_id;
+                  }
+                  else
+                  {
+                     vertex_id = face_it->second;
+                  }
+
+                  face.push_back(vertex_id + 1);  // wavefront obj starts indexing at 1
+               }
+
+               faces.push_back(face);
             }
          }
       }
@@ -261,4 +279,3 @@ bool Physics::dumpObj(
 
    return true;
 }
-
