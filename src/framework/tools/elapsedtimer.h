@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-
+#include <string>
 
 class ElapsedTimer
 {
@@ -11,8 +11,10 @@ class ElapsedTimer
 public:
 
    ElapsedTimer();
+   ElapsedTimer(const std::string& name);
    ~ElapsedTimer();
 
    HighResTimePoint _start_time;
+   std::string _name{"timer"};
 };
 
