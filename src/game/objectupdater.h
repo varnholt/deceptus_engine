@@ -12,7 +12,6 @@ class ObjectUpdater
 {
 public:
    ObjectUpdater() = default;
-   virtual ~ObjectUpdater();
 
    void update();
 
@@ -30,4 +29,4 @@ private:
    std::atomic<bool> _stopped{false};
 };
 
-#endif // OBJECTUPDATER_H
+#endif  // OBJECTUPDATER_H

@@ -1,6 +1,7 @@
 #include "tmxlayer.h"
 
 // tmxparser
+#include "framework/tools/log.h"
 #include "tmxchunk.h"
 #include "tmxproperties.h"
 #include "tmxtools.h"
@@ -8,18 +9,33 @@
 #include <iostream>
 #include <sstream>
 
+namespace
+{
+int32_t atoi2(char* text)
+{
+   int32_t num = 0;
+   while (*text == ' ')
+      text++;  // skip spaces
+   while (*text >= '0' && *text <= '9')
+   {
+      num = num * 10 + (*text - '0');
+      text++;
+   }
+   return num;
+}
+
+}  // namespace
 
 TmxLayer::TmxLayer()
 {
    _type = TmxElement::Type::TypeLayer;
 }
 
-
 void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
 
-   _width_tl  = element->IntAttribute("width");
+   _width_tl = element->IntAttribute("width");
    _height_tl = element->IntAttribute("height");
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _visible = element->BoolAttribute("visible", true);
@@ -41,82 +57,96 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
          auto data_node = sub_element->FirstChild();
          while (data_node)
          {
-           auto chunk_element = data_node->ToElement();
+            auto chunk_element = data_node->ToElement();
 
-           std::shared_ptr<TmxElement> inner_element;
+            std::shared_ptr<TmxElement> inner_element;
 
-           // process chunk data
-           if (chunk_element)
-           {
-              if (chunk_element->Name() == std::string("chunk"))
-              {
-                 auto chunk = std::make_shared<TmxChunk>();
-                 chunk->deserialize(chunk_element, parse_data);
-                 inner_element = chunk;
-                 chunks.push_back(chunk);
-              }
-           }
+            // process chunk data
+            if (chunk_element)
+            {
+               if (chunk_element->Name() == std::string("chunk"))
+               {
+                  auto chunk = std::make_shared<TmxChunk>();
+                  chunk->deserialize(chunk_element, parse_data);
+                  inner_element = chunk;
+                  chunks.push_back(chunk);
+               }
+            }
 
-           // there are no chunks, the layer data is raw
-           if (!inner_element && data_node)
-           {
-              _data.resize(_width_tl * _height_tl);
-              std::string data = sub_element->FirstChild()->Value();
+            // there are no chunks, the layer data is raw
+            if (!inner_element && data_node)
+            {
+               _data.resize(_width_tl * _height_tl);
+               std::string data = sub_element->FirstChild()->Value();
 
-              // parse csv data and store it in mData array
-              std::stringstream stream(data);
-              std::string line;
-              int32_t y = 0;
+               // parse csv data and store it in mData array
+               std::stringstream stream(data);
+               std::string line;
+               int32_t y = 0;
 
-              std::string previous_line;
-              std::vector<int32_t> previous_values;
-              while (std::getline(stream, line, '\n'))
-              {
-                 TmxTools::trim(line);
-                 if (line.empty())
-                    continue;
+               std::string previous_line;
+               std::vector<int32_t> previous_values;
+               while (std::getline(stream, line, '\n'))
+               {
+                  TmxTools::trim(line);
+                  if (line.empty())
+                     continue;
 
-                 int32_t x = 0;
+                  int32_t x = 0;
 
-                 if (previous_line == line)
-                 {
-                    for (auto x = 0; x < previous_values.size(); x++)
-                    {
-                       _data[y * _width_tl + x] = previous_values[x];
-                    }
-                 }
-                 else
-                 {
-                    previous_values.clear();
-                    std::istringstream iss(line);
-                    int32_t val;
-                    char comma;
-                    while (iss >> val)
-                    {
-                       iss >> comma;  // read and discard the comma
-                       _data[y * _width_tl + x] = val;
-                       x++;
-                       previous_values.push_back(val);
-                    }
-                 }
+                  // optimization: check for repetition of previous line
+                  if (previous_line == line)
+                  {
+                     for (auto x = 0; x < previous_values.size(); x++)
+                     {
+                        _data[y * _width_tl + x] = previous_values[x];
+                     }
+                  }
+                  else
+                  {
+                     previous_values.clear();
+                     int32_t val;
 
-                 previous_line = line;
+                     int32_t pos = 0;
+                     int32_t next = 0;
 
-                 // previous approach to split the line into values, seems slower
-                 //
-                 // auto row_content = TmxTools::split(line, ',');
-                 // for (const std::string& val_str : row_content)
-                 // {
-                 //    int32_t val = std::stoi(val_str);
-                 //    _data[y * _width_tl + x] = val;
-                 //    x++;
-                 // }
+                     while (next >= 0)
+                     {
+                        next = line.find(',', pos);
+                        val = atoi2(line.data() + pos);
+                        _data[y * _width_tl + x] = val;
+                        x++;
+                        previous_values.push_back(val);
+                        pos = next + 1;
+                     }
 
-                 y++;
-              }
-           }
+                     // previous optimization attempt
+                     //                     std::istringstream iss(line);
+                     //                     char comma;
+                     //                     while (iss >> val)
+                     //                     {
+                     //                        iss >> comma;  // read and discard the comma
+                     //                        _data[y * _width_tl + x] = val;
+                     //                        x++;
+                     //                        previous_values.push_back(val);
+                     //                     }
+                     //
+                     // optimization attempt
+                     //                     auto row_content = TmxTools::split(line, ',');
+                     //                     for (const std::string& val_str : row_content)
+                     //                     {
+                     //                        int32_t val = std::stoi(val_str);
+                     //                        _data[y * _width_tl + x] = val;
+                     //                        x++;
+                     //                     }
+                  }
+                  previous_line = line;
 
-           data_node = data_node->NextSibling();
+                  y++;
+               }
+            }
+
+            data_node = data_node->NextSibling();
          }
       }
       else if (sub_element->Name() == std::string("properties"))
@@ -169,10 +199,10 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
       _offset_y_px = y_min;
 
       // assume identical chunk sizes
-      const auto chunk_width  = chunks.at(0)->_width_px;
+      const auto chunk_width = chunks.at(0)->_width_px;
       const auto chunk_height = chunks.at(0)->_height_px;
 
-      _width_tl  = (x_max - x_min) + chunk_width;
+      _width_tl = (x_max - x_min) + chunk_width;
       _height_tl = (y_max - y_min) + chunk_height;
 
       _data.resize(_width_tl * _height_tl);
@@ -184,8 +214,8 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
             for (auto x = 0; x < chunk_width; x++)
             {
                // translate chunk coordinates to layer coordinates starting at 0; 0
-               auto xl = c->_x_px + x -x_min;
-               auto yl = c->_y_px + y -y_min;
+               auto xl = c->_x_px + x - x_min;
+               auto yl = c->_y_px + y - y_min;
 
                _data[yl * _width_tl + xl] = c->_data[y * chunk_width + x];
             }
@@ -194,6 +224,30 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
    }
 
    chunks.clear();
+
+   //   const auto now = std::chrono::high_resolution_clock::now();
+   //   const FloatSeconds elapsed = now - start;
+   //   elapsed_sum += elapsed;
+   //   std::cout << "elapsed: " << std::fixed << std::setprecision(9) << elapsed_sum.count() << " seconds" << std::endl;
+
+   // optimization levels
+   // ohne fluff check + istringstream
+   // elapsed: 1.592319608 seconds
+   //
+   // ohne fluff check + stoi
+   // elapsed: 0.471441239 seconds
+   //
+   // fluff check + istringstream
+   // elapsed: 0.185933411 seconds
+   //
+   // hopscotch mit + ","
+   // elapsed: 0.162213713 seconds
+   //
+   // hopscotch ohne + ","
+   // elapsed: 0.086008102 seconds
+   //
+   // hopscotch ohne "," mit atoi2
+   // elapsed: 0.081965700 seconds
 }
 
 /*
@@ -239,9 +293,8 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 
 /*
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="256" height="128" tilewidth="24" tileheight="24" infinite="1" nextobjectid="1">
- <tileset firstgid="1" source="crypts.tsx"/>
- <layer name="LEVEL" width="256" height="128">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="256" height="128" tilewidth="24"
+tileheight="24" infinite="1" nextobjectid="1"> <tileset firstgid="1" source="crypts.tsx"/> <layer name="LEVEL" width="256" height="128">
   <data encoding="csv">
    <chunk x="-16" y="-144" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -263,26 +316,25 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 </chunk>
 */
 
-
-    /*
-      TmxLayer::deserialize: layer: LEVEL             TmxLayer::deserialize: layer: LEVEL
-        dimensions: width: 288; height: 144             dimensions: width: 288; height: 160
-        offset: 0; 0                                    offset: -16; -144
-        x min: 0; x max: 272                            x min: -16; x max: 256
-        y min: 0; y max: 128                            y min: -144; y max: 0
-      TmxLayer::deserialize: layer: WATER             TmxLayer::deserialize: layer: WATER
-        dimensions: width: 272; height: 112             dimensions: width: 272; height: 112
-        offset: 0; 32                                   offset: 0; -112
-        x min: 0; x max: 256                            x min: 0; x max: 256
-        y min: 32; y max: 128                           y min: -112; y max: -16
-      TmxLayer::deserialize: layer: OTHERS            TmxLayer::deserialize: layer: OTHERS
-        dimensions: width: 64; height: 32               dimensions: width: 64; height: 16
-        offset: 32; 96                                  offset: 16; -32
-        x min: 32; x max: 80                            x min: 16; x max: 64
-        y min: 96; y max: 112                           y min: -32; y max: -32
-      TmxLayer::deserialize: layer: physics           TmxLayer::deserialize: layer: physics
-        dimensions: width: 192; height: 32              dimensions: width: 208; height: 32
-        offset: 16; 96                                  offset: 0; -32
-        x min: 16; x max: 192                           x min: 0; x max: 192
-        y min: 96; y max: 112                           y min: -32; y max: -16
-   */
+/*
+  TmxLayer::deserialize: layer: LEVEL             TmxLayer::deserialize: layer: LEVEL
+    dimensions: width: 288; height: 144             dimensions: width: 288; height: 160
+    offset: 0; 0                                    offset: -16; -144
+    x min: 0; x max: 272                            x min: -16; x max: 256
+    y min: 0; y max: 128                            y min: -144; y max: 0
+  TmxLayer::deserialize: layer: WATER             TmxLayer::deserialize: layer: WATER
+    dimensions: width: 272; height: 112             dimensions: width: 272; height: 112
+    offset: 0; 32                                   offset: 0; -112
+    x min: 0; x max: 256                            x min: 0; x max: 256
+    y min: 32; y max: 128                           y min: -112; y max: -16
+  TmxLayer::deserialize: layer: OTHERS            TmxLayer::deserialize: layer: OTHERS
+    dimensions: width: 64; height: 32               dimensions: width: 64; height: 16
+    offset: 32; 96                                  offset: 16; -32
+    x min: 32; x max: 80                            x min: 16; x max: 64
+    y min: 96; y max: 112                           y min: -32; y max: -32
+  TmxLayer::deserialize: layer: physics           TmxLayer::deserialize: layer: physics
+    dimensions: width: 192; height: 32              dimensions: width: 208; height: 32
+    offset: 16; 96                                  offset: 0; -32
+    x min: 16; x max: 192                           x min: 0; x max: 192
+    y min: 96; y max: 112                           y min: -32; y max: -16
+*/

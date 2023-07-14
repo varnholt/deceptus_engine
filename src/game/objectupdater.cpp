@@ -7,12 +7,6 @@
 
 #include <iostream>
 
-
-ObjectUpdater::~ObjectUpdater()
-{
-   std::cout << "object updater destroyed" << std::endl;
-}
-
 float ObjectUpdater::computeDistanceToPlayerPx(const std::shared_ptr<GameMechanism>& mechanism)
 {
    const auto rect = mechanism->getBoundingBoxPx().value();
