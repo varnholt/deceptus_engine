@@ -4,6 +4,7 @@ CONFIG_APP_NAME = deceptus
 
 DEFINES += _USE_MATH_DEFINES
 DEFINES += USE_GL
+DEFINES += DEVELOPMENT_MODE
 
 CONFIG += c++latest
 CONFIG -= debug_and_release

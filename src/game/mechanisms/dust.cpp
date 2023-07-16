@@ -5,14 +5,12 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "game/texturepool.h"
 
-
-Dust::Dust(GameNode* parent)
-    : GameNode(parent)
+Dust::Dust(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Dust).name());
 }
-
 
 void Dust::update(const sf::Time& dt)
 {
@@ -45,8 +43,6 @@ void Dust::update(const sf::Time& dt)
       }
    }
 }
-
-
 
 void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
@@ -97,7 +93,6 @@ std::optional<sf::FloatRect> Dust::getBoundingBoxPx()
    return _clip_rect;
 }
 
-
 std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto dust = std::make_shared<Dust>(parent);
@@ -105,22 +100,18 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
    std::string flowfield_texture = "data/effects/flowfield_3.png";
 
-   dust->_clip_rect = sf::FloatRect {
-      data._tmx_object->_x_px,
-      data._tmx_object->_y_px,
-      data._tmx_object->_width_px,
-      data._tmx_object->_height_px
-   };
+   dust->_clip_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    if (data._tmx_object->_properties)
    {
-      const auto z_it                 = data._tmx_object->_properties->_map.find("z");
-      const auto particle_size_it     = data._tmx_object->_properties->_map.find("particle_size_px");
-      const auto particle_count_it    = data._tmx_object->_properties->_map.find("particle_count");
-      const auto color_it             = data._tmx_object->_properties->_map.find("particle_color");
-      const auto velocity_it          = data._tmx_object->_properties->_map.find("particle_velocity");
-      const auto wind_dir_x_it        = data._tmx_object->_properties->_map.find("wind_dir_x");
-      const auto wind_dir_y_it        = data._tmx_object->_properties->_map.find("wind_dir_y");
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
+      const auto particle_size_it = data._tmx_object->_properties->_map.find("particle_size_px");
+      const auto particle_count_it = data._tmx_object->_properties->_map.find("particle_count");
+      const auto color_it = data._tmx_object->_properties->_map.find("particle_color");
+      const auto velocity_it = data._tmx_object->_properties->_map.find("particle_velocity");
+      const auto wind_dir_x_it = data._tmx_object->_properties->_map.find("wind_dir_x");
+      const auto wind_dir_y_it = data._tmx_object->_properties->_map.find("wind_dir_y");
       const auto flowfield_texture_it = data._tmx_object->_properties->_map.find("flowfield_texture");
 
       if (z_it != data._tmx_object->_properties->_map.end())
@@ -156,7 +147,8 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
       if (color_it != data._tmx_object->_properties->_map.end())
       {
-         const auto rgba = TmxTools::color(color_it->second->_value_string.value());;
+         const auto rgba = TmxTools::color(color_it->second->_value_string.value());
+         ;
          dust->_particle_color = {rgba[0], rgba[1], rgba[2]};
       }
 
@@ -171,13 +163,13 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
       }
    }
 
-   sf::Texture flow_field;
-   flow_field.loadFromFile(flowfield_texture);
-   dust->_flow_field_image = flow_field.copyToImage();
+   // remember the instance so it's not instantly removed from the cache and each
+   // dust instance has to reload the texture
+   dust->_flow_field_texture = TexturePool::getInstance().get(flowfield_texture);
+   dust->_flow_field_image = dust->_flow_field_texture->copyToImage();
 
    return dust;
 }
-
 
 void Dust::Particle::spawn(sf::FloatRect& rect)
 {
@@ -186,5 +178,3 @@ void Dust::Particle::spawn(sf::FloatRect& rect)
    _age = 0.0f;
    _lifetime = 5.0f + (std::rand() % 100) * 0.1f;
 }
-
-
