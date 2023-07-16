@@ -883,6 +883,7 @@ void Game::reloadLevel(LoadingMode loading_mode)
 //----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
+#ifdef DEVELOPMENT_MODE
    if (Console::getInstance().isActive())
    {
       // these should be moved to the console itself
@@ -910,6 +911,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
       return;
    }
+#endif
 
    if (DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
@@ -921,6 +923,24 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
    switch (event.key.code)
    {
+      case sf::Keyboard::F:
+      {
+         toggleFullScreen();
+         break;
+      }
+      case sf::Keyboard::I:
+      {
+         _ingame_menu->open();
+         break;
+      }
+      case sf::Keyboard::P:
+      case sf::Keyboard::Escape:
+      {
+         showPauseMenu();
+         break;
+      }
+
+#ifdef DEVELOPMENT_MODE
       case sf::Keyboard::Num0:
       {
          Audio::getInstance().playSample({"powerup.wav"});
@@ -997,14 +1017,19 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          Console::getInstance().setActive(DrawStates::_draw_console);
          break;
       }
-      case sf::Keyboard::F:
-      {
-         toggleFullScreen();
-         break;
-      }
-      case sf::Keyboard::I:
+      case sf::Keyboard::Tab:
       {
          _ingame_menu->open();
+         break;
+      }
+      case sf::Keyboard::PageUp:
+      {
+         Level::getCurrentLevel()->getLightSystem()->increaseAmbient(0.1f);
+         break;
+      }
+      case sf::Keyboard::PageDown:
+      {
+         Level::getCurrentLevel()->getLightSystem()->decreaseAmbient(0.1f);
          break;
       }
       case sf::Keyboard::L:
@@ -1020,12 +1045,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::N:
       {
          nextLevel();
-         break;
-      }
-      case sf::Keyboard::P:
-      case sf::Keyboard::Escape:
-      {
-         showPauseMenu();
          break;
       }
       case sf::Keyboard::Q:
@@ -1048,21 +1067,8 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          _player->setVisible(!_player->getVisible());
          break;
       }
-      case sf::Keyboard::Tab:
-      {
-         _ingame_menu->open();
-         break;
-      }
-      case sf::Keyboard::PageUp:
-      {
-         Level::getCurrentLevel()->getLightSystem()->increaseAmbient(0.1f);
-         break;
-      }
-      case sf::Keyboard::PageDown:
-      {
-         Level::getCurrentLevel()->getLightSystem()->decreaseAmbient(0.1f);
-         break;
-      }
+#endif
+
       default:
       {
          break;
