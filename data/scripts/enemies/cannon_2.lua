@@ -88,6 +88,15 @@ function initialize()
    )
 
    setSpriteOffset(0, 24, 12);
+
+   -- set a default sprite rect to avoid rendering the entire sprite
+   updateSpriteRect(
+      0,
+      0,
+      0,
+      SPRITE_WIDTH,
+      SPRITE_HEIGHT
+   )
 end
 
 
