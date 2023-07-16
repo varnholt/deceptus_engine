@@ -409,8 +409,10 @@ void Level::deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const
 void Level::loadTmx()
 {
    static const std::string parallax_identifier = "parallax_";
-
    const auto path = std::filesystem::path(_description->_filename).parent_path();
+
+#ifdef DEVELOPMENT_MODE
+   // checksum checking won't be needed in production
    const auto checksum_old = Checksum::readChecksum(_description->_filename + ".crc");
    const auto checksum_new = Checksum::calcChecksum(_description->_filename);
    const auto checksum_mismatch = checksum_old != checksum_new;
@@ -420,6 +422,7 @@ void Level::loadTmx()
       LevelFiles::clean(*_description);
       Checksum::writeChecksum(_description->_filename + ".crc", checksum_new);
    }
+#endif
 
    sf::Clock elapsed;
 

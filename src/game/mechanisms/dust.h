@@ -1,14 +1,13 @@
 #pragma once
 
-#include "gamedeserializedata.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
+#include "gamedeserializedata.h"
 
 #include <SFML/Graphics.hpp>
 #include <array>
 #include <deque>
 #include <memory>
-
 
 struct TmxObject;
 
@@ -24,9 +23,7 @@ class Dust : public GameMechanism, public GameNode
       float _z = 0.0f;
    };
 
-
 public:
-
    Dust(GameNode* parent = nullptr);
 
    void update(const sf::Time& dt) override;
@@ -35,15 +32,13 @@ public:
 
    static std::shared_ptr<Dust> deserialize(GameNode* parent, const GameDeserializeData& data);
 
-
 private:
-
    std::vector<Particle> _particles;
    sf::FloatRect _clip_rect;
+   std::shared_ptr<sf::Texture> _flow_field_texture;
    sf::Image _flow_field_image;
    sf::Vector3f _wind_direction;
    sf::Color _particle_color = {255, 255, 255, 255};
    float _particle_velocity = 100.0f;
    uint8_t _particle_size_px = 2;
 };
-
