@@ -8,6 +8,30 @@ namespace
 const std::string FUNCTION_INITIALIZE = "initialize";
 const std::string FUNCTION_UPDATE = "update";
 
+/**
+ * @brief addCollisionRect add a collision rect that fires when the player intersects
+ * @param state lua state
+ *    param 1: x position relative to where the object has been placed
+ *    param 2: y position relative to where the object has been placed
+ *    param 3: collision rect width
+ *    param 4: collision rect height
+ * @return collision rect id
+ */
+int32_t addCollisionRect(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
+   {
+      return 0;
+   }
+
+   const auto x_px = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto y_px = static_cast<int32_t>(lua_tointeger(state, 2));
+   const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
+   const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
+
+   return LevelScript::getInstance().addCollisionRect({x_px, y_px, w_px, h_px});
+}
 
 /**
  * @brief isMechanismEnabled check if a given mechanism is enabled
@@ -30,7 +54,6 @@ int32_t isMechanismEnabled(lua_State* state)
    return 1;
 }
 
-
 /**
  * @brief setMechanismEnabled set a mechanism node to enabled/disabled
  * @param state lua state
@@ -52,12 +75,10 @@ int32_t setMechanismEnabled(lua_State* state)
    return 0;
 }
 
-
-
 [[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
-  // the error message is on top of the stack.
-  // fetch it, print32_t it and then pop it off the stack.
+   // the error message is on top of the stack.
+   // fetch it, print32_t it and then pop it off the stack.
    std::stringstream os;
    os << lua_tostring(state, -1);
 
@@ -68,14 +89,12 @@ int32_t setMechanismEnabled(lua_State* state)
    exit(1);
 }
 
-}
-
+}  // namespace
 
 void LevelScript::update(const sf::Time& dt)
 {
    luaUpdate(dt);
 }
-
 
 void LevelScript::setup(const std::filesystem::path& path)
 {
@@ -84,7 +103,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    _lua_state = luaL_newstate();
 
    // register callbacks
-   // lua_register(_lua_state, "boom", ::boom);
+   lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -112,7 +131,6 @@ void LevelScript::setup(const std::filesystem::path& path)
    }
 }
 
-
 /**
  * @brief LevelScript::luaInitialize called to call the initialize function inside the lua script
  * callback name: initialize
@@ -127,7 +145,6 @@ void LevelScript::luaInitialize()
       error(_lua_state, FUNCTION_INITIALIZE.c_str());
    }
 }
-
 
 /**
  * @brief LevelScript::luaUpdate update the lua node
@@ -147,5 +164,14 @@ void LevelScript::luaUpdate(const sf::Time& dt)
    }
 }
 
+int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
+{
+   _collision_rects.push_back(rect);
+   return _collision_rects.size();
+}
 
-
+LevelScript& LevelScript::getInstance()
+{
+   static LevelScript __level_script;
+   return __level_script;
+}
