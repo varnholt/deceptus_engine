@@ -139,6 +139,11 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 void SpikeBall::update(const sf::Time& dt)
 {
+   if (dt.asMilliseconds() > 16 * 2)
+   {
+      return;
+   }
+
    _spike_sprite.setPosition(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
 
    static const b2Vec2 up{0.0, 1.0};
