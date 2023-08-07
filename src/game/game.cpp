@@ -762,6 +762,11 @@ void Game::processEvent(const sf::Event& event)
    {
       _window->close();
    }
+   else if (event.type == sf::Event::Resized)
+   {
+      // avoid bad aspect ratios for windowed mode
+      changeResolution(_window->getSize().x, _window->getSize().y);
+   }
    else if (event.type == sf::Event::LostFocus)
    {
       if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
