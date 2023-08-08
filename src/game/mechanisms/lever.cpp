@@ -1,25 +1,26 @@
 #include "lever.h"
 
-#include "audio.h"
-#include "constants.h"
-#include "conveyorbelt.h"
-#include "door.h"
-#include "fan.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
-#include "gamemechanism.h"
-#include "laser.h"
-#include "movingplatform.h"
-#include "onoffblock.h"
-#include "player/player.h"
-#include "rotatingblade.h"
-#include "spikeblock.h"
-#include "spikes.h"
-#include "texturepool.h"
+#include "game/audio.h"
+#include "game/constants.h"
+#include "game/gameclock.h"
+#include "game/gamemechanism.h"
+#include "game/mechanisms/conveyorbelt.h"
+#include "game/mechanisms/door.h"
+#include "game/mechanisms/fan.h"
+#include "game/mechanisms/laser.h"
+#include "game/mechanisms/movingplatform.h"
+#include "game/mechanisms/onoffblock.h"
+#include "game/mechanisms/rotatingblade.h"
+#include "game/mechanisms/spikeblock.h"
+#include "game/mechanisms/spikes.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 
@@ -305,6 +306,14 @@ void Lever::toggle()
       return;
    }
 
+   // block spamming
+   using namespace std::chrono_literals;
+   const auto now = std::chrono::high_resolution_clock::now();
+   if (_last_toggle_time.has_value() && (now - _last_toggle_time.value()) < 1s)
+   {
+      return;
+   }
+
    if (_type == Type::TwoState)
    {
       switch (_target_state)
@@ -356,6 +365,8 @@ void Lever::toggle()
    );
 
    updateReceivers();
+
+   _last_toggle_time = now;
 }
 
 //-----------------------------------------------------------------------------

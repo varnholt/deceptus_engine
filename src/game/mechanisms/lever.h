@@ -89,6 +89,7 @@ private:
    bool _reached_previous = false;
    float _idle_time_s = 0.0f;
    std::optional<std::string> _target_id;
+   std::optional<std::chrono::high_resolution_clock::time_point> _last_toggle_time;
 
    std::shared_ptr<sf::Texture> _texture;
 
