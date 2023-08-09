@@ -40,8 +40,15 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
 
    const auto distance = computeDistanceToPlayerPx(mechanism);
    const auto range = mechanism->getAudioRange().value();
+   const auto within_range = distance < range._radius_far_px;
 
-   if (distance < range._radius_far_px)
+   auto audible = true;
+   if (mechanism->isOnlyAudibleWhenSharingRoomWithPlayer())
+   {
+      // check if same room
+   }
+
+   if (audible && within_range)
    {
       // calculate volume
       float volume = 0.0f;

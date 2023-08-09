@@ -28,6 +28,11 @@ void GameMechanism::setVolume(float volume)
    _volume = volume;
 }
 
+bool GameMechanism::isOnlyAudibleWhenSharingRoomWithPlayer() const
+{
+   return _only_audible_when_sharing_room_with_player;
+}
+
 bool GameMechanism::hasChunks() const
 {
    return !_chunks.empty();

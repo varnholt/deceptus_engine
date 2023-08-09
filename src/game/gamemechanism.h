@@ -28,8 +28,9 @@ public:
    virtual bool hasAudio() const;
    virtual std::optional<AudioRange> getAudioRange() const;
    virtual bool isAudioEnabled() const;
-   virtual void setAudioEnabled(bool newAudio_enabled);
+   virtual void setAudioEnabled(bool audio_enabled);
    virtual void setVolume(float volume);
+   virtual bool isOnlyAudibleWhenSharingRoomWithPlayer() const;
 
    virtual bool hasChunks() const;
    virtual const std::vector<Chunk>& getChunks() const;
@@ -48,10 +49,15 @@ protected:
    int32_t _z_index{0};
    bool _enabled{true};
    bool _serialized{false};
+   std::optional<int32_t> _room_id;
+
+   // audio related
    bool _has_audio{false};
    bool _audio_enabled{false};
+   bool _only_audible_when_sharing_room_with_player{false};
    float _volume{0.0f};
    std::optional<AudioRange> _audio_range;
+
    std::vector<Chunk> _chunks;
    MechanismVersion _version = MechanismVersion::Version1;
 };
