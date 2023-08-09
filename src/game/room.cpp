@@ -59,7 +59,13 @@ Room::Room(GameNode* parent) : GameNode(parent)
 std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::Vector2f& p) const
 {
    const auto it = std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [p](const auto& sub_room) { return sub_room._rect.contains(p); });
+   return it;
+}
 
+std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::FloatRect& rect) const
+{
+   const auto it =
+      std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sub_room._rect.intersects(rect); });
    return it;
 }
 
@@ -71,6 +77,21 @@ std::shared_ptr<Room> Room::find(const sf::Vector2f& p, const std::vector<std::s
       [p, rooms](const std::shared_ptr<Room>& r)
       {
          const auto& it = r->findSubRoom(p);
+         return (it != r->_sub_rooms.end());
+      }
+   );
+
+   return (room_it != rooms.end()) ? (*room_it) : nullptr;
+}
+
+std::shared_ptr<Room> Room::find(const sf::FloatRect& rect, const std::vector<std::shared_ptr<Room>>& rooms)
+{
+   const auto room_it = std::find_if(
+      rooms.begin(),
+      rooms.end(),
+      [rect, rooms](const std::shared_ptr<Room>& r)
+      {
+         const auto& it = r->findSubRoom(rect);
          return (it != r->_sub_rooms.end());
       }
    );
