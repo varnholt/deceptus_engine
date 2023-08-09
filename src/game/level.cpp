@@ -1,15 +1,6 @@
 #include "level.h"
 
 // game
-#include "animationplayer.h"
-#include "camerapanorama.h"
-#include "cameraroomlock.h"
-#include "chainshapeanalyzer.h"
-#include "constants.h"
-#include "debugdraw.h"
-#include "displaymode.h"
-#include "extra.h"
-#include "fixturenode.h"
 #include "framework/math/maptools.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxelement.h"
@@ -29,32 +20,41 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
-#include "gameconfiguration.h"
-#include "gamecontactlistener.h"
-#include "gamedeserializedata.h"
-#include "gamemechanismdeserializer.h"
-#include "gamemechanismdeserializerconstants.h"
-#include "gun.h"
-#include "ingamemenumap.h"
-#include "leveldescription.h"
-#include "levelfiles.h"
-#include "luainterface.h"
-#include "mechanisms/bouncer.h"
-#include "mechanisms/checkpoint.h"
-#include "mechanisms/conveyorbelt.h"
-#include "mechanisms/door.h"
-#include "mechanisms/lever.h"
-#include "meshtools.h"
-#include "parsedata.h"
-#include "physics/physicsconfiguration.h"
-#include "player/player.h"
-#include "savestate.h"
-#include "screentransition.h"
-#include "squaremarcher.h"
-#include "stenciltilemap.h"
-#include "texturepool.h"
-#include "tilemap.h"
-#include "tilemapfactory.h"
+#include "game/animationplayer.h"
+#include "game/camerapanorama.h"
+#include "game/cameraroomlock.h"
+#include "game/chainshapeanalyzer.h"
+#include "game/constants.h"
+#include "game/debugdraw.h"
+#include "game/displaymode.h"
+#include "game/extra.h"
+#include "game/fixturenode.h"
+#include "game/gameconfiguration.h"
+#include "game/gamecontactlistener.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanismdeserializer.h"
+#include "game/gamemechanismdeserializerconstants.h"
+#include "game/gun.h"
+#include "game/ingamemenumap.h"
+#include "game/leveldescription.h"
+#include "game/levelfiles.h"
+#include "game/luainterface.h"
+#include "game/mechanisms/bouncer.h"
+#include "game/mechanisms/checkpoint.h"
+#include "game/mechanisms/conveyorbelt.h"
+#include "game/mechanisms/door.h"
+#include "game/mechanisms/lever.h"
+#include "game/meshtools.h"
+#include "game/parsedata.h"
+#include "game/physics/physicsconfiguration.h"
+#include "game/player/player.h"
+#include "game/savestate.h"
+#include "game/screentransition.h"
+#include "game/squaremarcher.h"
+#include "game/stenciltilemap.h"
+#include "game/texturepool.h"
+#include "game/tilemap.h"
+#include "game/tilemapfactory.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -639,6 +639,9 @@ void Level::initialize()
    spawnEnemies();
 
    _object_updater->setMechanisms(_mechanisms_list);
+
+   const auto path = std::filesystem::path(_description->_filename).parent_path();
+   _level_script.setup(path / "level.lua");
 
    // dump();
 }
@@ -1430,6 +1433,8 @@ void Level::update(const sf::Time& dt)
          mechanism->update(dt);
       }
    }
+
+   _level_script.update(dt);
 
    LuaInterface::instance().update(dt);
 
