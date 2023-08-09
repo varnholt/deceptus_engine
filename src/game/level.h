@@ -1,28 +1,27 @@
 #pragma once
 
 // game
-#include "ambientocclusion.h"
-#include "atmosphere.h"
-#include "boomeffect.h"
-#include "camerasystem.h"
-#include "constants.h"
 #include "framework/joystick/gamecontrollerinfo.h"
-#include "gamenode.h"
-#include "imagelayer.h"
-#include "luanode.h"
-#include "mechanisms/portal.h"
-#include "objectupdater.h"
-#include "physics/physics.h"
-#include "room.h"
-#include "shaders/atmosphereshader.h"
-#include "shaders/blurshader.h"
-#include "shaders/gammashader.h"
-#include "squaremarcher.h"
-#include "tmxenemy.h"
-
-// effects
-#include "effects/lightsystem.h"
-#include "effects/staticlight.h"
+#include "game/ambientocclusion.h"
+#include "game/atmosphere.h"
+#include "game/boomeffect.h"
+#include "game/camerasystem.h"
+#include "game/constants.h"
+#include "game/effects/lightsystem.h"
+#include "game/effects/staticlight.h"
+#include "game/gamenode.h"
+#include "game/imagelayer.h"
+#include "game/levelscript.h"
+#include "game/luanode.h"
+#include "game/mechanisms/portal.h"
+#include "game/objectupdater.h"
+#include "game/physics/physics.h"
+#include "game/room.h"
+#include "game/shaders/atmosphereshader.h"
+#include "game/shaders/blurshader.h"
+#include "game/shaders/gammashader.h"
+#include "game/squaremarcher.h"
+#include "game/tmxenemy.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -155,6 +154,7 @@ protected:
    std::shared_ptr<Room> _room_current;
    std::shared_ptr<Room> _room_previous;
    bool _room_synced = false;
+   LevelScript _level_script;
 
    std::shared_ptr<sf::RenderTexture> _render_texture_level;
    std::shared_ptr<sf::RenderTexture> _render_texture_level_background;

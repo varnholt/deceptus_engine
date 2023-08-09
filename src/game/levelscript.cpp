@@ -5,6 +5,27 @@
 namespace
 {
 
+std::mutex instance_mutex;
+LevelScript* instance = nullptr;
+
+LevelScript* getInstance()
+{
+   std::lock_guard<std::mutex> lock(instance_mutex);
+   return instance;
+}
+
+void setInstance(LevelScript* newInstance)
+{
+   std::lock_guard<std::mutex> lock(instance_mutex);
+   instance = newInstance;
+}
+
+void resetInstance()
+{
+   std::lock_guard<std::mutex> lock(instance_mutex);
+   instance = nullptr;
+}
+
 const std::string FUNCTION_INITIALIZE = "initialize";
 const std::string FUNCTION_UPDATE = "update";
 
@@ -30,7 +51,7 @@ int32_t addCollisionRect(lua_State* state)
    const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
    const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
 
-   return LevelScript::getInstance().addCollisionRect({x_px, y_px, w_px, h_px});
+   return getInstance()->addCollisionRect({x_px, y_px, w_px, h_px});
 }
 
 /**
@@ -93,7 +114,24 @@ int32_t setMechanismEnabled(lua_State* state)
 
 void LevelScript::update(const sf::Time& dt)
 {
+   // this might be a valid scenario. not every level needs a script to drive its logic.
+   if (!_initialized)
+   {
+      return;
+   }
+
    luaUpdate(dt);
+}
+
+LevelScript::LevelScript()
+{
+   // lua is really c style
+   setInstance(this);
+}
+
+LevelScript::~LevelScript()
+{
+   resetInstance();
 }
 
 void LevelScript::setup(const std::filesystem::path& path)
@@ -104,6 +142,8 @@ void LevelScript::setup(const std::filesystem::path& path)
 
    // register callbacks
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
+   lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
+   lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -121,13 +161,8 @@ void LevelScript::setup(const std::filesystem::path& path)
       }
       else
       {
-         // luaMovedTo();
          luaInitialize();
       }
-   }
-   else
-   {
-      error(_lua_state);
    }
 }
 
@@ -144,6 +179,8 @@ void LevelScript::luaInitialize()
    {
       error(_lua_state, FUNCTION_INITIALIZE.c_str());
    }
+
+   _initialized = true;
 }
 
 /**
@@ -168,10 +205,4 @@ int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);
    return _collision_rects.size();
-}
-
-LevelScript& LevelScript::getInstance()
-{
-   static LevelScript __level_script;
-   return __level_script;
 }

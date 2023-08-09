@@ -37,12 +37,12 @@ uint64_t computeHash(float px, float py)
 void Physics::parse(
    const std::shared_ptr<TmxLayer>& layer,
    const std::shared_ptr<TmxTileSet>& tileSet,
-   const std::filesystem::path& basePath
+   const std::filesystem::path& base_path
 )
 {
    // Log::Info() << "parsing physics tiles vs. level layer (" << basePath.string() << ")";
 
-   std::ifstream phsyicsFile(basePath / std::filesystem::path("physics_tiles.csv").string());
+   std::ifstream phsyicsFile(base_path / std::filesystem::path("physics_tiles.csv").string());
 
    std::map<int32_t, std::array<int32_t, 9>> map;
    std::string line;
