@@ -1,9 +1,9 @@
 #include "objectupdater.h"
 
-#include "audio.h"
 #include "framework/math/sfmlmath.h"
-#include "gamestate.h"
-#include "luainterface.h"
+#include "game/audio.h"
+#include "game/gamestate.h"
+#include "game/luainterface.h"
 
 #include <iostream>
 
@@ -18,6 +18,11 @@ float ObjectUpdater::computeDistanceToPlayerPx(const std::shared_ptr<GameMechani
    const auto distance_px = SfmlMath::length(_player_position - pos);
 
    return distance_px;
+}
+
+void ObjectUpdater::setRoomId(const std::optional<int32_t>& room_id)
+{
+   _room_id = room_id;
 }
 
 void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism)
@@ -43,9 +48,10 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
    const auto within_range = distance < range._radius_far_px;
 
    auto audible = true;
-   if (mechanism->isOnlyAudibleWhenSharingRoomWithPlayer())
+   if (mechanism->isAudibleOnlyWhenSharingRoomWithPlayer())
    {
       // check if same room
+      audible = _room_id.has_value() && mechanism->getRoomId().has_value() && mechanism->getRoomId().value() == _room_id.value();
    }
 
    if (audible && within_range)
@@ -99,6 +105,7 @@ void ObjectUpdater::update()
       }
    }
 
+   // update volume of every enemy
    for (const auto& enemy : LuaInterface::instance().getObjectList())
    {
       updateVolume(enemy);
