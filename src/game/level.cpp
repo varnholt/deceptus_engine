@@ -554,6 +554,25 @@ void Level::loadTmx()
 
    TileMapFactory::merge(_tile_maps);
 
+   // assign room identifiers to mechanism
+   // for now it's safe to assume that a mechanism always stays in the same room
+   for (auto& mechanism_vector : _mechanisms_list)
+   {
+      for (auto& mechanism : *mechanism_vector)
+      {
+         if (!mechanism->getBoundingBoxPx().has_value())
+         {
+            continue;
+         }
+
+         auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
+         if (room)
+         {
+            mechanism->setRoomId(room->_id);
+         }
+      }
+   }
+
    if (!_atmosphere._tile_map)
    {
       Log::Error() << "fatal: no physics layer (called 'physics') found!";
@@ -1442,6 +1461,7 @@ void Level::update(const sf::Time& dt)
 
    _static_light->update(GlobalClock::getInstance().getElapsedTime());
 
+   _object_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
    _object_updater->update();
 }
 

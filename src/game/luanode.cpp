@@ -210,6 +210,32 @@ int32_t addAudioRange(lua_State* state)
 }
 
 /**
+ * @brief setAudibleOnlyWhenSharingRoomWithPlayer only hear sound if mechanism and player are in the same room
+ * @param state lua state
+ *    param 1: enabled flag
+ * @return error code
+ */
+int32_t setAudibleOnlyWhenSharingRoomWithPlayer(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto enabled = static_cast<bool>(lua_toboolean(state, 1));
+   node->setAudibleOnlyWhenSharingRoomWithPlayer(enabled);
+
+   return 0;
+}
+
+/**
  * @brief updateSpriteRect update node's sprite rect
  * @param state lua state
  *    param 1: id of sprite
@@ -1719,6 +1745,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
    lua_register(_lua_state, "registerHitSamples", ::registerHitSamples);
    lua_register(_lua_state, "setActive", ::setActive);
+   lua_register(_lua_state, "setAudibleOnlyWhenSharingRoomWithPlayer", ::setAudibleOnlyWhenSharingRoomWithPlayer);
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
