@@ -12,7 +12,6 @@
 #include "game/gamenode.h"
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
-#include "game/luanode.h"
 #include "game/mechanisms/portal.h"
 #include "game/objectupdater.h"
 #include "game/physics/physics.h"

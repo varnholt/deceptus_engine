@@ -23,14 +23,29 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+std::optional<int32_t> GameMechanism::getRoomId() const
+{
+   return _room_id;
+}
+
+void GameMechanism::setRoomId(int32_t room_id)
+{
+   _room_id = room_id;
+}
+
 void GameMechanism::setVolume(float volume)
 {
    _volume = volume;
 }
 
-bool GameMechanism::isOnlyAudibleWhenSharingRoomWithPlayer() const
+bool GameMechanism::isAudibleOnlyWhenSharingRoomWithPlayer() const
 {
-   return _only_audible_when_sharing_room_with_player;
+   return _audible_only_when_sharing_room_with_player;
+}
+
+void GameMechanism::setAudibleOnlyWhenSharingRoomWithPlayer(bool enabled)
+{
+   _audible_only_when_sharing_room_with_player = enabled;
 }
 
 bool GameMechanism::hasChunks() const

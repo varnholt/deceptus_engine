@@ -3,8 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "gamemechanism.h"
-#include "luanode.h"
+#include "game/gamemechanism.h"
+#include "game/luanode.h"
 
 #include <thread>
 
@@ -17,6 +17,7 @@ public:
 
    void setPlayerPosition(const sf::Vector2f& position);
    void setMechanisms(const std::vector<std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms);
+   void setRoomId(const std::optional<int32_t>& room_id);
 
 private:
    void updateVolume(const std::shared_ptr<GameMechanism>& mechanism);
@@ -27,6 +28,7 @@ private:
 
    std::unique_ptr<std::thread> _thread;
    std::atomic<bool> _stopped{false};
+   std::optional<int32_t> _room_id;
 };
 
 #endif  // OBJECTUPDATER_H
