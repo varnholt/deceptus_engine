@@ -144,6 +144,9 @@ function writeProperty(key, value)
       _jump_height_px = value
    elseif (key == "jump_interval_ms") then
       _jump_interval_ms = value
+   elseif (key == "audio_update_behavior") then
+      update_behavior = audioUpdateBehaviorFromString(value)
+      setAudioUpdateBehavior(update_behavior)
    end
 end
 

@@ -65,9 +65,13 @@ void GameNode::dump(int32_t depth)
 
 void GameNode::setClassName(const std::string& name)
 {
-   _class_name = name;
+    _class_name = name;
 }
 
+std::string GameNode::getClassName() const
+{
+    return _class_name;
+}
 
 const std::string& GameNode::getObjectId() const
 {

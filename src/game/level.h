@@ -130,6 +130,7 @@ protected:
    );
 
    void deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
+   void assignMechanismsToRooms();
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture& texture);
    void updatePlayerLight();

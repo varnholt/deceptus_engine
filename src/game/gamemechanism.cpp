@@ -23,6 +23,16 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+AudioUpdateBehavior GameMechanism::getAudioUpdateBehavior() const
+{
+   return _audio_update_behavior;
+}
+
+void GameMechanism::setAudioUpdateBehavior(AudioUpdateBehavior newAudio_update_behavior)
+{
+   _audio_update_behavior = newAudio_update_behavior;
+}
+
 std::optional<int32_t> GameMechanism::getRoomId() const
 {
    return _room_id;
@@ -36,16 +46,6 @@ void GameMechanism::setRoomId(int32_t room_id)
 void GameMechanism::setVolume(float volume)
 {
    _volume = volume;
-}
-
-bool GameMechanism::isAudibleOnlyWhenSharingRoomWithPlayer() const
-{
-   return _audible_only_when_sharing_room_with_player;
-}
-
-void GameMechanism::setAudibleOnlyWhenSharingRoomWithPlayer(bool enabled)
-{
-   _audible_only_when_sharing_room_with_player = enabled;
 }
 
 bool GameMechanism::hasChunks() const

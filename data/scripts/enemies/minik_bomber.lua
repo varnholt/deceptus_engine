@@ -159,6 +159,9 @@ function writeProperty(key, value)
          _throw_dir_x = 1.0
          _alignment_offset = 5 * SPRITE_HEIGHT
       end
+   elseif (key == "audio_update_behavior") then
+      update_behavior = audioUpdateBehaviorFromString(value)
+      setAudioUpdateBehavior(update_behavior)
    end
 end
 
