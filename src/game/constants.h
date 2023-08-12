@@ -309,3 +309,10 @@ enum class LoadingMode
    Standard,
    Clean,
 };
+
+enum class AudioUpdateBehavior
+{
+   None,
+   RangeBased,
+   RoomBased,
+};

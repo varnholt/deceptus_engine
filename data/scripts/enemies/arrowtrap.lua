@@ -203,6 +203,10 @@ function writeProperty(key, value)
       updateAlignment(alignment)
    elseif (key == "time_offset_s") then
       _elapsed = _elapsed + value
+
+   elseif (key == "audio_update_behavior") then
+      update_behavior = audioUpdateBehaviorFromString(value)
+      setAudioUpdateBehavior(update_behavior)
    end
 end
 

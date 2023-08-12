@@ -29,6 +29,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
 {
    setClassName(typeid(CollapsingPlatform).name());
    setType(ObjectTypeCollapsingPlatform);
+   setObjectId(data._tmx_object->_name);
 
    // read properties
    auto readFloatProperty = [data](float& value, const std::string& id)
