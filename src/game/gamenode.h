@@ -17,8 +17,9 @@ public:
    const std::string& getObjectId() const;
    void setObjectId(const std::string& object_id);
 
-protected:
+   std::string getClassName() const;
 
+protected:
    void setClassName(const std::string& name);
 
    std::string _class_name;

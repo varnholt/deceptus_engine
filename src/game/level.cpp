@@ -406,6 +406,49 @@ void Level::deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const
 }
 
 //-----------------------------------------------------------------------------
+// assign room identifiers to mechanism
+// for now it's safe to assume that a mechanism always stays in the same room
+void Level::assignMechanismsToRooms()
+{
+   auto update_room = [this](const std::shared_ptr<GameMechanism>& mechanism)
+   {
+      auto game_node = std::dynamic_pointer_cast<GameNode>(mechanism);
+
+      if (!mechanism->getBoundingBoxPx().has_value())
+      {
+         // std::cout << "skipping: " << game_node->getObjectId() << " (" << game_node->getClassName() << ")" << std::endl;
+         return;
+      }
+
+      auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
+      if (room)
+      {
+         mechanism->setRoomId(room->_id);
+         //         std::cout << "assigning " << game_node->getObjectId() << " (" << game_node->getClassName() << ")"
+         //                   << " to room " << room->_id << std::endl;
+      }
+      //      else
+      //      {
+      //         std::cout << "not assigning " << game_node->getObjectId() << " (" << game_node->getClassName() << ")"
+      //                   << " to any room " << std::endl;
+      //      }
+   };
+
+   for (auto& mechanism_vector : _mechanisms_list)
+   {
+      for (auto& mechanism : *mechanism_vector)
+      {
+         update_room(mechanism);
+      }
+   }
+
+   for (const auto& enemy : LuaInterface::instance().getObjectList())
+   {
+      update_room(enemy);
+   }
+}
+
+//-----------------------------------------------------------------------------
 void Level::loadTmx()
 {
    static const std::string parallax_identifier = "parallax_";
@@ -554,25 +597,6 @@ void Level::loadTmx()
 
    TileMapFactory::merge(_tile_maps);
 
-   // assign room identifiers to mechanism
-   // for now it's safe to assume that a mechanism always stays in the same room
-   for (auto& mechanism_vector : _mechanisms_list)
-   {
-      for (auto& mechanism : *mechanism_vector)
-      {
-         if (!mechanism->getBoundingBoxPx().has_value())
-         {
-            continue;
-         }
-
-         auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
-         if (room)
-         {
-            mechanism->setRoomId(room->_id);
-         }
-      }
-   }
-
    if (!_atmosphere._tile_map)
    {
       Log::Error() << "fatal: no physics layer (called 'physics') found!";
@@ -657,6 +681,7 @@ void Level::initialize()
    loadState();
    spawnEnemies();
 
+   assignMechanismsToRooms();
    _object_updater->setMechanisms(_mechanisms_list);
 
    const auto path = std::filesystem::path(_description->_filename).parent_path();

@@ -32,8 +32,6 @@ public:
    virtual bool isAudioEnabled() const;
    virtual void setAudioEnabled(bool audio_enabled);
    virtual void setVolume(float volume);
-   virtual bool isAudibleOnlyWhenSharingRoomWithPlayer() const;
-   virtual void setAudibleOnlyWhenSharingRoomWithPlayer(bool enabled);
 
    virtual bool hasChunks() const;
    virtual const std::vector<Chunk>& getChunks() const;
@@ -51,6 +49,9 @@ public:
    virtual void deserializeState(const nlohmann::json&);
    virtual bool isSerialized() const;
 
+   virtual AudioUpdateBehavior getAudioUpdateBehavior() const;
+   virtual void setAudioUpdateBehavior(AudioUpdateBehavior newAudio_update_behavior);
+
 protected:
    int32_t _z_index{0};
    bool _enabled{true};
@@ -60,9 +61,9 @@ protected:
    // audio related
    bool _has_audio{false};
    bool _audio_enabled{false};
-   bool _audible_only_when_sharing_room_with_player{false};
    float _volume{0.0f};
    std::optional<AudioRange> _audio_range;
+   AudioUpdateBehavior _audio_update_behavior{AudioUpdateBehavior::RangeBased};
 
    std::vector<Chunk> _chunks;
    MechanismVersion _version = MechanismVersion::Version1;

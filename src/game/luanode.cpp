@@ -210,15 +210,15 @@ int32_t addAudioRange(lua_State* state)
 }
 
 /**
- * @brief setAudibleOnlyWhenSharingRoomWithPlayer only hear sound if mechanism and player are in the same room
+ * @brief setAudioUpdateBehavior change audio update behavior
  * @param state lua state
- *    param 1: enabled flag
+ *    param 1: update behavior
  * @return error code
  */
-int32_t setAudibleOnlyWhenSharingRoomWithPlayer(lua_State* state)
+int32_t setAudioUpdateBehavior(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc != 4)
+   if (argc != 1)
    {
       return 0;
    }
@@ -229,8 +229,8 @@ int32_t setAudibleOnlyWhenSharingRoomWithPlayer(lua_State* state)
       return 0;
    }
 
-   const auto enabled = static_cast<bool>(lua_toboolean(state, 1));
-   node->setAudibleOnlyWhenSharingRoomWithPlayer(enabled);
+   const auto audio_update_behavior = static_cast<AudioUpdateBehavior>(lua_tointeger(state, 1));
+   node->setAudioUpdateBehavior(audio_update_behavior);
 
    return 0;
 }
@@ -1745,7 +1745,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
    lua_register(_lua_state, "registerHitSamples", ::registerHitSamples);
    lua_register(_lua_state, "setActive", ::setActive);
-   lua_register(_lua_state, "setAudibleOnlyWhenSharingRoomWithPlayer", ::setAudibleOnlyWhenSharingRoomWithPlayer);
+   lua_register(_lua_state, "setAudioUpdateBehavior", ::setAudioUpdateBehavior);
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);

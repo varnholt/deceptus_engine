@@ -32,65 +32,74 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
       return;
    }
 
-   if (!mechanism->getAudioRange().has_value())
+   switch (mechanism->getAudioUpdateBehavior())
    {
-      // just assume to always play
-      return;
-   }
-
-   if (!mechanism->getBoundingBoxPx().has_value())
-   {
-      return;
-   }
-
-   const auto distance = computeDistanceToPlayerPx(mechanism);
-   const auto range = mechanism->getAudioRange().value();
-   const auto within_range = distance < range._radius_far_px;
-
-   auto audible = true;
-   if (mechanism->isAudibleOnlyWhenSharingRoomWithPlayer())
-   {
-      // check if same room
-      audible = _room_id.has_value() && mechanism->getRoomId().has_value() && mechanism->getRoomId().value() == _room_id.value();
-   }
-
-   if (audible && within_range)
-   {
-      // calculate volume
-      float volume = 0.0f;
-      if (distance < range._radius_near_px)
+      case AudioUpdateBehavior::RoomBased:
       {
-         volume = range._volume_near;
+         const auto same_room =
+            _room_id.has_value() && mechanism->getRoomId().has_value() && mechanism->getRoomId().value() == _room_id.value();
+         mechanism->setAudioEnabled(same_room);
+         break;
       }
-      else
+      case AudioUpdateBehavior::RangeBased:
       {
-         //    object
-         // +---------+
-         // |         |      volume near                                  volume far
-         // |    +--- | -------- | -------------------------------------------|-----------------
-         // |         |         0.7   |                                      0.1
-         // +---------+        100px  |                                     1000px
-         //                           |
-         //                           x = 300px
-         //
-         // everything below 100px is 0.7
-         // everything between 100px and 1000px is between 0.7 and 0.1
-         //
-         const auto range_width_px = (range._radius_far_px - range._radius_near_px);
-         const auto dist_normalized = 1.0f - ((distance - range._radius_near_px) / range_width_px);
-         volume = std::lerp(range._volume_far, range._volume_near, dist_normalized);
-      }
+         if (!mechanism->getAudioRange().has_value())
+         {
+            return;
+         }
 
-      // std::cout << "update volume: " << volume.value() << std::endl;
-      const auto paused_factor = (GameState::getInstance().getMode() == ExecutionMode::Paused) ? 0.5f : 1.0f;
-      mechanism->setAudioEnabled(true);
-      mechanism->setVolume(volume * paused_factor);
-   }
-   else
-   {
-      // disable sounds for the object
-      // std::cout << "disable sounds" << std::endl;
-      mechanism->setAudioEnabled(false);
+         if (!mechanism->getBoundingBoxPx().has_value())
+         {
+            return;
+         }
+
+         const auto range = mechanism->getAudioRange().value();
+         const auto distance = computeDistanceToPlayerPx(mechanism);
+         const auto within_range = distance < range._radius_far_px;
+
+         if (within_range)
+         {
+            // calculate volume
+            float volume = 0.0f;
+            if (distance < range._radius_near_px)
+            {
+               volume = range._volume_near;
+            }
+            else
+            {
+               //    object
+               // +---------+
+               // |         |      volume near                                  volume far
+               // |    +--- | -------- | -------------------------------------------|-----------------
+               // |         |         0.7   |                                      0.1
+               // +---------+        100px  |                                     1000px
+               //                           |
+               //                           x = 300px
+               //
+               // everything below 100px is 0.7
+               // everything between 100px and 1000px is between 0.7 and 0.1
+               //
+               const auto range_width_px = (range._radius_far_px - range._radius_near_px);
+               const auto dist_normalized = 1.0f - ((distance - range._radius_near_px) / range_width_px);
+               volume = std::lerp(range._volume_far, range._volume_near, dist_normalized);
+            }
+
+            // std::cout << "update volume: " << volume.value() << std::endl;
+            const auto paused_factor = (GameState::getInstance().getMode() == ExecutionMode::Paused) ? 0.5f : 1.0f;
+            mechanism->setAudioEnabled(true);
+            mechanism->setVolume(volume * paused_factor);
+         }
+         else
+         {
+            // disable sounds for the object
+            // std::cout << "disable sounds" << std::endl;
+            mechanism->setAudioEnabled(false);
+         }
+      }
+      case AudioUpdateBehavior::None:
+      {
+         break;
+      }
    }
 }
 
