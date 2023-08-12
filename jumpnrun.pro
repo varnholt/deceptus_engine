@@ -78,11 +78,9 @@ linux {
    LIBS += -lX11
 }
 
-
 #sfml
 INCLUDEPATH += thirdparty/sfml/include
 DEPENDPATH += thirdparty/sfml/include
-
 
 INCLUDEPATH += .
 INCLUDEPATH += src
