@@ -6,8 +6,9 @@
 #include <sstream>
 
 #include "framework/tools/log.h"
+#include "game/texturepool.h"
+
 #include "json/json.hpp"
-#include "texturepool.h"
 
 using json = nlohmann::json;
 

@@ -33,8 +33,8 @@ win32-msvc {
    message("configured for msvc")
    QMAKE_CXXFLAGS_RELEASE += /Zi
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
-   QMAKE_CFLAGS_WARN_ON = -W3
-   QMAKE_CXXFLAGS_WARN_ON = -W3
+   QMAKE_CXXFLAGS += -Wall
+   QMAKE_CXXFLAGS += /wd5045
 }
 
 linux|win32-g++ {
@@ -642,7 +642,6 @@ SOURCES += \
 SOURCES += \
    thirdparty/imgui/imgui-SFML.cpp \
    thirdparty/imgui/imgui.cpp \
-   thirdparty/imgui/imgui_demo.cpp \
    thirdparty/imgui/imgui_draw.cpp \
    thirdparty/imgui/imgui_tables.cpp \
    thirdparty/imgui/imgui_widgets.cpp
