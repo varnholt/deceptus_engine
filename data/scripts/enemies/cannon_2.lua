@@ -113,7 +113,7 @@ function writeProperty(key, value)
       mElapsedUntilFired = mElapsedUntilFired + value
    elseif (key == "fire_interval_s") then
       mFireInterval = value
-   elseif (key == "audio_update_behavior") then -- write property: audio_update_behavior room_based
+   elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
       setAudioUpdateBehavior(update_behavior)
    end
