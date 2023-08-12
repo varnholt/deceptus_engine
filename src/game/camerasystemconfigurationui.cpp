@@ -1,8 +1,10 @@
 #include "camerasystemconfigurationui.h"
 #include "camerasystemconfiguration.h"
 
+#pragma warning(push, 0)
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
+#pragma warning(pop)
 
 #include <iostream>
 #include <sstream>

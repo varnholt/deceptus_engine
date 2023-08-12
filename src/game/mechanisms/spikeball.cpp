@@ -238,6 +238,20 @@ void SpikeBall::setup(const GameDeserializeData& data)
       {
          _config._chain_element_height = chain_element_height_it->second->_value_float.value();
       }
+
+      auto audio_update_behavior_it = data._tmx_object->_properties->_map.find("audio_update_behavior");
+      if (audio_update_behavior_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto audio_update_behavior_str = audio_update_behavior_it->second->_value_string.value();
+         if (audio_update_behavior_str == "room_based")
+         {
+            _audio_update_behavior = AudioUpdateBehavior::RoomBased;
+         }
+         else if (audio_update_behavior_str == "range_based")
+         {
+            _audio_update_behavior = AudioUpdateBehavior::RangeBased;
+         }
+      }
    }
 
    setPixelPosition(sf::Vector2i{
