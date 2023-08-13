@@ -21,7 +21,7 @@ SmokeEffect::SmokeEffect(GameNode* parent) : GameNode(parent), _texture(TextureP
    _z_index = 20;
 }
 
-void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _render_texture.clear();
 

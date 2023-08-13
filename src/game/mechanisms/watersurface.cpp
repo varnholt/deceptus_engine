@@ -25,7 +25,7 @@ std::vector<WaterSurface::SplashEmitter> emitters;
 
 // #define DEBUG_WATERSURFACE 1
 
-void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    //
    //         __--4
@@ -209,7 +209,7 @@ void WaterSurface::splash(int32_t index, float velocity)
    }
 }
 
-void WaterSurface::addEmitter(GameNode* parent, const GameDeserializeData& data)
+void WaterSurface::addEmitter(GameNode* /*parent*/, const GameDeserializeData& data)
 {
    SplashEmitter emitter;
 
@@ -314,7 +314,7 @@ void WaterSurface::updateVertices(int32_t start_index)
    }
 }
 
-WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
+WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data)
 {
    setClassName(typeid(WaterSurface).name());
    setObjectId(data._tmx_object->_name);
@@ -372,7 +372,7 @@ WaterSurface::WaterSurface(GameNode* parent, const GameDeserializeData& data)
       auto opacity_it = data._tmx_object->_properties->_map.find("opacity");
       if (opacity_it != data._tmx_object->_properties->_map.end())
       {
-         _opacity = static_cast<int32_t>(opacity_it->second->_value_int.value());
+         _opacity = static_cast<uint8_t>(opacity_it->second->_value_int.value());
       }
 
       auto tension_it = data._tmx_object->_properties->_map.find("tension");
