@@ -24,7 +24,7 @@ WeaponType = {
 }
 
 AudioUpdateBehavior = {
-   None = 0,
+   AlwaysOn = 0,
    RangeBased = 1,
    RoomBased = 2
 }
@@ -50,6 +50,6 @@ function audioUpdateBehaviorFromString(value)
       return AudioUpdateBehavior["RoomBased"]
    end
 
-   return AudioUpdateBehavior["None"]
+   return AudioUpdateBehavior["AlwaysOn"]
 end
 

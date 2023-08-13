@@ -1,4 +1,4 @@
-#include "objectupdater.h"
+#include "volumeupdater.h"
 
 #include "framework/math/sfmlmath.h"
 #include "game/audio.h"
@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-float ObjectUpdater::computeDistanceToPlayerPx(const std::shared_ptr<GameMechanism>& mechanism)
+float VolumeUpdater::computeDistanceToPlayerPx(const std::shared_ptr<GameMechanism>& mechanism)
 {
    const auto rect = mechanism->getBoundingBoxPx().value();
    const auto mechanism_left_px = rect.left;
@@ -20,17 +20,19 @@ float ObjectUpdater::computeDistanceToPlayerPx(const std::shared_ptr<GameMechani
    return distance_px;
 }
 
-void ObjectUpdater::setRoomId(const std::optional<int32_t>& room_id)
+void VolumeUpdater::setRoomId(const std::optional<int32_t>& room_id)
 {
    _room_id = room_id;
 }
 
-void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism)
+void VolumeUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism)
 {
    if (!mechanism->hasAudio())
    {
       return;
    }
+
+   const auto paused_factor = (GameState::getInstance().getMode() == ExecutionMode::Paused) ? 0.5f : 1.0f;
 
    switch (mechanism->getAudioUpdateBehavior())
    {
@@ -85,7 +87,6 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
             }
 
             // std::cout << "update volume: " << volume.value() << std::endl;
-            const auto paused_factor = (GameState::getInstance().getMode() == ExecutionMode::Paused) ? 0.5f : 1.0f;
             mechanism->setAudioEnabled(true);
             mechanism->setVolume(volume * paused_factor);
          }
@@ -95,15 +96,20 @@ void ObjectUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
             // std::cout << "disable sounds" << std::endl;
             mechanism->setAudioEnabled(false);
          }
+
+         break;
       }
-      case AudioUpdateBehavior::None:
+      case AudioUpdateBehavior::AlwaysOn:
       {
+         mechanism->setAudioEnabled(true);
+         const auto volume = mechanism->getReferenceVolume();
+         mechanism->setVolume(volume * paused_factor);
          break;
       }
    }
 }
 
-void ObjectUpdater::update()
+void VolumeUpdater::update()
 {
    // update volume of all mechanisms and enemies
    for (const auto* mechanism_vector : _mechanisms)
@@ -121,12 +127,12 @@ void ObjectUpdater::update()
    }
 }
 
-void ObjectUpdater::setPlayerPosition(const sf::Vector2f& position)
+void VolumeUpdater::setPlayerPosition(const sf::Vector2f& position)
 {
    _player_position = position;
 }
 
-void ObjectUpdater::setMechanisms(const std::vector<std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms)
+void VolumeUpdater::setMechanisms(const std::vector<std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms)
 {
    _mechanisms = mechanisms;
 }

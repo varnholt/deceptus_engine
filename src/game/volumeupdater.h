@@ -1,5 +1,5 @@
-#ifndef OBJECTUPDATER_H
-#define OBJECTUPDATER_H
+#ifndef VOLUMEUPDATER_H
+#define VOLUMEUPDATER_H
 
 #include <SFML/Graphics.hpp>
 
@@ -8,10 +8,10 @@
 
 #include <thread>
 
-class ObjectUpdater
+class VolumeUpdater
 {
 public:
-   ObjectUpdater() = default;
+   VolumeUpdater() = default;
 
    void update();
 
@@ -31,4 +31,4 @@ private:
    std::optional<int32_t> _room_id;
 };
 
-#endif  // OBJECTUPDATER_H
+#endif  // VOLUMEUPDATER_H

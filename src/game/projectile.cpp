@@ -132,10 +132,16 @@ void Projectile::processHitInformation()
       // Log::Info() << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle;
 
       // at the moment the distance to the player is calculated and if the player is close enough, he'll hear the sound.
-      // in the future this should be replaced by just doing the 'are you in the same chunk' check.
+      // in the future this should be done by the volume updater.
       const auto distance_px = SfmlMath::length(player_position - sf::Vector2f{gx, gy});
 
+      bool audio_enabled = false;
       if (distance_px < 600.0f)
+      {
+         audio_enabled = true;
+      }
+
+      if (audio_enabled)
       {
          // play sample
          const auto reference_samples = ProjectileHitAudio::getReferenceSamples(hit_info._projectile_animation_identifier);
