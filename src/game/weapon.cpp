@@ -42,6 +42,8 @@ int32_t Weapon::damage() const
       case WeaponType::Sword:
          damage_value = 20;
          break;
+      case WeaponType::None:
+         break;
    }
 
    return damage_value;

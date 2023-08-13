@@ -13,7 +13,7 @@
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
 #include "game/mechanisms/portal.h"
-#include "game/objectupdater.h"
+#include "game/volumeupdater.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -64,7 +64,7 @@ public:
 
    void update(const sf::Time& dt);
    void updateViews();
-   void updateObjectUpdater();
+   void updateMechanismVolumes();
    void updateCameraSystem(const sf::Time& dt);
 
    void spawnEnemies();
@@ -196,7 +196,7 @@ protected:
    std::array<ParallaxLayer, 3> _parallax_layers;
 
    // mechanisms
-   std::unique_ptr<ObjectUpdater> _object_updater;
+   std::unique_ptr<VolumeUpdater> _volume_updater;
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_map;
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_list;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;

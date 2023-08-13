@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game/audiorange.h"
+#include "game/audioupdatedata.h"
 #include "game/chunk.h"
 #include "game/constants.h"
 
@@ -32,7 +33,9 @@ public:
    virtual std::optional<AudioRange> getAudioRange() const;
    virtual bool isAudioEnabled() const;
    virtual void setAudioEnabled(bool audio_enabled);
+   virtual void setReferenceVolume(float volume);  // this is read only for the volume updater
    virtual void setVolume(float volume);
+   virtual float getReferenceVolume() const;
    virtual AudioUpdateBehavior getAudioUpdateBehavior() const;
    virtual void setAudioUpdateBehavior(AudioUpdateBehavior newAudio_update_behavior);
    virtual std::optional<int32_t> getRoomId() const;
@@ -57,12 +60,10 @@ protected:
    bool _serialized{false};
 
    // audio related
-   std::optional<int32_t> _room_id;
    bool _has_audio{false};
    bool _audio_enabled{false};
-   float _volume{0.0f};
-   std::optional<AudioRange> _audio_range;
-   AudioUpdateBehavior _audio_update_behavior{AudioUpdateBehavior::RangeBased};
+   float _reference_volume{0.0f};
+   AudioUpdateData _audio_update_data;
 
    std::vector<Chunk> _chunks;
    MechanismVersion _version = MechanismVersion::Version1;

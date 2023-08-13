@@ -500,10 +500,10 @@ void BubbleCube::pop()
 
 // the box2d code path is no longer required and only kept for debugging purposes
 
-void BubbleCube::beginContact(b2Contact* /*contact*/, FixtureNode* other)
+void BubbleCube::beginContact(b2Contact* /*contact*/, FixtureNode* /*other*/)
 {
 }
 
-void BubbleCube::endContact(FixtureNode* other)
+void BubbleCube::endContact(FixtureNode* /*other*/)
 {
 }

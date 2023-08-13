@@ -158,7 +158,7 @@ void Extra::resetExtras()
    _extra_items.clear();
 }
 
-Extra::ExtraItem::ExtraItem(GameNode* parent)
+Extra::ExtraItem::ExtraItem(GameNode* /*parent*/)
 {
    setClassName(typeid(ExtraItem).name());
 }

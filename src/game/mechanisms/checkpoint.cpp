@@ -52,7 +52,7 @@ Checkpoint::Checkpoint(GameNode* parent) : GameNode(parent)
    Audio::getInstance().addSample("wallclock_tick.wav");
 
    _has_audio = true;
-   _audio_range = AudioRange{12 * PIXELS_PER_TILE, 0.0f, 2 * PIXELS_PER_TILE, 1.0f};
+   _audio_update_data._range = AudioRange{12 * PIXELS_PER_TILE, 0.0f, 2 * PIXELS_PER_TILE, 1.0f};
 }
 
 std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(uint32_t index, const std::vector<std::shared_ptr<GameMechanism>>& checkpoints)
@@ -247,7 +247,7 @@ void Checkpoint::updateSpriteRect(float dt_s)
             {
                _tick_played = true;
                _tock_played = false;
-               Audio::getInstance().playSample({"wallclock_tock.wav", _volume});
+               Audio::getInstance().playSample({"wallclock_tock.wav", _reference_volume});
             }
          }
          else if (static_cast<int32_t>(_sprite_index) == tock_index)
@@ -256,7 +256,7 @@ void Checkpoint::updateSpriteRect(float dt_s)
             {
                _tock_played = true;
                _tick_played = false;
-               Audio::getInstance().playSample({"wallclock_tick.wav", _volume});
+               Audio::getInstance().playSample({"wallclock_tick.wav", _reference_volume});
             }
          }
 
