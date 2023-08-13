@@ -312,7 +312,7 @@ enum class LoadingMode
 
 enum class AudioUpdateBehavior
 {
-   None,
+   AlwaysOn,
    RangeBased,
    RoomBased,
 };

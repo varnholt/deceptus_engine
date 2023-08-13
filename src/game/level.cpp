@@ -193,7 +193,7 @@ Level::Level() : GameNode(nullptr)
 {
    setClassName(typeid(Level).name());
 
-   _object_updater = std::make_unique<ObjectUpdater>();
+   _volume_updater = std::make_unique<VolumeUpdater>();
 
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -682,7 +682,7 @@ void Level::initialize()
    spawnEnemies();
 
    assignMechanismsToRooms();
-   _object_updater->setMechanisms(_mechanisms_list);
+   _volume_updater->setMechanisms(_mechanisms_list);
 
    const auto path = std::filesystem::path(_description->_filename).parent_path();
    _level_script.setup(path / "level.lua");
@@ -955,14 +955,14 @@ void Level::updateViews()
 }
 
 //-----------------------------------------------------------------------------
-void Level::updateObjectUpdater()
+void Level::updateMechanismVolumes()
 {
-   if (!_object_updater)
+   if (!_volume_updater)
    {
       return;
    }
 
-   _object_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
+   _volume_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
 }
 
 //-----------------------------------------------------------------------------
@@ -1450,7 +1450,7 @@ void Level::update(const sf::Time& dt)
 {
    Projectile::update(dt);
 
-   updateObjectUpdater();
+   updateMechanismVolumes();
    updateCameraSystem(dt);
    updateViews();
 
@@ -1486,8 +1486,8 @@ void Level::update(const sf::Time& dt)
 
    _static_light->update(GlobalClock::getInstance().getElapsedTime());
 
-   _object_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
-   _object_updater->update();
+   _volume_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
+   _volume_updater->update();
 }
 
 //-----------------------------------------------------------------------------

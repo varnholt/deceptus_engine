@@ -34,7 +34,7 @@ public:
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void setAudioEnabled(bool enabled) override;
-   void setVolume(float volume) override;
+   void setReferenceVolume(float volume) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    const sf::FloatRect& getPixelRect() const;

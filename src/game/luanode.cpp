@@ -2567,7 +2567,7 @@ void LuaNode::addAudioRange(float far_distance, float far_volume, float near_dis
    audio_range._volume_far = far_volume;
    audio_range._radius_near_px = near_distance;
    audio_range._volume_near = near_volume;
-   _audio_range = audio_range;
+   _audio_update_data._range = audio_range;
 
    if (_hitboxes.empty())
    {
@@ -2588,7 +2588,7 @@ void LuaNode::playSample(const std::string& sample, float volume)
       return;
    }
 
-   Audio::getInstance().playSample({sample, volume * _volume});
+   Audio::getInstance().playSample({sample, volume * _reference_volume});
 }
 
 void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
