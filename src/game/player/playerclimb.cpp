@@ -25,7 +25,7 @@ public:
 }  // namespace
 
 //----------------------------------------------------------------------------------------------------------------------
-void PlayerClimb::update(b2Body* player_body, bool in_air)
+void PlayerClimb::update(b2Body* /*player_body*/, bool /*in_air*/)
 {
    // disable wallclimb entirely for now - nobody seems to want it.
    return;
