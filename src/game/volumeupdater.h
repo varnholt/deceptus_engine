@@ -6,7 +6,10 @@
 #include "game/gamemechanism.h"
 #include "game/luanode.h"
 
+#include <set>
 #include <thread>
+
+class Projectile;
 
 class VolumeUpdater
 {
@@ -14,6 +17,7 @@ public:
    VolumeUpdater() = default;
 
    void update();
+   void updateProjectiles(const std::set<Projectile*>& projectiles);
 
    void setPlayerPosition(const sf::Vector2f& position);
    void setMechanisms(const std::vector<std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms);
