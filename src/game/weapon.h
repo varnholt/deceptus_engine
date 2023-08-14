@@ -2,8 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "audioupdatedata.h"
 #include "constants.h"
 
+#include <optional>
 
 class Weapon
 {
@@ -22,7 +24,9 @@ public:
    // make virtual and move to subclasses
    int32_t damage() const;
 
-protected:
+   void setParentAudioUpdateData(const AudioUpdateData& parent_audio_update_data);
 
+protected:
    WeaponType _type = WeaponType::None;
+   std::optional<AudioUpdateData> _parent_audio_update_data;
 };

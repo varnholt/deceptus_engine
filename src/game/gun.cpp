@@ -92,6 +92,12 @@ void Gun::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
 
    fixture->SetUserData(static_cast<void*>(projectile));
 
+   // store audio update data if present
+   if (_parent_audio_update_data.has_value())
+   {
+      projectile->setParentAudioUpdateData(_parent_audio_update_data.value());
+   }
+
    // store projectile
    _projectiles.push_back(projectile);
 }

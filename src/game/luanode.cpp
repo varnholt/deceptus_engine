@@ -2394,7 +2394,9 @@ void LuaNode::addWeapon(std::unique_ptr<Weapon> weapon)
 
 void LuaNode::useGun(size_t index, b2Vec2 from, b2Vec2 to)
 {
-   dynamic_cast<Gun&>(*_weapons[index]).useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
+   auto& gun = dynamic_cast<Gun&>(*_weapons[index]);
+   gun.setParentAudioUpdateData(_audio_update_data);
+   gun.useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
 }
 
 void LuaNode::stopScript()
