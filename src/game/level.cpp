@@ -1488,6 +1488,7 @@ void Level::update(const sf::Time& dt)
 
    _volume_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
    _volume_updater->update();
+   _volume_updater->updateProjectiles(Projectile::getProjectiles());
 }
 
 //-----------------------------------------------------------------------------

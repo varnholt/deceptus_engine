@@ -4,6 +4,7 @@
 #include "game/audio.h"
 #include "game/gamestate.h"
 #include "game/luainterface.h"
+#include "game/projectile.h"
 
 #include <iostream>
 
@@ -124,6 +125,62 @@ void VolumeUpdater::update()
    for (const auto& enemy : LuaInterface::instance().getObjectList())
    {
       updateVolume(enemy);
+   }
+}
+
+void VolumeUpdater::updateProjectiles(const std::set<Projectile*>& projectiles)
+{
+   for (auto* projectile : projectiles)
+   {
+      // don't touch audio if there's no audio update data available.
+      // that is the case for bullets coming from the player.
+      const auto audio_update_data = projectile->getParentAudioUpdateData();
+      if (!audio_update_data.has_value())
+      {
+         continue;
+      }
+
+      switch (audio_update_data->_update_behavior)
+      {
+         case AudioUpdateBehavior::AlwaysOn:
+         {
+            projectile->setAudioEnabled(true);
+            break;
+         }
+         case AudioUpdateBehavior::RoomBased:
+         {
+            if (!_room_id.has_value())
+            {
+               return;
+            }
+
+            if (!audio_update_data->_room_id.has_value())
+            {
+               return;
+            }
+
+            const auto same_room = audio_update_data->_room_id.value() == _room_id.value();
+            projectile->setAudioEnabled(same_room);
+            break;
+         }
+         case AudioUpdateBehavior::RangeBased:
+         {
+            if (!audio_update_data->_range.has_value())
+            {
+               return;
+            }
+
+            const auto projectile_position = projectile->getBody()->GetPosition();
+            const auto gx = projectile_position.x * PPM;
+            const auto gy = projectile_position.y * PPM;
+            const auto distance_px = SfmlMath::length(_player_position - sf::Vector2f{gx, gy});
+            const auto within_range = distance_px < 600.0f;
+
+            projectile->setAudioEnabled(within_range);
+
+            break;
+         }
+      }
    }
 }
 

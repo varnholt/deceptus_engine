@@ -13,7 +13,17 @@
 
 namespace
 {
-std::vector<Projectile::HitInformation> _hit_information;
+
+struct HitInformation
+{
+   b2Vec2 _pos = b2Vec2{0.0f, 0.0};
+   float _angle = 0.0f;
+   WeaponType _weapon_type = WeaponType::None;
+   std::string _projectile_animation_identifier;
+   bool _audio_enabled{true};
+};
+
+std::vector<HitInformation> _hit_information;
 std::set<Projectile*> _projectiles;
 }  // namespace
 
@@ -103,7 +113,8 @@ void Projectile::collectHitInformation()
             {b2Vec2(projectile->getBody()->GetPosition()),
              projectile->_rotation,
              projectile->_weapon_type,
-             projectile->_projectile_identifier}
+             projectile->_projectile_identifier,
+             projectile->_audio_enabled}
          );
 
          delete projectile;
@@ -119,8 +130,6 @@ void Projectile::collectHitInformation()
 
 void Projectile::processHitInformation()
 {
-   const auto player_position = PlayerUtils::getPixelPositionFloat();
-
    std::vector<HitInformation>::iterator it;
    for (it = _hit_information.begin(); it != _hit_information.end(); ++it)
    {
@@ -131,17 +140,7 @@ void Projectile::processHitInformation()
 
       // Log::Info() << "adding hit animation at: " << gx << ", " << gy << " angle: " << it->_angle;
 
-      // at the moment the distance to the player is calculated and if the player is close enough, he'll hear the sound.
-      // in the future this should be done by the volume updater.
-      const auto distance_px = SfmlMath::length(player_position - sf::Vector2f{gx, gy});
-
-      bool audio_enabled = false;
-      if (distance_px < 600.0f)
-      {
-         audio_enabled = true;
-      }
-
-      if (audio_enabled)
+      if (hit_info._audio_enabled)
       {
          // play sample
          const auto reference_samples = ProjectileHitAudio::getReferenceSamples(hit_info._projectile_animation_identifier);
@@ -156,6 +155,21 @@ void Projectile::processHitInformation()
       const auto reference_animation = ProjectileHitAnimation::getReferenceAnimation(hit_info._projectile_animation_identifier);
       ProjectileHitAnimation::playHitAnimation(gx, gy, it->_angle, reference_animation->second);
    }
+}
+
+void Projectile::setAudioEnabled(bool enabled)
+{
+   _audio_enabled = enabled;
+}
+
+std::optional<AudioUpdateData> Projectile::getParentAudioUpdateData() const
+{
+   return _parent_audio_update_data;
+}
+
+void Projectile::setParentAudioUpdateData(const AudioUpdateData& audio_update_data)
+{
+   _parent_audio_update_data = audio_update_data;
 }
 
 std::string Projectile::getProjectileIdentifier() const
@@ -213,6 +227,11 @@ void Projectile::update(const sf::Time& dt)
    collectHitInformation();
    processHitInformation();
    ProjectileHitAnimation::updateHitAnimations(dt);
+}
+
+std::set<Projectile*>& Projectile::getProjectiles()
+{
+   return _projectiles;
 }
 
 void Projectile::addDestroyedCallback(const DestroyedCallback& destroyed_callback)

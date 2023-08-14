@@ -49,6 +49,10 @@ int32_t Weapon::damage() const
    return damage_value;
 }
 
+void Weapon::setParentAudioUpdateData(const AudioUpdateData& parent_audio_update_data)
+{
+   _parent_audio_update_data = parent_audio_update_data;
+}
 
 void Weapon::initialize()
 {
