@@ -413,25 +413,14 @@ void Level::assignMechanismsToRooms()
    auto update_room = [this](const std::shared_ptr<GameMechanism>& mechanism)
    {
       auto game_node = std::dynamic_pointer_cast<GameNode>(mechanism);
-
-      if (!mechanism->getBoundingBoxPx().has_value())
+      if (mechanism->getBoundingBoxPx().has_value())
       {
-         // std::cout << "skipping: " << game_node->getObjectId() << " (" << game_node->getClassName() << ")" << std::endl;
-         return;
+         auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
+         if (room)
+         {
+            mechanism->setRoomId(room->_id);
+         }
       }
-
-      auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
-      if (room)
-      {
-         mechanism->setRoomId(room->_id);
-         //         std::cout << "assigning " << game_node->getObjectId() << " (" << game_node->getClassName() << ")"
-         //                   << " to room " << room->_id << std::endl;
-      }
-      //      else
-      //      {
-      //         std::cout << "not assigning " << game_node->getObjectId() << " (" << game_node->getClassName() << ")"
-      //                   << " to any room " << std::endl;
-      //      }
    };
 
    for (auto& mechanism_vector : _mechanisms_list)

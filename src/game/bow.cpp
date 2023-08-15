@@ -134,6 +134,12 @@ void Bow::use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2
    _loaded_arrow->getBody()->SetLinearVelocity(velocity);
    _loaded_arrow->setProperty("damage", _damage);
 
+   // store audio update data if present
+   if (_parent_audio_update_data.has_value())
+   {
+      _loaded_arrow->setParentAudioUpdateData(_parent_audio_update_data.value());
+   }
+
    updateRotation(_loaded_arrow);
    copyReferenceAnimation(_loaded_arrow);
 
