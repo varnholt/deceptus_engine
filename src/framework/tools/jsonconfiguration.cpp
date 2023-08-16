@@ -16,7 +16,7 @@ void JsonConfiguration::deserializeFromFile(const std::string& filename)
    while (ifs.good())
    {
       data.push_back(c);
-      c = ifs.get();
+      c = static_cast<char>(ifs.get());
    }
 
    ifs.close();

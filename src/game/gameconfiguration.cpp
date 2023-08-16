@@ -76,13 +76,13 @@ void GameConfiguration::deserializeFromFile(const std::string& filename)
 {
    std::ifstream ifs(filename, std::ifstream::in);
 
-   char c = ifs.get();
+   char c = static_cast<char>(ifs.get());
    std::string data;
 
    while (ifs.good())
    {
       data.push_back(c);
-      c = ifs.get();
+      c = static_cast<char>(ifs.get());
    }
 
    ifs.close();
