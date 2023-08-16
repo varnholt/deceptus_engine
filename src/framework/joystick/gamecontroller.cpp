@@ -296,7 +296,7 @@ void GameController::rumble(float intensity, int32_t ms)
       return;
    }
 
-   SDL_GameControllerRumble(_controller, 0xffff * intensity, 0xffff * intensity, ms);
+   SDL_GameControllerRumble(_controller, static_cast<uint16_t>(0xffff * intensity), static_cast<uint16_t>(0xffff * intensity), ms);
 }
 
 //-----------------------------------------------------------------------------

@@ -64,7 +64,7 @@ class PSD
                public:
                   Channel() = default;
                   void load(std::istream& stream);
-                  void init(int32_t id, int32_t width, int32_t height);
+                  void init(int16_t id, int32_t width, int32_t height);
                   void loadRLE(int32_t width, int32_t height, std::istream& stream);
                   void loadRaw(int32_t width, int32_t height, std::istream &stream);
                   void unpackBits(std::vector<uint8_t>& dest, int32_t offset, size_t scanlineBytesLeft, std::istream& stream);
@@ -91,7 +91,7 @@ class PSD
             int32_t getLeft() const;
             int32_t getWidth() const;
             int32_t getHeight() const;
-            void setOpacity(int32_t opacity);
+            void setOpacity(uint8_t opacity);
             int32_t getOpacity() const;
             bool isVisible() const;
             void setVisible(bool visible);

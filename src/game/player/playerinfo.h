@@ -6,9 +6,8 @@
 
 #include "json/json.hpp"
 
-#include "extratable.h"
-#include "inventory.h"
-
+#include "game/extratable.h"
+#include "game/inventory.h"
 
 struct PlayerInfo
 {

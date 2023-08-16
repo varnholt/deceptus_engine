@@ -23,3 +23,33 @@ WeaponType = {
    Sowrd   = 3
 }
 
+AudioUpdateBehavior = {
+   AlwaysOn = 0,
+   RangeBased = 1,
+   RoomBased = 2
+}
+
+------------------------------------------------------------------------------------------------------------------------
+function alignmentFromString(value)
+   if (value == "right") then
+      return Alignment["AlignmentRight"]
+   elseif (value == "left") then
+      return Alignment["AlignmentLeft"]
+   elseif (value == "up") then
+      return Alignment["AlignmentUp"]
+   elseif (value == "down") then
+      return Alignment["AlignmentDown"]
+   end
+end
+
+------------------------------------------------------------------------------------------------------------------------
+function audioUpdateBehaviorFromString(value)
+   if (value == "range_based") then
+      return AudioUpdateBehavior["RangeBased"]
+   elseif (value == "room_based") then
+      return AudioUpdateBehavior["RoomBased"]
+   end
+
+   return AudioUpdateBehavior["AlwaysOn"]
+end
+

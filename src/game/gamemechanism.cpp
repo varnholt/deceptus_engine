@@ -23,9 +23,39 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+float GameMechanism::getReferenceVolume() const
+{
+   return _reference_volume;
+}
+
+AudioUpdateBehavior GameMechanism::getAudioUpdateBehavior() const
+{
+   return _audio_update_data._update_behavior;
+}
+
+void GameMechanism::setAudioUpdateBehavior(AudioUpdateBehavior audio_update_behavior)
+{
+   _audio_update_data._update_behavior = audio_update_behavior;
+}
+
+std::optional<int32_t> GameMechanism::getRoomId() const
+{
+   return _audio_update_data._room_id;
+}
+
+void GameMechanism::setRoomId(int32_t room_id)
+{
+   _audio_update_data._room_id = room_id;
+}
+
+void GameMechanism::setReferenceVolume(float volume)
+{
+   _reference_volume = volume;
+}
+
 void GameMechanism::setVolume(float volume)
 {
-   _volume = volume;
+   _audio_update_data._volume = volume;
 }
 
 bool GameMechanism::hasChunks() const
@@ -85,5 +115,5 @@ bool GameMechanism::hasAudio() const
 
 std::optional<AudioRange> GameMechanism::getAudioRange() const
 {
-   return _audio_range;
+   return _audio_update_data._range;
 }

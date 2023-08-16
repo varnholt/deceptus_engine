@@ -35,7 +35,7 @@ void SoundEmitter::setAudioEnabled(bool audio_enabled)
    if (audio_enabled)
    {
       // start playing
-      _thread_id = Audio::getInstance().playSample({_filename, _volume, _looped});
+      _thread_id = Audio::getInstance().playSample({_filename, _reference_volume, _looped});
    }
    else
    {
@@ -44,9 +44,9 @@ void SoundEmitter::setAudioEnabled(bool audio_enabled)
    }
 }
 
-void SoundEmitter::setVolume(float volume)
+void SoundEmitter::setReferenceVolume(float volume)
 {
-   GameMechanism::setVolume(volume);
+   GameMechanism::setReferenceVolume(volume);
 
    if (!_thread_id.has_value())
    {
@@ -97,7 +97,7 @@ std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const 
          audio_range._volume_near = volume_near->second->_value_float.value();
       }
 
-      instance->_audio_range = audio_range;
+      instance->_audio_update_data._range = audio_range;
 
       // read sample properties
       const auto looped = data._tmx_object->_properties->_map.find("looped");

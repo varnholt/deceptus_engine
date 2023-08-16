@@ -3,9 +3,10 @@
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 
-#include "fixturenode.h"
-#include "gamenode.h"
-#include "projectilehitanimation.h"
+#include "game/audioupdatedata.h"
+#include "game/fixturenode.h"
+#include "game/gamenode.h"
+#include "game/projectilehitanimation.h"
 
 #include <functional>
 #include <list>
@@ -17,14 +18,6 @@ class b2Body;
 class Projectile : public FixtureNode
 {
 public:
-   struct HitInformation
-   {
-      b2Vec2 _pos = b2Vec2{0.0f, 0.0};
-      float _angle = 0.0f;
-      WeaponType _weapon_type = WeaponType::None;
-      std::string _projectile_animation_identifier;
-      std::string _hit_sample;
-   };
 
    using DestroyedCallback = std::function<void(void)>;
 
@@ -36,6 +29,7 @@ public:
 
    static void clear();
    static void update(const sf::Time& dt);
+   static std::set<Projectile*>& getProjectiles();
 
    void addDestroyedCallback(const DestroyedCallback& destroyedCallback);
 
@@ -63,6 +57,11 @@ public:
    std::string getProjectileIdentifier() const;
    void setProjectileIdentifier(const std::string& projectile_identifier);
 
+   void setParentAudioUpdateData(const AudioUpdateData& audio_update_data);
+
+   std::optional<AudioUpdateData> getParentAudioUpdateData() const;
+   void setAudioEnabled(bool enabled);
+
 protected:
    static void collectHitInformation();
    static void processHitInformation();
@@ -83,4 +82,7 @@ protected:
 
    Animation _animation;
    sf::Rect<int32_t> _animation_texture_rect;
+
+   std::optional<AudioUpdateData> _parent_audio_update_data;
+   bool _audio_enabled{true};
 };
