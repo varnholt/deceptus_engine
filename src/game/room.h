@@ -63,6 +63,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
 
    static void deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
+   static std::shared_ptr<Room> find(const sf::FloatRect& p, const std::vector<std::shared_ptr<Room>>& rooms);
 
    void startTransition();
    void lockCamera();
@@ -73,6 +74,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    Room::EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
 
    std::vector<SubRoom>::const_iterator findSubRoom(const sf::Vector2f& p) const;
+   std::vector<SubRoom>::const_iterator findSubRoom(const sf::FloatRect& p) const;
    bool correctedCamera(float& x, float& y, float focus_offset, float view_ratio_y) const;
    std::unique_ptr<ScreenTransition> makeFadeTransition();
 

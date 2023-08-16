@@ -33,8 +33,9 @@ win32-msvc {
    message("configured for msvc")
    QMAKE_CXXFLAGS_RELEASE += /Zi
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
-   QMAKE_CFLAGS_WARN_ON = -W3
-   QMAKE_CXXFLAGS_WARN_ON = -W3
+   QMAKE_CFLAGS_WARN_ON = -W4
+   QMAKE_CXXFLAGS_WARN_ON = -W4
+   QMAKE_CXXFLAGS += /wd5045
 }
 
 linux|win32-g++ {
@@ -78,11 +79,9 @@ linux {
    LIBS += -lX11
 }
 
-
 #sfml
 INCLUDEPATH += thirdparty/sfml/include
 DEPENDPATH += thirdparty/sfml/include
-
 
 INCLUDEPATH += .
 INCLUDEPATH += src
@@ -140,6 +139,7 @@ SOURCES += \
    src/game/atmosphere.cpp \
    src/game/audio.cpp \
    src/game/audiorange.cpp \
+   src/game/audioupdatedata.cpp \
    src/game/bitmapfont.cpp \
    src/game/boomeffect.cpp \
    src/game/boomeffectenvelope.cpp \
@@ -239,7 +239,6 @@ SOURCES += \
    src/game/mechanisms/weather.cpp \
    src/game/meshtools.cpp \
    src/game/messagebox.cpp \
-   src/game/objectupdater.cpp \
    src/game/onewaywall.cpp \
    src/game/overlays/controlleroverlay.cpp \
    src/game/overlays/rainoverlay.cpp \
@@ -284,6 +283,7 @@ SOURCES += \
    src/game/tilemapfactory.cpp \
    src/game/tmxenemy.cpp \
    src/game/tweaks.cpp \
+   src/game/volumeupdater.cpp \
    src/game/waterbubbles.cpp \
    src/game/weapon.cpp \
    src/game/weaponfactory.cpp \
@@ -357,6 +357,7 @@ HEADERS += \
    src/game/atmosphere.h \
    src/game/audio.h \
    src/game/audiorange.h \
+   src/game/audioupdatedata.h \
    src/game/bitmapfont.h \
    src/game/boomeffect.h \
    src/game/boomeffectenvelope.h \
@@ -457,7 +458,6 @@ HEADERS += \
    src/game/mechanisms/weather.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
-   src/game/objectupdater.h \
    src/game/onewaywall.h \
    src/game/overlays/controlleroverlay.h \
    src/game/overlays/rainoverlay.h \
@@ -506,6 +506,7 @@ HEADERS += \
    src/game/tilemapfactory.h \
    src/game/tmxenemy.h \
    src/game/tweaks.h \
+   src/game/volumeupdater.h \
    src/game/waterbubbles.h \
    src/game/weapon.h \
    src/game/weaponfactory.h \
@@ -642,7 +643,6 @@ SOURCES += \
 SOURCES += \
    thirdparty/imgui/imgui-SFML.cpp \
    thirdparty/imgui/imgui.cpp \
-   thirdparty/imgui/imgui_demo.cpp \
    thirdparty/imgui/imgui_draw.cpp \
    thirdparty/imgui/imgui_tables.cpp \
    thirdparty/imgui/imgui_widgets.cpp

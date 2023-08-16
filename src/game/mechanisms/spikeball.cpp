@@ -40,7 +40,8 @@ auto instance_counter = 0;
 
 SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance_counter++)
 {
-   _audio_range = AudioRange{800.0f, 0.0f, 100.0f, 1.0f};
+   _reference_volume = 1.0f;
+   _audio_update_data._range = AudioRange{800.0f, 0.0f, 100.0f, _reference_volume};
    _has_audio = true;
 
    setClassName(typeid(SpikeBall).name());
@@ -170,8 +171,8 @@ void SpikeBall::update(const sf::Time& dt)
       const auto changed_direction = std::signbit(_last_ball_x_velocity) != std::signbit(_ball_body->GetLinearVelocity().x);
       if (changed_direction)
       {
-         const auto sample = (_swing_counter++ & 1) ? Audio::PlayInfo{"mechanism_spikeball_01.wav", _volume}
-                                                    : Audio::PlayInfo{"mechanism_spikeball_02.wav", _volume};
+         const auto sample = (_swing_counter++ & 1) ? Audio::PlayInfo{"mechanism_spikeball_01.wav", _audio_update_data._volume}
+                                                    : Audio::PlayInfo{"mechanism_spikeball_02.wav", _audio_update_data._volume};
          Audio::getInstance().playSample(sample);
       }
 
@@ -237,6 +238,20 @@ void SpikeBall::setup(const GameDeserializeData& data)
       if (chain_element_height_it != data._tmx_object->_properties->_map.end())
       {
          _config._chain_element_height = chain_element_height_it->second->_value_float.value();
+      }
+
+      auto audio_update_behavior_it = data._tmx_object->_properties->_map.find("audio_update_behavior");
+      if (audio_update_behavior_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto audio_update_behavior_str = audio_update_behavior_it->second->_value_string.value();
+         if (audio_update_behavior_str == "room_based")
+         {
+            _audio_update_data._update_behavior = AudioUpdateBehavior::RoomBased;
+         }
+         else if (audio_update_behavior_str == "range_based")
+         {
+            _audio_update_data._update_behavior = AudioUpdateBehavior::RangeBased;
+         }
       }
    }
 

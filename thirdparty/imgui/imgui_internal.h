@@ -69,6 +69,7 @@ Index of this file:
 #pragma warning (disable: 26495)    // [Static Analyzer] Variable 'XXX' is uninitialized. Always initialize a member variable (type.6).
 #if defined(_MSC_VER) && _MSC_VER >= 1922 // MSVC 2019 16.2 or later
 #pragma warning (disable: 5054)     // operator '|': deprecated between enumerations of different types
+#pragma warning(disable : 5219)     // deceptus
 #endif
 #endif
 

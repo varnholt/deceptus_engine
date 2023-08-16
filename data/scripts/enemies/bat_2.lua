@@ -290,5 +290,8 @@ function writeProperty(key, value)
    if (key == "exploding") then
       mCanExplode = true
       mSpriteOffsetY = 4 * 3 * 24
+   elseif (key == "audio_update_behavior") then
+      update_behavior = audioUpdateBehaviorFromString(value)
+      setAudioUpdateBehavior(update_behavior)
    end
 end
