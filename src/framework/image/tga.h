@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string>
 
-int savetga(const std::string& filename, uint32_t *data, int32_t width, int32_t height);
+int savetga(const std::string& filename, uint32_t* data, int16_t width, int16_t height);
 
 struct TGAHeader
 {

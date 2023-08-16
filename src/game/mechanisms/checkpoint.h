@@ -28,11 +28,7 @@ public:
 
    Checkpoint(GameNode* parent = nullptr);
 
-   static std::shared_ptr<Checkpoint> getCheckpoint(
-      uint32_t index,
-      const std::vector<std::shared_ptr<GameMechanism>>& checkpoints
-   );
-
+   static std::shared_ptr<Checkpoint> getCheckpoint(int32_t index, const std::vector<std::shared_ptr<GameMechanism>>& checkpoints);
    static std::shared_ptr<Checkpoint> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget &target, sf::RenderTarget &normal) override;

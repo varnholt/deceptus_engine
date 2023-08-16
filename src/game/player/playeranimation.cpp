@@ -612,7 +612,6 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(
    if (data._points_left)
    {
       auto next_cycle = _idle_l_tmp;
-
       if (getMappedArmedAnimation(_idle_l_tmp, data)->_finished)
       {
          _idle_l_tmp = (std::rand() % 10 == 0) ? _idle_blink_l : _idle_l;
@@ -620,19 +619,14 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(
 
       return next_cycle;
    }
-   else
+
+   auto next_cycle = _idle_r_tmp;
+   if (getMappedArmedAnimation(_idle_r_tmp, data)->_finished)
    {
-      auto next_cycle = _idle_r_tmp;
-
-      if (getMappedArmedAnimation(_idle_r_tmp, data)->_finished)
-      {
-         _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r : _idle_r;
-      }
-
-      return next_cycle;
+      _idle_r_tmp = (std::rand() % 10 == 0) ? _idle_blink_r : _idle_r;
    }
 
-   return std::nullopt;
+   return next_cycle;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processBendUpAnimation(const PlayerAnimationData& data)
@@ -742,12 +736,8 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDashAnimation(
    {
       return (data._dash_dir == Dash::Left) ? _dash_stop_l : _dash_stop_r;
    }
-   else
-   {
-      return (data._dash_dir == Dash::Left) ? _dash_l : _dash_r;
-   }
 
-   return std::nullopt;
+   return (data._dash_dir == Dash::Left) ? _dash_l : _dash_r;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processSwimAnimation(const PlayerAnimationData& data)
