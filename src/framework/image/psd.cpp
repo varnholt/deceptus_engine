@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 
+#define IMAGE_RESOURCE_DECTION_IGNORED 1
+
 // https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577409_pgfId-1036097
 
 namespace
@@ -270,7 +272,7 @@ void PSD::Layer::setColorFormat(const PSD::ColorFormat& colorFormat)
    _color_format = colorFormat;
 }
 
-void PSD::Layer::setOpacity(int32_t opacity)
+void PSD::Layer::setOpacity(uint8_t opacity)
 {
    _opacity = opacity;
 }
@@ -639,7 +641,7 @@ void PSD::Layer::Channel::loadRaw(int32_t width, int32_t height, std::istream& s
    read(_data, stream);
 }
 
-void PSD::Layer::Channel::init(int32_t id, int32_t width, int32_t height)
+void PSD::Layer::Channel::init(int16_t id, int32_t width, int32_t height)
 {
    _id = id;
    _data.resize(width * height, 0xff);
@@ -717,13 +719,13 @@ void PSD::loadImageResourceSection(std::istream& stream)
    //
    // Variable   Image resources (Image Resource Blocks).
 
+#ifdef IMAGE_RESOURCE_DECTION_IGNORED
    // to ignore the whole resource block
-   //
    int32_t length;
    read(length, stream);
    stream.ignore(length);
    return;
-
+#else
    // Image resource block
    //
    // 4           Signature: '8BIM'
@@ -793,6 +795,7 @@ void PSD::loadImageResourceSection(std::istream& stream)
    const auto sectionBytesRead = stream.tellg() - sectionStart;
    const auto sectionIgnoredBytes = totalSize - sectionBytesRead;
    stream.ignore(sectionIgnoredBytes);
+#endif
 }
 
 void PSD::loadLayerAndMaskInformation(std::istream& stream)
@@ -829,7 +832,7 @@ void PSD::loadLayerAndMaskInformation(std::istream& stream)
 
    int16_t layer_count = 0;
    read(layer_count, stream);
-   layer_count = abs(layer_count);
+   layer_count = static_cast<int16_t>(std::abs(layer_count));
 
    // load 'layer records'
    for (auto i = 0; i < layer_count; i++)
