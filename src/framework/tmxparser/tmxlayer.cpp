@@ -97,7 +97,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
                   // optimization: check for repetition of previous line
                   if (previous_line == line)
                   {
-                     for (auto x = 0; x < previous_values.size(); x++)
+                     for (x = 0; x < previous_values.size(); x++)
                      {
                         _data[y * _width_tl + x] = previous_values[x];
                      }
@@ -112,7 +112,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 
                      while (next >= 0)
                      {
-                        next = line.find(',', pos);
+                        next = static_cast<int32_t>(line.find(',', pos));
                         val = atoi2(line.data() + pos);
                         _data[y * _width_tl + x] = val;
                         x++;

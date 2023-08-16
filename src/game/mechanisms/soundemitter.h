@@ -9,10 +9,10 @@ class SoundEmitter : public GameMechanism, public GameNode
 {
 public:
    SoundEmitter(GameNode* parent);
-   ~SoundEmitter();
+   ~SoundEmitter() override;
 
    void setAudioEnabled(bool enabled) override;
-   void setVolume(float volume) override;
+   void setReferenceVolume(float volume) override;
 
    static std::shared_ptr<SoundEmitter> deserialize(GameNode* parent, const GameDeserializeData& data);
 

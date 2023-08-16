@@ -193,7 +193,7 @@ Level::Level() : GameNode(nullptr)
 {
    setClassName(typeid(Level).name());
 
-   _object_updater = std::make_unique<ObjectUpdater>();
+   _volume_updater = std::make_unique<VolumeUpdater>();
 
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -402,6 +402,38 @@ void Level::deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const
          parallax_offset_with_error.y *= parallax_factor.y;
          parallax_layer._error = parallax_layer._offset - parallax_offset_with_error;
       }
+   }
+}
+
+//-----------------------------------------------------------------------------
+// assign room identifiers to mechanism
+// for now it's safe to assume that a mechanism always stays in the same room
+void Level::assignMechanismsToRooms()
+{
+   auto update_room = [this](const std::shared_ptr<GameMechanism>& mechanism)
+   {
+      auto game_node = std::dynamic_pointer_cast<GameNode>(mechanism);
+      if (mechanism->getBoundingBoxPx().has_value())
+      {
+         auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
+         if (room)
+         {
+            mechanism->setRoomId(room->_id);
+         }
+      }
+   };
+
+   for (auto& mechanism_vector : _mechanisms_list)
+   {
+      for (auto& mechanism : *mechanism_vector)
+      {
+         update_room(mechanism);
+      }
+   }
+
+   for (const auto& enemy : LuaInterface::instance().getObjectList())
+   {
+      update_room(enemy);
    }
 }
 
@@ -638,7 +670,8 @@ void Level::initialize()
    loadState();
    spawnEnemies();
 
-   _object_updater->setMechanisms(_mechanisms_list);
+   assignMechanismsToRooms();
+   _volume_updater->setMechanisms(_mechanisms_list);
 
    const auto path = std::filesystem::path(_description->_filename).parent_path();
    _level_script.setup(path / "level.lua");
@@ -911,14 +944,14 @@ void Level::updateViews()
 }
 
 //-----------------------------------------------------------------------------
-void Level::updateObjectUpdater()
+void Level::updateMechanismVolumes()
 {
-   if (!_object_updater)
+   if (!_volume_updater)
    {
       return;
    }
 
-   _object_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
+   _volume_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
 }
 
 //-----------------------------------------------------------------------------
@@ -1406,7 +1439,7 @@ void Level::update(const sf::Time& dt)
 {
    Projectile::update(dt);
 
-   updateObjectUpdater();
+   updateMechanismVolumes();
    updateCameraSystem(dt);
    updateViews();
 
@@ -1442,7 +1475,9 @@ void Level::update(const sf::Time& dt)
 
    _static_light->update(GlobalClock::getInstance().getElapsedTime());
 
-   _object_updater->update();
+   _volume_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
+   _volume_updater->update();
+   _volume_updater->updateProjectiles(Projectile::getProjectiles());
 }
 
 //-----------------------------------------------------------------------------

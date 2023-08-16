@@ -23,7 +23,7 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
    _sprite.setTexture(*_texture_map.get());
    _sprite.setOrigin(_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f);
 
-   _audio_range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
+   _audio_update_data._range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
    _has_audio = true;
 }
 
@@ -272,9 +272,9 @@ void RotatingBlade::setAudioEnabled(bool enabled)
    GameMechanism::setAudioEnabled(enabled);
 }
 
-void RotatingBlade::setVolume(float volume)
+void RotatingBlade::setReferenceVolume(float volume)
 {
-   GameMechanism::setVolume(volume);
+   GameMechanism::setReferenceVolume(volume);
 
    if (_sample_enabled.has_value())
    {

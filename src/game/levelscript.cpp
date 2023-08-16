@@ -204,5 +204,5 @@ void LevelScript::luaUpdate(const sf::Time& dt)
 int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);
-   return _collision_rects.size();
+   return static_cast<int32_t>(_collision_rects.size());
 }

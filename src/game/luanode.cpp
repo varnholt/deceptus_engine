@@ -210,6 +210,32 @@ int32_t addAudioRange(lua_State* state)
 }
 
 /**
+ * @brief setAudioUpdateBehavior change audio update behavior
+ * @param state lua state
+ *    param 1: update behavior
+ * @return error code
+ */
+int32_t setAudioUpdateBehavior(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto audio_update_behavior = static_cast<AudioUpdateBehavior>(lua_tointeger(state, 1));
+   node->setAudioUpdateBehavior(audio_update_behavior);
+
+   return 0;
+}
+
+/**
  * @brief updateSpriteRect update node's sprite rect
  * @param state lua state
  *    param 1: id of sprite
@@ -1719,6 +1745,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
    lua_register(_lua_state, "registerHitSamples", ::registerHitSamples);
    lua_register(_lua_state, "setActive", ::setActive);
+   lua_register(_lua_state, "setAudioUpdateBehavior", ::setAudioUpdateBehavior);
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
@@ -2367,7 +2394,9 @@ void LuaNode::addWeapon(std::unique_ptr<Weapon> weapon)
 
 void LuaNode::useGun(size_t index, b2Vec2 from, b2Vec2 to)
 {
-   dynamic_cast<Gun&>(*_weapons[index]).useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
+   auto& gun = dynamic_cast<Gun&>(*_weapons[index]);
+   gun.setParentAudioUpdateData(_audio_update_data);
+   gun.useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
 }
 
 void LuaNode::stopScript()
@@ -2540,7 +2569,7 @@ void LuaNode::addAudioRange(float far_distance, float far_volume, float near_dis
    audio_range._volume_far = far_volume;
    audio_range._radius_near_px = near_distance;
    audio_range._volume_near = near_volume;
-   _audio_range = audio_range;
+   _audio_update_data._range = audio_range;
 
    if (_hitboxes.empty())
    {
@@ -2561,7 +2590,7 @@ void LuaNode::playSample(const std::string& sample, float volume)
       return;
    }
 
-   Audio::getInstance().playSample({sample, volume * _volume});
+   Audio::getInstance().playSample({sample, volume * _reference_volume});
 }
 
 void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)

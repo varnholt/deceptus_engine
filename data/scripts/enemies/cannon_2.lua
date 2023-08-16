@@ -102,6 +102,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function writeProperty(key, value)
+   -- print(string.format("write property: %s %s", key, value))
    if (key == "alignment") then
       if (value == "right") then
          -- print("setting alignment to left")
@@ -112,6 +113,9 @@ function writeProperty(key, value)
       mElapsedUntilFired = mElapsedUntilFired + value
    elseif (key == "fire_interval_s") then
       mFireInterval = value
+   elseif (key == "audio_update_behavior") then
+      update_behavior = audioUpdateBehaviorFromString(value)
+      setAudioUpdateBehavior(update_behavior)
    end
 end
 

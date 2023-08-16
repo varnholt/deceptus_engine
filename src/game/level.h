@@ -12,9 +12,8 @@
 #include "game/gamenode.h"
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
-#include "game/luanode.h"
 #include "game/mechanisms/portal.h"
-#include "game/objectupdater.h"
+#include "game/volumeupdater.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -65,7 +64,7 @@ public:
 
    void update(const sf::Time& dt);
    void updateViews();
-   void updateObjectUpdater();
+   void updateMechanismVolumes();
    void updateCameraSystem(const sf::Time& dt);
 
    void spawnEnemies();
@@ -131,6 +130,7 @@ protected:
    );
 
    void deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
+   void assignMechanismsToRooms();
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture& texture);
    void updatePlayerLight();
@@ -196,7 +196,7 @@ protected:
    std::array<ParallaxLayer, 3> _parallax_layers;
 
    // mechanisms
-   std::unique_ptr<ObjectUpdater> _object_updater;
+   std::unique_ptr<VolumeUpdater> _volume_updater;
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_map;
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_list;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
