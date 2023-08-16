@@ -112,7 +112,7 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 
                      while (next >= 0)
                      {
-                        next = line.find(',', pos);
+                        next = static_cast<int32_t>(line.find(',', pos));
                         val = atoi2(line.data() + pos);
                         _data[y * _width_tl + x] = val;
                         x++;

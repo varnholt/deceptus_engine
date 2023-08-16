@@ -481,23 +481,23 @@ b2Hull b2ComputeHull(const b2Vec2* points, int32 count)
 
 		for (int32 i = 0; i < hull.count; ++i)
 		{
-			int32 i1 = i;
-			int32 i2 = (i + 1) % hull.count;
-			int32 i3 = (i + 2) % hull.count;
+			int32 it1 = i;
+			int32 it2 = (i + 1) % hull.count;
+			int32 it3 = (i + 2) % hull.count;
 
-			b2Vec2 p1 = hull.points[i1];
-			b2Vec2 p2 = hull.points[i2];
-			b2Vec2 p3 = hull.points[i3];
+			b2Vec2 hp1 = hull.points[it1];
+			b2Vec2 hp2 = hull.points[it2];
+			b2Vec2 hp3 = hull.points[it3];
 
-			b2Vec2 e = p3 - p1;
-			e.Normalize();
+			b2Vec2 he = hp3 - hp1;
+			he.Normalize();
 
-			b2Vec2 v = p2 - p1;
-			float distance = b2Cross(p2 - p1, e);
+			b2Vec2 v = hp2 - hp1;
+			float distance = b2Cross(hp2 - hp1, he);
 			if (distance <= 2.0f * b2_linearSlop)
 			{
 				// remove midpoint from hull
-				for (int32 j = i2; j < hull.count - 1; ++j)
+				for (int32 j = it2; j < hull.count - 1; ++j)
 				{
 					hull.points[j] = hull.points[j + 1];
 				}
