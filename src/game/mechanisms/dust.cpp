@@ -121,7 +121,7 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
       if (particle_size_it != data._tmx_object->_properties->_map.end())
       {
-         dust->_particle_size_px = particle_size_it->second->_value_int.value();
+         dust->_particle_size_px = static_cast<uint8_t>(particle_size_it->second->_value_int.value());
       }
 
       if (particle_count_it != data._tmx_object->_properties->_map.end())

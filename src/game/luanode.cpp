@@ -1643,7 +1643,7 @@ LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(paren
 
 LuaNode::~LuaNode()
 {
-   Log::Info() << "stopping script: " << _script_name << " address: " << this;
+   // Log::Info() << "stopping script: " << _script_name << " address: " << this;
    stopScript();
 }
 
