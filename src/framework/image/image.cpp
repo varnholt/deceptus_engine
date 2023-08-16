@@ -39,7 +39,7 @@ void Image::init(int32_t x, int32_t y)
 // save image to file
 void Image::save(const std::string& filename) const
 {
-   savetga(filename, const_cast<uint32_t*>(getData().data()), getWidth(), getHeight());
+   savetga(filename, const_cast<uint32_t*>(getData().data()), static_cast<int16_t>(getWidth()), static_cast<int16_t>(getHeight()));
 }
 
 // load image from file
@@ -167,7 +167,7 @@ void Image::scaled(const Image& image) const
    for (auto dstY = 0; dstY < _height; dstY++)
    {
       auto y = iy >> 16;
-      auto sy = iy >> 8 & 0xff;
+      auto sy = static_cast<unsigned char>(iy >> 8 & 0xff);
 
       auto dst = getScanline(dstY);
       uint32_t *src1, *src2;
@@ -187,7 +187,7 @@ void Image::scaled(const Image& image) const
       for (int32_t dstX = 0; dstX < _width - 1; dstX++)
       {
          auto x = ix >> 16;
-         auto sx = ix >> 8 & 0xff;
+         auto sx = static_cast<unsigned char>(ix >> 8 & 0xff);
 
          auto c1 = src1[x];
          auto c2 = src1[x + 1];
