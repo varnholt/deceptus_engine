@@ -72,6 +72,33 @@ The properties below may differ for each rectangle within one room group.
 |start_offset_right_x_px|int|When player entering from the right of the room, position him to the relative x offset, given in pixels. The y counterpart `start_offset_right_y_px` is optional.|
 |start_offset_right_y_px|int|When player entering from the right of the room, position him to the relative x offset, given in pixels. The x counterpart `start_offset_right_x_px` must be provided.|
 
+
+## Controlling Audio and Volume
+
+Some mechanisms and enemies emit sounds. From a level design standpoint, it is very important that those sounds are only played when the player is nearby; and that the volume of the sound is scaled depending on the distance to the player.
+
+There are different approaches that are implemented in a unified manner across all mechanisms and enemies.
+
+First, there is the attribute '`audio_update_behavior`'. You can set it to the values below:
+
+|Value|Description|
+|-|-|
+|`always-on`|The mechanisms sounds are always on.|
+|`room-based`|Sounds are on when the player and the mechanism are in the same room.|
+|`range-based`|Sounds are on when the player is within a maximum radius around the mechanism. The sound is scaled between a 'far radius' and a 'near radius' where the volume is lerped between a 'far volume' and a 'near volume'.|
+|`room-range-based`|Not implemented yet. Sounds are on when the player and the mechanism are in the same room. Sounds are on when the player is within a maximum radius around the mechanism. The sound is scaled between a 'far radius' and a 'near radius' where the volume is lerped between a 'far volume' and a 'near volume'.|
+
+In order to control the range-based update behavior, you have to set the attributes below:  
+
+|Custom Property|Type|Description|
+|-|-|-|
+|`radius_far_px`|`float`|The maximum radius around the mechanism. When the player is within that radius, sounds will be interpolated between volume_far and volume_near.|
+|`radius_near_px`|`float`|The minimum radius around the mechanism. When the player is closer to the mechanism that this radius, sounds are at maximum.|
+|`volume_far`|`float`|The minimum sound for when volume interpolation starts.|
+|`volume_near`|`float`|The maximum sound for the sound interpolation.|
+
+
+
 # Addendum
 
 ## Folder Structure
