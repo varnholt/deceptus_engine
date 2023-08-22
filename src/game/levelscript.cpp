@@ -1,6 +1,7 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
+#include "game/luaconstants.h"
 
 namespace
 {
@@ -25,9 +26,6 @@ void resetInstance()
    std::lock_guard<std::mutex> lock(instance_mutex);
    instance = nullptr;
 }
-
-const std::string FUNCTION_INITIALIZE = "initialize";
-const std::string FUNCTION_UPDATE = "update";
 
 /**
  * @brief addCollisionRect add a collision rect that fires when the player intersects
@@ -162,6 +160,12 @@ void LevelScript::setup(const std::filesystem::path& path)
       else
       {
          luaInitialize();
+
+         // register properties
+         for (const auto& prop : _properties)
+         {
+            luaWriteProperty(prop._name, prop._value);
+         }
       }
    }
 }
@@ -172,12 +176,12 @@ void LevelScript::setup(const std::filesystem::path& path)
  */
 void LevelScript::luaInitialize()
 {
-   lua_getglobal(_lua_state, FUNCTION_INITIALIZE.c_str());
+   lua_getglobal(_lua_state, FUNCTION_INITIALIZE);
    auto result = lua_pcall(_lua_state, 0, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_INITIALIZE.c_str());
+      error(_lua_state, FUNCTION_INITIALIZE);
    }
 
    _initialized = true;
@@ -190,14 +194,37 @@ void LevelScript::luaInitialize()
  */
 void LevelScript::luaUpdate(const sf::Time& dt)
 {
-   lua_getglobal(_lua_state, FUNCTION_UPDATE.c_str());
+   lua_getglobal(_lua_state, FUNCTION_UPDATE);
    lua_pushnumber(_lua_state, dt.asSeconds());
 
    auto result = lua_pcall(_lua_state, 1, 0, 0);
 
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_UPDATE.c_str());
+      error(_lua_state, FUNCTION_UPDATE);
+   }
+}
+
+/**
+ * @brief LuaNode::luaWriteProperty write a property of the luanode
+ * @param key property key
+ * @param value property value
+ * callback name: writeProperty
+ */
+void LevelScript::luaWriteProperty(const std::string& key, const std::string& value)
+{
+   lua_getglobal(_lua_state, FUNCTION_WRITE_PROPERTY);
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, key.c_str());
+      lua_pushstring(_lua_state, value.c_str());
+
+      const auto result = lua_pcall(_lua_state, 2, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(_lua_state, FUNCTION_WRITE_PROPERTY);
+      }
    }
 }
 
