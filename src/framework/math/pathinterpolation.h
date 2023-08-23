@@ -1,9 +1,9 @@
 #pragma once
 
+#include <box2d/box2d.h>
 #include <functional>
 #include <iostream>
 #include <vector>
-#include "Box2D/Box2D.h"
 #include "framework/easings/easings.h"
 #include "framework/math/sfmlmath.h"
 

@@ -7,7 +7,8 @@ struct TmxObject;
 #include "fixturenode.h"
 #include "gamemechanism.h"
 
-#include "Box2D/Box2D.h"
+#include <box2d/box2d.h>
+
 #include <filesystem>
 #include <vector>
 

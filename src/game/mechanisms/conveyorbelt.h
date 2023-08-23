@@ -2,12 +2,12 @@
 
 #include <filesystem>
 
+#include <box2d/box2d.h>
+#include "SFML/Graphics.hpp"
 #include "constants.h"
+#include "fixturenode.h"
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
-#include "fixturenode.h"
-#include "Box2D/Box2D.h"
-#include "SFML/Graphics.hpp"
 
 struct TmxObject;
 

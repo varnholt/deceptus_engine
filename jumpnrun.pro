@@ -38,6 +38,12 @@ win32-msvc {
    QMAKE_CXXFLAGS += /wd5045
 }
 
+*-clang++
+{
+   message("configured for clang")
+   QMAKE_CXXFLAGS += /std:c++20
+}
+
 linux|win32-g++ {
    message("configured for g++")
    QMAKE_CXXFLAGS += -std=c++20

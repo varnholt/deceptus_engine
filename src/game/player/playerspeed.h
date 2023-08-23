@@ -1,7 +1,7 @@
 #ifndef PLAYERSPEED_H
 #define PLAYERSPEED_H
 
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 
 struct PlayerSpeed
 {

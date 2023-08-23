@@ -9,7 +9,8 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "Box2D/Box2D.h"
+#include <box2d/box2d.h>
+
 
 struct TmxLayer;
 struct TmxTileSet;

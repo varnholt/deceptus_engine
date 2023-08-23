@@ -6,7 +6,8 @@
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
-#include "Box2D/Box2D.h"
+#include <box2d/box2d.h>
+
 #include "SFML/Graphics.hpp"
 
 
