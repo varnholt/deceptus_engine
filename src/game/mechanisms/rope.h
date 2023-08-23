@@ -4,7 +4,7 @@
 #include "gamemechanism.h"
 #include "gamenode.h"
 
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 
 #include <cstdint>
 

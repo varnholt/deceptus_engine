@@ -1,10 +1,10 @@
 #pragma once
 
-#include "SDL/include/SDL.h"
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <thread>
+#include "sdl/include/SDL.h"
 
 class GameControllerDetection
 {

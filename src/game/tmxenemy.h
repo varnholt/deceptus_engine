@@ -1,7 +1,7 @@
 #pragma once
 
+#include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
-#include <Box2D/Box2D.h>
 
 #include <array>
 #include <optional>

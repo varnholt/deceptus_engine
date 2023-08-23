@@ -15,9 +15,9 @@
 #include "overlays/rainoverlay.h"
 #include "physics/physicsconfigurationui.h"
 
+#include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-#include "Box2D/Box2D.h"
 
 #include <future>
 #include <thread>

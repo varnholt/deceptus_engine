@@ -1,10 +1,10 @@
 #ifndef CHAINSHAPEANALYZER_H
 #define CHAINSHAPEANALYZER_H
 
+#include <box2d/box2d.h>
 #include <memory>
 #include <optional>
 #include <vector>
-#include "Box2D/Box2D.h"
 #include "constants.h"
 
 //
