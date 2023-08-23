@@ -1,8 +1,8 @@
 #pragma once
 
-#include "playercontrols.h"
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 #include <functional>
+#include "playercontrols.h"
 
 class b2Joint;
 class b2ChainShape;

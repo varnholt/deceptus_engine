@@ -17,9 +17,9 @@
 #include "game/player/playerspeed.h"
 #include "game/waterbubbles.h"
 
+#include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-#include "Box2D/Box2D.h"
 
 #include <chrono>
 #include <deque>
