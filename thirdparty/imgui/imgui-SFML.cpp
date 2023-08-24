@@ -551,8 +551,9 @@ ImGuiKey keycodeToImGuiKey(sf::Keyboard::Key code)
          return ImGuiKey_F11;
       case sf::Keyboard::F12:
          return ImGuiKey_F12;
+      default:
+         return ImGuiKey_None;
    }
-   return ImGuiKey_None;
 }
 
 ImGuiKey keycodeToImGuiMod(sf::Keyboard::Key code)
@@ -571,8 +572,9 @@ ImGuiKey keycodeToImGuiMod(sf::Keyboard::Key code)
       case sf::Keyboard::LSystem:
       case sf::Keyboard::RSystem:
          return ImGuiKey_ModSuper;
+      default:
+         return ImGuiKey_None;
    }
-   return ImGuiKey_None;
 }
 
 void ProcessEvent(const sf::Event& event)

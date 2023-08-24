@@ -3,60 +3,13 @@
 #include "audio.h"
 #include "constants.h"
 #include "extratable.h"
-#include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxtile.h"
-#include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "gamedeserializedata.h"
-#include "inventoryitem.h"
-#include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
 #include "tilemap.h"
 
 #include <iostream>
-#include "SFML/Graphics.hpp"
-
-//----------------------------------------------------------------------------------------------------------------------
-void Extra::load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
-{
-   resetExtras();
-
-   if (!layer)
-   {
-      Log::Error() << "tmx layer is empty, please fix your level design";
-      return;
-   }
-
-   if (!tileset)
-   {
-      Log::Error() << "tmx tileset is empty, please fix your level design";
-      return;
-   }
-
-   auto tiles = layer->_data;
-   auto width = layer->_width_tl;
-   auto height = layer->_height_tl;
-   auto first_id = tileset->_first_gid;
-
-   for (auto i = 0u; i < width; ++i)
-   {
-      for (auto j = 0u; j < height; ++j)
-      {
-         const auto tile_number = tiles[i + j * width];
-         if (tile_number != 0)
-         {
-            std::shared_ptr<ExtraItem> item = std::make_shared<ExtraItem>();
-            item->_sprite_offset.x = i;
-            item->_sprite_offset.y = j;
-            item->_position.x = static_cast<float>(i * PIXELS_PER_TILE);
-            item->_position.y = static_cast<float>(j * PIXELS_PER_TILE);
-            item->_type = static_cast<ExtraItem::ExtraSpriteIndex>(tile_number - first_id);
-            _extra_items.push_back(item);
-         }
-      }
-   }
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)

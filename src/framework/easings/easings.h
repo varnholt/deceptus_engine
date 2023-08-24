@@ -226,15 +226,18 @@ constexpr T easeOutBounce(T x)
    }
    else if (x < 2.0 / d1)
    {
-      return n1 * (x -= T{1.5} / d1) * x + T{0.75};
+      const auto temp = x - T{1.5} / d1;
+      return n1 * temp * temp + T{0.75};
    }
    else if (x < 2.5 / d1)
    {
-      return n1 * (x -= T{2.25} / d1) * x + T{0.9375};
+      const auto temp = x - T{2.25} / d1;
+      return n1 * temp * temp + T{0.9375};
    }
    else
    {
-      return n1 * (x -= T{2.625} / d1) * x + T{0.984375};
+      const auto temp = x - T{2.625} / d1;
+      return n1 * temp * temp + T{0.984375};
    }
 }
 

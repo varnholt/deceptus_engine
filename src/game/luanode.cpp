@@ -1723,6 +1723,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
    lua_register(_lua_state, "addShapeRect", ::addShapeRect);
    lua_register(_lua_state, "addShapeRectBevel", ::addShapeRectBevel);
+   lua_register(_lua_state, "addShapePoly", ::addShapePoly);
    lua_register(_lua_state, "addSprite", ::addSprite);
    lua_register(_lua_state, "addWeapon", ::addWeapon);
    lua_register(_lua_state, "applyForce", ::applyForce);

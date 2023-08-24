@@ -31,6 +31,7 @@ debug {
 win32-msvc {
    # link debug symbols
    message("configured for msvc")
+   DEFINES += _CRT_SECURE_NO_WARNINGS
    QMAKE_CXXFLAGS_RELEASE += /Zi
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
    QMAKE_CFLAGS_WARN_ON = -W4
@@ -38,10 +39,11 @@ win32-msvc {
    QMAKE_CXXFLAGS += /wd5045
 }
 
-*-clang++
-{
+linux|win32-clang++ {
    message("configured for clang")
    QMAKE_CXXFLAGS += /std:c++20
+   QMAKE_CXXFLAGS += -Wno-backslash-newline-escape
+   QMAKE_CXXFLAGS += -Wno-deprecated-declarations
 }
 
 linux|win32-g++ {

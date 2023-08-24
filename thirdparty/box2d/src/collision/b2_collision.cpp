@@ -493,8 +493,9 @@ b2Hull b2ComputeHull(const b2Vec2* points, int32 count)
 			he.Normalize();
 
 			b2Vec2 v = hp2 - hp1;
-			float distance = b2Cross(hp2 - hp1, he);
-			if (distance <= 2.0f * b2_linearSlop)
+                        (void)v;
+                        float distance = b2Cross(hp2 - hp1, he);
+                        if (distance <= 2.0f * b2_linearSlop)
 			{
 				// remove midpoint from hull
 				for (int32 j = it2; j < hull.count - 1; ++j)
@@ -568,7 +569,8 @@ bool b2ValidateHull(const b2Hull& hull)
 		e.Normalize();
 
 		b2Vec2 v = p2 - p1;
-		float distance = b2Cross(p2 - p1, e);
+                (void)v;
+                float distance = b2Cross(p2 - p1, e);
 		if (distance <= b2_linearSlop)
 		{
 			// p1-p2-p3 are collinear

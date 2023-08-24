@@ -51,8 +51,6 @@ private:
    uint32_t _index = 0;
 
    sf::FloatRect _pixel_rect;
-   bool _repeated = false;
-   bool _played = false;
    bool _active = false;
    bool _button_required = true;
    std::optional<int32_t> _consumed_counter;
