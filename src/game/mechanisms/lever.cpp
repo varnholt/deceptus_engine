@@ -1,14 +1,11 @@
 #include "lever.h"
 
-#include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "game/audio.h"
 #include "game/constants.h"
-#include "game/gameclock.h"
 #include "game/gamemechanism.h"
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
@@ -34,74 +31,6 @@ constexpr auto left_offset = (sprites_per_row - 1) * 3 * PIXELS_PER_TILE;
 constexpr auto idle_animation_speed = 10.0f;
 }  // namespace
 
-//-----------------------------------------------------------------------------
-std::vector<std::shared_ptr<GameMechanism>> Lever::load(GameNode* parent, const GameDeserializeData& data)
-{
-   if (!data._tmx_layer)
-   {
-      Log::Error() << "tmx layer is empty, please fix your level design";
-      return {};
-   }
-
-   if (!data._tmx_tileset)
-   {
-      Log::Error() << "tmx tileset is empty, please fix your level design";
-      return {};
-   }
-
-   std::vector<std::shared_ptr<GameMechanism>> levers;
-
-   auto tiles = data._tmx_layer->_data;
-   auto width = data._tmx_layer->_width_tl;
-   auto height = data._tmx_layer->_height_tl;
-   auto first_id = data._tmx_tileset->_first_gid;
-
-   for (auto j = 0; j < static_cast<int32_t>(height); j++)
-   {
-      for (auto i = 0; i < static_cast<int32_t>(width); i++)
-      {
-         auto tile_number = tiles[i + j * width];
-
-         if (tile_number != 0)
-         {
-            auto tile_id = tile_number - first_id;
-
-            if (tile_id == 33)
-            {
-               auto lever = std::make_shared<Lever>(parent);
-
-               if (data._tmx_layer->_properties)
-               {
-                  auto z_it = data._tmx_layer->_properties->_map.find("z");
-                  if (z_it != data._tmx_layer->_properties->_map.end())
-                  {
-                     auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-                     lever->setZ(z_index);
-                  }
-               }
-
-               // sprite is two tiles high
-               const auto x = PIXELS_PER_TILE * i;
-               const auto y = PIXELS_PER_TILE * (j - 1);
-
-               lever->_rect.left = static_cast<float>(x);
-               lever->_rect.top = static_cast<float>(y);
-               lever->_rect.width = PIXELS_PER_TILE * 3;
-               lever->_rect.height = PIXELS_PER_TILE * 2;
-
-               lever->_sprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-               lever->_texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
-               lever->_sprite.setTexture(*lever->_texture);
-               lever->updateSprite();
-
-               levers.push_back(lever);
-            }
-         }
-      }
-   }
-
-   return levers;
-}
 
 //-----------------------------------------------------------------------------
 void Lever::setup(const GameDeserializeData& data)

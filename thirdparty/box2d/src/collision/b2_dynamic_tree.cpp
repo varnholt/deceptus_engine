@@ -659,7 +659,8 @@ void b2DynamicTree::ValidateMetrics(int32 index) const
 	int32 height2 = m_nodes[child2].height;
 	int32 height;
 	height = 1 + b2Max(height1, height2);
-	b2Assert(node->height == height);
+        (void)height;
+        b2Assert(node->height == height);
 
 	b2AABB aabb;
 	aabb.Combine(m_nodes[child1].aabb, m_nodes[child2].aabb);

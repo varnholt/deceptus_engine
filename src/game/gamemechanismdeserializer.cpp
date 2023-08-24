@@ -97,11 +97,7 @@ void GameMechanismDeserializer::deserialize(
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
-         if (layer->_name.rfind(layer_name_doors, 0) == 0)
-         {
-            *mechanism_doors = Door::load(data);
-         }
-         else if (layer->_name == layer_name_fans)
+         if (layer->_name == layer_name_fans)
          {
             Fan::load(data);
          }
@@ -114,11 +110,6 @@ void GameMechanismDeserializer::deserialize(
          {
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
-         }
-         else if (layer->_name == layer_name_levers)
-         {
-            auto mechanism = Lever::load(parent, data);
-            mechanism_levers->insert(mechanism_levers->end(), mechanism.begin(), mechanism.end());
          }
          else if (layer->_name == layer_name_platforms)
          {
