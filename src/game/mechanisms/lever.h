@@ -61,7 +61,6 @@ public:
       const std::vector<std::shared_ptr<GameMechanism>>& doors
    );
 
-   [[deprecated]] static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
    void setup(const GameDeserializeData& data);
 
    void updateReceivers();

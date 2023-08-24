@@ -49,9 +49,6 @@ private:
    void updateLeverLag(const sf::Time& dt);
    void updateCollision();
 
-   int32_t _tu = 0;
-   int32_t _tv = 0;
-
    //     +---+
    //     | 0 |
    // +---+---+---+
@@ -72,8 +69,6 @@ private:
       sf::IntRect{0 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
       sf::IntRect{1 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
       sf::IntRect{2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE}};
-
-   int32_t _elapsed_ms = 0;
 
    sf::Vector2f _pixel_positions;
    sf::FloatRect _rect;

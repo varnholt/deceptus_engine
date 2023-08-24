@@ -45,7 +45,6 @@ private:
    float _angle = 0.0f;
    float _velocity = 0.0f;
    float _direction = 1.0f;
-   float _time_normalized = 0.0f;
 
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;

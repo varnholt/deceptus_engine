@@ -45,7 +45,6 @@ public:
    void toggle();
    void toggleWithPlayerChecks();
 
-   [[deprecated]] static std::vector<std::shared_ptr<GameMechanism>> load(const GameDeserializeData& data);
    void setup(const GameDeserializeData& data);
 
    bool isPlayerAtDoor() const;
@@ -82,7 +81,6 @@ private:
    bool _automatic_close = true;
 
    float _offset = 0.0f;
-   int32_t _tile_id = 0;
    bool _player_at_door = false;
    b2Body* _body = nullptr;
 };

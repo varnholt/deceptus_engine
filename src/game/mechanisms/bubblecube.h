@@ -77,7 +77,6 @@ private:
    float _mapped_value_normalized = 0.0f;
    float _move_down_velocity = 0.5f;
    float _move_up_velocity = -0.3f;
-   float _push_down_offset_m = 0.0f;
    float _contact_duration_s = 0.0f;
    std::optional<float> _maximum_contact_duration_s;
 
@@ -92,7 +91,6 @@ private:
    b2PolygonShape _shape;
 
    // spring based approach
-   bool _spring_based{false};
    b2BodyDef _anchor_def;
    b2Body* _anchor_body{nullptr};
    b2EdgeShape _anchor_a_shape;

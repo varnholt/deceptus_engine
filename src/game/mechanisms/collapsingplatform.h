@@ -72,7 +72,6 @@ private:
    void collapse();
 
    Settings _settings;
-   float _animation_offset_s = 0.0f;
    float _elapsed_s = 0.0f;
    float _collapse_elapsed_s = 0.0f;
    bool _collapsed = false;

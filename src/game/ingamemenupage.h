@@ -26,6 +26,7 @@ public:
    using FloatSeconds = std::chrono::duration<float>;
 
    InGameMenuPage() = default;
+   virtual ~InGameMenuPage() = default;
 
    virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    virtual void update(const sf::Time& dt) = 0;

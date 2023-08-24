@@ -72,7 +72,7 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
       str.erase(location + 1);
    };
 
-   auto faceCount = 0u;
+   // auto faceCount = 0u;
 
    std::ifstream obj_stream(filename, std::ios::in);
 
@@ -124,7 +124,7 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
          }
          else if (token == "f")
          {
-            faceCount++;
+            // faceCount++;
 
             std::vector<uint32_t> face;
 

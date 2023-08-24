@@ -204,7 +204,7 @@ void MenuScreenNameSelect::retrieveUsername()
 
    if (!_name.empty())
    {
-      _name[0] = std::toupper(_name[0]);
+      _name[0] = static_cast<char>(std::toupper(_name[0]));
       updateText();
    }
 }

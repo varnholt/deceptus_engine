@@ -5,7 +5,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "constants.h"
 #include "gamenode.h"
 
 struct ExtraItem;
@@ -44,7 +43,6 @@ public:
       ExtraSpriteIndex _type = ExtraSpriteIndex::Invalid;
    };
 
-   [[deprecated]] void load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset);
    void deserialize(GameNode* parent, const GameDeserializeData& data);
    void collide(const sf::FloatRect& player_rect);
    void resetExtras();
