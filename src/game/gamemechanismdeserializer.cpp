@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tools/log.h"
 
+#include "mechanisms/blockingrect.h"
 #include "mechanisms/bouncer.h"
 #include "mechanisms/bubblecube.h"
 #include "mechanisms/checkpoint.h"
@@ -51,6 +52,7 @@ void GameMechanismDeserializer::deserialize(
 
    GameDeserializeData data(data_ref);
 
+   auto mechanism_blocking_rects = mechanisms[std::string{layer_name_blocking_rects}];
    auto mechanism_bouncers = mechanisms[std::string{layer_name_bouncers}];
    auto mechanism_bubble_cubes = mechanisms[std::string{layer_name_bubble_cube}];
    auto mechanism_checkpoints = mechanisms[std::string{layer_name_checkpoints}];
@@ -146,7 +148,13 @@ void GameMechanismDeserializer::deserialize(
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
 
-            if (object_group->_name == layer_name_bubble_cube || tmx_object->_template_type == type_name_bubble_cube)
+            if (object_group->_name == layer_name_blocking_rects)
+            {
+               auto mechanism = std::make_shared<BlockingRect>(parent);
+               mechanism->setup(data);
+               mechanism_blocking_rects->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_bubble_cube || tmx_object->_template_type == type_name_bubble_cube)
             {
                auto mechanism = std::make_shared<BubbleCube>(parent, data);
                mechanism_bubble_cubes->push_back(mechanism);

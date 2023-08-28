@@ -1,20 +1,19 @@
 #include "menuscreennameselect.h"
 
-#include "menu.h"
 #include "game/gamestate.h"
 #include "game/savestate.h"
+#include "menu.h"
 
+#include <stdlib.h>
 #include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
 
-
-namespace {
-   static const int32_t charWidth = 19;
-   static const int32_t charHeight = 24;
-   static const size_t maxLength = 11;
-}
-
+namespace
+{
+static const int32_t charWidth = 19;
+static const int32_t charHeight = 24;
+static const size_t maxLength = 11;
+}  // namespace
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
@@ -28,14 +27,11 @@ MenuScreenNameSelect::MenuScreenNameSelect()
    setFilename("data/menus/nameselect.psd");
 
    _chars = {
-      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-      'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
+      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+      'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+      's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
    };
 }
-
 
 void MenuScreenNameSelect::up()
 {
@@ -43,7 +39,6 @@ void MenuScreenNameSelect::up()
    _char_offset.y = std::max(_char_offset.y, 0);
    updateLayers();
 }
-
 
 void MenuScreenNameSelect::down()
 {
@@ -66,7 +61,6 @@ void MenuScreenNameSelect::right()
    updateLayers();
 }
 
-
 void MenuScreenNameSelect::select()
 {
    if (_name.empty())
@@ -83,12 +77,10 @@ void MenuScreenNameSelect::select()
    SaveState::getCurrent()._load_level_requested = true;
 }
 
-
 void MenuScreenNameSelect::back()
 {
    Menu::getInstance()->show(Menu::MenuType::FileSelect);
 }
-
 
 void MenuScreenNameSelect::updateText()
 {
@@ -99,7 +91,6 @@ void MenuScreenNameSelect::updateText()
    const auto x = _name_rect.left + xOffset;
    _text.setPosition(x, _name_rect.top);
 }
-
 
 void MenuScreenNameSelect::chop()
 {
@@ -113,14 +104,12 @@ void MenuScreenNameSelect::chop()
    updateLayers();
 }
 
-
 void MenuScreenNameSelect::appendChar(char c)
 {
    _name += c;
    updateText();
    updateLayers();
 }
-
 
 void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -174,19 +163,16 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _shift -= static_cast<int32_t>(key == sf::Keyboard::LShift);
    _shift -= static_cast<int32_t>(key == sf::Keyboard::RShift);
 }
 
-
 void MenuScreenNameSelect::controllerButtonX()
 {
    chop();
 }
-
 
 void MenuScreenNameSelect::controllerButtonY()
 {
@@ -194,12 +180,11 @@ void MenuScreenNameSelect::controllerButtonY()
    appendChar(c);
 }
 
-
 void MenuScreenNameSelect::retrieveUsername()
 {
    // probably requires a regular expression to filter out the unicode crap
-   auto u1 = std::getenv("USERNAME");
-   auto u2 = std::getenv("USER");
+   const auto u1 = std::getenv("USERNAME");
+   const auto u2 = std::getenv("USER");
    _name = u1 ? u1 : (u2 ? u2 : "");
 
    if (!_name.empty())
@@ -209,30 +194,27 @@ void MenuScreenNameSelect::retrieveUsername()
    }
 }
 
-
 void MenuScreenNameSelect::loadingFinished()
 {
-    auto cursor = _layers["cursor"];
-    _char_origin.x = cursor->_sprite->getPosition().x;
-    _char_origin.y = cursor->_sprite->getPosition().y;
+   const auto cursor = _layers["cursor"];
+   _char_origin.x = cursor->_sprite->getPosition().x;
+   _char_origin.y = cursor->_sprite->getPosition().y;
 
-    auto playerName = _layers["players-name"];
-    _name_rect.left = playerName->_sprite->getPosition().x;
-    _name_rect.top = playerName->_sprite->getPosition().y;
-    _name_rect.width = static_cast<float>(playerName->_texture->getSize().x);
+   const auto playerName = _layers["players-name"];
+   _name_rect.left = playerName->_sprite->getPosition().x;
+   _name_rect.top = playerName->_sprite->getPosition().y;
+   _name_rect.width = static_cast<float>(playerName->_texture->getSize().x);
 
-    retrieveUsername();
+   retrieveUsername();
 
-    updateLayers();
+   updateLayers();
 }
-
 
 void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
    cursor->_sprite->setPosition(
-      static_cast<float>(_char_origin.x + _char_offset.x * charWidth),
-      static_cast<float>(_char_origin.y + _char_offset.y * charHeight)
+      static_cast<float>(_char_origin.x + _char_offset.x * charWidth), static_cast<float>(_char_origin.y + _char_offset.y * charHeight)
    );
 
    _layers["header-bg"]->_visible = true;
@@ -260,11 +242,8 @@ void MenuScreenNameSelect::updateLayers()
    _layers["cancel_pc_1"]->_visible = false;
 }
 
-
 void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
    window.draw(_text, states);
 }
-
-

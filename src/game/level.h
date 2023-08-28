@@ -199,6 +199,7 @@ protected:
    std::unique_ptr<VolumeUpdater> _volume_updater;
    std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_map;
    std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_list;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_blocking_rects;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bubble_cubes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;

@@ -212,6 +212,7 @@ SOURCES += \
    src/game/levelscript.cpp \
    src/game/luainterface.cpp \
    src/game/luanode.cpp \
+   src/game/mechanisms/blockingrect.cpp \
    src/game/mechanisms/bouncer.cpp \
    src/game/mechanisms/bouncerwrapper.cpp \
    src/game/mechanisms/bubblecube.cpp \
@@ -433,6 +434,7 @@ HEADERS += \
    src/game/luaconstants.h \
    src/game/luainterface.h \
    src/game/luanode.h \
+   src/game/mechanisms/blockingrect.h \
    src/game/mechanisms/bouncer.h \
    src/game/mechanisms/bouncerwrapper.h \
    src/game/mechanisms/bubblecube.h \
