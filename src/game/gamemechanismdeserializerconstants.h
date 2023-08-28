@@ -3,6 +3,7 @@
 
 #include <string_view>
 
+static constexpr std::string_view layer_name_blocking_rects{"blocking_rects"};
 static constexpr std::string_view layer_name_bouncers{"bouncers"};
 static constexpr std::string_view layer_name_bubble_cube{"bubble_cubes"};
 static constexpr std::string_view layer_name_checkpoints{"checkpoints"};

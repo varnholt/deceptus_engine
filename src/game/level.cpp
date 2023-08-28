@@ -219,6 +219,7 @@ Level::Level() : GameNode(nullptr)
    _light_system->_lights.push_back(_player_light);
 
    _mechanisms_list = {
+      &_mechanism_blocking_rects,
       &_mechanism_bouncers,
       &_mechanism_bubble_cubes,
       &_mechanism_checkpoints,
@@ -251,6 +252,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_weather,
    };
 
+   _mechanisms_map[std::string{layer_name_blocking_rects}] = &_mechanism_blocking_rects;
    _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
    _mechanisms_map[std::string{layer_name_bubble_cube}] = &_mechanism_bubble_cubes;
    _mechanisms_map[std::string{layer_name_checkpoints}] = &_mechanism_checkpoints;
