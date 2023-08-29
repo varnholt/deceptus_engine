@@ -44,6 +44,7 @@ static constexpr std::string_view layer_name_water_surface{"water_surface"};
 static constexpr std::string_view layer_name_water_surface_emitter{"water_surface_emitter"};
 static constexpr std::string_view layer_name_weather{"weather"};
 
+static constexpr std::string_view type_name_blocking_rect{"BlockingRect"};
 static constexpr std::string_view type_name_bouncer{"Bouncer"};
 static constexpr std::string_view type_name_bubble_cube{"BubbleCube"};
 static constexpr std::string_view type_name_checkpoint{"CheckPoint"};
