@@ -11,6 +11,37 @@ If you put all objects into a separate object group, you can adjust their z inde
 &nbsp;
 
 ---
+
+## Blocking Rects
+
+A blocking rectangle is a textured or untextured (invisible) rectangle the player cannot pass through while it is enabled.
+The idea is that there are barriers in a level that are controlled by a Lever mechanism, by a Sensor Rect mechanism, or by the level's script.
+Once disabled, the barrier is no longer effective and the player can pass through.
+Like most mechanisms, blocking rectangle are created by just drawing a rectangle into its corresponding layer or by assigning the right object type.
+The dimensions and position of the blocking area are controlled by the size of the rectangle.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`BlockingRect`|
+|Object Group|`blocking_rects`|
+
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index|
+|texture|string|Path to the color texture to draw (the default is empty/invisible).|
+|normal|string|Path to the normal texture to draw (the default is empty/invisible).|
+
+&nbsp;
+
+&nbsp;
+
+---
+
 ## Bouncers
 
 Bouncers allow the player to jump very high or bounce him far into the direction the bouncer points to. At the moment only bouncers pointing up are supported.
