@@ -148,7 +148,7 @@ void GameMechanismDeserializer::deserialize(
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
 
-            if (object_group->_name == layer_name_blocking_rects)
+            if (object_group->_name == layer_name_blocking_rects || tmx_object->_template_type == type_name_blocking_rect)
             {
                auto mechanism = std::make_shared<BlockingRect>(parent);
                mechanism->setup(data);
