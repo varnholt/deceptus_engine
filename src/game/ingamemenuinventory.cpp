@@ -1,13 +1,13 @@
 #include "ingamemenuinventory.h"
 
-#include "extra.h"
 #include "framework/easings/easings.h"
-#include "gameconfiguration.h"
-#include "inventoryitem.h"
-#include "player/player.h"
-#include "player/playerinfo.h"
-#include "savestate.h"
-#include "texturepool.h"
+#include "game/gameconfiguration.h"
+#include "game/inventoryitem.h"
+#include "game/mechanisms/extra.h"
+#include "game/player/player.h"
+#include "game/player/playerinfo.h"
+#include "game/savestate.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 
