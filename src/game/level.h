@@ -9,11 +9,11 @@
 #include "game/constants.h"
 #include "game/effects/lightsystem.h"
 #include "game/effects/staticlight.h"
+#include "game/extra.h"
 #include "game/gamenode.h"
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
 #include "game/mechanisms/portal.h"
-#include "game/volumeupdater.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -21,6 +21,7 @@
 #include "game/shaders/gammashader.h"
 #include "game/squaremarcher.h"
 #include "game/tmxenemy.h"
+#include "game/volumeupdater.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -230,6 +231,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
+   std::shared_ptr<Extra> _extra;  // should become a gamemechanism
 
    // graphic effects
    BoomEffect _boom_effect;
