@@ -228,6 +228,26 @@ void LevelScript::luaWriteProperty(const std::string& key, const std::string& va
    }
 }
 
+/**
+ * @brief LuaNode::luaPlayerReceivedExtra called when player received an extra
+ * @param extra_name name of the extra
+ */
+void LevelScript::luaPlayerReceivedExtra(const std::string& extra_name)
+{
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_RECEIVED_EXTRA);
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, extra_name.c_str());
+
+      const auto result = lua_pcall(_lua_state, 1, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(_lua_state, FUNCTION_PLAYER_RECEIVED_EXTRA);
+      }
+   }
+}
+
 int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);

@@ -116,7 +116,6 @@ public:
    void kill(std::optional<DeathReason> death_reason = std::nullopt);
    void goToPortal(auto portal);
 
-   const std::shared_ptr<Extra>& getExtra() const;
    const std::shared_ptr<WeaponSystem>& getWeaponSystem() const;
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerJump& getJump() const;
@@ -173,7 +172,6 @@ private:
 
    ToggleCallback _toggle_callback;
    std::shared_ptr<WeaponSystem> _weapon_system;
-   std::shared_ptr<Extra> _extra;
 
    // all related to player physics and box2d
    std::shared_ptr<b2World> _world;

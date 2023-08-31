@@ -552,8 +552,7 @@ void Level::loadTmx()
             }
             else if (object_group->_name == "extras")
             {
-               const auto& extra_manager = Player::getCurrent()->getExtra();
-               extra_manager->deserialize(this, data);
+               _extra->deserialize(this, data);
             }
             else if (object_group->_name == "rooms")
             {
