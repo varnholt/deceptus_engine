@@ -9,7 +9,6 @@
 #include "game/constants.h"
 #include "game/effects/lightsystem.h"
 #include "game/effects/staticlight.h"
-#include "game/extra.h"
 #include "game/gamenode.h"
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
@@ -213,6 +212,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dust;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_extras;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
@@ -231,7 +231,6 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
-   std::shared_ptr<Extra> _extra;  // should become a gamemechanism
 
    // graphic effects
    BoomEffect _boom_effect;
