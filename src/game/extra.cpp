@@ -3,11 +3,15 @@
 #include "audio.h"
 #include "constants.h"
 #include "extratable.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
-#include "gamedeserializedata.h"
-#include "player/playerinfo.h"
-#include "savestate.h"
-#include "tilemap.h"
+#include "game/gamedeserializedata.h"
+#include "game/player/playerinfo.h"
+#include "game/savestate.h"
+#include "game/texturepool.h"
+#include "game/tilemap.h"
 
 #include <iostream>
 
@@ -20,6 +24,46 @@ void Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
    const auto height_px = data._tmx_object->_height_px;
 
    std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
+
+   auto extra = std::make_shared<ExtraItem>(this);
+
+   extra->_name = data._tmx_object->_name;
+   extra->_rect = {pos_x_px, pos_y_px, width_px, height_px};
+
+   if (data._tmx_object->_properties)
+   {
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
+      if (z_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         extra->_z = z_index;
+      }
+
+      const auto texture_it = data._tmx_object->_properties->_map.find("texture");
+      if (texture_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto texture = texture_it->second->_value_string.value();
+         extra->_texture = TexturePool::getInstance().get(texture);
+         extra->_sprite.setTexture(*extra->_texture);
+         extra->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+      }
+
+      const auto sample_it = data._tmx_object->_properties->_map.find("sample");
+      if (sample_it != data._tmx_object->_properties->_map.end())
+      {
+         extra->_sample = sample_it->second->_value_string.value();
+      }
+   }
+
+   //
+   // add
+   // - giveextra
+   // - removeextra
+   // to levelscript
+   //
+   // add
+   // - enable/disable mechanism function to level
+   // - add enable/disable mechanism code to levelscript
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -32,83 +76,39 @@ void Extra::collide(const sf::FloatRect& player_rect)
          continue;
       }
 
-      sf::FloatRect item_rect;
-      item_rect.left = extra->_position.x;
-      item_rect.top = extra->_position.y;
-      item_rect.width = PIXELS_PER_TILE;
-      item_rect.height = PIXELS_PER_TILE;
-
-      if (player_rect.intersects(item_rect))
+      if (player_rect.intersects(extra->_rect))
       {
          extra->_active = false;
 
-         _tilemap->hideTile(extra->_sprite_offset.x, extra->_sprite_offset.y);
-
-         switch (extra->_type)
+         for (auto& cb : _callbacks)
          {
-            case ExtraItem::ExtraSpriteIndex::Coin:
-               Audio::getInstance().playSample({"coin.wav"});
-               break;
-            case ExtraItem::ExtraSpriteIndex::Cherry:
-               Audio::getInstance().playSample({"healthup.wav"});
-               SaveState::getPlayerInfo()._extra_table._health.addHealth(4);
-               break;
-            case ExtraItem::ExtraSpriteIndex::Banana:
-               Audio::getInstance().playSample({"healthup.wav"});
-               SaveState::getPlayerInfo()._extra_table._health.addHealth(1);
-               break;
-            case ExtraItem::ExtraSpriteIndex::Apple:
-               Audio::getInstance().playSample({"powerup.wav"});
-               break;
-            case ExtraItem::ExtraSpriteIndex::KeyRed:
-            {
-               Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyRed);
-               break;
-            }
-            case ExtraItem::ExtraSpriteIndex::KeyOrange:
-            {
-               Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyOrange);
-               break;
-            }
-            case ExtraItem::ExtraSpriteIndex::KeyBlue:
-            {
-               Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyBlue);
-               break;
-            }
-            case ExtraItem::ExtraSpriteIndex::KeyGreen:
-            {
-               Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyGreen);
-               break;
-            }
-            case ExtraItem::ExtraSpriteIndex::KeyYellow:
-            {
-               Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
-               break;
-            }
-            case ExtraItem::ExtraSpriteIndex::Dash:
-            {
-               Audio::getInstance().playSample({"powerup.wav"});
-               SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
-               break;
-            }
-            case ExtraItem::ExtraSpriteIndex::Invalid:
-            {
-               break;
-            }
+            cb(extra->_name);
          }
+
+         // case ExtraItem::ExtraSpriteIndex::KeyYellow:
+         // {
+         //    Audio::getInstance().playSample({"powerup.wav"});
+         //    SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
+         //    break;
+         // }
+         // case ExtraItem::ExtraSpriteIndex::Dash:
+         // {
+         //    Audio::getInstance().playSample({"powerup.wav"});
+         //    SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
+         //    break;
+         // }
       }
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Extra::resetExtras()
 {
    _extra_items.clear();
+}
+
+Extra::Extra(GameNode* parent) : GameNode(parent)
+{
+   setClassName(typeid(Extra).name());
 }
 
 Extra::ExtraItem::ExtraItem(GameNode* /*parent*/)
