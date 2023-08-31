@@ -35,7 +35,7 @@ public:
 
    bool _active = true;
    std::string _name;
-   std::string _sample;
+   std::optional<std::string> _sample;
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect;
