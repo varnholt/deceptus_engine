@@ -20,6 +20,7 @@ private:
    void luaInitialize();
    void luaUpdate(const sf::Time& dt);
    void luaWriteProperty(const std::string& key, const std::string& value);
+   void luaPlayerReceivedExtra(const std::string& extra_name);
 
    std::vector<sf::IntRect> _collision_rects;
    std::vector<ScriptProperty> _properties;

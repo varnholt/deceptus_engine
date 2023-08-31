@@ -1,22 +1,28 @@
 #include "extra.h"
 
-#include "audio.h"
-#include "constants.h"
-#include "extratable.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "game/audio.h"
+#include "game/constants.h"
+#include "game/extratable.h"
 #include "game/gamedeserializedata.h"
 #include "game/player/playerinfo.h"
-#include "game/savestate.h"
 #include "game/texturepool.h"
-#include "game/tilemap.h"
 
 #include <iostream>
 
+std::vector<std::shared_ptr<Extra>> Extra::_extra_items;
+std::vector<Extra::ExtraCollback> Extra::_callbacks;
+
+Extra::Extra(GameNode* parent) : GameNode(parent)
+{
+   setClassName(typeid(Extra).name());
+}
+
 //----------------------------------------------------------------------------------------------------------------------
-void Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
+std::shared_ptr<Extra> Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
 {
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
@@ -25,7 +31,7 @@ void Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
 
    std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
 
-   auto extra = std::make_shared<ExtraItem>(this);
+   auto extra = std::make_shared<Extra>(this);
 
    extra->_name = data._tmx_object->_name;
    extra->_rect = {pos_x_px, pos_y_px, width_px, height_px};
@@ -54,6 +60,8 @@ void Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
          extra->_sample = sample_it->second->_value_string.value();
       }
    }
+
+   return extra;
 
    //
    // add
@@ -106,12 +114,7 @@ void Extra::resetExtras()
    _extra_items.clear();
 }
 
-Extra::Extra(GameNode* parent) : GameNode(parent)
+std::optional<sf::FloatRect> Extra::getBoundingBoxPx()
 {
-   setClassName(typeid(Extra).name());
-}
-
-Extra::ExtraItem::ExtraItem(GameNode* /*parent*/)
-{
-   setClassName(typeid(ExtraItem).name());
+   return _rect;
 }
