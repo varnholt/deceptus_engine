@@ -27,7 +27,6 @@
 #include "game/constants.h"
 #include "game/debugdraw.h"
 #include "game/displaymode.h"
-#include "game/extra.h"
 #include "game/fixturenode.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontactlistener.h"
@@ -43,6 +42,7 @@
 #include "game/mechanisms/checkpoint.h"
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
+#include "game/mechanisms/extra.h"
 #include "game/mechanisms/lever.h"
 #include "game/meshtools.h"
 #include "game/parsedata.h"
@@ -549,10 +549,6 @@ void Level::loadTmx()
                TmxEnemy enemy;
                enemy.parse(tmx_object);
                _enemy_data_from_tmx_layer[enemy._id] = enemy;
-            }
-            else if (object_group->_name == "extras")
-            {
-               _extra->deserialize(this, data);
             }
             else if (object_group->_name == "rooms")
             {

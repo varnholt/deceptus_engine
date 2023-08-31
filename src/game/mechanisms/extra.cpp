@@ -22,7 +22,7 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<Extra> Extra::deserialize(GameNode* /*parent*/, const GameDeserializeData& data)
+std::shared_ptr<Extra> Extra::deserialize(const GameDeserializeData& data)
 {
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
@@ -93,9 +93,13 @@ void Extra::collide(const sf::FloatRect& player_rect)
             cb(extra->_name);
          }
 
+         if (extra->_sample.has_value())
+         {
+            Audio::getInstance().playSample({extra->_sample.value()});
+         }
+
          // case ExtraItem::ExtraSpriteIndex::KeyYellow:
          // {
-         //    Audio::getInstance().playSample({"powerup.wav"});
          //    SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
          //    break;
          // }

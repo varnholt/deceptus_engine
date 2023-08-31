@@ -22,7 +22,7 @@ class Extra : public GameMechanism, public GameNode
 public:
    Extra(GameNode* parent = nullptr);
 
-   std::shared_ptr<Extra> deserialize(GameNode* parent, const GameDeserializeData& data);
+   std::shared_ptr<Extra> deserialize(const GameDeserializeData& data);
 
    using ExtraCollback = std::function<void(const std::string&)>;
 

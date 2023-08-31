@@ -4,38 +4,39 @@
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tools/log.h"
 
-#include "mechanisms/blockingrect.h"
-#include "mechanisms/bouncer.h"
-#include "mechanisms/bubblecube.h"
-#include "mechanisms/checkpoint.h"
-#include "mechanisms/collapsingplatform.h"
-#include "mechanisms/controllerhelp.h"
-#include "mechanisms/conveyorbelt.h"
-#include "mechanisms/crusher.h"
-#include "mechanisms/damagerect.h"
-#include "mechanisms/deathblock.h"
-#include "mechanisms/dialogue.h"
-#include "mechanisms/door.h"
-#include "mechanisms/dust.h"
-#include "mechanisms/fan.h"
-#include "mechanisms/laser.h"
-#include "mechanisms/lever.h"
-#include "mechanisms/moveablebox.h"
-#include "mechanisms/movingplatform.h"
-#include "mechanisms/onoffblock.h"
-#include "mechanisms/portal.h"
-#include "mechanisms/rope.h"
-#include "mechanisms/ropewithlight.h"
-#include "mechanisms/rotatingblade.h"
-#include "mechanisms/sensorrect.h"
-#include "mechanisms/shaderlayer.h"
-#include "mechanisms/smokeeffect.h"
-#include "mechanisms/soundemitter.h"
-#include "mechanisms/spikeball.h"
-#include "mechanisms/spikeblock.h"
-#include "mechanisms/spikes.h"
-#include "mechanisms/watersurface.h"
-#include "mechanisms/weather.h"
+#include "game/mechanisms/blockingrect.h"
+#include "game/mechanisms/bouncer.h"
+#include "game/mechanisms/bubblecube.h"
+#include "game/mechanisms/checkpoint.h"
+#include "game/mechanisms/collapsingplatform.h"
+#include "game/mechanisms/controllerhelp.h"
+#include "game/mechanisms/conveyorbelt.h"
+#include "game/mechanisms/crusher.h"
+#include "game/mechanisms/damagerect.h"
+#include "game/mechanisms/deathblock.h"
+#include "game/mechanisms/dialogue.h"
+#include "game/mechanisms/door.h"
+#include "game/mechanisms/dust.h"
+#include "game/mechanisms/extra.h"
+#include "game/mechanisms/fan.h"
+#include "game/mechanisms/laser.h"
+#include "game/mechanisms/lever.h"
+#include "game/mechanisms/moveablebox.h"
+#include "game/mechanisms/movingplatform.h"
+#include "game/mechanisms/onoffblock.h"
+#include "game/mechanisms/portal.h"
+#include "game/mechanisms/rope.h"
+#include "game/mechanisms/ropewithlight.h"
+#include "game/mechanisms/rotatingblade.h"
+#include "game/mechanisms/sensorrect.h"
+#include "game/mechanisms/shaderlayer.h"
+#include "game/mechanisms/smokeeffect.h"
+#include "game/mechanisms/soundemitter.h"
+#include "game/mechanisms/spikeball.h"
+#include "game/mechanisms/spikeblock.h"
+#include "game/mechanisms/spikes.h"
+#include "game/mechanisms/watersurface.h"
+#include "game/mechanisms/weather.h"
 
 #include <ranges>
 
@@ -65,6 +66,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_dialogues = mechanisms[std::string{layer_name_dialogues}];
    auto mechanism_doors = mechanisms[std::string{layer_name_doors}];
    auto mechanism_dust = mechanisms[std::string{layer_name_dust}];
+   auto mechanism_extras = mechanisms[std::string{layer_name_extras}];
    auto mechanism_fans = mechanisms[std::string{layer_name_fans}];
    auto mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
    auto mechanism_levers = mechanisms[std::string{layer_name_levers}];
@@ -174,6 +176,12 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = std::make_shared<Door>(parent);
                mechanism->setup(data);
+               mechanism_doors->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_extras || tmx_object->_template_type == type_name_extra)
+            {
+               auto mechanism = std::make_shared<Extra>(parent);
+               mechanism->deserialize(data);
                mechanism_doors->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_levers || tmx_object->_template_type == type_name_lever)

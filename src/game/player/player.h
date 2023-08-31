@@ -3,7 +3,6 @@
 #include "game/animationpool.h"
 #include "game/chunk.h"
 #include "game/constants.h"
-#include "game/extra.h"
 #include "game/gamenode.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playerattack.h"
