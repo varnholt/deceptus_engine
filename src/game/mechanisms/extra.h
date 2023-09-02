@@ -24,14 +24,11 @@ public:
 
    std::shared_ptr<Extra> deserialize(const GameDeserializeData& data);
 
-   using ExtraCollback = std::function<void(const std::string&)>;
+   void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
+   void update(const sf::Time& dt) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   static void collide(const sf::FloatRect& player_rect);
-   static void resetExtras();
-   static std::vector<std::shared_ptr<Extra>> _extra_items;
-   static std::vector<ExtraCollback> _callbacks;
-
-   virtual std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   using ExtraCallback = std::function<void(const std::string&)>;
 
    bool _active = true;
    std::string _name;
@@ -40,4 +37,5 @@ public:
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect;
    int32_t _z = 0;
+   std::vector<ExtraCallback> _callbacks;
 };

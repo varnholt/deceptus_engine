@@ -182,7 +182,7 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = std::make_shared<Extra>(parent);
                mechanism->deserialize(data);
-               mechanism_doors->push_back(mechanism);
+               mechanism_extras->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_levers || tmx_object->_template_type == type_name_lever)
             {
