@@ -2,6 +2,7 @@
 
 #include "framework/tools/log.h"
 #include "game/luaconstants.h"
+#include "game/savestate.h"
 
 namespace
 {
@@ -62,15 +63,14 @@ int32_t addCollisionRect(lua_State* state)
 int32_t isMechanismEnabled(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc != 1)
+   if (argc != 2)
    {
       return 0;
    }
 
-   // const auto id = lua_tostring(state, 1);
-   // find mechanism with given id
+   const auto id = lua_tostring(state, 1);
 
-   return 1;
+   return getInstance()->isMechanismEnabled(id);
 }
 
 /**
@@ -87,10 +87,50 @@ int32_t setMechanismEnabled(lua_State* state)
       return 0;
    }
 
-   // const auto id = lua_tostring(state, 1);
-   // const auto active = static_cast<bool>(lua_toboolean(state, 2));
-   // node->setActive(active);
+   const auto id = lua_tostring(state, 1);
+   const auto enabled = lua_toboolean(state, 2);
 
+   getInstance()->setMechanismEnabled(id, enabled);
+   return 0;
+}
+
+/**
+ * @brief addSkill add a skill to the player
+ * @param state lua state
+ *    param 1: skill to add
+ * @return error code
+ */
+int32_t addSkill(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto skill = lua_tointeger(state, 1);
+
+   getInstance()->addSkill(skill);
+   return 0;
+}
+
+/**
+ * @brief removeSkill add a skill to the player
+ * @param state lua state
+ *    param 1: skill to add
+ * @return error code
+ */
+int32_t removeSkill(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto skill = lua_tointeger(state, 1);
+
+   getInstance()->removeSkill(skill);
    return 0;
 }
 
@@ -252,4 +292,26 @@ int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);
    return static_cast<int32_t>(_collision_rects.size());
+}
+
+void LevelScript::setMechanismEnabled(const std::string& mechanism_id, bool enabled)
+{
+   (void)mechanism_id;
+   (void)enabled;
+}
+
+bool LevelScript::isMechanismEnabled(const std::string& mechanism_id) const
+{
+   (void)mechanism_id;
+   return true;
+}
+
+void LevelScript::addSkill(int32_t skill)
+{
+   SaveState::getPlayerInfo()._extra_table._skills._skills |= skill;
+}
+
+void LevelScript::removeSkill(int32_t skill)
+{
+   SaveState::getPlayerInfo()._extra_table._skills._skills &= ~skill;
 }
