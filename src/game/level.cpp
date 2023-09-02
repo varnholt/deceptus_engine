@@ -667,6 +667,13 @@ void Level::initialize()
    const auto path = std::filesystem::path(_description->_filename).parent_path();
    _level_script.setup(path / "level.lua");
 
+   // handshake between extra mechanism and level script
+   for (auto extra_mechanism : _mechanism_extras)
+   {
+      auto extra = std::dynamic_pointer_cast<Extra>(extra_mechanism);
+      extra->_callbacks.push_back([this](const std::string& extra) { _level_script.luaPlayerReceivedExtra(extra); });
+   }
+
    // dump();
 }
 

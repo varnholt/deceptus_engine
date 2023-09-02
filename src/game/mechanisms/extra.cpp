@@ -8,13 +8,11 @@
 #include "game/constants.h"
 #include "game/extratable.h"
 #include "game/gamedeserializedata.h"
+#include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/texturepool.h"
 
 #include <iostream>
-
-std::vector<std::shared_ptr<Extra>> Extra::_extra_items;
-std::vector<Extra::ExtraCollback> Extra::_callbacks;
 
 Extra::Extra(GameNode* parent) : GameNode(parent)
 {
@@ -63,59 +61,52 @@ std::shared_ptr<Extra> Extra::deserialize(const GameDeserializeData& data)
 
    return extra;
 
-   //
-   // add
-   // - giveextra
-   // - removeextra
-   // to levelscript
-   //
    // add
    // - enable/disable mechanism function to level
    // - add enable/disable mechanism code to levelscript
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Extra::collide(const sf::FloatRect& player_rect)
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   for (auto& extra : _extra_items)
-   {
-      if (!extra->_active)
-      {
-         continue;
-      }
-
-      if (player_rect.intersects(extra->_rect))
-      {
-         extra->_active = false;
-
-         for (auto& cb : _callbacks)
-         {
-            cb(extra->_name);
-         }
-
-         if (extra->_sample.has_value())
-         {
-            Audio::getInstance().playSample({extra->_sample.value()});
-         }
-
-         // case ExtraItem::ExtraSpriteIndex::KeyYellow:
-         // {
-         //    SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
-         //    break;
-         // }
-         // case ExtraItem::ExtraSpriteIndex::Dash:
-         // {
-         //    Audio::getInstance().playSample({"powerup.wav"});
-         //    SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
-         //    break;
-         // }
-      }
-   }
+   target.draw(_sprite);
 }
 
-void Extra::resetExtras()
+//----------------------------------------------------------------------------------------------------------------------
+void Extra::update(const sf::Time& dt)
 {
-   _extra_items.clear();
+   if (!_active)
+   {
+      return;
+   }
+
+   const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
+   if (player_rect_px.intersects(_rect))
+   {
+      _active = false;
+
+      for (auto& cb : _callbacks)
+      {
+         cb(_name);
+      }
+
+      if (_sample.has_value())
+      {
+         Audio::getInstance().playSample({_sample.value()});
+      }
+
+      // case ExtraItem::ExtraSpriteIndex::KeyYellow:
+      // {
+      //    SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
+      //    break;
+      // }
+      // case ExtraItem::ExtraSpriteIndex::Dash:
+      // {
+      //    Audio::getInstance().playSample({"powerup.wav"});
+      //    SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
+      //    break;
+      // }
+   }
 }
 
 std::optional<sf::FloatRect> Extra::getBoundingBoxPx()
