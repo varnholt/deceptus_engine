@@ -20,7 +20,7 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-std::shared_ptr<Extra> Extra::deserialize(const GameDeserializeData& data)
+void Extra::deserialize(const GameDeserializeData& data)
 {
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
@@ -29,10 +29,8 @@ std::shared_ptr<Extra> Extra::deserialize(const GameDeserializeData& data)
 
    std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
 
-   auto extra = std::make_shared<Extra>(this);
-
-   extra->_name = data._tmx_object->_name;
-   extra->_rect = {pos_x_px, pos_y_px, width_px, height_px};
+   _name = data._tmx_object->_name;
+   _rect = {pos_x_px, pos_y_px, width_px, height_px};
 
    if (data._tmx_object->_properties)
    {
@@ -40,26 +38,24 @@ std::shared_ptr<Extra> Extra::deserialize(const GameDeserializeData& data)
       if (z_it != data._tmx_object->_properties->_map.end())
       {
          const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-         extra->_z = z_index;
+         _z = z_index;
       }
 
       const auto texture_it = data._tmx_object->_properties->_map.find("texture");
       if (texture_it != data._tmx_object->_properties->_map.end())
       {
-         const auto texture = texture_it->second->_value_string.value();
-         extra->_texture = TexturePool::getInstance().get(texture);
-         extra->_sprite.setTexture(*extra->_texture);
-         extra->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+         const auto texture_path = texture_it->second->_value_string.value();
+         _texture = TexturePool::getInstance().get(texture_path);
+         _sprite.setTexture(*_texture);
+         _sprite.setPosition(pos_x_px, pos_y_px);
       }
 
       const auto sample_it = data._tmx_object->_properties->_map.find("sample");
       if (sample_it != data._tmx_object->_properties->_map.end())
       {
-         extra->_sample = sample_it->second->_value_string.value();
+         _sample = sample_it->second->_value_string.value();
       }
    }
-
-   return extra;
 
    // add
    // - enable/disable mechanism function to level
@@ -69,11 +65,16 @@ std::shared_ptr<Extra> Extra::deserialize(const GameDeserializeData& data)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
+   if (!_active)
+   {
+      return;
+   }
+
    target.draw(_sprite);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Extra::update(const sf::Time& dt)
+void Extra::update(const sf::Time& /*dt*/)
 {
    if (!_active)
    {
@@ -81,6 +82,12 @@ void Extra::update(const sf::Time& dt)
    }
 
    const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
+
+   // std::cout << "x: " << _rect.left << ", " << _rect.top << " (width: " << _rect.width << ", height: " << _rect.height << ")"
+   //           << " vs "
+   //           << "x: " << player_rect_px.left << ", " << player_rect_px.top << " (width: " << player_rect_px.width
+   //           << ", height: " << player_rect_px.height << ")" << std::endl;
+
    if (player_rect_px.intersects(_rect))
    {
       _active = false;
@@ -102,7 +109,6 @@ void Extra::update(const sf::Time& dt)
       // }
       // case ExtraItem::ExtraSpriteIndex::Dash:
       // {
-      //    Audio::getInstance().playSample({"powerup.wav"});
       //    SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
       //    break;
       // }
