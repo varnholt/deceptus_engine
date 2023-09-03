@@ -232,6 +232,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_dialogues,
       &_mechanism_doors,
       &_mechanism_dust,
+      &_mechanism_extras,
       &_mechanism_fans,
       &_mechanism_lasers,
       &_mechanism_levers,
@@ -265,6 +266,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
    _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;
    _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
+   _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
@@ -307,7 +309,7 @@ Level::~Level()
    Log::Info() << "deleting current level";
 
    // stop active timers because their callbacks being called after destruction of the level/world can be nasty
-   for (auto& enemy : LuaInterface::instance().getObjectList())
+   for (const auto& enemy : LuaInterface::instance().getObjectList())
    {
       Timer::removeByCaller(enemy);
    }

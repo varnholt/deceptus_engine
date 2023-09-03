@@ -22,7 +22,7 @@ class Extra : public GameMechanism, public GameNode
 public:
    Extra(GameNode* parent = nullptr);
 
-   std::shared_ptr<Extra> deserialize(const GameDeserializeData& data);
+   void deserialize(const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
    void update(const sf::Time& dt) override;
