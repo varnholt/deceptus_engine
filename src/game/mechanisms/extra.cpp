@@ -6,6 +6,7 @@
 #include "framework/tools/log.h"
 #include "game/audio.h"
 #include "game/constants.h"
+#include "game/debugdraw.h"
 #include "game/extratable.h"
 #include "game/gamedeserializedata.h"
 #include "game/player/player.h"
@@ -38,7 +39,7 @@ void Extra::deserialize(const GameDeserializeData& data)
       if (z_it != data._tmx_object->_properties->_map.end())
       {
          const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-         _z = z_index;
+         setZ(z_index);
       }
 
       const auto texture_it = data._tmx_object->_properties->_map.find("texture");
@@ -71,6 +72,8 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    }
 
    target.draw(_sprite);
+
+   // DebugDraw::drawRect(target, _rect);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

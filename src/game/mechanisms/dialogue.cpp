@@ -98,6 +98,11 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
 
 void Dialogue::update(const sf::Time& /*dt*/)
 {
+   if (!_enabled)
+   {
+      return;
+   }
+
    // prevent 'pause visible' vs. 'dialogue visible' if both
    // are activated in the same frame.
    if (GameState::getInstance().getMode() == ExecutionMode::Paused || GameState::getInstance().getQueuedMode() == ExecutionMode::Paused)
