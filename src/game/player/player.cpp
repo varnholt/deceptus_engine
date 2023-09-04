@@ -129,7 +129,6 @@ Player::Player(GameNode* parent) : GameNode(parent)
    PlayerAudio::addSamples();
 
    _weapon_system = std::make_shared<WeaponSystem>();
-   _extra = std::make_shared<Extra>();
    _controls = std::make_shared<PlayerControls>();
 
    _climb.setControls(_controls);
@@ -255,12 +254,6 @@ void Player::initializeController()
          );
       }
    );
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-const std::shared_ptr<Extra>& Player::getExtra() const
-{
-   return _extra;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1630,8 +1623,7 @@ void Player::updateDash(Dash dir)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelCollisions()
 {
-   const auto rect = getPixelRectFloat();
-   _extra->collide(rect);
+   const auto& rect = getPixelRectFloat();
    Laser::collide(rect);
    Fan::collide(rect, _body);
 }

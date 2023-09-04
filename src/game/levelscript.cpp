@@ -2,6 +2,7 @@
 
 #include "framework/tools/log.h"
 #include "game/luaconstants.h"
+#include "game/savestate.h"
 
 namespace
 {
@@ -62,15 +63,20 @@ int32_t addCollisionRect(lua_State* state)
 int32_t isMechanismEnabled(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc != 1)
+   if (argc < 1 || argc > 2)
    {
       return 0;
    }
 
-   // const auto id = lua_tostring(state, 1);
-   // find mechanism with given id
+   const auto search_pattern = lua_tostring(state, 1);
 
-   return 1;
+   std::optional<std::string> group;
+   if (argc == 2)
+   {
+      group = lua_tostring(state, 2);
+   }
+
+   return getInstance()->isMechanismEnabled(search_pattern, group);
 }
 
 /**
@@ -82,15 +88,61 @@ int32_t isMechanismEnabled(lua_State* state)
 int32_t setMechanismEnabled(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc != 2)
+   if (argc < 2 || argc > 3)
    {
       return 0;
    }
 
-   // const auto id = lua_tostring(state, 1);
-   // const auto active = static_cast<bool>(lua_toboolean(state, 2));
-   // node->setActive(active);
+   const auto search_pattern = lua_tostring(state, 1);
+   const auto enabled = lua_toboolean(state, 2);
 
+   std::optional<std::string> group;
+   if (argc == 3)
+   {
+      group = lua_tostring(state, 3);
+   }
+
+   getInstance()->setMechanismEnabled(search_pattern, enabled, group);
+   return 0;
+}
+
+/**
+ * @brief addSkill add a skill to the player
+ * @param state lua state
+ *    param 1: skill to add
+ * @return error code
+ */
+int32_t addSkill(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto skill = lua_tointeger(state, 1);
+
+   getInstance()->addSkill(skill);
+   return 0;
+}
+
+/**
+ * @brief removeSkill add a skill to the player
+ * @param state lua state
+ *    param 1: skill to add
+ * @return error code
+ */
+int32_t removeSkill(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto skill = lua_tointeger(state, 1);
+
+   getInstance()->removeSkill(skill);
    return 0;
 }
 
@@ -142,6 +194,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
+   lua_register(_lua_state, "addSkill", ::addSkill);
+   lua_register(_lua_state, "removeSkill", ::removeSkill);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -228,8 +282,63 @@ void LevelScript::luaWriteProperty(const std::string& key, const std::string& va
    }
 }
 
+/**
+ * @brief LuaNode::luaPlayerReceivedExtra called when player received an extra
+ * @param extra_name name of the extra
+ */
+void LevelScript::luaPlayerReceivedExtra(const std::string& extra_name)
+{
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_RECEIVED_EXTRA);
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, extra_name.c_str());
+
+      const auto result = lua_pcall(_lua_state, 1, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(_lua_state, FUNCTION_PLAYER_RECEIVED_EXTRA);
+      }
+   }
+}
+
+void LevelScript::setSearchMechanismCallback(const SearchMechanismCallback& callback)
+{
+   _search_mechanism_callback = callback;
+}
+
 int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);
    return static_cast<int32_t>(_collision_rects.size());
+}
+
+void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group)
+{
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+
+   for (auto& mechanism : mechanisms)
+   {
+      mechanism->setEnabled(enabled);
+   }
+}
+
+bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const std::optional<std::string>& group) const
+{
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   if (mechanisms.empty())
+   {
+      return false;
+   }
+   return mechanisms.front()->isEnabled();
+}
+
+void LevelScript::addSkill(int32_t skill)
+{
+   SaveState::getPlayerInfo()._extra_table._skills._skills |= skill;
+}
+
+void LevelScript::removeSkill(int32_t skill)
+{
+   SaveState::getPlayerInfo()._extra_table._skills._skills &= ~skill;
 }
