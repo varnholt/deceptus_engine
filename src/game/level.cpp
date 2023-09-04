@@ -27,7 +27,6 @@
 #include "game/constants.h"
 #include "game/debugdraw.h"
 #include "game/displaymode.h"
-#include "game/extra.h"
 #include "game/fixturenode.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontactlistener.h"
@@ -43,6 +42,7 @@
 #include "game/mechanisms/checkpoint.h"
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
+#include "game/mechanisms/extra.h"
 #include "game/mechanisms/lever.h"
 #include "game/meshtools.h"
 #include "game/parsedata.h"
@@ -65,6 +65,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -232,6 +233,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_dialogues,
       &_mechanism_doors,
       &_mechanism_dust,
+      &_mechanism_extras,
       &_mechanism_fans,
       &_mechanism_lasers,
       &_mechanism_levers,
@@ -265,6 +267,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
    _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;
    _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
+   _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
@@ -307,7 +310,7 @@ Level::~Level()
    Log::Info() << "deleting current level";
 
    // stop active timers because their callbacks being called after destruction of the level/world can be nasty
-   for (auto& enemy : LuaInterface::instance().getObjectList())
+   for (const auto& enemy : LuaInterface::instance().getObjectList())
    {
       Timer::removeByCaller(enemy);
    }
@@ -550,11 +553,6 @@ void Level::loadTmx()
                enemy.parse(tmx_object);
                _enemy_data_from_tmx_layer[enemy._id] = enemy;
             }
-            else if (object_group->_name == "extras")
-            {
-               const auto& extra_manager = Player::getCurrent()->getExtra();
-               extra_manager->deserialize(this, data);
-            }
             else if (object_group->_name == "rooms")
             {
                Room::deserialize(this, data, _rooms);
@@ -671,6 +669,15 @@ void Level::initialize()
 
    const auto path = std::filesystem::path(_description->_filename).parent_path();
    _level_script.setup(path / "level.lua");
+   _level_script.setSearchMechanismCallback([this](const std::string& regexPattern, const std::optional<std::string>& group)
+                                            { return searchMechanisms(regexPattern, group); });
+
+   // handshake between extra mechanism and level script
+   for (auto extra_mechanism : _mechanism_extras)
+   {
+      auto extra = std::dynamic_pointer_cast<Extra>(extra_mechanism);
+      extra->_callbacks.push_back([this](const std::string& extra) { _level_script.luaPlayerReceivedExtra(extra); });
+   }
 
    // dump();
 }
@@ -1295,6 +1302,32 @@ void Level::drawGlowSprite()
    statesAdd.blendMode = sf::BlendAdd;
    _level_render_texture->draw(blur_scale_sprite, states_add);
 #endif
+}
+
+std::vector<std::shared_ptr<GameMechanism>>
+Level::searchMechanisms(const std::string& regexPattern, const std::optional<std::string>& group)
+{
+   std::vector<std::shared_ptr<GameMechanism>> results;
+
+   std::regex pattern(regexPattern);
+   for (const auto& [key, mechanism_vector] : _mechanisms_map)
+   {
+      // filter by mechanism group if requested
+      if (group.has_value() && group.value() != key)
+      {
+         continue;
+      }
+
+      for (const auto& mechanism : *mechanism_vector)
+      {
+         auto node = std::dynamic_pointer_cast<GameNode>(mechanism);
+         if (std::regex_match(node->getObjectId(), pattern))
+         {
+            results.push_back(mechanism);
+         }
+      }
+   }
+   return results;
 }
 
 void Level::setLoadingMode(LoadingMode loading_mode)

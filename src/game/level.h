@@ -13,7 +13,6 @@
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
 #include "game/mechanisms/portal.h"
-#include "game/volumeupdater.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -21,6 +20,7 @@
 #include "game/shaders/gammashader.h"
 #include "game/squaremarcher.h"
 #include "game/tmxenemy.h"
+#include "game/volumeupdater.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -150,6 +150,9 @@ protected:
    void drawGlowLayer();
    void drawGlowSprite();
 
+   std::vector<std::shared_ptr<GameMechanism>>
+   searchMechanisms(const std::string& regexp, const std::optional<std::string>& group = std::nullopt);
+
    std::vector<std::shared_ptr<Room>> _rooms;
    std::shared_ptr<Room> _room_current;
    std::shared_ptr<Room> _room_previous;
@@ -212,6 +215,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dust;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_extras;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;

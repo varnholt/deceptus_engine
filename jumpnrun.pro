@@ -172,7 +172,6 @@ SOURCES += \
    src/game/effects/staticlight.cpp \
    src/game/enemydescription.cpp \
    src/game/eventserializer.cpp \
-   src/game/extra.cpp \
    src/game/extratable.cpp \
    src/game/fadetransitioneffect.cpp \
    src/game/fixturenode.cpp \
@@ -226,6 +225,7 @@ SOURCES += \
    src/game/mechanisms/dialogue.cpp \
    src/game/mechanisms/door.cpp \
    src/game/mechanisms/dust.cpp \
+   src/game/mechanisms/extra.cpp \
    src/game/mechanisms/fan.cpp \
    src/game/mechanisms/laser.cpp \
    src/game/mechanisms/lever.cpp \
@@ -391,7 +391,6 @@ HEADERS += \
    src/game/drawstates.h \
    src/game/enemydescription.h \
    src/game/eventserializer.h \
-   src/game/extra.h \
    src/game/extratable.h \
    src/game/fadetransitioneffect.h \
    src/game/fixturenode.h \
@@ -448,6 +447,7 @@ HEADERS += \
    src/game/mechanisms/dialogue.h \
    src/game/mechanisms/door.h \
    src/game/mechanisms/dust.h \
+   src/game/mechanisms/extra.h \
    src/game/mechanisms/fan.h \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/moveablebox.h \

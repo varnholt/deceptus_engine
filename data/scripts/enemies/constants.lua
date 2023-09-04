@@ -29,6 +29,17 @@ AudioUpdateBehavior = {
    RoomBased = 2
 }
 
+SkillType = {
+   WallClimb = 0x01,
+   Dash = 0x02,
+   Invulnerable = 0x04,
+   WallSlide = 0x08,
+   WallJump = 0x10,
+   DoubleJump = 0x20,
+   Crouch = 0x40,
+   Swim = 0x80
+}
+
 ------------------------------------------------------------------------------------------------------------------------
 function alignmentFromString(value)
    if (value == "right") then
