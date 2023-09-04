@@ -106,6 +106,12 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* p
       {
          flicker_speed = it->second->_value_float.value();
       }
+
+      it = data._tmx_object->_properties->_map.find("z");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         light->_z = it->second->_value_int.value();
+      }
    }
 
    light->_color.r = rgba[0];
@@ -119,7 +125,6 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* p
    light->_texture = TexturePool::getInstance().get(texture);
    light->_sprite.setTexture(*light->_texture);
    light->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
-   light->_z = data._tmx_object_group->_z_index;
 
    auto scale_x_px = data._tmx_object->_width_px / light->_texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / light->_texture->getSize().y;
