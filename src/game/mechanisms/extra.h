@@ -36,6 +36,5 @@ public:
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect;
-   int32_t _z = 0;
    std::vector<ExtraCallback> _callbacks;
 };
