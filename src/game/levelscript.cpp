@@ -63,14 +63,20 @@ int32_t addCollisionRect(lua_State* state)
 int32_t isMechanismEnabled(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc != 2)
+   if (argc < 1 || argc > 2)
    {
       return 0;
    }
 
-   const auto id = lua_tostring(state, 1);
+   const auto search_pattern = lua_tostring(state, 1);
 
-   return getInstance()->isMechanismEnabled(id);
+   std::optional<std::string> group;
+   if (argc == 2)
+   {
+      group = lua_tostring(state, 2);
+   }
+
+   return getInstance()->isMechanismEnabled(search_pattern, group);
 }
 
 /**
@@ -82,15 +88,21 @@ int32_t isMechanismEnabled(lua_State* state)
 int32_t setMechanismEnabled(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc != 2)
+   if (argc < 2 || argc > 3)
    {
       return 0;
    }
 
-   const auto id = lua_tostring(state, 1);
+   const auto search_pattern = lua_tostring(state, 1);
    const auto enabled = lua_toboolean(state, 2);
 
-   getInstance()->setMechanismEnabled(id, enabled);
+   std::optional<std::string> group;
+   if (argc == 3)
+   {
+      group = lua_tostring(state, 3);
+   }
+
+   getInstance()->setMechanismEnabled(search_pattern, enabled, group);
    return 0;
 }
 
@@ -182,6 +194,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
+   lua_register(_lua_state, "addSkill", ::addSkill);
+   lua_register(_lua_state, "removeSkill", ::removeSkill);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -288,22 +302,35 @@ void LevelScript::luaPlayerReceivedExtra(const std::string& extra_name)
    }
 }
 
+void LevelScript::setSearchMechanismCallback(const SearchMechanismCallback& callback)
+{
+   _search_mechanism_callback = callback;
+}
+
 int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);
    return static_cast<int32_t>(_collision_rects.size());
 }
 
-void LevelScript::setMechanismEnabled(const std::string& mechanism_id, bool enabled)
+void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group)
 {
-   (void)mechanism_id;
-   (void)enabled;
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+
+   for (auto& mechanism : mechanisms)
+   {
+      mechanism->setEnabled(enabled);
+   }
 }
 
-bool LevelScript::isMechanismEnabled(const std::string& mechanism_id) const
+bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const std::optional<std::string>& group) const
 {
-   (void)mechanism_id;
-   return true;
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   if (mechanisms.empty())
+   {
+      return false;
+   }
+   return mechanisms.front()->isEnabled();
 }
 
 void LevelScript::addSkill(int32_t skill)
