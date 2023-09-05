@@ -11,63 +11,41 @@
 #include <array>
 #include <filesystem>
 
-
-const std::string StaticLight::__layer_name = "static_lights";
-
-
-void StaticLight::drawToZ(sf::RenderTarget &target, sf::RenderStates /*states*/, int z) const
+namespace
 {
-   for (const auto& light : _lights)
-   {
-      if (z != light->_z)
-      {
-         continue;
-      }
-
-      auto lumen =
-         fbm::mix(
-           light->_color.a,
-           light->_flicker_amount * 255.0f,
-           1.0f - light->_flicker_alpha_amount
-         );
-
-      sf::Color color{
-         light->_color.r,
-         light->_color.g,
-         light->_color.b,
-         static_cast<sf::Uint8>(lumen)
-      };
-
-      light->_sprite.setColor(color);
-      target.draw(light->_sprite, light->_blend_mode);
-   }
+auto instance_count = 0;
 }
 
+StaticLight::StaticLight(GameNode* parent) : GameNode(parent), _instance_number(instance_count++)
+{
+   setClassName(typeid(StaticLight).name());
+}
+
+void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
+{
+   auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);
+
+   sf::Color color{_color.r, _color.g, _color.b, static_cast<sf::Uint8>(lumen)};
+
+   _sprite.setColor(color);
+   target.draw(_sprite, _blend_mode);
+}
 
 void StaticLight::update(const sf::Time& time)
 {
-   auto y = 0;
-   for (auto& light : _lights)
-   {
-      light->_flicker_amount =
-          light->_flicker_intensity
-        * fbm::fbm(
-            fbm::vec2{
-              y + time.asSeconds() * light->_flicker_speed,
-              light->_time_offset + y / static_cast<float>(_lights.size())
-          }
-        );
-
-      y++;
-   }
+   _flicker_amount = _flicker_intensity * fbm::fbm(fbm::vec2{
+                                             _instance_number + time.asSeconds() * _flicker_speed,
+                                             _time_offset + _instance_number / static_cast<float>(instance_count)});
 }
 
-
-//-----------------------------------------------------------------------------
-std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* parent, const GameDeserializeData& data)
+std::optional<sf::FloatRect> StaticLight::getBoundingBoxPx()
 {
-   auto light = std::make_shared<StaticLight::LightInstance>(parent);
-   light->setObjectId(data._tmx_object->_name);
+   return std::nullopt;
+}
+
+void StaticLight::deserialize(const GameDeserializeData& data)
+{
+   setObjectId(data._tmx_object->_name);
 
    std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
@@ -110,31 +88,28 @@ std::shared_ptr<StaticLight::LightInstance> StaticLight::deserialize(GameNode* p
       it = data._tmx_object->_properties->_map.find("z");
       if (it != data._tmx_object->_properties->_map.end())
       {
-         light->_z = it->second->_value_int.value();
+         _z_index = it->second->_value_int.value();
       }
    }
 
-   light->_color.r = rgba[0];
-   light->_color.g = rgba[1];
-   light->_color.b = rgba[2];
-   light->_color.a = rgba[3];
-   light->_flicker_intensity = flicker_intensity;
-   light->_flicker_alpha_amount = flicker_alpha_amount;
-   light->_flicker_speed = flicker_speed;
-   light->_sprite.setColor(light->_color);
-   light->_texture = TexturePool::getInstance().get(texture);
-   light->_sprite.setTexture(*light->_texture);
-   light->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+   _color.r = rgba[0];
+   _color.g = rgba[1];
+   _color.b = rgba[2];
+   _color.a = rgba[3];
+   _flicker_intensity = flicker_intensity;
+   _flicker_alpha_amount = flicker_alpha_amount;
+   _flicker_speed = flicker_speed;
+   _sprite.setColor(_color);
+   _texture = TexturePool::getInstance().get(texture);
+   _sprite.setTexture(*_texture);
+   _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
 
-   auto scale_x_px = data._tmx_object->_width_px / light->_texture->getSize().x;
-   auto scale_y_px = data._tmx_object->_height_px / light->_texture->getSize().y;
-   light->_sprite.scale(scale_x_px, scale_y_px);
+   auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
+   auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
+   _sprite.scale(scale_x_px, scale_y_px);
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough
    std::srand(static_cast<uint32_t>(data._tmx_object->_x_px * data._tmx_object->_y_px));
-   light->_time_offset = (std::rand() % 100) * 0.01f;
-
-   return light;
+   _time_offset = (std::rand() % 100) * 0.01f;
 }
-
