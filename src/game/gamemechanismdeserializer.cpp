@@ -4,7 +4,6 @@
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tools/log.h"
 
-#include "game/effects/staticlight.h"
 #include "game/mechanisms/blockingrect.h"
 #include "game/mechanisms/bouncer.h"
 #include "game/mechanisms/bubblecube.h"
@@ -36,6 +35,7 @@
 #include "game/mechanisms/spikeball.h"
 #include "game/mechanisms/spikeblock.h"
 #include "game/mechanisms/spikes.h"
+#include "game/mechanisms/staticlight.h"
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
 
