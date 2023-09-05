@@ -234,11 +234,11 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_static_lights;
 
    // graphic effects
    BoomEffect _boom_effect;
    std::shared_ptr<LightSystem> _light_system;
-   std::shared_ptr<StaticLight> _static_light;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
 
    AmbientOcclusion _ambient_occlusion;

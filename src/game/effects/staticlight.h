@@ -4,49 +4,32 @@
 #include <memory>
 #include <vector>
 
-#include "gamedeserializedata.h"
-#include "gamenode.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/gamenode.h"
 
 struct TmxObject;
 struct TmxObjectGroup;
 
-class StaticLight
+class StaticLight : public GameMechanism, public GameNode
 {
-
 public:
+   StaticLight(GameNode* parent = nullptr);
 
-   static const std::string __layer_name;
+   void draw(sf::RenderTarget& target, sf::RenderTarget& color) override;
+   void update(const sf::Time& time) override;
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   struct LightInstance : public GameNode
-   {
-      LightInstance(GameNode* parent)
-       : GameNode(parent)
-      {
-         setClassName(typeid(LightInstance).name());
-      }
+   void deserialize(const GameDeserializeData& data);
 
-      std::shared_ptr<sf::Texture> _texture;
-      sf::Sprite _sprite;
-      sf::BlendMode _blend_mode = sf::BlendAdd;
-      sf::Color _color = {255, 255, 255, 255};
-      int _z = 0;
-      float _flicker_amount = 1.0f;
-      float _flicker_intensity = 0.0f;
-      float _flicker_speed = 0.0f;
-      float _flicker_alpha_amount = 1.0f;
-      float _time_offset = 0.0f;
-   };
-
-   std::vector<std::shared_ptr<LightInstance>> _lights;
-
-   static std::shared_ptr<StaticLight::LightInstance> deserialize(GameNode* parent, const GameDeserializeData& data);
-
-
-public:
-
-   StaticLight() = default;
-
-   void drawToZ(sf::RenderTarget& target, sf::RenderStates states, int z) const;
-   void draw(sf::RenderTarget& target, sf::RenderStates states);
-   void update(const sf::Time& time);
+   std::shared_ptr<sf::Texture> _texture;
+   sf::Sprite _sprite;
+   sf::BlendMode _blend_mode = sf::BlendAdd;
+   sf::Color _color = {255, 255, 255, 255};
+   float _flicker_amount = 1.0f;
+   float _flicker_intensity = 0.0f;
+   float _flicker_speed = 0.0f;
+   float _flicker_alpha_amount = 1.0f;
+   float _time_offset = 0.0f;
+   int32_t _instance_number = 0;
 };
