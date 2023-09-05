@@ -8,11 +8,11 @@
 #include "game/camerasystem.h"
 #include "game/constants.h"
 #include "game/effects/lightsystem.h"
-#include "game/effects/staticlight.h"
 #include "game/gamenode.h"
 #include "game/imagelayer.h"
 #include "game/levelscript.h"
 #include "game/mechanisms/portal.h"
+#include "game/mechanisms/staticlight.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -234,11 +234,11 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_static_lights;
 
    // graphic effects
    BoomEffect _boom_effect;
    std::shared_ptr<LightSystem> _light_system;
-   std::shared_ptr<StaticLight> _static_light;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
 
    AmbientOcclusion _ambient_occlusion;
