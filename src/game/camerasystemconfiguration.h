@@ -39,6 +39,9 @@ struct CameraSystemConfiguration
    int32_t _player_offset_y = 0;
    float _panic_acceleration_factor_y = 2.0f;
 
+   // shaking
+   bool _camera_shaking_enabled = true;
+
    static bool sInitialized;
    static CameraSystemConfiguration sInstance;
 };

@@ -40,7 +40,8 @@ std::string CameraSystemConfiguration::serialize()
         {"view_ratio_y", _view_ratio_y},
         {"back_in_bounds_tolerance_y", _back_in_bounds_tolerance_y},
         {"player_offset_y", _player_offset_y},
-        {"panic_acceleration_factor_y", _panic_acceleration_factor_y}}}};
+        {"panic_acceleration_factor_y", _panic_acceleration_factor_y},
+        {"camera_shaking_enabled", _camera_shaking_enabled}}}};
 
    std::stringstream sstream;
    sstream << std::setw(4) << config << "\n\n";
@@ -64,6 +65,11 @@ void CameraSystemConfiguration::deserialize(const std::string& data)
    _back_in_bounds_tolerance_y = camera_config["back_in_bounds_tolerance_y"].get<int32_t>();
    _player_offset_y = camera_config["player_offset_y"].get<int32_t>();
    _panic_acceleration_factor_y = camera_config["panic_acceleration_factor_y"].get<float>();
+
+   if (camera_config.find("camera_shaking_enabled") != camera_config.end())
+   {
+      _camera_shaking_enabled = camera_config.at("camera_shaking_enabled").get<bool>();
+   }
 }
 
 void CameraSystemConfiguration::deserializeFromFile(const std::string& filename)
