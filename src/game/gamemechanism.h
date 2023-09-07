@@ -37,7 +37,7 @@ public:
    virtual void setVolume(float volume);
    virtual float getReferenceVolume() const;
    virtual AudioUpdateBehavior getAudioUpdateBehavior() const;
-   virtual void setAudioUpdateBehavior(AudioUpdateBehavior newAudio_update_behavior);
+   virtual void setAudioUpdateBehavior(AudioUpdateBehavior audio_update_behavior);
    virtual std::optional<int32_t> getRoomId() const;
    virtual void setRoomId(int32_t room_id);
 

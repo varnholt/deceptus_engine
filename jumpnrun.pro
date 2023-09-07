@@ -169,7 +169,6 @@ SOURCES += \
    src/game/displaymode.cpp \
    src/game/drawstates.cpp \
    src/game/effects/lightsystem.cpp \
-   src/game/effects/staticlight.cpp \
    src/game/enemydescription.cpp \
    src/game/eventserializer.cpp \
    src/game/extratable.cpp \
@@ -244,6 +243,7 @@ SOURCES += \
    src/game/mechanisms/spikeball.cpp \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
+   src/game/mechanisms/staticlight.cpp \
    src/game/mechanisms/watersurface.cpp \
    src/game/mechanisms/weather.cpp \
    src/game/meshtools.cpp \
@@ -464,6 +464,7 @@ HEADERS += \
    src/game/mechanisms/spikeball.h \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
+   src/game/mechanisms/staticlight.h \
    src/game/mechanisms/watersurface.h \
    src/game/mechanisms/weather.h \
    src/game/meshtools.h \
