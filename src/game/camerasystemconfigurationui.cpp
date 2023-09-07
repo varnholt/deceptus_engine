@@ -124,6 +124,11 @@ void CameraSystemConfigurationUi::draw()
       drawFloatElement("panic acceleration factor", &config._panic_acceleration_factor_y, 0.1f, 10.0f);
    }
 
+   if (ImGui::CollapsingHeader("various", header_flags))
+   {
+      ImGui::Checkbox("camera shaking", &config._camera_shaking_enabled);
+   }
+
    ImGui::End();
 
    _render_window->clear();

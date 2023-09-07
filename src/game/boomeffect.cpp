@@ -1,5 +1,6 @@
 #include "boomeffect.h"
 
+#include "camerasystemconfiguration.h"
 #include "framework/tools/globalclock.h"
 #include "gameconfiguration.h"
 
@@ -14,6 +15,11 @@ BoomSettings BoomEffect::_default_boom_settings = BoomSettings{1.0f, 1.0f};
 //-----------------------------------------------------------------------------
 void BoomEffect::boom(float x, float y, const BoomSettings& boom_settings)
 {
+   if (!CameraSystemConfiguration::getInstance()._camera_shaking_enabled)
+   {
+      return;
+   }
+
    if (getRemainingTime() > 0.005f)
    {
       return;
