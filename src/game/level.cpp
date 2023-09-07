@@ -212,7 +212,6 @@ Level::Level() : GameNode(nullptr)
    __current_level = this;
 
    _light_system = std::make_shared<LightSystem>();
-   _static_light = std::make_shared<StaticLight>();
 
    // add raycast light for player
    _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
@@ -250,6 +249,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_spike_balls,
       &_mechanism_spike_blocks,
       &_mechanism_spikes,
+      &_mechanism_static_lights,
       &_mechanism_water_surface,
       &_mechanism_weather,
    };
@@ -283,6 +283,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_sound_emitters}] = &_mechanism_sound_emitters;
    _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
    _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
+   _mechanisms_map[std::string{layer_name_static_lights}] = &_mechanism_static_lights;
    _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
    _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
    _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
@@ -561,11 +562,6 @@ void Level::loadTmx()
             {
                const auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
-            }
-            else if (object_group->_name.compare(0, StaticLight::__layer_name.size(), StaticLight::__layer_name) == 0)
-            {
-               const auto light = StaticLight::deserialize(this, data);
-               _static_light->_lights.push_back(light);
             }
          }
       }
@@ -1085,8 +1081,6 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
-      _static_light->drawToZ(target, {}, z_index);
-
       drawParallaxMaps(*_render_texture_level_background.get(), z_index);
 
       // draw all tile maps
@@ -1501,8 +1495,6 @@ void Level::update(const sf::Time& dt)
    LuaInterface::instance().update(dt);
 
    updatePlayerLight();
-
-   _static_light->update(GlobalClock::getInstance().getElapsedTime());
 
    _volume_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
    _volume_updater->update();
