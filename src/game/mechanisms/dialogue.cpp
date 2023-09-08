@@ -36,7 +36,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    }
 
    // parse dialogue items
-   std::optional<sf::Vector2i> pos;
+   std::optional<sf::Vector2f> pos;
    std::optional<sf::Color> text_color;
    std::optional<sf::Color> background_color;
    for (auto i = 0u; i < 99; i++)
@@ -52,7 +52,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       auto pos_y_it = data._tmx_object->_properties->_map.find(item_id + "_y_px");
       if (pos_x_it != data._tmx_object->_properties->_map.end() && pos_y_it != data._tmx_object->_properties->_map.end())
       {
-         pos = {pos_x_it->second->_value_int.value(), pos_y_it->second->_value_int.value()};
+         pos = {static_cast<float>(pos_x_it->second->_value_int.value()), static_cast<float>(pos_y_it->second->_value_int.value())};
       }
 
       // read text color
