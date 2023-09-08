@@ -29,15 +29,15 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
    return str;
 }
 
-constexpr auto x_offset_left_px = 110;
-constexpr auto x_offset_center_px = 160;
-constexpr auto x_offset_right_px = 270;
-constexpr auto y_offset_top_px = 82;
-constexpr auto y_offset_middle_px = 149;
-constexpr auto y_offset_bottom_px = 216;
-constexpr auto text_margin_x_px = 8;
-constexpr auto textbox_width_px = 324;
-constexpr auto background_width_px = 318;
+constexpr auto x_offset_left_px = 110.0f;
+constexpr auto x_offset_center_px = 160.0f;
+constexpr auto x_offset_right_px = 270.0f;
+constexpr auto y_offset_top_px = 82.0f;
+constexpr auto y_offset_middle_px = 149.0f;
+constexpr auto y_offset_bottom_px = 216.0f;
+constexpr auto text_margin_x_px = 8.0f;
+constexpr auto textbox_width_px = 324.0f;
+constexpr auto background_width_px = 318.0f;
 
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
@@ -234,9 +234,9 @@ void MessageBox::initializeLayers()
    }
 }
 
-sf::Vector2i MessageBox::pixelLocation(MessageBoxLocation location)
+sf::Vector2f MessageBox::pixelLocation(MessageBoxLocation location)
 {
-   sf::Vector2i pos;
+   sf::Vector2f pos;
 
    switch (location)
    {
@@ -326,6 +326,7 @@ void MessageBox::showAnimation()
    auto background_color = __active->_properties._background_color;
    auto window_layer = __layers["window"];
    auto background_layer = __layers["background"];
+   const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
    if (visible_time < animation_scale_time_show)
    {
@@ -339,23 +340,25 @@ void MessageBox::showAnimation()
       const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
       window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset, __window_position.y);
+      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset + offset.x, __window_position.y + offset.y);
 
       const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
       background_color.a = static_cast<uint8_t>(t_normalized * 255);
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(scale_x, scale_y);
-      background_layer->_sprite->setPosition(__background_position.x + background_scale_offset, __background_position.y);
+      background_layer->_sprite->setPosition(
+         __background_position.x + background_scale_offset + offset.x, __background_position.y + offset.y
+      );
    }
    else
    {
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
       window_layer->_sprite->setScale(1.0f, 1.0f);
-      window_layer->_sprite->setPosition(__window_position);
+      window_layer->_sprite->setPosition(__window_position + offset);
 
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(1.0f, 1.0f);
-      background_layer->_sprite->setPosition(__background_position);
+      background_layer->_sprite->setPosition(__background_position + offset);
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
@@ -504,13 +507,13 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // text alignment
-   const auto pos = __active->_properties._pos.value_or(pixelLocation(__active->_properties._location));
-   auto x = 0;
+   const auto pos = pixelLocation(__active->_properties._location) + __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+   auto x = 0.0f;
    if (__active->_properties._centered)
    {
       const auto rect = __text.getGlobalBounds();
       const auto left = pos.x;
-      x = static_cast<int32_t>(left + (textbox_width_px - rect.width) * 0.5f);
+      x = left + (textbox_width_px - rect.width) * 0.5f;
    }
    else
    {

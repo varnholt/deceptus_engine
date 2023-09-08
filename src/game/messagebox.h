@@ -38,7 +38,7 @@ public:
    struct LayoutProperties
    {
       MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
-      std::optional<sf::Vector2i> _pos;
+      std::optional<sf::Vector2f> _pos;
       sf::Color _background_color = sf::Color{27, 59, 151};
       sf::Color _text_color = sf::Color{232, 219, 243};
       bool _animate_text = false;
@@ -84,7 +84,7 @@ private:
    );
 
    static void initializeLayers();
-   static sf::Vector2i pixelLocation(MessageBoxLocation);
+   static sf::Vector2f pixelLocation(MessageBoxLocation);
    static void close(Button button);
    static void animateText();
 

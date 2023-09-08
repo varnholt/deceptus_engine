@@ -816,11 +816,12 @@ In order to introduce a message box, you create a rectangle object that defines 
 |01|string|The first message to show|
 |02|string|The second message to show|
 |03|string|The third message to show|
+|..|...|...|
 |nn|string|The nth message to show, you get the idea...|
-|nn_x_px|int|The x position of the message box on the screen (optional). The screen dimensions are `640` x `360`.|
-|nn_y_px|int|The y position of the message box on the screen (optional). The screen dimensions are `640` x `360`.|
-|nn_text_color|color|The text color of the message box; if not set, the color previously set will be used.|
-|nn_background_color|color|The text color of the message box; if not set, the color previously set will be used.|
+|nn_x_px|int|The x offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
+|nn_y_px|int|The y offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
+|nn_text_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the text color refers to.|
+|nn_background_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the background color refers to.|
 |open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed.|
 
 Moreover, you can use the tags below inside your dialogue strings:
