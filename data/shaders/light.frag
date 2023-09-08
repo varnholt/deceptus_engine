@@ -12,7 +12,7 @@ struct Light{
 };
 
 uniform int u_light_count;
-uniform Light u_lights[5];
+uniform Light u_lights[50];
 
 
 void main()
