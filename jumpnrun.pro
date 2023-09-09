@@ -226,6 +226,7 @@ SOURCES += \
    src/game/mechanisms/dust.cpp \
    src/game/mechanisms/extra.cpp \
    src/game/mechanisms/fan.cpp \
+   src/game/mechanisms/fireflies.cpp \
    src/game/mechanisms/laser.cpp \
    src/game/mechanisms/lever.cpp \
    src/game/mechanisms/moveablebox.cpp \
@@ -449,6 +450,7 @@ HEADERS += \
    src/game/mechanisms/dust.h \
    src/game/mechanisms/extra.h \
    src/game/mechanisms/fan.h \
+   src/game/mechanisms/fireflies.h \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/moveablebox.h \
    src/game/mechanisms/movingplatform.h \
