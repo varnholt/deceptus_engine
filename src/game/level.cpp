@@ -55,6 +55,7 @@
 #include "game/texturepool.h"
 #include "game/tilemap.h"
 #include "game/tilemapfactory.h"
+#include "game/tweaks.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -214,9 +215,12 @@ Level::Level() : GameNode(nullptr)
    _light_system = std::make_shared<LightSystem>();
 
    // add raycast light for player
-   _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
-   _player_light->_color = sf::Color(255, 255, 255, 10);
-   _light_system->_lights.push_back(_player_light);
+   if (Tweaks::instance()._player_light_enabled)
+   {
+      _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
+      _player_light->_color = sf::Color(255, 255, 255, Tweaks::instance()._player_light_alpha);
+      _light_system->_lights.push_back(_player_light);
+   }
 
    _mechanisms_list = {
       &_mechanism_blocking_rects,
@@ -1443,12 +1447,17 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 //-----------------------------------------------------------------------------
 void Level::updatePlayerLight()
 {
+   if (!Tweaks::instance()._player_light_enabled)
+   {
+      return;
+   }
+
    _player_light->_pos_m = Player::getCurrent()->getBody()->GetPosition();
    _player_light->updateSpritePosition();
 
    // the player, once he dies, becomes inactive and just sinks down
    // so the player light is disabled to avoid any glitches
-   _player_light->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead() ? 0 : 10);
+   _player_light->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead() ? 0 : Tweaks::instance()._player_light_alpha);
 }
 
 //-----------------------------------------------------------------------------

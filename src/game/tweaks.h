@@ -16,6 +16,8 @@ class Tweaks : public JsonConfiguration
       float _cpan_look_speed_y = 3.0f;
       float _cpan_snap_back_factor = 0.85f;
       float _enter_portal_threshold = -0.6f;
+      bool _player_light_enabled = true;
+      uint8_t _player_light_alpha = 10;
 
    private:
 
