@@ -5,12 +5,18 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 
+// 4 frames, 24x24
+
 Fireflies::Fireflies(GameNode* parent) : GameNode(parent)
 {
 }
 
-void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   for (const auto& firefly : _fireflies)
+   {
+      target.draw(firefly._sprite);
+   }
 }
 
 void Fireflies::update(const sf::Time& dt)
@@ -30,6 +36,11 @@ void Fireflies::deserialize(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
+   _rect.left = data._tmx_object->_x_px;
+   _rect.top = data._tmx_object->_y_px;
+   _rect.width = data._tmx_object->_width_px;
+   _rect.height = data._tmx_object->_height_px;
+
    auto count = 1;
    if (data._tmx_object->_properties)
    {
@@ -46,7 +57,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
       }
    }
 
-   _texture = TexturePool::getInstance().get("data/sprites/fireflies.png");
+   _texture = TexturePool::getInstance().get("data/sprites/firefly.png");
 
    for (auto i = 0; i < count; i++)
    {
@@ -55,10 +66,24 @@ void Fireflies::deserialize(const GameDeserializeData& data)
 
    for (auto& firefly : _fireflies)
    {
+      firefly._instance_number = instance_counter++;
       firefly._sprite.setTexture(*_texture);
    }
 }
 
 void Fireflies::Firefly::update(const sf::Time& dt)
 {
+   _elapsed += dt;
+   const auto time_s = _elapsed.asSeconds();
+
+   // compute 8 shape (lemniscate of Bernoulli)
+   const auto x = static_cast<float>(std::cos(time_s));
+   const auto y = static_cast<float>(std::sin(2.0f * time_s) / 2.0f);
+
+   // the above should be rotated around x, y, z axes
+
+   _position.x = x;
+   _position.y = y;
+
+   _sprite.setPosition(_position);
 }

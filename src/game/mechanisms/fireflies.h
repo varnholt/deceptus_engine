@@ -13,8 +13,11 @@ public:
    {
       void update(const sf::Time& dt);
 
+      sf::Vector3f _position_3d;
       sf::Vector2f _position;
       sf::Sprite _sprite;
+      sf::Time _elapsed;
+      int32_t _instance_number{0};
    };
 
    Fireflies(GameNode* parent = nullptr);
@@ -27,6 +30,7 @@ private:
    sf::FloatRect _rect;
    std::vector<Firefly> _fireflies;
    std::shared_ptr<sf::Texture> _texture;
+   int32_t instance_counter = 0;
 };
 
 #endif // FIREFLIES_H
