@@ -19,6 +19,7 @@
 #include "game/mechanisms/dust.h"
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/fan.h"
+#include "game/mechanisms/fireflies.h"
 #include "game/mechanisms/laser.h"
 #include "game/mechanisms/lever.h"
 #include "game/mechanisms/moveablebox.h"
@@ -69,6 +70,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_dust = mechanisms[std::string{layer_name_dust}];
    auto mechanism_extras = mechanisms[std::string{layer_name_extras}];
    auto mechanism_fans = mechanisms[std::string{layer_name_fans}];
+   auto mechanism_fireflies = mechanisms[std::string{layer_name_fireflies}];
    auto mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
    auto mechanism_levers = mechanisms[std::string{layer_name_levers}];
    auto mechanism_moveable_objects = mechanisms[std::string{layer_name_moveable_objects}];
@@ -195,6 +197,12 @@ void GameMechanismDeserializer::deserialize(
             else if (object_group->_name == layer_name_fans || tmx_object->_template_type == type_name_fan)
             {
                Fan::addObject(parent, data);
+            }
+            else if (object_group->_name == layer_name_fireflies || tmx_object->_template_type == type_name_firefly)
+            {
+               auto mechanism = std::make_shared<Fireflies>(parent);
+               mechanism->deserialize(data);
+               mechanism_fireflies->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_portals || tmx_object->_template_type == type_name_portal)
             {
