@@ -24,6 +24,7 @@ public:
       float _angle_x{0.0f};
       float _angle_y{0.0f};
       float _speed{1.0f};
+      float _dir{1.0f};
    };
 
    Fireflies(GameNode* parent = nullptr);

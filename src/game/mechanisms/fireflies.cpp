@@ -80,6 +80,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
       firefly._angle_x = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
       firefly._angle_y = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
       firefly._speed = 1.0f + (std::rand() % 1000) * 0.001f;
+      firefly._dir = (std::rand() % 2) ? 1.0f : -1.0f;
    }
 }
 
@@ -104,10 +105,12 @@ void Fireflies::Firefly::update(const sf::Time& dt)
    const auto time_s = _elapsed.asSeconds();
 
    // compute 8 shape (lemniscate of Bernoulli)
-   auto x = static_cast<float>(std::cos(time_s * _speed));
-   auto y = static_cast<float>(std::sin(2.0f * time_s * _speed) / 2.0f);
+   auto x = static_cast<float>(std::cos(time_s * _speed * _dir));
+   auto y = static_cast<float>(std::sin(2.0f * time_s * _speed * _dir) / 2.0f);
    auto z = 0.0f;
    rotate(x, y, z, _angle_x, _angle_y);
+
+   // scale x and y based on z depth?
 
    const auto x_scaled_px = x * _rect_px.width * 0.5f;
    const auto y_scaled_px = y * _rect_px.height * 0.5f;
