@@ -238,6 +238,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_dust,
       &_mechanism_extras,
       &_mechanism_fans,
+      &_mechanism_fireflies,
       &_mechanism_lasers,
       &_mechanism_levers,
       &_mechanism_moveable_boxes,
@@ -273,6 +274,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
    _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
+   _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
    _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
