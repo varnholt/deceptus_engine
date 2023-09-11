@@ -217,6 +217,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dust;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_extras;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_fireflies;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
