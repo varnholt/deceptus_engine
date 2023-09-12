@@ -302,6 +302,52 @@ In there, just place a rectangle where you'd like to position your Collapsing Pl
 
 ---
 
+## Fireflies
+
+Well. Fireflies should be glowing on their own. What's been implemented here is rather a bunch of flies flying around a lantern in an 8 shape. So it's a terrible name choice for this mechanism. Let's hope that nobody really notices / cares.
+
+In order to add the Fireflies effect to your level, create an object layer called `fireflies`.
+In there, just place a rectangle where you'd like to position and scale the effect. To make the effect more convincing, it might be a good idea to place a `fireflies` layer in front, and another one behind the lantern. 
+
+![](images/mechanism_fireflies.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Fireflies`|
+|Object Group|`fireflies`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|animation_speed|float|This setting controls the sprite animation speed. The default is 3.0.|
+|scale_horizontal_max|float|This is the maximum scale an 8 shape can have in horizontal direction. The default is 1.0, anything above will exceed the rectangle width.|
+|scale_horizontal_min|float|This is the minimum scale an 8 shape can have in horizontal direction. The default is 1.0, very small values will make the movement look like a horizontal line.|
+|scale_vertical_max|float|This is the maximum scale an 8 shape can have in vertical direction. The default is 1.0, anything above will exceed the rectangle height.|
+|scale_vertical_min|float|This is the minimum scale an 8 shape can have in vertical direction. The default is 1.0, very small values will make the movement look like a vertical line.|
+|speed_max|float|This is them maximum speed a single firefly can have. The default is a random value between 1 and 2.|
+|speed_min|float|This is them minimum speed a single firefly can have. The default is 1.|
+|count|int|This controls the amount of fireflies to be drawn. The default is 1.|
+|z|int|The object's z index|
+
+|destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
+|fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
+|time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
+|fade_in_duration_s|float|The time in seconds it takes for a respawning platform to fade in (the default is 1.0s).|
+|z|int|The object's z index|
+
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 ## Portals
 
 Portals can teleport Adam from one location to another. For that reason, they give you a lot of freedom in your level design possibilities since you can have a coherent level, even though your individual rooms are distributed all over the map.
