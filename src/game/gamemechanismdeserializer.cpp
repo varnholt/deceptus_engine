@@ -198,7 +198,7 @@ void GameMechanismDeserializer::deserialize(
             {
                Fan::addObject(parent, data);
             }
-            else if (object_group->_name == layer_name_fireflies || tmx_object->_template_type == type_name_firefly)
+            else if (object_group->_name == layer_name_fireflies || tmx_object->_template_type == type_name_fireflies)
             {
                auto mechanism = std::make_shared<Fireflies>(parent);
                mechanism->deserialize(data);
