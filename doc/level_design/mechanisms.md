@@ -332,13 +332,6 @@ In there, just place a rectangle where you'd like to position and scale the effe
 |count|int|This controls the amount of fireflies to be drawn. The default is 1.|
 |z|int|The object's z index|
 
-|destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
-|fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
-|time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
-|fade_in_duration_s|float|The time in seconds it takes for a respawning platform to fade in (the default is 1.0s).|
-|z|int|The object's z index|
-
-
 ---
 
 &nbsp;
