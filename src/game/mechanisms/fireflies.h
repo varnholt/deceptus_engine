@@ -25,6 +25,9 @@ public:
       float _angle_y{0.0f};
       float _speed{1.0f};
       float _dir{1.0f};
+      float _scale_vertical{1.0f};
+      float _scale_horizontal{1.0f};
+      float _animation_speed{0.0};
    };
 
    Fireflies(GameNode* parent = nullptr);
@@ -37,7 +40,7 @@ private:
    sf::FloatRect _rect_px;
    std::vector<Firefly> _fireflies;
    std::shared_ptr<sf::Texture> _texture;
-   int32_t instance_counter = 0;
+   int32_t _instance_counter = 0;
 };
 
 #endif // FIREFLIES_H

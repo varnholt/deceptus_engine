@@ -62,7 +62,7 @@ static constexpr std::string_view type_name_door{"Door"};
 static constexpr std::string_view type_name_dust{"Dust"};
 static constexpr std::string_view type_name_extra{"Extra"};
 static constexpr std::string_view type_name_fan{"Fan"};
-static constexpr std::string_view type_name_firefly{"Firefly"};
+static constexpr std::string_view type_name_fireflies{"Fireflies"};
 static constexpr std::string_view type_name_laser{"Laser"};
 static constexpr std::string_view type_name_lever{"Lever"};
 static constexpr std::string_view type_name_moveable_object{"MoveableObject"};

@@ -6,6 +6,12 @@
 #include "game/debugdraw.h"
 #include "game/texturepool.h"
 
+namespace
+{
+constexpr auto FRAME_COUNT = 4;
+constexpr auto ANIMATION_SPEED = 3.0f;
+}  // namespace
+
 // #define DEBUG_RECT 1
 
 Fireflies::Fireflies(GameNode* parent) : GameNode(parent)
@@ -46,6 +52,10 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    _rect_px.width = data._tmx_object->_width_px;
    _rect_px.height = data._tmx_object->_height_px;
 
+   auto animation_speed = ANIMATION_SPEED;
+   float scale_vertical[2]{1.0f, 1.0f};
+   float scale_horizontal[2]{1.0f, 1.0f};
+   float speed[2]{1.0, 1.0f + (std::rand() % 1000) * 0.001f};
    auto count = 1;
    if (data._tmx_object->_properties)
    {
@@ -60,6 +70,48 @@ void Fireflies::deserialize(const GameDeserializeData& data)
       {
          count = it->second->_value_int.value();
       }
+
+      it = data._tmx_object->_properties->_map.find("scale_vertical_min");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         scale_vertical[0] = it->second->_value_float.value();
+      }
+
+      it = data._tmx_object->_properties->_map.find("scale_vertical_max");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         scale_vertical[1] = it->second->_value_float.value();
+      }
+
+      it = data._tmx_object->_properties->_map.find("scale_horizontal_min");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         scale_horizontal[0] = it->second->_value_float.value();
+      }
+
+      it = data._tmx_object->_properties->_map.find("scale_horizontal_max");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         scale_horizontal[1] = it->second->_value_float.value();
+      }
+
+      it = data._tmx_object->_properties->_map.find("speed_min");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         speed[0] = it->second->_value_float.value();
+      }
+
+      it = data._tmx_object->_properties->_map.find("speed_min");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         speed[1] = it->second->_value_float.value();
+      }
+
+      it = data._tmx_object->_properties->_map.find("animation_speed");
+      if (it != data._tmx_object->_properties->_map.end())
+      {
+         animation_speed = it->second->_value_float.value();
+      }
    }
 
    _texture = TexturePool::getInstance().get("data/sprites/firefly.png");
@@ -69,9 +121,15 @@ void Fireflies::deserialize(const GameDeserializeData& data)
       _fireflies.push_back({});
    }
 
+   auto frand = [](float min, float max)
+   {
+      const auto val = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+      return min + val * (max - min);
+   };
+
    for (auto& firefly : _fireflies)
    {
-      firefly._instance_number = instance_counter++;
+      firefly._instance_number = _instance_counter++;
       firefly._rect_px = _rect_px;
       firefly._sprite.setTexture(*_texture);
       firefly._sprite.setTextureRect({0, 0, PIXELS_PER_TILE, PIXELS_PER_TILE});
@@ -79,8 +137,11 @@ void Fireflies::deserialize(const GameDeserializeData& data)
       firefly._elapsed += sf::seconds(static_cast<float>(std::rand() % 999));
       firefly._angle_x = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
       firefly._angle_y = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
-      firefly._speed = 1.0f + (std::rand() % 1000) * 0.001f;
+      firefly._speed = frand(speed[0], speed[1]);
       firefly._dir = (std::rand() % 2) ? 1.0f : -1.0f;
+      firefly._scale_vertical = frand(scale_vertical[0], scale_vertical[1]);
+      firefly._scale_horizontal = frand(scale_horizontal[0], scale_horizontal[1]);
+      firefly._animation_speed = animation_speed;
    }
 }
 
@@ -112,8 +173,8 @@ void Fireflies::Firefly::update(const sf::Time& dt)
 
    // scale x and y based on z depth?
 
-   const auto x_scaled_px = x * _rect_px.width * 0.5f;
-   const auto y_scaled_px = y * _rect_px.height * 0.5f;
+   const auto x_scaled_px = x * _rect_px.width * 0.5f * _scale_horizontal;
+   const auto y_scaled_px = y * _rect_px.height * 0.5f * _scale_vertical;
 
    // the above should be rotated around x, y, z axes
    _position.x = _rect_px.left + (_rect_px.width * 0.5f) + x_scaled_px;
@@ -125,16 +186,10 @@ void Fireflies::Firefly::update(const sf::Time& dt)
    updateTextureRect();
 }
 
-namespace
-{
-constexpr auto FRAME_COUNT = 4;
-constexpr auto ANIMATION_SPEED = 3.0f;
-}  // namespace
-
 void Fireflies::Firefly::updateTextureRect()
 {
    const auto elapsed_s = _elapsed.asSeconds();
-   const auto frame = static_cast<int32_t>(elapsed_s * ANIMATION_SPEED) % FRAME_COUNT;
+   const auto frame = static_cast<int32_t>(elapsed_s * _animation_speed) % FRAME_COUNT;
 
    if (frame != _current_frame)
    {
