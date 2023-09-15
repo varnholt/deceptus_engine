@@ -4,26 +4,25 @@
 #include "gun.h"
 #include "sword.h"
 
-
-std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
+std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type)
 {
-   std::unique_ptr<Weapon> weapon;
+   std::shared_ptr<Weapon> weapon;
 
    switch (type)
    {
       case WeaponType::Bow:
       {
-         weapon = std::make_unique<Bow>();
+         weapon = std::make_shared<Bow>();
          break;
       }
       case WeaponType::Gun:
       {
-         weapon = std::make_unique<Gun>();
+         weapon = std::make_shared<Gun>();
          break;
       }
       case WeaponType::Sword:
       {
-         weapon = std::make_unique<Sword>();
+         weapon = std::make_shared<Sword>();
          break;
       }
       case WeaponType::None:
@@ -35,27 +34,25 @@ std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type)
    return weapon;
 }
 
-std::unique_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponProperties& properties)
+std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponProperties& properties)
 {
-   std::unique_ptr<Weapon> weapon;
+   std::shared_ptr<Weapon> weapon;
 
    switch (type)
    {
       case WeaponType::Bow:
       {
-         auto bow = std::make_unique<Bow>(properties);
-         weapon = std::move(bow);
+         weapon = std::make_shared<Bow>(properties);
          break;
       }
       case WeaponType::Gun:
       {
-         weapon = std::make_unique<Gun>(properties);
+         weapon = std::make_shared<Gun>(properties);
          break;
       }
       case WeaponType::Sword:
       {
-         auto sword = std::make_unique<Sword>();
-         weapon = std::move(sword);
+         weapon = std::make_shared<Sword>();
          break;
       }
       case WeaponType::None:

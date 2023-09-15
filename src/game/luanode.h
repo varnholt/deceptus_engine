@@ -63,7 +63,7 @@ struct LuaNode : public GameMechanism, public GameNode
    void addShapeRectBevel(float width, float height, float bevel, float offset_x = 0.0f, float offset_y = 0.0f);
 
    //! add a weapon to the node
-   void addWeapon(std::unique_ptr<Weapon> weapon);
+   void addWeapon(const std::shared_ptr<Weapon>& weapon);
 
    //! trigger boom effect
    void boom(float x, float y, float intensity);
@@ -205,7 +205,7 @@ struct LuaNode : public GameMechanism, public GameNode
    b2Body* _body{nullptr};
    b2BodyDef* _body_def{nullptr};
    std::vector<b2Shape*> _shapes_m;
-   std::vector<std::unique_ptr<Weapon>> _weapons;
+   std::vector<std::shared_ptr<Weapon>> _weapons;
 
    // damage
    std::vector<Hitbox> _hitboxes;

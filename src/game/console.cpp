@@ -8,7 +8,7 @@
 #include "player/player.h"
 #include "player/playerinfo.h"
 #include "savestate.h"
-#include "sword.h"
+#include "weaponfactory.h"
 #include "weaponsystem.h"
 
 #include <iostream>
@@ -70,31 +70,37 @@ void Console::showHelp()
    _log.push_back("   available weapons: bow, gun, sword");
 }
 
+namespace
+{
+void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
+{
+   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(weapon);
+   Player::getCurrent()->getWeaponSystem()->_selected = weapon;
+}
+}  // namespace
+
 void Console::giveWeaponBow()
 {
-   auto bow = std::make_shared<Bow>();
+   auto bow = WeaponFactory::create(WeaponType::Bow);
    bow->initialize();
-   bow->setLauncherBody(Player::getCurrent()->getBody());
-   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(bow);
-   Player::getCurrent()->getWeaponSystem()->_selected = bow;
+   std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
+   giveWeaponToPlayer(bow);
    _log.push_back("given bow to player");
 }
 
 void Console::giveWeaponGun()
 {
-   auto gun = std::make_shared<Gun>();
+   auto gun = WeaponFactory::create(WeaponType::Gun);
    gun->initialize();
-   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(gun);
-   Player::getCurrent()->getWeaponSystem()->_selected = gun;
+   giveWeaponToPlayer(gun);
    _log.push_back("given gun to player");
 }
 
 void Console::giveWeaponSword()
 {
-   auto sword = std::make_shared<Sword>();
+   auto sword = WeaponFactory::create(WeaponType::Sword);
    sword->initialize();
-   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(sword);
-   Player::getCurrent()->getWeaponSystem()->_selected = sword;
+   giveWeaponToPlayer(sword);
    _log.push_back("given sword to player");
 }
 
