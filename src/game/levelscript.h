@@ -20,6 +20,10 @@ public:
    void addSkill(int32_t skill);
    void removeSkill(int32_t skill);
 
+   void giveWeaponBow();
+   void giveWeaponGun();
+   void giveWeaponSword();
+
    // functions on the lua end
    void luaInitialize();
    void luaUpdate(const sf::Time& dt);

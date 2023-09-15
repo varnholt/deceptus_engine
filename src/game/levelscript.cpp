@@ -1,8 +1,12 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
+#include "game/bow.h"
 #include "game/luaconstants.h"
+#include "game/player/player.h"
 #include "game/savestate.h"
+#include "game/weaponfactory.h"
+#include "game/weaponsystem.h"
 
 namespace
 {
@@ -120,7 +124,7 @@ int32_t addSkill(lua_State* state)
       return 0;
    }
 
-   const auto skill = lua_tointeger(state, 1);
+   const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
 
    getInstance()->addSkill(skill);
    return 0;
@@ -140,9 +144,39 @@ int32_t removeSkill(lua_State* state)
       return 0;
    }
 
-   const auto skill = lua_tointeger(state, 1);
+   const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
 
    getInstance()->removeSkill(skill);
+   return 0;
+}
+
+/**
+ * @brief giveWeaponBow give bow to player
+ * @return error code
+ */
+int32_t giveWeaponBow(lua_State* /*state*/)
+{
+   getInstance()->giveWeaponBow();
+   return 0;
+}
+
+/**
+ * @brief giveWeaponGun give gun to player
+ * @return error code
+ */
+int32_t giveWeaponGun(lua_State* /*state*/)
+{
+   getInstance()->giveWeaponGun();
+   return 0;
+}
+
+/**
+ * @brief giveWeaponSword give sword to player
+ * @return error code
+ */
+int32_t giveWeaponSword(lua_State* /*state*/)
+{
+   getInstance()->giveWeaponSword();
    return 0;
 }
 
@@ -195,7 +229,9 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
    lua_register(_lua_state, "addSkill", ::addSkill);
-   lua_register(_lua_state, "removeSkill", ::removeSkill);
+   lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
+   lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
+   lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -341,4 +377,35 @@ void LevelScript::addSkill(int32_t skill)
 void LevelScript::removeSkill(int32_t skill)
 {
    SaveState::getPlayerInfo()._extra_table._skills._skills &= ~skill;
+}
+
+namespace
+{
+void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
+{
+   Player::getCurrent()->getWeaponSystem()->_weapons.push_back(weapon);
+   Player::getCurrent()->getWeaponSystem()->_selected = weapon;
+}
+}  // namespace
+
+void LevelScript::giveWeaponBow()
+{
+   auto bow = WeaponFactory::create(WeaponType::Bow);
+   bow->initialize();
+   std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
+   giveWeaponToPlayer(bow);
+}
+
+void LevelScript::giveWeaponGun()
+{
+   auto gun = WeaponFactory::create(WeaponType::Gun);
+   gun->initialize();
+   giveWeaponToPlayer(gun);
+}
+
+void LevelScript::giveWeaponSword()
+{
+   auto sword = WeaponFactory::create(WeaponType::Sword);
+   sword->initialize();
+   giveWeaponToPlayer(sword);
 }
