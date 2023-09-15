@@ -9,6 +9,6 @@
 namespace WeaponFactory
 {
 
-std::unique_ptr<Weapon> create(WeaponType type);
-std::unique_ptr<Weapon> create(WeaponType type, const WeaponProperties& properties);
+std::shared_ptr<Weapon> create(WeaponType type);
+std::shared_ptr<Weapon> create(WeaponType type, const WeaponProperties& properties);
 }  // namespace WeaponFactory
