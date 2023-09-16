@@ -1,0 +1,18 @@
+{
+   "sword_regular": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [72, 72],
+      "origin": [36.0, 36.0],
+      "sprite_count": 30,
+      "texture": "data/sprites/extra_sword.png"
+   },
+   "sword_flash": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 72],
+      "frame_size": [72, 72],
+      "origin": [36.0, 36.0],
+      "sprite_count": 30,
+      "texture": "data/sprites/extra_sword.png"
+   }
+}
