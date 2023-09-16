@@ -87,6 +87,7 @@ void WaterSurface::update(const sf::Time& dt)
    // safeguard against me debugging this :)
    if (dt.asMilliseconds() > 16 * 2)
    {
+      // std::cout << "panic. " << dt.asMilliseconds() << std::endl;
       return;
    }
 
