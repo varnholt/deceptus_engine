@@ -6,6 +6,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "game/animationpool.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
 
@@ -37,4 +38,18 @@ public:
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect;
    std::vector<ExtraCallback> _callbacks;
+
+   // animations (if used)
+
+   // unclear if a probability is needed
+   //
+   // struct ExtraAnimationData
+   // {
+   //    float _probability{1.0f};
+   //    std::shared_ptr<Animation> _animation;
+   // };
+
+   std::vector<std::shared_ptr<Animation>> _animations_main;
+   std::shared_ptr<Animation> _animation_pickup;
+   std::vector<std::shared_ptr<Animation>>::iterator _animations_main_it;
 };

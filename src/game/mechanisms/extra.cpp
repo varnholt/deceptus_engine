@@ -15,6 +15,8 @@
 
 #include <iostream>
 
+#define DRAW_DEBUG 1
+
 Extra::Extra(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Extra).name());
@@ -28,7 +30,7 @@ void Extra::deserialize(const GameDeserializeData& data)
    const auto width_px = data._tmx_object->_width_px;
    const auto height_px = data._tmx_object->_height_px;
 
-   std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
+   // std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
 
    _name = data._tmx_object->_name;
    _rect = {pos_x_px, pos_y_px, width_px, height_px};
@@ -56,6 +58,32 @@ void Extra::deserialize(const GameDeserializeData& data)
       {
          _sample = sample_it->second->_value_string.value();
       }
+
+      // read animations if set up
+      AnimationPool animation_pool{"data/sprites/extra_animations.json"};
+      const auto animation_pickup = data._tmx_object->_properties->_map.find("animation_pickup");
+      if (animation_pickup != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = animation_pickup->second->_value_string.value();
+         _animation_pickup = animation_pool.create(key, pos_x_px, pos_y_px, false, false);
+      }
+
+      for (auto i = 0; i < 99; i++)
+      {
+         const auto main_animation_key = "animation_main_" + std::to_string(i);
+         const auto main_animation_n = data._tmx_object->_properties->_map.find(main_animation_key);
+         if (main_animation_n != data._tmx_object->_properties->_map.end())
+         {
+            const auto key = main_animation_n->second->_value_string.value();
+            auto main_animation = animation_pool.create(key, pos_x_px, pos_y_px, false, false);
+            _animations_main.push_back(main_animation);
+         }
+      }
+   }
+
+   if (!_animations_main.empty())
+   {
+      _animations_main_it = _animations_main.begin();
    }
 
    // add
@@ -66,22 +94,64 @@ void Extra::deserialize(const GameDeserializeData& data)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
+   if (_animation_pickup && !_animation_pickup->_paused)
+   {
+      _animation_pickup->draw(target);
+   }
+
    if (!_active)
    {
       return;
    }
 
-   target.draw(_sprite);
+   // draw animations
+   if (_animations_main_it->get())
+   {
+      _animations_main_it->get()->draw(target);
+   }
 
-   // DebugDraw::drawRect(target, _rect);
+   // or show static extra texture
+   else
+   {
+      target.draw(_sprite);
+   }
+
+#ifdef DRAW_DEBUG
+   DebugDraw::drawRect(target, _rect);
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Extra::update(const sf::Time& /*dt*/)
+void Extra::update(const sf::Time& dt)
 {
+   // play pickup animation if active
+   if (_animation_pickup && !_animation_pickup->_paused)
+   {
+      _animation_pickup->update(dt);
+   }
+
    if (!_active)
    {
       return;
+   }
+
+   // update regular animations
+   if (*_animations_main_it)
+   {
+      (*_animations_main_it)->update(dt);
+      if ((*_animations_main_it)->_finished)
+      {
+         _animations_main_it++;
+
+         // start loop again if needed
+         if (_animations_main_it == _animations_main.end())
+         {
+            _animations_main_it = _animations_main.begin();
+         }
+
+         (*_animations_main_it)->seekToStart();
+         (*_animations_main_it)->play();
+      }
    }
 
    const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
