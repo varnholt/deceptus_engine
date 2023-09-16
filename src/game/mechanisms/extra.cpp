@@ -15,7 +15,7 @@
 
 #include <iostream>
 
-#define DRAW_DEBUG 1
+// #define DRAW_DEBUG 1
 
 Extra::Extra(GameNode* parent) : GameNode(parent)
 {
@@ -60,12 +60,14 @@ void Extra::deserialize(const GameDeserializeData& data)
       }
 
       // read animations if set up
+      const auto offset_x = width_px * 0.5f;
+      const auto offset_y = height_px * 0.5f;
       AnimationPool animation_pool{"data/sprites/extra_animations.json"};
       const auto animation_pickup = data._tmx_object->_properties->_map.find("animation_pickup");
       if (animation_pickup != data._tmx_object->_properties->_map.end())
       {
          const auto key = animation_pickup->second->_value_string.value();
-         _animation_pickup = animation_pool.create(key, pos_x_px, pos_y_px, false, false);
+         _animation_pickup = animation_pool.create(key, pos_x_px + offset_x, pos_y_px + offset_y, false, false);
       }
 
       for (auto i = 0; i < 99; i++)
@@ -75,7 +77,7 @@ void Extra::deserialize(const GameDeserializeData& data)
          if (main_animation_n != data._tmx_object->_properties->_map.end())
          {
             const auto key = main_animation_n->second->_value_string.value();
-            auto main_animation = animation_pool.create(key, pos_x_px, pos_y_px, false, false);
+            auto main_animation = animation_pool.create(key, pos_x_px + offset_x, pos_y_px + offset_y, false, false);
             _animations_main.push_back(main_animation);
          }
       }
@@ -139,7 +141,7 @@ void Extra::update(const sf::Time& dt)
    if (*_animations_main_it)
    {
       (*_animations_main_it)->update(dt);
-      if ((*_animations_main_it)->_finished)
+      if ((*_animations_main_it)->_paused)
       {
          _animations_main_it++;
 
