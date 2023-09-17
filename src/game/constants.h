@@ -118,16 +118,6 @@ enum class Display
    ScreenTransition = 0x20,
 };
 
-enum class ItemType
-{
-   Invalid,
-   KeyBlue,
-   KeyOrange,
-   KeyGreen,
-   KeyRed,
-   KeyYellow,
-};
-
 enum class ExecutionMode
 {
    None,
