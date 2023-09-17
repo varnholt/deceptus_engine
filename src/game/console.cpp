@@ -260,11 +260,6 @@ void Console::execute()
       SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
       _log.push_back("invulnerable");
    }
-   else if (results.at(0) == "/idkfa")
-   {
-      SaveState::getPlayerInfo()._inventory.giveAllKeys();
-      _log.push_back("all keys");
-   }
    else if (results.at(0) == "/damage" && results.size() == 2)
    {
       const auto damage = std::atoi(results.at(1).c_str());
