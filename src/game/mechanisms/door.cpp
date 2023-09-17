@@ -11,6 +11,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "game/animationpool.h"
 #include "level.h"
 #include "player/player.h"
 #include "savestate.h"
@@ -209,6 +210,7 @@ const sf::FloatRect& Door::getPixelRect() const
 //-----------------------------------------------------------------------------
 void Door::toggleWithPlayerChecks()
 {
+   // TODO: needs to be converted to string identifiers
    if (!SaveState::getPlayerInfo()._inventory.hasInventoryItem(_required_item))
    {
       // Log::Info() << "player doesn't have key";
@@ -288,35 +290,14 @@ void Door::setPlayerAtDoor(bool player_at_door)
    _player_at_door = player_at_door;
 }
 
-//-----------------------------------------------------------------------------
-void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
-{
-   static const std::unordered_map<ItemType, int32_t> map{
-      std::make_pair(ItemType::KeyRed, 1),
-      std::make_pair(ItemType::KeyGreen, 4),
-      std::make_pair(ItemType::KeyBlue, 7),
-      std::make_pair(ItemType::KeyYellow, 10),
-      std::make_pair(ItemType::KeyOrange, 13),
-   };
-
-   const auto offset_it = map.find(item_type);
-
-   if (offset_it != map.end())
-   {
-      _sprite_icon.setTexture(*_texture);
-      _sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * offset_it->second, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
-   }
-
-   _sprite_icon.setPosition(pos);
-}
-
-
 void Door::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
    const auto x_px = data._tmx_object->_x_px;
    const auto y_px = data._tmx_object->_y_px;
+   const auto width_px = data._tmx_object->_width_px;
+   const auto height_px = data._tmx_object->_height_px;
 
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "doors.png");
 
@@ -346,28 +327,40 @@ void Door::setup(const GameDeserializeData& data)
          setZ(z_index);
       }
 
+      const auto texture_it = data._tmx_object->_properties->_map.find("texture");
+      if (texture_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto texture_path = texture_it->second->_value_string.value();
+         _texture = TexturePool::getInstance().get(texture_path);
+         _sprite_icon.setTexture(*_texture);
+         _sprite_icon.setPosition(x_px, y_px);
+      }
+
+      const auto sample_it = data._tmx_object->_properties->_map.find("sample");
+      if (sample_it != data._tmx_object->_properties->_map.end())
+      {
+         _sample = sample_it->second->_value_string.value();
+      }
+
       // read required key to open door
       const auto key_it = data._tmx_object->_properties->_map.find("key");
       if (key_it != data._tmx_object->_properties->_map.end())
       {
          const auto key = key_it->second->_value_string.value();
+         _required_item = key;
+      }
 
-         static const std::unordered_map<std::string, ItemType> map{
-            std::make_pair("key_red", ItemType::KeyRed),
-            std::make_pair("key_green", ItemType::KeyGreen),
-            std::make_pair("key_blue", ItemType::KeyBlue),
-            std::make_pair("key_yellow", ItemType::KeyYellow),
-            std::make_pair("key_orange", ItemType::KeyOrange),
-         };
-
-         const auto key_type_it = map.find(key);
-         if (key_type_it != map.end())
-         {
-            _required_item = key_type_it->second;
-         }
+      // read key animation if present
+      const auto offset_x = width_px * 0.5f;
+      const auto offset_y = height_px * 0.5f;
+      AnimationPool animation_pool{"data/sprites/door_animations.json"};
+      const auto key_animation = data._tmx_object->_properties->_map.find("key_animation");
+      if (key_animation != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = key_animation->second->_value_string.value();
+         _key_animation = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
       }
    }
 
-   setupKeySprite(_required_item, sf::Vector2f{x_px, y_px});
    setupBody(data._world);
 }

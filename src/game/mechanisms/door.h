@@ -1,5 +1,6 @@
 #pragma once
 
+#include "animation.h"
 #include "constants.h"
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
@@ -58,15 +59,16 @@ public:
 private:
    void setupBody(const std::shared_ptr<b2World>& world, float x_offset = 0.0f, float x_scale = 1.0f);
 
-   void setupKeySprite(ItemType item_type, const sf::Vector2f& pos);
    void updateTransform();
    void updateBars(const sf::Time& dt);
    bool checkPlayerAtDoor() const;
 
    std::shared_ptr<sf::Texture> _texture;
+   std::optional<std::string> _sample;
+   std::shared_ptr<Animation> _key_animation;
+   sf::Sprite _sprite_icon;
 
    sf::VertexArray _door_quad{sf::Quads, 4};
-   sf::Sprite _sprite_icon;
 
    Type _type = Type::Bars;
 
@@ -76,7 +78,7 @@ private:
    sf::Vector2i _tile_position_tl;
    sf::FloatRect _pixel_rect;
 
-   ItemType _required_item = ItemType::Invalid;
+   std::string _required_item;
 
    bool _automatic_close = true;
 
