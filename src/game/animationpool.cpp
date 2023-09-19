@@ -205,6 +205,11 @@ void AnimationPool::deserializeFromFile(const std::string& filename)
 {
    std::ifstream ifs(filename, std::ifstream::in);
 
+   if (!ifs.good())
+   {
+      Log::Error() << "file " << filename << " not found";
+   }
+
    auto c = ifs.get();
    std::string data;
 
