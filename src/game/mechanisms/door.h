@@ -67,6 +67,7 @@ private:
    std::shared_ptr<Animation> _animation_open;
    std::shared_ptr<Animation> _animation_close;
    std::shared_ptr<Animation> _animation_key;
+   sf::FloatRect _player_at_door_rect;
 
    Version _version = Version::Version2;
    State _initial_state = State::Closed;
@@ -80,6 +81,7 @@ private:
 
    std::string _required_item;
 
+   bool _can_be_closed = false;
    bool _automatic_close = false;
 
    bool _player_at_door = false;
