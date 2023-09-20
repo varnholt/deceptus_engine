@@ -201,7 +201,6 @@ SOURCES += \
    src/game/ingamemenumap.cpp \
    src/game/ingamemenupage.cpp \
    src/game/inventory.cpp \
-   src/game/inventoryitem.cpp \
    src/game/layerdata.cpp \
    src/game/level.cpp \
    src/game/leveldescription.cpp \
@@ -423,7 +422,6 @@ HEADERS += \
    src/game/ingamemenumap.h \
    src/game/ingamemenupage.h \
    src/game/inventory.h \
-   src/game/inventoryitem.h \
    src/game/laser.h \
    src/game/layerdata.h \
    src/game/level.h \

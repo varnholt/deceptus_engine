@@ -46,7 +46,7 @@ public:
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
 private:
-   void addItem(int32_t x, int32_t y, ItemType type);
+   void addItem(int32_t x, int32_t y, const std::string& item_id);
    Inventory& getInventory();
 
    std::shared_ptr<Layer> getFilterLayer(Filter filter) const;
@@ -64,7 +64,7 @@ private:
    sf::Vector2f _cursor_position;
    std::shared_ptr<sf::Texture> _inventory_texture;
 
-   std::map<ItemType, ItemSprite> _sprites;
+   std::map<std::string, ItemSprite> _sprites;
    int32_t _selected_item = 0;
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;

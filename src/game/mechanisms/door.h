@@ -1,5 +1,6 @@
 #pragma once
 
+#include "animation.h"
 #include "constants.h"
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
@@ -18,10 +19,10 @@ struct TmxTileSet;
 class Door : public GameMechanism, public GameNode
 {
 public:
-   enum class Type
+   enum class Version
    {
-      Bars,
-      Conventional,
+      Version1,
+      Version2,
    };
 
    enum class State
@@ -50,37 +51,39 @@ public:
    bool isPlayerAtDoor() const;
    void setPlayerAtDoor(bool isPlayerAtDoor);
 
-   void reset();
-
    const sf::Vector2i& getTilePosition() const;
    const sf::FloatRect& getPixelRect() const;
 
 private:
-   void setupBody(const std::shared_ptr<b2World>& world, float x_offset = 0.0f, float x_scale = 1.0f);
+   void setupBody(const std::shared_ptr<b2World>& world);
 
-   void setupKeySprite(ItemType item_type, const sf::Vector2f& pos);
    void updateTransform();
    void updateBars(const sf::Time& dt);
    bool checkPlayerAtDoor() const;
 
+   sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
+   std::optional<std::string> _sample;
+   std::shared_ptr<Animation> _animation_open;
+   std::shared_ptr<Animation> _animation_close;
+   std::shared_ptr<Animation> _animation_key;
+   sf::FloatRect _player_at_door_rect;
 
-   sf::VertexArray _door_quad{sf::Quads, 4};
-   sf::Sprite _sprite_icon;
-
-   Type _type = Type::Bars;
-
+   Version _version = Version::Version2;
    State _initial_state = State::Closed;
    State _state = State::Closed;
 
+   // for 'version 1'
+   sf::VertexArray _door_quad{sf::Quads, 4};
    sf::Vector2i _tile_position_tl;
    sf::FloatRect _pixel_rect;
+   float _bar_offset = 0.0f;
 
-   ItemType _required_item = ItemType::Invalid;
+   std::string _required_item;
 
-   bool _automatic_close = true;
+   bool _can_be_closed = false;
+   bool _automatic_close = false;
 
-   float _offset = 0.0f;
    bool _player_at_door = false;
    b2Body* _body = nullptr;
 };
