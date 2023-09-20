@@ -2,7 +2,6 @@
 
 #include "framework/easings/easings.h"
 #include "game/gameconfiguration.h"
-#include "game/inventoryitem.h"
 #include "game/mechanisms/extra.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
@@ -124,24 +123,24 @@ Inventory& InGameMenuInventory::getInventory()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::addItem(int32_t x, int32_t y, ItemType type)
+void InGameMenuInventory::addItem(int32_t /*x*/, int32_t /*y*/, const std::string& /*item_id*/)
 {
-   sf::Sprite sprite;
-   sprite.setTexture(*_inventory_texture);
-   sprite.setTextureRect({x * icon_width, y * icon_height, icon_width, icon_height});
-   _sprites[type].mSprite = sprite;
-
-   getInventory().add(type);
+   //   sf::Sprite sprite;
+   //   sprite.setTexture(*_inventory_texture);
+   //   sprite.setTextureRect({x * icon_width, y * icon_height, icon_width, icon_height});
+   //   _sprites[type].mSprite = sprite;
+   //
+   //   getInventory().add(type);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::addDemoInventory()
 {
-   addItem(0, 0, ItemType::KeyRed);
-   addItem(1, 0, ItemType::KeyOrange);
-   addItem(2, 0, ItemType::KeyBlue);
-   addItem(3, 0, ItemType::KeyGreen);
-   addItem(4, 0, ItemType::KeyYellow);
+   //   addItem(0, 0, ItemType::KeyRed);
+   //   addItem(1, 0, ItemType::KeyOrange);
+   //   addItem(2, 0, ItemType::KeyBlue);
+   //   addItem(3, 0, ItemType::KeyGreen);
+   //   addItem(4, 0, ItemType::KeyYellow);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
