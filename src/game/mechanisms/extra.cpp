@@ -11,6 +11,7 @@
 #include "game/gamedeserializedata.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/savestate.h"
 #include "game/texturepool.h"
 
 #include <iostream>
@@ -177,16 +178,7 @@ void Extra::update(const sf::Time& dt)
          Audio::getInstance().playSample({_sample.value()});
       }
 
-      // case ExtraItem::ExtraSpriteIndex::KeyYellow:
-      // {
-      //    SaveState::getPlayerInfo()._inventory.add(ItemType::KeyYellow);
-      //    break;
-      // }
-      // case ExtraItem::ExtraSpriteIndex::Dash:
-      // {
-      //    SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
-      //    break;
-      // }
+      SaveState::getPlayerInfo()._inventory.add(_name);
    }
 }
 

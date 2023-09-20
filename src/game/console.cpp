@@ -55,8 +55,11 @@ void Console::showHelp()
    _log.push_back("/damage <n>: cause damage to player");
    _log.push_back("   example: /damage 100");
    _log.push_back("");
-   _log.push_back("/extra <name>: give extra");
+   _log.push_back("/extra <name>: give extra to player");
    _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
+   _log.push_back("");
+   _log.push_back("/give <item name>: give item to player");
+   _log.push_back("   example: /give key_skull");
    _log.push_back("");
    _log.push_back("/playback <command>: game playback");
    _log.push_back("   commands: enable, disable, load, save, replay, reset");
@@ -189,6 +192,12 @@ void Console::execute()
          skills = 0;
          _log.push_back("reset all player extras");
       }
+   }
+   else if (results.at(0) == "/give" && results.size() == 2)
+   {
+      const auto item = results.at(1);
+      SaveState::getPlayerInfo()._inventory.add(item);
+      _log.push_back("given item player");
    }
    else if (results.at(0) == "/tp" && results.size() == 3)
    {
