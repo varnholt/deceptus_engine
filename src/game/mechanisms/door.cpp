@@ -11,6 +11,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "game/animationpool.h"
 #include "level.h"
 #include "player/player.h"
 #include "savestate.h"
@@ -20,7 +21,7 @@
 
 namespace
 {
-constexpr auto door_height_tl = 3;
+constexpr auto door_height_tl = 4;
 }
 
 //-----------------------------------------------------------------------------
@@ -39,8 +40,31 @@ Door::~Door()
 //-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(_sprite_icon);
-   color.draw(_door_quad, _texture.get());
+   if (_animation_open && !_animation_open->_paused)
+   {
+      _animation_open->draw(color);
+   }
+   else if (_animation_close && !_animation_close->_paused)
+   {
+      _animation_close->draw(color);
+   }
+   else if (_state == State::Closed)
+   {
+      color.draw(_sprite);
+   }
+
+   if (_player_at_door)
+   {
+      if (_animation_key)
+      {
+         _animation_key->draw(color);
+      }
+   }
+
+   if (_version == Version::Version1)
+   {
+      color.draw(_door_quad, _texture.get());
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -48,7 +72,7 @@ void Door::updateBars(const sf::Time& dt)
 {
    const auto left = 0.0f;
    const auto right = left + 3.0f * PIXELS_PER_TILE;
-   const auto top = 3.0f * PIXELS_PER_TILE - _offset;
+   const auto top = 3.0f * PIXELS_PER_TILE - _bar_offset;
    const auto bottom = top + 3.0f * PIXELS_PER_TILE;
 
    _door_quad[0].texCoords = sf::Vector2f(left, top);
@@ -63,21 +87,21 @@ void Door::updateBars(const sf::Time& dt)
    {
       case State::Opening:
       {
-         _offset -= open_speed * dt.asSeconds();
-         if (fabs(_offset) >= PIXELS_PER_TILE * door_height_tl)
+         _bar_offset -= open_speed * dt.asSeconds();
+         if (fabs(_bar_offset) >= PIXELS_PER_TILE * door_height_tl)
          {
             _state = State::Open;
-            _offset = static_cast<float_t>(-PIXELS_PER_TILE * door_height_tl);
+            _bar_offset = static_cast<float_t>(-PIXELS_PER_TILE * door_height_tl);
          }
          break;
       }
       case State::Closing:
       {
-         _offset += close_speed * dt.asSeconds();
-         if (_offset >= 0.0f)
+         _bar_offset += close_speed * dt.asSeconds();
+         if (_bar_offset >= 0.0f)
          {
             _state = State::Closed;
-            _offset = 0.0f;
+            _bar_offset = 0.0f;
          }
          break;
       }
@@ -92,17 +116,42 @@ void Door::updateBars(const sf::Time& dt)
 //-----------------------------------------------------------------------------
 void Door::update(const sf::Time& dt)
 {
-   switch (_type)
+   if (_player_at_door)
    {
-      case Type::Conventional:
+      if (_animation_key)
       {
-         break;
+         _animation_key->update(dt);
       }
-      case Type::Bars:
+   }
+
+   if (_state == State::Opening)
+   {
+      if (_animation_open)
       {
-         updateBars(dt);
-         break;
+         _animation_open->update(dt);
+         if (_animation_open->_paused)
+         {
+            _state = State::Open;
+            _body->SetEnabled(false);
+         }
       }
+   }
+   else if (_state == State::Closing)
+   {
+      if (_animation_close)
+      {
+         _animation_close->update(dt);
+         if (_animation_open->_paused)
+         {
+            _state = State::Closed;
+            _body->SetEnabled(true);
+         }
+      }
+   }
+
+   if (_version == Version::Version1)
+   {
+      updateBars(dt);
    }
 }
 
@@ -129,48 +178,27 @@ std::optional<sf::FloatRect> Door::getBoundingBoxPx()
 //-----------------------------------------------------------------------------
 void Door::updateTransform()
 {
-   const auto x = _tile_position_tl.x * PIXELS_PER_TILE / PPM;
-   const auto y = (_offset + _tile_position_tl.y * PIXELS_PER_TILE) / PPM;
+   // todo: offset should be computed from rectangle dimension
+   const auto _offset_x_m = PIXELS_PER_TILE * MPP;
+   const auto _offset_y_m = PIXELS_PER_TILE * MPP;
+
+   const auto x = _offset_x_m + _tile_position_tl.x * PIXELS_PER_TILE / PPM;
+   const auto y = _offset_y_m + (_bar_offset + _tile_position_tl.y * PIXELS_PER_TILE) / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
 //-----------------------------------------------------------------------------
-void Door::reset()
-{
-   _state = _initial_state;
-
-   switch (_state)
-   {
-      case State::Open:
-      {
-         _offset = 1.0f;
-         break;
-      }
-      case State::Closed:
-      {
-         _offset = 0.0f;
-         break;
-      }
-      case State::Opening:
-      case State::Closing:
-      {
-         break;
-      }
-   }
-}
-
-//-----------------------------------------------------------------------------
-void Door::setupBody(const std::shared_ptr<b2World>& world, float x_offset, float x_scale)
+void Door::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
-   auto size_x = (PIXELS_PER_TILE / PPM) * x_scale;
-   auto size_y = (PIXELS_PER_TILE / PPM);
+   const auto size_x = (PIXELS_PER_TILE / PPM);
+   const auto size_y = (PIXELS_PER_TILE / PPM);
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(x_offset, 0);
-   vertices[1] = b2Vec2(x_offset, door_height_tl * size_y);
-   vertices[2] = b2Vec2(x_offset + size_x, door_height_tl * size_y);
-   vertices[3] = b2Vec2(x_offset + size_x, 0);
+   vertices[0] = b2Vec2(0, 0);
+   vertices[1] = b2Vec2(0, door_height_tl * size_y);
+   vertices[2] = b2Vec2(0 + size_x, door_height_tl * size_y);
+   vertices[3] = b2Vec2(0 + size_x, 0);
    polygon_shape.Set(vertices, 4);
 
    b2BodyDef body_def;
@@ -189,14 +217,7 @@ void Door::setupBody(const std::shared_ptr<b2World>& world, float x_offset, floa
 bool Door::checkPlayerAtDoor() const
 {
    const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
-   const auto door_pos = _sprite_icon.getPosition();
-
-   sf::Vector2f a(player_pos.x, player_pos.y);
-   sf::Vector2f b(door_pos.x + PIXELS_PER_TILE * 0.5f, door_pos.y + 3 * PIXELS_PER_TILE);
-
-   const auto distance = SfmlMath::length(a - b);
-   const auto at_door = (distance < PIXELS_PER_TILE * 1.5f);
-
+   const auto at_door = _player_at_door_rect.contains(player_pos);
    return at_door;
 }
 
@@ -211,13 +232,13 @@ void Door::toggleWithPlayerChecks()
 {
    if (!SaveState::getPlayerInfo()._inventory.hasInventoryItem(_required_item))
    {
-      // Log::Info() << "player doesn't have key";
+      Log::Info() << "player doesn't have key: " << _required_item;
       return;
    }
 
    if (!checkPlayerAtDoor())
    {
-      // Log::Info() << "player not in front of door";
+      Log::Info() << "player not in front of door";
       return;
    }
 
@@ -234,6 +255,13 @@ void Door::open()
 
    _state = State::Opening;
 
+   // play open animation
+   if (_animation_open)
+   {
+      _animation_open->seekToStart();
+      _animation_open->play();
+   }
+
    if (_automatic_close)
    {
       Timer::add(
@@ -245,12 +273,24 @@ void Door::open()
 //-----------------------------------------------------------------------------
 void Door::close()
 {
+   if (!_can_be_closed)
+   {
+      return;
+   }
+
    if (_state == State::Closing)
    {
       return;
    }
 
    _state = State::Closing;
+
+   // play close animation
+   if (_animation_close)
+   {
+      _animation_close->seekToStart();
+      _animation_close->play();
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -259,14 +299,20 @@ void Door::toggle()
    switch (_state)
    {
       case State::Open:
+      {
          close();
          break;
+      }
       case State::Closed:
+      {
          open();
          break;
+      }
       case State::Opening:
       case State::Closing:
+      {
          break;
+      }
    }
 }
 
@@ -288,56 +334,31 @@ void Door::setPlayerAtDoor(bool player_at_door)
    _player_at_door = player_at_door;
 }
 
-//-----------------------------------------------------------------------------
-void Door::setupKeySprite(ItemType item_type, const sf::Vector2f& pos)
-{
-   static const std::unordered_map<ItemType, int32_t> map{
-      std::make_pair(ItemType::KeyRed, 1),
-      std::make_pair(ItemType::KeyGreen, 4),
-      std::make_pair(ItemType::KeyBlue, 7),
-      std::make_pair(ItemType::KeyYellow, 10),
-      std::make_pair(ItemType::KeyOrange, 13),
-   };
-
-   const auto offset_it = map.find(item_type);
-
-   if (offset_it != map.end())
-   {
-      _sprite_icon.setTexture(*_texture);
-      _sprite_icon.setTextureRect(sf::IntRect(PIXELS_PER_TILE * offset_it->second, PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
-   }
-
-   _sprite_icon.setPosition(pos);
-}
-
-
 void Door::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
    const auto x_px = data._tmx_object->_x_px;
    const auto y_px = data._tmx_object->_y_px;
-
-   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "doors.png");
-
-   _door_quad[0].position.x = x_px - PIXELS_PER_TILE;
-   _door_quad[0].position.y = y_px;
-   _door_quad[1].position.x = x_px - PIXELS_PER_TILE;
-   _door_quad[1].position.y = y_px + 3 * PIXELS_PER_TILE;
-   _door_quad[2].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
-   _door_quad[2].position.y = y_px + 3 * PIXELS_PER_TILE;
-   _door_quad[3].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
-   _door_quad[3].position.y = y_px;
-
-   _type = Type::Bars;
-
+   const auto width_px = data._tmx_object->_width_px;
+   const auto height_px = data._tmx_object->_height_px;
    _tile_position_tl.x = static_cast<int32_t>(x_px / PIXELS_PER_TILE);
    _tile_position_tl.y = static_cast<int32_t>(y_px / PIXELS_PER_TILE);
 
-   _pixel_rect = sf::FloatRect{x_px, y_px, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
-
    if (data._tmx_object->_properties)
    {
+      // read door version
+      const auto type_it = data._tmx_object->_properties->_map.find("version");
+      if (type_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto type_identifier = type_it->second->_value_string.value();
+         if (type_identifier == "version")
+         {
+            // this is the 1st version that has ever been implemented
+            _version = Version::Version1;
+         }
+      }
+
       // read z index
       const auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
@@ -346,28 +367,101 @@ void Door::setup(const GameDeserializeData& data)
          setZ(z_index);
       }
 
+      const auto texture_it = data._tmx_object->_properties->_map.find("texture");
+      if (texture_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto texture_path = texture_it->second->_value_string.value();
+         _texture = TexturePool::getInstance().get(texture_path);
+         _sprite.setTexture(*_texture);
+         _sprite.setPosition(x_px, y_px);
+      }
+
+      const auto sample_it = data._tmx_object->_properties->_map.find("sample");
+      if (sample_it != data._tmx_object->_properties->_map.end())
+      {
+         _sample = sample_it->second->_value_string.value();
+      }
+
       // read required key to open door
       const auto key_it = data._tmx_object->_properties->_map.find("key");
       if (key_it != data._tmx_object->_properties->_map.end())
       {
          const auto key = key_it->second->_value_string.value();
+         _required_item = key;
+      }
 
-         static const std::unordered_map<std::string, ItemType> map{
-            std::make_pair("key_red", ItemType::KeyRed),
-            std::make_pair("key_green", ItemType::KeyGreen),
-            std::make_pair("key_blue", ItemType::KeyBlue),
-            std::make_pair("key_yellow", ItemType::KeyYellow),
-            std::make_pair("key_orange", ItemType::KeyOrange),
-         };
+      // read key animation if present
+      const auto offset_x = width_px * 0.5f;
+      const auto offset_y = height_px * 0.5f;
+      AnimationPool animation_pool{"data/sprites/door_animations.json"};
+      const auto key_animation = data._tmx_object->_properties->_map.find("key_animation");
+      if (key_animation != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = key_animation->second->_value_string.value();
+         _animation_key = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
+      }
 
-         const auto key_type_it = map.find(key);
-         if (key_type_it != map.end())
-         {
-            _required_item = key_type_it->second;
-         }
+      // read open animation
+      const auto animation_open = data._tmx_object->_properties->_map.find("animation_open");
+      if (animation_open != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = animation_open->second->_value_string.value();
+         _animation_open = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
+      }
+
+      // read close animation
+      const auto animation_close = data._tmx_object->_properties->_map.find("animation_close");
+      if (animation_close != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = animation_close->second->_value_string.value();
+         _animation_close = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
       }
    }
 
-   setupKeySprite(_required_item, sf::Vector2f{x_px, y_px});
+   // set up the old version
+   if (_version == Version::Version1)
+   {
+      _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "doors.png");
+
+      _door_quad[0].position.x = x_px - PIXELS_PER_TILE;
+      _door_quad[0].position.y = y_px;
+      _door_quad[1].position.x = x_px - PIXELS_PER_TILE;
+      _door_quad[1].position.y = y_px + 3 * PIXELS_PER_TILE;
+      _door_quad[2].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      _door_quad[2].position.y = y_px + 3 * PIXELS_PER_TILE;
+      _door_quad[3].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      _door_quad[3].position.y = y_px;
+
+      _pixel_rect = sf::FloatRect{x_px, y_px, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
+   }
+   else
+   {
+      // the first frame of the open animation should be the texture rect used for drawing
+      if (_animation_open)
+      {
+         _sprite.setTextureRect(_animation_open->_frames.at(0));
+      }
+   }
+
+   //
+   // for colliding rect used to check whether the player is close to the door, extend
+   // the original dimensions a little
+   //
+   // +///+///+///+///+
+   // +---+---+---+---+
+   // |///|       |///|
+   // +---+       +---+
+   // |///|       |///|
+   // +---+       +---+
+   // |///|       |///|
+   // +---+---+---+---+
+   // +///+///+///+///+
+   //
+
+   _player_at_door_rect.left = x_px - PIXELS_PER_TILE;
+   _player_at_door_rect.top = y_px - 0.5f * PIXELS_PER_TILE;
+   _player_at_door_rect.width = width_px + 2 * PIXELS_PER_TILE;
+   _player_at_door_rect.height = height_px + PIXELS_PER_TILE;
+
    setupBody(data._world);
 }
