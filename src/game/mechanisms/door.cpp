@@ -40,7 +40,18 @@ Door::~Door()
 //-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(_sprite);
+   if (_animation_open && !_animation_open->_paused)
+   {
+      _animation_open->draw(color);
+   }
+   else if (_animation_close && !_animation_close->_paused)
+   {
+      _animation_close->draw(color);
+   }
+   else if (_state == State::Closed)
+   {
+      color.draw(_sprite);
+   }
 
    if (_player_at_door)
    {
@@ -206,15 +217,7 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
 bool Door::checkPlayerAtDoor() const
 {
    const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
-   const auto door_pos = _sprite.getPosition();
-
-   const sf::Vector2f a(player_pos.x, player_pos.y);
-   const sf::Vector2f b(door_pos.x + PIXELS_PER_TILE * 0.5f, door_pos.y + 3 * PIXELS_PER_TILE);
-
-   // todo: calculate a colliding rect at setup time!
-   const auto distance = SfmlMath::length(a - b);
-   const auto at_door = (distance < PIXELS_PER_TILE * 1.5f);
-
+   const auto at_door = _player_at_door_rect.contains(player_pos);
    return at_door;
 }
 
@@ -229,13 +232,13 @@ void Door::toggleWithPlayerChecks()
 {
    if (!SaveState::getPlayerInfo()._inventory.hasInventoryItem(_required_item))
    {
-      // Log::Info() << "player doesn't have key";
+      Log::Info() << "player doesn't have key: " << _required_item;
       return;
    }
 
    if (!checkPlayerAtDoor())
    {
-      // Log::Info() << "player not in front of door";
+      Log::Info() << "player not in front of door";
       return;
    }
 
@@ -252,6 +255,13 @@ void Door::open()
 
    _state = State::Opening;
 
+   // play open animation
+   if (_animation_open)
+   {
+      _animation_open->seekToStart();
+      _animation_open->play();
+   }
+
    if (_automatic_close)
    {
       Timer::add(
@@ -263,12 +273,24 @@ void Door::open()
 //-----------------------------------------------------------------------------
 void Door::close()
 {
+   if (!_can_be_closed)
+   {
+      return;
+   }
+
    if (_state == State::Closing)
    {
       return;
    }
 
    _state = State::Closing;
+
+   // play close animation
+   if (_animation_close)
+   {
+      _animation_close->seekToStart();
+      _animation_close->play();
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -277,14 +299,20 @@ void Door::toggle()
    switch (_state)
    {
       case State::Open:
+      {
          close();
          break;
+      }
       case State::Closed:
+      {
          open();
          break;
+      }
       case State::Opening:
       case State::Closing:
+      {
          break;
+      }
    }
 }
 
@@ -414,6 +442,26 @@ void Door::setup(const GameDeserializeData& data)
          _sprite.setTextureRect(_animation_open->_frames.at(0));
       }
    }
+
+   //
+   // for colliding rect used to check whether the player is close to the door, extend
+   // the original dimensions a little
+   //
+   // +///+///+///+///+
+   // +---+---+---+---+
+   // |///|       |///|
+   // +---+       +---+
+   // |///|       |///|
+   // +---+       +---+
+   // |///|       |///|
+   // +---+---+---+---+
+   // +///+///+///+///+
+   //
+
+   _player_at_door_rect.left = x_px - PIXELS_PER_TILE;
+   _player_at_door_rect.top = y_px - 0.5f * PIXELS_PER_TILE;
+   _player_at_door_rect.width = width_px + 2 * PIXELS_PER_TILE;
+   _player_at_door_rect.height = height_px + PIXELS_PER_TILE;
 
    setupBody(data._world);
 }
