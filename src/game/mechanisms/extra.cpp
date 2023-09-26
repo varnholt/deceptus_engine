@@ -58,6 +58,7 @@ void Extra::deserialize(const GameDeserializeData& data)
       if (sample_it != data._tmx_object->_properties->_map.end())
       {
          _sample = sample_it->second->_value_string.value();
+         Audio::getInstance().addSample(_sample.value());
       }
 
       // read animations if set up
