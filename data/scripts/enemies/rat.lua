@@ -37,7 +37,8 @@ CYCLE_IDLE_2 = 2
 CYCLE_IDLE_3 = 3
 CYCLE_UPDOWN = 4
 CYCLE_LENGTHS =  {7, 7, 4, 7, 2}
-ANIMATION_SPEED = 5.0
+ANIMATION_SPEED = 20.0
+DELAY_BETWEEN_IDLE_FRAMES = 1.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +55,7 @@ _patrol_path_arrived = false
 _elapsed = 0.0
 _animation_flag_inverse = false
 _key_pressed = 0
-
+_animation_pause_time = 0.0
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -153,7 +154,10 @@ function decide(dt)
          else
             next_cycle = CYCLE_RUN
          end
+
+      -- handle what happens after an idle cycle is complete
       elseif (_current_cycle == CYCLE_IDLE_1 or _current_cycle == CYCLE_IDLE_2 or _current_cycle == CYCLE_IDLE_3) then
+         _animation_pause_time = DELAY_BETWEEN_IDLE_FRAMES
          rand = math.random(4)
          if (rand == 1) then
             next_cycle = CYCLE_IDLE_1
@@ -165,7 +169,10 @@ function decide(dt)
             next_cycle = CYCLE_UPDOWN
             next_animation_flag_inverse = true
          end
-      elseif (_current_cycle == CYCLE_UPDOWN and not _animation_flag_inverse) then -- handle what comes after standing up
+
+      -- handle what comes after standing up
+      elseif (_current_cycle == CYCLE_UPDOWN and not _animation_flag_inverse) then
+         _animation_pause_time = DELAY_BETWEEN_IDLE_FRAMES
          rand = math.random(3)
          if (rand == 1) then
             next_cycle = CYCLE_IDLE_1
@@ -174,7 +181,9 @@ function decide(dt)
          elseif (rand == 3) then
             next_cycle = CYCLE_IDLE_3
          end
-      elseif (_current_cycle == CYCLE_UPDOWN and _animation_flag_inverse) then -- handle what comes after sitting down
+
+      -- handle what comes after sitting down
+      elseif (_current_cycle == CYCLE_UPDOWN and _animation_flag_inverse) then
          next_cycle = CYCLE_RUN
       end
 
@@ -211,6 +220,12 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function updateSprite(dt)
+
+   if (_animation_pause_time > 0.0) then
+      _animation_pause_time = _animation_pause_time - dt
+      return
+   end
+
    _current_sprite_elapsed = _current_sprite_elapsed + dt * ANIMATION_SPEED
    sprite_index = math.floor(math.fmod(_current_sprite_elapsed, getMaxCycle()))
 
