@@ -809,17 +809,36 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 
 ## Extras
 
-Extras are currently hardcoded, i.e. the ID of each extra in the extra tileset is mapped to one particular extra inside the C++ code. Whenever Adam 'collides' with an extra tile, the Engine's `ExtraManager` is invoked. This is where you'd have to adjust the engine as needed.
+Extras are nothing but generic string attributes that are passed to the player. I.e., you define a rectangle inside your level, and when the player intersects with that rectangle, the extra is passed to the player. Extras can be keys for doors, or upgrades for players. While doors are able to simply check whether a player has a certain extra, upgrades (such as weapons or power-ups), are usually passed to the player in the `level.lua` script.   
+Inside the lua script, the power-up logic is defined. Below is an example of an extra called 'sword' being evaluated and then passed to the player:
 
-```cpp
-  case ExtraItem::ExtraSpriteIndex::Banana: // this is your tile id
-    SaveState::getPlayerInfo().mExtraTable.mHealth.addHealth(10);
-    break;
+```lua
+function playerReceivedExtra(extra)
+   -- enable all blocking rects once player picked up diving suit
+   if (extra == "sword") then
+      giveWeaponSword()
+   end
+end
 ```
 
-Apart from that, placing extras in your level is easy. Just create a tile layer called `extras` where you place your extra tiles.
 
----
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Extra`|
+|Object Group|`extras`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|texture|string|Path to a static texture that represents the extra. If an 'animation_main_0' is defined as described below, the same texture dimensions are applied as used by the animation.|
+|sample|string|Name of an audio file that is played on collision with the extra|
+|animation_pickup|string|Name of the animation shown when the extra is picked up. The animation cycle is defined inside the file `extra_animations.json`.|
+|animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same dull idle animation over and over again.|
+
 
 &nbsp;
 
