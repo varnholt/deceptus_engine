@@ -63,7 +63,8 @@ private:
 
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
-   std::optional<std::string> _sample;
+   std::optional<std::string> _sample_open;
+   std::optional<std::string> _sample_close;
    std::shared_ptr<Animation> _animation_open;
    std::shared_ptr<Animation> _animation_close;
    std::shared_ptr<Animation> _animation_key;
@@ -79,7 +80,7 @@ private:
    sf::FloatRect _pixel_rect;
    float _bar_offset = 0.0f;
 
-   std::string _required_item;
+   std::optional<std::string> _required_item;
 
    bool _can_be_closed = false;
    bool _automatic_close = false;
