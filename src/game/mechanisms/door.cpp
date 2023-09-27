@@ -1,8 +1,6 @@
 #include "door.h"
 
 // game
-#include "constants.h"
-#include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
@@ -12,10 +10,13 @@
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/animationpool.h"
-#include "level.h"
-#include "player/player.h"
-#include "savestate.h"
-#include "texturepool.h"
+#include "game/audio.h"
+#include "game/constants.h"
+#include "game/fixturenode.h"
+#include "game/level.h"
+#include "game/player/player.h"
+#include "game/savestate.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 
@@ -230,9 +231,9 @@ const sf::FloatRect& Door::getPixelRect() const
 //-----------------------------------------------------------------------------
 void Door::toggleWithPlayerChecks()
 {
-   if (!SaveState::getPlayerInfo()._inventory.hasInventoryItem(_required_item))
+   if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.hasInventoryItem(*_required_item))
    {
-      Log::Info() << "player doesn't have key: " << _required_item;
+      Log::Info() << "player doesn't have key: " << *_required_item;
       return;
    }
 
@@ -254,6 +255,12 @@ void Door::open()
    }
 
    _state = State::Opening;
+
+   // play open sample
+   if (_player_at_door && _sample_open)
+   {
+      Audio::getInstance().playSample(_sample_open.value());
+   }
 
    // play open animation
    if (_animation_open)
@@ -284,6 +291,12 @@ void Door::close()
    }
 
    _state = State::Closing;
+
+   // play close sample
+   if (_player_at_door && _sample_close)
+   {
+      Audio::getInstance().playSample(_sample_close.value());
+   }
 
    // play close animation
    if (_animation_close)
@@ -376,10 +389,18 @@ void Door::setup(const GameDeserializeData& data)
          _sprite.setPosition(x_px, y_px);
       }
 
-      const auto sample_it = data._tmx_object->_properties->_map.find("sample");
-      if (sample_it != data._tmx_object->_properties->_map.end())
+      const auto sample_open_it = data._tmx_object->_properties->_map.find("sample_open");
+      if (sample_open_it != data._tmx_object->_properties->_map.end())
       {
-         _sample = sample_it->second->_value_string.value();
+         _sample_open = sample_open_it->second->_value_string.value();
+         Audio::getInstance().addSample(_sample_open.value());
+      }
+
+      const auto sample_close_it = data._tmx_object->_properties->_map.find("sample_close");
+      if (sample_close_it != data._tmx_object->_properties->_map.end())
+      {
+         _sample_close = sample_close_it->second->_value_string.value();
+         Audio::getInstance().addSample(_sample_close.value());
       }
 
       // read required key to open door
@@ -415,6 +436,9 @@ void Door::setup(const GameDeserializeData& data)
       {
          const auto key = animation_close->second->_value_string.value();
          _animation_close = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
+
+         // a property can be added if needed
+         _can_be_closed = true;
       }
    }
 

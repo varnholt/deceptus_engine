@@ -137,7 +137,7 @@ Damage rects will give the player a configured amount of damage on intersection.
 
 Doors are not to be confused with 'Portals'. While the latter teleport you from one place to another, doors serve the purpose of a gate that allows you to move from one room to another.
 
-Doors can have keys assigned which the player has to find inside your level in form of extras. At the moment they're all color-coded (red, green, blue, yellow, orange) but the implementation could be changed anytime.
+Doors can have keys assigned the player has to find inside your level (in form of extras). Once the player picks up the corresponding extra, the door may be opened.
 
 ![](images/mechanism_doors.png)
 
@@ -150,10 +150,17 @@ Doors can have keys assigned which the player has to find inside your level in f
 
 ### Object Properties
 
+
+
 |Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
-|key|string|An optional parameter to define a key that is required to open the door. So far, this value can be `key_red`, `key_green`, `key_blue`, `key_yellow`, and `key_orange`.|
+|key|string|If defined, the door can only be opened when the player has the corresponding key. For that reason an extra must be added that has the name of the key.|
+|texture|string|A path to a static door texture that is drawn in closed state.|
+|sample_open|string|A filename of a sample that is played when the door is opened.|
+|sample_close|string|A filenname of a sample that is played when the door is closed.|
+|animation_open|string|Name of the 'door open animation' that is configured inside the file `door_animations.json`.|
+|animation_close|string|Name of the 'close open animation' that is configured inside the file `door_animations.json`.|
 ---
 
 &nbsp;
