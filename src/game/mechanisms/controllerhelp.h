@@ -25,5 +25,6 @@ private:
    std::vector<sf::Sprite> _sprites;
    sf::Sprite _background;
    bool _visible = false;
+   float _alpha = 0.0f;
    sf::Time _time;
 };
