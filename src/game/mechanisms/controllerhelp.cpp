@@ -1,7 +1,7 @@
 #include "controllerhelp.h"
 
-#include <sstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "framework/tmxparser/tmxobject.h"
@@ -11,7 +11,7 @@
 #include "player/player.h"
 #include "texturepool.h"
 
-
+// clang-format off
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+
 //   | 0       | 1     | 2     | 3       | 4      | 5      | 6        | 7   | 8   | 9          | 10          | 11           | 12          | 13  | 14   | 15  |
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+
@@ -23,16 +23,20 @@
 // 5 |bt_a     |bt_b   |bt_x   |bt_y     |bt_list |bt_menu |bt_rt     |bt_lt|bt_lb|bt_rb       |             |              |             |     |      |     |
 // 6 |dpad_u   |dpad_d |dpad_l |dpad_r   |bt_u    |bt_d    |bt_l      |bt_r |bt_1 |bt_2        |bt_3         |bt_4          |bt_5         |bt_6 | bt_7 |bt_8 |
 // 7 |bt_r_u   |bt_r_d |bt_r_l |bt_r_r   |bt_r_u_d|bt_r_l_r|dpad_empty|bt_0 |bt_9 |bt_10       |bt_11        |bt_12         |bt_13        |bt_14| bt_15|bt_16|
-// 8 |bt_l_u   |bt_l_d |bt_l_l |bt_l_r   |bt_l_u_d|bt_l_l_r|          |     |     |            |             |              |             |     |      |     |
+// 8 |bt_l_u   |bt_l_d |bt_l_l |bt_l_r   |bt_l_u_d|bt_l_l_r|key_door  |     |     |            |             |              |             |     |      |     |
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+
+// clang-format on
 
+namespace
+{
+constexpr auto show_speed = 1.0f;
+constexpr auto hide_speed = 1.0f;
+}  // namespace
 
-ControllerHelp::ControllerHelp(GameNode* parent)
- : GameNode(parent)
+ControllerHelp::ControllerHelp(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(ControllerHelp).name());
 }
-
 
 void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
@@ -67,12 +71,6 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    }
 }
 
-namespace
-{
-constexpr auto show_speed = 1.0f;
-constexpr auto hide_speed = 1.0f;
-}  // namespace
-
 void ControllerHelp::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
@@ -95,7 +93,6 @@ void ControllerHelp::update(const sf::Time& dt)
    }
 }
 
-
 void ControllerHelp::deserialize(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
@@ -111,7 +108,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       "bt_a",      "bt_b",    "bt_x",    "bt_y",      "bt_list",  "bt_menu",  "bt_rt",      "bt_lt", "bt_lb", "bt_rb",         "",              "",               "",             "",     "",       "",
       "dpad_u",    "dpad_d",  "dpad_l",  "dpad_r",    "bt_u",     "bt_d",     "bt_l",       "bt_r",  "bt_1",  "bt_2",          "bt_3",          "bt_4",           "bt_5",        "bt_6",  "bt_7",  "bt_8",
       "bt_r_u",    "bt_r_d",  "bt_r_l",  "bt_r_r",    "bt_r_u_d", "bt_r_l_r", "dpad_empty", "bt_0",  "bt_9",  "bt_10",         "bt_11",         "bt_12",          "bt_13",       "bt_14", "bt_15", "bt_16",
-      "bt_l_u",    "bt_l_d",  "bt_l_l",  "bt_l_r",    "bt_l_u_d", "bt_l_l_r", "",            "",      "",     "",              "",               "",              "",            "",       "",     ""
+      "bt_l_u",    "bt_l_d",  "bt_l_l",  "bt_l_r",    "bt_l_u_d", "bt_l_l_r", "key_door",   "",      "",     "",              "",               "",              "",            "",       "",     ""
    };
 
    // clang-format on
@@ -165,13 +162,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
 
       sf::Sprite sprite;
       sprite.setTexture(*_texture);
-      sprite.setTextureRect({
-           col * PIXELS_PER_TILE,
-           row * PIXELS_PER_TILE,
-           PIXELS_PER_TILE,
-           PIXELS_PER_TILE
-        }
-     );
+      sprite.setTextureRect({col * PIXELS_PER_TILE, row * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
 
       _sprites.push_back(sprite);
    }
@@ -180,23 +171,11 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
 
    if (_sprites.size() == 1)
    {
-      _background.setTextureRect({
-            6 * PIXELS_PER_TILE,
-            10 * PIXELS_PER_TILE,
-            PIXELS_PER_TILE * 2,
-            PIXELS_PER_TILE * 2
-         }
-      );
+      _background.setTextureRect({6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE, PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2});
    }
    else if (_sprites.size() == 2)
    {
-      _background.setTextureRect({
-            9 * PIXELS_PER_TILE,
-            10 * PIXELS_PER_TILE,
-            PIXELS_PER_TILE * 2,
-            PIXELS_PER_TILE * 3
-         }
-      );
+      _background.setTextureRect({9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE, PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 3});
    }
 }
 
