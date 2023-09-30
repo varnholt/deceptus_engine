@@ -6,13 +6,15 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "game/debugdraw.h"
+#include "game/fixturenode.h"
 #include "game/level.h"
 #include "game/player/player.h"
-#include "texturepool.h"
+#include "game/texturepool.h"
 
 #include <math.h>
 #include <algorithm>
 #include <iostream>
+#include <ranges>
 
 #include <SFML/OpenGL.hpp>
 
@@ -45,26 +47,54 @@ LightSystem::LightSystem()
 //-----------------------------------------------------------------------------
 void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightSystem::LightInstance> light) const
 {
-   // do not draw lights that are too far away
-   auto player_body = Player::getCurrent()->getBody();
-
    const auto light_pos_m = light->_pos_m + light->_center_offset_m;
+   const auto& world = Level::getCurrentLevel()->getWorld();
 
-   for (auto body = Level::getCurrentLevel()->getWorld()->GetBodyList(); body; body = body->GetNext())
+   // read all bodies from world
+   std::vector<b2Body*> bodies_to_process;
+   for (auto body = world->GetBodyList(); body; body = body->GetNext())
    {
-      if (body == player_body)
-      {
-         continue;
-      }
+      bodies_to_process.push_back(body);
+   }
 
-      if (!body->IsEnabled())
-      {
-         continue;
-      }
+   auto body_view = bodies_to_process | std::views::filter(
+                                           [](b2Body* body)
+                                           {
+                                              auto player_body = Player::getCurrent()->getBody();
+                                              if (body == player_body)
+                                              {
+                                                 return false;
+                                              }
 
+                                              if (!body->IsEnabled())
+                                              {
+                                                 return false;
+                                              }
+
+                                              // for now enemies shouldn't cast shadows
+                                              for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+                                              {
+                                                 auto user_data = fixture->GetUserData().pointer;
+                                                 if (user_data)
+                                                 {
+                                                    auto fixture_node = static_cast<FixtureNode*>(user_data);
+                                                    if (fixture_node->getType() == ObjectType::ObjectTypeEnemy)
+                                                    {
+                                                       return false;
+                                                    }
+                                                 }
+                                              }
+
+                                              return true;
+                                           }
+                                        );
+
+   for (auto body : body_view)
+   {
       for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
       {
-         // if something doesn't collide, it probably shouldn't have any impact on lighting, too
+         // if something doesn't collide, it probably shouldn't have any impact on lighting, too.
+         // however, the rest of the body should of course cast a shadow.
          if (fixture->IsSensor())
          {
             continue;
@@ -78,6 +108,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
          if (shape_circle)
          {
+            // do not draw lights that are too far away
             const auto center = shape_circle->m_p + body->GetTransform().p;
             if ((light_pos_m - center).LengthSquared() > max_distance_m2)
                continue;
@@ -100,7 +131,6 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
                const auto& v0 = circle_positions[pos_current];
                const auto& v1 = circle_positions[pos_next];
-
                const auto v0far = 10000.0f * (v0 - light_pos_m);
                const auto v1far = 10000.0f * (v1 - light_pos_m);
 
@@ -117,7 +147,6 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
          {
             // for now it is assumed that chainshapes are static objects only.
             // therefore no transform is applied to chainshape based objects.
-
             for (auto pos_current = 0; pos_current < shape_chain->m_count; pos_current++)
             {
                auto pos_next = pos_current + 1;
@@ -156,7 +185,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   pos_next = 0;
                }
 
-               auto v0 = shape_polygon->m_vertices[pos_current] + body->GetTransform().p;
+               const auto v0 = shape_polygon->m_vertices[pos_current] + body->GetTransform().p;
 
                if ((light_pos_m - v0).LengthSquared() > max_distance_m2)
                {
