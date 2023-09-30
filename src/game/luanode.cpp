@@ -2196,13 +2196,12 @@ void LuaNode::setDamageToPlayer(int32_t damage)
    for (auto fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       auto user_data = fixture->GetUserData().pointer;
-
       if (!user_data)
       {
          continue;
       }
 
-      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
+      auto fixture_node = static_cast<FixtureNode*>(user_data);
       fixture_node->setProperty("damage", damage);
    }
 }
