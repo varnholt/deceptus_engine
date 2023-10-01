@@ -114,7 +114,6 @@ void MenuScreenVideo::select(int32_t step)
          break;
       }
 
-      case Selection::Monitor:
       case Selection::Count:
       {
          break;
