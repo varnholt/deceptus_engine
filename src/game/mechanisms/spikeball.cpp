@@ -15,6 +15,7 @@
 namespace
 {
 auto instance_counter = 0;
+constexpr auto box_sprite_y_offset_px = -3;
 }
 
 /*
@@ -60,7 +61,6 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
 
    _box_sprite.setTexture(*_texture);
    _box_sprite.setTextureRect(sf::IntRect(72, 45, 24, 27));
-   _box_sprite.setOrigin(12, 15);
 
    _chain_element_a.setTexture(*_texture);
    _chain_element_a.setTextureRect(sf::IntRect(0, 64, 8, 8));
@@ -309,7 +309,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
-   _box_sprite.setPosition(_chain_elements[0]->GetPosition().x * PPM, _chain_elements[0]->GetPosition().y * PPM);
+   _box_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px);
 }
 
 sf::Vector2i SpikeBall::getPixelPosition() const
