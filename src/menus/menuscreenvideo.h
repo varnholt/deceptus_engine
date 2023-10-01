@@ -10,12 +10,11 @@ class MenuScreenVideo : public MenuScreen
 public:
    enum class Selection
    {
-      Monitor = 0,
-      Resolution = 1,
-      DisplayMode = 2,
-      VSync = 3,
-      Brightness = 4,
-      Count = 5
+      Resolution = 0,
+      DisplayMode = 1,
+      VSync = 2,
+      Brightness = 3,
+      Count = 4
    };
 
    using FullscreenCallback = std::function<void(void)>;
