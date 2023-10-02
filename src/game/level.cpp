@@ -1403,10 +1403,29 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _render_texture_level_background->display();
    takeScreenshot("texture_level_background", *_render_texture_level_background.get());
 
-   // draw the atmospheric parts into the level texture using the atmosphere shader
-   sf::Sprite background_sprite(_render_texture_level_background->getTexture());
+   // draw the background texture using the atmosphere shader
    _atmosphere_shader->update();
+   sf::Sprite background_sprite(_render_texture_level_background->getTexture());
    _render_texture_level->draw(background_sprite, &_atmosphere_shader->getShader());
+
+   // draw the background normal texture using the atmosphere shader
+   _render_texture_normal->display();
+   takeScreenshot("texture_level_background_normal_dist", *_render_texture_normal.get());  // works
+
+   _render_texture_level_background->clear();  // re-purpose for background normal
+   sf::Sprite background_normal_sprite(_render_texture_normal->getTexture());
+   _render_texture_level_background->draw(background_normal_sprite, &_atmosphere_shader->getShader());
+
+   _render_texture_level_background->display();
+   takeScreenshot("texture_level_background_normal_to_bg_dist", *_render_texture_level_background.get());  // does not work
+
+   // _render_texture_normal->clear();
+   // sf::Sprite background_sprite_normal2(_render_texture_level_background->getTexture());
+   // _render_texture_normal->draw(background_sprite_normal2);
+   // _render_texture_normal->display();
+   // takeScreenshot("texture_level_background_normal_to_nm_dist", *_render_texture_normal.get());  // does not work
+
+   // std::swap(_render_texture_normal, _render_texture_level_background);
 
    drawGlowSprite();
 
