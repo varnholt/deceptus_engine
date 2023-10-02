@@ -223,12 +223,12 @@
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
-   "player_death": {
-      "frame_durations": [75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75],
+	"player_death": {
+      "frame_durations": [50, 50, 50, 50, 50, 50, 60, 60, 60, 60, 70, 70, 70, 70, 80, 80, 80, 80, 80, 80],
       "frame_offset": [0, 1704],
       "frame_size": [72, 72],
       "origin": [36.0, 72.0],
-      "sprite_count": 18,
+      "sprite_count": 20,
       "texture": "data/sprites/player.png"
    },
    "player_death_electrocuted_l": {
@@ -472,7 +472,7 @@
       "texture": "data/sprites/player.png"
    },
    "player_run_l": {
-      "frame_durations": [60, 60, 80, 60, 60, 60, 60, 80, 60, 60, 60, 60],
+      "frame_durations": [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
       "frame_offset": [0, 432],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
@@ -480,7 +480,7 @@
       "texture": "data/sprites/player.png"
    },
    "player_run_r": {
-      "frame_durations": [60, 60, 80, 60, 60, 60, 60, 80, 60, 60, 60, 60],
+      "frame_durations": [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
       "frame_offset": [0, 384],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
@@ -696,11 +696,11 @@
       "texture": "data/sprites/player.png"
    },
    "player_water_splash": {
-      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_durations": [20, 20, 20, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 40, 40, 40],
       "frame_offset": [0, 1440],
-      "frame_size": [72, 48],
-      "origin": [36.0, 24.0],
-      "sprite_count": 15,
+      "frame_size": [72, 72],
+      "origin": [36.0, 38.0],
+      "sprite_count": 20,
       "texture": "data/sprites/player.png"
    },
    "player_jump_init_sword_l": {
