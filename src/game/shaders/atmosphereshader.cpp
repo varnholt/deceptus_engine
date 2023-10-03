@@ -46,9 +46,10 @@ void AtmosphereShader::initialize()
 //----------------------------------------------------------------------------------------------------------------------
 void AtmosphereShader::update()
 {
-   float distortionFactor = 0.02f;
+   constexpr auto distortionFactor = 0.02f;
+   constexpr auto distortionSpeed = 0.2f;
 
-   _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * 0.2f);
+   _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * distortionSpeed);
    _shader.setUniform("distortionFactor", distortionFactor);
 }
 
