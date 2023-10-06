@@ -37,10 +37,6 @@ void AtmosphereShader::initialize()
 
    _distortion_map.setRepeated(true);
    _distortion_map.setSmooth(true);
-
-   _shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
-   _shader.setUniform("distortionMapTexture", _distortion_map);
-   _shader.setUniform("physicsTexture", _render_texture->getTexture());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -49,6 +45,9 @@ void AtmosphereShader::update()
    constexpr auto distortionFactor = 0.02f;
    constexpr auto distortionSpeed = 0.2f;
 
+   _shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+   _shader.setUniform("distortionMapTexture", _distortion_map);
+   _shader.setUniform("physicsTexture", _render_texture->getTexture());
    _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * distortionSpeed);
    _shader.setUniform("distortionFactor", distortionFactor);
 }

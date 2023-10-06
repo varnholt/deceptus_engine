@@ -39,14 +39,14 @@ void main()
    // gl_FragColor = effectColor;
   
    // the check below is not great. ideas?
-   if (effectColor.r == 0.0 && effectColor.g > 0.01 && effectColor.b > 0.01)
+   // if (effectColor.r == 0.0 && effectColor.g > 0.01 && effectColor.b > 0.01)
    {
       vec4 originalColor = texture2D(currentTexture, gl_TexCoord[0].xy);
       gl_FragColor = distort(effectColor.g);
    }
-   else
-   {
-      vec4 ambient = vec4(0.0, 0.0, 0.0, 1.0);
-      gl_FragColor = mix(ambient, gl_Color, 1.0f) * texture2D(currentTexture, gl_TexCoord[0].xy);
-   }
+//   else
+//   {
+//      vec4 ambient = vec4(0.0, 0.0, 0.0, 1.0);
+//      gl_FragColor = mix(ambient, gl_Color, 1.0f) * texture2D(currentTexture, gl_TexCoord[0].xy);
+//   }
 }
