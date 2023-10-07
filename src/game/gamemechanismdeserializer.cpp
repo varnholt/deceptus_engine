@@ -37,6 +37,7 @@
 #include "game/mechanisms/spikeblock.h"
 #include "game/mechanisms/spikes.h"
 #include "game/mechanisms/staticlight.h"
+#include "game/mechanisms/waterdamage.h"
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
 
@@ -87,6 +88,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_spike_blocks = mechanisms[std::string{layer_name_spike_blocks}];
    auto mechanism_spikes = mechanisms[std::string{layer_name_interval_spikes}];
    auto mechanism_static_lights = mechanisms[std::string{layer_name_static_lights}];
+   auto mechanism_water_damage = mechanisms[std::string{layer_name_water_damage}];
    auto mechanism_weather = mechanisms[std::string{layer_name_weather}];
    auto mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
 
@@ -346,6 +348,12 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<StaticLight>(parent);
                mechanism->deserialize(data);
                mechanism_static_lights->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_water_damage || tmx_object->_template_type == type_name_water_damage)
+            {
+               auto mechanism = std::make_shared<WaterDamage>(parent);
+               mechanism->setup(data);
+               mechanism_water_damage->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_water_surface || tmx_object->_template_type == type_name_water_surface)
             {
