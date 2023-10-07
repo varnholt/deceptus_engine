@@ -161,6 +161,12 @@ void Level::initializeTextures()
       Log::Fatal() << "failed to create normal render texture";
    }
 
+   _render_texture_normal_tmp = std::make_shared<sf::RenderTexture>();
+   if (!_render_texture_normal_tmp->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   {
+      Log::Fatal() << "failed to create tmp normal render texture";
+   }
+
    _render_texture_deferred = std::make_shared<sf::RenderTexture>();
 
    if (!_render_texture_deferred->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
@@ -178,6 +184,7 @@ void Level::initializeTextures()
    _render_textures.push_back(_render_texture_level_background);
    _render_textures.push_back(_render_texture_lighting);
    _render_textures.push_back(_render_texture_normal);
+   _render_textures.push_back(_render_texture_normal_tmp);
    _render_textures.push_back(_render_texture_deferred);
 
    for (const auto& fb : _render_textures)
@@ -1017,21 +1024,6 @@ void Level::updateCameraSystem(const sf::Time& dt)
 }
 
 //-----------------------------------------------------------------------------
-void Level::drawNormalMap()
-{
-   auto tile_maps = _tile_maps;
-
-   std::sort(tile_maps.begin(), tile_maps.end(), [](const auto& lhs, const auto& rhs) { return lhs->getZ() < rhs->getZ(); });
-
-   //   static int32_t bump_map_save_counter = 0;
-   //   bump_map_save_counter++;
-   //   if (bump_map_save_counter % 60 == 0)
-   //   {
-   //      mNormalTexture->getTexture().copyToImage().saveToFile("normal_map.png");
-   //   }
-}
-
-//-----------------------------------------------------------------------------
 void Level::drawLightMap()
 {
    _render_texture_lighting->clear();
@@ -1087,7 +1079,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
-      drawParallaxMaps(*_render_texture_level_background.get(), z_index);
+      drawParallaxMaps(target, z_index);
 
       // draw all tile maps
       for (const auto& tile_map : _tile_maps)
@@ -1128,7 +1120,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
                if (draw_mechanism)
                {
-                  mechanism->draw(target, *_render_texture_normal.get());
+                  mechanism->draw(target, normal);
                }
             }
          }
@@ -1139,7 +1131,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (enemy->getZ() == z_index)
          {
-            enemy->draw(target, *_render_texture_normal.get());
+            enemy->draw(target, normal);
          }
       }
 
@@ -1149,7 +1141,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          _ambient_occlusion.draw(target);
 
          // draw player
-         drawPlayer(target, *_render_texture_normal.get());
+         drawPlayer(target, normal);
       }
 
       // draw image layers
@@ -1164,19 +1156,19 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 }
 
 //-----------------------------------------------------------------------------
-void Level::drawAtmosphereLayer(sf::RenderTarget& target)
+void Level::drawAtmosphereLayer()
 {
    if (!_atmosphere._tile_map)
    {
       return;
    }
 
+   _atmosphere_shader->getRenderTexture()->clear();
    _atmosphere._tile_map->setVisible(true);
-
-   target.setView(*_level_view);
-   target.draw(*_atmosphere._tile_map);
-
+   _atmosphere_shader->getRenderTexture()->setView(*_level_view);
+   _atmosphere_shader->getRenderTexture()->draw(*_atmosphere._tile_map);
    _atmosphere._tile_map->setVisible(false);
+   _atmosphere_shader->getRenderTexture()->display();
 }
 
 //-----------------------------------------------------------------------------
@@ -1248,7 +1240,7 @@ void Level::drawDebugInformation()
 }
 
 //-----------------------------------------------------------------------------
-void Level::displayTextures()
+void Level::displayFinalTextures()
 {
    // display the whole texture
    sf::View view(sf::FloatRect(
@@ -1260,7 +1252,7 @@ void Level::displayTextures()
    _render_texture_level->setView(view);
    _render_texture_level->display();
 
-   _render_texture_normal->setView(*_level_view);
+   _render_texture_normal->setView(view);
    _render_texture_normal->display();
 }
 
@@ -1361,52 +1353,67 @@ const std::vector<std::shared_ptr<GameMechanism>>& Level::getPortals() const
 //
 //    01) draw atmosphere (air / water)                           -> atmosphere texture
 //    02) draw parallax info                                      -> level background texture
-//    03) draw level background with atmosphere shader enabled    -> background texture
+//    03) draw level background                                   -> level texture
 //        - layers z=0..15
-//    04) draw level background                                   -> level texture
-//    05) draw level foreground                                   -> level texture
+//    04) draw level background normals                           -> normal tmp texture
+//        - layers z=0..15
+//    05) draw level background with atmosphere shader on         -> background texture
+//    06) draw level background normals with atmosphere shader on -> normal texture
+//    07) draw level foreground                                   -> level texture
 //        - layers z=16..50
 //        - additive lights
 //        - mechanisms
 //        - ambient occlusion
 //        - images with varying blend modes
 //        - player
-//    06) draw raycast lights                                     -> level texture
-//    07) draw projectiles                                        -> level texture
-//    08) flash and bounce -> move level texture
-//    09) draw level texture with gamma shader enabled            -> straight to window
-//    10) draw level map (if enabled)                             -> straight to window
+//    08) draw raycast lights                                     -> level texture
+//    09) draw projectiles                                        -> level texture
+//    10) flash and bounce -> move level texture
+//    11) draw level texture with gamma shader enabled            -> straight to window
+//    12) draw level map (if enabled)                             -> straight to window
 //
 void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot)
 {
    _screenshot = screenshot;
 
    // render atmosphere to atmosphere texture, that texture is used in the shader only
-   _atmosphere_shader->getRenderTexture()->clear();
-   drawAtmosphereLayer(*_atmosphere_shader->getRenderTexture().get());
-   _atmosphere_shader->getRenderTexture()->display();
+   drawAtmosphereLayer();
    takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
 
    // render glowing elements
    drawGlowLayer();
 
    // render layers affected by the atmosphere
+   _render_texture_level->clear();
    _render_texture_level_background->clear();
+   _render_texture_normal_tmp->clear();
    _render_texture_normal->clear();
 
    drawLayers(
       *_render_texture_level_background.get(),
-      *_render_texture_normal.get(),
+      *_render_texture_normal_tmp.get(),
       static_cast<int32_t>(ZDepth::BackgroundMin),
       static_cast<int32_t>(ZDepth::BackgroundMax)
    );
+
    _render_texture_level_background->display();
    takeScreenshot("texture_level_background", *_render_texture_level_background.get());
 
+   _render_texture_normal_tmp->display();
+   takeScreenshot("texture_level_background_normal", *_render_texture_normal_tmp.get());
+
    // draw the atmospheric parts into the level texture using the atmosphere shader
-   sf::Sprite background_sprite(_render_texture_level_background->getTexture());
+   sf::Sprite tmp_sprite;
+   tmp_sprite.setTexture(_render_texture_level_background->getTexture());
    _atmosphere_shader->update();
-   _render_texture_level->draw(background_sprite, &_atmosphere_shader->getShader());
+   _render_texture_level->draw(tmp_sprite, &_atmosphere_shader->getShader());
+   takeScreenshot("texture_level_level_dist", *_render_texture_level.get());
+
+   // draw the normal parts into the final normal texture using the atmosphere shader
+   tmp_sprite.setTexture(_render_texture_normal_tmp->getTexture());
+   _atmosphere_shader->update();
+   _render_texture_normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
+   takeScreenshot("texture_level_background_normal_dist", *_render_texture_normal.get());
 
    drawGlowSprite();
 
@@ -1423,7 +1430,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    drawDebugInformation();
 
-   displayTextures();
+   displayFinalTextures();
 
    drawLightMap();
 

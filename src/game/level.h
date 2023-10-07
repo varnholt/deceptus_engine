@@ -139,14 +139,13 @@ protected:
    void drawLightAndShadows(sf::RenderTarget& target);
    void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
    void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
-   void drawAtmosphereLayer(sf::RenderTarget& target);
+   void drawAtmosphereLayer();
    void drawBlurLayer(sf::RenderTarget& target);
-   void drawNormalMap();
    void drawLightMap();
    void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
    void drawStaticChains(sf::RenderTarget& target);
    void drawDebugInformation();
-   void displayTextures();
+   void displayFinalTextures();
    void drawGlowLayer();
    void drawGlowSprite();
 
@@ -163,6 +162,7 @@ protected:
    std::shared_ptr<sf::RenderTexture> _render_texture_level_background;
    std::shared_ptr<sf::RenderTexture> _render_texture_lighting;
    std::shared_ptr<sf::RenderTexture> _render_texture_normal;
+   std::shared_ptr<sf::RenderTexture> _render_texture_normal_tmp;
    std::shared_ptr<sf::RenderTexture> _render_texture_deferred;
    std::vector<std::shared_ptr<sf::RenderTexture>> _render_textures;
 
