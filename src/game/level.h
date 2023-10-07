@@ -13,6 +13,7 @@
 #include "game/levelscript.h"
 #include "game/mechanisms/portal.h"
 #include "game/mechanisms/staticlight.h"
+#include "game/parallaxlayer.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -129,7 +130,6 @@ protected:
       auto path_solid_optimized
    );
 
-   void deserializeParallaxMap(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
    void assignMechanismsToRooms();
 
    void takeScreenshot(const std::string& basename, sf::RenderTexture& texture);
@@ -183,17 +183,6 @@ protected:
    Atmosphere _atmosphere;
    Physics _physics;
    sf::Vector2f _start_position;
-
-   // parallax (move to separate mechanism!)
-   struct ParallaxLayer
-   {
-      int32_t _z_index = 0;
-      sf::Vector2f _factor;
-      sf::Vector2f _offset;
-      sf::Vector2f _error;
-      sf::View _view;
-      std::shared_ptr<TileMap> _tile_map;
-   };
 
    std::vector<std::unique_ptr<ParallaxLayer>> _parallax_layers;
 
