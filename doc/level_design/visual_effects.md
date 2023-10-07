@@ -5,7 +5,7 @@
 
 In order to create the illusion of depth, some time in the 90s Parallax layers were introduced. Those are basically layers in the background that scroll at a different pace than the foreground.
 
-Deceptus supports 3 Parallax layers.<br>
+Deceptus supports Parallax layers.<br>
 All Parallax layer names must start with `parallax_`.
 
 They have the properties below:
@@ -15,7 +15,6 @@ They have the properties below:
 |factor_y|float|The vertical scrolling pace in relation to the foreground [`0..1`]|
 |offset_x|int|Imagine the contents of your tile layer are located somewhere in the middle of your level. In that case the parallax factor would be applied and your contents would not end up at that location where you placed them in Tiled but shifted much further to the top/left. That's because every tile position is multiplied with the parallax factor. To compensate that, you can define an offset (given in pixels) to where your actual contents begin, e.g. at `2640, 2880`. The same goes for the vertical error (offset_y).|
 |offset_y|int|Please see `offset_x`|
-|slot|int|The reference to the Parallax layer slot. Since Deceptus supports 3 slots, the value range goes from [`0..2`]|
 |z|int|As you might want to place something _behind_ your parallax layers, configuring the z index might be useful, too. The default value is `0`.|
 
 
