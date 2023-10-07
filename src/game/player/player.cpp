@@ -1880,6 +1880,7 @@ void Player::reset()
    _death_reason.reset();
    _spawn_complete = false;
    _spawn_orientation_locked = false;
+   _in_water = false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
