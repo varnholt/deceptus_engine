@@ -254,6 +254,7 @@ SOURCES += \
    src/game/overlays/rainoverlay.cpp \
    src/game/overlays/thunderstormoverlay.cpp \
    src/game/overlays/weatheroverlay.cpp \
+   src/game/parallaxlayer.cpp \
    src/game/parsedata.cpp \
    src/game/physics/physics.cpp \
    src/game/physics/physicsconfiguration.cpp \
@@ -476,6 +477,7 @@ HEADERS += \
    src/game/overlays/rainoverlay.h \
    src/game/overlays/thunderstormoverlay.h \
    src/game/overlays/weatheroverlay.h \
+   src/game/parallaxlayer.h \
    src/game/parsedata.h \
    src/game/physics/physics.h \
    src/game/physics/physicsconfiguration.h \
