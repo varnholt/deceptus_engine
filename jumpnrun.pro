@@ -244,6 +244,7 @@ SOURCES += \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
    src/game/mechanisms/staticlight.cpp \
+   src/game/mechanisms/waterdamage.cpp \
    src/game/mechanisms/watersurface.cpp \
    src/game/mechanisms/weather.cpp \
    src/game/meshtools.cpp \
@@ -465,6 +466,7 @@ HEADERS += \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
    src/game/mechanisms/staticlight.h \
+   src/game/mechanisms/waterdamage.h \
    src/game/mechanisms/watersurface.h \
    src/game/mechanisms/weather.h \
    src/game/meshtools.h \

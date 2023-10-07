@@ -236,6 +236,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_static_lights;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_damage;
 
    // graphic effects
    BoomEffect _boom_effect;
