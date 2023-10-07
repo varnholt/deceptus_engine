@@ -187,16 +187,15 @@ protected:
    // parallax (move to separate mechanism!)
    struct ParallaxLayer
    {
-      bool _used = false;
       int32_t _z_index = 0;
       sf::Vector2f _factor;
       sf::Vector2f _offset;
       sf::Vector2f _error;
-      std::shared_ptr<sf::View> _view;
+      sf::View _view;
       std::shared_ptr<TileMap> _tile_map;
    };
 
-   std::array<ParallaxLayer, 3> _parallax_layers;
+   std::vector<std::unique_ptr<ParallaxLayer>> _parallax_layers;
 
    // mechanisms
    std::unique_ptr<VolumeUpdater> _volume_updater;
