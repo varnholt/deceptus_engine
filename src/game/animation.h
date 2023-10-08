@@ -38,6 +38,8 @@ public:
 
    void updateVertices(bool resetTime = true);
 
+   void setColor(const sf::Color& color);
+   void setColorTree(const sf::Color& color);
    void setAlpha(uint8_t alpha);
    void setAlphaTree(uint8_t alpha);
 
