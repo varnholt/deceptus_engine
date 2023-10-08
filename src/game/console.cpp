@@ -1,15 +1,16 @@
 #include "console.h"
 
-#include "bow.h"
-#include "eventserializer.h"
 #include "framework/tools/log.h"
-#include "level.h"
-#include "mechanisms/checkpoint.h"
-#include "player/player.h"
-#include "player/playerinfo.h"
-#include "savestate.h"
-#include "weaponfactory.h"
-#include "weaponsystem.h"
+#include "game/bow.h"
+#include "game/eventserializer.h"
+#include "game/level.h"
+#include "game/mechanisms/checkpoint.h"
+#include "game/player/player.h"
+#include "game/player/playerinfo.h"
+#include "game/savestate.h"
+#include "game/tweaks.h"
+#include "game/weaponfactory.h"
+#include "game/weaponsystem.h"
 
 #include <iostream>
 #include <ostream>
@@ -51,6 +52,9 @@ void Console::showHelp()
    _log.push_back("");
    _log.push_back("/cp <n>: jump to checkpoint");
    _log.push_back("   example: /cp 0");
+   _log.push_back("");
+   _log.push_back("/cpanlimitoff: disable cpan maximum radius");
+   _log.push_back("   example: /cpanlimitoff");
    _log.push_back("");
    _log.push_back("/damage <n>: cause damage to player");
    _log.push_back("   example: /damage 100");
@@ -230,6 +234,11 @@ void Console::execute()
       }
 
       _log.push_back(os.str());
+   }
+   else if (results.at(0) == "/cpanlimitoff")
+   {
+      Tweaks::instance()._cpan_unlimited = true;
+      _log.push_back("disabled cpan limit");
    }
    else if (results.at(0) == "/playback" && results.size() == 2)
    {
