@@ -12,14 +12,10 @@ namespace SfmlMath
 float length(const sf::Vector2f&);
 float lengthSquared(const sf::Vector2f&);
 sf::Vector2f normalize(const sf::Vector2f& v);
+sf::Color mixColors(const sf::Color& color_1, const sf::Color& color_2, float ratio);
 
 template <typename T>
-std::optional<T> intersect(
-   const T& p0,
-   const T& p1,
-   const T& p2,
-   const T& p3
-)
+std::optional<T> intersect(const T& p0, const T& p1, const T& p2, const T& p3)
 {
    auto s1 = p1 - p0;
    auto s2 = p3 - p2;
