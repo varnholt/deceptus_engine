@@ -324,6 +324,16 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          _last_animations.push_back({draw_position_px, current_cycle});
       }
 
+      // update color if player is hurt
+      constexpr auto red_intensity = 200;
+      const auto damage_color_value =
+         static_cast<uint8_t>(red_intensity * std::max(0.0f, 1.0f - _damage_clock.getElapsedTime().asSeconds()));
+      if (damage_color_value > 0)
+      {
+         const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
+         current_cycle->setColor(damage_color);
+      }
+
       // player animations might be combined of multiple animations, hence the recursive calls
       current_cycle->draw(color, normal);
    }
