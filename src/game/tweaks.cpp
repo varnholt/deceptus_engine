@@ -5,8 +5,7 @@ namespace
 std::string filename = "data/config/tweaks.json";
 }
 
-
-const Tweaks& Tweaks::instance()
+Tweaks& Tweaks::instance()
 {
    static Tweaks __instance;
 
@@ -19,7 +18,6 @@ const Tweaks& Tweaks::instance()
 
    return __instance;
 }
-
 
 std::string Tweaks::serialize()
 {
@@ -41,17 +39,16 @@ std::string Tweaks::serialize()
    return toString(config);
 }
 
-
 void Tweaks::deserialize(const std::string& data)
 {
    auto config = toJson(data);
-   _bend_down_threshold    = config["Tweaks"]["bend_down_threshold"].get<float>();
-   _cpan_tolerance_x       = config["Tweaks"]["cpan_tolerance_x"].get<float>();
-   _cpan_tolerance_y       = config["Tweaks"]["cpan_tolerance_y"].get<float>();
-   _cpan_max_distance_px   = config["Tweaks"]["cpan_max_distance_px"].get<float>();
-   _cpan_look_speed_x      = config["Tweaks"]["cpan_look_speed_x"].get<float>();
-   _cpan_look_speed_y      = config["Tweaks"]["cpan_look_speed_y"].get<float>();
-   _cpan_snap_back_factor  = config["Tweaks"]["cpan_snap_back_factor"].get<float>();
+   _bend_down_threshold = config["Tweaks"]["bend_down_threshold"].get<float>();
+   _cpan_tolerance_x = config["Tweaks"]["cpan_tolerance_x"].get<float>();
+   _cpan_tolerance_y = config["Tweaks"]["cpan_tolerance_y"].get<float>();
+   _cpan_max_distance_px = config["Tweaks"]["cpan_max_distance_px"].get<float>();
+   _cpan_look_speed_x = config["Tweaks"]["cpan_look_speed_x"].get<float>();
+   _cpan_look_speed_y = config["Tweaks"]["cpan_look_speed_y"].get<float>();
+   _cpan_snap_back_factor = config["Tweaks"]["cpan_snap_back_factor"].get<float>();
    _enter_portal_threshold = config["Tweaks"]["enter_portal_threshold"].get<float>();
 
    if (config.find("player_light_enabled") != config.end())
@@ -64,4 +61,3 @@ void Tweaks::deserialize(const std::string& data)
       _player_light_alpha = config.at("player_light_alpha").get<uint8_t>();
    }
 }
-

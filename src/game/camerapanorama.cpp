@@ -57,25 +57,39 @@ void CameraPanorama::update()
    {
       // only update the desired look vector when boundaries are not exceeded
       sf::Vector2f desired_look_vector = _look_vector;
-      if (_look_state & static_cast<int32_t>(Look::Up) && !(locked_up && desired_look_vector.y < 0.0f))
+
+      const auto looking_up = _look_state & static_cast<int32_t>(Look::Up);
+      const auto looking_down = _look_state & static_cast<int32_t>(Look::Down);
+      const auto looking_left = _look_state & static_cast<int32_t>(Look::Left);
+      const auto looking_right = _look_state & static_cast<int32_t>(Look::Right);
+
+      const auto can_look_up = !(locked_up && desired_look_vector.y < 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_down = !(locked_down && desired_look_vector.y > 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_left = !(locked_left && desired_look_vector.x < 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_right = !(locked_right && desired_look_vector.x > 0.0f) || tweaks._cpan_unlimited;
+
+      if (looking_up && can_look_up)
       {
          desired_look_vector += sf::Vector2f(0.0f, -speed);
       }
-      else if (_look_state & static_cast<int32_t>(Look::Down) && !(locked_down && desired_look_vector.y > 0.0f))
+      else if (looking_down && can_look_down)
       {
          desired_look_vector += sf::Vector2f(0.0f, speed);
       }
-
-      if (_look_state & static_cast<int32_t>(Look::Left) && !(locked_left && desired_look_vector.x < 0.0f))
+      if (looking_left && can_look_left)
       {
          desired_look_vector += sf::Vector2f(-speed, 0.0f);
       }
-      else if (_look_state & static_cast<int32_t>(Look::Right) && !(locked_right && desired_look_vector.x > 0.0f))
+      else if (looking_right && can_look_right)
       {
          desired_look_vector += sf::Vector2f(speed, 0.0f);
       }
 
-      limit_look_vector(desired_look_vector);
+      if (!tweaks._cpan_unlimited)
+      {
+         limit_look_vector(desired_look_vector);
+      }
+
       updateLookVector(desired_look_vector);
    }
    else if (GameControllerIntegration::getInstance().isControllerConnected())
