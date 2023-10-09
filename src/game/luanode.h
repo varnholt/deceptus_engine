@@ -15,12 +15,13 @@
 #include "SFML/Graphics.hpp"
 
 // game
-#include "detonationanimation.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
-#include "hitbox.h"
-#include "leveldescription.h"
-#include "weapon.h"
+#include "game/detonationanimation.h"
+#include "game/gamemechanism.h"
+#include "game/gamenode.h"
+#include "game/hitbox.h"
+#include "game/leveldescription.h"
+#include "game/skill.h"
+#include "game/weapon.h"
 
 struct lua_State;
 
@@ -94,6 +95,12 @@ struct LuaNode : public GameMechanism, public GameNode
 
    //! fire a gun
    void useGun(size_t index, b2Vec2 from, b2Vec2 to);
+
+   //! add a skill to the player
+   void addPlayerSkill(int32_t);
+
+   //! remove a skill to the player
+   void removePlayerSkill(int32_t);
 
    //! make the body a dynamic object
    void makeDynamic();
