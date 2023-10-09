@@ -946,20 +946,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
 
 #ifdef DEVELOPMENT_MODE
-      case sf::Keyboard::Num0:
-      {
-         Audio::getInstance().playSample({"powerup.wav"});
-
-         if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::WallClimb))
-         {
-            SaveState::getPlayerInfo()._extra_table._skills._skills &= ~static_cast<int32_t>(Skill::SkillType::WallClimb);
-         }
-         else
-         {
-            SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::WallClimb);
-         }
-         break;
-      }
       case sf::Keyboard::F1:
       {
          DisplayMode::getInstance().enqueueToggle(Display::Debug);

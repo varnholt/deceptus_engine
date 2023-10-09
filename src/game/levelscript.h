@@ -17,8 +17,8 @@ public:
    int32_t addCollisionRect(const sf::IntRect& rect);
    void setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group = std::nullopt);
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
-   void addSkill(int32_t skill);
-   void removeSkill(int32_t skill);
+   void addPlayerSkill(int32_t skill);
+   void removePlayerSkill(int32_t skill);
 
    void giveWeaponBow();
    void giveWeaponGun();
