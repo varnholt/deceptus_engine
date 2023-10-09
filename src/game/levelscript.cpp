@@ -111,12 +111,12 @@ int32_t setMechanismEnabled(lua_State* state)
 }
 
 /**
- * @brief addSkill add a skill to the player
+ * @brief addPlayerSkill add a skill to the player
  * @param state lua state
  *    param 1: skill to add
  * @return error code
  */
-int32_t addSkill(lua_State* state)
+int32_t addPlayerSkill(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc != 1)
@@ -126,17 +126,17 @@ int32_t addSkill(lua_State* state)
 
    const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
 
-   getInstance()->addSkill(skill);
+   getInstance()->addPlayerSkill(skill);
    return 0;
 }
 
 /**
- * @brief removeSkill add a skill to the player
+ * @brief removePlayerSkill add a skill to the player
  * @param state lua state
  *    param 1: skill to add
  * @return error code
  */
-int32_t removeSkill(lua_State* state)
+int32_t removePlayerSkill(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc != 1)
@@ -146,7 +146,7 @@ int32_t removeSkill(lua_State* state)
 
    const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
 
-   getInstance()->removeSkill(skill);
+   getInstance()->removePlayerSkill(skill);
    return 0;
 }
 
@@ -228,7 +228,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
-   lua_register(_lua_state, "addSkill", ::addSkill);
+   lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
+   lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
@@ -369,12 +370,12 @@ bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const st
    return mechanisms.front()->isEnabled();
 }
 
-void LevelScript::addSkill(int32_t skill)
+void LevelScript::addPlayerSkill(int32_t skill)
 {
    SaveState::getPlayerInfo()._extra_table._skills._skills |= skill;
 }
 
-void LevelScript::removeSkill(int32_t skill)
+void LevelScript::removePlayerSkill(int32_t skill)
 {
    SaveState::getPlayerInfo()._extra_table._skills._skills &= ~skill;
 }

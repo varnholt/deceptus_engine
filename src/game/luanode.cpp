@@ -10,23 +10,24 @@
 #include <thread>
 
 // game
-#include "animationplayer.h"
-#include "audio.h"
-#include "constants.h"
-#include "debugdraw.h"
-#include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
-#include "gun.h"
-#include "level.h"
-#include "luaconstants.h"
-#include "luainterface.h"
-#include "physics/physicsconfiguration.h"
-#include "player/player.h"
-#include "projectilehitaudio.h"
-#include "texturepool.h"
-#include "weaponfactory.h"
+#include "game/animationplayer.h"
+#include "game/audio.h"
+#include "game/constants.h"
+#include "game/debugdraw.h"
+#include "game/fixturenode.h"
+#include "game/gun.h"
+#include "game/level.h"
+#include "game/luaconstants.h"
+#include "game/luainterface.h"
+#include "game/physics/physicsconfiguration.h"
+#include "game/player/player.h"
+#include "game/projectilehitaudio.h"
+#include "game/savestate.h"
+#include "game/texturepool.h"
+#include "game/weaponfactory.h"
 
 namespace
 {
@@ -1602,6 +1603,58 @@ int32_t die(lua_State* state)
    return 0;
 }
 
+/**
+ * @brief addPlayerSkill add a skill to the player
+ * @param state lua state
+ *    param 1: skill to add
+ * @return error code
+ */
+int32_t addPlayerSkill(lua_State* state)
+{
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
+
+   node->addPlayerSkill(skill);
+   return 0;
+}
+
+/**
+ * @brief removePlayerSkill add a skill to the player
+ * @param state lua state
+ *    param 1: skill to add
+ * @return error code
+ */
+int32_t removePlayerSkill(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
+
+   node->removePlayerSkill(skill);
+   return 0;
+}
+
 [[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
    // the error message is on top of the stack.
@@ -1719,6 +1772,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "addAudioRange", ::addAudioRange);
    lua_register(_lua_state, "addDebugRect", ::addDebugRect);
    lua_register(_lua_state, "addHitbox", ::addHitbox);
+   lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
    lua_register(_lua_state, "addSample", ::addSample);
    lua_register(_lua_state, "addShapeCircle", ::addShapeCircle);
    lua_register(_lua_state, "addShapeRect", ::addShapeRect);
@@ -1745,6 +1799,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "queryRayCast", ::queryRayCast);
    lua_register(_lua_state, "registerHitAnimation", ::registerHitAnimation);
    lua_register(_lua_state, "registerHitSamples", ::registerHitSamples);
+   lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
    lua_register(_lua_state, "setActive", ::setActive);
    lua_register(_lua_state, "setAudioUpdateBehavior", ::setAudioUpdateBehavior);
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
@@ -2397,6 +2452,16 @@ void LuaNode::useGun(size_t index, b2Vec2 from, b2Vec2 to)
    auto& gun = dynamic_cast<Gun&>(*_weapons[index]);
    gun.setParentAudioUpdateData(_audio_update_data);
    gun.useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
+}
+
+void LuaNode::addPlayerSkill(int32_t skill_type)
+{
+   SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(skill_type);
+}
+
+void LuaNode::removePlayerSkill(int32_t skill_type)
+{
+   SaveState::getPlayerInfo()._extra_table._skills._skills &= ~static_cast<int32_t>(skill_type);
 }
 
 void LuaNode::stopScript()
