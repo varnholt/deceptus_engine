@@ -1,5 +1,6 @@
 #include "playerstencil.h"
 
+#include <format>
 #include <iostream>
 #include "SFML/Graphics.hpp"
 #include "SFML/OpenGL.hpp"
@@ -31,11 +32,21 @@ void PlayerStencil::disable()
 void PlayerStencil::clearStencilBuffer()
 {
    glClear(GL_STENCIL_BUFFER_BIT);
-   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 }
+
+namespace
+{
+int32_t counter = 0;
+int32_t frame_counter = 0;
+}  // namespace
 
 void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
 {
+   if ((++frame_counter % 60) != 0)
+   {
+      return;
+   }
+
    const auto w = texture->getSize().x;
    const auto h = texture->getSize().y;
 
@@ -52,17 +63,11 @@ void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
       {
          auto index = y * w + x;
          auto stencil_value = stencilBuffer[index];
-         sf::Color color(stencil_value & 0xFF, 0, 0);  // Create a color based on the stencil value
-         image.setPixel(x, y, color);
+         const auto color = (stencil_value > 0) ? sf::Color::White : sf::Color::Black;
+         image.setPixel(x, h - y - 1, color);
       }
    }
 
-   if (image.saveToFile("stencil_debug.png"))
-   {
-      std::cout << "Image saved successfully!" << std::endl;
-   }
-   else
-   {
-      std::cout << "Failed to save the image." << std::endl;
-   }
+   const auto filename = std::format("stencil_debug_{}.png", counter++);
+   image.saveToFile(filename);
 }
