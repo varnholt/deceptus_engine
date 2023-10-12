@@ -986,7 +986,11 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
    player->draw(color, normal);
 }
 
+#define PLAYER_STENCIL 1
+
+#ifdef PLAYER_STENCIL
 #include "playerstencil.h"
+#endif
 
 //-----------------------------------------------------------------------------
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
@@ -998,6 +1002,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
+#ifdef PLAYER_STENCIL
       if (z_index == static_cast<int32_t>(ZDepth::Player) + 1)
       {
          PlayerStencil::clearStencilBuffer();
@@ -1007,12 +1012,12 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       if (z_index == static_cast<int32_t>(ZDepth::ForegroundMax) - 1)
       {
          PlayerStencil::setupPlayer();
-         PlayerStencil::dump(_render_texture_level);
+         // PlayerStencil::dump(_render_texture_level);
          // draw player here
          PlayerStencil::disable();
          PlayerStencil::clearStencilBuffer();
       }
-
+#endif
       drawParallaxMaps(target, z_index);
 
       // draw all tile maps
