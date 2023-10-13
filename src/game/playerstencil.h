@@ -10,9 +10,12 @@ class RenderTexture;
 
 namespace PlayerStencil
 {
+int32_t getStartLayer();
+int32_t getStopLayer();
 void clearStencilBuffer();
 void setupForeground();
 void setupPlayer();
+bool isIgnored(int32_t z_index);
 void enable();
 void disable();
 void dump(const std::shared_ptr<sf::RenderTexture>& texture);

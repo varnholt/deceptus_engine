@@ -5,6 +5,8 @@
 #include "SFML/Graphics.hpp"
 #include "SFML/OpenGL.hpp"
 
+#include "game/constants.h"
+
 void PlayerStencil::setupForeground()
 {
    // always pass and replace with 1
@@ -70,4 +72,19 @@ void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
 
    const auto filename = std::format("stencil_debug_{}.png", counter++);
    image.saveToFile(filename);
+}
+
+bool PlayerStencil::isIgnored(int32_t /*z_index*/)
+{
+   return false;
+}
+
+int32_t PlayerStencil::getStartLayer()
+{
+   return static_cast<int32_t>(ZDepth::Player) + 1;
+}
+
+int32_t PlayerStencil::getStopLayer()
+{
+   return static_cast<int32_t>(ZDepth::ForegroundMax) - 1;
 }
