@@ -986,6 +986,11 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
    player->draw(color, normal);
 }
 
+namespace
+{
+int32_t frame_counter = 0;
+}
+
 //-----------------------------------------------------------------------------
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
@@ -1000,15 +1005,14 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       if (z_index == PlayerStencil::getStartLayer())
       {
          PlayerStencil::clearStencilBuffer();
-         PlayerStencil::enable();
-         PlayerStencil::setupForeground();
+         PlayerStencil::replaceAllWithOne();
       }
       if (z_index == PlayerStencil::getStopLayer())
       {
-         PlayerStencil::setupPlayer();
-         // PlayerStencil::dump(_render_texture_level);
-         // draw player here
-         PlayerStencil::disable();
+         PlayerStencil::enableTest();
+         PlayerStencil::keepIfOne();
+         //         Player::getCurrent()->drawStencil(*_render_texture_level);
+         PlayerStencil::disableTest();
          PlayerStencil::clearStencilBuffer();
       }
 #endif

@@ -380,6 +380,7 @@ void Player::drawStencil(sf::RenderTarget& color)
    auto current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
+      current_cycle->setColor(sf::Color::White);
       current_cycle->setPosition(draw_position_px);
       current_cycle->draw(color);
    }
@@ -387,6 +388,7 @@ void Player::drawStencil(sf::RenderTarget& color)
    auto auxiliary_cycle = _player_animation.getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
+      auxiliary_cycle->setColor(sf::Color::White);
       auxiliary_cycle->setPosition(draw_position_px);
       auxiliary_cycle->draw(color);
    }
