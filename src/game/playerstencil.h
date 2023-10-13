@@ -13,11 +13,11 @@ namespace PlayerStencil
 int32_t getStartLayer();
 int32_t getStopLayer();
 void clearStencilBuffer();
-void setupForeground();
-void setupPlayer();
+void replaceAllWithOne();
+void keepIfOne();
 bool isIgnored(int32_t z_index);
-void enable();
-void disable();
+void enableTest();
+void disableTest();
 void dump(const std::shared_ptr<sf::RenderTexture>& texture);
 };  // namespace PlayerStencil
 

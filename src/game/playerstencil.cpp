@@ -7,26 +7,24 @@
 
 #include "game/constants.h"
 
-void PlayerStencil::setupForeground()
+void PlayerStencil::replaceAllWithOne()
 {
-   // always pass and replace with 1
    glStencilFunc(GL_ALWAYS, 1, 0xFF);
    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 }
 
-void PlayerStencil::setupPlayer()
+void PlayerStencil::keepIfOne()
 {
-   // pass only if stencil value is 1
    glStencilFunc(GL_EQUAL, 1, 0xFF);
    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 }
 
-void PlayerStencil::enable()
+void PlayerStencil::enableTest()
 {
    glEnable(GL_STENCIL_TEST);
 }
 
-void PlayerStencil::disable()
+void PlayerStencil::disableTest()
 {
    glDisable(GL_STENCIL_TEST);
 }
