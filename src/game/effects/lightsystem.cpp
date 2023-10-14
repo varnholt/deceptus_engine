@@ -324,8 +324,8 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       glStencilFunc(GL_EQUAL, 0, 1);
       glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-      sf::RenderStates lightRs{sf::BlendAdd};
-      target.draw(light->_sprite, lightRs);
+      sf::RenderStates render_states{sf::BlendAdd};
+      target.draw(light->_sprite, render_states);
    }
 
    glDisable(GL_STENCIL_TEST);

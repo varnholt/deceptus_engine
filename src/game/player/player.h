@@ -53,6 +53,7 @@ public:
    void initializeLevel();
    void initializeController();
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void drawStencil(sf::RenderTarget& color);
 
    void update(const sf::Time& dt);
    void reloadAnimationPool();
@@ -168,6 +169,10 @@ private:
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
    std::unique_ptr<ScreenTransition> makeFadeTransition();
+
+   void drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px);
+   bool checkDamageDrawSkip() const;
+   void updateHurtColor(const std::shared_ptr<Animation>& current_cycle);
 
    ToggleCallback _toggle_callback;
    std::shared_ptr<WeaponSystem> _weapon_system;

@@ -48,6 +48,7 @@
 #include "game/parsedata.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
+#include "game/playerstencil.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
 #include "game/squaremarcher.h"
@@ -79,8 +80,7 @@
 namespace fmt = std;
 #endif
 
-// things that should be optimised
-// - the tilemaps are unsorted, sort them by z once after deserializing a level
+#define PLAYER_STENCIL 1
 
 Level* Level::__current_level = nullptr;
 
@@ -986,6 +986,11 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
    player->draw(color, normal);
 }
 
+namespace
+{
+int32_t frame_counter = 0;
+}
+
 //-----------------------------------------------------------------------------
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
@@ -996,6 +1001,21 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
+#ifdef PLAYER_STENCIL
+      if (z_index == PlayerStencil::getStartLayer())
+      {
+         PlayerStencil::clearStencilBuffer();
+         PlayerStencil::replaceAllWithOne();
+      }
+      if (z_index == PlayerStencil::getStopLayer())
+      {
+         PlayerStencil::enableTest();
+         PlayerStencil::keepIfOne();
+         Player::getCurrent()->drawStencil(*_render_texture_level);
+         PlayerStencil::disableTest();
+         PlayerStencil::clearStencilBuffer();
+      }
+#endif
       drawParallaxMaps(target, z_index);
 
       // draw all tile maps
