@@ -119,6 +119,18 @@ void Animation::addChild(const std::shared_ptr<Animation>& child)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+bool Animation::isVisible() const
+{
+   return _visible;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Animation::setVisible(bool newVisible)
+{
+   _visible = newVisible;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Animation::setAlpha(uint8_t alpha)
 {
    _vertices[0].color.a = alpha;
@@ -192,6 +204,11 @@ void Animation::update(const sf::Time& dt)
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+   if (!_visible)
+   {
+      return;
+   }
+
    states.transform *= getTransform();
    states.texture = _color_texture.get();
 
@@ -206,6 +223,11 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
+   if (!_visible)
+   {
+      return;
+   }
+
    states.transform *= getTransform();
 
    states.texture = _color_texture.get();
@@ -221,6 +243,11 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::drawTree(sf::RenderTarget& target, sf::RenderStates states) const
 {
+   if (!_visible)
+   {
+      return;
+   }
+
    draw(target, states);
    for (const auto& child : _children)
    {
@@ -231,6 +258,11 @@ void Animation::drawTree(sf::RenderTarget& target, sf::RenderStates states) cons
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::drawTree(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
+   if (!_visible)
+   {
+      return;
+   }
+
    draw(color, normal, states);
    for (const auto& child : _children)
    {

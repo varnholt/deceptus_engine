@@ -352,6 +352,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
+      current_cycle->setColor(sf::Color::White);
       current_cycle->setPosition(draw_position_px);
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
@@ -361,6 +362,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& auxiliary_cycle = _player_animation.getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
+      auxiliary_cycle->setColor(sf::Color::White);
       auxiliary_cycle->setPosition(draw_position_px);
       auxiliary_cycle->draw(color, normal);
    }
@@ -376,11 +378,13 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::drawStencil(sf::RenderTarget& color)
 {
+   const auto stencil_color = sf::Color{255, 255, 255, 40};
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+
    auto current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->setColor(sf::Color::White);
+      current_cycle->setColor(stencil_color);
       current_cycle->setPosition(draw_position_px);
       current_cycle->draw(color);
    }
@@ -388,7 +392,7 @@ void Player::drawStencil(sf::RenderTarget& color)
    auto auxiliary_cycle = _player_animation.getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->setColor(sf::Color::White);
+      auxiliary_cycle->setColor(stencil_color);
       auxiliary_cycle->setPosition(draw_position_px);
       auxiliary_cycle->draw(color);
    }
