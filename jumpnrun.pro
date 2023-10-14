@@ -270,6 +270,7 @@ SOURCES += \
    src/game/player/playerinput.cpp \
    src/game/player/playerjump.cpp \
    src/game/player/timerlock.cpp \
+   src/game/playerstencil.cpp \
    src/game/playerutils.cpp \
    src/game/preloader.cpp \
    src/game/projectile.cpp \
@@ -497,6 +498,7 @@ HEADERS += \
    src/game/player/playerjumptrace.h \
    src/game/player/playerspeed.h \
    src/game/player/timerlock.h \
+   src/game/playerstencil.h \
    src/game/playerutils.h \
    src/game/preloader.h \
    src/game/projectile.h \
@@ -729,7 +731,10 @@ DISTFILES += \
     data/shaders/death.frag \
     data/shaders/death.vert \
     data/scripts/enemies/deprecated_cannon.lua \
+    data/shaders/flash.frag \
     data/shaders/light.frag \
+    data/shaders/raycast.frag \
+    data/shaders/raycast.vert \
     data/shaders/water.frag \
     data/scripts/enemies/landmine.lua \
     data/scripts/enemies/constants.lua \
