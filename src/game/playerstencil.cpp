@@ -6,6 +6,7 @@
 #include "SFML/OpenGL.hpp"
 
 #include "game/constants.h"
+#include "game/player/player.h"
 
 void PlayerStencil::replaceAllWithOne()
 {
@@ -85,4 +86,22 @@ int32_t PlayerStencil::getStartLayer()
 int32_t PlayerStencil::getStopLayer()
 {
    return static_cast<int32_t>(ZDepth::ForegroundMax) - 1;
+}
+
+void PlayerStencil::draw(sf::RenderTarget& target, int32_t z_index)
+{
+   if (z_index == PlayerStencil::getStartLayer())
+   {
+      PlayerStencil::clearStencilBuffer();
+      PlayerStencil::replaceAllWithOne();
+   }
+
+   if (z_index == PlayerStencil::getStopLayer())
+   {
+      PlayerStencil::enableTest();
+      PlayerStencil::keepIfOne();
+      Player::getCurrent()->drawStencil(target);
+      PlayerStencil::disableTest();
+      PlayerStencil::clearStencilBuffer();
+   }
 }
