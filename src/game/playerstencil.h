@@ -5,11 +5,13 @@
 
 namespace sf
 {
+class RenderTarget;
 class RenderTexture;
 }
 
 namespace PlayerStencil
 {
+void draw(sf::RenderTarget& target, int32_t z_index);
 int32_t getStartLayer();
 int32_t getStopLayer();
 void clearStencilBuffer();
