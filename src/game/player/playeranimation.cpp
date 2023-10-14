@@ -892,7 +892,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimatio
          for (auto& appear_animation : _appear_animations)
          {
             appear_animation->seekToStart();
-            appear_animation->setAlpha(0);
+            appear_animation->setVisible(false);
          }
       }
       else
@@ -901,7 +901,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimatio
          for (auto& appear_animation : _appear_animations)
          {
             appear_animation->play();
-            appear_animation->setAlpha(255);
+            appear_animation->setVisible(true);
          }
       }
    }
