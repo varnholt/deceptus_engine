@@ -80,8 +80,6 @@
 namespace fmt = std;
 #endif
 
-#define PLAYER_STENCIL 1
-
 Level* Level::__current_level = nullptr;
 
 //-----------------------------------------------------------------------------
@@ -1001,21 +999,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
-#ifdef PLAYER_STENCIL
-      if (z_index == PlayerStencil::getStartLayer())
-      {
-         PlayerStencil::clearStencilBuffer();
-         PlayerStencil::replaceAllWithOne();
-      }
-      if (z_index == PlayerStencil::getStopLayer())
-      {
-         PlayerStencil::enableTest();
-         PlayerStencil::keepIfOne();
-         Player::getCurrent()->drawStencil(*_render_texture_level);
-         PlayerStencil::disableTest();
-         PlayerStencil::clearStencilBuffer();
-      }
-#endif
+      PlayerStencil::draw(target, z_index);
       drawParallaxMaps(target, z_index);
 
       // draw all tile maps
