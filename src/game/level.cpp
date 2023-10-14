@@ -1011,7 +1011,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          PlayerStencil::enableTest();
          PlayerStencil::keepIfOne();
-         //         Player::getCurrent()->drawStencil(*_render_texture_level);
+         Player::getCurrent()->drawStencil(*_render_texture_level);
          PlayerStencil::disableTest();
          PlayerStencil::clearStencilBuffer();
       }

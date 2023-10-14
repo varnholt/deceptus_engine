@@ -731,7 +731,10 @@ DISTFILES += \
     data/shaders/death.frag \
     data/shaders/death.vert \
     data/scripts/enemies/deprecated_cannon.lua \
+    data/shaders/flash.frag \
     data/shaders/light.frag \
+    data/shaders/raycast.frag \
+    data/shaders/raycast.vert \
     data/shaders/water.frag \
     data/scripts/enemies/landmine.lua \
     data/scripts/enemies/constants.lua \
