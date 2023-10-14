@@ -42,6 +42,8 @@ public:
    void setColorTree(const sf::Color& color);
    void setAlpha(uint8_t alpha);
    void setAlphaTree(uint8_t alpha);
+   bool isVisible() const;
+   void setVisible(bool newVisible);
 
    sf::FloatRect getLocalBounds() const;
    sf::FloatRect getGlobalBounds() const;
@@ -62,16 +64,16 @@ public:
    sf::Time _elapsed;
    sf::Time _overall_time;
    HighResDuration _overall_time_chrono;
-   int32_t _current_frame = 0;
-   int32_t _previous_frame = -1;
+   int32_t _current_frame{0};
+   int32_t _previous_frame{-1};
 
-   bool _paused = false;
-   bool _looped = false;
-   bool _reset_to_first_frame = true;
-   bool _finished = false;
+   bool _paused{false};
+   bool _looped{false};
+   bool _reset_to_first_frame{true};
+   bool _finished{false};
+   bool _visible{true};
 
    std::vector<std::shared_ptr<Animation>> _children;
-
 
 private:
    std::vector<sf::Time> _frame_times;

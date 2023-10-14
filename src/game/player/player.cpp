@@ -268,6 +268,60 @@ void Player::setBodyViaPixelPosition(float x, float y)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+bool Player::checkDamageDrawSkip() const
+{
+   if (isDead())
+   {
+      // dead players shouldn't flash
+      return false;
+   }
+
+   auto skip_render = false;
+   const auto time = GlobalClock::getInstance().getElapsedTimeInMs();
+   const auto damage_time = _damage_clock.getElapsedTime().asMilliseconds();
+   if (_damage_initialized && time > 3000 && damage_time < 3000)
+   {
+      if ((damage_time / 100) % 2 == 0)
+      {
+         skip_render = true;
+      }
+   }
+
+   return skip_render;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
+{
+   // update color if player is hurt
+   constexpr auto red_intensity = 200;
+   const auto damage_color_value = static_cast<uint8_t>(red_intensity * std::max(0.0f, 1.0f - _damage_clock.getElapsedTime().asSeconds()));
+   if (damage_color_value > 0)
+   {
+      const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
+      current_cycle->setColor(damage_color);
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px)
+{
+   // draw dash with motion blur
+   for (auto i = 0u; i < _last_animations.size(); i++)
+   {
+      auto& anim = _last_animations[i];
+      anim._animation->setPosition(anim._position);
+      anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
+      anim._animation->draw(color);
+   }
+
+   if (_dash.hasMoreFrames())
+   {
+      _last_animations.push_back({draw_position_px, current_cycle});
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    _water_bubbles.draw(color, normal);
@@ -277,19 +331,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       return;
    }
 
-   // dead players shouldn't flash
-   if (!isDead())
+   if (checkDamageDrawSkip())
    {
-      // damaged player flashes
-      const auto time = GlobalClock::getInstance().getElapsedTimeInMs();
-      const auto damage_time = _damage_clock.getElapsedTime().asMilliseconds();
-      if (_damage_initialized && time > 3000 && damage_time < 3000)
-      {
-         if ((damage_time / 100) % 2 == 0)
-         {
-            return;
-         }
-      }
+      return;
    }
 
    if (_jump._wallsliding && _jump._walljump_frame_count == 0)
@@ -305,51 +349,53 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    // that y offset is to compensate the wonky box2d origin
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-   auto current_cycle = _player_animation.getCurrentCycle();
+   const auto& current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
+      current_cycle->setColor(sf::Color::White);
       current_cycle->setPosition(draw_position_px);
-
-      // draw dash with motion blur
-      for (auto i = 0u; i < _last_animations.size(); i++)
-      {
-         auto& anim = _last_animations[i];
-         anim._animation->setPosition(anim._position);
-         anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
-         anim._animation->draw(color);
-      }
-
-      if (_dash.hasMoreFrames())
-      {
-         _last_animations.push_back({draw_position_px, current_cycle});
-      }
-
-      // update color if player is hurt
-      constexpr auto red_intensity = 200;
-      const auto damage_color_value =
-         static_cast<uint8_t>(red_intensity * std::max(0.0f, 1.0f - _damage_clock.getElapsedTime().asSeconds()));
-      if (damage_color_value > 0)
-      {
-         const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
-         current_cycle->setColor(damage_color);
-      }
-
-      // player animations might be combined of multiple animations, hence the recursive calls
+      drawDash(color, current_cycle, draw_position_px);
+      updateHurtColor(current_cycle);
       current_cycle->draw(color, normal);
    }
 
-   auto auxiliary_cycle = _player_animation.getAuxiliaryCycle();
+   const auto& auxiliary_cycle = _player_animation.getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
+      auxiliary_cycle->setColor(sf::Color::White);
       auxiliary_cycle->setPosition(draw_position_px);
       auxiliary_cycle->draw(color, normal);
    }
 
+   // draw additional effects such as dust, water splash
    _animation_pool.drawAnimations(
       color,
       normal,
       {"player_jump_dust_l", "player_jump_dust_r", "player_jump_dust_inair_l", "player_jump_dust_inair_r", "player_water_splash"}
    );
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::drawStencil(sf::RenderTarget& color)
+{
+   const auto stencil_color = sf::Color{255, 255, 255, 40};
+   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+
+   auto current_cycle = _player_animation.getCurrentCycle();
+   if (current_cycle)
+   {
+      current_cycle->setColor(stencil_color);
+      current_cycle->setPosition(draw_position_px);
+      current_cycle->draw(color);
+   }
+
+   auto auxiliary_cycle = _player_animation.getAuxiliaryCycle();
+   if (auxiliary_cycle)
+   {
+      auxiliary_cycle->setColor(stencil_color);
+      auxiliary_cycle->setPosition(draw_position_px);
+      auxiliary_cycle->draw(color);
+   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
