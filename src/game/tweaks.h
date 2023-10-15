@@ -18,6 +18,7 @@ class Tweaks : public JsonConfiguration
       float _enter_portal_threshold = -0.6f;
       bool _player_light_enabled = true;
       uint8_t _player_light_alpha = 10;
+      uint8_t _player_stencil_alpha = 40;
 
    private:
 
