@@ -293,6 +293,11 @@ bool Player::checkDamageDrawSkip() const
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
 {
+   if (isDead())
+   {
+      return;
+   }
+
    // update color if player is hurt
    constexpr auto red_intensity = 200;
    const auto damage_color_value = static_cast<uint8_t>(red_intensity * std::max(0.0f, 1.0f - _damage_clock.getElapsedTime().asSeconds()));
