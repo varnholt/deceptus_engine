@@ -1,12 +1,13 @@
 #include "moveablebox.h"
 
-#include "audio.h"
-#include "constants.h"
-#include "fixturenode.h"
+#include "framework/math/box2dtools.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "texturepool.h"
+#include "game/audio.h"
+#include "game/constants.h"
+#include "game/fixturenode.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 
@@ -144,17 +145,16 @@ void MoveableBox::setupTransform()
 //--------------------------------------------------------------------------------------------------
 void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
 {
-   b2PolygonShape polygon_shape;
-   auto size_x = _size.x / PPM;
-   auto size_y = _size.y / PPM;
+   const auto size_x = _size.x / PPM;
+   const auto size_y = _size.y / PPM;
+   b2PolygonShape polygon_shape = Box2DTools::createBeveledBox(size_x, size_y, 0.1f);
 
-   b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0, 0);
-   vertices[1] = b2Vec2(0, size_y);
-   vertices[2] = b2Vec2(size_x, size_y);
-   vertices[3] = b2Vec2(size_x, 0);
-
-   polygon_shape.Set(vertices, 4);
+   //   b2Vec2 vertices[4];
+   //   vertices[0] = b2Vec2(0, 0);
+   //   vertices[1] = b2Vec2(0, size_y);
+   //   vertices[2] = b2Vec2(size_x, size_y);
+   //   vertices[3] = b2Vec2(size_x, 0);
+   //   polygon_shape.Set(vertices, 4);
 
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
