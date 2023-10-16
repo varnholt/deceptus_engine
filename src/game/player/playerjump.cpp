@@ -253,7 +253,7 @@ void PlayerJump::jump()
       return;
    }
 
-   if (_controls->isDownButtonPressed())
+   if (_controls->isMovingDown())
    {
       // equivalent to check for bending down, but jump can be called via lamda
       // which mich skip the bend state update in the player update loop.
