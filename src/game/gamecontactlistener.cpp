@@ -198,17 +198,33 @@ void GameContactListener::processEnemyContactBegin(FixtureNode* fixture_node_a, 
 
 void GameContactListener::processBouncerContactBegin(FixtureNode* fixture_node)
 {
-   dynamic_cast<Bouncer*>(fixture_node)->activate();
+   auto bouncer = dynamic_cast<Bouncer*>(fixture_node);
+   if (!bouncer)
+   {
+      return;
+   }
+   bouncer->activate();
 }
 
-void GameContactListener::processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* bubble, FixtureNode* other)
+void GameContactListener::processBubbleCubeContactBegin(b2Contact* contact, FixtureNode* fixture_node, FixtureNode* other)
 {
-   dynamic_cast<BubbleCube*>(bubble)->beginContact(contact, other);
+   auto bubble = dynamic_cast<BubbleCube*>(fixture_node);
+   if (!bubble)
+   {
+      return;
+   }
+   bubble->beginContact(contact, other);
 }
 
-void GameContactListener::processCollapsingPlatformContactBegin(b2Contact* contact, FixtureNode* platform, FixtureNode* other)
+void GameContactListener::processCollapsingPlatformContactBegin(b2Contact* contact, FixtureNode* fixture_node, FixtureNode* other)
 {
-   dynamic_cast<CollapsingPlatform*>(platform)->beginContact(contact, other);
+   auto platform = dynamic_cast<CollapsingPlatform*>(fixture_node);
+
+   if (!platform)
+   {
+      return;
+   }
+   platform->beginContact(contact, other);
 }
 
 void GameContactListener::processBeginContact(

@@ -105,6 +105,7 @@ SOURCES += \
    src/framework/image/tga.cpp \
    src/framework/joystick/gamecontroller.cpp \
    src/framework/joystick/gamecontrollerinfo.cpp \
+   src/framework/math/box2dtools.cpp \
    src/framework/math/fbm.cpp \
    src/framework/math/hermitecurve.cpp \
    src/framework/math/maptools.cpp \
@@ -328,6 +329,7 @@ HEADERS += \
    src/framework/joystick/gamecontroller.h \
    src/framework/joystick/gamecontrollerballvector.h \
    src/framework/joystick/gamecontrollerinfo.h \
+   src/framework/math/box2dtools.h \
    src/framework/math/fbm.h \
    src/framework/math/hermitecurve.h \
    src/framework/math/hermitecurvekey.h \
