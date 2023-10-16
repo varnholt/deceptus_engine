@@ -192,6 +192,7 @@ enum KeyPressed
 
 enum ObjectType
 {
+   ObjectTypeInvalid,
    ObjectTypeBouncer,
    ObjectTypeBubbleCube,
    ObjectTypeCollapsingPlatform,
@@ -201,7 +202,6 @@ enum ObjectType
    ObjectTypeDeathBlock,
    ObjectTypeDoor,
    ObjectTypeEnemy,
-   ObjectTypeInvalid,
    ObjectTypeMoveableBox,
    ObjectTypeMovingPlatform,
    ObjectTypePlayer,
