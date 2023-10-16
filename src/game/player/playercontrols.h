@@ -38,7 +38,8 @@ public:
 
    bool isMovingRight() const;
    bool isMovingLeft() const;
-   bool isMovingDown() const;
+   bool isMovingDown(float analog_threshold = 0.3f) const;
+   bool isMovingUp(float analog_threshold = 0.3f) const;
    bool isMovingHorizontally() const;
 
    const GameControllerInfo& getJoystickInfo() const;

@@ -272,7 +272,7 @@ bool PlayerControls::isDownButtonPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDroppingDown() const
 {
-   return isJumpButtonPressed() && isMovingDown();
+   return isJumpButtonPressed() && isMovingDown(0.7f);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -323,7 +323,7 @@ bool PlayerControls::isMovingLeft() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isMovingDown() const
+bool PlayerControls::isMovingDown(float analog_threshold) const
 {
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -333,18 +333,18 @@ bool PlayerControls::isMovingDown() const
       auto y1 = axis_values[static_cast<size_t>(axis_left_y)] / 32767.0f;
       const auto hat_value = _joystick_info.getHatValues().at(0);
       const auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
-      const auto dpad_right_pressed = hat_value & SDL_HAT_UP;
+      const auto dpad_up_pressed = hat_value & SDL_HAT_UP;
 
       if (dpad_down_pressed)
       {
          y1 = 1.0f;
       }
-      else if (dpad_right_pressed)
+      else if (dpad_up_pressed)
       {
-         y1 = 1.0f;
+         y1 = -1.0f;
       }
 
-      if (fabs(y1) > 0.3f)
+      if (fabs(y1) > analog_threshold)
       {
          if (y1 > 0.0f)
          {
@@ -355,6 +355,46 @@ bool PlayerControls::isMovingDown() const
 
    // keyboard input
    if (_keys_pressed & KeyPressedDown)
+   {
+      return true;
+   }
+
+   return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isMovingUp(float analog_threshold) const
+{
+   // controller input
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      const auto& axis_values = _joystick_info.getAxisValues();
+      const auto axis_left_y = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+      auto y1 = axis_values[static_cast<size_t>(axis_left_y)] / 32767.0f;
+      const auto hat_value = _joystick_info.getHatValues().at(0);
+      const auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
+      const auto dpad_up_pressed = hat_value & SDL_HAT_UP;
+
+      if (dpad_down_pressed)
+      {
+         y1 = 1.0f;
+      }
+      else if (dpad_up_pressed)
+      {
+         y1 = -1.0f;
+      }
+
+      if (fabs(y1) > analog_threshold)
+      {
+         if (y1 < 0.0f)
+         {
+            return true;
+         }
+      }
+   }
+
+   // keyboard input
+   if (_keys_pressed & KeyPressedUp)
    {
       return true;
    }

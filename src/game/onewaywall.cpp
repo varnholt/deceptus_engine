@@ -4,14 +4,11 @@
 
 #include <iostream>
 
-
-
 OneWayWall& OneWayWall::instance()
 {
    static OneWayWall _instance;
    return _instance;
 }
-
 
 void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture)
 {
@@ -36,14 +33,12 @@ void OneWayWall::beginContact(b2Contact* contact, b2Fixture* player_fixture)
    contact->SetEnabled(false);
 }
 
-
 void OneWayWall::endContact(b2Contact* contact)
 {
    // reset the default state of the contact
    contact->SetEnabled(true);
    _contacts.erase(contact);
 }
-
 
 void OneWayWall::drop()
 {
@@ -53,12 +48,10 @@ void OneWayWall::drop()
    }
 }
 
-
 bool OneWayWall::hasContacts() const
 {
    return _contacts.size() > 0;
 }
-
 
 void OneWayWall::clear()
 {
