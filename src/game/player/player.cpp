@@ -211,7 +211,7 @@ void Player::initializeController()
          );
 
          gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_X,
+            SDL_CONTROLLER_BUTTON_B,
             [&]()
             {
                if (!is_running())
@@ -1327,12 +1327,12 @@ void Player::updateAttack()
       return;
    }
 
-   _attack._fire_button_was_pressed = _attack._fire_button_pressed;
-   _attack._fire_button_pressed = _controls->isFireButtonPressed();
+   _attack._attack_button_was_pressed = _attack._attack_button_pressed;
+   _attack._attack_button_pressed = _controls->isButtonXPressed();
 
    // there are weapons that support continous attacks while the button is down, others like the sword
    // require a fresh button press each time the sword should be swung
-   if (_attack._fire_button_pressed)
+   if (_attack._attack_button_pressed)
    {
       attack();
    }
@@ -1807,7 +1807,7 @@ void Player::attack()
          pos.x = x_offset + _pixel_position_f.x * MPP;
          pos.y = y_offset + _pixel_position_f.y * MPP;
 
-         if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
+         if (_attack._attack_button_pressed && !_attack._attack_button_was_pressed)
          {
             _attack._timepoint_attack_start = StopWatch::getInstance().now();
          }
@@ -1824,7 +1824,7 @@ void Player::attack()
          pos.x = x_offset + _pixel_position_f.x * MPP;
          pos.y = y_offset + _pixel_position_f.y * MPP;
 
-         if (_attack._fire_button_pressed && !_attack._fire_button_was_pressed)
+         if (_attack._attack_button_pressed && !_attack._attack_button_was_pressed)
          {
             _attack._timepoint_attack_start = StopWatch::getInstance().now();
          }
@@ -1835,7 +1835,7 @@ void Player::attack()
       case WeaponType::Sword:
       {
          // no 2nd strike without new button press
-         if (_attack._fire_button_pressed && _attack._fire_button_was_pressed)
+         if (_attack._attack_button_pressed && _attack._attack_button_was_pressed)
          {
             return;
          }
@@ -1989,7 +1989,7 @@ void Player::setStartPixelPosition(float x, float y)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::traceJumpCurve()
 {
-   if (_controls->isJumpButtonPressed())
+   if (_controls->isButtonAPressed())
    {
       if (!_jump_trace._jump_started)
       {
@@ -2017,24 +2017,32 @@ void Player::traceJumpCurve()
 //----------------------------------------------------------------------------------------------------------------------
 void Player::keyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Space)
+   switch (key)
    {
-      _jump.jump();
-   }
-
-   if (key == sf::Keyboard::Return)
-   {
-      _toggle_callback();
-   }
-
-   if (key == sf::Keyboard::Z)
-   {
-      updateDash(Dash::Left);
-   }
-
-   if (key == sf::Keyboard::X)
-   {
-      updateDash(Dash::Right);
+      case sf::Keyboard::Space:
+      {
+         _jump.jump();
+         break;
+      }
+      case sf::Keyboard::Return:
+      {
+         _toggle_callback();
+         break;
+      }
+      case sf::Keyboard::Z:
+      {
+         updateDash(Dash::Left);
+         break;
+      }
+      case sf::Keyboard::X:
+      {
+         updateDash(Dash::Right);
+         break;
+      }
+      default:
+      {
+         break;
+      }
    }
 }
 

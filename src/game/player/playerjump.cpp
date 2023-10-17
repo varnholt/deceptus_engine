@@ -78,7 +78,7 @@ void PlayerJump::updateJump()
 {
    const auto& physics = PhysicsConfiguration::getInstance();
 
-   if (_jump_info._in_water && _controls->isJumpButtonPressed())
+   if (_jump_info._in_water && _controls->isButtonAPressed())
    {
       // only allow jumping out of the water / water movement if the player stayed inside the water for a bit
       using namespace std::chrono_literals;
@@ -94,7 +94,7 @@ void PlayerJump::updateJump()
       }
    }
    else if (
-      (_jump_frame_count > 0 && _controls->isJumpButtonPressed())                                  // still jumping
+      (_jump_frame_count > 0 && _controls->isButtonAPressed())                                  // still jumping
       || _jump_clock.getElapsedTime().asMilliseconds() < physics._player_jump_minimal_duration_ms  // fresh jump
    )
    {
