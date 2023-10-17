@@ -70,14 +70,9 @@ void PlayerControls::forceSync()
       _keys_pressed |= KeyPressedRight;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
-   {
-      _keys_pressed |= KeyPressedRun;
-   }
-
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
    {
-      _keys_pressed |= KeyPressedFire;
+      _keys_pressed |= KeyPressedAttack;
    }
 }
 
@@ -110,13 +105,9 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    {
       _keys_pressed |= KeyPressedRight;
    }
-   else if (key == sf::Keyboard::LAlt)
-   {
-      _keys_pressed |= KeyPressedRun;
-   }
    else if (key == sf::Keyboard::LControl)
    {
-      _keys_pressed |= KeyPressedFire;
+      _keys_pressed |= KeyPressedAttack;
    }
 
    for (const auto& callback : _keypressed_callbacks)
@@ -154,13 +145,9 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    {
       _keys_pressed &= ~KeyPressedJump;
    }
-   else if (key == sf::Keyboard::LAlt)
-   {
-      _keys_pressed &= ~KeyPressedRun;
-   }
    else if (key == sf::Keyboard::LControl)
    {
-      _keys_pressed &= ~KeyPressedFire;
+      _keys_pressed &= ~KeyPressedAttack;
    }
 }
 
@@ -206,9 +193,9 @@ bool PlayerControls::isControllerButtonPressed(int button_enum) const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isFireButtonPressed() const
+bool PlayerControls::isButtonXPressed() const
 {
-   if (_keys_pressed & KeyPressedFire)
+   if (_keys_pressed & KeyPressedAttack)
    {
       return true;
    }
@@ -222,7 +209,7 @@ bool PlayerControls::isFireButtonPressed() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isJumpButtonPressed() const
+bool PlayerControls::isButtonAPressed() const
 {
    if (_keys_pressed & KeyPressedJump)
    {
@@ -272,7 +259,7 @@ bool PlayerControls::isDownButtonPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDroppingDown() const
 {
-   return isJumpButtonPressed() && isMovingDown(0.7f);
+   return isButtonAPressed() && isMovingDown(0.7f);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

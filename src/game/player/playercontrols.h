@@ -30,8 +30,8 @@ public:
 
    bool isLookingAround() const;
    bool isControllerButtonPressed(int32_t button_enum) const;
-   bool isFireButtonPressed() const;
-   bool isJumpButtonPressed() const;
+   bool isButtonXPressed() const;
+   bool isButtonAPressed() const;
    bool isUpButtonPressed() const;
    bool isDownButtonPressed() const;
    bool isDroppingDown() const;
