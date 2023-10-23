@@ -129,8 +129,21 @@ void PhysicsConfigurationUi::draw()
 
    if (ImGui::CollapsingHeader("player jump", header_flags))
    {
-      drawIntElement("jump frame count", &config._player_jump_frame_count, 1, 50);
-      drawIntElement("jump after contact lost [ms]", &config._player_jump_after_contact_lost_ms, 50, 200);
+      const auto jump_frame_count_min = 1;
+      const auto jump_frame_count_max = 50;
+      const auto jump_frame_count_min_min = 0;
+      auto jump_frame_count_min_max = config._player_jump_frame_count - 1;
+
+      if (jump_frame_count_min_max < jump_frame_count_min_min)
+      {
+         jump_frame_count_min_max = jump_frame_count_min_min;
+      }
+
+      drawIntElement("jump frame count", &config._player_jump_frame_count, jump_frame_count_min, jump_frame_count_max);
+      drawIntElement(
+         "jump frame count minimum", &config._player_jump_frame_count_minimum, jump_frame_count_min_min, jump_frame_count_min_max
+      );
+      drawIntElement("jump after contact lost [ms]", &config._player_jump_after_contact_lost_ms, jump_frame_count_min_min, 200);
       drawIntElement("jump buffer [ms]", &config._player_jump_buffer_ms, 10, 200);
       drawIntElement("jump minimal duration [ms]", &config._player_jump_minimal_duration_ms, 20, 200);
       drawFloatElement("jump falloff", &config._player_jump_falloff, 1.0f, 20.0f);
