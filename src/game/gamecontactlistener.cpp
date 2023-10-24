@@ -38,7 +38,17 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
       return false;
    }
 
-   return dynamic_cast<Player*>(obj->getParent());
+   auto can_cast = false;
+   try
+   {
+      can_cast = dynamic_cast<Player*>(obj->getParent());
+   }
+   catch (...)
+   {
+      return false;
+   }
+
+   return can_cast;
 }
 
 bool GameContactListener::isEnemy(FixtureNode* obj) const
@@ -48,7 +58,17 @@ bool GameContactListener::isEnemy(FixtureNode* obj) const
       return false;
    }
 
-   return dynamic_cast<LuaNode*>(obj->getParent());
+   auto can_cast = false;
+   try
+   {
+      can_cast = dynamic_cast<LuaNode*>(obj->getParent());
+   }
+   catch (...)
+   {
+      return false;
+   }
+
+   return can_cast;
 }
 
 void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
