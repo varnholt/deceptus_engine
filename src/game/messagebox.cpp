@@ -123,6 +123,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
+   if (__active->_state != State::Visible)
+   {
+      return false;
+   }
+
    if (__active->_drawn)
    {
       MessageBox::Button button = MessageBox::Button::Invalid;
@@ -328,7 +333,7 @@ void MessageBox::showAnimation()
    auto background_layer = __layers["background"];
    const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
-   if (visible_time < animation_scale_time_show)
+   if (visible_time < animation_scale_time_show)  // zoom effect
    {
       contents_alpha = 0.0f;
 
@@ -350,7 +355,7 @@ void MessageBox::showAnimation()
          __background_position.x + background_scale_offset + offset.x, __background_position.y + offset.y
       );
    }
-   else
+   else  // fade in
    {
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
       window_layer->_sprite->setScale(1.0f, 1.0f);
@@ -370,7 +375,8 @@ void MessageBox::showAnimation()
    }
 
    // fade in text and buttons
-   const auto alpha = static_cast<uint8_t>(contents_alpha * 255);
+   const auto contents_alpha_scaled = contents_alpha * 255;
+   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
    const auto color = sf::Color{255, 255, 255, alpha};
    auto text_color = __active->_properties._text_color;
    text_color.a = alpha;
@@ -381,6 +387,9 @@ void MessageBox::showAnimation()
    }
 
    __text.setFillColor(text_color);
+
+   // update state
+   __active->_state = (contents_alpha_scaled < 255) ? State::ShowAnimation : State::Visible;
 }
 
 void MessageBox::hideAnimation()
@@ -394,6 +403,7 @@ void MessageBox::hideAnimation()
 
    const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
    const auto contents_alpha = 1.0f - t_normalized;
+   const auto contents_alpha_scaled = static_cast<uint8_t>(contents_alpha * 255);
 
    if (contents_alpha < 0.0f)
    {
@@ -401,12 +411,11 @@ void MessageBox::hideAnimation()
    }
    else
    {
-      const auto alpha = static_cast<uint8_t>(contents_alpha * 255);
-      const auto window_color = sf::Color{255, 255, 255, alpha};
+      const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
       auto background_color = __active->_properties._background_color;
       auto text_color = __active->_properties._text_color;
-      text_color.a = alpha;
-      background_color.a = alpha;
+      text_color.a = contents_alpha_scaled;
+      background_color.a = contents_alpha_scaled;
 
       __layers["window"]->_sprite->setColor(window_color);
       __layers["background"]->_sprite->setColor(background_color);
@@ -418,6 +427,9 @@ void MessageBox::hideAnimation()
 
       __text.setFillColor(text_color);
    }
+
+   // update state
+   __active->_state = (contents_alpha_scaled > 0) ? State::HideAnimation : State::Hidden;
 }
 
 void MessageBox::animateText()
@@ -449,32 +461,6 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (!__active)
    {
       return;
-   }
-
-   __active->_drawn = true;
-
-   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
-   const auto buttons = __active->_buttons;
-
-   // background layer is unused for now
-   // bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
-   // __layers["temp_bg"]->_visible = menu_shown;
-   __layers["temp_bg"]->_visible = false;
-
-   // init button layers
-   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
-   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
-   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
-   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
-
-   if (__active->_properties._animate_show_event)
-   {
-      showAnimation();
-   }
-
-   if (__active->_properties._animate_hide_event)
-   {
-      hideAnimation();
    }
 
    // set up an ortho view with screen dimensions
@@ -528,6 +514,43 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (__active->_reset_instance)
    {
       __active.reset();
+   }
+}
+
+void MessageBox::update(const sf::Time& /*dt*/)
+{
+   if (!__active)
+   {
+      return;
+   }
+
+   __active->_drawn = true;
+
+   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
+   const auto buttons = __active->_buttons;
+
+   // background layer is unused for now
+   // bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
+   // __layers["temp_bg"]->_visible = menu_shown;
+   __layers["temp_bg"]->_visible = false;
+
+   // init button layers
+   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
+   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
+   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
+   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
+
+   // animate
+   __active->_state = State::Visible;  // default to visible until adjusted by either showAnimation or hideAnimation
+
+   if (__active->_properties._animate_show_event)
+   {
+      showAnimation();
+   }
+
+   if (__active->_properties._animate_hide_event)
+   {
+      hideAnimation();
    }
 }
 
