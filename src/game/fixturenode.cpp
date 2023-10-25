@@ -43,9 +43,13 @@ void FixtureNode::setProperty(const std::string& key, const Variant& value)
 
 FixtureNode::Variant FixtureNode::getProperty(const std::string& key) const
 {
-   return _properties.find(key)->second;
+    return _properties.find(key)->second;
 }
 
+bool FixtureNode::hasProperty(const std::string& key) const
+{
+    return _properties.contains(key);
+}
 
 void FixtureNode::collisionWithPlayer()
 {

@@ -654,6 +654,7 @@ void Game::update()
 
    Timer::update(Timer::Scope::UpdateAlways);
    Audio::getInstance().updateMusic();
+   MessageBox::update(dt);
 
    // update screen transitions here
    ScreenTransitionHandler::getInstance().update(dt);

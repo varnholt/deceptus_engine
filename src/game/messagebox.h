@@ -48,6 +48,14 @@ public:
       bool _animate_hide_event = true;
    };
 
+   enum class State
+   {
+      ShowAnimation,
+      HideAnimation,
+      Visible,
+      Hidden,
+   };
+
    using MessageBoxCallback = std::function<void(Button)>;
 
    MessageBox(Type type, const std::string& message, const MessageBoxCallback& cb, const LayoutProperties& properties, int32_t buttons);
@@ -55,6 +63,7 @@ public:
    virtual ~MessageBox();
 
    static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   static void update(const sf::Time& dt);
    static bool keyboardKeyPressed(sf::Keyboard::Key key);
 
    static void info(
@@ -105,6 +114,7 @@ private:
    sf::Time _show_time;
    sf::Time _hide_time;
    ExecutionMode _previous_mode = ExecutionMode::None;
+   State _state{State::Hidden};
 
    static LayoutProperties __default_properties;
    static std::unique_ptr<MessageBox> __active;
