@@ -27,6 +27,7 @@ class FixtureNode : public GameNode
 
       void setProperty(const std::string& key, const Variant& value);
       Variant getProperty(const std::string& key) const;
+      bool hasProperty(const std::string& key) const;
 
       virtual void collisionWithPlayer();
       void setCollisionCallback(const CollisionCallback& collisionCallback);
