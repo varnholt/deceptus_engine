@@ -41,7 +41,7 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
    auto can_cast = false;
    try
    {
-      can_cast = dynamic_cast<Player*>(obj->getParent());
+      can_cast = (dynamic_cast<Player*>(obj->getParent()) != nullptr);
    }
    catch (...)
    {
@@ -61,7 +61,7 @@ bool GameContactListener::isEnemy(FixtureNode* obj) const
    auto can_cast = false;
    try
    {
-      can_cast = dynamic_cast<LuaNode*>(obj->getParent());
+      can_cast = (dynamic_cast<LuaNode*>(obj->getParent()) != nullptr);
    }
    catch (...)
    {
@@ -73,7 +73,12 @@ bool GameContactListener::isEnemy(FixtureNode* obj) const
 
 void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
 {
-   const auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
+   auto damage = 0;
+   if (fixture_node_a->hasProperty("damage"))
+   {
+      const auto property = fixture_node_a->getProperty("damage");
+      damage = std::get<int32_t>(property);
+   }
 
    if (isPlayer(fixture_node_b))
    {
