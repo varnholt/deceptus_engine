@@ -231,15 +231,14 @@ const sf::FloatRect& Door::getPixelRect() const
 //-----------------------------------------------------------------------------
 void Door::toggleWithPlayerChecks()
 {
-   if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.hasInventoryItem(*_required_item))
+   if (!checkPlayerAtDoor())
    {
-      Log::Info() << "player doesn't have key: " << *_required_item;
       return;
    }
 
-   if (!checkPlayerAtDoor())
+   if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.hasInventoryItem(*_required_item))
    {
-      Log::Info() << "player not in front of door";
+      Log::Info() << "player doesn't have key: " << *_required_item;
       return;
    }
 
