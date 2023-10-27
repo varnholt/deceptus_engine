@@ -38,17 +38,8 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
       return false;
    }
 
-   auto can_cast = false;
-   try
-   {
-      can_cast = (dynamic_cast<Player*>(obj->getParent()) != nullptr);
-   }
-   catch (...)
-   {
-      return false;
-   }
-
-   return can_cast;
+   const auto is_player = (obj->getParent() == Player::getCurrent());
+   return is_player;
 }
 
 bool GameContactListener::isEnemy(FixtureNode* obj) const
