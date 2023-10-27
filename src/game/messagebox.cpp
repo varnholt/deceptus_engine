@@ -128,7 +128,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
-   if (__active->_drawn)
+   if (__active->_ready_to_draw)
    {
       MessageBox::Button button = MessageBox::Button::Invalid;
 
@@ -183,60 +183,65 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MessageBox::initializeLayers()
 {
-   if (!__initialized)
+   if (__initialized)
    {
-      PSD psd;
-      psd.setColorFormat(PSD::ColorFormat::ABGR);
-      psd.load("data/game/messagebox.psd");
-
-      if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
-      {
-         Log::Error() << "font load fuckup";
-      }
-
-      const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
-
-      // load layers
-      for (const auto& layer : psd.getLayers())
-      {
-         // skip groups
-         if (!layer.isImageLayer())
-         {
-            continue;
-         }
-
-         auto tmp = std::make_shared<Layer>();
-
-         auto texture = std::make_shared<sf::Texture>();
-         auto sprite = std::make_shared<sf::Sprite>();
-
-         if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
-         {
-            Log::Fatal() << "failed to create texture: " << layer.getName();
-         }
-
-         texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
-
-         sprite->setTexture(*texture, true);
-         sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
-
-         tmp->_texture = texture;
-         tmp->_sprite = sprite;
-
-         __layer_stack.push_back(tmp);
-         __layers[layer.getName()] = tmp;
-      }
-
-      __window_position = __layers["window"]->_sprite->getPosition();
-      __background_position = __layers["background"]->_sprite->getPosition();
-
-      __box_content_layers.push_back(__layers["yes_xbox_1"]);
-      __box_content_layers.push_back(__layers["no_xbox_1"]);
-      __box_content_layers.push_back(__layers["yes_pc_1"]);
-      __box_content_layers.push_back(__layers["no_pc_1"]);
-
-      __initialized = true;
+      return;
    }
+
+   PSD psd;
+   psd.setColorFormat(PSD::ColorFormat::ABGR);
+   psd.load("data/game/messagebox.psd");
+
+   if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
+   {
+      Log::Error() << "font load fuckup";
+   }
+
+   const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
+
+   // load layers
+   for (const auto& layer : psd.getLayers())
+   {
+      // skip groups
+      if (!layer.isImageLayer())
+      {
+         continue;
+      }
+
+      auto tmp = std::make_shared<Layer>();
+
+      auto texture = std::make_shared<sf::Texture>();
+      auto sprite = std::make_shared<sf::Sprite>();
+
+      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
+      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+
+      sprite->setTexture(*texture, true);
+      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
+
+      __layer_stack.push_back(tmp);
+      __layers[layer.getName()] = tmp;
+   }
+
+   __window_position = __layers["window"]->_sprite->getPosition();
+   __background_position = __layers["background"]->_sprite->getPosition();
+
+   __box_content_layers.push_back(__layers["yes_xbox_1"]);
+   __box_content_layers.push_back(__layers["no_xbox_1"]);
+   __box_content_layers.push_back(__layers["yes_pc_1"]);
+   __box_content_layers.push_back(__layers["no_pc_1"]);
+
+   // background layer is unused for now
+   __layers["temp_bg"]->_visible = false;
+
+   __initialized = true;
 }
 
 sf::Vector2f MessageBox::pixelLocation(MessageBoxLocation location)
@@ -463,6 +468,11 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       return;
    }
 
+   if (!__active->_ready_to_draw)
+   {
+      return;
+   }
+
    // set up an ortho view with screen dimensions
    sf::View pixelOrtho(sf::FloatRect(
       0.0f,
@@ -524,15 +534,10 @@ void MessageBox::update(const sf::Time& /*dt*/)
       return;
    }
 
-   __active->_drawn = true;
+   __active->_ready_to_draw = true;
 
    const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
    const auto buttons = __active->_buttons;
-
-   // background layer is unused for now
-   // bool menu_shown = (DisplayMode::getInstance().isSet(Display::MainMenu));
-   // __layers["temp_bg"]->_visible = menu_shown;
-   __layers["temp_bg"]->_visible = false;
 
    // init button layers
    __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);

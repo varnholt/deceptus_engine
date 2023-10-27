@@ -106,7 +106,7 @@ private:
    LayoutProperties _properties;
    int32_t _buttons = 0;
    uint32_t _chars_shown = 0;
-   bool _drawn = false;
+   bool _ready_to_draw = false;
    bool _closed = false;
    bool _reset_instance = false;
    std::function<void(void)> _button_callback_a;
