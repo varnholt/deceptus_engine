@@ -49,6 +49,7 @@
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
 #include "game/playerstencil.h"
+#include "game/roomupdater.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
 #include "game/squaremarcher.h"
@@ -884,14 +885,14 @@ void Level::updateMechanismVolumes()
 //-----------------------------------------------------------------------------
 void Level::updateRoom()
 {
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
+   RoomUpdater::setCurrent(Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms));
 }
 
 //-----------------------------------------------------------------------------
 void Level::syncRoom()
 {
-   _room_current = Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms);
-   CameraRoomLock::setRoom(_room_current);
+   RoomUpdater::setCurrent(Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms));
+   CameraRoomLock::setRoom(RoomUpdater::getCurrent());
 }
 
 //-----------------------------------------------------------------------------
@@ -900,42 +901,42 @@ void Level::updateCameraSystem(const sf::Time& dt)
    auto& camera_system = CameraSystem::getInstance();
 
    // update room
-   const auto prev_room = _room_current;
+   const auto room_previous = RoomUpdater::getCurrent();
    updateRoom();
+   const auto room_current = RoomUpdater::getCurrent();
 
    // room changed
-   if (prev_room != _room_current)
+   if (room_previous != room_current)
    {
-      Log::Info() << "player moved to room: " << (_room_current ? _room_current->getObjectId() : "undefined") << " on side '"
-                  << (_room_current ? static_cast<char>(_room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat()))
-                                    : '?')
+      Log::Info() << "player moved to room: " << (room_current ? room_current->getObjectId() : "undefined") << " on side '"
+                  << (room_current ? static_cast<char>(room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat())) : '?')
                   << "'";
 
       // will update the current room in both cases, either after the camera lock delay or instantly
-      if (_room_current && _room_current->_camera_lock_delay.has_value())
+      if (room_current && room_current->_camera_lock_delay.has_value())
       {
-         _room_current->lockCamera();
+         room_current->lockCamera();
       }
       else
       {
-         CameraRoomLock::setRoom(_room_current);
+         CameraRoomLock::setRoom(room_current);
       }
 
       // trigger transition effect
       // when level has been loaded, room changes certainly do not require a transition
-      if (_room_synced && _room_current)
+      if (RoomUpdater::isSynced() && room_current)
       {
-         _room_current->startTransition();
+         room_current->startTransition();
       }
    }
 
    // update camera system
-   if (!_room_current || !_room_current->_camera_locked)
+   if (!room_current || !room_current->_camera_locked)
    {
       camera_system.update(dt, _view_width, _view_height);
    }
 
-   _room_synced = true;
+   RoomUpdater::setSynced(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -1435,7 +1436,7 @@ void Level::update(const sf::Time& dt)
 
    updatePlayerLight();
 
-   _volume_updater->setRoomId(_room_current ? std::optional<int32_t>(_room_current->_id) : std::nullopt);
+   _volume_updater->setRoomId(RoomUpdater::getCurrentId());
    _volume_updater->update();
    _volume_updater->updateProjectiles(Projectile::getProjectiles());
 }

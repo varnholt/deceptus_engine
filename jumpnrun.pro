@@ -278,6 +278,7 @@ SOURCES += \
    src/game/projectilehitanimation.cpp \
    src/game/projectilehitaudio.cpp \
    src/game/room.cpp \
+   src/game/roomupdater.cpp \
    src/game/savestate.cpp \
    src/game/screentransition.cpp \
    src/game/screentransitioneffect.cpp \
@@ -507,6 +508,7 @@ HEADERS += \
    src/game/projectilehitanimation.h \
    src/game/projectilehitaudio.h \
    src/game/room.h \
+   src/game/roomupdater.h \
    src/game/savestate.h \
    src/game/screentransition.h \
    src/game/screentransitioneffect.h \

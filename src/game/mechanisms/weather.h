@@ -28,6 +28,16 @@ public:
    static std::shared_ptr<Weather> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
+   void updateWaitDelay(const sf::Time& dt, bool intersects);
+
    std::shared_ptr<WeatherOverlay> _overlay;
    sf::FloatRect _rect;
+   bool _limit_effect_to_room{false};
+   std::optional<bool> _intersected_in_previous_frame;
+
+   using FloatSeconds = std::chrono::duration<float>;
+
+   std::optional<FloatSeconds> _effect_start_delay;
+   FloatSeconds _elapsed_since_intersect;
+   bool _wait_until_start_delay_elapsed{false};
 };

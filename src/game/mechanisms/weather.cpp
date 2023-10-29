@@ -3,7 +3,8 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "player/player.h"
+#include "game/player/player.h"
+#include "game/roomupdater.h"
 
 Weather::Weather(GameNode* parent) : GameNode(parent)
 {
@@ -12,20 +13,75 @@ Weather::Weather(GameNode* parent) : GameNode(parent)
 
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   auto player_rect = Player::getCurrent()->getPixelRectFloat();
+   if (_wait_until_start_delay_elapsed)
+   {
+      return;
+   }
 
-   if (_rect.intersects(player_rect))
+   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesId(getRoomId()))
+   {
+      return;
+   }
+
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto intersects = _rect.intersects(player_rect);
+   if (intersects)
    {
       _overlay->draw(target, normal);
    }
 }
 
+void Weather::updateWaitDelay(const sf::Time& dt, bool intersects)
+{
+   // the first frame ever
+   if (!_intersected_in_previous_frame.has_value())
+   {
+      _intersected_in_previous_frame = intersects;
+
+      // if we're already intersecting from the beginning, skip the delay
+      if (intersects)
+      {
+         _elapsed_since_intersect = _effect_start_delay.value_or(FloatSeconds(0));
+      }
+   }
+
+   if (_effect_start_delay.has_value())
+   {
+      // reset elapsed time when intersection state changes
+      if (intersects && !_intersected_in_previous_frame.value())
+      {
+         _elapsed_since_intersect = FloatSeconds(0);
+      }
+      else
+      {
+         _elapsed_since_intersect += FloatSeconds(dt.asSeconds());
+      }
+
+      _wait_until_start_delay_elapsed = _elapsed_since_intersect < _effect_start_delay.value();
+   }
+
+   _intersected_in_previous_frame = intersects;
+}
+
 void Weather::update(const sf::Time& dt)
 {
-   auto player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto intersects = _rect.intersects(player_rect);
+   updateWaitDelay(dt, intersects);
 
-   if (_rect.intersects(player_rect))
+   // checked after the intersection because the wait delay must always be updated
+   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesId(getRoomId()))
    {
+      return;
+   }
+
+   if (intersects)
+   {
+      if (_wait_until_start_delay_elapsed)
+      {
+         return;
+      }
+
       _overlay->update(dt);
    }
 }
@@ -45,6 +101,24 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
    weather->setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 
+   // generic settings
+   if (data._tmx_object->_properties)
+   {
+      const auto limit_effect_to_room_it = data._tmx_object->_properties->_map.find("limit_effect_to_room");
+      const auto effect_start_delay_s_it = data._tmx_object->_properties->_map.find("effect_start_delay_s");
+
+      if (limit_effect_to_room_it != data._tmx_object->_properties->_map.end())
+      {
+         weather->_limit_effect_to_room = limit_effect_to_room_it->second->_value_bool.value();
+      }
+
+      if (effect_start_delay_s_it != data._tmx_object->_properties->_map.end())
+      {
+         weather->_effect_start_delay = FloatSeconds(effect_start_delay_s_it->second->_value_float.value());
+      }
+   }
+
+   // rain settings
    if (data._tmx_object->_name.rfind("rain", 0) == 0)
    {
       weather->_overlay = std::make_shared<RainOverlay>();
@@ -81,6 +155,7 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
       }
    }
 
+   // thunderstorm settings
    if (data._tmx_object->_name.rfind("thunderstorm", 0) == 0)
    {
       weather->_overlay = std::make_shared<ThunderstormOverlay>();
