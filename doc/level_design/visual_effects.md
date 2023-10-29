@@ -185,10 +185,10 @@ Rain layers have the custom properties below:
 |Custom Property|Type|Description|
 |-|-|-|
 |z|int|The z depth of your rain layer|
+|limit_effect_to_room|bool|Whether to only show the effect when the player is in the same room that has been assigned to the object. The default is `false`.|
 |collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through|
 |drop_count|int|Number of rain drops used inside this layer|
 |fall_through_rate|int|Decides how many nth rain drops are passed through to the collision detection. Set to `0` or `1` to make every rain drop colliding, set to `2` to pass every second drop to the collision detection, and so on. This setting is only relevant when `collide` is set to `true`.|
-
 
 ![](images/weather_rain.png)
 
@@ -204,6 +204,7 @@ Thunderstorms have the custom properties below:
 |Custom Property|Type|Description|
 |-|-|-|
 |z|int|The z depth of your thunderstorm layer|
+|limit_effect_to_room|bool|Whether to only show the effect when the player is in the same room that has been assigned to the object. The default is `false`.|
 |thunderstorm_time_s|float|The duration of the lightning phase. The default is `3s`.|
 |silence_time_s|float|The duration for everything to be 'quiet', i.e. from one lightning phase to the other (given in seconds). The default is `5s`.|
 
