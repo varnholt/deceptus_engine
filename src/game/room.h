@@ -64,6 +64,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    static void deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::FloatRect& p, const std::vector<std::shared_ptr<Room>>& rooms);
+   static std::vector<std::shared_ptr<Room>> findAll(const sf::FloatRect& p, const std::vector<std::shared_ptr<Room>>& rooms);
 
    void startTransition();
    void lockCamera();

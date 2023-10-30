@@ -39,8 +39,13 @@ void VolumeUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
    {
       case AudioUpdateBehavior::RoomBased:
       {
-         const auto same_room =
-            _room_id.has_value() && mechanism->getRoomId().has_value() && mechanism->getRoomId().value() == _room_id.value();
+         auto same_room = false;
+         if (_room_id.has_value())
+         {
+            const auto& room_ids = mechanism->getRoomIds();
+            same_room = (std::find(room_ids.begin(), room_ids.end(), _room_id.value()) != room_ids.end());
+         }
+
          mechanism->setAudioEnabled(same_room);
          break;
       }
@@ -154,12 +159,18 @@ void VolumeUpdater::updateProjectiles(const std::set<Projectile*>& projectiles)
                return;
             }
 
-            if (!audio_update_data->_room_id.has_value())
+            if (!audio_update_data->_room_ids.empty())
             {
                return;
             }
 
-            const auto same_room = audio_update_data->_room_id.value() == _room_id.value();
+            auto same_room = false;
+            if (_room_id.has_value())
+            {
+               const auto& room_ids = audio_update_data->_room_ids;
+               same_room = (std::find(room_ids.begin(), room_ids.end(), _room_id.value()) != room_ids.end());
+            }
+
             projectile->setAudioEnabled(same_room);
             break;
          }
