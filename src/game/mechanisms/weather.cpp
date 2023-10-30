@@ -18,7 +18,7 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       return;
    }
 
-   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesId(getRoomId()))
+   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesIds(getRoomIds()))
    {
       return;
    }
@@ -70,7 +70,7 @@ void Weather::update(const sf::Time& dt)
    updateWaitDelay(dt, intersects);
 
    // checked after the intersection because the wait delay must always be updated
-   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesId(getRoomId()))
+   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesIds(getRoomIds()))
    {
       return;
    }

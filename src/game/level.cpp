@@ -354,10 +354,10 @@ void Level::assignMechanismsToRooms()
       auto game_node = std::dynamic_pointer_cast<GameNode>(mechanism);
       if (mechanism->getBoundingBoxPx().has_value())
       {
-         auto room = Room::find(mechanism->getBoundingBoxPx().value(), _rooms);
-         if (room)
+         auto rooms = Room::findAll(mechanism->getBoundingBoxPx().value(), _rooms);
+         for (const auto& room : rooms)
          {
-            mechanism->setRoomId(room->_id);
+            mechanism->addRoomId(room->_id);
          }
       }
    };
