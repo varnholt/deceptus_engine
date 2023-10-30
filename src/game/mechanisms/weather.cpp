@@ -33,13 +33,15 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void Weather::updateWaitDelay(const sf::Time& dt, bool intersects)
 {
+   const auto draw_allowed = intersects && matchesRoom();
+
    // the first frame ever
-   if (!_intersected_in_previous_frame.has_value())
+   if (!_draw_allowed_in_previous_frame.has_value())
    {
-      _intersected_in_previous_frame = intersects;
+      _draw_allowed_in_previous_frame = draw_allowed;
 
       // if we're already intersecting from the beginning, skip the delay
-      if (intersects)
+      if (draw_allowed)
       {
          _elapsed_since_intersect = _effect_start_delay.value_or(FloatSeconds(0));
       }
@@ -48,7 +50,7 @@ void Weather::updateWaitDelay(const sf::Time& dt, bool intersects)
    if (_effect_start_delay.has_value())
    {
       // reset elapsed time when intersection state changes
-      if (intersects && !_intersected_in_previous_frame.value())
+      if (draw_allowed && !_draw_allowed_in_previous_frame.value())
       {
          _elapsed_since_intersect = FloatSeconds(0);
       }
@@ -60,7 +62,17 @@ void Weather::updateWaitDelay(const sf::Time& dt, bool intersects)
       _wait_until_start_delay_elapsed = _elapsed_since_intersect < _effect_start_delay.value();
    }
 
-   _intersected_in_previous_frame = intersects;
+   _draw_allowed_in_previous_frame = draw_allowed;
+}
+
+bool Weather::matchesRoom() const
+{
+   if (!_limit_effect_to_room)
+   {
+      return true;
+   }
+
+   return RoomUpdater::checkCurrentMatchesIds(getRoomIds());
 }
 
 void Weather::update(const sf::Time& dt)
@@ -69,19 +81,8 @@ void Weather::update(const sf::Time& dt)
    const auto intersects = _rect.intersects(player_rect);
    updateWaitDelay(dt, intersects);
 
-   // checked after the intersection because the wait delay must always be updated
-   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesIds(getRoomIds()))
+   if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)
    {
-      return;
-   }
-
-   if (intersects)
-   {
-      if (_wait_until_start_delay_elapsed)
-      {
-         return;
-      }
-
       _overlay->update(dt);
    }
 }
