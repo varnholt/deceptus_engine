@@ -59,17 +59,22 @@ std::optional<int32_t> RoomUpdater::getPreviousId()
    return _room_previous->_id;
 }
 
-bool RoomUpdater::checkCurrentMatchesId(std::optional<int32_t> value)
+bool RoomUpdater::checkCurrentMatchesId(int32_t value)
 {
-   if (!value.has_value())
-   {
-      return false;
-   }
-
    if (!_room_current)
    {
       return false;
    }
 
-   return value.value() == _room_current->_id;
+   return value == _room_current->_id;
+}
+
+bool RoomUpdater::checkCurrentMatchesIds(const std::vector<int32_t>& ids)
+{
+   if (!_room_current)
+   {
+      return false;
+   }
+
+   return std::find(ids.cbegin(), ids.cend(), _room_current->_id) != ids.cend();
 }

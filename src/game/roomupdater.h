@@ -3,12 +3,14 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
 
 struct Room;
 
 namespace RoomUpdater
 {
-bool checkCurrentMatchesId(std::optional<int32_t>);
+bool checkCurrentMatchesId(int32_t);
+bool checkCurrentMatchesIds(const std::vector<int32_t>& ids);
 void setCurrent(const std::shared_ptr<Room>& current);
 void setPrevious(const std::shared_ptr<Room>& previous);
 std::optional<int32_t> getCurrentId();
