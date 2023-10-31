@@ -278,7 +278,7 @@ void Game::nextLevel()
    SaveState::getCurrent()._level_index++;
 
    auto levels = Levels::readLevelItems();
-   if (SaveState::getCurrent()._level_index == levels.size())
+   if (SaveState::getCurrent()._level_index == static_cast<int32_t>(levels.size()))
    {
       // this could show the end sequence or similar
       // DrawStates::_draw_test_scene = true;
