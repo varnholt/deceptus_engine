@@ -99,6 +99,24 @@ std::shared_ptr<Room> Room::find(const sf::FloatRect& rect, const std::vector<st
    return (room_it != rooms.end()) ? (*room_it) : nullptr;
 }
 
+std::vector<std::shared_ptr<Room>> Room::findAll(const sf::FloatRect& rect, const std::vector<std::shared_ptr<Room>>& rooms)
+{
+   std::vector<std::shared_ptr<Room>> matching_rooms;
+
+   std::copy_if(
+      rooms.begin(),
+      rooms.end(),
+      std::back_inserter(matching_rooms),
+      [rect](const std::shared_ptr<Room>& r)
+      {
+         const auto& it = r->findSubRoom(rect);
+         return (it != r->_sub_rooms.end());
+      }
+   );
+
+   return matching_rooms;
+}
+
 void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms)
 {
    // ignore invalid rects
