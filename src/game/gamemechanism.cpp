@@ -38,14 +38,19 @@ void GameMechanism::setAudioUpdateBehavior(AudioUpdateBehavior audio_update_beha
    _audio_update_data._update_behavior = audio_update_behavior;
 }
 
-std::optional<int32_t> GameMechanism::getRoomId() const
+const std::vector<int32_t>& GameMechanism::getRoomIds() const
 {
-   return _audio_update_data._room_id;
+   return _audio_update_data._room_ids;
 }
 
-void GameMechanism::setRoomId(int32_t room_id)
+void GameMechanism::setRoomIds(const std::vector<int32_t>& room_ids)
 {
-   _audio_update_data._room_id = room_id;
+   _audio_update_data._room_ids = room_ids;
+}
+
+void GameMechanism::addRoomId(int32_t room_id)
+{
+   _audio_update_data._room_ids.push_back(room_id);
 }
 
 void GameMechanism::setReferenceVolume(float volume)

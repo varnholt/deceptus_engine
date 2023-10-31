@@ -38,8 +38,9 @@ public:
    virtual float getReferenceVolume() const;
    virtual AudioUpdateBehavior getAudioUpdateBehavior() const;
    virtual void setAudioUpdateBehavior(AudioUpdateBehavior audio_update_behavior);
-   virtual std::optional<int32_t> getRoomId() const;
-   virtual void setRoomId(int32_t room_id);
+   virtual const std::vector<int32_t>& getRoomIds() const;
+   virtual void setRoomIds(const std::vector<int32_t>& room_ids);
+   virtual void addRoomId(int32_t room_id);
 
    virtual bool hasChunks() const;
    virtual const std::vector<Chunk>& getChunks() const;

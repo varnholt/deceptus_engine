@@ -153,9 +153,6 @@ protected:
    searchMechanisms(const std::string& regexp, const std::optional<std::string>& group = std::nullopt);
 
    std::vector<std::shared_ptr<Room>> _rooms;
-   std::shared_ptr<Room> _room_current;
-   std::shared_ptr<Room> _room_previous;
-   bool _room_synced = false;
    LevelScript _level_script;
 
    std::shared_ptr<sf::RenderTexture> _render_texture_level;
