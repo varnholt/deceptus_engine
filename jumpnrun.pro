@@ -248,6 +248,7 @@ SOURCES += \
    src/game/mechanisms/waterdamage.cpp \
    src/game/mechanisms/watersurface.cpp \
    src/game/mechanisms/weather.cpp \
+   src/game/menuconfig.cpp \
    src/game/meshtools.cpp \
    src/game/messagebox.cpp \
    src/game/onewaywall.cpp \
@@ -474,6 +475,7 @@ HEADERS += \
    src/game/mechanisms/waterdamage.h \
    src/game/mechanisms/watersurface.h \
    src/game/mechanisms/weather.h \
+   src/game/menuconfig.h \
    src/game/meshtools.h \
    src/game/messagebox.h \
    src/game/onewaywall.h \
