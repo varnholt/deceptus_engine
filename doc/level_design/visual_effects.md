@@ -211,7 +211,6 @@ Thunderstorms have the custom properties below:
 
 |Custom Property|Type|Description|
 |-|-|-|
-|limit_effect_to_room|bool|Whether to only show the effect when the player is in the same room that has been assigned to the object. The default is `false`.|
 |thunderstorm_time_s|float|The duration of the lightning phase. The default is `3s`.|
 |silence_time_s|float|The duration for everything to be 'quiet', i.e. from one lightning phase to the other (given in seconds). The default is `5s`.|
 

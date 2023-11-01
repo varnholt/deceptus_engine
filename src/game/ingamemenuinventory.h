@@ -73,6 +73,7 @@ private:
    std::vector<LayerData> _panel_left;
    std::vector<LayerData> _panel_center;
    std::vector<LayerData> _panel_right;
+   std::vector<LayerData> _panel_background;
 };
 
 #endif  // INGAMEMENUINVENTORY_H
