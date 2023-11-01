@@ -1,6 +1,7 @@
 #include "ingamemenuarchives.h"
 
 #include "framework/easings/easings.h"
+#include "game/menuconfig.h"
 
 InGameMenuArchives::InGameMenuArchives()
 {
@@ -46,6 +47,10 @@ InGameMenuArchives::InGameMenuArchives()
    };
 
    updateButtons();
+
+   MenuConfig config;
+   _duration_hide = config._duration_hide;
+   _duration_show = config._duration_show;
 }
 
 void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -100,9 +105,6 @@ void InGameMenuArchives::updateShowHide()
    const FloatSeconds duration_since_show_s = now - _time_show;
    const FloatSeconds duration_since_hide_s = now - _time_hide;
 
-   constexpr auto duration_show_s = 0.5f;
-   constexpr auto duration_hide_s = 1.0f;
-
    sf::Vector2f panel_left_offset_px;
    sf::Vector2f panel_center_offset_px;
    sf::Vector2f panel_right_offset_px;
@@ -110,9 +112,9 @@ void InGameMenuArchives::updateShowHide()
    auto alpha = 1.0f;
 
    // animate show event
-   if (_animation == Animation::Show && duration_since_show_s.count() < duration_show_s)
+   if (_animation == Animation::Show && duration_since_show_s.count() < _duration_show.count())
    {
-      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
+      const auto elapsed_s_normalized = duration_since_show_s.count() / _duration_show.count();
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
 
       panel_left_offset_px.x = -200 * val;
@@ -136,9 +138,9 @@ void InGameMenuArchives::updateShowHide()
    }
 
    // animate hide event
-   if (_animation == Animation::Hide && duration_since_hide_s.count() < duration_hide_s)
+   if (_animation == Animation::Hide && duration_since_hide_s.count() < _duration_hide.count())
    {
-      const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
+      const auto elapsed_s_normalized = duration_since_hide_s.count() / _duration_hide.count();
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
 
       panel_left_offset_px.x = -200 * val;

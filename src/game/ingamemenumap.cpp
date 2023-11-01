@@ -1,17 +1,18 @@
 #include "ingamemenumap.h"
 
-#include "camerapanorama.h"
-#include "console.h"
-#include "extratable.h"
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "gameconfiguration.h"
-#include "mechanisms/door.h"
-#include "mechanisms/portal.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/camerapanorama.h"
+#include "game/console.h"
+#include "game/extratable.h"
+#include "game/gameconfiguration.h"
+#include "game/mechanisms/door.h"
+#include "game/mechanisms/portal.h"
+#include "game/menuconfig.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 #include <sstream>
@@ -85,6 +86,10 @@ IngameMenuMap::IngameMenuMap()
    _panel_background = {
       _layers["bg"],
    };
+
+   MenuConfig config;
+   _duration_hide = config._duration_hide;
+   _duration_show = config._duration_show;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -344,9 +349,6 @@ void IngameMenuMap::updateShowHide()
    const FloatSeconds duration_since_show_s = now - _time_show;
    const FloatSeconds duration_since_hide_s = now - _time_hide;
 
-   constexpr auto duration_show_s = 0.5f;
-   constexpr auto duration_hide_s = 1.0f;
-
    sf::Vector2f panel_left_offset_px;
    sf::Vector2f panel_center_offset_px;
    sf::Vector2f panel_right_offset_px;
@@ -354,9 +356,9 @@ void IngameMenuMap::updateShowHide()
    auto alpha = 1.0f;
 
    // animate show event
-   if (_animation == Animation::Show && duration_since_show_s.count() < duration_show_s)
+   if (_animation == Animation::Show && duration_since_show_s.count() < _duration_show.count())
    {
-      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
+      const auto elapsed_s_normalized = duration_since_show_s.count() / _duration_show.count();
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
 
       panel_left_offset_px.x = -200 * val;
@@ -380,9 +382,9 @@ void IngameMenuMap::updateShowHide()
    }
 
    // animate hide event
-   if (_animation == Animation::Hide && duration_since_hide_s.count() < duration_hide_s)
+   if (_animation == Animation::Hide && duration_since_hide_s.count() < _duration_hide.count())
    {
-      const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
+      const auto elapsed_s_normalized = duration_since_hide_s.count() / _duration_hide.count();
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
 
       panel_left_offset_px.x = -200 * val;

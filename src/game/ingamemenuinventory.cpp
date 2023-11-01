@@ -3,6 +3,7 @@
 #include "framework/easings/easings.h"
 #include "game/gameconfiguration.h"
 #include "game/mechanisms/extra.h"
+#include "game/menuconfig.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
@@ -117,6 +118,10 @@ InGameMenuInventory::InGameMenuInventory()
 
    // update button visibility
    updateButtons();
+
+   MenuConfig config;
+   _duration_hide = config._duration_hide;
+   _duration_show = config._duration_show;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -185,9 +190,6 @@ void InGameMenuInventory::updateShowHide()
    const FloatSeconds duration_since_show_s = now - _time_show;
    const FloatSeconds duration_since_hide_s = now - _time_hide;
 
-   constexpr auto duration_show_s = 0.5f;
-   constexpr auto duration_hide_s = 1.0f;
-
    sf::Vector2f panel_left_offset_px;
    sf::Vector2f panel_center_offset_px;
    sf::Vector2f panel_right_offset_px;
@@ -195,9 +197,9 @@ void InGameMenuInventory::updateShowHide()
    auto alpha = 1.0f;
 
    // animate show event
-   if (_animation == Animation::Show && duration_since_show_s.count() < duration_show_s)
+   if (_animation == Animation::Show && duration_since_show_s.count() < _duration_show.count())
    {
-      const auto elapsed_s_normalized = duration_since_show_s.count() / duration_show_s;
+      const auto elapsed_s_normalized = duration_since_show_s.count() / _duration_show.count();
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
 
       panel_left_offset_px.x = -200 * val;
@@ -220,9 +222,9 @@ void InGameMenuInventory::updateShowHide()
    }
 
    // animate hide event
-   if (_animation == Animation::Hide && duration_since_hide_s.count() < duration_hide_s)
+   if (_animation == Animation::Hide && duration_since_hide_s.count() < _duration_hide.count())
    {
-      const auto elapsed_s_normalized = duration_since_hide_s.count() / duration_hide_s;
+      const auto elapsed_s_normalized = duration_since_hide_s.count() / _duration_hide.count();
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
 
       panel_left_offset_px.x = -200 * val;
