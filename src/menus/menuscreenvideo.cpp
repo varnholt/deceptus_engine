@@ -270,7 +270,7 @@ void MenuScreenVideo::updateLayers()
    _layers["vSync_value_0"]->_visible = vsync_selection == 0;
    _layers["vSync_value_1"]->_visible = vsync_selection == 1;
 
-   const auto brightness_index = static_cast<int32_t>(std::ceil(brightness_value * 10));
+   const auto brightness_index = static_cast<int32_t>(std::ceil((brightness_value * 10.0f) - 0.1f));
    for (auto i = 0; i < 11; i++)
    {
       _brightness_value_layers[i]->_visible = (i == brightness_index);
