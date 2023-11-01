@@ -109,7 +109,10 @@ InGameMenuInventory::InGameMenuInventory()
       _layers["close_pc_1"],
       _layers["close_xbox_0"],
       _layers["close_xbox_1"],
-      _layers["background"],  // background is faded in/out, too
+   };
+
+   _panel_background = {
+      _layers["background"],
    };
 
    // update button visibility
@@ -257,8 +260,13 @@ void InGameMenuInventory::updateShowHide()
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
-   // top
+   // fade in/out
    for (const auto& layer : _panel_header)
+   {
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+   }
+
+   for (const auto& layer : _panel_background)
    {
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
@@ -276,6 +284,12 @@ void InGameMenuInventory::updateMove()
    }
 
    for (const auto& layer : _panel_center)
+   {
+      const auto x = layer._pos.x + move_offset.value_or(0.0f);
+      layer._layer->_sprite->setPosition(x, layer._pos.y);
+   }
+
+   for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
       layer._layer->_sprite->setPosition(x, layer._pos.y);
