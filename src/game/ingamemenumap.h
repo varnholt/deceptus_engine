@@ -52,6 +52,9 @@ private:
    std::vector<LayerData> _panel_right;
    std::vector<LayerData> _panel_background;
 
+   FloatSeconds _duration_show;
+   FloatSeconds _duration_hide;
+
    float _zoom = 1.0f;
 };
 
