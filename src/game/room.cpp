@@ -15,6 +15,11 @@
 #include "player/player.h"
 #include "screentransition.h"
 
+namespace
+{
+constexpr auto eps_px = 100;
+}
+
 /*
 
    room a_0
@@ -211,66 +216,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
       sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    // read start positions if available
-   if (data._tmx_object->_properties)
-   {
-      const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
-      const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
-      if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
-      {
-         sub_room._start_position_l = {
-            start_position_l_x_it->second->_value_int.value(), start_position_l_y_it->second->_value_int.value()};
-      }
-
-      const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
-      const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
-      if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
-      {
-         sub_room._start_position_r = {
-            start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()};
-      }
-
-      const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
-      const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
-      if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
-      {
-         sub_room._start_position_t = {
-            start_position_t_x_it->second->_value_int.value(), start_position_t_y_it->second->_value_int.value()};
-      }
-
-      const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
-      const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
-      if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
-      {
-         sub_room._start_position_b = {
-            start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()};
-      }
-
-      const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
-      const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
-      if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
-      {
-         auto offset_y = 0;
-         if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
-         {
-            offset_y = start_offset_l_y_it->second->_value_int.value();
-         }
-
-         sub_room._start_offset_l = {start_offset_l_x_it->second->_value_int.value(), offset_y};
-      }
-
-      const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
-      const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
-      if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
-      {
-         auto offset_y = 0;
-         if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
-         {
-            offset_y = start_offset_r_y_it->second->_value_int.value();
-         }
-
-         sub_room._start_offset_r = {start_offset_r_x_it->second->_value_int.value(), offset_y};
-      }
-   }
+   sub_room.readEntracePositions(data);
 
    room->_sub_rooms.push_back(sub_room);
 
@@ -316,62 +262,34 @@ void Room::movePlayerToRoomStartPosition()
       return;
    }
 
-   const auto entered_direction = (*active_sub_room).enteredDirection(player_pos_px);
+   const auto entered_direction = (*active_sub_room).findEnteredArea(player_pos_px);
+   if (!entered_direction.has_value())
+   {
+      return;
+   }
 
-   if ((*active_sub_room)._start_position_l.has_value() && (entered_direction == EnteredDirection::Left))
+   const auto area = entered_direction.value();
+
+   if (area._start_position.has_value())
    {
       Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>((*active_sub_room)._start_position_l.value().x),
-         static_cast<float>((*active_sub_room)._start_position_l.value().y)
-      );
-   }
-   else if ((*active_sub_room)._start_position_r.has_value() && (entered_direction == EnteredDirection::Right))
-   {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>((*active_sub_room)._start_position_r.value().x),
-         static_cast<float>((*active_sub_room)._start_position_r.value().y)
-      );
-   }
-   else if ((*active_sub_room)._start_position_t.has_value() && (entered_direction == EnteredDirection::Top))
-   {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>((*active_sub_room)._start_position_t.value().x),
-         static_cast<float>((*active_sub_room)._start_position_t.value().y)
-      );
-   }
-   else if ((*active_sub_room)._start_position_b.has_value() && (entered_direction == EnteredDirection::Bottom))
-   {
-      Player::getCurrent()->setBodyViaPixelPosition(
-         static_cast<float>((*active_sub_room)._start_position_b.value().x),
-         static_cast<float>((*active_sub_room)._start_position_b.value().y)
+         static_cast<float>(area._start_position.value().x), static_cast<float>(area._start_position.value().y)
       );
    }
 
-   if ((*active_sub_room)._start_offset_l.has_value() && (entered_direction == EnteredDirection::Left))
+   if (area._start_offset.has_value())
    {
       auto player_pos = Player::getCurrent()->getPixelPositionInt();
-      player_pos += (*active_sub_room)._start_offset_l.value();
-      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(player_pos.x), static_cast<float>(player_pos.y));
-   }
-   else if ((*active_sub_room)._start_offset_r.has_value() && (entered_direction == EnteredDirection::Right))
-   {
-      auto player_pos = Player::getCurrent()->getPixelPositionInt();
-      player_pos += (*active_sub_room)._start_offset_r.value();
+      player_pos += area._start_offset.value();
       Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(player_pos.x), static_cast<float>(player_pos.y));
    }
 }
 
 void Room::syncCamera()
 {
-   if (_camera_sync_after_fade_out)
-   {
-      _camera_locked = false;
-      CameraRoomLock::setRoom(getptr());
-      CameraSystem::getInstance().syncNow();
-
-      // apply room start position if available
-      movePlayerToRoomStartPosition();
-   }
+   _camera_locked = false;
+   CameraRoomLock::setRoom(getptr());
+   CameraSystem::getInstance().syncNow();
 }
 
 void Room::startTransition()
@@ -386,7 +304,18 @@ void Room::startTransition()
       case TransitionEffect::FadeOutFadeIn:
       {
          auto screen_transition = makeFadeTransition();
-         screen_transition->_callbacks_effect_1_ended.push_back([this]() { syncCamera(); });
+         screen_transition->_callbacks_effect_1_ended.push_back(
+            [this]()
+            {
+               if (_camera_sync_after_fade_out)
+               {
+                  syncCamera();
+               }
+
+               // apply room start position if available
+               movePlayerToRoomStartPosition();
+            }
+         );
          screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          screen_transition->startEffect1();
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
@@ -415,36 +344,97 @@ void Room::lockCamera()
    );
 }
 
-Room::EnteredDirection Room::SubRoom::enteredDirection(const sf::Vector2f& player_pos_px) const
+void Room::SubRoom::readEntracePositions(const GameDeserializeData& data)
 {
-   constexpr auto eps_px = 100;
-
    sf::FloatRect rect_l{_rect.left, _rect.top, eps_px, _rect.height};
    sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top, eps_px, _rect.height};
    sf::FloatRect rect_t{_rect.left, _rect.top, _rect.width, eps_px};
    sf::FloatRect rect_b{_rect.left, _rect.top + _rect.height - eps_px, _rect.width, eps_px};
 
-   if (rect_l.contains(player_pos_px))
+   auto area_left = RoomEnterArea{"left", rect_l, std::nullopt, std::nullopt};
+   auto area_right = RoomEnterArea{"right", rect_r, std::nullopt, std::nullopt};
+   auto area_top = RoomEnterArea{"top", rect_t, std::nullopt, std::nullopt};
+   auto area_bottom = RoomEnterArea{"bottom", rect_b, std::nullopt, std::nullopt};
+
+   // fixed enter areas positions, one for each screen corner
+   if (data._tmx_object->_properties)
    {
-      return Room::EnteredDirection::Left;
+      const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
+      const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
+      if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
+      {
+         area_left._start_position = {start_position_l_x_it->second->_value_int.value(), start_position_l_y_it->second->_value_int.value()};
+      }
+
+      const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
+      const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
+      if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
+      {
+         area_right._start_position = {
+            start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()};
+      }
+
+      const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
+      const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
+      if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
+      {
+         area_top._start_position = {start_position_t_x_it->second->_value_int.value(), start_position_t_y_it->second->_value_int.value()};
+      }
+
+      const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
+      const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
+      if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
+      {
+         area_bottom._start_position = {
+            start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()};
+      }
+
+      const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
+      const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
+      if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
+      {
+         auto offset_y = 0;
+         if (start_offset_l_y_it != data._tmx_object->_properties->_map.end())
+         {
+            offset_y = start_offset_l_y_it->second->_value_int.value();
+         }
+
+         area_left._start_offset = {start_offset_l_x_it->second->_value_int.value(), offset_y};
+      }
+
+      const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
+      const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
+      if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
+      {
+         auto offset_y = 0;
+         if (start_offset_r_y_it != data._tmx_object->_properties->_map.end())
+         {
+            offset_y = start_offset_r_y_it->second->_value_int.value();
+         }
+
+         area_right._start_offset = {start_offset_r_x_it->second->_value_int.value(), offset_y};
+      }
    }
 
-   if (rect_r.contains(player_pos_px))
+   _enter_areas.push_back(area_left);
+   _enter_areas.push_back(area_right);
+   _enter_areas.push_back(area_top);
+   _enter_areas.push_back(area_bottom);
+}
+
+std::optional<Room::RoomEnterArea> Room::SubRoom::findEnteredArea(const sf::Vector2f& player_pos_px) const
+{
+   std::optional<RoomEnterArea> enter_area;
+
+   for (auto& area : _enter_areas)
    {
-      return Room::EnteredDirection::Right;
+      if (area._area.contains(player_pos_px))
+      {
+         return area;
+      }
    }
 
-   if (rect_t.contains(player_pos_px))
-   {
-      return Room::EnteredDirection::Top;
-   }
-
-   if (rect_b.contains(player_pos_px))
-   {
-      return Room::EnteredDirection::Bottom;
-   }
-
-   return EnteredDirection::Invalid;
+   return std::nullopt;
 }
 
 std::optional<Room::SubRoom> Room::activeSubRoom(const sf::Vector2f& player_pos_px) const
@@ -463,13 +453,13 @@ std::optional<Room::SubRoom> Room::activeSubRoom(const sf::Vector2f& player_pos_
    return rect;
 }
 
-Room::EnteredDirection Room::enteredDirection(const sf::Vector2f& player_pos_px) const
+std::optional<Room::RoomEnterArea> Room::enteredArea(const sf::Vector2f& player_pos_px) const
 {
    const auto active_sub_room = activeSubRoom(player_pos_px);
    if (!active_sub_room.has_value())
    {
-      return EnteredDirection::Invalid;
+      return std::nullopt;
    }
 
-   return (*active_sub_room).enteredDirection(player_pos_px);
+   return (*active_sub_room).findEnteredArea(player_pos_px);
 }

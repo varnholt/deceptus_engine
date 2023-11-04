@@ -1,9 +1,9 @@
 #pragma once
 
 #include <chrono>
-#include <optional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -13,9 +13,7 @@
 #include "gamedeserializedata.h"
 #include "gamenode.h"
 
-
 struct ScreenTransition;
-
 
 /*! \brief Room representation used by the camera system
  *         The room class limits the camera system to a defined area.
@@ -25,8 +23,9 @@ struct ScreenTransition;
  */
 struct Room : std::enable_shared_from_this<Room>, public GameNode
 {
-   std::shared_ptr<Room> getptr() {
-       return shared_from_this();
+   std::shared_ptr<Room> getptr()
+   {
+      return shared_from_this();
    }
 
    enum class TransitionEffect
@@ -34,29 +33,30 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
       FadeOutFadeIn
    };
 
-
    enum class EnteredDirection : char
    {
-      Invalid  = '?',
-      Left     = 'l',
-      Right    = 'r',
-      Top      = 't',
-      Bottom   = 'b'
+      Invalid = '?',
+      Left = 'l',
+      Right = 'r',
+      Top = 't',
+      Bottom = 'b'
+   };
+
+   struct RoomEnterArea
+   {
+      std::string _name;
+      sf::FloatRect _area;
+      std::optional<sf::Vector2i> _start_position;
+      std::optional<sf::Vector2i> _start_offset;
    };
 
    struct SubRoom
    {
+      std::optional<RoomEnterArea> findEnteredArea(const sf::Vector2f& player_pos_px) const;
+      void readEntracePositions(const GameDeserializeData& data);
+
       sf::FloatRect _rect;
-
-      //! start positions when room was entered
-      std::optional<sf::Vector2i> _start_position_l;
-      std::optional<sf::Vector2i> _start_position_r;
-      std::optional<sf::Vector2i> _start_position_t;
-      std::optional<sf::Vector2i> _start_position_b;
-      std::optional<sf::Vector2i> _start_offset_l;
-      std::optional<sf::Vector2i> _start_offset_r;
-
-      Room::EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
+      std::vector<RoomEnterArea> _enter_areas;
    };
 
    Room(GameNode* parent);
@@ -72,7 +72,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    void syncCamera();
 
    std::optional<SubRoom> activeSubRoom(const sf::Vector2f& player_pos_px) const;
-   Room::EnteredDirection enteredDirection(const sf::Vector2f& player_pos_px) const;
+   std::optional<RoomEnterArea> enteredArea(const sf::Vector2f& player_pos_px) const;
 
    std::vector<SubRoom>::const_iterator findSubRoom(const sf::Vector2f& p) const;
    std::vector<SubRoom>::const_iterator findSubRoom(const sf::FloatRect& p) const;
@@ -93,5 +93,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    std::chrono::milliseconds _delay_between_effects_ms{250};
    bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
-};
 
+private:
+   void readEntracePositions(Room::SubRoom sub_room, const GameDeserializeData& data);
+};
