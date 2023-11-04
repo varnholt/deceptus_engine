@@ -122,8 +122,43 @@ std::vector<std::shared_ptr<Room>> Room::findAll(const sf::FloatRect& rect, cons
    return matching_rooms;
 }
 
+namespace
+{
+std::vector<Room::RoomEnterArea> _enter_areas;
+}  // namespace
+
+void Room::mergeStartAreas(const std::vector<std::shared_ptr<Room>>& rooms)
+{
+   for (const auto& area : _enter_areas)
+   {
+      for (auto& room : rooms)
+      {
+         auto it = std::find_if(
+            room->_sub_rooms.begin(), room->_sub_rooms.end(), [area](const auto& sub_room) { return sub_room._rect.intersects(area._area); }
+         );
+
+         if (it != room->_sub_rooms.end())
+         {
+            it->_enter_areas.insert(it->_enter_areas.begin(), area);
+         }
+      }
+   }
+   _enter_areas.clear();
+}
+
 void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::vector<std::shared_ptr<Room>>& rooms)
 {
+   if (data._tmx_object->_name.starts_with("enter_area"))
+   {
+      std::cout << "skip enter area";
+      Room::RoomEnterArea area;
+      area._area =
+         sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+      _enter_areas.push_back(area);
+      return;
+   }
+
    // ignore invalid rects
    const auto& config = GameConfiguration::getInstance();
    if (data._tmx_object->_width_px < config._view_width)
@@ -356,7 +391,7 @@ void Room::SubRoom::readEntracePositions(const GameDeserializeData& data)
    auto area_top = RoomEnterArea{"top", rect_t, std::nullopt, std::nullopt};
    auto area_bottom = RoomEnterArea{"bottom", rect_b, std::nullopt, std::nullopt};
 
-   // fixed enter areas positions, one for each screen corner
+   // fixed enter area positions, one for each screen corner
    if (data._tmx_object->_properties)
    {
       const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
