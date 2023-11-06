@@ -179,7 +179,6 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
 {
    if (data._tmx_object->_name.starts_with("enter_area"))
    {
-      std::cout << "skip enter area";
       Room::RoomEnterArea area;
       area.deserializeEnterArea(data);
       _enter_areas.push_back(area);
@@ -288,28 +287,12 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
           room->_sub_rooms.end(),
           [sub_room](const auto& room)
           {
-             // reduce 1px on each right and bottom side because that's technically not an intersection
-             sf::FloatRect a = room._rect;
-             sf::FloatRect b = sub_room._rect;
+             if (room._rect == sub_room._rect)
+             {
+                return false;
+             }
 
-             // doesn't seem to make a difference
-             //
-             //             if (&room._rect == &sub_room._rect)
-             //             {
-             //                return false;
-             //             }
-             //
-             //             a.top++;
-             //             a.left++;
-             //             a.height -= 2;
-             //             a.width -= 2;
-             //
-             //             b.top++;
-             //             b.left++;
-             //             b.height -= 2;
-             //             b.width -= 2;
-
-             return a.intersects(b);
+             return room._rect.intersects(sub_room._rect);
           }
        ))
    {
