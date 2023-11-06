@@ -10,6 +10,7 @@
 #include "game/gameconfiguration.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/roomupdater.h"
 #include "game/savestate.h"
 #include "game/texturepool.h"
 
@@ -290,13 +291,16 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
    std::stringstream stream_tl;
    std::stringstream stream_px;
+   std::stringstream room_name;
    auto pos = Player::getCurrent()->getPixelPositionFloat();
 
    stream_tl << "player tl: " << static_cast<int>(pos.x / PIXELS_PER_TILE) << ", " << static_cast<int>(pos.y / PIXELS_PER_TILE);
    stream_px << "player px: " << static_cast<int>(pos.x) << ", " << static_cast<int>(pos.y);
+   room_name << "room: " << RoomUpdater::getCurrentRoomName();
 
    _font.draw(window, _font.getCoords(stream_tl.str()), 500, 5);
    _font.draw(window, _font.getCoords(stream_px.str()), 500, 20);
+   _font.draw(window, _font.getCoords(room_name.str()), 498, 35);
 }
 
 void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)

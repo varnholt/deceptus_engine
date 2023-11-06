@@ -166,11 +166,7 @@ void Game::initializeWindow()
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
-   if (!_level)
-   {
-      Log::Warning() << "level not initialized";
-   }
-   else
+   if (_level)
    {
       _level->initializeTextures();
    }
