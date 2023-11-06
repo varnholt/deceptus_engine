@@ -33,15 +33,6 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
       FadeOutFadeIn
    };
 
-   enum class EnteredDirection : char
-   {
-      Invalid = '?',
-      Left = 'l',
-      Right = 'r',
-      Top = 't',
-      Bottom = 'b'
-   };
-
    struct RoomEnterArea
    {
       void deserializeEnterArea(const GameDeserializeData& data);
@@ -54,8 +45,9 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    struct SubRoom
    {
       std::optional<RoomEnterArea> findEnteredArea(const sf::Vector2f& player_pos_px) const;
-      void readEntracePositions(const GameDeserializeData& data);
+      void deserialize(const GameDeserializeData& data);
 
+      std::string _name;
       sf::FloatRect _rect;
       std::vector<RoomEnterArea> _enter_areas;
    };
@@ -66,7 +58,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    static std::shared_ptr<Room> find(const sf::Vector2f& p, const std::vector<std::shared_ptr<Room>>& rooms);
    static std::shared_ptr<Room> find(const sf::FloatRect& p, const std::vector<std::shared_ptr<Room>>& rooms);
    static std::vector<std::shared_ptr<Room>> findAll(const sf::FloatRect& p, const std::vector<std::shared_ptr<Room>>& rooms);
-   static void mergeStartAreas(const std::vector<std::shared_ptr<Room>>& rooms);
+   static void mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms);
 
    void startTransition();
    void lockCamera();
@@ -96,10 +88,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
    
-   
-public:
-   void deserializeEnterArea(const GameDeserializeData& data);
-   
 private:
    void readEntracePositions(Room::SubRoom sub_room, const GameDeserializeData& data);
+   void deserializeEnterArea(const GameDeserializeData& data);
 };
