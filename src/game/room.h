@@ -44,8 +44,9 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
 
    struct RoomEnterArea
    {
+      void deserializeEnterArea(const GameDeserializeData& data);
       std::string _name;
-      sf::FloatRect _area;
+      sf::FloatRect _rect;
       std::optional<sf::Vector2i> _start_position;
       std::optional<sf::Vector2i> _start_offset;
    };
@@ -94,7 +95,11 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    std::chrono::milliseconds _delay_between_effects_ms{250};
    bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
-
+   
+   
+public:
+   void deserializeEnterArea(const GameDeserializeData& data);
+   
 private:
    void readEntracePositions(Room::SubRoom sub_room, const GameDeserializeData& data);
 };
