@@ -127,7 +127,7 @@ namespace
 std::vector<Room::RoomEnterArea> _enter_areas;
 }  // namespace
 
-void Room::mergeStartAreas(const std::vector<std::shared_ptr<Room>>& rooms)
+void Room::mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms)
 {
    for (const auto& area : _enter_areas)
    {
@@ -155,7 +155,7 @@ void Room::RoomEnterArea::deserializeEnterArea(const GameDeserializeData& data)
    {
       const auto start_position_x_it = data._tmx_object->_properties->_map.find("start_position_x_px");
       const auto start_position_y_it = data._tmx_object->_properties->_map.find("start_position_y_px");
-      if (start_position_x_it != data._tmx_object->_properties->_map.end())
+      if (start_position_x_it != data._tmx_object->_properties->_map.end() && start_position_y_it != data._tmx_object->_properties->_map.end())
       {
          _start_position = {start_position_x_it->second->_value_int.value(), start_position_y_it->second->_value_int.value()};
       }
@@ -273,33 +273,19 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
    }
 
    Room::SubRoom sub_room;
-   sub_room._rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
-
-   // read start positions if available
-   sub_room.readEntracePositions(data);
-
-   room->_sub_rooms.push_back(sub_room);
+   sub_room.deserialize(data);
 
    // test for overlaps
-   if (std::any_of(
-          room->_sub_rooms.begin(),
-          room->_sub_rooms.end(),
-          [sub_room](const auto& room)
-          {
-             if (room._rect == sub_room._rect)
-             {
-                return false;
-             }
-
-             return room._rect.intersects(sub_room._rect);
-          }
+   if (!std::any_of(
+          room->_sub_rooms.begin(), room->_sub_rooms.end(), [sub_room](const auto& room) { return room._rect.intersects(sub_room._rect); }
        ))
    {
-      Log::Error() << "bad rect intersection for room " << data._tmx_object->_name;
+      room->_sub_rooms.push_back(sub_room);
    }
-
-   // Log::Info() << "adding room: " << key;
+   else
+   {
+      Log::Error() << "bad rect intersection for sub-room " << data._tmx_object->_name;
+   }
 }
 
 std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
@@ -415,8 +401,11 @@ void Room::lockCamera()
    );
 }
 
-void Room::SubRoom::readEntracePositions(const GameDeserializeData& data)
+void Room::SubRoom::deserialize(const GameDeserializeData& data)
 {
+   _name = data._tmx_object->_name;
+   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
    sf::FloatRect rect_l{_rect.left, _rect.top, eps_px, _rect.height};
    sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top, eps_px, _rect.height};
    sf::FloatRect rect_t{_rect.left, _rect.top, _rect.width, eps_px};
