@@ -509,6 +509,7 @@ void Level::loadTmx()
    }
 
    TileMapFactory::merge(_tile_maps);
+   Room::mergeEnterAreas(_rooms);
 
    if (!_atmosphere._tile_map)
    {
@@ -908,9 +909,19 @@ void Level::updateCameraSystem(const sf::Time& dt)
    // room changed
    if (room_previous != room_current)
    {
-      Log::Info() << "player moved to room: " << (room_current ? room_current->getObjectId() : "undefined") << " on side '"
-                  << (room_current ? static_cast<char>(room_current->enteredDirection(Player::getCurrent()->getPixelPositionFloat())) : '?')
-                  << "'";
+      std::string room_id = "undefined";
+      std::string enter_area_name = "undefined";
+      if (room_current)
+      {
+         room_id = room_current->getObjectId();
+         const auto entered_area = room_current->enteredArea(Player::getCurrent()->getPixelPositionFloat());
+         if (entered_area.has_value())
+         {
+            enter_area_name = entered_area.value()._name;
+         }
+      }
+
+      Log::Info() << "player moved to room: " << room_id << " on side " << enter_area_name;
 
       // will update the current room in both cases, either after the camera lock delay or instantly
       if (room_current && room_current->_camera_lock_delay.has_value())

@@ -70,7 +70,7 @@ bool TileMap::load(
    const auto normal_map_path = (path.parent_path() / normal_map_filename);
    if (std::filesystem::exists(normal_map_path))
    {
-      Log::Info() << "found normal map for " << path.string();
+      // Log::Info() << "found normal map for " << path.string();
       _normal_map = TexturePool::getInstance().get(normal_map_path);
    }
 
