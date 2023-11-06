@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 struct Room;
@@ -17,6 +18,7 @@ std::optional<int32_t> getCurrentId();
 std::optional<int32_t> getPreviousId();
 std::shared_ptr<Room> getCurrent();
 std::shared_ptr<Room> getPrevious();
+std::string getCurrentRoomName();
 void setSynced(bool synced);
 bool isSynced();
 };  // namespace RoomUpdater
