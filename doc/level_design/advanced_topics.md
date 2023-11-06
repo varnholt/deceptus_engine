@@ -53,7 +53,7 @@ The values below should be identical for all rectangles of one room group.
 |camera_sync_after_fade_out|bool|Move the camera focus to the new room immediately after fading out; the new room is then focussed when fading back in (optional). The default value is `true`.|
 |camera_lock_delay_ms|int|This value will 'hold' the camera focus in the old room, even though a new room has been entered already. Once the defined time in milliseconds is elapsed, the new room is focussed. The default value is `0`. <br> If `camera_sync_after_fade_out` is set to `true`, it'll override this setting and synchronize the camera position as promised. Actually these two settings work very well together. If you are uncertain what value to put here, you can just choose a rather long duration (1000ms) and enable `camera_sync_after_fade_out`. <br>This will lock the camera in the old room once the player entered a new room. Then, when the screen is black, the camera focus will be moved to the new room (the camera lock is released) and the new room is shown when fading in. It all sounds more complicated than it is. Just try a configuration like this and play around with it:<br>![](images/rooms_settings.png)|
 
-### Properties for each room rectangle
+### Properties for each room rectangle (default enter areas)
 
 The properties below may differ for each rectangle within one room group.
 
@@ -71,6 +71,22 @@ The properties below may differ for each rectangle within one room group.
 |start_offset_left_y_px|int|When player entering from the left of the room, position him to the relative x offset, given in pixels. The x counterpart `start_offset_right_x_px` must be provided.|
 |start_offset_right_x_px|int|When player entering from the right of the room, position him to the relative x offset, given in pixels. The y counterpart `start_offset_right_y_px` is optional.|
 |start_offset_right_y_px|int|When player entering from the right of the room, position him to the relative x offset, given in pixels. The x counterpart `start_offset_right_x_px` must be provided.|
+
+
+### Custom enter areas
+
+If you need to configure more than one enter area on each side of the level, you may override or extend the default enter areas with custom ones.
+You do so by inserting a rectangle with an Object Name starting with `enter_area_` at the location where your custom enter area should be placed.
+When entering a room, custom enter areas are always checked first, and default enter areas afterwards, i.e. they will always override the default enter areas if specified at overlapping locations.
+
+Just like the default enter areas, it comes with properties to configure the player start position and/or start offset:
+
+|Custom Property|Type|Description|
+|-|-|-|
+|start_position_x_px|int|When player entering from this custom enter area, position him to the absolute x position, given in pixels. Also need to provide `start_position_y_px`|
+|start_position_y_px|int|When player entering from this custom enter area, position him to the absolute y position, given in pixels. Also need to provide `start_position_x_px`|
+|start_offset_x_px|int|When player entering from this custom enter area, position him to the relative x offset, given in pixels. The y counterpart `start_offset_y_px` is optional.|
+|start_offset_y_px|int|When player entering from this custom enter area, position him to the relative x offset, given in pixels. The x counterpart `start_offset_x_px` must be provided.|
 
 
 ## Controlling Audio and Volume

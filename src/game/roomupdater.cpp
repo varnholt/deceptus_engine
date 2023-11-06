@@ -78,3 +78,13 @@ bool RoomUpdater::checkCurrentMatchesIds(const std::vector<int32_t>& ids)
 
    return std::find(ids.cbegin(), ids.cend(), _room_current->_id) != ids.cend();
 }
+
+std::string RoomUpdater::getCurrentRoomName()
+{
+   if (!_room_current)
+   {
+      return "undefined";
+   }
+
+   return _room_current->getObjectId();
+}
