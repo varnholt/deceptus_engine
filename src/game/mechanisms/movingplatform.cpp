@@ -22,7 +22,6 @@
 
 #include <box2d/box2d.h>
 
-
 namespace
 {
 constexpr auto element_width_m = PIXELS_PER_TILE / PPM;

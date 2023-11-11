@@ -31,7 +31,7 @@ int32_t GameContactListener::getDeadlyContactCount() const
    return _count_deadly_contacts;
 }
 
-bool GameContactListener::isPlayer(FixtureNode* obj) const
+bool GameContactListener::isPlayer(const FixtureNode* obj) const
 {
    if (!obj)
    {
@@ -42,7 +42,7 @@ bool GameContactListener::isPlayer(FixtureNode* obj) const
    return is_player;
 }
 
-bool GameContactListener::isEnemy(FixtureNode* obj) const
+bool GameContactListener::isEnemy(const FixtureNode* obj) const
 {
    if (!obj)
    {
@@ -98,6 +98,12 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
 {
    // check if platform smashes the player
    const auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
+
+   if (!isPlayer(fixture_node))
+   {
+      return;
+   }
+
    if (fixture_node && fixture_node->getType() == ObjectType::ObjectTypePlayerHeadSensor)
    {
       if (Player::getCurrent()->isOnGround())
@@ -447,8 +453,13 @@ void GameContactListener::processDeadlyContactEnd(FixtureNode* fixture_node)
    _count_deadly_contacts--;
 }
 
-void GameContactListener::processMovingPlatformContactEnd()
+void GameContactListener::processMovingPlatformContactEnd(FixtureNode* fixture_node)
 {
+   if (!isPlayer(fixture_node))
+   {
+      return;
+   }
+
    _count_moving_platform_contacts--;
    Player::getCurrent()->setPlatformBody(nullptr);
 }
@@ -514,7 +525,7 @@ void GameContactListener::processEndContact(
       }
       case ObjectTypeMovingPlatform:
       {
-         processMovingPlatformContactEnd();
+         processMovingPlatformContactEnd(fixture_node_b);
          break;
       }
       case ObjectTypeBubbleCube:

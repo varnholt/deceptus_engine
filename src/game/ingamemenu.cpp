@@ -204,6 +204,7 @@ void InGameMenu::processEvent(const sf::Event& event)
          break;
       }
       case sf::Keyboard::Return:
+      case sf::Keyboard::Tab:
       {
          close();
          break;
