@@ -32,8 +32,8 @@ public:
    void processPlayerHeadSensorContactEnd(auto contact_fixture_b);
 
 protected:
-   bool isPlayer(FixtureNode* obj) const;
-   bool isEnemy(FixtureNode* obj) const;
+   bool isPlayer(const FixtureNode* obj) const;
+   bool isEnemy(const FixtureNode* obj) const;
 
 private:
    GameContactListener() = default;
@@ -68,7 +68,7 @@ private:
    void processCollapsingPlatformContactEnd(FixtureNode* fixture_node_platform, FixtureNode* fixture_node_other);
    void processCrusherContactEnd(FixtureNode* fixture_node);
    void processDeadlyContactEnd(FixtureNode* fixture_node);
-   void processMovingPlatformContactEnd();
+   void processMovingPlatformContactEnd(FixtureNode* fixture_node);
    void processOneWayWallContactEnd(b2Contact* contact);
    void processPlayerContactEnd();
    void processPlayerFootSensorContactEnd(FixtureNode* fixture_node, b2Fixture* fixture);

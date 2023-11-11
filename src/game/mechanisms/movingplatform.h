@@ -6,12 +6,11 @@
 #include "framework/math/pathinterpolation.h"
 #include "gamedeserializedata.h"
 
+#include <box2d/box2d.h>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <filesystem>
-#include <box2d/box2d.h>
-
 
 struct TmxLayer;
 struct TmxObject;
