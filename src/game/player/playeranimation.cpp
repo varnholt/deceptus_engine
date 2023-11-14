@@ -124,11 +124,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_double_jump_r = pool.create("player_double_jump_sword_r", 0.0f, 0.0f, true, false);
    _sword_double_jump_l = pool.create("player_double_jump_sword_l", 0.0f, 0.0f, true, false);
 
-   _swim_idle_r = pool.create("player_swim_idle_r", 0.0f, 0.0f, true, false);
-   _swim_idle_l = pool.create("player_swim_idle_l", 0.0f, 0.0f, true, false);
-   _sword_swim_idle_r = pool.create("player_swim_idle_sword_r", 0.0f, 0.0f, true, false);
-   _sword_swim_idle_l = pool.create("player_swim_idle_sword_l", 0.0f, 0.0f, true, false);
-
    _swim_r = pool.create("player_swim_r", 0.0f, 0.0f, true, false);
    _swim_l = pool.create("player_swim_l", 0.0f, 0.0f, true, false);
    _sword_swim_r = pool.create("player_swim_sword_r", 0.0f, 0.0f, true, false);
@@ -272,11 +267,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _looped_animations.push_back(_sword_double_jump_r);
    _looped_animations.push_back(_sword_double_jump_l);
 
-   _looped_animations.push_back(_swim_idle_r);
-   _looped_animations.push_back(_swim_idle_l);
-   _looped_animations.push_back(_sword_swim_idle_r);
-   _looped_animations.push_back(_sword_swim_idle_l);
-
    _looped_animations.push_back(_wallslide_impact_r);
    _looped_animations.push_back(_wallslide_impact_l);
    _looped_animations.push_back(_wallslide_r);
@@ -316,8 +306,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_lut[_idle_blink_r] = _sword_idle_blink_r;
    _sword_lut[_run_l] = _sword_run_l;
    _sword_lut[_run_r] = _sword_run_r;
-   _sword_lut[_swim_idle_l] = _sword_swim_idle_l;
-   _sword_lut[_swim_idle_r] = _sword_swim_idle_r;
    _sword_lut[_swim_l] = _sword_swim_l;
    _sword_lut[_swim_r] = _sword_swim_r;
    _sword_lut[_jump_init_r] = _sword_jump_init_r;
@@ -799,6 +787,11 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processScreenTransiti
    // force idle for screen transitions
    if (DisplayMode::getInstance().isSet(Display::ScreenTransition))
    {
+      if (data._in_water)
+      {
+         return data._points_left ? _swim_l : _swim_r;
+      }
+
       return data._points_left ? _idle_l_tmp : _idle_r_tmp;
    }
 
