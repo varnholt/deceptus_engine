@@ -18,7 +18,8 @@
 namespace
 {
 constexpr auto eps_px = 100;
-}
+std::vector<Room::RoomEnterArea> _enter_areas;
+}  // namespace
 
 /*
 
@@ -121,11 +122,6 @@ std::vector<std::shared_ptr<Room>> Room::findAll(const sf::FloatRect& rect, cons
 
    return matching_rooms;
 }
-
-namespace
-{
-std::vector<Room::RoomEnterArea> _enter_areas;
-}  // namespace
 
 void Room::mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms)
 {
@@ -236,30 +232,31 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
          }
 
          const auto fade_in_speed_it = data._tmx_object->_properties->_map.find("fade_in_speed");
+         const auto fade_out_speed_it = data._tmx_object->_properties->_map.find("fade_out_speed");
+         const auto delay_between_effects_it = data._tmx_object->_properties->_map.find("delay_between_effects_ms");
+         const auto camera_sync_after_fade_out_it = data._tmx_object->_properties->_map.find("camera_sync_after_fade_out");
+         const auto delay_it = data._tmx_object->_properties->_map.find("camera_lock_delay_ms");
+
          if (fade_in_speed_it != data._tmx_object->_properties->_map.end())
          {
             room->_fade_in_speed = fade_in_speed_it->second->_value_float.value();
          }
 
-         const auto fade_out_speed_it = data._tmx_object->_properties->_map.find("fade_out_speed");
          if (fade_out_speed_it != data._tmx_object->_properties->_map.end())
          {
             room->_fade_out_speed = fade_out_speed_it->second->_value_float.value();
          }
 
-         const auto delay_between_effects_it = data._tmx_object->_properties->_map.find("delay_between_effects_ms");
          if (delay_between_effects_it != data._tmx_object->_properties->_map.end())
          {
             room->_delay_between_effects_ms = std::chrono::milliseconds{*delay_between_effects_it->second->_value_int};
          }
 
-         const auto camera_sync_after_fade_out_it = data._tmx_object->_properties->_map.find("camera_sync_after_fade_out");
          if (camera_sync_after_fade_out_it != data._tmx_object->_properties->_map.end())
          {
             room->_camera_sync_after_fade_out = camera_sync_after_fade_out_it->second->_value_bool.value();
          }
 
-         const auto delay_it = data._tmx_object->_properties->_map.find("camera_lock_delay_ms");
          if (delay_it != data._tmx_object->_properties->_map.end())
          {
             room->_camera_lock_delay = std::chrono::milliseconds{*delay_it->second->_value_int};
@@ -421,36 +418,39 @@ void Room::SubRoom::deserialize(const GameDeserializeData& data)
    {
       const auto start_position_l_x_it = data._tmx_object->_properties->_map.find("start_position_left_x_px");
       const auto start_position_l_y_it = data._tmx_object->_properties->_map.find("start_position_left_y_px");
+      const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
+      const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
+      const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
+      const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
+      const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
+      const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
+      const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
+      const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
+      const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
+      const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
+
       if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
       {
          area_left._start_position = {start_position_l_x_it->second->_value_int.value(), start_position_l_y_it->second->_value_int.value()};
       }
 
-      const auto start_position_r_x_it = data._tmx_object->_properties->_map.find("start_position_right_x_px");
-      const auto start_position_r_y_it = data._tmx_object->_properties->_map.find("start_position_right_y_px");
       if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
       {
          area_right._start_position = {
             start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()};
       }
 
-      const auto start_position_t_x_it = data._tmx_object->_properties->_map.find("start_position_top_x_px");
-      const auto start_position_t_y_it = data._tmx_object->_properties->_map.find("start_position_top_y_px");
       if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
       {
          area_top._start_position = {start_position_t_x_it->second->_value_int.value(), start_position_t_y_it->second->_value_int.value()};
       }
 
-      const auto start_position_b_x_it = data._tmx_object->_properties->_map.find("start_position_bottom_x_px");
-      const auto start_position_b_y_it = data._tmx_object->_properties->_map.find("start_position_bottom_y_px");
       if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
       {
          area_bottom._start_position = {
             start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()};
       }
 
-      const auto start_offset_l_x_it = data._tmx_object->_properties->_map.find("start_offset_left_x_px");
-      const auto start_offset_l_y_it = data._tmx_object->_properties->_map.find("start_offset_left_y_px");
       if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())
       {
          auto offset_y = 0;
@@ -462,8 +462,6 @@ void Room::SubRoom::deserialize(const GameDeserializeData& data)
          area_left._start_offset = {start_offset_l_x_it->second->_value_int.value(), offset_y};
       }
 
-      const auto start_offset_r_x_it = data._tmx_object->_properties->_map.find("start_offset_right_x_px");
-      const auto start_offset_r_y_it = data._tmx_object->_properties->_map.find("start_offset_right_y_px");
       if (start_offset_r_x_it != data._tmx_object->_properties->_map.end())
       {
          auto offset_y = 0;
