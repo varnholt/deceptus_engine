@@ -1157,16 +1157,17 @@ void Level::drawDebugInformation()
 {
    if (DisplayMode::getInstance().isSet(Display::Debug))
    {
-      drawStaticChains(*_render_texture_level.get());
-      DebugDraw::debugBodies(*_render_texture_level.get(), this);
-      DebugDraw::drawRect(*_render_texture_level.get(), Player::getCurrent()->getPixelRectInt());
-      DebugDraw::debugHitboxes(*_render_texture_level.get());
+      auto& texture = *_render_texture_level.get();
+      drawStaticChains(texture);
+      DebugDraw::debugBodies(texture, this);
+      DebugDraw::drawRect(texture, Player::getCurrent()->getPixelRectFloat());
+      DebugDraw::debugHitboxes(texture);
 
       for (const auto& room : _rooms)
       {
          for (const auto& sub_room : room->_sub_rooms)
          {
-            DebugDraw::drawRect(*_render_texture_level.get(), sub_room._rect, sf::Color::Yellow);
+            DebugDraw::drawRect(texture, sub_room._rect, sf::Color::Yellow);
          }
       }
    }

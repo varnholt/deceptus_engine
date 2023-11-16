@@ -201,7 +201,6 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);
    DebugDraw::drawRect(color, _original_rect_px, sf::Color::Green);
    DebugDraw::drawRect(color, _jump_off_collision_rect_px, sf::Color::Blue);
-   DebugDraw::drawRect(color, Player::getCurrent()->computeFootSensorPixelIntRect(), sf::Color::Cyan);
    DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionFloat() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
 #endif
 }

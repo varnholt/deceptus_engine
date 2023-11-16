@@ -803,7 +803,8 @@ bool Player::isJumpingThroughOneWayWall()
    // a player is considered jumping through a one-way wall when
    // - the y velocity goes up
    // - there are active contacts with a one-way wall
-   if (_body->GetLinearVelocity().y < 0.0f)
+   constexpr auto epsilon = 0.00001f;
+   if (_body->GetLinearVelocity().y < -epsilon)
    {
       if (OneWayWall::instance().hasContacts())
       {
