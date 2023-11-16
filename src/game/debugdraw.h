@@ -26,6 +26,8 @@ void drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const sf::Vector
 void drawLines(sf::RenderTarget& target, const b2Vec2* vertices, const b2Vec2& offset, int32_t vertex_count, const b2Color& color);
 void drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color);
 
+void drawLineLoop(sf::RenderTarget& target, const b2Vec2* vertices, const b2Vec2& offset, int32_t vertex_count, const b2Color& color);
+
 void drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color);
 void drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const b2Color& color);
 
