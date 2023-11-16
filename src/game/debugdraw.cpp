@@ -185,6 +185,29 @@ void DebugDraw::drawLines(
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void DebugDraw::drawLineLoop(
+   sf::RenderTarget& target,
+   const b2Vec2* vertices,
+   const b2Vec2& offset,
+   int32_t vertex_count,
+   const b2Color& color
+)
+{
+   const auto sf_color = DebugDraw::glColorToSfml(color);
+   std::vector<sf::Vertex> sf_lines;
+
+   for (auto i = 0; i < vertex_count; i++)
+   {
+      sf_lines.push_back(sf::Vertex(vecB2S(vertices[i] + offset), sf_color));
+   }
+
+   // close loop
+   sf_lines.push_back(sf::Vertex(vecB2S(vertices[0] + offset), sf_color));
+
+   target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
 {
    constexpr auto line_length = 0.4f;
@@ -304,7 +327,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                {
                   const auto offset = body->GetPosition();
                   auto poly = dynamic_cast<b2PolygonShape*>(shape);
-                  drawLines(target, poly->m_vertices, offset, poly->m_count, b2Color{1.0f, 0.3f, 0.0f, 1.0f});
+                  drawLineLoop(target, poly->m_vertices, offset, poly->m_count, b2Color{1.0f, 0.3f, 0.0f, 1.0f});
                   break;
                }
 

@@ -947,6 +947,14 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
       next_cycle->play();
    }
 
+   // i keep this here
+   // might not be the last time to debug an impossible sequence of animation cycles
+   //
+   //   if (_current_cycle && next_cycle && _current_cycle->_name == "player_idle_blink_r" && next_cycle->_name == "player_jump_down_r")
+   //   {
+   //      std::cout << "we're fucked." << std::endl;
+   //   }
+
    _current_cycle = next_cycle;
    _current_cycle->update(dt);
 
