@@ -21,6 +21,66 @@ constexpr auto JUMP_UP_VELOCITY_THRESHOLD = -1.2f;
 constexpr auto JUMP_DOWN_VELOCITY_THRESHOLD = 1.2f;
 
 std::chrono::high_resolution_clock::time_point now;
+
+std::ostream& operator<<(std::ostream& os, const PlayerAnimation::PlayerAnimationData& data)
+{
+   os << "Player Animation Data:\n";
+   os << "Dead: " << std::boolalpha << data._dead << std::endl;
+   os << "In Air: " << data._in_air << std::endl;
+   os << "In Water: " << data._in_water << std::endl;
+   os << "Hard Landing: " << data._hard_landing << std::endl;
+   os << "Bending Down: " << data._bending_down << std::endl;
+   os << "Crouching: " << data._crouching << std::endl;
+   os << "Points Left: " << data._points_left << std::endl;
+   os << "Points Right: " << data._points_right << std::endl;
+   os << "Climb Joint Present: " << data._climb_joint_present << std::endl;
+   os << "Moving Left: " << data._moving_left << std::endl;
+   os << "Moving Right: " << data._moving_right << std::endl;
+   os << "Wall Sliding: " << data._wall_sliding << std::endl;
+   os << "Wall Jump Points Right: " << data._wall_jump_points_right << std::endl;
+   os << "Jumping Through One-Way Wall: " << data._jumping_through_one_way_wall << std::endl;
+   os << "Attacking: " << data._attacking << std::endl;
+   os << "Death Reason: " << static_cast<int>(data._death_reason) << std::endl;
+   os << "Weapon Type: " << static_cast<int>(data._weapon_type) << std::endl;
+
+   os << "Dash Direction: ";
+   if (data._dash_dir.has_value())
+   {
+      switch (data._dash_dir.value())
+      {
+         case Dash::Left:
+            os << "Left" << std::endl;
+            break;
+         case Dash::Right:
+            os << "Right" << std::endl;
+            break;
+         case Dash::None:
+            os << "None" << std::endl;
+            break;
+      }
+   }
+   else
+   {
+      os << "N/A";
+   }
+   os << std::endl;
+
+   os << "Linear Velocity: (" << data._linear_velocity.x << ", " << data._linear_velocity.y << ")\n";
+   os << "Jump Frame Count: " << data._jump_frame_count << std::endl;
+   os << "Dash Frame Count: " << data._dash_frame_count << std::endl;
+   os << "Timepoint Wallslide: " << data._timepoint_wallslide.time_since_epoch().count() << std::endl;
+   os << "Timepoint Walljump: " << data._timepoint_walljump.time_since_epoch().count() << std::endl;
+   os << "Timepoint Doublejump: " << data._timepoint_doublejump.time_since_epoch().count() << std::endl;
+   os << "Timepoint Bend Down Start: " << data._timepoint_bend_down_start.time_since_epoch().count() << std::endl;
+   os << "Timepoint Bend Down End: " << data._timepoint_bend_down_end.time_since_epoch().count() << std::endl;
+   os << "Timepoint Attack Start: " << data._timepoint_attack_start.time_since_epoch().count() << std::endl;
+   os << "Timepoint Attack Bend Down Start: " << data._timepoint_attack_bend_down_start.time_since_epoch().count() << std::endl;
+   os << "Timepoint Attack Jumping Start: " << data._timepoint_attack_jumping_start.time_since_epoch().count() << std::endl;
+   os << "Timepoint Attack Standing Start: " << data._timepoint_attack_standing_start.time_since_epoch().count() << std::endl;
+
+   return os;
+}
+
 }  // namespace
 
 void PlayerAnimation::loadAnimations(AnimationPool& pool)
@@ -953,6 +1013,7 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    //   if (_current_cycle && next_cycle && _current_cycle->_name == "player_idle_blink_r" && next_cycle->_name == "player_jump_down_r")
    //   {
    //      std::cout << "we're fucked." << std::endl;
+   //      std::cout << data << std::endl;
    //   }
 
    _current_cycle = next_cycle;
