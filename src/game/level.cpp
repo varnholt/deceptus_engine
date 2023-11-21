@@ -850,9 +850,10 @@ void Level::createViews()
 //-----------------------------------------------------------------------------
 void Level::updateViews()
 {
+   // this should really just fetch the camera position and the camera panorama vectors and
+   // update the views with them; no camera or camera panorama correction must be done here
    const auto& look_vector = CameraPanorama::getInstance().getLookVector();
    const auto& camera_system = CameraSystem::getInstance();
-
    const auto level_view_x = camera_system.getX() + look_vector.x;
    const auto level_view_y = camera_system.getY() + look_vector.y;
    const auto view_rect = sf::FloatRect{level_view_x, level_view_y, _view_width, _view_height};

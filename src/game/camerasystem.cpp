@@ -7,7 +7,6 @@
 
 #include <iostream>
 
-
 /*
 
    Camera system
@@ -47,7 +46,6 @@
 
 */
 
-
 void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_height_px)
 {
    _view_width_px = view_width_px;
@@ -56,7 +54,6 @@ void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_he
    updateX(dt);
    updateY(dt);
 }
-
 
 void CameraSystem::updateX(const sf::Time& dt)
 {
@@ -67,9 +64,9 @@ void CameraSystem::updateX(const sf::Time& dt)
    auto player_y_px = player->getPixelPositionFloat().y;
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x_px, player_y_px, _focus_offset_px);
    _dx_px = (player_x_px - _x_px);
-   const auto dx_px = (_dx_px) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
+   const auto dx_px = (_dx_px)*dt.asSeconds() * camera_config.getCameraVelocityFactorX();
    const auto f_center = _view_width_px / 2.0f;
-   const auto f_range  = _view_width_px / camera_config.getFocusZoneDivider();
+   const auto f_range = _view_width_px / camera_config.getFocusZoneDivider();
 
    _focus_zone_x0_px = f_center - f_range;
    _focus_zone_x1_px = f_center + f_range;
@@ -78,9 +75,8 @@ void CameraSystem::updateX(const sf::Time& dt)
    auto target_offset = 0.0f;
    if (camera_config.isFollowingPlayerOrientation())
    {
-      target_offset = player->isPointingLeft()
-         ? ( f_range * camera_config.getTargetShiftFactor())
-         : (-f_range * camera_config.getTargetShiftFactor());
+      target_offset =
+         player->isPointingLeft() ? (f_range * camera_config.getTargetShiftFactor()) : (-f_range * camera_config.getTargetShiftFactor());
    }
 
    const auto focus_delta = (target_offset - _focus_offset_px) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
@@ -117,12 +113,11 @@ void CameraSystem::updateX(const sf::Time& dt)
    }
 }
 
-
 void CameraSystem::updateY(const sf::Time& dt)
 {
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
-   const auto p_range  = _view_height_px / camera_config.getPanicLineDivider();
+   const auto p_range = _view_height_px / camera_config.getPanicLineDivider();
    const auto p_center = _view_height_px / 2.0f;
 
    _panic_line_y0_px = p_center - p_range;
@@ -155,15 +150,12 @@ void CameraSystem::updateY(const sf::Time& dt)
    }
 
    // test if back within close boundaries
-   if (
-         (test > _y_px - view_center - camera_config.getBackInBoundsToleranceY())
-      && (test < _y_px - view_center + camera_config.getBackInBoundsToleranceY())
-   )
+   if ((test > _y_px - view_center - camera_config.getBackInBoundsToleranceY()) && (test < _y_px - view_center + camera_config.getBackInBoundsToleranceY()))
    {
       _focus_y_triggered = false;
    }
 
-   if (player->isInAir() && !_focus_y_triggered &&! room_corrected)
+   if (player->isInAir() && !_focus_y_triggered && !room_corrected)
    {
       _no_y_update_triggered = false;
       return;
@@ -180,10 +172,7 @@ void CameraSystem::updateY(const sf::Time& dt)
 
    // have some acceleration in the y update velocity so it doesn't got at full speed instantly
    const auto y_update_start_time_s = _y_update_start_time.asSeconds();
-   const auto y_update_acceleration =
-      _panic
-         ? 2.0f
-         : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
+   const auto y_update_acceleration = _panic ? 2.0f : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
 
    _dy_px = player_y - _y_px;
    const auto dy = _dy_px * dt.asSeconds() * camera_config.getCameraVelocityFactorY() * y_update_acceleration;
@@ -191,30 +180,25 @@ void CameraSystem::updateY(const sf::Time& dt)
    _y_px += dy;
 }
 
-
 float CameraSystem::getDy() const
 {
    return _dy_px;
 }
-
 
 float CameraSystem::getDx() const
 {
    return _dx_px;
 }
 
-
 float CameraSystem::getFocusZoneCenter() const
 {
    return _focus_zone_center_px;
 }
 
-
 float CameraSystem::getFocusOffset() const
 {
    return _focus_offset_px;
 }
-
 
 void CameraSystem::syncNow()
 {
@@ -229,31 +213,26 @@ void CameraSystem::syncNow()
    _y_px = player_y;
 }
 
-
 float CameraSystem::getX() const
 {
    // camera should be in the center of the focus zone
    return _x_px - _focus_zone_center_px;
 }
 
-
 float CameraSystem::getY() const
 {
    return _y_px - (_view_height_px / CameraSystemConfiguration::getInstance().getViewRatioY());
 }
-
 
 float CameraSystem::getFocusZoneX0() const
 {
    return _focus_zone_x0_px;
 }
 
-
 float CameraSystem::getFocusZoneX1() const
 {
    return _focus_zone_x1_px;
 }
-
 
 CameraSystem& CameraSystem::getInstance()
 {
@@ -261,16 +240,12 @@ CameraSystem& CameraSystem::getInstance()
    return __instance;
 }
 
-
 float CameraSystem::getPanicLineY0() const
 {
    return _panic_line_y0_px;
 }
 
-
 float CameraSystem::getPanicLineY1() const
 {
    return _panic_line_y1_px;
 }
-
-
