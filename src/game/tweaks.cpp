@@ -31,6 +31,7 @@ std::string Tweaks::serialize()
           {"cpan_look_speed_x", _cpan_look_speed_x},
           {"cpan_look_speed_y", _cpan_look_speed_y},
           {"cpan_snap_back_factor", _cpan_snap_back_factor},
+          {"cpan_unlimited", _cpan_unlimited},
           {"enter_portal_threshold", _enter_portal_threshold},
           {"player_light_enabled", _player_light_enabled},
           {"player_light_alpha", _player_light_alpha},
@@ -77,6 +78,11 @@ void Tweaks::deserialize(const std::string& data)
    if (config.find("cpan_snap_back_factor") != config.end())
    {
       _cpan_snap_back_factor = config.at("cpan_snap_back_factor").get<float>();
+   }
+
+   if (config.find("cpan_unlimited") != config.end())
+   {
+      _cpan_unlimited = config.at("cpan_unlimited").get<bool>();
    }
 
    if (config.find("enter_portal_threshold") != config.end())
