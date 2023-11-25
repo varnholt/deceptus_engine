@@ -109,6 +109,11 @@ void GameMechanism::setEnabled(bool enabled)
    _enabled = enabled;
 }
 
+void GameMechanism::toggle()
+{
+   setEnabled(!isEnabled());
+}
+
 void GameMechanism::preload()
 {
 }

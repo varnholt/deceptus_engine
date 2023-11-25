@@ -15,11 +15,10 @@ namespace
 constexpr auto speed = 3.0f;
 }
 
-CameraPanorama CameraPanorama::__instance;
-
 //-----------------------------------------------------------------------------
 CameraPanorama& CameraPanorama::getInstance()
 {
+   static CameraPanorama __instance;
    return __instance;
 }
 
@@ -42,11 +41,9 @@ void CameraPanorama::update()
       }
    };
 
-   // this should work on actual screen boundaries instead of creating a screen rectangle around the player
-   // 1) get screen rectangle
-   // 2) have 4 points on each side to check if they are outside the room rectangle
-   // 3) if those points are outside the room boundaries, do not allow further movement
    const auto result = CameraRoomLock::checkRoomBoundaries();
+
+   bool changed = false;
 
    const auto locked_up = result[0];
    const auto locked_down = result[1];
@@ -91,6 +88,7 @@ void CameraPanorama::update()
       }
 
       updateLookVector(desired_look_vector);
+      changed = true;
    }
    else if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -104,6 +102,7 @@ void CameraPanorama::update()
 
       if (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y)
       {
+         // compute values from 0..1 removing the tolerance gap at the beginning
          const auto x_direction = std::signbit(x_normalized) ? -1.0f : 1.0f;
          const auto y_direction = std::signbit(y_normalized) ? -1.0f : 1.0f;
          const auto x_relative = x_direction * (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
@@ -132,13 +131,11 @@ void CameraPanorama::update()
 
          limit_look_vector(desired_look_vector);
          updateLookVector(desired_look_vector);
-      }
-      else
-      {
-         _look_vector *= tweaks._cpan_snap_back_factor;
+         changed = true;
       }
    }
-   else
+
+   if (!changed)
    {
       _look_vector *= tweaks._cpan_snap_back_factor;
    }

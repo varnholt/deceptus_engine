@@ -54,7 +54,9 @@ int32_t addCollisionRect(lua_State* state)
    const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
    const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
 
-   return getInstance()->addCollisionRect({x_px, y_px, w_px, h_px});
+   const auto rect_id = getInstance()->addCollisionRect({x_px, y_px, w_px, h_px});
+   lua_pushinteger(state, rect_id);
+   return 1;
 }
 
 /**
@@ -80,13 +82,16 @@ int32_t isMechanismEnabled(lua_State* state)
       group = lua_tostring(state, 2);
    }
 
-   return getInstance()->isMechanismEnabled(search_pattern, group);
+   const auto enabled = getInstance()->isMechanismEnabled(search_pattern, group);
+   lua_pushboolean(state, enabled);
+   return 1;
 }
 
 /**
  * @brief setMechanismEnabled set a mechanism node to enabled/disabled
  * @param state lua state
- *    param 1: enabled flag
+ *    param 1: search pattern
+ *    param 2: enabled flag
  * @return error code
  */
 int32_t setMechanismEnabled(lua_State* state)
@@ -107,6 +112,33 @@ int32_t setMechanismEnabled(lua_State* state)
    }
 
    getInstance()->setMechanismEnabled(search_pattern, enabled, group);
+   return 0;
+}
+
+/**
+ * @brief toggle toggle a mechanism
+ * @param state lua state
+ *    param 1: mechanism name
+ *    param 2: group name
+ * @return error code
+ */
+int32_t toggle(lua_State* state)  // TODO: document
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 1 || argc > 2)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+
+   std::optional<std::string> group;
+   if (argc == 2)
+   {
+      group = lua_tostring(state, 2);
+   }
+
+   getInstance()->toggle(search_pattern, group);
    return 0;
 }
 
@@ -233,6 +265,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
+   lua_register(_lua_state, "toggle", ::toggle);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -368,6 +401,15 @@ bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const st
       return false;
    }
    return mechanisms.front()->isEnabled();
+}
+
+void LevelScript::toggle(const std::string& search_pattern, const std::optional<std::string>& group)
+{
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   for (auto& mechanism : mechanisms)
+   {
+      mechanism->toggle();
+   }
 }
 
 void LevelScript::addPlayerSkill(int32_t skill)

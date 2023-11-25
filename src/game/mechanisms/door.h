@@ -43,7 +43,7 @@ public:
 
    void open();
    void close();
-   void toggle();
+   void toggle() override;
    void toggleWithPlayerChecks();
 
    void setup(const GameDeserializeData& data);

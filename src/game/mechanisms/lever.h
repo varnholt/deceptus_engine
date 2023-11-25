@@ -40,8 +40,10 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
    void setEnabled(bool enabled) override;
+   bool isEnabled() const override;
+   void toggle() override;
 
-   void toggle();
+   void addCallback(const Callback& callback);
    void setCallbacks(const std::vector<Callback>& callbacks);
    const sf::FloatRect& getPixelRect() const;
 
@@ -87,7 +89,7 @@ private:
    bool _reached = false;
    bool _reached_previous = false;
    float _idle_time_s = 0.0f;
-   std::optional<std::string> _target_id;
+   std::vector<std::string> _target_ids;
    std::optional<std::chrono::high_resolution_clock::time_point> _last_toggle_time;
 
    std::shared_ptr<sf::Texture> _texture;
