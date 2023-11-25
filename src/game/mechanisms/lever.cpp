@@ -31,35 +31,46 @@ constexpr auto left_offset = (sprites_per_row - 1) * 3 * PIXELS_PER_TILE;
 constexpr auto idle_animation_speed = 10.0f;
 }  // namespace
 
-
 //-----------------------------------------------------------------------------
 void Lever::setup(const GameDeserializeData& data)
 {
    if (data._tmx_object->_properties)
    {
-      auto z_it = data._tmx_object->_properties->_map.find("z");
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
-         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
       }
 
-      auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
+      const auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
       if (enabled_it != data._tmx_object->_properties->_map.end())
       {
          _enabled = enabled_it->second->_value_bool.value();
       }
 
-      auto serialized_it = data._tmx_object->_properties->_map.find("serialized");
+      const auto serialized_it = data._tmx_object->_properties->_map.find("serialized");
       if (serialized_it != data._tmx_object->_properties->_map.end())
       {
          _serialized = serialized_it->second->_value_bool.value();
       }
 
-      auto target_id_it = data._tmx_object->_properties->_map.find("target_id");
+      const auto target_id_it = data._tmx_object->_properties->_map.find("target_id");
       if (target_id_it != data._tmx_object->_properties->_map.end())
       {
-         _target_id = target_id_it->second->_value_string.value();
+         _target_ids.push_back(target_id_it->second->_value_string.value());
+      }
+
+      const auto target_ids_it = data._tmx_object->_properties->_map.find("target_ids");  // TODO: document
+      if (target_ids_it != data._tmx_object->_properties->_map.end())
+      {
+         std::string tmp;
+         const auto id_string = target_ids_it->second->_value_string.value();
+         std::stringstream string_stream(id_string);
+         while (getline(string_stream, tmp, ';'))
+         {
+            _target_ids.push_back(tmp);
+         }
       }
    }
 
@@ -219,6 +230,12 @@ void Lever::setEnabled(bool enabled)
 }
 
 //-----------------------------------------------------------------------------
+bool Lever::isEnabled() const
+{
+   return (_target_state == State::Right);
+}
+
+//-----------------------------------------------------------------------------
 void Lever::updateReceivers()
 {
    for (auto& cb : _callbacks)
@@ -299,6 +316,12 @@ void Lever::toggle()
 }
 
 //-----------------------------------------------------------------------------
+void Lever::addCallback(const Callback& callback)
+{
+   _callbacks.push_back(callback);
+}
+
+//-----------------------------------------------------------------------------
 void Lever::setCallbacks(const std::vector<Callback>& callbacks)
 {
    _callbacks = callbacks;
@@ -340,9 +363,8 @@ void Lever::merge(
       auto lever = std::dynamic_pointer_cast<Lever>(tmp);
 
       // don't go by search rectangle, go by target id
-      if (lever->_target_id.has_value())
+      for (const auto& target_id : lever->_target_ids)
       {
-         const auto target_id = lever->_target_id.value();
          const auto target_it = std::find_if(
             all_mechanism.begin(),
             all_mechanism.end(),
@@ -357,7 +379,7 @@ void Lever::merge(
          {
             auto mechanism = (*target_it);
             auto callback = [mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); };
-            lever->setCallbacks({callback});
+            lever->addCallback(callback);
             lever->updateReceivers();
          }
       }

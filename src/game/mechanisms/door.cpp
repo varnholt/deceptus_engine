@@ -108,7 +108,9 @@ void Door::updateBars(const sf::Time& dt)
       }
       case State::Open:
       case State::Closed:
+      {
          break;
+      }
    }
 
    updateTransform();
@@ -125,11 +127,21 @@ void Door::update(const sf::Time& dt)
       }
    }
 
+   if (_animation_open && !_animation_open->_paused)
+   {
+      _animation_open->update(dt);
+   }
+
+   if (_animation_close && !_animation_close->_paused)
+   {
+      _animation_close->update(dt);
+   }
+
+   // disable body when animation is done
    if (_state == State::Opening)
    {
       if (_animation_open)
       {
-         _animation_open->update(dt);
          if (_animation_open->_paused)
          {
             _state = State::Open;
@@ -137,11 +149,12 @@ void Door::update(const sf::Time& dt)
          }
       }
    }
+
+   // enable body when animation is done
    else if (_state == State::Closing)
    {
       if (_animation_close)
       {
-         _animation_close->update(dt);
          if (_animation_open->_paused)
          {
             _state = State::Closed;
@@ -248,7 +261,7 @@ void Door::toggleWithPlayerChecks()
 //-----------------------------------------------------------------------------
 void Door::open()
 {
-   if (_state == State::Opening)
+   if (_state == State::Opening || _state == State::Open)
    {
       return;
    }
@@ -284,7 +297,7 @@ void Door::close()
       return;
    }
 
-   if (_state == State::Closing)
+   if (_state == State::Closing || _state == State::Closed)
    {
       return;
    }
@@ -400,6 +413,13 @@ void Door::setup(const GameDeserializeData& data)
       {
          _sample_close = sample_close_it->second->_value_string.value();
          Audio::getInstance().addSample(_sample_close.value());
+      }
+
+      const auto open_it = data._tmx_object->_properties->_map.find("open");  // TODO: document
+      if (open_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto open = open_it->second->_value_bool.value();
+         setEnabled(open);
       }
 
       // read required key to open door

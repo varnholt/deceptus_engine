@@ -1134,6 +1134,11 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 //----------------------------------------------------------------------------------------------------------------------
 bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const
 {
+   if (a_tl.x < 0 || a_tl.y < 0 || b_tl.x < 0 || b_tl.y < 0 || a_tl.x > _physics._grid_width || b_tl.x > _physics._grid_width || a_tl.y > _physics._grid_height || b_tl.y > _physics._grid_height)
+   {
+      return false;
+   }
+
    auto blocks = [this](uint32_t x, uint32_t y) -> bool { return _physics._physics_map[(_physics._grid_width * y) + x] == 1; };
 
    return MapTools::lineCollide(a_tl.x, a_tl.y, b_tl.x, b_tl.y, blocks);
