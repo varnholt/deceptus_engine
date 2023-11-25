@@ -25,6 +25,7 @@ public:
 
    virtual bool isEnabled() const;
    virtual void setEnabled(bool enabled);
+   virtual void toggle();
 
    virtual void preload();
 
