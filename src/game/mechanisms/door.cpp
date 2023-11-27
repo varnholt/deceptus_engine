@@ -415,7 +415,7 @@ void Door::setup(const GameDeserializeData& data)
          Audio::getInstance().addSample(_sample_close.value());
       }
 
-      const auto open_it = data._tmx_object->_properties->_map.find("open");  // TODO: document
+      const auto open_it = data._tmx_object->_properties->_map.find("open");
       if (open_it != data._tmx_object->_properties->_map.end())
       {
          const auto open = open_it->second->_value_bool.value();

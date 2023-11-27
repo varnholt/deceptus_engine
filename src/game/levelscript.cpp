@@ -122,7 +122,7 @@ int32_t setMechanismEnabled(lua_State* state)
  *    param 2: group name
  * @return error code
  */
-int32_t toggle(lua_State* state)  // TODO: document
+int32_t toggle(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc < 1 || argc > 2)
