@@ -61,7 +61,7 @@ void Lever::setup(const GameDeserializeData& data)
          _target_ids.push_back(target_id_it->second->_value_string.value());
       }
 
-      const auto target_ids_it = data._tmx_object->_properties->_map.find("target_ids");  // TODO: document
+      const auto target_ids_it = data._tmx_object->_properties->_map.find("target_ids");
       if (target_ids_it != data._tmx_object->_properties->_map.end())
       {
          std::string tmp;

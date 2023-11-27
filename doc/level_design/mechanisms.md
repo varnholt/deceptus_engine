@@ -155,6 +155,7 @@ Doors can have keys assigned the player has to find inside your level (in form o
 |Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
+|open|bool|Defines the initial state of the door (default is `false`).|
 |key|string|If defined, the door can only be opened when the player has the corresponding key. For that reason an extra must be added that has the name of the key.|
 |texture|string|A path to a static door texture that is drawn in closed state.|
 |sample_open|string|A filename of a sample that is played when the door is opened.|
@@ -462,6 +463,7 @@ The properties below apply for the object inside the `levers` object group.
 |enabled|bool|Defines the initial state of the lever which is either enabled or disabled|
 |z|int|The object's z index|
 |target_id|string|An optional name of the object controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
+|target_ids|string|An semicolon separated list of object names for objects that are controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
 
 ---
 

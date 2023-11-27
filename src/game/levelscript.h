@@ -12,15 +12,16 @@ class LevelScript
 public:
    LevelScript();
    ~LevelScript();
+
    void setup(const std::filesystem::path& path);
    void update(const sf::Time& dt);
+
    int32_t addCollisionRect(const sf::IntRect& rect);
    void setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group = std::nullopt);
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
    void toggle(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt);
    void addPlayerSkill(int32_t skill);
    void removePlayerSkill(int32_t skill);
-
    void giveWeaponBow();
    void giveWeaponGun();
    void giveWeaponSword();
