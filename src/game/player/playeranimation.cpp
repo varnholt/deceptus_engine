@@ -647,7 +647,10 @@ bool PlayerAnimation::isBendingUp(const PlayerAnimationData& data) const
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(const PlayerAnimationData& data)
 {
-   if (data._in_water || data._dash_dir.has_value() || data._bending_down || data._moving_left || data._moving_right)
+   const auto look_active = CameraPanorama::getInstance().isLookActive();
+   const auto move_active = (data._moving_left || data._moving_right) && !look_active;
+
+   if (data._in_water || data._dash_dir.has_value() || data._bending_down || move_active)
    {
       return std::nullopt;
    }
