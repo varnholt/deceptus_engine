@@ -10,10 +10,6 @@
 #include "game/gamecontrollerintegration.h"
 #include "game/tweaks.h"
 
-namespace
-{
-constexpr auto speed = 3.0f;
-}
 
 //-----------------------------------------------------------------------------
 CameraPanorama& CameraPanorama::getInstance()
@@ -23,7 +19,18 @@ CameraPanorama& CameraPanorama::getInstance()
 }
 
 //-----------------------------------------------------------------------------
-void CameraPanorama::update()
+sf::Vector2f CameraPanorama::computeDesiredLookVector(
+   bool looking_up,
+   bool looking_down,
+   bool looking_left,
+   bool looking_right,
+   bool can_look_up,
+   bool can_look_down,
+   bool can_look_left,
+   bool can_look_right,
+   float x_relative = 1.0f,
+   float y_relative = 1.0f
+) const
 {
    const auto& tweaks = Tweaks::instance();
 
@@ -41,6 +48,38 @@ void CameraPanorama::update()
       }
    };
 
+   sf::Vector2f desired_look_vector = _look_vector;
+
+   if (looking_up && can_look_up)
+   {
+      desired_look_vector += sf::Vector2f(0.0f, -tweaks._cpan_look_speed_y * y_relative);
+   }
+   else if (looking_down && can_look_down)
+   {
+      desired_look_vector += sf::Vector2f(0.0f, tweaks._cpan_look_speed_y * y_relative);
+   }
+
+   if (looking_left && can_look_left)
+   {
+      desired_look_vector += sf::Vector2f(-tweaks._cpan_look_speed_x * x_relative, 0.0f);
+   }
+   else if (looking_right && can_look_right)
+   {
+      desired_look_vector += sf::Vector2f(tweaks._cpan_look_speed_x * x_relative, 0.0f);
+   }
+
+   if (!tweaks._cpan_unlimited)
+   {
+      limit_look_vector(desired_look_vector);
+   }
+
+   return desired_look_vector;
+}
+
+//-----------------------------------------------------------------------------
+void CameraPanorama::update()
+{
+   const auto& tweaks = Tweaks::instance();
    const auto result = CameraRoomLock::checkRoomBoundaries();
 
    bool changed = false;
@@ -53,39 +92,28 @@ void CameraPanorama::update()
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
       // only update the desired look vector when boundaries are not exceeded
-      sf::Vector2f desired_look_vector = _look_vector;
-
       const auto looking_up = _look_state & static_cast<int32_t>(Look::Up);
       const auto looking_down = _look_state & static_cast<int32_t>(Look::Down);
       const auto looking_left = _look_state & static_cast<int32_t>(Look::Left);
       const auto looking_right = _look_state & static_cast<int32_t>(Look::Right);
 
-      const auto can_look_up = !(locked_up && desired_look_vector.y < 0.0f) || tweaks._cpan_unlimited;
-      const auto can_look_down = !(locked_down && desired_look_vector.y > 0.0f) || tweaks._cpan_unlimited;
-      const auto can_look_left = !(locked_left && desired_look_vector.x < 0.0f) || tweaks._cpan_unlimited;
-      const auto can_look_right = !(locked_right && desired_look_vector.x > 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_up = !(locked_up && _look_vector.y < 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_down = !(locked_down && _look_vector.y > 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_left = !(locked_left && _look_vector.x < 0.0f) || tweaks._cpan_unlimited;
+      const auto can_look_right = !(locked_right && _look_vector.x > 0.0f) || tweaks._cpan_unlimited;
 
-      if (looking_up && can_look_up)
-      {
-         desired_look_vector += sf::Vector2f(0.0f, -speed);
-      }
-      else if (looking_down && can_look_down)
-      {
-         desired_look_vector += sf::Vector2f(0.0f, speed);
-      }
-      if (looking_left && can_look_left)
-      {
-         desired_look_vector += sf::Vector2f(-speed, 0.0f);
-      }
-      else if (looking_right && can_look_right)
-      {
-         desired_look_vector += sf::Vector2f(speed, 0.0f);
-      }
-
-      if (!tweaks._cpan_unlimited)
-      {
-         limit_look_vector(desired_look_vector);
-      }
+      // clang-format off
+      const auto desired_look_vector = computeDesiredLookVector(
+         looking_up,
+         looking_down,
+         looking_left,
+         looking_right,
+         can_look_up,
+         can_look_down,
+         can_look_left,
+         can_look_right
+      );
+      // clang-format on
 
       updateLookVector(desired_look_vector);
       changed = true;
@@ -103,33 +131,34 @@ void CameraPanorama::update()
       if (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y)
       {
          // compute values from 0..1 removing the tolerance gap at the beginning
-         const auto x_direction = std::signbit(x_normalized) ? -1.0f : 1.0f;
-         const auto y_direction = std::signbit(y_normalized) ? -1.0f : 1.0f;
-         const auto x_relative = x_direction * (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
-         const auto y_relative = y_direction * (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
+         const auto x_relative = (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
+         const auto y_relative = (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
 
-         sf::Vector2f desired_look_vector = _look_vector;
+         const auto looking_left = x_relative < 0.0f;
+         const auto looking_right = x_relative > 0.0f;
+         const auto looking_up = y_relative < 0.0f;
+         const auto looking_down = y_relative > 0.0f;
 
-         // only update the desired look vector when boundaries are not exceeded
-         if (x_relative < 0.0f && !(locked_left && desired_look_vector.x < 0.0f))
-         {
-            desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
-         }
-         else if (x_relative > 0.0f && !(locked_right && desired_look_vector.x > 0.0f))
-         {
-            desired_look_vector.x += x_relative * tweaks._cpan_look_speed_x;
-         }
+         const auto can_look_left = !(locked_left && _look_vector.x < 0.0f);
+         const auto can_look_right = !(locked_right && _look_vector.x > 0.0f);
+         const auto can_look_up = !(locked_up && _look_vector.y < 0.0f);
+         const auto can_look_down = !(locked_down && _look_vector.y > 0.0f);
 
-         if (y_relative < 0.0f && !(locked_up && desired_look_vector.y < 0.0f))
-         {
-            desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
-         }
-         else if (y_relative > 0.0f && !(locked_down && desired_look_vector.y > 0.0f))
-         {
-            desired_look_vector.y += y_relative * tweaks._cpan_look_speed_y;
-         }
+         // clang-format off
+         const auto desired_look_vector = computeDesiredLookVector(
+            looking_up,
+            looking_down,
+            looking_left,
+            looking_right,
+            can_look_up,
+            can_look_down,
+            can_look_left,
+            can_look_right,
+            x_relative,
+            y_relative
+         );
+         // clang-format on
 
-         limit_look_vector(desired_look_vector);
          updateLookVector(desired_look_vector);
          changed = true;
       }
