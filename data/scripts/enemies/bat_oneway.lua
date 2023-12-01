@@ -67,7 +67,6 @@ _exploded = false
 _path = {}
 _energy = 3
 _speed = 0.1
-_enabled = true
 
 ANIMATION_SPEED = 40.0
 ANIMATION_SPEED_IDLE = 20.0
@@ -269,10 +268,10 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function writeProperty(key, value)
 
-   -- print(string.format("write property: %s %s", key, value))
+   print(string.format("write property: %s %s", key, value))
 
-   if (key == "enabled") then
-      _enabled = value == "true" and true or false
+   if (key == "activated") then
+      _activated = value == "true" and true or false
    elseif (key == "speed") then
       _speed = tonumber(value)
    elseif (key == "exploding") then

@@ -13,3 +13,5 @@
 #define FUNCTION_TIMEOUT "timeout"
 #define FUNCTION_UPDATE "update"
 #define FUNCTION_WRITE_PROPERTY "writeProperty"
+#define FUNCTION_PLAYER_COLLIDES_WITH_RECT "playerCollidesWithRect"
+#define FUNCTION_PLAYER_COLLIDES_WITH_SENSOR_RECT "playerCollidesWithSensorRect"
