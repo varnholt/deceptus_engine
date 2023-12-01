@@ -1688,6 +1688,7 @@ LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(paren
    _z_index = static_cast<int32_t>(ZDepth::Player);
 
    setClassName(typeid(LuaNode).name());
+   setObjectId(filename);
 
    // create instances
    _body_def = new b2BodyDef();
@@ -1746,7 +1747,10 @@ void LuaNode::deserializeEnemyDescription()
       _position_px = _start_position_px;
    }
 
-   setObjectId(_enemy_description._id);
+   if (!_enemy_description._id.empty())
+   {
+      setObjectId(_enemy_description._id);
+   }
 }
 
 void LuaNode::initialize()

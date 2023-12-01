@@ -1237,11 +1237,11 @@ void Level::drawGlowSprite()
 }
 
 std::vector<std::shared_ptr<GameMechanism>>
-Level::searchMechanisms(const std::string& regexPattern, const std::optional<std::string>& group)
+Level::searchMechanisms(const std::string& regex_pattern, const std::optional<std::string>& group)
 {
    std::vector<std::shared_ptr<GameMechanism>> results;
 
-   std::regex pattern(regexPattern);
+   std::regex pattern(regex_pattern);
    for (const auto& [key, mechanism_vector] : _mechanisms_map)
    {
       // filter by mechanism group if requested

@@ -17,6 +17,7 @@ public:
    void update(const sf::Time& dt);
 
    int32_t addCollisionRect(const sf::IntRect& rect);
+   void addSensorRectCallback(const std::string& sensor_rect_id);
    void setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group = std::nullopt);
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
    void toggle(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt);
@@ -25,12 +26,15 @@ public:
    void giveWeaponBow();
    void giveWeaponGun();
    void giveWeaponSword();
+   void writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern);
 
    // functions on the lua end
    void luaInitialize();
    void luaUpdate(const sf::Time& dt);
    void luaWriteProperty(const std::string& key, const std::string& value);
    void luaPlayerReceivedExtra(const std::string& extra_name);
+   void luaPlayerCollidesWithRect(int32_t rect_id);
+   void luaPlayerCollidesWithSensorRect(const std::string& sensor_rect_id);
 
    using SearchMechanismCallback =
       std::function<std::vector<std::shared_ptr<GameMechanism>>(const std::string& regexp, const std::optional<std::string>&)>;
