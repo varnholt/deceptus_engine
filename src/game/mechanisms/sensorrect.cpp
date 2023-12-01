@@ -46,6 +46,7 @@ std::optional<sf::FloatRect> SensorRect::getBoundingBoxPx()
 
 void SensorRect::setup(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
    _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    if (data._tmx_object->_properties)
@@ -106,6 +107,11 @@ void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>
    );
 }
 
+void SensorRect::addSensorCallback(const SensorCallback& callback)
+{
+   _callbacks.push_back(callback);
+}
+
 void SensorRect::processAction()
 {
    switch (_action)
@@ -134,5 +140,10 @@ void SensorRect::processAction()
          }
          break;
       }
+   }
+
+   for (auto& callback : _callbacks)
+   {
+      callback(_object_id);
    }
 }

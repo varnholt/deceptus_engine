@@ -3,10 +3,15 @@
 #include "framework/tools/log.h"
 #include "game/bow.h"
 #include "game/luaconstants.h"
+#include "game/luainterface.h"
+#include "game/luanode.h"
 #include "game/player/player.h"
 #include "game/savestate.h"
 #include "game/weaponfactory.h"
 #include "game/weaponsystem.h"
+#include "mechanisms/sensorrect.h"
+
+#include <regex>
 
 namespace
 {
@@ -57,6 +62,25 @@ int32_t addCollisionRect(lua_State* state)
    const auto rect_id = getInstance()->addCollisionRect({x_px, y_px, w_px, h_px});
    lua_pushinteger(state, rect_id);
    return 1;
+}
+
+/**
+ * @brief addSensorRectCallback add a callback when player intersects with a given sensor rect
+ * @param state lua state
+ *    param 1: identifier of the sensor rect
+ * @return error code
+ */
+int32_t addSensorRectCallback(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto rect_id = lua_tostring(state, 1);
+   getInstance()->addSensorRectCallback(rect_id);
+   return 0;
 }
 
 /**
@@ -139,6 +163,31 @@ int32_t toggle(lua_State* state)
    }
 
    getInstance()->toggle(search_pattern, group);
+   return 0;
+}
+
+/**
+ * @brief writeLuaNodeProperty write a property of another lua node
+ * @param state lua state
+ *    param 1: property key
+ *    param 2: property value
+ *    param 3: mechanism name
+ *    param 4: group name
+ * @return error code
+ */
+int32_t writeLuaNodeProperty(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
+   {
+      return 0;
+   }
+
+   const auto key = lua_tostring(state, 1);
+   const auto value = lua_tostring(state, 2);
+   const auto search_pattern = lua_tostring(state, 3);
+
+   getInstance()->writeLuaNodeProperty(key, value, search_pattern);
    return 0;
 }
 
@@ -237,6 +286,18 @@ void LevelScript::update(const sf::Time& dt)
    }
 
    luaUpdate(dt);
+
+   const auto player_rect = Player::getCurrent()->getPixelRectInt();
+   auto id = 0;
+   for (const auto& rect : _collision_rects)
+   {
+      if (player_rect.intersects(rect))
+      {
+         luaPlayerCollidesWithRect(id);
+      };
+
+      id++;
+   }
 }
 
 LevelScript::LevelScript()
@@ -258,6 +319,7 @@ void LevelScript::setup(const std::filesystem::path& path)
 
    // register callbacks
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
+   lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
    lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
@@ -266,6 +328,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
    lua_register(_lua_state, "toggle", ::toggle);
+   lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -385,6 +448,12 @@ int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 
 void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group)
 {
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return;
+   }
+
    auto mechanisms = _search_mechanism_callback(search_pattern, group);
 
    for (auto& mechanism : mechanisms)
@@ -395,6 +464,12 @@ void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool en
 
 bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const std::optional<std::string>& group) const
 {
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return false;
+   }
+
    auto mechanisms = _search_mechanism_callback(search_pattern, group);
    if (mechanisms.empty())
    {
@@ -451,4 +526,70 @@ void LevelScript::giveWeaponSword()
    auto sword = WeaponFactory::create(WeaponType::Sword);
    sword->initialize();
    giveWeaponToPlayer(sword);
+}
+
+void LevelScript::writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern)
+{
+   std::vector<std::shared_ptr<LuaNode>> results;
+
+   const auto& object_list = LuaInterface::instance().getObjectList();
+   std::regex pattern(search_pattern);
+   for (auto& node : object_list)
+   {
+      auto lua_node = std::dynamic_pointer_cast<LuaNode>(node);
+      if (std::regex_match(lua_node->getObjectId(), pattern))
+      {
+         results.push_back(lua_node);
+      }
+   }
+
+   for (auto& lua_node : results)
+   {
+      lua_node->luaWriteProperty(key, value);
+   }
+}
+
+void LevelScript::addSensorRectCallback(const std::string& search_pattern)
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return;
+   }
+
+   auto mechanisms = _search_mechanism_callback(search_pattern, "sensor_rects");
+   for (auto& mechanism : mechanisms)
+   {
+      auto sensor_rect = std::dynamic_pointer_cast<SensorRect>(mechanism);
+      if (sensor_rect)
+      {
+         sensor_rect->addSensorCallback([this](const std::string& rect_id) { luaPlayerCollidesWithSensorRect(rect_id); });
+      }
+   }
+}
+
+void LevelScript::luaPlayerCollidesWithRect(int32_t rect_id)
+{
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_RECT);
+   lua_pushnumber(_lua_state, rect_id);
+
+   auto result = lua_pcall(_lua_state, 1, 0, 0);
+
+   if (result != LUA_OK)
+   {
+      error(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_RECT);
+   }
+}
+
+void LevelScript::luaPlayerCollidesWithSensorRect(const std::string& sensor_rect_id)
+{
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_SENSOR_RECT);
+   lua_pushstring(_lua_state, sensor_rect_id.c_str());
+
+   auto result = lua_pcall(_lua_state, 1, 0, 0);
+
+   if (result != LUA_OK)
+   {
+      error(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_SENSOR_RECT);
+   }
 }
