@@ -12,6 +12,7 @@ struct EnemyDescription
    EnemyDescription() = default;
 
    std::string _id;
+   std::string _name;
    std::string _script;
    std::vector<int32_t> _start_position;
    std::vector<int32_t> _path;
