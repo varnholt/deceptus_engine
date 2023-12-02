@@ -191,11 +191,12 @@ struct LuaNode : public GameMechanism, public GameNode
    void stopScript();
 
    // members
-   int32_t _id{-1};
    int32_t _keys_pressed{0};
    std::string _script_name;
+   std::string _name;
    lua_State* _lua_state{nullptr};
    EnemyDescription _enemy_description;
+   bool _visible{true};
 
    // visualization
    sf::Vector2f _start_position_px;

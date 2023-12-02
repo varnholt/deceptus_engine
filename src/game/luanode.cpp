@@ -1688,7 +1688,6 @@ LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(paren
    _z_index = static_cast<int32_t>(ZDepth::Player);
 
    setClassName(typeid(LuaNode).name());
-   setObjectId(filename);
 
    // create instances
    _body_def = new b2BodyDef();
@@ -1703,6 +1702,9 @@ LuaNode::~LuaNode()
 
 void LuaNode::deserializeEnemyDescription()
 {
+   _object_id = _enemy_description._id;
+   _name = _enemy_description._name;
+
    // set up patrol path
    if (!_enemy_description._path.empty())
    {
@@ -1745,11 +1747,6 @@ void LuaNode::deserializeEnemyDescription()
       }
 
       _position_px = _start_position_px;
-   }
-
-   if (!_enemy_description._id.empty())
-   {
-      setObjectId(_enemy_description._id);
    }
 }
 
@@ -2664,6 +2661,11 @@ void LuaNode::playSample(const std::string& sample, float volume)
 
 void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   if (!_visible)
+   {
+      return;
+   }
+
    if (_hit_time.has_value())
    {
       // using namespace std::chrono_literals;

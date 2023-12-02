@@ -7,6 +7,8 @@
 #include "game/scriptproperty.h"
 #include "lua.hpp"
 
+struct LuaNode;
+
 class LevelScript
 {
 public:
@@ -27,6 +29,7 @@ public:
    void giveWeaponGun();
    void giveWeaponSword();
    void writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern);
+   void setLuaNodeVisible(const std::string& search_pattern, bool visible);
 
    // functions on the lua end
    void luaInitialize();
@@ -42,6 +45,8 @@ public:
    void setSearchMechanismCallback(const SearchMechanismCallback& callback);
 
 private:
+   std::vector<std::shared_ptr<LuaNode>> findLuaNodes(const std::string& search_pattern);
+
    std::vector<sf::IntRect> _collision_rects;
    std::vector<ScriptProperty> _properties;
 
