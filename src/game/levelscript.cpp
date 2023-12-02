@@ -192,6 +192,28 @@ int32_t writeLuaNodeProperty(lua_State* state)
 }
 
 /**
+ * @brief writeLuaNodeProperty write a property of another lua node
+ * @param state lua state
+ *    param 1: mechanism name
+ *    param 2: visible flag
+ * @return error code
+ */
+int32_t setLuaNodeVisible(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+   const auto visible = lua_toboolean(state, 2);
+
+   getInstance()->setLuaNodeVisible(search_pattern, visible);
+   return 0;
+}
+
+/**
  * @brief addPlayerSkill add a skill to the player
  * @param state lua state
  *    param 1: skill to add
@@ -329,6 +351,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
    lua_register(_lua_state, "toggle", ::toggle);
    lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
+   lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -528,7 +551,7 @@ void LevelScript::giveWeaponSword()
    giveWeaponToPlayer(sword);
 }
 
-void LevelScript::writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern)
+std::vector<std::shared_ptr<LuaNode>> LevelScript::findLuaNodes(const std::string& search_pattern)
 {
    std::vector<std::shared_ptr<LuaNode>> results;
 
@@ -537,15 +560,30 @@ void LevelScript::writeLuaNodeProperty(const std::string& key, const std::string
    for (auto& node : object_list)
    {
       auto lua_node = std::dynamic_pointer_cast<LuaNode>(node);
-      if (std::regex_match(lua_node->getObjectId(), pattern))
+      if (std::regex_match(lua_node->_name, pattern))
       {
          results.push_back(lua_node);
       }
    }
 
+   return results;
+}
+
+void LevelScript::writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern)
+{
+   const auto results = findLuaNodes(search_pattern);
    for (auto& lua_node : results)
    {
       lua_node->luaWriteProperty(key, value);
+   }
+}
+
+void LevelScript::setLuaNodeVisible(const std::string& search_pattern, bool visible)
+{
+   const auto results = findLuaNodes(search_pattern);
+   for (auto& lua_node : results)
+   {
+      lua_node->_visible = visible;
    }
 }
 

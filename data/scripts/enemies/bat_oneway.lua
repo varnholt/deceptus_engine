@@ -162,7 +162,7 @@ function update(dt)
          if (_activated) then
             _transform_x = _transform_x + dt * _speed
          end
-         setTransform(_start_position:getX() - _transform_x, _start_position:getY() + _transform_y, 0.0)
+         setTransform(_start_position:getX() + _transform_x, _start_position:getY() + _transform_y, 0.0)
       end
    end
 
