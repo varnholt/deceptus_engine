@@ -308,7 +308,7 @@ void Console::execute()
       }
    }
 
-   while (_log.size() > 20)
+   while (_log.size() > 50)
    {
       _log.pop_front();
    }
