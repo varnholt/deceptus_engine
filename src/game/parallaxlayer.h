@@ -2,17 +2,16 @@
 #define PARALLAXLAYER_H
 
 #include <SFML/Graphics.hpp>
+#include "game/parallaxsettings.h"
 #include "game/tilemap.h"
 
 // parallax (move to separate mechanism!)
 struct ParallaxLayer
 {
    int32_t _z_index = 0;
-   sf::Vector2f _factor;
-   sf::Vector2f _offset;
-   sf::Vector2f _error;
-   sf::View _view;
+   ParallaxSettings _settings;
    std::shared_ptr<TileMap> _tile_map;
+   sf::View _view;
 
    static std::unique_ptr<ParallaxLayer> deserialize(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map);
 };

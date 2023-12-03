@@ -867,8 +867,8 @@ void Level::updateViews()
    for (const auto& parallax : _parallax_layers)
    {
       parallax->_view.reset(sf::FloatRect(
-         level_view_x * parallax->_factor.x + parallax->_error.x,
-         level_view_y * parallax->_factor.y + parallax->_error.y,
+         level_view_x * parallax->_settings._factor.x + parallax->_settings._error.x,
+         level_view_y * parallax->_settings._factor.y + parallax->_settings._error.y,
          _view_width,
          _view_height
       ));
