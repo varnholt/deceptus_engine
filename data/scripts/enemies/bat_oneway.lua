@@ -192,7 +192,7 @@ function update(dt)
 
    -- updateDebugRect(0, _position:getX() - 12, _position:getY() + 12, 24, 24)
 
-   if (_can_explode and not _exploded and not _dead) then
+   if (_activated and _can_explode and not _exploded and not _dead) then
 
       -- |24px|
       -- +----+----+----+ - - -

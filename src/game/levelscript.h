@@ -28,8 +28,9 @@ public:
    void giveWeaponBow();
    void giveWeaponGun();
    void giveWeaponSword();
-   void writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern);
+   void writeLuaNodeProperty(const std::string& search_pattern, const std::string& key, const std::string& value);
    void setLuaNodeVisible(const std::string& search_pattern, bool visible);
+   void setLuaNodeActive(const std::string& search_pattern, bool active);
 
    // functions on the lua end
    void luaInitialize();
