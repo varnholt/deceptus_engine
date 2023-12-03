@@ -844,8 +844,12 @@ void Level::createViews()
 
    for (auto& parallax_layer : _parallax_layers)
    {
-      parallax_layer->_view.reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
-      parallax_layer->_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+      parallax_layer->resetView(_view_width, _view_height);
+   }
+
+   for (auto& image_layer : _image_layers)
+   {
+      image_layer->resetView(_view_width, _view_height);
    }
 }
 
@@ -866,12 +870,12 @@ void Level::updateViews()
 
    for (const auto& parallax : _parallax_layers)
    {
-      parallax->_view.reset(sf::FloatRect(
-         level_view_x * parallax->_settings._factor.x + parallax->_settings._error.x,
-         level_view_y * parallax->_settings._factor.y + parallax->_settings._error.y,
-         _view_width,
-         _view_height
-      ));
+      parallax->updateView(level_view_x, level_view_y, _view_width, _view_height);
+   }
+
+   for (const auto& image_layer : _image_layers)
+   {
+      image_layer->updateView(level_view_x, level_view_y, _view_width, _view_height);
    }
 }
 
@@ -1085,7 +1089,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (layer->_z_index == z_index)
          {
-            target.draw(layer->_sprite, {layer->_blend_mode});
+            layer->draw(target, normal);
          }
       }
    }
