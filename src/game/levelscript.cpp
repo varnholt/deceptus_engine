@@ -183,16 +183,16 @@ int32_t writeLuaNodeProperty(lua_State* state)
       return 0;
    }
 
-   const auto key = lua_tostring(state, 1);
-   const auto value = lua_tostring(state, 2);
-   const auto search_pattern = lua_tostring(state, 3);
+   const auto search_pattern = lua_tostring(state, 1);
+   const auto key = lua_tostring(state, 2);
+   const auto value = lua_tostring(state, 3);
 
-   getInstance()->writeLuaNodeProperty(key, value, search_pattern);
+   getInstance()->writeLuaNodeProperty(search_pattern, key, value);
    return 0;
 }
 
 /**
- * @brief writeLuaNodeProperty write a property of another lua node
+ * @brief setLuaNodeVisible write a property of another lua node
  * @param state lua state
  *    param 1: mechanism name
  *    param 2: visible flag
@@ -210,6 +210,28 @@ int32_t setLuaNodeVisible(lua_State* state)
    const auto visible = lua_toboolean(state, 2);
 
    getInstance()->setLuaNodeVisible(search_pattern, visible);
+   return 0;
+}
+
+/**
+ * @brief setLuaNodeActive write a property of another lua node
+ * @param state lua state
+ *    param 1: mechanism name
+ *    param 2: active flag
+ * @return error code
+ */
+int32_t setLuaNodeActive(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+   const auto active = lua_toboolean(state, 2);
+
+   getInstance()->setLuaNodeActive(search_pattern, active);
    return 0;
 }
 
@@ -341,17 +363,18 @@ void LevelScript::setup(const std::filesystem::path& path)
 
    // register callbacks
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
-   lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
-   lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
-   lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
    lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
-   lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
+   lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
+   lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
+   lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
+   lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
+   lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
+   lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
    lua_register(_lua_state, "toggle", ::toggle);
    lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
-   lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -569,7 +592,7 @@ std::vector<std::shared_ptr<LuaNode>> LevelScript::findLuaNodes(const std::strin
    return results;
 }
 
-void LevelScript::writeLuaNodeProperty(const std::string& key, const std::string& value, const std::string& search_pattern)
+void LevelScript::writeLuaNodeProperty(const std::string& search_pattern, const std::string& key, const std::string& value)
 {
    const auto results = findLuaNodes(search_pattern);
    for (auto& lua_node : results)
@@ -584,6 +607,15 @@ void LevelScript::setLuaNodeVisible(const std::string& search_pattern, bool visi
    for (auto& lua_node : results)
    {
       lua_node->_visible = visible;
+   }
+}
+
+void LevelScript::setLuaNodeActive(const std::string& search_pattern, bool active)
+{
+   const auto results = findLuaNodes(search_pattern);
+   for (auto& lua_node : results)
+   {
+      lua_node->setActive(active);
    }
 }
 
