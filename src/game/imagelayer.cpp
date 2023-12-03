@@ -4,9 +4,50 @@
 #include "framework/tmxparser/tmximagelayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "texturepool.h"
+#include "game/texturepool.h"
 
 #include <iostream>
+
+//-----------------------------------------------------------------------------
+void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+{
+   const auto& level_view = target.getView();
+
+   if (_parallax_settings.has_value())
+   {
+      target.setView(_parallax_view);
+   }
+
+   target.draw(_sprite, {_blend_mode});
+
+   if (_parallax_settings.has_value())
+   {
+      target.setView(level_view);
+   }
+}
+
+//-----------------------------------------------------------------------------
+void ImageLayer::updateView(float level_view_x, float level_view_y, float view_width, float view_height)
+{
+   if (!_parallax_settings.has_value())
+   {
+      return;
+   }
+
+   _parallax_view.reset(sf::FloatRect(
+      level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
+      level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y,
+      view_width,
+      view_height
+   ));
+}
+
+//-----------------------------------------------------------------------------
+void ImageLayer::resetView(float view_width, float view_height)
+{
+   _parallax_view.reset(sf::FloatRect(0.0f, 0.0f, view_width, view_height));
+   _parallax_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+}
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxElement>& element, const std::filesystem::path& level_path)
@@ -20,7 +61,7 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
    image->_sprite.setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)));
    image->_sprite.setTexture(*image->_texture);
 
-   sf::BlendMode blend_mode = sf::BlendAdd;
+   sf::BlendMode blend_mode = sf::BlendAlpha;
    if (image_layer->_properties)
    {
       auto z_index_it = image_layer->_properties->_map.find("z");
