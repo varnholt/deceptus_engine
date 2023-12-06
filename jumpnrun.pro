@@ -765,5 +765,6 @@ DISTFILES += \
     doc/level_design/mechanisms.md \
     doc/level_design/readme.md \
     doc/level_design/visual_effects.md \
+    doc/level_scripts/readme.md \
     doc/lua_interface/readme.md \
     doc/physics/readme.md
