@@ -1,168 +1,111 @@
-# callback list
+# Deceptus Level Scripts
 
-```cpp
-lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
-lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
-lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
-lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
-lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
-lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
-lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
-lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
-lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
-lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
-lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
-lua_register(_lua_state, "toggle", ::toggle);
-lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
-```
+Each level can have a `level.lua` script to drive logic that is not covered by standard mechanism behavior.
+For example, you might want to close a door or activate an enemy when the player moves to a certain position.
+All that 'custom' logic goes into the level script.
 
-## addCollisionRect
 
-```cpp
-/**
- * @brief addCollisionRect add a collision rect that fires when the player intersects
- * @param state lua state
- *    param 1: x position relative to where the object has been placed
- *    param 2: y position relative to where the object has been placed
- *    param 3: collision rect width
- *    param 4: collision rect height
- * @return collision rect id
- */
-int32_t addCollisionRect(lua_State* state)
-{
-}
-```
+# The Level Script API
 
-## addSensorRectCallback
+## `addCollisionRect`
 
-```cpp
-/**
- * @brief addSensorRectCallback add a callback when player intersects with a given sensor rect
- * @param state lua state
- *    param 1: identifier of the sensor rect
- * @return error code
- */
-int32_t addSensorRectCallback(lua_State* state)
-{
-}
-```
+Adds a collision rectangle that triggers when the player intersects.
 
-## isMechanismEnabled
-```cpp
-/**
- * @brief isMechanismEnabled check if a given mechanism is enabled
- * @param state lua state
- *    param 1: mechanism ID
- *    return \c true if mechanism is enabled
- * @return error code
- */
-int32_t isMechanismEnabled(lua_State* state)
-{
-}
-```
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int|x position relative to where the object has been placed|
+|2|int|y position relative to where the object has been placed|
+|3|int|Collision rect width|
+|4|int|Collision rect height|
+|return|int|Identifier of the collision rectangle|
 
-## setMechanismEnabled
 
-```cpp
-/**
- * @brief setMechanismEnabled set a mechanism node to enabled/disabled
- * @param state lua state
- *    param 1: search pattern
- *    param 2: enabled flag
- * @return error code
- */
-int32_t setMechanismEnabled(lua_State* state)
-{
-}
-```
+## `addSensorRectCallback`
 
-## toggle
+Adds a callback when the player intersects with a specified sensor rectangle.
 
-```cpp
-/**
- * @brief toggle toggle a mechanism
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: group name
- * @return error code
- */
-int32_t toggle(lua_State* state)
-{
-}
-```
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Identifier of the sensor rect|
 
-## writeLuaNodeProperty
 
-```cpp
-/**
- * @brief writeLuaNodeProperty write a property of another lua node
- * @param state lua state
- *    param 1: property key
- *    param 2: property value
- *    param 3: mechanism name
- *    param 4: group name
- * @return error code
- */
-int32_t writeLuaNodeProperty(lua_State* state)
-{
-}
-```
+## `isMechanismEnabled`
 
-## setLuaNodeVisible
+Checks if a given mechanism is enabled.
 
-```cpp
-/**
- * @brief setLuaNodeVisible write a property of another lua node
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: visible flag
- * @return error code
- */
-int32_t setLuaNodeVisible(lua_State* state)
-{
-}
-```
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|string|Mechanism group (optional)|
 
-## setLuaNodeActive
 
-```cpp
-/**
- * @brief setLuaNodeActive write a property of another lua node
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: active flag
- * @return error code
- */
-int32_t setLuaNodeActive(lua_State* state)
-{
-}
-```
+## `setMechanismEnabled`
 
-## addPlayerSkill
+Sets a mechanism to be enabled or disabled based on the search pattern.
 
-```cpp
-/**
- * @brief addPlayerSkill add a skill to the player
- * @param state lua state
- *    param 1: skill to add
- * @return error code
- */
-int32_t addPlayerSkill(lua_State* state)
-{
-}
-```
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Search pattern (regular expression)|
+|2|bool|Enabled flag|
 
-## removePlayerSkill
 
-```cpp
-/**
- * @brief removePlayerSkill add a skill to the player
- * @param state lua state
- *    param 1: skill to add
- * @return error code
- */
-int32_t removePlayerSkill(lua_State* state)
-{
-}
-```
+## `toggle`
+
+Toggles the enabled state of a mechanism.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|string|Group name (optional)|
+
+
+## `writeLuaNodeProperty`
+
+Writes a property of another Lua node based on the provided parameters.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|string|property key|
+|3|string|property value|
+
+
+## `setLuaNodeVisible`
+
+Sets the visibility of a specified mechanism.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|bool|Visible flag|
+
+
+## `setLuaNodeActive`
+
+Enables or disables the body of a Lua node.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|bool|Active flag|
+
+
+## `addPlayerSkill`
+
+Adds a skill to the player (as specified in `constants.lua`).
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int|Skill to add|
+
+
+## `removePlayerSkill`
+
+Removes a skill from the player (as specified in `constants.lua`).
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int|Skill to remove|
+
+
 
