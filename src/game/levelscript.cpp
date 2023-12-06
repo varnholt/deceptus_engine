@@ -86,7 +86,8 @@ int32_t addSensorRectCallback(lua_State* state)
 /**
  * @brief isMechanismEnabled check if a given mechanism is enabled
  * @param state lua state
- *    param 1: mechanism ID
+ *    param 1: mechanism search pattern
+ *    param 2: mechanism group
  *    return \c true if mechanism is enabled
  * @return error code
  */
@@ -169,10 +170,9 @@ int32_t toggle(lua_State* state)
 /**
  * @brief writeLuaNodeProperty write a property of another lua node
  * @param state lua state
- *    param 1: property key
- *    param 2: property value
- *    param 3: mechanism name
- *    param 4: group name
+ *    param 1: mechanism name
+ *    param 2: property key
+ *    param 3: property value
  * @return error code
  */
 int32_t writeLuaNodeProperty(lua_State* state)
