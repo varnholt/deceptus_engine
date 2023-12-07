@@ -31,6 +31,7 @@ public:
    void writeLuaNodeProperty(const std::string& search_pattern, const std::string& key, const std::string& value);
    void setLuaNodeVisible(const std::string& search_pattern, bool visible);
    void setLuaNodeActive(const std::string& search_pattern, bool active);
+   void showDialogue(const std::string& search_pattern);
 
    // functions on the lua end
    void luaInitialize();

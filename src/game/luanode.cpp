@@ -734,6 +734,33 @@ int32_t applyForce(lua_State* state)
    return 0;
 }
 
+// todo: document
+/**
+ * @brief setVisible
+ * @param state lua state
+ *    param 1: visible flag
+ * @return error code
+ */
+int32_t setVisible(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto visible = lua_toboolean(state, 1);
+   node->_visible = visible;
+
+   return 0;
+}
+
 /**
  * @brief damage the node sets some damage to the player
  * @param state lua state
@@ -1810,6 +1837,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
    lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);
    lua_register(_lua_state, "setTransform", ::setTransform);
+   lua_register(_lua_state, "setVisible", ::setVisible);
    lua_register(_lua_state, "setZ", ::setZIndex);
    lua_register(_lua_state, "timer", ::timer);
    lua_register(_lua_state, "updateDebugRect", ::updateDebugRect);
