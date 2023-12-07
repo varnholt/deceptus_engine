@@ -9,6 +9,7 @@
 #include "game/savestate.h"
 #include "game/weaponfactory.h"
 #include "game/weaponsystem.h"
+#include "mechanisms/dialogue.h"
 #include "mechanisms/sensorrect.h"
 
 #include <regex>
@@ -137,6 +138,27 @@ int32_t setMechanismEnabled(lua_State* state)
    }
 
    getInstance()->setMechanismEnabled(search_pattern, enabled, group);
+   return 0;
+}
+
+// todo: document
+/**
+ * @brief showDialogue show a dialogue
+ * @param state lua state
+ *    param 1: search pattern
+ * @return error code
+ */
+int32_t showDialogue(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+
+   getInstance()->showDialogue(search_pattern);
    return 0;
 }
 
@@ -373,6 +395,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
+   lua_register(_lua_state, "showDialogue", ::showDialogue);
    lua_register(_lua_state, "toggle", ::toggle);
    lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
 
@@ -595,6 +618,13 @@ std::vector<std::shared_ptr<LuaNode>> LevelScript::findLuaNodes(const std::strin
 void LevelScript::writeLuaNodeProperty(const std::string& search_pattern, const std::string& key, const std::string& value)
 {
    const auto results = findLuaNodes(search_pattern);
+
+   if (results.empty())
+   {
+      Log::Error() << "search pattern " << search_pattern << " did not give any results";
+      return;
+   }
+
    for (auto& lua_node : results)
    {
       lua_node->luaWriteProperty(key, value);
@@ -604,6 +634,13 @@ void LevelScript::writeLuaNodeProperty(const std::string& search_pattern, const 
 void LevelScript::setLuaNodeVisible(const std::string& search_pattern, bool visible)
 {
    const auto results = findLuaNodes(search_pattern);
+
+   if (results.empty())
+   {
+      Log::Error() << "search pattern " << search_pattern << " did not give any results";
+      return;
+   }
+
    for (auto& lua_node : results)
    {
       lua_node->_visible = visible;
@@ -613,10 +650,38 @@ void LevelScript::setLuaNodeVisible(const std::string& search_pattern, bool visi
 void LevelScript::setLuaNodeActive(const std::string& search_pattern, bool active)
 {
    const auto results = findLuaNodes(search_pattern);
+
+   if (results.empty())
+   {
+      Log::Error() << "search pattern " << search_pattern << " did not give any results";
+      return;
+   }
+
    for (auto& lua_node : results)
    {
       lua_node->setActive(active);
    }
+}
+
+void LevelScript::showDialogue(const std::string& search_pattern)
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return;
+   }
+
+   auto mechanisms = _search_mechanism_callback(search_pattern, "dialogues");
+
+   if (mechanisms.empty())
+   {
+      Log::Error() << "search pattern " << search_pattern << " did not give any results";
+      return;
+   }
+
+   auto dialogue = std::dynamic_pointer_cast<Dialogue>(mechanisms.front());
+   dialogue->setActive(true);
+   dialogue->showNext();
 }
 
 void LevelScript::addSensorRectCallback(const std::string& search_pattern)
@@ -628,6 +693,13 @@ void LevelScript::addSensorRectCallback(const std::string& search_pattern)
    }
 
    auto mechanisms = _search_mechanism_callback(search_pattern, "sensor_rects");
+
+   if (mechanisms.empty())
+   {
+      Log::Error() << "search pattern " << search_pattern << " did not give any results";
+      return;
+   }
+
    for (auto& mechanism : mechanisms)
    {
       auto sensor_rect = std::dynamic_pointer_cast<SensorRect>(mechanism);
