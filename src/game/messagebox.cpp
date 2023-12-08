@@ -437,6 +437,43 @@ void MessageBox::hideAnimation()
    __active->_state = (contents_alpha_scaled > 0) ? State::HideAnimation : State::Hidden;
 }
 
+void MessageBox::updateBox()
+{
+   if (__active->_closed)
+   {
+      return;
+   }
+
+   auto contents_alpha = 1.0f;
+
+   auto background_color = __active->_properties._background_color;
+   auto window_layer = __layers["window"];
+   auto background_layer = __layers["background"];
+   const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
+   window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+   window_layer->_sprite->setScale(1.0f, 1.0f);
+   window_layer->_sprite->setPosition(__window_position + offset);
+
+   background_layer->_sprite->setColor(background_color);
+   background_layer->_sprite->setScale(1.0f, 1.0f);
+   background_layer->_sprite->setPosition(__background_position + offset);
+
+   // fade in text and buttons
+   const auto contents_alpha_scaled = contents_alpha * 255;
+   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
+   const auto color = sf::Color{255, 255, 255, alpha};
+   auto text_color = __active->_properties._text_color;
+   text_color.a = alpha;
+
+   for (const auto& layer : __box_content_layers)
+   {
+      layer->_sprite->setColor(color);
+   }
+
+   __text.setFillColor(text_color);
+}
+
 void MessageBox::animateText()
 {
    static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
@@ -557,6 +594,12 @@ void MessageBox::update(const sf::Time& /*dt*/)
    {
       hideAnimation();
    }
+
+   // for all message boxes after the first one, the position and alpha must be updated regardless of show/hide events
+   if (!__active->_properties._animate_show_event)
+   {
+      updateBox();
+   }
 }
 
 void MessageBox::messageBox(
@@ -575,6 +618,7 @@ void MessageBox::info(const std::string& message, const MessageBoxCallback& call
 {
    if (__active)
    {
+      Log::Error() << "messagebox deadlock" << std::endl;
       return;
    }
 
