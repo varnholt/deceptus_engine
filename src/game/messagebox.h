@@ -82,6 +82,7 @@ public:
 
    static void showAnimation();
    static void hideAnimation();
+   static void updateBox();
 
 private:
    static void messageBox(
