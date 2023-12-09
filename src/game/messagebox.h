@@ -7,7 +7,6 @@
 #include <SFML/Graphics.hpp>
 
 #include "constants.h"
-#include "framework/image/layer.h"
 
 /*! \brief Implements a simple message box
  *         The MessageBox class is implemented in a way that only a single messagebox is shown at a time (modal).
@@ -16,9 +15,8 @@
  *  is retrieved by passing in a MessageBoxCallback. The message box design is configured by passing in
  *  an instance of LayoutProperties.
  */
-class MessageBox
+struct MessageBox
 {
-public:
    enum class Button
    {
       Invalid = 0x00,
@@ -35,6 +33,14 @@ public:
       Error
    };
 
+   enum class State
+   {
+      ShowAnimation,
+      HideAnimation,
+      Visible,
+      Hidden,
+   };
+
    struct LayoutProperties
    {
       MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
@@ -48,18 +54,9 @@ public:
       bool _animate_hide_event = true;
    };
 
-   enum class State
-   {
-      ShowAnimation,
-      HideAnimation,
-      Visible,
-      Hidden,
-   };
-
    using MessageBoxCallback = std::function<void(Button)>;
 
    MessageBox(Type type, const std::string& message, const MessageBoxCallback& cb, const LayoutProperties& properties, int32_t buttons);
-
    virtual ~MessageBox();
 
    static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
@@ -70,38 +67,19 @@ public:
       const std::string& message,
       const MessageBoxCallback& callback,
       const LayoutProperties& properties = __default_properties,
-      int buttons = static_cast<int32_t>(Button::Ok)
+      int32_t buttons = static_cast<int32_t>(Button::Ok)
    );
 
    static void question(
       const std::string& message,
       const MessageBoxCallback& callback,
       const LayoutProperties& properties = __default_properties,
-      int buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
+      int32_t buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
    );
-
-   static void showAnimation();
-   static void hideAnimation();
-   static void updateBox();
-
-private:
-   static void messageBox(
-      Type type,
-      const std::string& message,
-      const MessageBoxCallback& callback,
-      const LayoutProperties& properties,
-      int32_t buttons
-   );
-
-   static void initializeLayers();
-   static sf::Vector2f pixelLocation(MessageBoxLocation);
-   static void close(Button button);
-   static void animateText();
 
    void initializeControllerCallbacks();
 
    Type _type;
-   std::string _title;  // still unsupported
    std::string _message;
    MessageBoxCallback _callback;
    LayoutProperties _properties;
@@ -114,17 +92,7 @@ private:
    std::function<void(void)> _button_callback_b;
    sf::Time _show_time;
    sf::Time _hide_time;
-   ExecutionMode _previous_mode = ExecutionMode::None;
    State _state{State::Hidden};
 
    static LayoutProperties __default_properties;
-   static std::unique_ptr<MessageBox> __active;
-   static std::vector<std::shared_ptr<Layer>> __layer_stack;
-   static std::map<std::string, std::shared_ptr<Layer>> __layers;
-   static std::vector<std::shared_ptr<Layer>> __box_content_layers;
-   static sf::Font __font;
-   static sf::Text __text;
-   static sf::Vector2f __window_position;
-   static sf::Vector2f __background_position;
-   static bool __initialized;
 };

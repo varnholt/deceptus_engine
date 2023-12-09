@@ -3,6 +3,7 @@
 #include "audio.h"
 #include "displaymode.h"
 #include "framework/easings/easings.h"
+#include "framework/image/layer.h"
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
@@ -18,17 +19,6 @@
 
 namespace
 {
-std::string replaceAll(std::string str, const std::string& from, const std::string& to)
-{
-   size_t start_pos = 0;
-   while ((start_pos = str.find(from, start_pos)) != std::string::npos)
-   {
-      str.replace(start_pos, from.length(), to);
-      start_pos += to.length();
-   }
-   return str;
-}
-
 constexpr auto x_offset_left_px = 110.0f;
 constexpr auto x_offset_center_px = 160.0f;
 constexpr auto x_offset_right_px = 270.0f;
@@ -42,147 +32,33 @@ constexpr auto background_width_px = 318.0f;
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_hide = sf::seconds(0.5f);
-}  // namespace
 
-std::unique_ptr<MessageBox> MessageBox::__active;
-MessageBox::LayoutProperties MessageBox::__default_properties;
-bool MessageBox::__initialized = false;
+std::unique_ptr<MessageBox> __active;
+std::vector<std::shared_ptr<Layer>> __layer_stack;
+std::map<std::string, std::shared_ptr<Layer>> __layers;
+std::vector<std::shared_ptr<Layer>> __box_content_layers;
+sf::Font __font;
+sf::Text __text;
+sf::Vector2f __window_position;
+sf::Vector2f __background_position;
 
-std::vector<std::shared_ptr<Layer>> MessageBox::__layer_stack;
-std::map<std::string, std::shared_ptr<Layer>> MessageBox::__layers;
-std::vector<std::shared_ptr<Layer>> MessageBox::__box_content_layers;
-sf::Font MessageBox::__font;
-sf::Text MessageBox::__text;
-sf::Vector2f MessageBox::__window_position;
-sf::Vector2f MessageBox::__background_position;
-
-MessageBox::MessageBox(
-   MessageBox::Type type,
-   const std::string& message,
-   const MessageBox::MessageBoxCallback& cb,
-   const LayoutProperties& properties,
-   int32_t buttons
-)
-    : _type(type), _message(message), _callback(cb), _properties(properties), _buttons(buttons)
+//----------------------------------------------------------------------------------------------------------------------
+std::string replaceAll(std::string str, const std::string& from, const std::string& to)
 {
-   initializeLayers();
-   initializeControllerCallbacks();
-   _show_time = GlobalClock::getInstance().getElapsedTime();
-
-   DisplayMode::getInstance().enqueueSet(Display::Modal);
-
-   Player::getCurrent()->getControls()->setKeysPressed(0);
-
-   __text.setFont(__font);
-   __text.setCharacterSize(12);
-   __text.setFillColor(_properties._text_color);
-   __text.setString("");
+   size_t start_pos = 0;
+   while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+   {
+      str.replace(start_pos, from.length(), to);
+      start_pos += to.length();
+   }
+   return str;
 }
 
-MessageBox::~MessageBox()
+//----------------------------------------------------------------------------------------------------------------------
+void initializeLayers()
 {
-   auto& gci = GameControllerIntegration::getInstance();
-   if (gci.isControllerConnected())
-   {
-      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
-      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
-   }
+   static bool __initialized = false;
 
-   DisplayMode::getInstance().enqueueUnset(Display::Modal);
-}
-
-void MessageBox::close(MessageBox::Button button)
-{
-   auto callback = __active->_callback;
-
-   if (__active->_properties._animate_hide_event)
-   {
-      __active->_closed = true;
-      __active->_hide_time = GlobalClock::getInstance().getElapsedTime();
-   }
-   else
-   {
-      __active.reset();
-   }
-
-   if (callback)
-   {
-      callback(button);
-   }
-}
-
-bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
-{
-   if (!__active)
-   {
-      return false;
-   }
-
-   if (__active->_closed)
-   {
-      return false;
-   }
-
-   if (__active->_state != State::Visible)
-   {
-      return false;
-   }
-
-   if (__active->_ready_to_draw)
-   {
-      MessageBox::Button button = MessageBox::Button::Invalid;
-
-      // yay
-      if (key == sf::Keyboard::Return)
-      {
-         Audio::getInstance().playSample({"messagebox_confirm.wav"});
-
-         if (__active->_buttons & static_cast<int32_t>(Button::Yes))
-         {
-            button = Button::Yes;
-         }
-         else if (__active->_buttons & static_cast<int32_t>(Button::Ok))
-         {
-            button = Button::Ok;
-         }
-
-         if (__active->_properties._animate_text)
-         {
-            if (__active->_chars_shown < __active->_message.length())
-            {
-               __active->_properties._animate_text = false;
-               return true;
-            }
-         }
-      }
-
-      // nay
-      if (key == sf::Keyboard::Escape)
-      {
-         Audio::getInstance().playSample({"messagebox_cancel.wav"});
-
-         if (__active->_buttons & static_cast<int32_t>(Button::No))
-         {
-            button = Button::No;
-         }
-         else if (__active->_buttons & static_cast<int32_t>(Button::Cancel))
-         {
-            button = Button::Cancel;
-         }
-      }
-
-      // call callback and close message box
-      if (button != MessageBox::Button::Invalid)
-      {
-         close(button);
-      }
-   }
-
-   return true;
-}
-
-void MessageBox::initializeLayers()
-{
    if (__initialized)
    {
       return;
@@ -244,7 +120,8 @@ void MessageBox::initializeLayers()
    __initialized = true;
 }
 
-sf::Vector2f MessageBox::pixelLocation(MessageBoxLocation location)
+//----------------------------------------------------------------------------------------------------------------------
+sf::Vector2f pixelLocation(MessageBoxLocation location)
 {
    sf::Vector2f pos;
 
@@ -311,25 +188,68 @@ sf::Vector2f MessageBox::pixelLocation(MessageBoxLocation location)
    return pos;
 }
 
-void MessageBox::initializeControllerCallbacks()
+//----------------------------------------------------------------------------------------------------------------------
+void close(MessageBox::Button button)
 {
-   auto& gci = GameControllerIntegration::getInstance();
-   if (gci.isControllerConnected())
+   auto callback = __active->_callback;
+
+   if (__active->_properties._animate_hide_event)
    {
-      _button_callback_a = []() { keyboardKeyPressed(sf::Keyboard::Return); };
-      _button_callback_b = []() { keyboardKeyPressed(sf::Keyboard::Escape); };
-      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
-      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
+      __active->_closed = true;
+      __active->_hide_time = GlobalClock::getInstance().getElapsedTime();
+   }
+   else
+   {
+      __active.reset();
+   }
+
+   if (callback)
+   {
+      callback(button);
    }
 }
 
-void MessageBox::showAnimation()
+//----------------------------------------------------------------------------------------------------------------------
+void animateText()
 {
-   if (__active->_closed)
-   {
-      return;
-   }
+   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
 
+   auto x =
+      (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds() -
+       (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
+
+   x *= __active->_properties._animate_text_speed;
+   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
+
+   // if the thing is animated we want to wait for the animation_scale_time to pass
+   // so x might go into negative for that duration.
+   x = std::max(0.0f, x);
+
+   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
+
+   if (__active->_chars_shown != to)
+   {
+      __active->_chars_shown = to;
+      __text.setString(__active->_message.substr(0, to));
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void updateButtonLayers()
+{
+   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
+   const auto buttons = __active->_buttons;
+
+   // init button layers
+   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
+   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
+   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void showAnimation()
+{
    auto contents_alpha = 1.0f;
    const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
 
@@ -394,16 +314,12 @@ void MessageBox::showAnimation()
    __text.setFillColor(text_color);
 
    // update state
-   __active->_state = (contents_alpha_scaled < 255) ? State::ShowAnimation : State::Visible;
+   __active->_state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
 }
 
-void MessageBox::hideAnimation()
+//----------------------------------------------------------------------------------------------------------------------
+void hideAnimation()
 {
-   if (!__active->_closed)
-   {
-      return;
-   }
-
    const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __active->_hide_time;
 
    const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
@@ -434,16 +350,12 @@ void MessageBox::hideAnimation()
    }
 
    // update state
-   __active->_state = (contents_alpha_scaled > 0) ? State::HideAnimation : State::Hidden;
+   __active->_state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
 }
 
-void MessageBox::updateBox()
+//----------------------------------------------------------------------------------------------------------------------
+void updateBox()
 {
-   if (__active->_closed)
-   {
-      return;
-   }
-
    auto contents_alpha = 1.0f;
 
    auto background_color = __active->_properties._background_color;
@@ -474,30 +386,147 @@ void MessageBox::updateBox()
    __text.setFillColor(text_color);
 }
 
-void MessageBox::animateText()
+//----------------------------------------------------------------------------------------------------------------------
+void messageBox(
+   MessageBox::Type type,
+   const std::string& message,
+   const MessageBox::MessageBoxCallback& callback,
+   const MessageBox::LayoutProperties& properties,
+   int32_t buttons
+)
 {
-   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
+   Audio::getInstance().playSample({"messagebox_open_01.wav"});
+   __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
+}
 
-   auto x =
-      (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds() -
-       (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
+}  // namespace
 
-   x *= __active->_properties._animate_text_speed;
-   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
+MessageBox::LayoutProperties MessageBox::__default_properties;
 
-   // if the thing is animated we want to wait for the animation_scale_time to pass
-   // so x might go into negative for that duration.
-   x = std::max(0.0f, x);
+//----------------------------------------------------------------------------------------------------------------------
+MessageBox::MessageBox(
+   MessageBox::Type type,
+   const std::string& message,
+   const MessageBox::MessageBoxCallback& cb,
+   const LayoutProperties& properties,
+   int32_t buttons
+)
+    : _type(type), _message(message), _callback(cb), _properties(properties), _buttons(buttons)
+{
+   initializeLayers();
+   initializeControllerCallbacks();
+   _show_time = GlobalClock::getInstance().getElapsedTime();
 
-   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
+   DisplayMode::getInstance().enqueueSet(Display::Modal);
 
-   if (__active->_chars_shown != to)
+   Player::getCurrent()->getControls()->setKeysPressed(0);
+
+   __text.setFont(__font);
+   __text.setCharacterSize(12);
+   __text.setFillColor(_properties._text_color);
+   __text.setString("");
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+MessageBox::~MessageBox()
+{
+   auto& gci = GameControllerIntegration::getInstance();
+   if (gci.isControllerConnected())
    {
-      __active->_chars_shown = to;
-      __text.setString(__active->_message.substr(0, to));
+      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
+      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
+   }
+
+   DisplayMode::getInstance().enqueueUnset(Display::Modal);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
+{
+   if (!__active)
+   {
+      return false;
+   }
+
+   if (__active->_closed)
+   {
+      return false;
+   }
+
+   if (__active->_state != State::Visible)
+   {
+      return false;
+   }
+
+   if (!__active->_ready_to_draw)
+   {
+      return false;
+   }
+
+   MessageBox::Button button = MessageBox::Button::Invalid;
+
+   // yay
+   if (key == sf::Keyboard::Return)
+   {
+      Audio::getInstance().playSample({"messagebox_confirm.wav"});
+
+      if (__active->_buttons & static_cast<int32_t>(Button::Yes))
+      {
+         button = Button::Yes;
+      }
+      else if (__active->_buttons & static_cast<int32_t>(Button::Ok))
+      {
+         button = Button::Ok;
+      }
+
+      if (__active->_properties._animate_text)
+      {
+         if (__active->_chars_shown < __active->_message.length())
+         {
+            __active->_properties._animate_text = false;
+            return true;
+         }
+      }
+   }
+
+   // nay
+   if (key == sf::Keyboard::Escape)
+   {
+      Audio::getInstance().playSample({"messagebox_cancel.wav"});
+
+      if (__active->_buttons & static_cast<int32_t>(Button::No))
+      {
+         button = Button::No;
+      }
+      else if (__active->_buttons & static_cast<int32_t>(Button::Cancel))
+      {
+         button = Button::Cancel;
+      }
+   }
+
+   // call callback and close message box
+   if (button != MessageBox::Button::Invalid)
+   {
+      close(button);
+   }
+
+   return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::initializeControllerCallbacks()
+{
+   auto& gci = GameControllerIntegration::getInstance();
+   if (gci.isControllerConnected())
+   {
+      _button_callback_a = []() { keyboardKeyPressed(sf::Keyboard::Return); };
+      _button_callback_b = []() { keyboardKeyPressed(sf::Keyboard::Escape); };
+      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
+      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (!__active)
@@ -564,6 +593,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::update(const sf::Time& /*dt*/)
 {
    if (!__active)
@@ -573,47 +603,29 @@ void MessageBox::update(const sf::Time& /*dt*/)
 
    __active->_ready_to_draw = true;
 
-   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
-   const auto buttons = __active->_buttons;
-
-   // init button layers
-   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::Yes);
-   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(Button::No);
-   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::Yes);
-   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(Button::No);
+   updateButtonLayers();
 
    // animate
    __active->_state = State::Visible;  // default to visible until adjusted by either showAnimation or hideAnimation
 
-   if (__active->_properties._animate_show_event)
+   if (__active->_properties._animate_show_event && !__active->_closed)
    {
       showAnimation();
    }
 
-   if (__active->_properties._animate_hide_event)
+   if (__active->_properties._animate_hide_event && __active->_closed)
    {
       hideAnimation();
    }
 
    // for all message boxes after the first one, the position and alpha must be updated regardless of show/hide events
-   if (!__active->_properties._animate_show_event)
+   if (!__active->_properties._animate_show_event && !__active->_closed)
    {
       updateBox();
    }
 }
 
-void MessageBox::messageBox(
-   Type type,
-   const std::string& message,
-   const MessageBoxCallback& callback,
-   const LayoutProperties& properties,
-   int32_t buttons
-)
-{
-   Audio::getInstance().playSample({"messagebox_open_01.wav"});
-   __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
-}
-
+//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::info(const std::string& message, const MessageBoxCallback& callback, const LayoutProperties& properties, int32_t buttons)
 {
    if (__active)
@@ -625,6 +637,7 @@ void MessageBox::info(const std::string& message, const MessageBoxCallback& call
    messageBox(MessageBox::Type::Info, message, callback, properties, buttons);
 }
 
+//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::question(
    const std::string& message,
    const MessageBox::MessageBoxCallback& callback,
@@ -634,6 +647,7 @@ void MessageBox::question(
 {
    if (__active)
    {
+      Log::Error() << "messagebox deadlock" << std::endl;
       return;
    }
 
