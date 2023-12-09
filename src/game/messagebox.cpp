@@ -34,6 +34,8 @@ static const auto animation_fade_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_hide = sf::seconds(0.5f);
 
 std::unique_ptr<MessageBox> __active;
+std::unique_ptr<MessageBox> __previous;
+
 std::vector<std::shared_ptr<Layer>> __layer_stack;
 std::map<std::string, std::shared_ptr<Layer>> __layers;
 std::vector<std::shared_ptr<Layer>> __box_content_layers;
@@ -195,8 +197,9 @@ void close(MessageBox::Button button)
 
    if (__active->_properties._animate_hide_event)
    {
-      __active->_closed = true;
-      __active->_hide_time = GlobalClock::getInstance().getElapsedTime();
+      __previous = std::move(__active);
+      __previous->_closed = true;
+      __previous->_hide_time = GlobalClock::getInstance().getElapsedTime();
    }
    else
    {
@@ -320,7 +323,7 @@ void showAnimation()
 //----------------------------------------------------------------------------------------------------------------------
 void hideAnimation()
 {
-   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __active->_hide_time;
+   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __previous->_hide_time;
 
    const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
    const auto contents_alpha = 1.0f - t_normalized;
@@ -328,13 +331,13 @@ void hideAnimation()
 
    if (contents_alpha < 0.0f)
    {
-      __active->_reset_instance = true;
+      __previous->_reset_instance = true;
    }
    else
    {
       const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
-      auto background_color = __active->_properties._background_color;
-      auto text_color = __active->_properties._text_color;
+      auto background_color = __previous->_properties._background_color;
+      auto text_color = __previous->_properties._text_color;
       text_color.a = contents_alpha_scaled;
       background_color.a = contents_alpha_scaled;
 
@@ -350,7 +353,7 @@ void hideAnimation()
    }
 
    // update state
-   __active->_state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
+   __previous->_state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -587,9 +590,9 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    window.draw(__text, states);
 
    // not particularly nice to delete the instance from inside the draw call
-   if (__active->_reset_instance)
+   if (__previous && __previous->_reset_instance)
    {
-      __active.reset();
+      __previous.reset();
    }
 }
 
@@ -613,7 +616,7 @@ void MessageBox::update(const sf::Time& /*dt*/)
       showAnimation();
    }
 
-   if (__active->_properties._animate_hide_event && __active->_closed)
+   if (__previous && __previous->_properties._animate_hide_event && __previous->_closed)
    {
       hideAnimation();
    }
