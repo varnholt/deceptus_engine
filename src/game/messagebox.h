@@ -77,11 +77,15 @@ struct MessageBox
       int32_t buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
    );
 
+   void drawLayers(sf::RenderTarget& window, sf::RenderStates states);
+   void drawText(sf::RenderStates states, sf::RenderTarget& window);
+
    void initializeControllerCallbacks();
 
    void showAnimation();
    void hideAnimation();
    void updateContents();
+   void animateText();
 
    Type _type;
    std::string _message;
