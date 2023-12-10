@@ -251,145 +251,6 @@ void updateButtonLayers()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void showAnimation()
-{
-   auto contents_alpha = 1.0f;
-   const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
-
-   auto background_color = __active->_properties._background_color;
-   auto window_layer = __layers["window"];
-   auto background_layer = __layers["background"];
-   const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-
-   if (visible_time < animation_scale_time_show)  // zoom effect
-   {
-      contents_alpha = 0.0f;
-
-      const auto t_normalized = visible_time.asSeconds() / animation_scale_time_show.asSeconds();
-
-      const auto scale_x = Easings::easeOutBack<float>(t_normalized);
-      const auto scale_y = scale_x;
-
-      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
-      window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
-      window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset + offset.x, __window_position.y + offset.y);
-
-      const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
-      background_color.a = static_cast<uint8_t>(t_normalized * 255);
-      background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale(scale_x, scale_y);
-      background_layer->_sprite->setPosition(
-         __background_position.x + background_scale_offset + offset.x, __background_position.y + offset.y
-      );
-   }
-   else  // fade in
-   {
-      window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
-      window_layer->_sprite->setScale(1.0f, 1.0f);
-      window_layer->_sprite->setPosition(__window_position + offset);
-
-      background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale(1.0f, 1.0f);
-      background_layer->_sprite->setPosition(__background_position + offset);
-
-      if (visible_time < animation_scale_time_show + animation_fade_time_show)
-      {
-         const auto t_normalized =
-            (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
-
-         contents_alpha = t_normalized;
-      }
-   }
-
-   // fade in text and buttons
-   const auto contents_alpha_scaled = contents_alpha * 255;
-   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
-   const auto color = sf::Color{255, 255, 255, alpha};
-   auto text_color = __active->_properties._text_color;
-   text_color.a = alpha;
-
-   for (const auto& layer : __box_content_layers)
-   {
-      layer->_sprite->setColor(color);
-   }
-
-   __text.setFillColor(text_color);
-
-   // update state
-   __active->_state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void hideAnimation()
-{
-   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __previous->_hide_time;
-
-   const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
-   const auto contents_alpha = 1.0f - t_normalized;
-   const auto contents_alpha_scaled = static_cast<uint8_t>(contents_alpha * 255);
-
-   if (contents_alpha < 0.0f)
-   {
-      __previous->_reset_instance = true;
-   }
-   else
-   {
-      const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
-      auto background_color = __previous->_properties._background_color;
-      auto text_color = __previous->_properties._text_color;
-      text_color.a = contents_alpha_scaled;
-      background_color.a = contents_alpha_scaled;
-
-      __layers["window"]->_sprite->setColor(window_color);
-      __layers["background"]->_sprite->setColor(background_color);
-
-      for (const auto& layer : __box_content_layers)
-      {
-         layer->_sprite->setColor(window_color);
-      }
-
-      __text.setFillColor(text_color);
-   }
-
-   // update state
-   __previous->_state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void updateBox()
-{
-   auto contents_alpha = 1.0f;
-
-   auto background_color = __active->_properties._background_color;
-   auto window_layer = __layers["window"];
-   auto background_layer = __layers["background"];
-   const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-
-   window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
-   window_layer->_sprite->setScale(1.0f, 1.0f);
-   window_layer->_sprite->setPosition(__window_position + offset);
-
-   background_layer->_sprite->setColor(background_color);
-   background_layer->_sprite->setScale(1.0f, 1.0f);
-   background_layer->_sprite->setPosition(__background_position + offset);
-
-   // fade in text and buttons
-   const auto contents_alpha_scaled = contents_alpha * 255;
-   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
-   const auto color = sf::Color{255, 255, 255, alpha};
-   auto text_color = __active->_properties._text_color;
-   text_color.a = alpha;
-
-   for (const auto& layer : __box_content_layers)
-   {
-      layer->_sprite->setColor(color);
-   }
-
-   __text.setFillColor(text_color);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 void messageBox(
    MessageBox::Type type,
    const std::string& message,
@@ -613,19 +474,158 @@ void MessageBox::update(const sf::Time& /*dt*/)
 
    if (__active->_properties._animate_show_event && !__active->_closed)
    {
-      showAnimation();
+      __active->showAnimation();
    }
 
    if (__previous && __previous->_properties._animate_hide_event && __previous->_closed)
    {
-      hideAnimation();
+      __previous->hideAnimation();
    }
 
    // for all message boxes after the first one, the position and alpha must be updated regardless of show/hide events
    if (!__active->_properties._animate_show_event && !__active->_closed)
    {
-      updateBox();
+      __active->updateContents();
    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::updateContents()
+{
+   auto contents_alpha = 1.0f;
+
+   auto background_color = _properties._background_color;
+   auto window_layer = __layers["window"];
+   auto background_layer = __layers["background"];
+   const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
+   window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+   window_layer->_sprite->setScale(1.0f, 1.0f);
+   window_layer->_sprite->setPosition(__window_position + offset);
+
+   background_layer->_sprite->setColor(background_color);
+   background_layer->_sprite->setScale(1.0f, 1.0f);
+   background_layer->_sprite->setPosition(__background_position + offset);
+
+   // fade in text and buttons
+   const auto contents_alpha_scaled = contents_alpha * 255;
+   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
+   const auto color = sf::Color{255, 255, 255, alpha};
+   auto text_color = _properties._text_color;
+   text_color.a = alpha;
+
+   for (const auto& layer : __box_content_layers)
+   {
+      layer->_sprite->setColor(color);
+   }
+
+   __text.setFillColor(text_color);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::showAnimation()
+{
+   auto contents_alpha = 1.0f;
+   const auto visible_time = GlobalClock::getInstance().getElapsedTime() - _show_time;
+
+   auto background_color = _properties._background_color;
+   auto window_layer = __layers["window"];
+   auto background_layer = __layers["background"];
+   const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
+   if (visible_time < animation_scale_time_show)  // zoom effect
+   {
+      contents_alpha = 0.0f;
+
+      const auto t_normalized = visible_time.asSeconds() / animation_scale_time_show.asSeconds();
+
+      const auto scale_x = Easings::easeOutBack<float>(t_normalized);
+      const auto scale_y = scale_x;
+
+      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
+      window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
+      window_layer->_sprite->setScale(scale_x, scale_y);
+      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset + offset.x, __window_position.y + offset.y);
+
+      const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
+      background_color.a = static_cast<uint8_t>(t_normalized * 255);
+      background_layer->_sprite->setColor(background_color);
+      background_layer->_sprite->setScale(scale_x, scale_y);
+      background_layer->_sprite->setPosition(
+         __background_position.x + background_scale_offset + offset.x, __background_position.y + offset.y
+      );
+   }
+   else  // fade in
+   {
+      window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+      window_layer->_sprite->setScale(1.0f, 1.0f);
+      window_layer->_sprite->setPosition(__window_position + offset);
+
+      background_layer->_sprite->setColor(background_color);
+      background_layer->_sprite->setScale(1.0f, 1.0f);
+      background_layer->_sprite->setPosition(__background_position + offset);
+
+      if (visible_time < animation_scale_time_show + animation_fade_time_show)
+      {
+         const auto t_normalized =
+            (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
+
+         contents_alpha = t_normalized;
+      }
+   }
+
+   // fade in text and buttons
+   const auto contents_alpha_scaled = contents_alpha * 255;
+   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
+   const auto color = sf::Color{255, 255, 255, alpha};
+   auto text_color = _properties._text_color;
+   text_color.a = alpha;
+
+   for (const auto& layer : __box_content_layers)
+   {
+      layer->_sprite->setColor(color);
+   }
+
+   __text.setFillColor(text_color);
+
+   // update state
+   _state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::hideAnimation()
+{
+   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __previous->_hide_time;
+
+   const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
+   const auto contents_alpha = 1.0f - t_normalized;
+   const auto contents_alpha_scaled = static_cast<uint8_t>(contents_alpha * 255);
+
+   if (contents_alpha < 0.0f)
+   {
+      _reset_instance = true;
+   }
+   else
+   {
+      const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
+      auto background_color = _properties._background_color;
+      auto text_color = _properties._text_color;
+      text_color.a = contents_alpha_scaled;
+      background_color.a = contents_alpha_scaled;
+
+      __layers["window"]->_sprite->setColor(window_color);
+      __layers["background"]->_sprite->setColor(background_color);
+
+      for (const auto& layer : __box_content_layers)
+      {
+         layer->_sprite->setColor(window_color);
+      }
+
+      __text.setFillColor(text_color);
+   }
+
+   // update state
+   _state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

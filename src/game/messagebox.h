@@ -79,6 +79,10 @@ struct MessageBox
 
    void initializeControllerCallbacks();
 
+   void showAnimation();
+   void hideAnimation();
+   void updateContents();
+
    Type _type;
    std::string _message;
    MessageBoxCallback _callback;
