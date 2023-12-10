@@ -213,31 +213,6 @@ void close(MessageBox::Button button)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void animateText()
-{
-   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
-
-   auto x =
-      (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds() -
-       (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
-
-   x *= __active->_properties._animate_text_speed;
-   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
-
-   // if the thing is animated we want to wait for the animation_scale_time to pass
-   // so x might go into negative for that duration.
-   x = std::max(0.0f, x);
-
-   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
-
-   if (__active->_chars_shown != to)
-   {
-      __active->_chars_shown = to;
-      __text.setString(__active->_message.substr(0, to));
-   }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 void updateButtonLayers()
 {
    const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
@@ -391,6 +366,51 @@ void MessageBox::initializeControllerCallbacks()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
+{
+   for (auto& layer : __layer_stack)
+   {
+      if (layer->_visible)
+      {
+         layer->draw(window, states);
+      }
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
+{
+   _message = replaceAll(_message, "[br]", "\n");
+
+   if (_properties._animate_text)
+   {
+      animateText();
+   }
+   else
+   {
+      __text.setString(_message);
+   }
+
+   // text alignment
+   const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+   auto x = 0.0f;
+   if (_properties._centered)
+   {
+      const auto rect = __text.getGlobalBounds();
+      const auto left = pos.x;
+      x = left + (textbox_width_px - rect.width) * 0.5f;
+   }
+   else
+   {
+      x = pos.x + text_margin_x_px;
+   }
+
+   __text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
+
+   window.draw(__text, states);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (!__active)
@@ -413,47 +433,38 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    window.setView(pixelOrtho);
 
-   for (auto& layer : __layer_stack)
-   {
-      if (layer->_visible)
-      {
-         layer->draw(window, states);
-      }
-   }
-
-   __active->_message = replaceAll(__active->_message, "[br]", "\n");
-
-   if (__active->_properties._animate_text)
-   {
-      animateText();
-   }
-   else
-   {
-      __text.setString(__active->_message);
-   }
-
-   // text alignment
-   const auto pos = pixelLocation(__active->_properties._location) + __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-   auto x = 0.0f;
-   if (__active->_properties._centered)
-   {
-      const auto rect = __text.getGlobalBounds();
-      const auto left = pos.x;
-      x = left + (textbox_width_px - rect.width) * 0.5f;
-   }
-   else
-   {
-      x = pos.x + text_margin_x_px;
-   }
-
-   __text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
-
-   window.draw(__text, states);
+   __active->drawLayers(window, states);
+   __active->drawText(states, window);
 
    // not particularly nice to delete the instance from inside the draw call
    if (__previous && __previous->_reset_instance)
    {
       __previous.reset();
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::animateText()
+{
+   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
+
+   auto x =
+      (GlobalClock::getInstance().getElapsedTime().asSeconds() - _show_time.asSeconds() -
+       (_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
+
+   x *= _properties._animate_text_speed;
+   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
+
+   // if the thing is animated we want to wait for the animation_scale_time to pass
+   // so x might go into negative for that duration.
+   x = std::max(0.0f, x);
+
+   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_message.size()));
+
+   if (_chars_shown != to)
+   {
+      _chars_shown = to;
+      __text.setString(_message.substr(0, to));
    }
 }
 
