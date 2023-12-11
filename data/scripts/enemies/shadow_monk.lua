@@ -14,7 +14,7 @@ properties = {
 SPRITE_WIDTH = 72
 SPRITE_HEIGHT = 120
 SPRITE_COUNTS = {20, 20, 24}
-ANIMATION_SPEED = 20.0
+ANIMATION_SPEEDS = {13.0, 13.0, 50.0}
 ROW_IDLE = 1
 ROW_BLINK = 2
 ROW_APPEAR = 3
@@ -105,9 +105,9 @@ function update(dt)
    sprite_index = 0
 
    if (_animation_dir_forward) then
-      sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNTS[_current_cycle]))
+      sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEEDS[_current_cycle], SPRITE_COUNTS[_current_cycle]))
    else
-      sprite_index = SPRITE_COUNTS[_current_cycle] - 1 - math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNTS[_current_cycle]))
+      sprite_index = SPRITE_COUNTS[_current_cycle] - 1 - math.floor(math.fmod(_elapsed * ANIMATION_SPEEDS[_current_cycle], SPRITE_COUNTS[_current_cycle]))
    end
 
    if (sprite_index ~= _sprite_index) then
