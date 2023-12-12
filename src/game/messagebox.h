@@ -106,8 +106,8 @@ struct MessageBox
    sf::Time _hide_time;
    State _state{State::Hidden};
    sf::Text _text;
-   sf::Vector2f __window_position;
-   sf::Vector2f __background_position;
+   sf::Vector2f _window_position;
+   sf::Vector2f _background_position;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
    std::vector<std::shared_ptr<Layer>> _box_content_layers;
