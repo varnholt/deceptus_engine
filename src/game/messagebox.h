@@ -8,6 +8,8 @@
 
 #include "constants.h"
 
+struct Layer;
+
 /*! \brief Implements a simple message box
  *         The MessageBox class is implemented in a way that only a single messagebox is shown at a time (modal).
  *
@@ -81,10 +83,12 @@ struct MessageBox
    void drawText(sf::RenderStates states, sf::RenderTarget& window);
 
    void initializeControllerCallbacks();
+   void initializeLayers();
 
    void showAnimation();
    void hideAnimation();
    void updateContents();
+   void updateButtonLayers();
    void animateText();
 
    Type _type;
@@ -93,7 +97,7 @@ struct MessageBox
    LayoutProperties _properties;
    int32_t _buttons = 0;
    uint32_t _chars_shown = 0;
-   bool _ready_to_draw = false;
+   bool _initialized = false;
    bool _closed = false;
    bool _reset_instance = false;
    std::function<void(void)> _button_callback_a;
@@ -101,6 +105,12 @@ struct MessageBox
    sf::Time _show_time;
    sf::Time _hide_time;
    State _state{State::Hidden};
+   sf::Text _text;
+   sf::Vector2f __window_position;
+   sf::Vector2f __background_position;
+   std::vector<std::shared_ptr<Layer>> _layer_stack;
+   std::map<std::string, std::shared_ptr<Layer>> _layers;
+   std::vector<std::shared_ptr<Layer>> _box_content_layers;
 
    static LayoutProperties __default_properties;
 };

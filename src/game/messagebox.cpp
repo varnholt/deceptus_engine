@@ -36,13 +36,7 @@ static const auto animation_fade_time_hide = sf::seconds(0.5f);
 std::unique_ptr<MessageBox> __active;
 std::unique_ptr<MessageBox> __previous;
 
-std::vector<std::shared_ptr<Layer>> __layer_stack;
-std::map<std::string, std::shared_ptr<Layer>> __layers;
-std::vector<std::shared_ptr<Layer>> __box_content_layers;
 sf::Font __font;
-sf::Text __text;
-sf::Vector2f __window_position;
-sf::Vector2f __background_position;
 
 //----------------------------------------------------------------------------------------------------------------------
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
@@ -54,72 +48,6 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
       start_pos += to.length();
    }
    return str;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void initializeLayers()
-{
-   static bool __initialized = false;
-
-   if (__initialized)
-   {
-      return;
-   }
-
-   PSD psd;
-   psd.setColorFormat(PSD::ColorFormat::ABGR);
-   psd.load("data/game/messagebox.psd");
-
-   if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
-   {
-      Log::Error() << "font load fuckup";
-   }
-
-   const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
-
-   // load layers
-   for (const auto& layer : psd.getLayers())
-   {
-      // skip groups
-      if (!layer.isImageLayer())
-      {
-         continue;
-      }
-
-      auto tmp = std::make_shared<Layer>();
-
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
-
-      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
-      {
-         Log::Fatal() << "failed to create texture: " << layer.getName();
-      }
-
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
-
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
-
-      __layer_stack.push_back(tmp);
-      __layers[layer.getName()] = tmp;
-   }
-
-   __window_position = __layers["window"]->_sprite->getPosition();
-   __background_position = __layers["background"]->_sprite->getPosition();
-
-   __box_content_layers.push_back(__layers["yes_xbox_1"]);
-   __box_content_layers.push_back(__layers["no_xbox_1"]);
-   __box_content_layers.push_back(__layers["yes_pc_1"]);
-   __box_content_layers.push_back(__layers["no_pc_1"]);
-
-   // background layer is unused for now
-   __layers["temp_bg"]->_visible = false;
-
-   __initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -213,19 +141,6 @@ void close(MessageBox::Button button)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void updateButtonLayers()
-{
-   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
-   const auto buttons = __active->_buttons;
-
-   // init button layers
-   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
-   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
-   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
-   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
 void messageBox(
    MessageBox::Type type,
    const std::string& message,
@@ -260,10 +175,10 @@ MessageBox::MessageBox(
 
    Player::getCurrent()->getControls()->setKeysPressed(0);
 
-   __text.setFont(__font);
-   __text.setCharacterSize(12);
-   __text.setFillColor(_properties._text_color);
-   __text.setString("");
+   _text.setFont(__font);
+   _text.setCharacterSize(12);
+   _text.setFillColor(_properties._text_color);
+   _text.setString("");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -277,6 +192,65 @@ MessageBox::~MessageBox()
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::Modal);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::initializeLayers()
+{
+   static bool __initialized = false;
+   static PSD psd;
+
+   if (!__initialized)
+   {
+      psd.setColorFormat(PSD::ColorFormat::ABGR);
+      psd.load("data/game/messagebox.psd");
+
+      if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
+      {
+         Log::Error() << "font load fuckup";
+      }
+      const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
+   }
+
+   // load layers
+   for (const auto& layer : psd.getLayers())
+   {
+      // skip groups
+      if (!layer.isImageLayer())
+      {
+         continue;
+      }
+
+      auto tmp = std::make_shared<Layer>();
+      auto texture = std::make_shared<sf::Texture>();
+      auto sprite = std::make_shared<sf::Sprite>();
+
+      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
+      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+
+      sprite->setTexture(*texture, true);
+      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
+
+      _layer_stack.push_back(tmp);
+      _layers[layer.getName()] = tmp;
+   }
+
+   _box_content_layers.push_back(_layers["yes_xbox_1"]);
+   _box_content_layers.push_back(_layers["no_xbox_1"]);
+   _box_content_layers.push_back(_layers["yes_pc_1"]);
+   _box_content_layers.push_back(_layers["no_pc_1"]);
+
+   // background layer is unused for now
+   _layers["temp_bg"]->_visible = false;
+
+   __initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -297,7 +271,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
-   if (!__active->_ready_to_draw)
+   if (!__active->_initialized)
    {
       return false;
    }
@@ -368,7 +342,7 @@ void MessageBox::initializeControllerCallbacks()
 //----------------------------------------------------------------------------------------------------------------------
 void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
 {
-   for (auto& layer : __layer_stack)
+   for (auto& layer : _layer_stack)
    {
       if (layer->_visible)
       {
@@ -388,7 +362,7 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
    }
    else
    {
-      __text.setString(_message);
+      _text.setString(_message);
    }
 
    // text alignment
@@ -396,7 +370,7 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
    auto x = 0.0f;
    if (_properties._centered)
    {
-      const auto rect = __text.getGlobalBounds();
+      const auto rect = _text.getGlobalBounds();
       const auto left = pos.x;
       x = left + (textbox_width_px - rect.width) * 0.5f;
    }
@@ -405,9 +379,9 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
       x = pos.x + text_margin_x_px;
    }
 
-   __text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
+   _text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
 
-   window.draw(__text, states);
+   window.draw(_text, states);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -418,7 +392,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       return;
    }
 
-   if (!__active->_ready_to_draw)
+   if (!__active->_initialized)
    {
       return;
    }
@@ -464,7 +438,7 @@ void MessageBox::animateText()
    if (_chars_shown != to)
    {
       _chars_shown = to;
-      __text.setString(_message.substr(0, to));
+      _text.setString(_message.substr(0, to));
    }
 }
 
@@ -476,9 +450,14 @@ void MessageBox::update(const sf::Time& /*dt*/)
       return;
    }
 
-   __active->_ready_to_draw = true;
+   if (!__active->_initialized)
+   {
+      __active->_initialized = true;
+      __active->__window_position = __active->_layers["window"]->_sprite->getPosition();
+      __active->__background_position = __active->_layers["background"]->_sprite->getPosition();
+   }
 
-   updateButtonLayers();
+   __active->updateButtonLayers();
 
    // animate
    __active->_state = State::Visible;  // default to visible until adjusted by either showAnimation or hideAnimation
@@ -501,13 +480,26 @@ void MessageBox::update(const sf::Time& /*dt*/)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+void MessageBox::updateButtonLayers()
+{
+   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
+   const auto buttons = __active->_buttons;
+
+   // init button layers
+   _layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
+   _layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+   _layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
+   _layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::updateContents()
 {
    auto contents_alpha = 1.0f;
 
    auto background_color = _properties._background_color;
-   auto window_layer = __layers["window"];
-   auto background_layer = __layers["background"];
+   auto window_layer = _layers["window"];
+   auto background_layer = _layers["background"];
    const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
    window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
@@ -525,12 +517,12 @@ void MessageBox::updateContents()
    auto text_color = _properties._text_color;
    text_color.a = alpha;
 
-   for (const auto& layer : __box_content_layers)
+   for (const auto& layer : _box_content_layers)
    {
       layer->_sprite->setColor(color);
    }
 
-   __text.setFillColor(text_color);
+   _text.setFillColor(text_color);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -540,8 +532,8 @@ void MessageBox::showAnimation()
    const auto visible_time = GlobalClock::getInstance().getElapsedTime() - _show_time;
 
    auto background_color = _properties._background_color;
-   auto window_layer = __layers["window"];
-   auto background_layer = __layers["background"];
+   auto window_layer = _layers["window"];
+   auto background_layer = _layers["background"];
    const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
    if (visible_time < animation_scale_time_show)  // zoom effect
@@ -592,12 +584,12 @@ void MessageBox::showAnimation()
    auto text_color = _properties._text_color;
    text_color.a = alpha;
 
-   for (const auto& layer : __box_content_layers)
+   for (const auto& layer : _box_content_layers)
    {
       layer->_sprite->setColor(color);
    }
 
-   __text.setFillColor(text_color);
+   _text.setFillColor(text_color);
 
    // update state
    _state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
@@ -624,15 +616,15 @@ void MessageBox::hideAnimation()
       text_color.a = contents_alpha_scaled;
       background_color.a = contents_alpha_scaled;
 
-      __layers["window"]->_sprite->setColor(window_color);
-      __layers["background"]->_sprite->setColor(background_color);
+      _layers["window"]->_sprite->setColor(window_color);
+      _layers["background"]->_sprite->setColor(background_color);
 
-      for (const auto& layer : __box_content_layers)
+      for (const auto& layer : _box_content_layers)
       {
          layer->_sprite->setColor(window_color);
       }
 
-      __text.setFillColor(text_color);
+      _text.setFillColor(text_color);
    }
 
    // update state
