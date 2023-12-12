@@ -387,12 +387,10 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
 //----------------------------------------------------------------------------------------------------------------------
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   if (!__active)
-   {
-      return;
-   }
+   const auto messageboxes = {__active.get(), __previous.get()};
+   const auto has_valid_ptr = std::ranges::any_of(messageboxes, [](const auto ptr) { return ptr != nullptr; });
 
-   if (!__active->_initialized)
+   if (!has_valid_ptr)
    {
       return;
    }
@@ -407,13 +405,13 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    window.setView(pixelOrtho);
 
-   __active->drawLayers(window, states);
-   __active->drawText(states, window);
-
-   // not particularly nice to delete the instance from inside the draw call
-   if (__previous && __previous->_reset_instance)
+   for (auto messagebox : messageboxes)
    {
-      __previous.reset();
+      if (messagebox && messagebox->_initialized)
+      {
+         messagebox->drawLayers(window, states);
+         messagebox->drawText(states, window);
+      }
    }
 }
 
@@ -445,37 +443,45 @@ void MessageBox::animateText()
 //----------------------------------------------------------------------------------------------------------------------
 void MessageBox::update(const sf::Time& /*dt*/)
 {
-   if (!__active)
+   if (__active)
    {
-      return;
+      if (!__active->_initialized)
+      {
+         __active->_initialized = true;
+         __active->_window_position = __active->_layers["window"]->_sprite->getPosition();
+         __active->_background_position = __active->_layers["background"]->_sprite->getPosition();
+      }
+
+      __active->updateButtonLayers();
+
+      // default to visible until adjusted by either showAnimation or hideAnimation
+      __active->_state = State::Visible;
+
+      if (!__active->_closed)
+      {
+         if (__active->_properties._animate_show_event)
+         {
+            __active->showAnimation();
+         }
+         else
+         {
+            // the position and alpha must be updated regardless of show/hide events
+            __active->updateContents();
+         }
+      }
    }
 
-   if (!__active->_initialized)
+   if (__previous)
    {
-      __active->_initialized = true;
-      __active->__window_position = __active->_layers["window"]->_sprite->getPosition();
-      __active->__background_position = __active->_layers["background"]->_sprite->getPosition();
-   }
+      if (__previous->_properties._animate_hide_event && __previous->_closed)
+      {
+         __previous->hideAnimation();
+      }
 
-   __active->updateButtonLayers();
-
-   // animate
-   __active->_state = State::Visible;  // default to visible until adjusted by either showAnimation or hideAnimation
-
-   if (__active->_properties._animate_show_event && !__active->_closed)
-   {
-      __active->showAnimation();
-   }
-
-   if (__previous && __previous->_properties._animate_hide_event && __previous->_closed)
-   {
-      __previous->hideAnimation();
-   }
-
-   // for all message boxes after the first one, the position and alpha must be updated regardless of show/hide events
-   if (!__active->_properties._animate_show_event && !__active->_closed)
-   {
-      __active->updateContents();
+      if (__previous->_reset_instance)
+      {
+         __previous.reset();
+      }
    }
 }
 
@@ -504,11 +510,11 @@ void MessageBox::updateContents()
 
    window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
    window_layer->_sprite->setScale(1.0f, 1.0f);
-   window_layer->_sprite->setPosition(__window_position + offset);
+   window_layer->_sprite->setPosition(_window_position + offset);
 
    background_layer->_sprite->setColor(background_color);
    background_layer->_sprite->setScale(1.0f, 1.0f);
-   background_layer->_sprite->setPosition(__background_position + offset);
+   background_layer->_sprite->setPosition(_background_position + offset);
 
    // fade in text and buttons
    const auto contents_alpha_scaled = contents_alpha * 255;
@@ -548,25 +554,25 @@ void MessageBox::showAnimation()
       const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
       window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset + offset.x, __window_position.y + offset.y);
+      window_layer->_sprite->setPosition(_window_position.x + window_scale_offset + offset.x, _window_position.y + offset.y);
 
       const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
       background_color.a = static_cast<uint8_t>(t_normalized * 255);
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(scale_x, scale_y);
       background_layer->_sprite->setPosition(
-         __background_position.x + background_scale_offset + offset.x, __background_position.y + offset.y
+         _background_position.x + background_scale_offset + offset.x, _background_position.y + offset.y
       );
    }
    else  // fade in
    {
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
       window_layer->_sprite->setScale(1.0f, 1.0f);
-      window_layer->_sprite->setPosition(__window_position + offset);
+      window_layer->_sprite->setPosition(_window_position + offset);
 
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(1.0f, 1.0f);
-      background_layer->_sprite->setPosition(__background_position + offset);
+      background_layer->_sprite->setPosition(_background_position + offset);
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
@@ -636,7 +642,7 @@ void MessageBox::info(const std::string& message, const MessageBoxCallback& call
 {
    if (__active)
    {
-      Log::Error() << "messagebox deadlock" << std::endl;
+      Log::Info() << "messagebox blocked" << std::endl;
       return;
    }
 
@@ -653,7 +659,7 @@ void MessageBox::question(
 {
    if (__active)
    {
-      Log::Error() << "messagebox deadlock" << std::endl;
+      Log::Info() << "messagebox blocked" << std::endl;
       return;
    }
 
