@@ -36,6 +36,9 @@ std::set<IndexedVector> _indexed_vectors;
 
 void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
 {
+   _conflicting_pos_set_m.clear();
+   _conflicting_positions_m.clear();
+   _conflicting_positions_px.clear();
    _indexed_vectors.clear();
 
    int32_t chain_index = 0;
@@ -84,32 +87,32 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
             }
             else if (chain_index != it->_chain_index && object_type != it->_object_type)
             {
+#ifdef DEBUG_ANALYSIS
                // check if the vertex needs a ghost vertex on the left or on the right
-               // auto isOnTheRightOfCollisionPos = [](const b2Vec2& colliding_vertex, b2Vec2* vertices, int32_t count)
-               // {
-               //    return std::any_of(
-               //       vertices,
-               //       vertices + count,
-               //       [colliding_vertex](auto pos)
-               //       {
-               //          // std::cout << pos.x * PPM << " vs " << colliding_vertex.x * PPM << std::endl;
-               //          return (pos.x - 0.001f > colliding_vertex.x) && (fabs(pos.y - colliding_vertex.y) < 0.001f);
-               //       }
-               //    );
-               // };
-               //
-               // const auto chain_is_on_the_right_of_the_collision =
-               //   isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->m_count);
-               //
-               // const auto collision_is_on_the_right_of_the_one_way_wall =
-               //   (object_type == ObjectTypeSolid && chain_is_on_the_right_of_the_collision);
-               //
-               // std::cout << "chain " << chain_index << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1) << "], pos("
-               //           << iv._pos.first * PPM << ", " << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index
-               //           << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
-               //           << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
-               //           << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side" << std::endl;
+               auto isOnTheRightOfCollisionPos = [](const b2Vec2& colliding_vertex, b2Vec2* vertices, int32_t count)
+               {
+                  return std::any_of(
+                     vertices,
+                     vertices + count,
+                     [colliding_vertex](auto pos)
+                     {
+                        // std::cout << pos.x * PPM << " vs " << colliding_vertex.x * PPM << std::endl;
+                        return (pos.x - 0.001f > colliding_vertex.x) && (fabs(pos.y - colliding_vertex.y) < 0.001f);
+                     }
+                  );
+               };
 
+               const auto chain_is_on_the_right_of_the_collision = isOnTheRightOfCollisionPos(pos, chain->m_vertices, chain->m_count);
+
+               const auto collision_is_on_the_right_of_the_one_way_wall =
+                  (object_type == ObjectTypeSolid && chain_is_on_the_right_of_the_collision);
+
+               std::cout << "chain " << chain_index << ", vertex: [" << vertex_index << "/" << (chain->m_count - 1) << "], pos("
+                         << iv._pos.first * PPM << ", " << iv._pos.second * PPM << ") collides with chain: " << it->_chain_index
+                         << ", vertex: [" << it->_vertex_index << "/" << (it->_chain->m_count - 1) << "]"
+                         << ", pos(" << it->_pos.first * PPM << ", " << it->_pos.second * PPM << ")"
+                         << " on the " << (collision_is_on_the_right_of_the_one_way_wall ? "right" : "left") << " side" << std::endl;
+#endif
                _conflicting_pos_set_m.insert({pos.x, pos.y});
             }
             vertex_index++;

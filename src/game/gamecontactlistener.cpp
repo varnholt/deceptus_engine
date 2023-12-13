@@ -21,17 +21,9 @@
 // TODO: pass collision normal to projectile detonation
 //       so animation can be aligned to detonation angle.
 
-int32_t GameContactListener::getPlayerFootContactCount() const
+namespace
 {
-   return _count_foot_contacts;
-}
-
-int32_t GameContactListener::getDeadlyContactCount() const
-{
-   return _count_deadly_contacts;
-}
-
-bool GameContactListener::isPlayer(const FixtureNode* obj) const
+bool isPlayer(const FixtureNode* obj)
 {
    if (!obj)
    {
@@ -42,24 +34,32 @@ bool GameContactListener::isPlayer(const FixtureNode* obj) const
    return is_player;
 }
 
-bool GameContactListener::isEnemy(const FixtureNode* obj) const
+bool isPlayer(const b2Fixture* obj)
 {
    if (!obj)
    {
       return false;
    }
 
-   auto can_cast = false;
-   try
-   {
-      can_cast = (dynamic_cast<LuaNode*>(obj->getParent()) != nullptr);
-   }
-   catch (...)
-   {
-      return false;
-   }
+   const auto is_player = (obj->GetBody() == Player::getCurrent()->getBody());
+   return is_player;
+}
 
-   return can_cast;
+bool isEnemy(const FixtureNode* obj)
+{
+   return obj && obj->getType() == ObjectTypeEnemy;
+}
+
+}  // namespace
+
+int32_t GameContactListener::getPlayerFootContactCount() const
+{
+   return _count_foot_contacts;
+}
+
+int32_t GameContactListener::getDeadlyContactCount() const
+{
+   return _count_deadly_contacts;
 }
 
 void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b)
@@ -188,6 +188,11 @@ void GameContactListener::processPlayerRightArmSensorContactBegin(b2Fixture* fix
 
 void GameContactListener::processOneWayWallContactBegin(b2Contact* contact, b2Fixture* fixture)
 {
+   if (!isPlayer(fixture))
+   {
+      return;
+   }
+
    OneWayWall::instance().beginContact(contact, fixture);
 }
 

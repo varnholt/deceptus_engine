@@ -31,10 +31,6 @@ public:
 
    void processPlayerHeadSensorContactEnd(auto contact_fixture_b);
 
-protected:
-   bool isPlayer(const FixtureNode* obj) const;
-   bool isEnemy(const FixtureNode* obj) const;
-
 private:
    GameContactListener() = default;
 
