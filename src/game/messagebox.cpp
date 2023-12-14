@@ -34,13 +34,9 @@ static const auto animation_fade_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_hide = sf::seconds(0.5f);
 
 std::unique_ptr<MessageBox> __active;
-std::vector<std::shared_ptr<Layer>> __layer_stack;
-std::map<std::string, std::shared_ptr<Layer>> __layers;
-std::vector<std::shared_ptr<Layer>> __box_content_layers;
+std::unique_ptr<MessageBox> __previous;
+
 sf::Font __font;
-sf::Text __text;
-sf::Vector2f __window_position;
-sf::Vector2f __background_position;
 
 //----------------------------------------------------------------------------------------------------------------------
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
@@ -52,72 +48,6 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
       start_pos += to.length();
    }
    return str;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void initializeLayers()
-{
-   static bool __initialized = false;
-
-   if (__initialized)
-   {
-      return;
-   }
-
-   PSD psd;
-   psd.setColorFormat(PSD::ColorFormat::ABGR);
-   psd.load("data/game/messagebox.psd");
-
-   if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
-   {
-      Log::Error() << "font load fuckup";
-   }
-
-   const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
-
-   // load layers
-   for (const auto& layer : psd.getLayers())
-   {
-      // skip groups
-      if (!layer.isImageLayer())
-      {
-         continue;
-      }
-
-      auto tmp = std::make_shared<Layer>();
-
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
-
-      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
-      {
-         Log::Fatal() << "failed to create texture: " << layer.getName();
-      }
-
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
-
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
-
-      __layer_stack.push_back(tmp);
-      __layers[layer.getName()] = tmp;
-   }
-
-   __window_position = __layers["window"]->_sprite->getPosition();
-   __background_position = __layers["background"]->_sprite->getPosition();
-
-   __box_content_layers.push_back(__layers["yes_xbox_1"]);
-   __box_content_layers.push_back(__layers["no_xbox_1"]);
-   __box_content_layers.push_back(__layers["yes_pc_1"]);
-   __box_content_layers.push_back(__layers["no_pc_1"]);
-
-   // background layer is unused for now
-   __layers["temp_bg"]->_visible = false;
-
-   __initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -195,8 +125,9 @@ void close(MessageBox::Button button)
 
    if (__active->_properties._animate_hide_event)
    {
-      __active->_closed = true;
-      __active->_hide_time = GlobalClock::getInstance().getElapsedTime();
+      __previous = std::move(__active);
+      __previous->_closed = true;
+      __previous->_hide_time = GlobalClock::getInstance().getElapsedTime();
    }
    else
    {
@@ -207,183 +138,6 @@ void close(MessageBox::Button button)
    {
       callback(button);
    }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void animateText()
-{
-   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
-
-   auto x =
-      (GlobalClock::getInstance().getElapsedTime().asSeconds() - __active->_show_time.asSeconds() -
-       (__active->_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
-
-   x *= __active->_properties._animate_text_speed;
-   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
-
-   // if the thing is animated we want to wait for the animation_scale_time to pass
-   // so x might go into negative for that duration.
-   x = std::max(0.0f, x);
-
-   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(__active->_message.size()));
-
-   if (__active->_chars_shown != to)
-   {
-      __active->_chars_shown = to;
-      __text.setString(__active->_message.substr(0, to));
-   }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void updateButtonLayers()
-{
-   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
-   const auto buttons = __active->_buttons;
-
-   // init button layers
-   __layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
-   __layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
-   __layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
-   __layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void showAnimation()
-{
-   auto contents_alpha = 1.0f;
-   const auto visible_time = GlobalClock::getInstance().getElapsedTime() - __active->_show_time;
-
-   auto background_color = __active->_properties._background_color;
-   auto window_layer = __layers["window"];
-   auto background_layer = __layers["background"];
-   const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-
-   if (visible_time < animation_scale_time_show)  // zoom effect
-   {
-      contents_alpha = 0.0f;
-
-      const auto t_normalized = visible_time.asSeconds() / animation_scale_time_show.asSeconds();
-
-      const auto scale_x = Easings::easeOutBack<float>(t_normalized);
-      const auto scale_y = scale_x;
-
-      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
-      window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
-      window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(__window_position.x + window_scale_offset + offset.x, __window_position.y + offset.y);
-
-      const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
-      background_color.a = static_cast<uint8_t>(t_normalized * 255);
-      background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale(scale_x, scale_y);
-      background_layer->_sprite->setPosition(
-         __background_position.x + background_scale_offset + offset.x, __background_position.y + offset.y
-      );
-   }
-   else  // fade in
-   {
-      window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
-      window_layer->_sprite->setScale(1.0f, 1.0f);
-      window_layer->_sprite->setPosition(__window_position + offset);
-
-      background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale(1.0f, 1.0f);
-      background_layer->_sprite->setPosition(__background_position + offset);
-
-      if (visible_time < animation_scale_time_show + animation_fade_time_show)
-      {
-         const auto t_normalized =
-            (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
-
-         contents_alpha = t_normalized;
-      }
-   }
-
-   // fade in text and buttons
-   const auto contents_alpha_scaled = contents_alpha * 255;
-   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
-   const auto color = sf::Color{255, 255, 255, alpha};
-   auto text_color = __active->_properties._text_color;
-   text_color.a = alpha;
-
-   for (const auto& layer : __box_content_layers)
-   {
-      layer->_sprite->setColor(color);
-   }
-
-   __text.setFillColor(text_color);
-
-   // update state
-   __active->_state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void hideAnimation()
-{
-   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __active->_hide_time;
-
-   const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
-   const auto contents_alpha = 1.0f - t_normalized;
-   const auto contents_alpha_scaled = static_cast<uint8_t>(contents_alpha * 255);
-
-   if (contents_alpha < 0.0f)
-   {
-      __active->_reset_instance = true;
-   }
-   else
-   {
-      const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
-      auto background_color = __active->_properties._background_color;
-      auto text_color = __active->_properties._text_color;
-      text_color.a = contents_alpha_scaled;
-      background_color.a = contents_alpha_scaled;
-
-      __layers["window"]->_sprite->setColor(window_color);
-      __layers["background"]->_sprite->setColor(background_color);
-
-      for (const auto& layer : __box_content_layers)
-      {
-         layer->_sprite->setColor(window_color);
-      }
-
-      __text.setFillColor(text_color);
-   }
-
-   // update state
-   __active->_state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void updateBox()
-{
-   auto contents_alpha = 1.0f;
-
-   auto background_color = __active->_properties._background_color;
-   auto window_layer = __layers["window"];
-   auto background_layer = __layers["background"];
-   const auto offset = __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-
-   window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
-   window_layer->_sprite->setScale(1.0f, 1.0f);
-   window_layer->_sprite->setPosition(__window_position + offset);
-
-   background_layer->_sprite->setColor(background_color);
-   background_layer->_sprite->setScale(1.0f, 1.0f);
-   background_layer->_sprite->setPosition(__background_position + offset);
-
-   // fade in text and buttons
-   const auto contents_alpha_scaled = contents_alpha * 255;
-   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
-   const auto color = sf::Color{255, 255, 255, alpha};
-   auto text_color = __active->_properties._text_color;
-   text_color.a = alpha;
-
-   for (const auto& layer : __box_content_layers)
-   {
-      layer->_sprite->setColor(color);
-   }
-
-   __text.setFillColor(text_color);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -421,10 +175,10 @@ MessageBox::MessageBox(
 
    Player::getCurrent()->getControls()->setKeysPressed(0);
 
-   __text.setFont(__font);
-   __text.setCharacterSize(12);
-   __text.setFillColor(_properties._text_color);
-   __text.setString("");
+   _text.setFont(__font);
+   _text.setCharacterSize(12);
+   _text.setFillColor(_properties._text_color);
+   _text.setString("");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -438,6 +192,65 @@ MessageBox::~MessageBox()
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::Modal);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::initializeLayers()
+{
+   static bool __initialized = false;
+   static PSD psd;
+
+   if (!__initialized)
+   {
+      psd.setColorFormat(PSD::ColorFormat::ABGR);
+      psd.load("data/game/messagebox.psd");
+
+      if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
+      {
+         Log::Error() << "font load fuckup";
+      }
+      const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
+   }
+
+   // load layers
+   for (const auto& layer : psd.getLayers())
+   {
+      // skip groups
+      if (!layer.isImageLayer())
+      {
+         continue;
+      }
+
+      auto tmp = std::make_shared<Layer>();
+      auto texture = std::make_shared<sf::Texture>();
+      auto sprite = std::make_shared<sf::Sprite>();
+
+      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      {
+         Log::Fatal() << "failed to create texture: " << layer.getName();
+      }
+
+      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+
+      sprite->setTexture(*texture, true);
+      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+
+      tmp->_texture = texture;
+      tmp->_sprite = sprite;
+
+      _layer_stack.push_back(tmp);
+      _layers[layer.getName()] = tmp;
+   }
+
+   _box_content_layers.push_back(_layers["yes_xbox_1"]);
+   _box_content_layers.push_back(_layers["no_xbox_1"]);
+   _box_content_layers.push_back(_layers["yes_pc_1"]);
+   _box_content_layers.push_back(_layers["no_pc_1"]);
+
+   // background layer is unused for now
+   _layers["temp_bg"]->_visible = false;
+
+   __initialized = true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -458,7 +271,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
-   if (!__active->_ready_to_draw)
+   if (!__active->_initialized)
    {
       return false;
    }
@@ -527,14 +340,57 @@ void MessageBox::initializeControllerCallbacks()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
+void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
 {
-   if (!__active)
+   for (auto& layer : _layer_stack)
    {
-      return;
+      if (layer->_visible)
+      {
+         layer->draw(window, states);
+      }
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
+{
+   _message = replaceAll(_message, "[br]", "\n");
+
+   if (_properties._animate_text)
+   {
+      animateText();
+   }
+   else
+   {
+      _text.setString(_message);
    }
 
-   if (!__active->_ready_to_draw)
+   // text alignment
+   const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+   auto x = 0.0f;
+   if (_properties._centered)
+   {
+      const auto rect = _text.getGlobalBounds();
+      const auto left = pos.x;
+      x = left + (textbox_width_px - rect.width) * 0.5f;
+   }
+   else
+   {
+      x = pos.x + text_margin_x_px;
+   }
+
+   _text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
+
+   window.draw(_text, states);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto messageboxes = {__active.get(), __previous.get()};
+   const auto has_valid_ptr = std::ranges::any_of(messageboxes, [](const auto ptr) { return ptr != nullptr; });
+
+   if (!has_valid_ptr)
    {
       return;
    }
@@ -549,80 +405,236 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    window.setView(pixelOrtho);
 
-   for (auto& layer : __layer_stack)
+   for (auto messagebox : messageboxes)
    {
-      if (layer->_visible)
+      if (messagebox && messagebox->_initialized)
       {
-         layer->draw(window, states);
+         messagebox->drawLayers(window, states);
+         messagebox->drawText(states, window);
       }
    }
+}
 
-   __active->_message = replaceAll(__active->_message, "[br]", "\n");
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::animateText()
+{
+   static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
 
-   if (__active->_properties._animate_text)
+   auto x =
+      (GlobalClock::getInstance().getElapsedTime().asSeconds() - _show_time.asSeconds() -
+       (_properties._animate_show_event ? animation_scale_time_show.asSeconds() : 0.0f));
+
+   x *= _properties._animate_text_speed;
+   x *= text_speeds[GameConfiguration::getInstance()._text_speed];
+
+   // if the thing is animated we want to wait for the animation_scale_time to pass
+   // so x might go into negative for that duration.
+   x = std::max(0.0f, x);
+
+   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_message.size()));
+
+   if (_chars_shown != to)
    {
-      animateText();
-   }
-   else
-   {
-      __text.setString(__active->_message);
-   }
-
-   // text alignment
-   const auto pos = pixelLocation(__active->_properties._location) + __active->_properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-   auto x = 0.0f;
-   if (__active->_properties._centered)
-   {
-      const auto rect = __text.getGlobalBounds();
-      const auto left = pos.x;
-      x = left + (textbox_width_px - rect.width) * 0.5f;
-   }
-   else
-   {
-      x = pos.x + text_margin_x_px;
-   }
-
-   __text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
-
-   window.draw(__text, states);
-
-   // not particularly nice to delete the instance from inside the draw call
-   if (__active->_reset_instance)
-   {
-      __active.reset();
+      _chars_shown = to;
+      _text.setString(_message.substr(0, to));
    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 void MessageBox::update(const sf::Time& /*dt*/)
 {
-   if (!__active)
+   if (__active)
    {
-      return;
+      if (!__active->_initialized)
+      {
+         __active->_initialized = true;
+         __active->_window_position = __active->_layers["window"]->_sprite->getPosition();
+         __active->_background_position = __active->_layers["background"]->_sprite->getPosition();
+      }
+
+      __active->updateButtonLayers();
+
+      // default to visible until adjusted by either showAnimation or hideAnimation
+      __active->_state = State::Visible;
+
+      if (!__active->_closed)
+      {
+         if (__active->_properties._animate_show_event)
+         {
+            __active->showAnimation();
+         }
+         else
+         {
+            // the position and alpha must be updated regardless of show/hide events
+            __active->updateContents();
+         }
+      }
    }
 
-   __active->_ready_to_draw = true;
-
-   updateButtonLayers();
-
-   // animate
-   __active->_state = State::Visible;  // default to visible until adjusted by either showAnimation or hideAnimation
-
-   if (__active->_properties._animate_show_event && !__active->_closed)
+   if (__previous)
    {
-      showAnimation();
+      if (__previous->_properties._animate_hide_event && __previous->_closed)
+      {
+         __previous->hideAnimation();
+      }
+
+      if (__previous->_reset_instance)
+      {
+         __previous.reset();
+      }
+   }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::updateButtonLayers()
+{
+   const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
+   const auto buttons = __active->_buttons;
+
+   // init button layers
+   _layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
+   _layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+   _layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
+   _layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::updateContents()
+{
+   auto contents_alpha = 1.0f;
+
+   auto background_color = _properties._background_color;
+   auto window_layer = _layers["window"];
+   auto background_layer = _layers["background"];
+   const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
+   window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+   window_layer->_sprite->setScale(1.0f, 1.0f);
+   window_layer->_sprite->setPosition(_window_position + offset);
+
+   background_layer->_sprite->setColor(background_color);
+   background_layer->_sprite->setScale(1.0f, 1.0f);
+   background_layer->_sprite->setPosition(_background_position + offset);
+
+   // fade in text and buttons
+   const auto contents_alpha_scaled = contents_alpha * 255;
+   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
+   const auto color = sf::Color{255, 255, 255, alpha};
+   auto text_color = _properties._text_color;
+   text_color.a = alpha;
+
+   for (const auto& layer : _box_content_layers)
+   {
+      layer->_sprite->setColor(color);
    }
 
-   if (__active->_properties._animate_hide_event && __active->_closed)
+   _text.setFillColor(text_color);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::showAnimation()
+{
+   auto contents_alpha = 1.0f;
+   const auto visible_time = GlobalClock::getInstance().getElapsedTime() - _show_time;
+
+   auto background_color = _properties._background_color;
+   auto window_layer = _layers["window"];
+   auto background_layer = _layers["background"];
+   const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
+   if (visible_time < animation_scale_time_show)  // zoom effect
    {
-      hideAnimation();
+      contents_alpha = 0.0f;
+
+      const auto t_normalized = visible_time.asSeconds() / animation_scale_time_show.asSeconds();
+
+      const auto scale_x = Easings::easeOutBack<float>(t_normalized);
+      const auto scale_y = scale_x;
+
+      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
+      window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
+      window_layer->_sprite->setScale(scale_x, scale_y);
+      window_layer->_sprite->setPosition(_window_position.x + window_scale_offset + offset.x, _window_position.y + offset.y);
+
+      const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
+      background_color.a = static_cast<uint8_t>(t_normalized * 255);
+      background_layer->_sprite->setColor(background_color);
+      background_layer->_sprite->setScale(scale_x, scale_y);
+      background_layer->_sprite->setPosition(
+         _background_position.x + background_scale_offset + offset.x, _background_position.y + offset.y
+      );
+   }
+   else  // fade in
+   {
+      window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+      window_layer->_sprite->setScale(1.0f, 1.0f);
+      window_layer->_sprite->setPosition(_window_position + offset);
+
+      background_layer->_sprite->setColor(background_color);
+      background_layer->_sprite->setScale(1.0f, 1.0f);
+      background_layer->_sprite->setPosition(_background_position + offset);
+
+      if (visible_time < animation_scale_time_show + animation_fade_time_show)
+      {
+         const auto t_normalized =
+            (visible_time.asSeconds() - animation_scale_time_show.asSeconds()) / animation_fade_time_show.asSeconds();
+
+         contents_alpha = t_normalized;
+      }
    }
 
-   // for all message boxes after the first one, the position and alpha must be updated regardless of show/hide events
-   if (!__active->_properties._animate_show_event && !__active->_closed)
+   // fade in text and buttons
+   const auto contents_alpha_scaled = contents_alpha * 255;
+   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
+   const auto color = sf::Color{255, 255, 255, alpha};
+   auto text_color = _properties._text_color;
+   text_color.a = alpha;
+
+   for (const auto& layer : _box_content_layers)
    {
-      updateBox();
+      layer->_sprite->setColor(color);
    }
+
+   _text.setFillColor(text_color);
+
+   // update state
+   _state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void MessageBox::hideAnimation()
+{
+   const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __previous->_hide_time;
+
+   const auto t_normalized = elapsed_time.asSeconds() / animation_fade_time_hide.asSeconds();
+   const auto contents_alpha = 1.0f - t_normalized;
+   const auto contents_alpha_scaled = static_cast<uint8_t>(contents_alpha * 255);
+
+   if (contents_alpha < 0.0f)
+   {
+      _reset_instance = true;
+   }
+   else
+   {
+      const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
+      auto background_color = _properties._background_color;
+      auto text_color = _properties._text_color;
+      text_color.a = contents_alpha_scaled;
+      background_color.a = contents_alpha_scaled;
+
+      _layers["window"]->_sprite->setColor(window_color);
+      _layers["background"]->_sprite->setColor(background_color);
+
+      for (const auto& layer : _box_content_layers)
+      {
+         layer->_sprite->setColor(window_color);
+      }
+
+      _text.setFillColor(text_color);
+   }
+
+   // update state
+   _state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -630,7 +642,7 @@ void MessageBox::info(const std::string& message, const MessageBoxCallback& call
 {
    if (__active)
    {
-      Log::Error() << "messagebox deadlock" << std::endl;
+      Log::Info() << "messagebox blocked" << std::endl;
       return;
    }
 
@@ -647,7 +659,7 @@ void MessageBox::question(
 {
    if (__active)
    {
-      Log::Error() << "messagebox deadlock" << std::endl;
+      Log::Info() << "messagebox blocked" << std::endl;
       return;
    }
 
