@@ -32,6 +32,7 @@ public:
    bool isControllerButtonPressed(int32_t button_enum) const;
    bool isButtonXPressed() const;
    bool isButtonAPressed() const;
+   bool isButtonBPressed() const;
    bool isUpButtonPressed() const;
    bool isDownButtonPressed() const;
    bool isDroppingDown() const;

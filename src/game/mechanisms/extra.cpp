@@ -10,6 +10,7 @@
 #include "game/extratable.h"
 #include "game/gamedeserializedata.h"
 #include "game/player/player.h"
+#include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/texturepool.h"
@@ -59,6 +60,12 @@ void Extra::deserialize(const GameDeserializeData& data)
       {
          _sample = sample_it->second->_value_string.value();
          Audio::getInstance().addSample(_sample.value());
+      }
+
+      const auto requires_action_button_it = data._tmx_object->_properties->_map.find("requires_button_press");
+      if (requires_action_button_it != data._tmx_object->_properties->_map.end())
+      {
+         _requires_button_press = requires_action_button_it->second->_value_bool.value();
       }
 
       // read animations if set up
@@ -164,6 +171,14 @@ void Extra::update(const sf::Time& dt)
    //           << " vs "
    //           << "x: " << player_rect_px.left << ", " << player_rect_px.top << " (width: " << player_rect_px.width
    //           << ", height: " << player_rect_px.height << ")" << std::endl;
+
+   if (_requires_button_press)
+   {
+      if (!Player::getCurrent()->getControls()->isButtonBPressed())
+      {
+         return;
+      }
+   }
 
    if (player_rect_px.intersects(_rect))
    {

@@ -74,6 +74,11 @@ void PlayerControls::forceSync()
    {
       _keys_pressed |= KeyPressedAttack;
    }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+   {
+      _keys_pressed |= KeyPressedAction;
+   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -108,6 +113,10 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::LControl)
    {
       _keys_pressed |= KeyPressedAttack;
+   }
+   else if (key == sf::Keyboard::Return)
+   {
+      _keys_pressed |= KeyPressedAction;
    }
 
    for (const auto& callback : _keypressed_callbacks)
@@ -148,6 +157,10 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::LControl)
    {
       _keys_pressed &= ~KeyPressedAttack;
+   }
+   else if (key == sf::Keyboard::Return)
+   {
+      _keys_pressed &= ~KeyPressedAction;
    }
 }
 
@@ -219,6 +232,22 @@ bool PlayerControls::isButtonAPressed() const
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_A);
+   }
+
+   return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isButtonBPressed() const
+{
+   if (_keys_pressed & KeyPressedAction)
+   {
+      return true;
+   }
+
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_B);
    }
 
    return false;
