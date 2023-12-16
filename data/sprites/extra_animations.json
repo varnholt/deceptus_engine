@@ -14,5 +14,21 @@
       "origin": [36.0, 36.0],
       "sprite_count": 30,
       "texture": "data/sprites/extra_sword.png"
+   },
+   "handle_regular": {
+      "frame_durations": [4000],
+      "frame_offset": [0, 0],
+      "frame_size": [48, 48],
+      "origin": [24, 24],
+      "sprite_count": 1,
+      "texture": "data/sprites/ingame-items.png"
+   },
+   "handle_flash": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [48, 48],
+      "origin": [24, 24],
+      "sprite_count": 17,
+      "texture": "data/sprites/ingame-items.png"
    }
 }

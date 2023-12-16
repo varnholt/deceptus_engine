@@ -187,6 +187,7 @@ enum KeyPressed
    KeyPressedJump = 0x10,
    KeyPressedAttack = 0x20,
    KeyPressedLook = 0x40,
+   KeyPressedAction = 0x80,
 };
 
 enum ObjectType
