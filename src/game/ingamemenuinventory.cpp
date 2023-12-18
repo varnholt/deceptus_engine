@@ -2,6 +2,7 @@
 
 #include "framework/easings/easings.h"
 #include "game/gameconfiguration.h"
+#include "game/inventoryimages.h"
 #include "game/mechanisms/extra.h"
 #include "game/menuconfig.h"
 #include "game/player/player.h"
@@ -10,20 +11,21 @@
 #include "game/texturepool.h"
 
 #include <iostream>
+#include <ranges>
 
 namespace
 {
-static const auto icon_width = 40;
-static const auto icon_height = 24;
+constexpr auto icon_width = 38;
+constexpr auto icon_height = 38;
 }  // namespace
 
 //: _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
-// static const auto quad_width = 38;
-// static const auto quad_height = 38;
-// static const auto dist = 10.2f;
-// static const auto icon_quad_dist = (icon_width - quad_width);
-// static const auto y_offset = 300.0f;
-// static const auto item_count = 13;
+// constexpr auto quad_width = 38;
+// constexpr auto quad_height = 38;
+// constexpr auto dist = 10.2f;
+// constexpr auto icon_quad_dist = (icon_width - quad_width);
+// constexpr auto y_offset = 300.0f;
+// constexpr auto item_count = 13;
 
 //---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InGameMenuInventory::getJoystickInfo() const
@@ -122,6 +124,26 @@ InGameMenuInventory::InGameMenuInventory()
    MenuConfig config;
    _duration_hide = config._duration_hide;
    _duration_show = config._duration_show;
+
+   loadInventoryItems();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::loadInventoryItems()
+{
+   auto images = InventoryImages::readImages();
+   auto texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
+
+   std::ranges::for_each(
+      images,
+      [this, texture](const auto& image)
+      {
+         sf::Sprite sprite;
+         sprite.setTexture(*texture);
+         sprite.setTextureRect({image._x_px * icon_width, image._y_px * icon_height, icon_width, icon_height});
+         _sprites[image._name].mSprite = sprite;
+      }
+   );
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -131,30 +153,32 @@ Inventory& InGameMenuInventory::getInventory()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::addItem(int32_t /*x*/, int32_t /*y*/, const std::string& /*item_id*/)
-{
-   //   sf::Sprite sprite;
-   //   sprite.setTexture(*_inventory_texture);
-   //   sprite.setTextureRect({x * icon_width, y * icon_height, icon_width, icon_height});
-   //   _sprites[type].mSprite = sprite;
-   //
-   //   getInventory().add(type);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::addDemoInventory()
-{
-   //   addItem(0, 0, ItemType::KeyRed);
-   //   addItem(1, 0, ItemType::KeyOrange);
-   //   addItem(2, 0, ItemType::KeyBlue);
-   //   addItem(3, 0, ItemType::KeyGreen);
-   //   addItem(4, 0, ItemType::KeyYellow);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
+
+   // _cursor_sprite.setTexture(*_inventory_texture);
+   // _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
+
+   /*
+      const sf::Color color = {50, 70, 100, 150};
+
+    y = y_offset  + 15.0f;
+    x = dist;
+
+    for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
+    {
+       auto visualization = _sprites[item._type];
+
+       visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
+       window.draw(visualization.mSprite);
+       x += icon_width + dist - icon_quad_dist;
+    }
+
+    _cursor_position.y = y_offset;
+    _cursor_sprite.setPosition(_cursor_position);
+    window.draw(_cursor_sprite);
+ */
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -377,26 +401,3 @@ void InGameMenuInventory::up()
 void InGameMenuInventory::down()
 {
 }
-
-// _cursor_sprite.setTexture(*_inventory_texture);
-// _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
-
-/*
-   const sf::Color color = {50, 70, 100, 150};
-
-    y = y_offset  + 15.0f;
-    x = dist;
-
-   for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
-   {
-      auto visualization = _sprites[item._type];
-
-       visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-       window.draw(visualization.mSprite);
-       x += icon_width + dist - icon_quad_dist;
-    }
-
-   _cursor_position.y = y_offset;
-   _cursor_sprite.setPosition(_cursor_position);
-   window.draw(_cursor_sprite);
-*/

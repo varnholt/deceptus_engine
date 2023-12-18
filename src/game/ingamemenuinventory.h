@@ -32,8 +32,6 @@ public:
 
    InGameMenuInventory();
 
-   void addDemoInventory();
-
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
    void update(const sf::Time& dt) override;
 
@@ -46,7 +44,7 @@ public:
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
 private:
-   void addItem(int32_t x, int32_t y, const std::string& item_id);
+   void loadInventoryItems();
    Inventory& getInventory();
 
    std::shared_ptr<Layer> getFilterLayer(Filter filter) const;

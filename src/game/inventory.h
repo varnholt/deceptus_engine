@@ -2,17 +2,23 @@
 
 #include "json/json.hpp"
 
+#include <functional>
+
 struct Inventory
 {
    Inventory() = default;
 
    void add(const std::string&);
+   void remove(const std::string&);
    bool hasInventoryItem(const std::string& item_key) const;
    const std::vector<std::string>& getItems() const;
    void clear();
-
    void resetKeys();
 
+   using UpdateddCallback = std::function<void()>;
+   std::vector<UpdateddCallback> _updated_callbacks;
+
+   // members
    std::vector<std::string> _items;
 };
 
