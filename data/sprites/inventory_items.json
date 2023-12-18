@@ -1,0 +1,38 @@
+{
+    "handle": {
+        "x_px": 0,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38
+    },
+    "key": {
+        "x_px": 38,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38
+    },
+    "sword": {
+        "x_px": 76,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38
+    },
+    "potion_green": {
+        "x_px": 114,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38
+    },
+    "potion_red": {
+        "x_px": 152,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38
+    },
+    "book": {
+        "x_px": 190,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38
+    }
+}

@@ -19,6 +19,8 @@ void InventoryImages::to_json(nlohmann::json& j, const InventoryImages::Inventor
 
 void InventoryImages::from_json(const json& j, InventoryImages::InventoryImage& image)
 {
+   image._name = j.begin().key();
+
    j.at("x_px").get_to(image._x_px);
    j.at("y_px").get_to(image._y_px);
    j.at("width_px").get_to(image._width_px);
@@ -27,14 +29,14 @@ void InventoryImages::from_json(const json& j, InventoryImages::InventoryImage& 
 
 std::vector<InventoryImages::InventoryImage> InventoryImages::readImages()
 {
-   const auto path = "data/sprites/inventory_items.json";
+   const auto json_path = "data/sprites/inventory_items.json";
 
-   if (!std::filesystem::exists(path))
+   if (!std::filesystem::exists(json_path))
    {
       return {};
    }
 
-   std::ifstream ifs(path, std::ifstream::in);
+   std::ifstream ifs(json_path, std::ifstream::in);
 
    auto c = ifs.get();
    std::string data;
