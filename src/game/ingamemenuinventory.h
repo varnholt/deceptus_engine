@@ -43,6 +43,8 @@ public:
    GameControllerInfo getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
+   void clampIndex();
+
 private:
    void loadInventoryItems();
    Inventory& getInventory();
@@ -55,15 +57,20 @@ private:
    void updateMove();
    void updateButtons();
 
+   void updateSelectedItem();
+   void resetIndex();
+   void updateFrame();
+
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
 
    sf::Sprite _cursor_sprite;
    sf::Vector2f _cursor_position;
    std::shared_ptr<sf::Texture> _inventory_texture;
+   std::unique_ptr<LayerData> _frame;
 
    std::map<std::string, ItemSprite> _sprites;
-   int32_t _selected_item = 0;
+   int32_t _selected_index = 0;
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
 
@@ -72,6 +79,7 @@ private:
    std::vector<LayerData> _panel_center;
    std::vector<LayerData> _panel_right;
    std::vector<LayerData> _panel_background;
+   std::vector<LayerData> _frames;
 
    FloatSeconds _duration_show;
    FloatSeconds _duration_hide;
