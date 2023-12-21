@@ -82,6 +82,7 @@ InGameMenuInventory::InGameMenuInventory()
    };
 
    _panel_center = {
+      _layers["frame"],
       _layers["inventory_panel"],
       _layers["item_filter_next_0"],
       _layers["item_filter_next_1"],
@@ -114,9 +115,24 @@ InGameMenuInventory::InGameMenuInventory()
       _layers["close_xbox_1"],
    };
 
+   _frames = {
+      _layers["frm_red"],
+      _layers["frm_blue"],
+      _layers["frm_purple"],
+      _layers["frm_green"],
+   };
+
+   _frame = std::make_unique<LayerData>(_layers["frame"]);
+
    _panel_background = {
       _layers["background"],
    };
+
+   // frames (no need for the colored ones for now)
+   for (auto& frame : _frames)
+   {
+      frame._layer->hide();
+   }
 
    // update button visibility
    updateButtons();
@@ -376,28 +392,90 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
 // |             | |                              | |             |
 // +-------------+ +------------------------------+ +-------------+
 
+// inventory
+//
+// 1 page is 6 x 3
+//
+// x x x x x x
+// x x x x x x
+// x x x x x x
+//
+// left:  index--
+// right: index++
+// up:    index -= 6
+// down:  index += 6
+
+namespace
+{
+constexpr auto COLUMNS = 6;
+constexpr auto ROWS = 3;
+}  // namespace
+
+void InGameMenuInventory::clampIndex()
+{
+   _selected_index = std::clamp(_selected_index, 0, (ROWS * COLUMNS) - 1);
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::left()
 {
-   if (_selected_item > 0)
-   {
-      _selected_item--;
-   }
+   _selected_index--;
+   clampIndex();
+   updateFrame();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::right()
 {
-   if (_selected_item < static_cast<int32_t>(getInventory().getItems().size()) - 1)
+   _selected_index++;
+   clampIndex();
+   updateFrame();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::up()
+{
+   const auto next_index = _selected_index - COLUMNS;
+   if (next_index >= 0)
    {
-      _selected_item++;
+      _selected_index = next_index;
+      updateFrame();
    }
 }
 
-void InGameMenuInventory::up()
-{
-}
-
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::down()
 {
+   const auto next_index = _selected_index + COLUMNS;
+   if (next_index <= (ROWS * COLUMNS) - 1)
+   {
+      _selected_index = next_index;
+      updateFrame();
+   }
+}
+
+void InGameMenuInventory::updateSelectedItem()
+{
+   // if (_selected_index > 0)
+   // {
+   //    _selected_index--;
+   // }
+
+   // if (_selected_index < static_cast<int32_t>(getInventory().getItems().size()) - 1)
+   // {
+   //    _selected_index++;
+   // }
+}
+
+void InGameMenuInventory::resetIndex()
+{
+   _selected_index = 0;
+}
+
+void InGameMenuInventory::updateFrame()
+{
+   const auto x = _selected_index % COLUMNS;
+   const auto y = _selected_index / COLUMNS;
+   const auto pos = _frame->_pos + sf::Vector2f{x * 44.0f, y * 52.0f};
+   _frame->_layer->_sprite->setPosition(pos);
 }
