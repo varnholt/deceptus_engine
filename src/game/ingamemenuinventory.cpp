@@ -13,19 +13,43 @@
 #include <iostream>
 #include <ranges>
 
+// ---------------------------------------------------------------
+//               <LT>   MAP   INVENTORY   VAULT   <RT>
+// ---------------------------------------------------------------
+// +-------------+ +----+-----+---+---+---+---+---+ +-------------+
+// |             | |<LB>|#####|all|wpn|con|itm|var| |             |
+// |             | +----+-----+---+---+---+---+---+ |             |
+// |             | |                              | |             |
+// |             | |                              | |    item     |
+// |   profile   | |                              | | description |
+// |    panel    | |       inventory_panel        | |   panel     |
+// |             | |                              | |             |
+// |             | |                              | |             |
+// |             | |                              | |             |
+// +-------------+ +------------------------------+ +-------------+
+
+// inventory
+//
+// 1 page is 6 x 3
+//
+// x x x x x x
+// x x x x x x
+// x x x x x x
+//
+// left:  index--
+// right: index++
+// up:    index -= 6
+// down:  index += 6
+
 namespace
 {
+constexpr auto COLUMNS = 6;
+constexpr auto ROWS = 3;
 constexpr auto icon_width = 38;
 constexpr auto icon_height = 38;
+constexpr auto frame_width = 44;
+constexpr auto frame_height = 52;
 }  // namespace
-
-//: _inventory_texture(TexturePool::getInstance().get("data/game/inventory.png"))
-// constexpr auto quad_width = 38;
-// constexpr auto quad_height = 38;
-// constexpr auto dist = 10.2f;
-// constexpr auto icon_quad_dist = (icon_width - quad_width);
-// constexpr auto y_offset = 300.0f;
-// constexpr auto item_count = 13;
 
 //---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InGameMenuInventory::getJoystickInfo() const
@@ -147,8 +171,8 @@ InGameMenuInventory::InGameMenuInventory()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::loadInventoryItems()
 {
-   auto images = InventoryImages::readImages();
-   auto texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
+   const auto images = InventoryImages::readImages();
+   const auto& texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
       images,
@@ -156,8 +180,8 @@ void InGameMenuInventory::loadInventoryItems()
       {
          sf::Sprite sprite;
          sprite.setTexture(*texture);
-         sprite.setTextureRect({image._x_px * icon_width, image._y_px * icon_height, icon_width, icon_height});
-         _sprites[image._name].mSprite = sprite;
+         sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
+         _sprites[image._name]._sprite = sprite;
       }
    );
 }
@@ -172,29 +196,7 @@ Inventory& InGameMenuInventory::getInventory()
 void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
-
-   // _cursor_sprite.setTexture(*_inventory_texture);
-   // _cursor_sprite.setTextureRect({0, 512 - 48, 48, 48});
-
-   /*
-      const sf::Color color = {50, 70, 100, 150};
-
-    y = y_offset  + 15.0f;
-    x = dist;
-
-    for (auto item : SaveState::getPlayerInfo()._inventory.getItems())
-    {
-       auto visualization = _sprites[item._type];
-
-       visualization.mSprite.setPosition(static_cast<float>(x), static_cast<float>(y));
-       window.draw(visualization.mSprite);
-       x += icon_width + dist - icon_quad_dist;
-    }
-
-    _cursor_position.y = y_offset;
-    _cursor_sprite.setPosition(_cursor_position);
-    window.draw(_cursor_sprite);
- */
+   drawInventoryItems(window, states);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -363,6 +365,35 @@ void InGameMenuInventory::updateButtons()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto& inventory = getInventory();
+   for (const auto& item_key : inventory._items)
+   {
+      window.draw(_sprites[item_key]._sprite, states);
+   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::updateInventoryItems()
+{
+   const auto& inventory = getInventory();
+
+   int32_t index{0};
+   for (const auto& item_key : inventory._items)
+   {
+      constexpr auto offset_x_px = 190;
+      constexpr auto offset_y_px = 126;
+
+      const auto x_px = static_cast<float>(offset_x_px + (index % COLUMNS) * frame_width);
+      const auto y_px = static_cast<float>(offset_y_px + (index / COLUMNS) * frame_height);
+
+      _sprites[item_key]._sprite.setPosition(x_px, y_px);
+      index++;
+   }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::update(const sf::Time& /*dt*/)
 {
    // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
@@ -375,42 +406,11 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
    {
       updateMove();
    }
+
+   updateInventoryItems();
 }
 
-// ---------------------------------------------------------------
-//               <LT>   MAP   INVENTORY   VAULT   <RT>
-// ---------------------------------------------------------------
-// +-------------+ +----+-----+---+---+---+---+---+ +-------------+
-// |             | |<LB>|#####|all|wpn|con|itm|var| |             |
-// |             | +----+-----+---+---+---+---+---+ |             |
-// |             | |                              | |             |
-// |             | |                              | |    item     |
-// |   profile   | |                              | | description |
-// |    panel    | |       inventory_panel        | |   panel     |
-// |             | |                              | |             |
-// |             | |                              | |             |
-// |             | |                              | |             |
-// +-------------+ +------------------------------+ +-------------+
-
-// inventory
-//
-// 1 page is 6 x 3
-//
-// x x x x x x
-// x x x x x x
-// x x x x x x
-//
-// left:  index--
-// right: index++
-// up:    index -= 6
-// down:  index += 6
-
-namespace
-{
-constexpr auto COLUMNS = 6;
-constexpr auto ROWS = 3;
-}  // namespace
-
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::clampIndex()
 {
    _selected_index = std::clamp(_selected_index, 0, (ROWS * COLUMNS) - 1);
@@ -454,6 +454,7 @@ void InGameMenuInventory::down()
    }
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateSelectedItem()
 {
    // if (_selected_index > 0)
@@ -467,15 +468,29 @@ void InGameMenuInventory::updateSelectedItem()
    // }
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::resetIndex()
 {
    _selected_index = 0;
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateFrame()
 {
    const auto x = _selected_index % COLUMNS;
    const auto y = _selected_index / COLUMNS;
-   const auto pos = _frame->_pos + sf::Vector2f{x * 44.0f, y * 52.0f};
+   const auto pos = _frame->_pos + sf::Vector2f{static_cast<float>(x * frame_width), static_cast<float>(y * frame_height)};
    _frame->_layer->_sprite->setPosition(pos);
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
+{
+   if (key == sf::Keyboard::Space)
+   {
+   }
+   else if (key == sf::Keyboard::Return)
+   {
+   }
+}
+

@@ -19,8 +19,6 @@ void InventoryImages::to_json(nlohmann::json& j, const InventoryImages::Inventor
 
 void InventoryImages::from_json(const json& j, InventoryImages::InventoryImage& image)
 {
-   image._name = j.begin().key();
-
    j.at("x_px").get_to(image._x_px);
    j.at("y_px").get_to(image._y_px);
    j.at("width_px").get_to(image._width_px);
@@ -52,7 +50,14 @@ std::vector<InventoryImages::InventoryImage> InventoryImages::readImages()
    try
    {
       const json json_data = json::parse(data);
-      std::vector<InventoryImage> images = json_data;
+      std::vector<InventoryImage> images;
+      for (auto it = json_data.begin(); it != json_data.end(); ++it)
+      {
+         InventoryImage image;
+         image._name = it.key();
+         it.value().get_to(image);
+         images.push_back(image);
+      }
       return images;
    }
    catch (const std::exception& e)
