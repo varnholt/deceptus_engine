@@ -34,6 +34,11 @@ void Inventory::resetKeys()
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
 }
 
+void Inventory::selectItem(int32_t slot, const std::string& item)
+{
+   _slots[slot] = item;
+}
+
 bool Inventory::hasInventoryItem(const std::string& item_key) const
 {
    const auto it = std::find(_items.cbegin(), _items.cend(), item_key);

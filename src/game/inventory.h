@@ -15,11 +15,16 @@ struct Inventory
    void clear();
    void resetKeys();
 
+   void selectItem(int32_t slot, const std::string& item);
+
    using UpdateddCallback = std::function<void()>;
    std::vector<UpdateddCallback> _updated_callbacks;
 
    // members
    std::vector<std::string> _items;
+
+   // selected slots
+   std::array<std::string, 2> _slots;
 };
 
 void to_json(nlohmann::json& j, const Inventory& d);

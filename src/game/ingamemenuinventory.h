@@ -18,7 +18,7 @@ public:
 
    struct ItemSprite
    {
-      sf::Sprite mSprite;
+      sf::Sprite _sprite;
    };
 
    enum class Filter
@@ -45,6 +45,8 @@ public:
 
    void clampIndex();
 
+   void keyboardKeyPressed(sf::Keyboard::Key key);
+
 private:
    void loadInventoryItems();
    Inventory& getInventory();
@@ -56,10 +58,12 @@ private:
    void updateShowHide();
    void updateMove();
    void updateButtons();
+   void updateInventoryItems();
 
    void updateSelectedItem();
    void resetIndex();
    void updateFrame();
+   void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
