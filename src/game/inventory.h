@@ -16,6 +16,7 @@ struct Inventory
    void resetKeys();
 
    void selectItem(int32_t slot, const std::string& item);
+   void autoPopulate(const std::string& item);
 
    using UpdateddCallback = std::function<void()>;
    std::vector<UpdateddCallback> _updated_callbacks;
