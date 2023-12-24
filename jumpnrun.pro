@@ -171,6 +171,7 @@ SOURCES += \
    src/game/drawstates.cpp \
    src/game/effects/lightsystem.cpp \
    src/game/enemydescription.cpp \
+   src/game/eventdistributor.cpp \
    src/game/eventserializer.cpp \
    src/game/extratable.cpp \
    src/game/fadetransitioneffect.cpp \
@@ -399,6 +400,7 @@ HEADERS += \
    src/game/displaymode.h \
    src/game/drawstates.h \
    src/game/enemydescription.h \
+   src/game/eventdistributor.h \
    src/game/eventserializer.h \
    src/game/extratable.h \
    src/game/fadetransitioneffect.h \

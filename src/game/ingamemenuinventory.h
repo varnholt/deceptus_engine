@@ -60,10 +60,12 @@ private:
    void updateButtons();
    void updateInventoryItems();
 
-   void updateSelectedItem();
    void resetIndex();
    void updateFrame();
    void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+
+   std::string getSelectedItem() const;
+   void assign(const std::string& item, int32_t slot);
 
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;

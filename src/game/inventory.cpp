@@ -14,12 +14,27 @@ void Inventory::remove(const std::string& item)
 {
    auto it = std::remove(_items.begin(), _items.end(), item);
    _items.erase(it, _items.end());
+
+   // remove item from slots
+   std::ranges::for_each(
+      _slots,
+      [item](auto& slot)
+      {
+         if (slot == item)
+            slot.clear();
+      }
+   );
+
+   // notify callbacks
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
 }
 
 void Inventory::clear()
 {
    _items.clear();
+   std::ranges::for_each(_slots, [](auto& slot) { slot.clear(); });
+
+   // notify callbacks
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
 }
 
@@ -37,6 +52,16 @@ void Inventory::resetKeys()
 void Inventory::selectItem(int32_t slot, const std::string& item)
 {
    _slots[slot] = item;
+}
+
+void Inventory::autoPopulate(const std::string& item)
+{
+   // add new items to free slots
+   const auto& it = std::find_if(_slots.begin(), _slots.end(), [](const auto& slot) { return slot.empty(); });
+   if (it != _slots.end())
+   {
+      *it = item;
+   }
 }
 
 bool Inventory::hasInventoryItem(const std::string& item_key) const
