@@ -1,6 +1,7 @@
 #include "ingamemenuinventory.h"
 
 #include "framework/easings/easings.h"
+#include "game/eventdistributor.h"
 #include "game/gameconfiguration.h"
 #include "game/inventoryimages.h"
 #include "game/mechanisms/extra.h"
@@ -166,6 +167,8 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    loadInventoryItems();
+
+   EventDistributor::registerEvent(sf::Event::KeyPressed, [this](const sf::Event& event) { keyboardKeyPressed(event.key.code); });
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -375,6 +378,30 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+std::string InGameMenuInventory::getSelectedItem() const
+{
+   std::string item;
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+
+   if (_selected_index < static_cast<int32_t>(inventory._items.size()))
+   {
+      // apply filter
+      // ...
+
+      item = inventory._items[_selected_index];
+   }
+
+   return item;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::assign(const std::string& item, int32_t slot)
+{
+   auto& inventory = getInventory();
+   inventory._slots[slot] = item;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateInventoryItems()
 {
    const auto& inventory = getInventory();
@@ -396,8 +423,6 @@ void InGameMenuInventory::updateInventoryItems()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::update(const sf::Time& /*dt*/)
 {
-   // _cursor_position.x = dist * 0.5f + _selected_item * (quad_width + dist) - 0.5f;
-
    if (_animation == Animation::Show || _animation == Animation::Hide)
    {
       updateShowHide();
@@ -455,20 +480,6 @@ void InGameMenuInventory::down()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::updateSelectedItem()
-{
-   // if (_selected_index > 0)
-   // {
-   //    _selected_index--;
-   // }
-
-   // if (_selected_index < static_cast<int32_t>(getInventory().getItems().size()) - 1)
-   // {
-   //    _selected_index++;
-   // }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::resetIndex()
 {
    _selected_index = 0;
@@ -486,11 +497,16 @@ void InGameMenuInventory::updateFrame()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Space)
+   int32_t slot = 0;
+   if (key == sf::Keyboard::Z)
    {
+      slot = 0;
    }
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::X)
    {
+      slot = 1;
    }
-}
 
+   const auto item = getSelectedItem();
+   assign(item, slot);
+}
