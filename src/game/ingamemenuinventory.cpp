@@ -175,14 +175,14 @@ InGameMenuInventory::InGameMenuInventory()
 void InGameMenuInventory::loadInventoryItems()
 {
    const auto images = InventoryImages::readImages();
-   const auto& texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
+   _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
       images,
-      [this, texture](const auto& image)
+      [this](const auto& image)
       {
          sf::Sprite sprite;
-         sprite.setTexture(*texture);
+         sprite.setTexture(*_inventory_texture);
          sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
          _sprites[image._name]._sprite = sprite;
       }
@@ -235,10 +235,6 @@ void InGameMenuInventory::updateShowHide()
    const FloatSeconds duration_since_show_s = now - _time_show;
    const FloatSeconds duration_since_hide_s = now - _time_hide;
 
-   sf::Vector2f panel_left_offset_px;
-   sf::Vector2f panel_center_offset_px;
-   sf::Vector2f panel_right_offset_px;
-
    auto alpha = 1.0f;
 
    // animate show event
@@ -247,17 +243,17 @@ void InGameMenuInventory::updateShowHide()
       const auto elapsed_s_normalized = duration_since_show_s.count() / _duration_show.count();
       const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
 
-      panel_left_offset_px.x = -200 * val;
-      panel_center_offset_px.y = 250 * val;
-      panel_right_offset_px.x = 200 * val;
+      _panel_left_offset_px.x = -200 * val;
+      _panel_center_offset_px.y = 250 * val;
+      _panel_right_offset_px.x = 200 * val;
 
       alpha = Easings::easeInQuint(elapsed_s_normalized);
    }
    else
    {
-      panel_left_offset_px.x = 0;
-      panel_center_offset_px.y = 0;
-      panel_right_offset_px.x = 0;
+      _panel_left_offset_px.x = 0;
+      _panel_center_offset_px.y = 0;
+      _panel_right_offset_px.x = 0;
       alpha = 1.0f;
 
       if (_animation == Animation::Show)
@@ -272,9 +268,9 @@ void InGameMenuInventory::updateShowHide()
       const auto elapsed_s_normalized = duration_since_hide_s.count() / _duration_hide.count();
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
 
-      panel_left_offset_px.x = -200 * val;
-      panel_center_offset_px.y = 250 * val;
-      panel_right_offset_px.x = 200 * val;
+      _panel_left_offset_px.x = -200 * val;
+      _panel_center_offset_px.y = 250 * val;
+      _panel_right_offset_px.x = 200 * val;
 
       alpha = 1.0f - Easings::easeInQuint(elapsed_s_normalized);
    }
@@ -289,21 +285,21 @@ void InGameMenuInventory::updateShowHide()
    // move in x
    for (const auto& layer : _panel_left)
    {
-      const auto x = layer._pos.x + panel_left_offset_px.x;
+      const auto x = layer._pos.x + _panel_left_offset_px.x;
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
-      const auto y = layer._pos.y + panel_center_offset_px.y;
+      const auto y = layer._pos.y + _panel_center_offset_px.y;
       layer._layer->_sprite->setPosition(layer._pos.x, y);
    }
 
    // move in x
    for (const auto& layer : _panel_right)
    {
-      const auto x = layer._pos.x + panel_right_offset_px.x;
+      const auto x = layer._pos.x + _panel_right_offset_px.x;
       layer._layer->_sprite->setPosition(x, layer._pos.y);
    }
 
@@ -410,7 +406,7 @@ void InGameMenuInventory::updateInventoryItems()
    for (const auto& item_key : inventory._items)
    {
       constexpr auto offset_x_px = 190;
-      constexpr auto offset_y_px = 126;
+      const auto offset_y_px = 126 + _panel_center_offset_px.y;
 
       const auto x_px = static_cast<float>(offset_x_px + (index % COLUMNS) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (index / COLUMNS) * frame_height);
@@ -433,6 +429,7 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
    }
 
    updateInventoryItems();
+   updateFrame();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -446,7 +443,6 @@ void InGameMenuInventory::left()
 {
    _selected_index--;
    clampIndex();
-   updateFrame();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -454,7 +450,6 @@ void InGameMenuInventory::right()
 {
    _selected_index++;
    clampIndex();
-   updateFrame();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -464,7 +459,6 @@ void InGameMenuInventory::up()
    if (next_index >= 0)
    {
       _selected_index = next_index;
-      updateFrame();
    }
 }
 
@@ -475,7 +469,6 @@ void InGameMenuInventory::down()
    if (next_index <= (ROWS * COLUMNS) - 1)
    {
       _selected_index = next_index;
-      updateFrame();
    }
 }
 
@@ -490,7 +483,8 @@ void InGameMenuInventory::updateFrame()
 {
    const auto x = _selected_index % COLUMNS;
    const auto y = _selected_index / COLUMNS;
-   const auto pos = _frame->_pos + sf::Vector2f{static_cast<float>(x * frame_width), static_cast<float>(y * frame_height)};
+   const auto pos =
+      _frame->_pos + sf::Vector2f{static_cast<float>(x * frame_width), static_cast<float>(y * frame_height + _panel_center_offset_px.y)};
    _frame->_layer->_sprite->setPosition(pos);
 }
 
