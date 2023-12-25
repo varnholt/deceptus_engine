@@ -17,13 +17,13 @@
         "width_px": 38,
         "height_px": 38
     },
-    "potion_green": {
+    "potion_red": {
         "x_px": 114,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38
     },
-    "potion_red": {
+    "potion_green": {
         "x_px": 152,
         "y_px": 0,
         "width_px": 38,
