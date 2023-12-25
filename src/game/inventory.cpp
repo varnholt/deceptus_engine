@@ -72,7 +72,7 @@ bool Inventory::hasInventoryItem(const std::string& item_key) const
 
 void to_json(nlohmann::json& j, const Inventory& d)
 {
-   j = json{{"items", d._items}};
+   j = json{{"items", d._items}, {"slots", d._slots}};
 }
 
 void from_json(const nlohmann::json& j, Inventory& d)
@@ -80,5 +80,10 @@ void from_json(const nlohmann::json& j, Inventory& d)
    if (j.find("items") != j.end())
    {
       d._items = j.at("items").get<std::vector<std::string>>();
+   }
+
+   if (j.find("slots") != j.end())
+   {
+      d._slots = j.at("slots").get<std::array<std::string, 2>>();
    }
 }

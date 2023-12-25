@@ -89,6 +89,10 @@ private:
 
    FloatSeconds _duration_show;
    FloatSeconds _duration_hide;
+
+   sf::Vector2f _panel_left_offset_px;
+   sf::Vector2f _panel_center_offset_px;
+   sf::Vector2f _panel_right_offset_px;
 };
 
 #endif  // INGAMEMENUINVENTORY_H
