@@ -17,17 +17,19 @@
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>
 // ---------------------------------------------------------------
-// +-------------+ +----+-----+---+---+---+---+---+ +-------------+
-// |             | |<LB>|#####|all|wpn|con|itm|var| |             |
-// |             | +----+-----+---+---+---+---+---+ |             |
-// |             | |                              | |             |
-// |             | |                              | |    item     |
-// |   profile   | |                              | | description |
-// |    panel    | |       inventory_panel        | |   panel     |
-// |             | |                              | |             |
-// |             | |                              | |             |
-// |             | |                              | |             |
-// +-------------+ +------------------------------+ +-------------+
+// +-------------+   +--+---+---+---+---+---+--+   +-------------+
+// |             |   |LB|all|wpn|con|itm|var|RB|   |    item     |
+// |             |   +--+---+---+---+---+---+--+   | description |
+// |             | +----+----+----+----+----+----+ |    panel    |
+// |             | |    |    |    |    |    |    | |             |
+// |             | | 00 | 01 | 02 | 03 | 04 | 05 | |             |
+// |   profile   | +----+----+----+----+----+----+ +-------------|
+// |    panel    | |    |    |    |    |    |    | |   slot 1    |
+// |             | | 06 | 07 | 08 | 09 | 10 | 11 | |     (X)     |
+// |             | +----+----+----+----+----+----+ +-------------+
+// |             | |    |    |    |    |    |    | |   slot 2    |
+// |             | | 12 | 13 | 14 | 15 | 16 | 17 | |     (Y)     |
+// +-------------+ +----+----+----+----+----+----+ +-------------+
 
 // inventory
 //
@@ -401,11 +403,12 @@ void InGameMenuInventory::assign(const std::string& item, int32_t slot)
 void InGameMenuInventory::updateInventoryItems()
 {
    const auto& inventory = getInventory();
+   const auto move_offset = getMoveOffset();
 
    int32_t index{0};
    for (const auto& item_key : inventory._items)
    {
-      constexpr auto offset_x_px = 190;
+      const auto offset_x_px = 190 + move_offset.value_or(0.0f);
       const auto offset_y_px = 126 + _panel_center_offset_px.y;
 
       const auto x_px = static_cast<float>(offset_x_px + (index % COLUMNS) * frame_width);
@@ -481,10 +484,14 @@ void InGameMenuInventory::resetIndex()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateFrame()
 {
+   const auto move_offset = getMoveOffset();
+
    const auto x = _selected_index % COLUMNS;
    const auto y = _selected_index / COLUMNS;
-   const auto pos =
-      _frame->_pos + sf::Vector2f{static_cast<float>(x * frame_width), static_cast<float>(y * frame_height + _panel_center_offset_px.y)};
+   const auto pos = _frame->_pos + sf::Vector2f{
+                                      static_cast<float>(x * frame_width + move_offset.value_or(0.0f)),
+                                      static_cast<float>(y * frame_height + _panel_center_offset_px.y)
+                                   };
    _frame->_layer->_sprite->setPosition(pos);
 }
 
