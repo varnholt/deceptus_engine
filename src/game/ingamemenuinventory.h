@@ -40,6 +40,9 @@ public:
    void up() override;
    void down() override;
 
+   void show() override;
+   void hide() override;
+
    GameControllerInfo getJoystickInfo() const;
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
@@ -64,7 +67,7 @@ private:
    void updateFrame();
    void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
-   std::string getSelectedItem() const;
+   std::optional<std::string> getSelectedItem() const;
    void assign(const std::string& item, int32_t slot);
 
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
@@ -73,7 +76,9 @@ private:
    sf::Sprite _cursor_sprite;
    sf::Vector2f _cursor_position;
    std::shared_ptr<sf::Texture> _inventory_texture;
-   std::unique_ptr<LayerData> _frame;
+   std::unique_ptr<LayerData> _frame_selection;
+   std::unique_ptr<LayerData> _frame_slot1;
+   std::unique_ptr<LayerData> _frame_slot2;
 
    std::map<std::string, ItemSprite> _sprites;
    int32_t _selected_index = 0;
@@ -93,6 +98,9 @@ private:
    sf::Vector2f _panel_left_offset_px;
    sf::Vector2f _panel_center_offset_px;
    sf::Vector2f _panel_right_offset_px;
+
+   using EventCallback = std::function<void(const sf::Event&)>;
+   EventCallback _keyboard_event_handler;
 };
 
 #endif  // INGAMEMENUINVENTORY_H

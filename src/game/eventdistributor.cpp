@@ -21,3 +21,16 @@ void EventDistributor::registerEvent(sf::Event::EventType event_type, const Even
 {
    _callback_mapping[event_type].push_back(callback);
 }
+
+void EventDistributor::unregisterEvent(sf::Event::EventType event_type, const EventCallback& callback)
+{
+   auto& callbacks = _callback_mapping[event_type];
+   callbacks.erase(
+      std::remove_if(
+         callbacks.begin(),
+         callbacks.end(),
+         [callback](const auto& cb) { return cb.target<void(const sf::Event&)>() == callback.target<void(const sf::Event&)>(); }
+      ),
+      callbacks.end()
+   );
+}
