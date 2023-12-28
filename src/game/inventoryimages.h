@@ -13,6 +13,8 @@ struct InventoryImage
    int32_t _width_px{0};
    int32_t _height_px{0};
    std::string _name;
+   std::string _title;
+   std::string _description;
 };
 
 void to_json(nlohmann::json& j, const InventoryImage& d);
