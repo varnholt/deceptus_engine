@@ -3,36 +3,48 @@
         "x_px": 0,
         "y_px": 0,
         "width_px": 38,
-        "height_px": 38
+        "height_px": 38,
+        "title" : "",
+        "description" : ""
     },
     "key": {
         "x_px": 38,
         "y_px": 0,
         "width_px": 38,
-        "height_px": 38
+        "height_px": 38,
+        "title" : "",
+        "description" : ""
     },
     "sword": {
         "x_px": 76,
         "y_px": 0,
         "width_px": 38,
-        "height_px": 38
+        "height_px": 38,
+        "title" : "",
+        "description" : ""
     },
     "potion_red": {
         "x_px": 114,
         "y_px": 0,
         "width_px": 38,
-        "height_px": 38
+        "height_px": 38,
+        "title" : "",
+        "description" : ""
     },
     "potion_green": {
         "x_px": 152,
         "y_px": 0,
         "width_px": 38,
-        "height_px": 38
+        "height_px": 38,
+        "title" : "",
+        "description" : ""
     },
     "book": {
         "x_px": 190,
         "y_px": 0,
         "width_px": 38,
-        "height_px": 38
+        "height_px": 38,
+        "title" : "",
+        "description" : ""
     }
 }
