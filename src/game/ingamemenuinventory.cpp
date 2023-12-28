@@ -17,18 +17,18 @@
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>
 // ---------------------------------------------------------------
-// +-------------+   +--+---+---+---+---+---+--+   +-------------+
-// |             |   |LB|all|wpn|con|itm|var|RB|   |    item     |
-// |             |   +--+---+---+---+---+---+--+   | description |
-// |             | +----+----+----+----+----+----+ |    panel    |
+// +-------------|   +--+---+---+---+---+---+--+   +-------------+
+// |   slot 1    |   |LB|all|wpn|con|itm|var|RB|   |    item     |
+// |     (X)     |   +--+---+---+---+---+---+--+   | description |
+// +-------------+ +----+----+----+----+----+----+ |    panel    |
+// |   slot 2    | |    |    |    |    |    |    | |             |
+// |     (Y)     | | 00 | 01 | 02 | 03 | 04 | 05 | |             |
+// +-------------+ +----+----+----+----+----+----+ |             |
+// |   profile   | |    |    |    |    |    |    | |             |
+// |    panel    | | 06 | 07 | 08 | 09 | 10 | 11 | |             |
+// |             | +----+----+----+----+----+----+ |             |
 // |             | |    |    |    |    |    |    | |             |
-// |             | | 00 | 01 | 02 | 03 | 04 | 05 | |             |
-// |   profile   | +----+----+----+----+----+----+ +-------------|
-// |    panel    | |    |    |    |    |    |    | |   slot 1    |
-// |             | | 06 | 07 | 08 | 09 | 10 | 11 | |     (X)     |
-// |             | +----+----+----+----+----+----+ +-------------+
-// |             | |    |    |    |    |    |    | |   slot 2    |
-// |             | | 12 | 13 | 14 | 15 | 16 | 17 | |     (Y)     |
+// |             | | 12 | 13 | 14 | 15 | 16 | 17 | |             |
 // +-------------+ +----+----+----+----+----+----+ +-------------+
 
 // inventory
@@ -379,9 +379,23 @@ void InGameMenuInventory::updateButtons()
 void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto& inventory = getInventory();
+
    for (const auto& item_key : inventory._items)
    {
       window.draw(_sprites[item_key]._sprite, states);
+   }
+
+   int32_t index = 0;
+   for (const auto& slot : inventory._slots)
+   {
+      if (slot.empty())
+      {
+         index++;
+         continue;
+      }
+
+      window.draw(_slot_sprites[index]._sprite, states);
+      index++;
    }
 }
 
@@ -407,6 +421,13 @@ void InGameMenuInventory::assign(const std::string& item, int32_t slot)
    auto& inventory = getInventory();
    inventory._slots[slot] = item;
 
+   // clear slot if there's a duplicate assignment
+   const auto other_slot_index = 1 - slot;
+   if (inventory._slots[other_slot_index] == item)
+   {
+      inventory._slots[other_slot_index].clear();
+   }
+
 #ifdef DEBUG_INVENTORY
    std::cout << "assigning " << item << " to slot " << slot << std::endl;
 #endif
@@ -418,6 +439,7 @@ void InGameMenuInventory::updateInventoryItems()
    const auto& inventory = getInventory();
    const auto move_offset = getMoveOffset();
 
+   // update grid of items
    int32_t index{0};
    for (const auto& item_key : inventory._items)
    {
@@ -430,6 +452,29 @@ void InGameMenuInventory::updateInventoryItems()
       _sprites[item_key]._sprite.setPosition(x_px, y_px);
       index++;
    }
+
+   // update items in slot
+   index = 0;
+   for (const auto& slot : inventory._slots)
+   {
+      if (slot.empty())
+      {
+         index++;
+         continue;
+      }
+
+      const auto& reference_sprite = _sprites[slot]._sprite;
+
+      auto& sprite = _slot_sprites[index];
+      sprite._sprite.setTextureRect(reference_sprite.getTextureRect());
+      sprite._sprite.setTexture(*reference_sprite.getTexture());
+
+      constexpr auto frame_width_slots = 47;
+      const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
+      const auto pos_y_px = 110;
+      sprite._sprite.setPosition(pos_x_px, pos_y_px);
+      index++;
+   };
 }
 
 //---------------------------------------------------------------------------------------------------------------------

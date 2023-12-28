@@ -81,6 +81,8 @@ private:
    std::unique_ptr<LayerData> _frame_slot2;
 
    std::map<std::string, ItemSprite> _sprites;
+   std::array<ItemSprite, 2> _slot_sprites;
+
    int32_t _selected_index = 0;
    GameControllerInfo _joystick_info;
    float _joystick_update_time = 0.0f;
