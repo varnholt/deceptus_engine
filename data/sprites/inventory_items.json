@@ -4,47 +4,47 @@
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title" : "",
-        "description" : ""
+        "title": "Whisperwood Lever-Grip",
+        "description": "Carved from ancient Whisperwood, this lever-grip activates forgotten mechanisms. It resonates with the past, breathing life into dormant contraptions that guard the mysteries of bygone eras."
     },
     "key": {
         "x_px": 38,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title" : "",
-        "description" : ""
+        "title": "Chrono-Skeleton Key",
+        "description": "Crafted by Chrono-Smiths, this key unlocks doors frozen in time. Its intricate design hints at mysteries, allowing passage to hidden realms where echoes of history linger. The surprise lies in its seamless compatibility with locks guarding yesteryear's secrets."
     },
     "sword": {
         "x_px": 76,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title" : "",
-        "description" : ""
+        "title": "Echoing Blade",
+        "description": "Forged in a lost forge, this blade sings forgotten battles' songs. It thirsts for steel clashes, yearning to carve a new legend in the ancient tapestry of a world long gone."
     },
     "potion_red": {
         "x_px": 114,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title" : "",
-        "description" : ""
+        "title": "Phoenix Elixir",
+        "description": "Brewed from Phoenix feathers, this elixir promises rebirth. Its crimson hue rekindles resilience, offering renewed strength and vitality to those who dare sip from its ethereal chalice."
     },
     "potion_green": {
         "x_px": 152,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title" : "",
-        "description" : ""
+        "title": "Sylvan Essence Draught",
+        "description": "Distilled from Sylvan Grove essence, this potion whispers nature's language. It bestows forest wisdom, unveiling flora and fauna secrets to navigate the labyrinth of time."
     },
     "book": {
         "x_px": 190,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title" : "",
-        "description" : ""
+        "title": "Temporal Grimoire",
+        "description": "Penned by a Chrono-Scribe, this grimoire unravels time's threads, revealing lost spells. Its pages hold the key to manipulating reality, a coveted tome for seekers of forgotten wisdom."
     }
 }
