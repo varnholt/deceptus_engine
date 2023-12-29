@@ -30,6 +30,13 @@ public:
       Various = 0x08
    };
 
+   struct ItemText
+   {
+      std::string _title;
+      std::string _description;
+      std::string _description_wrapped;
+   };
+
    InGameMenuInventory();
 
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
@@ -66,6 +73,7 @@ private:
    void resetIndex();
    void updateFrame();
    void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   void drawInventoryTexts();
 
    std::optional<std::string> getSelectedItem() const;
    void assign(const std::string& item, int32_t slot);
@@ -81,6 +89,7 @@ private:
    std::unique_ptr<LayerData> _frame_slot2;
 
    std::map<std::string, ItemSprite> _sprites;
+   std::map<std::string, ItemText> _texts;
    std::array<ItemSprite, 2> _slot_sprites;
 
    int32_t _selected_index = 0;
@@ -100,6 +109,11 @@ private:
    sf::Vector2f _panel_left_offset_px;
    sf::Vector2f _panel_center_offset_px;
    sf::Vector2f _panel_right_offset_px;
+
+   sf::Font _font_title;
+   sf::Font _font_description;
+   sf::Text _text_title;
+   sf::Text _text_description;
 
    using EventCallback = std::function<void(const sf::Event&)>;
    EventCallback _keyboard_event_handler;

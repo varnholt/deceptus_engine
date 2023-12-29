@@ -180,6 +180,23 @@ InGameMenuInventory::InGameMenuInventory()
 
    loadInventoryItems();
 
+   // load fonts
+   if (_font_title.loadFromFile("data/fonts/deceptum.ttf"))
+   {
+      const_cast<sf::Texture&>(_font_title.getTexture(12)).setSmooth(false);
+      _text_title.setFont(_font_title);
+      _text_title.setCharacterSize(12);
+      _text_title.setFillColor(sf::Color{232, 219, 243});
+   }
+
+   if (_font_description.loadFromFile("data/fonts/deceptum.ttf"))
+   {
+      const_cast<sf::Texture&>(_font_description.getTexture(12)).setSmooth(false);
+      _text_description.setFont(_font_description);
+      _text_description.setCharacterSize(12);
+      _text_description.setFillColor(sf::Color{232, 219, 243});
+   }
+
    EventDistributor::registerEvent(sf::Event::KeyPressed, [this](const sf::Event& event) { keyboardKeyPressed(event.key.code); });
 }
 
@@ -193,10 +210,15 @@ void InGameMenuInventory::loadInventoryItems()
       images,
       [this](const auto& image)
       {
+         // store sprites
          sf::Sprite sprite;
          sprite.setTexture(*_inventory_texture);
          sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
          _sprites[image._name]._sprite = sprite;
+
+         // store texts
+         _texts[image._name]._title = image._title;
+         _texts[image._name]._description = image._description;
       }
    );
 }
@@ -397,6 +419,50 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
       window.draw(_slot_sprites[index]._sprite, states);
       index++;
    }
+}
+
+namespace
+{
+void wrapTextWithinRect(const sf::FloatRect& rect, const sf::Text& original_text)
+{
+   std::string wrapped_text;
+   std::string line;
+   sf::Text temp_text;
+   temp_text.setFont(*original_text.getFont());
+   temp_text.setCharacterSize(12);
+
+   // get words from original text
+   std::vector<std::string> words;
+   std::istringstream iss(original_text.getString());
+   copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), back_inserter(words));
+
+   for (const auto& word : words)
+   {
+      // check if the current line exceeds the right boundary
+      std::string test_line = line + word + " ";
+      temp_text.setString(test_line);
+
+      if (temp_text.getLocalBounds().width <= rect.width)  // text fits into boundary
+      {
+         line = test_line;
+      }
+      else  // boundary is exceeded
+      {
+         wrapped_text = wrapped_text + line + "\n";
+         line = word + " ";
+      }
+   }
+
+   // add remaining text to the last line
+   wrapped_text = wrapped_text + line;
+}
+
+}  // namespace
+
+void InGameMenuInventory::drawInventoryTexts()
+{
+   // top left is 486, 116
+   // rectangle space is 100 x 135
 }
 
 //---------------------------------------------------------------------------------------------------------------------
