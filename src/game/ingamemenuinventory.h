@@ -73,7 +73,7 @@ private:
    void resetIndex();
    void updateFrame();
    void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
-   void drawInventoryTexts();
+   void drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
    std::optional<std::string> getSelectedItem() const;
    void assign(const std::string& item, int32_t slot);
