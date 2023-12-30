@@ -28,9 +28,11 @@ public:
    void setLoading(bool loading);
 
 private:
-
+   void loadInventoryItems();
    void playHeartAnimation();
    void drawHeartAnimation(sf::RenderTarget& window);
+   void drawInventoryItem(sf::RenderTarget& window);
+   void updateInventoryItems();
 
    BitmapFont _font;
 
@@ -69,4 +71,9 @@ private:
    HighResDuration _animation_duration_heart{HighResDuration::zero()};
    HighResDuration _animation_duration_stamina{HighResDuration::zero()};
    HighResDuration _animation_duration_skull_blink{HighResDuration::zero()};
+
+   // inventory
+   sf::Sprite _inventory_sprite;
+   std::map<std::string, sf::Sprite> _sprites;
+   std::shared_ptr<sf::Texture> _inventory_texture;
 };
