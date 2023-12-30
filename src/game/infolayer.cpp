@@ -8,6 +8,7 @@
 #include "game/console.h"
 #include "game/extratable.h"
 #include "game/gameconfiguration.h"
+#include "game/inventoryimages.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/roomupdater.h"
@@ -208,8 +209,53 @@ InfoLayer::InfoLayer()
    _animation_skull_blink->_reset_to_first_frame = false;
    _animation_hp_unlock_left->_reset_to_first_frame = false;
    _animation_hp_unlock_right->_reset_to_first_frame = false;
+
+   loadInventoryItems();
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+void InfoLayer::loadInventoryItems()
+{
+   const auto images = InventoryImages::readImages();
+   _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
+
+   constexpr auto icon_width = 38;
+   constexpr auto icon_height = 38;
+
+   std::ranges::for_each(
+      images,
+      [this](const auto& image)
+      {
+         // store sprites
+         sf::Sprite sprite;
+         sprite.setTexture(*_inventory_texture);
+         sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
+         _sprites[image._name] = sprite;
+      }
+   );
+
+   _inventory_sprite.setTexture(*_inventory_texture);
+   const auto pos_x_px = 594;
+   const auto pos_y_px = 11;
+   _inventory_sprite.setPosition(pos_x_px, pos_y_px);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void InfoLayer::updateInventoryItems()
+{
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   const auto slot = inventory._slots[1];
+
+   if (slot.empty())
+   {
+      return;
+   }
+
+   const auto& sprite = _sprites[slot];
+   _inventory_sprite.setTextureRect(sprite.getTextureRect());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance().getElapsedTime();
@@ -263,6 +309,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
       _item_sword_ammo_layer->draw(window, states);
       _weapon_sword_icon_layer->draw(window, states);
       _slot_1_item_layer->draw(window, states);
+      drawInventoryItem(window);
 
       if (_animation_duration_heart < _next_animation_duration_heart)
       {
@@ -314,13 +361,13 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    auto layer_health = _layers["console"];
    layer_health->draw(window, states);
 
-   auto w_screen = GameConfiguration::getInstance()._video_mode_width;
-   auto h_screen = GameConfiguration::getInstance()._video_mode_height;
+   const auto w_screen = GameConfiguration::getInstance()._video_mode_width;
+   const auto h_screen = GameConfiguration::getInstance()._video_mode_height;
 
    sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
    window.setView(view_screen);
 
-   auto& console = Console::getInstance();
+   const auto& console = Console::getInstance();
    const auto& command = console.getCommand();
    const auto& commands = console.getLog();
 
@@ -359,6 +406,7 @@ void InfoLayer::setLoading(bool loading)
 
 void InfoLayer::update(const sf::Time& dt)
 {
+   updateInventoryItems();
    updateAnimations(dt);
 
    if (_heart_animation._paused)
@@ -456,6 +504,19 @@ void InfoLayer::playHeartAnimation()
 void InfoLayer::drawHeartAnimation(sf::RenderTarget& window)
 {
    _heart_animation.draw(window);
+}
+
+void InfoLayer::drawInventoryItem(sf::RenderTarget& window)
+{
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   const auto slot = inventory._slots[1];
+
+   if (slot.empty())
+   {
+      return;
+   }
+
+   window.draw(_inventory_sprite);
 }
 
 // auto layer_health = _layers["health"];
