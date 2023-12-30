@@ -46,15 +46,65 @@
 
 namespace
 {
+
 constexpr auto COLUMNS = 6;
 constexpr auto ROWS = 3;
 constexpr auto icon_width = 38;
 constexpr auto icon_height = 38;
 constexpr auto frame_width = 44;
 constexpr auto frame_height = 52;
+
+constexpr auto description_rect_width = 100;
+constexpr auto description_rect_height = 135;
+
+// top left is 486, 116
+// rectangle space is 100 x 135
+
+std::string
+wrapTextWithinRect(const std::string& original_text, const sf::FloatRect& rect, const sf::Font& font, int32_t character_size = 12)
+{
+   std::string wrapped_text;
+   std::string line;
+   sf::Text temp_text;
+   temp_text.setFont(font);
+   temp_text.setCharacterSize(character_size);
+
+   // get words from original text
+   std::vector<std::string> words;
+   std::istringstream iss(original_text);
+   copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), back_inserter(words));
+
+   for (const auto& word : words)
+   {
+      // check if the current line exceeds the right boundary
+      std::string test_line = line + word + " ";
+      temp_text.setString(test_line);
+
+      if (temp_text.getLocalBounds().width <= rect.width)  // text fits into boundary
+      {
+         line = test_line;
+      }
+      else  // boundary is exceeded
+      {
+         wrapped_text = wrapped_text + line + "\n";
+         line = word + " ";
+      }
+   }
+
+   // add remaining text to the last line
+   wrapped_text = wrapped_text + line;
+   return wrapped_text;
+}
+
+float getHorizontallyCenteredX(const sf::Text& text, const sf::FloatRect& rect)
+{
+   const auto x_pos = rect.left + (rect.width - text.getLocalBounds().width) * 0.5f;
+   return x_pos;
+}
+
 }  // namespace
 
-#define DEBUG_INVENTORY 1
+// #define DEBUG_INVENTORY 1
 
 //---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InGameMenuInventory::getJoystickInfo() const
@@ -178,8 +228,6 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_hide = config._duration_hide;
    _duration_show = config._duration_show;
 
-   loadInventoryItems();
-
    // load fonts
    if (_font_title.loadFromFile("data/fonts/deceptum.ttf"))
    {
@@ -196,6 +244,8 @@ InGameMenuInventory::InGameMenuInventory()
       _text_description.setCharacterSize(12);
       _text_description.setFillColor(sf::Color{232, 219, 243});
    }
+
+   loadInventoryItems();
 
    EventDistributor::registerEvent(sf::Event::KeyPressed, [this](const sf::Event& event) { keyboardKeyPressed(event.key.code); });
 }
@@ -219,6 +269,11 @@ void InGameMenuInventory::loadInventoryItems()
          // store texts
          _texts[image._name]._title = image._title;
          _texts[image._name]._description = image._description;
+
+         // ...
+         sf::FloatRect rect{0.0f, 0.0f, description_rect_width, description_rect_height};
+         const auto wrapped_text = wrapTextWithinRect(image._description, rect, _font_description);
+         _texts[image._name]._description_wrapped = wrapped_text;
       }
    );
 }
@@ -234,6 +289,7 @@ void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states
 {
    InGameMenuPage::draw(window, states);
    drawInventoryItems(window, states);
+   drawInventoryTexts(window, states);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -421,48 +477,11 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
    }
 }
 
-namespace
+//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates states)
 {
-void wrapTextWithinRect(const sf::FloatRect& rect, const sf::Text& original_text)
-{
-   std::string wrapped_text;
-   std::string line;
-   sf::Text temp_text;
-   temp_text.setFont(*original_text.getFont());
-   temp_text.setCharacterSize(12);
-
-   // get words from original text
-   std::vector<std::string> words;
-   std::istringstream iss(original_text.getString());
-   copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), back_inserter(words));
-
-   for (const auto& word : words)
-   {
-      // check if the current line exceeds the right boundary
-      std::string test_line = line + word + " ";
-      temp_text.setString(test_line);
-
-      if (temp_text.getLocalBounds().width <= rect.width)  // text fits into boundary
-      {
-         line = test_line;
-      }
-      else  // boundary is exceeded
-      {
-         wrapped_text = wrapped_text + line + "\n";
-         line = word + " ";
-      }
-   }
-
-   // add remaining text to the last line
-   wrapped_text = wrapped_text + line;
-}
-
-}  // namespace
-
-void InGameMenuInventory::drawInventoryTexts()
-{
-   // top left is 486, 116
-   // rectangle space is 100 x 135
+   window.draw(_text_title, states);
+   window.draw(_text_description, states);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -541,6 +560,23 @@ void InGameMenuInventory::updateInventoryItems()
       sprite._sprite.setPosition(pos_x_px, pos_y_px);
       index++;
    };
+
+   // update inventory texts
+   const auto selected_item = getSelectedItem();
+   if (!selected_item.has_value())
+   {
+      _text_description.setString("");
+      _text_title.setString("");
+      return;
+   }
+
+   const auto& text = _texts[selected_item.value()];
+   const sf::FloatRect rect{482, 0, 106, 16};
+   const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
+   _text_description.setString(text._description_wrapped);
+   _text_description.setPosition(_panel_right_offset_px.x + 486 + move_offset.value_or(0.0f), 116);
+   _text_title.setString(text._title);
+   _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), 92);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
