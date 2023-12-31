@@ -72,7 +72,12 @@ void PlayerControls::forceSync()
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
    {
-      _keys_pressed |= KeyPressedAttack;
+      _keys_pressed |= KeyPressedSlot1;
+   }
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+   {
+      _keys_pressed |= KeyPressedSlot2;
    }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
@@ -112,7 +117,11 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    }
    else if (key == sf::Keyboard::LControl)
    {
-      _keys_pressed |= KeyPressedAttack;
+      _keys_pressed |= KeyPressedSlot1;
+   }
+   else if (key == sf::Keyboard::LAlt)
+   {
+      _keys_pressed |= KeyPressedSlot2;
    }
    else if (key == sf::Keyboard::Return)
    {
@@ -156,7 +165,11 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    }
    else if (key == sf::Keyboard::LControl)
    {
-      _keys_pressed &= ~KeyPressedAttack;
+      _keys_pressed &= ~KeyPressedSlot1;
+   }
+   else if (key == sf::Keyboard::LAlt)
+   {
+      _keys_pressed &= ~KeyPressedSlot2;
    }
    else if (key == sf::Keyboard::Return)
    {
@@ -188,7 +201,7 @@ bool PlayerControls::isLookingAround() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool PlayerControls::isControllerButtonPressed(int button_enum) const
+bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
 {
    if (!GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -197,10 +210,6 @@ bool PlayerControls::isControllerButtonPressed(int button_enum) const
 
    _joystick_info.getButtonValues();
 
-   // does not need to be mapped
-   // auto button_id = gji->getController()->getButtonId(static_cast<SDL_GameControllerButton>(button_enum));
-   // pressed = (_joystick_info.getButtonValues()[static_cast<size_t>(button_id)]);
-
    const auto pressed = (_joystick_info.getButtonValues()[static_cast<size_t>(button_enum)]);
    return pressed;
 }
@@ -208,7 +217,7 @@ bool PlayerControls::isControllerButtonPressed(int button_enum) const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonXPressed() const
 {
-   if (_keys_pressed & KeyPressedAttack)
+   if (_keys_pressed & KeyPressedSlot1)
    {
       return true;
    }
@@ -216,6 +225,22 @@ bool PlayerControls::isButtonXPressed() const
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_X);
+   }
+
+   return false;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isButtonYPressed() const
+{
+   if (_keys_pressed & KeyPressedSlot2)
+   {
+      return true;
+   }
+
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      return isControllerButtonPressed(SDL_CONTROLLER_BUTTON_Y);
    }
 
    return false;
@@ -737,7 +762,7 @@ void PlayerControls::lockState(KeyPressed key, LockedState state, std::chrono::m
 {
    if (key == KeyPressedLeft || key == KeyPressedRight)
    {
-      _locked_keys[key] = {duration, state};
+      _locked_keys[key] = {duration, state, {}};
    }
    else
    {
