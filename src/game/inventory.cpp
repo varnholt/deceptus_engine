@@ -8,6 +8,9 @@ void Inventory::add(const std::string& item)
 {
    _items.push_back(item);
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
+
+   // fill empty slots with new items
+   autoPopulate(item);
 }
 
 void Inventory::remove(const std::string& item)
@@ -21,7 +24,9 @@ void Inventory::remove(const std::string& item)
       [item](auto& slot)
       {
          if (slot == item)
+         {
             slot.clear();
+         }
       }
    );
 
