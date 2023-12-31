@@ -30,9 +30,10 @@ public:
 
    bool isLookingAround() const;
    bool isControllerButtonPressed(int32_t button_enum) const;
-   bool isButtonXPressed() const;
    bool isButtonAPressed() const;
    bool isButtonBPressed() const;
+   bool isButtonXPressed() const;  // slot 1
+   bool isButtonYPressed() const;  // slot 2
    bool isUpButtonPressed() const;
    bool isDownButtonPressed() const;
    bool isDroppingDown() const;

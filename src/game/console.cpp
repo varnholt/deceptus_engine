@@ -50,30 +50,30 @@ void Console::showHelp()
 {
    _log.push_back("help:");
    _log.push_back("");
-   _log.push_back("/cp <n>: jump to checkpoint");
-   _log.push_back("   example: /cp 0");
+   _log.push_back("cp <n>: jump to checkpoint");
+   _log.push_back("   example: cp 0");
    _log.push_back("");
-   _log.push_back("/cpanlimitoff: disable cpan maximum radius");
-   _log.push_back("   example: /cpanlimitoff");
+   _log.push_back("cpanlimitoff: disable cpan maximum radius");
+   _log.push_back("   example: cpanlimitoff");
    _log.push_back("");
-   _log.push_back("/damage <n>: cause damage to player");
-   _log.push_back("   example: /damage 100");
+   _log.push_back("damage <n>: cause damage to player");
+   _log.push_back("   example: damage 100");
    _log.push_back("");
-   _log.push_back("/extra <name>: give extra to player");
+   _log.push_back("extra <name>: give extra to player");
    _log.push_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
    _log.push_back("");
-   _log.push_back("/give <item name>: give item to player");
-   _log.push_back("   example: /give key_skull");
+   _log.push_back("give <item name>: give item to player");
+   _log.push_back("   example: give key_skull");
    _log.push_back("");
-   _log.push_back("/playback <command>: game playback");
+   _log.push_back("playback <command>: game playback");
    _log.push_back("   commands: enable, disable, load, save, replay, reset");
    _log.push_back("");
-   _log.push_back("/tp <x>,<y>: teleport to position");
-   _log.push_back("   example: /tp 100, 330");
+   _log.push_back("tp <x>,<y>: teleport to position");
+   _log.push_back("   example: tp 100, 330");
    _log.push_back("");
-   _log.push_back("/start: go to start position");
+   _log.push_back("start: go to start position");
    _log.push_back("");
-   _log.push_back("/weapon <weapon>: give weapon to player");
+   _log.push_back("weapon <weapon>: give weapon to player");
    _log.push_back("   available weapons: bow, gun, sword");
 }
 
@@ -115,9 +115,6 @@ void Console::execute()
 {
    Log::Info() << "process command: " << _command;
 
-   // not sure what's the best behavior, probably just staying active until deactivated
-   // mActive = false;
-
    // parse command
    std::istringstream iss(_command);
    std::vector<std::string> results((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
@@ -129,11 +126,11 @@ void Console::execute()
 
    _log.push_back(_command);
 
-   if (results.at(0) == "/help")
+   if (results.at(0) == "help")
    {
       showHelp();
    }
-   else if (results.at(0) == "/weapon" && results.size() == 2)
+   else if (results.at(0) == "weapon" && results.size() == 2)
    {
       if (results.at(1) == "gun")
       {
@@ -148,7 +145,7 @@ void Console::execute()
          giveWeaponSword();
       }
    }
-   else if (results.at(0) == "/extra" && results.size() == 2)
+   else if (results.at(0) == "extra" && results.size() == 2)
    {
       auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
       if (results.at(1) == "climb")
@@ -197,13 +194,13 @@ void Console::execute()
          _log.push_back("reset all player extras");
       }
    }
-   else if (results.at(0) == "/give" && results.size() == 2)
+   else if (results.at(0) == "give" && results.size() == 2)
    {
       const auto item = results.at(1);
       SaveState::getPlayerInfo()._inventory.add(item);
       _log.push_back("given item player");
    }
-   else if (results.at(0) == "/tp" && results.size() == 3)
+   else if (results.at(0) == "tp" && results.size() == 3)
    {
       auto x = std::atoi(results.at(1).c_str());
       auto y = std::atoi(results.at(2).c_str());
@@ -214,7 +211,7 @@ void Console::execute()
 
       Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
    }
-   else if (results.at(0) == "/cp" && results.size() == 2)
+   else if (results.at(0) == "cp" && results.size() == 2)
    {
       auto n = std::atoi(results.at(1).c_str());
 
@@ -235,12 +232,12 @@ void Console::execute()
 
       _log.push_back(os.str());
    }
-   else if (results.at(0) == "/cpanlimitoff")
+   else if (results.at(0) == "cpanlimitoff")
    {
       Tweaks::instance()._cpan_unlimited = true;
       _log.push_back("disabled cpan limit");
    }
-   else if (results.at(0) == "/playback" && results.size() == 2)
+   else if (results.at(0) == "playback" && results.size() == 2)
    {
       if (results[1] == "enable")
       {
@@ -273,12 +270,12 @@ void Console::execute()
          _log.push_back("playback reset");
       }
    }
-   else if (results.at(0) == "/iddqd")
+   else if (results.at(0) == "iddqd")
    {
       SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
       _log.push_back("invulnerable");
    }
-   else if (results.at(0) == "/damage" && results.size() == 2)
+   else if (results.at(0) == "damage" && results.size() == 2)
    {
       const auto damage = std::atoi(results.at(1).c_str());
       Player::getCurrent()->damage(damage);
@@ -287,7 +284,7 @@ void Console::execute()
       os << "damage player " << damage << std::endl;
       _log.push_back(os.str());
    }
-   else if (results[0] == "/start")
+   else if (results[0] == "start")
    {
       const auto pos = Level::getCurrentLevel()->getStartPosition();
       Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));

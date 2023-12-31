@@ -1319,6 +1319,7 @@ void Player::updatePlatformMovement(const sf::Time& /*dt*/)
    }
 }
 
+#include "inventorybasedcontrols.h"
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAttack()
 {
@@ -1328,8 +1329,14 @@ void Player::updateAttack()
       return;
    }
 
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   const auto x_button_pressed = _controls->isButtonXPressed();
+   const auto y_button_pressed = _controls->isButtonYPressed();
    _attack._attack_button_was_pressed = _attack._attack_button_pressed;
-   _attack._attack_button_pressed = _controls->isButtonXPressed();
+   _attack._attack_button_pressed = InventoryBasedControls::isAttackButtonPressed(inventory, x_button_pressed, y_button_pressed);
+
+   // old non-inventory-based approach
+   // _attack._attack_button_pressed = _controls->isButtonXPressed();
 
    // there are weapons that support continous attacks while the button is down, others like the sword
    // require a fresh button press each time the sword should be swung

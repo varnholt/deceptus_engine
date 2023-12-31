@@ -47,8 +47,8 @@
 namespace
 {
 
-constexpr auto COLUMNS = 6;
-constexpr auto ROWS = 3;
+constexpr auto count_columns = 6;
+constexpr auto count_rows = 3;
 constexpr auto icon_width = 38;
 constexpr auto icon_height = 38;
 constexpr auto frame_width = 44;
@@ -57,8 +57,6 @@ constexpr auto frame_height = 52;
 constexpr auto description_rect_width = 100;
 constexpr auto description_rect_height = 135;
 
-// top left is 486, 116
-// rectangle space is 100 x 135
 
 std::string
 wrapTextWithinRect(const std::string& original_text, const sf::FloatRect& rect, const sf::Font& font, int32_t character_size = 12)
@@ -492,7 +490,7 @@ std::optional<std::string> InGameMenuInventory::getSelectedItem() const
    if (_selected_index < static_cast<int32_t>(inventory._items.size()))
    {
       // apply filter
-      // ...
+      // not implemented yet
 
       return inventory._items[_selected_index];
    }
@@ -531,8 +529,8 @@ void InGameMenuInventory::updateInventoryItems()
       const auto offset_x_px = 190 + move_offset.value_or(0.0f);
       const auto offset_y_px = 110 + _panel_center_offset_px.y;
 
-      const auto x_px = static_cast<float>(offset_x_px + (index % COLUMNS) * frame_width);
-      const auto y_px = static_cast<float>(offset_y_px + (index / COLUMNS) * frame_height);
+      const auto x_px = static_cast<float>(offset_x_px + (index % count_columns) * frame_width);
+      const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
 
       _sprites[item_key]._sprite.setPosition(x_px, y_px);
       index++;
@@ -598,7 +596,7 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::clampIndex()
 {
-   _selected_index = std::clamp(_selected_index, 0, (ROWS * COLUMNS) - 1);
+   _selected_index = std::clamp(_selected_index, 0, (count_rows * count_columns) - 1);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -618,7 +616,7 @@ void InGameMenuInventory::right()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::up()
 {
-   const auto next_index = _selected_index - COLUMNS;
+   const auto next_index = _selected_index - count_columns;
    if (next_index >= 0)
    {
       _selected_index = next_index;
@@ -628,8 +626,8 @@ void InGameMenuInventory::up()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::down()
 {
-   const auto next_index = _selected_index + COLUMNS;
-   if (next_index <= (ROWS * COLUMNS) - 1)
+   const auto next_index = _selected_index + count_columns;
+   if (next_index <= (count_rows * count_columns) - 1)
    {
       _selected_index = next_index;
    }
@@ -675,8 +673,8 @@ void InGameMenuInventory::updateFrame()
 {
    const auto move_offset = getMoveOffset();
 
-   const auto x = _selected_index % COLUMNS;
-   const auto y = _selected_index / COLUMNS;
+   const auto x = _selected_index % count_columns;
+   const auto y = _selected_index / count_columns;
    const auto pos = _frame_selection->_pos + sf::Vector2f{
                                                 static_cast<float>(x * frame_width + move_offset.value_or(0.0f)),
                                                 static_cast<float>(y * frame_height + _panel_center_offset_px.y)
@@ -688,11 +686,11 @@ void InGameMenuInventory::updateFrame()
 void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    std::optional<int32_t> slot;
-   if (key == sf::Keyboard::Z)
+   if (key == sf::Keyboard::LControl)
    {
       slot = 0;
    }
-   else if (key == sf::Keyboard::X)
+   else if (key == sf::Keyboard::LAlt)
    {
       slot = 1;
    }

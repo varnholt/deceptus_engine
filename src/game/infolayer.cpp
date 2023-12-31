@@ -45,70 +45,17 @@ HighResDuration getRandomDuration(const HighResDuration& min_duration, const Hig
 
 constexpr auto heart_layer_count = 10;
 constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
+
+constexpr auto icon_width = 38;
+constexpr auto icon_height = 38;
+constexpr auto pos_x_px = 594;
+constexpr auto pos_y_px = 11;
+
+constexpr auto heart_pos_x_px = 100;
+constexpr auto heart_pos_y_px = 100;
+
 }  // namespace
 
-/*
-
-Background
-
-console
-
-zone_the_sewers
-zone_graveyard
-
-item_slot_1
-
-health area
-   [x] character_window
-   [x] item_sword_ammo
-   [x] weapon_sword_icon
-   [ ] weapon_none_icon
-   [ ] weapon_sword_disabled_icon
-
-40
-...
-1
-
-health
-   keep disabled until given
-      [ ] hp_slot_13
-      [ ] hp_slot_12
-      ...
-      [ ] hp_slot_02
-      [ ] hp_slot_01
-
-stamina bars
-   energy_6
-   energy_5
-   energy_4
-   energy_3
-   energy_2
-   energy_1
-
-no_pause
-skip_0
-skip_1
-skip_2
-skip_3
-autosave
-cpan_right
-cpan_down
-cpan_left
-cpan_up
-cpan_up_enabled
-cpan_down_enabled
-cpan_left_enabled
-cpan_right_enabled
-
-weapon_slot_Y
-weapon_slot_X
-weapon_slot_B
-weapon_slot_A
-item_slot2_Y
-item_slot2_X
-item_slot2_B
-item_slot2_A
-*/
 
 InfoLayer::InfoLayer()
 {
@@ -119,8 +66,6 @@ InfoLayer::InfoLayer()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/ingame_ui.psd");
 
-   // Log::Info() << mFilename;
-
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
@@ -128,8 +73,6 @@ InfoLayer::InfoLayer()
       {
          continue;
       }
-
-      // Log::Info() << layer.getName();
 
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
@@ -219,9 +162,6 @@ void InfoLayer::loadInventoryItems()
    const auto images = InventoryImages::readImages();
    _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
-   constexpr auto icon_width = 38;
-   constexpr auto icon_height = 38;
-
    std::ranges::for_each(
       images,
       [this](const auto& image)
@@ -235,8 +175,6 @@ void InfoLayer::loadInventoryItems()
    );
 
    _inventory_sprite.setTexture(*_inventory_texture);
-   const auto pos_x_px = 594;
-   const auto pos_y_px = 11;
    _inventory_sprite.setPosition(pos_x_px, pos_y_px);
 }
 
@@ -352,27 +290,24 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
 void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto w_view = GameConfiguration::getInstance()._view_width;
-   auto h_view = GameConfiguration::getInstance()._view_height;
+   const auto w_view = GameConfiguration::getInstance()._view_width;
+   const auto h_view = GameConfiguration::getInstance()._view_height;
+   const auto w_screen = GameConfiguration::getInstance()._video_mode_width;
+   const auto h_screen = GameConfiguration::getInstance()._video_mode_height;
+   const auto& console = Console::getInstance();
+   const auto& command = console.getCommand();
+   const auto& commands = console.getLog();
+   constexpr auto offset_x = 16;
+   static const auto offset_y = h_screen - 48;
 
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
    window.setView(view);
 
-   auto layer_health = _layers["console"];
+   const auto& layer_health = _layers["console"];
    layer_health->draw(window, states);
-
-   const auto w_screen = GameConfiguration::getInstance()._video_mode_width;
-   const auto h_screen = GameConfiguration::getInstance()._video_mode_height;
 
    sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
    window.setView(view_screen);
-
-   const auto& console = Console::getInstance();
-   const auto& command = console.getCommand();
-   const auto& commands = console.getLog();
-
-   static const auto offset_x = 16;
-   static const auto offset_y = h_screen - 48;
 
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
@@ -385,7 +320,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    _font.draw(window, bitmap_font, offset_x, h_screen - 28);
 
    // draw cursor
-   auto elapsed = GlobalClock::getInstance().getElapsedTime();
+   const auto elapsed = GlobalClock::getInstance().getElapsedTime();
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
       _font.draw(window, _font.getCoords("_"), _font._text_width + offset_x, h_screen - 28);
@@ -493,10 +428,7 @@ void InfoLayer::updateAnimations(const sf::Time& dt)
 
 void InfoLayer::playHeartAnimation()
 {
-   static const auto x = 100;
-   static const auto y = 100;
-
-   _heart_animation.setPosition(x, y);
+   _heart_animation.setPosition(heart_pos_x_px, heart_pos_y_px);
    _heart_animation.updateVertices();
    _heart_animation.play();
 }
@@ -518,38 +450,3 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window)
 
    window.draw(_inventory_sprite);
 }
-
-// auto layer_health = _layers["health"];
-// auto layer_health_energy = _layers["health_energy"];
-// auto layer_health_weapon = _layers["health_weapon"];
-//
-// if (layer_health_energy->_visible)
-// {
-//     const auto health = (SaveState::getPlayerInfo().mExtraTable._health._health) * 0.01f;
-//
-//     const auto healthLayerWidth  = layer_health_energy->_sprite->getTexture()->getSize().x * health;
-//     const auto healthLayerHeight = layer_health_energy->_sprite->getTexture()->getSize().y;
-//
-//     layer_health_energy->_sprite->setTextureRect(
-//        sf::IntRect{
-//           0,
-//           0,
-//           static_cast<int32_t>(healthLayerWidth),
-//           static_cast<int32_t>(healthLayerHeight)
-//        }
-//     );
-//
-//     // Log::Info() << "energy: " << healthLayerWidth;
-//
-//     auto t = (now - _show_time).asSeconds();
-//     const auto duration = 1.0f;
-//     t = (0.5f * (1.0f + cos((std::min(t, duration) / duration) * static_cast<float>(M_PI)))) * 200;
-//
-//     layer_health->_sprite->setOrigin(t, 0.0f);
-//     layer_health_energy->_sprite->setOrigin(t, 0.0f);
-//     layer_health_weapon->_sprite->setOrigin(t, 0.0f);
-//
-//     layer_health->draw(window, states);
-//     layer_health_energy->draw(window, states);
-//     layer_health_weapon->draw(window, states);
-// }
