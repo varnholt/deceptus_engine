@@ -213,15 +213,15 @@ void Console::execute()
    }
    else if (results.at(0) == "cp" && results.size() == 2)
    {
-      auto n = std::atoi(results.at(1).c_str());
+      const auto checkpoint_index = std::atoi(results.at(1).c_str());
 
       std::ostringstream os;
 
-      auto checkpoint = Checkpoint::getCheckpoint(n, Level::getCurrentLevel()->getCheckpoints());
+      auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, Level::getCurrentLevel()->getCheckpoints());
       if (checkpoint)
       {
          const auto pos = checkpoint->spawnPoint();
-         os << "jumped to checkpoint " << n << std::endl;
+         os << "jumped to checkpoint " << checkpoint_index << std::endl;
 
          Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
       }
@@ -286,7 +286,9 @@ void Console::execute()
    }
    else if (results[0] == "start")
    {
-      const auto pos = Level::getCurrentLevel()->getStartPosition();
+      auto* level = Level::getCurrentLevel();
+      level->loadStartPosition();
+      const auto pos = level->getStartPosition();
       Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
    }
    else

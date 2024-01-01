@@ -554,7 +554,7 @@ void InGameMenuInventory::updateInventoryItems()
 
       constexpr auto frame_width_slots = 47;
       const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
-      const auto pos_y_px = 110;
+      constexpr auto pos_y_px = 110;
       sprite._sprite.setPosition(pos_x_px, pos_y_px);
       index++;
    };
