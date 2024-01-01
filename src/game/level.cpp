@@ -571,6 +571,29 @@ bool Level::load()
 }
 
 //-----------------------------------------------------------------------------
+void Level::loadStartPosition()
+{
+   _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
+   _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+}
+
+//-----------------------------------------------------------------------------
+void Level::loadLevelScript()
+{
+   const auto path = std::filesystem::path(_description->_filename).parent_path();
+   _level_script.setup(path / "level.lua");
+   _level_script.setSearchMechanismCallback([this](const std::string& regexPattern, const std::optional<std::string>& group)
+                                            { return searchMechanisms(regexPattern, group); });
+
+   // handshake between extra mechanism and level script
+   for (auto extra_mechanism : _mechanism_extras)
+   {
+      auto extra = std::dynamic_pointer_cast<Extra>(extra_mechanism);
+      extra->_callbacks.push_back([this](const std::string& extra) { _level_script.luaPlayerReceivedExtra(extra); });
+   }
+}
+
+//-----------------------------------------------------------------------------
 void Level::initialize()
 {
    createViews();
@@ -589,8 +612,7 @@ void Level::initialize()
       return;
    }
 
-   _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
-   _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+   loadStartPosition();
 
    loadState();
    spawnEnemies();
@@ -598,17 +620,7 @@ void Level::initialize()
    assignMechanismsToRooms();
    _volume_updater->setMechanisms(_mechanisms_list);
 
-   const auto path = std::filesystem::path(_description->_filename).parent_path();
-   _level_script.setup(path / "level.lua");
-   _level_script.setSearchMechanismCallback([this](const std::string& regexPattern, const std::optional<std::string>& group)
-                                            { return searchMechanisms(regexPattern, group); });
-
-   // handshake between extra mechanism and level script
-   for (auto extra_mechanism : _mechanism_extras)
-   {
-      auto extra = std::dynamic_pointer_cast<Extra>(extra_mechanism);
-      extra->_callbacks.push_back([this](const std::string& extra) { _level_script.luaPlayerReceivedExtra(extra); });
-   }
+   loadLevelScript();
 
    // dump();
 }

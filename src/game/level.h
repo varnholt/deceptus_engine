@@ -58,6 +58,7 @@ public:
    virtual void initialize();
    void initializeTextures();
    void reset();
+   void loadStartPosition();
 
    void saveState();
 
@@ -121,6 +122,7 @@ protected:
    bool load();
    void loadTmx();
    void loadState();
+   void loadLevelScript();
 
    void regenerateLevelPaths(
       const std::shared_ptr<TmxLayer>& layer,
