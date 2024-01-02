@@ -29,9 +29,8 @@ public:
 
 private:
    void loadInventoryItems();
-   void playHeartAnimation();
-   void drawHeartAnimation(sf::RenderTarget& window);
-   void drawInventoryItem(sf::RenderTarget& window);
+   void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
+   void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
    void updateInventoryItems();
 
    BitmapFont _font;
@@ -45,13 +44,6 @@ private:
    std::vector<std::shared_ptr<Layer>> _heart_layers;
    std::vector<std::shared_ptr<Layer>> _stamina_layers;
    std::shared_ptr<Layer> _character_window_layer;
-   std::shared_ptr<Layer> _item_sword_ammo_layer;
-   std::shared_ptr<Layer> _weapon_sword_icon_layer;
-
-   std::shared_ptr<Layer> _slot_1_item_layer;
-   std::shared_ptr<Layer> _slot_1_weapon_layer;
-   std::shared_ptr<Layer> _slot_2_item_layer;
-   std::shared_ptr<Layer> _slot_2_weapon_layer;
 
    Animation _heart_animation;
 
@@ -73,7 +65,8 @@ private:
    HighResDuration _animation_duration_skull_blink{HighResDuration::zero()};
 
    // inventory
-   sf::Sprite _inventory_sprite;
+   std::array<std::shared_ptr<Layer>, 2> _slot_item_layers;
+   std::array<sf::Sprite, 2> _inventory_sprites;
    std::map<std::string, sf::Sprite> _sprites;
    std::shared_ptr<sf::Texture> _inventory_texture;
 };

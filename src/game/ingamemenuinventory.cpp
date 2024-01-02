@@ -244,8 +244,6 @@ InGameMenuInventory::InGameMenuInventory()
    }
 
    loadInventoryItems();
-
-   EventDistributor::registerEvent(sf::Event::KeyPressed, [this](const sf::Event& event) { keyboardKeyPressed(event.key.code); });
 }
 
 //---------------------------------------------------------------------------------------------------------------------

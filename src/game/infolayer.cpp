@@ -48,12 +48,18 @@ constexpr auto heart_quarter_layer_count = heart_layer_count * 4;
 
 constexpr auto icon_width = 38;
 constexpr auto icon_height = 38;
-constexpr auto pos_x_px = 594;
-constexpr auto pos_y_px = 11;
 
-constexpr auto heart_pos_x_px = 100;
-constexpr auto heart_pos_y_px = 100;
+constexpr auto frame_0_pos_x_px = 5;
+constexpr auto frame_0_pos_y_px = 16;
+constexpr auto frame_1_pos_x_px = 43;
+constexpr auto frame_1_pos_y_px = 16;
 
+constexpr auto heart_pos_x_px = 81.0f;
+constexpr auto heart_pos_y_px = 19.0f;
+constexpr auto stamina_pos_x_px = 81.0f;
+constexpr auto stamina_pos_y_px = 28.0f;
+constexpr auto skull_pos_x_px = 37.0f;
+constexpr auto skull_pos_y_px = 12.0f;
 }  // namespace
 
 
@@ -109,13 +115,9 @@ InfoLayer::InfoLayer()
    }
 
    _character_window_layer = _layers["character_window"];
-   _item_sword_ammo_layer = _layers["item_sword_ammo"];
-   _weapon_sword_icon_layer = _layers["weapon_sword_icon"];
 
-   _slot_1_item_layer = _layers["item_slot_1"];
-   _slot_2_item_layer = _layers["item_slot_2"];
-   _slot_1_weapon_layer = _layers["weapon_slot_1"];
-   _slot_2_weapon_layer = _layers["weapon_slot_2"];
+   _slot_item_layers[0] = _layers["item_slot_X"];
+   _slot_item_layers[1] = _layers["item_slot_Y"];
 
    // load heart animation
    const auto t = sf::milliseconds(100);
@@ -141,9 +143,9 @@ InfoLayer::InfoLayer()
 
    _animation_pool.setGarbageCollectorEnabled(false);  // don't clear animations
 
-   _animation_heart = _animation_pool.create("heart", 37.0f, 25.0f, false, false);
-   _animation_stamina = _animation_pool.create("stamina", 37.0f, 34.0f, false, false);
-   _animation_skull_blink = _animation_pool.create("skull_blink", 14.0f, 13.0f, false, false);
+   _animation_heart = _animation_pool.create("heart", heart_pos_x_px, heart_pos_y_px, false, false);
+   _animation_stamina = _animation_pool.create("stamina", stamina_pos_x_px, stamina_pos_y_px, false, false);
+   _animation_skull_blink = _animation_pool.create("skull_blink", skull_pos_x_px, skull_pos_y_px, false, false);
    _animation_hp_unlock_left = _animation_pool.create("hp_unlock_left", 0.0f, 0.0f, false, false);
    _animation_hp_unlock_right = _animation_pool.create("hp_unlock_right", 0.0f, 0.0f, false, false);
 
@@ -174,23 +176,28 @@ void InfoLayer::loadInventoryItems()
       }
    );
 
-   _inventory_sprite.setTexture(*_inventory_texture);
-   _inventory_sprite.setPosition(pos_x_px, pos_y_px);
+   _inventory_sprites[0].setTexture(*_inventory_texture);
+   _inventory_sprites[0].setPosition(frame_0_pos_x_px, frame_0_pos_y_px);
+   _inventory_sprites[1].setTexture(*_inventory_texture);
+   _inventory_sprites[1].setPosition(frame_1_pos_x_px, frame_1_pos_y_px);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void InfoLayer::updateInventoryItems()
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
-   const auto slot = inventory._slots[1];
-
-   if (slot.empty())
+   for (auto i = 0u; i < inventory._slots.size(); i++)
    {
-      return;
-   }
+      const auto slot = inventory._slots[i];
 
-   const auto& sprite = _sprites[slot];
-   _inventory_sprite.setTextureRect(sprite.getTextureRect());
+      if (slot.empty())
+      {
+         continue;
+      }
+
+      const auto& sprite = _sprites[slot];
+      _inventory_sprites[i].setTextureRect(sprite.getTextureRect());
+   }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -244,10 +251,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
          _heart_layers[i]->draw(window, states);
       }
 
-      _item_sword_ammo_layer->draw(window, states);
-      _weapon_sword_icon_layer->draw(window, states);
-      _slot_1_item_layer->draw(window, states);
-      drawInventoryItem(window);
+      drawInventoryItem(window, states);
 
       if (_animation_duration_heart < _next_animation_duration_heart)
       {
@@ -426,27 +430,25 @@ void InfoLayer::updateAnimations(const sf::Time& dt)
    _animation_duration_skull_blink += elapsed_duration;
 }
 
-void InfoLayer::playHeartAnimation()
+void InfoLayer::drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states)
 {
-   _heart_animation.setPosition(heart_pos_x_px, heart_pos_y_px);
-   _heart_animation.updateVertices();
-   _heart_animation.play();
+   _heart_animation.draw(window, states);
 }
 
-void InfoLayer::drawHeartAnimation(sf::RenderTarget& window)
-{
-   _heart_animation.draw(window);
-}
-
-void InfoLayer::drawInventoryItem(sf::RenderTarget& window)
+void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
-   const auto slot = inventory._slots[1];
 
-   if (slot.empty())
+   for (auto i = 0u; i < inventory._slots.size(); i++)
    {
-      return;
-   }
+      const auto slot = inventory._slots[i];
 
-   window.draw(_inventory_sprite);
+      if (slot.empty())
+      {
+         continue;
+      }
+
+      window.draw(_inventory_sprites[i]);
+      _slot_item_layers[i]->draw(window, states);
+   }
 }

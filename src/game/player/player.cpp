@@ -1,36 +1,37 @@
 #include "player.h"
 
-#include "audio.h"
-#include "bow.h"
-#include "camerapanorama.h"
-#include "chainshapeanalyzer.h"
-#include "fadetransitioneffect.h"
-#include "fixturenode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
+#include "game/audio.h"
+#include "game/bow.h"
+#include "game/camerapanorama.h"
+#include "game/chainshapeanalyzer.h"
+#include "game/fadetransitioneffect.h"
+#include "game/fixturenode.h"
 #include "game/gameclock.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontactlistener.h"
 #include "game/gamecontrollerintegration.h"
 #include "game/gamestate.h"
 #include "game/gun.h"
+#include "game/inventorybasedcontrols.h"
 #include "game/level.h"
+#include "game/mechanisms/bouncerwrapper.h"
+#include "game/mechanisms/fan.h"
+#include "game/mechanisms/laser.h"
+#include "game/mechanisms/portalwrapper.h"
+#include "game/onewaywall.h"
+#include "game/physics/physicsconfiguration.h"
 #include "game/player/playeraudio.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
 #include "game/sword.h"
-#include "mechanisms/bouncerwrapper.h"
-#include "mechanisms/fan.h"
-#include "mechanisms/laser.h"
-#include "mechanisms/portalwrapper.h"
-#include "onewaywall.h"
-#include "physics/physicsconfiguration.h"
-#include "tweaks.h"
-#include "weapon.h"
-#include "weaponsystem.h"
+#include "game/tweaks.h"
+#include "game/weapon.h"
+#include "game/weaponsystem.h"
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -731,7 +732,7 @@ void Player::updateOrientation()
 //----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
-   if (_controls->hasFlag(KeyPressedLook))
+   if (_controls->isLookingAround())
    {
       return 0.0f;
    }
@@ -1319,7 +1320,6 @@ void Player::updatePlatformMovement(const sf::Time& /*dt*/)
    }
 }
 
-#include "inventorybasedcontrols.h"
 //----------------------------------------------------------------------------------------------------------------------
 void Player::updateAttack()
 {
