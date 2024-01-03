@@ -58,8 +58,8 @@ constexpr auto heart_pos_x_px = 81.0f;
 constexpr auto heart_pos_y_px = 19.0f;
 constexpr auto stamina_pos_x_px = 81.0f;
 constexpr auto stamina_pos_y_px = 28.0f;
-constexpr auto skull_pos_x_px = 37.0f;
-constexpr auto skull_pos_y_px = 12.0f;
+constexpr auto skull_pos_x_px = 32.0f;
+constexpr auto skull_pos_y_px = 0.0f;
 }  // namespace
 
 
