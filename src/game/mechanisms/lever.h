@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <filesystem>
 #include <functional>
 
 #include <box2d/box2d.h>
@@ -42,33 +41,16 @@ public:
    void setEnabled(bool enabled) override;
    bool isEnabled() const override;
    void toggle() override;
+   void serializeState(nlohmann::json& j) override;
+   void deserializeState(const nlohmann::json& j) override;
 
    void addCallback(const Callback& callback);
    void setCallbacks(const std::vector<Callback>& callbacks);
-   const sf::FloatRect& getPixelRect() const;
-
-   static void addSearchRect(const std::shared_ptr<TmxObject>& rect);
-
-   // requires a unified datastructure/mechanism in the future!
-   static void merge(
-      const std::vector<std::shared_ptr<GameMechanism>>& levers,
-      const std::vector<std::shared_ptr<GameMechanism>>& lasers,
-      const std::vector<std::shared_ptr<GameMechanism>>& platforms,
-      const std::vector<std::shared_ptr<GameMechanism>>& fans,
-      const std::vector<std::shared_ptr<GameMechanism>>& belts,
-      const std::vector<std::shared_ptr<GameMechanism>>& spikes,
-      const std::vector<std::shared_ptr<GameMechanism>>& spike_blocks,
-      const std::vector<std::shared_ptr<GameMechanism>>& on_off_blocks,
-      const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades,
-      const std::vector<std::shared_ptr<GameMechanism>>& doors
-   );
-
    void setup(const GameDeserializeData& data);
-
    void updateReceivers();
-
-   void serializeState(nlohmann::json& j) override;
-   void deserializeState(const nlohmann::json& j) override;
+   const sf::FloatRect& getPixelRect() const;
+   const std::vector<std::string>& getTargetIds() const;
+   void setHandleAvailable(bool handle_available);
 
 private:
    void updateSprite();
@@ -76,23 +58,22 @@ private:
    void updateTargetPositionReached();
 
    Type _type = Type::TwoState;
-
    State _target_state = State::Left;
    State _state_previous = State::Left;
 
-   std::vector<Callback> _callbacks;
    sf::FloatRect _rect;
-   bool _player_at_lever = false;
    sf::Sprite _sprite;
+   std::shared_ptr<sf::Texture> _texture;
    int32_t _offset = 0;
    int32_t _dir = 0;
+   float _idle_time_s = 0.0f;
+
    bool _reached = false;
    bool _reached_previous = false;
-   float _idle_time_s = 0.0f;
+   bool _player_at_lever = false;
+   bool _handle_available = true;
+
+   std::vector<Callback> _callbacks;
    std::vector<std::string> _target_ids;
    std::optional<std::chrono::high_resolution_clock::time_point> _last_toggle_time;
-
-   std::shared_ptr<sf::Texture> _texture;
-
-   static std::vector<std::shared_ptr<TmxObject>> __rectangles;
 };
