@@ -22,6 +22,7 @@
 #include "game/mechanisms/fireflies.h"
 #include "game/mechanisms/laser.h"
 #include "game/mechanisms/lever.h"
+#include "game/mechanisms/levermechanismmerger.h"
 #include "game/mechanisms/moveablebox.h"
 #include "game/mechanisms/movingplatform.h"
 #include "game/mechanisms/onoffblock.h"
@@ -320,7 +321,7 @@ void GameMechanismDeserializer::deserialize(
             }
             else if (object_group->_name == layer_name_switchable_objects || tmx_object->_template_type == type_name_switchable_object)
             {
-               Lever::addSearchRect(tmx_object);
+               LeverMechanismMerger::addSearchRect(tmx_object);
             }
             else if (object_group->_name == layer_name_sensor_rects || tmx_object->_template_type == type_name_sensor_rect)
             {
@@ -386,7 +387,7 @@ void GameMechanismDeserializer::deserialize(
       std::dynamic_pointer_cast<SensorRect>(sensor_rect)->findReference(all_mechanisms);
    }
 
-   Lever::merge(
+   LeverMechanismMerger::merge(
       *mechanism_levers,
       *mechanism_lasers,
       *mechanism_platforms,
