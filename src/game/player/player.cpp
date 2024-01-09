@@ -241,6 +241,7 @@ void Player::initializeController()
                updateDash(Dash::Left);
             }
          );
+
          gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
             [&]()
@@ -251,6 +252,32 @@ void Player::initializeController()
                }
 
                updateDash(Dash::Right);
+            }
+         );
+
+         gji.getController()->addButtonPressedCallback(
+            SDL_CONTROLLER_BUTTON_X,
+            [&]()
+            {
+               if (!is_running())
+               {
+                  return;
+               }
+
+               useInventory(0);
+            }
+         );
+
+         gji.getController()->addButtonPressedCallback(
+            SDL_CONTROLLER_BUTTON_Y,
+            [&]()
+            {
+               if (!is_running())
+               {
+                  return;
+               }
+
+               useInventory(1);
             }
          );
       }
@@ -307,6 +334,13 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
       const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
       current_cycle->setColor(damage_color);
    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+void Player::useInventory(int32_t slot)
+{
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   inventory.use(slot);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2045,6 +2079,16 @@ void Player::keyPressed(sf::Keyboard::Key key)
       case sf::Keyboard::X:
       {
          updateDash(Dash::Right);
+         break;
+      }
+      case sf::Keyboard::LControl:
+      {
+         useInventory(0);
+         break;
+      }
+      case sf::Keyboard::LAlt:
+      {
+         useInventory(1);
          break;
       }
       default:

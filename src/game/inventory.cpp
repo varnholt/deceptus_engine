@@ -69,6 +69,24 @@ void Inventory::autoPopulate(const std::string& item)
    }
 }
 
+void Inventory::use(int32_t slot) const
+{
+   const auto& item = _slots[slot];
+   std::ranges::for_each(_used_callbacks, [&item](const auto& cb) { cb(item); });
+}
+
+void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)
+{
+   _used_callbacks.erase(
+      std::remove_if(
+         _used_callbacks.begin(),
+         _used_callbacks.end(),
+         [&callback_to_remove](const UsedCallback& callback) { return &callback == &callback_to_remove; }
+      ),
+      _used_callbacks.end()
+   );
+}
+
 bool Inventory::hasInventoryItem(const std::string& item_key) const
 {
    const auto it = std::find(_items.cbegin(), _items.cend(), item_key);

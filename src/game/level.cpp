@@ -423,7 +423,7 @@ void Level::loadTmx()
 
    // process everything that's not considered a mechanism
    const auto& tmx_elements = tmx_parser.getElements();
-   for (auto element : tmx_elements)
+   for (const auto& element : tmx_elements)
    {
       data._tmx_layer = nullptr;
       data._tmx_tileset = nullptr;
@@ -434,7 +434,6 @@ void Level::loadTmx()
       if (element->_type == TmxElement::Type::TypeLayer)
       {
          auto layer = std::dynamic_pointer_cast<TmxLayer>(element);
-
          if (GameMechanismDeserializer::isLayerNameReserved(layer->_name))
          {
             continue;
@@ -614,7 +613,7 @@ void Level::initialize()
 
    loadStartPosition();
 
-   loadState();
+   loadSaveState();
    spawnEnemies();
 
    assignMechanismsToRooms();
@@ -626,7 +625,7 @@ void Level::initialize()
 }
 
 //-----------------------------------------------------------------------------
-void Level::loadState()
+void Level::loadSaveState()
 {
    const auto& save_state = SaveState::getCurrent();
    auto checkpoint_index = save_state._checkpoint;
@@ -1013,11 +1012,6 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
    player->draw(color, normal);
-}
-
-namespace
-{
-int32_t frame_counter = 0;
 }
 
 //-----------------------------------------------------------------------------
