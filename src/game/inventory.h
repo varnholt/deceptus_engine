@@ -8,6 +8,9 @@ struct Inventory
 {
    Inventory() = default;
 
+   using UpdateddCallback = std::function<void()>;
+   using UsedCallback = std::function<void(const std::string&)>;
+
    void add(const std::string&);
    void remove(const std::string&);
    bool hasInventoryItem(const std::string& item_key) const;
@@ -17,9 +20,11 @@ struct Inventory
 
    void selectItem(int32_t slot, const std::string& item);
    void autoPopulate(const std::string& item);
+   void use(int32_t) const;
+   void removeUsedCallback(const UsedCallback& callbackToRemove);
 
-   using UpdateddCallback = std::function<void()>;
    std::vector<UpdateddCallback> _updated_callbacks;
+   std::vector<UsedCallback> _used_callbacks;
 
    // members
    std::vector<std::string> _items;

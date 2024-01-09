@@ -121,7 +121,7 @@ protected:
 
    bool load();
    void loadTmx();
-   void loadState();
+   void loadSaveState();
    void loadLevelScript();
 
    void regenerateLevelPaths(

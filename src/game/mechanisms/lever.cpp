@@ -7,6 +7,7 @@
 #include "game/audio.h"
 #include "game/constants.h"
 #include "game/player/player.h"
+#include "game/savestate.h"
 #include "game/texturepool.h"
 
 namespace
@@ -33,6 +34,7 @@ void Lever::setup(const GameDeserializeData& data)
       if (enabled_it != data._tmx_object->_properties->_map.end())
       {
          _enabled = enabled_it->second->_value_bool.value();
+         _target_state = (_enabled ? State::Right : State::Left);
       }
 
       const auto serialized_it = data._tmx_object->_properties->_map.find("serialized");
@@ -59,10 +61,25 @@ void Lever::setup(const GameDeserializeData& data)
          }
       }
 
+      // todo: document handle_available
       const auto handle_available_it = data._tmx_object->_properties->_map.find("handle_available");
       if (handle_available_it != data._tmx_object->_properties->_map.end())
       {
          _handle_available = handle_available_it->second->_value_bool.value();
+
+         // accept handle from inventory
+         if (!_handle_available)
+         {
+            _handle_callback = [this](const std::string& item)
+            {
+               if (_player_at_lever && !_handle_available && item == "handle")
+               {
+                  setHandleAvailable(true);
+               }
+            };
+
+            SaveState::getPlayerInfo()._inventory._used_callbacks.push_back(_handle_callback);
+         }
       }
    }
 
@@ -75,7 +92,8 @@ void Lever::setup(const GameDeserializeData& data)
    _rect.height = PIXELS_PER_TILE * 2;
 
    _sprite.setPosition(x, y);
-   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
+   // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
+   _texture = TexturePool::getInstance().get("data/sprites/levers.png");
    _sprite.setTexture(*_texture);
 
    setObjectId(data._tmx_object->_name);
@@ -118,6 +136,12 @@ const sf::FloatRect& Lever::getPixelRect() const
 Lever::Lever(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Lever).name());
+}
+
+//-----------------------------------------------------------------------------
+Lever::~Lever()
+{
+   SaveState::getPlayerInfo()._inventory.removeUsedCallback(_handle_callback);
 }
 
 //-----------------------------------------------------------------------------
@@ -176,19 +200,25 @@ const std::vector<std::string>& Lever::getTargetIds() const
 //-----------------------------------------------------------------------------
 void Lever::update(const sf::Time& dt)
 {
-   if (!_handle_available)
-   {
-      // only show lever without the handle
-      constexpr auto no_handle_row = 2;
-      constexpr auto no_handle_col = 10;
-      _sprite.setTextureRect(
-         {PIXELS_PER_TILE * 3 * no_handle_col, PIXELS_PER_TILE * 3 * no_handle_row, PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}
-      );
-      return;
-   }
-
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    _player_at_lever = _rect.intersects(player_rect);
+
+   if (!_handle_available)
+   {
+      // clang-format off
+      constexpr auto no_handle_col = 10;
+      constexpr auto no_handle_row = 2;
+      const auto rect = sf::IntRect{
+         PIXELS_PER_TILE * 3 * no_handle_col,
+         PIXELS_PER_TILE * 3 * no_handle_row,
+         PIXELS_PER_TILE * 3,
+         PIXELS_PER_TILE * 3
+      };
+      // clang-format on
+
+      _sprite.setTextureRect(rect);
+      return;
+   }
 
    updateTargetPositionReached();
    updateDirection();
@@ -263,6 +293,11 @@ void Lever::updateReceivers()
 void Lever::toggle()
 {
    if (!_player_at_lever)
+   {
+      return;
+   }
+
+   if (!_handle_available)
    {
       return;
    }
