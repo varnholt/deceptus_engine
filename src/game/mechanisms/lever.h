@@ -33,6 +33,7 @@ public:
    };
 
    Lever(GameNode* parent = nullptr);
+   ~Lever();
 
    void preload() override;
    void update(const sf::Time& dt) override;
@@ -76,4 +77,5 @@ private:
    std::vector<Callback> _callbacks;
    std::vector<std::string> _target_ids;
    std::optional<std::chrono::high_resolution_clock::time_point> _last_toggle_time;
+   std::function<void(const std::string&)> _handle_callback;
 };

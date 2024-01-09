@@ -174,6 +174,8 @@ private:
    bool checkDamageDrawSkip() const;
    void updateHurtColor(const std::shared_ptr<Animation>& current_cycle);
 
+   void useInventory(int32_t slot);
+
    ToggleCallback _toggle_callback;
    std::shared_ptr<WeaponSystem> _weapon_system;
 
