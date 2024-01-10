@@ -57,9 +57,10 @@ constexpr auto frame_height = 52;
 constexpr auto description_rect_width = 100;
 constexpr auto description_rect_height = 135;
 
+constexpr auto inventory_text_font_size = 12;
+constexpr auto inventory_title_font_size = 12;
 
-std::string
-wrapTextWithinRect(const std::string& original_text, const sf::FloatRect& rect, const sf::Font& font, int32_t character_size = 12)
+std::string wrapTextWithinRect(const std::string& original_text, const sf::FloatRect& rect, const sf::Font& font, int32_t character_size)
 {
    std::string wrapped_text;
    std::string line;
@@ -156,12 +157,12 @@ InGameMenuInventory::InGameMenuInventory()
       _layers["heart_upgrade_2"],
       _layers["heart_upgrade_3"],
       _layers["heart_upgrade_4"],
-      _layers["profile_buttons"],
    };
 
    _panel_center = {
       _layers["frame"],
       _layers["inventory_panel"],
+      _layers["filters"],
       _layers["item_filter_next_0"],
       _layers["item_filter_next_1"],
       _layers["item_filter_previous_0"],
@@ -177,7 +178,7 @@ InGameMenuInventory::InGameMenuInventory()
 
    _panel_right = {
       _layers["item_description_panel"],
-      _layers["item_info"],
+      _layers["equip"],
    };
 
    _panel_header = {
@@ -219,6 +220,11 @@ InGameMenuInventory::InGameMenuInventory()
       frame._layer->hide();
    }
 
+   // hide unused layers
+   _layers["btn_Y"]->hide();
+   _layers["btn_X"]->hide();
+   _layers["item_desc_oldlever"]->hide();
+
    // update button visibility
    updateButtons();
 
@@ -229,17 +235,17 @@ InGameMenuInventory::InGameMenuInventory()
    // load fonts
    if (_font_title.loadFromFile("data/fonts/deceptum.ttf"))
    {
-      const_cast<sf::Texture&>(_font_title.getTexture(12)).setSmooth(false);
+      const_cast<sf::Texture&>(_font_title.getTexture(inventory_title_font_size)).setSmooth(false);
       _text_title.setFont(_font_title);
-      _text_title.setCharacterSize(12);
+      _text_title.setCharacterSize(inventory_title_font_size);
       _text_title.setFillColor(sf::Color{232, 219, 243});
    }
 
    if (_font_description.loadFromFile("data/fonts/deceptum.ttf"))
    {
-      const_cast<sf::Texture&>(_font_description.getTexture(12)).setSmooth(false);
+      const_cast<sf::Texture&>(_font_description.getTexture(inventory_text_font_size)).setSmooth(false);
       _text_description.setFont(_font_description);
-      _text_description.setCharacterSize(12);
+      _text_description.setCharacterSize(inventory_text_font_size);
       _text_description.setFillColor(sf::Color{232, 219, 243});
    }
 
@@ -266,9 +272,9 @@ void InGameMenuInventory::loadInventoryItems()
          _texts[image._name]._title = image._title;
          _texts[image._name]._description = image._description;
 
-         // ...
+         // wrap text
          sf::FloatRect rect{0.0f, 0.0f, description_rect_width, description_rect_height};
-         const auto wrapped_text = wrapTextWithinRect(image._description, rect, _font_description);
+         const auto wrapped_text = wrapTextWithinRect(image._description, rect, _font_description, inventory_text_font_size);
          _texts[image._name]._description_wrapped = wrapped_text;
       }
    );
@@ -355,7 +361,7 @@ void InGameMenuInventory::updateShowHide()
       const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
 
       _panel_left_offset_px.x = -200 * val;
-      _panel_center_offset_px.y = 250 * val;
+      _panel_center_offset_px.y = 300 * val;
       _panel_right_offset_px.x = 200 * val;
 
       alpha = 1.0f - Easings::easeInQuint(elapsed_s_normalized);
@@ -520,12 +526,15 @@ void InGameMenuInventory::updateInventoryItems()
    const auto& inventory = getInventory();
    const auto move_offset = getMoveOffset();
 
+   constexpr auto item_grid_offset_x_px = 190;
+   constexpr auto item_grid_offset_y_px = 107;
+
    // update grid of items
    int32_t index{0};
    for (const auto& item_key : inventory._items)
    {
-      const auto offset_x_px = 190 + move_offset.value_or(0.0f);
-      const auto offset_y_px = 110 + _panel_center_offset_px.y;
+      const auto offset_x_px = item_grid_offset_x_px + move_offset.value_or(0.0f);
+      const auto offset_y_px = item_grid_offset_y_px + _panel_center_offset_px.y;
 
       const auto x_px = static_cast<float>(offset_x_px + (index % count_columns) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
@@ -566,13 +575,21 @@ void InGameMenuInventory::updateInventoryItems()
       return;
    }
 
+   constexpr auto text_description_x_offset_px = 486;
+   constexpr auto text_description_y_offset_px = 128;
+   constexpr auto text_title_x_offset_px = 482;
+   constexpr auto text_title_y_offset_px = 95;
+   constexpr auto text_title_width_px = 115;
+
    const auto& text = _texts[selected_item.value()];
-   const sf::FloatRect rect{482, 0, 106, 16};
+   const sf::FloatRect rect{text_title_x_offset_px, 0, text_title_width_px, 16};
    const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
    _text_description.setString(text._description_wrapped);
-   _text_description.setPosition(_panel_right_offset_px.x + 486 + move_offset.value_or(0.0f), 116);
+   _text_description.setPosition(
+      _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
+   );
    _text_title.setString(text._title);
-   _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), 92);
+   _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
