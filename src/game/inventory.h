@@ -1,15 +1,17 @@
 #pragma once
 
-#include "json/json.hpp"
-
 #include <functional>
+
+#include "game/inventoryitemdescriptionreader.h"
+
+#include "json/json.hpp"
 
 struct Inventory
 {
-   Inventory() = default;
+   Inventory();
 
    using UpdateddCallback = std::function<void()>;
-   using UsedCallback = std::function<void(const std::string&)>;
+   using UsedCallback = std::function<bool(const std::string&)>;
 
    void add(const std::string&);
    void remove(const std::string&);
@@ -20,17 +22,20 @@ struct Inventory
 
    void selectItem(int32_t slot, const std::string& item);
    void autoPopulate(const std::string& item);
-   void use(int32_t) const;
+   void use(int32_t);
    void removeUsedCallback(const UsedCallback& callbackToRemove);
 
    std::vector<UpdateddCallback> _updated_callbacks;
    std::vector<UsedCallback> _used_callbacks;
 
-   // members
+   // serialized data
    std::vector<std::string> _items;
 
    // selected slots
    std::array<std::string, 2> _slots;
+
+   // additional inventory data
+   std::vector<InventoryItemDescriptionReader::InventoryItemDescription> _descriptions;
 };
 
 void to_json(nlohmann::json& j, const Inventory& d);
