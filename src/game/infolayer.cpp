@@ -8,7 +8,7 @@
 #include "game/console.h"
 #include "game/extratable.h"
 #include "game/gameconfiguration.h"
-#include "game/inventoryimages.h"
+#include "game/inventoryitemdescriptionreader.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/roomupdater.h"
@@ -161,11 +161,12 @@ InfoLayer::InfoLayer()
 //---------------------------------------------------------------------------------------------------------------------
 void InfoLayer::loadInventoryItems()
 {
-   const auto images = InventoryImages::readImages();
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   const auto& inventory_item_descriptions = inventory._descriptions;
    _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
-      images,
+      inventory_item_descriptions,
       [this](const auto& image)
       {
          // store sprites

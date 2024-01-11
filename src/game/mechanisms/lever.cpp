@@ -75,7 +75,9 @@ void Lever::setup(const GameDeserializeData& data)
                if (_player_at_lever && !_handle_available && item == "handle")
                {
                   setHandleAvailable(true);
+                  return true;
                }
+               return false;
             };
 
             SaveState::getPlayerInfo()._inventory._used_callbacks.push_back(_handle_callback);
