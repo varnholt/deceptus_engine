@@ -339,7 +339,7 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
 //----------------------------------------------------------------------------------------------------------------------
 void Player::useInventory(int32_t slot)
 {
-   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.use(slot);
 }
 

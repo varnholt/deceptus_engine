@@ -1,14 +1,12 @@
 #ifndef INGAMEMENUINVENTORY_H
 #define INGAMEMENUINVENTORY_H
 
-#include "constants.h"
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "ingamemenupage.h"
 #include "inventory.h"
 #include "layerdata.h"
 
 #include <SFML/Graphics.hpp>
-#include <chrono>
 #include <memory>
 #include <vector>
 

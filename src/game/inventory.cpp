@@ -4,6 +4,11 @@
 
 using json = nlohmann::json;
 
+Inventory::Inventory()
+{
+   _descriptions = InventoryItemDescriptionReader::readItemDescriptions();
+}
+
 void Inventory::add(const std::string& item)
 {
    _items.push_back(item);
@@ -69,10 +74,31 @@ void Inventory::autoPopulate(const std::string& item)
    }
 }
 
-void Inventory::use(int32_t slot) const
+void Inventory::use(int32_t slot)
 {
-   const auto& item = _slots[slot];
-   std::ranges::for_each(_used_callbacks, [&item](const auto& cb) { cb(item); });
+   const auto& item_name = _slots[slot];
+   std::ranges::for_each(
+      _used_callbacks,
+      [&item_name, this](const auto& cb)
+      {
+         // call use callback on the item
+         if (cb(item_name))
+         {
+            // if the item has a 'consumed after use' property, remove it
+            const auto& it = std::find_if(
+               _descriptions.begin(), _descriptions.end(), [item_name](const auto& description) { return description._name == item_name; }
+            );
+
+            if (it != _descriptions.end())
+            {
+               if (it->_properties.find("consumed_after_use") != it->_properties.end())
+               {
+                  remove(item_name);
+               }
+            }
+         }
+      }
+   );
 }
 
 void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)

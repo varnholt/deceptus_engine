@@ -2,17 +2,10 @@
 
 #include "framework/easings/easings.h"
 #include "game/eventdistributor.h"
-#include "game/gameconfiguration.h"
-#include "game/inventoryimages.h"
-#include "game/mechanisms/extra.h"
 #include "game/menuconfig.h"
-#include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/texturepool.h"
-
-#include <iostream>
-#include <ranges>
 
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>
@@ -255,11 +248,11 @@ InGameMenuInventory::InGameMenuInventory()
 //---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::loadInventoryItems()
 {
-   const auto images = InventoryImages::readImages();
+   const auto& inventory_item_descriptions = getInventory()._descriptions;
    _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
-      images,
+      inventory_item_descriptions,
       [this](const auto& image)
       {
          // store sprites
