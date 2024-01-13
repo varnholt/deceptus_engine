@@ -1070,14 +1070,16 @@ void Player::updateVelocity()
    }
 
    // cap speed
-   constexpr auto max_speed = 10.0f;
-   auto vel = _body->GetLinearVelocity();
-   const auto speed = vel.Normalize();
-   if (speed > max_speed)
-   {
-      // Log::Info() << "cap speed";
-      _body->SetLinearVelocity(max_speed * vel);
-   }
+   constexpr auto max_velocity_horizontal = 10.0f;
+   constexpr auto max_velocity_up = 5.0f;
+   constexpr auto max_velocity_down = 10.0f;
+   auto linear_velocity = _body->GetLinearVelocity();
+
+   // cap speed
+   _body->SetLinearVelocity(
+      {std::clamp(linear_velocity.x, -max_velocity_horizontal, max_velocity_horizontal),
+       std::clamp(linear_velocity.y, -max_velocity_up, max_velocity_down)}
+   );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
