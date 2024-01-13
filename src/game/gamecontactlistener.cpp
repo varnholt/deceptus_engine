@@ -164,6 +164,14 @@ void GameContactListener::processPlayerHeadSensorContactBegin(b2Fixture* fixture
    }
 
    _count_head_contacts++;
+
+   // count 'real' head collisions, too - not just those
+   const auto category_friendly = (fixture->GetFilterData().categoryBits & CategoryFriendly);
+   const auto walk_through = (fixture->GetFilterData().categoryBits & CategoryEnemyWalkThrough);
+   if (!category_friendly && !walk_through)
+   {
+      _count_head_contacts_colliding++;
+   }
 }
 
 void GameContactListener::processPlayerLeftArmSensorContactBegin(b2Fixture* fixture)
@@ -408,14 +416,22 @@ void GameContactListener::processPlayerFootSensorContactEnd(FixtureNode* fixture
    _count_foot_contacts--;
 }
 
-void GameContactListener::processPlayerHeadSensorContactEnd(auto contact_fixture_b)
+void GameContactListener::processPlayerHeadSensorContactEnd(b2Fixture* fixture)
 {
-   if (contact_fixture_b->IsSensor())
+   if (fixture->IsSensor())
    {
       return;
    }
 
    _count_head_contacts--;
+
+   // count 'real' head collisions, too - not just those
+   const auto category_friendly = (fixture->GetFilterData().categoryBits & CategoryFriendly);
+   const auto walk_through = (fixture->GetFilterData().categoryBits & CategoryEnemyWalkThrough);
+   if (!category_friendly && !walk_through)
+   {
+      _count_head_contacts_colliding--;
+   }
 }
 
 void GameContactListener::processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture)
@@ -725,9 +741,15 @@ int32_t GameContactListener::getPlayerHeadContactCount() const
    return _count_head_contacts;
 }
 
+int32_t GameContactListener::getPlayerHeadContactCollidingCount() const
+{
+   return _count_head_contacts_colliding;
+}
+
 void GameContactListener::reset()
 {
    _count_head_contacts = 0;
+   _count_head_contacts_colliding = 0;
    _count_foot_contacts = 0;
    _count_player_contacts = 0;
    _count_arm_left_contacts = 0;

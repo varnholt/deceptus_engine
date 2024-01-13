@@ -1445,7 +1445,7 @@ void Player::updateBendDown()
    auto down_pressed = _controls->isBendDownActive();
 
    // if the head touches something while crouches, keep crouching
-   if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCount() > 0))
+   if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCollidingCount() > 0))
    {
       return;
    }
