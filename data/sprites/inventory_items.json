@@ -5,7 +5,10 @@
         "width_px": 38,
         "height_px": 38,
         "title": "Whisperwood Lever-Grip",
-        "description": "Carved from ancient Whisperwood, this lever-grip activates forgotten mechanisms. It resonates with the past, breathing life into dormant contraptions that guard the mysteries of bygone eras."
+        "description": "Carved from ancient Whisperwood, this lever-grip activates forgotten mechanisms. It resonates with the past, breathing life into dormant contraptions that guard the mysteries of bygone eras.",
+        "properties":{
+           "consumed_after_use" : "true"
+        }
     },
     "key": {
         "x_px": 38,
