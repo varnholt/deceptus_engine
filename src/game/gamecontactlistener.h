@@ -1,8 +1,6 @@
 #pragma once
 
-#include <vector>
 #include <box2d/box2d.h>
-
 
 class FixtureNode;
 
@@ -10,6 +8,7 @@ class GameContactListener : public b2ContactListener
 {
 public:
    int32_t getPlayerHeadContactCount() const;
+   int32_t getPlayerHeadContactCollidingCount() const;
    int32_t getPlayerFootContactCount() const;
    int32_t getPlayerArmLeftContactCount() const;
    int32_t getPlayerArmRightContactCount() const;
@@ -28,8 +27,6 @@ public:
    void reset();
 
    static GameContactListener& getInstance();
-
-   void processPlayerHeadSensorContactEnd(auto contact_fixture_b);
 
 private:
    GameContactListener() = default;
@@ -70,12 +67,14 @@ private:
    void processPlayerFootSensorContactEnd(FixtureNode* fixture_node, b2Fixture* fixture);
    void processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture);
    void processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture);
+   void processPlayerHeadSensorContactEnd(b2Fixture* contact_fixture_b);
 
    void processPostSolveImpulse(float impulse);
    void processPostSolveProjectile(FixtureNode* node, float impulse);
 
    int32_t _count_foot_contacts = 0;
    int32_t _count_head_contacts = 0;
+   int32_t _count_head_contacts_colliding = 0;
    int32_t _count_player_contacts = 0;
    int32_t _count_arm_left_contacts = 0;
    int32_t _count_arm_right_contacts = 0;
