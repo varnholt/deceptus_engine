@@ -28,6 +28,9 @@ std::string PhysicsConfiguration::serialize()
           {"player_deceleration_ground", _player_deceleration_ground},
           {"player_acceleration_air", _player_acceleration_air},
           {"player_deceleration_air", _player_deceleration_air},
+          {"player_max_velocity_horizontal", _player_max_velocity_horizontal},
+          {"player_max_velocity_up", _player_max_velocity_up},
+          {"player_max_velocity_down", _player_max_velocity_down},
 
           {"player_jump_strength", _player_jump_strength},
           {"player_jump_steps", _player_jump_frame_count},
@@ -66,7 +69,8 @@ std::string PhysicsConfiguration::serialize()
           {"player_in_water_linear_velocity_y_clamp_min", _player_in_water_linear_velocity_y_clamp_min},
           {"player_in_water_linear_velocity_y_clamp_max", _player_in_water_linear_velocity_y_clamp_max},
           {"in_water_buoyancy_force", _in_water_buoyancy_force},
-       }}};
+       }}
+   };
 
    std::stringstream sstream;
    sstream << std::setw(4) << config << "\n\n";
@@ -75,6 +79,9 @@ std::string PhysicsConfiguration::serialize()
 
 void PhysicsConfiguration::deserialize(const std::string& data)
 {
+   PhysicsConfiguration reset_values;
+   *this = reset_values;
+
    json config;
    try
    {
@@ -100,6 +107,21 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    _player_acceleration_air = physics_config["player_acceleration_air"].get<float>();
    _player_deceleration_ground = physics_config["player_deceleration_ground"].get<float>();
    _player_deceleration_air = physics_config["player_deceleration_air"].get<float>();
+
+   if (physics_config.find("player_max_velocity_horizontal") != physics_config.end())
+   {
+      _player_max_velocity_horizontal = physics_config["player_max_velocity_horizontal"].get<float>();
+   }
+
+   if (physics_config.find("player_max_velocity_up") != physics_config.end())
+   {
+      _player_max_velocity_up = physics_config["player_max_velocity_up"].get<float>();
+   }
+
+   if (physics_config.find("player_max_velocity_down") != physics_config.end())
+   {
+      _player_max_velocity_down = physics_config["player_max_velocity_down"].get<float>();
+   }
 
    _player_jump_strength = physics_config["player_jump_strength"].get<float>();
    _player_jump_frame_count = physics_config["player_jump_steps"].get<int32_t>();

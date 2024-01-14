@@ -125,6 +125,9 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("acceleration air", &config._player_acceleration_air, 0.01f, 2.0f);
       drawFloatElement("deceleration ground", &config._player_deceleration_ground, 0.01f, 2.0f);
       drawFloatElement("deceleration air", &config._player_deceleration_air, 0.01f, 2.0f);
+      drawFloatElement("cap velocity horizontal", &config._player_max_velocity_horizontal, 0.1f, 30.0f);
+      drawFloatElement("cap velocity up", &config._player_max_velocity_up, 0.1f, 30.0f);
+      drawFloatElement("cap velocity down", &config._player_max_velocity_down, 0.1f, 30.0f);
    }
 
    if (ImGui::CollapsingHeader("player jump", header_flags))
