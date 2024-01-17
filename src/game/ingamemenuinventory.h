@@ -69,12 +69,12 @@ private:
    void updateInventoryItems();
 
    void resetIndex();
-   void updateFrame();
    void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    void drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
 
    std::optional<std::string> getSelectedItem() const;
    void assign(const std::string& item, int32_t slot);
+   sf::Vector2f getFramePosition(LayerData* layer_data, int32_t index) const;
 
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
@@ -83,8 +83,8 @@ private:
    sf::Vector2f _cursor_position;
    std::shared_ptr<sf::Texture> _inventory_texture;
    std::unique_ptr<LayerData> _frame_selection;
-   std::unique_ptr<LayerData> _frame_slot1;
-   std::unique_ptr<LayerData> _frame_slot2;
+   std::unique_ptr<LayerData> _frame_slot_0;
+   std::unique_ptr<LayerData> _frame_slot_1;
 
    std::map<std::string, ItemSprite> _sprites;
    std::map<std::string, ItemText> _texts;
