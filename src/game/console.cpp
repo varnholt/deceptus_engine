@@ -68,6 +68,9 @@ void Console::showHelp()
    _log.push_back("playback <command>: game playback");
    _log.push_back("   commands: enable, disable, load, save, replay, reset");
    _log.push_back("");
+   _log.push_back("take <item name>: take item from player");
+   _log.push_back("   example: take key_skull");
+   _log.push_back("");
    _log.push_back("tp <x>,<y>: teleport to position");
    _log.push_back("   example: tp 100, 330");
    _log.push_back("");
@@ -198,7 +201,13 @@ void Console::execute()
    {
       const auto item = results.at(1);
       SaveState::getPlayerInfo()._inventory.add(item);
-      _log.push_back("given item player");
+      _log.push_back("given item to player");
+   }
+   else if (results.at(0) == "take" && results.size() == 2)
+   {
+      const auto item = results.at(1);
+      SaveState::getPlayerInfo()._inventory.remove(item);
+      _log.push_back("removed item from player");
    }
    else if (results.at(0) == "tp" && results.size() == 3)
    {
