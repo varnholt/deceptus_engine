@@ -198,10 +198,10 @@ InGameMenuInventory::InGameMenuInventory()
    _frame_selection = std::make_unique<LayerData>(_layers["frame"]);
 
    // init slot layers and hide them initially
-   _frame_slot1 = std::make_unique<LayerData>(_layers["frm_silver"]);
-   _frame_slot2 = std::make_unique<LayerData>(_layers["frm_silver"]);
-   _frame_slot1->_layer->hide();
-   _frame_slot2->_layer->hide();
+   _frame_slot_0 = std::make_unique<LayerData>(_layers["frm_silver_0"]);
+   _frame_slot_1 = std::make_unique<LayerData>(_layers["frm_silver_1"]);
+   _frame_slot_0->_layer->hide();
+   _frame_slot_1->_layer->hide();
 
    _panel_background = {
       _layers["background"],
@@ -522,6 +522,9 @@ void InGameMenuInventory::updateInventoryItems()
    constexpr auto item_grid_offset_x_px = 190;
    constexpr auto item_grid_offset_y_px = 107;
 
+   std::optional<int32_t> slot_0_index;
+   std::optional<int32_t> slot_1_index;
+
    // update grid of items
    int32_t index{0};
    for (const auto& item_key : inventory._items)
@@ -533,6 +536,18 @@ void InGameMenuInventory::updateInventoryItems()
       const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
 
       _sprites[item_key]._sprite.setPosition(x_px, y_px);
+
+      // also determine the indices for the selected slots
+      if (item_key == inventory._slots[0])
+      {
+         slot_0_index = index;
+      }
+
+      if (item_key == inventory._slots[1])
+      {
+         slot_1_index = index;
+      }
+
       index++;
    }
 
@@ -565,24 +580,43 @@ void InGameMenuInventory::updateInventoryItems()
    {
       _text_description.setString("");
       _text_title.setString("");
-      return;
+   }
+   else
+   {
+      constexpr auto text_description_x_offset_px = 486;
+      constexpr auto text_description_y_offset_px = 128;
+      constexpr auto text_title_x_offset_px = 482;
+      constexpr auto text_title_y_offset_px = 95;
+      constexpr auto text_title_width_px = 115;
+
+      const auto& text = _texts[selected_item.value()];
+      const sf::FloatRect rect{text_title_x_offset_px, 0, text_title_width_px, 16};
+      const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
+      _text_description.setString(text._description_wrapped);
+      _text_description.setPosition(
+         _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
+      );
+      _text_title.setString(text._title);
+      _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px);
    }
 
-   constexpr auto text_description_x_offset_px = 486;
-   constexpr auto text_description_y_offset_px = 128;
-   constexpr auto text_title_x_offset_px = 482;
-   constexpr auto text_title_y_offset_px = 95;
-   constexpr auto text_title_width_px = 115;
+   // update frames
+   const auto selected_frame_position = getFramePosition(_frame_selection.get(), _selected_index);
+   _frame_selection->_layer->_sprite->setPosition(selected_frame_position);
 
-   const auto& text = _texts[selected_item.value()];
-   const sf::FloatRect rect{text_title_x_offset_px, 0, text_title_width_px, 16};
-   const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
-   _text_description.setString(text._description_wrapped);
-   _text_description.setPosition(
-      _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
-   );
-   _text_title.setString(text._title);
-   _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px);
+   _frame_slot_0->_layer->_visible = slot_0_index.has_value();
+   _frame_slot_1->_layer->_visible = slot_1_index.has_value();
+   if (slot_0_index.has_value())
+   {
+      const auto slot_0_position = getFramePosition(_frame_slot_0.get(), slot_0_index.value());
+      _frame_slot_0->_layer->_sprite->setPosition(slot_0_position);
+   }
+
+   if (slot_1_index.has_value())
+   {
+      const auto slot_1_position = getFramePosition(_frame_slot_1.get(), slot_1_index.value());
+      _frame_slot_1->_layer->_sprite->setPosition(slot_1_position);
+   }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -598,7 +632,6 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
    }
 
    updateInventoryItems();
-   updateFrame();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -677,17 +710,17 @@ void InGameMenuInventory::resetIndex()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void InGameMenuInventory::updateFrame()
+sf::Vector2f InGameMenuInventory::getFramePosition(LayerData* layer_data, int32_t index) const
 {
    const auto move_offset = getMoveOffset();
+   const auto x = index % count_columns;
+   const auto y = index / count_columns;
+   const auto pos = layer_data->_pos + sf::Vector2f{
+                                          static_cast<float>(x * frame_width + move_offset.value_or(0.0f)),
+                                          static_cast<float>(y * frame_height + _panel_center_offset_px.y)
+                                       };
 
-   const auto x = _selected_index % count_columns;
-   const auto y = _selected_index / count_columns;
-   const auto pos = _frame_selection->_pos + sf::Vector2f{
-                                                static_cast<float>(x * frame_width + move_offset.value_or(0.0f)),
-                                                static_cast<float>(y * frame_height + _panel_center_offset_px.y)
-                                             };
-   _frame_selection->_layer->_sprite->setPosition(pos);
+   return pos;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
