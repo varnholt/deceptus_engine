@@ -5,6 +5,7 @@
 #include "game/audiorange.h"
 #include "game/constants.h"
 
+#include <cstdint>
 #include <vector>
 
 struct AudioUpdateData
