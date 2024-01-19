@@ -4,6 +4,7 @@
 #include "menus/menu.h"
 #include "menus/menuaudio.h"
 
+#include <cmath>
 #include <format>
 
 static const auto STEP_SIZE = 10;
