@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(GNUInstallDirs)
 
-add_executable(deceptus
+set(GAME_FILES
     src/framework/image/image.cpp src/framework/image/image.h
     src/framework/image/layer.cpp src/framework/image/layer.h
     src/framework/image/psd.cpp src/framework/image/psd.h
@@ -119,7 +119,6 @@ add_executable(deceptus
     src/game/inventory.cpp src/game/inventory.h
     src/game/inventorybasedcontrols.cpp src/game/inventorybasedcontrols.h
     src/game/inventoryitemdescriptionreader.cpp src/game/inventoryitemdescriptionreader.h
-    src/game/mechanisms/laser.h
     src/game/layerdata.cpp src/game/layerdata.h
     src/game/level.cpp src/game/level.h
     src/game/leveldescription.cpp src/game/leveldescription.h
@@ -147,6 +146,7 @@ add_executable(deceptus
     src/game/mechanisms/fan.cpp src/game/mechanisms/fan.h
     src/game/mechanisms/fireflies.cpp src/game/mechanisms/fireflies.h
     src/game/mechanisms/laser.cpp
+    src/game/mechanisms/laser.h
     src/game/mechanisms/lever.cpp src/game/mechanisms/lever.h
     src/game/mechanisms/levermechanismmerger.cpp src/game/mechanisms/levermechanismmerger.h
     src/game/mechanisms/moveablebox.cpp src/game/mechanisms/moveablebox.h
@@ -245,6 +245,9 @@ add_executable(deceptus
     src/menus/menuscreenoptions.cpp src/menus/menuscreenoptions.h
     src/menus/menuscreenpause.cpp src/menus/menuscreenpause.h
     src/menus/menuscreenvideo.cpp src/menus/menuscreenvideo.h
+)
+
+set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
     thirdparty/box2d/include/box2d/b2_block_allocator.h
     thirdparty/box2d/include/box2d/b2_body.h
@@ -330,11 +333,11 @@ add_executable(deceptus
     thirdparty/box2d/src/dynamics/b2_world.cpp
     thirdparty/box2d/src/dynamics/b2_world_callbacks.cpp
     thirdparty/box2d/src/rope/b2_rope.cpp
-    thirdparty/imgui/imconfig.h
     thirdparty/imgui/imconfig-SFML.h
-    thirdparty/imgui/imgui.cpp thirdparty/imgui/imgui.h
+    thirdparty/imgui/imconfig.h
     thirdparty/imgui/imgui-SFML.cpp thirdparty/imgui/imgui-SFML.h
     thirdparty/imgui/imgui-SFML_export.h
+    thirdparty/imgui/imgui.cpp thirdparty/imgui/imgui.h
     thirdparty/imgui/imgui_draw.cpp
     thirdparty/imgui/imgui_internal.h
     thirdparty/imgui/imgui_tables.cpp
@@ -345,6 +348,16 @@ add_executable(deceptus
     thirdparty/json/json.hpp
     thirdparty/tinyxml2/tinyxml2.cpp thirdparty/tinyxml2/tinyxml2.h
 )
+
+# add_executable(deceptus ${THIRD_PARTY_FILES} ${GAME_FILES})
+
+add_executable(deceptus ${GAME_FILES})
+target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
+
+# disable warnings for third party
+set(THIRD_PARTY_FILES_OPTIONS -w)
+target_compile_options(deceptus PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${THIRD_PARTY_FILES_OPTIONS}>)
+
 target_include_directories(deceptus PRIVATE
     .
     src
