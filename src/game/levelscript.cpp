@@ -12,6 +12,7 @@
 #include "mechanisms/dialogue.h"
 #include "mechanisms/sensorrect.h"
 
+#include <mutex>
 #include <regex>
 
 namespace

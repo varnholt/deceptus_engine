@@ -380,7 +380,8 @@ if(win32-msvc)
     )
 endif()
 
-if(LINUX OR win32-clang++)
+
+if(UNIX OR win32-clang++)
     target_compile_options(deceptus
         -Wno-backslash-newline-escape
         -Wno-deprecated-declarations
@@ -388,44 +389,52 @@ if(LINUX OR win32-clang++)
     )
 endif()
 
-if(LINUX OR win32-g++)
+if(UNIX OR win32-g++)
     target_compile_options(deceptus
         -lc++fs
         -lfmt
     )
 endif()
 
+
 if(WIN32)
+    set(SDL_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sdl/lib/x64)
+    set(LUA_PATH ${CMAKE_SOURCE_DIR}/thirdparty/lua/lib64)
+    set(SFML_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sfml/lib)
+
+    link_directories(${LUA_PATH} ${SDL_PATH} ${SFML_PATH})
+    
     target_link_libraries(deceptus PRIVATE
-        SDL2
+        ${SDL_PATH}/SDL2.lib
+        ${LUA_PATH}/lua53.lib
         glu32
-        lua53
         opengl32
     )
+
+    if(CMAKE_BUILD_TYPE STREQUAL Release)
+        target_link_libraries(deceptus PRIVATE
+            ${SFML_PATH}/sfml-audio.lib
+            ${SFML_PATH}/sfml-graphics.lib
+            ${SFML_PATH}/sfml-network.lib
+            ${SFML_PATH}/sfml-system.lib
+            ${SFML_PATH}/sfml-window.lib
+        )
+    else()
+        target_link_libraries(deceptus PRIVATE
+            ${SFML_PATH}/sfml-audio-d.lib
+            ${SFML_PATH}/sfml-graphics-d.lib
+            ${SFML_PATH}/sfml-network-d.lib
+            ${SFML_PATH}/sfml-system-d.lib
+            ${SFML_PATH}/sfml-window-d.lib
+        )
+    endif()
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL Release AND WIN32)
-    target_link_libraries(deceptus PRIVATE
-        sfml-audio
-        sfml-graphics
-        sfml-network
-        sfml-system
-        sfml-window
-    )
-endif()
 
-if(WIN32 AND NOT CMAKE_BUILD_TYPE STREQUAL Release)
-    target_link_libraries(deceptus PRIVATE
-        sfml-audio-d
-        sfml-graphics-d
-        sfml-network-d
-        sfml-system-d
-        sfml-window-d
-    )
-endif()
+if(UNIX)
 
-#if(LINUX)
     find_package(PkgConfig)
+    
     PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
     PKG_SEARCH_MODULE(LUA REQUIRED lua)
     PKG_SEARCH_MODULE(SFML-AUDIO REQUIRED sfml-audio)
@@ -433,7 +442,7 @@ endif()
     PKG_SEARCH_MODULE(SFML-NETWORK REQUIRED sfml-network)
     PKG_SEARCH_MODULE(SFML-SYSTEM REQUIRED sfml-system)
     PKG_SEARCH_MODULE(SFML-WINDOW REQUIRED sfml-window)
-    # find_library(WINDOW sfml-window)
+    
     target_link_libraries(deceptus PRIVATE
     	${SDL2_LIBRARIES}	 
     	${LUA_LIBRARIES}	 
@@ -442,12 +451,12 @@ endif()
     	${SFML-NETWORK_LIBRARIES} 
     	${SFML-SYSTEM_LIBRARIES} 
     	${SFML-WINDOW_LIBRARIES} 
-    	#${WINDOW} 
         GL
         X11
         stdc++fs
     )
-#endif()
+    
+endif()
 
 install(TARGETS deceptus
     BUNDLE DESTINATION .
