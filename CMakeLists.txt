@@ -245,6 +245,7 @@ set(GAME_FILES
     src/menus/menuscreenoptions.cpp src/menus/menuscreenoptions.h
     src/menus/menuscreenpause.cpp src/menus/menuscreenpause.h
     src/menus/menuscreenvideo.cpp src/menus/menuscreenvideo.h
+    deceptus_resource.rc
 )
 
 set(THIRD_PARTY_FILES
