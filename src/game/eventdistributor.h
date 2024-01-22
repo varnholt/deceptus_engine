@@ -6,7 +6,10 @@
 
 namespace EventDistributor
 {
-using EventCallback = std::function<void(const sf::Event&)>;
+using EventCallbackType = void(const sf::Event&);
+using EventCallback = std::function<EventCallbackType>;
+using CallbackWrapper = std::reference_wrapper<const EventCallback>;
+
 void event(const sf::Event& event);
 void registerEvent(sf::Event::EventType event_type, const EventCallback& callback);
 void unregisterEvent(sf::Event::EventType event_type, const EventCallback& callback);

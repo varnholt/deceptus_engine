@@ -1,10 +1,12 @@
 #include "eventdistributor.h"
 
 #include <algorithm>
+#include <functional>
+#include <map>
 
 namespace
 {
-std::map<sf::Event::EventType, std::vector<EventDistributor::EventCallback>> _callback_mapping;
+std::map<sf::Event::EventType, std::vector<EventDistributor::CallbackWrapper>> _callback_mapping;
 }
 
 void EventDistributor::event(const sf::Event& event)
@@ -13,13 +15,13 @@ void EventDistributor::event(const sf::Event& event)
 
    if (callbacks != _callback_mapping.end())
    {
-      std::for_each(callbacks->second.begin(), callbacks->second.end(), [event](const auto& callback) { callback(event); });
+      std::for_each(callbacks->second.begin(), callbacks->second.end(), [event](const auto& callback) { callback.get()(event); });
    }
 }
 
 void EventDistributor::registerEvent(sf::Event::EventType event_type, const EventCallback& callback)
 {
-   _callback_mapping[event_type].push_back(callback);
+   _callback_mapping[event_type].emplace_back(std::cref(callback));
 }
 
 void EventDistributor::unregisterEvent(sf::Event::EventType event_type, const EventCallback& callback)
@@ -29,7 +31,11 @@ void EventDistributor::unregisterEvent(sf::Event::EventType event_type, const Ev
       std::remove_if(
          callbacks.begin(),
          callbacks.end(),
-         [callback](const auto& cb) { return cb.target<void(const sf::Event&)>() == callback.target<void(const sf::Event&)>(); }
+         [&callback](const CallbackWrapper& cb)
+         {
+            // compare reference pointers
+            return &cb.get() == &callback;
+         }
       ),
       callbacks.end()
    );
