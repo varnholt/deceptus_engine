@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "framework/tmxparser/tmxelement.h"
 #include "framework/tmxparser/tmxparser.h"
 #include "gamedeserializedata.h"
 #include "gamemechanism.h"
