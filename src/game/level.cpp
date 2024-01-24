@@ -2,22 +2,12 @@
 
 // game
 #include "framework/math/maptools.h"
-#include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxelement.h"
-#include "framework/tmxparser/tmximage.h"
-#include "framework/tmxparser/tmximagelayer.h"
 #include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxparser.h"
-#include "framework/tmxparser/tmxpolygon.h"
-#include "framework/tmxparser/tmxpolyline.h"
-#include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
-#include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/checksum.h"
-#include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/animationplayer.h"
@@ -38,7 +28,6 @@
 #include "game/leveldescription.h"
 #include "game/levelfiles.h"
 #include "game/luainterface.h"
-#include "game/mechanisms/bouncer.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
@@ -51,10 +40,7 @@
 #include "game/playerstencil.h"
 #include "game/roomupdater.h"
 #include "game/savestate.h"
-#include "game/screentransition.h"
 #include "game/squaremarcher.h"
-#include "game/stenciltilemap.h"
-#include "game/texturepool.h"
 #include "game/tilemap.h"
 #include "game/tilemapfactory.h"
 #include "game/tweaks.h"
@@ -245,6 +231,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_extras,
       &_mechanism_fans,
       &_mechanism_fireflies,
+      &_mechanism_info_overlay,
       &_mechanism_lasers,
       &_mechanism_levers,
       &_mechanism_moveable_boxes,
@@ -282,6 +269,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
+   _mechanisms_map[std::string{layer_name_info_overlays}] = &_mechanism_info_overlay;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
    _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
@@ -730,46 +718,6 @@ void Level::reset()
 //-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
-   // deprecated approach:
-   // merge enemy layer from tmx with enemy info that's stored inside json
-   // iterate through all enemies in the json
-   // for (auto& json_description : _description->_enemies)
-   // {
-   //    Log::Warning() << "deprecated: define enemies inside your TMX instead of JSON";
-   //    auto lua_node = LuaInterface::instance().addObject(this, std::string("data/scripts/enemies/") + json_description._script);
-   //
-   //    // find matching enemy data from the tmx layer and retrieve the patrol path from there
-   //    const auto& it = _enemy_data_from_tmx_layer.find(json_description._id);
-   //    if (it != _enemy_data_from_tmx_layer.end())
-   //    {
-   //       // positions from the tmx are given in pixels, not tiles
-   //       json_description._position_in_tiles = false;
-   //
-   //       json_description._start_position.push_back(it->second._pixel_position.x);
-   //       json_description._start_position.push_back(it->second._pixel_position.y);
-   //
-   //       if (json_description._generate_path)
-   //       {
-   //          it->second.addPaths(_world_chains);
-   //       }
-   //
-   //       if (!it->second._pixel_path.empty())
-   //       {
-   //          json_description._path = it->second._pixel_path;
-   //       }
-   //
-   //       // merge properties from tmx with those loaded from json
-   //       for (auto& property : it->second._properties)
-   //       {
-   //          json_description._properties.push_back(property);
-   //       }
-   //    }
-   //
-   //    // initialize lua node and store enemy
-   //    lua_node->_enemy_description = json_description;
-   //    lua_node->initialize();
-   // }
-
    // those enemies that have a lua script associated inside the tmx layer don't need
    // additional information from json, those can just be spawned.
    // this should probably be the future and only approach how to handle enemy spawning.
