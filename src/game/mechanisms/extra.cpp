@@ -3,11 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "framework/tools/log.h"
 #include "game/audio.h"
-#include "game/constants.h"
-#include "game/debugdraw.h"
-#include "game/extratable.h"
 #include "game/gamedeserializedata.h"
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"
@@ -15,9 +11,10 @@
 #include "game/savestate.h"
 #include "game/texturepool.h"
 
-#include <iostream>
-
 // #define DRAW_DEBUG 1
+#ifdef DRAW_DEBUG
+#include "game/debugdraw.h"
+#endif
 
 Extra::Extra(GameNode* parent) : GameNode(parent)
 {
@@ -31,8 +28,6 @@ void Extra::deserialize(const GameDeserializeData& data)
    const auto pos_y_px = data._tmx_object->_y_px;
    const auto width_px = data._tmx_object->_width_px;
    const auto height_px = data._tmx_object->_height_px;
-
-   // std::cout << "extra at: " << pos_x_px << ", " << pos_y_px << " (width: " << width_px << ", height: " << height_px << ")" << std::endl;
 
    _name = data._tmx_object->_name;
    _rect = {pos_x_px, pos_y_px, width_px, height_px};
@@ -166,12 +161,6 @@ void Extra::update(const sf::Time& dt)
    }
 
    const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
-
-   // std::cout << "x: " << _rect.left << ", " << _rect.top << " (width: " << _rect.width << ", height: " << _rect.height << ")"
-   //           << " vs "
-   //           << "x: " << player_rect_px.left << ", " << player_rect_px.top << " (width: " << player_rect_px.width
-   //           << ", height: " << player_rect_px.height << ")" << std::endl;
-
    if (_requires_button_press)
    {
       if (!Player::getCurrent()->getControls()->isButtonBPressed())
