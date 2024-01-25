@@ -1,13 +1,9 @@
 #include "shaderlayer.h"
 
-#include "camerapanorama.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "framework/tools/globalclock.h"
 #include "texturepool.h"
-
-#include <iostream>
 
 ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 {
@@ -16,10 +12,10 @@ ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   float x = _position.x;
-   float y = _position.y;
-   float w = _size.x;
-   float h = _size.y;
+   const auto x = _position.x;
+   const auto y = _position.y;
+   const auto w = _size.x;
+   const auto h = _size.y;
 
    _shader.setUniform("u_uv_height", _uv_height);
    _shader.setUniform("u_texture", *_texture.get());

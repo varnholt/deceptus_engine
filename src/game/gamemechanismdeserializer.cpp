@@ -195,8 +195,7 @@ void GameMechanismDeserializer::deserialize(
             }
             else if (object_group->_name == layer_name_info_overlays || tmx_object->_template_type == type_name_info_overlay)
             {
-               auto mechanism = std::make_shared<InfoOverlay>(parent);
-               mechanism->setup(data);
+               auto mechanism = InfoOverlay::setup(parent, data);
                mechanism_info_overlays->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_levers || tmx_object->_template_type == type_name_lever)
