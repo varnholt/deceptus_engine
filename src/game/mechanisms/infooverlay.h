@@ -15,8 +15,9 @@ public:
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
-   void setup(const GameDeserializeData& data);
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
+   static std::shared_ptr<InfoOverlay> setup(GameNode* parent, const GameDeserializeData& data);
 
 private:
    struct Settings
@@ -27,9 +28,11 @@ private:
       FloatSeconds _fade_out_duration;
    };
 
+   sf::FloatRect _rect;
    sf::IntRect _texture_rect;
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
+   sf::Time _elapsed;
 };
 
 #endif  // INFOOVERLAY_H
