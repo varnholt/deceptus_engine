@@ -20,19 +20,20 @@ public:
    static std::shared_ptr<InfoOverlay> setup(GameNode* parent, const GameDeserializeData& data);
 
 private:
+   using FloatSeconds = std::chrono::duration<float>;
    struct Settings
    {
-      using FloatSeconds = std::chrono::duration<float>;
-      FloatSeconds _fade_in_duration;
-      FloatSeconds _show_duration;
-      FloatSeconds _fade_out_duration;
+      FloatSeconds _fade_in_duration{1.0f};
+      FloatSeconds _show_duration{3.0f};
+      FloatSeconds _fade_out_duration{2.0f};
    };
 
    sf::FloatRect _rect;
    sf::IntRect _texture_rect;
    sf::Sprite _sprite;
    std::shared_ptr<sf::Texture> _texture;
-   sf::Time _elapsed;
+   FloatSeconds _elapsed{0.0f};
+   Settings _settings;
 };
 
 #endif  // INFOOVERLAY_H
