@@ -26,25 +26,6 @@ Rope::Rope(GameNode* parent) : GameNode(parent)
    _rope_element_fixture_def.density = 20.0f;
    _rope_element_fixture_def.friction = 0.2f;
 
-   _texture = TexturePool::getInstance().get("data/level-demo/tilesheets/catacombs-level-diffuse.png");
-
-   // rope 1
-   // 971,  73 .. 973,  73
-   // 971, 211 .. 973, 211
-   _texture_rect_px.left = 971;
-   _texture_rect_px.top = 73;
-   _texture_rect_px.width = 3;
-   _texture_rect_px.height = 138;
-
-   // rope 2
-   // 1019,  72 .. 1021,  72
-   // 1019, 153 .. 1021, 153
-   //
-   // _texture_rect_px.left = 1019;
-   // _texture_rect_px.top = 72;
-   // _texture_rect_px.width = 3;
-   // _texture_rect_px.height = 81;
-
    _instance_counter++;
    _push_time_s = static_cast<float>(_instance_counter);
 }
@@ -157,6 +138,25 @@ std::optional<sf::FloatRect> Rope::getBoundingBoxPx()
 
 void Rope::setup(const GameDeserializeData& data)
 {
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "catacombs-level-diffuse.png");
+
+   // rope 1
+   // 971,  73 .. 973,  73
+   // 971, 211 .. 973, 211
+   _texture_rect_px.left = 971;
+   _texture_rect_px.top = 73;
+   _texture_rect_px.width = 3;
+   _texture_rect_px.height = 138;
+
+   // rope 2
+   // 1019,  72 .. 1021,  72
+   // 1019, 153 .. 1021, 153
+   //
+   // _texture_rect_px.left = 1019;
+   // _texture_rect_px.top = 72;
+   // _texture_rect_px.width = 3;
+   // _texture_rect_px.height = 81;
+
    // read properties
    const auto push_interval_it = data._tmx_object->_properties->_map.find("push_interval_s");
    if (push_interval_it != data._tmx_object->_properties->_map.end())
