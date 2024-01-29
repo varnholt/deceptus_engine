@@ -933,13 +933,6 @@ void Level::drawLightMap()
 }
 
 //-----------------------------------------------------------------------------
-void Level::drawLightAndShadows(sf::RenderTarget& target)
-{
-   target.setView(*_level_view);
-   _light_system->draw(target, {});
-}
-
-//-----------------------------------------------------------------------------
 void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 {
    for (const auto& parallax : _parallax_layers)

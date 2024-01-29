@@ -1,5 +1,6 @@
 #include "infooverlay.h"
 
+#include "framework/easings/easings.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -18,11 +19,45 @@ void InfoOverlay::update(const sf::Time& dt)
       return;
    }
 
-   _elapsed += dt;
+   _elapsed += FloatSeconds(dt.asSeconds());
+
+   auto alpha = 0.0f;
+
+   if (_elapsed < _settings._fade_in_duration)
+   {
+      // fade in
+      const auto elapsed_normalized = (_elapsed.count() / _settings._fade_in_duration.count());
+      alpha = Easings::easeInOutQuad(elapsed_normalized);
+   }
+   else if (_elapsed < _settings._fade_in_duration + _settings._show_duration)
+   {
+      // wait
+      alpha = 1.0f;
+   }
+   else if (_elapsed < _settings._fade_in_duration + _settings._show_duration + _settings._fade_out_duration)
+   {
+      // fade out
+      const auto fade_out_start = _settings._fade_in_duration + _settings._show_duration;
+      const auto elapsed_normalized = ((_elapsed.count() - fade_out_start.count()) / _settings._fade_out_duration.count());
+      alpha = 1.0f - Easings::easeInOutQuad(elapsed_normalized);
+   }
+   else
+   {
+      // done
+      alpha = 0.0f;
+      setEnabled(false);
+   }
+
+   _sprite.setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha)));
 }
 
 void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    color.draw(_sprite);
 }
 
@@ -40,16 +75,66 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
    if (data._tmx_object->_properties)
    {
-      auto z = data._tmx_object->_properties->_map.find("z");
+      const auto z = data._tmx_object->_properties->_map.find("z");
       if (z != data._tmx_object->_properties->_map.end())
       {
          instance->_z_index = z->second->_value_int.value();
       }
 
-      auto texture_id = data._tmx_object->_properties->_map.find("texture");
+      const auto fade_in_duration = data._tmx_object->_properties->_map.find("fade_in_duration");
+      if (fade_in_duration != data._tmx_object->_properties->_map.end())
+      {
+         instance->_settings._fade_in_duration = FloatSeconds(fade_in_duration->second->_value_float.value());
+      }
+
+      const auto show_duration = data._tmx_object->_properties->_map.find("fade_out_duration");
+      if (show_duration != data._tmx_object->_properties->_map.end())
+      {
+         instance->_settings._show_duration = FloatSeconds(show_duration->second->_value_float.value());
+      }
+
+      const auto fade_out_duration = data._tmx_object->_properties->_map.find("fade_out_duration");
+      if (fade_out_duration != data._tmx_object->_properties->_map.end())
+      {
+         instance->_settings._fade_out_duration = FloatSeconds(fade_out_duration->second->_value_float.value());
+      }
+
+      const auto texture_id = data._tmx_object->_properties->_map.find("texture");
       if (texture_id != data._tmx_object->_properties->_map.end())
       {
          instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
+         instance->_sprite.setTexture(*instance->_texture);
+      }
+
+      // read texture rect
+      sf::IntRect rect;
+      const auto texture_rect_x = data._tmx_object->_properties->_map.find("texture_rect_x");
+      if (texture_rect_x != data._tmx_object->_properties->_map.end())
+      {
+         rect.left = texture_rect_x->second->_value_int.value();
+      }
+
+      const auto texture_rect_y = data._tmx_object->_properties->_map.find("texture_rect_y");
+      if (texture_rect_y != data._tmx_object->_properties->_map.end())
+      {
+         rect.top = texture_rect_y->second->_value_int.value();
+      }
+
+      const auto texture_rect_width = data._tmx_object->_properties->_map.find("texture_rect_width");
+      if (texture_rect_width != data._tmx_object->_properties->_map.end())
+      {
+         rect.width = texture_rect_width->second->_value_int.value();
+      }
+
+      const auto texture_rect_height = data._tmx_object->_properties->_map.find("texture_rect_height");
+      if (texture_rect_height != data._tmx_object->_properties->_map.end())
+      {
+         rect.height = texture_rect_height->second->_value_int.value();
+      }
+
+      if (rect.width > 0 && rect.height > 0)
+      {
+         instance->_sprite.setTextureRect(rect);
       }
    }
 

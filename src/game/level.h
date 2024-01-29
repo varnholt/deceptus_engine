@@ -138,7 +138,6 @@ protected:
    void updatePlayerLight();
    void updateRoom();
 
-   void drawLightAndShadows(sf::RenderTarget& target);
    void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
    void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
    void drawAtmosphereLayer();
