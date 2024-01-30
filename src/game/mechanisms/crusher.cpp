@@ -34,8 +34,6 @@ Crusher::Crusher(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Crusher).name());
 
-   _texture = TexturePool::getInstance().get("data/level-crypt/tilesets/crushers.png");
-
    _instance_id = __instance_counter;
    __instance_counter++;
 }
@@ -195,6 +193,8 @@ void Crusher::setup(const GameDeserializeData& data)
    _rect.top = data._tmx_object->_y_px;
    _rect.width = data._tmx_object->_width_px;
    _rect.height = data._tmx_object->_height_px;
+
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "crushers.png");
 
    if (data._tmx_object->_properties)
    {
