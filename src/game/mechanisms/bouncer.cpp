@@ -82,7 +82,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    fixture->SetUserData(static_cast<void*>(this));
 
    // load texture
-   _texture = TexturePool::getInstance().get("data/level-crypt/tilesets/bumper.png");
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bumper.png");
    _sprite.setTexture(*_texture);
    _sprite.setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
