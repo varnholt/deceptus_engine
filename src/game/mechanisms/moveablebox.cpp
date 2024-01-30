@@ -15,9 +15,6 @@
 MoveableBox::MoveableBox(GameNode* node) : GameNode(node)
 {
    setClassName(typeid(MoveableBox).name());
-
-   _texture = TexturePool::getInstance().get("data/level-malte/tilesets/crypts.png");
-   _sprite.setTexture(*_texture.get());
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -94,6 +91,9 @@ std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 void MoveableBox::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
+
+   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "crypts.png");
+   _sprite.setTexture(*_texture.get());
 
    _size.x = data._tmx_object->_width_px;
    _size.y = data._tmx_object->_height_px;
