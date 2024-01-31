@@ -6,10 +6,13 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "texturepool.h"
 
+#include <iostream>
+
 InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InfoOverlay).name());
    setEnabled(false);
+   setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 }
 
 void InfoOverlay::update(const sf::Time& dt)
@@ -23,21 +26,26 @@ void InfoOverlay::update(const sf::Time& dt)
 
    auto alpha = 0.0f;
 
-   if (_elapsed < _settings._fade_in_duration)
+   if (_elapsed < _settings._start_delay_duration)
+   {
+      alpha = 0.0f;
+   }
+   else if (_elapsed < _settings._start_delay_duration + _settings._fade_in_duration)
    {
       // fade in
-      const auto elapsed_normalized = (_elapsed.count() / _settings._fade_in_duration.count());
+      const auto fade_in_start = _settings._start_delay_duration;
+      const auto elapsed_normalized = ((_elapsed.count() - fade_in_start.count()) / _settings._fade_in_duration.count());
       alpha = Easings::easeInOutQuad(elapsed_normalized);
    }
-   else if (_elapsed < _settings._fade_in_duration + _settings._show_duration)
+   else if (_elapsed < _settings._start_delay_duration + _settings._fade_in_duration + _settings._show_duration)
    {
       // wait
       alpha = 1.0f;
    }
-   else if (_elapsed < _settings._fade_in_duration + _settings._show_duration + _settings._fade_out_duration)
+   else if (_elapsed < _settings._start_delay_duration + _settings._fade_in_duration + _settings._show_duration + _settings._fade_out_duration)
    {
       // fade out
-      const auto fade_out_start = _settings._fade_in_duration + _settings._show_duration;
+      const auto fade_out_start = _settings._start_delay_duration + _settings._fade_in_duration + _settings._show_duration;
       const auto elapsed_normalized = ((_elapsed.count() - fade_out_start.count()) / _settings._fade_out_duration.count());
       alpha = 1.0f - Easings::easeInOutQuad(elapsed_normalized);
    }
@@ -46,7 +54,14 @@ void InfoOverlay::update(const sf::Time& dt)
       // done
       alpha = 0.0f;
       setEnabled(false);
+
+      if (!_settings._show_once)
+      {
+         _elapsed = FloatSeconds{0};
+      }
    }
+
+   // std::cout << alpha << std::endl;
 
    _sprite.setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha)));
 }
@@ -71,6 +86,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
    instance->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+   instance->_sprite.setColor(sf::Color(255, 255, 255, 0));
    instance->addChunks(bounding_rect);
 
    if (data._tmx_object->_properties)
@@ -79,6 +95,12 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       if (z != data._tmx_object->_properties->_map.end())
       {
          instance->_z_index = z->second->_value_int.value();
+      }
+
+      const auto start_delay_duration = data._tmx_object->_properties->_map.find("start_delay_duration");
+      if (start_delay_duration != data._tmx_object->_properties->_map.end())
+      {
+         instance->_settings._start_delay_duration = FloatSeconds(start_delay_duration->second->_value_float.value());
       }
 
       const auto fade_in_duration = data._tmx_object->_properties->_map.find("fade_in_duration");
@@ -97,6 +119,12 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       if (fade_out_duration != data._tmx_object->_properties->_map.end())
       {
          instance->_settings._fade_out_duration = FloatSeconds(fade_out_duration->second->_value_float.value());
+      }
+
+      const auto show_once = data._tmx_object->_properties->_map.find("show_once");
+      if (show_once != data._tmx_object->_properties->_map.end())
+      {
+         instance->_settings._show_once = show_once->second->_value_bool.value();
       }
 
       const auto texture_id = data._tmx_object->_properties->_map.find("texture");
