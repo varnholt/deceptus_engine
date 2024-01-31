@@ -23,9 +23,11 @@ private:
    using FloatSeconds = std::chrono::duration<float>;
    struct Settings
    {
-      FloatSeconds _fade_in_duration{1.0f};
+      FloatSeconds _start_delay_duration{1.5f};
+      FloatSeconds _fade_in_duration{1.5f};
       FloatSeconds _show_duration{3.0f};
-      FloatSeconds _fade_out_duration{2.0f};
+      FloatSeconds _fade_out_duration{2.5f};
+      bool _show_once{true};
    };
 
    sf::FloatRect _rect;
