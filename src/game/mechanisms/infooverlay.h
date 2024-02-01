@@ -28,6 +28,7 @@ private:
       FloatSeconds _show_duration{3.0f};
       FloatSeconds _fade_out_duration{2.5f};
       bool _show_once{true};
+      bool _fullscreen{true};
    };
 
    sf::FloatRect _rect;

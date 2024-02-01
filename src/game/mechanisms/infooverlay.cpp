@@ -4,9 +4,10 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "texturepool.h"
+#include "game/gameconfiguration.h"
+#include "game/texturepool.h"
 
-#include <iostream>
+// #include <iostream>
 
 InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 {
@@ -73,21 +74,30 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       return;
    }
 
+   const auto& level_view = color.getView();
+   if (_settings._fullscreen)
+   {
+      const sf::View ortho(sf::FloatRect(
+         0.0f,
+         0.0f,
+         static_cast<float>(GameConfiguration::getInstance()._view_width),
+         static_cast<float>(GameConfiguration::getInstance()._view_height)
+      ));
+
+      color.setView(ortho);
+   }
+
    color.draw(_sprite);
+
+   if (_settings._fullscreen)
+   {
+      color.setView(level_view);
+   }
 }
 
 std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDeserializeData& data)
 {
    auto instance = std::make_shared<InfoOverlay>(parent);
-
-   const auto bounding_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
-
-   instance->setObjectId(data._tmx_object->_name);
-   instance->_rect = bounding_rect;
-   instance->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
-   instance->_sprite.setColor(sf::Color(255, 255, 255, 0));
-   instance->addChunks(bounding_rect);
 
    if (data._tmx_object->_properties)
    {
@@ -127,6 +137,12 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
          instance->_settings._show_once = show_once->second->_value_bool.value();
       }
 
+      const auto fullscreen = data._tmx_object->_properties->_map.find("fullscreen");
+      if (fullscreen != data._tmx_object->_properties->_map.end())
+      {
+         instance->_settings._fullscreen = fullscreen->second->_value_bool.value();
+      }
+
       const auto texture_id = data._tmx_object->_properties->_map.find("texture");
       if (texture_id != data._tmx_object->_properties->_map.end())
       {
@@ -164,6 +180,19 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       {
          instance->_sprite.setTextureRect(rect);
       }
+   }
+
+   const auto bounding_rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   instance->setObjectId(data._tmx_object->_name);
+   instance->_rect = bounding_rect;
+   instance->_sprite.setColor(sf::Color(255, 255, 255, 0));
+   instance->addChunks(bounding_rect);
+
+   if (!instance->_settings._fullscreen)
+   {
+      instance->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
    }
 
    return instance;
