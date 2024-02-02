@@ -31,6 +31,37 @@ They have the properties below:
 |blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
 
 
+## Info Overlays
+
+Info Overlays are mechanisms that display an image by fading it in and out again. 
+You can use this mechanism for instance to display the name of the zone or room a player just entered. 
+Usually this mechanism should be activated through a lua script or by setting up a SensorRect mechanism.  
+
+![](images/info_overlay_01.png)
+
+|Custom Property|Type|Description|
+|-|-|-|
+|start_delay_duration|float|The time to wait before starting the fade-in (default is 1.5s).|
+|fade_in_duration|float|The fade-in duration (default is 1.5s).|
+|show_duration|float|The duration elapsed when the the image is fully visible (default is 3.0s).|
+|fade_out_duration|float|The fade-out duration (default is 2.5s).|
+|show_once|bool|The value is `true` when the effect should only show once when activated (default is `true`).|
+|fullscreen|bool|When set to `true`, the texture is displayed with a full-screen view (default is `true`).|
+|texture|string|The path to the texture.|
+|texture_rect_x|int|The texture rect's x position in px (0 is the default).|
+|texture_rect_y|int|The texture rect's y position in px (0 is the default).|
+|texture_rect_width|int|The texture rect's width in px (0 is the default).|
+|texture_rect_height|int|The texture rect's height in px (0 is the default).|
+
+The SensorRect setup for an Info Overlay would look like below:
+
+|Custom Property|Value|
+|-|-|
+|action|`enable`|
+|event|`on_enter`|
+|reference_id|`zone_1`|
+
+
 ## Static lights
 
 Static lights are probably the simplest 'visual effect' inside the Deceptus Engine. They are basically additive sprites, i.e. the sprites' color information is added on top of the color of your level.
