@@ -119,7 +119,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
          instance->_settings._fade_in_duration = FloatSeconds(fade_in_duration->second->_value_float.value());
       }
 
-      const auto show_duration = data._tmx_object->_properties->_map.find("fade_out_duration");
+      const auto show_duration = data._tmx_object->_properties->_map.find("show_duration");
       if (show_duration != data._tmx_object->_properties->_map.end())
       {
          instance->_settings._show_duration = FloatSeconds(show_duration->second->_value_float.value());
