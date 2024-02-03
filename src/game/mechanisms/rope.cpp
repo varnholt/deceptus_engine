@@ -138,7 +138,8 @@ std::optional<sf::FloatRect> Rope::getBoundingBoxPx()
 
 void Rope::setup(const GameDeserializeData& data)
 {
-   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "catacombs-level-diffuse.png");
+   const auto path = data._base_path / "tilesets" / "catacombs-level-diffuse.png";
+   _texture = TexturePool::getInstance().get(path);
 
    // rope 1
    // 971,  73 .. 973,  73
