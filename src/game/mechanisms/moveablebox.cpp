@@ -92,7 +92,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
-   _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "crypts.png");
+   _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
    _sprite.setTexture(*_texture.get());
 
    _size.x = data._tmx_object->_width_px;
@@ -102,10 +102,10 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-      auto z_it = data._tmx_object->_properties->_map.find("z");
+      const auto z_it = data._tmx_object->_properties->_map.find("z");
       if (z_it != data._tmx_object->_properties->_map.end())
       {
-         auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
       }
    }
@@ -114,13 +114,13 @@ void MoveableBox::setup(const GameDeserializeData& data)
    {
       case 24:
       {
-         _sprite.setTextureRect(sf::IntRect(1392, 0, 24, 2 * 24));
+         _sprite.setTextureRect(sf::IntRect(168, 0, 24, 2 * 24));
          break;
       }
 
       case 48:
       {
-         _sprite.setTextureRect(sf::IntRect(1296, 24, 2 * 24, 3 * 24));
+         _sprite.setTextureRect(sf::IntRect(72, 24, 2 * 24, 3 * 24));
          break;
       }
 
@@ -148,13 +148,6 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    const auto size_x = _size.x / PPM;
    const auto size_y = _size.y / PPM;
    b2PolygonShape polygon_shape = Box2DTools::createBeveledBox(size_x, size_y, 0.1f);
-
-   //   b2Vec2 vertices[4];
-   //   vertices[0] = b2Vec2(0, 0);
-   //   vertices[1] = b2Vec2(0, size_y);
-   //   vertices[2] = b2Vec2(size_x, size_y);
-   //   vertices[3] = b2Vec2(size_x, 0);
-   //   polygon_shape.Set(vertices, 4);
 
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
