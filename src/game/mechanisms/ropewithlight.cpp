@@ -10,20 +10,6 @@ RopeWithLight::RopeWithLight(GameNode* parent)
  : Rope(parent)
 {
    setClassName(typeid(RopeWithLight).name());
-
-   _lamp_sprite.setTexture(*_texture.get());
-
-   // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
-   _lamp_sprite_rect_1 = sf::IntRect{1056, 28, 24, 21};
-   _lamp_sprite_rect_2 = sf::IntRect{1056, 78, 24, 22};
-
-   // texture rect 1
-   // 1056, 28
-   // 1080, 53
-
-   // texture rect 2
-   // 1056, 78
-   // 1080, 100
 }
 
 
@@ -59,6 +45,21 @@ void RopeWithLight::update(const sf::Time& dt)
 void RopeWithLight::setup(const GameDeserializeData& data)
 {
    Rope::setup(data);
+
+   // set up texture
+   _lamp_sprite.setTexture(*_texture);
+
+   // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
+   _lamp_sprite_rect_1 = sf::IntRect{1056, 28, 24, 21};
+   _lamp_sprite_rect_2 = sf::IntRect{1056, 78, 24, 22};
+
+   // texture rect 1
+   // 1056, 28
+   // 1080, 53
+
+   // texture rect 2
+   // 1056, 78
+   // 1080, 100
 
    std::array<uint8_t, 4> color = {255, 255, 255, 100};
 
