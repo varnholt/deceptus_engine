@@ -178,8 +178,10 @@ void InfoLayer::loadInventoryItems()
    );
 
    _inventory_sprites[0].setTexture(*_inventory_texture);
+   _inventory_sprites[0].setTextureRect({});
    _inventory_sprites[0].setPosition(frame_0_pos_x_px, frame_0_pos_y_px);
    _inventory_sprites[1].setTexture(*_inventory_texture);
+   _inventory_sprites[1].setTextureRect({});
    _inventory_sprites[1].setPosition(frame_1_pos_x_px, frame_1_pos_y_px);
 }
 
