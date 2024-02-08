@@ -50,8 +50,8 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    _lamp_sprite.setTexture(*_texture);
 
    // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
-   _lamp_sprite_rect_1 = sf::IntRect{1056, 28, 24, 21};
-   _lamp_sprite_rect_2 = sf::IntRect{1056, 78, 24, 22};
+   _lamp_sprite_rect_1 = sf::IntRect{1056, 28, 24, 28};
+   _lamp_sprite_rect_2 = sf::IntRect{1056, 78, 24, 25};
 
    // texture rect 1
    // 1056, 28
