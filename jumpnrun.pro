@@ -150,6 +150,7 @@ SOURCES += \
    src/game/audiorange.cpp \
    src/game/audioupdatedata.cpp \
    src/game/bitmapfont.cpp \
+   src/game/blendmodedeserializer.cpp \
    src/game/boomeffect.cpp \
    src/game/boomeffectenvelope.cpp \
    src/game/boomeffectenveloperandom.cpp \
@@ -381,6 +382,7 @@ HEADERS += \
    src/game/audiorange.h \
    src/game/audioupdatedata.h \
    src/game/bitmapfont.h \
+   src/game/blendmodedeserializer.h \
    src/game/boomeffect.h \
    src/game/boomeffectenvelope.h \
    src/game/boomeffectenveloperandom.h \

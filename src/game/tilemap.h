@@ -89,5 +89,6 @@ private:
    bool _visible = true;
    std::string _layer_name;
    std::string _tileset_name;
+   std::optional<sf::BlendMode> _blend_mode;
 };
 

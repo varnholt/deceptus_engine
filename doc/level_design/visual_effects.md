@@ -1,5 +1,58 @@
 # Visualization
 
+## Tile Map Blend Modes
+
+To configure a blend mode, you can choose from the 3 different blend mode types below.
+The easiest and most common approach is to go for pre-defined blend modes.
+If the predefined blend modes are not sufficient for you, you can define custom ones. 
+There are blend modes that use combined color and alpha channels and those that handle them separately.
+The latter give you full configuration freedom.
+
+### Pre-defined Blend Modes
+|Custom Property|Type|Description|
+|-|-|-|
+|blend_mode|string|Predefined blend modes: `add`, `alpha`, `multiply`, `min`, `max`, `none`|
+
+### Blend Mode with Combined Color and Alpha Channels
+|Custom Property|Type|Description|
+|-|-|-|
+|source_factor|Blend Factor (string)|Specifies how to compute the source factor for the color and alpha channels.|
+|destination_factor|Blend Factor (string)|Specifies how to compute the destination factor for the color and alpha channels.|
+|blend_equation|Blend Equation (string)|Specifies how to combine the source and destination colors and alpha.|
+
+### Blend Mode with Separate Color and Alpha Channels
+|Custom Property|Type|Description|
+|-|-|-|
+|color_source_factor|Blend Factor (string)|Specifies how to compute the source factor for the color channels.|
+|color_destination_factor|Blend Factor (string)|Specifies how to compute the destination factor for the color channels.|
+|color_blend_equation|Blend Equation (string)|Specifies how to combine the source and destination colors.|
+|alpha_source_factor|Blend Factor (string)|Specifies how to compute the source factor.|
+|alpha_destination_factor|Blend Factor (string)|Specifies how to compute the destination factor.|
+|alpha_blend_equation|Blend Equation (string)|Specifies how to combine the source and destination alphas.|
+
+### Blend Factors
+|Custom Property|Description|
+|-|-|
+|zero|(0, 0, 0, 0)|
+|one|(1, 1, 1, 1)|
+|src_color|(src.r, src.g, src.b, src.a)|
+|one_minus_src_color|(1, 1, 1, 1) - (src.r, src.g, src.b, src.a)|
+|dst_color|(dst.r, dst.g, dst.b, dst.a)|
+|one_minus_dst_color|(1, 1, 1, 1) - (dst.r, dst.g, dst.b, dst.a)|
+|src_alpha|	(src.a, src.a, src.a, src.a)|
+|one_minus_src_alpha|(1, 1, 1, 1) - (src.a, src.a, src.a, src.a)|
+|dst_alpha|(dst.a, dst.a, dst.a, dst.a)|
+|one_minus_dst_alpha|(1, 1, 1, 1) - (dst.a, dst.a, dst.a, dst.a)|
+
+### Blend Factors
+|Custom Property|Description|
+|-|-|
+|add|Pixel = Src * SrcFactor + Dst * DstFactor|
+|subtract|Pixel = Src * SrcFactor - Dst * DstFactor|
+|reverse_subtract|Pixel = Dst * DstFactor - Src * SrcFactor|
+|min|Pixel = min(Dst, Src)|
+|max|Pixel = max(Dst, Src)|
+
 
 ## Adding Parallax Layers
 

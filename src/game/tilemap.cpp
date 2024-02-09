@@ -14,8 +14,9 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/blendmodedeserializer.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 namespace
 {
@@ -77,13 +78,15 @@ bool TileMap::load(
    auto parallax_scale = 1.0f;
    if (layer->_properties)
    {
-      auto& map = layer->_properties->_map;
+      const auto& map = layer->_properties->_map;
 
-      auto it_parallax_value = map.find("parallax");
+      const auto it_parallax_value = map.find("parallax");
       if (it_parallax_value != map.end())
       {
          parallax_scale = it_parallax_value->second->_value_float.value();
       }
+
+      _blend_mode = BlendModeDeserializer::readBlendMode(map);
    }
 
    // Log::Info() << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path;
@@ -307,6 +310,12 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
    }
 
    states.texture = _texture_map.get();
+
+   if (_blend_mode.has_value())
+   {
+      states.blendMode = _blend_mode.value();
+   }
+
    drawVertices(color, states);
 
    if (_normal_map)
