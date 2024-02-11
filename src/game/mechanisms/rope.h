@@ -33,6 +33,8 @@ protected:
    std::shared_ptr<sf::Texture> _texture;
 
 private:
+   void pushChain(float impulse);
+
    sf::Vector2i _position_px;
    sf::FloatRect _bounding_box;
 
@@ -54,6 +56,7 @@ private:
    float _push_interval_s = 5.0f;
    float _push_duration_s = 1.0f;
    float _push_strength = 0.02f;
+   std::optional<float> _player_impulse;
 
    static int32_t _instance_counter;
 };
