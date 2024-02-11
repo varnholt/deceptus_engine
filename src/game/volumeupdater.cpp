@@ -1,7 +1,6 @@
 #include "volumeupdater.h"
 
 #include "framework/math/sfmlmath.h"
-#include "game/audio.h"
 #include "game/gamestate.h"
 #include "game/luainterface.h"
 #include "game/projectile.h"
@@ -68,7 +67,7 @@ void VolumeUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
          if (within_range)
          {
             // calculate volume
-            float volume = 0.0f;
+            auto volume = 0.0f;
             if (distance < range._radius_near_px)
             {
                volume = range._volume_near;
