@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/player/player.h"
 #include "texturepool.h"
 
 #include <array>
@@ -15,8 +16,6 @@ int32_t Rope::_instance_counter = 0;
 Rope::Rope(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Rope).name());
-
-   _joint_def.collideConnected = false;
 
    setZ(16);
 
@@ -97,6 +96,15 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(quads.data(), quads.size(), sf::Quads, states);
 }
 
+void Rope::pushChain(float impulse)
+{
+   auto* last_element = _chain_elements.back();
+   for (auto* element : _chain_elements)
+   {
+      element->ApplyLinearImpulse(b2Vec2{impulse, 0.0f}, last_element->GetWorldCenter(), true);
+   }
+}
+
 void Rope::update(const sf::Time& dt)
 {
    // prevent glitches`
@@ -111,18 +119,20 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
+   if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().intersects(_bounding_box))
+   {
+      // using a fix timestep for now, everything else lets box2d go nuts
+      // const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * dt.asSeconds() * 0.02f;
+      const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * _player_impulse.value();
+      pushChain(impulse);
+   }
+
    // slightly push the rope all the way while it's moving from the right to the left
    _push_time_s += dt.asSeconds();
-
    if (_push_time_s > _push_interval_s)
    {
-      auto f = _push_strength * dt.asSeconds();
-
-      auto last_element = _chain_elements.back();
-      for (auto element : _chain_elements)
-      {
-         element->ApplyLinearImpulse(b2Vec2{-f, 0.0f}, last_element->GetWorldCenter(), true);
-      }
+      const auto impulse = -_push_strength * dt.asSeconds();
+      pushChain(impulse);
    }
 
    if (_push_time_s > _push_interval_s + _push_duration_s)
@@ -183,26 +193,49 @@ void Rope::setup(const GameDeserializeData& data)
       _segment_count = segment_it->second->_value_int.value();
    }
 
+   const auto player_impulse_it = data._tmx_object->_properties->_map.find("player_impulse");
+   if (player_impulse_it != data._tmx_object->_properties->_map.end())
+   {
+      _player_impulse = player_impulse_it->second->_value_float.value();
+   }
+
    // init segment length
    std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
-   auto path_0_px = pixel_path.at(0);
-   auto path_1_px = pixel_path.at(1);
-   _segment_length_m = (SfmlMath::length(path_1_px - path_0_px) * MPP) / static_cast<float>(_segment_count);
+   const auto path_0_px = pixel_path.at(0);
+   const auto path_1_px = pixel_path.at(1);
+   const auto rope_length_px = path_1_px - path_0_px;
+   _segment_length_m = (SfmlMath::length(rope_length_px) * MPP) / static_cast<float>(_segment_count);
 
    // init start position
    setPixelPosition(sf::Vector2i{static_cast<int32_t>(data._tmx_object->_x_px), static_cast<int32_t>(data._tmx_object->_y_px)});
 
+   // clang-format off
+   //      p0
+   //   +---+---+
+   //   |   |   |
+   //   |   |   |
+   //   |   |   |
+   //   |   |   |
+   //   |   |   |
+   //   +---+---+
+   //      p1
    _bounding_box =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{
+         data._tmx_object->_x_px - 10,
+         data._tmx_object->_y_px,
+         20,
+         std::fabs(rope_length_px.y)
+   };
+   // clang-format on
 
    // pin the rope to the starting point (anchor)
    auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
    _anchor_a_body = data._world->CreateBody(&_anchor_a_def);
    _anchor_a_shape.SetTwoSided(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
-   auto anchor_fixture = _anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
+   auto* anchor_fixture = _anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
    anchor_fixture->SetSensor(true);
 
-   auto previous_body = _anchor_a_body;
+   auto* previous_body = _anchor_a_body;
 
    for (auto i = 0; i < _segment_count; ++i)
    {
@@ -210,13 +243,14 @@ void Rope::setup(const GameDeserializeData& data)
       b2BodyDef chain_body_def;
       chain_body_def.type = b2_dynamicBody;
       chain_body_def.position.Set(pos_m.x, pos_m.y + 0.01f + i * _segment_length_m);
-      auto chain_body = data._world->CreateBody(&chain_body_def);
-      auto chain_fixture = chain_body->CreateFixture(&_rope_element_fixture_def);
+      auto* chain_body = data._world->CreateBody(&chain_body_def);
+      auto* chain_fixture = chain_body->CreateFixture(&_rope_element_fixture_def);
       chain_fixture->SetSensor(true);
 
       // attach chain element to the previous one
-      b2Vec2 anchor(pos_m.x, pos_m.y + i * _segment_length_m);
+      const b2Vec2 anchor(pos_m.x, pos_m.y + i * _segment_length_m);
       _joint_def.Initialize(previous_body, chain_body, anchor);
+      _joint_def.collideConnected = false;
       data._world->CreateJoint(&_joint_def);
 
       // store chain elements
@@ -230,7 +264,7 @@ sf::Vector2i Rope::getPixelPosition() const
    return _position_px;
 }
 
-void Rope::setPixelPosition(const sf::Vector2i& pixelPosition)
+void Rope::setPixelPosition(const sf::Vector2i& pixel_position)
 {
-   _position_px = pixelPosition;
+   _position_px = pixel_position;
 }

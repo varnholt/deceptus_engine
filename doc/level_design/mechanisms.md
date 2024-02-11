@@ -526,6 +526,7 @@ Moreover, ropes have a number of properties to simulate 'wind behavior'. So you 
 |push_interval_s|float|The interval how often the rope is pushed (in seconds, a good value is `5.0`)|
 |push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
 |push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
+|player_impulse|float|The amount the player influences the rope by passing it (`0.0003` is a good value, `0.0` is the default)|
 |segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
 |z|int|The object's z index|
 
