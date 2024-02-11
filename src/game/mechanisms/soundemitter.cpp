@@ -60,6 +60,7 @@ std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const 
 {
    auto instance = std::make_shared<SoundEmitter>(parent);
 
+   instance->_reference_volume = 1.0f;
    instance->_position.x = data._tmx_object->_x_px;
    instance->_position.y = data._tmx_object->_y_px;
    instance->_size.x = data._tmx_object->_width_px;
