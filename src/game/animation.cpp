@@ -125,9 +125,9 @@ bool Animation::isVisible() const
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Animation::setVisible(bool newVisible)
+void Animation::setVisible(bool visible)
 {
-   _visible = newVisible;
+   _visible = visible;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -172,9 +172,13 @@ void Animation::update(const sf::Time& dt)
    if (_current_time >= frameTime)
    {
       // reset time, but keep the remainder
+      // clang-format off
       _current_time = sf::microseconds(
-         (frameTime.asMicroseconds() > 0) ? _current_time.asMicroseconds() % frameTime.asMicroseconds() : _current_time.asMicroseconds()
+         (frameTime.asMicroseconds() > 0)
+            ? _current_time.asMicroseconds() % frameTime.asMicroseconds()
+            : _current_time.asMicroseconds()
       );
+      // clang-format on
 
       if (_current_frame + 1 < static_cast<int32_t>(_frames.size()))
       {
@@ -318,7 +322,7 @@ void Animation::setColorTree(const sf::Color& color)
 //----------------------------------------------------------------------------------------------------------------------
 sf::FloatRect Animation::getLocalBounds() const
 {
-   sf::IntRect rect = _frames[static_cast<size_t>(_current_frame)];
+   const sf::IntRect rect = _frames[static_cast<size_t>(_current_frame)];
    return sf::FloatRect(0.f, 0.f, static_cast<float>(std::abs(rect.width)), static_cast<float>(std::abs(rect.height)));
 }
 
