@@ -21,6 +21,7 @@
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/fireflies.h"
 #include "game/mechanisms/infooverlay.h"
+#include "game/mechanisms/interactionhelp.h"
 #include "game/mechanisms/laser.h"
 #include "game/mechanisms/lever.h"
 #include "game/mechanisms/levermechanismmerger.h"
@@ -75,6 +76,7 @@ void GameMechanismDeserializer::deserialize(
    auto mechanism_fans = mechanisms[std::string{layer_name_fans}];
    auto mechanism_fireflies = mechanisms[std::string{layer_name_fireflies}];
    auto mechanism_info_overlays = mechanisms[std::string{layer_name_info_overlays}];
+   auto mechanism_interaction_help = mechanisms[std::string{layer_name_interaction_help}];
    auto mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
    auto mechanism_levers = mechanisms[std::string{layer_name_levers}];
    auto mechanism_moveable_objects = mechanisms[std::string{layer_name_moveable_objects}];
@@ -302,6 +304,12 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = std::make_shared<Crusher>(parent);
                mechanism->setup(data);
                mechanism_crushers->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_interaction_help || tmx_object->_template_type == type_name_interaction_help)
+            {
+               auto mechanism = std::make_shared<InteractionHelp>(parent);
+               mechanism->deserialize(data);
+               mechanism_interaction_help->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_platform_paths || tmx_object->_template_type == type_name_platform_path)
             {

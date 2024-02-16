@@ -76,9 +76,6 @@ public:
    const std::shared_ptr<b2World>& getWorld() const;
    const sf::Vector2f& getStartPosition() const;
 
-   const std::unordered_map<void*, b2Vec2*>& getPointMap() const;
-   const std::unordered_map<void*, size_t>& getPointSizeMap() const;
-
    const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints() const;
 
    void toggleMechanisms();
@@ -105,7 +102,6 @@ public:
    void setLoadingMode(LoadingMode loading_mode);
 
 protected:
-   void addDebugRect(void* body, float x, float y, float w, float h);
 
    void parsePhysicsTiles(
       const std::shared_ptr<TmxLayer>& layer,
@@ -205,6 +201,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fireflies;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_info_overlay;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_interaction_help;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
@@ -239,9 +236,6 @@ protected:
    bool _screenshot = false;
 
    // box2d
-   std::unordered_map<void*, b2Vec2*> _point_map;
-   std::unordered_map<void*, size_t> _point_count_map;
-
    std::shared_ptr<b2World> _world = nullptr;
    std::vector<std::vector<b2Vec2>> _world_chains;
    Winding _winding = Winding::Clockwise;

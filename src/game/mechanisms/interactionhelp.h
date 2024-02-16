@@ -33,6 +33,8 @@ private:
    bool _visible = false;
    float _alpha = 0.0f;
    sf::Time _time;
+   bool _player_intersected_in_last_frame{false};
+   bool _active{false};
 
    std::shared_ptr<Animation> _animation_show;
    std::shared_ptr<Animation> _animation_hide;

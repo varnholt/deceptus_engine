@@ -232,6 +232,7 @@ SOURCES += \
    src/game/mechanisms/fan.cpp \
    src/game/mechanisms/fireflies.cpp \
    src/game/mechanisms/infooverlay.cpp \
+   src/game/mechanisms/interactionhelp.cpp \
    src/game/mechanisms/laser.cpp \
    src/game/mechanisms/lever.cpp \
    src/game/mechanisms/levermechanismmerger.cpp \
@@ -468,6 +469,7 @@ HEADERS += \
    src/game/mechanisms/fan.h \
    src/game/mechanisms/fireflies.h \
    src/game/mechanisms/infooverlay.h \
+   src/game/mechanisms/interactionhelp.h \
    src/game/mechanisms/lever.h \
    src/game/mechanisms/levermechanismmerger.h \
    src/game/mechanisms/moveablebox.h \
