@@ -172,9 +172,9 @@ void Level::initializeTextures()
    _render_textures.push_back(_render_texture_normal_tmp);
    _render_textures.push_back(_render_texture_deferred);
 
-   for (const auto& fb : _render_textures)
+   for (const auto& texture : _render_textures)
    {
-      Log::Info() << "created render texture: " << fb->getSize().x << " x " << fb->getSize().y;
+      Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
    }
 
    _atmosphere_shader->initialize();
@@ -232,6 +232,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_fans,
       &_mechanism_fireflies,
       &_mechanism_info_overlay,
+      &_mechanism_interaction_help,
       &_mechanism_lasers,
       &_mechanism_levers,
       &_mechanism_moveable_boxes,
@@ -270,6 +271,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
    _mechanisms_map[std::string{layer_name_info_overlays}] = &_mechanism_info_overlay;
+   _mechanisms_map[std::string{layer_name_interaction_help}] = &_mechanism_interaction_help;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
    _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
@@ -316,12 +318,6 @@ Level::~Level()
    for (const auto& enemy : LuaInterface::instance().getObjectList())
    {
       Timer::removeByCaller(enemy);
-   }
-
-   // properly delete point map
-   for (const auto& kv : _point_map)
-   {
-      delete kv.second;
    }
 
    _file_watcher_thread_active = false;
@@ -1644,33 +1640,8 @@ Level* Level::getCurrentLevel()
 }
 
 //-----------------------------------------------------------------------------
-void Level::addDebugRect(void* body, float x, float y, float w, float h)
-{
-   auto points = new b2Vec2[4];
-
-   points[0] = b2Vec2(x * MPP, y * MPP);
-   points[1] = b2Vec2(x * MPP + w * MPP, y * MPP);
-   points[2] = b2Vec2(x * MPP + w * MPP, y * MPP + h * MPP);
-   points[3] = b2Vec2(x * MPP, y * MPP + h * MPP);
-
-   _point_map[body] = points;
-   _point_count_map[body] = 4;
-}
-
-//-----------------------------------------------------------------------------
 const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints() const
 {
    return _mechanism_checkpoints;
 }
 
-//-----------------------------------------------------------------------------
-const std::unordered_map<void*, size_t>& Level::getPointSizeMap() const
-{
-   return _point_count_map;
-}
-
-//-----------------------------------------------------------------------------
-const std::unordered_map<void*, b2Vec2*>& Level::getPointMap() const
-{
-   return _point_map;
-}

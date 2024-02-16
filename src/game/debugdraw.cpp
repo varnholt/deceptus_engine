@@ -277,7 +277,7 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
 //----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 {
-   for (auto joint = level->getWorld()->GetJointList(); joint; joint = joint->GetNext())
+   for (auto* joint = level->getWorld()->GetJointList(); joint; joint = joint->GetNext())
    {
       auto distance_joint = dynamic_cast<b2DistanceJoint*>(joint);
       if (distance_joint)
@@ -286,7 +286,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
       }
    }
 
-   sf::FloatRect screen = getScreenRect(target);
+   const auto screen = getScreenRect(target);
 
    // optimization is to only use bodies on screen by doing some world querying.
    // that reduces the amount of bodies to about 1/5, depending on the level complexity.
@@ -300,7 +300,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 
    auto bodies = WorldQuery::retrieveBodiesOnScreen(level->getWorld(), screen);
 
-   for (auto body : bodies)
+   for (auto* body : bodies)
    {
       if (body->GetType() == b2_dynamicBody || body->GetType() == b2_kinematicBody || body->GetType() == b2_staticBody)
       {
@@ -315,11 +315,11 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
          drawLine(target, body->GetPosition(), body->GetPosition() + normalized_velocity, b2Color(1.0f, length / max_velocity, 0.0, 1.0f));
 
          // draw fixtures
-         auto f = body->GetFixtureList();
-         while (f)
+         auto* fixture = body->GetFixtureList();
+         while (fixture)
          {
-            auto next = f->GetNext();
-            auto shape = f->GetShape();
+            auto next = fixture->GetNext();
+            auto shape = fixture->GetShape();
 
             switch (shape->GetType())
             {
@@ -359,17 +359,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
                }
             }
 
-            f = next;
-         }
-      }
-      else
-      {
-         const auto& vertex_it = level->getPointMap().find(body);
-         const auto& vertex_count_it = level->getPointSizeMap().find(body);
-
-         if (vertex_it != level->getPointMap().end() && vertex_count_it != level->getPointSizeMap().end())
-         {
-            drawLines(target, vertex_it->second, {}, static_cast<int32_t>(vertex_count_it->second), b2Color(1.0f, 0.0f, 0.0f));
+            fixture = next;
          }
       }
    }
