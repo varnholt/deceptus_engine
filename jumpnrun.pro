@@ -545,6 +545,7 @@ HEADERS += \
    src/game/tilemapfactory.h \
    src/game/tmxenemy.h \
    src/game/tweaks.h \
+   src/game/valuereader.h \
    src/game/volumeupdater.h \
    src/game/waterbubbles.h \
    src/game/weapon.h \

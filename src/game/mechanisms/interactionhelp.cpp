@@ -7,18 +7,44 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/gameconfiguration.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
+#include "game/valuereader.h"
 
 InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InteractionHelp).name());
+
+   if (_font.loadFromFile("data/fonts/deceptum.ttf"))
+   {
+      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
+      _text.setFont(_font);
+      _text.setCharacterSize(12);
+   }
 }
 
 void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    _animation_show->draw(target);
    _animation_hide->draw(target);
+
+   if (_button_alpha.has_value())
+   {
+      const auto& level_view = target.getView();
+
+      const sf::View ortho(sf::FloatRect(
+         0.0f,
+         0.0f,
+         static_cast<float>(GameConfiguration::getInstance()._view_width),
+         static_cast<float>(GameConfiguration::getInstance()._view_height)
+      ));
+
+      target.setView(ortho);
+      target.draw(_button_sprite);
+      target.draw(_text);
+      target.setView(level_view);
+   }
 }
 
 // workflow
@@ -54,14 +80,31 @@ void InteractionHelp::update(const sf::Time& dt)
       _active = false;
    }
 
+   std::optional<float> alpha;
+
    if (!_animation_show->_paused)
    {
       _animation_show->update(dt);
+      alpha = static_cast<float>(_animation_show->_current_frame) / static_cast<float>(_animation_show->_frames.size());
    }
 
    if (!_animation_hide->_paused)
    {
       _animation_hide->update(dt);
+      alpha = 1.0f - (static_cast<float>(_animation_hide->_current_frame) / static_cast<float>(_animation_show->_frames.size()));
+   }
+
+   if (_active && _animation_show->_paused)
+   {
+      alpha = 1.0f;
+   }
+
+   _button_alpha = alpha;
+   if (alpha.has_value())
+   {
+      const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
+      _text.setFillColor(sf::Color{232, 219, 243, alpha_byte});
+      _button_sprite.setColor({255, 255, 255, alpha_byte});
    }
 
    _player_intersected_in_last_frame = intersects;
@@ -70,37 +113,45 @@ void InteractionHelp::update(const sf::Time& dt)
 void InteractionHelp::deserialize(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
-   setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 
    _rect_px = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
-   const auto z_it = data._tmx_object->_properties->_map.find("z");
-   if (z_it != data._tmx_object->_properties->_map.end())
-   {
-      const auto z_index = static_cast<int32_t>(z_it->second->_value_int.value());
-      setZ(z_index);
-   }
+   const auto& map = data._tmx_object->_properties->_map;
+   setZ(ValueReader::readValue<int32_t>("z", map).value_or(static_cast<int32_t>(ZDepth::ForegroundMax)));
 
    // read animations if set up
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
 
    AnimationPool animation_pool{"data/sprites/interaction_animations.json"};
-
-   const auto animation_name_show = data._tmx_object->_properties->_map.find("animation");
-   if (animation_name_show != data._tmx_object->_properties->_map.end())
+   const auto animation = ValueReader::readValue<std::string>("animation", map);
+   if (animation.has_value())
    {
-      const auto key = animation_name_show->second->_value_string.value();
+      const auto offset_x_px = ValueReader::readValue<int32_t>("offset_x_px", map).value_or(0);
+      const auto offset_y_px = ValueReader::readValue<int32_t>("offset_y_px", map).value_or(0);
 
-      _animation_show = animation_pool.create(key, pos_x_px, pos_y_px, false, false);
+      _animation_show = animation_pool.create(
+         animation.value(), pos_x_px + static_cast<float>(offset_x_px), pos_y_px + static_cast<float>(offset_y_px), false, false
+      );
       _animation_show->_looped = false;
       _animation_show->_reset_to_first_frame = false;
 
-      _animation_hide = animation_pool.create(key, pos_x_px, pos_y_px, false, false);
+      _animation_hide = animation_pool.create(
+         animation.value(), offset_x_px + static_cast<float>(pos_x_px), pos_y_px + static_cast<float>(offset_y_px), false, false
+      );
       _animation_hide->_looped = false;
       _animation_hide->_reset_to_first_frame = false;
       _animation_hide->reverse();
    }
+
+   _button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
+   _button_sprite.setTexture(*_button_texture);
+   _button_sprite.setTextureRect({0, 120, 24, 24});
+   _button_sprite.setPosition(550, 335);
+
+   const auto text = ValueReader::readValue<std::string>("text", map).value_or("");
+   _text.setString(text.c_str());
+   _text.setPosition(574, 339);
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()
