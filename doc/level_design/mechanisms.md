@@ -960,3 +960,28 @@ Depending on whether a keyboard or a game controller is connected, the buttons b
 ---
 
 &nbsp;
+
+&nbsp;
+
+---
+
+
+## Interaction Help
+
+|Method|Value|
+|-|-|
+|Object Type|`InteractionHelp`|
+|Object Group|`interaction_help`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index|
+|animation|string|Animation cycle to show. The hide animation will be the same animation, just reversed.|
+|text|string|Text to show next to the controller button.|
+|offset_x_px|int|An offset in x (in px) for where the animation will be shown. The default is 0.|
+|offset_y_px|int|An offset in y (in px) for where the animation will be shown. The default is 0.|
+
+
+

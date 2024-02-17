@@ -396,14 +396,14 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // set up an ortho view with screen dimensions
-   sf::View pixelOrtho(sf::FloatRect(
+   sf::View pixel_ortho(sf::FloatRect(
       0.0f,
       0.0f,
       static_cast<float>(GameConfiguration::getInstance()._view_width),
       static_cast<float>(GameConfiguration::getInstance()._view_height)
    ));
 
-   window.setView(pixelOrtho);
+   window.setView(pixel_ortho);
 
    for (auto messagebox : messageboxes)
    {
