@@ -27,15 +27,17 @@ private:
       Use
    };
 
-   std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect_px;
-   std::vector<sf::Sprite> _sprites;
-   bool _visible = false;
-   float _alpha = 0.0f;
-   sf::Time _time;
    bool _player_intersected_in_last_frame{false};
    bool _active{false};
 
    std::shared_ptr<Animation> _animation_show;
    std::shared_ptr<Animation> _animation_hide;
+
+   std::optional<float> _button_alpha;
+   sf::Sprite _button_sprite;
+   std::shared_ptr<sf::Texture> _button_texture;
+
+   sf::Font _font;
+   sf::Text _text;
 };
