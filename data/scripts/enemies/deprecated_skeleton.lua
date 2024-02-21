@@ -32,7 +32,7 @@ mSpriteIndex = 0
 mSpriteCounts = {12, 10, 6, 14, 14}
 mSpriteOffsets = {0, 144, 288, 432, 576}
 mCurrentAction = Action["Idle"]
-mEnergy = 100
+mEnergy = 20
 mDead = false
 mWaiting = false
 mAttackStarted = false
@@ -47,6 +47,7 @@ function initialize()
    mPatrolEpsilon = 1.0
    addShapeRect(0.2, 0.5, 0.0, 0.23)
    updateSpriteRect(0, 0, 0, 72, 72)
+   addHitbox(-18, -18, 36, 48)
 end
 
 
@@ -215,7 +216,7 @@ function attack()
          mAttackLaunched = true
 
          if (checkAttackDistance()) then
-            damage(50, mPointsLeft and -5000.0 or 5000.0, 0.0)
+            damage(2, mPointsLeft and -5000.0 or 5000.0, 0.0)
          end
       end
    else
@@ -272,7 +273,7 @@ function hit(damage_value)
       mKeyPressed = 0
 
       -- need to store the current hit time
-      -- print(string.format("hit: %d", damage_value))
+      -- print(string.format("hit: damage: %d, energy: %d", damage_value, mEnergy))
 
       mEnergy = mEnergy - damage_value
 

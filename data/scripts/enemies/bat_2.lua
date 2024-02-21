@@ -69,7 +69,7 @@ ANIMATION_SPEED = 40.0
 ANIMATION_SPEED_IDLE = 20.0
 ANIMATION_SPEED_DEATH = 20.0
 HIT_RADIUS = 0.3
-ATTACK_DURATION = 1.0
+ATTACK_DURATION = 2.0
 ATTACK_SPRITE_COUNT = 9
 
 
@@ -113,8 +113,8 @@ function attack()
    sy = mStartPosition:getY()
 
    k1 = Key:create{x = bx, y = by, time = 0.0}
-   k2 = Key:create{x = px, y = py, time = 0.5} -- player pos
-   k3 = Key:create{x = sx, y = sy, time = 1.0} -- go back
+   k2 = Key:create{x = px, y = py, time = ATTACK_DURATION / 2.0} -- player pos
+   k3 = Key:create{x = sx, y = sy, time = ATTACK_DURATION}       -- go back
 
    mPath = {k1, k2, k3}
 end
@@ -170,15 +170,15 @@ function update(dt)
 
       -- carry out attack
       else
-         time = (mElapsed - mAttackTime) / ATTACK_DURATION
+         time = (mElapsed - mAttackTime) -- / ATTACK_DURATION
          p = getValueCubic(mPath, time)
 
          -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
          setTransform(p:getX(), p:getY(), 0.0)
 
-         if (time > 1.0) then
+         if (time > ATTACK_DURATION) then
             mAttack = false
-            mIdleTime = mElapsed + 1.0
+            mIdleTime = mElapsed + ATTACK_DURATION
          end
       end
    end
