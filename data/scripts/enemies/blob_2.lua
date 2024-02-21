@@ -8,7 +8,7 @@ properties = {
    sprite = "data/sprites/enemy_blob_2.png",
    velocity_walk_max = 0.4,
    acceleration_ground = 0.1,
-   damage = 40
+   damage = 4
 }
 
 
@@ -58,6 +58,7 @@ _gravity_scale = 1.0
 _alignment_offset = 0
 _patrol_epsilon = 1.0
 _tick = 0
+_energy = 30
 
 -- jump related
 _jump = false
@@ -587,4 +588,15 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function setStartPosition(x, y)
    _jump_start_position = v2d.Vector2D(x, y)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function hit(damage_value)
+      -- need to store the current hit time
+      print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
+      _energy = _energy - damage_value
+      if (_energy <= 0) then
+         die()
+      end
 end
