@@ -137,7 +137,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       _animation_show->_reset_to_first_frame = false;
 
       _animation_hide = animation_pool.create(
-         animation.value(), offset_x_px + static_cast<float>(pos_x_px), pos_y_px + static_cast<float>(offset_y_px), false, false
+         animation.value(), pos_x_px + static_cast<float>(offset_x_px), pos_y_px + static_cast<float>(offset_y_px), false, false
       );
       _animation_hide->_looped = false;
       _animation_hide->_reset_to_first_frame = false;
