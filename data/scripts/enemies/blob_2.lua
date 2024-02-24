@@ -39,7 +39,7 @@ SPRITE_COUNT_LEFT = 16
 SPRITE_COUNT_RIGHT = 16
 SPRITE_COUNT_JUMP_UP = 12
 SPRITE_COUNT_JUMP_DOWN = 12
-SPRITE_COUNT_DIE = 5
+SPRITE_COUNT_DEATH = 14
 SPRITE_COUNT_DROP = 12
 SPRITE_COUNT_LANDING = 11 -- last one is skipped, that doesn't make sense
 
@@ -59,6 +59,7 @@ _alignment_offset = 0
 _patrol_epsilon = 1.0
 _tick = 0
 _energy = 30
+_dead = false
 
 -- jump related
 _jump = false
@@ -209,6 +210,37 @@ function goRight()
 
    keyReleased(Key["KeyLeft"])
    keyPressed(Key["KeyRight"])
+end
+
+------------------------------------------------------------------------------------------------------------------------
+function updateDeath()
+
+   if (not _dead) then
+      return false
+   end
+
+   sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, SPRITE_COUNT_DEATH + 1))
+
+   if (_sprite_index ~= sprite_index) then
+
+      _sprite_index = sprite_index
+      _animation_row = ROW_DIE
+
+      if (sprite_index == SPRITE_COUNT_DEATH) then
+         die()
+      end
+
+      updateSpriteRect(
+         0,
+         _sprite_index * SPRITE_WIDTH,
+         _animation_row * SPRITE_HEIGHT,
+         SPRITE_WIDTH,
+         SPRITE_HEIGHT
+      )
+
+   end
+
+   return true
 end
 
 
@@ -551,6 +583,10 @@ function update(dt)
       return
    end
 
+   if (updateDeath(dt)) then
+      return
+   end
+
    updatePatrol()
    updateKeysPressed(_key_pressed)
 end
@@ -597,6 +633,6 @@ function hit(damage_value)
       print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
       _energy = _energy - damage_value
       if (_energy <= 0) then
-         die()
+         _dead = true
       end
 end
