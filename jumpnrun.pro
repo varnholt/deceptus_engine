@@ -23,6 +23,8 @@ RC_ICONS = data/game/deceptus.ico
 
 DEFINES_RELEASE += RELEASE_BUILD
 
+DEFINES += SFML_DEFINE_DISCRETE_GPU_PREFERENCE
+
 debug {
    CONFIG += console
    DEFINES += DEBUG
@@ -252,6 +254,7 @@ SOURCES += \
    src/game/mechanisms/spikeblock.cpp \
    src/game/mechanisms/spikes.cpp \
    src/game/mechanisms/staticlight.cpp \
+   src/game/mechanisms/textlayer.cpp \
    src/game/mechanisms/waterdamage.cpp \
    src/game/mechanisms/watersurface.cpp \
    src/game/mechanisms/weather.cpp \
@@ -487,6 +490,7 @@ HEADERS += \
    src/game/mechanisms/spikeblock.h \
    src/game/mechanisms/spikes.h \
    src/game/mechanisms/staticlight.h \
+   src/game/mechanisms/textlayer.h \
    src/game/mechanisms/waterdamage.h \
    src/game/mechanisms/watersurface.h \
    src/game/mechanisms/weather.h \
