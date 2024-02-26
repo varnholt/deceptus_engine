@@ -10,11 +10,11 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element, const std::shared
 {
    TmxElement::deserialize(element, parse_data);
 
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto sub_element = node->ToElement();
-      if (!sub_element)
+      auto* sub_element = node->ToElement();
+      if (sub_element == nullptr)
       {
          node = node->NextSibling();
          continue;

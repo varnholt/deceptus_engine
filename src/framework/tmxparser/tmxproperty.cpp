@@ -15,18 +15,18 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element, const std::shared_p
 {
    TmxElement::deserialize(element, parse_data);
 
-   auto attrVal = element->Attribute("type");
-   _value_type = attrVal ? attrVal : "string";
+   const auto* attribute_type = element->Attribute("type");
+   _value_type = (attribute_type != nullptr) ? attribute_type : "string";
 
    if (_value_type == "int")
    {
       _value_int = element->IntAttribute("value");
    }
-   if (_value_type == "bool")
+   else if (_value_type == "bool")
    {
       _value_bool = element->BoolAttribute("value");
    }
-   if (_value_type == "float")
+   else if (_value_type == "float")
    {
       _value_float = element->FloatAttribute("value");
    }

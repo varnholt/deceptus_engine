@@ -131,6 +131,20 @@ void Game::initializeWindow()
       context_settings
    );
 
+   // Get the GPU vendor and renderer strings
+   const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+   const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+
+   if (vendor && renderer)
+   {
+      std::cout << "GPU Vendor: " << vendor << std::endl;
+      std::cout << "GPU Renderer: " << renderer << std::endl;
+   }
+   else
+   {
+      std::cerr << "Failed to retrieve GPU information" << std::endl;
+   }
+
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);

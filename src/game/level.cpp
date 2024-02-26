@@ -249,6 +249,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_spike_blocks,
       &_mechanism_spikes,
       &_mechanism_static_lights,
+      &_mechanism_text_layers,
       &_mechanism_water_damage,
       &_mechanism_water_surface,
       &_mechanism_weather,
@@ -272,6 +273,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
    _mechanisms_map[std::string{layer_name_info_overlays}] = &_mechanism_info_overlay;
    _mechanisms_map[std::string{layer_name_interaction_help}] = &_mechanism_interaction_help;
+   _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
    _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
@@ -287,9 +289,9 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
    _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
    _mechanisms_map[std::string{layer_name_static_lights}] = &_mechanism_static_lights;
-   _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
-   _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
+   _mechanisms_map[std::string{layer_name_text_layer}] = &_mechanism_text_layers;
    _mechanisms_map[std::string{layer_name_water_damage}] = &_mechanism_water_damage;
+   _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
    _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
 
    // called whenever the player toggles a mechanism in the game
