@@ -3,18 +3,14 @@
 #include "framework/tools/log.h"
 #include "texturepool.h"
 
+#include <stdio.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
 #include <string>
 #include <vector>
 
-
-void BitmapFont::load(
-   const std::string& texturePath,
-   const std::string& mapPath
-)
+void BitmapFont::load(const std::string& texturePath, const std::string& mapPath)
 {
    _texture = TexturePool::getInstance().get(texturePath);
    _sprite.setTexture(*_texture);
@@ -68,7 +64,7 @@ void BitmapFont::load(
       rect->top = y;
       rect->width = _char_width;
       rect->height = _char_height;
-      _map.insert(std::pair<char,std::shared_ptr<sf::IntRect>>(c, rect));
+      _map.insert(std::pair<char, std::shared_ptr<sf::IntRect>>(c, rect));
 
       x += _char_width;
 
@@ -82,8 +78,7 @@ void BitmapFont::load(
    }
 }
 
-
-std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::string &text)
+std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::string& text)
 {
    std::vector<std::shared_ptr<sf::IntRect>> coords;
 
@@ -93,37 +88,20 @@ std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::strin
 
       if (it != _map.end())
       {
-        coords.push_back(it->second);
+         coords.push_back(it->second);
       }
    }
 
    return coords;
 }
 
-
-void BitmapFont::draw(
-   sf::RenderTarget& window,
-   const std::vector<std::shared_ptr<sf::IntRect> >& coords,
-   int32_t x,
-   int32_t y
-)
+void BitmapFont::draw(sf::RenderTarget& window, const std::vector<std::shared_ptr<sf::IntRect>>& coords, int32_t x, int32_t y)
 {
    auto x_offset = 0;
    for (auto& coord : coords)
    {
-      _sprite.setTextureRect(
-         sf::IntRect(
-            coord->left,
-            coord->top,
-            coord->width,
-            coord->height
-         )
-      );
-
-      _sprite.setPosition(
-         static_cast<float>(x + x_offset),
-         static_cast<float>(y)
-      );
+      _sprite.setTextureRect(sf::IntRect(coord->left, coord->top, coord->width, coord->height));
+      _sprite.setPosition(static_cast<float>(x + x_offset), static_cast<float>(y));
 
       window.draw(_sprite);
       x_offset += _char_width;
