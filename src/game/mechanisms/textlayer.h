@@ -22,11 +22,12 @@ public:
 private:
    enum class Mode
    {
+      Invalid,
       Bitmap,
       TrueType
    };
 
-   Mode _mode = Mode::Bitmap;
+   Mode _mode = Mode::Invalid;
 
    sf::Sprite _sprite;
    sf::FloatRect _rect;
@@ -36,7 +37,8 @@ private:
    std::vector<std::shared_ptr<sf::IntRect>> _bitmap_coords;
 
    std::string _text;
-   sf::Text _truetype_font;
+   sf::Font _truetype_font;
+   sf::Text _truetype_text;
 };
 
 #endif  // TEXTLAYER_H
