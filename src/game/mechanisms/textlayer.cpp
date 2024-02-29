@@ -50,6 +50,18 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
    instance->_z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
    instance->_text = ValueReader::readValue<std::string>("text", map).value_or("undefined");
 
+   auto replace = [](std::string& str, const std::string& what, const std::string& with)
+   {
+      auto index = str.find(what, 0);
+      while (index != std::string::npos)
+      {
+         str.replace(index, what.size(), with);
+         index = str.find(what, index + with.size());
+      }
+   };
+
+   replace(instance->_text, "<br>", "\n");
+
    // handle bitmap font
    const auto font_bitmap = ValueReader::readValue<std::string>("bitmap_font_texture", map);
    const auto font_map = ValueReader::readValue<std::string>("bitmap_font_map", map);
