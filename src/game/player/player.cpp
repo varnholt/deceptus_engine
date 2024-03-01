@@ -1468,7 +1468,12 @@ void Player::updateBendDown()
       Audio::getInstance().playSample({"player_kneel_01.wav"});
    }
 
-   if (_bend._was_bending_down && !_bend._bending_down)
+   // when the player transitions from "was bending down" to "no longer bending down", we want to
+   // store the timepoint that's used for the "bending up" animation. however, that is actually only
+   // relevant when the player is not in the air right now. that is because the player can also hit
+   // down + jump on one way walls to drop through. in that case we don't want any bend up frames
+   // to mess up any of the subsequent animation frames.
+   if (_bend._was_bending_down && !_bend._bending_down && !isInAir())
    {
       _bend._timepoint_bend_down_end = StopWatch::getInstance().now();
    }
