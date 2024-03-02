@@ -280,9 +280,7 @@ function hit(damage_value)
       if (mEnergy <= 0) then
          mDead = true
       end
-
    end
-
 end
 
 
@@ -353,10 +351,10 @@ function think()
 
    if (mDead) then
       nextAction = Action["Die"]
-   elseif (canAttack()) then
-      nextAction = Action["Attack"]
    elseif (isHit()) then
       nextAction = Action["Hit"]
+   elseif (canAttack()) then
+      nextAction = Action["Attack"]
    elseif (not isWaiting()) then
       nextAction = Action["Walk"]
    else
