@@ -630,7 +630,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage_value)
       -- need to store the current hit time
-      print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
+      -- print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
       _energy = _energy - damage_value
       if (_energy <= 0) then
          _dead = true
