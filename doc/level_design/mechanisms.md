@@ -64,8 +64,141 @@ Bouncers use the `tilesets/bumper.png` texture inside your level directory.
 |width|float|The width of the bouncer should be set to `24.0` for horizontally aligned bouncers.|
 |height|float|The height of the bouncer should be set to `5.0` for horizontally aligned bouncers.|
 |z|int|The object's z index|
+
 ---
 
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Bubble Cubes
+
+Bubble Cubes serve as a solid platform the player can land on and jump off again. However, once the player contact to the Bubble Cube ends, it pops and only respawns after a couple of seconds.
+
+The rectangle object's dimensions (including margin) are 3 x 2 tiles so it makes sense to adjust your rectangle accordingly.
+
+![](images/bubble_cubes.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`BubbleCube`|
+|Object Group|`bubble_cubes`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
+|pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`).|
+|move_down_velocity|float|Controls the movement velocity when the player is standing on the bubble (the default is `0.5`).|
+|move_up_velocity|float|Controls the movement velocity (back up) when the player is no longer standing on the bubble (the default is `0.5`).|
+|maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
+|z|int|The object's z index|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+
+## Collapsing Platforms
+
+Collapsing Platforms behave similar to Bubble Cubes. As soon as the player steps onto them, they start shaking for a while, then they collapse.
+A little later, they respawn.
+
+In order to place Collapsing Platforms in your level, create an object layer called `collapsing_platforms`.
+In there, just place a rectangle where you'd like to position your Collapsing Platform. Make sure that the rectangle height is one tile and its width a multiple of n tiles.
+
+![](images/mechanism_collapsing_platforms_1.png)
+![](images/mechanism_collapsing_platforms_2.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`CollapsingPlatform`|
+|Object Group|`collapsing_platforms`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|time_to_collapse_s|float|The time in seconds it takes for a platform to collapse (the default is 1.0s).|
+|destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
+|fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
+|time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
+|fade_in_duration_s|float|The time in seconds it takes for a respawning platform to fade in (the default is 1.0s).|
+|z|int|The object's z index|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+
+## Controller Help
+
+When you're designing tutorial levels that should introduce the user to the basic game controls, it makes sense to visualize those controls inside the level.
+E.g. when the player has to press a certain button to open a door etc. the related button could be indicated.
+
+You do so by creating a layer called `controller_help` and inserting rectangles in there for those areas where help should be shown.
+
+![](images/mechanism_controller_help_settings.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`ControllerHelp`|
+|Object Group|`controller_help`|
+
+### Object Properties
+
+
+|Property|Type|Description|
+|-|-|-|
+|keys|string|A semicolon delimited string that lists the key/button combinations to be shown|
+|z|int|The object's z index|
+
+### Available Keys
+
+||0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|0|`key_esc`|`key_1`|`key_2`|`key_3`|`key_4`|`key_5`|`key_6`|`key_7`|`key_8`|`key_9`|`key_minus`|`key_equals`|`key_backspace`||||`
+|1|`key_tab`|`key_q`|`key_w`|`key_e`|`key_r`|`key_t`|`key_y`|`key_u`|`key_i`|`key_o`|`key_p`|`key_bracket_l`|`key_bracket_r`||||`
+|2|`key_caps`|`key_a`|`key_s`|`key_d`|`key_f`|`key_g`|`key_h`|`key_j`|`key_k`|`key_l`|`key_semicolon`|`key_apostrophe`|`key_return`||||`
+|3|`key_shift`|`key_0`|`key_z`|`key_x`|`key_c`|`key_v`|`key_b`|`key_n`|`key_m`|`key_comma`|`key_period`|`key_question`|`key_backslash`||||`
+|4|`key_ctrl`|`key_win`|`key_alt`|`key_empty`|`key_list`|||||`key_cursor_l`|`key_cursor_u`|`key_cursor_d`|`key_cursor_r`||||`
+|5|`bt_a`|`bt_b`|`bt_x`|`bt_y`|`bt_list`|`bt_menu`|`bt_rt`|`bt_lt`|`bt_lb`|`bt_rb`|||||||`
+|6|`dpad_u`|`dpad_d`|`dpad_l`|`dpad_r`|`bt_u`|`bt_d`|`bt_l`|`bt_r`|`bt_1`|`bt_2`|`bt_3`|`bt_4`|`bt_5`|`bt_6`|`bt_7`|`bt_8`|`
+|7|`bt_r_u`|`bt_r_d`|`bt_r_l`|`bt_r_r`|`bt_r_u_d`|`bt_r_l_r`|`dpad_empty`|`bt_0`|`bt_9`|`bt_10`|`bt_11`|`bt_12`|`bt_13`|`bt_14`|`bt_15`|`bt_16`|`
+|8|`bt_l_u`|`bt_l_d`|`bt_l_l`|`bt_l_r`|`bt_l_u_d`|`bt_l_l_r`|||||||||||`
+
+Depending on whether a keyboard or a game controller is connected, the buttons below will be mapped as follows:
+
+|Key|Button|
+|-|-|
+|`key_cursor_u`|`dpad_u`|
+|`key_cursor_d`|`dpad_d`|
+|`key_cursor_l`|`dpad_l`|
+|`key_cursor_r`|`dpad_r`|
+|`key_return`|`bt_a`|
+|`key_escape`|`bt_b`|
+
+---
 
 &nbsp;
 
@@ -98,6 +231,8 @@ Now change the object's default properties below:
 |Height|float|The height of the belt should be set to `12.0`.|
 |z|int|The object's z index|
 |velocity|float|Negative values make the player move to the left, positive values move him to the right. Good values are probably something like `-0.6` and `0.6`.|
+
+
 ---
 
 &nbsp;
@@ -105,6 +240,37 @@ Now change the object's default properties below:
 &nbsp;
 
 ---
+
+
+## Crushers
+
+As the name promises, Crushers can crush Adam. They consist of a bunch of spikes connected to a heavy weight that moves to one direction with high velocity and then retracts again.
+
+![](images/mechanism_crushers.png)
+
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Crusher`|
+|Object Group|`crushers`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|alignment|string|Direction of the Crusher (valid values are '`up`', '`down`', '`left`', '`right`')|
+|z|int|The object's z index|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
 
 ## Damage Rects
 
@@ -125,6 +291,88 @@ Damage rects will give the player a configured amount of damage on intersection.
 
 ---
 
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Death Blocks
+
+Death Blocks are spiky boxes that move back and forth along a given line. Depending on your tilesheet the direction of the Death Block's rails is either horizontal, vertical, but can actually be any arbitrary angle.
+
+![](images/mechanism_death_block.png)
+
+Since you draw the 'rails' of the Death Blocks just to a background layer, this mechanism only requires you to create a polyline object.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`DeathBlock`|
+|Object Group|`death_blocks`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Dialogues
+
+The Deceptus Engine can display message boxes which are shown when the player is inside a defined area and presses a button to activate the message box.
+This is usually the `up` button of your keyboard or dpad.
+
+![](images/mechanism_dialogs_ingame.png)
+
+The message boxes can vary in color and can contain multiple messages.
+In the future they might be extended so they can alter in location, color and animation.
+
+In order to introduce a message box, you create a rectangle object that defines the area where a message box is shown when activated.
+
+![](images/mechanism_dialogs_tiled.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Dialogue`|
+|Object Group|`dialogues`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|01|string|The first message to show|
+|02|string|The second message to show|
+|03|string|The third message to show|
+|..|...|...|
+|nn|string|The nth message to show, you get the idea...|
+|nn_x_px|int|The x offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
+|nn_y_px|int|The y offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
+|nn_text_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the text color refers to.|
+|nn_background_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the background color refers to.|
+|open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed.|
+
+Moreover, you can use the tags below inside your dialogue strings:
+
+|Keyword|Description|
+|-|-|
+|`<br>`|Add a line break|
+|`<player>`|Insert the name of the player|
+
+---
 
 &nbsp;
 
@@ -169,6 +417,50 @@ Doors can have keys assigned the player has to find inside your level (in form o
 &nbsp;
 
 ---
+
+
+
+
+## Extras
+
+Extras are nothing but generic string attributes that are passed to the player. I.e., you define a rectangle inside your level, and when the player intersects with that rectangle, the extra is passed to the player. Extras can be keys for doors, or upgrades for players. While doors are able to simply check whether a player has a certain extra, upgrades (such as weapons or power-ups), are usually passed to the player in the `level.lua` script.   
+Inside the lua script, the power-up logic is defined. Below is an example of an extra called 'sword' being evaluated and then passed to the player:
+
+```lua
+function playerReceivedExtra(extra)
+   -- enable all blocking rects once player picked up diving suit
+   if (extra == "sword") then
+      giveWeaponSword()
+   end
+end
+```
+
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Extra`|
+|Object Group|`extras`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|texture|string|Path to a static texture that represents the extra. If an 'animation_main_0' is defined as described below, the same texture dimensions are applied as used by the animation.|
+|sample|string|Name of an audio file that is played on collision with the extra|
+|animation_pickup|string|Name of the animation shown when the extra is picked up. The animation cycle is defined inside the file `extra_animations.json`.|
+|animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same dull idle animation over and over again.|
+
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 ## Fans
 
 Fans work just like fans from the real world, however they are _slightly_ stronger than in the real world. So, depending on where they are pointing to, they can make Adam fly or serve as an impassable obstacle.
@@ -191,79 +483,7 @@ This mechanism uses a mix of layers and objects. While the fans inside the tile 
 |speed|float|The speed value typically ranges from [`0..1`], `0.9` turned out to be a suitable value.|
 
 ![](images/mechanism_fans.png)
----
 
-&nbsp;
-
-&nbsp;
-
----
-## Lasers
-
-Lasers follow the same concept as fans and are based on a combination of tiles and objects. Since the tileset allows rather complex laser shapes including mirror tiles, the object layer is used so you can group your laser tiles to one coherent 'unit'.
-
-So the first thing you do is to place all your laser tiles inside a tile layer called `lasers` and then create a rectangle object that covers all the laser tiles that belong together (to one laser group).
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`Laser`|
-|Object Group|`lasers`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The object's z index|
-|off_time|int|The duration the laser is in 'off' state (in ms)|
-|on_time|int|The duration the laser is sin 'on' state (in ms)|
-
-![](images/mechanism_lasers.png)
-
-### Moving Lasers
-
-To make lasers a little more interesting, there's also the option to make them movable. For that purpose, you can define a polygon inside your lasers layer that defines the movement path.
-All you need to do is to give your laser object a name, and then reference that object in your polygon's properties.
-
-|Property|Type|Description|
-|-|-|-|
-|reference_id|string|The object name of the rectangle that groups your laser tiles|
-|movement_speed|float|A velocity factor for the laser movement, the default is `0.2`.|
-|z|int|The object's z index|
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-## Bubble Cubes
-
-Bubble Cubes serve as a solid platform the player can land on and jump off again. However, once the player contact to the Bubble Cube ends, it pops and only respawns after a couple of seconds.
-
-The rectangle object's dimensions (including margin) are 3 x 2 tiles so it makes sense to adjust your rectangle accordingly.
-
-![](images/bubble_cubes.png)
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`BubbleCube`|
-|Object Group|`bubble_cubes`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|animation_offset_s|float|An offset for the bubble animation (in seconds), so they're not in sync. The default value is `0s`.|
-|pop_time_respawn_s|float|The time elapsed until the bubble respawns (the default is `3s`).|
-|move_down_velocity|float|Controls the movement velocity when the player is standing on the bubble (the default is `0.5`).|
-|move_up_velocity|float|Controls the movement velocity (back up) when the player is no longer standing on the bubble (the default is `0.5`).|
-|maximum_contact_duration_s|float|If configured, bubbles will pop after the given duration is elapsed (the default is `undefined`).|
-|z|int|The object's z index|
 
 ---
 
@@ -273,42 +493,6 @@ The rectangle object's dimensions (including margin) are 3 x 2 tiles so it makes
 
 ---
 
-## Collapsing Platforms
-
-Collapsing Platforms behave similar to Bubble Cubes. As soon as the player steps onto them, they start shaking for a while, then they collapse.
-A little later, they respawn.
-
-In order to place Collapsing Platforms in your level, create an object layer called `collapsing_platforms`.
-In there, just place a rectangle where you'd like to position your Collapsing Platform. Make sure that the rectangle height is one tile and its width a multiple of n tiles.
-
-![](images/mechanism_collapsing_platforms_1.png)
-![](images/mechanism_collapsing_platforms_2.png)
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`CollapsingPlatform`|
-|Object Group|`collapsing_platforms`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|time_to_collapse_s|float|The time in seconds it takes for a platform to collapse (the default is 1.0s).|
-|destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
-|fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
-|time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
-|fade_in_duration_s|float|The time in seconds it takes for a respawning platform to fade in (the default is 1.0s).|
-|z|int|The object's z index|
-
----
-
-&nbsp;
-
-&nbsp;
-
----
 
 ## Fireflies
 
@@ -349,46 +533,25 @@ In there, just place a rectangle where you'd like to position and scale the effe
 ---
 
 
-## Portals
-
-Portals can teleport Adam from one location to another. For that reason, they give you a lot of freedom in your level design possibilities since you can have a coherent level, even though your individual rooms are distributed all over the map.
-
-When the player enters a portal, a transition animation - like a fade-out/fade-in - is played so the viewer has no idea of what is happening behind the curtains.
-
-In order to create portals, first create a tile layer called `portals` where you place your portal tiles. Then, in an object layer, also called `portals`, you draw a polyline from the center of one portal to another. Now they are linked and the player can go back and forth between them. The first position of the polyline is the entrace, the 2nd position is the exit. Therefore, an exit also be an entrace to another portal. If you only draw a single polyline between two portals, it's just a simple two-way mechanism.
-
-![](images/mechanism_portals.png)
-
-In the screenshot above, Adam enters at the top left, exits at the bottom right, and when he enters again, teleports to the top right.
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-## Crushers
-
-As the name promises, Crushers can crush Adam. They consist of a bunch of spikes connected to a heavy weight that moves to one direction with high velocity and then retracts again.
-
-![](images/mechanism_crushers.png)
 
 
-### Object Type / Object Group
+## Interaction Help
 
 |Method|Value|
 |-|-|
-|Object Type|`Crusher`|
-|Object Group|`crushers`|
+|Object Type|`InteractionHelp`|
+|Object Group|`interaction_help`|
 
 ### Object Properties
 
 |Property|Type|Description|
 |-|-|-|
-|alignment|string|Direction of the Crusher (valid values are '`up`', '`down`', '`left`', '`right`')|
 |z|int|The object's z index|
+|animation|string|Animation cycle to show. The hide animation will be the same animation, just reversed.|
+|text|string|Text to show next to the controller button.|
+|offset_x_px|int|An offset in x (in px) for where the animation will be shown. The default is 0.|
+|offset_y_px|int|An offset in y (in px) for where the animation will be shown. The default is 0.|
+
 
 ---
 
@@ -398,25 +561,39 @@ As the name promises, Crushers can crush Adam. They consist of a bunch of spikes
 
 ---
 
-## Death Blocks
 
-Death Blocks are spiky boxes that move back and forth along a given line. Depending on your tilesheet the direction of the Death Block's rails is either horizontal, vertical, but can actually be any arbitrary angle.
+## Lasers
 
-![](images/mechanism_death_block.png)
+Lasers follow the same concept as fans and are based on a combination of tiles and objects. Since the tileset allows rather complex laser shapes including mirror tiles, the object layer is used so you can group your laser tiles to one coherent 'unit'.
 
-Since you draw the 'rails' of the Death Blocks just to a background layer, this mechanism only requires you to create a polyline object.
+So the first thing you do is to place all your laser tiles inside a tile layer called `lasers` and then create a rectangle object that covers all the laser tiles that belong together (to one laser group).
 
 ### Object Type / Object Group
 
 |Method|Value|
 |-|-|
-|Object Type|`DeathBlock`|
-|Object Group|`death_blocks`|
+|Object Type|`Laser`|
+|Object Group|`lasers`|
 
 ### Object Properties
 
 |Property|Type|Description|
 |-|-|-|
+|z|int|The object's z index|
+|off_time|int|The duration the laser is in 'off' state (in ms)|
+|on_time|int|The duration the laser is sin 'on' state (in ms)|
+
+![](images/mechanism_lasers.png)
+
+### Moving Lasers
+
+To make lasers a little more interesting, there's also the option to make them movable. For that purpose, you can define a polygon inside your lasers layer that defines the movement path.
+All you need to do is to give your laser object a name, and then reference that object in your polygon's properties.
+
+|Property|Type|Description|
+|-|-|-|
+|reference_id|string|The object name of the rectangle that groups your laser tiles|
+|movement_speed|float|A velocity factor for the laser movement, the default is `0.2`.|
 |z|int|The object's z index|
 
 ---
@@ -474,27 +651,60 @@ The properties below apply for the object inside the `levers` object group.
 ---
 
 
-## Sensor Rects
+## Moveable Objects
 
-Sensor Rectangles work pretty much like a photo sensor. They have no visualization. All they do is enable, disable or toggle another mechanism when the player is either entering or leaving a pre-defined area.
+At the moment this object type should rather be called 'Moveable Box' since their (rectangular) shape and texture is hardcoded. However, that might change in the future.
 
-This can come handy when you want to always trigger a switch when the player enters a room or always close a door when the player just walked through it.
-So you can build quite complex mechanisms with this while the mechanism itself is very easy to use.
+Anyhow, Moveable Objects are objects the player can push from one position to another just by walking against it. This way Adam might be able to climb obstacles, block enemies, etc.
+
+The way to create a moveable object, create a rectangle as usual. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
+
+![](images/mechanism_movable_objects.png)
 
 ### Object Type / Object Group
 
 |Method|Value|
 |-|-|
-|Object Type|`SensorRect`|
-|Object Group|`sensor_rects`|
+|Object Type|`MoveableObject`|
+|Object Group|`moveable_objects`|
 
 ### Object Properties
 
 |Property|Type|Description|
 |-|-|-|
-|reference_id|string|The object identifier that the sensor is connected to.|
-|event|string|The event that triggers the action. This can either be `on_enter` (default) or `on_leave`. |
-|action|string|Whether to `enable`, `disable`, or `toggle` the other reference mechanism. Valid values are `enable` (default), `disable`, `toggle`.|
+|z|int|The layer's z index|
+
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Moving Platform
+
+Moving Platforms are platforms that follow a certain path inside your level. They can be used just like an elevator or for any other purpose, like moving over a couple of deadly spikes, etc.
+
+![](images/mechanism_moving_platforms.png)
+
+To create moving platforms, the first thing to do is to draw your platform rail tiles into any background tile layer so know which path the platform is supposed to follow. This is only an optical change to your level since the actual path your platform will follow is defined in an object group called `platforms`. Therefore the next step is to create this object group and to draw a polyline from start to end. The last thing to do is to create the actual platform. That's done by simply placing a rectangle into the same layer which overlaps the path you defined in the previous step. The width should be a multiple of `24px` and the height should be `12px`.
+
+![](images/mechanism_moving_platforms_settings.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Platform`|
+|Object Group|`platforms`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
 |z|int|The object's z index|
 
 ---
@@ -504,6 +714,102 @@ So you can build quite complex mechanisms with this while the mechanism itself i
 &nbsp;
 
 ---
+
+
+
+## On/Off Blocks
+
+On/Off Blocks are basically the friendly version of the Spike Block. When you switch it on, it's just a solid block that could be placed as a barrier, ladder, etc.
+When you switch it off, it just disappears and the player does no longer collide with them.
+
+To create an On/Off Block, just create a rectangle object of 1x1 tiles for each block.
+
+![](images/mechanism_on_off_block_1.png)
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`OnOffBlock`|
+|Object Group|`on_off_blocks`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|enabled|bool|The default enabled state (default is `true`)|
+|mode|string|The Spike Block's mode, either '`interval`' or '`lever`' (default is '`lever`')|
+|time_on_ms|int|When mode is '`interval`', the time the Spike Block is extracted, given in ms (default is 4000ms)|
+|time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## One-Way Walls
+
+When making the decision to build a platform game engine on top of a realistic physics system such as Box2D, the need to have one-way walls is - from the software developer perspective - the greatest imaginable pain in the ass. Anyway, they're implemented. You are welcome.
+
+If you ever played any Mario title in your life, you will know what a one-way wall is. The concept is very simple: The player jumps up, the player passes through the wall. The player starts falling down again, the wall becomes solid.
+
+Like the `level` tile layer, there's also a layer for tiles with one-way behavior. It is called `level_solid_onesided`. When designing the shape of these tiles in Tiled's 'Tile Collision Editor', they should be defined as boxes with a height of 1px and a width of 24px:
+
+![](images/mechanism_one_way_walls_tile_collision_editor.png)
+
+So once all the tile shapes are set up, they can be drawn into the tile layer. When that's done, it is possible to debug the generated physics shapes in the game by pressing `F1`.
+
+![](images/mechanism_one_way_walls_in_game.png)
+
+While the player moves through the one-way walls by pressing the jump key / button, it is possible to drop from a one-way wall by pressing jump together with the down key / button.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`n/a`|
+|Object Group|`level_solid_onesided`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Portals
+
+Portals can teleport Adam from one location to another. For that reason, they give you a lot of freedom in your level design possibilities since you can have a coherent level, even though your individual rooms are distributed all over the map.
+
+When the player enters a portal, a transition animation - like a fade-out/fade-in - is played so the viewer has no idea of what is happening behind the curtains.
+
+In order to create portals, first create a tile layer called `portals` where you place your portal tiles. Then, in an object layer, also called `portals`, you draw a polyline from the center of one portal to another. Now they are linked and the player can go back and forth between them. The first position of the polyline is the entrace, the 2nd position is the exit. Therefore, an exit also be an entrace to another portal. If you only draw a single polyline between two portals, it's just a simple two-way mechanism.
+
+![](images/mechanism_portals.png)
+
+In the screenshot above, Adam enters at the top left, exits at the bottom right, and when he enters again, teleports to the top right.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
 
 
 ## Ropes
@@ -531,6 +837,75 @@ Moreover, ropes have a number of properties to simulate 'wind behavior'. So you 
 |z|int|The object's z index|
 
 Read more about Ropes in the paragraph 'Ropes with Lights'.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+
+## Rotating Blades
+
+Rotating Blades are pretty nasty. They're pretty much the same as an angle grinder with a very sharp blade attached to it. So don't run into it while it's rotating - collision means instant death.
+
+![](images/mechanism_rotating_blade.png)
+
+To create a rotating blade object, just create a polyline for its path.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`RotatingBlade`|
+|Object Group|`rotating_blades`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|enabled|bool|The default enabled state (default is `true`)|
+|blade_acceleration|float|The acceleration used for the blade to gain speed (both in rotation and vertical/horizontal movement) when enabled (the default is `0.006`).|
+|blade_deceleration|float|The deceleration used for the blade to drop speed (both in rotation and vertical/horizontal movement) when disabled (the default is `0.009`).|
+|blade_rotation_speed|float|The value that is applied to the rotation of the blade sprite. The higher, the faster the rotational movement (the default is `400.0`).|
+|movement_speed|float|A factor applied to the horizontal/vertical movement of the blade. The higher, the faster the blade moves around (the default is `0.2`). |
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+
+## Sensor Rects
+
+Sensor Rectangles work pretty much like a photo sensor. They have no visualization. All they do is enable, disable or toggle another mechanism when the player is either entering or leaving a pre-defined area.
+
+This can come handy when you want to always trigger a switch when the player enters a room or always close a door when the player just walked through it.
+So you can build quite complex mechanisms with this while the mechanism itself is very easy to use.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`SensorRect`|
+|Object Group|`sensor_rects`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|reference_id|string|The object identifier that the sensor is connected to.|
+|event|string|The event that triggers the action. This can either be `on_enter` (default) or `on_leave`. |
+|action|string|Whether to `enable`, `disable`, or `toggle` the other reference mechanism. Valid values are `enable` (default), `disable`, `toggle`.|
+|z|int|The object's z index|
 
 ---
 
@@ -647,31 +1022,28 @@ To create a Spike Block, just create a rectangle object of 1x1 tiles for each bl
 ---
 
 
-## On/Off Blocks
+## Text Layers
 
-On/Off Blocks are basically the friendly version of the Spike Block. When you switch it on, it's just a solid block that could be placed as a barrier, ladder, etc.
-When you switch it off, it just disappears and the player does no longer collide with them.
-
-To create an On/Off Block, just create a rectangle object of 1x1 tiles for each block.
-
-![](images/mechanism_on_off_block_1.png)
+A Text Layer either renders a given text using either a bitmap or a truetype font.
 
 ### Object Type / Object Group
 
 |Method|Value|
 |-|-|
-|Object Type|`OnOffBlock`|
-|Object Group|`on_off_blocks`|
+|Object Type|`TextLayer`|
+|Object Group|`text_layers`|
 
 ### Object Properties
 
 |Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
-|enabled|bool|The default enabled state (default is `true`)|
-|mode|string|The Spike Block's mode, either '`interval`' or '`lever`' (default is '`lever`')|
-|time_on_ms|int|When mode is '`interval`', the time the Spike Block is extracted, given in ms (default is 4000ms)|
-|time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
+|text|string|The text to display. Newlines can be added by inserting `<br>` (only for truetype font)|
+|bitmap_font_texture|string|The path to the texture of the bitmap font (used for bitmap mode).|
+|bitmap_font_map|string|The path to the font map of the bitmap font (used for bitmap mode).|
+|truetype_font|string|The path to the truetype font (used for truetype font mode).|
+|truetype_font_size|int|The font size to use (used for truetype font mode). The default is 12.|
+|truetype_font_color|color|The font color (used for truetype font mode). The default is `#ffffffff`.)
 
 ---
 
@@ -680,308 +1052,5 @@ To create an On/Off Block, just create a rectangle object of 1x1 tiles for each 
 &nbsp;
 
 ---
-
-
-## Rotating Blades
-
-Rotating Blades are pretty nasty. They're pretty much the same as an angle grinder with a very sharp blade attached to it. So don't run into it while it's rotating - collision means instant death.
-
-![](images/mechanism_rotating_blade.png)
-
-To create a rotating blade object, just create a polyline for its path.
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`RotatingBlade`|
-|Object Group|`rotating_blades`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The layer's z index|
-|enabled|bool|The default enabled state (default is `true`)|
-|blade_acceleration|float|The acceleration used for the blade to gain speed (both in rotation and vertical/horizontal movement) when enabled (the default is `0.006`).|
-|blade_deceleration|float|The deceleration used for the blade to drop speed (both in rotation and vertical/horizontal movement) when disabled (the default is `0.009`).|
-|blade_rotation_speed|float|The value that is applied to the rotation of the blade sprite. The higher, the faster the rotational movement (the default is `400.0`).|
-|movement_speed|float|A factor applied to the horizontal/vertical movement of the blade. The higher, the faster the blade moves around (the default is `0.2`). |
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-
-## Moving Platform
-
-Moving Platforms are platforms that follow a certain path inside your level. They can be used just like an elevator or for any other purpose, like moving over a couple of deadly spikes, etc.
-
-![](images/mechanism_moving_platforms.png)
-
-To create moving platforms, the first thing to do is to draw your platform rail tiles into any background tile layer so know which path the platform is supposed to follow. This is only an optical change to your level since the actual path your platform will follow is defined in an object group called `platforms`. Therefore the next step is to create this object group and to draw a polyline from start to end. The last thing to do is to create the actual platform. That's done by simply placing a rectangle into the same layer which overlaps the path you defined in the previous step. The width should be a multiple of `24px` and the height should be `12px`.
-
-![](images/mechanism_moving_platforms_settings.png)
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`Platform`|
-|Object Group|`platforms`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The object's z index|
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-## One-Way Walls
-
-When making the decision to build a platform game engine on top of a realistic physics system such as Box2D, the need to have one-way walls is - from the software developer perspective - the greatest imaginable pain in the ass. Anyway, they're implemented. You are welcome.
-
-If you ever played any Mario title in your life, you will know what a one-way wall is. The concept is very simple: The player jumps up, the player passes through the wall. The player starts falling down again, the wall becomes solid.
-
-Like the `level` tile layer, there's also a layer for tiles with one-way behavior. It is called `level_solid_onesided`. When designing the shape of these tiles in Tiled's 'Tile Collision Editor', they should be defined as boxes with a height of 1px and a width of 24px:
-
-![](images/mechanism_one_way_walls_tile_collision_editor.png)
-
-So once all the tile shapes are set up, they can be drawn into the tile layer. When that's done, it is possible to debug the generated physics shapes in the game by pressing `F1`.
-
-![](images/mechanism_one_way_walls_in_game.png)
-
-While the player moves through the one-way walls by pressing the jump key / button, it is possible to drop from a one-way wall by pressing jump together with the down key / button.
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`n/a`|
-|Object Group|`level_solid_onesided`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The layer's z index|
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-## Moveable Objects
-
-At the moment this object type should rather be called 'Moveable Box' since their (rectangular) shape and texture is hardcoded. However, that might change in the future.
-
-Anyhow, Moveable Objects are objects the player can push from one position to another just by walking against it. This way Adam might be able to climb obstacles, block enemies, etc.
-
-The way to create a moveable object, create a rectangle as usual. So far the sprite set supports 24x24px and 48x48px boxes. Depending on the size of your rectangle object, the right texture is selected.
-
-![](images/mechanism_movable_objects.png)
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`MoveableObject`|
-|Object Group|`moveable_objects`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The layer's z index|
-
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-## Extras
-
-Extras are nothing but generic string attributes that are passed to the player. I.e., you define a rectangle inside your level, and when the player intersects with that rectangle, the extra is passed to the player. Extras can be keys for doors, or upgrades for players. While doors are able to simply check whether a player has a certain extra, upgrades (such as weapons or power-ups), are usually passed to the player in the `level.lua` script.   
-Inside the lua script, the power-up logic is defined. Below is an example of an extra called 'sword' being evaluated and then passed to the player:
-
-```lua
-function playerReceivedExtra(extra)
-   -- enable all blocking rects once player picked up diving suit
-   if (extra == "sword") then
-      giveWeaponSword()
-   end
-end
-```
-
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`Extra`|
-|Object Group|`extras`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The layer's z index|
-|texture|string|Path to a static texture that represents the extra. If an 'animation_main_0' is defined as described below, the same texture dimensions are applied as used by the animation.|
-|sample|string|Name of an audio file that is played on collision with the extra|
-|animation_pickup|string|Name of the animation shown when the extra is picked up. The animation cycle is defined inside the file `extra_animations.json`.|
-|animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same dull idle animation over and over again.|
-
-
-&nbsp;
-
-&nbsp;
-
----
-
-## Dialogues
-
-The Deceptus Engine can display message boxes which are shown when the player is inside a defined area and presses a button to activate the message box.
-This is usually the `up` button of your keyboard or dpad.
-
-![](images/mechanism_dialogs_ingame.png)
-
-The message boxes can vary in color and can contain multiple messages.
-In the future they might be extended so they can alter in location, color and animation.
-
-In order to introduce a message box, you create a rectangle object that defines the area where a message box is shown when activated.
-
-![](images/mechanism_dialogs_tiled.png)
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`Dialogue`|
-|Object Group|`dialogues`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|01|string|The first message to show|
-|02|string|The second message to show|
-|03|string|The third message to show|
-|..|...|...|
-|nn|string|The nth message to show, you get the idea...|
-|nn_x_px|int|The x offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
-|nn_y_px|int|The y offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
-|nn_text_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the text color refers to.|
-|nn_background_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the background color refers to.|
-|open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed.|
-
-Moreover, you can use the tags below inside your dialogue strings:
-
-|Keyword|Description|
-|-|-|
-|`<br>`|Add a line break|
-|`<player>`|Insert the name of the player|
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-
-## Controller Help
-
-When you're designing tutorial levels that should introduce the user to the basic game controls, it makes sense to visualize those controls inside the level.
-E.g. when the player has to press a certain button to open a door etc. the related button could be indicated.
-
-You do so by creating a layer called `controller_help` and inserting rectangles in there for those areas where help should be shown.
-
-![](images/mechanism_controller_help_settings.png)
-
-### Object Type / Object Group
-
-|Method|Value|
-|-|-|
-|Object Type|`ControllerHelp`|
-|Object Group|`controller_help`|
-
-### Object Properties
-
-
-|Property|Type|Description|
-|-|-|-|
-|keys|string|A semicolon delimited string that lists the key/button combinations to be shown|
-|z|int|The object's z index|
-
-### Available Keys
-
-||0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|
-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
-|0|`key_esc`|`key_1`|`key_2`|`key_3`|`key_4`|`key_5`|`key_6`|`key_7`|`key_8`|`key_9`|`key_minus`|`key_equals`|`key_backspace`||||`
-|1|`key_tab`|`key_q`|`key_w`|`key_e`|`key_r`|`key_t`|`key_y`|`key_u`|`key_i`|`key_o`|`key_p`|`key_bracket_l`|`key_bracket_r`||||`
-|2|`key_caps`|`key_a`|`key_s`|`key_d`|`key_f`|`key_g`|`key_h`|`key_j`|`key_k`|`key_l`|`key_semicolon`|`key_apostrophe`|`key_return`||||`
-|3|`key_shift`|`key_0`|`key_z`|`key_x`|`key_c`|`key_v`|`key_b`|`key_n`|`key_m`|`key_comma`|`key_period`|`key_question`|`key_backslash`||||`
-|4|`key_ctrl`|`key_win`|`key_alt`|`key_empty`|`key_list`|||||`key_cursor_l`|`key_cursor_u`|`key_cursor_d`|`key_cursor_r`||||`
-|5|`bt_a`|`bt_b`|`bt_x`|`bt_y`|`bt_list`|`bt_menu`|`bt_rt`|`bt_lt`|`bt_lb`|`bt_rb`|||||||`
-|6|`dpad_u`|`dpad_d`|`dpad_l`|`dpad_r`|`bt_u`|`bt_d`|`bt_l`|`bt_r`|`bt_1`|`bt_2`|`bt_3`|`bt_4`|`bt_5`|`bt_6`|`bt_7`|`bt_8`|`
-|7|`bt_r_u`|`bt_r_d`|`bt_r_l`|`bt_r_r`|`bt_r_u_d`|`bt_r_l_r`|`dpad_empty`|`bt_0`|`bt_9`|`bt_10`|`bt_11`|`bt_12`|`bt_13`|`bt_14`|`bt_15`|`bt_16`|`
-|8|`bt_l_u`|`bt_l_d`|`bt_l_l`|`bt_l_r`|`bt_l_u_d`|`bt_l_l_r`|||||||||||`
-
-Depending on whether a keyboard or a game controller is connected, the buttons below will be mapped as follows:
-
-|Key|Button|
-|-|-|
-|`key_cursor_u`|`dpad_u`|
-|`key_cursor_d`|`dpad_d`|
-|`key_cursor_l`|`dpad_l`|
-|`key_cursor_r`|`dpad_r`|
-|`key_return`|`bt_a`|
-|`key_escape`|`bt_b`|
-
----
-
-&nbsp;
-
-&nbsp;
-
----
-
-
-## Interaction Help
-
-|Method|Value|
-|-|-|
-|Object Type|`InteractionHelp`|
-|Object Group|`interaction_help`|
-
-### Object Properties
-
-|Property|Type|Description|
-|-|-|-|
-|z|int|The object's z index|
-|animation|string|Animation cycle to show. The hide animation will be the same animation, just reversed.|
-|text|string|Text to show next to the controller button.|
-|offset_x_px|int|An offset in x (in px) for where the animation will be shown. The default is 0.|
-|offset_y_px|int|An offset in y (in px) for where the animation will be shown. The default is 0.|
-
 
 
