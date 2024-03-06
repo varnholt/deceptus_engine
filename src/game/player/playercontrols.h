@@ -77,6 +77,7 @@ public:
    bool isControllerUsedLast() const;
    void lockOrientation(std::chrono::milliseconds duration, Orientation = Orientation::Undefined);
    void lockState(KeyPressed key, LockedState state, std::chrono::milliseconds duration);
+   void lockAll(LockedState state, std::chrono::milliseconds duration);
 
    float readControllerNormalizedHorizontal() const;
 
