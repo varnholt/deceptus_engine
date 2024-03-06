@@ -770,6 +770,26 @@ void PlayerControls::lockState(KeyPressed key, LockedState state, std::chrono::m
    }
 }
 
+void PlayerControls::lockAll(LockedState state, std::chrono::milliseconds duration)
+{
+   constexpr std::initializer_list<KeyPressed> keypress_types{
+      KeyPressedUp,
+      KeyPressedDown,
+      KeyPressedLeft,
+      KeyPressedRight,
+      KeyPressedJump,
+      KeyPressedAction,
+      KeyPressedSlot1,
+      KeyPressedSlot2,
+      KeyPressedLook
+   };
+
+   for (auto keypress_type : keypress_types)
+   {
+      lockState(keypress_type, state, duration);
+   }
+}
+
 bool PlayerControls::LockedKey::asBool() const
 {
    if (_state == LockedState::Pressed)
