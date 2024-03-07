@@ -19,8 +19,9 @@ class RopeWithLight : public Rope
    private:
 
       sf::Sprite _lamp_sprite;
-      sf::IntRect _lamp_sprite_rect_1;
-      sf::IntRect _lamp_sprite_rect_2;
+      std::array<sf::IntRect, 3> _lamp_sprite_rects;
+      // sf::IntRect _lamp_sprite_rect_1;
+      // sf::IntRect _lamp_sprite_rect_2;
       std::shared_ptr<LightSystem::LightInstance> _light;
 };
 
