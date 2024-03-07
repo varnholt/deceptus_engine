@@ -1,10 +1,10 @@
 #include "ropewithlight.h"
 
-#include "level.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
-
+#include "game/valuereader.h"
+#include "level.h"
 
 RopeWithLight::RopeWithLight(GameNode* parent)
  : Rope(parent)
@@ -50,48 +50,25 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    _lamp_sprite.setTexture(*_texture);
 
    // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
-   _lamp_sprite_rect_1 = sf::IntRect{1056, 28, 24, 28};
-   _lamp_sprite_rect_2 = sf::IntRect{1056, 78, 24, 25};
-
-   // texture rect 1
-   // 1056, 28
-   // 1080, 53
-
-   // texture rect 2
-   // 1056, 78
-   // 1080, 100
+   _lamp_sprite_rects = {
+      sf::IntRect{1056, 28, 24, 28},
+      sf::IntRect{1056, 78, 24, 25},
+      sf::IntRect{1056, 120, 24, 28},
+   };
 
    std::array<uint8_t, 4> color = {255, 255, 255, 100};
-
-   const auto color_it = data._tmx_object->_properties->_map.find("color");
-   if (color_it != data._tmx_object->_properties->_map.end())
+   const auto map = data._tmx_object->_properties->_map;
+   const auto color_it = map.find("color");
+   if (color_it != map.end())
    {
       color = TmxTools::color(color_it->second->_value_string.value());
    }
 
-   auto sprite = 1;
-   const auto sprite_it = data._tmx_object->_properties->_map.find("sprite");
-   if (sprite_it != data._tmx_object->_properties->_map.end())
-   {
-      sprite = sprite_it->second->_value_int.value();
-   }
-
-   if (sprite == 2)
-   {
-      _lamp_sprite.setTextureRect(_lamp_sprite_rect_2);
-      _lamp_sprite.setOrigin(
-         static_cast<float>(_lamp_sprite_rect_2.width / 2),
-         static_cast<float>(_lamp_sprite_rect_2.height / 2)
-      );
-   }
-   else
-   {
-      _lamp_sprite.setTextureRect(_lamp_sprite_rect_1);
-      _lamp_sprite.setOrigin(
-         static_cast<float>(_lamp_sprite_rect_1.width / 2),
-         static_cast<float>(_lamp_sprite_rect_1.height / 2)
-      );
-   }
+   auto sprite_index = std::clamp(ValueReader::readValue<int32_t>("sprite", map).value_or(1) - 1, 0, 3);
+   _lamp_sprite.setTextureRect(_lamp_sprite_rects[sprite_index]);
+   _lamp_sprite.setOrigin(
+      static_cast<float>(_lamp_sprite_rects[sprite_index].width / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].height / 2)
+   );
 
    // add raycast light
    _light = LightSystem::createLightInstance(this, {});
