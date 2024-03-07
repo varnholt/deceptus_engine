@@ -11,6 +11,7 @@
 #include "game/weaponsystem.h"
 #include "mechanisms/dialogue.h"
 #include "mechanisms/sensorrect.h"
+#include "player/playercontrols.h"
 
 #include <mutex>
 #include <regex>
@@ -328,6 +329,26 @@ int32_t giveWeaponSword(lua_State* /*state*/)
    return 0;
 }
 
+/**
+ * @brief lockPlayerControls lock the player's controls
+ * @param state lua state
+ *    param 1: duration in milliseconds for lock
+ * @return error code
+ */
+int32_t lockPlayerControls(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto duration = static_cast<int32_t>(lua_tointeger(state, 1));
+
+   getInstance()->lockPlayerControls(std::chrono::milliseconds{duration});
+   return 0;
+}
+
 [[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
    // the error message is on top of the stack.
@@ -392,6 +413,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
+   lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
    lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
@@ -683,6 +705,11 @@ void LevelScript::showDialogue(const std::string& search_pattern)
    auto dialogue = std::dynamic_pointer_cast<Dialogue>(mechanisms.front());
    dialogue->setActive(true);
    dialogue->showNext();
+}
+
+void LevelScript::lockPlayerControls(const std::chrono::milliseconds& duration)
+{
+   Player::getCurrent()->getControls()->lockAll(PlayerControls::LockedState::Released, duration);
 }
 
 void LevelScript::addSensorRectCallback(const std::string& search_pattern)

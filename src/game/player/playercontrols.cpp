@@ -758,7 +758,7 @@ std::unordered_map<KeyPressed, PlayerControls::LockedKey>::const_iterator Player
    return _locked_keys.find(key);
 }
 
-void PlayerControls::lockState(KeyPressed key, LockedState state, std::chrono::milliseconds duration)
+void PlayerControls::lockState(KeyPressed key, LockedState state, const std::chrono::milliseconds& duration)
 {
    if (key == KeyPressedLeft || key == KeyPressedRight)
    {
@@ -770,7 +770,7 @@ void PlayerControls::lockState(KeyPressed key, LockedState state, std::chrono::m
    }
 }
 
-void PlayerControls::lockAll(LockedState state, std::chrono::milliseconds duration)
+void PlayerControls::lockAll(LockedState state, const std::chrono::milliseconds& duration)
 {
    constexpr std::initializer_list<KeyPressed> keypress_types{
       KeyPressedUp,
