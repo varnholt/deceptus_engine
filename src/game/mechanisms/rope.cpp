@@ -107,7 +107,7 @@ void Rope::pushChain(float impulse)
 
 void Rope::update(const sf::Time& dt)
 {
-   // prevent glitches`
+   // prevent glitches
    // it might make sense to come up with a more high level concept for this
    if (dt.asMilliseconds() > 500)
    {
@@ -122,9 +122,15 @@ void Rope::update(const sf::Time& dt)
    if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().intersects(_bounding_box))
    {
       // using a fix timestep for now, everything else lets box2d go nuts
-      // const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * dt.asSeconds() * 0.02f;
-      const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * _player_impulse.value();
+      const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();
       pushChain(impulse);
+
+      // cap speed
+      for (auto* body : _chain_bodies)
+      {
+         const auto& linear_velocity = body->GetLinearVelocity();
+         body->SetLinearVelocity({std::clamp(linear_velocity.x, -3.0f, 3.0f), linear_velocity.y});
+      }
    }
 
    // slightly push the rope all the way while it's moving from the right to the left
@@ -207,7 +213,10 @@ void Rope::setup(const GameDeserializeData& data)
    _segment_length_m = (SfmlMath::length(rope_length_px) * MPP) / static_cast<float>(_segment_count);
 
    // init start position
-   setPixelPosition(sf::Vector2i{static_cast<int32_t>(data._tmx_object->_x_px), static_cast<int32_t>(data._tmx_object->_y_px)});
+   setPixelPosition(sf::Vector2i{
+      static_cast<int32_t>(data._tmx_object->_x_px - data._tmx_object->_width_px),
+      static_cast<int32_t>(data._tmx_object->_y_px + path_1_px.y)  // the 2nd y coord of the polyline contains the line length
+   });
 
    // clang-format off
    //      p0
@@ -229,7 +238,7 @@ void Rope::setup(const GameDeserializeData& data)
    // clang-format on
 
    // pin the rope to the starting point (anchor)
-   auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
+   const auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
    _anchor_a_body = data._world->CreateBody(&_anchor_a_def);
    _anchor_a_shape.SetTwoSided(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
    auto* anchor_fixture = _anchor_a_body->CreateFixture(&_anchor_a_shape, 0.0f);
@@ -246,6 +255,7 @@ void Rope::setup(const GameDeserializeData& data)
       auto* chain_body = data._world->CreateBody(&chain_body_def);
       auto* chain_fixture = chain_body->CreateFixture(&_rope_element_fixture_def);
       chain_fixture->SetSensor(true);
+      _chain_bodies.push_back(chain_body);
 
       // attach chain element to the previous one
       const b2Vec2 anchor(pos_m.x, pos_m.y + i * _segment_length_m);
