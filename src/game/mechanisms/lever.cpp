@@ -35,6 +35,12 @@ void Lever::setup(const GameDeserializeData& data)
       {
          _enabled = enabled_it->second->_value_bool.value();
          _target_state = (_enabled ? State::Right : State::Left);
+
+         // put the lever on the correct position
+         if (_enabled)
+         {
+            _offset = sprites_per_row - 1;
+         }
       }
 
       const auto serialized_it = data._tmx_object->_properties->_map.find("serialized");
