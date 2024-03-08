@@ -42,6 +42,7 @@ private:
    b2BodyDef _anchor_a_def;
    b2Body* _anchor_a_body = nullptr;
    b2EdgeShape _anchor_a_shape;
+   std::vector<b2Body*> _chain_bodies;
 
    // rope
    b2PolygonShape _rope_element_shape;
