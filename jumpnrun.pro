@@ -197,7 +197,6 @@ SOURCES += \
    src/game/gun.cpp \
    src/game/health.cpp \
    src/game/hitbox.cpp \
-   src/game/imagelayer.cpp \
    src/game/infolayer.cpp \
    src/game/ingamemenu.cpp \
    src/game/ingamemenuarchives.cpp \
@@ -233,6 +232,7 @@ SOURCES += \
    src/game/mechanisms/extra.cpp \
    src/game/mechanisms/fan.cpp \
    src/game/mechanisms/fireflies.cpp \
+   src/game/mechanisms/imagelayer.cpp \
    src/game/mechanisms/infooverlay.cpp \
    src/game/mechanisms/interactionhelp.cpp \
    src/game/mechanisms/laser.cpp \
@@ -433,7 +433,6 @@ HEADERS += \
    src/game/gun.h \
    src/game/health.h \
    src/game/hitbox.h \
-   src/game/imagelayer.h \
    src/game/infolayer.h \
    src/game/ingamemenu.h \
    src/game/ingamemenuarchives.h \
@@ -471,6 +470,7 @@ HEADERS += \
    src/game/mechanisms/extra.h \
    src/game/mechanisms/fan.h \
    src/game/mechanisms/fireflies.h \
+   src/game/mechanisms/imagelayer.h \
    src/game/mechanisms/infooverlay.h \
    src/game/mechanisms/interactionhelp.h \
    src/game/mechanisms/lever.h \
