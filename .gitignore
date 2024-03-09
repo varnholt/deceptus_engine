@@ -1,0 +1,5 @@
+/.qtc_clangd/.cache/clangd/index
+/.obj/*.obj
+/lab/level_selector/.qtc_clangd/.cache/clangd/index/*.idx
+/.obj/*.pdb
+/data/config/*.bak
