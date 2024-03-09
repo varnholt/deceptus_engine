@@ -6,7 +6,11 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/texturepool.h"
 
-#include <iostream>
+
+//-----------------------------------------------------------------------------
+ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
+{
+}
 
 //-----------------------------------------------------------------------------
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -47,6 +51,12 @@ void ImageLayer::resetView(float view_width, float view_height)
 {
    _parallax_view.reset(sf::FloatRect(0.0f, 0.0f, view_width, view_height));
    _parallax_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+}
+
+//-----------------------------------------------------------------------------
+std::optional<sf::FloatRect> ImageLayer::getBoundingBoxPx()
+{
+   return std::nullopt;
 }
 
 //-----------------------------------------------------------------------------
