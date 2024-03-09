@@ -1032,7 +1032,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw image layers
       for (auto& layer : _image_layers)
       {
-         if (layer->_z_index == z_index)
+         if (layer->getZ() == z_index)
          {
             layer->draw(target, normal);
          }
