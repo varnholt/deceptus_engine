@@ -53,7 +53,7 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    _lamp_sprite_rects = {
       sf::IntRect{1056, 28, 24, 28},
       sf::IntRect{1056, 78, 24, 25},
-      sf::IntRect{1056, 120, 24, 28},
+      sf::IntRect{1056, 131, 24, 30},
    };
 
    std::array<uint8_t, 4> color = {255, 255, 255, 100};
