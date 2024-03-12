@@ -250,6 +250,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_spikes,
       &_mechanism_static_lights,
       &_mechanism_text_layers,
+      &_mechanism_treasure_chests,
       &_mechanism_water_damage,
       &_mechanism_water_surface,
       &_mechanism_weather,
@@ -290,6 +291,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
    _mechanisms_map[std::string{layer_name_static_lights}] = &_mechanism_static_lights;
    _mechanisms_map[std::string{layer_name_text_layer}] = &_mechanism_text_layers;
+   _mechanisms_map[std::string{layer_name_treasure_chests}] = &_mechanism_treasure_chests;
    _mechanisms_map[std::string{layer_name_water_damage}] = &_mechanism_water_damage;
    _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
    _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;

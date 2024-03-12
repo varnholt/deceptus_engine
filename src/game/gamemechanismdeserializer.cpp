@@ -41,6 +41,7 @@
 #include "game/mechanisms/spikes.h"
 #include "game/mechanisms/staticlight.h"
 #include "game/mechanisms/textlayer.h"
+#include "game/mechanisms/treasurechest.h"
 #include "game/mechanisms/waterdamage.h"
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
@@ -95,6 +96,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_spikes = mechanisms[std::string{layer_name_interval_spikes}];
    auto* mechanism_static_lights = mechanisms[std::string{layer_name_static_lights}];
    auto* mechanism_text_layers = mechanisms[std::string{layer_name_text_layer}];
+   auto* mechanism_treasure_chests = mechanisms[std::string{layer_name_treasure_chests}];
    auto* mechanism_water_damage = mechanisms[std::string{layer_name_water_damage}];
    auto* mechanism_weather = mechanisms[std::string{layer_name_weather}];
    auto* mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
@@ -371,6 +373,11 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = TextLayer::deserialize(parent, data);
                mechanism_text_layers->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_treasure_chests || tmx_object->_template_type == type_name_treasure_chest)
+            {
+               auto mechanism = std::make_shared<TreasureChest>(parent);
+               mechanism->deserialize(data);
             }
             else if (object_group->_name == layer_name_water_damage || tmx_object->_template_type == type_name_water_damage)
             {

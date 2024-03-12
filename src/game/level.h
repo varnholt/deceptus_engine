@@ -218,6 +218,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_text_layers;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_treasure_chests;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_static_lights;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_damage;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
