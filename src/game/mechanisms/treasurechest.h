@@ -24,14 +24,22 @@ private:
       Right
    };
 
+   enum class State
+   {
+      Closed,
+      Opening,
+      Open
+   };
+
    sf::FloatRect _rect;
    Alignment _alignment{Alignment::Left};
    std::shared_ptr<sf::Texture> _texture;
    sf::Sprite _sprite;
    std::string _sample_open;
+   State _state{State::Closed};
 
    std::shared_ptr<Animation> _animation_idle_closed;
-   std::shared_ptr<Animation> _animation_idle_opening;
+   std::shared_ptr<Animation> _animation_opening;
    std::shared_ptr<Animation> _animation_idle_open;
 };
 

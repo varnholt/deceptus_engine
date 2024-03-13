@@ -160,7 +160,6 @@ void Extra::update(const sf::Time& dt)
       }
    }
 
-   const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
    if (_requires_button_press)
    {
       if (!Player::getCurrent()->getControls()->isButtonBPressed())
@@ -169,6 +168,7 @@ void Extra::update(const sf::Time& dt)
       }
    }
 
+   const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
    if (player_rect_px.intersects(_rect))
    {
       _active = false;

@@ -378,6 +378,7 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = std::make_shared<TreasureChest>(parent);
                mechanism->deserialize(data);
+               mechanism_treasure_chests->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_water_damage || tmx_object->_template_type == type_name_water_damage)
             {
