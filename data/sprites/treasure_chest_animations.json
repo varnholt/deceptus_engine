@@ -1,0 +1,26 @@
+{
+   "idle": {
+      "frame_durations": [4000, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [72, 72],
+      "origin": [36.0, 36.0],
+      "sprite_count": 16,
+      "texture": "data/sprites/treasure_chest.png"
+   },
+   "opening": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 72],
+      "frame_size": [72, 72],
+      "origin": [36.0, 36.0],
+      "sprite_count": 22,
+      "texture": "data/sprites/treasure_chest.png"
+   },
+   "open": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 144],
+      "frame_size": [72, 72],
+      "origin": [36.0, 36.0],
+      "sprite_count": 22,
+      "texture": "data/sprites/treasure_chest.png"
+   }
+}

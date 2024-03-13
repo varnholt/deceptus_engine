@@ -1,9 +1,10 @@
-#include "treasurechest.h"
+﻿#include "treasurechest.h"
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/animationpool.h"
 #include "game/audio.h"
+#include "game/player/player.h"
 #include "game/texturepool.h"
 #include "game/valuereader.h"
 
@@ -26,7 +27,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       const auto& map = data._tmx_object->_properties->_map;
       _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
 
-      const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("treasure_chest.png");
+      const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
       _texture = TexturePool::getInstance().get(texture_path);
       _sprite.setTexture(*_texture);
       _sprite.setPosition(pos_x_px, pos_y_px);
@@ -38,18 +39,18 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       const auto offset_x = width_px * 0.5f;
       const auto offset_y = height_px * 0.5f;
 
-      AnimationPool animation_pool{"data/sprites/treasure_animations.json"};
+      AnimationPool animation_pool{"data/sprites/treasure_chest_animations.json"};
 
       _animation_idle_closed = animation_pool.create(
-         ValueReader::readValue<std::string>("animation_idle_closed", map).value_or("idle_closed"),
+         ValueReader::readValue<std::string>("animation_idle_closed", map).value_or("idle"),
          pos_x_px + offset_x,
          pos_y_px + offset_y,
          false,
          false
       );
 
-      _animation_idle_opening = animation_pool.create(
-         ValueReader::readValue<std::string>("animation_idle_opening", map).value_or("idle_opening"),
+      _animation_opening = animation_pool.create(
+         ValueReader::readValue<std::string>("animation_opening", map).value_or("opening"),
          pos_x_px + offset_x,
          pos_y_px + offset_y,
          false,
@@ -57,28 +58,96 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       );
 
       _animation_idle_open = animation_pool.create(
-         ValueReader::readValue<std::string>("animation_idle_open", map).value_or("idle_open"),
+         ValueReader::readValue<std::string>("animation_idle_open", map).value_or("open"),
          pos_x_px + offset_x,
          pos_y_px + offset_y,
          false,
          false
       );
+
+      _animation_idle_closed->_looped = true;
+      _animation_idle_open->_looped = true;
    }
 }
 
 void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   if (_animation_idle_closed)
+   if (_animation_idle_closed && !_animation_idle_closed->_paused)
    {
       _animation_idle_closed->draw(target);
+   }
+
+   if (_animation_opening && !_animation_opening->_paused)
+   {
+      _animation_opening->draw(target);
+   }
+
+   if (_animation_idle_open && !_animation_idle_open->_paused)
+   {
+      _animation_idle_open->draw(target);
    }
 }
 
 void TreasureChest::update(const sf::Time& dt)
 {
-   if (_animation_idle_closed)
+   switch (_state)
    {
-      _animation_idle_closed->update(dt);
+      case State::Closed:
+      {
+         if (_animation_idle_closed)
+         {
+            if (_animation_idle_closed->_paused)
+            {
+               _animation_idle_closed->seekToStart();
+               _animation_idle_closed->play();
+            }
+
+            _animation_idle_closed->update(dt);
+         }
+
+         if (Player::getCurrent()->getControls()->isButtonBPressed())
+         {
+            const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
+            if (player_rect_px.intersects(_rect))
+            {
+               _state = State::Opening;
+               _animation_opening->seekToStart();
+               _animation_opening->play();
+               _animation_idle_closed->pause();
+            }
+         }
+
+         break;
+      }
+
+      case State::Opening:
+      {
+         if (_animation_opening)
+         {
+            if (!_animation_opening->_paused)
+            {
+               _animation_opening->update(dt);
+            }
+            else
+            {
+               _state = State::Open;
+               _animation_idle_open->seekToStart();
+               _animation_idle_open->play();
+               _animation_opening->pause();
+            }
+         }
+
+         break;
+      }
+
+      case State::Open:
+      {
+         if (_animation_idle_open)
+         {
+            _animation_idle_open->update(dt);
+         }
+         break;
+      }
    }
 }
 
