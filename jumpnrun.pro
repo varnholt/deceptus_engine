@@ -173,6 +173,7 @@ SOURCES += \
    src/game/displaymode.cpp \
    src/game/drawstates.cpp \
    src/game/effects/lightsystem.cpp \
+   src/game/effects/spawneffect.cpp \
    src/game/enemydescription.cpp \
    src/game/eventdistributor.cpp \
    src/game/eventserializer.cpp \
@@ -409,6 +410,7 @@ HEADERS += \
    src/game/detonationanimation.h \
    src/game/displaymode.h \
    src/game/drawstates.h \
+   src/game/effects/spawneffect.h \
    src/game/enemydescription.h \
    src/game/eventdistributor.h \
    src/game/eventserializer.h \
