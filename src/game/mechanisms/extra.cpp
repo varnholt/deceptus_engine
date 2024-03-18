@@ -10,6 +10,7 @@
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/texturepool.h"
+#include "game/valuereader.h"
 
 // #define DRAW_DEBUG 1
 #ifdef DRAW_DEBUG
@@ -34,12 +35,9 @@ void Extra::deserialize(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-      const auto z_it = data._tmx_object->_properties->_map.find("z");
-      if (z_it != data._tmx_object->_properties->_map.end())
-      {
-         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-         setZ(z_index);
-      }
+      const auto& map = data._tmx_object->_properties->_map;
+
+      setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
 
       const auto texture_it = data._tmx_object->_properties->_map.find("texture");
       if (texture_it != data._tmx_object->_properties->_map.end())
@@ -100,6 +98,16 @@ void Extra::deserialize(const GameDeserializeData& data)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
+   if (!_spawned)
+   {
+      // if (_animation_spawn && !_animation_spawn->_paused)
+      // {
+      //    _animation_spawn->draw(target);
+      // }
+
+      return;
+   }
+
    if (_animation_pickup && !_animation_pickup->_paused)
    {
       _animation_pickup->draw(target);
