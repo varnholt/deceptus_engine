@@ -32,6 +32,7 @@ public:
    using ExtraCallback = std::function<void(const std::string&)>;
 
    bool _active{true};
+   bool _spawned{true};
    std::string _name;
    std::optional<std::string> _sample;
    sf::Sprite _sprite;
