@@ -2,6 +2,7 @@
 #define TREASURECHEST_H
 
 #include "game/animation.h"
+#include "game/effects/spawneffect.h"
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
@@ -41,6 +42,7 @@ private:
    std::shared_ptr<Animation> _animation_idle_closed;
    std::shared_ptr<Animation> _animation_opening;
    std::shared_ptr<Animation> _animation_idle_open;
+   std::unique_ptr<SpawnEffect> _spawn_effect;
 };
 
 #endif  // TREASURECHEST_H

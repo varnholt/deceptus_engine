@@ -86,6 +86,11 @@ void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
    {
       _animation_idle_open->draw(target);
    }
+
+   if (_spawn_effect != nullptr)
+   {
+      _spawn_effect->draw(target);
+   }
 }
 
 void TreasureChest::update(const sf::Time& dt)
@@ -107,6 +112,8 @@ void TreasureChest::update(const sf::Time& dt)
 
          if (Player::getCurrent()->getControls()->isButtonBPressed())
          {
+            _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left, _rect.top});
+
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
             if (player_rect_px.intersects(_rect))
             {
@@ -147,6 +154,16 @@ void TreasureChest::update(const sf::Time& dt)
             _animation_idle_open->update(dt);
          }
          break;
+      }
+   }
+
+   if (_spawn_effect != nullptr)
+   {
+      _spawn_effect->update(dt);
+
+      if (_spawn_effect->isFinished())
+      {
+         _spawn_effect.reset();
       }
    }
 }
