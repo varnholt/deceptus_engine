@@ -1,0 +1,26 @@
+{
+   "show": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [50, 50],
+      "origin": [25.0, 25.0],
+      "sprite_count": 30,
+      "texture": "data/effects/spawn_orb.png"
+   },
+   "idle": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 50],
+      "frame_size": [50, 50],
+      "origin": [25.0, 25.0],
+      "sprite_count": 60,
+      "texture": "data/effects/spawn_orb.png"
+   },
+   "hide": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 100],
+      "frame_size": [100, 100],
+      "origin": [50.0, 50.0],
+      "sprite_count": 12,
+      "texture": "data/effects/spawn_orb.png"
+   }
+}

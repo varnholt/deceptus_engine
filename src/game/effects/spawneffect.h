@@ -3,18 +3,18 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "constants.h"
+#include "game/animation.h"
 
 class SpawnEffect
 {
 public:
-   SpawnEffect();
+   SpawnEffect(const sf::Vector2f pos_px);
 
-   void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+   void draw(sf::RenderTarget& target);
    void update(const sf::Time& dt);
+   bool isFinished() const;
 
 private:
-   sf::Time _elapsed;
 
    struct Particle
    {
@@ -33,12 +33,33 @@ private:
       void update(const sf::Time& dt);
    };
 
-   void createParticles(const sf::Vector2f& offset_px, int32_t count, float radius_px, const std::shared_ptr<sf::Texture>& texture);
-   void drawParticles(sf::RenderTarget& target);
-   void updateParticles(const sf::Time& dt);
+   struct ParticleEffect
+   {
+      ParticleEffect(const sf::Vector2f& offset_px, int32_t count, float radius_px);
 
-   std::vector<Particle> _particles;
-   std::shared_ptr<sf::Texture> _texture;
+      void draw(sf::RenderTarget& target);
+      void update(const sf::Time& dt);
+
+      std::vector<Particle> _particles;
+      std::shared_ptr<sf::Texture> _texture;
+   };
+
+   struct Orb
+   {
+      Orb(const sf::Vector2f& pos);
+
+      void draw(sf::RenderTarget& target);
+      void update(const sf::Time& dt);
+
+      std::shared_ptr<sf::Texture> _texture;
+      std::shared_ptr<Animation> _animation_show;
+      std::shared_ptr<Animation> _animation_idle;
+      std::shared_ptr<Animation> _animation_hide;
+      int32_t _idle_cycles{0};
+   };
+
+   std::unique_ptr<Orb> _orb;
+   std::unique_ptr<ParticleEffect> _particles;
 };
 
 #endif  // SPAWNEFFECT_H
