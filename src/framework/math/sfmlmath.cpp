@@ -2,18 +2,15 @@
 
 #include <math.h>
 
-
-float SfmlMath::length(const sf::Vector2f & v)
+float SfmlMath::length(const sf::Vector2f& v)
 {
    return sqrt(v.x * v.x + v.y * v.y);
 }
 
-
-float SfmlMath::lengthSquared(const sf::Vector2f & v)
+float SfmlMath::lengthSquared(const sf::Vector2f& v)
 {
    return v.x * v.x + v.y * v.y;
 }
-
 
 sf::Vector2f SfmlMath::normalize(const sf::Vector2f& v)
 {
@@ -22,10 +19,8 @@ sf::Vector2f SfmlMath::normalize(const sf::Vector2f& v)
    {
       return {v.x / len, v.y / len};
    }
-   else
-   {
-      return {};
-   }
+
+   return {};
 }
 
 sf::Color mixColors(const sf::Color& color_1, const sf::Color& color_2, float ratio)
