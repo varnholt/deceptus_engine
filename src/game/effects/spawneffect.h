@@ -18,10 +18,13 @@ private:
 
    struct Particle
    {
+      sf::Vector2f _pos_norm;
       sf::Vector2f _pos_px;
       sf::Time _elapsed;
+      sf::Time _delay;
       float _velocity{0.0f};
       float _radius_px{60.0f};
+      float _scale_px{0.0f};
       sf::Vector2f _offset_px;
 
       float _alpha_all_particles{1.0f};
@@ -31,6 +34,7 @@ private:
 
       void spawn();
       void update(const sf::Time& dt);
+      void setupPosition(float random_scale);
    };
 
    struct ParticleEffect
@@ -46,7 +50,7 @@ private:
 
    struct Orb
    {
-      Orb(const sf::Vector2f& pos);
+      Orb(const sf::Vector2f& pos_px);
 
       void draw(sf::RenderTarget& target);
       void update(const sf::Time& dt);
