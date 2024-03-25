@@ -8,12 +8,9 @@
 #include <memory>
 #include <vector>
 
-
 class Animation : public sf::Sprite
 {
-
 public:
-
    using HighResDuration = std::chrono::high_resolution_clock::duration;
 
    Animation() = default;
@@ -66,6 +63,7 @@ public:
    HighResDuration _overall_time_chrono;
    int32_t _current_frame{0};
    int32_t _previous_frame{-1};
+   int32_t _loop_count{0};
 
    bool _paused{false};
    bool _looped{false};
@@ -78,4 +76,3 @@ public:
 private:
    std::vector<sf::Time> _frame_times;
 };
-

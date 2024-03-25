@@ -112,7 +112,7 @@ void TreasureChest::update(const sf::Time& dt)
 
          if (Player::getCurrent()->getControls()->isButtonBPressed())
          {
-            _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left + _rect.width / 2, _rect.top});
+            _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left + _rect.width / 2, _rect.top - _rect.height / 2});
 
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
             if (player_rect_px.intersects(_rect))

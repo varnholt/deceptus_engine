@@ -20,7 +20,6 @@ private:
    {
       sf::Vector2f _pos_norm;
       sf::Vector2f _pos_px;
-      sf::Time _elapsed;
       sf::Time _delay;
       float _velocity{0.0f};
       float _radius_px{60.0f};
@@ -28,7 +27,8 @@ private:
       sf::Vector2f _offset_px;
 
       float _alpha_all_particles{1.0f};
-      float _alpha_per_particle{1.0f};
+      bool _respawn{true};
+      bool _dead{false};
 
       sf::Sprite _sprite;
 
@@ -43,9 +43,12 @@ private:
 
       void draw(sf::RenderTarget& target);
       void update(const sf::Time& dt);
+      bool allDead() const;
 
       std::vector<Particle> _particles;
       std::shared_ptr<sf::Texture> _texture;
+      float _alpha{1.0f};
+      bool _respawn{true};
    };
 
    struct Orb
@@ -59,9 +62,12 @@ private:
       std::shared_ptr<Animation> _animation_show;
       std::shared_ptr<Animation> _animation_idle;
       std::shared_ptr<Animation> _animation_hide;
-      int32_t _idle_cycles{0};
+
+      bool _hiding{false};
    };
 
+   sf::Time _elapsed_show;
+   sf::Time _elapsed_hide;
    std::unique_ptr<Orb> _orb;
    std::unique_ptr<ParticleEffect> _particles;
 };
