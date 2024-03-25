@@ -166,16 +166,16 @@ void Animation::update(const sf::Time& dt)
    _previous_frame = _current_frame;
    _current_time += dt;
 
-   const auto& frameTime = _frame_times[static_cast<size_t>(_current_frame)];
+   const auto& frame_time = _frame_times[static_cast<size_t>(_current_frame)];
 
    // if current time is bigger then the frame time advance one frame
-   if (_current_time >= frameTime)
+   if (_current_time >= frame_time)
    {
       // reset time, but keep the remainder
       // clang-format off
       _current_time = sf::microseconds(
-         (frameTime.asMicroseconds() > 0)
-            ? _current_time.asMicroseconds() % frameTime.asMicroseconds()
+         (frame_time.asMicroseconds() > 0)
+            ? _current_time.asMicroseconds() % frame_time.asMicroseconds()
             : _current_time.asMicroseconds()
       );
       // clang-format on
@@ -193,7 +193,11 @@ void Animation::update(const sf::Time& dt)
             _current_frame = 0;
          }
 
-         if (!_looped)
+         if (_looped)
+         {
+            _loop_count++;
+         }
+         else
          {
             _paused = true;
          }
