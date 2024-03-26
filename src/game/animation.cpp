@@ -279,7 +279,7 @@ void Animation::drawTree(sf::RenderTarget& color, sf::RenderTarget& normal, sf::
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void Animation::updateVertices(bool resetTime)
+void Animation::updateVertices(bool reset_time)
 {
    const auto& rect_px = _frames[static_cast<size_t>(_current_frame)];
 
@@ -298,7 +298,7 @@ void Animation::updateVertices(bool resetTime)
    _vertices[2].texCoords = sf::Vector2f(r, b);
    _vertices[3].texCoords = sf::Vector2f(r, t);
 
-   if (resetTime)
+   if (reset_time)
    {
       _current_time = sf::Time::Zero;
    }
