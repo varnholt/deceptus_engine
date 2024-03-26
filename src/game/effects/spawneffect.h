@@ -53,6 +53,14 @@ private:
 
    struct Orb
    {
+      // just used for clarity
+      enum class Step
+      {
+         Show,
+         Idle,
+         Hide
+      };
+
       Orb(const sf::Vector2f& pos_px);
 
       void draw(sf::RenderTarget& target);
@@ -63,7 +71,7 @@ private:
       std::shared_ptr<Animation> _animation_idle;
       std::shared_ptr<Animation> _animation_hide;
 
-      bool _hiding{false};
+      Step _step{Step::Show};
    };
 
    sf::Time _elapsed_show;
