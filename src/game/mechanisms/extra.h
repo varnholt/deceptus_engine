@@ -28,11 +28,12 @@ public:
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   void spawn();
 
    using ExtraCallback = std::function<void(const std::string&)>;
 
    bool _active{true};
-   bool _spawned{true};
+   bool _spawn{false};
    std::string _name;
    std::optional<std::string> _sample;
    sf::Sprite _sprite;
@@ -42,6 +43,7 @@ public:
    bool _requires_button_press{false};
 
    std::vector<std::shared_ptr<Animation>> _animations_main;
+   std::shared_ptr<Animation> _animation_spawn;
    std::shared_ptr<Animation> _animation_pickup;
    std::vector<std::shared_ptr<Animation>>::iterator _animations_main_it;
 };

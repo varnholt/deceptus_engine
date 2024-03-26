@@ -33,7 +33,7 @@ public:
    void stopTree();
    void seekToStartTree();
 
-   void updateVertices(bool resetTime = true);
+   void updateVertices(bool reset_time = true);
 
    void setColor(const sf::Color& color);
    void setColorTree(const sf::Color& color);

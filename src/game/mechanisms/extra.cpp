@@ -38,6 +38,7 @@ void Extra::deserialize(const GameDeserializeData& data)
       const auto& map = data._tmx_object->_properties->_map;
 
       setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
+      _active = ValueReader::readValue<bool>("active", map).value_or(true);
 
       const auto texture_it = data._tmx_object->_properties->_map.find("texture");
       if (texture_it != data._tmx_object->_properties->_map.end())
@@ -98,13 +99,9 @@ void Extra::deserialize(const GameDeserializeData& data)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   if (!_spawned)
+   if (_spawn && !_animation_spawn->_paused)
    {
-      // if (_animation_spawn && !_animation_spawn->_paused)
-      // {
-      //    _animation_spawn->draw(target);
-      // }
-
+      _animation_spawn->draw(target);
       return;
    }
 
@@ -138,6 +135,19 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::update(const sf::Time& dt)
 {
+   if (_spawn)
+   {
+      if (_animation_spawn->_paused)
+      {
+         _spawn = false;
+      }
+      else
+      {
+         _animation_spawn->update(dt);
+         return;
+      }
+   }
+
    // play pickup animation if active
    if (_animation_pickup && !_animation_pickup->_paused)
    {
@@ -198,4 +208,10 @@ void Extra::update(const sf::Time& dt)
 std::optional<sf::FloatRect> Extra::getBoundingBoxPx()
 {
    return _rect;
+}
+
+void Extra::spawn()
+{
+   _spawn = true;
+   _animation_spawn->play();
 }
