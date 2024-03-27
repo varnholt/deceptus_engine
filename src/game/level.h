@@ -97,6 +97,7 @@ public:
 
    const std::vector<std::shared_ptr<GameMechanism>>& getBouncers() const;
    const std::vector<std::shared_ptr<GameMechanism>>& getPortals() const;
+   const std::vector<std::shared_ptr<GameMechanism>>& getExtras() const;
 
    bool isDirty() const;
    void setLoadingMode(LoadingMode loading_mode);

@@ -1235,6 +1235,11 @@ const std::vector<std::shared_ptr<GameMechanism>>& Level::getPortals() const
    return _mechanism_portals;
 }
 
+const std::vector<std::shared_ptr<GameMechanism>>& Level::getExtras() const
+{
+   return _mechanism_extras;
+}
+
 //-----------------------------------------------------------------------------
 // Level Rendering Flow
 //

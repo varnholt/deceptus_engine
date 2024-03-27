@@ -231,6 +231,7 @@ SOURCES += \
    src/game/mechanisms/door.cpp \
    src/game/mechanisms/dust.cpp \
    src/game/mechanisms/extra.cpp \
+   src/game/mechanisms/extrawrapper.cpp \
    src/game/mechanisms/fan.cpp \
    src/game/mechanisms/fireflies.cpp \
    src/game/mechanisms/imagelayer.cpp \
@@ -471,6 +472,7 @@ HEADERS += \
    src/game/mechanisms/door.h \
    src/game/mechanisms/dust.h \
    src/game/mechanisms/extra.h \
+   src/game/mechanisms/extrawrapper.h \
    src/game/mechanisms/fan.h \
    src/game/mechanisms/fireflies.h \
    src/game/mechanisms/imagelayer.h \

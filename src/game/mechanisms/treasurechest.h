@@ -38,6 +38,7 @@ private:
    sf::Sprite _sprite;
    std::string _sample_open;
    State _state{State::Closed};
+   std::optional<std::string> _spawn_extra;
 
    std::shared_ptr<Animation> _animation_idle_closed;
    std::shared_ptr<Animation> _animation_opening;

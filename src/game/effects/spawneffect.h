@@ -13,6 +13,7 @@ public:
    void draw(sf::RenderTarget& target);
    void update(const sf::Time& dt);
    bool isFinished() const;
+   bool isShown() const;
 
 private:
 

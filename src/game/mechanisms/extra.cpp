@@ -39,7 +39,9 @@ void Extra::deserialize(const GameDeserializeData& data)
 
       setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
       _active = ValueReader::readValue<bool>("active", map).value_or(true);
+      _spawn_required = ValueReader::readValue<bool>("spawn_required", map).value_or(false);
 
+      // if a texture is defined, no animation is used
       const auto texture_it = data._tmx_object->_properties->_map.find("texture");
       if (texture_it != data._tmx_object->_properties->_map.end())
       {
@@ -47,6 +49,18 @@ void Extra::deserialize(const GameDeserializeData& data)
          _texture = TexturePool::getInstance().get(texture_path);
          _sprite.setTexture(*_texture);
          _sprite.setPosition(pos_x_px, pos_y_px);
+
+         // read texture rect
+         sf::IntRect rect;
+         rect.left = ValueReader::readValue<int32_t>("texture_rect_x", map).value_or(0);
+         rect.top = ValueReader::readValue<int32_t>("texture_rect_y", map).value_or(0);
+         rect.width = ValueReader::readValue<int32_t>("texture_rect_width", map).value_or(0);
+         rect.height = ValueReader::readValue<int32_t>("texture_rect_height", map).value_or(0);
+
+         if (rect.width > 0 && rect.height > 0)
+         {
+            _sprite.setTextureRect(rect);
+         }
       }
 
       const auto sample_it = data._tmx_object->_properties->_map.find("sample");
@@ -99,10 +113,18 @@ void Extra::deserialize(const GameDeserializeData& data)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   if (_spawn && !_animation_spawn->_paused)
+   if (_spawn_required)
    {
-      _animation_spawn->draw(target);
-      return;
+      if (_animation_spawn && !_animation_spawn->_paused)
+      {
+         _animation_spawn->draw(target);
+      }
+
+      // don't draw item if not spawned yet
+      if (!_spawned)
+      {
+         return;
+      }
    }
 
    if (_animation_pickup && !_animation_pickup->_paused)
@@ -116,9 +138,9 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    }
 
    // draw animations
-   if (_animations_main_it->get())
+   if (!_animations_main.empty())
    {
-      _animations_main_it->get()->draw(target);
+      (*_animations_main_it)->draw(target);
    }
 
    // or show static extra texture
@@ -135,15 +157,16 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 //----------------------------------------------------------------------------------------------------------------------
 void Extra::update(const sf::Time& dt)
 {
-   if (_spawn)
+   if (_spawn_required)
    {
-      if (_animation_spawn->_paused)
-      {
-         _spawn = false;
-      }
-      else
+      if (_animation_spawn && !_animation_spawn->_paused)
       {
          _animation_spawn->update(dt);
+      }
+
+      // no pick up allowed if not spawned yet
+      if (!_spawned)
+      {
          return;
       }
    }
@@ -160,7 +183,7 @@ void Extra::update(const sf::Time& dt)
    }
 
    // update regular animations
-   if (*_animations_main_it)
+   if (!_animations_main.empty())
    {
       (*_animations_main_it)->update(dt);
       if ((*_animations_main_it)->_paused)
@@ -212,6 +235,10 @@ std::optional<sf::FloatRect> Extra::getBoundingBoxPx()
 
 void Extra::spawn()
 {
-   _spawn = true;
-   _animation_spawn->play();
+   _spawned = true;
+
+   if (_animation_spawn)
+   {
+      _animation_spawn->play();
+   }
 }
