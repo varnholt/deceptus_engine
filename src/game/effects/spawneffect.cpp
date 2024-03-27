@@ -55,6 +55,11 @@ bool SpawnEffect::isFinished() const
    return _orb->_animation_hide->_finished && _particles->_alpha < 0.01f;
 }
 
+bool SpawnEffect::isShown() const
+{
+   return _orb->_animation_show->_finished;
+}
+
 SpawnEffect::ParticleEffect::ParticleEffect(const sf::Vector2f& offset_px, int32_t count, float radius_px)
 {
    // texture: 3000 x 300

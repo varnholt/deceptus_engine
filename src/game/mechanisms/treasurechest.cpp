@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/animationpool.h"
 #include "game/audio.h"
+#include "game/mechanisms/extrawrapper.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 #include "game/valuereader.h"
@@ -34,6 +35,12 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
       _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("trasure_chest_open.wav");
       Audio::getInstance().addSample(_sample_open);
+
+      const auto spawn_extra = ValueReader::readValue<std::string>("spawn_extra", map).value_or("");
+      if (!spawn_extra.empty())
+      {
+         _spawn_extra = spawn_extra;
+      }
 
       // read animations if set up
       const auto offset_x = width_px * 0.5f;
@@ -160,6 +167,14 @@ void TreasureChest::update(const sf::Time& dt)
    if (_spawn_effect != nullptr)
    {
       _spawn_effect->update(dt);
+
+      if (_spawn_effect->isShown())
+      {
+         if (_spawn_extra.has_value())
+         {
+            ExtraWrapper::spawnExtra(_spawn_extra.value());
+         }
+      }
 
       if (_spawn_effect->isFinished())
       {
