@@ -42,10 +42,9 @@ void Extra::deserialize(const GameDeserializeData& data)
       _spawn_required = ValueReader::readValue<bool>("spawn_required", map).value_or(false);
 
       // if a texture is defined, no animation is used
-      const auto texture_it = data._tmx_object->_properties->_map.find("texture");
-      if (texture_it != data._tmx_object->_properties->_map.end())
+      const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("");
+      if (!texture_path.empty())
       {
-         const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
          _sprite.setTexture(*_texture);
          _sprite.setPosition(pos_x_px, pos_y_px);
@@ -115,6 +114,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
    if (_spawn_required)
    {
+      // draw spawn animation if we have one
       if (_animation_spawn && !_animation_spawn->_paused)
       {
          _animation_spawn->draw(target);
@@ -214,9 +214,9 @@ void Extra::update(const sf::Time& dt)
    {
       _active = false;
 
-      for (auto& cb : _callbacks)
+      for (auto& callback : _callbacks)
       {
-         cb(_name);
+         callback(_name);
       }
 
       if (_sample.has_value())
