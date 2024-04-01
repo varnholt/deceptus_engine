@@ -2,15 +2,14 @@
 
 #include <iostream>
 #include "framework/math/sfmlmath.h"
+#include "framework/tmxparser/tmxproperties.h"
 #include "game/animationpool.h"
 #include "game/constants.h"
 #include "game/texturepool.h"
+#include "game/valuereader.h"
 
 namespace
 {
-
-constexpr auto hide_duration_s = 2.0f;
-constexpr auto show_duration_s = 1.0f;
 
 float frand(float min, float max)
 {
@@ -22,8 +21,29 @@ float frand(float min, float max)
 
 SpawnEffect::SpawnEffect(const sf::Vector2f pos_px)
 {
-   _particles = std::make_unique<ParticleEffect>(pos_px, 100, 150);
-   _orb = std::make_unique<Orb>(pos_px);
+   _particles = std::make_unique<ParticleEffect>(
+      pos_px, _particle_count, _particle_radius, _show_duration_s, _particle_velocity_min, _particle_velocity_max
+   );
+
+   _orb = std::make_unique<Orb>(pos_px, _orb_idle_cycle_count);
+}
+
+void SpawnEffect::deserialize(const GameDeserializeData& data)
+{
+   if (!data._tmx_object->_properties)
+   {
+      return;
+   }
+
+   const auto& map = data._tmx_object->_properties->_map;
+
+   // float _hide_duration_s{2.0f};
+   // float _show_duration_s{1.0f};
+   // int32_t _particle_count{100};
+   // float _particle_radius{150.0f};
+   // float _particle_velocity_min{0.001f};
+   // float _particle_velocity_max{0.004f};
+   // int32_t _orb_idle_cycle_count{1};
 }
 
 void SpawnEffect::draw(sf::RenderTarget& target)
@@ -37,13 +57,13 @@ void SpawnEffect::update(const sf::Time& dt)
    if (_orb->_step == Orb::Step::Hide)
    {
       _elapsed_hide += dt;
-      _particles->_alpha = 1.0f - std::min(_elapsed_hide.asSeconds(), hide_duration_s) / hide_duration_s;
+      _particles->_alpha = 1.0f - std::min(_elapsed_hide.asSeconds(), _hide_duration_s) / _hide_duration_s;
       _particles->_respawn = false;
    }
    else
    {
       _elapsed_show += dt;
-      _particles->_alpha = std::min(_elapsed_show.asSeconds(), show_duration_s) / show_duration_s;
+      _particles->_alpha = std::min(_elapsed_show.asSeconds(), _show_duration_s) / _show_duration_s;
    }
 
    _particles->update(dt);
@@ -60,7 +80,14 @@ bool SpawnEffect::isShown() const
    return _orb->_animation_show->_finished;
 }
 
-SpawnEffect::ParticleEffect::ParticleEffect(const sf::Vector2f& offset_px, int32_t count, float radius_px)
+SpawnEffect::ParticleEffect::ParticleEffect(
+   const sf::Vector2f& offset_px,
+   int32_t count,
+   float radius_px,
+   float show_duration_s,
+   float particle_velocity_min,
+   float particle_velocity_max
+)
 {
    // texture: 3000 x 300
    // row 1: 30 * 50 x 50 (show)
@@ -74,6 +101,9 @@ SpawnEffect::ParticleEffect::ParticleEffect(const sf::Vector2f& offset_px, int32
       Particle particle;
       particle._offset_px = offset_px;
       particle._radius_px = radius_px;
+      particle._show_duration_s = show_duration_s;
+      particle._particle_velocity_min = particle_velocity_min;
+      particle._particle_velocity_max = particle_velocity_max;
       particle._sprite.setTexture(*_texture);
       particle._sprite.setOrigin(5, 5);
       particle.spawn();
@@ -132,8 +162,8 @@ void SpawnEffect::Particle::setupPosition(float random_scale)
 void SpawnEffect::Particle::spawn()
 {
    setupPosition(frand(0.7f, 1.0f));
-   _velocity = frand(0.001f, 0.004f);
-   _delay = sf::seconds(frand(0.0f, 1.0f));
+   _velocity = frand(_particle_velocity_min, _particle_velocity_max);
+   _delay = sf::seconds(frand(0.0f, _show_duration_s));
 
    // each texture rect is 10x10px, 5 particles in 1 row
    _sprite.setTextureRect({(std::rand() % 5) * 10, 0, 10, 10});
@@ -180,7 +210,7 @@ void SpawnEffect::Particle::update(const sf::Time& dt)
    _sprite.setPosition(_pos_px + _offset_px);
 }
 
-SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px)
+SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px, int32_t idle_cycle_count)
 {
    _texture = TexturePool::getInstance().get("data/effects/spawn_orb.png");
 
@@ -239,7 +269,7 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
       }
       case Step::Idle:
       {
-         if (_animation_idle->_loop_count == 1)
+         if (_animation_idle->_loop_count == _idle_cycle_count)
          {
             _animation_idle->pause();
             _step = Step::Hide;
