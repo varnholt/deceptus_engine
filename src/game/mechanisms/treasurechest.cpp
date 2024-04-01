@@ -33,7 +33,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       _sprite.setTexture(*_texture);
       _sprite.setPosition(pos_x_px, pos_y_px);
 
-      _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("trasure_chest_open.wav");
+      _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("treasure_chest_open.wav");
       Audio::getInstance().addSample(_sample_open);
 
       const auto spawn_extra = ValueReader::readValue<std::string>("spawn_extra", map).value_or("");
