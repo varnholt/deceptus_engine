@@ -37,13 +37,13 @@ void SpawnEffect::deserialize(const GameDeserializeData& data)
 
    const auto& map = data._tmx_object->_properties->_map;
 
-   // float _hide_duration_s{2.0f};
-   // float _show_duration_s{1.0f};
-   // int32_t _particle_count{100};
-   // float _particle_radius{150.0f};
-   // float _particle_velocity_min{0.001f};
-   // float _particle_velocity_max{0.004f};
-   // int32_t _orb_idle_cycle_count{1};
+   _hide_duration_s = ValueReader::readValue<float>("hide_duration", map).value_or(_default_hide_duration_s);
+   _show_duration_s = ValueReader::readValue<float>("show_duration_s", map).value_or(_default_show_duration_s);
+   _particle_count = ValueReader::readValue<int32_t>("particle_count", map).value_or(_default_particle_count);
+   _particle_radius = ValueReader::readValue<float>("particle_radius", map).value_or(_default_particle_radius);
+   _particle_velocity_min = ValueReader::readValue<float>("particle_velocity_min", map).value_or(_default_particle_velocity_min);
+   _particle_velocity_max = ValueReader::readValue<float>("particle_velocity_max", map).value_or(_default_particle_velocity_max);
+   _orb_idle_cycle_count = ValueReader::readValue<int32_t>("orb_idle_cycle_count", map).value_or(_default_orb_idle_cycle_count);
 }
 
 void SpawnEffect::draw(sf::RenderTarget& target)
@@ -78,6 +78,16 @@ bool SpawnEffect::isFinished() const
 bool SpawnEffect::isShown() const
 {
    return _orb->_animation_show->_finished;
+}
+
+void SpawnEffect::activate()
+{
+   _activate = true;
+}
+
+bool SpawnEffect::isActive() const
+{
+   return _activate;
 }
 
 SpawnEffect::ParticleEffect::ParticleEffect(
@@ -210,7 +220,7 @@ void SpawnEffect::Particle::update(const sf::Time& dt)
    _sprite.setPosition(_pos_px + _offset_px);
 }
 
-SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px, int32_t idle_cycle_count)
+SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px, int32_t idle_cycle_count) : _idle_cycle_count(idle_cycle_count)
 {
    _texture = TexturePool::getInstance().get("data/effects/spawn_orb.png");
 
