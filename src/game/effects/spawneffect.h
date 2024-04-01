@@ -17,6 +17,8 @@ public:
    void update(const sf::Time& dt);
    bool isFinished() const;
    bool isShown() const;
+   void activate();
+   bool isActive() const;
 
 private:
 
@@ -26,12 +28,12 @@ private:
       sf::Vector2f _pos_px;
       sf::Time _delay;
       float _velocity{0.0f};
-      float _radius_px{60.0f};
+      float _radius_px{0.0f};
       float _scale_px{0.0f};
-      float _show_duration_s{1.0f};
+      float _show_duration_s{0.0f};
       sf::Vector2f _offset_px;
-      float _particle_velocity_min{0.001f};
-      float _particle_velocity_max{0.004f};
+      float _particle_velocity_min{0.0f};
+      float _particle_velocity_max{0.0f};
 
       float _alpha_all_particles{1.0f};
       bool _respawn{true};
@@ -86,21 +88,30 @@ private:
       std::shared_ptr<Animation> _animation_hide;
 
       Step _step{Step::Show};
-      int32_t _idle_cycle_count{1};
+      int32_t _idle_cycle_count{0};
    };
 
-   float _hide_duration_s{2.0f};
-   float _show_duration_s{1.0f};
-   int32_t _particle_count{100};
-   float _particle_radius{150.0f};
-   float _particle_velocity_min{0.001f};
-   float _particle_velocity_max{0.004f};
-   int32_t _orb_idle_cycle_count{1};
+   static constexpr float _default_hide_duration_s{2.0f};
+   static constexpr float _default_show_duration_s{1.0f};
+   static constexpr int32_t _default_particle_count{100};
+   static constexpr float _default_particle_radius{150.0f};
+   static constexpr float _default_particle_velocity_min{0.001f};
+   static constexpr float _default_particle_velocity_max{0.004f};
+   static constexpr int32_t _default_orb_idle_cycle_count{1};
+
+   float _hide_duration_s{_default_hide_duration_s};
+   float _show_duration_s{_default_show_duration_s};
+   int32_t _particle_count{_default_particle_count};
+   float _particle_radius{_default_particle_radius};
+   float _particle_velocity_min{_default_particle_velocity_min};
+   float _particle_velocity_max{_default_particle_velocity_max};
+   int32_t _orb_idle_cycle_count{_default_orb_idle_cycle_count};
 
    sf::Time _elapsed_show;
    sf::Time _elapsed_hide;
    std::unique_ptr<Orb> _orb;
    std::unique_ptr<ParticleEffect> _particles;
+   bool _activate{false};
 };
 
 #endif  // SPAWNEFFECT_H
