@@ -23,58 +23,63 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
    _rect = {pos_x_px, pos_y_px, width_px, height_px};
 
-   if (data._tmx_object->_properties)
+   if (!data._tmx_object->_properties)
    {
-      const auto& map = data._tmx_object->_properties->_map;
-      _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
-
-      const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
-      _texture = TexturePool::getInstance().get(texture_path);
-      _sprite.setTexture(*_texture);
-      _sprite.setPosition(pos_x_px, pos_y_px);
-
-      _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("treasure_chest_open.wav");
-      Audio::getInstance().addSample(_sample_open);
-
-      const auto spawn_extra = ValueReader::readValue<std::string>("spawn_extra", map).value_or("");
-      if (!spawn_extra.empty())
-      {
-         _spawn_extra = spawn_extra;
-      }
-
-      // read animations if set up
-      const auto offset_x = width_px * 0.5f;
-      const auto offset_y = height_px * 0.5f;
-
-      AnimationPool animation_pool{"data/sprites/treasure_chest_animations.json"};
-
-      _animation_idle_closed = animation_pool.create(
-         ValueReader::readValue<std::string>("animation_idle_closed", map).value_or("idle"),
-         pos_x_px + offset_x,
-         pos_y_px + offset_y,
-         false,
-         false
-      );
-
-      _animation_opening = animation_pool.create(
-         ValueReader::readValue<std::string>("animation_opening", map).value_or("opening"),
-         pos_x_px + offset_x,
-         pos_y_px + offset_y,
-         false,
-         false
-      );
-
-      _animation_idle_open = animation_pool.create(
-         ValueReader::readValue<std::string>("animation_idle_open", map).value_or("open"),
-         pos_x_px + offset_x,
-         pos_y_px + offset_y,
-         false,
-         false
-      );
-
-      _animation_idle_closed->_looped = true;
-      _animation_idle_open->_looped = true;
+      return;
    }
+
+   const auto& map = data._tmx_object->_properties->_map;
+   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
+
+   const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
+   _texture = TexturePool::getInstance().get(texture_path);
+   _sprite.setTexture(*_texture);
+   _sprite.setPosition(pos_x_px, pos_y_px);
+
+   _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("treasure_chest_open.wav");
+   Audio::getInstance().addSample(_sample_open);
+
+   const auto spawn_extra = ValueReader::readValue<std::string>("spawn_extra", map).value_or("");
+   if (!spawn_extra.empty())
+   {
+      _spawn_extra = spawn_extra;
+   }
+
+   // read animations if set up
+   const auto offset_x = width_px * 0.5f;
+   const auto offset_y = height_px * 0.5f;
+
+   AnimationPool animation_pool{"data/sprites/treasure_chest_animations.json"};
+
+   _animation_idle_closed = animation_pool.create(
+      ValueReader::readValue<std::string>("animation_idle_closed", map).value_or("idle"),
+      pos_x_px + offset_x,
+      pos_y_px + offset_y,
+      false,
+      false
+   );
+
+   _animation_opening = animation_pool.create(
+      ValueReader::readValue<std::string>("animation_opening", map).value_or("opening"),
+      pos_x_px + offset_x,
+      pos_y_px + offset_y,
+      false,
+      false
+   );
+
+   _animation_idle_open = animation_pool.create(
+      ValueReader::readValue<std::string>("animation_idle_open", map).value_or("open"),
+      pos_x_px + offset_x,
+      pos_y_px + offset_y,
+      false,
+      false
+   );
+
+   _animation_idle_closed->_looped = true;
+   _animation_idle_open->_looped = true;
+
+   _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left + _rect.width / 2, _rect.top - _rect.height / 2});
+   _spawn_effect->deserialize(data);
 }
 
 void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
@@ -94,7 +99,7 @@ void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
       _animation_idle_open->draw(target);
    }
 
-   if (_spawn_effect != nullptr)
+   if (_spawn_effect->isActive())
    {
       _spawn_effect->draw(target);
    }
@@ -119,7 +124,7 @@ void TreasureChest::update(const sf::Time& dt)
 
          if (Player::getCurrent()->getControls()->isButtonBPressed())
          {
-            _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left + _rect.width / 2, _rect.top - _rect.height / 2});
+            _spawn_effect->activate();
 
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
             if (player_rect_px.intersects(_rect))
@@ -164,7 +169,7 @@ void TreasureChest::update(const sf::Time& dt)
       }
    }
 
-   if (_spawn_effect != nullptr)
+   if (_spawn_effect->isActive())
    {
       _spawn_effect->update(dt);
 
@@ -174,11 +179,6 @@ void TreasureChest::update(const sf::Time& dt)
          {
             ExtraWrapper::spawnExtra(_spawn_extra.value());
          }
-      }
-
-      if (_spawn_effect->isFinished())
-      {
-         _spawn_effect.reset();
       }
    }
 }
