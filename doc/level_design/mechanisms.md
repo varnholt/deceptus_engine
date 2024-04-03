@@ -1054,3 +1054,51 @@ A Text Layer either renders a given text using either a bitmap or a truetype fon
 ---
 
 
+## Treasure Chests
+
+Treasure chests are a mechanism that can spawn extras when opened. 
+For that reason, a treasure chest usually references an identifier of an extra item which is configured to be hidden until activated by the treasure chest.
+Further, when the extra is spawned, a 'Spawn Animation' is played which introduces another whole set of configurable properties.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`TreasureChest`|
+|Object Group|`treasure_chests`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The layer's z index|
+|texture|string|Path to the treasure chest texture (default is `data/sprites/treasure_chest.png`)|
+|sample|string|Sample that is played when the chest is opened (default is `treasure_chest_open.wav`)|
+|spawn_extra|string|The identifier of the extra that's supposed to be spawned when opened (default is an empty string)|
+|animation_idle_closed|string|The closed idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "idle")|
+|animation_opening|string|The opening animation loaded from `data/sprites/treasure_chest_animations.json` (default is "opening")|
+|animation_idle_open|string|The open idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "open")|
+
+### Spawn Effect Properties (extension to the Object Properties above)
+
+The spawn effect consists of an orb animation in the center and particles that move towards that orb.
+
+|Property|Type|Description|
+|-|-|-|
+|_show_duration_s|float|The duration in seconds until the effect is fully faded in, i.e. alpha goes from 0 to 1 (default is 1s)|
+|_hide_duration_s|float|The duration in seconds until the effect is fully faded out, i.e. alpha goes from 1 to 0 (default is 2s)|
+|_particle_count|int|The number of particles to be spawned (default is 100)|
+|_particle_radius|float|The maximum distance in pixels the particles are allowed to spawn away from the center (default is 150px)|
+|_particle_velocity_min|float|Particles pick a random velocity from a range. This is the minimum value (default is 0.001)|
+|_particle_velocity_max|float|Particles pick a random velocity from a range. This is the maximum value (default is 0.004)|
+|_orb_idle_cycle_count|int|The amount of times the orb's idle animation is looped (default is 1)|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
