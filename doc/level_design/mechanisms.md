@@ -1087,13 +1087,13 @@ The spawn effect consists of an orb animation in the center and particles that m
 
 |Property|Type|Description|
 |-|-|-|
-|_show_duration_s|float|The duration in seconds until the effect is fully faded in, i.e. alpha goes from 0 to 1 (default is 1s)|
-|_hide_duration_s|float|The duration in seconds until the effect is fully faded out, i.e. alpha goes from 1 to 0 (default is 2s)|
-|_particle_count|int|The number of particles to be spawned (default is 100)|
-|_particle_radius|float|The maximum distance in pixels the particles are allowed to spawn away from the center (default is 150px)|
-|_particle_velocity_min|float|Particles pick a random velocity from a range. This is the minimum value (default is 0.001)|
-|_particle_velocity_max|float|Particles pick a random velocity from a range. This is the maximum value (default is 0.004)|
-|_orb_idle_cycle_count|int|The amount of times the orb's idle animation is looped (default is 1)|
+|show_duration_s|float|The duration in seconds until the effect is fully faded in, i.e. alpha goes from 0 to 1 (default is 1s)|
+|hide_duration_s|float|The duration in seconds until the effect is fully faded out, i.e. alpha goes from 1 to 0 (default is 2s)|
+|particle_count|int|The number of particles to be spawned (default is 100)|
+|particle_radius|float|The maximum distance in pixels the particles are allowed to spawn away from the center (default is 150px)|
+|particle_velocity_min|float|Particles pick a random velocity from a range. This is the minimum value (default is 0.001)|
+|particle_velocity_max|float|Particles pick a random velocity from a range. This is the maximum value (default is 0.004)|
+|orb_idle_cycle_count|int|The amount of times the orb's idle animation is looped (default is 1)|
 
 ---
 
