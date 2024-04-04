@@ -16,7 +16,7 @@
       "texture": "data/game/ingame_heart_shine.png"
    },
    "skull_blink": {
-      "frame_durations": [100, 100, 100, 100, 100, 100, 100, 100],
+      "frame_durations": [70, 70, 70, 70, 70, 70, 70, 70],
       "frame_offset": [0, 0],
       "frame_size": [21, 20],
       "origin": [0, 0],

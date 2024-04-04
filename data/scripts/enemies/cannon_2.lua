@@ -28,7 +28,7 @@ mElapsedSinceFired = 0.0
 mElapsedUntilFired = 0.0
 mX = -1.0
 mAlignmentOffset = 0
-mSpeed = 1.5
+mSpeed = 1.0
 mProjectileIndex = 0
 
 mIdle = true
@@ -178,7 +178,7 @@ function update(dt)
    -- update sprite index
    mElapsed = mElapsed + dt
    index = mSpriteIndex
-   mSpriteIndex = math.floor(mElapsed * 20.0)
+   mSpriteIndex = math.floor(mElapsed * 16.0)
 
    -- update projectile index
    projectileIndex = 0
