@@ -1056,6 +1056,8 @@ A Text Layer either renders a given text using either a bitmap or a truetype fon
 
 ## Treasure Chests
 
+![](images/mechanism_treasure_chest.png)
+
 Treasure chests are a mechanism that can spawn extras when opened. 
 For that reason, a treasure chest usually references an identifier of an extra item which is configured to be hidden until activated by the treasure chest.
 Further, when the extra is spawned, a 'Spawn Animation' is played which introduces another whole set of configurable properties.
