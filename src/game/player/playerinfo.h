@@ -8,11 +8,14 @@
 
 #include "game/extratable.h"
 #include "game/inventory.h"
+#include "game/player/playerstats.h"
 
 struct PlayerInfo
 {
    Inventory _inventory;
    ExtraTable _extra_table;
+   PlayerStats _stats;
+
    std::string _name;
 };
 
