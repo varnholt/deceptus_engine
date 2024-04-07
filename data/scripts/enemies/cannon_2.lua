@@ -110,9 +110,9 @@ function writeProperty(key, value)
          mAlignmentOffset = 5 * SPRITE_HEIGHT
       end
    elseif (key == "time_offset_s") then
-      mElapsedUntilFired = mElapsedUntilFired + value
+      mElapsedUntilFired = mElapsedUntilFired + tonumber(value)
    elseif (key == "fire_interval_s") then
-      mFireInterval = value
+      mFireInterval = tonumber(value)
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
       setAudioUpdateBehavior(update_behavior)
