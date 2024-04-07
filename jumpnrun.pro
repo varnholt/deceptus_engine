@@ -285,6 +285,7 @@ SOURCES += \
    src/game/player/playerinfo.cpp \
    src/game/player/playerinput.cpp \
    src/game/player/playerjump.cpp \
+   src/game/player/playerstats.cpp \
    src/game/player/timerlock.cpp \
    src/game/playerstencil.cpp \
    src/game/playerutils.cpp \
@@ -528,6 +529,7 @@ HEADERS += \
    src/game/player/playerjump.h \
    src/game/player/playerjumptrace.h \
    src/game/player/playerspeed.h \
+   src/game/player/playerstats.h \
    src/game/player/timerlock.h \
    src/game/playerstencil.h \
    src/game/playerutils.h \
