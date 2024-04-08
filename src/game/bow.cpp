@@ -4,6 +4,7 @@
 #include "framework/tools/globalclock.h"
 #include "texturepool.h"
 
+#include <array>
 #include <iostream>
 
 // http://www.iforce2d.net/b2dtut/sticky-projectiles
@@ -89,12 +90,12 @@ void Bow::load(b2World* world)
    body_def.position.Set(0, 5);
 
    b2PolygonShape polygon_shape;
-   b2Vec2 vertices[4];
+   std::array<b2Vec2, 4> vertices;
    vertices[0].Set(arrow_tail * scale, 0.0f);
    vertices[1].Set(0.0, -arrow_width * scale);
    vertices[2].Set(arrow_tip * scale, 0.0f);
    vertices[3].Set(0.0, arrow_width * scale);
-   polygon_shape.Set(vertices, 4);
+   polygon_shape.Set(vertices.data(), 4);
 
    b2FixtureDef fixture_def;
    fixture_def.shape = &polygon_shape;
@@ -160,7 +161,7 @@ void Bow::updateRotation(Arrow* arrow)
 {
    constexpr auto minimum_velocity = 0.1f;
 
-   auto arrow_body = arrow->getBody();
+   auto* arrow_body = arrow->getBody();
    auto arrow_velocity = arrow_body->GetLinearVelocity();
 
    if (arrow_velocity.Length() > minimum_velocity)
@@ -175,7 +176,7 @@ void Bow::update(const sf::Time& time)
    Gun::update(time);
 
    // position the loaded arrow
-   if (_loaded_arrow)
+   if (_loaded_arrow != nullptr)
    {
       // position the arrow next to the object carrying it (half a meter away)
       const auto start_position = _launcher_body->GetWorldPoint(b2Vec2(0.5f, 0));
