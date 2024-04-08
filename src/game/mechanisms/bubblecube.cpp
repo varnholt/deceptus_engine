@@ -116,7 +116,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    // create body
    _x_px = data._tmx_object->_x_px;
    _y_px = data._tmx_object->_y_px;
-   _position_m = MPP* b2Vec2{_x_px - width_px / 2, _y_px};
+   _position_m = MPP * b2Vec2{_x_px - width_px / 2, _y_px};
 
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
@@ -294,7 +294,8 @@ void BubbleCube::updateFootSensorContact()
       pos_px.x + bevel_px - bevel_range_increase_px,
       pos_px.y,
       width_px - (2 * bevel_px) + (2 * bevel_range_increase_px),
-      collision_rect_height};
+      collision_rect_height
+   };
 
    const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
    _foot_sensor_rect_intersects_previous = _foot_sensor_rect_intersects;
@@ -386,7 +387,7 @@ struct BubbleQueryCallback : public b2QueryCallback
 
    bool checkBelongsToPlayer(b2Fixture* fixture) const
    {
-      auto fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
+      auto* fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
       if (!fixture_node)
       {
          return false;
@@ -402,7 +403,8 @@ struct BubbleQueryCallback : public b2QueryCallback
       {
          return true;
       }
-      else if (fixture->GetBody() == _body)
+
+      if (fixture->GetBody() == _body)
       {
          return true;
       }
