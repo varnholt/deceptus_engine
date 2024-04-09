@@ -53,6 +53,26 @@
 #define setUniform setParameter
 #endif
 
+namespace
+{
+void showGpu()
+{
+   // get the GPU vendor and renderer strings
+   const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+   const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+
+   if (vendor && renderer)
+   {
+      Log::Info() << "GPU vendor: " << vendor;
+      Log::Info() << "GPU renderer: " << renderer;
+   }
+   else
+   {
+      Log::Warning() << "failed to retrieve GPU information";
+   }
+}
+}  // namespace
+
 // screen concept
 //
 // +-----------+------------------------------------------------------------------------------+-----------+        -
@@ -131,24 +151,12 @@ void Game::initializeWindow()
       context_settings
    );
 
-   // Get the GPU vendor and renderer strings
-   const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-   const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-
-   if (vendor && renderer)
-   {
-      std::cout << "GPU Vendor: " << vendor << std::endl;
-      std::cout << "GPU Renderer: " << renderer << std::endl;
-   }
-   else
-   {
-      std::cerr << "Failed to retrieve GPU information" << std::endl;
-   }
-
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
+
+   showGpu();
 
    // reset render textures if needed
    if (_window_render_texture)
@@ -163,8 +171,8 @@ void Game::initializeWindow()
 
    const auto size_ratio = std::min(ratio_width, ratio_height);
 
-   int32_t texture_width = size_ratio * game_config._view_width;
-   int32_t texture_height = size_ratio * game_config._view_height;
+   const int32_t texture_width = size_ratio * game_config._view_width;
+   const int32_t texture_height = size_ratio * game_config._view_height;
 
    Log::Info() << "video mode: " << game_config._video_mode_width << " x " << game_config._video_mode_height
                << ", view size: " << game_config._view_width << " x " << game_config._view_height << ", ratio: " << size_ratio;
@@ -309,6 +317,8 @@ Game::~Game()
 //----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
+   initializeWindow();
+
    initializeController();
 
    _player = std::make_shared<Player>();
@@ -345,8 +355,6 @@ void Game::initialize()
             _level->createViews();
          }
       );
-
-   initializeWindow();
 
    showMainMenu();
 

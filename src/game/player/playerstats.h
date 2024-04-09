@@ -7,7 +7,8 @@
 
 struct PlayerStats
 {
-   int32_t _death_count{0};
+   int32_t _death_count_overall{0};
+   int32_t _death_count_current_level{0};  // if player goes back and forth between levels, this should be adjusted
 };
 
 void to_json(nlohmann::json& j, const PlayerStats& d);

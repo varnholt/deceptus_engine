@@ -1,7 +1,6 @@
 #include "texturepool.h"
 
-#include <iostream>
-
+#include "framework/tools/log.h"
 
 TexturePool& TexturePool::getInstance()
 {
@@ -19,7 +18,10 @@ std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
    if (!sp)
    {
       _pool[key] = sp = std::make_shared<sf::Texture>();
-      sp->loadFromFile(key);
+      if (!sp->loadFromFile(key))
+      {
+         Log::Warning() << "error loading texture: " << path;
+      }
    }
 
    return sp;
