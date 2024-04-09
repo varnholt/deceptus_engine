@@ -931,6 +931,12 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimation(const PlayerAnimationData& data)
 {
+   // if player didn't die earlier, don't play the appear animation
+   if (data._death_count_current_level == 0)
+   {
+      return std::nullopt;
+   }
+
    using namespace std::chrono_literals;
 
    std::optional<std::shared_ptr<Animation>> next_cycle;

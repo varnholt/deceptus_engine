@@ -856,6 +856,7 @@ void Player::updateAnimation(const sf::Time& dt)
    PlayerAnimation::PlayerAnimationData data;
 
    data._dead = isDead();
+   data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
    data._in_air = isInAir();
    data._in_water = isInWater();
    data._linear_velocity = _body->GetLinearVelocity();
@@ -967,7 +968,9 @@ void Player::updateVelocity()
       return;
    }
 
-   if (GameClock::getInstance().durationSinceSpawn() < _player_animation.getRevealDuration())
+   // block movement while spawning
+   // spawn is only played if player has died before in current level
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation.getRevealDuration() && SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;
@@ -1660,8 +1663,11 @@ void Player::updateSpawn()
 
    _spawn_complete = true;
 
-   // play reveal sound
-   Audio::getInstance().playSample({"player_spawn_01.wav"});
+   // play reveal sound (but only if player died earlier)
+   if (SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
+   {
+      Audio::getInstance().playSample({"player_spawn_01.wav"});
+   }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1951,6 +1957,8 @@ void Player::die()
 {
    _dead = true;
    Audio::getInstance().playSample({"death.wav"});
+   SaveState::getPlayerInfo()._stats._death_count_overall++;
+   SaveState::getPlayerInfo()._stats._death_count_current_level++;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
