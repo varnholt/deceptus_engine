@@ -2,6 +2,7 @@
 
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 
@@ -29,17 +30,13 @@ void AtmosphereShader::initialize()
       return;
    }
 
-   if (!_distortion_map.loadFromFile("data/effects/distortion_map.png"))
-   {
-      Log::Error() << "error loading distortion map";
-      return;
-   }
+   _distortion_map = TexturePool::getInstance().get("data/effects/distortion_map.png");
 
-   _distortion_map.setRepeated(true);
-   _distortion_map.setSmooth(true);
+   _distortion_map->setRepeated(true);
+   _distortion_map->setSmooth(true);
 
    _shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
-   _shader.setUniform("distortionMapTexture", _distortion_map);
+   _shader.setUniform("distortionMapTexture", *_distortion_map);
    _shader.setUniform("physicsTexture", _render_texture->getTexture());
 }
 

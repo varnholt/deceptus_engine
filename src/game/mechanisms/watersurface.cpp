@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "game/debugdraw.h"
+#include "game/texturepool.h"
 #include "player/player.h"
 
 #include <iostream>
@@ -40,7 +41,7 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    // draw water gradient
    sf::RenderStates states;
-   states.texture = &_gradient;
+   states.texture = _gradient.get();
 
    if (_pixel_ratio.has_value())
    {
@@ -452,7 +453,7 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
       Log::Error() << "box with width " << box_width << "px cannot be divided into " << segment_count << " segments";
    }
 
-   _gradient.loadFromFile(gradient_texture);
+   _gradient = TexturePool::getInstance().get(gradient_texture);
 
    Log::Info() << "deserialize water surface at: " << _bounding_box.left << ", " << _bounding_box.top << " w: " << _bounding_box.width
                << ", h:" << _bounding_box.height;

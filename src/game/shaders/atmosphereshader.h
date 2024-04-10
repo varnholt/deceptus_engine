@@ -20,5 +20,5 @@ private:
    std::shared_ptr<sf::RenderTexture> _render_texture;
 
    sf::Shader _shader;
-   sf::Texture _distortion_map;
+   std::shared_ptr<sf::Texture> _distortion_map;
 };
