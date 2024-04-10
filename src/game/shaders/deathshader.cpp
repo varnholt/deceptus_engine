@@ -1,6 +1,7 @@
 #include "deathshader.h"
 
 #include "framework/tools/log.h"
+#include "game/texturepool.h"
 #include "player/player.h"
 
 #include <iostream>
@@ -35,26 +36,17 @@ void DeathShader::initialize()
       return;
    }
 
-   if (!_flow_field_1.loadFromFile("data/effects/flowfield_1.png"))
-   {
-      Log::Error() << "error loading flowfield 1";
-      return;
-   }
+   _flow_field_1 = TexturePool::getInstance().get("data/effects/flowfield_1.png");
+   _flow_field_2 = TexturePool::getInstance().get("data/effects/flowfield_3.png");
 
-   if (!_flow_field_2.loadFromFile("data/effects/flowfield_3.png"))
-   {
-      Log::Error() << "error loading flowfield 2";
-      return;
-   }
-
-   _flow_field_1.setRepeated(true);
-   _flow_field_1.setSmooth(true);
-   _flow_field_2.setRepeated(true);
-   _flow_field_2.setSmooth(true);
+   _flow_field_1->setRepeated(true);
+   _flow_field_1->setSmooth(true);
+   _flow_field_2->setRepeated(true);
+   _flow_field_2->setSmooth(true);
 
    _shader.setUniform("current_texture", sf::Shader::CurrentTexture);
-   _shader.setUniform("flowfield_1", _flow_field_1);
-   _shader.setUniform("flowfield_2", _flow_field_2);
+   _shader.setUniform("flowfield_1", *_flow_field_1);
+   _shader.setUniform("flowfield_2", *_flow_field_2);
 }
 
 
