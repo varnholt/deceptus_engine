@@ -27,8 +27,8 @@ class DeathShader
 
       std::shared_ptr<sf::RenderTexture> _render_texture;
 
-      sf::Texture _flow_field_1;
-      sf::Texture _flow_field_2;
+      std::shared_ptr<sf::Texture> _flow_field_1;
+      std::shared_ptr<sf::Texture> _flow_field_2;
 
       float _elapsed = 0.0f;
 };

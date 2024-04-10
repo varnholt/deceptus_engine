@@ -71,7 +71,7 @@ private:
    std::optional<bool> _player_was_in_water;
    sf::VertexArray _vertices;
    float _segment_width{0.0f};
-   sf::Texture _gradient;
+   std::shared_ptr<sf::Texture> _gradient;
    uint8_t _opacity{200};
 
    sf::RenderTexture _render_texture;
