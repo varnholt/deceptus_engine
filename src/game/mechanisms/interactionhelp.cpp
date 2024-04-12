@@ -31,7 +31,7 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
 
    if (_button_alpha.has_value())
    {
-      const auto& level_view = target.getView();
+      const auto level_view = target.getView();
 
       const sf::View ortho(sf::FloatRect(
          0.0f,
@@ -59,13 +59,14 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
 void InteractionHelp::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   const auto intersects = (player_rect.intersects(_rect_px));
+   const auto intersects = player_rect.intersects(_rect_px);
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)
    {
       // show
       _animation_hide->setVisible(false);
       _animation_show->setVisible(true);
+
       _animation_show->seekToStart();
       _animation_show->play();
       _active = true;
@@ -75,11 +76,13 @@ void InteractionHelp::update(const sf::Time& dt)
       // hide
       _animation_show->setVisible(false);
       _animation_hide->setVisible(true);
+
       _animation_hide->seekToStart();
       _animation_hide->play();
       _active = false;
    }
 
+   // update alpha
    std::optional<float> alpha;
 
    if (!_animation_show->_paused)
