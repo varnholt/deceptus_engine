@@ -56,18 +56,18 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
 
    _texture = TexturePool::getInstance().get("data/sprites/enemy_spikeball.png");
    _spike_sprite.setTexture(*_texture);
-   _spike_sprite.setTextureRect(sf::IntRect(24, 0, 48, 48));
-   _spike_sprite.setOrigin(24, 24);
+   _spike_sprite.setTextureRect(sf::IntRect(118, 24, 51, 50));
+   _spike_sprite.setOrigin(25, 25);
 
    _box_sprite.setTexture(*_texture);
-   _box_sprite.setTextureRect(sf::IntRect(72, 45, 24, 27));
+   _box_sprite.setTextureRect(sf::IntRect(168, 93, 24, 27));
 
    _chain_element_a.setTexture(*_texture);
-   _chain_element_a.setTextureRect(sf::IntRect(0, 64, 8, 8));
+   _chain_element_a.setTextureRect(sf::IntRect(297, 56, 8, 8));
    _chain_element_a.setOrigin(4, 4);
 
    _chain_element_b.setTexture(*_texture);
-   _chain_element_b.setTextureRect(sf::IntRect(34, 64, 8, 8));
+   _chain_element_b.setTextureRect(sf::IntRect(320, 56, 8, 8));
    _chain_element_b.setOrigin(4, 4);
 }
 
