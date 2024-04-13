@@ -11,11 +11,11 @@
 
 // |         |         |         |         |
 // |         |         |         |         |
-// |         |   ######x         |         |
-// |      #######      |#####    |         |
-// +-----x---+---------+-----x---+---------+ y = 0
-// |      #######      |#####    |         |
-// |         |   ######x         |         |
+// |         |   ######x######   |         |
+// |      #######      |      #######      |
+// +-----x---+---------+---------+---x-----+---+ y = 0
+// |      #######      |      #######      |
+// |         |   ######x######   |         |
 // |         |         |         |         |
 //                   x = 0
 
@@ -27,7 +27,7 @@ constexpr auto launch_speed = 5.0f;
 constexpr auto arrow_gravity_scale = 0.1f;
 
 constexpr auto arrow_tail = -1.4f;
-constexpr auto arrow_tip = 0.6f;
+constexpr auto arrow_tip = 1.4f;
 constexpr auto arrow_width = 0.1f;
 constexpr auto scale = 0.1f;
 
