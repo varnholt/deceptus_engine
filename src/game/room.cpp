@@ -367,9 +367,11 @@ void Room::startTransition()
                }
 
                // apply room start position if available
+               Player::getCurrent()->fadeOutReset();
                movePlayerToRoomStartPosition();
             }
          );
+         Player::getCurrent()->fadeOut();
          screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          screen_transition->startEffect1();
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));

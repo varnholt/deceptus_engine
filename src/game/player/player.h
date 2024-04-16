@@ -91,6 +91,8 @@ public:
 
    bool getVisible() const;
    void setVisible(bool visible);
+   void fadeOut(float fade_out_speed_factor = 5.0f);
+   void fadeOutReset();
 
    void setPlatformBody(b2Body* body);
    b2Body* getPlatformBody() const;
@@ -128,6 +130,7 @@ public:
 private:
    void createPlayerBody();
 
+   void updateFadeOut(const sf::Time& dt);
    void updateAnimation(const sf::Time& dt);
    void updateAtmosphere();
    void updateBendDown();
@@ -192,7 +195,7 @@ private:
    b2Vec2 _ground_normal;
    b2Vec2 _position_previous;
    b2Vec2 _velocity_previous;
-   float _impulse = 0.0f;
+   float _impulse{0.0f};
 
    sf::Vector2f _pixel_position_f;
    sf::Vector2i _pixel_position_i;
@@ -203,26 +206,29 @@ private:
    sf::Clock _clock;
    sf::Clock _portal_clock;
    sf::Clock _damage_clock;
-   bool _damage_initialized = false;
+   bool _damage_initialized{false};
 
-   bool _points_to_left = false;
-   bool _visible = true;
-   bool _dead = false;
-   bool _spawn_complete = false;
-   bool _spawn_orientation_locked = false;
+   bool _points_to_left{false};
+   bool _visible{true};
+   bool _fade_out{false};
+   float _fade_out_alpha{1.0f};
+   float _fade_out_speed_factor{10.0f};
+   bool _dead{false};
+   bool _spawn_complete{false};
+   bool _spawn_orientation_locked{false};
    std::optional<DeathReason> _death_reason;
 
-   bool _in_water = false;
+   bool _in_water{false};
    HighResTimePoint _water_entered_time;
 
-   float _next_footstep_time = 0.0f;
-   int32_t _step_counter = 0;
+   float _next_footstep_time{0.0f};
+   int32_t _step_counter{0};
 
-   int32_t _z_index = 0;
-   int32_t _id = 0;
+   int32_t _z_index{0};
+   int32_t _id{0};
 
-   bool _hard_landing = false;
-   int32_t _hard_landing_cycles = 0;
+   bool _hard_landing{false};
+   int32_t _hard_landing_cycles{0};
    HighResTimePoint _timepoint_hard_landing;
 
    std::shared_ptr<PlayerControls> _controls;

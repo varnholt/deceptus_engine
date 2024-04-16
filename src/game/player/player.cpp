@@ -46,7 +46,6 @@
 namespace fmt = std;
 #endif
 
-//----------------------------------------------------------------------------------------------------------------------
 namespace
 {
 constexpr uint16_t category_bits = CategoryFriendly;
@@ -60,22 +59,18 @@ constexpr auto wall_slide_sensor_height = 0.75f;
 constexpr auto wall_slide_sensor_distance = 0.21f;
 }  // namespace
 
-//----------------------------------------------------------------------------------------------------------------------
 Player* Player::__current = nullptr;
 
-//----------------------------------------------------------------------------------------------------------------------
 b2Body* Player::getBody() const
 {
    return _body;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 b2Fixture* Player::getFootSensorFixture() const
 {
    return _foot_sensor_fixture;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::IntRect Player::computeFootSensorPixelIntRect() const
 {
    sf::IntRect rect_px;
@@ -120,7 +115,6 @@ sf::FloatRect Player::computeFootSensorPixelFloatRect() const
    return rect_px;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 Player::Player(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Player).name());
@@ -140,13 +134,11 @@ Player::Player(GameNode* parent) : GameNode(parent)
    _player_animation.loadAnimations(_animation_pool);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 Player* Player::getCurrent()
 {
    return __current;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::initialize()
 {
    _portal_clock.restart();
@@ -180,7 +172,6 @@ void Player::initialize()
    initializeController();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::initializeLevel()
 {
    createPlayerBody();
@@ -188,7 +179,6 @@ void Player::initializeLevel()
    setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::initializeController()
 {
    auto& gji = GameControllerIntegration::getInstance();
@@ -284,7 +274,6 @@ void Player::initializeController()
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setBodyViaPixelPosition(float x, float y)
 {
    setPixelPosition(x, y);
@@ -295,7 +284,6 @@ void Player::setBodyViaPixelPosition(float x, float y)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::checkDamageDrawSkip() const
 {
    if (isDead())
@@ -318,7 +306,6 @@ bool Player::checkDamageDrawSkip() const
    return skip_render;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
 {
    if (isDead())
@@ -336,14 +323,12 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::useInventory(int32_t slot)
 {
    auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.use(slot);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px)
 {
    // draw dash with motion blur
@@ -361,7 +346,6 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    _water_bubbles.draw(color, normal);
@@ -392,7 +376,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->setColor(sf::Color::White);
+      current_cycle->setColor(sf::Color(255, 255, 255, _fade_out_alpha * 255));
       current_cycle->setPosition(draw_position_px);
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
@@ -402,7 +386,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& auxiliary_cycle = _player_animation.getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->setColor(sf::Color::White);
+      auxiliary_cycle->setColor(sf::Color(255, 255, 255, _fade_out_alpha * 255));
       auxiliary_cycle->setPosition(draw_position_px);
       auxiliary_cycle->draw(color, normal);
    }
@@ -415,7 +399,6 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::drawStencil(sf::RenderTarget& color)
 {
    const auto stencil_color = sf::Color{255, 255, 255, 40};
@@ -438,19 +421,16 @@ void Player::drawStencil(sf::RenderTarget& color)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const sf::Vector2f& Player::getPixelPositionFloat() const
 {
    return _pixel_position_f;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const sf::Vector2i& Player::getPixelPositionInt() const
 {
    return _pixel_position_i;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setPixelPosition(float x, float y)
 {
    _pixel_position_f.x = x;
@@ -460,13 +440,11 @@ void Player::setPixelPosition(float x, float y)
    _pixel_position_i.y = static_cast<int32_t>(y);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const sf::FloatRect& Player::getPixelRectFloat() const
 {
    return _pixel_rect_f;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelRect()
 {
    constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
@@ -482,19 +460,16 @@ void Player::updatePixelRect()
    _pixel_rect_i.height = PLAYER_ACTUAL_HEIGHT;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateChunk()
 {
    _chunk.update(_pixel_position_i.x, _pixel_position_i.y);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const sf::IntRect& Player::getPixelRectInt() const
 {
    return _pixel_rect_i;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setMaskBitsCrouching(bool enabled)
 {
    b2Filter filter = _body_fixture->GetFilterData();
@@ -502,7 +477,6 @@ void Player::setMaskBitsCrouching(bool enabled)
    _body_fixture->SetFilterData(filter);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::createFeet()
 {
    // feet
@@ -610,7 +584,6 @@ void Player::createFeet()
    right_arm_sensor_fixture->SetUserData(static_cast<void*>(right_arm_object_data));
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::createBody()
 {
    // create player body
@@ -649,26 +622,32 @@ void Player::createBody()
    _jump._body = _body;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::createPlayerBody()
 {
    createBody();
    createFeet();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
+void Player::updateFadeOut(const sf::Time& dt)
+{
+   if (!_fade_out)
+   {
+      return;
+   }
+
+   _fade_out_alpha = std::max(_fade_out_alpha - dt.asSeconds() * _fade_out_speed_factor, 0.0f);
+}
+
 void Player::setWorld(const std::shared_ptr<b2World>& world)
 {
    _world = world;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::resetWorld()
 {
    _world.reset();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getMaxVelocity() const
 {
    if (isInWater())
@@ -692,7 +671,6 @@ float Player::getMaxVelocity() const
    return PhysicsConfiguration::getInstance()._player_speed_max_walk;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromController(const PlayerSpeed& speed) const
 {
    if (_controls->isLookingAround())
@@ -732,19 +710,16 @@ float Player::getVelocityFromController(const PlayerSpeed& speed) const
    return desired_velocity;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isPointingRight() const
 {
    return !_points_to_left;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isPointingLeft() const
 {
    return _points_to_left;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateOrientation()
 {
    if (isDead())
@@ -763,7 +738,6 @@ void Player::updateOrientation()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
    if (_controls->isLookingAround())
@@ -808,7 +782,6 @@ float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
    return desired_velocity;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getDeceleration() const
 {
    auto deceleration = (isInAir()) ? PhysicsConfiguration::getInstance()._player_deceleration_air
@@ -817,7 +790,6 @@ float Player::getDeceleration() const
    return deceleration;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getAcceleration() const
 {
    auto acceleration = (isInAir()) ? PhysicsConfiguration::getInstance()._player_acceleration_air
@@ -826,13 +798,11 @@ float Player::getAcceleration() const
    return acceleration;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isDead() const
 {
    return _dead;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isJumpingThroughOneWayWall()
 {
    // a player is considered jumping through a one-way wall when
@@ -850,7 +820,6 @@ bool Player::isJumpingThroughOneWayWall()
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateAnimation(const sf::Time& dt)
 {
    PlayerAnimation::PlayerAnimationData data;
@@ -907,7 +876,6 @@ void Player::updateAnimation(const sf::Time& dt)
    _player_animation.update(dt, data);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getDesiredVelocity() const
 {
    const auto acceleration = getAcceleration();
@@ -921,7 +889,6 @@ float Player::getDesiredVelocity() const
    return desired_velocity;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float Player::getDesiredVelocity(const PlayerSpeed& speed) const
 {
    auto desired_velocity = 0.0f;
@@ -945,7 +912,6 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
    return desired_velocity;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateVelocity()
 {
    using namespace std::chrono_literals;
@@ -1085,7 +1051,6 @@ void Player::updateVelocity()
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
 {
    auto screen_transition = std::make_unique<ScreenTransition>();
@@ -1104,37 +1069,31 @@ std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
    return screen_transition;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const Chunk& Player::getChunk() const
 {
    return _chunk;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const PlayerBend& Player::getBend() const
 {
    return _bend;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setToggleCallback(const ToggleCallback& callback)
 {
    _toggle_callback = callback;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const PlayerJump& Player::getJump() const
 {
    return _jump;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 PlayerBelt& Player::getBelt()
 {
    return _belt;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::goToPortal(auto portal)
 {
    auto dst_position_px = portal->getDestination()->getPortalPosition();
@@ -1146,7 +1105,6 @@ void Player::goToPortal(auto portal)
    Portal::unlock();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePortal()
 {
    if (CameraPanorama::getInstance().isLookActive())
@@ -1189,7 +1147,6 @@ void Player::updatePortal()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::impulse(float intensity)
 {
    // just store the information we get from the post solve call for now.
@@ -1197,7 +1154,6 @@ void Player::impulse(float intensity)
    _impulse = intensity;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::startHardLanding()
 {
    _controls->lockOrientation(std::chrono::milliseconds(1000));
@@ -1219,7 +1175,6 @@ void Player::startHardLanding()
    Audio::getInstance().playSample({"player_grunt_01.wav"});
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateImpulse()
 {
    if (_impulse < impulse_epsilon)
@@ -1269,7 +1224,6 @@ void Player::updateImpulse()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::damage(int32_t damage, const sf::Vector2f& force)
 {
    if (isDead())
@@ -1311,7 +1265,6 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::kill(std::optional<DeathReason> death_reason)
 {
    if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
@@ -1327,7 +1280,6 @@ void Player::kill(std::optional<DeathReason> death_reason)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnPlatform() const
 {
    const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
@@ -1335,13 +1287,11 @@ bool Player::isOnPlatform() const
    return on_platform;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isOnGround() const
 {
    return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePlatformMovement(const sf::Time& /*dt*/)
 {
    if (_jump.isJumping())
@@ -1359,7 +1309,6 @@ void Player::updatePlatformMovement(const sf::Time& /*dt*/)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateAttack()
 {
    // at the moment the game doesn't have any in-water attacks
@@ -1385,19 +1334,16 @@ void Player::updateAttack()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isInWater() const
 {
    return _in_water;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setInWater(bool in_water)
 {
    _in_water = in_water;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateFootsteps()
 {
    if (GameContactListener::getInstance().getPlayerFootContactCount() > 0 && !isInWater())
@@ -1418,25 +1364,21 @@ void Player::updateFootsteps()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 int Player::getId() const
 {
    return _id;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 int Player::getZIndex() const
 {
    return _z_index;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setZIndex(int32_t z)
 {
    _z_index = z;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateBendDown()
 {
    // disable bend down states when player hit dash button
@@ -1484,7 +1426,6 @@ void Player::updateBendDown()
    setMaskBitsCrouching(bending_down);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateHardLanding()
 {
    using namespace std::chrono_literals;
@@ -1521,7 +1462,6 @@ void Player::updateHardLanding()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateGroundAngle()
 {
    if (!isOnGround())
@@ -1572,7 +1512,6 @@ void Player::updateGroundAngle()
    _ground_normal = intersection_normal;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateOneWayWallDrop()
 {
    if (getControls()->isDroppingDown())
@@ -1581,7 +1520,6 @@ void Player::updateOneWayWallDrop()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateChainShapeCollisions()
 {
    if (_jump.isJumping())
@@ -1601,7 +1539,6 @@ void Player::updateChainShapeCollisions()
    _body->SetTransform({pos.x, hiccup_pos->y - 0.18f}, 0.0f);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateJump()
 {
    PlayerJump::PlayerJumpInfo info;
@@ -1616,7 +1553,6 @@ void Player::updateJump()
    _jump.update(info);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateWallslide(const sf::Time& dt)
 {
    const auto wallslide_animation = _player_animation.getWallslideAnimation();
@@ -1626,7 +1562,6 @@ void Player::updateWallslide(const sf::Time& dt)
    wallslide_animation->update(dt);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateWaterBubbles(const sf::Time& dt)
 {
    WaterBubbles::WaterBubbleInput input;
@@ -1636,7 +1571,6 @@ void Player::updateWaterBubbles(const sf::Time& dt)
    _water_bubbles.update(dt, input);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateSpawn()
 {
    using namespace std::chrono_literals;
@@ -1670,13 +1604,11 @@ void Player::updateSpawn()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateHealth(const sf::Time& dt)
 {
    SaveState::getPlayerInfo()._extra_table._health.update(dt);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
@@ -1687,6 +1619,7 @@ void Player::update(const sf::Time& dt)
    updateChunk();
    _animation_pool.updateAnimations(dt);
 
+   updateFadeOut(dt);
    updateHealth(dt);
    updateChainShapeCollisions();
    updateImpulse();
@@ -1715,28 +1648,24 @@ void Player::update(const sf::Time& dt)
    updateSpawn();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::reloadAnimationPool()
 {
    _animation_pool.reload();
    _player_animation.loadAnimations(_animation_pool);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::resetMotionBlur()
 {
    _last_animations.clear();
    _player_animation.resetAlpha();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateDash(Dash dir)
 {
    PlayerDash::DashInput input{dir, _jump._wallsliding, _hard_landing, isInWater(), _points_to_left, _body};
    _dash.update(input);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelCollisions()
 {
    const auto& rect = getPixelRectFloat();
@@ -1744,7 +1673,6 @@ void Player::updatePixelCollisions()
    Fan::collide(rect, _body);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateAtmosphere()
 {
    const auto was_inside_water = isInWater();
@@ -1780,43 +1708,48 @@ void Player::updateAtmosphere()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setPlatformBody(b2Body* body)
 {
    _platform_body = body;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 b2Body* Player::getPlatformBody() const
 {
    return _platform_body;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setPlatformDx(float dx)
 {
    _platform_dx = dx;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setGroundBody(b2Body* body)
 {
    _ground_body = body;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::getVisible() const
 {
    return _visible;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setVisible(bool visible)
 {
    _visible = visible;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
+void Player::fadeOut(float fade_out_speed_factor)
+{
+   _fade_out = true;
+   _fade_out_speed_factor = fade_out_speed_factor;
+}
+
+void Player::fadeOutReset()
+{
+   _fade_out = false;
+   _fade_out_alpha = 1.0f;
+}
+
 void Player::setFriction(float friction)
 {
    for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
@@ -1830,13 +1763,11 @@ void Player::setFriction(float friction)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Player::isInAir() const
 {
    return (GameContactListener::getInstance().getPlayerFootContactCount() == 0) && !isInWater();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::attack()
 {
    if (!_weapon_system->_selected)
@@ -1943,7 +1874,6 @@ void Player::attack()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updateWeapons(const sf::Time& dt)
 {
    for (auto& w : _weapon_system->_weapons)
@@ -1952,7 +1882,6 @@ void Player::updateWeapons(const sf::Time& dt)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::die()
 {
    _dead = true;
@@ -1961,7 +1890,6 @@ void Player::die()
    SaveState::getPlayerInfo()._stats._death_count_current_level++;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::reset()
 {
    // check for checkpoints
@@ -1999,9 +1927,10 @@ void Player::reset()
    _spawn_complete = false;
    _spawn_orientation_locked = false;
    _in_water = false;
+
+   fadeOutReset();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 DeathReason Player::checkDead() const
 {
    DeathReason reason = DeathReason::Invalid;
@@ -2037,13 +1966,11 @@ DeathReason Player::checkDead() const
    return reason;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::setStartPixelPosition(float x, float y)
 {
    setPixelPosition(x, y);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::traceJumpCurve()
 {
    if (_controls->isButtonAPressed())
@@ -2071,7 +1998,6 @@ void Player::traceJumpCurve()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::keyPressed(sf::Keyboard::Key key)
 {
    switch (key)
@@ -2113,19 +2039,16 @@ void Player::keyPressed(sf::Keyboard::Key key)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<WeaponSystem>& Player::getWeaponSystem() const
 {
    return _weapon_system;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<PlayerControls>& Player::getControls() const
 {
    return _controls;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePixelPosition()
 {
    if (isDead())
@@ -2140,7 +2063,6 @@ void Player::updatePixelPosition()
    setPixelPosition(x, y);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Player::updatePreviousBodyState()
 {
    _position_previous = _body->GetPosition();
