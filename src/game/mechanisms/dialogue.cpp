@@ -11,6 +11,8 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
+#include "framework/tools/timer.h"
+#include "game/valuereader.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -33,13 +35,15 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    if (!properties)
    {
       Log::Error() << "dialogue object has no properties";
+      return nullptr;
    }
 
    // parse dialogue items
    std::optional<sf::Vector2f> pos;
    std::optional<sf::Color> text_color;
    std::optional<sf::Color> background_color;
-   for (auto i = 0u; i < 99; i++)
+   constexpr auto message_box_count_max = 99;
+   for (auto i = 0u; i < message_box_count_max; i++)
    {
       std::ostringstream oss;
       oss << std::setw(2) << std::setfill('0') << i;
@@ -90,6 +94,13 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       dialogue->_consumed_counter = 1;
    }
 
+   dialogue->_pause_game = ValueReader::readValue<bool>("pause_game", properties->_map).value_or(true);
+   const auto show_delay = ValueReader::readValue<int32_t>("show_delay_ms", properties->_map);
+   if (show_delay.has_value())
+   {
+      dialogue->_show_delay_ms = std::chrono::milliseconds{show_delay.value()};
+   }
+
    dialogue->_pixel_rect =
       sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
@@ -134,7 +145,17 @@ void Dialogue::update(const sf::Time& /*dt*/)
       if (!isActive() && !DisplayMode::getInstance().isSet(Display::Modal))
       {
          setActive(true);
-         showNext();
+
+         if (_show_delay_ms.has_value())
+         {
+            Timer::add(
+               _show_delay_ms.value(), [this]() { showNext(); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame
+            );
+         }
+         else
+         {
+            showNext();
+         }
       }
 
       if (_consumed_counter.has_value())
@@ -186,13 +207,23 @@ void Dialogue::showNext()
 
       // when done, mark the dialogue as inactive so it can be reactivated on button press
       setActive(false);
-      GameState::getInstance().enqueueResume();
+
+      // un-pause game if configured to be paused
+      if (_pause_game)
+      {
+         GameState::getInstance().enqueueResume();
+      }
+
       return;
    }
 
    if (_index == 0)
    {
-      GameState::getInstance().enqueuePause();
+      // pause game if configured
+      if (_pause_game)
+      {
+         GameState::getInstance().enqueuePause();
+      }
    }
 
    const auto item = _dialogue_items.at(_index);
