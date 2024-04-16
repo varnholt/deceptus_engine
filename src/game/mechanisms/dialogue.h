@@ -28,8 +28,8 @@ public:
       sf::Color _background_color = sf::Color{47, 12, 75};
       MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
       std::optional<sf::Vector2f> _pos;
-      bool _animate_text = true;
-      float _animate_text_speed = 10.0f;
+      bool _animate_text{true};
+      float _animate_text_speed{10.0f};
    };
 
    Dialogue(GameNode* parent = nullptr);
@@ -51,9 +51,12 @@ private:
    uint32_t _index = 0;
 
    sf::FloatRect _pixel_rect;
-   bool _active = false;
-   bool _button_required = true;
+   bool _active{false};
+   bool _button_required{true};
+   bool _pause_game{true};
+   std::optional<std::chrono::milliseconds> _show_delay_ms;
    std::optional<int32_t> _consumed_counter;
+   sf::Time _elapsed;
 };
 
 
