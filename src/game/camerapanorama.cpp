@@ -134,10 +134,10 @@ void CameraPanorama::update()
          const auto x_relative = (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
          const auto y_relative = (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
 
-         const auto looking_left = x_relative < 0.0f;
-         const auto looking_right = x_relative > 0.0f;
-         const auto looking_up = y_relative < 0.0f;
-         const auto looking_down = y_relative > 0.0f;
+         const auto looking_left = x_normalized < 0.0f;
+         const auto looking_right = x_normalized > 0.0f;
+         const auto looking_up = y_normalized < 0.0f;
+         const auto looking_down = y_normalized > 0.0f;
 
          const auto can_look_left = !(locked_left && _look_vector.x < 0.0f);
          const auto can_look_right = !(locked_right && _look_vector.x > 0.0f);
