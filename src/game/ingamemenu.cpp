@@ -8,7 +8,6 @@
 
 #include <iostream>
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::setJoystickInfo(const GameControllerInfo& joystickInfo)
 {
    _joystick_info = joystickInfo;
@@ -33,7 +32,6 @@ void InGameMenu::initializeController()
    );
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 bool InGameMenu::isControllerActionSkipped() const
 {
    auto skipped = false;
@@ -47,8 +45,6 @@ bool InGameMenu::isControllerActionSkipped() const
    return skipped;
 }
 
-
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::updateControllerActions()
 {
    const auto& gci = GameControllerIntegration::getInstance();
@@ -100,7 +96,6 @@ void InGameMenu::updateControllerActions()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 InGameMenu::InGameMenu()
 {
    _audio_callback = [this](InGameMenuAudio::SoundEffect effect) { _audio.play(effect); };
@@ -126,7 +121,6 @@ InGameMenu::InGameMenu()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (_previous_submenu.has_value())
@@ -142,7 +136,6 @@ void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->draw(window, states);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void InGameMenu::updateController()
 {
    const auto& gji = GameControllerIntegration::getInstance();
@@ -152,7 +145,6 @@ void InGameMenu::updateController()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::update(const sf::Time& dt)
 {
    updateController();
@@ -166,7 +158,6 @@ void InGameMenu::update(const sf::Time& dt)
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::processEvent(const sf::Event& event)
 {
    switch (event.key.code)
@@ -216,7 +207,6 @@ void InGameMenu::processEvent(const sf::Event& event)
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::open()
 {
    if (GameState::getInstance().getMode() != ExecutionMode::Running)
@@ -237,7 +227,6 @@ void InGameMenu::open()
    show();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::close()
 {
    if (!DisplayMode::getInstance().isSet(Display::IngameMenu))
@@ -249,43 +238,36 @@ void InGameMenu::close()
    hide();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::left()
 {
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->left();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::right()
 {
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->right();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::up()
 {
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->up();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::down()
 {
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->down();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::show()
 {
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->show();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::hide()
 {
    _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->hide();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::rotateRight()
 {
    std::rotate(_submenu_selection.begin(), _submenu_selection.begin() + 1, _submenu_selection.end());
@@ -294,7 +276,6 @@ void InGameMenu::rotateRight()
    _previous_submenu = _submenu_selection[2];
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::goToRightSubMenu()
 {
    rotateRight();
@@ -307,7 +288,6 @@ void InGameMenu::goToRightSubMenu()
    _audio_callback(InGameMenuAudio::SoundEffect::MenuNext);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::rotateLeft()
 {
    std::rotate(_submenu_selection.rbegin(), _submenu_selection.rbegin() + 1, _submenu_selection.rend());
@@ -316,7 +296,6 @@ void InGameMenu::rotateLeft()
    _previous_submenu = _submenu_selection[1];
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::goToLeftSubMenu()
 {
    rotateLeft();
@@ -329,7 +308,6 @@ void InGameMenu::goToLeftSubMenu()
    _audio_callback(InGameMenuAudio::SoundEffect::MenuNext);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenu::debug()
 {
    const auto selected = _submenu_type_names[static_cast<uint8_t>(_selected_submenu)];

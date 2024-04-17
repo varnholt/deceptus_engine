@@ -128,7 +128,6 @@ void showGpu()
 // render texture width:    640 * 2 = 1280px
 // render texture height:   360 * 2 = 720px
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::initializeWindow()
 {
    const auto& game_config = GameConfiguration::getInstance();
@@ -197,7 +196,6 @@ void Game::initializeWindow()
    EventSerializer::getInstance().setCallback([this](const sf::Event& event) { processEvent(event); });
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::initializeController()
 {
    auto& gji = GameControllerIntegration::getInstance();
@@ -213,14 +211,12 @@ void Game::initializeController()
    gji.initialize();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::showMainMenu()
 {
    Menu::getInstance()->show(Menu::MenuType::Main);
    GameState::getInstance().enqueuePause();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::showPauseMenu()
 {
    // while the game is loading, don't bother to open the pause screen
@@ -244,7 +240,6 @@ void Game::showPauseMenu()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::loadLevel(LoadingMode loading_mode)
 {
    _level_loading_finished = false;
@@ -291,7 +286,6 @@ void Game::loadLevel(LoadingMode loading_mode)
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::nextLevel()
 {
    SaveState::getCurrent()._level_index++;
@@ -308,13 +302,11 @@ void Game::nextLevel()
    loadLevel();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 Game::~Game()
 {
    // _event_serializer.serialize();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::initialize()
 {
    initializeWindow();
@@ -403,7 +395,6 @@ void Game::initialize()
 //    - inventory
 //    - message boxes
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::draw()
 {
    _fps++;
@@ -509,7 +500,6 @@ void Game::draw()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameController()
 {
    auto& gji = GameControllerIntegration::getInstance();
@@ -523,7 +513,6 @@ void Game::updateGameController()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameControllerForGame()
 {
    const auto& gji = GameControllerIntegration::getInstance();
@@ -536,7 +525,6 @@ void Game::updateGameControllerForGame()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::updateWindowTitle()
 {
    std::ostringstream out_stream;
@@ -545,7 +533,6 @@ void Game::updateWindowTitle()
    _fps = 0;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::goToLastCheckpoint()
 {
    SaveState::deserializeFromFile();
@@ -553,7 +540,6 @@ void Game::goToLastCheckpoint()
    loadLevel();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::menuLoadRequest()
 {
    // the code below is mostly identical to 'goToLastCheckpoint'
@@ -563,7 +549,6 @@ void Game::menuLoadRequest()
    loadLevel();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
 {
    auto screen_transition = std::make_unique<ScreenTransition>();
@@ -584,7 +569,6 @@ std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
    return screen_transition;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::resetAfterDeath(const sf::Time& dt)
 {
    // not 100% if the screen transitions should actually drive the
@@ -616,7 +600,6 @@ void Game::resetAfterDeath(const sf::Time& dt)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::updateGameState(const sf::Time& dt)
 {
    // check if just died
@@ -665,7 +648,6 @@ void Game::updateGameState(const sf::Time& dt)
    resetAfterDeath(dt);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::update()
 {
    const auto dt = _delta_clock.getElapsedTime();
@@ -727,7 +709,6 @@ void Game::update()
    DisplayMode::getInstance().sync();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 int32_t Game::loop()
 {
    while (_window->isOpen())
@@ -740,13 +721,11 @@ int32_t Game::loop()
    return 0;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::reset()
 {
    _player->reset();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::toggleFullScreen()
 {
    GameConfiguration::getInstance()._fullscreen = !GameConfiguration::getInstance()._fullscreen;
@@ -754,7 +733,6 @@ void Game::toggleFullScreen()
    _level->createViews();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::changeResolution(int32_t w, int32_t h)
 {
    GameConfiguration::getInstance()._video_mode_width = w;
@@ -769,13 +747,11 @@ void Game::changeResolution(int32_t w, int32_t h)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::takeScreenshot()
 {
    _screenshot = true;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::processEvent(const sf::Event& event)
 {
    if (event.type == sf::Event::Closed)
@@ -877,7 +853,6 @@ void Game::processEvent(const sf::Event& event)
    EventDistributor::event(event);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::shutdown()
 {
    if (_physics_ui)
@@ -893,7 +868,6 @@ void Game::shutdown()
    std::exit(0);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::reloadLevel(LoadingMode loading_mode)
 {
    if (!_level_loading_finished)
@@ -907,7 +881,6 @@ void Game::reloadLevel(LoadingMode loading_mode)
    loadLevel(loading_mode);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
 #ifdef DEVELOPMENT_MODE
@@ -1089,13 +1062,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::processKeyReleasedEvents(const sf::Event& event)
 {
    CameraPanorama::getInstance().processKeyReleasedEvents(event);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Game::processEvents()
 {
    sf::Event event;

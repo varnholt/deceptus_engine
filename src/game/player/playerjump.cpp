@@ -255,7 +255,9 @@ void PlayerJump::jump()
       return;
    }
 
-   if (_controls->isMovingDown())
+   // using a higher threshold here to avoid blocking jumps for 'no reason'.
+   // a 0.3 value for the y axis (default threshold) might not be on purpose
+   if (_controls->isMovingDown(0.6f))
    {
       // equivalent to check for bending down, but jump can be called via lamda
       // which mich skip the bend state update in the player update loop.

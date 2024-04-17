@@ -14,11 +14,8 @@
 
 #include <iostream>
 
-
 int32_t GameControllerIntegration::_selected_controller_id = 0;
 
-
-//-----------------------------------------------------------------------------
 void GameControllerIntegration::initialize()
 {
    SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
@@ -30,21 +27,17 @@ void GameControllerIntegration::initialize()
    }
 
    _device_detection = std::make_unique<GameControllerDetection>();
-   _device_detection->setCallbackAdded([this](int32_t id){add(id);});
-   _device_detection->setCallbackRemoved([this](int32_t id){remove(id);});
+   _device_detection->setCallbackAdded([this](int32_t id) { add(id); });
+   _device_detection->setCallbackRemoved([this](int32_t id) { remove(id); });
    _device_detection->start();
 }
 
-
-//-----------------------------------------------------------------------------
 GameControllerIntegration::~GameControllerIntegration()
 {
    (void)_device_detection.release();
    SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 }
 
-
-//-----------------------------------------------------------------------------
 void GameControllerIntegration::update()
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
@@ -56,13 +49,12 @@ void GameControllerIntegration::update()
    _device_changed_callbacks.clear();
 }
 
-
-//-----------------------------------------------------------------------------
 void GameControllerIntegration::add(int32_t id)
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
    _device_changed_callbacks.push_back(
-      [this, id](){
+      [this, id]()
+      {
          auto controller = std::make_shared<GameController>();
          controller->activate(id);
          const auto controller_id = SDL_JoystickGetDeviceInstanceID(id);
@@ -77,13 +69,12 @@ void GameControllerIntegration::add(int32_t id)
    );
 }
 
-
-//-----------------------------------------------------------------------------
 void GameControllerIntegration::remove(int32_t id)
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
    _device_changed_callbacks.push_back(
-      [this, id](){
+      [this, id]()
+      {
          _controllers.erase(id);
 
          for (const auto& cb : _device_removed_callbacks)
@@ -94,15 +85,11 @@ void GameControllerIntegration::remove(int32_t id)
    );
 }
 
-
-//-----------------------------------------------------------------------------
 const std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id) const
 {
    return _controllers.at(controller_id);
 }
 
-
-//-----------------------------------------------------------------------------
 void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback& callback)
 {
    _device_added_callbacks.push_back(callback);
@@ -114,32 +101,23 @@ void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback
    }
 }
 
-
-//-----------------------------------------------------------------------------
 void GameControllerIntegration::addDeviceRemovedCallback(const DeviceAddedCallback& callback)
 {
    _device_removed_callbacks.push_back(callback);
 }
 
-
-//-----------------------------------------------------------------------------
 size_t GameControllerIntegration::getCount() const
 {
    return _controllers.size();
 }
 
-
-//-----------------------------------------------------------------------------
 bool GameControllerIntegration::isControllerConnected() const
 {
    return !_controllers.empty();
 }
 
-
-//-----------------------------------------------------------------------------
 GameControllerIntegration& GameControllerIntegration::getInstance()
 {
    static GameControllerIntegration __gci;
    return __gci;
 }
-
