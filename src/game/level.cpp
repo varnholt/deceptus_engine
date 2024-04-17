@@ -69,25 +69,21 @@ namespace fmt = std;
 
 Level* Level::__current_level = nullptr;
 
-//-----------------------------------------------------------------------------
 std::string Level::getDescriptionFilename() const
 {
    return _description_filename;
 }
 
-//-----------------------------------------------------------------------------
 void Level::setDescriptionFilename(const std::string& description_filename)
 {
    _description_filename = description_filename;
 }
 
-//-----------------------------------------------------------------------------
 const Atmosphere& Level::getAtmosphere() const
 {
    return _atmosphere;
 }
 
-//-----------------------------------------------------------------------------
 void Level::initializeTextures()
 {
    const auto& game_config = GameConfiguration::getInstance();
@@ -182,7 +178,6 @@ void Level::initializeTextures()
    _blur_shader->initialize();
 }
 
-//-----------------------------------------------------------------------------
 Level::Level() : GameNode(nullptr)
 {
    setClassName(typeid(Level).name());
@@ -313,7 +308,6 @@ Level::Level() : GameNode(nullptr)
    );
 }
 
-//-----------------------------------------------------------------------------
 Level::~Level()
 {
    Log::Info() << "deleting current level";
@@ -331,8 +325,6 @@ Level::~Level()
    }
 }
 
-
-//-----------------------------------------------------------------------------
 // assign room identifiers to mechanism
 // for now it's safe to assume that a mechanism always stays in the same room
 void Level::assignMechanismsToRooms()
@@ -364,7 +356,6 @@ void Level::assignMechanismsToRooms()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::loadTmx()
 {
    static const std::string parallax_identifier = "parallax_";
@@ -506,13 +497,11 @@ void Level::loadTmx()
    Log::Info() << "loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
 }
 
-//-----------------------------------------------------------------------------
 BoomEffect& Level::getBoomEffect()
 {
    return _boom_effect;
 }
 
-//-----------------------------------------------------------------------------
 bool Level::load()
 {
    const auto level_json_path = std::filesystem::path(_description->_filename);
@@ -557,14 +546,12 @@ bool Level::load()
    return true;
 }
 
-//-----------------------------------------------------------------------------
 void Level::loadStartPosition()
 {
    _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
    _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 }
 
-//-----------------------------------------------------------------------------
 void Level::loadLevelScript()
 {
    const auto path = std::filesystem::path(_description->_filename).parent_path();
@@ -580,7 +567,6 @@ void Level::loadLevelScript()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::initialize()
 {
    createViews();
@@ -612,7 +598,6 @@ void Level::initialize()
    // dump();
 }
 
-//-----------------------------------------------------------------------------
 void Level::loadSaveState()
 {
    const auto& save_state = SaveState::getCurrent();
@@ -681,7 +666,6 @@ void Level::loadSaveState()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::saveState()
 {
    auto& j = SaveState::getCurrent()._level_state;
@@ -706,7 +690,6 @@ void Level::saveState()
    j[_description->_filename] = mechanisms_json;
 }
 
-//-----------------------------------------------------------------------------
 void Level::reset()
 {
    for (auto& door : _mechanism_doors)
@@ -715,7 +698,6 @@ void Level::reset()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::spawnEnemies()
 {
    // those enemies that have a lua script associated inside the tmx layer don't need
@@ -772,7 +754,6 @@ void Level::spawnEnemies()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto& path : _atmosphere._outlines)
@@ -781,13 +762,11 @@ void Level::drawStaticChains(sf::RenderTarget& target)
    }
 }
 
-//-----------------------------------------------------------------------------
 const std::shared_ptr<sf::View>& Level::getLevelView() const
 {
    return _level_view;
 }
 
-//-----------------------------------------------------------------------------
 void Level::createViews()
 {
    auto& game_config = GameConfiguration::getInstance();
@@ -812,7 +791,6 @@ void Level::createViews()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::updateViews()
 {
    // this should really just fetch the camera position and the camera panorama vectors and
@@ -838,7 +816,6 @@ void Level::updateViews()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::updateMechanismVolumes()
 {
    if (!_volume_updater)
@@ -849,20 +826,17 @@ void Level::updateMechanismVolumes()
    _volume_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
 }
 
-//-----------------------------------------------------------------------------
 void Level::updateRoom()
 {
    RoomUpdater::setCurrent(Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms));
 }
 
-//-----------------------------------------------------------------------------
 void Level::syncRoom()
 {
    RoomUpdater::setCurrent(Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms));
    CameraRoomLock::setRoom(RoomUpdater::getCurrent());
 }
 
-//-----------------------------------------------------------------------------
 void Level::updateCameraSystem(const sf::Time& dt)
 {
    auto& camera_system = CameraSystem::getInstance();
@@ -916,7 +890,6 @@ void Level::updateCameraSystem(const sf::Time& dt)
    RoomUpdater::setSynced(true);
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawLightMap()
 {
    _render_texture_lighting->clear();
@@ -932,7 +905,6 @@ void Level::drawLightMap()
    //   }
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 {
    for (const auto& parallax : _parallax_layers)
@@ -948,14 +920,12 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    target.setView(*_level_view);
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
    player->draw(color, normal);
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
    const auto& player_chunk = Player::getCurrent()->getChunk();
@@ -1042,7 +1012,6 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawAtmosphereLayer()
 {
    if (!_atmosphere._tile_map)
@@ -1058,7 +1027,6 @@ void Level::drawAtmosphereLayer()
    _atmosphere_shader->getRenderTexture()->display();
 }
 
-//-----------------------------------------------------------------------------
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
    target.setView(*_level_view);
@@ -1084,7 +1052,6 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 #endif
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const
 {
    if (a_tl.x < 0 || a_tl.y < 0 || b_tl.x < 0 || b_tl.y < 0 || a_tl.x > _physics._grid_width || b_tl.x > _physics._grid_width || a_tl.y > _physics._grid_height || b_tl.y > _physics._grid_height)
@@ -1097,7 +1064,6 @@ bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_t
    return MapTools::lineCollide(a_tl.x, a_tl.y, b_tl.x, b_tl.y, blocks);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& texture)
 {
    if (!_screenshot)
@@ -1111,7 +1077,6 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
    texture.getTexture().copyToImage().saveToFile(ss.str());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Level::drawDebugInformation()
 {
    if (DisplayMode::getInstance().isSet(Display::Debug))
@@ -1132,7 +1097,6 @@ void Level::drawDebugInformation()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::displayFinalTextures()
 {
    // display the whole texture
@@ -1240,7 +1204,6 @@ const std::vector<std::shared_ptr<GameMechanism>>& Level::getExtras() const
    return _mechanism_extras;
 }
 
-//-----------------------------------------------------------------------------
 // Level Rendering Flow
 //
 //    textures/render targets:
@@ -1351,7 +1314,6 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
 }
 
-//-----------------------------------------------------------------------------
 void Level::updatePlayerLight()
 {
    if (!Tweaks::instance()._player_light_enabled)
@@ -1367,13 +1329,11 @@ void Level::updatePlayerLight()
    _player_light->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead() ? 0 : Tweaks::instance()._player_light_alpha);
 }
 
-//-----------------------------------------------------------------------------
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const
 {
    return _light_system;
 }
 
-//-----------------------------------------------------------------------------
 void Level::update(const sf::Time& dt)
 {
    Projectile::update(dt);
@@ -1417,13 +1377,11 @@ void Level::update(const sf::Time& dt)
    _volume_updater->updateProjectiles(Projectile::getProjectiles());
 }
 
-//-----------------------------------------------------------------------------
 const std::shared_ptr<b2World>& Level::getWorld() const
 {
    return _world;
 }
 
-//-----------------------------------------------------------------------------
 void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_type)
 {
    if (fabs(chain[0].x - chain[chain.size() - 1].x) < 0.001f && fabs(chain[0].y - chain[chain.size() - 1].y) < 0.001f)
@@ -1456,7 +1414,6 @@ void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
-//-----------------------------------------------------------------------------
 void Level::addPathsToWorld(int32_t offset_x, int32_t offset_y, const std::vector<SquareMarcher::Path>& paths, ObjectType behavior)
 {
    // create the physical chain with 1 body per chain
@@ -1475,7 +1432,6 @@ void Level::addPathsToWorld(int32_t offset_x, int32_t offset_y, const std::vecto
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior, const std::filesystem::path& path)
 {
    std::vector<b2Vec2> points;
@@ -1521,7 +1477,6 @@ void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior
    }
 }
 
-//-----------------------------------------------------------------------------
 void Level::regenerateLevelPaths(
    const std::shared_ptr<TmxLayer>& layer,
    const std::shared_ptr<TmxTileSet>& tileset,
@@ -1561,7 +1516,6 @@ void Level::regenerateLevelPaths(
    parseObj(layer, parse_data->object_type, path_solid_optimized);
 }
 
-//-----------------------------------------------------------------------------
 void Level::parsePhysicsTiles(
    const std::shared_ptr<TmxLayer>& layer,
    const std::shared_ptr<TmxTileSet>& tileset,
@@ -1636,21 +1590,17 @@ void Level::parsePhysicsTiles(
    ChainShapeAnalyzer::analyze(_world);
 }
 
-//-----------------------------------------------------------------------------
 const sf::Vector2f& Level::getStartPosition() const
 {
    return _start_position;
 }
 
-//-----------------------------------------------------------------------------
 Level* Level::getCurrentLevel()
 {
    return __current_level;
 }
 
-//-----------------------------------------------------------------------------
 const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints() const
 {
    return _mechanism_checkpoints;
 }
-

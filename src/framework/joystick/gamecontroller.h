@@ -77,7 +77,7 @@ public:
    virtual void rumbleTest();
 
    //! start rumble effect
-   virtual void rumble(float intensity, int32_t ms);
+   virtual void rumble(float intensity, int32_t rumble_duration_ms);
 
    //! get button type by button id
    SDL_GameControllerButton getButtonType(int32_t buttonId) const;
@@ -104,6 +104,9 @@ protected:
    bool isDpadButton(int32_t button) const;
 
 private:
+   void callPressedCallbacks(const SDL_GameControllerButton button);
+   void callReleasedCallbacks(const SDL_GameControllerButton button);
+
    GameControllerInfo _info;
 
    SDL_Joystick* _joystick = nullptr;
