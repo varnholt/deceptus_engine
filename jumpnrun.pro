@@ -25,6 +25,11 @@ DEFINES_RELEASE += RELEASE_BUILD
 
 DEFINES += SFML_DEFINE_DISCRETE_GPU_PREFERENCE
 
+# mac shit
+CONFIG += c++20
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 14.4.1
+
+
 debug {
    CONFIG += console
    DEFINES += DEBUG
@@ -38,22 +43,27 @@ win32-msvc {
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
    QMAKE_CFLAGS_WARN_ON = -W4
    QMAKE_CXXFLAGS_WARN_ON = -W4
-   QMAKE_CXXFLAGS += /wd5045
+   QMAKE_CXXFLAGS += /wd5045§
 }
 
-linux|win32-clang++ {
+macx|linux|win32-clang++ {
    message("configured for clang")
-   QMAKE_CXXFLAGS += /std:c++20
+   CLANG_VERSION = $$system("clang --version")
+   message($$CLANG_VERSION)
+
+   #QMAKE_CXXFLAGS += -std:c++20
+   QMAKE_CXXFLAGS += -std=c++20
    QMAKE_CXXFLAGS += -Wno-backslash-newline-escape
    QMAKE_CXXFLAGS += -Wno-deprecated-declarations
+   QMAKE_CXXFLAGS += -mmacosx-version-min=13.3
 }
 
-linux|win32-g++ {
-   message("configured for g++")
-   QMAKE_CXXFLAGS += -std=c++20
-   QMAKE_CXXFLAGS += -lc++fs
-   QMAKE_CXXFLAGS += -lfmt
-}
+#macx|linux|win32-g++ {
+#   message("configured for g++")
+#   QMAKE_CXXFLAGS += -std=c++20
+#   QMAKE_CXXFLAGS += -lc++fs
+#   QMAKE_CXXFLAGS += -lfmt
+#}
 
 win32 {
    LIBS += -Lthirdparty\lua\lib64
@@ -87,6 +97,22 @@ linux {
    LIBS += -lGL
    LIBS += $$system(pkg-config sfml-all --libs)
    LIBS += -lX11
+}
+
+macx {
+    LIBS += -L/usr/local/opt/sdl2/lib
+    LIBS += -lsdl2
+
+    LIBS += -L/usr/local/opt/lua/lib
+    LIBS += -llua
+
+
+    LIBS += -L/usr/local/opt/sfml/lib
+    LIBS += -lsfml-audio
+    LIBS += -lsfml-graphics
+    LIBS += -lsfml-network
+    LIBS += -lsfml-window
+    LIBS += -lsfml-system
 }
 
 #sfml

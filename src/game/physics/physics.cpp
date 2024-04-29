@@ -25,6 +25,11 @@ uint64_t computeHash(float px, float py)
 {
    struct VectorHash
    {
+      VectorHash(float x, float y)
+          : x(x), y(y)
+      {
+
+      }
       float x;
       float y;
    };

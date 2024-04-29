@@ -772,7 +772,7 @@ void PlayerControls::lockState(KeyPressed key, LockedState state, const std::chr
 
 void PlayerControls::lockAll(LockedState state, const std::chrono::milliseconds& duration)
 {
-   constexpr std::initializer_list<KeyPressed> keypress_types{
+   static const std::initializer_list<KeyPressed> keypress_types{
       KeyPressedUp,
       KeyPressedDown,
       KeyPressedLeft,
