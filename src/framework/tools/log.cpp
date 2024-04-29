@@ -3,13 +3,13 @@
 #include <filesystem>
 #include <iostream>
 
-#ifdef __GNUC__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#include <ctime>
-#else
+//#ifdef __GNUC__
+//#define FMT_HEADER_ONLY
+//#include <fmt/core.h>
+//#include <ctime>
+//#else
 namespace fmt = std;
-#endif
+//#endif
 
 // https://en.cppreference.com/w/cpp/utility/source_location
 // https://en.cppreference.com/w/cpp/chrono/zoned_time/formatter
@@ -28,15 +28,15 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
       source_location.line()
    );
 
-#ifdef __GNUC__
-   const auto now_time = std::chrono::system_clock::to_time_t(now);
+//#ifdef __GNUC__
+//   const auto now_time = std::chrono::system_clock::to_time_t(now);
 
-   std::stringstream ss;
-   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
-   const auto now_local = ss.str();
-#else
-   const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), now};
-#endif
+//   std::stringstream ss;
+//   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
+//   const auto now_local = ss.str();
+//#else
+//   const auto now_local = std::chrono::zoned_time{std::chrono::current, now};
+//#endif
 
    std::cout << fmt::format(
 #ifdef __GNUC__
@@ -45,7 +45,7 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
                    "[{0}] {1:%T} | {2}: {3}",
 #endif
                    static_cast<char>(level),
-                   now_local,
+                   now,
                    source_tag,
                    message
                 )
