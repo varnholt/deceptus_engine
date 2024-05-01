@@ -28,18 +28,18 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
       source_location.line()
    );
 
-//#ifdef __GNUC__
-//   const auto now_time = std::chrono::system_clock::to_time_t(now);
+#if defined __GNUC__ && __linux__
+   const auto now_time = std::chrono::system_clock::to_time_t(now);
 
-//   std::stringstream ss;
-//   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
-//   const auto now_local = ss.str();
-//#else
-//   const auto now_local = std::chrono::zoned_time{std::chrono::current, now};
-//#endif
+   std::stringstream ss;
+   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
+   const auto now_local = ss.str();
+#elif !defined __APPLE__
+   const auto now_local = std::chrono::zoned_time{std::chrono::current, now};
+#endif
 
    std::cout << fmt::format(
-#ifdef __GNUC__
+#if defined __GNUC__ && __linux__
                    "[{0}] {1} | {2}: {3}",
 #else
                    "[{0}] {1:%T} | {2}: {3}",
@@ -53,7 +53,11 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
 
    if (_log_callback)
    {
+#ifdef __APPLE__
       _log_callback(now, level, std::string{message}, source_location);
+#else
+      _log_callback(now_local, level, std::string{message}, source_location);
+#endif
    }
 }
 
