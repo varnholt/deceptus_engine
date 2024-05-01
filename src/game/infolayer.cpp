@@ -15,13 +15,13 @@
 #include "game/savestate.h"
 #include "game/texturepool.h"
 
-//#ifdef __GNUC__
-//#define FMT_HEADER_ONLY
-//#include <fmt/core.h>
-//#else
+#if defined __GNUC__ && __linux__
+#define FMT_HEADER_ONLY
+#include <fmt/core.h>
+#else
 #include <format>
 namespace fmt = std;
-//#endif
+#endif
 
 #include <iostream>
 #include <sstream>

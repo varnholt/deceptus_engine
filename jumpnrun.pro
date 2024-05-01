@@ -25,11 +25,6 @@ DEFINES_RELEASE += RELEASE_BUILD
 
 DEFINES += SFML_DEFINE_DISCRETE_GPU_PREFERENCE
 
-# mac shit
-CONFIG += c++20
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 14.4.1
-
-
 debug {
    CONFIG += console
    DEFINES += DEBUG
@@ -51,19 +46,17 @@ macx|linux|win32-clang++ {
    CLANG_VERSION = $$system("clang --version")
    message($$CLANG_VERSION)
 
-   #QMAKE_CXXFLAGS += -std:c++20
    QMAKE_CXXFLAGS += -std=c++20
    QMAKE_CXXFLAGS += -Wno-backslash-newline-escape
    QMAKE_CXXFLAGS += -Wno-deprecated-declarations
-   QMAKE_CXXFLAGS += -mmacosx-version-min=13.3
 }
 
-#macx|linux|win32-g++ {
-#   message("configured for g++")
-#   QMAKE_CXXFLAGS += -std=c++20
-#   QMAKE_CXXFLAGS += -lc++fs
-#   QMAKE_CXXFLAGS += -lfmt
-#}
+linux|win32-g++ {
+   message("configured for g++")
+   QMAKE_CXXFLAGS += -std=c++20
+   QMAKE_CXXFLAGS += -lc++fs
+   QMAKE_CXXFLAGS += -lfmt
+}
 
 win32 {
    LIBS += -Lthirdparty\lua\lib64
@@ -100,12 +93,16 @@ linux {
 }
 
 macx {
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 14.4.1
+    QMAKE_CXXFLAGS += -mmacosx-version-min=13.3
+
+    LIBS += -framework OpenGL
+
     LIBS += -L/usr/local/opt/sdl2/lib
     LIBS += -lsdl2
 
     LIBS += -L/usr/local/opt/lua/lib
     LIBS += -llua
-
 
     LIBS += -L/usr/local/opt/sfml/lib
     LIBS += -lsfml-audio

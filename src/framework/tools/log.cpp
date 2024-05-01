@@ -3,13 +3,13 @@
 #include <filesystem>
 #include <iostream>
 
-//#ifdef __GNUC__
-//#define FMT_HEADER_ONLY
-//#include <fmt/core.h>
-//#include <ctime>
-//#else
+#if defined __GNUC__ && __linux__
+#define FMT_HEADER_ONLY
+#include <fmt/core.h>
+#include <ctime>
+#else
 namespace fmt = std;
-//#endif
+#endif
 
 // https://en.cppreference.com/w/cpp/utility/source_location
 // https://en.cppreference.com/w/cpp/chrono/zoned_time/formatter
