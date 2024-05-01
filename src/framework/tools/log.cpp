@@ -35,7 +35,7 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
    ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
    const auto now_local = ss.str();
 #elif !defined __APPLE__
-   const auto now_local = std::chrono::zoned_time{std::chrono::current, now};
+   const auto now_local = std::chrono::zoned_time{std::chrono::current_zone, now};
 #endif
 
    std::cout << fmt::format(
@@ -45,7 +45,11 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
                    "[{0}] {1:%T} | {2}: {3}",
 #endif
                    static_cast<char>(level),
+#ifdef __APPLE__
                    now,
+#else
+                   now_local,
+#endif
                    source_tag,
                    message
                 )
