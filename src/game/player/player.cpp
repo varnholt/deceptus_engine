@@ -38,13 +38,13 @@
 
 #include <iostream>
 
-//#ifdef __GNUC__
-//#define FMT_HEADER_ONLY
-//#include <fmt/core.h>
-//#include <ctime>
-//#else
+#if defined __GNUC__ && __linux__
+#define FMT_HEADER_ONLY
+#include <fmt/core.h>
+#include <ctime>
+#else
 namespace fmt = std;
-//#endif
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 namespace

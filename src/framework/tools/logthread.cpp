@@ -5,13 +5,13 @@
 #include <iomanip>
 #include <iostream>
 
-//#ifdef __GNUC__
-//#define FMT_HEADER_ONLY
-//#  include <ctime>
-//#  include <fmt/core.h>
-//#else
+#if defined __GNUC__ && __linux__
+#define FMT_HEADER_ONLY
+#include <ctime>
+#include <fmt/core.h>
+#else
 namespace fmt = std;
-//#endif
+#endif
 
 
 namespace

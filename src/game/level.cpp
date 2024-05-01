@@ -59,13 +59,13 @@
 #include <string>
 #include <thread>
 
-//#ifdef __GNUC__
-//#define FMT_HEADER_ONLY
-//#include <fmt/core.h>
-//#else
+#if defined __GNUC__ && __linux__
+#define FMT_HEADER_ONLY
+#include <fmt/core.h>
+#else
 #include <format>
 namespace fmt = std;
-//#endif
+#endif
 
 Level* Level::__current_level = nullptr;
 
