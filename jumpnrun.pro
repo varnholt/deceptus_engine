@@ -43,9 +43,6 @@ win32-msvc {
 
 macx|linux|win32-clang++ {
    message("configured for clang")
-   CLANG_VERSION = $$system("clang --version")
-   message($$CLANG_VERSION)
-
    QMAKE_CXXFLAGS += -std=c++20
    QMAKE_CXXFLAGS += -Wno-backslash-newline-escape
    QMAKE_CXXFLAGS += -Wno-deprecated-declarations
