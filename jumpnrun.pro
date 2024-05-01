@@ -41,9 +41,9 @@ win32-msvc {
    QMAKE_CXXFLAGS += /wd5045
 }
 
-linux|win32-clang++ {
+macx|linux|win32-clang++ {
    message("configured for clang")
-   QMAKE_CXXFLAGS += /std:c++20
+   QMAKE_CXXFLAGS += -std=c++20
    QMAKE_CXXFLAGS += -Wno-backslash-newline-escape
    QMAKE_CXXFLAGS += -Wno-deprecated-declarations
 }
@@ -87,6 +87,26 @@ linux {
    LIBS += -lGL
    LIBS += $$system(pkg-config sfml-all --libs)
    LIBS += -lX11
+}
+
+macx {
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 14.4.1
+    QMAKE_CXXFLAGS += -mmacosx-version-min=13.3
+
+    LIBS += -framework OpenGL
+
+    LIBS += -L/usr/local/opt/sdl2/lib
+    LIBS += -lsdl2
+
+    LIBS += -L/usr/local/opt/lua/lib
+    LIBS += -llua
+
+    LIBS += -L/usr/local/opt/sfml/lib
+    LIBS += -lsfml-audio
+    LIBS += -lsfml-graphics
+    LIBS += -lsfml-network
+    LIBS += -lsfml-window
+    LIBS += -lsfml-system
 }
 
 #sfml
