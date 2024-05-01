@@ -38,7 +38,7 @@ win32-msvc {
    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF /OPT:ICF
    QMAKE_CFLAGS_WARN_ON = -W4
    QMAKE_CXXFLAGS_WARN_ON = -W4
-   QMAKE_CXXFLAGS += /wd5045§
+   QMAKE_CXXFLAGS += /wd5045
 }
 
 macx|linux|win32-clang++ {
