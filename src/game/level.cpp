@@ -59,7 +59,7 @@
 #include <string>
 #include <thread>
 
-#ifdef __GNUC__
+#if defined __GNUC__ && __linux__
 #define FMT_HEADER_ONLY
 #include <fmt/core.h>
 #else
