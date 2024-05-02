@@ -54,6 +54,7 @@ struct MessageBox
       bool _centered = true;
       bool _animate_show_event = true;
       bool _animate_hide_event = true;
+      int32_t _show_next = false;
    };
 
    using MessageBoxCallback = std::function<void(Button)>;
@@ -88,7 +89,7 @@ struct MessageBox
    void showAnimation();
    void hideAnimation();
    void updateContents();
-   void updateButtonLayers();
+   void updateBoxContentLayers();
    void animateText();
 
    Type _type;
@@ -106,8 +107,11 @@ struct MessageBox
    sf::Time _hide_time;
    State _state{State::Hidden};
    sf::Text _text;
-   sf::Vector2f _window_position;
-   sf::Vector2f _background_position;
+
+   sf::Vector2f _window_position_px;
+   sf::Vector2f _background_position_px;
+   sf::Vector2f _next_page_position_px;
+
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
    std::vector<std::shared_ptr<Layer>> _box_content_layers;
