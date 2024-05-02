@@ -246,6 +246,7 @@ void MessageBox::initializeLayers()
    _box_content_layers.push_back(_layers["no_xbox_1"]);
    _box_content_layers.push_back(_layers["yes_pc_1"]);
    _box_content_layers.push_back(_layers["no_pc_1"]);
+   _box_content_layers.push_back(_layers["next_page"]);
 
    // background layer is unused for now
    _layers["temp_bg"]->_visible = false;
@@ -448,11 +449,12 @@ void MessageBox::update(const sf::Time& /*dt*/)
       if (!__active->_initialized)
       {
          __active->_initialized = true;
-         __active->_window_position = __active->_layers["window"]->_sprite->getPosition();
-         __active->_background_position = __active->_layers["background"]->_sprite->getPosition();
+         __active->_window_position_px = __active->_layers["window"]->_sprite->getPosition();
+         __active->_background_position_px = __active->_layers["background"]->_sprite->getPosition();
+         __active->_next_page_position_px = __active->_layers["next_page"]->_sprite->getPosition();
       }
 
-      __active->updateButtonLayers();
+      __active->updateBoxContentLayers();
 
       // default to visible until adjusted by either showAnimation or hideAnimation
       __active->_state = State::Visible;
@@ -486,16 +488,19 @@ void MessageBox::update(const sf::Time& /*dt*/)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MessageBox::updateButtonLayers()
+void MessageBox::updateBoxContentLayers()
 {
    const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
    const auto buttons = __active->_buttons;
 
    // init button layers
-   _layers["yes_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
-   _layers["no_xbox_1"]->_visible = xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
-   _layers["yes_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::Yes);
-   _layers["no_pc_1"]->_visible = !xbox && buttons & static_cast<int32_t>(MessageBox::Button::No);
+   _layers["yes_xbox_1"]->_visible = xbox && (buttons & static_cast<int32_t>(MessageBox::Button::Yes));
+   _layers["no_xbox_1"]->_visible = xbox && (buttons & static_cast<int32_t>(MessageBox::Button::No));
+   _layers["yes_pc_1"]->_visible = !xbox && (buttons & static_cast<int32_t>(MessageBox::Button::Yes));
+   _layers["no_pc_1"]->_visible = !xbox && (buttons & static_cast<int32_t>(MessageBox::Button::No));
+
+   // next page arrow
+   _layers["next_page"]->_visible = _properties._show_next;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -506,15 +511,19 @@ void MessageBox::updateContents()
    auto background_color = _properties._background_color;
    auto window_layer = _layers["window"];
    auto background_layer = _layers["background"];
-   const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+   auto next_page_layer = _layers["next_page"];
+
+   const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
    window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
    window_layer->_sprite->setScale(1.0f, 1.0f);
-   window_layer->_sprite->setPosition(_window_position + offset);
+   window_layer->_sprite->setPosition(_window_position_px + offset_px);
 
    background_layer->_sprite->setColor(background_color);
    background_layer->_sprite->setScale(1.0f, 1.0f);
-   background_layer->_sprite->setPosition(_background_position + offset);
+   background_layer->_sprite->setPosition(_background_position_px + offset_px);
+
+   next_page_layer->_sprite->setPosition(_next_page_position_px + offset_px);
 
    // fade in text and buttons
    const auto contents_alpha_scaled = contents_alpha * 255;
@@ -538,8 +547,11 @@ void MessageBox::showAnimation()
    const auto visible_time = GlobalClock::getInstance().getElapsedTime() - _show_time;
 
    auto background_color = _properties._background_color;
+
    auto window_layer = _layers["window"];
    auto background_layer = _layers["background"];
+   auto next_page_layer = _layers["next_page"];
+
    const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
    if (visible_time < animation_scale_time_show)  // zoom effect
@@ -554,25 +566,25 @@ void MessageBox::showAnimation()
       const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
       window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(_window_position.x + window_scale_offset + offset.x, _window_position.y + offset.y);
+      window_layer->_sprite->setPosition(_window_position_px.x + window_scale_offset + offset.x, _window_position_px.y + offset.y);
 
       const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
       background_color.a = static_cast<uint8_t>(t_normalized * 255);
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(scale_x, scale_y);
       background_layer->_sprite->setPosition(
-         _background_position.x + background_scale_offset + offset.x, _background_position.y + offset.y
+         _background_position_px.x + background_scale_offset + offset.x, _background_position_px.y + offset.y
       );
    }
    else  // fade in
    {
       window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
       window_layer->_sprite->setScale(1.0f, 1.0f);
-      window_layer->_sprite->setPosition(_window_position + offset);
+      window_layer->_sprite->setPosition(_window_position_px + offset);
 
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(1.0f, 1.0f);
-      background_layer->_sprite->setPosition(_background_position + offset);
+      background_layer->_sprite->setPosition(_background_position_px + offset);
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
@@ -582,6 +594,8 @@ void MessageBox::showAnimation()
          contents_alpha = t_normalized;
       }
    }
+
+   next_page_layer->_sprite->setPosition(_next_page_position_px + offset);
 
    // fade in text and buttons
    const auto contents_alpha_scaled = contents_alpha * 255;
