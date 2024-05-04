@@ -29,7 +29,7 @@ public:
       MessageBoxLocation _location = MessageBoxLocation::MiddleCenter;
       std::optional<sf::Vector2f> _pos;
       bool _animate_text{true};
-      float _animate_text_speed{10.0f};
+      float _animate_text_speed{30.0f};
    };
 
    Dialogue(GameNode* parent = nullptr);
