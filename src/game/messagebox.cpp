@@ -442,7 +442,7 @@ void MessageBox::animateText()
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void MessageBox::update(const sf::Time& /*dt*/)
+void MessageBox::update(const sf::Time& dt)
 {
    if (__active)
    {
@@ -454,6 +454,7 @@ void MessageBox::update(const sf::Time& /*dt*/)
          __active->_next_page_position_px = __active->_layers["next_page"]->_sprite->getPosition();
       }
 
+      __active->_elapsed += dt;
       __active->updateBoxContentLayers();
 
       // default to visible until adjusted by either showAnimation or hideAnimation
@@ -503,6 +504,16 @@ void MessageBox::updateBoxContentLayers()
    _layers["next_page"]->_visible = _properties._show_next;
 }
 
+void MessageBox::updateNextPageIcon(const sf::Vector2f& offset_px)
+{
+   constexpr auto animation_speed = 3.0f;
+   constexpr auto animation_amplitude = 3.0f;
+   auto next_page_layer = _layers["next_page"];
+   next_page_layer->_sprite->setPosition(
+      _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude}
+   );
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 void MessageBox::updateContents()
 {
@@ -511,7 +522,6 @@ void MessageBox::updateContents()
    auto background_color = _properties._background_color;
    auto window_layer = _layers["window"];
    auto background_layer = _layers["background"];
-   auto next_page_layer = _layers["next_page"];
 
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
@@ -523,7 +533,7 @@ void MessageBox::updateContents()
    background_layer->_sprite->setScale(1.0f, 1.0f);
    background_layer->_sprite->setPosition(_background_position_px + offset_px);
 
-   next_page_layer->_sprite->setPosition(_next_page_position_px + offset_px);
+   updateNextPageIcon(offset_px);
 
    // fade in text and buttons
    const auto contents_alpha_scaled = contents_alpha * 255;
@@ -595,7 +605,7 @@ void MessageBox::showAnimation()
       }
    }
 
-   next_page_layer->_sprite->setPosition(_next_page_position_px + offset);
+   updateNextPageIcon(offset);
 
    // fade in text and buttons
    const auto contents_alpha_scaled = contents_alpha * 255;
