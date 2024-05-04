@@ -13,6 +13,8 @@ constexpr auto center_offset_px = 10;
 const auto head_offset_percent = 0.66f;
 constexpr auto velocity_scale = 100.0f;
 constexpr auto bubble_count_spawn_max = 10;
+constexpr auto bubble_count_dive_max = 10;
+constexpr auto bubble_count_dive_frames = 40;
 
 float frand(float min = 0.0f, float max = 1.0f)
 {
@@ -49,46 +51,89 @@ void WaterBubbles::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 //        +-------------+------+
 //
 
-void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
+void WaterBubbles::spawnBubble(const sf::Vector2f pos_px, const sf::Vector2f vel_px)
 {
-   if (input._player_in_water)
+   static const auto sprite_rects = std::array<sf::IntRect, 3>{
+      // sf::IntRect{576, 936, 24, 24},
+      sf::IntRect{600, 936, 24, 24},
+      sf::IntRect{624, 936, 24, 24},
+      sf::IntRect{648, 936, 24, 24},
+   };
+
+   auto bubble = std::make_shared<Bubble>(pos_px, vel_px, _texture);
+
+   bubble->_sprite.setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
+   bubble->_sprite.setOrigin(12.0f, 12.0f);
+   bubble->_delay_s = frand(0.0f, 0.3f);
+
+   _bubbles.push_back(bubble);
+}
+
+void WaterBubbles::spawnSplashBubbles(const WaterBubbleInput& input)
+{
+   const auto error_offset_x_px = input._player_pointing_right ? 0 : -12;
+   for (auto i = 0; i < bubble_count_dive_max; i++)
    {
-      duration_since_last_bubbles_s += dt.asSeconds();
+      // not really correct:
+      // the player rect does not change when the player is in the water, it should actually be rotated
+      const sf::Vector2f pos_px = {
+         input._player_rect.left + frand(0.0f, input._player_rect.height) + error_offset_x_px,
+         input._player_rect.top + frand(0.0f, input._player_rect.width * 1.5f)
+      };
+
+      const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
+
+      spawnBubble(pos_px, vel_px);
    }
 
-   if (duration_since_last_bubbles_s > delay_between_spawn_min_s + delay_between_spawn_variation_s)
+   _dive_frames_left--;
+}
+
+void WaterBubbles::spawnBubblesFromHead(const WaterBubbleInput& input)
+{
+   const auto spawn_bubble_count = std::max(bubble_count_spawn_max / 3, std::rand() % bubble_count_spawn_max);
+
+   // std::cout << "spawn " << spawn_bubble_count << " bubbles" << std::endl;
+
+   for (auto i = 0; i < spawn_bubble_count; i++)
    {
-      duration_since_last_bubbles_s = 0.0f;
-      delay_between_spawn_variation_s = frand();
-      const auto spawn_bubble_count = std::max(bubble_count_spawn_max / 3, std::rand() % bubble_count_spawn_max);
+      const auto range_right_px = head_offset_percent * input._player_rect.width +
+                                  frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) + center_offset_px;
+      const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) - center_offset_px;
+      const auto bubble_pos_x_px = input._player_rect.left + (input._player_pointing_right ? range_right_px : range_left_px);
 
-      // std::cout << "spawn " << spawn_bubble_count << " bubbles" << std::endl;
+      const sf::Vector2f pos_px = {bubble_pos_x_px, input._player_rect.top};
+      const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
 
-      for (auto i = 0; i < spawn_bubble_count; i++)
-      {
-         static const auto sprite_rects = std::array<sf::IntRect, 3>{
-            // sf::IntRect{576, 936, 24, 24},
-            sf::IntRect{600, 936, 24, 24},
-            sf::IntRect{624, 936, 24, 24},
-            sf::IntRect{648, 936, 24, 24},
-         };
+      // std::cout << "spawn " << pos_px.x << ", " << pos_px.y << std::endl;
+      spawnBubble(pos_px, vel_px);
+   }
+}
 
-         const auto range_right_px = head_offset_percent * input._player_rect.width +
-                                     frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) + center_offset_px;
-         const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) - center_offset_px;
-         const auto bubble_pos_x_px = input._player_rect.left + (input._player_pointing_right ? range_right_px : range_left_px);
+void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
+{
+   const auto was_in_water = _previous_input._player_in_water;
 
-         const sf::Vector2f pos_px = {bubble_pos_x_px, input._player_rect.top};
-         const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
+   if (!was_in_water && input._player_in_water)
+   {
+      _dive_frames_left = bubble_count_dive_frames;
+   }
 
-         // std::cout << "spawn " << pos_px.x << ", " << pos_px.y << std::endl;
+   if (_dive_frames_left > 0)
+   {
+      spawnSplashBubbles(input);
+   }
 
-         auto bubble = std::make_shared<Bubble>(pos_px, vel_px, _texture);
-         bubble->_sprite.setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
-         bubble->_sprite.setOrigin(12.0f, 12.0f);
-         bubble->_delay_s = frand(0.0f, 0.3f);
-         _bubbles.push_back(bubble);
-      }
+   if (input._player_in_water)
+   {
+      _duration_since_last_bubbles_s += dt.asSeconds();
+   }
+
+   if (_duration_since_last_bubbles_s > _delay_between_spawn_min_s + _delay_between_spawn_variation_s)
+   {
+      _duration_since_last_bubbles_s = 0.0f;
+      _delay_between_spawn_variation_s = frand();
+      spawnBubblesFromHead(input);
    }
 
    for (const auto& bubble : _bubbles)
@@ -111,6 +156,8 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
 
    // remove popped bubbles
    _bubbles.erase(std::remove_if(_bubbles.begin(), _bubbles.end(), [](const auto& bubble) { return bubble->_pop; }), _bubbles.end());
+
+   _previous_input = input;
 }
 
 WaterBubbles::Bubble::Bubble(const sf::Vector2f& pos, const sf::Vector2f& vel, const std::shared_ptr<sf::Texture>& texture)
