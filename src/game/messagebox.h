@@ -92,6 +92,8 @@ struct MessageBox
    void updateBoxContentLayers();
    void animateText();
 
+   void updateNextPageIcon(const sf::Vector2f& offset_px);
+
    Type _type;
    std::string _message;
    MessageBoxCallback _callback;
@@ -107,6 +109,7 @@ struct MessageBox
    sf::Time _hide_time;
    State _state{State::Hidden};
    sf::Text _text;
+   sf::Time _elapsed;
 
    sf::Vector2f _window_position_px;
    sf::Vector2f _background_position_px;
