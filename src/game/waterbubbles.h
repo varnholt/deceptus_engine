@@ -33,12 +33,19 @@ public:
    void update(const sf::Time& dt, const WaterBubbleInput& input);
 
 private:
+   void spawnBubble(const sf::Vector2f pos_px, const sf::Vector2f vel_px);
+   void spawnBubblesFromHead(const WaterBubbleInput& input);
+   void spawnSplashBubbles(const WaterBubbleInput& input);
+
    std::vector<std::shared_ptr<Bubble>> _bubbles;
    std::shared_ptr<sf::Texture> _texture;
+   WaterBubbleInput _previous_input;
 
-   float duration_since_last_bubbles_s = 0.0f;
-   float delay_between_spawn_variation_s = 1.0f;
-   float delay_between_spawn_min_s = 5.0f;
+   float _duration_since_last_bubbles_s = 0.0f;
+   float _delay_between_spawn_variation_s = 1.0f;
+   float _delay_between_spawn_min_s = 4.0f;
+
+   int32_t _dive_frames_left = 0;
 };
 
 #endif // WATERBUBBLES_H
