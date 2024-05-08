@@ -875,6 +875,11 @@ void Game::reloadLevel(LoadingMode loading_mode)
       return;
    }
 
+   // so when a dialogue is open and dstar modifies the tmx file and saves, then the game is reloaded.
+   // that'll leave the dialogue open which will call the callback which is gonna be invalid after re-loading.
+   // just resetting the messagebox before will just delete the messagebox.
+   MessageBox::reset();
+
    _restore_previous_position = true;
    _stored_position = _player->getPixelPositionFloat();
    _player->reset();

@@ -65,6 +65,7 @@ struct MessageBox
    static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
    static void update(const sf::Time& dt);
    static bool keyboardKeyPressed(sf::Keyboard::Key key);
+   static void reset();
 
    static void info(
       const std::string& message,
