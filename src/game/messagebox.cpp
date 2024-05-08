@@ -327,6 +327,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    return true;
 }
 
+void MessageBox::reset()
+{
+   __active.reset();
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 void MessageBox::initializeControllerCallbacks()
 {
