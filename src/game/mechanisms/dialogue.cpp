@@ -187,9 +187,10 @@ void Dialogue::setActive(bool active)
 void Dialogue::replace(std::string& str, const std::string& what, const std::string& with)
 {
    auto index = str.find(what, 0);
-   if (index != std::string::npos)
+   while (index != std::string::npos)
    {
       str.replace(index, what.size(), with);
+      index = str.find(what, 0);
    }
 }
 

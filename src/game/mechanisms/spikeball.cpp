@@ -133,7 +133,9 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       }
    }
 
-   color.draw(_box_sprite);
+   // dstar doesn't want the box sprite to be drawn
+   // color.draw(_box_sprite);
+
    drawChain(color);
    color.draw(_spike_sprite);
 }
