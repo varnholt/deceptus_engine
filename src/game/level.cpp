@@ -1492,6 +1492,8 @@ void Level::regenerateLevelPaths(
    {
 #ifdef __linux__
       auto cmd = std::string("tools/path_merge/path_merge") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
+#elif defined __APPLE__
+      auto cmd = std::string("tools/path_merge/path_merge_macos") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
 #else
       auto cmd =
          std::string("tools\\path_merge\\path_merge.exe") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
