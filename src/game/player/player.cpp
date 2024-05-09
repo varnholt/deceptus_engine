@@ -14,7 +14,6 @@
 #include "game/gameconfiguration.h"
 #include "game/gamecontactlistener.h"
 #include "game/gamecontrollerintegration.h"
-#include "game/gamestate.h"
 #include "game/gun.h"
 #include "game/inventorybasedcontrols.h"
 #include "game/level.h"
@@ -25,6 +24,7 @@
 #include "game/onewaywall.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/playeraudio.h"
+#include "game/player/playercontrolstate.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
@@ -186,13 +186,11 @@ void Player::initializeController()
    gji.addDeviceAddedCallback(
       [&](int32_t /*id*/)
       {
-         auto is_running = []() -> bool { return (GameState::getInstance().getMode() == ExecutionMode::Running); };
-
          gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_A,
             [&]()
             {
-               if (!is_running())
+               if (!PlayerControlState::checkState())
                {
                   return;
                }
@@ -205,7 +203,7 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_B,
             [&]()
             {
-               if (!is_running())
+               if (!PlayerControlState::checkState())
                {
                   return;
                }
@@ -223,7 +221,7 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
             [&]()
             {
-               if (!is_running())
+               if (!PlayerControlState::checkState())
                {
                   return;
                }
@@ -236,7 +234,7 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
             [&]()
             {
-               if (!is_running())
+               if (!PlayerControlState::checkState())
                {
                   return;
                }
@@ -249,7 +247,7 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_X,
             [&]()
             {
-               if (!is_running())
+               if (!PlayerControlState::checkState())
                {
                   return;
                }
@@ -262,7 +260,7 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_Y,
             [&]()
             {
-               if (!is_running())
+               if (!PlayerControlState::checkState())
                {
                   return;
                }
@@ -376,7 +374,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& current_cycle = _player_animation.getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->setColor(sf::Color(255, 255, 255, _fade_out_alpha * 255));
+      current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
       current_cycle->setPosition(draw_position_px);
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
@@ -386,7 +384,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& auxiliary_cycle = _player_animation.getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->setColor(sf::Color(255, 255, 255, _fade_out_alpha * 255));
+      auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
       auxiliary_cycle->setPosition(draw_position_px);
       auxiliary_cycle->draw(color, normal);
    }
@@ -671,7 +669,7 @@ float Player::getMaxVelocity() const
    return PhysicsConfiguration::getInstance()._player_speed_max_walk;
 }
 
-float Player::getVelocityFromController(const PlayerSpeed& speed) const
+float Player::readVelocityFromController(const PlayerSpeed& speed) const
 {
    if (_controls->isLookingAround())
    {
@@ -738,7 +736,7 @@ void Player::updateOrientation()
    }
 }
 
-float Player::getVelocityFromKeyboard(const PlayerSpeed& speed) const
+float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
    if (_controls->isLookingAround())
    {
@@ -876,7 +874,7 @@ void Player::updateAnimation(const sf::Time& dt)
    _player_animation.update(dt, data);
 }
 
-float Player::getDesiredVelocity() const
+float Player::readDesiredVelocity() const
 {
    const auto acceleration = getAcceleration();
    const auto deceleration = getDeceleration();
@@ -885,11 +883,11 @@ float Player::getDesiredVelocity() const
 
    PlayerSpeed speed{current_velocity, velocity_max, acceleration, deceleration};
 
-   const auto desired_velocity = getDesiredVelocity(speed);
+   const auto desired_velocity = readDesiredVelocity(speed);
    return desired_velocity;
 }
 
-float Player::getDesiredVelocity(const PlayerSpeed& speed) const
+float Player::readDesiredVelocity(const PlayerSpeed& speed) const
 {
    auto desired_velocity = 0.0f;
 
@@ -897,16 +895,16 @@ float Player::getDesiredVelocity(const PlayerSpeed& speed) const
    {
       if (_controls->isControllerUsedLast())
       {
-         desired_velocity = getVelocityFromController(speed);
+         desired_velocity = readVelocityFromController(speed);
       }
       else
       {
-         desired_velocity = getVelocityFromKeyboard(speed);
+         desired_velocity = readVelocityFromKeyboard(speed);
       }
    }
    else
    {
-      desired_velocity = getVelocityFromKeyboard(speed);
+      desired_velocity = readVelocityFromKeyboard(speed);
    }
 
    return desired_velocity;
@@ -1006,7 +1004,7 @@ void Player::updateVelocity()
       }
    }
 
-   auto desired_velocity = getDesiredVelocity();
+   auto desired_velocity = readDesiredVelocity();
    auto current_velocity = _body->GetLinearVelocity();
 
    // physically so wrong but gameplay-wise the best choice :)
@@ -1618,7 +1616,6 @@ void Player::update(const sf::Time& dt)
    updatePixelRect();
    updateChunk();
    _animation_pool.updateAnimations(dt);
-
    updateFadeOut(dt);
    updateHealth(dt);
    updateChainShapeCollisions();
@@ -1644,8 +1641,9 @@ void Player::update(const sf::Time& dt)
    updateWeapons(dt);
    updateWallslide(dt);
    updateWaterBubbles(dt);
-   _controls->update(dt);  // called at last just to backup previous controls
    updateSpawn();
+
+   _controls->update(dt);  // called at last just to backup previous controls
 }
 
 void Player::reloadAnimationPool()

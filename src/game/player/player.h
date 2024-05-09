@@ -162,10 +162,10 @@ private:
    void setMaskBitsCrouching(bool enabled);
 
    float getMaxVelocity() const;
-   float getVelocityFromController(const PlayerSpeed& speed) const;
-   float getVelocityFromKeyboard(const PlayerSpeed& speed) const;
-   float getDesiredVelocity(const PlayerSpeed& speed) const;
-   float getDesiredVelocity() const;
+   float readVelocityFromController(const PlayerSpeed& speed) const;
+   float readVelocityFromKeyboard(const PlayerSpeed& speed) const;
+   float readDesiredVelocity(const PlayerSpeed& speed) const;
+   float readDesiredVelocity() const;
    float getDeceleration() const;
    float getAcceleration() const;
 
