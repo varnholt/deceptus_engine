@@ -2,8 +2,9 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
-#include "gamecontrollerintegration.h"
-#include "tweaks.h"
+#include "game/gamecontrollerintegration.h"
+#include "game/player/playercontrolstate.h"
+#include "game/tweaks.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::update(const sf::Time& dt)
@@ -203,6 +204,11 @@ bool PlayerControls::isLookingAround() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (!GameControllerIntegration::getInstance().isControllerConnected())
    {
       return false;
@@ -217,6 +223,11 @@ bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonXPressed() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (_keys_pressed & KeyPressedSlot1)
    {
       return true;
@@ -233,6 +244,11 @@ bool PlayerControls::isButtonXPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonYPressed() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (_keys_pressed & KeyPressedSlot2)
    {
       return true;
@@ -249,6 +265,11 @@ bool PlayerControls::isButtonYPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonAPressed() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (_keys_pressed & KeyPressedJump)
    {
       return true;
@@ -265,6 +286,11 @@ bool PlayerControls::isButtonAPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonBPressed() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (_keys_pressed & KeyPressedAction)
    {
       return true;
@@ -281,6 +307,11 @@ bool PlayerControls::isButtonBPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isUpButtonPressed() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (_keys_pressed & KeyPressedUp)
    {
       return true;
@@ -297,6 +328,11 @@ bool PlayerControls::isUpButtonPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDownButtonPressed() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    if (_keys_pressed & KeyPressedDown)
    {
       return true;
@@ -313,12 +349,22 @@ bool PlayerControls::isDownButtonPressed() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDroppingDown() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    return isButtonAPressed() && isMovingDown(0.7f);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    // check if button state is locked
    const auto it = readLockedState(KeyPressedLeft);
    if (it != _locked_keys.end())
@@ -366,6 +412,11 @@ bool PlayerControls::isMovingLeft() const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingDown(float analog_threshold) const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -406,6 +457,11 @@ bool PlayerControls::isMovingDown(float analog_threshold) const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingUp(float analog_threshold) const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -446,6 +502,11 @@ bool PlayerControls::isMovingUp(float analog_threshold) const
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingRight() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    // check if button state is locked
    const auto it = readLockedState(KeyPressedRight);
    if (it != _locked_keys.end())
@@ -571,6 +632,11 @@ bool PlayerControls::changedToMoving() const
 //----------------------------------------------------------------------------------------------------------------------
 PlayerControls::Orientation PlayerControls::updateOrientation()
 {
+   if (!PlayerControlState::checkState())
+   {
+      return Orientation::Undefined;
+   }
+
    Orientation orientation = Orientation::Undefined;
 
    // controller input
@@ -643,6 +709,11 @@ PlayerControls::Orientation PlayerControls::updateOrientation()
 //----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isBendDownActive() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
    auto down_pressed = false;
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -796,11 +867,17 @@ bool PlayerControls::LockedKey::asBool() const
    {
       return true;
    }
+
    return false;
 }
 
 float PlayerControls::readControllerNormalizedHorizontal() const
 {
+   if (!PlayerControlState::checkState())
+   {
+      return 0.0f;
+   }
+
    // check if button state is locked
    const auto it_left = readLockedState(KeyPressedLeft);
    const auto it_right = readLockedState(KeyPressedRight);
