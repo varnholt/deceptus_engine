@@ -1,8 +1,9 @@
 #pragma once
 
-#include "constants.h"
 #include <cstdint>
+#include <functional>
 #include <vector>
+#include "constants.h"
 
 class DisplayMode
 {
@@ -26,9 +27,8 @@ private:
 
    int32_t _mode = static_cast<int32_t>(Display::Game);
 
-   std::vector<Display> _queued_set;
-   std::vector<Display> _queued_unset;
-   std::vector<Display> _queued_toggle;
+   using QueuedFunction = std::function<void(void)>;
 
+   std::vector<QueuedFunction> _queue;
 };
 

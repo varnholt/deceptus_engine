@@ -173,6 +173,7 @@ MessageBox::MessageBox(
 
    DisplayMode::getInstance().enqueueSet(Display::Modal);
 
+   // can probably be removed now, controls already checks if a modal dialogue is open
    Player::getCurrent()->getControls()->setKeysPressed(0);
 
    _text.setFont(__font);

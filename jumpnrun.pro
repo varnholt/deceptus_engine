@@ -301,6 +301,7 @@ SOURCES += \
    src/game/player/playerbelt.cpp \
    src/game/player/playerclimb.cpp \
    src/game/player/playercontrols.cpp \
+   src/game/player/playercontrolstate.cpp \
    src/game/player/playerdash.cpp \
    src/game/player/playerinfo.cpp \
    src/game/player/playerinput.cpp \
@@ -543,6 +544,7 @@ HEADERS += \
    src/game/player/playerbend.h \
    src/game/player/playerclimb.h \
    src/game/player/playercontrols.h \
+   src/game/player/playercontrolstate.h \
    src/game/player/playerdash.h \
    src/game/player/playerinfo.h \
    src/game/player/playerinput.h \
