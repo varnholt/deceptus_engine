@@ -1,5 +1,4 @@
-#version 130
-
+#version 120
 uniform float gamma;
 varying vec2 uv;
 uniform sampler2D texture;
