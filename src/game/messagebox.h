@@ -35,7 +35,7 @@ struct MessageBox
       Error
    };
 
-   enum class State
+   enum class DisplayState
    {
       ShowAnimation,
       HideAnimation,
@@ -89,11 +89,12 @@ struct MessageBox
 
    void showAnimation();
    void hideAnimation();
-   void updateContents();
+
+   void noAnimation();
    void updateBoxContentLayers();
    void animateText();
-
-   void updateNextPageIcon(const sf::Vector2f& offset_px);
+   void updateNextPageIcon();
+   void updateTextAndButtonColor(float contents_alpha);
 
    Type _type;
    std::string _message;
@@ -101,14 +102,14 @@ struct MessageBox
    LayoutProperties _properties;
    int32_t _buttons = 0;
    uint32_t _chars_shown = 0;
-   bool _initialized = false;
    bool _closed = false;
    bool _reset_instance = false;
    std::function<void(void)> _button_callback_a;
    std::function<void(void)> _button_callback_b;
+   std::optional<sf::Keyboard::Key> _button_callback_key;
    sf::Time _show_time;
    sf::Time _hide_time;
-   State _state{State::Hidden};
+   DisplayState _state{DisplayState::Hidden};
    sf::Text _text;
    sf::Time _elapsed;
 
