@@ -38,7 +38,6 @@ std::unique_ptr<MessageBox> __previous;
 
 sf::Font __font;
 
-//----------------------------------------------------------------------------------------------------------------------
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
 {
    size_t start_pos = 0;
@@ -50,7 +49,6 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
    return str;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::Vector2f pixelLocation(MessageBoxLocation location)
 {
    sf::Vector2f pos;
@@ -118,7 +116,6 @@ sf::Vector2f pixelLocation(MessageBoxLocation location)
    return pos;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void close(MessageBox::Button button)
 {
    auto callback = __active->_callback;
@@ -140,7 +137,6 @@ void close(MessageBox::Button button)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void messageBox(
    MessageBox::Type type,
    const std::string& message,
@@ -157,7 +153,6 @@ void messageBox(
 
 MessageBox::LayoutProperties MessageBox::__default_properties;
 
-//----------------------------------------------------------------------------------------------------------------------
 MessageBox::MessageBox(
    MessageBox::Type type,
    const std::string& message,
@@ -180,9 +175,10 @@ MessageBox::MessageBox(
    _text.setCharacterSize(12);
    _text.setFillColor(_properties._text_color);
    _text.setString("");
+
+   showAnimation();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 MessageBox::~MessageBox()
 {
    auto& gci = GameControllerIntegration::getInstance();
@@ -195,14 +191,14 @@ MessageBox::~MessageBox()
    DisplayMode::getInstance().enqueueUnset(Display::Modal);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::initializeLayers()
 {
-   static bool __initialized = false;
+   static bool __psd_loaded = false;
    static PSD psd;
 
-   if (!__initialized)
+   if (!__psd_loaded)
    {
+      __psd_loaded = true;
       psd.setColorFormat(PSD::ColorFormat::ABGR);
       psd.load("data/game/messagebox.psd");
 
@@ -252,10 +248,12 @@ void MessageBox::initializeLayers()
    // background layer is unused for now
    _layers["temp_bg"]->_visible = false;
 
-   __initialized = true;
+   // initialize positions
+   _window_position_px = _layers["window"]->_sprite->getPosition();
+   _background_position_px = _layers["background"]->_sprite->getPosition();
+   _next_page_position_px = _layers["next_page"]->_sprite->getPosition();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (!__active)
@@ -268,12 +266,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
-   if (__active->_state != State::Visible)
-   {
-      return false;
-   }
-
-   if (!__active->_initialized)
+   if (__active->_state != DisplayState::Visible)
    {
       return false;
    }
@@ -333,20 +326,20 @@ void MessageBox::reset()
    __active.reset();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::initializeControllerCallbacks()
 {
    auto& gci = GameControllerIntegration::getInstance();
    if (gci.isControllerConnected())
    {
-      _button_callback_a = []() { keyboardKeyPressed(sf::Keyboard::Return); };
-      _button_callback_b = []() { keyboardKeyPressed(sf::Keyboard::Escape); };
+      _button_callback_a = [this]() { _button_callback_key = sf::Keyboard::Return; };
+
+      _button_callback_b = [this]() { _button_callback_key = sf::Keyboard::Escape; };
+
       gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
       gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
 {
    for (auto& layer : _layer_stack)
@@ -358,7 +351,6 @@ void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
 {
    _message = replaceAll(_message, "[br]", "\n");
@@ -391,7 +383,6 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
    window.draw(_text, states);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto messageboxes = {__active.get(), __previous.get()};
@@ -414,7 +405,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    for (auto messagebox : messageboxes)
    {
-      if (messagebox && messagebox->_initialized)
+      if (messagebox)
       {
          messagebox->drawLayers(window, states);
          messagebox->drawText(states, window);
@@ -422,7 +413,6 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::animateText()
 {
    static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
@@ -447,35 +437,36 @@ void MessageBox::animateText()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::update(const sf::Time& dt)
 {
    if (__active)
    {
-      if (!__active->_initialized)
+      // handle emulated keypress event in update call to make sure it's processed before the next render call
+      if (__active->_button_callback_key.has_value())
       {
-         __active->_initialized = true;
-         __active->_window_position_px = __active->_layers["window"]->_sprite->getPosition();
-         __active->_background_position_px = __active->_layers["background"]->_sprite->getPosition();
-         __active->_next_page_position_px = __active->_layers["next_page"]->_sprite->getPosition();
+         __active->keyboardKeyPressed(__active->_button_callback_key.value());
       }
 
-      __active->_elapsed += dt;
-      __active->updateBoxContentLayers();
-
-      // default to visible until adjusted by either showAnimation or hideAnimation
-      __active->_state = State::Visible;
-
-      if (!__active->_closed)
+      // keyboard press event might actually delete the active messagebox
+      if (__active)
       {
-         if (__active->_properties._animate_show_event)
+         __active->_elapsed += dt;
+         __active->updateBoxContentLayers();
+
+         // default to visible until adjusted by either showAnimation or hideAnimation
+         __active->_state = DisplayState::Visible;
+
+         if (!__active->_closed)
          {
-            __active->showAnimation();
-         }
-         else
-         {
-            // the position and alpha must be updated regardless of show/hide events
-            __active->updateContents();
+            if (__active->_properties._animate_show_event)
+            {
+               __active->showAnimation();
+            }
+            else
+            {
+               // the position and alpha must be updated regardless of show/hide events
+               __active->noAnimation();
+            }
          }
       }
    }
@@ -494,7 +485,6 @@ void MessageBox::update(const sf::Time& dt)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::updateBoxContentLayers()
 {
    const auto xbox = (GameControllerIntegration::getInstance().isControllerConnected());
@@ -510,8 +500,10 @@ void MessageBox::updateBoxContentLayers()
    _layers["next_page"]->_visible = _properties._show_next;
 }
 
-void MessageBox::updateNextPageIcon(const sf::Vector2f& offset_px)
+void MessageBox::updateNextPageIcon()
 {
+   const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
    constexpr auto animation_speed = 3.0f;
    constexpr auto animation_amplitude = 3.0f;
    auto next_page_layer = _layers["next_page"];
@@ -520,18 +512,15 @@ void MessageBox::updateNextPageIcon(const sf::Vector2f& offset_px)
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-void MessageBox::updateContents()
+void MessageBox::noAnimation()
 {
-   auto contents_alpha = 1.0f;
-
    auto background_color = _properties._background_color;
    auto window_layer = _layers["window"];
    auto background_layer = _layers["background"];
 
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
-   window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+   window_layer->_sprite->setColor(sf::Color::White);
    window_layer->_sprite->setScale(1.0f, 1.0f);
    window_layer->_sprite->setPosition(_window_position_px + offset_px);
 
@@ -539,9 +528,12 @@ void MessageBox::updateContents()
    background_layer->_sprite->setScale(1.0f, 1.0f);
    background_layer->_sprite->setPosition(_background_position_px + offset_px);
 
-   updateNextPageIcon(offset_px);
+   updateNextPageIcon();
+   updateTextAndButtonColor(1.0f);
+}
 
-   // fade in text and buttons
+void MessageBox::updateTextAndButtonColor(float contents_alpha)
+{
    const auto contents_alpha_scaled = contents_alpha * 255;
    const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
    const auto color = sf::Color{255, 255, 255, alpha};
@@ -556,7 +548,6 @@ void MessageBox::updateContents()
    _text.setFillColor(text_color);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::showAnimation()
 {
    auto contents_alpha = 1.0f;
@@ -566,7 +557,6 @@ void MessageBox::showAnimation()
 
    auto window_layer = _layers["window"];
    auto background_layer = _layers["background"];
-   auto next_page_layer = _layers["next_page"];
 
    const auto offset = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
@@ -575,26 +565,31 @@ void MessageBox::showAnimation()
       contents_alpha = 0.0f;
 
       const auto t_normalized = visible_time.asSeconds() / animation_scale_time_show.asSeconds();
-
       const auto scale_x = Easings::easeOutBack<float>(t_normalized);
       const auto scale_y = scale_x;
 
-      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
-      window_layer->_sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)});
-      window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(_window_position_px.x + window_scale_offset + offset.x, _window_position_px.y + offset.y);
+      background_color.a = static_cast<uint8_t>(t_normalized * 255);
 
       const auto background_scale_offset = (background_width_px - background_width_px * scale_x) * 0.5f;
-      background_color.a = static_cast<uint8_t>(t_normalized * 255);
+      const auto background_pos_x_px = _background_position_px.x + background_scale_offset + offset.x;
+      const auto background_pos_y_px = _background_position_px.y + offset.y;
+
+      const auto window_scale_offset = (textbox_width_px - textbox_width_px * scale_x) * 0.5f;
+      const auto window_pos_x_px = _window_position_px.x + window_scale_offset + offset.x;
+      const auto window_pos_y_px = _window_position_px.y + offset.y;
+      const auto window_color = sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)};
+
+      window_layer->_sprite->setColor(window_color);
+      window_layer->_sprite->setScale(scale_x, scale_y);
+      window_layer->_sprite->setPosition(window_pos_x_px, window_pos_y_px);
+
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale(scale_x, scale_y);
-      background_layer->_sprite->setPosition(
-         _background_position_px.x + background_scale_offset + offset.x, _background_position_px.y + offset.y
-      );
+      background_layer->_sprite->setPosition(background_pos_x_px, background_pos_y_px);
    }
    else  // fade in
    {
-      window_layer->_sprite->setColor(sf::Color{255, 255, 255, 255});
+      window_layer->_sprite->setColor(sf::Color::White);
       window_layer->_sprite->setScale(1.0f, 1.0f);
       window_layer->_sprite->setPosition(_window_position_px + offset);
 
@@ -611,27 +606,13 @@ void MessageBox::showAnimation()
       }
    }
 
-   updateNextPageIcon(offset);
-
-   // fade in text and buttons
-   const auto contents_alpha_scaled = contents_alpha * 255;
-   const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
-   const auto color = sf::Color{255, 255, 255, alpha};
-   auto text_color = _properties._text_color;
-   text_color.a = alpha;
-
-   for (const auto& layer : _box_content_layers)
-   {
-      layer->_sprite->setColor(color);
-   }
-
-   _text.setFillColor(text_color);
+   updateNextPageIcon();
+   updateTextAndButtonColor(contents_alpha);
 
    // update state
-   _state = (contents_alpha_scaled < 255) ? MessageBox::State::ShowAnimation : MessageBox::State::Visible;
+   _state = (contents_alpha * 255 < 255) ? MessageBox::DisplayState::ShowAnimation : MessageBox::DisplayState::Visible;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::hideAnimation()
 {
    const auto elapsed_time = GlobalClock::getInstance().getElapsedTime() - __previous->_hide_time;
@@ -647,8 +628,10 @@ void MessageBox::hideAnimation()
    else
    {
       const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
+
       auto background_color = _properties._background_color;
       auto text_color = _properties._text_color;
+
       text_color.a = contents_alpha_scaled;
       background_color.a = contents_alpha_scaled;
 
@@ -664,10 +647,9 @@ void MessageBox::hideAnimation()
    }
 
    // update state
-   _state = (contents_alpha_scaled > 0) ? MessageBox::State::HideAnimation : MessageBox::State::Hidden;
+   _state = (contents_alpha_scaled > 0) ? MessageBox::DisplayState::HideAnimation : MessageBox::DisplayState::Hidden;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::info(const std::string& message, const MessageBoxCallback& callback, const LayoutProperties& properties, int32_t buttons)
 {
    if (__active)
@@ -679,7 +661,6 @@ void MessageBox::info(const std::string& message, const MessageBoxCallback& call
    messageBox(MessageBox::Type::Info, message, callback, properties, buttons);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void MessageBox::question(
    const std::string& message,
    const MessageBox::MessageBoxCallback& callback,
