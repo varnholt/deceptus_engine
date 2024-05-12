@@ -824,6 +824,7 @@ void Player::updateAnimation(const sf::Time& dt)
 
    data._dead = isDead();
    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
+   data._checkpoint_index = SaveState::getCurrent()._checkpoint;
    data._in_air = isInAir();
    data._in_water = isInWater();
    data._linear_velocity = _body->GetLinearVelocity();
