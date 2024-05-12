@@ -232,6 +232,12 @@ void Game::showPauseMenu()
       return;
    }
 
+   // when there's a dialogue open, opening the pause menu also does not make any sense
+   if (DisplayMode::getInstance().isSet(Display::Modal))
+   {
+      return;
+   }
+
    if (Menu::getInstance()->getCurrentType() == Menu::MenuType::None)
    {
       Menu::getInstance()->show(Menu::MenuType::Pause);
