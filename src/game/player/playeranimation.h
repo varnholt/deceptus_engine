@@ -44,6 +44,7 @@ public:
       int32_t _jump_frame_count = 0;
       int32_t _dash_frame_count = 0;
       int32_t _death_count_current_level = 0;
+      int32_t _checkpoint_index = 0;
       HighResTimePoint _timepoint_wallslide;
       HighResTimePoint _timepoint_walljump;
       HighResTimePoint _timepoint_doublejump;
