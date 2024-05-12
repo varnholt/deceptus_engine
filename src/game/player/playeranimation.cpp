@@ -931,8 +931,8 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimation(const PlayerAnimationData& data)
 {
-   // if player didn't die earlier, don't play the appear animation
-   if (data._death_count_current_level == 0)
+   // if player didn't die earlier and is also located at the start position, don't play the appear animation
+   if (data._death_count_current_level == 0 && data._checkpoint_index == 0)
    {
       return std::nullopt;
    }
