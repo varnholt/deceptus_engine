@@ -223,6 +223,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_dialogues,
       &_mechanism_doors,
       &_mechanism_dust,
+      &_mechanism_enemy_walls,
       &_mechanism_extras,
       &_mechanism_fans,
       &_mechanism_fireflies,
@@ -264,6 +265,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
    _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;
    _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
+   _mechanisms_map[std::string{layer_name_enemy_walls}] = &_mechanism_enemy_walls;
    _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;

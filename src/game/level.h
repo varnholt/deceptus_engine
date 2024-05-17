@@ -198,6 +198,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dust;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_enemy_walls;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_extras;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fireflies;
