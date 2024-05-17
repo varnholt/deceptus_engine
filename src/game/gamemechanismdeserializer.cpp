@@ -17,6 +17,7 @@
 #include "game/mechanisms/dialogue.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/dust.h"
+#include "game/mechanisms/enemywall.h"
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/fireflies.h"
@@ -75,6 +76,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_doors = mechanisms[std::string{layer_name_doors}];
    auto* mechanism_dust = mechanisms[std::string{layer_name_dust}];
    auto* mechanism_extras = mechanisms[std::string{layer_name_extras}];
+   auto* mechanism_enemy_walls = mechanisms[std::string{layer_name_enemy_walls}];
    auto* mechanism_fans = mechanisms[std::string{layer_name_fans}];
    auto* mechanism_fireflies = mechanisms[std::string{layer_name_fireflies}];
    auto* mechanism_info_overlays = mechanisms[std::string{layer_name_info_overlays}];
@@ -337,6 +339,12 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = Dust::deserialize(parent, data);
                mechanism_dust->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_enemy_walls || tmx_object->_template_type == type_name_enemy_wall)
+            {
+               auto mechanism = std::make_shared<EnemyWall>(parent);
+               mechanism->setup(data);
+               mechanism_enemy_walls->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_switchable_objects || tmx_object->_template_type == type_name_switchable_object)
             {
