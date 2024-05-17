@@ -250,6 +250,7 @@ SOURCES += \
    src/game/mechanisms/dialogue.cpp \
    src/game/mechanisms/door.cpp \
    src/game/mechanisms/dust.cpp \
+   src/game/mechanisms/enemywall.cpp \
    src/game/mechanisms/extra.cpp \
    src/game/mechanisms/extrawrapper.cpp \
    src/game/mechanisms/fan.cpp \
@@ -493,6 +494,7 @@ HEADERS += \
    src/game/mechanisms/dialogue.h \
    src/game/mechanisms/door.h \
    src/game/mechanisms/dust.h \
+   src/game/mechanisms/enemywall.h \
    src/game/mechanisms/extra.h \
    src/game/mechanisms/extrawrapper.h \
    src/game/mechanisms/fan.h \
