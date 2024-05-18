@@ -48,6 +48,9 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    static const auto alpha_default = 50;
 
+   sf::RenderStates states;
+   states.blendMode = sf::BlendAlpha;
+
    sf::Vertex quad[4];
    for (const auto& p : _particles)
    {
@@ -82,8 +85,6 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       quad[2].color = col;
       quad[3].color = col;
 
-      sf::RenderStates states;
-      states.blendMode = sf::BlendAlpha;
       target.draw(quad, 4, sf::Quads, states);
    }
 }
@@ -100,8 +101,11 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
    std::string flowfield_texture = "data/effects/flowfield_3.png";
 
-   dust->_clip_rect =
+   const auto clip_rect =
       sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   dust->_clip_rect = clip_rect;
+   dust->addChunks(clip_rect);
 
    if (data._tmx_object->_properties)
    {
