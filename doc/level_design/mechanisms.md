@@ -418,6 +418,32 @@ Doors can have keys assigned the player has to find inside your level (in form o
 
 &nbsp;
 
+
+---
+
+## Enemy Wall
+
+A rectangle wall that, when placed anywhere in the level, will block enemies from passing through. The player, however, is not blocked by an Enemy Wall.
+The Enemy Wall is represented by a rectangle object in Tiled.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`EnemyWall`|
+|Object Group|`enemy_walls`|
+
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|enabled|bool|Whether or not the wall is enabled|
+
+&nbsp;
+
+&nbsp;
+
 ---
 
 
