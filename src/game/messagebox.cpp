@@ -504,8 +504,9 @@ void MessageBox::updateNextPageIcon()
 {
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
-   constexpr auto animation_speed = 3.0f;
+   constexpr auto animation_speed = 8.0f;
    constexpr auto animation_amplitude = 3.0f;
+
    auto next_page_layer = _layers["next_page"];
    next_page_layer->_sprite->setPosition(
       _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude}
