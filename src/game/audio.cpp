@@ -14,8 +14,6 @@ const std::string sfx_path = "data/sounds/";
 const std::string music_path = "data/music";
 }  // namespace
 
-
-//-----------------------------------------------------------------------------
 /*!
  * \brief Audio::Audio
  * \param parent
@@ -27,7 +25,6 @@ Audio::Audio()
    initializeMusic();
 }
 
-//-----------------------------------------------------------------------------
 /*!
  * \brief Audio::getInstance
  * \return
@@ -38,7 +35,6 @@ Audio& Audio::getInstance()
    return __instance;
 }
 
-//-----------------------------------------------------------------------------
 std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 {
    auto buf = std::make_shared<sf::SoundBuffer>();
@@ -54,7 +50,6 @@ std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
    return buf;
 };
 
-//-----------------------------------------------------------------------------
 void Audio::addSample(const std::string& sample)
 {
    if (_sound_buffers.find(sample) != _sound_buffers.end())
@@ -65,7 +60,6 @@ void Audio::addSample(const std::string& sample)
    _sound_buffers[sample] = loadFile(sample);
 }
 
-//-----------------------------------------------------------------------------
 void Audio::initializeSamples()
 {
    addSample("coin.wav");
@@ -85,7 +79,6 @@ void Audio::initializeSamples()
    addSample("impact.wav");
 }
 
-//-----------------------------------------------------------------------------
 void Audio::initializeMusic()
 {
    if (!std::filesystem::exists(music_path))
@@ -115,7 +108,6 @@ void Audio::initializeMusic()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Audio::debug()
 {
    const auto stopped_thread_count = std::count_if(
@@ -125,7 +117,6 @@ void Audio::debug()
    std::cout << stopped_thread_count << "/" << _sound_threads.size() << " are free" << std::endl;
 }
 
-//-----------------------------------------------------------------------------
 void Audio::initializeMusicVolume()
 {
    const auto& config = GameConfiguration::getInstance();
@@ -134,7 +125,17 @@ void Audio::initializeMusicVolume()
    _music.setVolume(master * music);
 }
 
-//-----------------------------------------------------------------------------
+void Audio::adjustActiveSampleVolume()
+{
+   std::lock_guard<std::mutex> guard(_mutex);
+
+   auto threads = _sound_threads | std::views::filter([](const auto& thread) { return thread._sound.getStatus() != sf::Sound::Stopped; });
+   for (auto& thread : threads)
+   {
+      thread._sound.setVolume(thread._play_info._volume);
+   }
+}
+
 std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 {
    std::lock_guard<std::mutex> guard(_mutex);
@@ -164,6 +165,7 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    thread_it->_filename = play_info._sample_name;
    thread_it->setVolume(play_info._volume);
    thread_it->_sound.setLoop(play_info._looped);
+   thread_it->_play_info = play_info;
 
    if (play_info._pos.has_value())
    {
@@ -175,7 +177,6 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    return std::distance(_sound_threads.begin(), thread_it);
 }
 
-//-----------------------------------------------------------------------------
 void Audio::stopSample(const std::string& name)
 {
    std::lock_guard<std::mutex> guard(_mutex);
@@ -187,7 +188,6 @@ void Audio::stopSample(const std::string& name)
    }
 }
 
-//-----------------------------------------------------------------------------
 void Audio::stopSample(int32_t thread)
 {
    std::lock_guard<std::mutex> guard(_mutex);
@@ -195,21 +195,18 @@ void Audio::stopSample(int32_t thread)
    _sound_threads[thread]._sound.stop();
 }
 
-//-----------------------------------------------------------------------------
 void Audio::setVolume(int32_t thread, float volume)
 {
    std::lock_guard<std::mutex> guard(_mutex);
    _sound_threads[thread].setVolume(volume);
 }
 
-//-----------------------------------------------------------------------------
 void Audio::setPosition(int32_t thread, const sf::Vector2f pos)
 {
    std::lock_guard<std::mutex> guard(_mutex);
    _sound_threads[thread].setPosition(pos);
 }
 
-//-----------------------------------------------------------------------------
 void Audio::updateMusic()
 {
    if (_tracks.empty())
@@ -233,13 +230,11 @@ void Audio::updateMusic()
    _music.play();
 }
 
-//-----------------------------------------------------------------------------
 sf::Music& Audio::getMusic() const
 {
    return _music;
 }
 
-//-----------------------------------------------------------------------------
 void Audio::SoundThread::setVolume(float volume)
 {
    const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
@@ -247,7 +242,6 @@ void Audio::SoundThread::setVolume(float volume)
    _sound.setVolume(master * sfx * volume * 100.0f);
 }
 
-//-----------------------------------------------------------------------------
 void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
 {
    _sound.setPosition(pos.x, pos.y, 0.0f);
