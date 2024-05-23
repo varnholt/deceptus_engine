@@ -25,17 +25,10 @@ public:
       std::string _filename;
    };
 
-   struct SoundThread
-   {
-      std::string _filename;
-      sf::Sound _sound;
-
-      void setVolume(float volume);
-      void setPosition(const sf::Vector2f& pos);
-   };
-
    struct PlayInfo
    {
+      PlayInfo() = default;
+
       PlayInfo(const std::string& sample_name) : _sample_name(sample_name)
       {
       }
@@ -54,9 +47,20 @@ public:
       std::optional<sf::Vector2f> _pos;
    };
 
+   struct SoundThread
+   {
+      std::string _filename;
+      sf::Sound _sound;
+      PlayInfo _play_info;
+
+      void setVolume(float volume);
+      void setPosition(const sf::Vector2f& pos);
+   };
+
    static Audio& getInstance();
 
    void initializeMusicVolume();
+   void adjustActiveSampleVolume();
 
    void addSample(const std::string& sample);
    std::optional<int32_t> playSample(const PlayInfo& play_info);

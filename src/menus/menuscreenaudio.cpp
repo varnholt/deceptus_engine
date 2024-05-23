@@ -111,7 +111,10 @@ void MenuScreenAudio::set(int32_t x)
    }
 
    GameConfiguration::getInstance().serializeToFile();
+
+   // update the volume of active threads
    Audio::getInstance().initializeMusicVolume();
+   Audio::getInstance().adjustActiveSampleVolume();
 
    updateLayers();
 
