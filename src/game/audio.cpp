@@ -132,7 +132,8 @@ void Audio::adjustActiveSampleVolume()
    auto threads = _sound_threads | std::views::filter([](const auto& thread) { return thread._sound.getStatus() != sf::Sound::Stopped; });
    for (auto& thread : threads)
    {
-      thread._sound.setVolume(thread._play_info._volume);
+      std::cout << thread._play_info._volume << std::endl;
+      thread.setVolume(thread._play_info._volume);
    }
 }
 
