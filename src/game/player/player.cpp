@@ -743,20 +743,23 @@ float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
       return 0.0f;
    }
 
+   const auto attempt_move_left = _controls->isMovingLeft();
+   const auto attempt_move_right = _controls->isMovingRight();
+
    // sanity check to avoid moonwalking
-   if (_controls->hasFlag(KeyPressedLeft) && _controls->hasFlag(KeyPressedRight))
+   if (attempt_move_left && attempt_move_right)
    {
       return 0.0f;
    }
 
-   float desired_velocity = 0.0f;
+   auto desired_velocity = 0.0f;
 
-   if (_controls->hasFlag(KeyPressedLeft))
+   if (attempt_move_left)
    {
       desired_velocity = b2Max(speed._current_velocity.x - speed._acceleration, -speed._velocity_max);
    }
 
-   if (_controls->hasFlag(KeyPressedRight))
+   if (attempt_move_right)
    {
       desired_velocity = b2Min(speed._current_velocity.x + speed._acceleration, speed._velocity_max);
    }
@@ -765,10 +768,10 @@ float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
    // a) no movement to left or right
    // b) movement is opposite to given direction
    // c) no movement at all
-   const auto no_movement_to_left_or_right = (!(_controls->hasFlag(KeyPressedLeft))) && (!(_controls->hasFlag(KeyPressedRight)));
+   const auto no_movement_to_left_or_right = !attempt_move_left && !attempt_move_right;
 
-   const auto velocity_opposite_to_given_dir = (speed._current_velocity.x < -0.01f && _controls->hasFlag(KeyPressedRight)) ||
-                                               (speed._current_velocity.x > 0.01f && _controls->hasFlag(KeyPressedLeft));
+   const auto velocity_opposite_to_given_dir =
+      (speed._current_velocity.x < -0.01f && attempt_move_right) || (speed._current_velocity.x > 0.01f && attempt_move_left);
 
    const auto no_movement = (fabs(desired_velocity) < 0.0001f);
 
