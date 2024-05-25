@@ -366,6 +366,7 @@ In order to introduce a message box, you create a rectangle object that defines 
 |open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed. Default is `false`.|
 |show_delay_ms|int|An optional activation delay for the message box a (in milliseconds, undefined by default).|
 |pause_game|bool|Whether or not to pause the game when the dialogue is shown. Default is `true`.|
+|open_on_intersect|bool|You can make a dialogue only open from a lua script by setting `open_on_intersect` to `false`. Default is `true`.|
 
 Moreover, you can use the tags below inside your dialogue strings:
 
