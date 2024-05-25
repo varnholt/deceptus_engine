@@ -95,6 +95,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    }
 
    dialogue->_pause_game = ValueReader::readValue<bool>("pause_game", properties->_map).value_or(true);
+   dialogue->_open_on_intersect = ValueReader::readValue<bool>("open_on_intersect", properties->_map).value_or(true);
    const auto show_delay = ValueReader::readValue<int32_t>("show_delay_ms", properties->_map);
    if (show_delay.has_value())
    {
@@ -135,7 +136,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
    }
 
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   if (player_rect.intersects(_pixel_rect))
+   if (_open_on_intersect && player_rect.intersects(_pixel_rect))
    {
       // message boxes might already be marked as inactive, however
       // they might still be fading out. the display mode 'modal', however
