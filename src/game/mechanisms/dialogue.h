@@ -54,6 +54,7 @@ private:
    bool _active{false};
    bool _button_required{true};
    bool _pause_game{true};
+   bool _open_on_intersect{true};
    std::optional<std::chrono::milliseconds> _show_delay_ms;
    std::optional<int32_t> _consumed_counter;
    sf::Time _elapsed;
