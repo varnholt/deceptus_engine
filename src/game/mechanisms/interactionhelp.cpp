@@ -26,6 +26,11 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 
 void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    _animation_show->draw(target);
    _animation_hide->draw(target);
 
@@ -58,6 +63,11 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
 
 void InteractionHelp::update(const sf::Time& dt)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    const auto intersects = player_rect.intersects(_rect_px);
 
