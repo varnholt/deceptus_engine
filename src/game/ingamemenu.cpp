@@ -59,19 +59,28 @@ void InGameMenu::updateControllerActions()
 
    const auto axis_values = _joystick_info.getAxisValues();
    const auto axis_left_x = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
+   const auto axis_left_y = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
    const auto hat_values = _joystick_info.getHatValues().at(0);
-   const auto dpad_left_pressed = hat_values & SDL_HAT_LEFT;
-   const auto dpad_right_pressed = hat_values & SDL_HAT_RIGHT;
 
    auto xl = axis_values[axis_left_x] / 32767.0f;
+   auto yl = axis_values[axis_left_y] / 32767.0f;
 
-   if (dpad_left_pressed)
+   if (static_cast<bool>(hat_values & SDL_HAT_LEFT))
    {
       xl = -1.0f;
    }
-   else if (dpad_right_pressed)
+   else if (static_cast<bool>(hat_values & SDL_HAT_RIGHT))
    {
       xl = 1.0f;
+   }
+
+   if (static_cast<bool>(hat_values & SDL_HAT_UP))
+   {
+      yl = -1.0f;
+   }
+   else if (static_cast<bool>(hat_values & SDL_HAT_DOWN))
+   {
+      yl = 1.0f;
    }
 
    if (fabs(xl) > 0.3f)
@@ -90,6 +99,25 @@ void InGameMenu::updateControllerActions()
          {
             _joystick_update_time = GlobalClock::getInstance().getElapsedTimeInS();
             right();
+         }
+      }
+   }
+   else if (fabs(yl) > 0.3f)
+   {
+      if (yl < 0.0f)
+      {
+         if (!isControllerActionSkipped())
+         {
+            _joystick_update_time = GlobalClock::getInstance().getElapsedTimeInS();
+            up();
+         }
+      }
+      else
+      {
+         if (!isControllerActionSkipped())
+         {
+            _joystick_update_time = GlobalClock::getInstance().getElapsedTimeInS();
+            down();
          }
       }
    }
@@ -150,16 +178,16 @@ void InGameMenu::updateController()
    }
 }
 
-void InGameMenu::update(const sf::Time& dt)
+void InGameMenu::update(const sf::Time& delta_time)
 {
    updateController();
    updateControllerActions();
 
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->update(dt);
+   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->update(delta_time);
 
    if (_previous_submenu.has_value())
    {
-      _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->update(dt);
+      _submenu_type_map[static_cast<uint8_t>(_previous_submenu.value())]->update(delta_time);
    }
 }
 
