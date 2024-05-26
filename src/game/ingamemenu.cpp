@@ -28,6 +28,9 @@ void InGameMenu::initializeController()
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { open(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { close(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { close(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { close(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_LEFTSHOULDER, [this]() { goToLeftSubMenu(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [this]() { goToRightSubMenu(); });
       }
    );
 }
@@ -98,6 +101,8 @@ void InGameMenu::updateControllerActions()
 
 InGameMenu::InGameMenu()
 {
+   initializeController();
+
    _audio_callback = [this](InGameMenuAudio::SoundEffect effect) { _audio.play(effect); };
 
    _menu_archives = std::make_shared<InGameMenuArchives>();
