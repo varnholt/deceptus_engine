@@ -2,10 +2,8 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/callbackmap.h"
-#include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
-#include "game/animationpool.h"
 #include "game/audio.h"
 #include "game/camerapanorama.h"
 #include "game/debugdraw.h"
@@ -15,24 +13,17 @@
 #include "game/fadetransitioneffect.h"
 #include "game/gameclock.h"
 #include "game/gameconfiguration.h"
-#include "game/gamecontactlistener.h"
 #include "game/gamecontrollerdata.h"
 #include "game/gamecontrollerintegration.h"
 #include "game/gamestate.h"
 #include "game/level.h"
 #include "game/levels.h"
-#include "game/luainterface.h"
 #include "game/messagebox.h"
-#include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
-#include "game/player/playerinfo.h"
-#include "game/projectilehitanimation.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
-#include "game/weapon.h"
 
 #include "menus/menuscreenmain.h"
-#include "menus/menuscreenpause.h"
 #include "menus/menuscreenvideo.h"
 
 #include <SFML/Graphics.hpp>
@@ -205,6 +196,7 @@ void Game::initializeController()
       {
          const auto& gji = GameControllerIntegration::getInstance();
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this]() { showPauseMenu(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { _ingame_menu->open(); });
       }
    );
 
@@ -805,6 +797,7 @@ void Game::processEvent(const sf::Event& event)
       // todo: process keyboard events in the console class, just like done in the message box
       if (!Console::getInstance().isActive())
       {
+         // handle keypress events for the menu
          if (Menu::getInstance()->isVisible())
          {
             Menu::getInstance()->keyboardKeyPressed(event.key.code);
@@ -816,6 +809,7 @@ void Game::processEvent(const sf::Event& event)
          }
       }
 
+      // this is the handling of the actual in-game keypress events
       processKeyPressedEvents(event);
    }
    else if (event.type == sf::Event::KeyReleased)
@@ -940,6 +934,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          break;
       }
       case sf::Keyboard::I:
+      case sf::Keyboard::Tab:
       {
          _ingame_menu->open();
          break;
@@ -1012,11 +1007,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       {
          DrawStates::_draw_console = !DrawStates::_draw_console;
          Console::getInstance().setActive(DrawStates::_draw_console);
-         break;
-      }
-      case sf::Keyboard::Tab:
-      {
-         _ingame_menu->open();
          break;
       }
       case sf::Keyboard::PageUp:
