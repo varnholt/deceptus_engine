@@ -6,7 +6,6 @@
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "game/gameconfiguration.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
@@ -159,7 +158,14 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
    _button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
    _button_sprite.setTexture(*_button_texture);
-   _button_sprite.setTextureRect({0, 120, 24, 24});
+
+   // constexpr auto offset_a = 0;
+   constexpr auto offset_b = 24;
+   // constexpr auto offset_x = 48;
+   // constexpr auto offset_y = 72;
+   const auto rect_char = sf::IntRect{offset_b, 120, 24, 24};
+   _button_sprite.setTextureRect(rect_char);
+
    _button_sprite.setPosition(550, 335);
 
    const auto text = ValueReader::readValue<std::string>("text", map).value_or("");
