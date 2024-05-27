@@ -25,7 +25,7 @@ void InGameMenu::initializeController()
       [this](int32_t /*id*/)
       {
          const auto& gji = GameControllerIntegration::getInstance();
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, [this]() { open(); });
+         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { open(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { close(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { close(); });
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { close(); });

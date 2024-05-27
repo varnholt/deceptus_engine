@@ -6,7 +6,6 @@
 #include "game/player/playercontrolstate.h"
 #include "game/tweaks.h"
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::update(const sf::Time& dt)
 {
    updateLockedKeys(dt);
@@ -19,13 +18,11 @@ void PlayerControls::update(const sf::Time& dt)
    setWasMovingRight(isMovingRight());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::addKeypressedCallback(const KeypressedCallback& callback)
 {
    _keypressed_callbacks.push_back(callback);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::hasFlag(KeyPressed flag) const
 {
    // check if button state is locked
@@ -38,7 +35,6 @@ bool PlayerControls::hasFlag(KeyPressed flag) const
    return _keys_pressed & flag;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::forceSync()
 {
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
@@ -87,7 +83,6 @@ void PlayerControls::forceSync()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
@@ -135,7 +130,6 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
@@ -178,7 +172,6 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isLookingAround() const
 {
    if (_keys_pressed & KeyPressedLook)
@@ -201,7 +194,6 @@ bool PlayerControls::isLookingAround() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
 {
    if (!PlayerControlState::checkState())
@@ -220,7 +212,11 @@ bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
    return pressed;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
+bool PlayerControls::isInteractionButtonPressed() const
+{
+   return isMovingUp(0.7f) || isButtonBPressed();
+}
+
 bool PlayerControls::isButtonXPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -241,7 +237,6 @@ bool PlayerControls::isButtonXPressed() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonYPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -262,7 +257,6 @@ bool PlayerControls::isButtonYPressed() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonAPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -283,7 +277,6 @@ bool PlayerControls::isButtonAPressed() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isButtonBPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -304,7 +297,6 @@ bool PlayerControls::isButtonBPressed() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isUpButtonPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -325,7 +317,6 @@ bool PlayerControls::isUpButtonPressed() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDownButtonPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -346,7 +337,6 @@ bool PlayerControls::isDownButtonPressed() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isDroppingDown() const
 {
    if (!PlayerControlState::checkState())
@@ -357,7 +347,6 @@ bool PlayerControls::isDroppingDown() const
    return isButtonAPressed() && isMovingDown(0.7f);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingLeft() const
 {
    if (!PlayerControlState::checkState())
@@ -409,7 +398,6 @@ bool PlayerControls::isMovingLeft() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingDown(float analog_threshold) const
 {
    if (!PlayerControlState::checkState())
@@ -454,7 +442,6 @@ bool PlayerControls::isMovingDown(float analog_threshold) const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingUp(float analog_threshold) const
 {
    if (!PlayerControlState::checkState())
@@ -499,7 +486,6 @@ bool PlayerControls::isMovingUp(float analog_threshold) const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingRight() const
 {
    if (!PlayerControlState::checkState())
@@ -551,85 +537,71 @@ bool PlayerControls::isMovingRight() const
    return false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isMovingHorizontally() const
 {
    return isMovingLeft() || isMovingRight();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 int PlayerControls::getKeysPressed() const
 {
    return _keys_pressed;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setKeysPressed(int32_t keysPressed)
 {
    _keys_pressed = keysPressed;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const GameControllerInfo& PlayerControls::getJoystickInfo() const
 {
    return _joystick_info;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setJoystickInfo(const GameControllerInfo& joystick_info)
 {
    _joystick_info = joystick_info;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::wasMoving() const
 {
    return _was_moving;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setWasMoving(bool was_moving)
 {
    _was_moving = was_moving;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::wasMovingLeft() const
 {
    return _was_moving_left;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setWasMovingLeft(bool was_moving_left)
 {
    _was_moving_left = was_moving_left;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::wasMovingRight() const
 {
    return _was_moving_right;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerControls::setWasMovingRight(bool was_moving_right)
 {
    _was_moving_right = was_moving_right;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::changedToIdle() const
 {
    return wasMoving() && !isMovingHorizontally();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::changedToMoving() const
 {
    return !wasMoving() && isMovingHorizontally();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 PlayerControls::Orientation PlayerControls::updateOrientation()
 {
    if (!PlayerControlState::checkState())
@@ -706,7 +678,6 @@ PlayerControls::Orientation PlayerControls::updateOrientation()
    return orientation;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerControls::isBendDownActive() const
 {
    if (!PlayerControlState::checkState())
