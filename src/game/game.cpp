@@ -196,7 +196,6 @@ void Game::initializeController()
       {
          const auto& gji = GameControllerIntegration::getInstance();
          gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_START, [this]() { showPauseMenu(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { _ingame_menu->open(); });
       }
    );
 

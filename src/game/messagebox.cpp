@@ -10,10 +10,8 @@
 #include "framework/tools/log.h"
 #include "game/gameconfiguration.h"
 #include "game/gamecontrollerintegration.h"
-#include "gamestate.h"
 #include "player/player.h"
 
-#include <math.h>
 #include <algorithm>
 #include <iostream>
 
