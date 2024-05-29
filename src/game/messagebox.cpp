@@ -264,7 +264,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
       return false;
    }
 
-   if (__active->_state != DisplayState::Visible)
+   if (__active->_state != DisplayState::Visible && __active->_state != DisplayState::ShowAnimation)
    {
       return false;
    }
@@ -330,7 +330,6 @@ void MessageBox::initializeControllerCallbacks()
    if (gci.isControllerConnected())
    {
       _button_callback_a = [this]() { _button_callback_key = sf::Keyboard::Return; };
-
       _button_callback_b = [this]() { _button_callback_key = sf::Keyboard::Escape; };
 
       gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
@@ -442,7 +441,9 @@ void MessageBox::update(const sf::Time& dt)
       // handle emulated keypress event in update call to make sure it's processed before the next render call
       if (__active->_button_callback_key.has_value())
       {
-         __active->keyboardKeyPressed(__active->_button_callback_key.value());
+         const auto key = __active->_button_callback_key.value();
+         __active->_button_callback_key.reset();
+         __active->keyboardKeyPressed(key);
       }
 
       // keyboard press event might actually delete the active messagebox
