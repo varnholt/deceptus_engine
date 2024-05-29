@@ -12,7 +12,7 @@
         "player_jump_after_contact_lost_in_ms": 100,
         "player_jump_minimal_duration_in_ms": 80,
         "player_jump_buffer_in_ms": 100,
-        "player_jump_strength": 2.64,
+        "player_jump_strength": 2.68,
         "player_speed_max_run": 3.2,
         "player_speed_max_walk": 2.5,
         "player_speed_max_water": 1.5,
