@@ -1,4 +1,4 @@
-#include "ingamemenuinventory.h"
+﻿#include "ingamemenuinventory.h"
 
 #include "framework/easings/easings.h"
 #include "game/eventdistributor.h"
@@ -98,19 +98,16 @@ float getHorizontallyCenteredX(const sf::Text& text, const sf::FloatRect& rect)
 
 // #define DEBUG_INVENTORY 1
 
-//---------------------------------------------------------------------------------------------------------------------
 GameControllerInfo InGameMenuInventory::getJoystickInfo() const
 {
    return _joystick_info;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::setJoystickInfo(const GameControllerInfo& joystickInfo)
 {
    _joystick_info = joystickInfo;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 InGameMenuInventory::InGameMenuInventory()
 {
    _filename = "data/game/inventory.psd";
@@ -245,7 +242,6 @@ InGameMenuInventory::InGameMenuInventory()
    loadInventoryItems();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::loadInventoryItems()
 {
    const auto& inventory_item_descriptions = getInventory()._descriptions;
@@ -273,13 +269,11 @@ void InGameMenuInventory::loadInventoryItems()
    );
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 Inventory& InGameMenuInventory::getInventory()
 {
    return SaveState::getPlayerInfo()._inventory;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
@@ -287,32 +281,27 @@ void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states
    drawInventoryTexts(window, states);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 std::shared_ptr<Layer> InGameMenuInventory::getFilterLayer(Filter filter) const
 {
    return _filter_map.at(filter);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::selectNextFilter()
 {
    std::rotate(_filters.begin(), _filters.begin() + 1, _filters.end());
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::selectPreviousFilter()
 {
    std::rotate(_filters.rbegin(), _filters.rbegin() + 1, _filters.rend());
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateFilterLayers()
 {
    std::for_each(_filters.begin() + 1, _filters.end(), [this](auto filter) { getFilterLayer(filter)->hide(); });
    getFilterLayer(_filters.front())->show();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateShowHide()
 {
    const auto now = std::chrono::high_resolution_clock::now();
@@ -400,7 +389,6 @@ void InGameMenuInventory::updateShowHide()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateMove()
 {
    const auto move_offset = getMoveOffset();
@@ -435,7 +423,6 @@ void InGameMenuInventory::updateMove()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::updateButtons()
 {
    _layers["previous_menu_1"]->_visible = false;
@@ -448,7 +435,6 @@ void InGameMenuInventory::updateButtons()
    _layers["close_xbox_0"]->_visible = true;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto& inventory = getInventory();
@@ -472,14 +458,12 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates states)
 {
    window.draw(_text_title, states);
    window.draw(_text_description, states);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 std::optional<std::string> InGameMenuInventory::getSelectedItem() const
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
@@ -495,7 +479,6 @@ std::optional<std::string> InGameMenuInventory::getSelectedItem() const
    return std::nullopt;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::assign(const std::string& item, int32_t slot)
 {
    auto& inventory = getInventory();
@@ -513,7 +496,18 @@ void InGameMenuInventory::assign(const std::string& item, int32_t slot)
 #endif
 }
 
-//---------------------------------------------------------------------------------------------------------------------
+void InGameMenuInventory::assignSelectedItemToSlot(int32_t slot)
+{
+   const auto item = getSelectedItem();
+
+   if (!item.has_value())
+   {
+      return;
+   }
+
+   assign(item.value(), slot);
+}
+
 void InGameMenuInventory::updateInventoryItems()
 {
    const auto& inventory = getInventory();
@@ -619,7 +613,6 @@ void InGameMenuInventory::updateInventoryItems()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::update(const sf::Time& /*dt*/)
 {
    if (_animation == Animation::Show || _animation == Animation::Hide)
@@ -634,27 +627,23 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
    updateInventoryItems();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::clampIndex()
 {
    _selected_index = std::clamp(_selected_index, 0, (count_rows * count_columns) - 1);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::left()
 {
    _selected_index--;
    clampIndex();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::right()
 {
    _selected_index++;
    clampIndex();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::up()
 {
    const auto next_index = _selected_index - count_columns;
@@ -664,7 +653,6 @@ void InGameMenuInventory::up()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::down()
 {
    const auto next_index = _selected_index + count_columns;
@@ -674,7 +662,9 @@ void InGameMenuInventory::down()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
+#include "framework/joystick/gamecontroller.h"
+#include "game/gamecontrollerintegration.h"
+
 void InGameMenuInventory::show()
 {
 #ifdef DEBUG_INVENTORY
@@ -693,23 +683,32 @@ void InGameMenuInventory::show()
 
    _keyboard_event_handler = [this](const auto& event) { keyboardKeyPressed(event.key.code); };
    EventDistributor::registerEvent(sf::Event::KeyPressed, _keyboard_event_handler);
+
+   const auto& gji = GameControllerIntegration::getInstance();
+   _controller_button_x_pressed_callback = [this]() { assignSelectedItemToSlot(0); };
+   _controller_button_y_pressed_callback = [this]() { assignSelectedItemToSlot(1); };
+   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
+   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+
    InGameMenuPage::show();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::hide()
 {
    EventDistributor::unregisterEvent(sf::Event::KeyPressed, _keyboard_event_handler);
+
+   const auto& gji = GameControllerIntegration::getInstance();
+   gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
+   gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+
    InGameMenuPage::hide();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::resetIndex()
 {
    _selected_index = 0;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 sf::Vector2f InGameMenuInventory::getFramePosition(LayerData* layer_data, int32_t index) const
 {
    const auto move_offset = getMoveOffset();
@@ -723,10 +722,10 @@ sf::Vector2f InGameMenuInventory::getFramePosition(LayerData* layer_data, int32_
    return pos;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    std::optional<int32_t> slot;
+
    if (key == sf::Keyboard::LControl)
    {
       slot = 0;
@@ -741,12 +740,5 @@ void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
       return;
    }
 
-   const auto item = getSelectedItem();
-
-   if (!item.has_value())
-   {
-      return;
-   }
-
-   assign(item.value(), slot.value());
+   assignSelectedItemToSlot(slot.value());
 }
