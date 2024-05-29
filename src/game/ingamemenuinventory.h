@@ -74,6 +74,7 @@ private:
 
    std::optional<std::string> getSelectedItem() const;
    void assign(const std::string& item, int32_t slot);
+   void assignSelectedItemToSlot(int32_t slot);
    sf::Vector2f getFramePosition(LayerData* layer_data, int32_t index) const;
 
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
@@ -112,6 +113,9 @@ private:
    sf::Font _font_description;
    sf::Text _text_title;
    sf::Text _text_description;
+
+   std::function<void(void)> _controller_button_x_pressed_callback;
+   std::function<void(void)> _controller_button_y_pressed_callback;
 
    using EventCallback = std::function<void(const sf::Event&)>;
    EventCallback _keyboard_event_handler;
