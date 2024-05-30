@@ -125,7 +125,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
    // check whether up button is pressed
    // actually there could be a number of 'message box activation buttons' here but for
    // now it might be sufficient to just check for the up button
-   if (_button_required && !Player::getCurrent()->getControls()->isInteractionButtonPressed())
+   if (_button_required && !Player::getCurrent()->getControls()->isUpButtonPressed())
    {
       return;
    }
