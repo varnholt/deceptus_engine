@@ -212,11 +212,6 @@ bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
    return pressed;
 }
 
-bool PlayerControls::isInteractionButtonPressed() const
-{
-   return isMovingUp(0.7f) || isButtonBPressed();
-}
-
 bool PlayerControls::isButtonXPressed() const
 {
    if (!PlayerControlState::checkState())

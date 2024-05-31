@@ -580,7 +580,7 @@ In there, just place a rectangle where you'd like to position and scale the effe
 |text|string|Text to show next to the controller button.|
 |offset_x_px|int|An offset in x (in px) for where the animation will be shown. The default is 0.|
 |offset_y_px|int|An offset in y (in px) for where the animation will be shown. The default is 0.|
-
+|button|string|Button icon to show (same identifiers as used in 'Controller Help' mechanism). The default is 'dpad_u'.|
 
 ---
 
