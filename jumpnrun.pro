@@ -243,6 +243,7 @@ SOURCES += \
    src/game/mechanisms/checkpoint.cpp \
    src/game/mechanisms/collapsingplatform.cpp \
    src/game/mechanisms/controllerhelp.cpp \
+   src/game/mechanisms/controllerkeymap.cpp \
    src/game/mechanisms/conveyorbelt.cpp \
    src/game/mechanisms/crusher.cpp \
    src/game/mechanisms/damagerect.cpp \
@@ -487,6 +488,7 @@ HEADERS += \
    src/game/mechanisms/checkpoint.h \
    src/game/mechanisms/collapsingplatform.h \
    src/game/mechanisms/controllerhelp.h \
+   src/game/mechanisms/controllerkeymap.h \
    src/game/mechanisms/conveyorbelt.h \
    src/game/mechanisms/crusher.h \
    src/game/mechanisms/damagerect.h \

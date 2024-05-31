@@ -1,12 +1,11 @@
 #include "interactionhelp.h"
 
-#include <iostream>
-#include <sstream>
 #include <vector>
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/gameconfiguration.h"
+#include "game/mechanisms/controllerkeymap.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 #include "game/valuereader.h"
@@ -159,11 +158,12 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    _button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
    _button_sprite.setTexture(*_button_texture);
 
-   // constexpr auto offset_a = 0;
-   constexpr auto offset_b = 24;
-   // constexpr auto offset_x = 48;
-   // constexpr auto offset_y = 72;
-   const auto rect_char = sf::IntRect{offset_b, 120, 24, 24};
+   // read button icon
+   const auto button_name = ValueReader::readValue<std::string>("button", map).value_or("dpad_u");
+   const auto pos_index = ControllerKeyMap::getArrayPosition(button_name);
+
+   const auto rect_char =
+      sf::IntRect{pos_index.first * PIXELS_PER_TILE, pos_index.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
    _button_sprite.setTextureRect(rect_char);
 
    _button_sprite.setPosition(550, 335);
