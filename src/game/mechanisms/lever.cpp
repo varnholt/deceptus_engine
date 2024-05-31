@@ -18,7 +18,6 @@ constexpr auto left_offset = (sprites_per_row - 1) * 3 * PIXELS_PER_TILE;
 constexpr auto idle_animation_speed = 10.0f;
 }  // namespace
 
-//-----------------------------------------------------------------------------
 void Lever::setup(const GameDeserializeData& data)
 {
    if (data._tmx_object->_properties)
@@ -109,7 +108,6 @@ void Lever::setup(const GameDeserializeData& data)
    updateSprite();
 }
 
-//-----------------------------------------------------------------------------
 void Lever::updateSprite()
 {
    if (_reached && (_target_state == State::Right))
@@ -134,32 +132,27 @@ void Lever::updateSprite()
    }
 }
 
-//-----------------------------------------------------------------------------
 const sf::FloatRect& Lever::getPixelRect() const
 {
    return _rect;
 }
 
-//-----------------------------------------------------------------------------
 Lever::Lever(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Lever).name());
 }
 
-//-----------------------------------------------------------------------------
 Lever::~Lever()
 {
    SaveState::getPlayerInfo()._inventory.removeUsedCallback(_handle_callback);
 }
 
-//-----------------------------------------------------------------------------
 void Lever::preload()
 {
    Audio::getInstance().addSample("mechanism_switch_off.wav");
    Audio::getInstance().addSample("mechanism_switch_on.wav");
 }
 
-//-----------------------------------------------------------------------------
 void Lever::updateDirection()
 {
    if (_target_state == State::Left)
@@ -176,7 +169,6 @@ void Lever::updateDirection()
    };
 }
 
-//-----------------------------------------------------------------------------
 void Lever::updateTargetPositionReached()
 {
    if (_target_state == State::Left)
@@ -193,19 +185,16 @@ void Lever::updateTargetPositionReached()
    };
 }
 
-//-----------------------------------------------------------------------------
 void Lever::setHandleAvailable(bool handle_available)
 {
    _handle_available = handle_available;
 }
 
-//-----------------------------------------------------------------------------
 const std::vector<std::string>& Lever::getTargetIds() const
 {
    return _target_ids;
 }
 
-//-----------------------------------------------------------------------------
 void Lever::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
@@ -252,19 +241,16 @@ void Lever::update(const sf::Time& dt)
    _reached_previous = _reached;
 }
 
-//-----------------------------------------------------------------------------
 void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
 }
 
-//-----------------------------------------------------------------------------
 std::optional<sf::FloatRect> Lever::getBoundingBoxPx()
 {
    return sf::FloatRect(_rect.left, _rect.top, _rect.width, _rect.height);
 }
 
-//-----------------------------------------------------------------------------
 void Lever::setEnabled(bool enabled)
 {
    if (enabled)
@@ -282,13 +268,11 @@ void Lever::setEnabled(bool enabled)
    updateReceivers();
 }
 
-//-----------------------------------------------------------------------------
 bool Lever::isEnabled() const
 {
    return (_target_state == State::Right);
 }
 
-//-----------------------------------------------------------------------------
 void Lever::updateReceivers()
 {
    for (auto& cb : _callbacks)
@@ -297,7 +281,6 @@ void Lever::updateReceivers()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Lever::toggle()
 {
    if (!_player_at_lever)
@@ -373,20 +356,16 @@ void Lever::toggle()
    _last_toggle_time = now;
 }
 
-//-----------------------------------------------------------------------------
 void Lever::addCallback(const Callback& callback)
 {
    _callbacks.push_back(callback);
 }
 
-//-----------------------------------------------------------------------------
 void Lever::setCallbacks(const std::vector<Callback>& callbacks)
 {
    _callbacks = callbacks;
 }
 
-
-//-----------------------------------------------------------------------------
 void Lever::serializeState(nlohmann::json& j)
 {
    if (!_serialized)
@@ -403,7 +382,6 @@ void Lever::serializeState(nlohmann::json& j)
    j[_object_id] = {{"state", static_cast<int32_t>(_target_state)}};
 }
 
-//-----------------------------------------------------------------------------
 void Lever::deserializeState(const nlohmann::json& j)
 {
    _target_state = static_cast<State>(j.at("state").get<int32_t>());
