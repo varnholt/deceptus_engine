@@ -685,10 +685,14 @@ void InGameMenuInventory::show()
    EventDistributor::registerEvent(sf::Event::KeyPressed, _keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
-   _controller_button_x_pressed_callback = [this]() { assignSelectedItemToSlot(0); };
-   _controller_button_y_pressed_callback = [this]() { assignSelectedItemToSlot(1); };
-   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
-   gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+   if (gji.isControllerConnected())
+   {
+      _controller_button_x_pressed_callback = [this]() { assignSelectedItemToSlot(0); };
+      _controller_button_y_pressed_callback = [this]() { assignSelectedItemToSlot(1); };
+
+      gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
+      gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+   }
 
    InGameMenuPage::show();
 }
@@ -698,8 +702,11 @@ void InGameMenuInventory::hide()
    EventDistributor::unregisterEvent(sf::Event::KeyPressed, _keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
-   gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
-   gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+   if (gji.isControllerConnected())
+   {
+      gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
+      gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+   }
 
    InGameMenuPage::hide();
 }
