@@ -292,22 +292,6 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_water_damage}] = &_mechanism_water_damage;
    _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
    _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
-
-   // called whenever the player toggles a mechanism in the game
-   Player::getCurrent()->setToggleCallback(
-      [this]()
-      {
-         for (auto& door : _mechanism_doors)
-         {
-            std::dynamic_pointer_cast<Door>(door)->toggleWithPlayerChecks();
-         }
-
-         for (auto& lever : _mechanism_levers)
-         {
-            std::dynamic_pointer_cast<Lever>(lever)->toggle();
-         }
-      }
-   );
 }
 
 Level::~Level()

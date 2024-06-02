@@ -239,6 +239,21 @@ void Lever::update(const sf::Time& dt)
    updateSprite();
 
    _reached_previous = _reached;
+
+   if (Player::getCurrent()->getControls()->isButtonBPressed() && _player_at_lever && _handle_available)
+   {
+      // block spamming
+      using namespace std::chrono_literals;
+      const auto now = std::chrono::high_resolution_clock::now();
+      if (_last_toggle_time.has_value() && (now - _last_toggle_time.value()) < 1s)
+      {
+         return;
+      }
+
+      toggle();
+
+      _last_toggle_time = now;
+   }
 }
 
 void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
@@ -283,24 +298,6 @@ void Lever::updateReceivers()
 
 void Lever::toggle()
 {
-   if (!_player_at_lever)
-   {
-      return;
-   }
-
-   if (!_handle_available)
-   {
-      return;
-   }
-
-   // block spamming
-   using namespace std::chrono_literals;
-   const auto now = std::chrono::high_resolution_clock::now();
-   if (_last_toggle_time.has_value() && (now - _last_toggle_time.value()) < 1s)
-   {
-      return;
-   }
-
    if (_type == Type::TwoState)
    {
       switch (_target_state)
@@ -352,8 +349,6 @@ void Lever::toggle()
    );
 
    updateReceivers();
-
-   _last_toggle_time = now;
 }
 
 void Lever::addCallback(const Callback& callback)

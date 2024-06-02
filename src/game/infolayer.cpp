@@ -180,6 +180,7 @@ void InfoLayer::loadInventoryItems()
    _inventory_sprites[0].setTexture(*_inventory_texture);
    _inventory_sprites[0].setTextureRect({});
    _inventory_sprites[0].setPosition(frame_0_pos_x_px, frame_0_pos_y_px);
+
    _inventory_sprites[1].setTexture(*_inventory_texture);
    _inventory_sprites[1].setTextureRect({});
    _inventory_sprites[1].setPosition(frame_1_pos_x_px, frame_1_pos_y_px);
@@ -211,13 +212,13 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
 
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   const sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
    window.setView(view);
 
    auto autosave = _layers["autosave"];
    if (autosave->_visible)
    {
-      auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
+      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
       autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
       autosave->draw(window, states);
    }
