@@ -16,14 +16,14 @@ InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
    setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 }
 
-void InfoOverlay::update(const sf::Time& dt)
+void InfoOverlay::update(const sf::Time& delta_time)
 {
    if (!isEnabled())
    {
       return;
    }
 
-   _elapsed += FloatSeconds(dt.asSeconds());
+   _elapsed += FloatSeconds(delta_time.asSeconds());
 
    auto alpha = 0.0f;
 

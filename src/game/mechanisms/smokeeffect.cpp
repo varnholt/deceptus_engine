@@ -73,13 +73,11 @@ void SmokeEffect::update(const sf::Time& dt)
    }
 }
 
-//-----------------------------------------------------------------------------
 std::optional<sf::FloatRect> SmokeEffect::getBoundingBoxPx()
 {
    return _bounding_box_px;
 }
 
-//-----------------------------------------------------------------------------
 std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto smoke_effect = std::make_shared<SmokeEffect>(parent);
