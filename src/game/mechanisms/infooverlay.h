@@ -13,7 +13,7 @@ class InfoOverlay : public GameMechanism, public GameNode
 public:
    InfoOverlay(GameNode* parent = nullptr);
 
-   void update(const sf::Time& dt) override;
+   void update(const sf::Time& delta_time) override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
