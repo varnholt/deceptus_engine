@@ -22,7 +22,6 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Extra).name());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Extra::deserialize(const GameDeserializeData& data)
 {
    const auto pos_x_px = data._tmx_object->_x_px;
@@ -86,7 +85,8 @@ void Extra::deserialize(const GameDeserializeData& data)
          _animation_pickup = animation_pool.create(key, pos_x_px + offset_x, pos_y_px + offset_y, false, false);
       }
 
-      for (auto i = 0; i < 99; i++)
+      constexpr auto item_count_max = 99;
+      for (auto i = 0; i < item_count_max; i++)
       {
          const auto main_animation_key = "animation_main_" + std::to_string(i);
          const auto main_animation_n = data._tmx_object->_properties->_map.find(main_animation_key);
@@ -109,7 +109,6 @@ void Extra::deserialize(const GameDeserializeData& data)
    // - add enable/disable mechanism code to levelscript
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
    if (_spawn_required)
@@ -154,14 +153,13 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 #endif
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-void Extra::update(const sf::Time& dt)
+void Extra::update(const sf::Time& delta_time)
 {
    if (_spawn_required)
    {
       if (_animation_spawn && !_animation_spawn->_paused)
       {
-         _animation_spawn->update(dt);
+         _animation_spawn->update(delta_time);
       }
 
       // no pick up allowed if not spawned yet
@@ -174,7 +172,7 @@ void Extra::update(const sf::Time& dt)
    // play pickup animation if active
    if (_animation_pickup && !_animation_pickup->_paused)
    {
-      _animation_pickup->update(dt);
+      _animation_pickup->update(delta_time);
    }
 
    if (!_active)
@@ -185,7 +183,7 @@ void Extra::update(const sf::Time& dt)
    // update regular animations
    if (!_animations_main.empty())
    {
-      (*_animations_main_it)->update(dt);
+      (*_animations_main_it)->update(delta_time);
       if ((*_animations_main_it)->_paused)
       {
          _animations_main_it++;

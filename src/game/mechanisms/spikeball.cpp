@@ -117,10 +117,10 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    {
       for (auto i = 0u; i < _chain_elements.size() - 1; i++)
       {
-         auto c1 = _chain_elements[i];
-         auto c2 = _chain_elements[i + 1];
-         const auto c1_pos_m = c1->GetPosition();
-         const auto c2_pos_m = c2->GetPosition();
+         auto chain_element_1 = _chain_elements[i];
+         auto chain_element_2 = _chain_elements[i + 1];
+         const auto c1_pos_m = chain_element_1->GetPosition();
+         const auto c2_pos_m = chain_element_2->GetPosition();
 
          sf::Vertex line[] = {
             sf::Vertex(sf::Vector2f(c1_pos_m.x * PPM, c1_pos_m.y * PPM), vertex_color),
@@ -197,6 +197,8 @@ std::optional<sf::FloatRect> SpikeBall::getBoundingBoxPx()
 void SpikeBall::setup(const GameDeserializeData& data)
 {
    _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   addChunks(_rect);
 
    if (data._tmx_object->_properties)
    {
