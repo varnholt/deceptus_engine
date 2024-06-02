@@ -200,24 +200,6 @@ void Player::initializeController()
          );
 
          gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_B,
-            [&]()
-            {
-               if (!PlayerControlState::checkState())
-               {
-                  return;
-               }
-
-               if (!_toggle_callback)
-               {
-                  return;
-               }
-
-               _toggle_callback();
-            }
-         );
-
-         gji.getController()->addButtonPressedCallback(
             SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
             [&]()
             {
@@ -1079,11 +1061,6 @@ const Chunk& Player::getChunk() const
 const PlayerBend& Player::getBend() const
 {
    return _bend;
-}
-
-void Player::setToggleCallback(const ToggleCallback& callback)
-{
-   _toggle_callback = callback;
 }
 
 const PlayerJump& Player::getJump() const
@@ -2007,11 +1984,6 @@ void Player::keyPressed(sf::Keyboard::Key key)
       case sf::Keyboard::Space:
       {
          _jump.jump();
-         break;
-      }
-      case sf::Keyboard::Return:
-      {
-         _toggle_callback();
          break;
       }
       case sf::Keyboard::Z:

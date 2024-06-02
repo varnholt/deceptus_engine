@@ -44,7 +44,6 @@ public:
    void open();
    void close();
    void toggle() override;
-   void toggleWithPlayerChecks();
 
    void setup(const GameDeserializeData& data);
 
@@ -84,6 +83,7 @@ private:
 
    bool _can_be_closed = false;
    bool _automatic_close = false;
+   std::optional<std::chrono::high_resolution_clock::time_point> _last_toggle_time;
 
    bool _player_at_door = false;
    b2Body* _body = nullptr;

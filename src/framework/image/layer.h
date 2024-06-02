@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include <SFML/Graphics.hpp>
+#include <memory>
 
 struct Layer : public sf::Drawable
 {
@@ -18,4 +18,3 @@ struct Layer : public sf::Drawable
    std::shared_ptr<sf::Texture> _texture;
    std::shared_ptr<sf::Sprite> _sprite;
 };
-
