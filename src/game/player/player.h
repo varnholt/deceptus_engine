@@ -179,7 +179,6 @@ private:
 
    void useInventory(int32_t slot);
 
-   ToggleCallback _toggle_callback;
    std::shared_ptr<WeaponSystem> _weapon_system;
 
    // all related to player physics and box2d

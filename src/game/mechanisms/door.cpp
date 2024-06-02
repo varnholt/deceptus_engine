@@ -25,20 +25,17 @@ namespace
 constexpr auto door_height_tl = 4;
 }
 
-//-----------------------------------------------------------------------------
 Door::Door(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Door).name());
 }
 
-//-----------------------------------------------------------------------------
 Door::~Door()
 {
    // destructor for debugging purposes only
    // std::cout << "door destroyed" << std::endl;
 }
 
-//-----------------------------------------------------------------------------
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    if (_animation_open && !_animation_open->_paused)
@@ -68,7 +65,6 @@ void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
 }
 
-//-----------------------------------------------------------------------------
 void Door::updateBars(const sf::Time& dt)
 {
    const auto left = 0.0f;
@@ -116,7 +112,6 @@ void Door::updateBars(const sf::Time& dt)
    updateTransform();
 }
 
-//-----------------------------------------------------------------------------
 void Door::update(const sf::Time& dt)
 {
    if (_player_at_door)
@@ -167,9 +162,29 @@ void Door::update(const sf::Time& dt)
    {
       updateBars(dt);
    }
+
+   if (Player::getCurrent()->getControls()->isButtonBPressed() && checkPlayerAtDoor())
+   {
+      // block spamming
+      using namespace std::chrono_literals;
+      const auto now = std::chrono::high_resolution_clock::now();
+      if (_last_toggle_time.has_value() && (now - _last_toggle_time.value()) < 1s)
+      {
+         return;
+      }
+
+      if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.hasInventoryItem(*_required_item))
+      {
+         Log::Info() << "player doesn't have key: " << *_required_item;
+         return;
+      }
+
+      toggle();
+
+      _last_toggle_time = now;
+   }
 }
 
-//-----------------------------------------------------------------------------
 void Door::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
@@ -189,7 +204,6 @@ std::optional<sf::FloatRect> Door::getBoundingBoxPx()
    return _pixel_rect;
 }
 
-//-----------------------------------------------------------------------------
 void Door::updateTransform()
 {
    // todo: offset should be computed from rectangle dimension
@@ -201,7 +215,6 @@ void Door::updateTransform()
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
-//-----------------------------------------------------------------------------
 void Door::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
@@ -227,7 +240,6 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
-//-----------------------------------------------------------------------------
 bool Door::checkPlayerAtDoor() const
 {
    const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
@@ -235,30 +247,11 @@ bool Door::checkPlayerAtDoor() const
    return at_door;
 }
 
-//-----------------------------------------------------------------------------
 const sf::FloatRect& Door::getPixelRect() const
 {
    return _pixel_rect;
 }
 
-//-----------------------------------------------------------------------------
-void Door::toggleWithPlayerChecks()
-{
-   if (!checkPlayerAtDoor())
-   {
-      return;
-   }
-
-   if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.hasInventoryItem(*_required_item))
-   {
-      Log::Info() << "player doesn't have key: " << *_required_item;
-      return;
-   }
-
-   toggle();
-}
-
-//-----------------------------------------------------------------------------
 void Door::open()
 {
    if (_state == State::Opening || _state == State::Open)
@@ -289,7 +282,6 @@ void Door::open()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Door::close()
 {
    if (!_can_be_closed)
@@ -318,7 +310,6 @@ void Door::close()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Door::toggle()
 {
    switch (_state)
@@ -341,19 +332,16 @@ void Door::toggle()
    }
 }
 
-//-----------------------------------------------------------------------------
 const sf::Vector2i& Door::getTilePosition() const
 {
    return _tile_position_tl;
 }
 
-//-----------------------------------------------------------------------------
 bool Door::isPlayerAtDoor() const
 {
    return _player_at_door;
 }
 
-//-----------------------------------------------------------------------------
 void Door::setPlayerAtDoor(bool player_at_door)
 {
    _player_at_door = player_at_door;
