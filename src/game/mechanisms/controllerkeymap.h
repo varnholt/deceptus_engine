@@ -2,6 +2,7 @@
 #define CONTROLLERKEYMAP_H
 
 #include <array>
+#include <map>
 #include <string>
 
 namespace ControllerKeyMap
@@ -18,6 +19,17 @@ static const std::array<std::string, 16 * 9> key_map{
    "dpad_u",    "dpad_d",  "dpad_l",  "dpad_r",    "bt_u",     "bt_d",     "bt_l",       "bt_r",  "bt_1",  "bt_2",          "bt_3",          "bt_4",           "bt_5",        "bt_6",  "bt_7",  "bt_8",
    "bt_r_u",    "bt_r_d",  "bt_r_l",  "bt_r_r",    "bt_r_u_d", "bt_r_l_r", "dpad_empty", "bt_0",  "bt_9",  "bt_10",         "bt_11",         "bt_12",          "bt_13",       "bt_14", "bt_15", "bt_16",
    "bt_l_u",    "bt_l_d",  "bt_l_l",  "bt_l_r",    "bt_l_u_d", "bt_l_l_r", "key_door",   "",      "",     "",              "",               "",              "",            "",       "",     ""
+};
+// clang-format on
+
+// clang-format off
+std::map<std::string, std::string> key_controller_map{
+   {"key_cursor_u", "dpad_u"},
+   {"key_cursor_d", "dpad_d"},
+   {"key_cursor_l", "dpad_l"},
+   {"key_cursor_r", "dpad_r"},
+   {"key_return",   "bt_a"},
+   {"key_escape",   "bt_b"},
 };
 // clang-format on
 

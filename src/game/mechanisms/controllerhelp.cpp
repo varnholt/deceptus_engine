@@ -99,14 +99,6 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
    setZ(static_cast<int32_t>(ZDepth::Player) - 1);
 
-   std::map<std::string, std::string> key_controller_map;
-   key_controller_map["key_cursor_u"] = "dpad_u";
-   key_controller_map["key_cursor_d"] = "dpad_d";
-   key_controller_map["key_cursor_l"] = "dpad_l";
-   key_controller_map["key_cursor_r"] = "dpad_r";
-   key_controller_map["key_return"] = "bt_a";
-   key_controller_map["key_escape"] = "bt_b";
-
    _rect_px = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
    _rect_center = sf::Vector2f{
@@ -124,11 +116,16 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       std::string key;
       while (getline(f, key, ';'))
       {
+         // instead of the code below, have two sets of keys
+         // - one for the controller
+         // - one for the keyboard
+         // and then just hold two sprite vectors
+
          // if the game controller is used, try to find a mapping
          if (GameControllerIntegration::getInstance().isControllerConnected())
          {
-            auto mapped_it = key_controller_map.find(key);
-            if (mapped_it != key_controller_map.end())
+            const auto mapped_it = ControllerKeyMap::key_controller_map.find(key);
+            if (mapped_it != ControllerKeyMap::key_controller_map.end())
             {
                key = mapped_it->second;
             }
@@ -138,7 +135,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       }
    }
 
-   for (auto& key : keys)
+   for (const auto& key : keys)
    {
       const auto pos_index = ControllerKeyMap::getArrayPosition(key);
 
