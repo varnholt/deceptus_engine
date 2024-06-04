@@ -3,6 +3,7 @@
 
 #include <array>
 #include <map>
+#include <optional>
 #include <string>
 
 namespace ControllerKeyMap
@@ -23,7 +24,7 @@ static const std::array<std::string, 16 * 9> key_map{
 // clang-format on
 
 // clang-format off
-std::map<std::string, std::string> key_controller_map{
+static const std::map<std::string, std::string> key_controller_map{
    {"key_cursor_u", "dpad_u"},
    {"key_cursor_d", "dpad_d"},
    {"key_cursor_l", "dpad_l"},
@@ -33,7 +34,14 @@ std::map<std::string, std::string> key_controller_map{
 };
 // clang-format on
 
+enum class InputType
+{
+   Controller,
+   Keyboard,
+};
+
 std::pair<int32_t, int32_t> getArrayPosition(const std::string& key);
+std::optional<std::tuple<std::string, InputType>> retrieveMappedKey(const std::string& key);
 
 }  // namespace ControllerKeyMap
 
