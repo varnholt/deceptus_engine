@@ -10,9 +10,9 @@
 
 namespace
 {
-static const int32_t charWidth = 19;
-static const int32_t charHeight = 24;
-static const size_t maxLength = 11;
+static const int32_t char_width = 19;
+static const int32_t char_height = 24;
+static const size_t max_length = 11;
 }  // namespace
 
 MenuScreenNameSelect::MenuScreenNameSelect()
@@ -86,10 +86,10 @@ void MenuScreenNameSelect::updateText()
 {
    // draw text
    _text.setString(_name);
-   const auto textRect = _text.getLocalBounds();
-   const auto xOffset = (_name_rect.width - textRect.width) * 0.5f;
-   const auto x = _name_rect.left + xOffset;
-   _text.setPosition(x, _name_rect.top);
+   const auto text_rect = _text.getLocalBounds();
+   const auto x_offset_px = (_name_rect.width - text_rect.width) * 0.5f;
+   const auto x_px = _name_rect.left + x_offset_px;
+   _text.setPosition(x_px, _name_rect.top);
 }
 
 void MenuScreenNameSelect::chop()
@@ -118,7 +118,7 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 
    if (key >= sf::Keyboard::A && key <= sf::Keyboard::Z)
    {
-      if (_name.size() >= maxLength)
+      if (_name.size() >= max_length)
       {
          return;
       }
@@ -200,13 +200,12 @@ void MenuScreenNameSelect::loadingFinished()
    _char_origin.x = cursor->_sprite->getPosition().x;
    _char_origin.y = cursor->_sprite->getPosition().y;
 
-   const auto playerName = _layers["players-name"];
-   _name_rect.left = playerName->_sprite->getPosition().x;
-   _name_rect.top = playerName->_sprite->getPosition().y;
-   _name_rect.width = static_cast<float>(playerName->_texture->getSize().x);
+   const auto player_name = _layers["players-name"];
+   _name_rect.left = player_name->_sprite->getPosition().x;
+   _name_rect.top = player_name->_sprite->getPosition().y;
+   _name_rect.width = static_cast<float>(player_name->_texture->getSize().x);
 
    retrieveUsername();
-
    updateLayers();
 }
 
@@ -214,7 +213,7 @@ void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
    cursor->_sprite->setPosition(
-      static_cast<float>(_char_origin.x + _char_offset.x * charWidth), static_cast<float>(_char_origin.y + _char_offset.y * charHeight)
+      static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)
    );
 
    _layers["header-bg"]->_visible = true;
