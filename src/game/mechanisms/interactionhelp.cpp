@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/gameconfiguration.h"
+#include "game/gamecontrollerintegration.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
@@ -118,6 +119,15 @@ void InteractionHelp::update(const sf::Time& dt)
       _button_sprite.setColor({255, 255, 255, alpha_byte});
    }
 
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      _button_sprite.setTextureRect(_button_rect_controller);
+   }
+   else
+   {
+      _button_sprite.setTextureRect(_button_rect_keyboard);
+   }
+
    _player_intersected_in_last_frame = intersects;
 }
 
@@ -159,13 +169,14 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    _button_sprite.setTexture(*_button_texture);
 
    // read button icon
-   const auto button_name = ValueReader::readValue<std::string>("button", map).value_or("dpad_u");
-   const auto pos_index = ControllerKeyMap::getArrayPosition(button_name);
+   const auto button_name = ValueReader::readValue<std::string>("button", map).value_or("key_cursor_u");
+   const auto button_names_keyboard_controller = ControllerKeyMap::retrieveMappedKey(button_name);
+   const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.first);
+   const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.second);
 
-   const auto rect_char =
-      sf::IntRect{pos_index.first * PIXELS_PER_TILE, pos_index.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
-   _button_sprite.setTextureRect(rect_char);
-
+   _button_rect_keyboard = {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _button_rect_controller = {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _button_sprite.setTextureRect(_button_rect_keyboard);
    _button_sprite.setPosition(550, 335);
 
    const auto text = ValueReader::readValue<std::string>("text", map).value_or("");

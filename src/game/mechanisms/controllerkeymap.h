@@ -3,8 +3,8 @@
 
 #include <array>
 #include <map>
-#include <optional>
 #include <string>
+#include <utility>
 
 namespace ControllerKeyMap
 {
@@ -34,14 +34,8 @@ static const std::map<std::string, std::string> key_controller_map{
 };
 // clang-format on
 
-enum class InputType
-{
-   Controller,
-   Keyboard,
-};
-
 std::pair<int32_t, int32_t> getArrayPosition(const std::string& key);
-std::optional<std::tuple<std::string, InputType>> retrieveMappedKey(const std::string& key);
+std::pair<std::string, std::string> retrieveMappedKey(const std::string& key);
 
 }  // namespace ControllerKeyMap
 
