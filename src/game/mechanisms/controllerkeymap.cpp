@@ -11,13 +11,16 @@ std::pair<int32_t, int32_t> ControllerKeyMap::getArrayPosition(const std::string
    return {col, row};
 }
 
-std::optional<std::tuple<std::string, ControllerKeyMap::InputType>> ControllerKeyMap::retrieveMappedKey(const std::string& key)
+std::pair<std::string, std::string> ControllerKeyMap::retrieveMappedKey(const std::string& key)
 {
    const auto key_it = key_controller_map.find(key);
+
+   // key has no controller buddy, just use same identifier for both keyboard and controller
    if (key_it == key_controller_map.cend())
    {
-      return std::tuple<std::string, ControllerKeyMap::InputType>{key, ControllerKeyMap::InputType::Controller};
+      return {key, key};
    }
 
-   return std::tuple<std::string, ControllerKeyMap::InputType>{key_it->second, ControllerKeyMap::InputType::Keyboard};
+   // return keyboard <-> controller tuple
+   return {key, key_it->second};
 }

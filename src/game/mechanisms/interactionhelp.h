@@ -40,4 +40,7 @@ private:
 
    sf::Font _font;
    sf::Text _text;
+
+   sf::IntRect _button_rect_keyboard;
+   sf::IntRect _button_rect_controller;
 };
