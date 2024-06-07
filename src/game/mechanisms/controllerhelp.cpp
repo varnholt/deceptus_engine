@@ -32,6 +32,7 @@ namespace
 {
 constexpr auto show_speed = 1.0f;
 constexpr auto hide_speed = 1.0f;
+constexpr auto alpha_min_threshold = 0.01f;
 }  // namespace
 
 ControllerHelp::ControllerHelp(GameNode* parent) : GameNode(parent)
@@ -41,7 +42,7 @@ ControllerHelp::ControllerHelp(GameNode* parent) : GameNode(parent)
 
 void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   if (!_visible && _alpha <= 0.01f)
+   if (!_visible && _alpha <= alpha_min_threshold)
    {
       return;
    }
@@ -60,6 +61,8 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    _background.setColor(color);
    target.draw(_background);
 
+   const auto is_controller_connected = GameControllerIntegration::getInstance().isControllerConnected();
+
    // draw icons
    auto index = 0;
    for (auto& sprite : _sprites)
@@ -67,30 +70,31 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
       sprite.setColor(color);
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
       sprite.setPosition(_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y);
+      sprite.setTextureRect(is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
       target.draw(sprite);
       index++;
    }
 }
 
-void ControllerHelp::update(const sf::Time& dt)
+void ControllerHelp::update(const sf::Time& delta_time)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    _visible = (player_rect.intersects(_rect_px));
 
    if (!_visible)
    {
-      _alpha = std::max(0.0f, _alpha - dt.asSeconds() * hide_speed);
+      _alpha = std::max(0.0f, _alpha - delta_time.asSeconds() * hide_speed);
 
       // keep animating until fully disappeared
-      if (_alpha > 0.01f)
+      if (_alpha > alpha_min_threshold)
       {
-         _time += dt;
+         _time += delta_time;
       }
    }
    else
    {
-      _alpha = std::min(1.0f, _alpha + dt.asSeconds() * show_speed);
-      _time += dt;
+      _alpha = std::min(1.0f, _alpha + delta_time.asSeconds() * show_speed);
+      _time += delta_time;
    }
 }
 
@@ -106,44 +110,41 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       data._tmx_object->_y_px + data._tmx_object->_height_px / 2.0f,
    };
 
-   std::vector<std::string> keys;
+   std::vector<std::string> buttons_unmapped;
+
    auto keys_it = data._tmx_object->_properties->_map.find("keys");
    if (keys_it != data._tmx_object->_properties->_map.end())
    {
       _texture = TexturePool::getInstance().get("data/game/ui_icons.png");
 
-      std::istringstream f(keys_it->second->_value_string.value());
+      std::istringstream text_line(keys_it->second->_value_string.value());
       std::string key;
-      while (getline(f, key, ';'))
+      while (getline(text_line, key, ';'))
       {
-         // instead of the code below, have two sets of keys
-         // - one for the controller
-         // - one for the keyboard
-         // and then just hold two sprite vectors
-
-         // if the game controller is used, try to find a mapping
-         if (GameControllerIntegration::getInstance().isControllerConnected())
-         {
-            const auto mapped_it = ControllerKeyMap::key_controller_map.find(key);
-            if (mapped_it != ControllerKeyMap::key_controller_map.end())
-            {
-               key = mapped_it->second;
-            }
-         }
-
-         keys.push_back(key);
+         buttons_unmapped.emplace_back(key);
       }
    }
 
-   for (const auto& key : keys)
+   for (const auto& unmapped_button_key : buttons_unmapped)
    {
-      const auto pos_index = ControllerKeyMap::getArrayPosition(key);
+      const auto button_key_pair = ControllerKeyMap::retrieveMappedKey(unmapped_button_key);
+      const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_key_pair.first);
+      const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_key_pair.second);
+
+      const auto sprite_rect_keyboard = sf::IntRect{
+         pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+      };
+
+      const auto sprite_rect_controller = sf::IntRect{
+         pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+      };
 
       sf::Sprite sprite;
       sprite.setTexture(*_texture);
-      sprite.setTextureRect({pos_index.first * PIXELS_PER_TILE, pos_index.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
-
-      _sprites.push_back(sprite);
+      sprite.setTextureRect(sprite_rect_keyboard);
+      _sprites.emplace_back(sprite);
+      _sprite_rects_controller.emplace_back(sprite_rect_controller);
+      _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
    }
 
    _background.setTexture(*_texture);

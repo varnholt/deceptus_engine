@@ -32,8 +32,6 @@ constexpr auto PLAYER_TILES_HEIGHT = 48;
 constexpr auto PLAYER_ACTUAL_WIDTH = 20;   // the actual width can be smaller than the tile width
 constexpr auto PLAYER_ACTUAL_HEIGHT = 32;  // the actual height can be smaller than the tile height
 
-constexpr auto PLAYER_1_COLLISION_ID = 3;
-
 constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
 constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
 
