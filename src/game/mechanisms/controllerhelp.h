@@ -22,7 +22,11 @@ private:
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect_px;
    sf::Vector2f _rect_center;
+
    std::vector<sf::Sprite> _sprites;
+   std::vector<sf::IntRect> _sprite_rects_keyboard;
+   std::vector<sf::IntRect> _sprite_rects_controller;
+
    sf::Sprite _background;
    bool _visible = false;
    float _alpha = 0.0f;
