@@ -35,8 +35,8 @@ public:
 private:
    CameraSystem() = default;
 
-   void updateX(const sf::Time& dt);
-   void updateY(const sf::Time& dt);
+   void updateX(const sf::Time& delta_time);
+   void updateY(const sf::Time& delta_time);
 
    float _x_px = 0.0f;
    float _y_px = 0.0f;
