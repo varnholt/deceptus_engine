@@ -108,7 +108,7 @@ void CameraSystemConfigurationUi::draw()
    if (ImGui::CollapsingHeader("horizontal", header_flags))
    {
       drawFloatElement("camera velocity factor", &config._camera_velocity_factor_x, -0.1f, 10.0f);
-      drawFloatElement("focus zone divider", &config._focus_zone_divider, 0.1f, 20.0f);
+      drawFloatElement("focus zone divider", &config._focus_zone_divider, 0.1f, 100.0f);
       drawFloatElement("target shift factor", &config._target_shift_factor, 0.1f, 2.0f);
       drawIntElement("back in bounds tolerance", &config._back_in_bounds_tolerance_x, 1, 50);
       ImGui::Checkbox("follow player orientation", &config._follow_player_orientation);
@@ -120,7 +120,7 @@ void CameraSystemConfigurationUi::draw()
       drawFloatElement("view ratio", &config._view_ratio_y, 0.1f, 10.0f);
       drawIntElement("back in bounds tolerance", &config._back_in_bounds_tolerance_y, 1, 50);
       drawIntElement("player offset", &config._player_offset_y, -500, 500);
-      drawFloatElement("panic line divider", &config._panic_line_divider, 0.1f, 20.0f);
+      drawFloatElement("panic line divider", &config._panic_line_divider, 0.1f, 100.0f);
       drawFloatElement("panic acceleration factor", &config._panic_acceleration_factor_y, 0.1f, 10.0f);
    }
 
