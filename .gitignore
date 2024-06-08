@@ -6,3 +6,5 @@
 *.idx
 *.stash
 *.user
+compile_commands.json
+Makefile

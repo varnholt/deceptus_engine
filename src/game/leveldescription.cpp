@@ -38,6 +38,7 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string& path
 {
    if (!std::filesystem::exists(path))
    {
+      Log::Error() << "path does not exist: " << path;
       return nullptr;
    }
 
