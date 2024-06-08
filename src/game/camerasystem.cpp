@@ -2,10 +2,7 @@
 
 #include "cameraroomlock.h"
 #include "framework/easings/easings.h"
-#include "gameconfiguration.h"
 #include "player/player.h"
-
-#include <iostream>
 
 /*
 
@@ -55,7 +52,7 @@ void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_he
    updateY(dt);
 }
 
-void CameraSystem::updateX(const sf::Time& dt)
+void CameraSystem::updateX(const sf::Time& delta_time)
 {
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
@@ -64,7 +61,7 @@ void CameraSystem::updateX(const sf::Time& dt)
    auto player_y_px = player->getPixelPositionFloat().y;
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x_px, player_y_px, _focus_offset_px);
    _dx_px = (player_x_px - _x_px);
-   const auto dx_px = (_dx_px)*dt.asSeconds() * camera_config.getCameraVelocityFactorX();
+   const auto dx_px = (_dx_px)*delta_time.asSeconds() * camera_config.getCameraVelocityFactorX();
    const auto f_center = _view_width_px / 2.0f;
    const auto f_range = _view_width_px / camera_config.getFocusZoneDivider();
 
@@ -79,7 +76,7 @@ void CameraSystem::updateX(const sf::Time& dt)
          player->isPointingLeft() ? (f_range * camera_config.getTargetShiftFactor()) : (-f_range * camera_config.getTargetShiftFactor());
    }
 
-   const auto focus_delta = (target_offset - _focus_offset_px) * dt.asSeconds() * camera_config.getCameraVelocityFactorX();
+   const auto focus_delta = (target_offset - _focus_offset_px) * delta_time.asSeconds() * camera_config.getCameraVelocityFactorX();
    if (fabs(_focus_offset_px) < fabs(f_range * camera_config.getTargetShiftFactor()))
    {
       _focus_offset_px += focus_delta;
@@ -113,7 +110,7 @@ void CameraSystem::updateX(const sf::Time& dt)
    }
 }
 
-void CameraSystem::updateY(const sf::Time& dt)
+void CameraSystem::updateY(const sf::Time& delta_time)
 {
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
@@ -168,14 +165,14 @@ void CameraSystem::updateY(const sf::Time& dt)
       _y_update_start_time = sf::Time{};
    }
 
-   _y_update_start_time += dt;
+   _y_update_start_time += delta_time;
 
    // have some acceleration in the y update velocity so it doesn't got at full speed instantly
    const auto y_update_start_time_s = _y_update_start_time.asSeconds();
    const auto y_update_acceleration = _panic ? 2.0f : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
 
    _dy_px = player_y - _y_px;
-   const auto dy = _dy_px * dt.asSeconds() * camera_config.getCameraVelocityFactorY() * y_update_acceleration;
+   const auto dy = _dy_px * delta_time.asSeconds() * camera_config.getCameraVelocityFactorY() * y_update_acceleration;
 
    _y_px += dy;
 }
@@ -236,8 +233,8 @@ float CameraSystem::getFocusZoneX1() const
 
 CameraSystem& CameraSystem::getInstance()
 {
-   static CameraSystem __instance;
-   return __instance;
+   static CameraSystem instance;
+   return instance;
 }
 
 float CameraSystem::getPanicLineY0() const
