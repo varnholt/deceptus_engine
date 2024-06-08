@@ -409,6 +409,10 @@ void Door::setup(const GameDeserializeData& data)
          const auto open = open_it->second->_value_bool.value();
          setEnabled(open);
       }
+      else
+      {
+         setEnabled(false);
+      }
 
       // read required key to open door
       const auto key_it = data._tmx_object->_properties->_map.find("key");
