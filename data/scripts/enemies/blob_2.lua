@@ -575,15 +575,15 @@ end
 function update(dt)
    _elapsed = _elapsed + dt
 
+   if (updateDeath(dt)) then
+      return
+   end
+
    if (updateJump(dt)) then
       return
    end
 
    if (updateDrop(dt)) then
-      return
-   end
-
-   if (updateDeath(dt)) then
       return
    end
 
@@ -629,10 +629,22 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage_value)
-      -- need to store the current hit time
-      -- print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
-      _energy = _energy - damage_value
-      if (_energy <= 0) then
-         _dead = true
-      end
+
+   if (_dead) then
+      return
+   end
+
+   -- need to store the current hit time
+   -- print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
+   _energy = _energy - damage_value
+   if (_energy <= 0) then
+      _dead = true
+      _elapsed = 0.0
+
+      -- make sure the thing stops to move
+      prop = {velocity_walk_max = 0.0}
+      keyReleased(Key["KeyLeft"])
+      keyReleased(Key["KeyRight"])
+      updateProperties(prop)
+   end
 end
