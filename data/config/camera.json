@@ -5,7 +5,7 @@
         "velocity_factor_x": 4.0,
         "follow_player_orientation" : false,
         "velocity_factor_y": 3.0,
-        "focus_zone_divider": 6.0,
+        "focus_zone_divider": 100.0,
         "panic_line_divider": 2.5,
         "target_shift_factor": 0.5,
         "view_ratio_y": 1.5,
