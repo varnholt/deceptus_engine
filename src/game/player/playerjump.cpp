@@ -10,14 +10,12 @@
 #include "game/savestate.h"
 
 #include <box2d/box2d.h>
-#include <iostream>
 
 namespace
 {
 constexpr auto fixed_timestep = (1.0f / 60.0f);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::update(const PlayerJumpInfo& info)
 {
    const auto was_in_air = _jump_info._in_air;
@@ -54,7 +52,6 @@ void PlayerJump::update(const PlayerJumpInfo& info)
    updateWallJump();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJumpBuffer()
 {
    if (_jump_info._in_air)
@@ -73,7 +70,6 @@ void PlayerJump::updateJumpBuffer()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateJump()
 {
    const auto& physics = PhysicsConfiguration::getInstance();
@@ -140,7 +136,6 @@ void PlayerJump::updateJump()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jumpImpulse()
 {
    const auto impulse = _body->GetMass() * PhysicsConfiguration::getInstance()._player_jump_impulse_factor;
@@ -149,14 +144,12 @@ void PlayerJump::jumpImpulse()
    _body->ApplyLinearImpulse(b2Vec2(0.0f, -impulse), _body->GetWorldCenter(), true);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jumpImpulse(const b2Vec2& impulse)
 {
    _jump_clock.restart();
    _body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jumpForce()
 {
    // apply individual forces for a given number of frames
@@ -165,7 +158,6 @@ void PlayerJump::jumpForce()
    _jump_frame_count = PhysicsConfiguration::getInstance()._player_jump_frame_count;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::doubleJump()
 {
    if (_walljump_frame_count > 0)
@@ -201,7 +193,6 @@ void PlayerJump::doubleJump()
    Audio::getInstance().playSample({"player_doublejump_01.mp3"});
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::wallJump()
 {
    const auto skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
@@ -245,7 +236,6 @@ void PlayerJump::wallJump()
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::jump()
 {
    if (_jump_info._dashing)
@@ -269,7 +259,7 @@ void PlayerJump::jump()
       return;
    }
 
-   sf::Time elapsed = _jump_clock.getElapsedTime();
+   const auto elapsed = _jump_clock.getElapsedTime();
 
    // only allow a new jump after a a couple of milliseconds
    if (elapsed.asMilliseconds() <= PhysicsConfiguration::getInstance()._player_minimum_jump_interval_ms)
@@ -291,7 +281,7 @@ void PlayerJump::jump()
       }
       else
       {
-         _jump_dust_animation_callback(DustAnimationType::Ground);
+         _jump_dust_animation_callback(_ground_contact_just_lost ? DustAnimationType::InAir : DustAnimationType::Ground);
          Audio::getInstance().playSample({"player_jump_liftoff.wav", 0.3f});
       }
    }
@@ -309,7 +299,6 @@ void PlayerJump::jump()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateLostGroundContact()
 {
    // when losing contact to the ground allow jumping for 2-3 more frames
@@ -338,7 +327,6 @@ void PlayerJump::updateLostGroundContact()
    _had_ground_contact = !_jump_info._in_air;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallSlide()
 {
    // start and stop wallsliding sample
@@ -403,7 +391,6 @@ void PlayerJump::updateWallSlide()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::updateWallJump()
 {
    if (_walljump_frame_count == 0)
@@ -421,13 +408,11 @@ void PlayerJump::updateWallJump()
    _walljump_frame_count--;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerJump::isJumping() const
 {
    return (_jump_frame_count > 0);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& controls)
 {
    _controls = controls;
