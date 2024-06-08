@@ -562,13 +562,13 @@ void Level::initialize()
 
    if (!_description)
    {
-      Log::Error() << "level configuration is bad";
+      Log::Error() << "level configuration is bad, could not load " << _description_filename;
       return;
    }
 
    if (!load())
    {
-      Log::Error() << "level loading failed";
+      Log::Error() << "level loading failed, filename: " << _description_filename;
       return;
    }
 
