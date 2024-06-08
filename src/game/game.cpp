@@ -270,7 +270,7 @@ void Game::loadLevel(LoadingMode loading_mode)
 
          _player->updatePixelRect();
 
-         Log::Info() << "level loading finished";
+         Log::Info() << "level loading finished: " << level_item._level_name;
 
          _level_loading_finished = true;
 
