@@ -196,6 +196,21 @@ Ugly piece of technology. When Adam steps onto one of these, it's time to run re
 
 
 
+### Minik Bomber
+
+![](images/enemy_minik_bomber.png)
+
+Don't judge him by his size. This little guy is a dangerous fellow, throwing bombs at you.
+
+|Property|Type|Description|
+|-|-|-|
+|script|string|`minik_bomber.lua`|
+|alignment|string|Whether the Minik Bomber is pointing `left` (default) or `right`.|
+|velocity_x|float|Throw velocity in x (default is `nil`); If not set, Minik Bomber will automatically find a good value| 
+|velocity_y|float|Throw velocity in y (default is `nil`); If not set, Minik Bomber will automatically find a good value| 
+|interval_s|float|Throw interval in seconds (default is `nil`); if not set, Minik Bomber will throw when the player is in reach|
+
+
 ### Watermine
 
 ![](images/enemy_watermine.png)
