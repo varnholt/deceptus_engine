@@ -8,12 +8,15 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    static_body = true,
    sprite = "data/sprites/enemy_bonefish.png",
-   damage = 40
+   damage =4
 }
 
 
 ------------------------------------------------------------------------------------------------------------------------
 mPosition = v2d.Vector2D(0, 0)
+mSpeed = 1.0
+mCurve1 = 1.0
+mCurve2 = 1.0
 mPlayerPosition = v2d.Vector2D(0, 0)
 mCenter = v2d.Vector2D(0, 0)
 mWidth = 0
@@ -30,8 +33,8 @@ function initialize()
    patrolIndex = 1
    patrolEpsilon = 1.0
 
-   addShapeRect(0.2, 0.2, -0.05, 0.0)
-   updateSpriteRect(0, 0, 0, 48, 24)
+   addShapeRect(0.3, 0.15, 0, 0.05)
+   updateSpriteRect(0, 0, 0, 72, 48)
 end
 
 
@@ -43,20 +46,21 @@ function update(dt)
 
    -- get sprite index
    mElapsed = mElapsed + dt
-   spriteIndex = math.floor(math.fmod(mElapsed * 10.0, 8))
+   spriteIndex = math.floor(math.fmod(mElapsed * 20.0, 30))
 
    -- get sprite direction
-   x = 0.5 * math.sin(mElapsed) * mWidth
+   x = 0.5 * math.sin(mElapsed * mSpeed) * mWidth
 
    if (x > mPrevX) then
       pointsLeft = false
-      yOffset = 24
+      yOffset = 48
    end
 
    mPrevX = x
-
+   
    -- update transform
-   setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * 3.0) * 5.0, 0.0)
+   setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * mCurve1) * mCurve2, 0.0)
+   --    setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * 2.0) * 5.0, 0.0) --default values	
 
    -- update sprite index
    if (spriteIndex ~= mSpriteIndex) then
@@ -70,11 +74,24 @@ function update(dt)
    end
 
    if (updateSprite) then
-      updateSpriteRect(0, mSpriteIndex * 48, yOffset, 48, 24) -- x, y, width, height
+      updateSpriteRect(0, mSpriteIndex * 72, yOffset, 72, 48) -- x, y, width, height
    end
 
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+
+function writeProperty(parameter, value)
+
+   if (parameter == "speed") then
+		mSpeed = value
+	elseif (parameter == "curve1") then
+		mCurve1 = value
+   	elseif (parameter == "curve2") then
+		mCurve2 = value
+   end
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setPath(name, table)
