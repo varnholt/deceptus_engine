@@ -92,6 +92,11 @@ _points_to_left = true
 _current_cycle = CYCLE_IDLE
 _can_throw = false
 _gravity = 0.0
+_velocity_x = nil
+_velocity_y = nil
+_interval_s = nil
+_interval_elapsed_s = 0.0
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -162,6 +167,12 @@ function writeProperty(key, value)
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
       setAudioUpdateBehavior(update_behavior)
+   elseif (key == "velocity_x") then
+      _velocity_x = tonumber(value)
+   elseif (key == "velocity_y") then
+      _velocity_y = tonumber(value)
+   elseif (key == "interval_s") then
+      _interval_s = tonumber(value)
    end
 end
 
@@ -175,11 +186,16 @@ end
 function throw()
    -- playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
 
-   velocity = calculateVelocity(
-      math.abs(_pos:getX() - _pos_player:getX()),
-      60.0,
-      0.0015
-   )
+   velocity = v2d.Vector2D(0, 0)
+   if (_velocity_x and _velocity_y) then
+      velocity = v2d.Vector2D(_velocity_x, _velocity_y)
+   else
+      velocity = calculateVelocity(
+         math.abs(_pos:getX() - _pos_player:getX()),
+         60.0,
+         0.0015
+      )
+   end
 
    velocity:setX(velocity:getX() * math.random(90, 110) * 0.01)
    velocity:setY(velocity:getY() * math.random(90, 110) * 0.01)
@@ -247,7 +263,6 @@ function decide(dt)
       end
 
    end
-
 end
 
 
@@ -269,7 +284,6 @@ end
 function updateSprite(dt)
 
    cycle = getCurrentCycle(dt)
-
    sprite_index = math.floor(cycle)
 
    if (_current_sprite ~= sprite_index) then
@@ -302,6 +316,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
    _elapsed_s = _elapsed_s + dt
+   _interval_elapsed_s = _interval_elapsed_s + dt
    updateThrowCondition(dt)
    decide(dt)
    updateSprite(dt)
@@ -317,9 +332,18 @@ end
 function updateThrowCondition(dt)
 
    if (_current_cycle == CYCLE_IDLE or _current_cycle == CYCLE_IDLE_BLINK) then
+
       _can_throw = false
 
-      if (math.abs(_pos:getY() - _pos_player:getY()) < 24) then
+      -- check if minik is configured to an interval
+      if (_interval_s) then
+         if (_interval_elapsed_s > _interval_s) then
+            _interval_elapsed_s = 0.0
+            _can_throw = true
+         end
+
+      -- check if player is nearby
+      elseif (math.abs(_pos:getY() - _pos_player:getY()) < 24) then
          if (math.abs(_pos:getX() - _pos_player:getX()) < THROW_DISTANCE_PX) then
 
             player_is_left = (_pos:getX() > _pos_player:getX())
