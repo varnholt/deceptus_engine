@@ -8,15 +8,15 @@ v2d = require "data/scripts/enemies/vectorial2"
 properties = {
    static_body = true,
    sprite = "data/sprites/enemy_bonefish.png",
-   damage =4
+   damage = 4
 }
 
 
 ------------------------------------------------------------------------------------------------------------------------
 mPosition = v2d.Vector2D(0, 0)
 mSpeed = 1.0
-mCurve1 = 1.0
-mCurve2 = 1.0
+mFrequency = 1.0
+mAmplitude = 1.0
 mPlayerPosition = v2d.Vector2D(0, 0)
 mCenter = v2d.Vector2D(0, 0)
 mWidth = 0
@@ -59,8 +59,7 @@ function update(dt)
    mPrevX = x
    
    -- update transform
-   setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * mCurve1) * mCurve2, 0.0)
-   --    setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * 2.0) * 5.0, 0.0) --default values	
+   setTransform(mCenter:getX() + x, mCenter:getY() + math.sin(mElapsed * mFrequency) * mAmplitude, 0.0)
 
    -- update sprite index
    if (spriteIndex ~= mSpriteIndex) then
@@ -85,11 +84,11 @@ end
 function writeProperty(parameter, value)
 
    if (parameter == "speed") then
-		mSpeed = value
-	elseif (parameter == "curve1") then
-		mCurve1 = value
-   	elseif (parameter == "curve2") then
-		mCurve2 = value
+      mSpeed = value
+   elseif (parameter == "frequency") then
+      mFrequency = value
+   elseif (parameter == "amplitude") then
+      mAmplitude = value
    end
 end
 
