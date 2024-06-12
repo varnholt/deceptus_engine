@@ -130,6 +130,9 @@ A Blob can either move left and right on the floor or ceiling of a room, jump up
 |-|-|-|
 |script|string|`bonefish.lua`|
 |path|string|Usually you would only define a 2nd x,y-position here which will make the Bonefish go back and forth between its start position and the other position. Format: `x0, y0, x1, y1, etc.`|
+|speed|float|Movement speed (default is `1.0`)|
+|frequency|float|Movement sine wave frequency (default is `1.0`)|
+|amplitude|float|Movement sine wave amplitude (default is `1.0`)|
 
 
 ### Cannon
