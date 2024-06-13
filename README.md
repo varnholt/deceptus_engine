@@ -31,6 +31,35 @@ qmake && make
 qmake && nmake
 ```
 
+## MacOS
+
+### Building
+```bash
+brew install fmt
+brew install sfml
+brew install sdl2
+brew install lua
+qmake && make
+```
+
+### Running
+```bash
+export PATH="$(brew --prefix fmt)/include:$PATH"
+export PATH="$(brew --prefix fmt)/lib:$PATH"
+
+export PATH="$(brew --prefix sfml)/include:$PATH"
+export PATH="$(brew --prefix sfml)/lib:$PATH"
+
+export PATH="$(brew --prefix sdl2)/include:$PATH"
+export PATH="$(brew --prefix sdl2)/lib:$PATH"
+
+export PATH="$(brew --prefix lua)/include:$PATH"
+export PATH="$(brew --prefix lua)/lib:$PATH"
+
+./deceptus
+```
+
+
 # Contribute and Talk to Us!
 If you're a musician, graphic artist, level designer or programmer, or just want to hang out and chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
 
