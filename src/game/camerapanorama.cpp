@@ -1,7 +1,5 @@
 #include "camerapanorama.h"
 
-#include <iostream>
-
 #include "framework/joystick/gamecontroller.h"
 #include "framework/math/sfmlmath.h"
 #include "game/cameraroomlock.h"
@@ -10,15 +8,12 @@
 #include "game/gamecontrollerintegration.h"
 #include "game/tweaks.h"
 
-
-//-----------------------------------------------------------------------------
 CameraPanorama& CameraPanorama::getInstance()
 {
    static CameraPanorama __instance;
    return __instance;
 }
 
-//-----------------------------------------------------------------------------
 sf::Vector2f CameraPanorama::computeDesiredLookVector(
    bool looking_up,
    bool looking_down,
@@ -76,7 +71,6 @@ sf::Vector2f CameraPanorama::computeDesiredLookVector(
    return desired_look_vector;
 }
 
-//-----------------------------------------------------------------------------
 void CameraPanorama::update()
 {
    const auto& tweaks = Tweaks::instance();
@@ -170,7 +164,6 @@ void CameraPanorama::update()
    }
 }
 
-//-----------------------------------------------------------------------------
 void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
 {
    switch (event.key.code)
@@ -178,6 +171,7 @@ void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::LShift:
       {
          updateLookState(Look::Active, true);
+         DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
          break;
       }
       case sf::Keyboard::Left:
@@ -207,7 +201,6 @@ void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
    }
 }
 
-//-----------------------------------------------------------------------------
 void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
 {
    switch (event.key.code)
@@ -215,6 +208,7 @@ void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
       case sf::Keyboard::LShift:
       {
          updateLookState(Look::Active, false);
+         DisplayMode::getInstance().enqueueUnset(Display::CameraPanorama);
          break;
       }
       case sf::Keyboard::Left:
@@ -244,7 +238,6 @@ void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
    }
 }
 
-//-----------------------------------------------------------------------------
 void CameraPanorama::updateLookState(Look look, bool enable)
 {
    if (enable)
@@ -257,19 +250,16 @@ void CameraPanorama::updateLookState(Look look, bool enable)
    }
 }
 
-//-----------------------------------------------------------------------------
 void CameraPanorama::updateLookVector(const sf::Vector2f& desired)
 {
    _look_vector = desired;
 }
 
-//-----------------------------------------------------------------------------
 bool CameraPanorama::isLookActive() const
 {
    return (_look_state & static_cast<int32_t>(Look::Active));
 }
 
-//-----------------------------------------------------------------------------
 const sf::Vector2f& CameraPanorama::getLookVector() const
 {
    return _look_vector;
