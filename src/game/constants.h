@@ -113,6 +113,7 @@ enum class Display
    Debug = 0x08,
    Modal = 0x10,
    ScreenTransition = 0x20,
+   CameraPanorama = 0x40,
 };
 
 enum class ExecutionMode

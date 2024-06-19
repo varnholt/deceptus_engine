@@ -122,6 +122,13 @@ void Dialogue::update(const sf::Time& /*dt*/)
       return;
    }
 
+   // don't open dialogues when camera panorama is active
+   const auto& dm = DisplayMode::getInstance();
+   if (dm.isSet(Display::CameraPanorama))
+   {
+      return;
+   }
+
    // check whether up button is pressed
    // actually there could be a number of 'message box activation buttons' here but for
    // now it might be sufficient to just check for the up button
