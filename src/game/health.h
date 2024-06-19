@@ -24,7 +24,7 @@ struct Health
    void removeStaminaDrain(StaminaDrain);
    bool hasFullStamina() const;
 
-   int32_t _life_count = 5;
+   int32_t _life_count = 1;
 
    int32_t _health = 12;
    int32_t _health_max = 12;

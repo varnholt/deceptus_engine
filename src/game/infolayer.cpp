@@ -104,11 +104,13 @@ InfoLayer::InfoLayer()
    }
 
    // init heart layers
+   _heart_layers.reserve(heart_quarter_layer_count);
    for (auto i = 1u; i <= heart_quarter_layer_count; i++)
    {
       _heart_layers.push_back(_layers[fmt::format("{}", i)]);
    }
 
+   _stamina_layers.reserve(6);
    for (auto i = 1u; i <= 6; i++)
    {
       _stamina_layers.push_back(_layers[fmt::format("energy_{}", i)]);
