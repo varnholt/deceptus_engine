@@ -57,33 +57,22 @@ int32_t updateProperties(lua_State* state)
       if (lua_isboolean(state, -1))  // bool
       {
          OBJINSTANCE->_properties[key] = static_cast<bool>(lua_toboolean(state, -1));
-         // printf("%s = %d\n", key.c_str(), lua_toboolean(state, -1));
       }
       if (lua_isnumber(state, -1))
       {
          if (lua_isinteger(state, -1))  // int64
          {
             OBJINSTANCE->_properties[key] = static_cast<int64_t>(lua_tointeger(state, -1));
-            // printf("%s = %lld\n", key.c_str(), lua_tointeger(state, -1));
          }
          else  // double
          {
             OBJINSTANCE->_properties[key] = lua_tonumber(state, -1);
-            // printf("%s = %f\n", key.c_str(), lua_tonumber(state, -1));
          }
       }
       else if (lua_isstring(state, -1))  // string
       {
          OBJINSTANCE->_properties[key] = std::string(lua_tostring(state, -1));
-         // printf("%s = %s\n", key.c_str(), lua_tostring(state, -1));
       }
-
-      // process nested tables
-      //
-      //      else if(lua_istable(state, -1))
-      //      {
-      //         return updateProperties(state);
-      //      }
 
       lua_pop(state, 1);
    }
