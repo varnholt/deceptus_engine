@@ -642,9 +642,12 @@ function hit(damage_value)
       _elapsed = 0.0
 
       -- make sure the thing stops to move
-      prop = {velocity_walk_max = 0.0}
       keyReleased(Key["KeyLeft"])
       keyReleased(Key["KeyRight"])
+      prop = {velocity_walk_max = 0.0}
       updateProperties(prop)
+
+      -- when dead, stop causing damage to the player
+      setDamage(0)
    end
 end
