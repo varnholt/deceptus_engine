@@ -2,7 +2,7 @@
 #define KEYBOARDEVENTDISTRIBUTOR_H
 
 #include <functional>
-#include <sfml/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 
 namespace EventDistributor
 {
