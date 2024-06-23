@@ -1,5 +1,7 @@
 #include "controllerkeymap.h"
 
+#include <algorithm>
+
 std::pair<int32_t, int32_t> ControllerKeyMap::getArrayPosition(const std::string& key)
 {
    const auto it = std::find(key_map.begin(), key_map.end(), key);
