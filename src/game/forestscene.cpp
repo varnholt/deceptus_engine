@@ -4,7 +4,7 @@
 #include "framework/tools/log.h"
 #include "gameconfiguration.h"
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 ForestScene::ForestScene()

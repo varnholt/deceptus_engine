@@ -1,6 +1,8 @@
 #include "scopeexit.h"
 
-ScopeExit::ScopeExit(const ExitFunction& f) : mExitFunction(f)
+#include <utility>
+
+ScopeExit::ScopeExit(ExitFunction  f) : mExitFunction(std::move(f))
 {
 }
 

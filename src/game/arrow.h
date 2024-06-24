@@ -8,7 +8,7 @@
 struct Arrow : public Projectile
 {
    Arrow();
-   ~Arrow();
+   ~Arrow() override;
    int32_t _start_time = 0;
    static bool _animation_initialised;
 };

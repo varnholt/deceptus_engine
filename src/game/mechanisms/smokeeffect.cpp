@@ -9,8 +9,8 @@
 #include "framework/tools/log.h"
 #include "texturepool.h"
 
-#include <math.h>
 #include <array>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
 

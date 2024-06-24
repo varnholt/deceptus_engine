@@ -2,8 +2,8 @@
 #include "hermitecurve.h"
 
 // stl
+#include <cmath>
 #include <cstdint>
-#include <math.h>
 
 
 namespace

@@ -16,7 +16,7 @@ class FixtureQueryCallback : public b2QueryCallback
 {
    public:
 
-      bool ReportFixture(b2Fixture* fixture);
+      bool ReportFixture(b2Fixture* fixture) override;
       std::vector<b2Fixture*> _fixtures;
 };
 
@@ -25,7 +25,7 @@ class BodyQueryCallback : public b2QueryCallback
 {
    public:
 
-      bool ReportFixture(b2Fixture* fixture);
+      bool ReportFixture(b2Fixture* fixture) override;
       std::vector<b2Body*> _bodies;
 };
 

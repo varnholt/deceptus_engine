@@ -22,7 +22,7 @@ public:
    using DestroyedCallback = std::function<void(void)>;
 
    Projectile();
-   virtual ~Projectile();
+   ~Projectile() override;
 
    b2Body* getBody() const;
    void setBody(b2Body* body);

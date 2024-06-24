@@ -7,6 +7,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <utility>
 
 /*! \brief The class Audio implements audio support
  *         It supports audio samples and music.
@@ -29,15 +30,15 @@ public:
    {
       PlayInfo() = default;
 
-      PlayInfo(const std::string& sample_name) : _sample_name(sample_name)
+      PlayInfo(std::string  sample_name) : _sample_name(std::move(sample_name))
       {
       }
 
-      PlayInfo(const std::string& sample_name, float volume) : _sample_name(sample_name), _volume(volume)
+      PlayInfo(std::string  sample_name, float volume) : _sample_name(std::move(sample_name)), _volume(volume)
       {
       }
 
-      PlayInfo(const std::string& sample_name, float volume, bool looped) : _sample_name(sample_name), _volume(volume), _looped(looped)
+      PlayInfo(std::string  sample_name, float volume, bool looped) : _sample_name(std::move(sample_name)), _volume(volume), _looped(looped)
       {
       }
 

@@ -111,7 +111,7 @@ void EventSerializer::add(const sf::Event& event)
    }
 
    const auto now = HighResClock::now();
-   _events.push_back({now, event});
+   _events.emplace_back(now, event);
 }
 
 

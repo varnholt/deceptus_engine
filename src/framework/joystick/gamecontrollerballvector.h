@@ -11,8 +11,7 @@ class GameControllerBallVector
       }
 
       GameControllerBallVector()
-      {
-      }
+      = default;
 
       float* getXPtr()
       {

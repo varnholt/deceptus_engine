@@ -3,7 +3,6 @@
 #include <cmath>
 #include <functional>
 #include <limits>
-#include <math.h>
 #include <string>
 #include <type_traits>
 #include <utility>

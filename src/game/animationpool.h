@@ -11,7 +11,7 @@
 class AnimationPool
 {
 public:
-   AnimationPool(const std::string& file_path);
+   AnimationPool(std::string  file_path);
 
    void initialize();
    void reload();

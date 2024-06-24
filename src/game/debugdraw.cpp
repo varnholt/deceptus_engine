@@ -10,9 +10,9 @@ constexpr auto outline_thickness = 0.5f;
 //----------------------------------------------------------------------------------------------------------------------
 sf::Color DebugDraw::glColorToSfml(const b2Color& color, sf::Uint8 alpha)
 {
-   return sf::Color(
+   return {
       static_cast<sf::Uint8>(color.r * 255), static_cast<sf::Uint8>(color.g * 255), static_cast<sf::Uint8>(color.b * 255), alpha
-   );
+   };
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ void DebugDraw::drawLines(
 
    for (auto i = 0; i < vertex_count; i++)
    {
-      sf_lines.push_back(sf::Vertex(vecB2S(vertices[i] + offset), sf_color));
+      sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
    }
 
    target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
@@ -198,11 +198,11 @@ void DebugDraw::drawLineLoop(
 
    for (auto i = 0; i < vertex_count; i++)
    {
-      sf_lines.push_back(sf::Vertex(vecB2S(vertices[i] + offset), sf_color));
+      sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
    }
 
    // close loop
-   sf_lines.push_back(sf::Vertex(vecB2S(vertices[0] + offset), sf_color));
+   sf_lines.emplace_back(vecB2S(vertices[0] + offset), sf_color);
 
    target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
 }

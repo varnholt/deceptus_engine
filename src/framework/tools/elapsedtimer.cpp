@@ -2,12 +2,13 @@
 
 #include <iomanip>
 #include <iostream>
+#include <utility>
 
 ElapsedTimer::ElapsedTimer() : _start_time{std::chrono::high_resolution_clock::now()}
 {
 }
 
-ElapsedTimer::ElapsedTimer(const std::string& name) : _start_time{std::chrono::high_resolution_clock::now()}, _name(name)
+ElapsedTimer::ElapsedTimer(std::string  name) : _start_time{std::chrono::high_resolution_clock::now()}, _name(std::move(name))
 {
 }
 

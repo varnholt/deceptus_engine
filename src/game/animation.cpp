@@ -307,9 +307,9 @@ void Animation::updateVertices(bool reset_time)
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::setColor(const sf::Color& color)
 {
-   for (auto i = 0u; i < 4; ++i)
+   for (auto & _vertice : _vertices)
    {
-      _vertices[i].color = color;
+      _vertice.color = color;
    }
 }
 
@@ -327,7 +327,7 @@ void Animation::setColorTree(const sf::Color& color)
 sf::FloatRect Animation::getLocalBounds() const
 {
    const sf::IntRect rect = _frames[static_cast<size_t>(_current_frame)];
-   return sf::FloatRect(0.f, 0.f, static_cast<float>(std::abs(rect.width)), static_cast<float>(std::abs(rect.height)));
+   return {0.f, 0.f, static_cast<float>(std::abs(rect.width)), static_cast<float>(std::abs(rect.height))};
 }
 
 //----------------------------------------------------------------------------------------------------------------------

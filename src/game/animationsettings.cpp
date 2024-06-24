@@ -1,5 +1,7 @@
 #include "animationsettings.h"
 
+#include <utility>
+
 void from_json(const nlohmann::json& j, AnimationSettings& settings)
 {
    settings._sprite_count = j.at("sprite_count").get<int32_t>();
@@ -34,12 +36,12 @@ void from_json(const nlohmann::json& j, AnimationSettings& settings)
 
    for (auto i = 0; i < settings._sprite_count; i++)
    {
-      settings._frames.push_back(sf::IntRect(
+      settings._frames.emplace_back(
          settings._frame_offset[0] + (i * settings._frame_size[0]),
          settings._frame_offset[1],
          settings._frame_size[0],
          settings._frame_size[1]
-      ));
+      );
    }
 }
 
@@ -47,26 +49,17 @@ AnimationSettings::AnimationSettings(
    const std::array<int32_t, 2>& frameSize,
    const std::array<int32_t, 2>& frameOffset,
    const std::array<float, 2>& origin,
-   const std::vector<sf::Time>& frameDurations,
-   const std::filesystem::path& texturePath
+   std::vector<sf::Time>  frameDurations,
+   std::filesystem::path  texturePath
 )
-    : _frame_size(frameSize), _frame_offset(frameOffset), _origin(origin), _frame_durations(frameDurations), _texture_path(texturePath)
+    : _frame_size(frameSize), _frame_offset(frameOffset), _origin(origin), _frame_durations(std::move(frameDurations)), _texture_path(std::move(texturePath))
 {
 }
 
 AnimationSettings::AnimationSettings(const AnimationSettings& other)
-    : _frame_size(other._frame_size),
-      _frame_offset(other._frame_offset),
-      _origin(other._origin),
-      _frame_durations(other._frame_durations),
-      _texture_path(other._texture_path),
-      _texture(other._texture),
-      _normal_map(other._normal_map),
-      _frames(other._frames),
-      _sprite_count(other._sprite_count),
-      _valid(other._valid)
-{
-}
+    
+      
+= default;
 
 void to_json(nlohmann::json& j, const AnimationSettings& settings)
 {

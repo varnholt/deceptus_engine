@@ -1,9 +1,9 @@
 #include "image.h"
 #include "tga.h"
 
-#include <math.h>
 #include <memory.h>
 #include <algorithm>
+#include <cmath>
 
 // construct image from file
 Image::Image(const std::string& filename)
@@ -333,8 +333,8 @@ uint32_t calcNormal(int32_t z, uint32_t x0, uint32_t x1, uint32_t y0, uint32_t y
    y0 = (y0 >> 16 & 255) + (y0 >> 8 & 255) + (y0 & 255);
    y1 = (y1 >> 16 & 255) + (y1 >> 8 & 255) + (y1 & 255);
 
-   int32_t x = static_cast<int32_t>(x0 - x1);
-   int32_t y = static_cast<int32_t>(y0 - y1);
+   auto x = static_cast<int32_t>(x0 - x1);
+   auto y = static_cast<int32_t>(y0 - y1);
 
    const auto magnitude = x * x + y * y + z * z;
    const auto t = static_cast<float>(128.0 / sqrt(static_cast<double>(magnitude)));

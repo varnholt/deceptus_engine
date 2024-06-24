@@ -4,7 +4,7 @@
 #include "framework/tools/globalclock.h"
 #include "gameconfiguration.h"
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include "boomeffectenveloperandom.h"

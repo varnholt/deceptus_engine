@@ -3,7 +3,7 @@
 #include "framework/tools/log.h"
 #include "texturepool.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>

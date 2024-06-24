@@ -11,8 +11,8 @@
 #include "game/player/player.h"
 #include "game/texturepool.h"
 
-#include <math.h>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <ranges>
 

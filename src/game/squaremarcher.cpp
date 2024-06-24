@@ -9,6 +9,7 @@
 #include <iostream>
 #include <ostream>
 #include <sstream>
+#include <utility>
 
 
 SquareMarcher::SquareMarcher(
@@ -16,14 +17,14 @@ SquareMarcher::SquareMarcher(
    uint32_t h,
    const std::vector<int32_t>& tiles,
    const std::vector<int32_t>& colliding_tiles,
-   const std::filesystem::path& cache_path,
+   std::filesystem::path  cache_path,
    float scaleFactor
 )
  : _width(w),
    _height(h),
    _tiles(tiles),
    _colliding_tiles(colliding_tiles),
-   _cache_path(cache_path),
+   _cache_path(std::move(cache_path)),
    _scale(scaleFactor)
 {
    _visited.resize(_width * _height);

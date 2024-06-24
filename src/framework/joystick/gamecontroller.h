@@ -1,6 +1,6 @@
 #pragma once
 
-#include <math.h>  // added here since sdl wants to define its own M_PI
+#include <cmath>  // added here since sdl wants to define its own M_PI
 #include <functional>
 #include <map>
 #include <string>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <functional>
 
 #include <box2d/box2d.h>
@@ -33,7 +33,7 @@ public:
    };
 
    Lever(GameNode* parent = nullptr);
-   ~Lever();
+   ~Lever() override;
 
    void preload() override;
    void update(const sf::Time& dt) override;

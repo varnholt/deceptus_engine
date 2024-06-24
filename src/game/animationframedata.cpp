@@ -1,6 +1,7 @@
 #include "animationframedata.h"
 
 #include <cmath>
+#include <utility>
 
 //   0   1   2   3   4   5   6   7
 // +---+---+---+---+---+---+---+---+
@@ -15,18 +16,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 AnimationFrameData::AnimationFrameData(
-   const std::shared_ptr<sf::Texture>& texture,
+   std::shared_ptr<sf::Texture>  texture,
    const sf::Vector2f& origin,
    uint32_t frame_width,
    uint32_t frame_height,
    uint32_t frame_count,
    uint32_t frames_per_row,
-   const std::vector<sf::Time>& frame_times,
+   std::vector<sf::Time>  frame_times,
    uint32_t start_frame
 )
-   : _texture(texture),
+   : _texture(std::move(texture)),
      _origin(origin),
-     _frame_times(frame_times)
+     _frame_times(std::move(frame_times))
 {
    for (auto i = start_frame; i < start_frame + frame_count; i++)
    {
@@ -35,13 +36,12 @@ AnimationFrameData::AnimationFrameData(
 
       // Log::Info() << this << " x: " << x << " y: " << y;
 
-      _frames.push_back(
-         sf::IntRect(
+      _frames.emplace_back(
             x * frame_width,
             y * frame_height,
             frame_width,
             frame_height
-         )
+         
       );
    }
 }

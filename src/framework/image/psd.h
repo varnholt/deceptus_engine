@@ -3,8 +3,8 @@
 #include "image.h"
 
 #include <array>
+#include <cstdint>
 #include <memory>
-#include <stdint.h>
 #include <vector>
 
 class PSD

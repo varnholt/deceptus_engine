@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 int savetga(const std::string& filename, uint32_t* data, int16_t width, int16_t height);

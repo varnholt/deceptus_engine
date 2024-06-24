@@ -1,8 +1,8 @@
 #include "detonationanimation.h"
 
-#include <math.h>
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <ctime>
 #include <iostream>
 

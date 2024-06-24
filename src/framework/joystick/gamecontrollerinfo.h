@@ -16,10 +16,10 @@ class GameControllerInfo
 
       //! constructor b
       GameControllerInfo(
-         const std::vector<int32_t>& axis_values,
-         const std::vector<bool>& button_values,
-         const std::vector<GameControllerBallVector>& ball_values,
-         const std::vector<int32_t>& hat_values
+         std::vector<int32_t>  axis_values,
+         std::vector<bool>  button_values,
+         std::vector<GameControllerBallVector>  ball_values,
+         std::vector<int32_t>  hat_values
       );
 
       //! add axis value

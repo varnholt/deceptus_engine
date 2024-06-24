@@ -29,7 +29,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-#include <time.h>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <sstream>

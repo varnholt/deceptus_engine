@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include <optional>
 
 namespace SfmlMath

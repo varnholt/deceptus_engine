@@ -1,6 +1,6 @@
 #include "fbm.h"
+#include <cmath>
 #include <iostream>
-#include <math.h>
 
 // code is based on
 // - https://thebookofshaders.com/13/
@@ -50,7 +50,7 @@ float fbm::hash(const vec2& p)
 //-----------------------------------------------------------------------------
 float fbm::noise2(const vec2& st)
 {
-   vec2 i{floor(st.x), floor(st.y)};
+   vec2 i{static_cast<float>(floor(st.x)), static_cast<float>(floor(st.y))};
    vec2 f{fract(st.x), fract(st.y)};
 
    // four corners in 2D of a tile
@@ -78,7 +78,7 @@ float fbm::random1(const vec2& st)
 //-----------------------------------------------------------------------------
 float fbm::noise1(const vec2& st)
 {
-   vec2 i{floor(st.x), floor(st.y)};
+   vec2 i{static_cast<float>(floor(st.x)), static_cast<float>(floor(st.y))};
    vec2 f{fract(st.x), fract(st.y)};
 
    // four corners in 2D of a tile

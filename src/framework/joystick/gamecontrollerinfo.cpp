@@ -1,5 +1,7 @@
 #include "gamecontrollerinfo.h"
 
+#include <utility>
+
 
 //-----------------------------------------------------------------------------
 /*!
@@ -9,15 +11,15 @@
    \param hatValues hat values
 */
 GameControllerInfo::GameControllerInfo(
-   const std::vector<int32_t>& axis_values,
-   const std::vector<bool>& button_values,
-   const std::vector<GameControllerBallVector>& ball_values,
-   const std::vector<int32_t>& hat_values
+   std::vector<int32_t>  axis_values,
+   std::vector<bool>  button_values,
+   std::vector<GameControllerBallVector>  ball_values,
+   std::vector<int32_t>  hat_values
 )
-   : _axis_values(axis_values),
-     _button_values(button_values),
-     _ball_values(ball_values),
-     _hat_values(hat_values)
+   : _axis_values(std::move(axis_values)),
+     _button_values(std::move(button_values)),
+     _ball_values(std::move(ball_values)),
+     _hat_values(std::move(hat_values))
 {
 }
 

@@ -35,8 +35,8 @@ struct LuaNode : public GameMechanism, public GameNode
 {
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 
-   LuaNode(GameNode* parent, const std::string& filename);
-   ~LuaNode();
+   LuaNode(GameNode* parent, std::string  filename);
+   ~LuaNode() override;
 
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

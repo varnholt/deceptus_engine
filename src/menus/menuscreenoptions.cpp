@@ -1,5 +1,7 @@
 #include "menuscreenoptions.h"
 
+#include <ranges>
+
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -37,14 +39,14 @@ void MenuScreenOptions::back()
 
    // choose whatever has been used the last time to open up the options menu
    auto menu = Menu::MenuType::Main;
-   for (auto it = history.crbegin(); it != history.crend(); ++it)
+   for (auto it : std::ranges::reverse_view(history))
    {
-      if ((*it) == Menu::MenuType::Main)
+      if (it == Menu::MenuType::Main)
       {
          menu = Menu::MenuType::Main;
          break;
       }
-      else if ((*it) == Menu::MenuType::Pause)
+      else if (it == Menu::MenuType::Pause)
       {
          menu = Menu::MenuType::Pause;
          break;

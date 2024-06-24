@@ -27,7 +27,7 @@ public:
    };
 
    RotatingBlade(GameNode* parent = nullptr);
-   ~RotatingBlade();
+   ~RotatingBlade() override;
 
    void setup(const GameDeserializeData& data);
    void preload() override;

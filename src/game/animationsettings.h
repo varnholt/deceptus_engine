@@ -4,7 +4,6 @@
 
 #include "json/json.hpp"
 
-#include <stdint.h>
 #include <cstdint>
 #include <filesystem>
 #include <vector>
@@ -30,8 +29,8 @@ struct AnimationSettings
       const std::array<int32_t, 2>& frameSize,
       const std::array<int32_t, 2>& frameOffset,
       const std::array<float, 2>& origin,
-      const std::vector<sf::Time>& frameDurations,
-      const std::filesystem::path& texturePath
+      std::vector<sf::Time>  frameDurations,
+      std::filesystem::path  texturePath
    );
 };
 

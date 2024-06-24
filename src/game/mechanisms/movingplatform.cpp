@@ -17,7 +17,7 @@
 #include "player/player.h"
 #include "texturepool.h"
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include <box2d/box2d.h>

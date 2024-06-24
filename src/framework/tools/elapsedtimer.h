@@ -11,7 +11,7 @@ class ElapsedTimer
 public:
 
    ElapsedTimer();
-   ElapsedTimer(const std::string& name);
+   ElapsedTimer(std::string  name);
    ~ElapsedTimer();
 
    HighResTimePoint _start_time;

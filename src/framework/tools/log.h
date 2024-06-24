@@ -35,7 +35,7 @@ using LogFunction = std::function<void(const std::string_view& message, const st
 struct Message : public std::ostringstream
 {
    Message(const std::source_location& source_location, const LogFunction& log_function);
-   virtual ~Message();
+   ~Message() override;
    std::source_location _source_location;
    LogFunction _log_function;
 };

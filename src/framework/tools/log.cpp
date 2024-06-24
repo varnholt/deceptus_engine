@@ -7,6 +7,7 @@
 #define FMT_HEADER_ONLY
 #include <fmt/core.h>
 #include <ctime>
+#include <utility>
 #else
 namespace fmt = std;
 #endif
@@ -93,8 +94,8 @@ void Log::fatal(const std::string_view& message, const std::source_location& sou
    std::exit(-1);
 }
 
-Log::Message::Message(const std::source_location& source_location, const LogFunction& log_function)
-    : _source_location(source_location), _log_function(log_function)
+Log::Message::Message(const std::source_location& source_location, LogFunction  log_function)
+    : _source_location(source_location), _log_function(std::move(log_function))
 {
 }
 

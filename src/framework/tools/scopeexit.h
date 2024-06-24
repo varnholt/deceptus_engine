@@ -7,7 +7,7 @@ class ScopeExit
 public:
    using ExitFunction = std::function<void()>;
 
-   ScopeExit(const ExitFunction& f);
+   ScopeExit(ExitFunction  f);
    ~ScopeExit();
 
 private:

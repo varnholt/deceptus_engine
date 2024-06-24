@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <sstream>
+#include <utility>
 
 #include "framework/tools/log.h"
 #include "game/texturepool.h"
@@ -13,8 +14,8 @@
 using json = nlohmann::json;
 
 //----------------------------------------------------------------------------------------------------------------------
-AnimationPool::AnimationPool(const std::string& file_path)
- : _file_path(file_path)
+AnimationPool::AnimationPool(std::string  file_path)
+ : _file_path(std::move(file_path))
 {
 }
 

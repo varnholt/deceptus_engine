@@ -53,7 +53,7 @@ class Level : public GameNode
 {
 public:
    Level();
-   virtual ~Level();
+   ~Level() override;
 
    virtual void initialize();
    void initializeTextures();

@@ -1,6 +1,6 @@
 #include "tilemap.h"
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <map>
 

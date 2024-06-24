@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 namespace
 {
@@ -153,12 +154,12 @@ MessageBox::LayoutProperties MessageBox::__default_properties;
 
 MessageBox::MessageBox(
    MessageBox::Type type,
-   const std::string& message,
-   const MessageBox::MessageBoxCallback& cb,
+   std::string  message,
+   MessageBox::MessageBoxCallback  cb,
    const LayoutProperties& properties,
    int32_t buttons
 )
-    : _type(type), _message(message), _callback(cb), _properties(properties), _buttons(buttons)
+    : _type(type), _message(std::move(message)), _callback(std::move(cb)), _properties(properties), _buttons(buttons)
 {
    initializeLayers();
    initializeControllerCallbacks();

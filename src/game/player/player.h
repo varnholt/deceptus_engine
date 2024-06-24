@@ -45,7 +45,7 @@ class Player : public GameNode
 
 public:
    Player(GameNode* parent = nullptr);
-   virtual ~Player() = default;
+   ~Player() override = default;
 
    static Player* getCurrent();
 

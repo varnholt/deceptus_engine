@@ -3,8 +3,8 @@
 #include "image.h"
 
 #include <memory.h>
-#include <stdlib.h>
 #include <algorithm>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 

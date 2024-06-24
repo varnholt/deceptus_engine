@@ -59,7 +59,7 @@ struct MessageBox
 
    using MessageBoxCallback = std::function<void(Button)>;
 
-   MessageBox(Type type, const std::string& message, const MessageBoxCallback& cb, const LayoutProperties& properties, int32_t buttons);
+   MessageBox(Type type, std::string  message, MessageBoxCallback  cb, const LayoutProperties& properties, int32_t buttons);
    virtual ~MessageBox();
 
    static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
