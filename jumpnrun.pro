@@ -6,7 +6,7 @@ DEFINES += _USE_MATH_DEFINES
 DEFINES += USE_GL
 DEFINES += DEVELOPMENT_MODE
 
-CONFIG += c++latest
+CONFIG += c++2b
 CONFIG -= debug_and_release
 
 OBJECTS_DIR = .obj
@@ -43,14 +43,14 @@ win32-msvc {
 
 macx|linux|win32-clang++ {
    message("configured for clang")
-   QMAKE_CXXFLAGS += -std=c++20
+   QMAKE_CXXFLAGS += -std=c++23
    QMAKE_CXXFLAGS += -Wno-backslash-newline-escape
    QMAKE_CXXFLAGS += -Wno-deprecated-declarations
 }
 
 linux|win32-g++ {
    message("configured for g++")
-   QMAKE_CXXFLAGS += -std=c++20
+   QMAKE_CXXFLAGS += -std=c++23
    QMAKE_CXXFLAGS += -lc++fs
    QMAKE_CXXFLAGS += -lfmt
 }
