@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <ostream>
+#include <print>
 #include <sstream>
 
 
@@ -41,9 +42,9 @@ void SquareMarcher::printMap()
    {
       for (auto x = 0u; x < _width; x++)
       {
-         printf("%d", isColliding(x, y));
+         std::print("{:d}", isColliding(x, y));
       }
-      printf("\n");
+      std::println("");
    }
 }
 
@@ -528,12 +529,12 @@ SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
 
 void SquareMarcher::Path::printPoly()
 {
-   printf("{ ");
+   std::print("{{ ");
    for (const auto& pos : _polygon)
    {
-      printf("{%d, %d}; ", pos.x, pos.y);
+      std::print("{{{}, {}}}; ", pos.x, pos.y);
    }
-   printf("}\n");
+   std::println("}}");
 }
 
 
@@ -544,16 +545,16 @@ void SquareMarcher::Path::printDirs()
       switch (dir)
       {
          case SquareMarcher::Direction::Up:
-            printf("u;");
+            std::print("u;");
             break;
          case SquareMarcher::Direction::Down:
-            printf("d;");
+            std::print("d;");
             break;
          case SquareMarcher::Direction::Left:
-            printf("l;");
+            std::print("l;");
             break;
          case SquareMarcher::Direction::Right:
-            printf("r;");
+            std::print("r;");
             break;
          default:
             break;
