@@ -307,9 +307,9 @@ void Animation::updateVertices(bool reset_time)
 //----------------------------------------------------------------------------------------------------------------------
 void Animation::setColor(const sf::Color& color)
 {
-   for (auto i = 0u; i < 4; ++i)
+   for (auto& vertex : _vertices)
    {
-      _vertices[i].color = color;
+      vertex.color = color;
    }
 }
 

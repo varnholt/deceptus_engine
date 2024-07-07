@@ -12,7 +12,7 @@ public:
    std::set<b2Body*> _bodies;
 
 public:
-   bool ReportFixture(b2Fixture* fixture)
+   bool ReportFixture(b2Fixture* fixture) override
    {
       // foundBodies.push_back(fixture->GetBody());
       _bodies.insert(fixture->GetBody());

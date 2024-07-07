@@ -34,12 +34,12 @@ void from_json(const nlohmann::json& j, AnimationSettings& settings)
 
    for (auto i = 0; i < settings._sprite_count; i++)
    {
-      settings._frames.push_back(sf::IntRect(
+      settings._frames.emplace_back(
          settings._frame_offset[0] + (i * settings._frame_size[0]),
          settings._frame_offset[1],
          settings._frame_size[0],
          settings._frame_size[1]
-      ));
+      );
    }
 }
 
