@@ -358,8 +358,7 @@ void Room::startTransition()
       case TransitionEffect::FadeOutFadeIn:
       {
          auto screen_transition = makeFadeTransition();
-         screen_transition->_callbacks_effect_1_ended.push_back(
-            [this]()
+         screen_transition->_callbacks_effect_1_ended.emplace_back([this]()
             {
                if (_camera_sync_after_fade_out)
                {
@@ -372,7 +371,7 @@ void Room::startTransition()
             }
          );
          Player::getCurrent()->fadeOut();
-         screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
+         screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          screen_transition->startEffect1();
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          break;

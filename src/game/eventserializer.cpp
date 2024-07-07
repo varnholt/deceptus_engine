@@ -111,7 +111,7 @@ void EventSerializer::add(const sf::Event& event)
    }
 
    const auto now = HighResClock::now();
-   _events.push_back({now, event});
+   _events.emplace_back(now, event);
 }
 
 
@@ -218,7 +218,7 @@ void EventSerializer::deserialize()
       const auto duration = readDuration(in);
       const auto event = readEvent(in);
 
-      _events.push_back({duration, event});
+      _events.emplace_back(duration, event);
    }
 }
 

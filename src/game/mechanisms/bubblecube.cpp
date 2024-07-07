@@ -396,7 +396,7 @@ struct BubbleQueryCallback : public b2QueryCallback
       return dynamic_cast<Player*>(fixture_node->getParent());
    }
 
-   bool ReportFixture(b2Fixture* fixture)
+   bool ReportFixture(b2Fixture* fixture) override
    {
       // filter out player fixtures and the bubble body
       if (checkBelongsToPlayer(fixture))

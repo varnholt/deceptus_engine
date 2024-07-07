@@ -65,9 +65,9 @@ void Test::testInterpolation()
 {
    PathInterpolation<sf::Vector2f> interpolation;
    std::vector<sf::Vector2f> positions;
-   positions.push_back({0.0f, 0.0f});
-   positions.push_back({5.0f, 5.0f});
-   positions.push_back({0.0f, 0.0f});
+   positions.emplace_back(0.0f, 0.0f);
+   positions.emplace_back(5.0f, 5.0f);
+   positions.emplace_back(0.0f, 0.0f);
    interpolation.addKeys(positions, 5, Easings::Type::EaseInCubic);
 
    for (const auto& k : interpolation.getTrack())
