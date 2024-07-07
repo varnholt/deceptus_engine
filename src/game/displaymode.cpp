@@ -24,17 +24,17 @@ void DisplayMode::sync()
 
 void DisplayMode::enqueueSet(Display mode)
 {
-   _queue.push_back([this, mode]() { _mode |= static_cast<int32_t>(mode); });
+   _queue.emplace_back([this, mode]() { _mode |= static_cast<int32_t>(mode); });
 }
 
 void DisplayMode::enqueueUnset(Display mode)
 {
-   _queue.push_back([this, mode]() { _mode &= ~static_cast<int32_t>(mode); });
+   _queue.emplace_back([this, mode]() { _mode &= ~static_cast<int32_t>(mode); });
 }
 
 void DisplayMode::enqueueToggle(Display mode)
 {
-   _queue.push_back([this, mode]() { toggle(mode); });
+   _queue.emplace_back([this, mode]() { toggle(mode); });
 }
 
 int32_t DisplayMode::get() const
