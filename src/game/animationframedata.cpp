@@ -35,13 +35,11 @@ AnimationFrameData::AnimationFrameData(
 
       // Log::Info() << this << " x: " << x << " y: " << y;
 
-      _frames.push_back(
-         sf::IntRect(
-            x * frame_width,
-            y * frame_height,
-            frame_width,
-            frame_height
-         )
+      _frames.emplace_back(
+         x * frame_width,
+         y * frame_height,
+         frame_width,
+         frame_height
       );
    }
 }

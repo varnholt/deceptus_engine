@@ -105,7 +105,7 @@ void SquareMarcher::deserialize()
          std::getline(posStream, eatComma, ',');
          posStream >> y;
 
-         path._polygon.push_back(sf::Vector2i{x, y});
+         path._polygon.emplace_back(x, y);
       }
 
       _paths.push_back(path);
@@ -302,11 +302,9 @@ void SquareMarcher::scale()
    {
       for (const auto& pos : path._polygon)
       {
-         path._scaled.push_back(
-            sf::Vector2f{
-               pos.x * _scale,
-               pos.y * _scale
-            }
+         path._scaled.emplace_back(
+            pos.x * _scale,
+            pos.y * _scale
          );
       }
    }
@@ -511,11 +509,10 @@ SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
       if (_dir_current != Direction::None)
       {
          path._dirs.push_back(_dir_current);
-         path._polygon.push_back(
-            sf::Vector2i(
+         path._polygon.emplace_back(
                static_cast<int32_t>(_x),
                static_cast<int32_t>(_y)
-            )
+            
          );
       }
 

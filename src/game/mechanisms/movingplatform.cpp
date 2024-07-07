@@ -285,7 +285,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
             if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() || SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
             {
-               box_path_pairs.push_back({box, path});
+               box_path_pairs.emplace_back(box, path);
                break;
             }
          }
@@ -413,7 +413,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
          platform_pos_m.y = y_px * MPP;
 
          moving_platform->_interpolation.addKey(platform_pos_m, time);
-         moving_platform->_pixel_path.push_back({(path->_x_px + poly_pos_px.x), (path->_y_px + poly_pos_px.y)});
+         moving_platform->_pixel_path.emplace_back((path->_x_px + poly_pos_px.x), (path->_y_px + poly_pos_px.y));
 
          platform_x_min = std::min(platform_pos_m.x, platform_x_min);
          platform_y_min = std::min(platform_pos_m.y, platform_y_min);
@@ -495,7 +495,7 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
          platform_pos.y = y;
 
          platform->_interpolation.addKey(platform_pos, time);
-         platform->_pixel_path.push_back({(pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px)});
+         platform->_pixel_path.emplace_back((pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px));
 
          i++;
       }

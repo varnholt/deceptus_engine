@@ -107,7 +107,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -117,7 +117,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -127,7 +127,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -141,7 +141,7 @@ void LeverMechanismMerger::merge(
                       pixel_path.begin(), pixel_path.end(), [&](const auto& pixel) { return (search_rect.contains(pixel.x, pixel.y)); }
                    ))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -151,7 +151,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -161,7 +161,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -171,7 +171,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -181,7 +181,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
+                  callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
             }
 
@@ -191,8 +191,7 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.push_back(
-                     [mechanism](int32_t state)
+                  callbacks.emplace_back([mechanism](int32_t state)
                      {
                         if (state == -1)
                         {
