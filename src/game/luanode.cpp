@@ -2244,8 +2244,8 @@ void LuaNode::setTransform(const b2Vec2& position, float angle)
 
 void LuaNode::addSprite()
 {
-   _sprites.push_back({});
-   _sprite_offsets_px.push_back({});
+   _sprites.emplace_back();
+   _sprite_offsets_px.emplace_back();
 }
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
@@ -2294,7 +2294,7 @@ class LuaQueryCallback : public b2QueryCallback
 public:
    std::vector<b2Body*> _bodies;
 
-   bool ReportFixture(b2Fixture* fixture)
+   bool ReportFixture(b2Fixture* fixture) override
    {
       _bodies.push_back(fixture->GetBody());
 
@@ -2322,7 +2322,7 @@ public:
       const b2Vec2& /*point*/,
       const b2Vec2& /*normal*/,
       float /*fraction*/
-   )
+   ) override
    {
       _bodies.push_back(fixture->GetBody());
       return 0.0f;
@@ -2612,7 +2612,7 @@ void LuaNode::updateDebugRect(int32_t index, float left_px, float top_px, float 
 
 void LuaNode::addDebugRect()
 {
-   _debug_rects.push_back({});
+   _debug_rects.emplace_back();
 }
 
 void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)

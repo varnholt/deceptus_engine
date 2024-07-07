@@ -211,7 +211,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.push_back({(pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px)});
+      _pixel_paths.emplace_back((pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px));
 
       // Log::Info() << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY;
 

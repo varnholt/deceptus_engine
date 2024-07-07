@@ -124,8 +124,8 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
 
    for (const auto& pos_m : _conflicting_pos_set_m)
    {
-      _conflicting_positions_m.push_back({pos_m.first, pos_m.second});
-      _conflicting_positions_px.push_back({pos_m.first * PPM, pos_m.second * PPM});
+      _conflicting_positions_m.emplace_back(pos_m.first, pos_m.second);
+      _conflicting_positions_px.emplace_back(pos_m.first * PPM, pos_m.second * PPM);
    }
 }
 

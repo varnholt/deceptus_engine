@@ -75,10 +75,10 @@ const std::vector<Chunk>& GameMechanism::getChunks() const
 
 void GameMechanism::addChunks(const sf::FloatRect& bouding_box)
 {
-   _chunks.push_back({bouding_box.left, bouding_box.top});
-   _chunks.push_back({bouding_box.left, bouding_box.top + bouding_box.height});
-   _chunks.push_back({bouding_box.left + bouding_box.width, bouding_box.top + bouding_box.height});
-   _chunks.push_back({bouding_box.left + bouding_box.width, bouding_box.top});
+   _chunks.emplace_back(bouding_box.left, bouding_box.top);
+   _chunks.emplace_back(bouding_box.left, bouding_box.top + bouding_box.height);
+   _chunks.emplace_back(bouding_box.left + bouding_box.width, bouding_box.top + bouding_box.height);
+   _chunks.emplace_back(bouding_box.left + bouding_box.width, bouding_box.top);
 }
 
 bool GameMechanism::isAudioEnabled() const
