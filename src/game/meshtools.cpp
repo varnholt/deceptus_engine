@@ -103,7 +103,7 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
             float z = 0.0f;
 
             line_stream >> x >> y >> z;
-            points.push_back(b2Vec2(x, y));
+            points.emplace_back(x, y);
          }
          else if (token == "vt")
          {
@@ -111,7 +111,7 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
             float t = 0.0f;
 
             line_stream >> s >> t;
-            uvs.push_back(b2Vec2(s, t));
+            uvs.emplace_back(s, t);
          }
          else if (token == "vn")
          {
@@ -120,7 +120,7 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
             float z = 0.0f;
 
             line_stream >> x >> y >> z;
-            normals.push_back(b2Vec2(x, y));
+            normals.emplace_back(x, y);
          }
          else if (token == "f")
          {

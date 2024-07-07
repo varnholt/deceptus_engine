@@ -581,8 +581,8 @@ void Game::resetAfterDeath(const sf::Time& dt)
          // fade out/in
          // do the actual level reset once the fade out has happened
          auto screen_transition = makeFadeOutFadeIn();
-         screen_transition->_callbacks_effect_1_ended.push_back([this]() { goToLastCheckpoint(); });
-         screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
+         screen_transition->_callbacks_effect_1_ended.emplace_back([this]() { goToLastCheckpoint(); });
+         screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
       }
    }

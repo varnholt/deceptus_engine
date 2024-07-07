@@ -1443,7 +1443,7 @@ void Level::parseObj(const std::shared_ptr<TmxLayer>& layer, ObjectType behavior
             chain.push_back(v);
          }
 
-         debug_path.push_back({p.x / PIXELS_PER_TILE, p.y / PIXELS_PER_TILE});
+         debug_path.emplace_back(p.x / PIXELS_PER_TILE, p.y / PIXELS_PER_TILE);
       }
 
       // creating a box2d loop is automatically closing the path

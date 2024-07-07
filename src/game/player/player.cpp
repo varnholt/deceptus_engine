@@ -1118,8 +1118,8 @@ void Player::updatePortal()
             _portal_clock.restart();
 
             auto screen_transition = makeFadeTransition();
-            screen_transition->_callbacks_effect_1_ended.push_back([this, portal]() { goToPortal(portal); });
-            screen_transition->_callbacks_effect_2_ended.push_back([]() { ScreenTransitionHandler::getInstance().pop(); });
+            screen_transition->_callbacks_effect_1_ended.emplace_back([this, portal]() { goToPortal(portal); });
+            screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
             ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
          }
       }
