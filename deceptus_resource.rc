@@ -1,6 +1,6 @@
 #include <windows.h>
 
-IDI_ICON1	ICON	"C:\\git\\mine\\deceptus_engine\\data\\game\\deceptus.ico"
+IDI_ICON1	ICON	"data\\game\\deceptus.ico"
 
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION 0,0,0,0

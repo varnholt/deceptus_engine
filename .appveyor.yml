@@ -16,6 +16,8 @@ before_build:
     dir
     cmake --version
     cmake -DCMAKE_BUILD_TYPE=Release ..
+    dir
+    dir ..
 
 build_script:
 - cmake --build . -j
