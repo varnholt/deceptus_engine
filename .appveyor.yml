@@ -11,13 +11,13 @@ environment:
 init:
 - call "%QTDIR%\bin\qtenv2.bat"
 - set PATH=C:\Qt\Tools\QtCreator\bin;%PATH%
-- call "%VCVAR2019%" %PLATFORM%
+- call "%VCVAR2022%" %PLATFORM%
 - cd /D "%APPVEYOR_BUILD_FOLDER%"
 
 before_build:
 
 build_script:
-- C:\Qt\6.7.1\msvc2022_64\bin\qmake jumpnrun.pro
+- %QTDIR%\bin\qmake jumpnrun.pro
 - nmake
 - call "deploy_appveyor.bat"
 
