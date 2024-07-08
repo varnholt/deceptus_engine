@@ -18,8 +18,7 @@ before_build:
     cmake -DCMAKE_BUILD_TYPE=Release ..
 
 build_script:
-    parallel: true
-- cmake --build .
+- cmake --build . -j
 - call "deploy_appveyor.bat"
 
 artifacts:
