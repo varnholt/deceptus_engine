@@ -6,16 +6,19 @@ environment:
     VCVAR2022: 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat'
 
 init:
-- echo %APPVEYOR_BUILD_FOLDER%
 - call "%VCVAR2022%"
 - cd /D "%APPVEYOR_BUILD_FOLDER%"
-- mkdir build
-- cd build
-- cmake -DCMAKE_BUILD_TYPE=Release "%APPVEYOR_BUILD_FOLDER%"
 
 before_build:
+- cmd: |-
+    mkdir build
+    cd build
+    dir
+    cmake --version
+    cmake -DCMAKE_BUILD_TYPE=Release ..
 
 build_script:
+    parallel: true
 - cmake --build .
 - call "deploy_appveyor.bat"
 
