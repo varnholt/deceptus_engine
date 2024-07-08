@@ -20,12 +20,12 @@ Log::ListenerCallback _log_callback;
 
 void log(Log::Level level, const std::string_view& message, const std::source_location& source_location)
 {
+   std::string function_name = source_location.function_name();
+   function_name = function_name.substr(0, function_name.find('('));
+
    const auto now = std::chrono::system_clock::now();
    const auto source_tag = fmt::format(
-      "{0}:{1}:{2}",
-      std::filesystem::path{source_location.file_name()}.filename().string(),
-      source_location.function_name(),
-      source_location.line()
+      "{0}:{1}:{2}", std::filesystem::path{source_location.file_name()}.filename().string(), function_name, source_location.line()
    );
 
 #if defined __GNUC__ && __linux__
