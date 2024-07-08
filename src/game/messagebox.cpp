@@ -143,7 +143,11 @@ void messageBox(
    int32_t buttons
 )
 {
-   Audio::getInstance().playSample({"messagebox_open_01.wav"});
+   if (properties._animate_show_event)
+   {
+      Audio::getInstance().playSample({"messagebox_open_01.wav"});
+   }
+
    __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
 }
 
