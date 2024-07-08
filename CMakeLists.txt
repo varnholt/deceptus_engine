@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(deceptus VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 include(GNUInstallDirs)
 
@@ -62,6 +62,7 @@ set(GAME_FILES
     src/game/audiorange.cpp src/game/audiorange.h
     src/game/audioupdatedata.cpp src/game/audioupdatedata.h
     src/game/bitmapfont.cpp src/game/bitmapfont.h
+    src/game/blendmodedeserializer.cpp src/game/blendmodedeserializer.h
     src/game/boomeffect.cpp src/game/boomeffect.h
     src/game/boomeffectenvelope.cpp src/game/boomeffectenvelope.h
     src/game/boomeffectenveloperandom.cpp src/game/boomeffectenveloperandom.h
@@ -82,7 +83,8 @@ set(GAME_FILES
     src/game/detonationanimation.cpp src/game/detonationanimation.h
     src/game/displaymode.cpp src/game/displaymode.h
     src/game/drawstates.cpp src/game/drawstates.h
-    src/game/effects/lightsystem.cpp
+    src/game/effects/lightsystem.cpp src/game/effects/lightsystem.h
+    src/game/effects/spawneffect.cpp src/game/effects/spawneffect.h
     src/game/enemydescription.cpp src/game/enemydescription.h
     src/game/eventdistributor.cpp src/game/eventdistributor.h
     src/game/eventserializer.cpp src/game/eventserializer.h
@@ -108,7 +110,6 @@ set(GAME_FILES
     src/game/gun.cpp src/game/gun.h
     src/game/health.cpp src/game/health.h
     src/game/hitbox.cpp src/game/hitbox.h
-    src/game/imagelayer.cpp src/game/imagelayer.h
     src/game/infolayer.cpp src/game/infolayer.h
     src/game/ingamemenu.cpp src/game/ingamemenu.h
     src/game/ingamemenuarchives.cpp src/game/ingamemenuarchives.h
@@ -135,6 +136,7 @@ set(GAME_FILES
     src/game/mechanisms/checkpoint.cpp src/game/mechanisms/checkpoint.h
     src/game/mechanisms/collapsingplatform.cpp src/game/mechanisms/collapsingplatform.h
     src/game/mechanisms/controllerhelp.cpp src/game/mechanisms/controllerhelp.h
+    src/game/mechanisms/controllerkeymap.cpp src/game/mechanisms/controllerkeymap.h
     src/game/mechanisms/conveyorbelt.cpp src/game/mechanisms/conveyorbelt.h
     src/game/mechanisms/crusher.cpp src/game/mechanisms/crusher.h
     src/game/mechanisms/damagerect.cpp src/game/mechanisms/damagerect.h
@@ -142,11 +144,15 @@ set(GAME_FILES
     src/game/mechanisms/dialogue.cpp src/game/mechanisms/dialogue.h
     src/game/mechanisms/door.cpp src/game/mechanisms/door.h
     src/game/mechanisms/dust.cpp src/game/mechanisms/dust.h
+    src/game/mechanisms/enemywall.cpp src/game/mechanisms/enemywall.h
     src/game/mechanisms/extra.cpp src/game/mechanisms/extra.h
+    src/game/mechanisms/extrawrapper.cpp src/game/mechanisms/extrawrapper.h
     src/game/mechanisms/fan.cpp src/game/mechanisms/fan.h
     src/game/mechanisms/fireflies.cpp src/game/mechanisms/fireflies.h
-    src/game/mechanisms/laser.cpp
-    src/game/mechanisms/laser.h
+    src/game/mechanisms/imagelayer.cpp src/game/mechanisms/imagelayer.h
+    src/game/mechanisms/infooverlay.cpp src/game/mechanisms/infooverlay.h
+    src/game/mechanisms/interactionhelp.cpp src/game/mechanisms/interactionhelp.h
+    src/game/mechanisms/laser.cpp src/game/mechanisms/laser.h
     src/game/mechanisms/lever.cpp src/game/mechanisms/lever.h
     src/game/mechanisms/levermechanismmerger.cpp src/game/mechanisms/levermechanismmerger.h
     src/game/mechanisms/moveablebox.cpp src/game/mechanisms/moveablebox.h
@@ -165,6 +171,8 @@ set(GAME_FILES
     src/game/mechanisms/spikeblock.cpp src/game/mechanisms/spikeblock.h
     src/game/mechanisms/spikes.cpp src/game/mechanisms/spikes.h
     src/game/mechanisms/staticlight.cpp src/game/mechanisms/staticlight.h
+    src/game/mechanisms/textlayer.cpp src/game/mechanisms/textlayer.h
+    src/game/mechanisms/treasurechest.cpp src/game/mechanisms/treasurechest.h
     src/game/mechanisms/waterdamage.cpp src/game/mechanisms/waterdamage.h
     src/game/mechanisms/watersurface.cpp src/game/mechanisms/watersurface.h
     src/game/mechanisms/weather.cpp src/game/mechanisms/weather.h
@@ -190,12 +198,14 @@ set(GAME_FILES
     src/game/player/playerbend.h
     src/game/player/playerclimb.cpp src/game/player/playerclimb.h
     src/game/player/playercontrols.cpp src/game/player/playercontrols.h
+    src/game/player/playercontrolstate.cpp src/game/player/playercontrolstate.h
     src/game/player/playerdash.cpp src/game/player/playerdash.h
     src/game/player/playerinfo.cpp src/game/player/playerinfo.h
     src/game/player/playerinput.cpp src/game/player/playerinput.h
     src/game/player/playerjump.cpp src/game/player/playerjump.h
     src/game/player/playerjumptrace.h
     src/game/player/playerspeed.h
+    src/game/player/playerstats.cpp src/game/player/playerstats.h
     src/game/player/timerlock.cpp src/game/player/timerlock.h
     src/game/playerstencil.cpp src/game/playerstencil.h
     src/game/playerutils.cpp src/game/playerutils.h
