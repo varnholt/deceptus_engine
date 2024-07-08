@@ -42,29 +42,29 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-mPosition = v2d.Vector2D(0, 0)
-mPositionAtDeath = v2d.Vector2D(0, 0)
-mPlayerPosition = v2d.Vector2D(0, 0)
-mPlayerPositionPrevious = v2d.Vector2D(0, 0)
-mElapsed = math.random(0, 3)
-mAttackTime = 0
-mIdleTime = 0
-mActivated = false
-mMoveRangeY = 48
-mSpriteOffsetX = 0
-mSpriteOffsetY = 0 -- 9 * 24
-mSpriteWidth = 72
-mSpriteHeight = 72
-mStartPosition = v2d.Vector2D(0, 0)
-mDying = false
-mDead = false
-mDeathTime = 0
-mTransformY = 0
-mAttack = false
-mCanExplode = false
-mExploded = false
-mPath = {}
-mEnergy = 3
+_position_px = v2d.Vector2D(0, 0)
+_position_at_death_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
+_player_position_previous_px = v2d.Vector2D(0, 0)
+_elapsed = math.random(0, 3)
+_attack_time = 0
+_idle_time = 0
+_activated = false
+_move_range_y_px = 48
+_sprite_offset_x = 0
+_sprite_offset_y = 0 -- 9 * 24
+_sprite_width = 72
+_sprite_height = 72
+_start_position_px = v2d.Vector2D(0, 0)
+_dying = false
+_dead = false
+_death_time = 0
+_transform_y = 0
+_attack = false
+_can_explode = false
+_exploded = false
+_path = {}
+_energy = 3
 ANIMATION_SPEED = 40.0
 ANIMATION_SPEED_IDLE = 20.0
 ANIMATION_SPEED_DEATH = 20.0
@@ -82,8 +82,8 @@ function initialize()
       0,
       0,
       0,
-      mSpriteWidth,
-      mSpriteHeight
+      _sprite_width,
+      _sprite_height
    )
    setZ(30) -- somewhere in the foreground
 
@@ -93,30 +93,30 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function attack()
-   mAttack = true
+   _attack = true
 
-   mAttackTime = mElapsed
+   _attack_time = _elapsed
 
-   bx = mPosition:getX()
-   by = mPosition:getY()
+   bx = _position_px:getX()
+   by = _position_px:getY()
 
-   px = mPlayerPosition:getX()
-   py = mPlayerPosition:getY()
+   px = _player_position_px:getX()
+   py = _player_position_px:getY()
 
-   if (mCanExplode) then
-      mSpriteOffsetY = (px > bx) and (4 * mSpriteHeight) or (5 * mSpriteHeight)
+   if (_can_explode) then
+      _sprite_offset_y = (px > bx) and (4 * _sprite_height) or (5 * _sprite_height)
    else
-      mSpriteOffsetY = (px > bx) and 0 or mSpriteHeight
+      _sprite_offset_y = (px > bx) and 0 or _sprite_height
    end
 
-   sx = mStartPosition:getX()
-   sy = mStartPosition:getY()
+   sx = _start_position_px:getX()
+   sy = _start_position_px:getY()
 
    k1 = Key:create{x = bx, y = by, time = 0.0}
    k2 = Key:create{x = px, y = py, time = ATTACK_DURATION / 2.0} -- player pos
    k3 = Key:create{x = sx, y = sy, time = ATTACK_DURATION}       -- go back
 
-   mPath = {k1, k2, k3}
+   _path = {k1, k2, k3}
 end
 
 
@@ -128,35 +128,36 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
 
-   updateSprite = false
-   mElapsed = mElapsed + dt
+   update_sprite = false
+   _elapsed = _elapsed + dt
 
    -- check if dead
-   if (not mDying) then
-      if (mEnergy == 0) then
-         mDying = true
-         mDeathTime = mElapsed
-         mSpriteOffsetX = 0
-         mSpriteOffsetY = 2 * mSpriteHeight
+   if (not _dying) then
+      if (_energy == 0) then
+         _dying = true
+         _death_time = _elapsed
+         _sprite_offset_x = 0
+         _sprite_offset_y = 2 * _sprite_height
          setActive(false)
-         mPositionAtDeath = mPosition
+         _position_at_death_px = _position_px
+         setDamage(0)
       end
    end
 
-   if (mDying) then
+   if (_dying) then
       -- stickytape the bat to its death location
-      setTransform(mPositionAtDeath:getX(), mPositionAtDeath:getY(), 0.0)
+      setTransform(_position_at_death_px:getX(), _position_at_death_px:getY(), 0.0)
    else
       -- consider attacking
-      idle = mElapsed < mIdleTime
-      if (not mAttack or idle) then
+      idle = _elapsed < _idle_time
+      if (not _attack or idle) then
 
          -- make sure bat is not too far away from player in x
-         xDiff = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
+         xDiff = _position_px:getX() // 24 - _player_position_px:getX() // 24
          if (math.abs(xDiff) < 6) then
 
             -- make sure bat is not too far away from player in y
-            yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
+            yDiff = _position_px:getY() // 24 - _player_position_px:getY() // 24
             if (yDiff < 0 and yDiff > -7 and not idle) then
 
                attack()
@@ -164,52 +165,52 @@ function update(dt)
          end
 
          -- update transform
-         -- mTransformY = 0.25 * math.sin(mElapsed) * mMoveRangeY
-         mTransformY = 0
-         setTransform(mStartPosition:getX(), mStartPosition:getY() + mTransformY, 0.0)
+         -- _transform_y = 0.25 * math.sin(_elapsed) * _move_range_y_px
+         _transform_y = 0
+         setTransform(_start_position_px:getX(), _start_position_px:getY() + _transform_y, 0.0)
 
       -- carry out attack
       else
-         time = (mElapsed - mAttackTime) -- / ATTACK_DURATION
-         p = getValueCubic(mPath, time)
+         time = (_elapsed - _attack_time) -- / ATTACK_DURATION
+         p = getValueCubic(_path, time)
 
          -- print(string.format("i: %f, x: %f, y: %f", time, p:getX(), p:getY()))
          setTransform(p:getX(), p:getY(), 0.0)
 
          if (time > ATTACK_DURATION) then
-            mAttack = false
-            mIdleTime = mElapsed + ATTACK_DURATION
+            _attack = false
+            _idle_time = _elapsed + ATTACK_DURATION
          end
       end
    end
 
-   if (mDead) then
+   if (_dead) then
       die()
    end
 
    -- update sprite offset
-   if (mDying) then
+   if (_dying) then
       -- 12 sprites per row
-      spriteIndex = math.min(math.floor((mElapsed - mDeathTime) * ANIMATION_SPEED_DEATH), 21)
-      if (spriteIndex == 21) then
-         spriteIndex = 20
-         mDead = true
+      sprite_index = math.min(math.floor((_elapsed - _death_time) * ANIMATION_SPEED_DEATH), 21)
+      if (sprite_index == 21) then
+         sprite_index = 20
+         _dead = true
       end
-   elseif (idle or not mAttack) then
-      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED_IDLE, ATTACK_SPRITE_COUNT))
+   elseif (idle or not _attack) then
+      sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED_IDLE, ATTACK_SPRITE_COUNT))
    else
-      spriteIndex = math.floor(math.fmod(mElapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
+      sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, ATTACK_SPRITE_COUNT))
    end
 
    -- update sprite index
-   if (index ~= mSpriteOffsetX) then
-      mSpriteOffsetX = spriteIndex
-      updateSprite = true
+   if (index ~= _sprite_offset_x) then
+      _sprite_offset_x = sprite_index
+      update_sprite = true
    end
 
-   -- updateDebugRect(0, mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
+   -- updateDebugRect(0, _position_px:getX() - 12, _position_px:getY() + 12, 24, 24)
 
-   if (mCanExplode and not mExploded and not mDead) then
+   if (_can_explode and not _exploded and not _dead) then
 
       -- |24px|
       -- +----+----+----+ - - -
@@ -220,27 +221,27 @@ function update(dt)
       -- |    |(XX)|    |
       -- +----+----+----+
 
-      intersects = intersectsWithPlayer(mPosition:getX() - 12, mPosition:getY() + 12, 24, 24)
+      intersects = intersectsWithPlayer(_position_px:getX() - 12, _position_px:getY() + 12, 24, 24)
 
       if (intersects) then
 
-         mExploded = true
-         mDead = true
+         _exploded = true
+         _dead = true
 
          boom(0.0, 1.0, 0.5)
          playSample("boom.wav")
-         playDetonationAnimation(mPosition:getX(), mPosition:getY())
+         playDetonationAnimation(_position_px:getX(), _position_px:getY())
          damage(10, 0.0, 0.0)
       end
    end
 
-   if (updateSprite) then
+   if (update_sprite) then
       updateSpriteRect(
          0,
-         mSpriteOffsetX * mSpriteWidth,
-         mSpriteOffsetY,
-         mSpriteWidth,
-         mSpriteHeight
+         _sprite_offset_x * _sprite_width,
+         _sprite_offset_y,
+         _sprite_width,
+         _sprite_height
       ) -- x, y, width, height
    end
 
@@ -260,25 +261,25 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setStartPosition(x, y)
-   mStartPosition = v2d.Vector2D(x, y)
+   _start_position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   mPosition = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   mPlayerPosition = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage_value)
-  mEnergy = mEnergy - 1
+  _energy = _energy - 1
 end
 
 
@@ -288,8 +289,8 @@ function writeProperty(key, value)
    -- print(string.format("write property: %s %s", key, value))
 
    if (key == "exploding") then
-      mCanExplode = true
-      mSpriteOffsetY = 4 * 3 * 24
+      _can_explode = true
+      _sprite_offset_y = 4 * 3 * 24
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
       setAudioUpdateBehavior(update_behavior)
