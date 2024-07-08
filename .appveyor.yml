@@ -13,17 +13,17 @@ before_build:
 - cmd: |-
     mkdir build
     cd build
-    dir
     cmake --version
     cmake -DCMAKE_BUILD_TYPE=Release ..
     dir
     dir ..
 
 build_script:
-- cmake --build . -j
+- cmake --build . --config Release --parallel
+- cd /D "%APPVEYOR_BUILD_FOLDER%"
 - call "deploy_appveyor.bat"
 
 artifacts:
-- path: build
+- path: artifacts
   name: deceptus
   type: zip
