@@ -275,13 +275,11 @@ function decide(dt)
       next_animation_flag_inverse = false
 
       if (_cycle_change_requested) then
-         print("cycle change requested")
          next_cycle = _requested_cycle
          _cycle_change_requested = false
       end
 
       if (_current_cycle == CYCLE_HIDE) then
-         print("go to hide idle")
          next_cycle = CYCLE_HIDE_IDLE
       end
 
@@ -312,5 +310,4 @@ function hit(damage_value)
    _cycle_change_requested = true
    _requested_cycle = CYCLE_HIDE
    _counter_to_reveal = math.random(20,30)
-   print("hide")
 end
