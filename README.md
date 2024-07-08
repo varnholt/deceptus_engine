@@ -1,6 +1,6 @@
 # Deceptus Engine
 
-A C++20/lua-based platformer game engine<br>
+A C++23/lua-based platformer game engine<br>
 It utilizes Box2D for game physics, SFML for rendering, and SDL for game controller support.
 
 ![](doc/screenshots/screenshot_section.png)
@@ -16,10 +16,10 @@ It utilizes Box2D for game physics, SFML for rendering, and SDL for game control
 
 # How to Build
 
-As the engine uses some C++20 code, you need a recent compiler, i.e.
-- gcc >= 8
-- clang >= 7
-- vs >= 2019
+As the engine uses some C++23 code, you need a recent compiler, i.e.
+- gcc >= 13
+- clang >= 15
+- vs >= 2022
 
 ## Linux
 ```
@@ -27,7 +27,16 @@ qmake && make
 ```
 
 ## Windows
+
+### cmake
+```bash
+mkdir deceptus_engine-build
+cd deceptus_engine-build
+cmake -DCMAKE_BUILD_TYPE=Release ..\deceptus_engine
 ```
+
+### qmake
+```bash
 qmake && nmake
 ```
 
