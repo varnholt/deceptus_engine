@@ -18,8 +18,8 @@ It utilizes Box2D for game physics, SFML for rendering, and SDL for game control
 
 As the engine uses some C++23 code, you need a recent compiler, i.e.
 - gcc >= 13
-- clang >= 15
-- vs >= 2022
+- Clang >= 15
+- MSVC >= 2022
 
 ## Linux
 ```
@@ -33,6 +33,7 @@ qmake && make
 mkdir deceptus_engine-build
 cd deceptus_engine-build
 cmake -DCMAKE_BUILD_TYPE=Release ..\deceptus_engine
+cmake --build .
 ```
 
 ### qmake

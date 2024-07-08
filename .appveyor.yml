@@ -3,22 +3,19 @@ image: Visual Studio 2022
 environment:
   matrix:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    QTDIR: C:\Qt\6.7.1\msvc2022_64
-    VCVAR2019: 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat'
-    PLATFORM: x64
-    VER_SUFFIX: win64
+    VCVAR2022: 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat'
 
 init:
-- call "%QTDIR%\bin\qtenv2.bat"
-- set PATH=C:\Qt\Tools\QtCreator\bin;%PATH%
-- call "%VCVAR2022%" %PLATFORM%
+- call "%VCVAR2022%"
 - cd /D "%APPVEYOR_BUILD_FOLDER%"
+- mkdir build
+- cd build
+- cmake -DCMAKE_BUILD_TYPE=Release ..
 
 before_build:
 
 build_script:
-- %QTDIR%\bin\qmake jumpnrun.pro
-- nmake
+- cmake --build .
 - call "deploy_appveyor.bat"
 
 artifacts:
