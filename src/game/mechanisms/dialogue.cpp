@@ -236,12 +236,12 @@ void Dialogue::showNext()
    }
 
    const auto item = _dialogue_items.at(_index);
-   auto messag_text = item._message;
+   auto message_text = item._message;
 
-   replaceTags(messag_text);
+   replaceTags(message_text);
 
    MessageBox::info(
-      messag_text,
+      message_text,
       [this](MessageBox::Button /*b*/) { showNext(); },
       MessageBox::LayoutProperties{
          item._location,
