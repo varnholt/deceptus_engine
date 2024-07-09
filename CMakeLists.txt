@@ -88,7 +88,6 @@ set(GAME_FILES
     src/game/enemydescription.cpp src/game/enemydescription.h
     src/game/eventdistributor.cpp src/game/eventdistributor.h
     src/game/eventserializer.cpp src/game/eventserializer.h
-    src/game/extratable.cpp src/game/extratable.h
     src/game/fadetransitioneffect.cpp src/game/fadetransitioneffect.h
     src/game/fixturenode.cpp src/game/fixturenode.h
     src/game/forestscene.cpp src/game/forestscene.h
@@ -117,7 +116,6 @@ set(GAME_FILES
     src/game/ingamemenuinventory.cpp src/game/ingamemenuinventory.h
     src/game/ingamemenumap.cpp src/game/ingamemenumap.h
     src/game/ingamemenupage.cpp src/game/ingamemenupage.h
-    src/game/inventory.cpp src/game/inventory.h
     src/game/inventorybasedcontrols.cpp src/game/inventorybasedcontrols.h
     src/game/inventoryitemdescriptionreader.cpp src/game/inventoryitemdescriptionreader.h
     src/game/layerdata.cpp src/game/layerdata.h
@@ -190,6 +188,8 @@ set(GAME_FILES
     src/game/physics/physics.cpp src/game/physics/physics.h
     src/game/physics/physicsconfiguration.cpp src/game/physics/physicsconfiguration.h
     src/game/physics/physicsconfigurationui.cpp src/game/physics/physicsconfigurationui.h
+    src/game/player/extratable.cpp src/game/player/extratable.h
+    src/game/player/inventory.cpp src/game/player/inventory.h
     src/game/player/player.cpp src/game/player/player.h
     src/game/player/playeranimation.cpp src/game/player/playeranimation.h
     src/game/player/playerattack.cpp src/game/player/playerattack.h
@@ -206,9 +206,10 @@ set(GAME_FILES
     src/game/player/playerjumptrace.h
     src/game/player/playerspeed.h
     src/game/player/playerstats.cpp src/game/player/playerstats.h
+    src/game/player/playerstencil.cpp src/game/player/playerstencil.h
+    src/game/player/playerutils.cpp src/game/player/playerutils.h
     src/game/player/timerlock.cpp src/game/player/timerlock.h
-    src/game/playerstencil.cpp src/game/playerstencil.h
-    src/game/playerutils.cpp src/game/playerutils.h
+    src/game/player/weaponsystem.cpp src/game/player/weaponsystem.h
     src/game/preloader.cpp src/game/preloader.h
     src/game/projectile.cpp src/game/projectile.h
     src/game/projectilehitanimation.cpp src/game/projectilehitanimation.h
@@ -238,7 +239,6 @@ set(GAME_FILES
     src/game/weapon.cpp src/game/weapon.h
     src/game/weaponfactory.cpp src/game/weaponfactory.h
     src/game/weaponproperties.cpp src/game/weaponproperties.h
-    src/game/weaponsystem.cpp src/game/weaponsystem.h
     src/game/worldquery.cpp src/game/worldquery.h
     src/main.cpp
     src/menus/menu.cpp src/menus/menu.h

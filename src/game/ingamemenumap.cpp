@@ -6,11 +6,11 @@
 #include "framework/tools/log.h"
 #include "game/camerapanorama.h"
 #include "game/console.h"
-#include "game/extratable.h"
 #include "game/gameconfiguration.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/portal.h"
 #include "game/menuconfig.h"
+#include "game/player/extratable.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 

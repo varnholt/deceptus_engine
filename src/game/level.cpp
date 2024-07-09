@@ -37,7 +37,7 @@
 #include "game/parsedata.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
-#include "game/playerstencil.h"
+#include "game/player/playerstencil.h"
 #include "game/roomupdater.h"
 #include "game/savestate.h"
 #include "game/squaremarcher.h"
