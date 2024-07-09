@@ -2,9 +2,9 @@
 
 #include "audio.h"
 #include "framework/math/sfmlmath.h"
-#include "playerutils.h"
-#include "projectilehitanimation.h"
-#include "projectilehitaudio.h"
+#include "game/player/playerutils.h"
+#include "game/projectilehitanimation.h"
+#include "game/projectilehitaudio.h"
 
 #include <box2d/box2d.h>
 

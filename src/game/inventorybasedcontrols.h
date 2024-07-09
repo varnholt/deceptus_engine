@@ -1,7 +1,7 @@
 #ifndef INVENTORYBASEDCONTROLS_H
 #define INVENTORYBASEDCONTROLS_H
 
-#include "game/inventory.h"
+#include "game/player/inventory.h"
 
 namespace InventoryBasedControls
 {
