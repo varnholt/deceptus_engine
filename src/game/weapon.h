@@ -9,9 +9,7 @@
 
 class Weapon
 {
-
 public:
-
    Weapon() = default;
    virtual ~Weapon() = default;
    WeaponType getWeaponType() const;

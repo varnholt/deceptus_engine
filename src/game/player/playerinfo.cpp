@@ -32,4 +32,7 @@ void from_json(const nlohmann::json& j, PlayerInfo& data)
    {
       data._stats = j.at("stats").get<PlayerStats>();
    }
+
+   // MISSING
+   // player weapon system
 }
