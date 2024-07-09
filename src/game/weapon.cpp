@@ -3,29 +3,19 @@
 
 // game
 #include "constants.h"
-#include "projectile.h"
-#include "projectilehitanimation.h"
-#include "texturepool.h"
-
-#include <iostream>
-
-
 
 WeaponType Weapon::getWeaponType() const
 {
    return _type;
 }
 
-
 void Weapon::draw(sf::RenderTarget& /*target*/)
 {
 }
 
-
 void Weapon::update(const sf::Time& /*time*/)
 {
 }
-
 
 int32_t Weapon::damage() const
 {
@@ -57,5 +47,3 @@ void Weapon::setParentAudioUpdateData(const AudioUpdateData& parent_audio_update
 void Weapon::initialize()
 {
 }
-
-
