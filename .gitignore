@@ -8,3 +8,4 @@
 *.user
 compile_commands.json
 Makefile
+build/*
