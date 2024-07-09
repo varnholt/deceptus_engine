@@ -7,10 +7,10 @@
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/player/weaponsystem.h"
 #include "game/savestate.h"
 #include "game/tweaks.h"
 #include "game/weaponfactory.h"
-#include "game/weaponsystem.h"
 
 #include <iostream>
 #include <ostream>

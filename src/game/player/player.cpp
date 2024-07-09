@@ -24,11 +24,11 @@
 #include "game/player/playeraudio.h"
 #include "game/player/playercontrolstate.h"
 #include "game/player/playerinfo.h"
+#include "game/player/weaponsystem.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
 #include "game/tweaks.h"
 #include "game/weapon.h"
-#include "game/weaponsystem.h"
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>

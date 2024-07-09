@@ -2,8 +2,8 @@
 #define INGAMEMENUINVENTORY_H
 
 #include "framework/joystick/gamecontrollerinfo.h"
-#include "ingamemenupage.h"
-#include "inventory.h"
+#include "game/ingamemenupage.h"
+#include "game/player/inventory.h"
 #include "layerdata.h"
 
 #include <SFML/Graphics.hpp>

@@ -6,8 +6,8 @@
 #include "game/gun.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playercontrols.h"
+#include "game/player/weaponsystem.h"
 #include "game/sword.h"
-#include "game/weaponsystem.h"
 
 #if defined __GNUC__ && __linux__
 #define FMT_HEADER_ONLY
