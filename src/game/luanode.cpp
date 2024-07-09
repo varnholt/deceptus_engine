@@ -2461,7 +2461,6 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 
 void LuaNode::addWeapon(const std::shared_ptr<Weapon>& weapon)
 {
-   weapon->initialize();
    _weapons.push_back(weapon);
 }
 

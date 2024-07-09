@@ -58,7 +58,6 @@ public:
    void update(const sf::Time& dt);
    void reloadAnimationPool();
 
-   void attack();
    void die();
    void reset();
    DeathReason checkDead() const;
@@ -240,7 +239,7 @@ private:
    PlayerJumpTrace _jump_trace;
    WaterBubbles _water_bubbles;
 
-   PlayerAnimation _player_animation;
+   std::shared_ptr<PlayerAnimation> _player_animation;
    std::deque<PositionedAnimation> _last_animations;
 
    Chunk _chunk;

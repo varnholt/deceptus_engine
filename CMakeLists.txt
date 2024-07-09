@@ -192,7 +192,7 @@ set(GAME_FILES
     src/game/physics/physicsconfigurationui.cpp src/game/physics/physicsconfigurationui.h
     src/game/player/player.cpp src/game/player/player.h
     src/game/player/playeranimation.cpp src/game/player/playeranimation.h
-    src/game/player/playerattack.h
+    src/game/player/playerattack.cpp src/game/player/playerattack.h
     src/game/player/playeraudio.cpp src/game/player/playeraudio.h
     src/game/player/playerbelt.cpp src/game/player/playerbelt.h
     src/game/player/playerbend.h
