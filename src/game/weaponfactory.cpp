@@ -27,9 +27,12 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type)
       }
       case WeaponType::None:
       {
+         std::unreachable();
          break;
       }
    }
+
+   weapon->initialize();
 
    return weapon;
 }
@@ -57,9 +60,12 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
       }
       case WeaponType::None:
       {
+         std::unreachable();
          break;
       }
    }
+
+   weapon->initialize();
 
    return weapon;
 }

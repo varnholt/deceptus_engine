@@ -601,7 +601,6 @@ void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
 void LevelScript::giveWeaponBow()
 {
    auto bow = WeaponFactory::create(WeaponType::Bow);
-   bow->initialize();
    std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
    giveWeaponToPlayer(bow);
 }
@@ -609,14 +608,12 @@ void LevelScript::giveWeaponBow()
 void LevelScript::giveWeaponGun()
 {
    auto gun = WeaponFactory::create(WeaponType::Gun);
-   gun->initialize();
    giveWeaponToPlayer(gun);
 }
 
 void LevelScript::giveWeaponSword()
 {
    auto sword = WeaponFactory::create(WeaponType::Sword);
-   sword->initialize();
    giveWeaponToPlayer(sword);
 }
 

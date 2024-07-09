@@ -92,7 +92,6 @@ void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
 void Console::giveWeaponBow()
 {
    auto bow = WeaponFactory::create(WeaponType::Bow);
-   bow->initialize();
    std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
    giveWeaponToPlayer(bow);
    _log.emplace_back("given bow to player");
@@ -100,18 +99,51 @@ void Console::giveWeaponBow()
 
 void Console::giveWeaponGun()
 {
-   auto gun = WeaponFactory::create(WeaponType::Gun);
-   gun->initialize();
-   giveWeaponToPlayer(gun);
+   giveWeaponToPlayer(WeaponFactory::create(WeaponType::Gun));
    _log.emplace_back("given gun to player");
 }
 
 void Console::giveWeaponSword()
 {
-   auto sword = WeaponFactory::create(WeaponType::Sword);
-   sword->initialize();
-   giveWeaponToPlayer(sword);
+   giveWeaponToPlayer(WeaponFactory::create(WeaponType::Sword));
    _log.emplace_back("given sword to player");
+}
+
+void Console::teleportToStartPosition()
+{
+   auto* level = Level::getCurrentLevel();
+   level->loadStartPosition();
+   const auto pos_px = level->getStartPosition();
+   Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos_px.x), static_cast<float>(pos_px.y));
+}
+
+void Console::teleportToCheckpoint(int32_t checkpoint_index)
+{
+   std::ostringstream os;
+
+   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, Level::getCurrentLevel()->getCheckpoints());
+   if (checkpoint)
+   {
+      const auto pos = checkpoint->spawnPoint();
+      os << "jumped to checkpoint " << checkpoint_index << std::endl;
+
+      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
+   }
+   else
+   {
+      os << "invalid checkpoint " << std::endl;
+   }
+
+   _log.push_back(os.str());
+}
+
+void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
+{
+   std::ostringstream os;
+   os << "teleport to " << x_tl << ", " << y_tl << std::endl;
+   _log.push_back(os.str());
+
+   Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE));
 }
 
 void Console::execute()
@@ -211,35 +243,15 @@ void Console::execute()
    }
    else if (results.at(0) == "tp" && results.size() == 3)
    {
-      auto x = std::atoi(results.at(1).c_str());
-      auto y = std::atoi(results.at(2).c_str());
+      const auto x_tl = std::atoi(results.at(1).c_str());
+      const auto y_tl = std::atoi(results.at(2).c_str());
 
-      std::ostringstream os;
-      os << "teleport to " << x << ", " << y << std::endl;
-      _log.push_back(os.str());
-
-      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>(y * PIXELS_PER_TILE));
+      teleportToTile(x_tl, y_tl);
    }
    else if (results.at(0) == "cp" && results.size() == 2)
    {
       const auto checkpoint_index = std::atoi(results.at(1).c_str());
-
-      std::ostringstream os;
-
-      auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, Level::getCurrentLevel()->getCheckpoints());
-      if (checkpoint)
-      {
-         const auto pos = checkpoint->spawnPoint();
-         os << "jumped to checkpoint " << checkpoint_index << std::endl;
-
-         Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
-      }
-      else
-      {
-         os << "invalid checkpoint " << std::endl;
-      }
-
-      _log.push_back(os.str());
+      teleportToCheckpoint(checkpoint_index);
    }
    else if (results.at(0) == "cpanlimitoff")
    {
@@ -295,10 +307,7 @@ void Console::execute()
    }
    else if (results[0] == "start")
    {
-      auto* level = Level::getCurrentLevel();
-      level->loadStartPosition();
-      const auto pos = level->getStartPosition();
-      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
+      teleportToStartPosition();
    }
    else
    {

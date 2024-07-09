@@ -1,7 +1,13 @@
 #ifndef PLAYERATTACK_H
 #define PLAYERATTACK_H
 
+#include <box2d/box2d.h>
+#include <SFML/Graphics.hpp>
 #include <chrono>
+
+class PlayerAnimation;
+class PlayerControls;
+class WeaponSystem;
 
 struct PlayerAttack
 {
@@ -15,10 +21,17 @@ struct PlayerAttack
    HighResTimePoint _timepoint_attack_standing_start;
    HighResTimePoint _timepoint_attack_jumping_start;
 
-   bool isAttacking() const
-   {
-      return _attack_button_pressed;
-   }
+   void attack(
+      const std::shared_ptr<WeaponSystem>& weapon_system,
+      const std::shared_ptr<b2World>& world,
+      const std::shared_ptr<PlayerControls>& controls,
+      const std::shared_ptr<PlayerAnimation>& animation,
+      const sf::Vector2f& player_pos_px,
+      bool points_to_left,
+      bool in_air
+   );
+
+   bool isAttacking() const;
 };
 
-#endif // PLAYERATTACK_H
+#endif  // PLAYERATTACK_H
