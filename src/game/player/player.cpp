@@ -5,7 +5,6 @@
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "game/audio.h"
-#include "game/bow.h"
 #include "game/camerapanorama.h"
 #include "game/chainshapeanalyzer.h"
 #include "game/fadetransitioneffect.h"
@@ -14,7 +13,6 @@
 #include "game/gameconfiguration.h"
 #include "game/gamecontactlistener.h"
 #include "game/gamecontrollerintegration.h"
-#include "game/gun.h"
 #include "game/inventorybasedcontrols.h"
 #include "game/level.h"
 #include "game/mechanisms/bouncerwrapper.h"
@@ -28,7 +26,6 @@
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/screentransition.h"
-#include "game/sword.h"
 #include "game/tweaks.h"
 #include "game/weapon.h"
 #include "game/weaponsystem.h"
@@ -37,14 +34,6 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
-
-#if defined __GNUC__ && __linux__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#include <ctime>
-#else
-namespace fmt = std;
-#endif
 
 namespace
 {

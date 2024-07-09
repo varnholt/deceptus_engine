@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include <SFML/Graphics.hpp>
-
 class Weapon;
 
 struct WeaponSystem
