@@ -32,6 +32,10 @@ private:
    void giveWeaponGun();
    void giveWeaponSword();
 
+   void teleportToStartPosition();
+   void teleportToCheckpoint(int32_t checkpoint_index);
+   void teleportToTile(int32_t x_tl, int32_t y_tl);
+
    bool _active = false;
    std::string _command;
 

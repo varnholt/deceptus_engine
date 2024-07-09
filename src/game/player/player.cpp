@@ -125,13 +125,14 @@ Player::Player(GameNode* parent) : GameNode(parent)
 
    _weapon_system = std::make_shared<WeaponSystem>();
    _controls = std::make_shared<PlayerControls>();
+   _player_animation = std::make_shared<PlayerAnimation>();
 
    _climb.setControls(_controls);
    _jump.setControls(_controls);
 
    _dash._reset_dash_callback = [this]() { resetMotionBlur(); };
 
-   _player_animation.loadAnimations(_animation_pool);
+   _player_animation->loadAnimations(_animation_pool);
 }
 
 Player* Player::getCurrent()
@@ -143,8 +144,6 @@ void Player::initialize()
 {
    _portal_clock.restart();
    _damage_clock.restart();
-
-   _weapon_system->initialize();
 
    _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type)
    {
@@ -342,7 +341,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    if (_jump._wallsliding && _jump._walljump_frame_count == 0)
    {
-      _player_animation.getWallslideAnimation()->draw(color);
+      _player_animation->getWallslideAnimation()->draw(color);
    }
 
    if (_weapon_system->_selected)
@@ -353,7 +352,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    // that y offset is to compensate the wonky box2d origin
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-   const auto& current_cycle = _player_animation.getCurrentCycle();
+   const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
       current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
@@ -363,7 +362,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       current_cycle->draw(color, normal);
    }
 
-   const auto& auxiliary_cycle = _player_animation.getAuxiliaryCycle();
+   const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
@@ -384,7 +383,7 @@ void Player::drawStencil(sf::RenderTarget& color)
    const auto stencil_color = sf::Color{255, 255, 255, 40};
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-   auto current_cycle = _player_animation.getCurrentCycle();
+   auto current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
       current_cycle->setColor(stencil_color);
@@ -392,7 +391,7 @@ void Player::drawStencil(sf::RenderTarget& color)
       current_cycle->draw(color);
    }
 
-   auto auxiliary_cycle = _player_animation.getAuxiliaryCycle();
+   auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(stencil_color);
@@ -857,7 +856,7 @@ void Player::updateAnimation(const sf::Time& dt)
       }
    }
 
-   _player_animation.update(dt, data);
+   _player_animation->update(dt, data);
 }
 
 float Player::readDesiredVelocity() const
@@ -920,13 +919,13 @@ void Player::updateVelocity()
 
    // block movement while spawning
    // spawn is only played if player has died before in current level
-   if (GameClock::getInstance().durationSinceSpawn() < _player_animation.getRevealDuration() && SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealDuration() && SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;
    }
 
-   if (StopWatch::getInstance().now() < _attack._timepoint_attack_standing_start + _player_animation.getSwordAttackDurationStanding())
+   if (StopWatch::getInstance().now() < _attack._timepoint_attack_standing_start + _player_animation->getSwordAttackDurationStanding())
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;
@@ -1297,19 +1296,17 @@ void Player::updateAttack()
    }
 
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
+
    const auto x_button_pressed = _controls->isButtonXPressed();
    const auto y_button_pressed = _controls->isButtonYPressed();
    _attack._attack_button_was_pressed = _attack._attack_button_pressed;
    _attack._attack_button_pressed = InventoryBasedControls::isAttackButtonPressed(inventory, x_button_pressed, y_button_pressed);
 
-   // old non-inventory-based approach
-   // _attack._attack_button_pressed = _controls->isButtonXPressed();
-
    // there are weapons that support continous attacks while the button is down, others like the sword
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      attack();
+      _attack.attack(_weapon_system, _world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
    }
 }
 
@@ -1534,7 +1531,7 @@ void Player::updateJump()
 
 void Player::updateWallslide(const sf::Time& dt)
 {
-   const auto wallslide_animation = _player_animation.getWallslideAnimation();
+   const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
    wallslide_animation->setPosition(_pixel_position_f.x + offset_x_px, _pixel_position_f.y);
    wallslide_animation->play();
@@ -1559,7 +1556,7 @@ void Player::updateSpawn()
       if (!_spawn_orientation_locked)
       {
          _spawn_orientation_locked = true;
-         const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getRevealDuration());
+         const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation->getRevealDuration());
 
          // appear animation is shown after spawn is complete
          // for that duration of time, lock the player orientation
@@ -1630,13 +1627,13 @@ void Player::update(const sf::Time& dt)
 void Player::reloadAnimationPool()
 {
    _animation_pool.reload();
-   _player_animation.loadAnimations(_animation_pool);
+   _player_animation->loadAnimations(_animation_pool);
 }
 
 void Player::resetMotionBlur()
 {
    _last_animations.clear();
-   _player_animation.resetAlpha();
+   _player_animation->resetAlpha();
 }
 
 void Player::updateDash(Dash dir)
@@ -1745,112 +1742,6 @@ void Player::setFriction(float friction)
 bool Player::isInAir() const
 {
    return (GameContactListener::getInstance().getPlayerFootContactCount() == 0) && !isInWater();
-}
-
-void Player::attack()
-{
-   if (!_weapon_system->_selected)
-   {
-      return;
-   }
-
-   b2Vec2 pos;
-   b2Vec2 dir;
-   dir.x = _points_to_left ? -1.0f : 1.0f;
-   dir.y = 0.0f;
-
-   switch (_weapon_system->_selected->getWeaponType())
-   {
-      case WeaponType::Bow:
-      {
-         dir.y = -0.1f;
-
-         constexpr auto force = 1.5f;
-         const auto x_offset = dir.x * 0.5f;
-         const auto y_offset = -0.25f;
-
-         pos.x = x_offset + _pixel_position_f.x * MPP;
-         pos.y = y_offset + _pixel_position_f.y * MPP;
-
-         if (_attack._attack_button_pressed && !_attack._attack_button_was_pressed)
-         {
-            _attack._timepoint_attack_start = StopWatch::getInstance().now();
-         }
-
-         dynamic_pointer_cast<Bow>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
-         break;
-      }
-      case WeaponType::Gun:
-      {
-         constexpr auto force = 10.0f;
-         const auto x_offset = dir.x * 1.0f;
-         const auto y_offset = -0.1f;
-
-         pos.x = x_offset + _pixel_position_f.x * MPP;
-         pos.y = y_offset + _pixel_position_f.y * MPP;
-
-         if (_attack._attack_button_pressed && !_attack._attack_button_was_pressed)
-         {
-            _attack._timepoint_attack_start = StopWatch::getInstance().now();
-         }
-
-         dynamic_pointer_cast<Gun>(_weapon_system->_selected)->useInIntervals(_world, pos, force * dir);
-         break;
-      }
-      case WeaponType::Sword:
-      {
-         // no 2nd strike without new button press
-         if (_attack._attack_button_pressed && _attack._attack_button_was_pressed)
-         {
-            return;
-         }
-
-         // no 2nd strike when previous animation is not elapsed
-         const auto attack_duration = _player_animation.getActiveAttackCycleDuration();
-         if (attack_duration.has_value())
-         {
-            const auto duration_since_attack = StopWatch::getInstance().now() - _attack._timepoint_attack_start;
-            const auto attack_elapsed = (duration_since_attack > attack_duration.value());
-
-            if (!attack_elapsed)
-            {
-               return;
-            }
-         }
-
-         // for the sword weapon we also have to store the times when the player attacks while
-         // bending down, in-air or while standing; they need to be distinguished so the player animation
-         // knows which animation to play (even if bend down or jump is no longer pressed)
-         const auto now = StopWatch::getInstance().now();
-         _attack._timepoint_attack_start = now;
-
-         if (isInAir())
-         {
-            _attack._timepoint_attack_jumping_start = now;
-            Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
-         }
-         else if (_controls->isBendDownActive())
-         {
-            _attack._timepoint_attack_bend_down_start = now;
-            Audio::getInstance().playSample({fmt::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
-         }
-         else
-         {
-            _attack._timepoint_attack_standing_start = now;
-            _controls->lockOrientation(
-               std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation.getSwordAttackDurationStanding())
-            );
-            Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
-         }
-
-         dynamic_pointer_cast<Sword>(_weapon_system->_selected)->use(_world, dir);
-         break;
-      }
-      case WeaponType::None:
-      {
-         break;
-      }
-   }
 }
 
 void Player::updateWeapons(const sf::Time& dt)
