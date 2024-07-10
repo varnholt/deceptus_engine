@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "json/json.hpp"
+
 class Weapon;
 
 struct WeaponSystem
@@ -13,3 +15,5 @@ struct WeaponSystem
    std::vector<std::shared_ptr<Weapon>> _weapons;
 };
 
+void to_json(nlohmann::json& j, const WeaponSystem& d);
+void from_json(const nlohmann::json& j, WeaponSystem& d);

@@ -112,7 +112,6 @@ Player::Player(GameNode* parent) : GameNode(parent)
 
    PlayerAudio::addSamples();
 
-   _weapon_system = std::make_shared<WeaponSystem>();
    _controls = std::make_shared<PlayerControls>();
    _player_animation = std::make_shared<PlayerAnimation>();
 
@@ -333,9 +332,10 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       _player_animation->getWallslideAnimation()->draw(color);
    }
 
-   if (_weapon_system->_selected)
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   if (weapon_system._selected)
    {
-      _weapon_system->_selected->draw(color);
+      weapon_system._selected->draw(color);
    }
 
    // that y offset is to compensate the wonky box2d origin
@@ -824,7 +824,9 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_attack_bend_down_start = _attack._timepoint_attack_bend_down_start;
    data._timepoint_attack_jumping_start = _attack._timepoint_attack_jumping_start;
    data._attacking = _attack.isAttacking();
-   data._weapon_type = (!_weapon_system->_selected) ? WeaponType::None : _weapon_system->_selected->getWeaponType();
+
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   data._weapon_type = (!weapon_system._selected) ? WeaponType::None : weapon_system._selected->getWeaponType();
 
    if (_dash.hasMoreFrames())
    {
@@ -1295,7 +1297,7 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      _attack.attack(_weapon_system, _world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+      _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
    }
 }
 
@@ -1735,7 +1737,7 @@ bool Player::isInAir() const
 
 void Player::updateWeapons(const sf::Time& dt)
 {
-   for (auto& w : _weapon_system->_weapons)
+   for (auto& w : SaveState::getPlayerInfo()._weapons._weapons)
    {
       w->update(dt);
    }
@@ -1891,11 +1893,6 @@ void Player::keyPressed(sf::Keyboard::Key key)
          break;
       }
    }
-}
-
-const std::shared_ptr<WeaponSystem>& Player::getWeaponSystem() const
-{
-   return _weapon_system;
 }
 
 const std::shared_ptr<PlayerControls>& Player::getControls() const
