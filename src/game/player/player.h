@@ -117,7 +117,6 @@ public:
    void kill(std::optional<DeathReason> death_reason = std::nullopt);
    void goToPortal(auto portal);
 
-   const std::shared_ptr<WeaponSystem>& getWeaponSystem() const;
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerJump& getJump() const;
    const PlayerBend& getBend() const;
@@ -177,8 +176,6 @@ private:
    void updateHurtColor(const std::shared_ptr<Animation>& current_cycle);
 
    void useInventory(int32_t slot);
-
-   std::shared_ptr<WeaponSystem> _weapon_system;
 
    // all related to player physics and box2d
    std::shared_ptr<b2World> _world;
