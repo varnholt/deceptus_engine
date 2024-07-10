@@ -22,7 +22,6 @@ struct PlayerAttack
    HighResTimePoint _timepoint_attack_jumping_start;
 
    void attack(
-      const std::shared_ptr<WeaponSystem>& weapon_system,
       const std::shared_ptr<b2World>& world,
       const std::shared_ptr<PlayerControls>& controls,
       const std::shared_ptr<PlayerAnimation>& animation,

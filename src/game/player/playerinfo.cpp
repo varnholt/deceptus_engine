@@ -10,6 +10,7 @@ void to_json(nlohmann::json& j, const PlayerInfo& data)
       {"inventory", data._inventory},
       {"extras", data._extra_table},
       {"stats", data._extra_table},
+      {"weapons", data._weapons}
    };
 }
 
@@ -33,6 +34,8 @@ void from_json(const nlohmann::json& j, PlayerInfo& data)
       data._stats = j.at("stats").get<PlayerStats>();
    }
 
-   // MISSING
-   // player weapon system
+   if (j.find("weapons") != j.end())
+   {
+      data._weapons = j.at("weapons").get<WeaponSystem>();
+   }
 }

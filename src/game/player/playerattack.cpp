@@ -7,6 +7,7 @@
 #include "game/player/playeranimation.h"
 #include "game/player/playercontrols.h"
 #include "game/player/weaponsystem.h"
+#include "game/savestate.h"
 #include "game/sword.h"
 
 #if defined __GNUC__ && __linux__
@@ -18,7 +19,6 @@ namespace fmt = std;
 #endif
 
 void PlayerAttack::attack(
-   const std::shared_ptr<WeaponSystem>& weapon_system,
    const std::shared_ptr<b2World>& world,
    const std::shared_ptr<PlayerControls>& controls,
    const std::shared_ptr<PlayerAnimation>& animation,
@@ -27,7 +27,9 @@ void PlayerAttack::attack(
    bool in_air
 )
 {
-   if (!weapon_system->_selected)
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+
+   if (!weapon_system._selected)
    {
       return;
    }
@@ -37,7 +39,7 @@ void PlayerAttack::attack(
    dir.x = points_to_left ? -1.0f : 1.0f;
    dir.y = 0.0f;
 
-   switch (weapon_system->_selected->getWeaponType())
+   switch (weapon_system._selected->getWeaponType())
    {
       case WeaponType::Bow:
       {
@@ -55,7 +57,7 @@ void PlayerAttack::attack(
             _timepoint_attack_start = StopWatch::getInstance().now();
          }
 
-         dynamic_pointer_cast<Bow>(weapon_system->_selected)->useInIntervals(world, pos, force * dir);
+         dynamic_pointer_cast<Bow>(weapon_system._selected)->useInIntervals(world, pos, force * dir);
          break;
       }
       case WeaponType::Gun:
@@ -72,7 +74,7 @@ void PlayerAttack::attack(
             _timepoint_attack_start = StopWatch::getInstance().now();
          }
 
-         dynamic_pointer_cast<Gun>(weapon_system->_selected)->useInIntervals(world, pos, force * dir);
+         dynamic_pointer_cast<Gun>(weapon_system._selected)->useInIntervals(world, pos, force * dir);
          break;
       }
       case WeaponType::Sword:
@@ -119,7 +121,7 @@ void PlayerAttack::attack(
             Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
 
-         dynamic_pointer_cast<Sword>(weapon_system->_selected)->use(world, dir);
+         dynamic_pointer_cast<Sword>(weapon_system._selected)->use(world, dir);
          break;
       }
       case WeaponType::None:
