@@ -57,6 +57,16 @@ void Sword::update(const sf::Time& /*time*/)
    }
 }
 
+int32_t Sword::getDamage() const
+{
+   return 20;
+}
+
+std::string Sword::getName() const
+{
+   return "sword";
+}
+
 void Sword::use(const std::shared_ptr<b2World>& /*world*/, const b2Vec2& dir)
 {
    _cleared_to_attack = true;

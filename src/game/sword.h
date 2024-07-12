@@ -15,6 +15,8 @@ class Sword : public Weapon
 
       void draw(sf::RenderTarget& target) override;
       void update(const sf::Time& time) override;
+      int32_t getDamage() const override;
+      std::string getName() const override;
 
       void use(const std::shared_ptr<b2World>& world, const b2Vec2& dir);
 

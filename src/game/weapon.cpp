@@ -17,26 +17,9 @@ void Weapon::update(const sf::Time& /*time*/)
 {
 }
 
-int32_t Weapon::damage() const
+int32_t Weapon::getDamage() const
 {
-   auto damage_value = 0;
-
-   switch (_type)
-   {
-      case WeaponType::Bow:
-         damage_value = 20;
-         break;
-      case WeaponType::Gun:
-         damage_value = 20;
-         break;
-      case WeaponType::Sword:
-         damage_value = 20;
-         break;
-      case WeaponType::None:
-         break;
-   }
-
-   return damage_value;
+   return 0;
 }
 
 void Weapon::setParentAudioUpdateData(const AudioUpdateData& parent_audio_update_data)
