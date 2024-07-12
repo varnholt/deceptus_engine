@@ -2,8 +2,6 @@
 
 #include "gun.h"
 
-#include <vector>
-
 #include <box2d/box2d.h>
 
 struct Arrow;
@@ -14,10 +12,10 @@ public:
    Bow(const WeaponProperties& properties = _default_properties);
 
    void load(b2World* world);
-
    void use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2Vec2& dir) override;
-
    void update(const sf::Time& /*time*/) override;
+   int32_t getDamage() const override;
+   std::string getName() const override;
 
    b2Body* getLauncherBody() const;
    void setLauncherBody(b2Body* launcher_body);

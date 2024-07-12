@@ -36,6 +36,8 @@ public:
 
    void draw(sf::RenderTarget& target) override;
    void update(const sf::Time& time) override;
+   int32_t getDamage() const override;
+   std::string getName() const override;
 
    static void drawProjectileHitAnimations(sf::RenderTarget& target);
    void setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, const sf::Rect<int32_t>& textureRect = _empty_rect);

@@ -194,3 +194,13 @@ void Bow::update(const sf::Time& time)
       updateRotation(dynamic_cast<Arrow*>(arrow));
    }
 }
+
+int32_t Bow::getDamage() const
+{
+   return 20;
+}
+
+std::string Bow::getName() const
+{
+   return "bow";
+}

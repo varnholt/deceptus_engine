@@ -17,10 +17,8 @@ public:
    virtual void draw(sf::RenderTarget& target);
    virtual void update(const sf::Time& time);
    virtual void initialize();
-
-   // todo
-   // make virtual and move to subclasses
-   int32_t damage() const;
+   virtual int32_t getDamage() const;
+   virtual std::string getName() const = 0;
 
    void setParentAudioUpdateData(const AudioUpdateData& parent_audio_update_data);
 

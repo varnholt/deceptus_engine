@@ -185,6 +185,16 @@ void Gun::update(const sf::Time& time)
    }
 }
 
+int32_t Gun::getDamage() const
+{
+   return 20;
+}
+
+std::string Gun::getName() const
+{
+   return "gun";
+}
+
 // create a reference animation from a single frame
 void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, const sf::Rect<int32_t>& texture_rect_px)
 {
