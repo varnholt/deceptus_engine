@@ -57,12 +57,12 @@ set(GAME_FILES
     src/game/animation/animationpool.cpp src/game/animation/animationpool.h
     src/game/animation/animationsettings.cpp src/game/animation/animationsettings.h
     src/game/weapons/arrow.cpp src/game/weapons/arrow.h
-    src/game/atmosphere.cpp src/game/atmosphere.h
+    src/game/level/atmosphere.cpp src/game/level/atmosphere.h
     src/game/audio/audio.cpp src/game/audio/audio.h
     src/game/audio/audiorange.cpp src/game/audio/audiorange.h
     src/game/audio/audioupdatedata.cpp src/game/audio/audioupdatedata.h
     src/game/layers/bitmapfont.cpp src/game/layers/bitmapfont.h
-    src/game/blendmodedeserializer.cpp src/game/blendmodedeserializer.h
+    src/game/level/blendmodedeserializer.cpp src/game/level/blendmodedeserializer.h
     src/game/effects/boomeffect.cpp src/game/effects/boomeffect.h
     src/game/effects/boomeffectenvelope.cpp src/game/effects/boomeffectenvelope.h
     src/game/effects/boomeffectenveloperandom.cpp src/game/effects/boomeffectenveloperandom.h
@@ -107,7 +107,7 @@ set(GAME_FILES
     src/game/gamestate.cpp src/game/gamestate.h
     src/game/weapons/gun.cpp src/game/weapons/gun.h
     src/game/player/health.cpp src/game/player/health.h
-    src/game/hitbox.cpp src/game/hitbox.h
+    src/game/level/hitbox.cpp src/game/level/hitbox.h
     src/game/layers/infolayer.cpp src/game/layers/infolayer.h
     src/game/ingamemenu/ingamemenu.cpp src/game/ingamemenu/ingamemenu.h
     src/game/ingamemenu/ingamemenuarchives.cpp src/game/ingamemenu/ingamemenuarchives.h
@@ -115,8 +115,8 @@ set(GAME_FILES
     src/game/ingamemenu/ingamemenuinventory.cpp src/game/ingamemenu/ingamemenuinventory.h
     src/game/ingamemenu/ingamemenumap.cpp src/game/ingamemenu/ingamemenumap.h
     src/game/ingamemenu/ingamemenupage.cpp src/game/ingamemenu/ingamemenupage.h
-    src/game/inventorybasedcontrols.cpp src/game/inventorybasedcontrols.h
-    src/game/inventoryitemdescriptionreader.cpp src/game/inventoryitemdescriptionreader.h
+    src/game/player/inventorybasedcontrols.cpp src/game/player/inventorybasedcontrols.h
+    src/game/player/inventoryitemdescriptionreader.cpp src/game/player/inventoryitemdescriptionreader.h
     src/game/layerdata.cpp src/game/layerdata.h
     src/game/level/level.cpp src/game/level/level.h
     src/game/level/leveldescription.cpp src/game/level/leveldescription.h
@@ -183,7 +183,7 @@ set(GAME_FILES
     src/game/layers/weatheroverlay.cpp src/game/layers/weatheroverlay.h
     src/game/layers/parallaxlayer.cpp src/game/layers/parallaxlayer.h
     src/game/layers/parallaxsettings.cpp src/game/layers/parallaxsettings.h
-    src/game/parsedata.cpp src/game/parsedata.h
+    src/game/level/parsedata.cpp src/game/level/parsedata.h
     src/game/physics/physics.cpp src/game/physics/physics.h
     src/game/physics/physicsconfiguration.cpp src/game/physics/physicsconfiguration.h
     src/game/physics/physicsconfigurationui.cpp src/game/physics/physicsconfigurationui.h

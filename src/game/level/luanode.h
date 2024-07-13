@@ -1,8 +1,6 @@
 #pragma once
 
-#include <atomic>
 #include <chrono>
-#include <map>
 #include <memory>
 #include <optional>
 #include <string>
@@ -17,9 +15,9 @@
 // game
 #include "game/animation/detonationanimation.h"
 #include "game/gamemechanism.h"
-#include "game/hitbox.h"
+#include "game/level/enemydescription.h"
 #include "game/level/gamenode.h"
-#include "game/level/leveldescription.h"
+#include "game/level/hitbox.h"
 #include "game/weapons/weapon.h"
 
 struct lua_State;
