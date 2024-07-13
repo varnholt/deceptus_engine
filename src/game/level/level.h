@@ -2,7 +2,6 @@
 
 // game
 #include "framework/joystick/gamecontrollerinfo.h"
-#include "game/atmosphere.h"
 #include "game/audio/volumeupdater.h"
 #include "game/camera/camerasystem.h"
 #include "game/constants.h"
@@ -10,7 +9,9 @@
 #include "game/effects/lightsystem.h"
 #include "game/layers/ambientocclusion.h"
 #include "game/layers/parallaxlayer.h"
+#include "game/level/atmosphere.h"
 #include "game/level/gamenode.h"
+#include "game/level/leveldescription.h"
 #include "game/level/levelscript.h"
 #include "game/level/room.h"
 #include "game/level/tmxenemy.h"

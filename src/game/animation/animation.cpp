@@ -3,7 +3,6 @@
 #include <iostream>
 #include <numeric>
 
-//----------------------------------------------------------------------------------------------------------------------
 Animation::Animation(const Animation& anim)
     : sf::Sprite(anim),
       _name(anim._name),
@@ -23,19 +22,16 @@ Animation::Animation(const Animation& anim)
    _vertices[3] = anim._vertices[3];
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::play()
 {
    _paused = false;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::pause()
 {
    _paused = true;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::seekToStart()
 {
    _previous_frame = -1;
@@ -44,7 +40,6 @@ void Animation::seekToStart()
    updateVertices();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::updateTree(const sf::Time& dt)
 {
    if (_frame_times.empty())
@@ -65,14 +60,12 @@ void Animation::updateTree(const sf::Time& dt)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::stop()
 {
    _paused = true;
    seekToStart();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::playTree()
 {
    play();
@@ -82,7 +75,6 @@ void Animation::playTree()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::pauseTree()
 {
    pause();
@@ -92,7 +84,6 @@ void Animation::pauseTree()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::stopTree()
 {
    stop();
@@ -102,7 +93,6 @@ void Animation::stopTree()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::seekToStartTree()
 {
    seekToStart();
@@ -112,25 +102,21 @@ void Animation::seekToStartTree()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::addChild(const std::shared_ptr<Animation>& child)
 {
    _children.push_back(child);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool Animation::isVisible() const
 {
    return _visible;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::setVisible(bool visible)
 {
    _visible = visible;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::setAlpha(uint8_t alpha)
 {
    _vertices[0].color.a = alpha;
@@ -139,7 +125,6 @@ void Animation::setAlpha(uint8_t alpha)
    _vertices[3].color.a = alpha;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::setAlphaTree(uint8_t alpha)
 {
    setAlpha(alpha);
@@ -149,7 +134,6 @@ void Animation::setAlphaTree(uint8_t alpha)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::update(const sf::Time& dt)
 {
    if (_frame_times.empty())
@@ -209,7 +193,6 @@ void Animation::update(const sf::Time& dt)
    _elapsed += dt;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    if (!_visible)
@@ -228,7 +211,6 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
    if (!_visible)
@@ -248,7 +230,6 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::drawTree(sf::RenderTarget& target, sf::RenderStates states) const
 {
    if (!_visible)
@@ -263,7 +244,6 @@ void Animation::drawTree(sf::RenderTarget& target, sf::RenderStates states) cons
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::drawTree(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
    if (!_visible)
@@ -278,7 +258,6 @@ void Animation::drawTree(sf::RenderTarget& color, sf::RenderTarget& normal, sf::
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::updateVertices(bool reset_time)
 {
    const auto& rect_px = _frames[static_cast<size_t>(_current_frame)];
@@ -304,7 +283,6 @@ void Animation::updateVertices(bool reset_time)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::setColor(const sf::Color& color)
 {
    for (auto& vertex : _vertices)
@@ -313,7 +291,6 @@ void Animation::setColor(const sf::Color& color)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::setColorTree(const sf::Color& color)
 {
    setColor(color);
@@ -323,20 +300,17 @@ void Animation::setColorTree(const sf::Color& color)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::FloatRect Animation::getLocalBounds() const
 {
    const sf::IntRect rect = _frames[static_cast<size_t>(_current_frame)];
    return sf::FloatRect(0.f, 0.f, static_cast<float>(std::abs(rect.width)), static_cast<float>(std::abs(rect.height)));
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::FloatRect Animation::getGlobalBounds() const
 {
    return getTransform().transformRect(getLocalBounds());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::setFrameTimes(const std::vector<sf::Time>& frame_times)
 {
    _frame_times = frame_times;
@@ -344,13 +318,11 @@ void Animation::setFrameTimes(const std::vector<sf::Time>& frame_times)
    _overall_time_chrono = std::chrono::milliseconds(_overall_time.asMilliseconds());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 size_t Animation::getFrameCount() const
 {
    return _frame_times.size();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void Animation::reverse()
 {
    std::reverse(_frame_times.begin(), _frame_times.end());

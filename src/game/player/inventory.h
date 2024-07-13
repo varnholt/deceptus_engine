@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "game/inventoryitemdescriptionreader.h"
+#include "game/player/inventoryitemdescriptionreader.h"
 
 #include "json/json.hpp"
 

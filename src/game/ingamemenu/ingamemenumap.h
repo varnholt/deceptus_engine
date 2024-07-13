@@ -57,4 +57,3 @@ private:
 
    float _zoom = 1.0f;
 };
-

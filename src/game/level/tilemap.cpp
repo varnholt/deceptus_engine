@@ -14,7 +14,7 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
-#include "game/blendmodedeserializer.h"
+#include "game/level/blendmodedeserializer.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 
