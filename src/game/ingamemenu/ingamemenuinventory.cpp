@@ -1,6 +1,8 @@
 ﻿#include "ingamemenuinventory.h"
 
 #include "framework/easings/easings.h"
+#include "framework/joystick/gamecontroller.h"
+#include "game/controller/gamecontrollerintegration.h"
 #include "game/eventdistributor.h"
 #include "game/menuconfig.h"
 #include "game/player/playerinfo.h"
@@ -661,9 +663,6 @@ void InGameMenuInventory::down()
       _selected_index = next_index;
    }
 }
-
-#include "framework/joystick/gamecontroller.h"
-#include "game/gamecontrollerintegration.h"
 
 void InGameMenuInventory::show()
 {

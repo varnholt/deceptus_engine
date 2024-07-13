@@ -4,8 +4,8 @@
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "game/controller/gamecontrollerintegration.h"
 #include "game/gameconfiguration.h"
-#include "game/gamecontrollerintegration.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"

@@ -1,11 +1,11 @@
 #include "test.h"
 
 // things under test
-#include "detonationanimation.h"
 #include "framework/math/fbm.h"
 #include "framework/math/maptools.h"
 #include "framework/math/pathinterpolation.h"
-#include "game/framemapper.h"
+#include "game/animation/detonationanimation.h"
+#include "game/animation/framemapper.h"
 
 #include <iostream>
 

@@ -2,7 +2,7 @@
 #define PARALLAXLAYER_H
 
 #include <SFML/Graphics.hpp>
-#include "game/parallaxsettings.h"
+#include "game/layers/parallaxsettings.h"
 #include "game/tilemap.h"
 
 // parallax (move to separate mechanism!)

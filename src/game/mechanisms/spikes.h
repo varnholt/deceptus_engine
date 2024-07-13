@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framemapper.h"
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/animation/framemapper.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/gamenode.h"
 
 #include "SFML/Graphics.hpp"
 

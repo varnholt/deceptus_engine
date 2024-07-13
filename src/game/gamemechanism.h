@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game/audiorange.h"
-#include "game/audioupdatedata.h"
+#include "game/audio/audiorange.h"
+#include "game/audio/audioupdatedata.h"
 #include "game/chunk.h"
 #include "game/constants.h"
 

@@ -3,8 +3,8 @@
 #include "game/gamemechanism.h"
 #include "gamedeserializedata.h"
 #include "gamenode.h"
-#include "overlays/rainoverlay.h"
-#include "overlays/thunderstormoverlay.h"
+#include "layers/rainoverlay.h"
+#include "layers/thunderstormoverlay.h"
 
 #include <SFML/Graphics.hpp>
 #include <memory>

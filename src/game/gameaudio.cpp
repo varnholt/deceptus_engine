@@ -1,6 +1,6 @@
 #include "gameaudio.h"
 
-#include "audio.h"
+#include "game/audio/audio.h"
 
 void GameAudio::initialize()
 {

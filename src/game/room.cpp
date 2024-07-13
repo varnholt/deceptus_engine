@@ -4,16 +4,16 @@
 #include <iostream>
 #include <sstream>
 
-#include "cameraroomlock.h"
-#include "camerasystem.h"
-#include "fadetransitioneffect.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
-#include "gameconfiguration.h"
-#include "player/player.h"
-#include "screentransition.h"
+#include "game/camera/cameraroomlock.h"
+#include "game/camera/camerasystem.h"
+#include "game/effects/fadetransitioneffect.h"
+#include "game/effects/screentransition.h"
+#include "game/gameconfiguration.h"
+#include "game/player/player.h"
 
 namespace
 {

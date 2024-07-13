@@ -1,10 +1,10 @@
 #include "projectile.h"
 
-#include "audio.h"
 #include "framework/math/sfmlmath.h"
+#include "game/audio/audio.h"
 #include "game/player/playerutils.h"
-#include "game/projectilehitanimation.h"
-#include "game/projectilehitaudio.h"
+#include "game/weapons/projectilehitanimation.h"
+#include "game/weapons/projectilehitaudio.h"
 
 #include <box2d/box2d.h>
 

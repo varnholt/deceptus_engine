@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "constants.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"

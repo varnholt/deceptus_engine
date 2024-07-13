@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game/animation.h"
-#include "game/animationsettings.h"
+#include "game/animation/animation.h"
+#include "game/animation/animationsettings.h"
 #include "game/constants.h"
 
 #include <array>

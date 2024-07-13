@@ -2,8 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "audioupdatedata.h"
-#include "constants.h"
+#include "game/audio/audioupdatedata.h"
+#include "game/constants.h"
 
 #include <optional>
 

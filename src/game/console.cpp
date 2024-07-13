@@ -1,7 +1,6 @@
 #include "console.h"
 
 #include "framework/tools/log.h"
-#include "game/bow.h"
 #include "game/eventserializer.h"
 #include "game/level.h"
 #include "game/mechanisms/checkpoint.h"
@@ -10,7 +9,8 @@
 #include "game/player/weaponsystem.h"
 #include "game/savestate.h"
 #include "game/tweaks.h"
-#include "game/weaponfactory.h"
+#include "game/weapons/bow.h"
+#include "game/weapons/weaponfactory.h"
 
 #include <iostream>
 #include <ostream>

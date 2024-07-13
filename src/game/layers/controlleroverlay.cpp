@@ -3,9 +3,9 @@
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
-#include "gameconfiguration.h"
-#include "gamecontrollerdata.h"
-#include "gamecontrollerintegration.h"
+#include "game/controller/gamecontrollerdata.h"
+#include "game/controller/gamecontrollerintegration.h"
+#include "game/gameconfiguration.h"
 
 #include <iostream>
 

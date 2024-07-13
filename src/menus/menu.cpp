@@ -16,8 +16,8 @@
 #include "menuscreenpause.h"
 #include "menuscreenvideo.h"
 
-#include "game/gamecontrollerintegration.h"
 #include "framework/joystick/gamecontroller.h"
+#include "game/controller/gamecontrollerintegration.h"
 
 #include <iostream>
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "bitmapfont.h"
 #include "framework/image/layer.h"
-#include "ingamemenupage.h"
-#include "layerdata.h"
+#include "game/ingamemenu/ingamemenupage.h"
+#include "game/layerdata.h"
+#include "layers/bitmapfont.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
