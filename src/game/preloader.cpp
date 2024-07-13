@@ -2,9 +2,8 @@
 
 #include <iostream>
 
-#include "detonationanimation.h"
 #include "framework/tools/log.h"
-
+#include "game/animation/detonationanimation.h"
 
 void preloadDetonationAnimations()
 {

@@ -2,8 +2,8 @@
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "game/animationpool.h"
-#include "game/audio.h"
+#include "game/animation/animationpool.h"
+#include "game/audio/audio.h"
 #include "game/mechanisms/extrawrapper.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"

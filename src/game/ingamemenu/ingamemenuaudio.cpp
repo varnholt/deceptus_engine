@@ -1,6 +1,6 @@
 #include "ingamemenuaudio.h"
 
-#include "audio.h"
+#include "game/audio/audio.h"
 
 InGameMenuAudio::InGameMenuAudio()
 {

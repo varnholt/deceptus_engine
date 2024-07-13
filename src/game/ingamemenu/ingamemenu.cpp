@@ -1,10 +1,10 @@
 #include "ingamemenu.h"
 
-#include "displaymode.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
-#include "gamecontrollerintegration.h"
-#include "gamestate.h"
+#include "game/controller/gamecontrollerintegration.h"
+#include "game/displaymode.h"
+#include "game/gamestate.h"
 
 #include <iostream>
 

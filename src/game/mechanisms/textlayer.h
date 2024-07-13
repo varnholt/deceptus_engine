@@ -1,10 +1,10 @@
 #ifndef TEXTLAYER_H
 #define TEXTLAYER_H
 
-#include "game/bitmapfont.h"
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
+#include "game/layers/bitmapfont.h"
 
 #include <SFML/Graphics.hpp>
 

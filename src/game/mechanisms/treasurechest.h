@@ -1,7 +1,7 @@
 #ifndef TREASURECHEST_H
 #define TREASURECHEST_H
 
-#include "game/animation.h"
+#include "game/animation/animation.h"
 #include "game/effects/spawneffect.h"
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"

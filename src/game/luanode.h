@@ -15,13 +15,12 @@
 #include "SFML/Graphics.hpp"
 
 // game
-#include "game/detonationanimation.h"
+#include "game/animation/detonationanimation.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
 #include "game/hitbox.h"
 #include "game/leveldescription.h"
-#include "game/skill.h"
-#include "game/weapon.h"
+#include "game/weapons/weapon.h"
 
 struct lua_State;
 

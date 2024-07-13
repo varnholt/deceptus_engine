@@ -2,18 +2,19 @@
 
 // game
 #include "framework/joystick/gamecontrollerinfo.h"
-#include "game/ambientocclusion.h"
 #include "game/atmosphere.h"
-#include "game/boomeffect.h"
-#include "game/camerasystem.h"
+#include "game/audio/volumeupdater.h"
+#include "game/camera/camerasystem.h"
 #include "game/constants.h"
+#include "game/effects/boomeffect.h"
 #include "game/effects/lightsystem.h"
 #include "game/gamenode.h"
+#include "game/layers/ambientocclusion.h"
+#include "game/layers/parallaxlayer.h"
 #include "game/levelscript.h"
 #include "game/mechanisms/imagelayer.h"
 #include "game/mechanisms/portal.h"
 #include "game/mechanisms/staticlight.h"
-#include "game/parallaxlayer.h"
 #include "game/physics/physics.h"
 #include "game/room.h"
 #include "game/shaders/atmosphereshader.h"
@@ -21,7 +22,6 @@
 #include "game/shaders/gammashader.h"
 #include "game/squaremarcher.h"
 #include "game/tmxenemy.h"
-#include "game/volumeupdater.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>

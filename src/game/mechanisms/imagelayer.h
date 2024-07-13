@@ -2,7 +2,7 @@
 
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
-#include "parallaxsettings.h"
+#include "game/layers/parallaxsettings.h"
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>

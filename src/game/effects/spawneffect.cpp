@@ -3,7 +3,7 @@
 #include <iostream>
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxproperties.h"
-#include "game/animationpool.h"
+#include "game/animation/animationpool.h"
 #include "game/constants.h"
 #include "game/texturepool.h"
 #include "game/valuereader.h"

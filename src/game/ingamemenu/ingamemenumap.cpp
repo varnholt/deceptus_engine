@@ -4,7 +4,7 @@
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "game/camerapanorama.h"
+#include "game/camera/camerapanorama.h"
 #include "game/console.h"
 #include "game/gameconfiguration.h"
 #include "game/mechanisms/door.h"

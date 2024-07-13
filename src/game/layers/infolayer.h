@@ -1,9 +1,9 @@
 #pragma once
 
 #include "framework/image/layer.h"
-#include "game/animation.h"
-#include "game/animationpool.h"
-#include "game/bitmapfont.h"
+#include "game/animation/animation.h"
+#include "game/animation/animationpool.h"
+#include "game/layers/bitmapfont.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>

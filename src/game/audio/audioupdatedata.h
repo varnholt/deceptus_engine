@@ -2,7 +2,7 @@
 #ifndef AUDIOUPDATEDATA_H
 #define AUDIOUPDATEDATA_H
 
-#include "game/audiorange.h"
+#include "game/audio/audiorange.h"
 #include "game/constants.h"
 
 #include <cstdint>

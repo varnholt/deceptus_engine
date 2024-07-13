@@ -1,12 +1,12 @@
 #include "rotatingblade.h"
 
-#include "audio.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "game/audio/audio.h"
 #include "game/debugdraw.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "game/animationpool.h"
+#include "game/animation/animationpool.h"
 #include "game/chunk.h"
 #include "game/constants.h"
+#include "game/effects/waterbubbles.h"
 #include "game/gamenode.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playerattack.h"
@@ -14,7 +15,6 @@
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerspeed.h"
-#include "game/waterbubbles.h"
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>

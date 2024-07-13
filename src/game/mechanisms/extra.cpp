@@ -3,7 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "game/audio.h"
+#include "game/audio/audio.h"
 #include "game/gamedeserializedata.h"
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"

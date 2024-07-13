@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
-#include "game/audio.h"
+#include "game/audio/audio.h"
 #include "game/debugdraw.h"
 #include "game/level.h"
 #include "game/player/player.h"

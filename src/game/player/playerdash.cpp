@@ -2,9 +2,9 @@
 
 #include <box2d/box2d.h>
 
-#include "audio.h"
-#include "physics/physicsconfiguration.h"
-#include "savestate.h"
+#include "game/audio/audio.h"
+#include "game/physics/physicsconfiguration.h"
+#include "game/savestate.h"
 
 void PlayerDash::update(const DashInput& input)
 {

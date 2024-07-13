@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game/animation.h"
-#include "game/animationframedata.h"
+#include "game/animation/animation.h"
+#include "game/animation/animationframedata.h"
 
 #include <chrono>
 #include <filesystem>

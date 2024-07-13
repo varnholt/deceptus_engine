@@ -1,14 +1,14 @@
 #include "playerattack.h"
 #include "framework/tools/stopwatch.h"
-#include "game/audio.h"
-#include "game/bow.h"
+#include "game/audio/audio.h"
 #include "game/constants.h"
-#include "game/gun.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playercontrols.h"
 #include "game/player/weaponsystem.h"
 #include "game/savestate.h"
-#include "game/sword.h"
+#include "game/weapons/bow.h"
+#include "game/weapons/gun.h"
+#include "game/weapons/sword.h"
 
 #if defined __GNUC__ && __linux__
 #define FMT_HEADER_ONLY
