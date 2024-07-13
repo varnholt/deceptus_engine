@@ -28,13 +28,11 @@ constexpr auto element_width_m = PIXELS_PER_TILE / PPM;
 constexpr auto element_height_m = 0.5f * PIXELS_PER_TILE / PPM;
 }  // namespace
 
-//-----------------------------------------------------------------------------
 MovingPlatform::MovingPlatform(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(MovingPlatform).name());
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    for (auto& sprite : _sprites)
@@ -58,32 +56,27 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 }
 
-//-----------------------------------------------------------------------------
 double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
 {
    double mu2 = (1.0 - cos(mu * M_PI)) * 0.5;
    return (y1 * (1.0 - mu2) + y2 * mu2);
 }
 
-//-----------------------------------------------------------------------------
 const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 {
    return _pixel_path;
 }
 
-//-----------------------------------------------------------------------------
 float MovingPlatform::getDx() const
 {
    return _pos.x - _pos_prev.x;
 }
 
-//-----------------------------------------------------------------------------
 b2Body* MovingPlatform::getBody()
 {
    return _body;
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
@@ -98,7 +91,6 @@ void MovingPlatform::setEnabled(bool enabled)
    }
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::setupTransformDeprecated()
 {
    auto x = _tile_positions.x * PIXELS_PER_TILE / PPM;
@@ -106,7 +98,6 @@ void MovingPlatform::setupTransformDeprecated()
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
@@ -129,13 +120,11 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
    fixture->SetUserData(static_cast<void*>(object_data));
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::addSprite(const sf::Sprite& sprite)
 {
    _sprites.push_back(sprite);
 }
 
-//-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* parent, const GameDeserializeData& data)
 {
    if (!data._tmx_layer)
@@ -225,7 +214,6 @@ std::vector<std::shared_ptr<TmxObject>> boxes;
 std::vector<std::shared_ptr<TmxObject>> paths;
 }  // namespace
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
 {
    // just collect all the tmx objects
@@ -239,7 +227,6 @@ void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
    }
 }
 
-//-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent, const GameDeserializeData& data)
 {
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
@@ -440,7 +427,6 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
    return moving_platforms;
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data)
 {
    if (!data._tmx_object->_polyline)
@@ -512,7 +498,6 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
 //
 //  p0                pn
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::updateLeverLag(const sf::Time& dt)
 {
    if (!isEnabled())
@@ -539,7 +524,6 @@ void MovingPlatform::updateLeverLag(const sf::Time& dt)
    }
 }
 
-//-----------------------------------------------------------------------------
 void MovingPlatform::update(const sf::Time& dt)
 {
    updateLeverLag(dt);

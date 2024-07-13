@@ -1,6 +1,6 @@
 #include "waterbubbles.h"
 
-#include "game/atmosphere.h"
+#include "game/level/atmosphere.h"
 #include "game/level/level.h"
 #include "game/texturepool.h"
 

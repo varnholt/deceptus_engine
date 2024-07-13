@@ -7,7 +7,6 @@
 #include "game/camera/camerapanorama.h"
 #include "game/config/gameconfiguration.h"
 #include "game/console.h"
-#include "game/inventoryitemdescriptionreader.h"
 #include "game/level/roomupdater.h"
 #include "game/player/extratable.h"
 #include "game/player/player.h"

@@ -17,8 +17,6 @@
 #include <iostream>
 #include <sstream>
 
-
-//---------------------------------------------------------------------------------------------------------------------
 IngameMenuMap::IngameMenuMap()
 {
    _font.load("data/game/font.png", "data/game/font.map");
@@ -92,7 +90,6 @@ IngameMenuMap::IngameMenuMap()
    _duration_show = config._duration_show;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
 {
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
@@ -105,7 +102,6 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
    _level_render_texture.create(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (_level_grid_texture)
@@ -145,7 +141,6 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    InGameMenuPage::draw(window, states);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::update(const sf::Time& /*dt*/)
 {
    CameraPanorama::getInstance().update();
@@ -160,7 +155,6 @@ void IngameMenuMap::update(const sf::Time& /*dt*/)
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::updateMove()
 {
    const auto move_offset = getMoveOffset();
@@ -195,19 +189,16 @@ void IngameMenuMap::updateMove()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors)
 {
    _doors = doors;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals)
 {
    _portals = portals;
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 {
    float scale = 3.0f;
@@ -253,10 +244,10 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       auto pos = sf::Vector2f(static_cast<float>(door->getTilePosition().x), static_cast<float>(door->getTilePosition().y));
 
-      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale),             static_cast<float>(pos.y * scale));
+      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale));
       quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale));
       quad[2].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale + doorHeight));
-      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale),             static_cast<float>(pos.y * scale + doorHeight));
+      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + doorHeight));
 
       target.draw(&quad[0], 4, sf::Quads);
    }
@@ -275,10 +266,10 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
       auto portal = std::dynamic_pointer_cast<Portal>(p);
       auto pos = sf::Vector2f(portal->getTilePosition().x, portal->getTilePosition().y);
 
-      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale),               static_cast<float>(pos.y * scale));
+      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale));
       quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + portalWidth), static_cast<float>(pos.y * scale));
       quad[2].position = sf::Vector2f(static_cast<float>(pos.x * scale + portalWidth), static_cast<float>(pos.y * scale + portalHeight));
-      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale),               static_cast<float>(pos.y * scale + portalHeight));
+      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + portalHeight));
 
       target.draw(&quad[0], 4, sf::Quads);
    }
@@ -293,7 +284,6 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    target.draw(square);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void IngameMenuMap::updateButtons()
 {
    bool xbox = true;
