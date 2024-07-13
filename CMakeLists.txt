@@ -74,29 +74,28 @@ set(GAME_FILES
     src/game/camera/camerasystem.cpp src/game/camera/camerasystem.h
     src/game/camera/camerasystemconfiguration.cpp src/game/camera/camerasystemconfiguration.h
     src/game/camera/camerasystemconfigurationui.cpp src/game/camera/camerasystemconfigurationui.h
-    src/game/chainshapeanalyzer.cpp src/game/chainshapeanalyzer.h
-    src/game/chunk.cpp src/game/chunk.h
+    src/game/physics/chainshapeanalyzer.cpp src/game/physics/chainshapeanalyzer.h
+    src/game/level/chunk.cpp src/game/level/chunk.h
     src/game/console.cpp src/game/console.h
     src/game/constants.h
-    src/game/cutscene.cpp src/game/cutscene.h
     src/game/debugdraw.cpp src/game/debugdraw.h
     src/game/animation/detonationanimation.cpp src/game/animation/detonationanimation.h
     src/game/displaymode.cpp src/game/displaymode.h
     src/game/drawstates.cpp src/game/drawstates.h
     src/game/effects/lightsystem.cpp src/game/effects/lightsystem.h
     src/game/effects/spawneffect.cpp src/game/effects/spawneffect.h
-    src/game/enemydescription.cpp src/game/enemydescription.h
+    src/game/level/enemydescription.cpp src/game/level/enemydescription.h
     src/game/eventdistributor.cpp src/game/eventdistributor.h
     src/game/eventserializer.cpp src/game/eventserializer.h
     src/game/effects/fadetransitioneffect.cpp src/game/effects/fadetransitioneffect.h
-    src/game/fixturenode.cpp src/game/fixturenode.h
+    src/game/level/fixturenode.cpp src/game/level/fixturenode.h
     src/game/forestscene.cpp src/game/forestscene.h
     src/game/animation/framemapper.cpp src/game/animation/framemapper.h
     src/game/game.cpp src/game/game.h
     src/game/gameaudio.cpp src/game/gameaudio.h
     src/game/gameclock.cpp src/game/gameclock.h
-    src/game/gameconfiguration.cpp src/game/gameconfiguration.h
-    src/game/gamecontactlistener.cpp src/game/gamecontactlistener.h
+    src/game/config/gameconfiguration.cpp src/game/config/gameconfiguration.h
+    src/game/physics/gamecontactlistener.cpp src/game/physics/gamecontactlistener.h
     src/game/controller/gamecontrollerdata.cpp src/game/controller/gamecontrollerdata.h
     src/game/controller/gamecontrollerdetection.cpp src/game/controller/gamecontrollerdetection.h
     src/game/controller/gamecontrollerintegration.cpp src/game/controller/gamecontrollerintegration.h
@@ -104,7 +103,7 @@ set(GAME_FILES
     src/game/gamemechanism.cpp src/game/gamemechanism.h
     src/game/gamemechanismdeserializer.cpp src/game/gamemechanismdeserializer.h
     src/game/gamemechanismdeserializerconstants.h
-    src/game/gamenode.cpp src/game/gamenode.h
+    src/game/level/gamenode.cpp src/game/level/gamenode.h
     src/game/gamestate.cpp src/game/gamestate.h
     src/game/weapons/gun.cpp src/game/weapons/gun.h
     src/game/player/health.cpp src/game/player/health.h
@@ -119,14 +118,14 @@ set(GAME_FILES
     src/game/inventorybasedcontrols.cpp src/game/inventorybasedcontrols.h
     src/game/inventoryitemdescriptionreader.cpp src/game/inventoryitemdescriptionreader.h
     src/game/layerdata.cpp src/game/layerdata.h
-    src/game/level.cpp src/game/level.h
-    src/game/leveldescription.cpp src/game/leveldescription.h
-    src/game/levelfiles.cpp src/game/levelfiles.h
-    src/game/levels.cpp src/game/levels.h
-    src/game/levelscript.cpp src/game/levelscript.h
-    src/game/luaconstants.h
-    src/game/luainterface.cpp src/game/luainterface.h
-    src/game/luanode.cpp src/game/luanode.h
+    src/game/level/level.cpp src/game/level/level.h
+    src/game/level/leveldescription.cpp src/game/level/leveldescription.h
+    src/game/level/levelfiles.cpp src/game/level/levelfiles.h
+    src/game/level/levels.cpp src/game/level/levels.h
+    src/game/level/levelscript.cpp src/game/level/levelscript.h
+    src/game/level/luaconstants.h
+    src/game/level/luainterface.cpp src/game/level/luainterface.h
+    src/game/level/luanode.cpp src/game/level/luanode.h
     src/game/mechanisms/blockingrect.cpp src/game/mechanisms/blockingrect.h
     src/game/mechanisms/bouncer.cpp src/game/mechanisms/bouncer.h
     src/game/mechanisms/bouncerwrapper.cpp src/game/mechanisms/bouncerwrapper.h
@@ -174,10 +173,10 @@ set(GAME_FILES
     src/game/mechanisms/waterdamage.cpp src/game/mechanisms/waterdamage.h
     src/game/mechanisms/watersurface.cpp src/game/mechanisms/watersurface.h
     src/game/mechanisms/weather.cpp src/game/mechanisms/weather.h
-    src/game/menuconfig.cpp src/game/menuconfig.h
+    src/game/ingamemenu/menuconfig.cpp src/game/ingamemenu/menuconfig.h
     src/game/meshtools.cpp src/game/meshtools.h
     src/game/messagebox.cpp src/game/messagebox.h
-    src/game/onewaywall.cpp src/game/onewaywall.h
+    src/game/physics/onewaywall.cpp src/game/physics/onewaywall.h
     src/game/layers/controlleroverlay.cpp src/game/layers/controlleroverlay.h
     src/game/layers/rainoverlay.cpp src/game/layers/rainoverlay.h
     src/game/layers/thunderstormoverlay.cpp src/game/layers/thunderstormoverlay.h
@@ -214,26 +213,26 @@ set(GAME_FILES
     src/game/weapons/projectile.cpp src/game/weapons/projectile.h
     src/game/weapons/projectilehitanimation.cpp src/game/weapons/projectilehitanimation.h
     src/game/weapons/projectilehitaudio.cpp src/game/weapons/projectilehitaudio.h
-    src/game/room.cpp src/game/room.h
-    src/game/roomupdater.cpp src/game/roomupdater.h
+    src/game/level/room.cpp src/game/level/room.h
+    src/game/level/roomupdater.cpp src/game/level/roomupdater.h
     src/game/savestate.cpp src/game/savestate.h
     src/game/effects/screentransition.cpp src/game/effects/screentransition.h
     src/game/effects/screentransitioneffect.cpp src/game/effects/screentransitioneffect.h
-    src/game/scriptproperty.cpp src/game/scriptproperty.h
+    src/game/level/scriptproperty.cpp src/game/level/scriptproperty.h
     src/game/shaders/atmosphereshader.cpp src/game/shaders/atmosphereshader.h
     src/game/shaders/blurshader.cpp src/game/shaders/blurshader.h
     src/game/shaders/deathshader.cpp src/game/shaders/deathshader.h
     src/game/shaders/gammashader.cpp src/game/shaders/gammashader.h
     src/game/player/skill.cpp src/game/player/skill.h
-    src/game/squaremarcher.cpp src/game/squaremarcher.h
-    src/game/stenciltilemap.cpp src/game/stenciltilemap.h
+    src/game/physics/squaremarcher.cpp src/game/physics/squaremarcher.h
+    src/game/level/stenciltilemap.cpp src/game/level/stenciltilemap.h
     src/game/weapons/sword.cpp src/game/weapons/sword.h
     src/game/test.cpp src/game/test.h
     src/game/texturepool.cpp src/game/texturepool.h
-    src/game/tilemap.cpp src/game/tilemap.h
-    src/game/tilemapfactory.cpp src/game/tilemapfactory.h
-    src/game/tmxenemy.cpp src/game/tmxenemy.h
-    src/game/tweaks.cpp src/game/tweaks.h
+    src/game/level/tilemap.cpp src/game/level/tilemap.h
+    src/game/level/tilemapfactory.cpp src/game/level/tilemapfactory.h
+    src/game/level/tmxenemy.cpp src/game/level/tmxenemy.h
+    src/game/config/tweaks.cpp src/game/config/tweaks.h
     src/game/audio/volumeupdater.cpp src/game/audio/volumeupdater.h
     src/game/effects/waterbubbles.cpp src/game/effects/waterbubbles.h
     src/game/weapons/weapon.cpp src/game/weapons/weapon.h

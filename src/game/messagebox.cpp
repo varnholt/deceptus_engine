@@ -7,9 +7,9 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
+#include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/displaymode.h"
-#include "game/gameconfiguration.h"
 
 #include <algorithm>
 #include <iostream>

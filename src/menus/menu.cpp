@@ -1,7 +1,9 @@
 #include "menu.h"
 
+#include "framework/joystick/gamecontroller.h"
+#include "game/config/gameconfiguration.h"
+#include "game/controller/gamecontrollerintegration.h"
 #include "game/displaymode.h"
-#include "game/gameconfiguration.h"
 
 #include "menuaudio.h"
 #include "menuscreenachievements.h"
@@ -15,9 +17,6 @@
 #include "menuscreenoptions.h"
 #include "menuscreenpause.h"
 #include "menuscreenvideo.h"
-
-#include "framework/joystick/gamecontroller.h"
-#include "game/controller/gamecontrollerintegration.h"
 
 #include <iostream>
 

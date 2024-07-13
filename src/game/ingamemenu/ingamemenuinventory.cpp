@@ -4,7 +4,7 @@
 #include "framework/joystick/gamecontroller.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/eventdistributor.h"
-#include "game/menuconfig.h"
+#include "game/ingamemenu/menuconfig.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
 #include "game/texturepool.h"

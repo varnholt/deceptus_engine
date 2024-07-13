@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 #include "SFML/Graphics.hpp"
 
@@ -10,9 +10,7 @@
 #include <memory>
 #include <vector>
 
-
 struct TmxObject;
-
 
 class Checkpoint : public GameMechanism, public GameNode
 {
@@ -31,7 +29,7 @@ public:
    static std::shared_ptr<Checkpoint> getCheckpoint(int32_t index, const std::vector<std::shared_ptr<GameMechanism>>& checkpoints);
    static std::shared_ptr<Checkpoint> deserialize(GameNode* parent, const GameDeserializeData& data);
 
-   void draw(sf::RenderTarget &target, sf::RenderTarget &normal) override;
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 

@@ -4,13 +4,13 @@
 // game
 #include "framework/tools/log.h"
 #include "game/constants.h"
-#include "game/fixturenode.h"
-#include "game/luanode.h"
+#include "game/level/fixturenode.h"
+#include "game/level/luanode.h"
 #include "game/mechanisms/bouncer.h"
 #include "game/mechanisms/bubblecube.h"
 #include "game/mechanisms/collapsingplatform.h"
 #include "game/mechanisms/conveyorbelt.h"
-#include "game/onewaywall.h"
+#include "game/physics/onewaywall.h"
 #include "game/player/player.h"
 #include "game/weapons/projectile.h"
 

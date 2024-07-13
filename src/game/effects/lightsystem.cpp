@@ -6,8 +6,8 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "game/debugdraw.h"
-#include "game/fixturenode.h"
-#include "game/level.h"
+#include "game/level/fixturenode.h"
+#include "game/level/level.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 
@@ -18,13 +18,11 @@
 
 #include <SFML/OpenGL.hpp>
 
-//-----------------------------------------------------------------------------
 namespace
 {
 constexpr auto max_distance_m2 = 100.0f;  // depends on the view dimensions
 }
 
-//-----------------------------------------------------------------------------
 LightSystem::LightSystem()
 {
    // prepare unit circle for circle shapes
@@ -44,7 +42,6 @@ LightSystem::LightSystem()
    }
 }
 
-//-----------------------------------------------------------------------------
 void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightSystem::LightInstance> light) const
 {
    const auto light_pos_m = light->_pos_m + light->_center_offset_m;
@@ -117,8 +114,8 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
             for (auto i = 0u; i < segments; i++)
             {
                circle_positions[i] = b2Vec2{
-                  center.x + _unit_circle[i].x * shape_circle->m_radius * 1.2f,
-                  center.y + _unit_circle[i].y * shape_circle->m_radius * 1.2f};
+                  center.x + _unit_circle[i].x * shape_circle->m_radius * 1.2f, center.y + _unit_circle[i].y * shape_circle->m_radius * 1.2f
+               };
             }
 
             for (auto pos_current = 0u; pos_current < circle_positions.size(); pos_current++)
@@ -138,7 +135,8 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)};
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
+               };
 
                target.draw(quad, 4, sf::Quads);
             }
@@ -170,7 +168,8 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0_far.x, v0_far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)};
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
+               };
 
                target.draw(quad, 4, sf::Quads);
             }
@@ -200,7 +199,8 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)};
+                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
+               };
 
                target.draw(quad, 4, sf::Quads);
             }
@@ -209,7 +209,6 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
    }
 }
 
-//-----------------------------------------------------------------------------
 sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)
 {
    // first, transform the point by the view matrix
@@ -224,7 +223,6 @@ sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::Vie
    return pixel;
 }
 
-//-----------------------------------------------------------------------------
 sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf::Vector2f& point, const sf::View& view)
 {
    // first, transform the point by the view matrix
@@ -239,7 +237,6 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    return pixel;
 }
 
-//-----------------------------------------------------------------------------
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
@@ -292,7 +289,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    }
 }
 
-//-----------------------------------------------------------------------------
 void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
 {
    _active_lights.clear();
@@ -333,7 +329,6 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
    // Log::Info() << _active_lights.size() << " active light sources";
 }
 
-//-----------------------------------------------------------------------------
 void LightSystem::draw(
    sf::RenderTarget& target,
    const std::shared_ptr<sf::RenderTexture>& color_map,
@@ -354,13 +349,11 @@ void LightSystem::draw(
    target.draw(sprite, &_light_shader);
 }
 
-//-----------------------------------------------------------------------------
 void LightSystem::LightInstance::updateSpritePosition()
 {
    _sprite.setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
 }
 
-//-----------------------------------------------------------------------------
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
 {
    auto light = std::make_shared<LightSystem::LightInstance>(parent);

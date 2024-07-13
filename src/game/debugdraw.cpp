@@ -7,7 +7,6 @@
 
 constexpr auto outline_thickness = 0.5f;
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::Color DebugDraw::glColorToSfml(const b2Color& color, sf::Uint8 alpha)
 {
    return sf::Color(
@@ -15,19 +14,16 @@ sf::Color DebugDraw::glColorToSfml(const b2Color& color, sf::Uint8 alpha)
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::Vector2f DebugDraw::vecB2S(const b2Vec2& vector)
 {
    return {vector.x * PPM, vector.y * PPM};
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 b2Vec2 DebugDraw::vecS2B(const sf::Vector2f& vector)
 {
    return {vector.x * MPP, vector.y * MPP};
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
    sf::ConvexShape polygon(vertexCount);
@@ -44,7 +40,6 @@ void DebugDraw::drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, in
    target.draw(polygon);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color)
 {
    sf::ConvexShape polygon(vertex_count);
@@ -61,7 +56,6 @@ void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertice
    target.draw(polygon);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
@@ -74,7 +68,6 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float
    target.draw(circle);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center, float radius, const b2Color& color)
 {
    sf::CircleShape circle(radius);
@@ -87,7 +80,6 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center,
    target.draw(circle);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
@@ -107,7 +99,6 @@ void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
    target.draw(line, 2, sf::Lines);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const b2Color& color)
 {
    constexpr auto pointSize = 3;
@@ -121,7 +112,6 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const
    target.draw(line, 4, sf::Lines);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
 {
    constexpr auto pointSize = 3;
@@ -135,7 +125,6 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Col
    target.draw(line, 4, sf::Lines);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
    sf::Vertex line[] = {
@@ -145,7 +134,6 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec
    target.draw(line, 2, sf::Lines);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const sf::Vector2f& p2, const b2Color& color)
 {
    sf::Vertex line[] = {sf::Vertex(p1, DebugDraw::glColorToSfml(color)), sf::Vertex(p2, DebugDraw::glColorToSfml(color))};
@@ -153,7 +141,6 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const
    target.draw(line, 2, sf::Lines);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color)
 {
    const auto sf_color = DebugDraw::glColorToSfml(color);
@@ -164,7 +151,6 @@ void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& l
    target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawLines(
    sf::RenderTarget& target,
    const b2Vec2* vertices,
@@ -184,7 +170,6 @@ void DebugDraw::drawLines(
    target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawLineLoop(
    sf::RenderTarget& target,
    const b2Vec2* vertices,
@@ -207,7 +192,6 @@ void DebugDraw::drawLineLoop(
    target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
 {
    constexpr auto line_length = 0.4f;
@@ -225,7 +209,6 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
    target.draw(line_green, 2, sf::Lines);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
 {
    shape.setOutlineThickness(outline_thickness);
@@ -234,7 +217,6 @@ void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::
    target.draw(shape);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
    const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
@@ -247,7 +229,6 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, cons
    drawShape(target, rs, color, fill_color);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
    const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
@@ -260,7 +241,6 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, co
    drawShape(target, rs, color, fill_color);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
 {
    const auto& screen_view = target.getView();
@@ -274,7 +254,6 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
    return screen;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
 {
    for (auto* joint = level->getWorld()->GetJointList(); joint; joint = joint->GetNext())
@@ -365,7 +344,6 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
 {
    auto& camera_system = CameraSystem::getInstance();

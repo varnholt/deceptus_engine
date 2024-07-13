@@ -3,10 +3,10 @@
 #include "framework/joystick/gamecontroller.h"
 #include "framework/math/sfmlmath.h"
 #include "game/camera/cameraroomlock.h"
+#include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerdata.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/displaymode.h"
-#include "game/tweaks.h"
 
 CameraPanorama& CameraPanorama::getInstance()
 {

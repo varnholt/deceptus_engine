@@ -2,9 +2,9 @@
 
 #include "framework/tools/globalclock.h"
 #include "game/camera/camerasystemconfiguration.h"
+#include "game/config/gameconfiguration.h"
 #include "game/effects/boomeffectenveloperandom.h"
 #include "game/effects/boomeffectenvelopesine.h"
-#include "game/gameconfiguration.h"
 
 #include <math.h>
 #include <iostream>

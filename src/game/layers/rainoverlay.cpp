@@ -1,12 +1,12 @@
 #include "rainoverlay.h"
 
-#include "debugdraw.h"
 #include "framework/math/sfmlmath.h"
-#include "game/gameconfiguration.h"
-#include "level.h"
-#include "player/player.h"
-#include "texturepool.h"
-#include "worldquery.h"
+#include "game/config/gameconfiguration.h"
+#include "game/debugdraw.h"
+#include "game/level/level.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
+#include "game/worldquery.h"
 
 #include <algorithm>
 #include <cstdlib>

@@ -7,7 +7,7 @@
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/debugdraw.h"
-#include "game/level.h"
+#include "game/level/level.h"
 #include "game/player/player.h"
 #include "game/savestate.h"
 #include "game/texturepool.h"
@@ -109,8 +109,8 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
       if (sprite_pos_x_it != data._tmx_object->_properties->_map.end() && sprite_pos_y_it != data._tmx_object->_properties->_map.end())
       {
          sf::Vector2f pos{
-            static_cast<float>(sprite_pos_x_it->second->_value_int.value()),
-            static_cast<float>(sprite_pos_y_it->second->_value_int.value())};
+            static_cast<float>(sprite_pos_x_it->second->_value_int.value()), static_cast<float>(sprite_pos_y_it->second->_value_int.value())
+         };
          checkpoint->_sprite.setPosition(pos);
       }
       else

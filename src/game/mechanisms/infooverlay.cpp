@@ -4,7 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "game/gameconfiguration.h"
+#include "game/config/gameconfiguration.h"
 #include "game/texturepool.h"
 
 // #include <iostream>

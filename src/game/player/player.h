@@ -1,10 +1,10 @@
 #pragma once
 
 #include "game/animation/animationpool.h"
-#include "game/chunk.h"
 #include "game/constants.h"
 #include "game/effects/waterbubbles.h"
-#include "game/gamenode.h"
+#include "game/level/chunk.h"
+#include "game/level/gamenode.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playerattack.h"
 #include "game/player/playerbelt.h"

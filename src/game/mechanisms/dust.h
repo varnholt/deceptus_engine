@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game/gamemechanism.h"
-#include "game/gamenode.h"
+#include "game/level/gamenode.h"
 #include "gamedeserializedata.h"
 
 #include <SFML/Graphics.hpp>

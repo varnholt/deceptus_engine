@@ -1,6 +1,6 @@
 #include "onewaywall.h"
 
-#include "fixturenode.h"
+#include "game/level/fixturenode.h"
 
 #include <iostream>
 

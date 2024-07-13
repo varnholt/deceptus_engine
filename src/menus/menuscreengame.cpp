@@ -1,6 +1,6 @@
 #include "menuscreengame.h"
 
-#include "gameconfiguration.h"
+#include "game/config/gameconfiguration.h"
 #include "menu.h"
 #include "menuaudio.h"
 

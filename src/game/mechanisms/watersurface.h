@@ -1,9 +1,9 @@
 #ifndef WATERSURFACE_H
 #define WATERSURFACE_H
 
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 class WaterSurface : public GameMechanism, public GameNode
 {

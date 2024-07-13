@@ -1,14 +1,14 @@
 #include "console.h"
 
 #include "framework/tools/log.h"
+#include "game/config/tweaks.h"
 #include "game/eventserializer.h"
-#include "game/level.h"
+#include "game/level/level.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/player/weaponsystem.h"
 #include "game/savestate.h"
-#include "game/tweaks.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
 

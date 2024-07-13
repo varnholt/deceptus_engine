@@ -1,7 +1,6 @@
 #pragma once
 
-#include "camerasystemconfiguration.h"
-#include "room.h"
+#include "game/level/room.h"
 
 #include <SFML/Graphics.hpp>
 

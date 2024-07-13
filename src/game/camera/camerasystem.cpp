@@ -1,7 +1,8 @@
 #include "camerasystem.h"
 
-#include "cameraroomlock.h"
 #include "framework/easings/easings.h"
+#include "game/camera/cameraroomlock.h"
+#include "game/camera/camerasystemconfiguration.h"
 #include "player/player.h"
 
 /*

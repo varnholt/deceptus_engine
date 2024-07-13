@@ -4,7 +4,7 @@
 
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"
-#include "game/gamenode.h"
+#include "game/level/gamenode.h"
 
 class Fireflies : public GameMechanism, public GameNode
 {

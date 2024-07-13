@@ -2,9 +2,9 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
+#include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/player/playercontrolstate.h"
-#include "game/tweaks.h"
 
 void PlayerControls::update(const sf::Time& dt)
 {

@@ -1,4 +1,4 @@
-#include "luainterface.h"
+#include "game/level/luainterface.h"
 
 // lua
 #include "lua.hpp"

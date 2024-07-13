@@ -2,10 +2,9 @@
 #ifndef BLOCKINGRECT_H
 #define BLOCKINGRECT_H
 
-#include "gamemechanism.h"
-#include "gamenode.h"
-
-#include "gamedeserializedata.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 class BlockingRect : public GameMechanism, public GameNode
 {
