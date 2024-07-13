@@ -1,4 +1,4 @@
-#include "game/ingamemenupage.h"
+#include "game/ingamemenu/ingamemenupage.h"
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/log.h"

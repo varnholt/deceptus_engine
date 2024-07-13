@@ -2,7 +2,7 @@
 
 #include "framework/image/psd.h"
 #include "framework/tools/log.h"
-#include "game/gamecontrollerintegration.h"
+#include "game/controller/gamecontrollerintegration.h"
 
 #include <iostream>
 

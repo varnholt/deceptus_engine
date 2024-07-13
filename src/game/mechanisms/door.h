@@ -1,10 +1,10 @@
 #pragma once
 
-#include "animation.h"
-#include "constants.h"
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/animation/animation.h"
+#include "game/constants.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/gamenode.h"
 
 #include <filesystem>
 

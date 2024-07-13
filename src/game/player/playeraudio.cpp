@@ -1,6 +1,6 @@
 #include "playeraudio.h"
 
-#include "game/audio.h"
+#include "game/audio/audio.h"
 
 #include <SFML/Audio.hpp>
 

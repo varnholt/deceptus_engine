@@ -1,7 +1,7 @@
 #include "playerclimb.h"
 
-#include "audio.h"
-#include "savestate.h"
+#include "game/audio/audio.h"
+#include "game/savestate.h"
 
 namespace
 {

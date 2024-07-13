@@ -1,6 +1,6 @@
 #include "menuaudio.h"
 
-#include "audio.h"
+#include "game/audio/audio.h"
 
 void MenuAudio::play(SoundEffect effect)
 {

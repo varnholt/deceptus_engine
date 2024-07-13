@@ -50,37 +50,37 @@ set(GAME_FILES
     src/framework/tools/scopeexit.cpp src/framework/tools/scopeexit.h
     src/framework/tools/stopwatch.cpp src/framework/tools/stopwatch.h
     src/framework/tools/timer.cpp
-    src/game/ambientocclusion.cpp src/game/ambientocclusion.h
-    src/game/animation.cpp src/game/animation.h
-    src/game/animationframedata.cpp src/game/animationframedata.h
-    src/game/animationplayer.cpp src/game/animationplayer.h
-    src/game/animationpool.cpp src/game/animationpool.h
-    src/game/animationsettings.cpp src/game/animationsettings.h
-    src/game/arrow.cpp src/game/arrow.h
+    src/game/layers/ambientocclusion.cpp src/game/layers/ambientocclusion.h
+    src/game/animation/animation.cpp src/game/animation/animation.h
+    src/game/animation/animationframedata.cpp src/game/animation/animationframedata.h
+    src/game/animation/animationplayer.cpp src/game/animation/animationplayer.h
+    src/game/animation/animationpool.cpp src/game/animation/animationpool.h
+    src/game/animation/animationsettings.cpp src/game/animation/animationsettings.h
+    src/game/weapons/arrow.cpp src/game/weapons/arrow.h
     src/game/atmosphere.cpp src/game/atmosphere.h
-    src/game/audio.cpp src/game/audio.h
-    src/game/audiorange.cpp src/game/audiorange.h
-    src/game/audioupdatedata.cpp src/game/audioupdatedata.h
-    src/game/bitmapfont.cpp src/game/bitmapfont.h
+    src/game/audio/audio.cpp src/game/audio/audio.h
+    src/game/audio/audiorange.cpp src/game/audio/audiorange.h
+    src/game/audio/audioupdatedata.cpp src/game/audio/audioupdatedata.h
+    src/game/layers/bitmapfont.cpp src/game/layers/bitmapfont.h
     src/game/blendmodedeserializer.cpp src/game/blendmodedeserializer.h
-    src/game/boomeffect.cpp src/game/boomeffect.h
-    src/game/boomeffectenvelope.cpp src/game/boomeffectenvelope.h
-    src/game/boomeffectenveloperandom.cpp src/game/boomeffectenveloperandom.h
-    src/game/boomeffectenvelopesine.cpp src/game/boomeffectenvelopesine.h
-    src/game/boomsettings.cpp src/game/boomsettings.h
-    src/game/bow.cpp src/game/bow.h
-    src/game/camerapanorama.cpp src/game/camerapanorama.h
-    src/game/cameraroomlock.cpp src/game/cameraroomlock.h
-    src/game/camerasystem.cpp src/game/camerasystem.h
-    src/game/camerasystemconfiguration.cpp src/game/camerasystemconfiguration.h
-    src/game/camerasystemconfigurationui.cpp src/game/camerasystemconfigurationui.h
+    src/game/effects/boomeffect.cpp src/game/effects/boomeffect.h
+    src/game/effects/boomeffectenvelope.cpp src/game/effects/boomeffectenvelope.h
+    src/game/effects/boomeffectenveloperandom.cpp src/game/effects/boomeffectenveloperandom.h
+    src/game/effects/boomeffectenvelopesine.cpp src/game/effects/boomeffectenvelopesine.h
+    src/game/effects/boomsettings.cpp src/game/effects/boomsettings.h
+    src/game/weapons/bow.cpp src/game/weapons/bow.h
+    src/game/camera/camerapanorama.cpp src/game/camera/camerapanorama.h
+    src/game/camera/cameraroomlock.cpp src/game/camera/cameraroomlock.h
+    src/game/camera/camerasystem.cpp src/game/camera/camerasystem.h
+    src/game/camera/camerasystemconfiguration.cpp src/game/camera/camerasystemconfiguration.h
+    src/game/camera/camerasystemconfigurationui.cpp src/game/camera/camerasystemconfigurationui.h
     src/game/chainshapeanalyzer.cpp src/game/chainshapeanalyzer.h
     src/game/chunk.cpp src/game/chunk.h
     src/game/console.cpp src/game/console.h
     src/game/constants.h
     src/game/cutscene.cpp src/game/cutscene.h
     src/game/debugdraw.cpp src/game/debugdraw.h
-    src/game/detonationanimation.cpp src/game/detonationanimation.h
+    src/game/animation/detonationanimation.cpp src/game/animation/detonationanimation.h
     src/game/displaymode.cpp src/game/displaymode.h
     src/game/drawstates.cpp src/game/drawstates.h
     src/game/effects/lightsystem.cpp src/game/effects/lightsystem.h
@@ -88,34 +88,34 @@ set(GAME_FILES
     src/game/enemydescription.cpp src/game/enemydescription.h
     src/game/eventdistributor.cpp src/game/eventdistributor.h
     src/game/eventserializer.cpp src/game/eventserializer.h
-    src/game/fadetransitioneffect.cpp src/game/fadetransitioneffect.h
+    src/game/effects/fadetransitioneffect.cpp src/game/effects/fadetransitioneffect.h
     src/game/fixturenode.cpp src/game/fixturenode.h
     src/game/forestscene.cpp src/game/forestscene.h
-    src/game/framemapper.cpp src/game/framemapper.h
+    src/game/animation/framemapper.cpp src/game/animation/framemapper.h
     src/game/game.cpp src/game/game.h
     src/game/gameaudio.cpp src/game/gameaudio.h
     src/game/gameclock.cpp src/game/gameclock.h
     src/game/gameconfiguration.cpp src/game/gameconfiguration.h
     src/game/gamecontactlistener.cpp src/game/gamecontactlistener.h
-    src/game/gamecontrollerdata.cpp src/game/gamecontrollerdata.h
-    src/game/gamecontrollerdetection.cpp src/game/gamecontrollerdetection.h
-    src/game/gamecontrollerintegration.cpp src/game/gamecontrollerintegration.h
+    src/game/controller/gamecontrollerdata.cpp src/game/controller/gamecontrollerdata.h
+    src/game/controller/gamecontrollerdetection.cpp src/game/controller/gamecontrollerdetection.h
+    src/game/controller/gamecontrollerintegration.cpp src/game/controller/gamecontrollerintegration.h
     src/game/gamedeserializedata.cpp src/game/gamedeserializedata.h
     src/game/gamemechanism.cpp src/game/gamemechanism.h
     src/game/gamemechanismdeserializer.cpp src/game/gamemechanismdeserializer.h
     src/game/gamemechanismdeserializerconstants.h
     src/game/gamenode.cpp src/game/gamenode.h
     src/game/gamestate.cpp src/game/gamestate.h
-    src/game/gun.cpp src/game/gun.h
-    src/game/health.cpp src/game/health.h
+    src/game/weapons/gun.cpp src/game/weapons/gun.h
+    src/game/player/health.cpp src/game/player/health.h
     src/game/hitbox.cpp src/game/hitbox.h
-    src/game/infolayer.cpp src/game/infolayer.h
-    src/game/ingamemenu.cpp src/game/ingamemenu.h
-    src/game/ingamemenuarchives.cpp src/game/ingamemenuarchives.h
-    src/game/ingamemenuaudio.cpp src/game/ingamemenuaudio.h
-    src/game/ingamemenuinventory.cpp src/game/ingamemenuinventory.h
-    src/game/ingamemenumap.cpp src/game/ingamemenumap.h
-    src/game/ingamemenupage.cpp src/game/ingamemenupage.h
+    src/game/layers/infolayer.cpp src/game/layers/infolayer.h
+    src/game/ingamemenu/ingamemenu.cpp src/game/ingamemenu/ingamemenu.h
+    src/game/ingamemenu/ingamemenuarchives.cpp src/game/ingamemenu/ingamemenuarchives.h
+    src/game/ingamemenu/ingamemenuaudio.cpp src/game/ingamemenu/ingamemenuaudio.h
+    src/game/ingamemenu/ingamemenuinventory.cpp src/game/ingamemenu/ingamemenuinventory.h
+    src/game/ingamemenu/ingamemenumap.cpp src/game/ingamemenu/ingamemenumap.h
+    src/game/ingamemenu/ingamemenupage.cpp src/game/ingamemenu/ingamemenupage.h
     src/game/inventorybasedcontrols.cpp src/game/inventorybasedcontrols.h
     src/game/inventoryitemdescriptionreader.cpp src/game/inventoryitemdescriptionreader.h
     src/game/layerdata.cpp src/game/layerdata.h
@@ -178,12 +178,12 @@ set(GAME_FILES
     src/game/meshtools.cpp src/game/meshtools.h
     src/game/messagebox.cpp src/game/messagebox.h
     src/game/onewaywall.cpp src/game/onewaywall.h
-    src/game/overlays/controlleroverlay.cpp src/game/overlays/controlleroverlay.h
-    src/game/overlays/rainoverlay.cpp src/game/overlays/rainoverlay.h
-    src/game/overlays/thunderstormoverlay.cpp src/game/overlays/thunderstormoverlay.h
-    src/game/overlays/weatheroverlay.cpp src/game/overlays/weatheroverlay.h
-    src/game/parallaxlayer.cpp src/game/parallaxlayer.h
-    src/game/parallaxsettings.cpp src/game/parallaxsettings.h
+    src/game/layers/controlleroverlay.cpp src/game/layers/controlleroverlay.h
+    src/game/layers/rainoverlay.cpp src/game/layers/rainoverlay.h
+    src/game/layers/thunderstormoverlay.cpp src/game/layers/thunderstormoverlay.h
+    src/game/layers/weatheroverlay.cpp src/game/layers/weatheroverlay.h
+    src/game/layers/parallaxlayer.cpp src/game/layers/parallaxlayer.h
+    src/game/layers/parallaxsettings.cpp src/game/layers/parallaxsettings.h
     src/game/parsedata.cpp src/game/parsedata.h
     src/game/physics/physics.cpp src/game/physics/physics.h
     src/game/physics/physicsconfiguration.cpp src/game/physics/physicsconfiguration.h
@@ -211,34 +211,34 @@ set(GAME_FILES
     src/game/player/timerlock.cpp src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp src/game/player/weaponsystem.h
     src/game/preloader.cpp src/game/preloader.h
-    src/game/projectile.cpp src/game/projectile.h
-    src/game/projectilehitanimation.cpp src/game/projectilehitanimation.h
-    src/game/projectilehitaudio.cpp src/game/projectilehitaudio.h
+    src/game/weapons/projectile.cpp src/game/weapons/projectile.h
+    src/game/weapons/projectilehitanimation.cpp src/game/weapons/projectilehitanimation.h
+    src/game/weapons/projectilehitaudio.cpp src/game/weapons/projectilehitaudio.h
     src/game/room.cpp src/game/room.h
     src/game/roomupdater.cpp src/game/roomupdater.h
     src/game/savestate.cpp src/game/savestate.h
-    src/game/screentransition.cpp src/game/screentransition.h
-    src/game/screentransitioneffect.cpp src/game/screentransitioneffect.h
+    src/game/effects/screentransition.cpp src/game/effects/screentransition.h
+    src/game/effects/screentransitioneffect.cpp src/game/effects/screentransitioneffect.h
     src/game/scriptproperty.cpp src/game/scriptproperty.h
     src/game/shaders/atmosphereshader.cpp src/game/shaders/atmosphereshader.h
     src/game/shaders/blurshader.cpp src/game/shaders/blurshader.h
     src/game/shaders/deathshader.cpp src/game/shaders/deathshader.h
     src/game/shaders/gammashader.cpp src/game/shaders/gammashader.h
-    src/game/skill.cpp src/game/skill.h
+    src/game/player/skill.cpp src/game/player/skill.h
     src/game/squaremarcher.cpp src/game/squaremarcher.h
     src/game/stenciltilemap.cpp src/game/stenciltilemap.h
-    src/game/sword.cpp src/game/sword.h
+    src/game/weapons/sword.cpp src/game/weapons/sword.h
     src/game/test.cpp src/game/test.h
     src/game/texturepool.cpp src/game/texturepool.h
     src/game/tilemap.cpp src/game/tilemap.h
     src/game/tilemapfactory.cpp src/game/tilemapfactory.h
     src/game/tmxenemy.cpp src/game/tmxenemy.h
     src/game/tweaks.cpp src/game/tweaks.h
-    src/game/volumeupdater.cpp src/game/volumeupdater.h
-    src/game/waterbubbles.cpp src/game/waterbubbles.h
-    src/game/weapon.cpp src/game/weapon.h
-    src/game/weaponfactory.cpp src/game/weaponfactory.h
-    src/game/weaponproperties.cpp src/game/weaponproperties.h
+    src/game/audio/volumeupdater.cpp src/game/audio/volumeupdater.h
+    src/game/effects/waterbubbles.cpp src/game/effects/waterbubbles.h
+    src/game/weapons/weapon.cpp src/game/weapons/weapon.h
+    src/game/weapons/weaponfactory.cpp src/game/weapons/weaponfactory.h
+    src/game/weapons/weaponproperties.cpp src/game/weapons/weaponproperties.h
     src/game/worldquery.cpp src/game/worldquery.h
     src/main.cpp
     src/menus/menu.cpp src/menus/menu.h

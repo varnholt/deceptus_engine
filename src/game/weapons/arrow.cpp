@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "framework/tools/globalclock.h"
-#include "projectilehitaudio.h"
+#include "game/weapons/projectilehitaudio.h"
 #include "texturepool.h"
 
 

@@ -1,16 +1,15 @@
 #include "messagebox.h"
 
-#include "audio.h"
-#include "displaymode.h"
 #include "framework/easings/easings.h"
 #include "framework/image/layer.h"
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
+#include "game/audio/audio.h"
+#include "game/controller/gamecontrollerintegration.h"
+#include "game/displaymode.h"
 #include "game/gameconfiguration.h"
-#include "game/gamecontrollerintegration.h"
-#include "player/player.h"
 
 #include <algorithm>
 #include <iostream>
@@ -169,9 +168,6 @@ MessageBox::MessageBox(
    _show_time = GlobalClock::getInstance().getElapsedTime();
 
    DisplayMode::getInstance().enqueueSet(Display::Modal);
-
-   // can probably be removed now, controls already checks if a modal dialogue is open
-   // Player::getCurrent()->getControls()->setKeysPressed(0);
 
    _text.setFont(__font);
    _text.setCharacterSize(12);

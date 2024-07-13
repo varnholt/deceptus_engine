@@ -7,8 +7,8 @@
 #include <optional>
 #include <unordered_map>
 
-#include "game/animation.h"
-#include "game/animationpool.h"
+#include "game/animation/animation.h"
+#include "game/animation/animationpool.h"
 #include "game/constants.h"
 
 class PlayerAnimation

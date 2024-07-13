@@ -2,8 +2,7 @@
 
 #include <cstdint>
 
-#include "projectile.h"
-
+#include "game/weapons/projectile.h"
 
 struct Arrow : public Projectile
 {

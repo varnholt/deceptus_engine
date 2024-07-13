@@ -14,8 +14,8 @@
 #include <memory>
 
 // game
-#include "game/projectile.h"
-#include "weaponproperties.h"
+#include "game/weapons/projectile.h"
+#include "game/weapons/weaponproperties.h"
 
 class Gun : public Weapon
 {

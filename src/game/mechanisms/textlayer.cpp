@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
-#include "game/bitmapfont.h"
+#include "game/layers/bitmapfont.h"
 #include "game/texturepool.h"
 #include "game/valuereader.h"
 

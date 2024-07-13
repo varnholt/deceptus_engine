@@ -5,14 +5,14 @@
 #include <iostream>
 #include <sstream>
 
-#include "animationpool.h"
-#include "camerapanorama.h"
-#include "displaymode.h"
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
+#include "game/animation/animationpool.h"
+#include "game/camera/camerapanorama.h"
+#include "game/displaymode.h"
 #include "game/gameclock.h"
-#include "mechanisms/portal.h"
-#include "physics/physicsconfiguration.h"
+#include "game/mechanisms/portal.h"
+#include "game/physics/physicsconfiguration.h"
 
 namespace
 {

@@ -3,10 +3,10 @@
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 
-#include "game/audioupdatedata.h"
+#include "game/audio/audioupdatedata.h"
 #include "game/fixturenode.h"
 #include "game/gamenode.h"
-#include "game/projectilehitanimation.h"
+#include "game/weapons/projectilehitanimation.h"
 
 #include <functional>
 #include <list>

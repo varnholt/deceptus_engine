@@ -1,8 +1,8 @@
 #include "soundemitter.h"
 
-#include "audio.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/audio/audio.h"
 
 SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
 {

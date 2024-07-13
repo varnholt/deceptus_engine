@@ -1,10 +1,10 @@
 #include "bouncer.h"
 
-#include "audio.h"
-#include "fixturenode.h"
 #include "framework/tools/globalclock.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/audio/audio.h"
+#include "game/fixturenode.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 

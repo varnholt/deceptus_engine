@@ -2,7 +2,7 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
-#include "game/gamecontrollerintegration.h"
+#include "game/controller/gamecontrollerintegration.h"
 #include "game/player/playercontrolstate.h"
 #include "game/tweaks.h"
 

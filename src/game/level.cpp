@@ -10,9 +10,9 @@
 #include "framework/tools/checksum.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
-#include "game/animationplayer.h"
-#include "game/camerapanorama.h"
-#include "game/cameraroomlock.h"
+#include "game/animation/animationplayer.h"
+#include "game/camera/camerapanorama.h"
+#include "game/camera/cameraroomlock.h"
 #include "game/chainshapeanalyzer.h"
 #include "game/constants.h"
 #include "game/debugdraw.h"
@@ -23,8 +23,7 @@
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanismdeserializer.h"
 #include "game/gamemechanismdeserializerconstants.h"
-#include "game/gun.h"
-#include "game/ingamemenumap.h"
+#include "game/ingamemenu/ingamemenumap.h"
 #include "game/leveldescription.h"
 #include "game/levelfiles.h"
 #include "game/luainterface.h"
@@ -44,6 +43,7 @@
 #include "game/tilemap.h"
 #include "game/tilemapfactory.h"
 #include "game/tweaks.h"
+#include "game/weapons/gun.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>

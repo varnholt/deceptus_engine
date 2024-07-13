@@ -6,7 +6,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "game/animationpool.h"
+#include "game/animation/animationpool.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
 

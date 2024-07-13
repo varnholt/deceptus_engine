@@ -1,18 +1,16 @@
 #include "boomeffect.h"
 
-#include "camerasystemconfiguration.h"
 #include "framework/tools/globalclock.h"
-#include "gameconfiguration.h"
+#include "game/camera/camerasystemconfiguration.h"
+#include "game/effects/boomeffectenveloperandom.h"
+#include "game/effects/boomeffectenvelopesine.h"
+#include "game/gameconfiguration.h"
 
 #include <math.h>
 #include <iostream>
 
-#include "boomeffectenveloperandom.h"
-#include "boomeffectenvelopesine.h"
-
 BoomSettings BoomEffect::_default_boom_settings = BoomSettings{1.0f, 1.0f};
 
-//-----------------------------------------------------------------------------
 void BoomEffect::boom(float x, float y, const BoomSettings& boom_settings)
 {
    if (!CameraSystemConfiguration::getInstance()._camera_shaking_enabled)
@@ -49,13 +47,11 @@ void BoomEffect::boom(float x, float y, const BoomSettings& boom_settings)
    _boom_time_end = GlobalClock::getInstance().getElapsedTime() + sf::seconds(_boom_duration_s);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float BoomEffect::getRemainingTime() const
 {
    return (_boom_time_end - GlobalClock::getInstance().getElapsedTime()).asSeconds();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 float BoomEffect::getRemainingTimeNormalized() const
 {
    const auto remaining_time = getRemainingTime();
@@ -63,7 +59,6 @@ float BoomEffect::getRemainingTimeNormalized() const
    return time_normalized;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void BoomEffect::update(const sf::Time& /*dt*/)
 {
    if (getRemainingTime() > 0.0f)

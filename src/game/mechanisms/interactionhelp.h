@@ -3,7 +3,7 @@
 #include <array>
 #include <memory>
 
-#include "game/animationpool.h"
+#include "game/animation/animationpool.h"
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"
 #include "game/gamenode.h"
