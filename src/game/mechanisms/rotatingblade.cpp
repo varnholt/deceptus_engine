@@ -1,4 +1,4 @@
-#include "rotatingblade.h"
+#include "game/mechanisms/rotatingblade.h"
 
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmxpolygon.h"

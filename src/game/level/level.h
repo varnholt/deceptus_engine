@@ -8,20 +8,20 @@
 #include "game/constants.h"
 #include "game/effects/boomeffect.h"
 #include "game/effects/lightsystem.h"
-#include "game/gamenode.h"
 #include "game/layers/ambientocclusion.h"
 #include "game/layers/parallaxlayer.h"
-#include "game/levelscript.h"
+#include "game/level/gamenode.h"
+#include "game/level/levelscript.h"
+#include "game/level/room.h"
+#include "game/level/tmxenemy.h"
 #include "game/mechanisms/imagelayer.h"
 #include "game/mechanisms/portal.h"
 #include "game/mechanisms/staticlight.h"
 #include "game/physics/physics.h"
-#include "game/room.h"
+#include "game/physics/squaremarcher.h"
 #include "game/shaders/atmosphereshader.h"
 #include "game/shaders/blurshader.h"
 #include "game/shaders/gammashader.h"
-#include "game/squaremarcher.h"
-#include "game/tmxenemy.h"
 
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -32,7 +32,6 @@
 #include <box2d/box2d.h>
 
 // std
-#include <list>
 #include <map>
 #include <memory>
 

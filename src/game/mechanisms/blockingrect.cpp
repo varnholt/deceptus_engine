@@ -1,9 +1,9 @@
-#include "blockingrect.h"
+#include "game/mechanisms/blockingrect.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "texturepool.h"
+#include "game/texturepool.h"
 
 BlockingRect::BlockingRect(GameNode* parent) : GameNode(parent)
 {

@@ -7,7 +7,7 @@
 #include <cmath>
 #include <memory>
 
-#include "game/level.h"
+#include "game/level/level.h"
 
 namespace DebugDraw
 {

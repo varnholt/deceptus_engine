@@ -1,8 +1,6 @@
 // base
-#include "movingplatform.h"
+#include "game/mechanisms/movingplatform.h"
 
-#include "constants.h"
-#include "fixturenode.h"
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
@@ -13,9 +11,11 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "physics/physicsconfiguration.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/constants.h"
+#include "game/level/fixturenode.h"
+#include "game/physics/physicsconfiguration.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 #include <math.h>
 #include <iostream>

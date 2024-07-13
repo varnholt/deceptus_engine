@@ -1,6 +1,6 @@
 #include "menus/menuscreenvideo.h"
 
-#include "game/gameconfiguration.h"
+#include "game/config/gameconfiguration.h"
 #include "menus/menu.h"
 #include "menus/menuaudio.h"
 

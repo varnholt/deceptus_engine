@@ -1,7 +1,7 @@
 #include "portalwrapper.h"
 
-#include "level.h"
-#include "portal.h"
+#include "game/level/level.h"
+#include "game/mechanisms/portal.h"
 
 std::shared_ptr<Portal> PortalWrapper::getNearbyPortal()
 {

@@ -11,9 +11,9 @@
 class GameNode;
 struct TmxObject;
 
-#include "fixturenode.h"
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/fixturenode.h"
 
 #include <box2d/box2d.h>
 

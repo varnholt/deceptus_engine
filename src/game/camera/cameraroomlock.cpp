@@ -1,19 +1,17 @@
-#include "cameraroomlock.h"
+#include "game/camera/cameraroomlock.h"
 
-#include "camerasystemconfiguration.h"
-#include "gameconfiguration.h"
-
+#include "game/camera/camerasystemconfiguration.h"
+#include "game/config/gameconfiguration.h"
 
 namespace
 {
 std::shared_ptr<Room> _room;
-auto _locked_left   = false;
-auto _locked_right  = false;
-auto _locked_top    = false;
+auto _locked_left = false;
+auto _locked_right = false;
+auto _locked_top = false;
 auto _locked_bottom = false;
 sf::FloatRect _view_rect;
-}
-
+}  // namespace
 
 std::array<bool, 4> CameraRoomLock::checkRoomBoundaries()
 {
@@ -24,7 +22,7 @@ std::array<bool, 4> CameraRoomLock::checkRoomBoundaries()
 
    // fetch current room rectangle from view rectangle's center
    const auto view_center = sf::Vector2f{_view_rect.left + _view_rect.width / 2, _view_rect.top + _view_rect.height / 2};
-   const auto sub_room_it =  _room->findSubRoom(view_center);
+   const auto sub_room_it = _room->findSubRoom(view_center);
    if (sub_room_it == _room->_sub_rooms.end())
    {
       return {};
@@ -46,7 +44,6 @@ std::array<bool, 4> CameraRoomLock::checkRoomBoundaries()
 
    return {out_u, out_d, out_l, out_r};
 }
-
 
 bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
 {
@@ -90,7 +87,7 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    // 1) check which in which rectangle the current camera center lies
    //    -> find the right FloatRect
    auto pos = sf::Vector2f{x, y};
-   const auto sub_room_it =  _room->findSubRoom(pos);
+   const auto sub_room_it = _room->findSubRoom(pos);
    if (sub_room_it == _room->_sub_rooms.end())
    {
       // that's an error.
@@ -110,19 +107,19 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    // left or to the right depending on its orientation
    const auto& game_config = GameConfiguration::getInstance();
    const auto& camera_config = CameraSystemConfiguration::getInstance();
-   const auto half_width    = static_cast<float>(game_config._view_width / 2.0f);
-   const auto height        = static_cast<float>(game_config._view_height);
-   const auto height_top    = height * (1.0f - 1.0f / camera_config.getViewRatioY());
+   const auto half_width = static_cast<float>(game_config._view_width / 2.0f);
+   const auto height = static_cast<float>(game_config._view_height);
+   const auto height_top = height * (1.0f - 1.0f / camera_config.getViewRatioY());
    const auto height_bottom = height / camera_config.getViewRatioY();
 
    const auto u = pos + sf::Vector2f{0.0f, -height_bottom};
-   const auto d = pos + sf::Vector2f{0.0f,  height_top};
+   const auto d = pos + sf::Vector2f{0.0f, height_top};
    const auto l = pos + sf::Vector2f{-half_width - focus_offset, 0.0f};
-   const auto r = pos + sf::Vector2f{ half_width - focus_offset, 0.0f};
+   const auto r = pos + sf::Vector2f{half_width - focus_offset, 0.0f};
 
-   _locked_left   = !sub_room._rect.contains(l);
-   _locked_right  = !sub_room._rect.contains(r);
-   _locked_top    = !sub_room._rect.contains(u);
+   _locked_left = !sub_room._rect.contains(l);
+   _locked_right = !sub_room._rect.contains(r);
+   _locked_top = !sub_room._rect.contains(u);
    _locked_bottom = !sub_room._rect.contains(d);
 
    if (_locked_left)
@@ -150,24 +147,20 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    return _locked_left || _locked_right || _locked_top || _locked_bottom;
 }
 
-
 void CameraRoomLock::setRoom(const std::shared_ptr<Room>& room)
 {
    _room = room;
 }
 
-
 void CameraRoomLock::readLockedSides(bool& left, bool& right, bool& top, bool& bottom)
 {
-   left   = _locked_left;
-   right  = _locked_right;
-   top    = _locked_top;
+   left = _locked_left;
+   right = _locked_right;
+   top = _locked_top;
    bottom = _locked_bottom;
 }
-
 
 void CameraRoomLock::setViewRect(const sf::FloatRect& rect)
 {
    _view_rect = rect;
 }
-

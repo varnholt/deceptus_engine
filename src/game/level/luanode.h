@@ -17,9 +17,9 @@
 // game
 #include "game/animation/detonationanimation.h"
 #include "game/gamemechanism.h"
-#include "game/gamenode.h"
 #include "game/hitbox.h"
-#include "game/leveldescription.h"
+#include "game/level/gamenode.h"
+#include "game/level/leveldescription.h"
 #include "game/weapons/weapon.h"
 
 struct lua_State;

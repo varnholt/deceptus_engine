@@ -6,8 +6,7 @@
 
 #include <vector>
 
-#include "luanode.h"
-
+#include "game/level/luanode.h"
 
 namespace WorldQuery
 {

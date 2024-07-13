@@ -1,7 +1,7 @@
 #include "ingamemenuarchives.h"
 
 #include "framework/easings/easings.h"
-#include "game/menuconfig.h"
+#include "game/ingamemenu/menuconfig.h"
 
 InGameMenuArchives::InGameMenuArchives()
 {

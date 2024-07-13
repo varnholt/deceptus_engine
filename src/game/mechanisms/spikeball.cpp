@@ -8,7 +8,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
-#include "game/fixturenode.h"
+#include "game/level/fixturenode.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 
@@ -16,7 +16,7 @@ namespace
 {
 auto instance_counter = 0;
 constexpr auto box_sprite_y_offset_px = -3;
-}
+}  // namespace
 
 /*
    spike ball concept
@@ -261,7 +261,8 @@ void SpikeBall::setup(const GameDeserializeData& data)
 
    setPixelPosition(sf::Vector2i{
       static_cast<int32_t>(data._tmx_object->_x_px) + PIXELS_PER_HALF_TILE,
-      static_cast<int32_t>(data._tmx_object->_y_px) + PIXELS_PER_HALF_TILE});
+      static_cast<int32_t>(data._tmx_object->_y_px) + PIXELS_PER_HALF_TILE
+   });
 
    const auto pos_m = b2Vec2{static_cast<float>(_pixel_position.x * MPP), static_cast<float>(_pixel_position.y * MPP)};
 

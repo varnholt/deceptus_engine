@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>

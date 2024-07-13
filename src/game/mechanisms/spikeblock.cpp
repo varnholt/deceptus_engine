@@ -3,8 +3,8 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 /*
    000

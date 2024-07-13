@@ -4,8 +4,8 @@
 #include <SFML/Graphics.hpp>
 
 #include "game/audio/audioupdatedata.h"
-#include "game/fixturenode.h"
-#include "game/gamenode.h"
+#include "game/level/fixturenode.h"
+#include "game/level/gamenode.h"
 #include "game/weapons/projectilehitanimation.h"
 
 #include <functional>

@@ -3,7 +3,7 @@
 #include "game/animation/framemapper.h"
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"
-#include "game/gamenode.h"
+#include "game/level/gamenode.h"
 
 #include "SFML/Graphics.hpp"
 

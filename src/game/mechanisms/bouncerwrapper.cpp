@@ -1,7 +1,7 @@
 #include "bouncerwrapper.h"
 
-#include "bouncer.h"
-#include "level.h"
+#include "game/level/level.h"
+#include "game/mechanisms/bouncer.h"
 
 std::shared_ptr<Bouncer> BouncerWrapper::getNearbyBouncer()
 {

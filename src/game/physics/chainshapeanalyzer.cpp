@@ -5,9 +5,9 @@
 #include <set>
 #include <SFML/Graphics.hpp>
 
-#include "constants.h"
-#include "fixturenode.h"
-#include "player/player.h"
+#include "game/constants.h"
+#include "game/level/fixturenode.h"
+#include "game/player/player.h"
 
 namespace
 {

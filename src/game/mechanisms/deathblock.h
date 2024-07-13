@@ -1,10 +1,10 @@
 #pragma once
 
-#include "constants.h"
 #include "framework/math/pathinterpolation.h"
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/constants.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 #include <box2d/box2d.h>
 
@@ -68,7 +68,8 @@ private:
       sf::IntRect{1 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
       sf::IntRect{0 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
       sf::IntRect{1 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE},
-      sf::IntRect{2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE}};
+      sf::IntRect{2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE}
+   };
 
    sf::Vector2f _pixel_positions;
    sf::FloatRect _rect;

@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "game/layers/parallaxsettings.h"
-#include "game/tilemap.h"
+#include "game/level/tilemap.h"
 
 // parallax (move to separate mechanism!)
 struct ParallaxLayer

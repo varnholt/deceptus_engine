@@ -146,7 +146,8 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
       b2Vec2{0.0, height_m},
       b2Vec2{width_m, height_m},
       b2Vec2{width_m, height_m - dy},
-      b2Vec2{width_m - dx, 0.0}};
+      b2Vec2{width_m - dx, 0.0}
+   };
 
    _shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 

@@ -2,7 +2,7 @@
 
 #include "framework/image/psd.h"
 #include "framework/tools/log.h"
-#include "gameconfiguration.h"
+#include "game/config/gameconfiguration.h"
 
 #include <math.h>
 #include <iostream>

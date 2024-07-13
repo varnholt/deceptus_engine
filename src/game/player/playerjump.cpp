@@ -5,7 +5,7 @@
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerapanorama.h"
-#include "game/gamecontactlistener.h"
+#include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/savestate.h"
 

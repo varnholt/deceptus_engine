@@ -1,6 +1,6 @@
 #include "roomupdater.h"
 
-#include "game/room.h"
+#include "game/level/room.h"
 
 namespace
 {

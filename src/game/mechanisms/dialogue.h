@@ -1,7 +1,5 @@
 #pragma once
 
-#include "gamemechanism.h"
-#include "gamenode.h"
 
 #include <optional>
 #include <memory>
@@ -10,8 +8,10 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "constants.h"
-#include "gamedeserializedata.h"
+#include "game/constants.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 struct TmxObject;
 
