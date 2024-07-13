@@ -3,7 +3,7 @@
 #include "framework/math/pathinterpolation.h"
 #include "game/gamedeserializedata.h"
 #include "game/gamemechanism.h"
-#include "game/gamenode.h"
+#include "game/level/gamenode.h"
 
 // sfml
 #include "SFML/Graphics.hpp"

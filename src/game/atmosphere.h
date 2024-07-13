@@ -1,7 +1,7 @@
 #pragma once
 
-#include "constants.h"
-#include "tilemap.h"
+#include "game/constants.h"
+#include "level/tilemap.h"
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>

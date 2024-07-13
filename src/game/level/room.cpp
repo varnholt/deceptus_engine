@@ -10,9 +10,9 @@
 #include "framework/tools/timer.h"
 #include "game/camera/cameraroomlock.h"
 #include "game/camera/camerasystem.h"
+#include "game/config/gameconfiguration.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
-#include "game/gameconfiguration.h"
 #include "game/player/player.h"
 
 namespace

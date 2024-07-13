@@ -1,9 +1,8 @@
 #pragma once
 
-#include "gamemechanism.h"
-#include "gamenode.h"
-
-#include "gamedeserializedata.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 #include <deque>
 #include <memory>

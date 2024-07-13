@@ -6,7 +6,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
-#include "game/fixturenode.h"
+#include "game/level/fixturenode.h"
 #include "game/texturepool.h"
 
 #include <iostream>

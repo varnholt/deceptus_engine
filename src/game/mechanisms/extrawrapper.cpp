@@ -1,7 +1,7 @@
 #include "extrawrapper.h"
 
-#include "extra.h"
-#include "level.h"
+#include "game/level/level.h"
+#include "game/mechanisms/extra.h"
 
 void ExtraWrapper::spawnExtra(const std::string& id)
 {

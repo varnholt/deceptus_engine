@@ -2,7 +2,7 @@
 
 #include "framework/math/sfmlmath.h"
 #include "game/gamestate.h"
-#include "game/luainterface.h"
+#include "game/level/luainterface.h"
 #include "game/weapons/projectile.h"
 
 #include <iostream>

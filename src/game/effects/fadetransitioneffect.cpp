@@ -1,7 +1,6 @@
 #include "fadetransitioneffect.h"
 
-#include "gameconfiguration.h"
-
+#include "game/config/gameconfiguration.h"
 
 FadeTransitionEffect::FadeTransitionEffect(const sf::Color color)
  : _fade_color(color)

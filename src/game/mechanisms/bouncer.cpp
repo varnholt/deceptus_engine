@@ -2,7 +2,7 @@
 
 #include "framework/tools/globalclock.h"
 #include "game/audio/audio.h"
-#include "game/fixturenode.h"
+#include "game/level/fixturenode.h"
 #include "game/player/player.h"
 #include "game/texturepool.h"
 

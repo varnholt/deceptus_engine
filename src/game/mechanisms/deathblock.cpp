@@ -1,12 +1,11 @@
-#include "deathblock.h"
+#include "game/mechanisms/deathblock.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolyline.h"
-
-#include "constants.h"
-#include "fixturenode.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/constants.h"
+#include "game/level/fixturenode.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 

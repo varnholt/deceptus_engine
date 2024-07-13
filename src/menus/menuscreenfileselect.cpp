@@ -4,8 +4,8 @@
 #include "menuaudio.h"
 
 #include "game/gamestate.h"
-#include "game/leveldescription.h"
-#include "game/levels.h"
+#include "game/level/leveldescription.h"
+#include "game/level/levels.h"
 #include "game/messagebox.h"
 #include "game/savestate.h"
 

@@ -1,9 +1,6 @@
 #include "crusher.h"
 
-#include "fixturenode.h"
-
 #include "framework/easings/easings.h"
-
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -11,7 +8,8 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
-#include "texturepool.h"
+#include "game/level/fixturenode.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 

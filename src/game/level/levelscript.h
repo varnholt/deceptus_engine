@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <string>
 #include "game/gamemechanism.h"
-#include "game/scriptproperty.h"
+#include "game/level/scriptproperty.h"
 #include "lua.hpp"
 
 struct LuaNode;

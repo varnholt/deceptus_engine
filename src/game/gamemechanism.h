@@ -2,8 +2,8 @@
 
 #include "game/audio/audiorange.h"
 #include "game/audio/audioupdatedata.h"
-#include "game/chunk.h"
 #include "game/constants.h"
+#include "game/level/chunk.h"
 
 #include "SFML/Graphics.hpp"
 

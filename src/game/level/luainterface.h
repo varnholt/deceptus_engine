@@ -6,7 +6,7 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "luanode.h"
+#include "game/level/luanode.h"
 
 class LuaInterface
 {

@@ -4,10 +4,9 @@
 
 #include <box2d/box2d.h>
 
-
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include "gamenode.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 struct TmxObject;
 

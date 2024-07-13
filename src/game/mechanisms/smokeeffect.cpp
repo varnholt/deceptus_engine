@@ -7,7 +7,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
-#include "texturepool.h"
+#include "game/texturepool.h"
 
 #include <math.h>
 #include <array>

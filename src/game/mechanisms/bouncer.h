@@ -1,12 +1,12 @@
 #pragma once
 
-#include "constants.h"
-#include "fixturenode.h"
+#include <box2d/box2d.h>
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
-#include "gamedeserializedata.h"
-#include "gamemechanism.h"
-#include <box2d/box2d.h>
+#include "game/constants.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/fixturenode.h"
 
 #include "SFML/Graphics.hpp"
 

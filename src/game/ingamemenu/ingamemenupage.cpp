@@ -2,8 +2,8 @@
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/log.h"
+#include "game/config/gameconfiguration.h"
 #include "game/displaymode.h"
-#include "game/gameconfiguration.h"
 #include "game/gamestate.h"
 
 #include <iostream>

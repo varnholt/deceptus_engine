@@ -1,9 +1,9 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
-#include "game/luaconstants.h"
-#include "game/luainterface.h"
-#include "game/luanode.h"
+#include "game/level/luaconstants.h"
+#include "game/level/luainterface.h"
+#include "game/level/luanode.h"
 #include "game/player/player.h"
 #include "game/player/weaponsystem.h"
 #include "game/savestate.h"

@@ -5,9 +5,9 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
-#include "level.h"
-#include "player/player.h"
-#include "texturepool.h"
+#include "game/level/level.h"
+#include "game/player/player.h"
+#include "game/texturepool.h"
 
 #include <iostream>
 

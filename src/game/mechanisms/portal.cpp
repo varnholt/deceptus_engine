@@ -1,10 +1,6 @@
 #include "portal.h"
 
 // game
-#include "constants.h"
-#include "fixturenode.h"
-#include "player/player.h"
-
 #include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
@@ -14,6 +10,9 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "game/constants.h"
+#include "game/level/fixturenode.h"
+#include "game/player/player.h"
 #include "texturepool.h"
 
 #include <atomic>

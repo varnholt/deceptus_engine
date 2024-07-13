@@ -1,10 +1,9 @@
 #pragma once
 
-#include "gamemechanism.h"
-#include "gamenode.h"
-
 #include "framework/math/pathinterpolation.h"
-#include "gamedeserializedata.h"
+#include "game/gamedeserializedata.h"
+#include "game/gamemechanism.h"
+#include "game/level/gamenode.h"
 
 #include <vector>
 #include "SFML/Graphics.hpp"

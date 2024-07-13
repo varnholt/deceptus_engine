@@ -7,8 +7,8 @@
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 
-#include "gamedeserializedata.h"
-#include "gamenode.h"
+#include "game/gamedeserializedata.h"
+#include "game/level/gamenode.h"
 
 struct TmxObject;
 

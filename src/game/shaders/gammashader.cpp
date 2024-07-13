@@ -1,7 +1,7 @@
 #include "gammashader.h"
 
 #include "framework/tools/log.h"
-#include "gameconfiguration.h"
+#include "game/config/gameconfiguration.h"
 
 #include <iostream>
 

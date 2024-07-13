@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "game/gamemechanism.h"
-#include "game/luanode.h"
+#include "game/level/luanode.h"
 
 #include <set>
 #include <thread>
