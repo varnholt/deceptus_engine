@@ -80,7 +80,7 @@ set(GAME_FILES
     src/game/constants.h
     src/game/debug/debugdraw.cpp src/game/debug/debugdraw.h
     src/game/animation/detonationanimation.cpp src/game/animation/detonationanimation.h
-    src/game/displaymode.cpp src/game/displaymode.h
+    src/game/state/displaymode.cpp src/game/state/displaymode.h
     src/game/debug/drawstates.cpp src/game/debug/drawstates.h
     src/game/effects/lightsystem.cpp src/game/effects/lightsystem.h
     src/game/effects/spawneffect.cpp src/game/effects/spawneffect.h
@@ -92,8 +92,8 @@ set(GAME_FILES
     src/game/scenes/forestscene.cpp src/game/scenes/forestscene.h
     src/game/animation/framemapper.cpp src/game/animation/framemapper.h
     src/game/game.cpp src/game/game.h
-    src/game/gameaudio.cpp src/game/gameaudio.h
-    src/game/gameclock.cpp src/game/gameclock.h
+    src/game/sfx/gameaudio.cpp src/game/sfx/gameaudio.h
+    src/game/clock/gameclock.cpp src/game/clock/gameclock.h
     src/game/config/gameconfiguration.cpp src/game/config/gameconfiguration.h
     src/game/physics/gamecontactlistener.cpp src/game/physics/gamecontactlistener.h
     src/game/controller/gamecontrollerdata.cpp src/game/controller/gamecontrollerdata.h
@@ -104,7 +104,7 @@ set(GAME_FILES
     src/game/mechanisms/gamemechanismdeserializer.cpp src/game/mechanisms/gamemechanismdeserializer.h
     src/game/mechanisms/gamemechanismdeserializerconstants.h
     src/game/level/gamenode.cpp src/game/level/gamenode.h
-    src/game/gamestate.cpp src/game/gamestate.h
+    src/game/state/gamestate.cpp src/game/state/gamestate.h
     src/game/weapons/gun.cpp src/game/weapons/gun.h
     src/game/player/health.cpp src/game/player/health.h
     src/game/level/hitbox.cpp src/game/level/hitbox.h
@@ -117,7 +117,7 @@ set(GAME_FILES
     src/game/ingamemenu/ingamemenupage.cpp src/game/ingamemenu/ingamemenupage.h
     src/game/player/inventorybasedcontrols.cpp src/game/player/inventorybasedcontrols.h
     src/game/player/inventoryitemdescriptionreader.cpp src/game/player/inventoryitemdescriptionreader.h
-    src/game/layerdata.cpp src/game/layerdata.h
+    src/game/image/layerdata.cpp src/game/image/layerdata.h
     src/game/level/level.cpp src/game/level/level.h
     src/game/level/leveldescription.cpp src/game/level/leveldescription.h
     src/game/level/levelfiles.cpp src/game/level/levelfiles.h
@@ -215,7 +215,7 @@ set(GAME_FILES
     src/game/weapons/projectilehitaudio.cpp src/game/weapons/projectilehitaudio.h
     src/game/level/room.cpp src/game/level/room.h
     src/game/level/roomupdater.cpp src/game/level/roomupdater.h
-    src/game/savestate.cpp src/game/savestate.h
+    src/game/state/savestate.cpp src/game/state/savestate.h
     src/game/effects/screentransition.cpp src/game/effects/screentransition.h
     src/game/effects/screentransitioneffect.cpp src/game/effects/screentransitioneffect.h
     src/game/level/scriptproperty.cpp src/game/level/scriptproperty.h

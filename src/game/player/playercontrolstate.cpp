@@ -1,7 +1,7 @@
 #include "playercontrolstate.h"
 
-#include "game/displaymode.h"
-#include "game/gamestate.h"
+#include "game/state/displaymode.h"
+#include "game/state/gamestate.h"
 
 bool PlayerControlState::checkState()
 {

@@ -4,14 +4,14 @@
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
+#include "game/mechanisms/dialogue.h"
+#include "game/mechanisms/sensorrect.h"
 #include "game/player/player.h"
+#include "game/player/playercontrols.h"
 #include "game/player/weaponsystem.h"
-#include "game/savestate.h"
+#include "game/state/savestate.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
-#include "mechanisms/dialogue.h"
-#include "mechanisms/sensorrect.h"
-#include "player/playercontrols.h"
 
 #include <mutex>
 #include <regex>

@@ -1,8 +1,8 @@
 #ifndef INGAMEMENUARCHIVES_H
 #define INGAMEMENUARCHIVES_H
 
+#include "game/image/layerdata.h"
 #include "ingamemenupage.h"
-#include "layerdata.h"
 
 #include <SFML/Graphics.hpp>
 

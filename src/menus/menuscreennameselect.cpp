@@ -1,7 +1,7 @@
 #include "menuscreennameselect.h"
 
-#include "game/gamestate.h"
-#include "game/savestate.h"
+#include "game/state/gamestate.h"
+#include "game/state/savestate.h"
 #include "menu.h"
 
 #include <stdlib.h>

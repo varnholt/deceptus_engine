@@ -1,7 +1,7 @@
 #include "eventserializer.h"
 
 #include "framework/tools/log.h"
-#include "gamestate.h"
+#include "game/state/gamestate.h"
 
 #include <iostream>
 #include <ostream>
