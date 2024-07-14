@@ -6,8 +6,8 @@
 #include "game/gamestate.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levels.h"
-#include "game/messagebox.h"
 #include "game/savestate.h"
+#include "game/ui/messagebox.h"
 
 #include <iostream>
 #include <ostream>

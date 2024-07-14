@@ -2,9 +2,9 @@
 
 #include <array>
 
-#include "gamedeserializedata.h"
-#include "rope.h"
-#include "effects/lightsystem.h"
+#include "game/effects/lightsystem.h"
+#include "game/io/gamedeserializedata.h"
+#include "game/mechanisms/rope.h"
 
 class RopeWithLight : public Rope
 {

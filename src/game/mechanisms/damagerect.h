@@ -1,9 +1,9 @@
 #ifndef DAMAGERECT_H
 #define DAMAGERECT_H
 
-#include "game/gamedeserializedata.h"
-#include "game/gamemechanism.h"
+#include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 class DamageRect : public GameMechanism, public GameNode
 {

@@ -76,20 +76,20 @@ set(GAME_FILES
     src/game/camera/camerasystemconfigurationui.cpp src/game/camera/camerasystemconfigurationui.h
     src/game/physics/chainshapeanalyzer.cpp src/game/physics/chainshapeanalyzer.h
     src/game/level/chunk.cpp src/game/level/chunk.h
-    src/game/console.cpp src/game/console.h
+    src/game/debug/console.cpp src/game/debug/console.h
     src/game/constants.h
-    src/game/debugdraw.cpp src/game/debugdraw.h
+    src/game/debug/debugdraw.cpp src/game/debug/debugdraw.h
     src/game/animation/detonationanimation.cpp src/game/animation/detonationanimation.h
     src/game/displaymode.cpp src/game/displaymode.h
-    src/game/drawstates.cpp src/game/drawstates.h
+    src/game/debug/drawstates.cpp src/game/debug/drawstates.h
     src/game/effects/lightsystem.cpp src/game/effects/lightsystem.h
     src/game/effects/spawneffect.cpp src/game/effects/spawneffect.h
     src/game/level/enemydescription.cpp src/game/level/enemydescription.h
-    src/game/eventdistributor.cpp src/game/eventdistributor.h
-    src/game/eventserializer.cpp src/game/eventserializer.h
+    src/game/event/eventdistributor.cpp src/game/event/eventdistributor.h
+    src/game/io/eventserializer.cpp src/game/io/eventserializer.h
     src/game/effects/fadetransitioneffect.cpp src/game/effects/fadetransitioneffect.h
     src/game/level/fixturenode.cpp src/game/level/fixturenode.h
-    src/game/forestscene.cpp src/game/forestscene.h
+    src/game/scenes/forestscene.cpp src/game/scenes/forestscene.h
     src/game/animation/framemapper.cpp src/game/animation/framemapper.h
     src/game/game.cpp src/game/game.h
     src/game/gameaudio.cpp src/game/gameaudio.h
@@ -99,10 +99,10 @@ set(GAME_FILES
     src/game/controller/gamecontrollerdata.cpp src/game/controller/gamecontrollerdata.h
     src/game/controller/gamecontrollerdetection.cpp src/game/controller/gamecontrollerdetection.h
     src/game/controller/gamecontrollerintegration.cpp src/game/controller/gamecontrollerintegration.h
-    src/game/gamedeserializedata.cpp src/game/gamedeserializedata.h
-    src/game/gamemechanism.cpp src/game/gamemechanism.h
-    src/game/gamemechanismdeserializer.cpp src/game/gamemechanismdeserializer.h
-    src/game/gamemechanismdeserializerconstants.h
+    src/game/io/gamedeserializedata.cpp src/game/io/gamedeserializedata.h
+    src/game/mechanisms/gamemechanism.cpp src/game/mechanisms/gamemechanism.h
+    src/game/mechanisms/gamemechanismdeserializer.cpp src/game/mechanisms/gamemechanismdeserializer.h
+    src/game/mechanisms/gamemechanismdeserializerconstants.h
     src/game/level/gamenode.cpp src/game/level/gamenode.h
     src/game/gamestate.cpp src/game/gamestate.h
     src/game/weapons/gun.cpp src/game/weapons/gun.h
@@ -174,8 +174,8 @@ set(GAME_FILES
     src/game/mechanisms/watersurface.cpp src/game/mechanisms/watersurface.h
     src/game/mechanisms/weather.cpp src/game/mechanisms/weather.h
     src/game/ingamemenu/menuconfig.cpp src/game/ingamemenu/menuconfig.h
-    src/game/meshtools.cpp src/game/meshtools.h
-    src/game/messagebox.cpp src/game/messagebox.h
+    src/game/io/meshtools.cpp src/game/io/meshtools.h
+    src/game/ui/messagebox.cpp src/game/ui/messagebox.h
     src/game/physics/onewaywall.cpp src/game/physics/onewaywall.h
     src/game/layers/controlleroverlay.cpp src/game/layers/controlleroverlay.h
     src/game/layers/rainoverlay.cpp src/game/layers/rainoverlay.h
@@ -209,7 +209,7 @@ set(GAME_FILES
     src/game/player/playerutils.cpp src/game/player/playerutils.h
     src/game/player/timerlock.cpp src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp src/game/player/weaponsystem.h
-    src/game/preloader.cpp src/game/preloader.h
+    src/game/io/preloader.cpp src/game/io/preloader.h
     src/game/weapons/projectile.cpp src/game/weapons/projectile.h
     src/game/weapons/projectilehitanimation.cpp src/game/weapons/projectilehitanimation.h
     src/game/weapons/projectilehitaudio.cpp src/game/weapons/projectilehitaudio.h
@@ -227,8 +227,8 @@ set(GAME_FILES
     src/game/physics/squaremarcher.cpp src/game/physics/squaremarcher.h
     src/game/level/stenciltilemap.cpp src/game/level/stenciltilemap.h
     src/game/weapons/sword.cpp src/game/weapons/sword.h
-    src/game/test.cpp src/game/test.h
-    src/game/texturepool.cpp src/game/texturepool.h
+    src/game/tests/test.cpp src/game/tests/test.h
+    src/game/io/texturepool.cpp src/game/io/texturepool.h
     src/game/level/tilemap.cpp src/game/level/tilemap.h
     src/game/level/tilemapfactory.cpp src/game/level/tilemapfactory.h
     src/game/level/tmxenemy.cpp src/game/level/tmxenemy.h
@@ -238,7 +238,7 @@ set(GAME_FILES
     src/game/weapons/weapon.cpp src/game/weapons/weapon.h
     src/game/weapons/weaponfactory.cpp src/game/weapons/weaponfactory.h
     src/game/weapons/weaponproperties.cpp src/game/weapons/weaponproperties.h
-    src/game/worldquery.cpp src/game/worldquery.h
+    src/game/physics/worldquery.cpp src/game/physics/worldquery.h
     src/main.cpp
     src/menus/menu.cpp src/menus/menu.h
     src/menus/menuaudio.cpp src/menus/menuaudio.h

@@ -10,8 +10,8 @@
 #include <SFML/Graphics.hpp>
 
 #include "framework/tmxparser/tmxobject.h"
-#include "gamedeserializedata.h"
-#include "gamenode.h"
+#include "game/io/gamedeserializedata.h"
+#include "game/level/gamenode.h"
 
 struct ScreenTransition;
 

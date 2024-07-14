@@ -1,10 +1,9 @@
 #ifndef ENEMYWALL_H
 #define ENEMYWALL_H
 
-#include "game/gamemechanism.h"
+#include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
-
-#include "gamedeserializedata.h"
+#include "game/mechanisms/gamemechanism.h"
 
 class EnemyWall : public GameMechanism, public GameNode
 {

@@ -16,7 +16,7 @@
 #include "game/level/level.h"
 #include "game/player/player.h"
 #include "game/savestate.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <iostream>
 

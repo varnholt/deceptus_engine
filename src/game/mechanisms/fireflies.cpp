@@ -3,8 +3,8 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "game/debugdraw.h"
-#include "game/texturepool.h"
+#include "game/debug/debugdraw.h"
+#include "game/io/texturepool.h"
 
 namespace
 {

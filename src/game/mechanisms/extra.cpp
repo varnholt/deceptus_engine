@@ -4,13 +4,13 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/audio/audio.h"
-#include "game/gamedeserializedata.h"
+#include "game/io/gamedeserializedata.h"
+#include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
-#include "game/texturepool.h"
-#include "game/valuereader.h"
 
 // #define DRAW_DEBUG 1
 #ifdef DRAW_DEBUG

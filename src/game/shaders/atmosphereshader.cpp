@@ -2,7 +2,7 @@
 
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <iostream>
 

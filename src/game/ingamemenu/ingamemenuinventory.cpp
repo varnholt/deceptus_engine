@@ -3,11 +3,11 @@
 #include "framework/easings/easings.h"
 #include "framework/joystick/gamecontroller.h"
 #include "game/controller/gamecontrollerintegration.h"
-#include "game/eventdistributor.h"
+#include "game/event/eventdistributor.h"
 #include "game/ingamemenu/menuconfig.h"
+#include "game/io/texturepool.h"
 #include "game/player/playerinfo.h"
 #include "game/savestate.h"
-#include "game/texturepool.h"
 
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>

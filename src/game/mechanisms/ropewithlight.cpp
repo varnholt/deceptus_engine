@@ -3,8 +3,8 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "game/io/valuereader.h"
 #include "game/level/level.h"
-#include "game/valuereader.h"
 
 RopeWithLight::RopeWithLight(GameNode* parent)
  : Rope(parent)

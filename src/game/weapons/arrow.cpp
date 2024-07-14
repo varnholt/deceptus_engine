@@ -4,7 +4,7 @@
 
 #include "framework/tools/globalclock.h"
 #include "game/weapons/projectilehitaudio.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 
 const auto sprite_width = PIXELS_PER_TILE;

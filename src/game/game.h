@@ -2,25 +2,20 @@
 
 #include "game/audio/audio.h"
 #include "game/camera/camerasystemconfigurationui.h"
-#include "game/console.h"
 #include "game/constants.h"
-#include "game/drawstates.h"
-#include "game/eventserializer.h"
-#include "game/forestscene.h"
+#include "game/debug/console.h"
 #include "game/ingamemenu/ingamemenu.h"
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
-#include "game/layers/rainoverlay.h"
 #include "game/physics/physicsconfigurationui.h"
+#include "game/scenes/forestscene.h"
 #include "gameaudio.h"
-#include "menus/menu.h"
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
 #include <future>
-#include <thread>
 
 class Level;
 class Player;

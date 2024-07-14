@@ -1,10 +1,11 @@
 #include "dialogue.h"
 
-#include "displaymode.h"
-#include "gamestate.h"
-#include "messagebox.h"
-#include "player/player.h"
-#include "savestate.h"
+#include "game/displaymode.h"
+#include "game/gamestate.h"
+#include "game/io/valuereader.h"
+#include "game/player/player.h"
+#include "game/savestate.h"
+#include "game/ui/messagebox.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -12,7 +13,6 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
-#include "game/valuereader.h"
 
 #include <algorithm>
 #include <iomanip>

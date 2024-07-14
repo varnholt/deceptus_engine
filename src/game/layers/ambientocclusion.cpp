@@ -8,7 +8,7 @@
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
 #include "player/player.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 void AmbientOcclusion::load(const std::filesystem::path& path, const std::string& base_filename)
 {

@@ -1,11 +1,11 @@
 // base
-#include "gun.h"
+#include "game/weapons/gun.h"
 
 // game
-#include "constants.h"
-#include "projectile.h"
-#include "projectilehitanimation.h"
-#include "texturepool.h"
+#include "game/constants.h"
+#include "game/io/texturepool.h"
+#include "game/weapons/projectile.h"
+#include "game/weapons/projectilehitanimation.h"
 
 #include <iostream>
 

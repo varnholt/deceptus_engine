@@ -2,7 +2,7 @@
 
 #include "constants.h"
 #include "player/player.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxproperties.h"

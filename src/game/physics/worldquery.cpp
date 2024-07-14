@@ -1,4 +1,4 @@
-#include "game/worldquery.h"
+#include "game/physics/worldquery.h"
 #include "game/level/luainterface.h"
 
 b2Vec2 vecS2B(const sf::Vector2f& vector)

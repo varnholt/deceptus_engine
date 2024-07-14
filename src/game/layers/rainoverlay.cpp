@@ -2,11 +2,11 @@
 
 #include "framework/math/sfmlmath.h"
 #include "game/config/gameconfiguration.h"
-#include "game/debugdraw.h"
+#include "game/debug/debugdraw.h"
+#include "game/io/texturepool.h"
 #include "game/level/level.h"
+#include "game/physics/worldquery.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
-#include "game/worldquery.h"
 
 #include <algorithm>
 #include <cstdlib>

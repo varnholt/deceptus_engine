@@ -16,7 +16,7 @@
 #include "framework/tools/log.h"
 #include "game/level/blendmodedeserializer.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 namespace
 {

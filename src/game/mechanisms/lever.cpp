@@ -8,7 +8,7 @@
 #include "game/constants.h"
 #include "game/player/player.h"
 #include "game/savestate.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 namespace
 {

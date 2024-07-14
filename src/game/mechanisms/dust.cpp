@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 Dust::Dust(GameNode* parent) : GameNode(parent)
 {

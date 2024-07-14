@@ -5,9 +5,9 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
+#include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/layers/bitmapfont.h"
-#include "game/texturepool.h"
-#include "game/valuereader.h"
 
 TextLayer::TextLayer(GameNode* parent) : GameNode(parent)
 {
