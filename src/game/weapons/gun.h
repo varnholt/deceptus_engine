@@ -1,6 +1,6 @@
 #pragma once
 
-#include "weapon.h"
+#include "game/weapons/weapon.h"
 
 // sfml
 #include <SFML/Graphics.hpp>

@@ -3,8 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "game/gamemechanism.h"
 #include "game/level/luanode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 #include <set>
 #include <thread>

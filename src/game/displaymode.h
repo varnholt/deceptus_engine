@@ -8,7 +8,6 @@
 class DisplayMode
 {
 public:
-
    DisplayMode() = default;
 
    static DisplayMode& getInstance();
@@ -22,13 +21,8 @@ public:
    bool isSet(Display mode) const;
 
 private:
-
    void toggle(Display mode);
-
    int32_t _mode = static_cast<int32_t>(Display::Game);
-
    using QueuedFunction = std::function<void(void)>;
-
    std::vector<QueuedFunction> _queue;
 };
-

@@ -1,7 +1,7 @@
 #include "bitmapfont.h"
 
 #include "framework/tools/log.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <stdio.h>
 #include <fstream>

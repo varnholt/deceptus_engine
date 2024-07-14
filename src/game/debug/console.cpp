@@ -2,7 +2,7 @@
 
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
-#include "game/eventserializer.h"
+#include "game/io/eventserializer.h"
 #include "game/level/level.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"

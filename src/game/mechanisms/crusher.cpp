@@ -9,7 +9,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "game/level/fixturenode.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <iostream>
 

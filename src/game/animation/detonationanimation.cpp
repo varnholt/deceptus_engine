@@ -6,7 +6,7 @@
 #include <ctime>
 #include <iostream>
 
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 // big detonations are: 6 x 6 x 24
 //    8 rows

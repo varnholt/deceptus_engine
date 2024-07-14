@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include "game/gamedeserializedata.h"
-#include "game/gamemechanism.h"
+#include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 struct TmxObject;
 struct TmxObjectGroup;

@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "game/animation/animation.h"
-#include "game/gamedeserializedata.h"
+#include "game/io/gamedeserializedata.h"
 
 class SpawnEffect
 {

@@ -10,7 +10,7 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "player/player.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 namespace
 {

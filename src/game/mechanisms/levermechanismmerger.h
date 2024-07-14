@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "framework/tmxparser/tmxobject.h"
-#include "game/gamemechanism.h"
+#include "game/mechanisms/gamemechanism.h"
 
 namespace LeverMechanismMerger
 {

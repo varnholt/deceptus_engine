@@ -6,10 +6,10 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
+#include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
-#include "game/valuereader.h"
 
 InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {

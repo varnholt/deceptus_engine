@@ -2,7 +2,7 @@
 
 #include "game/level/atmosphere.h"
 #include "game/level/level.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <iostream>
 

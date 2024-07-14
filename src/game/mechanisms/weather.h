@@ -1,10 +1,10 @@
 #pragma once
 
-#include "game/gamedeserializedata.h"
-#include "game/gamemechanism.h"
+#include "game/io/gamedeserializedata.h"
 #include "game/layers/rainoverlay.h"
 #include "game/layers/thunderstormoverlay.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
 #include <memory>

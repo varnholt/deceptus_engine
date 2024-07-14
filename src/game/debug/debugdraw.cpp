@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "framework/tools/elapsedtimer.h"
-#include "worldquery.h"
+#include "game/physics/worldquery.h"
 
 constexpr auto outline_thickness = 0.5f;
 

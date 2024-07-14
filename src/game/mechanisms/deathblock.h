@@ -2,9 +2,9 @@
 
 #include "framework/math/pathinterpolation.h"
 #include "game/constants.h"
-#include "game/gamedeserializedata.h"
-#include "game/gamemechanism.h"
+#include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 #include <box2d/box2d.h>
 

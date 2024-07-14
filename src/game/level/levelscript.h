@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <string>
-#include "game/gamemechanism.h"
+#include "game/mechanisms/gamemechanism.h"
 #include "game/level/scriptproperty.h"
 #include "lua.hpp"
 

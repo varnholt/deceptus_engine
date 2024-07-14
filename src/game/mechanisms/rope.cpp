@@ -6,7 +6,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/player/player.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <array>
 #include <iostream>

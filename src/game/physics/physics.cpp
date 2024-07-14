@@ -17,7 +17,7 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
-#include "meshtools.h"
+#include "game/io/meshtools.h"
 
 namespace
 {
