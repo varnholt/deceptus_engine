@@ -1,7 +1,7 @@
 #include "menuscreenpause.h"
 
-#include "game/gameaudio.h"
-#include "game/gamestate.h"
+#include "game/sfx/gameaudio.h"
+#include "game/state/gamestate.h"
 #include "game/ui/messagebox.h"
 #include "menu.h"
 #include "menuaudio.h"

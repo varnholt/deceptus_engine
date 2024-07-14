@@ -1,18 +1,17 @@
 #include "dialogue.h"
 
-#include "game/displaymode.h"
-#include "game/gamestate.h"
-#include "game/io/valuereader.h"
-#include "game/player/player.h"
-#include "game/savestate.h"
-#include "game/ui/messagebox.h"
-
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
+#include "game/io/valuereader.h"
+#include "game/player/player.h"
+#include "game/state/displaymode.h"
+#include "game/state/gamestate.h"
+#include "game/state/savestate.h"
+#include "game/ui/messagebox.h"
 
 #include <algorithm>
 #include <iomanip>

@@ -1,7 +1,7 @@
 #include "menuscreenmain.h"
 
-#include "game/gamestate.h"
-#include "game/savestate.h"
+#include "game/state/gamestate.h"
+#include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
 #include "menu.h"
 #include "menuaudio.h"

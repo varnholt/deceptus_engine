@@ -3,10 +3,10 @@
 #include "menu.h"
 #include "menuaudio.h"
 
-#include "game/gamestate.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levels.h"
-#include "game/savestate.h"
+#include "game/state/gamestate.h"
+#include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
 
 #include <iostream>

@@ -6,12 +6,12 @@
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerapanorama.h"
+#include "game/clock/gameclock.h"
 #include "game/config/gameconfiguration.h"
 #include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
-#include "game/gameclock.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/mechanisms/bouncerwrapper.h"
@@ -27,7 +27,7 @@
 #include "game/player/playercontrolstate.h"
 #include "game/player/playerinfo.h"
 #include "game/player/weaponsystem.h"
-#include "game/savestate.h"
+#include "game/state/savestate.h"
 #include "game/weapons/weapon.h"
 
 #include <SFML/Audio.hpp>

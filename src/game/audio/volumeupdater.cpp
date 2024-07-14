@@ -1,8 +1,8 @@
 #include "volumeupdater.h"
 
 #include "framework/math/sfmlmath.h"
-#include "game/gamestate.h"
 #include "game/level/luainterface.h"
+#include "game/state/gamestate.h"
 #include "game/weapons/projectile.h"
 
 #include <iostream>
