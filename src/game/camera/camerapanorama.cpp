@@ -6,7 +6,7 @@
 #include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerdata.h"
 #include "game/controller/gamecontrollerintegration.h"
-#include "game/displaymode.h"
+#include "game/state/displaymode.h"
 
 CameraPanorama& CameraPanorama::getInstance()
 {

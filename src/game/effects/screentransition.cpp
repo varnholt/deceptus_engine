@@ -1,9 +1,8 @@
 #include "screentransition.h"
 
-#include "displaymode.h"
 #include "framework/tools/timer.h"
-#include "screentransitioneffect.h"
-
+#include "game/effects/screentransitioneffect.h"
+#include "game/state/displaymode.h"
 
 void ScreenTransition::startEffect1()
 {

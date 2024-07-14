@@ -10,7 +10,7 @@
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
-#include "game/savestate.h"
+#include "game/state/savestate.h"
 
 // #define DRAW_DEBUG 1
 #ifdef DRAW_DEBUG

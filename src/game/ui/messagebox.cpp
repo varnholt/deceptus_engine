@@ -9,7 +9,7 @@
 #include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
-#include "game/displaymode.h"
+#include "game/state/displaymode.h"
 
 #include <algorithm>
 #include <iostream>

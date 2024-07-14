@@ -9,7 +9,7 @@
 #include "game/layers/infolayer.h"
 #include "game/physics/physicsconfigurationui.h"
 #include "game/scenes/forestscene.h"
-#include "gameaudio.h"
+#include "game/sfx/gameaudio.h"
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>

@@ -7,12 +7,12 @@
 #include "game/camera/camerapanorama.h"
 #include "game/config/gameconfiguration.h"
 #include "game/debug/console.h"
+#include "game/io/texturepool.h"
 #include "game/level/roomupdater.h"
 #include "game/player/extratable.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
-#include "game/savestate.h"
-#include "game/io/texturepool.h"
+#include "game/state/savestate.h"
 
 #if defined __GNUC__ && __linux__
 #define FMT_HEADER_ONLY

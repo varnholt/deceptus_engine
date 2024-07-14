@@ -7,7 +7,7 @@
 #include "game/ingamemenu/menuconfig.h"
 #include "game/io/texturepool.h"
 #include "game/player/playerinfo.h"
-#include "game/savestate.h"
+#include "game/state/savestate.h"
 
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>

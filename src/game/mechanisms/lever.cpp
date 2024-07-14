@@ -6,9 +6,9 @@
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
-#include "game/player/player.h"
-#include "game/savestate.h"
 #include "game/io/texturepool.h"
+#include "game/player/player.h"
+#include "game/state/savestate.h"
 
 namespace
 {

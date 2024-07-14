@@ -17,7 +17,6 @@
 #include "game/config/tweaks.h"
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
-#include "game/displaymode.h"
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
@@ -42,7 +41,8 @@
 #include "game/physics/squaremarcher.h"
 #include "game/player/player.h"
 #include "game/player/playerstencil.h"
-#include "game/savestate.h"
+#include "game/state/displaymode.h"
+#include "game/state/savestate.h"
 #include "game/weapons/gun.h"
 
 // sfml

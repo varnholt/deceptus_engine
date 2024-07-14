@@ -7,7 +7,7 @@
 #include "game/camera/camerapanorama.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
-#include "game/savestate.h"
+#include "game/state/savestate.h"
 
 #include <box2d/box2d.h>
 

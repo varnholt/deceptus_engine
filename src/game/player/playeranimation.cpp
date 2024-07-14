@@ -9,10 +9,10 @@
 #include "framework/tools/stopwatch.h"
 #include "game/animation/animationpool.h"
 #include "game/camera/camerapanorama.h"
-#include "game/displaymode.h"
-#include "game/gameclock.h"
+#include "game/clock/gameclock.h"
 #include "game/mechanisms/portal.h"
 #include "game/physics/physicsconfiguration.h"
+#include "game/state/displaymode.h"
 
 namespace
 {
