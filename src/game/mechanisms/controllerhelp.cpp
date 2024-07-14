@@ -10,7 +10,7 @@
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 // clang-format off
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+

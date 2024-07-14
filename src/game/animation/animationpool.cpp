@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include "framework/tools/log.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include "json/json.hpp"
 

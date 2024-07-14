@@ -5,9 +5,9 @@
 #include <box2d/box2d.h>
 #include "SFML/Graphics.hpp"
 #include "game/constants.h"
-#include "game/gamedeserializedata.h"
-#include "game/gamemechanism.h"
+#include "game/io/gamedeserializedata.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 struct TmxObject;
 

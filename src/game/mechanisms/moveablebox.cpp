@@ -7,7 +7,7 @@
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/level/fixturenode.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <iostream>
 

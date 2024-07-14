@@ -4,7 +4,7 @@
 #include "framework/tmxparser/tmximagelayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 
 //-----------------------------------------------------------------------------

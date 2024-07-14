@@ -1,6 +1,6 @@
 #include "projectilehitanimation.h"
 
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <cmath>
 #include <iostream>

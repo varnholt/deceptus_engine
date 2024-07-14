@@ -7,9 +7,9 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
-#include "game/debugdraw.h"
+#include "game/debug/debugdraw.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 // #define DEBUG_INTERSECTION
 

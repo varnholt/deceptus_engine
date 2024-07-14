@@ -15,7 +15,7 @@
 #include "game/level/fixturenode.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <math.h>
 #include <iostream>

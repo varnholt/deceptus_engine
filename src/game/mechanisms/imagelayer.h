@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/gamemechanism.h"
+#include "game/mechanisms/gamemechanism.h"
 #include "game/layers/parallaxsettings.h"
 #include "game/level/gamenode.h"
 

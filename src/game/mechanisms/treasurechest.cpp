@@ -4,10 +4,10 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
+#include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/mechanisms/extrawrapper.h"
 #include "game/player/player.h"
-#include "game/texturepool.h"
-#include "game/valuereader.h"
 
 TreasureChest::TreasureChest(GameNode* parent) : GameNode(parent)
 {

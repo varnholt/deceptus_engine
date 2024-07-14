@@ -13,7 +13,7 @@
 #include "game/constants.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
-#include "texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <atomic>
 #include <iostream>

@@ -7,8 +7,8 @@
 
 #include "framework/tools/logthread.h"
 #include "game/constants.h"
-#include "game/preloader.h"
-#include "game/test.h"
+#include "game/io/preloader.h"
+#include "game/tests/test.h"
 
 #ifdef __linux__
 extern "C" int XInitThreads();

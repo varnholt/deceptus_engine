@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-#include "constants.h"
-#include "debugdraw.h"
-#include "drawstates.h"
 #include "framework/tools/stopwatch.h"
-#include "player/player.h"
-#include "worldquery.h"
+#include "game/constants.h"
+#include "game/debug/debugdraw.h"
+#include "game/debug/drawstates.h"
+#include "game/physics/worldquery.h"
+#include "game/player/player.h"
 
 namespace
 {

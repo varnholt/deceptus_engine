@@ -1,7 +1,7 @@
 #include "deathshader.h"
 
 #include "framework/tools/log.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 #include "player/player.h"
 
 #include <iostream>

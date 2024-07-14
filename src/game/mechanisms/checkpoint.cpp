@@ -6,11 +6,11 @@
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
-#include "game/debugdraw.h"
+#include "game/debug/debugdraw.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
 #include "game/savestate.h"
-#include "game/texturepool.h"
+#include "game/io/texturepool.h"
 
 #include <iostream>
 
