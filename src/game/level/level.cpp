@@ -970,6 +970,12 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          }
       }
 
+      // ambient occlusion
+      if (z_index == _ambient_occlusion.getZ())
+      {
+         _ambient_occlusion.draw(target);
+      }
+
       // draw enemies
       for (auto& enemy : LuaInterface::instance().getObjectList())
       {
@@ -979,12 +985,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          }
       }
 
+      // draw player
       if (z_index == static_cast<int32_t>(ZDepth::Player))
       {
-         // ambient occlusion
-         _ambient_occlusion.draw(target);
-
-         // draw player
          drawPlayer(target, normal);
       }
 
