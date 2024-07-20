@@ -7,18 +7,44 @@
 
 #include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
-#include "player/player.h"
 #include "game/io/texturepool.h"
+#include "player/player.h"
 
 void AmbientOcclusion::load(const std::filesystem::path& path, const std::string& base_filename)
 {
-   const auto ao_base_filename = base_filename + "_ao_tiles.png";
-   const auto texture = (path / ao_base_filename).string();
-   const auto uv = (path / (base_filename + "_ao_tiles.uv")).string();
+   // read config file
+   const auto config_filename = path / "ambient_occlusion.json";
+   std::ifstream ifs(config_filename, std::ifstream::in);
+   auto c = static_cast<char>(ifs.get());
+   std::string data;
+
+   while (ifs.good())
+   {
+      data.push_back(c);
+      c = static_cast<char>(ifs.get());
+   }
+
+   ifs.close();
+
+   // parse json
+   nlohmann::json json_config;
+   try
+   {
+      json_config = nlohmann::json::parse(data);
+   }
+   catch (const std::exception& e)
+   {
+      std::cerr << e.what() << std::endl;
+   }
+
+   // read config from json
+   _config = json_config.get<Config>();
+   const auto texture = (path / _config._texture_filename).string();
+   const auto uv = (path / _config._uv_filename).string();
 
    if (!std::filesystem::exists(texture))
    {
-      Log::Error() << "need to create an ambient occlusion map (" << ao_base_filename << ")";
+      Log::Error() << "need to create an ambient occlusion map (" << texture << ")";
       return;
    }
 
@@ -107,4 +133,16 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
          }
       }
    }
+}
+
+int32_t AmbientOcclusion::getZ() const
+{
+   return _config._z_index;
+}
+
+void from_json(const nlohmann::json& j, AmbientOcclusion::Config& settings)
+{
+   settings._texture_filename = j.at("texture_filename").get<std::string>();
+   settings._uv_filename = j.at("uv_filename").get<std::string>();
+   settings._z_index = j.at("z_index").get<int32_t>();
 }
