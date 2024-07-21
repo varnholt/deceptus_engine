@@ -182,6 +182,7 @@ Level::Level() : GameNode(nullptr)
 {
    setClassName(typeid(Level).name());
 
+   _ambient_occlusion = std::make_unique<AmbientOcclusion>();
    _volume_updater = std::make_unique<VolumeUpdater>();
 
    // init world for this level
@@ -504,7 +505,7 @@ bool Level::load()
 
    // loading ao
    Log::Info() << "loading ao... ";
-   _ambient_occlusion.load(level_json_path.parent_path(), std::filesystem::path(_description->_filename).stem().string());
+   _ambient_occlusion->load(level_json_path.parent_path(), std::filesystem::path(_description->_filename).stem().string());
 
    Log::Info() << "level loading complete";
 
@@ -970,6 +971,12 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          }
       }
 
+      // ambient occlusion
+      if (z_index == _ambient_occlusion->getZ())
+      {
+         _ambient_occlusion->draw(target);
+      }
+
       // draw enemies
       for (auto& enemy : LuaInterface::instance().getObjectList())
       {
@@ -979,12 +986,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          }
       }
 
+      // draw player
       if (z_index == static_cast<int32_t>(ZDepth::Player))
       {
-         // ambient occlusion
-         _ambient_occlusion.draw(target);
-
-         // draw player
          drawPlayer(target, normal);
       }
 
