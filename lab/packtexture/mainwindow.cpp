@@ -75,8 +75,17 @@ void MainWindow::pack()
    mUi->textureLabel_->mQuads = &mPackTexture->mQuads;
    mUi->textureLabel_->repaint();
    mUi->info_->setText(tr("creating texture..."));
+
    mPackTexture->dump();
-   mUi->info_->setText(tr("created %1x%1px texture").arg(mPackTexture->mTextureSize));
+
+   if (mPackTexture->mTextureSize != 0)
+   {
+      mUi->info_->setText(tr("created %1x%1px texture").arg(mPackTexture->mTextureSize));
+   }
+   else
+   {
+      mUi->info_->setText(tr("failed to create suitable texture texture; please try smaller chunk sizes"));
+   }
 }
 
 
