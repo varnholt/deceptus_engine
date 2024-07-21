@@ -78,7 +78,7 @@ void PackTexture::dump()
    auto count = mQuads.size();
 
    std::cout << "[x] quad count: " << count << std::endl;
-   std::array<int, 5> textureSizes = {512, 1024, 2048, 4096, 8192};
+   std::array<int, 7> textureSizes = {512, 1024, 2048, 4096, 8192, 16384, 32768};
 
    auto suitable = std::find_if(std::begin(textureSizes), std::end(textureSizes), [&](auto textureSize){
       auto tmp = textureSize / mSize;
@@ -86,7 +86,15 @@ void PackTexture::dump()
       return (tmp >= count);
    });
 
-   mTextureSize = *suitable;
+   if (suitable == textureSizes.end())
+   {
+      std::cout << "[e] no suitable texture size for given configuration (" << mSize << ")" << std::endl;
+      return;
+   }
+   else
+   {
+      mTextureSize = *suitable;
+   }
 
    std::cout << "[x] picking a " << mTextureSize << "x" << mTextureSize << " texture" << std::endl;
 
