@@ -39,7 +39,7 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
       std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &i, &x, &y, &w, &h);
 
       sf::Sprite sprite;
-      sprite.setPosition(static_cast<float>(x - 5), static_cast<float>(y - 6));
+      sprite.setPosition(static_cast<float>(x - _config._offset_x_px), static_cast<float>(y - _config._offset_y_px));
       sprite.setTexture(*_texture);
       sprite.setTextureRect({xi, yi, w, h});
 
@@ -156,6 +156,16 @@ AmbientOcclusion::Config::Config(const std::filesystem::path& path, const std::s
    else
    {
       _z_index = static_cast<int32_t>(ZDepth::Player);
+   }
+
+   if (j.find("offset_x_px") != j.end())
+   {
+      _offset_x_px = j.at("offset_x_px").get<int32_t>();
+   }
+
+   if (j.find("offset_y_px") != j.end())
+   {
+      _offset_y_px = j.at("offset_y_px").get<int32_t>();
    }
 
    if (!std::filesystem::exists(_texture_filename))
