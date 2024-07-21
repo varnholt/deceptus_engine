@@ -16,6 +16,12 @@ public:
 
    struct Config
    {
+      Config() = default;
+      Config(const std::filesystem::path& path, const std::string& base_filename);
+
+      std::filesystem::path _path;
+      std::string _base_filename;
+
       std::string _texture_filename;
       std::string _uv_filename;
       int32_t _z_index{};
@@ -26,5 +32,3 @@ private:
    std::shared_ptr<sf::Texture> _texture;
    std::map<int32_t, std::map<int32_t, std::vector<sf::Sprite>>> _sprite_map;
 };
-
-void from_json(const nlohmann::json& j, AmbientOcclusion::Config& settings);
