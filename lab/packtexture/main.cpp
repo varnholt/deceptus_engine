@@ -1,17 +1,16 @@
 #include "mainwindow.h"
 #include "packtexture.h"
 
-#include <iostream>
 #include <QApplication>
 #include <QCommandLineParser>
+#include <iostream>
 
 // support qt6
 #if QT_VERSION > 0x060000
 #include <QImageReader>
 #endif
 
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
    QApplication a(argc, argv);
 
@@ -27,31 +26,33 @@ int main(int argc, char *argv[])
    parser.addHelpOption();
    parser.addVersionOption();
 
-   QCommandLineOption inputOption(
-      QStringList() << "i" << "input",
+   QCommandLineOption input_option(
+      QStringList() << "i"
+                    << "input",
       QCoreApplication::translate("main", "specify input file"),
       QCoreApplication::translate("main", "file path")
    );
 
-   QCommandLineOption sizeOption(
-      QStringList() << "s" << "size",
+   QCommandLineOption size_option(
+      QStringList() << "s"
+                    << "size",
       QCoreApplication::translate("main", "specify quad size, available values: 16, 24, 32, 64, 128, 256, 512, 1024"),
       QCoreApplication::translate("main", "quad size")
    );
 
-   parser.addOption(inputOption);
-   parser.addOption(sizeOption);
+   parser.addOption(input_option);
+   parser.addOption(size_option);
    parser.process(a);
 
-   if (parser.isSet(inputOption))
+   if (parser.isSet(input_option))
    {
       PackTexture pt;
-      int32_t size = pt.mSize;
+      int32_t size = pt._size;
 
-      if (parser.isSet(sizeOption))
+      if (parser.isSet(size_option))
       {
          bool ok = false;
-         size = parser.value(sizeOption).toInt(&ok);
+         size = parser.value(size_option).toInt(&ok);
 
          if (!ok)
          {
@@ -69,10 +70,10 @@ int main(int argc, char *argv[])
          }
       }
 
-      pt.mSize = size;
-      if (!pt.load(parser.value(inputOption)))
+      pt._size = size;
+      if (!pt.load(parser.value(input_option)))
       {
-         std::cerr << "[!] unable to load file: " << parser.value(inputOption).toStdString() << std::endl;
+         std::cerr << "[!] unable to load file: " << parser.value(input_option).toStdString() << std::endl;
          exit(3);
       }
       pt.pack();
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 
    MainWindow w;
    w.show();
-   w.setFixedSize(550,550);
+   // w.setFixedSize(550, 550);
 
    return a.exec();
 }
