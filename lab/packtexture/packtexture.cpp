@@ -1,78 +1,21 @@
 #include "packtexture.h"
+
+#include <QApplication>
+#include <QByteArray>
+#include <QCryptographicHash>
+#include <QDir>
 #include <QFileInfo>
+#include <QImage>
 #include <QPainter>
+#include <QString>
 #include <array>
 #include <fstream>
 #include <iostream>
-
-#include <QByteArray>
-#include <QCryptographicHash>
-#include <iostream>
-
-#include <QImage>
-#include <iostream>
 #include <vector>
 
-// namespace
-// {
-// // Function to compare two QImages
-// bool imagesAreEqual(const QImage& img1, const QImage& img2)
-// {
-//    if (img1.size() != img2.size() || img1.format() != img2.format())
-//    {
-//       return false;
-//    }
-
-//    for (int y = 0; y < img1.height(); ++y)
-//    {
-//       const QRgb* row1 = reinterpret_cast<const QRgb*>(img1.constScanLine(y));
-//       const QRgb* row2 = reinterpret_cast<const QRgb*>(img2.constScanLine(y));
-//       for (int x = 0; x < img1.width(); ++x)
-//       {
-//          if (row1[x] != row2[x])
-//          {
-//             return false;
-//          }
-//       }
-//    }
-
-//    return true;
-// }
-
-// // Function to check if a QImage is already in the vector
-// bool containsImage(const std::vector<QImage>& images, const QImage& image)
-// {
-//    for (const auto& img : images)
-//    {
-//       if (imagesAreEqual(img, image))
-//       {
-//          return true;
-//       }
-//    }
-//    return false;
-// }
-
-// }  // namespace
-
 namespace
 {
-QString calculateSHA256Checksum(const QImage& image)
-{
-   QCryptographicHash hash(QCryptographicHash::Sha256);
-
-   for (int y = 0; y < image.height(); ++y)
-   {
-      const QRgb* row_data = reinterpret_cast<const QRgb*>(image.constScanLine(y));
-      hash.addData(reinterpret_cast<const char*>(row_data), image.width() * sizeof(QRgb));
-   }
-
-   return QString(hash.result().toHex());
-}
-}  // namespace
-
-namespace
-{
-// Precomputed CRC32 table
+// precomputed CRC32 table
 std::array<uint32_t, 256> createCRC32Table()
 {
    std::array<uint32_t, 256> table;
@@ -104,7 +47,6 @@ const std::array<uint32_t, 256>& getCRC32Table()
    return table;
 }
 
-// Function to calculate CRC32 checksum for a QImage
 uint32_t calculateCRC32Checksum(const QImage& image)
 {
    const auto& table = getCRC32Table();
@@ -124,22 +66,6 @@ uint32_t calculateCRC32Checksum(const QImage& image)
    }
 
    return crc ^ 0xFFFFFFFF;
-}
-}  // namespace
-namespace
-{
-quint32 calculateChecksum(const QImage& image)
-{
-   quint32 checksum = 0;
-   for (auto y = 0; y < image.height(); ++y)
-   {
-      const QRgb* row_data = reinterpret_cast<const QRgb*>(image.constScanLine(y));
-      for (auto x = 0; x < image.width(); ++x)
-      {
-         checksum ^= row_data[x];
-      }
-   }
-   return checksum;
 }
 }  // namespace
 
@@ -191,8 +117,6 @@ void PackTexture::pack()
          }
 
          const auto checksum = calculateCRC32Checksum(sub_image);
-         // const auto checksum = calculateSHA256Checksum(sub_image);
-
          const auto checksum_it = _quads.find(checksum);
 
          Rect rect;
@@ -213,7 +137,7 @@ void PackTexture::pack()
          else
          {
             // extend existing quad
-            std::cout << "[!] duplicate found: " << checksum /*.toStdString()*/ << std::endl;
+            _log(qApp->tr("duplicate block found at %1x%2").arg(block_x).arg(block_y));
             _quads[checksum]._rects.push_back(rect);
          }
       }
@@ -225,13 +149,11 @@ void PackTexture::pack()
    }
 }
 
-#include <QDir>
-
 void PackTexture::dump()
 {
    auto quad_count = _quads.size();
 
-   std::cout << "[x] quad count: " << quad_count << std::endl;
+   _log(qApp->tr("quad count: %1").arg(quad_count));
    std::array<int, 7> texture_sizes = {512, 1024, 2048, 4096, 8192};
 
    auto suitable_texture_size = std::find_if(
@@ -247,7 +169,7 @@ void PackTexture::dump()
 
    if (suitable_texture_size == texture_sizes.end())
    {
-      std::cout << "[e] no suitable texture size for given configuration (" << _size << ")" << std::endl;
+      _log(qApp->tr("no suitable texture size for given configuration (%1)").arg(_size));
       return;
    }
    else
@@ -255,15 +177,15 @@ void PackTexture::dump()
       _texture_size = *suitable_texture_size;
    }
 
-   std::cout << "[x] picking a " << _texture_size << "x" << _texture_size << " texture" << std::endl;
+   _log(qApp->tr("picking a %1x%1 texture").arg(_texture_size));
 
    QImage out(_texture_size, _texture_size, _image.format());
    QPainter painter(&out);
    painter.setCompositionMode(QPainter::CompositionMode_Source);
 
-   const auto uv_filename = QString("%1_tiles.uv").arg(QFileInfo(_filename).baseName()).toStdString();
-   std::cout << "[x] dumping uvs to: " << uv_filename << std::endl;
-   std::ofstream uv_file(uv_filename);
+   const auto uv_filename = QString("%1_tiles.uv").arg(QFileInfo(_filename).baseName());
+   _log(qApp->tr("dumping uvs to: %1").arg(uv_filename));
+   std::ofstream uv_file(uv_filename.toStdString());
    auto x = 0;
    auto y = 0;
    auto quad_index = 0;
@@ -283,7 +205,8 @@ void PackTexture::dump()
 
       if (_update_progress)
       {
-         _update_progress(100 * static_cast<int32_t>((static_cast<float>(quad_index) / _quads.size())));
+         const auto percent = 100 * (static_cast<float>(quad_index) / _quads.size());
+         _update_progress(percent);
       }
 
       for (auto& rect : quad._rects)
@@ -299,11 +222,11 @@ void PackTexture::dump()
    uv_file.close();
 
    const auto texture_filename = QString("%1_tiles.png").arg(QFileInfo(_filename).baseName());
-   std::cout << "[x] dumping texture to: " << texture_filename.toStdString() << std::endl;
+   _log(qApp->tr("dumping texture to: %1").arg(texture_filename));
 
    if (!out.save(texture_filename))
    {
-      std::cout << "[e] saving failed" << std::endl;
+      _log(qApp->tr("saving failed"));
    }
 
    if (_update_progress)
@@ -311,5 +234,5 @@ void PackTexture::dump()
       _update_progress(100);
    }
 
-   std::cout << "[x] done!" << std::endl;
+   _log(qApp->tr("done!"));
 }

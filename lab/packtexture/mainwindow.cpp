@@ -1,11 +1,16 @@
 #include "mainwindow.h"
 #include <QActionGroup>
 #include <QFileDialog>
+#include <QPlainTextEdit>
+#include <QScrollBar>
 #include <QSettings>
 #include "packtexture.h"
 #include "ui_mainwindow.h"
 
-const auto defaultSize = 512;
+namespace
+{
+constexpr auto default_size = 512;
+}
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), _ui(new Ui::MainWindow)
 {
@@ -27,7 +32,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), _ui(new Ui::MainW
          auto option = options->addAction(tr("%1x%1").arg(val), this, &MainWindow::setSize);
          option->setCheckable(true);
 
-         if (val == defaultSize)
+         if (val == default_size)
          {
             option->setChecked(true);
          }
@@ -37,8 +42,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), _ui(new Ui::MainW
    );
 
    _pack_texture = std::make_unique<PackTexture>();
-   _pack_texture->_size = defaultSize;
-   _pack_texture->_update_progress = [&](int value) { _ui->progressBar_->setValue(value); };
+   _pack_texture->_size = default_size;
+   _pack_texture->_update_progress = [&](int value)
+   {
+      _ui->progressBar_->setValue(value);
+      qApp->processEvents();
+   };
+   _pack_texture->_log = [&](const QString& line) { log(line); };
 }
 
 MainWindow::~MainWindow()
@@ -48,6 +58,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateTextureLabel()
 {
+   if (_pack_texture->_image.isNull())
+   {
+      return;
+   }
+
    _texture = QPixmap::fromImage(_pack_texture->_image);
    const auto w = static_cast<float>(width());
    const auto h = static_cast<float>(height());
@@ -58,40 +73,43 @@ void MainWindow::updateTextureLabel()
 
 void MainWindow::load()
 {
-   QSettings fileSettings("texpack.ini", QSettings::IniFormat);
-   const auto path = fileSettings.value("path").toString();
+   QSettings file_settings("texpack.ini", QSettings::IniFormat);
+   const auto path = file_settings.value("path").toString();
    const auto filename = QFileDialog::getOpenFileName(this, "load image", path, "*.png");
    if (filename.isEmpty())
    {
       return;
    }
 
+   log(tr("loading %1...").arg(filename));
+
    _pack_texture->load(filename);
 
    updateTextureLabel();
 
-   fileSettings.setValue("path", QFileInfo(filename).absolutePath());
-   fileSettings.sync();
+   file_settings.setValue("path", QFileInfo(filename).absolutePath());
+   file_settings.sync();
+
+   log(tr("finished loading %1").arg(filename));
 }
 
 void MainWindow::pack()
 {
-   _ui->info_->clear();
-   _ui->info_->setText(tr("detecting empty areas..."));
+   log(tr("detecting empty areas..."));
    _pack_texture->pack();
    _ui->textureLabel_->_quads = &_pack_texture->_quads;
    _ui->textureLabel_->repaint();
-   _ui->info_->setText(tr("creating texture..."));
+   log(tr("creating texture..."));
 
    _pack_texture->dump();
 
    if (_pack_texture->_texture_size != 0)
    {
-      _ui->info_->setText(tr("created %1x%1px texture (%2)").arg(_pack_texture->_texture_size).arg(_pack_texture->_filename));
+      log(tr("created %1x%1px texture (%2)").arg(_pack_texture->_texture_size).arg(_pack_texture->_filename));
    }
    else
    {
-      _ui->info_->setText(tr("failed to create suitable texture texture; please try smaller chunk sizes"));
+      log(tr("failed to create suitable texture texture; please try smaller chunk sizes"));
    }
 }
 
@@ -102,6 +120,13 @@ void MainWindow::setSize()
    (*it)->setChecked(true);
    auto size = _sizes[it - _size_actions.begin()];
    _pack_texture->_size = size;
+}
+
+void MainWindow::log(const QString& line)
+{
+   _ui->_info->appendPlainText(line);
+   _ui->_info->verticalScrollBar()->setValue(_ui->_info->verticalScrollBar()->maximum());
+   qApp->processEvents();
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
