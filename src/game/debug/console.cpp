@@ -65,6 +65,9 @@ void Console::showHelp()
    _log.emplace_back("give <item name>: give item to player");
    _log.emplace_back("   example: give key_skull");
    _log.emplace_back("");
+   _log.emplace_back("pgravity <gravity>: set player gravity scale");
+   _log.emplace_back("   example: pgravity 0.1");
+   _log.emplace_back("");
    _log.emplace_back("playback <command>: game playback");
    _log.emplace_back("   commands: enable, disable, load, save, replay, reset");
    _log.emplace_back("");
@@ -309,6 +312,14 @@ void Console::execute()
    else if (results[0] == "start")
    {
       teleportToStartPosition();
+   }
+   else if (results[0] == "pgravity" && results.size() == 2)
+   {
+      const auto scale = std::atof(results.at(1).c_str());
+      Player::getCurrent()->getBody()->SetGravityScale(scale);
+      std::ostringstream os;
+      os << "player gravity " << scale << std::endl;
+      _log.push_back(os.str());
    }
    else
    {
