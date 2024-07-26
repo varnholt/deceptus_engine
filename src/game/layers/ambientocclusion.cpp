@@ -5,23 +5,31 @@
 #include <iostream>
 #include <sstream>
 
-#include "framework/math/sfmlmath.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 #include "player/player.h"
+
+namespace
+{
+// increase the range if you have smaller AO block sizes
+constexpr int32_t chunk_range_x_left = 4;
+constexpr int32_t chunk_range_x_right = 4;
+constexpr int32_t chunk_range_y_left = 3;
+constexpr int32_t chunk_range_y_right = 3;
+}  // namespace
 
 void AmbientOcclusion::load(const std::filesystem::path& path, const std::string& base_filename)
 {
    _config = Config(path, base_filename);
    _texture = TexturePool::getInstance().get(_config._texture_filename);
 
-   auto xi = 0;
-   auto yi = 0;
-   auto i = 0;
-   auto x = 0;
-   auto y = 0;
-   auto w = 0;
-   auto h = 0;
+   auto x_index_px = 0;
+   auto y_index_px = 0;
+   auto quad_index = 0;
+   auto x_px = 0;
+   auto y_px = 0;
+   auto width_px = 0;
+   auto height_px = 0;
 
    auto group_x = 0;
    auto group_y = 0;
@@ -36,23 +44,23 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
    while (uv_file.good())
    {
       std::getline(uv_file, line);
-      std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &i, &x, &y, &w, &h);
+      std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &quad_index, &x_px, &y_px, &width_px, &height_px);
+
+      const auto x_index_px_prev = x_index_px;
+      x_index_px = (quad_index * width_px) % _texture->getSize().x;
+      if (x_index_px == 0 && x_index_px_prev != 0)
+      {
+         y_index_px += height_px;
+      }
 
       sf::Sprite sprite;
-      sprite.setPosition(static_cast<float>(x - _config._offset_x_px), static_cast<float>(y - _config._offset_y_px));
+      sprite.setPosition(static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px));
       sprite.setTexture(*_texture);
-      sprite.setTextureRect({xi, yi, w, h});
+      sprite.setTextureRect({x_index_px, y_index_px, width_px, height_px});
 
-      group_x = (x >> 8);
-      group_y = (y >> 8);
+      group_x = (x_px >> 8);
+      group_y = (y_px >> 8);
       _sprite_map[group_y][group_x].push_back(sprite);
-
-      xi += w;
-      if (xi == static_cast<int32_t>(_texture->getSize().x))
-      {
-         xi = 0;
-         yi += h;
-      }
    }
 
    uv_file.close();
@@ -65,14 +73,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
    const int32_t player_chunk_x = player_pos_px.x >> 8;
    const int32_t player_chunk_y = player_pos_px.y >> 8;
 
-   // increase the range if you have smaller AO block sizes
-   constexpr int32_t rxl = 4;
-   constexpr int32_t rxr = 4;
-
-   constexpr int32_t ryl = 3;
-   constexpr int32_t ryr = 3;
-
-   for (auto y = player_chunk_y - ryl; y < player_chunk_y + ryr; y++)
+   for (auto y = player_chunk_y - chunk_range_y_left; y < player_chunk_y + chunk_range_y_right; y++)
    {
       const auto& y_it = _sprite_map.find(y);
       if (y_it == _sprite_map.end())
@@ -80,7 +81,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
          continue;
       }
 
-      for (auto x = player_chunk_x - rxl; x < player_chunk_x + rxr; x++)
+      for (auto x = player_chunk_x - chunk_range_x_left; x < player_chunk_x + chunk_range_x_right; x++)
       {
          const auto& x_it = y_it->second.find(x);
          if (x_it == y_it->second.end())

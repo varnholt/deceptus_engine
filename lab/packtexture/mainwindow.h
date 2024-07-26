@@ -22,6 +22,7 @@ public slots:
    void load();
    void pack();
    void setSize();
+   void log(const QString& line);
 
 protected:
    void resizeEvent(QResizeEvent* event) override;

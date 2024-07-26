@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>packtexture // mueslee 2018</string>
+   <string>packtexture // mueslee 2024</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -30,15 +30,15 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="info_">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QPlainTextEdit" name="_info">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>70</height>
+       </size>
       </property>
-      <property name="text">
-       <string/>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -50,7 +50,7 @@
      <x>0</x>
      <y>0</y>
      <width>550</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
