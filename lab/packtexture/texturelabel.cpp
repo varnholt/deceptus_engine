@@ -2,32 +2,36 @@
 
 #include <QPainter>
 
-TextureLabel::TextureLabel(QWidget* p)
- : QLabel(p)
+TextureLabel::TextureLabel(QWidget* p) : QLabel(p)
 {
 }
 
-
-void TextureLabel::paintEvent(QPaintEvent * /*e*/)
+void TextureLabel::paintEvent(QPaintEvent* /*e*/)
 {
    QPainter p(this);
 
-   if (!mPixmap.isNull())
+   if (!_pixmap.isNull())
    {
-      p.drawPixmap(0, 0, mPixmap);
+      p.drawPixmap(0, 0, _pixmap);
    }
 
-   if (mQuads != nullptr)
+   if (_quads != nullptr)
    {
-      p.setBrush(QColor(255,0,0,60));
-      std::for_each(mQuads->begin(), mQuads->end(), [&](Quad& q)
+      for (auto& [k, q] : *_quads)
       {
-         p.drawRect(
-           q.mX * mScaleX,
-           q.mY * mScaleY,
-           q.mW * mScaleX,
-           q.mH * mScaleY
-         );
-      });
+         auto unique_quad = true;
+         for (auto& rect : q._rects)
+         {
+            p.setBrush(QColor(unique_quad ? 255 : 0, 0, unique_quad ? 0 : 255, 60));
+            unique_quad = false;
+
+            p.drawRect(
+               rect._x / _scale_x,  //
+               rect._y / _scale_y,
+               rect._w / _scale_x,
+               rect._h / _scale_y
+            );
+         }
+      };
    }
 }

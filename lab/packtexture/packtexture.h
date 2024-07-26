@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QImage>
-#include "quad.h"
 #include <functional>
+#include <map>
+#include <vector>
+#include "quad.h"
 
 struct PackTexture
 {
@@ -12,11 +14,11 @@ struct PackTexture
    void pack();
    void dump();
 
-   int mSize = 512;
-   int mTextureSize = 0;
-   QImage mImage;
-   QString mFilename;
-   std::vector<Quad> mQuads;
-   std::function<void(int)> mUpdateProgress;
+   int _size = 512;
+   int _texture_size = 0;
+   QImage _image;
+   QString _filename;
+   std::map<uint32_t, Quad> _quads;
+   std::function<void(int)> _update_progress;
+   std::function<void(const QString&)> _log;
 };
-
