@@ -20,4 +20,5 @@ struct PackTexture
    QString _filename;
    std::map<uint32_t, Quad> _quads;
    std::function<void(int)> _update_progress;
+   std::function<void(const QString&)> _log;
 };
