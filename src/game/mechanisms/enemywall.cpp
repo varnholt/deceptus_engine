@@ -14,6 +14,7 @@ int16_t group_index = 0;                                                   // 0 
 EnemyWall::EnemyWall(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(EnemyWall).name());
+   setZ(1);  // bogus z
 }
 
 void EnemyWall::setup(const GameDeserializeData& data)
