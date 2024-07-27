@@ -7,6 +7,7 @@
 SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(SoundEmitter).name());
+   setZ(1);  // bogus z
    _has_audio = true;
 }
 

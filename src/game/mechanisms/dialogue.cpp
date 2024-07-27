@@ -22,6 +22,7 @@
 Dialogue::Dialogue(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Dialogue).name());
+   setZ(1);  // bogus z
 }
 
 std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDeserializeData& data)
