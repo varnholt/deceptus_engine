@@ -8,8 +8,11 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
-#include "game/level/fixturenode.h"
+#include "game/effects/boomeffect.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
+#include "game/level/fixturenode.h"
+#include "game/level/level.h"
 
 #include <iostream>
 
@@ -27,7 +30,6 @@ constexpr auto BLADE_SHARPNESS = 0.1f;
 constexpr auto BLADE_TOLERANCE = 0.06f;
 }  // namespace
 
-//-----------------------------------------------------------------------------
 Crusher::Crusher(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Crusher).name());
@@ -36,7 +38,6 @@ Crusher::Crusher(GameNode* parent) : GameNode(parent)
    __instance_counter++;
 }
 
-//-----------------------------------------------------------------------------
 void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite_spike);
@@ -44,7 +45,6 @@ void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_sprite_mount);
 }
 
-//-----------------------------------------------------------------------------
 void Crusher::step(const sf::Time& dt)
 {
    const auto distance_to_be_traveled = 48.0f;
@@ -124,7 +124,6 @@ std::optional<sf::FloatRect> Crusher::getBoundingBoxPx()
    return _rect;
 }
 
-//-----------------------------------------------------------------------------
 void Crusher::updateState()
 {
    switch (_mode)
@@ -149,10 +148,20 @@ void Crusher::updateState()
                      _state = State::Retract;
                   }
                }
+
                break;
             }
             case State::Extract:
             {
+               if (_extraction_time.asSeconds() >= 0.35f && !_shake_shown)
+               {
+                  _shake_shown = true;
+                  const auto x = 0.0f;
+                  const auto y = 1.0f;
+                  const auto intensity = 0.25f;
+                  Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.4f, BoomSettings::ShakeType::Random});
+               }
+
                // extract until normalised extraction time is 1
                if (_extraction_time.asSeconds() >= 1.0f)
                {
@@ -160,6 +169,7 @@ void Crusher::updateState()
                   _state_previous = State::Extract;
                   _extraction_time = {};
                }
+
                break;
             }
             case State::Retract:
@@ -167,10 +177,13 @@ void Crusher::updateState()
                // retract until normalised retraction time is 1
                if (_retraction_time.asSeconds() >= 1.0f)
                {
+                  _shake_shown = false;
+
                   _state = State::Idle;
                   _state_previous = State::Retract;
                   _retraction_time = {};
                }
+
                break;
             }
          }
@@ -184,7 +197,6 @@ void Crusher::updateState()
    }
 }
 
-//-----------------------------------------------------------------------------
 void Crusher::setup(const GameDeserializeData& data)
 {
    _rect.left = data._tmx_object->_x_px;
@@ -196,28 +208,27 @@ void Crusher::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-      const auto it = data._tmx_object->_properties->_map.find("alignment");
+      const auto& map = data._tmx_object->_properties->_map;
+      const auto alignment = ValueReader::readValue<std::string>("alignment", map).value_or("down");
 
-      if (it != data._tmx_object->_properties->_map.end())
+      if (alignment == "up")
       {
-         const auto alignment = it->second->_value_string;
-         if (alignment == "up")
-         {
-            _alignment = Alignment::PointsUp;
-         }
-         else if (alignment == "down")
-         {
-            _alignment = Alignment::PointsDown;
-         }
-         else if (alignment == "left")
-         {
-            _alignment = Alignment::PointsLeft;
-         }
-         else if (alignment == "right")
-         {
-            _alignment = Alignment::PointsRight;
-         }
+         _alignment = Alignment::PointsUp;
       }
+      else if (alignment == "down")
+      {
+         _alignment = Alignment::PointsDown;
+      }
+      else if (alignment == "left")
+      {
+         _alignment = Alignment::PointsLeft;
+      }
+      else if (alignment == "right")
+      {
+         _alignment = Alignment::PointsRight;
+      }
+
+      _shake = ValueReader::readValue<bool>("shake", map).value_or(true);
    }
 
    //    0123456789012
@@ -247,17 +258,12 @@ void Crusher::setup(const GameDeserializeData& data)
    {
       case Alignment::PointsDown:
       {
-         _sprite_mount.setTextureRect({7 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE});
-
-         _sprite_pusher.setTextureRect({
-            7 * PIXELS_PER_TILE,
-            7 * PIXELS_PER_TILE,
-            5 * PIXELS_PER_TILE,
-            1  // * PIXELS_PER_TILE - i only want this to be one pixel in height so scaling is easy
-         });
-
+         // pusher gets only 1px in height as i only want this to be one pixel in height so scaling is easy
+         _sprite_mount.setTextureRect({9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE});
+         _sprite_pusher.setTextureRect({7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 1});
          _sprite_spike.setTextureRect({7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE});
 
+         _pixel_offset_mount.x = 2 * PIXELS_PER_TILE;
          _pixel_offset_pusher.y = 2 * PIXELS_PER_TILE;
          _pixel_offset_spike.y = 2 * PIXELS_PER_TILE;
 
@@ -267,9 +273,7 @@ void Crusher::setup(const GameDeserializeData& data)
       case Alignment::PointsUp:
       {
          _sprite_mount.setTextureRect({0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE});
-
          _sprite_pusher.setTextureRect({0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 1});
-
          _sprite_spike.setTextureRect({0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = 6 * PIXELS_PER_TILE;
@@ -282,9 +286,7 @@ void Crusher::setup(const GameDeserializeData& data)
       case Alignment::PointsLeft:
       {
          _sprite_pusher.setTextureRect({3 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
-
          _sprite_mount.setTextureRect({4 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
-
          _sprite_spike.setTextureRect({0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
@@ -299,9 +301,7 @@ void Crusher::setup(const GameDeserializeData& data)
       case Alignment::PointsRight:
       {
          _sprite_mount.setTextureRect({7 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
-
          _sprite_pusher.setTextureRect({9 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
-
          _sprite_spike.setTextureRect({10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
@@ -321,15 +321,13 @@ void Crusher::setup(const GameDeserializeData& data)
    setupBody(data._world);
 }
 
-//-----------------------------------------------------------------------------
 void Crusher::updateTransform()
 {
-   auto x = (_blade_offset.x + _pixel_position.x) / PPM;
-   auto y = (_blade_offset.y + _pixel_position.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
+   const auto x = (_blade_offset.x + _pixel_position.x) / PPM;
+   const auto y = (_blade_offset.y + _pixel_position.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    _body->SetTransform(b2Vec2(x, y), 0.0f);
 }
 
-//-----------------------------------------------------------------------------
 void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 {
    //       +-+
