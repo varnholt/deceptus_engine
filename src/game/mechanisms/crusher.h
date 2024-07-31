@@ -43,6 +43,8 @@ private:
    void step(const sf::Time& dt);
    void updateState();
    void updateSpritePositions();
+   void startBoomEffect();
+   void stopBoomEffect();
 
    Mode _mode = Mode::Interval;
    State _state = State::Idle;
