@@ -13,6 +13,7 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
+#include "game/level/roomupdater.h"
 
 #include <iostream>
 
@@ -124,6 +125,40 @@ std::optional<sf::FloatRect> Crusher::getBoundingBoxPx()
    return _rect;
 }
 
+void Crusher::startBoomEffect()
+{
+   if (_extraction_time.asSeconds() < 0.35f)
+   {
+      return;
+   }
+
+   if (_shake_shown)
+   {
+      return;
+   }
+
+   // mechanism room should match player room
+   const auto& roomIds = getRoomIds();
+   if (!roomIds.empty() && !RoomUpdater::checkCurrentMatchesIds(roomIds))
+   {
+      return;
+   }
+
+   _shake_shown = true;
+   const auto x = 0.0f;
+   const auto y = 1.0f;
+   const auto intensity = 0.25f;
+   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.4f, BoomSettings::ShakeType::Random});
+}
+
+void Crusher::stopBoomEffect()
+{
+   if (_retraction_time.asSeconds() >= 1.0f)
+   {
+      _shake_shown = false;
+   }
+}
+
 void Crusher::updateState()
 {
    switch (_mode)
@@ -153,14 +188,7 @@ void Crusher::updateState()
             }
             case State::Extract:
             {
-               if (_extraction_time.asSeconds() >= 0.35f && !_shake_shown)
-               {
-                  _shake_shown = true;
-                  const auto x = 0.0f;
-                  const auto y = 1.0f;
-                  const auto intensity = 0.25f;
-                  Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.4f, BoomSettings::ShakeType::Random});
-               }
+               startBoomEffect();
 
                // extract until normalised extraction time is 1
                if (_extraction_time.asSeconds() >= 1.0f)
@@ -174,11 +202,11 @@ void Crusher::updateState()
             }
             case State::Retract:
             {
+               stopBoomEffect();
+
                // retract until normalised retraction time is 1
                if (_retraction_time.asSeconds() >= 1.0f)
                {
-                  _shake_shown = false;
-
                   _state = State::Idle;
                   _state_previous = State::Retract;
                   _retraction_time = {};
