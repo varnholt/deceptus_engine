@@ -1,9 +1,9 @@
 #include "image.h"
 #include "tga.h"
 
-#include <math.h>
 #include <memory.h>
 #include <algorithm>
+#include <cmath>
 
 // construct image from file
 Image::Image(const std::string& filename)
