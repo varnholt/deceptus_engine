@@ -1,6 +1,6 @@
 #include "sfmlmath.h"
 
-#include <math.h>
+#include <cmath>
 
 float SfmlMath::length(const sf::Vector2f& v)
 {

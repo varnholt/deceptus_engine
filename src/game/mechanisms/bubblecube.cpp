@@ -10,6 +10,7 @@
 #include "game/io/texturepool.h"
 
 #include <iostream>
+#include <numbers>
 
 // #define DEBUG_COLLISION_RECTS 1
 
@@ -232,8 +233,8 @@ void BubbleCube::updateMaxDurationCondition(const sf::Time& dt)
 
 void BubbleCube::updateSpriteIndex()
 {
-   const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, static_cast<float>(M_PI) * 2.0f);
-   _mapped_value_normalized = mapped_value / (static_cast<float>(M_PI) * 2.0f);
+   const auto mapped_value = fmod((_animation_offset_s + _elapsed_s) * move_frequency, std::numbers::pi_v<float> * 2.0f);
+   _mapped_value_normalized = mapped_value / (std::numbers::pi_v<float> * 2.0f);
 }
 
 void BubbleCube::updatePosition()
