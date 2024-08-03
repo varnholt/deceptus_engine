@@ -4,7 +4,6 @@
 #include "game/state/savestate.h"
 #include "menu.h"
 
-#include <stdlib.h>
 #include <cstdlib>
 #include <iostream>
 

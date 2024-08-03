@@ -9,10 +9,11 @@
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 
-#include <math.h>
 #include <array>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <numbers>
 
 SmokeEffect::SmokeEffect(GameNode* parent) : GameNode(parent), _texture(TexturePool::getInstance().get("data/effects/smoke.png"))
 {
@@ -222,7 +223,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       particle._rot_dir = static_cast<float>((std::rand() % 200) - 100) * 0.01f;  // -1.0 .. 1.0
       particle._center = sf::Vector2f{center_x_px, center_y_px};
       particle._offset = sf::Vector2f{offset_x_px, offset_y_px};
-      particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * static_cast<float>(M_PI);  // 0 .. 2_PI
+      particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * std::numbers::pi_v<float>;  // 0 .. 2_PI
 
       particle._sprite.setScale(sprite_scale_x, sprite_scale_y);
       particle._sprite.setRotation(static_cast<float>(std::rand() % 360));

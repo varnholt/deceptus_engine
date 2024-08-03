@@ -1,6 +1,6 @@
 #include "fbm.h"
+#include <cmath>
 #include <iostream>
-#include <math.h>
 
 // code is based on
 // - https://thebookofshaders.com/13/
