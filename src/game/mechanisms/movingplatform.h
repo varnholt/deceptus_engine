@@ -42,7 +42,7 @@ private:
    void setupTransformDeprecated();
    void updateLeverLag(const sf::Time& dt);
 
-   double CosineInterpolate(double y1, double y2, double mu);
+   double cosineInterpolate(double y1, double y2, double mu);
 
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
