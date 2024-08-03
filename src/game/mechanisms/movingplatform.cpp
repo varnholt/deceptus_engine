@@ -17,7 +17,7 @@
 #include "game/player/player.h"
 #include "game/io/texturepool.h"
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include <box2d/box2d.h>
@@ -56,9 +56,9 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 }
 
-double MovingPlatform::CosineInterpolate(double y1, double y2, double mu)
+double MovingPlatform::cosineInterpolate(double y1, double y2, double mu)
 {
-   double mu2 = (1.0 - cos(mu * M_PI)) * 0.5;
+   const auto mu2 = (1.0 - cos(mu * M_PI)) * 0.5;
    return (y1 * (1.0 - mu2) + y2 * mu2);
 }
 
@@ -181,9 +181,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
 
             while (tile_number != 0)
             {
-               auto tileId = tile_number - first_id;
-               auto tu = (tileId) % (moving_platform->_texture_map->getSize().x / tilesize.x);
-               auto tv = (tileId) / (moving_platform->_texture_map->getSize().x / tilesize.x);
+               const auto tile_id = tile_number - first_id;
+               const auto tu = (tile_id) % (moving_platform->_texture_map->getSize().x / tilesize.x);
+               const auto tv = (tile_id) / (moving_platform->_texture_map->getSize().x / tilesize.x);
 
                sf::Sprite sprite;
                sprite.setTexture(*moving_platform->_texture_map);
@@ -574,7 +574,7 @@ void MovingPlatform::update(const sf::Time& dt)
       const auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
       sprite.setPosition(x, y);
-      bool update_sprite_rect = false;
+      auto update_sprite_rect = false;
       auto u = 0;
       auto v = 0;
 
