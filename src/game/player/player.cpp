@@ -943,18 +943,9 @@ void Player::updateVelocity()
          {
             // while the player is standing on a platform, he is allowed to be to bend down
             // however, he is not capable of changing his velocity by pressing left or right
-            if (!_belt.isOnBelt())
-            {
-               const auto velocity = _body->GetLinearVelocity();
-               _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
-               return;
-            }
-            else
-            {
-               const auto velocity = _body->GetLinearVelocity();
-               _body->SetLinearVelocity({_belt.getBeltVelocity(), velocity.y});
-               return;
-            }
+            const auto velocity = _body->GetLinearVelocity();
+            _body->SetLinearVelocity({_belt.isOnBelt() ? _belt.getBeltVelocity() : 0.0f, velocity.y});
+            return;
          }
       }
 
@@ -1061,6 +1052,11 @@ const PlayerJump& Player::getJump() const
 PlayerBelt& Player::getBelt()
 {
    return _belt;
+}
+
+PlayerPlatform& Player::getPlatform()
+{
+   return _platform;
 }
 
 void Player::goToPortal(auto portal)
@@ -1249,33 +1245,9 @@ void Player::kill(std::optional<DeathReason> death_reason)
    }
 }
 
-bool Player::isOnPlatform() const
-{
-   const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
-
-   return on_platform;
-}
-
 bool Player::isOnGround() const
 {
    return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
-}
-
-void Player::updatePlatformMovement(const sf::Time& /*dt*/)
-{
-   if (_jump.isJumping())
-   {
-      return;
-   }
-
-   if (isOnPlatform() && _platform_body)
-   {
-      const auto x = _body->GetPosition().x + _platform_dx;
-      const auto y = _body->GetPosition().y;
-      _body->SetTransform(b2Vec2(x, y), 0.0f);
-
-      // printf("standing on platform, x: %f, y: %f, dx: %f \n", x, y, dx);
-   }
 }
 
 void Player::updateAttack()
@@ -1415,7 +1387,7 @@ void Player::updateHardLanding()
    {
       // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
       // maybe come up with a nice concept for this one day.
-      if (isOnPlatform())
+      if (_platform.isOnPlatform())
       {
          _hard_landing = false;
       }
@@ -1602,7 +1574,7 @@ void Player::update(const sf::Time& dt)
    updateJump();
    updateDash();
    _climb.update(_body, isInAir());
-   updatePlatformMovement(dt);
+   _platform.update(_body, _jump.isJumping());
    PlayerAudio::updateListenerPosition(_pixel_position_f);
    updateFootsteps();
    updatePortal();
@@ -1675,21 +1647,6 @@ void Player::updateAtmosphere()
    }
 }
 
-void Player::setPlatformBody(b2Body* body)
-{
-   _platform_body = body;
-}
-
-b2Body* Player::getPlatformBody() const
-{
-   return _platform_body;
-}
-
-void Player::setPlatformDx(float dx)
-{
-   _platform_dx = dx;
-}
-
 void Player::setGroundBody(b2Body* body)
 {
    _ground_body = body;
@@ -1719,7 +1676,7 @@ void Player::fadeOutReset()
 
 void Player::setFriction(float friction)
 {
-   for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+   for (auto* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       fixture->SetFriction(friction);
    }
@@ -1777,7 +1734,6 @@ void Player::reset()
    // SaveState::getPlayerInfo().mInventory.resetKeys();
 
    // reset bodies passed from the contact listener
-   _platform_body = nullptr;
    _ground_body = nullptr;
 
    // reset dash

@@ -1,0 +1,71 @@
+#include "playerplatform.h"
+
+#include "game/physics/gamecontactlistener.h"
+
+void PlayerPlatform::update(b2Body* body, bool jumping)
+{
+   if (jumping)
+   {
+      if (_platform_gravity_scale.has_value())
+      {
+         body->SetGravityScale(_platform_gravity_scale.value());
+         _platform_gravity_scale.reset();
+      }
+
+      return;
+   }
+
+   if (isOnPlatform() && _platform_body)
+   {
+      if (!_platform_gravity_scale.has_value())
+      {
+         _platform_gravity_scale = body->GetGravityScale();
+      }
+
+      const auto x = body->GetPosition().x + _platform_dx;
+      const auto y = body->GetPosition().y;
+      body->SetTransform(b2Vec2(x, y), 0.0f);
+      body->SetGravityScale(10.0f);
+
+      // printf("standing on platform, x: %f, y: %f, dx: %f \n", x, y, dx);
+   }
+   else if (_platform_gravity_scale.has_value())
+   {
+      body->SetGravityScale(_platform_gravity_scale.value());
+      _platform_gravity_scale.reset();
+   }
+}
+
+void PlayerPlatform::reset()
+{
+   // reset bodies passed from the contact listener
+   _platform_body = nullptr;
+
+   _platform_gravity_scale.reset();
+}
+
+void PlayerPlatform::setPlatformBody(b2Body* body)
+{
+   _platform_body = body;
+}
+
+b2Body* PlayerPlatform::getPlatformBody() const
+{
+   return _platform_body;
+}
+
+void PlayerPlatform::setPlatformDx(float dx)
+{
+   _platform_dx = dx;
+}
+
+bool PlayerPlatform::isOnPlatform() const
+{
+   const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
+   return on_platform;
+}
+
+bool PlayerPlatform::isOnGround() const
+{
+   return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
+}
