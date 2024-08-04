@@ -14,6 +14,7 @@
 #include "game/player/playerdash.h"
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
+#include "game/player/playerplatform.h"
 #include "game/player/playerspeed.h"
 
 #include <box2d/box2d.h>
@@ -93,14 +94,10 @@ public:
    void fadeOut(float fade_out_speed_factor = 5.0f);
    void fadeOutReset();
 
-   void setPlatformBody(b2Body* body);
-   b2Body* getPlatformBody() const;
-   void setPlatformDx(float dx_px);
    void setGroundBody(b2Body* body);
 
    bool isInAir() const;
    bool isInWater() const;
-   bool isOnPlatform() const;
    bool isOnGround() const;
    bool isDead() const;
    bool isJumpingThroughOneWayWall();
@@ -121,6 +118,7 @@ public:
    const PlayerJump& getJump() const;
    const PlayerBend& getBend() const;
    PlayerBelt& getBelt();
+   PlayerPlatform& getPlatform();
    const Chunk& getChunk() const;
 
    void setToggleCallback(const ToggleCallback& callback);
@@ -141,7 +139,6 @@ private:
    void updateOneWayWallDrop();
    void updateChainShapeCollisions();
    void updatePixelCollisions();
-   void updatePlatformMovement(const sf::Time& dt);
    void updateOrientation();
    void updatePortal();
    void updateVelocity();
@@ -184,8 +181,6 @@ private:
    b2Fixture* _body_fixture = nullptr;
    b2Fixture* _foot_fixture[__foot_count]{nullptr, nullptr, nullptr, nullptr};
    b2Fixture* _foot_sensor_fixture = nullptr;
-   b2Body* _platform_body = nullptr;
-   float _platform_dx{0.0f};
    b2Body* _ground_body = nullptr;
    b2Vec2 _ground_normal;
    b2Vec2 _position_previous;
@@ -229,6 +224,7 @@ private:
    std::shared_ptr<PlayerControls> _controls;
    PlayerBend _bend;
    PlayerClimb _climb;
+   PlayerPlatform _platform;
    PlayerJump _jump;
    PlayerDash _dash;
    PlayerAttack _attack;

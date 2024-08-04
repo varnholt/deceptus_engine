@@ -535,7 +535,7 @@ void MovingPlatform::update(const sf::Time& dt)
    // set the player velocity to the linear platform velocity, so he doesn't jump up for a second
    if (std::signbit(previous_velocity.y) != std::signbit(_velocity.y))
    {
-      if (Player::getCurrent()->isOnPlatform())
+      if (Player::getCurrent()->getPlatform().isOnPlatform())
       {
          Player::getCurrent()->getBody()->SetLinearVelocity(_velocity);
       }
@@ -546,9 +546,9 @@ void MovingPlatform::update(const sf::Time& dt)
    _pos.x = _body->GetPosition().x;
    _pos.y = _body->GetPosition().y;
 
-   if (Player::getCurrent()->getPlatformBody() == _body)
+   if (Player::getCurrent()->getPlatform().getPlatformBody() == _body)
    {
-      Player::getCurrent()->setPlatformDx(getDx());
+      Player::getCurrent()->getPlatform().setPlatformDx(getDx());
    }
 
    // update sprite animation
