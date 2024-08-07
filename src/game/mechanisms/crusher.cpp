@@ -331,7 +331,12 @@ void Crusher::updateTransform()
 {
    const auto x = (_blade_offset.x + _pixel_position.x) / PPM;
    const auto y = (_blade_offset.y + _pixel_position.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
-   _body->SetTransform(b2Vec2(x, y), 0.0f);
+   const auto target_position = b2Vec2(x, y);
+   const auto current_position = _body->GetPosition();
+   const auto direction = target_position - current_position;
+   constexpr auto timestep = TIMESTEP_ERROR * (PPM / 60.0f);
+   _body->SetTransform(target_position, 0.0f);
+   _body->SetLinearVelocity(timestep * direction);
 }
 
 void Crusher::setupBody(const std::shared_ptr<b2World>& world)

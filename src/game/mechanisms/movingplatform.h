@@ -39,7 +39,7 @@ public:
    float getDx() const;
 
 private:
-   void setupTransformDeprecated();
+   void setupTransform();
    void updateLeverLag(const sf::Time& dt);
 
    double cosineInterpolate(double y1, double y2, double mu);
