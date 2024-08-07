@@ -91,7 +91,7 @@ void MovingPlatform::setEnabled(bool enabled)
    }
 }
 
-void MovingPlatform::setupTransformDeprecated()
+void MovingPlatform::setupTransform()
 {
    auto x = _tile_positions.x * PIXELS_PER_TILE / PPM;
    auto y = _tile_positions.y * PIXELS_PER_TILE / PPM;
@@ -200,7 +200,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
             }
 
             moving_platform->setupBody(data._world);
-            moving_platform->setupTransformDeprecated();
+            moving_platform->setupTransform();
          }
       }
    }
