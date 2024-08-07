@@ -5,12 +5,12 @@
 
 void ExtraWrapper::spawnExtra(const std::string& id)
 {
-   auto level = Level::getCurrentLevel();
+   auto* level = Level::getCurrentLevel();
    const auto extras = level->getExtras();
 
    std::shared_ptr<Portal> nearby_portal;
 
-   for (auto& tmp : extras)
+   for (const auto& tmp : extras)
    {
       auto extra = std::dynamic_pointer_cast<Extra>(tmp);
       if (extra->_name == id)

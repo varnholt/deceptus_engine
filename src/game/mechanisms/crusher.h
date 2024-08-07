@@ -5,9 +5,6 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-#include <array>
-#include <filesystem>
-
 #include <box2d/box2d.h>
 
 struct TmxObject;

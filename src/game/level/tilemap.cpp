@@ -225,7 +225,7 @@ void TileMap::update(const sf::Time& dt)
 
       auto index = 0u;
       float frameDuration = 0.0f;
-      for (const auto* frame : anim->_frames)
+      for (auto* frame : anim->_frames)
       {
          frameDuration += frame->_duration_ms;
 
@@ -338,7 +338,7 @@ void TileMap::setZ(int32_t z)
 void TileMap::hideTile(int32_t x, int32_t y)
 {
    const auto& it = std::find_if(
-      std::begin(_animations), std::end(_animations), [x, y](const auto* tile) { return (tile->_tile_x == x && tile->_tile_y == y); }
+      std::begin(_animations), std::end(_animations), [x, y](auto* tile) { return (tile->_tile_x == x && tile->_tile_y == y); }
    );
 
    if (it != _animations.end())

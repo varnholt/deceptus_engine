@@ -97,7 +97,7 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
 void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data)
 {
    // check if platform smashes the player
-   const auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
+   auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
 
    if (!isPlayer(fixture_node))
    {
@@ -115,7 +115,7 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
    auto platform_body = fixture->GetBody();
 
    // player should have a separate namespace for this stuff
-   Player::getCurrent()->setPlatformBody(platform_body);
+   Player::getCurrent()->getPlatform().setPlatformBody(platform_body);
 
    _count_moving_platform_contacts++;
 }
@@ -482,7 +482,7 @@ void GameContactListener::processMovingPlatformContactEnd(FixtureNode* fixture_n
    }
 
    _count_moving_platform_contacts--;
-   Player::getCurrent()->setPlatformBody(nullptr);
+   Player::getCurrent()->getPlatform().setPlatformBody(nullptr);
 }
 
 void GameContactListener::processBubbleCubeContactEnd(FixtureNode* fixture_node_bubble, FixtureNode* fixture_node_other)

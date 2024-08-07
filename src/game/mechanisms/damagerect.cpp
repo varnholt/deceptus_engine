@@ -2,7 +2,7 @@
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "player/player.h"
+#include "game/player/player.h"
 
 DamageRect::DamageRect(GameNode* /*parent*/)
 {
@@ -11,7 +11,7 @@ DamageRect::DamageRect(GameNode* /*parent*/)
 
 void DamageRect::update(const sf::Time& /*dt*/)
 {
-   auto player = Player::getCurrent();
+   auto* player = Player::getCurrent();
    const auto player_intersects = player->getPixelRectFloat().intersects(_rect);
 
    if (player_intersects)

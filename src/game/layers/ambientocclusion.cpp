@@ -7,7 +7,7 @@
 
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
-#include "player/player.h"
+#include "game/player/player.h"
 
 namespace
 {

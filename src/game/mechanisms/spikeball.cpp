@@ -83,7 +83,7 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
 
    auto t = 0.0f;
    auto ti = 1.0f / _chain_elements.size();
-   for (auto c : _chain_elements)
+   for (auto* c : _chain_elements)
    {
       HermiteCurveKey k;
       k._position = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
@@ -117,8 +117,8 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    {
       for (auto i = 0u; i < _chain_elements.size() - 1; i++)
       {
-         auto chain_element_1 = _chain_elements[i];
-         auto chain_element_2 = _chain_elements[i + 1];
+         auto* chain_element_1 = _chain_elements[i];
+         auto* chain_element_2 = _chain_elements[i + 1];
          const auto c1_pos_m = chain_element_1->GetPosition();
          const auto c2_pos_m = chain_element_2->GetPosition();
 
@@ -278,14 +278,14 @@ void SpikeBall::setup(const GameDeserializeData& data)
 
    _joint_def.collideConnected = false;
 
-   auto prev_body = _anchor_body;
+   auto* prev_body = _anchor_body;
    for (auto i = 0; i < _config._chain_element_count; ++i)
    {
       b2BodyDef bd;
       bd.type = b2_dynamicBody;
       bd.position.Set(pos_m.x + 0.01f + i * _config._chain_element_distance, pos_m.y);
-      auto chain_body = data._world->CreateBody(&bd);
-      auto chain_fixture = chain_body->CreateFixture(&_chain_element_fixture_def);
+      auto* chain_body = data._world->CreateBody(&bd);
+      auto* chain_fixture = chain_body->CreateFixture(&_chain_element_fixture_def);
       chain_fixture->SetSensor(true);
       _chain_elements.push_back(chain_body);
 
@@ -304,12 +304,12 @@ void SpikeBall::setup(const GameDeserializeData& data)
    _ball_body_def.position.Set(pos_m.x + 0.01f + _config._chain_element_count * _config._chain_element_distance, pos_m.y);
    _ball_fixture_def.shape = &_ball_shape;
    _ball_body = data._world->CreateBody(&_ball_body_def);
-   auto ball_fixture = _ball_body->CreateFixture(&_ball_fixture_def);
+   auto* ball_fixture = _ball_body->CreateFixture(&_ball_fixture_def);
    b2Vec2 anchor(pos_m.x + _config._chain_element_count * _config._chain_element_distance, pos_m.y);
    _joint_def.Initialize(prev_body, _ball_body, anchor);
    data._world->CreateJoint(&_joint_def);
 
-   auto object_data = new FixtureNode(this);
+   auto* object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeDeadly);
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
