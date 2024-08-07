@@ -155,8 +155,8 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
 
    setupTransform();
 
-   auto fixture = _body->CreateFixture(&polygon_shape, 1.0);
-   auto object_data = new FixtureNode(this);
+   auto* fixture = _body->CreateFixture(&polygon_shape, 1.0);
+   auto* object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeMoveableBox);
    fixture->SetUserData(static_cast<void*>(object_data));
 }

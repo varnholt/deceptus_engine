@@ -5,9 +5,9 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
+#include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <iostream>
 #include <numbers>
@@ -135,7 +135,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    // pin the cube to its anchor
    _anchor_def.position = b2Vec2(_position_m.x + width_m * 0.5f, _position_m.y - 0.1f);
    _anchor_body = data._world->CreateBody(&_anchor_def);
-   auto anchor_fixture = _anchor_body->CreateFixture(&_anchor_a_shape, 0.0f);
+   auto* anchor_fixture = _anchor_body->CreateFixture(&_anchor_a_shape, 0.0f);
    anchor_fixture->SetSensor(true);
 
    // Step 3: Define and create the prismatic joint

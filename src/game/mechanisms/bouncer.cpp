@@ -2,9 +2,9 @@
 
 #include "framework/tools/globalclock.h"
 #include "game/audio/audio.h"
+#include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <iostream>
 
@@ -78,7 +78,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    sensor_fixture_def.shape = &_shape_bounds;
    sensor_fixture_def.isSensor = true;
 
-   auto fixture = _body->CreateFixture(&sensor_fixture_def);
+   auto* fixture = _body->CreateFixture(&sensor_fixture_def);
    fixture->SetUserData(static_cast<void*>(this));
 
    // load texture
@@ -99,7 +99,7 @@ void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 void Bouncer::updatePlayerAtBouncer()
 {
-   auto player = Player::getCurrent();
+   auto* player = Player::getCurrent();
    auto rect = player->getPixelRectFloat();
    rect.height *= 3;
 
@@ -166,7 +166,7 @@ void Bouncer::activate()
          break;
    }
 
-   auto body = Player::getCurrent()->getBody();
+   auto* body = Player::getCurrent()->getBody();
 
    // it's pretty important to reset the body's y velocity
    const auto& velocity = body->GetLinearVelocity();

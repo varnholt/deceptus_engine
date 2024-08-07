@@ -1,7 +1,7 @@
 #include "spikes.h"
 
 #include "constants.h"
-#include "player/player.h"
+#include "game/player/player.h"
 #include "game/io/texturepool.h"
 
 #include "framework/tmxparser/tmxlayer.h"

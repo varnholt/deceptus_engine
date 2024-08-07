@@ -641,7 +641,7 @@ void Level::loadSaveState()
             mechanism_vector->end(),
             [object_key](const auto& object)
             {
-               const auto* game_node = dynamic_cast<GameNode*>(object.get());
+               auto* game_node = dynamic_cast<GameNode*>(object.get());
                return (game_node && game_node->getObjectId() == object_key);
             }
          );
@@ -936,7 +936,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw mechanisms
-      for (const auto* mechanism_vector : _mechanisms_list)
+      for (auto* mechanism_vector : _mechanisms_list)
       {
          for (const auto& mechanism : *mechanism_vector)
          {
@@ -1349,7 +1349,7 @@ void Level::update(const sf::Time& dt)
       tile_map->update(dt);
    }
 
-   for (const auto* mechanism_vector : _mechanisms_list)
+   for (auto* mechanism_vector : _mechanisms_list)
    {
       for (const auto& mechanism : *mechanism_vector)
       {

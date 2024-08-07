@@ -42,10 +42,10 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 
    std::vector<std::shared_ptr<TmxChunk>> chunks;
 
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto sub_element = node->ToElement();
+      auto* sub_element = node->ToElement();
       if (!sub_element)
       {
          node = node->NextSibling();
@@ -54,10 +54,10 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
 
       if (sub_element->Name() == std::string("data"))
       {
-         auto data_node = sub_element->FirstChild();
+         auto* data_node = sub_element->FirstChild();
          while (data_node)
          {
-            auto chunk_element = data_node->ToElement();
+            auto* chunk_element = data_node->ToElement();
 
             std::shared_ptr<TmxElement> inner_element;
 

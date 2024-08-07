@@ -8,18 +8,17 @@
 
 #include <iostream>
 
-
 void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-  TmxElement::deserialize(element, parse_data);
+   TmxElement::deserialize(element, parse_data);
 
-   const auto id_attribute = element->Attribute("id");
+   auto* id_attribute = element->Attribute("id");
    if (id_attribute)
    {
       _id = id_attribute;
    }
 
-   const auto gid_attribute = element->Attribute("gid");
+   auto* gid_attribute = element->Attribute("gid");
    if (gid_attribute)
    {
       _gid = gid_attribute;
@@ -27,33 +26,33 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
 
    _x_px = static_cast<float>(element->IntAttribute("x"));
    _y_px = static_cast<float>(element->IntAttribute("y"));
-   _width_px  = element->FloatAttribute("width");
+   _width_px = element->FloatAttribute("width");
    _height_px = element->FloatAttribute("height");
 
-   const auto type_attribute = element->Attribute("type");
+   auto* type_attribute = element->Attribute("type");
    if (type_attribute)
    {
       _template_type = type_attribute;
    }
 
    // inherit object type from template
-   auto template_name = element->Attribute("template");
+   auto* template_name = element->Attribute("template");
    if (template_name)
    {
-       _template_name = template_name;
+      _template_name = template_name;
 
-       // if we don't have an object type yet, try to derive it from the template
-       if (!_template_type.has_value())
-       {
-          TmxTemplate t(template_name, parse_data);
-          _template_type = t._object->_template_type;
-       }
+      // if we don't have an object type yet, try to derive it from the template
+      if (!_template_type.has_value())
+      {
+         TmxTemplate t(template_name, parse_data);
+         _template_type = t._object->_template_type;
+      }
    }
 
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto sub_element = node->ToElement();
+      auto* sub_element = node->ToElement();
       if (!sub_element)
       {
          node = node->NextSibling();
@@ -93,7 +92,6 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
    }
 }
 
-
 /*
  <objectgroup name="objects">
   <object id="8" name="walk32" x="120.5" y="73.5" width="143" height="2.5"/>
@@ -129,10 +127,12 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
   <object id="39" name="walk2" x="864" y="384" width="24" height="4"/>
   <object id="40" name="walk1" x="889.5" y="409.5" width="22.5" height="3"/>
   <object id="41" name="walkpoly2" x="463.5" y="311">
-   <polyline points="0,0 20.5,1 19,-68.5 43.5,-70 44.5,-141.5 64,-141 67.5,-214 87.5,-212 88,-141.5 111.5,-141 109.5,-69 135.5,-69 134.5,0 158,1.5 158,21.5 -3,20.5 0,-1"/>
+   <polyline points="0,0 20.5,1 19,-68.5 43.5,-70 44.5,-141.5 64,-141 67.5,-214 87.5,-212 88,-141.5 111.5,-141 109.5,-69 135.5,-69 134.5,0
+ 158,1.5 158,21.5 -3,20.5 0,-1"/>
   </object>
   <object id="42" name="walkpoly1" x="384.5" y="265">
-   <polyline points="0,0 22,-0.5 21.5,96 93.5,96.5 94.5,169.5 218,168.5 218.5,97.5 291.5,97.5 290,-1.5 309.5,-1.5 310,118.5 236.5,117.5 237.5,189 74.5,189.5 74.5,117 1,118 0,3"/>
+   <polyline points="0,0 22,-0.5 21.5,96 93.5,96.5 94.5,169.5 218,168.5 218.5,97.5 291.5,97.5 290,-1.5 309.5,-1.5 310,118.5 236.5,117.5
+ 237.5,189 74.5,189.5 74.5,117 1,118 0,3"/>
   </object>
   <object id="43" name="kill11" x="518" y="145" width="9" height="22"/>
   <object id="44" name="kill10" x="554" y="145" width="7.5" height="21.5"/>

@@ -182,8 +182,8 @@ void MenuScreenNameSelect::controllerButtonY()
 void MenuScreenNameSelect::retrieveUsername()
 {
    // probably requires a regular expression to filter out the unicode crap
-   const auto u1 = std::getenv("USERNAME");
-   const auto u2 = std::getenv("USER");
+   auto* u1 = std::getenv("USERNAME");
+   auto* u2 = std::getenv("USER");
    _name = u1 ? u1 : (u2 ? u2 : "");
 
    if (!_name.empty())

@@ -1,21 +1,15 @@
 #include "crusher.h"
 
 #include "framework/easings/easings.h"
-#include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
-#include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
-#include "framework/tmxparser/tmxtileset.h"
 #include "game/effects/boomeffect.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/level/roomupdater.h"
-
-#include <iostream>
 
 int32_t Crusher::__instance_counter = 0;
 
@@ -259,22 +253,6 @@ void Crusher::setup(const GameDeserializeData& data)
       _shake = ValueReader::readValue<bool>("shake", map).value_or(true);
    }
 
-   //    0123456789012
-   //   +-------------+
-   //  0|<#         #>|
-   //  1|<#         #>|
-   //  2|<#CBAA AABC#>|
-   //  3|<#         #>|
-   //  4|<#         #>|
-   //  6|^^^^^    A   |
-   //  7|#####    A   |
-   //  8|  C      B   |
-   //  9|  B      C   |
-   //  0|  A    ##### |
-   //  1|  A    VVVVV |
-   //   +-------------+
-   //    0123456789012
-
    _pixel_position.x = data._tmx_object->_x_px;
    _pixel_position.y = data._tmx_object->_y_px;
 
@@ -415,9 +393,9 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 
    b2PolygonShape spike_shape;
    spike_shape.Set(blade_vertices, 4);
-   auto deadly_fixture = _body->CreateFixture(&spike_shape, 0);
+   auto* deadly_fixture = _body->CreateFixture(&spike_shape, 0);
 
-   auto object_data = new FixtureNode(this);
+   auto* object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeCrusher);
    deadly_fixture->SetUserData(static_cast<void*>(object_data));
 

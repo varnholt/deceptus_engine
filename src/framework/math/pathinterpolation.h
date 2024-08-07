@@ -39,7 +39,7 @@ public:
       auto length_to_this_point = 0.0f;
       for (auto index = 0; index < static_cast<int32_t>(positions.size()); index++)
       {
-         auto& pos = positions.at(index);
+         const auto& pos = positions.at(index);
          const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
          length_to_this_point += length;
 

@@ -97,7 +97,7 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
 void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data)
 {
    // check if platform smashes the player
-   const auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
+   auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
 
    if (!isPlayer(fixture_node))
    {

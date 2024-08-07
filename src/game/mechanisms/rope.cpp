@@ -38,8 +38,8 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    for (auto i = 0u; i < _chain_elements.size() - 1; i++)
    {
-      const auto c1 = _chain_elements[i];
-      const auto c2 = _chain_elements[i + 1];
+      auto* c1 = _chain_elements[i];
+      auto* c2 = _chain_elements[i + 1];
 
       const auto c1_pos_m = c1->GetPosition();
       const auto c2_pos_m = c2->GetPosition();
