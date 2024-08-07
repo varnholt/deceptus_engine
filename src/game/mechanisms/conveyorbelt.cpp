@@ -1,6 +1,6 @@
 #include "conveyorbelt.h"
-#include "player/player.h"
 #include "game/io/texturepool.h"
+#include "game/player/player.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -155,7 +155,7 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    boundary_fixture_def.shape = &_shape;
    boundary_fixture_def.density = 1.0f;
    boundary_fixture_def.isSensor = false;
-   auto boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
+   auto* boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
    boundary_fixture->SetUserData(static_cast<void*>(this));
 
    _belt_pixel_rect.left = x;
@@ -210,7 +210,7 @@ float ConveyorBelt::getVelocity() const
 void ConveyorBelt::resetBeltState()
 {
    __bodies_on_belt.clear();
-   auto player = Player::getCurrent();
+   auto* player = Player::getCurrent();
    player->getBelt().setBeltVelocity(0.0f);
    player->getBelt().setOnBelt(false);
 }
@@ -219,9 +219,9 @@ void ConveyorBelt::processFixtureNode(FixtureNode* fixture_node, b2Body* collidi
 {
    if (fixture_node->getType() == ObjectTypeConveyorBelt)
    {
-      auto player_body = Player::getCurrent()->getBody();
+      auto* player_body = Player::getCurrent()->getBody();
 
-      auto belt = dynamic_cast<ConveyorBelt*>(fixture_node);
+      auto* belt = dynamic_cast<ConveyorBelt*>(fixture_node);
 
       if (!belt->isEnabled())
       {
@@ -244,7 +244,7 @@ void ConveyorBelt::processFixtureNode(FixtureNode* fixture_node, b2Body* collidi
          else
          {
             // handle player differently because multiple linear velocities are applied to the player
-            auto player = Player::getCurrent();
+            auto* player = Player::getCurrent();
             player->getBelt().setOnBelt(true);
             player->getBelt().setBeltVelocity(belt_velocity);
 
@@ -261,18 +261,18 @@ sf::FloatRect ConveyorBelt::getPixelRect() const
 
 void ConveyorBelt::processContact(b2Contact* contact)
 {
-   auto fixture_user_data_a = contact->GetFixtureA()->GetUserData().pointer;
-   auto fixture_user_data_b = contact->GetFixtureB()->GetUserData().pointer;
+   auto* fixture_user_data_a = contact->GetFixtureA()->GetUserData().pointer;
+   auto* fixture_user_data_b = contact->GetFixtureB()->GetUserData().pointer;
 
    if (fixture_user_data_a)
    {
-      auto fixture_node = static_cast<FixtureNode*>(fixture_user_data_a);
+      auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data_a);
       processFixtureNode(fixture_node, contact->GetFixtureB()->GetBody());
    }
 
    if (fixture_user_data_b)
    {
-      auto fixture_node = static_cast<FixtureNode*>(fixture_user_data_b);
+      auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data_b);
       processFixtureNode(fixture_node, contact->GetFixtureA()->GetBody());
    }
 }

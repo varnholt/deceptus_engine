@@ -114,8 +114,8 @@ void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
    body_def.type = b2_kinematicBody;
    _body = world->CreateBody(&body_def);
 
-   auto fixture = _body->CreateFixture(&polygon_shape, 0);
-   auto object_data = new FixtureNode(this);
+   auto* fixture = _body->CreateFixture(&polygon_shape, 0);
+   auto* object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeMovingPlatform);
    fixture->SetUserData(static_cast<void*>(object_data));
 }

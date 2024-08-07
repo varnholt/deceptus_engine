@@ -3,15 +3,14 @@
 #include "framework/tools/log.h"
 
 #include "tmximagelayer.h"
-#include "tmxobjectgroup.h"
 #include "tmxlayer.h"
-#include "tmxtileset.h"
+#include "tmxobjectgroup.h"
 #include "tmxparsedata.h"
-#include "tmxproperty.h"
 #include "tmxproperties.h"
+#include "tmxproperty.h"
+#include "tmxtileset.h"
 
 #include <iostream>
-
 
 void TmxParser::parse(const std::string& filename)
 {
@@ -21,12 +20,12 @@ void TmxParser::parse(const std::string& filename)
    tinyxml2::XMLDocument doc;
    if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
    {
-      auto doc_element = doc.FirstChildElement();
-      auto node = doc_element->FirstChild();
+      auto* doc_element = doc.FirstChildElement();
+      auto* node = doc_element->FirstChild();
 
       while (node)
       {
-         auto sub_element = node->ToElement();
+         auto* sub_element = node->ToElement();
          if (!sub_element)
          {
             node = node->NextSibling();
@@ -35,7 +34,7 @@ void TmxParser::parse(const std::string& filename)
 
          // groups are just flattened
          auto z = 0;
-         
+
          if (sub_element->Name() == std::string("group"))
          {
             parseGroup(sub_element, z);
@@ -50,10 +49,9 @@ void TmxParser::parse(const std::string& filename)
    }
 }
 
-
 void TmxParser::parseGroup(tinyxml2::XMLElement* sub_element, int32_t& z)
 {
-   auto nested_child = sub_element->FirstChild();
+   auto* nested_child = sub_element->FirstChild();
    while (nested_child)
    {
       // std::cout << "parse " << nested_child->ToElement()->Name() << std::endl;
@@ -61,7 +59,6 @@ void TmxParser::parseGroup(tinyxml2::XMLElement* sub_element, int32_t& z)
       nested_child = nested_child->NextSibling();
    };
 }
-
 
 void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
 {
@@ -115,12 +112,10 @@ void TmxParser::parseSubElement(tinyxml2::XMLElement* sub_element, int32_t& z)
    _elements.push_back(sub_element_parsed);
 }
 
-
 const std::vector<std::shared_ptr<TmxElement>>& TmxParser::getElements() const
 {
    return _elements;
 }
-
 
 std::vector<std::shared_ptr<TmxObjectGroup>> TmxParser::retrieveObjectGroups() const
 {
@@ -135,7 +130,6 @@ std::vector<std::shared_ptr<TmxObjectGroup>> TmxParser::retrieveObjectGroups() c
 
    return object_groups;
 }
-
 
 std::shared_ptr<TmxTileSet> TmxParser::getTileSet(const std::shared_ptr<TmxLayer>& layer) const
 {
@@ -162,10 +156,7 @@ std::shared_ptr<TmxTileSet> TmxParser::getTileSet(const std::shared_ptr<TmxLayer
 
          if (tmp)
          {
-            if (
-                  tile_id >= tmp->_first_gid
-               && tile_id <  tmp->_first_gid + tmp->_tile_count
-            )
+            if (tile_id >= tmp->_first_gid && tile_id < tmp->_first_gid + tmp->_tile_count)
             {
                tileset = tmp;
                break;
@@ -176,5 +167,3 @@ std::shared_ptr<TmxTileSet> TmxParser::getTileSet(const std::shared_ptr<TmxLayer
 
    return tileset;
 }
-
-

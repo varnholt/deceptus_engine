@@ -6,17 +6,16 @@
 
 #include <iostream>
 
-
 void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
 
    _id = element->IntAttribute("id");
 
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto child_element = node->ToElement();
+      auto* child_element = node->ToElement();
       if (child_element)
       {
          std::shared_ptr<TmxElement> tmp;
@@ -28,8 +27,8 @@ void TmxTile::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<T
          }
          else if (child_element->Name() == std::string("objectgroup"))
          {
-           _object_group = std::make_shared<TmxObjectGroup>();
-           tmp = _object_group;
+            _object_group = std::make_shared<TmxObjectGroup>();
+            tmp = _object_group;
          }
 
          if (tmp)

@@ -95,7 +95,7 @@ void WaterSurface::update(const sf::Time& dt)
    const auto elapsed_s = dt.asSeconds();
    updateEmitters(elapsed_s);
 
-   auto player = Player::getCurrent();
+   auto* player = Player::getCurrent();
 
    bool splash_needed = false;
    auto splash_velocity_factor = 1.0f;
@@ -267,7 +267,7 @@ void WaterSurface::merge()
 
       if (it != surfaces.end())
       {
-         auto surface = *it;
+         auto* surface = *it;
          emitter._x_offset_to_parent_px = emitter._bounding_box.left - surface->_bounding_box.left;
          surface->_emitters.push_back(emitter);
       }

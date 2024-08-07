@@ -22,10 +22,10 @@ void TmxImageLayer::deserialize(tinyxml2::XMLElement* element, const std::shared
    _offset_x_px = element->FloatAttribute("offsetx", 0.0f);
    _offset_y_px = element->FloatAttribute("offsety", 0.0f);
 
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto sub_element = node->ToElement();
+      auto* sub_element = node->ToElement();
       if (!sub_element)
       {
          node = node->NextSibling();
