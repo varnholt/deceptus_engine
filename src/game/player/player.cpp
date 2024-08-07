@@ -477,10 +477,10 @@ void Player::createFeet()
       feet_shape.m_radius = feet_radius_m;
       fixture_def_feet.shape = &feet_shape;
 
-      auto foot = _body->CreateFixture(&fixture_def_feet);
+      auto* foot = _body->CreateFixture(&fixture_def_feet);
       _foot_fixture[i] = foot;
 
-      auto object_data_feet = new FixtureNode(this);
+      auto* object_data_feet = new FixtureNode(this);
       object_data_feet->setType(ObjectTypePlayer);
       object_data_feet->setFlag("foot", true);
       foot->SetUserData(static_cast<void*>(object_data_feet));
@@ -497,7 +497,7 @@ void Player::createFeet()
    foot_sensor_fixture_def.shape = &foot_sensor_shape;
 
    _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
-   auto foot_object_data = new FixtureNode(this);
+   auto* foot_object_data = new FixtureNode(this);
    foot_object_data->setType(ObjectTypePlayerFootSensor);
    _foot_sensor_fixture->SetUserData(static_cast<void*>(foot_object_data));
 
@@ -511,8 +511,8 @@ void Player::createFeet()
    head_sensor_fixture_def.isSensor = true;
    head_sensor_fixture_def.shape = &head_polygon_shape;
 
-   auto head_sensor_fixture = _body->CreateFixture(&head_sensor_fixture_def);
-   auto head_object_data = new FixtureNode(this);
+   auto* head_sensor_fixture = _body->CreateFixture(&head_sensor_fixture_def);
+   auto* head_object_data = new FixtureNode(this);
    head_object_data->setType(ObjectTypePlayerHeadSensor);
    head_sensor_fixture->SetUserData(static_cast<void*>(head_object_data));
 
@@ -529,8 +529,8 @@ void Player::createFeet()
    left_arm_sensor_fixture_def.isSensor = true;
    left_arm_sensor_fixture_def.shape = &left_arm_polygon_shape;
 
-   auto left_arm_sensor_fixture = _body->CreateFixture(&left_arm_sensor_fixture_def);
-   auto left_arm_object_data = new FixtureNode(this);
+   auto* left_arm_sensor_fixture = _body->CreateFixture(&left_arm_sensor_fixture_def);
+   auto* left_arm_object_data = new FixtureNode(this);
    left_arm_object_data->setType(ObjectTypePlayerLeftArmSensor);
    left_arm_sensor_fixture->SetUserData(static_cast<void*>(left_arm_object_data));
 
@@ -546,8 +546,8 @@ void Player::createFeet()
    right_arm_sensor_fixture_def.isSensor = true;
    right_arm_sensor_fixture_def.shape = &right_arm_polygon_shape;
 
-   auto right_arm_sensor_fixture = _body->CreateFixture(&right_arm_sensor_fixture_def);
-   auto right_arm_object_data = new FixtureNode(this);
+   auto* right_arm_sensor_fixture = _body->CreateFixture(&right_arm_sensor_fixture_def);
+   auto* right_arm_object_data = new FixtureNode(this);
    right_arm_object_data->setType(ObjectTypePlayerRightArmSensor);
    right_arm_sensor_fixture->SetUserData(static_cast<void*>(right_arm_object_data));
 }
@@ -555,7 +555,7 @@ void Player::createFeet()
 void Player::createBody()
 {
    // create player body
-   auto body_def = new b2BodyDef();
+   auto* body_def = new b2BodyDef();
    body_def->position.Set(getPixelPositionFloat().x * MPP, getPixelPositionFloat().y * MPP);
 
    body_def->type = b2_dynamicBody;
@@ -579,7 +579,7 @@ void Player::createBody()
 
    _body_fixture = _body->CreateFixture(&body_fixture_def);
 
-   auto object_data_head = new FixtureNode(this);
+   auto* object_data_head = new FixtureNode(this);
    object_data_head->setType(ObjectTypePlayer);
    object_data_head->setFlag("head", true);
    _body_fixture->SetUserData(static_cast<void*>(object_data_head));
@@ -943,18 +943,9 @@ void Player::updateVelocity()
          {
             // while the player is standing on a platform, he is allowed to be to bend down
             // however, he is not capable of changing his velocity by pressing left or right
-            if (!_belt.isOnBelt())
-            {
-               const auto velocity = _body->GetLinearVelocity();
-               _body->SetLinearVelocity(b2Vec2{0.0, velocity.y});
-               return;
-            }
-            else
-            {
-               const auto velocity = _body->GetLinearVelocity();
-               _body->SetLinearVelocity({_belt.getBeltVelocity(), velocity.y});
-               return;
-            }
+            const auto velocity = _body->GetLinearVelocity();
+            _body->SetLinearVelocity({_belt.isOnBelt() ? _belt.getBeltVelocity() : 0.0f, velocity.y});
+            return;
          }
       }
 
@@ -1061,6 +1052,11 @@ const PlayerJump& Player::getJump() const
 PlayerBelt& Player::getBelt()
 {
    return _belt;
+}
+
+PlayerPlatform& Player::getPlatform()
+{
+   return _platform;
 }
 
 void Player::goToPortal(auto portal)
@@ -1217,7 +1213,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
       Audio::getInstance().playSample({"hurt.wav"});
 
       // not converting this to PPM to make the effect of the applied force more visible
-      auto body = getBody();
+      auto* body = getBody();
       body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
       SaveState::getPlayerInfo()._extra_table._health._health -= damage;
@@ -1249,33 +1245,9 @@ void Player::kill(std::optional<DeathReason> death_reason)
    }
 }
 
-bool Player::isOnPlatform() const
-{
-   const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
-
-   return on_platform;
-}
-
 bool Player::isOnGround() const
 {
    return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
-}
-
-void Player::updatePlatformMovement(const sf::Time& /*dt*/)
-{
-   if (_jump.isJumping())
-   {
-      return;
-   }
-
-   if (isOnPlatform() && _platform_body)
-   {
-      const auto x = _body->GetPosition().x + _platform_dx;
-      const auto y = _body->GetPosition().y;
-      _body->SetTransform(b2Vec2(x, y), 0.0f);
-
-      // printf("standing on platform, x: %f, y: %f, dx: %f \n", x, y, dx);
-   }
 }
 
 void Player::updateAttack()
@@ -1415,7 +1387,7 @@ void Player::updateHardLanding()
    {
       // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
       // maybe come up with a nice concept for this one day.
-      if (isOnPlatform())
+      if (_platform.isOnPlatform())
       {
          _hard_landing = false;
       }
@@ -1452,7 +1424,7 @@ void Player::updateGroundAngle()
       return;
    }
 
-   for (auto f = _ground_body->GetFixtureList(); f; f = f->GetNext())
+   for (auto* f = _ground_body->GetFixtureList(); f; f = f->GetNext())
    {
       // terrain is made out of chains, so only process those
       if (f->GetShape()->GetType() != b2Shape::e_chain)
@@ -1602,7 +1574,7 @@ void Player::update(const sf::Time& dt)
    updateJump();
    updateDash();
    _climb.update(_body, isInAir());
-   updatePlatformMovement(dt);
+   _platform.update(_body, _jump.isJumping());
    PlayerAudio::updateListenerPosition(_pixel_position_f);
    updateFootsteps();
    updatePortal();
@@ -1675,21 +1647,6 @@ void Player::updateAtmosphere()
    }
 }
 
-void Player::setPlatformBody(b2Body* body)
-{
-   _platform_body = body;
-}
-
-b2Body* Player::getPlatformBody() const
-{
-   return _platform_body;
-}
-
-void Player::setPlatformDx(float dx)
-{
-   _platform_dx = dx;
-}
-
 void Player::setGroundBody(b2Body* body)
 {
    _ground_body = body;
@@ -1719,12 +1676,12 @@ void Player::fadeOutReset()
 
 void Player::setFriction(float friction)
 {
-   for (b2Fixture* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+   for (auto* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
    {
       fixture->SetFriction(friction);
    }
 
-   for (auto contact = _body->GetContactList(); contact; contact = contact->next)
+   for (auto* contact = _body->GetContactList(); contact; contact = contact->next)
    {
       contact->contact->ResetFriction();
    }
@@ -1777,7 +1734,6 @@ void Player::reset()
    // SaveState::getPlayerInfo().mInventory.resetKeys();
 
    // reset bodies passed from the contact listener
-   _platform_body = nullptr;
    _ground_body = nullptr;
 
    // reset dash

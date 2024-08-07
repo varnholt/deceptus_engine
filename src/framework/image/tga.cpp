@@ -75,7 +75,7 @@ int savetga(const std::string& filename, uint32_t* data, int16_t width, int16_t 
 
    for (int y = 0; y < height; y++)
    {
-      const auto* src = data + (height - 1 - y) * header._width;
+      auto* src = data + (height - 1 - y) * header._width;
       for (auto x = 0u; x < header._width; x++)
       {
          auto c = src[x];

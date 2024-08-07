@@ -2,7 +2,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
-#include "player/player.h"
+#include "game/player/player.h"
 
 SensorRect::SensorRect(GameNode* parent) : GameNode(parent)
 {
@@ -101,7 +101,7 @@ void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>
       std::back_inserter(_references),
       [this](const auto& object)
       {
-         auto game_node = dynamic_cast<GameNode*>(object.get());
+         auto* game_node = dynamic_cast<GameNode*>(object.get());
          return (game_node && game_node->getObjectId() == _reference_id);
       }
    );

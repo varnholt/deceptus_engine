@@ -118,10 +118,10 @@ Image Image::downsample() const
 
    for (auto y = 0; y < ny; y++)
    {
-      auto dst = image.getScanline(y);
+      auto* dst = image.getScanline(y);
 
-      auto src1 = getScanline(y * 2);
-      auto src2 = getScanline(y * 2 + 1);
+      auto* src1 = getScanline(y * 2);
+      auto* src2 = getScanline(y * 2 + 1);
 
       for (int32_t x = 0; x < nx; x++)
       {
@@ -169,7 +169,7 @@ void Image::scaled(const Image& image) const
       auto y = iy >> 16;
       auto sy = static_cast<unsigned char>(iy >> 8 & 0xff);
 
-      auto dst = getScanline(dstY);
+      auto* dst = getScanline(dstY);
       uint32_t *src1, *src2;
 
       src1 = image.getScanline(y);
@@ -211,7 +211,7 @@ void Image::premultiplyAlpha()
 {
    for (auto y = 0; y < _height; y++)
    {
-      auto dst = getScanline(y);
+      auto* dst = getScanline(y);
 
       for (auto x = 0; x < _width; x++)
       {
@@ -243,7 +243,7 @@ void Image::minimum(const Image& image)
    for (auto y = 0; y < height; y++)
    {
       auto* dst = getScanline(y);
-      const auto* src = image.getScanline(y);
+      auto* src = image.getScanline(y);
 
       for (auto x = 0; x < width; x++)
       {
@@ -278,7 +278,7 @@ void Image::clear(uint32_t argb)
 {
    for (int32_t y = 0; y < _height; y++)
    {
-      auto dst = getScanline(y);
+      auto* dst = getScanline(y);
 
       for (int32_t x = 0; x < _width; x++)
       {
@@ -297,8 +297,8 @@ void Image::copy(int32_t posX, int32_t posY, const Image& image, int32_t replica
 
    for (auto y = 0; y < height; y++)
    {
-      auto dst = getScanline(y + posY) + posX;
-      const auto* src = image.getScanline(y);
+      auto* dst = getScanline(y + posY) + posX;
+      auto* src = image.getScanline(y);
 
       for (auto x = 0; x < width; x++)
       {
@@ -315,7 +315,7 @@ void Image::copy(int32_t posX, int32_t posY, const Image& image, int32_t replica
    // replicate last scanline
    if (replicate > 0)
    {
-      auto src = getScanline(height - 1);
+      auto* src = getScanline(height - 1);
 
       for (int32_t y = 0; y < endy - height && y < replicate; y++)
       {
@@ -360,13 +360,13 @@ uint32_t calcNormal(int32_t z, uint32_t x0, uint32_t x1, uint32_t y0, uint32_t y
 
 uint32_t* Image::buildNormalMap(int32_t z)
 {
-   auto src = _data.data();
+   auto* src = _data.data();
 
-   auto src0 = _data.data() + (_height - 1) * _width;
-   auto src1 = _data.data();
-   auto src2 = _data.data() + _width;
+   auto* src0 = _data.data() + (_height - 1) * _width;
+   auto* src1 = _data.data();
+   auto* src2 = _data.data() + _width;
 
-   auto dst = new uint32_t[_width * _height];
+   auto* dst = new uint32_t[_width * _height];
 
    for (auto y = 0; y < _height; y++)
    {
@@ -400,13 +400,13 @@ uint32_t* Image::buildNormalMap(int32_t z)
 
 uint32_t* Image::buildDeltaMap()
 {
-   auto temp = _data.data();
+   auto* temp = _data.data();
 
-   auto src0 = _data.data() + (_height - 1) * _width;
-   auto src1 = _data.data();
-   auto src2 = _data.data() + _width;
+   auto* src0 = _data.data() + (_height - 1) * _width;
+   auto* src1 = _data.data();
+   auto* src2 = _data.data() + _width;
 
-   auto dst = new uint32_t[_width * _height];
+   auto* dst = new uint32_t[_width * _height];
 
    const auto s = 2;
 

@@ -234,8 +234,8 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
 
    updateTransform();
 
-   auto fixture = _body->CreateFixture(&polygon_shape, 0);
-   auto object_data = new FixtureNode(this);
+   auto* fixture = _body->CreateFixture(&polygon_shape, 0);
+   auto* object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeDoor);
    fixture->SetUserData(static_cast<void*>(object_data));
 }

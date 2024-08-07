@@ -1,6 +1,6 @@
 #include "playerutils.h"
 
-#include "player/player.h"
+#include "game/player/player.h"
 
 sf::Vector2f PlayerUtils::getPixelPositionFloat()
 {

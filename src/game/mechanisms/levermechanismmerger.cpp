@@ -52,7 +52,7 @@ void LeverMechanismMerger::merge(
    std::copy(rotating_blades.begin(), rotating_blades.end(), std::back_inserter(all_mechanism));
    std::copy(doors.begin(), doors.end(), std::back_inserter(all_mechanism));
 
-   for (auto& tmp : levers)
+   for (const auto& tmp : levers)
    {
       auto lever = std::dynamic_pointer_cast<Lever>(tmp);
 
@@ -93,7 +93,7 @@ void LeverMechanismMerger::merge(
       //    << "w: " << searchRect.width << " "
       //    << "h: " << searchRect.height << " ";
 
-      for (auto& tmp : levers)
+      for (const auto& tmp : levers)
       {
          auto lever = std::dynamic_pointer_cast<Lever>(tmp);
 
@@ -101,7 +101,7 @@ void LeverMechanismMerger::merge(
          {
             std::vector<Callback> callbacks;
 
-            for (auto& l : lasers)
+            for (const auto& l : lasers)
             {
                auto mechanism = std::dynamic_pointer_cast<Laser>(l);
 
@@ -111,7 +111,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& b : belts)
+            for (const auto& b : belts)
             {
                auto mechanism = std::dynamic_pointer_cast<ConveyorBelt>(b);
 
@@ -121,7 +121,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& f : fans)
+            for (const auto& f : fans)
             {
                auto mechanism = std::dynamic_pointer_cast<Fan>(f);
 
@@ -131,7 +131,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& p : platforms)
+            for (const auto& p : platforms)
             {
                auto mechanism = std::dynamic_pointer_cast<MovingPlatform>(p);
 
@@ -145,7 +145,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& s : spikes)
+            for (const auto& s : spikes)
             {
                auto mechanism = std::dynamic_pointer_cast<Spikes>(s);
 
@@ -155,7 +155,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& s : spike_blocks)
+            for (const auto& s : spike_blocks)
             {
                auto mechanism = std::dynamic_pointer_cast<SpikeBlock>(s);
 
@@ -165,7 +165,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& instance : on_off_blocks)
+            for (const auto& instance : on_off_blocks)
             {
                auto mechanism = std::dynamic_pointer_cast<OnOffBlock>(instance);
 
@@ -175,7 +175,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& instance : rotating_blades)
+            for (const auto& instance : rotating_blades)
             {
                auto mechanism = std::dynamic_pointer_cast<RotatingBlade>(instance);
 
@@ -185,7 +185,7 @@ void LeverMechanismMerger::merge(
                }
             }
 
-            for (auto& instance : doors)
+            for (const auto& instance : doors)
             {
                auto mechanism = std::dynamic_pointer_cast<Door>(instance);
 

@@ -6,10 +6,10 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "game/debug/debugdraw.h"
+#include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <algorithm>
 #include <cmath>
@@ -49,7 +49,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
 
    // read all bodies from world
    std::vector<b2Body*> bodies_to_process;
-   for (auto body = world->GetBodyList(); body; body = body->GetNext())
+   for (auto* body = world->GetBodyList(); body; body = body->GetNext())
    {
       bodies_to_process.push_back(body);
    }
@@ -57,7 +57,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
    auto body_view = bodies_to_process | std::views::filter(
                                            [](b2Body* body)
                                            {
-                                              auto player_body = Player::getCurrent()->getBody();
+                                              auto* player_body = Player::getCurrent()->getBody();
                                               if (body == player_body)
                                               {
                                                  return false;
@@ -69,12 +69,12 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                                               }
 
                                               // for now enemies shouldn't cast shadows
-                                              for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+                                              for (auto* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
                                               {
-                                                 auto user_data = fixture->GetUserData().pointer;
+                                                 auto* user_data = fixture->GetUserData().pointer;
                                                  if (user_data)
                                                  {
-                                                    auto fixture_node = static_cast<FixtureNode*>(user_data);
+                                                    auto* fixture_node = static_cast<FixtureNode*>(user_data);
                                                     if (fixture_node->getType() == ObjectType::ObjectTypeEnemy)
                                                     {
                                                        return false;
@@ -86,9 +86,9 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                                            }
                                         );
 
-   for (auto body : body_view)
+   for (auto* body : body_view)
    {
-      for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+      for (auto* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
       {
          // if something doesn't collide, it probably shouldn't have any impact on lighting, too.
          // however, the rest of the body should of course cast a shadow.
@@ -97,11 +97,11 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
             continue;
          }
 
-         auto shape = fixture->GetShape();
+         auto* shape = fixture->GetShape();
 
-         const auto* shape_polygon = dynamic_cast<b2PolygonShape*>(shape);
-         const auto* shape_chain = dynamic_cast<b2ChainShape*>(shape);
-         const auto* shape_circle = dynamic_cast<b2CircleShape*>(shape);
+         auto* shape_polygon = dynamic_cast<b2PolygonShape*>(shape);
+         auto* shape_chain = dynamic_cast<b2ChainShape*>(shape);
+         auto* shape_circle = dynamic_cast<b2CircleShape*>(shape);
 
          if (shape_circle)
          {
@@ -293,7 +293,7 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
 {
    _active_lights.clear();
 
-   auto player_body = Player::getCurrent()->getBody();
+   auto* player_body = Player::getCurrent()->getBody();
 
    for (const auto& light : _lights)
    {
