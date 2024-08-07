@@ -5,7 +5,7 @@
 
 std::shared_ptr<Bouncer> BouncerWrapper::getNearbyBouncer()
 {
-   auto level = Level::getCurrentLevel();
+   auto* level = Level::getCurrentLevel();
    auto bouncers = level->getBouncers();
 
    std::shared_ptr<Bouncer> nearby_bouncer;

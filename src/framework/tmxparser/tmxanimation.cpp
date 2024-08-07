@@ -5,10 +5,10 @@
 
 void TmxAnimation::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto sub_element = node->ToElement();
+      auto* sub_element = node->ToElement();
       if (!sub_element)
       {
          node = node->NextSibling();

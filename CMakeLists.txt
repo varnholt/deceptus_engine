@@ -203,6 +203,7 @@ set(GAME_FILES
     src/game/player/playerinput.cpp src/game/player/playerinput.h
     src/game/player/playerjump.cpp src/game/player/playerjump.h
     src/game/player/playerjumptrace.h
+    src/game/player/playerplatform.h src/game/player/playerplatform.cpp
     src/game/player/playerspeed.h
     src/game/player/playerstats.cpp src/game/player/playerstats.h
     src/game/player/playerstencil.cpp src/game/player/playerstencil.h

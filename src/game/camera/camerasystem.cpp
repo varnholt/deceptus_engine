@@ -3,7 +3,7 @@
 #include "framework/easings/easings.h"
 #include "game/camera/cameraroomlock.h"
 #include "game/camera/camerasystemconfiguration.h"
-#include "player/player.h"
+#include "game/player/player.h"
 
 /*
 
@@ -57,7 +57,7 @@ void CameraSystem::updateX(const sf::Time& delta_time)
 {
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
-   const auto* player = Player::getCurrent();
+   auto* player = Player::getCurrent();
    auto player_x_px = player->getPixelPositionFloat().x;
    auto player_y_px = player->getPixelPositionFloat().y;
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x_px, player_y_px, _focus_offset_px);
@@ -124,7 +124,7 @@ void CameraSystem::updateY(const sf::Time& delta_time)
    const auto view_center = (_view_height_px / 2.0f);
 
    // test if out of panic line boundaries
-   const auto* player = Player::getCurrent();
+   auto* player = Player::getCurrent();
    auto player_x = player->getPixelPositionFloat().x;
    auto player_y = player->getPixelPositionFloat().y + camera_config.getPlayerOffsetY();
    const auto room_corrected = CameraRoomLock::correctedCamera(player_x, player_y, _focus_offset_px);
@@ -200,7 +200,7 @@ float CameraSystem::getFocusOffset() const
 
 void CameraSystem::syncNow()
 {
-   const auto* player = Player::getCurrent();
+   auto* player = Player::getCurrent();
 
    auto player_x = player->getPixelPositionFloat().x;
    auto player_y = player->getPixelPositionFloat().y;

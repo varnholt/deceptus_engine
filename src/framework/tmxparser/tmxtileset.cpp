@@ -6,27 +6,25 @@
 
 #include <iostream>
 
-
 TmxTileSet::TmxTileSet()
 {
    _type = TmxElement::Type::TypeTileSet;
 }
 
-
 void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
 
-   _tile_width_px  = element->IntAttribute("tilewidth");
+   _tile_width_px = element->IntAttribute("tilewidth");
    _tile_height_px = element->IntAttribute("tileheight");
-   _tile_count  = element->IntAttribute("tilecount");
-   _columns    = element->IntAttribute("columns");
-   _rows       = _columns > 0 ? (_tile_count / _columns) : 0;
+   _tile_count = element->IntAttribute("tilecount");
+   _columns = element->IntAttribute("columns");
+   _rows = _columns > 0 ? (_tile_count / _columns) : 0;
 
-   auto node = element->FirstChild();
+   auto* node = element->FirstChild();
    while (node)
    {
-      auto child_element = node->ToElement();
+      auto* child_element = node->ToElement();
 
       if (!child_element)
       {
@@ -67,11 +65,10 @@ void TmxTileSet::parseTileSet(tinyxml2::XMLElement* element, const std::shared_p
    }
 }
 
-
-void TmxTileSet::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
+void TmxTileSet::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
-   _first_gid   = element->IntAttribute("firstgid");
-   _source      = element->Attribute("source") ? element->Attribute("source") : "";
+   _first_gid = element->IntAttribute("firstgid");
+   _source = element->Attribute("source") ? element->Attribute("source") : "";
 
    // id is read later because source can be an external file
    if (!_source.empty())
@@ -86,8 +83,8 @@ void TmxTileSet::deserialize(tinyxml2::XMLElement *element, const std::shared_pt
       }
       else
       {
-        Log::Error() << "TmxTileSet::deserialize: source not found: " << filename;
-        exit(-1);
+         Log::Error() << "TmxTileSet::deserialize: source not found: " << filename;
+         exit(-1);
       }
    }
    else
@@ -95,4 +92,3 @@ void TmxTileSet::deserialize(tinyxml2::XMLElement *element, const std::shared_pt
       parseTileSet(element, parse_data);
    }
 }
-
