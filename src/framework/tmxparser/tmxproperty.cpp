@@ -15,7 +15,7 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element, const std::shared_p
 {
    TmxElement::deserialize(element, parse_data);
 
-   const auto* attribute_type = element->Attribute("type");
+   auto* attribute_type = element->Attribute("type");
    _value_type = (attribute_type != nullptr) ? attribute_type : "string";
 
    if (_value_type == "int")

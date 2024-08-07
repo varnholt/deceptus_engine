@@ -46,7 +46,7 @@ void read(uint8_t& val, std::istream& stream)
 void read(int16_t& val, std::istream& stream)
 {
    // std::cout << "reading " << sizeof(val) << " bytes" << std::endl;
-   auto bytes = reinterpret_cast<char*>(&val);
+   auto* bytes = reinterpret_cast<char*>(&val);
    stream.read(bytes, sizeof(val));
    std::reverse(bytes, bytes + sizeof(val));
    check(stream);
@@ -55,7 +55,7 @@ void read(int16_t& val, std::istream& stream)
 void read(uint16_t& val, std::istream& stream)
 {
    // std::cout << "reading " << sizeof(val) << " bytes" << std::endl;
-   auto bytes = reinterpret_cast<char*>(&val);
+   auto* bytes = reinterpret_cast<char*>(&val);
    stream.read(bytes, sizeof(val));
    std::reverse(bytes, bytes + sizeof(val));
    check(stream);
@@ -64,7 +64,7 @@ void read(uint16_t& val, std::istream& stream)
 void read(uint32_t& val, std::istream& stream)
 {
    // std::cout << "reading " << sizeof(val) << " bytes" << std::endl;
-   auto bytes = reinterpret_cast<char*>(&val);
+   auto* bytes = reinterpret_cast<char*>(&val);
    stream.read(bytes, sizeof(val));
    std::reverse(bytes, bytes + sizeof(val));
    check(stream);
@@ -73,7 +73,7 @@ void read(uint32_t& val, std::istream& stream)
 void read(int32_t& val, std::istream& stream)
 {
    // std::cout << "reading " << sizeof(val) << " bytes" << std::endl;
-   auto bytes = reinterpret_cast<char*>(&val);
+   auto* bytes = reinterpret_cast<char*>(&val);
    stream.read(bytes, sizeof(val));
    std::reverse(bytes, bytes + sizeof(val));
    check(stream);
@@ -388,7 +388,7 @@ void PSD::Layer::loadLayerRecords(std::istream& stream)
             uint32_t length = 0;
             read(length, stream);
 
-            const auto name = new char[length + 1];
+            auto* name = new char[length + 1];
             name[length] = 0;
 
             for (auto i = 0u; i < length; i++)
