@@ -436,15 +436,15 @@ if(win32-msvc)
 endif()
 
 
-if(UNIX OR win32-clang++)
+if((UNIX OR win32-clang++) AND NOT APPLE)
     target_compile_options(deceptus
         -Wno-backslash-newline-escape
         -Wno-deprecated-declarations
         /std:c++20
     )
 endif()
-
-if(UNIX OR win32-g++)
+    
+if((UNIX OR win32-g++) AND NOT APPLE)
     target_compile_options(deceptus
         -lc++fs
         -lfmt
@@ -486,7 +486,7 @@ if(WIN32)
 endif()
 
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
 
     find_package(PkgConfig)
     
@@ -511,6 +511,31 @@ if(UNIX)
         stdc++fs
     )
     
+endif()
+
+if (APPLE)
+
+    include(GNUInstallDirs)
+    list(APPEND CMAKE_PREFIX_PATH "/usr/local" "/opt/homebrew")
+
+    find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
+    find_package(Lua REQUIRED)
+    find_package(OpenGL REQUIRED)
+    find_package(SDL2 REQUIRED)
+
+    include_directories(
+        ${SFML_INCLUDE_DIR}
+        ${LUA_INCLUDE_DIR}
+        ${OPENGL_INCLUDE_DIR}
+        ${SDL2_INCLUDE_DIRS}
+    )
+
+    target_link_libraries(${PROJECT_NAME}
+        sfml-system sfml-audio sfml-graphics sfml-window
+        ${LUA_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        ${SDL2_LIBRARIES}
+    )
 endif()
 
 install(TARGETS deceptus
